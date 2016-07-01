@@ -1,0 +1,16 @@
+Makefile
+CMakeCache.txt
+*.o
+*.a
+cmake_install.cmake
+*~
+CMakeFiles
+*.cfg
+*.cmake
+/build/
+*.swp
+*.pyc
+compile_commands.json
+.vimrc
+.clang_complete
+/.idea
