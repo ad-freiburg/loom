@@ -65,14 +65,28 @@ int main(int argc, char** argv) {
       LOG(ERROR) << "Feed could not be parsed. " << e.what();
     }
   } else {
-    transitmapper::geo::PolyLine p;
 
-    for (double i = 0; i < 2000; i += 10) {
+    // just testing parallel drawing...
+    transitmapper::geo::PolyLine p;
+    transitmapper::geo::PolyLine a;
+    transitmapper::geo::PolyLine b;
+
+    for (double i = 0; i < 2000; i += 20) {
       // sin
-      p << util::geo::Point(i, 1000 + sin(0.005 * i) * 500);
+      a << util::geo::Point(i, 1000 + sin(0.006 * i) * 500);
+
+      // cos
+      b << util::geo::Point(i, 1000 + cos(0.003 * i) * 500);
 
       // linear
-      // p << util::geo::Point(i, 1000);
+      // a << util::geo::Point(i, 1000);
+
+      // triangle
+      if (i < 1000) {
+        p << util::geo::Point(i, 1000 - (i/2));
+      } else {
+        p << util::geo::Point(i, (i/2));
+      }
     }
 
     std::ofstream o;
@@ -81,25 +95,35 @@ int main(int argc, char** argv) {
 
     o << "<svg width=\"2000\" height=\"2000\">";
 
-    svgOut.printLine(p, "fill:none;stroke:black;stroke-width:10");
+    //svgOut.printLine(p, "fill:none;stroke:black;stroke-width:10");
 
-    for (size_t i = 24; i < 25; i++) {
-      transitmapper::geo::PolyLine pl = p;
+    std::vector<const transitmapper::geo::PolyLine*> ls;
+    ls.push_back(&a);
+    ls.push_back(&p);
+    ls.push_back(&b);
+    transitmapper::geo::PolyLine avg = transitmapper::geo::PolyLine::average(ls);
 
-      pl.offsetPerp(12 * i);
-      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:green;stroke-width:10");
-      else svgOut.printLine(pl, "fill:none;stroke:red;stroke-width:10");
+    svgOut.printLine(avg, "fill:none;stroke:#8844AA;stroke-width:15");
+
+    svgOut.printLine(a, "fill:none;stroke:black;stroke-width:5");
+    svgOut.printLine(p, "fill:none;stroke:red;stroke-width:5");
+    svgOut.printLine(b, "fill:none;stroke:red;stroke-width:5");
+
+    for (size_t i = 1; i < 5; i++) {
+      transitmapper::geo::PolyLine pl = avg;
+
+      pl.offsetPerp(18 * i);
+      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:green;stroke-width:15");
+      else svgOut.printLine(pl, "fill:none;stroke:red;stroke-width:15");
     }
 
-    /**
-    for (int i = 1; i < 15; i++) {
-      transitmapper::geo::PolyLine pl = p;
+    for (int i = 1; i < 5; i++) {
+      transitmapper::geo::PolyLine pl = avg;
 
-      pl.offsetPerp(-12 * i);
-      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:blue;stroke-width:10");
-      else svgOut.printLine(pl, "fill:none;stroke:orange;stroke-width:10");
+      pl.offsetPerp(-18 * i);
+      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:blue;stroke-width:15");
+      else svgOut.printLine(pl, "fill:none;stroke:orange;stroke-width:15");
     }
-    **/
     o << "</svg>";
 
   }

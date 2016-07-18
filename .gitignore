@@ -14,3 +14,4 @@ compile_commands.json
 .vimrc
 .clang_complete
 /.idea
+*.swo

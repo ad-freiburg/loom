@@ -43,7 +43,7 @@ class Edge {
   // geometrical equivalence.
   //
   // In a 3rd step, we split those edges with |_tripsContained| > 1
-  // into single edges. This created either multiple distinct edges from
+  // into single edges. This creates either multiple distinct edges from
   // _from to _to, OR, in case the geometries have partial equivalence,
   // introduces new topological nodes which mark the position where two
   // lines part or join.

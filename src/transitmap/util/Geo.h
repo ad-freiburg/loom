@@ -111,7 +111,6 @@ inline double segmentAngle(const Point& p1, const Point& q1) {
   return segmentAngle(p1.get<0>(), p1.get<1>(), q1.get<0>(), q1.get<1>());
 }
 
-
 }}}
 
 #endif  // TRANSITMAP_UTIL_GEO_H_
