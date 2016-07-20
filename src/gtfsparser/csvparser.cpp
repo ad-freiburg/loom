@@ -127,7 +127,7 @@ const char* CsvParser::getTString(const size_t i) const {
 // _____________________________________________________________________________
 double CsvParser::getDouble(const size_t i) const {
   if (i >= _currentItems.size() || !isDouble(_currentItems[i]))
-    throw CsvParserException("Expected float number", i, getFieldName(i),
+    throw CsvParserException("expected float number", i, getFieldName(i),
                               _curLine);
   return atof(_currentItems[i]);
 }
@@ -152,7 +152,7 @@ bool CsvParser::lineIsEmpty(const char* line) const {
 // _____________________________________________________________________________
 int32_t CsvParser::getLong(const size_t i) const {
   if (i >= _currentItems.size() || !isLong(_currentItems[i]))
-    throw CsvParserException("Expected integer number", i, getFieldName(i),
+    throw CsvParserException("expected integer number", i, getFieldName(i),
                               _curLine);
   return atol(_currentItems[i]);
 }
@@ -190,7 +190,7 @@ size_t CsvParser::getNumColumns() const {
 // _____________________________________________________________________________
 size_t CsvParser::getFieldIndex(const string& fieldName) const {
   if (_headerMap.find(fieldName) == _headerMap.end())
-    throw CsvParserException("Field " + fieldName + " does not exist.", -1,
+    throw CsvParserException("field " + fieldName + " does not exist.", -1,
                               fieldName, _curLine);
   return _headerMap.find(fieldName)->second;
 }

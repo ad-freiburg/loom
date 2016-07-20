@@ -5,12 +5,14 @@
 #ifndef GTFSPARSER_GTFS_FEED_H_
 #define GTFSPARSER_GTFS_FEED_H_
 
-#include <vector>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include "agency.h"
 #include "stop.h"
 #include "route.h"
+#include "trip.h"
+#include "shape.h"
+#include "service.h"
 
 namespace gtfsparser {
 namespace gtfs {
@@ -31,11 +33,25 @@ class Feed {
   const Route* getRouteById(const std::string& id) const;
   Route* getRouteById(const std::string& id);
 
+  bool addTrip(Trip* a);
+  const Trip* getTripById(const std::string& id) const;
+  Trip* getTripById(const std::string& id);
+
+  bool addShape(Shape* a);
+  const Shape* getShapeById(const std::string& id) const;
+  Shape* getShapeById(const std::string& id);
+
+  bool addService(Service* a);
+  const Service* getServiceById(const std::string& id) const;
+  Service* getServiceById(const std::string& id);
 
  private:
-  std::map<std::string, Agency*> _agencies;
-  std::map<std::string, Stop*> _stops;
-  std::map<std::string, Route*> _routes;
+  std::unordered_map<std::string, Agency*> _agencies;
+  std::unordered_map<std::string, Stop*> _stops;
+  std::unordered_map<std::string, Route*> _routes;
+  std::unordered_map<std::string, Trip*> _trips;
+  std::unordered_map<std::string, Shape*> _shapes;
+  std::unordered_map<std::string, Service*> _services;
 };
 }}
 

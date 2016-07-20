@@ -17,37 +17,77 @@ using namespace boost;
 
 // ____________________________________________________________________________
 bool Parser::parse(gtfs::Feed* targetFeed, std::string path) const {
-  parseAgency(targetFeed, path);
-  parseStops(targetFeed, path);
-  parseRoutes(targetFeed, path);
+  std::ifstream fs;
+  filesystem::path gtfsPath(path);
+  filesystem::path curFile;
+
+  try {
+    curFile = gtfsPath / "agency.txt";
+    fs.open(curFile.c_str());
+    if (!fs.good()) fileNotFound(curFile);
+    parseAgency(targetFeed, &fs);
+    fs.close();
+
+    curFile = gtfsPath / "stops.txt";
+    fs.open(curFile.c_str());
+    if (!fs.good()) fileNotFound(curFile);
+    parseStops(targetFeed, &fs);
+    fs.close();
+
+    curFile = gtfsPath / "routes.txt";
+    fs.open(curFile.c_str());
+    if (!fs.good()) fileNotFound(curFile);
+    parseRoutes(targetFeed, &fs);
+    fs.close();
+
+    curFile = gtfsPath / "calendar.txt";
+    fs.open(curFile.c_str());
+    if (fs.good()) {
+      parseCalendar(targetFeed, &fs);
+      fs.close();
+    }
+
+    curFile = gtfsPath / "calendar_dates.txt";
+    fs.open(curFile.c_str());
+    if (fs.good()) {
+      parseCalendarDates(targetFeed, &fs);
+      fs.close();
+    }
+
+    curFile = gtfsPath / "trips.txt";
+    fs.open(curFile.c_str());
+    if (!fs.good()) fileNotFound(curFile);
+    parseTrips(targetFeed, &fs);
+    fs.close();
+
+ } catch (const CsvParserException& e) {
+    throw ParserException(e.getMsg(), e.getFieldName(), e.getLine(),
+      curFile.c_str());
+  } catch (const ParserException& e) {
+    // augment with file namoe
+    ParserException fe = e;
+    fe.setFileName(curFile.c_str());
+    throw fe;
+  }
 
   return true;
 }
 
 // ____________________________________________________________________________
-void Parser::parseAgency(gtfs::Feed* targetFeed, std::string path) const {
-  std::ifstream file_stream;
-  filesystem::path gtfs_path(path);
-  filesystem::path file_path("agency.txt");
-  filesystem::path full_path = gtfs_path / file_path;
-
-  file_stream.open(full_path.c_str());
-
-  if (!file_stream.good()) fileNotFound(full_path);
-
-  CsvParser csvp(&file_stream);
+void Parser::parseAgency(gtfs::Feed* targetFeed, std::istream* s) const {
+  CsvParser csvp(s);
   Agency* a = 0;
 
   while (csvp.readNextLine()) {
     a = new Agency(
-      getString(full_path, csvp, "agency_id", ""),
-      getString(full_path, csvp, "agency_name"),
-      getString(full_path, csvp, "agency_url"),
-      getString(full_path, csvp, "agency_timezone"),
-      getString(full_path, csvp, "agency_lang", ""),
-      getString(full_path, csvp, "agency_phone", ""),
-      getString(full_path, csvp, "agency_fare_url", ""),
-      getString(full_path, csvp, "agency_email", "")
+      getString(csvp, "agency_id", ""),
+      getString(csvp, "agency_name"),
+      getString(csvp, "agency_url"),
+      getString(csvp, "agency_timezone"),
+      getString(csvp, "agency_lang", ""),
+      getString(csvp, "agency_phone", ""),
+      getString(csvp, "agency_fare_url", ""),
+      getString(csvp, "agency_email", "")
     );
 
     if (!targetFeed->addAgency(a)) {
@@ -55,46 +95,46 @@ void Parser::parseAgency(gtfs::Feed* targetFeed, std::string path) const {
       msg << "'agency_id' must be dataset unique. Collision with id '"
         << a->getId() << "')";
       throw ParserException(msg.str(), "agency_id",
-        csvp.getCurLine(), std::string(full_path.c_str()));
+        csvp.getCurLine());
     }
   }
 
   if (!a) {
-    throw ParserException("The feed has no agency defined."
-      " This is a required field.", "", 1, std::string(full_path.c_str()));
+    throw ParserException("the feed has no agency defined."
+      " This is a required field.", "", 1);
   }
 }
 
 // ____________________________________________________________________________
-void Parser::parseStops(gtfs::Feed* targetFeed, std::string path) const {
-  std::ifstream file_stream;
-  filesystem::path gtfs_path(path);
-  filesystem::path file_path("stops.txt");
-  filesystem::path full_path = gtfs_path / file_path;
+void Parser::parseShapes(gtfs::Feed* targetFeed, std::istream* s) const {
+  CsvParser csvp(s);
 
-  file_stream.open(full_path.c_str());
+  while (csvp.readNextLine()) {
 
-  if (!file_stream.good()) fileNotFound(full_path);
+  }
+}
 
-  CsvParser csvp(&file_stream);
+// ____________________________________________________________________________
+void Parser::parseStops(gtfs::Feed* targetFeed, std::istream* s) const {
+  CsvParser csvp(s);
 
   while (csvp.readNextLine()) {
     Stop* s = new Stop(
-      getString(full_path, csvp, "stop_id", ""),
-      getString(full_path, csvp, "stop_code"),
-      getString(full_path, csvp, "stop_name"),
-      getString(full_path, csvp, "stop_desc"),
-      getDouble(full_path, csvp, "stop_lat"),
-      getDouble(full_path, csvp, "stop_lon"),
-      getString(full_path, csvp, "zone_id", ""),
-      getString(full_path, csvp, "stop_url", ""),
+      getString(csvp, "stop_id", ""),
+      getString(csvp, "stop_code", ""),
+      getString(csvp, "stop_name"),
+      getString(csvp, "stop_desc", ""),
+      getDouble(csvp, "stop_lat"),
+      getDouble(csvp, "stop_lon"),
+      getString(csvp, "zone_id", ""),
+      getString(csvp, "stop_url", ""),
       static_cast<Stop::LOCATION_TYPE>(
-        getRangeInteger(full_path, csvp, "location_type", 0, 1, 0)
+        getRangeInteger(csvp, "location_type", 0, 1, 0)
       ),
-      getString(full_path, csvp, "parent_station", ""),
-      getString(full_path, csvp, "stop_timezone", ""),
+      getString(csvp, "parent_station", ""),
+      getString(csvp, "stop_timezone", ""),
       static_cast<Stop::WHEELCHAIR_BOARDING>(
-        getRangeInteger(full_path, csvp, "wheelchair_boarding", 0, 2, 0)
+        getRangeInteger(csvp, "wheelchair_boarding", 0, 2, 0)
       )
     );
 
@@ -103,51 +143,41 @@ void Parser::parseStops(gtfs::Feed* targetFeed, std::string path) const {
       msg << "'stop_id' must be dataset unique. Collision with id '"
         << s->getId() << "')";
       throw ParserException(msg.str(), "stop_id",
-        csvp.getCurLine(), std::string(full_path.c_str()));
+        csvp.getCurLine());
     }
   }
 }
 
 // ____________________________________________________________________________
-void Parser::parseRoutes(gtfs::Feed* targetFeed, std::string path) const {
-  std::ifstream file_stream;
-  filesystem::path gtfs_path(path);
-  filesystem::path file_path("routes.txt");
-  filesystem::path full_path = gtfs_path / file_path;
-
-  file_stream.open(full_path.c_str());
-
-  if (!file_stream.good()) fileNotFound(full_path);
-
-  CsvParser csvp(&file_stream);
+void Parser::parseRoutes(gtfs::Feed* targetFeed, std::istream* s) const {
+  CsvParser csvp(s);
 
   while (csvp.readNextLine()) {
-    std::string agencyId = getString(full_path, csvp, "agency_id", "");
+    std::string agencyId = getString(csvp, "agency_id", "");
     Agency* routeAgency = 0;
 
     if (!agencyId.empty()) {
       routeAgency = targetFeed->getAgencyById(agencyId);
       if (!routeAgency) {
         std::stringstream msg;
-        msg << "No agency with id '" << agencyId << "' defined, cannot "
+        msg << "no agency with id '" << agencyId << "' defined, cannot "
           << "reference here.";
-        throw ParserException(msg.str(), "agency_id", csvp.getCurLine(),
-          full_path.c_str());
+        throw ParserException(msg.str(), "agency_id", csvp.getCurLine());
       }
     }
 
     Route* r = new Route(
-      getString(full_path, csvp, "route_id"),
+      getString(csvp, "route_id"),
       routeAgency,
-      getString(full_path, csvp, "route_short_name", ""),
-      getString(full_path, csvp, "route_long_name"),
-      getString(full_path, csvp, "route_desc", ""),
+      getString(csvp, "route_short_name", ""),
+      getString(csvp, "route_long_name"),
+      getString(csvp, "route_desc", ""),
       static_cast<Route::TYPE> (
-        getRangeInteger(full_path, csvp, "route_type", 0, 7)
+        getRangeInteger(csvp, "route_type", 0, 7)
       ),
-      getString(full_path, csvp, "route_url", ""),
-      getColorFromHexString(full_path, csvp, "route_color", "FFFFFF"),
-      getColorFromHexString(full_path, csvp, "route_text_color", "000000")
+      getString(csvp, "route_url", ""),
+      getColorFromHexString(csvp, "route_color", "FFFFFF"),
+      getColorFromHexString(csvp, "route_text_color", "000000")
     );
 
     if (!targetFeed->addRoute(r)) {
@@ -155,7 +185,127 @@ void Parser::parseRoutes(gtfs::Feed* targetFeed, std::string path) const {
       msg << "'route_id' must be dataset unique. Collision with id '"
         << r->getId() << "')";
       throw ParserException(msg.str(), "route_id",
-        csvp.getCurLine(), std::string(full_path.c_str()));
+        csvp.getCurLine());
+    }
+  }
+}
+
+// ____________________________________________________________________________
+void Parser::parseCalendar(gtfs::Feed* targetFeed, std::istream* s) const {
+  CsvParser csvp(s);
+
+  while (csvp.readNextLine()) {
+    std::string serviceId = getString(csvp, "service_id");
+
+    Service* s = new Service(
+      serviceId,
+      (0 << getRangeInteger(csvp,  "monday", 0, 1)) |
+      (0 << getRangeInteger(csvp,  "tuesday", 0, 1) * 2) |
+      (0 << getRangeInteger(csvp,  "wednesday", 0, 1) * 3) |
+      (0 << getRangeInteger(csvp,  "thursday", 0, 1) * 4) |
+      (0 << getRangeInteger(csvp,  "friday", 0, 1) * 5) |
+      (0 << getRangeInteger(csvp,  "saturday", 0, 1) * 6) |
+      (0 << getRangeInteger(csvp,  "sunday", 0, 1) * 7),
+      getServiceDate(csvp, "start_date"),
+      getServiceDate(csvp, "end_date")
+    );
+
+    if (!targetFeed->addService(s)) {
+      std::stringstream msg;
+      msg << "'service_id' must be unique in calendars.txt. Collision with id '"
+        << s->getId() << "')";
+      throw ParserException(msg.str(), "service_id",
+        csvp.getCurLine());
+    }
+  }
+
+}
+
+// ____________________________________________________________________________
+void Parser::parseCalendarDates(gtfs::Feed* targetFeed, std::istream* s) const {
+  CsvParser csvp(s);
+
+  while (csvp.readNextLine()) {
+    std::string serviceId = getString(csvp, "service_id");
+    ServiceDate d = getServiceDate(csvp, "date");
+    Service::EXCEPTION_TYPE t = static_cast<Service::EXCEPTION_TYPE>(
+      getRangeInteger(csvp, "exception_type", 1, 2)
+    );
+
+    Service* e = targetFeed->getServiceById(serviceId);
+
+    if (!e) {
+      e = new Service(serviceId);
+      targetFeed->addService(e);
+    }
+
+    e->addException(d, t);
+  }
+}
+
+// ____________________________________________________________________________
+void Parser::parseTrips(gtfs::Feed* targetFeed, std::istream* s) const {
+  CsvParser csvp(s);
+
+  while (csvp.readNextLine()) {
+    std::string routeId = getString(csvp, "route_id");
+    Route* tripRoute = 0;
+
+    tripRoute = targetFeed->getRouteById(routeId);
+    if (!tripRoute) {
+      std::stringstream msg;
+      msg << "no route with id '" << routeId << "' defined, cannot "
+        << "reference here.";
+      throw ParserException(msg.str(), "route_id", csvp.getCurLine());
+    }
+
+    std::string shapeId = getString(csvp, "shape_id", "");
+    Shape* tripShape = 0;
+
+    if (!shapeId.empty()) {
+      tripShape = targetFeed->getShapeById(shapeId);
+      if (!tripShape) {
+        std::stringstream msg;
+        msg << "no shape with id '" << shapeId << "' defined, cannot "
+          << "reference here.";
+        throw ParserException(msg.str(), "shape_id", csvp.getCurLine());
+      }
+    }
+
+    std::string serviceId = getString(csvp, "service_id");
+    Service* tripService = targetFeed->getServiceById(serviceId);
+    if (!tripService) {
+      std::stringstream msg;
+      msg << "no service with id '" << serviceId << "' defined, cannot "
+        << "reference here.";
+      throw ParserException(msg.str(), "service_id", csvp.getCurLine());
+    }
+
+    Trip* t = new Trip(
+      getString(csvp, "trip_id"),
+      tripRoute,
+      tripService,
+      getString(csvp, "trip_headsign", ""),
+      getString(csvp, "trip_short_name", ""),
+      static_cast<Trip::DIRECTION>(
+        getRangeInteger(csvp, "direction_id", 0, 1, 2)
+      ),
+      getString(csvp, "block_id", ""),
+      tripShape,
+      static_cast<Trip::WC_BIKE_ACCESSIBLE>(
+        getRangeInteger(csvp, "wheelchair_accessible", 0, 2, 0)
+      ),
+      static_cast<Trip::WC_BIKE_ACCESSIBLE>(
+        getRangeInteger(csvp, "bikes_allowed", 0, 2, 0)
+      )
+    );
+
+    if (!targetFeed->addTrip(t)) {
+      std::stringstream msg;
+      msg << "'trip_id' must be dataset unique. Collision with id '"
+        << t->getId() << "')";
+      throw ParserException(msg.str(), "trip_id",
+        csvp.getCurLine());
     }
   }
 }
@@ -163,17 +313,17 @@ void Parser::parseRoutes(gtfs::Feed* targetFeed, std::string path) const {
 // ___________________________________________________________________________
 void Parser::fileNotFound(filesystem::path file) const {
   throw ParserException("File not found",
-     "", 1, std::string(file.c_str()));
+     "", -1, std::string(file.c_str()));
 }
 
 // ___________________________________________________________________________
-std::string Parser::getString(const filesystem::path& fn, const CsvParser& csv,
+std::string Parser::getString(const CsvParser& csv,
   const std::string& field) const {
   return csv.getTString(field.c_str());
 }
 
 // ___________________________________________________________________________
-std::string Parser::getString(const filesystem::path& fn, const CsvParser& csv,
+std::string Parser::getString(const CsvParser& csv,
   const std::string& fld, const std::string& def) const {
   std::string ret = def;
 
@@ -184,15 +334,14 @@ std::string Parser::getString(const filesystem::path& fn, const CsvParser& csv,
   return ret;
 }
 
-
 // ___________________________________________________________________________
-double Parser::getDouble(const filesystem::path& fn, const CsvParser& csv,
+double Parser::getDouble(const CsvParser& csv,
   const std::string& field) const {
   return csv.getDouble(field.c_str());
 }
 
 // ___________________________________________________________________________
-double Parser::getDouble(const filesystem::path& fn, const CsvParser& csv,
+double Parser::getDouble(const CsvParser& csv,
   const std::string& field, double ret) const {
   if (csv.hasItem(field.c_str()) && !csv.fieldIsEmpty(field.c_str())) {
     ret = csv.getDouble(field.c_str());
@@ -201,41 +350,42 @@ double Parser::getDouble(const filesystem::path& fn, const CsvParser& csv,
   return ret;
 }
 
-
 // ___________________________________________________________________________
-int64_t Parser::getRangeInteger(const filesystem::path& fn, const CsvParser& csv,
+int64_t Parser::getRangeInteger(const CsvParser& csv,
   const std::string& field, int64_t minv, int64_t maxv) const {
   int64_t ret = csv.getLong(field.c_str());
 
   if (ret < minv || ret > maxv) {
     std::stringstream msg;
-    msg << "Expected integer in range [" << minv << "," << maxv << "]";
-    throw ParserException(msg.str(), field, csv.getCurLine(), fn.c_str());
+    msg << "expected integer in range [" << minv << "," << maxv << "]";
+    throw ParserException(msg.str(), field, csv.getCurLine());
   }
 
   return ret;
 }
 
 // ___________________________________________________________________________
-int64_t Parser::getRangeInteger(const filesystem::path& fn, const CsvParser& csv,
+int64_t Parser::getRangeInteger(const CsvParser& csv,
   const std::string& field, int64_t minv, int64_t maxv, int64_t def) const {
-  int64_t ret = def;
+  int64_t ret;
 
   if (csv.hasItem(field.c_str()) && !csv.fieldIsEmpty(field.c_str())) {
     ret = csv.getLong(field.c_str());
+
+    if (ret < minv || ret > maxv) {
+      std::stringstream msg;
+      msg << "expected integer in range [" << minv << "," << maxv << "]";
+      throw ParserException(msg.str(), field, csv.getCurLine());
+    }
+
+    return ret;
   }
 
-  if (ret < minv || ret > maxv) {
-    std::stringstream msg;
-    msg << "Expected integer in range [" << minv << "," << maxv << "]";
-    throw ParserException(msg.str(), field, csv.getCurLine(), fn.c_str());
-  }
-
-  return ret;
+  return def;
 }
 
 // ___________________________________________________________________________
-uint32_t Parser::getColorFromHexString(const filesystem::path& fn,
+uint32_t Parser::getColorFromHexString(
   const CsvParser& csv, const std::string& field, const std::string& def)
   const {
   std::string color_string;
@@ -253,20 +403,47 @@ uint32_t Parser::getColorFromHexString(const filesystem::path& fn,
     ret = std::stoul("0x"+color_string, &chars_processed, 16);
   } catch (std::exception e) {
    std::stringstream msg;
-   msg << "Expected a 6-character hexadecimal color string, found '"
+   msg << "expected a 6-character hexadecimal color string, found '"
       << color_string << "' instead. (Error while parsing was: "
       << e.what() << ")";
-   throw ParserException(msg.str(), field, csv.getCurLine(), fn.c_str());
+   throw ParserException(msg.str(), field, csv.getCurLine());
   }
 
   if (color_string.size() != 6 || chars_processed != 8) {
     std::stringstream msg;
-    msg << "Expected a 6-character hexadecimal color string, found '"
+    msg << "expected a 6-character hexadecimal color string, found '"
       << color_string << "' instead.";
-    throw ParserException(msg.str(), field, csv.getCurLine(), fn.c_str());
+    throw ParserException(msg.str(), field, csv.getCurLine());
   }
 
   return ret;
 }
 
+// ____________________________________________________________________________
+ServiceDate Parser::getServiceDate(
+  const CsvParser& csv, const std::string& field) const {
+  size_t p;
+  std::string val(csv.getTString(field.c_str()));
+
+  try {
+    int32_t yyyymmdd = std::stoul(val, &p, 10);
+    if (p != val.length() || yyyymmdd > 99999999) {
+      std::stringstream msg;
+      msg << "expected a date in the YYYYMMDD format, found '"
+        << val << "' instead.";
+      throw ParserException(msg.str(), field, csv.getCurLine());
+    }
+    return ServiceDate(yyyymmdd);
+  } catch (const std::out_of_range& e) {
+     std::stringstream msg;
+     msg << "expected a date in the YYYYMMDD format, found '"
+        << val << "' instead. (Integer out of range).";
+     throw ParserException(msg.str(), field, csv.getCurLine());
+  } catch (const std::invalid_argument& e) {
+     std::stringstream msg;
+     msg << "expected a date in the YYYYMMDD format, found '"
+        << val << "' instead.";
+     throw ParserException(msg.str(), field, csv.getCurLine());
+  }
+}
 

@@ -17,6 +17,7 @@
 #include "util/XmlWriter.cpp"
 #include "output/svgoutput.h"
 #include "geo/PolyLine.h"
+#include "gtfsparser/gtfs/service.h"
 
 INITIALIZE_EASYLOGGINGPP;
 
@@ -46,24 +47,20 @@ int main(int argc, char** argv) {
   gtfsparser::gtfs::Feed feed;
 
   if (argc > 1) {
-    try {
-      LOG(INFO) << "reading feed at " << argv[1];
-      parser.parse(&feed, argv[1]);
+    LOG(INFO) << "reading feed at " << argv[1];
+    parser.parse(&feed, argv[1]);
 
-      graph::TransitGraph g("shinygraph");
+    graph::TransitGraph g("shinygraph");
 
-      g.addEdge(g.addNode(new graph::Node(50, 30)), g.addNode(new graph::Node(100, 80)));
+    g.addEdge(g.addNode(new graph::Node(50, 30)), g.addNode(new graph::Node(100, 80)));
 
-      graph::Node* a = g.addNode(new graph::Node(244, 600));
-      g.addEdge(a, a);
+    graph::Node* a = g.addNode(new graph::Node(244, 600));
+    g.addEdge(a, a);
 
-      std::ofstream o;
-      o.open("/home/patrick/test.svg");
-      output::SvgOutput svgOut(&o);
-      svgOut.print(g);
-    } catch (gtfsparser::ParserException &e) {
-      LOG(ERROR) << "Feed could not be parsed. " << e.what();
-    }
+    std::ofstream o;
+    o.open("/home/patrick/test.svg");
+    output::SvgOutput svgOut(&o);
+    svgOut.print(g);
   } else {
 
     // just testing parallel drawing...

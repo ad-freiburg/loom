@@ -2,9 +2,13 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
+#include <unordered_map>
+#include <string>
 #include "feed.h"
 #include "agency.h"
 #include "route.h"
+#include "trip.h"
+#include "shape.h"
 
 using namespace gtfsparser;
 using namespace gtfs;
@@ -72,4 +76,66 @@ Route* Feed::getRouteById(const std::string& id) {
   return 0;
 }
 
+// ____________________________________________________________________________
+bool Feed::addTrip(Trip* t) {
+  return (_trips.insert(std::pair<std::string, Trip*>(t->getId(), t))).second;
+}
+
+// ____________________________________________________________________________
+const Trip* Feed::getTripById(const std::string& id) const {
+  if (_trips.find(id) != _trips.end()) {
+    return _trips.find(id)->second;
+  }
+  return 0;
+}
+
+// ____________________________________________________________________________
+Trip* Feed::getTripById(const std::string& id) {
+  if (_trips.find(id) != _trips.end()) {
+    return _trips.find(id)->second;
+  }
+  return 0;
+}
+
+// ____________________________________________________________________________
+bool Feed::addShape(Shape* s) {
+  return (_shapes.insert(std::pair<std::string, Shape*>(s->getId(), s))).second;
+}
+
+// ____________________________________________________________________________
+const Shape* Feed::getShapeById(const std::string& id) const {
+  if (_shapes.find(id) != _shapes.end()) {
+    return _shapes.find(id)->second;
+  }
+  return 0;
+}
+
+// ____________________________________________________________________________
+Shape* Feed::getShapeById(const std::string& id) {
+  if (_shapes.find(id) != _shapes.end()) {
+    return _shapes.find(id)->second;
+  }
+  return 0;
+}
+
+// ____________________________________________________________________________
+bool Feed::addService(Service* s) {
+  return (_services.insert(std::pair<std::string, Service*>(s->getId(), s))).second;
+}
+
+// ____________________________________________________________________________
+const Service* Feed::getServiceById(const std::string& id) const {
+  if (_services.find(id) != _services.end()) {
+    return _services.find(id)->second;
+  }
+  return 0;
+}
+
+// ____________________________________________________________________________
+Service* Feed::getServiceById(const std::string& id) {
+  if (_services.find(id) != _services.end()) {
+    return _services.find(id)->second;
+  }
+  return 0;
+}
 

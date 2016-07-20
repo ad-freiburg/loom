@@ -32,13 +32,17 @@ class CsvParserException : public exception {
     ss << _msg;
     if (_index > -1)
       ss << " for field #" << (_index+1) << " (" << _fieldName << ")   ";
-    return ss.str().c_str();
+    _what_msg = ss.str();
+    return _what_msg.c_str();
   };
-  virtual uint64_t getLine() const throw() {
+  virtual uint64_t getLine() const {
     return _line;
   };
 
+  const std::string& getMsg() const { return _msg; }
+  const std::string& getFieldName() const { return _fieldName; }
  private:
+  mutable std::string _what_msg;
   std::string _msg;
   int _index;
   std::string _fieldName;
