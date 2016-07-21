@@ -6,6 +6,7 @@
 #define GTFSPARSER_GTFS_TRIP_H_
 
 #include <stdint.h>
+#include <set>
 #include <string>
 #include "route.h"
 #include "service.h"
@@ -19,7 +20,8 @@ using std::string;
 namespace gtfsparser {
 namespace gtfs {
 
-typedef std::vector<StopTime> StopTimes;
+typedef std::set<StopTime, StopTimeCompare> StopTimes;
+
 
 class Trip {
 
@@ -52,7 +54,7 @@ class Trip {
   WC_BIKE_ACCESSIBLE getWheelchairAccessibility() const;
   WC_BIKE_ACCESSIBLE getBikesAllowed() const;
   const StopTimes& getStopTimes() const;
-  void addStopTimes(StopTime t);
+  bool addStopTime(const StopTime& t);
 
  private:
   std::string _id;

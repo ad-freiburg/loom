@@ -272,5 +272,3 @@ inline bool CsvParser::isDouble(string line) const {
   strtod(line.c_str(), &p);
   return *p == 0;
 }
-
-

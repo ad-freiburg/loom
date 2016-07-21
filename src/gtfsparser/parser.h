@@ -108,6 +108,9 @@ class Parser {
   gtfs::ServiceDate getServiceDate(const CsvParser& csv,
     const std::string& field) const;
 
+  gtfs::Time getTime(const CsvParser& csv,
+    const std::string& field) const;
+
   void fileNotFound(boost::filesystem::path file) const;
 };
 }

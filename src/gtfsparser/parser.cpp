@@ -60,6 +60,12 @@ bool Parser::parse(gtfs::Feed* targetFeed, std::string path) const {
     parseTrips(targetFeed, &fs);
     fs.close();
 
+    curFile = gtfsPath / "stop_times.txt";
+    fs.open(curFile.c_str());
+    if (!fs.good()) fileNotFound(curFile);
+    parseStopTimes(targetFeed, &fs);
+    fs.close();
+
  } catch (const CsvParserException& e) {
     throw ParserException(e.getMsg(), e.getFieldName(), e.getLine(),
       curFile.c_str());
@@ -262,7 +268,7 @@ void Parser::parseTrips(gtfs::Feed* targetFeed, std::istream* s) const {
     std::string shapeId = getString(csvp, "shape_id", "");
     Shape* tripShape = 0;
 
-    if (!shapeId.empty()) {
+    if (false && !shapeId.empty()) {
       tripShape = targetFeed->getShapeById(shapeId);
       if (!tripShape) {
         std::stringstream msg;
@@ -307,6 +313,82 @@ void Parser::parseTrips(gtfs::Feed* targetFeed, std::istream* s) const {
       throw ParserException(msg.str(), "trip_id",
         csvp.getCurLine());
     }
+  }
+}
+
+// ____________________________________________________________________________
+void Parser::parseStopTimes(gtfs::Feed* targetFeed, std::istream* s) const {
+  CsvParser csvp(s);
+
+  while (csvp.readNextLine()) {
+    Stop* stop = 0;
+    Trip* trip = 0;
+
+    const std::string& stopId = getString(csvp, "stop_id");
+    const std::string& tripId = getString(csvp, "trip_id");
+
+    stop = targetFeed->getStopById(stopId);
+    trip = targetFeed->getTripById(tripId);
+
+    if (!stop) {
+      std::stringstream msg;
+      msg << "no stop with id '" << stopId << "' defined in stops.txt, cannot "
+        << "reference here.";
+      throw ParserException(msg.str(), "stop_id", csvp.getCurLine());
+    }
+
+    if (!trip) {
+      std::stringstream msg;
+      msg << "no trip with id '" << tripId << "' defined in trips.txt, cannot "
+        << "reference here.";
+      throw ParserException(msg.str(), "trip_id", csvp.getCurLine());
+    }
+
+    std::string rawDist =  getString(csvp, "shape_dist_traveled", "");
+
+    double dist = -1;  // using -1 as a NULL value here
+
+    if (!rawDist.empty()) {
+      dist = getDouble(csvp, "shape_dist_traveled");
+      if (dist < -0.01) { // TODO: better double comp
+         throw ParserException("negative values not supported for distances"
+           " (value was: " + std::to_string(dist),
+          "trip_id",
+         csvp.getCurLine());
+      }
+    }
+
+    StopTime st(
+      getTime(csvp, "arrival_time"),
+      getTime(csvp, "departure_time"),
+      stop,
+      getRangeInteger(csvp, "stop_sequence", 0, UINT16_MAX),
+      getString(csvp, "stop_headsign", ""),
+      static_cast<StopTime::PU_DO_TYPE>(
+        getRangeInteger(csvp, "drop_off_type", 0, 3, 0)
+      ),
+      static_cast<StopTime::PU_DO_TYPE>(
+        getRangeInteger(csvp, "pick_up_type", 0, 3, 0)
+      ),
+      dist,
+      getRangeInteger(csvp, "timepoint", 0, 1, 1)
+    );
+
+    if (st.getArrivalTime() > st.getDepartureTime()) {
+     throw ParserException("arrival time '" + st.getArrivalTime().toString() +
+      "' is later than departure time '" + st.getDepartureTime().toString() +
+      "'. You cannot depart earlier than you arrive.",
+      "departure_time",
+      csvp.getCurLine());
+    }
+
+    if (!trip->addStopTime(st)) {
+     throw ParserException("stop_sequence collision, stop_sequence has "
+      "to be increasing for a single trip.",
+      "stop_sequence",
+      csvp.getCurLine());
+    }
+
   }
 }
 
@@ -444,6 +526,46 @@ ServiceDate Parser::getServiceDate(
      msg << "expected a date in the YYYYMMDD format, found '"
         << val << "' instead.";
      throw ParserException(msg.str(), field, csv.getCurLine());
+  }
+}
+
+// ____________________________________________________________________________
+gtfs::Time Parser::getTime(
+  const CsvParser& csv, const std::string& field) const {
+  size_t p;
+  std::string val(csv.getTString(field.c_str()));
+
+  try {
+    uint64_t h = std::stoul(val, &p, 10);
+    if (h > 255) throw std::out_of_range(
+      "only hour-values up to 255 are "
+      "supported. (read " + std::to_string(h) + ")");
+    val.erase(0, p+1);
+
+    uint64_t m = std::stoul(val, &p, 10);
+    if (p == 1) throw std::invalid_argument(
+      "one-digit minute values are not allowed.");
+    // allow values of 60, although standard forbids it
+    if (m > 60) throw std::out_of_range(
+      "only minute-values up to 60 are "
+      "allowed. (read " + std::to_string(m) + ")");
+    val.erase(0, p+1);
+
+    uint64_t s = std::stoul(val, &p, 10);
+    if (p == 0) s = 0; // support HH:MM format (although standard forbids it)
+    if (p == 1) throw std::invalid_argument(
+      "one-digit second values are not allowed.");
+     // allow values of 60, although standard forbids it
+    if (s > 60) throw std::out_of_range(
+      "only second-values up to 60 are "
+      "allowed. (read " + std::to_string(s) + ")");
+
+    return gtfs::Time(h, m % 60, s % 60);
+  } catch (const std::exception& e) {
+    std::stringstream msg;
+    msg << "expected a time in HH:MM:SS (or H:MM:SS) format, found '"
+      << val << "' instead. (" <<  e.what() << ")";
+    throw ParserException(msg.str(), field, csv.getCurLine());
   }
 }
 

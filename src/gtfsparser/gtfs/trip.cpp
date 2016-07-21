@@ -80,6 +80,6 @@ const StopTimes& Trip::getStopTimes() const {
 }
 
 // _____________________________________________________________________________
-void Trip::addStopTimes(StopTime t) {
-  _stoptimes.push_back(t);
+bool Trip::addStopTime(const StopTime& t) {
+  return _stoptimes.insert(t).second ;
 }
