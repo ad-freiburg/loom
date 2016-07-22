@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 #include <string>
+#include <iterator>
 #include "agency.h"
 #include "stop.h"
 #include "route.h"
@@ -16,6 +17,15 @@
 
 namespace gtfsparser {
 namespace gtfs {
+
+typedef std::unordered_map<std::string, Agency*> Agencies;
+typedef std::unordered_map<std::string, Stop*> Stops;
+typedef std::unordered_map<std::string, Route*> Routes;
+typedef std::unordered_map<std::string, Trip*> Trips;
+typedef std::unordered_map<std::string, Shape*> Shapes;
+typedef std::unordered_map<std::string, Service*> Services;
+
+
 
 class Feed {
  public:
@@ -28,6 +38,10 @@ class Feed {
   bool addStop(Stop* a);
   const Stop* getStopById(const std::string& id) const;
   Stop* getStopById(const std::string& id);
+  Stops::const_iterator stopsBegin() const;
+  Stops::const_iterator stopsEnd() const;
+  Stops::iterator stopsBegin();
+  Stops::iterator stopsEnd();
 
   bool addRoute(Route* a);
   const Route* getRouteById(const std::string& id) const;
@@ -46,12 +60,12 @@ class Feed {
   Service* getServiceById(const std::string& id);
 
  private:
-  std::unordered_map<std::string, Agency*> _agencies;
-  std::unordered_map<std::string, Stop*> _stops;
-  std::unordered_map<std::string, Route*> _routes;
-  std::unordered_map<std::string, Trip*> _trips;
-  std::unordered_map<std::string, Shape*> _shapes;
-  std::unordered_map<std::string, Service*> _services;
+  Agencies _agencies;
+  Stops _stops;
+  Routes _routes;
+  Trips _trips;
+  Shapes  _shapes;
+  Services _services;
 };
 }}
 

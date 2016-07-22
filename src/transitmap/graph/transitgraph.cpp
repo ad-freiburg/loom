@@ -2,6 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
+#include <proj_api.h>
 #include <string>
 #include <set>
 #include "transitgraph.h"
@@ -10,22 +11,32 @@
 using namespace transitmapper;
 using namespace graph;
 
+
+// _____________________________________________________________________________
+TransitGraph::TransitGraph(const std::string& name, const std::string& proj)
+: _name(name) {
+  _bbox = boost::geometry::make_inverse<boost::geometry::model::box<util::geo::Point> >();
+  _proj = pj_init_plus(proj.c_str());
+}
+
 // _____________________________________________________________________________
 TransitGraph::~TransitGraph() {
   // an edge is _deleted_ if either the from or to node is deleted!
   for (auto n : _nodes) {
     delete n;
   }
-}
 
-
-// _____________________________________________________________________________
-TransitGraph::TransitGraph(const std::string& name) : _name(name) {
-
+  // clean up projection stuff
+  pj_free(_proj);
 }
 
 // _____________________________________________________________________________
 Node* TransitGraph::addNode(Node* n) {
+  // expand the bounding box to hold this new node
+  boost::geometry::expand(_bbox, n->getPos());
+
+  std::cout << boost::geometry::wkt(n->getPos()) << std::endl;
+  std::cout << boost::geometry::wkt(_bbox) << std::endl;
   return *(_nodes.insert(n)).first;
 }
 
@@ -55,4 +66,14 @@ bool TransitGraph::containsNode(Node* n) const {
 // _____________________________________________________________________________
 void TransitGraph::deleteNode(Node* n) {
   _nodes.erase(n);
+}
+
+// _____________________________________________________________________________
+projPJ TransitGraph::getProjection() const {
+  return _proj;
+}
+
+// _____________________________________________________________________________
+const boost::geometry::model::box<util::geo::Point>& TransitGraph::getBoundingBox() const {
+  return _bbox;
 }

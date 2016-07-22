@@ -5,6 +5,7 @@
 #ifndef TRANSITMAP_GRAPH_TRANSITGRAPH_H_
 #define TRANSITMAP_GRAPH_TRANSITGRAPH_H_
 
+#include <proj_api.h>
 #include <string>
 #include <set>
 #include <boost/geometry.hpp>
@@ -12,6 +13,7 @@
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
+#include "../util/Geo.h"
 #include "node.h"
 #include "edge.h"
 
@@ -23,7 +25,7 @@ namespace graph {
 class TransitGraph {
 
  public:
-  explicit TransitGraph(const std::string& name);
+  explicit TransitGraph(const std::string& name, const std::string& projStr);
 
   ~TransitGraph(); // TODO: free memory
 
@@ -36,9 +38,15 @@ class TransitGraph {
   const std::set<Node*>& getNodes() const;
   std::set<Node*>* getNodes();
 
+  projPJ getProjection() const;
+  const boost::geometry::model::box<util::geo::Point>& getBoundingBox() const;
  private:
   std::string _name;
   std::set<Node*> _nodes;
+
+  boost::geometry::model::box<util::geo::Point> _bbox;
+
+  projPJ _proj;
 };
 
 }}

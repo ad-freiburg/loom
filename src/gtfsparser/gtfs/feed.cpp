@@ -56,6 +56,26 @@ Stop* Feed::getStopById(const std::string& id) {
 }
 
 // ____________________________________________________________________________
+Stops::const_iterator Feed::stopsBegin() const {
+  return _stops.begin();
+}
+
+// ____________________________________________________________________________
+Stops::const_iterator Feed::stopsEnd() const {
+  return _stops.end();
+}
+
+// ____________________________________________________________________________
+Stops::iterator Feed::stopsBegin() {
+  return _stops.begin();
+}
+
+// ____________________________________________________________________________
+Stops::iterator Feed::stopsEnd() {
+  return _stops.end();
+}
+
+// ____________________________________________________________________________
 bool Feed::addRoute(Route* r) {
   return (_routes.insert(std::pair<std::string, Route*>(r->getId(), r))).second;
 }
@@ -138,4 +158,3 @@ Service* Feed::getServiceById(const std::string& id) {
   }
   return 0;
 }
-

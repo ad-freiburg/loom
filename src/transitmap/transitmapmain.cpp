@@ -13,6 +13,7 @@
 #include "easylogging/easylogging.h"
 #include "gtfsparser/parser.h"
 #include "graph/transitgraph.h"
+#include "graph/GraphBuilder.h"
 #include "graph/node.h"
 #include "util/XmlWriter.cpp"
 #include "output/svgoutput.h"
@@ -50,12 +51,11 @@ int main(int argc, char** argv) {
     LOG(INFO) << "reading feed at " << argv[1];
     parser.parse(&feed, argv[1]);
 
-    graph::TransitGraph g("shinygraph");
+    graph::TransitGraph g("shinygraph", "+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=6378137 +b=6378137 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
 
-    g.addEdge(g.addNode(new graph::Node(50, 30)), g.addNode(new graph::Node(100, 80)));
+    graph::GraphBuilder b(&g);
 
-    graph::Node* a = g.addNode(new graph::Node(244, 600));
-    g.addEdge(a, a);
+    b.consume(feed);
 
     std::ofstream o;
     o.open("/home/patrick/test.svg");
