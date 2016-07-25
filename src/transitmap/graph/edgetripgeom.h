@@ -8,7 +8,7 @@
 #include <vector>
 #include "gtfsparser/gtfs/trip.h"
 #include "gtfsparser/gtfs/route.h"
-#include "../util/Geo.h"
+#include "../geo/PolyLine.h"
 
 namespace transitmapper {
 namespace graph {
@@ -17,14 +17,15 @@ using namespace gtfsparser;
 
 class EdgeTripGeom {
  public:
-  EdgeTripGeom(const util::geo::Line& geom);
+  EdgeTripGeom(geo::PolyLine pl);
   void addTrip(gtfs::Trip* t);
   const std::map<gtfs::Route*, std::vector<gtfs::Trip*> >& getTrips() const;
 
+  const geo::PolyLine& getGeom() const;
  private:
   std::map<gtfs::Route*, std::vector<gtfs::Trip*> > _trips;
 
-  util::geo::Line _geom;
+  geo::PolyLine _geom;
 };
 
 }}

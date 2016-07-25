@@ -12,7 +12,7 @@ using namespace graph;
 using namespace gtfsparser;
 
 // _____________________________________________________________________________
-EdgeTripGeom::EdgeTripGeom(const util::geo::Line& geom) : _geom(geom) {
+EdgeTripGeom::EdgeTripGeom(geo::PolyLine geom) : _geom(geom) {
 
 }
 
@@ -25,4 +25,9 @@ void EdgeTripGeom::addTrip(gtfs::Trip* t) {
 const std::map<gtfs::Route*, std::vector<gtfs::Trip*> >& EdgeTripGeom::getTrips() 
 const {
   return _trips;
+}
+
+// _____________________________________________________________________________
+const geo::PolyLine& EdgeTripGeom::getGeom() const {
+  return _geom;
 }

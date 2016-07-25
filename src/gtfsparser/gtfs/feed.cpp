@@ -118,6 +118,25 @@ Trip* Feed::getTripById(const std::string& id) {
 }
 
 // ____________________________________________________________________________
+Trips::const_iterator Feed::tripsBegin() const {
+  return _trips.begin();
+}
+
+// ____________________________________________________________________________
+Trips::const_iterator Feed::tripsEnd() const {
+  return _trips.end();
+}
+
+// ____________________________________________________________________________
+Trips::iterator Feed::tripsBegin() {
+  return _trips.begin();
+}
+
+// ____________________________________________________________________________
+Trips::iterator Feed::tripsEnd() {
+  return _trips.end();
+}
+// ____________________________________________________________________________
 bool Feed::addShape(Shape* s) {
   return (_shapes.insert(std::pair<std::string, Shape*>(s->getId(), s))).second;
 }

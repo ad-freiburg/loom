@@ -28,6 +28,24 @@ Node* Edge::getTo() const {
 }
 
 // _____________________________________________________________________________
-void Edge::addTrip(gtfs::Trip* t) {
- // todo!
+void Edge::addTrip(gtfs::Trip* t, geo::PolyLine pl) {
+  bool inserted = false;
+  for (auto& e : _tripsContained) {
+    if (e.getGeom() == pl) {  // TODO: determine what equality means here
+      e.addTrip(t);
+      inserted = true;
+      break;
+    }
+  }
+
+  if (!inserted) {
+    EdgeTripGeom etg(pl);
+    etg.addTrip(t);
+    _tripsContained.push_back(etg);
+  }
+}
+
+// _____________________________________________________________________________
+const std::vector<EdgeTripGeom>& Edge::getEdgeTripGeoms() const {
+  return _tripsContained;
 }

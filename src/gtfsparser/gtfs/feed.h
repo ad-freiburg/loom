@@ -50,6 +50,10 @@ class Feed {
   bool addTrip(Trip* a);
   const Trip* getTripById(const std::string& id) const;
   Trip* getTripById(const std::string& id);
+  Trips::const_iterator tripsBegin() const;
+  Trips::const_iterator tripsEnd() const;
+  Trips::iterator tripsBegin();
+  Trips::iterator tripsEnd();
 
   bool addShape(Shape* a);
   const Shape* getShapeById(const std::string& id) const;

@@ -31,12 +31,16 @@ class TransitGraph {
 
   Node* addNode(Node* n);
   Edge* addEdge(Node* from, Node* to);
+  Edge* getEdge(Node* from, Node* to);
 
   void deleteNode(Node* n);
   bool containsNode(Node* n) const;
 
   const std::set<Node*>& getNodes() const;
   std::set<Node*>* getNodes();
+
+  Node* getNodeByStop(const gtfs::Stop* s) const;
+  Node* getNodeByStop(const gtfs::Stop* s, bool getParent) const;
 
   projPJ getProjection() const;
   const boost::geometry::model::box<util::geo::Point>& getBoundingBox() const;

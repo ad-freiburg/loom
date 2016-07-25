@@ -23,7 +23,7 @@ TransitGraph::TransitGraph(const std::string& name, const std::string& proj)
 TransitGraph::~TransitGraph() {
   // an edge is _deleted_ if either the from or to node is deleted!
   for (auto n : _nodes) {
-    delete n;
+    //delete n;
   }
 
   // clean up projection stuff
@@ -35,8 +35,6 @@ Node* TransitGraph::addNode(Node* n) {
   // expand the bounding box to hold this new node
   boost::geometry::expand(_bbox, n->getPos());
 
-  std::cout << boost::geometry::wkt(n->getPos()) << std::endl;
-  std::cout << boost::geometry::wkt(_bbox) << std::endl;
   return *(_nodes.insert(n)).first;
 }
 
@@ -49,6 +47,14 @@ Edge* TransitGraph::addEdge(Node* from, Node* to) {
 }
 
 // _____________________________________________________________________________
+Edge* TransitGraph::getEdge(Node* from, Node* to) {
+  for (auto e : from->getAdjListOut()) {
+    if (e->getTo() == to) return e;
+  }
+  return 0;
+}
+
+// _____________________________________________________________________________
 const std::set<Node*>& TransitGraph::getNodes() const {
   return _nodes;
 }
@@ -57,6 +63,26 @@ const std::set<Node*>& TransitGraph::getNodes() const {
 std::set<Node*>* TransitGraph::getNodes() {
   return &_nodes;
 }
+
+// _____________________________________________________________________________
+Node* TransitGraph::getNodeByStop(const gtfs::Stop* s, bool getParent) const {
+  if (getParent && s->getParentStation()) return getNodeByStop(
+    s->getParentStation()
+  );
+
+  return getNodeByStop(s);
+}
+
+// _____________________________________________________________________________
+Node* TransitGraph::getNodeByStop(const gtfs::Stop* s) const {
+  for (const auto n : _nodes) {
+    if (n->getStop() == s) {
+      return n;
+    }
+  }
+  return 0;
+}
+
 
 // _____________________________________________________________________________
 bool TransitGraph::containsNode(Node* n) const {

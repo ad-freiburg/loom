@@ -33,6 +33,10 @@ class Node {
   virtual gtfs::Stop* getStop() const;
   const util::geo::Point& getPos() const;
 
+  const std::set<Edge*>& getAdjListOut() const {
+    return _adjListOut;
+  }
+
  protected:
   // add edge to this node's adjacency lists
   void addEdge(Edge* e);

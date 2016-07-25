@@ -36,11 +36,12 @@ class Stop {
     const string& desc, double lat,
     double lng, string zone_id, const string& stop_url,
     Stop::LOCATION_TYPE location_type,
-    const string& parent_station, const string& stop_timezone,
+    Stop* parent_station, const string& stop_timezone,
     Stop::WHEELCHAIR_BOARDING wheelchair_boarding)
   : _id(id), _code(code), _name(name), _desc(desc), _zone_id(zone_id),
     _stop_url(stop_url),
-    _parent_station(parent_station), _stop_timezone(stop_timezone),
+    _stop_timezone(stop_timezone),
+    _parent_station(parent_station),
     _lat(lat), _lng(lng), _wheelchair_boarding(wheelchair_boarding),
     _location_type(location_type) {}
 
@@ -80,8 +81,12 @@ class Stop {
     return _location_type;
   }
 
-  std::string getParentStation() const {
+  Stop* getParentStation() const {
     return _parent_station;
+  }
+
+  Stop* setParentStation(Stop* p) {
+    _parent_station = p;
   }
 
   std::string getStopTimezone() const {
@@ -97,7 +102,8 @@ class Stop {
 
  private:
   string _id, _code, _name, _desc, _zone_id, _stop_url,
-    _parent_station, _stop_timezone;
+    _stop_timezone;
+  Stop* _parent_station;
   double _lat, _lng;
   Stop::WHEELCHAIR_BOARDING _wheelchair_boarding;
   Stop::LOCATION_TYPE _location_type;

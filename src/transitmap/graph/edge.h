@@ -9,6 +9,7 @@
 #include "edge.h"
 #include "node.h"
 #include "edgetripgeom.h"
+#include "../geo/PolyLine.h"
 #include "gtfsparser/gtfs/trip.h"
 
 using namespace gtfsparser;
@@ -29,7 +30,9 @@ class Edge {
   Node* getFrom() const;
   Node* getTo() const;
 
-  void addTrip(gtfs::Trip* t);
+  void addTrip(gtfs::Trip* t, geo::PolyLine pl);
+
+  const std::vector<EdgeTripGeom>& getEdgeTripGeoms() const;
  private:
   Node* _from;
   Node* _to;

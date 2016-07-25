@@ -100,26 +100,26 @@ int main(int argc, char** argv) {
     ls.push_back(&b);
     transitmapper::geo::PolyLine avg = transitmapper::geo::PolyLine::average(ls);
 
-    svgOut.printLine(avg, "fill:none;stroke:#8844AA;stroke-width:15");
+    svgOut.printLine(avg, "fill:none;stroke:#8844AA;stroke-width:15", 0, 0, 0, 0);
 
-    svgOut.printLine(a, "fill:none;stroke:black;stroke-width:5");
-    svgOut.printLine(p, "fill:none;stroke:red;stroke-width:5");
-    svgOut.printLine(b, "fill:none;stroke:red;stroke-width:5");
+    svgOut.printLine(a, "fill:none;stroke:black;stroke-width:5", 0, 0, 0, 0);
+    svgOut.printLine(p, "fill:none;stroke:red;stroke-width:5", 0, 0, 0, 0);
+    svgOut.printLine(b, "fill:none;stroke:red;stroke-width:5", 0, 0, 0, 0);
 
     for (size_t i = 1; i < 5; i++) {
       transitmapper::geo::PolyLine pl = avg;
 
       pl.offsetPerp(18 * i);
-      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:green;stroke-width:15");
-      else svgOut.printLine(pl, "fill:none;stroke:red;stroke-width:15");
+      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:green;stroke-width:15", 0, 0, 0, 0);
+      else svgOut.printLine(pl, "fill:none;stroke:red;stroke-width:15", 0, 0, 0, 0);
     }
 
     for (int i = 1; i < 5; i++) {
       transitmapper::geo::PolyLine pl = avg;
 
       pl.offsetPerp(-18 * i);
-      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:blue;stroke-width:15");
-      else svgOut.printLine(pl, "fill:none;stroke:orange;stroke-width:15");
+      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:blue;stroke-width:15", 0, 0, 0, 0);
+      else svgOut.printLine(pl, "fill:none;stroke:orange;stroke-width:15", 0, 0, 0, 0);
     }
     o << "</svg>";
 

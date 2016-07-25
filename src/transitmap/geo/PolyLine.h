@@ -23,6 +23,7 @@ class PolyLine {
 
  public:
   PolyLine();
+  PolyLine(const util::geo::Point& from, const util::geo::Point& to);
 
   PolyLine& operator<<(const util::geo::Point& p);
 
@@ -49,6 +50,10 @@ class PolyLine {
   util::geo::Point getPointAt(double dist) const;
 
   static PolyLine average(std::vector<const PolyLine*>& lines);
+
+  // equality operator, will hold frechet-distance equality check in
+  // the future
+  bool operator==(const PolyLine& rhs) const;
  private:
   util::geo::Line _line;
 

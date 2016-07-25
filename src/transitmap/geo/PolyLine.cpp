@@ -14,6 +14,11 @@ PolyLine::PolyLine() {
 }
 
 // _____________________________________________________________________________
+PolyLine::PolyLine(const util::geo::Point& from, const util::geo::Point& to) {
+  *this << from << to;
+}
+
+// _____________________________________________________________________________
 PolyLine& PolyLine::operator<<(const util::geo::Point& p) {
   _line.push_back(p);
   return *this;
@@ -191,4 +196,18 @@ PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+bool PolyLine::operator==(const PolyLine& rhs) const {
+  if (_line.size() == 2 &&_line.size() == rhs.getLine().size()) {
+    // trivial case, straight line, implement directly
+
+    // TODO: why 10? make global static or configurable or determine in some
+    //       way!
+    return (boost::geometry::distance(rhs.getLine()[0], getLine()[0]) < 10 ||
+        boost::geometry::distance(rhs.getLine().back(), getLine().back()) < 10); 
+  }
+
+  return false;
 }

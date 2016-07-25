@@ -124,7 +124,13 @@ void Parser::parseShapes(gtfs::Feed* targetFeed, std::istream* s) const {
 void Parser::parseStops(gtfs::Feed* targetFeed, std::istream* s) const {
   CsvParser csvp(s);
 
+  std::map<Stop*, std::pair<size_t, std::string> > parentStations;
+
   while (csvp.readNextLine()) {
+    Stop::LOCATION_TYPE locType = static_cast<Stop::LOCATION_TYPE>(
+      getRangeInteger(csvp, "location_type", 0, 1, 0)
+    );
+
     Stop* s = new Stop(
       getString(csvp, "stop_id", ""),
       getString(csvp, "stop_code", ""),
@@ -134,15 +140,26 @@ void Parser::parseStops(gtfs::Feed* targetFeed, std::istream* s) const {
       getDouble(csvp, "stop_lon"),
       getString(csvp, "zone_id", ""),
       getString(csvp, "stop_url", ""),
-      static_cast<Stop::LOCATION_TYPE>(
-        getRangeInteger(csvp, "location_type", 0, 1, 0)
-      ),
-      getString(csvp, "parent_station", ""),
+      locType,
+      0,
       getString(csvp, "stop_timezone", ""),
       static_cast<Stop::WHEELCHAIR_BOARDING>(
         getRangeInteger(csvp, "wheelchair_boarding", 0, 2, 0)
       )
     );
+
+    const std::string& parentStatId = getString(csvp, "parent_station", "");
+    if (!parentStatId.empty()) {
+      if (locType == Stop::LOCATION_TYPE::STATION) {
+        throw ParserException("a stop with location_type 'station' (1) cannot"
+          " have a parent station", "parent_station", csvp.getCurLine());
+      }
+
+      parentStations[s] = std::pair<size_t, std::string>(
+        csvp.getCurLine(),
+        parentStatId
+      );
+    }
 
     if (!targetFeed->addStop(s)) {
       std::stringstream msg;
@@ -151,6 +168,20 @@ void Parser::parseStops(gtfs::Feed* targetFeed, std::istream* s) const {
       throw ParserException(msg.str(), "stop_id",
         csvp.getCurLine());
     }
+  }
+
+  // second pass to resolve parentStation pointers
+  for (const auto& ps : parentStations) {
+      Stop* parentStation = 0;
+      parentStation = targetFeed->getStopById(ps.second.second);
+      if (!parentStation) {
+        std::stringstream msg;
+        msg << "no stop with id '" << ps.second.second << "' defined, cannot "
+          << "reference here.";
+        throw ParserException(msg.str(), "parent_station", ps.second.first);
+      } else {
+        ps.first->setParentStation(parentStation);
+      }
   }
 }
 

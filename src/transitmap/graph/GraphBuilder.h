@@ -20,7 +20,7 @@ class GraphBuilder {
   GraphBuilder(TransitGraph* targetGraph);
 
   void consume(const gtfs::Feed& f);
-
+  void simplify();
  private:
   TransitGraph* _targetGraph;
   projPJ _mercProj;
