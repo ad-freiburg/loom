@@ -30,9 +30,13 @@ class Edge {
   Node* getFrom() const;
   Node* getTo() const;
 
-  void addTrip(gtfs::Trip* t, geo::PolyLine pl);
+  bool addTrip(gtfs::Trip* t, Node* toNode);
+  bool addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode);
 
   const std::vector<EdgeTripGeom>& getEdgeTripGeoms() const;
+  std::vector<EdgeTripGeom>* getEdgeTripGeoms();
+
+  void simplify();
  private:
   Node* _from;
   Node* _to;
@@ -51,7 +55,6 @@ class Edge {
   // introduces new topological nodes which mark the position where two
   // lines part or join.
   std::vector<EdgeTripGeom> _tripsContained;
-
 };
 
 }}

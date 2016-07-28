@@ -5,6 +5,7 @@
 #ifndef GTFSPARSER_GTFS_SHAPE_H_
 #define GTFSPARSER_GTFS_SHAPE_H_
 
+#include <set>
 #include <vector>
 #include <string>
 
@@ -16,17 +17,28 @@ namespace gtfsparser {
 namespace gtfs {
 
 struct ShapePoint {
+  ShapePoint(double lat, double ln, double dist, uint16_t seq)
+  : lat(lat), lng(ln), travelDist(dist), seq(seq) {}
+  ShapePoint()
+  : lat(0), lng(0), travelDist(-1), seq(0) {}
   double lat, lng, travelDist;
+  uint16_t seq;
 };
 
-typedef std::vector<ShapePoint> ShapePoints;
+struct ShapePointCompare {
+  bool operator() (const ShapePoint& lh, const ShapePoint& rh) const {
+    return lh.seq < rh.seq;
+  }
+};
+
+typedef std::set<ShapePoint, ShapePointCompare> ShapePoints;
 
 class Shape {
 
  public:
   Shape() {}
 
-  Shape(const string& id) {}
+  Shape(const string& id) : _id(id) {}
 
   std::string getId() const {
     return _id;
@@ -36,8 +48,8 @@ class Shape {
     return _shapePoints;
   }
 
-  void addPoint(ShapePoint p) {
-    _shapePoints.push_back(p);
+  bool addPoint(ShapePoint p) {
+    return _shapePoints.insert(p).second;
   }
 
  private:

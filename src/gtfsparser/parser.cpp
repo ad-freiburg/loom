@@ -54,6 +54,13 @@ bool Parser::parse(gtfs::Feed* targetFeed, std::string path) const {
       fs.close();
     }
 
+    curFile = gtfsPath / "shapes.txt";
+    fs.open(curFile.c_str());
+    if (fs.good()) {
+      parseShapes(targetFeed, &fs);
+      fs.close();
+    }
+
     curFile = gtfsPath / "trips.txt";
     fs.open(curFile.c_str());
     if (!fs.good()) fileNotFound(curFile);
@@ -65,6 +72,7 @@ bool Parser::parse(gtfs::Feed* targetFeed, std::string path) const {
     if (!fs.good()) fileNotFound(curFile);
     parseStopTimes(targetFeed, &fs);
     fs.close();
+
 
  } catch (const CsvParserException& e) {
     throw ParserException(e.getMsg(), e.getFieldName(), e.getLine(),
@@ -108,15 +116,6 @@ void Parser::parseAgency(gtfs::Feed* targetFeed, std::istream* s) const {
   if (!a) {
     throw ParserException("the feed has no agency defined."
       " This is a required field.", "", 1);
-  }
-}
-
-// ____________________________________________________________________________
-void Parser::parseShapes(gtfs::Feed* targetFeed, std::istream* s) const {
-  CsvParser csvp(s);
-
-  while (csvp.readNextLine()) {
-    // TODO
   }
 }
 
@@ -299,7 +298,7 @@ void Parser::parseTrips(gtfs::Feed* targetFeed, std::istream* s) const {
     std::string shapeId = getString(csvp, "shape_id", "");
     Shape* tripShape = 0;
 
-    if (false && !shapeId.empty()) {
+    if (!shapeId.empty()) {
       tripShape = targetFeed->getShapeById(shapeId);
       if (!tripShape) {
         std::stringstream msg;
@@ -348,6 +347,46 @@ void Parser::parseTrips(gtfs::Feed* targetFeed, std::istream* s) const {
 }
 
 // ____________________________________________________________________________
+void Parser::parseShapes(gtfs::Feed* targetFeed, std::istream* s) const {
+  CsvParser csvp(s);
+
+  while (csvp.readNextLine()) {
+    const std::string& shapeId = getString(csvp, "shape_id");
+    Shape* s = targetFeed->getShapeById(shapeId);
+    if (!s) {
+      targetFeed->addShape(new Shape(shapeId));
+      s = targetFeed->getShapeById(shapeId);
+    }
+
+    std::string rawDist =  getString(csvp, "shape_dist_traveled", "");
+
+    double dist = -1;  // using -1 as a NULL value here
+
+    if (!rawDist.empty()) {
+      dist = getDouble(csvp, "shape_dist_traveled");
+      if (dist < -0.01) { // TODO: better double comp
+         throw ParserException("negative values not supported for distances"
+           " (value was: " + std::to_string(dist),
+          "shape_dist_traveled",
+         csvp.getCurLine());
+      }
+    }
+
+    if (!s->addPoint(ShapePoint(
+            getDouble(csvp, "shape_pt_lat"),
+            getDouble(csvp, "shape_pt_lon"),
+            dist,
+            getRangeInteger(csvp, "shape_pt_sequence", 0, UINT16_MAX)
+    ))) {
+      throw ParserException("shape_pt_sequence collision, shape_pt_sequence has "
+      "to be increasing for a single shape.",
+      "shape_pt_sequence",
+      csvp.getCurLine());
+    }
+  }
+}
+
+// ____________________________________________________________________________
 void Parser::parseStopTimes(gtfs::Feed* targetFeed, std::istream* s) const {
   CsvParser csvp(s);
 
@@ -384,7 +423,7 @@ void Parser::parseStopTimes(gtfs::Feed* targetFeed, std::istream* s) const {
       if (dist < -0.01) { // TODO: better double comp
          throw ParserException("negative values not supported for distances"
            " (value was: " + std::to_string(dist),
-          "trip_id",
+          "shape_dist_traveled",
          csvp.getCurLine());
       }
     }

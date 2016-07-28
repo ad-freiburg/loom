@@ -10,18 +10,16 @@
 using namespace transitmapper;
 using namespace output;
 
-const static double XSCALE = 0.5;
-const static double YSCALE = 0.5;
+const static double XSCALE = 0.8;
+const static double YSCALE = 0.8;
 
 // _____________________________________________________________________________
-SvgOutput::SvgOutput(std::ostream* o) : _o(o), _w(o) {
+SvgOutput::SvgOutput(std::ostream* o) : _o(o), _w(o, true) {
 
 }
 
 // _____________________________________________________________________________
 void SvgOutput::print(const graph::TransitGraph& outG) {
-
-
   std::map<std::string, std::string> params;
 
   uint32_t xOffset = outG.getBoundingBox().min_corner().get<0>();
@@ -35,6 +33,9 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
 
   params["width"] = std::to_string(width) + "px";
   params["height"] = std::to_string(height) + "px";
+
+  *_o << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  *_o << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">";
 
   _w.openTag("svg", params);
 
@@ -56,7 +57,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
     std::map<std::string, std::string> params;
     params["cx"] = std::to_string((n->getPos().get<0>() - xOffset) * XSCALE);
     params["cy"] = std::to_string(h-(n->getPos().get<1>() - yOffset) * YSCALE);
-    params["r"] = "10";
+    params["r"] = "20";
     params["stroke"] = "black";
     params["stroke-width"] = "4";
     params["fill"] = "white";
@@ -74,21 +75,22 @@ void SvgOutput::outputEdges(const graph::TransitGraph& outG, double w, double h)
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
-      for (const graph::EdgeTripGeom& g : e->getEdgeTripGeoms()) {
+      for (const graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
         // _________ outfactor this
         geo::PolyLine center = g.getGeom();
-        double lineW = 8;
-        double lineSpc = 3;
-        double oo = (lineW + lineSpc) * g.getTrips().size();
+        center.simplify(1);
+        double lineW = 12;
+        double lineSpc = 6;
+        double oo = ((lineW + lineSpc)) * (g.getTrips().size() -1);
         double o = oo;
         for (auto r : g.getTrips()) {
             geo::PolyLine p = center;
-            p.offsetPerp(o - oo / 2);
+            p.offsetPerp(o - oo / 2, XSCALE, YSCALE);
             std::stringstream attrs;
             attrs << "fill:none;stroke:#" << r.first->getColorString()
               << ";stroke-width:" << lineW;
             printLine(p, attrs.str(), w, h, xOffset, yOffset);
-
+            //break;
             o -= lineW + lineSpc;
         }
         // __________

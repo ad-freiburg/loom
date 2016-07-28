@@ -30,12 +30,24 @@ void PolyLine::reverse() {
 }
 
 // _____________________________________________________________________________
+PolyLine PolyLine::getReversed() const {
+  PolyLine ret = *this;
+  ret.reverse();
+  return ret;
+}
+
+// _____________________________________________________________________________
 const Line& PolyLine::getLine() const {
   return _line;
 }
 
 // _____________________________________________________________________________
 PolyLine PolyLine::getPerpOffsetted(double units) const {
+  return getPerpOffsetted(units, 1, 1);
+}
+
+// _____________________________________________________________________________
+PolyLine PolyLine::getPerpOffsetted(double units, double xscale, double yscale) const {
   PolyLine p = *this;
   p.offsetPerp(units);
   return p;
@@ -43,6 +55,11 @@ PolyLine PolyLine::getPerpOffsetted(double units) const {
 
 // _____________________________________________________________________________
 void PolyLine::offsetPerp(double units) {
+  return offsetPerp(units, 1, 1);
+}
+
+// _____________________________________________________________________________
+void PolyLine::offsetPerp(double units, double xscale, double yscale) {
   // calculate perpendicular offset of a polyline
   //
   // there doesn't seem to be any library which reliably does that,
@@ -70,11 +87,11 @@ void PolyLine::offsetPerp(double units) {
     n1 = n1 / n;
     n2 = n2 / n;
 
-    lastP.set<0>(lastP.get<0>() + (n1 * units));
-    lastP.set<1>(lastP.get<1>() + (n2 * units));
+    lastP.set<0>(lastP.get<0>() + (n1 * units / xscale));
+    lastP.set<1>(lastP.get<1>() + (n2 * units / yscale));
 
-    curP.set<0>(curP.get<0>() + (n1 * units));
-    curP.set<1>(curP.get<1>() + (n2 * units));
+    curP.set<0>(curP.get<0>() + (n1 * units / xscale));
+    curP.set<1>(curP.get<1>() + (n2 * units / yscale));
 
     if (lastIns && befLastIns &&
         lineIntersects(*lastIns, *befLastIns, lastP, curP)) {
@@ -95,10 +112,44 @@ void PolyLine::offsetPerp(double units) {
 }
 
 // _____________________________________________________________________________
-util::geo::Point PolyLine::getPointAtDist(double atDist) const {
+PolyLine PolyLine::getSegment(double a, double b) const {
+  assert(a <= b);
+  PointOnLine start = getPointAt(a);
+  PointOnLine end = getPointAt(b);
+
+  return getSegment(start, end);
+}
+
+// _____________________________________________________________________________
+PolyLine PolyLine::getSegment(const Point& a, const Point& b) const {
+  PointOnLine start = projectOn(a);
+  PointOnLine end = projectOnAfter(b, start.lastIndex);
+
+  return getSegment(start, end);
+}
+
+// __________________________________________________________________
+PolyLine PolyLine::getSegment(const PointOnLine& start, const PointOnLine& end)
+const {
+  PolyLine ret;
+
+  ret << start.p;
+
+  if (start.lastIndex+1 <= end.lastIndex) {
+    ret._line.insert(
+      ret._line.end(), _line.begin() + start.lastIndex+1, _line.begin() + end.lastIndex
+    );
+  }
+  ret << end.p;
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+PointOnLine PolyLine::getPointAtDist(double atDist) const {
   double dist = 0;
 
-  if (_line.size() == 1) return _line[0];
+  if (_line.size() == 1) return PointOnLine(0, 0, _line[0]);
 
   const util::geo::Point* last = &_line[0];
 
@@ -109,16 +160,17 @@ util::geo::Point PolyLine::getPointAtDist(double atDist) const {
 
     if (dist > atDist) {
       double p = (d - (dist - atDist)) / d;
-      return interpolate(*last, cur, p);
+      return PointOnLine(i-1, atDist / getLength(), interpolate(*last, cur, p));
     }
+
     last = &_line[i];
   }
 
-  return _line.back();
+  return PointOnLine(_line.size()-1, 1, _line.back());
 }
 
 // _____________________________________________________________________________
-util::geo::Point PolyLine::getPointAt(double atDist) const {
+PointOnLine PolyLine::getPointAt(double atDist) const {
   atDist *= boost::geometry::length(_line);
   return getPointAtDist(atDist);
 }
@@ -188,7 +240,7 @@ PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
     double y = 0;
 
     for (const PolyLine* pl : lines) {
-      util::geo::Point p = pl->getPointAt(a);
+      util::geo::Point p = pl->getPointAt(a).p;
       x += p.get<0>();
       y += p.get<1>();
     }
@@ -199,15 +251,93 @@ PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
 }
 
 // _____________________________________________________________________________
-bool PolyLine::operator==(const PolyLine& rhs) const {
-  if (_line.size() == 2 &&_line.size() == rhs.getLine().size()) {
-    // trivial case, straight line, implement directly
+std::pair<size_t, double> PolyLine::nearestSegmentAfter(const Point& p, size_t a) const {
+  // returns the index of the starting point of the nearest segment of p
 
-    // TODO: why 10? make global static or configurable or determine in some
-    //       way!
-    return (boost::geometry::distance(rhs.getLine()[0], getLine()[0]) < 10 ||
-        boost::geometry::distance(rhs.getLine().back(), getLine().back()) < 10); 
+  assert(a < _line.size());
+
+  double totalLength = getLength();
+  size_t smallest = a;
+  double totalDist = 0;
+  double dist = DBL_MAX;
+  double smallestDist = 0;
+
+  for (size_t i = smallest + 1; i < _line.size(); i++) {
+    Point startP(_line[i-1]);
+    Point endP(_line[i]);
+
+    if (i > 1) {
+      totalDist += boost::geometry::distance(_line[i-2], _line[i-1]);
+    }
+
+    double curDist = util::geo::distToSegment(
+      startP,
+      endP,
+      p
+    );
+
+    if (curDist < dist) {
+      dist = curDist;
+      smallest = i-1;
+      smallestDist = totalDist;
+    }
   }
 
-  return false;
+  return std::pair<size_t, double>(smallest, smallestDist / totalLength);
+}
+
+// _____________________________________________________________________________
+std::pair<size_t, double> PolyLine::nearestSegment(const Point& p) const {
+  return nearestSegmentAfter(p, 0);
+}
+
+// _____________________________________________________________________________
+PointOnLine PolyLine::projectOn(const Point& p) const {
+  return projectOnAfter(p, 0);
+}
+
+// _____________________________________________________________________________
+PointOnLine PolyLine::projectOnAfter(const Point& p, size_t a) const {
+  assert(a < _line.size());
+  std::pair<size_t, double> bc = nearestSegmentAfter(p, a);
+
+  Point ret = util::geo::projectOn(
+    _line[bc.first],
+    p,
+    _line[bc.first+1]
+  );
+
+  bc.second += boost::geometry::distance(_line[bc.first], ret) / getLength();
+
+  return PointOnLine(bc.first, bc.second, ret);
+}
+
+// _____________________________________________________________________________
+void PolyLine::simplify(double d) {
+  util::geo::Line simpled;
+  boost::geometry::simplify(_line, simpled, d);
+  _line = simpled;
+}
+
+// _____________________________________________________________________________
+bool PolyLine::operator==(const PolyLine& rhs) const {
+  // TODO: why 10? make global static or configurable or determine in some
+  //       way!
+  double DMAX = 100;
+
+  if (_line.size() == 2 &&_line.size() == rhs.getLine().size()) {
+    // trivial case, straight line, implement directly
+    return boost::geometry::distance(_line[0], rhs.getLine()[0]) < DMAX &&
+      boost::geometry::distance(_line.back(), rhs.getLine().back()) < DMAX;
+  } else {
+    for (size_t i = 0; i < rhs.getLine().size(); ++i) {
+      double d = boost::geometry::distance(rhs.getLine()[i], getLine());
+      std::cout << d << std::endl;
+      if (d > DMAX) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }

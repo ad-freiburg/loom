@@ -23,6 +23,10 @@ typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian>
 typedef boost::geometry::model::linestring<Point> Line;
 typedef boost::geometry::model::multi_linestring<Line> MultiLine;
 
+// _____________________________________________________________________________
+inline bool doubleEq(double a, double b) {
+  return fabs(a - b) < 0.000001;
+}
 
 // _____________________________________________________________________________
 inline bool _onSegment(double px, double py,
@@ -109,6 +113,63 @@ inline double segmentAngle(double p1x, double p1y, double q1x, double q1y) {
 // _____________________________________________________________________________
 inline double segmentAngle(const Point& p1, const Point& q1) {
   return segmentAngle(p1.get<0>(), p1.get<1>(), q1.get<0>(), q1.get<1>());
+}
+
+// _____________________________________________________________________________
+inline double dist(double x1, double y1, double x2, double y2) {
+  return sqrt((x2 - x1)*(x2 - x1)
+              + (y2 - y1)*(y2 - y1));
+}
+
+// _____________________________________________________________________________
+inline double dist(const Point& a, const Point& b) {
+  return dist(a.get<0>(), a.get<1>(), b.get<0>(), b.get<1>());
+}
+
+// _____________________________________________________________________________
+inline double distToSegment(double lax, double lay, double lbx, double lby,
+                            double px, double py) {
+  double d = dist(lax, lay, lbx, lby) * dist(lax, lay, lbx, lby);
+  if (d == 0) return dist(px, py, lax, lay);
+
+  double t = ((px - lax) * (lbx - lax)
+    + (py - lay) * (lby - lay)) / d;
+
+  if (t < 0) {
+    return dist(px, py, lax, lay);
+  } else if (t > 1) {
+    return dist(px, py, lbx, lby);
+  }
+
+  return dist(px, py, lax + t * (lbx - lax), lay + t * (lby - lay));
+}
+
+// _____________________________________________________________________________
+inline double distToSegment(const Point& la, const Point& lb, const Point& p) {
+  return distToSegment(la.get<0>(), la.get<1>(), lb.get<0>(), lb.get<1>(), p.get<0>(),
+    p.get<1>());
+}
+
+// _____________________________________________________________________________
+inline Point projectOn(const Point& a, const Point& b, const Point& c) {
+  if (doubleEq(a.get<0>(), b.get<0>()) && doubleEq(a.get<1>(), b.get<1>())) return a;
+  if (doubleEq(a.get<0>(), c.get<0>()) && doubleEq(a.get<1>(), c.get<1>())) return a;
+  if (doubleEq(b.get<0>(), c.get<0>()) && doubleEq(b.get<1>(), c.get<1>())) return b;
+
+  double m = (double)(c.get<1>() - a.get<1>()) / (c.get<0>() - a.get<0>());
+  double bb = (double)a.get<1>() - (m * a.get<0>());
+
+  double x = (m * b.get<1>() + b.get<0>() - m * bb) / (m * m + 1);
+  double y = (m * m * b.get<1>() + m * b.get<0>() + bb) / (m * m + 1);
+
+  Point ret = Point(x, y);
+
+  bool isBetween = dist(a, c) > dist(a, ret) && dist(a, c) > dist(c, ret);
+  bool nearer = dist(a, ret) < dist(c, ret);
+
+  if (!(isBetween)) return nearer ? a : c;
+
+  return ret;
 }
 
 }}}

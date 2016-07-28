@@ -8,11 +8,11 @@ CMakeFiles
 *.cfg
 *.cmake
 /build/
-*.swp
 *.pyc
 compile_commands.json
 .vimrc
 .clang_complete
 /.idea
 *.vs
-*.swo
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]

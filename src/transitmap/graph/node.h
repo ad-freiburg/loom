@@ -36,6 +36,9 @@ class Node {
   const std::set<Edge*>& getAdjListOut() const {
     return _adjListOut;
   }
+  const std::set<Edge*>& getAdjListIn() const {
+    return _adjListIn;
+  }
 
  protected:
   // add edge to this node's adjacency lists

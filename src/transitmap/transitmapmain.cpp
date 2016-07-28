@@ -55,10 +55,13 @@ int main(int argc, char** argv) {
 
     graph::GraphBuilder b(&g);
 
+    LOG(INFO) << "building graph...";
     b.consume(feed);
-
+    b.simplify();
     std::ofstream o;
     o.open("/home/patrick/test.svg");
+
+    LOG(INFO) << "outputting to SVG...";
     output::SvgOutput svgOut(&o);
     svgOut.print(g);
   } else {

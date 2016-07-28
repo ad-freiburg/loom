@@ -12,6 +12,7 @@
 #include "service.h"
 #include "shape.h"
 #include "stoptime.h"
+#include "stop.h"
 
 using std::exception;
 using std::string;

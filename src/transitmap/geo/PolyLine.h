@@ -18,6 +18,14 @@ typedef std::pair<std::pair<size_t, size_t>, std::pair<size_t, size_t> > SharedS
 static const double MAX_EQ_DISTANCE = 15;
 static const double AVERAGING_STEP = 20;
 
+struct PointOnLine {
+  PointOnLine(size_t i, double pos, const util::geo::Point& p)
+  : lastIndex(i), totalPos(pos), p(p) {}
+  size_t lastIndex;
+  double totalPos;
+  util::geo::Point p;
+};
+
 // TODO: maybe let this class inherit from a more generic geometry class
 class PolyLine {
 
@@ -28,10 +36,13 @@ class PolyLine {
   PolyLine& operator<<(const util::geo::Point& p);
 
   void reverse();
+  PolyLine getReversed() const;
 
   void offsetPerp(double units);
+  void offsetPerp(double units, double xscale, double yscale);
 
   PolyLine getPerpOffsetted(double units) const;
+  PolyLine getPerpOffsetted(double units, double xscale, double yscale) const;
 
 	const util::geo::Line& getLine() const;
 
@@ -44,12 +55,24 @@ class PolyLine {
   double getLength() const;
 
   // return point at dist
-  util::geo::Point getPointAtDist(double dist) const;
+  PointOnLine getPointAtDist(double dist) const;
 
   // return point at [0..1]
-  util::geo::Point getPointAt(double dist) const;
+  PointOnLine getPointAt(double dist) const;
+
+  PolyLine getSegment(double a, double b) const;
+  PolyLine getSegment(const PointOnLine& start, const PointOnLine& end) const;
+  PolyLine getSegment(const util::geo::Point& a, const util::geo::Point& b) const;
 
   static PolyLine average(std::vector<const PolyLine*>& lines);
+
+  void simplify(double d);
+
+	std::pair<size_t, double> nearestSegment(const util::geo::Point& p) const;
+	std::pair<size_t, double> nearestSegmentAfter(const util::geo::Point& p, size_t after) const;
+
+  PointOnLine projectOn(const util::geo::Point& p) const;
+  PointOnLine projectOnAfter(const util::geo::Point& p, size_t after) const;
 
   // equality operator, will hold frechet-distance equality check in
   // the future

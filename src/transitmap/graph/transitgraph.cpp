@@ -51,6 +51,13 @@ Edge* TransitGraph::getEdge(Node* from, Node* to) {
   for (auto e : from->getAdjListOut()) {
     if (e->getTo() == to) return e;
   }
+
+  // also search in the opposite direction, we are handling an undirected
+  // graph here
+  for (auto e : from->getAdjListIn()) {
+    if (e->getFrom() == to) return e;
+  }
+
   return 0;
 }
 
