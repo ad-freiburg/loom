@@ -58,6 +58,7 @@ int main(int argc, char** argv) {
     LOG(INFO) << "building graph...";
     b.consume(feed);
     b.simplify();
+    b.createTopologicalNodes();
     std::ofstream o;
     o.open("/home/patrick/test.svg");
 

@@ -197,25 +197,6 @@ double PolyLine::distTo(const util::geo::Point& p) const {
 }
 
 // _____________________________________________________________________________
-void PolyLine::getSharedSegments(const PolyLine& pl,
-  std::vector<SharedSeg>* ret) const {
-
-  double curTotalDist = 0;
-  double curTotalDistNeg = 0;
-  std::pair<size_t, size_t> curStartCand;
-  std::pair<size_t, size_t> curEndCand;
-
-  for (const util::geo::Point& p : _line) {
-    // for now, only check anchor points, should be sufficient for most
-    // lines
-
-    // TODO
-
-
-  }
-}
-
-// _____________________________________________________________________________
 double PolyLine::getLength() const {
   return boost::geometry::length(_line);
 }
@@ -341,3 +322,62 @@ bool PolyLine::operator==(const PolyLine& rhs) const {
 
   return true;
 }
+
+// _____________________________________________________________________________ 
+SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
+  /**
+   * Returns the segments this polyline share with pl
+   * atm, this is a very simple distance-based algorithm
+   *
+   * TODO: use some mutation of frechet distance here
+   */
+  double STEP_SIZE = 10;
+  double DMAX = 100;
+  SharedSegments ret;
+
+  bool in = false;
+  double curDist = 0;
+  double curTotalSegDist = 0;
+  PointOnLine currentStartCand;
+  PointOnLine currentEndCand;
+
+  for (size_t i = 1; i < _line.size(); ++i) {
+    const Point& s = _line[i-1];
+    const Point& e = _line[i];
+
+    double totalDist = boost::geometry::distance(s, e);
+    double curSegDist = 0;
+    while (curSegDist < totalDist) {
+      const Point& curPointer = interpolate(s, e, curSegDist / totalDist);
+      auto nearestSeg = pl.nearestSegment(curPointer);
+      // compare angles
+      int32_t angA = util::geo::angBetween(s, pl.getLine()[nearestSeg.first]);
+      int32_t angB = util::geo::angBetween(curPointer, pl.getLine()[nearestSeg.first + 1]);
+      if (angA < 90 && angB > 90 && pl.distTo(curPointer) <= DMAX) {
+        if (in) {
+          // update currendEndCand
+          currentEndCand = PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
+        } else {
+          in = true;
+          currentStartCand = PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
+        }
+      } else {
+        if (in && !(currentEndCand.totalPos < .5)) {
+          in = false;
+          ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
+        } else {
+          // do nothing
+        }
+      }
+
+      curSegDist += STEP_SIZE;
+      curDist += STEP_SIZE;
+
+    }
+
+    curTotalSegDist += totalDist;
+  }
+
+  return ret;
+}
+

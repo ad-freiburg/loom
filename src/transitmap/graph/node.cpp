@@ -12,19 +12,21 @@ using namespace graph;
 using namespace gtfsparser;
 
 // _____________________________________________________________________________
-Node::Node(util::geo::Point pos) : _pos(pos), _stop(0) {
+Node::Node(util::geo::Point pos) : _pos(pos) {
 }
 
 // _____________________________________________________________________________
-Node::Node(double x, double y) : _pos(x, y), _stop(0) {
+Node::Node(double x, double y) : _pos(x, y) {
 }
 
 // _____________________________________________________________________________
-Node::Node(util::geo::Point pos, gtfs::Stop* s) : _pos(pos), _stop(s) {
+Node::Node(util::geo::Point pos, gtfs::Stop* s) : _pos(pos) {
+  _stops.insert(s);
 }
 
 // _____________________________________________________________________________
-Node::Node(double x, double y, gtfs::Stop* s) : _pos(x, y), _stop(s) {
+Node::Node(double x, double y, gtfs::Stop* s) : _pos(x, y) {
+  _stops.insert(s);
 }
 
 // _____________________________________________________________________________
@@ -44,8 +46,13 @@ Node::~Node() {
 }
 
 // _____________________________________________________________________________
-gtfs::Stop* Node::getStop() const {
-  return _stop;
+void Node::addStop(gtfs::Stop* s) {
+  _stops.insert(s);
+}
+
+// _____________________________________________________________________________
+const std::set<gtfs::Stop*>& Node::getStops() const {
+  return _stops;
 }
 
 // _____________________________________________________________________________

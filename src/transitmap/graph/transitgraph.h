@@ -42,6 +42,8 @@ class TransitGraph {
   Node* getNodeByStop(const gtfs::Stop* s) const;
   Node* getNodeByStop(const gtfs::Stop* s, bool getParent) const;
 
+  Node* getNearestNode(const util::geo::Point& p, double maxD) const;
+
   projPJ getProjection() const;
   const boost::geometry::model::box<util::geo::Point>& getBoundingBox() const;
  private:

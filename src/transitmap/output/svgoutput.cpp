@@ -10,8 +10,8 @@
 using namespace transitmapper;
 using namespace output;
 
-const static double XSCALE = 0.8;
-const static double YSCALE = 0.8;
+const static double XSCALE = 0.4;
+const static double YSCALE = 0.4;
 
 // _____________________________________________________________________________
 SvgOutput::SvgOutput(std::ostream* o) : _o(o), _w(o, true) {
@@ -57,10 +57,15 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
     std::map<std::string, std::string> params;
     params["cx"] = std::to_string((n->getPos().get<0>() - xOffset) * XSCALE);
     params["cy"] = std::to_string(h-(n->getPos().get<1>() - yOffset) * YSCALE);
-    params["r"] = "20";
-    params["stroke"] = "black";
-    params["stroke-width"] = "4";
-    params["fill"] = "white";
+    if (n->getStops().size() > 0) {
+      params["r"] = "20";
+      params["stroke"] = "black";
+      params["stroke-width"] = "4";
+      params["fill"] = "white";
+    } else {
+      params["r"] = "5";
+      params["fill"] = "red";
+    }
     _w.openTag("circle", params);
     _w.closeTag();
   }

@@ -104,15 +104,15 @@ inline bool lineIntersects(const Point& p1, const Point& q1, const Point& p2,
 }
 
 // _____________________________________________________________________________
-inline double segmentAngle(double p1x, double p1y, double q1x, double q1y) {
+inline double angBetween(double p1x, double p1y, double q1x, double q1y) {
   double dY = q1y - p1y;
   double dX = q1x - p1x;
   return atan2(dY, dX) * (180.0 / M_PI);
 }
 
 // _____________________________________________________________________________
-inline double segmentAngle(const Point& p1, const Point& q1) {
-  return segmentAngle(p1.get<0>(), p1.get<1>(), q1.get<0>(), q1.get<1>());
+inline double angBetween(const Point& p1, const Point& q1) {
+  return angBetween(p1.get<0>(), p1.get<1>(), q1.get<0>(), q1.get<1>());
 }
 
 // _____________________________________________________________________________

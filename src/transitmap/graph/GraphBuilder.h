@@ -23,6 +23,7 @@ class GraphBuilder {
 
   void consume(const gtfs::Feed& f);
   void simplify();
+  void createTopologicalNodes();
  private:
   TransitGraph* _targetGraph;
   projPJ _mercProj;

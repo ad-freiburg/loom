@@ -83,7 +83,7 @@ Node* TransitGraph::getNodeByStop(const gtfs::Stop* s, bool getParent) const {
 // _____________________________________________________________________________
 Node* TransitGraph::getNodeByStop(const gtfs::Stop* s) const {
   for (const auto n : _nodes) {
-    if (n->getStop() == s) {
+    if (n->getStops().find(const_cast<gtfs::Stop*>(s)) != n->getStops().end()) {
       return n;
     }
   }
@@ -109,4 +109,19 @@ projPJ TransitGraph::getProjection() const {
 // _____________________________________________________________________________
 const boost::geometry::model::box<util::geo::Point>& TransitGraph::getBoundingBox() const {
   return _bbox;
+}
+
+// _____________________________________________________________________________
+Node* TransitGraph::getNearestNode(const util::geo::Point& p, double maxD) const {
+  double curD = DBL_MAX;;
+  Node* curN = 0;
+  for (auto n : _nodes) {
+    double d = boost::geometry::distance(n->getPos(), p);
+    if (d < maxD && d < curD) {
+      curN = n;
+      curD = d;
+    }
+  }
+
+  return curN;
 }

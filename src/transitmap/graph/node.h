@@ -28,9 +28,10 @@ class Node {
   Node(util::geo::Point pos, gtfs::Stop* stop);
   Node(double x, double y, gtfs::Stop* stop);
 
-  virtual ~Node();
+  ~Node();
 
-  virtual gtfs::Stop* getStop() const;
+  const std::set<gtfs::Stop*>& getStops() const;
+  void addStop(gtfs::Stop* s);
   const util::geo::Point& getPos() const;
 
   const std::set<Edge*>& getAdjListOut() const {
@@ -52,7 +53,7 @@ class Node {
   std::set<Edge*> _adjListOut;
   util::geo::Point _pos;
 
-  gtfs::Stop* _stop;
+  std::set<gtfs::Stop*> _stops;
 
   friend class TransitGraph;
 };

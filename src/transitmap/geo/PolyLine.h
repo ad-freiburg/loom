@@ -13,17 +13,22 @@
 namespace transitmapper {
 namespace geo {
 
-typedef std::pair<std::pair<size_t, size_t>, std::pair<size_t, size_t> > SharedSeg;
-
 static const double MAX_EQ_DISTANCE = 15;
 static const double AVERAGING_STEP = 20;
 
 struct PointOnLine {
+  PointOnLine()
+  : lastIndex(0), totalPos(-1), p() {}
+
   PointOnLine(size_t i, double pos, const util::geo::Point& p)
   : lastIndex(i), totalPos(pos), p(p) {}
   size_t lastIndex;
   double totalPos;
   util::geo::Point p;
+};
+
+struct SharedSegments {
+  std::vector<std::pair<PointOnLine, PointOnLine> > segments;
 };
 
 // TODO: maybe let this class inherit from a more generic geometry class
@@ -49,8 +54,7 @@ class PolyLine {
   double distTo(const PolyLine& g) const;
   double distTo(const util::geo::Point& p) const;
 
-  void getSharedSegments(const PolyLine& pl,
-    std::vector<SharedSeg>* res) const;
+  SharedSegments getSharedSegments(const PolyLine& pl) const;
 
   double getLength() const;
 

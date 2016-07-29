@@ -20,7 +20,8 @@ GraphBuilder::GraphBuilder(TransitGraph* targetGraph)
 void GraphBuilder::consume(const Feed& f) {
   // TODO: make this stuff configurable
 
-  bool AGGREGATE_STOPS = true;
+  uint8_t AGGREGATE_STOPS = 2; // 1: aggregate stops already aggrgated in GTFS
+                               // 2: aaggregte stops by distance
 
   // add all the nodes first. the TransitGraph maintains
   // a map stationid->nodeid for us
@@ -39,12 +40,24 @@ void GraphBuilder::consume(const Feed& f) {
 
     pj_transform(_mercProj, _targetGraph->getProjection(), 1, 1, &x, &y, 0);
 
-    _targetGraph->addNode(
-      new Node(
-        getProjectedPoint(curStop->getLat(), curStop->getLng()),
-        curStop
-      )
-    );
+    util::geo::Point p = getProjectedPoint(curStop->getLat(), curStop->getLng());
+
+    Node* n = 0;
+
+    if (AGGREGATE_STOPS > 1) {
+      n = _targetGraph->getNearestNode(p, 100);
+    }
+
+    if (n) {
+      n->addStop(curStop);
+    } else {
+      _targetGraph->addNode(
+        new Node(
+          p,
+          curStop
+        )
+      );
+    }
   }
 
   size_t cur = 0;
@@ -54,8 +67,6 @@ void GraphBuilder::consume(const Feed& f) {
 
     if (t->second->getRoute()->getType() != gtfs::Route::TYPE::TRAM) continue;
     if (!(t->second->getShape())) continue;
-
-    std::cout << "AT " << cur << std::endl;
 
     auto st = t->second->getStopTimes().begin();
 
@@ -113,6 +124,31 @@ void GraphBuilder::simplify() {
   for (auto n : *_targetGraph->getNodes()) {
     for (auto e : n->getAdjListOut()) {
       e->simplify();
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void GraphBuilder::createTopologicalNodes() {
+  for (auto n : *_targetGraph->getNodes()) {
+    for (auto e : n->getAdjListOut()) {
+      if (e->getEdgeTripGeoms()->size() == 0) continue;
+      // TODO: outfactor this _______
+      for (auto nt : *_targetGraph->getNodes()) {
+        for (auto toTest : nt->getAdjListOut()) {
+          if (toTest->getEdgeTripGeoms()->size() == 0) continue;
+          if (e != toTest) {
+            geo::SharedSegments s = e->getEdgeTripGeoms()->front().getGeom().getSharedSegments(toTest->getEdgeTripGeoms()->front().getGeom());
+            for (auto& segment : s.segments) {
+              Node* a = new Node(segment.first.p, 0);
+              Node* b = new Node(segment.second.p, 0);
+              _targetGraph->addNode(a);
+              _targetGraph->addNode(b);
+            }
+          }
+        }
+      }
+      // _________
     }
   }
 }
