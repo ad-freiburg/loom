@@ -33,15 +33,20 @@ class SvgOutputException : public std::exception {
 class SvgOutput : public Output {
 
  public:
-  SvgOutput(std::ostream* o);
+  SvgOutput(std::ostream* o, double xScale, double yScale);
   virtual ~SvgOutput() {};
 
   virtual void print(const graph::TransitGraph& outputGraph);
 
-	void printLine(const transitmapper::geo::PolyLine& l, const std::string& style, double w, double h, uint32_t xOffs, uint32_t yOffs);
+	void printLine(const transitmapper::geo::PolyLine& l, const std::string& style, double w, double h, int64_t xOffs, int64_t yOffs);
+  void printPoint(const util::geo::Point& p, const std::string& style,
+                          double w, double h, int64_t xOffs, int64_t yOffs);
  private:
   std::ostream* _o;
   util::XmlWriter _w;
+
+  double _xScale;
+  double _yScale;
 
   void outputNodes(const graph::TransitGraph& outputGraph, double w, double h);
   void outputEdges(const graph::TransitGraph& outputGraph, double w, double h);

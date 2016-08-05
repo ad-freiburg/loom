@@ -90,10 +90,20 @@ Node* TransitGraph::getNodeByStop(const gtfs::Stop* s) const {
   return 0;
 }
 
-
 // _____________________________________________________________________________
 bool TransitGraph::containsNode(Node* n) const {
   return  _nodes.find(n) != _nodes.end();
+}
+
+// _____________________________________________________________________________
+void TransitGraph::deleteEdge(Node* from, Node* to) {
+  Edge* toDel = getEdge(from, to);
+  if (!toDel) return;
+
+  from->removeEdge(toDel);
+  to->removeEdge(toDel);
+
+  delete toDel;
 }
 
 // _____________________________________________________________________________

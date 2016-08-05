@@ -122,11 +122,30 @@ inline double dist(double x1, double y1, double x2, double y2) {
 }
 
 // _____________________________________________________________________________
-inline double dist(const Point& a, const Point& b) {
-  return dist(a.get<0>(), a.get<1>(), b.get<0>(), b.get<1>());
+inline double innerProd(double x1, double y1, double x2, double y2,
+    double x3, double y3) {
+  double dx21 = x2-x1;
+  double dx31 = x3-x1;
+  double dy21 = y2-y1;
+  double dy31 = y3-y1;
+  double m12 = sqrt(dx21*dx21 + dy21*dy21);
+  double m13 = sqrt(dx31*dx31 + dy31*dy31);
+  double theta = acos((dx21*dx31 + dy21*dy31) / (m12 * m13));
+
+  return theta * (180 / M_PI);
 }
 
 // _____________________________________________________________________________
+inline double innerProd(const Point& a, const Point& b, const Point& c) {
+  return innerProd(a.get<0>(), a.get<1>(), b.get<0>(), b.get<1>(), c.get<0>(), c.get<1>());
+}
+
+// _____________________________________________________________________________
+inline double dist(const Point& p1, const Point& p2) {
+  return dist(p1.get<0>(), p1.get<1>(), p2.get<0>(), p2.get<1>());
+}
+
+ // _____________________________________________________________________________
 inline double distToSegment(double lax, double lay, double lbx, double lby,
                             double px, double py) {
   double d = dist(lax, lay, lbx, lby) * dist(lax, lay, lbx, lby);

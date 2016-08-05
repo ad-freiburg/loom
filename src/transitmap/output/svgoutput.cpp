@@ -1,4 +1,4 @@
-// Copyright 2016, University of Freiburg,
+// Copyright 2016, U  //niversity of Freiburg,
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
@@ -10,11 +10,11 @@
 using namespace transitmapper;
 using namespace output;
 
-const static double XSCALE = 0.4;
-const static double YSCALE = 0.4;
 
 // _____________________________________________________________________________
-SvgOutput::SvgOutput(std::ostream* o) : _o(o), _w(o, true) {
+SvgOutput::SvgOutput(std::ostream* o, double xScale, double yScale)
+: _o(o), _w(o, true), _xScale(xScale),
+  _yScale(yScale) {
 
 }
 
@@ -22,14 +22,16 @@ SvgOutput::SvgOutput(std::ostream* o) : _o(o), _w(o, true) {
 void SvgOutput::print(const graph::TransitGraph& outG) {
   std::map<std::string, std::string> params;
 
-  uint32_t xOffset = outG.getBoundingBox().min_corner().get<0>();
-  uint32_t yOffset = outG.getBoundingBox().min_corner().get<1>();
+  int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
+  int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 
-  uint32_t width = outG.getBoundingBox().max_corner().get<0>() - xOffset;
-  uint32_t height = outG.getBoundingBox().max_corner().get<1>() - yOffset;
+  std::cout << xOffset << std::endl;
 
-  width *= XSCALE;
-  height *= YSCALE;
+  int64_t width = outG.getBoundingBox().max_corner().get<0>() - xOffset;
+  int64_t height = outG.getBoundingBox().max_corner().get<1>() - yOffset;
+
+  width *= _xScale;
+  height *= _yScale;
 
   params["width"] = std::to_string(width) + "px";
   params["height"] = std::to_string(height) + "px";
@@ -49,22 +51,22 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
 
 // _____________________________________________________________________________
 void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h) {
-  uint32_t xOffset = outG.getBoundingBox().min_corner().get<0>();
-  uint32_t yOffset = outG.getBoundingBox().min_corner().get<1>();
+  int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
+  int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
     std::map<std::string, std::string> params;
-    params["cx"] = std::to_string((n->getPos().get<0>() - xOffset) * XSCALE);
-    params["cy"] = std::to_string(h-(n->getPos().get<1>() - yOffset) * YSCALE);
+    params["cx"] = std::to_string((n->getPos().get<0>() - xOffset) * _xScale);
+    params["cy"] = std::to_string(h-(n->getPos().get<1>() - yOffset) * _yScale);
     if (n->getStops().size() > 0) {
-      params["r"] = "20";
+      params["r"] = "5";
       params["stroke"] = "black";
       params["stroke-width"] = "4";
       params["fill"] = "white";
     } else {
       params["r"] = "5";
-      params["fill"] = "red";
+      params["fill"] = "#FF00FF";
     }
     _w.openTag("circle", params);
     _w.closeTag();
@@ -74,8 +76,8 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
 
 // _____________________________________________________________________________
 void SvgOutput::outputEdges(const graph::TransitGraph& outG, double w, double h) {
-  uint32_t xOffset = outG.getBoundingBox().min_corner().get<0>();
-  uint32_t yOffset = outG.getBoundingBox().min_corner().get<1>();
+  int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
+  int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
@@ -90,10 +92,10 @@ void SvgOutput::outputEdges(const graph::TransitGraph& outG, double w, double h)
         double o = oo;
         for (auto r : g.getTrips()) {
             geo::PolyLine p = center;
-            p.offsetPerp(o - oo / 2, XSCALE, YSCALE);
+            p.offsetPerp(o - oo / 2, _xScale, _yScale);
             std::stringstream attrs;
             attrs << "fill:none;stroke:#" << r.first->getColorString()
-              << ";stroke-width:" << lineW;
+              << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:" << lineW;
             printLine(p, attrs.str(), w, h, xOffset, yOffset);
             //break;
             o -= lineW + lineSpc;
@@ -106,20 +108,32 @@ void SvgOutput::outputEdges(const graph::TransitGraph& outG, double w, double h)
 }
 
 // _____________________________________________________________________________
+void SvgOutput::printPoint(const util::geo::Point& p,
+													const std::string& style,
+                          double w, double h, int64_t xOffs, int64_t yOffs) {
+  std::map<std::string, std::string> params;
+  params["cx"] = std::to_string((p.get<0>() - xOffs) * _xScale);
+  params["cy"] = std::to_string(h-(p.get<1>() - yOffs) * _yScale);
+  params["r"] = "5";
+  params["fill"] = "#FF00FF";
+  _w.openTag("circle", params);
+  _w.closeTag();
+
+}
+// _____________________________________________________________________________
 void SvgOutput::printLine(const transitmapper::geo::PolyLine& l,
 													const std::string& style,
-                          double w, double h, uint32_t xOffs, uint32_t yOffs) {
+                          double w, double h, int64_t xOffs, int64_t yOffs) {
 	std::map<std::string, std::string> params;
 	params["style"] = style;
 	std::stringstream points;
 
 	for (auto& p : l.getLine()) {
-		points << " " << (p.get<0>() - xOffs)*XSCALE << "," << h - (p.get<1>() - yOffs) * YSCALE;
+		points << " " << (p.get<0>() - xOffs)*_xScale << "," << h - (p.get<1>() - yOffs) * _yScale;
 	}
 
 	params["points"] = points.str();
 
 	_w.openTag("polyline", params);
-
 	_w.closeTag();
 }

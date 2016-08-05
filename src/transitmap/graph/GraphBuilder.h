@@ -5,6 +5,7 @@
 #ifndef TRANSITMAP_GRAPH_GRAPHBUILDER_H_
 #define TRANSITMAP_GRAPH_GRAPHBUILDER_H_
 
+#include <algorithm>
 #include <unordered_map>
 #include <proj_api.h>
 #include "transitgraph.h"
@@ -15,6 +16,14 @@ namespace transitmapper {
 namespace graph {
 
 const static char* WGS84_PROJ = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+
+struct ShrdSegWrap {
+  ShrdSegWrap() : e(0), f(0) {};
+  ShrdSegWrap(Edge* e, Edge* f, geo::SharedSegment s) : e(e), f(f), s(s) {};
+  Edge* e;
+  Edge* f;
+  geo::SharedSegment s;
+};
 
 class GraphBuilder {
 
@@ -33,8 +42,8 @@ class GraphBuilder {
 
   util::geo::Point getProjectedPoint(double lat, double lng) const;
 
-  // we do this here, to avoid boost::geometry dependency in gtfs parser
   geo::PolyLine getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b, gtfs::Trip* t);
+  ShrdSegWrap getNextSharedSegment() const;
 };
 
 }}

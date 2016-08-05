@@ -32,16 +32,9 @@ void GraphBuilder::consume(const Feed& f) {
     Stop* curStop = s->second;
     if (AGGREGATE_STOPS && curStop->getParentStation() != 0) continue;
 
-    // reproject to graph projection
-    double x = curStop->getLng();
-    double y = curStop->getLat();
-    x *= DEG_TO_RAD;
-    y *= DEG_TO_RAD;
-
-    pj_transform(_mercProj, _targetGraph->getProjection(), 1, 1, &x, &y, 0);
-
     util::geo::Point p = getProjectedPoint(curStop->getLat(), curStop->getLng());
 
+    std::cout << boost::geometry::wkt(p) << std::endl;
     Node* n = 0;
 
     if (AGGREGATE_STOPS > 1) {
@@ -65,15 +58,26 @@ void GraphBuilder::consume(const Feed& f) {
     cur++;
     if (t->second->getStopTimes().size() < 2) continue;
 
-    if (t->second->getRoute()->getType() != gtfs::Route::TYPE::TRAM) continue;
-    if (!(t->second->getShape())) continue;
-
+    if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
+    //if (t->second->getRoute()->getShortName() != "3") continue;
+    //if (!(t->second->getShape())) continue;
     auto st = t->second->getStopTimes().begin();
 
     StopTime prev = *st;
     ++st;
+    /**
+      while ((!prev.getStop()->getParentStation() || (prev.getStop()->getParentStation()->getId() != "Parent30501" && 
+          prev.getStop()->getParentStation()->getId() != "Parent30505")) && st != t->second->getStopTimes().end()) {
+        prev = *st;
+        ++st;
+      }
+**/
     for (; st != t->second->getStopTimes().end(); ++st) {
       const StopTime& cur = *st;
+      /**
+      if (!cur.getStop()->getParentStation() || (cur.getStop()->getParentStation()->getId() != "Parent30501" && 
+          cur.getStop()->getParentStation()->getId() != "Parent30505")) continue;
+      **/
       Node* fromNode = _targetGraph->getNodeByStop(
         prev.getStop(),
         AGGREGATE_STOPS
@@ -129,27 +133,128 @@ void GraphBuilder::simplify() {
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::createTopologicalNodes() {
+ShrdSegWrap GraphBuilder::getNextSharedSegment() const {
   for (auto n : *_targetGraph->getNodes()) {
     for (auto e : n->getAdjListOut()) {
-      if (e->getEdgeTripGeoms()->size() == 0) continue;
+      if (e->getEdgeTripGeoms()->size() != 1) continue;
       // TODO: outfactor this _______
       for (auto nt : *_targetGraph->getNodes()) {
         for (auto toTest : nt->getAdjListOut()) {
-          if (toTest->getEdgeTripGeoms()->size() == 0) continue;
+          // TODO: only check edges with a SINGLE geometry atm, see also check above
+          if (toTest->getEdgeTripGeoms()->size() != 1) continue;
           if (e != toTest) {
             geo::SharedSegments s = e->getEdgeTripGeoms()->front().getGeom().getSharedSegments(toTest->getEdgeTripGeoms()->front().getGeom());
-            for (auto& segment : s.segments) {
-              Node* a = new Node(segment.first.p, 0);
-              Node* b = new Node(segment.second.p, 0);
-              _targetGraph->addNode(a);
-              _targetGraph->addNode(b);
+            if (s.segments.size() > 0 && boost::geometry::distance(s.segments.front().first.p, s.segments.front().second.p) > 10) {
+              return ShrdSegWrap(e, toTest, s.segments.front());
             }
           }
         }
       }
       // _________
     }
+  }
+
+  return ShrdSegWrap();
+}
+
+// _____________________________________________________________________________
+void GraphBuilder::createTopologicalNodes() {
+  ShrdSegWrap w;
+  while ((w = getNextSharedSegment()).e) {
+    const EdgeTripGeom& curEdgeGeom = w.e->getEdgeTripGeoms()->front();
+    const EdgeTripGeom& compEdgeGeom = w.f->getEdgeTripGeoms()->front();
+
+    geo::PolyLine ea = curEdgeGeom.getGeom().getSegment(0, w.s.first.totalPos);
+    geo::PolyLine ab = curEdgeGeom.getGeom().getSegment(w.s.first.totalPos, w.s.second.totalPos);
+    geo::PolyLine ec = curEdgeGeom.getGeom().getSegment(w.s.second.totalPos, 1);
+
+    geo::PointOnLine fap = compEdgeGeom.getGeom().projectOn(w.s.first.p);
+    geo::PointOnLine fbp = compEdgeGeom.getGeom().projectOn(w.s.second.p);
+
+    bool reversed = false;
+    if (fap.totalPos > fbp.totalPos) {
+      geo::PointOnLine temp = fap;
+      fap = fbp;
+      fbp = temp;
+      reversed = true;
+    }
+
+    geo::PolyLine fa = compEdgeGeom.getGeom().getSegment(0, fap.totalPos);
+    geo::PolyLine fab = compEdgeGeom.getGeom().getSegment(fap, fbp);
+    geo::PolyLine fc = compEdgeGeom.getGeom().getSegment(fbp.totalPos, 1);
+
+    if (reversed) fab.reverse();
+
+    std::vector<const geo::PolyLine*> avg;
+    avg.push_back(&ab);
+    avg.push_back(&fab);
+    // ab = geo::PolyLine::average(avg);
+
+    // new node at the start of the shared segment
+    Node* a = new Node(w.s.first.p);
+
+    // new node at the end of the shared segment
+    Node* b = new Node(w.s.second.p);
+
+
+    EdgeTripGeom eaEdgeGeom(ea, a);
+    EdgeTripGeom abEdgeGeom(ab, b);
+    EdgeTripGeom ecEdgeGeom(ec, w.e->getTo());
+
+    EdgeTripGeom faEdgeGeom(fa, a);
+    EdgeTripGeom fcEdgeGeom(fc, w.f->getTo());
+
+    for (auto& r : curEdgeGeom.getTrips()) {
+      for (auto& t : r.second.trips) {
+        if (r.second.direction == w.e->getTo()) {
+          eaEdgeGeom.addTrip(t, a);
+          abEdgeGeom.addTrip(t, b);
+          ecEdgeGeom.addTrip(t, w.e->getTo());
+        } else {
+          eaEdgeGeom.addTrip(t, w.e->getFrom());
+          abEdgeGeom.addTrip(t, a);
+          ecEdgeGeom.addTrip(t, b);
+        }
+      }
+    }
+
+    for (auto& r : compEdgeGeom.getTrips()) {
+      for (auto& t : r.second.trips) {
+        if (r.second.direction == w.f->getTo()) {
+          faEdgeGeom.addTrip(t, a);
+          abEdgeGeom.addTrip(t, b);
+          fcEdgeGeom.addTrip(t, w.f->getTo());
+        } else {
+          faEdgeGeom.addTrip(t, w.f->getFrom());
+          abEdgeGeom.addTrip(t, a);
+          fcEdgeGeom.addTrip(t, b);
+        }
+      }
+    }
+
+
+    // add new edges
+    _targetGraph->addNode(a);
+    _targetGraph->addNode(b);
+    Edge* eaE =_targetGraph->addEdge(w.e->getFrom(), a);
+    Edge* abE =_targetGraph->addEdge(a, b);
+    Edge* ebE =_targetGraph->addEdge(b, w.e->getTo());
+
+    Edge* faE =_targetGraph->addEdge(w.f->getFrom(), a);
+    Edge* fbE =_targetGraph->addEdge(b, w.f->getTo());
+
+    eaE->addEdgeTripGeom(eaEdgeGeom);
+    abE->addEdgeTripGeom(abEdgeGeom);
+    ebE->addEdgeTripGeom(ecEdgeGeom);
+
+    faE->addEdgeTripGeom(faEdgeGeom);
+    fbE->addEdgeTripGeom(fcEdgeGeom);
+
+    std::cout << w.e << std::endl;
+
+    // delete old edges
+    _targetGraph->deleteEdge(w.e->getFrom(), w.e->getTo());
+    _targetGraph->deleteEdge(w.f->getFrom(), w.f->getTo());
   }
 }
 

@@ -27,8 +27,10 @@ struct PointOnLine {
   util::geo::Point p;
 };
 
+typedef std::pair<PointOnLine, PointOnLine> SharedSegment;
+
 struct SharedSegments {
-  std::vector<std::pair<PointOnLine, PointOnLine> > segments;
+  std::vector<SharedSegment> segments;
 };
 
 // TODO: maybe let this class inherit from a more generic geometry class
@@ -81,6 +83,7 @@ class PolyLine {
   // equality operator, will hold frechet-distance equality check in
   // the future
   bool operator==(const PolyLine& rhs) const;
+  bool contains(const PolyLine& rhs) const;
  private:
   util::geo::Line _line;
 

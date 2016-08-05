@@ -49,15 +49,14 @@ bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
 bool Edge::addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode) {
   bool inserted = false;
   for (auto& e : _tripsContained) {
-    if (e.getGeom() == pl || e.getGeom() == pl.getReversed()) {
-      e.addTrip(t, toNode);
+    if (e.getGeom() == pl) {
+      e.addTrip(t, toNode, pl);
       inserted = true;
       break;
     }
   }
-
   if (!inserted) {
-    EdgeTripGeom etg(pl);
+    EdgeTripGeom etg(pl, toNode);
     etg.addTrip(t, toNode);
     _tripsContained.push_back(etg);
   }
@@ -76,12 +75,17 @@ std::vector<EdgeTripGeom>* Edge::getEdgeTripGeoms() {
 }
 
 // _____________________________________________________________________________
+void Edge::addEdgeTripGeom(const EdgeTripGeom& e) {
+  _tripsContained.push_back(e);
+}
+
+// _____________________________________________________________________________
 void Edge::simplify() {
   for (auto& e : _tripsContained) {
     e.removeOrphans();
   }
 
-// calculate average cardinalty of geometries on this edge
+  // calculate average cardinalty of geometries on this edge
   double avg = 0;
   for (auto& e : _tripsContained) {
     avg += e.getTripCardinality();
@@ -93,6 +97,74 @@ void Edge::simplify() {
     std::cout << it->getTripCardinality() << " vs. " << avg*0.1 << std::endl;
     if (it->getTripCardinality() < avg*0.1) {
       it = _tripsContained.erase(it);
+    }
+  }
+
+  combineIncludedGeoms();
+
+  averageCombineGeom();
+}
+
+// _____________________________________________________________________________
+void Edge::averageCombineGeom() {
+  if (_tripsContained.size() < 2) {
+    return;
+  }
+
+  std::vector<const geo::PolyLine*> lines;
+  std::vector<geo::PolyLine> reversed;
+  const Node* referenceDir = _tripsContained.front().getGeomDir();
+
+  for (auto& et : _tripsContained) {
+    if (et.getGeomDir() != referenceDir) {
+      reversed.push_back(et.getGeom().getReversed());
+      lines.push_back(&reversed.back());
+    } else {
+      lines.push_back(&et.getGeom());
+    }
+  }
+
+  geo::PolyLine pl;
+  pl = pl.average(lines);
+
+  EdgeTripGeom combined(pl, referenceDir);
+
+  for (auto& et : _tripsContained) {
+    for (auto& r : *et.getTrips()) {
+      for (auto& t : r.second.trips) {
+        combined.addTrip(t, r.second.direction);
+      }
+    }
+  }
+
+  _tripsContained.clear();
+  _tripsContained.push_back(combined);
+}
+
+// _____________________________________________________________________________
+void Edge::combineIncludedGeoms() {
+  if (_tripsContained.size() < 2) {
+    return;
+  }
+
+  for (auto et = _tripsContained.begin(); et != _tripsContained.end();) {
+    bool combined = false;
+    for (auto& toCheckAgainst : _tripsContained) {
+      if (toCheckAgainst.getGeom().contains(et->getGeom())
+          && !et->getGeom().contains(toCheckAgainst.getGeom())) {
+        for (auto& r : *(et->getTrips())) {
+          for (auto& t : r.second.trips) {
+            toCheckAgainst.addTrip(t, r.second.direction);
+          }
+        }
+        combined = true;
+      }
+    }
+    if (combined) {
+      // delete the old EdgeTripGeom
+      et = _tripsContained.erase(et);
+    } else {
+      et++;
     }
   }
 }

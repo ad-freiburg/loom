@@ -36,6 +36,8 @@ class Edge {
   const std::vector<EdgeTripGeom>& getEdgeTripGeoms() const;
   std::vector<EdgeTripGeom>* getEdgeTripGeoms();
 
+  void addEdgeTripGeom(const EdgeTripGeom& e);
+
   void simplify();
  private:
   Node* _from;
@@ -55,6 +57,9 @@ class Edge {
   // introduces new topological nodes which mark the position where two
   // lines part or join.
   std::vector<EdgeTripGeom> _tripsContained;
+
+  void combineIncludedGeoms();
+  void averageCombineGeom();
 };
 
 }}

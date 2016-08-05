@@ -12,12 +12,26 @@ using namespace graph;
 using namespace gtfsparser;
 
 // _____________________________________________________________________________
-EdgeTripGeom::EdgeTripGeom(geo::PolyLine geom) : _geom(geom) {
+EdgeTripGeom::EdgeTripGeom(geo::PolyLine geom, const Node* geomDir)
+: _geom(geom), _geomDir(geomDir) {
 
 }
 
 // _____________________________________________________________________________
-void EdgeTripGeom::addTrip(gtfs::Trip* t, Node* dirNode) {
+void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode,
+    geo::PolyLine& pl) {
+  std::vector<const geo::PolyLine*> vec;
+  vec.push_back(&_geom);
+  if (dirNode != _geomDir) {
+    pl.reverse();
+  }
+  vec.push_back(&pl);
+  _geom = geo::PolyLine::average(vec);
+  _trips[t->getRoute()].addTrip(t, dirNode);
+}
+
+// _____________________________________________________________________________
+void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode) {
   _trips[t->getRoute()].addTrip(t, dirNode);
 }
 
@@ -67,4 +81,9 @@ void EdgeTripGeom::removeOrphans() {
       it = _trips.erase(it);
     }
   }
+}
+
+// _____________________________________________________________________________
+const Node* EdgeTripGeom::getGeomDir() const {
+  return _geomDir; 
 }

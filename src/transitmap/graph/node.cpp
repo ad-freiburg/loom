@@ -21,12 +21,12 @@ Node::Node(double x, double y) : _pos(x, y) {
 
 // _____________________________________________________________________________
 Node::Node(util::geo::Point pos, gtfs::Stop* s) : _pos(pos) {
-  _stops.insert(s);
+  if (s) _stops.insert(s);
 }
 
 // _____________________________________________________________________________
 Node::Node(double x, double y, gtfs::Stop* s) : _pos(x, y) {
-  _stops.insert(s);
+  if (s) _stops.insert(s);
 }
 
 // _____________________________________________________________________________

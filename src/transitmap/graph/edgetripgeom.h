@@ -18,7 +18,7 @@ using namespace gtfsparser;
 
 struct TripOccurance {
   TripOccurance() : direction(0) {}
-  void addTrip(gtfs::Trip* t, Node* dirNode) {
+  void addTrip(gtfs::Trip* t, const Node* dirNode) {
     if (trips.size() == 0) {
       direction = dirNode;
     } else {
@@ -29,13 +29,14 @@ struct TripOccurance {
     trips.push_back(t);
   }
   std::vector<gtfs::Trip*> trips;
-  Node* direction;  // 0 if in both directions (should be 0 in most cases!)
+  const Node* direction;  // 0 if in both directions (should be 0 in most cases!)
 };
 
 class EdgeTripGeom {
  public:
-  EdgeTripGeom(geo::PolyLine pl);
-  void addTrip(gtfs::Trip* t, Node* dirNode);
+  EdgeTripGeom(geo::PolyLine pl, const Node* geomDir);
+  void addTrip(gtfs::Trip* t, const Node* dirNode, geo::PolyLine& pl);
+  void addTrip(gtfs::Trip* t, const Node* dirNode);
   const std::map<gtfs::Route*, TripOccurance>& getTrips() const;
   std::map<gtfs::Route*, TripOccurance>* getTrips();
 
@@ -45,10 +46,12 @@ class EdgeTripGeom {
 
   bool containsRoute(gtfs::Route* r) const;
   size_t getTripCardinality() const;
+  const Node* getGeomDir() const;
  private:
   std::map<gtfs::Route*, TripOccurance> _trips;
 
   geo::PolyLine _geom;
+  const Node* _geomDir; // the direction of the geometry, may be reversed
 };
 
 }}

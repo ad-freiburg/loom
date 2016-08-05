@@ -34,6 +34,7 @@ class TransitGraph {
   Edge* getEdge(Node* from, Node* to);
 
   void deleteNode(Node* n);
+  void deleteEdge(Node* from, Node* to);
   bool containsNode(Node* n) const;
 
   const std::set<Node*>& getNodes() const;

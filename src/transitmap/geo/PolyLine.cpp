@@ -1,4 +1,4 @@
-// Copyright 2016, University of Freiburg,
+// Copyright 2016, University of Freibur
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
@@ -68,7 +68,7 @@ void PolyLine::offsetPerp(double units, double xscale, double yscale) {
   // polygon. An offsetted line is part of that polygon, but retrieving
   // it reliably could result in some geometrical diffing hocus pocus which is
   // bound to go wrong at /some/ point (self intersections, numerical
-  // instability etc)
+  // instability etc) 
   Line ret;
 
   if (_line.size() < 2) return; // TODO: throw error
@@ -113,7 +113,7 @@ void PolyLine::offsetPerp(double units, double xscale, double yscale) {
 
 // _____________________________________________________________________________
 PolyLine PolyLine::getSegment(double a, double b) const {
-  assert(a <= b);
+  if (a > b) a = b;
   PointOnLine start = getPointAt(a);
   PointOnLine end = getPointAt(b);
 
@@ -137,7 +137,7 @@ const {
 
   if (start.lastIndex+1 <= end.lastIndex) {
     ret._line.insert(
-      ret._line.end(), _line.begin() + start.lastIndex+1, _line.begin() + end.lastIndex
+      ret._line.end(), _line.begin() + start.lastIndex+1, _line.begin() + end.lastIndex + 1
     );
   }
   ret << end.p;
@@ -204,8 +204,8 @@ double PolyLine::getLength() const {
 // _____________________________________________________________________________
 PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
   double stepSize;
-  const PolyLine* longest;
-  double longestLength = 0;  // avoid recalc of length on each comparision
+  const PolyLine* longest = 0;
+  double longestLength = DBL_MIN;  // avoid recalc of length on each comparision
   for (const PolyLine* p : lines) {
     if (p->getLength() > longestLength) {
       longestLength = p->getLength();
@@ -213,10 +213,15 @@ PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
     }
   }
 
+
   PolyLine ret;
   stepSize = AVERAGING_STEP / longestLength;
-
-  for (double a = 0; a <= 1.0; a += stepSize) {
+  bool end = false;
+  for (double a = 0; !end; a += stepSize) {
+    if (a > 1) {
+      a = 1;
+      end = true;
+    }
     double x = 0;
     double y = 0;
 
@@ -302,21 +307,37 @@ void PolyLine::simplify(double d) {
 
 // _____________________________________________________________________________
 bool PolyLine::operator==(const PolyLine& rhs) const {
-  // TODO: why 10? make global static or configurable or determine in some
+  // check if two lines are equal, THE DIRECTION DOES NOT MATTER HERE!!!!!
+
+  // TODO: why 100? make global static or configurable or determine in some
   //       way!
   double DMAX = 100;
 
   if (_line.size() == 2 &&_line.size() == rhs.getLine().size()) {
     // trivial case, straight line, implement directly
-    return boost::geometry::distance(_line[0], rhs.getLine()[0]) < DMAX &&
-      boost::geometry::distance(_line.back(), rhs.getLine().back()) < DMAX;
+    return (boost::geometry::distance(_line[0], rhs.getLine()[0]) < DMAX &&
+      boost::geometry::distance(_line.back(), rhs.getLine().back()) < DMAX) ||
+      (boost::geometry::distance(_line[0], rhs.getLine().back()) < DMAX &&
+      boost::geometry::distance(_line.back(), rhs.getLine()[0]) < DMAX);
   } else {
-    for (size_t i = 0; i < rhs.getLine().size(); ++i) {
-      double d = boost::geometry::distance(rhs.getLine()[i], getLine());
-      std::cout << d << std::endl;
-      if (d > DMAX) {
-        return false;
-      }
+    return contains(rhs) && rhs.contains(*this);
+  }
+
+  return true;
+}
+
+// _____________________________________________________________________________
+bool PolyLine::contains(const PolyLine& rhs) const {
+  // check if two lines are equal, THE DIRECTION DOES NOT MATTER HERE!!!!!
+
+  // TODO: why 100? make global static or configurable or determine in some
+  //       way!
+  double DMAX = 100;
+
+  for (size_t i = 0; i < rhs.getLine().size(); ++i) {
+    double d = boost::geometry::distance(rhs.getLine()[i], getLine());
+    if (d > DMAX) {
+      return false;
     }
   }
 
@@ -331,40 +352,65 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
    *
    * TODO: use some mutation of frechet distance here
    */
-  double STEP_SIZE = 10;
-  double DMAX = 100;
+  double STEP_SIZE = 20;
+  double DMAX = 50;
   SharedSegments ret;
 
   bool in = false;
+  bool notSingle = false;
+  double segDist = 0;
   double curDist = 0;
   double curTotalSegDist = 0;
+  size_t skips;
   PointOnLine currentStartCand;
   PointOnLine currentEndCand;
 
+  double curSegDist = 0;
   for (size_t i = 1; i < _line.size(); ++i) {
     const Point& s = _line[i-1];
     const Point& e = _line[i];
 
     double totalDist = boost::geometry::distance(s, e);
-    double curSegDist = 0;
     while (curSegDist < totalDist) {
       const Point& curPointer = interpolate(s, e, curSegDist / totalDist);
       auto nearestSeg = pl.nearestSegment(curPointer);
-      // compare angles
-      int32_t angA = util::geo::angBetween(s, pl.getLine()[nearestSeg.first]);
-      int32_t angB = util::geo::angBetween(curPointer, pl.getLine()[nearestSeg.first + 1]);
-      if (angA < 90 && angB > 90 && pl.distTo(curPointer) <= DMAX) {
+
+
+      // curPointer is the current point we are checking on THIS polyline
+      // nearestSeg is the nearest total segment on pl we are checking against
+      // we now have to check whether curPointer "contained"  in nearestSegment
+
+      double ang = util::geo::innerProd(pl.getLine()[nearestSeg.first], curPointer, pl.getLine()[nearestSeg.first + 1]);
+      double ang2 = util::geo::innerProd(pl.getLine()[nearestSeg.first + 1], curPointer, pl.getLine()[nearestSeg.first]);
+
+      if ((ang) <= 90 && (ang2) <= 90 &&
+          pl.distTo(curPointer) <= DMAX) {
+        skips = 0;
         if (in) {
           // update currendEndCand
+          if (notSingle) segDist += util::geo::dist(currentEndCand.p, curPointer);
+          else segDist += util::geo::dist(currentStartCand.p, curPointer);
+          notSingle = true;
           currentEndCand = PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
         } else {
           in = true;
           currentStartCand = PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
         }
       } else {
-        if (in && !(currentEndCand.totalPos < .5)) {
-          in = false;
-          ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
+        if (in) {
+          skips++;
+          if (skips > 5) {
+            if (notSingle && segDist > DMAX) {
+              ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
+
+              // TODO: only return the FIRST one, make this configuralbe
+              return ret;
+            } else {
+            }
+            in = false;
+            notSingle = false;
+            segDist = 0;
+          }
         } else {
           // do nothing
         }
@@ -375,9 +421,13 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
 
     }
 
+    curSegDist = curSegDist - totalDist;
     curTotalSegDist += totalDist;
   }
 
+  if (in && notSingle && segDist > DMAX) {
+    ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
+  }
   return ret;
 }
 
