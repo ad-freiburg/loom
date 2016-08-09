@@ -71,3 +71,13 @@ void Node::removeEdge(Edge* e) {
 const util::geo::Point& Node::getPos() const {
   return _pos;
 }
+
+// _____________________________________________________________________________
+void Node::setPos(const util::geo::Point& p) {
+  _pos = p;
+}
+
+// _____________________________________________________________________________
+void Node::addMainDir(NodeFront f) {
+  _mainDirs.push_back(f);
+}

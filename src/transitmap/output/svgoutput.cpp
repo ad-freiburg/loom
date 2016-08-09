@@ -25,7 +25,6 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
   int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
   int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 
-  std::cout << xOffset << std::endl;
 
   int64_t width = outG.getBoundingBox().max_corner().get<0>() - xOffset;
   int64_t height = outG.getBoundingBox().max_corner().get<1>() - yOffset;
@@ -70,6 +69,21 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
     }
     _w.openTag("circle", params);
     _w.closeTag();
+
+    for (graph::NodeFront front : n->getMainDirs()) {
+      double angleX1 = n->getPos().get<0>() + cos(front.angle) * 100;
+      double angleY1 = n->getPos().get<1>() + sin(front.angle) * 100;
+
+      double angleX2 = n->getPos().get<0>() + cos(front.angle) * -100;
+      double angleY2 = n->getPos().get<1>() + sin(front.angle) * -100;
+
+      geo::PolyLine p(util::geo::Point(angleX1, angleY1), util::geo::Point(angleX2, angleY2));
+
+      std::stringstream attrs;
+      attrs << "fill:none;stroke:red"
+        << ";stroke-width:1";
+      printLine(p, attrs.str(), w, h, xOffset, yOffset);
+    }
   }
   _w.closeTag();
 }
@@ -86,8 +100,8 @@ void SvgOutput::outputEdges(const graph::TransitGraph& outG, double w, double h)
         // _________ outfactor this
         geo::PolyLine center = g.getGeom();
         center.simplify(1);
-        double lineW = 12;
-        double lineSpc = 6;
+        double lineW = 8;
+        double lineSpc = 2;
         double oo = ((lineW + lineSpc)) * (g.getTrips().size() -1);
         double o = oo;
         for (auto r : g.getTrips()) {
@@ -118,7 +132,6 @@ void SvgOutput::printPoint(const util::geo::Point& p,
   params["fill"] = "#FF00FF";
   _w.openTag("circle", params);
   _w.closeTag();
-
 }
 // _____________________________________________________________________________
 void SvgOutput::printLine(const transitmapper::geo::PolyLine& l,

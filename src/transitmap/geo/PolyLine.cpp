@@ -350,11 +350,13 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
    * Returns the segments this polyline share with pl
    * atm, this is a very simple distance-based algorithm
    *
-   * TODO: use some mutation of frechet distance here
+   * TODO: use some mutation of frechet distance here..?
    */
   double STEP_SIZE = 20;
   double DMAX = 50;
   SharedSegments ret;
+
+  if (distTo(pl) > DMAX) return ret;
 
   bool in = false;
   bool notSingle = false;
@@ -365,6 +367,11 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
   PointOnLine currentStartCand;
   PointOnLine currentEndCand;
 
+  PointOnLine currentStartCandComp;
+  PointOnLine currentEndCandComp;
+
+  double comp = 0;
+
   double curSegDist = 0;
   for (size_t i = 1; i < _line.size(); ++i) {
     const Point& s = _line[i-1];
@@ -374,8 +381,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
     while (curSegDist < totalDist) {
       const Point& curPointer = interpolate(s, e, curSegDist / totalDist);
       auto nearestSeg = pl.nearestSegment(curPointer);
-
-
+      bool intersects = util::geo::lineIntersects(pl.getLine()[nearestSeg.first], pl.getLine()[nearestSeg.first + 1], s, e);
       // curPointer is the current point we are checking on THIS polyline
       // nearestSeg is the nearest total segment on pl we are checking against
       // we now have to check whether curPointer "contained"  in nearestSegment
@@ -383,7 +389,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
       double ang = util::geo::innerProd(pl.getLine()[nearestSeg.first], curPointer, pl.getLine()[nearestSeg.first + 1]);
       double ang2 = util::geo::innerProd(pl.getLine()[nearestSeg.first + 1], curPointer, pl.getLine()[nearestSeg.first]);
 
-      if ((ang) <= 90 && (ang2) <= 90 &&
+      if (//(ang) <= 90 && (ang2) <= 90 &&
           pl.distTo(curPointer) <= DMAX) {
         skips = 0;
         if (in) {
@@ -392,15 +398,19 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
           else segDist += util::geo::dist(currentStartCand.p, curPointer);
           notSingle = true;
           currentEndCand = PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
+          currentEndCandComp = pl.projectOn(curPointer);
+
+          comp = util::geo::dist(currentStartCand.p, currentEndCand.p) / util::geo::dist(currentStartCandComp.p, currentEndCandComp.p);
         } else {
           in = true;
           currentStartCand = PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
+          currentStartCandComp = pl.projectOn(curPointer);
         }
       } else {
         if (in) {
           skips++;
           if (skips > 5) {
-            if (notSingle && segDist > DMAX) {
+            if (comp < 1.5 && notSingle && segDist > DMAX) {
               ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
 
               // TODO: only return the FIRST one, make this configuralbe
@@ -425,7 +435,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
     curTotalSegDist += totalDist;
   }
 
-  if (in && notSingle && segDist > DMAX) {
+  if (comp < 2 && in && notSingle && segDist > DMAX) {
     ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
   }
   return ret;

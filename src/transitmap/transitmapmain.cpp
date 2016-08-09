@@ -59,11 +59,14 @@ int main(int argc, char** argv) {
     b.consume(feed);
     b.simplify();
     b.createTopologicalNodes();
+    b.averageNodePositions();
+    b.writeMainDirs();
+    b.freeNodes(50);
     std::ofstream o;
     o.open("/home/patrick/test.svg");
 
     LOG(INFO) << "outputting to SVG...";
-    output::SvgOutput svgOut(&o, .4, .4);
+    output::SvgOutput svgOut(&o, .3, .3);
     svgOut.print(g);
   } else {
 

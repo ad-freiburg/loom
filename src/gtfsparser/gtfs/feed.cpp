@@ -158,6 +158,26 @@ Shape* Feed::getShapeById(const std::string& id) {
 }
 
 // ____________________________________________________________________________
+Shapes::const_iterator Feed::shapesBegin() const {
+  return _shapes.begin();
+}
+
+// ____________________________________________________________________________
+Shapes::const_iterator Feed::shapesEnd() const {
+  return _shapes.end();
+}
+
+// ____________________________________________________________________________
+Shapes::iterator Feed::shapesBegin() {
+  return _shapes.begin();
+}
+
+// ____________________________________________________________________________
+Shapes::iterator Feed::shapesEnd() {
+  return _shapes.end();
+}
+
+// ____________________________________________________________________________
 bool Feed::addService(Service* s) {
   return (_services.insert(std::pair<std::string, Service*>(s->getId(), s))).second;
 }

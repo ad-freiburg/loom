@@ -40,6 +40,7 @@ Node* TransitGraph::addNode(Node* n) {
 
 // _____________________________________________________________________________
 Edge* TransitGraph::addEdge(Node* from, Node* to) {
+  if (from == to) return 0;
   Edge* e = new Edge(from, to);
   from->addEdge(e);
   to->addEdge(e);

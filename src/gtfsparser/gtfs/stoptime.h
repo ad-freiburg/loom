@@ -54,7 +54,7 @@ class StopTime {
     MUST_COORDINATE_W_DRIVER = 3
   };
 
-  StopTime(const Time& at, const Time& dt, Stop* s, uint16_t seq,
+  StopTime(const Time& at, const Time& dt, Stop* s, uint32_t seq,
     const std::string& hs,
     PU_DO_TYPE put, PU_DO_TYPE dot, float distTrav, bool isTp)
   : _at(at), _dt(dt), _s(s), _sequence(seq),
@@ -76,7 +76,7 @@ class StopTime {
   Time _dt;
 
   Stop* _s;
-  uint16_t _sequence;
+  uint32_t _sequence;
   std::string _headsign;
   PU_DO_TYPE _pickupType;
   PU_DO_TYPE _dropOffType;

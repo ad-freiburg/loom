@@ -33,6 +33,10 @@ class GraphBuilder {
   void consume(const gtfs::Feed& f);
   void simplify();
   void createTopologicalNodes();
+  void averageNodePositions();
+  void writeMainDirs();
+
+  void freeNodes(double d);
  private:
   TransitGraph* _targetGraph;
   projPJ _mercProj;
@@ -44,6 +48,11 @@ class GraphBuilder {
 
   geo::PolyLine getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b, gtfs::Trip* t);
   ShrdSegWrap getNextSharedSegment() const;
+
+  void addStop(gtfs::Stop* curStop, uint8_t aggrLevel);
+
+  mutable std::set<const Edge*> _indEdges;
+  mutable std::map<const Edge*, size_t> _pEdges;
 };
 
 }}

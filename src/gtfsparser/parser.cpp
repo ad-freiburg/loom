@@ -376,7 +376,7 @@ void Parser::parseShapes(gtfs::Feed* targetFeed, std::istream* s) const {
             getDouble(csvp, "shape_pt_lat"),
             getDouble(csvp, "shape_pt_lon"),
             dist,
-            getRangeInteger(csvp, "shape_pt_sequence", 0, UINT16_MAX)
+            getRangeInteger(csvp, "shape_pt_sequence", 0, UINT32_MAX)
     ))) {
       throw ParserException("shape_pt_sequence collision, shape_pt_sequence has "
       "to be increasing for a single shape.",
@@ -432,7 +432,7 @@ void Parser::parseStopTimes(gtfs::Feed* targetFeed, std::istream* s) const {
       getTime(csvp, "arrival_time"),
       getTime(csvp, "departure_time"),
       stop,
-      getRangeInteger(csvp, "stop_sequence", 0, UINT16_MAX),
+      getRangeInteger(csvp, "stop_sequence", 0, UINT32_MAX),
       getString(csvp, "stop_headsign", ""),
       static_cast<StopTime::PU_DO_TYPE>(
         getRangeInteger(csvp, "drop_off_type", 0, 3, 0)

@@ -41,12 +41,15 @@ class EdgeTripGeom {
   std::map<gtfs::Route*, TripOccurance>* getTrips();
 
   const geo::PolyLine& getGeom() const;
+  void setGeom(const geo::PolyLine& p);
 
   void removeOrphans();
 
   bool containsRoute(gtfs::Route* r) const;
   size_t getTripCardinality() const;
   const Node* getGeomDir() const;
+
+  void setGeomDir(const Node* newDir);
  private:
   std::map<gtfs::Route*, TripOccurance> _trips;
 

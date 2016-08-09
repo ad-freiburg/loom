@@ -52,6 +52,11 @@ const geo::PolyLine& EdgeTripGeom::getGeom() const {
 }
 
 // _____________________________________________________________________________
+void EdgeTripGeom::setGeom(const geo::PolyLine& p) {
+   _geom = p;
+}
+
+// _____________________________________________________________________________
 bool EdgeTripGeom::containsRoute(gtfs::Route* r) const {
   return _trips.find(r) != _trips.end();
 }
@@ -85,5 +90,10 @@ void EdgeTripGeom::removeOrphans() {
 
 // _____________________________________________________________________________
 const Node* EdgeTripGeom::getGeomDir() const {
-  return _geomDir; 
+  return _geomDir;
+}
+
+// _____________________________________________________________________________
+void EdgeTripGeom::setGeomDir(const Node* n) {
+  _geomDir = n;
 }

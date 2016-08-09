@@ -58,6 +58,10 @@ class Feed {
   bool addShape(Shape* a);
   const Shape* getShapeById(const std::string& id) const;
   Shape* getShapeById(const std::string& id);
+  Shapes::const_iterator shapesBegin() const;
+  Shapes::const_iterator shapesEnd() const;
+  Shapes::iterator shapesBegin();
+  Shapes::iterator shapesEnd();
 
   bool addService(Service* a);
   const Service* getServiceById(const std::string& id) const;
