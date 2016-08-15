@@ -8,12 +8,12 @@
 #include <unordered_map>
 #include <string>
 #include <iterator>
-#include "agency.h"
-#include "stop.h"
-#include "route.h"
-#include "trip.h"
-#include "shape.h"
-#include "service.h"
+#include "Agency.h"
+#include "Stop.h"
+#include "Route.h"
+#include "Trip.h"
+#include "Shape.h"
+#include "Service.h"
 
 namespace gtfsparser {
 namespace gtfs {

@@ -25,6 +25,12 @@ PolyLine& PolyLine::operator<<(const util::geo::Point& p) {
 }
 
 // _____________________________________________________________________________
+PolyLine& PolyLine::operator>>(const util::geo::Point& p) {
+  _line.insert(_line.begin(), p);
+  return *this;
+}
+
+// _____________________________________________________________________________
 void PolyLine::reverse() {
   std::reverse(_line.begin(), _line.end());
 }
@@ -43,11 +49,6 @@ const Line& PolyLine::getLine() const {
 
 // _____________________________________________________________________________
 PolyLine PolyLine::getPerpOffsetted(double units) const {
-  return getPerpOffsetted(units, 1, 1);
-}
-
-// _____________________________________________________________________________
-PolyLine PolyLine::getPerpOffsetted(double units, double xscale, double yscale) const {
   PolyLine p = *this;
   p.offsetPerp(units);
   return p;
@@ -55,11 +56,6 @@ PolyLine PolyLine::getPerpOffsetted(double units, double xscale, double yscale) 
 
 // _____________________________________________________________________________
 void PolyLine::offsetPerp(double units) {
-  return offsetPerp(units, 1, 1);
-}
-
-// _____________________________________________________________________________
-void PolyLine::offsetPerp(double units, double xscale, double yscale) {
   // calculate perpendicular offset of a polyline
   //
   // there doesn't seem to be any library which reliably does that,
@@ -87,11 +83,11 @@ void PolyLine::offsetPerp(double units, double xscale, double yscale) {
     n1 = n1 / n;
     n2 = n2 / n;
 
-    lastP.set<0>(lastP.get<0>() + (n1 * units / xscale));
-    lastP.set<1>(lastP.get<1>() + (n2 * units / yscale));
+    lastP.set<0>(lastP.get<0>() + (n1 * units));
+    lastP.set<1>(lastP.get<1>() + (n2 * units));
 
-    curP.set<0>(curP.get<0>() + (n1 * units / xscale));
-    curP.set<1>(curP.get<1>() + (n2 * units / yscale));
+    curP.set<0>(curP.get<0>() + (n1 * units));
+    curP.set<1>(curP.get<1>() + (n2 * units));
 
     if (lastIns && befLastIns &&
         lineIntersects(*lastIns, *befLastIns, lastP, curP)) {
@@ -204,12 +200,12 @@ double PolyLine::getLength() const {
 // _____________________________________________________________________________
 PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
   double stepSize;
-  const PolyLine* longest = 0;
+  // const PolyLine* longest = 0;
   double longestLength = DBL_MIN;  // avoid recalc of length on each comparision
   for (const PolyLine* p : lines) {
     if (p->getLength() > longestLength) {
       longestLength = p->getLength();
-      longest = p;
+      // longest = p;
     }
   }
 
@@ -344,6 +340,14 @@ bool PolyLine::contains(const PolyLine& rhs) const {
   return true;
 }
 
+// _____________________________________________________________________________
+void PolyLine::move(double vx, double vy) {
+  for (size_t i = 0; i < _line.size(); i++) {
+    _line[i].set<0>(_line[i].get<0>() + vx);
+    _line[i].set<1>(_line[i].get<1>() + vy);
+  }
+}
+
 // _____________________________________________________________________________ 
 SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
   /**
@@ -380,14 +384,14 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
     double totalDist = boost::geometry::distance(s, e);
     while (curSegDist < totalDist) {
       const Point& curPointer = interpolate(s, e, curSegDist / totalDist);
-      auto nearestSeg = pl.nearestSegment(curPointer);
-      bool intersects = util::geo::lineIntersects(pl.getLine()[nearestSeg.first], pl.getLine()[nearestSeg.first + 1], s, e);
+      // auto nearestSeg = pl.nearestSegment(curPointer);
+      // bool intersects = util::geo::lineIntersects(pl.getLine()[nearestSeg.first], pl.getLine()[nearestSeg.first + 1], s, e);
       // curPointer is the current point we are checking on THIS polyline
       // nearestSeg is the nearest total segment on pl we are checking against
       // we now have to check whether curPointer "contained"  in nearestSegment
 
-      double ang = util::geo::innerProd(pl.getLine()[nearestSeg.first], curPointer, pl.getLine()[nearestSeg.first + 1]);
-      double ang2 = util::geo::innerProd(pl.getLine()[nearestSeg.first + 1], curPointer, pl.getLine()[nearestSeg.first]);
+      // double ang = util::geo::innerProd(pl.getLine()[nearestSeg.first], curPointer, pl.getLine()[nearestSeg.first + 1]);
+      // double ang2 = util::geo::innerProd(pl.getLine()[nearestSeg.first + 1], curPointer, pl.getLine()[nearestSeg.first]);
 
       if (//(ang) <= 90 && (ang2) <= 90 &&
           pl.distTo(curPointer) <= DMAX) {
@@ -441,3 +445,30 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
   return ret;
 }
 
+// _____________________________________________________________________________
+std::set<PointOnLine, PointOnLineCompare> PolyLine::getIntersections(const PolyLine& g) const {
+  std::set<PointOnLine, PointOnLineCompare> ret;
+
+  for (size_t i = 1; i < g.getLine().size(); ++i) {
+    // for each line segment, check if it intersects with a line segment in g
+    const std::set<PointOnLine, PointOnLineCompare> a = getIntersections(g, i-1, i);
+    ret.insert(a.begin(), a.end());
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::set<PointOnLine, PointOnLineCompare> PolyLine::getIntersections(const PolyLine& p,
+    size_t a, size_t b) const {
+  std::set<PointOnLine, PointOnLineCompare> ret;
+
+  for (size_t i = 1; i < _line.size(); ++i) {
+    if (util::geo::intersects(_line[i-1], _line[i], p.getLine()[a], p.getLine()[b])) {
+      util::geo::Point isect = util::geo::intersection(_line[i-1], _line[i], p.getLine()[a], p.getLine()[b]);
+      ret.insert(p.projectOn(isect));
+    }
+  }
+
+  return ret;
+}

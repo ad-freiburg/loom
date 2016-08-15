@@ -6,11 +6,11 @@
 #define TRANSITMAP_GRAPH_EDGE_H_
 
 #include <vector>
-#include "edge.h"
-#include "node.h"
-#include "edgetripgeom.h"
+#include "Edge.h"
+#include "Node.h"
+#include "EdgeTripGeom.h"
 #include "../geo/PolyLine.h"
-#include "gtfsparser/gtfs/trip.h"
+#include "gtfsparser/gtfs/Trip.h"
 
 using namespace gtfsparser;
 

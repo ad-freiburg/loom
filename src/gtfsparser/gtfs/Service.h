@@ -56,8 +56,8 @@ bool operator>=(const ServiceDate& lh, const ServiceDate& rh);
 bool operator<=(const ServiceDate& lh, const ServiceDate& rh);
 ServiceDate operator+(const ServiceDate& lh, int i);
 ServiceDate operator-(const ServiceDate& lh, int i);
-ServiceDate operator++(ServiceDate& lh, int i);
-ServiceDate operator--(ServiceDate& lh, int i);
+ServiceDate operator++(ServiceDate& lh);
+ServiceDate operator--(ServiceDate& lh);
 
 class Service {
  public:

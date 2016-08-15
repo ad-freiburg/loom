@@ -11,14 +11,14 @@
 #include <set>
 #include <stdio.h>
 #include "easylogging/easylogging.h"
-#include "gtfsparser/parser.h"
-#include "graph/transitgraph.h"
+#include "gtfsparser/Parser.h"
+#include "graph/TransitGraph.h"
 #include "graph/GraphBuilder.h"
-#include "graph/node.h"
+#include "graph/Node.h"
 #include "util/XmlWriter.cpp"
-#include "output/svgoutput.h"
+#include "output/SvgOutput.h"
 #include "geo/PolyLine.h"
-#include "gtfsparser/gtfs/service.h"
+#include "gtfsparser/gtfs/Service.h"
 
 INITIALIZE_EASYLOGGINGPP;
 
@@ -61,12 +61,12 @@ int main(int argc, char** argv) {
     b.createTopologicalNodes();
     b.averageNodePositions();
     b.writeMainDirs();
-    b.freeNodes(50);
+    b.freeNodes(20, 4);
     std::ofstream o;
     o.open("/home/patrick/test.svg");
 
     LOG(INFO) << "outputting to SVG...";
-    output::SvgOutput svgOut(&o, .3, .3);
+    output::SvgOutput svgOut(&o, .3);
     svgOut.print(g);
   } else {
 
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
 
     std::ofstream o;
     o.open("/home/patrick/test.svg");
-    output::SvgOutput svgOut(&o, 1, 1);
+    output::SvgOutput svgOut(&o, 1);
 
     o << "<svg width=\"2000\" height=\"2000\">";
 

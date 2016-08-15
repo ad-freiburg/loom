@@ -2,10 +2,11 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
+#include <cassert>
 #include <vector>
-#include "gtfsparser/gtfs/trip.h"
-#include "gtfsparser/gtfs/route.h"
-#include "edgetripgeom.h"
+#include "gtfsparser/gtfs/Trip.h"
+#include "gtfsparser/gtfs/Route.h"
+#include "EdgeTripGeom.h"
 
 using namespace transitmapper;
 using namespace graph;
@@ -13,8 +14,8 @@ using namespace gtfsparser;
 
 // _____________________________________________________________________________
 EdgeTripGeom::EdgeTripGeom(geo::PolyLine geom, const Node* geomDir)
-: _geom(geom), _geomDir(geomDir) {
-
+: _w(1), _s(1), _geomDir(geomDir) {
+  setGeom(geom);
 }
 
 // _____________________________________________________________________________
@@ -53,7 +54,10 @@ const geo::PolyLine& EdgeTripGeom::getGeom() const {
 
 // _____________________________________________________________________________
 void EdgeTripGeom::setGeom(const geo::PolyLine& p) {
-   _geom = p;
+  _geom = p;
+  if (util::geo::dist(_geom.getLine().back(), _geomDir->getPos()) <= util::geo::dist(_geom.getLine().front(), _geomDir->getPos())) {
+ //   _geom.reverse();
+  }
 }
 
 // _____________________________________________________________________________
@@ -96,4 +100,24 @@ const Node* EdgeTripGeom::getGeomDir() const {
 // _____________________________________________________________________________
 void EdgeTripGeom::setGeomDir(const Node* n) {
   _geomDir = n;
+}
+
+// _____________________________________________________________________________
+double EdgeTripGeom::getWidth() const {
+  return _w;
+}
+
+// _____________________________________________________________________________
+double EdgeTripGeom::getSpacing() const {
+  return _s;
+}
+
+// _____________________________________________________________________________
+void EdgeTripGeom::setWidth(double w) {
+  _w = w;
+}
+
+// _____________________________________________________________________________
+void EdgeTripGeom::setSpacing(double s) {
+  _s = s;
 }

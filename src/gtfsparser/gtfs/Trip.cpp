@@ -5,11 +5,11 @@
 #include <iostream>
 #include <stdint.h>
 #include <string>
-#include "route.h"
-#include "service.h"
-#include "shape.h"
-#include "stoptime.h"
-#include "trip.h"
+#include "Route.h"
+#include "Service.h"
+#include "Shape.h"
+#include "StopTime.h"
+#include "Trip.h"
 
 using std::exception;
 using std::string;

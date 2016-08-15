@@ -164,13 +164,13 @@ void GraphBuilder::createTopologicalNodes() {
     avg.push_back(&ab);
     avg.push_back(&fab);
     ab = geo::PolyLine::average(avg);
-
+    ab.simplify(5);
     // new node at the start of the shared segment
     Node* a = 0;
 
-    if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getFrom()->getPos()).p, w.s.first.p) < 50) {
+    if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getFrom()->getPos()).p, w.s.first.p) < 20) {
       a = w.e->getFrom();
-    } else if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getTo()->getPos()).p, w.s.first.p) < 50) {
+    } else if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getTo()->getPos()).p, w.s.first.p) < 20) {
       a = w.e->getTo();
     } else {
       a = new Node(w.s.first.p);
@@ -179,9 +179,9 @@ void GraphBuilder::createTopologicalNodes() {
     // new node at the end of the shared segment
     Node* b = 0;
 
-    if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getTo()->getPos()).p, w.s.second.p) < 50) {
+    if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getTo()->getPos()).p, w.s.second.p) < 20) {
       b = w.e->getTo();
-    } else if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getFrom()->getPos()).p, w.s.second.p) < 50) {
+    } else if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getFrom()->getPos()).p, w.s.second.p) < 20) {
       b = w.e->getFrom();
     } else {
       b = new Node(w.s.second.p);
@@ -191,8 +191,26 @@ void GraphBuilder::createTopologicalNodes() {
     EdgeTripGeom abEdgeGeom(ab, b);
     EdgeTripGeom ecEdgeGeom(ec, w.e->getTo());
 
-    EdgeTripGeom faEdgeGeom(fa, a);
-    EdgeTripGeom fcEdgeGeom(fc, w.f->getTo());
+    const Node* faDir = 0;
+    const Node* fcDir = 0;
+    if (compEdgeGeom.getGeomDir() == w.f->getFrom()) {
+      faDir = w.f->getFrom();
+      if (reversed) {
+        fcDir = a;
+      } else {
+        fcDir = b;
+      }
+    } else {
+      fcDir = w.f->getTo();
+      if (reversed) {
+        faDir = b;
+      } else {
+        faDir = a;
+      }
+    }
+
+    EdgeTripGeom faEdgeGeom(fa, faDir);
+    EdgeTripGeom fcEdgeGeom(fc, fcDir);
 
     for (auto& r : curEdgeGeom.getTrips()) {
       for (auto& t : r.second.trips) {
@@ -286,7 +304,7 @@ void GraphBuilder::averageNodePositions() {
 
     for (auto e : n->getAdjListOut()) {
       for (auto eg : *e->getEdgeTripGeoms()) {
-        if (eg.getGeomDir() == e->getTo()) {
+        if (eg.getGeomDir() != n) {
           x += eg.getGeom().getLine().front().get<0>();
           y += eg.getGeom().getLine().front().get<1>();
         } else {
@@ -299,12 +317,12 @@ void GraphBuilder::averageNodePositions() {
 
     for (auto e : n->getAdjListIn()) {
       for (auto eg : *e->getEdgeTripGeoms()) {
-        if (eg.getGeomDir() == e->getTo()) {
-          x += eg.getGeom().getLine().back().get<0>();
-          y += eg.getGeom().getLine().back().get<1>();
-        } else {
+        if (eg.getGeomDir() != n) {
           x += eg.getGeom().getLine().front().get<0>();
           y += eg.getGeom().getLine().front().get<1>();
+        } else {
+          x += eg.getGeom().getLine().back().get<0>();
+          y += eg.getGeom().getLine().back().get<1>();
         }
         c++;
       }
@@ -382,32 +400,59 @@ void GraphBuilder::writeMainDirs() {
       if (res.rem >= 2*(step/3)) angle += step - res.rem;
       **/
 
-      n->addMainDir(NodeFront((angle + 90) / (180 / M_PI), e));
+      n->addMainDir(NodeFront((angle) / (180 / M_PI), e));
     }
   }
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::freeNodes(double d) {
+void GraphBuilder::freeNodes(double d, double spacing) {
   for (auto n : *_targetGraph->getNodes()) {
     size_t c = 0;
     for (auto f : n->getMainDirs()) {
       size_t curN = 0;
       for (auto e : f.edges) {
-        for (auto g : *e->getEdgeTripGeoms()) {
+        for (auto& g : *e->getEdgeTripGeoms()) {
+          g.setWidth(d);
+          g.setSpacing(spacing);
           curN += g.getTrips()->size();
         }
       }
       if (curN > c) c = curN;
     }
-    std::cout << c << std::endl;
-    for (auto f : n->getMainDirs()) {
+    double md = d;
+    if (c < 2) md = 0;
+    if (n->getMainDirs().size() < 3) md = 0;
+    for (auto& f : n->getMainDirs()) {
       for (auto e : f.edges) {
-        for (auto g : *e->getEdgeTripGeoms()) {
-          if (g.getGeomDir() != n) {
-            g.setGeom(g.getGeom().getSegment(g.getGeom().getPointAtDist(d * c).totalPos, 1));
-          } else {
-            g.setGeom(g.getGeom().getSegment(0, g.getGeom().getPointAtDist(g.getGeom().getLength() - d * c).totalPos));
+        size_t lc = 0;
+        for (auto& g : *e->getEdgeTripGeoms()) {
+           lc += g.getTrips()->size();
+        }
+        double angleX1 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * lc/2 * (d + spacing);
+        double angleY1 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * lc/2 * (d + spacing);
+
+        double angleX2 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * -1 * lc/2 * (d + spacing);
+        double angleY2 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * -1 * lc/2 * (d + spacing);
+
+        double vx = cos(f.angle) * (c/2) * md;
+        double vy = sin(f.angle) * (c/2) * md;
+
+        geo::PolyLine p(util::geo::Point(angleX1, angleY1), util::geo::Point(angleX2, angleY2));
+        p.move(vx, vy);
+
+        f.setGeom(p);
+
+        for (EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
+          std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = p.getIntersections(g.getGeom());
+          if (iSects.size() > 0) {
+            if (g.getGeomDir() !=n) {
+               // cut at beginning
+              g.setGeom(g.getGeom().getSegment(iSects.begin()->totalPos, 1));
+            } else {
+              // cut at end
+              g.setGeom(g.getGeom().getSegment(0, (--iSects.end())->totalPos));
+            }
           }
         }
       }

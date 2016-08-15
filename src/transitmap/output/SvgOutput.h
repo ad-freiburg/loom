@@ -7,10 +7,10 @@
 
 #include <string>
 #include <ostream>
-#include "output.h"
+#include "Output.h"
 #include "../util/XmlWriter.h"
 #include "../util/Geo.h"
-#include "../graph/transitgraph.h"
+#include "../graph/TransitGraph.h"
 #include "../geo/PolyLine.h"
 
 namespace transitmapper {
@@ -33,7 +33,7 @@ class SvgOutputException : public std::exception {
 class SvgOutput : public Output {
 
  public:
-  SvgOutput(std::ostream* o, double xScale, double yScale);
+  SvgOutput(std::ostream* o, double scale);
   virtual ~SvgOutput() {};
 
   virtual void print(const graph::TransitGraph& outputGraph);
@@ -45,11 +45,13 @@ class SvgOutput : public Output {
   std::ostream* _o;
   util::XmlWriter _w;
 
-  double _xScale;
-  double _yScale;
+  double _scale;
 
   void outputNodes(const graph::TransitGraph& outputGraph, double w, double h);
   void outputEdges(const graph::TransitGraph& outputGraph, double w, double h);
+
+  void renderEdgeTripGeom(const graph::TransitGraph& outG,
+    const graph::EdgeTripGeom& g, const graph::Edge* e, double w, double h);
 };
 
 }}

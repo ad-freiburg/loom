@@ -27,6 +27,12 @@ struct PointOnLine {
   util::geo::Point p;
 };
 
+struct PointOnLineCompare {
+  bool operator() (const PointOnLine& lh, const PointOnLine& rh) const {
+    return lh.totalPos < rh.totalPos;
+  }
+};
+
 typedef std::pair<PointOnLine, PointOnLine> SharedSegment;
 
 struct SharedSegments {
@@ -41,15 +47,14 @@ class PolyLine {
   PolyLine(const util::geo::Point& from, const util::geo::Point& to);
 
   PolyLine& operator<<(const util::geo::Point& p);
+  PolyLine& operator>>(const util::geo::Point& p);
 
   void reverse();
   PolyLine getReversed() const;
 
   void offsetPerp(double units);
-  void offsetPerp(double units, double xscale, double yscale);
 
   PolyLine getPerpOffsetted(double units) const;
-  PolyLine getPerpOffsetted(double units, double xscale, double yscale) const;
 
 	const util::geo::Line& getLine() const;
 
@@ -70,6 +75,8 @@ class PolyLine {
   PolyLine getSegment(const PointOnLine& start, const PointOnLine& end) const;
   PolyLine getSegment(const util::geo::Point& a, const util::geo::Point& b) const;
 
+  std::set<PointOnLine, PointOnLineCompare> getIntersections(const PolyLine& g) const;
+
   static PolyLine average(std::vector<const PolyLine*>& lines);
 
   void simplify(double d);
@@ -80,11 +87,15 @@ class PolyLine {
   PointOnLine projectOn(const util::geo::Point& p) const;
   PointOnLine projectOnAfter(const util::geo::Point& p, size_t after) const;
 
+  void move(double vx, double vy);
+
   // equality operator, will hold frechet-distance equality check in
   // the future
   bool operator==(const PolyLine& rhs) const;
   bool contains(const PolyLine& rhs) const;
  private:
+  std::set<PointOnLine, PointOnLineCompare> getIntersections(const PolyLine& p,
+    size_t a, size_t b) const;
   util::geo::Line _line;
 
   // TODO: maybe move this into util header

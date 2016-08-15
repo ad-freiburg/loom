@@ -8,8 +8,8 @@
 #include <algorithm>
 #include <unordered_map>
 #include <proj_api.h>
-#include "transitgraph.h"
-#include "gtfsparser/gtfs/feed.h"
+#include "TransitGraph.h"
+#include "gtfsparser/gtfs/Feed.h"
 #include "../geo/PolyLine.h"
 
 namespace transitmapper {
@@ -36,7 +36,7 @@ class GraphBuilder {
   void averageNodePositions();
   void writeMainDirs();
 
-  void freeNodes(double d);
+  void freeNodes(double d, double spacing);
  private:
   TransitGraph* _targetGraph;
   projPJ _mercProj;

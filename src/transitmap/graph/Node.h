@@ -6,7 +6,9 @@
 #define TRANSITMAP_GRAPH_NODE_H_
 
 #include <set>
-#include "gtfsparser/gtfs/stop.h"
+#include "gtfsparser/gtfs/Stop.h"
+#include "gtfsparser/gtfs/Route.h"
+#include "../geo/PolyLine.h"
 #include "../util/Geo.h"
 
 using namespace gtfsparser;
@@ -17,6 +19,9 @@ namespace graph {
 // forward declaration of Edge
 class Edge;
 
+// forward declaration of EdgeTripGeometry
+class EdgeTripGeom;
+
 // forward declaration of TransitGraph
 class TransitGraph;
 
@@ -25,9 +30,19 @@ struct NodeFront {
     addEdge(e);
   }
   double angle;
+
   std::vector<Edge*> edges;
 
+  geo::PolyLine geom;
+  void setGeom(const geo::PolyLine& g) { geom = g; };
   void addEdge(Edge* e) { edges.push_back(e); }
+};
+
+struct Partner {
+  const NodeFront* front;
+  const Edge* edge;
+  const EdgeTripGeom* etg;
+  const gtfs::Route* route;
 };
 
 class Node {
@@ -54,9 +69,15 @@ class Node {
   const std::vector<NodeFront>& getMainDirs() const {
     return _mainDirs;
   }
+  std::vector<NodeFront>& getMainDirs() {
+    return _mainDirs;
+  }
 
   void addMainDir(NodeFront f);
 
+  const NodeFront* getNodeFrontFor(const Edge* e) const;
+  double getScore() const;
+  std::vector<Partner> getPartner(const NodeFront* f, const gtfs::Route* r) const;
  protected:
   // add edge to this node's adjacency lists
   void addEdge(Edge* e);

@@ -5,11 +5,11 @@
 #include <string>
 #include <fstream>
 #include <boost/filesystem.hpp>
-#include "parser.h"
-#include "csvparser.h"
-#include "gtfs/agency.h"
-#include "gtfs/stop.h"
-#include "gtfs/route.h"
+#include "Parser.h"
+#include "CsvParser.h"
+#include "gtfs/Agency.h"
+#include "gtfs/Stop.h"
+#include "gtfs/Route.h"
 
 using namespace gtfsparser;
 using namespace gtfs;

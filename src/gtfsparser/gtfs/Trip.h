@@ -8,11 +8,11 @@
 #include <stdint.h>
 #include <set>
 #include <string>
-#include "route.h"
-#include "service.h"
-#include "shape.h"
-#include "stoptime.h"
-#include "stop.h"
+#include "Route.h"
+#include "Service.h"
+#include "Shape.h"
+#include "StopTime.h"
+#include "Stop.h"
 
 using std::exception;
 using std::string;

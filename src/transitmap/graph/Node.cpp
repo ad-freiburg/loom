@@ -2,10 +2,12 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
-#include "./node.h"
-#include "./edge.h"
-#include "./transitgraph.h"
-#include "gtfsparser/gtfs/stop.h"
+#include <cassert>
+#include "./Node.h"
+#include "./Edge.h"
+#include "./TransitGraph.h"
+#include "gtfsparser/gtfs/Stop.h"
+#include "../graph/EdgeTripGeom.h"
 
 using namespace transitmapper;
 using namespace graph;
@@ -80,4 +82,56 @@ void Node::setPos(const util::geo::Point& p) {
 // _____________________________________________________________________________
 void Node::addMainDir(NodeFront f) {
   _mainDirs.push_back(f);
+}
+
+// _____________________________________________________________________________
+const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
+  for (auto& nf : getMainDirs()) {
+    if (std::find(nf.edges.begin(), nf.edges.end(), e) != nf.edges.end()) {
+      return &nf;
+    }
+  }
+
+  return 0;
+}
+
+// _____________________________________________________________________________
+double Node::getScore() const {
+  std::vector<geo::PolyLine> connections;
+  for (auto nf : getMainDirs()) {
+    for (auto e : nf.edges) {
+      // TODO: only handle cases with 1 edgetripgeometry atm
+      const EdgeTripGeom& etg = e->getEdgeTripGeoms()->front();
+      size_t c = 0;
+      for (auto rt : etg.getTrips()) {
+
+      }
+    }
+  }
+
+  return 0;
+}
+
+// _____________________________________________________________________________
+std::vector<Partner> Node::getPartner(const NodeFront* f, const gtfs::Route* r) const {
+  std::vector<Partner> ret;
+  for (const auto& nf : getMainDirs()) {
+    if (&nf == f) continue;
+
+    for (const auto e : nf.edges) {
+      for (const auto& etg : *e->getEdgeTripGeoms()) {
+        for (const auto& route : etg.getTrips()) {
+          if (route.first == r) {
+            Partner p;
+            p.front = &nf;
+            p.edge = e;
+            p.etg = &etg;
+            p.route = route.first;
+            ret.push_back(p);
+          }
+        }
+      }
+    }
+  }
+  return ret;
 }

@@ -2,11 +2,12 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
+#include <cassert>
 #include <vector>
-#include "edge.h"
-#include "node.h"
-#include "gtfsparser/gtfs/trip.h"
-#include "edgetripgeom.h"
+#include "Edge.h"
+#include "Node.h"
+#include "gtfsparser/gtfs/Trip.h"
+#include "EdgeTripGeom.h"
 
 using namespace transitmapper;
 using namespace graph;
@@ -29,6 +30,7 @@ Node* Edge::getTo() const {
 
 // _____________________________________________________________________________
 bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
+  assert(toNode == _from || toNode == _to);
   for (auto& e : _tripsContained) {
     if (e.containsRoute(t->getRoute())) {
       for (auto& tr : (*e.getTrips())[t->getRoute()].trips) {
@@ -47,6 +49,7 @@ bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
 
 // _____________________________________________________________________________
 bool Edge::addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode) {
+  assert(toNode == _from || toNode == _to);
   bool inserted = false;
   for (auto& e : _tripsContained) {
     if (e.getGeom() == pl) {
@@ -76,6 +79,7 @@ std::vector<EdgeTripGeom>* Edge::getEdgeTripGeoms() {
 
 // _____________________________________________________________________________
 void Edge::addEdgeTripGeom(const EdgeTripGeom& e) {
+  assert(e.getGeomDir() == _from || e.getGeomDir() ==  _to);
   _tripsContained.push_back(e);
 }
 
@@ -112,20 +116,20 @@ void Edge::averageCombineGeom() {
   }
 
   std::vector<const geo::PolyLine*> lines;
-  std::vector<geo::PolyLine> reversed;
+  std::vector<geo::PolyLine*> reversed;
+  reversed.reserve(lines.size()); // prevent reallocation
   const Node* referenceDir = _tripsContained.front().getGeomDir();
 
   for (auto& et : _tripsContained) {
     if (et.getGeomDir() != referenceDir) {
-      reversed.push_back(et.getGeom().getReversed());
-      lines.push_back(&reversed.back());
+      reversed.push_back(new geo::PolyLine(et.getGeom().getReversed()));
+      lines.push_back(reversed.back());
     } else {
       lines.push_back(&et.getGeom());
     }
   }
 
-  geo::PolyLine pl;
-  pl = pl.average(lines);
+  geo::PolyLine pl = geo::PolyLine::average(lines);
 
   EdgeTripGeom combined(pl, referenceDir);
 
@@ -137,6 +141,9 @@ void Edge::averageCombineGeom() {
     }
   }
 
+  for (auto p : reversed) {
+    delete p;
+  }
   _tripsContained.clear();
   _tripsContained.push_back(combined);
 }

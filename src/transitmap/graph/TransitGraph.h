@@ -14,8 +14,8 @@
 #include <boost/geometry/index/rtree.hpp>
 
 #include "../util/Geo.h"
-#include "node.h"
-#include "edge.h"
+#include "Node.h"
+#include "Edge.h"
 
 namespace bg = boost::geometry;
 

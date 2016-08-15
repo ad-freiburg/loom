@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string>
 #include <sstream>
-#include "agency.h"
+#include "Agency.h"
 
 using std::exception;
 using std::string;
@@ -37,8 +37,8 @@ class Route {
     const string& long_name, const string& desc, Route::TYPE type,
     const string& url, uint32_t color, uint32_t text_color)
   : _id(id), _agency(agency), _short_name(short_name), _long_name(long_name),
-    _type(type), _url(url), _color(color),
-    _text_color(color) {}
+    _desc(desc),  _type(type), _url(url), _color(color),
+    _text_color(text_color) {}
 
   const std::string& getId() const {
     return _id;
@@ -107,7 +107,7 @@ class Route {
   std::string getHexColorString(uint32_t color) const {
     // using stringstream here, because it doesnt add "0x" to the front
     std::stringstream ss;
-    ss << std::hex << _color;
+    ss << std::hex << color;
     return ss.str();
   }
 

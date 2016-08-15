@@ -14,8 +14,8 @@
 #include <sstream>
 #include <iostream>
 #include <boost/filesystem.hpp>
-#include "gtfs/feed.h"
-#include "csvparser.h"
+#include "gtfs/Feed.h"
+#include "CsvParser.h"
 
 using std::string;
 using namespace boost;

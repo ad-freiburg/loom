@@ -85,7 +85,7 @@ class Stop {
     return _parent_station;
   }
 
-  Stop* setParentStation(Stop* p) {
+  void setParentStation(Stop* p) {
     _parent_station = p;
   }
 

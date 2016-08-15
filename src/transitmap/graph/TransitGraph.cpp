@@ -5,8 +5,8 @@
 #include <proj_api.h>
 #include <string>
 #include <set>
-#include "transitgraph.h"
-#include "edge.h"
+#include "TransitGraph.h"
+#include "Edge.h"
 
 using namespace transitmapper;
 using namespace graph;

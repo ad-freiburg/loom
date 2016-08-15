@@ -6,10 +6,10 @@
 #define TRANSITMAP_GRAPH_EDGETRIPGEOM_H_
 
 #include <vector>
-#include "gtfsparser/gtfs/trip.h"
-#include "gtfsparser/gtfs/route.h"
+#include "gtfsparser/gtfs/Trip.h"
+#include "gtfsparser/gtfs/Route.h"
 #include "../geo/PolyLine.h"
-#include "./node.h"
+#include "./Node.h"
 
 namespace transitmapper {
 namespace graph {
@@ -50,9 +50,17 @@ class EdgeTripGeom {
   const Node* getGeomDir() const;
 
   void setGeomDir(const Node* newDir);
+
+  void setWidth(double w);
+  void setSpacing(double s);
+
+  double getWidth() const;
+  double getSpacing() const;
  private:
   std::map<gtfs::Route*, TripOccurance> _trips;
 
+  double _w;
+  double _s;
   geo::PolyLine _geom;
   const Node* _geomDir; // the direction of the geometry, may be reversed
 };

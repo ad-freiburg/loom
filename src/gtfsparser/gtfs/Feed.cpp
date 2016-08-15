@@ -4,11 +4,11 @@
 
 #include <unordered_map>
 #include <string>
-#include "feed.h"
-#include "agency.h"
-#include "route.h"
-#include "trip.h"
-#include "shape.h"
+#include "Feed.h"
+#include "Agency.h"
+#include "Route.h"
+#include "Trip.h"
+#include "Shape.h"
 
 using namespace gtfsparser;
 using namespace gtfs;

@@ -2,7 +2,7 @@
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
 #include <iostream>
-#include "service.h"
+#include "Service.h"
 
 using namespace gtfsparser;
 using namespace gtfs;
@@ -75,7 +75,7 @@ bool gtfsparser::gtfs::operator==(const ServiceDate& lh, const ServiceDate& rh) 
 
 // _____________________________________________________________________________
 bool gtfsparser::gtfs::operator!=(const ServiceDate& lh, const ServiceDate& rh) {
-  return !(rh == rh);
+  return !(lh == rh);
 }
 
 // _____________________________________________________________________________
@@ -103,7 +103,7 @@ ServiceDate gtfsparser::gtfs::operator-(const ServiceDate& lh, int i) {
 }
 
 // _____________________________________________________________________________
-ServiceDate gtfsparser::gtfs::operator--(ServiceDate& lh, int i) {
+ServiceDate gtfsparser::gtfs::operator--(ServiceDate& lh) {
   ServiceDate ret = lh - 1;
   lh.setDay(ret.getDay());
   lh.setMonth(ret.getMonth());
@@ -112,7 +112,7 @@ ServiceDate gtfsparser::gtfs::operator--(ServiceDate& lh, int i) {
 }
 
 // _____________________________________________________________________________
-ServiceDate gtfsparser::gtfs::operator++(ServiceDate& lh, int i) {
+ServiceDate gtfsparser::gtfs::operator++(ServiceDate& lh) {
   ServiceDate ret = lh + 1;
   lh.setDay(ret.getDay());
   lh.setMonth(ret.getMonth());
