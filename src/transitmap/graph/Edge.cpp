@@ -98,7 +98,6 @@ void Edge::simplify() {
   avg /= _tripsContained.size();
 
   for (auto it = _tripsContained.begin(); it < _tripsContained.end(); ++it) {
-    std::cout << it->getTripCardinality() << " vs. " << avg*0.1 << std::endl;
     if (it->getTripCardinality() < avg*0.1) {
       it = _tripsContained.erase(it);
     }

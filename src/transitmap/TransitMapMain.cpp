@@ -55,13 +55,21 @@ int main(int argc, char** argv) {
 
     graph::GraphBuilder b(&g);
 
-    LOG(INFO) << "building graph...";
+    LOG(INFO) << "Building graph...";
     b.consume(feed);
+
+    LOG(INFO) << "Simplyfing...";
     b.simplify();
+    LOG(INFO) << "Building topological nodes...";
     b.createTopologicalNodes();
+    LOG(INFO) << "Averaging node positions";
     b.averageNodePositions();
+    LOG(INFO) << "Creating node fronts...";
     b.writeMainDirs();
+    LOG(INFO) << "...";
     b.freeNodes(20, 4);
+    LOG(INFO) << "Outputting to SVG...";
+
     std::ofstream o;
     o.open("/home/patrick/test.svg");
 

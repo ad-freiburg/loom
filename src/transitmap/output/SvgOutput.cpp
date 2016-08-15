@@ -118,7 +118,6 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
       // TODO: why is this check necessary? shouldnt be!
       // ___ OUTFACTOR
-      std::cout <<nfTo->geom.getLine().size() << std::endl;
       if (nfTo->geom.getLine().size() > 0 && nfFrom->geom.getLine().size() > 0) {
         if (g.getGeomDir() == e->getTo()) {
           std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfTo->geom.getIntersections(p);
