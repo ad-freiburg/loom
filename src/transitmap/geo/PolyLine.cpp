@@ -183,12 +183,12 @@ util::geo::Point PolyLine::interpolate(const util::geo::Point& a,
 }
 
 // _____________________________________________________________________________
-double PolyLine::distTo(const PolyLine& g) const {
+inline double PolyLine::distTo(const PolyLine& g) const {
   return boost::geometry::distance(_line, g.getLine());
 }
 
 // _____________________________________________________________________________
-double PolyLine::distTo(const util::geo::Point& p) const {
+inline double PolyLine::distTo(const util::geo::Point& p) const {
   return boost::geometry::distance(_line, p);
 }
 
@@ -360,7 +360,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
   double DMAX = 50;
   SharedSegments ret;
 
-  if (distTo(pl) > DMAX) return ret;
+  //if (distTo(pl) > DMAX) return ret;
 
   bool in = false;
   bool notSingle = false;
@@ -375,7 +375,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
   PointOnLine currentEndCandComp;
 
   double comp = 0;
-
+  size_t j = 0;
   double curSegDist = 0;
   for (size_t i = 1; i < _line.size(); ++i) {
     const Point& s = _line[i-1];
@@ -383,15 +383,16 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
 
     double totalDist = boost::geometry::distance(s, e);
     while (curSegDist < totalDist) {
+      j++;
       const Point& curPointer = interpolate(s, e, curSegDist / totalDist);
-      // auto nearestSeg = pl.nearestSegment(curPointer);
+      auto nearestSeg = pl.nearestSegment(curPointer);
       // bool intersects = util::geo::lineIntersects(pl.getLine()[nearestSeg.first], pl.getLine()[nearestSeg.first + 1], s, e);
       // curPointer is the current point we are checking on THIS polyline
       // nearestSeg is the nearest total segment on pl we are checking against
       // we now have to check whether curPointer "contained"  in nearestSegment
 
-      // double ang = util::geo::innerProd(pl.getLine()[nearestSeg.first], curPointer, pl.getLine()[nearestSeg.first + 1]);
-      // double ang2 = util::geo::innerProd(pl.getLine()[nearestSeg.first + 1], curPointer, pl.getLine()[nearestSeg.first]);
+      //double ang = util::geo::innerProd(pl.getLine()[nearestSeg.first], curPointer, pl.getLine()[nearestSeg.first + 1]);
+      //double ang2 = util::geo::innerProd(pl.getLine()[nearestSeg.first + 1], curPointer, pl.getLine()[nearestSeg.first]);
 
       if (//(ang) <= 90 && (ang2) <= 90 &&
           pl.distTo(curPointer) <= DMAX) {
@@ -442,6 +443,8 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
   if (comp < 2 && in && notSingle && segDist > DMAX) {
     ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
   }
+
+  std::cout << "Iterations needed: " << j << std::endl;
   return ret;
 }
 

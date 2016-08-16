@@ -32,10 +32,13 @@ TransitGraph::~TransitGraph() {
 
 // _____________________________________________________________________________
 Node* TransitGraph::addNode(Node* n) {
-  // expand the bounding box to hold this new node
-  boost::geometry::expand(_bbox, n->getPos());
 
-  return *(_nodes.insert(n)).first;
+  auto ins = _nodes.insert(n);
+  if (ins.second) {
+    // expand the bounding box to hold this new node
+    boost::geometry::expand(_bbox, n->getPos());
+  } 
+  return *ins.first;
 }
 
 // _____________________________________________________________________________

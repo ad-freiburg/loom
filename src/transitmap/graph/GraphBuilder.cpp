@@ -39,16 +39,13 @@ void GraphBuilder::consume(const Feed& f) {
 
     for (; st != t->second->getStopTimes().end(); ++st) {
       const StopTime& cur = *st;
-      addStop(cur.getStop(), AGGREGATE_STOPS);
 
       Node* fromNode = _targetGraph->getNodeByStop(
         prev.getStop(),
         AGGREGATE_STOPS
       );
-      Node* toNode =  _targetGraph->getNodeByStop(
-        cur.getStop(),
-        AGGREGATE_STOPS
-      );
+
+      Node* toNode = addStop(cur.getStop(), AGGREGATE_STOPS);
 
       if (fromNode == toNode) continue;
 
@@ -102,6 +99,7 @@ ShrdSegWrap GraphBuilder::getNextSharedSegment() const {
   int i = 0;
   for (auto n : *_targetGraph->getNodes()) {
     for (auto e : n->getAdjListOut()) {
+      i++;
       if (_indEdges.find(e) != _indEdges.end() || e->getEdgeTripGeoms()->size() != 1) continue;
       // TODO: outfactor this _______
       for (auto nt : *_targetGraph->getNodes()) {
@@ -110,18 +108,20 @@ ShrdSegWrap GraphBuilder::getNextSharedSegment() const {
           if (_indEdges.find(toTest) != _indEdges.end() || toTest->getEdgeTripGeoms()->size() != 1) continue;
           if (e != toTest) {
             geo::SharedSegments s = e->getEdgeTripGeoms()->front().getGeom().getSharedSegments(toTest->getEdgeTripGeoms()->front().getGeom());
-            i++;
+
             if (s.segments.size() > 0 && util::geo::dist(s.segments[0].first.p, s.segments[0].second.p) > 50) {
               _pEdges[e]++;
               if (_pEdges[e] > 100) {
                 std::cout << "Too many optimiziations for " << e << ", preventing further..." << std::endl;
                 _indEdges.insert(e);
               }
+              std::cout << _indEdges.size() << " / " << i << std::endl;
               return ShrdSegWrap(e, toTest, s.segments.front());
             }
           }
         }
       }
+
       // nothing overlapping found for this edge anymore, mark as processed
       _indEdges.insert(e);
       // _________
@@ -333,14 +333,19 @@ void GraphBuilder::averageNodePositions() {
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel) {
+Node* GraphBuilder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel) {
   if (aggrLevel && curStop->getParentStation() != 0) {
-    addStop(curStop->getParentStation(), aggrLevel);
+    return addStop(curStop->getParentStation(), aggrLevel);
   }
 
-  util::geo::Point p = getProjectedPoint(curStop->getLat(), curStop->getLng());
+  Node* n = _targetGraph->getNodeByStop(
+    curStop,
+    aggrLevel
+  );
 
-  Node* n = 0;
+  if (n) return n;
+
+  util::geo::Point p = getProjectedPoint(curStop->getLat(), curStop->getLng());
 
   if (aggrLevel > 1) {
     n = _targetGraph->getNearestNode(p, 100);
@@ -349,13 +354,15 @@ void GraphBuilder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel) {
   if (n) {
     n->addStop(curStop);
   } else {
-    _targetGraph->addNode(
+    n = _targetGraph->addNode(
       new Node(
         p,
         curStop
       )
     );
   }
+
+  return n;
 }
 
 // _____________________________________________________________________________
