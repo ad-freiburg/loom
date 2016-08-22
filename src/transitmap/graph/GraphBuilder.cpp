@@ -427,6 +427,7 @@ void GraphBuilder::freeNodes(double d, double spacing) {
       }
       if (curN > c) c = curN;
     }
+
     double md = d;
     if (c < 2) md = 0;
     if (n->getMainDirs().size() < 3) md = 0;

@@ -385,7 +385,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
     while (curSegDist < totalDist) {
       j++;
       const Point& curPointer = interpolate(s, e, curSegDist / totalDist);
-      auto nearestSeg = pl.nearestSegment(curPointer);
+      // auto nearestSeg = pl.nearestSegment(curPointer);
       // bool intersects = util::geo::lineIntersects(pl.getLine()[nearestSeg.first], pl.getLine()[nearestSeg.first + 1], s, e);
       // curPointer is the current point we are checking on THIS polyline
       // nearestSeg is the nearest total segment on pl we are checking against
@@ -444,7 +444,6 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
     ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
   }
 
-  std::cout << "Iterations needed: " << j << std::endl;
   return ret;
 }
 

@@ -186,7 +186,7 @@ inline Point projectOn(const Point& a, const Point& b, const Point& c) {
   bool isBetween = dist(a, c) > dist(a, ret) && dist(a, c) > dist(c, ret);
   bool nearer = dist(a, ret) < dist(c, ret);
 
-  if (!(isBetween)) return nearer ? a : c;
+  if (!isBetween) return nearer ? a : c;
 
   return ret;
 }

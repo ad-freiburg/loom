@@ -78,9 +78,6 @@ int main(int argc, char** argv) {
     svgOut.print(g);
   } else {
 
-
-
-
     // just testing parallel drawing...
     transitmapper::geo::PolyLine p;
     transitmapper::geo::PolyLine a;
