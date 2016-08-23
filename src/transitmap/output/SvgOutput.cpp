@@ -155,7 +155,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
       // _______ /OUTFACTOR
       std::stringstream attrs;
-      attrs << "fill:none;stroke:#" << r.first->getColorString()
+      attrs << "fill:none;stroke:#" << r.route->getColorString()
         << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:" << lineW * _scale;
       printLine(p, attrs.str(), w, h, xOffset, yOffset);
       // break;

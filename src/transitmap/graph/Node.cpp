@@ -120,13 +120,13 @@ std::vector<Partner> Node::getPartner(const NodeFront* f, const gtfs::Route* r) 
 
     for (const auto e : nf.edges) {
       for (const auto& etg : *e->getEdgeTripGeoms()) {
-        for (const auto& route : etg.getTrips()) {
-          if (route.first == r) {
+        for (const auto& to: etg.getTrips()) {
+          if (to.route == r) {
             Partner p;
             p.front = &nf;
             p.edge = e;
             p.etg = &etg;
-            p.route = route.first;
+            p.route = to.route;
             ret.push_back(p);
           }
         }

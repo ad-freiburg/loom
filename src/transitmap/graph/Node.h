@@ -33,6 +33,10 @@ struct NodeFront {
 
   std::vector<Edge*> edges;
 
+  util::geo::Point getTripOccPos(gtfs::Route*) {
+
+  }
+
   geo::PolyLine geom;
   void setGeom(const geo::PolyLine& g) { geom = g; };
   void addEdge(Edge* e) { edges.push_back(e); }

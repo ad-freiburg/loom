@@ -33,7 +33,7 @@ bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
   assert(toNode == _from || toNode == _to);
   for (auto& e : _tripsContained) {
     if (e.containsRoute(t->getRoute())) {
-      for (auto& tr : (*e.getTrips())[t->getRoute()].trips) {
+      for (auto& tr : e.getTripsForRoute(t->getRoute())->trips) {
         // shorcut: if a trip is contained here with the same shape id,
         // don't require recalc of polyline etc
         if (tr->getShape() == t->getShape()) {
@@ -134,8 +134,8 @@ void Edge::averageCombineGeom() {
 
   for (auto& et : _tripsContained) {
     for (auto& r : *et.getTrips()) {
-      for (auto& t : r.second.trips) {
-        combined.addTrip(t, r.second.direction);
+      for (auto& t : r.trips) {
+        combined.addTrip(t, r.direction);
       }
     }
   }
@@ -159,8 +159,8 @@ void Edge::combineIncludedGeoms() {
       if (toCheckAgainst.getGeom().contains(et->getGeom())
           && !et->getGeom().contains(toCheckAgainst.getGeom())) {
         for (auto& r : *(et->getTrips())) {
-          for (auto& t : r.second.trips) {
-            toCheckAgainst.addTrip(t, r.second.direction);
+          for (auto& t : r.trips) {
+            toCheckAgainst.addTrip(t, r.direction);
           }
         }
         combined = true;

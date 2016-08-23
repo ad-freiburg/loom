@@ -17,7 +17,7 @@ namespace graph {
 using namespace gtfsparser;
 
 struct TripOccurance {
-  TripOccurance() : direction(0) {}
+  TripOccurance(gtfs::Route* r) : route(r), direction(0) {}
   void addTrip(gtfs::Trip* t, const Node* dirNode) {
     if (trips.size() == 0) {
       direction = dirNode;
@@ -28,6 +28,7 @@ struct TripOccurance {
     }
     trips.push_back(t);
   }
+  gtfs::Route* route;
   std::vector<gtfs::Trip*> trips;
   const Node* direction;  // 0 if in both directions (should be 0 in most cases!)
 };
@@ -37,8 +38,10 @@ class EdgeTripGeom {
   EdgeTripGeom(geo::PolyLine pl, const Node* geomDir);
   void addTrip(gtfs::Trip* t, const Node* dirNode, geo::PolyLine& pl);
   void addTrip(gtfs::Trip* t, const Node* dirNode);
-  const std::map<gtfs::Route*, TripOccurance>& getTrips() const;
-  std::map<gtfs::Route*, TripOccurance>* getTrips();
+  const std::vector<TripOccurance>& getTrips() const;
+  std::vector<TripOccurance>* getTrips();
+
+  TripOccurance* getTripsForRoute(gtfs::Route* r) const;
 
   const geo::PolyLine& getGeom() const;
   void setGeom(const geo::PolyLine& p);
@@ -57,7 +60,7 @@ class EdgeTripGeom {
   double getWidth() const;
   double getSpacing() const;
  private:
-  std::map<gtfs::Route*, TripOccurance> _trips;
+  std::vector<TripOccurance> _trips;
 
   double _w;
   double _s;

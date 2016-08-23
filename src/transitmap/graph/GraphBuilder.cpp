@@ -213,8 +213,8 @@ void GraphBuilder::createTopologicalNodes() {
     EdgeTripGeom fcEdgeGeom(fc, fcDir);
 
     for (auto& r : curEdgeGeom.getTrips()) {
-      for (auto& t : r.second.trips) {
-        if (r.second.direction == w.e->getTo()) {
+      for (auto& t : r.trips) {
+        if (r.direction == w.e->getTo()) {
           eaEdgeGeom.addTrip(t, a);
           abEdgeGeom.addTrip(t, b);
           ecEdgeGeom.addTrip(t, w.e->getTo());
@@ -227,8 +227,8 @@ void GraphBuilder::createTopologicalNodes() {
     }
 
     for (auto& r : compEdgeGeom.getTrips()) {
-      for (auto& t : r.second.trips) {
-        if (r.second.direction == w.f->getTo()) {
+      for (auto& t : r.trips) {
+        if (r.direction == w.f->getTo()) {
           faEdgeGeom.addTrip(t, a);
           abEdgeGeom.addTrip(t, b);
           fcEdgeGeom.addTrip(t, w.f->getTo());

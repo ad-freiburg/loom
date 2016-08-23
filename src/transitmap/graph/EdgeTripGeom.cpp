@@ -28,22 +28,36 @@ void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode,
   }
   vec.push_back(&pl);
   _geom = geo::PolyLine::average(vec);
-  _trips[t->getRoute()].addTrip(t, dirNode);
+
+  addTrip(t, dirNode);
 }
 
 // _____________________________________________________________________________
 void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode) {
-  _trips[t->getRoute()].addTrip(t, dirNode);
+  TripOccurance* to = getTripsForRoute(t->getRoute());
+  if (!to) {
+    _trips.push_back(TripOccurance(t->getRoute()));
+    to = &_trips.back();
+  }
+  to->addTrip(t, dirNode);
 }
 
 // _____________________________________________________________________________
-const std::map<gtfs::Route*, TripOccurance>& EdgeTripGeom::getTrips()
+const std::vector<TripOccurance>& EdgeTripGeom::getTrips()
 const {
   return _trips;
 }
 
 // _____________________________________________________________________________
-std::map<gtfs::Route*, TripOccurance >* EdgeTripGeom::getTrips() {
+TripOccurance* EdgeTripGeom::getTripsForRoute(gtfs::Route* r) const {
+  for (auto& to : _trips) {
+    if (to.route == r) return const_cast<TripOccurance*>(&to);
+  }
+  return 0;
+}
+
+// _____________________________________________________________________________
+std::vector<TripOccurance>* EdgeTripGeom::getTrips() {
   return &_trips;
 }
 
@@ -62,7 +76,7 @@ void EdgeTripGeom::setGeom(const geo::PolyLine& p) {
 
 // _____________________________________________________________________________
 bool EdgeTripGeom::containsRoute(gtfs::Route* r) const {
-  return _trips.find(r) != _trips.end();
+  return getTripsForRoute(r);
 }
 
 // _____________________________________________________________________________
@@ -70,7 +84,7 @@ size_t EdgeTripGeom::getTripCardinality() const {
   size_t ret = 0;
 
   for (auto& t : _trips) {
-    ret += t.second.trips.size();
+    ret += t.trips.size();
   }
 
   return ret;
@@ -81,13 +95,14 @@ void EdgeTripGeom::removeOrphans() {
   double avgTrips = 0;
 
   for (auto& to : _trips) {
-    avgTrips += to.second.trips.size();
+    avgTrips += to.trips.size();
   }
   avgTrips /= _trips.size();
 
   for (auto it = _trips.begin(); it != _trips.end(); it++) {
-    if (it->second.trips.size() < avgTrips * 0.1) {
+    if (it->trips.size() < avgTrips * 0.1) {
       it = _trips.erase(it);
+      it--;
     }
   }
 }
