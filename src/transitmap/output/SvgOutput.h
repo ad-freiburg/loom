@@ -52,6 +52,10 @@ class SvgOutput : public Output {
 
   void renderEdgeTripGeom(const graph::TransitGraph& outG,
     const graph::EdgeTripGeom& g, const graph::Edge* e, double w, double h);
+
+  void renderNodeConnections(const graph::TransitGraph& outG,
+    const graph::Node* n, double w, double h);
+
 };
 
 }}

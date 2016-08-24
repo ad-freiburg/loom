@@ -34,7 +34,7 @@ void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode,
 
 // _____________________________________________________________________________
 void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode) {
-  TripOccurance* to = getTripsForRoute(t->getRoute());
+  TripOccurance* to = getTripsForRoute(t->getRoute()).first;
   if (!to) {
     _trips.push_back(TripOccurance(t->getRoute()));
     to = &_trips.back();
@@ -49,11 +49,13 @@ const {
 }
 
 // _____________________________________________________________________________
-TripOccurance* EdgeTripGeom::getTripsForRoute(gtfs::Route* r) const {
-  for (auto& to : _trips) {
-    if (to.route == r) return const_cast<TripOccurance*>(&to);
+TripOccWithPos EdgeTripGeom::getTripsForRoute(const gtfs::Route* r) const {
+  for (size_t i = 0; i < _trips.size(); i++) {
+    const TripOccurance& to = _trips[i];
+    if (to.route == r)
+      return std::pair<TripOccurance*, size_t>(const_cast<TripOccurance*>(&to), i);
   }
-  return 0;
+  return std::pair<TripOccurance*, size_t>(0, 0);
 }
 
 // _____________________________________________________________________________
@@ -76,7 +78,7 @@ void EdgeTripGeom::setGeom(const geo::PolyLine& p) {
 
 // _____________________________________________________________________________
 bool EdgeTripGeom::containsRoute(gtfs::Route* r) const {
-  return getTripsForRoute(r);
+  return getTripsForRoute(r).first;
 }
 
 // _____________________________________________________________________________

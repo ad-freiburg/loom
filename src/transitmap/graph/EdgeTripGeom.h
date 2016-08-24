@@ -33,6 +33,8 @@ struct TripOccurance {
   const Node* direction;  // 0 if in both directions (should be 0 in most cases!)
 };
 
+typedef std::pair<TripOccurance*, size_t> TripOccWithPos;
+
 class EdgeTripGeom {
  public:
   EdgeTripGeom(geo::PolyLine pl, const Node* geomDir);
@@ -41,7 +43,7 @@ class EdgeTripGeom {
   const std::vector<TripOccurance>& getTrips() const;
   std::vector<TripOccurance>* getTrips();
 
-  TripOccurance* getTripsForRoute(gtfs::Route* r) const;
+  TripOccWithPos getTripsForRoute(const gtfs::Route* r) const;
 
   const geo::PolyLine& getGeom() const;
   void setGeom(const geo::PolyLine& p);

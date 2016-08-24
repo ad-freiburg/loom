@@ -44,6 +44,7 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
   outputEdges(outG, width, height);
   outputNodes(outG, width, height);
 
+
   _w.closeTags();
 }
 
@@ -78,6 +79,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
 
     }
 
+    renderNodeConnections(outG, n, w, h);
   }
   _w.closeTag();
 }
@@ -94,6 +96,39 @@ void SvgOutput::outputEdges(const graph::TransitGraph& outG, double w, double h)
     }
   }
   _w.closeTag();
+}
+
+// _____________________________________________________________________________
+void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
+    const graph::Node* n, double w, double h) {
+  int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
+  int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
+  //
+  // for testing, just use one edgefront
+
+  for (size_t i = 0; i < 1; i++) {
+    const graph::NodeFront& nf = n->getMainDirs()[i];
+    for (auto e : nf.edges) {
+      for (auto& etg : *e->getEdgeTripGeoms()) {
+        for (auto& tripOcc : *etg.getTrips()) {
+          util::geo::Point p = nf.getTripOccPos(tripOcc.route);
+          std::vector<graph::Partner> partners = n->getPartner(&nf, tripOcc.route);
+
+          if (partners.size() == 0) continue;
+
+          util::geo::Point pp = partners[0].front->getTripOccPos(partners[0].route);
+
+          geo::PolyLine line(p, pp);
+
+          std::stringstream attrs;
+          attrs << "fill:none;stroke:#" << tripOcc.route->getColorString()
+            << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:" << etg.getWidth() * _scale;
+          printLine(line, attrs.str(), w, h, xOffset, yOffset);
+        }
+      }
+    }
+  }
+
 }
 
 // _____________________________________________________________________________

@@ -14,6 +14,21 @@ using namespace graph;
 using namespace gtfsparser;
 
 // _____________________________________________________________________________
+util::geo::Point NodeFront::getTripOccPos(const gtfs::Route* r) const {
+  for (auto e : edges) {
+    for (auto& etg : *e->getEdgeTripGeoms()) {
+      TripOccWithPos to = etg.getTripsForRoute(r);
+      if (to.first) {
+        double p = (etg.getWidth() + etg.getSpacing()) * to.second;
+        double pp = p / geom.getLength();
+
+        return geom.getPointAt(pp).p;
+      }
+    }
+  }
+};
+
+// _____________________________________________________________________________
 Node::Node(util::geo::Point pos) : _pos(pos) {
 }
 
