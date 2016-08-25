@@ -19,7 +19,13 @@ util::geo::Point NodeFront::getTripOccPos(const gtfs::Route* r) const {
     for (auto& etg : *e->getEdgeTripGeoms()) {
       TripOccWithPos to = etg.getTripsForRoute(r);
       if (to.first) {
-        double p = (etg.getWidth() + etg.getSpacing()) * to.second;
+        double p = 0;
+        //if (etg.getGeomDir() == n) {
+          p = (etg.getWidth() + etg.getSpacing()) * to.second + etg.getWidth()/2;
+        //} else {
+        //  p = (etg.getWidth() + etg.getSpacing()) * (etg.getTrips()->size() - 1 - to.second) + etg.getWidth()/2;
+        //}
+
         double pp = p / geom.getLength();
 
         return geom.getPointAt(pp).p;

@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
     LOG(INFO) << "Creating node fronts...";
     b.writeMainDirs();
     LOG(INFO) << "...";
-    b.freeNodes(20, 4);
+    b.freeNodes(25, 10);
     LOG(INFO) << "Outputting to SVG...";
 
     std::ofstream o;

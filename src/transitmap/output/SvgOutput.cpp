@@ -55,6 +55,12 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
 
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
+    renderNodeConnections(outG, n, w, h);
+  }
+  _w.closeTag();
+
+  _w.openTag("g");
+  for (graph::Node* n : outG.getNodes()) {
     std::map<std::string, std::string> params;
     params["cx"] = std::to_string((n->getPos().get<0>() - xOffset) * _scale);
     params["cy"] = std::to_string(h-(n->getPos().get<1>() - yOffset) * _scale);
@@ -70,16 +76,15 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
     _w.openTag("circle", params);
     _w.closeTag();
 
+    /**
     for (auto& f : n->getMainDirs()) {
       const geo::PolyLine p = f.geom;
       std::stringstream attrs;
       attrs << "fill:none;stroke:red"
         << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
       printLine(p, attrs.str(), w, h, xOffset, yOffset);
-
     }
-
-    renderNodeConnections(outG, n, w, h);
+    **/
   }
   _w.closeTag();
 }
@@ -106,11 +111,13 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
   //
   // for testing, just use one edgefront
 
-  for (size_t i = 0; i < 1; i++) {
+  std::set<const gtfs::Route*> processed;
+  for (size_t i = 0; i < n->getMainDirs().size(); i++) {
     const graph::NodeFront& nf = n->getMainDirs()[i];
     for (auto e : nf.edges) {
       for (auto& etg : *e->getEdgeTripGeoms()) {
         for (auto& tripOcc : *etg.getTrips()) {
+          if (!processed.insert(tripOcc.route).second) continue;
           util::geo::Point p = nf.getTripOccPos(tripOcc.route);
           std::vector<graph::Partner> partners = n->getPartner(&nf, tripOcc.route);
 
@@ -122,7 +129,7 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
 
           std::stringstream attrs;
           attrs << "fill:none;stroke:#" << tripOcc.route->getColorString()
-            << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:" << etg.getWidth() * _scale;
+            << ";stroke-linecap:round;stroke-opacity:1;stroke-width:" << etg.getWidth() * _scale;
           printLine(line, attrs.str(), w, h, xOffset, yOffset);
         }
       }
@@ -145,11 +152,13 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   center.simplify(1);
   double lineW = g.getWidth();
   double lineSpc = g.getSpacing();
-  double oo = ((lineW + lineSpc)) * (g.getTrips().size() -1);
+  double oo = g.getTotalWidth();
+
   double o = oo;
+
   for (auto r : g.getTrips()) {
       geo::PolyLine p = center;
-      p.offsetPerp((o - oo / 2));
+      p.offsetPerp(-(o - oo / 2 - g.getWidth() /2));
 
       // TODO: why is this check necessary? shouldnt be!
       // ___ OUTFACTOR
@@ -191,7 +200,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       // _______ /OUTFACTOR
       std::stringstream attrs;
       attrs << "fill:none;stroke:#" << r.route->getColorString()
-        << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:" << lineW * _scale;
+        << ";stroke-linecap:round;stroke-opacity:1;stroke-width:" << lineW * _scale;
       printLine(p, attrs.str(), w, h, xOffset, yOffset);
       // break;
       o -= lineW + lineSpc;

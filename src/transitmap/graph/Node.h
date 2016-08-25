@@ -19,6 +19,8 @@ namespace graph {
 // forward declaration of Edge
 class Edge;
 
+class Node;
+
 // forward declaration of EdgeTripGeometry
 class EdgeTripGeom;
 
@@ -26,10 +28,12 @@ class EdgeTripGeom;
 class TransitGraph;
 
 struct NodeFront {
-  NodeFront(double angle, Edge* e) : angle(angle) {
+  NodeFront(double angle, Edge* e, Node* n) : angle(angle) {
     addEdge(e);
   }
   double angle;
+
+  Node* n; // pointer to node here also
 
   std::vector<Edge*> edges;
 

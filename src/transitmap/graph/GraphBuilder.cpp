@@ -407,7 +407,7 @@ void GraphBuilder::writeMainDirs() {
       if (res.rem >= 2*(step/3)) angle += step - res.rem;
       **/
 
-      n->addMainDir(NodeFront((angle) / (180 / M_PI), e));
+      n->addMainDir(NodeFront((angle) / (180 / M_PI), e, n));
     }
   }
 }
@@ -434,35 +434,73 @@ void GraphBuilder::freeNodes(double d, double spacing) {
     for (auto& f : n->getMainDirs()) {
       for (auto e : f.edges) {
         size_t lc = 0;
+        const EdgeTripGeom* refEtg;
         for (auto& g : *e->getEdgeTripGeoms()) {
-           lc += g.getTrips()->size();
+           if (g.getTrips()->size() >= lc) {
+             lc = g.getTrips()->size();
+             refEtg = &g;
+           }
         }
-        double angleX1 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * lc/2 * (d + spacing);
-        double angleY1 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * lc/2 * (d + spacing);
 
-        double angleX2 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * -1 * lc/2 * (d + spacing);
-        double angleY2 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * -1 * lc/2 * (d + spacing);
+        double cutAngleX1 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * refEtg->getTotalWidth() * 2;
+        double cutAngleY1 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * refEtg->getTotalWidth() * 2;
+
+        double cutAngleX2 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * -refEtg->getTotalWidth() * 2;
+        double cutAngleY2 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * -refEtg->getTotalWidth() * 2;
 
         double vx = cos(f.angle) * (c/2) * md;
         double vy = sin(f.angle) * (c/2) * md;
 
-        geo::PolyLine p(util::geo::Point(angleX1, angleY1), util::geo::Point(angleX2, angleY2));
-        p.move(vx, vy);
+        geo::PolyLine cutLine(util::geo::Point(cutAngleX1, cutAngleY1), util::geo::Point(cutAngleX2, cutAngleY2));
+        cutLine.move(vx, vy);
 
-        f.setGeom(p);
+        double cx = 0;
+        double cy = 0;
+        size_t cn = 0;
 
         for (EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
-          std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = p.getIntersections(g.getGeom());
+          std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = cutLine.getIntersections(g.getGeom());
           if (iSects.size() > 0) {
             if (g.getGeomDir() !=n) {
                // cut at beginning
+              cx += iSects.begin()->p.get<0>();
+              cy += iSects.begin()->p.get<1>();
+              cn++;
               g.setGeom(g.getGeom().getSegment(iSects.begin()->totalPos, 1));
             } else {
               // cut at end
+              cx += (--iSects.end())->p.get<0>();
+              cy += (--iSects.end())->p.get<1>();
+              cn++;
               g.setGeom(g.getGeom().getSegment(0, (--iSects.end())->totalPos));
             }
           }
         }
+
+        util::geo::Point avgP;
+
+        if (cn) {
+          avgP = util::geo::Point(cx/cn, cy/cn);
+        } else {
+          avgP = n->getPos();
+          avgP.set<0>(avgP.get<0>() + vx);
+          avgP.set<1>(avgP.get<1>() + vy);
+        }
+
+        double angleX1 = avgP.get<0>() + cos(f.angle + M_PI/2) * refEtg->getTotalWidth()/2;
+        double angleY1 = avgP.get<1>() + sin(f.angle + M_PI/2) * refEtg->getTotalWidth()/2;
+
+        double angleX2 = avgP.get<0>() + cos(f.angle + M_PI/2) * -refEtg->getTotalWidth()/2;
+        double angleY2 = avgP.get<1>() + sin(f.angle + M_PI/2) * -refEtg->getTotalWidth()/2;
+
+        geo::PolyLine p;
+        if (refEtg->getGeomDir() == n) {
+          p = geo::PolyLine(util::geo::Point(angleX1, angleY1), util::geo::Point(angleX2, angleY2));
+        } else {
+          p = geo::PolyLine(util::geo::Point(angleX2, angleY2), util::geo::Point(angleX1, angleY1));
+        }
+
+        f.setGeom(p);
       }
     }
   }

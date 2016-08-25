@@ -175,11 +175,20 @@ inline Point projectOn(const Point& a, const Point& b, const Point& c) {
   if (doubleEq(a.get<0>(), c.get<0>()) && doubleEq(a.get<1>(), c.get<1>())) return a;
   if (doubleEq(b.get<0>(), c.get<0>()) && doubleEq(b.get<1>(), c.get<1>())) return b;
 
-  double m = (double)(c.get<1>() - a.get<1>()) / (c.get<0>() - a.get<0>());
-  double bb = (double)a.get<1>() - (m * a.get<0>());
+  double x;
+  double y;
 
-  double x = (m * b.get<1>() + b.get<0>() - m * bb) / (m * m + 1);
-  double y = (m * m * b.get<1>() + m * b.get<0>() + bb) / (m * m + 1);
+  if (c.get<0>() == a.get<0>()) {
+    // infinite slope
+    x = a.get<0>();
+    y = b.get<1>();
+  } else {
+    double m = (double)(c.get<1>() - a.get<1>()) / (c.get<0>() - a.get<0>());
+    double bb = (double)a.get<1>() - (m * a.get<0>());
+
+    x = (m * b.get<1>() + b.get<0>() - m * bb) / (m * m + 1);
+    y = (m * m * b.get<1>() + m * b.get<0>() + bb) / (m * m + 1);
+  }
 
   Point ret = Point(x, y);
 

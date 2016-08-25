@@ -138,3 +138,8 @@ void EdgeTripGeom::setWidth(double w) {
 void EdgeTripGeom::setSpacing(double s) {
   _s = s;
 }
+
+// _____________________________________________________________________________
+double EdgeTripGeom::getTotalWidth() const {
+  return _w * _trips.size() + _s * (_trips.size() - 1);
+}

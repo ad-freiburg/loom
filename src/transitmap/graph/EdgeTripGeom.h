@@ -61,6 +61,8 @@ class EdgeTripGeom {
 
   double getWidth() const;
   double getSpacing() const;
+
+  double getTotalWidth() const;
  private:
   std::vector<TripOccurance> _trips;
 
