@@ -51,6 +51,14 @@ struct Partner {
   const gtfs::Route* route;
 };
 
+struct InnerGeometry {
+  InnerGeometry(geo::PolyLine g, const gtfs::Route* r, const EdgeTripGeom* etg)
+  : geom(g), route(r), etg(etg) {};
+  geo::PolyLine geom;
+  const gtfs::Route* route;
+  const EdgeTripGeom* etg;
+};
+
 class Node {
 
  public:
@@ -84,6 +92,9 @@ class Node {
   const NodeFront* getNodeFrontFor(const Edge* e) const;
   double getScore() const;
   std::vector<Partner> getPartner(const NodeFront* f, const gtfs::Route* r) const;
+
+  std::vector<InnerGeometry> getInnerGeometries() const;
+
  protected:
   // add edge to this node's adjacency lists
   void addEdge(Edge* e);

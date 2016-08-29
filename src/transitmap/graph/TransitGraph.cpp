@@ -31,13 +31,23 @@ TransitGraph::~TransitGraph() {
 }
 
 // _____________________________________________________________________________
+double TransitGraph::getScore() const {
+  double ret = 0;
+
+  for (auto n : getNodes()) {
+    ret += n->getScore();
+  }
+
+  return ret;
+}
+// _____________________________________________________________________________
 Node* TransitGraph::addNode(Node* n) {
 
   auto ins = _nodes.insert(n);
   if (ins.second) {
     // expand the bounding box to hold this new node
     boost::geometry::expand(_bbox, n->getPos());
-  } 
+  }
   return *ins.first;
 }
 

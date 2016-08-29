@@ -47,6 +47,9 @@ class TransitGraph {
 
   projPJ getProjection() const;
   const boost::geometry::model::box<util::geo::Point>& getBoundingBox() const;
+
+  double getScore() const;
+
  private:
   std::string _name;
   std::set<Node*> _nodes;

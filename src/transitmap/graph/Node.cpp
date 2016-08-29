@@ -20,11 +20,11 @@ util::geo::Point NodeFront::getTripOccPos(const gtfs::Route* r) const {
       TripOccWithPos to = etg.getTripsForRoute(r);
       if (to.first) {
         double p = 0;
-        //if (etg.getGeomDir() == n) {
+        if (etg.getGeomDir() != n) {
           p = (etg.getWidth() + etg.getSpacing()) * to.second + etg.getWidth()/2;
-        //} else {
-        //  p = (etg.getWidth() + etg.getSpacing()) * (etg.getTrips()->size() - 1 - to.second) + etg.getWidth()/2;
-        //}
+        } else {
+          p = (etg.getWidth() + etg.getSpacing()) * (etg.getTrips()->size() - 1 - to.second) + etg.getWidth()/2;
+        }
 
         double pp = p / geom.getLength();
 
@@ -118,23 +118,24 @@ const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
 
 // _____________________________________________________________________________
 double Node::getScore() const {
-  std::vector<geo::PolyLine> connections;
-  for (auto nf : getMainDirs()) {
-    for (auto e : nf.edges) {
-      // TODO: only handle cases with 1 edgetripgeometry atm
-      const EdgeTripGeom& etg = e->getEdgeTripGeoms()->front();
-      size_t c = 0;
-      for (auto rt : etg.getTrips()) {
+  std::vector<InnerGeometry> igs = getInnerGeometries();
 
-      }
+  double score = 0;
+
+  for (size_t i = 0; i < igs.size(); i++) {
+    for (size_t j = 0; j < igs.size(); j++) {
+      if (j == i) continue;  // don't check against itself
+
+      score += .5 * igs[i].geom.getIntersections(igs[j].geom).size();
     }
   }
 
-  return 0;
+  return score;
 }
 
 // _____________________________________________________________________________
-std::vector<Partner> Node::getPartner(const NodeFront* f, const gtfs::Route* r) const {
+std::vector<Partner> Node::getPartner(const NodeFront* f, const gtfs::Route* r)
+const {
   std::vector<Partner> ret;
   for (const auto& nf : getMainDirs()) {
     if (&nf == f) continue;
@@ -154,5 +155,34 @@ std::vector<Partner> Node::getPartner(const NodeFront* f, const gtfs::Route* r) 
       }
     }
   }
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::vector<InnerGeometry> Node::getInnerGeometries() const {
+  std::vector<InnerGeometry> ret;
+
+  std::set<const gtfs::Route*> processed;
+  for (size_t i = 0; i < getMainDirs().size(); i++) {
+    const graph::NodeFront& nf = getMainDirs()[i];
+    for (auto e : nf.edges) {
+      for (auto etgIt = e->getEdgeTripGeoms()->begin();
+            etgIt != e->getEdgeTripGeoms()->end(); etgIt++) {
+        for (auto& tripOcc : *etgIt->getTrips()) {
+          if (!processed.insert(tripOcc.route).second) continue;
+          util::geo::Point p = nf.getTripOccPos(tripOcc.route);
+          std::vector<graph::Partner> partners = getPartner(&nf, tripOcc.route);
+
+          if (partners.size() == 0) continue;
+
+          util::geo::Point pp = partners[0].front->getTripOccPos(partners[0].route);
+
+          geo::PolyLine line(p, pp);
+          ret.push_back(InnerGeometry(line, partners[0].route, &*etgIt));
+        }
+      }
+    }
+  }
+
   return ret;
 }

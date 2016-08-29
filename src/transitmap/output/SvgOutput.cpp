@@ -56,6 +56,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
     renderNodeConnections(outG, n, w, h);
+    renderNodeScore(outG, n, w, h);
   }
   _w.closeTag();
 
@@ -108,33 +109,29 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
     const graph::Node* n, double w, double h) {
   int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
   int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
-  //
-  // for testing, just use one edgefront
 
-  std::set<const gtfs::Route*> processed;
-  for (size_t i = 0; i < n->getMainDirs().size(); i++) {
-    const graph::NodeFront& nf = n->getMainDirs()[i];
-    for (auto e : nf.edges) {
-      for (auto& etg : *e->getEdgeTripGeoms()) {
-        for (auto& tripOcc : *etg.getTrips()) {
-          if (!processed.insert(tripOcc.route).second) continue;
-          util::geo::Point p = nf.getTripOccPos(tripOcc.route);
-          std::vector<graph::Partner> partners = n->getPartner(&nf, tripOcc.route);
-
-          if (partners.size() == 0) continue;
-
-          util::geo::Point pp = partners[0].front->getTripOccPos(partners[0].route);
-
-          geo::PolyLine line(p, pp);
-
-          std::stringstream attrs;
-          attrs << "fill:none;stroke:#" << tripOcc.route->getColorString()
-            << ";stroke-linecap:round;stroke-opacity:1;stroke-width:" << etg.getWidth() * _scale;
-          printLine(line, attrs.str(), w, h, xOffset, yOffset);
-        }
-      }
-    }
+  for (auto& ie : n->getInnerGeometries()) {
+    std::stringstream attrs;
+    attrs << "fill:none;stroke:#" << ie.route->getColorString()
+      << ";stroke-linecap:round;stroke-opacity:1;stroke-width:" << ie.etg->getWidth() * _scale;
+    printLine(ie.geom, attrs.str(), w, h, xOffset, yOffset);
   }
+}
+
+// _____________________________________________________________________________
+void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
+    const graph::Node* n, double w, double h) {
+  int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
+  int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
+
+  std::map<std::string, std::string> params;
+  params["x"] = std::to_string((n->getPos().get<0>() - xOffset) * _scale + 10);
+  params["y"] = std::to_string(h-(n->getPos().get<1>() - yOffset) * _scale - 10);
+  params["fill"] = "red";
+  params["stroke"] = "white";
+  _w.openTag("text", params);
+  _w.writeText(std::to_string(n->getScore()));
+  _w.closeTag();
 
 }
 

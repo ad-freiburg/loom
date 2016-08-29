@@ -56,6 +56,8 @@ class SvgOutput : public Output {
   void renderNodeConnections(const graph::TransitGraph& outG,
     const graph::Node* n, double w, double h);
 
+  void renderNodeScore(const graph::TransitGraph& outG,
+      const graph::Node* n, double w, double h);
 };
 
 }}

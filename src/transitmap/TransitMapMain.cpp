@@ -19,6 +19,7 @@
 #include "output/SvgOutput.h"
 #include "geo/PolyLine.h"
 #include "gtfsparser/gtfs/Service.h"
+#include "optim/EdgeOrderOptimizer.h"
 
 INITIALIZE_EASYLOGGINGPP;
 
@@ -68,8 +69,15 @@ int main(int argc, char** argv) {
     b.writeMainDirs();
     LOG(INFO) << "...";
     b.freeNodes(25, 10);
-    LOG(INFO) << "Outputting to SVG...";
 
+
+    LOG(INFO) << "Optimizing...";
+    optim::EdgeOrderOptimizer eoOptim(&g);
+    eoOptim.optimize();
+
+    LOG(INFO) << "Graph score is -- " << g.getScore() << " --";
+
+    LOG(INFO) << "Outputting to SVG...";
     std::ofstream o;
     o.open("/home/patrick/test.svg");
 
