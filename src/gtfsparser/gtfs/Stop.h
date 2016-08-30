@@ -19,9 +19,9 @@ class Stop {
 
  public:
   enum LOCATION_TYPE : uint8_t {
-    STOP_INSIDE_STATION = 0,
-    STOP_OUTSIDE_STATION = 1,
-    STATION = 2
+    STOP = 0,
+    STATION = 1,
+    STATION_ENTRANCE = 2
   };
 
   enum WHEELCHAIR_BOARDING : uint8_t {

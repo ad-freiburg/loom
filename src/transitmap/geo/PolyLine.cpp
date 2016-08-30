@@ -183,12 +183,12 @@ util::geo::Point PolyLine::interpolate(const util::geo::Point& a,
 }
 
 // _____________________________________________________________________________
-inline double PolyLine::distTo(const PolyLine& g) const {
+double PolyLine::distTo(const PolyLine& g) const {
   return boost::geometry::distance(_line, g.getLine());
 }
 
 // _____________________________________________________________________________
-inline double PolyLine::distTo(const util::geo::Point& p) const {
+double PolyLine::distTo(const util::geo::Point& p) const {
   return boost::geometry::distance(_line, p);
 }
 

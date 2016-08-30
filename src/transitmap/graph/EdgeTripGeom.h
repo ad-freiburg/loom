@@ -40,8 +40,13 @@ class EdgeTripGeom {
   EdgeTripGeom(geo::PolyLine pl, const Node* geomDir);
   void addTrip(gtfs::Trip* t, const Node* dirNode, geo::PolyLine& pl);
   void addTrip(gtfs::Trip* t, const Node* dirNode);
-  const std::vector<TripOccurance>& getTrips() const;
-  std::vector<TripOccurance>* getTrips();
+  const std::vector<TripOccurance>& getTripsUnordered() const;
+
+  const std::vector<size_t>& getTripOrdering() const;
+
+  void setTripOrdering(std::vector<size_t>& ordering);
+
+  std::vector<TripOccurance>::iterator removeTripOccurance(std::vector<TripOccurance>::const_iterator pos);
 
   TripOccWithPos getTripsForRoute(const gtfs::Route* r) const;
 
@@ -64,7 +69,15 @@ class EdgeTripGeom {
 
   double getTotalWidth() const;
  private:
+  /**
+   * this vector remains in the same order all the time
+   */
   std::vector<TripOccurance> _trips;
+
+  /**
+   * this represents the ording of the vector above
+   */
+  std::vector<size_t> _ordering;
 
   double _w;
   double _s;

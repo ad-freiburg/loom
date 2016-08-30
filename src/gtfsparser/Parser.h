@@ -111,6 +111,8 @@ class Parser {
   gtfs::Time getTime(const CsvParser& csv,
     const std::string& field) const;
 
+  gtfs::Route::TYPE getRouteType(const CsvParser& csv,
+    const std::string& field, int64_t t) const;
   void fileNotFound(boost::filesystem::path file) const;
 };
 }

@@ -58,8 +58,8 @@ class PolyLine {
 
 	const util::geo::Line& getLine() const;
 
-  inline double distTo(const PolyLine& g) const;
-  inline double distTo(const util::geo::Point& p) const;
+  double distTo(const PolyLine& g) const;
+  double distTo(const util::geo::Point& p) const;
 
   SharedSegments getSharedSegments(const PolyLine& pl) const;
 

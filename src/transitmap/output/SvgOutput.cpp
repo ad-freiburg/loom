@@ -153,7 +153,8 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
   double o = oo;
 
-  for (auto r : g.getTrips()) {
+  for (size_t i : g.getTripOrdering()) {
+      const graph::TripOccurance& r = g.getTripsUnordered()[i];
       geo::PolyLine p = center;
       p.offsetPerp(-(o - oo / 2 - g.getWidth() /2));
 

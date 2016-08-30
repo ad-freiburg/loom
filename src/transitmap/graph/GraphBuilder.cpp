@@ -212,7 +212,8 @@ void GraphBuilder::createTopologicalNodes() {
     EdgeTripGeom faEdgeGeom(fa, faDir);
     EdgeTripGeom fcEdgeGeom(fc, fcDir);
 
-    for (auto& r : curEdgeGeom.getTrips()) {
+    for (size_t i : curEdgeGeom.getTripOrdering()) {
+      const TripOccurance& r = curEdgeGeom.getTripsUnordered()[i];
       for (auto& t : r.trips) {
         if (r.direction == w.e->getTo()) {
           eaEdgeGeom.addTrip(t, a);
@@ -226,7 +227,8 @@ void GraphBuilder::createTopologicalNodes() {
       }
     }
 
-    for (auto& r : compEdgeGeom.getTrips()) {
+    for (size_t i : compEdgeGeom.getTripOrdering()) {
+      const TripOccurance& r = compEdgeGeom.getTripsUnordered()[i];
       for (auto& t : r.trips) {
         if (r.direction == w.f->getTo()) {
           faEdgeGeom.addTrip(t, a);
@@ -422,7 +424,7 @@ void GraphBuilder::freeNodes(double d, double spacing) {
         for (auto& g : *e->getEdgeTripGeoms()) {
           g.setWidth(d);
           g.setSpacing(spacing);
-          curN += g.getTrips()->size();
+          curN += g.getTripsUnordered().size();
         }
       }
       if (curN > c) c = curN;
@@ -436,8 +438,8 @@ void GraphBuilder::freeNodes(double d, double spacing) {
         size_t lc = 0;
         const EdgeTripGeom* refEtg;
         for (auto& g : *e->getEdgeTripGeoms()) {
-           if (g.getTrips()->size() >= lc) {
-             lc = g.getTrips()->size();
+           if (g.getTripsUnordered().size() >= lc) {
+             lc = g.getTripsUnordered().size();
              refEtg = &g;
            }
         }

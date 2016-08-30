@@ -1,4 +1,4 @@
-// Copyright 2016, University of Freiburg,
+// Copyright 2016, Universityjof Freiburg,
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
@@ -38,12 +38,13 @@ void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode) {
   if (!to) {
     _trips.push_back(TripOccurance(t->getRoute()));
     to = &_trips.back();
+    _ordering.push_back(_trips.size() - 1);
   }
   to->addTrip(t, dirNode);
 }
 
 // _____________________________________________________________________________
-const std::vector<TripOccurance>& EdgeTripGeom::getTrips()
+const std::vector<TripOccurance>& EdgeTripGeom::getTripsUnordered()
 const {
   return _trips;
 }
@@ -52,15 +53,17 @@ const {
 TripOccWithPos EdgeTripGeom::getTripsForRoute(const gtfs::Route* r) const {
   for (size_t i = 0; i < _trips.size(); i++) {
     const TripOccurance& to = _trips[i];
-    if (to.route == r)
-      return std::pair<TripOccurance*, size_t>(const_cast<TripOccurance*>(&to), i);
+    if (to.route == r) {
+      size_t pos = std::find(_ordering.begin(), _ordering.end(), i) - _ordering.begin();
+      return std::pair<TripOccurance*, size_t>(const_cast<TripOccurance*>(&to), pos);
+    }
   }
   return std::pair<TripOccurance*, size_t>(0, 0);
 }
 
 // _____________________________________________________________________________
-std::vector<TripOccurance>* EdgeTripGeom::getTrips() {
-  return &_trips;
+const std::vector<size_t>& EdgeTripGeom::getTripOrdering() const {
+  return _ordering;
 }
 
 // _____________________________________________________________________________
@@ -103,10 +106,23 @@ void EdgeTripGeom::removeOrphans() {
 
   for (auto it = _trips.begin(); it != _trips.end(); it++) {
     if (it->trips.size() < avgTrips * 0.1) {
-      it = _trips.erase(it);
+      it = removeTripOccurance(it);
       it--;
     }
   }
+}
+// _____________________________________________________________________________
+std::vector<TripOccurance>::iterator
+EdgeTripGeom::removeTripOccurance(std::vector<TripOccurance>::const_iterator pos) {
+  std::vector<TripOccurance>::iterator ret = _trips.erase(pos);
+
+  // rebuild ordering
+  _ordering.clear();
+  for (size_t i = 0; i < _trips.size(); ++i) {
+    _ordering.push_back(i);
+  }
+
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -142,4 +158,10 @@ void EdgeTripGeom::setSpacing(double s) {
 // _____________________________________________________________________________
 double EdgeTripGeom::getTotalWidth() const {
   return _w * _trips.size() + _s * (_trips.size() - 1);
+}
+
+// _____________________________________________________________________________
+void EdgeTripGeom::setTripOrdering(std::vector<size_t>& ordering) {
+  assert(ordering.size() == _trips.size());
+  _ordering = ordering;
 }

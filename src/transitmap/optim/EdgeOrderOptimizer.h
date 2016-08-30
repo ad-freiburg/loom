@@ -15,6 +15,9 @@ namespace optim {
 
 using namespace graph;
 
+typedef std::vector<size_t> Ordering;
+typedef std::map<EdgeTripGeom*, Ordering> Configuration;
+
 class EdgeOrderOptimizer {
  public:
   EdgeOrderOptimizer(TransitGraph* g) : _g(g) {};
@@ -23,7 +26,13 @@ class EdgeOrderOptimizer {
  private:
   TransitGraph* _g;
 
-  void doOptimStep();
+  bool doOptimStep(Configuration* c);
+
+  void applyConfig(const Configuration& c);
+
+  std::vector<std::vector<size_t> > getPermutations(std::vector<size_t> order) const;
+
+  void generateRandConfig(Configuration* c) const;
 };
 
 }}

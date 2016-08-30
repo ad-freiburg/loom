@@ -133,7 +133,7 @@ void Edge::averageCombineGeom() {
   EdgeTripGeom combined(pl, referenceDir);
 
   for (auto& et : _tripsContained) {
-    for (auto& r : *et.getTrips()) {
+    for (auto& r : et.getTripsUnordered()) {
       for (auto& t : r.trips) {
         combined.addTrip(t, r.direction);
       }
@@ -158,7 +158,7 @@ void Edge::combineIncludedGeoms() {
     for (auto& toCheckAgainst : _tripsContained) {
       if (toCheckAgainst.getGeom().contains(et->getGeom())
           && !et->getGeom().contains(toCheckAgainst.getGeom())) {
-        for (auto& r : *(et->getTrips())) {
+        for (auto& r : et->getTripsUnordered()) {
           for (auto& t : r.trips) {
             toCheckAgainst.addTrip(t, r.direction);
           }
