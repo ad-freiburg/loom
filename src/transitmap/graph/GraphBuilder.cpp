@@ -29,8 +29,7 @@ void GraphBuilder::consume(const Feed& f) {
     if (t->second->getStopTimes().size() < 2) continue;
 
     if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
-    //if (t->second->getRoute()->getShortName() != "3") continue;
-    //if (!(t->second->getShape())) continue;
+    if (!(t->second->getShape())) continue;
     auto st = t->second->getStopTimes().begin();
 
     StopTime prev = *st;
@@ -147,45 +146,76 @@ void GraphBuilder::createTopologicalNodes() {
 
     bool reversed = false;
     if (fap.totalPos > fbp.totalPos) {
-      geo::PointOnLine temp = fap;
-      fap = fbp;
-      fbp = temp;
       reversed = true;
+
+      geo::PolyLine fa = compEdgeGeom.getGeom().getSegment(fap.totalPos, 1);
+      geo::PolyLine fab = compEdgeGeom.getGeom().getSegment(fbp, fap);
+      geo::PolyLine fc = compEdgeGeom.getGeom().getSegment(0, fbp.totalPos);
+
+      fab.reverse();
+    } else {
+      geo::PolyLine fa = compEdgeGeom.getGeom().getSegment(0, fap.totalPos);
+      geo::PolyLine fab = compEdgeGeom.getGeom().getSegment(fap, fbp);
+      geo::PolyLine fc = compEdgeGeom.getGeom().getSegment(fbp.totalPos, 1);
     }
 
     geo::PolyLine fa = compEdgeGeom.getGeom().getSegment(0, fap.totalPos);
     geo::PolyLine fab = compEdgeGeom.getGeom().getSegment(fap, fbp);
     geo::PolyLine fc = compEdgeGeom.getGeom().getSegment(fbp.totalPos, 1);
 
-    if (reversed) {
-      fab.reverse();
-    }
     std::vector<const geo::PolyLine*> avg;
     avg.push_back(&ab);
     avg.push_back(&fab);
     ab = geo::PolyLine::average(avg);
     ab.simplify(5);
-    // new node at the start of the shared segment
+
+    // new nodes at the start and end of the shared segment
     Node* a = 0;
-
-    if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getFrom()->getPos()).p, w.s.first.p) < 20) {
-      a = w.e->getFrom();
-    } else if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getTo()->getPos()).p, w.s.first.p) < 20) {
-      a = w.e->getTo();
-    } else {
-      a = new Node(w.s.first.p);
-    }
-
-    // new node at the end of the shared segment
     Node* b = 0;
 
-    if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getTo()->getPos()).p, w.s.second.p) < 20) {
-      b = w.e->getTo();
-    } else if (util::geo::dist(curEdgeGeom.getGeom().projectOn(w.e->getFrom()->getPos()).p, w.s.second.p) < 20) {
-      b = w.e->getFrom();
+    double maxSnapDist = 50;
+
+    if (curEdgeGeom.getGeomDir() == w.e->getTo()) {
+      if (ea.getLength() < maxSnapDist) {
+        a = w.e->getFrom();
+      }
+
+      if (ec.getLength() < maxSnapDist) {
+        b = w.e->getTo();
+      }
     } else {
-      b = new Node(w.s.second.p);
+      if (ea.getLength() < maxSnapDist) {
+        a = w.e->getTo();
+      }
+
+      if (ec.getLength() < maxSnapDist) {
+        b = w.e->getFrom();
+      }
     }
+
+    if ((compEdgeGeom.getGeomDir() == w.f->getTo() && !reversed)  ||
+        (compEdgeGeom.getGeomDir() != w.f->getTo() && reversed)) {
+      if (fa.getLength() < maxSnapDist) {
+        a = w.f->getFrom();
+      }
+
+      if (fc.getLength() < maxSnapDist) {
+        b = w.f->getTo();
+      }
+    } else if ((compEdgeGeom.getGeomDir() == w.f->getTo() && reversed)  ||
+        (compEdgeGeom.getGeomDir() != w.f->getTo() && !reversed)) {
+      if (fa.getLength() < maxSnapDist) {
+        a = w.f->getTo();
+      }
+
+      if (fc.getLength() < maxSnapDist) {
+        b = w.f->getFrom();
+      }
+    }
+
+
+    if (!a) a = new Node(w.s.first.p);
+    if (!b) b = new Node(w.s.second.p);
 
     EdgeTripGeom eaEdgeGeom(ea, a);
     EdgeTripGeom abEdgeGeom(ab, b);
@@ -193,19 +223,21 @@ void GraphBuilder::createTopologicalNodes() {
 
     const Node* faDir = 0;
     const Node* fcDir = 0;
-    if (compEdgeGeom.getGeomDir() == w.f->getFrom()) {
-      faDir = w.f->getFrom();
+    if (compEdgeGeom.getGeomDir() == w.f->getTo()) {
       if (reversed) {
-        fcDir = a;
-      } else {
+        faDir = w.f->getTo();
         fcDir = b;
-      }
-    } else {
-      fcDir = w.f->getTo();
-      if (reversed) {
-        faDir = b;
       } else {
         faDir = a;
+        fcDir = w.f->getTo();
+      }
+    } else {
+      if (reversed) {
+        faDir = a;
+        fcDir = w.f->getFrom();
+      } else {
+        faDir = w.f->getTo();
+        fcDir = b;
       }
     }
 
@@ -241,7 +273,6 @@ void GraphBuilder::createTopologicalNodes() {
         }
       }
     }
-
 
     // add new edges
     _targetGraph->addNode(a);
@@ -290,7 +321,7 @@ geo::PolyLine GraphBuilder::getSubPolyLine(Stop* a, Stop* b, Trip* t) {
       pl->second << getProjectedPoint(sp.lat, sp.lng);
     }
 
-    pl->second.simplify(3);
+    pl->second.simplify(10);
   }
 
   return pl->second.getSegment(getProjectedPoint(a->getLat(), a->getLng()),
@@ -444,18 +475,21 @@ void GraphBuilder::freeNodes(double d, double spacing) {
            }
         }
 
-        double cutAngleX1 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * refEtg->getTotalWidth() * 2;
-        double cutAngleY1 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * refEtg->getTotalWidth() * 2;
+        double cuttingWidth = c * (refEtg->getWidth() + refEtg->getSpacing());
+        std::cout << cuttingWidth << std::endl;
 
-        double cutAngleX2 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * -refEtg->getTotalWidth() * 2;
-        double cutAngleY2 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * -refEtg->getTotalWidth() * 2;
+        double cutAngleX1 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * (cuttingWidth * 2);
+        double cutAngleY1 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * (cuttingWidth * 2);
+
+        double cutAngleX2 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * -(cuttingWidth * 2);
+        double cutAngleY2 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * -(cuttingWidth * 2);
 
         double vx = cos(f.angle) * (c/2) * md;
         double vy = sin(f.angle) * (c/2) * md;
 
         geo::PolyLine cutLine(util::geo::Point(cutAngleX1, cutAngleY1), util::geo::Point(cutAngleX2, cutAngleY2));
         cutLine.move(vx, vy);
-
+        f.setGeom(cutLine);
         double cx = 0;
         double cy = 0;
         size_t cn = 0;
@@ -482,11 +516,14 @@ void GraphBuilder::freeNodes(double d, double spacing) {
         util::geo::Point avgP;
 
         if (cn) {
+          std::cout << cn << std::endl;
           avgP = util::geo::Point(cx/cn, cy/cn);
         } else {
-          avgP = n->getPos();
-          avgP.set<0>(avgP.get<0>() + vx);
-          avgP.set<1>(avgP.get<1>() + vy);
+          if (refEtg->getGeomDir() == n) {
+            avgP = refEtg->getGeom().getLine().back();
+          } else {
+            avgP = refEtg->getGeom().getLine().front();
+          }
         }
 
         double angleX1 = avgP.get<0>() + cos(f.angle + M_PI/2) * refEtg->getTotalWidth()/2;

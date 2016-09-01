@@ -80,6 +80,11 @@ void PolyLine::offsetPerp(double units) {
     double n1 = lastP.get<1>() - curP.get<1>();
     double n2 = curP.get<0>() - lastP.get<0>();
     double n = sqrt(n1*n1 + n2*n2);
+
+    // if n == 0, the segment is effectively a point
+    // we would get into all sorts of troubles if we tried to offset a point
+    if (!(n > 0)) continue;
+
     n1 = n1 / n;
     n2 = n2 / n;
 
@@ -358,6 +363,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
    */
   double STEP_SIZE = 20;
   double DMAX = 50;
+  double MIN_SEG_LENGTH = DMAX;
   SharedSegments ret;
 
   //if (distTo(pl) > DMAX) return ret;
@@ -365,6 +371,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
   bool in = false;
   bool notSingle = false;
   double segDist = 0;
+  double compSegDist = 0;
   double curDist = 0;
   double curTotalSegDist = 0;
   size_t skips;
@@ -381,8 +388,10 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
     const Point& s = _line[i-1];
     const Point& e = _line[i];
 
+    bool lastRound = false;
+
     double totalDist = boost::geometry::distance(s, e);
-    while (curSegDist < totalDist) {
+    while (curSegDist <= totalDist) {
       j++;
       const Point& curPointer = interpolate(s, e, curSegDist / totalDist);
       // auto nearestSeg = pl.nearestSegment(curPointer);
@@ -401,11 +410,16 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
           // update currendEndCand
           if (notSingle) segDist += util::geo::dist(currentEndCand.p, curPointer);
           else segDist += util::geo::dist(currentStartCand.p, curPointer);
-          notSingle = true;
           currentEndCand = PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
-          currentEndCandComp = pl.projectOn(curPointer);
 
+          PointOnLine curCompPointer = pl.projectOn(curPointer);
+
+          if (notSingle) compSegDist += util::geo::dist(currentEndCandComp.p, curCompPointer.p);
+          else compSegDist += util::geo::dist(currentStartCandComp.p, curCompPointer.p);
+
+          currentEndCandComp = curCompPointer;
           comp = util::geo::dist(currentStartCand.p, currentEndCand.p) / util::geo::dist(currentStartCandComp.p, currentEndCandComp.p);
+          notSingle = true;
         } else {
           in = true;
           currentStartCand = PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
@@ -414,33 +428,37 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
       } else {
         if (in) {
           skips++;
-          if (skips > 5) {
-            if (comp < 1.5 && notSingle && segDist > DMAX) {
+          if (skips > 5) { // TODO: make configurable
+            if (comp < 1.5 && notSingle && segDist > MIN_SEG_LENGTH && compSegDist > MIN_SEG_LENGTH) {
               ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
 
               // TODO: only return the FIRST one, make this configuralbe
               return ret;
-            } else {
             }
             in = false;
             notSingle = false;
+            compSegDist = 0;
             segDist = 0;
           }
-        } else {
-          // do nothing
         }
       }
 
-      curSegDist += STEP_SIZE;
-      curDist += STEP_SIZE;
-
+      if (curSegDist + STEP_SIZE > totalDist && !lastRound) {
+        lastRound = true;
+        double finalStep = totalDist - curSegDist;
+        curSegDist += finalStep;
+        curDist += finalStep;
+      } else {
+        curSegDist += STEP_SIZE;
+        curDist += STEP_SIZE;
+      }
     }
 
     curSegDist = curSegDist - totalDist;
     curTotalSegDist += totalDist;
   }
 
-  if (comp < 2 && in && notSingle && segDist > DMAX) {
+  if (comp < 1.5 && in && notSingle && segDist > MIN_SEG_LENGTH && compSegDist > MIN_SEG_LENGTH) {
     ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
   }
 

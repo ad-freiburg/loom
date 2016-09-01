@@ -61,19 +61,21 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Simplyfing...";
     b.simplify();
+
     LOG(INFO) << "Building topological nodes...";
     b.createTopologicalNodes();
+
     LOG(INFO) << "Averaging node positions";
     b.averageNodePositions();
     LOG(INFO) << "Creating node fronts...";
     b.writeMainDirs();
     LOG(INFO) << "...";
-    b.freeNodes(25, 10);
+    b.freeNodes(5, 20);
 
 
     LOG(INFO) << "Optimizing...";
     optim::EdgeOrderOptimizer eoOptim(&g);
-//    eoOptim.optimize();
+    //eoOptim.optimize();
 
     LOG(INFO) << "Graph score is -- " << g.getScore() << " --";
 

@@ -1,4 +1,4 @@
-// Copyright 2016, U  //niversity of Freiburg,
+// Copy//right 2016, U  //niversity of Freiburg,
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
@@ -55,7 +55,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
 
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
-    renderNodeConnections(outG, n, w, h);
+    //renderNodeConnections(outG, n, w, h);
     renderNodeScore(outG, n, w, h);
   }
   _w.closeTag();
@@ -65,7 +65,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
     std::map<std::string, std::string> params;
     params["cx"] = std::to_string((n->getPos().get<0>() - xOffset) * _scale);
     params["cy"] = std::to_string(h-(n->getPos().get<1>() - yOffset) * _scale);
-    if (n->getStops().size() > 0) {
+    if (false && n->getStops().size() > 0) {
       params["r"] = "5";
       params["stroke"] = "black";
       params["stroke-width"] = "4";
@@ -77,7 +77,6 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
     _w.openTag("circle", params);
     _w.closeTag();
 
-    /**
     for (auto& f : n->getMainDirs()) {
       const geo::PolyLine p = f.geom;
       std::stringstream attrs;
@@ -85,7 +84,6 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
         << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
       printLine(p, attrs.str(), w, h, xOffset, yOffset);
     }
-    **/
   }
   _w.closeTag();
 }
@@ -130,6 +128,10 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
   params["fill"] = "red";
   params["stroke"] = "white";
   _w.openTag("text", params);
+  if (n->getStops().size()) {
+    _w.writeText((*n->getStops().begin())->getName());
+    _w.writeText("\n");
+  }
   _w.writeText(std::to_string(n->getScore()));
   _w.closeTag();
 
@@ -160,7 +162,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
       // TODO: why is this check necessary? shouldnt be!
       // ___ OUTFACTOR
-      if (nfTo->geom.getLine().size() > 0 && nfFrom->geom.getLine().size() > 0) {
+      if (nfTo && nfFrom && nfTo->geom.getLine().size() > 0 && nfFrom->geom.getLine().size() > 0) {
         if (g.getGeomDir() == e->getTo()) {
           std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfTo->geom.getIntersections(p);
           if (iSects.size() > 0) {
@@ -200,7 +202,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       attrs << "fill:none;stroke:#" << r.route->getColorString()
         << ";stroke-linecap:round;stroke-opacity:1;stroke-width:" << lineW * _scale;
       printLine(p, attrs.str(), w, h, xOffset, yOffset);
-      // break;
+      //break;
       o -= lineW + lineSpc;
   }
 }

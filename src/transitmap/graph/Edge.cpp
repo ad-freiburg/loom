@@ -104,7 +104,6 @@ void Edge::simplify() {
   }
 
   combineIncludedGeoms();
-
   averageCombineGeom();
 }
 

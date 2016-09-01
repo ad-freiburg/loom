@@ -15,7 +15,7 @@ void EdgeOrderOptimizer::optimize() {
 
   Configuration bestConfig;
   double bestScore = DBL_MAX;
-  for (size_t i = 0; i < 10; i++) {
+  for (size_t i = 0; i < 100; i++) {
     std::cout << "Round " << i << std::endl;
     Configuration c;
     generateRandConfig(&c);
@@ -45,6 +45,12 @@ bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
         Ordering origOrdering = g.getTripOrdering();
         std::vector<Ordering > permutations = getPermutations(origOrdering);
 
+        /**
+        //take random permutation
+        size_t r = rand() % permutations.size();
+        auto& perm = permutations[r];
+        **/
+
         for (auto& perm : permutations) {
           g.setTripOrdering(perm);
           double newScore = _g->getScore();
@@ -61,7 +67,6 @@ bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
   }
 
   if (currentScore < _g->getScore()) {
-    std::cout << currentScore << std::endl;
     bestCand.first->setTripOrdering(bestCand.second);
     (*c)[bestCand.first] = bestCand.second;
     return true;
