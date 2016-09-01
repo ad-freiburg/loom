@@ -74,9 +74,6 @@ const geo::PolyLine& EdgeTripGeom::getGeom() const {
 // _____________________________________________________________________________
 void EdgeTripGeom::setGeom(const geo::PolyLine& p) {
   _geom = p;
-  if (util::geo::dist(_geom.getLine().back(), _geomDir->getPos()) <= util::geo::dist(_geom.getLine().front(), _geomDir->getPos())) {
- //   _geom.reverse();
-  }
 }
 
 // _____________________________________________________________________________

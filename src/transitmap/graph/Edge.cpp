@@ -173,3 +173,13 @@ void Edge::combineIncludedGeoms() {
     }
   }
 }
+
+// _____________________________________________________________________________
+void Edge::fixEdgeTripGeomDirs() {
+  for (auto& e : *getEdgeTripGeoms()) {
+    if (e.getGeomDir() != _to) {
+      e.setGeomDir(_to);
+      (const_cast<geo::PolyLine*>(&e.getGeom()))->reverse();
+    }
+  }
+}

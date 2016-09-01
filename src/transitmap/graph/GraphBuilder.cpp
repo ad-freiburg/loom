@@ -89,6 +89,7 @@ void GraphBuilder::simplify() {
   for (auto n : *_targetGraph->getNodes()) {
     for (auto e : n->getAdjListOut()) {
       e->simplify();
+      e->fixEdgeTripGeomDirs();
     }
   }
 }
@@ -236,7 +237,7 @@ void GraphBuilder::createTopologicalNodes() {
         faDir = a;
         fcDir = w.f->getFrom();
       } else {
-        faDir = w.f->getTo();
+        faDir = a;
         fcDir = b;
       }
     }
