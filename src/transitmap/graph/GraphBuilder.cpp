@@ -172,7 +172,7 @@ void GraphBuilder::createTopologicalNodes() {
     Node* a = 0;
     Node* b = 0;
 
-    double maxSnapDist = 50;
+    double maxSnapDist = 20;
 
     if (ea.getLength() < maxSnapDist) {
       a = w.e->getFrom();
@@ -250,6 +250,8 @@ void GraphBuilder::createTopologicalNodes() {
     // delete old edges
     _targetGraph->deleteEdge(w.e->getFrom(), w.e->getTo());
     _targetGraph->deleteEdge(w.f->getFrom(), w.f->getTo());
+
+    assert(a != b);
 
     // add new edges
     _targetGraph->addNode(a);
