@@ -38,7 +38,12 @@ class SvgOutput : public Output {
 
   virtual void print(const graph::TransitGraph& outputGraph);
 
-	void printLine(const transitmapper::geo::PolyLine& l, const std::string& style, double w, double h, int64_t xOffs, int64_t yOffs);
+	void printLine(const transitmapper::geo::PolyLine& l,
+								const std::map<std::string, std::string>& ps,
+                double w, double h, int64_t xOffs, int64_t yOffs);
+	void printLine(const transitmapper::geo::PolyLine& l,
+								const std::string& style,
+                double w, double h, int64_t xOffs, int64_t yOffs);
   void printPoint(const util::geo::Point& p, const std::string& style,
                           double w, double h, int64_t xOffs, int64_t yOffs);
  private:

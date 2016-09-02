@@ -79,10 +79,12 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
 
     for (auto& f : n->getMainDirs()) {
       const geo::PolyLine p = f.geom;
-      std::stringstream attrs;
-      attrs << "fill:none;stroke:red"
+      std::stringstream style;
+      style << "fill:none;stroke:red"
         << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
-      printLine(p, attrs.str(), w, h, xOffset, yOffset);
+      std::map<std::string, std::string> params;
+      params["style"] = style.str();
+      printLine(p, params, w, h, xOffset, yOffset);
     }
   }
   _w.closeTag();
@@ -109,10 +111,12 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
   int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 
   for (auto& ie : n->getInnerGeometries()) {
-    std::stringstream attrs;
-    attrs << "fill:none;stroke:#" << ie.route->getColorString()
+    std::stringstream style;
+    style << "fill:none;stroke:#" << ie.route->getColorString()
       << ";stroke-linecap:round;stroke-opacity:1;stroke-width:" << ie.etg->getWidth() * _scale;
-    printLine(ie.geom, attrs.str(), w, h, xOffset, yOffset);
+    std::map<std::string, std::string> params;
+    params["style"] = style.str();
+    printLine(ie.geom, params, w, h, xOffset, yOffset);
   }
 }
 
@@ -154,6 +158,12 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   double oo = g.getTotalWidth();
 
   double o = oo;
+
+  assert(g.getTripOrdering().size() == g.getTripsUnordered().size());
+
+  std::cout << e << " " << (e->getFrom()->getStops().size() ? (*e->getFrom()->getStops().begin())->getName() : "");
+  std::cout << " to " << (e->getTo()->getStops().size() ? (*e->getTo()->getStops().begin())->getName() : "");
+  std::cout << " " << g.getTripOrdering().size() << std::endl;
 
   for (size_t i : g.getTripOrdering()) {
       const graph::TripOccurance& r = g.getTripsUnordered()[i];
@@ -198,10 +208,23 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       }
 
       // _______ /OUTFACTOR
-      std::stringstream attrs;
-      attrs << "fill:none;stroke:#" << r.route->getColorString()
+      std::stringstream style;
+      style << "fill:none;stroke:#" << r.route->getColorString()
         << ";stroke-linecap:round;stroke-opacity:1;stroke-width:" << lineW * _scale;
-      printLine(p, attrs.str(), w, h, xOffset, yOffset);
+      std::map<std::string, std::string> params;
+      std::stringstream id;
+      params["style"] = style.str();
+      printLine(p, params, w, h, xOffset, yOffset);
+
+      std::map<std::string, std::string> tparams;
+      tparams["x"] = std::to_string((p.getPointAt(0.5).p.get<0>() - xOffset) * _scale);
+      tparams["y"] = std::to_string(h-(p.getPointAt(0.5).p.get<1>() - yOffset) * _scale);
+      tparams["fill"] = "white";
+      tparams["stroke"] = "red";
+      _w.openTag("text", tparams);
+      _w.writeText(r.route->getId());
+      _w.closeTag();
+
       //break;
       o -= lineW + lineSpc;
   }
@@ -219,12 +242,30 @@ void SvgOutput::printPoint(const util::geo::Point& p,
   _w.openTag("circle", params);
   _w.closeTag();
 }
+
 // _____________________________________________________________________________
 void SvgOutput::printLine(const transitmapper::geo::PolyLine& l,
 													const std::string& style,
                           double w, double h, int64_t xOffs, int64_t yOffs) {
 	std::map<std::string, std::string> params;
-	params["style"] = style;
+  params["style"] = style;
+	std::stringstream points;
+
+	for (auto& p : l.getLine()) {
+		points << " " << (p.get<0>() - xOffs)*_scale << "," << h - (p.get<1>() - yOffs) * _scale;
+	}
+
+	params["points"] = points.str();
+
+	_w.openTag("polyline", params);
+	_w.closeTag();
+}
+
+// _____________________________________________________________________________
+void SvgOutput::printLine(const transitmapper::geo::PolyLine& l,
+													const std::map<std::string, std::string>& ps,
+                          double w, double h, int64_t xOffs, int64_t yOffs) {
+	std::map<std::string, std::string> params = ps;
 	std::stringstream points;
 
 	for (auto& p : l.getLine()) {

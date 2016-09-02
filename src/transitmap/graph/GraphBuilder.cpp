@@ -229,7 +229,8 @@ void GraphBuilder::createTopologicalNodes() {
     for (size_t i : compEdgeGeom.getTripOrdering()) {
       const TripOccurance& r = compEdgeGeom.getTripsUnordered()[i];
       for (auto& t : r.trips) {
-        if (r.direction == w.f->getTo()) {
+        if ((r.direction == w.f->getTo() && !reversed) ||
+            (r.direction != w.f->getTo() && reversed)) {
           faEdgeGeom.addTrip(t, a);
           abEdgeGeom.addTrip(t, b);
           fcEdgeGeom.addTrip(t, w.f->getTo());
@@ -241,22 +242,31 @@ void GraphBuilder::createTopologicalNodes() {
       }
     }
 
+    Node* wefrom = w.e->getFrom();
+    Node* weto = w.e->getTo();
+    Node* wffrom = w.f->getFrom();
+    Node* wfto = w.f->getTo();
+
+    // delete old edges
+    _targetGraph->deleteEdge(w.e->getFrom(), w.e->getTo());
+    _targetGraph->deleteEdge(w.f->getFrom(), w.f->getTo());
+
     // add new edges
     _targetGraph->addNode(a);
     _targetGraph->addNode(b);
-    Edge* eaE =_targetGraph->addEdge(w.e->getFrom(), a);
+    Edge* eaE =_targetGraph->addEdge(wefrom, a);
     Edge* abE =_targetGraph->addEdge(a, b);
-    Edge* ebE =_targetGraph->addEdge(b, w.e->getTo());
+    Edge* ebE =_targetGraph->addEdge(b, weto);
 
     Edge* faE = 0;
     Edge* fbE = 0;
 
     if (reversed) {
-      faE =_targetGraph->addEdge(a, w.f->getTo());
-      fbE =_targetGraph->addEdge(w.f->getFrom(), b);
+      faE =_targetGraph->addEdge(a, wfto);
+      fbE =_targetGraph->addEdge(wffrom, b);
     } else {
-      faE =_targetGraph->addEdge(w.f->getFrom(), a);
-      fbE =_targetGraph->addEdge(b, w.f->getTo());
+      faE =_targetGraph->addEdge(wffrom, a);
+      fbE =_targetGraph->addEdge(b, wfto);
     }
 
     if (eaE) eaE->addEdgeTripGeom(eaEdgeGeom);
@@ -266,13 +276,10 @@ void GraphBuilder::createTopologicalNodes() {
     if (faE) faE->addEdgeTripGeom(faEdgeGeom);
     if (fbE) fbE->addEdgeTripGeom(fcEdgeGeom);
 
-    // delete old edges
-    _targetGraph->deleteEdge(w.e->getFrom(), w.e->getTo());
-    _targetGraph->deleteEdge(w.f->getFrom(), w.f->getTo());
   }
 }
 
-// _____________________________________________________________________________ 
+// _____________________________________________________________________________
 geo::PolyLine GraphBuilder::getSubPolyLine(Stop* a, Stop* b, Trip* t) {
   if (!t->getShape()) {
     return geo::PolyLine(getProjectedPoint(a->getLat(), a->getLng()),
@@ -443,7 +450,6 @@ void GraphBuilder::freeNodes(double d, double spacing) {
         }
 
         double cuttingWidth = c * (refEtg->getWidth() + refEtg->getSpacing());
-        std::cout << cuttingWidth << std::endl;
 
         double cutAngleX1 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * (cuttingWidth * 2);
         double cutAngleY1 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * (cuttingWidth * 2);
@@ -483,7 +489,6 @@ void GraphBuilder::freeNodes(double d, double spacing) {
         util::geo::Point avgP;
 
         if (cn) {
-          std::cout << cn << std::endl;
           avgP = util::geo::Point(cx/cn, cy/cn);
         } else {
           if (refEtg->getGeomDir() == n) {
