@@ -81,6 +81,10 @@ std::vector<EdgeTripGeom>* Edge::getEdgeTripGeoms() {
 void Edge::addEdgeTripGeom(const EdgeTripGeom& e) {
   assert(e.getGeomDir() == _from || e.getGeomDir() ==  _to);
   _tripsContained.push_back(e);
+  if (e.getGeomDir() != _to) {
+    const_cast<geo::PolyLine*>(&_tripsContained.back().getGeom())->reverse();
+    _tripsContained.back().setGeomDir(_to);
+  }
 }
 
 // _____________________________________________________________________________
@@ -170,16 +174,6 @@ void Edge::combineIncludedGeoms() {
       et = _tripsContained.erase(et);
     } else {
       et++;
-    }
-  }
-}
-
-// _____________________________________________________________________________
-void Edge::fixEdgeTripGeomDirs() {
-  for (auto& e : *getEdgeTripGeoms()) {
-    if (e.getGeomDir() != _to) {
-      e.setGeomDir(_to);
-      (const_cast<geo::PolyLine*>(&e.getGeom()))->reverse();
     }
   }
 }

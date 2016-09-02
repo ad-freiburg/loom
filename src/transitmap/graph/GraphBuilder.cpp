@@ -89,7 +89,6 @@ void GraphBuilder::simplify() {
   for (auto n : *_targetGraph->getNodes()) {
     for (auto e : n->getAdjListOut()) {
       e->simplify();
-      e->fixEdgeTripGeomDirs();
     }
   }
 }
@@ -146,23 +145,22 @@ void GraphBuilder::createTopologicalNodes() {
     geo::PointOnLine fbp = compEdgeGeom.getGeom().projectOn(w.s.second.p);
 
     bool reversed = false;
+    geo::PolyLine fa;
+    geo::PolyLine fab;
+    geo::PolyLine fc;
     if (fap.totalPos > fbp.totalPos) {
       reversed = true;
 
-      geo::PolyLine fa = compEdgeGeom.getGeom().getSegment(fap.totalPos, 1);
-      geo::PolyLine fab = compEdgeGeom.getGeom().getSegment(fbp, fap);
-      geo::PolyLine fc = compEdgeGeom.getGeom().getSegment(0, fbp.totalPos);
+      fa = compEdgeGeom.getGeom().getSegment(fap.totalPos, 1);
+      fab = compEdgeGeom.getGeom().getSegment(fbp, fap);
+      fc = compEdgeGeom.getGeom().getSegment(0, fbp.totalPos);
 
       fab.reverse();
     } else {
-      geo::PolyLine fa = compEdgeGeom.getGeom().getSegment(0, fap.totalPos);
-      geo::PolyLine fab = compEdgeGeom.getGeom().getSegment(fap, fbp);
-      geo::PolyLine fc = compEdgeGeom.getGeom().getSegment(fbp.totalPos, 1);
+      fa = compEdgeGeom.getGeom().getSegment(0, fap.totalPos);
+      fab = compEdgeGeom.getGeom().getSegment(fap, fbp);
+      fc = compEdgeGeom.getGeom().getSegment(fbp.totalPos, 1);
     }
-
-    geo::PolyLine fa = compEdgeGeom.getGeom().getSegment(0, fap.totalPos);
-    geo::PolyLine fab = compEdgeGeom.getGeom().getSegment(fap, fbp);
-    geo::PolyLine fc = compEdgeGeom.getGeom().getSegment(fbp.totalPos, 1);
 
     std::vector<const geo::PolyLine*> avg;
     avg.push_back(&ab);
@@ -176,44 +174,21 @@ void GraphBuilder::createTopologicalNodes() {
 
     double maxSnapDist = 50;
 
-    if (curEdgeGeom.getGeomDir() == w.e->getTo()) {
-      if (ea.getLength() < maxSnapDist) {
-        a = w.e->getFrom();
-      }
-
-      if (ec.getLength() < maxSnapDist) {
-        b = w.e->getTo();
-      }
-    } else {
-      if (ea.getLength() < maxSnapDist) {
-        a = w.e->getTo();
-      }
-
-      if (ec.getLength() < maxSnapDist) {
-        b = w.e->getFrom();
-      }
+    if (ea.getLength() < maxSnapDist) {
+      a = w.e->getFrom();
     }
 
-    if ((compEdgeGeom.getGeomDir() == w.f->getTo() && !reversed)  ||
-        (compEdgeGeom.getGeomDir() != w.f->getTo() && reversed)) {
-      if (fa.getLength() < maxSnapDist) {
-        a = w.f->getFrom();
-      }
-
-      if (fc.getLength() < maxSnapDist) {
-        b = w.f->getTo();
-      }
-    } else if ((compEdgeGeom.getGeomDir() == w.f->getTo() && reversed)  ||
-        (compEdgeGeom.getGeomDir() != w.f->getTo() && !reversed)) {
-      if (fa.getLength() < maxSnapDist) {
-        a = w.f->getTo();
-      }
-
-      if (fc.getLength() < maxSnapDist) {
-        b = w.f->getFrom();
-      }
+    if (ec.getLength() < maxSnapDist) {
+      b = w.e->getTo();
     }
 
+    if (fa.getLength() < maxSnapDist) {
+      a = !reversed ? w.f->getFrom() : w.f->getTo();
+    }
+
+    if (fc.getLength() < maxSnapDist) {
+      b = !reversed ? w.f->getTo() : w.f->getFrom();
+    }
 
     if (!a) a = new Node(w.s.first.p);
     if (!b) b = new Node(w.s.second.p);
@@ -224,22 +199,13 @@ void GraphBuilder::createTopologicalNodes() {
 
     const Node* faDir = 0;
     const Node* fcDir = 0;
-    if (compEdgeGeom.getGeomDir() == w.f->getTo()) {
-      if (reversed) {
-        faDir = w.f->getTo();
-        fcDir = b;
-      } else {
-        faDir = a;
-        fcDir = w.f->getTo();
-      }
+
+    if (reversed) {
+      faDir = w.f->getTo();
+      fcDir = b;
     } else {
-      if (reversed) {
-        faDir = a;
-        fcDir = w.f->getFrom();
-      } else {
-        faDir = a;
-        fcDir = b;
-      }
+      faDir = a;
+      fcDir = w.f->getTo();
     }
 
     EdgeTripGeom faEdgeGeom(fa, faDir);
@@ -286,8 +252,8 @@ void GraphBuilder::createTopologicalNodes() {
     Edge* fbE = 0;
 
     if (reversed) {
-      faE =_targetGraph->addEdge(w.f->getFrom(), b);
-      fbE =_targetGraph->addEdge(a, w.f->getTo());
+      faE =_targetGraph->addEdge(a, w.f->getTo());
+      fbE =_targetGraph->addEdge(w.f->getFrom(), b);
     } else {
       faE =_targetGraph->addEdge(w.f->getFrom(), a);
       fbE =_targetGraph->addEdge(b, w.f->getTo());
