@@ -397,25 +397,6 @@ void GraphBuilder::writeMainDirs() {
         angle = util::geo::angBetween(p, g.getGeom().getPointAtDist(50).p);
       }
 
-      /**
-
-      angle = ((angle % 360) + 360) % 360;
-
-      if (first) {
-        first = false;
-        ref = angle;
-      }
-
-      int step = 90;
-      div_t res;
-
-      int32_t diff = (((angle - ref) % 360) + 360) % 360;
-      res = div(diff, step);
-
-      if (res.rem < step/3) angle -= res.rem;
-      if (res.rem >= 2*(step/3)) angle += step - res.rem;
-      **/
-
       n->addMainDir(NodeFront((angle) / (180 / M_PI), e, n));
     }
   }
@@ -423,8 +404,12 @@ void GraphBuilder::writeMainDirs() {
 
 // _____________________________________________________________________________
 void GraphBuilder::freeNodes(double d, double spacing) {
+  // TODO: move the creation of the node front geometries to the
+  // method above. add method to "expand" node front geometries until they DO
+  // NOT OVERLAP. after this, add an extension method to the polyline to double the
+  // "stretch" the geometry to the desired length. use this as a cutting geom.
   for (auto n : *_targetGraph->getNodes()) {
-    size_t c = 0;
+   size_t c = 0;
     for (auto f : n->getMainDirs()) {
       size_t curN = 0;
       for (auto e : f.edges) {

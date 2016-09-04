@@ -1,0 +1,18 @@
+Parallel line snapping
+======================
+
+* use dynamic max distance based on width of compared geometries (use existing getTotalWidth() method for that)
+* "crossing" detection. if the route part before the shared segment is on the opposite site of the compared route than
+  the part after the shared segment (maybe for a min distance?), consider this matching a crossing and don't snap it
+
+Drawing
+=======
+
+* station rendering
+* direction arrows
+
+Preprocessing
+=============
+
+* maybe auto-generate colors if no colors are present? or move to gtfstidy?????
+* join routes that serve the same routes, but in different directions (new york feed...)
