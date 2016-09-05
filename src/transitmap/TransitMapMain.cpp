@@ -67,10 +67,12 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Averaging node positions";
     b.averageNodePositions();
+
+    b.setLineWidth(5, 20);
+
     LOG(INFO) << "Creating node fronts...";
     b.writeMainDirs();
-    LOG(INFO) << "...";
-    b.freeNodes(5, 20);
+    b.freeNodes();
 
 
     LOG(INFO) << "Optimizing...";

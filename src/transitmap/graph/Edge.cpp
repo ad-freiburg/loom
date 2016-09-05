@@ -159,8 +159,8 @@ void Edge::combineIncludedGeoms() {
   for (auto et = _tripsContained.begin(); et != _tripsContained.end();) {
     bool combined = false;
     for (auto& toCheckAgainst : _tripsContained) {
-      if (toCheckAgainst.getGeom().contains(et->getGeom())
-          && !et->getGeom().contains(toCheckAgainst.getGeom())) {
+      if (toCheckAgainst.getGeom().contains(et->getGeom(), 100)
+          && !et->getGeom().contains(toCheckAgainst.getGeom(), 100)) {
         for (auto& r : et->getTripsUnordered()) {
           for (auto& t : r.trips) {
             toCheckAgainst.addTrip(t, r.direction);

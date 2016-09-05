@@ -90,9 +90,11 @@ class PolyLine {
   void move(double vx, double vy);
 
   // equality operator, will hold frechet-distance equality check in
-  // the future
+  // the dmax
   bool operator==(const PolyLine& rhs) const;
-  bool contains(const PolyLine& rhs) const;
+  bool contains(const PolyLine& rhs, double dmax) const;
+  bool equals(const PolyLine& rhs) const;
+  bool equals(const PolyLine& rhs, double dmax) const;
  private:
   std::set<PointOnLine, PointOnLineCompare> getIntersections(const PolyLine& p,
     size_t a, size_t b) const;

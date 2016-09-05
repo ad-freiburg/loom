@@ -375,130 +375,123 @@ Node* GraphBuilder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel) {
 }
 
 // _____________________________________________________________________________
+void GraphBuilder::setLineWidth(double width, double spacing) {
+  for (auto n : *_targetGraph->getNodes()) {
+    for (auto& e : n->getAdjListOut()) {
+      for (auto& g : *e->getEdgeTripGeoms()) {
+        g.setWidth(width);
+        std::cout << spacing << std::endl;
+        g.setSpacing(spacing);
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
 void GraphBuilder::writeMainDirs() {
   for (auto n : *_targetGraph->getNodes()) {
     std::set<Edge*> eSet;
     eSet.insert(n->getAdjListIn().begin(), n->getAdjListIn().end());
     eSet.insert(n->getAdjListOut().begin(), n->getAdjListOut().end());
 
-    bool first = true;
-    int32_t ref;
-
     for (Edge* e : eSet) {
       if (e->getEdgeTripGeoms()->size() == 0) continue;
 
       // atm, always take the first edge trip geometry
-      const EdgeTripGeom& g = e->getEdgeTripGeoms()->front();
-      int32_t angle;
-      util::geo::Point p = g.getGeom().projectOn(n->getPos()).p;
-      if (g.getGeomDir() == n) {
-        angle = util::geo::angBetween(p, g.getGeom().getPointAtDist(g.getGeom().getLength() - 50).p);
-      } else {
-        angle = util::geo::angBetween(p, g.getGeom().getPointAtDist(50).p);
+      size_t lc = 0;
+      const EdgeTripGeom* g;
+      for (auto& rg : *e->getEdgeTripGeoms()) {
+         if (rg.getTripsUnordered().size() >= lc) {
+           lc = rg.getTripsUnordered().size();
+           g = &rg;
+         }
       }
 
-      n->addMainDir(NodeFront((angle) / (180 / M_PI), e, n));
+      double angle;
+      util::geo::Point avgP;
+      NodeFront f(0, e, n);
+
+      if (g->getGeomDir() == n) {
+        angle = util::geo::angBetween(g->getGeom().getLine()[g->getGeom().getLine().size() - 1], g->getGeom().getLine()[g->getGeom().getLine().size() - 2]) / (180/M_PI);
+        avgP = g->getGeom().getLine().back();
+      } else {
+        angle = util::geo::angBetween(g->getGeom().getLine().front(), g->getGeom().getLine()[1]) / (180/M_PI);
+        avgP = g->getGeom().getLine().front();
+      }
+
+      double angleX1 = avgP.get<0>() + cos(angle + M_PI/2) * g->getTotalWidth()/2;
+      double angleY1 = avgP.get<1>() + sin(angle + M_PI/2) * g->getTotalWidth()/2;
+
+      double angleX2 = avgP.get<0>() + cos(angle + M_PI/2) * -g->getTotalWidth()/2;
+      double angleY2 = avgP.get<1>() + sin(angle + M_PI/2) * -g->getTotalWidth()/2;
+
+      geo::PolyLine pl;
+      if (g->getGeomDir() == n) {
+        pl = geo::PolyLine(util::geo::Point(angleX1, angleY1), util::geo::Point(angleX2, angleY2));
+      } else {
+        pl = geo::PolyLine(util::geo::Point(angleX2, angleY2), util::geo::Point(angleX1, angleY1));
+      }
+
+      f.setGeom(pl);
+      f.angle = angle;
+      n->addMainDir(f);
+    }
+
+    // now, look at the nodes entire front geometries and expand them
+    // until nothing overlaps
+    while (false && nodeHasOverlappingFronts(n)) {
+      for (auto& f : n->getMainDirs()) {
+        double vx = cos(f.angle) * 10;
+        double vy = sin(f.angle) * 10;
+        f.geom.move(vx, vy);
+      }
     }
   }
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::freeNodes(double d, double spacing) {
+bool GraphBuilder::nodeHasOverlappingFronts(const Node* n) const {
+  for (size_t i = 0; i < n->getMainDirs().size(); ++i) {
+    const NodeFront& fa = n->getMainDirs()[i];
+    for (size_t j = 0; j < n->getMainDirs().size(); ++j) {
+      const NodeFront& fb = n->getMainDirs()[j];
+      if (fa.geom.equals(fb.geom, 50) || j == i) continue;
+      std::cout << boost::geometry::wkt(fa.geom.getLine()) << std::endl;
+      std::cout << boost::geometry::wkt(fb.geom.getLine()) << std::endl;
+      std::cout << fa.geom.distTo(fb.geom) << std::endl;
+
+      if (fa.geom.distTo(fb.geom) < fa.edges.front()->getEdgeTripGeoms()->front().getSpacing()) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+// _____________________________________________________________________________
+void GraphBuilder::freeNodes() {
   // TODO: move the creation of the node front geometries to the
   // method above. add method to "expand" node front geometries until they DO
   // NOT OVERLAP. after this, add an extension method to the polyline to double the
   // "stretch" the geometry to the desired length. use this as a cutting geom.
   for (auto n : *_targetGraph->getNodes()) {
-   size_t c = 0;
-    for (auto f : n->getMainDirs()) {
-      size_t curN = 0;
-      for (auto e : f.edges) {
-        for (auto& g : *e->getEdgeTripGeoms()) {
-          g.setWidth(d);
-          g.setSpacing(spacing);
-          curN += g.getTripsUnordered().size();
-        }
-      }
-      if (curN > c) c = curN;
-    }
-
-    double md = d;
-    if (c < 2) md = 0;
-    if (n->getMainDirs().size() < 3) md = 0;
     for (auto& f : n->getMainDirs()) {
       for (auto e : f.edges) {
-        size_t lc = 0;
-        const EdgeTripGeom* refEtg;
-        for (auto& g : *e->getEdgeTripGeoms()) {
-           if (g.getTripsUnordered().size() >= lc) {
-             lc = g.getTripsUnordered().size();
-             refEtg = &g;
-           }
-        }
-
-        double cuttingWidth = c * (refEtg->getWidth() + refEtg->getSpacing());
-
-        double cutAngleX1 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * (cuttingWidth * 2);
-        double cutAngleY1 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * (cuttingWidth * 2);
-
-        double cutAngleX2 = n->getPos().get<0>() + cos(f.angle + M_PI/2) * -(cuttingWidth * 2);
-        double cutAngleY2 = n->getPos().get<1>() + sin(f.angle + M_PI/2) * -(cuttingWidth * 2);
-
-        double vx = cos(f.angle) * (c/2) * md;
-        double vy = sin(f.angle) * (c/2) * md;
-
-        geo::PolyLine cutLine(util::geo::Point(cutAngleX1, cutAngleY1), util::geo::Point(cutAngleX2, cutAngleY2));
-        cutLine.move(vx, vy);
-        f.setGeom(cutLine);
-        double cx = 0;
-        double cy = 0;
-        size_t cn = 0;
+        geo::PolyLine cutLine = f.geom;
 
         for (EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
           std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = cutLine.getIntersections(g.getGeom());
           if (iSects.size() > 0) {
             if (g.getGeomDir() !=n) {
                // cut at beginning
-              cx += iSects.begin()->p.get<0>();
-              cy += iSects.begin()->p.get<1>();
-              cn++;
               g.setGeom(g.getGeom().getSegment(iSects.begin()->totalPos, 1));
             } else {
               // cut at end
-              cx += (--iSects.end())->p.get<0>();
-              cy += (--iSects.end())->p.get<1>();
-              cn++;
               g.setGeom(g.getGeom().getSegment(0, (--iSects.end())->totalPos));
             }
           }
         }
-
-        util::geo::Point avgP;
-
-        if (cn) {
-          avgP = util::geo::Point(cx/cn, cy/cn);
-        } else {
-          if (refEtg->getGeomDir() == n) {
-            avgP = refEtg->getGeom().getLine().back();
-          } else {
-            avgP = refEtg->getGeom().getLine().front();
-          }
-        }
-
-        double angleX1 = avgP.get<0>() + cos(f.angle + M_PI/2) * refEtg->getTotalWidth()/2;
-        double angleY1 = avgP.get<1>() + sin(f.angle + M_PI/2) * refEtg->getTotalWidth()/2;
-
-        double angleX2 = avgP.get<0>() + cos(f.angle + M_PI/2) * -refEtg->getTotalWidth()/2;
-        double angleY2 = avgP.get<1>() + sin(f.angle + M_PI/2) * -refEtg->getTotalWidth()/2;
-
-        geo::PolyLine p;
-        if (refEtg->getGeomDir() == n) {
-          p = geo::PolyLine(util::geo::Point(angleX1, angleY1), util::geo::Point(angleX2, angleY2));
-        } else {
-          p = geo::PolyLine(util::geo::Point(angleX2, angleY2), util::geo::Point(angleX1, angleY1));
-        }
-
-        f.setGeom(p);
       }
     }
   }

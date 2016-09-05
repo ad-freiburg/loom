@@ -34,10 +34,11 @@ class GraphBuilder {
   void simplify();
   void createTopologicalNodes();
   void averageNodePositions();
+  void setLineWidth(double width, double spacing);
   void fixGeomDirs();
   void writeMainDirs();
 
-  void freeNodes(double d, double spacing);
+  void freeNodes();
  private:
   TransitGraph* _targetGraph;
   projPJ _mercProj;
@@ -49,6 +50,8 @@ class GraphBuilder {
 
   geo::PolyLine getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b, gtfs::Trip* t);
   ShrdSegWrap getNextSharedSegment() const;
+
+  bool nodeHasOverlappingFronts(const Node* n) const;
 
   Node* addStop(gtfs::Stop* curStop, uint8_t aggrLevel);
 

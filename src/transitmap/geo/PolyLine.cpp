@@ -307,37 +307,43 @@ void PolyLine::simplify(double d) {
 }
 
 // _____________________________________________________________________________
-bool PolyLine::operator==(const PolyLine& rhs) const {
-  // check if two lines are equal, THE DIRECTION DOES NOT MATTER HERE!!!!!
-
+bool PolyLine::equals(const PolyLine& rhs) const {
   // TODO: why 100? make global static or configurable or determine in some
   //       way!
-  double DMAX = 100;
+  return equals(rhs, 100);
+}
+
+// _____________________________________________________________________________
+bool PolyLine::operator==(const PolyLine& rhs) const {
+  // TODO: why 100? make global static or configurable or determine in some
+  //       way!
+  return equals(rhs, 100);
+}
+
+// _____________________________________________________________________________
+bool PolyLine::equals(const PolyLine& rhs, double dmax) const {
+  // check if two lines are equal, THE DIRECTION DOES NOT MATTER HERE!!!!!
 
   if (_line.size() == 2 &&_line.size() == rhs.getLine().size()) {
     // trivial case, straight line, implement directly
-    return (boost::geometry::distance(_line[0], rhs.getLine()[0]) < DMAX &&
-      boost::geometry::distance(_line.back(), rhs.getLine().back()) < DMAX) ||
-      (boost::geometry::distance(_line[0], rhs.getLine().back()) < DMAX &&
-      boost::geometry::distance(_line.back(), rhs.getLine()[0]) < DMAX);
+    return (boost::geometry::distance(_line[0], rhs.getLine()[0]) < dmax &&
+      boost::geometry::distance(_line.back(), rhs.getLine().back()) < dmax) ||
+      (boost::geometry::distance(_line[0], rhs.getLine().back()) < dmax &&
+      boost::geometry::distance(_line.back(), rhs.getLine()[0]) < dmax);
   } else {
-    return contains(rhs) && rhs.contains(*this);
+    return contains(rhs, dmax) && rhs.contains(*this, dmax);
   }
 
   return true;
 }
 
 // _____________________________________________________________________________
-bool PolyLine::contains(const PolyLine& rhs) const {
+bool PolyLine::contains(const PolyLine& rhs, double dmax) const {
   // check if two lines are equal, THE DIRECTION DOES NOT MATTER HERE!!!!!
-
-  // TODO: why 100? make global static or configurable or determine in some
-  //       way!
-  double DMAX = 100;
 
   for (size_t i = 0; i < rhs.getLine().size(); ++i) {
     double d = boost::geometry::distance(rhs.getLine()[i], getLine());
-    if (d > DMAX) {
+    if (d > dmax) {
       return false;
     }
   }
