@@ -28,10 +28,9 @@ class EdgeTripGeom;
 class TransitGraph;
 
 struct NodeFront {
-  NodeFront(double angle, Edge* e, Node* n) : angle(angle), n(n) {
+  NodeFront(Edge* e, Node* n) : n(n) {
     addEdge(e);
   }
-  double angle;
 
   Node* n; // pointer to node here also
 

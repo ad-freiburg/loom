@@ -498,3 +498,20 @@ std::set<PointOnLine, PointOnLineCompare> PolyLine::getIntersections(const PolyL
 
   return ret;
 }
+
+// _____________________________________________________________________________
+PolyLine PolyLine::getOrthoLineAtDist(double d, double length) const {
+  util::geo::Point avgP = getPointAt(d).p;
+
+  double angle = util::geo::angBetween(avgP, getPointAtDist(getLength() * d - 10).p) / (180/M_PI);
+
+  double angleX1 = avgP.get<0>() + cos(angle + M_PI/2) * length/2;
+  double angleY1 = avgP.get<1>() + sin(angle + M_PI/2) * length/2;
+
+  double angleX2 = avgP.get<0>() + cos(angle + M_PI/2) * -length/2;
+  double angleY2 = avgP.get<1>() + sin(angle + M_PI/2) * -length/2;
+
+  geo::PolyLine pl(util::geo::Point(angleX1, angleY1), util::geo::Point(angleX2, angleY2));
+
+  return pl;
+}

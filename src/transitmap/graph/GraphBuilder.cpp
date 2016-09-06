@@ -409,7 +409,7 @@ void GraphBuilder::writeMainDirs() {
 
       double angle;
       util::geo::Point avgP;
-      NodeFront f(0, e, n);
+      NodeFront f(e, n);
 
       if (g->getGeomDir() == n) {
         angle = util::geo::angBetween(g->getGeom().getLine()[g->getGeom().getLine().size() - 1], g->getGeom().getLine()[g->getGeom().getLine().size() - 2]) / (180/M_PI);
@@ -433,7 +433,6 @@ void GraphBuilder::writeMainDirs() {
       }
 
       f.setGeom(pl);
-      f.angle = angle;
       n->addMainDir(f);
     }
 
@@ -441,9 +440,7 @@ void GraphBuilder::writeMainDirs() {
     // until nothing overlaps
     while (false && nodeHasOverlappingFronts(n)) {
       for (auto& f : n->getMainDirs()) {
-        double vx = cos(f.angle) * 10;
-        double vy = sin(f.angle) * 10;
-        f.geom.move(vx, vy);
+        // TODO: move
       }
     }
   }
