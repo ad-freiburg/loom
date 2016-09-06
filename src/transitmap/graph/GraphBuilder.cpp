@@ -397,7 +397,7 @@ void GraphBuilder::writeMainDirs() {
     for (Edge* e : eSet) {
       if (e->getEdgeTripGeoms()->size() == 0) continue;
 
-      // atm, always take the first edge trip geometry
+      // atm, always take the first edge trip geometry with the most routes
       size_t lc = 0;
       const EdgeTripGeom* g;
       for (auto& rg : *e->getEdgeTripGeoms()) {
@@ -407,29 +407,22 @@ void GraphBuilder::writeMainDirs() {
          }
       }
 
-      double angle;
-      util::geo::Point avgP;
-      NodeFront f(e, n);
+      if (g->getGeom().getLength() == 0) continue;
+
+      NodeFront f(e, n, g);
+      geo::PolyLine pl;
 
       if (g->getGeomDir() == n) {
-        angle = util::geo::angBetween(g->getGeom().getLine()[g->getGeom().getLine().size() - 1], g->getGeom().getLine()[g->getGeom().getLine().size() - 2]) / (180/M_PI);
-        avgP = g->getGeom().getLine().back();
+        pl = g->getGeom().getOrthoLineAtDist(g->getGeom().getLength(), g->getTotalWidth());
       } else {
-        angle = util::geo::angBetween(g->getGeom().getLine().front(), g->getGeom().getLine()[1]) / (180/M_PI);
-        avgP = g->getGeom().getLine().front();
+        pl = g->getGeom().getOrthoLineAtDist(0, g->getTotalWidth());
       }
 
-      double angleX1 = avgP.get<0>() + cos(angle + M_PI/2) * g->getTotalWidth()/2;
-      double angleY1 = avgP.get<1>() + sin(angle + M_PI/2) * g->getTotalWidth()/2;
-
-      double angleX2 = avgP.get<0>() + cos(angle + M_PI/2) * -g->getTotalWidth()/2;
-      double angleY2 = avgP.get<1>() + sin(angle + M_PI/2) * -g->getTotalWidth()/2;
-
-      geo::PolyLine pl;
+      geo::PointOnLine curGeomPos = *(pl.getIntersections(f.refEtg->getGeom()).begin());
       if (g->getGeomDir() == n) {
-        pl = geo::PolyLine(util::geo::Point(angleX1, angleY1), util::geo::Point(angleX2, angleY2));
+        assert(curGeomPos.totalPos > .5);
       } else {
-        pl = geo::PolyLine(util::geo::Point(angleX2, angleY2), util::geo::Point(angleX1, angleY1));
+        assert(curGeomPos.totalPos < .5);
       }
 
       f.setGeom(pl);
@@ -438,11 +431,22 @@ void GraphBuilder::writeMainDirs() {
 
     // now, look at the nodes entire front geometries and expand them
     // until nothing overlaps
-    while (false && nodeHasOverlappingFronts(n)) {
+    //while (nodeHasOverlappingFronts(n)) {
+    while (nodeHasOverlappingFronts(n)) {
       for (auto& f : n->getMainDirs()) {
-        // TODO: move
+        // TODO: store the reference ETG in the front
+        geo::PointOnLine curGeomPos = *(f.geom.getIntersections(f.refEtg->getGeom()).begin());
+        if (f.refEtg->getGeomDir() == n) {
+          if (curGeomPos.totalPos * f.refEtg->getGeom().getLength() < 5 * 2) goto exitloop;
+          f.geom = f.refEtg->getGeom().getOrthoLineAtDist(curGeomPos.totalPos * f.refEtg->getGeom().getLength() - 5, f.refEtg->getTotalWidth());
+        } else {
+          if (curGeomPos.totalPos * f.refEtg->getGeom().getLength() > f.refEtg->getGeom().getLength() - 5 * 2) goto exitloop;
+          f.geom = f.refEtg->getGeom().getOrthoLineAtDist(curGeomPos.totalPos * f.refEtg->getGeom().getLength() + 5, f.refEtg->getTotalWidth());
+        }
       }
     }
+    exitloop:
+      continue;
   }
 }
 
@@ -452,10 +456,7 @@ bool GraphBuilder::nodeHasOverlappingFronts(const Node* n) const {
     const NodeFront& fa = n->getMainDirs()[i];
     for (size_t j = 0; j < n->getMainDirs().size(); ++j) {
       const NodeFront& fb = n->getMainDirs()[j];
-      if (fa.geom.equals(fb.geom, 50) || j == i) continue;
-      std::cout << boost::geometry::wkt(fa.geom.getLine()) << std::endl;
-      std::cout << boost::geometry::wkt(fb.geom.getLine()) << std::endl;
-      std::cout << fa.geom.distTo(fb.geom) << std::endl;
+      if (fa.geom.equals(fb.geom, 5) || j == i) continue;
 
       if (fa.geom.distTo(fb.geom) < fa.edges.front()->getEdgeTripGeoms()->front().getSpacing()) {
         return true;
@@ -481,7 +482,7 @@ void GraphBuilder::freeNodes() {
           std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = cutLine.getIntersections(g.getGeom());
           if (iSects.size() > 0) {
             if (g.getGeomDir() !=n) {
-               // cut at beginning
+              // cut at beginning
               g.setGeom(g.getGeom().getSegment(iSects.begin()->totalPos, 1));
             } else {
               // cut at end

@@ -216,6 +216,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       params["style"] = style.str();
       printLine(p, params, w, h, xOffset, yOffset);
 
+      /**
       std::map<std::string, std::string> tparams;
       tparams["x"] = std::to_string((p.getPointAt(0.5).p.get<0>() - xOffset) * _scale);
       tparams["y"] = std::to_string(h-(p.getPointAt(0.5).p.get<1>() - yOffset) * _scale);
@@ -224,6 +225,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       _w.openTag("text", tparams);
       _w.writeText(r.route->getId());
       _w.closeTag();
+      **/
 
       //break;
       o -= lineW + lineSpc;

@@ -148,6 +148,9 @@ const {
 
 // _____________________________________________________________________________
 PointOnLine PolyLine::getPointAtDist(double atDist) const {
+  if (atDist > getLength()) atDist = getLength();
+  if (atDist < 0) atDist = 0;
+
   double dist = 0;
 
   if (_line.size() == 1) return PointOnLine(0, 0, _line[0]);
@@ -270,7 +273,13 @@ std::pair<size_t, double> PolyLine::nearestSegmentAfter(const Point& p, size_t a
     }
   }
 
-  return std::pair<size_t, double>(smallest, smallestDist / totalLength);
+  if (totalLength > 0) {
+    smallestDist /= totalLength;
+  } else {
+    smallestDist = 0;
+  }
+
+  return std::pair<size_t, double>(smallest, smallestDist);
 }
 
 // _____________________________________________________________________________
@@ -294,7 +303,9 @@ PointOnLine PolyLine::projectOnAfter(const Point& p, size_t a) const {
     _line[bc.first+1]
   );
 
-  bc.second += boost::geometry::distance(_line[bc.first], ret) / getLength();
+  if (getLength() > 0) {
+    bc.second += boost::geometry::distance(_line[bc.first], ret) / getLength();
+  }
 
   return PointOnLine(bc.first, bc.second, ret);
 }
@@ -489,6 +500,13 @@ std::set<PointOnLine, PointOnLineCompare> PolyLine::getIntersections(const PolyL
     size_t a, size_t b) const {
   std::set<PointOnLine, PointOnLineCompare> ret;
 
+  assert(getLength() > 0);
+
+  if (util::geo::dist(p.getLine()[a], p.getLine()[b]) == 0) {
+    // we cannot intersect with a point
+    return ret;
+  }
+
   for (size_t i = 1; i < _line.size(); ++i) {
     if (util::geo::intersects(_line[i-1], _line[i], p.getLine()[a], p.getLine()[b])) {
       util::geo::Point isect = util::geo::intersection(_line[i-1], _line[i], p.getLine()[a], p.getLine()[b]);
@@ -501,9 +519,9 @@ std::set<PointOnLine, PointOnLineCompare> PolyLine::getIntersections(const PolyL
 
 // _____________________________________________________________________________
 PolyLine PolyLine::getOrthoLineAtDist(double d, double length) const {
-  util::geo::Point avgP = getPointAt(d).p;
+  util::geo::Point avgP = getPointAtDist(d).p;
 
-  double angle = util::geo::angBetween(avgP, getPointAtDist(getLength() * d - 10).p) / (180/M_PI);
+  double angle = util::geo::angBetween(getPointAtDist(d-5).p, getPointAtDist(d+5).p) / (180/M_PI);
 
   double angleX1 = avgP.get<0>() + cos(angle + M_PI/2) * length/2;
   double angleY1 = avgP.get<1>() + sin(angle + M_PI/2) * length/2;

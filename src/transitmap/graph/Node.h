@@ -28,7 +28,7 @@ class EdgeTripGeom;
 class TransitGraph;
 
 struct NodeFront {
-  NodeFront(Edge* e, Node* n) : n(n) {
+  NodeFront(Edge* e, Node* n, const EdgeTripGeom* refEtg) : n(n), refEtg(refEtg) {
     addEdge(e);
   }
 
@@ -37,6 +37,8 @@ struct NodeFront {
   std::vector<Edge*> edges;
 
   util::geo::Point getTripOccPos(const gtfs::Route*) const;
+
+  const EdgeTripGeom* refEtg;
 
   geo::PolyLine geom;
   void setGeom(const geo::PolyLine& g) { geom = g; };
