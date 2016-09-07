@@ -58,16 +58,11 @@ bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
         Ordering origOrdering = g.getTripOrdering();
         std::vector<Ordering > permutations = getPermutations(origOrdering);
 
-        #pragma omp parallel
         for (size_t i = 0; i < permutations.size(); ++i) {
           double newAreaScore = n->getAreaScore(g, permutations[i]);
           if (newAreaScore < oldAreaScore) {
-            std::cout << "TEST" << std::endl;
-            #pragma omp critical
-            {
-              bestCand = std::pair<EdgeTripGeom*, Ordering>(&g, permutations[i]);
-              oldAreaScore = newAreaScore;
-            }
+            bestCand = std::pair<EdgeTripGeom*, Ordering>(&g, permutations[i]);
+            oldAreaScore = newAreaScore;
           }
         }
       }

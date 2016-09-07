@@ -52,6 +52,8 @@ class EdgeTripGeom {
   std::vector<TripOccurance>::iterator removeTripOccurance(std::vector<TripOccurance>::const_iterator pos);
 
   TripOccWithPos getTripsForRoute(const gtfs::Route* r) const;
+  TripOccWithPos getTripsForRouteUnder(const gtfs::Route* r,
+    const std::vector<size_t> ordering) const;
 
   const geo::PolyLine& getGeom() const;
   void setGeom(const geo::PolyLine& p);

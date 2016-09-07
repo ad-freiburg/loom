@@ -37,6 +37,8 @@ struct NodeFront {
   std::vector<Edge*> edges;
 
   util::geo::Point getTripOccPos(const gtfs::Route*) const;
+  util::geo::Point getTripOccPosUnder(const gtfs::Route* r,
+    const EdgeTripGeom& g, const std::vector<size_t>& order) const;
 
   const EdgeTripGeom* refEtg;
 

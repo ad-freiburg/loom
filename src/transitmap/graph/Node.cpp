@@ -35,6 +35,35 @@ util::geo::Point NodeFront::getTripOccPos(const gtfs::Route* r) const {
 };
 
 // _____________________________________________________________________________
+util::geo::Point NodeFront::getTripOccPosUnder(const gtfs::Route* r,
+    const EdgeTripGeom& g, const std::vector<size_t>& order) const {
+  for (auto e : edges) {
+    for (auto& etg : *e->getEdgeTripGeoms()) {
+      TripOccWithPos to;
+
+      if (&etg == &g) {
+        to = etg.getTripsForRouteUnder(r, order);
+      } else {
+        to = etg.getTripsForRoute(r);
+      }
+
+      if (to.first) {
+        double p = 0;
+        //if (etg.getGeomDir() != n) {
+        //  p = (etg.getWidth() + etg.getSpacing()) * to.second + etg.getWidth()/2;
+        //} else {
+          p = (etg.getWidth() + etg.getSpacing()) * (etg.getTripsUnordered().size() - 1 - to.second) + etg.getWidth()/2;
+        //}
+
+        double pp = p / geom.getLength();
+
+        return geom.getPointAt(pp).p;
+      }
+    }
+  }
+};
+
+// _____________________________________________________________________________
 Node::Node(util::geo::Point pos) : _pos(pos) {
 }
 
@@ -257,7 +286,6 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(const EdgeTripGeom& g,
         const std::vector<size_t>* ordering = 0;
 
         if (&*etgIt == &g) {
-          std::cout << "YUPP" << std::endl;
           ordering = &order;
         } else {
           ordering = &etgIt->getTripOrdering();
@@ -266,7 +294,7 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(const EdgeTripGeom& g,
         for (size_t i : *ordering) {
           const TripOccurance& tripOcc = etgIt->getTripsUnordered()[i];
           if (!processed.insert(tripOcc.route).second) continue;
-          util::geo::Point p = nf.getTripOccPos(tripOcc.route);
+          util::geo::Point p = nf.getTripOccPosUnder(tripOcc.route, g, *ordering);
           std::vector<graph::Partner> partners = getPartner(&nf, tripOcc.route);
 
           if (partners.size() == 0) continue;

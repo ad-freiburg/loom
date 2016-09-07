@@ -51,10 +51,16 @@ const {
 
 // _____________________________________________________________________________
 TripOccWithPos EdgeTripGeom::getTripsForRoute(const gtfs::Route* r) const {
+  return getTripsForRouteUnder(r, _ordering);
+}
+
+// _____________________________________________________________________________
+TripOccWithPos EdgeTripGeom::getTripsForRouteUnder(const gtfs::Route* r,
+    const std::vector<size_t> ordering) const {
   for (size_t i = 0; i < _trips.size(); i++) {
     const TripOccurance& to = _trips[i];
     if (to.route == r) {
-      size_t pos = std::find(_ordering.begin(), _ordering.end(), i) - _ordering.begin();
+      size_t pos = std::find(ordering.begin(), ordering.end(), i) - ordering.begin();
       return std::pair<TripOccurance*, size_t>(const_cast<TripOccurance*>(&to), pos);
     }
   }
