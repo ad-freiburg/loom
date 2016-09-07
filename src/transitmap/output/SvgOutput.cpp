@@ -55,7 +55,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
 
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
-    //renderNodeConnections(outG, n, w, h);
+    renderNodeConnections(outG, n, w, h);
     renderNodeScore(outG, n, w, h);
   }
   _w.closeTag();
@@ -132,11 +132,11 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
   params["fill"] = "red";
   params["stroke"] = "white";
   _w.openTag("text", params);
-  if (n->getStops().size()) {
+  if (false && n->getStops().size()) {
     _w.writeText((*n->getStops().begin())->getName());
     _w.writeText("\n");
   }
-  _w.writeText(std::to_string(n->getScore()));
+  _w.writeText(std::to_string(n->getScore()) + " " + std::to_string(n->getAreaScore()));
   _w.closeTag();
 
 }
@@ -160,10 +160,6 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   double o = oo;
 
   assert(g.getTripOrdering().size() == g.getTripsUnordered().size());
-
-  std::cout << e << " " << (e->getFrom()->getStops().size() ? (*e->getFrom()->getStops().begin())->getName() : "");
-  std::cout << " to " << (e->getTo()->getStops().size() ? (*e->getTo()->getStops().begin())->getName() : "");
-  std::cout << " " << g.getTripOrdering().size() << std::endl;
 
   for (size_t i : g.getTripOrdering()) {
       const graph::TripOccurance& r = g.getTripsUnordered()[i];

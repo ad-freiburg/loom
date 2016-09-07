@@ -34,7 +34,6 @@ class GraphBuilder {
   void simplify();
   void createTopologicalNodes();
   void averageNodePositions();
-  void setLineWidth(double width, double spacing);
   void fixGeomDirs();
   void writeMainDirs();
 

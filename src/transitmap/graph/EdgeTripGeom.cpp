@@ -14,7 +14,7 @@ using namespace gtfsparser;
 
 // _____________________________________________________________________________
 EdgeTripGeom::EdgeTripGeom(geo::PolyLine geom, const Node* geomDir)
-: _w(1), _s(1), _geomDir(geomDir) {
+: _geomDir(geomDir) {
   setGeom(geom);
 }
 
@@ -134,31 +134,22 @@ void EdgeTripGeom::setGeomDir(const Node* n) {
 
 // _____________________________________________________________________________
 double EdgeTripGeom::getWidth() const {
-  return _w;
+  // TODO: replace this with per-route widths
+  return WIDTH;
 }
 
 // _____________________________________________________________________________
 double EdgeTripGeom::getSpacing() const {
-  return _s;
-}
-
-// _____________________________________________________________________________
-void EdgeTripGeom::setWidth(double w) {
-  _w = w;
-}
-
-// _____________________________________________________________________________
-void EdgeTripGeom::setSpacing(double s) {
-  _s = s;
+  // TODO: make this configurable somewhere, maybe also per-route?
+  return SPACING;
 }
 
 // _____________________________________________________________________________
 double EdgeTripGeom::getTotalWidth() const {
-  return _w * _trips.size() + _s * (_trips.size() - 1);
+  return getWidth() * _trips.size() + getSpacing() * (_trips.size() - 1);
 }
 
 // _____________________________________________________________________________
 void EdgeTripGeom::setTripOrdering(std::vector<size_t>& ordering) {
-  assert(ordering.size() == _trips.size());
   _ordering = ordering;
 }

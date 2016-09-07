@@ -68,7 +68,6 @@ int main(int argc, char** argv) {
     LOG(INFO) << "Averaging node positions";
     b.averageNodePositions();
 
-    b.setLineWidth(5, 20);
 
     LOG(INFO) << "Creating node fronts...";
     b.writeMainDirs();
@@ -77,7 +76,7 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Optimizing...";
     optim::EdgeOrderOptimizer eoOptim(&g);
-    //eoOptim.optimize();
+    eoOptim.optimize();
 
     LOG(INFO) << "Graph score is -- " << g.getScore() << " --";
 

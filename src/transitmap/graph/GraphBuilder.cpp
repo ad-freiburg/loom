@@ -106,7 +106,9 @@ ShrdSegWrap GraphBuilder::getNextSharedSegment() const {
           // TODO: only check edges with a SINGLE geometry atm, see also check above
           if (_indEdges.find(toTest) != _indEdges.end() || toTest->getEdgeTripGeoms()->size() != 1) continue;
           if (e != toTest) {
-            geo::SharedSegments s = e->getEdgeTripGeoms()->front().getGeom().getSharedSegments(toTest->getEdgeTripGeoms()->front().getGeom());
+            // set dmax according to the width of the etg
+            double dmax = fmax(30, e->getEdgeTripGeoms()->front().getTotalWidth() / 2 + toTest->getEdgeTripGeoms()->front().getTotalWidth() / 2);
+            geo::SharedSegments s = e->getEdgeTripGeoms()->front().getGeom().getSharedSegments(toTest->getEdgeTripGeoms()->front().getGeom(), dmax);
 
             if (s.segments.size() > 0 && util::geo::dist(s.segments[0].first.p, s.segments[0].second.p) > 50) {
               _pEdges[e]++;
@@ -375,19 +377,6 @@ Node* GraphBuilder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel) {
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::setLineWidth(double width, double spacing) {
-  for (auto n : *_targetGraph->getNodes()) {
-    for (auto& e : n->getAdjListOut()) {
-      for (auto& g : *e->getEdgeTripGeoms()) {
-        g.setWidth(width);
-        std::cout << spacing << std::endl;
-        g.setSpacing(spacing);
-      }
-    }
-  }
-}
-
-// _____________________________________________________________________________
 void GraphBuilder::writeMainDirs() {
   for (auto n : *_targetGraph->getNodes()) {
     std::set<Edge*> eSet;
@@ -437,10 +426,10 @@ void GraphBuilder::writeMainDirs() {
         // TODO: store the reference ETG in the front
         geo::PointOnLine curGeomPos = *(f.geom.getIntersections(f.refEtg->getGeom()).begin());
         if (f.refEtg->getGeomDir() == n) {
-          if (curGeomPos.totalPos * f.refEtg->getGeom().getLength() < 5 * 2) goto exitloop;
+          if (curGeomPos.totalPos < .5) goto exitloop;
           f.geom = f.refEtg->getGeom().getOrthoLineAtDist(curGeomPos.totalPos * f.refEtg->getGeom().getLength() - 5, f.refEtg->getTotalWidth());
         } else {
-          if (curGeomPos.totalPos * f.refEtg->getGeom().getLength() > f.refEtg->getGeom().getLength() - 5 * 2) goto exitloop;
+          if (curGeomPos.totalPos > .5) goto exitloop;
           f.geom = f.refEtg->getGeom().getOrthoLineAtDist(curGeomPos.totalPos * f.refEtg->getGeom().getLength() + 5, f.refEtg->getTotalWidth());
         }
       }
@@ -458,7 +447,7 @@ bool GraphBuilder::nodeHasOverlappingFronts(const Node* n) const {
       const NodeFront& fb = n->getMainDirs()[j];
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
 
-      if (fa.geom.distTo(fb.geom) < fa.edges.front()->getEdgeTripGeoms()->front().getSpacing()) {
+      if (fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 4) {
         return true;
       }
     }

@@ -371,7 +371,8 @@ void PolyLine::move(double vx, double vy) {
 }
 
 // _____________________________________________________________________________ 
-SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
+SharedSegments PolyLine::getSharedSegments(const PolyLine& pl, double dmax)
+const {
   /**
    * Returns the segments this polyline share with pl
    * atm, this is a very simple distance-based algorithm
@@ -379,8 +380,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
    * TODO: use some mutation of frechet distance here..?
    */
   double STEP_SIZE = 20;
-  double DMAX = 50;
-  double MIN_SEG_LENGTH = DMAX;
+  double MIN_SEG_LENGTH = dmax * 2;
   SharedSegments ret;
 
   //if (distTo(pl) > DMAX) return ret;
@@ -421,7 +421,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl) const {
       //double ang2 = util::geo::innerProd(pl.getLine()[nearestSeg.first + 1], curPointer, pl.getLine()[nearestSeg.first]);
 
       if (//(ang) <= 90 && (ang2) <= 90 &&
-          pl.distTo(curPointer) <= DMAX) {
+          pl.distTo(curPointer) <= dmax) {
         skips = 0;
         if (in) {
           // update currendEndCand

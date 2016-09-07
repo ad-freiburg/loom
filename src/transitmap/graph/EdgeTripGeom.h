@@ -16,6 +16,9 @@ namespace graph {
 
 using namespace gtfsparser;
 
+static const double SPACING = 20;
+static const double WIDTH = 5;
+
 struct TripOccurance {
   TripOccurance(gtfs::Route* r) : route(r), direction(0) {}
   void addTrip(gtfs::Trip* t, const Node* dirNode) {
@@ -61,9 +64,6 @@ class EdgeTripGeom {
 
   void setGeomDir(const Node* newDir);
 
-  void setWidth(double w);
-  void setSpacing(double s);
-
   double getWidth() const;
   double getSpacing() const;
 
@@ -79,8 +79,6 @@ class EdgeTripGeom {
    */
   std::vector<size_t> _ordering;
 
-  double _w;
-  double _s;
   geo::PolyLine _geom;
   const Node* _geomDir; // the direction of the geometry, may be reversed
 };

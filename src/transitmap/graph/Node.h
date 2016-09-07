@@ -92,9 +92,14 @@ class Node {
 
   const NodeFront* getNodeFrontFor(const Edge* e) const;
   double getScore() const;
+  double getScoreUnder(const EdgeTripGeom& g, const std::vector<size_t>& order) const;
+  double getAreaScore(const EdgeTripGeom& g, const std::vector<size_t>& order) const;
+  double getAreaScore() const;
   std::vector<Partner> getPartner(const NodeFront* f, const gtfs::Route* r) const;
 
   std::vector<InnerGeometry> getInnerGeometries() const;
+  std::vector<InnerGeometry> getInnerGeometriesUnder(const EdgeTripGeom& g,
+    const std::vector<size_t>& order) const;
 
  protected:
   // add edge to this node's adjacency lists

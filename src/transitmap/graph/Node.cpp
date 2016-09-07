@@ -20,10 +20,10 @@ util::geo::Point NodeFront::getTripOccPos(const gtfs::Route* r) const {
       TripOccWithPos to = etg.getTripsForRoute(r);
       if (to.first) {
         double p = 0;
-        //if (etg.getGeomDir() == n) {
-        p = (etg.getWidth() + etg.getSpacing()) * to.second + etg.getWidth()/2;
+        //if (etg.getGeomDir() != n) {
+        //  p = (etg.getWidth() + etg.getSpacing()) * to.second + etg.getWidth()/2;
         //} else {
-        //  p = (etg.getWidth() + etg.getSpacing()) * (etg.getTripsUnordered().size() - 1 - to.second) + etg.getWidth()/2;
+          p = (etg.getWidth() + etg.getSpacing()) * (etg.getTripsUnordered().size() - 1 - to.second) + etg.getWidth()/2;
         //}
 
         double pp = p / geom.getLength();
@@ -123,17 +123,66 @@ double Node::getScore() const {
   double score = 0;
 
   for (size_t i = 0; i < igs.size(); i++) {
-    //score += igs[i].geom.getLength() / 100;
     for (size_t j = 0; j < igs.size(); j++) {
       if (j == i) continue;  // don't check against itself
 
-      if (igs[j].geom.distTo(igs[i].geom) < igs[i].etg->getWidth()) {
+      if (igs[j].geom.distTo(igs[i].geom) < 1) {
         score += .5;
       }
     }
   }
 
   return score / sqrt(_adjListIn.size() + _adjListOut.size());
+}
+
+// _____________________________________________________________________________
+double Node::getScoreUnder(const EdgeTripGeom& g, const std::vector<size_t>& order) const {
+  std::vector<InnerGeometry> igs = getInnerGeometriesUnder(g, order);
+
+  double score = 0;
+
+  for (size_t i = 0; i < igs.size(); i++) {
+    for (size_t j = 0; j < igs.size(); j++) {
+      if (j == i) continue;  // don't check against itself
+
+      if (igs[j].geom.distTo(igs[i].geom) < 1) {
+        score += .5;
+      }
+    }
+  }
+
+  return score / sqrt(_adjListIn.size() + _adjListOut.size());
+}
+
+// _____________________________________________________________________________
+double Node::getAreaScore(const EdgeTripGeom& g, const std::vector<size_t>& order)
+const {
+  double ret = getScoreUnder(g, order);
+
+  for (auto e : _adjListIn) {
+    ret += e->getFrom()->getScoreUnder(g, order);
+  }
+
+  for (auto e : _adjListOut) {
+    ret += e->getTo()->getScoreUnder(g, order);
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+double Node::getAreaScore() const {
+  double ret = getScore();
+
+  for (auto e : _adjListIn) {
+    ret += e->getFrom()->getScore();
+  }
+
+  for (auto e : _adjListOut) {
+    ret += e->getTo()->getScore();
+  }
+
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -174,6 +223,47 @@ std::vector<InnerGeometry> Node::getInnerGeometries() const {
             etgIt != e->getEdgeTripGeoms()->end(); etgIt++) {
 
         for (size_t i : etgIt->getTripOrdering()) {
+          const TripOccurance& tripOcc = etgIt->getTripsUnordered()[i];
+          if (!processed.insert(tripOcc.route).second) continue;
+          util::geo::Point p = nf.getTripOccPos(tripOcc.route);
+          std::vector<graph::Partner> partners = getPartner(&nf, tripOcc.route);
+
+          if (partners.size() == 0) continue;
+
+          util::geo::Point pp = partners[0].front->getTripOccPos(partners[0].route);
+
+          geo::PolyLine line(p, pp);
+          ret.push_back(InnerGeometry(line, partners[0].route, &*etgIt));
+        }
+      }
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::vector<InnerGeometry> Node::getInnerGeometriesUnder(const EdgeTripGeom& g,
+    const std::vector<size_t>& order) const {
+  std::vector<InnerGeometry> ret;
+
+  std::set<const gtfs::Route*> processed;
+  for (size_t i = 0; i < getMainDirs().size(); i++) {
+    const graph::NodeFront& nf = getMainDirs()[i];
+    for (auto e : nf.edges) {
+      for (auto etgIt = e->getEdgeTripGeoms()->begin();
+            etgIt != e->getEdgeTripGeoms()->end(); etgIt++) {
+
+        const std::vector<size_t>* ordering = 0;
+
+        if (&*etgIt == &g) {
+          std::cout << "YUPP" << std::endl;
+          ordering = &order;
+        } else {
+          ordering = &etgIt->getTripOrdering();
+        }
+
+        for (size_t i : *ordering) {
           const TripOccurance& tripOcc = etgIt->getTripsUnordered()[i];
           if (!processed.insert(tripOcc.route).second) continue;
           util::geo::Point p = nf.getTripOccPos(tripOcc.route);
