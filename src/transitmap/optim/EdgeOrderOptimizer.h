@@ -5,6 +5,7 @@
 #ifndef TRANSITMAP_OPTIM_EDGEORDEROPTIMIZER_H_
 #define TRANSITMAP_OPTIM_EDGEORDEROPTIMIZER_H_
 
+#include "./../graph/OrderingConfiguration.h"
 #include "./../graph/TransitGraph.h"
 
 using std::exception;
@@ -14,9 +15,6 @@ namespace transitmapper {
 namespace optim {
 
 using namespace graph;
-
-typedef std::vector<size_t> Ordering;
-typedef std::map<EdgeTripGeom*, Ordering> Configuration;
 
 class EdgeOrderOptimizer {
  public:

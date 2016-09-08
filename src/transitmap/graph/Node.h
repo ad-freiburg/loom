@@ -16,13 +16,17 @@ using namespace gtfsparser;
 namespace transitmapper {
 namespace graph {
 
-// forward declaration of Edge
+// forward declarations
 class Edge;
 
 class Node;
 
+
 // forward declaration of EdgeTripGeometry
 class EdgeTripGeom;
+
+typedef std::vector<size_t> Ordering;
+typedef std::map<EdgeTripGeom*, Ordering> Configuration;
 
 // forward declaration of TransitGraph
 class TransitGraph;
@@ -37,7 +41,8 @@ struct NodeFront {
   std::vector<Edge*> edges;
 
   util::geo::Point getTripOccPos(const gtfs::Route*) const;
-  util::geo::Point getTripOccPosUnder(const gtfs::Route* r,
+  util::geo::Point getTripOccPos(const gtfs::Route* r, const Configuration& c) const;
+  util::geo::Point getTripOccPosUnder(const gtfs::Route* r, const graph::Configuration& c,
     const EdgeTripGeom& g, const std::vector<size_t>& order) const;
 
   const EdgeTripGeom* refEtg;
@@ -94,13 +99,15 @@ class Node {
 
   const NodeFront* getNodeFrontFor(const Edge* e) const;
   double getScore() const;
-  double getScoreUnder(const EdgeTripGeom& g, const std::vector<size_t>& order) const;
-  double getAreaScore(const EdgeTripGeom& g, const std::vector<size_t>& order) const;
-  double getAreaScore() const;
+  double getScore(const graph::Configuration& c) const;
+  double getScoreUnder(const graph::Configuration& c, const EdgeTripGeom& g, const graph::Ordering& order) const;
+  double getAreaScore(const Configuration& c, const EdgeTripGeom& g, const graph::Ordering& order) const;
+  double getAreaScore(const Configuration& c) const;
   std::vector<Partner> getPartner(const NodeFront* f, const gtfs::Route* r) const;
 
+  std::vector<InnerGeometry> getInnerGeometries(const graph::Configuration& c) const;
   std::vector<InnerGeometry> getInnerGeometries() const;
-  std::vector<InnerGeometry> getInnerGeometriesUnder(const EdgeTripGeom& g,
+  std::vector<InnerGeometry> getInnerGeometriesUnder(const graph::Configuration& c, const EdgeTripGeom& g,
     const std::vector<size_t>& order) const;
 
  protected:

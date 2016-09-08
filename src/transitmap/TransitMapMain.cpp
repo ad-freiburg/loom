@@ -2,9 +2,6 @@
 // University of Freiburg - Chair of Algorithms and Datastructures
 // Author: Patrick Brosi
 
-#define _ELPP_NO_DEFAULT_LOG_FILE
-#define _ELPP_DISABLE_LOG_FILE_FROM_ARG
-
 #include <unistd.h>
 #include <iostream>
 #include <string>

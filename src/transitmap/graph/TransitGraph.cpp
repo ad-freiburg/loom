@@ -7,6 +7,7 @@
 #include <set>
 #include "TransitGraph.h"
 #include "Edge.h"
+#include "OrderingConfiguration.h"
 
 using namespace transitmapper;
 using namespace graph;
@@ -40,6 +41,18 @@ double TransitGraph::getScore() const {
 
   return ret;
 }
+
+// _____________________________________________________________________________
+double TransitGraph::getScore(const Configuration& c) const {
+  double ret = 0;
+
+  for (auto n : getNodes()) {
+    ret += n->getScore(c);
+  }
+
+  return ret;
+}
+
 // _____________________________________________________________________________
 Node* TransitGraph::addNode(Node* n) {
 

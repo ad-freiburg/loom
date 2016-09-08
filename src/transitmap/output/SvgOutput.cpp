@@ -136,7 +136,7 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
     _w.writeText((*n->getStops().begin())->getName());
     _w.writeText("\n");
   }
-  _w.writeText(std::to_string(n->getScore()) + " " + std::to_string(n->getAreaScore()));
+  _w.writeText(std::to_string(n->getScore()));
   _w.closeTag();
 
 }

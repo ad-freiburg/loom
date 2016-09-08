@@ -23,6 +23,9 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Ofast")
 set(CMAKE_CXX_FLAGS_RELEASE        "-Ofast")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Ofast -g")
 
+add_definitions(-DELPP_THREAD_SAFE)
+add_definitions(-DELPP_NO_DEFAULT_LOG_FILE)
+
 # export compile commands to tools like clang
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

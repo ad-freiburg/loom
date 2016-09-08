@@ -14,6 +14,7 @@
 #include <boost/geometry/index/rtree.hpp>
 
 #include "../util/Geo.h"
+#include "OrderingConfiguration.h"
 #include "Node.h"
 #include "Edge.h"
 
@@ -49,6 +50,7 @@ class TransitGraph {
   const boost::geometry::model::box<util::geo::Point>& getBoundingBox() const;
 
   double getScore() const;
+  double getScore(const Configuration& c) const;
 
  private:
   std::string _name;

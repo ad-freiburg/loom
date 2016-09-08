@@ -2,6 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
+#include "easylogging/easylogging.h"
 #include "./EdgeOrderOptimizer.h"
 
 
@@ -13,33 +14,50 @@ using namespace graph;
 void EdgeOrderOptimizer::optimize() {
   srand(time(0));
 
-  Configuration bestConfig;
-  double bestScore = _g->getScore();
+  Configuration startConfig;
+  getConfig(&startConfig);
 
-  for (size_t i = 0; i < 100; i++) {
-    std::cout << "Round " << i << std::endl;
+  size_t numRuns = 100;
+
+  std::vector<std::pair<double, Configuration> > results;
+  results.resize(numRuns);
+
+  for (size_t i = 0; i < numRuns; i++) {
+    LOG(INFO) << "Round " << i;
+
     Configuration c;
-    getConfig(&c);
 
-    size_t s = 0;
-    while (doOptimStep(&c)) {
-      s++;
-      std::cout << "Step: " << s << std::endl;
-    };
-
-    applyConfig(c);
-    double newScore = _g->getScore();
-    if (newScore < bestScore) {
-      std::cout << "New best score: " << newScore << std::endl;
-      bestScore = newScore;
-      bestConfig = c;
+    if (i == 0) {
+      c = startConfig;
+    } else {
+      generateRandConfig(&c);
     }
 
-    generateRandConfig(&c);
-    applyConfig(c);
+    while (doOptimStep(&c)) {
+    };
+
+    double newScore = _g->getScore(c);
+    LOG(INFO) << newScore;
+    results[i] = std::pair<double, Configuration>(newScore, c);
   }
 
-  applyConfig(bestConfig);
+  // take best one
+  size_t best;
+  double bestScore = DBL_MAX;
+  for (size_t i = 0; i < numRuns; i++) {
+    if (results[i].first < bestScore) {
+      best = i;
+      bestScore = results[i].first;
+    }
+  }
+
+  std::cout << "result: " << best << " score: " << bestScore << std::endl;
+  double s = _g->getScore(results[best].second);
+  applyConfig(results[best].second);
+  double ss = _g->getScore(results[best].second);
+  std::cout << s << " vs1 " << ss << std::endl;
+  assert(s == ss);
+  std::cout << s << " vs " << _g->getScore() << std::endl;
 }
 
 // _____________________________________________________________________________
@@ -47,20 +65,34 @@ bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
   std::pair<EdgeTripGeom*, std::vector<size_t> > bestCand;
   bestCand.first = 0;
 
+  double oldScore = _g->getScore(*c);
+
   for (graph::Node* n : *_g->getNodes()) {
-    // the area score is the score of the node plus the score of all its
-    // neighbors
     for (graph::Edge* e : n->getAdjListOut()) {
       for (graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
         if (g.getTripOrdering().size() == 1) continue;
 
-        double oldAreaScore = n->getAreaScore();
+        double oldAreaScore = n->getAreaScore(*c);
         Ordering origOrdering = g.getTripOrdering();
         std::vector<Ordering > permutations = getPermutations(origOrdering);
 
         for (size_t i = 0; i < permutations.size(); ++i) {
-          double newAreaScore = n->getAreaScore(g, permutations[i]);
-          if (newAreaScore < oldAreaScore) {
+          double newAreaScore = n->getAreaScore(*c, g, permutations[i]);
+
+          // for testin
+          double diff = oldAreaScore - newAreaScore;
+          Ordering old = (*c)[&g];
+          (*c)[&g] = permutations[i];
+          std::cout << newAreaScore << " " <<  n->getAreaScore(*c) << std::endl;
+          assert(newAreaScore == n->getAreaScore(*c));
+          double diff2 = oldScore - _g->getScore(*c);
+
+          //std::cout << "Scores: " << diff << " vs " << diff2 << std::endl;
+          //assert(fabs(diff - diff2) < 0.001);
+
+          (*c)[&g] = old;
+
+          if (diff2 > 0) { //newAreaScore < oldAreaScore) {
             bestCand = std::pair<EdgeTripGeom*, Ordering>(&g, permutations[i]);
             oldAreaScore = newAreaScore;
           }
@@ -72,6 +104,7 @@ bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
   if (bestCand.first) {
     bestCand.first->setTripOrdering(bestCand.second);
     (*c)[bestCand.first] = bestCand.second;
+    assert(_g->getScore(*c) < oldScore);
     return true;
   } else {
     // no improvement could be made
@@ -84,7 +117,6 @@ void EdgeOrderOptimizer::generateRandConfig(Configuration* c) const {
   for (graph::Node* n : *_g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       for (graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
-        if (g.getTripOrdering().size() == 1) continue;
         Ordering origOrdering = g.getTripOrdering();
         std::vector<Ordering > permutations = getPermutations(origOrdering);
         size_t i = rand() % permutations.size();
@@ -99,7 +131,6 @@ void EdgeOrderOptimizer::getConfig(Configuration* c) const {
   for (graph::Node* n : *_g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       for (graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
-        if (g.getTripOrdering().size() == 1) continue;
         Ordering origOrdering = g.getTripOrdering();
         (*c)[&g] = origOrdering;
       }
