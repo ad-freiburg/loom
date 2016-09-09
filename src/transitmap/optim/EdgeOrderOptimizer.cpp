@@ -77,18 +77,16 @@ bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
         std::vector<Ordering > permutations = getPermutations(origOrdering);
 
         for (size_t i = 0; i < permutations.size(); ++i) {
-          double newAreaScore = n->getAreaScore(*c, g, permutations[i]);
+          double newAreaScore = n->getAreaScore(*c, &g, &permutations[i]);
 
           // for testin
           double diff = oldAreaScore - newAreaScore;
           Ordering old = (*c)[&g];
           (*c)[&g] = permutations[i];
-          std::cout << newAreaScore << " " <<  n->getAreaScore(*c) << std::endl;
-          assert(newAreaScore == n->getAreaScore(*c));
           double diff2 = oldScore - _g->getScore(*c);
 
-          //std::cout << "Scores: " << diff << " vs " << diff2 << std::endl;
-          //assert(fabs(diff - diff2) < 0.001);
+          std::cout << "Scores: " << diff << " vs " << diff2 << std::endl;
+          assert(fabs(diff - diff2) < 0.001);
 
           (*c)[&g] = old;
 
