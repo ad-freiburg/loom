@@ -46,6 +46,12 @@ class SvgOutput : public Output {
                 double w, double h, int64_t xOffs, int64_t yOffs);
   void printPoint(const util::geo::Point& p, const std::string& style,
                           double w, double h, int64_t xOffs, int64_t yOffs);
+  void printPolygon(const util::geo::Polygon& g,
+										const std::string& style,
+                    double w, double h, int64_t xOffs, int64_t yOffs);
+  void printPolygon(const util::geo::Polygon& g,
+								    const std::map<std::string, std::string>& ps,
+                    double w, double h, int64_t xOffs, int64_t yOffs);
  private:
   std::ostream* _o;
   util::XmlWriter _w;

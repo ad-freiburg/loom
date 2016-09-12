@@ -237,6 +237,8 @@ PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
     ret << util::geo::Point(x / lines.size(), y / lines.size());
   }
 
+  ret.simplify(0);
+
   return ret;
 }
 

@@ -16,8 +16,8 @@ namespace graph {
 
 using namespace gtfsparser;
 
-static const double SPACING = 20;
-static const double WIDTH = 5;
+static const double SPACING = 10;
+static const double WIDTH = 25;
 
 struct TripOccurance {
   TripOccurance(gtfs::Route* r) : route(r), direction(0) {}

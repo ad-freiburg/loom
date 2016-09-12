@@ -351,3 +351,50 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(const graph::Configurat
 
   return ret;
 }
+
+// _____________________________________________________________________________
+util::geo::Polygon Node::getConvexFrontHull(double d) const {
+  util::geo::MultiLine l;
+
+  if (getMainDirs().size() != 2) {
+    for (auto& nf : getMainDirs()) {
+      l.push_back(nf.geom.getLine());
+    }
+  } else {
+    // for two main dirs, take average
+    std::vector<const geo::PolyLine*> pols;
+    geo::PolyLine a = getMainDirs()[0].geom;
+    geo::PolyLine b = getMainDirs()[1].geom;
+
+    assert(a.getLine().size() > 1);
+    assert(b.getLine().size() > 1);
+
+    if (util::geo::dist(a.getLine()[0], b.getLine()[0]) > util::geo::dist(a.getLine()[1], b.getLine()[0])) {
+      a.reverse();
+    }
+
+    pols.push_back(&a);
+    pols.push_back(&b);
+    l.push_back(geo::PolyLine::average(pols).getLine());
+  }
+
+  util::geo::MultiPolygon ret;
+  double pointsPerCircle = 36;
+  boost::geometry::strategy::buffer::distance_symmetric<double> distanceStrat(d);
+  boost::geometry::strategy::buffer::join_round joinStrat(pointsPerCircle);
+  boost::geometry::strategy::buffer::end_round endStrat(pointsPerCircle);
+  boost::geometry::strategy::buffer::point_circle circleStrat(pointsPerCircle);
+  boost::geometry::strategy::buffer::side_straight sideStrat;
+
+  if (l.size() > 1) {
+    util::geo::Polygon hull;
+    boost::geometry::convex_hull(l, hull);
+    boost::geometry::buffer(hull, ret, distanceStrat, sideStrat, joinStrat, endStrat, circleStrat);
+  } else {
+    boost::geometry::buffer(l, ret, distanceStrat, sideStrat, joinStrat, endStrat, circleStrat);
+  }
+
+
+  assert(ret.size() == 1);
+  return ret[0];
+}

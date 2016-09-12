@@ -17,7 +17,7 @@ void EdgeOrderOptimizer::optimize() {
   Configuration startConfig;
   getConfig(&startConfig);
 
-  size_t numRuns = 100;
+  size_t numRuns = 4;
 
   std::vector<std::pair<double, Configuration> > results;
   results.resize(numRuns);
@@ -33,7 +33,10 @@ void EdgeOrderOptimizer::optimize() {
       generateRandConfig(&c);
     }
 
+    size_t step = 0;
+
     while (doOptimStep(&c)) {
+      std::cout << step++ << std::endl;
     };
 
     double newScore = _g->getScore(c);
@@ -52,12 +55,7 @@ void EdgeOrderOptimizer::optimize() {
   }
 
   std::cout << "result: " << best << " score: " << bestScore << std::endl;
-  double s = _g->getScore(results[best].second);
   applyConfig(results[best].second);
-  double ss = _g->getScore(results[best].second);
-  std::cout << s << " vs1 " << ss << std::endl;
-  assert(s == ss);
-  std::cout << s << " vs " << _g->getScore() << std::endl;
 }
 
 // _____________________________________________________________________________
@@ -65,44 +63,49 @@ bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
   std::pair<EdgeTripGeom*, std::vector<size_t> > bestCand;
   bestCand.first = 0;
 
-  double oldScore = _g->getScore(*c);
+  bool simple = false; // TRUE for simple, false for steepest hill climbing
+  bool abort = false;
+
+  double bestAreaScoreImprov = 0;
 
   for (graph::Node* n : *_g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       for (graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
+        if (abort) goto exitloop;
         if (g.getTripOrdering().size() == 1) continue;
 
         double oldAreaScore = n->getAreaScore(*c);
-        Ordering origOrdering = g.getTripOrdering();
-        std::vector<Ordering > permutations = getPermutations(origOrdering);
+        std::vector<Ordering > permutations;
+        getPermutations(g.getTripOrdering(), &permutations);
 
+        #pragma omp parallel for
         for (size_t i = 0; i < permutations.size(); ++i) {
-          double newAreaScore = n->getAreaScore(*c, &g, &permutations[i]);
+          if (!abort) {
+            double newAreaScore = n->getAreaScore(*c, &g, &permutations[i]);
 
-          // for testin
-          double diff = oldAreaScore - newAreaScore;
-          Ordering old = (*c)[&g];
-          (*c)[&g] = permutations[i];
-          double diff2 = oldScore - _g->getScore(*c);
+            double diff = oldAreaScore - newAreaScore;
 
-          std::cout << "Scores: " << diff << " vs " << diff2 << std::endl;
-          assert(fabs(diff - diff2) < 0.001);
+            if (diff - bestAreaScoreImprov > 0.000001) {
+              #pragma omp critical
+              {
+                bestCand = std::pair<EdgeTripGeom*, Ordering>(&g, permutations[i]);
+                bestAreaScoreImprov = diff;
+              }
 
-          (*c)[&g] = old;
-
-          if (diff2 > 0) { //newAreaScore < oldAreaScore) {
-            bestCand = std::pair<EdgeTripGeom*, Ordering>(&g, permutations[i]);
-            oldAreaScore = newAreaScore;
+              if (simple) {
+                abort = true;
+              }
+            }
           }
         }
       }
     }
   }
 
+exitloop:
+
   if (bestCand.first) {
-    bestCand.first->setTripOrdering(bestCand.second);
     (*c)[bestCand.first] = bestCand.second;
-    assert(_g->getScore(*c) < oldScore);
     return true;
   } else {
     // no improvement could be made
@@ -116,7 +119,8 @@ void EdgeOrderOptimizer::generateRandConfig(Configuration* c) const {
     for (graph::Edge* e : n->getAdjListOut()) {
       for (graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
         Ordering origOrdering = g.getTripOrdering();
-        std::vector<Ordering > permutations = getPermutations(origOrdering);
+        std::vector<Ordering > permutations;
+        getPermutations(origOrdering, &permutations);
         size_t i = rand() % permutations.size();
         (*c)[&g] = permutations[i];
       }
@@ -137,17 +141,14 @@ void EdgeOrderOptimizer::getConfig(Configuration* c) const {
 }
 
 // _____________________________________________________________________________
-std::vector<std::vector<size_t> >
-EdgeOrderOptimizer::getPermutations(std::vector<size_t> order)
+void
+EdgeOrderOptimizer::getPermutations(std::vector<size_t> order, std::vector<std::vector<size_t> >* ret)
 const {
-  std::sort(order.begin(), order.end());
-  std::vector<std::vector<size_t> > ret;
+  //std::sort(order.begin(), order.end());
 
   do {
-    ret.push_back(order);
+    ret->push_back(order);
   } while (std::next_permutation(order.begin(), order.end()));
-
-  return ret;
 }
 
 // _____________________________________________________________________________

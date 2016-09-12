@@ -28,7 +28,7 @@ class EdgeOrderOptimizer {
 
   void applyConfig(const Configuration& c);
 
-  std::vector<std::vector<size_t> > getPermutations(std::vector<size_t> order) const;
+  void getPermutations(std::vector<size_t> order, std::vector<std::vector<size_t> >* ret) const;
 
   void generateRandConfig(Configuration* c) const;
   void getConfig(Configuration* c) const;

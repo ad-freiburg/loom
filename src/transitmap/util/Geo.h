@@ -22,6 +22,8 @@ namespace geo {
 typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian> Point;
 typedef boost::geometry::model::linestring<Point> Line;
 typedef boost::geometry::model::multi_linestring<Line> MultiLine;
+typedef boost::geometry::model::polygon<Point> Polygon;
+typedef boost::geometry::model::multi_polygon<Polygon> MultiPolygon;
 
 // _____________________________________________________________________________
 inline bool doubleEq(double a, double b) {

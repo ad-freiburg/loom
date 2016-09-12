@@ -279,7 +279,6 @@ void GraphBuilder::createTopologicalNodes() {
 
     if (faE) faE->addEdgeTripGeom(faEdgeGeom);
     if (fbE) fbE->addEdgeTripGeom(fcEdgeGeom);
-
   }
 }
 

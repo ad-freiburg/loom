@@ -68,6 +68,8 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Creating node fronts...";
     b.writeMainDirs();
+
+    // TODO: check if this method is necessary
     b.freeNodes();
 
 
@@ -82,7 +84,7 @@ int main(int argc, char** argv) {
     o.open("/home/patrick/test.svg");
 
     LOG(INFO) << "outputting to SVG...";
-    output::SvgOutput svgOut(&o, .3);
+    output::SvgOutput svgOut(&o, .1);
     svgOut.print(g);
   } else {
 

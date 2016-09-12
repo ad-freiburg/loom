@@ -110,6 +110,8 @@ class Node {
   std::vector<InnerGeometry> getInnerGeometriesUnder(const graph::Configuration& c, const EdgeTripGeom* g,
     const std::vector<size_t>* order) const;
 
+  util::geo::Polygon getConvexFrontHull(double d) const;
+
  protected:
   // add edge to this node's adjacency lists
   void addEdge(Edge* e);

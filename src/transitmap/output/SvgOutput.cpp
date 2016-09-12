@@ -63,19 +63,16 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
     std::map<std::string, std::string> params;
-    params["cx"] = std::to_string((n->getPos().get<0>() - xOffset) * _scale);
-    params["cy"] = std::to_string(h-(n->getPos().get<1>() - yOffset) * _scale);
-    if (false && n->getStops().size() > 0) {
-      params["r"] = "5";
+
+    if (n->getStops().size() > 0) {
       params["stroke"] = "black";
-      params["stroke-width"] = "4";
+      params["stroke-width"] = "1";
       params["fill"] = "white";
+      printPolygon(n->getConvexFrontHull(20), params, w, h, xOffset, yOffset);
     } else if (false) {
       params["r"] = "5";
       params["fill"] = "#FF00FF";
     }
-    _w.openTag("circle", params);
-    _w.closeTag();
 
     for (auto& f : n->getMainDirs()) {
       const geo::PolyLine p = f.geom;
@@ -84,7 +81,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
         << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
       std::map<std::string, std::string> params;
       params["style"] = style.str();
-      printLine(p, params, w, h, xOffset, yOffset);
+      //printLine(p, params, w, h, xOffset, yOffset);
     }
   }
   _w.closeTag();
@@ -128,15 +125,14 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
 
   std::map<std::string, std::string> params;
   params["x"] = std::to_string((n->getPos().get<0>() - xOffset) * _scale + 10);
-  params["y"] = std::to_string(h-(n->getPos().get<1>() - yOffset) * _scale - 10);
-  params["fill"] = "red";
-  params["stroke"] = "white";
+  params["y"] = std::to_string(h-(n->getPos().get<1>() - yOffset) * _scale - 6);
+  params["style"] = "font-family:Verdana;font-size:8px; font-style:normal; font-weight: normal; fill: white; stroke-width: 0.2px; stroke-linecap: butt; stroke-linejoin: miter; stroke: black";
   _w.openTag("text", params);
-  if (false && n->getStops().size()) {
+  if (n->getStops().size()) {
     _w.writeText((*n->getStops().begin())->getName());
     _w.writeText("\n");
   }
-  _w.writeText(std::to_string(n->getScore()));
+  //_w.writeText(std::to_string(n->getScore()));
   _w.closeTag();
 
 }
@@ -247,16 +243,7 @@ void SvgOutput::printLine(const transitmapper::geo::PolyLine& l,
                           double w, double h, int64_t xOffs, int64_t yOffs) {
 	std::map<std::string, std::string> params;
   params["style"] = style;
-	std::stringstream points;
-
-	for (auto& p : l.getLine()) {
-		points << " " << (p.get<0>() - xOffs)*_scale << "," << h - (p.get<1>() - yOffs) * _scale;
-	}
-
-	params["points"] = points.str();
-
-	_w.openTag("polyline", params);
-	_w.closeTag();
+  printLine(l, params, w, h, xOffs, yOffs);
 }
 
 // _____________________________________________________________________________
@@ -274,4 +261,31 @@ void SvgOutput::printLine(const transitmapper::geo::PolyLine& l,
 
 	_w.openTag("polyline", params);
 	_w.closeTag();
+}
+
+// _____________________________________________________________________________
+void SvgOutput::printPolygon(const util::geo::Polygon& g,
+													const std::map<std::string, std::string>& ps,
+                          double w, double h, int64_t xOffs, int64_t yOffs)
+{
+	std::map<std::string, std::string> params = ps;
+	std::stringstream points;
+
+	for (auto& p : g.outer()) {
+		points << " " << (p.get<0>() - xOffs)*_scale << "," << h - (p.get<1>() - yOffs) * _scale;
+	}
+
+	params["points"] = points.str();
+
+	_w.openTag("polygon", params);
+	_w.closeTag();
+}
+
+// _____________________________________________________________________________
+void SvgOutput::printPolygon(const util::geo::Polygon& g,
+													const std::string& style,
+                          double w, double h, int64_t xOffs, int64_t yOffs) {
+	std::map<std::string, std::string> params;
+  params["style"] = style;
+  printPolygon(g, params, w, h, xOffs, yOffs);
 }
