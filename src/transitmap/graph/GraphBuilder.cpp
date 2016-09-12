@@ -446,7 +446,9 @@ bool GraphBuilder::nodeHasOverlappingFronts(const Node* n) const {
       const NodeFront& fb = n->getMainDirs()[j];
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
 
-      if (fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 4) {
+      if (n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 8) {
+        return true;
+      } else if (n->getStops().size() == 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) * 2) {
         return true;
       }
     }
