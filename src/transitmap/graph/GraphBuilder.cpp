@@ -107,7 +107,7 @@ ShrdSegWrap GraphBuilder::getNextSharedSegment() const {
           if (_indEdges.find(toTest) != _indEdges.end() || toTest->getEdgeTripGeoms()->size() != 1) continue;
           if (e != toTest) {
             // set dmax according to the width of the etg
-            double dmax = fmax(30, e->getEdgeTripGeoms()->front().getTotalWidth() / 2 + toTest->getEdgeTripGeoms()->front().getTotalWidth() / 2);
+            double dmax = fmax(30, e->getEdgeTripGeoms()->front().getTotalWidth() / 2 + toTest->getEdgeTripGeoms()->front().getTotalWidth() / 2 + ((e->getEdgeTripGeoms()->front().getSpacing() + toTest->getEdgeTripGeoms()->front().getSpacing()) / 2));
             geo::SharedSegments s = e->getEdgeTripGeoms()->front().getGeom().getSharedSegments(toTest->getEdgeTripGeoms()->front().getGeom(), dmax);
 
             if (s.segments.size() > 0 && util::geo::dist(s.segments[0].first.p, s.segments[0].second.p) > 50) {

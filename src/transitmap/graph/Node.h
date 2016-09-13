@@ -106,7 +106,7 @@ class Node {
   std::vector<Partner> getPartner(const NodeFront* f, const gtfs::Route* r) const;
 
   std::vector<InnerGeometry> getInnerGeometries(const graph::Configuration& c) const;
-  std::vector<InnerGeometry> getInnerGeometries() const;
+  std::vector<InnerGeometry> getInnerGeometries(bool bezier) const;
   std::vector<InnerGeometry> getInnerGeometriesUnder(const graph::Configuration& c, const EdgeTripGeom* g,
     const std::vector<size_t>* order) const;
 

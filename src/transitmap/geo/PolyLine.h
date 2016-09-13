@@ -80,6 +80,7 @@ class PolyLine {
   static PolyLine average(std::vector<const PolyLine*>& lines);
 
   void simplify(double d);
+  void empty();
 
 	std::pair<size_t, double> nearestSegment(const util::geo::Point& p) const;
 	std::pair<size_t, double> nearestSegmentAfter(const util::geo::Point& p, size_t after) const;
@@ -88,6 +89,9 @@ class PolyLine {
   PointOnLine projectOnAfter(const util::geo::Point& p, size_t after) const;
 
   void move(double vx, double vy);
+
+  std::pair<double, double> getSlopeBetween(double ad, double bd) const;
+  std::pair<double, double> getSlopeBetweenDists(double ad, double bd) const;
 
   // equality operator, will hold frechet-distance equality check in
   // the dmax

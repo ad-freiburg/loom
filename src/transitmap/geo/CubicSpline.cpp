@@ -19,17 +19,29 @@ CubicSpline::CubicSpline(const util::geo::Line& knots) : _didRender(false) {
 }
 
 // _____________________________________________________________________________
+double CubicPolynom::valueAt(double atx) const {
+  double dx = atx - x;
+  return a + b * dx + c * dx * dx + d * dx * dx * dx;
+}
+
+// _____________________________________________________________________________
 PolyLine CubicSpline::render(double d) const {
   if (!_didRender) {
     // TODO:render
+
+    while (true) {
+ 
+
+    }
 
     _didRender = true;
   }
   return _rendered;
 }
 
+
 // _____________________________________________________________________________
-void CubicSpline::findPolynoms(const util::geo::Line& knots, std::vector<Polynom>* ret)
+void CubicSpline::findPolynoms(const util::geo::Line& knots, std::vector<CubicPolynom>* ret)
 const {
   /**
    * based on
@@ -71,6 +83,6 @@ const {
   }
 
   for (size_t i = 0; i < knots.size(); ++i) {
-    ret->push_back(Polynom(a[i], b[i], c[i], d[i], knots[i].get<0>()));
+    ret->push_back(CubicPolynom(a[i], b[i], c[i], d[i], knots[i].get<0>()));
   }
 }

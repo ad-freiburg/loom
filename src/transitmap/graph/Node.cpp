@@ -6,6 +6,7 @@
 #include "./Node.h"
 #include "./Edge.h"
 #include "./TransitGraph.h"
+#include "./../geo/BezierCurve.h"
 #include "gtfsparser/gtfs/Stop.h"
 #include "../graph/EdgeTripGeom.h"
 #include "../graph/OrderingConfiguration.h"
@@ -156,7 +157,7 @@ const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
 
 // _____________________________________________________________________________
 double Node::getScore() const {
-  std::vector<InnerGeometry> igs = getInnerGeometries();
+  std::vector<InnerGeometry> igs = getInnerGeometries(false);
 
   double score = 0;
 
@@ -263,7 +264,7 @@ const {
 }
 
 // _____________________________________________________________________________
-std::vector<InnerGeometry> Node::getInnerGeometries() const {
+std::vector<InnerGeometry> Node::getInnerGeometries(bool bezier) const {
   std::vector<InnerGeometry> ret;
 
   std::set<const gtfs::Route*> processed;
@@ -283,8 +284,35 @@ std::vector<InnerGeometry> Node::getInnerGeometries() const {
 
           util::geo::Point pp = partners[0].front->getTripOccPos(partners[0].route);
 
-          geo::PolyLine line(p, pp);
-          ret.push_back(InnerGeometry(line, partners[0].route, &*etgIt));
+          if (bezier) {
+            util::geo::Point b = p;
+            util::geo::Point c = pp;
+            std::pair<double, double> slopeA, slopeB;
+
+            double d = nf.geom.distTo(partners[0].front->geom) / 2;
+
+            if (nf.refEtg->getGeomDir() == this) {
+              slopeA = nf.refEtg->getGeom().getSlopeBetweenDists(nf.refEtg->getGeom().getLength() - 5, nf.refEtg->getGeom().getLength());
+            } else {
+              slopeA = nf.refEtg->getGeom().getSlopeBetweenDists(5, 0);
+            }
+
+            if (partners[0].front->refEtg->getGeomDir() == this) {
+              slopeB = partners[0].front->refEtg->getGeom().getSlopeBetweenDists(partners[0].front->refEtg->getGeom().getLength() - 5, partners[0].front->refEtg->getGeom().getLength());
+            } else {
+              slopeB = partners[0].front->refEtg->getGeom().getSlopeBetweenDists(5, 0);
+            }
+
+
+            b = util::geo::Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
+            c = util::geo::Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
+
+            geo::BezierCurve bc(p, b, c, pp);
+            ret.push_back(InnerGeometry(bc.render(5), partners[0].route, &*etgIt));
+          } else {
+            geo::PolyLine line(p, pp);
+            ret.push_back(InnerGeometry(line, partners[0].route, &*etgIt));
+          }
         }
       }
     }

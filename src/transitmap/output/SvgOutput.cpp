@@ -107,7 +107,7 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
   int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
   int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 
-  for (auto& ie : n->getInnerGeometries()) {
+  for (auto& ie : n->getInnerGeometries(true)) {
     std::stringstream style;
     style << "fill:none;stroke:#" << ie.route->getColorString()
       << ";stroke-linecap:round;stroke-opacity:1;stroke-width:" << ie.etg->getWidth() * _scale;

@@ -535,3 +535,27 @@ PolyLine PolyLine::getOrthoLineAtDist(double d, double length) const {
 
   return pl;
 }
+
+// _____________________________________________________________________________
+void PolyLine::empty() {
+  _line.empty();
+}
+
+// _____________________________________________________________________________
+std::pair<double, double> PolyLine::getSlopeBetween(double ad, double bd) const {
+  PointOnLine a = getPointAt(ad);
+  PointOnLine b = getPointAt(bd);
+
+  double d = util::geo::dist(a.p, b.p);
+
+  double dx = (b.p.get<0>() - a.p.get<0>()) / d;
+  double dy = (b.p.get<1>() - a.p.get<1>()) / d;
+
+  return std::pair<double, double>(dx, dy);
+}
+
+// _____________________________________________________________________________
+std::pair<double, double> PolyLine::getSlopeBetweenDists(double ad, double bd) const {
+  return getSlopeBetween(ad / getLength(), bd / getLength());
+
+}
