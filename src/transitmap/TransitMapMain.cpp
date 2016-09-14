@@ -69,13 +69,12 @@ int main(int argc, char** argv) {
     LOG(INFO) << "Creating node fronts...";
     b.writeMainDirs();
 
-    // TODO: check if this method is necessary
+    // frees geoms so that the "inside" of the main dirs is free
     b.freeNodes();
-
 
     LOG(INFO) << "Optimizing...";
     optim::EdgeOrderOptimizer eoOptim(&g);
-    eoOptim.optimize();
+    // eoOptim.optimize();
 
     LOG(INFO) << "Graph score is -- " << g.getScore() << " --";
 

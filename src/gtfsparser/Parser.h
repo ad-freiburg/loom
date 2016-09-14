@@ -5,20 +5,19 @@
 #ifndef GTFSPARSER_PARSER_H_
 #define GTFSPARSER_PARSER_H_
 
-#include <unordered_map>
 #include <stdint.h>
+#include <boost/filesystem.hpp>
+#include <unordered_map>
 #include <istream>
 #include <string>
 #include <vector>
 #include <exception>
 #include <sstream>
 #include <iostream>
-#include <boost/filesystem.hpp>
 #include "gtfs/Feed.h"
 #include "CsvParser.h"
 
 using std::string;
-using namespace boost;
 
 // A GTFS parser
 
@@ -34,7 +33,7 @@ class ParserException : public std::exception {
     std::string field_name, int64_t line)
     : _msg(msg), _field_name(field_name),
       _line(line), _file_name("?") {}
-   ~ParserException() throw() {}
+  ~ParserException() throw() {}
 
   virtual const char* what() const throw() {
     std::stringstream ss;
@@ -44,11 +43,11 @@ class ParserException : public std::exception {
     ss << " " << _msg;
     _what_msg = ss.str();
     return _what_msg.c_str();
-  };
+  }
 
   virtual uint64_t getLine() const throw() {
     return _line;
-  };
+  }
 
   void setFileName(const std::string& fn) {
     _file_name = fn;
@@ -66,7 +65,7 @@ class ParserException : public std::exception {
 class Parser {
  public:
   // Default initialization.
-  Parser() {};
+  Parser() {}
 
   // parse a zip/folder into a GtfsFeed
   bool parse(gtfs::Feed* targetFeed, std::string path) const;
@@ -85,7 +84,6 @@ class Parser {
   void parseFrequencies(gtfs::Feed* targetFeed, std::istream*) const;
   void parseTransfers(gtfs::Feed* targetFeed, std::istream*) const;
   void parseFeedInfo(gtfs::Feed* targetFeed, std::istream*) const;
-
 
   std::string getString(const CsvParser& csv,
     const std::string& field) const;
@@ -115,5 +113,6 @@ class Parser {
     const std::string& field, int64_t t) const;
   void fileNotFound(boost::filesystem::path file) const;
 };
-}
+}  // namespace gtfsparser
+
 #endif  // GTFSPARSER_PARSER_H_

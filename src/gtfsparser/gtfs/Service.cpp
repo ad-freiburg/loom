@@ -1,11 +1,14 @@
+// Copyright 2016, University of Freiburg,
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
+#include <map>
+#include <string>
 #include <iostream>
 #include "Service.h"
 
-using namespace gtfsparser;
-using namespace gtfs;
+using gtfsparser::gtfs::Service;
+using gtfsparser::gtfs::ServiceDate;
 
 // _____________________________________________________________________________
 Service::Service(const std::string& id)
@@ -27,7 +30,8 @@ std::string Service::getId() const {
 }
 
 // _____________________________________________________________________________
-const std::map<ServiceDate, Service::EXCEPTION_TYPE>& Service::getExceptions() const {
+const std::map<ServiceDate, Service::EXCEPTION_TYPE>& Service::getExceptions()
+const {
   return _exceptions;
 }
 
@@ -47,8 +51,7 @@ bool Service::isActiveOn(const ServiceDate& d) const {
 // _____________________________________________________________________________
 Service::SERVICE_DAY Service::getServiceDay(const ServiceDate& d) {
   return static_cast<SERVICE_DAY>(
-    1 << (((d.getTimeStrc().tm_wday + 6) % 7))
-  );
+    1 << (((d.getTimeStrc().tm_wday + 6) % 7)));
 }
 
 // _____________________________________________________________________________
@@ -69,22 +72,26 @@ bool gtfsparser::gtfs::operator<(const ServiceDate& lh, const ServiceDate& rh) {
 }
 
 // _____________________________________________________________________________
-bool gtfsparser::gtfs::operator==(const ServiceDate& lh, const ServiceDate& rh) {
+bool gtfsparser::gtfs::operator==(const ServiceDate& lh,
+    const ServiceDate& rh) {
   return !(lh > rh) && !(lh < rh);
 }
 
 // _____________________________________________________________________________
-bool gtfsparser::gtfs::operator!=(const ServiceDate& lh, const ServiceDate& rh) {
+bool gtfsparser::gtfs::operator!=(const ServiceDate& lh,
+    const ServiceDate& rh) {
   return !(lh == rh);
 }
 
 // _____________________________________________________________________________
-bool gtfsparser::gtfs::operator>=(const ServiceDate& lh, const ServiceDate& rh) {
+bool gtfsparser::gtfs::operator>=(const ServiceDate& lh,
+    const ServiceDate& rh) {
   return lh > rh || lh == rh;
 }
 
 // _____________________________________________________________________________
-bool gtfsparser::gtfs::operator<=(const ServiceDate& lh, const ServiceDate& rh) {
+bool gtfsparser::gtfs::operator<=(const ServiceDate& lh,
+    const ServiceDate& rh) {
   return rh > lh || lh == rh;
 }
 

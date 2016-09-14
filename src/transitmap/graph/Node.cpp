@@ -93,17 +93,36 @@ Node::Node(double x, double y, gtfs::Stop* s) : _pos(x, y) {
 
 // _____________________________________________________________________________
 Node::~Node() {
-  for (Edge* e : _adjListOut) {
-    e->getFrom()->removeEdge(e);
-    e->getTo()->removeEdge(e);
-    _adjListIn.erase(e); // catch edge to itself case
-    delete e;
+  for (auto e = _adjListOut.begin(); e != _adjListOut.end();) {
+    Edge* eP = *e;
+
+    if (eP->getFrom() == this) {
+      // careful with invalidating iterators
+      e = _adjListOut.erase(e);
+    } else {
+      eP->getFrom()->removeEdge(eP);
+      e++;
+    }
+
+    eP->getTo()->removeEdge(eP);
+
+    delete eP;
   }
 
-  for (Edge* e : _adjListIn) {
-    e->getFrom()->removeEdge(e);
-    e->getTo()->removeEdge(e);
-    delete e;
+  for (auto e = _adjListIn.begin(); e != _adjListIn.end();) {
+    Edge* eP = *e;
+
+    if (eP->getTo() == this) {
+      // careful with invalidating iterators
+      e = _adjListIn.erase(e);
+    } else {
+      eP->getTo()->removeEdge(eP);
+      e++;
+    }
+
+    eP->getFrom()->removeEdge(eP);
+
+    delete eP;
   }
 }
 
@@ -283,13 +302,14 @@ std::vector<InnerGeometry> Node::getInnerGeometries(bool bezier) const {
           if (partners.size() == 0) continue;
 
           util::geo::Point pp = partners[0].front->getTripOccPos(partners[0].route);
+          double d = nf.geom.distTo(partners[0].front->geom) / 2;
 
-          if (bezier) {
+          if (bezier && d > 5) {
+            // TODO(patrick): outfactor this
             util::geo::Point b = p;
             util::geo::Point c = pp;
             std::pair<double, double> slopeA, slopeB;
 
-            double d = nf.geom.distTo(partners[0].front->geom) / 2;
 
             if (nf.refEtg->getGeomDir() == this) {
               slopeA = nf.refEtg->getGeom().getSlopeBetweenDists(nf.refEtg->getGeom().getLength() - 5, nf.refEtg->getGeom().getLength());
@@ -303,12 +323,27 @@ std::vector<InnerGeometry> Node::getInnerGeometries(bool bezier) const {
               slopeB = partners[0].front->refEtg->getGeom().getSlopeBetweenDists(5, 0);
             }
 
-
             b = util::geo::Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
             c = util::geo::Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
 
+
+            d = 1000;
+
+            util::geo::Point bd = util::geo::Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
+            util::geo::Point cd = util::geo::Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
+
+            geo::PolyLine bl(p, bd);
+            geo::PolyLine cl(pp, cd);
+
+            auto is = bl.getIntersections(cl);
+
+            if (is.size() == 1) {
+              b = is.begin()->p;
+              c = is.begin()->p;
+            }
+
             geo::BezierCurve bc(p, b, c, pp);
-            ret.push_back(InnerGeometry(bc.render(5), partners[0].route, &*etgIt));
+            ret.push_back(InnerGeometry(bc.render(3), partners[0].route, &*etgIt));
           } else {
             geo::PolyLine line(p, pp);
             ret.push_back(InnerGeometry(line, partners[0].route, &*etgIt));

@@ -16,7 +16,6 @@ namespace gtfsparser {
 namespace gtfs {
 
 class Stop {
-
  public:
   enum LOCATION_TYPE : uint8_t {
     STOP = 0,
@@ -30,7 +29,7 @@ class Stop {
     BOARDING_NOT_POSSIBLE = 2
   };
 
-  Stop() {};
+  Stop() {}
 
   Stop(const string& id, const string& code, const string& name,
     const string& desc, double lat,
@@ -97,7 +96,7 @@ class Stop {
     return _wheelchair_boarding;
   }
 
-  // TODO: implement setters
+  // TODO(patrick): implement setters
 
 
  private:
@@ -109,6 +108,7 @@ class Stop {
   Stop::LOCATION_TYPE _location_type;
 };
 
-}}
+}  // namespace gtfs
+}  // namespace gtfsparser
 
 #endif  // GTFSPARSER_GTFS_STOP_H_

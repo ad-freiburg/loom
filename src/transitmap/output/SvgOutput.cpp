@@ -55,7 +55,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
 
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
-    renderNodeConnections(outG, n, w, h);
+    //renderNodeConnections(outG, n, w, h);
     renderNodeScore(outG, n, w, h);
   }
   _w.closeTag();
@@ -81,7 +81,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
         << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
       std::map<std::string, std::string> params;
       params["style"] = style.str();
-      //printLine(p, params, w, h, xOffset, yOffset);
+      printLine(p, params, w, h, xOffset, yOffset);
     }
   }
   _w.closeTag();
@@ -164,7 +164,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
       // TODO: why is this check necessary? shouldnt be!
       // ___ OUTFACTOR
-      if (nfTo && nfFrom && nfTo->geom.getLine().size() > 0 && nfFrom->geom.getLine().size() > 0) {
+      if (false && nfTo && nfFrom && nfTo->geom.getLine().size() > 0 && nfFrom->geom.getLine().size() > 0) {
         if (g.getGeomDir() == e->getTo()) {
           std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfTo->geom.getIntersections(p);
           if (iSects.size() > 0) {

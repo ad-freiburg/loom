@@ -1,3 +1,4 @@
+// Copyright 2016, University of Freiburg,
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
@@ -19,19 +20,27 @@ namespace gtfs {
 class ServiceDate {
  public:
   ServiceDate(uint8_t day, uint8_t month, uint16_t year)
-  : _yyyymmdd(year * 10000 + month * 100 + day) {};
+  : _yyyymmdd(year * 10000 + month * 100 + day) {}
 
-  explicit ServiceDate(uint32_t yyyymmdd) : _yyyymmdd(yyyymmdd) {};
+  explicit ServiceDate(uint32_t yyyymmdd) : _yyyymmdd(yyyymmdd) {}
 
   uint32_t getYYYYMMDD() const { return _yyyymmdd;}
 
   uint16_t getYear() const { return _yyyymmdd / 10000; }
   uint8_t getMonth() const { return (_yyyymmdd - (getYear() * 10000)) / 100; }
-  uint8_t getDay() const { return _yyyymmdd - (getYear() * 10000) - (getMonth() * 100); }
+  uint8_t getDay() const {
+    return _yyyymmdd - (getYear() * 10000) - (getMonth() * 100);
+  }
 
-  void setDay(uint8_t day) { _yyyymmdd = _yyyymmdd - getDay() + day; };
-  void setMonth(uint8_t month) { _yyyymmdd = _yyyymmdd - getMonth() * 100 + month * 100; };
-  void setYear(uint16_t year) { _yyyymmdd = _yyyymmdd - getYear() * 10000 + year * 10000; };
+  void setDay(uint8_t day) { _yyyymmdd = _yyyymmdd - getDay() + day; }
+
+  void setMonth(uint8_t month) {
+    _yyyymmdd = _yyyymmdd - getMonth() * 100 + month * 100;
+  }
+
+  void setYear(uint16_t year) {
+    _yyyymmdd = _yyyymmdd - getYear() * 10000 + year * 10000;
+  }
 
   // returns a time struct of this date at 12:00
   tm getTimeStrc() const {
@@ -81,7 +90,7 @@ class Service {
     SERVICE_REMOVED = 2
   };
 
-  Service(const string& id);
+  explicit Service(const string& id);
   Service(const string& id, uint8_t serviceDays, ServiceDate start,
     ServiceDate end);
 
@@ -95,14 +104,15 @@ class Service {
   static SERVICE_DAY getServiceDay(const ServiceDate& d);
 
   EXCEPTION_TYPE getExceptionOn(const ServiceDate& d) const;
+
  private:
   string _id;
   uint8_t _serviceDays;
   std::map<ServiceDate, Service::EXCEPTION_TYPE> _exceptions;
   ServiceDate _exceptionsBegin, _exceptionsEnd;
-
 };
 
-}}
+}  // namespace gtfs
+}  // namespace gtfsparser
 
 #endif  // GTFSPARSER_GTFS_SERVICE_H_

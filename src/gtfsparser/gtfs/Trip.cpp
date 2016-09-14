@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
-#include <iostream>
 #include <stdint.h>
+#include <iostream>
 #include <string>
 #include "Route.h"
 #include "Service.h"
@@ -14,9 +14,12 @@
 using std::exception;
 using std::string;
 
-
-using namespace gtfsparser;
-using namespace gtfs;
+using gtfsparser::gtfs::Trip;
+using gtfsparser::gtfs::Route;
+using gtfsparser::gtfs::Service;
+using gtfsparser::gtfs::Shape;
+using gtfsparser::gtfs::StopTime;
+using gtfsparser::gtfs::StopTimes;
 
 // _____________________________________________________________________________
 Trip::Trip(std::string id, Route* r, Service* s, std::string hs,
@@ -82,5 +85,5 @@ const StopTimes& Trip::getStopTimes() const {
 
 // _____________________________________________________________________________
 bool Trip::addStopTime(const StopTime& t) {
-  return _stoptimes.insert(t).second ;
+  return _stoptimes.insert(t).second;
 }

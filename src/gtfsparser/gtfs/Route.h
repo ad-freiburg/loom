@@ -18,7 +18,6 @@ namespace gtfsparser {
 namespace gtfs {
 
 class Route {
-
  public:
   enum TYPE: uint8_t {
     TRAM = 0,
@@ -31,7 +30,7 @@ class Route {
     FUNICULAR = 7
   };
 
-  Route() {};
+  Route() {}
 
   Route(const string& id, Agency* agency, const string& short_name,
     const string& long_name, const string& desc, Route::TYPE type,
@@ -88,10 +87,7 @@ class Route {
     return getHexColorString(_text_color);
   }
 
-
-
-  // TODO: implement setters
-
+  // TODO(patrick): implement setters
 
  private:
   string _id;
@@ -110,9 +106,9 @@ class Route {
     ss << std::hex << color;
     return ss.str();
   }
-
 };
 
-}}
+}  // namespace gtfs
+}  // namespace gtfsparser
 
 #endif  // GTFSPARSER_GTFS_ROUTE_H_

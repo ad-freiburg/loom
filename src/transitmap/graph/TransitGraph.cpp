@@ -9,22 +9,25 @@
 #include "Edge.h"
 #include "OrderingConfiguration.h"
 
-using namespace transitmapper;
-using namespace graph;
-
+using transitmapper::graph::TransitGraph;
+using transitmapper::graph::Node;
+using transitmapper::graph::Edge;
+using transitmapper::util::geo::Point;
+using boost::geometry::make_inverse;
 
 // _____________________________________________________________________________
 TransitGraph::TransitGraph(const std::string& name, const std::string& proj)
 : _name(name) {
-  _bbox = boost::geometry::make_inverse<boost::geometry::model::box<util::geo::Point> >();
+  _bbox = make_inverse<boost::geometry::model::box<Point> >();
   _proj = pj_init_plus(proj.c_str());
 }
 
 // _____________________________________________________________________________
 TransitGraph::~TransitGraph() {
   // an edge is _deleted_ if either the from or to node is deleted!
+  // thus, we don't have to delete edges separately here
   for (auto n : _nodes) {
-    //delete n;
+    delete n;
   }
 
   // clean up projection stuff
@@ -55,7 +58,6 @@ double TransitGraph::getScore(const Configuration& c) const {
 
 // _____________________________________________________________________________
 Node* TransitGraph::addNode(Node* n) {
-
   auto ins = _nodes.insert(n);
   if (ins.second) {
     // expand the bounding box to hold this new node
@@ -101,8 +103,7 @@ std::set<Node*>* TransitGraph::getNodes() {
 // _____________________________________________________________________________
 Node* TransitGraph::getNodeByStop(const gtfs::Stop* s, bool getParent) const {
   if (getParent && s->getParentStation()) return getNodeByStop(
-    s->getParentStation()
-  );
+    s->getParentStation());
 
   return getNodeByStop(s);
 }
@@ -144,12 +145,12 @@ projPJ TransitGraph::getProjection() const {
 }
 
 // _____________________________________________________________________________
-const boost::geometry::model::box<util::geo::Point>& TransitGraph::getBoundingBox() const {
+const boost::geometry::model::box<Point>& TransitGraph::getBoundingBox() const {
   return _bbox;
 }
 
 // _____________________________________________________________________________
-Node* TransitGraph::getNearestNode(const util::geo::Point& p, double maxD) const {
+Node* TransitGraph::getNearestNode(const Point& p, double maxD) const {
   double curD = DBL_MAX;;
   Node* curN = 0;
   for (auto n : _nodes) {

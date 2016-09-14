@@ -3,14 +3,14 @@
 // Authors: Hannah Bast <bast@informatik.uni-freiburg.de>,
 //          Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
+#include <functional>
 #include <string>
 #include <cstring>
 #include <algorithm>
 #include <iostream>
 #include "CsvParser.h"
 
-using namespace gtfsparser;
-
+using gtfsparser::CsvParser;
 using std::string;
 using std::remove;
 
@@ -88,8 +88,7 @@ bool CsvParser::readNextLine() {
 
       if (!esc_quotes_found) {
         _currentItems.push_back(
-          inlineRightTrim(_currentLine.c_str() + lastPos)
-        );
+          inlineRightTrim(_currentLine.c_str() + lastPos));
       } else {
         size_t p = -1;
 
@@ -158,12 +157,12 @@ int32_t CsvParser::getLong(const size_t i) const {
 }
 
 // _____________________________________________________________________________
-bool CsvParser::hasItem(const std::string& fieldName) const {
+bool CsvParser::hasItem(const string& fieldName) const {
   return _headerMap.find(fieldName) != _headerMap.end();
 }
 
 // _____________________________________________________________________________
-bool CsvParser::fieldIsEmpty(const std::string& fieldName) const {
+bool CsvParser::fieldIsEmpty(const string& fieldName) const {
   return strlen(getTString(fieldName)) == 0;
 }
 
@@ -234,7 +233,7 @@ inline bool CsvParser::isDouble(string line, bool notEmpty) const {
 
 // ___________________________________________________________________________
 inline void CsvParser::ltrim(string* s) const {
-	s->erase(s->begin(), std::find_if(s->begin(), s->end(),
+  s->erase(s->begin(), std::find_if(s->begin(), s->end(),
   std::not1(std::ptr_fun<int, int>(std::isspace))));
 }
 
@@ -246,8 +245,8 @@ inline void CsvParser::rtrim(string* s) const {
 
 // ___________________________________________________________________________
 inline void CsvParser::strtrim(string* s) const {
-	ltrim(s);
-	rtrim(s);
+  ltrim(s);
+  rtrim(s);
 }
 
 // ___________________________________________________________________________

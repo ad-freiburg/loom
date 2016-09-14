@@ -34,11 +34,10 @@ struct ShapePointCompare {
 typedef std::set<ShapePoint, ShapePointCompare> ShapePoints;
 
 class Shape {
-
  public:
   Shape() {}
 
-  Shape(const string& id) : _id(id) {}
+  explicit Shape(const string& id) : _id(id) {}
 
   std::string getId() const {
     return _id;
@@ -57,6 +56,7 @@ class Shape {
   ShapePoints _shapePoints;
 };
 
-}}
+}  // namespace gtfs
+}  // namespace gtfsparser
 
 #endif  // GTFSPARSER_GTFS_SHAPE_H_

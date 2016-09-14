@@ -2,6 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
 
+#include <utility>
 #include <unordered_map>
 #include <string>
 #include "Feed.h"
@@ -10,12 +11,21 @@
 #include "Trip.h"
 #include "Shape.h"
 
-using namespace gtfsparser;
-using namespace gtfs;
+using gtfsparser::gtfs::Feed;
+using gtfsparser::gtfs::Agency;
+using gtfsparser::gtfs::Stop;
+using gtfsparser::gtfs::Stops;
+using gtfsparser::gtfs::Trip;
+using gtfsparser::gtfs::Trips;
+using gtfsparser::gtfs::Route;
+using gtfsparser::gtfs::Shape;
+using gtfsparser::gtfs::Shapes;
+using gtfsparser::gtfs::Service;
 
 // ____________________________________________________________________________
 bool Feed::addAgency(Agency* a) {
-  return (_agencies.insert(std::pair<std::string, Agency*>(a->getId(), a))).second;
+  return (_agencies.insert(
+        std::pair<std::string, Agency*>(a->getId(), a))).second;
 }
 
 // ____________________________________________________________________________
@@ -179,7 +189,8 @@ Shapes::iterator Feed::shapesEnd() {
 
 // ____________________________________________________________________________
 bool Feed::addService(Service* s) {
-  return (_services.insert(std::pair<std::string, Service*>(s->getId(), s))).second;
+  return (_services.insert(
+        std::pair<std::string, Service*>(s->getId(), s))).second;
 }
 
 // ____________________________________________________________________________

@@ -29,7 +29,7 @@ typedef std::unordered_map<std::string, Service*> Services;
 
 class Feed {
  public:
-  Feed() {};
+  Feed() {}
 
   bool addAgency(Agency* a);
   const Agency* getAgencyById(const std::string& id) const;
@@ -75,6 +75,7 @@ class Feed {
   Shapes  _shapes;
   Services _services;
 };
-}}
+}  // namespace gtfs
+}  // namespace gtfsparser
 
 #endif  // GTFSPARSER_GTFS_FEED_H_

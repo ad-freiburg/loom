@@ -6,8 +6,8 @@
 #ifndef GTFSPARSER_CSVPARSER_H_
 #define GTFSPARSER_CSVPARSER_H_
 
-#include <unordered_map>
 #include <stdint.h>
+#include <unordered_map>
 #include <istream>
 #include <string>
 #include <vector>
@@ -18,8 +18,10 @@
 using std::exception;
 using std::string;
 
-// A parser for CSV files, as defined at
-// http://tools.ietf.org/html/rfc4180#page-2
+/**
+ * A parser for CSV files, as defined at
+ * http://tools.ietf.org/html/rfc4180#page-2
+ */
 namespace gtfsparser {
 class CsvParserException : public exception {
  public:
@@ -27,6 +29,7 @@ class CsvParserException : public exception {
     uint64_t line)
     : _msg(msg), _index(index), _fieldName(fieldName), _line(line) {}
   ~CsvParserException() throw() {}
+
   virtual const char* what() const throw() {
     std::stringstream ss;
     ss << _msg;
@@ -34,13 +37,15 @@ class CsvParserException : public exception {
       ss << " for field #" << (_index+1) << " (" << _fieldName << ")   ";
     _what_msg = ss.str();
     return _what_msg.c_str();
-  };
+  }
+
   virtual uint64_t getLine() const {
     return _line;
-  };
+  }
 
   const std::string& getMsg() const { return _msg; }
   const std::string& getFieldName() const { return _fieldName; }
+
  private:
   mutable std::string _what_msg;
   std::string _msg;
@@ -141,8 +146,7 @@ class CsvParser {
   void rtrim(string* s) const;
   void ltrim(string* s) const;
   bool isDouble(string line, bool notEmpty) const;
-
 };
-}
+}  // namespace gtfsparser
 
 #endif  // GTFSPARSER_CSVPARSER_H_

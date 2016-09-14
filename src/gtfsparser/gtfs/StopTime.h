@@ -38,12 +38,24 @@ struct Time {
 inline bool operator>(const Time& lh, const Time& rh) {
   return  lh.h * 3600 + lh.m * 60 + lh.s > rh.h * 3600 + rh.m * 60 + rh.s;
 }
-inline bool operator<(const Time& lh, const Time& rh) { return rh > lh; }
-inline bool operator==(const Time& lh, const Time& rh) { return !(rh > lh) && !(rh < lh); }
-inline bool operator!=(const Time& lh, const Time& rh) { return !(rh == lh); }
-inline bool operator>=(const Time& lh, const Time& rh) { return lh > rh || lh == rh; }
-inline bool operator<=(const Time& lh, const Time& rh) { return lh < rh || lh == rh; }
 
+inline bool operator<(const Time& lh, const Time& rh) { return rh > lh; }
+
+inline bool operator==(const Time& lh, const Time& rh) {
+  return !(rh > lh) && !(rh < lh);
+}
+
+inline bool operator!=(const Time& lh, const Time& rh) {
+  return !(rh == lh);
+}
+
+inline bool operator>=(const Time& lh, const Time& rh) {
+  return lh > rh || lh == rh;
+}
+
+inline bool operator<=(const Time& lh, const Time& rh) {
+  return lh < rh || lh == rh;
+}
 
 class StopTime {
  public:
@@ -71,6 +83,7 @@ class StopTime {
   float getShapeDistanceTravelled() const { return _shapeDistTravelled; }
   bool isTimepoint() const { return _isTimepoint; }
   uint16_t getSeq() const { return _sequence; }
+
  private:
   Time _at;
   Time _dt;
@@ -90,6 +103,7 @@ struct StopTimeCompare {
   }
 };
 
-}}
+}  // namespace gtfs
+}  // namespace gtfsparser
 
 #endif  // GTFSPARSER_GTFS_STOPTIME_H_

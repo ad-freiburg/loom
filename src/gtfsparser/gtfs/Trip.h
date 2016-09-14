@@ -25,7 +25,6 @@ typedef std::set<StopTime, StopTimeCompare> StopTimes;
 
 
 class Trip {
-
  public:
   enum WC_BIKE_ACCESSIBLE: uint8_t {
     NO_INFORMATION = 0,
@@ -39,7 +38,7 @@ class Trip {
     NOT_SET = 2
   };
 
-  Trip() {};
+  Trip() {}
   Trip(std::string id, Route* r, Service* s, std::string hs,
     std::string short_name, DIRECTION dir, std::string blockid, Shape* shp,
     WC_BIKE_ACCESSIBLE wc, WC_BIKE_ACCESSIBLE ba);
@@ -72,6 +71,7 @@ class Trip {
   StopTimes _stoptimes;
 };
 
-}}
+}  // namespace gtfs
+}  // namespace gtfsparser
 
 #endif  // GTFSPARSER_GTFS_TRIP_H_
