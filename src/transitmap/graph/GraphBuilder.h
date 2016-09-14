@@ -37,7 +37,6 @@ class GraphBuilder {
   void fixGeomDirs();
   void writeMainDirs();
 
-  void freeNodes();
  private:
   TransitGraph* _targetGraph;
   projPJ _mercProj;
@@ -53,6 +52,7 @@ class GraphBuilder {
   bool nodeHasOverlappingFronts(const Node* n) const;
 
   Node* addStop(gtfs::Stop* curStop, uint8_t aggrLevel);
+  void freeNodeFront(NodeFront* f);
 
   mutable std::set<const Edge*> _indEdges;
   mutable std::map<const Edge*, size_t> _pEdges;

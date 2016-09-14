@@ -406,15 +406,11 @@ void GraphBuilder::writeMainDirs() {
         pl = g->getGeom().getOrthoLineAtDist(0, g->getTotalWidth());
       }
 
-      geo::PointOnLine curGeomPos = *(pl.getIntersections(f.refEtg->getGeom()).begin());
-
-      if (g->getGeomDir() == n) {
-        assert(curGeomPos.totalPos > .5);
-      } else {
-        assert(curGeomPos.totalPos < .5);
-      }
-
       f.setGeom(pl);
+
+      // initial free
+      freeNodeFront(&f);
+
       n->addMainDir(f);
     }
 
@@ -423,18 +419,17 @@ void GraphBuilder::writeMainDirs() {
     double step = 1;
     while (nodeHasOverlappingFronts(n)) {
       for (auto& f : n->getMainDirs()) {
-        // TODO: store the reference ETG in the front
-        geo::PointOnLine curGeomPos = *(f.geom.getIntersections(f.refEtg->getGeom()).begin());
-
+        if (f.refEtg->getGeom().getLength() < step + 0.1) goto exitloop;
         if (f.refEtg->getGeomDir() == n) {
-          if (curGeomPos.totalPos * f.refEtg->getGeom().getLength() < f.refEtg->getGeom().getLength() / 2 + (step)) goto exitloop;
           f.geom = f.refEtg->getGeom().getOrthoLineAtDist(
-              curGeomPos.totalPos * f.refEtg->getGeom().getLength() - step, f.refEtg->getTotalWidth());
+              f.refEtg->getGeom().getLength() - step, f.refEtg->getTotalWidth());
         } else {
-          if (curGeomPos.totalPos * f.refEtg->getGeom().getLength() > f.refEtg->getGeom().getLength() / 2 - (step)) goto exitloop;
           f.geom = f.refEtg->getGeom().getOrthoLineAtDist(
-              curGeomPos.totalPos * f.refEtg->getGeom().getLength() + step, f.refEtg->getTotalWidth());
+              step, f.refEtg->getTotalWidth());
         }
+
+        // cut the edges to fit the new front
+        freeNodeFront(&f);
       }
     }
     exitloop:
@@ -452,7 +447,7 @@ bool GraphBuilder::nodeHasOverlappingFronts(const Node* n) const {
 
       if (n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 8) {
         return true;
-      } else if (n->getStops().size() == 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getTotalWidth() + fb.refEtg->getTotalWidth()) / 2) {
+      } else if (n->getStops().size() == 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getTotalWidth() + fb.refEtg->getTotalWidth()) * 2) {
         return true;
       }
     }
@@ -462,30 +457,22 @@ bool GraphBuilder::nodeHasOverlappingFronts(const Node* n) const {
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::freeNodes() {
-  // TODO: move the creation of the node front geometries to the
-  // method above. add method to "expand" node front geometries until they DO
-  // NOT OVERLAP. after this, add an extension method to the polyline to double the
-  // "stretch" the geometry to the desired length. use this as a cutting geom.
-  for (auto n : *_targetGraph->getNodes()) {
-    for (auto& f : n->getMainDirs()) {
-      for (auto e : f.edges) {
-        geo::PolyLine cutLine = f.geom;
+void GraphBuilder::freeNodeFront(NodeFront* f) {
+  for (auto e : f->edges) {
+    geo::PolyLine cutLine = f->geom;
 
-        for (EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
-          std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = cutLine.getIntersections(g.getGeom());
-          if (iSects.size() > 0) {
-            if (g.getGeomDir() != n) {
-              // cut at beginning
-              g.setGeom(g.getGeom().getSegment(iSects.begin()->totalPos, 1));
+    for (EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
+      std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = cutLine.getIntersections(g.getGeom());
+      if (iSects.size() > 0) {
+        if (g.getGeomDir() != f->n) {
+          // cut at beginning
+          g.setGeom(g.getGeom().getSegment(iSects.begin()->totalPos, 1));
 
-              assert(cutLine.distTo(g.getGeom().getLine().front()) < 0.1);
-            } else {
-              // cut at end
-              g.setGeom(g.getGeom().getSegment(0, (--iSects.end())->totalPos));
-              assert(cutLine.distTo(g.getGeom().getLine().back()) < 0.1);
-            }
-          }
+          assert(cutLine.distTo(g.getGeom().getLine().front()) < 0.1);
+        } else {
+          // cut at end
+          g.setGeom(g.getGeom().getSegment(0, (--iSects.end())->totalPos));
+          assert(cutLine.distTo(g.getGeom().getLine().back()) < 0.1);
         }
       }
     }

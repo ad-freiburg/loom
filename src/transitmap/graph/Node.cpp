@@ -295,58 +295,20 @@ std::vector<InnerGeometry> Node::getInnerGeometries(bool bezier) const {
 
         for (size_t i : etgIt->getTripOrdering()) {
           const TripOccurance& tripOcc = etgIt->getTripsUnordered()[i];
+
           if (!processed.insert(tripOcc.route).second) continue;
-          util::geo::Point p = nf.getTripOccPos(tripOcc.route);
           std::vector<graph::Partner> partners = getPartner(&nf, tripOcc.route);
 
           if (partners.size() == 0) continue;
 
-          util::geo::Point pp = partners[0].front->getTripOccPos(partners[0].route);
-          double d = nf.geom.distTo(partners[0].front->geom) / 2;
-
-          if (bezier && d > 5) {
-            // TODO(patrick): outfactor this
-            util::geo::Point b = p;
-            util::geo::Point c = pp;
-            std::pair<double, double> slopeA, slopeB;
-
-
-            if (nf.refEtg->getGeomDir() == this) {
-              slopeA = nf.refEtg->getGeom().getSlopeBetweenDists(nf.refEtg->getGeom().getLength() - 5, nf.refEtg->getGeom().getLength());
-            } else {
-              slopeA = nf.refEtg->getGeom().getSlopeBetweenDists(5, 0);
-            }
-
-            if (partners[0].front->refEtg->getGeomDir() == this) {
-              slopeB = partners[0].front->refEtg->getGeom().getSlopeBetweenDists(partners[0].front->refEtg->getGeom().getLength() - 5, partners[0].front->refEtg->getGeom().getLength());
-            } else {
-              slopeB = partners[0].front->refEtg->getGeom().getSlopeBetweenDists(5, 0);
-            }
-
-            b = util::geo::Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
-            c = util::geo::Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
-
-
-            d = 1000;
-
-            util::geo::Point bd = util::geo::Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
-            util::geo::Point cd = util::geo::Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
-
-            geo::PolyLine bl(p, bd);
-            geo::PolyLine cl(pp, cd);
-
-            auto is = bl.getIntersections(cl);
-
-            if (is.size() == 1) {
-              b = is.begin()->p;
-              c = is.begin()->p;
-            }
-
-            geo::BezierCurve bc(p, b, c, pp);
-            ret.push_back(InnerGeometry(bc.render(3), partners[0].route, &*etgIt));
+          if (bezier) {
+            ret.push_back(InnerGeometry(
+                getInnerBezier(nf, tripOcc, partners[0]),
+                partners[0].route, &*etgIt));
           } else {
-            geo::PolyLine line(p, pp);
-            ret.push_back(InnerGeometry(line, partners[0].route, &*etgIt));
+            ret.push_back(InnerGeometry(
+                getInnerStraightLine(nf, tripOcc, partners[0]),
+                partners[0].route, &*etgIt));
           }
         }
       }
@@ -354,6 +316,65 @@ std::vector<InnerGeometry> Node::getInnerGeometries(bool bezier) const {
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+geo::PolyLine Node::getInnerStraightLine(const NodeFront& nf,
+    const TripOccurance& tripOcc, const graph::Partner& partner) const {
+  util::geo::Point p = nf.getTripOccPos(tripOcc.route);
+  util::geo::Point pp = partner.front->getTripOccPos(partner.route);
+
+  return geo::PolyLine(p, pp);
+}
+
+// _____________________________________________________________________________
+geo::PolyLine Node::getInnerBezier(const NodeFront& nf,
+    const TripOccurance& tripOcc, const graph::Partner& partner) const {
+
+  double d = nf.geom.distTo(partner.front->geom) / 2;
+
+  // for small distances, fall back to straight line
+  if (d < 5) return getInnerStraightLine(nf, tripOcc, partner);
+
+  util::geo::Point p = nf.getTripOccPos(tripOcc.route);
+  util::geo::Point pp = partner.front->getTripOccPos(partner.route);
+  util::geo::Point b = p;
+  util::geo::Point c = pp;
+  std::pair<double, double> slopeA, slopeB;
+
+  if (nf.refEtg->getGeomDir() == this) {
+    slopeA = nf.refEtg->getGeom().getSlopeBetweenDists(nf.refEtg->getGeom().getLength() - 5, nf.refEtg->getGeom().getLength());
+  } else {
+    slopeA = nf.refEtg->getGeom().getSlopeBetweenDists(5, 0);
+  }
+
+  if (partner.front->refEtg->getGeomDir() == this) {
+    slopeB = partner.front->refEtg->getGeom().getSlopeBetweenDists(partner.front->refEtg->getGeom().getLength() - 5, partner.front->refEtg->getGeom().getLength());
+  } else {
+    slopeB = partner.front->refEtg->getGeom().getSlopeBetweenDists(5, 0);
+  }
+
+  b = util::geo::Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
+  c = util::geo::Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
+
+  // TODO(patrick): why 1000? find some heuristic
+  d = 1000;
+
+  util::geo::Point bd = util::geo::Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
+  util::geo::Point cd = util::geo::Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
+
+  geo::PolyLine bl(p, bd);
+  geo::PolyLine cl(pp, cd);
+
+  auto is = bl.getIntersections(cl);
+
+  if (is.size() == 1) {
+    b = is.begin()->p;
+    c = is.begin()->p;
+  }
+
+  geo::BezierCurve bc(p, b, c, pp);
+  return bc.render(3);
 }
 
 // _____________________________________________________________________________
@@ -391,8 +412,7 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(const graph::Configurat
             tripOcc.route,
             c,
             g,
-            order
-          );
+            order);
 
           std::vector<graph::Partner> partners = getPartner(&nf, tripOcc.route);
 
@@ -402,8 +422,7 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(const graph::Configurat
             partners[0].route,
             c,
             g,
-            order
-          );
+            order);
 
           geo::PolyLine line(p, pp);
           ret.push_back(InnerGeometry(line, partners[0].route, &*etgIt));
@@ -456,7 +475,6 @@ util::geo::Polygon Node::getConvexFrontHull(double d) const {
   } else {
     boost::geometry::buffer(l, ret, distanceStrat, sideStrat, joinStrat, endStrat, circleStrat);
   }
-
 
   assert(ret.size() == 1);
   return ret[0];

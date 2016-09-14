@@ -18,12 +18,10 @@ namespace graph {
 
 // forward declarations
 class Edge;
-
 class Node;
-
-
-// forward declaration of EdgeTripGeometry
 class EdgeTripGeom;
+struct TripOccurance;
+
 
 typedef std::vector<size_t> Ordering;
 typedef std::map<EdgeTripGeom*, Ordering> Configuration;
@@ -127,6 +125,12 @@ class Node {
   std::vector<NodeFront> _mainDirs;
 
   std::set<gtfs::Stop*> _stops;
+
+  geo::PolyLine getInnerBezier(const NodeFront& nf,
+      const TripOccurance& tripOcc, const graph::Partner& partner) const;
+
+  geo::PolyLine getInnerStraightLine(const NodeFront& nf,
+      const TripOccurance& tripOcc, const graph::Partner& partner) const;
 
   friend class TransitGraph;
 };
