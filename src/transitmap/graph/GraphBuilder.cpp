@@ -415,9 +415,10 @@ void GraphBuilder::writeMainDirs() {
     // now, look at the nodes entire front geometries and expand them
     // until nothing overlaps
     double step = 1;
+    double minLength = 10;
     while (nodeHasOverlappingFronts(n)) {
       for (auto& f : n->getMainDirs()) {
-        if (f.refEtg->getGeom().getLength() < step + 0.1) goto exitloop;
+        if (f.refEtg->getGeom().getLength() < minLength - step) goto exitloop;
         if (f.refEtg->getGeomDir() == n) {
           f.geom = f.refEtg->getGeom().getOrthoLineAtDist(
               f.refEtg->getGeom().getLength() - step, f.refEtg->getTotalWidth());
@@ -445,7 +446,7 @@ bool GraphBuilder::nodeHasOverlappingFronts(const Node* n) const {
 
       if (n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 8) {
         return true;
-      } else if (n->getStops().size() == 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getTotalWidth() + fb.refEtg->getTotalWidth()) * 2) {
+      } else if (n->getStops().size() == 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getTotalWidth() + fb.refEtg->getTotalWidth())) {
         return true;
       }
     }

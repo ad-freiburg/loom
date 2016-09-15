@@ -307,10 +307,8 @@ geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
 
 // _____________________________________________________________________________
 std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
-    const graph::Configuration& c,
-    bool bezier,
-    const EdgeTripGeom* g,
-    const graph::Ordering* order) const {
+    const graph::Configuration& c, bool bezier,
+    const EdgeTripGeom* g, const graph::Ordering* order) const {
   std::vector<InnerGeometry> ret;
 
   std::set<const gtfs::Route*> processed;
@@ -336,16 +334,16 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
 
           std::vector<graph::Partner> partners = getPartner(&nf, tripOcc.route);
 
-          if (partners.size() == 0) continue;
-
-          if (bezier) {
-            ret.push_back(InnerGeometry(
-                getInnerBezier(c, nf, tripOcc, partners[0], g, order),
-                partners[0].route, &*etgIt));
-          } else {
-            ret.push_back(InnerGeometry(
-                getInnerStraightLine(c, nf, tripOcc, partners[0], g, order),
-                partners[0].route, &*etgIt));
+          for (const graph::Partner& p : partners) {
+            if (bezier) {
+              ret.push_back(InnerGeometry(
+                  getInnerBezier(c, nf, tripOcc, p, g, order),
+                  p.route, &*etgIt));
+            } else {
+              ret.push_back(InnerGeometry(
+                  getInnerStraightLine(c, nf, tripOcc, p, g, order),
+                  p.route, &*etgIt));
+            }
           }
         }
       }

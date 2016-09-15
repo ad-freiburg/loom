@@ -94,7 +94,6 @@ class Node {
   void addMainDir(NodeFront f);
 
   const NodeFront* getNodeFrontFor(const Edge* e) const;
-  //double getScore() const;
   double getScore(const graph::Configuration& c) const;
   double getScoreUnder(const graph::Configuration& c, const EdgeTripGeom* g, const graph::Ordering* order) const;
   double getAreaScore(const Configuration& c, const EdgeTripGeom* g, const graph::Ordering* order) const;
@@ -119,7 +118,7 @@ class Node {
  private:
   std::set<Edge*> _adjListIn;
   std::set<Edge*> _adjListOut;
-  util::geo::Point _pos;
+  Point _pos;
 
   std::vector<NodeFront> _mainDirs;
 

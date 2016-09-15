@@ -81,7 +81,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
         << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
       std::map<std::string, std::string> params;
       params["style"] = style.str();
-      //printLine(p, params, w, h, xOffset, yOffset);
+      printLine(p, params, w, h, xOffset, yOffset);
     }
   }
   _w.closeTag();
