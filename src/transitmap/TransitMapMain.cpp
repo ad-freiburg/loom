@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Optimizing...";
     optim::EdgeOrderOptimizer eoOptim(&g);
-    //eoOptim.optimize();
+    eoOptim.optimize();
 
     LOG(INFO) << "Total graph score is -- " << g.getScore() << " --";
     LOG(INFO) << "Per node graph score is -- "

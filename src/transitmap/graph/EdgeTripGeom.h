@@ -16,8 +16,8 @@ namespace graph {
 
 using namespace gtfsparser;
 
-static const double SPACING = 20;
-static const double WIDTH = 3;
+static const double SPACING = 10;
+static const double WIDTH = 20;
 
 struct TripOccurance {
   TripOccurance(gtfs::Route* r) : route(r), direction(0) {}
@@ -68,6 +68,11 @@ class EdgeTripGeom {
   double getSpacing() const;
 
   double getTotalWidth() const;
+
+  std::vector<gtfs::Route*> getSharedRoutes(const EdgeTripGeom& e) const;
+
+  // TODO: store this here atm, but find better plcae...
+  std::vector<std::vector<size_t> > permutations;
  private:
   std::vector<TripOccurance> _trips;
 

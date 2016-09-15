@@ -28,7 +28,7 @@ void GraphBuilder::consume(const Feed& f) {
     cur++;
     if (t->second->getStopTimes().size() < 2) continue;
 
-    if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
+    //if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
     if (!(t->second->getShape())) continue;
     auto st = t->second->getStopTimes().begin();
 
@@ -195,6 +195,10 @@ void GraphBuilder::createTopologicalNodes() {
     if (!a) a = new Node(w.s.first.p);
     if (!b) b = new Node(w.s.second.p);
 
+
+    if (a == b) continue;
+
+
     EdgeTripGeom eaEdgeGeom(ea, a);
     EdgeTripGeom abEdgeGeom(ab, b);
     EdgeTripGeom ecEdgeGeom(ec, w.e->getTo());
@@ -250,8 +254,6 @@ void GraphBuilder::createTopologicalNodes() {
     // delete old edges
     _targetGraph->deleteEdge(w.e->getFrom(), w.e->getTo());
     _targetGraph->deleteEdge(w.f->getFrom(), w.f->getTo());
-
-    assert(a != b);
 
     // add new edges
     _targetGraph->addNode(a);
@@ -421,20 +423,19 @@ void GraphBuilder::writeMainDirs() {
   while (true) {
     bool stillFree = false;
     for (auto n : *_targetGraph->getNodes()) {
-      if (nodeHasOverlappingFronts(n)) {
+      std::set<NodeFront*> overlaps = nodeGetOverlappingFronts(n);
+      for (auto f : overlaps) {
         stillFree = true;
-        for (auto& f : n->getMainDirs()) {
-          if (f.refEtg->getGeomDir() == n) {
-            f.geom = f.refEtg->getGeom().getOrthoLineAtDist(
-                f.refEtg->getGeom().getLength() - step, f.refEtg->getTotalWidth());
-          } else {
-            f.geom = f.refEtg->getGeom().getOrthoLineAtDist(
-                step, f.refEtg->getTotalWidth());
-          }
-
-          // cut the edges to fit the new front
-          freeNodeFront(&f);
+        if (f->refEtg->getGeomDir() == n) {
+          f->geom = f->refEtg->getGeom().getOrthoLineAtDist(
+              f->refEtg->getGeom().getLength() - step, f->refEtg->getTotalWidth());
+        } else {
+          f->geom = f->refEtg->getGeom().getOrthoLineAtDist(
+              step, f->refEtg->getTotalWidth());
         }
+
+        // cut the edges to fit the new front
+        freeNodeFront(f);
       }
     }
     if (!stillFree) break;
@@ -442,28 +443,43 @@ void GraphBuilder::writeMainDirs() {
 }
 
 // _____________________________________________________________________________
-bool GraphBuilder::nodeHasOverlappingFronts(const Node* n) const {
-  double minLength = 20;
+std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(const Node* n) const {
+  std::set<NodeFront*> ret;
+  double minLength = 10;
 
   for (size_t i = 0; i < n->getMainDirs().size(); ++i) {
     const NodeFront& fa = n->getMainDirs()[i];
-    if (fa.refEtg->getGeom().getLength() < minLength) break;
 
     for (size_t j = 0; j < n->getMainDirs().size(); ++j) {
       const NodeFront& fb = n->getMainDirs()[j];
+
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
-      if (fb.refEtg->getGeom().getLength() < minLength) break;
 
-
-      if (n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 8) {
-        return true;
-      } else if (n->getStops().size() == 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getTotalWidth() + fb.refEtg->getTotalWidth())) {
-        return true;
+      if ((n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 8) ||
+          (n->getStops().size() == 0 && fa.geom.distTo(fb.geom) < getNodeFreeMinDistance(fa, fb))) {
+        if (fa.refEtg->getGeom().getLength() > minLength) {
+          ret.insert(const_cast<NodeFront*>(&fa));
+        }
+        if (fb.refEtg->getGeom().getLength() > minLength) {
+          ret.insert(const_cast<NodeFront*>(&fb));
+        }
       }
     }
   }
 
-  return false;
+  return ret;
+}
+
+// _____________________________________________________________________________
+double GraphBuilder::getNodeFreeMinDistance(const NodeFront& a,
+    const NodeFront& b) const {
+  size_t numShared = a.refEtg->getSharedRoutes(*b.refEtg).size();
+
+  if (numShared == 0) {
+    return (a.refEtg->getSpacing() + b.refEtg->getSpacing()) / 2;
+  } else {
+    return fmax(a.refEtg->getTotalWidth(), b.refEtg->getTotalWidth()) * 2;
+  }
 }
 
 // _____________________________________________________________________________

@@ -48,8 +48,6 @@ const PolyLine& BezierCurve::render(double d) {
   double dt = 1 / n;
   double t = 0;
 
-  std::cout << dt << std::endl;
-
   bool cancel = false;
   while (true) {
     _rendered << valueAt(t);

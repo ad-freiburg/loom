@@ -17,7 +17,7 @@ void EdgeOrderOptimizer::optimize() {
   Configuration startConfig;
   startConfig = _g->getConfig();
 
-  size_t numRuns = 4;
+  size_t numRuns = 1;
 
   std::vector<std::pair<double, Configuration> > results;
   results.resize(numRuns);
@@ -72,11 +72,15 @@ bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
     for (graph::Edge* e : n->getAdjListOut()) {
       for (graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
         if (abort) goto exitloop;
-        if (g.getTripsUnordered().size() == 1) continue;
+        if (g.getCardinality() == 1) continue;
 
         double oldAreaScore = n->getAreaScore(*c);
-        std::vector<Ordering > permutations;
-        getPermutations(g.getCardinality(), &permutations);
+
+        if (g.permutations.size() == 0) {
+          getPermutations(g.getCardinality(), &g.permutations);
+        }
+
+        const std::vector<Ordering >& permutations = g.permutations;
 
         #pragma omp parallel for
         for (size_t i = 0; i < permutations.size(); ++i) {

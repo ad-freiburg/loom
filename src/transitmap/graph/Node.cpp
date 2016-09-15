@@ -316,17 +316,13 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
     const graph::NodeFront& nf = getMainDirs()[i];
     for (auto e : nf.edges) {
       for (auto etgIt = e->getEdgeTripGeoms()->begin();
-            etgIt != e->getEdgeTripGeoms()->end(); etgIt++) {
+            etgIt != e->getEdgeTripGeoms()->end(); ++etgIt) {
 
-        const std::vector<size_t>* ordering = 0;
+        const std::vector<size_t>* ordering = &c.find(&*etgIt)->second;
 
         if (&*etgIt == g) {
           ordering = order;
-        } else {
-          ordering = &c.find(&*etgIt)->second;
         }
-
-        assert(ordering->size() == etgIt->getTripsUnordered().size());
 
         for (size_t i : *ordering) {
           const TripOccurance& tripOcc = etgIt->getTripsUnordered()[i];
@@ -395,6 +391,6 @@ util::geo::Polygon Node::getConvexFrontHull(double d) const {
     boost::geometry::buffer(l, ret, distanceStrat, sideStrat, joinStrat, endStrat, circleStrat);
   }
 
-  assert(ret.size() == 1);
+  assert(ret.size() > 0);
   return ret[0];
 }

@@ -50,10 +50,12 @@ class GraphBuilder {
   geo::PolyLine getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b, gtfs::Trip* t);
   ShrdSegWrap getNextSharedSegment() const;
 
-  bool nodeHasOverlappingFronts(const Node* n) const;
+  std::set<NodeFront*> nodeGetOverlappingFronts(const Node* n) const;
 
   Node* addStop(gtfs::Stop* curStop, uint8_t aggrLevel);
   void freeNodeFront(NodeFront* f);
+
+  double getNodeFreeMinDistance(const NodeFront& a, const NodeFront& b) const;
 
   mutable std::set<const Edge*> _indEdges;
   mutable std::map<const Edge*, size_t> _pEdges;

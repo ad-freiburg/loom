@@ -64,7 +64,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
   for (graph::Node* n : outG.getNodes()) {
     std::map<std::string, std::string> params;
 
-    if (n->getStops().size() > 0) {
+    if (n->getStops().size() > 0 && n->getMainDirs().size() > 0) {
       params["stroke"] = "black";
       params["stroke-width"] = "1";
       params["fill"] = "white";
@@ -81,7 +81,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
         << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
       std::map<std::string, std::string> params;
       params["style"] = style.str();
-      printLine(p, params, w, h, xOffset, yOffset);
+      //printLine(p, params, w, h, xOffset, yOffset);
     }
   }
   _w.closeTag();
@@ -126,7 +126,7 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
   std::map<std::string, std::string> params;
   params["x"] = std::to_string((n->getPos().get<0>() - xOffset) * _scale + 10);
   params["y"] = std::to_string(h-(n->getPos().get<1>() - yOffset) * _scale - 6);
-  params["style"] = "font-family:Verdana;font-size:8px; font-style:normal; font-weight: normal; fill: white; stroke-width: 0.2px; stroke-linecap: butt; stroke-linejoin: miter; stroke: black";
+  params["style"] = "font-family:Verdana;font-size:8px; font-style:normal; font-weight: normal; fill: white; stroke-width: 0.25px; stroke-linecap: butt; stroke-linejoin: miter; stroke: black";
   _w.openTag("text", params);
   if (n->getStops().size()) {
     _w.writeText((*n->getStops().begin())->getName());

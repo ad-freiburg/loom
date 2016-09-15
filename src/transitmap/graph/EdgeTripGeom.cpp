@@ -153,3 +153,14 @@ double EdgeTripGeom::getSpacing() const {
 double EdgeTripGeom::getTotalWidth() const {
   return getWidth() * _trips.size() + getSpacing() * (_trips.size() - 1);
 }
+
+// _____________________________________________________________________________
+std::vector<gtfs::Route*> EdgeTripGeom::getSharedRoutes(const EdgeTripGeom& e)
+const {
+  std::vector<gtfs::Route*> ret;
+  for (auto& to : _trips) {
+    if (e.containsRoute(to.route)) ret.push_back(to.route);
+  }
+
+  return ret;
+}
