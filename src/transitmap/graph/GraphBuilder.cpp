@@ -412,37 +412,48 @@ void GraphBuilder::writeMainDirs() {
       n->addMainDir(f);
     }
 
-    // now, look at the nodes entire front geometries and expand them
-    // until nothing overlaps
-    double step = 1;
-    double minLength = 10;
-    while (nodeHasOverlappingFronts(n)) {
-      for (auto& f : n->getMainDirs()) {
-        if (f.refEtg->getGeom().getLength() < minLength - step) goto exitloop;
-        if (f.refEtg->getGeomDir() == n) {
-          f.geom = f.refEtg->getGeom().getOrthoLineAtDist(
-              f.refEtg->getGeom().getLength() - step, f.refEtg->getTotalWidth());
-        } else {
-          f.geom = f.refEtg->getGeom().getOrthoLineAtDist(
-              step, f.refEtg->getTotalWidth());
-        }
+  }
 
-        // cut the edges to fit the new front
-        freeNodeFront(&f);
+  // now, look at the nodes entire front geometries and expand them
+  // until nothing overlaps
+  double step = 1;
+
+  while (true) {
+    bool stillFree = false;
+    for (auto n : *_targetGraph->getNodes()) {
+      if (nodeHasOverlappingFronts(n)) {
+        stillFree = true;
+        for (auto& f : n->getMainDirs()) {
+          if (f.refEtg->getGeomDir() == n) {
+            f.geom = f.refEtg->getGeom().getOrthoLineAtDist(
+                f.refEtg->getGeom().getLength() - step, f.refEtg->getTotalWidth());
+          } else {
+            f.geom = f.refEtg->getGeom().getOrthoLineAtDist(
+                step, f.refEtg->getTotalWidth());
+          }
+
+          // cut the edges to fit the new front
+          freeNodeFront(&f);
+        }
       }
     }
-    exitloop:
-      continue;
+    if (!stillFree) break;
   }
 }
 
 // _____________________________________________________________________________
 bool GraphBuilder::nodeHasOverlappingFronts(const Node* n) const {
+  double minLength = 20;
+
   for (size_t i = 0; i < n->getMainDirs().size(); ++i) {
     const NodeFront& fa = n->getMainDirs()[i];
+    if (fa.refEtg->getGeom().getLength() < minLength) break;
+
     for (size_t j = 0; j < n->getMainDirs().size(); ++j) {
       const NodeFront& fb = n->getMainDirs()[j];
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
+      if (fb.refEtg->getGeom().getLength() < minLength) break;
+
 
       if (n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 8) {
         return true;
