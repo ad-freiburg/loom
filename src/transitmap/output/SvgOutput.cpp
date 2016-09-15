@@ -1,6 +1,6 @@
 // Copy//right 2016, U  //niversity of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <stdint.h>
 #include <ostream>
@@ -107,7 +107,7 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
   int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
   int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 
-  for (auto& ie : n->getInnerGeometries(true)) {
+  for (auto& ie : n->getInnerGeometries(outG.getConfig(), true)) {
     std::stringstream style;
     style << "fill:none;stroke:#" << ie.route->getColorString()
       << ";stroke-linecap:round;stroke-opacity:1;stroke-width:" << ie.etg->getWidth() * _scale;
@@ -155,9 +155,9 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
   double o = oo;
 
-  assert(g.getTripOrdering().size() == g.getTripsUnordered().size());
+  assert(outG.getConfig().find(&g) != outG.getConfig().end());
 
-  for (size_t i : g.getTripOrdering()) {
+  for (size_t i : outG.getConfig().find(&g)->second) {
       const graph::TripOccurance& r = g.getTripsUnordered()[i];
       geo::PolyLine p = center;
       p.offsetPerp(-(o - oo / 2 - g.getWidth() /2));

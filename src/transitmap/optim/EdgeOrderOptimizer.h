@@ -1,6 +1,6 @@
 // Copyright 2016, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #ifndef TRANSITMAP_OPTIM_EDGEORDEROPTIMIZER_H_
 #define TRANSITMAP_OPTIM_EDGEORDEROPTIMIZER_H_
@@ -28,10 +28,9 @@ class EdgeOrderOptimizer {
 
   void applyConfig(const Configuration& c);
 
-  void getPermutations(std::vector<size_t> order, std::vector<std::vector<size_t> >* ret) const;
+  void getPermutations(size_t n, std::vector<std::vector<size_t> >* ret) const;
 
   void generateRandConfig(Configuration* c) const;
-  void getConfig(Configuration* c) const;
 };
 
 }}

@@ -1,7 +1,7 @@
 // Copyright 2014, University of Freiburg,
 // Chair of Algorithms and Data Structures.
 // Authors: Hannah Bast <bast@informatik.uni-freiburg.de>,
-//          Patrick Brosi <brosip@informatik.uni-freiburg.de>
+//          Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #ifndef GTFSPARSER_CSVPARSER_H_
 #define GTFSPARSER_CSVPARSER_H_

@@ -1,6 +1,6 @@
 // Copyright 2016, University of Freibur
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "PolyLine.h"
 

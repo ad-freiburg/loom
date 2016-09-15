@@ -1,20 +1,17 @@
 // Copyright 2016, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #ifndef TRANSITMAP_GRAPH_ORDERINGCONFIGURATION_H_
 #define TRANSITMAP_GRAPH_ORDERINGCONFIGURATION_H_
 
-#include "./EdgeTripGeom.h"
-
-using std::exception;
-using std::string;
-
 namespace transitmapper {
 namespace graph {
 
+class EdgeTripGeom;
+
 typedef std::vector<size_t> Ordering;
-typedef std::map<EdgeTripGeom*, Ordering> Configuration;
+typedef std::map<const EdgeTripGeom*, Ordering> Configuration;
 
 }}
 

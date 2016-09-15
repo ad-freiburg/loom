@@ -1,7 +1,7 @@
 // Copyright 2013, University of Freiburg,
 // Chair of Algorithms and Data Structures.
 // Authors: Hannah Bast <bast@informatik.uni-freiburg.de>,
-//          Patrick Brosi <brosip@informatik.uni-freiburg.de>
+//          Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <functional>
 #include <string>

@@ -1,6 +1,6 @@
 // Copyright 2016, Universityjof Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <cassert>
 #include <vector>
@@ -34,11 +34,10 @@ void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode,
 
 // _____________________________________________________________________________
 void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode) {
-  TripOccurance* to = getTripsForRoute(t->getRoute()).first;
+  TripOccurance* to = getTripsForRoute(t->getRoute());
   if (!to) {
     _trips.push_back(TripOccurance(t->getRoute()));
     to = &_trips.back();
-    _ordering.push_back(_trips.size() - 1);
   }
   to->addTrip(t, dirNode);
 }
@@ -50,8 +49,14 @@ const {
 }
 
 // _____________________________________________________________________________
-TripOccWithPos EdgeTripGeom::getTripsForRoute(const gtfs::Route* r) const {
-  return getTripsForRouteUnder(r, _ordering);
+TripOccurance* EdgeTripGeom::getTripsForRoute(const gtfs::Route* r) const {
+  for (size_t i = 0; i < _trips.size(); i++) {
+    TripOccurance* to = const_cast<TripOccurance*>(&_trips[i]);
+    if (to->route == r) {
+      return to;
+    }
+  }
+  return 0;
 }
 
 // _____________________________________________________________________________
@@ -68,11 +73,6 @@ TripOccWithPos EdgeTripGeom::getTripsForRouteUnder(const gtfs::Route* r,
 }
 
 // _____________________________________________________________________________
-const std::vector<size_t>& EdgeTripGeom::getTripOrdering() const {
-  return _ordering;
-}
-
-// _____________________________________________________________________________
 const geo::PolyLine& EdgeTripGeom::getGeom() const {
   return _geom;
 }
@@ -84,7 +84,7 @@ void EdgeTripGeom::setGeom(const geo::PolyLine& p) {
 
 // _____________________________________________________________________________
 bool EdgeTripGeom::containsRoute(gtfs::Route* r) const {
-  return getTripsForRoute(r).first;
+  return getTripsForRoute(r);
 }
 
 // _____________________________________________________________________________
@@ -96,6 +96,11 @@ size_t EdgeTripGeom::getTripCardinality() const {
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+size_t EdgeTripGeom::getCardinality() const {
+  return _trips.size();
 }
 
 // _____________________________________________________________________________
@@ -118,12 +123,6 @@ void EdgeTripGeom::removeOrphans() {
 std::vector<TripOccurance>::iterator
 EdgeTripGeom::removeTripOccurance(std::vector<TripOccurance>::const_iterator pos) {
   std::vector<TripOccurance>::iterator ret = _trips.erase(pos);
-
-  // rebuild ordering
-  _ordering.clear();
-  for (size_t i = 0; i < _trips.size(); ++i) {
-    _ordering.push_back(i);
-  }
 
   return ret;
 }
@@ -153,9 +152,4 @@ double EdgeTripGeom::getSpacing() const {
 // _____________________________________________________________________________
 double EdgeTripGeom::getTotalWidth() const {
   return getWidth() * _trips.size() + getSpacing() * (_trips.size() - 1);
-}
-
-// _____________________________________________________________________________
-void EdgeTripGeom::setTripOrdering(std::vector<size_t>& ordering) {
-  _ordering = ordering;
 }

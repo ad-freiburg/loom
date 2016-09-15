@@ -1,6 +1,6 @@
 // Copyright 2016, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <proj_api.h>
 #include <string>
@@ -13,6 +13,7 @@ using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
 using transitmapper::util::geo::Point;
+using transitmapper::graph::Configuration;
 using boost::geometry::make_inverse;
 
 // _____________________________________________________________________________
@@ -35,11 +36,21 @@ TransitGraph::~TransitGraph() {
 }
 
 // _____________________________________________________________________________
+const Configuration& TransitGraph::getConfig() const {
+  return _config;
+}
+
+// _____________________________________________________________________________
+void TransitGraph::setConfig(const Configuration& c) {
+  _config = c;
+}
+
+// _____________________________________________________________________________
 double TransitGraph::getScore() const {
   double ret = 0;
 
   for (auto n : getNodes()) {
-    ret += n->getScore();
+    ret += n->getScore(_config);
   }
 
   return ret;

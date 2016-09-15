@@ -1,6 +1,6 @@
 // Copyright 2016, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <cassert>
 #include <vector>
@@ -33,7 +33,7 @@ bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
   assert(toNode == _from || toNode == _to);
   for (auto& e : _tripsContained) {
     if (e.containsRoute(t->getRoute())) {
-      for (auto& tr : e.getTripsForRoute(t->getRoute()).first->trips) {
+      for (auto& tr : e.getTripsForRoute(t->getRoute())->trips) {
         // shorcut: if a trip is contained here with the same shape id,
         // don't require recalc of polyline etc
         if (tr->getShape() == t->getShape()) {

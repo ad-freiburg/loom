@@ -1,6 +1,6 @@
 // Copyright 2016, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <proj_api.h>
 #include "GraphBuilder.h"
@@ -213,8 +213,7 @@ void GraphBuilder::createTopologicalNodes() {
     EdgeTripGeom faEdgeGeom(fa, faDir);
     EdgeTripGeom fcEdgeGeom(fc, fcDir);
 
-    for (size_t i : curEdgeGeom.getTripOrdering()) {
-      const TripOccurance& r = curEdgeGeom.getTripsUnordered()[i];
+    for (const TripOccurance& r : curEdgeGeom.getTripsUnordered()) {
       for (auto& t : r.trips) {
         if (r.direction == w.e->getTo()) {
           eaEdgeGeom.addTrip(t, a);
@@ -228,8 +227,7 @@ void GraphBuilder::createTopologicalNodes() {
       }
     }
 
-    for (size_t i : compEdgeGeom.getTripOrdering()) {
-      const TripOccurance& r = compEdgeGeom.getTripsUnordered()[i];
+    for (const TripOccurance r : compEdgeGeom.getTripsUnordered()) {
       for (auto& t : r.trips) {
         if ((r.direction == w.f->getTo() && !reversed) ||
             (r.direction != w.f->getTo() && reversed)) {
@@ -477,4 +475,20 @@ void GraphBuilder::freeNodeFront(NodeFront* f) {
       }
     }
   }
+}
+
+// _____________________________________________________________________________
+void GraphBuilder::writeInitialConfig() {
+  Configuration c;
+  for (graph::Node* n : *_targetGraph->getNodes()) {
+    for (graph::Edge* e : n->getAdjListOut()) {
+      for (graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
+        Ordering order(g.getCardinality());
+        for (size_t i = 0; i < g.getCardinality(); i++) order[i] = i;
+        c[&g] = order;
+      }
+    }
+  }
+
+  _targetGraph->setConfig(c);
 }

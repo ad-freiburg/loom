@@ -1,6 +1,6 @@
 // Copyright 2016, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #ifndef TRANSITMAP_GRAPH_TRANSITGRAPH_H_
 #define TRANSITMAP_GRAPH_TRANSITGRAPH_H_
@@ -52,9 +52,14 @@ class TransitGraph {
   double getScore() const;
   double getScore(const Configuration& c) const;
 
+  const Configuration& getConfig() const;
+  void setConfig(const Configuration&);
+
  private:
   std::string _name;
   std::set<Node*> _nodes;
+
+  Configuration _config;
 
   boost::geometry::model::box<util::geo::Point> _bbox;
 

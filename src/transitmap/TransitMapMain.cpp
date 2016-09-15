@@ -68,11 +68,16 @@ int main(int argc, char** argv) {
     LOG(INFO) << "Creating node fronts...";
     b.writeMainDirs();
 
+    LOG(INFO) << "Writing initial ordering configuration...";
+    b.writeInitialConfig();
+
     LOG(INFO) << "Optimizing...";
     optim::EdgeOrderOptimizer eoOptim(&g);
     eoOptim.optimize();
 
-    LOG(INFO) << "Graph score is -- " << g.getScore() << " --";
+    LOG(INFO) << "Total graph score is -- " << g.getScore() << " --";
+    LOG(INFO) << "Per node graph score is -- "
+      << g.getScore() / g.getNodes()->size() << " --";
 
     LOG(INFO) << "Outputting to SVG...";
     std::ofstream o;

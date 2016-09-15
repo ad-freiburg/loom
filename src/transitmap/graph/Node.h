@@ -1,6 +1,6 @@
 // Copyright 2016, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #ifndef TRANSITMAP_GRAPH_NODE_H_
 #define TRANSITMAP_GRAPH_NODE_H_
@@ -9,6 +9,7 @@
 #include "gtfsparser/gtfs/Stop.h"
 #include "gtfsparser/gtfs/Route.h"
 #include "../geo/PolyLine.h"
+#include "./OrderingConfiguration.h"
 #include "../util/Geo.h"
 
 using namespace gtfsparser;
@@ -22,12 +23,10 @@ class Node;
 class EdgeTripGeom;
 struct TripOccurance;
 
-
-typedef std::vector<size_t> Ordering;
-typedef std::map<EdgeTripGeom*, Ordering> Configuration;
-
 // forward declaration of TransitGraph
 class TransitGraph;
+
+using util::geo::Point;
 
 struct NodeFront {
   NodeFront(Edge* e, Node* n, const EdgeTripGeom* refEtg) : n(n), refEtg(refEtg) {
@@ -38,9 +37,8 @@ struct NodeFront {
 
   std::vector<Edge*> edges;
 
-  util::geo::Point getTripOccPos(const gtfs::Route*) const;
-  util::geo::Point getTripOccPos(const gtfs::Route* r, const Configuration& c) const;
-  util::geo::Point getTripOccPosUnder(const gtfs::Route* r, const graph::Configuration& c,
+  Point getTripOccPos(const gtfs::Route* r, const Configuration& c) const;
+  Point getTripOccPosUnder(const gtfs::Route* r, const graph::Configuration& c,
     const EdgeTripGeom* g, const std::vector<size_t>* order) const;
 
   const EdgeTripGeom* refEtg;
@@ -68,17 +66,17 @@ struct InnerGeometry {
 class Node {
 
  public:
-  explicit Node(util::geo::Point pos);
+  explicit Node(Point pos);
   Node(double x, double y);
-  Node(util::geo::Point pos, gtfs::Stop* stop);
+  Node(Point pos, gtfs::Stop* stop);
   Node(double x, double y, gtfs::Stop* stop);
 
   ~Node();
 
   const std::set<gtfs::Stop*>& getStops() const;
   void addStop(gtfs::Stop* s);
-  const util::geo::Point& getPos() const;
-  void setPos(const util::geo::Point& p);
+  const Point& getPos() const;
+  void setPos(const Point& p);
 
   const std::set<Edge*>& getAdjListOut() const {
     return _adjListOut;
@@ -96,17 +94,18 @@ class Node {
   void addMainDir(NodeFront f);
 
   const NodeFront* getNodeFrontFor(const Edge* e) const;
-  double getScore() const;
+  //double getScore() const;
   double getScore(const graph::Configuration& c) const;
   double getScoreUnder(const graph::Configuration& c, const EdgeTripGeom* g, const graph::Ordering* order) const;
   double getAreaScore(const Configuration& c, const EdgeTripGeom* g, const graph::Ordering* order) const;
   double getAreaScore(const Configuration& c) const;
   std::vector<Partner> getPartner(const NodeFront* f, const gtfs::Route* r) const;
 
-  std::vector<InnerGeometry> getInnerGeometries(const graph::Configuration& c) const;
-  std::vector<InnerGeometry> getInnerGeometries(bool bezier) const;
-  std::vector<InnerGeometry> getInnerGeometriesUnder(const graph::Configuration& c, const EdgeTripGeom* g,
-    const std::vector<size_t>* order) const;
+  std::vector<InnerGeometry> getInnerGeometries(const graph::Configuration& c,
+      bool bezier) const;
+  std::vector<InnerGeometry> getInnerGeometriesUnder(
+      const graph::Configuration& c, bool bezier, const EdgeTripGeom* g,
+      const std::vector<size_t>* order) const;
 
   util::geo::Polygon getConvexFrontHull(double d) const;
 
@@ -126,11 +125,14 @@ class Node {
 
   std::set<gtfs::Stop*> _stops;
 
-  geo::PolyLine getInnerBezier(const NodeFront& nf,
-      const TripOccurance& tripOcc, const graph::Partner& partner) const;
+  geo::PolyLine getInnerBezier(const Configuration& c, const NodeFront& nf,
+      const TripOccurance& tripOcc, const graph::Partner& partner, const EdgeTripGeom* g,
+      const std::vector<size_t>* order) const;
 
-  geo::PolyLine getInnerStraightLine(const NodeFront& nf,
-      const TripOccurance& tripOcc, const graph::Partner& partner) const;
+  geo::PolyLine getInnerStraightLine(const Configuration& c,
+      const NodeFront& nf, const TripOccurance& tripOcc,
+      const graph::Partner& partner, const EdgeTripGeom* g,
+      const std::vector<size_t>* order) const;
 
   friend class TransitGraph;
 };

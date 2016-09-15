@@ -1,6 +1,6 @@
 // Copyright 2016, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosip@informatik.uni-freiburg.de>
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #ifndef TRANSITMAP_GRAPH_EDGETRIPGEOM_H_
 #define TRANSITMAP_GRAPH_EDGETRIPGEOM_H_
@@ -45,15 +45,12 @@ class EdgeTripGeom {
   void addTrip(gtfs::Trip* t, const Node* dirNode);
   const std::vector<TripOccurance>& getTripsUnordered() const;
 
-  const std::vector<size_t>& getTripOrdering() const;
-
-  void setTripOrdering(std::vector<size_t>& ordering);
-
   std::vector<TripOccurance>::iterator removeTripOccurance(std::vector<TripOccurance>::const_iterator pos);
 
-  TripOccWithPos getTripsForRoute(const gtfs::Route* r) const;
   TripOccWithPos getTripsForRouteUnder(const gtfs::Route* r,
     const std::vector<size_t> ordering) const;
+
+  TripOccurance* getTripsForRoute(const gtfs::Route* r) const;
 
   const geo::PolyLine& getGeom() const;
   void setGeom(const geo::PolyLine& p);
@@ -62,6 +59,7 @@ class EdgeTripGeom {
 
   bool containsRoute(gtfs::Route* r) const;
   size_t getTripCardinality() const;
+  size_t getCardinality() const;
   const Node* getGeomDir() const;
 
   void setGeomDir(const Node* newDir);
@@ -71,15 +69,7 @@ class EdgeTripGeom {
 
   double getTotalWidth() const;
  private:
-  /**
-   * this vector remains in the same order all the time
-   */
   std::vector<TripOccurance> _trips;
-
-  /**
-   * this represents the ording of the vector above
-   */
-  std::vector<size_t> _ordering;
 
   geo::PolyLine _geom;
   const Node* _geomDir; // the direction of the geometry, may be reversed
