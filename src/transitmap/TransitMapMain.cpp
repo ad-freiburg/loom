@@ -4,10 +4,11 @@
 
 #include <unistd.h>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <set>
 #include <stdio.h>
-#include "easylogging/easylogging.h"
+#include "./../log/Log.h"
 #include "gtfsparser/Parser.h"
 #include "graph/TransitGraph.h"
 #include "graph/GraphBuilder.h"
@@ -17,8 +18,8 @@
 #include "geo/PolyLine.h"
 #include "gtfsparser/gtfs/Service.h"
 #include "optim/EdgeOrderOptimizer.h"
-
-INITIALIZE_EASYLOGGINGPP;
+#include "config/ConfigReader.cpp"
+#include "config/TransitMapConfig.h"
 
 using namespace transitmapper;
 using std::string;
@@ -31,59 +32,55 @@ int main(int argc, char** argv) {
   // initialize randomness
   srand(time(NULL) + rand());
 
-  el::Loggers::reconfigureAllLoggers(
-    el::ConfigurationType::Format, "[%datetime] %level: %msg");
+  config::Config cfg;
 
-  el::Loggers::reconfigureAllLoggers(
-    el::ConfigurationType::ToFile, "false");
-
-  // initialize easylogging lib
-  START_EASYLOGGINGPP(argc, argv);
+  config::ConfigReader cr;
+  cr.read(&cfg, argc, argv);
 
   // parse an example feed
   gtfsparser::Parser parser;
-
   gtfsparser::gtfs::Feed feed;
 
   if (argc > 1) {
-    LOG(INFO) << "reading feed at " << argv[1];
+    LOG(INFO) << "reading feed at " << argv[1] << std::endl;
     parser.parse(&feed, argv[1]);
 
     graph::TransitGraph g("shinygraph", "+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=6378137 +b=6378137 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
 
-    graph::GraphBuilder b(&g);
+    graph::GraphBuilder b(&g, &cfg);
 
-    LOG(INFO) << "Building graph...";
+    LOG(INFO) << "Building graph..." << std::endl;
     b.consume(feed);
 
-    LOG(INFO) << "Simplyfing...";
+    LOG(INFO) << "Simplyfing..." << std::endl;
     b.simplify();
 
-    LOG(INFO) << "Building topological nodes...";
+    LOG(INFO) << "Building topological nodes..." << std::endl;
     b.createTopologicalNodes();
 
-    LOG(INFO) << "Averaging node positions";
+    LOG(INFO) << "Averaging node positions" << std::endl;
     b.averageNodePositions();
 
-    LOG(INFO) << "Creating node fronts...";
+    LOG(INFO) << "Creating node fronts..." << std::endl;
     b.writeMainDirs();
+    b.expandOverlappinFronts();
 
-    LOG(INFO) << "Writing initial ordering configuration...";
+    LOG(INFO) << "Writing initial ordering configuration..." << std::endl;
     b.writeInitialConfig();
 
-    LOG(INFO) << "Optimizing...";
+    LOG(INFO) << "Optimizing..." << std::endl;
     optim::EdgeOrderOptimizer eoOptim(&g);
-    eoOptim.optimize();
+    //eoOptim.optimize();
 
-    LOG(INFO) << "Total graph score is -- " << g.getScore() << " --";
+    LOG(INFO) << "Total graph score is -- " << g.getScore() << " --" << std::endl;
     LOG(INFO) << "Per node graph score is -- "
-      << g.getScore() / g.getNodes()->size() << " --";
+      << g.getScore() / g.getNodes()->size() << " --" << std::endl;
 
-    LOG(INFO) << "Outputting to SVG...";
+    LOG(INFO) << "Outputting to SVG..." << std::endl;
     std::ofstream o;
     o.open("/home/patrick/test.svg");
 
-    LOG(INFO) << "outputting to SVG...";
+    LOG(INFO) << "outputting to SVG..." << std::endl;
     output::SvgOutput svgOut(&o, .1);
     svgOut.print(g);
   } else {
@@ -147,6 +144,18 @@ int main(int argc, char** argv) {
     svgOut.printLine(a, "fill:none;stroke:black;stroke-width:5", 2000, 2000, 0, 0);
     svgOut.printLine(p, "fill:none;stroke:red;stroke-width:5", 2000, 2000, 0, 0);
     svgOut.printLine(b, "fill:none;stroke:red;stroke-width:5", 2000, 2000, 0, 0);
+
+    transitmapper::geo::PolyLine ptest;
+
+    ptest << util::geo::Point(90, 100);
+    ptest << util::geo::Point(100, 100);
+    ptest << util::geo::Point(95, 102);
+    ptest << util::geo::Point(101, 103);
+    ptest << util::geo::Point(121, 103);
+
+    ptest.smoothenOutliers(10);
+    svgOut.printLine(ptest, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+
 
     for (size_t i = 1; i < 5; i++) {
       transitmapper::geo::PolyLine pl = avg;

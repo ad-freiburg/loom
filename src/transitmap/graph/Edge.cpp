@@ -48,7 +48,8 @@ bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
 }
 
 // _____________________________________________________________________________
-bool Edge::addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode) {
+bool Edge::addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode, double w,
+    double s) {
   assert(toNode == _from || toNode == _to);
   bool inserted = false;
   for (auto& e : _tripsContained) {
@@ -59,7 +60,7 @@ bool Edge::addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode) {
     }
   }
   if (!inserted) {
-    EdgeTripGeom etg(pl, toNode);
+    EdgeTripGeom etg(pl, toNode, w, s);
     etg.addTrip(t, toNode);
     _tripsContained.push_back(etg);
   }
@@ -134,7 +135,9 @@ void Edge::averageCombineGeom() {
 
   geo::PolyLine pl = geo::PolyLine::average(lines);
 
-  EdgeTripGeom combined(pl, referenceDir);
+  EdgeTripGeom combined(pl, referenceDir,
+      _tripsContained.front().getWidth(),
+      _tripsContained.front().getSpacing());
 
   for (auto& et : _tripsContained) {
     for (auto& r : et.getTripsUnordered()) {

@@ -82,6 +82,8 @@ class PolyLine {
   void simplify(double d);
   void empty();
 
+  void smoothenOutliers(double d);
+
 	std::pair<size_t, double> nearestSegment(const util::geo::Point& p) const;
 	std::pair<size_t, double> nearestSegmentAfter(const util::geo::Point& p, size_t after) const;
 

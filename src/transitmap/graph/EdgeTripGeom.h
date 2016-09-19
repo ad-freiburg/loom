@@ -16,9 +16,6 @@ namespace graph {
 
 using namespace gtfsparser;
 
-static const double SPACING = 10;
-static const double WIDTH = 20;
-
 struct TripOccurance {
   TripOccurance(gtfs::Route* r) : route(r), direction(0) {}
   void addTrip(gtfs::Trip* t, const Node* dirNode) {
@@ -40,12 +37,16 @@ typedef std::pair<TripOccurance*, size_t> TripOccWithPos;
 
 class EdgeTripGeom {
  public:
-  EdgeTripGeom(geo::PolyLine pl, const Node* geomDir);
+  EdgeTripGeom(geo::PolyLine pl, const Node* geomDir, double w, double s);
+
   void addTrip(gtfs::Trip* t, const Node* dirNode, geo::PolyLine& pl);
+
   void addTrip(gtfs::Trip* t, const Node* dirNode);
+
   const std::vector<TripOccurance>& getTripsUnordered() const;
 
-  std::vector<TripOccurance>::iterator removeTripOccurance(std::vector<TripOccurance>::const_iterator pos);
+  std::vector<TripOccurance>::iterator removeTripOccurance(
+      std::vector<TripOccurance>::const_iterator pos);
 
   TripOccWithPos getTripsForRouteUnder(const gtfs::Route* r,
     const std::vector<size_t> ordering) const;
@@ -73,11 +74,14 @@ class EdgeTripGeom {
 
   // TODO: store this here atm, but find better plcae...
   std::vector<std::vector<size_t> > permutations;
+
  private:
   std::vector<TripOccurance> _trips;
 
   geo::PolyLine _geom;
   const Node* _geomDir; // the direction of the geometry, may be reversed
+
+  double _width, _spacing;
 };
 
 }}

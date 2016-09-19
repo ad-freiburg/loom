@@ -4,19 +4,20 @@
 
 #include <proj_api.h>
 #include "GraphBuilder.h"
+#include "./../config/TransitMapConfig.h"
 
 using namespace transitmapper;
 using namespace graph;
 using namespace gtfsparser;
 using namespace gtfs;
 
-// _____________________________________________________________________________ 
-GraphBuilder::GraphBuilder(TransitGraph* targetGraph)
-: _targetGraph(targetGraph) {
+// _____________________________________________________________________________
+GraphBuilder::GraphBuilder(TransitGraph* targetGraph, const config::Config* cfg)
+: _targetGraph(targetGraph), _cfg(cfg) {
   _mercProj = pj_init_plus(WGS84_PROJ);
 }
 
-// _____________________________________________________________________________ 
+// _____________________________________________________________________________
 void GraphBuilder::consume(const Feed& f) {
   // TODO: make this stuff configurable
 
@@ -28,8 +29,9 @@ void GraphBuilder::consume(const Feed& f) {
     cur++;
     if (t->second->getStopTimes().size() < 2) continue;
 
-    //if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
-    if (!(t->second->getShape())) continue;
+    // if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
+    if (!checkTripSanity(t->second)) continue;
+
     auto st = t->second->getStopTimes().begin();
 
     StopTime prev = *st;
@@ -55,7 +57,7 @@ void GraphBuilder::consume(const Feed& f) {
       }
 
       if (!exE->addTrip(t->second, toNode)) {
-        geo::PolyLine edgeGeom;
+        std::pair<bool, geo::PolyLine> edgeGeom;
         if (AGGREGATE_STOPS) {
           Stop* frs = prev.getStop()->getParentStation() ? prev.getStop()->getParentStation() : prev.getStop();
           Stop* tos = cur.getStop()->getParentStation() ? cur.getStop()->getParentStation() : cur.getStop();
@@ -63,14 +65,20 @@ void GraphBuilder::consume(const Feed& f) {
         } else {
           edgeGeom = getSubPolyLine(prev.getStop(), cur.getStop(), t->second);
         }
-        exE->addTrip(t->second, edgeGeom, toNode);
+
+        // only take geometries that could be found using the
+        // shape geometry, not some fallback
+        if (edgeGeom.first) {
+          exE->addTrip(t->second, edgeGeom.second, toNode,
+              _cfg->lineWidth, _cfg->lineSpacing);
+        }
       }
       prev = cur;
     }
   }
 }
 
-// _____________________________________________________________________________ 
+// _____________________________________________________________________________
 util::geo::Point GraphBuilder::getProjectedPoint(double lat, double lng) const {
   double x = lng;
   double y = lat;
@@ -82,7 +90,7 @@ util::geo::Point GraphBuilder::getProjectedPoint(double lat, double lng) const {
   return util::geo::Point(x, y);
 }
 
-// _____________________________________________________________________________ 
+// _____________________________________________________________________________
 void GraphBuilder::simplify() {
   // try to merge both-direction edges into a single one
 
@@ -199,9 +207,9 @@ void GraphBuilder::createTopologicalNodes() {
     if (a == b) continue;
 
 
-    EdgeTripGeom eaEdgeGeom(ea, a);
-    EdgeTripGeom abEdgeGeom(ab, b);
-    EdgeTripGeom ecEdgeGeom(ec, w.e->getTo());
+    EdgeTripGeom eaEdgeGeom(ea, a, _cfg->lineWidth, _cfg->lineSpacing);
+    EdgeTripGeom abEdgeGeom(ab, b, _cfg->lineWidth, _cfg->lineSpacing);
+    EdgeTripGeom ecEdgeGeom(ec, w.e->getTo(), _cfg->lineWidth, _cfg->lineSpacing);
 
     const Node* faDir = 0;
     const Node* fcDir = 0;
@@ -214,8 +222,8 @@ void GraphBuilder::createTopologicalNodes() {
       fcDir = w.f->getTo();
     }
 
-    EdgeTripGeom faEdgeGeom(fa, faDir);
-    EdgeTripGeom fcEdgeGeom(fc, fcDir);
+    EdgeTripGeom faEdgeGeom(fa, faDir, _cfg->lineWidth, _cfg->lineSpacing);
+    EdgeTripGeom fcEdgeGeom(fc, fcDir, _cfg->lineWidth, _cfg->lineSpacing);
 
     for (const TripOccurance& r : curEdgeGeom.getTripsUnordered()) {
       for (auto& t : r.trips) {
@@ -283,10 +291,10 @@ void GraphBuilder::createTopologicalNodes() {
 }
 
 // _____________________________________________________________________________
-geo::PolyLine GraphBuilder::getSubPolyLine(Stop* a, Stop* b, Trip* t) {
+std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b, Trip* t) {
   if (!t->getShape()) {
-    return geo::PolyLine(getProjectedPoint(a->getLat(), a->getLng()),
-      getProjectedPoint(b->getLat(), b->getLng()));
+    return std::pair<bool, geo::PolyLine>(false, geo::PolyLine(getProjectedPoint(a->getLat(), a->getLng()),
+      getProjectedPoint(b->getLat(), b->getLng())));
   }
 
   auto pl = _polyLines.find(t->getShape());
@@ -299,10 +307,21 @@ geo::PolyLine GraphBuilder::getSubPolyLine(Stop* a, Stop* b, Trip* t) {
     }
 
     pl->second.simplify(10);
+    pl->second.smoothenOutliers(50);
   }
 
-  return pl->second.getSegment(getProjectedPoint(a->getLat(), a->getLng()),
-    getProjectedPoint(b->getLat(), b->getLng()));
+  if ((pl->second.distTo(getProjectedPoint(a->getLat(), a->getLng())) > 200) ||
+    (pl->second.distTo(getProjectedPoint(b->getLat(), b->getLng())) > 200)) {
+    // something is not right, the distance from the station to its geometry
+    // is excessive. fall back to straight line connection
+    geo::PolyLine p = geo::PolyLine(getProjectedPoint(a->getLat(), a->getLng()),
+      getProjectedPoint(b->getLat(), b->getLng()));
+    p.smoothenOutliers(50);
+    return std::pair<bool, geo::PolyLine>(false, p);
+  }
+
+  return std::pair<bool, geo::PolyLine>(true, pl->second.getSegment(getProjectedPoint(a->getLat(), a->getLng()),
+    getProjectedPoint(b->getLat(), b->getLng())));
 }
 
 // _____________________________________________________________________________
@@ -413,9 +432,11 @@ void GraphBuilder::writeMainDirs() {
 
       n->addMainDir(f);
     }
-
   }
+}
 
+// _____________________________________________________________________________
+void GraphBuilder::expandOverlappinFronts() {
   // now, look at the nodes entire front geometries and expand them
   // until nothing overlaps
   double step = 1;
@@ -445,7 +466,7 @@ void GraphBuilder::writeMainDirs() {
 // _____________________________________________________________________________
 std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(const Node* n) const {
   std::set<NodeFront*> ret;
-  double minLength = 10;
+  double minLength = 20;
 
   for (size_t i = 0; i < n->getMainDirs().size(); ++i) {
     const NodeFront& fa = n->getMainDirs()[i];
@@ -493,7 +514,6 @@ void GraphBuilder::freeNodeFront(NodeFront* f) {
         if (g.getGeomDir() != f->n) {
           // cut at beginning
           g.setGeom(g.getGeom().getSegment(iSects.begin()->totalPos, 1));
-
           assert(cutLine.distTo(g.getGeom().getLine().front()) < 0.1);
         } else {
           // cut at end
@@ -519,4 +539,15 @@ void GraphBuilder::writeInitialConfig() {
   }
 
   _targetGraph->setConfig(c);
+}
+
+// _____________________________________________________________________________
+bool GraphBuilder::checkTripSanity(gtfs::Trip* t) const {
+  return checkShapeSanity(t->getShape());
+}
+
+// _____________________________________________________________________________
+bool GraphBuilder::checkShapeSanity(gtfs::Shape* s) const {
+  if (!s || s->getPoints().size() < 2) return false;
+  return true;
 }

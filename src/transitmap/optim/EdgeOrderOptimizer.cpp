@@ -2,7 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "easylogging/easylogging.h"
+#include "./../../log/Log.h"
 #include "./EdgeOrderOptimizer.h"
 
 
@@ -17,13 +17,13 @@ void EdgeOrderOptimizer::optimize() {
   Configuration startConfig;
   startConfig = _g->getConfig();
 
-  size_t numRuns = 1;
+  size_t numRuns = 10;
 
   std::vector<std::pair<double, Configuration> > results;
   results.resize(numRuns);
 
   for (size_t i = 0; i < numRuns; i++) {
-    LOG(INFO) << "Round " << i;
+    LOG(INFO) << "Round " << i << std::endl;
 
     Configuration c;
 
@@ -40,7 +40,7 @@ void EdgeOrderOptimizer::optimize() {
     };
 
     double newScore = _g->getScore(c);
-    LOG(INFO) << newScore;
+    LOG(INFO) << newScore << std::endl;
     results[i] = std::pair<double, Configuration>(newScore, c);
   }
 
@@ -54,7 +54,6 @@ void EdgeOrderOptimizer::optimize() {
     }
   }
 
-  std::cout << "result: " << best << " score: " << bestScore << std::endl;
   _g->setConfig(results[best].second);
 }
 

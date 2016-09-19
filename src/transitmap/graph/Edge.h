@@ -31,7 +31,7 @@ class Edge {
   Node* getTo() const;
 
   bool addTrip(gtfs::Trip* t, Node* toNode);
-  bool addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode);
+  bool addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode, double w, double s);
 
   const std::vector<EdgeTripGeom>& getEdgeTripGeoms() const;
   std::vector<EdgeTripGeom>* getEdgeTripGeoms();

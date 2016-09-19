@@ -10,6 +10,7 @@
 #include <proj_api.h>
 #include "TransitGraph.h"
 #include "gtfsparser/gtfs/Feed.h"
+#include "./../config/TransitMapConfig.h"
 #include "../geo/PolyLine.h"
 
 namespace transitmapper {
@@ -28,7 +29,7 @@ struct ShrdSegWrap {
 class GraphBuilder {
 
  public:
-  GraphBuilder(TransitGraph* targetGraph);
+  GraphBuilder(TransitGraph* targetGraph, const config::Config* cfg);
 
   void consume(const gtfs::Feed& f);
   void simplify();
@@ -36,10 +37,12 @@ class GraphBuilder {
   void averageNodePositions();
   void fixGeomDirs();
   void writeMainDirs();
+  void expandOverlappinFronts();
   void writeInitialConfig();
 
  private:
   TransitGraph* _targetGraph;
+  const config::Config* _cfg;
   projPJ _mercProj;
 
   // map of compiled polylines, to avoid calculating them each time
@@ -47,7 +50,7 @@ class GraphBuilder {
 
   util::geo::Point getProjectedPoint(double lat, double lng) const;
 
-  geo::PolyLine getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b, gtfs::Trip* t);
+  std::pair<bool, geo::PolyLine> getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b, gtfs::Trip* t);
   ShrdSegWrap getNextSharedSegment() const;
 
   std::set<NodeFront*> nodeGetOverlappingFronts(const Node* n) const;
@@ -56,6 +59,9 @@ class GraphBuilder {
   void freeNodeFront(NodeFront* f);
 
   double getNodeFreeMinDistance(const NodeFront& a, const NodeFront& b) const;
+
+  bool checkTripSanity(gtfs::Trip* t) const;
+  bool checkShapeSanity(gtfs::Shape* t) const;
 
   mutable std::set<const Edge*> _indEdges;
   mutable std::map<const Edge*, size_t> _pEdges;

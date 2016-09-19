@@ -320,6 +320,21 @@ void PolyLine::simplify(double d) {
 }
 
 // _____________________________________________________________________________
+void PolyLine::smoothenOutliers(double d) {
+  if (_line.size() < 3) return;
+  for (size_t i = 1; i < _line.size()-3; ++i) {
+    double ang = util::geo::innerProd(_line[i], _line[i-1], _line[i+1]);
+
+    if (util::geo::dist(_line[i], _line[i+1]) < d || util::geo::dist(_line[i], _line[i-1]) < d) {
+      if (ang < 35) {
+        std::cout << "Fixing outlier..." << std::endl;
+        _line.erase(_line.begin() + i);
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
 bool PolyLine::equals(const PolyLine& rhs) const {
   // TODO: why 100? make global static or configurable or determine in some
   //       way!
@@ -382,7 +397,7 @@ const {
    * TODO: use some mutation of frechet distance here..?
    */
   double STEP_SIZE = 20;
-  double MIN_SEG_LENGTH = dmax * 2;
+  double MIN_SEG_LENGTH = dmax;
   SharedSegments ret;
 
   //if (distTo(pl) > DMAX) return ret;

@@ -56,7 +56,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
     renderNodeConnections(outG, n, w, h);
-    renderNodeScore(outG, n, w, h);
+    //renderNodeScore(outG, n, w, h);
   }
   _w.closeTag();
 
@@ -68,7 +68,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
       params["stroke"] = "black";
       params["stroke-width"] = "1";
       params["fill"] = "white";
-      printPolygon(n->getConvexFrontHull(20), params, w, h, xOffset, yOffset);
+      //printPolygon(n->getConvexFrontHull(20), params, w, h, xOffset, yOffset);
     } else if (false) {
       params["r"] = "5";
       params["fill"] = "#FF00FF";
@@ -81,7 +81,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
         << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
       std::map<std::string, std::string> params;
       params["style"] = style.str();
-      //printLine(p, params, w, h, xOffset, yOffset);
+      printLine(p, params, w, h, xOffset, yOffset);
     }
   }
   _w.closeTag();
@@ -104,6 +104,7 @@ void SvgOutput::outputEdges(const graph::TransitGraph& outG, double w, double h)
 // _____________________________________________________________________________
 void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
     const graph::Node* n, double w, double h) {
+  if (n->getStops().size() != 0) return;
   int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
   int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 

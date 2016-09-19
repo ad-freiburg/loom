@@ -13,8 +13,9 @@ using namespace graph;
 using namespace gtfsparser;
 
 // _____________________________________________________________________________
-EdgeTripGeom::EdgeTripGeom(geo::PolyLine geom, const Node* geomDir)
-: _geomDir(geomDir) {
+EdgeTripGeom::EdgeTripGeom(geo::PolyLine geom, const Node* geomDir, double w,
+    double s)
+: _geomDir(geomDir), _width(w), _spacing(s) {
   setGeom(geom);
 }
 
@@ -113,7 +114,7 @@ void EdgeTripGeom::removeOrphans() {
   avgTrips /= _trips.size();
 
   for (auto it = _trips.begin(); it != _trips.end(); it++) {
-    if (it->trips.size() < avgTrips * 0.1) {
+    if (it->trips.size() < avgTrips * 0.15) {
       it = removeTripOccurance(it);
       it--;
     }
@@ -122,9 +123,7 @@ void EdgeTripGeom::removeOrphans() {
 // _____________________________________________________________________________
 std::vector<TripOccurance>::iterator
 EdgeTripGeom::removeTripOccurance(std::vector<TripOccurance>::const_iterator pos) {
-  std::vector<TripOccurance>::iterator ret = _trips.erase(pos);
-
-  return ret;
+  return _trips.erase(pos);
 }
 
 // _____________________________________________________________________________
@@ -139,14 +138,12 @@ void EdgeTripGeom::setGeomDir(const Node* n) {
 
 // _____________________________________________________________________________
 double EdgeTripGeom::getWidth() const {
-  // TODO: replace this with per-route widths
-  return WIDTH;
+  return _width;
 }
 
 // _____________________________________________________________________________
 double EdgeTripGeom::getSpacing() const {
-  // TODO: make this configurable somewhere, maybe also per-route?
-  return SPACING;
+  return _spacing;
 }
 
 // _____________________________________________________________________________
