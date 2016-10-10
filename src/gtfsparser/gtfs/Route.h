@@ -6,6 +6,7 @@
 #define GTFSPARSER_GTFS_ROUTE_H_
 
 #include <stdint.h>
+#include <iomanip>
 #include <string>
 #include <sstream>
 #include "Agency.h"
@@ -103,7 +104,7 @@ class Route {
   std::string getHexColorString(uint32_t color) const {
     // using stringstream here, because it doesnt add "0x" to the front
     std::stringstream ss;
-    ss << std::hex << color;
+    ss << std::hex << std::setfill('0') << std::setw(6) << color;
     return ss.str();
   }
 };

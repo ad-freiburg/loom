@@ -1,15 +1,23 @@
 Parallel line snapping
 ======================
 
-* use dynamic max distance based on width of compared geometries (use existing getTotalWidth() method for that)
-* "crossing" detection. if the route part before the shared segment is on the opposite site of the compared route than
-  the part after the shared segment (maybe for a min distance?), consider this matching a crossing and don't snap it
+* be more exact! handle edge cases! this has to work 100%!
+* NO artifacts!
+* dont snap to stations! or: snap with smaller threshold!
+
+Node front expansion
+===================
+
+* new criteria: not distance, but length a front has to be expanded to intersect
+  with another front!
 
 Drawing
 =======
 
-* station rendering
 * direction arrows
+* line names
+* dirs at last station
+* better station name placement
 
 Preprocessing
 =============

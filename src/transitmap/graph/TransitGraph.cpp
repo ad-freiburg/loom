@@ -5,9 +5,9 @@
 #include <proj_api.h>
 #include <string>
 #include <set>
-#include "TransitGraph.h"
-#include "Edge.h"
-#include "OrderingConfiguration.h"
+#include "./TransitGraph.h"
+#include "./Edge.h"
+#include "./OrderingConfiguration.h"
 
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;

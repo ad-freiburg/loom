@@ -46,6 +46,9 @@ struct NodeFront {
   geo::PolyLine geom;
   void setGeom(const geo::PolyLine& g) { geom = g; };
   void addEdge(Edge* e) { edges.push_back(e); }
+
+  // TODO
+  double refEtgLengthBefExp;
 };
 
 struct Partner {

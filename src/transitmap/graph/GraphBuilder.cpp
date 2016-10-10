@@ -4,12 +4,14 @@
 
 #include <proj_api.h>
 #include "GraphBuilder.h"
+#include "log/Log.h"
 #include "./../config/TransitMapConfig.h"
 
 using namespace transitmapper;
 using namespace graph;
 using namespace gtfsparser;
 using namespace gtfs;
+using util::geo::Point;
 
 // _____________________________________________________________________________
 GraphBuilder::GraphBuilder(TransitGraph* targetGraph, const config::Config* cfg)
@@ -29,7 +31,7 @@ void GraphBuilder::consume(const Feed& f) {
     cur++;
     if (t->second->getStopTimes().size() < 2) continue;
 
-    // if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
+    if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
     if (!checkTripSanity(t->second)) continue;
 
     auto st = t->second->getStopTimes().begin();
@@ -79,7 +81,7 @@ void GraphBuilder::consume(const Feed& f) {
 }
 
 // _____________________________________________________________________________
-util::geo::Point GraphBuilder::getProjectedPoint(double lat, double lng) const {
+Point GraphBuilder::getProjectedPoint(double lat, double lng) const {
   double x = lng;
   double y = lat;
   x *= DEG_TO_RAD;
@@ -87,7 +89,7 @@ util::geo::Point GraphBuilder::getProjectedPoint(double lat, double lng) const {
 
   pj_transform(_mercProj, _targetGraph->getProjection(), 1, 1, &x, &y, 0);
 
-  return util::geo::Point(x, y);
+  return Point(x, y);
 }
 
 // _____________________________________________________________________________
@@ -107,24 +109,31 @@ ShrdSegWrap GraphBuilder::getNextSharedSegment() const {
   for (auto n : *_targetGraph->getNodes()) {
     for (auto e : n->getAdjListOut()) {
       i++;
-      if (_indEdges.find(e) != _indEdges.end() || e->getEdgeTripGeoms()->size() != 1) continue;
+      if (_indEdges.find(e) != _indEdges.end() || e->getEdgeTripGeoms()->size() != 1) {
+        continue;
+      }
       // TODO: outfactor this _______
       for (auto nt : *_targetGraph->getNodes()) {
         for (auto toTest : nt->getAdjListOut()) {
           // TODO: only check edges with a SINGLE geometry atm, see also check above
-          if (_indEdges.find(toTest) != _indEdges.end() || toTest->getEdgeTripGeoms()->size() != 1) continue;
+          if (_indEdges.find(toTest) != _indEdges.end() || toTest->getEdgeTripGeoms()->size() != 1) {
+            continue;
+          }
+
           if (e != toTest) {
             // set dmax according to the width of the etg
             double dmax = fmax(30, e->getEdgeTripGeoms()->front().getTotalWidth() / 2 + toTest->getEdgeTripGeoms()->front().getTotalWidth() / 2 + ((e->getEdgeTripGeoms()->front().getSpacing() + toTest->getEdgeTripGeoms()->front().getSpacing()) / 2));
+
             geo::SharedSegments s = e->getEdgeTripGeoms()->front().getGeom().getSharedSegments(toTest->getEdgeTripGeoms()->front().getGeom(), dmax);
 
             if (s.segments.size() > 0 && util::geo::dist(s.segments[0].first.p, s.segments[0].second.p) > 50) {
               _pEdges[e]++;
               if (_pEdges[e] > 100) {
-                std::cout << "Too many optimiziations for " << e << ", preventing further..." << std::endl;
+                LOG(WARN) << "Too many optimiziations for " << e
+                  << ", preventing further..." << std::endl;
                 _indEdges.insert(e);
               }
-              std::cout << _indEdges.size() << " / " << i << std::endl;
+              LOG(DEBUG) << _indEdges.size() << " / " << i << std::endl;
               return ShrdSegWrap(e, toTest, s.segments.front());
             }
           }
@@ -148,7 +157,8 @@ void GraphBuilder::createTopologicalNodes() {
     const EdgeTripGeom& compEdgeGeom = w.f->getEdgeTripGeoms()->front();
 
     geo::PolyLine ea = curEdgeGeom.getGeom().getSegment(0, w.s.first.totalPos);
-    geo::PolyLine ab = curEdgeGeom.getGeom().getSegment(w.s.first.totalPos, w.s.second.totalPos);
+    geo::PolyLine ab = curEdgeGeom.getGeom().getSegment(w.s.first.totalPos,
+        w.s.second.totalPos);
     geo::PolyLine ec = curEdgeGeom.getGeom().getSegment(w.s.second.totalPos, 1);
 
     geo::PointOnLine fap = compEdgeGeom.getGeom().projectOn(w.s.first.p);
@@ -158,6 +168,9 @@ void GraphBuilder::createTopologicalNodes() {
     geo::PolyLine fa;
     geo::PolyLine fab;
     geo::PolyLine fc;
+
+    assert(w.f->getTo() == compEdgeGeom.getGeomDir());
+
     if (fap.totalPos > fbp.totalPos) {
       reversed = true;
 
@@ -172,17 +185,21 @@ void GraphBuilder::createTopologicalNodes() {
       fc = compEdgeGeom.getGeom().getSegment(fbp.totalPos, 1);
     }
 
+    /**
     std::vector<const geo::PolyLine*> avg;
     avg.push_back(&ab);
     avg.push_back(&fab);
     ab = geo::PolyLine::average(avg);
     ab.simplify(5);
+    **/
+
+    //if (fab.getLength() > ab.getLength()) ab = fab;
 
     // new nodes at the start and end of the shared segment
     Node* a = 0;
     Node* b = 0;
 
-    double maxSnapDist = 20;
+    double maxSnapDist = 40;
 
     if (ea.getLength() < maxSnapDist) {
       a = w.e->getFrom();
@@ -205,7 +222,6 @@ void GraphBuilder::createTopologicalNodes() {
 
 
     if (a == b) continue;
-
 
     EdgeTripGeom eaEdgeGeom(ea, a, _cfg->lineWidth, _cfg->lineSpacing);
     EdgeTripGeom abEdgeGeom(ab, b, _cfg->lineWidth, _cfg->lineSpacing);
@@ -254,6 +270,14 @@ void GraphBuilder::createTopologicalNodes() {
       }
     }
 
+    for (auto to : curEdgeGeom.getTripsUnordered()) {
+      assert(abEdgeGeom.containsRoute(to.route));
+    }
+
+    for (auto to : compEdgeGeom.getTripsUnordered()) {
+      assert(abEdgeGeom.containsRoute(to.route));
+    }
+
     Node* wefrom = w.e->getFrom();
     Node* weto = w.e->getTo();
     Node* wffrom = w.f->getFrom();
@@ -266,9 +290,9 @@ void GraphBuilder::createTopologicalNodes() {
     // add new edges
     _targetGraph->addNode(a);
     _targetGraph->addNode(b);
-    Edge* eaE =_targetGraph->addEdge(wefrom, a);
-    Edge* abE =_targetGraph->addEdge(a, b);
-    Edge* ebE =_targetGraph->addEdge(b, weto);
+    Edge* eaE = _targetGraph->addEdge(wefrom, a);
+    Edge* abE = _targetGraph->addEdge(a, b);
+    Edge* ebE = _targetGraph->addEdge(b, weto);
 
     Edge* faE = 0;
     Edge* fbE = 0;
@@ -291,16 +315,22 @@ void GraphBuilder::createTopologicalNodes() {
 }
 
 // _____________________________________________________________________________
-std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b, Trip* t) {
+std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b,
+    Trip* t) {
+  Point ap = getProjectedPoint(a->getLat(), a->getLng());
+  Point bp = getProjectedPoint(b->getLat(), b->getLng());
+
   if (!t->getShape()) {
-    return std::pair<bool, geo::PolyLine>(false, geo::PolyLine(getProjectedPoint(a->getLat(), a->getLng()),
-      getProjectedPoint(b->getLat(), b->getLng())));
+    return std::pair<bool, geo::PolyLine>(false,
+        geo::PolyLine(ap, bp));
   }
 
   auto pl = _polyLines.find(t->getShape());
   if (pl == _polyLines.end()) {
     // generate polyline for this shape
-    pl = _polyLines.insert(std::pair<gtfs::Shape*, geo::PolyLine>(t->getShape(), geo::PolyLine())).first;
+    pl = _polyLines.insert(
+        std::pair<gtfs::Shape*, geo::PolyLine>(
+          t->getShape(), geo::PolyLine())).first;
 
     for (const auto& sp : t->getShape()->getPoints()) {
       pl->second << getProjectedPoint(sp.lat, sp.lng);
@@ -310,18 +340,22 @@ std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b, Tr
     pl->second.smoothenOutliers(50);
   }
 
-  if ((pl->second.distTo(getProjectedPoint(a->getLat(), a->getLng())) > 200) ||
-    (pl->second.distTo(getProjectedPoint(b->getLat(), b->getLng())) > 200)) {
-    // something is not right, the distance from the station to its geometry
-    // is excessive. fall back to straight line connection
-    geo::PolyLine p = geo::PolyLine(getProjectedPoint(a->getLat(), a->getLng()),
-      getProjectedPoint(b->getLat(), b->getLng()));
+  if ((pl->second.distTo(ap) > 200) ||
+    (pl->second.distTo(bp) > 200)) {
+
+    /**
+     * something is not right, the distance from the station to its geometry
+     * is excessive. fall back to straight line connection
+     */
+    geo::PolyLine p = geo::PolyLine(ap, bp);
     p.smoothenOutliers(50);
+    LOG(ERROR) << "RABE" << std::endl;
     return std::pair<bool, geo::PolyLine>(false, p);
   }
 
-  return std::pair<bool, geo::PolyLine>(true, pl->second.getSegment(getProjectedPoint(a->getLat(), a->getLng()),
-    getProjectedPoint(b->getLat(), b->getLng())));
+  geo::PolyLine p = pl->second.getSegment(ap, bp);
+
+  return std::pair<bool, geo::PolyLine>(true, p);
 }
 
 // _____________________________________________________________________________
@@ -357,7 +391,7 @@ void GraphBuilder::averageNodePositions() {
       }
     }
 
-    n->setPos(util::geo::Point(x/c, y/c));
+    n->setPos(Point(x/c, y/c));
   }
 }
 
@@ -374,7 +408,7 @@ Node* GraphBuilder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel) {
 
   if (n) return n;
 
-  util::geo::Point p = getProjectedPoint(curStop->getLat(), curStop->getLng());
+  Point p = getProjectedPoint(curStop->getLat(), curStop->getLng());
 
   if (aggrLevel > 1) {
     n = _targetGraph->getNearestNode(p, 100);
@@ -419,8 +453,11 @@ void GraphBuilder::writeMainDirs() {
       NodeFront f(e, n, g);
       geo::PolyLine pl;
 
+      f.refEtgLengthBefExp = g->getGeom().getLength();
+
       if (g->getGeomDir() == n) {
-        pl = g->getGeom().getOrthoLineAtDist(g->getGeom().getLength(), g->getTotalWidth());
+        pl = g->getGeom().getOrthoLineAtDist(g->getGeom().getLength(),
+            g->getTotalWidth());
       } else {
         pl = g->getGeom().getOrthoLineAtDist(0, g->getTotalWidth());
       }
@@ -449,7 +486,8 @@ void GraphBuilder::expandOverlappinFronts() {
         stillFree = true;
         if (f->refEtg->getGeomDir() == n) {
           f->geom = f->refEtg->getGeom().getOrthoLineAtDist(
-              f->refEtg->getGeom().getLength() - step, f->refEtg->getTotalWidth());
+              f->refEtg->getGeom().getLength() - step,
+              f->refEtg->getTotalWidth());
         } else {
           f->geom = f->refEtg->getGeom().getOrthoLineAtDist(
               step, f->refEtg->getTotalWidth());
@@ -464,9 +502,10 @@ void GraphBuilder::expandOverlappinFronts() {
 }
 
 // _____________________________________________________________________________
-std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(const Node* n) const {
+std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(const Node* n)
+const {
   std::set<NodeFront*> ret;
-  double minLength = 20;
+  double minLength = 100;
 
   for (size_t i = 0; i < n->getMainDirs().size(); ++i) {
     const NodeFront& fa = n->getMainDirs()[i];
@@ -478,10 +517,12 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(const Node* n) const
 
       if ((n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 8) ||
           (n->getStops().size() == 0 && fa.geom.distTo(fb.geom) < getNodeFreeMinDistance(fa, fb))) {
-        if (fa.refEtg->getGeom().getLength() > minLength) {
+        if (fa.refEtg->getGeom().getLength() > minLength &&
+            fa.refEtg->getGeom().getLength() > fa.refEtgLengthBefExp / 2) {
           ret.insert(const_cast<NodeFront*>(&fa));
         }
-        if (fb.refEtg->getGeom().getLength() > minLength) {
+        if (fb.refEtg->getGeom().getLength() > minLength &&
+            fb.refEtg->getGeom().getLength() > fb.refEtgLengthBefExp / 2) {
           ret.insert(const_cast<NodeFront*>(&fb));
         }
       }
@@ -494,13 +535,10 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(const Node* n) const
 // _____________________________________________________________________________
 double GraphBuilder::getNodeFreeMinDistance(const NodeFront& a,
     const NodeFront& b) const {
-  size_t numShared = a.refEtg->getSharedRoutes(*b.refEtg).size();
+  size_t numShr= a.refEtg->getSharedRoutes(*b.refEtg).size() / 2;
 
-  if (numShared == 0) {
-    return (a.refEtg->getSpacing() + b.refEtg->getSpacing()) / 2;
-  } else {
-    return fmax(a.refEtg->getTotalWidth(), b.refEtg->getTotalWidth()) * 2;
-  }
+  if (numShr == 0) numShr = 1;
+  return (numShr * a.refEtg->getWidth() + a.refEtg->getSpacing() * (numShr-1)) * 2;
 }
 
 // _____________________________________________________________________________
@@ -509,7 +547,8 @@ void GraphBuilder::freeNodeFront(NodeFront* f) {
     geo::PolyLine cutLine = f->geom;
 
     for (EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
-      std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = cutLine.getIntersections(g.getGeom());
+      std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects =
+          cutLine.getIntersections(g.getGeom());
       if (iSects.size() > 0) {
         if (g.getGeomDir() != f->n) {
           // cut at beginning
@@ -548,6 +587,6 @@ bool GraphBuilder::checkTripSanity(gtfs::Trip* t) const {
 
 // _____________________________________________________________________________
 bool GraphBuilder::checkShapeSanity(gtfs::Shape* s) const {
-  if (!s || s->getPoints().size() < 2) return false;
+  if (!s|| s->getPoints().size() < 2) return false;
   return true;
 }

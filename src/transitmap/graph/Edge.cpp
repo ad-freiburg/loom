@@ -62,7 +62,7 @@ bool Edge::addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode, double w,
   if (!inserted) {
     EdgeTripGeom etg(pl, toNode, w, s);
     etg.addTrip(t, toNode);
-    _tripsContained.push_back(etg);
+    addEdgeTripGeom(etg);
   }
 
   return true;
@@ -87,13 +87,18 @@ void Edge::addEdgeTripGeom(const EdgeTripGeom& e) {
     const_cast<geo::PolyLine*>(&_tripsContained.back().getGeom())->reverse();
     _tripsContained.back().setGeomDir(_to);
   }
+
+  assert(util::geo::dist(_tripsContained.back().getGeom().getLine().front(), _from->getPos()) <
+    util::geo::dist(_tripsContained.back().getGeom().getLine().back(), _from->getPos()) + 10);
 }
 
 // _____________________________________________________________________________
 void Edge::simplify() {
+  /**
   for (auto& e : _tripsContained) {
     e.removeOrphans();
   }
+  **/
 
   // calculate average cardinalty of geometries on this edge
   double avg = 0;
@@ -105,7 +110,7 @@ void Edge::simplify() {
 
   for (auto it = _tripsContained.begin(); it < _tripsContained.end(); ++it) {
     if (it->getTripCardinality() < avg*0.1) {
-      it = _tripsContained.erase(it);
+      //it = _tripsContained.erase(it);
     }
   }
 
@@ -120,22 +125,15 @@ void Edge::averageCombineGeom() {
   }
 
   std::vector<const geo::PolyLine*> lines;
-  std::vector<geo::PolyLine*> reversed;
-  reversed.reserve(lines.size()); // prevent reallocation
-  const Node* referenceDir = _tripsContained.front().getGeomDir();
 
   for (auto& et : _tripsContained) {
-    if (et.getGeomDir() != referenceDir) {
-      reversed.push_back(new geo::PolyLine(et.getGeom().getReversed()));
-      lines.push_back(reversed.back());
-    } else {
-      lines.push_back(&et.getGeom());
-    }
+    assert(et.getGeomDir() == _to);
+    lines.push_back(&et.getGeom());
   }
 
   geo::PolyLine pl = geo::PolyLine::average(lines);
 
-  EdgeTripGeom combined(pl, referenceDir,
+  EdgeTripGeom combined(pl, _to,
       _tripsContained.front().getWidth(),
       _tripsContained.front().getSpacing());
 
@@ -147,9 +145,6 @@ void Edge::averageCombineGeom() {
     }
   }
 
-  for (auto p : reversed) {
-    delete p;
-  }
   _tripsContained.clear();
   _tripsContained.push_back(combined);
 }
@@ -163,14 +158,16 @@ void Edge::combineIncludedGeoms() {
   for (auto et = _tripsContained.begin(); et != _tripsContained.end();) {
     bool combined = false;
     for (auto& toCheckAgainst : _tripsContained) {
-      if (toCheckAgainst.getGeom().contains(et->getGeom(), 100)
-          && !et->getGeom().contains(toCheckAgainst.getGeom(), 100)) {
+      if (toCheckAgainst.getGeom().getLength() > et->getGeom().getLength()
+          && toCheckAgainst.getGeom().contains(et->getGeom(), 50)
+          && !et->getGeom().contains(toCheckAgainst.getGeom(), 50)) {
         for (auto& r : et->getTripsUnordered()) {
           for (auto& t : r.trips) {
             toCheckAgainst.addTrip(t, r.direction);
           }
         }
         combined = true;
+        break;
       }
     }
     if (combined) {

@@ -2,11 +2,14 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "PolyLine.h"
+#include "log/Log.h"
+#include "./PolyLine.h"
 
 using namespace transitmapper;
 using namespace geo;
-using namespace util::geo;
+using util::geo::Point;
+using util::geo::Line;
+using util::geo::intersection;
 
 // _____________________________________________________________________________
 PolyLine::PolyLine() {
@@ -14,18 +17,18 @@ PolyLine::PolyLine() {
 }
 
 // _____________________________________________________________________________
-PolyLine::PolyLine(const util::geo::Point& from, const util::geo::Point& to) {
+PolyLine::PolyLine(const Point& from, const Point& to) {
   *this << from << to;
 }
 
 // _____________________________________________________________________________
-PolyLine& PolyLine::operator<<(const util::geo::Point& p) {
+PolyLine& PolyLine::operator<<(const Point& p) {
   _line.push_back(p);
   return *this;
 }
 
 // _____________________________________________________________________________
-PolyLine& PolyLine::operator>>(const util::geo::Point& p) {
+PolyLine& PolyLine::operator>>(const Point& p) {
   _line.insert(_line.begin(), p);
   return *this;
 }
@@ -95,9 +98,24 @@ void PolyLine::offsetPerp(double units) {
     curP.set<1>(curP.get<1>() + (n2 * units));
 
     if (lastIns && befLastIns &&
-        lineIntersects(*lastIns, *befLastIns, lastP, curP)) {
-      *lastIns = intersection(*lastIns, *befLastIns, lastP, curP);
-      ret.push_back(curP);
+        util::geo::lineIntersects(*lastIns, *befLastIns, lastP, curP)) {
+      *lastIns = util::geo::intersection(*lastIns, *befLastIns, lastP, curP);
+
+      double d = util::geo::dist(lastP, *lastIns);
+      double d2 = util::geo::distToSegment(*lastIns, *befLastIns, lastP);
+
+      if (d > fabs(units) * 2 && d2 < d - (fabs(units))) {
+        geo::PolyLine pl(*lastIns, *befLastIns);
+        geo::PolyLine pll(*lastIns, curP);
+        pl = pl.getSegment(0, (d - (fabs(units))) / pl.getLength());
+        pll = pll.getSegment(0, (d - (fabs(units))) / pll.getLength());
+
+        ret.push_back(pll.getLine().back());
+        *lastIns = pl.getLine().back();
+        ret.push_back(curP);
+      } else {
+        ret.push_back(curP);
+      }
     } else {
       ret.push_back(lastP);
       ret.push_back(curP);
@@ -155,15 +173,15 @@ PointOnLine PolyLine::getPointAtDist(double atDist) const {
 
   if (_line.size() == 1) return PointOnLine(0, 0, _line[0]);
 
-  const util::geo::Point* last = &_line[0];
+  const Point* last = &_line[0];
 
   for (size_t i = 1; i < _line.size(); i++) {
-    const util::geo::Point& cur = _line[i];
+    const Point& cur = _line[i];
     double d = boost::geometry::distance(last, cur);
     dist += d;
 
     if (dist > atDist) {
-      double p = (d - (dist - atDist)) / d;
+      double p = (d - (dist - atDist));
       return PointOnLine(i-1, atDist / getLength(), interpolate(*last, cur, p));
     }
 
@@ -174,20 +192,20 @@ PointOnLine PolyLine::getPointAtDist(double atDist) const {
 }
 
 // _____________________________________________________________________________
-PointOnLine PolyLine::getPointAt(double atDist) const {
-  atDist *= boost::geometry::length(_line);
-  return getPointAtDist(atDist);
+PointOnLine PolyLine::getPointAt(double at) const {
+  at *= getLength();
+  return getPointAtDist(at);
 }
 
 // _____________________________________________________________________________
-util::geo::Point PolyLine::interpolate(const util::geo::Point& a,
-  const util::geo::Point& b, double p) const {
+Point PolyLine::interpolate(const Point& a,
+  const Point& b, double p) const {
   double n1 = b.get<0>() - a.get<0>();
   double n2 = b.get<1>() - a.get<1>();
   double n = sqrt(n1*n1 + n2*n2);
   n1 = n1 / n;
   n2 = n2 / n;
-  return util::geo::Point(a.get<0>() + (n1 * p * n), a.get<1>() + (n2 * p * n));
+  return Point(a.get<0>() + (n1 * p), a.get<1>() + (n2 * p));
 }
 
 // _____________________________________________________________________________
@@ -196,7 +214,7 @@ double PolyLine::distTo(const PolyLine& g) const {
 }
 
 // _____________________________________________________________________________
-double PolyLine::distTo(const util::geo::Point& p) const {
+double PolyLine::distTo(const Point& p) const {
   return boost::geometry::distance(_line, p);
 }
 
@@ -217,7 +235,6 @@ PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
     }
   }
 
-
   PolyLine ret;
   stepSize = AVERAGING_STEP / longestLength;
   bool end = false;
@@ -230,11 +247,11 @@ PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
     double y = 0;
 
     for (const PolyLine* pl : lines) {
-      util::geo::Point p = pl->getPointAt(a).p;
+      Point p = pl->getPointAt(a).p;
       x += p.get<0>();
       y += p.get<1>();
     }
-    ret << util::geo::Point(x / lines.size(), y / lines.size());
+    ret << Point(x / lines.size(), y / lines.size());
   }
 
   ret.simplify(0);
@@ -243,9 +260,9 @@ PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
 }
 
 // _____________________________________________________________________________
-std::pair<size_t, double> PolyLine::nearestSegmentAfter(const Point& p, size_t a) const {
+std::pair<size_t, double> PolyLine::nearestSegmentAfter(const Point& p,
+    size_t a) const {
   // returns the index of the starting point of the nearest segment of p
-
   assert(a < _line.size());
 
   double totalLength = getLength();
@@ -327,7 +344,7 @@ void PolyLine::smoothenOutliers(double d) {
 
     if (util::geo::dist(_line[i], _line[i+1]) < d || util::geo::dist(_line[i], _line[i-1]) < d) {
       if (ang < 35) {
-        std::cout << "Fixing outlier..." << std::endl;
+        LOG(DEBUG) << "Fixing outlier..." << std::endl;
         _line.erase(_line.begin() + i);
       }
     }
@@ -396,11 +413,10 @@ const {
    *
    * TODO: use some mutation of frechet distance here..?
    */
-  double STEP_SIZE = 20;
-  double MIN_SEG_LENGTH = dmax;
+  double STEP_SIZE = 5.5;
+  double MAX_SKIPS = 4;
+  double MIN_SEG_LENGTH = dmax; // make this configurable!
   SharedSegments ret;
-
-  //if (distTo(pl) > DMAX) return ret;
 
   bool in = false;
   bool notSingle = false;
@@ -416,7 +432,6 @@ const {
   PointOnLine currentEndCandComp;
 
   double comp = 0;
-  size_t j = 0;
   double curSegDist = 0;
   for (size_t i = 1; i < _line.size(); ++i) {
     const Point& s = _line[i-1];
@@ -426,19 +441,8 @@ const {
 
     double totalDist = boost::geometry::distance(s, e);
     while (curSegDist <= totalDist) {
-      j++;
-      const Point& curPointer = interpolate(s, e, curSegDist / totalDist);
-      // auto nearestSeg = pl.nearestSegment(curPointer);
-      // bool intersects = util::geo::lineIntersects(pl.getLine()[nearestSeg.first], pl.getLine()[nearestSeg.first + 1], s, e);
-      // curPointer is the current point we are checking on THIS polyline
-      // nearestSeg is the nearest total segment on pl we are checking against
-      // we now have to check whether curPointer "contained"  in nearestSegment
-
-      //double ang = util::geo::innerProd(pl.getLine()[nearestSeg.first], curPointer, pl.getLine()[nearestSeg.first + 1]);
-      //double ang2 = util::geo::innerProd(pl.getLine()[nearestSeg.first + 1], curPointer, pl.getLine()[nearestSeg.first]);
-
-      if (//(ang) <= 90 && (ang2) <= 90 &&
-          pl.distTo(curPointer) <= dmax) {
+      const Point& curPointer = interpolate(s, e, curSegDist);
+      if (pl.distTo(curPointer) <= dmax) {
         skips = 0;
         if (in) {
           // update currendEndCand
@@ -462,7 +466,7 @@ const {
       } else {
         if (in) {
           skips++;
-          if (skips > 5) { // TODO: make configurable
+          if (skips > MAX_SKIPS) { // TODO: make configurable
             if (comp < 1.5 && notSingle && segDist > MIN_SEG_LENGTH && compSegDist > MIN_SEG_LENGTH) {
               ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
 
@@ -479,7 +483,7 @@ const {
 
       if (curSegDist + STEP_SIZE > totalDist && !lastRound) {
         lastRound = true;
-        double finalStep = totalDist - curSegDist;
+        double finalStep = totalDist - curSegDist - 0.0005;
         curSegDist += finalStep;
         curDist += finalStep;
       } else {
@@ -526,7 +530,7 @@ std::set<PointOnLine, PointOnLineCompare> PolyLine::getIntersections(const PolyL
 
   for (size_t i = 1; i < _line.size(); ++i) {
     if (util::geo::intersects(_line[i-1], _line[i], p.getLine()[a], p.getLine()[b])) {
-      util::geo::Point isect = util::geo::intersection(_line[i-1], _line[i], p.getLine()[a], p.getLine()[b]);
+      Point isect = intersection(_line[i-1], _line[i], p.getLine()[a], p.getLine()[b]);
       ret.insert(p.projectOn(isect));
     }
   }
@@ -536,9 +540,10 @@ std::set<PointOnLine, PointOnLineCompare> PolyLine::getIntersections(const PolyL
 
 // _____________________________________________________________________________
 PolyLine PolyLine::getOrthoLineAtDist(double d, double length) const {
-  util::geo::Point avgP = getPointAtDist(d).p;
+  Point avgP = getPointAtDist(d).p;
 
-  double angle = util::geo::angBetween(getPointAtDist(d-5).p, getPointAtDist(d+5).p) / (180/M_PI);
+  double angle = util::geo::angBetween(getPointAtDist(d-5).p,
+      getPointAtDist(d+5).p) / (180/M_PI);
 
   double angleX1 = avgP.get<0>() + cos(angle + M_PI/2) * length/2;
   double angleY1 = avgP.get<1>() + sin(angle + M_PI/2) * length/2;
@@ -546,7 +551,7 @@ PolyLine PolyLine::getOrthoLineAtDist(double d, double length) const {
   double angleX2 = avgP.get<0>() + cos(angle + M_PI/2) * -length/2;
   double angleY2 = avgP.get<1>() + sin(angle + M_PI/2) * -length/2;
 
-  geo::PolyLine pl(util::geo::Point(angleX1, angleY1), util::geo::Point(angleX2, angleY2));
+  geo::PolyLine pl(Point(angleX1, angleY1), Point(angleX2, angleY2));
 
   return pl;
 }
@@ -570,7 +575,8 @@ std::pair<double, double> PolyLine::getSlopeBetween(double ad, double bd) const 
 }
 
 // _____________________________________________________________________________
-std::pair<double, double> PolyLine::getSlopeBetweenDists(double ad, double bd) const {
+std::pair<double, double> PolyLine::getSlopeBetweenDists(double ad, double bd) 
+const {
   return getSlopeBetween(ad / getLength(), bd / getLength());
 
 }

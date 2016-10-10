@@ -103,13 +103,12 @@ class PolyLine {
   bool equals(const PolyLine& rhs, double dmax) const;
 
   PolyLine getOrthoLineAtDist(double d, double lengt) const;
+
+  util::geo::Point interpolate(const util::geo::Point& a, const util::geo::Point& b, double p) const;
  private:
   std::set<PointOnLine, PointOnLineCompare> getIntersections(const PolyLine& p,
     size_t a, size_t b) const;
   util::geo::Line _line;
-
-  // TODO: maybe move this into util header
-  util::geo::Point interpolate(const util::geo::Point& a, const util::geo::Point& b, double p) const;
 };
 
 }}

@@ -17,14 +17,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
 # set compiler flags, see http://stackoverflow.com/questions/7724569/debug-vs-release-in-cmake
-set(CMAKE_CXX_FLAGS                "-fopenmp -Ofast -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wformat-security -Wformat=2")
-set(CMAKE_CXX_FLAGS_DEBUG          "-Og -g")
-set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Ofast")
-set(CMAKE_CXX_FLAGS_RELEASE        "-Ofast")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Ofast -g")
-
-add_definitions(-DELPP_THREAD_SAFE)
-add_definitions(-DELPP_NO_DEFAULT_LOG_FILE)
+set(CMAKE_CXX_FLAGS                "-fopenmp -DLOGLEVEL=3 -O3 -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wformat-security -Wformat=2")
+set(CMAKE_CXX_FLAGS_DEBUG          "-Og -g -DLOGLEVEL=5")
+set(CMAKE_CXX_FLAGS_MINSIZEREL     "-DLOGLEVEL=3")
+set(CMAKE_CXX_FLAGS_RELEASE        "-DLOGLEVEL=3")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -DLOGLEVEL=5")
 
 # export compile commands to tools like clang
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

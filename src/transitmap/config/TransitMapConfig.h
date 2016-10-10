@@ -5,6 +5,8 @@
 #ifndef TRANSITMAP_CONFIG_TRANSITMAPCONFIG_H_
 #define TRANSITMAP_CONFIG_TRANSITMAPCONFIG_H_
 
+#include <string>
+
 namespace transitmapper {
 namespace config {
 
@@ -12,6 +14,20 @@ struct Config {
 
   double lineWidth;
   double lineSpacing;
+
+  std::string projectionString;
+  std::string inputFeedPath;
+  std::string outputPath;
+
+  std::string renderMethod;
+
+  size_t optimIterations;
+
+  double outputResolution;
+
+  bool renderStations;
+  bool renderNodeFronts;
+  bool renderStationNames;
 
 };
 

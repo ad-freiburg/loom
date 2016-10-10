@@ -32,15 +32,11 @@ Point NodeFront::getTripOccPosUnder(const gtfs::Route* r,
 
       if (to.first) {
         double p = 0;
-        //if (etg.getGeomDir() != n) {
-        //  p = (etg.getWidth() + etg.getSpacing()) * to.second + etg.getWidth()/2;
-        //} else {
-          p = (etg.getWidth() + etg.getSpacing()) * (etg.getTripsUnordered().size() - 1 - to.second) + etg.getWidth()/2;
-        //}
+        p = (etg.getWidth() + etg.getSpacing()) * (etg.getTripsUnordered().size() - 1 - to.second)
+            + etg.getWidth()/2;
 
-        double pp = p / geom.getLength();
-
-        return geom.getPointAt(pp).p;
+        // use interpolate here directly for speed
+        return geom.interpolate(geom.getLine().front(), geom.getLine().back(), p);
       }
     }
   }
@@ -170,7 +166,6 @@ double Node::getScore(const Configuration& c) const {
 // _____________________________________________________________________________
 double Node::getScoreUnder(const graph::Configuration& c, const EdgeTripGeom* g,
     const std::vector<size_t>* order) const {
-
 
   std::vector<InnerGeometry> igs = getInnerGeometriesUnder(c, false, g, order);
 
@@ -312,7 +307,7 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
   std::vector<InnerGeometry> ret;
 
   std::set<const gtfs::Route*> processed;
-  for (size_t i = 0; i < getMainDirs().size(); i++) {
+  for (size_t i = 0; i < getMainDirs().size(); ++i) {
     const graph::NodeFront& nf = getMainDirs()[i];
     for (auto e : nf.edges) {
       for (auto etgIt = e->getEdgeTripGeoms()->begin();

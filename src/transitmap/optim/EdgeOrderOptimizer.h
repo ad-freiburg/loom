@@ -20,7 +20,7 @@ class EdgeOrderOptimizer {
  public:
   EdgeOrderOptimizer(TransitGraph* g) : _g(g) {};
 
-  void optimize();
+  void optimize(size_t numRuns);
  private:
   TransitGraph* _g;
 

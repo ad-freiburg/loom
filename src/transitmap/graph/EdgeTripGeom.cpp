@@ -28,7 +28,7 @@ void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode,
     pl.reverse();
   }
   vec.push_back(&pl);
-  _geom = geo::PolyLine::average(vec);
+  setGeom(geo::PolyLine::average(vec));
 
   addTrip(t, dirNode);
 }
@@ -85,7 +85,9 @@ void EdgeTripGeom::setGeom(const geo::PolyLine& p) {
 
 // _____________________________________________________________________________
 bool EdgeTripGeom::containsRoute(gtfs::Route* r) const {
-  return getTripsForRoute(r);
+  if (getTripsForRoute(r)) return true;
+
+  return false;
 }
 
 // _____________________________________________________________________________

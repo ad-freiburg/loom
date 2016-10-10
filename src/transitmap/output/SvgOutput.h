@@ -8,10 +8,11 @@
 #include <string>
 #include <ostream>
 #include "Output.h"
-#include "../util/XmlWriter.h"
-#include "../util/Geo.h"
-#include "../graph/TransitGraph.h"
-#include "../geo/PolyLine.h"
+#include "./../config/TransitMapConfig.h"
+#include "./../util/XmlWriter.h"
+#include "./../util/Geo.h"
+#include "./../graph/TransitGraph.h"
+#include "./../geo/PolyLine.h"
 
 namespace transitmapper {
 namespace output {
@@ -30,10 +31,13 @@ class SvgOutputException : public std::exception {
   std::string _msg;
 };
 
+typedef std::map<std::string, std::string> Params;
+typedef std::pair<Params, geo::PolyLine> PrintDelegate;
+
 class SvgOutput : public Output {
 
  public:
-  SvgOutput(std::ostream* o, double scale);
+  SvgOutput(std::ostream* o, const config::Config* cfg);
   virtual ~SvgOutput() {};
 
   virtual void print(const graph::TransitGraph& outputGraph);
@@ -56,7 +60,9 @@ class SvgOutput : public Output {
   std::ostream* _o;
   util::XmlWriter _w;
 
-  double _scale;
+  const config::Config* _cfg;
+
+  std::map<uintptr_t, std::vector<PrintDelegate> > _delegates;
 
   void outputNodes(const graph::TransitGraph& outputGraph, double w, double h);
   void outputEdges(const graph::TransitGraph& outputGraph, double w, double h);
@@ -69,6 +75,10 @@ class SvgOutput : public Output {
 
   void renderNodeScore(const graph::TransitGraph& outG,
       const graph::Node* n, double w, double h);
+
+  void renderDelegates(const graph::TransitGraph& outG, double w, double h);
+
+  void renderNodeFronts(const graph::TransitGraph& outG, double w, double h);
 };
 
 }}

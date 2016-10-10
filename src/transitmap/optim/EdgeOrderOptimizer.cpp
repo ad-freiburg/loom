@@ -5,19 +5,18 @@
 #include "./../../log/Log.h"
 #include "./EdgeOrderOptimizer.h"
 
-
 using namespace transitmapper;
 using namespace optim;
 using namespace graph;
 
 // _____________________________________________________________________________
-void EdgeOrderOptimizer::optimize() {
+void EdgeOrderOptimizer::optimize(size_t numRuns) {
+  if (numRuns == 0) return;
+
   srand(time(0));
 
   Configuration startConfig;
   startConfig = _g->getConfig();
-
-  size_t numRuns = 10;
 
   std::vector<std::pair<double, Configuration> > results;
   results.resize(numRuns);
@@ -62,15 +61,11 @@ bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
   std::pair<EdgeTripGeom*, std::vector<size_t> > bestCand;
   bestCand.first = 0;
 
-  bool simple = false; // TRUE for simple, false for steepest hill climbing
-  bool abort = false;
-
   double bestAreaScoreImprov = 0;
 
   for (graph::Node* n : *_g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       for (graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
-        if (abort) goto exitloop;
         if (g.getCardinality() == 1) continue;
 
         double oldAreaScore = n->getAreaScore(*c);
@@ -83,29 +78,21 @@ bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
 
         #pragma omp parallel for
         for (size_t i = 0; i < permutations.size(); ++i) {
-          if (!abort) {
-            double newAreaScore = n->getAreaScore(*c, &g, &permutations[i]);
+          double newAreaScore = n->getAreaScore(*c, &g, &permutations[i]);
 
-            double diff = oldAreaScore - newAreaScore;
+          double diff = oldAreaScore - newAreaScore;
 
-            if (diff - bestAreaScoreImprov > 0.000001) {
-              #pragma omp critical
-              {
-                bestCand = std::pair<EdgeTripGeom*, Ordering>(&g, permutations[i]);
-                bestAreaScoreImprov = diff;
-              }
-
-              if (simple) {
-                abort = true;
-              }
+          if (diff - bestAreaScoreImprov > 0.000001) {
+            #pragma omp critical
+            {
+              bestCand = std::pair<EdgeTripGeom*, Ordering>(&g, permutations[i]);
+              bestAreaScoreImprov = diff;
             }
           }
         }
       }
     }
   }
-
-exitloop:
 
   if (bestCand.first) {
     (*c)[bestCand.first] = bestCand.second;

@@ -27,7 +27,6 @@ struct ShrdSegWrap {
 };
 
 class GraphBuilder {
-
  public:
   GraphBuilder(TransitGraph* targetGraph, const config::Config* cfg);
 
@@ -50,7 +49,9 @@ class GraphBuilder {
 
   util::geo::Point getProjectedPoint(double lat, double lng) const;
 
-  std::pair<bool, geo::PolyLine> getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b, gtfs::Trip* t);
+  std::pair<bool, geo::PolyLine> getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b,
+      gtfs::Trip* t);
+
   ShrdSegWrap getNextSharedSegment() const;
 
   std::set<NodeFront*> nodeGetOverlappingFronts(const Node* n) const;
@@ -67,6 +68,7 @@ class GraphBuilder {
   mutable std::map<const Edge*, size_t> _pEdges;
 };
 
-}}
+}  // namespace graph
+}  // namespace transitmapper
 
 #endif  // TRANSITMAP_GRAPH_GRAPHBUILDER_H_

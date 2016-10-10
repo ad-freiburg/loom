@@ -10,24 +10,39 @@
 #include <iomanip>
 #include <iostream>
 
+#define VDEBUG 4
 #define DEBUG 3
 #define INFO 2
 #define WARN 1
 #define ERROR 0
 
-#define LOG(x) Log::log(x)
+#ifndef LOGLEVEL
+#define LOGLEVEL 2
+#endif
+
+/**
+ * code mostly taken from the ad_utility logger
+ */
+
+// compiler will optimize statement away if x <= LOGLEVEL
+#define LOG(x) if (x > LOGLEVEL) ; else Log::log<x>()
+
+using std::setfill;
+using std::setw;
 
 class Log {
  public:
-  static std::ostream& log(uint8_t lvl) {
-    if (lvl == ERROR) {
-      return logPrefix(std::cerr, lvl) << " : ";
+  template<char LEVEL>
+  static std::ostream& log() {
+    if (LEVEL == ERROR) {
+      return getLogTime(std::cerr) << getLogPrefix<LEVEL>() << " : ";
     } else {
-      return logPrefix(std::cout, lvl) << " : ";
+      return getLogTime(std::cout) << getLogPrefix<LEVEL>() << " : ";
     }
   }
 
-  static std::ostream& logPrefix(std::ostream& os, uint8_t lvl) {
+ private:
+  static std::ostream& getLogTime(std::ostream& os) {
     struct timeb tb;
     char tl[26];
 
@@ -36,28 +51,24 @@ class Log {
     tl[19] = '.';
     tl[20] = 0;
 
-    os << "[" << tl << std::setfill('0') << std::setw(3)
-       << tb.millitm << "] ";
-    switch (lvl) {
+    return os << "[" << tl << setfill('0') << setw(3) << tb.millitm << "] ";
+  }
+
+  template<char LEVEL>
+  static const char* getLogPrefix() {
+    switch (LEVEL) {
       case DEBUG:
-        return os << "DEBUG";
+        return "DEBUG";
       case INFO:
-        return os << "INFO";
+        return "INFO ";
       case WARN:
-        return os << "WARN";
+        return "WARN ";
       case ERROR:
-        return os << "ERROR";
+        return "ERROR";
+      default:
+        return "???  ";
     }
   }
-
-  static void setLogLvl(uint8_t l) {
-    _logLvl = l;
-  }
-
- private:
-  static uint8_t _logLvl;
 };
-
-uint8_t Log::_logLvl = 5;
 
 #endif  // LOGGING_LOG_H_

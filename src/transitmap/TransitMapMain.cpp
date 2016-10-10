@@ -8,18 +8,18 @@
 #include <string>
 #include <set>
 #include <stdio.h>
-#include "./../log/Log.h"
+#include "log/Log.h"
 #include "gtfsparser/Parser.h"
-#include "graph/TransitGraph.h"
-#include "graph/GraphBuilder.h"
-#include "graph/Node.h"
-#include "util/XmlWriter.cpp"
-#include "output/SvgOutput.h"
-#include "geo/PolyLine.h"
-#include "gtfsparser/gtfs/Service.h"
-#include "optim/EdgeOrderOptimizer.h"
-#include "config/ConfigReader.cpp"
-#include "config/TransitMapConfig.h"
+#include "./graph/TransitGraph.h"
+#include "./graph/GraphBuilder.h"
+#include "./graph/Node.h"
+#include "./util/XmlWriter.cpp"
+#include "./output/SvgOutput.h"
+#include "./geo/PolyLine.h"
+#include "./gtfsparser/gtfs/Service.h"
+#include "./optim/EdgeOrderOptimizer.h"
+#include "./config/ConfigReader.cpp"
+#include "./config/TransitMapConfig.h"
 
 using namespace transitmapper;
 using std::string;
@@ -41,12 +41,20 @@ int main(int argc, char** argv) {
   gtfsparser::Parser parser;
   gtfsparser::gtfs::Feed feed;
 
-  if (argc > 1) {
-    LOG(INFO) << "reading feed at " << argv[1] << std::endl;
-    parser.parse(&feed, argv[1]);
+  LOG(INFO) << "Resolution is " << cfg.outputResolution << std::endl;
+  LOG(INFO) << cfg.lineWidth << std::endl;
+  LOG(INFO) << cfg.inputFeedPath << std::endl;
+  LOG(INFO) << cfg.lineSpacing << std::endl;
+  LOG(INFO) << cfg.renderMethod << std::endl;
+  LOG(INFO) << cfg.optimIterations << std::endl;
+  LOG(INFO) << cfg.renderStations << std::endl;
+  LOG(INFO) << cfg.renderStationNames << std::endl;
 
-    graph::TransitGraph g("shinygraph", "+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=6378137 +b=6378137 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+  if (!cfg.inputFeedPath.empty()) {
+    LOG(INFO) << "reading feed at " << cfg.inputFeedPath << std::endl;
+    parser.parse(&feed, cfg.inputFeedPath);
 
+    graph::TransitGraph g("shinygraph", cfg.projectionString);
     graph::GraphBuilder b(&g, &cfg);
 
     LOG(INFO) << "Building graph..." << std::endl;
@@ -70,19 +78,28 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Optimizing..." << std::endl;
     optim::EdgeOrderOptimizer eoOptim(&g);
-    //eoOptim.optimize();
-
+    eoOptim.optimize(cfg.optimIterations);
     LOG(INFO) << "Total graph score is -- " << g.getScore() << " --" << std::endl;
     LOG(INFO) << "Per node graph score is -- "
       << g.getScore() / g.getNodes()->size() << " --" << std::endl;
 
-    LOG(INFO) << "Outputting to SVG..." << std::endl;
-    std::ofstream o;
-    o.open("/home/patrick/test.svg");
+    if (cfg.renderMethod == "svg") {
+      std::string path = cfg.outputPath;
+      LOG(INFO) << "Outputting to SVG " << path << " ..."
+        << std::endl;
+      std::ofstream o;
+      o.open(path);
+      output::SvgOutput svgOut(&o, &cfg);
+      svgOut.print(g);
+    }
 
-    LOG(INFO) << "outputting to SVG..." << std::endl;
-    output::SvgOutput svgOut(&o, .1);
-    svgOut.print(g);
+    LOG(INFO) << "World file for this map: " << std::endl << std::endl;
+
+    std::cout << 1/cfg.outputResolution << std::endl
+      << 0 << std::endl << 0 << std::endl
+      << -1/cfg.outputResolution << std::endl
+      << std::fixed << g.getBoundingBox().min_corner().get<0>() << std::endl
+      << g.getBoundingBox().max_corner().get<1>() << std::endl;
   } else {
 
     // just testing parallel drawing...
@@ -111,7 +128,7 @@ int main(int argc, char** argv) {
 
     std::ofstream o;
     o.open("/home/patrick/test.svg");
-    output::SvgOutput svgOut(&o, 1);
+    output::SvgOutput svgOut(&o, &cfg);
 
     o << "<svg width=\"2000\" height=\"2000\">";
 
@@ -156,6 +173,19 @@ int main(int argc, char** argv) {
     ptest.smoothenOutliers(10);
     svgOut.printLine(ptest, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
 
+    transitmapper::geo::PolyLine ptest2;
+
+    ptest2 << util::geo::Point(130, 100);
+    ptest2 << util::geo::Point(190, 100);
+    ptest2 << util::geo::Point(192, 180);
+    ptest2 << util::geo::Point(210, 103);
+    ptest2 << util::geo::Point(280, 193);
+    ptest2 << util::geo::Point(290, 183);
+
+    svgOut.printLine(ptest2, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+
+    ptest2.offsetPerp(18);
+    svgOut.printLine(ptest2, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
 
     for (size_t i = 1; i < 5; i++) {
       transitmapper::geo::PolyLine pl = avg;

@@ -13,10 +13,10 @@
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-#include "../util/Geo.h"
-#include "OrderingConfiguration.h"
-#include "Node.h"
-#include "Edge.h"
+#include "./../util/Geo.h"
+#include "./OrderingConfiguration.h"
+#include "./Node.h"
+#include "./Edge.h"
 
 namespace bg = boost::geometry;
 
@@ -28,7 +28,7 @@ class TransitGraph {
  public:
   explicit TransitGraph(const std::string& name, const std::string& projStr);
 
-  ~TransitGraph(); // TODO: free memory
+  ~TransitGraph();
 
   Node* addNode(Node* n);
   Edge* addEdge(Node* from, Node* to);
