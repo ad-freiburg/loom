@@ -199,7 +199,7 @@ void GraphBuilder::createTopologicalNodes() {
     Node* a = 0;
     Node* b = 0;
 
-    double maxSnapDist = 40;
+    double maxSnapDist = (compEdgeGeom.getTotalWidth() + curEdgeGeom.getTotalWidth()) / 2;
 
     if (ea.getLength() < maxSnapDist) {
       a = w.e->getFrom();
@@ -516,7 +516,7 @@ const {
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
 
       if ((n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 8) ||
-          (n->getStops().size() == 0 && fa.geom.distTo(fb.geom) < getNodeFreeMinDistance(fa, fb))) {
+          (n->getStops().size() == 0 && nodeFrontsOverlap(fa, fb))) {
         if (fa.refEtg->getGeom().getLength() > minLength &&
             fa.refEtg->getGeom().getLength() > fa.refEtgLengthBefExp / 2) {
           ret.insert(const_cast<NodeFront*>(&fa));
@@ -533,12 +533,22 @@ const {
 }
 
 // _____________________________________________________________________________
-double GraphBuilder::getNodeFreeMinDistance(const NodeFront& a,
+bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
     const NodeFront& b) const {
-  size_t numShr= a.refEtg->getSharedRoutes(*b.refEtg).size() / 2;
+  //size_t numShr= a.refEtg->getSharedRoutes(*b.refEtg).size() / 2;
 
-  if (numShr == 0) numShr = 1;
-  return (numShr * a.refEtg->getWidth() + a.refEtg->getSpacing() * (numShr-1)) * 2;
+  Point aa = a.geom.getLine().front();
+  Point ab = a.geom.getLine().back();
+  Point ba = b.geom.getLine().front();
+  Point bb = b.geom.getLine().back();
+
+  bool intersects = util::geo::lineIntersects(aa, ab, ba, bb);
+  if (!intersects) return false;
+
+  Point i = util::geo::intersection(aa, ab, ba, bb);
+
+  return a.geom.distTo(i) < a.refEtg->getWidth() + a.refEtg->getSpacing() ||
+    b.geom.distTo(i) < b.refEtg->getWidth() + b.refEtg->getSpacing();
 }
 
 // _____________________________________________________________________________

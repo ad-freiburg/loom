@@ -59,7 +59,7 @@ class GraphBuilder {
   Node* addStop(gtfs::Stop* curStop, uint8_t aggrLevel);
   void freeNodeFront(NodeFront* f);
 
-  double getNodeFreeMinDistance(const NodeFront& a, const NodeFront& b) const;
+  bool nodeFrontsOverlap(const NodeFront& a, const NodeFront& b) const;
 
   bool checkTripSanity(gtfs::Trip* t) const;
   bool checkShapeSanity(gtfs::Shape* t) const;

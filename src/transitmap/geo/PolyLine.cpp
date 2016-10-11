@@ -413,9 +413,9 @@ const {
    *
    * TODO: use some mutation of frechet distance here..?
    */
-  double STEP_SIZE = 5.5;
+  double STEP_SIZE = 0.5;
   double MAX_SKIPS = 4;
-  double MIN_SEG_LENGTH = dmax; // make this configurable!
+  double MIN_SEG_LENGTH = 0; // make this configurable!
   SharedSegments ret;
 
   bool in = false;
