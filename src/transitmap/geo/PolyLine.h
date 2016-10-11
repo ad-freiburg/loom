@@ -102,6 +102,8 @@ class PolyLine {
   bool equals(const PolyLine& rhs) const;
   bool equals(const PolyLine& rhs, double dmax) const;
 
+  std::string getWKT() const;
+
   PolyLine getOrthoLineAtDist(double d, double lengt) const;
 
   util::geo::Point interpolate(const util::geo::Point& a, const util::geo::Point& b, double p) const;

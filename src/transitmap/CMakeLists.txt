@@ -17,4 +17,4 @@ configure_file (
 add_executable(transitmap ${transitmap_main})
 add_library(transitmap_dep ${transitmap_SRC})
 
-target_link_libraries(transitmap transitmap_dep gtfsparser ${Boost_LIBRARIES} -lproj -lpthread)
+target_link_libraries(transitmap transitmap_dep gtfsparser ${Boost_LIBRARIES} ${GDAL_LIBRARY} -lproj -lpthread)

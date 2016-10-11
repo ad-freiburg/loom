@@ -15,6 +15,7 @@
 #include "./graph/Node.h"
 #include "./util/XmlWriter.cpp"
 #include "./output/SvgOutput.h"
+#include "./output/OgrOutput.h"
 #include "./geo/PolyLine.h"
 #include "./gtfsparser/gtfs/Service.h"
 #include "./optim/EdgeOrderOptimizer.h"
@@ -67,11 +68,11 @@ int main(int argc, char** argv) {
     b.createTopologicalNodes();
 
     LOG(INFO) << "Averaging node positions" << std::endl;
-    //b.averageNodePositions();
+    b.averageNodePositions();
 
     LOG(INFO) << "Creating node fronts..." << std::endl;
-    //b.writeMainDirs();
-    //b.expandOverlappinFronts();
+    b.writeMainDirs();
+    b.expandOverlappinFronts();
 
     LOG(INFO) << "Writing initial ordering configuration..." << std::endl;
     b.writeInitialConfig();
@@ -82,6 +83,14 @@ int main(int argc, char** argv) {
     LOG(INFO) << "Total graph score is -- " << g.getScore() << " --" << std::endl;
     LOG(INFO) << "Per node graph score is -- "
       << g.getScore() / g.getNodes()->size() << " --" << std::endl;
+
+    if (cfg.renderMethod == "ogr") {
+      std::string path = cfg.outputPath;
+      LOG(INFO) << "Outputting to OGR " << path << " ..."
+        << std::endl;
+      output::OgrOutput ogrOut(path, &cfg);
+      ogrOut.print(g);
+    }
 
     if (cfg.renderMethod == "svg") {
       std::string path = cfg.outputPath;
@@ -100,6 +109,25 @@ int main(int argc, char** argv) {
       << -1/cfg.outputResolution << std::endl
       << std::fixed << g.getBoundingBox().min_corner().get<0>() << std::endl
       << g.getBoundingBox().max_corner().get<1>() << std::endl;
+  } else if (true) {
+    transitmapper::geo::PolyLine a;
+    transitmapper::geo::PolyLine b;
+
+    a << util::geo::Point(1, 1);
+    a << util::geo::Point(1, 2);
+    a << util::geo::Point(1, 3);
+    a << util::geo::Point(1, 4);
+    a << util::geo::Point(1, 5);
+
+    b << util::geo::Point(2, 3);
+    b << util::geo::Point(2, 4);
+    b << util::geo::Point(2, 5);
+    b << util::geo::Point(2, 6);
+    b << util::geo::Point(2, 7);
+
+    transitmapper::geo::SharedSegments ss = a.getSharedSegments(b, 3);
+    LOG(INFO) << "RESULT: " << ss.segments.size() << std::endl;
+
   } else {
 
     // just testing parallel drawing...

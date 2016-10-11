@@ -413,17 +413,15 @@ const {
    *
    * TODO: use some mutation of frechet distance here..?
    */
-  double STEP_SIZE = 0.5;
+  double STEP_SIZE = 5;
   double MAX_SKIPS = 4;
-  double MIN_SEG_LENGTH = 0; // make this configurable!
+  double MIN_SEG_LENGTH = dmax / 2; // make this configurable!
   SharedSegments ret;
 
   bool in = false;
-  bool notSingle = false;
-  double segDist = 0;
-  double compSegDist = 0;
   double curDist = 0;
   double curTotalSegDist = 0;
+  bool single = true;
   size_t skips;
   PointOnLine currentStartCand;
   PointOnLine currentEndCand;
@@ -444,39 +442,38 @@ const {
       const Point& curPointer = interpolate(s, e, curSegDist);
       if (pl.distTo(curPointer) <= dmax) {
         skips = 0;
+        PointOnLine curCompPointer = pl.projectOn(curPointer);
+        PointOnLine curBackProjectedPointer = projectOn(curCompPointer.p);
+
         if (in) {
-          // update currendEndCand
-          if (notSingle) segDist += util::geo::dist(currentEndCand.p, curPointer);
-          else segDist += util::geo::dist(currentStartCand.p, curPointer);
-          currentEndCand = PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
-
-          PointOnLine curCompPointer = pl.projectOn(curPointer);
-
-          if (notSingle) compSegDist += util::geo::dist(currentEndCandComp.p, curCompPointer.p);
-          else compSegDist += util::geo::dist(currentStartCandComp.p, curCompPointer.p);
+          currentEndCand = curBackProjectedPointer;  //PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
 
           currentEndCandComp = curCompPointer;
-          comp = util::geo::dist(currentStartCand.p, currentEndCand.p) / util::geo::dist(currentStartCandComp.p, currentEndCandComp.p);
-          notSingle = true;
+
+          single = false;
+
+          comp = fabs(currentStartCand.totalPos * getLength() - currentEndCand.totalPos * getLength()) / fabs(currentStartCandComp.totalPos * pl.getLength() - currentEndCandComp.totalPos * pl.getLength());
         } else {
           in = true;
-          currentStartCand = PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
-          currentStartCandComp = pl.projectOn(curPointer);
+          currentStartCand = curBackProjectedPointer; //PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
+          currentStartCandComp = curCompPointer;
+
         }
       } else {
         if (in) {
           skips++;
           if (skips > MAX_SKIPS) { // TODO: make configurable
-            if (comp < 1.5 && notSingle && segDist > MIN_SEG_LENGTH && compSegDist > MIN_SEG_LENGTH) {
+            if (comp < 1.2 && !single &&
+                fabs(currentStartCand.totalPos * getLength() - currentEndCand.totalPos * getLength()) > MIN_SEG_LENGTH &&
+                fabs(currentStartCandComp.totalPos * pl.getLength() - currentEndCandComp.totalPos * pl.getLength()) > MIN_SEG_LENGTH
+              ) {
               ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
 
               // TODO: only return the FIRST one, make this configuralbe
               return ret;
             }
             in = false;
-            notSingle = false;
-            compSegDist = 0;
-            segDist = 0;
+            single = true;
           }
         }
       }
@@ -496,7 +493,10 @@ const {
     curTotalSegDist += totalDist;
   }
 
-  if (comp < 1.5 && in && notSingle && segDist > MIN_SEG_LENGTH && compSegDist > MIN_SEG_LENGTH) {
+  if (comp < 1.2 && in && !single &&
+        fabs(currentStartCand.totalPos * getLength() - currentEndCand.totalPos * getLength()) > MIN_SEG_LENGTH &&
+        fabs(currentStartCandComp.totalPos * pl.getLength() - currentEndCandComp.totalPos * pl.getLength()) > MIN_SEG_LENGTH
+    ) {
     ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
   }
 
@@ -579,4 +579,12 @@ std::pair<double, double> PolyLine::getSlopeBetweenDists(double ad, double bd)
 const {
   return getSlopeBetween(ad / getLength(), bd / getLength());
 
+}
+
+// _____________________________________________________________________________
+std::string PolyLine::getWKT() const {
+  std::stringstream ss;
+  ss << std::setprecision(12) << boost::geometry::wkt(_line);
+
+  return ss.str();
 }

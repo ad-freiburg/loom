@@ -16,6 +16,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
+find_package(GDAL REQUIRED)
+
 # set compiler flags, see http://stackoverflow.com/questions/7724569/debug-vs-release-in-cmake
 set(CMAKE_CXX_FLAGS                "-fopenmp -DLOGLEVEL=3 -O3 -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wformat-security -Wformat=2")
 set(CMAKE_CXX_FLAGS_DEBUG          "-Og -g -DLOGLEVEL=5")

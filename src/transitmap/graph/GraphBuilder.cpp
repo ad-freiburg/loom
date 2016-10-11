@@ -126,7 +126,7 @@ ShrdSegWrap GraphBuilder::getNextSharedSegment() const {
 
             geo::SharedSegments s = e->getEdgeTripGeoms()->front().getGeom().getSharedSegments(toTest->getEdgeTripGeoms()->front().getGeom(), dmax);
 
-            if (s.segments.size() > 0 && util::geo::dist(s.segments[0].first.p, s.segments[0].second.p) > 50) {
+            if (s.segments.size() > 0) {
               _pEdges[e]++;
               if (_pEdges[e] > 100) {
                 LOG(WARN) << "Too many optimiziations for " << e
@@ -152,6 +152,8 @@ ShrdSegWrap GraphBuilder::getNextSharedSegment() const {
 // _____________________________________________________________________________
 void GraphBuilder::createTopologicalNodes() {
   ShrdSegWrap w;
+  _indEdges.clear();
+  _pEdges.clear();
   while ((w = getNextSharedSegment()).e) {
     const EdgeTripGeom& curEdgeGeom = w.e->getEdgeTripGeoms()->front();
     const EdgeTripGeom& compEdgeGeom = w.f->getEdgeTripGeoms()->front();
@@ -185,21 +187,20 @@ void GraphBuilder::createTopologicalNodes() {
       fc = compEdgeGeom.getGeom().getSegment(fbp.totalPos, 1);
     }
 
-    /**
     std::vector<const geo::PolyLine*> avg;
     avg.push_back(&ab);
     avg.push_back(&fab);
     ab = geo::PolyLine::average(avg);
     ab.simplify(5);
-    **/
 
     //if (fab.getLength() > ab.getLength()) ab = fab;
+    //
 
     // new nodes at the start and end of the shared segment
     Node* a = 0;
     Node* b = 0;
 
-    double maxSnapDist = (compEdgeGeom.getTotalWidth() + curEdgeGeom.getTotalWidth()) / 2;
+    double maxSnapDist = 40; //(compEdgeGeom.getTotalWidth() + curEdgeGeom.getTotalWidth()) / 2;
 
     if (ea.getLength() < maxSnapDist) {
       a = w.e->getFrom();
@@ -220,8 +221,17 @@ void GraphBuilder::createTopologicalNodes() {
     if (!a) a = new Node(w.s.first.p);
     if (!b) b = new Node(w.s.second.p);
 
+    if (util::geo::dist(a->getPos(), b->getPos()) < maxSnapDist) {
+      // after the snapping above, it is possible that the segment distance
+      // is now SMALLER than the maxSnapDistance. Discard this shared segment
 
-    if (a == b) continue;
+      continue;
+    }
+
+
+    if (a == b) {
+      continue;
+    }
 
     EdgeTripGeom eaEdgeGeom(ea, a, _cfg->lineWidth, _cfg->lineSpacing);
     EdgeTripGeom abEdgeGeom(ab, b, _cfg->lineWidth, _cfg->lineSpacing);
@@ -305,12 +315,26 @@ void GraphBuilder::createTopologicalNodes() {
       fbE =_targetGraph->addEdge(b, wfto);
     }
 
-    if (eaE) eaE->addEdgeTripGeom(eaEdgeGeom);
-    if (abE) abE->addEdgeTripGeom(abEdgeGeom);
-    if (ebE) ebE->addEdgeTripGeom(ecEdgeGeom);
-
-    if (faE) faE->addEdgeTripGeom(faEdgeGeom);
-    if (fbE) fbE->addEdgeTripGeom(fcEdgeGeom);
+    if (eaE) {
+      eaE->addEdgeTripGeom(eaEdgeGeom);
+      eaE->simplify();
+    }
+    if (abE) {
+      abE->addEdgeTripGeom(abEdgeGeom);
+      abE->simplify();
+    }
+    if (ebE) {
+      ebE->addEdgeTripGeom(ecEdgeGeom);
+      ebE->simplify();
+    }
+    if (faE) {
+      faE->addEdgeTripGeom(faEdgeGeom);
+      faE->simplify();
+    }
+    if (fbE) {
+      fbE->addEdgeTripGeom(fcEdgeGeom);
+      fbE->simplify();
+    }
   }
 }
 
@@ -505,7 +529,7 @@ void GraphBuilder::expandOverlappinFronts() {
 std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(const Node* n)
 const {
   std::set<NodeFront*> ret;
-  double minLength = 100;
+  double minLength = 1;
 
   for (size_t i = 0; i < n->getMainDirs().size(); ++i) {
     const NodeFront& fa = n->getMainDirs()[i];
@@ -517,12 +541,10 @@ const {
 
       if ((n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 8) ||
           (n->getStops().size() == 0 && nodeFrontsOverlap(fa, fb))) {
-        if (fa.refEtg->getGeom().getLength() > minLength &&
-            fa.refEtg->getGeom().getLength() > fa.refEtgLengthBefExp / 2) {
+        if (fa.refEtg->getGeom().getLength() > minLength) {
           ret.insert(const_cast<NodeFront*>(&fa));
         }
-        if (fb.refEtg->getGeom().getLength() > minLength &&
-            fb.refEtg->getGeom().getLength() > fb.refEtgLengthBefExp / 2) {
+        if (fb.refEtg->getGeom().getLength() > minLength) {
           ret.insert(const_cast<NodeFront*>(&fb));
         }
       }
@@ -535,7 +557,7 @@ const {
 // _____________________________________________________________________________
 bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
     const NodeFront& b) const {
-  //size_t numShr= a.refEtg->getSharedRoutes(*b.refEtg).size() / 2;
+  size_t numShr= a.refEtg->getSharedRoutes(*b.refEtg).size() / 2;
 
   Point aa = a.geom.getLine().front();
   Point ab = a.geom.getLine().back();
@@ -547,8 +569,12 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
 
   Point i = util::geo::intersection(aa, ab, ba, bb);
 
+  if (numShr) {
   return a.geom.distTo(i) < a.refEtg->getWidth() + a.refEtg->getSpacing() ||
     b.geom.distTo(i) < b.refEtg->getWidth() + b.refEtg->getSpacing();
+  } else {
+    return a.geom.distTo(b.geom) < a.refEtg->getSpacing() + a.refEtg->getWidth();
+  }
 }
 
 // _____________________________________________________________________________

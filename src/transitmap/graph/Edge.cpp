@@ -88,8 +88,10 @@ void Edge::addEdgeTripGeom(const EdgeTripGeom& e) {
     _tripsContained.back().setGeomDir(_to);
   }
 
+  /**
   assert(util::geo::dist(_tripsContained.back().getGeom().getLine().front(), _from->getPos()) <
     util::geo::dist(_tripsContained.back().getGeom().getLine().back(), _from->getPos()) + 10);
+  **/
 }
 
 // _____________________________________________________________________________
