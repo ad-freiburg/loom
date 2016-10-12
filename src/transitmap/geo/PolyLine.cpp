@@ -67,11 +67,12 @@ void PolyLine::offsetPerp(double units) {
   // polygon. An offsetted line is part of that polygon, but retrieving
   // it reliably could result in some geometrical diffing hocus pocus which is
   // bound to go wrong at /some/ point (self intersections, numerical
-  // instability etc) 
+  // instability etc)
+
+
+  if (_line.size() < 2) return;
+
   Line ret;
-
-  if (_line.size() < 2) return; // TODO: throw error
-
   Point lastP = _line.front();
 
   Point* lastIns = 0;
@@ -128,6 +129,7 @@ void PolyLine::offsetPerp(double units) {
   }
 
   _line = ret;
+  fixTopology(fabs(2*3.14*units));
 }
 
 // _____________________________________________________________________________
@@ -591,4 +593,31 @@ std::string PolyLine::getWKT() const {
   ss << std::setprecision(12) << boost::geometry::wkt(_line);
 
   return ss.str();
+}
+
+// ____________________________________________________________________________
+void PolyLine::fixTopology(double maxl) {
+  double distA = 0;
+  double distB = 0;
+  for (size_t i = 1; i < _line.size(); i++) {
+    for (size_t j = i+2; j < _line.size(); j++) {
+      if (util::geo::intersects(_line[i-1], _line[i], _line[j-1], _line[j])) {
+        Point p = util::geo::intersection(_line[i-1], _line[i], _line[j-1], _line[j]);
+
+        Point pA = util::geo::projectOn(p, _line[i-1], _line[i]);
+        Point pB = util::geo::projectOn(p, _line[j-1], _line[j]);
+
+        double posA = (util::geo::dist(_line[i-1], pA) + distA);
+        double posB = (util::geo::dist(_line[j-1], pB) + distB);
+
+        if (fabs(posA - posB) < maxl) {
+          _line[i] = p;
+          _line.erase(_line.begin() + i + 1, _line.begin() + j);
+        }
+      }
+
+      distB += util::geo::dist(_line[j-1], _line[j]);
+    }
+    distA += util::geo::dist(_line[i-1], _line[i]);
+  }
 }

@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
       << -1/cfg.outputResolution << std::endl
       << std::fixed << g.getBoundingBox().min_corner().get<0>() << std::endl
       << g.getBoundingBox().max_corner().get<1>() << std::endl;
-  } else if (true) {
+  } else if (false) {
     transitmapper::geo::PolyLine a;
     transitmapper::geo::PolyLine b;
 
@@ -160,6 +160,7 @@ int main(int argc, char** argv) {
 
     std::ofstream o;
     o.open("/home/patrick/test.svg");
+    cfg.outputResolution = 1;
     output::SvgOutput svgOut(&o, &cfg);
 
     o << "<svg width=\"2000\" height=\"2000\">";
@@ -234,6 +235,28 @@ int main(int argc, char** argv) {
       if (i % 2) svgOut.printLine(pl, "fill:none;stroke:blue;stroke-width:15", 2000, 2000, 0, 0);
       else svgOut.printLine(pl, "fill:none;stroke:orange;stroke-width:15", 2000, 2000, 0, 0);
     }
+
+    transitmapper::geo::PolyLine ptest3;
+    transitmapper::geo::PolyLine ptest4;
+
+    ptest3 << util::geo::Point(130, 300);
+    ptest3 << util::geo::Point(150, 300);
+    ptest3 << util::geo::Point(160, 305);
+    ptest3 << util::geo::Point(165, 310);
+    ptest3 << util::geo::Point(170, 320);
+
+    ptest3 << util::geo::Point(170, 353);
+    ptest4 = ptest3;
+
+    svgOut.printLine(ptest3, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+    ptest3.offsetPerp(18);
+    svgOut.printLine(ptest3, "fill:none;stroke:green;stroke-width:1", 2000, 2000, 0, 0);
+    ptest3.offsetPerp(18);
+    svgOut.printLine(ptest3, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+    ptest4.offsetPerp(36);
+    //svgOut.printLine(ptest4, "fill:none;stroke:green;stroke-width:1", 2000, 2000, 0, 0);
+
+
     o << "</svg>";
 
   }

@@ -179,6 +179,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   center.simplify(1);
   double lineW = g.getWidth();
   double lineSpc = g.getSpacing();
+  double offsetStep = lineW + lineSpc;
   double oo = g.getTotalWidth();
 
   double o = oo;
@@ -188,7 +189,10 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   for (size_t i : outG.getConfig().find(&g)->second) {
       const graph::TripOccurance& r = g.getTripsUnordered()[i];
       geo::PolyLine p = center;
-      p.offsetPerp(-(o - oo / 2 - g.getWidth() /2));
+
+      double offset = -(o - oo / 2.0 - g.getWidth() /2.0);
+
+      p.offsetPerp(offset);
 
       // TODO: why is this check necessary? shouldnt be!
       // ___ OUTFACTOR
@@ -248,7 +252,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       **/
 
       //break;
-      o -= lineW + lineSpc;
+      o -= offsetStep;
   }
 }
 

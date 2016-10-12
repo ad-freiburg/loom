@@ -107,6 +107,8 @@ class PolyLine {
   PolyLine getOrthoLineAtDist(double d, double lengt) const;
 
   util::geo::Point interpolate(const util::geo::Point& a, const util::geo::Point& b, double p) const;
+
+  void fixTopology(double maxl);
  private:
   std::set<PointOnLine, PointOnLineCompare> getIntersections(const PolyLine& p,
     size_t a, size_t b) const;

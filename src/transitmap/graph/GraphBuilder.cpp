@@ -363,6 +363,7 @@ std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b,
 
     pl->second.simplify(10);
     pl->second.smoothenOutliers(50);
+    pl->second.fixTopology(50);
   }
 
   if ((pl->second.distTo(ap) > 200) ||

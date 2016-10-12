@@ -254,13 +254,15 @@ geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
     const EdgeTripGeom* g,
     const graph::Ordering* order) const {
 
-  double d = nf.geom.distTo(partner.front->geom) / 2;
-
-  // for small distances, fall back to straight line
-  if (d < 5) return getInnerStraightLine(cf, nf, tripOcc, partner, g, order);
 
   Point p = nf.getTripOccPosUnder(tripOcc.route, cf, g, order);
   Point pp = partner.front->getTripOccPosUnder(partner.route, cf, g, order);
+
+  double d = util::geo::dist(p, pp) / 2;
+
+  // for small distances, fall back to straight line
+  //if (d < 5) return getInnerStraightLine(cf, nf, tripOcc, partner, g, order);
+
   Point b = p;
   Point c = pp;
   std::pair<double, double> slopeA, slopeB;
@@ -280,6 +282,7 @@ geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
   b = Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
   c = Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
 
+  /**
   // TODO(patrick): why 1000? find some heuristic
   d = 1000;
 
@@ -295,6 +298,7 @@ geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
     b = is.begin()->p;
     c = is.begin()->p;
   }
+  **/
 
   geo::BezierCurve bc(p, b, c, pp);
   return bc.render(3);
