@@ -45,7 +45,7 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
   outputEdges(outG, width, height);
 
   for (graph::Node* n : outG.getNodes()) {
-    //renderNodeConnections(outG, n, width, height);
+    renderNodeConnections(outG, n, width, height);
   }
 
   renderDelegates(outG, width, height);
@@ -54,7 +54,7 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
     if (_cfg->renderStationNames) renderNodeScore(outG, n, width, height);
   }
 
-  //outputNodes(outG, width, height);
+  outputNodes(outG, width, height);
   if (_cfg->renderNodeFronts) {
     renderNodeFronts(outG, width, height);
   }

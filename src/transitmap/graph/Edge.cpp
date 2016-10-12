@@ -140,7 +140,7 @@ void Edge::averageCombineGeom() {
       _tripsContained.front().getSpacing());
 
   for (auto& et : _tripsContained) {
-    for (auto& r : et.getTripsUnordered()) {
+    for (auto& r : *et.getTripsUnordered()) {
       for (auto& t : r.trips) {
         combined.addTrip(t, r.direction);
       }
@@ -163,7 +163,7 @@ void Edge::combineIncludedGeoms() {
       if (toCheckAgainst.getGeom().getLength() > et->getGeom().getLength()
           && toCheckAgainst.getGeom().contains(et->getGeom(), 50)
           && !et->getGeom().contains(toCheckAgainst.getGeom(), 50)) {
-        for (auto& r : et->getTripsUnordered()) {
+        for (auto& r : *et->getTripsUnordered()) {
           for (auto& t : r.trips) {
             toCheckAgainst.addTrip(t, r.direction);
           }
@@ -179,4 +179,38 @@ void Edge::combineIncludedGeoms() {
       et++;
     }
   }
+}
+
+// _____________________________________________________________________________
+void Edge::setFrom(Node* from) {
+  for (size_t i = 0; i < _tripsContained.size(); i++) {
+    EdgeTripGeom& g = _tripsContained[i];
+
+    if (g.getGeomDir() == _from) {
+      g.setGeomDir(from);
+    }
+
+    for (auto to : *g.getTripsUnordered()) {
+      if (to.direction == _from) to.direction = from;
+    }
+  }
+
+  _from = from;
+}
+
+// _____________________________________________________________________________
+void Edge::setTo(Node* to) {
+  for (size_t i = 0; i < _tripsContained.size(); i++) {
+    EdgeTripGeom& g = _tripsContained[i];
+
+    if (g.getGeomDir() == _to) {
+      g.setGeomDir(to);
+    }
+
+    for (auto toc : *g.getTripsUnordered()) {
+      if (toc.direction == _to) toc.direction = to;
+    }
+  }
+
+  _to = to;
 }

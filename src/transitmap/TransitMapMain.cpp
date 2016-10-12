@@ -65,14 +65,18 @@ int main(int argc, char** argv) {
     b.simplify();
 
     LOG(INFO) << "Building topological nodes..." << std::endl;
-    b.createTopologicalNodes();
+    while (b.createTopologicalNodes()) {}
 
     LOG(INFO) << "Averaging node positions" << std::endl;
     b.averageNodePositions();
 
+    b.removeArtifacts();
+
     LOG(INFO) << "Creating node fronts..." << std::endl;
     b.writeMainDirs();
     b.expandOverlappinFronts();
+
+    //b.removeArtifacts();
 
     LOG(INFO) << "Writing initial ordering configuration..." << std::endl;
     b.writeInitialConfig();

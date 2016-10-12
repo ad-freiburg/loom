@@ -413,7 +413,7 @@ const {
    *
    * TODO: use some mutation of frechet distance here..?
    */
-  double STEP_SIZE = 5;
+  double STEP_SIZE = 2;
   double MAX_SKIPS = 4;
   double MIN_SEG_LENGTH = dmax / 2; // make this configurable!
   SharedSegments ret;
@@ -440,14 +440,14 @@ const {
     double totalDist = boost::geometry::distance(s, e);
     while (curSegDist <= totalDist) {
       const Point& curPointer = interpolate(s, e, curSegDist);
+
       if (pl.distTo(curPointer) <= dmax) {
-        skips = 0;
         PointOnLine curCompPointer = pl.projectOn(curPointer);
         PointOnLine curBackProjectedPointer = projectOn(curCompPointer.p);
+        skips = 0;
 
         if (in) {
           currentEndCand = curBackProjectedPointer;  //PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
-
           currentEndCandComp = curCompPointer;
 
           single = false;
@@ -457,21 +457,23 @@ const {
           in = true;
           currentStartCand = curBackProjectedPointer; //PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
           currentStartCandComp = curCompPointer;
-
         }
       } else {
         if (in) {
           skips++;
           if (skips > MAX_SKIPS) { // TODO: make configurable
-            if (comp < 1.2 && !single &&
-                fabs(currentStartCand.totalPos * getLength() - currentEndCand.totalPos * getLength()) > MIN_SEG_LENGTH &&
-                fabs(currentStartCandComp.totalPos * pl.getLength() - currentEndCandComp.totalPos * pl.getLength()) > MIN_SEG_LENGTH
+            if (comp > 0.8 && comp < 1.2 && !single &&
+                (
+                  fabs(currentStartCand.totalPos * getLength() - currentEndCand.totalPos * getLength()) > MIN_SEG_LENGTH &&
+                  fabs(currentStartCandComp.totalPos * pl.getLength() - currentEndCandComp.totalPos * pl.getLength()) > MIN_SEG_LENGTH
+                )
               ) {
               ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
 
               // TODO: only return the FIRST one, make this configuralbe
               return ret;
             }
+
             in = false;
             single = true;
           }
@@ -493,9 +495,11 @@ const {
     curTotalSegDist += totalDist;
   }
 
-  if (comp < 1.2 && in && !single &&
+  if (comp > 0.8 && comp < 1.2 && in && !single &&
+      (
         fabs(currentStartCand.totalPos * getLength() - currentEndCand.totalPos * getLength()) > MIN_SEG_LENGTH &&
         fabs(currentStartCandComp.totalPos * pl.getLength() - currentEndCandComp.totalPos * pl.getLength()) > MIN_SEG_LENGTH
+      )
     ) {
     ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
   }

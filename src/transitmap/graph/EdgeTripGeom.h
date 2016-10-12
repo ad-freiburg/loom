@@ -44,6 +44,7 @@ class EdgeTripGeom {
   void addTrip(gtfs::Trip* t, const Node* dirNode);
 
   const std::vector<TripOccurance>& getTripsUnordered() const;
+  std::vector<TripOccurance>* getTripsUnordered();
 
   std::vector<TripOccurance>::iterator removeTripOccurance(
       std::vector<TripOccurance>::const_iterator pos);

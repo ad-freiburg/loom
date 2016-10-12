@@ -32,7 +32,7 @@ Point NodeFront::getTripOccPosUnder(const gtfs::Route* r,
 
       if (to.first) {
         double p = 0;
-        p = (etg.getWidth() + etg.getSpacing()) * (etg.getTripsUnordered().size() - 1 - to.second)
+        p = (etg.getWidth() + etg.getSpacing()) * (etg.getTripsUnordered()->size() - 1 - to.second)
             + etg.getWidth()/2;
 
         // use interpolate here directly for speed
@@ -320,7 +320,7 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
         }
 
         for (size_t i : *ordering) {
-          const TripOccurance& tripOcc = etgIt->getTripsUnordered()[i];
+          const TripOccurance& tripOcc = (*etgIt->getTripsUnordered())[i];
           if (!processed.insert(tripOcc.route).second) continue;
 
           std::vector<graph::Partner> partners = getPartner(&nf, tripOcc.route);

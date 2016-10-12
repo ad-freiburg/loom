@@ -32,12 +32,14 @@ class GraphBuilder {
 
   void consume(const gtfs::Feed& f);
   void simplify();
-  void createTopologicalNodes();
+  bool createTopologicalNodes();
   void averageNodePositions();
   void fixGeomDirs();
   void writeMainDirs();
   void expandOverlappinFronts();
   void writeInitialConfig();
+
+  void removeArtifacts();
 
  private:
   TransitGraph* _targetGraph;
@@ -50,7 +52,7 @@ class GraphBuilder {
   util::geo::Point getProjectedPoint(double lat, double lng) const;
 
   std::pair<bool, geo::PolyLine> getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b,
-      gtfs::Trip* t);
+      gtfs::Trip* t, double distA, double distB);
 
   ShrdSegWrap getNextSharedSegment() const;
 
@@ -63,6 +65,8 @@ class GraphBuilder {
 
   bool checkTripSanity(gtfs::Trip* t) const;
   bool checkShapeSanity(gtfs::Shape* t) const;
+
+  void combineNodes(Node* a, Node* b);
 
   mutable std::set<const Edge*> _indEdges;
   mutable std::map<const Edge*, size_t> _pEdges;

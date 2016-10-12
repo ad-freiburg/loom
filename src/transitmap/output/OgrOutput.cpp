@@ -65,8 +65,8 @@ void OgrOutput::print(const graph::TransitGraph& outG) {
 
   for (graph::Node* n : outG.getNodes()) {
     LOG(INFO) << n->getStops().size()  << std::endl;
-    if (n->getStops().size() == 0 && n->getAdjListIn().size() + n->getAdjListOut().size() > 0)
-      addNode(n, nodeLayer);
+    //if (n->getStops().size() == 0 && n->getAdjListIn().size() + n->getAdjListOut().size() > 0)
+    addNode(n, nodeLayer);
   }
 
   OGRDataSource::DestroyDataSource(poDS);
@@ -122,7 +122,7 @@ bool OgrOutput::addNode(const graph::Node* n, OGRLayer* layer) const {
   OGRPoint geom;
 
   std::stringstream wktStr;
-  wktStr << boost::geometry::wkt(n->getPos());
+  wktStr << std::setprecision(12) << boost::geometry::wkt(n->getPos());
   std::string wktString = wktStr.str();
 
   const char *wkt[1];

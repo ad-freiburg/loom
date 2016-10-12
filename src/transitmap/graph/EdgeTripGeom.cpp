@@ -50,6 +50,11 @@ const {
 }
 
 // _____________________________________________________________________________
+std::vector<TripOccurance>* EdgeTripGeom::getTripsUnordered() {
+  return &_trips;
+}
+
+// _____________________________________________________________________________
 TripOccurance* EdgeTripGeom::getTripsForRoute(const gtfs::Route* r) const {
   for (size_t i = 0; i < _trips.size(); i++) {
     TripOccurance* to = const_cast<TripOccurance*>(&_trips[i]);

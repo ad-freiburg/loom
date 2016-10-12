@@ -63,9 +63,9 @@ void GraphBuilder::consume(const Feed& f) {
         if (AGGREGATE_STOPS) {
           Stop* frs = prev.getStop()->getParentStation() ? prev.getStop()->getParentStation() : prev.getStop();
           Stop* tos = cur.getStop()->getParentStation() ? cur.getStop()->getParentStation() : cur.getStop();
-          edgeGeom = getSubPolyLine(frs, tos, t->second);
+          edgeGeom = getSubPolyLine(frs, tos, t->second, prev.getShapeDistanceTravelled(), cur.getShapeDistanceTravelled());
         } else {
-          edgeGeom = getSubPolyLine(prev.getStop(), cur.getStop(), t->second);
+          edgeGeom = getSubPolyLine(prev.getStop(), cur.getStop(), t->second, prev.getShapeDistanceTravelled(), cur.getShapeDistanceTravelled());
         }
 
         // only take geometries that could be found using the
@@ -150,10 +150,12 @@ ShrdSegWrap GraphBuilder::getNextSharedSegment() const {
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::createTopologicalNodes() {
+bool GraphBuilder::createTopologicalNodes() {
   ShrdSegWrap w;
   _indEdges.clear();
   _pEdges.clear();
+  bool found = false;
+
   while ((w = getNextSharedSegment()).e) {
     const EdgeTripGeom& curEdgeGeom = w.e->getEdgeTripGeoms()->front();
     const EdgeTripGeom& compEdgeGeom = w.f->getEdgeTripGeoms()->front();
@@ -200,7 +202,7 @@ void GraphBuilder::createTopologicalNodes() {
     Node* a = 0;
     Node* b = 0;
 
-    double maxSnapDist = 40; //(compEdgeGeom.getTotalWidth() + curEdgeGeom.getTotalWidth()) / 2;
+    double maxSnapDist = 20; //(compEdgeGeom.getTotalWidth() + curEdgeGeom.getTotalWidth()) / 2;
 
     if (ea.getLength() < maxSnapDist) {
       a = w.e->getFrom();
@@ -220,14 +222,6 @@ void GraphBuilder::createTopologicalNodes() {
 
     if (!a) a = new Node(w.s.first.p);
     if (!b) b = new Node(w.s.second.p);
-
-    if (util::geo::dist(a->getPos(), b->getPos()) < maxSnapDist) {
-      // after the snapping above, it is possible that the segment distance
-      // is now SMALLER than the maxSnapDistance. Discard this shared segment
-
-      continue;
-    }
-
 
     if (a == b) {
       continue;
@@ -335,12 +329,16 @@ void GraphBuilder::createTopologicalNodes() {
       fbE->addEdgeTripGeom(fcEdgeGeom);
       fbE->simplify();
     }
+
+    found = true;
   }
+
+  return found;
 }
 
 // _____________________________________________________________________________
 std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b,
-    Trip* t) {
+    Trip* t, double distA, double distB) {
   Point ap = getProjectedPoint(a->getLat(), a->getLng());
   Point bp = getProjectedPoint(b->getLat(), b->getLng());
 
@@ -348,6 +346,9 @@ std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b,
     return std::pair<bool, geo::PolyLine>(false,
         geo::PolyLine(ap, bp));
   }
+
+  double totalTripDist = t->getShape()->getPoints().rbegin()->travelDist -
+    t->getShape()->getPoints().begin()->travelDist;
 
   auto pl = _polyLines.find(t->getShape());
   if (pl == _polyLines.end()) {
@@ -373,11 +374,16 @@ std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b,
      */
     geo::PolyLine p = geo::PolyLine(ap, bp);
     p.smoothenOutliers(50);
-    LOG(ERROR) << "RABE" << std::endl;
     return std::pair<bool, geo::PolyLine>(false, p);
   }
 
-  geo::PolyLine p = pl->second.getSegment(ap, bp);
+  geo::PolyLine p;
+
+  if (distA > -1 && distA > -1 && totalTripDist > 0) {
+    p = pl->second.getSegment((distA - t->getShape()->getPoints().begin()->travelDist) / totalTripDist, (distB - t->getShape()->getPoints().begin()->travelDist) / totalTripDist);
+  } else {
+    p = pl->second.getSegment(ap, bp);
+  }
 
   return std::pair<bool, geo::PolyLine>(true, p);
 }
@@ -466,8 +472,8 @@ void GraphBuilder::writeMainDirs() {
       size_t lc = 0;
       const EdgeTripGeom* g;
       for (auto& rg : *e->getEdgeTripGeoms()) {
-         if (rg.getTripsUnordered().size() >= lc) {
-           lc = rg.getTripsUnordered().size();
+         if (rg.getTripsUnordered()->size() >= lc) {
+           lc = rg.getTripsUnordered()->size();
            g = &rg;
          }
       }
@@ -570,7 +576,7 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
   Point i = util::geo::intersection(aa, ab, ba, bb);
 
   if (numShr) {
-  return a.geom.distTo(i) < a.refEtg->getWidth() + a.refEtg->getSpacing() ||
+    return a.geom.distTo(i) < a.refEtg->getWidth() + a.refEtg->getSpacing() ||
     b.geom.distTo(i) < b.refEtg->getWidth() + b.refEtg->getSpacing();
   } else {
     return a.geom.distTo(b.geom) < a.refEtg->getSpacing() + a.refEtg->getWidth();
@@ -625,4 +631,57 @@ bool GraphBuilder::checkTripSanity(gtfs::Trip* t) const {
 bool GraphBuilder::checkShapeSanity(gtfs::Shape* s) const {
   if (!s|| s->getPoints().size() < 2) return false;
   return true;
+}
+
+// _____________________________________________________________________________
+void GraphBuilder::removeArtifacts() {
+  double MIN_SEG_LENGTH = 20;
+  std::vector<Edge*> toDel;
+
+  for (graph::Node* n : *_targetGraph->getNodes()) {
+    for (graph::Edge* e : n->getAdjListOut()) {
+      for (auto etg : *e->getEdgeTripGeoms()) {
+        if (etg.getGeom().getLength() < MIN_SEG_LENGTH) {
+          toDel.push_back(e);
+        }
+      }
+    }
+  }
+
+  for (Edge* e : toDel) {
+    if (e->getFrom()->getStops().size() == 0 ||
+          e->getTo()->getStops().size() == 0) {
+      Node* from = e->getFrom();
+      Node* to = e->getTo();
+      _targetGraph->deleteEdge(e->getFrom(), e->getTo());
+      combineNodes(from, to);
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void GraphBuilder::combineNodes(Node* a, Node* b) {
+  assert(a->getStops().size() == 0 || b->getStops().size() == 0);
+
+  if (a->getStops().size() != 0) {
+    Node* c = a;
+    a = b;
+    b = c;
+  }
+
+  for (graph::Edge* e : a->getAdjListOut()) {
+    e->setFrom(b);
+    b->addEdge(e);
+  }
+
+  for (graph::Edge* e : a->getAdjListIn()) {
+    e->setTo(b);
+    b->addEdge(e);
+  }
+
+  for (auto d : a->getMainDirs()) {
+    b->getMainDirs().push_back(d);
+  }
+
+  _targetGraph->deleteNode(a);
 }

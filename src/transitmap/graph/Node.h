@@ -111,7 +111,6 @@ class Node {
 
   util::geo::Polygon getConvexFrontHull(double d) const;
 
- protected:
   // add edge to this node's adjacency lists
   void addEdge(Edge* e);
 

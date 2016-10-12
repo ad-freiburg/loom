@@ -39,6 +39,9 @@ class Edge {
   void addEdgeTripGeom(const EdgeTripGeom& e);
 
   void simplify();
+
+  void setFrom(Node* from);
+  void setTo(Node* to);
  private:
   Node* _from;
   Node* _to;
