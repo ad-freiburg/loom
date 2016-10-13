@@ -183,6 +183,7 @@ void Edge::combineIncludedGeoms() {
 
 // _____________________________________________________________________________
 void Edge::setFrom(Node* from) {
+  assert(from != _to);
   for (size_t i = 0; i < _tripsContained.size(); i++) {
     EdgeTripGeom& g = _tripsContained[i];
 
@@ -200,6 +201,7 @@ void Edge::setFrom(Node* from) {
 
 // _____________________________________________________________________________
 void Edge::setTo(Node* to) {
+  assert(to != _from);
   for (size_t i = 0; i < _tripsContained.size(); i++) {
     EdgeTripGeom& g = _tripsContained[i];
 

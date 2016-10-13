@@ -145,6 +145,8 @@ void TransitGraph::deleteEdge(Node* from, Node* to) {
   from->removeEdge(toDel);
   to->removeEdge(toDel);
 
+  assert(!getEdge(from, to));
+
   delete toDel;
 }
 

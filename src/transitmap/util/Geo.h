@@ -44,7 +44,7 @@ inline bool _onSegment(double px, double py,
 inline uint64_t _orientation(double px, double py,
                               double qx, double qy,
                               double rx, double ry) {
-  int64_t val = (qy - py) * (rx - qx) - (qx - px) * (ry - qy);
+  double val = (qy - py) * (rx - qx) - (qx - px) * (ry - qy);
 
   if (val == 0) return 0;
   return (val > 0) ? 1 : 2;

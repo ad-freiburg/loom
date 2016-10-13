@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     b.writeMainDirs();
     b.expandOverlappinFronts();
 
-    //b.removeArtifacts();
+    b.removeArtifacts();
 
     LOG(INFO) << "Writing initial ordering configuration..." << std::endl;
     b.writeInitialConfig();
@@ -270,6 +270,8 @@ int main(int argc, char** argv) {
     ptest5.fixTopology(100);
     std::cout << ptest5.getLine().size() << std::endl;
     svgOut.printLine(ptest5, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+
+    std::cout << "Intersects: " << util::geo::intersects(4.914, 8.505, 7.316, 9.094, 12.198, 10.008, 14.676, 10.332) << std::endl;
 
     o << "</svg>";
 

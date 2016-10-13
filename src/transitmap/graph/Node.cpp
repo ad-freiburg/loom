@@ -27,6 +27,7 @@ Point NodeFront::getTripOccPosUnder(const gtfs::Route* r,
       if (&etg == g) {
         to = etg.getTripsForRouteUnder(r, *order);
       } else {
+        assert(c.find(&etg) != c.end());
         to = etg.getTripsForRouteUnder(r, c.find(&etg)->second);
       }
 
@@ -116,6 +117,15 @@ void Node::addEdge(Edge* e) {
 void Node::removeEdge(Edge* e) {
   if (e->getFrom() == this) _adjListOut.erase(e);
   if (e->getTo() == this) _adjListIn.erase(e);
+
+  // remove main dirs containing this edge
+  for (size_t i = 0; i < _mainDirs.size(); i++) {
+    NodeFront& nf = _mainDirs[i];
+    auto p = std::find(nf.edges.begin(), nf.edges.end(), e);
+    if (p != nf.edges.end()) {
+      _mainDirs.erase(_mainDirs.begin() + i);
+    }
+  }
 }
 
 // _____________________________________________________________________________

@@ -598,28 +598,17 @@ std::string PolyLine::getWKT() const {
 
 // _____________________________________________________________________________
 void PolyLine::fixTopology(double maxl) {
-  for (size_t i = 0; i < _line.size() - 1; i++) {
-    if (util::geo::dist(_line[i], _line[i+1]) < 0.001) {
-      _line.erase(_line.begin() + i+1);
-    }
-  }
-
   double distA = 0;
-  double distB = 0;
-  for (size_t i = 1; i < _line.size(); i++) {
+
+  for (size_t i = 1; i < _line.size()-1; i++) {
+    double distB = distA + util::geo::dist(_line[i-1], _line[i]) +
+      util::geo::dist(_line[i], _line[i+1]);
     for (size_t j = i+2; j < _line.size(); j++) {
       if (util::geo::intersects(_line[i-1], _line[i], _line[j-1], _line[j])) {
         Point p = util::geo::intersection(_line[i-1], _line[i], _line[j-1], _line[j]);
 
         double posA = (util::geo::dist(_line[i-1], p) + distA);
         double posB = (util::geo::dist(_line[j-1], p) + distB);
-
-        LOG(INFO) << "checking.. " << i << " vs " << j << std::endl;
-        LOG(INFO) << boost::geometry::wkt(_line[i-1]) << std::endl;
-        LOG(INFO) << boost::geometry::wkt(_line[i]) << std::endl;
-        LOG(INFO) << boost::geometry::wkt(_line[j-1]) << std::endl;
-        LOG(INFO) << boost::geometry::wkt(_line[j]) << std::endl;
-        LOG(INFO) << boost::geometry::wkt(p) << std::endl;
 
         if (fabs(posA - posB) < maxl) {
           _line[i] = p;

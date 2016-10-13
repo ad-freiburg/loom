@@ -177,7 +177,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
   geo::PolyLine center = g.getGeom();
   center.applyChaikinSmooth(3);
-  //center.simplify(1);
+
   double lineW = g.getWidth();
   double lineSpc = g.getSpacing();
   double offsetStep = lineW + lineSpc;
@@ -194,7 +194,8 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       double offset = -(o - oo / 2.0 - g.getWidth() /2.0);
 
       p.offsetPerp(offset);
-      //p.applyChaikinSmooth(3);
+      p.applyChaikinSmooth(3);
+      p.simplify(0.5);
 
       // TODO: why is this check necessary? shouldnt be!
       // ___ OUTFACTOR

@@ -637,25 +637,22 @@ bool GraphBuilder::checkShapeSanity(gtfs::Shape* s) const {
 // _____________________________________________________________________________
 void GraphBuilder::removeArtifacts() {
   double MIN_SEG_LENGTH = 20;
-  std::vector<Edge*> toDel;
 
+  restart:
   for (graph::Node* n : *_targetGraph->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       for (auto etg : *e->getEdgeTripGeoms()) {
         if (etg.getGeom().getLength() < MIN_SEG_LENGTH) {
-          toDel.push_back(e);
+          Node* from = e->getFrom();
+          Node* to = e->getTo();
+          if (from->getStops().size() == 0 || to->getStops().size() == 0) {
+            _targetGraph->deleteEdge(e->getFrom(), e->getTo());
+            combineNodes(from, to);
+            goto restart;
+          }
+          // OMG really
         }
       }
-    }
-  }
-
-  for (Edge* e : toDel) {
-    if (e->getFrom()->getStops().size() == 0 ||
-          e->getTo()->getStops().size() == 0) {
-      Node* from = e->getFrom();
-      Node* to = e->getTo();
-      _targetGraph->deleteEdge(e->getFrom(), e->getTo());
-      combineNodes(from, to);
     }
   }
 }
@@ -671,11 +668,15 @@ void GraphBuilder::combineNodes(Node* a, Node* b) {
   }
 
   for (graph::Edge* e : a->getAdjListOut()) {
+    assert(e->getTo() != b);
+    if (_targetGraph->getEdge(b, e->getTo())) continue;
     e->setFrom(b);
     b->addEdge(e);
   }
 
   for (graph::Edge* e : a->getAdjListIn()) {
+    assert(e->getFrom() != b);
+    if (_targetGraph->getEdge(e->getFrom(), b)) continue;
     e->setTo(b);
     b->addEdge(e);
   }
