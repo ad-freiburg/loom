@@ -76,6 +76,11 @@ inline bool intersects(const Point& p1, const Point& q1, const Point& p2,
 // _____________________________________________________________________________
 inline Point intersection(double p1x, double p1y, double q1x, double q1y,
                         double p2x, double p2y, double q2x, double q2y) {
+  if (p1x == q1x && p1y == q1y) return Point(p1x, p1y);
+  if (p2x == q1x && p2y == q1y) return Point(p2x, p2y);
+  if (p2x == q2x && p2y == q2y) return Point(p2x, p2y);
+  if (p1x == q2x && p1y == q2y) return Point(p1x, p1y);
+
   double a = ((q2y - p2y) * (q1x - p1x)) - ((q2x - p2x) * (q1y - p1y));
   double u = (((q2x - p2x)*(p1y - p2y)) - ((q2y - p2y) * (p1x - p2x))) / a;
 

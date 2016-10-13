@@ -244,18 +244,32 @@ int main(int argc, char** argv) {
     ptest3 << util::geo::Point(160, 305);
     ptest3 << util::geo::Point(165, 310);
     ptest3 << util::geo::Point(170, 320);
-
     ptest3 << util::geo::Point(170, 353);
+
+
     ptest4 = ptest3;
 
     svgOut.printLine(ptest3, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
-    ptest3.offsetPerp(18);
-    svgOut.printLine(ptest3, "fill:none;stroke:green;stroke-width:1", 2000, 2000, 0, 0);
-    ptest3.offsetPerp(18);
-    svgOut.printLine(ptest3, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
-    ptest4.offsetPerp(36);
-    //svgOut.printLine(ptest4, "fill:none;stroke:green;stroke-width:1", 2000, 2000, 0, 0);
 
+    ptest3.applyChaikinSmooth(1);
+    ptest3.offsetPerp(39);
+    svgOut.printLine(ptest3, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+
+    transitmapper::geo::PolyLine ptest5;
+
+    ptest5 << util::geo::Point(210, 300);
+    ptest5 << util::geo::Point(230, 300);
+    ptest5 << util::geo::Point(250, 300);
+    ptest5 << util::geo::Point(260, 305);
+    ptest5 << util::geo::Point(265, 310);
+    ptest5 << util::geo::Point(270, 320);
+    ptest5 << util::geo::Point(270, 353);
+    ptest5 << util::geo::Point(240, 353);
+    ptest5 << util::geo::Point(240, 253);
+    std::cout << ptest5.getLine().size() << std::endl;
+    ptest5.fixTopology(100);
+    std::cout << ptest5.getLine().size() << std::endl;
+    svgOut.printLine(ptest5, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
 
     o << "</svg>";
 

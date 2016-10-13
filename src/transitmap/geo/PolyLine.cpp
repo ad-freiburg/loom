@@ -113,6 +113,7 @@ void PolyLine::offsetPerp(double units) {
 
         ret.push_back(pll.getLine().back());
         *lastIns = pl.getLine().back();
+
         ret.push_back(curP);
       } else {
         ret.push_back(curP);
@@ -595,8 +596,14 @@ std::string PolyLine::getWKT() const {
   return ss.str();
 }
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void PolyLine::fixTopology(double maxl) {
+  for (size_t i = 0; i < _line.size() - 1; i++) {
+    if (util::geo::dist(_line[i], _line[i+1]) < 0.001) {
+      _line.erase(_line.begin() + i+1);
+    }
+  }
+
   double distA = 0;
   double distB = 0;
   for (size_t i = 1; i < _line.size(); i++) {
@@ -604,11 +611,15 @@ void PolyLine::fixTopology(double maxl) {
       if (util::geo::intersects(_line[i-1], _line[i], _line[j-1], _line[j])) {
         Point p = util::geo::intersection(_line[i-1], _line[i], _line[j-1], _line[j]);
 
-        Point pA = util::geo::projectOn(p, _line[i-1], _line[i]);
-        Point pB = util::geo::projectOn(p, _line[j-1], _line[j]);
+        double posA = (util::geo::dist(_line[i-1], p) + distA);
+        double posB = (util::geo::dist(_line[j-1], p) + distB);
 
-        double posA = (util::geo::dist(_line[i-1], pA) + distA);
-        double posB = (util::geo::dist(_line[j-1], pB) + distB);
+        LOG(INFO) << "checking.. " << i << " vs " << j << std::endl;
+        LOG(INFO) << boost::geometry::wkt(_line[i-1]) << std::endl;
+        LOG(INFO) << boost::geometry::wkt(_line[i]) << std::endl;
+        LOG(INFO) << boost::geometry::wkt(_line[j-1]) << std::endl;
+        LOG(INFO) << boost::geometry::wkt(_line[j]) << std::endl;
+        LOG(INFO) << boost::geometry::wkt(p) << std::endl;
 
         if (fabs(posA - posB) < maxl) {
           _line[i] = p;
@@ -619,5 +630,26 @@ void PolyLine::fixTopology(double maxl) {
       distB += util::geo::dist(_line[j-1], _line[j]);
     }
     distA += util::geo::dist(_line[i-1], _line[i]);
+  }
+}
+
+// _____________________________________________________________________________
+void PolyLine::applyChaikinSmooth(size_t depth) {
+  for (size_t i = 0; i < depth; i++) {
+    Line smooth;
+
+    smooth.push_back(_line.front());
+
+    for (size_t i = 1; i < _line.size(); i++) {
+      Point pA = _line[i-1];
+      Point pB = _line[i];
+
+      smooth.push_back(Point(0.75 * pA.get<0>() + 0.25 * pB.get<0>(), 0.75 * pA.get<1>() + 0.25 * pB.get<1>()));
+      smooth.push_back(Point(0.25 * pA.get<0>() + 0.75 * pB.get<0>(), 0.25 * pA.get<1>() + 0.75 * pB.get<1>()));
+    }
+
+    smooth.push_back(_line.back());
+
+    _line = smooth;
   }
 }

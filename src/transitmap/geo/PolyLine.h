@@ -109,6 +109,8 @@ class PolyLine {
   util::geo::Point interpolate(const util::geo::Point& a, const util::geo::Point& b, double p) const;
 
   void fixTopology(double maxl);
+  void applyChaikinSmooth(size_t depth);
+
  private:
   std::set<PointOnLine, PointOnLineCompare> getIntersections(const PolyLine& p,
     size_t a, size_t b) const;
