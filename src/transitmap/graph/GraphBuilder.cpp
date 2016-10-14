@@ -578,7 +578,7 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
 
   if (numShr) {
     return a.geom.distTo(i) < a.refEtg->getWidth() + a.refEtg->getSpacing() ||
-    b.geom.distTo(i) < b.refEtg->getWidth() + b.refEtg->getSpacing();
+    b.geom.distTo(i) < (b.refEtg->getWidth() + b.refEtg->getSpacing()) * numShr;
   } else {
     return a.geom.distTo(b.geom) < a.refEtg->getSpacing() + a.refEtg->getWidth();
   }
@@ -648,9 +648,9 @@ void GraphBuilder::removeArtifacts() {
           if (from->getStops().size() == 0 || to->getStops().size() == 0) {
             _targetGraph->deleteEdge(e->getFrom(), e->getTo());
             combineNodes(from, to);
+            // OMG really
             goto restart;
           }
-          // OMG really
         }
       }
     }
@@ -668,22 +668,63 @@ void GraphBuilder::combineNodes(Node* a, Node* b) {
   }
 
   for (graph::Edge* e : a->getAdjListOut()) {
-    assert(e->getTo() != b);
-    if (_targetGraph->getEdge(b, e->getTo())) continue;
-    e->setFrom(b);
-    b->addEdge(e);
+    Edge* newE = _targetGraph->addEdge(b, e->getTo());
+    a->addEdge(newE);
+
+    for (auto etg : *e->getEdgeTripGeoms()) {
+      EdgeTripGeom etgNew(
+          etg.getGeom(),
+          etg.getGeomDir() == a ? b : etg.getGeomDir(),
+          etg.getWidth(),
+          etg.getSpacing());
+      for (auto to : *etg.getTripsUnordered()) {
+        for (auto trip : to.trips) {
+          etgNew.addTrip(trip, to.direction == a ? b : to.direction);
+        }
+      }
+
+      newE->addEdgeTripGeom(etgNew);
+    }
+
+    const NodeFront* nf = a->getNodeFrontFor(e);
+    if (nf) {
+      NodeFront newNf(newE, b, &(*newE->getEdgeTripGeoms()->begin()));
+      newNf.setGeom(nf->geom);
+      // NOTE: we are adding a new node front here for each edges,
+      //   breaks multiple edges in one single nodefront
+      b->addMainDir(newNf);
+    }
   }
 
   for (graph::Edge* e : a->getAdjListIn()) {
-    assert(e->getFrom() != b);
-    if (_targetGraph->getEdge(e->getFrom(), b)) continue;
-    e->setTo(b);
-    b->addEdge(e);
-  }
+    Edge* newE = _targetGraph->addEdge(e->getFrom(), b);
+    a->addEdge(newE);
 
-  for (auto d : a->getMainDirs()) {
-    b->getMainDirs().push_back(d);
+    for (auto etg : *e->getEdgeTripGeoms()) {
+      EdgeTripGeom etgNew(
+          etg.getGeom(),
+          etg.getGeomDir() == a ? b : etg.getGeomDir(),
+          etg.getWidth(),
+          etg.getSpacing());
+      for (auto to : *etg.getTripsUnordered()) {
+        for (auto trip : to.trips) {
+          etgNew.addTrip(trip, to.direction == a ? b : to.direction);
+        }
+      }
+
+      newE->addEdgeTripGeom(etgNew);
+    }
+
+    const NodeFront* nf = a->getNodeFrontFor(e);
+    if (nf) {
+      NodeFront newNf(newE, b, &(*newE->getEdgeTripGeoms()->begin()));
+      newNf.setGeom(nf->geom);
+      // NOTE: we are adding a new node front here for each edges,
+      //   breaks multiple edges in one single nodefront
+      b->addMainDir(newNf);
+    }
   }
 
   _targetGraph->deleteNode(a);
+  delete a;
 }

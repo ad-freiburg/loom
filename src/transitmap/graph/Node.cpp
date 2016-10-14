@@ -118,11 +118,9 @@ void Node::removeEdge(Edge* e) {
   if (e->getFrom() == this) _adjListOut.erase(e);
   if (e->getTo() == this) _adjListIn.erase(e);
 
-  // remove main dirs containing this edge
   for (size_t i = 0; i < _mainDirs.size(); i++) {
-    NodeFront& nf = _mainDirs[i];
-    auto p = std::find(nf.edges.begin(), nf.edges.end(), e);
-    if (p != nf.edges.end()) {
+    _mainDirs[i].removeEdge(e);
+    if (_mainDirs[i].edges.size() == 0) {
       _mainDirs.erase(_mainDirs.begin() + i);
     }
   }

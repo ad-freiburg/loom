@@ -180,39 +180,3 @@ void Edge::combineIncludedGeoms() {
     }
   }
 }
-
-// _____________________________________________________________________________
-void Edge::setFrom(Node* from) {
-  assert(from != _to);
-  for (size_t i = 0; i < _tripsContained.size(); i++) {
-    EdgeTripGeom& g = _tripsContained[i];
-
-    if (g.getGeomDir() == _from) {
-      g.setGeomDir(from);
-    }
-
-    for (auto to : *g.getTripsUnordered()) {
-      if (to.direction == _from) to.direction = from;
-    }
-  }
-
-  _from = from;
-}
-
-// _____________________________________________________________________________
-void Edge::setTo(Node* to) {
-  assert(to != _from);
-  for (size_t i = 0; i < _tripsContained.size(); i++) {
-    EdgeTripGeom& g = _tripsContained[i];
-
-    if (g.getGeomDir() == _to) {
-      g.setGeomDir(to);
-    }
-
-    for (auto toc : *g.getTripsUnordered()) {
-      if (toc.direction == _to) toc.direction = to;
-    }
-  }
-
-  _to = to;
-}

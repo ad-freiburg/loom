@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     b.writeMainDirs();
     b.expandOverlappinFronts();
 
-    b.removeArtifacts();
+    //b.removeArtifacts();
 
     LOG(INFO) << "Writing initial ordering configuration..." << std::endl;
     b.writeInitialConfig();

@@ -46,6 +46,10 @@ struct NodeFront {
   geo::PolyLine geom;
   void setGeom(const geo::PolyLine& g) { geom = g; };
   void addEdge(Edge* e) { edges.push_back(e); }
+  void removeEdge(Edge* e) {
+    auto pos = std::find(edges.begin(), edges.end(), e);
+    if (pos != edges.end()) edges.erase(pos);
+  }
 
   // TODO
   double refEtgLengthBefExp;
