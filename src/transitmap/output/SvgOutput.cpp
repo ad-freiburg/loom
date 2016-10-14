@@ -135,14 +135,31 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
   if (n->getStops().size() != 0) return;
 
   for (auto& ie : n->getInnerGeometries(outG.getConfig(), true)) {
-    std::stringstream style;
-    style << "fill:none;stroke:#" << ie.route->getColorString()
-      << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
-      << ie.etg->getWidth() * _cfg->outputResolution;
-    Params params;
-    params["style"] = style.str();
-    _delegates[(uintptr_t)ie.route].push_back(PrintDelegate(params, ie.geom));
+    renderLinePart(ie.geom, ie.etg->getWidth(), *ie.route);
   }
+}
+
+// _____________________________________________________________________________
+void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
+    const gtfs::Route& route) {
+  std::stringstream styleOutline;
+  styleOutline << "fill:none;stroke:#000000"
+    << ";stroke-linecap:round;stroke-opacity:0.8;stroke-width:"
+    << (width + 4) * _cfg->outputResolution;
+  Params paramsOutline;
+  paramsOutline["style"] = styleOutline.str();
+
+  std::stringstream style;
+  style << "fill:none;stroke:#" << route.getColorString()
+    << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
+    << width * _cfg->outputResolution;
+  Params params;
+  params["style"] = style.str();
+
+  _delegates[(uintptr_t)&route].push_back(
+      OutlinePrintPair(
+        PrintDelegate(paramsOutline, p),
+        PrintDelegate(params, p)));
 }
 
 // _____________________________________________________________________________
@@ -234,14 +251,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
         }
       }
 
-      // _______ /OUTFACTOR
-      std::stringstream style;
-      style << "fill:none;stroke:#" << r.route->getColorString()
-        << ";stroke-linecap:round;stroke-opacity:1;stroke-width:" << lineW * _cfg->outputResolution;
-      std::map<std::string, std::string> params;
-      std::stringstream id;
-      params["style"] = style.str();
-      _delegates[(uintptr_t)r.route].push_back(PrintDelegate(params, p));
+      renderLinePart(p, lineW, *r.route);
 
       /**
       std::map<std::string, std::string> tparams;
@@ -268,10 +278,17 @@ void SvgOutput::renderDelegates(const graph::TransitGraph& outG,
   for (auto& a : _delegates) {
     _w.openTag("g");
     for (auto& pd : a.second) {
-      printLine(pd.second, pd.first, w, h, xOffset, yOffset);
+      printLine(pd.first.second, pd.first.first, w, h, xOffset, yOffset);
+    }
+    _w.closeTag();
+
+    _w.openTag("g");
+    for (auto& pd : a.second) {
+      printLine(pd.second.second, pd.second.first, w, h, xOffset, yOffset);
     }
     _w.closeTag();
   }
+
 }
 
 // _____________________________________________________________________________
@@ -281,8 +298,8 @@ void SvgOutput::printPoint(const util::geo::Point& p,
   std::map<std::string, std::string> params;
   params["cx"] = std::to_string((p.get<0>() - xOffs) * _cfg->outputResolution);
   params["cy"] = std::to_string(h-(p.get<1>() - yOffs) * _cfg->outputResolution);
-  params["r"] = "5";
-  params["fill"] = "#FF00FF";
+  params["r"] = "2";
+  params["style"] = style;
   _w.openTag("circle", params);
   _w.closeTag();
 }

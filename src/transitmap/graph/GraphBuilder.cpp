@@ -564,7 +564,7 @@ const {
 // _____________________________________________________________________________
 bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
     const NodeFront& b) const {
-  size_t numShr= a.refEtg->getSharedRoutes(*b.refEtg).size() / 2;
+  size_t numShr= a.refEtg->getSharedRoutes(*b.refEtg).size();
 
   Point aa = a.geom.getLine().front();
   Point ab = a.geom.getLine().back();
@@ -576,12 +576,11 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
 
   Point i = util::geo::intersection(aa, ab, ba, bb);
 
-  if (numShr) {
-    return a.geom.distTo(i) < a.refEtg->getWidth() + a.refEtg->getSpacing() ||
-    b.geom.distTo(i) < (b.refEtg->getWidth() + b.refEtg->getSpacing()) * numShr;
-  } else {
-    return a.geom.distTo(b.geom) < a.refEtg->getSpacing() + a.refEtg->getWidth();
-  }
+  if (numShr && a.geom.distTo(i) < a.refEtg->getWidth() + a.refEtg->getSpacing()) return true;
+  if (b.geom.distTo(a.geom) < (b.refEtg->getTotalWidth() + a.refEtg->getTotalWidth()) / 2) return true;
+
+  return a.geom.distTo(b.geom) < a.refEtg->getSpacing() + a.refEtg->getWidth();
+
 }
 
 // _____________________________________________________________________________

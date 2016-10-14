@@ -27,7 +27,6 @@ Point NodeFront::getTripOccPosUnder(const gtfs::Route* r,
       if (&etg == g) {
         to = etg.getTripsForRouteUnder(r, *order);
       } else {
-        assert(c.find(&etg) != c.end());
         to = etg.getTripsForRouteUnder(r, c.find(&etg)->second);
       }
 
@@ -362,13 +361,22 @@ util::geo::Polygon Node::getConvexFrontHull(double d) const {
 
   if (getMainDirs().size() != 2) {
     for (auto& nf : getMainDirs()) {
-      l.push_back(nf.geom.getLine());
+
+      geo::PolyLine capped = nf.geom.getSegment(
+          (nf.refEtg->getWidth() / 2) / nf.geom.getLength(),
+          (nf.geom.getLength() - nf.refEtg->getWidth() / 2) / nf.geom.getLength());
+
+      l.push_back(capped.getLine());
     }
   } else {
     // for two main dirs, take average
     std::vector<const geo::PolyLine*> pols;
-    geo::PolyLine a = getMainDirs()[0].geom;
-    geo::PolyLine b = getMainDirs()[1].geom;
+    geo::PolyLine a = getMainDirs()[0].geom.getSegment(
+          (getMainDirs()[0].refEtg->getWidth() / 2) / getMainDirs()[0].geom.getLength(),
+          (getMainDirs()[0].geom.getLength() - getMainDirs()[0].refEtg->getWidth() / 2) / getMainDirs()[0].geom.getLength());
+    geo::PolyLine b = getMainDirs()[1].geom.getSegment(
+          (getMainDirs()[1].refEtg->getWidth() / 2) / getMainDirs()[1].geom.getLength(),
+          (getMainDirs()[1].geom.getLength() - getMainDirs()[1].refEtg->getWidth() / 2) / getMainDirs()[1].geom.getLength());
 
     assert(a.getLine().size() > 1);
     assert(b.getLine().size() > 1);

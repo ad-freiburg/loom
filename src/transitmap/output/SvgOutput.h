@@ -33,6 +33,7 @@ class SvgOutputException : public std::exception {
 
 typedef std::map<std::string, std::string> Params;
 typedef std::pair<Params, geo::PolyLine> PrintDelegate;
+typedef std::pair<PrintDelegate, PrintDelegate> OutlinePrintPair;
 
 class SvgOutput : public Output {
 
@@ -62,7 +63,7 @@ class SvgOutput : public Output {
 
   const config::Config* _cfg;
 
-  std::map<uintptr_t, std::vector<PrintDelegate> > _delegates;
+  std::map<uintptr_t, std::vector<OutlinePrintPair> > _delegates;
 
   void outputNodes(const graph::TransitGraph& outputGraph, double w, double h);
   void outputEdges(const graph::TransitGraph& outputGraph, double w, double h);
@@ -75,6 +76,9 @@ class SvgOutput : public Output {
 
   void renderNodeScore(const graph::TransitGraph& outG,
       const graph::Node* n, double w, double h);
+
+  void renderLinePart(const geo::PolyLine p, double width,
+    const gtfs::Route& route);
 
   void renderDelegates(const graph::TransitGraph& outG, double w, double h);
 

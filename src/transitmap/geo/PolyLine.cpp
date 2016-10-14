@@ -471,6 +471,18 @@ const {
                   fabs(currentStartCandComp.totalPos * pl.getLength() - currentEndCandComp.totalPos * pl.getLength()) > MIN_SEG_LENGTH
                 )
               ) {
+
+              /**
+              bool intersects =  false;
+              if (util::geo::intersects(currentStartCand.p, currentEndCand.p, currentStartCandComp.p, currentEndCandComp.p)) {
+                Point is = util::geo::intersection(currentStartCand.p, currentEndCand.p, currentStartCandComp.p, currentEndCandComp.p);
+                double d1 = util::geo::dist(currentStartCand.p, is);
+                double d2 = util::geo::dist(currentEndCand.p, is);
+
+                if (d1 > dmax / 4 && d2 > dmax / 4) intersects = true;
+              }
+              **/
+
               ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
 
               // TODO: only return the FIRST one, make this configuralbe
@@ -527,8 +539,6 @@ std::set<PointOnLine, PointOnLineCompare> PolyLine::getIntersections(const PolyL
 std::set<PointOnLine, PointOnLineCompare> PolyLine::getIntersections(const PolyLine& p,
     size_t a, size_t b) const {
   std::set<PointOnLine, PointOnLineCompare> ret;
-
-  assert(getLength() > 0);
 
   if (util::geo::dist(p.getLine()[a], p.getLine()[b]) == 0) {
     // we cannot intersect with a point

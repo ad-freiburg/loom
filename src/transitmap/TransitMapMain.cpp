@@ -273,6 +273,36 @@ int main(int argc, char** argv) {
 
     std::cout << "Intersects: " << util::geo::intersects(4.914, 8.505, 7.316, 9.094, 12.198, 10.008, 14.676, 10.332) << std::endl;
 
+    transitmapper::geo::PolyLine ptest6;
+    transitmapper::geo::PolyLine ptest7;
+
+    ptest6 << util::geo::Point(500, 500) << util::geo::Point(600, 600);
+    ptest7 << util::geo::Point(500, 480) << util::geo::Point(600, 620);
+
+    svgOut.printLine(ptest6, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+    svgOut.printLine(ptest7, "fill:none;stroke:blue;stroke-width:1", 2000, 2000, 0, 0);
+
+    transitmapper::geo::SharedSegments ss = ptest6.getSharedSegments(ptest7, 2);
+    for (auto seg : ss.segments) {
+      svgOut.printPoint(seg.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
+      svgOut.printPoint(seg.second.p, "fill:green;r:4", 2000, 2000, 0, 0);
+    }
+
+    transitmapper::geo::PolyLine ptest8;
+    transitmapper::geo::PolyLine ptest9;
+
+    ptest8 << util::geo::Point(700, 300) << util::geo::Point(800, 400);
+    ptest9 << util::geo::Point(700, 280) << util::geo::Point(750, 350) << util::geo::Point(800, 380);
+
+    svgOut.printLine(ptest8, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+    svgOut.printLine(ptest9, "fill:none;stroke:blue;stroke-width:1", 2000, 2000, 0, 0);
+
+    ss = ptest8.getSharedSegments(ptest9, 2);
+    for (auto seg : ss.segments) {
+      svgOut.printPoint(seg.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
+      svgOut.printPoint(seg.second.p, "fill:green;r:4", 2000, 2000, 0, 0);
+    }
+
     o << "</svg>";
 
   }
