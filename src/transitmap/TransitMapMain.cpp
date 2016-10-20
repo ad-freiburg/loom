@@ -284,8 +284,8 @@ int main(int argc, char** argv) {
 
     transitmapper::geo::SharedSegments ss = ptest6.getSharedSegments(ptest7, 2);
     for (auto seg : ss.segments) {
-      svgOut.printPoint(seg.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
-      svgOut.printPoint(seg.second.p, "fill:green;r:4", 2000, 2000, 0, 0);
+      svgOut.printPoint(seg.first.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
+      svgOut.printPoint(seg.second.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
     }
 
     transitmapper::geo::PolyLine ptest8;
@@ -299,8 +299,8 @@ int main(int argc, char** argv) {
 
     ss = ptest8.getSharedSegments(ptest9, 2);
     for (auto seg : ss.segments) {
-      svgOut.printPoint(seg.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
-      svgOut.printPoint(seg.second.p, "fill:green;r:4", 2000, 2000, 0, 0);
+      svgOut.printPoint(seg.first.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
+      svgOut.printPoint(seg.second.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
     }
 
     o << "</svg>";

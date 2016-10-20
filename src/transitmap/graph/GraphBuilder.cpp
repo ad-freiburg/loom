@@ -160,49 +160,32 @@ bool GraphBuilder::createTopologicalNodes() {
     const EdgeTripGeom& curEdgeGeom = w.e->getEdgeTripGeoms()->front();
     const EdgeTripGeom& compEdgeGeom = w.f->getEdgeTripGeoms()->front();
 
-    geo::PolyLine ea = curEdgeGeom.getGeom().getSegment(0, w.s.first.totalPos);
-    geo::PolyLine ab = curEdgeGeom.getGeom().getSegment(w.s.first.totalPos,
-        w.s.second.totalPos);
-    geo::PolyLine ec = curEdgeGeom.getGeom().getSegment(w.s.second.totalPos, 1);
+    geo::PolyLine ea = curEdgeGeom.getGeom().getSegment(0, w.s.first.first.totalPos);
+    geo::PolyLine ec = curEdgeGeom.getGeom().getSegment(w.s.second.first.totalPos, 1);
 
-    geo::PointOnLine fap = compEdgeGeom.getGeom().projectOn(w.s.first.p);
-    geo::PointOnLine fbp = compEdgeGeom.getGeom().projectOn(w.s.second.p);
+    const geo::PointOnLine& fap = w.s.first.second;
+    const geo::PointOnLine& fbp = w.s.second.second;
 
-    bool reversed = false;
     geo::PolyLine fa;
-    geo::PolyLine fab;
     geo::PolyLine fc;
 
     assert(w.f->getTo() == compEdgeGeom.getGeomDir());
 
     if (fap.totalPos > fbp.totalPos) {
-      reversed = true;
-
       fa = compEdgeGeom.getGeom().getSegment(fap.totalPos, 1);
-      fab = compEdgeGeom.getGeom().getSegment(fbp, fap);
       fc = compEdgeGeom.getGeom().getSegment(0, fbp.totalPos);
-
-      fab.reverse();
     } else {
       fa = compEdgeGeom.getGeom().getSegment(0, fap.totalPos);
-      fab = compEdgeGeom.getGeom().getSegment(fap, fbp);
       fc = compEdgeGeom.getGeom().getSegment(fbp.totalPos, 1);
     }
 
-    std::vector<const geo::PolyLine*> avg;
-    avg.push_back(&ab);
-    avg.push_back(&fab);
-    ab = geo::PolyLine::average(avg);
-    ab.simplify(5);
-
-    //if (fab.getLength() > ab.getLength()) ab = fab;
-    //
+    geo::PolyLine ab = getAveragedFromSharedSeg(w);
 
     // new nodes at the start and end of the shared segment
     Node* a = 0;
     Node* b = 0;
 
-    double maxSnapDist = 20; //(compEdgeGeom.getTotalWidth() + curEdgeGeom.getTotalWidth()) / 2;
+    double maxSnapDist = 20;
 
     if (ea.getLength() < maxSnapDist) {
       a = w.e->getFrom();
@@ -213,15 +196,15 @@ bool GraphBuilder::createTopologicalNodes() {
     }
 
     if (fa.getLength() < maxSnapDist) {
-      a = !reversed ? w.f->getFrom() : w.f->getTo();
+      a = !(fap.totalPos > fbp.totalPos) ? w.f->getFrom() : w.f->getTo();
     }
 
     if (fc.getLength() < maxSnapDist) {
-      b = !reversed ? w.f->getTo() : w.f->getFrom();
+      b = !(fap.totalPos > fbp.totalPos) ? w.f->getTo() : w.f->getFrom();
     }
 
-    if (!a) a = new Node(w.s.first.p);
-    if (!b) b = new Node(w.s.second.p);
+    if (!a) a = new Node(w.s.first.first.p);
+    if (!b) b = new Node(w.s.second.first.p);
 
     if (a == b) {
       continue;
@@ -234,7 +217,7 @@ bool GraphBuilder::createTopologicalNodes() {
     const Node* faDir = 0;
     const Node* fcDir = 0;
 
-    if (reversed) {
+    if (fap.totalPos > fbp.totalPos) {
       faDir = w.f->getTo();
       fcDir = b;
     } else {
@@ -261,8 +244,8 @@ bool GraphBuilder::createTopologicalNodes() {
 
     for (const TripOccurance r : compEdgeGeom.getTripsUnordered()) {
       for (auto& t : r.trips) {
-        if ((r.direction == w.f->getTo() && !reversed) ||
-            (r.direction != w.f->getTo() && reversed)) {
+        if ((r.direction == w.f->getTo() && !(fap.totalPos > fbp.totalPos)) ||
+            (r.direction != w.f->getTo() && (fap.totalPos > fbp.totalPos))) {
           faEdgeGeom.addTrip(t, a);
           abEdgeGeom.addTrip(t, b);
           fcEdgeGeom.addTrip(t, w.f->getTo());
@@ -301,7 +284,7 @@ bool GraphBuilder::createTopologicalNodes() {
     Edge* faE = 0;
     Edge* fbE = 0;
 
-    if (reversed) {
+    if (fap.totalPos > fbp.totalPos) {
       faE =_targetGraph->addEdge(a, wfto);
       fbE =_targetGraph->addEdge(wffrom, b);
     } else {
@@ -361,7 +344,7 @@ std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b,
       pl->second << getProjectedPoint(sp.lat, sp.lng);
     }
 
-    pl->second.simplify(10);
+    pl->second.simplify(20);
     pl->second.smoothenOutliers(50);
     pl->second.fixTopology(50);
   }
@@ -726,4 +709,32 @@ void GraphBuilder::combineNodes(Node* a, Node* b) {
 
   _targetGraph->deleteNode(a);
   delete a;
+}
+
+// _____________________________________________________________________________
+geo::PolyLine GraphBuilder::getAveragedFromSharedSeg(const ShrdSegWrap& w) 
+const {
+  const EdgeTripGeom& geomA = w.e->getEdgeTripGeoms()->front();
+  const EdgeTripGeom& geomB = w.f->getEdgeTripGeoms()->front();
+
+  geo::PolyLine a = geomA.getGeom().getSegment(w.s.first.first.totalPos,
+      w.s.second.first.totalPos);
+  geo::PolyLine b;
+
+  if (w.s.first.second.totalPos > w.s.second.second.totalPos) {
+    b = geomB.getGeom().getSegment(w.s.second.second.totalPos,
+        w.s.first.second.totalPos);
+    b.reverse();
+  } else {
+    b = geomB.getGeom().getSegment(w.s.first.second.totalPos,
+        w.s.second.second.totalPos);
+  }
+
+  std::vector<const geo::PolyLine*> avg;
+  avg.push_back(&a);
+  avg.push_back(&b);
+
+  geo::PolyLine ret = geo::PolyLine::average(avg);
+  ret.simplify(5);
+  return ret;
 }

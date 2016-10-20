@@ -55,6 +55,7 @@ class GraphBuilder {
       gtfs::Trip* t, double distA, double distB);
 
   ShrdSegWrap getNextSharedSegment() const;
+  geo::PolyLine getAveragedFromSharedSeg(const ShrdSegWrap& w) const;
 
   std::set<NodeFront*> nodeGetOverlappingFronts(const Node* n) const;
 

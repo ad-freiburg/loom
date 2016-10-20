@@ -450,7 +450,7 @@ const {
         skips = 0;
 
         if (in) {
-          currentEndCand = curBackProjectedPointer;  //PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
+          currentEndCand = curBackProjectedPointer;
           currentEndCandComp = curCompPointer;
 
           single = false;
@@ -458,7 +458,7 @@ const {
           comp = fabs(currentStartCand.totalPos * getLength() - currentEndCand.totalPos * getLength()) / fabs(currentStartCandComp.totalPos * pl.getLength() - currentEndCandComp.totalPos * pl.getLength());
         } else {
           in = true;
-          currentStartCand = curBackProjectedPointer; //PointOnLine(i-1, (curTotalSegDist + curSegDist) / getLength(), curPointer);
+          currentStartCand = curBackProjectedPointer;
           currentStartCandComp = curCompPointer;
         }
       } else {
@@ -483,7 +483,8 @@ const {
               }
               **/
 
-              ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
+              ret.segments.push_back(SharedSegment(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentStartCandComp),
+                  std::pair<PointOnLine, PointOnLine>(currentEndCand, currentEndCandComp)));
 
               // TODO: only return the FIRST one, make this configuralbe
               return ret;
@@ -516,7 +517,8 @@ const {
         fabs(currentStartCandComp.totalPos * pl.getLength() - currentEndCandComp.totalPos * pl.getLength()) > MIN_SEG_LENGTH
       )
     ) {
-    ret.segments.push_back(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentEndCand));
+    ret.segments.push_back(SharedSegment(std::pair<PointOnLine, PointOnLine>(currentStartCand, currentStartCandComp),
+        std::pair<PointOnLine, PointOnLine>(currentEndCand, currentEndCandComp)));
   }
 
   return ret;

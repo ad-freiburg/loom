@@ -33,7 +33,7 @@ struct PointOnLineCompare {
   }
 };
 
-typedef std::pair<PointOnLine, PointOnLine> SharedSegment;
+typedef std::pair<std::pair<PointOnLine, PointOnLine>, std::pair<PointOnLine, PointOnLine>> SharedSegment;
 
 struct SharedSegments {
   std::vector<SharedSegment> segments;
