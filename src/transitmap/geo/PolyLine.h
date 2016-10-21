@@ -77,7 +77,9 @@ class PolyLine {
 
   std::set<PointOnLine, PointOnLineCompare> getIntersections(const PolyLine& g) const;
 
-  static PolyLine average(std::vector<const PolyLine*>& lines);
+  static PolyLine average(const std::vector<const PolyLine*>& lines);
+  static PolyLine average(const std::vector<const PolyLine*>& lines,
+    const std::vector<double>& weights);
 
   void simplify(double d);
   void empty();

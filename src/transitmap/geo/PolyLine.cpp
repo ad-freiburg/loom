@@ -227,18 +227,29 @@ double PolyLine::getLength() const {
 }
 
 // _____________________________________________________________________________
-PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
+PolyLine PolyLine::average(const std::vector<const PolyLine*>& lines,
+    const std::vector<double>& weights) {
+  bool weighted = lines.size() == weights.size();
   double stepSize;
-  // const PolyLine* longest = 0;
+
   double longestLength = DBL_MIN;  // avoid recalc of length on each comparision
   for (const PolyLine* p : lines) {
     if (p->getLength() > longestLength) {
       longestLength = p->getLength();
-      // longest = p;
     }
   }
 
   PolyLine ret;
+  double total = 0;
+
+  for (size_t i = 0; i < lines.size(); ++i) {
+    if (weighted) {
+      total += weights[i];
+    } else {
+      total += 1;
+    }
+  }
+
   stepSize = AVERAGING_STEP / longestLength;
   bool end = false;
   for (double a = 0; !end; a += stepSize) {
@@ -249,17 +260,28 @@ PolyLine PolyLine::average(std::vector<const PolyLine*>& lines) {
     double x = 0;
     double y = 0;
 
-    for (const PolyLine* pl : lines) {
+    for (size_t i = 0; i < lines.size(); ++i) {
+      const PolyLine* pl = lines[i];
       Point p = pl->getPointAt(a).p;
-      x += p.get<0>();
-      y += p.get<1>();
+      if (weighted) {
+        x += p.get<0>() * weights[i];
+        y += p.get<1>() * weights[i];
+      } else {
+        x += p.get<0>();
+        y += p.get<1>();
+      }
     }
-    ret << Point(x / lines.size(), y / lines.size());
+    ret << Point(x / total, y / total);
   }
 
   ret.simplify(0);
 
   return ret;
+}
+
+// _____________________________________________________________________________
+PolyLine PolyLine::average(const std::vector<const PolyLine*>& lines) {
+  return average(lines, std::vector<double>());
 }
 
 // _____________________________________________________________________________

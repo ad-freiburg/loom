@@ -160,11 +160,13 @@ bool GraphBuilder::createTopologicalNodes() {
     const EdgeTripGeom& curEdgeGeom = w.e->getEdgeTripGeoms()->front();
     const EdgeTripGeom& compEdgeGeom = w.f->getEdgeTripGeoms()->front();
 
-    geo::PolyLine ea = curEdgeGeom.getGeom().getSegment(0, w.s.first.first.totalPos);
-    geo::PolyLine ec = curEdgeGeom.getGeom().getSegment(w.s.second.first.totalPos, 1);
-
+    const geo::PointOnLine& eap = w.s.first.first;
+    const geo::PointOnLine& ebp = w.s.second.first;
     const geo::PointOnLine& fap = w.s.first.second;
     const geo::PointOnLine& fbp = w.s.second.second;
+
+    geo::PolyLine ea = curEdgeGeom.getGeom().getSegment(0, eap.totalPos);
+    geo::PolyLine ec = curEdgeGeom.getGeom().getSegment(ebp.totalPos, 1);
 
     geo::PolyLine fa;
     geo::PolyLine fc;
@@ -712,7 +714,7 @@ void GraphBuilder::combineNodes(Node* a, Node* b) {
 }
 
 // _____________________________________________________________________________
-geo::PolyLine GraphBuilder::getAveragedFromSharedSeg(const ShrdSegWrap& w) 
+geo::PolyLine GraphBuilder::getAveragedFromSharedSeg(const ShrdSegWrap& w)
 const {
   const EdgeTripGeom& geomA = w.e->getEdgeTripGeoms()->front();
   const EdgeTripGeom& geomB = w.f->getEdgeTripGeoms()->front();
@@ -731,10 +733,13 @@ const {
   }
 
   std::vector<const geo::PolyLine*> avg;
+  std::vector<double> weights;
   avg.push_back(&a);
   avg.push_back(&b);
+  weights.push_back(geomA.getCardinality() * geomA.getCardinality());
+  weights.push_back(geomB.getCardinality() * geomB.getCardinality());
 
-  geo::PolyLine ret = geo::PolyLine::average(avg);
+  geo::PolyLine ret = geo::PolyLine::average(avg, weights);
   ret.simplify(5);
   return ret;
 }
