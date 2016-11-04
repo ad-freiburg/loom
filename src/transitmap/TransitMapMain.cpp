@@ -19,6 +19,7 @@
 #include "./geo/PolyLine.h"
 #include "./gtfsparser/gtfs/Service.h"
 #include "./optim/EdgeOrderOptimizer.h"
+#include "./optim/ILPEdgeOrderOptimizer.h"
 #include "./config/ConfigReader.cpp"
 #include "./config/TransitMapConfig.h"
 
@@ -42,14 +43,6 @@ int main(int argc, char** argv) {
   gtfsparser::Parser parser;
   gtfsparser::gtfs::Feed feed;
 
-  LOG(INFO) << "Resolution is " << cfg.outputResolution << std::endl;
-  LOG(INFO) << cfg.lineWidth << std::endl;
-  LOG(INFO) << cfg.inputFeedPath << std::endl;
-  LOG(INFO) << cfg.lineSpacing << std::endl;
-  LOG(INFO) << cfg.renderMethod << std::endl;
-  LOG(INFO) << cfg.optimIterations << std::endl;
-  LOG(INFO) << cfg.renderStations << std::endl;
-  LOG(INFO) << cfg.renderStationNames << std::endl;
 
   if (!cfg.inputFeedPath.empty()) {
     LOG(INFO) << "reading feed at " << cfg.inputFeedPath << std::endl;
@@ -82,8 +75,14 @@ int main(int argc, char** argv) {
     b.writeInitialConfig();
 
     LOG(INFO) << "Optimizing..." << std::endl;
+    /**
     optim::EdgeOrderOptimizer eoOptim(&g);
     eoOptim.optimize(cfg.optimIterations);
+    */
+
+    optim::ILPEdgeOrderOptimizer ilpEoOptim(&g);
+    ilpEoOptim.optimize();
+
     LOG(INFO) << "Total graph score is -- " << g.getScore() << " --" << std::endl;
     LOG(INFO) << "Per node graph score is -- "
       << g.getScore() / g.getNodes()->size() << " --" << std::endl;

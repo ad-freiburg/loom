@@ -168,3 +168,13 @@ const {
 
   return ret;
 }
+
+
+// _____________________________________________________________________________
+std::string EdgeTripGeom::getStrRepr() const {
+  const void* address = static_cast<const void*>(this);
+  std::stringstream ss;
+  ss << address;
+
+  return ss.str();
+}

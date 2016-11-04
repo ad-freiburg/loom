@@ -76,6 +76,8 @@ class EdgeTripGeom {
   // TODO: store this here atm, but find better plcae...
   std::vector<std::vector<size_t> > permutations;
 
+  std::string getStrRepr() const;
+
  private:
   std::vector<TripOccurance> _trips;
 
