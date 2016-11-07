@@ -27,6 +27,11 @@ class ILPEdgeOrderOptimizer {
 
   glp_prob* createProblem() const;
   void solveProblem(glp_prob* lp) const;
+
+  void getConfigurationFromSoluation(glp_prob* lp,
+      Configuration* c) const;
+  std::string getILPVarName(const EdgeTripGeom* seg,
+    const gtfs::Route* r, size_t p) const;
 };
 
 }}

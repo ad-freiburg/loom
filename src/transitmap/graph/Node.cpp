@@ -31,16 +31,26 @@ Point NodeFront::getTripOccPosUnder(const gtfs::Route* r,
       }
 
       if (to.first) {
-        double p = 0;
-        p = (etg.getWidth() + etg.getSpacing()) * (etg.getTripsUnordered()->size() - 1 - to.second)
-            + etg.getWidth()/2;
-
-        // use interpolate here directly for speed
-        return geom.interpolate(geom.getLine().front(), geom.getLine().back(), p);
+        return getTripPos(etg, to.second);
       }
     }
   }
   // TODO: handle not-found case
+}
+
+// _____________________________________________________________________________
+Point NodeFront::getTripPos(const EdgeTripGeom& etg, size_t pos) const {
+  double p;
+  if (n != etg.getGeomDir()) {
+    p = (etg.getWidth() + etg.getSpacing()) * pos
+        + etg.getWidth()/2;
+  } else {
+    p = (etg.getWidth() + etg.getSpacing()) * (etg.getCardinality() - 1 - pos)
+        + etg.getWidth()/2;
+  }
+
+  // use interpolate here directly for speed
+  return geom.interpolate(geom.getLine().front(), geom.getLine().back(), p);
 }
 
 // _____________________________________________________________________________
@@ -146,6 +156,15 @@ const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
     if (std::find(nf.edges.begin(), nf.edges.end(), e) != nf.edges.end()) {
       return &nf;
     }
+  }
+
+  return 0;
+}
+
+// _____________________________________________________________________________
+const NodeFront* Node::getNodeFrontFor(const EdgeTripGeom* e) const {
+  for (auto& nf : getMainDirs()) {
+    if (nf.refEtg == e) return &nf;
   }
 
   return 0;
@@ -408,4 +427,48 @@ util::geo::Polygon Node::getConvexFrontHull(double d) const {
 
   assert(ret.size() > 0);
   return ret[0];
+}
+
+// _____________________________________________________________________________
+size_t Node::getNodeFrontPos(const NodeFront* a) const {
+  for (size_t i = 0; i < _mainDirs.size(); ++i) {
+    if (&_mainDirs[i] == a) return i;
+  }
+
+  return _mainDirs.size();
+}
+
+// _____________________________________________________________________________
+bool Node::isAdjacent(const NodeFront* a, const NodeFront* b) const {
+  size_t pa = getNodeFrontPos(a);
+  size_t pb = getNodeFrontPos(b);
+
+  if (pa == 0 && pb == _mainDirs.size() - 1) return true;
+  if (pa > pb && pa - pb == 1) return true;
+  if (pb > pa && pb - pa == 1) return true;
+
+  return false;
+}
+
+// _____________________________________________________________________________
+bool Node::crosses(const EdgeTripGeom& a, const EdgeTripGeom& b,
+    size_t posLineAinA,
+    size_t posLineAinB,
+    size_t posLineBinA,
+    size_t posLineBinB) const {
+
+  const NodeFront* na = getNodeFrontFor(&a);
+  const NodeFront* nb = getNodeFrontFor(&b);
+
+  Point aa;
+  Point ab;
+  aa = na->getTripPos(a, posLineAinA);
+  ab = na->getTripPos(a, posLineBinA);
+
+  Point ba;
+  Point bb;
+  ba = nb->getTripPos(b, posLineAinB);
+  bb = nb->getTripPos(b, posLineBinB);
+
+  return util::geo::intersects(aa, ba, ab, bb);
 }

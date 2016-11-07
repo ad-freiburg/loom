@@ -476,6 +476,7 @@ void GraphBuilder::writeMainDirs() {
             g->getTotalWidth());
       } else {
         pl = g->getGeom().getOrthoLineAtDist(0, g->getTotalWidth());
+        pl.reverse();
       }
 
       f.setGeom(pl);
@@ -507,6 +508,7 @@ void GraphBuilder::expandOverlappinFronts() {
         } else {
           f->geom = f->refEtg->getGeom().getOrthoLineAtDist(
               step, f->refEtg->getTotalWidth());
+          f->geom.reverse();
         }
 
         // cut the edges to fit the new front

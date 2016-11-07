@@ -80,10 +80,12 @@ int main(int argc, char** argv) {
     eoOptim.optimize(cfg.optimIterations);
     */
 
+    LOG(INFO) << "Total graph score BEFORE optim is -- " << g.getScore() << " --" << std::endl;
+
     optim::ILPEdgeOrderOptimizer ilpEoOptim(&g);
     ilpEoOptim.optimize();
 
-    LOG(INFO) << "Total graph score is -- " << g.getScore() << " --" << std::endl;
+    LOG(INFO) << "Total graph score AFTER optim is -- " << g.getScore() << " --" << std::endl;
     LOG(INFO) << "Per node graph score is -- "
       << g.getScore() / g.getNodes()->size() << " --" << std::endl;
 

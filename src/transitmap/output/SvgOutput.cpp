@@ -54,7 +54,7 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
     if (_cfg->renderStationNames) renderNodeScore(outG, n, width, height);
   }
 
-  outputNodes(outG, width, height);
+  //outputNodes(outG, width, height);
   if (_cfg->renderNodeFronts) {
     renderNodeFronts(outG, width, height);
   }
@@ -103,12 +103,18 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG, double w,
       params["style"] = style.str();
       printLine(p, params, w, h, xOffset, yOffset);
 
+      util::geo::Point dir = p.getPointAt(1).p;
+      style.clear();
+      style << "fill:none;stroke:red"
+        << ";stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
+      printPoint(dir, style.str(), w, h, xOffset, yOffset);
+
       util::geo::Point a = p.getPointAt(.5).p;
 
       std::stringstream styleA;
-      style << "fill:none;stroke:red"
+      styleA << "fill:none;stroke:red"
         << ";stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
-      params["style"] = style.str();
+      params["style"] = styleA.str();
 
       printLine(geo::PolyLine(n->getPos(), a), params, w, h, xOffset, yOffset);
     }
@@ -204,6 +210,14 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
   assert(outG.getConfig().find(&g) != outG.getConfig().end());
 
+  util::geo::Point dir = center.getPointAt(1).p;
+  std::stringstream style;
+  style.clear();
+  style << "fill:none;stroke:white"
+    << ";stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
+  printPoint(dir, style.str(), w, h, xOffset, yOffset);
+
+  size_t a = 0;
   for (size_t i : outG.getConfig().find(&g)->second) {
       const graph::TripOccurance& r = g.getTripsUnordered()[i];
       geo::PolyLine p = center;
@@ -253,16 +267,16 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
       renderLinePart(p, lineW, *r.route);
 
-      /**
       std::map<std::string, std::string> tparams;
-      tparams["x"] = std::to_string((p.getPointAt(0.5).p.get<0>() - xOffset) * _scale);
-      tparams["y"] = std::to_string(h-(p.getPointAt(0.5).p.get<1>() - yOffset) * _scale);
+      tparams["x"] = std::to_string((p.getPointAt(0.5).p.get<0>() - xOffset) * _cfg->outputResolution);
+      tparams["y"] = std::to_string(h-(p.getPointAt(0.5).p.get<1>() - yOffset) * _cfg->outputResolution);
       tparams["fill"] = "white";
-      tparams["stroke"] = "red";
+      tparams["font-size"] = "3px";
       _w.openTag("text", tparams);
-      _w.writeText(r.route->getId());
+      _w.writeText(std::to_string(a));
       _w.closeTag();
-      **/
+
+      a++;
 
       //break;
       o -= offsetStep;

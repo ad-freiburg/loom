@@ -40,6 +40,7 @@ struct NodeFront {
   Point getTripOccPos(const gtfs::Route* r, const Configuration& c) const;
   Point getTripOccPosUnder(const gtfs::Route* r, const graph::Configuration& c,
     const EdgeTripGeom* g, const std::vector<size_t>* order) const;
+  Point getTripPos(const EdgeTripGeom& etg, size_t pos) const;
 
   const EdgeTripGeom* refEtg;
 
@@ -100,7 +101,14 @@ class Node {
 
   void addMainDir(NodeFront f);
 
+  bool crosses(const EdgeTripGeom& a, const EdgeTripGeom& b,
+      size_t posLineAinA,
+      size_t posLineAinB,
+      size_t posLineBinA,
+      size_t posLineBinB) const;
+
   const NodeFront* getNodeFrontFor(const Edge* e) const;
+  const NodeFront* getNodeFrontFor(const EdgeTripGeom* etg) const;
   double getScore(const graph::Configuration& c) const;
   double getScoreUnder(const graph::Configuration& c, const EdgeTripGeom* g, const graph::Ordering* order) const;
   double getAreaScore(const Configuration& c, const EdgeTripGeom* g, const graph::Ordering* order) const;
@@ -121,6 +129,8 @@ class Node {
   // remove edge from this node's adjacency lists
   void removeEdge(Edge* e);
 
+  bool isAdjacent(const NodeFront* a, const NodeFront* b) const;
+
  private:
   std::set<Edge*> _adjListIn;
   std::set<Edge*> _adjListOut;
@@ -129,6 +139,8 @@ class Node {
   std::vector<NodeFront> _mainDirs;
 
   std::set<gtfs::Stop*> _stops;
+
+  size_t getNodeFrontPos(const NodeFront* a) const;
 
   geo::PolyLine getInnerBezier(const Configuration& c, const NodeFront& nf,
       const TripOccurance& tripOcc, const graph::Partner& partner, const EdgeTripGeom* g,
