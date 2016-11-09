@@ -184,6 +184,11 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
     _w.writeText("\n");
   }
   //_w.writeText(std::to_string(n->getScore(outG.getConfig())));
+  const void* address = static_cast<const void*>(n);
+  std::stringstream ss;
+  ss << address;
+
+  _w.writeText(ss.str());
   _w.closeTag();
 
 }

@@ -129,8 +129,6 @@ class Node {
   // remove edge from this node's adjacency lists
   void removeEdge(Edge* e);
 
-  bool isAdjacent(const NodeFront* a, const NodeFront* b) const;
-
  private:
   std::set<Edge*> _adjListIn;
   std::set<Edge*> _adjListOut;

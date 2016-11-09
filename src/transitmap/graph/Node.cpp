@@ -439,18 +439,6 @@ size_t Node::getNodeFrontPos(const NodeFront* a) const {
 }
 
 // _____________________________________________________________________________
-bool Node::isAdjacent(const NodeFront* a, const NodeFront* b) const {
-  size_t pa = getNodeFrontPos(a);
-  size_t pb = getNodeFrontPos(b);
-
-  if (pa == 0 && pb == _mainDirs.size() - 1) return true;
-  if (pa > pb && pa - pb == 1) return true;
-  if (pb > pa && pb - pa == 1) return true;
-
-  return false;
-}
-
-// _____________________________________________________________________________
 bool Node::crosses(const EdgeTripGeom& a, const EdgeTripGeom& b,
     size_t posLineAinA,
     size_t posLineAinB,
@@ -459,6 +447,7 @@ bool Node::crosses(const EdgeTripGeom& a, const EdgeTripGeom& b,
 
   const NodeFront* na = getNodeFrontFor(&a);
   const NodeFront* nb = getNodeFrontFor(&b);
+
 
   Point aa;
   Point ab;
@@ -469,6 +458,8 @@ bool Node::crosses(const EdgeTripGeom& a, const EdgeTripGeom& b,
   Point bb;
   ba = nb->getTripPos(b, posLineAinB);
   bb = nb->getTripPos(b, posLineBinB);
+
+  if ((aa == ba && ab == bb || (aa == bb && ab = ba)) return true;
 
   return util::geo::intersects(aa, ba, ab, bb);
 }

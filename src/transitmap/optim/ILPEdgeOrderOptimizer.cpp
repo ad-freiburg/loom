@@ -151,129 +151,113 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem() const {
     for (auto& nf : n->getMainDirs()) {
       const graph::EdgeTripGeom* seg = nf.refEtg;
 
-      std::set<gtfs::Route*> processed;
-
       // check all line pairs in this seg
-      for (auto& toA : seg->getTripsUnordered()) {
-        processed.insert(toA.route);
-        for (auto& toB : seg->getTripsUnordered()) {
-          if (processed.find(toB.route) != processed.end()) continue;
-          if (toA.route == toB.route) continue; // dont check against itself
-
+      for (size_t toAi = 0; toAi < seg->getTripsUnordered().size(); toAi++) {
+        const TripOccurance& toA = seg->getTripsUnordered()[toAi];
+        for (size_t toBi = 0; toBi < toAi; toBi++) {
+          const TripOccurance& toB = seg->getTripsUnordered()[toBi];
           std::vector<Partner> partnersA = n->getPartner(&nf, toA.route);
           std::vector<Partner> partnersB = n->getPartner(&nf, toB.route);
 
-          const NodeFront* nfAdj = 0;
-
-          // check for adjacent partner in A
+          // check for partnes in A
           for (size_t i = 0; i < partnersA.size(); ++i) {
-            if (n->isAdjacent(&nf, partnersA[i].front)) {
-                nfAdj = partnersA[i].front;
-            }
-          }
+            for (size_t i = 0; i < partnersB.size(); ++i) {
+              const NodeFront* nfAdj = partnersA[i].front;
+              if (partnersB[i].front == nfAdj) {
+                // === lines continue in nodefront
 
-          if (!nfAdj) {
-            std::cout << "No adj. partner found..." << std::endl;
-            continue; // no adjacent partner found
-          }
+                const graph::EdgeTripGeom* segB = nfAdj->refEtg;
 
-          // now, check if nfa is present in partnersB also
-          bool found = false;
-          for (size_t i = 0; i < partnersB.size(); ++i) {
-            if (partnersB[i].front == nfAdj) found = true;
-          }
+                size_t decisionVar = glp_add_cols(lp, 1);
 
-          if (!found) {
-            std::cout << "No partner in same nf found..." << std::endl;
-            continue;
-          }
+                // introduce dec var
+                std::stringstream ss;
+                ss << "x_dec(" << seg->getStrRepr() << "," << segB->getStrRepr()
+                  << "," << toA.route << "(" << toA.route->getShortName() << "),"
+                  << toB.route << "(" << toB.route->getShortName() << ")," << n << ")";
+                glp_set_col_name(lp, decisionVar, ss.str().c_str());
+                glp_set_col_kind(lp, decisionVar, GLP_BV);
+                glp_set_obj_coef(lp, decisionVar, 1);
 
+                for (size_t posLineAinA = 0; posLineAinA < seg->getCardinality(); posLineAinA++) {
+                  for (size_t posLineBinA = 0; posLineBinA < seg->getCardinality(); posLineBinA++) {
 
-          const graph::EdgeTripGeom* segB = nfAdj->refEtg;
+                    if (posLineAinA == posLineBinA) continue; // already covered by constraint above
 
-          std::cout << "-> " << toA.route << " (" << toA.route->getShortName()
-            << ") and " << toB.route << " (" << toB.route->getShortName()
-            << ") continue together from segment " << seg << " to segment "
-            << nfAdj->refEtg << ", adjacent in node " << n
-            << " (" << (n->getStops().size() > 0 ? (*(n->getStops().begin()))->getName() : "<tn>")
-            << ")" << std::endl;
+                    for (size_t posLineAinB = 0; posLineAinB < segB->getCardinality(); posLineAinB++) {
+                      for (size_t posLineBinB = 0; posLineBinB < segB->getCardinality(); posLineBinB++) {
 
-          size_t decisionVar = glp_add_cols(lp, 1);
+                        if (posLineAinB == posLineBinB) continue; // already covered by constraint above
 
-          // introduce dec var
-          std::stringstream ss;
-          ss << "x_dec(" << seg->getStrRepr() << "," << segB->getStrRepr()
-            << "," << toA.route << "(" << toA.route->getShortName() << "),"
-            << toB.route << "(" << toB.route->getShortName() << ")," << n << ")";
-          glp_set_col_name(lp, decisionVar, ss.str().c_str());
-          glp_set_col_kind(lp, decisionVar, GLP_BV);
-          glp_set_obj_coef(lp, decisionVar, 1);
+                        if (n->getStops().size() > 0 && (*(n->getStops().begin()))->getId() == "Parent30201") {
+                          std::cout << "Crosses: " << n->crosses(*seg, *segB, posLineAinA, posLineAinB, posLineBinA, posLineBinB) << std::endl;
+                        }
+                        if (n->crosses(*seg, *segB, posLineAinA, posLineAinB, posLineBinA, posLineBinB)) {
+                          // get variables
 
-          for (size_t posLineAinA = 0; posLineAinA < seg->getCardinality(); posLineAinA++) {
-            for (size_t posLineBinA = 0; posLineBinA < seg->getCardinality(); posLineBinA++) {
+                          size_t lineAinAatP = glp_find_col(lp, getILPVarName(seg, toA.route, posLineAinA).c_str());
+                          size_t lineBinAatP = glp_find_col(lp, getILPVarName(seg, toB.route, posLineBinA).c_str());
+                          size_t lineAinBatP = glp_find_col(lp, getILPVarName(segB, toA.route, posLineAinB).c_str());
+                          size_t lineBinBatP = glp_find_col(lp, getILPVarName(segB, toB.route, posLineBinB).c_str());
 
-              if (posLineAinA == posLineBinA) continue; // already covered by constraint above
+                          assert(lineAinAatP > 0);
+                          assert(lineAinBatP > 0);
+                          assert(lineBinAatP > 0);
+                          assert(lineBinBatP > 0);
 
-              for (size_t posLineAinB = 0; posLineAinB < segB->getCardinality(); posLineAinB++) {
-                for (size_t posLineBinB = 0; posLineBinB < segB->getCardinality(); posLineBinB++) {
+                          size_t row = glp_add_rows(lp, 1);
+                          std::stringstream ss;
+                          ss << "dec_sum(" << seg->getStrRepr() << "," << segB->getStrRepr()
+                            << "," << toA.route << "," << toB.route
+                            << "pa=" << posLineAinA << ",pb=" << posLineBinA
+                           << ",pa'=" << posLineAinB << ",pb'=" << posLineBinB
+                            << ",n=" << n << ")";
+                          glp_set_row_name(lp, row, ss.str().c_str());
+                          glp_set_row_bnds(lp, row, GLP_UP, 0, 3);
 
-                  if (posLineAinB == posLineBinB) continue; // already covered by constraint above
+                          c++;
+                          ia[c] = row;
+                          ja[c] = lineAinAatP;
+                          res[c] = 1;
 
-                  if (n->crosses(*seg, *segB, posLineAinA, posLineAinB, posLineBinA, posLineBinB)) {
-                    std::cout << "  crosses with pa=" << posLineAinA << ", pb=" << posLineBinA
-                      << ", pa'=" << posLineAinB << ", pb'=" << posLineBinB << std::endl;
-                    // get variables
+                          c++;
+                          ia[c] = row;
+                          ja[c] = lineBinAatP;
+                          res[c] = 1;
 
-                    size_t lineAinAatP = glp_find_col(lp, getILPVarName(seg, toA.route, posLineAinA).c_str());
-                    size_t lineBinAatP = glp_find_col(lp, getILPVarName(seg, toB.route, posLineBinA).c_str());
-                    size_t lineAinBatP = glp_find_col(lp, getILPVarName(segB, toA.route, posLineAinB).c_str());
-                    size_t lineBinBatP = glp_find_col(lp, getILPVarName(segB, toB.route, posLineBinB).c_str());
+                          c++;
+                          ia[c] = row;
+                          ja[c] = lineAinBatP;
+                          res[c] = 1;
 
-                    assert(lineAinAatP > 0);
-                    assert(lineAinBatP > 0);
-                    assert(lineBinAatP > 0);
-                    assert(lineBinBatP > 0);
+                          c++;
+                          ia[c] = row;
+                          ja[c] = lineBinBatP;
+                          res[c] = 1;
 
-                    size_t row = glp_add_rows(lp, 1);
-                    std::stringstream ss;
-                    ss << "dec_sum(" << seg->getStrRepr() << "," << segB->getStrRepr()
-                      << "," << toA.route << "," << toB.route
-                      << "pa=" << posLineAinA << ",pb=" << posLineBinA
-                     << ",pa'=" << posLineAinB << ",pb'=" << posLineBinB
-                      << ",n=" << n << ")";
-                    glp_set_row_name(lp, row, ss.str().c_str());
-                    glp_set_row_bnds(lp, row, GLP_UP, 0, 3);
+                          c++;
+                          ia[c] = row;
+                          ja[c] = decisionVar;
+                          res[c] = -1;
+                        }
+                      }
+                    }
 
-                    c++;
-                    ia[c] = row;
-                    ja[c] = lineAinAatP;
-                    res[c] = 1;
-
-                    c++;
-                    ia[c] = row;
-                    ja[c] = lineBinAatP;
-                    res[c] = 1;
-
-                    c++;
-                    ia[c] = row;
-                    ja[c] = lineAinBatP;
-                    res[c] = 1;
-
-                    c++;
-                    ia[c] = row;
-                    ja[c] = lineBinBatP;
-                    res[c] = 1;
-
-                    c++;
-                    ia[c] = row;
-                    ja[c] = decisionVar;
-                    res[c] = -1;
                   }
                 }
-              }
+              } else {
+                // traverse to different segments
+                std::cout << "different segment traverse" << std::endl;
 
+
+
+              }
             }
+
+
           }
+
+
 
         }
       }
