@@ -189,7 +189,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem() const {
 
                         if (posLineAinB == posLineBinB) continue; // already covered by constraint above
 
-                        if (n->getStops().size() > 0 && (*(n->getStops().begin()))->getId() == "Parent30201") {
+                        if (n->getStops().size() > 0 && (*(n->getStops().begin()))->getId() == "Parent30202") {
                           std::cout << "Crosses: " << n->crosses(*seg, *segB, posLineAinA, posLineAinB, posLineBinA, posLineBinB) << std::endl;
                         }
                         if (n->crosses(*seg, *segB, posLineAinA, posLineAinB, posLineBinA, posLineBinB)) {

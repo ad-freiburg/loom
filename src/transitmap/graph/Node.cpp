@@ -6,6 +6,7 @@
 #include "./Node.h"
 #include "./Edge.h"
 #include "./TransitGraph.h"
+#include "./../util/Geo.h"
 #include "./../geo/BezierCurve.h"
 #include "gtfsparser/gtfs/Stop.h"
 #include "../graph/EdgeTripGeom.h"
@@ -16,6 +17,7 @@ using namespace graph;
 using namespace gtfsparser;
 
 using util::geo::Point;
+using util::geo::Line;
 
 // _____________________________________________________________________________
 Point NodeFront::getTripOccPosUnder(const gtfs::Route* r,
@@ -448,7 +450,6 @@ bool Node::crosses(const EdgeTripGeom& a, const EdgeTripGeom& b,
   const NodeFront* na = getNodeFrontFor(&a);
   const NodeFront* nb = getNodeFrontFor(&b);
 
-
   Point aa;
   Point ab;
   aa = na->getTripPos(a, posLineAinA);
@@ -459,7 +460,15 @@ bool Node::crosses(const EdgeTripGeom& a, const EdgeTripGeom& b,
   ba = nb->getTripPos(b, posLineAinB);
   bb = nb->getTripPos(b, posLineBinB);
 
-  if ((aa == ba && ab == bb || (aa == bb && ab = ba)) return true;
+  Line la;
+  la.push_back(aa);
+  la.push_back(ab);
+  Line lb;
+  lb.push_back(ba);
+  lb.push_back(bb);
+
+
+  if (boost::geometry::distance(la, lb) < 1)  return true;
 
   return util::geo::intersects(aa, ba, ab, bb);
 }

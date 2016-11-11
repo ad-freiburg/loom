@@ -25,10 +25,6 @@ typedef boost::geometry::model::multi_linestring<Line> MultiLine;
 typedef boost::geometry::model::polygon<Point> Polygon;
 typedef boost::geometry::model::multi_polygon<Polygon> MultiPolygon;
 
-// _____________________________________________________________________________
-inline bool operator==(const Point& a, const Point& b) {
-  return a.get<0>() == b.get<0>() && b.get<1>() == b.get<1>();
-}
 
 // _____________________________________________________________________________
 inline bool doubleEq(double a, double b) {
@@ -56,27 +52,28 @@ inline uint64_t _orientation(double px, double py,
 }
 
 // _____________________________________________________________________________
-inline bool intersects(double p1x, double p1y, double q1x, double q1y,
-                        double p2x, double p2y, double q2x, double q2y) {
-  int64_t o1 = _orientation(p1x, p1y, q1x, q1y, p2x, p2y);
-  int64_t o2 = _orientation(p1x, p1y, q1x, q1y, q2x, q2y);
-  int64_t o3 = _orientation(p2x, p2y, q2x, q2y, p1x, p1y);
-  int64_t o4 = _orientation(p2x, p2y, q2x, q2y, q1x, q1y);
+inline bool intersects(const Point& p1, const Point& q1, const Point& p2,
+                        const Point& q2) {
+  Line a;
+  a.push_back(p1);
+  a.push_back(q1);
+  Line b;
+  b.push_back(p2);
+  b.push_back(q2);
 
-  return (o1 != o2 && o3 != o4)
-    || (o1 == 0 && _onSegment(p1x, p1y, p2x, p2y, q1x, q1y))
-    || (o2 == 0 && _onSegment(p1x, p1y, q2x, q2y, q1x, q1y))
-    || (o3 == 0 && _onSegment(p2x, p2y, p1x, p1y, q2x, q2y))
-    || (o4 == 0 && _onSegment(p2x, p2y, q1x, q1y, q2x, q2y));
+  return boost::geometry::intersects(a, b);
 }
 
 // _____________________________________________________________________________
-inline bool intersects(const Point& p1, const Point& q1, const Point& p2,
-                        const Point& q2) {
-  return intersects(p1.get<0>(), p1.get<1>(), q1.get<0>(), q1.get<1>(),
-    p2.get<0>(), p2.get<1>(), q2.get<0>(), q2.get<1>());
-}
+inline bool intersects(double p1x, double p1y, double q1x, double q1y,
+                        double p2x, double p2y, double q2x, double q2y) {
+  Point p1 (p1x, p1y);
+  Point q1 (q1x, q1y);
+  Point p2 (p2x, p2y);
+  Point q2 (q2x, q2y);
 
+  return intersects(p1, q1, p2, q2);
+}
 
 // _____________________________________________________________________________
 inline Point intersection(double p1x, double p1y, double q1x, double q1y,
@@ -215,5 +212,6 @@ inline Point projectOn(const Point& a, const Point& b, const Point& c) {
 }}}
 
 #endif  // TRANSITMAP_UTIL_GEO_H_
+
 
 
