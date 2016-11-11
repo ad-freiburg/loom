@@ -4,6 +4,7 @@
 
 #include "log/Log.h"
 #include "./PolyLine.h"
+#include "../util/Geo.h"
 
 using namespace transitmapper;
 using namespace geo;
@@ -180,7 +181,7 @@ PointOnLine PolyLine::getPointAtDist(double atDist) const {
 
   for (size_t i = 1; i < _line.size(); i++) {
     const Point& cur = _line[i];
-    double d = boost::geometry::distance(last, cur);
+    double d = bgeo::distance(last, cur);
     dist += d;
 
     if (dist > atDist) {
@@ -213,17 +214,17 @@ Point PolyLine::interpolate(const Point& a,
 
 // _____________________________________________________________________________
 double PolyLine::distTo(const PolyLine& g) const {
-  return boost::geometry::distance(_line, g.getLine());
+  return bgeo::distance(_line, g.getLine());
 }
 
 // _____________________________________________________________________________
 double PolyLine::distTo(const Point& p) const {
-  return boost::geometry::distance(_line, p);
+  return bgeo::distance(_line, p);
 }
 
 // _____________________________________________________________________________
 double PolyLine::getLength() const {
-  return boost::geometry::length(_line);
+  return bgeo:length(_line);
 }
 
 // _____________________________________________________________________________
@@ -301,7 +302,7 @@ std::pair<size_t, double> PolyLine::nearestSegmentAfter(const Point& p,
     Point endP(_line[i]);
 
     if (i > 1) {
-      totalDist += boost::geometry::distance(_line[i-2], _line[i-1]);
+      totalDist += bgeo::distance(_line[i-2], _line[i-1]);
     }
 
     double curDist = util::geo::distToSegment(
@@ -348,7 +349,7 @@ PointOnLine PolyLine::projectOnAfter(const Point& p, size_t a) const {
   );
 
   if (getLength() > 0) {
-    bc.second += boost::geometry::distance(_line[bc.first], ret) / getLength();
+    bc.second += bgeo::distance(_line[bc.first], ret) / getLength();
   }
 
   return PointOnLine(bc.first, bc.second, ret);
@@ -357,7 +358,7 @@ PointOnLine PolyLine::projectOnAfter(const Point& p, size_t a) const {
 // _____________________________________________________________________________
 void PolyLine::simplify(double d) {
   util::geo::Line simpled;
-  boost::geometry::simplify(_line, simpled, d);
+  bgeo::simplify(_line, simpled, d);
   _line = simpled;
 }
 
@@ -396,10 +397,10 @@ bool PolyLine::equals(const PolyLine& rhs, double dmax) const {
 
   if (_line.size() == 2 &&_line.size() == rhs.getLine().size()) {
     // trivial case, straight line, implement directly
-    return (boost::geometry::distance(_line[0], rhs.getLine()[0]) < dmax &&
-      boost::geometry::distance(_line.back(), rhs.getLine().back()) < dmax) ||
-      (boost::geometry::distance(_line[0], rhs.getLine().back()) < dmax &&
-      boost::geometry::distance(_line.back(), rhs.getLine()[0]) < dmax);
+    return (bgeo::distance(_line[0], rhs.getLine()[0]) < dmax &&
+      bgeo::distance(_line.back(), rhs.getLine().back()) < dmax) ||
+      (bgeo::distance(_line[0], rhs.getLine().back()) < dmax &&
+      bgeo::distance(_line.back(), rhs.getLine()[0]) < dmax);
   } else {
     return contains(rhs, dmax) && rhs.contains(*this, dmax);
   }
@@ -412,7 +413,7 @@ bool PolyLine::contains(const PolyLine& rhs, double dmax) const {
   // check if two lines are equal, THE DIRECTION DOES NOT MATTER HERE!!!!!
 
   for (size_t i = 0; i < rhs.getLine().size(); ++i) {
-    double d = boost::geometry::distance(rhs.getLine()[i], getLine());
+    double d = bgeo::distance(rhs.getLine()[i], getLine());
     if (d > dmax) {
       return false;
     }
@@ -462,7 +463,7 @@ const {
 
     bool lastRound = false;
 
-    double totalDist = boost::geometry::distance(s, e);
+    double totalDist = bgeo::distance(s, e);
     while (curSegDist <= totalDist) {
       const Point& curPointer = interpolate(s, e, curSegDist);
 
@@ -625,7 +626,7 @@ const {
 // _____________________________________________________________________________
 std::string PolyLine::getWKT() const {
   std::stringstream ss;
-  ss << std::setprecision(12) << boost::geometry::wkt(_line);
+  ss << std::setprecision(12) << bgeo::wkt(_line);
 
   return ss.str();
 }

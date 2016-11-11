@@ -14,41 +14,23 @@
 // Geometry stuff
 // ------------------
 
+namespace bgeo = boost::geometry;
+
 namespace transitmapper {
 namespace util {
 namespace geo {
 
 // 2D cartesian coordinate
-typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian> Point;
-typedef boost::geometry::model::linestring<Point> Line;
-typedef boost::geometry::model::multi_linestring<Line> MultiLine;
-typedef boost::geometry::model::polygon<Point> Polygon;
-typedef boost::geometry::model::multi_polygon<Polygon> MultiPolygon;
+typedef bgeo::model::point<double, 2, bgeo::cs::cartesian> Point;
+typedef bgeo::model::linestring<Point> Line;
+typedef bgeo::model::multi_linestring<Line> MultiLine;
+typedef bgeo::model::polygon<Point> Polygon;
+typedef bgeo::model::multi_polygon<Polygon> MultiPolygon;
 
 
 // _____________________________________________________________________________
 inline bool doubleEq(double a, double b) {
   return fabs(a - b) < 0.000001;
-}
-
-// _____________________________________________________________________________
-inline bool _onSegment(double px, double py,
-                              double qx, double qy,
-                              double rx, double ry) {
-    if (qx <= std::max(px, rx) && qx >= std::min(px, rx) &&
-        qy <= std::max(py, ry) && qy >= std::min(py, ry)) return true;
-
-    return false;
-}
-
-// _____________________________________________________________________________
-inline uint64_t _orientation(double px, double py,
-                              double qx, double qy,
-                              double rx, double ry) {
-  double val = (qy - py) * (rx - qx) - (qx - px) * (ry - qy);
-
-  if (val == 0) return 0;
-  return (val > 0) ? 1 : 2;
 }
 
 // _____________________________________________________________________________
@@ -61,7 +43,7 @@ inline bool intersects(const Point& p1, const Point& q1, const Point& p2,
   b.push_back(p2);
   b.push_back(q2);
 
-  return boost::geometry::intersects(a, b);
+  return bgeo::intersects(a, b);
 }
 
 // _____________________________________________________________________________
@@ -151,7 +133,7 @@ inline double innerProd(const Point& a, const Point& b, const Point& c) {
 
 // _____________________________________________________________________________
 inline double dist(const Point& p1, const Point& p2) {
-  return dist(p1.get<0>(), p1.get<1>(), p2.get<0>(), p2.get<1>());
+  return bgeo::distance(p1, p2);
 }
 
  // _____________________________________________________________________________

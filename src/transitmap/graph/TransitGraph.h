@@ -18,7 +18,7 @@
 #include "./Node.h"
 #include "./Edge.h"
 
-namespace bg = boost::geometry;
+namespace bg = bgeo;
 
 namespace transitmapper {
 namespace graph {
@@ -47,7 +47,7 @@ class TransitGraph {
   Node* getNearestNode(const util::geo::Point& p, double maxD) const;
 
   projPJ getProjection() const;
-  const boost::geometry::model::box<util::geo::Point>& getBoundingBox() const;
+  const bgeo::model::box<util::geo::Point>& getBoundingBox() const;
 
   double getScore() const;
   double getScore(const Configuration& c) const;
@@ -61,7 +61,7 @@ class TransitGraph {
 
   Configuration _config;
 
-  boost::geometry::model::box<util::geo::Point> _bbox;
+  bgeo::model::box<util::geo::Point> _bbox;
 
   projPJ _proj;
 };

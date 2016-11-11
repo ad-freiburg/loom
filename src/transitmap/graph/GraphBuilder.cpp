@@ -11,6 +11,7 @@ using namespace transitmapper;
 using namespace graph;
 using namespace gtfsparser;
 using namespace gtfs;
+
 using util::geo::Point;
 
 // _____________________________________________________________________________

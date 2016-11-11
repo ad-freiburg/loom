@@ -14,12 +14,12 @@ using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
 using transitmapper::util::geo::Point;
 using transitmapper::graph::Configuration;
-using boost::geometry::make_inverse;
+using bgeo::make_inverse;
 
 // _____________________________________________________________________________
 TransitGraph::TransitGraph(const std::string& name, const std::string& proj)
 : _name(name) {
-  _bbox = make_inverse<boost::geometry::model::box<Point> >();
+  _bbox = make_inverse<bgeo::model::box<Point> >();
   _proj = pj_init_plus(proj.c_str());
 }
 
@@ -72,7 +72,7 @@ Node* TransitGraph::addNode(Node* n) {
   auto ins = _nodes.insert(n);
   if (ins.second) {
     // expand the bounding box to hold this new node
-    boost::geometry::expand(_bbox, n->getPos());
+    bgeo::expand(_bbox, n->getPos());
   }
   return *ins.first;
 }
@@ -161,7 +161,7 @@ projPJ TransitGraph::getProjection() const {
 }
 
 // _____________________________________________________________________________
-const boost::geometry::model::box<Point>& TransitGraph::getBoundingBox() const {
+const bgeo::model::box<Point>& TransitGraph::getBoundingBox() const {
   return _bbox;
 }
 
@@ -170,7 +170,7 @@ Node* TransitGraph::getNearestNode(const Point& p, double maxD) const {
   double curD = DBL_MAX;;
   Node* curN = 0;
   for (auto n : _nodes) {
-    double d = boost::geometry::distance(n->getPos(), p);
+    double d = bgeo::distance(n->getPos(), p);
     if (d < maxD && d < curD) {
       curN = n;
       curD = d;

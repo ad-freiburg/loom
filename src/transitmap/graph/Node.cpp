@@ -413,18 +413,18 @@ util::geo::Polygon Node::getConvexFrontHull(double d) const {
 
   util::geo::MultiPolygon ret;
   double pointsPerCircle = 36;
-  boost::geometry::strategy::buffer::distance_symmetric<double> distanceStrat(d);
-  boost::geometry::strategy::buffer::join_round joinStrat(pointsPerCircle);
-  boost::geometry::strategy::buffer::end_round endStrat(pointsPerCircle);
-  boost::geometry::strategy::buffer::point_circle circleStrat(pointsPerCircle);
-  boost::geometry::strategy::buffer::side_straight sideStrat;
+  bgeo::strategy::buffer::distance_symmetric<double> distanceStrat(d);
+  bgeo::strategy::buffer::join_round joinStrat(pointsPerCircle);
+  bgeo::strategy::buffer::end_round endStrat(pointsPerCircle);
+  bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
+  bgeo::strategy::buffer::side_straight sideStrat;
 
   if (l.size() > 1) {
     util::geo::Polygon hull;
-    boost::geometry::convex_hull(l, hull);
-    boost::geometry::buffer(hull, ret, distanceStrat, sideStrat, joinStrat, endStrat, circleStrat);
+    bgeo::convex_hull(l, hull);
+    bgeo::buffer(hull, ret, distanceStrat, sideStrat, joinStrat, endStrat, circleStrat);
   } else {
-    boost::geometry::buffer(l, ret, distanceStrat, sideStrat, joinStrat, endStrat, circleStrat);
+    bgeo::buffer(l, ret, distanceStrat, sideStrat, joinStrat, endStrat, circleStrat);
   }
 
   assert(ret.size() > 0);
@@ -468,7 +468,7 @@ bool Node::crosses(const EdgeTripGeom& a, const EdgeTripGeom& b,
   lb.push_back(bb);
 
 
-  if (boost::geometry::distance(la, lb) < 1)  return true;
+  if (bgeo::distance(la, lb) < 1)  return true;
 
   return util::geo::intersects(aa, ba, ab, bb);
 }
