@@ -224,7 +224,7 @@ double PolyLine::distTo(const Point& p) const {
 
 // _____________________________________________________________________________
 double PolyLine::getLength() const {
-  return bgeo:length(_line);
+  return bgeo::length(_line);
 }
 
 // _____________________________________________________________________________

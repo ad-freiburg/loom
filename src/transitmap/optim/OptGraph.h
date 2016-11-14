@@ -2,20 +2,90 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "./OptGraph.h"
+#ifndef TRANSITMAP_GRAPH_OPTIM_OPTGRAPH_H_
+#define TRANSITMAP_GRAPH_OPTIM_OPTGRAPH_H_
 
-// _____________________________________________________________________________
-void OptGraph::addNode(Node* n) {
-   _nodes.insert(n);
-}
+#include <string>
+#include <set>
 
-// _____________________________________________________________________________
-void OptGraph::addEdge(Node* from, Node* to) {
-  if (from == to) return;
-  if (!e) {
-    e = new OptEdge(from, to);
-    from->addEdge(e);
-    to->addEdge(e);
+#include "./../util/Geo.h"
+#include "./../graph/TransitGraph.h"
+#include "./../graph/EdgeTripGeom.h"
+
+using transitmapper::graph::TransitGraph;
+using transitmapper::graph::Node;
+using transitmapper::graph::EdgeTripGeom;
+
+namespace transitmapper {
+namespace optim {
+
+struct OptNode;
+
+struct EtgPart {
+  EdgeTripGeom* etg;
+  bool dir;
+
+  EtgPart(EdgeTripGeom* etg, bool dir) : etg(etg), dir(dir) {};
+};
+
+struct OptEdge {
+  std::vector<EtgPart> etgs;
+
+  OptNode* from;
+  OptNode* to;
+  OptEdge(OptNode* from, OptNode* to) : from(from), to(to) {};
+
+  std::string getStrRepr() const {
+    const void* address = static_cast<const void*>(this);
+    std::stringstream ss;
+    ss << address;
+
+    return ss.str();
   }
-  return e;
-}
+};
+
+struct OptNode {
+  const Node* node;
+
+  std::set<OptEdge*> adjListIn;
+  std::set<OptEdge*> adjListOut;
+  std::set<OptEdge*> adjList;
+
+  OptNode(const Node* node) : node(node) {};
+
+  void addEdge(OptEdge* e) {
+    adjList.insert(e);
+    if (e->from == this) adjListOut.insert(e);
+    if (e->to == this) adjListIn.insert(e);
+  }
+
+  void deleteEdge(OptEdge* e) {
+    adjList.erase(e);
+    adjListOut.erase(e);
+    adjListIn.erase(e);
+  }
+};
+
+class OptGraph {
+ public:
+  explicit OptGraph(TransitGraph* toOptim);
+
+  const std::set<OptNode*>& getNodes() const;
+
+  void simplify();
+ private:
+  TransitGraph* _g;
+  std::set<OptNode*> _nodes;
+
+  void addNode(OptNode* n);
+
+  OptNode* getNodeForTransitNode(const Node* tn) const;
+
+  void build();
+
+  bool simplifyStep();
+};
+
+}}
+
+#endif  // TRANSITMAP_GRAPH_TRANSITGRAPH_H_

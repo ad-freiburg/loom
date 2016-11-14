@@ -14,6 +14,7 @@
 #include "./../graph/TransitGraph.h"
 #include "./../graph/Edge.h"
 #include "./../geo/PolyLine.h"
+#include "./../optim/OptGraph.h"
 
 namespace transitmapper {
 namespace output {
@@ -29,6 +30,7 @@ class OgrOutput : public Output {
   virtual ~OgrOutput() {};
 
   void print(const graph::TransitGraph& outG);
+  void print(const optim::OptGraph& g);
 
  private:
   std::string _outFolder;
@@ -36,7 +38,7 @@ class OgrOutput : public Output {
   OGROutputType _t;
 
   OGRDataSource* getDataSource(OGROutputType t, const std::string& folder,
-                               bool reuse, const graph::TransitGraph* g) const;
+                               bool reuse) const;
 
   OGRLayer* createOGREdgeLayer(OGROutputType t, const string& folder,
       OGRDataSource* poDS) const;
@@ -46,6 +48,8 @@ class OgrOutput : public Output {
 
   bool addEdge(const graph::Edge* e, OGRLayer* layer) const;
   bool addNode(const graph::Node* e, OGRLayer* layer) const;
+  bool addNode(const optim::OptNode* n, OGRLayer* layer) const;
+  bool addEdge(const optim::OptEdge* e, OGRLayer* layer) const;
 };
 
 }}

@@ -40,7 +40,7 @@ struct NodeFront {
   Point getTripOccPos(const gtfs::Route* r, const Configuration& c) const;
   Point getTripOccPosUnder(const gtfs::Route* r, const graph::Configuration& c,
     const EdgeTripGeom* g, const std::vector<size_t>* order) const;
-  Point getTripPos(const EdgeTripGeom& etg, size_t pos) const;
+  Point getTripPos(const EdgeTripGeom& etg, size_t pos, bool inv) const;
 
   const EdgeTripGeom* refEtg;
 
@@ -100,12 +100,6 @@ class Node {
   }
 
   void addMainDir(NodeFront f);
-
-  bool crosses(const EdgeTripGeom& a, const EdgeTripGeom& b,
-      size_t posLineAinA,
-      size_t posLineAinB,
-      size_t posLineBinA,
-      size_t posLineBinB) const;
 
   const NodeFront* getNodeFrontFor(const Edge* e) const;
   const NodeFront* getNodeFrontFor(const EdgeTripGeom* etg) const;

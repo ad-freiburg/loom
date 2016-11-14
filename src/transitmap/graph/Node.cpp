@@ -33,7 +33,7 @@ Point NodeFront::getTripOccPosUnder(const gtfs::Route* r,
       }
 
       if (to.first) {
-        return getTripPos(etg, to.second);
+        return getTripPos(etg, to.second, n == etg.getGeomDir());
       }
     }
   }
@@ -41,9 +41,10 @@ Point NodeFront::getTripOccPosUnder(const gtfs::Route* r,
 }
 
 // _____________________________________________________________________________
-Point NodeFront::getTripPos(const EdgeTripGeom& etg, size_t pos) const {
+Point NodeFront::getTripPos(const EdgeTripGeom& etg, size_t pos,
+    bool inv) const {
   double p;
-  if (n != etg.getGeomDir()) {
+  if (!inv) {
     p = (etg.getWidth() + etg.getSpacing()) * pos
         + etg.getWidth()/2;
   } else {
@@ -438,37 +439,4 @@ size_t Node::getNodeFrontPos(const NodeFront* a) const {
   }
 
   return _mainDirs.size();
-}
-
-// _____________________________________________________________________________
-bool Node::crosses(const EdgeTripGeom& a, const EdgeTripGeom& b,
-    size_t posLineAinA,
-    size_t posLineAinB,
-    size_t posLineBinA,
-    size_t posLineBinB) const {
-
-  const NodeFront* na = getNodeFrontFor(&a);
-  const NodeFront* nb = getNodeFrontFor(&b);
-
-  Point aa;
-  Point ab;
-  aa = na->getTripPos(a, posLineAinA);
-  ab = na->getTripPos(a, posLineBinA);
-
-  Point ba;
-  Point bb;
-  ba = nb->getTripPos(b, posLineAinB);
-  bb = nb->getTripPos(b, posLineBinB);
-
-  Line la;
-  la.push_back(aa);
-  la.push_back(ab);
-  Line lb;
-  lb.push_back(ba);
-  lb.push_back(bb);
-
-
-  if (bgeo::distance(la, lb) < 1)  return true;
-
-  return util::geo::intersects(aa, ba, ab, bb);
 }

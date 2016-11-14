@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Total graph score BEFORE optim is -- " << g.getScore() << " --" << std::endl;
 
-    optim::ILPEdgeOrderOptimizer ilpEoOptim(&g);
+    optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg);
     ilpEoOptim.optimize();
 
     LOG(INFO) << "Total graph score AFTER optim is -- " << g.getScore() << " --" << std::endl;
