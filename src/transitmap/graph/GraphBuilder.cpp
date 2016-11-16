@@ -367,7 +367,8 @@ std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b,
   geo::PolyLine p;
 
   // TODO!!!!! REMOVE FALSE!!!! ONLY USE FOR FREIBURG TESTING!!!!
-  if (false && distA > -1 && distA > -1 && totalTripDist > 0) {
+  if (distA > -1 && distA > -1 && totalTripDist > 0) {
+  //if (false && distA > -1 && distA > -1 && totalTripDist > 0) {
     p = pl->second.getSegment((distA - t->getShape()->getPoints().begin()->travelDist) / totalTripDist, (distB - t->getShape()->getPoints().begin()->travelDist) / totalTripDist);
   } else {
     p = pl->second.getSegment(ap, bp);

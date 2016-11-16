@@ -26,6 +26,7 @@ using util::geo::Line;
 typedef std::pair<const Route*, const Route*> LinePair;
 typedef std::pair<size_t, size_t> PosCom;
 typedef std::pair<PosCom, PosCom> PosComPair;
+typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
 class ILPEdgeOrderOptimizer {
  public:
@@ -48,13 +49,23 @@ class ILPEdgeOrderOptimizer {
   void writeSameSegConstraints(const OptGraph& g,
     int* ia, int* ja, double* res, size_t* c, glp_prob* lp) const;
 
+  void writeDiffSegConstraints(const OptGraph& g,
+    int* ia, int* ja, double* res, size_t* c, glp_prob* lp) const;
+
   std::vector<LinePair> getLinePairs(OptEdge* segment) const;
   std::vector<OptEdge*> getEdgePartners(OptNode* node,
     OptEdge* segmentA, const LinePair& linepair) const;
+  std::vector<EdgePair> getEdgePartnerPairs(OptNode* node,
+    OptEdge* segmentA, const LinePair& linepair) const;
   std::vector<PosComPair> getPositionCombinations(OptEdge* a, OptEdge* b) const;
+  std::vector<PosCom> getPositionCombinations(OptEdge* a)
+  const;
 
   bool crosses(OptNode* node, OptEdge* segmentA,
       OptEdge* segmentB, PosComPair postcomb) const;
+
+  bool crosses(OptNode* node, OptEdge* segmentA,
+      EdgePair segments, PosCom postcomb) const;
 
   Point getPos(OptNode* n, OptEdge* segment, size_t p) const;
 };

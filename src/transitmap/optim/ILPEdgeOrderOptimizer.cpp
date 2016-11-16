@@ -156,6 +156,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
   glp_create_index(lp);
 
   writeSameSegConstraints(g, ia, ja, res, &c, lp);
+  writeDiffSegConstraints(g, ia, ja, res, &c, lp);
 
   glp_load_matrix(lp, c, ia, ja, res);
 
@@ -197,7 +198,6 @@ const {
 
           for (PosComPair poscomb : getPositionCombinations(segmentA, segmentB)) {
             if (crosses(node, segmentA, segmentB, poscomb)) {
-              std::cout << "TEST" << std::endl;
 							size_t lineAinAatP = glp_find_col(lp, getILPVarName(segmentA, linepair.first, poscomb.first.first).c_str());
 							size_t lineBinAatP = glp_find_col(lp, getILPVarName(segmentA, linepair.second, poscomb.second.first).c_str());
 							size_t lineAinBatP = glp_find_col(lp, getILPVarName(segmentB, linepair.first, poscomb.first.second).c_str());
@@ -251,6 +251,91 @@ const {
 }
 
 // _____________________________________________________________________________
+void ILPEdgeOrderOptimizer::writeDiffSegConstraints(const OptGraph& g,
+    int* ia, int* ja, double* res, size_t* c, glp_prob* lp)
+const {
+  // go into nodes and build crossing constraints for adjacent
+  for (OptNode* node : g.getNodes()) {
+    std::set<OptEdge*> processed;
+    for (OptEdge* segmentA : node->adjList) {
+      processed.insert(segmentA);
+      // iterate over all possible line pairs in this segment
+      for (LinePair linepair : getLinePairs(segmentA)) {
+        // iterate over all edges this
+        // pair traverses to _TOGETHER_
+        // (its possible that there are multiple edges if a line continues
+        //  in more then 1 segment)
+        for (EdgePair segments : getEdgePartnerPairs(node, segmentA, linepair)) {
+          // if (processed.find(segmentB) != processed.end()) continue;
+
+          // try all position combinations
+          size_t decisionVar = glp_add_cols(lp, 1);
+
+          // introduce dec var
+          std::stringstream ss;
+          ss << "x_dec(" << segmentA->getStrRepr() << ","
+            << segments.first->getStrRepr()
+            << segments.second->getStrRepr()
+            << "," << linepair.first << "(" << linepair.first->getShortName() << "),"
+            << linepair.second << "(" << linepair.second->getShortName() << ")," << node << ")";
+          glp_set_col_name(lp, decisionVar, ss.str().c_str());
+          glp_set_col_kind(lp, decisionVar, GLP_BV);
+          glp_set_obj_coef(lp, decisionVar, 1);
+
+          for (PosCom poscomb : getPositionCombinations(segmentA)) {
+            std::cout << "checking: "
+              << linepair.first->getShortName() << " and " 
+              << linepair.second->getShortName() << " @ "
+              << poscomb.first << " and " << poscomb.second
+              << " in " << (node->node->getStops().size() ? (*node->node->getStops().begin())->getName() : "?")
+              << std::endl;
+            if (crosses(node, segmentA, segments, poscomb)) {
+              std::cout << "crossing: "
+                << linepair.first->getShortName() << " and " 
+                << linepair.second->getShortName() << " @ "
+                << poscomb.first << " and " << poscomb.second
+                << " in " << (node->node->getStops().size() ? (*node->node->getStops().begin())->getName() : "?")
+                << std::endl;
+							size_t lineAinAatP = glp_find_col(lp, getILPVarName(segmentA, linepair.first, poscomb.first).c_str());
+							size_t lineBinAatP = glp_find_col(lp, getILPVarName(segmentA, linepair.second, poscomb.second).c_str());
+
+							assert(lineAinAatP > 0);
+							assert(lineBinAatP > 0);
+
+							size_t row = glp_add_rows(lp, 1);
+							std::stringstream ss;
+							ss << "dec_sum(" << segmentA->getStrRepr() << ","
+                << segments.first->getStrRepr()
+                << segments.second->getStrRepr()
+								<< "," << linepair.first << "," << linepair.second
+								<< "pa=" << poscomb.first << ",pb=" << poscomb.second
+								<< ",n=" << node << ")";
+							glp_set_row_name(lp, row, ss.str().c_str());
+							glp_set_row_bnds(lp, row, GLP_UP, 0, 1);
+
+							(*c)++;
+							ia[*c] = row;
+							ja[*c] = lineAinAatP;
+							res[*c] = 1;
+
+							(*c)++;
+							ia[*c] = row;
+							ja[*c] = lineBinAatP;
+							res[*c] = 1;
+
+							(*c)++;
+							ia[*c] = row;
+							ja[*c] = decisionVar;
+							res[*c] = -1;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
 std::vector<PosComPair> ILPEdgeOrderOptimizer::getPositionCombinations(OptEdge* a,
     OptEdge* b) const {
   std::vector<PosComPair> ret;
@@ -268,6 +353,20 @@ std::vector<PosComPair> ILPEdgeOrderOptimizer::getPositionCombinations(OptEdge* 
                 PosCom(posLineBinA, posLineBinB)));
         }
       }
+    }
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::vector<PosCom> ILPEdgeOrderOptimizer::getPositionCombinations(OptEdge* a)
+const {
+  std::vector<PosCom> ret;
+  graph::EdgeTripGeom* etgA = a->etgs[0].etg;
+  for (size_t posLineAinA = 0; posLineAinA < etgA->getCardinality(); posLineAinA++) {
+    for (size_t posLineBinA = 0; posLineBinA < etgA->getCardinality(); posLineBinA++) {
+      if (posLineAinA == posLineBinA) continue;
+      ret.push_back(PosCom(posLineAinA, posLineBinA));
     }
   }
   return ret;
@@ -298,6 +397,29 @@ std::vector<OptEdge*> ILPEdgeOrderOptimizer::getEdgePartners(OptNode* node,
 }
 
 // _____________________________________________________________________________
+std::vector<EdgePair> ILPEdgeOrderOptimizer::getEdgePartnerPairs(OptNode* node,
+  OptEdge* segmentA, const LinePair& linepair) const {
+  std::vector<EdgePair> ret;
+  for (OptEdge* segmentB : node->adjList) {
+    if (segmentB == segmentA) continue;
+    graph::EdgeTripGeom* etg = segmentB->etgs[0].etg;
+    if (etg->getTripsForRoute(linepair.first)) {
+      EdgePair curPair;
+      curPair.first = segmentB;
+      for (OptEdge* segmentC : node->adjList) {
+        if (segmentC == segmentA || segmentC == segmentB) continue;
+        graph::EdgeTripGeom* etg = segmentC->etgs[0].etg;
+        if (etg->getTripsForRoute(linepair.second)) {
+          curPair.second = segmentC;
+          ret.push_back(curPair);
+        }
+      }
+    }
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
 std::vector<LinePair> ILPEdgeOrderOptimizer::getLinePairs(OptEdge* segment)
 const {
   std::set<Route*> processed;
@@ -317,7 +439,7 @@ void ILPEdgeOrderOptimizer::solveProblem(glp_prob* lp) const {
   glp_iocp params;
   glp_init_iocp(&params);
   params.presolve = GLP_ON;
-  params.tm_lim = 6000000;
+  params.tm_lim = 10000;
   glp_intopt(lp, &params);
 }
 
@@ -340,6 +462,32 @@ bool ILPEdgeOrderOptimizer::crosses(OptNode* node, OptEdge* segmentA,
 
   if (bgeo::distance(a, b) < 1)  return true;
   return util::geo::intersects(aInA, aInB, bInA, bInA);
+}
+
+// _____________________________________________________________________________
+bool ILPEdgeOrderOptimizer::crosses(OptNode* node, OptEdge* segmentA,
+    EdgePair segments, PosCom postcomb) const {
+  Point aInA = getPos(node, segmentA, postcomb.first);
+  Point bInA = getPos(node, segmentA, postcomb.second);
+
+  for (size_t i = 0; i < segments.first->etgs.front().etg->getCardinality(); ++i) {
+    for (size_t j = 0; j < segments.second->etgs.front().etg->getCardinality(); ++j) {
+      Point aInB = getPos(node, segments.first, i);
+      Point bInB = getPos(node, segments.second, j);
+
+      Line a;
+      a.push_back(aInA);
+      a.push_back(aInB);
+
+      Line b;
+      b.push_back(bInA);
+      b.push_back(bInB);
+
+      if (util::geo::intersects(aInA, aInB, bInA, bInA) ||
+          bgeo::distance(a, b) < 1) return true;
+    }
+  }
+  return false;
 }
 
 // _____________________________________________________________________________
