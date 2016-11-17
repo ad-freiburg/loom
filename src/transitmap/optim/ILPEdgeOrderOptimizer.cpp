@@ -427,7 +427,7 @@ const {
   for (auto& toA : *segment->etgs[0].etg->getTripsUnordered()) {
     processed.insert(toA.route);
     for (auto& toB : *segment->etgs[0].etg->getTripsUnordered()) {
-      if (processed.find(toB.route) != processed.end()) continue;
+      //if (processed.find(toB.route) != processed.end()) continue;
       ret.push_back(LinePair(toA.route, toB.route));
     }
   }
@@ -451,34 +451,48 @@ void ILPEdgeOrderOptimizer::solveProblem(glp_prob* lp) const {
 // _____________________________________________________________________________
 bool ILPEdgeOrderOptimizer::crosses(OptNode* node, OptEdge* segmentA,
       OptEdge* segmentB, PosComPair postcomb) const {
-  Point aInA = getPos(node, segmentA, postcomb.first.first);
-  Point aInB = getPos(node, segmentB, postcomb.first.second);
 
-  Point bInA = getPos(node, segmentA, postcomb.second.first);
-  Point bInB = getPos(node, segmentB, postcomb.second.second);
+  bool otherWayA = (segmentA->from != node) ^ segmentA->etgs.front().dir;
+  bool otherWayB = (segmentB->from != node) ^ segmentB->etgs.front().dir;
 
-  Line a;
-  a.push_back(aInA);
-  a.push_back(aInB);
+  size_t cardA = segmentA->etgs.front().etg->getCardinality();
+  size_t cardB = segmentB->etgs.front().etg->getCardinality();
 
-  Line b;
-  b.push_back(bInA);
-  b.push_back(bInB);
+  size_t posAinA = otherWayA ? cardA - 1 - postcomb.first.first : postcomb.first.first;
+  size_t posAinB = otherWayB ? cardB - 1 - postcomb.first.second: postcomb.first.second;
+  size_t posBinA = otherWayA ? cardA - 1 - postcomb.second.first : postcomb.second.first;
+  size_t posBinB = otherWayB ? cardB - 1 - postcomb.second.second : postcomb.second.second;
 
-  if (bgeo::distance(a, b) < 1)  return true;
-  return util::geo::intersects(aInA, aInB, bInA, bInA);
+  bool pCrossing = (posAinA < posBinA && posAinB < posBinB);
+
+  return pCrossing;
 }
 
 // _____________________________________________________________________________
 bool ILPEdgeOrderOptimizer::crosses(OptNode* node, OptEdge* segmentA,
     EdgePair segments, PosCom postcomb) const {
-  Point aInA = getPos(node, segmentA, postcomb.first);
-  Point bInA = getPos(node, segmentA, postcomb.second);
+
+  bool otherWayA = (segmentA->from != node) ^ segmentA->etgs.front().dir;
+  bool otherWayB = (segments.first->from != node) ^ segments.first->etgs.front().dir;
+  bool otherWayC = (segments.second->from != node) ^ segments.second->etgs.front().dir;
+
+  size_t cardA = segmentA->etgs.front().etg->getCardinality();
+  size_t cardB = segments.first->etgs.front().etg->getCardinality();
+  size_t cardC = segments.second->etgs.front().etg->getCardinality();
+
+  size_t posAinA = otherWayA ? cardA - 1 - postcomb.first : postcomb.first;
+  size_t posBinA = otherWayA ? cardA - 1 - postcomb.second : postcomb.second;
+
+  Point aInA = getPos(node, segmentA, posAinA);
+  Point bInA = getPos(node, segmentA, posBinA);
 
   for (size_t i = 0; i < segments.first->etgs.front().etg->getCardinality(); ++i) {
     for (size_t j = 0; j < segments.second->etgs.front().etg->getCardinality(); ++j) {
-      Point aInB = getPos(node, segments.first, i);
-      Point bInB = getPos(node, segments.second, j);
+      size_t posAinB = otherWayB ? cardB - 1 - i : i;
+      size_t posBinC = otherWayC ? cardC - 1 - j : j;
+
+      Point aInB = getPos(node, segments.first, posAinB);
+      Point bInB = getPos(node, segments.second, posBinC);
 
       Line a;
       a.push_back(aInA);
@@ -509,7 +523,6 @@ Point ILPEdgeOrderOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) cons
 
   assert(nf);
 
-  bool otherWay = (segment->from != n) ^ segment->etgs.front().dir;
 
-  return nf->getTripPos(*segment->etgs.front().etg, p, otherWay);
+  return nf->getTripPos(*segment->etgs.front().etg, p, false);
 }
