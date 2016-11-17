@@ -103,12 +103,6 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG, double w,
       params["style"] = style.str();
       printLine(p, params, w, h, xOffset, yOffset);
 
-      util::geo::Point dir = p.getPointAt(1).p;
-      style.clear();
-      style << "fill:none;stroke:red"
-        << ";stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
-      printPoint(dir, style.str(), w, h, xOffset, yOffset);
-
       util::geo::Point a = p.getPointAt(.5).p;
 
       std::stringstream styleA;
@@ -272,6 +266,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
       renderLinePart(p, lineW, *r.route);
 
+      /**
       std::map<std::string, std::string> tparams;
       tparams["x"] = std::to_string((p.getPointAt(0.5).p.get<0>() - xOffset) * _cfg->outputResolution);
       tparams["y"] = std::to_string(h-(p.getPointAt(0.5).p.get<1>() - yOffset) * _cfg->outputResolution);
@@ -280,6 +275,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       _w.openTag("text", tparams);
       _w.writeText(std::to_string(a));
       _w.closeTag();
+      **/
 
       a++;
 

@@ -21,7 +21,7 @@ void ILPEdgeOrderOptimizer::optimize() {
   g.simplify();
 
   output::OgrOutput ogrOut("/home/patrick/optimgraph", _cfg);
-  //ogrOut.print(g);
+  // ogrOut.print(g);
 
   glp_prob* lp = createProblem(g);
 
@@ -439,7 +439,12 @@ void ILPEdgeOrderOptimizer::solveProblem(glp_prob* lp) const {
   glp_iocp params;
   glp_init_iocp(&params);
   params.presolve = GLP_ON;
-  params.tm_lim = 10000;
+  //params.tm_lim = 30000;
+  params.mip_gap = 0;
+  params.binarize = 1;
+  params.bt_tech = GLP_BT_BPH;
+  params.fp_heur = GLP_ON;
+
   glp_intopt(lp, &params);
 }
 
