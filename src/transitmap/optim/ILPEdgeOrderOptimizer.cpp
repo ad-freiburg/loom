@@ -23,7 +23,8 @@ void ILPEdgeOrderOptimizer::optimize() {
   output::OgrOutput ogrOut("/home/patrick/optimgraph", _cfg);
   // ogrOut.print(g);
 
-  glp_prob* lp = createProblem(g);
+  glp_prob* lp = createProblemImpr(g);
+  //glp_prob* lp = createProblem(g);
 
   // write problem for debugging...
   glp_write_mps(lp, GLP_MPS_FILE, 0, "/home/patrick/ilp");
@@ -35,11 +36,66 @@ void ILPEdgeOrderOptimizer::optimize() {
   glp_print_mip(lp, "/home/patrick/ilp.sol");
 
   Configuration c;
-  getConfigurationFromSoluation(lp, &c, g);
+  getConfigurationFromSoluationImpr(lp, &c, g);
+  // getConfigurationFromSoluation(lp, &c, g);
   _g->setConfig(c);
 
   glp_delete_prob(lp);
   glp_free_env();
+}
+
+// _____________________________________________________________________________
+void ILPEdgeOrderOptimizer::getConfigurationFromSoluationImpr(glp_prob* lp,
+    Configuration* c, const OptGraph& g) const {
+  // build name index for faster lookup
+  glp_create_index(lp);
+
+  for (OptNode* n : g.getNodes()) {
+    for (OptEdge* e : n->adjListOut) {
+      for (auto etgp : e->etgs) {
+        for (size_t tp = 0; tp < etgp.etg->getCardinality(); tp++) {
+          bool found = false;
+          for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
+            auto r = (*etgp.etg->getTripsUnordered())[p];
+
+            // check if this route (r) switch from 0 to 1 at tp-1 and tp
+
+            double valPrev = 0;
+            std::stringstream varName;
+
+            if (tp > 0) {
+              varName << "x_(" << e->getStrRepr() << ",l="
+                << r.route << ",p<=" << tp-1 << ")";
+
+              size_t i = glp_find_col(lp, varName.str().c_str());
+              assert(i > 0);
+              valPrev = glp_mip_col_val(lp, i);
+            }
+
+            varName.str("");
+            varName << "x_(" << e->getStrRepr() << ",l="
+              << r.route << ",p<=" << tp << ")";
+
+            size_t i = glp_find_col(lp, varName.str().c_str());
+            assert(i > 0);
+            double val = glp_mip_col_val(lp, i);
+
+            if (valPrev < 0.5 && val > 0.5) {
+              // first time p is eq/greater, so it is this p
+              if (!(etgp.dir ^ e->etgs.front().dir)) {
+                (*c)[etgp.etg].insert((*c)[etgp.etg].begin(), p);
+              } else {
+                (*c)[etgp.etg].push_back(p);
+              }
+              assert(!found);  // should be assured by ILP constraints
+              found = true;
+            }
+          }
+          assert(found);
+        }
+      }
+    }
+  }
 }
 
 // _____________________________________________________________________________
@@ -78,6 +134,95 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSoluation(glp_prob* lp,
       }
     }
   }
+}
+
+// _____________________________________________________________________________
+glp_prob* ILPEdgeOrderOptimizer::createProblemImpr(const OptGraph& g) const {
+  glp_prob* lp = glp_create_prob();
+
+  glp_set_prob_name(lp, "edgeorder_impr");
+  glp_set_obj_dir(lp, GLP_MIN);
+
+  size_t c = 0;
+
+  // TODO: array sizes
+  int* ia = new int[1000000];
+  int* ja = new int[1000000];
+  double* res = new double[1000000];
+
+  for (OptNode* n : g.getNodes()) {
+    for (OptEdge* e : n->adjListOut) {
+      // the first stored etg is always the ref
+      graph::EdgeTripGeom* etg = e->etgs[0].etg;
+
+      // constraint: the sum of all x_sl<=p over the set of lines
+      // must be p+1
+
+      size_t rowA = glp_add_rows(lp, etg->getCardinality());
+      for (size_t p = 0; p < etg->getCardinality(); p++) {
+        std::stringstream varName;
+        varName << "sum(" << e->getStrRepr()
+          << ",<=" << p << ")";
+        glp_set_row_name(lp, rowA + p, varName.str().c_str());
+        glp_set_row_bnds(lp, rowA + p, GLP_FX, p+1, p+1);
+      }
+
+      for (auto r : *etg->getTripsUnordered()) {
+
+        for (size_t p = 0; p < etg->getCardinality(); p++) {
+          std::stringstream varName;
+          varName << "x_(" << e->getStrRepr() << ",l="
+            << r.route << ",p<=" << p << ")";
+          size_t curCol = glp_add_cols(lp, 1);
+          glp_set_col_name(lp, curCol, varName.str().c_str());
+          glp_set_col_kind(lp, curCol, GLP_BV);
+
+          // coefficients for constraint from above
+          c++;
+
+          ia[c] = rowA + p;
+          ja[c] = curCol;
+          res[c] = 1;
+
+          if (p > 0) {
+            size_t row = glp_add_rows(lp, 1);
+
+            std::stringstream rowName;
+            rowName.str("");
+            rowName << "sum(" << e->getStrRepr() << ",p="
+              << p << ")";
+
+            glp_set_row_name(lp, row, rowName.str().c_str());
+            glp_set_row_bnds(lp, row, GLP_LO, 0, 1);
+
+            c++;
+
+            ia[c] = row;
+            ja[c] = curCol;
+            res[c] = 1;
+
+            c++;
+
+            ia[c] = row;
+            ja[c] = curCol - 1;
+            res[c] = -1;
+          }
+        }
+      }
+    }
+  }
+
+  glp_create_index(lp);
+
+  writeCrossingOracle(g, ia, ja, res, &c, lp);
+
+  glp_load_matrix(lp, c, ia, ja, res);
+
+  delete[](ia);
+  delete[](ja);
+  delete[](res);
+
+  return lp;
 }
 
 // _____________________________________________________________________________
@@ -245,6 +390,82 @@ const {
             }
           }
         }
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
+    int* ia, int* ja, double* res, size_t* c, glp_prob* lp)
+const {
+  // do everything iteratively, otherwise it would be unreadable
+
+  // introduce crossing constraint variables
+  for (OptNode* node : g.getNodes()) {
+    for (OptEdge* segment : node->adjListOut) {
+
+      // iterate over all possible line pairs in this segment
+      for (LinePair linepair : getLinePairs(segment)) {
+        size_t smallerVar = glp_add_cols(lp, 1);
+        std::stringstream ss;
+        ss << "x_(" << segment->getStrRepr() << ","
+          << "," << linepair.first << " < "
+          << linepair.second << ")";
+        glp_set_col_name(lp, smallerVar, ss.str().c_str());
+        glp_set_col_kind(lp, smallerVar, GLP_BV);
+      }
+    }
+  }
+
+  // write constraints for the crossing variable, both can never be 1...
+  for (OptNode* node : g.getNodes()) {
+    for (OptEdge* segment : node->adjListOut) {
+
+      // iterate over all possible line pairs in this segment
+      for (LinePair linepair : getLinePairs(segment)) {
+        std::stringstream ss;
+        ss << "x_(" << segment->getStrRepr() << ","
+          << "," << linepair.first << " < "
+          << linepair.second << ")";
+        size_t smaller = glp_find_col(lp, ss.str().c_str());
+        assert(smaller > 0);
+
+        std::stringstream ss2;
+        ss2 << "x_(" << segment->getStrRepr() << ","
+          << "," << linepair.second << " < "
+          << linepair.first << ")";
+        std::cout << linepair.second << " vs " << linepair.first << std::endl;
+        size_t bigger = glp_find_col(lp, ss2.str().c_str());
+        assert(bigger > 0);
+
+        std::stringstream rowName;
+        rowName << "sum(" << ss.str() << "," << ss2.str() << ")";
+
+        size_t row = glp_add_rows(lp, 1);
+
+        glp_set_row_name(lp, row, rowName.str().c_str());
+        glp_set_row_bnds(lp, row, GLP_FX, 1, 1);
+
+        (*c)++;
+        ia[*c] = row;
+        ja[*c] = smaller;
+        res[*c] = 1;
+
+        (*c)++;
+        ia[*c] = row;
+        ja[*c] = bigger;
+        res[*c] = 1;
+      }
+    }
+  }
+
+  // sum constraint
+  for (OptNode* node : g.getNodes()) {
+    for (OptEdge* segment : node->adjListOut) {
+
+      for (LinePair linepair : getLinePairs(segment)) {
+
       }
     }
   }
@@ -427,7 +648,7 @@ const {
   for (auto& toA : *segment->etgs[0].etg->getTripsUnordered()) {
     processed.insert(toA.route);
     for (auto& toB : *segment->etgs[0].etg->getTripsUnordered()) {
-      //if (processed.find(toB.route) != processed.end()) continue;
+      if (toA.route == toB.route) continue;
       ret.push_back(LinePair(toA.route, toB.route));
     }
   }

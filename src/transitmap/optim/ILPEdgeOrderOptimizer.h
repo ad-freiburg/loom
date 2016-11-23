@@ -39,14 +39,22 @@ class ILPEdgeOrderOptimizer {
   const config::Config* _cfg;
 
   glp_prob* createProblem(const OptGraph& g) const;
+  glp_prob* createProblemImpr(const OptGraph& g) const;
+
   void solveProblem(glp_prob* lp) const;
 
   void getConfigurationFromSoluation(glp_prob* lp,
       Configuration* c, const OptGraph& g) const;
+  void getConfigurationFromSoluationImpr(glp_prob* lp,
+      Configuration* c, const OptGraph& g) const;
+
   std::string getILPVarName(OptEdge* e,
     const gtfs::Route* r, size_t p) const;
 
   void writeSameSegConstraints(const OptGraph& g,
+    int* ia, int* ja, double* res, size_t* c, glp_prob* lp) const;
+
+  void writeCrossingOracle(const OptGraph& g,
     int* ia, int* ja, double* res, size_t* c, glp_prob* lp) const;
 
   void writeDiffSegConstraints(const OptGraph& g,
