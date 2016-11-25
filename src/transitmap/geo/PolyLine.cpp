@@ -131,6 +131,8 @@ void PolyLine::offsetPerp(double units) {
   }
 
   _line = ret;
+
+  simplify(1);
   fixTopology(fabs(2*3.14*units));
 }
 
@@ -442,7 +444,11 @@ const {
   double STEP_SIZE = 2;
   double MAX_SKIPS = 4;
   double MIN_SEG_LENGTH = dmax / 2; // make this configurable!
+
+
   SharedSegments ret;
+
+  if (distTo(pl) > dmax) return ret;
 
   bool in = false;
   double curDist = 0;

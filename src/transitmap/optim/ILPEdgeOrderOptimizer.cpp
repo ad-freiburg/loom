@@ -36,8 +36,8 @@ void ILPEdgeOrderOptimizer::optimize() {
   glp_print_mip(lp, "/home/patrick/ilp.sol");
 
   Configuration c;
-  getConfigurationFromSoluationImpr(lp, &c, g);
-  // getConfigurationFromSoluation(lp, &c, g);
+  getConfigurationFromSolutionImpr(lp, &c, g);
+  // getConfigurationFromSolution(lp, &c, g);
   _g->setConfig(c);
 
   glp_delete_prob(lp);
@@ -45,7 +45,7 @@ void ILPEdgeOrderOptimizer::optimize() {
 }
 
 // _____________________________________________________________________________
-void ILPEdgeOrderOptimizer::getConfigurationFromSoluationImpr(glp_prob* lp,
+void ILPEdgeOrderOptimizer::getConfigurationFromSolutionImpr(glp_prob* lp,
     Configuration* c, const OptGraph& g) const {
   // build name index for faster lookup
   glp_create_index(lp);
@@ -99,7 +99,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSoluationImpr(glp_prob* lp,
 }
 
 // _____________________________________________________________________________
-void ILPEdgeOrderOptimizer::getConfigurationFromSoluation(glp_prob* lp,
+void ILPEdgeOrderOptimizer::getConfigurationFromSolution(glp_prob* lp,
     Configuration* c, const OptGraph& g) const {
   // build name index for faster lookup
   glp_create_index(lp);

@@ -58,6 +58,30 @@ inline bool intersects(double p1x, double p1y, double q1x, double q1y,
 }
 
 // _____________________________________________________________________________
+inline bool contains(const Point& p1, const Point& q1, const Point& p2,
+                        const Point& q2) {
+  Line a;
+  a.push_back(p1);
+  a.push_back(q1);
+  Line b;
+  b.push_back(p2);
+  b.push_back(q2);
+
+  return bgeo::within(a, b);
+}
+
+// _____________________________________________________________________________
+inline bool contains(double p1x, double p1y, double q1x, double q1y,
+                        double p2x, double p2y, double q2x, double q2y) {
+  Point p1 (p1x, p1y);
+  Point q1 (q1x, q1y);
+  Point p2 (p2x, p2y);
+  Point q2 (q2x, q2y);
+
+  return intersects(p1, q1, p2, q2);
+}
+
+// _____________________________________________________________________________
 inline Point intersection(double p1x, double p1y, double q1x, double q1y,
                         double p2x, double p2y, double q2x, double q2y) {
   if (p1x == q1x && p1y == q1y) return Point(p1x, p1y); // TODO: <-- intersecting with a point??
@@ -194,6 +218,4 @@ inline Point projectOn(const Point& a, const Point& b, const Point& c) {
 }}}
 
 #endif  // TRANSITMAP_UTIL_GEO_H_
-
-
 

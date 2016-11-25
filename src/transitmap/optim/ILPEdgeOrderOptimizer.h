@@ -43,9 +43,9 @@ class ILPEdgeOrderOptimizer {
 
   void solveProblem(glp_prob* lp) const;
 
-  void getConfigurationFromSoluation(glp_prob* lp,
+  void getConfigurationFromSolution(glp_prob* lp,
       Configuration* c, const OptGraph& g) const;
-  void getConfigurationFromSoluationImpr(glp_prob* lp,
+  void getConfigurationFromSolutionImpr(glp_prob* lp,
       Configuration* c, const OptGraph& g) const;
 
   std::string getILPVarName(OptEdge* e,

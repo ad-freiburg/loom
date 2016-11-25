@@ -54,8 +54,8 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
     if (_cfg->renderStationNames) renderNodeScore(outG, n, width, height);
   }
 
-  //outputNodes(outG, width, height);
-  if (_cfg->renderNodeFronts) {
+  outputNodes(outG, width, height);
+  if (true || _cfg->renderNodeFronts) {
     renderNodeFronts(outG, width, height);
   }
 
@@ -209,13 +209,6 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
   assert(outG.getConfig().find(&g) != outG.getConfig().end());
 
-  util::geo::Point dir = center.getPointAt(1).p;
-  std::stringstream style;
-  style.clear();
-  style << "fill:none;stroke:white"
-    << ";stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
-  printPoint(dir, style.str(), w, h, xOffset, yOffset);
-
   size_t a = 0;
   for (size_t i : outG.getConfig().find(&g)->second) {
       const graph::TripOccurance& r = g.getTripsUnordered()[i];
@@ -265,15 +258,6 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       }
 
       renderLinePart(p, lineW, *r.route);
-
-      std::map<std::string, std::string> tparams;
-      tparams["x"] = std::to_string((p.getPointAt(0.5).p.get<0>() - xOffset) * _cfg->outputResolution);
-      tparams["y"] = std::to_string(h-(p.getPointAt(0.5).p.get<1>() - yOffset) * _cfg->outputResolution);
-      tparams["fill"] = "white";
-      tparams["font-size"] = "3px";
-      _w.openTag("text", tparams);
-      _w.writeText(std::to_string(a));
-      _w.closeTag();
 
       a++;
 
