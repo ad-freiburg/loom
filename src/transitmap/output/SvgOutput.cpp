@@ -55,7 +55,7 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
   }
 
   outputNodes(outG, width, height);
-  if (true || _cfg->renderNodeFronts) {
+  if (_cfg->renderNodeFronts) {
     renderNodeFronts(outG, width, height);
   }
 

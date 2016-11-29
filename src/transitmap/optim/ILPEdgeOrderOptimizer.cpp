@@ -45,6 +45,15 @@ void ILPEdgeOrderOptimizer::optimize() {
 }
 
 // _____________________________________________________________________________
+void ILPEdgeOrderOptimizer::printHumanReadable(glp_prob* lp) const {
+  // get objective function
+  std::stringstream obj;
+  for (size_t i = 1; i < glp_get_num_cols(lp) - 1; ++i) {
+     
+  }
+}
+
+// _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::getConfigurationFromSolutionImpr(glp_prob* lp,
     Configuration* c, const OptGraph& g) const {
   // build name index for faster lookup
