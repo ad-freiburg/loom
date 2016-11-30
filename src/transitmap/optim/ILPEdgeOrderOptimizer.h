@@ -63,6 +63,9 @@ class ILPEdgeOrderOptimizer {
   void writeDiffSegConstraintsImpr(const OptGraph& g,
     int* ia, int* ja, double* res, size_t* c, glp_prob* lp) const;
 
+  bool printHumanReadable(glp_prob* lp, const std::string& path) const;
+  double getConstraintCoeff(glp_prob* lp, size_t constraint, size_t col) const;
+
   std::vector<LinePair> getLinePairs(OptEdge* segment) const;
   std::vector<OptEdge*> getEdgePartners(OptNode* node,
     OptEdge* segmentA, const LinePair& linepair) const;

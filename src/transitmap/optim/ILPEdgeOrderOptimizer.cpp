@@ -8,6 +8,7 @@
 #include "./../output/OgrOutput.h"
 #include "./../graph/OrderingConfiguration.h"
 #include "./../util/Geo.h"
+#include <fstream>
 #include <glpk.h>
 
 using namespace transitmapper;
@@ -25,6 +26,8 @@ void ILPEdgeOrderOptimizer::optimize() {
 
   glp_prob* lp = createProblemImpr(g);
   //glp_prob* lp = createProblem(g);
+
+  printHumanReadable(lp, "/home/patrick/optim.ilp");
 
   // write problem for debugging...
   glp_write_mps(lp, GLP_MPS_FILE, 0, "/home/patrick/ilp");
@@ -45,12 +48,88 @@ void ILPEdgeOrderOptimizer::optimize() {
 }
 
 // _____________________________________________________________________________
-void ILPEdgeOrderOptimizer::printHumanReadable(glp_prob* lp) const {
+double ILPEdgeOrderOptimizer::getConstraintCoeff(glp_prob* lp,
+    size_t constraint, size_t col) const {
+  int indices[glp_get_num_cols(lp)];
+  double values[glp_get_num_cols(lp)];
+  glp_get_mat_col(lp, col, indices, values);
+
+  for (size_t i = 1; i < glp_get_num_cols(lp); i++) {
+    if (indices[i] == constraint) return values[i];
+  }
+
+  return 0;
+}
+
+// _____________________________________________________________________________
+bool ILPEdgeOrderOptimizer::printHumanReadable(glp_prob* lp,
+    const std::string& path) const {
+  double maxDblDst = 0.000001;
+  std::ofstream myfile;
+  myfile.open(path);
+  if (!myfile) return false;
+
   // get objective function
   std::stringstream obj;
-  for (size_t i = 1; i < glp_get_num_cols(lp) - 1; ++i) {
-     
+
+  for (size_t i = 0; i < glp_get_num_cols(lp) - 1; ++i) {
+    std::string colName = i > 0 ? glp_get_col_name(lp, i) : "";
+    double coef = glp_get_obj_coef(lp, i);
+    if (fabs(coef) > maxDblDst) {
+      if (coef > maxDblDst && obj.str().size() > 0) obj << " + ";
+      else if (coef < 0 && obj.str().size() > 0) obj << " - ";
+      if (fabs(fabs(coef) - 1) > maxDblDst) {
+        obj << (obj.str().size() > 0 ? fabs(coef) : coef) << " ";
+      }
+      obj << colName;
+    }
   }
+
+
+  if (glp_get_obj_dir(lp) == GLP_MIN) { myfile << "min "; }
+  else { myfile << "max "; }
+  myfile << obj.str() << std::endl;
+
+  for (size_t j = 1; j < glp_get_num_rows(lp) - 1; ++j) {
+    std::stringstream row;
+    for (size_t i = 1; i < glp_get_num_cols(lp) - 1; ++i) {
+      std::string colName = glp_get_col_name(lp, i);
+      double coef = getConstraintCoeff(lp, j, i);
+      if (fabs(coef) > maxDblDst) {
+        if (coef > maxDblDst && row.str().size() > 0) row << " + ";
+        else if (coef < 0 && row.str().size() > 0) row << " - ";
+        if (fabs(fabs(coef) - 1) > maxDblDst) {
+          row << (row.str().size() > 0 ? fabs(coef) : coef) << " ";
+        }
+        row << colName;
+      }
+    }
+
+    switch (glp_get_row_type(lp, j)) {
+      case GLP_FR:
+        break;
+      case GLP_LO:
+        myfile << std::endl << row.str()
+          << " >= " << glp_get_row_lb(lp, j);
+        break;
+      case GLP_UP:
+        myfile << std::endl << row.str()
+          << " <= " << glp_get_row_ub(lp, j);
+        break;
+      case GLP_DB:
+        myfile << std::endl << row.str()
+          << " >= " << glp_get_row_lb(lp, j);
+        myfile << std::endl << row.str()
+          << " <= " << glp_get_row_ub(lp, j);
+        break;
+      case GLP_FX:
+        myfile << std::endl << row.str()
+          << " = " << glp_get_row_lb(lp, j);
+        break;
+    }
+  }
+
+  myfile.close();
 }
 
 // _____________________________________________________________________________
@@ -425,7 +504,7 @@ const {
         size_t smallerVar = glp_add_cols(lp, 1);
         std::stringstream ss;
         ss << "x_(" << segment->getStrRepr() << ","
-          << "," << linepair.first << " < "
+          << "," << linepair.first << "<"
           << linepair.second << ")";
         glp_set_col_name(lp, smallerVar, ss.str().c_str());
         glp_set_col_kind(lp, smallerVar, GLP_BV);
@@ -441,14 +520,14 @@ const {
       for (LinePair linepair : getLinePairs(segment)) {
         std::stringstream ss;
         ss << "x_(" << segment->getStrRepr() << ","
-          << "," << linepair.first << " < "
+          << "," << linepair.first << "<"
           << linepair.second << ")";
         size_t smaller = glp_find_col(lp, ss.str().c_str());
         assert(smaller > 0);
 
         std::stringstream ss2;
         ss2 << "x_(" << segment->getStrRepr() << ","
-          << "," << linepair.second << " < "
+          << "," << linepair.second << "<"
           << linepair.first << ")";
         size_t bigger = glp_find_col(lp, ss2.str().c_str());
         assert(bigger > 0);
@@ -491,7 +570,7 @@ const {
 
         std::stringstream ss;
         ss << "x_(" << segment->getStrRepr() << ","
-          << "," << linepair.first << " < "
+          << "," << linepair.first << "<"
           << linepair.second << ")";
 
         size_t decVar = glp_find_col(lp, ss.str().c_str());
@@ -568,19 +647,19 @@ const {
 
           std::stringstream aSmBStr;
           aSmBStr << "x_(" << segmentA->getStrRepr() << ","
-            << "," << linepair.first << " < "
+            << "," << linepair.first << "<"
             << linepair.second << ")";
           aSmallerBinL1 = glp_find_col(lp, aSmBStr.str().c_str());
 
           std::stringstream aBgBStr;
           aBgBStr << "x_(" << segmentB->getStrRepr() << ","
-            << "," << linepair.first << " < "
+            << "," << linepair.first << "<"
             << linepair.second << ")";
           aSmallerBinL2 = glp_find_col(lp, aBgBStr.str().c_str());
 
           std::stringstream bBgAStr;
           bBgAStr << "x_(" << segmentB->getStrRepr() << ","
-            << "," << linepair.second << " < "
+            << "," << linepair.second << "<"
             << linepair.first << ")";
           bSmallerAinL2 = glp_find_col(lp, bBgAStr.str().c_str());
 
@@ -694,13 +773,13 @@ const {
               if (poscomb.first > poscomb.second) {
                 std::stringstream bBgAStr;
                 bBgAStr << "x_(" << segmentA->getStrRepr() << ","
-                  << "," << linepair.first << " < "
+                  << "," << linepair.first << "<"
                   << linepair.second << ")";
                 testVar = glp_find_col(lp, bBgAStr.str().c_str());
               } else {
                 std::stringstream bBgAStr;
                 bBgAStr << "x_(" << segmentA->getStrRepr() << ","
-                  << "," << linepair.second << " < "
+                  << "," << linepair.second << "<"
                   << linepair.first<< ")";
                 testVar = glp_find_col(lp, bBgAStr.str().c_str());
               }
