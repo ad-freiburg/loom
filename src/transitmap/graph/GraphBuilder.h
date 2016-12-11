@@ -28,38 +28,39 @@ struct ShrdSegWrap {
 
 class GraphBuilder {
  public:
-  GraphBuilder(TransitGraph* targetGraph, const config::Config* cfg);
+  GraphBuilder(const config::Config* cfg);
 
-  void consume(const gtfs::Feed& f);
-  void simplify();
-  bool createTopologicalNodes();
-  void averageNodePositions();
-  void fixGeomDirs();
-  void writeMainDirs();
-  void expandOverlappinFronts();
-  void writeInitialConfig();
+  // build a graph from a gtfs feed
+  void consume(const gtfs::Feed& f, TransitGraph* targetGraph);
 
-  void removeArtifacts();
+  // simpliyfy the graph
+  void simplify(TransitGraph* g);
+  bool createTopologicalNodes(TransitGraph* g);
+  void averageNodePositions(TransitGraph* g);
+  void writeMainDirs(TransitGraph* g);
+  void expandOverlappinFronts(TransitGraph* g);
+  void writeInitialConfig(TransitGraph* g);
+
+  void removeArtifacts(TransitGraph* g);
 
  private:
-  TransitGraph* _targetGraph;
   const config::Config* _cfg;
   projPJ _mercProj;
 
   // map of compiled polylines, to avoid calculating them each time
   std::unordered_map<gtfs::Shape*, geo::PolyLine> _polyLines;
 
-  util::geo::Point getProjectedPoint(double lat, double lng) const;
+  util::geo::Point getProjectedPoint(double lat, double lng, projPJ p) const;
 
   std::pair<bool, geo::PolyLine> getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b,
-      gtfs::Trip* t, double distA, double distB);
+      gtfs::Trip* t, double distA, double distB, projPJ p);
 
-  ShrdSegWrap getNextSharedSegment() const;
+  ShrdSegWrap getNextSharedSegment(TransitGraph* g) const;
   geo::PolyLine getAveragedFromSharedSeg(const ShrdSegWrap& w) const;
 
   std::set<NodeFront*> nodeGetOverlappingFronts(const Node* n) const;
 
-  Node* addStop(gtfs::Stop* curStop, uint8_t aggrLevel);
+  Node* addStop(gtfs::Stop* curStop, uint8_t aggrLevel, TransitGraph* g);
   void freeNodeFront(NodeFront* f);
 
   bool nodeFrontsOverlap(const NodeFront& a, const NodeFront& b) const;
@@ -67,7 +68,7 @@ class GraphBuilder {
   bool checkTripSanity(gtfs::Trip* t) const;
   bool checkShapeSanity(gtfs::Shape* t) const;
 
-  void combineNodes(Node* a, Node* b);
+  void combineNodes(Node* a, Node* b, TransitGraph* g);
 
   mutable std::set<const Edge*> _indEdges;
   mutable std::map<const Edge*, size_t> _pEdges;

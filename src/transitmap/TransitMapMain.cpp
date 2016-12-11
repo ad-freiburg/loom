@@ -49,30 +49,30 @@ int main(int argc, char** argv) {
     parser.parse(&feed, cfg.inputFeedPath);
 
     graph::TransitGraph g("shinygraph", cfg.projectionString);
-    graph::GraphBuilder b(&g, &cfg);
+    graph::GraphBuilder b(&cfg);
 
     LOG(INFO) << "Building graph..." << std::endl;
-    b.consume(feed);
+    b.consume(feed, &g);
 
     LOG(INFO) << "Simplyfing..." << std::endl;
-    b.simplify();
+    b.simplify(&g);
 
     LOG(INFO) << "Building topological nodes..." << std::endl;
-    while (b.createTopologicalNodes()) {}
+    while (b.createTopologicalNodes(&g)) {}
 
     LOG(INFO) << "Averaging node positions" << std::endl;
-    b.averageNodePositions();
+    b.averageNodePositions(&g);
 
-    b.removeArtifacts();
+    b.removeArtifacts(&g);
 
     LOG(INFO) << "Creating node fronts..." << std::endl;
-    b.writeMainDirs();
-    b.expandOverlappinFronts();
+    b.writeMainDirs(&g);
+    b.expandOverlappinFronts(&g);
 
     //b.removeArtifacts();
 
     LOG(INFO) << "Writing initial ordering configuration..." << std::endl;
-    b.writeInitialConfig();
+    b.writeInitialConfig(&g);
 
     LOG(INFO) << "Optimizing..." << std::endl;
     /**
@@ -80,12 +80,14 @@ int main(int argc, char** argv) {
     eoOptim.optimize(cfg.optimIterations);
     */
 
-    LOG(INFO) << "Total graph score BEFORE optim is -- " << g.getScore() << " --" << std::endl;
+    LOG(INFO) << "Total graph score BEFORE optim is -- "
+      << g.getScore() << " --" << std::endl;
 
     optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg);
     ilpEoOptim.optimize();
 
-    LOG(INFO) << "Total graph score AFTER optim is -- " << g.getScore() << " --" << std::endl;
+    LOG(INFO) << "Total graph score AFTER optim is -- "
+      << g.getScore() << " --" << std::endl;
     LOG(INFO) << "Per node graph score is -- "
       << g.getScore() / g.getNodes()->size() << " --" << std::endl;
 
