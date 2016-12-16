@@ -57,6 +57,15 @@ Point NodeFront::getTripPos(const EdgeTripGeom& etg, size_t pos,
 }
 
 // _____________________________________________________________________________
+double Node::getMaxNodeFrontWidth() const {
+  double ret = 0;
+  for (const NodeFront& g : _mainDirs) {
+    if (g.refEtg->getTotalWidth() > ret) ret = g.refEtg->getTotalWidth(); 
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
 Node::Node(Point pos) : _pos(pos) {
 }
 

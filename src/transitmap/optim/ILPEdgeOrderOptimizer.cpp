@@ -27,10 +27,10 @@ void ILPEdgeOrderOptimizer::optimize() {
   glp_prob* lp = createProblemImpr(g);
   //glp_prob* lp = createProblem(g);
 
-  printHumanReadable(lp, "/home/patrick/optim.ilp");
+  // printHumanReadable(lp, "/home/patrick/optim.ilp");
 
   // write problem for debugging...
-  glp_write_mps(lp, GLP_MPS_FILE, 0, "/home/patrick/ilp");
+  // glp_write_mps(lp, GLP_MPS_FILE, 0, "/home/patrick/ilp");
 
   solveProblem(lp);
 

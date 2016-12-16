@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Creating node fronts..." << std::endl;
     b.writeMainDirs(&g);
-    b.expandOverlappinFronts(&g);
+    //b.expandOverlappinFronts(&g);
 
     //b.removeArtifacts();
 
@@ -83,8 +83,10 @@ int main(int argc, char** argv) {
     LOG(INFO) << "Total graph score BEFORE optim is -- "
       << g.getScore() << " --" << std::endl;
 
-    optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg);
-    ilpEoOptim.optimize();
+    if (cfg.renderMethod != "ogr") {
+      optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg);
+      ilpEoOptim.optimize();
+    }
 
     LOG(INFO) << "Total graph score AFTER optim is -- "
       << g.getScore() << " --" << std::endl;

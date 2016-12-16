@@ -123,6 +123,8 @@ class Node {
   // remove edge from this node's adjacency lists
   void removeEdge(Edge* e);
 
+  double getMaxNodeFrontWidth() const;
+
  private:
   std::set<Edge*> _adjListIn;
   std::set<Edge*> _adjListOut;

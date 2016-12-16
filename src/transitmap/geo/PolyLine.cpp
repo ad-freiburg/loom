@@ -591,7 +591,7 @@ PolyLine PolyLine::getOrthoLineAtDist(double d, double length) const {
   Point avgP = getPointAtDist(d).p;
 
   double angle = util::geo::angBetween(getPointAtDist(d-5).p,
-      getPointAtDist(d+5).p) / (180/M_PI);
+      getPointAtDist(d+5).p);
 
   double angleX1 = avgP.get<0>() + cos(angle + M_PI/2) * length/2;
   double angleY1 = avgP.get<1>() + sin(angle + M_PI/2) * length/2;

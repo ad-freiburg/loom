@@ -122,7 +122,7 @@ inline bool lineIntersects(const Point& p1, const Point& q1, const Point& p2,
 inline double angBetween(double p1x, double p1y, double q1x, double q1y) {
   double dY = q1y - p1y;
   double dX = q1x - p1x;
-  return atan2(dY, dX) * (180.0 / M_PI);
+  return atan2(dY, dX);
 }
 
 // _____________________________________________________________________________

@@ -47,6 +47,8 @@ class GraphBuilder {
   const config::Config* _cfg;
   projPJ _mercProj;
 
+  bool lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const;
+
   // map of compiled polylines, to avoid calculating them each time
   std::unordered_map<gtfs::Shape*, geo::PolyLine> _polyLines;
 

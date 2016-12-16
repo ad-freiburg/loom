@@ -368,7 +368,7 @@ std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b,
 
   // TODO!!!!! REMOVE FALSE!!!! ONLY USE FOR FREIBURG TESTING!!!!
   // if (distA > -1 && distA > -1 && totalTripDist > 0) {
-  if (distA > -1 && distA > -1 && totalTripDist > 0) {
+  if (false && distA > -1 && distA > -1 && totalTripDist > 0) {
     p = pl->second.getSegment((distA - t->getShape()->getPoints().begin()->travelDist) / totalTripDist, (distB - t->getShape()->getPoints().begin()->travelDist) / totalTripDist);
   } else {
     p = pl->second.getSegment(ap, bp);
@@ -540,10 +540,12 @@ const {
 
       if ((n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 8) ||
           (n->getStops().size() == 0 && nodeFrontsOverlap(fa, fb))) {
-        if (fa.refEtg->getGeom().getLength() > minLength) {
+        if (fa.refEtg->getGeom().getLength() > minLength &&
+            fa.geom.distTo(n->getPos()) < n->getMaxNodeFrontWidth()) {
           ret.insert(const_cast<NodeFront*>(&fa));
         }
-        if (fb.refEtg->getGeom().getLength() > minLength) {
+        if (fb.refEtg->getGeom().getLength() > minLength &&
+            fb.geom.distTo(n->getPos()) < n->getMaxNodeFrontWidth()) {
           ret.insert(const_cast<NodeFront*>(&fb));
         }
       }
@@ -569,7 +571,7 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
   Point i = util::geo::intersection(aa, ab, ba, bb);
 
   if (numShr && a.geom.distTo(i) < (a.refEtg->getWidth() + a.refEtg->getSpacing())) return true;
-  if (b.geom.distTo(a.geom) < fmin((b.refEtg->getWidth() + b.refEtg->getSpacing()) * 5, (b.refEtg->getTotalWidth() + a.refEtg->getTotalWidth()))) return true;
+  if (b.geom.distTo(a.geom) < fmax((b.refEtg->getWidth() + b.refEtg->getSpacing()) * 3, (b.refEtg->getTotalWidth() + a.refEtg->getTotalWidth())/4)) return true;
 
   return false;
 }
@@ -727,6 +729,7 @@ const {
 
   geo::PolyLine a = geomA.getGeom().getSegment(w.s.first.first.totalPos,
       w.s.second.first.totalPos);
+
   geo::PolyLine b;
 
   if (w.s.first.second.totalPos > w.s.second.second.totalPos) {
@@ -736,6 +739,21 @@ const {
   } else {
     b = geomB.getGeom().getSegment(w.s.first.second.totalPos,
         w.s.second.second.totalPos);
+  }
+
+  // test if one geom is the dominant line here
+  bool aDomin = lineDominatesSharedSeg(w, w.e);
+  bool bDomin = lineDominatesSharedSeg(w, w.f);
+  if (aDomin && !bDomin) {
+    std::cout << "a dominates" << std::endl;
+    return a;
+  }
+  if (bDomin && !aDomin) {
+    std::cout << "b dominates" << std::endl;
+    return b;
+  }
+  if (bDomin && aDomin) {
+    std::cout << "both dominate" << std::endl;
   }
 
   std::vector<const geo::PolyLine*> avg;
@@ -748,4 +766,47 @@ const {
   geo::PolyLine ret = geo::PolyLine::average(avg, weights);
   ret.simplify(5);
   return ret;
+}
+
+// _____________________________________________________________________________
+bool GraphBuilder::lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const {
+  if (e != w.e && e != w.f) return false;
+
+  double LOOKAHEAD = 50;
+  double DELTA = .5;
+
+  Point a;
+  Point b;
+  Point c;
+  Point d;
+
+  if (e == w.e) {
+    const EdgeTripGeom& geom = w.e->getEdgeTripGeoms()->front();
+    double lookAhead = LOOKAHEAD / geom.getGeom().getLength();
+    a = geom.getGeom().getPointAt(w.s.first.first.totalPos - lookAhead).p;
+    b = geom.getGeom().getPointAt(w.s.first.first.totalPos).p;
+    c = geom.getGeom().getPointAt(w.s.second.first.totalPos).p;
+    d = geom.getGeom().getPointAt(w.s.second.first.totalPos + lookAhead).p;
+  } else if (e == w.f) {
+    const EdgeTripGeom& geom = w.f->getEdgeTripGeoms()->front();
+    double lookAhead = LOOKAHEAD / geom.getGeom().getLength();
+    if (w.s.first.second.totalPos > w.s.second.second.totalPos) {
+      a = geom.getGeom().getPointAt(w.s.first.second.totalPos + lookAhead).p;
+      d = geom.getGeom().getPointAt(w.s.second.second.totalPos - lookAhead).p;
+    } else {
+      a = geom.getGeom().getPointAt(w.s.first.second.totalPos - lookAhead).p;
+      d = geom.getGeom().getPointAt(w.s.second.second.totalPos + lookAhead).p;
+    }
+    b = geom.getGeom().getPointAt(w.s.first.second.totalPos).p;
+    c = geom.getGeom().getPointAt(w.s.second.second.totalPos).p;
+  }
+
+  std::cout << "AB angle: " << util::geo::angBetween(a, b) * 180/M_PI << std::endl;
+  std::cout << "CD angle: " << util::geo::angBetween(c, d) * 180/M_PI << std::endl;
+
+  double ang = util::geo::angBetween(a, b) - util::geo::angBetween(c, d);
+  double tang = fabs(tan(ang));
+
+  std::cout << tang << " vs " << DELTA << std::endl;
+  return tang < DELTA;
 }
