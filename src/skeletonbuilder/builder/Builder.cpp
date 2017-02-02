@@ -3,10 +3,10 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <proj_api.h>
-#include "GraphBuilder.h"
+#include "./Builder.h"
 #include "log/Log.h"
-#include "./../config/TransitMapConfig.h"
 
+using namespace skeletonbuilder;
 using namespace transitmapper;
 using namespace graph;
 using namespace gtfsparser;
@@ -15,13 +15,13 @@ using namespace gtfs;
 using util::geo::Point;
 
 // _____________________________________________________________________________
-GraphBuilder::GraphBuilder(const config::Config* cfg)
+Builder::Builder(const config::Config* cfg)
 : _cfg(cfg) {
   _mercProj = pj_init_plus(WGS84_PROJ);
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::consume(const Feed& f, TransitGraph* g) {
+void Builder::consume(const Feed& f, TransitGraph* g) {
   // TODO: make this stuff configurable
 
   uint8_t AGGREGATE_STOPS = 2; // 1: aggregate stops already aggrgated in GTFS
@@ -82,7 +82,7 @@ void GraphBuilder::consume(const Feed& f, TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-Point GraphBuilder::getProjectedPoint(double lat, double lng, projPJ p) const {
+Point Builder::getProjectedPoint(double lat, double lng, projPJ p) const {
   double x = lng;
   double y = lat;
   x *= DEG_TO_RAD;
@@ -94,7 +94,7 @@ Point GraphBuilder::getProjectedPoint(double lat, double lng, projPJ p) const {
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::simplify(TransitGraph* g) {
+void Builder::simplify(TransitGraph* g) {
   // try to merge both-direction edges into a single one
 
   for (auto n : *g->getNodes()) {
@@ -105,7 +105,7 @@ void GraphBuilder::simplify(TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-ShrdSegWrap GraphBuilder::getNextSharedSegment(TransitGraph* g) const {
+ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g) const {
   int i = 0;
   for (auto n : *g->getNodes()) {
     for (auto e : n->getAdjListOut()) {
@@ -151,7 +151,7 @@ ShrdSegWrap GraphBuilder::getNextSharedSegment(TransitGraph* g) const {
 }
 
 // _____________________________________________________________________________
-bool GraphBuilder::createTopologicalNodes(TransitGraph* g) {
+bool Builder::createTopologicalNodes(TransitGraph* g) {
   ShrdSegWrap w;
   _indEdges.clear();
   _pEdges.clear();
@@ -323,7 +323,7 @@ bool GraphBuilder::createTopologicalNodes(TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b,
+std::pair<bool, geo::PolyLine> Builder::getSubPolyLine(Stop* a, Stop* b,
     Trip* t, double distA, double distB, projPJ proj) {
   Point ap = getProjectedPoint(a->getLat(), a->getLng(), proj);
   Point bp = getProjectedPoint(b->getLat(), b->getLng(), proj);
@@ -378,7 +378,7 @@ std::pair<bool, geo::PolyLine> GraphBuilder::getSubPolyLine(Stop* a, Stop* b,
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::averageNodePositions(TransitGraph* g) {
+void Builder::averageNodePositions(TransitGraph* g) {
   for (auto n : *g->getNodes()) {
     double x = 0;
     double y = 0;
@@ -415,7 +415,7 @@ void GraphBuilder::averageNodePositions(TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-Node* GraphBuilder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel,
+Node* Builder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel,
     TransitGraph* g) {
   if (aggrLevel && curStop->getParentStation() != 0) {
     return addStop(curStop->getParentStation(), aggrLevel, g);
@@ -450,184 +450,18 @@ Node* GraphBuilder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel,
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::writeMainDirs(TransitGraph* graph) {
-  for (auto n : *graph->getNodes()) {
-    std::set<Edge*> eSet;
-    eSet.insert(n->getAdjListIn().begin(), n->getAdjListIn().end());
-    eSet.insert(n->getAdjListOut().begin(), n->getAdjListOut().end());
-
-    for (Edge* e : eSet) {
-      if (e->getEdgeTripGeoms()->size() == 0) continue;
-
-      // atm, always take the first edge trip geometry with the most routes
-      size_t lc = 0;
-      const EdgeTripGeom* g = 0;
-      for (auto& rg : *e->getEdgeTripGeoms()) {
-         if (rg.getTripsUnordered()->size() >= lc) {
-           lc = rg.getTripsUnordered()->size();
-           g = &rg;
-         }
-      }
-
-      if (!g || g->getGeom().getLength() == 0) continue;
-
-      NodeFront f(e, n, g);
-      geo::PolyLine pl;
-
-      f.refEtgLengthBefExp = g->getGeom().getLength();
-
-      if (g->getGeomDir() == n) {
-        pl = g->getGeom().getOrthoLineAtDist(g->getGeom().getLength(),
-            g->getTotalWidth());
-      } else {
-        pl = g->getGeom().getOrthoLineAtDist(0, g->getTotalWidth());
-        pl.reverse();
-      }
-
-      f.setGeom(pl);
-
-      // initial free
-      freeNodeFront(&f);
-
-      n->addMainDir(f);
-    }
-  }
-}
-
-// _____________________________________________________________________________
-void GraphBuilder::expandOverlappinFronts(TransitGraph* g) {
-  // now, look at the nodes entire front geometries and expand them
-  // until nothing overlaps
-  double step = 1;
-
-  while (true) {
-    bool stillFree = false;
-    for (auto n : *g->getNodes()) {
-      std::set<NodeFront*> overlaps = nodeGetOverlappingFronts(n);
-      for (auto f : overlaps) {
-        stillFree = true;
-        if (f->refEtg->getGeomDir() == n) {
-          f->geom = f->refEtg->getGeom().getOrthoLineAtDist(
-              f->refEtg->getGeom().getLength() - step,
-              f->refEtg->getTotalWidth());
-        } else {
-          f->geom = f->refEtg->getGeom().getOrthoLineAtDist(
-              step, f->refEtg->getTotalWidth());
-          f->geom.reverse();
-        }
-
-        // cut the edges to fit the new front
-        freeNodeFront(f);
-      }
-    }
-    if (!stillFree) break;
-  }
-}
-
-// _____________________________________________________________________________
-std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(const Node* n)
-const {
-  std::set<NodeFront*> ret;
-  double minLength = 1;
-
-  for (size_t i = 0; i < n->getMainDirs().size(); ++i) {
-    const NodeFront& fa = n->getMainDirs()[i];
-
-    for (size_t j = 0; j < n->getMainDirs().size(); ++j) {
-      const NodeFront& fb = n->getMainDirs()[j];
-
-      if (fa.geom.equals(fb.geom, 5) || j == i) continue;
-
-      if ((n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.refEtg->getSpacing() + fb.refEtg->getSpacing()) / 8) ||
-          (n->getStops().size() == 0 && nodeFrontsOverlap(fa, fb))) {
-        if (fa.refEtg->getGeom().getLength() > minLength &&
-            fa.geom.distTo(n->getPos()) < n->getMaxNodeFrontWidth()) {
-          ret.insert(const_cast<NodeFront*>(&fa));
-        }
-        if (fb.refEtg->getGeom().getLength() > minLength &&
-            fb.geom.distTo(n->getPos()) < n->getMaxNodeFrontWidth()) {
-          ret.insert(const_cast<NodeFront*>(&fb));
-        }
-      }
-    }
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
-bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
-    const NodeFront& b) const {
-  size_t numShr= a.refEtg->getSharedRoutes(*b.refEtg).size();
-
-  Point aa = a.geom.getLine().front();
-  Point ab = a.geom.getLine().back();
-  Point ba = b.geom.getLine().front();
-  Point bb = b.geom.getLine().back();
-
-  bool intersects = util::geo::lineIntersects(aa, ab, ba, bb);
-  if (!intersects) return false;
-
-  Point i = util::geo::intersection(aa, ab, ba, bb);
-
-  if (numShr && a.geom.distTo(i) < (a.refEtg->getWidth() + a.refEtg->getSpacing())) return true;
-  if (b.geom.distTo(a.geom) < fmax((b.refEtg->getWidth() + b.refEtg->getSpacing()) * 3, (b.refEtg->getTotalWidth() + a.refEtg->getTotalWidth())/4)) return true;
-
-  return false;
-}
-
-// _____________________________________________________________________________
-void GraphBuilder::freeNodeFront(NodeFront* f) {
-  for (auto e : f->edges) {
-    geo::PolyLine cutLine = f->geom;
-
-    for (EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
-      std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects =
-          cutLine.getIntersections(g.getGeom());
-      if (iSects.size() > 0) {
-        if (g.getGeomDir() != f->n) {
-          // cut at beginning
-          g.setGeom(g.getGeom().getSegment(iSects.begin()->totalPos, 1));
-          assert(cutLine.distTo(g.getGeom().getLine().front()) < 0.1);
-        } else {
-          // cut at end
-          g.setGeom(g.getGeom().getSegment(0, (--iSects.end())->totalPos));
-          assert(cutLine.distTo(g.getGeom().getLine().back()) < 0.1);
-        }
-      }
-    }
-  }
-}
-
-// _____________________________________________________________________________
-void GraphBuilder::writeInitialConfig(TransitGraph* g) {
-  Configuration c;
-  for (graph::Node* n : *g->getNodes()) {
-    for (graph::Edge* e : n->getAdjListOut()) {
-      for (graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
-        Ordering order(g.getCardinality());
-        for (size_t i = 0; i < g.getCardinality(); i++) order[i] = i;
-        c[&g] = order;
-      }
-    }
-  }
-
-  g->setConfig(c);
-}
-
-// _____________________________________________________________________________
-bool GraphBuilder::checkTripSanity(gtfs::Trip* t) const {
+bool Builder::checkTripSanity(gtfs::Trip* t) const {
   return checkShapeSanity(t->getShape());
 }
 
 // _____________________________________________________________________________
-bool GraphBuilder::checkShapeSanity(gtfs::Shape* s) const {
+bool Builder::checkShapeSanity(gtfs::Shape* s) const {
   if (!s|| s->getPoints().size() < 2) return false;
   return true;
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::removeArtifacts(TransitGraph* g) {
+void Builder::removeArtifacts(TransitGraph* g) {
   double MIN_SEG_LENGTH = 20;
 
   restart:
@@ -650,7 +484,7 @@ void GraphBuilder::removeArtifacts(TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::combineNodes(Node* a, Node* b, TransitGraph* g) {
+void Builder::combineNodes(Node* a, Node* b, TransitGraph* g) {
   assert(a->getStops().size() == 0 || b->getStops().size() == 0);
 
   if (a->getStops().size() != 0) {
@@ -722,7 +556,7 @@ void GraphBuilder::combineNodes(Node* a, Node* b, TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-geo::PolyLine GraphBuilder::getAveragedFromSharedSeg(const ShrdSegWrap& w)
+geo::PolyLine Builder::getAveragedFromSharedSeg(const ShrdSegWrap& w)
 const {
   const EdgeTripGeom& geomA = w.e->getEdgeTripGeoms()->front();
   const EdgeTripGeom& geomB = w.f->getEdgeTripGeoms()->front();
@@ -775,7 +609,7 @@ const {
 }
 
 // _____________________________________________________________________________
-bool GraphBuilder::lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const {
+bool Builder::lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const {
   if (e != w.e && e != w.f) return false;
 
   double LOOKAHEAD = 50;

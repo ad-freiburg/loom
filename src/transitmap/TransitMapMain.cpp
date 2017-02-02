@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Creating node fronts..." << std::endl;
     b.writeMainDirs(&g);
-    //b.expandOverlappinFronts(&g);
+    b.expandOverlappinFronts(&g);
 
     //b.removeArtifacts();
 

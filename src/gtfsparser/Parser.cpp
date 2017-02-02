@@ -2,11 +2,11 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include <boost/filesystem.hpp>
 #include <string>
 #include <fstream>
 #include <utility>
 #include <map>
+#include <boost/filesystem.hpp>
 #include "./Parser.h"
 #include "./CsvParser.h"
 #include "./gtfs/Agency.h"

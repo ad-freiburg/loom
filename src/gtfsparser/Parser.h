@@ -6,7 +6,6 @@
 #define GTFSPARSER_PARSER_H_
 
 #include <stdint.h>
-#include <boost/filesystem.hpp>
 #include <unordered_map>
 #include <istream>
 #include <string>
@@ -14,6 +13,7 @@
 #include <exception>
 #include <sstream>
 #include <iostream>
+#include <boost/filesystem.hpp>
 #include "gtfs/Feed.h"
 #include "CsvParser.h"
 

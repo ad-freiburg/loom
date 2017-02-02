@@ -119,7 +119,7 @@ class CsvParser {
 
   // returns a trimmed version of a const char*
   //
-  // careful: this function is not idempotent. if will leave t
+  // careful: this function is not idempotent. it will leave t
   // right-trimmed.
   const char* inlineRightTrim(const char* t) const;
 
