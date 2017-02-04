@@ -11,10 +11,10 @@
 namespace transitmapper {
 namespace graph {
 
-class EdgeTripGeom;
+class Edge;
 
 typedef std::vector<size_t> Ordering;
-typedef std::map<const EdgeTripGeom*, Ordering> Configuration;
+typedef std::map<const Edge*, Ordering> Configuration;
 
 }}
 

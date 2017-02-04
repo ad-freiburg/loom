@@ -25,7 +25,8 @@ class Node;
 
 class Edge {
  public:
-  Edge(Node* from, Node* to);
+  Edge(Node* from, Node* to, geo::PolyLine pl, double w,
+    double s);
 
   Node* getFrom() const;
   Node* getTo() const;
@@ -33,15 +34,43 @@ class Edge {
   bool addTrip(gtfs::Trip* t, Node* toNode);
   bool addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode, double w, double s);
 
-  const std::vector<EdgeTripGeom>& getEdgeTripGeoms() const;
-  std::vector<EdgeTripGeom>* getEdgeTripGeoms();
-
-  void addEdgeTripGeom(const EdgeTripGeom& e);
-
-  void simplify();
-
   void setFrom(Node* from);
   void setTo(Node* to);
+
+  const geo::PolyLine& getGeom() const;
+  void setGeom(const geo::PolyLine& p);
+
+  // FROM ETG
+  const std::vector<TripOccurance>& getTripsUnordered() const;
+  std::vector<TripOccurance>* getTripsUnordered();
+
+  std::vector<TripOccurance>::iterator removeTripOccurance(
+      std::vector<TripOccurance>::const_iterator pos);
+
+  TripOccWithPos getTripsForRouteUnder(const gtfs::Route* r,
+    const std::vector<size_t> ordering) const;
+
+  TripOccurance* getTripsForRoute(const gtfs::Route* r) const;
+
+  bool containsRoute(gtfs::Route* r) const;
+  size_t getTripCardinality() const;
+  size_t getCardinality() const;
+  const Node* getGeomDir() const;
+
+  void setGeomDir(const Node* newDir);
+
+  double getWidth() const;
+  double getSpacing() const;
+
+  double getTotalWidth() const;
+
+  std::vector<gtfs::Route*> getSharedRoutes(const Edge& e) const;
+
+
+
+
+  // TODO: store this here atm, but find better plcae...
+  std::vector<std::vector<size_t> > permutations;
  private:
   Node* _from;
   Node* _to;
@@ -61,8 +90,13 @@ class Edge {
   // lines part or join.
   std::vector<EdgeTripGeom> _tripsContained;
 
-  void combineIncludedGeoms();
-  void averageCombineGeom();
+
+  std::vector<TripOccurance> _trips;
+
+  geo::PolyLine _geom;
+  const Node* _geomDir;
+
+  double _width, _spacing;
 };
 
 }}

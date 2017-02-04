@@ -16,7 +16,7 @@ using namespace gtfsparser;
 EdgeTripGeom::EdgeTripGeom(geo::PolyLine geom, const Node* geomDir, double w,
     double s)
 : _geomDir(geomDir), _width(w), _spacing(s) {
-  setGeom(geom);
+
 }
 
 // _____________________________________________________________________________
@@ -28,7 +28,7 @@ void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode,
     pl.reverse();
   }
   vec.push_back(&pl);
-  setGeom(geo::PolyLine::average(vec));
+
 
   addTrip(t, dirNode);
 }
@@ -79,16 +79,6 @@ TripOccWithPos EdgeTripGeom::getTripsForRouteUnder(const gtfs::Route* r,
 }
 
 // _____________________________________________________________________________
-const geo::PolyLine& EdgeTripGeom::getGeom() const {
-  return _geom;
-}
-
-// _____________________________________________________________________________
-void EdgeTripGeom::setGeom(const geo::PolyLine& p) {
-  _geom = p;
-}
-
-// _____________________________________________________________________________
 bool EdgeTripGeom::containsRoute(gtfs::Route* r) const {
   if (getTripsForRoute(r)) return true;
 
@@ -111,22 +101,6 @@ size_t EdgeTripGeom::getCardinality() const {
   return _trips.size();
 }
 
-// _____________________________________________________________________________
-void EdgeTripGeom::removeOrphans() {
-  double avgTrips = 0;
-
-  for (auto& to : _trips) {
-    avgTrips += to.trips.size();
-  }
-  avgTrips /= _trips.size();
-
-  for (auto it = _trips.begin(); it != _trips.end(); it++) {
-    if (it->trips.size() < avgTrips * 0.15) {
-      it = removeTripOccurance(it);
-      it--;
-    }
-  }
-}
 // _____________________________________________________________________________
 std::vector<TripOccurance>::iterator
 EdgeTripGeom::removeTripOccurance(std::vector<TripOccurance>::const_iterator pos) {

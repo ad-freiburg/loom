@@ -39,37 +39,14 @@ int main(int argc, char** argv) {
   config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
-  // parse an example feed
-  gtfsparser::Parser parser;
-  gtfsparser::gtfs::Feed feed;
-
-
   if (!cfg.inputFeedPath.empty()) {
-    LOG(INFO) << "reading feed at " << cfg.inputFeedPath << std::endl;
-    parser.parse(&feed, cfg.inputFeedPath);
-
+    LOG(INFO) << "reading graph at " << cfg.inputFeedPath << std::endl;
     graph::TransitGraph g("shinygraph", cfg.projectionString);
     graph::GraphBuilder b(&cfg);
-
-    LOG(INFO) << "Building graph..." << std::endl;
-    b.consume(feed, &g);
-
-    LOG(INFO) << "Simplyfing..." << std::endl;
-    b.simplify(&g);
-
-    LOG(INFO) << "Building topological nodes..." << std::endl;
-    while (b.createTopologicalNodes(&g)) {}
-
-    LOG(INFO) << "Averaging node positions" << std::endl;
-    b.averageNodePositions(&g);
-
-    b.removeArtifacts(&g);
 
     LOG(INFO) << "Creating node fronts..." << std::endl;
     b.writeMainDirs(&g);
     b.expandOverlappinFronts(&g);
-
-    //b.removeArtifacts();
 
     LOG(INFO) << "Writing initial ordering configuration..." << std::endl;
     b.writeInitialConfig(&g);

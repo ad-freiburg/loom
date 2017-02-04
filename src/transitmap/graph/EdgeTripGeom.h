@@ -54,11 +54,6 @@ class EdgeTripGeom {
 
   TripOccurance* getTripsForRoute(const gtfs::Route* r) const;
 
-  const geo::PolyLine& getGeom() const;
-  void setGeom(const geo::PolyLine& p);
-
-  void removeOrphans();
-
   bool containsRoute(gtfs::Route* r) const;
   size_t getTripCardinality() const;
   size_t getCardinality() const;
@@ -80,7 +75,7 @@ class EdgeTripGeom {
   std::vector<TripOccurance> _trips;
 
   geo::PolyLine _geom;
-  const Node* _geomDir; // the direction of the geometry, may be reversed
+  const Node* _geomDir;
 
   double _width, _spacing;
 };

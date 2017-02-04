@@ -78,11 +78,12 @@ Node* TransitGraph::addNode(Node* n) {
 }
 
 // _____________________________________________________________________________
-Edge* TransitGraph::addEdge(Node* from, Node* to) {
+Edge* TransitGraph::addEdge(Node* from, Node* to, geo::PolyLine pl, double w,
+    double s) {
   if (from == to) return 0;
   Edge* e = getEdge(from, to);
   if (!e) {
-    e = new Edge(from, to);
+    e = new Edge(from, to, pl, w, s);
     from->addEdge(e);
     to->addEdge(e);
   }

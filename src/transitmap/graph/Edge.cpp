@@ -14,8 +14,9 @@ using namespace graph;
 using namespace gtfsparser;
 
 // _____________________________________________________________________________
-Edge::Edge(Node* from, Node* to) : _from(from), _to(to) {
-
+Edge::Edge(Node* from, Node* to, geo::PolyLine pl, double w,
+    double s) : _from(from), _to(to), _width(w), _spacing(s) {
+  setGeom(pl);
 }
 
 // _____________________________________________________________________________
@@ -51,132 +52,121 @@ bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
 bool Edge::addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode, double w,
     double s) {
   assert(toNode == _from || toNode == _to);
-  bool inserted = false;
+
   for (auto& e : _tripsContained) {
-    if (e.getGeom() == pl) {
-      e.addTrip(t, toNode, pl);
-      inserted = true;
-      break;
-    }
-  }
-  if (!inserted) {
-    EdgeTripGeom etg(pl, toNode, w, s);
-    etg.addTrip(t, toNode);
-    addEdgeTripGeom(etg);
+    e.addTrip(t, toNode, pl);
+    break;
   }
 
   return true;
 }
 
 // _____________________________________________________________________________
-const std::vector<EdgeTripGeom>& Edge::getEdgeTripGeoms() const {
-  return _tripsContained;
+const std::vector<TripOccurance>& Edge::getTripsUnordered()
+const {
+  return _trips;
 }
 
 // _____________________________________________________________________________
-std::vector<EdgeTripGeom>* Edge::getEdgeTripGeoms() {
-  return &_tripsContained;
+std::vector<TripOccurance>* Edge::getTripsUnordered() {
+  return &_trips;
 }
 
 // _____________________________________________________________________________
-void Edge::addEdgeTripGeom(const EdgeTripGeom& e) {
-  assert(e.getGeomDir() == _from || e.getGeomDir() ==  _to);
-
-  _tripsContained.push_back(e);
-  if (e.getGeomDir() != _to) {
-    const_cast<geo::PolyLine*>(&_tripsContained.back().getGeom())->reverse();
-    _tripsContained.back().setGeomDir(_to);
-  }
-
-  /**
-  assert(util::geo::dist(_tripsContained.back().getGeom().getLine().front(), _from->getPos()) <
-    util::geo::dist(_tripsContained.back().getGeom().getLine().back(), _from->getPos()) + 10);
-  **/
-}
-
-// _____________________________________________________________________________
-void Edge::simplify() {
-  /**
-  for (auto& e : _tripsContained) {
-    e.removeOrphans();
-  }
-  **/
-
-  // calculate average cardinalty of geometries on this edge
-  double avg = 0;
-  for (auto& e : _tripsContained) {
-    avg += e.getTripCardinality();
-  }
-
-  avg /= _tripsContained.size();
-
-  for (auto it = _tripsContained.begin(); it < _tripsContained.end(); ++it) {
-    if (it->getTripCardinality() < avg*0.1) {
-      //it = _tripsContained.erase(it);
+TripOccurance* Edge::getTripsForRoute(const gtfs::Route* r) const {
+  for (size_t i = 0; i < _trips.size(); i++) {
+    TripOccurance* to = const_cast<TripOccurance*>(&_trips[i]);
+    if (to->route == r) {
+      return to;
     }
   }
-
-  combineIncludedGeoms();
-  averageCombineGeom();
+  return 0;
 }
 
 // _____________________________________________________________________________
-void Edge::averageCombineGeom() {
-  if (_tripsContained.size() < 2) {
-    return;
-  }
-
-  std::vector<const geo::PolyLine*> lines;
-
-  for (auto& et : _tripsContained) {
-    assert(et.getGeomDir() == _to);
-    lines.push_back(&et.getGeom());
-  }
-
-  geo::PolyLine pl = geo::PolyLine::average(lines);
-
-  EdgeTripGeom combined(pl, _to,
-      _tripsContained.front().getWidth(),
-      _tripsContained.front().getSpacing());
-
-  for (auto& et : _tripsContained) {
-    for (auto& r : *et.getTripsUnordered()) {
-      for (auto& t : r.trips) {
-        combined.addTrip(t, r.direction);
-      }
+TripOccWithPos Edge::getTripsForRouteUnder(const gtfs::Route* r,
+    const std::vector<size_t> ordering) const {
+  for (size_t i = 0; i < _trips.size(); i++) {
+    const TripOccurance& to = _trips[i];
+    if (to.route == r) {
+      size_t pos = std::find(ordering.begin(), ordering.end(), i) - ordering.begin();
+      return std::pair<TripOccurance*, size_t>(const_cast<TripOccurance*>(&to), pos);
     }
   }
-
-  _tripsContained.clear();
-  _tripsContained.push_back(combined);
+  return std::pair<TripOccurance*, size_t>(0, 0);
 }
 
 // _____________________________________________________________________________
-void Edge::combineIncludedGeoms() {
-  if (_tripsContained.size() < 2) {
-    return;
+bool Edge::containsRoute(gtfs::Route* r) const {
+  if (getTripsForRoute(r)) return true;
+
+  return false;
+}
+
+// _____________________________________________________________________________
+size_t Edge::getTripCardinality() const {
+  size_t ret = 0;
+
+  for (auto& t : _trips) {
+    ret += t.trips.size();
   }
 
-  for (auto et = _tripsContained.begin(); et != _tripsContained.end();) {
-    bool combined = false;
-    for (auto& toCheckAgainst : _tripsContained) {
-      if (toCheckAgainst.getGeom().getLength() > et->getGeom().getLength()
-          && toCheckAgainst.getGeom().contains(et->getGeom(), 50)
-          && !et->getGeom().contains(toCheckAgainst.getGeom(), 50)) {
-        for (auto& r : *et->getTripsUnordered()) {
-          for (auto& t : r.trips) {
-            toCheckAgainst.addTrip(t, r.direction);
-          }
-        }
-        combined = true;
-        break;
-      }
-    }
-    if (combined) {
-      // delete the old EdgeTripGeom
-      et = _tripsContained.erase(et);
-    } else {
-      et++;
-    }
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t Edge::getCardinality() const {
+  return _trips.size();
+}
+
+// _____________________________________________________________________________
+std::vector<TripOccurance>::iterator
+Edge::removeTripOccurance(std::vector<TripOccurance>::const_iterator pos) {
+  return _trips.erase(pos);
+}
+
+// _____________________________________________________________________________
+const Node* Edge::getGeomDir() const {
+  return _geomDir;
+}
+
+// _____________________________________________________________________________
+void Edge::setGeomDir(const Node* n) {
+  _geomDir = n;
+}
+
+// _____________________________________________________________________________
+double Edge::getWidth() const {
+  return _width;
+}
+
+// _____________________________________________________________________________
+double Edge::getSpacing() const {
+  return _spacing;
+}
+
+// _____________________________________________________________________________
+double Edge::getTotalWidth() const {
+  return getWidth() * _trips.size() + getSpacing() * (_trips.size() - 1);
+}
+
+// _____________________________________________________________________________
+std::vector<gtfs::Route*> Edge::getSharedRoutes(const Edge& e)
+const {
+  std::vector<gtfs::Route*> ret;
+  for (auto& to : _trips) {
+    if (e.containsRoute(to.route)) ret.push_back(to.route);
   }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+const geo::PolyLine& Edge::getGeom() const {
+  return _geom;
+}
+
+// _____________________________________________________________________________
+void Edge::setGeom(const geo::PolyLine& p) {
+  _geom = p;
 }

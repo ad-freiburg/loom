@@ -22,11 +22,6 @@ void OptGraph::build() {
 
   for (graph::Node* n : *_g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
-      if (e->getEdgeTripGeoms()->size() == 0) continue;
-      assert(e->getEdgeTripGeoms()->size() == 1);
-
-      graph::EdgeTripGeom* etg = &*(e->getEdgeTripGeoms()->begin());
-
       graph::Node* fromTn = e->getFrom();
       graph::Node* toTn = e->getTo();
 
@@ -47,7 +42,7 @@ void OptGraph::build() {
       from->addEdge(edge);
       to->addEdge(edge);
 
-      edge->etgs.push_back(EtgPart(etg, etg->getGeomDir() == toTn));
+      edge->etgs.push_back(EtgPart(e, e->getGeomDir() == toTn));
     }
   }
 }

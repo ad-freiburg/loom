@@ -58,36 +58,34 @@ void EdgeOrderOptimizer::optimize(size_t numRuns) {
 
 // _____________________________________________________________________________
 bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
-  std::pair<EdgeTripGeom*, std::vector<size_t> > bestCand;
+  std::pair<Edge*, std::vector<size_t> > bestCand;
   bestCand.first = 0;
 
   double bestAreaScoreImprov = 0;
 
   for (graph::Node* n : *_g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
-      for (graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
-        if (g.getCardinality() == 1) continue;
+      if (e->getCardinality() == 1) continue;
 
-        double oldAreaScore = n->getAreaScore(*c);
+      double oldAreaScore = n->getAreaScore(*c);
 
-        if (g.permutations.size() == 0) {
-          getPermutations(g.getCardinality(), &g.permutations);
-        }
+      if (e->permutations.size() == 0) {
+        getPermutations(e->getCardinality(), &e->permutations);
+      }
 
-        const std::vector<Ordering >& permutations = g.permutations;
+      const std::vector<Ordering >& permutations = e->permutations;
 
-        #pragma omp parallel for
-        for (size_t i = 0; i < permutations.size(); ++i) {
-          double newAreaScore = n->getAreaScore(*c, &g, &permutations[i]);
+      #pragma omp parallel for
+      for (size_t i = 0; i < permutations.size(); ++i) {
+        double newAreaScore = n->getAreaScore(*c, e, &permutations[i]);
 
-          double diff = oldAreaScore - newAreaScore;
+        double diff = oldAreaScore - newAreaScore;
 
-          if (diff - bestAreaScoreImprov > 0.000001) {
-            #pragma omp critical
-            {
-              bestCand = std::pair<EdgeTripGeom*, Ordering>(&g, permutations[i]);
-              bestAreaScoreImprov = diff;
-            }
+        if (diff - bestAreaScoreImprov > 0.000001) {
+          #pragma omp critical
+          {
+            bestCand = std::pair<Edge*, Ordering>(e, permutations[i]);
+            bestAreaScoreImprov = diff;
           }
         }
       }
@@ -107,12 +105,10 @@ bool EdgeOrderOptimizer::doOptimStep(Configuration* c) {
 void EdgeOrderOptimizer::generateRandConfig(Configuration* c) const {
   for (graph::Node* n : *_g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
-      for (graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
-        std::vector<Ordering > permutations;
-        getPermutations(g.getCardinality(), &permutations);
-        size_t i = rand() % permutations.size();
-        (*c)[&g] = permutations[i];
-      }
+      std::vector<Ordering > permutations;
+      getPermutations(e->getCardinality(), &permutations);
+      size_t i = rand() % permutations.size();
+      (*c)[e] = permutations[i];
     }
   }
 }

@@ -122,9 +122,7 @@ void SvgOutput::outputEdges(const graph::TransitGraph& outG, double w, double h)
 
   for (graph::Node* n : outG.getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
-      for (const graph::EdgeTripGeom& g : *e->getEdgeTripGeoms()) {
-        renderEdgeTripGeom(outG, g, e, w, h);
-      }
+      renderEdgeTripGeom(outG, e, w, h);
     }
   }
 }
@@ -135,7 +133,7 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
   if (n->getStops().size() != 0) return;
 
   for (auto& ie : n->getInnerGeometries(outG.getConfig(), true)) {
-    renderLinePart(ie.geom, ie.etg->getWidth(), *ie.route);
+    renderLinePart(ie.geom, ie.e->getWidth(), *ie.route);
   }
 }
 
@@ -189,7 +187,7 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
 
 // _____________________________________________________________________________
 void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
-    const graph::EdgeTripGeom& g, const graph::Edge* e, double w, double h) {
+    const graph::Edge* e, double w, double h) {
 
   const graph::NodeFront* nfTo = e->getTo()->getNodeFrontFor(e);
   const graph::NodeFront* nfFrom = e->getFrom()->getNodeFrontFor(e);
@@ -197,24 +195,24 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
   int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 
-  geo::PolyLine center = g.getGeom();
+  geo::PolyLine center = e->getGeom();
   center.applyChaikinSmooth(3);
 
-  double lineW = g.getWidth();
-  double lineSpc = g.getSpacing();
+  double lineW = e->getWidth();
+  double lineSpc = e->getSpacing();
   double offsetStep = lineW + lineSpc;
-  double oo = g.getTotalWidth();
+  double oo = e->getTotalWidth();
 
   double o = oo;
 
-  assert(outG.getConfig().find(&g) != outG.getConfig().end());
+  assert(outG.getConfig().find(e) != outG.getConfig().end());
 
   size_t a = 0;
-  for (size_t i : outG.getConfig().find(&g)->second) {
-      const graph::TripOccurance& r = g.getTripsUnordered()[i];
+  for (size_t i : outG.getConfig().find(e)->second) {
+      const graph::TripOccurance& r = e->getTripsUnordered()[i];
       geo::PolyLine p = center;
 
-      double offset = -(o - oo / 2.0 - g.getWidth() /2.0);
+      double offset = -(o - oo / 2.0 - e->getWidth() /2.0);
 
       p.offsetPerp(offset);
       p.applyChaikinSmooth(3);
@@ -223,7 +221,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       // TODO: why is this check necessary? shouldnt be!
       // ___ OUTFACTOR
       if (nfTo && nfFrom && nfTo->geom.getLine().size() > 0 && nfFrom->geom.getLine().size() > 0) {
-        if (g.getGeomDir() == e->getTo()) {
+        if (e->getGeomDir() == e->getTo()) {
           std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfTo->geom.getIntersections(p);
           if (iSects.size() > 0) {
             p = p.getSegment(0, iSects.begin()->totalPos);

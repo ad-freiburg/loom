@@ -29,28 +29,21 @@ class TransitGraph;
 using util::geo::Point;
 
 struct NodeFront {
-  NodeFront(Edge* e, Node* n, const EdgeTripGeom* refEtg) : n(n), refEtg(refEtg) {
-    addEdge(e);
+  NodeFront(Edge* e, Node* n) : n(n), edge(e) {
+
   }
 
   Node* n; // pointer to node here also
 
-  std::vector<Edge*> edges;
-
   Point getTripOccPos(const gtfs::Route* r, const Configuration& c) const;
   Point getTripOccPosUnder(const gtfs::Route* r, const graph::Configuration& c,
-    const EdgeTripGeom* g, const std::vector<size_t>* order) const;
-  Point getTripPos(const EdgeTripGeom& etg, size_t pos, bool inv) const;
+    const Edge* e, const std::vector<size_t>* order) const;
+  Point getTripPos(const Edge* e, size_t pos, bool inv) const;
 
-  const EdgeTripGeom* refEtg;
+  Edge* edge;
 
   geo::PolyLine geom;
   void setGeom(const geo::PolyLine& g) { geom = g; };
-  void addEdge(Edge* e) { edges.push_back(e); }
-  void removeEdge(Edge* e) {
-    auto pos = std::find(edges.begin(), edges.end(), e);
-    if (pos != edges.end()) edges.erase(pos);
-  }
 
   // TODO
   double refEtgLengthBefExp;
@@ -64,11 +57,11 @@ struct Partner {
 };
 
 struct InnerGeometry {
-  InnerGeometry(geo::PolyLine g, const gtfs::Route* r, const EdgeTripGeom* etg)
-  : geom(g), route(r), etg(etg) {};
+  InnerGeometry(geo::PolyLine g, const gtfs::Route* r, const Edge* e)
+  : geom(g), route(r), e(e) {};
   geo::PolyLine geom;
   const gtfs::Route* route;
-  const EdgeTripGeom* etg;
+  const Edge* e;
 };
 
 class Node {
@@ -102,17 +95,16 @@ class Node {
   void addMainDir(NodeFront f);
 
   const NodeFront* getNodeFrontFor(const Edge* e) const;
-  const NodeFront* getNodeFrontFor(const EdgeTripGeom* etg) const;
   double getScore(const graph::Configuration& c) const;
-  double getScoreUnder(const graph::Configuration& c, const EdgeTripGeom* g, const graph::Ordering* order) const;
-  double getAreaScore(const Configuration& c, const EdgeTripGeom* g, const graph::Ordering* order) const;
+  double getScoreUnder(const graph::Configuration& c, const Edge* e, const graph::Ordering* order) const;
+  double getAreaScore(const Configuration& c, const Edge* e, const graph::Ordering* order) const;
   double getAreaScore(const Configuration& c) const;
   std::vector<Partner> getPartner(const NodeFront* f, const gtfs::Route* r) const;
 
   std::vector<InnerGeometry> getInnerGeometries(const graph::Configuration& c,
       bool bezier) const;
   std::vector<InnerGeometry> getInnerGeometriesUnder(
-      const graph::Configuration& c, bool bezier, const EdgeTripGeom* g,
+      const graph::Configuration& c, bool bezier, const Edge* e,
       const std::vector<size_t>* order) const;
 
   util::geo::Polygon getConvexFrontHull(double d) const;
@@ -137,12 +129,12 @@ class Node {
   size_t getNodeFrontPos(const NodeFront* a) const;
 
   geo::PolyLine getInnerBezier(const Configuration& c, const NodeFront& nf,
-      const TripOccurance& tripOcc, const graph::Partner& partner, const EdgeTripGeom* g,
+      const TripOccurance& tripOcc, const graph::Partner& partner, const Edge* e,
       const std::vector<size_t>* order) const;
 
   geo::PolyLine getInnerStraightLine(const Configuration& c,
       const NodeFront& nf, const TripOccurance& tripOcc,
-      const graph::Partner& partner, const EdgeTripGeom* g,
+      const graph::Partner& partner, const Edge* e,
       const std::vector<size_t>* order) const;
 
   friend class TransitGraph;

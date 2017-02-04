@@ -31,7 +31,8 @@ class TransitGraph {
   ~TransitGraph();
 
   Node* addNode(Node* n);
-  Edge* addEdge(Node* from, Node* to);
+  Edge* addEdge(Node* from, Node* to, geo::PolyLine pl, double w,
+    double s);
   Edge* getEdge(Node* from, Node* to);
 
   void deleteNode(Node* n);

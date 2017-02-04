@@ -8,13 +8,13 @@
 #include <algorithm>
 #include <unordered_map>
 #include <proj_api.h>
-#include "transitmap/graph/TransitGraph.h"
+#include "./../graph/Graph.h"
 #include "gtfsparser/gtfs/Feed.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/geo/PolyLine.h"
 
 using namespace transitmapper;
-using namespace graph;
+using namespace skeletonbuilder::graph;
 
 namespace skeletonbuilder {
 
@@ -33,13 +33,13 @@ class Builder {
   Builder(const config::Config* cfg);
 
   // build a graph from a gtfs feed
-  void consume(const gtfs::Feed& f, TransitGraph* targetGraph);
+  void consume(const gtfs::Feed& f, Graph* g);
 
   // simpliyfy the graph
-  void simplify(TransitGraph* g);
-  bool createTopologicalNodes(TransitGraph* g);
-  void averageNodePositions(TransitGraph* g);
-  void removeArtifacts(TransitGraph* g);
+  void simplify(Graph* g);
+  bool createTopologicalNodes(Graph* g);
+  void averageNodePositions(Graph* g);
+  void removeArtifacts(Graph* g);
 
  private:
   const config::Config* _cfg;
@@ -55,20 +55,15 @@ class Builder {
   std::pair<bool, geo::PolyLine> getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b,
       gtfs::Trip* t, double distA, double distB, projPJ p);
 
-  ShrdSegWrap getNextSharedSegment(TransitGraph* g) const;
+  ShrdSegWrap getNextSharedSegment(Graph* g) const;
   geo::PolyLine getAveragedFromSharedSeg(const ShrdSegWrap& w) const;
 
-  std::set<NodeFront*> nodeGetOverlappingFronts(const Node* n) const;
-
-  Node* addStop(gtfs::Stop* curStop, uint8_t aggrLevel, TransitGraph* g);
-  void freeNodeFront(NodeFront* f);
-
-  bool nodeFrontsOverlap(const NodeFront& a, const NodeFront& b) const;
+  Node* addStop(gtfs::Stop* curStop, uint8_t aggrLevel, Graph* g);
 
   bool checkTripSanity(gtfs::Trip* t) const;
   bool checkShapeSanity(gtfs::Shape* t) const;
 
-  void combineNodes(Node* a, Node* b, TransitGraph* g);
+  void combineNodes(Node* a, Node* b, Graph* g);
 
   mutable std::set<const Edge*> _indEdges;
   mutable std::map<const Edge*, size_t> _pEdges;

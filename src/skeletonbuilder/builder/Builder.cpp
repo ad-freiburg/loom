@@ -21,7 +21,7 @@ Builder::Builder(const config::Config* cfg)
 }
 
 // _____________________________________________________________________________
-void Builder::consume(const Feed& f, TransitGraph* g) {
+void Builder::consume(const Feed& f, Graph* g) {
   // TODO: make this stuff configurable
 
   uint8_t AGGREGATE_STOPS = 2; // 1: aggregate stops already aggrgated in GTFS
@@ -94,7 +94,7 @@ Point Builder::getProjectedPoint(double lat, double lng, projPJ p) const {
 }
 
 // _____________________________________________________________________________
-void Builder::simplify(TransitGraph* g) {
+void Builder::simplify(Graph* g) {
   // try to merge both-direction edges into a single one
 
   for (auto n : *g->getNodes()) {
@@ -105,7 +105,7 @@ void Builder::simplify(TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g) const {
+ShrdSegWrap Builder::getNextSharedSegment(Graph* g) const {
   int i = 0;
   for (auto n : *g->getNodes()) {
     for (auto e : n->getAdjListOut()) {
@@ -130,11 +130,13 @@ ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g) const {
             if (s.segments.size() > 0) {
               _pEdges[e]++;
               if (_pEdges[e] > 20) {
+                /**
                 LOG(WARN) << "Too many optimiziations for " << e
                   << ", preventing further..." << std::endl;
+                **/
                 _indEdges.insert(e);
               }
-              LOG(DEBUG) << _indEdges.size() << " / " << i << std::endl;
+              // LOG(DEBUG) << _indEdges.size() << " / " << i << std::endl;
               return ShrdSegWrap(e, toTest, s.segments.front());
             }
           }
@@ -151,7 +153,7 @@ ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g) const {
 }
 
 // _____________________________________________________________________________
-bool Builder::createTopologicalNodes(TransitGraph* g) {
+bool Builder::createTopologicalNodes(Graph* g) {
   ShrdSegWrap w;
   _indEdges.clear();
   _pEdges.clear();
@@ -378,7 +380,7 @@ std::pair<bool, geo::PolyLine> Builder::getSubPolyLine(Stop* a, Stop* b,
 }
 
 // _____________________________________________________________________________
-void Builder::averageNodePositions(TransitGraph* g) {
+void Builder::averageNodePositions(Graph* g) {
   for (auto n : *g->getNodes()) {
     double x = 0;
     double y = 0;
@@ -416,7 +418,7 @@ void Builder::averageNodePositions(TransitGraph* g) {
 
 // _____________________________________________________________________________
 Node* Builder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel,
-    TransitGraph* g) {
+    Graph* g) {
   if (aggrLevel && curStop->getParentStation() != 0) {
     return addStop(curStop->getParentStation(), aggrLevel, g);
   }
@@ -461,7 +463,7 @@ bool Builder::checkShapeSanity(gtfs::Shape* s) const {
 }
 
 // _____________________________________________________________________________
-void Builder::removeArtifacts(TransitGraph* g) {
+void Builder::removeArtifacts(Graph* g) {
   double MIN_SEG_LENGTH = 20;
 
   restart:
@@ -484,7 +486,7 @@ void Builder::removeArtifacts(TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-void Builder::combineNodes(Node* a, Node* b, TransitGraph* g) {
+void Builder::combineNodes(Node* a, Node* b, Graph* g) {
   assert(a->getStops().size() == 0 || b->getStops().size() == 0);
 
   if (a->getStops().size() != 0) {
@@ -511,15 +513,6 @@ void Builder::combineNodes(Node* a, Node* b, TransitGraph* g) {
 
       newE->addEdgeTripGeom(etgNew);
     }
-
-    const NodeFront* nf = a->getNodeFrontFor(e);
-    if (nf) {
-      NodeFront newNf(newE, b, &(*newE->getEdgeTripGeoms()->begin()));
-      newNf.setGeom(nf->geom);
-      // NOTE: we are adding a new node front here for each edges,
-      //   breaks multiple edges in one single nodefront
-      b->addMainDir(newNf);
-    }
   }
 
   for (graph::Edge* e : a->getAdjListIn()) {
@@ -539,15 +532,6 @@ void Builder::combineNodes(Node* a, Node* b, TransitGraph* g) {
       }
 
       newE->addEdgeTripGeom(etgNew);
-    }
-
-    const NodeFront* nf = a->getNodeFrontFor(e);
-    if (nf) {
-      NodeFront newNf(newE, b, &(*newE->getEdgeTripGeoms()->begin()));
-      newNf.setGeom(nf->geom);
-      // NOTE: we are adding a new node front here for each edges,
-      //   breaks multiple edges in one single nodefront
-      b->addMainDir(newNf);
     }
   }
 

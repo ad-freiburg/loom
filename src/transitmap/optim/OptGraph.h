@@ -10,11 +10,11 @@
 
 #include "./../util/Geo.h"
 #include "./../graph/TransitGraph.h"
-#include "./../graph/EdgeTripGeom.h"
+#include "./../graph/Edge.h"
 
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
-using transitmapper::graph::EdgeTripGeom;
+using transitmapper::graph::Edge;
 
 namespace transitmapper {
 namespace optim {
@@ -22,10 +22,10 @@ namespace optim {
 struct OptNode;
 
 struct EtgPart {
-  EdgeTripGeom* etg;
+  Edge* etg;
   bool dir;
 
-  EtgPart(EdgeTripGeom* etg, bool dir) : etg(etg), dir(dir) {};
+  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir) {};
 };
 
 struct OptEdge {

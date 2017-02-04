@@ -52,8 +52,7 @@ void OgrOutput::print(const graph::TransitGraph& outG) {
 
   for (graph::Node* n : outG.getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
-      if (e->getEdgeTripGeoms()->size() > 0)
-        addEdge(e, edgeLayer);
+      addEdge(e, edgeLayer);
     }
   }
 
@@ -72,7 +71,7 @@ void OgrOutput::print(const graph::TransitGraph& outG) {
   LOG(INFO) << "OGR written successfully\n";
 }
 
-// _____________________________________________________________________________ 
+// _____________________________________________________________________________
 bool OgrOutput::addEdge(const graph::Edge* e, OGRLayer* layer) const {
   OGRFeature* edge;
   edge = OGRFeature::CreateFeature(layer->GetLayerDefn());
@@ -92,7 +91,7 @@ bool OgrOutput::addEdge(const graph::Edge* e, OGRLayer* layer) const {
 
   OGRLineString geom;
 
-  std::string wktStr = e->getEdgeTripGeoms().front().getGeom().getWKT();
+  std::string wktStr = e->getGeom().getWKT();
 
   const char *wkt[1];
   wkt[0] = wktStr.c_str();
@@ -106,7 +105,7 @@ bool OgrOutput::addEdge(const graph::Edge* e, OGRLayer* layer) const {
   return true;
 }
 
-// _____________________________________________________________________________ 
+// _____________________________________________________________________________
 bool OgrOutput::addNode(const graph::Node* n, OGRLayer* layer) const {
   OGRFeature* node;
   node = OGRFeature::CreateFeature(layer->GetLayerDefn());
@@ -340,7 +339,7 @@ void OgrOutput::print(const optim::OptGraph& outG) {
   LOG(INFO) << "OGR written successfully\n";
 }
 
-// _____________________________________________________________________________ 
+// _____________________________________________________________________________
 bool OgrOutput::addNode(const optim::OptNode* n, OGRLayer* layer) const {
   OGRFeature* node;
   node = OGRFeature::CreateFeature(layer->GetLayerDefn());
@@ -370,7 +369,7 @@ bool OgrOutput::addNode(const optim::OptNode* n, OGRLayer* layer) const {
   return true;
 }
 
-// _____________________________________________________________________________ 
+// _____________________________________________________________________________
 bool OgrOutput::addEdge(const optim::OptEdge* e, OGRLayer* layer) const {
   OGRFeature* edge;
   edge = OGRFeature::CreateFeature(layer->GetLayerDefn());

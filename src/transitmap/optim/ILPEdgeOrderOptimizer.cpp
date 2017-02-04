@@ -241,7 +241,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblemImpr(const OptGraph& g) const {
   for (OptNode* n : g.getNodes()) {
     for (OptEdge* e : n->adjListOut) {
       // the first stored etg is always the ref
-      graph::EdgeTripGeom* etg = e->etgs[0].etg;
+      graph::Edge* etg = e->etgs[0].etg;
 
       // constraint: the sum of all x_sl<=p over the set of lines
       // must be p+1
@@ -332,7 +332,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
   for (OptNode* n : g.getNodes()) {
     for (OptEdge* e : n->adjListOut) {
       // the first stored etg is always the ref
-      graph::EdgeTripGeom* etg = e->etgs[0].etg;
+      graph::Edge* etg = e->etgs[0].etg;
 
       // get string repr of etg
 
@@ -894,8 +894,8 @@ const {
 std::vector<PosComPair> ILPEdgeOrderOptimizer::getPositionCombinations(OptEdge* a,
     OptEdge* b) const {
   std::vector<PosComPair> ret;
-  graph::EdgeTripGeom* etgA = a->etgs[0].etg;
-  graph::EdgeTripGeom* etgB = b->etgs[0].etg;
+  graph::Edge* etgA = a->etgs[0].etg;
+  graph::Edge* etgB = b->etgs[0].etg;
   for (size_t posLineAinA = 0; posLineAinA < etgA->getCardinality(); posLineAinA++) {
     for (size_t posLineBinA = 0; posLineBinA < etgA->getCardinality(); posLineBinA++) {
       if (posLineAinA == posLineBinA) continue;
@@ -917,7 +917,7 @@ std::vector<PosComPair> ILPEdgeOrderOptimizer::getPositionCombinations(OptEdge* 
 std::vector<PosCom> ILPEdgeOrderOptimizer::getPositionCombinations(OptEdge* a)
 const {
   std::vector<PosCom> ret;
-  graph::EdgeTripGeom* etgA = a->etgs[0].etg;
+  graph::Edge* etgA = a->etgs[0].etg;
   for (size_t posLineAinA = 0; posLineAinA < etgA->getCardinality(); posLineAinA++) {
     for (size_t posLineBinA = 0; posLineBinA < etgA->getCardinality(); posLineBinA++) {
       if (posLineAinA == posLineBinA) continue;
@@ -942,7 +942,7 @@ std::vector<OptEdge*> ILPEdgeOrderOptimizer::getEdgePartners(OptNode* node,
   std::vector<OptEdge*> ret;
   for (OptEdge* segmentB : node->adjList) {
     if (segmentB == segmentA) continue;
-    graph::EdgeTripGeom* etg = segmentB->etgs[0].etg;
+    graph::Edge* etg = segmentB->etgs[0].etg;
     if (etg->getTripsForRoute(linepair.first) &&
         etg->getTripsForRoute(linepair.second)) {
       ret.push_back(segmentB);
@@ -957,13 +957,13 @@ std::vector<EdgePair> ILPEdgeOrderOptimizer::getEdgePartnerPairs(OptNode* node,
   std::vector<EdgePair> ret;
   for (OptEdge* segmentB : node->adjList) {
     if (segmentB == segmentA) continue;
-    graph::EdgeTripGeom* etg = segmentB->etgs[0].etg;
+    graph::Edge* etg = segmentB->etgs[0].etg;
     if (etg->getTripsForRoute(linepair.first)) {
       EdgePair curPair;
       curPair.first = segmentB;
       for (OptEdge* segmentC : node->adjList) {
         if (segmentC == segmentA || segmentC == segmentB) continue;
-        graph::EdgeTripGeom* etg = segmentC->etgs[0].etg;
+        graph::Edge* etg = segmentC->etgs[0].etg;
         if (etg->getTripsForRoute(linepair.second)) {
           curPair.second = segmentC;
           ret.push_back(curPair);
@@ -1081,5 +1081,5 @@ Point ILPEdgeOrderOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) cons
   assert(nf);
 
 
-  return nf->getTripPos(*segment->etgs.front().etg, p, false);
+  return nf->getTripPos(segment->etgs.front().etg, p, false);
 }
