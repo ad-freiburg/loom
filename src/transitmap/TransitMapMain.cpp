@@ -39,10 +39,13 @@ int main(int argc, char** argv) {
   config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
-  if (!cfg.inputFeedPath.empty()) {
-    LOG(INFO) << "reading graph at " << cfg.inputFeedPath << std::endl;
+  if (true) {
+    LOG(INFO) << "reading graph " << std::endl;
     graph::TransitGraph g("shinygraph", cfg.projectionString);
     graph::GraphBuilder b(&cfg);
+    if (!b.build(&(std::cin), &g)) {
+      exit(1);
+    }
 
     LOG(INFO) << "Creating node fronts..." << std::endl;
     b.writeMainDirs(&g);

@@ -7,11 +7,13 @@
 #include <set>
 #include "./TransitGraph.h"
 #include "./Edge.h"
+#include "./Route.h"
 #include "./OrderingConfiguration.h"
 
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
+using transitmapper::graph::Route;
 using transitmapper::util::geo::Point;
 using transitmapper::graph::Configuration;
 using bgeo::make_inverse;
@@ -68,13 +70,19 @@ double TransitGraph::getScore(const Configuration& c) const {
 }
 
 // _____________________________________________________________________________
-Node* TransitGraph::addNode(Node* n) {
-  auto ins = _nodes.insert(n);
-  if (ins.second) {
-    // expand the bounding box to hold this new node
-    bgeo::expand(_bbox, n->getPos());
+void TransitGraph::addNode(Node* n) {
+  _nodes.insert(n);
+  // expand the bounding box to hold this new node
+  bgeo::expand(_bbox, n->getPos());
+}
+
+// _____________________________________________________________________________
+Node* TransitGraph::getNodeById(const std::string& id) const {
+  for (auto n : _nodes) {
+    if (n->getId() == id) return n;
   }
-  return *ins.first;
+
+  return 0;
 }
 
 // _____________________________________________________________________________
@@ -88,6 +96,21 @@ Edge* TransitGraph::addEdge(Node* from, Node* to, geo::PolyLine pl, double w,
     to->addEdge(e);
   }
   return e;
+}
+
+// _____________________________________________________________________________
+Route* TransitGraph::addRoute(const Route* r) {
+  if (!getRoute(r->id)) {
+    _routes[r->id] = r;
+  }
+}
+
+// _____________________________________________________________________________
+const Route* TransitGraph::getRoute(const std::string& id) const {
+  auto f = _routes.find(id);
+  if (f == _routes.end()) return 0;
+
+  return f->second;
 }
 
 // _____________________________________________________________________________
@@ -113,47 +136,6 @@ const std::set<Node*>& TransitGraph::getNodes() const {
 // _____________________________________________________________________________
 std::set<Node*>* TransitGraph::getNodes() {
   return &_nodes;
-}
-
-// _____________________________________________________________________________
-Node* TransitGraph::getNodeByStop(const gtfs::Stop* s, bool getParent) const {
-  if (getParent && s->getParentStation()) return getNodeByStop(
-    s->getParentStation());
-
-  return getNodeByStop(s);
-}
-
-// _____________________________________________________________________________
-Node* TransitGraph::getNodeByStop(const gtfs::Stop* s) const {
-  for (const auto n : _nodes) {
-    if (n->getStops().find(const_cast<gtfs::Stop*>(s)) != n->getStops().end()) {
-      return n;
-    }
-  }
-  return 0;
-}
-
-// _____________________________________________________________________________
-bool TransitGraph::containsNode(Node* n) const {
-  return  _nodes.find(n) != _nodes.end();
-}
-
-// _____________________________________________________________________________
-void TransitGraph::deleteEdge(Node* from, Node* to) {
-  Edge* toDel = getEdge(from, to);
-  if (!toDel) return;
-
-  from->removeEdge(toDel);
-  to->removeEdge(toDel);
-
-  assert(!getEdge(from, to));
-
-  delete toDel;
-}
-
-// _____________________________________________________________________________
-void TransitGraph::deleteNode(Node* n) {
-  _nodes.erase(n);
 }
 
 // _____________________________________________________________________________

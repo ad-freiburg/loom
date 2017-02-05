@@ -5,11 +5,10 @@
 #include <cassert>
 #include "./Node.h"
 #include "./Edge.h"
+#include "./Route.h"
 #include "./TransitGraph.h"
 #include "./../util/Geo.h"
 #include "./../geo/BezierCurve.h"
-#include "gtfsparser/gtfs/Stop.h"
-#include "../graph/EdgeTripGeom.h"
 #include "../graph/OrderingConfiguration.h"
 
 using namespace transitmapper;
@@ -20,10 +19,10 @@ using util::geo::Point;
 using util::geo::Line;
 
 // _____________________________________________________________________________
-Point NodeFront::getTripOccPosUnder(const gtfs::Route* r,
+Point NodeFront::getTripOccPosUnder(const Route* r,
     const graph::Configuration& c, const Edge* e, const Ordering* order) const {
 
-  TripOccWithPos to;
+  RouteOccWithPos to;
 
   if (edge == e) {
     to = edge->getTripsForRouteUnder(r, *order);
@@ -32,7 +31,7 @@ Point NodeFront::getTripOccPosUnder(const gtfs::Route* r,
   }
 
   if (to.first) {
-    return getTripPos(edge, to.second, n == edge->getGeomDir());
+    return getTripPos(edge, to.second, n == edge->getTo());
   }
 }
 
@@ -62,21 +61,21 @@ double Node::getMaxNodeFrontWidth() const {
 }
 
 // _____________________________________________________________________________
-Node::Node(Point pos) : _pos(pos) {
+Node::Node(const std::string& id, Point pos) : _id(id), _pos(pos) {
 }
 
 // _____________________________________________________________________________
-Node::Node(double x, double y) : _pos(x, y) {
+Node::Node(const std::string& id, double x, double y) : _id(id), _pos(x, y) {
 }
 
 // _____________________________________________________________________________
-Node::Node(Point pos, gtfs::Stop* s) : _pos(pos) {
-  if (s) _stops.insert(s);
+Node::Node(const std::string& id, Point pos, StationInfo s) : _id(id), _pos(pos) {
+  addStop(s);
 }
 
 // _____________________________________________________________________________
-Node::Node(double x, double y, gtfs::Stop* s) : _pos(x, y) {
-  if (s) _stops.insert(s);
+Node::Node(const std::string& id, double x, double y, StationInfo s) : _id(id), _pos(x, y) {
+  addStop(s);
 }
 
 // _____________________________________________________________________________
@@ -112,12 +111,12 @@ Node::~Node() {
 }
 
 // _____________________________________________________________________________
-void Node::addStop(gtfs::Stop* s) {
-  _stops.insert(s);
+void Node::addStop(StationInfo s) {
+  _stops.push_back(s);
 }
 
 // _____________________________________________________________________________
-const std::set<gtfs::Stop*>& Node::getStops() const {
+const std::vector<StationInfo>& Node::getStops() const {
   return _stops;
 }
 
@@ -147,6 +146,11 @@ const Point& Node::getPos() const {
 // _____________________________________________________________________________
 void Node::setPos(const Point& p) {
   _pos = p;
+}
+
+// _____________________________________________________________________________
+const std::string& Node::getId() const {
+  return _id;
 }
 
 // _____________________________________________________________________________
@@ -228,13 +232,14 @@ double Node::getAreaScore(const Configuration& c) const {
 }
 
 // _____________________________________________________________________________
-std::vector<Partner> Node::getPartner(const NodeFront* f, const gtfs::Route* r)
+std::vector<Partner> Node::getPartner(const NodeFront* f, const Route* r)
 const {
   std::vector<Partner> ret;
   for (const auto& nf : getMainDirs()) {
     if (&nf == f) continue;
 
-    for (const TripOccurance& to : *nf.edge->getTripsUnordered()) {
+    for (const RouteOccurance& to : *nf.edge->getTripsUnordered()) {
+      std::cout << to.route << " vs " << r << std::endl;
       if (to.route == r) {
         Partner p;
         p.front = &nf;
@@ -255,7 +260,7 @@ std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
 
 // _____________________________________________________________________________
 geo::PolyLine Node::getInnerStraightLine(const Configuration& c,
-    const NodeFront& nf, const TripOccurance& tripOcc,
+    const NodeFront& nf, const RouteOccurance& tripOcc,
     const graph::Partner& partner, const Edge* e,
     const graph::Ordering* order) const {
   Point p = nf.getTripOccPosUnder(tripOcc.route, c, e, order);
@@ -266,7 +271,7 @@ geo::PolyLine Node::getInnerStraightLine(const Configuration& c,
 
 // _____________________________________________________________________________
 geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
-    const TripOccurance& tripOcc, const graph::Partner& partner,
+    const RouteOccurance& tripOcc, const graph::Partner& partner,
     const Edge* e,
     const graph::Ordering* order) const {
 
@@ -283,13 +288,13 @@ geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
   Point c = pp;
   std::pair<double, double> slopeA, slopeB;
 
-  if (nf.edge->getGeomDir() == this) {
+  if (nf.edge->getTo() == this) {
     slopeA = nf.edge->getGeom().getSlopeBetweenDists(nf.edge->getGeom().getLength() - 5, nf.edge->getGeom().getLength());
   } else {
     slopeA = nf.edge->getGeom().getSlopeBetweenDists(5, 0);
   }
 
-  if (partner.front->edge->getGeomDir() == this) {
+  if (partner.front->edge->getTo() == this) {
     slopeB = partner.front->edge->getGeom().getSlopeBetweenDists(partner.front->edge->getGeom().getLength() - 5, partner.front->edge->getGeom().getLength());
   } else {
     slopeB = partner.front->edge->getGeom().getSlopeBetweenDists(5, 0);
@@ -326,7 +331,7 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
     const Edge* e, const graph::Ordering* order) const {
   std::vector<InnerGeometry> ret;
 
-  std::set<const gtfs::Route*> processed;
+  std::set<const Route*> processed;
   for (size_t i = 0; i < getMainDirs().size(); ++i) {
     const graph::NodeFront& nf = getMainDirs()[i];
 
@@ -337,10 +342,11 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
     }
 
     for (size_t i : *ordering) {
-      const TripOccurance& tripOcc = (*nf.edge->getTripsUnordered())[i];
+      const RouteOccurance& tripOcc = (*nf.edge->getTripsUnordered())[i];
       if (!processed.insert(tripOcc.route).second) continue;
 
       std::vector<graph::Partner> partners = getPartner(&nf, tripOcc.route);
+      std::cout << partners.size() << std::endl;
 
       for (const graph::Partner& p : partners) {
         if (bezier) {

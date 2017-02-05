@@ -12,6 +12,7 @@
 #include "./../util/XmlWriter.h"
 #include "./../util/Geo.h"
 #include "./../graph/TransitGraph.h"
+#include "./../graph/Route.h"
 #include "./../geo/PolyLine.h"
 
 namespace transitmapper {
@@ -78,7 +79,7 @@ class SvgOutput : public Output {
       const graph::Node* n, double w, double h);
 
   void renderLinePart(const geo::PolyLine p, double width,
-    const gtfs::Route& route);
+    const graph::Route& route);
 
   void renderDelegates(const graph::TransitGraph& outG, double w, double h);
 

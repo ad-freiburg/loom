@@ -3,14 +3,18 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <proj_api.h>
+#include <istream>
 #include "GraphBuilder.h"
+#include "../geo/PolyLine.h"
 #include "log/Log.h"
 #include "./../config/TransitMapConfig.h"
+#include "json/json.hpp"
 
 using namespace transitmapper;
 using namespace graph;
 using namespace gtfsparser;
 using namespace gtfs;
+using json = nlohmann::json;
 
 using util::geo::Point;
 
@@ -21,6 +25,81 @@ GraphBuilder::GraphBuilder(const config::Config* cfg)
 }
 
 // _____________________________________________________________________________
+bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
+  json j;
+  (*s) >> j;
+
+  if (j["type"] == "FeatureCollection") {
+
+    // first pass, nodes
+    for (auto feature : j["features"]) {
+      auto props = feature["properties"];
+      auto geom = feature["geometry"];
+      if (geom["type"] == "Point") {
+        std::string id = props["id"];
+
+                // check if node already exists
+        if (g->getNodeById(id)) continue;
+
+        std::vector<double> coords = geom["coordinates"];
+
+        Node* n = new Node(id,
+          coords[0],
+          coords[1]);
+
+        StationInfo i("", "");
+        if (!props["station_id"].is_null() || !props["station_label"].is_null()) {
+          if (!props["station_id"].is_null()) i.id = props["station_id"];
+          if (!props["station_label"].is_null()) i.name = props["station_label"];
+          n->addStop(i);
+        }
+
+        g->addNode(n);
+      }
+    }
+
+    // second pass, nodes
+    for (auto feature : j["features"]) {
+      auto props = feature["properties"];
+      auto geom = feature["geometry"];
+      if (geom["type"] == "LineString") {
+        std::string from = props["from"];
+        std::string to = props["to"];
+
+        geo::PolyLine pl;
+        for (auto coord : geom["coordinates"]) {
+          pl << Point(coord[0], coord[1]);
+        }
+
+        Node* fromN = g->getNodeById(from);
+        Node* toN = g->getNodeById(to);
+
+        Edge* e = g->addEdge(fromN, toN, pl, _cfg->lineWidth,
+          _cfg->lineSpacing);
+
+        for (auto route : props["lines"]) {
+          const Route* r = g->getRoute(route["id"]);
+          if (!r) {
+            std::string id = route["id"];
+            std::string label = route["label"].is_null() ? "" : route["label"];
+            std::string color = route["color"];
+            r = new Route(id, label, color);
+            g->addRoute(r);
+          }
+
+          e->addRoute(r, 0);
+        }
+      }
+    }
+  } else {
+    LOG(ERROR) << "Could not read input." << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+// _____________________________________________________________________________
 void GraphBuilder::writeMainDirs(TransitGraph* graph) {
   for (auto n : *graph->getNodes()) {
     std::set<Edge*> eSet;
@@ -28,9 +107,6 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
     eSet.insert(n->getAdjListOut().begin(), n->getAdjListOut().end());
 
     for (Edge* e : eSet) {
-      // atm, always take the first edge trip geometry with the most routes
-      size_t lc = 0;
-
       if (e->getGeom().getLength() == 0) continue;
 
       NodeFront f(e, n);
@@ -38,7 +114,7 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
 
       f.refEtgLengthBefExp = e->getGeom().getLength();
 
-      if (e->getGeomDir() == n) {
+      if (e->getTo() == n) {
         pl = e->getGeom().getOrthoLineAtDist(e->getGeom().getLength(),
             e->getTotalWidth());
       } else {
@@ -68,7 +144,7 @@ void GraphBuilder::expandOverlappinFronts(TransitGraph* g) {
       std::set<NodeFront*> overlaps = nodeGetOverlappingFronts(n);
       for (auto f : overlaps) {
         stillFree = true;
-        if (f->edge->getGeomDir() == n) {
+        if (f->edge->getTo() == n) {
           f->geom = f->edge->getGeom().getOrthoLineAtDist(
               f->edge->getGeom().getLength() - step,
               f->edge->getTotalWidth());
@@ -145,7 +221,7 @@ void GraphBuilder::freeNodeFront(NodeFront* f) {
   std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects =
       cutLine.getIntersections(f->edge->getGeom());
   if (iSects.size() > 0) {
-    if (f->edge->getGeomDir() != f->n) {
+    if (f->edge->getTo() != f->n) {
       // cut at beginning
       f->edge->setGeom(f->edge->getGeom().getSegment(iSects.begin()->totalPos, 1));
       assert(cutLine.distTo(f->edge->getGeom().getLine().front()) < 0.1);

@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_GRAPH_TRANSITGRAPH_H_
-#define TRANSITMAP_GRAPH_TRANSITGRAPH_H_
+#ifndef SKELETONBUILDER_GRAPH_TRANSITGRAPH_H_
+#define SKELETONBUILDER_GRAPH_TRANSITGRAPH_H_
 
 #include <proj_api.h>
 #include <string>
@@ -13,54 +13,44 @@
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-#include "./../util/Geo.h"
-#include "./OrderingConfiguration.h"
+#include "transitmap/util/Geo.h"
 #include "./Node.h"
 #include "./Edge.h"
-#include "./Route.h"
 
 namespace bg = bgeo;
 
-namespace transitmapper {
+namespace skeletonbuilder {
 namespace graph {
 
-class TransitGraph {
+class Graph {
 
  public:
-  TransitGraph(const std::string& name, const std::string& projStr);
+  explicit Graph(const std::string& name, const std::string& projStr);
 
-  ~TransitGraph();
+  ~Graph();
 
-  void addNode(Node* n);
-  Edge* addEdge(Node* from, Node* to, geo::PolyLine pl, double w,
-    double s);
+  Node* addNode(Node* n);
+  Edge* addEdge(Node* from, Node* to);
   Edge* getEdge(Node* from, Node* to);
+
+  void deleteNode(Node* n);
+  void deleteEdge(Node* from, Node* to);
+  bool containsNode(Node* n) const;
 
   const std::set<Node*>& getNodes() const;
   std::set<Node*>* getNodes();
 
-  Node* getNodeById(const std::string& id) const;
+  Node* getNodeByStop(const gtfs::Stop* s) const;
+  Node* getNodeByStop(const gtfs::Stop* s, bool getParent) const;
 
   Node* getNearestNode(const util::geo::Point& p, double maxD) const;
 
   projPJ getProjection() const;
   const bgeo::model::box<util::geo::Point>& getBoundingBox() const;
 
-  double getScore() const;
-  double getScore(const Configuration& c) const;
-
-  const Configuration& getConfig() const;
-  void setConfig(const Configuration&);
-
-  Route* addRoute(const Route* r);
-  const Route* getRoute(const std::string& id) const;
-
  private:
   std::string _name;
   std::set<Node*> _nodes;
-  std::map<std::string, const Route*> _routes;
-
-  Configuration _config;
 
   bgeo::model::box<util::geo::Point> _bbox;
 
@@ -69,4 +59,4 @@ class TransitGraph {
 
 }}
 
-#endif  // TRANSITMAP_GRAPH_TRANSITGRAPH_H_
+#endif  // SKELETONBUILDER_GRAPH_TRANSITGRAPH_H_

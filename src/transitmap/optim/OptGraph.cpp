@@ -42,7 +42,7 @@ void OptGraph::build() {
       from->addEdge(edge);
       to->addEdge(edge);
 
-      edge->etgs.push_back(EtgPart(e, e->getGeomDir() == toTn));
+      edge->etgs.push_back(EtgPart(e, e->getTo() == toTn));
     }
   }
 }

@@ -6,12 +6,9 @@
 #include <vector>
 #include "Edge.h"
 #include "Node.h"
-#include "gtfsparser/gtfs/Trip.h"
-#include "EdgeTripGeom.h"
 
 using namespace transitmapper;
 using namespace graph;
-using namespace gtfsparser;
 
 // _____________________________________________________________________________
 Edge::Edge(Node* from, Node* to, geo::PolyLine pl, double w,
@@ -30,52 +27,20 @@ Node* Edge::getTo() const {
 }
 
 // _____________________________________________________________________________
-bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
-  assert(toNode == _from || toNode == _to);
-  for (auto& e : _tripsContained) {
-    if (e.containsRoute(t->getRoute())) {
-      for (auto& tr : e.getTripsForRoute(t->getRoute())->trips) {
-        // shorcut: if a trip is contained here with the same shape id,
-        // don't require recalc of polyline etc
-        if (tr->getShape() == t->getShape()) {
-          e.addTrip(t, toNode);
-          return true;
-       }
-      }
-    }
-  }
-
-  return false;
-}
-
-// _____________________________________________________________________________
-bool Edge::addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode, double w,
-    double s) {
-  assert(toNode == _from || toNode == _to);
-
-  for (auto& e : _tripsContained) {
-    e.addTrip(t, toNode, pl);
-    break;
-  }
-
-  return true;
-}
-
-// _____________________________________________________________________________
-const std::vector<TripOccurance>& Edge::getTripsUnordered()
+const std::vector<RouteOccurance>& Edge::getTripsUnordered()
 const {
-  return _trips;
+  return _routes;
 }
 
 // _____________________________________________________________________________
-std::vector<TripOccurance>* Edge::getTripsUnordered() {
-  return &_trips;
+std::vector<RouteOccurance>* Edge::getTripsUnordered() {
+  return &_routes;
 }
 
 // _____________________________________________________________________________
-TripOccurance* Edge::getTripsForRoute(const gtfs::Route* r) const {
-  for (size_t i = 0; i < _trips.size(); i++) {
-    TripOccurance* to = const_cast<TripOccurance*>(&_trips[i]);
+RouteOccurance* Edge::getTripsForRoute(const Route* r) const {
+  for (size_t i = 0; i < _routes.size(); i++) {
+    RouteOccurance* to = const_cast<RouteOccurance*>(&_routes[i]);
     if (to->route == r) {
       return to;
     }
@@ -84,55 +49,33 @@ TripOccurance* Edge::getTripsForRoute(const gtfs::Route* r) const {
 }
 
 // _____________________________________________________________________________
-TripOccWithPos Edge::getTripsForRouteUnder(const gtfs::Route* r,
+RouteOccWithPos Edge::getTripsForRouteUnder(const Route* r,
     const std::vector<size_t> ordering) const {
-  for (size_t i = 0; i < _trips.size(); i++) {
-    const TripOccurance& to = _trips[i];
+  for (size_t i = 0; i < _routes.size(); i++) {
+    const RouteOccurance& to = _routes[i];
     if (to.route == r) {
       size_t pos = std::find(ordering.begin(), ordering.end(), i) - ordering.begin();
-      return std::pair<TripOccurance*, size_t>(const_cast<TripOccurance*>(&to), pos);
+      return std::pair<RouteOccurance*, size_t>(const_cast<RouteOccurance*>(&to), pos);
     }
   }
-  return std::pair<TripOccurance*, size_t>(0, 0);
+  return std::pair<RouteOccurance*, size_t>(0, 0);
 }
 
 // _____________________________________________________________________________
-bool Edge::containsRoute(gtfs::Route* r) const {
+void Edge::addRoute(const Route* r, const Node* dir) {
+  _routes.push_back(RouteOccurance(r, dir));
+}
+
+// _____________________________________________________________________________
+bool Edge::containsRoute(const Route* r) const {
   if (getTripsForRoute(r)) return true;
 
   return false;
 }
 
 // _____________________________________________________________________________
-size_t Edge::getTripCardinality() const {
-  size_t ret = 0;
-
-  for (auto& t : _trips) {
-    ret += t.trips.size();
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
 size_t Edge::getCardinality() const {
-  return _trips.size();
-}
-
-// _____________________________________________________________________________
-std::vector<TripOccurance>::iterator
-Edge::removeTripOccurance(std::vector<TripOccurance>::const_iterator pos) {
-  return _trips.erase(pos);
-}
-
-// _____________________________________________________________________________
-const Node* Edge::getGeomDir() const {
-  return _geomDir;
-}
-
-// _____________________________________________________________________________
-void Edge::setGeomDir(const Node* n) {
-  _geomDir = n;
+  return _routes.size();
 }
 
 // _____________________________________________________________________________
@@ -147,14 +90,14 @@ double Edge::getSpacing() const {
 
 // _____________________________________________________________________________
 double Edge::getTotalWidth() const {
-  return getWidth() * _trips.size() + getSpacing() * (_trips.size() - 1);
+  return getWidth() * _routes.size() + getSpacing() * (_routes.size() - 1);
 }
 
 // _____________________________________________________________________________
-std::vector<gtfs::Route*> Edge::getSharedRoutes(const Edge& e)
+std::vector<const Route*> Edge::getSharedRoutes(const Edge& e)
 const {
-  std::vector<gtfs::Route*> ret;
-  for (auto& to : _trips) {
+  std::vector<const Route*> ret;
+  for (auto& to : _routes) {
     if (e.containsRoute(to.route)) ret.push_back(to.route);
   }
 

@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <ostream>
 #include "./../config/TransitMapConfig.h"
+#include "./../graph/Route.h"
 #include "./SvgOutput.h"
 #include "../geo/PolyLine.h"
 
@@ -139,7 +140,7 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
 
 // _____________________________________________________________________________
 void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
-    const gtfs::Route& route) {
+    const graph::Route& route) {
   std::stringstream styleOutline;
   styleOutline << "fill:none;stroke:#000000"
     << ";stroke-linecap:round;stroke-opacity:0.8;stroke-width:"
@@ -148,7 +149,7 @@ void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
   paramsOutline["style"] = styleOutline.str();
 
   std::stringstream style;
-  style << "fill:none;stroke:#" << route.getColorString()
+  style << "fill:none;stroke:#" << route.color
     << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
     << width * _cfg->outputResolution;
   Params params;
@@ -172,7 +173,7 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
   params["style"] = "font-family:Verdana;font-size:8px; font-style:normal; font-weight: normal; fill: white; stroke-width: 0.25px; stroke-linecap: butt; stroke-linejoin: miter; stroke: black";
   _w.openTag("text", params);
   if (n->getStops().size()) {
-    _w.writeText((*n->getStops().begin())->getId());
+    _w.writeText((*n->getStops().begin()).id);
     _w.writeText("\n");
   }
   //_w.writeText(std::to_string(n->getScore(outG.getConfig())));
@@ -209,58 +210,39 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
   size_t a = 0;
   for (size_t i : outG.getConfig().find(e)->second) {
-      const graph::TripOccurance& r = e->getTripsUnordered()[i];
-      geo::PolyLine p = center;
+    const graph::RouteOccurance& r = e->getTripsUnordered()[i];
+    geo::PolyLine p = center;
 
-      double offset = -(o - oo / 2.0 - e->getWidth() /2.0);
+    double offset = -(o - oo / 2.0 - e->getWidth() /2.0);
 
-      p.offsetPerp(offset);
-      p.applyChaikinSmooth(3);
-      p.simplify(0.5);
+    p.offsetPerp(offset);
+    p.applyChaikinSmooth(3);
+    p.simplify(0.5);
 
-      // TODO: why is this check necessary? shouldnt be!
-      // ___ OUTFACTOR
-      if (nfTo && nfFrom && nfTo->geom.getLine().size() > 0 && nfFrom->geom.getLine().size() > 0) {
-        if (e->getGeomDir() == e->getTo()) {
-          std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfTo->geom.getIntersections(p);
-          if (iSects.size() > 0) {
-            p = p.getSegment(0, iSects.begin()->totalPos);
-          } else {
-            p << nfTo->geom.projectOn(p.getLine().back()).p;
-          }
-
-          std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects2 = nfFrom->geom.getIntersections(p);
-          if (iSects2.size() > 0) {
-            p = p.getSegment(iSects2.begin()->totalPos, 1);
-          } else {
-            p >> nfFrom->geom.projectOn(p.getLine().front()).p;
-          }
-        } else {
-          p << nfFrom->geom.projectOn(p.getLine().back()).p;
-          p >> nfTo->geom.projectOn(p.getLine().front()).p;
-
-          std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfFrom->geom.getIntersections(p);
-          if (iSects.size() > 0) {
-            p = p.getSegment(0, iSects.begin()->totalPos);
-          } else {
-            p << nfFrom->geom.projectOn(p.getLine().back()).p;
-          }
-
-          std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects2 = nfTo->geom.getIntersections(p);
-          if (iSects2.size() > 0) {
-            p = p.getSegment(iSects2.begin()->totalPos, 1);
-          } else {
-            p >> nfTo->geom.projectOn(p.getLine().front()).p;
-          }
-        }
+    // TODO: why is this check necessary? shouldnt be!
+    // ___ OUTFACTOR
+    if (nfTo && nfFrom && nfTo->geom.getLine().size() > 0 && nfFrom->geom.getLine().size() > 0) {
+      std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfTo->geom.getIntersections(p);
+      if (iSects.size() > 0) {
+        p = p.getSegment(0, iSects.begin()->totalPos);
+      } else {
+        p << nfTo->geom.projectOn(p.getLine().back()).p;
       }
 
-      renderLinePart(p, lineW, *r.route);
+      std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects2 = nfFrom->geom.getIntersections(p);
+      if (iSects2.size() > 0) {
+        p = p.getSegment(iSects2.begin()->totalPos, 1);
+      } else {
+        p >> nfFrom->geom.projectOn(p.getLine().front()).p;
+      }
+    }
 
-      a++;
+    renderLinePart(p, lineW, *r.route);
 
-      //break;
-      o -= offsetStep;
+    a++;
+
+    //break;
+    o -= offsetStep;
   }
 }
 

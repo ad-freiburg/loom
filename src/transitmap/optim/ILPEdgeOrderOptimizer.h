@@ -7,6 +7,7 @@
 
 #include "./../graph/OrderingConfiguration.h"
 #include "./../graph/TransitGraph.h"
+#include "./../graph/Route.h"
 #include "./../config/TransitMapConfig.h"
 #include "./OptGraph.h"
 #include <glpk.h>
@@ -18,7 +19,6 @@ namespace transitmapper {
 namespace optim {
 
 using namespace graph;
-using gtfs::Route;
 
 using util::geo::Point;
 using util::geo::Line;
@@ -49,7 +49,7 @@ class ILPEdgeOrderOptimizer {
       Configuration* c, const OptGraph& g) const;
 
   std::string getILPVarName(OptEdge* e,
-    const gtfs::Route* r, size_t p) const;
+    const Route* r, size_t p) const;
 
   void writeSameSegConstraints(const OptGraph& g,
     int* ia, int* ja, double* res, size_t* c, glp_prob* lp) const;

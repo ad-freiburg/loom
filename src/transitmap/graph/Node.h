@@ -7,7 +7,7 @@
 
 #include <set>
 #include "gtfsparser/gtfs/Stop.h"
-#include "gtfsparser/gtfs/Route.h"
+#include "./Route.h"
 #include "../geo/PolyLine.h"
 #include "./OrderingConfiguration.h"
 #include "../util/Geo.h"
@@ -21,7 +21,7 @@ namespace graph {
 class Edge;
 class Node;
 class EdgeTripGeom;
-struct TripOccurance;
+struct RouteOccurance;
 
 // forward declaration of TransitGraph
 class TransitGraph;
@@ -35,8 +35,8 @@ struct NodeFront {
 
   Node* n; // pointer to node here also
 
-  Point getTripOccPos(const gtfs::Route* r, const Configuration& c) const;
-  Point getTripOccPosUnder(const gtfs::Route* r, const graph::Configuration& c,
+  Point getTripOccPos(const Route* r, const Configuration& c) const;
+  Point getTripOccPosUnder(const Route* r, const graph::Configuration& c,
     const Edge* e, const std::vector<size_t>* order) const;
   Point getTripPos(const Edge* e, size_t pos, bool inv) const;
 
@@ -53,31 +53,37 @@ struct Partner {
   const NodeFront* front;
   const Edge* edge;
   const EdgeTripGeom* etg;
-  const gtfs::Route* route;
+  const Route* route;
 };
 
 struct InnerGeometry {
-  InnerGeometry(geo::PolyLine g, const gtfs::Route* r, const Edge* e)
+  InnerGeometry(geo::PolyLine g, const Route* r, const Edge* e)
   : geom(g), route(r), e(e) {};
   geo::PolyLine geom;
-  const gtfs::Route* route;
+  const Route* route;
   const Edge* e;
 };
 
-class Node {
+struct StationInfo {
+  StationInfo(const std::string& id, const std::string& name) : id(id), name(name) {}
+  std::string id, name;
+};
 
+class Node {
  public:
-  explicit Node(Point pos);
-  Node(double x, double y);
-  Node(Point pos, gtfs::Stop* stop);
-  Node(double x, double y, gtfs::Stop* stop);
+  Node(const std::string& id, Point pos);
+  Node(const std::string& id, double x, double y);
+  Node(const std::string& id, Point pos, StationInfo stop);
+  Node(const std::string& id, double x, double y, StationInfo stop);
 
   ~Node();
 
-  const std::set<gtfs::Stop*>& getStops() const;
-  void addStop(gtfs::Stop* s);
+  const std::vector<StationInfo>& getStops() const;
+  void addStop(StationInfo s);
   const Point& getPos() const;
   void setPos(const Point& p);
+
+  const std::string& getId() const;
 
   const std::set<Edge*>& getAdjListOut() const {
     return _adjListOut;
@@ -99,7 +105,7 @@ class Node {
   double getScoreUnder(const graph::Configuration& c, const Edge* e, const graph::Ordering* order) const;
   double getAreaScore(const Configuration& c, const Edge* e, const graph::Ordering* order) const;
   double getAreaScore(const Configuration& c) const;
-  std::vector<Partner> getPartner(const NodeFront* f, const gtfs::Route* r) const;
+  std::vector<Partner> getPartner(const NodeFront* f, const Route* r) const;
 
   std::vector<InnerGeometry> getInnerGeometries(const graph::Configuration& c,
       bool bezier) const;
@@ -118,22 +124,23 @@ class Node {
   double getMaxNodeFrontWidth() const;
 
  private:
+  std::string _id;
   std::set<Edge*> _adjListIn;
   std::set<Edge*> _adjListOut;
   Point _pos;
 
   std::vector<NodeFront> _mainDirs;
 
-  std::set<gtfs::Stop*> _stops;
+  std::vector<StationInfo> _stops;
 
   size_t getNodeFrontPos(const NodeFront* a) const;
 
   geo::PolyLine getInnerBezier(const Configuration& c, const NodeFront& nf,
-      const TripOccurance& tripOcc, const graph::Partner& partner, const Edge* e,
+      const RouteOccurance& tripOcc, const graph::Partner& partner, const Edge* e,
       const std::vector<size_t>* order) const;
 
   geo::PolyLine getInnerStraightLine(const Configuration& c,
-      const NodeFront& nf, const TripOccurance& tripOcc,
+      const NodeFront& nf, const RouteOccurance& tripOcc,
       const graph::Partner& partner, const Edge* e,
       const std::vector<size_t>* order) const;
 

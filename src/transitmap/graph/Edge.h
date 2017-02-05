@@ -8,11 +8,8 @@
 #include <vector>
 #include "Edge.h"
 #include "Node.h"
-#include "EdgeTripGeom.h"
+#include "Route.h"
 #include "../geo/PolyLine.h"
-#include "gtfsparser/gtfs/Trip.h"
-
-using namespace gtfsparser;
 
 using std::exception;
 using std::string;
@@ -23,6 +20,14 @@ namespace graph {
 // forward declaration of Node
 class Node;
 
+struct RouteOccurance {
+  RouteOccurance(const Route* r, const Node* dir) : route(r), direction(dir) {}
+  const Route* route;
+  const Node* direction;  // 0 if in both directions
+};
+
+typedef std::pair<RouteOccurance*, size_t> RouteOccWithPos;
+
 class Edge {
  public:
   Edge(Node* from, Node* to, geo::PolyLine pl, double w,
@@ -31,42 +36,31 @@ class Edge {
   Node* getFrom() const;
   Node* getTo() const;
 
-  bool addTrip(gtfs::Trip* t, Node* toNode);
-  bool addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode, double w, double s);
-
   void setFrom(Node* from);
   void setTo(Node* to);
+
+  void addRoute(const Route* r, const Node* dir);
 
   const geo::PolyLine& getGeom() const;
   void setGeom(const geo::PolyLine& p);
 
-  // FROM ETG
-  const std::vector<TripOccurance>& getTripsUnordered() const;
-  std::vector<TripOccurance>* getTripsUnordered();
+  const std::vector<RouteOccurance>& getTripsUnordered() const;
+  std::vector<RouteOccurance>* getTripsUnordered();
 
-  std::vector<TripOccurance>::iterator removeTripOccurance(
-      std::vector<TripOccurance>::const_iterator pos);
-
-  TripOccWithPos getTripsForRouteUnder(const gtfs::Route* r,
+  RouteOccWithPos getTripsForRouteUnder(const Route* r,
     const std::vector<size_t> ordering) const;
 
-  TripOccurance* getTripsForRoute(const gtfs::Route* r) const;
+  RouteOccurance* getTripsForRoute(const Route* r) const;
 
-  bool containsRoute(gtfs::Route* r) const;
-  size_t getTripCardinality() const;
+  bool containsRoute(const Route* r) const;
   size_t getCardinality() const;
-  const Node* getGeomDir() const;
-
-  void setGeomDir(const Node* newDir);
 
   double getWidth() const;
   double getSpacing() const;
 
   double getTotalWidth() const;
 
-  std::vector<gtfs::Route*> getSharedRoutes(const Edge& e) const;
-
-
+  std::vector<const Route*> getSharedRoutes(const Edge& e) const;
 
 
   // TODO: store this here atm, but find better plcae...
@@ -75,23 +69,7 @@ class Edge {
   Node* _from;
   Node* _to;
 
-  // Map of EdgeTripGeometries in this graph edge.
-  // An EdgeTripGeometry is a geometry holding N trips.
-  // This is meant as a multi-stage structure, where in the first
-  // (trivial) stage, each EdgeTripGeometry holds exactly 1 trip.
-  //
-  // In a 2nd step, the EdgeTripGeometries are combined based on
-  // geometrical equivalence.
-  //
-  // In a 3rd step, we split those edges with |_tripsContained| > 1
-  // into single edges. This creates either multiple distinct edges from
-  // _from to _to, OR, in case the geometries have partial equivalence,
-  // introduces new topological nodes which mark the position where two
-  // lines part or join.
-  std::vector<EdgeTripGeom> _tripsContained;
-
-
-  std::vector<TripOccurance> _trips;
+  std::vector<RouteOccurance> _routes;
 
   geo::PolyLine _geom;
   const Node* _geomDir;

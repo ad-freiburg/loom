@@ -29,6 +29,7 @@ struct ShrdSegWrap {
 class GraphBuilder {
  public:
   GraphBuilder(const config::Config* cfg);
+  bool build(std::istream* s, graph::TransitGraph* g);
 
   void writeMainDirs(TransitGraph* g);
   void expandOverlappinFronts(TransitGraph* g);

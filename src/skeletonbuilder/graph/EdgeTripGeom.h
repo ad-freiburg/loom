@@ -2,16 +2,16 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_GRAPH_EDGETRIPGEOM_H_
-#define TRANSITMAP_GRAPH_EDGETRIPGEOM_H_
+#ifndef SKELETONBUILDER_GRAPH_EDGETRIPGEOM_H_
+#define SKELETONBUILDER_GRAPH_EDGETRIPGEOM_H_
 
 #include <vector>
 #include "gtfsparser/gtfs/Trip.h"
 #include "gtfsparser/gtfs/Route.h"
-#include "../geo/PolyLine.h"
+#include "transitmap/geo/PolyLine.h"
 #include "./Node.h"
 
-namespace transitmapper {
+namespace skeletonbuilder {
 namespace graph {
 
 using namespace gtfsparser;
@@ -54,6 +54,11 @@ class EdgeTripGeom {
 
   TripOccurance* getTripsForRoute(const gtfs::Route* r) const;
 
+  const geo::PolyLine& getGeom() const;
+  void setGeom(const geo::PolyLine& p);
+
+  void removeOrphans();
+
   bool containsRoute(gtfs::Route* r) const;
   size_t getTripCardinality() const;
   size_t getCardinality() const;
@@ -75,12 +80,12 @@ class EdgeTripGeom {
   std::vector<TripOccurance> _trips;
 
   geo::PolyLine _geom;
-  const Node* _geomDir;
+  const Node* _geomDir; // the direction of the geometry, may be reversed
 
   double _width, _spacing;
 };
 
 }}
 
-#endif  // TRANSITMAP_GRAPH_EDGE_H_
+#endif  // SKELETONBUILDER_GRAPH_EDGETRIPGEOM_H_
 

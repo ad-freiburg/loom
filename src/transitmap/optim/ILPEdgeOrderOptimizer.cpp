@@ -22,12 +22,12 @@ void ILPEdgeOrderOptimizer::optimize() {
   g.simplify();
 
   output::OgrOutput ogrOut("/home/patrick/optimgraph", _cfg);
-  // ogrOut.print(g);
+  //ogrOut.print(g);
 
   glp_prob* lp = createProblemImpr(g);
   //glp_prob* lp = createProblem(g);
 
-  // printHumanReadable(lp, "/home/patrick/optim.ilp");
+  printHumanReadable(lp, "/home/patrick/optim.ilp");
 
   // write problem for debugging...
   // glp_write_mps(lp, GLP_MPS_FILE, 0, "/home/patrick/ilp");
@@ -424,8 +424,8 @@ const {
           // introduce dec var
           std::stringstream ss;
           ss << "x_dec(" << segmentA->getStrRepr() << "," << segmentB->getStrRepr()
-            << "," << linepair.first << "(" << linepair.first->getShortName() << "),"
-            << linepair.second << "(" << linepair.second->getShortName() << ")," << node << ")";
+            << "," << linepair.first << "(" << linepair.first->id << "),"
+            << linepair.second << "(" << linepair.second->id << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar, 1);
@@ -503,7 +503,7 @@ const {
       for (LinePair linepair : getLinePairs(segment)) {
         size_t smallerVar = glp_add_cols(lp, 1);
         std::stringstream ss;
-        ss << "x_(" << segment->getStrRepr() << ","
+        ss << "x_(" << segment->getStrRepr()
           << "," << linepair.first << "<"
           << linepair.second << ")";
         glp_set_col_name(lp, smallerVar, ss.str().c_str());
@@ -519,14 +519,14 @@ const {
       // iterate over all possible line pairs in this segment
       for (LinePair linepair : getLinePairs(segment)) {
         std::stringstream ss;
-        ss << "x_(" << segment->getStrRepr() << ","
+        ss << "x_(" << segment->getStrRepr()
           << "," << linepair.first << "<"
           << linepair.second << ")";
         size_t smaller = glp_find_col(lp, ss.str().c_str());
         assert(smaller > 0);
 
         std::stringstream ss2;
-        ss2 << "x_(" << segment->getStrRepr() << ","
+        ss2 << "x_(" << segment->getStrRepr()
           << "," << linepair.second << "<"
           << linepair.first << ")";
         size_t bigger = glp_find_col(lp, ss2.str().c_str());
@@ -569,7 +569,7 @@ const {
         glp_set_row_bnds(lp, row, GLP_LO, 0, 0);
 
         std::stringstream ss;
-        ss << "x_(" << segment->getStrRepr() << ","
+        ss << "x_(" << segment->getStrRepr()
           << "," << linepair.first << "<"
           << linepair.second << ")";
 
@@ -630,8 +630,8 @@ const {
           ss << "x_dec(" << segmentA->getStrRepr() << ","
             << segmentA->getStrRepr()
             << segmentB->getStrRepr()
-            << "," << linepair.first << "(" << linepair.first->getShortName() << "),"
-            << linepair.second << "(" << linepair.second->getShortName() << ")," << node << ")";
+            << "," << linepair.first << "(" << linepair.first->id << "),"
+            << linepair.second << "(" << linepair.second->id << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
@@ -646,19 +646,19 @@ const {
           size_t bSmallerAinL2 = 0;
 
           std::stringstream aSmBStr;
-          aSmBStr << "x_(" << segmentA->getStrRepr() << ","
+          aSmBStr << "x_(" << segmentA->getStrRepr()
             << "," << linepair.first << "<"
             << linepair.second << ")";
           aSmallerBinL1 = glp_find_col(lp, aSmBStr.str().c_str());
 
           std::stringstream aBgBStr;
-          aBgBStr << "x_(" << segmentB->getStrRepr() << ","
+          aBgBStr << "x_(" << segmentB->getStrRepr()
             << "," << linepair.first << "<"
             << linepair.second << ")";
           aSmallerBinL2 = glp_find_col(lp, aBgBStr.str().c_str());
 
           std::stringstream bBgAStr;
-          bBgAStr << "x_(" << segmentB->getStrRepr() << ","
+          bBgAStr << "x_(" << segmentB->getStrRepr()
             << "," << linepair.second << "<"
             << linepair.first << ")";
           bSmallerAinL2 = glp_find_col(lp, bBgAStr.str().c_str());
@@ -755,8 +755,8 @@ const {
           ss << "x_dec(" << segmentA->getStrRepr() << ","
             << segments.first->getStrRepr()
             << segments.second->getStrRepr()
-            << "," << linepair.first << "(" << linepair.first->getShortName() << "),"
-            << linepair.second << "(" << linepair.second->getShortName() << ")," << node << ")";
+            << "," << linepair.first << "(" << linepair.first->id << "),"
+            << linepair.second << "(" << linepair.second->id << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
@@ -772,13 +772,13 @@ const {
 
               if (poscomb.first > poscomb.second) {
                 std::stringstream bBgAStr;
-                bBgAStr << "x_(" << segmentA->getStrRepr() << ","
+                bBgAStr << "x_(" << segmentA->getStrRepr()
                   << "," << linepair.first << "<"
                   << linepair.second << ")";
                 testVar = glp_find_col(lp, bBgAStr.str().c_str());
               } else {
                 std::stringstream bBgAStr;
-                bBgAStr << "x_(" << segmentA->getStrRepr() << ","
+                bBgAStr << "x_(" << segmentA->getStrRepr()
                   << "," << linepair.second << "<"
                   << linepair.first<< ")";
                 testVar = glp_find_col(lp, bBgAStr.str().c_str());
@@ -843,8 +843,8 @@ const {
           ss << "x_dec(" << segmentA->getStrRepr() << ","
             << segments.first->getStrRepr()
             << segments.second->getStrRepr()
-            << "," << linepair.first << "(" << linepair.first->getShortName() << "),"
-            << linepair.second << "(" << linepair.second->getShortName() << ")," << node << ")";
+            << "," << linepair.first << "(" << linepair.first->id << "),"
+            << linepair.second << "(" << linepair.second->id << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar, 1);
@@ -929,7 +929,7 @@ const {
 
 // _____________________________________________________________________________
 std::string ILPEdgeOrderOptimizer::getILPVarName(OptEdge* seg,
-    const gtfs::Route* r, size_t p) const {
+    const Route* r, size_t p) const {
   std::stringstream varName;
   varName << "x_(" << seg->getStrRepr() << ",l="
     << r << ",p=" << p << ")";
@@ -977,7 +977,7 @@ std::vector<EdgePair> ILPEdgeOrderOptimizer::getEdgePartnerPairs(OptNode* node,
 // _____________________________________________________________________________
 std::vector<LinePair> ILPEdgeOrderOptimizer::getLinePairs(OptEdge* segment)
 const {
-  std::set<Route*> processed;
+  std::set<const Route*> processed;
   std::vector<LinePair> ret;
   for (auto& toA : *segment->etgs[0].etg->getTripsUnordered()) {
     processed.insert(toA.route);
@@ -999,7 +999,7 @@ void ILPEdgeOrderOptimizer::solveProblem(glp_prob* lp) const {
   params.binarize = 1;
   params.bt_tech = GLP_BT_BPH;
   params.fp_heur = GLP_ON;
-  params.ps_heur = GLP_ON;
+  //params.ps_heur = GLP_ON;
   params.ps_tm_lim = 120000;
 
   glp_intopt(lp, &params);
