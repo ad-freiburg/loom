@@ -55,6 +55,8 @@ class TransitGraph {
   Route* addRoute(const Route* r);
   const Route* getRoute(const std::string& id) const;
 
+  void expandBBox(const Point& p);
+
  private:
   std::string _name;
   std::set<Node*> _nodes;

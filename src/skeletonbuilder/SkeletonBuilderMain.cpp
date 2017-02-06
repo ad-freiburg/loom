@@ -38,7 +38,6 @@ int main(int argc, char** argv) {
   gtfsparser::gtfs::Feed feed;
 
   if (!cfg.inputFeedPath.empty()) {
-    //LOG(INFO) << "reading feed at " << cfg.inputFeedPath << std::endl;
     parser.parse(&feed, cfg.inputFeedPath);
 
     skeletonbuilder::graph::Graph g("shinygraph", cfg.projectionString);
@@ -47,11 +46,15 @@ int main(int argc, char** argv) {
     b.consume(feed, &g);
     b.simplify(&g);
 
-    while (b.createTopologicalNodes(&g)) {}
+    // first pass, with strict distance values (clearing things up first)
+    b.createTopologicalNodes(&g, false);
+    b.removeEdgeArtifacts(&g);
 
+    while (b.createTopologicalNodes(&g, true)) {}
+
+    b.removeEdgeArtifacts(&g);
+    b.removeNodeArtifacts(&g);
     b.averageNodePositions(&g);
-
-    b.removeArtifacts(&g);
 
     std::string path = cfg.outputPath;
     JsonOutput out(&cfg);

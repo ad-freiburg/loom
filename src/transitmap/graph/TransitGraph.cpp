@@ -73,7 +73,12 @@ double TransitGraph::getScore(const Configuration& c) const {
 void TransitGraph::addNode(Node* n) {
   _nodes.insert(n);
   // expand the bounding box to hold this new node
-  bgeo::expand(_bbox, n->getPos());
+  expandBBox(n->getPos());
+}
+
+// _____________________________________________________________________________
+void TransitGraph::expandBBox(const Point& p) {
+  bgeo::expand(_bbox, p);
 }
 
 // _____________________________________________________________________________

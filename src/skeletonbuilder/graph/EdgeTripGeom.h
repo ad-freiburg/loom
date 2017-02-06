@@ -49,9 +49,6 @@ class EdgeTripGeom {
   std::vector<TripOccurance>::iterator removeTripOccurance(
       std::vector<TripOccurance>::const_iterator pos);
 
-  TripOccWithPos getTripsForRouteUnder(const gtfs::Route* r,
-    const std::vector<size_t> ordering) const;
-
   TripOccurance* getTripsForRoute(const gtfs::Route* r) const;
 
   const geo::PolyLine& getGeom() const;
@@ -71,10 +68,7 @@ class EdgeTripGeom {
 
   double getTotalWidth() const;
 
-  std::vector<gtfs::Route*> getSharedRoutes(const EdgeTripGeom& e) const;
-
-  // TODO: store this here atm, but find better plcae...
-  std::vector<std::vector<size_t> > permutations;
+  bool routeEquivalent(const EdgeTripGeom& g) const;
 
  private:
   std::vector<TripOccurance> _trips;

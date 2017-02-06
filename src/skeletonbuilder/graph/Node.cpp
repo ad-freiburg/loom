@@ -103,3 +103,22 @@ const Point& Node::getPos() const {
 void Node::setPos(const Point& p) {
   _pos = p;
 }
+
+// _____________________________________________________________________________
+const std::set<Edge*>& Node::getAdjListOut() const {
+  return _adjListOut;
+}
+
+// _____________________________________________________________________________
+const std::set<Edge*>& Node::getAdjListIn() const {
+  return _adjListIn;
+}
+
+// _____________________________________________________________________________
+std::set<Edge*> Node::getAdjList() const {
+  std::set<Edge*> edges;
+  edges.insert(getAdjListIn().begin(), getAdjListIn().end());
+  edges.insert(getAdjListOut().begin(), getAdjListOut().end());
+
+  return edges;
+}

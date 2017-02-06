@@ -1,9 +1,10 @@
 Parallel line snapping
 ======================
 
-* be more exact! handle edge cases! this has to work 100%!
-* NO artifacts!
-* dont snap to stations! or: snap with smaller threshold!
+* what if we do 2 steps - one with a small distance value (to catch equal lines), one with the
+  normal one?
+
+* filtering for topological nodes that serve no purpose (1 in, 1 out), just leads to artifacts
 
 Node front expansion
 ===================

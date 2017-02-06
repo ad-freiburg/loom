@@ -27,27 +27,36 @@ void JsonOutput::print(const graph::Graph& outG) {
   geoj["type"] = "FeatureCollection";
   geoj["features"] = json::array();
 
+  // first pass, nodes
   for (graph::Node* n : outG.getNodes()) {
     json feature;
     feature["type"] = "Feature";
-    feature["propertiers"]["id"] = boost::lexical_cast<std::string>(n);
 
     feature["geometry"]["type"] = "Point";
     std::vector<double> coords;
     coords.push_back(n->getPos().get<0>());
-    coords.push_back(n->getPos().get<0>());
+    coords.push_back(n->getPos().get<1>());
     feature["geometry"]["coordinates"] = coords;
+
+    feature["properties"] = json::object();
+    feature["properties"]["id"] = boost::lexical_cast<std::string>(n);
+
+    if (n->getStops().size() > 0) {
+      feature["properties"]["station_id"] = (*n->getStops().begin())->getId();
+      feature["properties"]["station_label"] = (*n->getStops().begin())->getName();
+    }
 
     geoj["features"].push_back(feature);
   }
 
+  // second pass, edges
   for (graph::Node* n : outG.getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       if (e->getEdgeTripGeoms()->size() > 0) {
         json feature;
         feature["type"] = "Feature";
-        feature["propertiers"]["from"] = boost::lexical_cast<std::string>(e->getFrom());
-        feature["propertiers"]["to"] = boost::lexical_cast<std::string>(e->getTo());
+        feature["properties"]["from"] = boost::lexical_cast<std::string>(e->getFrom());
+        feature["properties"]["to"] = boost::lexical_cast<std::string>(e->getTo());
 
         feature["geometry"]["type"] = "LineString";
         feature["geometry"]["coordinates"] = json::array();
@@ -59,10 +68,20 @@ void JsonOutput::print(const graph::Graph& outG) {
           feature["geometry"]["coordinates"].push_back(coords);
         }
 
+        feature["properties"]["lines"] = json::array();
+
+        for (auto r : *e->getEdgeTripGeoms()->front().getTripsUnordered()) {
+          json route = json::object();
+          route["id"] = boost::lexical_cast<std::string>(r.route);
+          route["label"] = r.route->getShortName();
+          route["color"] = r.route->getColorString();
+          feature["properties"]["lines"].push_back(route);
+        }
+
         geoj["features"].push_back(feature);
       }
     }
   }
 
-  std::cout << geoj;
+  std::cout << geoj.dump(2);
 }

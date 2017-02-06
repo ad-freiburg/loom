@@ -66,13 +66,27 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
         std::string from = props["from"];
         std::string to = props["to"];
 
+        std::vector<std::vector<double> > coords = geom["coordinates"];
+
         geo::PolyLine pl;
-        for (auto coord : geom["coordinates"]) {
-          pl << Point(coord[0], coord[1]);
+        for (auto coord : coords) {
+          double x = coord[0];
+          double y = coord[1];
+          Point p(x, y);
+          pl << p;
+          g->expandBBox(p);
         }
 
         Node* fromN = g->getNodeById(from);
         Node* toN = g->getNodeById(to);
+
+        if (util::geo::dist(fromN->getPos(), pl.getLine().back()) <
+          util::geo::dist(fromN->getPos(), pl.getLine().front())) {
+          LOG(WARN) << "Geometry for edge from "
+            << fromN->getId() << " to " << toN->getId() << " seems "
+            << " to have the wrong orientation! This may lead to "
+            << " strange results." << std::endl;
+        }
 
         Edge* e = g->addEdge(fromN, toN, pl, _cfg->lineWidth,
           _cfg->lineSpacing);
@@ -179,11 +193,11 @@ const {
       if ((n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.edge->getSpacing() + fb.edge->getSpacing()) / 8) ||
           (n->getStops().size() == 0 && nodeFrontsOverlap(fa, fb))) {
         if (fa.edge->getGeom().getLength() > minLength &&
-            fa.geom.distTo(n->getPos()) < n->getMaxNodeFrontWidth()) {
+            fa.geom.distTo(n->getPos()) < 2*n->getMaxNodeFrontWidth()) {
           ret.insert(const_cast<NodeFront*>(&fa));
         }
         if (fb.edge->getGeom().getLength() > minLength &&
-            fb.geom.distTo(n->getPos()) < n->getMaxNodeFrontWidth()) {
+            fb.geom.distTo(n->getPos()) < 2*n->getMaxNodeFrontWidth()) {
           ret.insert(const_cast<NodeFront*>(&fb));
         }
       }
@@ -225,6 +239,7 @@ void GraphBuilder::freeNodeFront(NodeFront* f) {
       // cut at beginning
       f->edge->setGeom(f->edge->getGeom().getSegment(iSects.begin()->totalPos, 1));
       assert(cutLine.distTo(f->edge->getGeom().getLine().front()) < 0.1);
+
     } else {
       // cut at end
       f->edge->setGeom(f->edge->getGeom().getSegment(0, (--iSects.end())->totalPos));

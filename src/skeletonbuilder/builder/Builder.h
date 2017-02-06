@@ -37,9 +37,10 @@ class Builder {
 
   // simpliyfy the graph
   void simplify(Graph* g);
-  bool createTopologicalNodes(Graph* g);
+  bool createTopologicalNodes(Graph* g, bool final);
   void averageNodePositions(Graph* g);
-  void removeArtifacts(Graph* g);
+  void removeEdgeArtifacts(Graph* g);
+  void removeNodeArtifacts(Graph* g);
 
  private:
   const config::Config* _cfg;
@@ -55,7 +56,7 @@ class Builder {
   std::pair<bool, geo::PolyLine> getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b,
       gtfs::Trip* t, double distA, double distB, projPJ p);
 
-  ShrdSegWrap getNextSharedSegment(Graph* g) const;
+  ShrdSegWrap getNextSharedSegment(Graph* g, bool final) const;
   geo::PolyLine getAveragedFromSharedSeg(const ShrdSegWrap& w) const;
 
   Node* addStop(gtfs::Stop* curStop, uint8_t aggrLevel, Graph* g);
@@ -64,6 +65,9 @@ class Builder {
   bool checkShapeSanity(gtfs::Shape* t) const;
 
   void combineNodes(Node* a, Node* b, Graph* g);
+  void combineEdges(Edge* a, Edge* b, Node* n, Graph* g);
+
+  bool lineCrossesAtNode(const Node* a, const Edge* e, const Edge* f) const;
 
   mutable std::set<const Edge*> _indEdges;
   mutable std::map<const Edge*, size_t> _pEdges;

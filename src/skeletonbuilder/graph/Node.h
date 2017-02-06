@@ -42,13 +42,10 @@ class Node {
   const Point& getPos() const;
   void setPos(const Point& p);
 
-  const std::set<Edge*>& getAdjListOut() const {
-    return _adjListOut;
-  }
-  const std::set<Edge*>& getAdjListIn() const {
-    return _adjListIn;
-  }
+  const std::set<Edge*>& getAdjListOut() const;
+  const std::set<Edge*>& getAdjListIn() const;
 
+  std::set<Edge*> getAdjList() const;
 
   // add edge to this node's adjacency lists
   void addEdge(Edge* e);

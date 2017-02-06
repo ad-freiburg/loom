@@ -55,10 +55,6 @@ int main(int argc, char** argv) {
     b.writeInitialConfig(&g);
 
     LOG(INFO) << "Optimizing..." << std::endl;
-    /**
-    optim::EdgeOrderOptimizer eoOptim(&g);
-    eoOptim.optimize(cfg.optimIterations);
-    */
 
     LOG(INFO) << "Total graph score BEFORE optim is -- "
       << g.getScore() << " --" << std::endl;

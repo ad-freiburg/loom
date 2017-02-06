@@ -216,12 +216,11 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
     double offset = -(o - oo / 2.0 - e->getWidth() /2.0);
 
     p.offsetPerp(offset);
-    p.applyChaikinSmooth(3);
-    p.simplify(0.5);
+    //p.applyChaikinSmooth(3);
+    //p.simplify(0.5);
 
-    // TODO: why is this check necessary? shouldnt be!
     // ___ OUTFACTOR
-    if (nfTo && nfFrom && nfTo->geom.getLine().size() > 0 && nfFrom->geom.getLine().size() > 0) {
+    //if (nfTo && nfFrom && nfTo->geom.getLine().size() > 0 && nfFrom->geom.getLine().size() > 0) {
       std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfTo->geom.getIntersections(p);
       if (iSects.size() > 0) {
         p = p.getSegment(0, iSects.begin()->totalPos);
@@ -235,7 +234,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       } else {
         p >> nfFrom->geom.projectOn(p.getLine().front()).p;
       }
-    }
+    //}
 
     renderLinePart(p, lineW, *r.route);
 

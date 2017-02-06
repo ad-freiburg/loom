@@ -66,19 +66,6 @@ TripOccurance* EdgeTripGeom::getTripsForRoute(const gtfs::Route* r) const {
 }
 
 // _____________________________________________________________________________
-TripOccWithPos EdgeTripGeom::getTripsForRouteUnder(const gtfs::Route* r,
-    const std::vector<size_t> ordering) const {
-  for (size_t i = 0; i < _trips.size(); i++) {
-    const TripOccurance& to = _trips[i];
-    if (to.route == r) {
-      size_t pos = std::find(ordering.begin(), ordering.end(), i) - ordering.begin();
-      return std::pair<TripOccurance*, size_t>(const_cast<TripOccurance*>(&to), pos);
-    }
-  }
-  return std::pair<TripOccurance*, size_t>(0, 0);
-}
-
-// _____________________________________________________________________________
 const geo::PolyLine& EdgeTripGeom::getGeom() const {
   return _geom;
 }
@@ -159,14 +146,14 @@ double EdgeTripGeom::getTotalWidth() const {
 }
 
 // _____________________________________________________________________________
-std::vector<gtfs::Route*> EdgeTripGeom::getSharedRoutes(const EdgeTripGeom& e)
-const {
-  std::vector<gtfs::Route*> ret;
-  for (auto& to : _trips) {
-    if (e.containsRoute(to.route)) ret.push_back(to.route);
+bool EdgeTripGeom::routeEquivalent(const EdgeTripGeom& g) const {
+  if (_trips.size() != g._trips.size()) return false;
+
+  for (auto to : _trips) {
+    if (!g.containsRoute(to.route)) {
+      return false;
+    }
   }
 
-  return ret;
+  return true;
 }
-
-

@@ -17,7 +17,6 @@ using bgeo::make_inverse;
 // _____________________________________________________________________________
 Graph::Graph(const std::string& name, const std::string& proj)
 : _name(name) {
-  _bbox = make_inverse<bgeo::model::box<Point> >();
   _proj = pj_init_plus(proj.c_str());
 }
 
@@ -36,10 +35,6 @@ Graph::~Graph() {
 // _____________________________________________________________________________
 Node* Graph::addNode(Node* n) {
   auto ins = _nodes.insert(n);
-  if (ins.second) {
-    // expand the bounding box to hold this new node
-    bgeo::expand(_bbox, n->getPos());
-  }
   return *ins.first;
 }
 
@@ -99,11 +94,6 @@ Node* Graph::getNodeByStop(const gtfs::Stop* s) const {
 }
 
 // _____________________________________________________________________________
-bool Graph::containsNode(Node* n) const {
-  return  _nodes.find(n) != _nodes.end();
-}
-
-// _____________________________________________________________________________
 void Graph::deleteEdge(Node* from, Node* to) {
   Edge* toDel = getEdge(from, to);
   if (!toDel) return;
@@ -124,11 +114,6 @@ void Graph::deleteNode(Node* n) {
 // _____________________________________________________________________________
 projPJ Graph::getProjection() const {
   return _proj;
-}
-
-// _____________________________________________________________________________
-const bgeo::model::box<Point>& Graph::getBoundingBox() const {
-  return _bbox;
 }
 
 // _____________________________________________________________________________

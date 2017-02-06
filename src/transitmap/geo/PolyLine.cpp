@@ -167,6 +167,9 @@ const {
   }
   ret << end.p;
 
+  // find a more performant way to clear the result of above
+  ret.simplify(0);
+
   return ret;
 }
 
@@ -372,7 +375,6 @@ void PolyLine::smoothenOutliers(double d) {
 
     if (util::geo::dist(_line[i], _line[i+1]) < d || util::geo::dist(_line[i], _line[i-1]) < d) {
       if (ang < 35) {
-        LOG(DEBUG) << "Fixing outlier..." << std::endl;
         _line.erase(_line.begin() + i);
       }
     }
@@ -432,7 +434,7 @@ void PolyLine::move(double vx, double vy) {
   }
 }
 
-// _____________________________________________________________________________ 
+// _____________________________________________________________________________
 SharedSegments PolyLine::getSharedSegments(const PolyLine& pl, double dmax)
 const {
   /**
@@ -623,7 +625,7 @@ std::pair<double, double> PolyLine::getSlopeBetween(double ad, double bd) const 
 }
 
 // _____________________________________________________________________________
-std::pair<double, double> PolyLine::getSlopeBetweenDists(double ad, double bd) 
+std::pair<double, double> PolyLine::getSlopeBetweenDists(double ad, double bd)
 const {
   return getSlopeBetween(ad / getLength(), bd / getLength());
 

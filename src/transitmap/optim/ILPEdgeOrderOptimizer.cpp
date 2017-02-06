@@ -24,10 +24,12 @@ void ILPEdgeOrderOptimizer::optimize() {
   output::OgrOutput ogrOut("/home/patrick/optimgraph", _cfg);
   //ogrOut.print(g);
 
+  LOG(DEBUG) << "Creating ILP problem... " << std::endl;
   glp_prob* lp = createProblemImpr(g);
   //glp_prob* lp = createProblem(g);
+  LOG(DEBUG) << " .. done" << std::endl;
 
-  printHumanReadable(lp, "/home/patrick/optim.ilp");
+  // printHumanReadable(lp, "/home/patrick/optim.ilp");
 
   // write problem for debugging...
   // glp_write_mps(lp, GLP_MPS_FILE, 0, "/home/patrick/ilp");
@@ -999,7 +1001,7 @@ void ILPEdgeOrderOptimizer::solveProblem(glp_prob* lp) const {
   params.binarize = 1;
   params.bt_tech = GLP_BT_BPH;
   params.fp_heur = GLP_ON;
-  //params.ps_heur = GLP_ON;
+  params.ps_heur = GLP_ON;
   params.ps_tm_lim = 120000;
 
   glp_intopt(lp, &params);

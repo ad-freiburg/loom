@@ -35,7 +35,6 @@ class Graph {
 
   void deleteNode(Node* n);
   void deleteEdge(Node* from, Node* to);
-  bool containsNode(Node* n) const;
 
   const std::set<Node*>& getNodes() const;
   std::set<Node*>* getNodes();
@@ -46,13 +45,10 @@ class Graph {
   Node* getNearestNode(const util::geo::Point& p, double maxD) const;
 
   projPJ getProjection() const;
-  const bgeo::model::box<util::geo::Point>& getBoundingBox() const;
 
  private:
   std::string _name;
   std::set<Node*> _nodes;
-
-  bgeo::model::box<util::geo::Point> _bbox;
 
   projPJ _proj;
 };

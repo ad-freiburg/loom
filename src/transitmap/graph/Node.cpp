@@ -87,8 +87,11 @@ Node::~Node() {
       // careful with invalidating iterators
       e = _adjListOut.erase(e);
     } else {
+      eP->getFrom()->removeEdge(eP);
       e++;
     }
+
+    eP->getTo()->removeEdge(eP);
 
     delete eP;
   }
@@ -239,7 +242,6 @@ const {
     if (&nf == f) continue;
 
     for (const RouteOccurance& to : *nf.edge->getTripsUnordered()) {
-      std::cout << to.route << " vs " << r << std::endl;
       if (to.route == r) {
         Partner p;
         p.front = &nf;
@@ -346,7 +348,6 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
       if (!processed.insert(tripOcc.route).second) continue;
 
       std::vector<graph::Partner> partners = getPartner(&nf, tripOcc.route);
-      std::cout << partners.size() << std::endl;
 
       for (const graph::Partner& p : partners) {
         if (bezier) {

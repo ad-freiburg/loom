@@ -105,7 +105,7 @@ void Builder::simplify(Graph* g) {
 }
 
 // _____________________________________________________________________________
-ShrdSegWrap Builder::getNextSharedSegment(Graph* g) const {
+ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
   int i = 0;
   for (auto n : *g->getNodes()) {
     for (auto e : n->getAdjListOut()) {
@@ -122,8 +122,12 @@ ShrdSegWrap Builder::getNextSharedSegment(Graph* g) const {
           }
 
           if (e != toTest) {
-            // set dmax according to the width of the etg
-            double dmax = fmax(30, e->getEdgeTripGeoms()->front().getTotalWidth() / 2 + toTest->getEdgeTripGeoms()->front().getTotalWidth() / 2 + ((e->getEdgeTripGeoms()->front().getSpacing() + toTest->getEdgeTripGeoms()->front().getSpacing()) / 2));
+            double dmax = 5;
+
+            if (final) {
+              // set dmax according to the width of the etg
+              dmax = fmax(30, e->getEdgeTripGeoms()->front().getTotalWidth() / 2 + toTest->getEdgeTripGeoms()->front().getTotalWidth() / 2 + ((e->getEdgeTripGeoms()->front().getSpacing() + toTest->getEdgeTripGeoms()->front().getSpacing()) / 2));
+            }
 
             geo::SharedSegments s = e->getEdgeTripGeoms()->front().getGeom().getSharedSegments(toTest->getEdgeTripGeoms()->front().getGeom(), dmax);
 
@@ -153,13 +157,124 @@ ShrdSegWrap Builder::getNextSharedSegment(Graph* g) const {
 }
 
 // _____________________________________________________________________________
-bool Builder::createTopologicalNodes(Graph* g) {
+bool Builder::lineCrossesAtNode(const Node* a, const Edge* ea, const Edge* eb)
+const {
+  if (!(ea->getTo() == a || ea->getFrom() == a) ||
+    !(eb->getTo() == a || eb->getFrom() == a)) return false;
+
+  double lookDist = 100;
+  double minInAngle = 0.2;
+
+  const EdgeTripGeom& e = ea->getEdgeTripGeoms().front();
+  const EdgeTripGeom& f = eb->getEdgeTripGeoms().front();
+
+  double angleE = 0;
+  double angleF = 0;
+  double angleEPartner = 0;
+  double angleFPartner = 0;
+
+  if (e.getGeomDir() == a) {
+    // look at end of geom
+    Point a = e.getGeom().getLine().back();
+    Point b = e.getGeom().getPointAtDist(e.getGeom().getLength() - lookDist).p;
+    angleE = util::geo::angBetween(a, b);
+  } else {
+    // look at front of geom
+    Point a = e.getGeom().getLine().front();
+    Point b = e.getGeom().getPointAtDist(lookDist).p;
+    angleE = util::geo::angBetween(a, b);
+  }
+
+  if (f.getGeomDir() == a) {
+    // look at end of geom
+    Point a = f.getGeom().getLine().back();
+    Point b = f.getGeom().getPointAtDist(f.getGeom().getLength() - lookDist).p;
+    angleF = util::geo::angBetween(a, b);
+  } else {
+    // look at front of geom
+    Point a = f.getGeom().getLine().front();
+    Point b = f.getGeom().getPointAtDist(lookDist).p;
+    angleF = util::geo::angBetween(a, b);
+  }
+
+  double inDiff = fabs(angleE - angleF);
+
+  if (inDiff < minInAngle) return false;
+
+  bool eFound = false;
+  bool fFound = false;
+
+
+  // now lets get some edge that is not e or f and has all of e's routes
+
+  for (auto edge : a->getAdjList()) {
+    if (edge == ea || edge == eb) continue;
+    if (edge->getEdgeTripGeoms()->size() == 0) continue;
+    const EdgeTripGeom& etg = edge->getEdgeTripGeoms()->front();
+
+    if (etg.routeEquivalent(e)) {
+     if (etg.getGeomDir() != a) {
+        // look at end of geom
+        Point a = etg.getGeom().getLine().back();
+        Point b = etg.getGeom().getPointAtDist(etg.getGeom().getLength() - lookDist).p;
+        angleEPartner = util::geo::angBetween(a, b);
+      } else {
+        // look at front of geom
+        Point a = etg.getGeom().getLine().front();
+        Point b = etg.getGeom().getPointAtDist(lookDist).p;
+        angleEPartner = util::geo::angBetween(a, b);
+      }
+      eFound = true;
+      break;
+    }
+  }
+
+  for (auto edge : a->getAdjList()) {
+    if (edge == ea || edge == eb) continue;
+    if (edge->getEdgeTripGeoms()->size() == 0) continue;
+    const EdgeTripGeom& etg = edge->getEdgeTripGeoms()->front();
+
+    if (etg.routeEquivalent(f)) {
+     if (etg.getGeomDir() != a) {
+        // look at end of geom
+        Point a = etg.getGeom().getLine().back();
+        Point b = etg.getGeom().getPointAtDist(etg.getGeom().getLength() - lookDist).p;
+        angleFPartner = util::geo::angBetween(a, b);
+      } else {
+        // look at front of geom
+        Point a = etg.getGeom().getLine().front();
+        Point b = etg.getGeom().getPointAtDist(lookDist).p;
+        angleFPartner = util::geo::angBetween(a, b);
+      }
+      fFound = true;
+      break;
+    }
+  }
+
+  if (!eFound || !fFound) return false;
+
+  double outDiff = fabs(angleEPartner - angleFPartner);
+
+  if (outDiff < minInAngle) return false;
+
+  double aDiff = fabs(angleE - angleEPartner);
+  double bDiff = fabs(angleF - angleFPartner);
+
+  if (aDiff < 0.2 && bDiff < 0.2) {
+    return true;
+  }
+
+  return false;
+}
+
+// _____________________________________________________________________________
+bool Builder::createTopologicalNodes(Graph* g, bool final) {
   ShrdSegWrap w;
   _indEdges.clear();
   _pEdges.clear();
   bool found = false;
 
-  while ((w = getNextSharedSegment(g)).e) {
+  while ((w = getNextSharedSegment(g, final)).e) {
     const EdgeTripGeom& curEdgeGeom = w.e->getEdgeTripGeoms()->front();
     const EdgeTripGeom& compEdgeGeom = w.f->getEdgeTripGeoms()->front();
 
@@ -214,6 +329,9 @@ bool Builder::createTopologicalNodes(Graph* g) {
     if (a == b) {
       continue;
     }
+
+    if (lineCrossesAtNode(a, w.e, w.f)) continue;
+    if (lineCrossesAtNode(b, w.e, w.f)) continue;
 
     EdgeTripGeom eaEdgeGeom(ea, a, _cfg->lineWidth, _cfg->lineSpacing);
     EdgeTripGeom abEdgeGeom(ab, b, _cfg->lineWidth, _cfg->lineSpacing);
@@ -370,7 +488,7 @@ std::pair<bool, geo::PolyLine> Builder::getSubPolyLine(Stop* a, Stop* b,
 
   // TODO!!!!! REMOVE FALSE!!!! ONLY USE FOR FREIBURG TESTING!!!!
   if (distA > -1 && distA > -1 && totalTripDist > 0) {
-  // if (false && distA > -1 && distA > -1 && totalTripDist > 0) {
+  //if (false && distA > -1 && distA > -1 && totalTripDist > 0) {
     p = pl->second.getSegment((distA - t->getShape()->getPoints().begin()->travelDist) / totalTripDist, (distB - t->getShape()->getPoints().begin()->travelDist) / totalTripDist);
   } else {
     p = pl->second.getSegment(ap, bp);
@@ -386,7 +504,7 @@ void Builder::averageNodePositions(Graph* g) {
     double y = 0;
     size_t c = 0;
 
-    for (auto e : n->getAdjListOut()) {
+    for (auto e : n->getAdjList()) {
       for (auto eg : *e->getEdgeTripGeoms()) {
         if (eg.getGeomDir() != n) {
           x += eg.getGeom().getLine().front().get<0>();
@@ -399,20 +517,7 @@ void Builder::averageNodePositions(Graph* g) {
       }
     }
 
-    for (auto e : n->getAdjListIn()) {
-      for (auto eg : *e->getEdgeTripGeoms()) {
-        if (eg.getGeomDir() != n) {
-          x += eg.getGeom().getLine().front().get<0>();
-          y += eg.getGeom().getLine().front().get<1>();
-        } else {
-          x += eg.getGeom().getLine().back().get<0>();
-          y += eg.getGeom().getLine().back().get<1>();
-        }
-        c++;
-      }
-    }
-
-    n->setPos(Point(x/c, y/c));
+    if (c > 0) n->setPos(Point(x/c, y/c));
   }
 }
 
@@ -463,7 +568,7 @@ bool Builder::checkShapeSanity(gtfs::Shape* s) const {
 }
 
 // _____________________________________________________________________________
-void Builder::removeArtifacts(Graph* g) {
+void Builder::removeEdgeArtifacts(Graph* g) {
   double MIN_SEG_LENGTH = 20;
 
   restart:
@@ -484,6 +589,79 @@ void Builder::removeArtifacts(Graph* g) {
     }
   }
 }
+
+// _____________________________________________________________________________
+void Builder::removeNodeArtifacts(Graph* g) {
+  restart:
+  for (graph::Node* n : *g->getNodes()) {
+    std::vector<Edge*> edges;
+    edges.insert(edges.end(), n->getAdjListIn().begin(), n->getAdjListIn().end());
+    edges.insert(edges.end(), n->getAdjListOut().begin(), n->getAdjListOut().end());
+    if (edges.size() == 2 && n->getStops().size() == 0) {
+      const EdgeTripGeom& etga = *edges[0]->getEdgeTripGeoms()->begin();
+      const EdgeTripGeom& etgb = *edges[1]->getEdgeTripGeoms()->begin();
+
+      if (etga.routeEquivalent(etgb)) {
+        combineEdges(edges[0], edges[1], n, g);
+        // OMG really
+        goto restart;
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void Builder::combineEdges(Edge* a, Edge* b, Node* n, Graph* g) {
+  assert((a->getTo() == n || a->getFrom() ==n) && (b->getTo() == n || b->getFrom() == n));
+
+  if (a->getEdgeTripGeoms()->size() != 1 || b->getEdgeTripGeoms()->size() != 1) return;
+
+  EdgeTripGeom etga = *a->getEdgeTripGeoms()->begin();
+  const EdgeTripGeom& etgb = *b->getEdgeTripGeoms()->begin();
+
+  geo::PolyLine p = etga.getGeom();
+
+  if (etga.getGeomDir() == n) {
+    if (etgb.getGeomDir() == n) {
+      for (size_t i = etgb.getGeom().getLine().size(); i > 0; i--) {
+        p << etgb.getGeom().getLine()[i-1];
+      }
+    } else {
+      for (size_t i = 0; i < etgb.getGeom().getLine().size(); i++) {
+        p << etgb.getGeom().getLine()[i];
+      }
+    }
+  } else {
+    if (etgb.getGeomDir() == n) {
+      for (size_t i = etgb.getGeom().getLine().size(); i > 0; i--) {
+        p >> etgb.getGeom().getLine()[i-1];
+      }
+    } else {
+      for (size_t i = 0; i < etgb.getGeom().getLine().size(); i++) {
+        p >> etgb.getGeom().getLine()[i];
+      }
+    }
+  }
+
+  p.smoothenOutliers(50);
+  p.applyChaikinSmooth(3);
+  p.simplify(3);
+
+  Node* newFrom = a->getTo() == n ? a->getFrom() : a->getTo();
+  Node* newTo = b->getFrom() == n ? b->getTo() : b->getFrom();
+
+  if (etga.getGeomDir() == n) etga.setGeomDir(newTo);
+  etga.setGeom(p);
+
+  Edge* e = g->addEdge(newFrom, newTo);
+  e->addEdgeTripGeom(etga);
+
+  g->deleteEdge(a->getFrom(), a->getTo());
+  g->deleteEdge(b->getFrom(), b->getTo());
+  delete(n);
+  g->deleteNode(n);
+}
+
 
 // _____________________________________________________________________________
 void Builder::combineNodes(Node* a, Node* b, Graph* g) {
@@ -566,17 +744,11 @@ const {
     bool aDomin = lineDominatesSharedSeg(w, w.e);
     bool bDomin = lineDominatesSharedSeg(w, w.f);
     if (aDomin && !bDomin) {
-      std::cout << "a dominates" << std::endl;
       return a;
     }
 
     if (bDomin && !aDomin) {
-      std::cout << "b dominates" << std::endl;
       return b;
-    }
-
-    if (bDomin && aDomin) {
-      std::cout << "both dominate" << std::endl;
     }
   }
 
@@ -625,12 +797,8 @@ bool Builder::lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const {
     c = geom.getGeom().getPointAt(w.s.second.second.totalPos).p;
   }
 
-  std::cout << "AB angle: " << util::geo::angBetween(a, b) * 180/M_PI << std::endl;
-  std::cout << "CD angle: " << util::geo::angBetween(c, d) * 180/M_PI << std::endl;
-
   double ang = util::geo::angBetween(a, b) - util::geo::angBetween(c, d);
   double tang = fabs(tan(ang));
 
-  std::cout << tang << " vs " << DELTA << std::endl;
   return tang < DELTA;
 }
