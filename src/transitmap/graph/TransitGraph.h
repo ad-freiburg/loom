@@ -36,6 +36,8 @@ class TransitGraph {
     double s);
   Edge* getEdge(Node* from, Node* to);
 
+  void deleteEdge(Node* from, Node* to);
+
   const std::set<Node*>& getNodes() const;
   std::set<Node*>* getNodes();
 

@@ -3,6 +3,9 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <proj_api.h>
+#include <vector>
+#include <set>
+#include <stack>
 #include <istream>
 #include "GraphBuilder.h"
 #include "../geo/PolyLine.h"
@@ -79,6 +82,16 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
         Node* fromN = g->getNodeById(from);
         Node* toN = g->getNodeById(to);
+
+        if (!fromN) {
+          LOG(WARN) << "Node \"" << from << "\" not found." << std::endl;
+          continue;
+        }
+
+        if (!toN) {
+          LOG(WARN) << "Node \"" << to << "\" not found." << std::endl;
+          continue;
+        }
 
         if (util::geo::dist(fromN->getPos(), pl.getLine().back()) <
           util::geo::dist(fromN->getPos(), pl.getLine().front())) {
@@ -174,6 +187,169 @@ void GraphBuilder::expandOverlappinFronts(TransitGraph* g) {
     }
     if (!stillFree) break;
   }
+}
+
+// _____________________________________________________________________________
+void GraphBuilder::createMetaNodes(TransitGraph* g) {
+  std::vector<NodeFront> cands;
+  while ((cands = getNextMetaNodeCand(g)).size() > 0) {
+    std::cerr << "Candidate of size " << cands.size() << std::endl;
+
+    // remove all edges completely contained
+
+    for (auto nf : cands) {
+      auto onfs = getClosedNodeFronts(nf.n);
+
+      for (auto onf : onfs) {
+        const Edge* e = onf.edge;
+
+        bool found = false;
+
+        for (auto nf : cands) {
+          if (nf.n == e->getFrom()) {
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) continue;
+
+        for (auto nf : cands) {
+          if (nf.n == e->getTo()) {
+            found = true;
+            break;
+          }
+        }
+
+        g->deleteEdge(e->getTo(), e->getFrom());
+      }
+    }
+
+    // first node has new ref node id
+    Node* ref = new Node(cands[0].n->getId(), cands[0].n->getPos());
+    g->addNode(ref);
+
+    for (auto nf : cands) {
+      auto onf = getOpenNodeFronts(nf.n)[0];
+
+      if (onf.edge->getTo() == nf.n) {
+        onf.edge->setTo(ref);
+      } else {
+        onf.edge->setFrom(ref);
+      }
+
+      g->getNodes()->erase(onf.n);
+      onf.n = ref;
+      ref->addMainDir(onf);
+      ref->addEdge(onf.edge);
+    }
+
+  }
+}
+
+// _____________________________________________________________________________
+std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(TransitGraph* g) const {
+  for (auto n : *g->getNodes()) {
+    if (n->getStops().size()) continue;
+    std::cout << "Checking " << n->getId() << std::endl;
+    std::cout << getOpenNodeFronts(n).size() << std::endl;
+    if (getOpenNodeFronts(n).size() != 1) continue;
+
+    std::set<const Node*> potClique;
+
+    std::stack<const Node*> nodeStack;
+    nodeStack.push(n);
+
+    while (!nodeStack.empty()) {
+      auto nfronts = getClosedNodeFronts(nodeStack.top());
+      nodeStack.pop();
+      for (auto nf : nfronts) {
+        if (getOpenNodeFronts(nf.n).size() == 1 &&
+            nf.n->getStops().size() == 0) {
+          potClique.insert(nf.n);
+          for (auto nff : getClosedNodeFronts(nf.n)) {
+            const Node* m;
+
+            if (nff.edge->getTo() == nf.n) {
+              m = nff.edge->getFrom();
+            } else {
+              m = nff.edge->getTo();
+            }
+
+            if (potClique.find(m) == potClique.end()) {
+              nodeStack.push(m);
+            }
+          }
+        }
+      }
+    }
+
+    std::cout << "Checking clique" << std::endl;
+    for (const Node* n : potClique) {
+      std::cout << n->getId() << std::endl;
+    }
+
+
+    if (isClique(potClique)) {
+      std::vector<NodeFront> ret;
+
+      for (auto n : potClique) {
+        ret.push_back(getOpenNodeFronts(n)[0]);
+      }
+
+      return ret;
+    }
+  }
+
+  return std::vector<NodeFront>();
+}
+
+// _____________________________________________________________________________
+bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
+  if (potClique.size() < 2) return false;
+  for (const Node* n : potClique) {
+    for (auto nf : getClosedNodeFronts(n)) {
+      if (nf.edge->getTo() == n) {
+        if (potClique.find(nf.edge->getFrom()) == potClique.end()) return false;
+      } else {
+        if (potClique.find(nf.edge->getTo()) == potClique.end()) return false;
+      }
+    }
+
+    for (auto nf : getOpenNodeFronts(n)) {
+      if (nf.edge->getTo() == n) {
+        if (potClique.find(nf.edge->getFrom()) != potClique.end()) return false;
+      } else {
+        if (potClique.find(nf.edge->getTo()) != potClique.end()) return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+// _____________________________________________________________________________
+std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(const Node* n) const {
+  std::vector<NodeFront> res;
+  for (auto nf : n->getMainDirs()) {
+    if (nf.edge->getGeom().getLength() > 5) {
+      res.push_back(nf);
+    }
+  }
+
+  return res;
+}
+
+// _____________________________________________________________________________
+std::vector<NodeFront> GraphBuilder::getClosedNodeFronts(const Node* n) const {
+  std::vector<NodeFront> res;
+  for (auto nf : n->getMainDirs()) {
+    if (!(nf.edge->getGeom().getLength() > 5)) {
+      res.push_back(nf);
+    }
+  }
+
+  return res;
 }
 
 // _____________________________________________________________________________

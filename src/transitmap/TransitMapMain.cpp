@@ -51,6 +51,8 @@ int main(int argc, char** argv) {
     b.writeMainDirs(&g);
     b.expandOverlappinFronts(&g);
 
+    b.createMetaNodes(&g);
+
     LOG(INFO) << "Writing initial ordering configuration..." << std::endl;
     b.writeInitialConfig(&g);
 

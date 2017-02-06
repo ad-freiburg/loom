@@ -27,6 +27,16 @@ Node* Edge::getTo() const {
 }
 
 // _____________________________________________________________________________
+void Edge::setFrom(Node* f) {
+  _from = f;
+}
+
+// _____________________________________________________________________________
+void Edge::setTo(Node* t) {
+  _to = t;
+}
+
+// _____________________________________________________________________________
 const std::vector<RouteOccurance>& Edge::getTripsUnordered()
 const {
   return _routes;

@@ -7,6 +7,8 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include <vector>
+#include <set>
 #include <proj_api.h>
 #include "TransitGraph.h"
 #include "gtfsparser/gtfs/Feed.h"
@@ -34,6 +36,7 @@ class GraphBuilder {
   void writeMainDirs(TransitGraph* g);
   void expandOverlappinFronts(TransitGraph* g);
   void writeInitialConfig(TransitGraph* g);
+  void createMetaNodes(TransitGraph* g);
 
  private:
   const config::Config* _cfg;
@@ -41,6 +44,11 @@ class GraphBuilder {
 
   std::set<NodeFront*> nodeGetOverlappingFronts(const Node* n) const;
   void freeNodeFront(NodeFront* f);
+
+  std::vector<NodeFront> getNextMetaNodeCand(TransitGraph* g) const;
+  std::vector<NodeFront> getOpenNodeFronts(const Node* n) const;
+  std::vector<NodeFront> getClosedNodeFronts(const Node* n) const;
+  bool isClique(std::set<const Node*> potClique) const;
 
   bool nodeFrontsOverlap(const NodeFront& a, const NodeFront& b) const;
   mutable std::set<const Edge*> _indEdges;

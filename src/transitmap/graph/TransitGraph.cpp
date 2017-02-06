@@ -104,6 +104,19 @@ Edge* TransitGraph::addEdge(Node* from, Node* to, geo::PolyLine pl, double w,
 }
 
 // _____________________________________________________________________________
+void TransitGraph::deleteEdge(Node* from, Node* to) {
+  Edge* toDel = getEdge(from, to);
+  if (!toDel) return;
+
+  from->removeEdge(toDel);
+  to->removeEdge(toDel);
+
+  assert(!getEdge(from, to));
+
+  delete toDel;
+}
+
+// _____________________________________________________________________________
 Route* TransitGraph::addRoute(const Route* r) {
   if (!getRoute(r->id)) {
     _routes[r->id] = r;
