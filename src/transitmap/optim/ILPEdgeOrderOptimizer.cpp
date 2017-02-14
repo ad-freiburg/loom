@@ -637,10 +637,13 @@ const {
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
+          int coef = 2;
+          coef *= node->adjList.size();
+
           if (node->node->getStops().size() > 0) {
-            glp_set_obj_coef(lp, decisionVar, 3);
+            glp_set_obj_coef(lp, decisionVar, 3 * coef);
           } else {
-            glp_set_obj_coef(lp, decisionVar, 1);
+            glp_set_obj_coef(lp, decisionVar, coef);
           }
 
           size_t aSmallerBinL1 = 0;
@@ -742,10 +745,6 @@ const {
       processed.insert(segmentA);
       // iterate over all possible line pairs in this segment
       for (LinePair linepair : getLinePairs(segmentA)) {
-        // iterate over all edges this
-        // pair traverses to _TOGETHER_
-        // (its possible that there are multiple edges if a line continues
-        //  in more then 1 segment)
         for (EdgePair segments : getEdgePartnerPairs(node, segmentA, linepair)) {
           // if (processed.find(segmentB) != processed.end()) continue;
 
@@ -762,10 +761,14 @@ const {
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
+          int coef = 1;
+          coef *= node->adjList.size();
+
+
           if (node->node->getStops().size() > 0) {
-            glp_set_obj_coef(lp, decisionVar, 3);
+            glp_set_obj_coef(lp, decisionVar, 3 * coef);
           } else {
-            glp_set_obj_coef(lp, decisionVar, 1);
+            glp_set_obj_coef(lp, decisionVar, 1 * coef);
           }
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
@@ -830,10 +833,6 @@ const {
       processed.insert(segmentA);
       // iterate over all possible line pairs in this segment
       for (LinePair linepair : getLinePairs(segmentA)) {
-        // iterate over all edges this
-        // pair traverses to _TOGETHER_
-        // (its possible that there are multiple edges if a line continues
-        //  in more then 1 segment)
         for (EdgePair segments : getEdgePartnerPairs(node, segmentA, linepair)) {
           // if (processed.find(segmentB) != processed.end()) continue;
 
