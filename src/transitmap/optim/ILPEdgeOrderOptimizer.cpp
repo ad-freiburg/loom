@@ -22,7 +22,7 @@ void ILPEdgeOrderOptimizer::optimize() {
   g.simplify();
 
   output::OgrOutput ogrOut("/home/patrick/optimgraph", _cfg);
-  //ogrOut.print(g);
+  ogrOut.print(g);
 
   LOG(DEBUG) << "Creating ILP problem... " << std::endl;
   glp_prob* lp = createProblemImpr(g);
@@ -941,11 +941,34 @@ std::string ILPEdgeOrderOptimizer::getILPVarName(OptEdge* seg,
 std::vector<OptEdge*> ILPEdgeOrderOptimizer::getEdgePartners(OptNode* node,
   OptEdge* segmentA, const LinePair& linepair) const {
   std::vector<OptEdge*> ret;
+
+  const Node* routeDirA = 0;
+  const Node* routeDirB = 0;
+
+  // outfactor (see below)
+  if (segmentA->from == node) {
+    routeDirA = segmentA->getFirstEdge().etg->getTripsForRoute(linepair.first)->direction;
+    routeDirB = segmentA->getFirstEdge().etg->getTripsForRoute(linepair.second)->direction;
+  } else {
+    routeDirA = segmentA->getLastEdge().etg->getTripsForRoute(linepair.first)->direction;
+    routeDirB = segmentA->getLastEdge().etg->getTripsForRoute(linepair.second)->direction;
+  }
+  //
+
   for (OptEdge* segmentB : node->adjList) {
     if (segmentB == segmentA) continue;
-    graph::Edge* etg = segmentB->etgs[0].etg;
-    if (etg->getTripsForRoute(linepair.first) &&
-        etg->getTripsForRoute(linepair.second)) {
+    graph::Edge* etg = 0;
+
+    // outfactor (see below)
+    if (segmentB->from == node) {
+      etg = segmentB->getFirstEdge().etg;
+    } else {
+      etg = segmentB->getLastEdge().etg;
+    }
+    //
+
+    if (etg->getContinuedRoutesIn(node->node, linepair.first, routeDirA).size() &&
+      etg->getContinuedRoutesIn(node->node, linepair.second, routeDirB).size()) {
       ret.push_back(segmentB);
     }
   }
@@ -956,16 +979,52 @@ std::vector<OptEdge*> ILPEdgeOrderOptimizer::getEdgePartners(OptNode* node,
 std::vector<EdgePair> ILPEdgeOrderOptimizer::getEdgePartnerPairs(OptNode* node,
   OptEdge* segmentA, const LinePair& linepair) const {
   std::vector<EdgePair> ret;
+
+  const Node* routeDirA = 0;
+  const Node* routeDirB = 0;
+
+  // outfactor (see above)
+  if (segmentA->from == node) {
+    routeDirA = segmentA->getFirstEdge().etg->getTripsForRoute(linepair.first)->direction;
+    routeDirB = segmentA->getFirstEdge().etg->getTripsForRoute(linepair.second)->direction;
+  } else {
+    routeDirA = segmentA->getLastEdge().etg->getTripsForRoute(linepair.first)->direction;
+    routeDirB = segmentA->getLastEdge().etg->getTripsForRoute(linepair.second)->direction;
+  }
+  //
+
   for (OptEdge* segmentB : node->adjList) {
     if (segmentB == segmentA) continue;
-    graph::Edge* etg = segmentB->etgs[0].etg;
-    if (etg->getTripsForRoute(linepair.first)) {
+
+    graph::Edge* etg = 0;
+
+    // outfactor (see below and above)
+    if (segmentB->from == node) {
+      etg = segmentB->getFirstEdge().etg;
+    } else {
+      etg = segmentB->getLastEdge().etg;
+    }
+    //
+
+    if (etg->getContinuedRoutesIn(node->node, linepair.first, routeDirA).size()) {
       EdgePair curPair;
       curPair.first = segmentB;
       for (OptEdge* segmentC : node->adjList) {
         if (segmentC == segmentA || segmentC == segmentB) continue;
-        graph::Edge* etg = segmentC->etgs[0].etg;
-        if (etg->getTripsForRoute(linepair.second)) {
+
+
+        graph::Edge* etg = 0;
+
+        // outfactor (see above)
+        if (segmentC->from == node) {
+          etg = segmentC->getFirstEdge().etg;
+        } else {
+          etg = segmentC->getLastEdge().etg;
+        }
+        //
+
+
+        if (etg->getContinuedRoutesIn(node->node, linepair.second, routeDirB).size()) {
           curPair.second = segmentC;
           ret.push_back(curPair);
         }

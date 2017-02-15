@@ -105,7 +105,7 @@ class Node {
   double getScoreUnder(const graph::Configuration& c, const Edge* e, const graph::Ordering* order) const;
   double getAreaScore(const Configuration& c, const Edge* e, const graph::Ordering* order) const;
   double getAreaScore(const Configuration& c) const;
-  std::vector<Partner> getPartner(const NodeFront* f, const Route* r) const;
+  std::vector<Partner> getPartners(const NodeFront* f, const RouteOccurance& ro) const;
 
   std::vector<InnerGeometry> getInnerGeometries(const graph::Configuration& c,
       bool bezier) const;

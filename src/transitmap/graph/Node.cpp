@@ -235,20 +235,18 @@ double Node::getAreaScore(const Configuration& c) const {
 }
 
 // _____________________________________________________________________________
-std::vector<Partner> Node::getPartner(const NodeFront* f, const Route* r)
-const {
+std::vector<Partner> Node::getPartners(const NodeFront* f,
+  const RouteOccurance& ro) const {
   std::vector<Partner> ret;
   for (const auto& nf : getMainDirs()) {
     if (&nf == f) continue;
 
-    for (const RouteOccurance& to : *nf.edge->getTripsUnordered()) {
-      if (to.route == r) {
-        Partner p;
-        p.front = &nf;
-        p.edge = nf.edge;
-        p.route = to.route;
-        ret.push_back(p);
-      }
+    for (const RouteOccurance& to : nf.edge->getContinuedRoutesIn(this, ro.route, ro.direction)) {
+      Partner p;
+      p.front = &nf;
+      p.edge = nf.edge;
+      p.route = to.route;
+      ret.push_back(p);
     }
   }
   return ret;
@@ -333,7 +331,8 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
     const Edge* e, const graph::Ordering* order) const {
   std::vector<InnerGeometry> ret;
 
-  std::set<const Route*> processed;
+  std::map<const Route*, std::set<const NodeFront*> > processed;
+
   for (size_t i = 0; i < getMainDirs().size(); ++i) {
     const graph::NodeFront& nf = getMainDirs()[i];
 
@@ -343,23 +342,28 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
       ordering = order;
     }
 
-    for (size_t i : *ordering) {
-      const RouteOccurance& tripOcc = (*nf.edge->getTripsUnordered())[i];
-      if (!processed.insert(tripOcc.route).second) continue;
+    for (size_t j : *ordering) {
+      const RouteOccurance& routeOcc = (*nf.edge->getTripsUnordered())[j];
 
-      std::vector<graph::Partner> partners = getPartner(&nf, tripOcc.route);
+      std::vector<graph::Partner> partners = getPartners(&nf, routeOcc);
 
       for (const graph::Partner& p : partners) {
+        if (processed[routeOcc.route].find(p.front) != processed[routeOcc.route].end()) {
+          continue;
+        }
+
         if (bezier) {
           ret.push_back(InnerGeometry(
-              getInnerBezier(c, nf, tripOcc, p, e, order),
+              getInnerBezier(c, nf, routeOcc, p, e, order),
               p.route, nf.edge));
         } else {
           ret.push_back(InnerGeometry(
-              getInnerStraightLine(c, nf, tripOcc, p, e, order),
+              getInnerStraightLine(c, nf, routeOcc, p, e, order),
               p.route, nf.edge));
         }
       }
+
+      processed[routeOcc.route].insert(&nf);
     }
 
 

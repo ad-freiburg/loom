@@ -8,6 +8,24 @@ using namespace transitmapper;
 using namespace optim;
 
 // _____________________________________________________________________________
+EtgPart OptEdge::getFirstEdge() const {
+  for (const auto e : etgs) {
+    if (e.etg->getFrom() == from->node || e.etg->getTo() == from->node) {
+      return e;
+    }
+  }
+}
+
+// _____________________________________________________________________________
+EtgPart OptEdge::getLastEdge() const {
+  for (const auto e : etgs) {
+    if (e.etg->getFrom() == to->node || e.etg->getTo() == to->node) {
+      return e;
+    }
+  }
+}
+
+// _____________________________________________________________________________
 OptGraph::OptGraph(TransitGraph* toOptim) : _g(toOptim) {
   build();
 }
@@ -43,6 +61,8 @@ void OptGraph::build() {
       to->addEdge(edge);
 
       edge->etgs.push_back(EtgPart(e, e->getTo() == toTn));
+
+
     }
   }
 }
@@ -80,12 +100,16 @@ bool OptGraph::simplifyStep() {
 
       bool equal = first->etgs.front().etg->getCardinality() ==
           second->etgs.front().etg->getCardinality();
+
+
       for (auto& to : *first->etgs.front().etg->getTripsUnordered()) {
-        if (!second->etgs.front().etg->containsRoute(to.route)) {
+        if (!second->etgs.front().etg->getSameDirRoutesIn(n->node, to.route, to.direction).size()) {
+
           equal = false;
           break;
         }
       }
+
 
       if (equal) {
         OptNode* newFrom = 0;

@@ -48,6 +48,46 @@ std::vector<RouteOccurance>* Edge::getTripsUnordered() {
 }
 
 // _____________________________________________________________________________
+std::vector<RouteOccurance> Edge::getContinuedRoutesIn(const Node* n, 
+  const Route* r, const Node* dir) const {
+
+  std::vector<RouteOccurance> ret;
+
+  for (const RouteOccurance& to : _routes) {
+    if (to.route == r) {
+      if (to.direction == 0 || dir == 0 ||
+        (to.direction == n && dir != n) ||
+        (to.direction != n && dir == n)) {
+
+        ret.push_back(to);
+      }
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::vector<RouteOccurance> Edge::getSameDirRoutesIn(const Node* n, 
+  const Route* r, const Node* dir) const {
+
+  std::vector<RouteOccurance> ret;
+
+  for (const RouteOccurance& to : _routes) {
+    if (to.route == r) {
+      if ((to.direction == 0 && dir == 0) ||
+        (to.direction == n && dir != 0 && dir != n) ||
+        (to.direction != n && to.direction != 0 && dir == n)) {
+
+        ret.push_back(to);
+      }
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
 RouteOccurance* Edge::getTripsForRoute(const Route* r) const {
   for (size_t i = 0; i < _routes.size(); i++) {
     RouteOccurance* to = const_cast<RouteOccurance*>(&_routes[i]);

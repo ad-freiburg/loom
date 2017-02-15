@@ -35,6 +35,9 @@ struct OptEdge {
   OptNode* to;
   OptEdge(OptNode* from, OptNode* to) : from(from), to(to) {};
 
+  EtgPart getFirstEdge() const;
+  EtgPart getLastEdge() const;
+
   std::string getStrRepr() const {
     const void* address = static_cast<const void*>(this);
     std::stringstream ss;

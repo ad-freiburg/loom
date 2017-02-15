@@ -66,6 +66,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
       auto props = feature["properties"];
       auto geom = feature["geometry"];
       if (geom["type"] == "LineString") {
+        if (props["lines"].is_null() || props["lines"].size() == 0) continue;
         std::string from = props["from"];
         std::string to = props["to"];
 
@@ -114,7 +115,15 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
             g->addRoute(r);
           }
 
-          e->addRoute(r, 0);
+          Node* dir = 0;
+
+          if (!route["direction"].is_null()) {
+            dir = g->getNodeById(route["direction"]);
+            std::cerr << "dir: " << dir << std::endl;
+          }
+
+
+          e->addRoute(r, dir);
         }
       }
     }
