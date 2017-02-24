@@ -46,6 +46,31 @@ void JsonOutput::print(const graph::Graph& outG) {
       feature["properties"]["station_label"] = (*n->getStops().begin())->getName();
     }
 
+    auto arr = json::array();
+
+    for (graph::Edge* e : n->getAdjListOut()) {
+      for (auto r : *e->getEdgeTripGeoms()->front().getTripsUnordered()) {
+        for (graph::Edge* f : n->getAdjListOut()) {
+          if (e == f) continue;
+          for (auto rr : *f->getEdgeTripGeoms()->front().getTripsUnordered()) {
+            if (r.route == rr.route && 
+              (r.direction == 0 || rr.direction == 0 ||
+                (r.direction == n && rr.direction != n) ||
+                (r.direction != n && rr.direction == n))
+              && !n->isConnOccuring(r.route, e, f)) {
+              auto obj = json::object();
+              obj["route"] = boost::lexical_cast<std::string>(r.route);
+              obj["edge1_node"] = boost::lexical_cast<std::string>(e->getFrom() == n ? e->getTo() : e->getFrom());
+              obj["edge2_node"] = boost::lexical_cast<std::string>(f->getFrom() == n ? f->getTo() : f->getFrom());
+              arr.push_back(obj);
+            }
+          }
+        }
+      }
+    }
+
+    if (arr.size()) feature["properties"]["excluded_line_connections"] = arr;
+
     geoj["features"].push_back(feature);
   }
 
@@ -75,6 +100,11 @@ void JsonOutput::print(const graph::Graph& outG) {
           route["id"] = boost::lexical_cast<std::string>(r.route);
           route["label"] = r.route->getShortName();
           route["color"] = r.route->getColorString();
+
+          if (r.direction != 0) {
+            route["direction"] = boost::lexical_cast<std::string>(r.direction);
+          }
+
           feature["properties"]["lines"].push_back(route);
         }
 

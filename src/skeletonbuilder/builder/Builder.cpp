@@ -38,6 +38,7 @@ void Builder::consume(const Feed& f, Graph* g) {
     auto st = t->second->getStopTimes().begin();
 
     StopTime prev = *st;
+    const Edge* prevEdge = 0;
     addStop(prev.getStop(), AGGREGATE_STOPS, g);
     ++st;
 
@@ -72,11 +73,16 @@ void Builder::consume(const Feed& f, Graph* g) {
         // only take geometries that could be found using the
         // shape geometry, not some fallback
         if (edgeGeom.first) {
+          if (prevEdge) {
+            fromNode->connOccurs(t->second->getRoute(), prevEdge, exE);
+          }
+
           exE->addTrip(t->second, edgeGeom.second, toNode,
               _cfg->lineWidth, _cfg->lineSpacing);
         }
       }
       prev = cur;
+      prevEdge = exE;
     }
   }
 }

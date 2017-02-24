@@ -122,3 +122,26 @@ std::set<Edge*> Node::getAdjList() const {
 
   return edges;
 }
+
+// _____________________________________________________________________________
+bool Node::isConnOccuring(const gtfs::Route* r, const Edge* from, const Edge* to)
+const {
+  auto it = _occConns.find(r);
+  if (it == _occConns.end()) return false;
+
+  for (auto occ : it->second) {
+    if ((occ.from == from && occ.to == to) || (occ.from == to && occ.to == from))
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// _____________________________________________________________________________
+void Node::connOccurs(const gtfs::Route* r, const Edge* from, const Edge* to) {
+  if (isConnOccuring(r, from, to)) return;
+
+  _occConns[r].push_back(OccuringConnection(from, to));
+}

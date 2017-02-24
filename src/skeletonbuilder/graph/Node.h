@@ -27,6 +27,12 @@ class Graph;
 
 using util::geo::Point;
 
+struct OccuringConnection {
+  OccuringConnection(const Edge* from, const Edge* to) : from(from), to(to) {}
+  const Edge* from;
+  const Edge* to;
+};
+
 class Node {
 
  public:
@@ -53,12 +59,18 @@ class Node {
   // remove edge from this node's adjacency lists
   void removeEdge(Edge* e);
 
+  bool isConnOccuring(const gtfs::Route*, const Edge* from, const Edge* to) const;
+
+  void connOccurs(const gtfs::Route*, const Edge* from, const Edge* to);
+
  private:
   std::set<Edge*> _adjListIn;
   std::set<Edge*> _adjListOut;
   Point _pos;
 
   std::set<gtfs::Stop*> _stops;
+
+  std::map<const gtfs::Route*, std::vector<OccuringConnection> > _occConns;
 
   friend class Graph;
 };
