@@ -61,7 +61,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
       }
     }
 
-    // second pass, nodes
+    // second pass, edges
     for (auto feature : j["features"]) {
       auto props = feature["properties"];
       auto geom = feature["geometry"];
@@ -119,14 +119,83 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
           if (!route["direction"].is_null()) {
             dir = g->getNodeById(route["direction"]);
-            std::cerr << "dir: " << dir << std::endl;
           }
 
 
           e->addRoute(r, dir);
         }
+
       }
     }
+
+
+    // third pass, exceptions (TODO: do this in the first part, store in some data strcuture,
+    //  add here!)
+    for (auto feature : j["features"]) {
+      auto props = feature["properties"];
+      auto geom = feature["geometry"];
+      if (geom["type"] == "Point") {
+        std::string id = props["id"];
+
+        Node* n = g->getNodeById(id);
+
+        if (!n) continue;
+
+        if (!props["excluded_line_connections"].is_null()) {
+          for (auto excl : props["excluded_line_connections"]) {
+            std::string rid = excl["route"];
+            std::string nid1 = excl["edge1_node"];
+            std::string nid2 = excl["edge2_node"];
+
+            const Route* r = g->getRoute(rid);
+
+            if (!r) {
+              LOG(WARN) << "line connection exclude defined in node " << id 
+                << " for line " << rid
+                << ", but no such line exists." << std::endl;
+              continue;
+            }
+
+            Node* n1 = g->getNodeById(nid1);
+            Node* n2 = g->getNodeById(nid2);
+
+            if (!n1) {
+              LOG(WARN) << "line connection exclude defined in node " << id 
+                << " for edge from " << nid1
+                << ", but no such node exists." << std::endl;
+              continue;
+            }
+
+            if (!n2) {
+              LOG(WARN) << "line connection exclude defined in node " << id 
+                << " for edge from " << nid2
+                << ", but no such node exists." << std::endl;
+              continue;
+            }
+              
+            Edge* a = n->getEdge(n1);
+            Edge* b = n->getEdge(n2);
+
+            if (!a) {
+              LOG(WARN) << "line connection exclude defined in node " << id 
+                << " for edge from " << nid1
+                << ", but no such edge exists." << std::endl;
+              continue;
+            }
+
+            if (!b) {
+              LOG(WARN) << "line connection exclude defined in node " << id 
+                << " for edge from " << nid2
+                << ", but no such edge exists." << std::endl;
+              continue;
+            }
+
+            n->addRouteConnException(r, a, b);
+          }
+        }
+      }
+    }
+
   } else {
     LOG(ERROR) << "Could not read input." << std::endl;
     return false;

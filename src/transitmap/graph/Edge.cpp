@@ -49,7 +49,7 @@ std::vector<RouteOccurance>* Edge::getTripsUnordered() {
 
 // _____________________________________________________________________________
 std::vector<RouteOccurance> Edge::getContinuedRoutesIn(const Node* n, 
-  const Route* r, const Node* dir) const {
+  const Route* r, const Node* dir, const Edge* fromEdge) const {
 
   std::vector<RouteOccurance> ret;
 
@@ -59,7 +59,11 @@ std::vector<RouteOccurance> Edge::getContinuedRoutesIn(const Node* n,
         (to.direction == n && dir != n) ||
         (to.direction != n && dir == n)) {
 
-        ret.push_back(to);
+        if (n->connOccurs(r, fromEdge, this)) {
+          ret.push_back(to);
+        } else {
+          std::cout << "test" << std::endl;
+        }
       }
     }
   }
@@ -69,7 +73,7 @@ std::vector<RouteOccurance> Edge::getContinuedRoutesIn(const Node* n,
 
 // _____________________________________________________________________________
 std::vector<RouteOccurance> Edge::getSameDirRoutesIn(const Node* n, 
-  const Route* r, const Node* dir) const {
+  const Route* r, const Node* dir, const Edge* fromEdge) const {
 
   std::vector<RouteOccurance> ret;
 
@@ -79,7 +83,9 @@ std::vector<RouteOccurance> Edge::getSameDirRoutesIn(const Node* n,
         (to.direction == n && dir != 0 && dir != n) ||
         (to.direction != n && to.direction != 0 && dir == n)) {
 
-        ret.push_back(to);
+        if (n->connOccurs(r, fromEdge, this)) {
+          ret.push_back(to);
+        }
       }
     }
   }
@@ -144,8 +150,7 @@ double Edge::getTotalWidth() const {
 }
 
 // _____________________________________________________________________________
-std::vector<const Route*> Edge::getSharedRoutes(const Edge& e)
-const {
+std::vector<const Route*> Edge::getSharedRoutes(const Edge& e) const {
   std::vector<const Route*> ret;
   for (auto& to : _routes) {
     if (e.containsRoute(to.route)) ret.push_back(to.route);

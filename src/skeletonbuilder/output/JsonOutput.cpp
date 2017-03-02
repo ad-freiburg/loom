@@ -48,9 +48,9 @@ void JsonOutput::print(const graph::Graph& outG) {
 
     auto arr = json::array();
 
-    for (graph::Edge* e : n->getAdjListOut()) {
+    for (graph::Edge* e : n->getAdjList()) {
       for (auto r : *e->getEdgeTripGeoms()->front().getTripsUnordered()) {
-        for (graph::Edge* f : n->getAdjListOut()) {
+        for (graph::Edge* f : n->getAdjList()) {
           if (e == f) continue;
           for (auto rr : *f->getEdgeTripGeoms()->front().getTripsUnordered()) {
             if (r.route == rr.route && 

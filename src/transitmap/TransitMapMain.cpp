@@ -9,7 +9,6 @@
 #include <set>
 #include <stdio.h>
 #include "log/Log.h"
-#include "gtfsparser/Parser.h"
 #include "./graph/TransitGraph.h"
 #include "./graph/GraphBuilder.h"
 #include "./graph/Node.h"
@@ -17,7 +16,6 @@
 #include "./output/SvgOutput.h"
 #include "./output/OgrOutput.h"
 #include "./geo/PolyLine.h"
-#include "./gtfsparser/gtfs/Service.h"
 #include "./optim/EdgeOrderOptimizer.h"
 #include "./optim/ILPEdgeOrderOptimizer.h"
 #include "./config/ConfigReader.cpp"

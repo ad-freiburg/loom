@@ -139,6 +139,8 @@ void Node::removeEdge(Edge* e) {
       _mainDirs.erase(_mainDirs.begin() + i);
     }
   }
+
+  // TODO: remove from _routeConnExceptions
 }
 
 // _____________________________________________________________________________
@@ -241,7 +243,7 @@ std::vector<Partner> Node::getPartners(const NodeFront* f,
   for (const auto& nf : getMainDirs()) {
     if (&nf == f) continue;
 
-    for (const RouteOccurance& to : nf.edge->getContinuedRoutesIn(this, ro.route, ro.direction)) {
+    for (const RouteOccurance& to : nf.edge->getContinuedRoutesIn(this, ro.route, ro.direction, f->edge)) {
       Partner p;
       p.front = &nf;
       p.edge = nf.edge;
@@ -434,4 +436,41 @@ size_t Node::getNodeFrontPos(const NodeFront* a) const {
   }
 
   return _mainDirs.size();
+}
+
+// _____________________________________________________________________________
+void Node::addRouteConnException(const Route* r, const Edge* edgeA, const Edge* edgeB) {
+  _routeConnExceptions[r][edgeA].insert(edgeB);
+  // index the other direction also, will lead to faster lookups later on
+  _routeConnExceptions[r][edgeB].insert(edgeA);
+}
+
+// _____________________________________________________________________________
+bool Node::connOccurs(const Route* r, const Edge* edgeA, const Edge* edgeB)
+const {
+  const auto& i = _routeConnExceptions.find(r);
+  if (i == _routeConnExceptions.end()) return true;
+  const auto& ii = i->second.find(edgeA);
+  if (ii == i->second.end()) return true;
+
+  return ii->second.find(edgeB) == ii->second.end();
+}
+
+// _____________________________________________________________________________
+Edge* Node::getEdge(const Node* other) const {
+  for (auto e = _adjListOut.begin(); e != _adjListOut.end(); ++e) {
+    Edge* eP = *e;
+
+    if (eP->getTo() == other) {
+      return eP;
+    } 
+  }
+
+  for (auto e = _adjListIn.begin(); e != _adjListIn.end(); ++e) {
+    Edge* eP = *e;
+
+    if (eP->getFrom() == other) {
+      return eP;
+    } 
+  }
 }

@@ -945,19 +945,23 @@ std::vector<OptEdge*> ILPEdgeOrderOptimizer::getEdgePartners(OptNode* node,
   const Node* routeDirA = 0;
   const Node* routeDirB = 0;
 
+  graph::Edge* fromEtg = 0;
+
   // outfactor (see below)
   if (segmentA->from == node) {
-    routeDirA = segmentA->getFirstEdge().etg->getTripsForRoute(linepair.first)->direction;
-    routeDirB = segmentA->getFirstEdge().etg->getTripsForRoute(linepair.second)->direction;
+    fromEtg = segmentA->getFirstEdge().etg;
   } else {
-    routeDirA = segmentA->getLastEdge().etg->getTripsForRoute(linepair.first)->direction;
-    routeDirB = segmentA->getLastEdge().etg->getTripsForRoute(linepair.second)->direction;
+    fromEtg = segmentA->getLastEdge().etg;
   }
+
+  routeDirA = fromEtg->getTripsForRoute(linepair.first)->direction;
+  routeDirB = fromEtg->getTripsForRoute(linepair.second)->direction;
   //
 
   for (OptEdge* segmentB : node->adjList) {
     if (segmentB == segmentA) continue;
     graph::Edge* etg = 0;
+    graph::Edge* fromEtg = 0;
 
     // outfactor (see below)
     if (segmentB->from == node) {
@@ -967,8 +971,8 @@ std::vector<OptEdge*> ILPEdgeOrderOptimizer::getEdgePartners(OptNode* node,
     }
     //
 
-    if (etg->getContinuedRoutesIn(node->node, linepair.first, routeDirA).size() &&
-      etg->getContinuedRoutesIn(node->node, linepair.second, routeDirB).size()) {
+    if (etg->getContinuedRoutesIn(node->node, linepair.first, routeDirA, fromEtg).size() &&
+      etg->getContinuedRoutesIn(node->node, linepair.second, routeDirB, fromEtg).size()) {
       ret.push_back(segmentB);
     }
   }
@@ -983,14 +987,17 @@ std::vector<EdgePair> ILPEdgeOrderOptimizer::getEdgePartnerPairs(OptNode* node,
   const Node* routeDirA = 0;
   const Node* routeDirB = 0;
 
-  // outfactor (see above)
+  graph::Edge* fromEtg = 0;
+
+  // outfactor (see below)
   if (segmentA->from == node) {
-    routeDirA = segmentA->getFirstEdge().etg->getTripsForRoute(linepair.first)->direction;
-    routeDirB = segmentA->getFirstEdge().etg->getTripsForRoute(linepair.second)->direction;
+    fromEtg = segmentA->getFirstEdge().etg;
   } else {
-    routeDirA = segmentA->getLastEdge().etg->getTripsForRoute(linepair.first)->direction;
-    routeDirB = segmentA->getLastEdge().etg->getTripsForRoute(linepair.second)->direction;
+    fromEtg = segmentA->getLastEdge().etg;
   }
+
+  routeDirA = fromEtg->getTripsForRoute(linepair.first)->direction;
+  routeDirB = fromEtg->getTripsForRoute(linepair.second)->direction;
   //
 
   for (OptEdge* segmentB : node->adjList) {
@@ -1006,7 +1013,7 @@ std::vector<EdgePair> ILPEdgeOrderOptimizer::getEdgePartnerPairs(OptNode* node,
     }
     //
 
-    if (etg->getContinuedRoutesIn(node->node, linepair.first, routeDirA).size()) {
+    if (etg->getContinuedRoutesIn(node->node, linepair.first, routeDirA, fromEtg).size()) {
       EdgePair curPair;
       curPair.first = segmentB;
       for (OptEdge* segmentC : node->adjList) {
@@ -1024,7 +1031,7 @@ std::vector<EdgePair> ILPEdgeOrderOptimizer::getEdgePartnerPairs(OptNode* node,
         //
 
 
-        if (etg->getContinuedRoutesIn(node->node, linepair.second, routeDirB).size()) {
+        if (etg->getContinuedRoutesIn(node->node, linepair.second, routeDirB, fromEtg).size()) {
           curPair.second = segmentC;
           ret.push_back(curPair);
         }

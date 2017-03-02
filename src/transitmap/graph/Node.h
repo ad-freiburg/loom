@@ -118,8 +118,14 @@ class Node {
   // add edge to this node's adjacency lists
   void addEdge(Edge* e);
 
+  // get edge from or to this node, from or to node "other"
+  Edge* getEdge(const Node* other) const;
+
   // remove edge from this node's adjacency lists
   void removeEdge(Edge* e);
+
+  void addRouteConnException(const Route* r, const Edge* edgeA, const Edge* edgeB);
+  bool connOccurs(const Route* r, const Edge* edgeA, const Edge* edgeB) const;
 
   double getMaxNodeFrontWidth() const;
 
@@ -132,6 +138,8 @@ class Node {
   std::vector<NodeFront> _mainDirs;
 
   std::vector<StationInfo> _stops;
+
+  std::map<const Route*, std::map<const Edge*, std::set<const Edge*> > > _routeConnExceptions;
 
   size_t getNodeFrontPos(const NodeFront* a) const;
 

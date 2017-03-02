@@ -103,7 +103,7 @@ bool OptGraph::simplifyStep() {
 
 
       for (auto& to : *first->etgs.front().etg->getTripsUnordered()) {
-        if (!second->etgs.front().etg->getSameDirRoutesIn(n->node, to.route, to.direction).size()) {
+        if (!second->etgs.front().etg->getSameDirRoutesIn(n->node, to.route, to.direction, first->etgs.front().etg).size()) {
 
           equal = false;
           break;
