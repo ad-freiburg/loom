@@ -145,3 +145,28 @@ void Node::connOccurs(const gtfs::Route* r, const Edge* from, const Edge* to) {
 
   _occConns[r].push_back(OccuringConnection(from, to));
 }
+
+// _____________________________________________________________________________
+void Node::replaceEdgeInConnections(const Edge* oldE, const Edge* newE) {
+  for (auto it = _occConns.begin(); it != _occConns.end(); it++) {
+    for (auto itt = it->second.begin(); itt != it->second.end(); itt++) {
+      if (itt->from == oldE) itt->from = newE;
+      if (itt->to == oldE) itt->to = newE;
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void Node::sewConnectionsTogether(const Edge* a, const Edge* b) {
+  // TODO assertion that these edges are in here
+  for (const auto& ega : a->getEdgeTripGeoms()) {
+    for (const auto& to : ega.getTripsUnordered()) {
+      for (const auto& egb : b->getEdgeTripGeoms()) {
+        if (egb.containsRoute(to.route)) {
+          std::cerr << "sweing..." << std::endl;
+          connOccurs(to.route, a, b);
+        }
+      }
+    }
+  }
+}

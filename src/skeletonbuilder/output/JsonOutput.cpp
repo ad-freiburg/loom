@@ -53,7 +53,7 @@ void JsonOutput::print(const graph::Graph& outG) {
         for (graph::Edge* f : n->getAdjList()) {
           if (e == f) continue;
           for (auto rr : *f->getEdgeTripGeoms()->front().getTripsUnordered()) {
-            if (r.route == rr.route && 
+            if (r.route == rr.route &&
               (r.direction == 0 || rr.direction == 0 ||
                 (r.direction == n && rr.direction != n) ||
                 (r.direction != n && rr.direction == n))
@@ -63,6 +63,11 @@ void JsonOutput::print(const graph::Graph& outG) {
               obj["edge1_node"] = boost::lexical_cast<std::string>(e->getFrom() == n ? e->getTo() : e->getFrom());
               obj["edge2_node"] = boost::lexical_cast<std::string>(f->getFrom() == n ? f->getTo() : f->getFrom());
               arr.push_back(obj);
+            } else if (r.route == rr.route && n->getStops().size() == 0) {
+              std::cerr << "-: " << r.direction << " " << rr.direction << std::endl;
+              std::cerr << "A: " << (r.direction == n && rr.direction != n) << std::endl;
+              std::cerr << "B: " << (r.direction != n && rr.direction == n) << std::endl;
+              std::cerr << "C: " << (n->isConnOccuring(r.route, e, f)) << std::endl;
             }
           }
         }

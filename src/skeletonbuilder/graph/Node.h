@@ -63,6 +63,10 @@ class Node {
 
   void connOccurs(const gtfs::Route*, const Edge* from, const Edge* to);
 
+  void replaceEdgeInConnections(const Edge* oldE, const Edge* newE);
+
+  void sewConnectionsTogether(const Edge* a, const Edge* b);
+
  private:
   std::set<Edge*> _adjListIn;
   std::set<Edge*> _adjListOut;

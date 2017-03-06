@@ -359,7 +359,11 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
 
     for (const TripOccurance& r : curEdgeGeom.getTripsUnordered()) {
       for (auto& t : r.trips) {
-        if (r.direction == w.e->getTo()) {
+        if (!r.direction) {
+          eaEdgeGeom.addTrip(t, 0);
+          abEdgeGeom.addTrip(t, 0);
+          ecEdgeGeom.addTrip(t, 0);
+        } else if (r.direction == w.e->getTo()) {
           eaEdgeGeom.addTrip(t, a);
           abEdgeGeom.addTrip(t, b);
           ecEdgeGeom.addTrip(t, w.e->getTo());
@@ -373,7 +377,11 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
 
     for (const TripOccurance r : compEdgeGeom.getTripsUnordered()) {
       for (auto& t : r.trips) {
-        if ((r.direction == w.f->getTo() && !(fap.totalPos > fbp.totalPos)) ||
+        if (!r.direction) {
+          faEdgeGeom.addTrip(t, 0);
+          abEdgeGeom.addTrip(t, 0);
+          fcEdgeGeom.addTrip(t, 0);
+        } else if ((r.direction == w.f->getTo() && !(fap.totalPos > fbp.totalPos)) ||
             (r.direction != w.f->getTo() && (fap.totalPos > fbp.totalPos))) {
           faEdgeGeom.addTrip(t, a);
           abEdgeGeom.addTrip(t, b);
@@ -410,36 +418,77 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
     Edge* abE = g->addEdge(a, b);
     Edge* ebE = g->addEdge(b, weto);
 
+    if (eaE) {
+      wefrom->replaceEdgeInConnections(w.e, eaE);
+    } else {
+      a->replaceEdgeInConnections(w.e, abE);
+    }
+
+    if (ebE) {
+      weto->replaceEdgeInConnections(w.e, ebE);
+    } else {
+      b->replaceEdgeInConnections(w.e, abE);
+    }
+
     Edge* faE = 0;
     Edge* fbE = 0;
 
     if (fap.totalPos > fbp.totalPos) {
       faE = g->addEdge(a, wfto);
       fbE = g->addEdge(wffrom, b);
+
+      if (faE) {
+        wfto->replaceEdgeInConnections(w.f, faE);
+      } else {
+        a->replaceEdgeInConnections(w.f, abE);
+      }
+
+      if (fbE) {
+        wffrom->replaceEdgeInConnections(w.f, fbE);
+      } else {
+        b->replaceEdgeInConnections(w.f, abE);
+      }
     } else {
       faE = g->addEdge(wffrom, a);
       fbE = g->addEdge(b, wfto);
+
+      if (faE) {
+        wffrom->replaceEdgeInConnections(w.f, faE);
+      } else {
+        a->replaceEdgeInConnections(w.f, abE);
+      }
+
+      if (fbE) {
+        wfto->replaceEdgeInConnections(w.f, fbE);
+      } else {
+        b->replaceEdgeInConnections(w.f, abE);
+      }
     }
 
-    if (eaE) {
-      eaE->addEdgeTripGeom(eaEdgeGeom);
-      eaE->simplify();
-    }
     if (abE) {
       abE->addEdgeTripGeom(abEdgeGeom);
       abE->simplify();
     }
+    if (eaE) {
+      eaE->addEdgeTripGeom(eaEdgeGeom);
+      eaE->simplify();
+      a->sewConnectionsTogether(eaE, abE);
+    }
     if (ebE) {
       ebE->addEdgeTripGeom(ecEdgeGeom);
       ebE->simplify();
+      b->sewConnectionsTogether(abE, ebE);
     }
+
     if (faE) {
       faE->addEdgeTripGeom(faEdgeGeom);
       faE->simplify();
+      a->sewConnectionsTogether(faE, abE);
     }
     if (fbE) {
       fbE->addEdgeTripGeom(fcEdgeGeom);
       fbE->simplify();
+      b->sewConnectionsTogether(abE, fbE);
     }
 
     found = true;
@@ -666,6 +715,9 @@ void Builder::combineEdges(Edge* a, Edge* b, Node* n, Graph* g) {
   g->deleteEdge(b->getFrom(), b->getTo());
   delete(n);
   g->deleteNode(n);
+
+  newFrom->replaceEdgeInConnections(a, e);
+  newTo->replaceEdgeInConnections(b, e);
 }
 
 
@@ -682,6 +734,7 @@ void Builder::combineNodes(Node* a, Node* b, Graph* g) {
   for (graph::Edge* e : a->getAdjListOut()) {
     Edge* newE = g->addEdge(b, e->getTo());
     a->addEdge(newE);
+    e->getTo()->replaceEdgeInConnections(e, newE);
 
     for (auto etg : *e->getEdgeTripGeoms()) {
       EdgeTripGeom etgNew(
@@ -702,6 +755,7 @@ void Builder::combineNodes(Node* a, Node* b, Graph* g) {
   for (graph::Edge* e : a->getAdjListIn()) {
     Edge* newE = g->addEdge(e->getFrom(), b);
     a->addEdge(newE);
+    e->getFrom()->replaceEdgeInConnections(e, newE);
 
     for (auto etg : *e->getEdgeTripGeoms()) {
       EdgeTripGeom etgNew(
