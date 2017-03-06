@@ -37,7 +37,7 @@ typedef std::pair<TripOccurance*, size_t> TripOccWithPos;
 
 class EdgeTripGeom {
  public:
-  EdgeTripGeom(geo::PolyLine pl, const Node* geomDir, double w, double s);
+  EdgeTripGeom(geo::PolyLine pl, const Node* geomDir);
 
   void addTrip(gtfs::Trip* t, const Node* dirNode, geo::PolyLine& pl);
 
@@ -63,11 +63,6 @@ class EdgeTripGeom {
 
   void setGeomDir(const Node* newDir);
 
-  double getWidth() const;
-  double getSpacing() const;
-
-  double getTotalWidth() const;
-
   bool routeEquivalent(const EdgeTripGeom& g) const;
 
  private:
@@ -75,8 +70,6 @@ class EdgeTripGeom {
 
   geo::PolyLine _geom;
   const Node* _geomDir; // the direction of the geometry, may be reversed
-
-  double _width, _spacing;
 };
 
 }}

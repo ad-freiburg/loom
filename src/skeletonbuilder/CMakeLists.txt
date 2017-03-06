@@ -3,6 +3,7 @@ file(GLOB_RECURSE skeletonbuilder_SRC *.cpp)
 set(skeletonbuilder_main SkeletonBuilderMain.cpp)
 
 list(REMOVE_ITEM skeletonbuilder_SRC ${skeletonbuilder_main})
+list(REMOVE_ITEM skeletonbuilder_SRC TestMain.cpp)
 
 include_directories(
 	${TRANSITMAP_INCLUDE_DIR}

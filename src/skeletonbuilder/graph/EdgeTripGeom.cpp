@@ -13,9 +13,8 @@ using namespace graph;
 using namespace gtfsparser;
 
 // _____________________________________________________________________________
-EdgeTripGeom::EdgeTripGeom(geo::PolyLine geom, const Node* geomDir, double w,
-    double s)
-: _geomDir(geomDir), _width(w), _spacing(s) {
+EdgeTripGeom::EdgeTripGeom(geo::PolyLine geom, const Node* geomDir)
+: _geomDir(geomDir) {
   setGeom(geom);
 }
 
@@ -128,21 +127,6 @@ const Node* EdgeTripGeom::getGeomDir() const {
 // _____________________________________________________________________________
 void EdgeTripGeom::setGeomDir(const Node* n) {
   _geomDir = n;
-}
-
-// _____________________________________________________________________________
-double EdgeTripGeom::getWidth() const {
-  return _width;
-}
-
-// _____________________________________________________________________________
-double EdgeTripGeom::getSpacing() const {
-  return _spacing;
-}
-
-// _____________________________________________________________________________
-double EdgeTripGeom::getTotalWidth() const {
-  return getWidth() * _trips.size() + getSpacing() * (_trips.size() - 1);
 }
 
 // _____________________________________________________________________________

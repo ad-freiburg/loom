@@ -157,13 +157,14 @@ void Node::replaceEdgeInConnections(const Edge* oldE, const Edge* newE) {
 }
 
 // _____________________________________________________________________________
-void Node::sewConnectionsTogether(const Edge* a, const Edge* b) {
+void Node::sewConnectionsTogether(Edge* a, Edge* b) {
+  assert(_adjListIn.find(a) != _adjListIn.end() || _adjListOut.find(a) != _adjListOut.end());
+  assert(_adjListIn.find(b) != _adjListIn.end() || _adjListOut.find(b) != _adjListOut.end());
   // TODO assertion that these edges are in here
-  for (const auto& ega : a->getEdgeTripGeoms()) {
+  for (const auto& ega : *a->getEdgeTripGeoms()) {
     for (const auto& to : ega.getTripsUnordered()) {
-      for (const auto& egb : b->getEdgeTripGeoms()) {
+      for (const auto& egb : *b->getEdgeTripGeoms()) {
         if (egb.containsRoute(to.route)) {
-          std::cerr << "sweing..." << std::endl;
           connOccurs(to.route, a, b);
         }
       }

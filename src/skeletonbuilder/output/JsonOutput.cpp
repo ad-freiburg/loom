@@ -57,6 +57,7 @@ void JsonOutput::print(const graph::Graph& outG) {
               (r.direction == 0 || rr.direction == 0 ||
                 (r.direction == n && rr.direction != n) ||
                 (r.direction != n && rr.direction == n))
+              // && false) {
               && !n->isConnOccuring(r.route, e, f)) {
               auto obj = json::object();
               obj["route"] = boost::lexical_cast<std::string>(r.route);

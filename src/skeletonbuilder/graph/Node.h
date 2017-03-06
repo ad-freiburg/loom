@@ -65,7 +65,7 @@ class Node {
 
   void replaceEdgeInConnections(const Edge* oldE, const Edge* newE);
 
-  void sewConnectionsTogether(const Edge* a, const Edge* b);
+  void sewConnectionsTogether(Edge* a, Edge* b);
 
  private:
   std::set<Edge*> _adjListIn;

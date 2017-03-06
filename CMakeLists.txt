@@ -59,8 +59,8 @@ endif()
 
 add_subdirectory(src)
 
-add_test(ctest_build_test_code "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target transitmapTest)
-add_test(base_test ${EXECUTABLE_OUTPUT_PATH}/transitmapTest)
+add_test(ctest_build_test_code "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target skeletonbuilderTest)
+add_test(base_test ${EXECUTABLE_OUTPUT_PATH}/skeletonbuilderTest)
 set_tests_properties ( base_test PROPERTIES DEPENDS ctest_build_test_code)
 
 # handles install target

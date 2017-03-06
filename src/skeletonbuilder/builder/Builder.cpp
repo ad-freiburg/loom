@@ -77,8 +77,7 @@ void Builder::consume(const Feed& f, Graph* g) {
             fromNode->connOccurs(t->second->getRoute(), prevEdge, exE);
           }
 
-          exE->addTrip(t->second, edgeGeom.second, toNode,
-              _cfg->lineWidth, _cfg->lineSpacing);
+          exE->addTrip(t->second, edgeGeom.second, toNode);
         }
       }
       prev = cur;
@@ -113,6 +112,8 @@ void Builder::simplify(Graph* g) {
 // _____________________________________________________________________________
 ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
   int i = 0;
+  double width = 20;
+  double spacing = 10;
   for (auto n : *g->getNodes()) {
     for (auto e : n->getAdjListOut()) {
       i++;
@@ -132,7 +133,7 @@ ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
 
             if (final) {
               // set dmax according to the width of the etg
-              dmax = fmax(30, e->getEdgeTripGeoms()->front().getTotalWidth() / 2 + toTest->getEdgeTripGeoms()->front().getTotalWidth() / 2 + ((e->getEdgeTripGeoms()->front().getSpacing() + toTest->getEdgeTripGeoms()->front().getSpacing()) / 2));
+              dmax = fmax(30, e->getEdgeTripGeoms()->front().getCardinality() * ((width + spacing) / 2) + toTest->getEdgeTripGeoms()->front().getCardinality() * ((width + spacing)/ 2));
             }
 
             geo::SharedSegments s = e->getEdgeTripGeoms()->front().getGeom().getSharedSegments(toTest->getEdgeTripGeoms()->front().getGeom(), dmax);
@@ -339,9 +340,9 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
     if (lineCrossesAtNode(a, w.e, w.f)) continue;
     if (lineCrossesAtNode(b, w.e, w.f)) continue;
 
-    EdgeTripGeom eaEdgeGeom(ea, a, _cfg->lineWidth, _cfg->lineSpacing);
-    EdgeTripGeom abEdgeGeom(ab, b, _cfg->lineWidth, _cfg->lineSpacing);
-    EdgeTripGeom ecEdgeGeom(ec, w.e->getTo(), _cfg->lineWidth, _cfg->lineSpacing);
+    EdgeTripGeom eaEdgeGeom(ea, a);
+    EdgeTripGeom abEdgeGeom(ab, b);
+    EdgeTripGeom ecEdgeGeom(ec, w.e->getTo());
 
     const Node* faDir = 0;
     const Node* fcDir = 0;
@@ -354,8 +355,8 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
       fcDir = w.f->getTo();
     }
 
-    EdgeTripGeom faEdgeGeom(fa, faDir, _cfg->lineWidth, _cfg->lineSpacing);
-    EdgeTripGeom fcEdgeGeom(fc, fcDir, _cfg->lineWidth, _cfg->lineSpacing);
+    EdgeTripGeom faEdgeGeom(fa, faDir);
+    EdgeTripGeom fcEdgeGeom(fc, fcDir);
 
     for (const TripOccurance& r : curEdgeGeom.getTripsUnordered()) {
       for (auto& t : r.trips) {
@@ -421,12 +422,14 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
     if (eaE) {
       wefrom->replaceEdgeInConnections(w.e, eaE);
     } else {
+      assert(a == wefrom);
       a->replaceEdgeInConnections(w.e, abE);
     }
 
     if (ebE) {
       weto->replaceEdgeInConnections(w.e, ebE);
     } else {
+      assert(b == weto);
       b->replaceEdgeInConnections(w.e, abE);
     }
 
@@ -440,12 +443,14 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
       if (faE) {
         wfto->replaceEdgeInConnections(w.f, faE);
       } else {
+        assert(a == wfto);
         a->replaceEdgeInConnections(w.f, abE);
       }
 
       if (fbE) {
         wffrom->replaceEdgeInConnections(w.f, fbE);
       } else {
+        assert(b == wffrom);
         b->replaceEdgeInConnections(w.f, abE);
       }
     } else {
@@ -455,12 +460,14 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
       if (faE) {
         wffrom->replaceEdgeInConnections(w.f, faE);
       } else {
+        assert(a == wffrom);
         a->replaceEdgeInConnections(w.f, abE);
       }
 
       if (fbE) {
         wfto->replaceEdgeInConnections(w.f, fbE);
       } else {
+        assert(b == wfto);
         b->replaceEdgeInConnections(w.f, abE);
       }
     }
@@ -468,7 +475,11 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
     if (abE) {
       abE->addEdgeTripGeom(abEdgeGeom);
       abE->simplify();
+    } else {
+      // we use abE below without checking!
+      assert(false);
     }
+
     if (eaE) {
       eaE->addEdgeTripGeom(eaEdgeGeom);
       eaE->simplify();
@@ -739,9 +750,7 @@ void Builder::combineNodes(Node* a, Node* b, Graph* g) {
     for (auto etg : *e->getEdgeTripGeoms()) {
       EdgeTripGeom etgNew(
           etg.getGeom(),
-          etg.getGeomDir() == a ? b : etg.getGeomDir(),
-          etg.getWidth(),
-          etg.getSpacing());
+          etg.getGeomDir() == a ? b : etg.getGeomDir());
       for (auto to : *etg.getTripsUnordered()) {
         for (auto trip : to.trips) {
           etgNew.addTrip(trip, to.direction == a ? b : to.direction);
@@ -760,9 +769,7 @@ void Builder::combineNodes(Node* a, Node* b, Graph* g) {
     for (auto etg : *e->getEdgeTripGeoms()) {
       EdgeTripGeom etgNew(
           etg.getGeom(),
-          etg.getGeomDir() == a ? b : etg.getGeomDir(),
-          etg.getWidth(),
-          etg.getSpacing());
+          etg.getGeomDir() == a ? b : etg.getGeomDir());
       for (auto to : *etg.getTripsUnordered()) {
         for (auto trip : to.trips) {
           etgNew.addTrip(trip, to.direction == a ? b : to.direction);
