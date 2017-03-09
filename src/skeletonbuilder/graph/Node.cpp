@@ -147,6 +147,12 @@ void Node::connOccurs(const gtfs::Route* r, const Edge* from, const Edge* to) {
 }
 
 // _____________________________________________________________________________
+const std::map<const gtfs::Route*, std::vector<OccuringConnection> >& Node::getOccuringConnections()
+const {
+  return _occConns;
+}
+
+// _____________________________________________________________________________
 void Node::replaceEdgeInConnections(const Edge* oldE, const Edge* newE) {
   for (auto it = _occConns.begin(); it != _occConns.end(); it++) {
     for (auto itt = it->second.begin(); itt != it->second.end(); itt++) {
@@ -160,7 +166,7 @@ void Node::replaceEdgeInConnections(const Edge* oldE, const Edge* newE) {
 void Node::sewConnectionsTogether(Edge* a, Edge* b) {
   assert(_adjListIn.find(a) != _adjListIn.end() || _adjListOut.find(a) != _adjListOut.end());
   assert(_adjListIn.find(b) != _adjListIn.end() || _adjListOut.find(b) != _adjListOut.end());
-  // TODO assertion that these edges are in here
+
   for (const auto& ega : *a->getEdgeTripGeoms()) {
     for (const auto& to : ega.getTripsUnordered()) {
       for (const auto& egb : *b->getEdgeTripGeoms()) {
@@ -170,4 +176,21 @@ void Node::sewConnectionsTogether(Edge* a, Edge* b) {
       }
     }
   }
+}
+
+// _____________________________________________________________________________
+std::vector<const Edge*> Node::getConnectingEdgesFor(const gtfs::Route* to, Edge* a) 
+const {
+  std::vector<const Edge*> ret;
+
+  auto it = _occConns.find(to);
+
+  if (it == _occConns.end()) return ret;
+
+  for (auto itt = it->second.begin(); itt != it->second.end(); itt++) {
+    if (itt->from == a) ret.push_back(itt->to);
+    if (itt->to == a) ret.push_back(itt->from);
+  }
+
+  return ret;
 }

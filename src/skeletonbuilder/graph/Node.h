@@ -67,6 +67,10 @@ class Node {
 
   void sewConnectionsTogether(Edge* a, Edge* b);
 
+  std::vector<const Edge*> getConnectingEdgesFor(const gtfs::Route* to, Edge* a) const;
+
+  const std::map<const gtfs::Route*, std::vector<OccuringConnection> >& getOccuringConnections() const;
+
  private:
   std::set<Edge*> _adjListIn;
   std::set<Edge*> _adjListOut;

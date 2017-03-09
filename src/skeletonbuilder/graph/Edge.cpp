@@ -30,6 +30,12 @@ Node* Edge::getTo() const {
 }
 
 // _____________________________________________________________________________
+Node* Edge::getOtherNode(const Node* notNode) const {
+  if (_to == notNode) return _from;
+  return _to;
+}
+
+// _____________________________________________________________________________
 bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
   assert(toNode == _from || toNode == _to);
   for (auto& e : _tripsContained) {

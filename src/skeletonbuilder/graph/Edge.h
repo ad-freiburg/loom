@@ -30,6 +30,8 @@ class Edge {
   Node* getFrom() const;
   Node* getTo() const;
 
+  Node* getOtherNode(const Node* notNode) const;
+
   bool addTrip(gtfs::Trip* t, Node* toNode);
   bool addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode);
 
