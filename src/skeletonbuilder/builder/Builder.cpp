@@ -753,7 +753,6 @@ void Builder::combineNodes(Node* a, Node* b, Graph* g) {
 
     oldNew[e] = newE;
 
-    // case A
     e->getTo()->replaceEdgeInConnections(e, newE);
 
     for (auto etg : *e->getEdgeTripGeoms()) {
@@ -762,12 +761,10 @@ void Builder::combineNodes(Node* a, Node* b, Graph* g) {
           etg.getGeomDir() == a ? b : etg.getGeomDir());
       for (auto to : *etg.getTripsUnordered()) {
         if (a->isConnOccuring(to.route, e, connecting)) {
-          // find out occuring connections in b, connect them...
 
           for (const auto edge : b->getConnectingEdgesFor(to.route, connecting)) {
             b->connOccurs(to.route, newE, edge);
           }
-
         }
 
         for (auto trip : to.trips) {
@@ -787,7 +784,6 @@ void Builder::combineNodes(Node* a, Node* b, Graph* g) {
 
     oldNew[e] = newE;
 
-    // case A
     e->getFrom()->replaceEdgeInConnections(e, newE);
 
     for (auto etg : *e->getEdgeTripGeoms()) {
@@ -796,12 +792,9 @@ void Builder::combineNodes(Node* a, Node* b, Graph* g) {
           etg.getGeomDir() == a ? b : etg.getGeomDir());
       for (auto to : *etg.getTripsUnordered()) {
         if (a->isConnOccuring(to.route, e, connecting)) {
-          // find out occuring connections in b, connect them...
-
           for (const auto edge : b->getConnectingEdgesFor(to.route, connecting)) {
             b->connOccurs(to.route, newE, edge);
           }
-
         }
         for (auto trip : to.trips) {
           etgNew.addTrip(trip, to.direction == a ? b : to.direction);

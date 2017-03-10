@@ -39,11 +39,35 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
   *_o << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
   *_o << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">";
 
+  outputEdges(outG, width, height);
+
   _w.openTag("svg", params);
 
-  // TODO: output edges
+  _w.openTag("defs");
 
-  outputEdges(outG, width, height);
+  for (auto const& m : _markers) {
+    params.clear();
+    params["id"] = m.name;
+    params["orient"] = "auto";
+    params["markerWidth"] = "1";
+    params["markerHeight"] = "1";
+    params["refY"] = boost::lexical_cast<std::string>(m.width / 2 * _cfg->outputResolution);
+    params["refX"] = "-1";
+
+    _w.openTag("marker", params);
+
+    params.clear();
+    params["d"] = m.path;
+    params["fill"] = m.color;
+    params["stroke"] = "";
+
+    _w.openTag("path", params);
+
+    _w.closeTag();
+    _w.closeTag();
+  }
+
+  _w.closeTag();
 
   for (graph::Node* n : outG.getNodes()) {
     renderNodeConnections(outG, n, width, height);
@@ -141,16 +165,32 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
 // _____________________________________________________________________________
 void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
     const graph::Route& route) {
+  renderLinePart(p, width, route, "");
+}
+
+// _____________________________________________________________________________
+void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
+    const graph::Route& route, const std::string& endMarker) {
   std::stringstream styleOutline;
-  styleOutline << "fill:none;stroke:#000000"
-    << ";stroke-linecap:round;stroke-opacity:0.8;stroke-width:"
+  styleOutline << "fill:none;stroke:#000000";
+
+  if (!endMarker.empty()) {
+    styleOutline << ";marker-end:'url(#" << endMarker << "_black)';";
+  }
+
+  styleOutline  << "stroke-linecap:round;stroke-opacity:0.8;stroke-width:"
     << (width + 4) * _cfg->outputResolution;
   Params paramsOutline;
   paramsOutline["style"] = styleOutline.str();
 
   std::stringstream style;
-  style << "fill:none;stroke:#" << route.color
-    << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
+  style << "fill:none;stroke:#" << route.color;
+
+  if (!endMarker.empty()) {
+    style << ";marker-end:'url(#" << endMarker << ")';";
+  }
+  
+  style << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
     << width * _cfg->outputResolution;
   Params params;
   params["style"] = style.str();
@@ -219,30 +259,58 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
     //p.applyChaikinSmooth(3);
     //p.simplify(0.5);
 
-    // ___ OUTFACTOR
-    //if (nfTo && nfFrom && nfTo->geom.getLine().size() > 0 && nfFrom->geom.getLine().size() > 0) {
-      std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfTo->geom.getIntersections(p);
-      if (iSects.size() > 0) {
-        p = p.getSegment(0, iSects.begin()->totalPos);
-      } else {
-        p << nfTo->geom.projectOn(p.getLine().back()).p;
-      }
 
-      std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects2 = nfFrom->geom.getIntersections(p);
-      if (iSects2.size() > 0) {
-        p = p.getSegment(iSects2.begin()->totalPos, 1);
-      } else {
-        p >> nfFrom->geom.projectOn(p.getLine().front()).p;
-      }
-    //}
+    std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfTo->geom.getIntersections(p);
+    if (iSects.size() > 0) {
+      p = p.getSegment(0, iSects.begin()->totalPos);
+    } else {
+      p << nfTo->geom.projectOn(p.getLine().back()).p;
+    }
 
-    renderLinePart(p, lineW, *r.route);
+    std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects2 = nfFrom->geom.getIntersections(p);
+    if (iSects2.size() > 0) {
+      p = p.getSegment(iSects2.begin()->totalPos, 1);
+    } else {
+      p >> nfFrom->geom.projectOn(p.getLine().front()).p;
+    }
+
+    double arrowLength = (5 / _cfg->outputResolution);
+
+    if (r.direction != 0 && center.getLength() > arrowLength * 10) {
+
+      std::stringstream markerName;
+      markerName << e << ":" << r.route << ":" << i;
+
+      std::string markerPath = getMarkerPath(lineW);
+      EndMarker e(markerName.str(), "#" + r.route->color, markerPath, lineW, lineW);
+      _markers.push_back(e);
+
+      geo::PolyLine firstPart = p.getSegmentAtDist(0, p.getLength() / 2 - arrowLength / 2);
+      geo::PolyLine secondPart = p.getSegmentAtDist(p.getLength() / 2 + arrowLength / 2, p.getLength());
+      renderLinePart(firstPart, lineW, *r.route, markerName.str());
+      renderLinePart(secondPart, lineW, *r.route);
+    } else {
+      renderLinePart(p, lineW, *r.route);
+    }
 
     a++;
 
     //break;
     o -= offsetStep;
   }
+}
+
+// _____________________________________________________________________________
+std::string SvgOutput::getMarkerPath(double w)
+const {
+  std::stringstream path;
+
+  path << "M0,0"
+    << " V1"
+    << "L.5,.5"
+    << " Z";
+
+  return path.str();
 }
 
 // _____________________________________________________________________________

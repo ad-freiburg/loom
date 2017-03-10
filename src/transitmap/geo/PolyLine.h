@@ -72,6 +72,7 @@ class PolyLine {
   PointOnLine getPointAt(double dist) const;
 
   PolyLine getSegment(double a, double b) const;
+  PolyLine getSegmentAtDist(double dista, double distb) const;
   PolyLine getSegment(const PointOnLine& start, const PointOnLine& end) const;
   PolyLine getSegment(const util::geo::Point& a, const util::geo::Point& b) const;
 

@@ -146,6 +146,15 @@ PolyLine PolyLine::getSegment(double a, double b) const {
 }
 
 // _____________________________________________________________________________
+PolyLine PolyLine::getSegmentAtDist(double a, double b) const {
+  if (a > b) a = b;
+  PointOnLine start = getPointAtDist(a);
+  PointOnLine end = getPointAtDist(b);
+
+  return getSegment(start, end);
+}
+
+// _____________________________________________________________________________
 PolyLine PolyLine::getSegment(const Point& a, const Point& b) const {
   PointOnLine start = projectOn(a);
   PointOnLine end = projectOnAfter(b, start.lastIndex);

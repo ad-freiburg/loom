@@ -32,6 +32,15 @@ class SvgOutputException : public std::exception {
   std::string _msg;
 };
 
+struct EndMarker {
+  EndMarker(const std::string& name, const std::string& color, const std::string& path, double width, double height)
+  : name(name), color(color), path(path), width(width), height(height) {}
+  std::string name;
+  std::string color;
+  std::string path;
+  double width, height;
+};
+
 typedef std::map<std::string, std::string> Params;
 typedef std::pair<Params, geo::PolyLine> PrintDelegate;
 typedef std::pair<PrintDelegate, PrintDelegate> OutlinePrintPair;
@@ -65,6 +74,7 @@ class SvgOutput : public Output {
   const config::Config* _cfg;
 
   std::map<uintptr_t, std::vector<OutlinePrintPair> > _delegates;
+  std::vector<EndMarker> _markers;
 
   void outputNodes(const graph::TransitGraph& outputGraph, double w, double h);
   void outputEdges(const graph::TransitGraph& outputGraph, double w, double h);
@@ -81,9 +91,14 @@ class SvgOutput : public Output {
   void renderLinePart(const geo::PolyLine p, double width,
     const graph::Route& route);
 
+  void renderLinePart(const geo::PolyLine p, double width,
+    const graph::Route& route, const std::string& endMarker);
+
   void renderDelegates(const graph::TransitGraph& outG, double w, double h);
 
   void renderNodeFronts(const graph::TransitGraph& outG, double w, double h);
+
+  std::string getMarkerPath(double w) const;
 };
 
 }}
