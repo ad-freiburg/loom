@@ -61,20 +61,20 @@ double Node::getMaxNodeFrontWidth() const {
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, Point pos) : _id(id), _pos(pos) {
+Node::Node(const std::string& id, Point pos) : _id(id), _pos(pos), _relevant(false) {
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, double x, double y) : _id(id), _pos(x, y) {
+Node::Node(const std::string& id, double x, double y) : _id(id), _pos(x, y), _relevant(false) {
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, Point pos, StationInfo s) : _id(id), _pos(pos) {
+Node::Node(const std::string& id, Point pos, StationInfo s) : _id(id), _pos(pos), _relevant(false) {
   addStop(s);
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, double x, double y, StationInfo s) : _id(id), _pos(x, y) {
+Node::Node(const std::string& id, double x, double y, StationInfo s) : _id(id), _pos(x, y), _relevant(false) {
   addStop(s);
 }
 

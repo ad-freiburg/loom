@@ -49,10 +49,10 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
     params.clear();
     params["id"] = m.name;
     params["orient"] = "auto";
-    params["markerWidth"] = "1";
+    params["markerWidth"] = "2";
     params["markerHeight"] = "1";
-    params["refY"] = boost::lexical_cast<std::string>(m.width / 2 * _cfg->outputResolution);
-    params["refX"] = "-1";
+    params["refY"] = "0.5";//boost::lexical_cast<std::string>(m.width / 2 * _cfg->outputResolution);
+    params["refX"] = "0";
 
     _w.openTag("marker", params);
 
@@ -98,7 +98,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
   for (graph::Node* n : outG.getNodes()) {
     std::map<std::string, std::string> params;
 
-    if (_cfg->renderStations && n->getStops().size() > 0 && n->getMainDirs().size() > 0) {
+    if (n->_relevant && _cfg->renderStations && n->getStops().size() > 0 && n->getMainDirs().size() > 0) {
       params["stroke"] = "black";
       params["stroke-width"] = "1";
       params["fill"] = "white";
@@ -123,7 +123,7 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG, double w,
       const geo::PolyLine p = f.geom;
       std::stringstream style;
       style << "fill:none;stroke:red"
-        << ";stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
+        << ";stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
       std::map<std::string, std::string> params;
       params["style"] = style.str();
       printLine(p, params, w, h, xOffset, yOffset);
@@ -132,7 +132,7 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG, double w,
 
       std::stringstream styleA;
       styleA << "fill:none;stroke:red"
-        << ";stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
+        << ";stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
       params["style"] = styleA.str();
 
       printLine(geo::PolyLine(n->getPos(), a), params, w, h, xOffset, yOffset);
@@ -276,19 +276,28 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
     double arrowLength = (5 / _cfg->outputResolution);
 
-    if (r.direction != 0 && center.getLength() > arrowLength * 10) {
+    if (r.direction != 0 && center.getLength() > arrowLength * 8) {
 
       std::stringstream markerName;
       markerName << e << ":" << r.route << ":" << i;
 
-      std::string markerPath = getMarkerPath(lineW);
-      EndMarker e(markerName.str(), "#" + r.route->color, markerPath, lineW, lineW);
-      _markers.push_back(e);
-
+      std::string markerPathMale = getMarkerPathMale(lineW);
+      std::string markerPathFemale = getMarkerPathFemale(lineW);
+      EndMarker emm(markerName.str() + "_m", "#" + r.route->color, markerPathMale, lineW, lineW);
+      EndMarker emf(markerName.str() + "_f", "#" + r.route->color, markerPathFemale, lineW, lineW);
+      _markers.push_back(emm);
+      _markers.push_back(emf);
       geo::PolyLine firstPart = p.getSegmentAtDist(0, p.getLength() / 2 - arrowLength / 2);
       geo::PolyLine secondPart = p.getSegmentAtDist(p.getLength() / 2 + arrowLength / 2, p.getLength());
-      renderLinePart(firstPart, lineW, *r.route, markerName.str());
-      renderLinePart(secondPart, lineW, *r.route);
+
+
+      if (r.direction == e->getTo()) {
+        renderLinePart(firstPart, lineW, *r.route, markerName.str() + "_m");
+        renderLinePart(secondPart.getReversed(), lineW, *r.route, markerName.str() + "_f");
+      } else {
+        renderLinePart(firstPart, lineW, *r.route, markerName.str() + "_f");
+        renderLinePart(secondPart.getReversed(), lineW, *r.route, markerName.str() + "_m");
+      }
     } else {
       renderLinePart(p, lineW, *r.route);
     }
@@ -301,17 +310,26 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 }
 
 // _____________________________________________________________________________
-std::string SvgOutput::getMarkerPath(double w)
+std::string SvgOutput::getMarkerPathMale(double w)
 const {
   std::stringstream path;
 
-  path << "M0,0"
-    << " V1"
-    << "L.5,.5"
-    << " Z";
+  path << "M0,0 V1 H.5 L1.3,.5 L.5,0 Z";
 
   return path.str();
 }
+
+// _____________________________________________________________________________
+std::string SvgOutput::getMarkerPathFemale(double w)
+const {
+  std::stringstream path;
+
+  // path << "M0,0 L.8,.5 L0,1 L1.3,1 L1.3,0 Z";
+  path << "M1.3,1 L.5,.5 L1.3,0 L0,0 L0,1";
+
+  return path.str();
+}
+
 
 // _____________________________________________________________________________
 void SvgOutput::renderDelegates(const graph::TransitGraph& outG,

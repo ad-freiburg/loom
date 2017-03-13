@@ -78,7 +78,6 @@ class Edge {
   std::vector<RouteOccurance> _routes;
 
   geo::PolyLine _geom;
-  const Node* _geomDir;
 
   double _width, _spacing;
 };

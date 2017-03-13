@@ -84,6 +84,10 @@ OptNode* OptGraph::getNodeForTransitNode(const Node* tn) const {
 // _____________________________________________________________________________
 void OptGraph::simplify() {
   while(simplifyStep()) {}
+
+  for (auto n : _nodes) {
+    n->node->_relevant = true;
+  }
 }
 
 // _____________________________________________________________________________

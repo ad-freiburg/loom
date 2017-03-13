@@ -98,7 +98,8 @@ class SvgOutput : public Output {
 
   void renderNodeFronts(const graph::TransitGraph& outG, double w, double h);
 
-  std::string getMarkerPath(double w) const;
+  std::string getMarkerPathMale(double w) const;
+  std::string getMarkerPathFemale(double w) const;
 };
 
 }}

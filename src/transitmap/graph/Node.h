@@ -129,6 +129,9 @@ class Node {
 
   double getMaxNodeFrontWidth() const;
 
+  // TODO remove this
+  mutable bool _relevant;
+
  private:
   std::string _id;
   std::set<Edge*> _adjListIn;
