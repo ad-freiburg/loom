@@ -21,8 +21,8 @@ void ILPEdgeOrderOptimizer::optimize() {
   OptGraph g(_g);
   g.simplify();
 
-  output::OgrOutput ogrOut("/home/patrick/optimgraph", _cfg);
-  ogrOut.print(g);
+  //output::OgrOutput ogrOut("/home/patrick/optimgraph", _cfg);
+  //ogrOut.print(g);
 
   LOG(DEBUG) << "Creating ILP problem... " << std::endl;
   glp_prob* lp = createProblemImpr(g);

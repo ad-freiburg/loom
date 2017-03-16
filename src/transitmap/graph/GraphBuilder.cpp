@@ -106,9 +106,17 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
           _cfg->lineSpacing);
 
         for (auto route : props["lines"]) {
-          const Route* r = g->getRoute(route["id"]);
+          std::string id;
+          if (!route["id"].is_null()) {
+            id = route["id"];
+          } else if (!route["label"].is_null()) {
+            id = route["label"];
+          } else if (!route["color"].is_null()) {
+            id = route["color"];
+          } else continue;
+
+          const Route* r = g->getRoute(id);
           if (!r) {
-            std::string id = route["id"];
             std::string label = route["label"].is_null() ? "" : route["label"];
             std::string color = route["color"];
             r = new Route(id, label, color);
@@ -150,7 +158,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
             const Route* r = g->getRoute(rid);
 
             if (!r) {
-              LOG(WARN) << "line connection exclude defined in node " << id 
+              LOG(WARN) << "line connection exclude defined in node " << id
                 << " for line " << rid
                 << ", but no such line exists." << std::endl;
               continue;
@@ -160,31 +168,31 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
             Node* n2 = g->getNodeById(nid2);
 
             if (!n1) {
-              LOG(WARN) << "line connection exclude defined in node " << id 
+              LOG(WARN) << "line connection exclude defined in node " << id
                 << " for edge from " << nid1
                 << ", but no such node exists." << std::endl;
               continue;
             }
 
             if (!n2) {
-              LOG(WARN) << "line connection exclude defined in node " << id 
+              LOG(WARN) << "line connection exclude defined in node " << id
                 << " for edge from " << nid2
                 << ", but no such node exists." << std::endl;
               continue;
             }
-              
+
             Edge* a = n->getEdge(n1);
             Edge* b = n->getEdge(n2);
 
             if (!a) {
-              LOG(WARN) << "line connection exclude defined in node " << id 
+              LOG(WARN) << "line connection exclude defined in node " << id
                 << " for edge from " << nid1
                 << ", but no such edge exists." << std::endl;
               continue;
             }
 
             if (!b) {
-              LOG(WARN) << "line connection exclude defined in node " << id 
+              LOG(WARN) << "line connection exclude defined in node " << id
                 << " for edge from " << nid2
                 << ", but no such edge exists." << std::endl;
               continue;

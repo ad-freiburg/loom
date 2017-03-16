@@ -26,7 +26,6 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
   int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
   int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 
-
   int64_t width = outG.getBoundingBox().max_corner().get<0>() - xOffset;
   int64_t height = outG.getBoundingBox().max_corner().get<1>() - yOffset;
 

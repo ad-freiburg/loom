@@ -78,7 +78,9 @@ void TransitGraph::addNode(Node* n) {
 
 // _____________________________________________________________________________
 void TransitGraph::expandBBox(const Point& p) {
-  bgeo::expand(_bbox, p);
+  bgeo::expand(_bbox,
+    boost::geometry::make<bgeo::model::box<util::geo::Point>>(
+      p.get<0>() - 50, p.get<1>() - 50, p.get<0>() + 50, p.get<1>() + 50));
 }
 
 // _____________________________________________________________________________
@@ -99,6 +101,7 @@ Edge* TransitGraph::addEdge(Node* from, Node* to, geo::PolyLine pl, double w,
     e = new Edge(from, to, pl, w, s);
     from->addEdge(e);
     to->addEdge(e);
+    bgeo::expand(_bbox, bgeo::return_envelope<bgeo::model::box<util::geo::Point>>(pl.getLine()));
   }
   return e;
 }
