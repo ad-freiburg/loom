@@ -97,7 +97,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG, double w, double h)
   for (graph::Node* n : outG.getNodes()) {
     std::map<std::string, std::string> params;
 
-    if (n->_relevant && _cfg->renderStations && n->getStops().size() > 0 && n->getMainDirs().size() > 0) {
+    if (_cfg->renderStations && n->getStops().size() > 0 && n->getMainDirs().size() > 0) {
       params["stroke"] = "black";
       params["stroke-width"] = "1";
       params["fill"] = "white";
@@ -236,7 +236,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 
   geo::PolyLine center = e->getGeom();
-  center.applyChaikinSmooth(3);
+  //center.applyChaikinSmooth(3);
 
   double lineW = e->getWidth();
   double lineSpc = e->getSpacing();
@@ -255,9 +255,6 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
     double offset = -(o - oo / 2.0 - e->getWidth() /2.0);
 
     p.offsetPerp(offset);
-    //p.applyChaikinSmooth(3);
-    //p.simplify(0.5);
-
 
     std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfTo->geom.getIntersections(p);
     if (iSects.size() > 0) {

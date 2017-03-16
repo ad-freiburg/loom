@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
     LOG(INFO) << "Total graph score BEFORE optim is -- "
       << g.getScore() << " --" << std::endl;
 
-    if (cfg.renderMethod != "ogr") {
+    if (cfg.renderMethod != "ogr" && !cfg.noOptim) {
       optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg);
       ilpEoOptim.optimize();
     }

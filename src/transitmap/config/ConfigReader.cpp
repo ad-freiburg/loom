@@ -61,10 +61,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::bool_switch(&(cfg->renderNodeFronts))
       ->default_value(false),
       "render node fronts as red lines")
-    ("ordering-optim,O",
-      opts::value<size_t>(&(cfg->optimIterations))
-      ->default_value(10),
-      "number of edge order optimization iterations")
+    ("no-optim,N",
+      opts::bool_switch(&(cfg->noOptim))
+      ->default_value(false),
+      "disable line-ordering optimization")
     ("projection",
       opts::value<std::string>(&(cfg->projectionString))
       ->default_value("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs"),
@@ -73,7 +73,15 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->outputResolution))
       ->default_value(0.1),
       "output resolution (output pixel size / projection pixel size)")
-  ;
+    ("input-smoothing",
+      opts::value<double>(&(cfg->inputSmoothing))
+      ->default_value(3),
+      "level of input-data smoothing")
+    ("bezier-prec",
+      opts::value<double>(&(cfg->innerGeometryPrecision))
+      ->default_value(3),
+      "rendering precision of inner node geometries")
+  ;  
 
   opts::options_description positional("Positional arguments");
   positional.add_options()

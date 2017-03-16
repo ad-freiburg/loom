@@ -1064,9 +1064,9 @@ void ILPEdgeOrderOptimizer::solveProblem(glp_prob* lp) const {
   //params.tm_lim = 30000;
   //params.mip_gap = 0.5;
   params.binarize = 1;
-  params.bt_tech = GLP_BT_BPH;
-  params.fp_heur = GLP_ON;
-  params.ps_heur = GLP_ON;
+  //params.bt_tech = GLP_BT_BPH;
+  //params.fp_heur = GLP_ON;
+  //params.ps_heur = GLP_ON;
   params.ps_tm_lim = 120000;
 
   glp_intopt(lp, &params);

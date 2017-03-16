@@ -81,6 +81,8 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
           g->expandBBox(p);
         }
 
+        pl.applyChaikinSmooth(_cfg->inputSmoothing);
+
         Node* fromN = g->getNodeById(from);
         Node* toN = g->getNodeById(to);
 

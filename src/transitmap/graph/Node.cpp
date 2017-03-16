@@ -324,7 +324,7 @@ geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
   **/
 
   geo::BezierCurve bc(p, b, c, pp);
-  return bc.render(3);
+  return bc.render(cf.innerGeometryPrecision);
 }
 
 // _____________________________________________________________________________

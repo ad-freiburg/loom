@@ -21,9 +21,11 @@ struct Config {
 
   std::string renderMethod;
 
-  size_t optimIterations;
+  bool noOptim;
 
   double outputResolution;
+  double inputSmoothing;
+  double innerGeometryPrecision;
 
   bool renderStations;
   bool renderNodeFronts;
