@@ -83,7 +83,7 @@
         "lines": [
           {"color": "666600"},
           {"color": "990000", "direction": "1"},
-          {"color": "00a1de"}
+          {"color": "00a1de", "direction": "a"}
         ]
       }
     },
@@ -99,7 +99,7 @@
         "to": "3",
         "lines": [
           {"color": "33FF66"},
-          {"color": "00a1de"}
+          {"color": "00a1de", "direction": "3"}
         ]
       }
     },
@@ -114,7 +114,8 @@
         "from": "a",
         "to": "4",
         "lines": [
-          {"color": "666600"}
+          {"color": "666600"},
+          {"color": "00a1de", "direction": "a"}
         ]
       }
     }

@@ -10,6 +10,8 @@
 #include "Node.h"
 #include "Route.h"
 #include "../geo/PolyLine.h"
+#include "util/Nullable.h"
+#include "../style/LineStyle.h"
 
 using std::exception;
 using std::string;
@@ -24,6 +26,8 @@ struct RouteOccurance {
   RouteOccurance(const Route* r, const Node* dir) : route(r), direction(dir) {}
   const Route* route;
   const Node* direction;  // 0 if in both directions
+
+  Nullable<style::LineStyle> style;
 };
 
 typedef std::pair<RouteOccurance*, size_t> RouteOccWithPos;

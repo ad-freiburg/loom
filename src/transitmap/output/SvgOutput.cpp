@@ -190,13 +190,13 @@ void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
 void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
     const graph::Route& route, const std::string& endMarker) {
   std::stringstream styleOutline;
-  styleOutline << "fill:none;stroke:#000000;";
+  styleOutline << "fill:none;stroke:#000000";
 
   if (!endMarker.empty()) {
-    styleOutline << ";marker-end:'url(#" << endMarker << "_black)';";
+    styleOutline << ";marker-end:url(#" << endMarker << "_black);";
   }
 
-  styleOutline  << "stroke-linecap:round;stroke-opacity:0.8;stroke-width:"
+  styleOutline  << ";stroke-linecap:round;stroke-opacity:0.8;stroke-width:"
     << (width + _cfg->outlineWidth) * _cfg->outputResolution;
   Params paramsOutline;
   paramsOutline["style"] = styleOutline.str();
@@ -205,7 +205,7 @@ void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
   style << "fill:none;stroke:#" << route.color;
 
   if (!endMarker.empty()) {
-    style << ";marker-end:'url(#" << endMarker << ")';";
+    style << ";marker-end:url(#" << endMarker << ");";
   }
 
   style << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
@@ -289,7 +289,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       p >> nfFrom->geom.projectOn(p.getLine().front()).p;
     }
 
-    double arrowLength = (5 / _cfg->outputResolution);
+    double arrowLength = (6 / _cfg->outputResolution);
 
     if (r.direction != 0 && center.getLength() > arrowLength * 4) {
 
