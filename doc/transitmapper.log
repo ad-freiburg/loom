@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.19)  16 MAR 2017 17:23
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.7)  17 MAR 2017 01:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -333,6 +333,13 @@ Now handling font encoding U ...
    defining Unicode char U+2122 (decimal 8482)
    defining Unicode char U+2423 (decimal 9251)
 ))
+(/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty
+Package: fontenc 2005/09/27 v1.99g Standard LaTeX package
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/t1enc.def
+File: t1enc.def 2005/09/27 v1.99g Standard LaTeX file
+LaTeX Font Info:    Redeclaring font encoding T1 on input line 48.
+))
 (/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
 (/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
@@ -460,6 +467,9 @@ Package: enumitem 2011/09/28 v3.5.2 Customized lists
 \enit@inbox=\box28
 \enitdp@description=\count110
 )
+(/usr/share/texlive/texmf-dist/tex/latex/bera/beramono.sty
+Package: beramono 2004/01/31 (WaS)
+)
 (/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty
 Package: xcolor 2007/01/21 v2.11 LaTeX color extensions (UK)
 
@@ -480,18 +490,18 @@ Package xcolor Info: Model `wave' substituted by `hsb' on input line 1360.
 (./transitmapper.aux)
 \openout1 = `transitmapper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 80.
-LaTeX Font Info:    ... okay on input line 80.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 80.
-LaTeX Font Info:    ... okay on input line 80.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 80.
-LaTeX Font Info:    ... okay on input line 80.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 80.
-LaTeX Font Info:    ... okay on input line 80.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 80.
-LaTeX Font Info:    ... okay on input line 80.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 80.
-LaTeX Font Info:    ... okay on input line 80.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 82.
+LaTeX Font Info:    ... okay on input line 82.
 \c@lstlisting=\count111
 
 (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
@@ -557,28 +567,37 @@ e
 ))
 isodate: babel.sty has been loaded
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 81.
+(Font)              <12> on input line 83.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 81.
+(Font)              <8> on input line 83.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 81.
+(Font)              <6> on input line 83.
+LaTeX Font Info:    Try loading font information for T1+fvm on input line 87.
+(/usr/share/texlive/texmf-dist/tex/latex/bera/t1fvm.fd
+File: t1fvm.fd 2004/09/07 scalable font definitions for T1/fvm.
+)
+LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
+(Font)              scaled to size 8.50006pt on input line 87.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 96.
+(Font)              <7> on input line 98.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 96.
+(Font)              <5> on input line 98.
+
 <inputex.pdf, id=1, 72.27pt x 64.24pt>
 File: inputex.pdf Graphic file (type pdf)
  <use inputex.pdf>
-Package pdftex.def Info: inputex.pdf used on input line 96.
+Package pdftex.def Info: inputex.pdf used on input line 98.
 (pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
 
 <test2.pdf, id=2, 72.27pt x 64.24pt>
 File: test2.pdf Graphic file (type pdf)
  <use test2.pdf>
-Package pdftex.def Info: test2.pdf used on input line 100.
+Package pdftex.def Info: test2.pdf used on input line 102.
 (pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
-LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 109.
+LaTeX Font Info:    Font shape `T1/fvm/bx/n' in size <10> not available
+(Font)              Font shape `T1/fvm/b/n' tried instead on input line 111.
+LaTeX Font Info:    Font shape `T1/fvm/b/n' will be
+(Font)              scaled to size 8.50006pt on input line 111.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./inputex.pdf> <./test2.pd
@@ -586,37 +605,48 @@ f
 
 pdfTeX warning: pdflatex (file ./test2.pdf): PDF inclusion: multiple pdfs with 
 page group included in a single page
->] <test2_thin.pdf, id=23, 72.27pt x 64.24pt>
+>] <test2_thin.pdf, id=25, 72.27pt x 64.24pt>
 File: test2_thin.pdf Graphic file (type pdf)
  <use test2_thin.pdf>
-Package pdftex.def Info: test2_thin.pdf used on input line 120.
+Package pdftex.def Info: test2_thin.pdf used on input line 122.
 (pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
 
-<test2_thick.pdf, id=24, 72.27pt x 64.24pt>
+<test2_thick.pdf, id=26, 72.27pt x 64.24pt>
 File: test2_thick.pdf Graphic file (type pdf)
  <use test2_thick.pdf>
-Package pdftex.def Info: test2_thick.pdf used on input line 122.
+Package pdftex.def Info: test2_thick.pdf used on input line 124.
 (pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
 
-<test2_noopt.pdf, id=25, 72.27pt x 64.24pt>
+<test2_noopt.pdf, id=27, 72.27pt x 64.24pt>
 File: test2_noopt.pdf Graphic file (type pdf)
  <use test2_noopt.pdf>
-Package pdftex.def Info: test2_noopt.pdf used on input line 128.
+Package pdftex.def Info: test2_noopt.pdf used on input line 130.
 (pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
 
-<test2_nodefronts.pdf, id=26, 72.27pt x 64.24pt>
+<test2_nodefronts.pdf, id=28, 72.27pt x 64.24pt>
 File: test2_nodefronts.pdf Graphic file (type pdf)
  <use test2_nodefronts.pdf>
-Package pdftex.def Info: test2_nodefronts.pdf used on input line 134.
+Package pdftex.def Info: test2_nodefronts.pdf used on input line 136.
 (pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
-LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 144
-.
-LaTeX Font Info:    No file OMScmtt.fd. on input line 144.
 
+<test2_nosmoothing.pdf, id=29, 72.27pt x 64.24pt>
+File: test2_nosmoothing.pdf Graphic file (type pdf)
+ <use test2_nosmoothing.pdf>
+Package pdftex.def Info: test2_nosmoothing.pdf used on input line 142.
+(pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
 
-LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
-(Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbraceleft' on input line 144.
+Underfull \hbox (badness 10000) in paragraph at lines 143--143
+[]\T1/cmr/m/n/10 Figure 5: With-out any line smooth-ing (\T1/fvm/m/n/10 --input
+-smoothing=0
+ []
+
+LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
+(Font)              scaled to size 5.95004pt on input line 151.
+
+Overfull \hbox (7.92004pt too wide) in paragraph at lines 162--163
+\T1/cmr/m/n/10 A node con-sists of a ge-om-e-try (the node's co-or-di-nates) an
+d some prop-er-ties. 
+ []
 
 [2 <./test2_thin.pdf> <./test2_thick.pdf
 
@@ -630,32 +660,35 @@ pdfTeX warning: pdflatex (file ./test2_noopt.pdf): PDF inclusion: multiple pdfs
 
 pdfTeX warning: pdflatex (file ./test2_nodefronts.pdf): PDF inclusion: multiple
  pdfs with page group included in a single page
->] [3] (./transitmapper.aux)
-
-LaTeX Font Warning: Some font shapes were not available, defaults substituted.
-
- ) 
+>] <test3.pdf, id=39, 72.27pt x 64.24pt>
+File: test3.pdf Graphic file (type pdf)
+ <use test3.pdf>
+Package pdftex.def Info: test3.pdf used on input line 203.
+(pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
+ [3 <./test2_nosmoothing.pdf>] [4 <./test3.pdf>] [5] (./transitmapper.aux) ) 
 Here is how much of TeX's memory you used:
- 4953 strings out of 493029
- 65732 string characters out of 6136233
- 197618 words of memory out of 5000000
- 8419 multiletter control sequences out of 15000+600000
- 7924 words of font info for 29 fonts, out of 8000000 for 9000
+ 5211 strings out of 493029
+ 68160 string characters out of 6136234
+ 207923 words of memory out of 5000000
+ 8657 multiletter control sequences out of 15000+600000
+ 14394 words of font info for 37 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 38i,9n,37p,399b,1660s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share
-/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texliv
-e/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf
--dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmtt8.pfb>
-Output written on transitmapper.pdf (3 pages, 117415 bytes).
+ 38i,9n,37p,470b,1669s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/u
+sr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}{/usr/share/texlive/tex
+mf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
+/bera/fvmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/bera/fvmr8a.
+pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1000.pfb></usr/share/texm
+f/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf/fonts/type1/public
+/cm-super/sfbx1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0700.p
+fb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf
+/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/
+cm-super/sfrm1728.pfb>
+Output written on transitmapper.pdf (5 pages, 154264 bytes).
 PDF statistics:
- 70 PDF objects out of 1000 (max. 8388607)
- 47 compressed objects within 1 object stream
+ 88 PDF objects out of 1000 (max. 8388607)
+ 60 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 31 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 41 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -50,7 +50,7 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
     params["orient"] = "auto";
     params["markerWidth"] = "2";
     params["markerHeight"] = "1";
-    params["refY"] = "0.5";//boost::lexical_cast<std::string>(m.width / 2 * _cfg->outputResolution);
+    params["refY"] = "0.5";
     params["refX"] = "0";
 
     _w.openTag("marker", params);
@@ -59,6 +59,25 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
     params["d"] = m.path;
     params["fill"] = m.color;
     params["stroke"] = "";
+
+    _w.openTag("path", params);
+
+    _w.closeTag();
+    _w.closeTag();
+
+    params.clear();
+    params["id"] = m.name + "_black";
+    params["orient"] = "auto";
+    params["markerWidth"] = "2";
+    params["markerHeight"] = "1";
+    params["refY"] = "0.5";
+    params["refX"] = "0";
+
+    _w.openTag("marker", params);
+
+    params.clear();
+    params["d"] = m.path;
+    params["fill"] = "#000000";
 
     _w.openTag("path", params);
 
@@ -156,7 +175,7 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
     const graph::Node* n, double w, double h) {
   if (n->getStops().size() != 0) return;
 
-  for (auto& ie : n->getInnerGeometries(outG.getConfig(), true)) {
+  for (auto& ie : n->getInnerGeometries(outG.getConfig(), _cfg->innerGeometryPrecision)) {
     renderLinePart(ie.geom, ie.e->getWidth(), *ie.route);
   }
 }
@@ -171,14 +190,14 @@ void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
 void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
     const graph::Route& route, const std::string& endMarker) {
   std::stringstream styleOutline;
-  styleOutline << "fill:none;stroke:#000000";
+  styleOutline << "fill:none;stroke:#000000;";
 
   if (!endMarker.empty()) {
     styleOutline << ";marker-end:'url(#" << endMarker << "_black)';";
   }
 
   styleOutline  << "stroke-linecap:round;stroke-opacity:0.8;stroke-width:"
-    << (width + 4) * _cfg->outputResolution;
+    << (width + _cfg->outlineWidth) * _cfg->outputResolution;
   Params paramsOutline;
   paramsOutline["style"] = styleOutline.str();
 
@@ -188,7 +207,7 @@ void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
   if (!endMarker.empty()) {
     style << ";marker-end:'url(#" << endMarker << ")';";
   }
-  
+
   style << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
     << width * _cfg->outputResolution;
   Params params;
@@ -272,7 +291,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
     double arrowLength = (5 / _cfg->outputResolution);
 
-    if (r.direction != 0 && center.getLength() > arrowLength * 8) {
+    if (r.direction != 0 && center.getLength() > arrowLength * 4) {
 
       std::stringstream markerName;
       markerName << e << ":" << r.route << ":" << i;

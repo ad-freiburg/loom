@@ -61,20 +61,20 @@ double Node::getMaxNodeFrontWidth() const {
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, Point pos) : _id(id), _pos(pos), _relevant(false) {
+Node::Node(const std::string& id, Point pos) : _id(id), _pos(pos) {
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, double x, double y) : _id(id), _pos(x, y), _relevant(false) {
+Node::Node(const std::string& id, double x, double y) : _id(id), _pos(x, y) {
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, Point pos, StationInfo s) : _id(id), _pos(pos), _relevant(false) {
+Node::Node(const std::string& id, Point pos, StationInfo s) : _id(id), _pos(pos) {
   addStop(s);
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, double x, double y, StationInfo s) : _id(id), _pos(x, y), _relevant(false) {
+Node::Node(const std::string& id, double x, double y, StationInfo s) : _id(id), _pos(x, y) {
   addStop(s);
 }
 
@@ -176,7 +176,7 @@ const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
 
 // _____________________________________________________________________________
 double Node::getScore(const Configuration& c) const {
-  std::vector<InnerGeometry> igs = getInnerGeometries(c, false);
+  std::vector<InnerGeometry> igs = getInnerGeometries(c, -1);
 
   double score = 0;
 
@@ -197,7 +197,7 @@ double Node::getScore(const Configuration& c) const {
 double Node::getScoreUnder(const graph::Configuration& c, const Edge* e,
     const std::vector<size_t>* order) const {
 
-  std::vector<InnerGeometry> igs = getInnerGeometriesUnder(c, false, e, order);
+  std::vector<InnerGeometry> igs = getInnerGeometriesUnder(c, -1, e, order);
 
   double score = 0;
 
@@ -256,8 +256,8 @@ std::vector<Partner> Node::getPartners(const NodeFront* f,
 
 // _____________________________________________________________________________
 std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
-    bool bezier) const {
-  return getInnerGeometriesUnder(c, bezier, 0, 0);
+    double prec) const {
+  return getInnerGeometriesUnder(c, prec, 0, 0);
 }
 
 // _____________________________________________________________________________
@@ -275,16 +275,14 @@ geo::PolyLine Node::getInnerStraightLine(const Configuration& c,
 geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
     const RouteOccurance& tripOcc, const graph::Partner& partner,
     const Edge* e,
-    const graph::Ordering* order) const {
+    const graph::Ordering* order,
+    double prec) const {
 
 
   Point p = nf.getTripOccPosUnder(tripOcc.route, cf, e, order);
   Point pp = partner.front->getTripOccPosUnder(partner.route, cf, e, order);
 
   double d = util::geo::dist(p, pp) / 2;
-
-  // for small distances, fall back to straight line
-  //if (d < 5) return getInnerStraightLine(cf, nf, tripOcc, partner, g, order);
 
   Point b = p;
   Point c = pp;
@@ -305,31 +303,13 @@ geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
   b = Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
   c = Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
 
-  /**
-  // TODO(patrick): why 1000? find some heuristic
-  d = 1000;
-
-  Point bd = Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
-  Point cd = Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
-
-  geo::PolyLine bl(p, bd);
-  geo::PolyLine cl(pp, cd);
-
-  auto is = bl.getIntersections(cl);
-
-  if (is.size() == 1) {
-    b = is.begin()->p;
-    c = is.begin()->p;
-  }
-  **/
-
   geo::BezierCurve bc(p, b, c, pp);
-  return bc.render(cf.innerGeometryPrecision);
+  return bc.render(prec);
 }
 
 // _____________________________________________________________________________
 std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
-    const graph::Configuration& c, bool bezier,
+    const graph::Configuration& c, double prec,
     const Edge* e, const graph::Ordering* order) const {
   std::vector<InnerGeometry> ret;
 
@@ -354,9 +334,9 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
           continue;
         }
 
-        if (bezier) {
+        if (prec > 0) {
           ret.push_back(InnerGeometry(
-              getInnerBezier(c, nf, routeOcc, p, e, order),
+              getInnerBezier(c, nf, routeOcc, p, e, order, prec),
               p.route, nf.edge));
         } else {
           ret.push_back(InnerGeometry(
@@ -463,7 +443,7 @@ Edge* Node::getEdge(const Node* other) const {
 
     if (eP->getTo() == other) {
       return eP;
-    } 
+    }
   }
 
   for (auto e = _adjListIn.begin(); e != _adjListIn.end(); ++e) {
@@ -471,6 +451,6 @@ Edge* Node::getEdge(const Node* other) const {
 
     if (eP->getFrom() == other) {
       return eP;
-    } 
+    }
   }
 }

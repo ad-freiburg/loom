@@ -27,6 +27,9 @@ struct Config {
   double inputSmoothing;
   double innerGeometryPrecision;
 
+  double outlineWidth;
+  std::string outlineColor;
+
   bool renderStations;
   bool renderNodeFronts;
   bool renderStationNames;

@@ -49,6 +49,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->lineSpacing))
       ->default_value(10),
       "spacing between two rendered lines")
+    ("outline-width",
+      opts::value<double>(&(cfg->outlineWidth))
+      ->default_value(2),
+      "default width of line outline")
     ("render-stations",
      opts::bool_switch(&(cfg->renderStations))
       ->default_value(true),

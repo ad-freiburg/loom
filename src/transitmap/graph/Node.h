@@ -108,9 +108,9 @@ class Node {
   std::vector<Partner> getPartners(const NodeFront* f, const RouteOccurance& ro) const;
 
   std::vector<InnerGeometry> getInnerGeometries(const graph::Configuration& c,
-      bool bezier) const;
+       double prec) const;
   std::vector<InnerGeometry> getInnerGeometriesUnder(
-      const graph::Configuration& c, bool bezier, const Edge* e,
+      const graph::Configuration& c, double prec, const Edge* e,
       const std::vector<size_t>* order) const;
 
   util::geo::Polygon getConvexFrontHull(double d) const;
@@ -129,9 +129,6 @@ class Node {
 
   double getMaxNodeFrontWidth() const;
 
-  // TODO remove this
-  mutable bool _relevant;
-
  private:
   std::string _id;
   std::set<Edge*> _adjListIn;
@@ -148,7 +145,8 @@ class Node {
 
   geo::PolyLine getInnerBezier(const Configuration& c, const NodeFront& nf,
       const RouteOccurance& tripOcc, const graph::Partner& partner, const Edge* e,
-      const std::vector<size_t>* order) const;
+      const std::vector<size_t>* order,
+      double prec) const;
 
   geo::PolyLine getInnerStraightLine(const Configuration& c,
       const NodeFront& nf, const RouteOccurance& tripOcc,
