@@ -17,8 +17,10 @@ class LineStyle {
   LineStyle() {};
 
   const std::vector<double>& getDashArray() const;
+  std::string getDashArrayString() const;
   void setDashArray(const std::vector<double>& arr);
   void setDashArray(const std::string& doubleArrayString);
+
 
  private:
   std::vector<double> _dashArray;

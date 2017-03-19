@@ -19,11 +19,15 @@ using std::string;
 namespace transitmapper {
 namespace graph {
 
+using style::LineStyle;
+
 // forward declaration of Node
 class Node;
 
 struct RouteOccurance {
   RouteOccurance(const Route* r, const Node* dir) : route(r), direction(dir) {}
+  RouteOccurance(const Route* r, const Node* dir, const style::LineStyle& ls)
+   : route(r), direction(dir), style(ls) {}
   const Route* route;
   const Node* direction;  // 0 if in both directions
 
@@ -43,6 +47,7 @@ class Edge {
   void setFrom(Node* from);
   void setTo(Node* to);
 
+  void addRoute(const Route* r, const Node* dir, const LineStyle& ls);
   void addRoute(const Route* r, const Node* dir);
 
   const geo::PolyLine& getGeom() const;
@@ -56,10 +61,10 @@ class Edge {
 
   RouteOccurance* getTripsForRoute(const Route* r) const;
 
-  std::vector<RouteOccurance> getContinuedRoutesIn(const Node* n, 
+  std::vector<RouteOccurance> getContinuedRoutesIn(const Node* n,
     const Route* r, const Node* dir, const Edge* fromEdge) const;
 
-  std::vector<RouteOccurance> getSameDirRoutesIn(const Node* n, 
+  std::vector<RouteOccurance> getSameDirRoutesIn(const Node* n,
     const Route* r, const Node* dir, const Edge* fromEdge) const;
 
   bool containsRoute(const Route* r) const;

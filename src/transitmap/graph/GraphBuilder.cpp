@@ -131,8 +131,20 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
             dir = g->getNodeById(route["direction"]);
           }
 
+          if (!route["style"].is_null()) {
+            style::LineStyle ls;
+            auto style = route["style"];
+            std::string dashArray;
+            if (!style["dash-array"].is_null()) {
+              dashArray = style["dash-array"];
+            }
 
-          e->addRoute(r, dir);
+            ls.setDashArray(dashArray);
+
+            e->addRoute(r, dir, ls);
+          } else {
+            e->addRoute(r, dir);
+          }
         }
 
       }

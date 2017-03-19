@@ -118,6 +118,11 @@ RouteOccWithPos Edge::getTripsForRouteUnder(const Route* r,
 }
 
 // _____________________________________________________________________________
+void Edge::addRoute(const Route* r, const Node* dir, const LineStyle& ls) {
+  _routes.push_back(RouteOccurance(r, dir, ls));
+}
+
+// _____________________________________________________________________________
 void Edge::addRoute(const Route* r, const Node* dir) {
   _routes.push_back(RouteOccurance(r, dir));
 }
