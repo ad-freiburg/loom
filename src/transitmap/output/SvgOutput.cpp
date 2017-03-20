@@ -176,24 +176,31 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
   if (n->getStops().size() != 0) return;
 
   for (auto& ie : n->getInnerGeometries(outG.getConfig(), _cfg->innerGeometryPrecision)) {
-    renderLinePart(ie.geom, ie.e->getWidth(), *ie.route);
+    renderLinePart(ie.geom, ie.e->getWidth(), *ie.route, 0);
   }
 }
 
 // _____________________________________________________________________________
 void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
-    const graph::Route& route) {
-  renderLinePart(p, width, route, "");
+    const graph::Route& route, const Nullable<style::LineStyle> style) {
+  renderLinePart(p, width, route, "", style);
 }
 
 // _____________________________________________________________________________
 void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
-    const graph::Route& route, const std::string& endMarker) {
+    const graph::Route& route, const std::string& endMarker,
+    const Nullable<style::LineStyle> style) {
   std::stringstream styleOutline;
   styleOutline << "fill:none;stroke:#000000";
 
   if (!endMarker.empty()) {
-    styleOutline << ";marker-end:url(#" << endMarker << "_black);";
+    styleOutline << ";marker-end:url(#" << endMarker << "_black)";
+  }
+
+  if (!style.isNull()) {
+    if (style.get().getDashArray().size()) {
+      styleOutline << ";stroke-dasharray:" << style.get().getDashArrayString();
+    }
   }
 
   styleOutline  << ";stroke-linecap:round;stroke-opacity:0.8;stroke-width:"
@@ -201,17 +208,23 @@ void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
   Params paramsOutline;
   paramsOutline["style"] = styleOutline.str();
 
-  std::stringstream style;
-  style << "fill:none;stroke:#" << route.color;
+  std::stringstream styleStr;
+  styleStr << "fill:none;stroke:#" << route.color;
 
   if (!endMarker.empty()) {
-    style << ";marker-end:url(#" << endMarker << ");";
+    styleStr << ";marker-end:url(#" << endMarker << ")";
   }
 
-  style << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
+  if (!style.isNull()) {
+    if (style.get().getDashArray().size()) {
+      styleStr << ";stroke-dasharray:" << style.get().getDashArrayString();
+    }
+  }
+
+  styleStr << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
     << width * _cfg->outputResolution;
   Params params;
-  params["style"] = style.str();
+  params["style"] = styleStr.str();
 
   _delegates[(uintptr_t)&route].push_back(
       OutlinePrintPair(
@@ -307,14 +320,14 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
 
       if (r.direction == e->getTo()) {
-        renderLinePart(firstPart, lineW, *r.route, markerName.str() + "_m");
-        renderLinePart(secondPart.getReversed(), lineW, *r.route, markerName.str() + "_f");
+        renderLinePart(firstPart, lineW, *r.route, markerName.str() + "_m", r.style);
+        renderLinePart(secondPart.getReversed(), lineW, *r.route, markerName.str() + "_f", r.style);
       } else {
-        renderLinePart(firstPart, lineW, *r.route, markerName.str() + "_f");
-        renderLinePart(secondPart.getReversed(), lineW, *r.route, markerName.str() + "_m");
+        renderLinePart(firstPart, lineW, *r.route, markerName.str() + "_f", r.style);
+        renderLinePart(secondPart.getReversed(), lineW, *r.route, markerName.str() + "_m", r.style);
       }
     } else {
-      renderLinePart(p, lineW, *r.route);
+      renderLinePart(p, lineW, *r.route, r.style);
     }
 
     a++;

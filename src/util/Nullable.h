@@ -5,14 +5,20 @@
 #ifndef UTIL_NULLABLE_H_
 #define UTIL_NULLABLE_H_
 
-template<typename T> 
+template<typename T>
 class Nullable {
 
  public:
   Nullable()
    : val(), null(true) {}
+  Nullable(T* valPointer)
+   : val(), null(true) {
+   if (valPointer) {
+     assign(*valPointer);
+   }
+  }
   Nullable(const T& value)
-   : val(value), null(false) {} 
+   : val(value), null(false) {}
   Nullable(const Nullable& other)
    : val(other.val), null(other.isNull()) {}
 
@@ -27,13 +33,12 @@ class Nullable {
     return val;
   }
 
-
   /**
    * Passing through comparision operators
    */
 
   bool operator==(const Nullable& other) {
-    return (other.isNull() && isNull) || other.get() == get();
+    return (other.isNull() && isNull()) || other.get() == get();
   }
 
   bool operator!=(const Nullable& other) {
@@ -84,12 +89,12 @@ class Nullable {
     return get();
   }
 
-  T& get() const {
-    if (isNull()) return val;
+  T get() const {
+    if (!isNull()) return val;
     else throw std::runtime_error("Trying to retrieve value of NULL object.");
   }
 
-  bool isNull() const { 
+  bool isNull() const {
     return null;
   }
 

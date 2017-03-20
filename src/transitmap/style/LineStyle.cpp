@@ -28,10 +28,9 @@ void LineStyle::setDashArray(const std::vector<double>& arr) {
 
 // ____________________________________________________________________________
 void LineStyle::setDashArray(const std::string& doubleArrayString) {
+  _dashArray.clear();
   std::stringstream ss(doubleArrayString);
-  while (ss) {
-    double tmp;
-    ss >> tmp;
-    _dashArray.push_back(tmp);
+  for (double a; ss >> a;) {
+    _dashArray.push_back(a);
   }
 }

@@ -89,10 +89,11 @@ class SvgOutput : public Output {
       const graph::Node* n, double w, double h);
 
   void renderLinePart(const geo::PolyLine p, double width,
-    const graph::Route& route);
+    const graph::Route& route, const Nullable<style::LineStyle> style);
 
   void renderLinePart(const geo::PolyLine p, double width,
-    const graph::Route& route, const std::string& endMarker);
+    const graph::Route& route, const std::string& endMarker,
+    const Nullable<style::LineStyle> style);
 
   void renderDelegates(const graph::TransitGraph& outG, double w, double h);
 
