@@ -229,23 +229,36 @@ An edge consists also of a geometry (a linestring) and some properties.
 }
 \end{lstlisting}
 
-Properties \texttt{from} and \texttt{to} hold the IDs of the nodes this edges connects. 
+
+\subsubsection{Edge Properties}
+
+Fields \texttt{from} and \texttt{to} hold the IDs of the nodes this edges connects. Property \texttt{lines} holds the lines that occur on that edge.
 
 \begin{description}[align=right]
-  \item[\texttt{id}] A dataset-unique string identifier for this node. Will be referenced later in edges.
-
+  \item[\texttt{from}] Holds the ID of the node this edge originates from.
+  \item[\texttt{to}] Holds the ID of the node this edge ends in.
+  \item[\texttt{lines}] An array of line objects, see below.
 \end{description}
+
+\subsubsection{Line object}
+
+A line object is a single line occurance on an edge. Lines can either be identified accross edges by a unique ID or by the lines color as a shortcut. If you give a line an ID, you don't have to re-define its attributes again for an occurance in another edge. A single definition is enough.
+
+The following properties are available for line occurances at the moment:
+
+\begin{description}[align=right]
+	\item[\texttt{id}] (optional) A unique string-identifier of this line. Will not be visible in the rendered output.
+	\item[\texttt{label}] (optional) A string label that will be visible in the output as a line marker, if configured. Defaults to \texttt{""}.
+	\item[\texttt{color}] (optional) The color this line will be rendered in, as a hexadecimal string (for example, \texttt{"660000"}. \textbf{Important:} if the line has no id, the color will be used for matching lines in adjacent edges.
+	\item[\texttt{direction}] (optional) You may want to define a line that only occurs in one direction on the edge. This field allows you to specifiy the ID of the node this line is headed to. Node can either be \texttt{from} or \texttt{to}. \textbf{Note:} may be changed to a binary parameter. Defaults to a line that occurs in both directions. A single-direction line will be rendered with a little arrow indicating the direction, see (???).
+	\item{\texttt{style} (optional) A style attribute (still experimental). 
+\end{description}
+
 
 \begin{figure}
   \centering
 $	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{test4.pdf}}}$
 	\caption{Directed line occurances (via \texttt{direction})}
-\end{figure}
-
-\begin{figure}
-  \centering
-$	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{test_dashed.pdf}}}$
-	\caption{Dashed line (via \texttt{"dash-array"="4 2"})}
 \end{figure}
 
 \section{Example Input}
