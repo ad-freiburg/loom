@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <ostream>
+#include "util/String.h"
 #include "./../config/TransitMapConfig.h"
 #include "./../graph/Route.h"
 #include "./SvgOutput.h"
@@ -219,7 +220,14 @@ void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
     if (style.get().getDashArray().size()) {
       styleStr << ";stroke-dasharray:" << style.get().getDashArrayString();
     }
+
+    if (!style.get().getCss().empty()) {
+      std::string css = style.get().getCss();
+      ::util::replaceAll(css, "\"", "&quot;");
+      styleStr << ";" << css << ";";
+    }
   }
+
 
   styleStr << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
     << width * _cfg->outputResolution;

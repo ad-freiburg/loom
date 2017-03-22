@@ -22,6 +22,17 @@ std::string LineStyle::getDashArrayString() const {
 }
 
 // ____________________________________________________________________________
+void LineStyle::setCss(const std::string& css) {
+  _css = css;
+}
+
+// ____________________________________________________________________________
+const std::string& LineStyle::getCss() {
+  return _css;
+}
+
+
+// ____________________________________________________________________________
 void LineStyle::setDashArray(const std::vector<double>& arr) {
   _dashArray = arr;
 }

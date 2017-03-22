@@ -12,7 +12,7 @@ namespace transitmapper {
 namespace style {
 
 class LineStyle {
-  
+
  public:
   LineStyle() {};
 
@@ -21,9 +21,12 @@ class LineStyle {
   void setDashArray(const std::vector<double>& arr);
   void setDashArray(const std::string& doubleArrayString);
 
+  void setCss(const std::string& css);
+  const std::string& getCss();
 
  private:
   std::vector<double> _dashArray;
+  std::string _css;
 
 };
 

@@ -139,6 +139,10 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
               dashArray = style["dash-array"];
             }
 
+            if (!style["css"].is_null()) {
+              ls.setCss(style["css"]);
+            }
+
             ls.setDashArray(dashArray);
 
             e->addRoute(r, dir, ls);
@@ -163,8 +167,8 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
         if (!n) continue;
 
-        if (!props["excluded_line_connections"].is_null()) {
-          for (auto excl : props["excluded_line_connections"]) {
+        if (!props["excluded_line_conns"].is_null()) {
+          for (auto excl : props["excluded_line_conns"]) {
             std::string rid = excl["route"];
             std::string nid1 = excl["edge1_node"];
             std::string nid2 = excl["edge2_node"];

@@ -75,7 +75,7 @@ void JsonOutput::print(const graph::Graph& outG) {
       }
     }
 
-    if (arr.size()) feature["properties"]["excluded_line_connections"] = arr;
+    if (arr.size()) feature["properties"]["excluded_line_conns"] = arr;
 
     geoj["features"].push_back(feature);
   }

@@ -29,7 +29,7 @@
       },
       "properties": {
         "id": "a",
-		"excluded_line_connections": [
+		"excluded_line_cons": [
 			{
 				"route" : "A",
 				"edge1_node": "1",
