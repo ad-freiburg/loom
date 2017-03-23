@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.19)  22 MAR 2017 15:15
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.7)  23 MAR 2017 01:58
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -578,25 +578,22 @@ File: t1fvm.fd 2004/09/07 scalable font definitions for T1/fvm.
 )
 LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
 (Font)              scaled to size 8.50006pt on input line 87.
-
-
-LaTeX Warning: Reference `exampleinput' on page 1 undefined on input line 93.
-
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 97.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 97.
+
 <inputex.pdf, id=1, 72.27pt x 64.24pt>
 File: inputex.pdf Graphic file (type pdf)
  <use inputex.pdf>
 Package pdftex.def Info: inputex.pdf used on input line 97.
-(pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
+(pdftex.def)             Requested size: 124.20021pt x 110.40633pt.
 
 <test2.pdf, id=2, 72.27pt x 64.24pt>
 File: test2.pdf Graphic file (type pdf)
  <use test2.pdf>
 Package pdftex.def Info: test2.pdf used on input line 101.
-(pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
+(pdftex.def)             Requested size: 124.20021pt x 110.40633pt.
 LaTeX Font Info:    Font shape `T1/fvm/bx/n' in size <10> not available
 (Font)              Font shape `T1/fvm/b/n' tried instead on input line 111.
 LaTeX Font Info:    Font shape `T1/fvm/b/n' will be
@@ -608,49 +605,43 @@ f
 
 pdfTeX warning: pdflatex (file ./test2.pdf): PDF inclusion: multiple pdfs with 
 page group included in a single page
->] <test2_thin.pdf, id=26, 72.27pt x 64.24pt>
+>] <test2_thin.pdf, id=25, 72.27pt x 64.24pt>
 File: test2_thin.pdf Graphic file (type pdf)
  <use test2_thin.pdf>
 Package pdftex.def Info: test2_thin.pdf used on input line 122.
-(pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
+(pdftex.def)             Requested size: 124.20021pt x 110.40633pt.
 
-<test2_thick.pdf, id=27, 72.27pt x 64.24pt>
+<test2_thick.pdf, id=26, 72.27pt x 64.24pt>
 File: test2_thick.pdf Graphic file (type pdf)
  <use test2_thick.pdf>
 Package pdftex.def Info: test2_thick.pdf used on input line 124.
-(pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
+(pdftex.def)             Requested size: 124.20021pt x 110.40633pt.
 
-<test2_noopt.pdf, id=28, 72.27pt x 64.24pt>
+<test2_noopt.pdf, id=27, 72.27pt x 64.24pt>
 File: test2_noopt.pdf Graphic file (type pdf)
  <use test2_noopt.pdf>
 Package pdftex.def Info: test2_noopt.pdf used on input line 131.
-(pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
+(pdftex.def)             Requested size: 124.20021pt x 110.40633pt.
 
-<test2_nodefronts.pdf, id=29, 72.27pt x 64.24pt>
+<test2_nodefronts.pdf, id=28, 72.27pt x 64.24pt>
 File: test2_nodefronts.pdf Graphic file (type pdf)
  <use test2_nodefronts.pdf>
-Package pdftex.def Info: test2_nodefronts.pdf used on input line 137.
-(pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
+Package pdftex.def Info: test2_nodefronts.pdf used on input line 138.
+(pdftex.def)             Requested size: 124.20021pt x 110.40633pt.
 
-<test2_nosmoothing.pdf, id=30, 72.27pt x 64.24pt>
+<test2_nosmoothing.pdf, id=29, 72.27pt x 64.24pt>
 File: test2_nosmoothing.pdf Graphic file (type pdf)
  <use test2_nosmoothing.pdf>
-Package pdftex.def Info: test2_nosmoothing.pdf used on input line 143.
-(pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
+Package pdftex.def Info: test2_nosmoothing.pdf used on input line 145.
+(pdftex.def)             Requested size: 124.20021pt x 110.40633pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 144--144
+Underfull \hbox (badness 10000) in paragraph at lines 146--146
 []\T1/cmr/m/n/10 Figure 5: With-out any line smooth-ing (\T1/fvm/m/n/10 --input
 -smoothing=0
  []
 
 LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 5.95004pt on input line 152.
-
-Overfull \hbox (7.92004pt too wide) in paragraph at lines 163--164
-\T1/cmr/m/n/10 A node con-sists of a ge-om-e-try (the node's co-or-di-nates) an
-d some prop-er-ties. 
- []
-
+(Font)              scaled to size 5.95004pt on input line 155.
 [2 <./test2_thin.pdf> <./test2_thick.pdf
 
 pdfTeX warning: pdflatex (file ./test2_thick.pdf): PDF inclusion: multiple pdfs
@@ -663,52 +654,57 @@ pdfTeX warning: pdflatex (file ./test2_noopt.pdf): PDF inclusion: multiple pdfs
 
 pdfTeX warning: pdflatex (file ./test2_nodefronts.pdf): PDF inclusion: multiple
  pdfs with page group included in a single page
->] <test3.pdf, id=40, 72.27pt x 64.24pt>
+>]
+Overfull \hbox (7.92004pt too wide) in paragraph at lines 166--167
+\T1/cmr/m/n/10 A node con-sists of a ge-om-e-try (the node's co-or-di-nates) an
+d some prop-er-ties. 
+ []
+
+[3 <./test2_nosmoothing.pdf>] <test3.pdf, id=45, 72.27pt x 64.24pt>
 File: test3.pdf Graphic file (type pdf)
- <use test3.pdf>
-Package pdftex.def Info: test3.pdf used on input line 204.
-(pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
- [3 <./test2_nosmoothing.pdf>] [4 <./test3.pdf>] <test4.pdf, id=51, 67.75313pt 
-x 60.225pt>
+
+<use test3.pdf>
+Package pdftex.def Info: test3.pdf used on input line 207.
+(pdftex.def)             Requested size: 124.20021pt x 110.40633pt.
+ [4 <./test3.pdf>] <test4.pdf, id=51, 67.75313pt x 60.225pt>
 File: test4.pdf Graphic file (type pdf)
 
 <use test4.pdf>
-Package pdftex.def Info: test4.pdf used on input line 271.
-(pdftex.def)             Requested size: 113.85063pt x 101.20485pt.
+Package pdftex.def Info: test4.pdf used on input line 275.
+(pdftex.def)             Requested size: 124.20021pt x 110.40454pt.
  <test_dashed.pdf, id=52, 72.27pt x 64.24pt>
 File: test_dashed.pdf Graphic file (type pdf)
 
 <use test_dashed.pdf>
-Package pdftex.def Info: test_dashed.pdf used on input line 277.
-(pdftex.def)             Requested size: 113.85063pt x 101.20596pt.
- [5 <./test4.pdf>] [6 <./test_dashed.pdf>]
-(./transitmapper.aux)
+Package pdftex.def Info: test_dashed.pdf used on input line 282.
+(pdftex.def)             Requested size: 124.20021pt x 110.40633pt.
+ [5] [6 <./test4.pdf> <./test_dashed.pdf
 
-LaTeX Warning: There were undefined references.
-
- ) 
+pdfTeX warning: pdflatex (file ./test_dashed.pdf): PDF inclusion: multiple pdfs
+ with page group included in a single page
+>] [7] (./transitmapper.aux) ) 
 Here is how much of TeX's memory you used:
- 5224 strings out of 493029
- 68359 string characters out of 6136233
- 210941 words of memory out of 5000000
- 8668 multiletter control sequences out of 15000+600000
+ 5230 strings out of 493029
+ 68429 string characters out of 6136234
+ 208995 words of memory out of 5000000
+ 8674 multiletter control sequences out of 15000+600000
  14394 words of font info for 37 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 38i,9n,37p,499b,1217s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}{/usr/share/texliv
-e/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
-ublic/bera/fvmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/bera/fv
-mr8a.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1000.pfb></usr/share
-/texmf/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf/fonts/type1/p
-ublic/cm-super/sfbx1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0
-700.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/
-texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/pu
-blic/cm-super/sfrm1728.pfb>
-Output written on transitmapper.pdf (6 pages, 171951 bytes).
+ 38i,9n,37p,499b,1773s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-sup
+er-t1.enc}{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/public/bera/fvmb8a.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/bera/fvmr8a.pfb></usr/share/texmf/fonts/type1/public/cm-su
+per/sfbx1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1200.pfb></u
+sr/share/texmf/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texmf/fonts
+/type1/public/cm-super/sfrm0700.pfb></usr/share/texmf/fonts/type1/public/cm-sup
+er/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></us
+r/share/texmf/fonts/type1/public/cm-super/sfrm1728.pfb>
+Output written on transitmapper.pdf (7 pages, 172314 bytes).
 PDF statistics:
- 97 PDF objects out of 1000 (max. 8388607)
- 66 compressed objects within 1 object stream
+ 101 PDF objects out of 1000 (max. 8388607)
+ 69 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  51 words of extra memory for PDF output out of 10000 (max. 10000000)
 

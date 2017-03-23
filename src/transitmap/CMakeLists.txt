@@ -1,6 +1,6 @@
 file(GLOB_RECURSE transitmap_SRC *.cpp)
 
-set(transitmap_main ${CMAKE_CURRENT_SOURCE_DIR})
+set(transitmap_main TransitMapMain.cpp) 
 
 list(REMOVE_ITEM transitmap_SRC ${transitmap_main})
 list(REMOVE_ITEM transitmap_SRC TestMain.cpp)
