@@ -5,6 +5,8 @@
 #ifndef UTIL_NULLABLE_H_
 #define UTIL_NULLABLE_H_
 
+namespace pbutil {
+
 template<typename T>
 class Nullable {
 
@@ -37,51 +39,51 @@ class Nullable {
    * Passing through comparision operators
    */
 
-  bool operator==(const Nullable& other) {
+  bool operator==(const Nullable& other) const {
     return (other.isNull() && isNull()) || other.get() == get();
   }
 
-  bool operator!=(const Nullable& other) {
+  bool operator!=(const Nullable& other) const {
     return !(*this == other);
   }
 
-  bool operator<(const Nullable& other) {
+  bool operator<(const Nullable& other) const {
     return !other.isNull() && !isNull() && get() < other.get();
   }
 
-  bool operator>(const Nullable& other) {
+  bool operator>(const Nullable& other) const {
     return !(*this < other || *this == other);
   }
 
-  bool operator<=(const Nullable& other) {
+  bool operator<=(const Nullable& other) const {
     return *this < other || *this == other;
   }
 
-  bool operator>=(const Nullable& other) {
+  bool operator>=(const Nullable& other) const {
     return *this > other || *this == other;
   }
 
-  bool operator==(const T& other) {
+  bool operator==(const T& other) const {
     return !isNull() && other == get();
   }
 
-  bool operator!=(const T& other) {
+  bool operator!=(const T& other) const {
     return !(*this == other);
   }
 
-  bool operator<(const T& other) {
+  bool operator<(const T& other) const {
     return !isNull() && get() < other;
   }
 
-  bool operator>(const T& other) {
+  bool operator>(const T& other) const {
     return !(*this < other || *this == other);
   }
 
-  bool operator<=(const T& other) {
+  bool operator<=(const T& other) const {
     return *this < other || *this == other;
   }
 
-  bool operator>=(const T& other) {
+  bool operator>=(const T& other) const {
     return *this > other || *this == other;
   }
 
@@ -107,5 +109,7 @@ private:
   T val;
   bool null;
 };
+
+}
 
 #endif  // UTIL_NULLABLE_H_

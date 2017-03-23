@@ -15,6 +15,8 @@
 #include "./../graph/Route.h"
 #include "./../geo/PolyLine.h"
 
+using pbutil::Nullable;
+
 namespace transitmapper {
 namespace output {
 

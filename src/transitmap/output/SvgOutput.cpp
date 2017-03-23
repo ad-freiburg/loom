@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 #include <ostream>
-#include "util/String.h"
+#include "pbutil/String.h"
 #include "./../config/TransitMapConfig.h"
 #include "./../graph/Route.h"
 #include "./SvgOutput.h"
@@ -223,7 +223,7 @@ void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
 
     if (!style.get().getCss().empty()) {
       std::string css = style.get().getCss();
-      ::util::replaceAll(css, "\"", "&quot;");
+      pbutil::replaceAll(css, "\"", "&quot;");
       styleStr << ";" << css << ";";
     }
   }

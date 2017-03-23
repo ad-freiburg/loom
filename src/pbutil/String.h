@@ -9,7 +9,7 @@
 #include <string>
 #include <cstring>
 
-namespace util {
+namespace pbutil {
 
 // _____________________________________________________________________________
 inline std::string urlDecode(const std::string& encoded) {
@@ -49,11 +49,13 @@ inline std::string jsonStringEscape(const std::string& unescaped) {
 // _____________________________________________________________________________
 inline bool replace(std::string& subj, const std::string& from,
   const std::string& to) {
+  if (from.empty()) return false;
   size_t start_pos = subj.find(from);
   if (start_pos != std::string::npos) {
     subj.replace(start_pos, from.length(), to);
     return true;
   }
+
   return false;
 }
 
@@ -61,7 +63,9 @@ inline bool replace(std::string& subj, const std::string& from,
 inline bool replaceAll(std::string& subj, const std::string& from,
   const std::string& to) {
   bool found = false;
-  for (size_t s = 0; s != std::string::npos; s = subj.find(from, s + to.length())) {
+  if (from.empty()) return found;
+  size_t s = subj.find(from, 0);
+  for (; s != std::string::npos; s = subj.find(from, s + to.length())) {
     found = true;
     subj.replace(s, from.length(), to);
   }

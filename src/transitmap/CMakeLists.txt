@@ -3,11 +3,14 @@ file(GLOB_RECURSE transitmap_SRC *.cpp)
 set(transitmap_main ${CMAKE_CURRENT_SOURCE_DIR})
 
 list(REMOVE_ITEM transitmap_SRC ${transitmap_main})
+list(REMOVE_ITEM transitmap_SRC TestMain.cpp)
 
 include_directories(
 	${TRANSITMAP_INCLUDE_DIR}
 	${GDAL_INCLUDE_DIR}
 )
+
+add_subdirectory(tests)
 
 configure_file (
   "_config.h.in"

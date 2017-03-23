@@ -67,7 +67,7 @@
         "lines": [
           {"color": "990000",
 			"style": {
-			  "dash-array": "4 4"}},
+			  "css": "stroke-dasharray: 5,5"}},
           {"color": "33FF66"}
         ]
       }

@@ -59,9 +59,18 @@ endif()
 
 add_subdirectory(src)
 
-add_test(ctest_build_test_code "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target skeletonbuilderTest)
-add_test(base_test ${EXECUTABLE_OUTPUT_PATH}/skeletonbuilderTest)
-set_tests_properties ( base_test PROPERTIES DEPENDS ctest_build_test_code)
+add_test(ctest_build_skeletonbuilder_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target skeletonbuilderTest)
+add_test(skeletonbuilder_test ${EXECUTABLE_OUTPUT_PATH}/skeletonbuilderTest)
+set_tests_properties (skeletonbuilder_test PROPERTIES DEPENDS ctest_build_skeletonbuilder_test)
+
+add_test(ctest_build_transitmapper_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target transitmapperTest)
+add_test(transitmapper_test ${EXECUTABLE_OUTPUT_PATH}/transitmapperTest)
+set_tests_properties (transitmapper_test PROPERTIES DEPENDS ctest_build_transitmapper_test)
+
+
+add_test(ctest_build_pbutil_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target pbutilTest)
+add_test(pbutil_test ${EXECUTABLE_OUTPUT_PATH}/pbutilTest)
+set_tests_properties (pbutil_test PROPERTIES DEPENDS ctest_build_pbutil_test)
 
 # handles install target
 

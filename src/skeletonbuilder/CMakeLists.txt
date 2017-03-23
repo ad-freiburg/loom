@@ -10,6 +10,8 @@ include_directories(
 	${GDAL_INCLUDE_DIR}
 )
 
+add_subdirectory(tests)
+
 configure_file (
   "_config.h.in"
   "_config.h"
