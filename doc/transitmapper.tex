@@ -94,11 +94,11 @@ See \ref{exampleinput} for an example input.
 
 \begin{figure}[htbp]
   \centering
-$	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{inputex.pdf}}}$
+$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{inputex.pdf}}}$
 	\hspace{5mm}
 	$	\vcenter{\hbox{\scalebox{2}{\large $\Rightarrow$}}} $
 	\hspace{5mm}
-$	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{test2.pdf}}}$
+$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2.pdf}}}$
   \caption{Simple example output}
   \label{exampleoutput}
 \end{figure}
@@ -119,29 +119,32 @@ The following command line parameters are accepted by \texttt{transitmapper} (se
 
 \begin{figure}
   \centering
-	$	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{test2_thin.pdf}}}$
+	$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2_thin.pdf}}}$
 	\hspace{5mm}
-$	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{test2_thick.pdf}}}$
+$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2_thick.pdf}}}$
 	\caption{Different settings of \texttt{-{}-line-width} and \texttt{-{}-line-spacing}}
 	\label{linewidths}
 \end{figure}
 
 \begin{figure}
   \centering
-$	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{test2_noopt.pdf}}}$
+$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2_noopt.pdf}}}$
 	\caption{Output without ordering optimization (\texttt{-N})}
+  \label{wooptim}
 \end{figure}
 
 \begin{figure}
   \centering
-$	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{test2_nodefronts.pdf}}}$
+$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2_nodefronts.pdf}}}$
 	\caption{Node-front rendering (\texttt{-{}-render-node-fronts})}
+  \label{nodefronts}
 \end{figure}
 
 \begin{figure}
   \centering
-$	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{test2_nosmoothing.pdf}}}$
+$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2_nosmoothing.pdf}}}$
 	\caption{Without any line smoothing (\texttt{-{}-input-smoothing=0 -{}-bezier-prec=0})}
+  \label{wosmoothing}
 \end{figure}
 
 \section{JSON Format}
@@ -183,7 +186,7 @@ A node consists of a geometry (the node's coordinates) and some properties.
   \item[\texttt{id}] A dataset-unique string identifier for this node. Will be referenced later in edges.
   \item[\texttt{station\_id}] If this node is a station, the station's unique id (optional).
   \item[\texttt{station\_label}] If this node is a station, the station's name (optional). Either \texttt{station\_id} or \texttt{station\_label} has to be set for a node to become a station.
-  \item[\texttt{excluded\_line\_conns}] A list of lines that are not connected in this node, even though two or more edges containing the line start/end in the node. The \texttt{line\_id} (see ??) as well as the two edges this line is not connected in has to be given. Both edges are identified by the adjacent node. Example:
+  \item[\texttt{excluded\_line\_conns}] A list of lines that are not connected in this node, even though two or more edges containing the line start/end in the node (Figure \ref{excllines}). The \texttt{line\_id} as well as the two edges this line is not connected in has to be given. Both edges are identified by the adjacent node. Example:
 \begin{lstlisting}[language=json,firstnumber=1]
 "excluded_line_conns": [
   {
@@ -201,8 +204,9 @@ A node consists of a geometry (the node's coordinates) and some properties.
 
 \begin{figure}
   \centering
-$	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{test3.pdf}}}$
+$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test3.pdf}}}$
 	\caption{The red line is not connected between the two main axes (via \texttt{exluded\_line\_connections})}
+	\label{excllines}
 \end{figure}
 
 \end{description}
@@ -251,7 +255,7 @@ The following properties are available for line occurances at the moment:
 	\item[\texttt{id}] (optional) A unique string-identifier of this line. Will not be visible in the rendered output.
 	\item[\texttt{label}] (optional) A string label that will be visible in the output as a line marker, if configured. Defaults to \texttt{""}.
 	\item[\texttt{color}] (optional) The color this line will be rendered in, as a hexadecimal string (for example, \texttt{"660000"}. \textbf{Important:} if the line has no id, the color will be used for matching lines in adjacent edges.
-	\item[\texttt{direction}] (optional) You may want to define a line that only occurs in one direction on the edge. This field allows you to specifiy the ID of the node this line is headed to. Node can either be \texttt{from} or \texttt{to}. \textbf{Note:} may be changed to a binary parameter. Defaults to a line that occurs in both directions. A single-direction line will be rendered with a little arrow indicating the direction, see (???).
+	\item[\texttt{direction}] (optional) You may want to define a line that only occurs in one direction on the edge. This field allows you to specifiy the ID of the node this line is headed to. Node can either be \texttt{from} or \texttt{to}. \textbf{Note:} may be changed to a binary parameter. Defaults to a line that occurs in both directions. A single-direction line will be rendered with a little arrow indicating the direction. (Figure \ref{directedline}.)
 	\item[\texttt{style}] (optional) A style attribute (still experimental). See below.
 \end{description}
 
@@ -260,7 +264,7 @@ The following properties are available for line occurances at the moment:
 The style object can be used to define additional styles for lines. A style definition only changes the look of a line in the edge it is listed in. It is not global.
 
 \begin{description}[align=right]
-	\item[\texttt{dash-array}] (optional) A comma- or space-separated list of doubles. Starting at 1, the uneven positions are the lengths of filled line segments, the even positions are the lengths of the gaps. For example, \texttt{5, 10} produced a dashed line with segments of length 5, spaced by 10 units. See ??.
+	\item[\texttt{dash-array}] (optional) A comma- or space-separated list of doubles. Starting at 1, the uneven positions are the lengths of filled line segments, the even positions are the lengths of the gaps. For example, \texttt{5, 10} produced a dashed line with segments of length 5, spaced by 10 units. (Figure \ref{dasharray}.)
 	\item[\texttt{line-width}] (optional, \textbf{not yet implemented}) Overrides the width for this line, on this edge.
 	\item[\texttt{line-spacing}] (optional, \textbf{not yet implemented}) Overrides the spacing for this line, on this edge.
 	\item[\texttt{css}] (optional, \textbf{experimental!, only works with SVG output}) A free-hand css style for this line. Will be handed directly to the SVG renderer. The CSS defined here is not by the transitmapper to calculate spacing or optimize placements. For example, if you increase the width here, the line will overlap other lines.
@@ -268,17 +272,20 @@ The style object can be used to define additional styles for lines. A style defi
 
 \begin{figure}
   \centering
-$	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{test4.pdf}}}$
-	\caption{Directed line occurances (via \texttt{direction})}
+$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test4.pdf}}}$
+	\caption{Directed line (via \texttt{direction})}
+  \label{directedline}
 \end{figure}
 
 \begin{figure}
   \centering
-$	\vcenter{\hbox{\includegraphics[width=0.33\textwidth]{test_dashed.pdf}}}$
+$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test_dashed.pdf}}}$
 	\caption{Line with \texttt{dash-array = "10 5"}}
+  \label{dasharray}
 \end{figure}
 
 \section{Example Input}
+\label{exampleinput}
 
 
 \begin{lstlisting}[language=json,firstnumber=1]
