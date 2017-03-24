@@ -20,9 +20,6 @@ namespace optim {
 
 using namespace graph;
 
-using util::geo::Point;
-using util::geo::Line;
-
 typedef std::pair<const Route*, const Route*> LinePair;
 typedef std::pair<size_t, size_t> PosCom;
 typedef std::pair<PosCom, PosCom> PosComPair;

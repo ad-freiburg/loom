@@ -8,14 +8,15 @@
 #include <string>
 #include <ostream>
 #include "Output.h"
+#include "pbutil/geo/Geo.h"
+#include "pbutil/geo/PolyLine.h"
 #include "./../config/TransitMapConfig.h"
 #include "./../util/XmlWriter.h"
-#include "./../util/Geo.h"
 #include "./../graph/TransitGraph.h"
 #include "./../graph/Route.h"
-#include "./../geo/PolyLine.h"
 
 using pbutil::Nullable;
+using namespace pbutil::geo;
 
 namespace transitmapper {
 namespace output {
@@ -44,7 +45,7 @@ struct EndMarker {
 };
 
 typedef std::map<std::string, std::string> Params;
-typedef std::pair<Params, geo::PolyLine> PrintDelegate;
+typedef std::pair<Params, PolyLine> PrintDelegate;
 typedef std::pair<PrintDelegate, PrintDelegate> OutlinePrintPair;
 
 class SvgOutput : public Output {
@@ -55,18 +56,18 @@ class SvgOutput : public Output {
 
   virtual void print(const graph::TransitGraph& outputGraph);
 
-	void printLine(const transitmapper::geo::PolyLine& l,
+	void printLine(const PolyLine& l,
 								const std::map<std::string, std::string>& ps,
                 double w, double h, int64_t xOffs, int64_t yOffs);
-	void printLine(const transitmapper::geo::PolyLine& l,
+	void printLine(const PolyLine& l,
 								const std::string& style,
                 double w, double h, int64_t xOffs, int64_t yOffs);
-  void printPoint(const util::geo::Point& p, const std::string& style,
+  void printPoint(const Point& p, const std::string& style,
                           double w, double h, int64_t xOffs, int64_t yOffs);
-  void printPolygon(const util::geo::Polygon& g,
+  void printPolygon(const Polygon& g,
 										const std::string& style,
                     double w, double h, int64_t xOffs, int64_t yOffs);
-  void printPolygon(const util::geo::Polygon& g,
+  void printPolygon(const Polygon& g,
 								    const std::map<std::string, std::string>& ps,
                     double w, double h, int64_t xOffs, int64_t yOffs);
  private:
@@ -90,10 +91,10 @@ class SvgOutput : public Output {
   void renderNodeScore(const graph::TransitGraph& outG,
       const graph::Node* n, double w, double h);
 
-  void renderLinePart(const geo::PolyLine p, double width,
+  void renderLinePart(const PolyLine p, double width,
     const graph::Route& route, const Nullable<style::LineStyle> style);
 
-  void renderLinePart(const geo::PolyLine p, double width,
+  void renderLinePart(const PolyLine p, double width,
     const graph::Route& route, const std::string& endMarker,
     const Nullable<style::LineStyle> style);
 

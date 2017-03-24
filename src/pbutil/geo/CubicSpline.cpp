@@ -2,10 +2,10 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "../util/Geo.h"
+#include "./Geo.h"
 #include "./CubicSpline.h"
 
-using namespace transitmapper;
+using namespace pbutil;
 using namespace geo;
 
 // _____________________________________________________________________________
@@ -14,7 +14,7 @@ CubicSpline::CubicSpline(const PolyLine& knots) : _didRender(false) {
 }
 
 // _____________________________________________________________________________
-CubicSpline::CubicSpline(const util::geo::Line& knots) : _didRender(false) {
+CubicSpline::CubicSpline(const Line& knots) : _didRender(false) {
   findPolynoms(knots, &_set);
 }
 
@@ -30,7 +30,6 @@ PolyLine CubicSpline::render(double d) const {
     // TODO:render
 
     while (true) {
- 
 
     }
 
@@ -41,7 +40,7 @@ PolyLine CubicSpline::render(double d) const {
 
 
 // _____________________________________________________________________________
-void CubicSpline::findPolynoms(const util::geo::Line& knots, std::vector<CubicPolynom>* ret)
+void CubicSpline::findPolynoms(const Line& knots, std::vector<CubicPolynom>* ret)
 const {
   /**
    * based on

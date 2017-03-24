@@ -8,7 +8,7 @@
 #include <vector>
 #include "./PolyLine.h"
 
-namespace transitmapper {
+namespace pbutil {
 namespace geo {
 
 struct CubicPolynom {
@@ -29,7 +29,7 @@ class CubicSpline {
 
  public:
   CubicSpline(const PolyLine& knots);
-  CubicSpline(const util::geo::Line& knots);
+  CubicSpline(const Line& knots);
 
   PolyLine render(double d) const;
 
@@ -41,7 +41,7 @@ class CubicSpline {
   PolyLine _rendered;
   mutable bool _didRender;
 
-  void findPolynoms(const util::geo::Line& knots, std::vector<CubicPolynom>* ret) const;
+  void findPolynoms(const Line& knots, std::vector<CubicPolynom>* ret) const;
 };
 
 }}

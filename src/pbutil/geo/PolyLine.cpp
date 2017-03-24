@@ -2,21 +2,12 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "pbutil/log/Log.h"
+#include "./../log/Log.h"
 #include "./PolyLine.h"
-#include "../util/Geo.h"
+#include "./Geo.h"
 
-using namespace transitmapper;
+using namespace pbutil;
 using namespace geo;
-using util::geo::Point;
-using util::geo::Line;
-using util::geo::intersection;
-using util::geo::intersects;
-using util::geo::lineIntersects;
-using util::geo::dist;
-using util::geo::distToSegment;
-using util::geo::angBetween;
-using util::geo::projectOn;
 
 // _____________________________________________________________________________
 PolyLine::PolyLine() {
@@ -359,7 +350,7 @@ PointOnLine PolyLine::projectOnAfter(const Point& p, size_t a) const {
   assert(a < _line.size());
   std::pair<size_t, double> bc = nearestSegmentAfter(p, a);
 
-  Point ret = util::geo::projectOn(_line[bc.first], p, _line[bc.first+1]);
+  Point ret = geo::projectOn(_line[bc.first], p, _line[bc.first+1]);
 
   if (getLength() > 0) {
     bc.second += bgeo::distance(_line[bc.first], ret) / getLength();
@@ -379,7 +370,7 @@ void PolyLine::simplify(double d) {
 void PolyLine::smoothenOutliers(double d) {
   if (_line.size() < 3) return;
   for (size_t i = 1; i < _line.size()-3; ++i) {
-    double ang = util::geo::innerProd(_line[i], _line[i-1], _line[i+1]);
+    double ang = innerProd(_line[i], _line[i-1], _line[i+1]);
 
     if (dist(_line[i], _line[i+1]) < d || dist(_line[i], _line[i-1]) < d) {
       if (ang < 35) {

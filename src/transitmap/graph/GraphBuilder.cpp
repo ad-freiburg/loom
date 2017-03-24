@@ -7,9 +7,9 @@
 #include <set>
 #include <stack>
 #include <istream>
-#include "GraphBuilder.h"
-#include "../geo/PolyLine.h"
+#include "pbutil/geo/PolyLine.h"
 #include "pbutil/log/Log.h"
+#include "GraphBuilder.h"
 #include "./../config/TransitMapConfig.h"
 #include "json/json.hpp"
 
@@ -17,9 +17,9 @@ using namespace transitmapper;
 using namespace graph;
 using namespace gtfsparser;
 using namespace gtfs;
+using namespace pbutil::geo;
 using json = nlohmann::json;
 
-using util::geo::Point;
 
 // _____________________________________________________________________________
 GraphBuilder::GraphBuilder(const config::Config* cfg)
@@ -72,7 +72,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
         std::vector<std::vector<double> > coords = geom["coordinates"];
 
-        geo::PolyLine pl;
+        PolyLine pl;
         for (auto coord : coords) {
           double x = coord[0];
           double y = coord[1];
@@ -96,8 +96,8 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
           continue;
         }
 
-        if (util::geo::dist(fromN->getPos(), pl.getLine().back()) <
-          util::geo::dist(fromN->getPos(), pl.getLine().front())) {
+        if (dist(fromN->getPos(), pl.getLine().back()) <
+          dist(fromN->getPos(), pl.getLine().front())) {
           LOG(WARN) << "Geometry for edge from "
             << fromN->getId() << " to " << toN->getId() << " seems "
             << " to have the wrong orientation! This may lead to "
@@ -241,7 +241,7 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
       if (e->getGeom().getLength() == 0) continue;
 
       NodeFront f(e, n);
-      geo::PolyLine pl;
+      PolyLine pl;
 
       f.refEtgLengthBefExp = e->getGeom().getLength();
 
@@ -497,10 +497,10 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
   Point ba = b.geom.getLine().front();
   Point bb = b.geom.getLine().back();
 
-  bool intersects = util::geo::lineIntersects(aa, ab, ba, bb);
+  bool intersects = lineIntersects(aa, ab, ba, bb);
   if (!intersects) return false;
 
-  Point i = util::geo::intersection(aa, ab, ba, bb);
+  Point i = intersection(aa, ab, ba, bb);
 
   if (numShr && a.geom.distTo(i) < (a.edge->getWidth() + a.edge->getSpacing())) return true;
   if (b.geom.distTo(a.geom) < fmax((b.edge->getWidth() + b.edge->getSpacing()) * 3, (b.edge->getTotalWidth() + a.edge->getTotalWidth())/4)) return true;
@@ -510,9 +510,9 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
 
 // _____________________________________________________________________________
 void GraphBuilder::freeNodeFront(NodeFront* f) {
-  geo::PolyLine cutLine = f->geom;
+  PolyLine cutLine = f->geom;
 
-  std::set<geo::PointOnLine, geo::PointOnLineCmp> iSects =
+  std::set<PointOnLine, PointOnLineCmp> iSects =
       cutLine.getIntersections(f->edge->getGeom());
   if (iSects.size() > 0) {
     if (f->edge->getTo() != f->n) {

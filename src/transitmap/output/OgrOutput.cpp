@@ -5,16 +5,18 @@
 #include <stdint.h>
 #include <ostream>
 #include <boost/filesystem.hpp>
+#include "pbutil/geo/PolyLine.h"
 #include "pbutil/log/Log.h"
 #include "./../config/TransitMapConfig.h"
 #include "ogrsf_frmts.h"
 #include "./OgrOutput.h"
-#include "../geo/PolyLine.h"
 #include "./../graph/TransitGraph.h"
 #include "./../graph/Edge.h"
 
+using namespace pbutil::geo;
 using namespace transitmapper;
 using namespace output;
+
 // _____________________________________________________________________________
 OgrOutput::OgrOutput(const std::string& outFolder, const config::Config* cfg)
 : _outFolder(outFolder), _cfg(cfg), _t(SHAPEFILE) {
@@ -389,7 +391,7 @@ bool OgrOutput::addEdge(const optim::OptEdge* e, OGRLayer* layer) const {
 
   OGRLineString geom;
 
-  geo::PolyLine a;
+  PolyLine a;
   a << e->from->node->getPos();
   a << e->to->node->getPos();
   std::string wktStr = a.getWKT();

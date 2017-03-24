@@ -16,8 +16,7 @@
 
 namespace bgeo = boost::geometry;
 
-namespace transitmapper {
-namespace util {
+namespace pbutil {
 namespace geo {
 
 // 2D cartesian coordinate
@@ -215,7 +214,7 @@ inline Point projectOn(const Point& a, const Point& b, const Point& c) {
   return ret;
 }
 
-}}}
+}}
 
 #endif  // TRANSITMAP_UTIL_GEO_H_
 

@@ -9,12 +9,13 @@
 #include "Edge.h"
 #include "Node.h"
 #include "Route.h"
-#include "../geo/PolyLine.h"
+#include "pbutil/geo/PolyLine.h"
 #include "pbutil/Nullable.h"
 #include "../style/LineStyle.h"
 
 using std::exception;
 using std::string;
+using namespace pbutil::geo;
 
 namespace transitmapper {
 namespace graph {
@@ -38,8 +39,7 @@ typedef std::pair<RouteOccurance*, size_t> RouteOccWithPos;
 
 class Edge {
  public:
-  Edge(Node* from, Node* to, geo::PolyLine pl, double w,
-    double s);
+  Edge(Node* from, Node* to, PolyLine pl, double w, double s);
 
   Node* getFrom() const;
   Node* getTo() const;
@@ -50,8 +50,8 @@ class Edge {
   void addRoute(const Route* r, const Node* dir, const LineStyle& ls);
   void addRoute(const Route* r, const Node* dir);
 
-  const geo::PolyLine& getGeom() const;
-  void setGeom(const geo::PolyLine& p);
+  const PolyLine& getGeom() const;
+  void setGeom(const PolyLine& p);
 
   const std::vector<RouteOccurance>& getTripsUnordered() const;
   std::vector<RouteOccurance>* getTripsUnordered();
@@ -86,7 +86,7 @@ class Edge {
 
   std::vector<RouteOccurance> _routes;
 
-  geo::PolyLine _geom;
+  PolyLine _geom;
 
   double _width, _spacing;
 };

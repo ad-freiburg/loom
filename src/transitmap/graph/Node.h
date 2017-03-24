@@ -7,12 +7,13 @@
 
 #include <set>
 #include "gtfsparser/gtfs/Stop.h"
-#include "./Route.h"
-#include "../geo/PolyLine.h"
+#include "pbutil/geo/PolyLine.h"
+#include "pbutil/geo/Geo.h"
 #include "./OrderingConfiguration.h"
-#include "../util/Geo.h"
+#include "./Route.h"
 
 using namespace gtfsparser;
+using namespace pbutil::geo;
 
 namespace transitmapper {
 namespace graph {
@@ -26,7 +27,6 @@ struct RouteOccurance;
 // forward declaration of TransitGraph
 class TransitGraph;
 
-using util::geo::Point;
 
 struct NodeFront {
   NodeFront(Edge* e, Node* n) : n(n), edge(e) {
@@ -42,8 +42,8 @@ struct NodeFront {
 
   Edge* edge;
 
-  geo::PolyLine geom;
-  void setGeom(const geo::PolyLine& g) { geom = g; };
+  PolyLine geom;
+  void setGeom(const PolyLine& g) { geom = g; };
 
   // TODO
   double refEtgLengthBefExp;
@@ -57,9 +57,9 @@ struct Partner {
 };
 
 struct InnerGeometry {
-  InnerGeometry(geo::PolyLine g, const Route* r, const Edge* e)
+  InnerGeometry(PolyLine g, const Route* r, const Edge* e)
   : geom(g), route(r), e(e) {};
-  geo::PolyLine geom;
+  PolyLine geom;
   const Route* route;
   const Edge* e;
 };
@@ -113,7 +113,7 @@ class Node {
       const graph::Configuration& c, double prec, const Edge* e,
       const std::vector<size_t>* order) const;
 
-  util::geo::Polygon getConvexFrontHull(double d) const;
+  Polygon getConvexFrontHull(double d) const;
 
   // add edge to this node's adjacency lists
   void addEdge(Edge* e);
@@ -143,12 +143,12 @@ class Node {
 
   size_t getNodeFrontPos(const NodeFront* a) const;
 
-  geo::PolyLine getInnerBezier(const Configuration& c, const NodeFront& nf,
+  PolyLine getInnerBezier(const Configuration& c, const NodeFront& nf,
       const RouteOccurance& tripOcc, const graph::Partner& partner, const Edge* e,
       const std::vector<size_t>* order,
       double prec) const;
 
-  geo::PolyLine getInnerStraightLine(const Configuration& c,
+  PolyLine getInnerStraightLine(const Configuration& c,
       const NodeFront& nf, const RouteOccurance& tripOcc,
       const graph::Partner& partner, const Edge* e,
       const std::vector<size_t>* order) const;

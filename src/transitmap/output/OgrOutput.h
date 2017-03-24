@@ -9,11 +9,11 @@
 #include <ostream>
 #include "ogrsf_frmts.h"
 #include "Output.h"
+#include "pbutil/geo/PolyLine.h"
+#include "pbutil/geo/Geo.h"
 #include "./../config/TransitMapConfig.h"
-#include "./../util/Geo.h"
 #include "./../graph/TransitGraph.h"
 #include "./../graph/Edge.h"
-#include "./../geo/PolyLine.h"
 #include "./../optim/OptGraph.h"
 
 namespace transitmapper {

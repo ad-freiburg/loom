@@ -10,22 +10,24 @@
 #include <vector>
 #include <set>
 #include <proj_api.h>
+#include "pbutil/geo/PolyLine.h"
 #include "TransitGraph.h"
 #include "gtfsparser/gtfs/Feed.h"
 #include "./../config/TransitMapConfig.h"
-#include "../geo/PolyLine.h"
 
 namespace transitmapper {
 namespace graph {
+
+using pbutil::geo::SharedSegment;
 
 const static char* WGS84_PROJ = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
 struct ShrdSegWrap {
   ShrdSegWrap() : e(0), f(0) {};
-  ShrdSegWrap(Edge* e, Edge* f, geo::SharedSegment s) : e(e), f(f), s(s) {};
+  ShrdSegWrap(Edge* e, Edge* f, SharedSegment s) : e(e), f(f), s(s) {};
   Edge* e;
   Edge* f;
-  geo::SharedSegment s;
+  SharedSegment s;
 };
 
 class GraphBuilder {

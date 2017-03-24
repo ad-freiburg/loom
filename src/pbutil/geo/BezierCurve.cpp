@@ -3,23 +3,24 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "./BezierCurve.h"
-#include "./../util/Geo.h"
+#include "./Geo.h"
 #include "./PolyLine.h"
 #include "./CubicSpline.h"
 
-using namespace transitmapper;
+using namespace pbutil;
 using namespace geo;
 
 // _____________________________________________________________________________
-BezierCurve::BezierCurve(const util::geo::Point& a, const util::geo::Point& b,
-  const util::geo::Point& c, const util::geo::Point& d)
-: _d(util::geo::dist(a, b)) {
+BezierCurve::BezierCurve(const Point& a, const Point& b,
+  const Point& c, const Point& d)
+: _d(dist(a, b)) {
   recalcPolynoms(a, b, c, d);
 }
 
 // _____________________________________________________________________________
-void BezierCurve::recalcPolynoms(const util::geo::Point& a, const util::geo::Point& b,
-  const util::geo::Point& c, const util::geo::Point& d) {
+void BezierCurve::recalcPolynoms(const Point& a,
+  const Point& b, const Point& c,
+  const Point& d) {
 
   _xp.a = a.get<0>();
   _xp.b = 3.0 * (b.get<0>() - a.get<0>());
@@ -35,8 +36,8 @@ void BezierCurve::recalcPolynoms(const util::geo::Point& a, const util::geo::Poi
 }
 
 // _____________________________________________________________________________
-util::geo::Point BezierCurve::valueAt(double t) const {
-  return util::geo::Point(_xp.valueAt(t), _yp.valueAt(t));
+Point BezierCurve::valueAt(double t) const {
+  return Point(_xp.valueAt(t), _yp.valueAt(t));
 }
 
 // _____________________________________________________________________________

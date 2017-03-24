@@ -3,11 +3,11 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "pbutil/log/Log.h"
+#include "pbutil/geo/Geo.h"
 #include "./ILPEdgeOrderOptimizer.h"
 #include "./OptGraph.h"
 #include "./../output/OgrOutput.h"
 #include "./../graph/OrderingConfiguration.h"
-#include "./../util/Geo.h"
 #include <fstream>
 #include <glpk.h>
 
@@ -1126,7 +1126,7 @@ bool ILPEdgeOrderOptimizer::crosses(OptNode* node, OptEdge* segmentA,
       b.push_back(bInA);
       b.push_back(bInB);
 
-      if (util::geo::intersects(aInA, aInB, bInA, bInA) ||
+      if (pbutil::geo::intersects(aInA, aInB, bInA, bInA) ||
           bgeo::distance(a, b) < 1) return true;
     }
   }

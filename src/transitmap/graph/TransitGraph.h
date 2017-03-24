@@ -13,13 +13,14 @@
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-#include "./../util/Geo.h"
+#include "pbutil/geo/Geo.h"
 #include "./OrderingConfiguration.h"
 #include "./Node.h"
 #include "./Edge.h"
 #include "./Route.h"
 
 namespace bg = bgeo;
+using namespace pbutil::geo;
 
 namespace transitmapper {
 namespace graph {
@@ -32,7 +33,7 @@ class TransitGraph {
   ~TransitGraph();
 
   void addNode(Node* n);
-  Edge* addEdge(Node* from, Node* to, geo::PolyLine pl, double w,
+  Edge* addEdge(Node* from, Node* to, PolyLine pl, double w,
     double s);
   Edge* getEdge(Node* from, Node* to);
 
@@ -43,10 +44,10 @@ class TransitGraph {
 
   Node* getNodeById(const std::string& id) const;
 
-  Node* getNearestNode(const util::geo::Point& p, double maxD) const;
+  Node* getNearestNode(const Point& p, double maxD) const;
 
   projPJ getProjection() const;
-  const bgeo::model::box<util::geo::Point>& getBoundingBox() const;
+  const bgeo::model::box<Point>& getBoundingBox() const;
 
   double getScore() const;
   double getScore(const Configuration& c) const;
@@ -66,7 +67,7 @@ class TransitGraph {
 
   Configuration _config;
 
-  bgeo::model::box<util::geo::Point> _bbox;
+  bgeo::model::box<Point> _bbox;
 
   projPJ _proj;
 };

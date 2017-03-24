@@ -5,10 +5,10 @@
 #include <stdint.h>
 #include <ostream>
 #include "pbutil/String.h"
+#include "pbutil/geo/PolyLine.h"
 #include "./../config/TransitMapConfig.h"
 #include "./../graph/Route.h"
 #include "./SvgOutput.h"
-#include "../geo/PolyLine.h"
 
 using namespace transitmapper;
 using namespace output;
@@ -141,7 +141,7 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG, double w,
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
     for (auto& f : n->getMainDirs()) {
-      const geo::PolyLine p = f.geom;
+      const PolyLine p = f.geom;
       std::stringstream style;
       style << "fill:none;stroke:red"
         << ";stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
@@ -149,14 +149,14 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG, double w,
       params["style"] = style.str();
       printLine(p, params, w, h, xOffset, yOffset);
 
-      util::geo::Point a = p.getPointAt(.5).p;
+      Point a = p.getPointAt(.5).p;
 
       std::stringstream styleA;
       styleA << "fill:none;stroke:red"
         << ";stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
       params["style"] = styleA.str();
 
-      printLine(geo::PolyLine(n->getPos(), a), params, w, h, xOffset, yOffset);
+      printLine(PolyLine(n->getPos(), a), params, w, h, xOffset, yOffset);
     }
   }
   _w.closeTag();
@@ -184,13 +184,13 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
+void SvgOutput::renderLinePart(const PolyLine p, double width,
     const graph::Route& route, const Nullable<style::LineStyle> style) {
   renderLinePart(p, width, route, "", style);
 }
 
 // _____________________________________________________________________________
-void SvgOutput::renderLinePart(const geo::PolyLine p, double width,
+void SvgOutput::renderLinePart(const PolyLine p, double width,
     const graph::Route& route, const std::string& endMarker,
     const Nullable<style::LineStyle> style) {
   std::stringstream styleOutline;
@@ -270,7 +270,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   const graph::NodeFront* nfTo = e->getTo()->getNodeFrontFor(e);
   const graph::NodeFront* nfFrom = e->getFrom()->getNodeFrontFor(e);
 
-  geo::PolyLine center = e->getGeom();
+  PolyLine center = e->getGeom();
   //center.applyChaikinSmooth(3);
 
   double lineW = e->getWidth();
@@ -285,20 +285,20 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   size_t a = 0;
   for (size_t i : outG.getConfig().find(e)->second) {
     const graph::RouteOccurance& r = e->getTripsUnordered()[i];
-    geo::PolyLine p = center;
+    PolyLine p = center;
 
     double offset = -(o - oo / 2.0 - e->getWidth() /2.0);
 
     p.offsetPerp(offset);
 
-    std::set<geo::PointOnLine, geo::PointOnLineCmp> iSects = nfTo->geom.getIntersections(p);
+    std::set<PointOnLine, PointOnLineCmp> iSects = nfTo->geom.getIntersections(p);
     if (iSects.size() > 0) {
       p = p.getSegment(0, iSects.begin()->totalPos);
     } else {
       p << nfTo->geom.projectOn(p.getLine().back()).p;
     }
 
-    std::set<geo::PointOnLine, geo::PointOnLineCmp> iSects2 = nfFrom->geom.getIntersections(p);
+    std::set<PointOnLine, PointOnLineCmp> iSects2 = nfFrom->geom.getIntersections(p);
     if (iSects2.size() > 0) {
       p = p.getSegment(iSects2.begin()->totalPos, 1);
     } else {
@@ -318,8 +318,8 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       EndMarker emf(markerName.str() + "_f", "#" + r.route->color, markerPathFemale, lineW, lineW);
       _markers.push_back(emm);
       _markers.push_back(emf);
-      geo::PolyLine firstPart = p.getSegmentAtDist(0, p.getLength() / 2 - arrowLength / 2);
-      geo::PolyLine secondPart = p.getSegmentAtDist(p.getLength() / 2 + arrowLength / 2, p.getLength());
+      PolyLine firstPart = p.getSegmentAtDist(0, p.getLength() / 2 - arrowLength / 2);
+      PolyLine secondPart = p.getSegmentAtDist(p.getLength() / 2 + arrowLength / 2, p.getLength());
 
 
       if (r.direction == e->getTo()) {
@@ -381,7 +381,7 @@ void SvgOutput::renderDelegates(const graph::TransitGraph& outG,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printPoint(const util::geo::Point& p,
+void SvgOutput::printPoint(const Point& p,
 													const std::string& style,
                           double w, double h, int64_t xOffs, int64_t yOffs) {
   std::map<std::string, std::string> params;
@@ -394,7 +394,7 @@ void SvgOutput::printPoint(const util::geo::Point& p,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printLine(const transitmapper::geo::PolyLine& l,
+void SvgOutput::printLine(const PolyLine& l,
 													const std::string& style,
                           double w, double h, int64_t xOffs, int64_t yOffs) {
 	std::map<std::string, std::string> params;
@@ -403,7 +403,7 @@ void SvgOutput::printLine(const transitmapper::geo::PolyLine& l,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printLine(const transitmapper::geo::PolyLine& l,
+void SvgOutput::printLine(const PolyLine& l,
 													const std::map<std::string, std::string>& ps,
                           double w, double h, int64_t xOffs, int64_t yOffs) {
 	std::map<std::string, std::string> params = ps;
@@ -421,7 +421,7 @@ void SvgOutput::printLine(const transitmapper::geo::PolyLine& l,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printPolygon(const util::geo::Polygon& g,
+void SvgOutput::printPolygon(const Polygon& g,
 													const std::map<std::string, std::string>& ps,
                           double w, double h, int64_t xOffs, int64_t yOffs)
 {
@@ -440,7 +440,7 @@ void SvgOutput::printPolygon(const util::geo::Polygon& g,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printPolygon(const util::geo::Polygon& g,
+void SvgOutput::printPolygon(const Polygon& g,
 													const std::string& style,
                           double w, double h, int64_t xOffs, int64_t yOffs) {
 	std::map<std::string, std::string> params;

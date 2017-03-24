@@ -2,15 +2,15 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_GEO_BEZIERCURVE_H_
-#define TRANSITMAP_GEO_BEZIERCURVE_H_
+#ifndef PBUTIL_GEO_BEZIERCURVE_H_
+#define PBUTIL_GEO_BEZIERCURVE_H_
 
 #include <vector>
-#include "./../util/Geo.h"
+#include "./Geo.h"
 #include "./PolyLine.h"
 #include "./CubicSpline.h"
 
-namespace transitmapper {
+namespace pbutil {
 namespace geo {
 
 /**
@@ -20,8 +20,8 @@ namespace geo {
 class BezierCurve {
 
  public:
-  BezierCurve(const util::geo::Point& a, const util::geo::Point& b, const util::geo::Point& c,
-    const util::geo::Point& d);
+  BezierCurve(const Point& a, const Point& b, const Point& c,
+    const Point& d);
 
   const PolyLine& render(double d);
 
@@ -36,12 +36,12 @@ class BezierCurve {
   PolyLine _rendered;
   bool _didRender;
 
-  void recalcPolynoms(const util::geo::Point& x, const util::geo::Point& b,
-    const util::geo::Point& c, const util::geo::Point& d);
+  void recalcPolynoms(const Point& x, const Point& b,
+    const Point& c, const Point& d);
 
-  util::geo::Point valueAt(double t) const;
+  Point valueAt(double t) const;
 };
 
 }}
 
-#endif  // TRANSITMAP_GEO_BEZIERCURVE_H_
+#endif  // PBUTIL_GEO_BEZIERCURVE_H_

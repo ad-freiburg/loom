@@ -8,9 +8,9 @@
 #include <vector>
 #include <string>
 #include <ostream>
-#include "../util/Geo.h"
+#include "./Geo.h"
 
-namespace transitmapper {
+namespace pbutil {
 namespace geo {
 
 static const double MAX_EQ_DISTANCE = 15;
@@ -20,11 +20,11 @@ struct PointOnLine {
   PointOnLine()
   : lastIndex(0), totalPos(-1), p() {}
 
-  PointOnLine(size_t i, double pos, const util::geo::Point& p)
+  PointOnLine(size_t i, double pos, const Point& p)
   : lastIndex(i), totalPos(pos), p(p) {}
   size_t lastIndex;
   double totalPos;
-  util::geo::Point p;
+  Point p;
 };
 
 struct PointOnLineCmp {
@@ -44,10 +44,10 @@ class PolyLine {
 
  public:
   PolyLine();
-  PolyLine(const util::geo::Point& from, const util::geo::Point& to);
+  PolyLine(const Point& from, const Point& to);
 
-  PolyLine& operator<<(const util::geo::Point& p);
-  PolyLine& operator>>(const util::geo::Point& p);
+  PolyLine& operator<<(const Point& p);
+  PolyLine& operator>>(const Point& p);
 
   void reverse();
   PolyLine getReversed() const;
@@ -56,10 +56,10 @@ class PolyLine {
 
   PolyLine getPerpOffsetted(double units) const;
 
-	const util::geo::Line& getLine() const;
+	const Line& getLine() const;
 
   double distTo(const PolyLine& g) const;
-  double distTo(const util::geo::Point& p) const;
+  double distTo(const Point& p) const;
 
   SharedSegments getSharedSegments(const PolyLine& pl, double dmax) const;
 
@@ -74,7 +74,7 @@ class PolyLine {
   PolyLine getSegment(double a, double b) const;
   PolyLine getSegmentAtDist(double dista, double distb) const;
   PolyLine getSegment(const PointOnLine& start, const PointOnLine& end) const;
-  PolyLine getSegment(const util::geo::Point& a, const util::geo::Point& b) const;
+  PolyLine getSegment(const Point& a, const Point& b) const;
 
   std::set<PointOnLine, PointOnLineCmp> getIntersections(const PolyLine& g) const;
 
@@ -87,11 +87,11 @@ class PolyLine {
 
   void smoothenOutliers(double d);
 
-	std::pair<size_t, double> nearestSegment(const util::geo::Point& p) const;
-	std::pair<size_t, double> nearestSegmentAfter(const util::geo::Point& p, size_t after) const;
+	std::pair<size_t, double> nearestSegment(const Point& p) const;
+	std::pair<size_t, double> nearestSegmentAfter(const Point& p, size_t after) const;
 
-  PointOnLine projectOn(const util::geo::Point& p) const;
-  PointOnLine projectOnAfter(const util::geo::Point& p, size_t after) const;
+  PointOnLine projectOn(const Point& p) const;
+  PointOnLine projectOnAfter(const Point& p, size_t after) const;
 
   void move(double vx, double vy);
 
@@ -109,7 +109,7 @@ class PolyLine {
 
   PolyLine getOrthoLineAtDist(double d, double lengt) const;
 
-  util::geo::Point interpolate(const util::geo::Point& a, const util::geo::Point& b, double p) const;
+  Point interpolate(const Point& a, const util::geo::Point& b, double p) const;
 
   void fixTopology(double maxl);
   void applyChaikinSmooth(size_t depth);

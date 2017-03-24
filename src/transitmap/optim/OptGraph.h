@@ -8,7 +8,6 @@
 #include <string>
 #include <set>
 
-#include "./../util/Geo.h"
 #include "./../graph/TransitGraph.h"
 #include "./../graph/Edge.h"
 
