@@ -2,7 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "./../../log/Log.h"
+#include "pbutil/log/Log.h"
 #include "./ILPEdgeOrderOptimizer.h"
 #include "./OptGraph.h"
 #include "./../output/OgrOutput.h"

@@ -7,7 +7,7 @@
 #include <float.h>
 #include <string>
 #include <exception>
-#include "./../../log/Log.h"
+#include "pbutil/log/Log.h"
 #include "./ConfigReader.h"
 
 using transitmapper::config::ConfigReader;

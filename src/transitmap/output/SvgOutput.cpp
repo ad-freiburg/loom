@@ -13,6 +13,8 @@
 using namespace transitmapper;
 using namespace output;
 
+using pbutil::toString;
+
 
 // _____________________________________________________________________________
 SvgOutput::SvgOutput(std::ostream* o, const config::Config* cfg)
@@ -255,12 +257,8 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
     _w.writeText((*n->getStops().begin()).id);
     _w.writeText("\n");
   }
-  //_w.writeText(std::to_string(n->getScore(outG.getConfig())));
-  const void* address = static_cast<const void*>(n);
-  std::stringstream ss;
-  ss << address;
 
-  _w.writeText(ss.str());
+  _w.writeText(pbutil::toString(n));
   _w.closeTag();
 
 }
@@ -271,9 +269,6 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
   const graph::NodeFront* nfTo = e->getTo()->getNodeFrontFor(e);
   const graph::NodeFront* nfFrom = e->getFrom()->getNodeFrontFor(e);
-
-  int64_t xOffset = outG.getBoundingBox().min_corner().get<0>();
-  int64_t yOffset = outG.getBoundingBox().min_corner().get<1>();
 
   geo::PolyLine center = e->getGeom();
   //center.applyChaikinSmooth(3);
@@ -296,14 +291,14 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
     p.offsetPerp(offset);
 
-    std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects = nfTo->geom.getIntersections(p);
+    std::set<geo::PointOnLine, geo::PointOnLineCmp> iSects = nfTo->geom.getIntersections(p);
     if (iSects.size() > 0) {
       p = p.getSegment(0, iSects.begin()->totalPos);
     } else {
       p << nfTo->geom.projectOn(p.getLine().back()).p;
     }
 
-    std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects2 = nfFrom->geom.getIntersections(p);
+    std::set<geo::PointOnLine, geo::PointOnLineCmp> iSects2 = nfFrom->geom.getIntersections(p);
     if (iSects2.size() > 0) {
       p = p.getSegment(iSects2.begin()->totalPos, 1);
     } else {
@@ -349,7 +344,6 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 std::string SvgOutput::getMarkerPathMale(double w)
 const {
   std::stringstream path;
-
   path << "M0,0 V1 H.5 L1.3,.5 L.5,0 Z";
 
   return path.str();
@@ -359,8 +353,6 @@ const {
 std::string SvgOutput::getMarkerPathFemale(double w)
 const {
   std::stringstream path;
-
-  // path << "M0,0 L.8,.5 L0,1 L1.3,1 L1.3,0 Z";
   path << "M1.3,1 L.5,.5 L1.3,0 L0,0 L0,1";
 
   return path.str();
@@ -386,7 +378,6 @@ void SvgOutput::renderDelegates(const graph::TransitGraph& outG,
     }
     _w.closeTag();
   }
-
 }
 
 // _____________________________________________________________________________

@@ -27,7 +27,7 @@ struct PointOnLine {
   util::geo::Point p;
 };
 
-struct PointOnLineCompare {
+struct PointOnLineCmp {
   bool operator() (const PointOnLine& lh, const PointOnLine& rh) const {
     return lh.totalPos < rh.totalPos;
   }
@@ -76,7 +76,7 @@ class PolyLine {
   PolyLine getSegment(const PointOnLine& start, const PointOnLine& end) const;
   PolyLine getSegment(const util::geo::Point& a, const util::geo::Point& b) const;
 
-  std::set<PointOnLine, PointOnLineCompare> getIntersections(const PolyLine& g) const;
+  std::set<PointOnLine, PointOnLineCmp> getIntersections(const PolyLine& g) const;
 
   static PolyLine average(const std::vector<const PolyLine*>& lines);
   static PolyLine average(const std::vector<const PolyLine*>& lines,
@@ -115,7 +115,7 @@ class PolyLine {
   void applyChaikinSmooth(size_t depth);
 
  private:
-  std::set<PointOnLine, PointOnLineCompare> getIntersections(const PolyLine& p,
+  std::set<PointOnLine, PointOnLineCmp> getIntersections(const PolyLine& p,
     size_t a, size_t b) const;
   util::geo::Line _line;
 };

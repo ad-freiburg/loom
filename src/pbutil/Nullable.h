@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef UTIL_NULLABLE_H_
-#define UTIL_NULLABLE_H_
+#ifndef PBUTIL_NULLABLE_H_
+#define PBUTIL_NULLABLE_H_
 
 namespace pbutil {
 
@@ -91,13 +91,13 @@ class Nullable {
     return get();
   }
 
+  bool isNull() const {
+    return null;
+  }
+
   T get() const {
     if (!isNull()) return val;
     else throw std::runtime_error("Trying to retrieve value of NULL object.");
-  }
-
-  bool isNull() const {
-    return null;
   }
 
 private:
@@ -112,4 +112,4 @@ private:
 
 }
 
-#endif  // UTIL_NULLABLE_H_
+#endif  // PBUTIL_NULLABLE_H_

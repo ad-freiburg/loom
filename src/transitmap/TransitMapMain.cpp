@@ -8,7 +8,7 @@
 #include <string>
 #include <set>
 #include <stdio.h>
-#include "log/Log.h"
+#include "pbutil/log/Log.h"
 #include "./graph/TransitGraph.h"
 #include "./graph/GraphBuilder.h"
 #include "./graph/Node.h"

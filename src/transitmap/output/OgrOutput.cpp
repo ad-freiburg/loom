@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <ostream>
 #include <boost/filesystem.hpp>
-#include "log/Log.h"
+#include "pbutil/log/Log.h"
 #include "./../config/TransitMapConfig.h"
 #include "ogrsf_frmts.h"
 #include "./OgrOutput.h"

@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef LOGGING_LOG_H_
-#define LOGGING_LOG_H_
+#ifndef PBUTIL_LOG_LOG_H_
+#define PBUTIL_LOG_LOG_H_
 
 #include <time.h>
 #include <sys/timeb.h>
@@ -20,55 +20,49 @@
 #define LOGLEVEL 2
 #endif
 
-/**
- * code mostly taken from the ad_utility logger
- */
-
 // compiler will optimize statement away if x <= LOGLEVEL
-#define LOG(x) if (x > LOGLEVEL) ; else Log::log<x>()
+#define LOG(x) if (x > LOGLEVEL) ; else pbutil::Log::log<x>()
 
 using std::setfill;
 using std::setw;
 
+namespace pbutil {
+
 class Log {
  public:
-  template<char LEVEL>
+  template<char L>
   static std::ostream& log() {
-    if (LEVEL == ERROR) {
-      return getLogTime(std::cerr) << getLogPrefix<LEVEL>() << " : ";
-    } else {
-      return getLogTime(std::cout) << getLogPrefix<LEVEL>() << " : ";
-    }
+    return getLogHead(L == ERROR ? std::cerr : std::cout) << getLogName<L>();
   }
 
  private:
-  static std::ostream& getLogTime(std::ostream& os) {
+  static std::ostream& getLogHead(std::ostream& os) {
     struct timeb tb;
     char tl[26];
-
     ftime(&tb);
     ctime_r(&tb.time, tl);
     tl[19] = '.';
     tl[20] = 0;
-
     return os << "[" << tl << setfill('0') << setw(3) << tb.millitm << "] ";
   }
 
   template<char LEVEL>
-  static const char* getLogPrefix() {
+  static const char* getLogName() {
     switch (LEVEL) {
       case DEBUG:
-        return "DEBUG";
+        return "DEBUG:";
       case INFO:
-        return "INFO ";
+        return "INFO :";
       case WARN:
-        return "WARN ";
+        return "WARN :";
       case ERROR:
-        return "ERROR";
+        return "ERROR:";
       default:
-        return "???  ";
+        return "(\?\?) :";
     }
   }
 };
 
-#endif  // LOGGING_LOG_H_
+}
+
+#endif  // PBUTIL_LOG_LOG_H_

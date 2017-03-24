@@ -9,7 +9,7 @@
 #include <istream>
 #include "GraphBuilder.h"
 #include "../geo/PolyLine.h"
-#include "log/Log.h"
+#include "pbutil/log/Log.h"
 #include "./../config/TransitMapConfig.h"
 #include "json/json.hpp"
 
@@ -512,7 +512,7 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
 void GraphBuilder::freeNodeFront(NodeFront* f) {
   geo::PolyLine cutLine = f->geom;
 
-  std::set<geo::PointOnLine, geo::PointOnLineCompare> iSects =
+  std::set<geo::PointOnLine, geo::PointOnLineCmp> iSects =
       cutLine.getIntersections(f->edge->getGeom());
   if (iSects.size() > 0) {
     if (f->edge->getTo() != f->n) {

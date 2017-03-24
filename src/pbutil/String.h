@@ -2,12 +2,13 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef UTIL_STRING_H_
-#define UTIL_STRING_H_
+#ifndef PBUTIL_STRING_H_
+#define PBUTIL_STRING_H_
 
 #include <vector>
 #include <string>
 #include <cstring>
+#include <sstream>
 
 namespace pbutil {
 
@@ -73,7 +74,15 @@ inline bool replaceAll(std::string& subj, const std::string& from,
   return found;
 }
 
+// _____________________________________________________________________________
+template<typename T>
+inline std::string toString(T obj) {
+  std::stringstream ss;
+  ss << obj;
+  return ss.str();
+}
+
 }
 
 
-#endif  // UTIL_STRING_H_
+#endif  // PBUTIL_STRING_H_

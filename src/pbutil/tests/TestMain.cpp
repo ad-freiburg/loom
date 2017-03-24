@@ -28,6 +28,12 @@ CASE("json escape") {
 },
 
 // ___________________________________________________________________________
+CASE("toString") {
+  EXPECT(pbutil::toString(34) == "34");
+  EXPECT(pbutil::toString("34") == "34");
+},
+
+// ___________________________________________________________________________
 CASE("replace") {
   std::string a("lorem ipsum ipsum lorem");
 

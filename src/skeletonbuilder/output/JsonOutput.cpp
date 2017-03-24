@@ -4,15 +4,17 @@
 
 #include <stdint.h>
 #include <ostream>
-#include "log/Log.h"
+#include "pbutil/log/Log.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "./JsonOutput.h"
+#include "pbutil/String.h"
 #include "transitmap/geo/PolyLine.h"
 #include "./../graph/Graph.h"
 #include "transitmap/graph/Edge.h"
 #include "json/json.hpp"
 
 using json = nlohmann::json;
+using pbutil::toString;
 using namespace skeletonbuilder;
 
 // _____________________________________________________________________________
@@ -39,7 +41,7 @@ void JsonOutput::print(const graph::Graph& outG) {
     feature["geometry"]["coordinates"] = coords;
 
     feature["properties"] = json::object();
-    feature["properties"]["id"] = boost::lexical_cast<std::string>(n);
+    feature["properties"]["id"] = toString(n);
 
     if (n->getStops().size() > 0) {
       feature["properties"]["station_id"] = (*n->getStops().begin())->getId();
@@ -60,15 +62,10 @@ void JsonOutput::print(const graph::Graph& outG) {
               // && false) {
               && !n->isConnOccuring(r.route, e, f)) {
               auto obj = json::object();
-              obj["route"] = boost::lexical_cast<std::string>(r.route);
-              obj["edge1_node"] = boost::lexical_cast<std::string>(e->getFrom() == n ? e->getTo() : e->getFrom());
-              obj["edge2_node"] = boost::lexical_cast<std::string>(f->getFrom() == n ? f->getTo() : f->getFrom());
+              obj["route"] = toString(r.route);
+              obj["edge1_node"] = toString(e->getFrom() == n ? e->getTo() : e->getFrom());
+              obj["edge2_node"] = toString(f->getFrom() == n ? f->getTo() : f->getFrom());
               arr.push_back(obj);
-            } else if (r.route == rr.route && n->getStops().size() == 0) {
-              std::cerr << "-: " << r.direction << " " << rr.direction << std::endl;
-              std::cerr << "A: " << (r.direction == n && rr.direction != n) << std::endl;
-              std::cerr << "B: " << (r.direction != n && rr.direction == n) << std::endl;
-              std::cerr << "C: " << (n->isConnOccuring(r.route, e, f)) << std::endl;
             }
           }
         }
@@ -86,8 +83,8 @@ void JsonOutput::print(const graph::Graph& outG) {
       if (e->getEdgeTripGeoms()->size() > 0) {
         json feature;
         feature["type"] = "Feature";
-        feature["properties"]["from"] = boost::lexical_cast<std::string>(e->getFrom());
-        feature["properties"]["to"] = boost::lexical_cast<std::string>(e->getTo());
+        feature["properties"]["from"] = toString(e->getFrom());
+        feature["properties"]["to"] = toString(e->getTo());
 
         feature["geometry"]["type"] = "LineString";
         feature["geometry"]["coordinates"] = json::array();
@@ -103,12 +100,12 @@ void JsonOutput::print(const graph::Graph& outG) {
 
         for (auto r : *e->getEdgeTripGeoms()->front().getTripsUnordered()) {
           json route = json::object();
-          route["id"] = boost::lexical_cast<std::string>(r.route);
+          route["id"] = toString(r.route);
           route["label"] = r.route->getShortName();
           route["color"] = r.route->getColorString();
 
           if (r.direction != 0) {
-            route["direction"] = boost::lexical_cast<std::string>(r.direction);
+            route["direction"] = toString(r.direction);
           }
 
           feature["properties"]["lines"].push_back(route);
