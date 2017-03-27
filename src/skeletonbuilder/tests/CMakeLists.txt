@@ -3,4 +3,4 @@ include_directories(
 )
 
 add_executable(skeletonbuilderTest TestMain.cpp)
-target_link_libraries(skeletonbuilderTest skeletonbuilder_dep transitmap_dep gtfsparser ${Boost_LIBRARIES} -lproj)
+target_link_libraries(skeletonbuilderTest skeletonbuilder_dep pbutil gtfsparser ${Boost_LIBRARIES} -lproj)

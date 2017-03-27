@@ -9,13 +9,14 @@
 #include "Edge.h"
 #include "Node.h"
 #include "EdgeTripGeom.h"
-#include "transitmap/geo/PolyLine.h"
+#include "pbutil/geo/PolyLine.h"
 #include "gtfsparser/gtfs/Trip.h"
 
 using namespace gtfsparser;
 
 using std::exception;
 using std::string;
+using pbutil::geo::PolyLine;
 
 namespace skeletonbuilder {
 namespace graph {
@@ -33,7 +34,7 @@ class Edge {
   Node* getOtherNode(const Node* notNode) const;
 
   bool addTrip(gtfs::Trip* t, Node* toNode);
-  bool addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode);
+  bool addTrip(gtfs::Trip* t, PolyLine pl, Node* toNode);
 
   const std::vector<EdgeTripGeom>& getEdgeTripGeoms() const;
   std::vector<EdgeTripGeom>* getEdgeTripGeoms();

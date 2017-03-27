@@ -8,11 +8,8 @@
 #include <string>
 #include <ostream>
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/util/Geo.h"
-#include "./../graph/Graph.h"
-#include "transitmap/graph/Edge.h"
-#include "transitmap/geo/PolyLine.h"
 #include "json/json.hpp"
+#include "./../graph/Graph.h"
 
 using json = nlohmann::json;
 

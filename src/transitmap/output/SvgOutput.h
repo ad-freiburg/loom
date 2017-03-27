@@ -35,6 +35,13 @@ class SvgOutputException : public std::exception {
   std::string _msg;
 };
 
+struct RenderParams {
+  double width;
+  double height;
+  int64_t xOff;
+  int64_t yOff;
+};
+
 struct EndMarker {
   EndMarker(const std::string& name, const std::string& color, const std::string& path, double width, double height)
   : name(name), color(color), path(path), width(width), height(height) {}
@@ -58,18 +65,18 @@ class SvgOutput : public Output {
 
 	void printLine(const PolyLine& l,
 								const std::map<std::string, std::string>& ps,
-                double w, double h, int64_t xOffs, int64_t yOffs);
+                const RenderParams& params);
 	void printLine(const PolyLine& l,
 								const std::string& style,
-                double w, double h, int64_t xOffs, int64_t yOffs);
+                const RenderParams& params);
   void printPoint(const Point& p, const std::string& style,
-                          double w, double h, int64_t xOffs, int64_t yOffs);
+                  const RenderParams& params);
   void printPolygon(const Polygon& g,
 										const std::string& style,
-                    double w, double h, int64_t xOffs, int64_t yOffs);
+                    const RenderParams& params);
   void printPolygon(const Polygon& g,
 								    const std::map<std::string, std::string>& ps,
-                    double w, double h, int64_t xOffs, int64_t yOffs);
+                    const RenderParams& params);
  private:
   std::ostream* _o;
   util::XmlWriter _w;
@@ -79,17 +86,17 @@ class SvgOutput : public Output {
   std::map<uintptr_t, std::vector<OutlinePrintPair> > _delegates;
   std::vector<EndMarker> _markers;
 
-  void outputNodes(const graph::TransitGraph& outputGraph, double w, double h);
-  void outputEdges(const graph::TransitGraph& outputGraph, double w, double h);
+  void outputNodes(const graph::TransitGraph& outputGraph, const RenderParams& params);
+  void outputEdges(const graph::TransitGraph& outputGraph, const RenderParams& params);
 
   void renderEdgeTripGeom(const graph::TransitGraph& outG,
-    const graph::Edge* e, double w, double h);
+    const graph::Edge* e, const RenderParams& params);
 
   void renderNodeConnections(const graph::TransitGraph& outG,
-    const graph::Node* n, double w, double h);
+    const graph::Node* n, const RenderParams& params);
 
   void renderNodeScore(const graph::TransitGraph& outG,
-      const graph::Node* n, double w, double h);
+      const graph::Node* n, const RenderParams& params);
 
   void renderLinePart(const PolyLine p, double width,
     const graph::Route& route, const Nullable<style::LineStyle> style);
@@ -98,9 +105,9 @@ class SvgOutput : public Output {
     const graph::Route& route, const std::string& endMarker,
     const Nullable<style::LineStyle> style);
 
-  void renderDelegates(const graph::TransitGraph& outG, double w, double h);
+  void renderDelegates(const graph::TransitGraph& outG, const RenderParams& params);
 
-  void renderNodeFronts(const graph::TransitGraph& outG, double w, double h);
+  void renderNodeFronts(const graph::TransitGraph& outG, const RenderParams& params);
 
   std::string getMarkerPathMale(double w) const;
   std::string getMarkerPathFemale(double w) const;

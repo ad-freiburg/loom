@@ -4,14 +4,17 @@
 
 #include <cassert>
 #include <vector>
+#include "pbutil/geo/PolyLine.h"
 #include "Edge.h"
 #include "Node.h"
 
 using namespace transitmapper;
 using namespace graph;
 
+using pbutil::geo::PolyLine;
+
 // _____________________________________________________________________________
-Edge::Edge(Node* from, Node* to, geo::PolyLine pl, double w,
+Edge::Edge(Node* from, Node* to, PolyLine pl, double w,
     double s) : _from(from), _to(to), _width(w), _spacing(s) {
   setGeom(pl);
 }
@@ -165,11 +168,11 @@ std::vector<const Route*> Edge::getSharedRoutes(const Edge& e) const {
 }
 
 // _____________________________________________________________________________
-const geo::PolyLine& Edge::getGeom() const {
+const PolyLine& Edge::getGeom() const {
   return _geom;
 }
 
 // _____________________________________________________________________________
-void Edge::setGeom(const geo::PolyLine& p) {
+void Edge::setGeom(const PolyLine& p) {
   _geom = p;
 }

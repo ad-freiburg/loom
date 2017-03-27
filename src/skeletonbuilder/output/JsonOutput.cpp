@@ -5,12 +5,10 @@
 #include <stdint.h>
 #include <ostream>
 #include "pbutil/log/Log.h"
+#include "pbutil/String.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "./JsonOutput.h"
-#include "pbutil/String.h"
-#include "transitmap/geo/PolyLine.h"
 #include "./../graph/Graph.h"
-#include "transitmap/graph/Edge.h"
 #include "json/json.hpp"
 
 using json = nlohmann::json;

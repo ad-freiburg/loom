@@ -10,6 +10,15 @@
 \usepackage{enumitem}
 \usepackage[scaled=0.85]{beramono}
 
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks,
+	citecolor=black,
+	filecolor=black,
+	linkcolor=black,
+	urlcolor=black
+}
+
 
 \usepackage{xcolor}
 
@@ -19,7 +28,7 @@
 \colorlet{numb}{magenta!60!black}
 
 \lstdefinelanguage{json}{
-    basicstyle=\scriptsize\ttfamily,
+    basicstyle=\normalfont\ttfamily,
     numbers=left,
     numberstyle=\scriptsize,
     stepnumber=1,
@@ -86,11 +95,13 @@
 
 The input file is a graph given as a (simplified) Geo-JSON file, consisting of nodes (represented as ``Point''-features) and edges (represented as ``LineString''-features). Each edge has a collection of unique ``lines'' that travel through it. The transitmapper will render these lines in a way that resembles a transit map (Figure \ref{exampleoutput}). The input is read from \texttt{stdin}.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=bash,firstnumber=1]
 $ transitmapper -o test.svg < test.json
 \end{lstlisting}
+\end{minipage}
 
-See \ref{exampleinput} for an example input.
+See Section \ref{exampleinput} for an example input.
 
 \begin{figure}[htbp]
   \centering
@@ -120,7 +131,7 @@ The following command line parameters are accepted by \texttt{transitmapper} (se
 \begin{figure}
   \centering
 	$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2_thin.pdf}}}$
-	\hspace{5mm}
+	\hspace{10mm}
 $	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2_thick.pdf}}}$
 	\caption{Different settings of \texttt{-{}-line-width} and \texttt{-{}-line-spacing}}
 	\label{linewidths}
@@ -128,16 +139,17 @@ $	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2_thick.pdf}}}$
 
 \begin{figure}
   \centering
-$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2_noopt.pdf}}}$
+	\begin{minipage}[b]{0.4\textwidth}
+\includegraphics[width=0.96\textwidth]{test2_noopt.pdf}
 	\caption{Output without ordering optimization (\texttt{-N})}
   \label{wooptim}
-\end{figure}
-
-\begin{figure}
-  \centering
-$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2_nodefronts.pdf}}}$
+	\end{minipage}
+	\hspace{10mm}
+	\begin{minipage}[b]{0.4\textwidth}
+\includegraphics[width=0.96\textwidth]{test2_nodefronts.pdf}
 	\caption{Node-front rendering (\texttt{-{}-render-node-fronts})}
   \label{nodefronts}
+	\end{minipage}
 \end{figure}
 
 \begin{figure}
@@ -149,15 +161,16 @@ $	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test2_nosmoothing.pdf}}}
 
 \section{JSON Format}
 
-See also ??. The input format is a lightweight subset of GeoJSON. At the top level, the input JSON must contain a \texttt{FeatureCollection} object:
+See also Section \ref{exampleinput}. The input format is a lightweight subset of GeoJSON. At the top level, the input JSON must contain a \texttt{FeatureCollection} object:
 
-
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=json,firstnumber=1]
 {
   "type": "FeatureCollection",
   "features": [...]
 }
 \end{lstlisting}
+\end{minipage}
 
 A \texttt{feature} can either be a node (a \texttt{point}) or an edge (a \texttt{LineString}).
 
@@ -165,6 +178,7 @@ A \texttt{feature} can either be a node (a \texttt{point}) or an edge (a \texttt
 
 A node consists of a geometry (the node's coordinates) and some properties.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=json,firstnumber=1]
 {
   "geometry": {
@@ -177,6 +191,7 @@ A node consists of a geometry (the node's coordinates) and some properties.
   }
 }
 \end{lstlisting}
+\end{minipage}
 
 \texttt{Type} is always \texttt{"point"}. The \texttt{coordinates} are given as an \texttt{[x,y]} array.
 
@@ -187,6 +202,9 @@ A node consists of a geometry (the node's coordinates) and some properties.
   \item[\texttt{station\_id}] If this node is a station, the station's unique id (optional).
   \item[\texttt{station\_label}] If this node is a station, the station's name (optional). Either \texttt{station\_id} or \texttt{station\_label} has to be set for a node to become a station.
   \item[\texttt{excluded\_line\_conns}] A list of lines that are not connected in this node, even though two or more edges containing the line start/end in the node (Figure \ref{excllines}). The \texttt{line\_id} as well as the two edges this line is not connected in has to be given. Both edges are identified by the adjacent node. Example:
+\end{description}
+
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=json,firstnumber=1]
 "excluded_line_conns": [
   {
@@ -201,20 +219,21 @@ A node consists of a geometry (the node's coordinates) and some properties.
   }
 ]
 \end{lstlisting}
+\end{minipage}
 
 \begin{figure}
   \centering
 $	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test3.pdf}}}$
-	\caption{The red line is not connected between the two main axes (via \texttt{exluded\_line\_connections})}
+	\caption{The red line is not connected between the two main axes (via \texttt{exluded\_line\_conns})}
 	\label{excllines}
 \end{figure}
 
-\end{description}
 
 \subsection{Edges}
 
 An edge consists also of a geometry (a linestring) and some properties.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=json,firstnumber=1]
 {
   "geometry": {
@@ -233,6 +252,7 @@ An edge consists also of a geometry (a linestring) and some properties.
   }
 }
 \end{lstlisting}
+\end{minipage}
 
 
 \subsubsection{Edge Properties}
@@ -272,21 +292,24 @@ The style object can be used to define additional styles for lines. A style defi
 
 \begin{figure}
   \centering
-$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test4.pdf}}}$
+	\begin{minipage}[b]{0.4\textwidth}
+    \includegraphics[width=0.96\textwidth]{test4.pdf}
 	\caption{Directed line (via \texttt{direction})}
   \label{directedline}
-\end{figure}
-
-\begin{figure}
-  \centering
-$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{test_dashed.pdf}}}$
+	\end{minipage}
+	\hspace{10mm}
+	\begin{minipage}[b]{0.4\textwidth}
+	\includegraphics[width=0.96\textwidth]{test_dashed.pdf}
 	\caption{Line with \texttt{dash-array = "10 5"}}
   \label{dasharray}
+	\end{minipage}
+
 \end{figure}
 
 \section{Example Input}
 \label{exampleinput}
 
+The example input for Figure \ref{exampleoutput}.
 
 \begin{lstlisting}[language=json,firstnumber=1]
 {

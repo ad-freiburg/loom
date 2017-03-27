@@ -6,17 +6,16 @@
 #include "./Node.h"
 #include "./Edge.h"
 #include "./Graph.h"
-#include "transitmap/util/Geo.h"
+#include "pbutil/geo/Geo.h"
 #include "gtfsparser/gtfs/Stop.h"
 #include "./EdgeTripGeom.h"
 
-using namespace transitmapper;
 using namespace skeletonbuilder;
 using namespace graph;
 using namespace gtfsparser;
 
-using util::geo::Point;
-using util::geo::Line;
+using pbutil::geo::Point;
+using pbutil::geo::Line;
 
 
 // _____________________________________________________________________________

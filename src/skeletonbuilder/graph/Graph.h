@@ -13,7 +13,7 @@
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-#include "transitmap/util/Geo.h"
+#include "pbutil/geo/Geo.h"
 #include "./Node.h"
 #include "./Edge.h"
 
@@ -42,7 +42,7 @@ class Graph {
   Node* getNodeByStop(const gtfs::Stop* s) const;
   Node* getNodeByStop(const gtfs::Stop* s, bool getParent) const;
 
-  Node* getNearestNode(const util::geo::Point& p, double maxD) const;
+  Node* getNearestNode(const pbutil::geo::Point& p, double maxD) const;
 
   projPJ getProjection() const;
 

@@ -4,15 +4,17 @@
 
 #include <cassert>
 #include <vector>
+#include "gtfsparser/gtfs/Trip.h"
+#include "pbutil/geo/PolyLine.h"
 #include "Edge.h"
 #include "Node.h"
-#include "gtfsparser/gtfs/Trip.h"
 #include "EdgeTripGeom.h"
 
-using namespace transitmapper;
 using namespace skeletonbuilder;
 using namespace graph;
 using namespace gtfsparser;
+
+using pbutil::geo::PolyLine;
 
 // _____________________________________________________________________________
 Edge::Edge(Node* from, Node* to) : _from(from), _to(to) {
@@ -55,7 +57,7 @@ bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
 }
 
 // _____________________________________________________________________________
-bool Edge::addTrip(gtfs::Trip* t, geo::PolyLine pl, Node* toNode) {
+bool Edge::addTrip(gtfs::Trip* t, PolyLine pl, Node* toNode) {
   assert(toNode == _from || toNode == _to);
   bool inserted = false;
   for (auto& e : _tripsContained) {
@@ -90,14 +92,9 @@ void Edge::addEdgeTripGeom(const EdgeTripGeom& e) {
 
   _tripsContained.push_back(e);
   if (e.getGeomDir() != _to) {
-    const_cast<geo::PolyLine*>(&_tripsContained.back().getGeom())->reverse();
+    const_cast<PolyLine*>(&_tripsContained.back().getGeom())->reverse();
     _tripsContained.back().setGeomDir(_to);
   }
-
-  /**
-  assert(util::geo::dist(_tripsContained.back().getGeom().getLine().front(), _from->getPos()) <
-    util::geo::dist(_tripsContained.back().getGeom().getLine().back(), _from->getPos()) + 10);
-  **/
 }
 
 // _____________________________________________________________________________
@@ -132,14 +129,14 @@ void Edge::averageCombineGeom() {
     return;
   }
 
-  std::vector<const geo::PolyLine*> lines;
+  std::vector<const PolyLine*> lines;
 
   for (auto& et : _tripsContained) {
     assert(et.getGeomDir() == _to);
     lines.push_back(&et.getGeom());
   }
 
-  geo::PolyLine pl = geo::PolyLine::average(lines);
+  PolyLine pl = PolyLine::average(lines);
 
   EdgeTripGeom combined(pl, _to);
 

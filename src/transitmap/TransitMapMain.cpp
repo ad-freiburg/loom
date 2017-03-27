@@ -157,11 +157,17 @@ int main(int argc, char** argv) {
     Point projected = c.projectOn(pp).p;
     Point projectedB = c.projectOn(ppp).p;
 
-    svgOut.printLine(c, "fill:none;stroke:red;stroke-width:5", 2000, 2000, 0, 0);
-    svgOut.printPoint(pp, "fill:none;stroke:red;stroke-width:5", 2000, 2000, 0, 0);
-    svgOut.printPoint(ppp, "fill:none;stroke:red;stroke-width:5", 2000, 2000, 0, 0);
-    svgOut.printPoint(projected, "fill:none;stroke:red;stroke-width:5", 2000, 2000, 0, 0);
-    svgOut.printPoint(projectedB, "fill:none;stroke:red;stroke-width:5", 2000, 2000, 0, 0);
+    transitmapper::output::RenderParams rmp;
+    rmp.height = 2000;
+    rmp.width = 2000;
+    rmp.xOff = 0;
+    rmp.yOff = 0;
+
+    svgOut.printLine(c, "fill:none;stroke:red;stroke-width:5", rmp);
+    svgOut.printPoint(pp, "fill:none;stroke:red;stroke-width:5", rmp);
+    svgOut.printPoint(ppp, "fill:none;stroke:red;stroke-width:5", rmp);
+    svgOut.printPoint(projected, "fill:none;stroke:red;stroke-width:5", rmp);
+    svgOut.printPoint(projectedB, "fill:none;stroke:red;stroke-width:5", rmp);
 
     //svgOut.printLine(p, "fill:none;stroke:black;stroke-width:10");
 
@@ -171,11 +177,11 @@ int main(int argc, char** argv) {
     ls.push_back(&b);
     PolyLine avg = PolyLine::average(ls);
 
-    svgOut.printLine(avg, "fill:none;stroke:#8844AA;stroke-width:15", 2000, 2000, 0, 0);
+    svgOut.printLine(avg, "fill:none;stroke:#8844AA;stroke-width:15", rmp);
 
-    svgOut.printLine(a, "fill:none;stroke:black;stroke-width:5", 2000, 2000, 0, 0);
-    svgOut.printLine(p, "fill:none;stroke:red;stroke-width:5", 2000, 2000, 0, 0);
-    svgOut.printLine(b, "fill:none;stroke:red;stroke-width:5", 2000, 2000, 0, 0);
+    svgOut.printLine(a, "fill:none;stroke:black;stroke-width:5", rmp);
+    svgOut.printLine(p, "fill:none;stroke:red;stroke-width:5", rmp);
+    svgOut.printLine(b, "fill:none;stroke:red;stroke-width:5", rmp);
 
     PolyLine ptest;
 
@@ -186,7 +192,7 @@ int main(int argc, char** argv) {
     ptest << Point(121, 103);
 
     ptest.smoothenOutliers(10);
-    svgOut.printLine(ptest, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+    svgOut.printLine(ptest, "fill:none;stroke:red;stroke-width:1", rmp);
 
     PolyLine ptest2;
 
@@ -197,25 +203,25 @@ int main(int argc, char** argv) {
     ptest2 << Point(280, 193);
     ptest2 << Point(290, 183);
 
-    svgOut.printLine(ptest2, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+    svgOut.printLine(ptest2, "fill:none;stroke:red;stroke-width:1", rmp);
 
     ptest2.offsetPerp(18);
-    svgOut.printLine(ptest2, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+    svgOut.printLine(ptest2, "fill:none;stroke:red;stroke-width:1", rmp);
 
     for (size_t i = 1; i < 5; i++) {
       PolyLine pl = avg;
 
       pl.offsetPerp(18 * i);
-      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:green;stroke-width:15", 2000, 2000, 0, 0);
-      else svgOut.printLine(pl, "fill:none;stroke:red;stroke-width:15", 2000, 2000, 0, 0);
+      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:green;stroke-width:15", rmp);
+      else svgOut.printLine(pl, "fill:none;stroke:red;stroke-width:15", rmp);
     }
 
     for (int i = 1; i < 5; i++) {
       PolyLine pl = avg;
 
       pl.offsetPerp(-18 * i);
-      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:blue;stroke-width:15", 2000, 2000, 0, 0);
-      else svgOut.printLine(pl, "fill:none;stroke:orange;stroke-width:15", 2000, 2000, 0, 0);
+      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:blue;stroke-width:15", rmp);
+      else svgOut.printLine(pl, "fill:none;stroke:orange;stroke-width:15", rmp);
     }
 
     PolyLine ptest3;
@@ -231,11 +237,11 @@ int main(int argc, char** argv) {
 
     ptest4 = ptest3;
 
-    svgOut.printLine(ptest3, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+    svgOut.printLine(ptest3, "fill:none;stroke:red;stroke-width:1", rmp);
 
     ptest3.applyChaikinSmooth(1);
     ptest3.offsetPerp(39);
-    svgOut.printLine(ptest3, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+    svgOut.printLine(ptest3, "fill:none;stroke:red;stroke-width:1", rmp);
 
     PolyLine ptest5;
 
@@ -251,7 +257,7 @@ int main(int argc, char** argv) {
     std::cout << ptest5.getLine().size() << std::endl;
     ptest5.fixTopology(100);
     std::cout << ptest5.getLine().size() << std::endl;
-    svgOut.printLine(ptest5, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
+    svgOut.printLine(ptest5, "fill:none;stroke:red;stroke-width:1", rmp);
 
     std::cout << "Intersects: " << intersects(4.914, 8.505, 7.316, 9.094, 12.198, 10.008, 14.676, 10.332) << std::endl;
 
@@ -261,13 +267,13 @@ int main(int argc, char** argv) {
     ptest6 << Point(500, 500) << Point(600, 600);
     ptest7 << Point(500, 480) << Point(600, 620);
 
-    svgOut.printLine(ptest6, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
-    svgOut.printLine(ptest7, "fill:none;stroke:blue;stroke-width:1", 2000, 2000, 0, 0);
+    svgOut.printLine(ptest6, "fill:none;stroke:red;stroke-width:1", rmp);
+    svgOut.printLine(ptest7, "fill:none;stroke:blue;stroke-width:1", rmp);
 
     SharedSegments ss = ptest6.getSharedSegments(ptest7, 2);
     for (auto seg : ss.segments) {
-      svgOut.printPoint(seg.first.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
-      svgOut.printPoint(seg.second.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
+      svgOut.printPoint(seg.first.first.p, "fill:green;r:4", rmp);
+      svgOut.printPoint(seg.second.first.p, "fill:green;r:4", rmp);
     }
 
     PolyLine ptest8;
@@ -276,13 +282,13 @@ int main(int argc, char** argv) {
     ptest8 << Point(700, 300) << Point(800, 400);
     ptest9 << Point(700, 280) << Point(750, 350) << Point(800, 380);
 
-    svgOut.printLine(ptest8, "fill:none;stroke:red;stroke-width:1", 2000, 2000, 0, 0);
-    svgOut.printLine(ptest9, "fill:none;stroke:blue;stroke-width:1", 2000, 2000, 0, 0);
+    svgOut.printLine(ptest8, "fill:none;stroke:red;stroke-width:1", rmp);
+    svgOut.printLine(ptest9, "fill:none;stroke:blue;stroke-width:1", rmp);
 
     ss = ptest8.getSharedSegments(ptest9, 2);
     for (auto seg : ss.segments) {
-      svgOut.printPoint(seg.first.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
-      svgOut.printPoint(seg.second.first.p, "fill:green;r:4", 2000, 2000, 0, 0);
+      svgOut.printPoint(seg.first.first.p, "fill:green;r:4", rmp);
+      svgOut.printPoint(seg.second.first.p, "fill:green;r:4", rmp);
     }
 
     o << "</svg>";

@@ -8,13 +8,14 @@
 #include <vector>
 #include "gtfsparser/gtfs/Trip.h"
 #include "gtfsparser/gtfs/Route.h"
-#include "transitmap/geo/PolyLine.h"
+#include "pbutil/geo/PolyLine.h"
 #include "./Node.h"
 
 namespace skeletonbuilder {
 namespace graph {
 
 using namespace gtfsparser;
+using namespace pbutil::geo;
 
 struct TripOccurance {
   TripOccurance(gtfs::Route* r) : route(r), direction(0) {}
@@ -37,9 +38,9 @@ typedef std::pair<TripOccurance*, size_t> TripOccWithPos;
 
 class EdgeTripGeom {
  public:
-  EdgeTripGeom(geo::PolyLine pl, const Node* geomDir);
+  EdgeTripGeom(PolyLine pl, const Node* geomDir);
 
-  void addTrip(gtfs::Trip* t, const Node* dirNode, geo::PolyLine& pl);
+  void addTrip(gtfs::Trip* t, const Node* dirNode, PolyLine& pl);
 
   void addTrip(gtfs::Trip* t, const Node* dirNode);
 
@@ -51,8 +52,8 @@ class EdgeTripGeom {
 
   TripOccurance* getTripsForRoute(const gtfs::Route* r) const;
 
-  const geo::PolyLine& getGeom() const;
-  void setGeom(const geo::PolyLine& p);
+  const PolyLine& getGeom() const;
+  void setGeom(const PolyLine& p);
 
   void removeOrphans();
 
@@ -68,7 +69,7 @@ class EdgeTripGeom {
  private:
   std::vector<TripOccurance> _trips;
 
-  geo::PolyLine _geom;
+  PolyLine _geom;
   const Node* _geomDir; // the direction of the geometry, may be reversed
 };
 

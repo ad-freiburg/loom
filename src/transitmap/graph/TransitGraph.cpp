@@ -5,16 +5,17 @@
 #include <proj_api.h>
 #include <string>
 #include <set>
+#include "pbutil/geo/Geo.h"
 #include "./TransitGraph.h"
 #include "./Edge.h"
 #include "./Route.h"
 #include "./OrderingConfiguration.h"
 
+using pbutil::geo::Point;
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
 using transitmapper::graph::Route;
-using transitmapper::util::geo::Point;
 using transitmapper::graph::Configuration;
 using bgeo::make_inverse;
 
@@ -79,7 +80,7 @@ void TransitGraph::addNode(Node* n) {
 // _____________________________________________________________________________
 void TransitGraph::expandBBox(const Point& p) {
   bgeo::expand(_bbox,
-    boost::geometry::make<bgeo::model::box<util::geo::Point>>(
+    boost::geometry::make<bgeo::model::box<Point>>(
       p.get<0>() - 50, p.get<1>() - 50, p.get<0>() + 50, p.get<1>() + 50));
 }
 
@@ -93,7 +94,7 @@ Node* TransitGraph::getNodeById(const std::string& id) const {
 }
 
 // _____________________________________________________________________________
-Edge* TransitGraph::addEdge(Node* from, Node* to, geo::PolyLine pl, double w,
+Edge* TransitGraph::addEdge(Node* from, Node* to, PolyLine pl, double w,
     double s) {
   if (from == to) return 0;
   Edge* e = getEdge(from, to);
@@ -101,7 +102,7 @@ Edge* TransitGraph::addEdge(Node* from, Node* to, geo::PolyLine pl, double w,
     e = new Edge(from, to, pl, w, s);
     from->addEdge(e);
     to->addEdge(e);
-    bgeo::expand(_bbox, bgeo::return_envelope<bgeo::model::box<util::geo::Point>>(pl.getLine()));
+    bgeo::expand(_bbox, bgeo::return_envelope<bgeo::model::box<Point>>(pl.getLine()));
   }
   return e;
 }

@@ -3,20 +3,22 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <cassert>
+#include "pbutil/geo/Geo.h"
+#include "pbutil/geo/BezierCurve.h"
 #include "./Node.h"
 #include "./Edge.h"
 #include "./Route.h"
 #include "./TransitGraph.h"
-#include "./../util/Geo.h"
-#include "./../geo/BezierCurve.h"
 #include "../graph/OrderingConfiguration.h"
 
 using namespace transitmapper;
 using namespace graph;
 using namespace gtfsparser;
 
-using util::geo::Point;
-using util::geo::Line;
+using pbutil::geo::Point;
+using pbutil::geo::BezierCurve;
+using pbutil::geo::PolyLine;
+using pbutil::geo::Line;
 
 // _____________________________________________________________________________
 Point NodeFront::getTripOccPosUnder(const Route* r,
@@ -261,18 +263,18 @@ std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
 }
 
 // _____________________________________________________________________________
-geo::PolyLine Node::getInnerStraightLine(const Configuration& c,
+PolyLine Node::getInnerStraightLine(const Configuration& c,
     const NodeFront& nf, const RouteOccurance& tripOcc,
     const graph::Partner& partner, const Edge* e,
     const graph::Ordering* order) const {
   Point p = nf.getTripOccPosUnder(tripOcc.route, c, e, order);
   Point pp = partner.front->getTripOccPosUnder(partner.route, c, e, order);
 
-  return geo::PolyLine(p, pp);
+  return PolyLine(p, pp);
 }
 
 // _____________________________________________________________________________
-geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
+PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
     const RouteOccurance& tripOcc, const graph::Partner& partner,
     const Edge* e,
     const graph::Ordering* order,
@@ -282,7 +284,7 @@ geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
   Point p = nf.getTripOccPosUnder(tripOcc.route, cf, e, order);
   Point pp = partner.front->getTripOccPosUnder(partner.route, cf, e, order);
 
-  double d = util::geo::dist(p, pp) / 2;
+  double d = pbutil::geo::dist(p, pp) / 2;
 
   Point b = p;
   Point c = pp;
@@ -303,7 +305,7 @@ geo::PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
   b = Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
   c = Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
 
-  geo::BezierCurve bc(p, b, c, pp);
+  BezierCurve bc(p, b, c, pp);
   return bc.render(prec);
 }
 
@@ -355,13 +357,13 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
 }
 
 // _____________________________________________________________________________
-util::geo::Polygon Node::getConvexFrontHull(double d) const {
-  util::geo::MultiLine l;
+Polygon Node::getConvexFrontHull(double d) const {
+  MultiLine l;
 
   if (getMainDirs().size() != 2) {
     for (auto& nf : getMainDirs()) {
 
-      geo::PolyLine capped = nf.geom.getSegment(
+      PolyLine capped = nf.geom.getSegment(
           (nf.edge->getWidth() / 2) / nf.geom.getLength(),
           (nf.geom.getLength() - nf.edge->getWidth() / 2) / nf.geom.getLength());
 
@@ -369,27 +371,27 @@ util::geo::Polygon Node::getConvexFrontHull(double d) const {
     }
   } else {
     // for two main dirs, take average
-    std::vector<const geo::PolyLine*> pols;
-    geo::PolyLine a = getMainDirs()[0].geom.getSegment(
+    std::vector<const PolyLine*> pols;
+    PolyLine a = getMainDirs()[0].geom.getSegment(
           (getMainDirs()[0].edge->getWidth() / 2) / getMainDirs()[0].geom.getLength(),
           (getMainDirs()[0].geom.getLength() - getMainDirs()[0].edge->getWidth() / 2) / getMainDirs()[0].geom.getLength());
-    geo::PolyLine b = getMainDirs()[1].geom.getSegment(
+    PolyLine b = getMainDirs()[1].geom.getSegment(
           (getMainDirs()[1].edge->getWidth() / 2) / getMainDirs()[1].geom.getLength(),
           (getMainDirs()[1].geom.getLength() - getMainDirs()[1].edge->getWidth() / 2) / getMainDirs()[1].geom.getLength());
 
     assert(a.getLine().size() > 1);
     assert(b.getLine().size() > 1);
 
-    if (util::geo::dist(a.getLine()[0], b.getLine()[0]) > util::geo::dist(a.getLine()[1], b.getLine()[0])) {
+    if (dist(a.getLine()[0], b.getLine()[0]) > dist(a.getLine()[1], b.getLine()[0])) {
       a.reverse();
     }
 
     pols.push_back(&a);
     pols.push_back(&b);
-    l.push_back(geo::PolyLine::average(pols).getLine());
+    l.push_back(PolyLine::average(pols).getLine());
   }
 
-  util::geo::MultiPolygon ret;
+  MultiPolygon ret;
   double pointsPerCircle = 36;
   bgeo::strategy::buffer::distance_symmetric<double> distanceStrat(d);
   bgeo::strategy::buffer::join_round joinStrat(pointsPerCircle);
@@ -398,7 +400,7 @@ util::geo::Polygon Node::getConvexFrontHull(double d) const {
   bgeo::strategy::buffer::side_straight sideStrat;
 
   if (l.size() > 1) {
-    util::geo::Polygon hull;
+    Polygon hull;
     bgeo::convex_hull(l, hull);
     bgeo::buffer(hull, ret, distanceStrat, sideStrat, joinStrat, endStrat, circleStrat);
   } else {

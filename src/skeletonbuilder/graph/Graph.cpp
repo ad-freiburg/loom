@@ -11,7 +11,7 @@
 using skeletonbuilder::graph::Graph;
 using skeletonbuilder::graph::Node;
 using skeletonbuilder::graph::Edge;
-using transitmapper::util::geo::Point;
+using pbutil::geo::Point;
 using bgeo::make_inverse;
 
 // _____________________________________________________________________________

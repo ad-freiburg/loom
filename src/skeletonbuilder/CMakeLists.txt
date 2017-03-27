@@ -20,4 +20,4 @@ configure_file (
 add_executable(skeletonbuilder ${skeletonbuilder_main})
 add_library(skeletonbuilder_dep ${skeletonbuilder_SRC})
 
-target_link_libraries(skeletonbuilder skeletonbuilder_dep transitmap_dep gtfsparser ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} -lproj -lpthread)
+target_link_libraries(skeletonbuilder skeletonbuilder_dep transitmap_dep pbutil gtfsparser ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} -lproj -lpthread)

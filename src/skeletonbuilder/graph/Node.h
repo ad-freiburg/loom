@@ -8,11 +8,10 @@
 #include <set>
 #include "gtfsparser/gtfs/Stop.h"
 #include "gtfsparser/gtfs/Route.h"
-#include "transitmap/geo/PolyLine.h"
-#include "transitmap/util/Geo.h"
+#include "pbutil/geo/PolyLine.h"
+#include "pbutil/geo/Geo.h"
 
 using namespace gtfsparser;
-using namespace transitmapper;
 
 namespace skeletonbuilder {
 namespace graph {
@@ -25,7 +24,7 @@ class EdgeTripGeom;
 // forward declaration of TransitGraph
 class Graph;
 
-using util::geo::Point;
+using pbutil::geo::Point;
 
 struct OccuringConnection {
   OccuringConnection(const Edge* from, const Edge* to) : from(from), to(to) {}

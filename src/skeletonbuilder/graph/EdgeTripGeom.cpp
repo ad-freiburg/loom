@@ -13,21 +13,21 @@ using namespace graph;
 using namespace gtfsparser;
 
 // _____________________________________________________________________________
-EdgeTripGeom::EdgeTripGeom(geo::PolyLine geom, const Node* geomDir)
+EdgeTripGeom::EdgeTripGeom(PolyLine geom, const Node* geomDir)
 : _geomDir(geomDir) {
   setGeom(geom);
 }
 
 // _____________________________________________________________________________
 void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode,
-    geo::PolyLine& pl) {
-  std::vector<const geo::PolyLine*> vec;
+    PolyLine& pl) {
+  std::vector<const PolyLine*> vec;
   vec.push_back(&_geom);
   if (dirNode != _geomDir) {
     pl.reverse();
   }
   vec.push_back(&pl);
-  setGeom(geo::PolyLine::average(vec));
+  setGeom(PolyLine::average(vec));
 
   addTrip(t, dirNode);
 }
@@ -65,12 +65,12 @@ TripOccurance* EdgeTripGeom::getTripsForRoute(const gtfs::Route* r) const {
 }
 
 // _____________________________________________________________________________
-const geo::PolyLine& EdgeTripGeom::getGeom() const {
+const PolyLine& EdgeTripGeom::getGeom() const {
   return _geom;
 }
 
 // _____________________________________________________________________________
-void EdgeTripGeom::setGeom(const geo::PolyLine& p) {
+void EdgeTripGeom::setGeom(const PolyLine& p) {
   _geom = p;
 }
 
