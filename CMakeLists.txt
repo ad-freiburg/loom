@@ -59,9 +59,9 @@ endif()
 
 add_subdirectory(src)
 
-add_test(ctest_build_skeletonbuilder_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target skeletonbuilderTest)
-add_test(skeletonbuilder_test ${EXECUTABLE_OUTPUT_PATH}/skeletonbuilderTest)
-set_tests_properties (skeletonbuilder_test PROPERTIES DEPENDS ctest_build_skeletonbuilder_test)
+add_test(ctest_build_graphbuilder_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target graphbuilderTest)
+add_test(graphbuilder_test ${EXECUTABLE_OUTPUT_PATH}/graphbuilderTest)
+set_tests_properties (graphbuilder_test PROPERTIES DEPENDS ctest_build_graphbuilder_test)
 
 add_test(ctest_build_transitmapper_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target transitmapperTest)
 add_test(transitmapper_test ${EXECUTABLE_OUTPUT_PATH}/transitmapperTest)

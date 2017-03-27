@@ -2,24 +2,23 @@
 // University of Freiburg - Chair of Algorithms and Datastructures
 // Author: Patrick Brosi
 
-#include <unistd.h>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <set>
 #include <stdio.h>
-#include "pbutil/log/Log.h"
-#include "pbutil/geo/PolyLine.h"
-#include "./graph/TransitGraph.h"
-#include "./graph/GraphBuilder.h"
-#include "./graph/Node.h"
-#include "./util/XmlWriter.cpp"
-#include "./output/SvgOutput.h"
-#include "./output/OgrOutput.h"
-#include "./optim/EdgeOrderOptimizer.h"
-#include "./optim/ILPEdgeOrderOptimizer.h"
+#include <unistd.h>
+#include <fstream>
+#include <iostream>
+#include <set>
+#include <string>
 #include "./config/ConfigReader.cpp"
 #include "./config/TransitMapConfig.h"
+#include "./graph/GraphBuilder.h"
+#include "./graph/Node.h"
+#include "./graph/TransitGraph.h"
+#include "./optim/EdgeOrderOptimizer.h"
+#include "./optim/ILPEdgeOrderOptimizer.h"
+#include "./output/OgrOutput.h"
+#include "./output/SvgOutput.h"
+#include "pbutil/geo/PolyLine.h"
+#include "pbutil/log/Log.h"
 
 using namespace transitmapper;
 using namespace pbutil::geo;
@@ -57,31 +56,29 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Optimizing..." << std::endl;
 
-    LOG(INFO) << "Total graph score BEFORE optim is -- "
-      << g.getScore() << " --" << std::endl;
+    LOG(INFO) << "Total graph score BEFORE optim is -- " << g.getScore()
+              << " --" << std::endl;
 
     if (cfg.renderMethod != "ogr" && !cfg.noOptim) {
       optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg);
       ilpEoOptim.optimize();
     }
 
-    LOG(INFO) << "Total graph score AFTER optim is -- "
-      << g.getScore() << " --" << std::endl;
+    LOG(INFO) << "Total graph score AFTER optim is -- " << g.getScore() << " --"
+              << std::endl;
     LOG(INFO) << "Per node graph score is -- "
-      << g.getScore() / g.getNodes()->size() << " --" << std::endl;
+              << g.getScore() / g.getNodes()->size() << " --" << std::endl;
 
     if (cfg.renderMethod == "ogr") {
       std::string path = cfg.outputPath;
-      LOG(INFO) << "Outputting to OGR " << path << " ..."
-        << std::endl;
+      LOG(INFO) << "Outputting to OGR " << path << " ..." << std::endl;
       output::OgrOutput ogrOut(path, &cfg);
       ogrOut.print(g);
     }
 
     if (cfg.renderMethod == "svg") {
       std::string path = cfg.outputPath;
-      LOG(INFO) << "Outputting to SVG " << path << " ..."
-        << std::endl;
+      LOG(INFO) << "Outputting to SVG " << path << " ..." << std::endl;
       std::ofstream o;
       o.open(path);
       output::SvgOutput svgOut(&o, &cfg);
@@ -90,11 +87,13 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "World file for this map: " << std::endl << std::endl;
 
-    std::cout << 1/cfg.outputResolution << std::endl
-      << 0 << std::endl << 0 << std::endl
-      << -1/cfg.outputResolution << std::endl
-      << std::fixed << g.getBoundingBox().min_corner().get<0>() << std::endl
-      << g.getBoundingBox().max_corner().get<1>() << std::endl;
+    std::cout << 1 / cfg.outputResolution << std::endl
+              << 0 << std::endl
+              << 0 << std::endl
+              << -1 / cfg.outputResolution << std::endl
+              << std::fixed << g.getBoundingBox().min_corner().get<0>()
+              << std::endl
+              << g.getBoundingBox().max_corner().get<1>() << std::endl;
   } else if (false) {
     PolyLine a;
     PolyLine b;
@@ -115,7 +114,6 @@ int main(int argc, char** argv) {
     LOG(INFO) << "RESULT: " << ss.segments.size() << std::endl;
 
   } else {
-
     // just testing parallel drawing...
     PolyLine p;
     PolyLine a;
@@ -130,13 +128,13 @@ int main(int argc, char** argv) {
       b << Point(i, 1000 + cos(0.003 * i) * 500);
 
       // linear
-      //a << Point(i, 1000);
+      // a << Point(i, 1000);
 
       // triangle
       if (i < 1000) {
-        p << Point(i, 1000 - (i/2));
+        p << Point(i, 1000 - (i / 2));
       } else {
-        p << Point(i, (i/2));
+        p << Point(i, (i / 2));
       }
     }
 
@@ -147,10 +145,10 @@ int main(int argc, char** argv) {
 
     o << "<svg width=\"2000\" height=\"2000\">";
 
-
-    Point pp(500,470);
-    Point ppp(550,500);
-    c << Point(400, 400) << Point(450, 450) << Point(550, 450) << Point( 600, 700);
+    Point pp(500, 470);
+    Point ppp(550, 500);
+    c << Point(400, 400) << Point(450, 450) << Point(550, 450)
+      << Point(600, 700);
 
     c = c.getSegment(pp, ppp);
 
@@ -169,7 +167,7 @@ int main(int argc, char** argv) {
     svgOut.printPoint(projected, "fill:none;stroke:red;stroke-width:5", rmp);
     svgOut.printPoint(projectedB, "fill:none;stroke:red;stroke-width:5", rmp);
 
-    //svgOut.printLine(p, "fill:none;stroke:black;stroke-width:10");
+    // svgOut.printLine(p, "fill:none;stroke:black;stroke-width:10");
 
     std::vector<const PolyLine*> ls;
     ls.push_back(&a);
@@ -212,16 +210,20 @@ int main(int argc, char** argv) {
       PolyLine pl = avg;
 
       pl.offsetPerp(18 * i);
-      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:green;stroke-width:15", rmp);
-      else svgOut.printLine(pl, "fill:none;stroke:red;stroke-width:15", rmp);
+      if (i % 2)
+        svgOut.printLine(pl, "fill:none;stroke:green;stroke-width:15", rmp);
+      else
+        svgOut.printLine(pl, "fill:none;stroke:red;stroke-width:15", rmp);
     }
 
     for (int i = 1; i < 5; i++) {
       PolyLine pl = avg;
 
       pl.offsetPerp(-18 * i);
-      if (i % 2) svgOut.printLine(pl, "fill:none;stroke:blue;stroke-width:15", rmp);
-      else svgOut.printLine(pl, "fill:none;stroke:orange;stroke-width:15", rmp);
+      if (i % 2)
+        svgOut.printLine(pl, "fill:none;stroke:blue;stroke-width:15", rmp);
+      else
+        svgOut.printLine(pl, "fill:none;stroke:orange;stroke-width:15", rmp);
     }
 
     PolyLine ptest3;
@@ -233,7 +235,6 @@ int main(int argc, char** argv) {
     ptest3 << Point(165, 310);
     ptest3 << Point(170, 320);
     ptest3 << Point(170, 353);
-
 
     ptest4 = ptest3;
 
@@ -259,7 +260,9 @@ int main(int argc, char** argv) {
     std::cout << ptest5.getLine().size() << std::endl;
     svgOut.printLine(ptest5, "fill:none;stroke:red;stroke-width:1", rmp);
 
-    std::cout << "Intersects: " << intersects(4.914, 8.505, 7.316, 9.094, 12.198, 10.008, 14.676, 10.332) << std::endl;
+    std::cout << "Intersects: " << intersects(4.914, 8.505, 7.316, 9.094,
+                                              12.198, 10.008, 14.676, 10.332)
+              << std::endl;
 
     PolyLine ptest6;
     PolyLine ptest7;
@@ -292,9 +295,7 @@ int main(int argc, char** argv) {
     }
 
     o << "</svg>";
-
   }
 
-
-  return(0);
+  return (0);
 }

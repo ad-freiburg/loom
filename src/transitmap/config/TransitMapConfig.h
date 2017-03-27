@@ -11,12 +11,10 @@ namespace transitmapper {
 namespace config {
 
 struct Config {
-
   double lineWidth;
   double lineSpacing;
 
   std::string projectionString;
-  std::string inputFeedPath;
   std::string outputPath;
 
   std::string renderMethod;
@@ -33,7 +31,6 @@ struct Config {
   bool renderStations;
   bool renderNodeFronts;
   bool renderStationNames;
-
 };
 
 }  // namespace config

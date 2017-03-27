@@ -10,8 +10,8 @@
 #include "Output.h"
 #include "pbutil/geo/Geo.h"
 #include "pbutil/geo/PolyLine.h"
+#include "pbutil/xml/XmlWriter.h"
 #include "./../config/TransitMapConfig.h"
-#include "./../util/XmlWriter.h"
 #include "./../graph/TransitGraph.h"
 #include "./../graph/Route.h"
 

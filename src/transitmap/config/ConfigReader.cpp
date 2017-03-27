@@ -85,19 +85,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->innerGeometryPrecision))
       ->default_value(3),
       "rendering precision of inner node geometries")
-  ;  
-
-  opts::options_description positional("Positional arguments");
-  positional.add_options()
-    ("input-feed",
-      opts::value<std::string>(&(cfg->inputFeedPath)),
-      "path to an (unzipped) GTFS feed");
-
-  opts::positional_options_description positionalOptions;
-  positionalOptions.add("input-feed", 1);
+  ;
 
   opts::options_description cmdlineOptions;
-  cmdlineOptions.add(config).add(generic).add(positional);
+  cmdlineOptions.add(config).add(generic);
 
   opts::options_description visibleDesc("Allowed options");
   visibleDesc.add(generic).add(config);
@@ -105,7 +96,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
 
   try {
     opts::store(opts::command_line_parser(argc, argv).options(cmdlineOptions)
-        .positional(positionalOptions)
         .run(), vm);
     opts::notify(vm);
   } catch (exception e) {
@@ -115,7 +105,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   }
 
   if (vm.count("help")) {
-    std::cout << "transitmapper [options] <input-feed>\n"
+    std::cout << argv[0] << " [options]\n"
       << VERSION_STR << "\n\n"
       << visibleDesc << "\n";
     exit(0);
