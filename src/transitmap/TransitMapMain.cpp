@@ -60,8 +60,15 @@ int main(int argc, char** argv) {
               << " --" << std::endl;
 
     if (cfg.renderMethod != "ogr" && !cfg.noOptim) {
-      optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg);
-      ilpEoOptim.optimize();
+      if (cfg.optimMethod == "ilp_impr") {
+        optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg);
+        ilpEoOptim.optimize();
+      } else if (cfg.optimMethod == "ilp") {
+        optim::ILPOptimizer ilpEoOptim(&g, &cfg);
+        ilpEoOptim.optimize();
+      } else if (cfg.optimMethod == "hillc") {
+        // TODO
+      }
     }
 
     LOG(INFO) << "Total graph score AFTER optim is -- " << g.getScore() << " --"

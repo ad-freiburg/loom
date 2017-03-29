@@ -5,12 +5,14 @@
 #ifndef TRANSITMAP_OPTIM_ILPEDGEORDEROPTIMIZER_H_
 #define TRANSITMAP_OPTIM_ILPEDGEORDEROPTIMIZER_H_
 
-#include "./../graph/OrderingConfiguration.h"
-#include "./../graph/TransitGraph.h"
-#include "./../graph/Route.h"
-#include "./../config/TransitMapConfig.h"
-#include "./OptGraph.h"
 #include <glpk.h>
+#include "./../config/TransitMapConfig.h"
+#include "./../graph/OrderingConfiguration.h"
+#include "./../graph/Route.h"
+#include "./../graph/TransitGraph.h"
+#include "./ILPOptimizer.h"
+#include "./OptGraph.h"
+#include "./Optimizer.h"
 
 using std::exception;
 using std::string;
@@ -25,63 +27,24 @@ typedef std::pair<size_t, size_t> PosCom;
 typedef std::pair<PosCom, PosCom> PosComPair;
 typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
-class ILPEdgeOrderOptimizer {
+class ILPEdgeOrderOptimizer : public ILPOptimizer {
  public:
   ILPEdgeOrderOptimizer(TransitGraph* g, const config::Config* cfg)
-   : _g(g), _cfg(cfg) {};
+      : ILPOptimizer(g, cfg){};
 
-  void optimize();
  private:
-  TransitGraph* _g;
-  const config::Config* _cfg;
+  virtual glp_prob* createProblem(const OptGraph& g) const;
 
-  glp_prob* createProblem(const OptGraph& g) const;
-  glp_prob* createProblemImpr(const OptGraph& g) const;
+  virtual void getConfigurationFromSolution(glp_prob* lp, Configuration* c,
+                                            const OptGraph& g) const;
 
-  void solveProblem(glp_prob* lp) const;
+  void writeCrossingOracle(const OptGraph& g, int* ia, int* ja, double* res,
+                           size_t* c, glp_prob* lp) const;
 
-  void getConfigurationFromSolution(glp_prob* lp,
-      Configuration* c, const OptGraph& g) const;
-  void getConfigurationFromSolutionImpr(glp_prob* lp,
-      Configuration* c, const OptGraph& g) const;
-
-  std::string getILPVarName(OptEdge* e,
-    const Route* r, size_t p) const;
-
-  void writeSameSegConstraints(const OptGraph& g,
-    int* ia, int* ja, double* res, size_t* c, glp_prob* lp) const;
-
-  void writeCrossingOracle(const OptGraph& g,
-    int* ia, int* ja, double* res, size_t* c, glp_prob* lp) const;
-
-  void writeDiffSegConstraints(const OptGraph& g,
-    int* ia, int* ja, double* res, size_t* c, glp_prob* lp) const;
-
-  void writeDiffSegConstraintsImpr(const OptGraph& g,
-    int* ia, int* ja, double* res, size_t* c, glp_prob* lp) const;
-
-  bool printHumanReadable(glp_prob* lp, const std::string& path) const;
-  double getConstraintCoeff(glp_prob* lp, size_t constraint, size_t col) const;
-
-  std::vector<LinePair> getLinePairs(OptEdge* segment) const;
-  std::vector<OptEdge*> getEdgePartners(OptNode* node,
-    OptEdge* segmentA, const LinePair& linepair) const;
-  std::vector<EdgePair> getEdgePartnerPairs(OptNode* node,
-    OptEdge* segmentA, const LinePair& linepair) const;
-  std::vector<PosComPair> getPositionCombinations(OptEdge* a, OptEdge* b) const;
-  std::vector<PosCom> getPositionCombinations(OptEdge* a)
-  const;
-
-  bool crosses(OptNode* node, OptEdge* segmentA,
-      OptEdge* segmentB, PosComPair postcomb) const;
-
-  bool crosses(OptNode* node, OptEdge* segmentA,
-      EdgePair segments, PosCom postcomb) const;
-
-  Point getPos(OptNode* n, OptEdge* segment, size_t p) const;
+  void writeDiffSegConstraintsImpr(const OptGraph& g, int* ia, int* ja,
+                                   double* res, size_t* c, glp_prob* lp) const;
 };
-
-}}
+}  // namespace optim
+}  // namespace transitmapper
 
 #endif  // TRANSITMAP_OPTIM_ILPEDGEORDEROPTIMIZER_H_
-

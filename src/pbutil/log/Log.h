@@ -5,8 +5,8 @@
 #ifndef PBUTIL_LOG_LOG_H_
 #define PBUTIL_LOG_LOG_H_
 
-#include <time.h>
 #include <sys/timeb.h>
+#include <time.h>
 #include <iomanip>
 #include <iostream>
 
@@ -30,7 +30,7 @@ namespace pbutil {
 
 class Log {
  public:
-  template<char L>
+  template <char L>
   static std::ostream& log() {
     return getLogHead(L == ERROR ? std::cerr : std::cout) << getLogName<L>();
   }
@@ -46,23 +46,22 @@ class Log {
     return os << "[" << tl << setfill('0') << setw(3) << tb.millitm << "] ";
   }
 
-  template<char LEVEL>
+  template <char LEVEL>
   static const char* getLogName() {
     switch (LEVEL) {
       case DEBUG:
-        return "DEBUG:";
+        return "DEBUG: ";
       case INFO:
-        return "INFO :";
+        return "INFO : ";
       case WARN:
-        return "WARN :";
+        return "WARN : ";
       case ERROR:
-        return "ERROR:";
+        return "ERROR: ";
       default:
-        return "(\?\?) :";
+        return "(\?\?) : ";
     }
   }
 };
-
 }
 
 #endif  // PBUTIL_LOG_LOG_H_

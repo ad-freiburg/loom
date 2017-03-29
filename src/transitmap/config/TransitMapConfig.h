@@ -18,6 +18,7 @@ struct Config {
   std::string outputPath;
 
   std::string renderMethod;
+  std::string optimMethod;
 
   bool noOptim;
 
