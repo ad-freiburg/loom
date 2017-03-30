@@ -103,7 +103,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
           glp_set_col_kind(lp, curCol, GLP_BV);
 
           // coefficients for constraint from above
-          vm.addVar(rowA + p, curCol,  1);
+          vm.addVar(rowA + p, curCol, 1);
 
           if (p > 0) {
             size_t row = glp_add_rows(lp, 1);
@@ -116,7 +116,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
             glp_set_row_bnds(lp, row, GLP_LO, 0, 1);
 
             vm.addVar(row, curCol, 1);
-            vm.addVar(row, curCol -1, -1);
+            vm.addVar(row, curCol - 1, -1);
           }
         }
       }
@@ -143,7 +143,8 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
 }
 
 // _____________________________________________________________________________
-void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g, VariableMatrix* vm,
+void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
+                                                VariableMatrix* vm,
                                                 glp_prob* lp) const {
   // do everything iteratively, otherwise it would be unreadable
 
@@ -392,7 +393,9 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const OptGraph& g,
                 testVar = glp_find_col(lp, bBgAStr.str().c_str());
               }
 
-              assert(testVar); size_t row = glp_add_rows(lp, 1); std::stringstream ss;
+              assert(testVar);
+              size_t row = glp_add_rows(lp, 1);
+              std::stringstream ss;
               ss << "dec_sum(" << segmentA->getStrRepr() << ","
                  << segments.first->getStrRepr()
                  << segments.second->getStrRepr() << "," << linepair.first

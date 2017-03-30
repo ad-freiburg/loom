@@ -49,15 +49,17 @@ PolyLine PolyLine::getPerpOffsetted(double units) const {
 
 // _____________________________________________________________________________
 void PolyLine::offsetPerp(double units) {
-  // calculate perpendicular offset of a polyline
-  //
-  // there doesn't seem to be any library which reliably does that,
-  // so we do it ourself here until we find one...
-  // boost::geometry only supports buffering a line, resulting in a
-  // polygon. An offsetted line is part of that polygon, but retrieving
-  // it reliably could result in some geometrical diffing hocus pocus which is
-  // bound to go wrong at /some/ point (self intersections, numerical
-  // instability etc)
+  /*
+   * calculate perpendicular offset of a polyline
+   *
+   * there doesn't seem to be any library which reliably does that,
+   * so we do it ourself here until we find one...
+   * boost::geometry only supports buffering a line, resulting in a
+   * polygon. An offsetted line is part of that polygon, but retrieving
+   * it reliably could result in some geometrical diffing hocus pocus which is
+   * bound to go wrong at /some/ point (self intersections, numerical
+   * instability etc)
+   */
 
   if (_line.size() < 2) return;
 
@@ -95,8 +97,8 @@ void PolyLine::offsetPerp(double units) {
       double d2 = distToSegment(*lastIns, *befLastIns, lastP);
 
       if (d > fabs(units) * 2 && d2 < d - (fabs(units))) {
-        geo::PolyLine pl(*lastIns, *befLastIns);
-        geo::PolyLine pll(*lastIns, curP);
+        PolyLine pl(*lastIns, *befLastIns);
+        PolyLine pll(*lastIns, curP);
         pl = pl.getSegment(0, (d - (fabs(units))) / pl.getLength());
         pll = pll.getSegment(0, (d - (fabs(units))) / pll.getLength());
 
@@ -120,6 +122,7 @@ void PolyLine::offsetPerp(double units) {
 
   _line = ret;
 
+  // heuristics
   simplify(1);
   fixTopology(fabs(2 * 3.14 * units));
 }
@@ -127,8 +130,8 @@ void PolyLine::offsetPerp(double units) {
 // _____________________________________________________________________________
 PolyLine PolyLine::getSegment(double a, double b) const {
   if (a > b) a = b;
-  PointOnLine start = getPointAt(a);
-  PointOnLine end = getPointAt(b);
+  LinePoint start = getPointAt(a);
+  LinePoint end = getPointAt(b);
 
   return getSegment(start, end);
 }
@@ -136,23 +139,23 @@ PolyLine PolyLine::getSegment(double a, double b) const {
 // _____________________________________________________________________________
 PolyLine PolyLine::getSegmentAtDist(double a, double b) const {
   if (a > b) a = b;
-  PointOnLine start = getPointAtDist(a);
-  PointOnLine end = getPointAtDist(b);
+  LinePoint start = getPointAtDist(a);
+  LinePoint end = getPointAtDist(b);
 
   return getSegment(start, end);
 }
 
 // _____________________________________________________________________________
 PolyLine PolyLine::getSegment(const Point& a, const Point& b) const {
-  PointOnLine start = projectOn(a);
-  PointOnLine end = projectOnAfter(b, start.lastIndex);
+  LinePoint start = projectOn(a);
+  LinePoint end = projectOnAfter(b, start.lastIndex);
 
   return getSegment(start, end);
 }
 
 // __________________________________________________________________
-PolyLine PolyLine::getSegment(const PointOnLine& start,
-                              const PointOnLine& end) const {
+PolyLine PolyLine::getSegment(const LinePoint& start,
+                              const LinePoint& end) const {
   PolyLine ret;
   ret << start.p;
 
@@ -169,13 +172,13 @@ PolyLine PolyLine::getSegment(const PointOnLine& start,
 }
 
 // _____________________________________________________________________________
-PointOnLine PolyLine::getPointAtDist(double atDist) const {
+LinePoint PolyLine::getPointAtDist(double atDist) const {
   if (atDist > getLength()) atDist = getLength();
   if (atDist < 0) atDist = 0;
 
   double dist = 0;
 
-  if (_line.size() == 1) return PointOnLine(0, 0, _line[0]);
+  if (_line.size() == 1) return LinePoint(0, 0, _line[0]);
 
   const Point* last = &_line[0];
 
@@ -186,18 +189,18 @@ PointOnLine PolyLine::getPointAtDist(double atDist) const {
 
     if (dist > atDist) {
       double p = (d - (dist - atDist));
-      return PointOnLine(i - 1, atDist / getLength(),
+      return LinePoint(i - 1, atDist / getLength(),
                          interpolate(*last, cur, p));
     }
 
     last = &_line[i];
   }
 
-  return PointOnLine(_line.size() - 1, 1, _line.back());
+  return LinePoint(_line.size() - 1, 1, _line.back());
 }
 
 // _____________________________________________________________________________
-PointOnLine PolyLine::getPointAt(double at) const {
+LinePoint PolyLine::getPointAt(double at) const {
   at *= getLength();
   return getPointAtDist(at);
 }
@@ -327,12 +330,12 @@ std::pair<size_t, double> PolyLine::nearestSegment(const Point& p) const {
 }
 
 // _____________________________________________________________________________
-PointOnLine PolyLine::projectOn(const Point& p) const {
+LinePoint PolyLine::projectOn(const Point& p) const {
   return projectOnAfter(p, 0);
 }
 
 // _____________________________________________________________________________
-PointOnLine PolyLine::projectOnAfter(const Point& p, size_t a) const {
+LinePoint PolyLine::projectOnAfter(const Point& p, size_t a) const {
   assert(a < _line.size());
   std::pair<size_t, double> bc = nearestSegmentAfter(p, a);
 
@@ -342,7 +345,7 @@ PointOnLine PolyLine::projectOnAfter(const Point& p, size_t a) const {
     bc.second += bgeo::distance(_line[bc.first], ret) / getLength();
   }
 
-  return PointOnLine(bc.first, bc.second, ret);
+  return LinePoint(bc.first, bc.second, ret);
 }
 
 // _____________________________________________________________________________
@@ -441,11 +444,11 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
   double curTotalSegDist = 0;
   bool single = true;
   size_t skips;
-  PointOnLine currentStartCand;
-  PointOnLine currentEndCand;
+  LinePoint curStartCand;
+  LinePoint curEndCand;
 
-  PointOnLine currentStartCandComp;
-  PointOnLine currentEndCandComp;
+  LinePoint curStartCandCmp;
+  LinePoint curEndCandCmp;
 
   double comp = 0;
   double curSegDist = 0;
@@ -460,40 +463,40 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
       const Point& curPointer = interpolate(s, e, curSegDist);
 
       if (pl.distTo(curPointer) <= dmax) {
-        PointOnLine curCompPointer = pl.projectOn(curPointer);
-        PointOnLine curBackProjectedPointer = projectOn(curCompPointer.p);
+        LinePoint curCmpPointer = pl.projectOn(curPointer);
+        LinePoint curBackProjectedPointer = projectOn(curCmpPointer.p);
         skips = 0;
 
         if (in) {
-          currentEndCand = curBackProjectedPointer;
-          currentEndCandComp = curCompPointer;
+          curEndCand = curBackProjectedPointer;
+          curEndCandCmp = curCmpPointer;
 
           single = false;
 
-          comp = fabs(currentStartCand.totalPos * getLength() -
-                      currentEndCand.totalPos * getLength()) /
-                 fabs(currentStartCandComp.totalPos * pl.getLength() -
-                      currentEndCandComp.totalPos * pl.getLength());
+          comp = fabs(curStartCand.totalPos * getLength() -
+                      curEndCand.totalPos * getLength()) /
+                 fabs(curStartCandCmp.totalPos * pl.getLength() -
+                      curEndCandCmp.totalPos * pl.getLength());
         } else {
           in = true;
-          currentStartCand = curBackProjectedPointer;
-          currentStartCandComp = curCompPointer;
+          curStartCand = curBackProjectedPointer;
+          curStartCandCmp = curCmpPointer;
         }
       } else {
         if (in) {
           skips++;
           if (skips > MAX_SKIPS) {  // TODO: make configurable
             if (comp > 0.8 && comp < 1.2 && !single &&
-                (fabs(currentStartCand.totalPos * getLength() -
-                      currentEndCand.totalPos * getLength()) > MIN_SEG_LENGTH &&
-                 fabs(currentStartCandComp.totalPos * pl.getLength() -
-                      currentEndCandComp.totalPos * pl.getLength()) >
+                (fabs(curStartCand.totalPos * getLength() -
+                      curEndCand.totalPos * getLength()) > MIN_SEG_LENGTH &&
+                 fabs(curStartCandCmp.totalPos * pl.getLength() -
+                      curEndCandCmp.totalPos * pl.getLength()) >
                      MIN_SEG_LENGTH)) {
               ret.segments.push_back(
-                  SharedSegment(std::pair<PointOnLine, PointOnLine>(
-                                    currentStartCand, currentStartCandComp),
-                                std::pair<PointOnLine, PointOnLine>(
-                                    currentEndCand, currentEndCandComp)));
+                  SharedSegment(std::pair<LinePoint, LinePoint>(
+                                    curStartCand, curStartCandCmp),
+                                std::pair<LinePoint, LinePoint>(
+                                    curEndCand, curEndCandCmp)));
 
               // TODO: only return the FIRST one, make this configuralbe
               return ret;
@@ -521,28 +524,28 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
   }
 
   if (comp > 0.8 && comp < 1.2 && in && !single &&
-      (fabs(currentStartCand.totalPos * getLength() -
-            currentEndCand.totalPos * getLength()) > MIN_SEG_LENGTH &&
-       fabs(currentStartCandComp.totalPos * pl.getLength() -
-            currentEndCandComp.totalPos * pl.getLength()) > MIN_SEG_LENGTH)) {
+      (fabs(curStartCand.totalPos * getLength() -
+            curEndCand.totalPos * getLength()) > MIN_SEG_LENGTH &&
+       fabs(curStartCandCmp.totalPos * pl.getLength() -
+            curEndCandCmp.totalPos * pl.getLength()) > MIN_SEG_LENGTH)) {
     ret.segments.push_back(
-        SharedSegment(std::pair<PointOnLine, PointOnLine>(currentStartCand,
-                                                          currentStartCandComp),
-                      std::pair<PointOnLine, PointOnLine>(currentEndCand,
-                                                          currentEndCandComp)));
+        SharedSegment(std::pair<LinePoint, LinePoint>(curStartCand,
+                                                          curStartCandCmp),
+                      std::pair<LinePoint, LinePoint>(curEndCand,
+                                                          curEndCandCmp)));
   }
 
   return ret;
 }
 
 // _____________________________________________________________________________
-std::set<PointOnLine, PointOnLineCmp> PolyLine::getIntersections(
+std::set<LinePoint, LinePointCmp> PolyLine::getIntersections(
     const PolyLine& g) const {
-  std::set<PointOnLine, PointOnLineCmp> ret;
+  std::set<LinePoint, LinePointCmp> ret;
 
   for (size_t i = 1; i < g.getLine().size(); ++i) {
     // for each line segment, check if it intersects with a line segment in g
-    const std::set<PointOnLine, PointOnLineCmp> a =
+    const std::set<LinePoint, LinePointCmp> a =
         getIntersections(g, i - 1, i);
     ret.insert(a.begin(), a.end());
   }
@@ -551,9 +554,9 @@ std::set<PointOnLine, PointOnLineCmp> PolyLine::getIntersections(
 }
 
 // _____________________________________________________________________________
-std::set<PointOnLine, PointOnLineCmp> PolyLine::getIntersections(
+std::set<LinePoint, LinePointCmp> PolyLine::getIntersections(
     const PolyLine& p, size_t a, size_t b) const {
-  std::set<PointOnLine, PointOnLineCmp> ret;
+  std::set<LinePoint, LinePointCmp> ret;
 
   if (dist(p.getLine()[a], p.getLine()[b]) == 0) {
     // we cannot intersect with a point
@@ -583,7 +586,7 @@ PolyLine PolyLine::getOrthoLineAtDist(double d, double length) const {
   double angleX2 = avgP.get<0>() + cos(angle + M_PI / 2) * -length / 2;
   double angleY2 = avgP.get<1>() + sin(angle + M_PI / 2) * -length / 2;
 
-  return geo::PolyLine(Point(angleX1, angleY1), Point(angleX2, angleY2));
+  return PolyLine(Point(angleX1, angleY1), Point(angleX2, angleY2));
 }
 
 // _____________________________________________________________________________
@@ -592,8 +595,8 @@ void PolyLine::empty() { _line.empty(); }
 // _____________________________________________________________________________
 std::pair<double, double> PolyLine::getSlopeBetween(double ad,
                                                     double bd) const {
-  PointOnLine a = getPointAt(ad);
-  PointOnLine b = getPointAt(bd);
+  LinePoint a = getPointAt(ad);
+  LinePoint b = getPointAt(bd);
 
   double d = dist(a.p, b.p);
 

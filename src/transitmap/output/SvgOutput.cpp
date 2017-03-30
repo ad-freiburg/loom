@@ -283,14 +283,14 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
     p.offsetPerp(offset);
 
-    std::set<PointOnLine, PointOnLineCmp> iSects = nfTo->geom.getIntersections(p);
+    std::set<LinePoint, LinePointCmp> iSects = nfTo->geom.getIntersections(p);
     if (iSects.size() > 0) {
       p = p.getSegment(0, iSects.begin()->totalPos);
     } else {
       p << nfTo->geom.projectOn(p.getLine().back()).p;
     }
 
-    std::set<PointOnLine, PointOnLineCmp> iSects2 = nfFrom->geom.getIntersections(p);
+    std::set<LinePoint, LinePointCmp> iSects2 = nfFrom->geom.getIntersections(p);
     if (iSects2.size() > 0) {
       p = p.getSegment(iSects2.begin()->totalPos, 1);
     } else {

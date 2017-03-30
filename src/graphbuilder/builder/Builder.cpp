@@ -305,10 +305,10 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
     const EdgeTripGeom& curEdgeGeom = w.e->getEdgeTripGeoms()->front();
     const EdgeTripGeom& compEdgeGeom = w.f->getEdgeTripGeoms()->front();
 
-    const PointOnLine& eap = w.s.first.first;
-    const PointOnLine& ebp = w.s.second.first;
-    const PointOnLine& fap = w.s.first.second;
-    const PointOnLine& fbp = w.s.second.second;
+    const LinePoint& eap = w.s.first.first;
+    const LinePoint& ebp = w.s.second.first;
+    const LinePoint& fap = w.s.first.second;
+    const LinePoint& fbp = w.s.second.second;
 
     PolyLine ea = curEdgeGeom.getGeom().getSegment(0, eap.totalPos);
     PolyLine ec = curEdgeGeom.getGeom().getSegment(ebp.totalPos, 1);

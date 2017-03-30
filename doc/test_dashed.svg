@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="80px" width="90px">
+<svg height="80.000000px" width="90.000000px">
     <defs />
     <g>
         <polyline points=" 5,75 16.25,67.6875 20.7812,64.25 22.8125,62.4375 26.4062,58.625 27.9688,56.625 30.3354,52.9298" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:2.2" />

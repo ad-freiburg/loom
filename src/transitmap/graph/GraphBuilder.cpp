@@ -3,15 +3,15 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <proj_api.h>
-#include <vector>
+#include <istream>
 #include <set>
 #include <stack>
-#include <istream>
+#include <vector>
+#include "./../config/TransitMapConfig.h"
+#include "GraphBuilder.h"
+#include "json/json.hpp"
 #include "pbutil/geo/PolyLine.h"
 #include "pbutil/log/Log.h"
-#include "GraphBuilder.h"
-#include "./../config/TransitMapConfig.h"
-#include "json/json.hpp"
 
 using namespace transitmapper;
 using namespace graph;
@@ -20,10 +20,8 @@ using namespace gtfs;
 using namespace pbutil::geo;
 using json = nlohmann::json;
 
-
 // _____________________________________________________________________________
-GraphBuilder::GraphBuilder(const config::Config* cfg)
-: _cfg(cfg) {
+GraphBuilder::GraphBuilder(const config::Config* cfg) : _cfg(cfg) {
   _mercProj = pj_init_plus(WGS84_PROJ);
 }
 
@@ -33,7 +31,6 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
   (*s) >> j;
 
   if (j["type"] == "FeatureCollection") {
-
     // first pass, nodes
     for (auto feature : j["features"]) {
       auto props = feature["properties"];
@@ -41,19 +38,19 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
       if (geom["type"] == "Point") {
         std::string id = props["id"];
 
-                // check if node already exists
+        // check if node already exists
         if (g->getNodeById(id)) continue;
 
         std::vector<double> coords = geom["coordinates"];
 
-        Node* n = new Node(id,
-          coords[0],
-          coords[1]);
+        Node* n = new Node(id, coords[0], coords[1]);
 
         StationInfo i("", "");
-        if (!props["station_id"].is_null() || !props["station_label"].is_null()) {
+        if (!props["station_id"].is_null() ||
+            !props["station_label"].is_null()) {
           if (!props["station_id"].is_null()) i.id = props["station_id"];
-          if (!props["station_label"].is_null()) i.name = props["station_label"];
+          if (!props["station_label"].is_null())
+            i.name = props["station_label"];
           n->addStop(i);
         }
 
@@ -97,15 +94,15 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
         }
 
         if (dist(fromN->getPos(), pl.getLine().back()) <
-          dist(fromN->getPos(), pl.getLine().front())) {
-          LOG(WARN) << "Geometry for edge from "
-            << fromN->getId() << " to " << toN->getId() << " seems "
-            << " to have the wrong orientation! This may lead to "
-            << " strange results." << std::endl;
+            dist(fromN->getPos(), pl.getLine().front())) {
+          LOG(WARN) << "Geometry for edge from " << fromN->getId() << " to "
+                    << toN->getId() << " seems "
+                    << " to have the wrong orientation! This may lead to "
+                    << " strange results." << std::endl;
         }
 
-        Edge* e = g->addEdge(fromN, toN, pl, _cfg->lineWidth,
-          _cfg->lineSpacing);
+        Edge* e =
+            g->addEdge(fromN, toN, pl, _cfg->lineWidth, _cfg->lineSpacing);
 
         for (auto route : props["lines"]) {
           std::string id;
@@ -115,7 +112,8 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
             id = route["label"];
           } else if (!route["color"].is_null()) {
             id = route["color"];
-          } else continue;
+          } else
+            continue;
 
           const Route* r = g->getRoute(id);
           if (!r) {
@@ -150,12 +148,11 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
             e->addRoute(r, dir);
           }
         }
-
       }
     }
 
-
-    // third pass, exceptions (TODO: do this in the first part, store in some data strcuture,
+    // third pass, exceptions (TODO: do this in the first part, store in some
+    // data strcuture,
     //  add here!)
     for (auto feature : j["features"]) {
       auto props = feature["properties"];
@@ -177,8 +174,8 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
             if (!r) {
               LOG(WARN) << "line connection exclude defined in node " << id
-                << " for line " << rid
-                << ", but no such line exists." << std::endl;
+                        << " for line " << rid << ", but no such line exists."
+                        << std::endl;
               continue;
             }
 
@@ -187,15 +184,15 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
             if (!n1) {
               LOG(WARN) << "line connection exclude defined in node " << id
-                << " for edge from " << nid1
-                << ", but no such node exists." << std::endl;
+                        << " for edge from " << nid1
+                        << ", but no such node exists." << std::endl;
               continue;
             }
 
             if (!n2) {
               LOG(WARN) << "line connection exclude defined in node " << id
-                << " for edge from " << nid2
-                << ", but no such node exists." << std::endl;
+                        << " for edge from " << nid2
+                        << ", but no such node exists." << std::endl;
               continue;
             }
 
@@ -204,15 +201,15 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
             if (!a) {
               LOG(WARN) << "line connection exclude defined in node " << id
-                << " for edge from " << nid1
-                << ", but no such edge exists." << std::endl;
+                        << " for edge from " << nid1
+                        << ", but no such edge exists." << std::endl;
               continue;
             }
 
             if (!b) {
               LOG(WARN) << "line connection exclude defined in node " << id
-                << " for edge from " << nid2
-                << ", but no such edge exists." << std::endl;
+                        << " for edge from " << nid2
+                        << ", but no such edge exists." << std::endl;
               continue;
             }
 
@@ -247,7 +244,7 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
 
       if (e->getTo() == n) {
         pl = e->getGeom().getOrthoLineAtDist(e->getGeom().getLength(),
-            e->getTotalWidth());
+                                             e->getTotalWidth());
       } else {
         pl = e->getGeom().getOrthoLineAtDist(0, e->getTotalWidth());
         pl.reverse();
@@ -277,8 +274,7 @@ void GraphBuilder::expandOverlappinFronts(TransitGraph* g) {
         stillFree = true;
         if (f->edge->getTo() == n) {
           f->geom = f->edge->getGeom().getOrthoLineAtDist(
-              f->edge->getGeom().getLength() - step,
-              f->edge->getTotalWidth());
+              f->edge->getGeom().getLength() - step, f->edge->getTotalWidth());
         } else {
           f->geom = f->edge->getGeom().getOrthoLineAtDist(
               step, f->edge->getTotalWidth());
@@ -347,12 +343,12 @@ void GraphBuilder::createMetaNodes(TransitGraph* g) {
       ref->addMainDir(onf);
       ref->addEdge(onf.edge);
     }
-
   }
 }
 
 // _____________________________________________________________________________
-std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(TransitGraph* g) const {
+std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(
+    TransitGraph* g) const {
   for (auto n : *g->getNodes()) {
     if (n->getStops().size()) continue;
     std::cout << "Checking " << n->getId() << std::endl;
@@ -392,7 +388,6 @@ std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(TransitGraph* g) const 
     for (const Node* n : potClique) {
       std::cout << n->getId() << std::endl;
     }
-
 
     if (isClique(potClique)) {
       std::vector<NodeFront> ret;
@@ -457,8 +452,8 @@ std::vector<NodeFront> GraphBuilder::getClosedNodeFronts(const Node* n) const {
 }
 
 // _____________________________________________________________________________
-std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(const Node* n)
-const {
+std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
+    const Node* n) const {
   std::set<NodeFront*> ret;
   double minLength = 1;
 
@@ -470,14 +465,16 @@ const {
 
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
 
-      if ((n->getStops().size() > 0 && fa.geom.distTo(fb.geom) < (fa.edge->getSpacing() + fb.edge->getSpacing()) / 8) ||
+      if ((n->getStops().size() > 0 &&
+           fa.geom.distTo(fb.geom) <
+               (fa.edge->getSpacing() + fb.edge->getSpacing()) / 8) ||
           (n->getStops().size() == 0 && nodeFrontsOverlap(fa, fb))) {
         if (fa.edge->getGeom().getLength() > minLength &&
-            fa.geom.distTo(n->getPos()) < 2*n->getMaxNodeFrontWidth()) {
+            fa.geom.distTo(n->getPos()) < 2 * n->getMaxNodeFrontWidth()) {
           ret.insert(const_cast<NodeFront*>(&fa));
         }
         if (fb.edge->getGeom().getLength() > minLength &&
-            fb.geom.distTo(n->getPos()) < 2*n->getMaxNodeFrontWidth()) {
+            fb.geom.distTo(n->getPos()) < 2 * n->getMaxNodeFrontWidth()) {
           ret.insert(const_cast<NodeFront*>(&fb));
         }
       }
@@ -489,8 +486,8 @@ const {
 
 // _____________________________________________________________________________
 bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
-    const NodeFront& b) const {
-  size_t numShr= a.edge->getSharedRoutes(*b.edge).size();
+                                     const NodeFront& b) const {
+  size_t numShr = a.edge->getSharedRoutes(*b.edge).size();
 
   Point aa = a.geom.getLine().front();
   Point ab = a.geom.getLine().back();
@@ -502,8 +499,12 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
 
   Point i = intersection(aa, ab, ba, bb);
 
-  if (numShr && a.geom.distTo(i) < (a.edge->getWidth() + a.edge->getSpacing())) return true;
-  if (b.geom.distTo(a.geom) < fmax((b.edge->getWidth() + b.edge->getSpacing()) * 3, (b.edge->getTotalWidth() + a.edge->getTotalWidth())/4)) return true;
+  if (numShr && a.geom.distTo(i) < (a.edge->getWidth() + a.edge->getSpacing()))
+    return true;
+  if (b.geom.distTo(a.geom) <
+      fmax((b.edge->getWidth() + b.edge->getSpacing()) * 3,
+           (b.edge->getTotalWidth() + a.edge->getTotalWidth()) / 4))
+    return true;
 
   return false;
 }
@@ -512,17 +513,19 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
 void GraphBuilder::freeNodeFront(NodeFront* f) {
   PolyLine cutLine = f->geom;
 
-  std::set<PointOnLine, PointOnLineCmp> iSects =
+  std::set<LinePoint, LinePointCmp> iSects =
       cutLine.getIntersections(f->edge->getGeom());
   if (iSects.size() > 0) {
     if (f->edge->getTo() != f->n) {
       // cut at beginning
-      f->edge->setGeom(f->edge->getGeom().getSegment(iSects.begin()->totalPos, 1));
+      f->edge->setGeom(
+          f->edge->getGeom().getSegment(iSects.begin()->totalPos, 1));
       assert(cutLine.distTo(f->edge->getGeom().getLine().front()) < 0.1);
 
     } else {
       // cut at end
-      f->edge->setGeom(f->edge->getGeom().getSegment(0, (--iSects.end())->totalPos));
+      f->edge->setGeom(
+          f->edge->getGeom().getSegment(0, (--iSects.end())->totalPos));
       assert(cutLine.distTo(f->edge->getGeom().getLine().back()) < 0.1);
     }
   }
