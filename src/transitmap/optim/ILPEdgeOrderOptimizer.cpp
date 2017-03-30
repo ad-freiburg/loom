@@ -30,7 +30,6 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
             auto r = (*etgp.etg->getTripsUnordered())[p];
 
             // check if this route (r) switch from 0 to 1 at tp-1 and tp
-
             double valPrev = 0;
             std::stringstream varName;
 

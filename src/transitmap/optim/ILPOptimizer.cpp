@@ -63,77 +63,6 @@ double ILPOptimizer::getConstraintCoeff(glp_prob* lp, size_t constraint,
   return 0;
 }
 
-// _____________________________________________________________________________
-bool ILPOptimizer::printHumanReadable(glp_prob* lp,
-                                      const std::string& path) const {
-  double maxDblDst = 0.000001;
-  std::ofstream myfile;
-  myfile.open(path);
-  if (!myfile) return false;
-
-  // get objective function
-  std::stringstream obj;
-
-  for (size_t i = 0; i < glp_get_num_cols(lp) - 1; ++i) {
-    std::string colName = i > 0 ? glp_get_col_name(lp, i) : "";
-    double coef = glp_get_obj_coef(lp, i);
-    if (fabs(coef) > maxDblDst) {
-      if (coef > maxDblDst && obj.str().size() > 0)
-        obj << " + ";
-      else if (coef < 0 && obj.str().size() > 0)
-        obj << " - ";
-      if (fabs(fabs(coef) - 1) > maxDblDst) {
-        obj << (obj.str().size() > 0 ? fabs(coef) : coef) << " ";
-      }
-      obj << colName;
-    }
-  }
-
-  if (glp_get_obj_dir(lp) == GLP_MIN) {
-    myfile << "min ";
-  } else {
-    myfile << "max ";
-  }
-  myfile << obj.str() << std::endl;
-
-  for (size_t j = 1; j < glp_get_num_rows(lp) - 1; ++j) {
-    std::stringstream row;
-    for (size_t i = 1; i < glp_get_num_cols(lp) - 1; ++i) {
-      std::string colName = glp_get_col_name(lp, i);
-      double coef = getConstraintCoeff(lp, j, i);
-      if (fabs(coef) > maxDblDst) {
-        if (coef > maxDblDst && row.str().size() > 0)
-          row << " + ";
-        else if (coef < 0 && row.str().size() > 0)
-          row << " - ";
-        if (fabs(fabs(coef) - 1) > maxDblDst) {
-          row << (row.str().size() > 0 ? fabs(coef) : coef) << " ";
-        }
-        row << colName;
-      }
-    }
-
-    switch (glp_get_row_type(lp, j)) {
-      case GLP_FR:
-        break;
-      case GLP_LO:
-        myfile << std::endl << row.str() << " >= " << glp_get_row_lb(lp, j);
-        break;
-      case GLP_UP:
-        myfile << std::endl << row.str() << " <= " << glp_get_row_ub(lp, j);
-        break;
-      case GLP_DB:
-        myfile << std::endl << row.str() << " >= " << glp_get_row_lb(lp, j);
-        myfile << std::endl << row.str() << " <= " << glp_get_row_ub(lp, j);
-        break;
-      case GLP_FX:
-        myfile << std::endl << row.str() << " = " << glp_get_row_lb(lp, j);
-        break;
-    }
-  }
-
-  myfile.close();
-}
 
 // _____________________________________________________________________________
 void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, Configuration* c,
@@ -607,20 +536,20 @@ void ILPOptimizer::solveProblem(glp_prob* lp) const {
   glp_iocp params;
   glp_init_iocp(&params);
   params.presolve = GLP_ON;
-  // params.tm_lim = 30000;
-  // params.mip_gap = 0.5;
+  params.tm_lim = 30000;
+  params.mip_gap = 0.5;
   params.binarize = 1;
-  // params.bt_tech = GLP_BT_BPH;
-  // params.fp_heur = GLP_ON;
-  // params.ps_heur = GLP_ON;
-  params.ps_tm_lim = 120000;
+  params.bt_tech = GLP_BT_BPH;
+  params.fp_heur = GLP_ON;
+  params.ps_heur = GLP_ON;
+  params.ps_tm_lim = 12000;
 
   glp_intopt(lp, &params);
 }
 
 // _____________________________________________________________________________
 bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
-                           PosComPair postcomb) const {
+                           PosComPair poscomb) const {
   bool otherWayA = (segmentA->from != node) ^ segmentA->etgs.front().dir;
   bool otherWayB = (segmentB->from != node) ^ segmentB->etgs.front().dir;
 
@@ -628,15 +557,36 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
   size_t cardB = segmentB->etgs.front().etg->getCardinality();
 
   size_t posAinA =
-      otherWayA ? cardA - 1 - postcomb.first.first : postcomb.first.first;
+      otherWayA ? cardA - 1 - poscomb.first.first : poscomb.first.first;
   size_t posAinB =
-      otherWayB ? cardB - 1 - postcomb.first.second : postcomb.first.second;
+      otherWayB ? cardB - 1 - poscomb.first.second : poscomb.first.second;
   size_t posBinA =
-      otherWayA ? cardA - 1 - postcomb.second.first : postcomb.second.first;
+      otherWayA ? cardA - 1 - poscomb.second.first : poscomb.second.first;
   size_t posBinB =
-      otherWayB ? cardB - 1 - postcomb.second.second : postcomb.second.second;
+      otherWayB ? cardB - 1 - poscomb.second.second : poscomb.second.second;
 
-  bool pCrossing = (posAinA < posBinA && posAinB < posBinB);
+  bool pCrossing = false;
+
+  Point aInA = getPos(node, segmentA, posAinA);
+  Point bInA = getPos(node, segmentA, posBinA);
+  Point aInB = getPos(node, segmentB, posAinB);
+  Point bInB = getPos(node, segmentB, posBinB);
+
+  Line a;
+  a.push_back(aInA);
+  a.push_back(aInB);
+
+  Line b;
+  b.push_back(bInA);
+  b.push_back(bInB);
+
+  if (pbutil::geo::intersects(aInA, aInB, bInA, bInB) ||
+      bgeo::distance(a, b) < 1)
+    pCrossing = true;
+
+
+  // pCrossing = (posAinA < posBinA && posAinB < posBinB);
+
 
   return pCrossing;
 }
@@ -668,7 +618,7 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
       size_t posBinC = otherWayC ? cardC - 1 - j : j;
 
       Point aInB = getPos(node, segments.first, posAinB);
-      Point bInB = getPos(node, segments.second, posBinC);
+      Point bInC = getPos(node, segments.second, posBinC);
 
       Line a;
       a.push_back(aInA);
@@ -676,9 +626,9 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
 
       Line b;
       b.push_back(bInA);
-      b.push_back(bInB);
+      b.push_back(bInC);
 
-      if (pbutil::geo::intersects(aInA, aInB, bInA, bInA) ||
+      if (pbutil::geo::intersects(aInA, aInB, bInA, bInC) ||
           bgeo::distance(a, b) < 1)
         return true;
     }
@@ -701,4 +651,76 @@ Point ILPOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) const {
   assert(nf);
 
   return nf->getTripPos(segment->etgs.front().etg, p, false);
+}
+
+// _____________________________________________________________________________
+bool ILPOptimizer::printHumanReadable(glp_prob* lp,
+                                      const std::string& path) const {
+  double maxDblDst = 0.000001;
+  std::ofstream myfile;
+  myfile.open(path);
+  if (!myfile) return false;
+
+  // get objective function
+  std::stringstream obj;
+
+  for (size_t i = 0; i < glp_get_num_cols(lp) - 1; ++i) {
+    std::string colName = i > 0 ? glp_get_col_name(lp, i) : "";
+    double coef = glp_get_obj_coef(lp, i);
+    if (fabs(coef) > maxDblDst) {
+      if (coef > maxDblDst && obj.str().size() > 0)
+        obj << " + ";
+      else if (coef < 0 && obj.str().size() > 0)
+        obj << " - ";
+      if (fabs(fabs(coef) - 1) > maxDblDst) {
+        obj << (obj.str().size() > 0 ? fabs(coef) : coef) << " ";
+      }
+      obj << colName;
+    }
+  }
+
+  if (glp_get_obj_dir(lp) == GLP_MIN) {
+    myfile << "min ";
+  } else {
+    myfile << "max ";
+  }
+  myfile << obj.str() << std::endl;
+
+  for (size_t j = 1; j < glp_get_num_rows(lp) - 1; ++j) {
+    std::stringstream row;
+    for (size_t i = 1; i < glp_get_num_cols(lp) - 1; ++i) {
+      std::string colName = glp_get_col_name(lp, i);
+      double coef = getConstraintCoeff(lp, j, i);
+      if (fabs(coef) > maxDblDst) {
+        if (coef > maxDblDst && row.str().size() > 0)
+          row << " + ";
+        else if (coef < 0 && row.str().size() > 0)
+          row << " - ";
+        if (fabs(fabs(coef) - 1) > maxDblDst) {
+          row << (row.str().size() > 0 ? fabs(coef) : coef) << " ";
+        }
+        row << colName;
+      }
+    }
+
+    switch (glp_get_row_type(lp, j)) {
+      case GLP_FR:
+        break;
+      case GLP_LO:
+        myfile << std::endl << row.str() << " >= " << glp_get_row_lb(lp, j);
+        break;
+      case GLP_UP:
+        myfile << std::endl << row.str() << " <= " << glp_get_row_ub(lp, j);
+        break;
+      case GLP_DB:
+        myfile << std::endl << row.str() << " >= " << glp_get_row_lb(lp, j);
+        myfile << std::endl << row.str() << " <= " << glp_get_row_ub(lp, j);
+        break;
+      case GLP_FX:
+        myfile << std::endl << row.str() << " = " << glp_get_row_lb(lp, j);
+        break;
+    }
+  }
+
+  myfile.close();
 }

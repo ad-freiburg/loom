@@ -1,0 +1,7 @@
+TODOS Thur, March 30th
+======================
+
+1.) Add variable adding routing, dont use ugly arrays
+2.) Fix baseline ILP
+3.) Transform hill climber into new interface
+4.) REFACTOR
