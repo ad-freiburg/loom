@@ -38,11 +38,11 @@ class ILPEdgeOrderOptimizer : public ILPOptimizer {
   virtual void getConfigurationFromSolution(glp_prob* lp, Configuration* c,
                                             const OptGraph& g) const;
 
-  void writeCrossingOracle(const OptGraph& g, int* ia, int* ja, double* res,
-                           size_t* c, glp_prob* lp) const;
+  void writeCrossingOracle(const OptGraph& g, VariableMatrix* vm,
+                           glp_prob* lp) const;
 
-  void writeDiffSegConstraintsImpr(const OptGraph& g, int* ia, int* ja,
-                                   double* res, size_t* c, glp_prob* lp) const;
+  void writeDiffSegConstraintsImpr(const OptGraph& g, VariableMatrix* vm,
+                                   glp_prob* lp) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

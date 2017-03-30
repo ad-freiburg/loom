@@ -63,7 +63,6 @@ double ILPOptimizer::getConstraintCoeff(glp_prob* lp, size_t constraint,
   return 0;
 }
 
-
 // _____________________________________________________________________________
 void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, Configuration* c,
                                                 const OptGraph& g) const {
@@ -109,12 +108,7 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
   glp_set_prob_name(lp, "edgeorder");
   glp_set_obj_dir(lp, GLP_MIN);
 
-  size_t c = 0;
-
-  // TODO: array sizes
-  int* ia = new int[1000000];
-  int* ja = new int[1000000];
-  double* res = new double[1000000];
+  VariableMatrix vm;
 
   // for every segment s, we define |L(s)|^2 decision variables x_slp
   for (OptNode* n : g.getNodes()) {
@@ -154,17 +148,9 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
 
           // binary variable € {0,1}
           glp_set_col_kind(lp, curCol, GLP_BV);
-          c++;
 
-          ia[c] = row;
-          ja[c] = curCol;
-          res[c] = 1;
-
-          c++;
-
-          ia[c] = rowA + p;
-          ja[c] = curCol;
-          res[c] = 1;
+          vm.addVar(row, curCol, 1);
+          vm.addVar(rowA + p, curCol, 1);
 
           i++;
         }
@@ -174,10 +160,15 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
 
   glp_create_index(lp);
 
-  writeSameSegConstraints(g, ia, ja, res, &c, lp);
-  writeDiffSegConstraints(g, ia, ja, res, &c, lp);
+  writeSameSegConstraints(g, &vm, lp);
+  writeDiffSegConstraints(g, &vm, lp);
 
-  glp_load_matrix(lp, c, ia, ja, res);
+  int* ia = 0;
+  int* ja = 0;
+  double* res = 0;
+  vm.getGLPKArrs(&ia, &ja, &res);
+
+  glp_load_matrix(lp, vm.getNumVars(), ia, ja, res);
 
   delete[](ia);
   delete[](ja);
@@ -187,8 +178,8 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
 }
 
 // _____________________________________________________________________________
-void ILPOptimizer::writeSameSegConstraints(const OptGraph& g, int* ia, int* ja,
-                                           double* res, size_t* c,
+void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
+                                           VariableMatrix* vm,
                                            glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
   for (OptNode* node : g.getNodes()) {
@@ -252,30 +243,11 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g, int* ia, int* ja,
               glp_set_row_name(lp, row, ss.str().c_str());
               glp_set_row_bnds(lp, row, GLP_UP, 0, 3);
 
-              (*c)++;
-              ia[*c] = row;
-              ja[*c] = lineAinAatP;
-              res[*c] = 1;
-
-              (*c)++;
-              ia[*c] = row;
-              ja[*c] = lineBinAatP;
-              res[*c] = 1;
-
-              (*c)++;
-              ia[*c] = row;
-              ja[*c] = lineAinBatP;
-              res[*c] = 1;
-
-              (*c)++;
-              ia[*c] = row;
-              ja[*c] = lineBinBatP;
-              res[*c] = 1;
-
-              (*c)++;
-              ia[*c] = row;
-              ja[*c] = decisionVar;
-              res[*c] = -1;
+              vm->addVar(row, lineAinAatP, 1);
+              vm->addVar(row, lineBinAatP, 1);
+              vm->addVar(row, lineAinBatP, 1);
+              vm->addVar(row, lineBinBatP, 1);
+              vm->addVar(row, decisionVar, -1);
             }
           }
         }
@@ -285,8 +257,8 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g, int* ia, int* ja,
 }
 
 // _____________________________________________________________________________
-void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g, int* ia, int* ja,
-                                           double* res, size_t* c,
+void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
+                                           VariableMatrix* vm,
                                            glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
   for (OptNode* node : g.getNodes()) {
@@ -335,20 +307,9 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g, int* ia, int* ja,
               glp_set_row_name(lp, row, ss.str().c_str());
               glp_set_row_bnds(lp, row, GLP_UP, 0, 1);
 
-              (*c)++;
-              ia[*c] = row;
-              ja[*c] = lineAinAatP;
-              res[*c] = 1;
-
-              (*c)++;
-              ia[*c] = row;
-              ja[*c] = lineBinAatP;
-              res[*c] = 1;
-
-              (*c)++;
-              ia[*c] = row;
-              ja[*c] = decisionVar;
-              res[*c] = -1;
+              vm->addVar(row, lineAinAatP, 1);
+              vm->addVar(row, lineBinAatP, 1);
+              vm->addVar(row, decisionVar, -1);
             }
           }
         }
@@ -584,9 +545,7 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
       bgeo::distance(a, b) < 1)
     pCrossing = true;
 
-
   // pCrossing = (posAinA < posBinA && posAinB < posBinB);
-
 
   return pCrossing;
 }
@@ -723,4 +682,28 @@ bool ILPOptimizer::printHumanReadable(glp_prob* lp,
   }
 
   myfile.close();
+}
+
+// _____________________________________________________________________________
+void VariableMatrix::addVar(int row, int col, double val) {
+  rowNum.push_back(row);
+  colNum.push_back(col);
+  vals.push_back(val);
+}
+
+// _____________________________________________________________________________
+void VariableMatrix::getGLPKArrs(int** ia, int** ja, double** r) const {
+  assert(rowNum.size() == colNum.size());
+  assert(colNum.size() == vals.size());
+
+  *ia = new int[rowNum.size() + 1];
+  *ja = new int[rowNum.size() + 1];
+  *r = new double[rowNum.size() + 1];
+
+  // glpk arrays always start at 1 for some reason
+  for (size_t i = 1; i <= rowNum.size(); ++i) {
+    (*ia)[i] = rowNum[i - 1];
+    (*ja)[i] = colNum[i - 1];
+    (*r)[i] = vals[i - 1];
+  }
 }

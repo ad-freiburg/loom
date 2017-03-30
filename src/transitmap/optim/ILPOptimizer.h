@@ -26,10 +26,19 @@ typedef std::pair<size_t, size_t> PosCom;
 typedef std::pair<PosCom, PosCom> PosComPair;
 typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
+struct VariableMatrix {
+  std::vector<int> rowNum;
+  std::vector<int> colNum;
+  std::vector<double> vals;
+
+  void addVar(int row, int col, double val);
+  void getGLPKArrs(int** ia, int** ja, double** r) const;
+  size_t getNumVars() const { return vals.size(); }
+};
+
 class ILPOptimizer : public Optimizer {
  public:
-  ILPOptimizer(TransitGraph* g, const config::Config* cfg)
-      : _g(g), _cfg(cfg){};
+  ILPOptimizer(TransitGraph* g, const config::Config* cfg) : _g(g), _cfg(cfg){};
 
   int optimize() const;
 
@@ -42,15 +51,15 @@ class ILPOptimizer : public Optimizer {
   void solveProblem(glp_prob* lp) const;
 
   virtual void getConfigurationFromSolution(glp_prob* lp, Configuration* c,
-                                    const OptGraph& g) const;
+                                            const OptGraph& g) const;
 
   std::string getILPVarName(OptEdge* e, const Route* r, size_t p) const;
 
-  void writeSameSegConstraints(const OptGraph& g, int* ia, int* ja, double* res,
-                               size_t* c, glp_prob* lp) const;
+  void writeSameSegConstraints(const OptGraph& g, VariableMatrix* vm,
+                               glp_prob* lp) const;
 
-  void writeDiffSegConstraints(const OptGraph& g, int* ia, int* ja, double* res,
-                               size_t* c, glp_prob* lp) const;
+  void writeDiffSegConstraints(const OptGraph& g, VariableMatrix* vm,
+                               glp_prob* lp) const;
 
   bool printHumanReadable(glp_prob* lp, const std::string& path) const;
   double getConstraintCoeff(glp_prob* lp, size_t constraint, size_t col) const;
