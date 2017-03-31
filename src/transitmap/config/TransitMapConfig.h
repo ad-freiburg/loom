@@ -26,6 +26,8 @@ struct Config {
   double inputSmoothing;
   double innerGeometryPrecision;
 
+  double inStationCrossPenalty;
+
   double outlineWidth;
   std::string outlineColor;
 

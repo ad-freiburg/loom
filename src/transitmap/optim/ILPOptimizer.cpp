@@ -50,13 +50,24 @@ int ILPOptimizer::optimize() const {
 }
 
 // _____________________________________________________________________________
-double ILPOptimizer::getConstraintCoeff(glp_prob* lp, size_t constraint,
-                                        size_t col) const {
+double ILPOptimizer::getCrossingPenalty(const OptNode* n, double coef) const {
+  coef *= n->adjList.size();
+
+  if (n->node->getStops().size() > 0) {
+    return _cfg->inStationCrossPenalty * coef;
+  }
+
+  return coef;
+}
+
+// _____________________________________________________________________________
+double ILPOptimizer::getConstraintCoeff(glp_prob* lp, int constraint,
+                                        int col) const {
   int indices[glp_get_num_cols(lp)];
   double values[glp_get_num_cols(lp)];
   glp_get_mat_col(lp, col, indices, values);
 
-  for (size_t i = 1; i < glp_get_num_cols(lp); i++) {
+  for (int i = 1; i < glp_get_num_cols(lp); i++) {
     if (indices[i] == constraint) return values[i];
   }
 
@@ -205,7 +216,7 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
              << linepair.second->id << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
-          glp_set_obj_coef(lp, decisionVar, 1);
+          glp_set_obj_coef(lp, decisionVar, getCrossingPenalty(node, 2));
 
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
@@ -283,7 +294,7 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
              << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
-          glp_set_obj_coef(lp, decisionVar, 1);
+          glp_set_obj_coef(lp, decisionVar, getCrossingPenalty(node, 1));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
             if (crosses(node, segmentA, segments, poscomb)) {

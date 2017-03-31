@@ -89,6 +89,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->innerGeometryPrecision))
       ->default_value(3),
       "rendering precision of inner node geometries")
+    ("in-station-cross-penalty-factor",
+      opts::value<double>(&(cfg->inStationCrossPenalty))
+      ->default_value(3),
+      "penalty factor during optimization for crossings that occur in stations")
   ;
 
   opts::options_description cmdlineOptions;

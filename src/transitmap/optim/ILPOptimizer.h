@@ -62,7 +62,7 @@ class ILPOptimizer : public Optimizer {
                                glp_prob* lp) const;
 
   bool printHumanReadable(glp_prob* lp, const std::string& path) const;
-  double getConstraintCoeff(glp_prob* lp, size_t constraint, size_t col) const;
+  double getConstraintCoeff(glp_prob* lp, int constraint, int col) const;
 
   std::vector<LinePair> getLinePairs(OptEdge* segment) const;
   std::vector<OptEdge*> getEdgePartners(OptNode* node, OptEdge* segmentA,
@@ -77,6 +77,8 @@ class ILPOptimizer : public Optimizer {
 
   bool crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
                PosCom postcomb) const;
+
+  double getCrossingPenalty(const OptNode* n, double coef) const;
 
   Point getPos(OptNode* n, OptEdge* segment, size_t p) const;
 };
