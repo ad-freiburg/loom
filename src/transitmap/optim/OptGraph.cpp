@@ -26,6 +26,24 @@ EtgPart OptEdge::getLastEdge() const {
 }
 
 // _____________________________________________________________________________
+std::string OptEdge::getStrRepr() const {
+  const void* address = static_cast<const void*>(this);
+  std::stringstream ss;
+  ss << address;
+
+  return ss.str();
+}
+
+// _____________________________________________________________________________
+graph::Edge* OptEdge::getAdjacentEdge(const OptNode* n) const {
+  if (from == n) {
+    return getFirstEdge().etg;
+  } else {
+    return getLastEdge().etg;
+  }
+}
+
+// _____________________________________________________________________________
 OptGraph::OptGraph(TransitGraph* toOptim) : _g(toOptim) {
   build();
 }

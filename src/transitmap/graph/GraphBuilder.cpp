@@ -351,8 +351,6 @@ std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(
     TransitGraph* g) const {
   for (auto n : *g->getNodes()) {
     if (n->getStops().size()) continue;
-    std::cout << "Checking " << n->getId() << std::endl;
-    std::cout << getOpenNodeFronts(n).size() << std::endl;
     if (getOpenNodeFronts(n).size() != 1) continue;
 
     std::set<const Node*> potClique;
@@ -382,11 +380,6 @@ std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(
           }
         }
       }
-    }
-
-    std::cout << "Checking clique" << std::endl;
-    for (const Node* n : potClique) {
-      std::cout << n->getId() << std::endl;
     }
 
     if (isClique(potClique)) {

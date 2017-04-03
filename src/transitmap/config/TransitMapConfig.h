@@ -34,6 +34,11 @@ struct Config {
   bool renderStations;
   bool renderNodeFronts;
   bool renderStationNames;
+
+  bool useGlpkFeasibilityPump;
+  bool useGlpkProximSearch;
+  int glpkPSTimeLimit;
+  int glpkTimeLimit;
 };
 
 }  // namespace config

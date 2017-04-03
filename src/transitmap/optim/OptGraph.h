@@ -5,11 +5,11 @@
 #ifndef TRANSITMAP_GRAPH_OPTIM_OPTGRAPH_H_
 #define TRANSITMAP_GRAPH_OPTIM_OPTGRAPH_H_
 
-#include <string>
 #include <set>
+#include <string>
 
-#include "./../graph/TransitGraph.h"
 #include "./../graph/Edge.h"
+#include "./../graph/TransitGraph.h"
 
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
@@ -24,7 +24,7 @@ struct EtgPart {
   Edge* etg;
   bool dir;
 
-  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir) {};
+  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir){};
 };
 
 struct OptEdge {
@@ -32,18 +32,14 @@ struct OptEdge {
 
   OptNode* from;
   OptNode* to;
-  OptEdge(OptNode* from, OptNode* to) : from(from), to(to) {};
+  OptEdge(OptNode* from, OptNode* to) : from(from), to(to){};
 
   EtgPart getFirstEdge() const;
   EtgPart getLastEdge() const;
 
-  std::string getStrRepr() const {
-    const void* address = static_cast<const void*>(this);
-    std::stringstream ss;
-    ss << address;
+  std::string getStrRepr() const;
 
-    return ss.str();
-  }
+  graph::Edge* getAdjacentEdge(const OptNode* n) const;
 };
 
 struct OptNode {
@@ -53,7 +49,7 @@ struct OptNode {
   std::set<OptEdge*> adjListOut;
   std::set<OptEdge*> adjList;
 
-  OptNode(const Node* node) : node(node) {};
+  OptNode(const Node* node) : node(node){};
 
   void addEdge(OptEdge* e) {
     adjList.insert(e);
@@ -75,6 +71,7 @@ class OptGraph {
   const std::set<OptNode*>& getNodes() const;
 
   void simplify();
+
  private:
   TransitGraph* _g;
   std::set<OptNode*> _nodes;
@@ -87,7 +84,7 @@ class OptGraph {
 
   bool simplifyStep();
 };
-
-}}
+}
+}
 
 #endif  // TRANSITMAP_GRAPH_TRANSITGRAPH_H_

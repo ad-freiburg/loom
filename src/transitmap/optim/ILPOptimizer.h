@@ -26,6 +26,13 @@ typedef std::pair<size_t, size_t> PosCom;
 typedef std::pair<PosCom, PosCom> PosComPair;
 typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
+// multiplier used for crossing penalty in crossings that occur between
+// only two segments (where the crossing occurs in the "same" segment)
+static const double CR_PEN_MULTIPLIER_SAMESEG = 2;
+// multiplier used for crossing penalty in crossings that occur between
+// three segments
+static const double CR_PEN_MULTIPLIER_DIFFSEG = 1;
+
 struct VariableMatrix {
   std::vector<int> rowNum;
   std::vector<int> colNum;
@@ -65,6 +72,11 @@ class ILPOptimizer : public Optimizer {
   double getConstraintCoeff(glp_prob* lp, int constraint, int col) const;
 
   std::vector<LinePair> getLinePairs(OptEdge* segment) const;
+
+  /*
+   * For a node A, and edge e and a pair or routes return all the
+   * edges != e where the route-pair continues
+   */
   std::vector<OptEdge*> getEdgePartners(OptNode* node, OptEdge* segmentA,
                                         const LinePair& linepair) const;
   std::vector<EdgePair> getEdgePartnerPairs(OptNode* node, OptEdge* segmentA,
@@ -82,7 +94,7 @@ class ILPOptimizer : public Optimizer {
 
   Point getPos(OptNode* n, OptEdge* segment, size_t p) const;
 };
-}
-}
+}  // namespace optim
+}  // namespace transitmapper
 
 #endif  // TRANSITMAP_OPTIM_ILPOPTIMIZER_H_

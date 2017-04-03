@@ -268,7 +268,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
-          glp_set_obj_coef(lp, decisionVar, getCrossingPenalty(node, 2));
+          glp_set_obj_coef(lp, decisionVar,
+                           getCrossingPenalty(node, CR_PEN_MULTIPLIER_SAMESEG));
 
           size_t aSmallerBinL1 = 0;
           size_t aSmallerBinL2 = 0;
@@ -361,7 +362,8 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
-          glp_set_obj_coef(lp, decisionVar, getCrossingPenalty(node, 1));
+          glp_set_obj_coef(lp, decisionVar,
+                           getCrossingPenalty(node, CR_PEN_MULTIPLIER_DIFFSEG));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
             if (crosses(node, segmentA, segments, poscomb)) {

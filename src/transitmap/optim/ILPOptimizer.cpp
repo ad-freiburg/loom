@@ -87,11 +87,9 @@ void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, Configuration* c,
           bool found = false;
           for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
             auto r = (*etgp.etg->getTripsUnordered())[p];
-            std::stringstream varName;
-            varName << "x_(" << e->getStrRepr() << ",l=" << r.route
-                    << ",p=" << tp << ")";
+            std::string varName = getILPVarName(e, r.route, tp);
 
-            size_t i = glp_find_col(lp, varName.str().c_str());
+            size_t i = glp_find_col(lp, varName.c_str());
             assert(i > 0);
             double val = glp_mip_col_val(lp, i);
 
@@ -151,11 +149,9 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
         glp_set_row_bnds(lp, row, GLP_FX, 1, 1);
 
         for (size_t p = 0; p < etg->getCardinality(); p++) {
-          std::stringstream varName;
-          varName << "x_(" << e->getStrRepr() << ",l=" << r.route << ",p=" << p
-                  << ")";
+          std::string varName = getILPVarName(e, r.route, p);
           size_t curCol = cols + i;
-          glp_set_col_name(lp, curCol, varName.str().c_str());
+          glp_set_col_name(lp, curCol, varName.c_str());
 
           // binary variable € {0,1}
           glp_set_col_kind(lp, curCol, GLP_BV);
@@ -216,7 +212,8 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
              << linepair.second->id << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
-          glp_set_obj_coef(lp, decisionVar, getCrossingPenalty(node, 2));
+          glp_set_obj_coef(lp, decisionVar,
+                           getCrossingPenalty(node, CR_PEN_MULTIPLIER_SAMESEG));
 
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
@@ -294,7 +291,8 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
              << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
-          glp_set_obj_coef(lp, decisionVar, getCrossingPenalty(node, 1));
+          glp_set_obj_coef(lp, decisionVar,
+                           getCrossingPenalty(node, CR_PEN_MULTIPLIER_DIFFSEG));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
             if (crosses(node, segmentA, segments, poscomb)) {
@@ -384,40 +382,17 @@ std::vector<OptEdge*> ILPOptimizer::getEdgePartners(
     OptNode* node, OptEdge* segmentA, const LinePair& linepair) const {
   std::vector<OptEdge*> ret;
 
-  const Node* routeDirA = 0;
-  const Node* routeDirB = 0;
-
-  graph::Edge* fromEtg = 0;
-
-  // outfactor (see below)
-  if (segmentA->from == node) {
-    fromEtg = segmentA->getFirstEdge().etg;
-  } else {
-    fromEtg = segmentA->getLastEdge().etg;
-  }
-
-  routeDirA = fromEtg->getTripsForRoute(linepair.first)->direction;
-  routeDirB = fromEtg->getTripsForRoute(linepair.second)->direction;
-  //
+  graph::Edge* fromEtg = segmentA->getAdjacentEdge(node);
+  const Node* dirA = fromEtg->getTripsForRoute(linepair.first)->direction;
+  const Node* dirB = fromEtg->getTripsForRoute(linepair.second)->direction;
 
   for (OptEdge* segmentB : node->adjList) {
     if (segmentB == segmentA) continue;
-    graph::Edge* etg = 0;
-    graph::Edge* fromEtg = 0;
+    graph::Edge* etg = segmentB->getAdjacentEdge(node);
 
-    // outfactor (see below)
-    if (segmentB->from == node) {
-      etg = segmentB->getFirstEdge().etg;
-    } else {
-      etg = segmentB->getLastEdge().etg;
-    }
-    //
-
-    if (etg->getContinuedRoutesIn(node->node, linepair.first, routeDirA,
-                                  fromEtg)
+    if (etg->getContinuedRoutesIn(node->node, linepair.first, dirA, fromEtg)
             .size() &&
-        etg->getContinuedRoutesIn(node->node, linepair.second, routeDirB,
-                                  fromEtg)
+        etg->getContinuedRoutesIn(node->node, linepair.second, dirB, fromEtg)
             .size()) {
       ret.push_back(segmentB);
     }
@@ -430,54 +405,23 @@ std::vector<EdgePair> ILPOptimizer::getEdgePartnerPairs(
     OptNode* node, OptEdge* segmentA, const LinePair& linepair) const {
   std::vector<EdgePair> ret;
 
-  const Node* routeDirA = 0;
-  const Node* routeDirB = 0;
-
-  graph::Edge* fromEtg = 0;
-
-  // outfactor (see below)
-  if (segmentA->from == node) {
-    fromEtg = segmentA->getFirstEdge().etg;
-  } else {
-    fromEtg = segmentA->getLastEdge().etg;
-  }
-
-  routeDirA = fromEtg->getTripsForRoute(linepair.first)->direction;
-  routeDirB = fromEtg->getTripsForRoute(linepair.second)->direction;
-  //
+  graph::Edge* fromEtg = segmentA->getAdjacentEdge(node);
+  const Node* dirA = fromEtg->getTripsForRoute(linepair.first)->direction;
+  const Node* dirB = fromEtg->getTripsForRoute(linepair.second)->direction;
 
   for (OptEdge* segmentB : node->adjList) {
     if (segmentB == segmentA) continue;
+    graph::Edge* etg = segmentB->getAdjacentEdge(node);
 
-    graph::Edge* etg = 0;
-
-    // outfactor (see below and above)
-    if (segmentB->from == node) {
-      etg = segmentB->getFirstEdge().etg;
-    } else {
-      etg = segmentB->getLastEdge().etg;
-    }
-    //
-
-    if (etg->getContinuedRoutesIn(node->node, linepair.first, routeDirA,
-                                  fromEtg)
+    if (etg->getContinuedRoutesIn(node->node, linepair.first, dirA, fromEtg)
             .size()) {
       EdgePair curPair;
       curPair.first = segmentB;
       for (OptEdge* segmentC : node->adjList) {
         if (segmentC == segmentA || segmentC == segmentB) continue;
+        graph::Edge* etg = segmentC->getAdjacentEdge(node);
 
-        graph::Edge* etg = 0;
-
-        // outfactor (see above)
-        if (segmentC->from == node) {
-          etg = segmentC->getFirstEdge().etg;
-        } else {
-          etg = segmentC->getLastEdge().etg;
-        }
-        //
-
-        if (etg->getContinuedRoutesIn(node->node, linepair.second, routeDirB,
+        if (etg->getContinuedRoutesIn(node->node, linepair.second, dirB,
                                       fromEtg)
                 .size()) {
           curPair.second = segmentC;
@@ -508,13 +452,13 @@ void ILPOptimizer::solveProblem(glp_prob* lp) const {
   glp_iocp params;
   glp_init_iocp(&params);
   params.presolve = GLP_ON;
-  params.tm_lim = 30000;
   params.mip_gap = 0.5;
   params.binarize = 1;
   params.bt_tech = GLP_BT_BPH;
-  params.fp_heur = GLP_ON;
-  params.ps_heur = GLP_ON;
-  params.ps_tm_lim = 12000;
+  params.fp_heur = _cfg->useGlpkFeasibilityPump ? GLP_ON : GLP_OFF;
+  params.ps_heur = _cfg->useGlpkProximSearch ? GLP_ON : GLP_OFF;
+  params.ps_tm_lim = _cfg->glpkPSTimeLimit;
+  params.tm_lim = _cfg->glpkPSTimeLimit;
 
   glp_intopt(lp, &params);
 }
@@ -627,14 +571,14 @@ Point ILPOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) const {
 bool ILPOptimizer::printHumanReadable(glp_prob* lp,
                                       const std::string& path) const {
   double maxDblDst = 0.000001;
-  std::ofstream myfile;
-  myfile.open(path);
-  if (!myfile) return false;
+  std::ofstream file;
+  file.open(path);
+  if (!file) return false;
 
   // get objective function
   std::stringstream obj;
 
-  for (size_t i = 0; i < glp_get_num_cols(lp) - 1; ++i) {
+  for (int i = 0; i < glp_get_num_cols(lp) - 1; ++i) {
     std::string colName = i > 0 ? glp_get_col_name(lp, i) : "";
     double coef = glp_get_obj_coef(lp, i);
     if (fabs(coef) > maxDblDst) {
@@ -650,15 +594,15 @@ bool ILPOptimizer::printHumanReadable(glp_prob* lp,
   }
 
   if (glp_get_obj_dir(lp) == GLP_MIN) {
-    myfile << "min ";
+    file << "min ";
   } else {
-    myfile << "max ";
+    file << "max ";
   }
-  myfile << obj.str() << std::endl;
+  file << obj.str() << std::endl;
 
-  for (size_t j = 1; j < glp_get_num_rows(lp) - 1; ++j) {
+  for (int j = 1; j < glp_get_num_rows(lp) - 1; ++j) {
     std::stringstream row;
-    for (size_t i = 1; i < glp_get_num_cols(lp) - 1; ++i) {
+    for (int i = 1; i < glp_get_num_cols(lp) - 1; ++i) {
       std::string colName = glp_get_col_name(lp, i);
       double coef = getConstraintCoeff(lp, j, i);
       if (fabs(coef) > maxDblDst) {
@@ -677,22 +621,23 @@ bool ILPOptimizer::printHumanReadable(glp_prob* lp,
       case GLP_FR:
         break;
       case GLP_LO:
-        myfile << std::endl << row.str() << " >= " << glp_get_row_lb(lp, j);
+        file << std::endl << row.str() << " >= " << glp_get_row_lb(lp, j);
         break;
       case GLP_UP:
-        myfile << std::endl << row.str() << " <= " << glp_get_row_ub(lp, j);
+        file << std::endl << row.str() << " <= " << glp_get_row_ub(lp, j);
         break;
       case GLP_DB:
-        myfile << std::endl << row.str() << " >= " << glp_get_row_lb(lp, j);
-        myfile << std::endl << row.str() << " <= " << glp_get_row_ub(lp, j);
+        file << std::endl << row.str() << " >= " << glp_get_row_lb(lp, j);
+        file << std::endl << row.str() << " <= " << glp_get_row_ub(lp, j);
         break;
       case GLP_FX:
-        myfile << std::endl << row.str() << " = " << glp_get_row_lb(lp, j);
+        file << std::endl << row.str() << " = " << glp_get_row_lb(lp, j);
         break;
     }
   }
 
-  myfile.close();
+  file.close();
+  return true;
 }
 
 // _____________________________________________________________________________

@@ -4,9 +4,9 @@
 
 #include <cassert>
 #include <vector>
-#include "pbutil/geo/PolyLine.h"
 #include "Edge.h"
 #include "Node.h"
+#include "pbutil/geo/PolyLine.h"
 
 using namespace transitmapper;
 using namespace graph;
@@ -14,58 +14,43 @@ using namespace graph;
 using pbutil::geo::PolyLine;
 
 // _____________________________________________________________________________
-Edge::Edge(Node* from, Node* to, PolyLine pl, double w,
-    double s) : _from(from), _to(to), _width(w), _spacing(s) {
+Edge::Edge(Node* from, Node* to, PolyLine pl, double w, double s)
+    : _from(from), _to(to), _width(w), _spacing(s) {
   setGeom(pl);
 }
 
 // _____________________________________________________________________________
-Node* Edge::getFrom() const {
-  return _from;
-}
+Node* Edge::getFrom() const { return _from; }
 
 // _____________________________________________________________________________
-Node* Edge::getTo() const {
-  return _to;
-}
+Node* Edge::getTo() const { return _to; }
 
 // _____________________________________________________________________________
-void Edge::setFrom(Node* f) {
-  _from = f;
-}
+void Edge::setFrom(Node* f) { _from = f; }
 
 // _____________________________________________________________________________
-void Edge::setTo(Node* t) {
-  _to = t;
-}
+void Edge::setTo(Node* t) { _to = t; }
 
 // _____________________________________________________________________________
-const std::vector<RouteOccurance>& Edge::getTripsUnordered()
-const {
+const std::vector<RouteOccurance>& Edge::getTripsUnordered() const {
   return _routes;
 }
 
 // _____________________________________________________________________________
-std::vector<RouteOccurance>* Edge::getTripsUnordered() {
-  return &_routes;
-}
+std::vector<RouteOccurance>* Edge::getTripsUnordered() { return &_routes; }
 
 // _____________________________________________________________________________
-std::vector<RouteOccurance> Edge::getContinuedRoutesIn(const Node* n, 
-  const Route* r, const Node* dir, const Edge* fromEdge) const {
-
+std::vector<RouteOccurance> Edge::getContinuedRoutesIn(
+    const Node* n, const Route* r, const Node* dir,
+    const Edge* fromEdge) const {
   std::vector<RouteOccurance> ret;
 
   for (const RouteOccurance& to : _routes) {
     if (to.route == r) {
-      if (to.direction == 0 || dir == 0 ||
-        (to.direction == n && dir != n) ||
-        (to.direction != n && dir == n)) {
-
+      if (to.direction == 0 || dir == 0 || (to.direction == n && dir != n) ||
+          (to.direction != n && dir == n)) {
         if (n->connOccurs(r, fromEdge, this)) {
           ret.push_back(to);
-        } else {
-          std::cout << "test" << std::endl;
         }
       }
     }
@@ -75,17 +60,16 @@ std::vector<RouteOccurance> Edge::getContinuedRoutesIn(const Node* n,
 }
 
 // _____________________________________________________________________________
-std::vector<RouteOccurance> Edge::getSameDirRoutesIn(const Node* n, 
-  const Route* r, const Node* dir, const Edge* fromEdge) const {
-
+std::vector<RouteOccurance> Edge::getSameDirRoutesIn(
+    const Node* n, const Route* r, const Node* dir,
+    const Edge* fromEdge) const {
   std::vector<RouteOccurance> ret;
 
   for (const RouteOccurance& to : _routes) {
     if (to.route == r) {
       if ((to.direction == 0 && dir == 0) ||
-        (to.direction == n && dir != 0 && dir != n) ||
-        (to.direction != n && to.direction != 0 && dir == n)) {
-
+          (to.direction == n && dir != 0 && dir != n) ||
+          (to.direction != n && to.direction != 0 && dir == n)) {
         if (n->connOccurs(r, fromEdge, this)) {
           ret.push_back(to);
         }
@@ -108,13 +92,15 @@ RouteOccurance* Edge::getTripsForRoute(const Route* r) const {
 }
 
 // _____________________________________________________________________________
-RouteOccWithPos Edge::getTripsForRouteUnder(const Route* r,
-    const std::vector<size_t> ordering) const {
+RouteOccWithPos Edge::getTripsForRouteUnder(
+    const Route* r, const std::vector<size_t> ordering) const {
   for (size_t i = 0; i < _routes.size(); i++) {
     const RouteOccurance& to = _routes[i];
     if (to.route == r) {
-      size_t pos = std::find(ordering.begin(), ordering.end(), i) - ordering.begin();
-      return std::pair<RouteOccurance*, size_t>(const_cast<RouteOccurance*>(&to), pos);
+      size_t pos =
+          std::find(ordering.begin(), ordering.end(), i) - ordering.begin();
+      return std::pair<RouteOccurance*, size_t>(
+          const_cast<RouteOccurance*>(&to), pos);
     }
   }
   return std::pair<RouteOccurance*, size_t>(0, 0);
@@ -138,19 +124,13 @@ bool Edge::containsRoute(const Route* r) const {
 }
 
 // _____________________________________________________________________________
-size_t Edge::getCardinality() const {
-  return _routes.size();
-}
+size_t Edge::getCardinality() const { return _routes.size(); }
 
 // _____________________________________________________________________________
-double Edge::getWidth() const {
-  return _width;
-}
+double Edge::getWidth() const { return _width; }
 
 // _____________________________________________________________________________
-double Edge::getSpacing() const {
-  return _spacing;
-}
+double Edge::getSpacing() const { return _spacing; }
 
 // _____________________________________________________________________________
 double Edge::getTotalWidth() const {
@@ -168,11 +148,7 @@ std::vector<const Route*> Edge::getSharedRoutes(const Edge& e) const {
 }
 
 // _____________________________________________________________________________
-const PolyLine& Edge::getGeom() const {
-  return _geom;
-}
+const PolyLine& Edge::getGeom() const { return _geom; }
 
 // _____________________________________________________________________________
-void Edge::setGeom(const PolyLine& p) {
-  _geom = p;
-}
+void Edge::setGeom(const PolyLine& p) { _geom = p; }
