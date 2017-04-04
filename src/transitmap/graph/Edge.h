@@ -56,10 +56,10 @@ class Edge {
   const std::vector<RouteOccurance>& getTripsUnordered() const;
   std::vector<RouteOccurance>* getTripsUnordered();
 
-  RouteOccWithPos getTripsForRouteUnder(const Route* r,
+  RouteOccWithPos getRouteOccWithPosUnder(const Route* r,
     const std::vector<size_t> ordering) const;
 
-  RouteOccurance* getTripsForRoute(const Route* r) const;
+  RouteOccurance* getRouteOcc(const Route* r) const;
 
   std::vector<RouteOccurance> getContinuedRoutesIn(const Node* n,
     const Route* r, const Node* dir, const Edge* fromEdge) const;

@@ -81,7 +81,7 @@ std::vector<RouteOccurance> Edge::getSameDirRoutesIn(
 }
 
 // _____________________________________________________________________________
-RouteOccurance* Edge::getTripsForRoute(const Route* r) const {
+RouteOccurance* Edge::getRouteOcc(const Route* r) const {
   for (size_t i = 0; i < _routes.size(); i++) {
     RouteOccurance* to = const_cast<RouteOccurance*>(&_routes[i]);
     if (to->route == r) {
@@ -92,7 +92,7 @@ RouteOccurance* Edge::getTripsForRoute(const Route* r) const {
 }
 
 // _____________________________________________________________________________
-RouteOccWithPos Edge::getTripsForRouteUnder(
+RouteOccWithPos Edge::getRouteOccWithPosUnder(
     const Route* r, const std::vector<size_t> ordering) const {
   for (size_t i = 0; i < _routes.size(); i++) {
     const RouteOccurance& to = _routes[i];
@@ -118,9 +118,7 @@ void Edge::addRoute(const Route* r, const Node* dir) {
 
 // _____________________________________________________________________________
 bool Edge::containsRoute(const Route* r) const {
-  if (getTripsForRoute(r)) return true;
-
-  return false;
+  return (r) != 0;
 }
 
 // _____________________________________________________________________________

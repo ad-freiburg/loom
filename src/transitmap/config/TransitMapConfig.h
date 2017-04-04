@@ -19,6 +19,9 @@ struct Config {
 
   std::string renderMethod;
   std::string optimMethod;
+  std::string glpkMPSOutputPath;
+  std::string glpkHOutputPath;
+  std::string glpkSolutionOutputPath;
 
   bool noOptim;
 

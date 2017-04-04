@@ -28,16 +28,30 @@ int ILPOptimizer::optimize() const {
   glp_prob* lp = createProblem(g);
   LOG(DEBUG) << " .. done" << std::endl;
 
-  // printHumanReadable(lp, "/home/patrick/optim.ilp");
+  if (!_cfg->glpkHOutputPath.empty()) {
+    LOG(DEBUG) << "Writing human readable ILP to '"
+      << _cfg->glpkHOutputPath << "'" << std::endl;
+    printHumanReadable(lp, _cfg->glpkHOutputPath.c_str());
+  }
 
-  // write problem for debugging...
-  // glp_write_mps(lp, GLP_MPS_FILE, 0, "/home/patrick/ilp");
+  if (!_cfg->glpkMPSOutputPath.empty()) {
+    LOG(DEBUG) << "Writing ILP as .mps to '"
+      << _cfg->glpkMPSOutputPath << "'" << std::endl;
+    glp_write_mps(lp, GLP_MPS_FILE, 0, _cfg->glpkMPSOutputPath.c_str());
+  }
 
+
+  LOG(DEBUG) << "Solving problem..." << std::endl;
   solveProblem(lp);
+  LOG(DEBUG) << " ... done" << std::endl;
 
   LOG(DEBUG) << "ILP obj = " << glp_mip_obj_val(lp) << std::endl;
 
-  glp_print_mip(lp, "/home/patrick/ilp.sol");
+  if (!_cfg->glpkSolutionOutputPath.empty()) {
+    LOG(DEBUG) << "Writing ILP full solution to '"
+      << _cfg->glpkSolutionOutputPath << "'" << std::endl;
+    glp_print_mip(lp, _cfg->glpkSolutionOutputPath.c_str());
+  }
 
   Configuration c;
   getConfigurationFromSolution(lp, &c, g);
@@ -383,16 +397,16 @@ std::vector<OptEdge*> ILPOptimizer::getEdgePartners(
   std::vector<OptEdge*> ret;
 
   graph::Edge* fromEtg = segmentA->getAdjacentEdge(node);
-  const Node* dirA = fromEtg->getTripsForRoute(linepair.first)->direction;
-  const Node* dirB = fromEtg->getTripsForRoute(linepair.second)->direction;
+  const Node* dirA = fromEtg->getRouteOcc(linepair.first)->direction;
+  const Node* dirB = fromEtg->getRouteOcc(linepair.second)->direction;
 
   for (OptEdge* segmentB : node->adjList) {
     if (segmentB == segmentA) continue;
-    graph::Edge* etg = segmentB->getAdjacentEdge(node);
+    graph::Edge* e = segmentB->getAdjacentEdge(node);
 
-    if (etg->getContinuedRoutesIn(node->node, linepair.first, dirA, fromEtg)
+    if (e->getContinuedRoutesIn(node->node, linepair.first, dirA, fromEtg)
             .size() &&
-        etg->getContinuedRoutesIn(node->node, linepair.second, dirB, fromEtg)
+        e->getContinuedRoutesIn(node->node, linepair.second, dirB, fromEtg)
             .size()) {
       ret.push_back(segmentB);
     }
@@ -406,8 +420,8 @@ std::vector<EdgePair> ILPOptimizer::getEdgePartnerPairs(
   std::vector<EdgePair> ret;
 
   graph::Edge* fromEtg = segmentA->getAdjacentEdge(node);
-  const Node* dirA = fromEtg->getTripsForRoute(linepair.first)->direction;
-  const Node* dirB = fromEtg->getTripsForRoute(linepair.second)->direction;
+  const Node* dirA = fromEtg->getRouteOcc(linepair.first)->direction;
+  const Node* dirB = fromEtg->getRouteOcc(linepair.second)->direction;
 
   for (OptEdge* segmentB : node->adjList) {
     if (segmentB == segmentA) continue;
@@ -419,9 +433,9 @@ std::vector<EdgePair> ILPOptimizer::getEdgePartnerPairs(
       curPair.first = segmentB;
       for (OptEdge* segmentC : node->adjList) {
         if (segmentC == segmentA || segmentC == segmentB) continue;
-        graph::Edge* etg = segmentC->getAdjacentEdge(node);
+        graph::Edge* e = segmentC->getAdjacentEdge(node);
 
-        if (etg->getContinuedRoutesIn(node->node, linepair.second, dirB,
+        if (e->getContinuedRoutesIn(node->node, linepair.second, dirB,
                                       fromEtg)
                 .size()) {
           curPair.second = segmentC;

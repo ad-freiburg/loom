@@ -24,17 +24,19 @@ using pbutil::geo::Line;
 Point NodeFront::getTripOccPosUnder(const Route* r,
     const graph::Configuration& c, const Edge* e, const Ordering* order) const {
 
-  RouteOccWithPos to;
+  RouteOccWithPos rop;
 
   if (edge == e) {
-    to = edge->getTripsForRouteUnder(r, *order);
+    rop = edge->getRouteOccWithPosUnder(r, *order);
   } else {
-    to = edge->getTripsForRouteUnder(r, c.find(edge)->second);
+    rop = edge->getRouteOccWithPosUnder(r, c.find(edge)->second);
   }
 
-  if (to.first) {
-    return getTripPos(edge, to.second, n == edge->getTo());
+  if (rop.first) {
+    return getTripPos(edge, rop.second, n == edge->getTo());
   }
+
+  throw std::runtime_error("route does not occur in this edge");
 }
 
 // _____________________________________________________________________________

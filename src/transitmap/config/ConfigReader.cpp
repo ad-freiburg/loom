@@ -109,6 +109,18 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::bool_switch(&(cfg->useGlpkProximSearch))
       ->default_value(true),
       "GLPK: use feasibility pump heuristic")
+    ("glpk-mps-output-path",
+      opts::value<std::string>(&(cfg->glpkMPSOutputPath))
+      ->default_value(""),
+      "output path for ILP, printed in MPS format. If empty, no output will be generated.")
+    ("glpk-h-output-path",
+      opts::value<std::string>(&(cfg->glpkHOutputPath))
+      ->default_value(""),
+      "output path for ILP, printed in \"human readable\" format. If empty, no output will be generated.")
+    ("glpk-solution-output-path",
+      opts::value<std::string>(&(cfg->glpkSolutionOutputPath))
+      ->default_value(""),
+      "output path for ILP solution. If empty, no output will be generated.")
   ;
 
   opts::options_description cmdlineOptions;

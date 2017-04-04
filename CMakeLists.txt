@@ -20,10 +20,10 @@ find_package(GDAL REQUIRED)
 find_package(GLPK REQUIRED)
 
 # set compiler flags, see http://stackoverflow.com/questions/7724569/debug-vs-release-in-cmake
-set(CMAKE_CXX_FLAGS                "-fopenmp -DLOGLEVEL=3 -O3 -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wformat-security -Wformat=2")
+set(CMAKE_CXX_FLAGS                "-fopenmp -O3 -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wformat-security -Wformat=2")
 set(CMAKE_CXX_FLAGS_DEBUG          "-Og -g -DLOGLEVEL=5")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "-DLOGLEVEL=3")
-set(CMAKE_CXX_FLAGS_RELEASE        "-DLOGLEVEL=3")
+set(CMAKE_CXX_FLAGS_RELEASE        "-DLOGLEVEL=2")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -DLOGLEVEL=5")
 
 # export compile commands to tools like clang

@@ -75,7 +75,7 @@ class ILPOptimizer : public Optimizer {
 
   /*
    * For a node A, and edge e and a pair or routes return all the
-   * edges != e where the route-pair continues
+   * edges != e where the route-pair continues in
    */
   std::vector<OptEdge*> getEdgePartners(OptNode* node, OptEdge* segmentA,
                                         const LinePair& linepair) const;
