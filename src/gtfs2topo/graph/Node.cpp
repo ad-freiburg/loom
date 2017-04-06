@@ -10,7 +10,7 @@
 #include "gtfsparser/gtfs/Stop.h"
 #include "./EdgeTripGeom.h"
 
-using namespace graphbuilder;
+using namespace gtfs2topo;
 using namespace graph;
 using namespace gtfsparser;
 

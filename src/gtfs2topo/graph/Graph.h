@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GRAPHBUILDER_GRAPH_TRANSITGRAPH_H_
-#define GRAPHBUILDER_GRAPH_TRANSITGRAPH_H_
+#ifndef GTFS2TOPO_GRAPH_TRANSITGRAPH_H_
+#define GTFS2TOPO_GRAPH_TRANSITGRAPH_H_
 
 #include <proj_api.h>
 #include <string>
@@ -19,7 +19,7 @@
 
 namespace bg = bgeo;
 
-namespace graphbuilder {
+namespace gtfs2topo {
 namespace graph {
 
 class Graph {
@@ -55,4 +55,4 @@ class Graph {
 
 }}
 
-#endif  // GRAPHBUILDER_GRAPH_TRANSITGRAPH_H_
+#endif  // GTFS2TOPO_GRAPH_TRANSITGRAPH_H_

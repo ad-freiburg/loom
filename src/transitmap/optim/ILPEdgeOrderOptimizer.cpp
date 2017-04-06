@@ -157,19 +157,41 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
         m = segment->etgs[0].etg->getCardinality();
       }
 
+      std::stringstream rowName;
+      rowName << "sum_distancorRangeKeeper(e=" << segment->getStrRepr()<< ")";
+      size_t rowDistanceRangeKeeper = glp_add_rows(lp, 1);
+      glp_set_row_name(lp, rowDistanceRangeKeeper, rowName.str().c_str());
+      size_t c = segment->etgs[0].etg->getCardinality();
+      size_t max = getLinePairs(segment).size() - (2*c - 2);
+      glp_set_row_bnds(lp, rowDistanceRangeKeeper, GLP_UP, max, max);
+
       // iterate over all possible line pairs in this segment
       for (LinePair linepair : getLinePairs(segment)) {
+
+        // variable to check if position of line A (first) is < than
+        // position of line B (second) in segment
         size_t smallerVar = glp_add_cols(lp, 1);
         std::stringstream ss;
         ss << "x_(" << segment->getStrRepr() << "," << linepair.first << "<"
            << linepair.second << ")";
         glp_set_col_name(lp, smallerVar, ss.str().c_str());
         glp_set_col_kind(lp, smallerVar, GLP_BV);
+
+        // variable to check if distance between position of A and position
+        // of B is > 1
+        size_t dist1Var = glp_add_cols(lp, 1);
+        ss.str("");
+        ss << "x_(" << segment->getStrRepr() << "," << linepair.first << "<T>"
+           << linepair.second << ")";
+        glp_set_col_name(lp, dist1Var, ss.str().c_str());
+        glp_set_col_kind(lp, dist1Var, GLP_BV);
+
+        vm->addVar(rowDistanceRangeKeeper, dist1Var, 1);
       }
     }
   }
 
-  // write constraints for the crossing variable, both can never be 1...
+  // write constraints for the A>B variable, both can never be 1...
   for (OptNode* node : g.getNodes()) {
     for (OptEdge* segment : node->adjListOut) {
       // iterate over all possible line pairs in this segment
@@ -207,11 +229,23 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
         std::stringstream rowName;
         rowName << "sum_crossor(e=" << segment->getStrRepr()
                 << ",A=" << linepair.first << ",B=" << linepair.second << ")";
+        size_t rowSmallerThan = glp_add_rows(lp, 1);
+        glp_set_row_name(lp, rowSmallerThan, rowName.str().c_str());
+        glp_set_row_bnds(lp, rowSmallerThan, GLP_LO, 0, 0);
 
-        size_t row = glp_add_rows(lp, 1);
+        rowName.str("");
+        rowName << "sum_distancor1(e=" << segment->getStrRepr()
+                << ",A=" << linepair.first << ",B=" << linepair.second << ")";
+        size_t rowDistance1 = glp_add_rows(lp, 1);
+        glp_set_row_name(lp, rowDistance1, rowName.str().c_str());
+        glp_set_row_bnds(lp, rowDistance1, GLP_UP, 0, 1);
 
-        glp_set_row_name(lp, row, rowName.str().c_str());
-        glp_set_row_bnds(lp, row, GLP_LO, 0, 0);
+        rowName.str("");
+        rowName << "sum_distancor2(e=" << segment->getStrRepr()
+                << ",A=" << linepair.first << ",B=" << linepair.second << ")";
+        size_t rowDistance2 = glp_add_rows(lp, 1);
+        glp_set_row_name(lp, rowDistance2, rowName.str().c_str());
+        glp_set_row_bnds(lp, rowDistance2, GLP_UP, 0, 1);
 
         std::stringstream ss;
         ss << "x_(" << segment->getStrRepr() << "," << linepair.first << "<"
@@ -220,7 +254,17 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
         size_t decVar = glp_find_col(lp, ss.str().c_str());
         assert(decVar > 0);
 
-        vm->addVar(row, decVar, m);
+        vm->addVar(rowSmallerThan, decVar, m);
+
+        std::stringstream sss;
+        sss << "x_(" << segment->getStrRepr() << "," << linepair.first << "<T>"
+           << linepair.second << ")";
+
+        size_t decVarDistance = glp_find_col(lp, sss.str().c_str());
+        assert(decVarDistance > 0);
+
+        vm->addVar(rowDistance1, decVarDistance, -static_cast<int>(m));
+        vm->addVar(rowDistance2, decVarDistance, -static_cast<int>(m));
 
         for (size_t p = 0; p < segment->etgs[0].etg->getCardinality(); ++p) {
           std::stringstream ss;
@@ -235,8 +279,14 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           size_t second = glp_find_col(lp, ss2.str().c_str());
           assert(second > 0);
 
-          vm->addVar(row, first, 1);
-          vm->addVar(row, second, -1);
+          vm->addVar(rowSmallerThan, first, 1);
+          vm->addVar(rowSmallerThan, second, -1);
+
+          vm->addVar(rowDistance1, first, 1);
+          vm->addVar(rowDistance1, second, -1);
+
+          vm->addVar(rowDistance2, first, -1);
+          vm->addVar(rowDistance2, second, 1);
         }
       }
     }
@@ -257,7 +307,6 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           if (processed.find(segmentB) != processed.end()) continue;
 
           // introduce dec var
-
           size_t decisionVar = glp_add_cols(lp, 1);
           std::stringstream ss;
           ss << "x_dec(" << segmentA->getStrRepr() << ","
@@ -328,6 +377,64 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           vm->addVar(row2, aSmallerBinL1, -1);
           vm->addVar(row2, aSmallerBinL2, 1);
           vm->addVar(row2, decisionVar, -1);
+
+          // _____________________________________
+          // introduce dec var for distance 1 between lines changes
+          size_t decisionVarDist1Change = glp_add_cols(lp, 1);
+          std::stringstream sss;
+          sss << "x_decT(" << segmentA->getStrRepr() << ","
+             << segmentA->getStrRepr() << segmentB->getStrRepr() << ","
+             << linepair.first << "(" << linepair.first->id << "),"
+             << linepair.second << "(" << linepair.second->id << ")," << node
+             << ")";
+          glp_set_col_name(lp, decisionVarDist1Change, sss.str().c_str());
+          glp_set_col_kind(lp, decisionVarDist1Change, GLP_BV);
+
+          glp_set_obj_coef(lp, decisionVarDist1Change,
+                            getCrossingPenalty(node, 3));
+
+          size_t aNearBinL1 = 0;
+          size_t aNearBinL2 = 0;
+
+          std::stringstream aNearBL1Str;
+          aNearBL1Str << "x_(" << segmentA->getStrRepr() << "," << linepair.first
+                  << "<T>" << linepair.second << ")";
+          aNearBinL1 = glp_find_col(lp, aNearBL1Str.str().c_str());
+
+          std::stringstream aNearBL2Str;
+          aNearBL2Str << "x_(" << segmentB->getStrRepr() << "," << linepair.first
+                  << "<T>" << linepair.second << ")";
+          aNearBinL2 = glp_find_col(lp, aNearBL2Str.str().c_str());
+
+          assert(aNearBinL1 && aNearBinL2);
+
+          std::stringstream rowTName;
+          rowTName << "sum_decT(e1=" << segmentA->getStrRepr()
+                  << "e2=" << segmentA->getStrRepr() << ",A=" << linepair.first
+                  << ",B=" << linepair.second << ")";
+
+          size_t rowT = glp_add_rows(lp, 1);
+
+          glp_set_row_name(lp, rowT, rowTName.str().c_str());
+          glp_set_row_bnds(lp, rowT, GLP_UP, 0, 0);
+
+          std::stringstream rowTName2;
+          rowTName2 << "sum_decT2(e1=" << segmentA->getStrRepr()
+                  << "e2=" << segmentA->getStrRepr() << ",A=" << linepair.first
+                  << ",B=" << linepair.second << ")";
+
+          size_t rowT2 = glp_add_rows(lp, 1);
+
+          glp_set_row_name(lp, rowT2, rowTName2.str().c_str());
+          glp_set_row_bnds(lp, rowT2, GLP_UP, 0, 0);
+
+
+          vm->addVar(rowT, aNearBinL1, 1);
+          vm->addVar(rowT, aNearBinL2, -1);
+          vm->addVar(rowT, decisionVarDist1Change, -1);
+          vm->addVar(rowT2, aNearBinL1, -1);
+          vm->addVar(rowT2, aNearBinL2, 1);
+          vm->addVar(rowT2, decisionVarDist1Change, -1);
         }
       }
     }
@@ -347,7 +454,6 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const OptGraph& g,
       for (LinePair linepair : getLinePairs(segmentA)) {
         for (EdgePair segments :
              getEdgePartnerPairs(node, segmentA, linepair)) {
-          // if (processed.find(segmentB) != processed.end()) continue;
 
           // try all position combinations
           size_t decisionVar = glp_add_cols(lp, 1);

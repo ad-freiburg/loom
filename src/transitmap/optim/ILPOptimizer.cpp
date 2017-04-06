@@ -64,7 +64,7 @@ int ILPOptimizer::optimize() const {
 }
 
 // _____________________________________________________________________________
-double ILPOptimizer::getCrossingPenalty(const OptNode* n, double coef) const {
+int ILPOptimizer::getCrossingPenalty(const OptNode* n, int coef) const {
   coef *= n->adjList.size();
 
   if (n->node->getStops().size() > 0) {
@@ -291,7 +291,6 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
       for (LinePair linepair : getLinePairs(segmentA)) {
         for (EdgePair segments :
              getEdgePartnerPairs(node, segmentA, linepair)) {
-          // if (processed.find(segmentB) != processed.end()) continue;
 
           // try all position combinations
           size_t decisionVar = glp_add_cols(lp, 1);
@@ -472,7 +471,7 @@ void ILPOptimizer::solveProblem(glp_prob* lp) const {
   params.fp_heur = _cfg->useGlpkFeasibilityPump ? GLP_ON : GLP_OFF;
   params.ps_heur = _cfg->useGlpkProximSearch ? GLP_ON : GLP_OFF;
   params.ps_tm_lim = _cfg->glpkPSTimeLimit;
-  params.tm_lim = _cfg->glpkPSTimeLimit;
+  params.tm_lim = _cfg->glpkTimeLimit;
 
   glp_intopt(lp, &params);
 }

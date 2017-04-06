@@ -6,20 +6,20 @@
 #include <ostream>
 #include "./../config/GraphBuilderConfig.h"
 #include "./../graph/Graph.h"
-#include "./JsonOutput.h"
+#include "./GeoJsonOutput.h"
 #include "json/json.hpp"
 #include "pbutil/String.h"
 #include "pbutil/log/Log.h"
 
 using json = nlohmann::json;
 using pbutil::toString;
-using namespace graphbuilder;
+using namespace gtfs2topo;
 
 // _____________________________________________________________________________
-JsonOutput::JsonOutput(const config::Config* cfg) : _cfg(cfg) {}
+GeoJsonOutput::GeoJsonOutput(const config::Config* cfg) : _cfg(cfg) {}
 
 // _____________________________________________________________________________
-void JsonOutput::print(const graph::Graph& outG) {
+void GeoJsonOutput::print(const graph::Graph& outG) {
   json geoj;
   geoj["type"] = "FeatureCollection";
   geoj["features"] = json::array();

@@ -8,7 +8,7 @@
 #include "gtfsparser/gtfs/Route.h"
 #include "EdgeTripGeom.h"
 
-using namespace graphbuilder;
+using namespace gtfs2topo;
 using namespace graph;
 using namespace gtfsparser;
 

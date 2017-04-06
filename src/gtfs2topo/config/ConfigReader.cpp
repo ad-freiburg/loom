@@ -10,7 +10,7 @@
 #include "./ConfigReader.h"
 #include "pbutil/log/Log.h"
 
-using graphbuilder::config::ConfigReader;
+using gtfs2topo::config::ConfigReader;
 namespace opts = boost::program_options;
 
 using std::string;

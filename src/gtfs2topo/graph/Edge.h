@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GRAPHBUILDER_GRAPH_EDGE_H_
-#define GRAPHBUILDER_GRAPH_EDGE_H_
+#ifndef GTFS2TOPO_GRAPH_EDGE_H_
+#define GTFS2TOPO_GRAPH_EDGE_H_
 
 #include <vector>
 #include "Edge.h"
@@ -18,7 +18,7 @@ using std::exception;
 using std::string;
 using pbutil::geo::PolyLine;
 
-namespace graphbuilder {
+namespace gtfs2topo {
 namespace graph {
 
 // forward declaration of Node
@@ -70,5 +70,5 @@ class Edge {
 
 }}
 
-#endif  // GRAPHBUILDER_GRAPH_EDGE_H_
+#endif  // GTFS2TOPO_GRAPH_EDGE_H_
 

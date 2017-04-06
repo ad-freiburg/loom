@@ -2,12 +2,12 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GRAPHBUILDER_CONFIG_GRAPHBUILDERCONFIG_H_
-#define GRAPHBUILDER_CONFIG_GRAPHBUILDERCONFIG_H_
+#ifndef GTFS2TOPO_CONFIG_GTFS2TOPOCONFIG_H_
+#define GTFS2TOPO_CONFIG_GTFS2TOPOCONFIG_H_
 
 #include <string>
 
-namespace graphbuilder {
+namespace gtfs2topo {
 namespace config {
 
 struct Config {
@@ -16,6 +16,6 @@ struct Config {
 };
 
 }  // namespace config
-}  // namespace graphbuilder
+}  // namespace gtfs2topo
 
-#endif  // GRAPHBUILDER_CONFIG_GRAPHBUILDERCONFIG_H_
+#endif  // GTFS2TOPO_CONFIG_GTFS2TOPOCONFIG_H_

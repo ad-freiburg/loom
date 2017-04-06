@@ -253,7 +253,7 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
       f.setGeom(pl);
 
       // initial free
-      freeNodeFront(&f);
+      // freeNodeFront(&f);
 
       n->addMainDir(f);
     }

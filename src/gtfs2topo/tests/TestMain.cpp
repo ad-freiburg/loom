@@ -9,9 +9,9 @@
 #include "./../graph/Edge.h"
 
 using lest::approx;
-using graphbuilder::graph::Graph;
-using graphbuilder::graph::Edge;
-using graphbuilder::graph::Node;
+using gtfs2topo::graph::Graph;
+using gtfs2topo::graph::Edge;
+using gtfs2topo::graph::Node;
 
 
 const std::string proj = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0"
@@ -25,7 +25,7 @@ const lest::test specification[] = {
 CASE("node combine") {
   EXPECT(true);
 
-  graphbuilder::graph::Graph g("testgraph", proj);
+  gtfs2topo::graph::Graph g("testgraph", proj);
 
   Node* a = g.addNode(new Node(0, 0));
   Node* b = g.addNode(new Node(1, 1));

@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GRAPHBUILDER_BUILDER_BUILDER_H_
-#define GRAPHBUILDER_BUILDER_BUILDER_H_
+#ifndef GTFS2TOPO_BUILDER_BUILDER_H_
+#define GTFS2TOPO_BUILDER_BUILDER_H_
 
 #include <proj_api.h>
 #include <algorithm>
@@ -13,11 +13,11 @@
 #include "gtfsparser/gtfs/Feed.h"
 #include "pbutil/geo/PolyLine.h"
 
-using namespace graphbuilder::graph;
+using namespace gtfs2topo::graph;
 using pbutil::geo::PolyLine;
 using pbutil::geo::SharedSegment;
 
-namespace graphbuilder {
+namespace gtfs2topo {
 
 const static char* WGS84_PROJ =
     "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
@@ -76,6 +76,6 @@ class Builder {
   mutable std::map<const Edge*, size_t> _pEdges;
 };
 
-}  // namespace graphbuilder
+}  // namespace gtfs2topo
 
-#endif  // GRAPHBUILDER_BUILDER_BUILDER_H_
+#endif  // GTFS2TOPO_BUILDER_BUILDER_H_

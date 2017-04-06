@@ -90,7 +90,7 @@ class ILPOptimizer : public Optimizer {
   bool crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
                PosCom postcomb) const;
 
-  double getCrossingPenalty(const OptNode* n, double coef) const;
+  int getCrossingPenalty(const OptNode* n, int coef) const;
 
   Point getPos(OptNode* n, OptEdge* segment, size_t p) const;
 };

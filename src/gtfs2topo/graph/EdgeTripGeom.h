@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GRAPHBUILDER_GRAPH_EDGETRIPGEOM_H_
-#define GRAPHBUILDER_GRAPH_EDGETRIPGEOM_H_
+#ifndef GTFS2TOPO_GRAPH_EDGETRIPGEOM_H_
+#define GTFS2TOPO_GRAPH_EDGETRIPGEOM_H_
 
 #include <vector>
 #include "gtfsparser/gtfs/Trip.h"
@@ -11,7 +11,7 @@
 #include "pbutil/geo/PolyLine.h"
 #include "./Node.h"
 
-namespace graphbuilder {
+namespace gtfs2topo {
 namespace graph {
 
 using namespace gtfsparser;
@@ -75,5 +75,5 @@ class EdgeTripGeom {
 
 }}
 
-#endif  // GRAPHBUILDER_GRAPH_EDGETRIPGEOM_H_
+#endif  // GTFS2TOPO_GRAPH_EDGETRIPGEOM_H_
 

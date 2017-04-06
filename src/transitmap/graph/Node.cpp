@@ -351,8 +351,33 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
 
       processed[routeOcc.route].insert(&nf);
     }
+  }
 
+  return ret;
+}
 
+// _____________________________________________________________________________
+size_t Node::getConnCardinality() const {
+  size_t ret = 0;
+  std::map<const Route*, std::set<const NodeFront*> > processed;
+
+  for (size_t i = 0; i < getMainDirs().size(); ++i) {
+    const graph::NodeFront& nf = getMainDirs()[i];
+
+    for (size_t j = 0; j < nf.edge->getCardinality(); j++) {
+      const RouteOccurance& routeOcc = (*nf.edge->getTripsUnordered())[j];
+
+      std::vector<graph::Partner> partners = getPartners(&nf, routeOcc);
+
+      for (const graph::Partner& p : partners) {
+        if (processed[routeOcc.route].find(p.front) != processed[routeOcc.route].end()) {
+          continue;
+        }
+        ret++;
+      }
+
+      processed[routeOcc.route].insert(&nf);
+    }
   }
 
   return ret;

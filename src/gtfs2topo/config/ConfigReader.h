@@ -2,14 +2,14 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GRAPHBUILDER_CONFIG_CONFIGREADER_H_
-#define GRAPHBUILDER_CONFIG_CONFIGREADER_H_
+#ifndef GTFS2TOPO_CONFIG_CONFIGREADER_H_
+#define GTFS2TOPO_CONFIG_CONFIGREADER_H_
 
 #include <boost/program_options.hpp>
 #include <vector>
 #include "./GraphBuilderConfig.h"
 
-namespace graphbuilder {
+namespace gtfs2topo {
 namespace config {
 
 class ConfigReader {
@@ -19,4 +19,4 @@ class ConfigReader {
 };
 }
 }
-#endif  // GRAPHBUILDER_CONFIG_CONFIGREADER_H_
+#endif  // GTFS2TOPO_CONFIG_CONFIGREADER_H_

@@ -12,12 +12,12 @@
 #include "./config/ConfigReader.h"
 #include "./config/GraphBuilderConfig.h"
 #include "./graph/Graph.h"
-#include "./output/JsonOutput.h"
+#include "./output/GeoJsonOutput.h"
 #include "gtfsparser/Parser.h"
 #include "gtfsparser/gtfs/Service.h"
 #include "pbutil/log/Log.h"
 
-using namespace graphbuilder;
+using namespace gtfs2topo;
 using std::string;
 
 // _____________________________________________________________________________
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   if (!cfg.inputFeedPath.empty()) {
     parser.parse(&feed, cfg.inputFeedPath);
 
-    graphbuilder::graph::Graph g("shinygraph", cfg.projectionString);
+    gtfs2topo::graph::Graph g("shinygraph", cfg.projectionString);
     Builder b(&cfg);
 
     b.consume(feed, &g);
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
     b.removeNodeArtifacts(&g);
     b.averageNodePositions(&g);
 
-    JsonOutput out(&cfg);
+    GeoJsonOutput out(&cfg);
     out.print(g);
   }
 

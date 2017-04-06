@@ -12,7 +12,6 @@
 
 using transitmapper::config::ConfigReader;
 namespace opts = boost::program_options;
-
 using std::string;
 using std::exception;
 using std::vector;
@@ -95,11 +94,11 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "penalty factor during optimization for crossings that occur in stations")
     ("glpk-time-limit",
       opts::value<int>(&(cfg->glpkTimeLimit))
-      ->default_value(60000),
+      ->default_value(60000 + 60000),
       "GLPK: overall time limit for search, in ms")
     ("glpk-proximity-search-time-limit",
       opts::value<int>(&(cfg->glpkPSTimeLimit))
-      ->default_value(60000 + 60000),
+      ->default_value(60000),
       "GLPK: time limit for proximit search heuristig")
     ("glpk-use-proximity-search",
       opts::bool_switch(&(cfg->useGlpkProximSearch))

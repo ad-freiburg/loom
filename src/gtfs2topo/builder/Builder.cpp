@@ -7,7 +7,7 @@
 #include "pbutil/geo/Geo.h"
 #include "pbutil/log/Log.h"
 
-using namespace graphbuilder;
+using namespace gtfs2topo;
 using namespace graph;
 using namespace gtfsparser;
 using namespace gtfs;

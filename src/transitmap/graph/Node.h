@@ -113,6 +113,8 @@ class Node {
       const graph::Configuration& c, double prec, const Edge* e,
       const std::vector<size_t>* order) const;
 
+  size_t getConnCardinality() const;
+
   Polygon getConvexFrontHull(double d) const;
 
   // add edge to this node's adjacency lists

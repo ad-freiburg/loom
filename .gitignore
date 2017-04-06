@@ -16,3 +16,5 @@ compile_commands.json
 *.vs
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
+*.cppr
+*.hr

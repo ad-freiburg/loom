@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GRAPHBUILDER_GRAPH_NODE_H_
-#define GRAPHBUILDER_GRAPH_NODE_H_
+#ifndef GTFS2TOPO_GRAPH_NODE_H_
+#define GTFS2TOPO_GRAPH_NODE_H_
 
 #include <set>
 #include "gtfsparser/gtfs/Stop.h"
@@ -13,7 +13,7 @@
 
 using namespace gtfsparser;
 
-namespace graphbuilder {
+namespace gtfs2topo {
 namespace graph {
 
 // forward declarations
@@ -83,4 +83,4 @@ class Node {
 };
 }}
 
-#endif  // GRAPHBUILDER_GRAPH_NODE_H_
+#endif  // GTFS2TOPO_GRAPH_NODE_H_

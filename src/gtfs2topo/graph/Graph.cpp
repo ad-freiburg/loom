@@ -8,9 +8,9 @@
 #include "./Graph.h"
 #include "./Edge.h"
 
-using graphbuilder::graph::Graph;
-using graphbuilder::graph::Node;
-using graphbuilder::graph::Edge;
+using gtfs2topo::graph::Graph;
+using gtfs2topo::graph::Node;
+using gtfs2topo::graph::Edge;
 using pbutil::geo::Point;
 using bgeo::make_inverse;
 

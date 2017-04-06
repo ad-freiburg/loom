@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GRAPHBUILDER_OUTPUT_JSONOUTPUT_H_
-#define GRAPHBUILDER_OUTPUT_JSONOUTPUT_H_
+#ifndef GTFS2TOPO_OUTPUT_GEOJSONOUTPUT_H_
+#define GTFS2TOPO_OUTPUT_GEOJSONOUTPUT_H_
 
 #include <ostream>
 #include <string>
@@ -13,11 +13,11 @@
 
 using json = nlohmann::json;
 
-namespace graphbuilder {
+namespace gtfs2topo {
 
-class JsonOutput {
+class GeoJsonOutput {
  public:
-  JsonOutput(const config::Config* cfg);
+  GeoJsonOutput(const config::Config* cfg);
   void print(const graph::Graph& outG);
 
  private:
@@ -25,4 +25,4 @@ class JsonOutput {
 };
 }
 
-#endif  // GRAPHBUILDER_OUTPUT_JSONOUTPUT_H_
+#endif  // GTFS2TOPO_OUTPUT_GEOJSONOUTPUT_H_
