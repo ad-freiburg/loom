@@ -1,0 +1,133 @@
+\documentclass{llncs}
+%
+\usepackage{makeidx}  % allows for indexgeneration
+\usepackage{graphicx}
+%
+\begin{document}
+%
+\mainmatter              % start of the contributions
+%
+\title{Automatic Generation of Transit Maps}
+%
+\titlerunning{Automatic Generation of Transit Maps}
+%
+\author{Hannah Bast\inst{1} \and Patrick Brosi\inst{1} \and
+Sabine Storandt\inst{2}}
+%
+\authorrunning{Hannah Bast et al.} % abbreviated author list (for running head)
+%
+%%%% list of authors for the TOC (use if author list has to be modified)
+\tocauthor{Hannah Bast, Patrick Brosi, Sabine Storandt}
+%
+\institute{University of Freiburg (Germany)\\
+\email{\{bast, brosi\}@informatik.uni-freiburg.de}
+\and
+JMU W\"urzburg (Germany)\\
+\email{storandt@informatik.uni-wuerzburg.de}
+}
+
+\maketitle              % typeset the title of the contribution
+
+\begin{abstract}
+TODO
+\keywords{computational geometry, graph theory, optimization}
+\end{abstract}
+%
+\section{Introduction}
+%
+%
+\subsection{Related Work}
+%
+%
+\subsection{Contribution}
+%
+%
+\section{Spatial topology extraction}
+%
+
+\subsection{Meta nodes}
+
+%
+\section{Line Ordering Optimization}
+%
+
+
+
+
+%
+\subsection{Core problem graph}
+%
+%
+\subsection{Hill climbing}
+%
+%
+\subsection{Baseline ILP}
+%
+%
+\subsection{Improved ILP}
+%
+The $\mathcal{O}(|S|M^{2})$ variables in the baseline ILP seem to be reasonable, as indeed $\Omega(|S|M^{2})$ crossings could occur. But the $\mathcal{O}(|S|M^{6})$ constraints are due to enumerating all possible position inversions explicitly. If on the other hand the statement \emph{position of A on $s$ is smaller than the position of B} would be efficiently checkable, the number of constraints could be reduced. To have such an oracle, we first modify the line-position assignment constraints. Subsequently, we use  the oracle to encode inversions with fewer constraints.
+\subsubsection{Alternative line-position assignment}
+Instead of a decision variable which encode the exact position of a line in a segment as before, we know use $x_{sl\leq p} \in \{0,1\}$ which is $1$ if the position of $l$ in $s$ is $\leq p$ and $0$ otherwise. To enforce a unique position, we use the constraints:
+$$\forall l \in L(s) \forall p \in \{1, \cdots, |L(s)|-1\}: x_{sl\leq p} \leq x_{sl\leq p+1}$$
+This ensures that the sequence can only switch from $0$ to $1$, and this exactly once. To make sure that at some point a $1$ appears and that each position is occupied by exactly one line, we additionally introduce the following constraints:
+$$\forall p \in \{1, \cdots, |L(s)|\}: \sum_{l \in L(s)} x_{sl\leq p} = p$$
+So exactly for  one line $x_{s.\leq 1} =1$ is true, for two lines $x_{s.\leq 2} = 1$ (of which one has to fulfill $x_{s.\leq 1} =1$) and so on.
+\subsubsection{Crossing Oracle}
+We reconsider the example from \ref{SEC:ac}, left. Before, we enumerated all possible positions which induce a crossing for $A, B$ at the transition from $s$ to $s'$. But it would be sufficient to have variables which tell us whether the position of $A$ is smaller than the position of $B$ in $s$, and the same for $s'$, and then compare those variables. For a line pair $(A,B)$ on segment $s$ we call the respective variables $x_{sA>B}, x_{sA<b} \in \{0, 1\}$. Since we introduce these variables for each line pair in $s$, $x_{sA<B}$ will re-appear as $x_{sB>A}$, so we only need $x_{sA>B}$. To get the desired value assignments, we add the following constraints:
+$$\sum_{p=1}^{|L(s)|} x_{sA\leq p} - \sum_{p} x_{sB\leq p} + x_{sA>B} M \geq 0$$
+$$x_{sA>B} + x_{sB>A}=1$$
+The equality constraints make sure that not both $x_{sA>B}$ and $x_{sB>A}$ can be $1$. If the position of $A$ is smaller than the position of $B$, then more of the variables corresponding to $A$ are $1$, hence the sum over all is higher. So if we subtract the sum for $B$ from the sum for $A$ and the result is $\geq 0$, we know the position of $A$ is  smaller and $x_{sA>B}$ can be $0$. Otherwise, the difference is negative, and we need to set $x_{sA>B}$ to $1$ to fulfill the inequality. It is then indeed fulfilled for sure as the position gap can never exceed the number of lines per segment.
+
+To finally decide if there is a crossing, we would again like to have a decision variable $x_{ss'AB} \in \{0,1\}$ which is $1$ in case of a crossing and $0$ otherwise -- and minimize the sum of all such variables in the objective function. The constraint $$abs(x_{sA<B}-x_{s'A<B}) - x_{ss'AB} \leq 0$$ would realize this, as either $x_{sA<B} = x_{s'A<B}$ (both $0$ or both $1$) and then $x_{ss'AB}$ can be $0$, or they are unequal and hence the absolute value of their difference is $1$, enforcing $x_{ss'AB}=1$ to fulfill the $\leq 0$ condition. As absolute value computation can not be part of an ILP we use the following replacements:
+$$x_{sA<B} - x_{s'A<B} - x_{ss'AB} \leq 0$$
+$$-x_{sA<B} + x_{s'A<B} - x_{ss'AB} \leq 0$$
+If the values are equal, nothing changes in the argumentation. If the values are unequal, either the upper or the lower constraint will produce a $1$ as the sum of the first two terms, enforcing $x_{ss'AB}=1$ as desired.
+
+\subsection{Placement of inevitable crossings}
+
+\subsection{Preventing line partner splitting}
+So far, we only optimized for the number of line crossings. This may not lead to the solution that is most visually pleasing. Consider the example given in Figure~\ref{FIG:linesplitting}. The number of line crossings (1) is indeed minimized in the left example. However, the intuitive information that A and B continue together after x is lost. In the right example, this information is preserved, but the number of line crossings is now 2.
+
+\begin{figure}
+  \centering
+	$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{examples/splitting_example_nonopt.pdf}}}$
+	\hspace{10mm}
+$	\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{examples/splitting_example.pdf}}}$
+	\caption{Left: optimized only for line crossings, Right: optimized also for line splittings}
+	\label{FIG:linesplitting}
+\end{figure}
+
+A related problem can be seen in Figure TODO. Both solutions have the same number of line crossings (2), but the left one clearly looks better, because the crossing is done in one turn. In both cases, we could adress the problem by punishing the separation of lines. For two adjacent segments $s$ and $s'$ and a line pair $(A, B$) that continues from $s$ to $s'$, if $A$ and $B$ were placed next to each other in $s$ (were partners in $s$) but not anymore in $s'$, we want to add some penalty to the objective function. For this, we introduce a variable $x_{sA\|B} \in \{0, 1\}$. Let $p_{sA}$ be the position of $A$ and $s$ and $p_{sB}$ the position of $B$ in $s$. We want $s_{sA\|B}$ to be $1$ if $p_{sA} - p_{sB}| = 1$ (if they occur next to each other) and $1$ otherwise. To get the desired assignments, we add the following constraints per line pair in $s$:
+
+$$\sum_{p=1}^{|L(s)|} x_{sA\leq p} - \sum_{p} x_{sB\leq p} - x_{sA\|B} M \leq 1$$
+$$\sum_{p=1}^{|L(s)|} x_{sB\leq p} - \sum_{p} x_{sA\leq p} - x_{sA\|B} M \leq 1$$
+
+If $p_{sA} = p_{sB}$, then the difference of the sums in both constraints is 0. If $|p_{sA} - p_{sB}| = 1$, then the sum difference in both constraints is $\leq 1$. If $|p_{sA} - p_{sB}| > 1$, then either the first or the second constraint enforce $x_{sA\|B} = 1$. To prevent the trivial solution where $x_{A\|B}$ is always 1, we introduce the following additional constraint per segment:
+
+$$\sum_{l \in L(s)}\sum_{l' \in L(s)} x_{sl\|l'} \leq |L(s)|^2 - 3|L(s)| - 2$$
+
+as indeed the maximal number of line pairs in $s$ (excluding lines paired with themselves) is $|L(s)|^2 - |L(s)$ and the number of $x_{sl\|l'}$ in $s$ that are 0 is exactly $2|L(s)| - 2$ (each line is next to its two neighbors, but the first and last line only have 1 neighbor). A fixed constraint is not necessary here, however, because the lower bound is already provided by the line pair constraints (?) and (?).
+
+
+
+
+
+
+
+\section{Evaluation}
+
+
+%
+% ---- Bibliography ----
+%
+\begin{thebibliography}{5}
+%
+\bibitem {clar:eke}
+Clarke, F., Ekeland, I.:
+Nonlinear oscillations and
+boundary-value problems for Hamiltonian systems.
+Arch. Rat. Mech. Anal. 78, 315--333 (1982)
+
+\end{thebibliography}
+\end{document}
