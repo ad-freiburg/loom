@@ -2,6 +2,11 @@
 %
 \usepackage{makeidx}  % allows for indexgeneration
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{calc,trees,positioning,arrows,chains,shapes.geometric,%
+  decorations.pathreplacing,decorations.pathmorphing,shapes,%
+  decorations.text,
+  matrix,shapes.symbols,plotmarks,decorations.markings,shadows}
 %
 \begin{document}
 %
@@ -126,16 +131,51 @@ as indeed the maximal number of line pairs in $s$ (excluding lines paired with t
 \subsection{Core problem graph}
 %
 
-We make the following observations:
+An inevitable crossing (or splitting) between two lines $j$ and $k$ can only occur if there is at least one node with one of the following two properties:
+\begin{enumerate}
+\item $v$ is adjacent to segments $s : j \not\in L(s) \land k \in L(s')$ and $s' : j \in L(s') \land k \not\in L(s)$.
+\item $|{s \in adj(v) : j \in L(s) \land i \in L(s)}| > 2$
+\end{enumerate}
+Proof (sketch): if no such $v_jk$ exists, then it holds for all nodes $v \in V$ that $j$ and $k$ either both travel through $v$ on the same two segments or they don't travel together through $v$ at all (or only one of them). In the latter case, no crossing (or splitting) will occur and we can thus disregard it, which leaves us only with the former case. But if $j$ and $k$ travel through all nodes in which a crossing could occur together on the same two segments, then the relative order of $j$ and $k$ does not matter anymore - we just combine $j$ and $k$ into a new line $i$ and assign $j$ and $k$ an arbitrary (either $(j,k)$ or $(k, j$) global ordering.
+
+We call nodes that comply to (1) for a line pair $A = \{j, k\}$ a liaison node for $j$ and $k$ and nodes that comply to (2) a T-node for $j$ and $k$. Additionally, we call a node that is a liaison and/or T-node for at least one line pair an \textbf{intersection node} and a node in which one or more lines end a \textbf{terminus node}.
+
+Using the above, we can now greatly simplify the input graph prior to optimization with the following steps:
 
 \begin{enumerate}
-\item any transit graph with inevitable line crossings needs at least one vertice $v$ with $deg(v) > 2$.
-\item if a node $v$ has $deg(v) = 2$ and if for both segments $s$ and $s'$ adjacent to $v$ it holds that $L(s) = L(s')$, no line crossing has to occur in this node. Either the entire graph has no inevitable line crossings, or it has and the line crossing can be done at some other vertice with degree $>2$.
+\item combine lines that always occur together in a segment and for which no intersection or T-node exists into a single line with a global, arbitrary relative ordering
+\item delete each node with degree 2 (adjacent to segments $s = (u, v)$ and $s' = (v, w)$) and $L(s) = L(s')$ and combine $s$ and $s'$ into a single new segment $ss' = (u, w)$ with $L(ss') = L(s) = L(s')$ . Note that such a node can never be a terminus node or an intersection node.
 \end{enumerate}
 
-This means that we can greatly simplify any input transit graph by deleting every node $v$ with $deg(v) = 2$ and $L(s) = L(s')$ without affecting the optimality of the found solution, thus reducing the transit graph to its core optimization graph. Consider the example given in Figure (?), where the graph only consists of vertices with degree 2.
+Since we never delete an intersection node, these operations will not affect the optimality of the found solution. In practice, they will "move" line crossings to nodes where a new line is introduced to an existing thread of lines (liaison nodes) or to nodes where topological changes are introduced to the network (T-nodes). For real-world networks, this is asthecitally desirable and can significantly reduce the number of ILP variables and constraints.
 
-For real-world networks, the number of ILP variables and constraints can be significantly reduced.
+This core problem graph can be further prepared for optimiziation by splitting it into ordering-relevant connected components using the following rules:
+
+\begin{enumerate}
+	\item cut each segment $s = (u, v)$ with $|L(s)| = 1$ into two segments $s' = (u, v')$ and $s'' = (v'', v)$. Note that $v'$ and $v''$ are not connected.
+	\item replace each segment $s = (u, v)$ where $v$ is a terminus node for each $l \in L(s)$ with a segment $s' = (u, v'$ where $v'$ is only connected to $s'$. Delete $s$ from the adjaceny list of $v$.
+	\item remove each segment $s = (u, v)$ where $u$ and $v$ are termini for all $l \in L(s)$
+\end{enumerate}
+
+The line-ordering optimization can now be run independently on each connected component of the core problem graph, reducing the size of the ILPs that have to be solved and opening the way for parallelization.
+
+\begin{figure}[h]
+\centering
+	\tikzstyle{graphnode}=[inner sep=2pt, circle, draw=black, solid, fill=white]
+
+\begin{tikzpicture}
+	\foreach \place/\x in {{(9.5,4)/A}, {(12,3)/B},{(11,1)/C},{(9,2.3)/D}}
+	\node[graphnode] (\x) at \place {$\x$};
+
+	\draw (A) .. controls (10.5,4.3) and (11, 4) .. (B) node [midway, above right] {$abcd$};
+	\draw (B) .. controls (12.5,2) and (11.5, 2).. (C) node [midway, below right] {$abcd$};
+	\draw (C) .. controls (10, 1) and (10.3, 2.5) .. (D) node [midway, below left] {$ab$};
+	\draw (A) .. controls (10.3, 3) and (10.4, 2.7) .. (D) node [midway, right] {$d$};
+
+\end{tikzpicture}
+
+\caption{Static vehicle route information $P$}
+\end{figure}
 
 \section{Evaluation}
 
