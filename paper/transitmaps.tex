@@ -164,13 +164,14 @@ The line-ordering optimization can now be run independently on each connected co
 	\tikzstyle{graphnode}=[inner sep=2pt, circle, draw=black, solid, fill=white]
 
 \begin{tikzpicture}
-	\foreach \place/\x in {{(9.5,4)/A}, {(12,3)/B},{(11,1)/C},{(9,2.3)/D}}
+	\foreach \place/\x in {{(9.5,4)/A}, {(12,3)/B},{(11,1)/C},{(9,2.3)/D}, {(8, 4)/E}, {(6.5, 3)/F}}
 	\node[graphnode] (\x) at \place {$\x$};
 
 	\draw (A) .. controls (10.5,4.3) and (11, 4) .. (B) node [midway, above right] {$abcd$};
 	\draw (B) .. controls (12.5,2) and (11.5, 2).. (C) node [midway, below right] {$abcd$};
 	\draw (C) .. controls (10, 1) and (10.3, 2.5) .. (D) node [midway, below left] {$ab$};
 	\draw (A) .. controls (10.3, 3) and (10.4, 2.7) .. (D) node [midway, right] {$d$};
+	\draw (E) .. controls (9, 3.8) .. (A) node [midway, below] {$fgh$};
 
 \end{tikzpicture}
 
