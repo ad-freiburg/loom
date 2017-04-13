@@ -1,5 +1,6 @@
 \documentclass{llncs}
 %
+\usepackage{amssymb}
 \usepackage{makeidx}  % allows for indexgeneration
 \usepackage{graphicx}
 \usepackage{tikz}
@@ -40,6 +41,26 @@ TODO
 %
 \section{Introduction}
 %
+
+\begin{itemize}
+\item mention usefulness, mention bad google maps etc
+\item mention that we know of no publication adressing the MCLM or the drawing of metro maps that uses real-world data
+\item mention that we not only want to generate schematic maps, but maps that resemble the real-world vehicle paths as closely as possible (e.g. to serve as a map overlay)
+\end{itemize}
+
+\subsection{Problem Definition}
+
+Let $L$ by a set of unique transit lines and w.l.o.g. $l \in \mathbb{N}$. We call an undirected graph $T = (V, S)$ with vertices $v = (p_v, \sigma_v)$ and segments $s = (u, v, L(s), \tau_s)$ a transit graph. Each $v$ has a position $p_v \in \mathbb{R}^2$. Furthermore we assign each segment $s$ a polygonal chain $\tau_s = (p_1, ..., p_n), p_i \in \mathbb{R}^2$ which describes the geometrical path a segment takes through the plane. For each $s$, we impose $p_1 = p_u$ and $p_n = p_v$, that is the polygonal chain has to start and end at the position of the segment's start and end node. $L(s)$ is the (ordered) set of lines that traverse $s$. Finally, we assign each node a role $\sigma_v \in {0, 1}$, where $\sigma_v = 1$ means that $v$ is a real station node and $\sigma_v = 0$ that $v$ is only a spatial topological node.
+
+$G$ can be understood as an embedding of an undirected multigraph $G = (V, E)$, where each line $l$ traversing on a segment $s$ of $T$ is transformed into a single edge. It can also be understood as an embedding of a set $\mathbb{L}$ of polygonal chains, one for each $l \in L$.
+
+The goal is to render $T$ in a way that resembles a modern transit map.
+
+We chose this definition because it proved to be useful during line-ordering optimization as well as during map rendering (see ??). It also resembles the intuitive understanding of a transit map.
+
+
+TODO: mention in further work (or somewhere more appropriate) that it is very easy (as we have done it) to apply our approach to a directed graph.
+
 %
 \subsection{Related Work}
 %
@@ -51,15 +72,81 @@ Fink and Pupyrev show that MLCM is NP-hard in \cite{fink:pupyrev}.
 \begin{itemize}
 \item We introduce an approach for drawing transit maps that can be used with arbitrary input data in the GTFS format
 \item ... describe a simple line-sweeping approach to extract the spatial topology graph of a set of (partially overlapping) polylines
-\item ... describe a novel ILP for solving the metro line crossing problem (MLCM) and add a simple extension that also minimizes line-splittings (and subsequently, the periphery problem)
+\item ... describe a baseline ILP for solving the metro line crossing problem (MLCM)
+\item ... describe a improvied ILP for solving (MLCM) and add a simple extension that also minimizes line-splittings (and subsequently, the periphery problem)
 \item ... describe some heuristics for placing inevitable crossings in a asthecitally pleasing way
 \item ... describe the reduction of the minimization problem to core problem graphs which simplifies the problem
 \end{itemize}
+
 %
 \section{Spatial Topology Extraction}
 %
 
+Real-world public transit data is usually given as a set of stations (with geographical positions) and a set of vehicle routes, each consisting of some meta-information (line number, color, ...) and a list of stop / time pairs indicating the vehicle's schedule. In many cases, the geographical path the vehicle takes through the real world is also given. In recent years, the General Transit Feed Specification (GTFS) has become the dominant format for exchanging public transit schedules, but there are still many proprietary formats (e.g. HACON, EFA etc.) which can be converted to GTFS with moderate effort. The difference between most of the formats is mainly syntactical.
 
+This data can be understood as an unstructured set of vehicle paths that are only connected in stations where the vehicle makes a stop (see Fig ??), which makes it very difficult to handle. We transform this data into a well-formed transit graph $G$ by using a simple line-sweeping algorithm to collapse nearby vehicle paths into single segments in $G$.
+
+
+\begin{figure}[h]
+\centering
+	\begin{tikzpicture}[scale=1.5]
+   \tikzstyle{node}=[inner sep=1pt, circle, draw=black, solid, fill=white];
+   \tikzstyle{anc}=[inner sep=0.3pt, circle, draw=black, solid, fill=black];
+   \draw[->] (-1.2,0) -- (4.2,0) node[right] {$x$};
+   \draw[->] (-1,-0.2) -- (-1,2.2) node[above] {$y$};
+
+
+	\draw (-0.5,1) -- (-0.25, 0.95) node[anc]{} -- (-0.15, 0.93) node[anc]{}
+		-- (-0, 0.98) node[anc]{} -- (0.1, 0.97) node[anc]{} -- (0.41, 0.94) node[anc]{} -- (0.51, 0.97) node[anc]{}
+		-- (1.11, 0.99) node[anc]{} -- (1.31, 1.06) node[anc]{} -- (1.41, 1.09) node[anc]{} -- (1.59, 1.1) node[anc]{}
+		-- (1.77, 1.04) node[anc]{} -- (1.97, 1.01) node[anc]{} -- (2.07, 1.02) node[anc]{} -- (2.77, 0.94) node[anc]{}
+		-- (2.77, 0.94) node[anc]{} -- (2.97, 0.84) node[anc]{} -- (3.17, 0.54) node[anc]{} -- (3.27, 0.24) node[node]{\tiny B};
+
+	\draw (-0.5,1) -- (-0.1, 1.05) node[anc]{} -- (0.2, 1.03) node[anc]{} -- (0.35, 1.06) node[anc]{} -- (0.45, 1.096) node[anc]{}
+		-- (0.55, 1.14) node[anc]{}
+		-- (0.7, 1.18) node[anc]{}
+		-- (0.8, 1.2) node[anc]{}
+		-- (0.9, 1.2) node[anc]{}
+		-- (1.1, 1.15) node[anc]{}
+		-- (1.25, 0.985) node[anc]{}
+		-- (1.35, 0.965) node[anc]{}
+		-- (1.45, 0.967) node[anc]{}
+		-- (1.6, 0.98) node[anc]{}
+		-- (1.79, 1.12) node[anc]{}
+		-- (2.02, 1.09) node[anc]{}
+		-- (2.32, 1.07) node[anc]{}
+		-- (2.52, 1.02) node[anc]{}
+		-- (2.92, 1.1) node[anc]{}
+		-- (3.12, 1.3) node[anc]{}
+		-- (3.19, 1.5) node[anc]{}
+		-- (3.25, 1.8) node[node]{\tiny C};
+
+
+    \draw[dotted] (-0.5,0) node[below] {$d_0$} -- (-0.5,2) ;
+    \draw[dotted] (-0.2,0) node[below] {$d_1$} -- (-0.2,2) ;
+    \draw[dotted] (0.4,0) node[below] {$d_3$} -- (0.4,2) ;
+    \draw[dotted] (0.7,0) node[below] {$d_4$} -- (0.7,2) ;
+    \draw[dotted] (1,0) node[below] {$d_5$} -- (1,2) ;
+
+
+
+	\node at (-0.5, 1)[node]{\tiny $A$};
+
+
+
+
+
+
+
+
+	;
+
+\end{tikzpicture}
+
+\caption{Line sweeping algorithm for spatial topology extraction}
+\end{figure}
+
+The process can be sped up by indexing every linear segment of every vehicle path in a geometric index (for example, an R-Tree), making for a better lookup time of nearby segments.
 
 
 \subsection{Meta nodes}
@@ -74,6 +161,7 @@ Fink and Pupyrev show that MLCM is NP-hard in \cite{fink:pupyrev}.
 %
 \subsection{Local Search}
 %
+(maybe dont mention this)
 %
 \subsection{Baseline ILP}
 %
