@@ -56,6 +56,7 @@ class ILPOptimizer : public Optimizer {
   virtual glp_prob* createProblem(const OptGraph& g) const;
 
   void solveProblem(glp_prob* lp) const;
+  void preSolveCoinCbc(glp_prob* lp) const;
 
   virtual void getConfigurationFromSolution(glp_prob* lp, Configuration* c,
                                             const OptGraph& g) const;

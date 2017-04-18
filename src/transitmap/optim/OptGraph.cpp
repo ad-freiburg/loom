@@ -128,7 +128,6 @@ bool OptGraph::simplifyStep() {
         }
       }
 
-
       if (equal) {
         OptNode* newFrom = 0;
         OptNode* newTo = 0;

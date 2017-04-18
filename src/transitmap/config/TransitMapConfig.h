@@ -24,6 +24,7 @@ struct Config {
   std::string glpkSolutionOutputPath;
 
   bool noOptim;
+  bool splittingOpt;
 
   double outputResolution;
   double inputSmoothing;

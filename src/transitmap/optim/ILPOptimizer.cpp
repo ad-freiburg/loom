@@ -4,6 +4,7 @@
 
 #include <glpk.h>
 #include <fstream>
+#include <cstdio>
 #include "./../graph/OrderingConfiguration.h"
 #include "./../output/OgrOutput.h"
 #include "./ILPOptimizer.h"
@@ -42,6 +43,7 @@ int ILPOptimizer::optimize() const {
 
 
   LOG(DEBUG) << "Solving problem..." << std::endl;
+  preSolveCoinCbc(lp);
   solveProblem(lp);
   LOG(DEBUG) << " ... done" << std::endl;
 
@@ -466,14 +468,49 @@ void ILPOptimizer::solveProblem(glp_prob* lp) const {
   glp_init_iocp(&params);
   params.presolve = GLP_ON;
   params.mip_gap = 0.5;
-  params.binarize = 1;
+  params.binarize = GLP_ON;
   params.bt_tech = GLP_BT_BPH;
-  params.fp_heur = _cfg->useGlpkFeasibilityPump ? GLP_ON : GLP_OFF;
-  params.ps_heur = _cfg->useGlpkProximSearch ? GLP_ON : GLP_OFF;
   params.ps_tm_lim = _cfg->glpkPSTimeLimit;
   params.tm_lim = _cfg->glpkTimeLimit;
+  //  params.fp_heur = _cfg->useGlpkFeasibilityPump ? GLP_ON : GLP_OFF;
+  params.ps_heur = _cfg->useGlpkProximSearch ? GLP_ON : GLP_OFF;
 
   glp_intopt(lp, &params);
+}
+
+// _____________________________________________________________________________
+void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
+  // write temporary file
+  std::string f = std::tmpnam(0);
+  std::string outf = std::tmpnam(0);
+  glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
+  std::stringstream cmd;
+  LOG(INFO) << "Calling external solver CBC..." << std::endl;
+  cmd << "/home/patrick/repos/Cbc-2.9/build/bin/cbc " << f << " -threads 4 -printingOptions all -solve -solution " << outf << "";
+  int r = system(cmd.str().c_str());
+  LOG(INFO) << "Solver exited (" << r << ")" << std::endl;
+  LOG(INFO) << "Parsing solution..." << std::endl;
+
+  std::ifstream fin;
+  fin.open(outf.c_str());
+  std::string line;
+
+  // skip first line
+  std::getline(fin, line);
+
+  while (std::getline(fin, line)) {
+    std::istringstream iss(line);
+    int number;
+    string name;
+    int value;
+
+    iss >> number;
+    iss >> name;
+    iss >> value;
+
+    size_t col = glp_find_col(lp, name.c_str());
+    if (col != 0) glp_set_col_bnds(lp, col, GLP_FX, value, value);
+  }
 }
 
 // _____________________________________________________________________________

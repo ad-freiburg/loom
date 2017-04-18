@@ -68,6 +68,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::bool_switch(&(cfg->noOptim))
       ->default_value(false),
       "disable line-ordering optimization")
+    ("splitting-optim",
+      opts::bool_switch(&(cfg->splittingOpt))
+      ->default_value(false),
+      "enable splitting optimization")
     ("optim-method",
       opts::value<std::string>(&(cfg->optimMethod))
       ->default_value("ilp_impr"),
