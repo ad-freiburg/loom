@@ -50,9 +50,9 @@ TODO
 
 \subsection{Problem Definition}
 
-Let $L$ by a set of unique transit lines and w.l.o.g. $l \in \mathbb{N}$. We call an undirected graph $T = (V, S)$ with vertices $v = (p_v, \sigma_v)$ and segments $s = (u, v, L(s), \tau_s)$ a transit graph. Each $v$ has a position $p_v \in \mathbb{R}^2$. Furthermore we assign each segment $s$ a polygonal chain $\tau_s = (p_1, ..., p_n), p_i \in \mathbb{R}^2$ which describes the geometrical path a segment takes through the plane. For each $s$, we impose $p_1 = p_u$ and $p_n = p_v$, that is the polygonal chain has to start and end at the position of the segment's start and end node. $L(s)$ is the (ordered) set of lines that traverse $s$. Finally, we assign each node a role $\sigma_v \in {0, 1}$, where $\sigma_v = 1$ means that $v$ is a real station node and $\sigma_v = 0$ that $v$ is only a spatial topological node.
+Let $L$ by a set of unique transit lines and w.l.o.g. $l \in \mathbb{N}$. We call an undirected graph $T = (V, S)$ with vertices $v = (p_v, \sigma_v)$ and segments $s = (u, v, L(s), \tau_s)$ a transit graph. Each $v$ has a position $p_v \in \mathbb{R}^2$. Furthermore we assign each segment $s$ a polygonal chain $\tau_s = (p_1, ..., p_n), p_i \in \mathbb{R}^2$ which describes the geometrical path a segment takes through the plane. For each $s$, we impose $p_1 = p_u$ and $p_n = p_v$, that is the polygonal chain has to start and end at the position of the segment's start and end node. $L(s)$ is the (ordered) set of lines that traverse $s$. Finally, we assign each node a role $\sigma_v \in {0, 1}$, where $\sigma_v = 1$ means that $v$ is a real station node and $\sigma_v = 0$ that $v$ is only a spatial topology node.
 
-$G$ can be understood as an embedding of an undirected multigraph $G = (V, E)$, where each line $l$ traversing on a segment $s$ of $T$ is transformed into a single edge. It can also be understood as an embedding of a set $\mathbb{L}$ of polygonal chains, one for each $l \in L$.
+$G$ can be understood as an embedding of an undirected multigraph $G = (V, E)$, where each line $l$ traversing a segment $s$ is transformed into a single edge. It can also be understood as an embedding of a set of $\mathbb{L}$ polygonal chains.
 
 The goal is to render $T$ in a way that resembles a modern transit map.
 
@@ -82,9 +82,15 @@ Fink and Pupyrev show that MLCM is NP-hard in \cite{fink:pupyrev}.
 \section{Spatial Topology Extraction}
 %
 
-Real-world public transit data is usually given as a set of stations (with geographical positions) and a set of vehicle routes, each consisting of some meta-information (line number, color, ...) and a list of stop / time pairs indicating the vehicle's schedule. In many cases, the geographical path the vehicle takes through the real world is also given. In recent years, the General Transit Feed Specification (GTFS) has become the dominant format for exchanging public transit schedules, but there are still many proprietary formats (e.g. HACON, EFA etc.) which can be converted to GTFS with moderate effort. The difference between most of the formats is mainly syntactical.
+Real-world public transit data is usually given as a set of stations (with geographical positions) and a set of vehicle routes, each consisting of some meta-information (line number, color, ...) and a list of stop / time pairs representing the vehicle's schedule. In many cases, the geographical path the vehicle takes through the real world is also given. In recent years, the General Transit Feed Specification (GTFS) has become the dominant format for exchanging public transit schedules, but there are still many proprietary formats (e.g. HACON, EFA etc.) which can be converted to GTFS with moderate effort. The difference between most of the formats is mainly syntactical.
 
-This data can be understood as an unstructured set of vehicle paths that are only connected in stations where the vehicle makes a stop (see Fig ??), which makes it very difficult to handle. We transform this data into a well-formed transit graph $G$ by using a simple line-sweeping algorithm to collapse nearby vehicle paths into single segments in $G$.
+This data is essentially an embedding of a transit graph, but with two major problems:
+\begin{enumerate}
+\item there may be many (possibly thousands of) edges between two station nodes, with different polygonal chains as paths
+\item topological nodes are missing in most cases (TODO: mention possibility to store this in GTFS)
+\end{enumerate}
+
+We transform this data into a well-formed transit graph $G$ by using a simple line-sweeping algorithm to collapse (partially) similar vehicle paths into single segments. Topological nodes are inserted on-the-fly.
 
 
 \begin{figure}[h]
