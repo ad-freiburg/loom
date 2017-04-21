@@ -6,11 +6,11 @@
 #define TRANSITMAP_GRAPH_NODE_H_
 
 #include <set>
-#include "gtfsparser/gtfs/Stop.h"
-#include "pbutil/geo/PolyLine.h"
-#include "pbutil/geo/Geo.h"
 #include "./OrderingConfiguration.h"
 #include "./Route.h"
+#include "gtfsparser/gtfs/Stop.h"
+#include "pbutil/geo/Geo.h"
+#include "pbutil/geo/PolyLine.h"
 
 using namespace gtfsparser;
 using namespace pbutil::geo;
@@ -21,23 +21,17 @@ namespace graph {
 // forward declarations
 class Edge;
 class Node;
-class EdgeTripGeom;
 struct RouteOccurance;
 
 // forward declaration of TransitGraph
 class TransitGraph;
 
-
 struct NodeFront {
-  NodeFront(Edge* e, Node* n) : n(n), edge(e) {
+  NodeFront(Edge* e, Node* n) : n(n), edge(e) {}
 
-  }
-
-  Node* n; // pointer to node here also
+  Node* n;  // pointer to node here also
 
   Point getTripOccPos(const Route* r, const Configuration& c) const;
-  Point getTripOccPosUnder(const Route* r, const graph::Configuration& c,
-    const Edge* e, const std::vector<size_t>* order) const;
   Point getTripPos(const Edge* e, size_t pos, bool inv) const;
 
   Edge* edge;
@@ -50,22 +44,23 @@ struct NodeFront {
 };
 
 struct Partner {
+  Partner(const NodeFront* f, const Edge* e, const Route* r) :
+    front(f), edge(e), route(r) {};
   const NodeFront* front;
   const Edge* edge;
-  const EdgeTripGeom* etg;
   const Route* route;
 };
 
 struct InnerGeometry {
-  InnerGeometry(PolyLine g, const Route* r, const Edge* e)
-  : geom(g), route(r), e(e) {};
+  InnerGeometry(PolyLine g, Partner a, Partner b) : geom(g), from(a), to(b){};
   PolyLine geom;
-  const Route* route;
-  const Edge* e;
+  Partner from;
+  Partner to;
 };
 
 struct StationInfo {
-  StationInfo(const std::string& id, const std::string& name) : id(id), name(name) {}
+  StationInfo(const std::string& id, const std::string& name)
+      : id(id), name(name) {}
   std::string id, name;
 };
 
@@ -85,33 +80,20 @@ class Node {
 
   const std::string& getId() const;
 
-  const std::set<Edge*>& getAdjListOut() const {
-    return _adjListOut;
-  }
-  const std::set<Edge*>& getAdjListIn() const {
-    return _adjListIn;
-  }
-  const std::vector<NodeFront>& getMainDirs() const {
-    return _mainDirs;
-  }
-  std::vector<NodeFront>& getMainDirs() {
-    return _mainDirs;
-  }
+  const std::set<Edge*>& getAdjListOut() const { return _adjListOut; }
+  const std::set<Edge*>& getAdjListIn() const { return _adjListIn; }
+  const std::vector<NodeFront>& getMainDirs() const { return _mainDirs; }
+  std::vector<NodeFront>& getMainDirs() { return _mainDirs; }
 
   void addMainDir(NodeFront f);
 
   const NodeFront* getNodeFrontFor(const Edge* e) const;
   double getScore(const graph::Configuration& c) const;
-  double getScoreUnder(const graph::Configuration& c, const Edge* e, const graph::Ordering* order) const;
-  double getAreaScore(const Configuration& c, const Edge* e, const graph::Ordering* order) const;
-  double getAreaScore(const Configuration& c) const;
-  std::vector<Partner> getPartners(const NodeFront* f, const RouteOccurance& ro) const;
+  std::vector<Partner> getPartners(const NodeFront* f,
+                                   const RouteOccurance& ro) const;
 
   std::vector<InnerGeometry> getInnerGeometries(const graph::Configuration& c,
-       double prec) const;
-  std::vector<InnerGeometry> getInnerGeometriesUnder(
-      const graph::Configuration& c, double prec, const Edge* e,
-      const std::vector<size_t>* order) const;
+                                                double prec) const;
 
   size_t getConnCardinality() const;
 
@@ -126,7 +108,8 @@ class Node {
   // remove edge from this node's adjacency lists
   void removeEdge(Edge* e);
 
-  void addRouteConnException(const Route* r, const Edge* edgeA, const Edge* edgeB);
+  void addRouteConnException(const Route* r, const Edge* edgeA,
+                             const Edge* edgeB);
   bool connOccurs(const Route* r, const Edge* edgeA, const Edge* edgeB) const;
 
   double getMaxNodeFrontWidth() const;
@@ -141,22 +124,22 @@ class Node {
 
   std::vector<StationInfo> _stops;
 
-  std::map<const Route*, std::map<const Edge*, std::set<const Edge*> > > _routeConnExceptions;
+  std::map<const Route*, std::map<const Edge*, std::set<const Edge*> > >
+      _routeConnExceptions;
 
   size_t getNodeFrontPos(const NodeFront* a) const;
 
   PolyLine getInnerBezier(const Configuration& c, const NodeFront& nf,
-      const RouteOccurance& tripOcc, const graph::Partner& partner, const Edge* e,
-      const std::vector<size_t>* order,
-      double prec) const;
+                          const RouteOccurance& tripOcc,
+                          const graph::Partner& partner, double prec) const;
 
-  PolyLine getInnerStraightLine(const Configuration& c,
-      const NodeFront& nf, const RouteOccurance& tripOcc,
-      const graph::Partner& partner, const Edge* e,
-      const std::vector<size_t>* order) const;
+  PolyLine getInnerStraightLine(const Configuration& c, const NodeFront& nf,
+                                const RouteOccurance& tripOcc,
+                                const graph::Partner& partner) const;
 
   friend class TransitGraph;
 };
-}}
+}
+}
 
 #endif  // TRANSITMAP_GRAPH_NODE_H_

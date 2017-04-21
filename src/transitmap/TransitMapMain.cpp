@@ -13,7 +13,6 @@
 #include "./graph/GraphBuilder.h"
 #include "./graph/Node.h"
 #include "./graph/TransitGraph.h"
-#include "./optim/EdgeOrderOptimizer.h"
 #include "./optim/ILPEdgeOrderOptimizer.h"
 #include "./output/OgrOutput.h"
 #include "./output/SvgOutput.h"

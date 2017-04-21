@@ -3,13 +3,13 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <cassert>
-#include "pbutil/geo/Geo.h"
-#include "pbutil/geo/BezierCurve.h"
-#include "./Node.h"
+#include "../graph/OrderingConfiguration.h"
 #include "./Edge.h"
+#include "./Node.h"
 #include "./Route.h"
 #include "./TransitGraph.h"
-#include "../graph/OrderingConfiguration.h"
+#include "pbutil/geo/BezierCurve.h"
+#include "pbutil/geo/Geo.h"
 
 using namespace transitmapper;
 using namespace graph;
@@ -21,16 +21,11 @@ using pbutil::geo::PolyLine;
 using pbutil::geo::Line;
 
 // _____________________________________________________________________________
-Point NodeFront::getTripOccPosUnder(const Route* r,
-    const graph::Configuration& c, const Edge* e, const Ordering* order) const {
-
+Point NodeFront::getTripOccPos(const Route* r,
+                               const graph::Configuration& c) const {
   RouteOccWithPos rop;
 
-  if (edge == e) {
-    rop = edge->getRouteOccWithPosUnder(r, *order);
-  } else {
-    rop = edge->getRouteOccWithPosUnder(r, c.find(edge)->second);
-  }
+  rop = edge->getRouteOccWithPosUnder(r, c.find(edge)->second);
 
   if (rop.first) {
     return getTripPos(edge, rop.second, n == edge->getTo());
@@ -40,15 +35,13 @@ Point NodeFront::getTripOccPosUnder(const Route* r,
 }
 
 // _____________________________________________________________________________
-Point NodeFront::getTripPos(const Edge* e, size_t pos,
-    bool inv) const {
+Point NodeFront::getTripPos(const Edge* e, size_t pos, bool inv) const {
   double p;
   if (!inv) {
-    p = (e->getWidth() + e->getSpacing()) * pos
-        + e->getWidth()/2;
+    p = (e->getWidth() + e->getSpacing()) * pos + e->getWidth() / 2;
   } else {
-    p = (e->getWidth() + e->getSpacing()) * (e->getCardinality() - 1 - pos)
-        + e->getWidth()/2;
+    p = (e->getWidth() + e->getSpacing()) * (e->getCardinality() - 1 - pos) +
+        e->getWidth() / 2;
   }
 
   // use interpolate here directly for speed
@@ -65,20 +58,20 @@ double Node::getMaxNodeFrontWidth() const {
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, Point pos) : _id(id), _pos(pos) {
-}
+Node::Node(const std::string& id, Point pos) : _id(id), _pos(pos) {}
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, double x, double y) : _id(id), _pos(x, y) {
-}
+Node::Node(const std::string& id, double x, double y) : _id(id), _pos(x, y) {}
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, Point pos, StationInfo s) : _id(id), _pos(pos) {
+Node::Node(const std::string& id, Point pos, StationInfo s)
+    : _id(id), _pos(pos) {
   addStop(s);
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, double x, double y, StationInfo s) : _id(id), _pos(x, y) {
+Node::Node(const std::string& id, double x, double y, StationInfo s)
+    : _id(id), _pos(x, y) {
   addStop(s);
 }
 
@@ -118,14 +111,10 @@ Node::~Node() {
 }
 
 // _____________________________________________________________________________
-void Node::addStop(StationInfo s) {
-  _stops.push_back(s);
-}
+void Node::addStop(StationInfo s) { _stops.push_back(s); }
 
 // _____________________________________________________________________________
-const std::vector<StationInfo>& Node::getStops() const {
-  return _stops;
-}
+const std::vector<StationInfo>& Node::getStops() const { return _stops; }
 
 // _____________________________________________________________________________
 void Node::addEdge(Edge* e) {
@@ -148,24 +137,16 @@ void Node::removeEdge(Edge* e) {
 }
 
 // _____________________________________________________________________________
-const Point& Node::getPos() const {
-  return _pos;
-}
+const Point& Node::getPos() const { return _pos; }
 
 // _____________________________________________________________________________
-void Node::setPos(const Point& p) {
-  _pos = p;
-}
+void Node::setPos(const Point& p) { _pos = p; }
 
 // _____________________________________________________________________________
-const std::string& Node::getId() const {
-  return _id;
-}
+const std::string& Node::getId() const { return _id; }
 
 // _____________________________________________________________________________
-void Node::addMainDir(NodeFront f) {
-  _mainDirs.push_back(f);
-}
+void Node::addMainDir(NodeFront f) { _mainDirs.push_back(f); }
 
 // _____________________________________________________________________________
 const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
@@ -180,75 +161,20 @@ const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
 
 // _____________________________________________________________________________
 double Node::getScore(const Configuration& c) const {
-  std::vector<InnerGeometry> igs = getInnerGeometries(c, -1);
-
-  double score = 0;
-
-  for (size_t i = 0; i < igs.size(); i++) {
-    for (size_t j = 0; j < igs.size(); j++) {
-      if (j == i) continue;  // don't check against itself
-
-      if (igs[j].geom.distTo(igs[i].geom) < 1) {
-        score += .5;
-      }
-    }
-  }
-
-  return score / sqrt(_adjListIn.size() + _adjListOut.size());
-}
-
-// _____________________________________________________________________________
-double Node::getScoreUnder(const graph::Configuration& c, const Edge* e,
-    const std::vector<size_t>* order) const {
-
-  std::vector<InnerGeometry> igs = getInnerGeometriesUnder(c, -1, e, order);
-
-  double score = 0;
-
-  for (size_t i = 0; i < igs.size(); i++) {
-    for (size_t j = 0; j < igs.size(); j++) {
-      if (j == i) continue;  // don't check against itself
-
-      if (igs[j].geom.distTo(igs[i].geom) < 1) {
-        score += .5;
-      }
-    }
-  }
-
-  return score / sqrt(_adjListIn.size() + _adjListOut.size());
-}
-
-// _____________________________________________________________________________
-double Node::getAreaScore(const Configuration& c, const Edge* e,
-  const Ordering* order)
-const {
-  double ret = getScoreUnder(c, e, order);
-
-  for (auto e : _adjListIn) {
-    ret += e->getFrom()->getScoreUnder(c, e, order);
-  }
-
-  for (auto e : _adjListOut) {
-    ret += e->getTo()->getScoreUnder(c, e, order);
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
-double Node::getAreaScore(const Configuration& c) const {
-  return getAreaScore(c, 0, 0);
+  // TODO!
+  return 0;
 }
 
 // _____________________________________________________________________________
 std::vector<Partner> Node::getPartners(const NodeFront* f,
-  const RouteOccurance& ro) const {
+                                       const RouteOccurance& ro) const {
   std::vector<Partner> ret;
   for (const auto& nf : getMainDirs()) {
     if (&nf == f) continue;
 
-    for (const RouteOccurance& to : nf.edge->getContinuedRoutesIn(this, ro.route, ro.direction, f->edge)) {
-      Partner p;
+    for (const RouteOccurance& to :
+         nf.edge->getContinuedRoutesIn(this, ro.route, ro.direction, f->edge)) {
+      Partner p(f, nf.edge, to.route, 0);
       p.front = &nf;
       p.edge = nf.edge;
       p.route = to.route;
@@ -260,61 +186,7 @@ std::vector<Partner> Node::getPartners(const NodeFront* f,
 
 // _____________________________________________________________________________
 std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
-    double prec) const {
-  return getInnerGeometriesUnder(c, prec, 0, 0);
-}
-
-// _____________________________________________________________________________
-PolyLine Node::getInnerStraightLine(const Configuration& c,
-    const NodeFront& nf, const RouteOccurance& tripOcc,
-    const graph::Partner& partner, const Edge* e,
-    const graph::Ordering* order) const {
-  Point p = nf.getTripOccPosUnder(tripOcc.route, c, e, order);
-  Point pp = partner.front->getTripOccPosUnder(partner.route, c, e, order);
-
-  return PolyLine(p, pp);
-}
-
-// _____________________________________________________________________________
-PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
-    const RouteOccurance& tripOcc, const graph::Partner& partner,
-    const Edge* e,
-    const graph::Ordering* order,
-    double prec) const {
-
-
-  Point p = nf.getTripOccPosUnder(tripOcc.route, cf, e, order);
-  Point pp = partner.front->getTripOccPosUnder(partner.route, cf, e, order);
-
-  double d = pbutil::geo::dist(p, pp) / 2;
-
-  Point b = p;
-  Point c = pp;
-  std::pair<double, double> slopeA, slopeB;
-
-  if (nf.edge->getTo() == this) {
-    slopeA = nf.edge->getGeom().getSlopeBetweenDists(nf.edge->getGeom().getLength() - 5, nf.edge->getGeom().getLength());
-  } else {
-    slopeA = nf.edge->getGeom().getSlopeBetweenDists(5, 0);
-  }
-
-  if (partner.front->edge->getTo() == this) {
-    slopeB = partner.front->edge->getGeom().getSlopeBetweenDists(partner.front->edge->getGeom().getLength() - 5, partner.front->edge->getGeom().getLength());
-  } else {
-    slopeB = partner.front->edge->getGeom().getSlopeBetweenDists(5, 0);
-  }
-
-  b = Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
-  c = Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
-
-  BezierCurve bc(p, b, c, pp);
-  return bc.render(prec);
-}
-
-// _____________________________________________________________________________
-std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
-    const graph::Configuration& c, double prec,
-    const Edge* e, const graph::Ordering* order) const {
+                                                    double prec) const {
   std::vector<InnerGeometry> ret;
 
   std::map<const Route*, std::set<const NodeFront*> > processed;
@@ -324,28 +196,24 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
 
     const std::vector<size_t>* ordering = &c.find(nf.edge)->second;
 
-    if (nf.edge == e) {
-      ordering = order;
-    }
-
     for (size_t j : *ordering) {
       const RouteOccurance& routeOcc = (*nf.edge->getTripsUnordered())[j];
+      Partner o(&nf, nf.edge, routeOcc.route, 0);
 
       std::vector<graph::Partner> partners = getPartners(&nf, routeOcc);
 
       for (const graph::Partner& p : partners) {
-        if (processed[routeOcc.route].find(p.front) != processed[routeOcc.route].end()) {
+        if (processed[routeOcc.route].find(p.front) !=
+            processed[routeOcc.route].end()) {
           continue;
         }
 
         if (prec > 0) {
-          ret.push_back(InnerGeometry(
-              getInnerBezier(c, nf, routeOcc, p, e, order, prec),
-              p.route, nf.edge));
+          ret.push_back(InnerGeometry(getInnerBezier(c, nf, routeOcc, p, prec),
+                                      o, p));
         } else {
-          ret.push_back(InnerGeometry(
-              getInnerStraightLine(c, nf, routeOcc, p, e, order),
-              p.route, nf.edge));
+          ret.push_back(InnerGeometry(getInnerStraightLine(c, nf, routeOcc, p),
+                                      o, p));
         }
       }
 
@@ -354,6 +222,52 @@ std::vector<InnerGeometry> Node::getInnerGeometriesUnder(
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+PolyLine Node::getInnerStraightLine(const Configuration& c, const NodeFront& nf,
+                                    const RouteOccurance& tripOcc,
+                                    const graph::Partner& partner) const {
+  Point p = nf.getTripOccPos(tripOcc.route, c);
+  Point pp = partner.front->getTripOccPos(partner.route, c);
+
+  return PolyLine(p, pp);
+}
+
+// _____________________________________________________________________________
+PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
+                              const RouteOccurance& tripOcc,
+                              const graph::Partner& partner,
+                              double prec) const {
+  Point p = nf.getTripOccPos(tripOcc.route, cf);
+  Point pp = partner.front->getTripOccPos(partner.route, cf);
+
+  double d = pbutil::geo::dist(p, pp) / 2;
+
+  Point b = p;
+  Point c = pp;
+  std::pair<double, double> slopeA, slopeB;
+
+  if (nf.edge->getTo() == this) {
+    slopeA = nf.edge->getGeom().getSlopeBetweenDists(
+        nf.edge->getGeom().getLength() - 5, nf.edge->getGeom().getLength());
+  } else {
+    slopeA = nf.edge->getGeom().getSlopeBetweenDists(5, 0);
+  }
+
+  if (partner.front->edge->getTo() == this) {
+    slopeB = partner.front->edge->getGeom().getSlopeBetweenDists(
+        partner.front->edge->getGeom().getLength() - 5,
+        partner.front->edge->getGeom().getLength());
+  } else {
+    slopeB = partner.front->edge->getGeom().getSlopeBetweenDists(5, 0);
+  }
+
+  b = Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
+  c = Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
+
+  BezierCurve bc(p, b, c, pp);
+  return bc.render(prec);
 }
 
 // _____________________________________________________________________________
@@ -370,7 +284,8 @@ size_t Node::getConnCardinality() const {
       std::vector<graph::Partner> partners = getPartners(&nf, routeOcc);
 
       for (const graph::Partner& p : partners) {
-        if (processed[routeOcc.route].find(p.front) != processed[routeOcc.route].end()) {
+        if (processed[routeOcc.route].find(p.front) !=
+            processed[routeOcc.route].end()) {
           continue;
         }
         ret++;
@@ -389,10 +304,10 @@ Polygon Node::getConvexFrontHull(double d) const {
 
   if (getMainDirs().size() != 2) {
     for (auto& nf : getMainDirs()) {
-
-      PolyLine capped = nf.geom.getSegment(
-          (nf.edge->getWidth() / 2) / nf.geom.getLength(),
-          (nf.geom.getLength() - nf.edge->getWidth() / 2) / nf.geom.getLength());
+      PolyLine capped =
+          nf.geom.getSegment((nf.edge->getWidth() / 2) / nf.geom.getLength(),
+                             (nf.geom.getLength() - nf.edge->getWidth() / 2) /
+                                 nf.geom.getLength());
 
       l.push_back(capped.getLine());
     }
@@ -400,16 +315,23 @@ Polygon Node::getConvexFrontHull(double d) const {
     // for two main dirs, take average
     std::vector<const PolyLine*> pols;
     PolyLine a = getMainDirs()[0].geom.getSegment(
-          (getMainDirs()[0].edge->getWidth() / 2) / getMainDirs()[0].geom.getLength(),
-          (getMainDirs()[0].geom.getLength() - getMainDirs()[0].edge->getWidth() / 2) / getMainDirs()[0].geom.getLength());
+        (getMainDirs()[0].edge->getWidth() / 2) /
+            getMainDirs()[0].geom.getLength(),
+        (getMainDirs()[0].geom.getLength() -
+         getMainDirs()[0].edge->getWidth() / 2) /
+            getMainDirs()[0].geom.getLength());
     PolyLine b = getMainDirs()[1].geom.getSegment(
-          (getMainDirs()[1].edge->getWidth() / 2) / getMainDirs()[1].geom.getLength(),
-          (getMainDirs()[1].geom.getLength() - getMainDirs()[1].edge->getWidth() / 2) / getMainDirs()[1].geom.getLength());
+        (getMainDirs()[1].edge->getWidth() / 2) /
+            getMainDirs()[1].geom.getLength(),
+        (getMainDirs()[1].geom.getLength() -
+         getMainDirs()[1].edge->getWidth() / 2) /
+            getMainDirs()[1].geom.getLength());
 
     assert(a.getLine().size() > 1);
     assert(b.getLine().size() > 1);
 
-    if (dist(a.getLine()[0], b.getLine()[0]) > dist(a.getLine()[1], b.getLine()[0])) {
+    if (dist(a.getLine()[0], b.getLine()[0]) >
+        dist(a.getLine()[1], b.getLine()[0])) {
       a.reverse();
     }
 
@@ -429,9 +351,11 @@ Polygon Node::getConvexFrontHull(double d) const {
   if (l.size() > 1) {
     Polygon hull;
     bgeo::convex_hull(l, hull);
-    bgeo::buffer(hull, ret, distanceStrat, sideStrat, joinStrat, endStrat, circleStrat);
+    bgeo::buffer(hull, ret, distanceStrat, sideStrat, joinStrat, endStrat,
+                 circleStrat);
   } else {
-    bgeo::buffer(l, ret, distanceStrat, sideStrat, joinStrat, endStrat, circleStrat);
+    bgeo::buffer(l, ret, distanceStrat, sideStrat, joinStrat, endStrat,
+                 circleStrat);
   }
 
   assert(ret.size() > 0);
@@ -448,15 +372,16 @@ size_t Node::getNodeFrontPos(const NodeFront* a) const {
 }
 
 // _____________________________________________________________________________
-void Node::addRouteConnException(const Route* r, const Edge* edgeA, const Edge* edgeB) {
+void Node::addRouteConnException(const Route* r, const Edge* edgeA,
+                                 const Edge* edgeB) {
   _routeConnExceptions[r][edgeA].insert(edgeB);
   // index the other direction also, will lead to faster lookups later on
   _routeConnExceptions[r][edgeB].insert(edgeA);
 }
 
 // _____________________________________________________________________________
-bool Node::connOccurs(const Route* r, const Edge* edgeA, const Edge* edgeB)
-const {
+bool Node::connOccurs(const Route* r, const Edge* edgeA,
+                      const Edge* edgeB) const {
   const auto& i = _routeConnExceptions.find(r);
   if (i == _routeConnExceptions.end()) return true;
   const auto& ii = i->second.find(edgeA);

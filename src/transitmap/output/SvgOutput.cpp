@@ -175,7 +175,7 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
 
   for (auto& ie :
        n->getInnerGeometries(outG.getConfig(), _cfg->innerGeometryPrecision)) {
-    renderLinePart(ie.geom, ie.e->getWidth(), *ie.route, 0);
+    renderLinePart(ie.geom, ie.from.edge->getWidth(), *ie.from.route, 0);
   }
 }
 
