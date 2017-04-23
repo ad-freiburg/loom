@@ -174,7 +174,7 @@ std::vector<Partner> Node::getPartners(const NodeFront* f,
 
     for (const RouteOccurance& to :
          nf.edge->getContinuedRoutesIn(this, ro.route, ro.direction, f->edge)) {
-      Partner p(f, nf.edge, to.route, 0);
+      Partner p(f, nf.edge, to.route);
       p.front = &nf;
       p.edge = nf.edge;
       p.route = to.route;
@@ -188,7 +188,6 @@ std::vector<Partner> Node::getPartners(const NodeFront* f,
 std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
                                                     double prec) const {
   std::vector<InnerGeometry> ret;
-
   std::map<const Route*, std::set<const NodeFront*> > processed;
 
   for (size_t i = 0; i < getMainDirs().size(); ++i) {
@@ -198,7 +197,7 @@ std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
 
     for (size_t j : *ordering) {
       const RouteOccurance& routeOcc = (*nf.edge->getTripsUnordered())[j];
-      Partner o(&nf, nf.edge, routeOcc.route, 0);
+      Partner o(&nf, nf.edge, routeOcc.route);
 
       std::vector<graph::Partner> partners = getPartners(&nf, routeOcc);
 
@@ -209,11 +208,9 @@ std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
         }
 
         if (prec > 0) {
-          ret.push_back(InnerGeometry(getInnerBezier(c, nf, routeOcc, p, prec),
-                                      o, p));
+          ret.push_back(getInnerBezier(c, o, p, prec));
         } else {
-          ret.push_back(InnerGeometry(getInnerStraightLine(c, nf, routeOcc, p),
-                                      o, p));
+          ret.push_back(getInnerStraightLine(c, o, p));
         }
       }
 
@@ -225,49 +222,55 @@ std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
 }
 
 // _____________________________________________________________________________
-PolyLine Node::getInnerStraightLine(const Configuration& c, const NodeFront& nf,
-                                    const RouteOccurance& tripOcc,
-                                    const graph::Partner& partner) const {
-  Point p = nf.getTripOccPos(tripOcc.route, c);
-  Point pp = partner.front->getTripOccPos(partner.route, c);
+InnerGeometry Node::getInnerStraightLine(
+    const Configuration& c, const graph::Partner& partnerFrom,
+    const graph::Partner& partnerTo) const {
+  Point p = partnerFrom.front->getTripOccPos(partnerFrom.route, c);
+  Point pp = partnerTo.front->getTripOccPos(partnerTo.route, c);
 
-  return PolyLine(p, pp);
+  size_t s = partnerFrom.edge->getRouteOccWithPosUnder(partnerFrom.route, c.find(partnerFrom.edge)->second).second;
+  size_t ss = partnerTo.edge->getRouteOccWithPosUnder(partnerTo.route, c.find(partnerTo.edge)->second).second;
+
+  return InnerGeometry(PolyLine(p, pp), partnerFrom, partnerTo, s, ss);
 }
 
 // _____________________________________________________________________________
-PolyLine Node::getInnerBezier(const Configuration& cf, const NodeFront& nf,
-                              const RouteOccurance& tripOcc,
-                              const graph::Partner& partner,
-                              double prec) const {
-  Point p = nf.getTripOccPos(tripOcc.route, cf);
-  Point pp = partner.front->getTripOccPos(partner.route, cf);
-
+InnerGeometry Node::getInnerBezier(const Configuration& cf,
+                                   const graph::Partner& partnerFrom,
+                                   const graph::Partner& partnerTo,
+                                   double prec) const {
+  InnerGeometry ret = getInnerStraightLine(cf, partnerFrom, partnerTo);
+  Point p = ret.geom.getLine().front();
+  Point pp = ret.geom.getLine().back();
   double d = pbutil::geo::dist(p, pp) / 2;
 
   Point b = p;
   Point c = pp;
   std::pair<double, double> slopeA, slopeB;
 
-  if (nf.edge->getTo() == this) {
-    slopeA = nf.edge->getGeom().getSlopeBetweenDists(
-        nf.edge->getGeom().getLength() - 5, nf.edge->getGeom().getLength());
+  if (partnerFrom.front->edge->getTo() == this) {
+    slopeA = partnerFrom.front->edge->getGeom().getSlopeBetweenDists(
+        partnerFrom.front->edge->getGeom().getLength() - 5,
+        partnerFrom.front->edge->getGeom().getLength());
   } else {
-    slopeA = nf.edge->getGeom().getSlopeBetweenDists(5, 0);
+    slopeA = partnerFrom.front->edge->getGeom().getSlopeBetweenDists(5, 0);
   }
 
-  if (partner.front->edge->getTo() == this) {
-    slopeB = partner.front->edge->getGeom().getSlopeBetweenDists(
-        partner.front->edge->getGeom().getLength() - 5,
-        partner.front->edge->getGeom().getLength());
+  if (partnerTo.front->edge->getTo() == this) {
+    slopeB = partnerTo.front->edge->getGeom().getSlopeBetweenDists(
+        partnerTo.front->edge->getGeom().getLength() - 5,
+        partnerTo.front->edge->getGeom().getLength());
   } else {
-    slopeB = partner.front->edge->getGeom().getSlopeBetweenDists(5, 0);
+    slopeB = partnerTo.front->edge->getGeom().getSlopeBetweenDists(5, 0);
   }
 
   b = Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
   c = Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
 
   BezierCurve bc(p, b, c, pp);
-  return bc.render(prec);
+  ret.geom = bc.render(prec);
+
+  return ret;
 }
 
 // _____________________________________________________________________________

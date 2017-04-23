@@ -44,18 +44,22 @@ struct NodeFront {
 };
 
 struct Partner {
-  Partner(const NodeFront* f, const Edge* e, const Route* r) :
-    front(f), edge(e), route(r) {};
+  Partner(const NodeFront* f, const Edge* e, const Route* r)
+      : front(f), edge(e), route(r){};
   const NodeFront* front;
   const Edge* edge;
   const Route* route;
 };
 
 struct InnerGeometry {
-  InnerGeometry(PolyLine g, Partner a, Partner b) : geom(g), from(a), to(b){};
+  InnerGeometry(PolyLine g, Partner a, Partner b, size_t slotF,
+                size_t slotT)
+      : geom(g), from(a), to(b), slotFrom(slotF), slotTo(slotT){};
   PolyLine geom;
   Partner from;
   Partner to;
+  size_t slotFrom;
+  size_t slotTo;
 };
 
 struct StationInfo {
@@ -129,14 +133,14 @@ class Node {
 
   size_t getNodeFrontPos(const NodeFront* a) const;
 
-  PolyLine getInnerBezier(const Configuration& c, const NodeFront& nf,
-                          const RouteOccurance& tripOcc,
-                          const graph::Partner& partner, double prec) const;
+  InnerGeometry getInnerBezier(const Configuration& c,
+                               const graph::Partner& partnerFrom,
+                               const graph::Partner& partnerTo,
+                               double prec) const;
 
-  PolyLine getInnerStraightLine(const Configuration& c, const NodeFront& nf,
-                                const RouteOccurance& tripOcc,
-                                const graph::Partner& partner) const;
-
+  InnerGeometry getInnerStraightLine(const Configuration& c,
+                                     const graph::Partner& partnerFrom,
+                                     const graph::Partner& partnerTo) const;
   friend class TransitGraph;
 };
 }
