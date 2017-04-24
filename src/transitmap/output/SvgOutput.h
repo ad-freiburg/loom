@@ -7,6 +7,8 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
+#include <set>
 #include "./../config/TransitMapConfig.h"
 #include "./../graph/Route.h"
 #include "./../graph/TransitGraph.h"
@@ -35,6 +37,9 @@ class SvgOutputException : public std::exception {
 struct InnerClique {
   InnerClique(graph::InnerGeometry geom) {geoms.push_back(geom);};
   std::vector<graph::InnerGeometry> geoms;
+
+  int32_t getZWeight() const;
+  bool operator<(const InnerClique& rhs) const;
 };
 
 struct RenderParams {
@@ -114,7 +119,7 @@ class SvgOutput : public Output {
 
   void renderNodeFronts(const graph::TransitGraph& outG,
                         const RenderParams& params);
-  std::vector<InnerClique> getInnerCliques(
+  std::multiset<InnerClique> getInnerCliques(
       std::vector<graph::InnerGeometry> geoms, size_t level) const;
 
   void renderClique(const InnerClique& c, const graph::Node* node);

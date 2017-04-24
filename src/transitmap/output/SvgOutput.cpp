@@ -180,9 +180,9 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
 }
 
 // _____________________________________________________________________________
-std::vector<InnerClique> SvgOutput::getInnerCliques(
+std::multiset<InnerClique> SvgOutput::getInnerCliques(
     std::vector<graph::InnerGeometry> pool, size_t level) const {
-  std::vector<InnerClique> ret;
+  std::multiset<InnerClique> ret;
 
   // start with the first geom in pool
   while (!pool.empty()) {
@@ -195,7 +195,7 @@ std::vector<InnerClique> SvgOutput::getInnerCliques(
       pool.erase(pool.begin() + p);
     }
 
-    ret.push_back(cur);
+    ret.insert(cur);
   }
 
   return ret;
@@ -261,9 +261,14 @@ bool SvgOutput::hasSameOrigin(const graph::InnerGeometry& a, const graph::InnerG
 
 // _____________________________________________________________________________
 void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
-  std::vector<InnerClique> renderCliques = getInnerCliques(cc.geoms, 0);
+  std::multiset<InnerClique> renderCliques = getInnerCliques(cc.geoms, 0);
   for (const auto& c : renderCliques) {
+
+    // the longest geom will be the ref geom
     graph::InnerGeometry ref = c.geoms[0];
+    for (size_t i = 1; i < c.geoms.size(); i++) {
+      if (c.geoms[i].geom.getLength() > ref.geom.getLength()) ref = c.geoms[i];
+    }
 
     for (size_t i = 0; i < c.geoms.size(); i++) {
 
@@ -579,4 +584,14 @@ void SvgOutput::printPolygon(const Polygon& g, const std::string& style,
   std::map<std::string, std::string> params;
   params["style"] = style;
   printPolygon(g, params, rparams);
+}
+
+// _____________________________________________________________________________
+int32_t InnerClique::getZWeight() const {
+  return 0; // TODO
+}
+
+// _____________________________________________________________________________
+bool InnerClique::operator<(const InnerClique& rhs) const {
+ return getZWeight() < rhs.getZWeight();
 }
