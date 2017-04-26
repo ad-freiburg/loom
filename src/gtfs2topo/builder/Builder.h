@@ -67,8 +67,8 @@ class Builder {
   bool checkTripSanity(gtfs::Trip* t) const;
   bool checkShapeSanity(gtfs::Shape* t) const;
 
-  void combineNodes(Node* a, Node* b, Graph* g);
-  void combineEdges(Edge* a, Edge* b, Node* n, Graph* g);
+  bool combineNodes(Node* a, Node* b, Graph* g);
+  bool combineEdges(Edge* a, Edge* b, Node* n, Graph* g);
 
   bool lineCrossesAtNode(const Node* a, const Edge* e, const Edge* f) const;
 

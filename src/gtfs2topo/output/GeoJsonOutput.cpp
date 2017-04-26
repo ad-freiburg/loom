@@ -47,11 +47,13 @@ void GeoJsonOutput::print(const graph::Graph& outG) {
     auto arr = json::array();
 
     for (graph::Edge* e : n->getAdjList()) {
+      if (e->getEdgeTripGeoms()->size() == 0) continue;
       for (auto r : *e->getEdgeTripGeoms()->front().getTripsUnordered()) {
         for (graph::Edge* f : n->getAdjList()) {
           if (e == f) continue;
+          if (f->getEdgeTripGeoms()->size() == 0) continue;
           for (auto rr : *f->getEdgeTripGeoms()->front().getTripsUnordered()) {
-            if (r.route == rr.route &&
+            if (!_cfg->ignoreDirections && r.route == rr.route &&
                 (r.direction == 0 || rr.direction == 0 ||
                  (r.direction == n && rr.direction != n) ||
                  (r.direction != n && rr.direction == n)) &&
@@ -101,7 +103,7 @@ void GeoJsonOutput::print(const graph::Graph& outG) {
           route["label"] = r.route->getShortName();
           route["color"] = r.route->getColorString();
 
-          if (r.direction != 0) {
+          if (!_cfg->ignoreDirections && r.direction != 0) {
             route["direction"] = toString(r.direction);
           }
 

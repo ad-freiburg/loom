@@ -8,6 +8,7 @@
 #define _USE_MATH_DEFINES
 
 #include <boost/geometry.hpp>
+#include <boost/geometry/strategies/transform/matrix_transformers.hpp>
 #include <math.h>
 
 // -------------------
@@ -26,6 +27,60 @@ typedef bgeo::model::multi_linestring<Line> MultiLine;
 typedef bgeo::model::polygon<Point> Polygon;
 typedef bgeo::model::multi_polygon<Polygon> MultiPolygon;
 
+
+// _____________________________________________________________________________
+inline Polygon getOrientedEnvelope(Polygon pol) {
+  // TODO: implement this nicer, works for now, but inefficient
+  // see https://geidav.wordpress.com/tag/gift-wrapping/#fn-1057-FreemanShapira1975
+  // for a nicer algorithm
+
+  bgeo::model::box<Point> tmpBox;
+  bgeo::envelope(pol, tmpBox);
+  double rotateDeg = 0;
+
+  Point center;
+  bgeo::centroid(pol, center);
+
+  bgeo::strategy::transform::translate_transformer<double, 2, 2> translate(-center.get<0>(), -center.get<1>());
+  bgeo::strategy::transform::rotate_transformer<bgeo::degree, double, 2, 2> rotate(1.0);
+  bgeo::strategy::transform::translate_transformer<double, 2, 2> translateBack(center.get<0>(), center.get<1>());
+
+
+  // rotate in 5 deg steps
+  for (int i = 1; i < 360; i += 1) {
+    Polygon tmp;
+    bgeo::transform(pol, tmp, translate);
+    Polygon tmp2;
+    bgeo::transform(tmp, tmp2, rotate);
+    Polygon tmp3;
+    bgeo::transform(tmp2, tmp3, translateBack);
+
+    pol = tmp3;
+
+    bgeo::model::box<Point> e;
+    bgeo::envelope(pol, e);
+    if (bgeo::area(tmpBox) > bgeo::area(e)) {
+      tmpBox = e;
+      rotateDeg = i;
+    }
+  }
+
+  Polygon hull;
+  bgeo::convex_hull(tmpBox, hull);
+  bgeo::strategy::transform::translate_transformer<double, 2, 2> translate2(-center.get<0>(), -center.get<1>());
+  bgeo::strategy::transform::rotate_transformer<bgeo::degree, double, 2, 2> rotate2(-rotateDeg);
+  bgeo::strategy::transform::translate_transformer<double, 2, 2> translateBack2(center.get<0>(), center.get<1>());
+
+  Polygon hull2;
+  bgeo::transform(hull, hull2, translate2);
+  Polygon hull3;
+  bgeo::transform(hull2, hull3, rotate2);
+  Polygon hull4;
+  bgeo::transform(hull3, hull4, translateBack2);
+
+
+  return hull4;
+}
 
 // _____________________________________________________________________________
 inline bool doubleEq(double a, double b) {

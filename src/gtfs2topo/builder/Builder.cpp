@@ -25,8 +25,7 @@ Builder::Builder(const config::Config* cfg) : _cfg(cfg) {
 void Builder::consume(const Feed& f, Graph* g) {
   // TODO: make this stuff configurable
 
-  uint8_t AGGREGATE_STOPS = 2;  // 1: aggregate stops already aggrgated in GTFS
-                                // 2: aaggregte stops by distance
+  uint8_t AGGREGATE_STOPS = _cfg->stationAggrLevel;
 
   size_t cur = 0;
   for (auto t = f.tripsBegin(); t != f.tripsEnd(); ++t) {
@@ -58,7 +57,9 @@ void Builder::consume(const Feed& f, Graph* g) {
         exE = g->addEdge(fromNode, toNode);
       }
 
-      if (!exE->addTrip(t->second, toNode)) {
+      Node* directionNode = toNode;
+
+      if (!exE->addTrip(t->second, directionNode)) {
         std::pair<bool, PolyLine> edgeGeom;
         if (AGGREGATE_STOPS) {
           Stop* frs = prev.getStop()->getParentStation()
@@ -84,7 +85,7 @@ void Builder::consume(const Feed& f, Graph* g) {
             fromNode->connOccurs(t->second->getRoute(), prevEdge, exE);
           }
 
-          exE->addTrip(t->second, edgeGeom.second, toNode);
+          exE->addTrip(t->second, edgeGeom.second, directionNode);
         }
       }
       prev = cur;
@@ -573,9 +574,7 @@ std::pair<bool, PolyLine> Builder::getSubPolyLine(Stop* a, Stop* b, Trip* t,
 
   PolyLine p;
 
-  // TODO!!!!! REMOVE FALSE!!!! ONLY USE FOR FREIBURG TESTING!!!!
-  if (distA > -1 && distA > -1 && totalTripDist > 0) {
-    // if (false && distA > -1 && distA > -1 && totalTripDist > 0) {
+  if (!_cfg->ignoreGtfsDistances && distA > -1 && distA > -1 && totalTripDist > 0) {
     p = pl->second.getSegment(
         (distA - t->getShape()->getPoints().begin()->travelDist) /
             totalTripDist,
@@ -684,9 +683,11 @@ restart:
       const EdgeTripGeom& etga = *edges[0]->getEdgeTripGeoms()->begin();
       const EdgeTripGeom& etgb = *edges[1]->getEdgeTripGeoms()->begin();
 
-      if (etga.routeEquivalent(etgb)) {
+      if (edges[0]->getEdgeTripGeoms()->size() == 1 &&
+          edges[1]->getEdgeTripGeoms()->size() == 1 &&
+          etga.routeEquivalent(etgb)) {
         combineEdges(edges[0], edges[1], n, g);
-        // OMG really
+        // TODO: OMG really
         goto restart;
       }
     }
@@ -694,12 +695,12 @@ restart:
 }
 
 // _____________________________________________________________________________
-void Builder::combineEdges(Edge* a, Edge* b, Node* n, Graph* g) {
+bool Builder::combineEdges(Edge* a, Edge* b, Node* n, Graph* g) {
   assert((a->getTo() == n || a->getFrom() == n) &&
          (b->getTo() == n || b->getFrom() == n));
 
   if (a->getEdgeTripGeoms()->size() != 1 || b->getEdgeTripGeoms()->size() != 1)
-    return;
+    return false;
 
   EdgeTripGeom etga = *a->getEdgeTripGeoms()->begin();
   const EdgeTripGeom& etgb = *b->getEdgeTripGeoms()->begin();
@@ -748,10 +749,12 @@ void Builder::combineEdges(Edge* a, Edge* b, Node* n, Graph* g) {
 
   newFrom->replaceEdgeInConnections(a, e);
   newTo->replaceEdgeInConnections(b, e);
+
+  return true;
 }
 
 // _____________________________________________________________________________
-void Builder::combineNodes(Node* a, Node* b, Graph* g) {
+bool Builder::combineNodes(Node* a, Node* b, Graph* g) {
   assert(a->getStops().size() == 0 || b->getStops().size() == 0);
 
   if (a->getStops().size() != 0) {
@@ -834,6 +837,8 @@ void Builder::combineNodes(Node* a, Node* b, Graph* g) {
   g->deleteEdge(a, b);
   g->deleteNode(a);
   delete a;
+
+  return true;
 }
 
 // _____________________________________________________________________________

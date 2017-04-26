@@ -173,8 +173,10 @@ void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
                                       const RenderParams& rparams) {
   if (n->getStops().size() != 0) return;
 
-  for (auto& clique : getInnerCliques(n->getInnerGeometries(
-           outG.getConfig(), _cfg->innerGeometryPrecision), 99)) {
+  for (auto& clique :
+       getInnerCliques(n->getInnerGeometries(outG.getConfig(),
+                                             _cfg->innerGeometryPrecision),
+                       99)) {
     renderClique(clique, n);
   }
 }
@@ -202,10 +204,9 @@ std::multiset<InnerClique> SvgOutput::getInnerCliques(
 }
 
 // _____________________________________________________________________________
-size_t SvgOutput::getNextPartner(
-    const InnerClique& forClique,
-    const std::vector<graph::InnerGeometry>& pool, size_t level) const {
-
+size_t SvgOutput::getNextPartner(const InnerClique& forClique,
+                                 const std::vector<graph::InnerGeometry>& pool,
+                                 size_t level) const {
   for (size_t i = 0; i < pool.size(); i++) {
     const graph::InnerGeometry& ic = pool[i];
     for (auto& ciq : forClique.geoms) {
@@ -214,18 +215,19 @@ size_t SvgOutput::getNextPartner(
         return i;
       }
     }
-
   }
 
   return pool.size();
 }
 
 // _____________________________________________________________________________
-bool SvgOutput::isNextTo(const graph::InnerGeometry& a, const graph::InnerGeometry b) const {
+bool SvgOutput::isNextTo(const graph::InnerGeometry& a,
+                         const graph::InnerGeometry b) const {
   if (a.from.front == b.from.front && a.to.front == b.to.front) {
     if ((a.slotFrom - b.slotFrom == 1 || b.slotFrom - a.slotFrom == 1) &&
         (a.slotTo - b.slotTo == 1 || b.slotTo - a.slotTo == 1)) {
-      return !pbutil::geo::intersects(a.geom.getLine().front(), a.geom.getLine().back(),
+      return !pbutil::geo::intersects(
+          a.geom.getLine().front(), a.geom.getLine().back(),
           b.geom.getLine().front(), b.geom.getLine().back());
     }
   }
@@ -233,7 +235,8 @@ bool SvgOutput::isNextTo(const graph::InnerGeometry& a, const graph::InnerGeomet
   if (a.to.front == b.from.front && a.from.front == b.to.front) {
     if ((a.slotTo - b.slotFrom == 1 || b.slotFrom - a.slotTo == 1) &&
         (a.slotFrom - b.slotTo == 1 || b.slotTo - a.slotFrom == 1)) {
-      return !pbutil::geo::intersects(a.geom.getLine().front(), a.geom.getLine().back(),
+      return !pbutil::geo::intersects(
+          a.geom.getLine().front(), a.geom.getLine().back(),
           b.geom.getLine().front(), b.geom.getLine().back());
     }
   }
@@ -242,7 +245,8 @@ bool SvgOutput::isNextTo(const graph::InnerGeometry& a, const graph::InnerGeomet
 }
 
 // _____________________________________________________________________________
-bool SvgOutput::hasSameOrigin(const graph::InnerGeometry& a, const graph::InnerGeometry b) const {
+bool SvgOutput::hasSameOrigin(const graph::InnerGeometry& a,
+                              const graph::InnerGeometry b) const {
   if (a.from.front == b.from.front) {
     return a.slotFrom == b.slotFrom;
   }
@@ -261,9 +265,10 @@ bool SvgOutput::hasSameOrigin(const graph::InnerGeometry& a, const graph::InnerG
 
 // _____________________________________________________________________________
 void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
+  _innerDelegates.push_back(
+      std::map<uintptr_t, std::vector<OutlinePrintPair> >());
   std::multiset<InnerClique> renderCliques = getInnerCliques(cc.geoms, 0);
   for (const auto& c : renderCliques) {
-
     // the longest geom will be the ref geom
     graph::InnerGeometry ref = c.geoms[0];
     for (size_t i = 1; i < c.geoms.size(); i++) {
@@ -271,20 +276,22 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
     }
 
     for (size_t i = 0; i < c.geoms.size(); i++) {
-
-      double off = -(ref.from.edge->getWidth() + ref.from.edge->getSpacing()) * (static_cast<int>(c.geoms[i].slotFrom) -  static_cast<int>(ref.slotFrom));
+      double off = -(ref.from.edge->getWidth() + ref.from.edge->getSpacing()) *
+                   (static_cast<int>(c.geoms[i].slotFrom) -
+                    static_cast<int>(ref.slotFrom));
 
       if (ref.from.edge->getTo() == n) off = -off;
 
       PolyLine pl = ref.geom.getPerpOffsetted(off);
 
-      std::stringstream styleOutline;
-      styleOutline << "fill:none;stroke:#000000";
+      std::stringstream styleOutlineCropped;
+      styleOutlineCropped << "fill:none;stroke:#111111";
 
-      styleOutline << ";stroke-linecap:round;stroke-opacity:0.8;stroke-width:"
-                   << (ref.from.edge->getWidth() + _cfg->outlineWidth) * _cfg->outputResolution;
-      Params paramsOutline;
-      paramsOutline["style"] = styleOutline.str();
+      styleOutlineCropped << ";stroke-linecap:butt;stroke-width:"
+                   << (ref.from.edge->getWidth() + _cfg->outlineWidth) *
+                          _cfg->outputResolution;
+      Params paramsOutlineCropped;
+      paramsOutlineCropped["style"] = styleOutlineCropped.str();
 
       std::stringstream styleStr;
       styleStr << "fill:none;stroke:#" << c.geoms[i].from.route->color;
@@ -294,8 +301,9 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       Params params;
       params["style"] = styleStr.str();
 
-      _innerDelegates[(uintptr_t)&cc].push_back(OutlinePrintPair(
-          PrintDelegate(paramsOutline, pl), PrintDelegate(params, pl)));
+      _innerDelegates.back()[(uintptr_t)c.geoms[i].from.route].push_back(
+          OutlinePrintPair(PrintDelegate(params, pl),
+                              PrintDelegate(paramsOutlineCropped, pl)));
     }
   }
 }
@@ -313,7 +321,7 @@ void SvgOutput::renderLinePart(const PolyLine p, double width,
                                const std::string& endMarker,
                                const Nullable<style::LineStyle> style) {
   std::stringstream styleOutline;
-  styleOutline << "fill:none;stroke:#000000";
+  styleOutline << "fill:none;stroke:#111111";
 
   if (!endMarker.empty()) {
     styleOutline << ";marker-end:url(#" << endMarker << "_black)";
@@ -325,7 +333,7 @@ void SvgOutput::renderLinePart(const PolyLine p, double width,
     }
   }
 
-  styleOutline << ";stroke-linecap:round;stroke-opacity:0.8;stroke-width:"
+  styleOutline << ";stroke-linecap:round;stroke-width:"
                << (width + _cfg->outlineWidth) * _cfg->outputResolution;
   Params paramsOutline;
   paramsOutline["style"] = styleOutline.str();
@@ -355,7 +363,7 @@ void SvgOutput::renderLinePart(const PolyLine p, double width,
   params["style"] = styleStr.str();
 
   _delegates[(uintptr_t)&route].push_back(OutlinePrintPair(
-      PrintDelegate(paramsOutline, p), PrintDelegate(params, p)));
+      PrintDelegate(params, p), PrintDelegate(paramsOutline, p)));
 }
 
 // _____________________________________________________________________________
@@ -487,32 +495,32 @@ std::string SvgOutput::getMarkerPathFemale(double w) const {
 // _____________________________________________________________________________
 void SvgOutput::renderDelegates(const graph::TransitGraph& outG,
                                 const RenderParams& rparams) {
-  for (auto& a : _innerDelegates) {
-    _w.openTag("g");
-    for (auto& pd : a.second) {
-      printLine(pd.first.second, pd.first.first, rparams);
-    }
-    _w.closeTag();
-  }
-
   for (auto& a : _delegates) {
     _w.openTag("g");
     for (auto& pd : a.second) {
-      printLine(pd.first.second, pd.first.first, rparams);
+      printLine(pd.back.second, pd.back.first, rparams);
     }
     _w.closeTag();
 
     _w.openTag("g");
     for (auto& pd : a.second) {
-      printLine(pd.second.second, pd.second.first, rparams);
+      printLine(pd.front.second, pd.front.first, rparams);
     }
     _w.closeTag();
   }
 
   for (auto& a : _innerDelegates) {
     _w.openTag("g");
-    for (auto& pd : a.second) {
-      printLine(pd.second.second, pd.second.first, rparams);
+    for (auto& b : a) {
+      for (auto& pd : b.second) {
+        printLine(
+            pd.back.second.getSegmentAtDist(
+                rparams.width, pd.back.second.getLength() - rparams.width),
+            pd.back.first, rparams);
+      }
+      for (auto& pd : b.second) {
+        printLine(pd.front.second, pd.front.first, rparams);
+      }
     }
     _w.closeTag();
   }
@@ -587,11 +595,38 @@ void SvgOutput::printPolygon(const Polygon& g, const std::string& style,
 }
 
 // _____________________________________________________________________________
-int32_t InnerClique::getZWeight() const {
-  return 0; // TODO
+size_t InnerClique::getNumBranchesIn(const graph::NodeFront* front) const {
+  std::set<size_t> slots;
+  size_t ret = 0;
+  for (const auto& ig : geoms) {
+    if (ig.from.front == front && !slots.insert(ig.slotFrom).second) ret++;
+    if (ig.to.front == front && !slots.insert(ig.slotTo).second) ret++;
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+double InnerClique::getZWeight() const {
+  // more weight = more to the bottom
+
+  double BRANCH_WEIGHT = 4;
+
+  double ret = 0;
+
+  ret = geoms.size();  // baseline: threads with more lines to the bottom,
+                       // because they are easier to follow
+
+  for (const graph::NodeFront& nf :
+       geoms.front().from.front->n->getMainDirs()) {
+    ret -= getNumBranchesIn(&nf) * BRANCH_WEIGHT;
+  }
+
+  return ret;
 }
 
 // _____________________________________________________________________________
 bool InnerClique::operator<(const InnerClique& rhs) const {
- return getZWeight() < rhs.getZWeight();
+  // more weight = more to the bottom
+  return getZWeight() > rhs.getZWeight();
 }

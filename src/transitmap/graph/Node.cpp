@@ -354,6 +354,7 @@ Polygon Node::getConvexFrontHull(double d) const {
   if (l.size() > 1) {
     Polygon hull;
     bgeo::convex_hull(l, hull);
+    if (l.size() < 5) hull = pbutil::geo::getOrientedEnvelope(hull);
     bgeo::buffer(hull, ret, distanceStrat, sideStrat, joinStrat, endStrat,
                  circleStrat);
   } else {

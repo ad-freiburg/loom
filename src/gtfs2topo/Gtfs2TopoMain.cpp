@@ -53,6 +53,7 @@ int main(int argc, char** argv) {
     while (b.createTopologicalNodes(&g, true)) {
     }
 
+
     b.removeEdgeArtifacts(&g);
     b.removeNodeArtifacts(&g);
     b.averageNodePositions(&g);

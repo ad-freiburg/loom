@@ -13,6 +13,11 @@ namespace config {
 struct Config {
   std::string projectionString;
   std::string inputFeedPath;
+
+  bool ignoreGtfsDistances;
+  bool ignoreDirections;
+
+  size_t stationAggrLevel;
 };
 
 }  // namespace config

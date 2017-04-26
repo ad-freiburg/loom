@@ -129,7 +129,11 @@ void PolyLine::offsetPerp(double units) {
 
 // _____________________________________________________________________________
 PolyLine PolyLine::getSegment(double a, double b) const {
-  if (a > b) a = b;
+  if (a > b) {
+    double c = a;
+    a = b;
+    b = c;
+  }
   LinePoint start = getPointAt(a);
   LinePoint end = getPointAt(b);
 
@@ -138,7 +142,11 @@ PolyLine PolyLine::getSegment(double a, double b) const {
 
 // _____________________________________________________________________________
 PolyLine PolyLine::getSegmentAtDist(double a, double b) const {
-  if (a > b) a = b;
+  if (a > b) {
+    double c = a;
+    a = b;
+    b = c;
+  }
   LinePoint start = getPointAtDist(a);
   LinePoint end = getPointAtDist(b);
 

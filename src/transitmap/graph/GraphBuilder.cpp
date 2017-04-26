@@ -460,7 +460,7 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 
       if ((n->getStops().size() > 0 &&
            fa.geom.distTo(fb.geom) <
-               (fa.edge->getSpacing() + fb.edge->getSpacing()) / 8) ||
+               (fa.edge->getSpacing() + fb.edge->getSpacing()) / 2) ||
           (n->getStops().size() == 0 && nodeFrontsOverlap(fa, fb))) {
         if (fa.edge->getGeom().getLength() > minLength &&
             fa.geom.distTo(n->getPos()) < 2 * n->getMaxNodeFrontWidth()) {

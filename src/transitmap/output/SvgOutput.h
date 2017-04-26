@@ -38,7 +38,8 @@ struct InnerClique {
   InnerClique(graph::InnerGeometry geom) {geoms.push_back(geom);};
   std::vector<graph::InnerGeometry> geoms;
 
-  int32_t getZWeight() const;
+  double getZWeight() const;
+  size_t getNumBranchesIn(const graph::NodeFront* front) const;
   bool operator<(const InnerClique& rhs) const;
 };
 
@@ -61,7 +62,14 @@ struct EndMarker {
 
 typedef std::map<std::string, std::string> Params;
 typedef std::pair<Params, PolyLine> PrintDelegate;
-typedef std::pair<PrintDelegate, PrintDelegate> OutlinePrintPair;
+
+struct OutlinePrintPair {
+  OutlinePrintPair(PrintDelegate front, PrintDelegate back) :
+    front(front), back(back) {}
+
+  PrintDelegate front;
+  PrintDelegate back;
+};
 
 class SvgOutput : public Output {
  public:
@@ -90,7 +98,7 @@ class SvgOutput : public Output {
   const config::Config* _cfg;
 
   std::map<uintptr_t, std::vector<OutlinePrintPair> > _delegates;
-  std::map<uintptr_t, std::vector<OutlinePrintPair> > _innerDelegates;
+  std::vector<std::map<uintptr_t, std::vector<OutlinePrintPair> > > _innerDelegates;
   std::vector<EndMarker> _markers;
 
   void outputNodes(const graph::TransitGraph& outputGraph,
