@@ -55,19 +55,6 @@ inline Geometry rotate(const Geometry& geo, double deg) {
 }
 
 // _____________________________________________________________________________
-inline double parallelity(const Box& box, const Line& line) {
-  double ret = 0;
-
-  double a = angBetween(box.min_corner(), Point(box.min_corner().get<0>(), box.max_corner().get<1>()));
-  double b = angBetween(box.min_corner(), Point(box.max_corner().get<0>(), box.min_corner().get<1>()));
-
-  double c = angBetween(box.max_corner(), Point(box.min_corner().get<0>(), box.max_corner().get<1>()));
-  double d = angBetween(box.max_corner(), Point(box.max_corner().get<0>(), box.min_corner().get<1>()));
-
-  return ret;
-}
-
-// _____________________________________________________________________________
 inline Polygon getOrientedEnvelope(Polygon pol) {
   // TODO: implement this nicer, works for now, but inefficient
   // see https://geidav.wordpress.com/tag/gift-wrapping/#fn-1057-FreemanShapira1975
@@ -299,6 +286,39 @@ inline Point projectOn(const Point& a, const Point& b, const Point& c) {
   if (!isBetween) return nearer ? a : c;
 
   return ret;
+}
+
+// _____________________________________________________________________________
+inline double parallelity(const Box& box, const Line& line) {
+  double ret = M_PI;
+
+  double a = angBetween(box.min_corner(), Point(box.min_corner().get<0>(), box.max_corner().get<1>()));
+  double b = angBetween(box.min_corner(), Point(box.max_corner().get<0>(), box.min_corner().get<1>()));
+  double c = angBetween(box.max_corner(), Point(box.min_corner().get<0>(), box.max_corner().get<1>()));
+  double d = angBetween(box.max_corner(), Point(box.max_corner().get<0>(), box.min_corner().get<1>()));
+
+  double e = angBetween(line.front(), line.back());
+
+  double vals[] = {a, b, c, d};
+
+  for (double ang : vals) {
+    double v = fabs(ang - e);
+    if (v > M_PI) v = 2 * M_PI - v;
+    if (v > M_PI / 2) v = M_PI - v;
+    if (v < ret) ret = v;
+  }
+
+  return 1 - (ret / (M_PI / 4));
+}
+
+// _____________________________________________________________________________
+inline double parallelity(const Box& box, const MultiLine& multiline) {
+  double ret = 0;
+  for (const Line& l : multiline) {
+    ret += parallelity(box, l);
+  }
+
+  return ret / multiline.size();
 }
 
 }}

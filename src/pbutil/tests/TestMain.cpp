@@ -6,11 +6,45 @@
 #include "./lest.h"
 #include "./../Nullable.h"
 #include "./../String.h"
+#include "./../geo/Geo.h"
 
 using lest::approx;
+using namespace pbutil::geo;
 
 // define LEST cases
 const lest::test specification[] = {
+
+// ___________________________________________________________________________
+CASE("geo box alignmengt") {
+  Line a;
+  a.push_back(Point(1, 1));
+  a.push_back(Point(1, 2));
+
+  Line b;
+  b.push_back(Point(1, 2));
+  b.push_back(Point(2, 2));
+
+  Line c;
+  c.push_back(Point(2, 2));
+  c.push_back(Point(2, 1));
+
+  Line d;
+  d.push_back(Point(2, 1));
+  d.push_back(Point(1, 1));
+
+  Box box(Point(2, 3), Point(5, 4));
+  MultiLine ml;
+  ml.push_back(a);
+  ml.push_back(b);
+  ml.push_back(c);
+  ml.push_back(d);
+  std::cout << bgeo::wkt(ml) << std::endl;
+
+  for (int i = 0; i < 360; i++) {
+    std::cout << "at deg " << i << " " << parallelity(box, ml) << std::endl;
+    ml = rotate(ml, 1);
+  }
+},
 
 // ___________________________________________________________________________
 CASE("url decode") {
