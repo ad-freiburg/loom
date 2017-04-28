@@ -26,7 +26,46 @@ typedef bgeo::model::linestring<Point> Line;
 typedef bgeo::model::multi_linestring<Line> MultiLine;
 typedef bgeo::model::polygon<Point> Polygon;
 typedef bgeo::model::multi_polygon<Polygon> MultiPolygon;
+typedef bgeo::model::box<Point> Box;
 
+
+// _____________________________________________________________________________
+template<typename Geometry>
+inline Geometry rotate(const Geometry& geo, double deg, const Point& center) {
+  Geometry ret;
+
+  bgeo::strategy::transform::translate_transformer<double, 2, 2> translate(-center.get<0>(), -center.get<1>());
+  bgeo::strategy::transform::rotate_transformer<bgeo::degree, double, 2, 2> rotate(deg);
+  bgeo::strategy::transform::translate_transformer<double, 2, 2> translateBack(center.get<0>(), center.get<1>());
+
+  bgeo::strategy::transform::ublas_transformer<double, 2, 2> translateRotate(prod(rotate.matrix(), translate.matrix()));
+  bgeo::strategy::transform::ublas_transformer<double, 2, 2> all(prod(translateBack.matrix(), translateRotate.matrix()));
+
+  bgeo::transform(geo, ret, all);
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+template<typename Geometry>
+inline Geometry rotate(const Geometry& geo, double deg) {
+  Point center;
+  bgeo::centroid(geo, center);
+  return rotate(geo, deg, center);
+}
+
+// _____________________________________________________________________________
+inline double parallelity(const Box& box, const Line& line) {
+  double ret = 0;
+
+  double a = angBetween(box.min_corner(), Point(box.min_corner().get<0>(), box.max_corner().get<1>()));
+  double b = angBetween(box.min_corner(), Point(box.max_corner().get<0>(), box.min_corner().get<1>()));
+
+  double c = angBetween(box.max_corner(), Point(box.min_corner().get<0>(), box.max_corner().get<1>()));
+  double d = angBetween(box.max_corner(), Point(box.max_corner().get<0>(), box.min_corner().get<1>()));
+
+  return ret;
+}
 
 // _____________________________________________________________________________
 inline Polygon getOrientedEnvelope(Polygon pol) {
@@ -34,30 +73,17 @@ inline Polygon getOrientedEnvelope(Polygon pol) {
   // see https://geidav.wordpress.com/tag/gift-wrapping/#fn-1057-FreemanShapira1975
   // for a nicer algorithm
 
-  bgeo::model::box<Point> tmpBox;
-  bgeo::envelope(pol, tmpBox);
-  double rotateDeg = 0;
-
   Point center;
   bgeo::centroid(pol, center);
 
-  bgeo::strategy::transform::translate_transformer<double, 2, 2> translate(-center.get<0>(), -center.get<1>());
-  bgeo::strategy::transform::rotate_transformer<bgeo::degree, double, 2, 2> rotate(1.0);
-  bgeo::strategy::transform::translate_transformer<double, 2, 2> translateBack(center.get<0>(), center.get<1>());
-
+  Box tmpBox;
+  bgeo::envelope(pol, tmpBox);
+  double rotateDeg = 0;
 
   // rotate in 5 deg steps
   for (int i = 1; i < 360; i += 1) {
-    Polygon tmp;
-    bgeo::transform(pol, tmp, translate);
-    Polygon tmp2;
-    bgeo::transform(tmp, tmp2, rotate);
-    Polygon tmp3;
-    bgeo::transform(tmp2, tmp3, translateBack);
-
-    pol = tmp3;
-
-    bgeo::model::box<Point> e;
+    pol = rotate(pol, 1, center);
+    Box e;
     bgeo::envelope(pol, e);
     if (bgeo::area(tmpBox) > bgeo::area(e)) {
       tmpBox = e;
@@ -67,19 +93,7 @@ inline Polygon getOrientedEnvelope(Polygon pol) {
 
   Polygon hull;
   bgeo::convex_hull(tmpBox, hull);
-  bgeo::strategy::transform::translate_transformer<double, 2, 2> translate2(-center.get<0>(), -center.get<1>());
-  bgeo::strategy::transform::rotate_transformer<bgeo::degree, double, 2, 2> rotate2(-rotateDeg);
-  bgeo::strategy::transform::translate_transformer<double, 2, 2> translateBack2(center.get<0>(), center.get<1>());
-
-  Polygon hull2;
-  bgeo::transform(hull, hull2, translate2);
-  Polygon hull3;
-  bgeo::transform(hull2, hull3, rotate2);
-  Polygon hull4;
-  bgeo::transform(hull3, hull4, translateBack2);
-
-
-  return hull4;
+  return rotate(hull, -rotateDeg, center);
 }
 
 // _____________________________________________________________________________
@@ -90,6 +104,9 @@ inline bool doubleEq(double a, double b) {
 // _____________________________________________________________________________
 inline bool intersects(const Point& p1, const Point& q1, const Point& p2,
                         const Point& q2) {
+  /*
+   * checks whether two line segments intersect
+   */
   Line a;
   a.push_back(p1);
   a.push_back(q1);
@@ -103,6 +120,9 @@ inline bool intersects(const Point& p1, const Point& q1, const Point& p2,
 // _____________________________________________________________________________
 inline bool intersects(double p1x, double p1y, double q1x, double q1y,
                         double p2x, double p2y, double q2x, double q2y) {
+  /*
+   * checks whether two line segments intersect
+   */
   Point p1 (p1x, p1y);
   Point q1 (q1x, q1y);
   Point p2 (p2x, p2y);
@@ -138,6 +158,9 @@ inline bool contains(double p1x, double p1y, double q1x, double q1y,
 // _____________________________________________________________________________
 inline Point intersection(double p1x, double p1y, double q1x, double q1y,
                         double p2x, double p2y, double q2x, double q2y) {
+  /*
+   * calculates the intersection between two line segments
+   */
   if (p1x == q1x && p1y == q1y) return Point(p1x, p1y); // TODO: <-- intersecting with a point??
   if (p2x == q1x && p2y == q1y) return Point(p2x, p2y);
   if (p2x == q2x && p2y == q2y) return Point(p2x, p2y); // TODO: <-- intersecting with a point??
@@ -152,6 +175,9 @@ inline Point intersection(double p1x, double p1y, double q1x, double q1y,
 // _____________________________________________________________________________
 inline Point intersection(const Point& p1, const Point& q1, const Point& p2,
                         const Point& q2) {
+  /*
+   * calculates the intersection between two line segments
+   */
   return intersection(p1.get<0>(), p1.get<1>(), q1.get<0>(), q1.get<1>(),
     p2.get<0>(), p2.get<1>(), q2.get<0>(), q2.get<1>());
 }
@@ -159,6 +185,9 @@ inline Point intersection(const Point& p1, const Point& q1, const Point& p2,
 // _____________________________________________________________________________
 inline bool lineIntersects(double p1x, double p1y, double q1x, double q1y,
                         double p2x, double p2y, double q2x, double q2y) {
+  /*
+   * checks whether two lines intersect
+   */
   double EPSILON = 0.0000001;
   double a = ((q2y - p2y) * (q1x - p1x)) - ((q2x - p2x) * (q1y - p1y));
 
@@ -168,6 +197,9 @@ inline bool lineIntersects(double p1x, double p1y, double q1x, double q1y,
 // _____________________________________________________________________________
 inline bool lineIntersects(const Point& p1, const Point& q1, const Point& p2,
                         const Point& q2) {
+  /*
+   * checks whether two lines intersect
+   */
   return lineIntersects(p1.get<0>(), p1.get<1>(), q1.get<0>(), q1.get<1>(),
     p2.get<0>(), p2.get<1>(), q2.get<0>(), q2.get<1>());
 }
