@@ -38,12 +38,16 @@ CASE("geo box alignmengt") {
   ml.push_back(b);
   ml.push_back(c);
   ml.push_back(d);
-  std::cout << bgeo::wkt(ml) << std::endl;
 
-  for (int i = 0; i < 360; i++) {
-    std::cout << "at deg " << i << " " << parallelity(box, ml) << std::endl;
-    ml = rotate(ml, 1);
-  }
+  EXPECT(parallelity(box, ml) == approx(1));
+  ml = rotate(ml, 45);
+  EXPECT(parallelity(box, ml) == approx(0));
+  ml = rotate(ml, 45);
+  EXPECT(parallelity(box, ml) == approx(1));
+  ml = rotate(ml, 45);
+  EXPECT(parallelity(box, ml) == approx(0));
+  ml = rotate(ml, 45);
+  EXPECT(parallelity(box, ml) == approx(1));
 },
 
 // ___________________________________________________________________________
