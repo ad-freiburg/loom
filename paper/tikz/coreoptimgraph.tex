@@ -1,0 +1,30 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\begin{document}
+	\tikzstyle{graphnode}=[inner sep=2pt, circle, draw=black, solid, fill=white]
+	\begin{tikzpicture}[baseline=1.2cm]
+		\newcommand{\highlight}[3]{
+			\path [line cap = round, line join = round, line width = #1, draw = #2!40] #3;
+			\pgfmathsetmacro{\innerlinewidth}{0.95 * #1}
+			\path [line cap = round, line join = round, line width = \innerlinewidth, draw = #2!15] #3;
+		}
+
+		\foreach \place/\x in {{(9.5,4)/A}, {(10.3,2.3)/C},{(9,2.3)/D}, {(7, 4)/E}, {(7.9, 3.1)/H}, {(6.5, 2)/I}}
+		\node[graphnode] (\x) at \place {$\x$};
+
+		\draw (A) -- (C) node [midway, above right] {$xc$};
+		\draw (C) -- (D) node [midway, below left] {$x$};
+		\draw (A) -- (D) node [midway, right] {$c$};
+		\draw (E) -- (A) node [midway, above] {$def$};
+		\draw (D) -- (H) node [midway, below] {$x$};
+		\draw (D) -- (I) node [midway, below] {$e$};
+		\draw (I) -- (H) node [midway, below] {$f$};
+		\draw (E) -- (I) node [midway, above left] {$ef$};
+		\draw (H) -- (E) node [midway, right] {$d$};
+
+		\begin{pgfonlayer}{background}
+			\highlight{14mm}{blue}{(I) -- (E)}
+			\highlight{14mm}{red}{(A) -- (C)}
+		\end{pgfonlayer}
+	\end{tikzpicture}
+\end{document}

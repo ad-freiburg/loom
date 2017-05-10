@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.19)  19 APR 2017 18:49
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.19)  10 MAY 2017 19:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**transitmaps.tex
-(./transitmaps.tex
+**transit-maps.tex
+(./transit-maps.tex
 LaTeX2e <2016/02/01>
 Babel <3.9q> and hyphenation patterns for 81 language(s) loaded.
 (./llncs.cls
@@ -612,6 +612,10 @@ Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
 Package: filemod-expmin 2011/09/19 v1.2 Get and compare file modification times
  (expandable; minimal)
 ))
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip11
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
 (/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
 zlibrarycalc.code.tex
 File: tikzlibrarycalc.code.tex 2013/07/15 v3.0.1a (rcs-revision 1.9)
@@ -791,12 +795,12 @@ L3 Module: l3skip 2016/01/05 v6366 L3 Dimensions and skips
 \l_tmpb_skip=\skip51
 \g_tmpa_skip=\skip52
 \g_tmpb_skip=\skip53
-\c_zero_muskip=\muskip11
-\c_max_muskip=\muskip12
-\l_tmpa_muskip=\muskip13
-\l_tmpb_muskip=\muskip14
-\g_tmpa_muskip=\muskip15
-\g_tmpb_muskip=\muskip16
+\c_zero_muskip=\muskip12
+\c_max_muskip=\muskip13
+\l_tmpa_muskip=\muskip14
+\l_tmpb_muskip=\muskip15
+\g_tmpa_muskip=\muskip16
+\g_tmpb_muskip=\muskip17
 L3 Module: l3keys 2015/11/17 v6284 L3 Key-value interfaces
 \g__keyval_level_int=\count164
 \l_keys_choice_int=\count165
@@ -986,21 +990,21 @@ File: tikzlibraryfadings.code.tex 2009/11/15 v3.0.1a (rcs-revision 1.2)
 (/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/pgflibraryfadings.code
 .tex
 File: pgflibraryfadings.code.tex 2008/02/07 v3.0.1a (rcs-revision 1.3)
-))) (./transitmaps.aux)
-\openout1 = `transitmaps.aux'.
+))) (./transit-maps.aux)
+\openout1 = `transit-maps.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 16.
-LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
 
 (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -1042,79 +1046,82 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 ABD: EveryShipout initializing macros
-LaTeX Font Info:    Try loading font information for U+msa on input line 39.
+LaTeX Font Info:    Try loading font information for U+msa on input line 41.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 39.
+LaTeX Font Info:    Try loading font information for U+msb on input line 41.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 39.
+LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 41.
 
-LaTeX Font Info:    No file OMScmtt.fd. on input line 39.
+LaTeX Font Info:    No file OMScmtt.fd. on input line 41.
 
 
 LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
 (Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbraceleft' on input line 39.
+(Font)              for symbol `textbraceleft' on input line 41.
 
 [1
 
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (3.48703pt too wide) in paragraph at lines 78--79
+Overfull \hbox (3.48703pt too wide) in paragraph at lines 73--74
 []\OT1/cmr/m/n/10 ... de-scribe a base-line ILP for solv-ing the metro line cro
 ss-ing prob-lem (MLCM) 
  []
 
-[2] <figures/crossing.pdf, id=49, 440.67033pt x 218.07974pt>
-File: figures/crossing.pdf Graphic file (type pdf)
-
-<use figures/crossing.pdf>
-Package pdftex.def Info: figures/crossing.pdf used on input line 148.
+[2] [3] <crossing.pdf, id=52, 440.67033pt x 218.07974pt>
+File: crossing.pdf Graphic file (type pdf)
+ <use crossing.pdf>
+Package pdftex.def Info: crossing.pdf used on input line 154.
 (pdftex.def)             Requested size: 229.1028pt x 113.38214pt.
- [3] [4 <./figures/crossing.pdf>] [5]
-<render_examples/splitting_example_nonopt.pdf, id=79, 37.64063pt x 22.58438pt>
+
+[4] [5 <./crossing.pdf>] [6]
+<render_examples/splitting_example_nonopt.pdf, id=82, 37.64063pt x 22.58438pt>
 File: render_examples/splitting_example_nonopt.pdf Graphic file (type pdf)
 
 <use render_examples/splitting_example_nonopt.pdf>
 Package pdftex.def Info: render_examples/splitting_example_nonopt.pdf used on i
-nput line 229.
+nput line 235.
 (pdftex.def)             Requested size: 124.96468pt x 74.99384pt.
 
-<render_examples/splitting_example.pdf, id=80, 37.64063pt x 22.58438pt>
+<render_examples/splitting_example.pdf, id=83, 37.64063pt x 22.58438pt>
 File: render_examples/splitting_example.pdf Graphic file (type pdf)
 
 <use render_examples/splitting_example.pdf>
 Package pdftex.def Info: render_examples/splitting_example.pdf used on input li
-ne 231.
+ne 237.
 (pdftex.def)             Requested size: 124.96468pt x 74.99384pt.
- [6] [7 <./render_examples/splitting_example_nonopt.pdf> <./render_examples/spl
+ [7] [8 <./render_examples/splitting_example_nonopt.pdf> <./render_examples/spl
 itting_example.pdf
 
 pdfTeX warning: pdflatex (file ./render_examples/splitting_example.pdf): PDF in
 clusion: multiple pdfs with page group included in a single page
->] [8] (./figures/transitgraph.tex)
-File: figures/transitgraph.tex Graphic file (type tex)
- (./figures/coreoptimgraph.tex)
-File: figures/coreoptimgraph.tex Graphic file (type tex)
- [9] [10]
-(./transitmaps.aux)
+>] [9] (./tikz/transitgraph.tex)
+File: tikz/transitgraph.tex Graphic file (type tex)
+ (./tikz/coreoptimgraph.tex)
+File: tikz/coreoptimgraph.tex Graphic file (type tex)
+
+(./transit-maps.bbl [10]) [11] (./transit-maps.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
  ) 
 Here is how much of TeX's memory you used:
- 25043 strings out of 493029
- 538158 string characters out of 6136233
- 569322 words of memory out of 5000000
- 28111 multiletter control sequences out of 15000+600000
- 10780 words of font info for 42 fonts, out of 8000000 for 9000
+ 25128 strings out of 493029
+ 539109 string characters out of 6136233
+ 568602 words of memory out of 5000000
+ 28189 multiletter control sequences out of 15000+600000
+ 11125 words of font info for 43 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,14n,106p,10459b,1005s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,14n,106p,10460b,1005s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texli
@@ -1132,12 +1139,13 @@ xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/t
 exmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-di
 st/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/font
 s/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmtt9.pfb></usr/share/texlive/texmf-dist/fonts/type1/publi
-c/amsfonts/symbols/msbm10.pfb>
-Output written on transitmaps.pdf (10 pages, 253160 bytes).
+1/public/amsfonts/cm/cmti9.pfb></usr/share/texlive/texmf-dist/fonts/type1/publi
+c/amsfonts/cm/cmtt9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
+nts/symbols/msbm10.pfb>
+Output written on transit-maps.pdf (11 pages, 276492 bytes).
 PDF statistics:
- 159 PDF objects out of 1000 (max. 8388607)
- 104 compressed objects within 2 object streams
+ 166 PDF objects out of 1000 (max. 8388607)
+ 109 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  124 words of extra memory for PDF output out of 10000 (max. 10000000)
 

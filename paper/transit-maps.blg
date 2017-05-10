@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: transit-maps.aux
+The style file: plain.bst
+Database file #1: tm.bib.bib
+You've used 8 entries,
+            2118 wiz_defined-function locations,
+            543 strings with 5324 characters,
+and the built_in function-call counts, 3796 in all, are:
+= -- 403
+> -- 143
+< -- 8
++ -- 58
+- -- 48
+* -- 238
+:= -- 553
+add.period$ -- 30
+call.type$ -- 8
+change.case$ -- 48
+chr.to.int$ -- 0
+cite$ -- 8
+duplicate$ -- 170
+empty$ -- 310
+format.name$ -- 48
+if$ -- 867
+int.to.chr$ -- 0
+int.to.str$ -- 8
+missing$ -- 8
+newline$ -- 43
+num.names$ -- 16
+pop$ -- 66
+preamble$ -- 1
+purify$ -- 40
+quote$ -- 0
+skip$ -- 135
+stack$ -- 0
+substring$ -- 277
+swap$ -- 77
+text.length$ -- 8
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 32
+warning$ -- 0
+while$ -- 39
+width$ -- 9
+write$ -- 97

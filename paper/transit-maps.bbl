@@ -1,0 +1,54 @@
+\begin{thebibliography}{1}
+
+\bibitem{arg08}
+Evmorfia Argyriou, Michael~A Bekos, Michael Kaufmann, and Antonios Symvonis.
+\newblock Two polynomial time algorithms for the metro-line crossing
+  minimization problem.
+\newblock In {\em International Symposium on Graph Drawing}, pages 336--347.
+  Springer, 2008.
+
+\bibitem{arg10}
+Evmorfia~N Argyriou, Michael~A Bekos, Michael Kaufmann, and Antonios Symvonis.
+\newblock On metro-line crossing minimization.
+\newblock {\em J. Graph Algorithms Appl.}, 14(1):75--96, 2010.
+
+\bibitem{asq08}
+Matthew Asquith, Joachim Gudmundsson, and Damian Merrick.
+\newblock An ilp for the metro-line crossing problem.
+\newblock In {\em Proceedings of the fourteenth symposium on Computing: the
+  Australasian theory-Volume 77}, pages 49--56. Australian Computer Society,
+  Inc., 2008.
+
+\bibitem{bek07}
+Michael~A Bekos, Michael Kaufmann, Katerina Potika, and Antonios Symvonis.
+\newblock Line crossing minimization on metro maps.
+\newblock In {\em International Symposium on Graph Drawing}, pages 231--242.
+  Springer, 2007.
+
+\bibitem{ben06}
+Marc Benkert, Martin N{\"o}llenburg, Takeaki Uno, and Alexander Wolff.
+\newblock Minimizing intra-edge crossings in wiring diagrams and public
+  transportation maps.
+\newblock In {\em International Symposium on Graph Drawing}, pages 270--281.
+  Springer, 2006.
+
+\bibitem{fin13a}
+Martin Fink and Sergey Pupyrev.
+\newblock Metro-line crossing minimization: Hardness, approximations, and
+  tractable cases.
+\newblock In {\em Graph Drawing}, volume 8242, pages 328--339, 2013.
+
+\bibitem{fin13b}
+Martin Fink and Sergey Pupyrev.
+\newblock Ordering metro lines by block crossings.
+\newblock In {\em International Symposium on Mathematical Foundations of
+  Computer Science}, pages 397--408. Springer, 2013.
+
+\bibitem{nol09}
+Martin N{\"o}llenburg.
+\newblock An improved algorithm for the metro-line crossing minimization
+  problem.
+\newblock In {\em International Symposium on Graph Drawing}, pages 381--392.
+  Springer, 2009.
+
+\end{thebibliography}
