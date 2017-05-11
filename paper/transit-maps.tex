@@ -81,13 +81,14 @@ The other crucial difference of all these approaches to our work is the strong a
 %
 \subsection{Problem Definition}\label{SEC:def}
 %
-Let $L$ by a set of unique transit lines and w.l.o.g. $l \in \mathbb{N}$. We call an undirected graph $T = (V, S)$ with vertices $v = (p_v, \sigma_v)$ and segments $s = (u, v, L(s), \tau_s)$ a transit graph. Each $v$ has a position $p_v \in \mathbb{R}^2$. Furthermore we assign each segment $s$ a polygonal chain $\tau_s = (p_1, ..., p_n), p_i \in \mathbb{R}^2$ which describes the geometrical path a segment takes through the plane. For each $s$, we impose $p_1 = p_u$ and $p_n = p_v$, that is the polygonal chain has to start and end at the position of the segment's start and end node. $L(s)$ is the (ordered) set of lines that traverse $s$. Finally, we assign each node a role $\sigma_v \in {0, 1}$, where $\sigma_v = 1$ means that $v$ is a real station node and $\sigma_v = 0$ that $v$ is only a spatial topology node.
+Let $L$ by a set of unique transit lines and w.l.o.g. $l \in \mathbb{N}$. We call an undirected graph $T = (V, S)$ with vertices $v = (p_v, \sigma_v)$ and segments $s = (u, v, L(s), \tau_s)$ a transit graph. Each $v$ has a position $p_v \in \mathbb{R}^2$. Furthermore we assign each segment $s$ a polygonal chain $\tau_s = (p_1, ..., p_n), p_i \in \mathbb{R}^2$ which describes the geometrical path a segment takes through the plane. For each $s$, we impose $p_1 = p_u$ and $p_n = p_v$, that is the polygonal chain has to start and end at the position of the segment's start and end node. $L(s)$ is the (ordered) set of lines that traverse $s$. Finally, we assign each node a role $\sigma_v \in {0, 1}$. If $\sigma_v = 1$, then we say that $v$ is a real station node. If $\sigma_v = 0$, we call $v$ a spatial topology node. A spatial topology node is a node where two or more lines diverge.
 
-\begin{figure}[h]
-\centering
-	\includestandalone[width=5cm]{tikz/transitgraph_small}
-	\caption{A transitgraph.}
-\end{figure}
+\todo{some real-world transit graph example (maybe Freiburg?)}
+% \begin{figure}[h]
+% \centering
+%	\includestandalone[width=5cm]{tikz/transitgraph_small}
+%	\caption{A transitgraph.}
+%\end{figure}
 
 $G$ can be understood as an embedding of an undirected multigraph $G = (V, E)$, where each line $l$ traversing a segment $s$ is transformed into a single edge. It can also be understood as an embedding of a set of $\mathbb{L}$ polygonal chains.
 The goal is to render $T$ in a way that resembles a modern transit map.
@@ -99,27 +100,25 @@ We chose this definition because it proved to be useful during line-ordering opt
 \section{Spatial Topology Extraction}\label{SEC:topo}
 %
 
-Real-world public transit data is usually given as a set of stations (with geographical positions) and a set of vehicle routes, each consisting of some meta-information (line number, color, ...) and a list of stop / time pairs representing the vehicle's schedule. In many cases, the geographical path the vehicle takes through the real world is also given. In recent years, the General Transit Feed Specification (GTFS) has become the dominant format for exchanging public transit schedules, but there are still many proprietary formats (e.g. HACON, EFA etc.) which can be converted to GTFS with moderate effort. The difference between most of the formats is mainly syntactical.
+Real-world public transit data is usually given as a set of vehicle trips. A trip is an ordered list of served stations. The vehicle's geographical path may also be given. In recent years, the General Transit Feed Specification (GTFS) has become the dominant format for exchanging public transit schedules.
 
-This data is essentially an embedding of a transit graph, but with two major problems:
-\begin{enumerate}
-	\item there may be many (possibly thousands of) edges between two station nodes, with different paths
-	\item topological nodes are missing in most cases \todo{mention possibility to store this in GTFS}
-\end{enumerate}
+Because each trip is given explicitely, the embedded transit graph $T$ induced by this data has many overlapping edges that may (partially) share the same geographical path.
 
-We transform this data into a well-formed transit graph $G$ by using a simple line-sweeping algorithm to collapse (partially) similar vehicle paths into single segments. Topological nodes are inserted on-the-fly.
-\todo{describe algorithm}
+Let $e_1, e_2$ be two edges in $T$ with their geometrical paths $\tau_{e_1}$ and $\tau_{e_2}$. We define a parametrization $\tau(\pi): [0,1] \mapsto \mathbb{R}^2$ which maps the progress $\pi$ to a point $p_d$ on $\tau$. For some distance threshold $\hat{d}$, we say $((\pi_1, \pi_2), ({\pi'}_1, {\pi'}_2))$ is a shared segment of $e_1$ and $e_2$ iff \[\forall (\pi, \pi'), \pi \in [d_1, {d'}_1], \pi' \in [d_2, {d'}_2] : \|\tau_{e_1}(\pi) - \tau_{e_2}(\pi')\| \leq d,\]
+
+where $\|p - p'\|$ is the euclidean distance between $p$ and $p'$.
+
+We transform $T$ into a well-formed transit graph $T'$ by repeatedly collapsing shared segments between two edges $e_1, e_2$ into a single new edge $e_{12}$ until no shared segments can be found. If for any of the edges the start of the shared segment $\pi$ lies not at the beginning of $\tau_e$, we split $e = (u, v)$ at $\pi$ into two edges $e'$ and $e''$ and introduce a new topological node $v'$ such that $e' = (u, v')$ and $e'' = (v', v)$ as well as $\tau_{e'}(1) = \tau_{e}(pi)$ and $\tau_{e''}(0) = \tau_{e}(pi)$. The same goes for the end point of a shared segment.
+
+To find the shared segments between two paths $\tau$ and $\tau'$, we do a simple sweep over $\tau$ in $n$ steps of some $\Delta\pi$, measuring the distance $d$ between $\tau(i\cdot\Delta\pi)$ and $\tau'$ at each $i < n$ along the way. If $d \leq \hat{d}$, we start a new segment. If $d > \hat{d}$ and a segment is open, we close it. The algorithm can be mode more robust against outliers by allowing $d$ to exceed $\hat{d}$ for a number of $n$ steps.
+
+\todo{example figure}
 % \begin{figure}[h]
 % \centering
 % \includestandalone[width=\textwidth]{tikz/linecollapse}
 % \caption{Line sweeping algorithm for spatial topology extraction}
 % \end{figure}
 The process can be sped up by indexing every linear segment of every vehicle path in a geometric index (for example, an R-Tree), making for a better lookup time of nearby segments.
-
-%
-\subsection{Meta nodes}\label{SEC:metanodes}
-%
-\todo{describe meta nodes and why they can be useful}
 
 %
 \section{Line Ordering Optimization}\label{SEC:ordering}

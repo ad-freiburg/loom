@@ -1,0 +1,24 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\begin{document}
+	\tikzstyle{graphnode}=[inner sep=2pt, circle, draw=black, solid, fill=white]
+
+	\begin{tikzpicture}[scale=0.9]
+		\foreach \place/\x in {{(9.5,4)/v_1}, {(11.3,3)/v_2},{(11,1.5)/v_3},{(9,2.3)/v_4}, {(8, 4)/v_5}, {(6.3, 3.3)/v_6}, {(8.3, 1)/v_7}, {(7.3, 2.5)/v_8}, {(6.5, 1)/v_9}}
+		\node[graphnode] (\x) at \place {$\x$};
+
+		\draw (v_1) .. controls (10.5,4.3) and (11, 4) .. (v_2) node [midway, above right] {$abc$};
+		\draw (v_2) .. controls (11.5,2) and (11.5, 2).. (v_3) node [midway, above left] {$abc$};
+		\draw (v_3) .. controls (10, 1) and (10.3, 2.5) .. (v_4) node [midway, below left] {$ab$};
+		\draw (v_1) .. controls (10.3, 3) and (10.4, 2.7) .. (v_4) node [midway, right] {$c$};
+		\draw (v_5) .. controls (9, 3.8) .. (v_1) node [midway, below] {$def$};
+		\draw (v_4) .. controls (8, 2.3) .. (v_8) node [midway, below] {$ab$};
+		\draw (v_4) .. controls (8.6, 1.8) .. (v_7) node [midway, right] {$e$};
+		\draw (v_7) .. controls (7.35, .8) .. (v_9) node [midway, below] {$e$};
+		\draw (v_9) .. controls (6.7, 2.1) .. (v_8) node [midway, below right] {$f$};
+		\draw (v_6) .. controls (5.7, 2.3) .. (v_9) node [midway, right] {$ef$};
+		\draw (v_6) .. controls (7.3, 3.5) .. (v_5) node [midway, above] {$ef$};
+		\draw (v_8) .. controls (7.6, 3.3) .. (v_5) node [midway, right] {$d$};
+
+	\end{tikzpicture}
+\end{document}
