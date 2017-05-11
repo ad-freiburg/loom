@@ -83,6 +83,12 @@ The other crucial difference of all these approaches to our work is the strong a
 %
 Let $L$ by a set of unique transit lines and w.l.o.g. $l \in \mathbb{N}$. We call an undirected graph $T = (V, S)$ with vertices $v = (p_v, \sigma_v)$ and segments $s = (u, v, L(s), \tau_s)$ a transit graph. Each $v$ has a position $p_v \in \mathbb{R}^2$. Furthermore we assign each segment $s$ a polygonal chain $\tau_s = (p_1, ..., p_n), p_i \in \mathbb{R}^2$ which describes the geometrical path a segment takes through the plane. For each $s$, we impose $p_1 = p_u$ and $p_n = p_v$, that is the polygonal chain has to start and end at the position of the segment's start and end node. $L(s)$ is the (ordered) set of lines that traverse $s$. Finally, we assign each node a role $\sigma_v \in {0, 1}$, where $\sigma_v = 1$ means that $v$ is a real station node and $\sigma_v = 0$ that $v$ is only a spatial topology node.
 
+\begin{figure}[h]
+\centering
+	\includestandalone[width=5cm]{tikz/transitgraph_small}
+	\caption{A transitgraph.}
+\end{figure}
+
 $G$ can be understood as an embedding of an undirected multigraph $G = (V, E)$, where each line $l$ traversing a segment $s$ is transformed into a single edge. It can also be understood as an embedding of a set of $\mathbb{L}$ polygonal chains.
 The goal is to render $T$ in a way that resembles a modern transit map.
 We chose this definition because it proved to be useful during line-ordering optimization as well as during map rendering (see Section~\ref{SEC:rendering}). It also resembles the intuitive understanding of a transit map.
@@ -164,7 +170,7 @@ In the first case (left), $A, B$ induce a crossing if the position of $A$ is sma
 	x_{sA3} + x_{sB2} + x_{s'A1} + x_{s'B2} - x_{ss'AB} &\leq 3 \\
 	x_{sA3} + x_{sB2} + x_{s'A1} + x_{s'B2} - x_{ss'AB} &\leq 3.
 \end{align*}
-In case one of the crossings occurs, the first four variables of the corresponding constraint all have to be 1. Hence their sum equals 4 and the only way to fulfill the $\leq 3$ constraint is to set $x_{ss'AB}$ to $1$. 
+In case one of the crossings occurs, the first four variables of the corresponding constraint all have to be 1. Hence their sum equals 4 and the only way to fulfill the $\leq 3$ constraint is to set $x_{ss'AB}$ to $1$.
 The objective function then minimizes the sum over all such variables $x_{ss'AB}$.
 
 In the second case (right), $A$ and $B$ split into different segments $s', s''$. Then the actual positions of $A$ and $B$ in $s', s''$ do not matter, but the order of $s'$ and $s''$ itself. So we introduce a split crossing decision variable $x_{ss's''AB} \in \{0,1\}$ and the following constraints:
@@ -176,7 +182,7 @@ In the second case (right), $A$ and $B$ split into different segments $s', s''$.
 Likewise, $x_{ss's''AB}$ is added to the objective function.
 
 \subsubsection{ILP complexity}
-Let $M = \max_{s \in S} |L(s)|$ be the maximum number of lines per segment. To get a mapping of lines to positions for each segment we need $\leq |S|M^{2}$ variables and $\leq 2|S|M$ constraints in total. To minimize crossings, we have to consider $\leq M^{2}$ pairs of lines per segment in $S$, and introduce a new decision variable for each such pair. That makes $\leq |S| M^{2}$ additional variables, which all appear in the objective function. Most constraints are introduced when both lines follow the same next segment. In that case, we create at most $\binom{M}{2}^{2} < M^{4}$ additional constraints per line pair per segment, so $\leq |S| M^{6}$ in total. 
+Let $M = \max_{s \in S} |L(s)|$ be the maximum number of lines per segment. To get a mapping of lines to positions for each segment we need $\leq |S|M^{2}$ variables and $\leq 2|S|M$ constraints in total. To minimize crossings, we have to consider $\leq M^{2}$ pairs of lines per segment in $S$, and introduce a new decision variable for each such pair. That makes $\leq |S| M^{2}$ additional variables, which all appear in the objective function. Most constraints are introduced when both lines follow the same next segment. In that case, we create at most $\binom{M}{2}^{2} < M^{4}$ additional constraints per line pair per segment, so $\leq |S| M^{6}$ in total.
 
 In summary, there are $\mathcal{O}(|S|M^{2})$ variables and $\mathcal{O}(|S|M^{6})$ constraints.
 
@@ -289,7 +295,7 @@ This core problem graph can be further prepared for optimiziation by splitting i
 The line-ordering optimization can now be run independently on each connected component of the core problem graph, reducing the size of the ILPs that have to be solved and opening the way for parallelization.
 \begin{figure}[h]
 \centering
-	\includestandalone[width=5cm]{tikz/transitgraph}
+	\includestandalone[width=5cm]{tikz/transitgraph_optim}
 	\hspace{0.6cm}
 	\includestandalone[width=5cm]{tikz/coreoptimgraph}
 	\caption{Left: transit graph $G$ with lines $a, b, c, d, e, f$, Right: core optimization graph with highlighted ordering-relevant connected components with more than 1 node; $ab$ was collapsed into $x$.}

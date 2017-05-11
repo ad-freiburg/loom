@@ -9,22 +9,22 @@
 			\path [line cap = round, line join = round, line width = \innerlinewidth, draw = #2!15] #3;
 		}
 
-		\foreach \place/\x in {{(9.5,4)/A}, {(10.3,2.3)/C},{(9,2.3)/D}, {(7, 4)/E}, {(7.9, 3.1)/H}, {(6.5, 2)/I}}
+		\foreach \place/\x in {{(9.5,4)/v_1}, {(10.3,2.3)/v_3},{(9,2.3)/v_4}, {(7, 4)/v_5}, {(7.9, 3.1)/v_8}, {(6.5, 2)/v_9}}
 		\node[graphnode] (\x) at \place {$\x$};
 
-		\draw (A) -- (C) node [midway, above right] {$xc$};
-		\draw (C) -- (D) node [midway, below left] {$x$};
-		\draw (A) -- (D) node [midway, right] {$c$};
-		\draw (E) -- (A) node [midway, above] {$def$};
-		\draw (D) -- (H) node [midway, below] {$x$};
-		\draw (D) -- (I) node [midway, below] {$e$};
-		\draw (I) -- (H) node [midway, below] {$f$};
-		\draw (E) -- (I) node [midway, above left] {$ef$};
-		\draw (H) -- (E) node [midway, right] {$d$};
+		\draw (v_1) -- (v_3) node [midway, above right] {$xc$};
+		\draw (v_3) -- (v_4) node [midway, below left] {$x$};
+		\draw (v_1) -- (v_4) node [midway, right] {$c$};
+		\draw (v_5) -- (v_1) node [midway, above] {$def$};
+		\draw (v_4) -- (v_8) node [midway, below] {$x$};
+		\draw (v_4) -- (v_9) node [midway, below] {$e$};
+		\draw (v_9) -- (v_8) node [midway, below] {$f$};
+		\draw (v_5) -- (v_9) node [midway, above left] {$ef$};
+		\draw (v_8) -- (v_5) node [midway, right] {$d$};
 
 		\begin{pgfonlayer}{background}
-			\highlight{14mm}{blue}{(I) -- (E)}
-			\highlight{14mm}{red}{(A) -- (C)}
+			\highlight{14mm}{blue}{(v_9) -- (v_5)}
+			\highlight{14mm}{red}{(v_1) -- (v_3)}
 		\end{pgfonlayer}
 	\end{tikzpicture}
 \end{document}
