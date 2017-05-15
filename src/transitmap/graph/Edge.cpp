@@ -108,17 +108,19 @@ RouteOccWithPos Edge::getRouteOccWithPosUnder(
 
 // _____________________________________________________________________________
 void Edge::addRoute(const Route* r, const Node* dir, const LineStyle& ls) {
+  if (containsRoute(r)) return;
   _routes.push_back(RouteOccurance(r, dir, ls));
 }
 
 // _____________________________________________________________________________
 void Edge::addRoute(const Route* r, const Node* dir) {
+  if (containsRoute(r)) return;
   _routes.push_back(RouteOccurance(r, dir));
 }
 
 // _____________________________________________________________________________
 bool Edge::containsRoute(const Route* r) const {
-  return (r) != 0;
+  return getRouteOcc(r) != 0;
 }
 
 // _____________________________________________________________________________

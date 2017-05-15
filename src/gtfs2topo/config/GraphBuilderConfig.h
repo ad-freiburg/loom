@@ -18,6 +18,8 @@ struct Config {
   bool ignoreDirections;
 
   size_t stationAggrLevel;
+
+  double maxAggrDistance;
 };
 
 }  // namespace config

@@ -32,7 +32,9 @@ void Builder::consume(const Feed& f, Graph* g) {
     cur++;
     if (t->second->getStopTimes().size() < 2) continue;
 
-    if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
+    // if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
+    //if (t->second->getRoute()->getType() != gtfs::Route::TYPE::RAIL) continue;
+    if (t->second->getRoute()->getType() != gtfs::Route::TYPE::TRAM) continue;
     if (!checkTripSanity(t->second)) continue;
 
     auto st = t->second->getStopTimes().begin();
@@ -120,8 +122,7 @@ void Builder::simplify(Graph* g) {
 // _____________________________________________________________________________
 ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
   int i = 0;
-  double width = 20;
-  double spacing = 10;
+  double dmin = _cfg->maxAggrDistance;
   for (auto n : *g->getNodes()) {
     for (auto e : n->getAdjListOut()) {
       i++;
@@ -145,10 +146,10 @@ ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
             if (final) {
               // set dmax according to the width of the etg
               dmax = fmax(
-                  30, e->getEdgeTripGeoms()->front().getCardinality() *
-                              ((width + spacing) / 2) +
+                  dmin, e->getEdgeTripGeoms()->front().getCardinality() *
+                              (dmin / 2) +
                           toTest->getEdgeTripGeoms()->front().getCardinality() *
-                              ((width + spacing) / 2));
+                              (dmin / 2));
             }
 
             SharedSegments s =
