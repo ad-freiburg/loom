@@ -333,36 +333,6 @@ inline Polygon getOrientedEnvelope(Polygon pol) {
 }
 
 // _____________________________________________________________________________
-inline Polygon getOrientedEnvelope(Polygon pol) {
-  // TODO: implement this nicer, works for now, but inefficient
-  // see
-  // https://geidav.wordpress.com/tag/gift-wrapping/#fn-1057-FreemanShapira1975
-  // for a nicer algorithm
-
-  Point center;
-  bgeo::centroid(pol, center);
-
-  Box tmpBox;
-  bgeo::envelope(pol, tmpBox);
-  double rotateDeg = 0;
-
-  // rotate in 5 deg steps
-  for (int i = 1; i < 360; i += 1) {
-    pol = rotate(pol, 1, center);
-    Box e;
-    bgeo::envelope(pol, e);
-    if (bgeo::area(tmpBox) > bgeo::area(e)) {
-      tmpBox = e;
-      rotateDeg = i;
-    }
-  }
-
-  Polygon hull;
-  bgeo::convex_hull(tmpBox, hull);
-  return rotate(hull, -rotateDeg, center);
-}
-
-// _____________________________________________________________________________
 inline Polygon getOrientedEnvelope(const MultiLine& ml) {
   // first, get hull of multilines
   Polygon hull;

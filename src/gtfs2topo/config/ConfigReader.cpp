@@ -47,7 +47,11 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     ("station-aggregation-level",
       opts::value<size_t>(&(cfg->stationAggrLevel))
       ->default_value(2),
-      "2 = aggregate based on distance, 1 = aggregate based on feed, 0 = no aggr");
+      "2 = aggregate based on distance, 1 = aggregate based on feed, 0 = no aggr")
+    ("max-aggr-distance,d",
+      opts::value<double>(&(cfg->maxAggrDistance))
+      ->default_value(30),
+      "maximum aggregation distance between shared segments");
 
   opts::options_description positional("Positional arguments");
   positional.add_options()("input-feed",
