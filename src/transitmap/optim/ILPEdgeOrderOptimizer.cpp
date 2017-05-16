@@ -364,17 +364,17 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           size_t row = glp_add_rows(lp, 1);
 
           glp_set_row_name(lp, row, rowName.str().c_str());
-          glp_set_row_bnds(lp, row, GLP_UP, 0, 0);
+          glp_set_row_bnds(lp, row, GLP_LO, 0, 0);
 
           std::stringstream rowName2;
-          rowName << "sum_dec2(e1=" << segmentA->getStrRepr()
+          rowName2 << "sum_dec2(e1=" << segmentA->getStrRepr()
                   << "e2=" << segmentB->getStrRepr() << ",A=" << linepair.first
                   << ",B=" << linepair.second << ")";
 
           size_t row2 = glp_add_rows(lp, 1);
 
           glp_set_row_name(lp, row2, rowName2.str().c_str());
-          glp_set_row_bnds(lp, row2, GLP_UP, 0, 0);
+          glp_set_row_bnds(lp, row2, GLP_LO, 0, 0);
 
           bool otherWayA =
               (segmentA->from != node) ^ segmentA->etgs.front().dir;
@@ -386,12 +386,12 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
             aSmallerBinL2 = bSmallerAinL2;
           }
 
-          vm->addVar(row, aSmallerBinL1, 1);
-          vm->addVar(row, aSmallerBinL2, -1);
-          vm->addVar(row, decisionVar, -1);
-          vm->addVar(row2, aSmallerBinL1, -1);
-          vm->addVar(row2, aSmallerBinL2, 1);
-          vm->addVar(row2, decisionVar, -1);
+          vm->addVar(row, aSmallerBinL1, -1);
+          vm->addVar(row, aSmallerBinL2, 1);
+          vm->addVar(row, decisionVar, 1);
+          vm->addVar(row2, aSmallerBinL1, 1);
+          vm->addVar(row2, aSmallerBinL2, -1);
+          vm->addVar(row2, decisionVar, 1);
 
           // _____________________________________
           // introduce dec var for distance 1 between lines changes
@@ -441,7 +441,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
               size_t rowT = glp_add_rows(lp, 1);
 
               glp_set_row_name(lp, rowT, rowTName.str().c_str());
-              glp_set_row_bnds(lp, rowT, GLP_UP, 0, 0);
+              glp_set_row_bnds(lp, rowT, GLP_LO, 0, 0);
 
               std::stringstream rowTName2;
               rowTName2 << "sum_decT2(e1=" << segmentA->getStrRepr()
@@ -451,13 +451,13 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
               size_t rowT2 = glp_add_rows(lp, 1);
 
               glp_set_row_name(lp, rowT2, rowTName2.str().c_str());
-              glp_set_row_bnds(lp, rowT2, GLP_UP, 0, 0);
-              vm->addVar(rowT, aNearBinL1, 1);
-              vm->addVar(rowT, aNearBinL2, -1);
-              vm->addVar(rowT, decisionVarDist1Change, -1);
-              vm->addVar(rowT2, aNearBinL1, -1);
-              vm->addVar(rowT2, aNearBinL2, 1);
-              vm->addVar(rowT2, decisionVarDist1Change, -1);
+              glp_set_row_bnds(lp, rowT2, GLP_LO, 0, 0);
+              vm->addVar(rowT, aNearBinL1, -1);
+              vm->addVar(rowT, aNearBinL2, 1);
+              vm->addVar(rowT, decisionVarDist1Change, 1);
+              vm->addVar(rowT2, aNearBinL1, 1);
+              vm->addVar(rowT2, aNearBinL2, -1);
+              vm->addVar(rowT2, decisionVarDist1Change, 1);
             } else if ((segmentA->etgs[0].etg->getCardinality() == 2) ^
                   (segmentB->etgs[0].etg->getCardinality() == 2)) {
               // the trivial case where one of the two segments only has

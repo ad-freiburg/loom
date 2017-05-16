@@ -486,7 +486,7 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
   std::stringstream cmd;
   LOG(INFO) << "Calling external solver CBC..." << std::endl;
-  cmd << "/home/patrick/repos/Cbc-2.9/build/bin/clp " << f << " -printingOptions all -solve -solution " << outf << "";
+  cmd << "/home/patrick/repos/Cbc-2.9/build/bin/cbc " << f << " -printingOptions all -solve -solution " << outf << "";
   int r = system(cmd.str().c_str());
   LOG(INFO) << "Solver exited (" << r << ")" << std::endl;
   LOG(INFO) << "Parsing solution..." << std::endl;
@@ -502,15 +502,17 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
     std::istringstream iss(line);
     int number;
     string name;
-    int value;
+    double value;
 
     iss >> number;
     iss >> name;
     iss >> value;
 
+    int intVal = value;
+
     size_t col = glp_find_col(lp, name.c_str());
     if (col != 0) {
-      glp_set_col_bnds(lp, col, GLP_FX, value, value);
+      glp_set_col_bnds(lp, col, GLP_FX, intVal, intVal);
     }
   }
 }
