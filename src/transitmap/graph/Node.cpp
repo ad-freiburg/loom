@@ -58,6 +58,15 @@ double Node::getMaxNodeFrontWidth() const {
 }
 
 // _____________________________________________________________________________
+size_t Node::getMaxNodeFrontCardinality() const {
+  size_t ret = 0;
+  for (const NodeFront& g : _mainDirs) {
+    if (g.edge->getCardinality() > ret) ret = g.edge->getCardinality();
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
 Node::Node(const std::string& id, Point pos) : _id(id), _pos(pos) {}
 
 // _____________________________________________________________________________
@@ -307,22 +316,30 @@ Polygon Node::getConvexFrontHull(double d) const {
 
   if (getMainDirs().size() != 2) {
     for (auto& nf : getMainDirs()) {
-      l.push_back(nf.geom.getLine());
+      // l.push_back(nf.geom.getLine());
+      l.push_back(nf.geom.getSegment(
+        (d / 2) /
+            nf.geom.getLength(),
+        (nf.geom.getLength() -
+         d / 2) /
+            nf.geom.getLength()).getLine());
     }
   } else {
     // for two main dirs, take average
     std::vector<const PolyLine*> pols;
+
     PolyLine a = getMainDirs()[0].geom.getSegment(
-        (getMainDirs()[0].edge->getWidth() / 2) /
+        (d / 2) /
             getMainDirs()[0].geom.getLength(),
         (getMainDirs()[0].geom.getLength() -
-         getMainDirs()[0].edge->getWidth() / 2) /
+         d / 2) /
             getMainDirs()[0].geom.getLength());
+
     PolyLine b = getMainDirs()[1].geom.getSegment(
-        (getMainDirs()[1].edge->getWidth() / 2) /
+        (d / 2) /
             getMainDirs()[1].geom.getLength(),
         (getMainDirs()[1].geom.getLength() -
-         getMainDirs()[1].edge->getWidth() / 2) /
+         d / 2) /
             getMainDirs()[1].geom.getLength());
 
     assert(a.getLine().size() > 1);
@@ -348,11 +365,15 @@ Polygon Node::getConvexFrontHull(double d) const {
 
   if (l.size() > 1) {
     Polygon hull;
-    if (true || l.size() > 4) {
-      bgeo::convex_hull(l, hull);
-    } else {
-      if (l.size() < 5) hull = pbutil::geo::getOrientedEnvelope(l);
+    bgeo::convex_hull(l, hull);
+    if (l.size() < 5 && getMaxNodeFrontCardinality() > 1) {
+      Polygon env = pbutil::geo::getOrientedEnvelopeAvg(l).getPolygon();
+      double incr = (bgeo::area(env) / bgeo::area(hull)) - 1;
+      if (bgeo::area(env) < d*d*36) {
+        hull = env;
+      }
     }
+
     bgeo::buffer(hull, ret, distanceStrat, sideStrat, joinStrat, endStrat,
                  circleStrat);
   } else {

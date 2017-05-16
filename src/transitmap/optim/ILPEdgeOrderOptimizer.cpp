@@ -413,7 +413,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
               glp_set_col_kind(lp, decisionVarDist1Change, GLP_BV);
 
               glp_set_obj_coef(lp, decisionVarDist1Change,
-                                getCrossingPenalty(node, 3));
+                                getSplittingPenalty(node, SPLIT_PEN_MULTIPLIER));
 
               size_t aNearBinL1 = 0;
               size_t aNearBinL2 = 0;
@@ -470,7 +470,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
                       << "<T>" << linepair.second << ")";
               size_t aNearB = glp_find_col(lp, aNearBStr.str().c_str());
               glp_set_obj_coef(lp, aNearB,
-                                getCrossingPenalty(node, 3));
+                                getSplittingPenalty(node, SPLIT_PEN_MULTIPLIER));
             }
           }
         }

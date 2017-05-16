@@ -119,7 +119,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG,
       params["stroke"] = "black";
       params["stroke-width"] = "1";
       params["fill"] = "white";
-      printPolygon(n->getConvexFrontHull(20), params, rparams);
+      printPolygon(n->getConvexFrontHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8), params, rparams);
     } else if (false) {
       params["r"] = "5";
       params["fill"] = "#FF00FF";
@@ -171,8 +171,7 @@ void SvgOutput::outputEdges(const graph::TransitGraph& outG,
 void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
                                       const graph::Node* n,
                                       const RenderParams& rparams) {
-  if (n->getStops().size() != 0) return;
-
+  if (n->getStops().size() != 0 && n->getMainDirs().size() != 2) return;
   for (auto& clique :
        getInnerCliques(n->getInnerGeometries(outG.getConfig(),
                                              _cfg->innerGeometryPrecision),
@@ -211,7 +210,6 @@ size_t SvgOutput::getNextPartner(const InnerClique& forClique,
     const graph::InnerGeometry& ic = pool[i];
     for (auto& ciq : forClique.geoms) {
       if (isNextTo(ic, ciq) || (level > 1 && hasSameOrigin(ic, ciq))) {
-        std::cout << hasSameOrigin(ic, ciq) << std::endl;
         return i;
       }
     }
@@ -275,6 +273,8 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       if (c.geoms[i].geom.getLength() > ref.geom.getLength()) ref = c.geoms[i];
     }
 
+    if (ref.geom.getLength() < _cfg->lineWidth / 2) continue;
+
     for (size_t i = 0; i < c.geoms.size(); i++) {
       double off = -(ref.from.edge->getWidth() + ref.from.edge->getSpacing()) *
                    (static_cast<int>(c.geoms[i].slotFrom) -
@@ -285,7 +285,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       PolyLine pl = ref.geom.getPerpOffsetted(off);
 
       std::stringstream styleOutlineCropped;
-      styleOutlineCropped << "fill:none;stroke:#111111";
+      styleOutlineCropped << "fill:none;stroke:#FFFFFF";
 
       styleOutlineCropped << ";stroke-linecap:butt;stroke-width:"
                    << (ref.from.edge->getWidth() + _cfg->outlineWidth) *
@@ -321,7 +321,7 @@ void SvgOutput::renderLinePart(const PolyLine p, double width,
                                const std::string& endMarker,
                                const Nullable<style::LineStyle> style) {
   std::stringstream styleOutline;
-  styleOutline << "fill:none;stroke:#111111";
+  styleOutline << "fill:none;stroke:#FFFFFF";
 
   if (!endMarker.empty()) {
     styleOutline << ";marker-end:url(#" << endMarker << "_black)";
@@ -415,6 +415,8 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   for (size_t i : outG.getConfig().find(e)->second) {
     const graph::RouteOccurance& r = e->getTripsUnordered()[i];
     PolyLine p = center;
+
+    if (p.getLength() < _cfg->lineWidth / 2) continue;
 
     double offset = -(o - oo / 2.0 - e->getWidth() / 2.0);
 

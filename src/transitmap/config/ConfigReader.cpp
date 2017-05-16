@@ -54,7 +54,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "default width of line outline")
     ("render-stations",
      opts::bool_switch(&(cfg->renderStations))
-      ->default_value(true),
+      ->default_value(false),
       "render station geometries")
     ("render-station-names",
      opts::bool_switch(&(cfg->renderStationNames))

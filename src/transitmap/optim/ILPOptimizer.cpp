@@ -77,6 +77,17 @@ int ILPOptimizer::getCrossingPenalty(const OptNode* n, int coef) const {
 }
 
 // _____________________________________________________________________________
+int ILPOptimizer::getSplittingPenalty(const OptNode* n, int coef) const {
+  coef *= n->adjList.size();
+
+  if (n->node->getStops().size() > 0) {
+    return _cfg->inStationCrossPenalty * coef;
+  }
+
+  return coef;
+}
+
+// _____________________________________________________________________________
 double ILPOptimizer::getConstraintCoeff(glp_prob* lp, int constraint,
                                         int col) const {
   int indices[glp_get_num_cols(lp)];
@@ -486,7 +497,7 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
   std::stringstream cmd;
   LOG(INFO) << "Calling external solver CBC..." << std::endl;
-  cmd << "/home/patrick/repos/Cbc-2.9/build/bin/cbc " << f << " -printingOptions all -solve -solution " << outf << "";
+  cmd << "/home/patrick/repos/Cbc-2.9/build/bin/cbc " << f << " -threads 4 -printingOptions all -solve -solution " << outf << "";
   int r = system(cmd.str().c_str());
   LOG(INFO) << "Solver exited (" << r << ")" << std::endl;
   LOG(INFO) << "Parsing solution..." << std::endl;

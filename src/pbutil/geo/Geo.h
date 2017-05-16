@@ -28,6 +28,7 @@ typedef bgeo::model::polygon<Point> Polygon;
 typedef bgeo::model::multi_polygon<Polygon> MultiPolygon;
 typedef bgeo::model::box<Point> Box;
 
+
 // _____________________________________________________________________________
 template <typename Geometry>
 inline Geometry rotate(const Geometry& geo, double deg, const Point& center) {
@@ -57,6 +58,21 @@ inline Geometry rotate(const Geometry& geo, double deg) {
   bgeo::centroid(geo, center);
   return rotate(geo, deg, center);
 }
+
+// TODO: outfactor
+
+struct RotatedBox {
+  RotatedBox(const Box& b, double rot, const Point& center) : b(b), rotateDeg(rot), center(center) {}
+  Box b;
+  double rotateDeg;
+  Point center;
+
+  Polygon getPolygon() {
+    Polygon hull;
+    bgeo::convex_hull(b, hull);
+    return rotate(hull, rotateDeg, center);
+  }
+};
 
 // _____________________________________________________________________________
 inline bool doubleEq(double a, double b) { return fabs(a - b) < 0.000001; }
@@ -303,7 +319,8 @@ inline double parallelity(const Box& box, const MultiLine& multiline) {
 }
 
 // _____________________________________________________________________________
-inline Polygon getOrientedEnvelope(Polygon pol) {
+template <typename Geometry>
+inline RotatedBox getOrientedEnvelope(Geometry pol) {
   // TODO: implement this nicer, works for now, but inefficient
   // see
   // https://geidav.wordpress.com/tag/gift-wrapping/#fn-1057-FreemanShapira1975
@@ -327,27 +344,32 @@ inline Polygon getOrientedEnvelope(Polygon pol) {
     }
   }
 
-  Polygon hull;
-  bgeo::convex_hull(tmpBox, hull);
-  return rotate(hull, -rotateDeg, center);
+  return RotatedBox(tmpBox, -rotateDeg, center);
 }
 
 // _____________________________________________________________________________
-inline Polygon getOrientedEnvelope(const MultiLine& ml) {
-  // first, get hull of multilines
-  Polygon hull;
-  bgeo::convex_hull(ml, hull);
-
+inline RotatedBox getOrientedEnvelopeAvg(MultiLine ml) {
   // get oriented envelope for hull
-  hull = getOrientedEnvelope(hull);
+  RotatedBox rbox = getOrientedEnvelope(ml);
+  Point center;
+  bgeo::centroid(rbox.b, center);
 
-  double minDeg;
-  double score;
+  ml = rotate(ml, -rbox.rotateDeg - 45, center);
 
-  for (double i = 0; i <= 360; i += .5) {
+  double bestDeg = -45;
+  double score = parallelity(rbox.b, ml);
 
+  for (double i = -45; i <= 45; i += .5) {
+    ml = rotate(ml, -.5, center);
+    double p = parallelity(rbox.b, ml);
+    if (parallelity(rbox.b, ml) > score) {
+      bestDeg = i;
+      score = p;
+    }
   }
 
+  rbox.rotateDeg += bestDeg;
+  return rbox;
 }
 
 }

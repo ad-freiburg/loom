@@ -28,10 +28,12 @@ typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
 // multiplier used for crossing penalty in crossings that occur between
 // only two segments (where the crossing occurs in the "same" segment)
-static const double CR_PEN_MULTIPLIER_SAMESEG = 2;
+static const double CR_PEN_MULTIPLIER_SAMESEG = 4;
 // multiplier used for crossing penalty in crossings that occur between
 // three segments
 static const double CR_PEN_MULTIPLIER_DIFFSEG = 1;
+
+static const double SPLIT_PEN_MULTIPLIER = 3;
 
 struct VariableMatrix {
   std::vector<int> rowNum;
@@ -92,6 +94,7 @@ class ILPOptimizer : public Optimizer {
                PosCom postcomb) const;
 
   int getCrossingPenalty(const OptNode* n, int coef) const;
+  int getSplittingPenalty(const OptNode* n, int coef) const;
 
   Point getPos(OptNode* n, OptEdge* segment, size_t p) const;
 };

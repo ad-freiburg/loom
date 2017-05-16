@@ -117,6 +117,7 @@ class Node {
   bool connOccurs(const Route* r, const Edge* edgeA, const Edge* edgeB) const;
 
   double getMaxNodeFrontWidth() const;
+  size_t getMaxNodeFrontCardinality() const;
 
  private:
   std::string _id;
