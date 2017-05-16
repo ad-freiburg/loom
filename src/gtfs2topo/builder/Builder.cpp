@@ -127,7 +127,7 @@ ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
     for (auto e : n->getAdjListOut()) {
       i++;
       if (_indEdges.find(e) != _indEdges.end() ||
-          e->getEdgeTripGeoms()->size() != 1) {
+          e->getEdgeTripGeoms()->size() == 0) {
         continue;
       }
       // TODO: outfactor this _______
@@ -136,7 +136,7 @@ ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
           // TODO: only check edges with a SINGLE geometry atm, see also check
           // above
           if (_indEdges.find(toTest) != _indEdges.end() ||
-              toTest->getEdgeTripGeoms()->size() != 1) {
+              toTest->getEdgeTripGeoms()->size() == 0) {
             continue;
           }
 
@@ -159,10 +159,6 @@ ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
             if (s.segments.size() > 0) {
               _pEdges[e]++;
               if (_pEdges[e] > 20) {
-                /**
-                LOG(WARN) << "Too many optimiziations for " << e
-                  << ", preventing further..." << std::endl;
-                **/
                 _indEdges.insert(e);
               }
               // LOG(DEBUG) << _indEdges.size() << " / " << i << std::endl;
@@ -626,7 +622,7 @@ Node* Builder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel, Graph* g) {
                               g->getProjection());
 
   if (aggrLevel > 1) {
-    n = g->getNearestNode(p, 100);
+    n = g->getNearestNode(p, 300);
   }
 
   if (n) {
@@ -890,6 +886,7 @@ PolyLine Builder::getAveragedFromSharedSeg(const ShrdSegWrap& w) const {
 
 // _____________________________________________________________________________
 bool Builder::lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const {
+  return false;
   if (e != w.e && e != w.f) return false;
 
   double LOOKAHEAD = 50;

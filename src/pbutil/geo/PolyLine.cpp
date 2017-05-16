@@ -441,7 +441,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
    */
   double STEP_SIZE = 2;
   double MAX_SKIPS = 4;
-  double MIN_SEG_LENGTH = dmax / 2;  // make this configurable!
+  double MIN_SEG_LENGTH = 1;//dmax / 2;  // make this configurable!
 
   SharedSegments ret;
 

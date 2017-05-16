@@ -110,7 +110,7 @@ where $\|p - p'\|$ is the euclidean distance between $p$ and $p'$.
 
 We transform $T$ into a well-formed transit graph $T'$ by repeatedly collapsing shared segments between two edges $e_1, e_2$ into a single new edge $e_{12}$ until no shared segments can be found. If for any of the edges the start of the shared segment $\pi$ lies not at the beginning of $\tau_e$, we split $e = (u, v)$ at $\pi$ into two edges $e'$ and $e''$ and introduce a new topological node $v'$ such that $e' = (u, v')$ and $e'' = (v', v)$ as well as $\tau_{e'}(1) = \tau_{e}(pi)$ and $\tau_{e''}(0) = \tau_{e}(pi)$. The same goes for the end point of a shared segment.
 
-To find the shared segments between two paths $\tau$ and $\tau'$, we do a simple sweep over $\tau$ in $n$ steps of some $\Delta\pi$, measuring the distance $d$ between $\tau(i\cdot\Delta\pi)$ and $\tau'$ at each $i < n$ along the way. If $d \leq \hat{d}$, we start a new segment. If $d > \hat{d}$ and a segment is open, we close it. The algorithm can be mode more robust against outliers by allowing $d$ to exceed $\hat{d}$ for a number of $n$ steps.
+To find the shared segments between two paths $\tau$ and $\tau'$, we do a simple sweep over $\tau$ in $n$ steps of some $\Delta\pi$, measuring the distance $d$ between $\tau(i\cdot\Delta\pi)$ and $\tau'$ at each $i < n$ along the way. If $d \leq \hat{d}$, we start a new segment. If $d > \hat{d}$ and a segment is open, we close it. The algorithm can be mode more robust against outliers by allowing $d$ to exceed $\hat{d}$ for a number of $n$ steps. If can be significantly sped up by indexing every linear segment of every path in a geometric index (for example, an R-Tree).
 
 \todo{example figure}
 % \begin{figure}[h]
@@ -118,7 +118,6 @@ To find the shared segments between two paths $\tau$ and $\tau'$, we do a simple
 % \includestandalone[width=\textwidth]{tikz/linecollapse}
 % \caption{Line sweeping algorithm for spatial topology extraction}
 % \end{figure}
-The process can be sped up by indexing every linear segment of every vehicle path in a geometric index (for example, an R-Tree), making for a better lookup time of nearby segments.
 
 %
 \section{Line Ordering Optimization}\label{SEC:ordering}
