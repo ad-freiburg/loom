@@ -5,6 +5,7 @@
 \usepackage{tikz}
 \usepackage{standalone}
 \usepackage{url}
+\usepackage{wrapfig}
 
 \usetikzlibrary{calc,trees,positioning,arrows,chains,shapes.geometric,%
   decorations.pathreplacing,decorations.pathmorphing,shapes,%
@@ -49,12 +50,14 @@ JMU W\"urzburg (Germany)\\
 %
 \section{Introduction}\label{SEC:intro}
 %
+
 \begin{itemize}
 	\item mention usefulness, mention bad google maps etc
 	\item mention that we know of no publication adressing the MCLM or the drawing of metro maps that uses real-world data
 	\item mention that we not only want to generate schematic maps, but maps that resemble the real-world vehicle paths as closely as possible (e.g. to serve as a map overlay)
 \end{itemize}
 \todo{introduction, show some example map, either rendered by us or a manually created one to set the mood}
+
 
 %
 \subsection{Related Work}\label{SEC:related}
@@ -64,16 +67,19 @@ In \cite{ben06}, the problem of minimizing intra-edge crossings in transit maps 
 
 The other crucial difference of all these approaches to our work is the strong abstraction from the geometry of the transit map. In all papers listed above, the graph used for optimization is constructed upon the stations which serve as nodes and the transit lines which induce edges between those nodes. But the original embedding of the edges is not taken into account, and crossings are allowed to occur anywhere along the edges (except their endpoints). As we aim for a truthful presentation of vehicle paths in our transit map, we do not ignore the shape of the lines between stations.  Instead, we introduce a new graph model for transit maps where nodes represent topology changes in the embedding and edges represent parallel line segments. This allows us to restrict crossing events to nodes (without hiding them behind station markers!). Our approach resolves some issues with the MLCM model, as e.g. the restricted applicability of some algorithms to planar graphs, and the necessity of artificial grouping of crossings (which happens naturally with our approach).
 
+\todo{mention Anton Dubreaus work here}
+
 %
 \subsection{Contribution}\label{SEC:contrib}
 %
 \begin{itemize}
-	\item We introduce an approach for drawing transit maps that can be used with arbitrary input data in the GTFS format
+	\item We introduce an approach for drawing transit maps that can be used with arbitrary schedules as input data
 	\item ... describe a simple line-sweeping approach to extract the spatial topology graph of a set of (partially overlapping) polylines
-	\item ... describe a baseline ILP for solving the metro line crossing problem (MLCM)
-	\item ... describe a improvied ILP for solving (MLCM) and add a simple extension that also minimizes line-separations (and subsequently, a special case of the periphery problem (MLCM-P))
+	\item ... describe a baseline ILP for solving the metro line topological crossing problem (MLTCM)
+	\item ... describe a improvied ILP for solving MLTCM and add a simple extension that also minimizes line-separations (MLTCM-S) (handes the crucial case of the periphery problem (MLCM-S))
 	\item ... describe some heuristics for placing inevitable crossings in a asthecitally pleasing way
 	\item ... describe the reduction of the minimization problem to core problem graphs which simplifies the problem
+	\item ... apply our approach to several real-world datasets
 \end{itemize}
 
 \todo{write contributions}
@@ -81,216 +87,225 @@ The other crucial difference of all these approaches to our work is the strong a
 %
 \subsection{Problem Definition}\label{SEC:def}
 %
-Let $L$ by a set of unique transit lines and w.l.o.g. $l \in \mathbb{N}$. We call an undirected graph $T = (V, S)$ with vertices $v = (p_v, \sigma_v)$ and segments $s = (u, v, L(s), \tau_s)$ a transit graph. Each $v$ has a position $p_v \in \mathbb{R}^2$. Furthermore we assign each segment $s$ a polygonal chain $\tau_s = (p_1, ..., p_n), p_i \in \mathbb{R}^2$ which describes the geometrical path a segment takes through the plane. For each $s$, we impose $p_1 = p_u$ and $p_n = p_v$, that is the polygonal chain has to start and end at the position of the segment's start and end node. $L(s)$ is the (ordered) set of lines that traverse $s$. Finally, we assign each node a role $\sigma_v \in {0, 1}$. If $\sigma_v = 1$, then we say that $v$ is a real station node. If $\sigma_v = 0$, we call $v$ a spatial topology node. A spatial topology node is a node where two or more lines diverge.
+Let $L$ by a set of unique transit lines. We call an undirected graph $T = (V, E)$ with vertices $v = (p_v, \sigma_v)$ and edges $e = (u, v, L(e), \tau_e)$ a transit graph. Each node has a role $\sigma_v \in {0, 1}$. If $\sigma_v = 1$, then we say that $v$ is a station node. If $\sigma_v = 0$, we call $v$ a topology node. A topology node is a node where the topology of the underlying transit network changes. $L(e)$ is the set of lines that traverse $e$.
 
-\todo{some real-world transit graph example (maybe Freiburg?)}
-% \begin{figure}[h]
-% \centering
-%	\includestandalone[width=5cm]{tikz/transitgraph_small}
-%	\caption{A transitgraph.}
-%\end{figure}
+Optionally, we may assign each $v$ a position $p_v \in \mathbb{R}^2$ and each edge $e$ a polygonal chain $\tau_e = (p_1, ..., p_n), p_i \in \mathbb{R}^2$ which describes the geometrical path the edge takes through the plane. For each $e$, we then impose $p_1 = p_u$ and $p_n = p_v$.
 
-$G$ can be understood as an embedding of an undirected multigraph $G = (V, E)$, where each line $l$ traversing a segment $s$ is transformed into a single edge. It can also be understood as an embedding of a set of $\mathbb{L}$ polygonal chains.
-The goal is to render $T$ in a way that resembles a modern transit map.
-We chose this definition because it proved to be useful during line-ordering optimization as well as during map rendering (see Section~\ref{SEC:rendering}). It also resembles the intuitive understanding of a transit map.
+\begin{figure}
+  \centering
+	$\vcenter{\hbox{\includestandalone[width=0.49\textwidth]{render_examples/vvs_transit_graph}}}$
+    $\vcenter{\hbox{\includegraphics[width=0.49\textwidth]{render_examples/vvs_cropped.pdf}}}$
+	\caption{Left: \todo{UGLY} transit graph $T$ of the light rail network in the center of Stuttgart. Right: transit map rendered from $T$}
+	\label{FIG:transitgraphvvs}
+\end{figure}
 
-\todo{mention in further work (or somewhere more appropriate) that it is very easy (as we have done it) to apply our approach to a directed graph.}
+Our goal is to render $T$ in a way that resembles a modern transit map (Figure~\ref{FIG:transitgraphvvs}). We want to globally optimize the ordering of lines in such a way that single lines can be easily traced through the network. This is usually formulated as the problem of minimizing the number of line crossings in the map and commonly called the Metro Line Crossing Minimization Problem (MLCM). 
+
+In the classic MLCM problem, each node $e=(u, v)$ is assigned two orderings $e_{u}$ and $e_{v}$ for $L(e)$, one at each node. Line crossings occur somewhere on $e$ if $e_{u} != e_{v}$ and crossings inside of nodes are prohibited. We propose an alternative model where only a single line ordering is imposed on $L(e)$, meaning the line ordering remains the same throughout $e$. This effectively disallows line crossings on edges. Instead, we explicitely allow them in nodes and favor crossings in topological nodes (Section~\ref{SEC:crossing_placement}). We call this the MLTCM problem, the additional T stands for topological. In our opinion, this model not only greatly simplifies the rendering process (Section~\ref{SEC:rendering}), but also more closely resembles the way transit maps are drawn manually. In real-world maps, crossings usually occur at positions where the network topology changes. Additionally, crossings inside of stations are commonly found in transit maps.
+
+\todo{simple reduction to show that MLTCM is also NP-complete?}
 
 %
-\section{Spatial Topology Extraction}\label{SEC:topo}
+\section{Network Topology Extraction}\label{SEC:topo}
 %
 
-Real-world public transit data is usually given as a set of vehicle trips. A trip is an ordered list of served stations. The vehicle's geographical path may also be given. In recent years, the General Transit Feed Specification (GTFS) has become the dominant format for exchanging public transit schedules.
+Public transit data is usually given as a set of vehicle trips. A trip is an ordered list of served stations. The vehicle's geographical path may also be given. In recent years, the General Transit Feed Specification (GTFS) has become the dominant format for exchanging public transit schedules.
 
-Because each trip is given explicitely, the embedded transit graph $T$ induced by this data has many overlapping edges that may (partially) share the same geographical path.
+Because each trip is given explicitely, the transit graph induced by this data has many overlapping edges that may (partially) share the same geographical path. The network topology is usually lost.
 
 Let $e_1, e_2$ be two edges in $T$ with their geometrical paths $\tau_{e_1}$ and $\tau_{e_2}$. We define a parametrization $\tau(\pi): [0,1] \mapsto \mathbb{R}^2$ which maps the progress $\pi$ to a point $p_d$ on $\tau$. For some distance threshold $\hat{d}$, we say $((\pi_1, \pi_2), ({\pi'}_1, {\pi'}_2))$ is a shared segment of $e_1$ and $e_2$ iff \[\forall (\pi, \pi'), \pi \in [d_1, {d'}_1], \pi' \in [d_2, {d'}_2] : \|\tau_{e_1}(\pi) - \tau_{e_2}(\pi')\| \leq d,\]
 
 where $\|p - p'\|$ is the euclidean distance between $p$ and $p'$.
 
-We transform $T$ into a well-formed transit graph $T'$ by repeatedly collapsing shared segments between two edges $e_1, e_2$ into a single new edge $e_{12}$ until no shared segments can be found. If for any of the edges the start of the shared segment $\pi$ lies not at the beginning of $\tau_e$, we split $e = (u, v)$ at $\pi$ into two edges $e'$ and $e''$ and introduce a new topological node $v'$ such that $e' = (u, v')$ and $e'' = (v', v)$ as well as $\tau_{e'}(1) = \tau_{e}(pi)$ and $\tau_{e''}(0) = \tau_{e}(pi)$. The same goes for the end point of a shared segment.
+We restore the network topology and transform $T$ into a well-formed transit graph $T'$ by repeatedly collapsing shared segments between two edges $e_1, e_2$ into a single new edge $e_{12}$ until no more shared segments can be found. If for any of the edges the start of the shared segment $\pi$ lies not at the beginning of $\tau_e$, we split $e = (u, v)$ at $\pi$ into two edges $e'$ and $e''$ and introduce a new topological node $v'$ such that $e' = (u, v')$ and $e'' = (v', v)$ as well as $\tau_{e'}(1) = \tau_{e''}(0) = \tau_{e}(\pi)$. The same goes for the end point of a shared segment.
 
-To find the shared segments between two paths $\tau$ and $\tau'$, we do a simple sweep over $\tau$ in $n$ steps of some $\Delta\pi$, measuring the distance $d$ between $\tau(i\cdot\Delta\pi)$ and $\tau'$ at each $i < n$ along the way. If $d \leq \hat{d}$, we start a new segment. If $d > \hat{d}$ and a segment is open, we close it. The algorithm can be mode more robust against outliers by allowing $d$ to exceed $\hat{d}$ for a number of $n$ steps. If can be significantly sped up by indexing every linear segment of every path in a geometric index (for example, an R-Tree).
-
-\todo{example figure}
-% \begin{figure}[h]
-% \centering
-% \includestandalone[width=\textwidth]{tikz/linecollapse}
-% \caption{Line sweeping algorithm for spatial topology extraction}
-% \end{figure}
+To find the shared segments between two paths $\tau$ and $\tau'$, we do a simple sweep over $\tau$ in $n$ steps of some $\Delta\pi$, measuring the distance $d$ between $\tau(i\cdot\Delta\pi)$ and $\tau'$ at each $i < n$ along the way. If $d \leq \hat{d}$, we start a new segment. If $d > \hat{d}$ and a segment is open, we close it. The algorithm can be made more robust against outliers by allowing $d$ to exceed $\hat{d}$ for a number of $n$ steps. It can be significantly sped up by indexing every linear segment of every path in a geometric index (for example, an R-Tree).
 
 %
 \section{Line Ordering Optimization}\label{SEC:ordering}
 %
-We want to optimize the ordering imposed on each $s \in S$ in such a way that single lines can be easily traced through the network and the rendered map looks visually pleasing. These rather subjective criteria are usually formulated as the problem if minimizing the number of line crossing in the map (see Fig.~\ref{FIG:crossings}). This is commonly called the Metro Line Crossing Minimization Problem (MLCM). ? and ? suggest that it may improve the readability of the map if lines ending in a station only occur on the left or right side of the ordered sequence of a segment. This is called the periphery condition. MLCM under the periphery condition is called MLCM-P.
 
-In this section, we describe a baseline integer linear program (ILP) to solve MLCM with $\mathcal{O}(|S|M^{2})$ variables and $\mathcal{O}(|S|M^{6})$ constraints.
-We introduce an improved version of this program that only needs $\mathcal{O}(|S|M^2)$ constraints and describe an extension to this ILP which solves MLCM under the line separation constraint \todo{maybe call this MLCM-S?}
-MLCM-S tries to avoid the separation of lines that traverse a segment $s$ next to each other in an adjacent segment $s'$ (see Section~\ref{SEC:separation}).
-This has several benefits and also covers a special case of MLCM-P which we think is the most important.
+In this section, we describe a baseline integer linear program (ILP) to solve MLTCM with $\mathcal{O}(|S|M^{2})$ variables and $\mathcal{O}(|S|M^{6})$ constraints.
+We introduce an improved version of this program that only needs $\mathcal{O}(|S|M^2)$ constraints and describe an extension to this ILP which solves MLTCM under the line separation constraint (see Section~\ref{SEC:separation}).
 
 %
 \subsection{Baseline ILP}\label{SEC:baseline}
 %
-For every segment $s \in S$, we define $|L(s)|^{2}$ decision variables $x_{slp} \in \{0,1\}$ where $s$ indicates the segment, $l \in L(s)$ the line, and $p=1, \cdots, |L(s)|$ the position/number of the edge in the segment. We want to enforce $x_{slp}=1$ when line $l$ is assigned to edge number $p$ in the segment, and $0$ otherwise. This can be realized as follows:
+For every edge $e \in E$, we define $|L(e)|^{2}$ decision variables $x_{elp} \in \{0,1\}$ where $e$ indicates the edge, $l \in L(e)$ the line, and $p=1, \cdots, |L(e)|$ the position/number of the line in the edge. We want to enforce $x_{elp}=1$ when line $l$ is assigned to edge number $p$ in the edge, and $0$ otherwise. This can be realized as follows:
 \begin{equation*}
-\forall l \in L(s): \sum_{p=1}^{L(s)} x_{slp}=1.
+\forall l \in L(e): \sum_{p=1}^{L(e)} x_{elp}=1.
 \end{equation*}
 To assure that each edge get assigned exactly one line, we additionally need the constraints:
 \begin{equation*}
-	\forall p \in  \{1,\cdots,|L(s)|\} : \sum_{l \in L(s)} x_{slp} = 1.
+	\forall p \in  \{1,\cdots,|L(e)|\} : \sum_{l \in L(e)} x_{elp} = 1.
 \end{equation*}
 % \smallskip\\
 % \textbf{Example:}
 % \begin{center}
-% $x_{sA1} + x_{sA2} + x_{sA3} = 1$\\
-% $x_{sB1} + x_{sB2} + x_{sB3} = 1$\\
-% $x_{sC1} + x_{sC2} + x_{sC3} = 1$\smallskip\\
-% $x_{sA1} + x_{sB1} + x_{sC1} = 1$\\
-% $x_{sA2} + x_{sB2} + x_{sC2} = 1$\\
-% $x_{sA3} + x_{sB3} + x_{sC3} = 1$\smallskip\\
-% $x_{sA1}, x_{sA2}, x_{sA3}, x_{sB1}, x_{sB2}, x_{sB3}, x_{sC1}, x_{sC2}, x_{sC3} \in \{0, 1\}$
+% $x_{eA1} + x_{eA2} + x_{eA3} = 1$\\
+% $x_{eB1} + x_{eB2} + x_{eB3} = 1$\\
+% $x_{eC1} + x_{eC2} + x_{eC3} = 1$\smallskip\\
+% $x_{eA1} + x_{eB1} + x_{eC1} = 1$\\
+% $x_{eA2} + x_{eB2} + x_{eC2} = 1$\\
+% $x_{eA3} + x_{eB3} + x_{eC3} = 1$\smallskip\\
+% $x_{eA1}, x_{eA2}, x_{eA3}, x_{eB1}, x_{eB2}, x_{eB3}, x_{eC1}, x_{eC2}, x_{eC3} \in \{0, 1\}$
 % \end{center}
 \subsubsection{Avoiding crossings}\label{SEC:ac}
-Let $A, B$ be two lines belonging to a segment $s$ over vertices $v,w$ and both extend over $w$. We distinguish two cases: Either there is an adjacent segment $s'$ with $A,B \in L(s')$ as well or $A$ and $B$ continue in different segments.
+Let $A, B$ be two lines belonging to an edge $e$ over vertices $v,w$ and both extend over $w$. We distinguish two cases: Either there is an adjacent edge $e'$ with $A,B \in L(e')$ as well or $A$ and $B$ continue in different edges.
 \begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.66\textwidth]{crossing.pdf}}}$
-	\caption{Line crossings of $\{A, B\}$ in the same segments (left) and into different segments (right) }
+	\caption{Line crossings of $\{A, B\}$ in the same edges (left) and into different edges (right) }
 	\label{FIG:crossings}
 \end{figure}
-In the first case (left), $A, B$ induce a crossing if the position of $A$ is smaller than the position of $B$ in $s$ but vice versa in $s'$. We introduce the decision variable $x_{ss'AB} \in \{0,1\}$, which should be $1$ in case a crossing is induced and $0$ otherwise. To enforce this, we create one constraint per possible crossing as follows:
+In the first case (left), $A, B$ induce a crossing if the position of $A$ is smaller than the position of $B$ in $L(e)$ but vice versa in $L(e')$. We introduce the decision variable $x_{ee'AB} \in \{0,1\}$, which should be $1$ in case a crossing is induced and $0$ otherwise. To enforce this, we create one constraint per possible crossing as follows:
 \begin{align*}
-	x_{sA1} + x_{sB2} + x_{s'A2} + x_{s'B1} - x_{ss'AB} &\leq 3 \\
-	x_{sA1} + x_{sB3} + x_{s'A2} + x_{s'B1} - x_{ss'AB} &\leq 3 \\
-	x_{sA2} + x_{sB3} + x_{s'A2} + x_{s'B1} - x_{ss'AB} &\leq 3 \\
-	x_{sA2} + x_{sB1} + x_{s'A1} + x_{s'B2} - x_{ss'AB} &\leq 3 \\
-	x_{sA3} + x_{sB2} + x_{s'A1} + x_{s'B2} - x_{ss'AB} &\leq 3 \\
-	x_{sA3} + x_{sB2} + x_{s'A1} + x_{s'B2} - x_{ss'AB} &\leq 3.
+	x_{eA1} + x_{eB2} + x_{e'A2} + x_{e'B1} - x_{ee'AB} &\leq 3 \\
+	x_{eA1} + x_{eB3} + x_{e'A2} + x_{e'B1} - x_{ee'AB} &\leq 3 \\
+	x_{eA2} + x_{eB3} + x_{e'A2} + x_{e'B1} - x_{ee'AB} &\leq 3 \\
+	x_{eA2} + x_{eB1} + x_{e'A1} + x_{e'B2} - x_{ee'AB} &\leq 3 \\
+	x_{eA3} + x_{eB2} + x_{e'A1} + x_{e'B2} - x_{ee'AB} &\leq 3 \\
+	x_{eA3} + x_{eB2} + x_{e'A1} + x_{e'B2} - x_{ee'AB} &\leq 3.
 \end{align*}
-In case one of the crossings occurs, the first four variables of the corresponding constraint all have to be 1. Hence their sum equals 4 and the only way to fulfill the $\leq 3$ constraint is to set $x_{ss'AB}$ to $1$.
-The objective function then minimizes the sum over all such variables $x_{ss'AB}$.
+In case one of the crossings occurs, the first four variables of the corresponding constraint all have to be 1. Hence their sum equals 4 and the only way to fulfill the $\leq 3$ constraint is to set $x_{ee'AB}$ to $1$.
+The objective function then minimizes the sum over all such variables $x_{ee'AB}$.
 
-In the second case (right), $A$ and $B$ split into different segments $s', s''$. Then the actual positions of $A$ and $B$ in $s', s''$ do not matter, but the order of $s'$ and $s''$ itself. So we introduce a split crossing decision variable $x_{ss's''AB} \in \{0,1\}$ and the following constraints:
+In the second case (right), $A$ and $B$ split into different edges $e', e''$. Then the actual positions of $A$ and $B$ in $e', e''$ do not matter, but the order of $e'$ and $e''$ itself. So we introduce a split crossing decision variable $x_{ee'e''AB} \in \{0,1\}$ and the following constraints:
 \begin{align*}
-	x_{sA1} + x_{sB2} - x_{ss's''AB} &\leq 1 \\
-	x_{sA1} + x_{sB3} - x_{ss's''AB} &\leq 1 \\
-	x_{sA2} + x_{sB3} - x_{ss's''AB} &\leq 1.
+	x_{eA1} + x_{eB2} - x_{ee'e''AB} &\leq 1 \\
+	x_{eA1} + x_{eB3} - x_{ee'e''AB} &\leq 1 \\
+	x_{eA2} + x_{eB3} - x_{ee'e''AB} &\leq 1.
 \end{align*}
-Likewise, $x_{ss's''AB}$ is added to the objective function.
+Likewise, $x_{ee'e''AB}$ is added to the objective function.
 
 \subsubsection{ILP complexity}
-Let $M = \max_{s \in S} |L(s)|$ be the maximum number of lines per segment. To get a mapping of lines to positions for each segment we need $\leq |S|M^{2}$ variables and $\leq 2|S|M$ constraints in total. To minimize crossings, we have to consider $\leq M^{2}$ pairs of lines per segment in $S$, and introduce a new decision variable for each such pair. That makes $\leq |S| M^{2}$ additional variables, which all appear in the objective function. Most constraints are introduced when both lines follow the same next segment. In that case, we create at most $\binom{M}{2}^{2} < M^{4}$ additional constraints per line pair per segment, so $\leq |S| M^{6}$ in total.
+Let $M = \max_{e \in E} |L(e)|$ be the maximum number of lines per edge. To get a mapping of lines to positions for each edge we need $\leq |E|M^{2}$ variables and $\leq 2|E|M$ constraints in total. To minimize crossings, we have to consider $\leq M^{2}$ pairs of lines per edge in $E$, and introduce a new decision variable for each such pair. That makes $\leq |E| M^{2}$ additional variables, which all appear in the objective function. Most constraints are introduced when both lines follow the same next edge. In that case, we create at most $\binom{M}{2}^{2} < M^{4}$ additional constraints per line pair per edge, so $\leq |E| M^{6}$ in total.
 
-In summary, there are $\mathcal{O}(|S|M^{2})$ variables and $\mathcal{O}(|S|M^{6})$ constraints.
+In summary, there are $\mathcal{O}(|E|M^{2})$ variables and $\mathcal{O}(|E|M^{6})$ constraints.
 
 %
 \subsection{Improved ILP}\label{SEC:improved}
 %
-The $\mathcal{O}(|S|M^{2})$ variables in the baseline ILP seem to be reasonable, as indeed $\Omega(|S|M^{2})$ crossings could occur. But the $\mathcal{O}(|S|M^{6})$ constraints are due to enumerating all possible position inversions explicitly. If on the other hand the statement \emph{position of A on $s$ is smaller than the position of B} would be efficiently checkable, the number of constraints could be reduced. To have such an oracle, we first modify the line-position assignment constraints. Subsequently, we use  the oracle to encode inversions with fewer constraints.
+The $\mathcal{O}(|E|M^{2})$ variables in the baseline ILP seem to be reasonable, as indeed $\Omega(|E|M^{2})$ crossings could occur. But the $\mathcal{O}(|E|M^{6})$ constraints are due to enumerating all possible position inversions explicitly. If on the other hand the statement \emph{position of A on $e$ is smaller than the position of B} would be efficiently checkable, the number of constraints could be reduced. To have such an oracle, we first modify the line-position assignment constraints. Subsequently, we use the oracle to encode inversions with fewer constraints.
 
 \subsubsection{Alternative line-position assignment}
-Instead of a decision variable which encode the exact position of a line in a segment as before, we know use $x_{sl\leq p} \in \{0,1\}$ which is $1$ if the position of $l$ in $s$ is $\leq p$ and $0$ otherwise. To enforce a unique position, we use the constraints:
+Instead of a decision variable which encode the exact position of a line in an edge as before, we know use $x_{el\leq p} \in \{0,1\}$ which is $1$ if the position of $l$ in $e$ is $\leq p$ and $0$ otherwise. To enforce a unique position, we use the constraints:
 \begin{align}
-	\forall l \in L(s) \forall p \in \{1, \cdots, |L(s)|-1\}: x_{sl\leq p} \leq x_{sl\leq p+1} \label{EQ:up_constr}
+	\forall l \in L(e) \forall p \in \{1, \cdots, |L(e)|-1\}: x_{el\leq p} \leq x_{el\leq p+1} \label{EQ:up_constr}
 \end{align}
 This ensures that the sequence can only switch from $0$ to $1$, and this exactly once. To make sure that at some point a $1$ appears and that each position is occupied by exactly one line, we additionally introduce the following constraints:
 \begin{align}
-	\forall p \in \{1, \cdots, |L(s)|\}: \sum_{l \in L(s)} x_{sl\leq p} = p \label{EQ:01_constr}
+	\forall p \in \{1, \cdots, |L(e)|\}: \sum_{l \in L(e)} x_{el\leq p} = p \label{EQ:01_constr}
 \end{align}
-So exactly for  one line $x_{s.\leq 1} =1$ is true, for two lines $x_{s.\leq 2} = 1$ (of which one has to fulfill $x_{s.\leq 1} =1$) and so on.
+So exactly for  one line $x_{e.\leq 1} =1$ is true, for two lines $x_{e.\leq 2} = 1$ (of which one has to fulfill $x_{e.\leq 1} =1$) and so on.
 
 \subsubsection{Crossing Oracle}
-We reconsider the example from \ref{SEC:ac}, left. Before, we enumerated all possible positions which induce a crossing for $A, B$ at the transition from $s$ to $s'$. But it would be sufficient to have variables which tell us whether the position of $A$ is smaller than the position of $B$ in $s$, and the same for $s'$, and then compare those variables. For a line pair $(A,B)$ on segment $s$ we call the respective variables $x_{sA>B}, x_{sA<b} \in \{0, 1\}$. Since we introduce these variables for each line pair in $s$, $x_{sA<B}$ will re-appear as $x_{sB>A}$, so we only need $x_{sA>B}$. To get the desired value assignments, we add the following constraints:
+We reconsider the example from \ref{SEC:ac}, left. Before, we enumerated all possible positions which induce a crossing for $A, B$ at the transition from $e$ to $e'$. But it would be sufficient to have variables which tell us whether the position of $A$ is smaller than the position of $B$ in $e$, and the same for $e'$, and then compare those variables. For a line pair $(A,B)$ on edge $e$ we call the respective variables $x_{eA>B}, x_{eA<b} \in \{0, 1\}$. Since we introduce these variables for each line pair in $e$, $x_{eA<B}$ will re-appear as $x_{eB>A}$, so we only need $x_{eA>B}$. To get the desired value assignments, we add the following constraints:
 \begin{gather}
-	\sum_{p=1}^{|L(s)|} x_{sA\leq p} - \sum_{p} x_{sB\leq p} + x_{sA>B} M \geq 0 \\
-	x_{sA>B} + x_{sB>A}=1.
+	\sum_{p=1}^{|L(e)|} x_{eA\leq p} - \sum_{p} x_{eB\leq p} + x_{eA>B} M \geq 0 \\
+	x_{eA>B} + x_{eB>A}=1.
 \end{gather}
-The equality constraints make sure that not both $x_{sA>B}$ and $x_{sB>A}$ can be $1$. If the position of $A$ is smaller than the position of $B$, then more of the variables corresponding to $A$ are $1$, hence the sum over all is higher. So if we subtract the sum for $B$ from the sum for $A$ and the result is $\geq 0$, we know the position of $A$ is  smaller and $x_{sA>B}$ can be $0$. Otherwise, the difference is negative, and we need to set $x_{sA>B}$ to $1$ to fulfill the inequality. It is then indeed fulfilled for sure as the position gap can never exceed the number of lines per segment.
+The equality constraints make sure that not both $x_{eA>B}$ and $x_{eB>A}$ can be $1$. If the position of $A$ is smaller than the position of $B$, then more of the variables corresponding to $A$ are $1$, hence the sum over all is higher. So if we subtract the sum for $B$ from the sum for $A$ and the result is $\geq 0$, we know the position of $A$ is  smaller and $x_{eA>B}$ can be $0$. Otherwise, the difference is negative, and we need to set $x_{eA>B}$ to $1$ to fulfill the inequality. It is then indeed fulfilled for sure as the position gap can never exceed the number of lines per edge.
 
-To finally decide if there is a crossing, we would again like to have a decision variable $x_{ss'AB} \in \{0,1\}$ which is $1$ in case of a crossing and $0$ otherwise -- and minimize the sum of all such variables in the objective function.
+To finally decide if there is a crossing, we would again like to have a decision variable $x_{ee'AB} \in \{0,1\}$ which is $1$ in case of a crossing and $0$ otherwise -- and minimize the sum of all such variables in the objective function.
 The constraint
 \begin{gather}
-	abs(x_{sA<B}-x_{s'A<B}) - x_{ss'AB} \leq 0
+	abs(x_{eA<B}-x_{e'A<B}) - x_{ee'AB} \leq 0
 \end{gather}
-would realize this, as either $x_{sA<B} = x_{s'A<B}$ (both $0$ or both $1$) and then $x_{ss'AB}$ can be $0$, or they are unequal and hence the absolute value of their difference is $1$, enforcing $x_{ss'AB}=1$ to fulfill the $\leq 0$ condition. As absolute value computation can not be part of an ILP we use the following replacements:
+would realize this, as either $x_{eA<B} = x_{e'A<B}$ (both $0$ or both $1$) and then $x_{ee'AB}$ can be $0$, or they are unequal and hence the absolute value of their difference is $1$, enforcing $x_{e'AB}=1$ to fulfill the $\leq 0$ condition. As absolute value computation can not be part of an ILP we use the following replacements:
 \begin{align}
-	x_{sA<B} - x_{s'A<B} - x_{ss'AB} &\leq 0 \label{EQ:abs_upper}\\
-	-x_{sA<B} + x_{s'A<B} - x_{ss'AB} &\leq 0. \label{EQ:abs_lower}
+	x_{eA<B} - x_{e'A<B} - x_{ee'AB} &\leq 0 \label{EQ:abs_upper}\\
+	-x_{eA<B} + x_{e'A<B} - x_{ee'AB} &\leq 0. \label{EQ:abs_lower}
 \end{align}
-If the values are equal, nothing changes in the argumentation. If the values are unequal, either (\ref{EQ:abs_upper}) or (\ref{EQ:abs_lower})  will produce a $1$ as the sum of the first two terms, enforcing $x_{ss'AB}=1$ as desired.
+If the values are equal, nothing changes in the argumentation. If the values are unequal, either (\ref{EQ:abs_upper}) or (\ref{EQ:abs_lower})  will produce a $1$ as the sum of the first two terms, enforcing $x_{ee'AB}=1$ as desired.
 
 \subsubsection{Complexity of the improved ILP}
-For the line-position assignment, we need at most $\leq |S|M^{2}$ variables and constraints just like in the basic formulation. For counting the  crossings, we need per pair of lines per segment only a constant number of new variables and constraints as shown above, hence $\mathcal{O}(|S|M^{2})$ in total.
+For the line-position assignment, we need at most $\leq |S|M^{2}$ variables and constraints just like in the basic formulation. For counting the  crossings, we need per pair of lines per edge only a constant number of new variables and constraints as shown above, hence $\mathcal{O}(|E|M^{2})$ in total.
 
 \subsection{Placement of Inevitable Crossings}\label{SEC:crossing_placement}
 
-Inevitable crossings are induced by the network's topology and have to occur somewhere. In the ILPs described above, the placement of these crossings largely depends on the solver's strategy.
-However, we found that crossings should almost never happen inside of stations, as the crossing is then hidden behind a rendered station box and the semantic aspects of it are almost entirely lost to the reader. It may also be confusing if an inevitable crossing between two lines appeared in a part of the map where only these two lines travel next to each other.
+Inevitable crossings are enforced by the network's topology. In the ILPs described above, the placement of these crossings largely depends on the solver's strategy.
 
-We found that favoring nodes that aren't stations ($v_\sigma = 0$) and have a higher count of incident edges as a location for crossings yields maps that appear more well-arranged.
-Since these criteria are invariant to the orderings imposed on $S$, we can control the placements by simply introducing a weighting factor $k_{ss'}$ which is added with each $x_{ss'll'}$ to the objective function.
-The value of $k_{ss'}$ depends on the node where $s$ and $s'$ meet and is set like described above.
+We want to favor crossing placements in topological nodes ($v_\sigma = 0$). We also found that favoring nodes that have a higher count of incident edges as a location for crossings yields maps that appear more well-arranged.
+Since all of these criteria are invariant to the orderings imposed on the $L(E)$, we can control the placements by simply introducing a weighting factor $k_{ee'}$ which is added with each $x_{ee'll'}$ to the objective function.
+The value of $k_{ee'}$ depends on the node where $e$ and $e'$ meet and is set like described above.
 
 \subsection{Preventing Line Partner Separation}\label{SEC:separation}
-So far, we only optimized for the number of line crossings. This may not lead to the solution that is most visually pleasing. Consider the example given in Figure~\ref{FIG:linesplitting}. The number of line crossings (1) is indeed minimized in the left example. However, the intuitive information that A and B continue together after x is lost. In the right example, this information is preserved, but the number of line crossings is now 2.
+So far, we only optimized for the number of line crossings. However, consider the example given in Figure~\ref{FIG:linesplitting}. The number of line crossings (1) is indeed minimized in the left example. However, the intuitive information that A and B continue together after x is lost. In the right example, this information is preserved, but the number of line crossings is now 2.
+
+
 \begin{figure}
+\centering
+\begin{minipage}{.48\textwidth}
   \centering
-	$\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{render_examples/splitting_example_nonopt.pdf}}}$
-	\hspace{10mm}
-    $\vcenter{\hbox{\includegraphics[width=0.36\textwidth]{render_examples/splitting_example.pdf}}}$
+	\includegraphics[width=\textwidth]{render_examples/splitting_example_nonopt.pdf}
+
+	\includegraphics[width=\textwidth]{render_examples/splitting_example.pdf}
 	\caption{Left: optimized only for line crossings, Right: optimized also for line separations, with slightly higher penalty than crossings}
 	\label{FIG:linesplitting}
-\end{figure}
-A related problem can be seen in Figure \todo{insert figure}. Both solutions have the same number of line crossings (2), but the right one clearly looks better, because the crossing is done in one pass. In both cases, we could adress the problem by punishing the separation of lines. For two adjacent segments $s$ and $s'$ and a line pair $(A, B$) that continues from $s$ to $s'$, if $A$ and $B$ were placed next to each other in $s$ (were partners in $s$) but not anymore in $s'$, we want to add some penalty to the objective function. For this, we introduce a variable $x_{sA\|B} \in \{0, 1\}$. Let $p_{sA}$ be the position of $A$ in $s$ and $p_{sB}$ the position of $B$ in $s$. We want $s_{sA\|B}$ to be $1$ if $\left|p_{sA} - p_{sB}\right| = 0$ (if they occur next to each other) and $1$ otherwise. To get the desired assignments, we add the following constraints per line pair in $s$:
-\begin{align}
-	\sum_{p=1}^{|L(s)|} x_{sA\leq p} - \sum_{p} x_{sB\leq p} - x_{sA\|B} M &\leq 1 \label{EQ:sep_cstr_1} \\
-	\sum_{p=1}^{|L(s)|} x_{sB\leq p} - \sum_{p} x_{sA\leq p} - x_{sA\|B} M &\leq 1. \label{EQ:sep_cstr_2}
-\end{align}
-If $p_{sA} = p_{sB}$, then the difference of the sums in both constraints is 0. If $|p_{sA} - p_{sB}| = 1$, then the sum difference in both constraints is $\leq 1$. If $|p_{sA} - p_{sB}| > 1$, then either (\ref{EQ:sep_cstr_1}) or (\ref{EQ:sep_cstr_2}) enforce $x_{sA\|B} = 1$. To prevent the trivial solution where $x_{A\|B}$ is 1 for all line pairs, we introduce the following additional constraint per segment:
-\begin{align}
-	\sum_{l \in L(s)}\sum_{l' \in L(s)} x_{sl\|l'} \leq |L(s)|^2 - 3|L(s)| - 2
-\end{align}
-as indeed the maximal number of line pairs in $s$ (excluding lines paired with themselves) is $|L(s)|^2 - |L(s)$ and the number of $x_{sl\|l'}$ in $s$ that are 0 is exactly $2|L(s)| - 2$ (each line is next to its two neighbors, but the first and last line only have 1 neighbor). A fixed constraint is not necessary here, however, because the lower bound is already provided by the line pair constraints (\ref{EQ:sep_cstr_1}) and (\ref{EQ:sep_cstr_2}).
+\end{minipage}%
+\hfill
+\begin{minipage}{.48\textwidth}
+  \centering
+	\includegraphics[width=\textwidth]{render_examples/splitting_example_nonopt.pdf}
 
-Like in Section~\ref{SEC:improved}, we introduce a decision variable $x_{ss'A\|B} \in \{0, 1\}$ that should be $1$ if $A$ and $B$ are splitted between $s$ and $s'$ and $0$ otherwise:
+	\includegraphics[width=\textwidth]{render_examples/splitting_example.pdf}
+	\caption{Left: optimized only for line crossings, Right: optimized also for line separations, with slightly higher penalty than crossings}
+	\label{FIG:linesplitting2}
+\end{minipage}
+\end{figure}
+
+
+
+A related problem can be seen in Figure~\ref{FIG:linesplitting2}. Both solutions have the same number of line crossings (2), but the right one clearly looks better, because the crossing is done in one pass. In both cases, we could adress the problem by punishing the separation of lines. For two adjacent edges $e$ and $e'$ and a line pair $(A, B$) that continues from $e$ to $e'$, if $A$ and $B$ were placed next to each other in $e$ (were partners in $e$) but not anymore in $e'$, we want to add some penalty to the objective function. For this, we introduce a variable $x_{eA\|B} \in \{0, 1\}$. Let $p_{eA}$ be the position of $A$ in $e$ and $p_{eB}$ the position of $B$ in $e$. We want $e_{sA\|B}$ to be $1$ if $\left|p_{eA} - p_{eB}\right| = 0$ (if they occur next to each other) and $1$ otherwise. To get the desired assignments, we add the following constraints per line pair in $e$:
 \begin{align}
-	x_{sA\|B} - x_{s'A\|B} - x_{ss'A\|B} &\leq 0 \\
-	-x_{sA\|B} + x_{s'A\|B} - x_{ss'A\|B} &\leq 0.
+	\sum_{p=1}^{|L(e)|} x_{eA\leq p} - \sum_{p} x_{eB\leq p} - x_{eA\|B} M &\leq 1 \label{EQ:sep_cstr_1} \\
+	\sum_{p=1}^{|L(e)|} x_{eB\leq p} - \sum_{p} x_{eA\leq p} - x_{eA\|B} M &\leq 1. \label{EQ:sep_cstr_2}
 \end{align}
-$x_{ss'A\|B}$ is added to the objective function. If $|L(s)| = |L(s')| = 2$, a line separation penalty is not needed for $A$ and $B$ because they will always be next to each other. If only $|L(s)| = 2$, we can add $x_{s'A\|B}$ to the objective function directly (and likewise if only $|L(s')|=2$).
+If $p_{eA} = p_{eB}$, then the difference of the sums in both constraints is 0. If $|p_{eA} - p_{eB}| = 1$, then the sum difference in both constraints is $\leq 1$. If $|p_{eA} - p_{eB}| > 1$, then either (\ref{EQ:sep_cstr_1}) or (\ref{EQ:sep_cstr_2}) enforce $x_{eA\|B} = 1$. To prevent the trivial solution where $x_{A\|B}$ is 1 for all line pairs, we introduce the following additional constraint per edge:
+\begin{align}
+	\sum_{l \in L(e)}\sum_{l' \in L(e)} x_{el\|l'} \leq |L(e)|^2 - 3|L(e)| - 2
+\end{align}
+as indeed the maximal number of line pairs in $e$ (excluding lines paired with themselves) is $|L(e)|^2 - |L(e)|$ and the number of $x_{el\|l'}$ in $e$ that are 0 is exactly $2|L(e)| - 2$ (each line is next to its two neighbors, but the first and last line only have 1 neighbor). A fixed constraint is not necessary here, however, because the lower bound is already provided by the line pair constraints (\ref{EQ:sep_cstr_1}) and (\ref{EQ:sep_cstr_2}).
+
+Like in Section~\ref{SEC:improved}, we introduce a decision variable $x_{ee'A\|B} \in \{0, 1\}$ that should be $1$ if $A$ and $B$ are splitted between $e$ and $e'$ and $0$ otherwise:
+\begin{align}
+	x_{eA\|B} - x_{e'A\|B} - x_{ee'A\|B} &\leq 0 \\
+	-x_{eA\|B} + x_{e'A\|B} - x_{ee'A\|B} &\leq 0.
+\end{align}
+$x_{ee'A\|B}$ is added to the objective function. If $|L(e)| = |L(e')| = 2$, a line separation penalty is not needed for $A$ and $B$ because they will always be next to each other. If only $|L(e)| = 2$, we can add $x_{e'A\|B}$ to the objective function directly (and likewise if only $|L(e')|=2$).
 
 \todo{Mention the special case of the MLCM-P periphery constraint the above constraints handle out-of-the-box}
 
 \subsubsection{Complexity}
-We add $1$ additional constraint per segment in $S$ and a constant number of additional constraints and variables per line pair to the ILP, so the number of variables and constraints is still in $\mathcal{O}(|S|M^2)$.
+We add $1$ additional constraint per edge in $e$ and a constant number of additional constraints and variables per line pair to the ILP, so the number of variables and constraints is still in $\mathcal{O}(|E|M^2)$.
 
 %
 \subsection{Core problem graph}\label{SEC:coreprobgraph}
 %
 An inevitable crossing (or separation) between two lines $j$ and $k$ can only occur if there is at least one node with one of the following two properties:
 \begin{enumerate}
-\item $v$ is adjacent to segments $s : j \not\in L(s) \land k \in L(s')$ and $s' : j \in L(s') \land k \not\in L(s)$.
-\item $|{s \in adj(v) : j \in L(s) \land i \in L(s)}| > 2$
+\item $v$ is adjacent to edges $e : j \not\in L(e) \land k \in L(e')$ and $e' : j \in L(e') \land k \not\in L(e)$.
+\item $|{e \in adj(v) : j \in L(e) \land i \in L(e)}| > 2$
 \end{enumerate}
-\textbf{Proof} (sketch): if no such $v_jk$ exists, then it holds for all nodes $v \in V$ that $j$ and $k$ either both travel through $v$ on the same two segments or they don't travel together through $v$ at all (or only one of them). In the latter case, no crossing (or separation) will occur and we can thus disregard it, which leaves us only with the former case. But if $j$ and $k$ travel through all nodes in which a crossing could occur together on the same two segments, then the relative order of $j$ and $k$ does not matter anymore - we just combine $j$ and $k$ into a new line $i$ and assign $j$ and $k$ an arbitrary (either $(j,k)$ or $(k, j$) global ordering.
+\textbf{Proof} (sketch): if no such $v_jk$ exists, then it holds for all nodes $v \in V$ that $j$ and $k$ either both travel through $v$ on the same two edges or they don't travel together through $v$ at all (or only one of them). In the latter case, no crossing (or separation) will occur and we can thus disregard it, which leaves us only with the former case. But if $j$ and $k$ travel through all nodes in which a crossing could occur together on the same two edges, then the relative order of $j$ and $k$ does not matter anymore - we just combine $j$ and $k$ into a new line $i$ and assign $j$ and $k$ an arbitrary (either $(j,k)$ or $(k, j$) global ordering.
 
 We call nodes that comply to (1) for a line pair $A = \{j, k\}$ a liaison node for $j$ and $k$ and nodes that comply to (2) a T-node for $j$ and $k$. Additionally, we call a node that is a liaison and/or T-node for at least one line pair an \textbf{intersection node} and a node in which one or more lines end a \textbf{terminus node}.
 
 Using the above, we can now greatly simplify the input graph prior to optimization with the following steps:
 \begin{enumerate}
 \item combine lines that always occur together and for which no intersection or T-node exists into a single line with a global, arbitrary relative ordering
-\item delete each node with degree 2 (adjacent to segments $s = (u, v)$ and $s' = (v, w)$) and $L(s) = L(s')$ and combine $s$ and $s'$ into a single new segment $ss' = (u, w)$ with $L(ss') = L(s) = L(s')$ . Note that such a node can never be a terminus node or an intersection node.
+\item delete each node with degree 2 (adjacent to edges $e = (u, v)$ and $e' = (v, w)$) and $L(e) = L(e')$ and combine $e$ and $e'$ into a single new edge $ee' = (u, w)$ with $L(ee') = L(e) = L(e')$ . Note that such a node can never be a terminus node or an intersection node.
 \end{enumerate}
-Since we never delete an intersection node, these operations will not affect the optimality of the found solution. In practice, they will "move" line crossings to nodes where a new line is introduced to an existing thread of lines (liaison nodes) or to nodes where topological changes are introduced to the network (T-nodes). This has a similar effect as the heuristic described in Section~\ref{SEC:crossing_placement}. For real-world networks, it can significantly reduce the number of ILP variables and constraints.
+Since we never delete an intersection node, these operations will not affect the optimality of the found solution. In practice, they will moveline crossings to nodes where a new line is introduced to an existing thread of lines (liaison nodes) or to nodes where topological changes are introduced to the network (T-nodes). This has a similar effect as the heuristic described in Section~\ref{SEC:crossing_placement}. For real-world networks, it can significantly reduce the number of ILP variables and constraints.
 
 This core problem graph can be further prepared for optimiziation by splitting it into ordering-relevant connected components using the following rules:
 \begin{enumerate}
-	\item cut each segment $s = (u, v)$ with $|L(s)| = 1$ into two segments $s' = (u, v')$ and $s'' = (v'', v)$. Note that $v'$ and $v''$ are not connected.
-	\item replace each segment $s = (u, v)$ where $v$ is a terminus node for each $l \in L(s)$ with a segment $s' = (u, v'$ where $v'$ is only connected to $s'$. Delete $s$ from the adjaceny list of $v$.
-	\item remove each segment $s = (u, v)$ where $u$ and $v$ are termini for all $l \in L(s)$
+	\item cut each edge $e = (u, v)$ with $|L(e)| = 1$ into two edges $e' = (u, v')$ and $e'' = (v'', v)$. Note that $v'$ and $v''$ are not connected.
+	\item replace each edge $e = (u, v)$ where $v$ is a terminus node for each $l \in L(e)$ with an edge $e' = (u, v'$ where $v'$ is only connected to $e'$. Delete $e$ from the adjaceny list of $v$.
+	\item remove each edge $e = (u, v)$ where $u$ and $v$ are termini for all $l \in L(e)$
 \end{enumerate}
-The line-ordering optimization can now be run independently on each connected component of the core problem graph, reducing the size of the ILPs that have to be solved and opening the way for parallelization.
+The line-ordering optimization can now be run independently on each connected component of the core problem graph.
 \begin{figure}[h]
 \centering
 	\includestandalone[width=5cm]{tikz/transitgraph_optim}
@@ -308,9 +323,60 @@ The line-ordering optimization can now be run independently on each connected co
 \section{Evaluation}
 %
 
+To test our edge ordering optimization method, we ran it against the public transit schedules of several cities around the world (Table~\ref{TBL:datasets}). Each dataset was first transformed into a well-formed transit graph using the method described in Section~\ref{SEC:topo}. After that, an edge ordering optimization run was started for each city. 
+
 %
 \subsection{Optimization Results}
 %
+
+We evaluated the size of the resulting ILP using the baseline approach from Section~\ref{SEC:baseline} as well as the improved version from Section~\ref{SEC:improved}. We also compared the ILPs resulting from the reduced core optimization graph against those generated from the raw transit graph. Each ILP was then given to the GNU Linear Programming Kit (glpk) and the COIN-OR CBC (coin) solver. For the improved approach, we tested each dataset with or without the line separation penalty described in Section~\ref{SEC:separation}.
+\begin{table}
+	\centering
+	\footnotesize
+	\begin{tabular*}{1\textwidth}{@{\extracolsep{\fill}} l r r r r r r r r r r}
+							& \multicolumn{5}{ c }{\scriptsize Transit graph} & \multicolumn{5}{ c }{\scriptsize Core optimization graph} \\[-1.4ex]
+							& \multicolumn{5}{ c }{\scriptsize \downbracefill} & \multicolumn{5}{ c }{\scriptsize \downbracefill} \\
+							& $|V_{\sigma=1}|$ & $|V_{\sigma=0}|$ & $|E|$ & $|L|$ & ${|L(e)|}_{\text{max}}$ & $|V|$ & $|E|$ & $|L|$ & ${|L(e)|}_{\text{max}}$ \\[-2.5ex] \\\hline \\[-2ex]
+
+		Freiburg Trams		& 100	& 45	 & 5	& 120	& 65	& 65	& 40	& 5		& 4		\\
+		Boston				& 100	& 39	 & 8	& 120	& 12	& 65	& 40	& 5		& 4		\\
+		Chicago				& 54	& 15	 & 3	& 120	& 2		& 65	& 40	& 5		& 4		\\
+		Dallas				& 100	& 457	 & 3	& 120	& 66	& 65	& 40	& 5		& 4		\\
+		San Francisco		& 100	& 45	 & 5	& 120	& 3		& 65	& 40	& 5		& 4		\\
+		NYC Subway			& 2585	& 545	 & 17	& 120	& 8		& 65	& 40	& 5		& 4		\\
+		Manhattan Busses	& 7880	& 145	 & 5	& 120	& 43	& 65	& 40	& 5		& 4		\\
+		\noalign{\vspace{.8mm}}\hline\noalign{\vspace{1.5mm}}
+	\end{tabular*}
+	\caption[]{Testing datasets and their transit graph after spatial topology extraction \todo{enter real data here}\label{TBL:datasets}}
+\end{table}
+
+\begin{table}
+	\centering
+	\footnotesize
+	\begin{tabular*}{1\textwidth}{@{\extracolsep{\fill}} l r r r r r r r r r r}
+							& \multicolumn{4}{ c }{\scriptsize with graph reduction} & \multicolumn{4}{ c }{\scriptsize without graph reduction} \\[-1.4ex]
+							& \multicolumn{4}{ c }{\scriptsize \downbracefill} & \multicolumn{4}{ c }{\scriptsize \downbracefill} \\
+							& rows & cols & $t_\text{glpk}$ & $t_\text{coin}$  & rows & cols & $t_\text{glpk}$ & $t_\text{coin}$ & cross. & sep. \\[-2.5ex] \\\hline \\[-2ex]
+
+		Freiburg Trams		& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
+		\hspace{2mm}\scriptsize
+		(with sep. penalty)	& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
+		Boston				& 100	& 39	 & 8	& 120	& 12	& 40	& 5		& 4		& 6		& 7		\\
+							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
+		Chicago				& 54	& 15	 & 3	& 120	& 2		& 40	& 5		& 4		& 6		& 7		\\
+							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
+		Dallas				& 100	& 457	 & 3	& 120	& 66	& 40	& 5		& 4		& 6		& 7		\\
+							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
+		San Francisco		& 100	& 45	 & 5	& 120	& 3		& 40	& 5		& 4		& 6		& 7		\\
+							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
+		NYC Subway			& 2585	& 545	 & 17	& 120	& 8		& 40	& 5		& 4		& 6		& 7		\\
+							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
+		Manhattan Busses	& 7880	& 145	 & 5	& 120	& 43	& 40	& 5		& 4		& 6		& 7		\\
+							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
+		\noalign{\vspace{.8mm}}\hline\noalign{\vspace{1.5mm}}
+	\end{tabular*}
+	\caption[]{ILPs generated with improved approach, with or without graph reduction and separation penalty. Solving times with glpk or COIN \todo{enter real data here}\label{TBL:evalres}}
+\end{table}
 
 %
 \subsection{Aesthetical Evaluation}
@@ -319,6 +385,12 @@ The line-ordering optimization can now be run independently on each connected co
 %
 \section{Further work}
 %
+
+\todo{mention that our model forces a line crossing in a station if a topology change happens inside of this station. in this case, it may be useful to add "fake" topology nodes outside of the station}
+
+\todo{mention thorough aesthetical evaluation via crowdsourcing}
+
+
 \bibliographystyle{plain}
 \bibliography{tm.bib}
 
