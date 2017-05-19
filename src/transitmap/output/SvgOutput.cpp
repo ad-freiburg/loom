@@ -285,7 +285,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       PolyLine pl = ref.geom.getPerpOffsetted(off);
 
       std::stringstream styleOutlineCropped;
-      styleOutlineCropped << "fill:none;stroke:#FFFFFF";
+      styleOutlineCropped << "fill:none;stroke:#000000";
 
       styleOutlineCropped << ";stroke-linecap:butt;stroke-width:"
                    << (ref.from.edge->getWidth() + _cfg->outlineWidth) *
@@ -321,7 +321,7 @@ void SvgOutput::renderLinePart(const PolyLine p, double width,
                                const std::string& endMarker,
                                const Nullable<style::LineStyle> style) {
   std::stringstream styleOutline;
-  styleOutline << "fill:none;stroke:#FFFFFF";
+  styleOutline << "fill:none;stroke:#000000";
 
   if (!endMarker.empty()) {
     styleOutline << ";marker-end:url(#" << endMarker << "_black)";
@@ -515,10 +515,11 @@ void SvgOutput::renderDelegates(const graph::TransitGraph& outG,
     _w.openTag("g");
     for (auto& b : a) {
       for (auto& pd : b.second) {
-        printLine(
-            pd.back.second.getSegmentAtDist(
-                rparams.width, pd.back.second.getLength() - rparams.width),
-            pd.back.first, rparams);
+         printLine(pd.back.second, pd.back.first, rparams);
+        //printLine(
+        //    pd.back.second.getSegmentAtDist(
+        //        rparams.width * _cfg->outputResolution, pd.back.second.getLength() - rparams.width),
+        //    pd.back.first, rparams);
       }
       for (auto& pd : b.second) {
         printLine(pd.front.second, pd.front.first, rparams);

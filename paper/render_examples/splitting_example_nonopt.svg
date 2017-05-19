@@ -3,46 +3,56 @@
 <svg height="30.000000px" width="50.000000px">
     <defs />
     <g>
-        <polyline points=" 5,5 12.1009,12.1009" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 18.1,15 31.9,15" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 38.4295,17.3688 45.5303,24.4697" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 12.1009,12.1009 12.6912,12.6941 13.2044,13.2047 13.6624,13.6383 14.0876,14.0003 14.502,14.2965 14.928,14.5322 15.3876,14.7132 15.9031,14.8448 16.4966,14.9328 17.1903,14.9826 18.0064,14.9999 18.1,15" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 38.4295,17.3688 37.8315,16.7876 37.2984,16.3101 36.8117,15.9261 36.3533,15.6255 35.9047,15.3979 35.4478,15.2334 34.9643,15.1217 34.4358,15.0526 33.8441,15.0161 33.171,15.0018 32.398,14.9997 31.9,15" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
+        <polyline points=" 5,5 9.27244,9.27244" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:2.2" />
+        <polyline points=" 21.2,15 28.8,15" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:2.2" />
+        <polyline points=" 41.7882,19.6669 46.0607,23.9393" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:2.2" />
     </g>
     <g>
-        <polyline points=" 5,5 12.1009,12.1009" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 18.1,15 31.9,15" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 38.4295,17.3688 45.5303,24.4697" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 12.1009,12.1009 12.6912,12.6941 13.2044,13.2047 13.6624,13.6383 14.0876,14.0003 14.502,14.2965 14.928,14.5322 15.3876,14.7132 15.9031,14.8448 16.4966,14.9328 17.1903,14.9826 18.0064,14.9999 18.1,15" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 38.4295,17.3688 37.8315,16.7876 37.2984,16.3101 36.8117,15.9261 36.3533,15.6255 35.9047,15.3979 35.4478,15.2334 34.9643,15.1217 34.4358,15.0526 33.8441,15.0161 33.171,15.0018 32.398,14.9997 31.9,15" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
+        <polyline points=" 5,5 9.27244,9.27244" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+        <polyline points=" 21.2,15 28.8,15" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+        <polyline points=" 41.7882,19.6669 46.0607,23.9393" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
     </g>
     <g>
-        <polyline points=" 4.46967,24.4697 11.5705,17.3688 11.5705,17.3688" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 18.1,13.5 31.9,13.5" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 37.8991,12.1009 45,5" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 11.5705,17.3688 12.1607,16.7603 12.6711,16.2071 13.1206,15.7082 13.5282,15.2627 13.9126,14.8696 14.2928,14.5281 14.6877,14.2372 15.1162,13.996 15.5973,13.8035 16.1497,13.6589 16.7924,13.5612 17.5444,13.5094 18.1,13.5" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 37.8991,12.1009 37.3001,12.6566 36.762,13.0647 36.2638,13.3459 35.7845,13.521 35.3034,13.6105 34.7993,13.6354 34.2514,13.6162 33.6388,13.5737 32.9405,13.5286 32.1355,13.5015 31.9,13.5" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
+        <polyline points=" 3.93934,23.9393 8.21177,19.6669" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:2.2" />
+        <polyline points=" 21.2,12 28.8,12" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:2.2" />
+        <polyline points=" 40.7276,9.27244 45,5" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:2.2" />
     </g>
     <g>
-        <polyline points=" 4.46967,24.4697 11.5705,17.3688 11.5705,17.3688" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 18.1,13.5 31.9,13.5" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 37.8991,12.1009 45,5" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 11.5705,17.3688 12.1607,16.7603 12.6711,16.2071 13.1206,15.7082 13.5282,15.2627 13.9126,14.8696 14.2928,14.5281 14.6877,14.2372 15.1162,13.996 15.5973,13.8035 16.1497,13.6589 16.7924,13.5612 17.5444,13.5094 18.1,13.5" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 37.8991,12.1009 37.3001,12.6566 36.762,13.0647 36.2638,13.3459 35.7845,13.521 35.3034,13.6105 34.7993,13.6354 34.2514,13.6162 33.6388,13.5737 32.9405,13.5286 32.1355,13.5015 31.9,13.5" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
+        <polyline points=" 3.93934,23.9393 8.21177,19.6669" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+        <polyline points=" 21.2,12 28.8,12" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+        <polyline points=" 40.7276,9.27244 45,5" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
     </g>
     <g>
-        <polyline points=" 5.53033,25.5303 12.6312,18.4295" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 18.1,16.5 31.9,16.5" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 37.3688,18.4295 37.3688,18.4295 44.4697,25.5303 44.4697,25.5303" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 12.6312,18.4295 13.2227,17.8603 13.7419,17.4153 14.2147,17.0793 14.6672,16.837 15.1253,16.6733 15.615,16.5729 16.1623,16.5205 16.7932,16.501 17.5338,16.499 18.1,16.5" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
-        <polyline points=" 37.3688,18.4295 36.7773,17.8603 36.2581,17.4153 35.7853,17.0793 35.3328,16.837 34.8747,16.6733 34.385,16.5729 33.8377,16.5205 33.2068,16.501 32.4662,16.499 31.9,16.5" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-opacity:0.8;stroke-width:1.2" />
+        <polyline points=" 6.06066,26.0607 10.3331,21.7882" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:2.2" />
+        <polyline points=" 21.2,18 28.8,18" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:2.2" />
+        <polyline points=" 39.6669,21.7882 39.6669,21.7882 43.9393,26.0607 43.9393,26.0607" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:2.2" />
     </g>
     <g>
-        <polyline points=" 5.53033,25.5303 12.6312,18.4295" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 18.1,16.5 31.9,16.5" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 37.3688,18.4295 37.3688,18.4295 44.4697,25.5303 44.4697,25.5303" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 12.6312,18.4295 13.2227,17.8603 13.7419,17.4153 14.2147,17.0793 14.6672,16.837 15.1253,16.6733 15.615,16.5729 16.1623,16.5205 16.7932,16.501 17.5338,16.499 18.1,16.5" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
-        <polyline points=" 37.3688,18.4295 36.7773,17.8603 36.2581,17.4153 35.7853,17.0793 35.3328,16.837 34.8747,16.6733 34.385,16.5729 33.8377,16.5205 33.2068,16.501 32.4662,16.499 31.9,16.5" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1" />
+        <polyline points=" 6.06066,26.0607 10.3331,21.7882" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+        <polyline points=" 21.2,18 28.8,18" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+        <polyline points=" 39.6669,21.7882 39.6669,21.7882 43.9393,26.0607 43.9393,26.0607" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+    </g>
+    <g>
+        <polyline points=" 9.27244,9.27244 12.6833,12.5915 14.0764,13.6385 15.5385,14.3484 17.2771,14.7746 21.2,15" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:2.2" />
+        <polyline points=" 9.27244,9.27244 12.6833,12.5915 14.0764,13.6385 15.5385,14.3484 17.2771,14.7746 21.2,15" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+    </g>
+    <g>
+        <polyline points=" 10.3331,21.7882 12.2209,20.0367 13.8043,18.9275 15.3266,18.3149 17.0316,18.0529 21.2,18" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:2.2" />
+        <polyline points=" 10.3331,21.7882 12.2209,20.0367 13.8043,18.9275 15.3266,18.3149 17.0316,18.0529 21.2,18" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+    </g>
+    <g>
+        <polyline points=" 8.21177,19.6669 12.8945,14.6845 14.18,13.613 15.6226,12.8206 17.3991,12.2982 21.2,12" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:2.2" />
+        <polyline points=" 8.21177,19.6669 12.8945,14.6845 14.18,13.613 15.6226,12.8206 17.3991,12.2982 21.2,12" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+    </g>
+    <g>
+        <polyline points=" 28.8,15 33.5934,15.0756 35.3417,15.3153 36.8857,15.8189 38.3963,16.6831 41.7882,19.6669" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:2.2" />
+        <polyline points=" 28.8,15 33.5934,15.0756 35.3417,15.3153 36.8857,15.8189 38.3963,16.6831 41.7882,19.6669" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+        <polyline points=" 28.7969,18 33.3376,18.0686 34.6674,18.2509 35.663,18.5756 36.7027,19.1705 38.0676,20.2649 39.7183,21.8384" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:2.2" />
+        <polyline points=" 28.7969,18 33.3376,18.0686 34.6674,18.2509 35.663,18.5756 36.7027,19.1705 38.0676,20.2649 39.7183,21.8384" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
+    </g>
+    <g>
+        <polyline points=" 28.8,12 35.3387,12.266 36.9467,11.9472 38.5955,11.0961 40.7276,9.27244" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:2.2" />
+        <polyline points=" 28.8,12 35.3387,12.266 36.9467,11.9472 38.5955,11.0961 40.7276,9.27244" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:2" />
     </g>
     <g />
 </svg>

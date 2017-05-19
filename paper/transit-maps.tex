@@ -99,9 +99,9 @@ Optionally, we may assign each $v$ a position $p_v \in \mathbb{R}^2$ and each ed
 	\label{FIG:transitgraphvvs}
 \end{figure}
 
-Our goal is to render $T$ in a way that resembles a modern transit map (Figure~\ref{FIG:transitgraphvvs}). We want to globally optimize the ordering of lines in such a way that single lines can be easily traced through the network. This is usually formulated as the problem of minimizing the number of line crossings in the map and commonly called the Metro Line Crossing Minimization Problem (MLCM). 
+Our goal is to render $T$ in a way that resembles a modern transit map (Figure~\ref{FIG:transitgraphvvs}). We want to globally optimize the ordering of lines in such a way that single lines can be easily traced through the network. This is usually formulated as the problem of minimizing the number of line crossings in the map and commonly called the Metro Line Crossing Minimization Problem (MLCM).
 
-In the classic MLCM problem, each node $e=(u, v)$ is assigned two orderings $e_{u}$ and $e_{v}$ for $L(e)$, one at each node. Line crossings occur somewhere on $e$ if $e_{u} != e_{v}$ and crossings inside of nodes are prohibited. We propose an alternative model where only a single line ordering is imposed on $L(e)$, meaning the line ordering remains the same throughout $e$. This effectively disallows line crossings on edges. Instead, we explicitely allow them in nodes and favor crossings in topological nodes (Section~\ref{SEC:crossing_placement}). We call this the MLTCM problem, the additional T stands for topological. In our opinion, this model not only greatly simplifies the rendering process (Section~\ref{SEC:rendering}), but also more closely resembles the way transit maps are drawn manually. In real-world maps, crossings usually occur at positions where the network topology changes. Additionally, crossings inside of stations are commonly found in transit maps.
+In classic MLCM, each node $e=(u, v)$ gets two orderings $e_{u}$ and $e_{v}$ for $L(e)$, one at each node. Line crossings occur somewhere on $e$ if $e_{u} != e_{v}$ and crossings inside of nodes are prohibited. We propose an alternative model where only a single ordering is imposed on $L(e)$, meaning the ordering remains the same throughout $e$. This effectively disallows crossings on edges. Instead, we explicitely allow them in nodes (and favor crossings in topological nodes, see Section~\ref{SEC:crossing_placement}). We call this the MLTCM problem, the additional T stands for topological. In our opinion, this model better resembles the way transit maps are drawn manually. In real-world maps, crossings usually occur at positions where the network topology changes and crossings inside of stations are commonly. The model also greatly simplifies the rendering process (Section~\ref{SEC:rendering}),
 
 \todo{simple reduction to show that MLTCM is also NP-complete?}
 
@@ -231,33 +231,27 @@ Since all of these criteria are invariant to the orderings imposed on the $L(E)$
 The value of $k_{ee'}$ depends on the node where $e$ and $e'$ meet and is set like described above.
 
 \subsection{Preventing Line Partner Separation}\label{SEC:separation}
-So far, we only optimized for the number of line crossings. However, consider the example given in Figure~\ref{FIG:linesplitting}. The number of line crossings (1) is indeed minimized in the left example. However, the intuitive information that A and B continue together after x is lost. In the right example, this information is preserved, but the number of line crossings is now 2.
-
-
+So far, we only optimized for the number of line crossings. However, consider the example given in Figure~\ref{FIG:linesplitting}, where the ordering with more crossings looks better.
 \begin{figure}
 \centering
 \begin{minipage}{.48\textwidth}
   \centering
-	\includegraphics[width=\textwidth]{render_examples/splitting_example_nonopt.pdf}
-
-	\includegraphics[width=\textwidth]{render_examples/splitting_example.pdf}
-	\caption{Left: optimized only for line crossings, Right: optimized also for line separations, with slightly higher penalty than crossings}
+	\includegraphics[angle=270,origin=c,width=.3\textwidth]{render_examples/splitting_example_nonopt.pdf}\hspace{10pt}
+	\includegraphics[angle=270,origin=c,width=.3\textwidth]{render_examples/splitting_example.pdf}
+	\caption{Crossings are minimized in the left example (1), but the right one better indicates line pairings.}
 	\label{FIG:linesplitting}
 \end{minipage}%
 \hfill
 \begin{minipage}{.48\textwidth}
   \centering
-	\includegraphics[width=\textwidth]{render_examples/splitting_example_nonopt.pdf}
-
-	\includegraphics[width=\textwidth]{render_examples/splitting_example.pdf}
-	\caption{Left: optimized only for line crossings, Right: optimized also for line separations, with slightly higher penalty than crossings}
+	\includegraphics[angle=90,origin=c,width=.3\textwidth]{render_examples/splitting_example2_nonopt.pdf}\hspace{10pt}
+	\includegraphics[angle=90,origin=c,width=.3\textwidth]{render_examples/splitting_example2.pdf}
+	\caption{Both orderings have the same number of crossings (2), but in the right one the
+crossing is done in one pass.}
 	\label{FIG:linesplitting2}
 \end{minipage}
 \end{figure}
-
-
-
-A related problem can be seen in Figure~\ref{FIG:linesplitting2}. Both solutions have the same number of line crossings (2), but the right one clearly looks better, because the crossing is done in one pass. In both cases, we could adress the problem by punishing the separation of lines. For two adjacent edges $e$ and $e'$ and a line pair $(A, B$) that continues from $e$ to $e'$, if $A$ and $B$ were placed next to each other in $e$ (were partners in $e$) but not anymore in $e'$, we want to add some penalty to the objective function. For this, we introduce a variable $x_{eA\|B} \in \{0, 1\}$. Let $p_{eA}$ be the position of $A$ in $e$ and $p_{eB}$ the position of $B$ in $e$. We want $e_{sA\|B}$ to be $1$ if $\left|p_{eA} - p_{eB}\right| = 0$ (if they occur next to each other) and $1$ otherwise. To get the desired assignments, we add the following constraints per line pair in $e$:
+A similar problem can be seen in Figure~\ref{FIG:linesplitting2}. In both cases, we can adress the problem by punishing the separation of lines. For two adjacent edges $e$ and $e'$ and a line pair $(A, B$) that continues from $e$ to $e'$, if $A$ and $B$ were placed next to each other in $e$ (were partners in $e$) but not anymore in $e'$, we want to add some penalty to the objective function. For this, we introduce a variable $x_{eA\|B} \in \{0, 1\}$. Let $p_{eA}$ be the position of $A$ in $e$ and $p_{eB}$ the position of $B$ in $e$. We want $e_{sA\|B}$ to be $1$ if $\left|p_{eA} - p_{eB}\right| = 0$ (if they occur next to each other) and $1$ otherwise. To get the desired assignments, we add the following constraints per line pair in $e$:
 \begin{align}
 	\sum_{p=1}^{|L(e)|} x_{eA\leq p} - \sum_{p} x_{eB\leq p} - x_{eA\|B} M &\leq 1 \label{EQ:sep_cstr_1} \\
 	\sum_{p=1}^{|L(e)|} x_{eB\leq p} - \sum_{p} x_{eA\leq p} - x_{eA\|B} M &\leq 1. \label{EQ:sep_cstr_2}
@@ -323,7 +317,7 @@ The line-ordering optimization can now be run independently on each connected co
 \section{Evaluation}
 %
 
-To test our edge ordering optimization method, we ran it against the public transit schedules of several cities around the world (Table~\ref{TBL:datasets}). Each dataset was first transformed into a well-formed transit graph using the method described in Section~\ref{SEC:topo}. After that, an edge ordering optimization run was started for each city. 
+To test our edge ordering optimization method, we ran it against the public transit schedules of several cities around the world (Table~\ref{TBL:datasets}). Each dataset was first transformed into a well-formed transit graph using the method described in Section~\ref{SEC:topo}. After that, an edge ordering optimization run was started for each city.
 
 %
 \subsection{Optimization Results}
