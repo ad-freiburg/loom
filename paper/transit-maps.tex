@@ -93,15 +93,16 @@ Optionally, we may assign each $v$ a position $p_v \in \mathbb{R}^2$ and each ed
 
 \begin{figure}
   \centering
-	$\vcenter{\hbox{\includestandalone[width=0.49\textwidth]{render_examples/vvs_transit_graph}}}$
-    $\vcenter{\hbox{\includegraphics[width=0.49\textwidth]{render_examples/vvs_cropped.pdf}}}$
-	\caption{Left: \todo{UGLY} transit graph $T$ of the light rail network in the center of Stuttgart. Right: transit map rendered from $T$}
+	\includestandalone[trim={0.5cm 0cm 2.2cm 4.02cm},clip,width=0.44\textwidth]{render_examples/vvs_transit_graph}
+	\hspace{.5cm}
+    \includegraphics[trim={0cm 0 2.47cm 4.22cm},clip,width=0.44\textwidth]{render_examples/vvs_cropped.pdf}
+	\caption{Left: transit graph of the light rail network in the center of Stuttgart, with traversing lines. Topological nodes are smaller. Right: transit map rendered from graph}
 	\label{FIG:transitgraphvvs}
 \end{figure}
 
 Our goal is to render $T$ in a way that resembles a modern transit map (Figure~\ref{FIG:transitgraphvvs}). We want to globally optimize the ordering of lines in such a way that single lines can be easily traced through the network. This is usually formulated as the problem of minimizing the number of line crossings in the map and commonly called the Metro Line Crossing Minimization Problem (MLCM).
 
-In classic MLCM, each node $e=(u, v)$ gets two orderings $e_{u}$ and $e_{v}$ for $L(e)$, one at each node. Line crossings occur somewhere on $e$ if $e_{u} != e_{v}$ and crossings inside of nodes are prohibited. We propose an alternative model where only a single ordering is imposed on $L(e)$, meaning the ordering remains the same throughout $e$. This effectively disallows crossings on edges. Instead, we explicitely allow them in nodes (and favor crossings in topological nodes, see Section~\ref{SEC:crossing_placement}). We call this the MLTCM problem, the additional T stands for topological. In our opinion, this model better resembles the way transit maps are drawn manually. In real-world maps, crossings usually occur at positions where the network topology changes and crossings inside of stations are commonly. The model also greatly simplifies the rendering process (Section~\ref{SEC:rendering}),
+Classic MLCM assigns each edge $e=(u, v)$ two orderings $e_{u}$ and $e_{v}$ for $L(e)$, one at each node. Line crossings occur somewhere on $e$ if $e_{u} != e_{v}$ and crossings inside of nodes are prohibited. We propose an alternative model where only a single ordering is imposed on $L(e)$, meaning the ordering remains the same throughout $e$. This effectively disallows crossings on edges. Instead, we explicitely allow them in nodes (and favor crossings in topological nodes, see Section~\ref{SEC:crossing_placement}). We call this the MLTCM problem, the additional T stands for topological. In our opinion, this model better resembles the way transit maps are drawn manually. In real-world maps, crossings usually occur at positions where the network topology changes and crossings inside of stations are commonly. The model also greatly simplifies the rendering process (Section~\ref{SEC:rendering}), and \todo{other advantages.}
 
 \todo{simple reduction to show that MLTCM is also NP-complete?}
 
@@ -125,8 +126,8 @@ To find the shared segments between two paths $\tau$ and $\tau'$, we do a simple
 \section{Line Ordering Optimization}\label{SEC:ordering}
 %
 
-In this section, we describe a baseline integer linear program (ILP) to solve MLTCM with $\mathcal{O}(|S|M^{2})$ variables and $\mathcal{O}(|S|M^{6})$ constraints.
-We introduce an improved version of this program that only needs $\mathcal{O}(|S|M^2)$ constraints and describe an extension to this ILP which solves MLTCM under the line separation constraint (see Section~\ref{SEC:separation}).
+In this section, we describe an integer linear program (ILP) to solve MLTCM with $\mathcal{O}(|E|M^{2})$ variables and $\mathcal{O}(|E|M^{6})$ constraints.
+Subsequently, we introduce an improved version with only $\mathcal{O}(|E|M^2)$ constraints and describe an extension to that ILP which solves MLTCM under the line separation constraint.
 
 %
 \subsection{Baseline ILP}\label{SEC:baseline}
@@ -135,92 +136,73 @@ For every edge $e \in E$, we define $|L(e)|^{2}$ decision variables $x_{elp} \in
 \begin{equation*}
 \forall l \in L(e): \sum_{p=1}^{L(e)} x_{elp}=1.
 \end{equation*}
-To assure that each edge get assigned exactly one line, we additionally need the constraints:
+To assure that each position gets assigned exactly one line, we additionally need the constraints:
 \begin{equation*}
 	\forall p \in  \{1,\cdots,|L(e)|\} : \sum_{l \in L(e)} x_{elp} = 1.
 \end{equation*}
-% \smallskip\\
-% \textbf{Example:}
-% \begin{center}
-% $x_{eA1} + x_{eA2} + x_{eA3} = 1$\\
-% $x_{eB1} + x_{eB2} + x_{eB3} = 1$\\
-% $x_{eC1} + x_{eC2} + x_{eC3} = 1$\smallskip\\
-% $x_{eA1} + x_{eB1} + x_{eC1} = 1$\\
-% $x_{eA2} + x_{eB2} + x_{eC2} = 1$\\
-% $x_{eA3} + x_{eB3} + x_{eC3} = 1$\smallskip\\
-% $x_{eA1}, x_{eA2}, x_{eA3}, x_{eB1}, x_{eB2}, x_{eB3}, x_{eC1}, x_{eC2}, x_{eC3} \in \{0, 1\}$
-% \end{center}
 \subsubsection{Avoiding crossings}\label{SEC:ac}
-Let $A, B$ be two lines belonging to an edge $e$ over vertices $v,w$ and both extend over $w$. We distinguish two cases: Either there is an adjacent edge $e'$ with $A,B \in L(e')$ as well or $A$ and $B$ continue in different edges.
 \begin{figure}
   \centering
-	$\vcenter{\hbox{\includegraphics[width=0.66\textwidth]{crossing.pdf}}}$
-	\caption{Line crossings of $\{A, B\}$ in the same edges (left) and into different edges (right) }
+	$\vcenter{\hbox{\includegraphics[width=0.6\textwidth]{crossing.pdf}}}$
+	\caption{Example instance.}
 	\label{FIG:crossings}
 \end{figure}
-In the first case (left), $A, B$ induce a crossing if the position of $A$ is smaller than the position of $B$ in $L(e)$ but vice versa in $L(e')$. We introduce the decision variable $x_{ee'AB} \in \{0,1\}$, which should be $1$ in case a crossing is induced and $0$ otherwise. To enforce this, we create one constraint per possible crossing as follows:
-\begin{align*}
-	x_{eA1} + x_{eB2} + x_{e'A2} + x_{e'B1} - x_{ee'AB} &\leq 3 \\
-	x_{eA1} + x_{eB3} + x_{e'A2} + x_{e'B1} - x_{ee'AB} &\leq 3 \\
-	x_{eA2} + x_{eB3} + x_{e'A2} + x_{e'B1} - x_{ee'AB} &\leq 3 \\
-	x_{eA2} + x_{eB1} + x_{e'A1} + x_{e'B2} - x_{ee'AB} &\leq 3 \\
-	x_{eA3} + x_{eB2} + x_{e'A1} + x_{e'B2} - x_{ee'AB} &\leq 3 \\
-	x_{eA3} + x_{eB2} + x_{e'A1} + x_{e'B2} - x_{ee'AB} &\leq 3.
-\end{align*}
-In case one of the crossings occurs, the first four variables of the corresponding constraint all have to be 1. Hence their sum equals 4 and the only way to fulfill the $\leq 3$ constraint is to set $x_{ee'AB}$ to $1$.
-The objective function then minimizes the sum over all such variables $x_{ee'AB}$.
+Let $A, B$ be two lines belonging to an edge $e = \{v,w\}$ and both extend over $w$. We distinguish two cases: Either there is an adjacent edge $e'$ with $A,B \in L(e')$  or $A$ and $B$ continue in different edges, see Figure \ref{FIG:crossings}.
 
-In the second case (right), $A$ and $B$ split into different edges $e', e''$. Then the actual positions of $A$ and $B$ in $e', e''$ do not matter, but the order of $e'$ and $e''$ itself. So we introduce a split crossing decision variable $x_{ee'e''AB} \in \{0,1\}$ and the following constraints:
-\begin{align*}
-	x_{eA1} + x_{eB2} - x_{ee'e''AB} &\leq 1 \\
-	x_{eA1} + x_{eB3} - x_{ee'e''AB} &\leq 1 \\
-	x_{eA2} + x_{eB3} - x_{ee'e''AB} &\leq 1.
-\end{align*}
-Likewise, $x_{ee'e''AB}$ is added to the objective function.
+In the first case (left), $A, B$ induce a crossing if the position of $A$ is smaller than the position of $B$ in $L(e)$, so $p_e(A) < p_e(B)$, but vice versa in $L(e')$. We introduce the decision variable $x_{ee'AB} \in \{0,1\}$, which should be $1$ in case a crossing is induced and $0$ otherwise. To enforce this, we create one constraint per possible crossing. For example, a crossing would occur if we have $p_e(A)=1$ and $p_e(B)=2$ as well as $p_{e'}(A)=2$ and $p_{e'}(B) =1$. We encode this as follows:
+\begin{equation*}
+	x_{eA1} + x_{eB2} + x_{e'A2} + x_{e'B1} - x_{ee'AB} \leq 3.
+\end{equation*}
+In case the crossing occurs, the first four variables are all set to 1. Hence their sum is 4 and the only way to fulfill the $\leq 3$ constraint is to set $x_{ee'AB}$ to $1$. In the example given in Figure \ref{FIG:crossings}, six such constraints are necessary to account for all possible crossings of the lines $A$ and $B$ at node $w$.
+The objective function of the ILP then minimizes the sum over all variables $x_{ee'AB}$.
 
-\subsubsection{ILP complexity}
-Let $M = \max_{e \in E} |L(e)|$ be the maximum number of lines per edge. To get a mapping of lines to positions for each edge we need $\leq |E|M^{2}$ variables and $\leq 2|E|M$ constraints in total. To minimize crossings, we have to consider $\leq M^{2}$ pairs of lines per edge in $E$, and introduce a new decision variable for each such pair. That makes $\leq |E| M^{2}$ additional variables, which all appear in the objective function. Most constraints are introduced when both lines follow the same next edge. In that case, we create at most $\binom{M}{2}^{2} < M^{4}$ additional constraints per line pair per edge, so $\leq |E| M^{6}$ in total.
+In the second case (Figure \ref{FIG:crossings} right), $A$ and $B$ split into different edges $e', e''$. Then the actual positions of $A$ and $B$ in $e', e''$ do not matter, but the order of $e'$ and $e''$ itself. We introduce a split crossing decision variable $x_{ee'e''AB} \in \{0,1\}$ and constraints of the form
+$\quad x_{eAi} + x_{eBj} - x_{ee'e''AB} \leq 1 \quad$ 
+for all orders of $A$ and $B$ at $e$ with $i < j$ because in that case a crossing would occur. Likewise, $x_{ee'e''AB}$ is added to the objective function.
 
-In summary, there are $\mathcal{O}(|E|M^{2})$ variables and $\mathcal{O}(|E|M^{6})$ constraints.
+\subsubsection{ILP size}
+Let $M = \max_{e \in E} |L(e)|$ be the maximum number of lines per edge. For mapping lines to positions at each edge we need $\leq |E|M^{2}$ variables and $\leq 2|E|M$ constraints. To minimize crossings, we have to consider $\leq M^{2}$ pairs of lines per edge, and introduce a decision variable for each such pair. That makes $\leq |E| M^{2}$ additional variables, which all appear in the objective function. Most constraints are introduced when two lines continue over a node in the same direction. In that case, we create $\leq \binom{M}{2}^{2} < M^{4}$ constraints per line pair per edge, so $\leq |E| M^{6}$ in total.
+In summary, we have $\mathcal{O}(|E|M^{2})$ variables and $\mathcal{O}(|E|M^{6})$ constraints.
 
 %
-\subsection{Improved ILP}\label{SEC:improved}
+\subsection{Improved ILP Formulation}\label{SEC:improved}
 %
-The $\mathcal{O}(|E|M^{2})$ variables in the baseline ILP seem to be reasonable, as indeed $\Omega(|E|M^{2})$ crossings could occur. But the $\mathcal{O}(|E|M^{6})$ constraints are due to enumerating all possible position inversions explicitly. If on the other hand the statement \emph{position of A on $e$ is smaller than the position of B} would be efficiently checkable, the number of constraints could be reduced. To have such an oracle, we first modify the line-position assignment constraints. Subsequently, we use the oracle to encode inversions with fewer constraints.
+The $\mathcal{O}(|E|M^{2})$ variables in the baseline ILP seem to be reasonable, as indeed $\Omega(|E|M^{2})$ crossings could occur. But the $\mathcal{O}(|E|M^{6})$ constraints are due to enumerating all possible position inversions explicitly. If we could check the statement \emph{position of A on $e$ is smaller than the position of B} efficiently, the number of constraints could be reduced. To have such an oracle, we first modify the line-position assignment constraints.
 
 \subsubsection{Alternative line-position assignment}
-Instead of a decision variable which encode the exact position of a line in an edge as before, we know use $x_{el\leq p} \in \{0,1\}$ which is $1$ if the position of $l$ in $e$ is $\leq p$ and $0$ otherwise. To enforce a unique position, we use the constraints:
+Instead of a decision variable which encodes the exact position of a line in an edge as before, we know use $x_{el\leq p} \in \{0,1\}$ which is $1$ if the position of $l$ in $e$ is $\leq p$ and $0$ otherwise. To enforce a unique position, we use the constraints:
 \begin{align}
-	\forall l \in L(e) \forall p \in \{1, \cdots, |L(e)|-1\}: x_{el\leq p} \leq x_{el\leq p+1} \label{EQ:up_constr}
+	\forall l \in L(e)~ \forall p \in \{1, \cdots, |L(e)|-1\}: \quad x_{el\leq p} \leq x_{el\leq p+1}. \label{EQ:up_constr}
 \end{align}
 This ensures that the sequence can only switch from $0$ to $1$, and this exactly once. To make sure that at some point a $1$ appears and that each position is occupied by exactly one line, we additionally introduce the following constraints:
 \begin{align}
-	\forall p \in \{1, \cdots, |L(e)|\}: \sum_{l \in L(e)} x_{el\leq p} = p \label{EQ:01_constr}
+	\forall p \in \{1, \cdots, |L(e)|\}: \sum_{l \in L(e)} x_{el\leq p} = p. \label{EQ:01_constr}
 \end{align}
 So exactly for  one line $x_{e.\leq 1} =1$ is true, for two lines $x_{e.\leq 2} = 1$ (of which one has to fulfill $x_{e.\leq 1} =1$) and so on.
 
 \subsubsection{Crossing Oracle}
-We reconsider the example from \ref{SEC:ac}, left. Before, we enumerated all possible positions which induce a crossing for $A, B$ at the transition from $e$ to $e'$. But it would be sufficient to have variables which tell us whether the position of $A$ is smaller than the position of $B$ in $e$, and the same for $e'$, and then compare those variables. For a line pair $(A,B)$ on edge $e$ we call the respective variables $x_{eA>B}, x_{eA<b} \in \{0, 1\}$. Since we introduce these variables for each line pair in $e$, $x_{eA<B}$ will re-appear as $x_{eB>A}$, so we only need $x_{eA>B}$. To get the desired value assignments, we add the following constraints:
+We reconsider the example from \ref{SEC:ac}, left. Before, we enumerated all possible positions which induce a crossing for $A, B$ at the transition from $e$ to $e'$. But it would be sufficient to have variables which tell us whether the position of $A$ is smaller than the position of $B$ in $e$, and the same for $e'$, and then compare those variables. For a line pair $(A,B)$ on edge $e$ we call the respective variables $x_{eA>B}, x_{eA<B} \in \{0, 1\}$. %Since we introduce these variables for each line pair in $e$, $x_{eA<B}$ will re-appear as $x_{eB>A}$, so we only need $x_{eA>B}$. 
+To get the desired value assignments, we add the following constraints:
 \begin{gather}
 	\sum_{p=1}^{|L(e)|} x_{eA\leq p} - \sum_{p} x_{eB\leq p} + x_{eA>B} M \geq 0 \\
-	x_{eA>B} + x_{eB>A}=1.
+	x_{eA>B} + x_{eA<B}=1.
 \end{gather}
-The equality constraints make sure that not both $x_{eA>B}$ and $x_{eB>A}$ can be $1$. If the position of $A$ is smaller than the position of $B$, then more of the variables corresponding to $A$ are $1$, hence the sum over all is higher. So if we subtract the sum for $B$ from the sum for $A$ and the result is $\geq 0$, we know the position of $A$ is  smaller and $x_{eA>B}$ can be $0$. Otherwise, the difference is negative, and we need to set $x_{eA>B}$ to $1$ to fulfill the inequality. It is then indeed fulfilled for sure as the position gap can never exceed the number of lines per edge.
+The equality constraints make sure that not both $x_{eA>B}$ and $x_{eB>A}$ can be $1$. If the position of $A$ is smaller than the position of $B$, then more of the variables corresponding to $A$ are $1$, and hence the sum for $A$ is higher. So if we subtract the sum for $B$ from the sum for $A$ and the result is $\geq 0$, we know the position of $A$ is  smaller and $x_{eA>B}$ can be $0$. Otherwise, the difference is negative, and we need to set $x_{eA>B}$ to $1$ to fulfill the inequality. It is then indeed fulfilled for sure as the position gap can never exceed the number of lines per edge.
 
 To finally decide if there is a crossing, we would again like to have a decision variable $x_{ee'AB} \in \{0,1\}$ which is $1$ in case of a crossing and $0$ otherwise -- and minimize the sum of all such variables in the objective function.
 The constraint
 \begin{gather}
 	abs(x_{eA<B}-x_{e'A<B}) - x_{ee'AB} \leq 0
 \end{gather}
-would realize this, as either $x_{eA<B} = x_{e'A<B}$ (both $0$ or both $1$) and then $x_{ee'AB}$ can be $0$, or they are unequal and hence the absolute value of their difference is $1$, enforcing $x_{e'AB}=1$ to fulfill the $\leq 0$ condition. As absolute value computation can not be part of an ILP we use the following replacements:
+realizes this, as either $x_{eA<B} = x_{e'A<B}$ (both $0$ or both $1$) and then $x_{ee'AB}$ can be $0$, or they are unequal and hence the absolute value of their difference is $1$, enforcing $x_{e'AB}=1$. As absolute value computation can not be part of an ILP we use the following equivalent standard replacement:
 \begin{align}
 	x_{eA<B} - x_{e'A<B} - x_{ee'AB} &\leq 0 \label{EQ:abs_upper}\\
 	-x_{eA<B} + x_{e'A<B} - x_{ee'AB} &\leq 0. \label{EQ:abs_lower}
 \end{align}
-If the values are equal, nothing changes in the argumentation. If the values are unequal, either (\ref{EQ:abs_upper}) or (\ref{EQ:abs_lower})  will produce a $1$ as the sum of the first two terms, enforcing $x_{ee'AB}=1$ as desired.
+%If the values are equal, nothing changes in the argumentation. If the values are unequal, either (\ref{EQ:abs_upper}) or (\ref{EQ:abs_lower})  will produce a $1$ as the sum of the first two terms, enforcing $x_{ee'AB}=1$ as desired.
 
 \subsubsection{Complexity of the improved ILP}
-For the line-position assignment, we need at most $\leq |S|M^{2}$ variables and constraints just like in the basic formulation. For counting the  crossings, we need per pair of lines per edge only a constant number of new variables and constraints as shown above, hence $\mathcal{O}(|E|M^{2})$ in total.
+For the line-position assignment, we need at most $\leq |E|M^{2}$ variables and constraints just like before. For counting the  crossings, we need per pair of lines per edge only a constant number of new variables and constraints as shown above, hence $\mathcal{O}(|E|M^{2})$ in total.
 
 \subsection{Placement of Inevitable Crossings}\label{SEC:crossing_placement}
 
@@ -231,7 +213,7 @@ Since all of these criteria are invariant to the orderings imposed on the $L(E)$
 The value of $k_{ee'}$ depends on the node where $e$ and $e'$ meet and is set like described above.
 
 \subsection{Preventing Line Partner Separation}\label{SEC:separation}
-So far, we only optimized for the number of line crossings. However, consider the example given in Figure~\ref{FIG:linesplitting}, where the ordering with more crossings looks better.
+So far, we only optimized the number of line crossings. However, consider the example given in Figure~\ref{FIG:linesplitting}, where the ordering with more crossings looks better.
 \begin{figure}
 \centering
 \begin{minipage}{.48\textwidth}
@@ -257,16 +239,16 @@ A similar problem can be seen in Figure~\ref{FIG:linesplitting2}. In both cases,
 	\sum_{p=1}^{|L(e)|} x_{eB\leq p} - \sum_{p} x_{eA\leq p} - x_{eA\|B} M &\leq 1. \label{EQ:sep_cstr_2}
 \end{align}
 If $p_{eA} = p_{eB}$, then the difference of the sums in both constraints is 0. If $|p_{eA} - p_{eB}| = 1$, then the sum difference in both constraints is $\leq 1$. If $|p_{eA} - p_{eB}| > 1$, then either (\ref{EQ:sep_cstr_1}) or (\ref{EQ:sep_cstr_2}) enforce $x_{eA\|B} = 1$. To prevent the trivial solution where $x_{A\|B}$ is 1 for all line pairs, we introduce the following additional constraint per edge:
-\begin{align}
+\begin{align*}
 	\sum_{l \in L(e)}\sum_{l' \in L(e)} x_{el\|l'} \leq |L(e)|^2 - 3|L(e)| - 2
-\end{align}
+\end{align*}
 as indeed the maximal number of line pairs in $e$ (excluding lines paired with themselves) is $|L(e)|^2 - |L(e)|$ and the number of $x_{el\|l'}$ in $e$ that are 0 is exactly $2|L(e)| - 2$ (each line is next to its two neighbors, but the first and last line only have 1 neighbor). A fixed constraint is not necessary here, however, because the lower bound is already provided by the line pair constraints (\ref{EQ:sep_cstr_1}) and (\ref{EQ:sep_cstr_2}).
 
 Like in Section~\ref{SEC:improved}, we introduce a decision variable $x_{ee'A\|B} \in \{0, 1\}$ that should be $1$ if $A$ and $B$ are splitted between $e$ and $e'$ and $0$ otherwise:
-\begin{align}
+\begin{align*}
 	x_{eA\|B} - x_{e'A\|B} - x_{ee'A\|B} &\leq 0 \\
 	-x_{eA\|B} + x_{e'A\|B} - x_{ee'A\|B} &\leq 0.
-\end{align}
+\end{align*}
 $x_{ee'A\|B}$ is added to the objective function. If $|L(e)| = |L(e')| = 2$, a line separation penalty is not needed for $A$ and $B$ because they will always be next to each other. If only $|L(e)| = 2$, we can add $x_{e'A\|B}$ to the objective function directly (and likewise if only $|L(e')|=2$).
 
 \todo{Mention the special case of the MLCM-P periphery constraint the above constraints handle out-of-the-box}
@@ -304,7 +286,7 @@ The line-ordering optimization can now be run independently on each connected co
 \centering
 	\includestandalone[width=5cm]{tikz/transitgraph_optim}
 	\hspace{0.6cm}
-	\includestandalone[width=5cm]{tikz/coreoptimgraph}
+	\includestandalone[width=4.4cm]{tikz/coreoptimgraph}
 	\caption{Left: transit graph $G$ with lines $a, b, c, d, e, f$, Right: core optimization graph with highlighted ordering-relevant connected components with more than 1 node; $ab$ was collapsed into $x$.}
 \end{figure}
 

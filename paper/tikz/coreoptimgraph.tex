@@ -1,30 +1,30 @@
 \documentclass{standalone}
 \usepackage{tikz}
 \begin{document}
-	\tikzstyle{graphnode}=[inner sep=2pt, circle, draw=black, solid, fill=white]
-	\begin{tikzpicture}[baseline=1.2cm]
+	\tikzstyle{graphnode}=[minimum size=14pt, inner sep=0, circle, draw=black, solid, fill=white]
+	\begin{tikzpicture}[font=\small, baseline=1.2cm]
 		\newcommand{\highlight}[3]{
 			\path [line cap = round, line join = round, line width = #1, draw = #2!40] #3;
 			\pgfmathsetmacro{\innerlinewidth}{0.95 * #1}
 			\path [line cap = round, line join = round, line width = \innerlinewidth, draw = #2!15] #3;
 		}
 
-		\foreach \place/\x in {{(9.5,4)/v_1}, {(10.3,2.3)/v_3},{(9,2.3)/v_4}, {(7, 4)/v_5}, {(8.1, 3.1)/v_8}, {(6.5, 2)/v_9}}
+		\foreach \place/\x in {{(9.5,4)/1}, {(10.3,2.3)/3},{(9,2.3)/4}, {(7, 4)/5}, {(8.1, 3.1)/8}, {(6.5, 2)/9}}
 		\node[graphnode] (\x) at \place {$\x$};
 
-		\draw (v_1) -- (v_3) node [midway, above right] {$xc$};
-		\draw (v_3) -- (v_4) node [midway, below left] {$x$};
-		\draw (v_1) -- (v_4) node [midway, right] {$c$};
-		\draw (v_5) -- (v_1) node [midway, above] {$def$};
-		\draw (v_4) -- (v_8) node [midway, below] {$x$};
-		\draw (v_4) -- (v_9) node [midway, below] {$e$};
-		\draw (v_9) -- (v_8) node [midway, below] {$f$};
-		\draw (v_5) -- (v_9) node [midway, above left] {$ef$};
-		\draw (v_8) -- (v_5) node [midway, right] {$d$};
+		\draw (1) -- (3) node [midway, above right] {$XC$};
+		\draw (3) -- (4) node [midway, below left] {$X$};
+		\draw (1) -- (4) node [midway, right] {$C$};
+		\draw (5) -- (1) node [midway, above] {$DEF$};
+		\draw (4) -- (8) node [midway, above, xshift=3pt] {$X$};
+		\draw (4) -- (9) node [midway, below right] {$E$};
+		\draw (9) -- (8) node [midway, below right, yshift=3pt] {$F$};
+		\draw (5) -- (9) node [midway, above left] {$EF$};
+		\draw (8) -- (5) node [midway, right, xshift=1pt, yshift=2pt] {$D$};
 
 		\begin{pgfonlayer}{background}
-			\highlight{14mm}{blue}{(v_9) -- (v_5)}
-			\highlight{14mm}{red}{(v_1) -- (v_3)}
+			\highlight{14mm}{blue}{(9) -- (5)}
+			\highlight{14mm}{red}{(1) -- (3)}
 		\end{pgfonlayer}
 	\end{tikzpicture}
 \end{document}
