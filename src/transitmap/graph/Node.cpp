@@ -311,7 +311,7 @@ size_t Node::getConnCardinality() const {
 }
 
 // _____________________________________________________________________________
-Polygon Node::getConvexFrontHull(double d) const {
+Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
   MultiLine l;
 
   if (getMainDirs().size() != 2) {
@@ -366,9 +366,9 @@ Polygon Node::getConvexFrontHull(double d) const {
   if (l.size() > 1) {
     Polygon hull;
     bgeo::convex_hull(l, hull);
-    if (l.size() < 5 && getMaxNodeFrontCardinality() > 1) {
+    if (rectangulize && l.size() < 5 && getMaxNodeFrontCardinality() > 1) {
       Polygon env = pbutil::geo::getOrientedEnvelopeAvg(l).getPolygon();
-      double incr = (bgeo::area(env) / bgeo::area(hull)) - 1;
+      // double incr = (bgeo::area(env) / bgeo::area(hull)) - 1;
       if (bgeo::area(env) < d*d*36) {
         hull = env;
       }

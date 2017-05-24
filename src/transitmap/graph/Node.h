@@ -101,7 +101,7 @@ class Node {
 
   size_t getConnCardinality() const;
 
-  Polygon getConvexFrontHull(double d) const;
+  Polygon getConvexFrontHull(double d, bool rectangulize) const;
 
   // add edge to this node's adjacency lists
   void addEdge(Edge* e);

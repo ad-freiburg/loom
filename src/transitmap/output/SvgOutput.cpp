@@ -89,6 +89,10 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
 
   _w.closeTag();
 
+  if (_cfg->renderNodeCircles) {
+    renderNodeCircles(outG, rparams);
+  }
+
   for (graph::Node* n : outG.getNodes()) {
     renderNodeConnections(outG, n, rparams);
   }
@@ -119,11 +123,35 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG,
       params["stroke"] = "black";
       params["stroke-width"] = "1";
       params["fill"] = "white";
-      printPolygon(n->getConvexFrontHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8), params, rparams);
+      printPolygon(n->getConvexFrontHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8, true), params, rparams);
     } else if (false) {
       params["r"] = "5";
       params["fill"] = "#FF00FF";
     }
+  }
+  _w.closeTag();
+}
+
+// _____________________________________________________________________________
+void SvgOutput::renderNodeCircles(const graph::TransitGraph& outG,
+                                 const RenderParams& rparams) {
+  _w.openTag("g");
+  for (graph::Node* n : outG.getNodes()) {
+    if (n->getAdjListOut().size() + n->getAdjListIn().size() < 2) {
+      continue;
+    }
+
+    std::stringstream style;
+    style << "fill:#CCC;stroke:#888"
+          << ";stroke-dasharray:1,.5;stroke-linejoin: "
+             "miter;stroke-opacity:1;stroke-width:.3";
+    std::map<std::string, std::string> params;
+    params["style"] = style.str();
+    Point center = n->getPos();
+    // bgeo::centroid(n->getConvexFrontHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8, false), center);
+
+    printCircle(center, n->getMaxNodeFrontWidth() * 0.8, params, rparams);
+
   }
   _w.closeTag();
 }
@@ -586,6 +614,32 @@ void SvgOutput::printPolygon(const Polygon& g,
   params["points"] = points.str();
 
   _w.openTag("polygon", params);
+  _w.closeTag();
+}
+
+// _____________________________________________________________________________
+void SvgOutput::printCircle(const Point& center, double rad,
+                            const std::string& style,
+                             const RenderParams& rparams) {
+  std::map<std::string, std::string> params;
+  params["style"] = style;
+  printCircle(center, rad, params, rparams);
+}
+
+// _____________________________________________________________________________
+void SvgOutput::printCircle(const Point& center, double rad,
+                             const std::map<std::string, std::string>& ps,
+                             const RenderParams& rparams) {
+  std::map<std::string, std::string> params = ps;
+  std::stringstream points;
+
+
+  params["cx"] = std::to_string((center.get<0>() - rparams.xOff) * _cfg->outputResolution);
+  params["cy"] = std::to_string(rparams.height -
+                  (center.get<1>() - rparams.yOff) * _cfg->outputResolution);
+  params["r"] = std::to_string(rad * _cfg->outputResolution);
+
+  _w.openTag("circle", params);
   _w.closeTag();
 }
 

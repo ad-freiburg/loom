@@ -37,6 +37,7 @@ struct Config {
 
   bool renderStations;
   bool renderNodeFronts;
+  bool renderNodeCircles;
   bool renderStationNames;
 
   bool useGlpkFeasibilityPump;

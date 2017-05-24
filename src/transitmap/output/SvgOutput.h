@@ -90,6 +90,12 @@ class SvgOutput : public Output {
   void printPolygon(const Polygon& g,
                     const std::map<std::string, std::string>& ps,
                     const RenderParams& params);
+  void printCircle(const Point& center, double rad,
+                   const std::map<std::string, std::string>& ps,
+                   const RenderParams& rparams);
+  void printCircle(const Point& center, double rad,
+                   const std::string& style,
+                   const RenderParams& rparams);
 
  private:
   std::ostream* _o;
@@ -127,6 +133,8 @@ class SvgOutput : public Output {
 
   void renderNodeFronts(const graph::TransitGraph& outG,
                         const RenderParams& params);
+  void renderNodeCircles(const graph::TransitGraph& outG,
+                         const RenderParams& rparams);
   std::multiset<InnerClique> getInnerCliques(
       std::vector<graph::InnerGeometry> geoms, size_t level) const;
 

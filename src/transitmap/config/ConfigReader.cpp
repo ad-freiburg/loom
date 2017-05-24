@@ -64,6 +64,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::bool_switch(&(cfg->renderNodeFronts))
       ->default_value(false),
       "render node fronts as red lines")
+    ("render-node-circles",
+     opts::bool_switch(&(cfg->renderNodeCircles))
+      ->default_value(false),
+      "mark node areas with background grey")
     ("no-optim,N",
       opts::bool_switch(&(cfg->noOptim))
       ->default_value(false),
