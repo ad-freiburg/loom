@@ -102,7 +102,7 @@ Optionally, we may assign each $v$ a position $p_v \in \mathbb{R}^2$ and each ed
 
 Our goal is to render $T$ in a way that resembles a modern transit map (Figure~\ref{FIG:transitgraphvvs}). We want to globally optimize the ordering of lines in such a way that single lines can be easily traced through the network. This is usually formulated as the problem of minimizing the number of line crossings in the map and commonly called the Metro Line Crossing Minimization Problem (MLCM).
 
-Classic MLCM assigns each edge $e=(u, v)$ two orderings $e_{u}$ and $e_{v}$ for $L(e)$, one at each node. Line crossings occur somewhere on $e$ if $e_{u} != e_{v}$ and crossings inside of nodes are prohibited. We propose an alternative model where only a single ordering is imposed on $L(e)$, meaning the ordering remains the same throughout $e$. This effectively disallows crossings on edges. Instead, we explicitely allow them in nodes (and favor crossings in topological nodes, see Section~\ref{SEC:crossing_placement}). We call this the MLTCM problem, the additional T stands for topological. In our opinion, this model better resembles the way transit maps are drawn manually. In real-world maps, crossings usually occur at positions where the network topology changes and crossings inside of stations are commonly. The model also greatly simplifies the rendering process (Section~\ref{SEC:rendering}), and \todo{other advantages.}
+Classic MLCM assigns each edge $e=(u, v)$ two orderings $e_{u}$ and $e_{v}$ for $L(e)$, one at each node. Line crossings occur somewhere on $e$ if $e_{u} \neq e_{v}$ and crossings inside of nodes are prohibited. We propose an alternative model where only a single ordering is imposed on $L(e)$, meaning the ordering remains the same throughout $e$. This effectively disallows crossings on edges. Instead, we explicitely allow them in nodes (and favor crossings in topological nodes, see Section~\ref{SEC:crossing_placement}). We call this the MLTCM problem, the additional T stands for topological. In our opinion, this model better resembles the way transit maps are drawn manually. In real-world maps, crossings usually occur at positions where the network topology changes and crossings inside of stations are commonly. The model also greatly simplifies the rendering process (Section~\ref{SEC:rendering}), and \todo{other advantages.}
 
 \todo{simple reduction to show that MLTCM is also NP-complete?}
 
@@ -157,7 +157,7 @@ In case the crossing occurs, the first four variables are all set to 1. Hence th
 The objective function of the ILP then minimizes the sum over all variables $x_{ee'AB}$.
 
 In the second case (Figure \ref{FIG:crossings} right), $A$ and $B$ split into different edges $e', e''$. Then the actual positions of $A$ and $B$ in $e', e''$ do not matter, but the order of $e'$ and $e''$ itself. We introduce a split crossing decision variable $x_{ee'e''AB} \in \{0,1\}$ and constraints of the form
-$\quad x_{eAi} + x_{eBj} - x_{ee'e''AB} \leq 1 \quad$ 
+$\quad x_{eAi} + x_{eBj} - x_{ee'e''AB} \leq 1 \quad$
 for all orders of $A$ and $B$ at $e$ with $i < j$ because in that case a crossing would occur. Likewise, $x_{ee'e''AB}$ is added to the objective function.
 
 \subsubsection{ILP size}
@@ -181,7 +181,7 @@ This ensures that the sequence can only switch from $0$ to $1$, and this exactly
 So exactly for  one line $x_{e.\leq 1} =1$ is true, for two lines $x_{e.\leq 2} = 1$ (of which one has to fulfill $x_{e.\leq 1} =1$) and so on.
 
 \subsubsection{Crossing Oracle}
-We reconsider the example from \ref{SEC:ac}, left. Before, we enumerated all possible positions which induce a crossing for $A, B$ at the transition from $e$ to $e'$. But it would be sufficient to have variables which tell us whether the position of $A$ is smaller than the position of $B$ in $e$, and the same for $e'$, and then compare those variables. For a line pair $(A,B)$ on edge $e$ we call the respective variables $x_{eA>B}, x_{eA<B} \in \{0, 1\}$. %Since we introduce these variables for each line pair in $e$, $x_{eA<B}$ will re-appear as $x_{eB>A}$, so we only need $x_{eA>B}$. 
+We reconsider the example from \ref{SEC:ac}, left. Before, we enumerated all possible positions which induce a crossing for $A, B$ at the transition from $e$ to $e'$. But it would be sufficient to have variables which tell us whether the position of $A$ is smaller than the position of $B$ in $e$, and the same for $e'$, and then compare those variables. For a line pair $(A,B)$ on edge $e$ we call the respective variables $x_{eA>B}, x_{eA<B} \in \{0, 1\}$. %Since we introduce these variables for each line pair in $e$, $x_{eA<B}$ will re-appear as $x_{eB>A}$, so we only need $x_{eA>B}$.
 To get the desired value assignments, we add the following constraints:
 \begin{gather}
 	\sum_{p=1}^{|L(e)|} x_{eA\leq p} - \sum_{p} x_{eB\leq p} + x_{eA>B} M \geq 0 \\
