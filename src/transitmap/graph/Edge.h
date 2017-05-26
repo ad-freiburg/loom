@@ -59,6 +59,8 @@ class Edge {
   RouteOccWithPos getRouteOccWithPosUnder(const Route* r,
     const std::vector<size_t> ordering) const;
 
+  RouteOccWithPos getRouteOccWithPos(const Route* r) const;
+
   RouteOccurance* getRouteOcc(const Route* r) const;
 
   std::vector<RouteOccurance> getContinuedRoutesIn(const Node* n,
@@ -69,6 +71,7 @@ class Edge {
 
   bool containsRoute(const Route* r) const;
   size_t getCardinality() const;
+  size_t getCardinality(bool woRelatives) const;
 
   double getWidth() const;
   double getSpacing() const;
@@ -76,6 +79,9 @@ class Edge {
   double getTotalWidth() const;
 
   std::vector<const Route*> getSharedRoutes(const Edge& e) const;
+
+  bool replaceRoute(const Route* r, const Route* n);
+  bool removeRoute(const Route* r);
 
 
   // TODO: store this here atm, but find better plcae...

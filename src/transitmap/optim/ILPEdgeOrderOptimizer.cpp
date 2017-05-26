@@ -24,10 +24,11 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
   for (OptNode* n : g.getNodes()) {
     for (OptEdge* e : n->adjListOut) {
       for (auto etgp : e->etgs) {
-        for (size_t tp = 0; tp < etgp.etg->getCardinality(); tp++) {
+        for (size_t tp = 0; tp < etgp.etg->getCardinality(true); tp++) {
           bool found = false;
           for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
             auto r = (*etgp.etg->getTripsUnordered())[p];
+            if (r.route->relativeTo()) continue;
 
             // check if this route (r) switch from 0 to 1 at tp-1 and tp
             double valPrev = 0;
@@ -63,6 +64,21 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
           }
           assert(found);
         }
+
+        // now, sort in the relative edges
+        for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
+          auto r = (*etgp.etg->getTripsUnordered())[p];
+          if (r.route->relativeTo() == 0) continue;
+
+          size_t index = etgp.etg->getRouteOccWithPos(r.route->relativeTo()).second;
+          auto it = std::find((*c)[etgp.etg].begin(), (*c)[etgp.etg].end(), index);
+
+          if (!(etgp.dir ^ e->etgs.front().dir)) {
+            (*c)[etgp.etg].insert(it, p);
+          } else {
+            (*c)[etgp.etg].insert(it + 1, p);
+          }
+        }
       }
     }
   }
@@ -86,8 +102,8 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
       // constraint: the sum of all x_sl<=p over the set of lines
       // must be p+1
 
-      size_t rowA = glp_add_rows(lp, etg->getCardinality());
-      for (size_t p = 0; p < etg->getCardinality(); p++) {
+      size_t rowA = glp_add_rows(lp, etg->getCardinality(true));
+      for (size_t p = 0; p < etg->getCardinality(true); p++) {
         std::stringstream rowName;
         rowName << "sum(" << e->getStrRepr() << ",<=" << p << ")";
         glp_set_row_name(lp, rowA + p, rowName.str().c_str());
@@ -95,7 +111,8 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
       }
 
       for (auto r : *etg->getTripsUnordered()) {
-        for (size_t p = 0; p < etg->getCardinality(); p++) {
+        if (r.route->relativeTo()) continue;
+        for (size_t p = 0; p < etg->getCardinality(true); p++) {
           std::stringstream varName;
           varName << "x_(" << e->getStrRepr() << ",l=" << r.route << ",p<=" << p
                   << ")";
@@ -155,12 +172,12 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
   // introduce crossing constraint variables
   for (OptNode* node : g.getNodes()) {
     for (OptEdge* segment : node->adjListOut) {
-      if (segment->etgs[0].etg->getCardinality() > m) {
-        m = segment->etgs[0].etg->getCardinality();
+      if (segment->etgs[0].etg->getCardinality(true) > m) {
+        m = segment->etgs[0].etg->getCardinality(true);
       }
 
       size_t rowDistanceRangeKeeper = 0;
-      size_t c = segment->etgs[0].etg->getCardinality();
+      size_t c = segment->etgs[0].etg->getCardinality(true);
       // constraint is only needed for segments with more than 2 lines
       if (_cfg->splittingOpt && c > 2) {
         std::stringstream rowName;
@@ -253,7 +270,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
 
         size_t rowDistance1 = 0;
         size_t rowDistance2 = 0;
-        if (_cfg->splittingOpt && segment->etgs[0].etg->getCardinality() > 2) {
+        if (_cfg->splittingOpt && segment->etgs[0].etg->getCardinality(true) > 2) {
           rowName.str("");
           rowName << "sum_distancor1(e=" << segment->getStrRepr()
                   << ",A=" << linepair.first << ",B=" << linepair.second << ")";
@@ -279,7 +296,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           vm->addVar(rowDistance2, decVarDistance, -static_cast<int>(m));
         }
 
-        for (size_t p = 0; p < segment->etgs[0].etg->getCardinality(); ++p) {
+        for (size_t p = 0; p < segment->etgs[0].etg->getCardinality(true); ++p) {
           std::stringstream ss;
           ss << "x_(" << segment->getStrRepr() << ",l=" << linepair.first
              << ",p<=" << p << ")";
@@ -295,7 +312,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           vm->addVar(rowSmallerThan, first, 1);
           vm->addVar(rowSmallerThan, second, -1);
 
-          if (_cfg->splittingOpt && segment->etgs[0].etg->getCardinality() > 2) {
+          if (_cfg->splittingOpt && segment->etgs[0].etg->getCardinality(true) > 2) {
             vm->addVar(rowDistance1, first, 1);
             vm->addVar(rowDistance1, second, -1);
 
@@ -326,8 +343,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           std::stringstream ss;
           ss << "x_dec(" << segmentA->getStrRepr() << ","
              << segmentA->getStrRepr() << segmentB->getStrRepr() << ","
-             << linepair.first << "(" << linepair.first->id << "),"
-             << linepair.second << "(" << linepair.second->id << ")," << node
+             << linepair.first << "(" << linepair.first->getId() << "),"
+             << linepair.second << "(" << linepair.second->getId() << ")," << node
              << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
@@ -396,8 +413,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           // _____________________________________
           // introduce dec var for distance 1 between lines changes
           if (_cfg->splittingOpt) {
-            if (segmentA->etgs[0].etg->getCardinality() > 2 &&
-                  segmentB->etgs[0].etg->getCardinality() > 2) {
+            if (segmentA->etgs[0].etg->getCardinality(true) > 2 &&
+                  segmentB->etgs[0].etg->getCardinality(true) > 2) {
               // the interesting case where the line continue together from
               // segment A to segment B and the cardinality of both A and B
               // is > 2 (that is, it is possible in A or B that the two lines
@@ -406,8 +423,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
               std::stringstream sss;
               sss << "x_decT(" << segmentA->getStrRepr() << ","
                  << segmentA->getStrRepr() << segmentB->getStrRepr() << ","
-                 << linepair.first << "(" << linepair.first->id << "),"
-                 << linepair.second << "(" << linepair.second->id << ")," << node
+                 << linepair.first << "(" << linepair.first->getId() << "),"
+                 << linepair.second << "(" << linepair.second->getId() << ")," << node
                  << ")";
               glp_set_col_name(lp, decisionVarDist1Change, sss.str().c_str());
               glp_set_col_kind(lp, decisionVarDist1Change, GLP_BV);
@@ -458,12 +475,12 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
               vm->addVar(rowT2, aNearBinL1, 1);
               vm->addVar(rowT2, aNearBinL2, -1);
               vm->addVar(rowT2, decisionVarDist1Change, 1);
-            } else if ((segmentA->etgs[0].etg->getCardinality() == 2) ^
-                  (segmentB->etgs[0].etg->getCardinality() == 2)) {
+            } else if ((segmentA->etgs[0].etg->getCardinality(true) == 2) ^
+                  (segmentB->etgs[0].etg->getCardinality(true) == 2)) {
               // the trivial case where one of the two segments only has
               // cardinality = 2, so the lines will always be together
 
-              OptEdge* segment = segmentA->etgs[0].etg->getCardinality() != 2 ? segmentA : segmentB;
+              OptEdge* segment = segmentA->etgs[0].etg->getCardinality(true) != 2 ? segmentA : segmentB;
 
               std::stringstream aNearBStr;
               aNearBStr << "x_(" << segment->getStrRepr() << "," << linepair.first
@@ -500,8 +517,8 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const OptGraph& g,
           std::stringstream ss;
           ss << "x_dec(" << segmentA->getStrRepr() << ","
              << segments.first->getStrRepr() << segments.second->getStrRepr()
-             << "," << linepair.first << "(" << linepair.first->id << "),"
-             << linepair.second << "(" << linepair.second->id << ")," << node
+             << "," << linepair.first << "(" << linepair.first->getId() << "),"
+             << linepair.second << "(" << linepair.second->getId() << ")," << node
              << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);

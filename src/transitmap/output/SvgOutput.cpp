@@ -322,7 +322,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       paramsOutlineCropped["style"] = styleOutlineCropped.str();
 
       std::stringstream styleStr;
-      styleStr << "fill:none;stroke:#" << c.geoms[i].from.route->color;
+      styleStr << "fill:none;stroke:#" << c.geoms[i].from.route->getColor();
 
       styleStr << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
                << ref.from.edge->getWidth() * _cfg->outputResolution;
@@ -367,7 +367,7 @@ void SvgOutput::renderLinePart(const PolyLine p, double width,
   paramsOutline["style"] = styleOutline.str();
 
   std::stringstream styleStr;
-  styleStr << "fill:none;stroke:#" << route.color;
+  styleStr << "fill:none;stroke:#" << route.getColor();
 
   if (!endMarker.empty()) {
     styleStr << ";marker-end:url(#" << endMarker << ")";
@@ -412,12 +412,12 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
       "normal; fill: white; stroke-width: 0.25px; stroke-linecap: butt; "
       "stroke-linejoin: miter; stroke: black";
   _w.openTag("text", params);
-  if (n->getStops().size()) {
+  if (false && n->getStops().size()) {
     _w.writeText((*n->getStops().begin()).id);
     _w.writeText("\n");
   }
 
-  _w.writeText(pbutil::toString(n));
+  _w.writeText(pbutil::toString(n->getScore(outG.getConfig())));
   _w.closeTag();
 }
 
@@ -441,7 +441,9 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
   size_t a = 0;
   for (size_t i : outG.getConfig().find(e)->second) {
-    const graph::RouteOccurance& r = e->getTripsUnordered()[i];
+    const graph::RouteOccurance& ro = e->getTripsUnordered()[i];
+
+    const graph::Route* route = ro.route;
     PolyLine p = center;
 
     if (p.getLength() < _cfg->lineWidth / 2) continue;
@@ -467,15 +469,15 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
     double arrowLength = (6 / _cfg->outputResolution);
 
-    if (r.direction != 0 && center.getLength() > arrowLength * 4) {
+    if (ro.direction != 0 && center.getLength() > arrowLength * 4) {
       std::stringstream markerName;
-      markerName << e << ":" << r.route << ":" << i;
+      markerName << e << ":" << route << ":" << i;
 
       std::string markerPathMale = getMarkerPathMale(lineW);
       std::string markerPathFemale = getMarkerPathFemale(lineW);
-      EndMarker emm(markerName.str() + "_m", "#" + r.route->color,
+      EndMarker emm(markerName.str() + "_m", "#" + route->getColor(),
                     markerPathMale, lineW, lineW);
-      EndMarker emf(markerName.str() + "_f", "#" + r.route->color,
+      EndMarker emf(markerName.str() + "_f", "#" + route->getColor(),
                     markerPathFemale, lineW, lineW);
       _markers.push_back(emm);
       _markers.push_back(emf);
@@ -484,19 +486,19 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       PolyLine secondPart = p.getSegmentAtDist(
           p.getLength() / 2 + arrowLength / 2, p.getLength());
 
-      if (r.direction == e->getTo()) {
-        renderLinePart(firstPart, lineW, *r.route, markerName.str() + "_m",
-                       r.style);
-        renderLinePart(secondPart.getReversed(), lineW, *r.route,
-                       markerName.str() + "_f", r.style);
+      if (ro.direction == e->getTo()) {
+        renderLinePart(firstPart, lineW, *route, markerName.str() + "_m",
+                       ro.style);
+        renderLinePart(secondPart.getReversed(), lineW, *route,
+                       markerName.str() + "_f", ro.style);
       } else {
-        renderLinePart(firstPart, lineW, *r.route, markerName.str() + "_f",
-                       r.style);
-        renderLinePart(secondPart.getReversed(), lineW, *r.route,
-                       markerName.str() + "_m", r.style);
+        renderLinePart(firstPart, lineW, *route, markerName.str() + "_f",
+                       ro.style);
+        renderLinePart(secondPart.getReversed(), lineW, *route,
+                       markerName.str() + "_m", ro.style);
       }
     } else {
-      renderLinePart(p, lineW, *r.route, r.style);
+      renderLinePart(p, lineW, *route, ro.style);
     }
 
     a++;

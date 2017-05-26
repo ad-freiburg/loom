@@ -12,7 +12,6 @@
 #include <proj_api.h>
 #include "pbutil/geo/PolyLine.h"
 #include "TransitGraph.h"
-#include "gtfsparser/gtfs/Feed.h"
 #include "./../config/TransitMapConfig.h"
 
 namespace transitmapper {
@@ -35,6 +34,8 @@ class GraphBuilder {
   GraphBuilder(const config::Config* cfg);
   bool build(std::istream* s, graph::TransitGraph* g);
 
+  void combinePartnerRoutes(graph::TransitGraph* g);
+
   void writeMainDirs(TransitGraph* g);
   void expandOverlappinFronts(TransitGraph* g);
   void writeInitialConfig(TransitGraph* g);
@@ -46,6 +47,9 @@ class GraphBuilder {
 
   std::set<NodeFront*> nodeGetOverlappingFronts(const Node* n) const;
   void freeNodeFront(NodeFront* f);
+
+  std::map<const Route*, std::set<const Route*> >
+  getPartnerRoutes(graph::TransitGraph* g) const;
 
   std::vector<NodeFront> getNextMetaNodeCand(TransitGraph* g) const;
   std::vector<NodeFront> getOpenNodeFronts(const Node* n) const;

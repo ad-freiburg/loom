@@ -120,8 +120,8 @@ bool OptGraph::simplifyStep() {
           second->etgs.front().etg->getCardinality();
 
 
-      for (auto& to : *first->etgs.front().etg->getTripsUnordered()) {
-        if (!second->etgs.front().etg->getSameDirRoutesIn(n->node, to.route, to.direction, first->etgs.front().etg).size()) {
+      for (auto& to : *first->getAdjacentEdge(n)->getTripsUnordered()) {
+        if (!second->getAdjacentEdge(n)->getSameDirRoutesIn(n->node, to.route, to.direction, first->etgs.front().etg).size()) {
 
           equal = false;
           break;

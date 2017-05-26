@@ -595,6 +595,9 @@ Time Parser::getTime(
   size_t p;
   std::string val(csv.getTString(field.c_str()));
 
+  // TODO(patrick): null value
+  if (val == "") return Time(0, 0, 0);
+
   try {
     uint64_t h = std::stoul(val, &p, 10);
     if (h > 255) throw std::out_of_range(

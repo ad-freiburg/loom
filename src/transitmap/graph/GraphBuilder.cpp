@@ -525,6 +525,68 @@ void GraphBuilder::freeNodeFront(NodeFront* f) {
 }
 
 // _____________________________________________________________________________
+void GraphBuilder::combinePartnerRoutes(graph::TransitGraph* g) {
+  auto partners = getPartnerRoutes(g);
+  std::set<const Route*> processed;
+
+  size_t c = 0;
+
+  for (const auto& p : partners) {
+    if (processed.find(p.first) != processed.end()) continue;
+    if (p.second.size() == 0) continue;
+    std::stringstream ss;
+    ss << "___combined__" << c++;
+
+    for (const auto pp : p.second) {
+      processed.insert(pp);
+      const_cast<Route*>(pp)->setRelativeTo(p.first);
+    }
+  }
+}
+
+// _____________________________________________________________________________
+std::map<const Route*, std::set<const Route*> >
+GraphBuilder::getPartnerRoutes(graph::TransitGraph* g) const {
+  std::map<const Route*, std::set<const Route*> > partners;
+
+  for (graph::Node* n : *g->getNodes()) {
+    for (graph::Edge* e : n->getAdjListOut()) {
+      for (const auto& ra : *(e->getTripsUnordered())) {
+        std::set<const Route*> partnersHere;
+
+        for (const auto& rb : *(e->getTripsUnordered())) {
+          if (ra.direction == rb.direction) {
+            partnersHere.insert(rb.route);
+          }
+        }
+
+        if (partners.find(ra.route) == partners.end()) {
+          partners[ra.route] = partnersHere;
+        } else {
+          std::set<const Route*> interSect;
+          std::set_intersection(partners[ra.route].begin(), partners[ra.route].end(),
+              partnersHere.begin(), partnersHere.end(), std::inserter(interSect, interSect.begin()));
+          partners[ra.route] = interSect;
+        }
+      }
+    }
+  }
+
+  for (const auto& p : partners) {
+    std::set<const Route*> realPartners;
+    for (const auto& pp : p.second) {
+      if (p.first != pp && partners[pp].find(p.first) != partners[pp].end()) {
+        realPartners.insert(pp);
+      }
+    }
+
+    partners[p.first] = realPartners;
+  }
+
+  return partners;
+}
+
+// _____________________________________________________________________________
 void GraphBuilder::writeInitialConfig(TransitGraph* g) {
   Configuration c;
   for (graph::Node* n : *g->getNodes()) {

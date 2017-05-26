@@ -122,8 +122,8 @@ void TransitGraph::deleteEdge(Node* from, Node* to) {
 
 // _____________________________________________________________________________
 Route* TransitGraph::addRoute(const Route* r) {
-  if (!getRoute(r->id)) {
-    _routes[r->id] = r;
+  if (!getRoute(r->getId())) {
+    _routes[r->getId()] = r;
   }
 }
 

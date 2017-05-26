@@ -67,11 +67,19 @@ std::vector<RouteOccurance> Edge::getSameDirRoutesIn(
 
   for (const RouteOccurance& to : _routes) {
     if (to.route == r) {
+
       if ((to.direction == 0 && dir == 0) ||
           (to.direction == n && dir != 0 && dir != n) ||
           (to.direction != n && to.direction != 0 && dir == n)) {
         if (n->connOccurs(r, fromEdge, this)) {
           ret.push_back(to);
+        }
+      } else {
+        if (n->getId() == "0x2e138380") {
+          std::cout << "fail" << std::endl;
+          std::cout << to.route->getId() << " vs " << r->getId() << std::endl;
+          std::cout << to.direction->getId() << " vs " << dir->getId() << std::endl;
+          exit(0);
         }
       }
     }
@@ -107,6 +115,18 @@ RouteOccWithPos Edge::getRouteOccWithPosUnder(
 }
 
 // _____________________________________________________________________________
+RouteOccWithPos Edge::getRouteOccWithPos(const Route* r) const {
+  for (size_t i = 0; i < _routes.size(); i++) {
+    const RouteOccurance& to = _routes[i];
+    if (to.route == r) {
+      return std::pair<RouteOccurance*, size_t>(
+          const_cast<RouteOccurance*>(&to), i);
+    }
+  }
+  return std::pair<RouteOccurance*, size_t>(0, 0);
+}
+
+// _____________________________________________________________________________
 void Edge::addRoute(const Route* r, const Node* dir, const LineStyle& ls) {
   if (containsRoute(r)) return;
   _routes.push_back(RouteOccurance(r, dir, ls));
@@ -125,6 +145,19 @@ bool Edge::containsRoute(const Route* r) const {
 
 // _____________________________________________________________________________
 size_t Edge::getCardinality() const { return _routes.size(); }
+
+// _____________________________________________________________________________
+size_t Edge::getCardinality(bool woRelatives) const {
+  if (!woRelatives) return getCardinality();
+
+  size_t ret = 0;
+
+  for (const auto& ro : _routes) {
+    if (ro.route->relativeTo() == 0) ret++;
+  }
+
+  return ret;
+}
 
 // _____________________________________________________________________________
 double Edge::getWidth() const { return _width; }

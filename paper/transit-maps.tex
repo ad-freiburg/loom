@@ -259,21 +259,22 @@ We add $1$ additional constraint per edge in $e$ and a constant number of additi
 %
 \subsection{Core problem graph}\label{SEC:coreprobgraph}
 %
-An inevitable crossing (or separation) between two lines $j$ and $k$ can only occur if there is at least one node with one of the following two properties:
+An inevitable crossing (or separation) between two lines $j$ and $k$ can only occur if there is at least one node $v_{jk}$ with one of the following properties:
 \begin{enumerate}
-\item $v$ is adjacent to edges $e : j \not\in L(e) \land k \in L(e')$ and $e' : j \in L(e') \land k \not\in L(e)$.
-\item $|{e \in adj(v) : j \in L(e) \land i \in L(e)}| > 2$
+\item $v_{jk}$ is adjacent to $e : j \not\in L(e) \land k \in L(e')$ and $e' : j \in L(e') \land k \not\in L(e)$. \label{EQ:liaisonnode}
+\item $|{e \in adj(v_{jk}) : j \in L(e) \land i \in L(e)}| > 2$. \label{EQ:tnode}
 \end{enumerate}
-\textbf{Proof} (sketch): if no such $v_jk$ exists, then it holds for all nodes $v \in V$ that $j$ and $k$ either both travel through $v$ on the same two edges or they don't travel together through $v$ at all (or only one of them). In the latter case, no crossing (or separation) will occur and we can thus disregard it, which leaves us only with the former case. But if $j$ and $k$ travel through all nodes in which a crossing could occur together on the same two edges, then the relative order of $j$ and $k$ does not matter anymore - we just combine $j$ and $k$ into a new line $i$ and assign $j$ and $k$ an arbitrary (either $(j,k)$ or $(k, j$) global ordering.
+\begin{proof} If no such node exists, then it holds for all $v \in V$ that $j$ and $k$ either both travel through $v$ on the same two edges or they don't travel together through $v$ at all. In the latter case, no crossing (or separation) can occur and we can thus disregard it, which leaves us only with the former case. But if $j$ and $k$ travel through all nodes together on the same two edges, then the relative order of $j$ and $k$ does not matter anymore - we can just combine $j$ and $k$ into a new line $i$ and assign $j$ and $k$ an arbitrary global ordering.
+\end{proof}
 
-We call nodes that comply to (1) for a line pair $A = \{j, k\}$ a liaison node for $j$ and $k$ and nodes that comply to (2) a T-node for $j$ and $k$. Additionally, we call a node that is a liaison and/or T-node for at least one line pair an \textbf{intersection node} and a node in which one or more lines end a \textbf{terminus node}.
+We call nodes that comply to (\ref{EQ:liaisonnode}) for a line pair $A = \{j, k\}$ a liaison node for $j$ and $k$ and nodes that comply to (\ref{EQ:tnode})  a T-node for $j$ and $k$. Additionally, we call a node that is a liaison and/or T-node for at least one line pair an intersection node and a node in which one or more lines end a terminus node.
 
-Using the above, we can now greatly simplify the input graph prior to optimization with the following steps:
+Using the above, we can simplify the input graph prior to optimization with the following steps:
 \begin{enumerate}
-\item combine lines that always occur together and for which no intersection or T-node exists into a single line with a global, arbitrary relative ordering
+\item collapse lines that always occur together into a single new line
 \item delete each node with degree 2 (adjacent to edges $e = (u, v)$ and $e' = (v, w)$) and $L(e) = L(e')$ and combine $e$ and $e'$ into a single new edge $ee' = (u, w)$ with $L(ee') = L(e) = L(e')$ . Note that such a node can never be a terminus node or an intersection node.
 \end{enumerate}
-Since we never delete an intersection node, these operations will not affect the optimality of the found solution. In practice, they will moveline crossings to nodes where a new line is introduced to an existing thread of lines (liaison nodes) or to nodes where topological changes are introduced to the network (T-nodes). This has a similar effect as the heuristic described in Section~\ref{SEC:crossing_placement}. For real-world networks, it can significantly reduce the number of ILP variables and constraints.
+Since we never delete an intersection node, these operations will not affect the optimality of the found solution. In practice, they will move line crossings to liaison nodes or T-nodes. This has a similar effect as the heuristic described in Section~\ref{SEC:crossing_placement}.
 
 This core problem graph can be further prepared for optimiziation by splitting it into ordering-relevant connected components using the following rules:
 \begin{enumerate}

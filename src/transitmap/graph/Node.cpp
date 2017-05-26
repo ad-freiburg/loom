@@ -170,8 +170,27 @@ const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
 
 // _____________________________________________________________________________
 double Node::getScore(const Configuration& c) const {
-  // TODO!
-  return 0;
+  std::vector<InnerGeometry> igs = getInnerGeometries(c, -1);
+  size_t ret = 0;
+
+  for (size_t i = 0; i < igs.size(); ++i) {
+    for (size_t j = i + 1; j < igs.size(); ++j) {
+      const InnerGeometry& iga = igs[i];
+      const InnerGeometry& igb = igs[j];
+
+      if (iga.from.front == igb.from.front && iga.slotFrom == igb.slotFrom) continue;
+      if (iga.from.front == igb.to.front && iga.slotFrom == igb.slotTo) continue;
+      if (iga.to.front == igb.to.front && iga.slotTo == igb.slotTo) continue;
+      if (iga.to.front == igb.from.front && iga.slotTo == igb.slotFrom) continue;
+
+      if (pbutil::geo::intersects(iga.geom.getLine().front(), iga.geom.getLine().back(), igb.geom.getLine().front(), igb.geom.getLine().back()) ||
+          bgeo::distance(iga.geom.getLine(), igb.geom.getLine()) < 1) {
+        ret++;
+      }
+    }
+  }
+
+ return ret;
 }
 
 // _____________________________________________________________________________

@@ -44,6 +44,8 @@ int main(int argc, char** argv) {
       exit(1);
     }
 
+    b.combinePartnerRoutes(&g);
+
     LOG(INFO) << "Creating node fronts..." << std::endl;
     b.writeMainDirs(&g);
     b.expandOverlappinFronts(&g);
