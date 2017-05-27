@@ -67,8 +67,6 @@ int main(int argc, char** argv) {
       } else if (cfg.optimMethod == "ilp") {
         optim::ILPOptimizer ilpEoOptim(&g, &cfg);
         ilpEoOptim.optimize();
-      } else if (cfg.optimMethod == "hillc") {
-        // TODO
       }
     }
 

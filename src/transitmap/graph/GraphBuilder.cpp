@@ -293,10 +293,7 @@ void GraphBuilder::expandOverlappinFronts(TransitGraph* g) {
 void GraphBuilder::createMetaNodes(TransitGraph* g) {
   std::vector<NodeFront> cands;
   while ((cands = getNextMetaNodeCand(g)).size() > 0) {
-    std::cerr << "Candidate of size " << cands.size() << std::endl;
-
     // remove all edges completely contained
-
     for (auto nf : cands) {
       auto onfs = getClosedNodeFronts(nf.n);
 
@@ -330,18 +327,24 @@ void GraphBuilder::createMetaNodes(TransitGraph* g) {
     g->addNode(ref);
 
     for (auto nf : cands) {
-      auto onf = getOpenNodeFronts(nf.n)[0];
+      for (auto onf : getOpenNodeFronts(nf.n)) {
+        if (onf.edge->getTo() == nf.n) {
+          onf.edge->setTo(ref);
+        } else {
+          onf.edge->setFrom(ref);
+        }
 
-      if (onf.edge->getTo() == nf.n) {
-        onf.edge->setTo(ref);
-      } else {
-        onf.edge->setFrom(ref);
+        for (auto& to : *onf.edge->getTripsUnordered()) {
+          if (to.direction == nf.n) {
+            to.direction = ref;
+          }
+        }
+
+        g->getNodes()->erase(onf.n);
+        onf.n = ref;
+        ref->addMainDir(onf);
+        ref->addEdge(onf.edge);
       }
-
-      g->getNodes()->erase(onf.n);
-      onf.n = ref;
-      ref->addMainDir(onf);
-      ref->addEdge(onf.edge);
     }
   }
 }
@@ -360,10 +363,10 @@ std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(
 
     while (!nodeStack.empty()) {
       auto nfronts = getClosedNodeFronts(nodeStack.top());
-      nodeStack.pop();
-      for (auto nf : nfronts) {
-        if (getOpenNodeFronts(nf.n).size() == 1 &&
-            nf.n->getStops().size() == 0) {
+        nodeStack.pop();
+        for (auto nf : nfronts) {
+          if (getOpenNodeFronts(nf.n).size() >= 1 &&
+              nf.n->getStops().size() == 0) {
           potClique.insert(nf.n);
           for (auto nff : getClosedNodeFronts(nf.n)) {
             const Node* m;
@@ -402,17 +405,25 @@ bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
   for (const Node* n : potClique) {
     for (auto nf : getClosedNodeFronts(n)) {
       if (nf.edge->getTo() == n) {
-        if (potClique.find(nf.edge->getFrom()) == potClique.end()) return false;
+        if (potClique.find(nf.edge->getFrom()) == potClique.end()) {
+          return false;
+        }
       } else {
-        if (potClique.find(nf.edge->getTo()) == potClique.end()) return false;
+        if (potClique.find(nf.edge->getTo()) == potClique.end()) {
+          return false;
+        }
       }
     }
 
     for (auto nf : getOpenNodeFronts(n)) {
       if (nf.edge->getTo() == n) {
-        if (potClique.find(nf.edge->getFrom()) != potClique.end()) return false;
+        if (potClique.find(nf.edge->getFrom()) != potClique.end()) {
+          return false;
+        }
       } else {
-        if (potClique.find(nf.edge->getTo()) != potClique.end()) return false;
+        if (potClique.find(nf.edge->getTo()) != potClique.end()) {
+          return false;
+        }
       }
     }
   }
@@ -458,16 +469,24 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
 
-      if ((n->getStops().size() > 0 &&
-           fa.geom.distTo(fb.geom) <
-               (fa.edge->getSpacing() + fb.edge->getSpacing()) / 2) ||
-          (n->getStops().size() == 0 && nodeFrontsOverlap(fa, fb))) {
+      if (n->getStops().size() == 0 && nodeFrontsOverlap(fa, fb)) {
         if (fa.edge->getGeom().getLength() > minLength &&
             fa.geom.distTo(n->getPos()) < 2 * n->getMaxNodeFrontWidth()) {
           ret.insert(const_cast<NodeFront*>(&fa));
         }
         if (fb.edge->getGeom().getLength() > minLength &&
             fb.geom.distTo(n->getPos()) < 2 * n->getMaxNodeFrontWidth()) {
+          ret.insert(const_cast<NodeFront*>(&fb));
+        }
+      } else if ((n->getStops().size() > 0 &&
+           fa.geom.distTo(fb.geom) <
+               (fa.edge->getSpacing() + fb.edge->getSpacing()) / 2)) {
+        if (fa.edge->getGeom().getLength() > minLength &&
+            fa.geom.distTo(n->getPos()) < minLength) {
+          ret.insert(const_cast<NodeFront*>(&fa));
+        }
+        if (fb.edge->getGeom().getLength() > minLength &&
+            fb.geom.distTo(n->getPos()) < minLength) {
           ret.insert(const_cast<NodeFront*>(&fb));
         }
       }

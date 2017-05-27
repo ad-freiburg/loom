@@ -390,7 +390,7 @@ void SvgOutput::renderLinePart(const PolyLine p, double width,
   Params params;
   params["style"] = styleStr.str();
 
-  _delegates[(uintptr_t)&route].push_back(OutlinePrintPair(
+  _delegates[0].push_back(OutlinePrintPair(
       PrintDelegate(params, p), PrintDelegate(paramsOutline, p)));
 }
 
@@ -531,11 +531,6 @@ void SvgOutput::renderDelegates(const graph::TransitGraph& outG,
     _w.openTag("g");
     for (auto& pd : a.second) {
       printLine(pd.back.second, pd.back.first, rparams);
-    }
-    _w.closeTag();
-
-    _w.openTag("g");
-    for (auto& pd : a.second) {
       printLine(pd.front.second, pd.front.first, rparams);
     }
     _w.closeTag();

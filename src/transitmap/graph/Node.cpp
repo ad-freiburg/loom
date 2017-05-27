@@ -385,10 +385,10 @@ Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
   if (l.size() > 1) {
     Polygon hull;
     bgeo::convex_hull(l, hull);
-    if (rectangulize && l.size() < 5 && getMaxNodeFrontCardinality() > 1) {
+    if (rectangulize && getMaxNodeFrontCardinality() > 1) {
       Polygon env = pbutil::geo::getOrientedEnvelopeAvg(l).getPolygon();
-      // double incr = (bgeo::area(env) / bgeo::area(hull)) - 1;
-      if (bgeo::area(env) < d*d*36) {
+      double incr = (bgeo::area(env) / bgeo::area(hull)) - 1;
+      if (bgeo::area(env) < d*d*36 && (l.size() < 5 || incr < 0.5)) {
         hull = env;
       }
     }

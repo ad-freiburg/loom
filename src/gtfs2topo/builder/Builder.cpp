@@ -32,9 +32,9 @@ void Builder::consume(const Feed& f, Graph* g) {
     cur++;
     if (t->second->getStopTimes().size() < 2) continue;
 
-    // if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
-    //if (t->second->getRoute()->getType() != gtfs::Route::TYPE::RAIL) continue;
-    if (t->second->getRoute()->getType() != gtfs::Route::TYPE::TRAM) continue;
+    if (t->second->getRoute()->getType() == gtfs::Route::TYPE::BUS) continue;
+    // if (t->second->getRoute()->getType() != gtfs::Route::TYPE::RAIL) continue;
+    // if (t->second->getRoute()->getType() != gtfs::Route::TYPE::TRAM) continue;
     if (!checkTripSanity(t->second)) continue;
 
     auto st = t->second->getStopTimes().begin();
@@ -127,7 +127,7 @@ ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
     for (auto e : n->getAdjListOut()) {
       i++;
       if (_indEdges.find(e) != _indEdges.end() ||
-          e->getEdgeTripGeoms()->size() == 0) {
+          e->getEdgeTripGeoms()->size() != 1) {
         continue;
       }
       // TODO: outfactor this _______
@@ -136,7 +136,7 @@ ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
           // TODO: only check edges with a SINGLE geometry atm, see also check
           // above
           if (_indEdges.find(toTest) != _indEdges.end() ||
-              toTest->getEdgeTripGeoms()->size() == 0) {
+              toTest->getEdgeTripGeoms()->size() != 1) {
             continue;
           }
 
@@ -622,7 +622,7 @@ Node* Builder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel, Graph* g) {
                               g->getProjection());
 
   if (aggrLevel > 1) {
-    n = g->getNearestNode(p, 300);
+    n = g->getNearestNode(p, 100);
   }
 
   if (n) {
@@ -734,6 +734,11 @@ bool Builder::combineEdges(Edge* a, Edge* b, Node* n, Graph* g) {
   Node* newTo = b->getFrom() == n ? b->getTo() : b->getFrom();
 
   if (etga.getGeomDir() == n) etga.setGeomDir(newTo);
+
+  for (auto& to : *etga.getTripsUnordered()) {
+    if (to.direction == n) to.direction = newTo;
+  }
+
   etga.setGeom(p);
 
   Edge* e = g->addEdge(newFrom, newTo);
@@ -791,6 +796,7 @@ bool Builder::combineNodes(Node* a, Node* b, Graph* g) {
       }
 
       newE->addEdgeTripGeom(etgNew);
+      newE->simplify();
     }
   }
 
@@ -820,6 +826,7 @@ bool Builder::combineNodes(Node* a, Node* b, Graph* g) {
       }
 
       newE->addEdgeTripGeom(etgNew);
+      newE->simplify();
     }
   }
 
@@ -886,7 +893,6 @@ PolyLine Builder::getAveragedFromSharedSeg(const ShrdSegWrap& w) const {
 
 // _____________________________________________________________________________
 bool Builder::lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const {
-  return false;
   if (e != w.e && e != w.f) return false;
 
   double LOOKAHEAD = 50;
