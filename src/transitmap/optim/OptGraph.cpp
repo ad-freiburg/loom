@@ -183,3 +183,8 @@ bool OptGraph::simplifyStep() {
   }
   return false;
 }
+
+// _____________________________________________________________________________
+TransitGraph* OptGraph::getGraph() const {
+  return _g;
+}

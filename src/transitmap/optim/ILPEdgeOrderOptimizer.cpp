@@ -64,24 +64,11 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
           }
           assert(found);
         }
-
-        // now, sort in the relative edges
-        for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
-          auto r = (*etgp.etg->getTripsUnordered())[p];
-          if (r.route->relativeTo() == 0) continue;
-
-          size_t index = etgp.etg->getRouteOccWithPos(r.route->relativeTo()).second;
-          auto it = std::find((*c)[etgp.etg].begin(), (*c)[etgp.etg].end(), index);
-
-          if (!(etgp.dir ^ e->etgs.front().dir)) {
-            (*c)[etgp.etg].insert(it, p);
-          } else {
-            (*c)[etgp.etg].insert(it + 1, p);
-          }
-        }
       }
     }
   }
+
+  expandRelatives(c, g.getGraph());
 }
 
 // _____________________________________________________________________________
@@ -375,8 +362,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
 
           std::stringstream rowName;
           rowName << "sum_dec(e1=" << segmentA->getStrRepr()
-                  << "e2=" << segmentB->getStrRepr() << ",A=" << linepair.first
-                  << ",B=" << linepair.second << ")";
+                  << ",e2=" << segmentB->getStrRepr() << ",A=" << linepair.first
+                  << ",B=" << linepair.second << ",n=" << node << ")";
 
           size_t row = glp_add_rows(lp, 1);
 
@@ -385,8 +372,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
 
           std::stringstream rowName2;
           rowName2 << "sum_dec2(e1=" << segmentA->getStrRepr()
-                  << "e2=" << segmentB->getStrRepr() << ",A=" << linepair.first
-                  << ",B=" << linepair.second << ")";
+                  << ",e2=" << segmentB->getStrRepr() << ",A=" << linepair.first
+                  << ",B=" << linepair.second << ",n=" << node << ")";
 
           size_t row2 = glp_add_rows(lp, 1);
 
@@ -449,8 +436,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
 
               std::stringstream rowTName;
               rowTName << "sum_decT(e1=" << segmentA->getStrRepr()
-                      << "e2=" << segmentB->getStrRepr() << ",A=" << linepair.first
-                      << ",B=" << linepair.second << ")";
+                      << ",e2=" << segmentB->getStrRepr() << ",A=" << linepair.first
+                      << ",B=" << linepair.second << ",n=" << node << ")";
 
               size_t check = glp_find_row(lp, rowTName.str().c_str());
               assert(check == 0);
@@ -462,8 +449,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
 
               std::stringstream rowTName2;
               rowTName2 << "sum_decT2(e1=" << segmentA->getStrRepr()
-                      << "e2=" << segmentB->getStrRepr() << ",A=" << linepair.first
-                      << ",B=" << linepair.second << ")";
+                      << ",e2=" << segmentB->getStrRepr() << ",A=" << linepair.first
+                      << ",B=" << linepair.second << ",n=" << node << ")";
 
               size_t rowT2 = glp_add_rows(lp, 1);
 

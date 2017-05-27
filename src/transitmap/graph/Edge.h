@@ -63,6 +63,8 @@ class Edge {
 
   RouteOccurance* getRouteOcc(const Route* r) const;
 
+  std::set<const Route*> getRoutesRelTo(const Route* ref) const;
+
   std::vector<RouteOccurance> getContinuedRoutesIn(const Node* n,
     const Route* r, const Node* dir, const Edge* fromEdge) const;
 

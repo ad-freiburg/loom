@@ -60,6 +60,19 @@ std::vector<RouteOccurance> Edge::getContinuedRoutesIn(
 }
 
 // _____________________________________________________________________________
+std::set<const Route*> Edge::getRoutesRelTo(const Route* ref) const {
+  std::set<const Route*> ret;
+
+  for (const RouteOccurance& to : _routes) {
+    if (to.route->relativeTo() == ref) {
+      ret.insert(to.route);
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
 std::vector<RouteOccurance> Edge::getSameDirRoutesIn(
     const Node* n, const Route* r, const Node* dir,
     const Edge* fromEdge) const {

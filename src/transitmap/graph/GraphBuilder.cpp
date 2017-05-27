@@ -548,15 +548,13 @@ void GraphBuilder::combinePartnerRoutes(graph::TransitGraph* g) {
   auto partners = getPartnerRoutes(g);
   std::set<const Route*> processed;
 
-  size_t c = 0;
-
   for (const auto& p : partners) {
     if (processed.find(p.first) != processed.end()) continue;
     if (p.second.size() == 0) continue;
-    std::stringstream ss;
-    ss << "___combined__" << c++;
 
     for (const auto pp : p.second) {
+      LOG(INFO) << "Combining " << pp << "(" << pp->getLabel() << "," << pp->getColor() << ")"
+        << " and " << p.first << " (" << p.first->getLabel() << "," << p.first->getColor() << ")." << std::endl;
       processed.insert(pp);
       const_cast<Route*>(pp)->setRelativeTo(p.first);
     }

@@ -3,8 +3,8 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <glpk.h>
-#include <fstream>
 #include <cstdio>
+#include <fstream>
 #include "./../graph/OrderingConfiguration.h"
 #include "./../output/OgrOutput.h"
 #include "./ILPOptimizer.h"
@@ -22,25 +22,26 @@ int ILPOptimizer::optimize() const {
   OptGraph g(_g);
   g.simplify();
 
-  output::OgrOutput ogrOut("/home/patrick/optimgraph", _cfg);
-  ogrOut.print(g);
+  /*
+   * output::OgrOutput ogrOut("/home/patrick/optimgraph", _cfg);
+   * ogrOut.print(g);
+   */
 
   LOG(DEBUG) << "Creating ILP problem... " << std::endl;
   glp_prob* lp = createProblem(g);
   LOG(DEBUG) << " .. done" << std::endl;
 
   if (!_cfg->glpkHOutputPath.empty()) {
-    LOG(DEBUG) << "Writing human readable ILP to '"
-      << _cfg->glpkHOutputPath << "'" << std::endl;
+    LOG(DEBUG) << "Writing human readable ILP to '" << _cfg->glpkHOutputPath
+               << "'" << std::endl;
     printHumanReadable(lp, _cfg->glpkHOutputPath.c_str());
   }
 
   if (!_cfg->glpkMPSOutputPath.empty()) {
-    LOG(DEBUG) << "Writing ILP as .mps to '"
-      << _cfg->glpkMPSOutputPath << "'" << std::endl;
+    LOG(DEBUG) << "Writing ILP as .mps to '" << _cfg->glpkMPSOutputPath << "'"
+               << std::endl;
     glp_write_mps(lp, GLP_MPS_FILE, 0, _cfg->glpkMPSOutputPath.c_str());
   }
-
 
   LOG(DEBUG) << "Solving problem..." << std::endl;
   preSolveCoinCbc(lp);
@@ -51,7 +52,7 @@ int ILPOptimizer::optimize() const {
 
   if (!_cfg->glpkSolutionOutputPath.empty()) {
     LOG(DEBUG) << "Writing ILP full solution to '"
-      << _cfg->glpkSolutionOutputPath << "'" << std::endl;
+               << _cfg->glpkSolutionOutputPath << "'" << std::endl;
     glp_print_mip(lp, _cfg->glpkSolutionOutputPath.c_str());
   }
 
@@ -133,20 +134,79 @@ void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, Configuration* c,
           }
           assert(found);
         }
+      }
+    }
+  }
 
-        // now, sort in the relative edges
-        for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
-          auto r = (*etgp.etg->getTripsUnordered())[p];
-          if (r.route->relativeTo() == 0) continue;
+  expandRelatives(c, g.getGraph());
+}
 
-          size_t index = etgp.etg->getRouteOccWithPos(r.route->relativeTo()).second;
-          auto it = std::find((*c)[etgp.etg].begin(), (*c)[etgp.etg].end(), index);
+// _____________________________________________________________________________
+void ILPOptimizer::expandRelatives(Configuration* c, TransitGraph* g) const {
+  std::set<const Route*> proced;
 
-          if (!(etgp.dir ^ e->etgs.front().dir)) {
-            (*c)[etgp.etg].insert(it, p);
-          } else {
-            (*c)[etgp.etg].insert(it + 1, p);
-          }
+  for (graph::Node* n : *g->getNodes()) {
+    for (graph::Edge* e : n->getAdjListOut()) {
+      for (const auto& ra : *(e->getTripsUnordered())) {
+        if (ra.route->relativeTo()) {
+          const Route* ref = ra.route->relativeTo();
+          if (!proced.insert(ref).second) continue;
+          expandRelativesFor(c, ref, e, e->getRoutesRelTo(ref));
+        }
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void ILPOptimizer::expandRelativesFor(Configuration* c, const Route* ref,
+                                      graph::Edge* start,
+                                      const std::set<const Route*>& rs) const {
+  std::set<graph::Edge*> visited;
+  std::stack<std::pair<graph::Edge*, graph::Edge*> > todo;
+
+  todo.push(std::pair<graph::Edge*, graph::Edge*>(0, start));
+  while (!todo.empty()) {
+    auto cur = todo.top();
+    todo.pop();
+
+    if (!visited.insert(cur.second).second) continue;
+
+    for (auto r : rs) {
+      size_t index = cur.second->getRouteOccWithPos(ref).second;
+      auto it =
+          std::find((*c)[cur.second].begin(), (*c)[cur.second].end(), index);
+
+      size_t p = cur.second->getRouteOccWithPos(r).second;
+
+      assert(it != (*c)[cur.second].end());
+
+      if (cur.first != 0 &&
+          ((cur.first->getTo() == cur.second->getTo() ||
+            cur.first->getFrom() == cur.second->getFrom()) ^
+           (cur.first->getRouteOccWithPosUnder(r, (*c)[cur.first]).second >
+            cur.first->getRouteOccWithPosUnder(ref, (*c)[cur.first]).second))) {
+        (*c)[cur.second].insert(it + 1, p);
+      } else {
+        (*c)[cur.second].insert(it, p);
+      }
+    }
+
+    for (const Node* n : {cur.second->getFrom(), cur.second->getTo()}) {
+      if (cur.first != 0 &&
+          (cur.first->getTo() == n || cur.first->getFrom() == n)) {
+        continue;
+      }
+
+      for (auto e : n->getAdjListIn()) {
+        if (e->containsRoute(ref) && visited.find(e) == visited.end()) {
+          todo.push(std::pair<graph::Edge*, graph::Edge*>(cur.second, e));
+        }
+      }
+
+      for (auto e : n->getAdjListOut()) {
+        if (e->containsRoute(ref) && visited.find(e) == visited.end()) {
+          todo.push(std::pair<graph::Edge*, graph::Edge*>(cur.second, e));
         }
       }
     }
@@ -321,7 +381,6 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
       for (LinePair linepair : getLinePairs(segmentA)) {
         for (EdgePair segments :
              getEdgePartnerPairs(node, segmentA, linepair)) {
-
           // try all position combinations
           size_t decisionVar = glp_add_cols(lp, 1);
 
@@ -330,8 +389,8 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
           ss << "x_dec(" << segmentA->getStrRepr() << ","
              << segments.first->getStrRepr() << segments.second->getStrRepr()
              << "," << linepair.first << "(" << linepair.first->getId() << "),"
-             << linepair.second << "(" << linepair.second->getId() << ")," << node
-             << ")";
+             << linepair.second << "(" << linepair.second->getId() << "),"
+             << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar,
@@ -464,8 +523,7 @@ std::vector<EdgePair> ILPOptimizer::getEdgePartnerPairs(
         if (segmentC == segmentA || segmentC == segmentB) continue;
         graph::Edge* e = segmentC->getAdjacentEdge(node);
 
-        if (e->getContinuedRoutesIn(node->node, linepair.second, dirB,
-                                      fromEtg)
+        if (e->getContinuedRoutesIn(node->node, linepair.second, dirB, fromEtg)
                 .size()) {
           curPair.second = segmentC;
           ret.push_back(curPair);
@@ -516,7 +574,8 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
   std::stringstream cmd;
   LOG(INFO) << "Calling external solver CBC..." << std::endl;
-  cmd << "/home/patrick/repos/Cbc-2.9/build/bin/cbc " << f << " -threads 4 -printingOptions all -solve -solution " << outf << "";
+  cmd << "/home/patrick/repos/Cbc-2.9/build/bin/cbc " << f
+      << " -threads 4 -printingOptions all -solve -solution " << outf << "";
   int r = system(cmd.str().c_str());
   LOG(INFO) << "Solver exited (" << r << ")" << std::endl;
   LOG(INFO) << "Parsing solution..." << std::endl;
@@ -610,8 +669,8 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
 
   for (size_t i = 0; i < segments.first->etgs.front().etg->getCardinality(true);
        ++i) {
-    for (size_t j = 0; j < segments.second->etgs.front().etg->getCardinality(true);
-         ++j) {
+    for (size_t j = 0;
+         j < segments.second->etgs.front().etg->getCardinality(true); ++j) {
       size_t posAinB = otherWayB ? cardB - 1 - i : i;
       size_t posBinC = otherWayC ? cardC - 1 - j : j;
 

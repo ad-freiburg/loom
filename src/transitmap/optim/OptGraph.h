@@ -69,6 +69,7 @@ class OptGraph {
   explicit OptGraph(TransitGraph* toOptim);
 
   const std::set<OptNode*>& getNodes() const;
+  TransitGraph* getGraph() const;
 
   void simplify();
 

@@ -63,6 +63,12 @@ class ILPOptimizer : public Optimizer {
   virtual void getConfigurationFromSolution(glp_prob* lp, Configuration* c,
                                             const OptGraph& g) const;
 
+  void expandRelatives(Configuration* c, TransitGraph* g) const;
+
+  void expandRelativesFor(Configuration* c, const Route* ref,
+                          graph::Edge* start,
+                          const std::set<const Route*>& r) const;
+
   std::string getILPVarName(OptEdge* e, const Route* r, size_t p) const;
 
   void writeSameSegConstraints(const OptGraph& g, VariableMatrix* vm,
