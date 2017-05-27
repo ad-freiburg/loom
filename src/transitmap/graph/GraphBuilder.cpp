@@ -257,6 +257,8 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
 
       n->addMainDir(f);
     }
+
+    n->generateStationHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8);
   }
 }
 
@@ -469,7 +471,7 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
 
-      if (n->getStops().size() == 0 && nodeFrontsOverlap(fa, fb)) {
+      if ((true || n->getStops().size() == 0) && nodeFrontsOverlap(fa, fb)) {
         if (fa.edge->getGeom().getLength() > minLength &&
             fa.geom.distTo(n->getPos()) < 2 * n->getMaxNodeFrontWidth()) {
           ret.insert(const_cast<NodeFront*>(&fa));

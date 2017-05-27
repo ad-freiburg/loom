@@ -330,6 +330,16 @@ size_t Node::getConnCardinality() const {
 }
 
 // _____________________________________________________________________________
+void Node::generateStationHull(double d) {
+  _stationHull = getConvexFrontHull(d, true);
+}
+
+// _____________________________________________________________________________
+Polygon Node::getStationHull() const {
+  return _stationHull;
+}
+
+// _____________________________________________________________________________
 Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
   MultiLine l;
 

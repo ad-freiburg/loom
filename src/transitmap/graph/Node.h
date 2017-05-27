@@ -103,6 +103,10 @@ class Node {
 
   Polygon getConvexFrontHull(double d, bool rectangulize) const;
 
+  void generateStationHull(double d);
+
+  Polygon getStationHull() const;
+
   // add edge to this node's adjacency lists
   void addEdge(Edge* e);
 
@@ -124,6 +128,8 @@ class Node {
   std::set<Edge*> _adjListIn;
   std::set<Edge*> _adjListOut;
   Point _pos;
+
+  Polygon _stationHull;
 
   std::vector<NodeFront> _mainDirs;
 

@@ -61,6 +61,8 @@ void PolyLine::offsetPerp(double units) {
    * instability etc)
    */
 
+  if (fabs(units) < 0.001) return;
+
   assert(getLength() > 0);
 
   if (_line.size() < 2) return;

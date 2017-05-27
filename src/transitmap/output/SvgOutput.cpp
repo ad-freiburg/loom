@@ -123,7 +123,8 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG,
       params["stroke"] = "black";
       params["stroke-width"] = "1";
       params["fill"] = "white";
-      printPolygon(n->getConvexFrontHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8, true), params, rparams);
+
+      printPolygon(n->getStationHull(), params, rparams);
     } else if (false) {
       params["r"] = "5";
       params["fill"] = "#FF00FF";
@@ -199,7 +200,7 @@ void SvgOutput::outputEdges(const graph::TransitGraph& outG,
 void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
                                       const graph::Node* n,
                                       const RenderParams& rparams) {
-  if (n->getStops().size() != 0 && n->getMainDirs().size() != 2) return;
+  // if (n->getStops().size() != 0 && n->getMainDirs().size() != 2) return;
   for (auto& clique :
        getInnerCliques(n->getInnerGeometries(outG.getConfig(),
                                              _cfg->innerGeometryPrecision),
@@ -301,16 +302,21 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       if (c.geoms[i].geom.getLength() > ref.geom.getLength()) ref = c.geoms[i];
     }
 
-    if (ref.geom.getLength() < _cfg->lineWidth / 2) continue;
+    bool raw = true;
+    if (ref.to.front->geom.distTo(ref.from.front->geom) < _cfg->lineWidth * 2) raw = true;;
 
     for (size_t i = 0; i < c.geoms.size(); i++) {
-      double off = -(ref.from.edge->getWidth() + ref.from.edge->getSpacing()) *
-                   (static_cast<int>(c.geoms[i].slotFrom) -
-                    static_cast<int>(ref.slotFrom));
+      PolyLine pl = c.geoms[i].geom;
 
-      if (ref.from.edge->getTo() == n) off = -off;
+      if (!raw) {
+        double off = -(ref.from.edge->getWidth() + ref.from.edge->getSpacing()) *
+                     (static_cast<int>(c.geoms[i].slotFrom) -
+                      static_cast<int>(ref.slotFrom));
 
-      PolyLine pl = ref.geom.getPerpOffsetted(off);
+        if (ref.from.edge->getTo() == n) off = -off;
+
+        pl = ref.geom.getPerpOffsetted(off);
+      }
 
       std::stringstream styleOutlineCropped;
       styleOutlineCropped << "fill:none;stroke:#000000";
