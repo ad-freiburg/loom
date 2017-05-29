@@ -22,6 +22,16 @@ int ILPOptimizer::optimize() const {
   OptGraph g(_g);
   g.simplify();
 
+  if (_cfg->outputStats) {
+    LOG(INFO) << "(stats) Stats for core optim graph of '" << _g->getName() << std::endl;
+    LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
+      << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
+      << " non-topo)" << std::endl;
+    LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges() << std::endl;
+    LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes() << std::endl;
+    LOG(INFO) << "(stats)   Max edge route cardinality: " << g.getMaxCardinality() << std::endl;
+  }
+
   /*
    * output::OgrOutput ogrOut("/home/patrick/optimgraph", _cfg);
    * ogrOut.print(g);
@@ -30,6 +40,9 @@ int ILPOptimizer::optimize() const {
   LOG(DEBUG) << "Creating ILP problem... " << std::endl;
   glp_prob* lp = createProblem(g);
   LOG(DEBUG) << " .. done" << std::endl;
+
+  LOG(INFO) << "(stats) ILP has " << glp_get_num_cols(lp) << " cols and "
+    << glp_get_num_rows(lp) << " rows." << std::endl;
 
   if (!_cfg->glpkHOutputPath.empty()) {
     LOG(DEBUG) << "Writing human readable ILP to '" << _cfg->glpkHOutputPath
@@ -48,7 +61,7 @@ int ILPOptimizer::optimize() const {
   solveProblem(lp);
   LOG(DEBUG) << " ... done" << std::endl;
 
-  LOG(DEBUG) << "ILP obj = " << glp_mip_obj_val(lp) << std::endl;
+  LOG(INFO) << "(stats) ILP obj = " << glp_mip_obj_val(lp) << std::endl;
 
   if (!_cfg->glpkSolutionOutputPath.empty()) {
     LOG(DEBUG) << "Writing ILP full solution to '"
@@ -68,24 +81,12 @@ int ILPOptimizer::optimize() const {
 
 // _____________________________________________________________________________
 int ILPOptimizer::getCrossingPenalty(const OptNode* n, int coef) const {
-  coef *= n->adjList.size();
-
-  if (n->node->getStops().size() > 0) {
-    return _cfg->inStationCrossPenalty * coef;
-  }
-
-  return coef;
+  return n->node->getCrossingPenalty(_cfg->inStationCrossPenalty,  coef);
 }
 
 // _____________________________________________________________________________
 int ILPOptimizer::getSplittingPenalty(const OptNode* n, int coef) const {
-  coef *= n->adjList.size();
-
-  if (n->node->getStops().size() > 0) {
-    return _cfg->inStationCrossPenalty * coef;
-  }
-
-  return coef;
+  return n->node->getSplittingPenalty(_cfg->inStationCrossPenalty, coef);
 }
 
 // _____________________________________________________________________________
@@ -317,7 +318,7 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenalty(node, CR_PEN_MULTIPLIER_SAMESEG));
+                           getCrossingPenalty(node, _cfg->crossPenMultiSameSeg));
 
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
@@ -394,7 +395,7 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenalty(node, CR_PEN_MULTIPLIER_DIFFSEG));
+                           getCrossingPenalty(node, _cfg->crossPenMultiDiffSeg));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
             if (crosses(node, segmentA, segments, poscomb)) {

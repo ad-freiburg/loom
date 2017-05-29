@@ -3,13 +3,13 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <proj_api.h>
-#include <string>
 #include <set>
-#include "pbutil/geo/Geo.h"
-#include "./TransitGraph.h"
+#include <string>
 #include "./Edge.h"
-#include "./Route.h"
 #include "./OrderingConfiguration.h"
+#include "./Route.h"
+#include "./TransitGraph.h"
+#include "pbutil/geo/Geo.h"
 
 using pbutil::geo::Point;
 using transitmapper::graph::TransitGraph;
@@ -21,8 +21,8 @@ using bgeo::make_inverse;
 
 // _____________________________________________________________________________
 TransitGraph::TransitGraph(const std::string& name, const std::string& proj)
-: _name(name) {
-  _bbox = make_inverse<bgeo::model::box<Point> >();
+    : _name(name) {
+  _bbox = make_inverse<bgeo::model::box<Point>>();
   _proj = pj_init_plus(proj.c_str());
 }
 
@@ -39,32 +39,98 @@ TransitGraph::~TransitGraph() {
 }
 
 // _____________________________________________________________________________
-const Configuration& TransitGraph::getConfig() const {
-  return _config;
+const std::string& TransitGraph::getName() const { return _name; }
+
+// _____________________________________________________________________________
+const Configuration& TransitGraph::getConfig() const { return _config; }
+
+// _____________________________________________________________________________
+void TransitGraph::setConfig(const Configuration& c) { _config = c; }
+
+// _____________________________________________________________________________
+double TransitGraph::getScore(double inStatPen, double sameSegCrossPen,
+                              double diffSegCrossPen, double splitPen) const {
+  return getScore(inStatPen, sameSegCrossPen, diffSegCrossPen, splitPen,
+                  _config);
 }
 
 // _____________________________________________________________________________
-void TransitGraph::setConfig(const Configuration& c) {
-  _config = c;
-}
-
-// _____________________________________________________________________________
-double TransitGraph::getScore() const {
+double TransitGraph::getScore(double inStatPen, double sameSegCrossPen,
+                              double diffSegCrossPen, double splitPen,
+                              const Configuration& c) const {
   double ret = 0;
 
   for (auto n : getNodes()) {
-    ret += n->getScore(_config);
+    ret +=
+        n->getScore(inStatPen, sameSegCrossPen, diffSegCrossPen, splitPen, c);
+  }
+
+  return ret;
+}
+//
+// _____________________________________________________________________________
+double TransitGraph::getCrossScore(double inStatPen, double sameSegCrossPen,
+                                   double diffSegCrossPen) const {
+  return getCrossScore(inStatPen, sameSegCrossPen, diffSegCrossPen, _config);
+}
+
+// _____________________________________________________________________________
+double TransitGraph::getCrossScore(double inStatPen, double sameSegCrossPen,
+                                   double diffSegCrossPen,
+                                   const Configuration& c) const {
+  double ret = 0;
+
+  for (auto n : getNodes()) {
+    ret += n->getCrossingScore(c, inStatPen, sameSegCrossPen, diffSegCrossPen);
   }
 
   return ret;
 }
 
 // _____________________________________________________________________________
-double TransitGraph::getScore(const Configuration& c) const {
+double TransitGraph::getSeparationScore(double inStatPen, double pen) const {
+  return getSeparationScore(inStatPen, pen, _config);
+}
+
+// _____________________________________________________________________________
+double TransitGraph::getSeparationScore(double inStatPen, double pen,
+                                        const Configuration& c) const {
   double ret = 0;
 
   for (auto n : getNodes()) {
-    ret += n->getScore(c);
+    ret += n->getSeparationScore(c, inStatPen, pen);
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::getNumCrossings() const {
+  return getNumCrossings(_config);
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::getNumCrossings(const Configuration& c) const {
+  double ret = 0;
+
+  for (auto n : getNodes()) {
+    ret += n->getNumCrossings(c);
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::getNumSeparations() const {
+  return getNumSeparations(_config);
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::getNumSeparations(const Configuration& c) const {
+  double ret = 0;
+
+  for (auto n : getNodes()) {
+    ret += n->getNumSeparations(c);
   }
 
   return ret;
@@ -79,9 +145,9 @@ void TransitGraph::addNode(Node* n) {
 
 // _____________________________________________________________________________
 void TransitGraph::expandBBox(const Point& p) {
-  bgeo::expand(_bbox,
-    boost::geometry::make<bgeo::model::box<Point>>(
-      p.get<0>() - 50, p.get<1>() - 50, p.get<0>() + 50, p.get<1>() + 50));
+  bgeo::expand(_bbox, boost::geometry::make<bgeo::model::box<Point>>(
+                          p.get<0>() - 50, p.get<1>() - 50, p.get<0>() + 50,
+                          p.get<1>() + 50));
 }
 
 // _____________________________________________________________________________
@@ -95,14 +161,15 @@ Node* TransitGraph::getNodeById(const std::string& id) const {
 
 // _____________________________________________________________________________
 Edge* TransitGraph::addEdge(Node* from, Node* to, PolyLine pl, double w,
-    double s) {
+                            double s) {
   if (from == to) return 0;
   Edge* e = getEdge(from, to);
   if (!e) {
     e = new Edge(from, to, pl, w, s);
     from->addEdge(e);
     to->addEdge(e);
-    bgeo::expand(_bbox, bgeo::return_envelope<bgeo::model::box<Point>>(pl.getLine()));
+    bgeo::expand(_bbox,
+                 bgeo::return_envelope<bgeo::model::box<Point>>(pl.getLine()));
   }
   return e;
 }
@@ -151,19 +218,13 @@ Edge* TransitGraph::getEdge(Node* from, Node* to) {
 }
 
 // _____________________________________________________________________________
-const std::set<Node*>& TransitGraph::getNodes() const {
-  return _nodes;
-}
+const std::set<Node*>& TransitGraph::getNodes() const { return _nodes; }
 
 // _____________________________________________________________________________
-std::set<Node*>* TransitGraph::getNodes() {
-  return &_nodes;
-}
+std::set<Node*>* TransitGraph::getNodes() { return &_nodes; }
 
 // _____________________________________________________________________________
-projPJ TransitGraph::getProjection() const {
-  return _proj;
-}
+projPJ TransitGraph::getProjection() const { return _proj; }
 
 // _____________________________________________________________________________
 const bgeo::model::box<Point>& TransitGraph::getBoundingBox() const {
@@ -172,7 +233,8 @@ const bgeo::model::box<Point>& TransitGraph::getBoundingBox() const {
 
 // _____________________________________________________________________________
 Node* TransitGraph::getNearestNode(const Point& p, double maxD) const {
-  double curD = DBL_MAX;;
+  double curD = DBL_MAX;
+  ;
   Node* curN = 0;
   for (auto n : _nodes) {
     double d = bgeo::distance(n->getPos(), p);
@@ -183,4 +245,42 @@ Node* TransitGraph::getNearestNode(const Point& p, double maxD) const {
   }
 
   return curN;
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::getNumNodes() const { return _nodes.size(); }
+
+// _____________________________________________________________________________
+size_t TransitGraph::getNumRoutes() const { return _routes.size(); }
+
+// _____________________________________________________________________________
+size_t TransitGraph::getMaxCardinality() const {
+  size_t ret = 0;
+  for (auto n : getNodes()) {
+    for (auto e : n->getAdjListOut()) {
+      if (e->getCardinality() > ret) ret = e->getCardinality();
+    }
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::getNumEdges() const {
+  size_t ret = 0;
+
+  for (auto n : getNodes()) {
+    ret += n->getAdjListOut().size();
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::getNumNodes(bool topo) const {
+  size_t ret = 0;
+  for (auto n : _nodes) {
+    if ((n->getStops().size() == 0) ^ !topo) ret++;
+  }
+
+  return ret;
 }

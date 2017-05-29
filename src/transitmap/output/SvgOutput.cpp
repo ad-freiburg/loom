@@ -415,7 +415,7 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
       (n->getPos().get<1>() - yOffset) * _cfg->outputResolution - 0);
   params["style"] =
       "font-family:Verdana;font-size:8px; font-style:normal; font-weight: "
-      "normal; fill: white; stroke-width: 0.25px; stroke-linecap: butt; "
+      "normal; fill: red; stroke-width: 0.25px; stroke-linecap: butt; "
       "stroke-linejoin: miter; stroke: black";
   _w.openTag("text", params);
   if (false && n->getStops().size()) {
@@ -423,7 +423,7 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
     _w.writeText("\n");
   }
 
-  _w.writeText(pbutil::toString(n->getScore(outG.getConfig())));
+  _w.writeText(pbutil::toString(n->getNumCrossings(outG.getConfig())) + "(" + pbutil::toString(n->getNumSeparations(outG.getConfig())) + ")");
   _w.closeTag();
 }
 

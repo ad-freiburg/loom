@@ -169,7 +169,21 @@ const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
 }
 
 // _____________________________________________________________________________
-double Node::getScore(const Configuration& c) const {
+double Node::getScore(double inStatPen, double sameSegCrossPen,
+                      double diffSegCrossPen, double splittingPen,
+                      const graph::Configuration& cfg) const {
+  return getCrossingScore(cfg, inStatPen, sameSegCrossPen, diffSegCrossPen) +
+         getSeparationScore(cfg, inStatPen, splittingPen);
+}
+
+// _____________________________________________________________________________
+size_t Node::getNumCrossings(const Configuration& c) const {
+  return getCrossingScore(c, 1, 1, 1);
+}
+
+// _____________________________________________________________________________
+double Node::getCrossingScore(const Configuration& c, double inStatPen,
+                              double sameSegPen, double diffSegPen) const {
   std::vector<InnerGeometry> igs = getInnerGeometries(c, -1);
   size_t ret = 0;
 
@@ -178,19 +192,74 @@ double Node::getScore(const Configuration& c) const {
       const InnerGeometry& iga = igs[i];
       const InnerGeometry& igb = igs[j];
 
-      if (iga.from.front == igb.from.front && iga.slotFrom == igb.slotFrom) continue;
-      if (iga.from.front == igb.to.front && iga.slotFrom == igb.slotTo) continue;
+      if (iga.from.front == igb.from.front && iga.slotFrom == igb.slotFrom)
+        continue;
+      if (iga.from.front == igb.to.front && iga.slotFrom == igb.slotTo)
+        continue;
       if (iga.to.front == igb.to.front && iga.slotTo == igb.slotTo) continue;
-      if (iga.to.front == igb.from.front && iga.slotTo == igb.slotFrom) continue;
+      if (iga.to.front == igb.from.front && iga.slotTo == igb.slotFrom)
+        continue;
 
-      if (pbutil::geo::intersects(iga.geom.getLine().front(), iga.geom.getLine().back(), igb.geom.getLine().front(), igb.geom.getLine().back()) ||
+      bool sameSeg = (iga.from.front == igb.from.front && iga.to.front == igb.to.front) ||
+        (iga.to.front == igb.from.front && iga.from.front == igb.to.front);
+
+      if (pbutil::geo::intersects(
+              iga.geom.getLine().front(), iga.geom.getLine().back(),
+              igb.geom.getLine().front(), igb.geom.getLine().back()) ||
           bgeo::distance(iga.geom.getLine(), igb.geom.getLine()) < 1) {
-        ret++;
+        ret += 1 * getCrossingPenalty(inStatPen, sameSeg ? sameSegPen : diffSegPen);
       }
     }
   }
 
- return ret;
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t Node::getNumSeparations(const Configuration& c) const {
+  return getSeparationScore(c, 1, 1);
+}
+
+// _____________________________________________________________________________
+size_t Node::getSeparationScore(const Configuration& c, double inStatPen,
+                                double pen) const {
+  size_t ret = 0;
+  for (auto nf : getMainDirs()) {
+    const Edge* e = nf.edge;
+    std::vector<std::pair<const Route*, const Route*> > curPairs;
+    for (size_t i = 0; i < c.find(e)->second.size() - 1; i++) {
+      size_t p = c.find(e)->second[i];
+      curPairs.push_back(std::pair<const Route*, const Route*>(
+          e->getTripsUnordered().at(p).route,
+          e->getTripsUnordered().at(c.find(e)->second[i + 1]).route));
+    }
+
+    for (auto p : curPairs) {
+      for (auto nf : getMainDirs()) {
+        const Edge* f = nf.edge;
+        if (e == f) continue;
+
+        if (f->containsRoute(p.first) && f->containsRoute(p.second) &&
+            connOccurs(p.first, e, f) && connOccurs(p.second, e, f)) {
+          if (abs(int(f->getRouteOccWithPosUnder(p.first, c.find(f)->second)
+                          .second) -
+                  int(f->getRouteOccWithPosUnder(p.second, c.find(f)->second)
+                          .second)) > 1) {
+            ret += 1 * getSplittingPenalty(inStatPen, pen);
+          }
+        }
+      }
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::set<Edge*> Node::getAdjList() const {
+  std::set<Edge*> ret;
+  ret.insert(getAdjListIn().begin(), getAdjListIn().end());
+  ret.insert(getAdjListOut().begin(), getAdjListOut().end());
 }
 
 // _____________________________________________________________________________
@@ -256,8 +325,14 @@ InnerGeometry Node::getInnerStraightLine(
   Point p = partnerFrom.front->getTripOccPos(partnerFrom.route, c);
   Point pp = partnerTo.front->getTripOccPos(partnerTo.route, c);
 
-  size_t s = partnerFrom.edge->getRouteOccWithPosUnder(partnerFrom.route, c.find(partnerFrom.edge)->second).second;
-  size_t ss = partnerTo.edge->getRouteOccWithPosUnder(partnerTo.route, c.find(partnerTo.edge)->second).second;
+  size_t s = partnerFrom.edge
+                 ->getRouteOccWithPosUnder(partnerFrom.route,
+                                           c.find(partnerFrom.edge)->second)
+                 .second;
+  size_t ss = partnerTo.edge
+                  ->getRouteOccWithPosUnder(partnerTo.route,
+                                            c.find(partnerTo.edge)->second)
+                  .second;
 
   return InnerGeometry(PolyLine(p, pp), partnerFrom, partnerTo, s, ss);
 }
@@ -335,9 +410,7 @@ void Node::generateStationHull(double d) {
 }
 
 // _____________________________________________________________________________
-Polygon Node::getStationHull() const {
-  return _stationHull;
-}
+Polygon Node::getStationHull() const { return _stationHull; }
 
 // _____________________________________________________________________________
 Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
@@ -346,29 +419,24 @@ Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
   if (getMainDirs().size() != 2) {
     for (auto& nf : getMainDirs()) {
       // l.push_back(nf.geom.getLine());
-      l.push_back(nf.geom.getSegment(
-        (d / 2) /
-            nf.geom.getLength(),
-        (nf.geom.getLength() -
-         d / 2) /
-            nf.geom.getLength()).getLine());
+      l.push_back(
+          nf.geom
+              .getSegment((d / 2) / nf.geom.getLength(),
+                          (nf.geom.getLength() - d / 2) / nf.geom.getLength())
+              .getLine());
     }
   } else {
     // for two main dirs, take average
     std::vector<const PolyLine*> pols;
 
     PolyLine a = getMainDirs()[0].geom.getSegment(
-        (d / 2) /
-            getMainDirs()[0].geom.getLength(),
-        (getMainDirs()[0].geom.getLength() -
-         d / 2) /
+        (d / 2) / getMainDirs()[0].geom.getLength(),
+        (getMainDirs()[0].geom.getLength() - d / 2) /
             getMainDirs()[0].geom.getLength());
 
     PolyLine b = getMainDirs()[1].geom.getSegment(
-        (d / 2) /
-            getMainDirs()[1].geom.getLength(),
-        (getMainDirs()[1].geom.getLength() -
-         d / 2) /
+        (d / 2) / getMainDirs()[1].geom.getLength(),
+        (getMainDirs()[1].geom.getLength() - d / 2) /
             getMainDirs()[1].geom.getLength());
 
     assert(a.getLine().size() > 1);
@@ -398,7 +466,7 @@ Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
     if (rectangulize && getMaxNodeFrontCardinality() > 1) {
       Polygon env = pbutil::geo::getOrientedEnvelopeAvg(l).getPolygon();
       double incr = (bgeo::area(env) / bgeo::area(hull)) - 1;
-      if (bgeo::area(env) < d*d*36 && (l.size() < 5 || incr < 0.5)) {
+      if (bgeo::area(env) < d * d * 36 && (l.size() < 5 || incr < 0.5)) {
         hull = env;
       }
     }
@@ -459,4 +527,26 @@ Edge* Node::getEdge(const Node* other) const {
       return eP;
     }
   }
+}
+
+// _____________________________________________________________________________
+int Node::getCrossingPenalty(double inStatPen, double coef) const {
+  coef *= _adjListIn.size() + _adjListOut.size();
+
+  if (getStops().size() > 0) {
+    return inStatPen * coef;
+  }
+
+  return coef;
+}
+
+// _____________________________________________________________________________
+int Node::getSplittingPenalty(double inStatPen, double coef) const {
+  coef *= _adjListIn.size() + _adjListOut.size();
+
+  if (getStops().size() > 0) {
+    return inStatPen * coef;
+  }
+
+  return coef;
 }

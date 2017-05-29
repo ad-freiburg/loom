@@ -44,7 +44,22 @@ int main(int argc, char** argv) {
       exit(1);
     }
 
-    b.combinePartnerRoutes(&g);
+    if (cfg.collapseLinePartners) {
+      b.combinePartnerRoutes(&g);
+    }
+
+    if (cfg.outputStats) {
+      LOG(INFO) << "(stats) Stats for graph '" << g.getName() << std::endl;
+      LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
+                << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
+                << " non-topo)" << std::endl;
+      LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges()
+                << std::endl;
+      LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes()
+                << std::endl;
+      LOG(INFO) << "(stats)   Max edge route cardinality: "
+                << g.getMaxCardinality() << std::endl;
+    }
 
     LOG(INFO) << "Creating node fronts..." << std::endl;
     b.writeMainDirs(&g);
@@ -57,8 +72,25 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Optimizing..." << std::endl;
 
-    LOG(INFO) << "Total graph score BEFORE optim is -- " << g.getScore()
+    LOG(INFO) << "(stats) Total graph score BEFORE optim is -- "
+              << g.getScore(cfg.inStationCrossPenalty, cfg.crossPenMultiSameSeg,
+                            cfg.crossPenMultiDiffSeg, cfg.splitPenWeight)
               << " --" << std::endl;
+    LOG(INFO) << "(stats)   Per node graph score: "
+              << g.getScore(cfg.inStationCrossPenalty, cfg.crossPenMultiSameSeg,
+                            cfg.crossPenMultiDiffSeg, cfg.splitPenWeight) /
+                     g.getNodes()->size()
+              << std::endl;
+    LOG(INFO) << "(stats)   Crossings: " << g.getNumCrossings() << " (score: "
+              << g.getCrossScore(cfg.inStationCrossPenalty,
+                                 cfg.crossPenMultiSameSeg,
+                                 cfg.crossPenMultiDiffSeg)
+              << ")" << std::endl;
+    LOG(INFO) << "(stats)   Separations: " << g.getNumSeparations()
+              << " (score: "
+              << g.getSeparationScore(cfg.inStationCrossPenalty,
+                                      cfg.splitPenWeight)
+              << ")" << std::endl;
 
     if (cfg.renderMethod != "ogr" && !cfg.noOptim) {
       if (cfg.optimMethod == "ilp_impr") {
@@ -70,10 +102,25 @@ int main(int argc, char** argv) {
       }
     }
 
-    LOG(INFO) << "Total graph score AFTER optim is -- " << g.getScore() << " --"
+    LOG(INFO) << "(stats) Total graph score AFTER optim is -- "
+              << g.getScore(cfg.inStationCrossPenalty, cfg.crossPenMultiSameSeg,
+                            cfg.crossPenMultiDiffSeg, cfg.splitPenWeight)
+              << " --" << std::endl;
+    LOG(INFO) << "(stats)   Per node graph score: "
+              << g.getScore(cfg.inStationCrossPenalty, cfg.crossPenMultiSameSeg,
+                            cfg.crossPenMultiDiffSeg, cfg.splitPenWeight) /
+                     g.getNodes()->size()
               << std::endl;
-    LOG(INFO) << "Per node graph score is -- "
-              << g.getScore() / g.getNodes()->size() << " --" << std::endl;
+    LOG(INFO) << "(stats)   Crossings: " << g.getNumCrossings() << " (score: "
+              << g.getCrossScore(cfg.inStationCrossPenalty,
+                                 cfg.crossPenMultiSameSeg,
+                                 cfg.crossPenMultiDiffSeg)
+              << ")" << std::endl;
+    LOG(INFO) << "(stats)   Separations: " << g.getNumSeparations()
+              << " (score: "
+              << g.getSeparationScore(cfg.inStationCrossPenalty,
+                                      cfg.splitPenWeight)
+              << ")" << std::endl;
 
     if (cfg.renderMethod == "ogr") {
       std::string path = cfg.outputPath;

@@ -52,8 +52,7 @@ struct Partner {
 };
 
 struct InnerGeometry {
-  InnerGeometry(PolyLine g, Partner a, Partner b, size_t slotF,
-                size_t slotT)
+  InnerGeometry(PolyLine g, Partner a, Partner b, size_t slotF, size_t slotT)
       : geom(g), from(a), to(b), slotFrom(slotF), slotTo(slotT){};
   PolyLine geom;
   Partner from;
@@ -86,13 +85,22 @@ class Node {
 
   const std::set<Edge*>& getAdjListOut() const { return _adjListOut; }
   const std::set<Edge*>& getAdjListIn() const { return _adjListIn; }
+  std::set<Edge*> getAdjList() const;
   const std::vector<NodeFront>& getMainDirs() const { return _mainDirs; }
   std::vector<NodeFront>& getMainDirs() { return _mainDirs; }
 
   void addMainDir(NodeFront f);
 
   const NodeFront* getNodeFrontFor(const Edge* e) const;
-  double getScore(const graph::Configuration& c) const;
+  double getScore(double inStatPen, double sameSegCrossPen,
+                  double diffSegCrossPen, double splittingPen,
+                  const graph::Configuration& cfg) const;
+  size_t getNumCrossings(const graph::Configuration& c) const;
+  size_t getNumSeparations(const graph::Configuration& c) const;
+  size_t getSeparationScore(const Configuration& c, double inStatPen, double pen) const;
+  double getCrossingScore(const Configuration& c, double inStatPen, double sameSegPen,
+    double diffSegPen) const;
+
   std::vector<Partner> getPartners(const NodeFront* f,
                                    const RouteOccurance& ro) const;
 
@@ -122,6 +130,9 @@ class Node {
 
   double getMaxNodeFrontWidth() const;
   size_t getMaxNodeFrontCardinality() const;
+
+  int getCrossingPenalty(double inStatPen, double coef) const;
+  int getSplittingPenalty(double inStatPen, double coef) const;
 
  private:
   std::string _id;

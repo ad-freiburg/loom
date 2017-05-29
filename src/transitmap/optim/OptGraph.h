@@ -71,6 +71,12 @@ class OptGraph {
   const std::set<OptNode*>& getNodes() const;
   TransitGraph* getGraph() const;
 
+  size_t getNumNodes() const;
+  size_t getNumNodes(bool topo) const;
+  size_t getNumEdges() const;
+  size_t getNumRoutes() const;
+  size_t getMaxCardinality() const;
+
   void simplify();
 
  private:

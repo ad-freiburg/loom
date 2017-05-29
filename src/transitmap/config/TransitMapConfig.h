@@ -40,10 +40,17 @@ struct Config {
   bool renderNodeCircles;
   bool renderStationNames;
 
+  bool outputStats;
+  bool collapseLinePartners;
+
   bool useGlpkFeasibilityPump;
   bool useGlpkProximSearch;
   int glpkPSTimeLimit;
   int glpkTimeLimit;
+
+  double crossPenMultiSameSeg;
+  double crossPenMultiDiffSeg;
+  double splitPenWeight;
 };
 
 }  // namespace config

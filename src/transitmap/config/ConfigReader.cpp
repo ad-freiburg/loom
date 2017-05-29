@@ -53,29 +53,37 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       ->default_value(2),
       "default width of line outline")
     ("render-stations",
-     opts::bool_switch(&(cfg->renderStations))
-      ->default_value(false),
+     opts::value<bool>(&(cfg->renderStations))
+      ->default_value(true),
       "render station geometries")
     ("render-station-names",
-     opts::bool_switch(&(cfg->renderStationNames))
+     opts::value<bool>(&(cfg->renderStationNames))
       ->default_value(false),
       "render station name")
     ("render-node-fronts",
-     opts::bool_switch(&(cfg->renderNodeFronts))
+     opts::value<bool>(&(cfg->renderNodeFronts))
       ->default_value(false),
       "render node fronts as red lines")
     ("render-node-circles",
-     opts::bool_switch(&(cfg->renderNodeCircles))
+     opts::value<bool>(&(cfg->renderNodeCircles))
       ->default_value(false),
       "mark node areas with background grey")
     ("no-optim,N",
-      opts::bool_switch(&(cfg->noOptim))
+      opts::value<bool>(&(cfg->noOptim))
       ->default_value(false),
       "disable line-ordering optimization")
     ("splitting-optim",
-      opts::bool_switch(&(cfg->splittingOpt))
+      opts::value<bool>(&(cfg->splittingOpt))
       ->default_value(false),
       "enable splitting optimization")
+    ("output-stats",
+      opts::value<bool>(&(cfg->outputStats))
+      ->default_value(false),
+      "print some more graph stats")
+    ("collapse-line-partners",
+      opts::value<bool>(&(cfg->collapseLinePartners))
+      ->default_value(true),
+      "collapse line partners")
     ("optim-method",
       opts::value<std::string>(&(cfg->optimMethod))
       ->default_value("ilp_impr"),
@@ -100,6 +108,22 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->inStationCrossPenalty))
       ->default_value(3),
       "penalty factor during optimization for crossings that occur in stations")
+    ("same-seg-cross-penalty-factor",
+      opts::value<double>(&(cfg->crossPenMultiSameSeg))
+      ->default_value(4),
+      "penalty factor during optimization for crossings that occur between two lines that travel 2 same segments")
+    ("splitting-penalty-factor",
+      opts::value<double>(&(cfg->splitPenWeight))
+      ->default_value(3),
+      "penalty factor during optimization for splittings")
+    ("diff-seg-cross-penalty-factor",
+      opts::value<double>(&(cfg->crossPenMultiDiffSeg))
+      ->default_value(1),
+      "penalty factor during optimization for crossings that occur between two lines that travel through 3 segments")
+    ("in-station-cross-penalty-factor",
+      opts::value<double>(&(cfg->inStationCrossPenalty))
+      ->default_value(3),
+      "penalty factor during optimization for crossings that occur in stations")
     ("glpk-time-limit",
       opts::value<int>(&(cfg->glpkTimeLimit))
       ->default_value(60000 + 60000),
@@ -109,11 +133,11 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       ->default_value(60000),
       "GLPK: time limit for proximit search heuristig")
     ("glpk-use-proximity-search",
-      opts::bool_switch(&(cfg->useGlpkProximSearch))
+      opts::value<bool>(&(cfg->useGlpkProximSearch))
       ->default_value(true),
       "GLPK: use proximity search heuristic")
     ("glpk-use-feasibility-pump",
-      opts::bool_switch(&(cfg->useGlpkProximSearch))
+      opts::value<bool>(&(cfg->useGlpkProximSearch))
       ->default_value(true),
       "GLPK: use feasibility pump heuristic")
     ("glpk-mps-output-path",

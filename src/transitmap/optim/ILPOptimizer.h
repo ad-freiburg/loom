@@ -26,15 +26,6 @@ typedef std::pair<size_t, size_t> PosCom;
 typedef std::pair<PosCom, PosCom> PosComPair;
 typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
-// multiplier used for crossing penalty in crossings that occur between
-// only two segments (where the crossing occurs in the "same" segment)
-static const double CR_PEN_MULTIPLIER_SAMESEG = 4;
-// multiplier used for crossing penalty in crossings that occur between
-// three segments
-static const double CR_PEN_MULTIPLIER_DIFFSEG = 1;
-
-static const double SPLIT_PEN_MULTIPLIER = 3;
-
 struct VariableMatrix {
   std::vector<int> rowNum;
   std::vector<int> colNum;

@@ -188,3 +188,58 @@ bool OptGraph::simplifyStep() {
 TransitGraph* OptGraph::getGraph() const {
   return _g;
 }
+
+// _____________________________________________________________________________
+size_t OptGraph::getNumNodes() const {
+  return _nodes.size();
+}
+
+// _____________________________________________________________________________
+size_t OptGraph::getNumNodes(bool topo) const {
+  size_t ret = 0;
+  for (auto n : _nodes) {
+    if ((n->node->getStops().size() == 0) ^ !topo) ret++;
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t OptGraph::getNumEdges() const {
+  size_t ret = 0;
+
+  for (auto n : getNodes()) {
+    ret += n->adjListOut.size();
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t OptGraph::getNumRoutes() const {
+  std::set<const graph::Route*> routes;
+
+  for (auto n : getNodes()) {
+    for (auto e : n->adjListOut) {
+      for (const auto& to : *e->getFirstEdge().etg->getTripsUnordered()) {
+        if (to.route->relativeTo()) continue;
+        routes.insert(to.route);
+      }
+    }
+  }
+  return routes.size();
+}
+
+// _____________________________________________________________________________
+size_t OptGraph::getMaxCardinality() const {
+  size_t ret = 0;
+  for (auto n : getNodes()) {
+    for (auto e : n->adjListOut) {
+      if (e->getFirstEdge().etg->getCardinality(true) > ret) {
+        ret = e->getFirstEdge().etg->getCardinality(true);
+      }
+    }
+  }
+
+  return ret;
+}
