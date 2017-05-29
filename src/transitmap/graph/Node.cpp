@@ -351,6 +351,9 @@ InnerGeometry Node::getInnerBezier(const Configuration& cf,
   Point c = pp;
   std::pair<double, double> slopeA, slopeB;
 
+  assert(partnerFrom.front->edge->getGeom().getLength() > 5);
+  assert(partnerTo.front->edge->getGeom().getLength() > 5);
+
   if (partnerFrom.front->edge->getTo() == this) {
     slopeA = partnerFrom.front->edge->getGeom().getSlopeBetweenDists(
         partnerFrom.front->edge->getGeom().getLength() - 5,

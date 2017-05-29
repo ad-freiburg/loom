@@ -68,6 +68,8 @@ class TransitGraph {
   size_t getNumSeparations() const;
   size_t getNumSeparations(const Configuration& c) const;
 
+  double getNumPossSolutions() const;
+
   const Configuration& getConfig() const;
   void setConfig(const Configuration&);
 

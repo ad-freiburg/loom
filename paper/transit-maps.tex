@@ -53,11 +53,10 @@ JMU W\"urzburg (Germany)\\
 
 \begin{itemize}
 	\item mention usefulness, mention bad google maps etc
+	\item mention unintuitive hardness of problem: even for a small map like the Freiburg tram network, the total number of possible edge orderings is $1.1272 \times 10^{14}$
 	\item mention that we know of no publication adressing the MCLM or the drawing of metro maps that uses real-world data
 	\item mention that we not only want to generate schematic maps, but maps that resemble the real-world vehicle paths as closely as possible (e.g. to serve as a map overlay)
 \end{itemize}
-\todo{introduction, show some example map, either rendered by us or a manually created one to set the mood}
-
 
 %
 \subsection{Related Work}\label{SEC:related}
@@ -143,7 +142,7 @@ To assure that each position gets assigned exactly one line, we additionally nee
 \subsubsection{Avoiding crossings}\label{SEC:ac}
 \begin{figure}
   \centering
-	$\vcenter{\hbox{\includegraphics[width=0.6\textwidth]{crossing.pdf}}}$
+	$\vcenter{\hbox{\includegraphics[width=0.86\textwidth]{crossing.pdf}}}$
 	\caption{Example instance.}
 	\label{FIG:crossings}
 \end{figure}
@@ -288,12 +287,26 @@ The line-ordering optimization can now be run independently on each connected co
 	\includestandalone[width=5cm]{tikz/transitgraph_optim}
 	\hspace{0.6cm}
 	\includestandalone[width=4.4cm]{tikz/coreoptimgraph}
-	\caption{Left: transit graph $G$ with lines $a, b, c, d, e, f$, Right: core optimization graph with highlighted ordering-relevant connected components with more than 1 node; $ab$ was collapsed into $x$.}
+	\caption{Left: transit graph $G$ with $L = \{A, B, C, D, E, F\}$, Right: core optimization graph with highlighted ordering-relevant connected components with more than 1 node; $\{A, B\}$ was collapsed into $\{X\}$.}
 \end{figure}
 
 %
 \section{Rendering}\label{SEC:rendering}
 %
+
+\begin{figure}
+  \centering
+	\includegraphics[width=0.23\textwidth]{render_examples/rendering/render_example1.pdf}
+	\hfill
+    \includegraphics[width=0.23\textwidth]{render_examples/rendering/render_example2.pdf}
+    \hfill
+    \includegraphics[width=0.23\textwidth]{render_examples/rendering/render_example3.pdf}
+    \hfill
+    \includegraphics[width=0.23\textwidth]{render_examples/rendering/render_example4.pdf}
+	\caption{From left to right: ordered lines are rendered on edges, node area is freed, inner connections are rendered, finished transit map}
+	\label{FIG:renderingproc}
+\end{figure}
+
 \todo{short explanation of parallel line rendering, node front expansion for non-station nodes, explain bezier curve and explain degeneration to circle arc}
 
 %

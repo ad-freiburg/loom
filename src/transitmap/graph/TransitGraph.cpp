@@ -10,6 +10,7 @@
 #include "./Route.h"
 #include "./TransitGraph.h"
 #include "pbutil/geo/Geo.h"
+#include "pbutil/Misc.h"
 
 using pbutil::geo::Point;
 using transitmapper::graph::TransitGraph;
@@ -280,6 +281,19 @@ size_t TransitGraph::getNumNodes(bool topo) const {
   size_t ret = 0;
   for (auto n : _nodes) {
     if ((n->getStops().size() == 0) ^ !topo) ret++;
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+double TransitGraph::getNumPossSolutions() const {
+  double ret = 1;
+
+  for (auto n : getNodes()) {
+    for (auto e : n->getAdjListOut()) {
+      ret *= pbutil::factorial(e->getCardinality());    
+    }
   }
 
   return ret;

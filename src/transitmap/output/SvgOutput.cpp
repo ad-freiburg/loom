@@ -94,7 +94,9 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
   }
 
   for (graph::Node* n : outG.getNodes()) {
-    renderNodeConnections(outG, n, rparams);
+    if (_cfg->renderNodeConnections) {
+      renderNodeConnections(outG, n, rparams);
+    }
   }
 
   renderDelegates(outG, rparams);
@@ -121,7 +123,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG,
     if (_cfg->renderStations && n->getStops().size() > 0 &&
         n->getMainDirs().size() > 0) {
       params["stroke"] = "black";
-      params["stroke-width"] = "1";
+      params["stroke-width"] = pbutil::toString((_cfg->lineWidth / 2) * _cfg->outputResolution);
       params["fill"] = "white";
 
       printPolygon(n->getStationHull(), params, rparams);
@@ -151,7 +153,7 @@ void SvgOutput::renderNodeCircles(const graph::TransitGraph& outG,
     Point center = n->getPos();
     // bgeo::centroid(n->getConvexFrontHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8, false), center);
 
-    printCircle(center, n->getMaxNodeFrontWidth() * 0.8, params, rparams);
+    printCircle(center, n->getMaxNodeFrontWidth() * 1, params, rparams);
 
   }
   _w.closeTag();
@@ -165,9 +167,9 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG,
     for (auto& f : n->getMainDirs()) {
       const PolyLine p = f.geom;
       std::stringstream style;
-      style << "fill:none;stroke:red"
+      style << "fill:none;stroke:black"
             << ";stroke-linejoin: "
-               "miter;stroke-linecap:round;stroke-opacity:0.5;stroke-width:1";
+               "miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1";
       std::map<std::string, std::string> params;
       params["style"] = style.str();
       printLine(p, params, rparams);
@@ -175,7 +177,7 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG,
       Point a = p.getPointAt(.5).p;
 
       std::stringstream styleA;
-      styleA << "fill:none;stroke:red"
+      styleA << "fill:none;stroke:black"
              << ";stroke-linejoin: "
                 "miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
       params["style"] = styleA.str();

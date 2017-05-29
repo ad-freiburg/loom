@@ -60,6 +60,14 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->renderStationNames))
       ->default_value(false),
       "render station name")
+    ("render-node-connections",
+     opts::value<bool>(&(cfg->renderNodeConnections))
+      ->default_value(true),
+      "render inner node connections")
+    ("expand-fronts",
+     opts::value<bool>(&(cfg->expandFronts))
+      ->default_value(true),
+      "expand fronts to make room for inner geometries")
     ("render-node-fronts",
      opts::value<bool>(&(cfg->renderNodeFronts))
       ->default_value(false),

@@ -59,11 +59,16 @@ int main(int argc, char** argv) {
                 << std::endl;
       LOG(INFO) << "(stats)   Max edge route cardinality: "
                 << g.getMaxCardinality() << std::endl;
+      LOG(INFO) << "(stats)   Number of poss. solutions: "
+                << g.getNumPossSolutions() << std::endl;
     }
 
     LOG(INFO) << "Creating node fronts..." << std::endl;
     b.writeMainDirs(&g);
-    b.expandOverlappinFronts(&g);
+
+    if (cfg.expandFronts) {
+      b.expandOverlappinFronts(&g);
+    }
 
     b.createMetaNodes(&g);
 

@@ -42,6 +42,8 @@ struct Config {
 
   bool outputStats;
   bool collapseLinePartners;
+  bool renderNodeConnections;
+  bool expandFronts;
 
   bool useGlpkFeasibilityPump;
   bool useGlpkProximSearch;

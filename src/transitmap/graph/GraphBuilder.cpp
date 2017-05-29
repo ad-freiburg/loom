@@ -461,7 +461,7 @@ std::vector<NodeFront> GraphBuilder::getClosedNodeFronts(const Node* n) const {
 std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
     const Node* n) const {
   std::set<NodeFront*> ret;
-  double minLength = 1;
+  double minLength = 6;
 
   for (size_t i = 0; i < n->getMainDirs().size(); ++i) {
     const NodeFront& fa = n->getMainDirs()[i];
