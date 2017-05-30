@@ -12,15 +12,15 @@
 		\foreach \place/\x in {{(9.5,4)/1}, {(10.3,2.3)/3},{(9,2.3)/4}, {(7, 4)/5}, {(8.1, 3.1)/8}, {(6.5, 2)/9}}
 		\node[graphnode] (\x) at \place {$\x$};
 
-		\draw (1) -- (3) node [midway, above right] {$XC$};
-		\draw (3) -- (4) node [midway, below left] {$X$};
-		\draw (1) -- (4) node [midway, right] {$C$};
-		\draw (5) -- (1) node [midway, above] {$DEF$};
-		\draw (4) -- (8) node [midway, above, xshift=3pt] {$X$};
-		\draw (4) -- (9) node [midway, below right] {$E$};
-		\draw (9) -- (8) node [midway, below right, yshift=3pt] {$F$};
-		\draw (5) -- (9) node [midway, above left] {$EF$};
-		\draw (8) -- (5) node [midway, right, xshift=1pt, yshift=2pt] {$D$};
+		\draw (1) -- (3) node [midway, above right] {$\{X,C\}$};
+		\draw (3) -- (4) node [midway, below left] {$\{X\}$};
+		\draw (1) -- (4) node [midway, right] {$\{C\}$};
+		\draw (5) -- (1) node [midway, above] {$\{D,E,F\}$};
+		\draw (4) -- (8) node [midway, above, xshift=3pt] {$\{X\}$};
+		\draw (4) -- (9) node [midway, below right] {$\{E\}$};
+		\draw (9) -- (8) node [midway, below right, yshift=3pt] {$\{F\}$};
+		\draw (5) -- (9) node [midway, above left] {$\{E,F\}$};
+		\draw (8) -- (5) node [midway, right, xshift=1pt, yshift=2pt] {$\{D\}$};
 
 		\begin{pgfonlayer}{background}
 			\highlight{14mm}{blue}{(9) -- (5)}

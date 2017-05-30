@@ -81,8 +81,6 @@ The other crucial difference of all these approaches to our work is the strong a
 	\item ... apply our approach to several real-world datasets
 \end{itemize}
 
-\todo{write contributions}
-
 %
 \subsection{Problem Definition}\label{SEC:def}
 %
@@ -258,15 +256,15 @@ We add $1$ additional constraint per edge in $e$ and a constant number of additi
 %
 \subsection{Core problem graph}\label{SEC:coreprobgraph}
 %
-An inevitable crossing (or separation) between two lines $j$ and $k$ can only occur if there is at least one node $v_{jk}$ with one of the following properties:
+An inevitable crossing (or separation) between two lines $J$ and $K$ can only occur if there is at least one node $v$ with one of the following properties:
 \begin{enumerate}
-\item $v_{jk}$ is adjacent to $e : j \not\in L(e) \land k \in L(e')$ and $e' : j \in L(e') \land k \not\in L(e)$. \label{EQ:liaisonnode}
-\item $|{e \in adj(v_{jk}) : j \in L(e) \land i \in L(e)}| > 2$. \label{EQ:tnode}
+\item $v$ is adjacent to $e : J \not\in L(e) \land K \in L(e')$ and $e' : J \in L(e') \land K \not\in L(e)$. \label{EQ:liaisonnode}
+\item $|{e \in adj(v) : J \in L(e) \land K \in L(e)}| > 2$. \label{EQ:tnode}
 \end{enumerate}
-\begin{proof} If no such node exists, then it holds for all $v \in V$ that $j$ and $k$ either both travel through $v$ on the same two edges or they don't travel together through $v$ at all. In the latter case, no crossing (or separation) can occur and we can thus disregard it, which leaves us only with the former case. But if $j$ and $k$ travel through all nodes together on the same two edges, then the relative order of $j$ and $k$ does not matter anymore - we can just combine $j$ and $k$ into a new line $i$ and assign $j$ and $k$ an arbitrary global ordering.
+\begin{proof} If no such node exists, then it holds for all $v \in V$ that $J$ and $K$ either both travel through $v$ on the same two edges or they don't travel together through $v$ at all. In the latter case, no crossing (or separation) can occur and we can thus disregard it, which leaves us only with the former case. But if $J$ and $K$ travel through all nodes together on the same two edges, then the relative order of $j$ and $k$ does not matter anymore - we can just combine $J$ and $K$ into a new line $I$ and assign $J$ and $K$ an arbitrary global ordering.
 \end{proof}
 
-We call nodes that comply to (\ref{EQ:liaisonnode}) for a line pair $A = \{j, k\}$ a liaison node for $j$ and $k$ and nodes that comply to (\ref{EQ:tnode})  a T-node for $j$ and $k$. Additionally, we call a node that is a liaison and/or T-node for at least one line pair an intersection node and a node in which one or more lines end a terminus node.
+We call nodes that comply to (\ref{EQ:liaisonnode}) for a line pair $A = \{J, K\}$ a liaison node for $J$ and $K$ and nodes that comply to (\ref{EQ:tnode})  a T-node for $J$ and $K$. Additionally, we call a node that is a liaison and/or T-node for at least one line pair an intersection node and a node in which one or more lines end a terminus node.
 
 Using the above, we can simplify the input graph prior to optimization with the following steps:
 \begin{enumerate}
@@ -275,16 +273,16 @@ Using the above, we can simplify the input graph prior to optimization with the 
 \end{enumerate}
 Since we never delete an intersection node, these operations will not affect the optimality of the found solution. In practice, they will move line crossings to liaison nodes or T-nodes. This has a similar effect as the heuristic described in Section~\ref{SEC:crossing_placement}.
 
-This core problem graph can be further prepared for optimiziation by splitting it into ordering-relevant connected components using the following rules:
+This core problem graph can be further prepared for optimization by splitting it into ordering-relevant connected components using the following rules:
 \begin{enumerate}
 	\item cut each edge $e = (u, v)$ with $|L(e)| = 1$ into two edges $e' = (u, v')$ and $e'' = (v'', v)$. Note that $v'$ and $v''$ are not connected.
 	\item replace each edge $e = (u, v)$ where $v$ is a terminus node for each $l \in L(e)$ with an edge $e' = (u, v'$ where $v'$ is only connected to $e'$. Delete $e$ from the adjaceny list of $v$.
 	\item remove each edge $e = (u, v)$ where $u$ and $v$ are termini for all $l \in L(e)$
 \end{enumerate}
 The line-ordering optimization can now be run independently on each connected component of the core problem graph.
-\begin{figure}[h]
+\begin{figure}
 \centering
-	\includestandalone[width=5cm]{tikz/transitgraph_optim}
+	\includestandalone[width=5.5cm]{tikz/transitgraph_optim}
 	\hspace{0.6cm}
 	\includestandalone[width=4.4cm]{tikz/coreoptimgraph}
 	\caption{Left: transit graph $G$ with $L = \{A, B, C, D, E, F\}$, Right: core optimization graph with highlighted ordering-relevant connected components with more than 1 node; $\{A, B\}$ was collapsed into $\{X\}$.}
@@ -294,30 +292,28 @@ The line-ordering optimization can now be run independently on each connected co
 \section{Rendering}\label{SEC:rendering}
 %
 
+We split the process of rendering a transit graph instance into four steps (Figure~\ref{FIG:renderingproc}). As our graph model imposes only one line ordering per edge $e$, each $l \in L(e)$ can be rendered by perpendicular offsetting the edge's polyline by $-w\left|L(e)\right|/2 + w\left(p-1\right)$, where $w$ is the desired width of a single line and $p \in \left\{1, .. , \left|L(e)\right|\right\}$ the position of $l$ in $e$ (for simplicity, we disregard the spacing between lines here.) We call the perpendicular line segments of length $w\left|L(e)\right|$ that are formed at the beginning and end of $e$ the node fronts of the incident node and the positions of each $l$ on the node front the port of $l$. We make room for the line connections between edges by expanding these fronts.
+
+After the node fronts have been expanded, the line connections in the node can be rendered independently from the edges by connecting the port pairs. In our experiments, we used cubic Bezi\'{e}r curves, but for schematic maps a circular arc or even a straight line might be preferable.
+
 \begin{figure}
   \centering
-	\includegraphics[width=0.23\textwidth]{render_examples/rendering/render_example1.pdf}
+	\includegraphics[width=0.24\textwidth]{render_examples/rendering/render_example1.pdf}
 	\hfill
-    \includegraphics[width=0.23\textwidth]{render_examples/rendering/render_example2.pdf}
+    \includegraphics[width=0.24\textwidth]{render_examples/rendering/render_example2.pdf}
     \hfill
-    \includegraphics[width=0.23\textwidth]{render_examples/rendering/render_example3.pdf}
+    \includegraphics[width=0.24\textwidth]{render_examples/rendering/render_example3.pdf}
     \hfill
-    \includegraphics[width=0.23\textwidth]{render_examples/rendering/render_example4.pdf}
+    \includegraphics[width=0.24\textwidth]{render_examples/rendering/render_example4.pdf}
 	\caption{From left to right: ordered lines are rendered on edges, node area is freed, inner connections are rendered, finished transit map}
 	\label{FIG:renderingproc}
 \end{figure}
-
-\todo{short explanation of parallel line rendering, node front expansion for non-station nodes, explain bezier curve and explain degeneration to circle arc}
 
 %
 \section{Evaluation}
 %
 
-To test our edge ordering optimization method, we ran it against the public transit schedules of several cities around the world (Table~\ref{TBL:datasets}). Each dataset was first transformed into a well-formed transit graph using the method described in Section~\ref{SEC:topo}. After that, an edge ordering optimization run was started for each city.
-
-%
-\subsection{Optimization Results}
-%
+To test our approach, we ran it against the public transit schedules of several cities around the world (Table~\ref{TBL:datasets}). Each dataset was first transformed into a well-formed transit graph using the method described in Section~\ref{SEC:topo}. After that, an edge ordering optimization run was started for each city.
 
 We evaluated the size of the resulting ILP using the baseline approach from Section~\ref{SEC:baseline} as well as the improved version from Section~\ref{SEC:improved}. We also compared the ILPs resulting from the reduced core optimization graph against those generated from the raw transit graph. Each ILP was then given to the GNU Linear Programming Kit (glpk) and the COIN-OR CBC (coin) solver. For the improved approach, we tested each dataset with or without the line separation penalty described in Section~\ref{SEC:separation}.
 \begin{table}
@@ -369,16 +365,10 @@ We evaluated the size of the resulting ILP using the baseline approach from Sect
 \end{table}
 
 %
-\subsection{Aesthetical Evaluation}
+\section{Future work}
 %
 
-%
-\section{Further work}
-%
-
-\todo{mention that our model forces a line crossing in a station if a topology change happens inside of this station. in this case, it may be useful to add "fake" topology nodes outside of the station}
-
-\todo{mention thorough aesthetical evaluation via crowdsourcing}
+\todo{mention thorough aesthetical evaluation via crowdsourcing?}
 
 
 \bibliographystyle{plain}
