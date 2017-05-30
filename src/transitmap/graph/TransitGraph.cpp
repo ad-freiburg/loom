@@ -63,7 +63,7 @@ double TransitGraph::getScore(double inStatPen, double sameSegCrossPen,
 
   for (auto n : getNodes()) {
     ret +=
-        n->getScore(inStatPen, sameSegCrossPen, diffSegCrossPen, splitPen, c);
+        n->getScore(inStatPen, sameSegCrossPen, diffSegCrossPen, splitPen, true, true, c);
   }
 
   return ret;
@@ -82,7 +82,7 @@ double TransitGraph::getCrossScore(double inStatPen, double sameSegCrossPen,
   double ret = 0;
 
   for (auto n : getNodes()) {
-    ret += n->getCrossingScore(c, inStatPen, sameSegCrossPen, diffSegCrossPen);
+    ret += n->getCrossingScore(c, inStatPen, sameSegCrossPen, diffSegCrossPen, true);
   }
 
   return ret;
@@ -99,7 +99,7 @@ double TransitGraph::getSeparationScore(double inStatPen, double pen,
   double ret = 0;
 
   for (auto n : getNodes()) {
-    ret += n->getSeparationScore(c, inStatPen, pen);
+    ret += n->getSeparationScore(c, inStatPen, pen, true);
   }
 
   return ret;
@@ -249,7 +249,9 @@ Node* TransitGraph::getNearestNode(const Point& p, double maxD) const {
 }
 
 // _____________________________________________________________________________
-size_t TransitGraph::getNumNodes() const { return _nodes.size(); }
+size_t TransitGraph::getNumNodes() const {
+  return getNumNodes(true) + getNumNodes(false);
+}
 
 // _____________________________________________________________________________
 size_t TransitGraph::getNumRoutes() const { return _routes.size(); }
@@ -280,6 +282,7 @@ size_t TransitGraph::getNumEdges() const {
 size_t TransitGraph::getNumNodes(bool topo) const {
   size_t ret = 0;
   for (auto n : _nodes) {
+    if (n->getAdjListIn() .size() + n->getAdjListOut().size() == 0) continue;
     if ((n->getStops().size() == 0) ^ !topo) ret++;
   }
 
@@ -292,7 +295,7 @@ double TransitGraph::getNumPossSolutions() const {
 
   for (auto n : getNodes()) {
     for (auto e : n->getAdjListOut()) {
-      ret *= pbutil::factorial(e->getCardinality());    
+      ret *= pbutil::factorial(e->getCardinality());
     }
   }
 

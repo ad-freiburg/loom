@@ -171,19 +171,22 @@ const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
 // _____________________________________________________________________________
 double Node::getScore(double inStatPen, double sameSegCrossPen,
                       double diffSegCrossPen, double splittingPen,
+                      bool crossAdjPen, bool splitAdjPen,
                       const graph::Configuration& cfg) const {
-  return getCrossingScore(cfg, inStatPen, sameSegCrossPen, diffSegCrossPen) +
-         getSeparationScore(cfg, inStatPen, splittingPen);
+  return getCrossingScore(cfg, inStatPen, sameSegCrossPen, diffSegCrossPen,
+                          crossAdjPen) +
+         getSeparationScore(cfg, inStatPen, splittingPen, splitAdjPen);
 }
 
 // _____________________________________________________________________________
 size_t Node::getNumCrossings(const Configuration& c) const {
-  return getCrossingScore(c, 1, 1, 1);
+  return getCrossingScore(c, 1, 1, 1, false);
 }
 
 // _____________________________________________________________________________
 double Node::getCrossingScore(const Configuration& c, double inStatPen,
-                              double sameSegPen, double diffSegPen) const {
+                              double sameSegPen, double diffSegPen,
+                              bool adjpen) const {
   std::vector<InnerGeometry> igs = getInnerGeometries(c, -1);
   size_t ret = 0;
 
@@ -200,14 +203,16 @@ double Node::getCrossingScore(const Configuration& c, double inStatPen,
       if (iga.to.front == igb.from.front && iga.slotTo == igb.slotFrom)
         continue;
 
-      bool sameSeg = (iga.from.front == igb.from.front && iga.to.front == igb.to.front) ||
-        (iga.to.front == igb.from.front && iga.from.front == igb.to.front);
+      bool sameSeg =
+          (iga.from.front == igb.from.front && iga.to.front == igb.to.front) ||
+          (iga.to.front == igb.from.front && iga.from.front == igb.to.front);
 
       if (pbutil::geo::intersects(
               iga.geom.getLine().front(), iga.geom.getLine().back(),
               igb.geom.getLine().front(), igb.geom.getLine().back()) ||
           bgeo::distance(iga.geom.getLine(), igb.geom.getLine()) < 1) {
-        ret += 1 * getCrossingPenalty(inStatPen, sameSeg ? sameSegPen : diffSegPen);
+        ret += 1 * getCrossingPenalty(
+                       inStatPen, sameSeg ? sameSegPen : diffSegPen, adjpen);
       }
     }
   }
@@ -217,12 +222,12 @@ double Node::getCrossingScore(const Configuration& c, double inStatPen,
 
 // _____________________________________________________________________________
 size_t Node::getNumSeparations(const Configuration& c) const {
-  return getSeparationScore(c, 1, 1);
+  return getSeparationScore(c, 1, 1, false);
 }
 
 // _____________________________________________________________________________
 size_t Node::getSeparationScore(const Configuration& c, double inStatPen,
-                                double pen) const {
+                                double pen, bool adjpen) const {
   size_t ret = 0;
   for (auto nf : getMainDirs()) {
     const Edge* e = nf.edge;
@@ -245,7 +250,7 @@ size_t Node::getSeparationScore(const Configuration& c, double inStatPen,
                           .second) -
                   int(f->getRouteOccWithPosUnder(p.second, c.find(f)->second)
                           .second)) > 1) {
-            ret += 1 * getSplittingPenalty(inStatPen, pen);
+            ret += 1 * getSplittingPenalty(inStatPen, pen, adjpen);
           }
         }
       }
@@ -409,6 +414,7 @@ size_t Node::getConnCardinality() const {
 
 // _____________________________________________________________________________
 void Node::generateStationHull(double d) {
+  if (getMainDirs().size() == 0) return;
   _stationHull = getConvexFrontHull(d, true);
 }
 
@@ -533,8 +539,8 @@ Edge* Node::getEdge(const Node* other) const {
 }
 
 // _____________________________________________________________________________
-int Node::getCrossingPenalty(double inStatPen, double coef) const {
-  coef *= _adjListIn.size() + _adjListOut.size();
+int Node::getCrossingPenalty(double inStatPen, double coef, bool adjpen) const {
+  if (adjpen) coef *= _adjListIn.size() + _adjListOut.size();
 
   if (getStops().size() > 0) {
     return inStatPen * coef;
@@ -544,8 +550,9 @@ int Node::getCrossingPenalty(double inStatPen, double coef) const {
 }
 
 // _____________________________________________________________________________
-int Node::getSplittingPenalty(double inStatPen, double coef) const {
-  coef *= _adjListIn.size() + _adjListOut.size();
+int Node::getSplittingPenalty(double inStatPen, double coef,
+                              bool adjpen) const {
+  if (adjpen) coef *= _adjListIn.size() + _adjListOut.size();
 
   if (getStops().size() > 0) {
     return inStatPen * coef;

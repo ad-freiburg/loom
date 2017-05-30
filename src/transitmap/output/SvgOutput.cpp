@@ -304,7 +304,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       if (c.geoms[i].geom.getLength() > ref.geom.getLength()) ref = c.geoms[i];
     }
 
-    bool raw = true;
+    bool raw = false;
     if (ref.to.front->geom.distTo(ref.from.front->geom) < _cfg->lineWidth * 2) raw = true;;
 
     for (size_t i = 0; i < c.geoms.size(); i++) {

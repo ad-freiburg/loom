@@ -72,6 +72,14 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->renderNodeFronts))
       ->default_value(false),
       "render node fronts as red lines")
+    ("create-core-optim-graph",
+     opts::value<bool>(&(cfg->createCoreOptimGraph))
+      ->default_value(true),
+      "simplify optimization graph prior to optimization")
+    ("use-cbc",
+     opts::value<bool>(&(cfg->useCbc))
+      ->default_value(true),
+      "use the COIN-CBC solver for optimization instead of GLPK")
     ("render-node-circles",
      opts::value<bool>(&(cfg->renderNodeCircles))
       ->default_value(false),

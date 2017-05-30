@@ -20,10 +20,13 @@ using namespace graph;
 int ILPOptimizer::optimize() const {
   // create optim graph
   OptGraph g(_g);
-  g.simplify();
+
+  if (_cfg->createCoreOptimGraph) {
+    g.simplify();
+  }
 
   if (_cfg->outputStats) {
-    LOG(INFO) << "(stats) Stats for core optim graph of '" << _g->getName() << std::endl;
+    LOG(INFO) << "(stats) Stats for optim graph of '" << _g->getName() << std::endl;
     LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
       << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
       << " non-topo)" << std::endl;
@@ -57,7 +60,8 @@ int ILPOptimizer::optimize() const {
   }
 
   LOG(DEBUG) << "Solving problem..." << std::endl;
-  preSolveCoinCbc(lp);
+
+  if (_cfg->useCbc) preSolveCoinCbc(lp);
   solveProblem(lp);
   LOG(DEBUG) << " ... done" << std::endl;
 
@@ -81,12 +85,12 @@ int ILPOptimizer::optimize() const {
 
 // _____________________________________________________________________________
 int ILPOptimizer::getCrossingPenalty(const OptNode* n, int coef) const {
-  return n->node->getCrossingPenalty(_cfg->inStationCrossPenalty,  coef);
+  return n->node->getCrossingPenalty(_cfg->inStationCrossPenalty,  coef, true);
 }
 
 // _____________________________________________________________________________
 int ILPOptimizer::getSplittingPenalty(const OptNode* n, int coef) const {
-  return n->node->getSplittingPenalty(_cfg->inStationCrossPenalty, coef);
+  return n->node->getSplittingPenalty(_cfg->inStationCrossPenalty, coef, true);
 }
 
 // _____________________________________________________________________________
@@ -556,12 +560,10 @@ void ILPOptimizer::solveProblem(glp_prob* lp) const {
   glp_iocp params;
   glp_init_iocp(&params);
   params.presolve = GLP_ON;
-  params.mip_gap = 0.5;
   params.binarize = GLP_ON;
-  params.bt_tech = GLP_BT_BPH;
   params.ps_tm_lim = _cfg->glpkPSTimeLimit;
   params.tm_lim = _cfg->glpkTimeLimit;
-  //  params.fp_heur = _cfg->useGlpkFeasibilityPump ? GLP_ON : GLP_OFF;
+  params.fp_heur = _cfg->useGlpkFeasibilityPump ? GLP_ON : GLP_OFF;
   params.ps_heur = _cfg->useGlpkProximSearch ? GLP_ON : GLP_OFF;
 
   glp_intopt(lp, &params);

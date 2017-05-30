@@ -45,6 +45,10 @@ struct Config {
   bool renderNodeConnections;
   bool expandFronts;
 
+  bool useCbc;
+
+  bool createCoreOptimGraph;
+
   bool useGlpkFeasibilityPump;
   bool useGlpkProximSearch;
   int glpkPSTimeLimit;
