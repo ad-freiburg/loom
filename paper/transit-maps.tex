@@ -6,6 +6,11 @@
 \usepackage{standalone}
 \usepackage{url}
 \usepackage{wrapfig}
+\usepackage{array}
+\usepackage{footmisc}
+\usepackage{footnote}
+
+\makesavenoteenv{table}
 
 \usetikzlibrary{calc,trees,positioning,arrows,chains,shapes.geometric,%
   decorations.pathreplacing,decorations.pathmorphing,shapes,%
@@ -42,7 +47,7 @@ JMU W\"urzburg (Germany)\\
 \maketitle
 
 \begin{abstract}
-	\todo{abstract}
+	\todo{}
 \keywords{computational geometry, graph theory, optimization}
 \end{abstract}
 
@@ -56,6 +61,7 @@ JMU W\"urzburg (Germany)\\
 	\item mention unintuitive hardness of problem: even for a small map like the Freiburg tram network, the total number of possible edge orderings is $1.1272 \times 10^{14}$
 	\item mention that we know of no publication adressing the MCLM or the drawing of metro maps that uses real-world data
 	\item mention that we not only want to generate schematic maps, but maps that resemble the real-world vehicle paths as closely as possible (e.g. to serve as a map overlay)
+	\item mention that transit maps are not only useful for transit, but also to visualize for example flowcharts
 \end{itemize}
 
 %
@@ -64,22 +70,20 @@ JMU W\"urzburg (Germany)\\
 
 In \cite{ben06}, the problem of minimizing intra-edge crossings in transit maps was introduced with the premises of not hiding crossings under station markers for aesthetic reasons. A polynomial time algorithm for the special case of optimizing the layout along a single edge was described. The term metro-line crossing minimization problem (MLCM) was coined in \cite{bek07}. In this paper, optimal layouts for path and tree networks were investigated but arbitrary graphs were left as an open problem. In \cite{arg08}, \cite{nol09}, \cite{arg10}, several variants of MLCM were defined and efficient algorithms were presented for some of those, often with a restriction to planar graphs. In \cite{asq08}, an ILP formulation for MCLM under the periphery condition \todo{explain here?} was introduced. The resulting ILP was shown to have a size of $\mathcal{O}(|L|^2 \cdot |E|)$ with $L$ being the set of metro lines and $E$ the set of edges in the derived graph. In another line of research, it was observed that many (unavoidable) crossings scattered along a single edge are also not visually pleasing, hence the idea to group crossings into block crossing was exploited \cite{fin13b}. The problem of minimizing the number of block crossing was proven to be NP-hard on simple graphs just like the original MCLM problem \cite{fin13a}. As far as we are aware there are no papers on MLCM concerned with real data or containing an experimental evaluation.
 
-The other crucial difference of all these approaches to our work is the strong abstraction from the geometry of the transit map. In all papers listed above, the graph used for optimization is constructed upon the stations which serve as nodes and the transit lines which induce edges between those nodes. But the original embedding of the edges is not taken into account, and crossings are allowed to occur anywhere along the edges (except their endpoints). As we aim for a truthful presentation of vehicle paths in our transit map, we do not ignore the shape of the lines between stations.  Instead, we introduce a new graph model for transit maps where nodes represent topology changes in the embedding and edges represent parallel line segments. This allows us to restrict crossing events to nodes (without hiding them behind station markers!). Our approach resolves some issues with the MLCM model, as e.g. the restricted applicability of some algorithms to planar graphs, and the necessity of artificial grouping of crossings (which happens naturally with our approach).
-
 \todo{mention Anton Dubreaus work here}
 
 %
 \subsection{Contribution}\label{SEC:contrib}
 %
-\begin{itemize}
-	\item We introduce an approach for drawing transit maps that can be used with arbitrary schedules as input data
-	\item ... describe a simple line-sweeping approach to extract the spatial topology graph of a set of (partially overlapping) polylines
-	\item ... describe a baseline ILP for solving the metro line topological crossing problem (MLTCM)
-	\item ... describe a improvied ILP for solving MLTCM and add a simple extension that also minimizes line-separations (MLTCM-S) (handes the crucial case of the periphery problem (MLCM-S))
-	\item ... describe some heuristics for placing inevitable crossings in a asthecitally pleasing way
-	\item ... describe the reduction of the minimization problem to core problem graphs which simplifies the problem
-	\item ... apply our approach to several real-world datasets
-\end{itemize}
+
+We introduce an approach for automated drawing of visually pleasing transit maps that can be used with arbitrary schedule data as input. For medium sized urban rail networks, maps rendering usually only takes a few seconds. A crucial difference of previous approaches to our work is the strong abstraction from the geometry of the transit map. In all the publications listed above, the graph used for optimization is constructed upon the stations which serve as nodes and the transit lines which induce edges between those nodes. But the original embedding of the edges is not taken into account, and crossings are allowed to occur anywhere along the edges (except their endpoints). As we aim for a truthful presentation of vehicle paths in our transit map, we do not ignore the shape of the lines between stations. Instead, we introduce a new graph model for transit maps where nodes represent topology changes in the embedding and edges represent parallel line segments. This allows us to restrict crossing events to nodes (without hiding them behind station markers!). Our approach resolves some issues with the MLCM model, as e.g. the restricted applicability of some algorithms to planar graphs, and the necessity of artificial grouping of crossings (which happens naturally with our approach).
+
+We describe a simple line-sweeping approach to extract this graph from a set of (partially overlapping) vehicle trips as they occur in real-world schedule data. To solve the line-crossing problem in our model, we first describe an intuitive ILP and then develop an improved version of this program. For more aesthetic results, we introduce a line-partner separation criteria and describe an extension to our ILP that also optimizes the number of separations. To further simplify the optimization problem, we give some explicit rules to reduce our graph to an optimality-preserving core problem graph.
+
+We also briefly discuss some heuristics for the placement of inevitable crossings or separations and describe the basic method to render a map from our optimized graph.
+
+Our method is evaluated be running it against several real-world public transit schedules. The rendered maps have been published online\footnote{\url{http://panarea.informatik.uni-freiburg.de/gtfs-lines}}.
+
 
 %
 \subsection{Problem Definition}\label{SEC:def}
@@ -88,7 +92,7 @@ Let $L$ by a set of unique transit lines. We call an undirected graph $T = (V, E
 
 Optionally, we may assign each $v$ a position $p_v \in \mathbb{R}^2$ and each edge $e$ a polygonal chain $\tau_e = (p_1, ..., p_n), p_i \in \mathbb{R}^2$ which describes the geometrical path the edge takes through the plane. For each $e$, we then impose $p_1 = p_u$ and $p_n = p_v$.
 
-\begin{figure}
+\begin{figure}[t]
   \centering
 	\includestandalone[trim={0.5cm 0cm 2.2cm 4.02cm},clip,width=0.44\textwidth]{render_examples/vvs_transit_graph}
 	\hspace{.5cm}
@@ -99,9 +103,9 @@ Optionally, we may assign each $v$ a position $p_v \in \mathbb{R}^2$ and each ed
 
 Our goal is to render $T$ in a way that resembles a modern transit map (Figure~\ref{FIG:transitgraphvvs}). We want to globally optimize the ordering of lines in such a way that single lines can be easily traced through the network. This is usually formulated as the problem of minimizing the number of line crossings in the map and commonly called the Metro Line Crossing Minimization Problem (MLCM).
 
-Classic MLCM assigns each edge $e=(u, v)$ two orderings $e_{u}$ and $e_{v}$ for $L(e)$, one at each node. Line crossings occur somewhere on $e$ if $e_{u} \neq e_{v}$ and crossings inside of nodes are prohibited. We propose an alternative model where only a single ordering is imposed on $L(e)$, meaning the ordering remains the same throughout $e$. This effectively disallows crossings on edges. Instead, we explicitely allow them in nodes (and favor crossings in topological nodes, see Section~\ref{SEC:crossing_placement}). We call this the MLTCM problem, the additional T stands for topological. In our opinion, this model better resembles the way transit maps are drawn manually. In real-world maps, crossings usually occur at positions where the network topology changes and crossings inside of stations are commonly. The model also greatly simplifies the rendering process (Section~\ref{SEC:rendering}), and \todo{other advantages.}
+Classic MLCM assigns each edge $e=(u, v)$ two orderings $e_{u}$ and $e_{v}$ for $L(e)$, one at each node \cite{nol09}. Line crossings occur somewhere on $e$ if $e_{u} \neq e_{v}$ and inevitable crossings inside of nodes are prohibited. We propose an alternative model where only a single ordering is imposed on $L(e)$, meaning the ordering remains the same throughout $e$. This effectively disallows crossings on edges. Instead, we explicitely allow them in nodes (and favor crossings in topological nodes, see Section~\ref{SEC:crossing_placement}). We call this the MLTCM problem, the additional T stands for topological. In our opinion, this model better resembles the way transit maps are drawn manually. In real-world maps, crossings usually occur at positions where the network topology changes and crossings inside of stations are commonly. The model also greatly simplifies the rendering process (Section~\ref{SEC:rendering}).
 
-\todo{simple reduction to show that MLTCM is also NP-complete?}
+MLTCM is reducible to MLCM by transforming every edge $e$ with lines $L(e)$ into a single node $n_e$ with $2|L(e)|$ ports. In the next step, all original nodes are replaced by edges that connect those $n_e$ and $n_f$ for which there existed a continued line from $e$ to $f$ via $n$ in the original graph. Similarily, MLCM can be reduced to MLTCM by replacing each edge with a single node and each node with edges between all adjacent original edges with shared lines. Consequently, MLTCM is also NP-hard.
 
 %
 \section{Network Topology Extraction}\label{SEC:topo}
@@ -211,7 +215,7 @@ The value of $k_{ee'}$ depends on the node where $e$ and $e'$ meet and is set li
 
 \subsection{Preventing Line Partner Separation}\label{SEC:separation}
 So far, we only optimized the number of line crossings. However, consider the example given in Figure~\ref{FIG:linesplitting}, where the ordering with more crossings looks better.
-\begin{figure}
+\begin{figure}[t]
 \centering
 \begin{minipage}{.48\textwidth}
   \centering
@@ -256,17 +260,25 @@ We add $1$ additional constraint per edge in $e$ and a constant number of additi
 %
 \subsection{Core problem graph}\label{SEC:coreprobgraph}
 %
+\begin{figure}[t]
+\centering
+	\includestandalone[width=5.5cm]{tikz/transitgraph_optim}
+	\hspace{0.6cm}
+	\includestandalone[width=4.4cm]{tikz/coreoptimgraph}
+	\caption{Left: transit graph $G$ with $L = \{A, B, C, D, E, F\}$, Right: core optimization graph with highlighted ordering-relevant connected components with more than 1 node; $\{A, B\}$ was collapsed into $\{X\}$.}
+\end{figure}
+
 An inevitable crossing (or separation) between two lines $J$ and $K$ can only occur if there is at least one node $v$ with one of the following properties:
 \begin{enumerate}
 \item $v$ is adjacent to $e : J \not\in L(e) \land K \in L(e')$ and $e' : J \in L(e') \land K \not\in L(e)$. \label{EQ:liaisonnode}
 \item $|{e \in adj(v) : J \in L(e) \land K \in L(e)}| > 2$. \label{EQ:tnode}
 \end{enumerate}
-\begin{proof} If no such node exists, then it holds for all $v \in V$ that $J$ and $K$ either both travel through $v$ on the same two edges or they don't travel together through $v$ at all. In the latter case, no crossing (or separation) can occur and we can thus disregard it, which leaves us only with the former case. But if $J$ and $K$ travel through all nodes together on the same two edges, then the relative order of $j$ and $k$ does not matter anymore - we can just combine $J$ and $K$ into a new line $I$ and assign $J$ and $K$ an arbitrary global ordering.
+\begin{proof} If no such node exists, then it holds for all $v \in V$ that $J$ and $K$ either both travel through $v$ on the same two edges or they don't travel together through $v$ at all. In the latter case, no crossing (or separation) can occur and we can thus disregard it, which leaves us only with the former case. But if $J$ and $K$ travel through all nodes together on the same two edges, then their relative ordering does not matter anymore - we can just combine $J$ and $K$ into a new line $I$ and give them an arbitrary global ordering.
 \end{proof}
 
-We call nodes that comply to (\ref{EQ:liaisonnode}) for a line pair $A = \{J, K\}$ a liaison node for $J$ and $K$ and nodes that comply to (\ref{EQ:tnode})  a T-node for $J$ and $K$. Additionally, we call a node that is a liaison and/or T-node for at least one line pair an intersection node and a node in which one or more lines end a terminus node.
+We call nodes that comply to (\ref{EQ:liaisonnode}) for a line pair $A = \{J, K\}$ a liaison node for $J$ and $K$ and nodes that comply to (\ref{EQ:tnode}) a T-node for $J$ and $K$. Additionally, we call a node that is a liaison and/or T-node for at least one line pair an intersection node and a node in which one or more lines end a terminus node.
 
-Using the above, we can simplify the input graph prior to optimization with the following steps:
+Using the above, we can simplify the input graph prior to optimization using the following steps:
 \begin{enumerate}
 \item collapse lines that always occur together into a single new line
 \item delete each node with degree 2 (adjacent to edges $e = (u, v)$ and $e' = (v, w)$) and $L(e) = L(e')$ and combine $e$ and $e'$ into a single new edge $ee' = (u, w)$ with $L(ee') = L(e) = L(e')$ . Note that such a node can never be a terminus node or an intersection node.
@@ -280,13 +292,6 @@ This core problem graph can be further prepared for optimization by splitting it
 	\item remove each edge $e = (u, v)$ where $u$ and $v$ are termini for all $l \in L(e)$
 \end{enumerate}
 The line-ordering optimization can now be run independently on each connected component of the core problem graph.
-\begin{figure}
-\centering
-	\includestandalone[width=5.5cm]{tikz/transitgraph_optim}
-	\hspace{0.6cm}
-	\includestandalone[width=4.4cm]{tikz/coreoptimgraph}
-	\caption{Left: transit graph $G$ with $L = \{A, B, C, D, E, F\}$, Right: core optimization graph with highlighted ordering-relevant connected components with more than 1 node; $\{A, B\}$ was collapsed into $\{X\}$.}
-\end{figure}
 
 %
 \section{Rendering}\label{SEC:rendering}
@@ -294,9 +299,11 @@ The line-ordering optimization can now be run independently on each connected co
 
 We split the process of rendering a transit graph instance into four steps (Figure~\ref{FIG:renderingproc}). As our graph model imposes only one line ordering per edge $e$, each $l \in L(e)$ can be rendered by perpendicular offsetting the edge's polyline by $-w\left|L(e)\right|/2 + w\left(p-1\right)$, where $w$ is the desired width of a single line and $p \in \left\{1, .. , \left|L(e)\right|\right\}$ the position of $l$ in $e$ (for simplicity, we disregard the spacing between lines here.) We call the perpendicular line segments of length $w\left|L(e)\right|$ that are formed at the beginning and end of $e$ the node fronts of the incident node and the positions of each $l$ on the node front the port of $l$. We make room for the line connections between edges by expanding these fronts.
 
-After the node fronts have been expanded, the line connections in the node can be rendered independently from the edges by connecting the port pairs. In our experiments, we used cubic Bezi\'{e}r curves, but for schematic maps a circular arc or even a straight line might be preferable.
+After the node fronts have been expanded, the line connections in the node can be rendered independently from the edges by connecting all port pairs. In our experiments, we used cubic Bezi\'{e}r curves, but for schematic maps a circular arc or even a straight line might be preferable.
 
-\begin{figure}
+\todo{mention station rendering, convex hull of node fronts}
+
+\begin{figure}[t]
   \centering
 	\includegraphics[width=0.24\textwidth]{render_examples/rendering/render_example1.pdf}
 	\hfill
@@ -315,54 +322,68 @@ After the node fronts have been expanded, the line connections in the node can b
 
 To test our approach, we ran it against the public transit schedules of several cities around the world (Table~\ref{TBL:datasets}). Each dataset was first transformed into a well-formed transit graph using the method described in Section~\ref{SEC:topo}. After that, an edge ordering optimization run was started for each city.
 
-We evaluated the size of the resulting ILP using the baseline approach from Section~\ref{SEC:baseline} as well as the improved version from Section~\ref{SEC:improved}. We also compared the ILPs resulting from the reduced core optimization graph against those generated from the raw transit graph. Each ILP was then given to the GNU Linear Programming Kit (glpk) and the COIN-OR CBC (coin) solver. For the improved approach, we tested each dataset with or without the line separation penalty described in Section~\ref{SEC:separation}.
+We evaluated the size of the resulting ILP using the baseline approach from Section~\ref{SEC:baseline} as well as the improved version from Section~\ref{SEC:improved}. We also compared the ILPs resulting from the reduced core optimization graph against those generated from the raw transit graph. Each ILP was then given to the GNU Linear Programming Kit (glpk) and the COIN-OR CBC (coin) solver. For the improved approach, we tested each dataset with or without the line separation penalty described in Section~\ref{SEC:separation}. Tests were run on an Intel Core i5-6300U machine with 4 cores \`{a} 2.4 Ghz and 12 GB of RAM. The COIN solver was compiled with multithreading support. It was used with the default parameters and \texttt{threads=4}. The glpk solver was used with the feasibility pump heuristic (\texttt{fp\_heur=ON}), the proximity search heuristic (\texttt{ps\_heur=ON}) and the presolver enabled (\texttt{presolve=ON}).
+
+Inside-station crossings added a penalty of $3n$ to the objective function, crossings between line pairs a penalty of $4n$, where $n = |\text{adj}(v)|$ of the node the crossing occured in. The cost for a line separation was set to $4n$.
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
 \begin{table}
 	\centering
 	\footnotesize
-	\begin{tabular*}{1\textwidth}{@{\extracolsep{\fill}} l r r r r r r r r r r}
-							& \multicolumn{5}{ c }{\scriptsize Transit graph} & \multicolumn{5}{ c }{\scriptsize Core optimization graph} \\[-1.4ex]
-							& \multicolumn{5}{ c }{\scriptsize \downbracefill} & \multicolumn{5}{ c }{\scriptsize \downbracefill} \\
-							& $|V_{\sigma=1}|$ & $|V_{\sigma=0}|$ & $|E|$ & $|L|$ & ${|L(e)|}_{\text{max}}$ & $|V|$ & $|E|$ & $|L|$ & ${|L(e)|}_{\text{max}}$ \\[-2.5ex] \\\hline \\[-2ex]
+	\begin{tabular*}{1\textwidth}{@{\extracolsep{\fill}} l r r r r r r r r r}
+							& \multicolumn{5}{ c }{\tiny Transit graph} & \multicolumn{4}{ c }{\tiny Core  optim. graph} \\[-1.4ex]
+							& \multicolumn{5}{ c }{\scriptsize \downbracefill} & \multicolumn{4}{ c }{\scriptsize \downbracefill} \\
+							& $|V_{\sigma=1}|$ & $|V_{\sigma=0}|$ & $|E|$ & $|L|$ & $M$ & $|V|$ & $|E|$ & $|L|$ & $M$ \\\hline \\[-2ex]
 
-		Freiburg Trams		& 100	& 45	 & 5	& 120	& 65	& 65	& 40	& 5		& 4		\\
-		Boston				& 100	& 39	 & 8	& 120	& 12	& 65	& 40	& 5		& 4		\\
-		Chicago				& 54	& 15	 & 3	& 120	& 2		& 65	& 40	& 5		& 4		\\
-		Dallas				& 100	& 457	 & 3	& 120	& 66	& 65	& 40	& 5		& 4		\\
-		San Francisco		& 100	& 45	 & 5	& 120	& 3		& 65	& 40	& 5		& 4		\\
-		NYC Subway			& 2585	& 545	 & 17	& 120	& 8		& 65	& 40	& 5		& 4		\\
-		Manhattan Busses	& 7880	& 145	 & 5	& 120	& 43	& 65	& 40	& 5		& 4		\\
+		Freiburg (Stadtbahn)	& 76	& 6		 & 83	& 5		& 4		& 22	& 23	& 5		& 4		\\
+		Chicago	(`L' Train)		& 143	& 10	 & 154	& 8		& 6		& 23	& 24	& 8		& 6		\\
+		Stuttgart (Stadtbahn)	& 192	& 31	 & 235	& 15	& 8		& 59	& 71	& 15	& 8		\\
+		New York (Subway)		& 456	& 60	 & 546	& 26	& 7		& 124	& 154	& 23	& 7		\\
 		\noalign{\vspace{.8mm}}\hline\noalign{\vspace{1.5mm}}
 	\end{tabular*}
-	\caption[]{Testing datasets and their transit graph after spatial topology extraction \todo{enter real data here}\label{TBL:datasets}}
+	\caption[]{Testing datasets and their transit graph after spatial topology extraction\label{TBL:datasets}}
 \end{table}
 
 \begin{table}
 	\centering
 	\footnotesize
 	\begin{tabular*}{1\textwidth}{@{\extracolsep{\fill}} l r r r r r r r r r r}
-							& \multicolumn{4}{ c }{\scriptsize with graph reduction} & \multicolumn{4}{ c }{\scriptsize without graph reduction} \\[-1.4ex]
+							& \multicolumn{4}{ c }{\tiny without graph reduction} & \multicolumn{4}{ c }{\tiny with graph reduction} \\[-1.4ex]
+							& \multicolumn{4}{ c }{\scriptsize \downbracefill} & \multicolumn{4}{ c }{\scriptsize \downbracefill} \\
+							& rows & cols & $t_\text{glpk}$ & $t_\text{coin}$  & rows & cols & $t_\text{glpk}$ & $t_\text{coin}$ & cross. & sep.\textsuperscript{\textdagger} \\[-2.5ex] \\\hline \\[-2ex]
+
+		Freiburg    		& 4,044	& 354	 & ??	& \textbf{35.57}& 384	& 126	& ??	& \textbf{0.74}		& 5		& 1-22	\\
+		Chicago				& 41,242& 861	 & ??	& \textbf{??}	& 8,272	& 266	& ??	& \textbf{??}		& 6		& 7		\\
+		Stuttgart			& 100	& 45	 & ??	& \textbf{??}	& 3		& 40	& ??	& \textbf{4}		& 6		& 7		\\
+		New York			& 2585	& 545	 & ??	& \textbf{??}	& 8		& 40	& ??	& \textbf{4}		& 6		& 7		\\
+		\noalign{\vspace{.8mm}}\hline\noalign{\vspace{1.5mm}}
+	\end{tabular*}
+	\caption[]{ILPs generated with baseline approach, with or without graph reduction. Solving times with glpk or COIN \todo{enter real data here}\label{TBL:evalres_baseline}}
+\end{table}
+
+\begin{table}
+	\centering
+	\footnotesize
+	\begin{tabular*}{1\textwidth}{@{\extracolsep{\fill}} l r r r r r r r >{\bfseries}r r r}
+							& \multicolumn{4}{ c }{\tiny without graph reduction} & \multicolumn{4}{ c }{\tiny with graph reduction} \\[-1.4ex]
 							& \multicolumn{4}{ c }{\scriptsize \downbracefill} & \multicolumn{4}{ c }{\scriptsize \downbracefill} \\
 							& rows & cols & $t_\text{glpk}$ & $t_\text{coin}$  & rows & cols & $t_\text{glpk}$ & $t_\text{coin}$ & cross. & sep. \\[-2.5ex] \\\hline \\[-2ex]
 
-		Freiburg Trams		& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
-		\hspace{2mm}\scriptsize
-		(with sep. penalty)	& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
-		Boston				& 100	& 39	 & 8	& 120	& 12	& 40	& 5		& 4		& 6		& 7		\\
-							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
-		Chicago				& 54	& 15	 & 3	& 120	& 2		& 40	& 5		& 4		& 6		& 7		\\
-							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
-		Dallas				& 100	& 457	 & 3	& 120	& 66	& 40	& 5		& 4		& 6		& 7		\\
-							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
-		San Francisco		& 100	& 45	 & 5	& 120	& 3		& 40	& 5		& 4		& 6		& 7		\\
-							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
-		NYC Subway			& 2585	& 545	 & 17	& 120	& 8		& 40	& 5		& 4		& 6		& 7		\\
-							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
-		Manhattan Busses	& 7880	& 145	 & 5	& 120	& 43	& 40	& 5		& 4		& 6		& 7		\\
-							& 100	& 45	 & 5	& 120	& 65	& 40	& 5		& 4		& 6		& 7		\\
+		Freiburg 	 		& 654	& 462	 & 0.5		& \textbf{0.08}  & 210	& 162	& 0.3	& \textbf{0.02}	& 5		& 1-2\footnote[2]{Depends on input ordering and solving strategy}	\\ \hspace{2mm}\scriptsize
+		(sep. penalty)	& 906	& 584	 & 4,9		& \textbf{3.55}		& 265	& 188	& 0.5	& \textbf{0.38}	& 7		& 0		\\
+		Chicago				& 1,691	& 1.151	 & 16.6		& \textbf{0.51}		& 484	& 352	& 0.8	& \textbf{0.19}	& 22	& 4-7\textsuperscript{\textdagger}	\\
+							& 2,593	& 1,593	 & ??		& \textbf{23.66}	& 701	& 458	& ??	& \textbf{6.18}	& 27	& 0		\\
+		Stuttgart 			& 5,208	& 3,464	 & ??		& \textbf{3.72}		& 2,042	& 1,438 & 0.9	& \textbf{0.77}	& 68	& 12-13\textsuperscript{\textdagger}		\\
+							& 8,280	& 4,970	 & ??		& \textbf{305.68}	& 3,185	& 1,996	& ??	& \textbf{201.01}	& 71	& 6		\\
+		New York			& 10,091& 6,745	 & ??		& \textbf{2.26}		& 4,350	& 3,012	& ??	& \textbf{1.90}	& 125  	& 10-16\textsuperscript{\textdagger}	\\
+							& 15,534& 9,397	 & ??		& \textbf{326.98}	& 6,703	& 4,160	& ??	& \textbf{58.87}& 128	& 3		\\
 		\noalign{\vspace{.8mm}}\hline\noalign{\vspace{1.5mm}}
 	\end{tabular*}
-	\caption[]{ILPs generated with improved approach, with or without graph reduction and separation penalty. Solving times with glpk or COIN \todo{enter real data here}\label{TBL:evalres}}
+	\caption[]{ILPs generated with improved approach, with or without graph reduction and separation penalty. Solving times with glpk or COIN\label{TBL:evalres_impr}}
 \end{table}
+
+
 
 %
 \section{Future work}
