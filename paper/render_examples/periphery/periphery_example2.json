@@ -1,0 +1,96 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [0, 200],
+        "type": "Point"
+      },
+      "properties": {
+        "id": "A",
+        "station_id" : "A"
+      }
+    },
+    {
+      "geometry": {
+        "coordinates": [300,  200],
+        "type": "Point"
+      },
+      "properties": {
+        "id": "B",
+        "station_id" : "B"
+      },
+      "type": "Feature"
+    },
+	  {
+      "geometry": {
+        "coordinates": [450, 300],
+        "type": "Point"
+      },
+      "properties": {
+        "id": "C",
+        "station_id" : "C"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [600, 173],
+        "type": "Point"
+      },
+      "properties": {
+        "id": "D",
+        "station_id" : "D"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+			[0, 200], [300, 200]
+        ],
+        "type": "LineString"
+      },
+      "properties": {
+        "from": "A",
+        "to": "B",
+        "lines": [
+          {"color": "FF0000"},
+          {"color": "0000FF"},
+          {"color": "00FF00"},          
+          {"color": "f8da00"}
+        ]
+      }
+    },
+    {
+      "geometry": {
+        "coordinates": [
+			[300, 227], [390, 250], [450, 300]
+        ],
+        "type": "LineString"
+      },
+      "properties": {
+        "from": "B",
+        "to": "C",
+        "lines": [
+          {"color": "0000FF"}
+        ]
+      }
+    },
+    {
+      "geometry": {
+        "coordinates": [
+      [300, 163], [600, 163]
+        ],
+        "type": "LineString"
+      },
+      "properties": {
+        "from": "B",
+        "to": "D",
+        "lines": [
+          {"color": "f8da00"}
+        ]
+      }
+    }
+  ]
+}

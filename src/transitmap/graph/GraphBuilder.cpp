@@ -258,7 +258,8 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
       n->addMainDir(f);
     }
 
-    n->generateStationHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8);
+    n->generateStationHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
+        _cfg->simpleRenderForTwoEdgeNodes);
   }
 }
 

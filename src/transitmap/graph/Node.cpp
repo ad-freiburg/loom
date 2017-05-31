@@ -413,19 +413,20 @@ size_t Node::getConnCardinality() const {
 }
 
 // _____________________________________________________________________________
-void Node::generateStationHull(double d) {
+void Node::generateStationHull(double d, bool useSimple) {
   if (getMainDirs().size() == 0) return;
-  _stationHull = getConvexFrontHull(d, true);
+  _stationHull = getConvexFrontHull(d, true, useSimple);
 }
 
 // _____________________________________________________________________________
 Polygon Node::getStationHull() const { return _stationHull; }
 
 // _____________________________________________________________________________
-Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
+Polygon Node::getConvexFrontHull(double d, bool rectangulize,
+    bool simpleRenderForTwoEdgeNodes) const {
   MultiLine l;
 
-  if (getMainDirs().size() != 2) {
+  if (!simpleRenderForTwoEdgeNodes || getMainDirs().size() != 2) {
     for (auto& nf : getMainDirs()) {
       // l.push_back(nf.geom.getLine());
       l.push_back(
@@ -458,7 +459,9 @@ Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
 
     pols.push_back(&a);
     pols.push_back(&b);
-    l.push_back(PolyLine::average(pols).getLine());
+    PolyLine avg = PolyLine::average(pols);
+
+    l.push_back(avg.getLine());
   }
 
   MultiPolygon ret;
@@ -469,7 +472,7 @@ Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
   bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
   bgeo::strategy::buffer::side_straight sideStrat;
 
-  if (l.size() > 1) {
+  if (getMainDirs().size() != 2 && l.size() > 1) {
     Polygon hull;
     bgeo::convex_hull(l, hull);
     if (rectangulize && getMaxNodeFrontCardinality() > 1) {

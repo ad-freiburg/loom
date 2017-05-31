@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg height="22.600000px" width="70.000000px">
+    <defs />
+    <g>
+        <polyline points=" 5,18.75 5,18.75 34.4,18.75" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 5,18.75 5,18.75 34.4,18.75" style="fill:none;stroke:#f8da00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 5,16.25 5,16.25 34.4,16.25" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 5,16.25 5,16.25 34.4,16.25" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 5,13.75 34.4,13.75" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 5,13.75 34.4,13.75" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 5,11.25 34.4,11.25" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 5,11.25 34.4,11.25" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 35,18.85 65,18.85" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 35,18.85 65,18.85" style="fill:none;stroke:#f8da00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 35,16.35 65,16.35" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 35,16.35 65,16.35" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+    </g>
+    <g>
+        <polyline points=" 34.4,16.25 34.9878,16.3499 35,16.35" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 34.4,16.25 34.9878,16.3499 35,16.35" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 34.4,18.75 34.9878,18.8499 35,18.85" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 34.4,18.75 34.9878,18.8499 35,18.85" style="fill:none;stroke:#f8da00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+    </g>
+    <g>
+        <polygon fill="white" points=" 3,18.5 3,11.5 3.03038,11.1527 3.12061,10.816 3.26795,10.5 3.46791,10.2144 3.71442,9.96791 4,9.76795 4.31596,9.62061 4.6527,9.53038 5,9.5 5.3473,9.53038 5.68404,9.62061 6,9.76795 6.28558,9.96791 6.53209,10.2144 6.73205,10.5 6.87939,10.816 6.96962,11.1527 7,11.5 7,11.5 7,18.5 6.96962,18.8473 6.87939,19.184 6.73205,19.5 6.53209,19.7856 6.28558,20.0321 6,20.2321 5.68404,20.3794 5.3473,20.4696 5,20.5 4.6527,20.4696 4.31596,20.3794 4,20.2321 3.71442,20.0321 3.46791,19.7856 3.26795,19.5 3.12061,19.184 3.03038,18.8473 3,18.5" stroke="black" stroke-width="0.75" />
+        <polygon fill="white" points=" 37,16.6 37,18.5 37,18.6 36.9696,18.9473 36.8794,19.284 36.7321,19.6 36.5321,19.8856 36.2856,20.1321 36,20.3321 35.684,20.4794 35.3473,20.5696 35,20.6 34.6527,20.5696 34.316,20.4794 34,20.3321 33.7144,20.1321 33.4679,19.8856 33.2679,19.6 33.1206,19.284 33.0304,18.9473 33,18.6 33,18.5 33,16.6 33,11.5 33.0304,11.1527 33.1206,10.816 33.2679,10.5 33.4679,10.2144 33.7144,9.96791 34,9.76795 34.316,9.62061 34.6527,9.53038 35,9.5 35.3473,9.53038 35.684,9.62061 36,9.76795 36.2856,9.96791 36.5321,10.2144 36.7321,10.5 36.8794,10.816 36.9696,11.1527 37,11.5 37,16.6" stroke="black" stroke-width="0.75" />
+        <polygon fill="white" points=" 67,16.6 67,18.6 66.9696,18.9473 66.8794,19.284 66.7321,19.6 66.5321,19.8856 66.2856,20.1321 66,20.3321 65.684,20.4794 65.3473,20.5696 65,20.6 64.6527,20.5696 64.316,20.4794 64,20.3321 63.7144,20.1321 63.4679,19.8856 63.2679,19.6 63.1206,19.284 63.0304,18.9473 63,18.6 63,18.6 63,16.6 63.0304,16.2527 63.1206,15.916 63.2679,15.6 63.4679,15.3144 63.7144,15.0679 64,14.8679 64.316,14.7206 64.6527,14.6304 65,14.6 65.3473,14.6304 65.684,14.7206 66,14.8679 66.2856,15.0679 66.5321,15.3144 66.7321,15.6 66.8794,15.916 66.9696,16.2527 67,16.6" stroke="black" stroke-width="0.75" />
+    </g>
+</svg>
