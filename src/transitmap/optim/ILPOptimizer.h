@@ -72,6 +72,7 @@ class ILPOptimizer : public Optimizer {
   double getConstraintCoeff(glp_prob* lp, int constraint, int col) const;
 
   std::vector<LinePair> getLinePairs(OptEdge* segment) const;
+  std::vector<LinePair> getLinePairs(OptEdge* segment, bool unique) const;
 
   /*
    * For a node A, and edge e and a pair or routes return all the
