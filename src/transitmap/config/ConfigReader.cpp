@@ -40,6 +40,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
 
   opts::options_description config("Output");
   config.add_options()
+    ("name",
+      opts::value<std::string>(&(cfg->name))
+      ->default_value("shinygraph"),
+      "name of transit graph")
     ("line-width",
       opts::value<double>(&(cfg->lineWidth))
       ->default_value(20),
@@ -68,6 +72,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->renderNodeConnections))
       ->default_value(true),
       "render inner node connections")
+    ("render-edges",
+     opts::value<bool>(&(cfg->renderEdges))
+      ->default_value(true),
+      "render edges")
     ("expand-fronts",
      opts::value<bool>(&(cfg->expandFronts))
       ->default_value(true),
@@ -99,7 +107,11 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     ("output-stats",
       opts::value<bool>(&(cfg->outputStats))
       ->default_value(false),
-      "print some more graph stats")
+      "print some more graph stats to stdout")
+    ("render-stats",
+      opts::value<bool>(&(cfg->renderStats))
+      ->default_value(false),
+      "render stats to output")
     ("collapse-line-partners",
       opts::value<bool>(&(cfg->collapseLinePartners))
       ->default_value(true),

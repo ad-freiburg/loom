@@ -72,6 +72,7 @@ int ILPOptimizer::optimize() const {
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
 	if (!_cfg->useCbc) {
+    _g->setLastSolveTime(duration);
 		LOG(INFO) << " === Solve done in " << duration << " ms ===" << std::endl;
   }
 
@@ -603,6 +604,7 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
 	int r = system(cmd.str().c_str());
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+  _g->setLastSolveTime(duration);
 	LOG(INFO) << " === COIN solve done (ret=" << r << ") in " << duration << " ms ===" << std::endl;
   LOG(INFO) << "Parsing solution..." << std::endl;
 

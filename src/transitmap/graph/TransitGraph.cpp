@@ -9,8 +9,8 @@
 #include "./OrderingConfiguration.h"
 #include "./Route.h"
 #include "./TransitGraph.h"
-#include "pbutil/geo/Geo.h"
 #include "pbutil/Misc.h"
+#include "pbutil/geo/Geo.h"
 
 using pbutil::geo::Point;
 using transitmapper::graph::TransitGraph;
@@ -62,8 +62,8 @@ double TransitGraph::getScore(double inStatPen, double sameSegCrossPen,
   double ret = 0;
 
   for (auto n : getNodes()) {
-    ret +=
-        n->getScore(inStatPen, sameSegCrossPen, diffSegCrossPen, splitPen, true, true, c);
+    ret += n->getScore(inStatPen, sameSegCrossPen, diffSegCrossPen, splitPen,
+                       true, true, c);
   }
 
   return ret;
@@ -82,7 +82,8 @@ double TransitGraph::getCrossScore(double inStatPen, double sameSegCrossPen,
   double ret = 0;
 
   for (auto n : getNodes()) {
-    ret += n->getCrossingScore(c, inStatPen, sameSegCrossPen, diffSegCrossPen, true);
+    ret += n->getCrossingScore(c, inStatPen, sameSegCrossPen, diffSegCrossPen,
+                               true);
   }
 
   return ret;
@@ -147,8 +148,7 @@ void TransitGraph::addNode(Node* n) {
 // _____________________________________________________________________________
 void TransitGraph::expandBBox(const Point& p) {
   bgeo::expand(_bbox, boost::geometry::make<bgeo::model::box<Point>>(
-                          p.get<0>() - 50, p.get<1>() - 50, p.get<0>() + 50,
-                          p.get<1>() + 50));
+                          p.get<0>(), p.get<1>(), p.get<0>(), p.get<1>()));
 }
 
 // _____________________________________________________________________________
@@ -233,6 +233,13 @@ const bgeo::model::box<Point>& TransitGraph::getBoundingBox() const {
 }
 
 // _____________________________________________________________________________
+bgeo::model::box<Point> TransitGraph::getBoundingBox(double p) const {
+  return Box(
+      Point(_bbox.min_corner().get<0>() - p, _bbox.min_corner().get<1>() - p),
+      Point(_bbox.max_corner().get<0>() + p, _bbox.max_corner().get<1>() + p));
+}
+
+// _____________________________________________________________________________
 Node* TransitGraph::getNearestNode(const Point& p, double maxD) const {
   double curD = DBL_MAX;
   ;
@@ -282,7 +289,7 @@ size_t TransitGraph::getNumEdges() const {
 size_t TransitGraph::getNumNodes(bool topo) const {
   size_t ret = 0;
   for (auto n : _nodes) {
-    if (n->getAdjListIn() .size() + n->getAdjListOut().size() == 0) continue;
+    if (n->getAdjListIn().size() + n->getAdjListOut().size() == 0) continue;
     if ((n->getStops().size() == 0) ^ !topo) ret++;
   }
 
@@ -300,4 +307,14 @@ double TransitGraph::getNumPossSolutions() const {
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+double TransitGraph::getLastSolveTime() const {
+  return _lastSolveTime;
+}
+
+// _____________________________________________________________________________
+void TransitGraph::setLastSolveTime(double t) const {
+  _lastSolveTime = t;
 }

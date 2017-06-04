@@ -107,6 +107,9 @@ class SvgOutput : public Output {
   std::vector<std::map<uintptr_t, std::vector<OutlinePrintPair> > > _innerDelegates;
   std::vector<EndMarker> _markers;
 
+  void renderStats(const graph::TransitGraph& outG, double solveTime,
+    const RenderParams& rparams);
+
   void outputNodes(const graph::TransitGraph& outputGraph,
                    const RenderParams& params);
   void outputEdges(const graph::TransitGraph& outputGraph,

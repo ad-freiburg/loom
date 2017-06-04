@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 
   if (true) {
     LOG(INFO) << "reading graph " << std::endl;
-    graph::TransitGraph g("shinygraph", cfg.projectionString);
+    graph::TransitGraph g(cfg.name, cfg.projectionString);
     graph::GraphBuilder b(&cfg);
     if (!b.build(&(std::cin), &g)) {
       exit(1);
@@ -151,6 +151,44 @@ int main(int argc, char** argv) {
       svgOut.print(g);
     }
 
+    if (cfg.renderMethod == "svg_sep") {
+      {
+        std::string path = cfg.outputPath + "/edges.svg";
+        cfg.renderEdges = 1;
+        cfg.renderStations = 0;
+        cfg.renderNodeConnections = 0;
+        LOG(INFO) << "Outputting edge SVG to " << path << " ..." << std::endl;
+        std::ofstream o;
+        o.open(path);
+        output::SvgOutput svgOut(&o, &cfg);
+        svgOut.print(g);
+      }
+
+      {
+        std::string path = cfg.outputPath + "/nodes.svg";
+        cfg.renderEdges = 0;
+        cfg.renderStations = 0;
+        cfg.renderNodeConnections = 1;
+        LOG(INFO) << "Outputting node SVG to " << path << " ..." << std::endl;
+        std::ofstream o;
+        o.open(path);
+        output::SvgOutput svgOut(&o, &cfg);
+        svgOut.print(g);
+      }
+
+      {
+        std::string path = cfg.outputPath + "/stations.svg";
+        cfg.renderEdges = 0;
+        cfg.renderStations = 1;
+        cfg.renderNodeConnections = 0;
+        LOG(INFO) << "Outputting station SVG to " << path << " ..." << std::endl;
+        std::ofstream o;
+        o.open(path);
+        output::SvgOutput svgOut(&o, &cfg);
+        svgOut.print(g);
+      }
+    }
+
     if (!cfg.worldFilePath.empty()) {
       LOG(INFO) << "Writing world file for this map to " << cfg.worldFilePath << std::endl;
 
@@ -161,9 +199,9 @@ int main(int argc, char** argv) {
                 << 0 << std::endl
                 << 0 << std::endl
                 << -1 / cfg.outputResolution << std::endl
-                << std::fixed << g.getBoundingBox().min_corner().get<0>()
+                << std::fixed << g.getBoundingBox((cfg.lineWidth + cfg.lineSpacing) / cfg.outputResolution).min_corner().get<0>()
                 << std::endl
-                << g.getBoundingBox().max_corner().get<1>() << std::endl;
+                << g.getBoundingBox((cfg.lineWidth + cfg.lineSpacing) / cfg.outputResolution).max_corner().get<1>() << std::endl;
         file.close();
       }
     }

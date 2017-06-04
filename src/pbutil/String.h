@@ -5,10 +5,10 @@
 #ifndef PBUTIL_STRING_H_
 #define PBUTIL_STRING_H_
 
-#include <vector>
-#include <string>
 #include <cstring>
 #include <sstream>
+#include <string>
+#include <vector>
 
 namespace pbutil {
 
@@ -18,7 +18,7 @@ inline std::string urlDecode(const std::string& encoded) {
   for (size_t i = 0; i < encoded.size(); ++i) {
     char c = encoded[i];
     if (c == '%') {
-      std::string ah = encoded.substr(i+1, 2);
+      std::string ah = encoded.substr(i + 1, 2);
       char* nonProced = 0;
       char hexVal = strtol(ah.c_str(), &nonProced, 16);
 
@@ -26,7 +26,9 @@ inline std::string urlDecode(const std::string& encoded) {
         c = hexVal;
         i += 2;
       }
-    } else if (c == '+') { c = ' '; }
+    } else if (c == '+') {
+      c = ' ';
+    }
     decoded += c;
   }
   return decoded;
@@ -49,7 +51,7 @@ inline std::string jsonStringEscape(const std::string& unescaped) {
 
 // _____________________________________________________________________________
 inline bool replace(std::string& subj, const std::string& from,
-  const std::string& to) {
+                    const std::string& to) {
   if (from.empty()) return false;
   size_t start_pos = subj.find(from);
   if (start_pos != std::string::npos) {
@@ -62,7 +64,7 @@ inline bool replace(std::string& subj, const std::string& from,
 
 // _____________________________________________________________________________
 inline bool replaceAll(std::string& subj, const std::string& from,
-  const std::string& to) {
+                       const std::string& to) {
   bool found = false;
   if (from.empty()) return found;
   size_t s = subj.find(from, 0);
@@ -75,14 +77,20 @@ inline bool replaceAll(std::string& subj, const std::string& from,
 }
 
 // _____________________________________________________________________________
-template<typename T>
+inline std::string unixBasename(const std::string& pathname) {
+  return {std::find_if(pathname.rbegin(), pathname.rend(),
+                       [](char c) { return c == '/'; })
+              .base(),
+          pathname.end()};
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline std::string toString(T obj) {
   std::stringstream ss;
   ss << obj;
   return ss.str();
 }
-
 }
-
 
 #endif  // PBUTIL_STRING_H_

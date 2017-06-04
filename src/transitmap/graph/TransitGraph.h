@@ -46,6 +46,7 @@ class TransitGraph {
 
   projPJ getProjection() const;
   const bgeo::model::box<Point>& getBoundingBox() const;
+  bgeo::model::box<Point> getBoundingBox(double p) const;
 
   double getScore(double inStatPen, double sameSegCrossPen,
                   double diffSegCrossPen, double splitPen) const;
@@ -85,11 +86,15 @@ class TransitGraph {
   size_t getMaxCardinality() const;
 
   const std::string& getName() const;
+  double getLastSolveTime() const;
+  void setLastSolveTime(double t) const;
 
  private:
   std::string _name;
   std::set<Node*> _nodes;
   std::map<std::string, const Route*> _routes;
+
+  mutable double _lastSolveTime;
 
   Configuration _config;
 

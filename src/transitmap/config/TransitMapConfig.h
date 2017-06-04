@@ -14,6 +14,7 @@ struct Config {
   double lineWidth;
   double lineSpacing;
 
+  std::string name;
   std::string projectionString;
   std::string outputPath;
 
@@ -39,8 +40,10 @@ struct Config {
   bool renderNodeFronts;
   bool renderNodeCircles;
   bool renderStationNames;
+  bool renderEdges;
 
   bool outputStats;
+  bool renderStats;
   bool collapseLinePartners;
   bool renderNodeConnections;
   bool expandFronts;
