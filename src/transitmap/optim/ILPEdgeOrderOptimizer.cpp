@@ -193,7 +193,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
       // iterate over all possible line pairs in this segment
       for (LinePair linepair : getLinePairs(segment, true)) {
         if (_cfg->splittingOpt && c > 2) {
-        std::stringstream ss;
+          std::stringstream ss;
           // variable to check if distance between position of A and position
           // of B is > 1
           size_t dist1Var = glp_add_cols(lp, 1);
@@ -470,13 +470,13 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
               aNearBL1Str << "x_(" << segmentA->getStrRepr() << "," << linepair.first
                       << "<T>" << linepair.second << ")";
               aNearBinL1 = glp_find_col(lp, aNearBL1Str.str().c_str());
+              assert(aNearBinL1);
 
               std::stringstream aNearBL2Str;
               aNearBL2Str << "x_(" << segmentB->getStrRepr() << "," << linepair.first
                       << "<T>" << linepair.second << ")";
               aNearBinL2 = glp_find_col(lp, aNearBL2Str.str().c_str());
-
-              assert(aNearBinL1 && aNearBinL2);
+              assert(aNearBinL2);
 
               std::stringstream rowTName;
               rowTName << "sum_decT(e1=" << segmentA->getStrRepr()

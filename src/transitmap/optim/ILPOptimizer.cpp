@@ -555,7 +555,11 @@ std::vector<LinePair> ILPOptimizer::getLinePairs(OptEdge* segment, bool unique) 
       if (unique && processed.find(toB.route) != processed.end()) continue;
       if (toB.route->relativeTo()) continue;
       if (toA.route == toB.route) continue;
-      ret.push_back(LinePair(toA.route, toB.route));
+
+      // this is to make sure that we always get the same line pairs in unique
+      // mode -> take the smaller pointer first
+      if (!unique || toA.route < toB.route) ret.push_back(LinePair(toA.route, toB.route));
+      else ret.push_back(LinePair(toB.route, toA.route));
     }
   }
   return ret;
