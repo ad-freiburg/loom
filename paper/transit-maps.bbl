@@ -32,6 +32,13 @@ Marc Benkert, Martin N{\"o}llenburg, Takeaki Uno, and Alexander Wolff.
 \newblock In {\em International Symposium on Graph Drawing}, pages 270--281.
   Springer, 2006.
 
+\bibitem{dub16}
+Anton Dubreau.
+\newblock {Transit Maps: Apple vs. Google vs. Us}.
+\newblock
+  \url{https://medium.com/transit-app/transit-maps-apple-vs-google-vs-us-cb3d7cd2c362},
+  2016.
+
 \bibitem{fin13a}
 Martin Fink and Sergey Pupyrev.
 \newblock Metro-line crossing minimization: Hardness, approximations, and

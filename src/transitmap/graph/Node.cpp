@@ -490,16 +490,17 @@ size_t Node::getConnCardinality() const {
 }
 
 // _____________________________________________________________________________
-void Node::generateStationHull(double d) {
+void Node::generateStationHull(double d, bool useSimple) {
   if (getMainDirs().size() == 0) return;
-  _stationHull = getConvexFrontHull(d, true);
+  _stationHull = getConvexFrontHull(d, true, useSimple);
 }
 
 // _____________________________________________________________________________
 Polygon Node::getStationHull() const { return _stationHull; }
 
 // _____________________________________________________________________________
-Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
+Polygon Node::getConvexFrontHull(double d, bool rectangulize,
+    bool simpleRenderForTwoEdgeNodes) const {
   double cd = d;
 
   MultiPolygon ret;
@@ -510,7 +511,7 @@ Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
   bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
   bgeo::strategy::buffer::side_straight sideStrat;
 
-  if (getMainDirs().size() != 2) {
+  if (!simpleRenderForTwoEdgeNodes || getMainDirs().size() != 2) {
     MultiLine l;
     for (auto& nf : getMainDirs()) {
       l.push_back(

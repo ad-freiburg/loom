@@ -49,6 +49,7 @@ struct Config {
   bool useCbc;
 
   bool createCoreOptimGraph;
+  bool simpleRenderForTwoEdgeNodes;
 
   bool useGlpkFeasibilityPump;
   bool useGlpkProximSearch;

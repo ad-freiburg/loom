@@ -90,7 +90,7 @@ int ILPOptimizer::getCrossingPenalty(const OptNode* n, int coef) const {
 
 // _____________________________________________________________________________
 int ILPOptimizer::getSplittingPenalty(const OptNode* n, int coef) const {
-  return n->node->getSplittingPenalty(_cfg->inStationCrossPenalty, coef, true);
+  return n->node->getSplittingPenalty(_cfg->inStationCrossPenalty, coef, true) * 2;
 }
 
 // _____________________________________________________________________________
@@ -541,12 +541,18 @@ std::vector<EdgePair> ILPOptimizer::getEdgePartnerPairs(
 
 // _____________________________________________________________________________
 std::vector<LinePair> ILPOptimizer::getLinePairs(OptEdge* segment) const {
+  return getLinePairs(segment, false);
+}
+
+// _____________________________________________________________________________
+std::vector<LinePair> ILPOptimizer::getLinePairs(OptEdge* segment, bool unique) const {
   std::set<const Route*> processed;
   std::vector<LinePair> ret;
   for (auto& toA : *segment->etgs[0].etg->getTripsUnordered()) {
     if (toA.route->relativeTo()) continue;
     processed.insert(toA.route);
     for (auto& toB : *segment->etgs[0].etg->getTripsUnordered()) {
+      if (unique && processed.find(toB.route) != processed.end()) continue;
       if (toB.route->relativeTo()) continue;
       if (toA.route == toB.route) continue;
       ret.push_back(LinePair(toA.route, toB.route));

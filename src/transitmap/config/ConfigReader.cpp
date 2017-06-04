@@ -104,6 +104,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<bool>(&(cfg->collapseLinePartners))
       ->default_value(true),
       "collapse line partners")
+    ("simple-station-render-heur",
+      opts::value<bool>(&(cfg->simpleRenderForTwoEdgeNodes))
+      ->default_value(true),
+      "if a station only has 2 incident edges, dont calculate hull")
     ("optim-method",
       opts::value<std::string>(&(cfg->optimMethod))
       ->default_value("ilp_impr"),

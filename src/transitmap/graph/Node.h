@@ -120,9 +120,9 @@ class Node {
 
   size_t getConnCardinality() const;
 
-  Polygon getConvexFrontHull(double d, bool rectangulize) const;
+  Polygon getConvexFrontHull(double d, bool rectangulize, bool simple) const;
 
-  void generateStationHull(double d);
+  void generateStationHull(double d, bool useSimple);
 
   Polygon getStationHull() const;
 
