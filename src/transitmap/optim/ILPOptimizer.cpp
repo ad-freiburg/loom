@@ -5,6 +5,7 @@
 #include <glpk.h>
 #include <cstdio>
 #include <fstream>
+#include <chrono>
 #include "./../graph/OrderingConfiguration.h"
 #include "./../output/OgrOutput.h"
 #include "./ILPOptimizer.h"
@@ -61,9 +62,18 @@ int ILPOptimizer::optimize() const {
 
   LOG(DEBUG) << "Solving problem..." << std::endl;
 
-  if (_cfg->useCbc) preSolveCoinCbc(lp);
+  if (_cfg->useCbc) {
+    preSolveCoinCbc(lp);
+  }
+
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
   solveProblem(lp);
-  LOG(DEBUG) << " ... done" << std::endl;
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+	if (!_cfg->useCbc) {
+		LOG(INFO) << " === Solve done in " << duration << " ms ===" << std::endl;
+  }
 
   LOG(INFO) << "(stats) ILP obj = " << glp_mip_obj_val(lp) << std::endl;
 
@@ -587,10 +597,13 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
   std::stringstream cmd;
   LOG(INFO) << "Calling external solver CBC..." << std::endl;
-  cmd << "/home/patrick/repos/Cbc-2.9/build/bin/cbc " << f
-      << " -threads 4 -printingOptions all -solve -solution " << outf << "";
-  int r = system(cmd.str().c_str());
-  LOG(INFO) << "Solver exited (" << r << ")" << std::endl;
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	cmd << "/home/patrick/repos/Cbc-2.9/build/bin/cbc " << f
+			<< " -threads 4 -printingOptions all -solve -solution " << outf << "";
+	int r = system(cmd.str().c_str());
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	LOG(INFO) << " === COIN solve done (ret=" << r << ") in " << duration << " ms ===" << std::endl;
   LOG(INFO) << "Parsing solution..." << std::endl;
 
   std::ifstream fin;
