@@ -59,10 +59,23 @@ inline Geometry rotate(const Geometry& geo, double deg) {
   return rotate(geo, deg, center);
 }
 
+// _____________________________________________________________________________
+template <typename Geometry>
+inline Geometry move(const Geometry& geo, double x, double y) {
+  Geometry ret;
+  bgeo::strategy::transform::translate_transformer<double, 2, 2> translate(x, y);
+  bgeo::transform(geo, ret, translate);
+  return ret;
+}
+
 // TODO: outfactor
 
 struct RotatedBox {
   RotatedBox(const Box& b, double rot, const Point& center) : b(b), rotateDeg(rot), center(center) {}
+  RotatedBox(const Box& b, double rot) : b(b), rotateDeg(rot) {
+    bgeo::centroid(b, center);
+  }
+
   Box b;
   double rotateDeg;
   Point center;
@@ -73,6 +86,20 @@ struct RotatedBox {
     return rotate(hull, rotateDeg, center);
   }
 };
+
+// _____________________________________________________________________________
+inline RotatedBox shrink(const RotatedBox& b, double d) {
+  double xd = b.b.max_corner().get<0>() - b.b.min_corner().get<0>();
+  double yd = b.b.max_corner().get<1>() - b.b.min_corner().get<1>();
+
+  if (xd <= 2 * d) d = xd / 2 - 1;
+  if (yd <= 2 * d) d = yd / 2 - 1;
+
+  Box r(Point(b.b.min_corner().get<0>() + d, b.b.min_corner().get<1>() + d),
+        Point(b.b.max_corner().get<0>() - d, b.b.max_corner().get<1>() - d));
+
+  return RotatedBox(r, b.rotateDeg, b.center);
+}
 
 // _____________________________________________________________________________
 inline bool doubleEq(double a, double b) { return fabs(a - b) < 0.000001; }
@@ -348,9 +375,41 @@ inline RotatedBox getOrientedEnvelope(Geometry pol) {
 }
 
 // _____________________________________________________________________________
+template <typename Geometry>
+inline RotatedBox getFullEnvelope(Geometry pol) {
+  Point center;
+  bgeo::centroid(pol, center);
+
+  Box tmpBox;
+  bgeo::envelope(pol, tmpBox);
+  double rotateDeg = 0;
+
+  MultiPolygon ml;
+
+  // rotate in 5 deg steps
+  for (int i = 1; i < 360; i += 1) {
+    pol = rotate(pol, 1, center);
+    Polygon hull;
+    bgeo::convex_hull(pol, hull);
+    ml.push_back(hull);
+    Box e;
+    bgeo::envelope(pol, e);
+    if (bgeo::area(tmpBox) > bgeo::area(e)) {
+      tmpBox = e;
+      rotateDeg = i;
+    }
+  }
+
+  bgeo::envelope(ml, tmpBox);
+
+  return RotatedBox(tmpBox, rotateDeg, center);
+}
+
+// _____________________________________________________________________________
 inline RotatedBox getOrientedEnvelopeAvg(MultiLine ml) {
+  MultiLine orig = ml;
   // get oriented envelope for hull
-  RotatedBox rbox = getOrientedEnvelope(ml);
+  RotatedBox rbox = getFullEnvelope(ml);
   Point center;
   bgeo::centroid(rbox.b, center);
 
@@ -369,6 +428,23 @@ inline RotatedBox getOrientedEnvelopeAvg(MultiLine ml) {
   }
 
   rbox.rotateDeg += bestDeg;
+
+  double STEP = 2;
+
+
+  // move the box along 45deg angles from its origin until it fits the ml
+  // = until the intersection of its hull and the box is largest
+  Polygon p = rbox.getPolygon();
+  p = rotate(p, -rbox.rotateDeg, rbox.center);
+
+  Polygon hull;
+  bgeo::convex_hull(orig, hull);
+  hull = rotate(hull, -rbox.rotateDeg, rbox.center);
+
+  Box box;
+  bgeo::envelope(hull, box);
+  rbox = RotatedBox(box, rbox.rotateDeg, rbox.center);
+
   return rbox;
 }
 

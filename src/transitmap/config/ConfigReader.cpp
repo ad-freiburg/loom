@@ -56,6 +56,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->renderStations))
       ->default_value(true),
       "render station geometries")
+    ("dont-expand-stations",
+     opts::value<bool>(&(cfg->dontExpandStations))
+      ->default_value(true),
+      "dont expand node fronts for station rendering")
     ("render-station-names",
      opts::value<bool>(&(cfg->renderStationNames))
       ->default_value(false),
@@ -168,6 +172,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<std::string>(&(cfg->glpkSolutionOutputPath))
       ->default_value(""),
       "output path for ILP solution. If empty, no output will be generated.")
+    ("world-file-path",
+      opts::value<std::string>(&(cfg->worldFilePath))
+      ->default_value(""),
+      "if set, output world file of rendered map to this location")
   ;
 
   opts::options_description cmdlineOptions;

@@ -32,11 +32,19 @@ struct NodeFront {
   Node* n;  // pointer to node here also
 
   Point getTripOccPos(const Route* r, const Configuration& c) const;
+  Point getTripOccPos(const Route* r, const Configuration& c, bool originGeom) const;
   Point getTripPos(const Edge* e, size_t pos, bool inv) const;
+  Point getTripPos(const Edge* e, size_t pos, bool inv, bool originGeom) const;
 
   Edge* edge;
 
+  // geometry after expansion
   PolyLine geom;
+
+  // geometry before expansion
+  PolyLine origGeom;
+
+  void setInitialGeom(const PolyLine& g) { geom = g; origGeom=g; };
   void setGeom(const PolyLine& g) { geom = g; };
 
   // TODO
@@ -44,6 +52,8 @@ struct NodeFront {
 };
 
 struct Partner {
+  Partner()
+      : front(0), edge(0), route(0){};
   Partner(const NodeFront* f, const Edge* e, const Route* r)
       : front(f), edge(e), route(r){};
   const NodeFront* front;
@@ -160,6 +170,11 @@ class Node {
   InnerGeometry getInnerStraightLine(const Configuration& c,
                                      const graph::Partner& partnerFrom,
                                      const graph::Partner& partnerTo) const;
+  InnerGeometry getTerminusStraightLine(
+    const Configuration& c, const graph::Partner& partnerFrom) const;
+  InnerGeometry getTerminusBezier(
+    const Configuration& c, const graph::Partner& partnerFrom, double prec) const;
+
   friend class TransitGraph;
 };
 }

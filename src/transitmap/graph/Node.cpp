@@ -23,12 +23,19 @@ using pbutil::geo::Line;
 // _____________________________________________________________________________
 Point NodeFront::getTripOccPos(const Route* r,
                                const graph::Configuration& c) const {
+  return getTripOccPos(r, c, false);
+}
+
+// _____________________________________________________________________________
+Point NodeFront::getTripOccPos(const Route* r,
+                               const graph::Configuration& c,
+                               bool origGeom) const {
   RouteOccWithPos rop;
 
   rop = edge->getRouteOccWithPosUnder(r, c.find(edge)->second);
 
   if (rop.first) {
-    return getTripPos(edge, rop.second, n == edge->getTo());
+    return getTripPos(edge, rop.second, n == edge->getTo(), origGeom);
   }
 
   throw std::runtime_error("route does not occur in this edge");
@@ -36,6 +43,11 @@ Point NodeFront::getTripOccPos(const Route* r,
 
 // _____________________________________________________________________________
 Point NodeFront::getTripPos(const Edge* e, size_t pos, bool inv) const {
+  return getTripPos(e, pos, inv, false);
+}
+
+// _____________________________________________________________________________
+Point NodeFront::getTripPos(const Edge* e, size_t pos, bool inv, bool origG) const {
   double p;
   if (!inv) {
     p = (e->getWidth() + e->getSpacing()) * pos + e->getWidth() / 2;
@@ -45,7 +57,11 @@ Point NodeFront::getTripPos(const Edge* e, size_t pos, bool inv) const {
   }
 
   // use interpolate here directly for speed
-  return geom.interpolate(geom.getLine().front(), geom.getLine().back(), p);
+  if (origG) {
+    return origGeom.interpolate(origGeom.getLine().front(), origGeom.getLine().back(), p);
+  } else {
+    return geom.interpolate(geom.getLine().front(), geom.getLine().back(), p);
+  }
 }
 
 // _____________________________________________________________________________
@@ -265,6 +281,8 @@ std::set<Edge*> Node::getAdjList() const {
   std::set<Edge*> ret;
   ret.insert(getAdjListIn().begin(), getAdjListIn().end());
   ret.insert(getAdjListOut().begin(), getAdjListOut().end());
+
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -316,11 +334,38 @@ std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
         }
       }
 
+      // handle lines where this node is the terminus
+      if (partners.size() == 0) {
+        if (prec > 0) {
+          ret.push_back(getTerminusBezier(c, o, prec));
+        } else {
+          ret.push_back(getTerminusStraightLine(c, o));
+        }
+      }
+
       processed[routeOcc.route].insert(&nf);
     }
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+InnerGeometry Node::getTerminusStraightLine(
+    const Configuration& c, const graph::Partner& partnerFrom) const {
+  Point p = partnerFrom.front->getTripOccPos(partnerFrom.route, c, false);
+  Point pp = partnerFrom.front->getTripOccPos(partnerFrom.route, c, true);
+
+  size_t s = partnerFrom.edge
+                 ->getRouteOccWithPosUnder(partnerFrom.route,
+                                           c.find(partnerFrom.edge)->second)
+                 .second;
+  size_t ss = partnerFrom.edge
+                  ->getRouteOccWithPosUnder(partnerFrom.route,
+                                            c.find(partnerFrom.edge)->second)
+                  .second;
+
+  return InnerGeometry(PolyLine(p, pp), partnerFrom, Partner(), s, ss);
 }
 
 // _____________________________________________________________________________
@@ -340,6 +385,38 @@ InnerGeometry Node::getInnerStraightLine(
                   .second;
 
   return InnerGeometry(PolyLine(p, pp), partnerFrom, partnerTo, s, ss);
+}
+
+// _____________________________________________________________________________
+InnerGeometry Node::getTerminusBezier(const Configuration& cf,
+                                   const graph::Partner& partnerFrom,
+                                   double prec) const {
+  InnerGeometry ret = getTerminusStraightLine(cf, partnerFrom);
+  Point p = ret.geom.getLine().front();
+  Point pp = ret.geom.getLine().back();
+  double d = pbutil::geo::dist(p, pp) / 2;
+
+  Point b = p;
+  Point c = pp;
+  std::pair<double, double> slopeA, slopeB;
+
+  assert(partnerFrom.front->edge->getGeom().getLength() > 5);
+
+  if (partnerFrom.front->edge->getTo() == this) {
+    slopeA = partnerFrom.front->edge->getGeom().getSlopeBetweenDists(
+        partnerFrom.front->edge->getGeom().getLength() - 5,
+        partnerFrom.front->edge->getGeom().getLength());
+  } else {
+    slopeA = partnerFrom.front->edge->getGeom().getSlopeBetweenDists(5, 0);
+  }
+
+  b = Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
+  c = Point(pp.get<0>(), pp.get<1>());
+
+  BezierCurve bc(p, b, c, pp);
+  ret.geom = bc.render(prec);
+
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -423,29 +500,56 @@ Polygon Node::getStationHull() const { return _stationHull; }
 
 // _____________________________________________________________________________
 Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
-  MultiLine l;
+  double cd = d;
+
+  MultiPolygon ret;
+  double pointsPerCircle = 36;
+  bgeo::strategy::buffer::distance_symmetric<double> distanceStrat(d);
+  bgeo::strategy::buffer::join_round joinStrat(pointsPerCircle);
+  bgeo::strategy::buffer::end_round endStrat(pointsPerCircle);
+  bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
+  bgeo::strategy::buffer::side_straight sideStrat;
 
   if (getMainDirs().size() != 2) {
+    MultiLine l;
     for (auto& nf : getMainDirs()) {
-      // l.push_back(nf.geom.getLine());
       l.push_back(
           nf.geom
-              .getSegment((d / 2) / nf.geom.getLength(),
-                          (nf.geom.getLength() - d / 2) / nf.geom.getLength())
+              .getSegment((cd / 2) / nf.geom.getLength(),
+                          (nf.geom.getLength() - cd / 2) / nf.geom.getLength())
               .getLine());
     }
+
+    Polygon hull;
+    bgeo::convex_hull(l, hull);
+
+    if (rectangulize && getMaxNodeFrontCardinality() > 1) {
+      MultiLine ll;
+      for (auto& nf : getMainDirs()) {
+        ll.push_back(nf.geom.getLine());
+      }
+      Polygon env = pbutil::geo::shrink(pbutil::geo::getOrientedEnvelopeAvg(ll), cd / 2).getPolygon();
+
+      double incr = (bgeo::area(env) / bgeo::area(hull)) - 1;
+      if (ll.size() < 5 || incr < 0.5) {
+        hull = env;
+      }
+    }
+
+    bgeo::buffer(hull, ret, distanceStrat, sideStrat, joinStrat, endStrat,
+                 circleStrat);
   } else {
     // for two main dirs, take average
     std::vector<const PolyLine*> pols;
 
     PolyLine a = getMainDirs()[0].geom.getSegment(
-        (d / 2) / getMainDirs()[0].geom.getLength(),
-        (getMainDirs()[0].geom.getLength() - d / 2) /
+        (cd / 2) / getMainDirs()[0].geom.getLength(),
+        (getMainDirs()[0].geom.getLength() - cd / 2) /
             getMainDirs()[0].geom.getLength());
 
     PolyLine b = getMainDirs()[1].geom.getSegment(
-        (d / 2) / getMainDirs()[1].geom.getLength(),
-        (getMainDirs()[1].geom.getLength() - d / 2) /
+        (cd / 2) / getMainDirs()[1].geom.getLength(),
+        (getMainDirs()[1].geom.getLength() - cd / 2) /
             getMainDirs()[1].geom.getLength());
 
     assert(a.getLine().size() > 1);
@@ -458,32 +562,8 @@ Polygon Node::getConvexFrontHull(double d, bool rectangulize) const {
 
     pols.push_back(&a);
     pols.push_back(&b);
-    l.push_back(PolyLine::average(pols).getLine());
-  }
 
-  MultiPolygon ret;
-  double pointsPerCircle = 36;
-  bgeo::strategy::buffer::distance_symmetric<double> distanceStrat(d);
-  bgeo::strategy::buffer::join_round joinStrat(pointsPerCircle);
-  bgeo::strategy::buffer::end_round endStrat(pointsPerCircle);
-  bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
-  bgeo::strategy::buffer::side_straight sideStrat;
-
-  if (l.size() > 1) {
-    Polygon hull;
-    bgeo::convex_hull(l, hull);
-    if (rectangulize && getMaxNodeFrontCardinality() > 1) {
-      Polygon env = pbutil::geo::getOrientedEnvelopeAvg(l).getPolygon();
-      double incr = (bgeo::area(env) / bgeo::area(hull)) - 1;
-      if (bgeo::area(env) < d * d * 36 && (l.size() < 5 || incr < 0.5)) {
-        hull = env;
-      }
-    }
-
-    bgeo::buffer(hull, ret, distanceStrat, sideStrat, joinStrat, endStrat,
-                 circleStrat);
-  } else {
-    bgeo::buffer(l, ret, distanceStrat, sideStrat, joinStrat, endStrat,
+    bgeo::buffer(PolyLine::average(pols).getLine(), ret, distanceStrat, sideStrat, joinStrat, endStrat,
                  circleStrat);
   }
 

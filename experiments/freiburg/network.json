@@ -991,21 +991,6 @@
     {
       "geometry": {
         "coordinates": [
-          868664.237873828,
-          6105951.64555408
-        ],
-        "type": "Point"
-      },
-      "properties": {
-        "id": "0x3da13d0",
-        "station_id": "de:8311:30601:0:2",
-        "station_label": "Am Lindenwäldle"
-      },
-      "type": "Feature"
-    },
-    {
-      "geometry": {
-        "coordinates": [
           869079.976840027,
           6106447.6980051
         ],
@@ -1090,21 +1075,6 @@
         "id": "0x3da8990",
         "station_id": "Parent30715",
         "station_label": "VAG-Zentrum"
-      },
-      "type": "Feature"
-    },
-    {
-      "geometry": {
-        "coordinates": [
-          871811.002085577,
-          6108475.46633167
-        ],
-        "type": "Point"
-      },
-      "properties": {
-        "id": "0x3dabf00",
-        "station_id": "de:8311:30807:0:2",
-        "station_label": "Elsässer Straße"
       },
       "type": "Feature"
     },
@@ -4476,6 +4446,10 @@
           [
             868661.302658582,
             6105953.23433378
+          ],
+          [
+            868708.116861529,
+            6105942.06208516
           ]
         ],
         "type": "LineString"
@@ -4494,7 +4468,7 @@
             "label": "5"
           }
         ],
-        "to": "0x3da13d0"
+        "to": "0x3d9e6b0"
       },
       "type": "Feature"
     },
@@ -7262,38 +7236,6 @@
       "geometry": {
         "coordinates": [
           [
-            868708.116861529,
-            6105942.06208516
-          ],
-          [
-            868667.173089073,
-            6105950.05677438
-          ]
-        ],
-        "type": "LineString"
-      },
-      "properties": {
-        "from": "0x3d9e6b0",
-        "lines": [
-          {
-            "color": "0000ff",
-            "id": "0x1a92130",
-            "label": "5"
-          },
-          {
-            "color": "ff8000",
-            "id": "0x1a924f0",
-            "label": "3"
-          }
-        ],
-        "to": "0x3da13d0"
-      },
-      "type": "Feature"
-    },
-    {
-      "geometry": {
-        "coordinates": [
-          [
             872353.714065673,
             6104242.39410886
           ],
@@ -9338,33 +9280,6 @@
           }
         ],
         "to": "0x3dac380"
-      },
-      "type": "Feature"
-    },
-    {
-      "geometry": {
-        "coordinates": [
-          [
-            871816.412625974,
-            6108480.56733639
-          ],
-          [
-            871811.002085577,
-            6108475.46633167
-          ]
-        ],
-        "type": "LineString"
-      },
-      "properties": {
-        "from": "0x3db0c20",
-        "lines": [
-          {
-            "color": "ff33ff",
-            "id": "0x1a925b0",
-            "label": "4"
-          }
-        ],
-        "to": "0x3dabf00"
       },
       "type": "Feature"
     },

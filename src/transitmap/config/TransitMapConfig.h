@@ -44,6 +44,7 @@ struct Config {
   bool collapseLinePartners;
   bool renderNodeConnections;
   bool expandFronts;
+  bool dontExpandStations;
 
   bool useCbc;
 
@@ -57,6 +58,8 @@ struct Config {
   double crossPenMultiSameSeg;
   double crossPenMultiDiffSeg;
   double splitPenWeight;
+
+  std::string worldFilePath;
 };
 
 }  // namespace config

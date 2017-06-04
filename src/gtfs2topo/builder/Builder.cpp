@@ -622,7 +622,7 @@ Node* Builder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel, Graph* g) {
                               g->getProjection());
 
   if (aggrLevel > 1) {
-    n = g->getNearestNode(p, 100);
+    n = g->getNearestNode(p, 60);
   }
 
   if (n) {

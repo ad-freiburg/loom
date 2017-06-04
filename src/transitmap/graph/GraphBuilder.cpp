@@ -250,14 +250,19 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
         pl.reverse();
       }
 
-      f.setGeom(pl);
+      f.setInitialGeom(pl);
 
       // initial free
       // freeNodeFront(&f);
 
       n->addMainDir(f);
     }
+  }
+}
 
+// _____________________________________________________________________________
+void GraphBuilder::writeStationGeoms(TransitGraph* graph) {
+  for (auto n : *graph->getNodes()) {
     n->generateStationHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8);
   }
 }
@@ -471,24 +476,13 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
 
-      if ((true || n->getStops().size() == 0) && nodeFrontsOverlap(fa, fb)) {
+      if (nodeFrontsOverlap(fa, fb)) {
         if (fa.edge->getGeom().getLength() > minLength &&
-            fa.geom.distTo(n->getPos()) < 2 * n->getMaxNodeFrontWidth()) {
+            fa.geom.distTo(n->getPos()) < 2.5 * n->getMaxNodeFrontWidth()) {
           ret.insert(const_cast<NodeFront*>(&fa));
         }
         if (fb.edge->getGeom().getLength() > minLength &&
-            fb.geom.distTo(n->getPos()) < 2 * n->getMaxNodeFrontWidth()) {
-          ret.insert(const_cast<NodeFront*>(&fb));
-        }
-      } else if ((n->getStops().size() > 0 &&
-           fa.geom.distTo(fb.geom) <
-               (fa.edge->getSpacing() + fb.edge->getSpacing()) / 2)) {
-        if (fa.edge->getGeom().getLength() > minLength &&
-            fa.geom.distTo(n->getPos()) < minLength) {
-          ret.insert(const_cast<NodeFront*>(&fa));
-        }
-        if (fb.edge->getGeom().getLength() > minLength &&
-            fb.geom.distTo(n->getPos()) < minLength) {
+            fb.geom.distTo(n->getPos()) < 2.5 * n->getMaxNodeFrontWidth()) {
           ret.insert(const_cast<NodeFront*>(&fb));
         }
       }

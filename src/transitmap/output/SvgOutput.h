@@ -122,9 +122,10 @@ class SvgOutput : public Output {
                        const RenderParams& params);
 
   void renderLinePart(const PolyLine p, double width, const graph::Route& route,
-                      const Nullable<style::LineStyle> style);
+                      const graph::Edge* e, const Nullable<style::LineStyle> style);
 
   void renderLinePart(const PolyLine p, double width, const graph::Route& route,
+                      const graph::Edge* edge,
                       const std::string& endMarker,
                       const Nullable<style::LineStyle> style);
 

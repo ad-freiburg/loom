@@ -66,8 +66,16 @@ int main(int argc, char** argv) {
     LOG(INFO) << "Creating node fronts..." << std::endl;
     b.writeMainDirs(&g);
 
+    if (cfg.dontExpandStations) {
+      b.writeStationGeoms(&g);
+    }
+
     if (cfg.expandFronts) {
       b.expandOverlappinFronts(&g);
+    }
+
+    if (!cfg.dontExpandStations) {
+      b.writeStationGeoms(&g);
     }
 
     b.createMetaNodes(&g);
@@ -143,15 +151,22 @@ int main(int argc, char** argv) {
       svgOut.print(g);
     }
 
-    LOG(INFO) << "World file for this map: " << std::endl << std::endl;
+    if (!cfg.worldFilePath.empty()) {
+      LOG(INFO) << "Writing world file for this map to " << cfg.worldFilePath << std::endl;
 
-    std::cout << 1 / cfg.outputResolution << std::endl
-              << 0 << std::endl
-              << 0 << std::endl
-              << -1 / cfg.outputResolution << std::endl
-              << std::fixed << g.getBoundingBox().min_corner().get<0>()
-              << std::endl
-              << g.getBoundingBox().max_corner().get<1>() << std::endl;
+      std::ofstream file;
+      file.open(cfg.worldFilePath);
+      if (file) {
+        file << 1 / cfg.outputResolution << std::endl
+                << 0 << std::endl
+                << 0 << std::endl
+                << -1 / cfg.outputResolution << std::endl
+                << std::fixed << g.getBoundingBox().min_corner().get<0>()
+                << std::endl
+                << g.getBoundingBox().max_corner().get<1>() << std::endl;
+        file.close();
+      }
+    }
   } else if (false) {
     PolyLine a;
     PolyLine b;

@@ -40,6 +40,7 @@ class GraphBuilder {
   void expandOverlappinFronts(TransitGraph* g);
   void writeInitialConfig(TransitGraph* g);
   void createMetaNodes(TransitGraph* g);
+  void writeStationGeoms(TransitGraph* graph);
 
  private:
   const config::Config* _cfg;

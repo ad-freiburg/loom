@@ -191,9 +191,37 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG,
 // _____________________________________________________________________________
 void SvgOutput::outputEdges(const graph::TransitGraph& outG,
                             const RenderParams& rparams) {
-  for (graph::Node* n : outG.getNodes()) {
-    for (graph::Edge* e : n->getAdjListOut()) {
-      renderEdgeTripGeom(outG, e, rparams);
+  struct cmp {
+    bool operator() (const graph::Node* lhs, const graph::Node* rhs) const{
+      return lhs->getAdjList().size() > rhs->getAdjList().size() ||
+        (lhs->getAdjList().size() == rhs->getAdjList().size() && lhs->getConnCardinality() > rhs->getConnCardinality()) ||
+        (lhs->getAdjList().size() == rhs->getAdjList().size() && lhs > rhs);
+    }
+  };
+
+  struct cmpEdge {
+    bool operator() (const graph::Edge* lhs, const graph::Edge* rhs) const{
+      return lhs->getCardinality() < rhs->getCardinality() ||
+        (lhs->getCardinality() == rhs->getCardinality() && lhs < rhs);
+    }
+  };
+
+  std::set<const graph::Node*, cmp> nodesOrdered;
+  std::set<const graph::Edge*, cmpEdge> edgesOrdered;
+  for (const graph::Node* n : outG.getNodes()) {
+    nodesOrdered.insert(n);
+  }
+
+  std::set<const graph::Edge*> rendered;
+
+  for (const graph::Node* n : nodesOrdered) {
+    edgesOrdered.insert(n->getAdjListIn().begin(), n->getAdjListIn().end());
+    edgesOrdered.insert(n->getAdjListOut().begin(), n->getAdjListOut().end());
+
+    for (const graph::Edge* e : edgesOrdered) {
+      if (rendered.insert(e).second) {
+        renderEdgeTripGeom(outG, e, rparams);
+      }
     }
   }
 }
@@ -305,7 +333,13 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
     }
 
     bool raw = false;
-    if (ref.to.front->geom.distTo(ref.from.front->geom) < _cfg->lineWidth * 2) raw = true;;
+    if (ref.geom.getLength() < _cfg->lineWidth * 2) {
+      raw = true;;
+    }
+
+    if (ref.geom.getLength() < _cfg->lineWidth) {
+      // continue;
+    }
 
     for (size_t i = 0; i < c.geoms.size(); i++) {
       PolyLine pl = c.geoms[i].geom;
@@ -347,13 +381,15 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
 // _____________________________________________________________________________
 void SvgOutput::renderLinePart(const PolyLine p, double width,
                                const graph::Route& route,
+                               const graph::Edge* edge,
                                const Nullable<style::LineStyle> style) {
-  renderLinePart(p, width, route, "", style);
+  renderLinePart(p, width, route, edge,  "", style);
 }
 
 // _____________________________________________________________________________
 void SvgOutput::renderLinePart(const PolyLine p, double width,
                                const graph::Route& route,
+                               const graph::Edge* edge,
                                const std::string& endMarker,
                                const Nullable<style::LineStyle> style) {
   std::stringstream styleOutline;
@@ -398,7 +434,11 @@ void SvgOutput::renderLinePart(const PolyLine p, double width,
   Params params;
   params["style"] = styleStr.str();
 
-  _delegates[0].push_back(OutlinePrintPair(
+  /*
+   * _delegates[reinterpret_cast<std::uintptr_t>(edge)].push_back(OutlinePrintPair(
+   *     PrintDelegate(params, p), PrintDelegate(paramsOutline, p)));
+   */
+  _delegates[0].insert(_delegates[0].begin(), OutlinePrintPair(
       PrintDelegate(params, p), PrintDelegate(paramsOutline, p)));
 }
 
@@ -454,7 +494,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
     const graph::Route* route = ro.route;
     PolyLine p = center;
 
-    if (p.getLength() < _cfg->lineWidth / 2) continue;
+    if (p.getLength() < 0.01) continue;
 
     double offset = -(o - oo / 2.0 - e->getWidth() / 2.0);
 
@@ -495,23 +535,22 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
           p.getLength() / 2 + arrowLength / 2, p.getLength());
 
       if (ro.direction == e->getTo()) {
-        renderLinePart(firstPart, lineW, *route, markerName.str() + "_m",
+        renderLinePart(firstPart, lineW, *route, e, markerName.str() + "_m",
                        ro.style);
-        renderLinePart(secondPart.getReversed(), lineW, *route,
+        renderLinePart(secondPart.getReversed(), lineW, *route, e,
                        markerName.str() + "_f", ro.style);
       } else {
-        renderLinePart(firstPart, lineW, *route, markerName.str() + "_f",
+        renderLinePart(firstPart, lineW, *route, e, markerName.str() + "_f",
                        ro.style);
-        renderLinePart(secondPart.getReversed(), lineW, *route,
+        renderLinePart(secondPart.getReversed(), lineW, *route, e,
                        markerName.str() + "_m", ro.style);
       }
     } else {
-      renderLinePart(p, lineW, *route, ro.style);
+      renderLinePart(p, lineW, *route, e, ro.style);
     }
 
     a++;
 
-    // break;
     o -= offsetStep;
   }
 }
@@ -548,7 +587,7 @@ void SvgOutput::renderDelegates(const graph::TransitGraph& outG,
     _w.openTag("g");
     for (auto& b : a) {
       for (auto& pd : b.second) {
-         printLine(pd.back.second, pd.back.first, rparams);
+        printLine(pd.back.second, pd.back.first, rparams);
         //printLine(
         //    pd.back.second.getSegmentAtDist(
         //        rparams.width * _cfg->outputResolution, pd.back.second.getLength() - rparams.width),
