@@ -64,7 +64,7 @@ maps/%: %/network.json
 	inkscape $@/export/network.svg  --export-pdf=$@/export/network.pdf
 
 	# z16
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=10 --line-spacing=5 -o $@/z16/ --world-file-path=$@/z16/network_e.pngw  --resolution=0.4
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=10 --line-spacing=5 -o $@/z16/ --world-file-path=$@/z16/network_e.pngw  --resolution=0.5
 	cp $@/z16/network_e.pngw $@/z16/network_s.pngw
 	cp $@/z16/network_e.pngw $@/z16/network_n.pngw
 	inkscape $@/z16/edges.svg --export-png=$@/z16/network_e.png
@@ -75,7 +75,7 @@ maps/%: %/network.json
 	python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_n.png $@/nodes
 
 	# z15
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=20 --line-spacing=10 -o $@/z15/ --world-file-path=$@/z15/network_e.pngw  --resolution=0.2
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=20 --line-spacing=10 -o $@/z15/ --world-file-path=$@/z15/network_e.pngw  --resolution=0.25
 	cp $@/z15/network_e.pngw $@/z15/network_s.pngw
 	cp $@/z15/network_e.pngw $@/z15/network_n.pngw
 	inkscape $@/z15/edges.svg --export-png=$@/z15/network_e.png
@@ -87,7 +87,7 @@ maps/%: %/network.json
 
 
 	# z14
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=40 --line-spacing=20 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.1
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=40 --line-spacing=20 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.125
 	cp $@/z14/network_e.pngw $@/z14/network_s.pngw
 	cp $@/z14/network_e.pngw $@/z14/network_n.pngw
 	inkscape $@/z14/edges.svg --export-png=$@/z14/network_e.png
@@ -99,7 +99,7 @@ maps/%: %/network.json
 
 
 	# z13
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=70 --line-spacing=35 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.05
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=70 --line-spacing=35 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.075
 	cp $@/z13/network_e.pngw $@/z13/network_s.pngw
 	cp $@/z13/network_e.pngw $@/z13/network_n.pngw
 	inkscape $@/z13/edges.svg --export-png=$@/z13/network_e.png
@@ -111,7 +111,7 @@ maps/%: %/network.json
 
 
 	# z12
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=90 --line-spacing=40 -o $@/z12/ --world-file-path=$@/z12/network_e.pngw  --resolution=0.025
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=90 --line-spacing=40 -o $@/z12/ --world-file-path=$@/z12/network_e.pngw  --resolution=0.03
 	cp $@/z12/network_e.pngw $@/z12/network_s.pngw
 	cp $@/z12/network_e.pngw $@/z12/network_n.pngw
 	inkscape $@/z12/edges.svg --export-png=$@/z12/network_e.png
@@ -123,7 +123,7 @@ maps/%: %/network.json
 
 
 	# z11
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=170 --line-spacing=70 -o $@/z11/ --world-file-path=$@/z11/network_e.pngw  --resolution=0.0125
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=170 --line-spacing=70 -o $@/z11/ --world-file-path=$@/z11/network_e.pngw  --resolution=0.015
 	cp $@/z11/network_e.pngw $@/z11/network_s.pngw
 	cp $@/z11/network_e.pngw $@/z11/network_n.pngw
 	inkscape $@/z11/edges.svg --export-png=$@/z11/network_e.png
