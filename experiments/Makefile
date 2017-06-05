@@ -61,15 +61,15 @@ maps/%: %/network.json
 
 	# the reference used for download as3
 	cat $< | $(TRANSITMAP_BIN) --coin-cbc-binary=$(CBC_BIN) --outline-width=3 --render-stats=1 --line-width=20 --line-spacing=10 -o $@/export/network.svg --glpk-mps-output-path=$@/export/network.mps --world-file-path=$@/export/  --resolution=0.1 --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --name=$(shell basename $@ | tr /a-z/ /A-Z/) --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
-	inkscape $@/export/network.svg --export-dpi=96 --export-pdf=$@/export/network.pdf
+	inkscape $@/export/network.svg  --export-pdf=$@/export/network.pdf
 
 	# z16
 	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=10 --line-spacing=5 -o $@/z16/ --world-file-path=$@/z16/network_e.pngw  --resolution=0.4
 	cp $@/z16/network_e.pngw $@/z16/network_s.pngw
 	cp $@/z16/network_e.pngw $@/z16/network_n.pngw
-	inkscape $@/z16/edges.svg --export-png=$@/z16/network_e.png --export-dpi=96
-	inkscape $@/z16/nodes.svg --export-png=$@/z16/network_n.png --export-dpi=96
-	inkscape $@/z16/stations.svg --export-png=$@/z16/network_s.png --export-dpi=96
+	inkscape $@/z16/edges.svg --export-png=$@/z16/network_e.png
+	inkscape $@/z16/nodes.svg --export-png=$@/z16/network_n.png
+	inkscape $@/z16/stations.svg --export-png=$@/z16/network_s.png
 	python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_n.png $@/nodes
@@ -78,9 +78,9 @@ maps/%: %/network.json
 	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=20 --line-spacing=10 -o $@/z15/ --world-file-path=$@/z15/network_e.pngw  --resolution=0.2
 	cp $@/z15/network_e.pngw $@/z15/network_s.pngw
 	cp $@/z15/network_e.pngw $@/z15/network_n.pngw
-	inkscape $@/z15/edges.svg --export-png=$@/z15/network_e.png --export-dpi=96
-	inkscape $@/z15/nodes.svg --export-png=$@/z15/network_n.png --export-dpi=96
-	inkscape $@/z15/stations.svg --export-png=$@/z15/network_s.png --export-dpi=96
+	inkscape $@/z15/edges.svg --export-png=$@/z15/network_e.png
+	inkscape $@/z15/nodes.svg --export-png=$@/z15/network_n.png
+	inkscape $@/z15/stations.svg --export-png=$@/z15/network_s.png
 	python scripts/gdal2tilesp.py -w none -z 15 -s EPSG:4326 $@/z15/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 15 -s EPSG:4326 $@/z15/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 15 -s EPSG:4326 $@/z15/network_n.png $@/nodes
@@ -90,9 +90,9 @@ maps/%: %/network.json
 	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=40 --line-spacing=20 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.1
 	cp $@/z14/network_e.pngw $@/z14/network_s.pngw
 	cp $@/z14/network_e.pngw $@/z14/network_n.pngw
-	inkscape $@/z14/edges.svg --export-png=$@/z14/network_e.png --export-dpi=96
-	inkscape $@/z14/nodes.svg --export-png=$@/z14/network_n.png --export-dpi=96
-	inkscape $@/z14/stations.svg --export-png=$@/z14/network_s.png --export-dpi=96
+	inkscape $@/z14/edges.svg --export-png=$@/z14/network_e.png
+	inkscape $@/z14/nodes.svg --export-png=$@/z14/network_n.png
+	inkscape $@/z14/stations.svg --export-png=$@/z14/network_s.png
 	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z14/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z14/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z14/network_n.png $@/nodes
@@ -102,9 +102,9 @@ maps/%: %/network.json
 	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=70 --line-spacing=35 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.05
 	cp $@/z13/network_e.pngw $@/z13/network_s.pngw
 	cp $@/z13/network_e.pngw $@/z13/network_n.pngw
-	inkscape $@/z13/edges.svg --export-png=$@/z13/network_e.png --export-dpi=96
-	inkscape $@/z13/nodes.svg --export-png=$@/z13/network_n.png --export-dpi=96
-	inkscape $@/z13/stations.svg --export-png=$@/z13/network_s.png --export-dpi=96
+	inkscape $@/z13/edges.svg --export-png=$@/z13/network_e.png
+	inkscape $@/z13/nodes.svg --export-png=$@/z13/network_n.png
+	inkscape $@/z13/stations.svg --export-png=$@/z13/network_s.png
 	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z13/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z13/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z13/network_n.png $@/nodes
@@ -114,9 +114,9 @@ maps/%: %/network.json
 	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=90 --line-spacing=40 -o $@/z12/ --world-file-path=$@/z12/network_e.pngw  --resolution=0.025
 	cp $@/z12/network_e.pngw $@/z12/network_s.pngw
 	cp $@/z12/network_e.pngw $@/z12/network_n.pngw
-	inkscape $@/z12/edges.svg --export-png=$@/z12/network_e.png --export-dpi=96
-	inkscape $@/z12/nodes.svg --export-png=$@/z12/network_n.png --export-dpi=96
-	inkscape $@/z12/stations.svg --export-png=$@/z12/network_s.png --export-dpi=96
+	inkscape $@/z12/edges.svg --export-png=$@/z12/network_e.png
+	inkscape $@/z12/nodes.svg --export-png=$@/z12/network_n.png
+	inkscape $@/z12/stations.svg --export-png=$@/z12/network_s.png
 	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z12/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z12/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z12/network_n.png $@/nodes
@@ -126,9 +126,9 @@ maps/%: %/network.json
 	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=170 --line-spacing=70 -o $@/z11/ --world-file-path=$@/z11/network_e.pngw  --resolution=0.0125
 	cp $@/z11/network_e.pngw $@/z11/network_s.pngw
 	cp $@/z11/network_e.pngw $@/z11/network_n.pngw
-	inkscape $@/z11/edges.svg --export-png=$@/z11/network_e.png --export-dpi=96
-	inkscape $@/z11/nodes.svg --export-png=$@/z11/network_n.png --export-dpi=96
-	inkscape $@/z11/stations.svg --export-png=$@/z11/network_s.png --export-dpi=96
+	inkscape $@/z11/edges.svg --export-png=$@/z11/network_e.png
+	inkscape $@/z11/nodes.svg --export-png=$@/z11/network_n.png
+	inkscape $@/z11/stations.svg --export-png=$@/z11/network_s.png
 
 	# something is not right with multi-zoomlevel tile generationin parallel version, create them separately
 	python scripts/gdal2tilesp.py -w none -z 11 -s EPSG:4326 $@/z11/network_e.png $@/edges
