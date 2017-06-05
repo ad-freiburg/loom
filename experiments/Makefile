@@ -5,7 +5,7 @@ SPLITTING_OPTIM := 1
 CBC := 1
 CBC_BIN := /home/patrick/repos/Cbc-2.9/build/bin/cbc
 
-MAPS := maps/freiburg maps/boston maps/chicago maps/dallas maps/nyc_subway maps/stuttgart
+MAPS := maps/freiburg maps/chicago maps/stuttgart maps/turin maps/nyc_subway maps/busses_manhattan maps/dallas maps/boston
 
 PARAMS := --coin-cbc-binary=$(CBC_BIN) --render-station-names=1 --glpk-time-limit=100000000 --output-stats=1  --render-node-fronts=1
 RPARAMS := --coin-cbc-binary=$(CBC_BIN) --outline-width=1 --render-edges=0 --render-station-names=0 --glpk-time-limit=100000000 --output-stats=0  --render-node-fronts=0 --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
