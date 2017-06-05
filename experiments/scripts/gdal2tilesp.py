@@ -1214,7 +1214,7 @@ gdal2tiles temp.vrt""" % self.input )
 				if ti % self.options.processes != cpu:
 					continue
 
-				print("@ " + str(ti) + "/" + str(tcount) + "(" + str(ti*100/tcount) + ")%\n")
+				print("Thread # " + str(cpu) + " @ " + str(ti) + "/" + str(tcount) + "(~" + str(ti*100/tcount) + "%)\n")
 
 				if self.options.output_cache == 'xyz':
 					ty_final = (2**tz - 1) - ty
@@ -1372,7 +1372,7 @@ gdal2tiles temp.vrt""" % self.input )
 						print("Tile generation skiped because of --resume")
 					continue
 
-				print("@ " + str(ti) + "/" + str(tcount) + "(~" + str(ti*100/tcount) + "%)\n")
+				print("Thread # " + str(cpu) + " @ " + str(ti) + "/" + str(tcount) + "(~" + str(ti*100/tcount) + "%)\n")
 
 				# Create directories for the tile
 				if not os.path.exists(os.path.dirname(tilefilename)):
