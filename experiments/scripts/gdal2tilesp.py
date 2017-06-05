@@ -1211,8 +1211,10 @@ gdal2tiles temp.vrt""" % self.input )
 					break
 				ti += 1
 
-				if (ti - 1) % self.options.processes != cpu:
+				if ti % self.options.processes != cpu:
 					continue
+
+				print("@ " + str(ti) + "/" + str(tcount) + "(" + str(ti*100/tcount) + ")%\n")
 
 				if self.options.output_cache == 'xyz':
 					ty_final = (2**tz - 1) - ty
@@ -1220,11 +1222,6 @@ gdal2tiles temp.vrt""" % self.input )
 					ty_final = ty
 
 				tilefilename = os.path.join(self.output, str(tz), str(tx), "%s.%s" % (ty_final, self.tileext))
-				if self.options.verbose:
-					print(ti,'/',tcount, tilefilename) #, "( TileMapService: z / x / y )"
-
-
-				print("@ " + str(ti) + "/" + str(tcount) + "(" + str(ti*100/tcount) + ")%\n")
 
 				if self.options.resume and os.path.exists(tilefilename):
 					if self.options.verbose:
@@ -1359,7 +1356,7 @@ gdal2tiles temp.vrt""" % self.input )
 
 				ti += 1
 
-				if (ti - 1) % self.options.processes != cpu:
+				if ti % self.options.processes != cpu:
 					continue
 
 
