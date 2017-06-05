@@ -478,9 +478,6 @@ class GDAL2Tiles(object):
 		# Opening and preprocessing of the input file
 		self.open_input()
 
-		# Generation of main metadata files and HTML viewers
-		self.generate_metadata()
-
 		# Generation of the lowest tiles
 		self.generate_base_tiles()
 
@@ -1088,91 +1085,6 @@ gdal2tiles temp.vrt""" % self.input )
 				self.tileswne = rastertileswne
 			else:
 				self.tileswne = lambda x, y, z: (0,0,0,0)
-
-	# -------------------------------------------------------------------------
-	def generate_metadata(self):
-		"""Generation of main metadata files and HTML viewers (metadata related to particular tiles are generated during the tile processing)."""
-
-		if not os.path.exists(self.output):
-			if not os.path.exists(os.path.dirname(self.output)):
-				try:
-					os.makedirs(os.path.dirname(self.output))
-				except OSError as exc:
-					if exc.errno == errno.EEXIST and os.path.isdir(self.output):
-				 		pass
-
-		if self.options.profile == 'mercator':
-
-			south, west = self.mercator.MetersToLatLon( self.ominx, self.ominy)
-			north, east = self.mercator.MetersToLatLon( self.omaxx, self.omaxy)
-			south, west = max(-85.05112878, south), max(-180.0, west)
-			north, east = min(85.05112878, north), min(180.0, east)
-			self.swne = (south, west, north, east)
-
-			# Generate googlemaps.html
-			if self.options.webviewer in ('all','google') and self.options.profile == 'mercator':
-				if not self.options.resume or not os.path.exists(os.path.join(self.output, 'googlemaps.html')):
-					f = open(os.path.join(self.output, 'googlemaps.html'), 'w')
-					f.write( self.generate_googlemaps() )
-					f.close()
-
-			# Generate openlayers.html
-			if self.options.webviewer in ('all','openlayers'):
-				if not self.options.resume or not os.path.exists(os.path.join(self.output, 'openlayers.html')):
-					f = open(os.path.join(self.output, 'openlayers.html'), 'w')
-					f.write( self.generate_openlayers() )
-					f.close()
-
-		elif self.options.profile == 'geodetic':
-
-			west, south = self.ominx, self.ominy
-			east, north = self.omaxx, self.omaxy
-			south, west = max(-90.0, south), max(-180.0, west)
-			north, east = min(90.0, north), min(180.0, east)
-			self.swne = (south, west, north, east)
-
-			# Generate openlayers.html
-			if self.options.webviewer in ('all','openlayers'):
-				if not self.options.resume or not os.path.exists(os.path.join(self.output, 'openlayers.html')):
-					f = open(os.path.join(self.output, 'openlayers.html'), 'w')
-					f.write( self.generate_openlayers() )
-					f.close()
-
-		elif self.options.profile == 'raster':
-
-			west, south = self.ominx, self.ominy
-			east, north = self.omaxx, self.omaxy
-
-			self.swne = (south, west, north, east)
-
-			# Generate openlayers.html
-			if self.options.webviewer in ('all','openlayers'):
-				if not self.options.resume or not os.path.exists(os.path.join(self.output, 'openlayers.html')):
-					f = open(os.path.join(self.output, 'openlayers.html'), 'w')
-					f.write( self.generate_openlayers() )
-					f.close()
-
-
-		# Generate tilemapresource.xml.
-		if not self.options.resume or not os.path.exists(os.path.join(self.output, 'tilemapresource.xml')):
-			f = open(os.path.join(self.output, 'tilemapresource.xml'), 'w')
-			f.write( self.generate_tilemapresource())
-			f.close()
-
-		if self.kml:
-			# TODO: Maybe problem for not automatically generated tminz
-			# The root KML should contain links to all tiles in the tminz level
-			children = []
-			xmin, ymin, xmax, ymax = self.tminmax[self.tminz]
-			for x in range(xmin, xmax+1):
-				for y in range(ymin, ymax+1):
-					children.append( [ x, y, self.tminz ] )
-			# Generate Root KML
-			if self.kml:
-				if not self.options.resume or not os.path.exists(os.path.join(self.output, 'doc.kml')):
-					f = open(os.path.join(self.output, 'doc.kml'), 'w')
-					f.write( self.generate_kml( None, None, None, children) )
-					f.close()
 
 	# -------------------------------------------------------------------------
 	def generate_base_tiles(self, cpu):
@@ -2299,7 +2211,6 @@ gdal2tiles temp.vrt""" % self.input )
 def worker_metadata(argv):
 	gdal2tiles = GDAL2Tiles( argv[1:] )
 	gdal2tiles.open_input()
-	gdal2tiles.generate_metadata()
 
 def worker_base_tiles(argv, cpu):
 	try:
