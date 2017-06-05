@@ -3,11 +3,12 @@ OPTIM := ilp_impr
 CORE_GRAPH := 1
 SPLITTING_OPTIM := 1
 CBC := 1
+CBC_BIN := /home/patrick/repos/Cbc-2.9/build/bin/cbc
 
 MAPS := maps/freiburg maps/boston maps/chicago maps/dallas maps/nyc_subway maps/stuttgart
 
-PARAMS := --render-station-names=1 --glpk-time-limit=100000000 --output-stats=1  --render-node-fronts=1
-RPARAMS := --outline-width=1 --render-edges=0 --render-station-names=0 --glpk-time-limit=100000000 --output-stats=0  --render-node-fronts=0 --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
+PARAMS := --coin-cbc-binary=$(CBC_BIN) --render-station-names=1 --glpk-time-limit=100000000 --output-stats=1  --render-node-fronts=1
+RPARAMS := --coin-cbc-binary=$(CBC_BIN) --outline-width=1 --render-edges=0 --render-station-names=0 --glpk-time-limit=100000000 --output-stats=0  --render-node-fronts=0 --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
 
 
 freiburg/network.svg: freiburg/network.json
@@ -59,7 +60,7 @@ maps/%: %/network.json
 	cp $< $@/export/
 
 	# the reference used for download as3
-	cat $< | $(TRANSITMAP_BIN) --outline-width=3 --render-stats=1 --line-width=20 --line-spacing=10 -o $@/export/network.svg --glpk-mps-output-path=$@/export/network.mps --world-file-path=$@/export/  --resolution=0.1 --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --name=$(shell basename $@ | tr /a-z/ /A-Z/) --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
+	cat $< | $(TRANSITMAP_BIN) --coin-cbc-binary=$(CBC_BIN) --outline-width=3 --render-stats=1 --line-width=20 --line-spacing=10 -o $@/export/network.svg --glpk-mps-output-path=$@/export/network.mps --world-file-path=$@/export/  --resolution=0.1 --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --name=$(shell basename $@ | tr /a-z/ /A-Z/) --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
 	inkscape $@/export/network.svg --export-dpi=96 --export-pdf=$@/export/network.pdf
 
 	# z16
