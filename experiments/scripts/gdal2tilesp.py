@@ -47,6 +47,7 @@ except:
 	sys.exit(1)
 
 import os
+import errno
 import math
 
 try:
@@ -1093,7 +1094,12 @@ gdal2tiles temp.vrt""" % self.input )
 		"""Generation of main metadata files and HTML viewers (metadata related to particular tiles are generated during the tile processing)."""
 
 		if not os.path.exists(self.output):
-			os.makedirs(self.output)
+			if not os.path.exists(os.path.dirname(self.output)):
+				try:
+					os.makedirs(os.path.dirname(self.output))
+				except OSError as exc:
+					if exc.errno == errno.EEXIST and os.path.isdir(self.output):
+				 		pass
 
 		if self.options.profile == 'mercator':
 
@@ -1225,12 +1231,16 @@ gdal2tiles temp.vrt""" % self.input )
 
 				if self.options.resume and os.path.exists(tilefilename):
 					if self.options.verbose:
-						print("Tile generation skiped because of --resume")
+						print("Tile generation skipped because of --resume")
 					continue
 
 				# Create directories for the tile
 				if not os.path.exists(os.path.dirname(tilefilename)):
-					os.makedirs(os.path.dirname(tilefilename))
+					try:
+						os.makedirs(os.path.dirname(tilefilename))
+					except OSError as exc:
+						if exc.errno == errno.EEXIST and os.path.isdir(tilefilename):
+					 		pass
 
 				if self.options.profile == 'mercator':
 					# Tile bounds in EPSG:900913
@@ -1376,7 +1386,12 @@ gdal2tiles temp.vrt""" % self.input )
 
 				# Create directories for the tile
 				if not os.path.exists(os.path.dirname(tilefilename)):
-					os.makedirs(os.path.dirname(tilefilename))
+					if not os.path.exists(os.path.dirname(tilefilename)):
+						try:
+							os.makedirs(os.path.dirname(tilefilename))
+						except OSError as exc:
+							if exc.errno == errno.EEXIST and os.path.isdir(tilefilename):
+						 		pass
 
 				# TODO: improve that
 				if self.out_drv.ShortName == 'JPEG' and tilebands == 4:
@@ -2287,14 +2302,20 @@ def worker_metadata(argv):
 	gdal2tiles.generate_metadata()
 
 def worker_base_tiles(argv, cpu):
-	gdal2tiles = GDAL2Tiles( argv[1:] )
-	gdal2tiles.open_input()
-	gdal2tiles.generate_base_tiles(cpu)
+	try:
+		gdal2tiles = GDAL2Tiles( argv[1:] )
+		gdal2tiles.open_input()
+		gdal2tiles.generate_base_tiles(cpu)
 
-	# We'll need this information for the overviews generation
-	zoom_limits.put(gdal2tiles.tminz)
-	zoom_limits.put(gdal2tiles.tmaxz)
-
+		# We'll need this information for the overviews generation
+		zoom_limits.put(gdal2tiles.tminz)
+		zoom_limits.put(gdal2tiles.tmaxz)
+	except Exception:
+		print(" +++++++++++++++++++ THREAD " + str(cpu) + " crashed. +++++++++++++++++++")
+		exc_type, exc_obj, exc_trace = sys.exc_info()
+		print exc_type, exc_ob
+		print exc_trace.tb_lineno()
+		exc_trace.print_tb()
 
 def worker_overview_tiles(argv, cpu, tz):
 	gdal2tiles = GDAL2Tiles( argv[1:] )

@@ -162,19 +162,3 @@ maps/%: %/network.json
 	python scripts/gdal2tilesp.py -w none -z 4 -s EPSG:4326 $@/z11/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 4 -s EPSG:4326 $@/z11/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 4 -s EPSG:4326 $@/z11/network_n.png $@/nodes
-
-	python scripts/gdal2tilesp.py -w none -z 3 -s EPSG:4326 $@/z11/network_e.png $@/edges
-	python scripts/gdal2tilesp.py -w none -z 3 -s EPSG:4326 $@/z11/network_s.png $@/stations
-	python scripts/gdal2tilesp.py -w none -z 3 -s EPSG:4326 $@/z11/network_n.png $@/nodes
-
-	python scripts/gdal2tilesp.py -w none -z 2 -s EPSG:4326 $@/z11/network_e.png $@/edges
-	python scripts/gdal2tilesp.py -w none -z 2 -s EPSG:4326 $@/z11/network_s.png $@/stations
-	python scripts/gdal2tilesp.py -w none -z 2 -s EPSG:4326 $@/z11/network_n.png $@/nodes
-
-	python scripts/gdal2tilesp.py -w none -z 1 -s EPSG:4326 $@/z11/network_e.png $@/edges
-	python scripts/gdal2tilesp.py -w none -z 1 -s EPSG:4326 $@/z11/network_s.png $@/stations
-	python scripts/gdal2tilesp.py -w none -z 1 -s EPSG:4326 $@/z11/network_n.png $@/nodes
-
-	python scripts/gdal2tilesp.py -w none -z 0 -s EPSG:4326 $@/z11/network_e.png $@/edges
-	python scripts/gdal2tilesp.py -w none -z 0 -s EPSG:4326 $@/z11/network_s.png $@/stations
-	python scripts/gdal2tilesp.py -w none -z 0 -s EPSG:4326 $@/z11/network_n.png $@/nodes
