@@ -410,6 +410,15 @@ std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(
 // _____________________________________________________________________________
 bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
   if (potClique.size() < 2) return false;
+
+  for (const Node* a : potClique) {
+    for (const Node* b : potClique) {
+      if (pbutil::geo::dist(a->getPos(), b->getPos()) > (_cfg->lineWidth + _cfg->lineSpacing) * 6) {
+        return false;
+      }
+    }
+  }
+
   for (const Node* n : potClique) {
     for (auto nf : getClosedNodeFronts(n)) {
       if (nf.edge->getTo() == n) {
@@ -443,7 +452,8 @@ bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
 std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(const Node* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->getMainDirs()) {
-    if (nf.edge->getGeom().getLength() > nf.edge->getTotalWidth()) {
+    if (nf.edge->getGeom().getLength() > nf.edge->getWidth() ||
+        nf.edge->getTo()->getStops().size() > 0 || nf.edge->getFrom()->getStops().size() > 0) {
       res.push_back(nf);
     }
   }
@@ -455,7 +465,8 @@ std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(const Node* n) const {
 std::vector<NodeFront> GraphBuilder::getClosedNodeFronts(const Node* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->getMainDirs()) {
-    if (!(nf.edge->getGeom().getLength() > nf.edge->getTotalWidth())) {
+    if (!(nf.edge->getGeom().getLength() > nf.edge->getWidth()) &&
+        nf.edge->getTo()->getStops().size() == 0 && nf.edge->getFrom()->getStops().size() == 0) {
       res.push_back(nf);
     }
   }

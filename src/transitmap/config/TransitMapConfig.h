@@ -31,6 +31,8 @@ struct Config {
   double inputSmoothing;
   double innerGeometryPrecision;
 
+  double outputPadding;
+
   double inStationCrossPenalty;
 
   double outlineWidth;
@@ -39,6 +41,7 @@ struct Config {
   bool renderStations;
   bool renderNodeFronts;
   bool renderNodeCircles;
+  bool renderNodePolygons;
   bool renderStationNames;
   bool renderEdges;
 
@@ -48,6 +51,8 @@ struct Config {
   bool renderNodeConnections;
   bool expandFronts;
   bool dontExpandStations;
+
+  bool renderDirMarkers;
 
   bool useCbc;
 

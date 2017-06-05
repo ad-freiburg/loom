@@ -199,9 +199,9 @@ int main(int argc, char** argv) {
                 << 0 << std::endl
                 << 0 << std::endl
                 << -1 / cfg.outputResolution << std::endl
-                << std::fixed << g.getBoundingBox((cfg.lineWidth + cfg.lineSpacing) / cfg.outputResolution).min_corner().get<0>()
+                << std::fixed << g.getBoundingBox(cfg.outputPadding).min_corner().get<0>()
                 << std::endl
-                << g.getBoundingBox((cfg.lineWidth + cfg.lineSpacing) / cfg.outputResolution).max_corner().get<1>() << std::endl;
+                << g.getBoundingBox(cfg.outputPadding).max_corner().get<1>() << std::endl;
         file.close();
       }
     }

@@ -68,6 +68,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->renderStationNames))
       ->default_value(false),
       "render station name")
+    ("render-dir-markers",
+     opts::value<bool>(&(cfg->renderDirMarkers))
+      ->default_value(false),
+      "render direction markers (experimental!)")
     ("render-node-connections",
      opts::value<bool>(&(cfg->renderNodeConnections))
       ->default_value(true),
@@ -96,6 +100,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->renderNodeCircles))
       ->default_value(false),
       "mark node areas with background grey")
+    ("render-node-polygons",
+     opts::value<bool>(&(cfg->renderNodePolygons))
+      ->default_value(false),
+      "render node polygons")
     ("no-optim,N",
       opts::value<bool>(&(cfg->noOptim))
       ->default_value(false),
@@ -132,6 +140,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->outputResolution))
       ->default_value(0.1),
       "output resolution (output pixel size / projection pixel size)")
+    ("padding",
+      opts::value<double>(&(cfg->outputPadding))
+      ->default_value(-1),
+      "padding of output. If < 0, automatic.")
     ("input-smoothing",
       opts::value<double>(&(cfg->inputSmoothing))
       ->default_value(3),
@@ -205,6 +217,11 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     opts::store(opts::command_line_parser(argc, argv).options(cmdlineOptions)
         .run(), vm);
     opts::notify(vm);
+
+    if (cfg->outputPadding < 0) {
+      cfg->outputPadding = (cfg->lineWidth + cfg->lineSpacing);
+    }
+
   } catch (exception e) {
     LOG(ERROR) << e.what() << std::endl;
     std::cout << visibleDesc << "\n";

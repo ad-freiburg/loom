@@ -24,7 +24,7 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
   std::map<std::string, std::string> params;
   RenderParams rparams;
 
-  double p = (_cfg->lineWidth + _cfg->lineSpacing) / _cfg->outputResolution;
+  double p = _cfg->outputPadding;
 
   rparams.xOff = outG.getBoundingBox(p).min_corner().get<0>();
   rparams.yOff = outG.getBoundingBox(p).min_corner().get<1>();
@@ -97,6 +97,10 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
     renderNodeCircles(outG, rparams);
   }
 
+  if (_cfg->renderNodePolygons) {
+    renderNodePolygons(outG, rparams);
+  }
+
   for (graph::Node* n : outG.getNodes()) {
     if (_cfg->renderNodeConnections) {
       renderNodeConnections(outG, n, rparams);
@@ -162,7 +166,27 @@ void SvgOutput::renderNodeCircles(const graph::TransitGraph& outG,
     // bgeo::centroid(n->getConvexFrontHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8, false), center);
 
     printCircle(center, n->getMaxNodeFrontWidth() * 1, params, rparams);
+  }
+  _w.closeTag();
+}
 
+// _____________________________________________________________________________
+void SvgOutput::renderNodePolygons(const graph::TransitGraph& outG,
+                                 const RenderParams& rparams) {
+  _w.openTag("g");
+  for (graph::Node* n : outG.getNodes()) {
+    if (n->getAdjListOut().size() + n->getAdjListIn().size() < 2) {
+      continue;
+    }
+    std::stringstream style;
+    style << "fill:#CCC;stroke:#888"
+          << ";stroke-dasharray:1,.5;stroke-linejoin: "
+             "miter;stroke-opacity:1;stroke-width:.3";
+    std::map<std::string, std::string> params;
+    params["style"] = style.str();
+    Polygon p = n->getConvexFrontHull(1, false, false);
+
+    printPolygon(p, params, rparams);
   }
   _w.closeTag();
 }
@@ -481,7 +505,7 @@ void SvgOutput::renderStats(const graph::TransitGraph& outG, double solveTime,
   params["x"] = std::to_string(20);
   params["y"] = std::to_string(rparams.height);
   params["style"] =
-      std::string("font-size:") + std::to_string((_cfg->lineWidth + _cfg->lineSpacing) * 1) + "px; font-style:normal; font-weight: "
+      std::string("font-size:") + std::to_string((_cfg->lineWidth + _cfg->lineSpacing) * 4 * _cfg->outputResolution) + "px; font-style:normal; font-weight: "
       "normal; fill: black; stroke: none";
   _w.openTag("text", params);
 
@@ -535,6 +559,9 @@ void SvgOutput::renderStats(const graph::TransitGraph& outG, double solveTime,
   _w.closeTag();
   _w.openTag("tspan", {{"x", "0"}, {"dy", "-1.2em"}});
   _w.writeText("render-node-circles=" + std::string(_cfg->renderNodeCircles ? "yes" : "no"));
+  _w.closeTag();
+  _w.openTag("tspan", {{"x", "0"}, {"dy", "-1.2em"}});
+  _w.writeText("render-node-polygons=" + std::string(_cfg->renderNodePolygons ? "yes" : "no"));
   _w.closeTag();
   _w.openTag("tspan", {{"x", "0"}, {"dy", "-1.2em"}});
   _w.writeText("render-station-names=" + std::string(_cfg->renderStationNames ? "yes" : "no"));
@@ -622,9 +649,10 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       p >> nfFrom->geom.projectOn(p.getLine().front()).p;
     }
 
-    double arrowLength = (6 / _cfg->outputResolution);
+    double arrowLength = (_cfg->lineWidth * 2.5);
 
-    if (ro.direction != 0 && center.getLength() > arrowLength * 4) {
+    if (_cfg->renderDirMarkers &&
+        ro.direction != 0 && center.getLength() > arrowLength * 4) {
       std::stringstream markerName;
       markerName << e << ":" << route << ":" << i;
 
@@ -634,8 +662,10 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
                     markerPathMale, lineW, lineW);
       EndMarker emf(markerName.str() + "_f", "#" + route->getColor(),
                     markerPathFemale, lineW, lineW);
+
       _markers.push_back(emm);
       _markers.push_back(emf);
+
       PolyLine firstPart =
           p.getSegmentAtDist(0, p.getLength() / 2 - arrowLength / 2);
       PolyLine secondPart = p.getSegmentAtDist(

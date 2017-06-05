@@ -6,9 +6,9 @@
 #define TRANSITMAP_OUTPUT_SVGOUTPUT_H_
 
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 #include "./../config/TransitMapConfig.h"
 #include "./../graph/Route.h"
 #include "./../graph/TransitGraph.h"
@@ -35,7 +35,7 @@ class SvgOutputException : public std::exception {
 };
 
 struct InnerClique {
-  InnerClique(graph::InnerGeometry geom) {geoms.push_back(geom);};
+  InnerClique(graph::InnerGeometry geom) { geoms.push_back(geom); };
   std::vector<graph::InnerGeometry> geoms;
 
   double getZWeight() const;
@@ -64,8 +64,8 @@ typedef std::map<std::string, std::string> Params;
 typedef std::pair<Params, PolyLine> PrintDelegate;
 
 struct OutlinePrintPair {
-  OutlinePrintPair(PrintDelegate front, PrintDelegate back) :
-    front(front), back(back) {}
+  OutlinePrintPair(PrintDelegate front, PrintDelegate back)
+      : front(front), back(back) {}
 
   PrintDelegate front;
   PrintDelegate back;
@@ -93,8 +93,7 @@ class SvgOutput : public Output {
   void printCircle(const Point& center, double rad,
                    const std::map<std::string, std::string>& ps,
                    const RenderParams& rparams);
-  void printCircle(const Point& center, double rad,
-                   const std::string& style,
+  void printCircle(const Point& center, double rad, const std::string& style,
                    const RenderParams& rparams);
 
  private:
@@ -104,11 +103,12 @@ class SvgOutput : public Output {
   const config::Config* _cfg;
 
   std::map<uintptr_t, std::vector<OutlinePrintPair> > _delegates;
-  std::vector<std::map<uintptr_t, std::vector<OutlinePrintPair> > > _innerDelegates;
+  std::vector<std::map<uintptr_t, std::vector<OutlinePrintPair> > >
+      _innerDelegates;
   std::vector<EndMarker> _markers;
 
   void renderStats(const graph::TransitGraph& outG, double solveTime,
-    const RenderParams& rparams);
+                   const RenderParams& rparams);
 
   void outputNodes(const graph::TransitGraph& outputGraph,
                    const RenderParams& params);
@@ -125,11 +125,11 @@ class SvgOutput : public Output {
                        const RenderParams& params);
 
   void renderLinePart(const PolyLine p, double width, const graph::Route& route,
-                      const graph::Edge* e, const Nullable<style::LineStyle> style);
+                      const graph::Edge* e,
+                      const Nullable<style::LineStyle> style);
 
   void renderLinePart(const PolyLine p, double width, const graph::Route& route,
-                      const graph::Edge* edge,
-                      const std::string& endMarker,
+                      const graph::Edge* edge, const std::string& endMarker,
                       const Nullable<style::LineStyle> style);
 
   void renderDelegates(const graph::TransitGraph& outG,
@@ -139,17 +139,21 @@ class SvgOutput : public Output {
                         const RenderParams& params);
   void renderNodeCircles(const graph::TransitGraph& outG,
                          const RenderParams& rparams);
+  void renderNodePolygons(const graph::TransitGraph& outG,
+                          const RenderParams& rparams);
   std::multiset<InnerClique> getInnerCliques(
       std::vector<graph::InnerGeometry> geoms, size_t level) const;
 
   void renderClique(const InnerClique& c, const graph::Node* node);
 
-  bool isNextTo(const graph::InnerGeometry& a, const graph::InnerGeometry b) const;
-  bool hasSameOrigin(const graph::InnerGeometry& a, const graph::InnerGeometry b) const;
+  bool isNextTo(const graph::InnerGeometry& a,
+                const graph::InnerGeometry b) const;
+  bool hasSameOrigin(const graph::InnerGeometry& a,
+                     const graph::InnerGeometry b) const;
 
-  size_t getNextPartner(
-      const InnerClique& forGeom,
-      const std::vector<graph::InnerGeometry>& pool, size_t level) const;
+  size_t getNextPartner(const InnerClique& forGeom,
+                        const std::vector<graph::InnerGeometry>& pool,
+                        size_t level) const;
 
   std::string getMarkerPathMale(double w) const;
   std::string getMarkerPathFemale(double w) const;
