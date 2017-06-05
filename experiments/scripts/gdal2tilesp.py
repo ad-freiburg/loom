@@ -1224,7 +1224,7 @@ gdal2tiles temp.vrt""" % self.input )
 					print(ti,'/',tcount, tilefilename) #, "( TileMapService: z / x / y )"
 
 
-				print("@ " + str(ti) + "/" + str(tcount) + "(" + str(ti/tcount) + ")%\n")
+				print("@ " + str(ti) + "/" + str(tcount) + "(" + str(ti*100/tcount) + ")%\n")
 
 				if self.options.resume and os.path.exists(tilefilename):
 					if self.options.verbose:
@@ -1375,7 +1375,7 @@ gdal2tiles temp.vrt""" % self.input )
 						print("Tile generation skiped because of --resume")
 					continue
 
-				print("@ " + str(ti) + "/" + str(tcount) + "(~" + str(ti/tcount) + "%)\n")
+				print("@ " + str(ti) + "/" + str(tcount) + "(~" + str(ti*100/tcount) + "%)\n")
 
 				# Create directories for the tile
 				if not os.path.exists(os.path.dirname(tilefilename)):

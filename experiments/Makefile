@@ -64,7 +64,7 @@ maps/%: %/network.json
 	inkscape $@/export/network.svg --export-dpi=96 --export-pdf=$@/export/network.pdf
 
 	# z16
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=10 --line-spacing=5 -o $@/z16/ --world-file-path=$@/z16/network_e.pngw  --resolution=0.5
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=10 --line-spacing=5 -o $@/z16/ --world-file-path=$@/z16/network_e.pngw  --resolution=0.4
 	cp $@/z16/network_e.pngw $@/z16/network_s.pngw
 	cp $@/z16/network_e.pngw $@/z16/network_n.pngw
 	inkscape $@/z16/edges.svg --export-png=$@/z16/network_e.png --export-dpi=96
@@ -75,7 +75,7 @@ maps/%: %/network.json
 	python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_n.png $@/nodes
 
 	# z15
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=20 --line-spacing=10 -o $@/z15/ --world-file-path=$@/z15/network_e.pngw  --resolution=0.25
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=20 --line-spacing=10 -o $@/z15/ --world-file-path=$@/z15/network_e.pngw  --resolution=0.2
 	cp $@/z15/network_e.pngw $@/z15/network_s.pngw
 	cp $@/z15/network_e.pngw $@/z15/network_n.pngw
 	inkscape $@/z15/edges.svg --export-png=$@/z15/network_e.png --export-dpi=96
@@ -87,7 +87,7 @@ maps/%: %/network.json
 
 
 	# z14
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=40 --line-spacing=20 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.125
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=40 --line-spacing=20 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.1
 	cp $@/z14/network_e.pngw $@/z14/network_s.pngw
 	cp $@/z14/network_e.pngw $@/z14/network_n.pngw
 	inkscape $@/z14/edges.svg --export-png=$@/z14/network_e.png --export-dpi=96
@@ -99,7 +99,7 @@ maps/%: %/network.json
 
 
 	# z13
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=70 --line-spacing=35 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.0625
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=70 --line-spacing=35 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.05
 	cp $@/z13/network_e.pngw $@/z13/network_s.pngw
 	cp $@/z13/network_e.pngw $@/z13/network_n.pngw
 	inkscape $@/z13/edges.svg --export-png=$@/z13/network_e.png --export-dpi=96
@@ -111,7 +111,7 @@ maps/%: %/network.json
 
 
 	# z12
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=90 --line-spacing=40 -o $@/z12/ --world-file-path=$@/z12/network_e.pngw  --resolution=0.0325
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=90 --line-spacing=40 -o $@/z12/ --world-file-path=$@/z12/network_e.pngw  --resolution=0.025
 	cp $@/z12/network_e.pngw $@/z12/network_s.pngw
 	cp $@/z12/network_e.pngw $@/z12/network_n.pngw
 	inkscape $@/z12/edges.svg --export-png=$@/z12/network_e.png --export-dpi=96
@@ -123,12 +123,58 @@ maps/%: %/network.json
 
 
 	# z11
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=170 --line-spacing=70 -o $@/z11/ --world-file-path=$@/z11/network_e.pngw  --resolution=0.0175
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=170 --line-spacing=70 -o $@/z11/ --world-file-path=$@/z11/network_e.pngw  --resolution=0.0125
 	cp $@/z11/network_e.pngw $@/z11/network_s.pngw
 	cp $@/z11/network_e.pngw $@/z11/network_n.pngw
 	inkscape $@/z11/edges.svg --export-png=$@/z11/network_e.png --export-dpi=96
 	inkscape $@/z11/nodes.svg --export-png=$@/z11/network_n.png --export-dpi=96
 	inkscape $@/z11/stations.svg --export-png=$@/z11/network_s.png --export-dpi=96
-	python scripts/gdal2tilesp.py -w none -z 0-11 -s EPSG:4326 $@/z11/network_e.png $@/edges
-	python scripts/gdal2tilesp.py -w none -z 0-11 -s EPSG:4326 $@/z11/network_s.png $@/stations
-	python scripts/gdal2tilesp.py -w none -z 0-11 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	# something is not right with multi-zoomlevel tile generationin parallel version, create them separately
+	python scripts/gdal2tilesp.py -w none -z 11 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 11 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 11 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	python scripts/gdal2tilesp.py -w none -z 10 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 10 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 10 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	python scripts/gdal2tilesp.py -w none -z 9 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 9 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 9 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	python scripts/gdal2tilesp.py -w none -z 8 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 8 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 8 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	python scripts/gdal2tilesp.py -w none -z 7 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 7 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 7 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	python scripts/gdal2tilesp.py -w none -z 6 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 6 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 6 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	python scripts/gdal2tilesp.py -w none -z 5 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 5 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 5 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	python scripts/gdal2tilesp.py -w none -z 4 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 4 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 4 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	python scripts/gdal2tilesp.py -w none -z 3 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 3 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 3 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	python scripts/gdal2tilesp.py -w none -z 2 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 2 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 2 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	python scripts/gdal2tilesp.py -w none -z 1 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 1 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 1 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+
+	python scripts/gdal2tilesp.py -w none -z 0 -s EPSG:4326 $@/z11/network_e.png $@/edges
+	python scripts/gdal2tilesp.py -w none -z 0 -s EPSG:4326 $@/z11/network_s.png $@/stations
+	python scripts/gdal2tilesp.py -w none -z 0 -s EPSG:4326 $@/z11/network_n.png $@/nodes
