@@ -1,0 +1,91 @@
+#map {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+}
+
+html, body {
+    height: 100%;
+}
+
+.container-fluid {
+    height: 100%;
+    position: relative;
+}
+
+.col-md-10 {
+  padding: 0;
+}
+
+nav li .btn {
+  float: left;
+  margin-right: 0.4em;
+  z-index: 100;
+  position: relative;
+}
+
+nav li a.btn-xs {
+  padding: 1px 5px !important;
+  display: inline-block !important;
+  line-height: inherit !important;
+  float: right;
+}
+
+nav .form-group label {
+  display: block;
+  font-weight: normal;
+  color: #777;
+}
+
+.navbar-nav>li>.fakelink {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  line-height: 20px;
+  position: relative;
+  display: block;
+  border-bottom: 1px solid #e7e7e7;
+  overflow: hidden;
+  padding-left:15px;
+  color: #777;
+  cursor: pointer;
+}
+
+.navbar-nav>li>.fakelink:hover,
+.navbar-nav>li.active>.fakelink {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.navbar-nav>li>.fakelink:hover .fakelinke-cld,
+.navbar-nav.active>li>.fakelink .fakelinke-cld {
+  color: #333;
+}
+
+.buttons-row {
+  overflow: hidden;
+  position: relative;
+  width:50%;
+  float: right;
+}
+
+#map {
+  padding: 0;
+}
+
+.navbar-text a {
+  color: #777;
+}
+
+@media (min-width: 1400px) {
+  .col-vlg-2 {
+    width: 18%;
+  }
+
+  .col-vlg-10 {
+    width: 82%;
+  }
+
+  .col-vlg-offset-2 {
+    margin-left: 18%;
+  }
+}
