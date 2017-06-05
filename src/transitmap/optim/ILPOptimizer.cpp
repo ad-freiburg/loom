@@ -584,8 +584,10 @@ void ILPOptimizer::solveProblem(glp_prob* lp) const {
   params.binarize = GLP_ON;
   params.ps_tm_lim = _cfg->glpkPSTimeLimit;
   params.tm_lim = _cfg->glpkTimeLimit;
-  params.fp_heur = _cfg->useGlpkFeasibilityPump ? GLP_ON : GLP_OFF;
-  params.ps_heur = _cfg->useGlpkProximSearch ? GLP_ON : GLP_OFF;
+  if (!_cfg->useCbc) {
+    params.fp_heur = _cfg->useGlpkFeasibilityPump ? GLP_ON : GLP_OFF;
+    params.ps_heur = _cfg->useGlpkProximSearch ? GLP_ON : GLP_OFF;
+  }
 
   glp_intopt(lp, &params);
 }

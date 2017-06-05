@@ -67,7 +67,6 @@ __version__ = "$Id$"
 resampling_list = ('average','near','bilinear','cubic','cubicspline','lanczos','antialias')
 profile_list = ('mercator','geodetic','raster') #,'zoomify')
 webviewer_list = ('all','google','openlayers','none')
-queue = multiprocessing.Queue()
 zoom_limits = multiprocessing.Queue()
 
 
@@ -1224,11 +1223,12 @@ gdal2tiles temp.vrt""" % self.input )
 				if self.options.verbose:
 					print(ti,'/',tcount, tilefilename) #, "( TileMapService: z / x / y )"
 
+
+				print("@ " + str(ti) + "/" + str(tcount) + "(" + str(ti/tcount) + ")%\n")
+
 				if self.options.resume and os.path.exists(tilefilename):
 					if self.options.verbose:
 						print("Tile generation skiped because of --resume")
-					else:
-						queue.put(tcount)
 					continue
 
 				# Create directories for the tile
@@ -1332,9 +1332,6 @@ gdal2tiles temp.vrt""" % self.input )
 						f.write( self.generate_kml( tx, ty, tz ))
 						f.close()
 
-				if not self.options.verbose:
-					queue.put(tcount)
-
 
 	# -------------------------------------------------------------------------
 	def generate_overview_tiles(self, cpu, tz):
@@ -1373,15 +1370,12 @@ gdal2tiles temp.vrt""" % self.input )
 
 				tilefilename = os.path.join( self.output, str(tz), str(tx), "%s.%s" % (ty_final, self.tileext) )
 
-				if self.options.verbose:
-					print(ti,'/',tcount, tilefilename) #, "( TileMapService: z / x / y )"
-
 				if self.options.resume and os.path.exists(tilefilename):
 					if self.options.verbose:
 						print("Tile generation skiped because of --resume")
-					else:
-						queue.put(tcount)
 					continue
+
+				print("@ " + str(ti) + "/" + str(tcount) + "(~" + str(ti/tcount) + "%)\n")
 
 				# Create directories for the tile
 				if not os.path.exists(os.path.dirname(tilefilename)):
@@ -2330,21 +2324,12 @@ if __name__=='__main__':
 		for cpu in range(gdal2tiles.options.processes):
 			pool.apply_async(worker_base_tiles, [argv, cpu])
 		pool.close()
-		while len(multiprocessing.active_children()) != 0:
-			try:
-				total = queue.get(timeout=1)
-				processed_tiles += 1
-				gdal.TermProgress_nocb(processed_tiles / float(total))
-				sys.stdout.flush()
-			except:
-				pass
 		pool.join()
 
 		processed_tiles = 0
 
 		print("Generating Overview Tiles:")
 
-		# Values generated after base tiles creation
 		tminz = zoom_limits.get(timeout=1)
 		tmaxz = zoom_limits.get(timeout=1)
 
@@ -2353,14 +2338,6 @@ if __name__=='__main__':
 			for cpu in range(gdal2tiles.options.processes):
 				pool.apply_async(worker_overview_tiles, [argv, cpu, tz])
 			pool.close()
-			while len(multiprocessing.active_children()) != 0:
-				try:
-					total = queue.get(timeout=1)
-					processed_tiles += 1
-					gdal.TermProgress_nocb(processed_tiles / float(total))
-					sys.stdout.flush()
-				except:
-					pass
 			pool.join()
 
 
