@@ -63,6 +63,7 @@ struct Config {
   bool useGlpkProximSearch;
   int glpkPSTimeLimit;
   int glpkTimeLimit;
+  std::string coinCbcBinary;
 
   double crossPenMultiSameSeg;
   double crossPenMultiDiffSeg;

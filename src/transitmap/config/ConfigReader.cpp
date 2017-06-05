@@ -200,6 +200,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<std::string>(&(cfg->glpkSolutionOutputPath))
       ->default_value(""),
       "output path for ILP solution. If empty, no output will be generated.")
+    ("coin-cbc-binary",
+      opts::value<std::string>(&(cfg->coinCbcBinary))
+     ->default_value("/home/patrick/repos/Cbc-2.9/build/bin/cbc"),
+      "coin cbc binary path")
     ("world-file-path",
       opts::value<std::string>(&(cfg->worldFilePath))
       ->default_value(""),

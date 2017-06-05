@@ -599,7 +599,7 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
   std::stringstream cmd;
   LOG(INFO) << "Calling external solver CBC..." << std::endl;
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-	cmd << "/home/patrick/repos/Cbc-2.9/build/bin/cbc " << f
+  cmd << _cfg->coinCbcBinary << " " << f
 			<< " -threads 4 -printingOptions all -solve -solution " << outf << "";
 	int r = system(cmd.str().c_str());
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
