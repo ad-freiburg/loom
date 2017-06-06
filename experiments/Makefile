@@ -64,15 +64,15 @@ maps/%: %/network.json
 	inkscape $@/export/network.svg  --export-pdf=$@/export/network.pdf
 
 	# z16
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=10 --line-spacing=5 -o $@/z16/ --world-file-path=$@/z16/network_e.pngw  --resolution=0.5
-	cp $@/z16/network_e.pngw $@/z16/network_s.pngw
-	cp $@/z16/network_e.pngw $@/z16/network_n.pngw
-	inkscape $@/z16/edges.svg --export-png=$@/z16/network_e.png
-	inkscape $@/z16/nodes.svg --export-png=$@/z16/network_n.png
-	inkscape $@/z16/stations.svg --export-png=$@/z16/network_s.png
-	python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_e.png $@/edges
-	python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_s.png $@/stations
-	python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_n.png $@/nodes
+	# cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=10 --line-spacing=5 -o $@/z16/ --world-file-path=$@/z16/network_e.pngw  --resolution=0.5
+	# cp $@/z16/network_e.pngw $@/z16/network_s.pngw
+	# cp $@/z16/network_e.pngw $@/z16/network_n.pngw
+	# inkscape $@/z16/edges.svg --export-png=$@/z16/network_e.png
+	# inkscape $@/z16/nodes.svg --export-png=$@/z16/network_n.png
+	# inkscape $@/z16/stations.svg --export-png=$@/z16/network_s.png
+	# python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_e.png $@/edges
+	# python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_s.png $@/stations
+	# python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_n.png $@/nodes
 
 	# z15
 	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=20 --line-spacing=10 -o $@/z15/ --world-file-path=$@/z15/network_e.pngw  --resolution=0.25
