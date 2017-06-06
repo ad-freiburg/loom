@@ -114,39 +114,54 @@ var map = new ol.Map({
             attributions: ['&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', '&copy; <a href="https://carto.com/attribution">CARTO</a>']
           })
         }),
-        edgesLayer,
-        nodesLayer,
-        stationsLayer
+        edgesLayer, nodesLayer, stationsLayer
       ]
     })
   ],
   view: new ol.View({
     center: networks[0].center,
     zoom: networks[0].zoom,
-    resolutions: [156543.03390625, 78271.516953125, 39135.7584765625, 19567.87923828125, 9783.939619140625, 4891.9698095703125, 2445.9849047851562, 1222.9924523925781, 611.4962261962891, 305.74811309814453, 152.87405654907226, 76.43702827453613, 38.218514137268066, 19.109257068634033, 9.554628534317017, 4.7777, 2.38888]
+    resolutions: [156543.03390625, 78271.516953125, 39135.7584765625, 19567.87923828125, 9783.939619140625, 4891.9698095703125, 2445.9849047851562, 1222.9924523925781, 611.4962261962891, 305.74811309814453, 152.87405654907226, 76.43702827453613, 38.218514137268066, 19.109257068634033, 9.554628534317017]//, 4.7777, 2.38888]
   })
 });
 
-map.on('moveend', function onMoveEnd(evt) {
-  var map = evt.map;
+function getVisibleNetwork() {
+  if (map.getView().getZoom() < 6) return undefined;
   var extent = map.getView().calculateExtent(map.getSize());
+
+  for (var n in networks) {
+    var net = networks[n];
+    if (ol.extent.intersects(extent, net['extent'])) return net["id"];
+  }
+  return undefined;
+}
+
+function setVisibleNetwork(id) {
+  if (id === undefined) location.hash = "";
   for (var n in networks) {
     var net = networks[n];
 
-    $("#layer-" + net["id"]).removeClass("active");
-    if (ol.extent.intersects(extent, net['extent'])) {
+    if (id == net["id"]) {
       $("#layer-" + net["id"]).addClass("active");
+      location.hash = "#" + id;
+      if (id != getVisibleNetwork()) {
+        map.getView().setZoom(net['zoom']);
+        map.getView().setCenter(net['center']);
+      }
+    } else {
+      $("#layer-" + net["id"]).removeClass("active");
     }
   }
+}
+
+map.on('moveend', function onMoveEnd(evt) {
+  setVisibleNetwork(getVisibleNetwork());
 });
 
 for (var n in networks) {
   (function(n) {
   $("#layer-" + networks[n]["id"]).click(function() {
-    var z = networks[n]['zoom'];
-    var c = networks[n]['center'];
-    map.getView().setZoom(z);
-    map.getView().setCenter(c);
+    setVisibleNetwork(networks[n]["id"]);
   });})(n);
 }
 
@@ -161,3 +176,9 @@ document.getElementById("edge-cb").onchange = function() {
 document.getElementById("con-cb").onchange = function() {
   nodesLayer.setVisible(this.checked);
 };
+
+$(window).on('hashchange',function(){ 
+  setVisibleNetwork(location.hash.slice(1));
+});
+
+setVisibleNetwork(location.hash.slice(1));
