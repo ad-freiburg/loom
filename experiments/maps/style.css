@@ -1,6 +1,5 @@
 #map {
     height: 100%;
-    width: 100%;
     position: absolute;
 }
 
@@ -37,7 +36,11 @@ nav .form-group label {
   color: #777;
 }
 
-.navbar-nav>li>.fakelink {
+.navbar {
+  margin-bottom: 0;
+}
+
+.navbar-nav li .flink {
   padding-top: 10px;
   padding-bottom: 10px;
   line-height: 20px;
@@ -50,14 +53,9 @@ nav .form-group label {
   cursor: pointer;
 }
 
-.navbar-nav>li>.fakelink:hover,
-.navbar-nav>li.active>.fakelink {
+.navbar-nav li .flink:hover,
+.navbar-nav li.active .flink {
   background-color: #f0f0f0;
-  color: #333;
-}
-
-.navbar-nav>li>.fakelink:hover .fakelinke-cld,
-.navbar-nav.active>li>.fakelink .fakelinke-cld {
   color: #333;
 }
 

@@ -1,65 +1,66 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta charset="utf-8">
-  <meta name="author" content="2017 Patrick Brosi, University of Freiburg, Chair of Algorithms and Datastructures ">
-  <meta name="viewport" content="initial-scale=1">
-  <link href="/static/icon.png" rel="shortcut icon" type="image/png">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Transit Maps</title>
-  <link type="text/css" rel="stylesheet" href="static/ol3/ol.css" media="all">
-  <link href="static/style/bootstrap.min.css" rel="stylesheet" />
-  <link href="static/style/navbar-fixed-side.css" rel="stylesheet" />
-  <link type="text/css" rel="stylesheet" href="style.css" media="all">
-  <script type="text/javascript" src="static/ol3/ol.js"></script>
-  <script type="text/javascript" src="static/jquery/jquery-3.2.1.min.js"></script>
-  <script type="text/javascript" src="static/bootstrap/bootstrap.min.js"></script>
-</head>
-<body>
 
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta name="author" content="2017 Patrick Brosi, University of Freiburg, Chair of Algorithms and Datastructures ">
+    <meta name="viewport" content="initial-scale=1">
+    <link href="/static/icon.png" rel="shortcut icon" type="image/png">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>GTFS Transit Maps</title>
+    <link type="text/css" rel="stylesheet" href="static/ol3/ol.css" media="all">
+    <link href="static/style/bootstrap.min.css" rel="stylesheet" />
+    <link href="static/style/navbar-fixed-side.css" rel="stylesheet" />
+    <link type="text/css" rel="stylesheet" href="style.css" media="all">
+    <script type="text/javascript" src="static/ol3/ol.js"></script>
+    <script type="text/javascript" src="static/jquery/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="static/bootstrap/bootstrap.min.js"></script>
+</head>
+
+<body>
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-4 col-md-3 col-lg-3 col-vlg-2">
-          <nav class="navbar navbar-default navbar-fixed-side">
-            <div class="container">
-              <div class="navbar-header">
-                <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse">
-                  <span class="sr-only">Toggle navigation</span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="./">Transit Maps</a>
-              </div>
-              <div class="collapse navbar-collapse">
-                <ul id="layerlist" class="nav navbar-nav">
-                </ul>
-                <form class="navbar-form navbar-left">
-                  <div class="form-group">
-                    <label>
-                      <input id="stat-cb" checked="1" type="checkbox"> Show stations
-                    </label>
-                    <label>
-                      <input id="con-cb" checked="1" type="checkbox"> Show node connections
-                    </label>
-                    <label>
-                      <input id="edge-cb" checked="1" type="checkbox"> Show edges
-                    </label>
-                  </div>
-                </form>
-                <p class="navbar-text">
-                  <a href="https://ad.informatik.uni-freiburg.de/">University of Freiburg - Chair of Algorithms and Data Structures</a>
-                </p>
-              </div>
-            </div>
-          </nav>
+                <nav class="navbar navbar-default navbar-fixed-side">
+                    <div class="container">
+                        <div class="navbar-header">
+                            <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse">
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="./">Transit Maps</a>
+                        </div>
+                        <div class="collapse navbar-collapse">
+                            <ul id="layerlist" class="nav navbar-nav">
+                            </ul>
+                            <form class="navbar-form navbar-left">
+                                <div class="form-group">
+                                    <label>
+                                        <input id="stat-cb" checked="1" type="checkbox"> Show stations
+                                    </label>
+                                    <label>
+                                        <input id="con-cb" checked="1" type="checkbox"> Show node connections
+                                    </label>
+                                    <label>
+                                        <input id="edge-cb" checked="1" type="checkbox"> Show edges
+                                    </label>
+                                </div>
+                            </form>
+                            <p class="navbar-text">
+                                University of Freiburg - <a target="_blank" href="https://ad.informatik.uni-freiburg.de/">Chair of Algorithms and Data Structures</a>
+                            </p>
+                        </div>
+                    </div>
+                </nav>
             </div>
             <div id="map" class="col-md-9 col-md-offset-3 col-sm-offset-4 col-sd-8 col-lg-offset-3 col-lg-9 col-vlg-offset-2 col-vlg-10">
             </div>
         </div>
     </div>
 
-  <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="script.js"></script>
 </body>
 </html>

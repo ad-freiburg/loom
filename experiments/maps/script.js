@@ -23,7 +23,7 @@ var networks = [
   {
     'id' : 'nyc_subway',
     'extent' : [-8265720.488922 - 200, 4998093.107257 - 35267 * 2 - 200, -8265720.488922 + 24161 * 2 + 200, 4998093.107257 + 200],
-    'name' : "New York (Subway*)",
+    'name' : "New York (Subway)",
     'center' : ol.proj.transform([-73.901858, 40.734293], 'EPSG:4326', 'EPSG:3857'),
     'zoom' : 13
   },
@@ -32,7 +32,7 @@ var networks = [
     'extent' : [822575.924437 - 200, 5687970.805429 - 35267 * 2 - 200, 822575.924437 + 24161 * 2 + 200, 5687970.805429 + 200],
     'name' : "Turin (Tram)",
     'center' : ol.proj.transform([7.708555, 45.066714], 'EPSG:4326', 'EPSG:3857'),
-    'zoom' : 14
+    'zoom' : 16
   }
 ];
 
@@ -43,12 +43,16 @@ var stations = [];
 var edges = [];
 var nodes = [];
 
+var attr = '&copy; <a target="_blank" href="https://ad.informatik.uni-freiburg.de/">University of Freiburg (Chair of Algorithms and Data Structures)</a>';
+
+
 for (var n in networks) {
   var net = networks[n];
   networks[n]['layerSt'] = new ol.layer.Tile({
     source: new ol.source.XYZ({
       url: net['id'] + '/stations/{z}/{x}/{y}.png',
-      extent: net['extent']
+      extent: net['extent'],
+      attributions: attr
     }),
     extent: net['extent']
   });
@@ -57,7 +61,8 @@ for (var n in networks) {
   net['layerN'] = new ol.layer.Tile({
     source: new ol.source.XYZ({
       url: net['id'] + '/nodes/{z}/{x}/{y}.png',
-      extent: net['extent']
+      extent: net['extent'],
+      attributions: attr
     }),
     extent: net['extent']
   });
@@ -67,13 +72,14 @@ for (var n in networks) {
     source: new ol.source.XYZ({
       url: net['id'] + '/edges/{z}/{x}/{y}.png'
     }),
-    extent: net['extent']
+    extent: net['extent'],
+    attributions: attr
   });
   edges.push(net['layerE']);
 
   $("#layerlist")
     .append('<li class="" id="layer-' + net['id'] + '">' +
-      '<div class="fakelink">' +
+      '<div class="flink">' +
         '' + net['name'] + '' +
         '<div class="buttons-row">' +
           '<a target="_blank" href="' + net['id'] + '/export/network.json" type="button" class="btn btn-default btn-xs">TOPO</a>' +
@@ -91,19 +97,24 @@ var nodesLayer = new ol.layer.Group({layers : nodes});
 var map = new ol.Map({
   target: 'map',
   renderer: 'canvas',
+  controls: ol.control.defaults().extend([
+    new ol.control.ScaleLine({
+      units: 'metric'
+    })
+  ]),
   interactions: ol.interaction.defaults({
-    altShiftDragRotate: false,
-    pinchRotate: false
+    altShiftDragRotate: true,
+    pinchRotate: true
   }),
   layers: [
     new ol.layer.Group({
-      title: 'Base maps',
       layers: [
         new ol.layer.Tile({
           visible: true,
           opacity: 1,
           source: new ol.source.XYZ({
-            url: 'https://cartodb-basemaps-{1-4}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'
+            url: 'https://cartodb-basemaps-{1-4}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
+            attributions: ['&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', '&copy; <a href="https://carto.com/attribution">CARTO</a>']
           })
         }),
         edgesLayer,
