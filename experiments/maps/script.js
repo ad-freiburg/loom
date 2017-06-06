@@ -1,5 +1,12 @@
 var networks = [
   {
+    'id' : 'stuttgart',
+    'extent' : [1008935.476077 - 200, 6253494.847973 - 14869 * 2 - 200, 1008935.476077 + 12959 * 2 + 200, 6253494.847973 + 200],
+    'name' : "Stuttgart (Stadtbahn)",
+    'center' : ol.proj.transform([9.189099, 48.782386], 'EPSG:4326', 'EPSG:3857'),
+    'zoom' : 15
+  },
+  {
     'id' : 'freiburg',
     'extent' : ol.proj.transformExtent([7.786164, 47.964172, 7.905586, 48.039455], 'EPSG:4326', 'EPSG:3857'),
     'name' : "Freiburg (Stadtbahn)",
@@ -14,13 +21,6 @@ var networks = [
     'zoom' : 15
   },
   {
-    'id' : 'stuttgart',
-    'extent' : [1008935.476077 - 200, 6253494.847973 - 14869 * 2 - 200, 1008935.476077 + 12959 * 2 + 200, 6253494.847973 + 200],
-    'name' : "Stuttgart (Stadtbahn)",
-    'center' : ol.proj.transform([9.177061, 48.775737], 'EPSG:4326', 'EPSG:3857'),
-    'zoom' : 15
-  },
-  {
     'id' : 'nyc_subway',
     'extent' : [-8265720.488922 - 200, 4998093.107257 - 35267 * 2 - 200, -8265720.488922 + 24161 * 2 + 200, 4998093.107257 + 200],
     'name' : "New York (Subway)",
@@ -31,20 +31,16 @@ var networks = [
     'id' : 'turin',
     'extent' : [822575.924437 - 200, 5687970.805429 - 35267 * 2 - 200, 822575.924437 + 24161 * 2 + 200, 5687970.805429 + 200],
     'name' : "Turin (Tram)",
-    'center' : ol.proj.transform([7.708555, 45.066714], 'EPSG:4326', 'EPSG:3857'),
+    'center' : ol.proj.transform([7.678555, 45.060714], 'EPSG:4326', 'EPSG:3857'),
     'zoom' : 16
   }
 ];
-
-var pos = ol.proj.transform([7.850779, 47.994293], 'EPSG:4326', 'EPSG:3857');
-var zoom = 16;
 
 var stations = [];
 var edges = [];
 var nodes = [];
 
 var attr = '&copy; <a target="_blank" href="https://ad.informatik.uni-freiburg.de/">University of Freiburg (Chair of Algorithms and Data Structures)</a>';
-
 
 for (var n in networks) {
   var net = networks[n];
@@ -87,7 +83,8 @@ for (var n in networks) {
           '<a target="_blank" href="' + net['id'] + '/export/network.pdf" type="button" class="btn btn-default btn-xs">PDF</a>' +
         '</div>' +
       '</div>' +
-    '</li>');
+    '</li>'
+  );
 }
 
 var stationsLayer = new ol.layer.Group({layers : stations});
