@@ -482,6 +482,14 @@ InnerGeometry Node::getInnerBezier(const Configuration& cf,
 
       if (std::isnan(ang)) ang = 1;
 
+      if (std::max(partnerFrom.edge->getCardinality(), partnerTo.edge->getCardinality()) > 1) {
+        double fac = fabs((double)((int)partnerFrom.edge->getCardinality() - (int)partnerTo.edge->getCardinality())) / (double)(std::max(partnerFrom.edge->getCardinality(), partnerTo.edge->getCardinality()) - 1);
+
+        fac = pow(fac, 2);
+
+        ang = pow(ang, fac);
+      }
+
       double dar = pbutil::geo::dist(isect, p);
       double dbr = pbutil::geo::dist(isect, pp);
 
