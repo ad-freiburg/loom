@@ -44,6 +44,8 @@ class Edge {
   Node* getFrom() const;
   Node* getTo() const;
 
+  Node* getOther(const Node* n) const;
+
   void setFrom(Node* from);
   void setTo(Node* to);
 

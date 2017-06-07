@@ -452,10 +452,12 @@ bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
 std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(const Node* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->getMainDirs()) {
-    if (nf.edge->getGeom().getLength() > (nf.edge->getWidth() + nf.edge->getSpacing()) ||
-        nf.edge->getTo()->getStops().size() > 0 || nf.edge->getFrom()->getStops().size() > 0) {
-      res.push_back(nf);
-    }
+     if (nf.edge->getGeom().getLength() > (nf.edge->getWidth() + nf.edge->getSpacing()) ||
+        (nf.edge->getOther(n)->getNodeFrontFor(nf.edge)->geom.distTo(nf.edge->getOther(n)->getPos()) > 6 * (nf.edge->getWidth() + nf.edge->getSpacing())) ){
+       // (nf.edge->getFrom() == n && nf.edge->getTo()->getStops().size() > 0) ||
+       // (nf.edge->getTo() == n && nf.edge->getFrom()->getStops().size() > 0)) {
+       res.push_back(nf);
+     }
   }
 
   return res;
@@ -466,7 +468,9 @@ std::vector<NodeFront> GraphBuilder::getClosedNodeFronts(const Node* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->getMainDirs()) {
     if (!(nf.edge->getGeom().getLength() > (nf.edge->getWidth() + nf.edge->getSpacing())) &&
-        nf.edge->getTo()->getStops().size() == 0 && nf.edge->getFrom()->getStops().size() == 0) {
+       !(nf.edge->getOther(n)->getNodeFrontFor(nf.edge)->geom.distTo(nf.edge->getOther(n)->getPos()) > 6 * (nf.edge->getWidth() + nf.edge->getSpacing())) ){
+       // (nf.edge->getFrom() == n && nf.edge->getTo()->getStops().size() == 0) &&
+       // (nf.edge->getTo() == n && nf.edge->getFrom()->getStops().size() == 0)) {
       res.push_back(nf);
     }
   }

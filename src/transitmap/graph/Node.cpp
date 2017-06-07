@@ -32,6 +32,8 @@ Point NodeFront::getTripOccPos(const Route* r,
                                bool origGeom) const {
   RouteOccWithPos rop;
 
+  assert(c.find(edge) != c.end());
+
   rop = edge->getRouteOccWithPosUnder(r, c.find(edge)->second);
 
   if (rop.first) {
@@ -210,6 +212,8 @@ double Node::getCrossingScore(const Configuration& c, double inStatPen,
     for (size_t j = i + 1; j < igs.size(); ++j) {
       const InnerGeometry& iga = igs[i];
       const InnerGeometry& igb = igs[j];
+
+      if (iga.from.front == 0 || iga.to.front == 0 || igb.from.front == 0 || igb.to.front == 0) continue;
 
       if (iga.from.front == igb.from.front && iga.slotFrom == igb.slotFrom)
         continue;

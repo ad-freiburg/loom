@@ -37,6 +37,13 @@ const std::vector<RouteOccurance>& Edge::getTripsUnordered() const {
 }
 
 // _____________________________________________________________________________
+Node* Edge::getOther(const Node* n) const {
+  if (n == _from) return _to;
+  if (n == _to) return _from;
+  return 0;
+}
+
+// _____________________________________________________________________________
 std::vector<RouteOccurance>* Edge::getTripsUnordered() { return &_routes; }
 
 // _____________________________________________________________________________
