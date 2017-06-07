@@ -13,7 +13,8 @@ using namespace geo;
 // _____________________________________________________________________________
 BezierCurve::BezierCurve(const Point& a, const Point& b,
   const Point& c, const Point& d)
-: _d(dist(a, b)) {
+: _d(dist(a, d)) {
+  assert(_d > 0);
   recalcPolynoms(a, b, c, d);
 }
 
@@ -42,7 +43,13 @@ Point BezierCurve::valueAt(double t) const {
 
 // _____________________________________________________________________________
 const PolyLine& BezierCurve::render(double d) {
+  assert(d > 0);
   if (_didRender) return _rendered;
+
+  if (_d == 0) {
+    _rendered << Point(_xp.a, _yp.a) << Point(_xp.a, _yp.a);
+    return _rendered;
+  }
 
   _rendered.empty();
   double n = _d / d;

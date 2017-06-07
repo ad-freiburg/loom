@@ -73,7 +73,8 @@ class Builder {
   bool lineCrossesAtNode(const Node* a, const Edge* e, const Edge* f) const;
 
   mutable std::set<const Edge*> _indEdges;
-  mutable std::map<const Edge*, size_t> _pEdges;
+  mutable std::set<std::pair<const Edge*, const Edge*> > _indEdgesPairs;
+  mutable std::map<std::pair<const Edge*, const Edge*>, size_t> _pEdges;
 };
 
 }  // namespace gtfs2topo

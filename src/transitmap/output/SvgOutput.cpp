@@ -358,8 +358,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       std::map<uintptr_t, std::vector<OutlinePrintPair> >());
   std::multiset<InnerClique> renderCliques = getInnerCliques(cc.geoms, 0);
   for (const auto& c : renderCliques) {
-    // the shortes geom will be the ref geom (to avoid topological problems
-    //  while offsetting)
+    // the longest geom will be the ref geom
     graph::InnerGeometry ref = c.geoms[0];
     for (size_t i = 1; i < c.geoms.size(); i++) {
       if (c.geoms[i].geom.getLength() > ref.geom.getLength()) ref = c.geoms[i];
@@ -370,7 +369,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       raw = true;;
     }
 
-    if (ref.geom.getLength() < _cfg->lineWidth) {
+    if (ref.geom.getLength() < _cfg->lineWidth / 8) {
       // continue;
     }
 

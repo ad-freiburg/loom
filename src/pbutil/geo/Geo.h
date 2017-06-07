@@ -105,6 +105,30 @@ inline RotatedBox shrink(const RotatedBox& b, double d) {
 inline bool doubleEq(double a, double b) { return fabs(a - b) < 0.000001; }
 
 // _____________________________________________________________________________
+inline bool contains(const Point& p1, const Point& q1, const Point& p2,
+                     const Point& q2) {
+  Line a;
+  a.push_back(p1);
+  a.push_back(q1);
+  Line b;
+  b.push_back(p2);
+  b.push_back(q2);
+
+  return bgeo::covered_by(a, b);
+}
+
+// _____________________________________________________________________________
+inline bool contains(double p1x, double p1y, double q1x, double q1y, double p2x,
+                     double p2y, double q2x, double q2y) {
+  Point p1(p1x, p1y);
+  Point q1(q1x, q1y);
+  Point p2(p2x, p2y);
+  Point q2(q2x, q2y);
+
+  return contains(p1, q1, p2, q2);
+}
+
+// _____________________________________________________________________________
 inline bool intersects(const Point& p1, const Point& q1, const Point& p2,
                        const Point& q2) {
   /*
@@ -117,7 +141,7 @@ inline bool intersects(const Point& p1, const Point& q1, const Point& p2,
   b.push_back(p2);
   b.push_back(q2);
 
-  return bgeo::intersects(a, b);
+  return !(contains(p1, q1, p2, q2) || contains(p2, q2, p1, q1)) && bgeo::intersects(a, b);
 }
 
 // _____________________________________________________________________________
@@ -135,41 +159,17 @@ inline bool intersects(double p1x, double p1y, double q1x, double q1y,
 }
 
 // _____________________________________________________________________________
-inline bool contains(const Point& p1, const Point& q1, const Point& p2,
-                     const Point& q2) {
-  Line a;
-  a.push_back(p1);
-  a.push_back(q1);
-  Line b;
-  b.push_back(p2);
-  b.push_back(q2);
-
-  return bgeo::within(a, b);
-}
-
-// _____________________________________________________________________________
-inline bool contains(double p1x, double p1y, double q1x, double q1y, double p2x,
-                     double p2y, double q2x, double q2y) {
-  Point p1(p1x, p1y);
-  Point q1(q1x, q1y);
-  Point p2(p2x, p2y);
-  Point q2(q2x, q2y);
-
-  return intersects(p1, q1, p2, q2);
-}
-
-// _____________________________________________________________________________
 inline Point intersection(double p1x, double p1y, double q1x, double q1y,
                           double p2x, double p2y, double q2x, double q2y) {
   /*
    * calculates the intersection between two line segments
    */
-  if (p1x == q1x && p1y == q1y)
+  if (doubleEq(p1x, q1x) && doubleEq(p1y, q1y))
     return Point(p1x, p1y);  // TODO: <-- intersecting with a point??
-  if (p2x == q1x && p2y == q1y) return Point(p2x, p2y);
-  if (p2x == q2x && p2y == q2y)
+  if (doubleEq(p2x, q1x) && doubleEq(p2y, q1y)) return Point(p2x, p2y);
+  if (doubleEq(p2x, q2x) && doubleEq(p2y, q2y))
     return Point(p2x, p2y);  // TODO: <-- intersecting with a point??
-  if (p1x == q2x && p1y == q2y) return Point(p1x, p1y);
+  if (doubleEq(p1x, q2x) && doubleEq(p1y, q2y)) return Point(p1x, p1y);
 
   double a = ((q2y - p2y) * (q1x - p1x)) - ((q2x - p2x) * (q1y - p1y));
   double u = (((q2x - p2x) * (p1y - p2y)) - ((q2y - p2y) * (p1x - p2x))) / a;

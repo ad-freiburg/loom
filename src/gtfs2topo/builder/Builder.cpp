@@ -135,7 +135,8 @@ ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
         for (auto toTest : nt->getAdjListOut()) {
           // TODO: only check edges with a SINGLE geometry atm, see also check
           // above
-          if (_indEdges.find(toTest) != _indEdges.end() ||
+          if (_indEdgesPairs.find(std::pair<const Edge*, const Edge*>(e, toTest)) != _indEdgesPairs.end() ||
+              _indEdges.find(toTest) != _indEdges.end() ||
               toTest->getEdgeTripGeoms()->size() != 1) {
             continue;
           }
@@ -157,9 +158,11 @@ ShrdSegWrap Builder::getNextSharedSegment(Graph* g, bool final) const {
                     toTest->getEdgeTripGeoms()->front().getGeom(), dmax);
 
             if (s.segments.size() > 0) {
-              _pEdges[e]++;
-              if (_pEdges[e] > 20) {
-                _indEdges.insert(e);
+              _pEdges[std::pair<const Edge*, const Edge*>(e, toTest)]++;
+              _pEdges[std::pair<const Edge*, const Edge*>(toTest, e)]++;
+              if (_pEdges[std::pair<const Edge*, const Edge*>(e, toTest)] > 20) {
+                _indEdgesPairs.insert(std::pair<const Edge*, const Edge*>(e, toTest));
+                _indEdgesPairs.insert(std::pair<const Edge*, const Edge*>(toTest, e));
               }
               // LOG(DEBUG) << _indEdges.size() << " / " << i << std::endl;
               return ShrdSegWrap(e, toTest, s.segments.front());

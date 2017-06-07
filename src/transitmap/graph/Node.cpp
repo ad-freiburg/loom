@@ -327,19 +327,25 @@ std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
           continue;
         }
 
+        auto is = getInnerStraightLine(c, o, p);
+        if (is.geom.getLength() == 0) continue;
+
         if (prec > 0) {
           ret.push_back(getInnerBezier(c, o, p, prec));
         } else {
-          ret.push_back(getInnerStraightLine(c, o, p));
+          ret.push_back(is);
         }
       }
 
       // handle lines where this node is the terminus
       if (partners.size() == 0) {
-        if (prec > 0) {
-          ret.push_back(getTerminusBezier(c, o, prec));
-        } else {
-          ret.push_back(getTerminusStraightLine(c, o));
+        auto is = getTerminusStraightLine(c, o);
+        if (is.geom.getLength() > 0) {
+          if (prec > 0) {
+            ret.push_back(getTerminusBezier(c, o, prec));
+          } else {
+            ret.push_back(is);
+          }
         }
       }
 
@@ -429,7 +435,6 @@ InnerGeometry Node::getInnerBezier(const Configuration& cf,
   Point pp = ret.geom.getLine().back();
   double d = pbutil::geo::dist(p, pp);
 
-
   Point b = p;
   Point c = pp;
   std::pair<double, double> slopeA, slopeB;
@@ -465,20 +470,22 @@ InnerGeometry Node::getInnerBezier(const Configuration& cf,
   if (d > 0.001 && pbutil::geo::intersects(pa, ppa, pb, ppb)) {
     Point isect = pbutil::geo::intersection(pa, ppa, pb, ppb);
 
-    double ang = 0;
+    if (!std::isnan(isect.get<0>()) && !std::isnan(isect.get<1>())) {
+      double degAng = pbutil::geo::innerProd(isect, pa, ppb);
+      double ang = cos(degAng / (180 / M_PI));
 
-    if (pbutil::geo::dist(pa, isect) > 0.001 &&
-        pbutil::geo::dist(ppb, isect) > 0.001) {
-      double ang = pbutil::geo::innerProd(pa, isect, ppb);
+      ang = ang * ang;
+
+      if (std::isnan(ang)) ang = 1;
+
+      double dar = pbutil::geo::dist(isect, p);
+      double dbr = pbutil::geo::dist(isect, pp);
+
+      double avg = (dar + dbr) / 2;
+
+      da = (dar * 2 * (1 - ang) + avg * 2 * (ang)) / 2;
+      db = (dbr * 2 * (1 - ang) + avg * 2 * (ang)) / 2;
     }
-
-    ang = fabs(cos(ang));
-
-    double dar = pbutil::geo::dist(isect, p);
-    double dbr = pbutil::geo::dist(isect, pp);
-
-    da = 1 + (dar * (1-ang));
-    db = 1 + (dbr * (1-ang));
   }
 
   if ((da + db) < 0.001 || (da + db) > d * 2) {
