@@ -139,5 +139,11 @@ bool EdgeTripGeom::routeEquivalent(const EdgeTripGeom& g) const {
     }
   }
 
+  for (auto to : g._trips) {
+    if (!containsRoute(to.route)) {
+      return false;
+    }
+  }
+
   return true;
 }

@@ -376,18 +376,23 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
     EdgeTripGeom faEdgeGeom(fa, faDir);
     EdgeTripGeom fcEdgeGeom(fc, fcDir);
 
+    Node* wefrom = w.e->getFrom();
+    Node* weto = w.e->getTo();
+    Node* wffrom = w.f->getFrom();
+    Node* wfto = w.f->getTo();
+
     for (const TripOccurance& r : curEdgeGeom.getTripsUnordered()) {
       for (auto& t : r.trips) {
         if (!r.direction) {
           eaEdgeGeom.addTrip(t, 0);
           abEdgeGeom.addTrip(t, 0);
           ecEdgeGeom.addTrip(t, 0);
-        } else if (r.direction == w.e->getTo()) {
+        } else if (r.direction == weto) {
           eaEdgeGeom.addTrip(t, a);
           abEdgeGeom.addTrip(t, b);
-          ecEdgeGeom.addTrip(t, w.e->getTo());
+          ecEdgeGeom.addTrip(t, weto);
         } else {
-          eaEdgeGeom.addTrip(t, w.e->getFrom());
+          eaEdgeGeom.addTrip(t, wefrom);
           abEdgeGeom.addTrip(t, a);
           ecEdgeGeom.addTrip(t, b);
         }
@@ -400,17 +405,26 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
           faEdgeGeom.addTrip(t, 0);
           abEdgeGeom.addTrip(t, 0);
           fcEdgeGeom.addTrip(t, 0);
-        } else if ((r.direction == w.f->getTo() &&
-                    !(fap.totalPos > fbp.totalPos)) ||
-                   (r.direction != w.f->getTo() &&
-                    (fap.totalPos > fbp.totalPos))) {
-          faEdgeGeom.addTrip(t, a);
-          abEdgeGeom.addTrip(t, b);
-          fcEdgeGeom.addTrip(t, w.f->getTo());
+        } else if ((r.direction == wfto)) {
+          if (fap.totalPos > fbp.totalPos) {
+            faEdgeGeom.addTrip(t, wfto);
+            abEdgeGeom.addTrip(t, a);
+            fcEdgeGeom.addTrip(t, b);
+          } else {
+            faEdgeGeom.addTrip(t, a);
+            abEdgeGeom.addTrip(t, b);
+            fcEdgeGeom.addTrip(t, wfto);
+          }
         } else {
-          faEdgeGeom.addTrip(t, w.f->getFrom());
-          abEdgeGeom.addTrip(t, a);
-          fcEdgeGeom.addTrip(t, b);
+          if (fap.totalPos > fbp.totalPos) {
+            faEdgeGeom.addTrip(t, a);
+            abEdgeGeom.addTrip(t, b);
+            fcEdgeGeom.addTrip(t, b);
+          } else {
+            faEdgeGeom.addTrip(t, wffrom);
+            abEdgeGeom.addTrip(t, a);
+            fcEdgeGeom.addTrip(t, wfto);
+          }
         }
       }
     }
@@ -422,11 +436,6 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
     for (auto to : compEdgeGeom.getTripsUnordered()) {
       assert(abEdgeGeom.containsRoute(to.route));
     }
-
-    Node* wefrom = w.e->getFrom();
-    Node* weto = w.e->getTo();
-    Node* wffrom = w.f->getFrom();
-    Node* wfto = w.f->getTo();
 
     // delete old edges
     g->deleteEdge(w.e->getFrom(), w.e->getTo());
@@ -622,7 +631,7 @@ Node* Builder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel, Graph* g) {
                               g->getProjection());
 
   if (aggrLevel > 1) {
-    n = g->getNearestNode(p, 60);
+    n = g->getNearestNode(p, 100);
   }
 
   if (n) {

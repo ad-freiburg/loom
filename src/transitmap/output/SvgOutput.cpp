@@ -358,7 +358,8 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       std::map<uintptr_t, std::vector<OutlinePrintPair> >());
   std::multiset<InnerClique> renderCliques = getInnerCliques(cc.geoms, 0);
   for (const auto& c : renderCliques) {
-    // the longest geom will be the ref geom
+    // the shortes geom will be the ref geom (to avoid topological problems
+    //  while offsetting)
     graph::InnerGeometry ref = c.geoms[0];
     for (size_t i = 1; i < c.geoms.size(); i++) {
       if (c.geoms[i].geom.getLength() > ref.geom.getLength()) ref = c.geoms[i];
@@ -384,6 +385,20 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
         if (ref.from.edge->getTo() == n) off = -off;
 
         pl = ref.geom.getPerpOffsetted(off);
+
+        std::set<LinePoint, LinePointCmp> a;
+        std::set<LinePoint, LinePointCmp> b;
+
+        if (ref.from.front) a = ref.from.front->geom.getIntersections(pl);
+        if (ref.to.front) b = ref.to.front->geom.getIntersections(pl);
+
+        if (a.size() == 1 && b.size() == 1) {
+          pl = pl.getSegment(a.begin()->totalPos, b.begin()->totalPos);
+        } else if (a.size() == 1) {
+          pl = pl.getSegment(a.begin()->totalPos, 1);
+        } else if (b.size() == 1) {
+          pl = pl.getSegment(0, b.begin()->totalPos);
+        }
       }
 
       std::stringstream styleOutlineCropped;

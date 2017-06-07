@@ -452,7 +452,7 @@ bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
 std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(const Node* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->getMainDirs()) {
-    if (nf.edge->getGeom().getLength() > nf.edge->getWidth() ||
+    if (nf.edge->getGeom().getLength() > (nf.edge->getWidth() + nf.edge->getSpacing()) ||
         nf.edge->getTo()->getStops().size() > 0 || nf.edge->getFrom()->getStops().size() > 0) {
       res.push_back(nf);
     }
@@ -465,7 +465,7 @@ std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(const Node* n) const {
 std::vector<NodeFront> GraphBuilder::getClosedNodeFronts(const Node* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->getMainDirs()) {
-    if (!(nf.edge->getGeom().getLength() > nf.edge->getWidth()) &&
+    if (!(nf.edge->getGeom().getLength() > (nf.edge->getWidth() + nf.edge->getSpacing())) &&
         nf.edge->getTo()->getStops().size() == 0 && nf.edge->getFrom()->getStops().size() == 0) {
       res.push_back(nf);
     }

@@ -427,7 +427,8 @@ InnerGeometry Node::getInnerBezier(const Configuration& cf,
   InnerGeometry ret = getInnerStraightLine(cf, partnerFrom, partnerTo);
   Point p = ret.geom.getLine().front();
   Point pp = ret.geom.getLine().back();
-  double d = pbutil::geo::dist(p, pp) / 2;
+  double d = pbutil::geo::dist(p, pp);
+
 
   Point b = p;
   Point c = pp;
@@ -452,8 +453,41 @@ InnerGeometry Node::getInnerBezier(const Configuration& cf,
     slopeB = partnerTo.front->edge->getGeom().getSlopeBetweenDists(5, 0);
   }
 
-  b = Point(p.get<0>() + slopeA.first * d, p.get<1>() + slopeA.second * d);
-  c = Point(pp.get<0>() + slopeB.first * d, pp.get<1>() + slopeB.second * d);
+  double da = 1;
+  double db = 1;
+
+  Point pa = Point(p.get<0>() - slopeA.first * d * 2, p.get<1>() - slopeA.second * d * 2);
+  Point pb = Point(pp.get<0>() - slopeB.first * d * 2, pp.get<1>() - slopeB.second * d * 2);
+  Point ppa = Point(p.get<0>() + slopeA.first * d * 2, p.get<1>() + slopeA.second * d * 2);
+  Point ppb = Point(pp.get<0>() + slopeB.first * d * 2, pp.get<1>() + slopeB.second * d * 2);
+
+
+  if (d > 0.001 && pbutil::geo::intersects(pa, ppa, pb, ppb)) {
+    Point isect = pbutil::geo::intersection(pa, ppa, pb, ppb);
+
+    double ang = 0;
+
+    if (pbutil::geo::dist(pa, isect) > 0.001 &&
+        pbutil::geo::dist(ppb, isect) > 0.001) {
+      double ang = pbutil::geo::innerProd(pa, isect, ppb);
+    }
+
+    ang = fabs(cos(ang));
+
+    double dar = pbutil::geo::dist(isect, p);
+    double dbr = pbutil::geo::dist(isect, pp);
+
+    da = 1 + (dar * (1-ang));
+    db = 1 + (dbr * (1-ang));
+  }
+
+  if ((da + db) < 0.001 || (da + db) > d * 2) {
+    da = 1;
+    db = 1;
+  }
+
+  b = Point(p.get<0>() + slopeA.first * d * (da / (da+db)), p.get<1>() + slopeA.second * d * (da / (da+db)));
+  c = Point(pp.get<0>() + slopeB.first * d * (db / (da+db)), pp.get<1>() + slopeB.second * d * (db / (da+db)));
 
   BezierCurve bc(p, b, c, pp);
   ret.geom = bc.render(prec);

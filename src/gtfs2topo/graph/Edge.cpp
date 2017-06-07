@@ -90,6 +90,10 @@ std::vector<EdgeTripGeom>* Edge::getEdgeTripGeoms() {
 void Edge::addEdgeTripGeom(const EdgeTripGeom& e) {
   assert(e.getGeomDir() == _from || e.getGeomDir() ==  _to);
 
+  for (const auto& to : e.getTripsUnordered()) {
+    assert(to.direction == 0 || to.direction == _from || to.direction == _to);
+  }
+
   _tripsContained.push_back(e);
   if (e.getGeomDir() != _to) {
     const_cast<PolyLine*>(&_tripsContained.back().getGeom())->reverse();
