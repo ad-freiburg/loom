@@ -49,6 +49,7 @@ class GraphBuilder {
   std::set<NodeFront*> nodeGetOverlappingFronts(const Node* n) const;
   void freeNodeFront(NodeFront* f);
 
+
   std::map<const Route*, std::set<const Route*> >
   getPartnerRoutes(graph::TransitGraph* g) const;
 
