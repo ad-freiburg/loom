@@ -72,7 +72,7 @@ maps/%: %/network.json
 
 
 	# z14
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=40 --line-spacing=20 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.125
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=34 --line-spacing=17 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.125
 	cp $@/z14/network_e.pngw $@/z14/network_s.pngw
 	cp $@/z14/network_e.pngw $@/z14/network_n.pngw
 	inkscape $@/z14/edges.svg --export-png=$@/z14/network_e.png
@@ -84,7 +84,7 @@ maps/%: %/network.json
 
 
 	# z13
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=70 --line-spacing=35 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.075
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=60 --line-spacing=30 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.075
 	cp $@/z13/network_e.pngw $@/z13/network_s.pngw
 	cp $@/z13/network_e.pngw $@/z13/network_n.pngw
 	inkscape $@/z13/edges.svg --export-png=$@/z13/network_e.png
@@ -96,7 +96,7 @@ maps/%: %/network.json
 
 
 	# z12
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=90 --line-spacing=40 -o $@/z12/ --world-file-path=$@/z12/network_e.pngw  --resolution=0.03
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=100 --line-spacing=50 -o $@/z12/ --world-file-path=$@/z12/network_e.pngw  --resolution=0.03
 	cp $@/z12/network_e.pngw $@/z12/network_s.pngw
 	cp $@/z12/network_e.pngw $@/z12/network_n.pngw
 	inkscape $@/z12/edges.svg --export-png=$@/z12/network_e.png
@@ -108,7 +108,7 @@ maps/%: %/network.json
 
 
 	# z11
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=170 --line-spacing=70 -o $@/z11/ --world-file-path=$@/z11/network_e.pngw  --resolution=0.015
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=140 --line-spacing=60 -o $@/z11/ --world-file-path=$@/z11/network_e.pngw  --resolution=0.015
 	cp $@/z11/network_e.pngw $@/z11/network_s.pngw
 	cp $@/z11/network_e.pngw $@/z11/network_n.pngw
 	inkscape $@/z11/edges.svg --export-png=$@/z11/network_e.png

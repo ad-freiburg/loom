@@ -196,10 +196,11 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG,
                                  const RenderParams& rparams) {
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
+    std::string color = n->getStops().size() > 0 ? "red" : "black";
     for (auto& f : n->getMainDirs()) {
       const PolyLine p = f.geom;
       std::stringstream style;
-      style << "fill:none;stroke:black"
+      style << "fill:none;stroke:" << color
             << ";stroke-linejoin: "
                "miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1";
       std::map<std::string, std::string> params;
@@ -209,7 +210,7 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG,
       Point a = p.getPointAt(.5).p;
 
       std::stringstream styleA;
-      styleA << "fill:none;stroke:black"
+      styleA << "fill:none;stroke:" << color
              << ";stroke-linejoin: "
                 "miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
       params["style"] = styleA.str();

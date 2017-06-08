@@ -370,24 +370,22 @@ std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(
     nodeStack.push(n);
 
     while (!nodeStack.empty()) {
-      auto nfronts = getClosedNodeFronts(nodeStack.top());
-        nodeStack.pop();
-        for (auto nf : nfronts) {
-          if (getOpenNodeFronts(nf.n).size() >= 1 &&
-              nf.n->getStops().size() == 0) {
-          potClique.insert(nf.n);
-          for (auto nff : getClosedNodeFronts(nf.n)) {
-            const Node* m;
+      const Node* n = nodeStack.top();
+      nodeStack.pop();
 
-            if (nff.edge->getTo() == nf.n) {
-              m = nff.edge->getFrom();
-            } else {
-              m = nff.edge->getTo();
-            }
+      if (n->getStops().size() == 0) {
+        potClique.insert(n);
+        for (auto nff : getClosedNodeFronts(n)) {
+          const Node* m;
 
-            if (potClique.find(m) == potClique.end()) {
-              nodeStack.push(m);
-            }
+          if (nff.edge->getTo() == n) {
+            m = nff.edge->getFrom();
+          } else {
+            m = nff.edge->getTo();
+          }
+
+          if (potClique.find(m) == potClique.end()) {
+            nodeStack.push(m);
           }
         }
       }
@@ -397,7 +395,13 @@ std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(
       std::vector<NodeFront> ret;
 
       for (auto n : potClique) {
-        ret.push_back(getOpenNodeFronts(n)[0]);
+        if (getOpenNodeFronts(n).size() > 0) {
+          ret.push_back(getOpenNodeFronts(n)[0]);
+        } else {
+          for (auto nf : getClosedNodeFronts(n)) {
+            ret.push_back(nf);
+          }
+        }
       }
 
       return ret;
@@ -413,7 +417,7 @@ bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
 
   for (const Node* a : potClique) {
     for (const Node* b : potClique) {
-      if (pbutil::geo::dist(a->getPos(), b->getPos()) > (_cfg->lineWidth + _cfg->lineSpacing) * 6) {
+      if (pbutil::geo::dist(a->getPos(), b->getPos()) > (_cfg->lineWidth + _cfg->lineSpacing) * 10) {
         return false;
       }
     }
