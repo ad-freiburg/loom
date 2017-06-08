@@ -11,23 +11,8 @@ PARAMS := --coin-cbc-binary=$(CBC_BIN) --render-station-names=1 --glpk-time-limi
 RPARAMS := --coin-cbc-binary=$(CBC_BIN) --outline-width=1 --render-edges=0 --render-station-names=0 --glpk-time-limit=100000000 --output-stats=0  --render-node-fronts=0 --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
 
 
-freiburg/network.svg: freiburg/network.json
-	cat $< | $(TRANSITMAP_BIN) -o $@ $(PARAMS) --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH} | sed '/stats/w freiburg/stats'
-
-chicago/network.svg: chicago/network.json
-	cat $< | $(TRANSITMAP_BIN) -o $@ $(PARAMS) --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH} | sed '/stats/w chicago/stats'
-
-dallas/network.svg: dallas/network.json
-	cat $< | $(TRANSITMAP_BIN) -o $@ $(PARAMS) --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH} | sed '/stats/w dallas/stats'
-
-stuttgart/network.svg: stuttgart/network.json
-	cat $< | $(TRANSITMAP_BIN) -o $@ $(PARAMS) --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH} | sed '/stats/w stuttgart/stats'
-
-nyc_subway/network.svg: nyc_subway/network.json
-	cat $< | $(TRANSITMAP_BIN) -o $@ $(PARAMS) --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH} | sed '/stats/w nyc_subway/stats'
-
-busses_manhattan/network.svg: busses_manhattan/network.json
-	cat $< | $(TRANSITMAP_BIN) -o $@ $(PARAMS) --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH} | sed '/stats/w busses_manhattan/stats'
+%/network.svg: %/network.json
+	cat $< | $(TRANSITMAP_BIN) -o $@ $(PARAMS) --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH} | sed '/stats/w $(dir $<)/stats'
 
 clean:
 	rm -f freiburg/network.svg
