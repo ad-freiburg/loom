@@ -74,6 +74,14 @@ nav .form-group label {
   color: #777;
 }
 
+.loom {
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 0.9em;
+}
+
 @media (min-width: 1400px) {
   .col-vlg-2 {
     width: 18%;
