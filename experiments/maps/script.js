@@ -91,7 +91,7 @@ var stationsLayer = new ol.layer.Group({layers : stations});
 var edgesLayer = new ol.layer.Group({layers : edges});
 var nodesLayer = new ol.layer.Group({layers : nodes});
 
-var map = new ol.Map({
+window.map = new ol.Map({
   target: 'map',
   renderer: 'canvas',
   controls: ol.control.defaults().extend([
@@ -124,6 +124,8 @@ var map = new ol.Map({
     resolutions: [156543.03390625, 78271.516953125, 39135.7584765625, 19567.87923828125, 9783.939619140625, 4891.9698095703125, 2445.9849047851562, 1222.9924523925781, 611.4962261962891, 305.74811309814453, 152.87405654907226, 76.43702827453613, 38.218514137268066, 19.109257068634033, 9.554628534317017, 4.7777]//, 2.38888]
   })
 });
+
+$(document).ready(function() {window.map.updateSize()});
 
 function getVisibleNetwork() {
   if (map.getView().getZoom() < 6) return undefined;

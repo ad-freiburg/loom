@@ -1,6 +1,9 @@
 #map {
     height: 100%;
     position: absolute;
+    padding: 0;
+    right: 0;
+    left: 0;
 }
 
 html, body {
@@ -66,10 +69,6 @@ nav .form-group label {
   float: right;
 }
 
-#map {
-  padding: 0;
-}
-
 .navbar-text a {
   color: #777;
 }
@@ -93,5 +92,23 @@ nav .form-group label {
 
   .col-vlg-offset-2 {
     margin-left: 18%;
+  }
+}
+
+@media (min-width: 768px) {
+  #map {
+    width: auto;
+  }
+}
+
+@media (max-width: 400px) {
+  a.navbar-brand {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 300px) {
+  a.navbar-brand .subtitle {
+    display: none;
   }
 }
