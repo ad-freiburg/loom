@@ -37,13 +37,13 @@ class Node {
  public:
   explicit Node(Point pos);
   Node(double x, double y);
-  Node(Point pos, gtfs::Stop* stop);
-  Node(double x, double y, gtfs::Stop* stop);
+  Node(Point pos, const gtfs::Stop* stop);
+  Node(double x, double y, const gtfs::Stop* stop);
 
   ~Node();
 
-  const std::set<gtfs::Stop*>& getStops() const;
-  void addStop(gtfs::Stop* s);
+  const std::set<const gtfs::Stop*>& getStops() const;
+  void addStop(const gtfs::Stop* s);
   const Point& getPos() const;
   void setPos(const Point& p);
 
@@ -75,7 +75,7 @@ class Node {
   std::set<Edge*> _adjListOut;
   Point _pos;
 
-  std::set<gtfs::Stop*> _stops;
+  std::set<const gtfs::Stop*> _stops;
 
   std::map<const gtfs::Route*, std::vector<OccuringConnection> > _occConns;
 

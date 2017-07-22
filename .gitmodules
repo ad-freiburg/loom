@@ -1,0 +1,3 @@
+[submodule "src/cpp-gtfs"]
+	path = src/cpp-gtfs
+	url = /home/patrick/secure/repo/cpp-gtfs/

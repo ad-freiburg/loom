@@ -4,6 +4,7 @@
 
 #include <proj_api.h>
 #include "./Builder.h"
+#include "gtfsparser/gtfs/Feed.h"
 #include "pbutil/geo/Geo.h"
 #include "pbutil/log/Log.h"
 
@@ -28,7 +29,7 @@ void Builder::consume(const Feed& f, Graph* g) {
   uint8_t AGGREGATE_STOPS = _cfg->stationAggrLevel;
 
   size_t cur = 0;
-  for (auto t = f.tripsBegin(); t != f.tripsEnd(); ++t) {
+  for (auto t = f.getTrips().begin(); t != f.getTrips().end(); ++t) {
     cur++;
     if (t->second->getStopTimes().size() < 2) continue;
 
@@ -64,10 +65,10 @@ void Builder::consume(const Feed& f, Graph* g) {
       if (!exE->addTrip(t->second, directionNode)) {
         std::pair<bool, PolyLine> edgeGeom;
         if (AGGREGATE_STOPS) {
-          Stop* frs = prev.getStop()->getParentStation()
+          const Stop* frs = prev.getStop()->getParentStation()
                           ? prev.getStop()->getParentStation()
                           : prev.getStop();
-          Stop* tos = cur.getStop()->getParentStation()
+          const Stop* tos = cur.getStop()->getParentStation()
                           ? cur.getStop()->getParentStation()
                           : cur.getStop();
           edgeGeom = getSubPolyLine(
@@ -541,7 +542,7 @@ bool Builder::createTopologicalNodes(Graph* g, bool final) {
 }
 
 // _____________________________________________________________________________
-std::pair<bool, PolyLine> Builder::getSubPolyLine(Stop* a, Stop* b, Trip* t,
+std::pair<bool, PolyLine> Builder::getSubPolyLine(const Stop* a, const Stop* b, Trip* t,
                                                   double distA, double distB,
                                                   projPJ proj) {
   Point ap = getProjectedPoint(a->getLat(), a->getLng(), proj);
@@ -621,7 +622,7 @@ void Builder::averageNodePositions(Graph* g) {
 }
 
 // _____________________________________________________________________________
-Node* Builder::addStop(gtfs::Stop* curStop, uint8_t aggrLevel, Graph* g) {
+Node* Builder::addStop(const gtfs::Stop* curStop, uint8_t aggrLevel, Graph* g) {
   if (aggrLevel && curStop->getParentStation() != 0) {
     return addStop(curStop->getParentStation(), aggrLevel, g);
   }

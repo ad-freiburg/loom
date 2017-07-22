@@ -55,14 +55,14 @@ class Builder {
 
   Point getProjectedPoint(double lat, double lng, projPJ p) const;
 
-  std::pair<bool, PolyLine> getSubPolyLine(gtfs::Stop* a, gtfs::Stop* b,
+  std::pair<bool, PolyLine> getSubPolyLine(const gtfs::Stop* a, const gtfs::Stop* b,
                                            gtfs::Trip* t, double distA,
                                            double distB, projPJ p);
 
   ShrdSegWrap getNextSharedSegment(Graph* g, bool final) const;
   PolyLine getAveragedFromSharedSeg(const ShrdSegWrap& w) const;
 
-  Node* addStop(gtfs::Stop* curStop, uint8_t aggrLevel, Graph* g);
+  Node* addStop(const gtfs::Stop* curStop, uint8_t aggrLevel, Graph* g);
 
   bool checkTripSanity(gtfs::Trip* t) const;
   bool checkShapeSanity(gtfs::Shape* t) const;

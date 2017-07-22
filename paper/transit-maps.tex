@@ -57,7 +57,7 @@ JMU W\"urzburg (Germany)\\
 
 \begin{abstract}
 	We present LOOM, an algorithm for the fully automatic generation of esthetically pleasing and geographically accurate transit maps.
-	The input to our algorithm is data about the lines of a given transit network, namely for each line, the sequence of stations it visits and the 
+	The input to our algorithm is data about the lines of a given transit network, namely for each line, the sequence of stations it visits and the
 	geographical course the vehicles of this line take.
 	%We parse this data from GTFS, the prevailing standard for public transit data.
 	%
@@ -75,7 +75,7 @@ JMU W\"urzburg (Germany)\\
 	We evaluate our algorithms on the GTFS data of six cities around the world.
 	The construction process is fast (less than 30 seconds, even for large cities), and the resulting transit maps are esthetically pleasing.
 	Indeed, they are surprisingly close to hand-made transit maps and superior to the automatic transit maps provided by Google Maps.
-	Previous research work has focused on minimizing the number of line crossings irrespective of the geographical course of the lines and without 
+	Previous research work has focused on minimizing the number of line crossings irrespective of the geographical course of the lines and without
 	producing actual maps as an end result.
 	% seems like keywords are not common in GD publications
 	% \keywords{computational geometry, graph theory, optimization}
@@ -144,7 +144,7 @@ We will see that the complexity of our algorithm depends on $M = \max_{e \in E} 
 The line graph construction is described in Section \ref{SEC:graph}.
 
 \smallskip\noindent
-{\bf Line ordering optimization:} 
+{\bf Line ordering optimization:}
 This phase computes an \emph{ordering} for the line graph, which is simply an ordering of $\Hl(e)$ for each $e \in E$.
 This ordering determines where crossing occur, and is hence critical for the appearance of the final map; see again Figure \ref{FIG:transitgraphvvs}.
 We formulate this as an Integer Linear Program (ILP).
@@ -157,7 +157,7 @@ Section \ref{SEC:ordering} provide the details about this step (in particular, a
 %As a consequence, since MLCM is known to be NP-hard, also MLTCM is NP-hard.
 
 \smallskip\noindent
-{\bf Rendering:} 
+{\bf Rendering:}
 Given a line graph and an ordering, the final step is to draw the transit map.
 Each station node $v$ is drawn as a polygon, where each side of the polygon corresponds to exactly one incident edge of $v$.
 We call this side the \emph{node front} of that edge at that station.
@@ -199,7 +199,7 @@ See again Section \ref{SEC:related}.
 %
 %\item \TODO{mention that we know of no publication address the MCLM or the drawing of metro maps that uses real-world data}
 %
-%\item \TODO{mention that we not only want to generate schematic maps, but maps that resemble the real-world vehicle paths as closely as possible} 
+%\item \TODO{mention that we not only want to generate schematic maps, but maps that resemble the real-world vehicle paths as closely as possible}
 
 \end{itemize}
 
@@ -227,7 +227,7 @@ See again Section \ref{SEC:related}.
 \subsection{Related Work}\label{SEC:related}
 %
 
-The problem of minimizing intra-edge crossings in transit maps was introduced in \cite{ben06}, 
+The problem of minimizing intra-edge crossings in transit maps was introduced in \cite{ben06},
 with the premises of not hiding crossings under station markers for aesthetic reasons.
 A polynomial time algorithm for the special case of optimizing the layout along a single edge was described.
 The term metro-line crossing minimization problem (MLCM) was coined in \cite{bek07}.
@@ -235,7 +235,7 @@ In that paper, optimal layouts for path and tree networks were investigated but 
 In \cite{arg08}, \cite{nol09}, \cite{arg10}, several variants of MLCM were defined and efficient algorithms were presented for some of those, often with a restriction to planar graphs.
 In \cite{asq08}, an ILP formulation for MCLM under the periphery condition (see Sec.~\ref{SEC:separation}) was introduced.
 The resulting ILP was shown to have a size of $\mathcal{O}(|L|^2 \cdot |E|)$ with $L$ being the set of lines and $E$ the set of edges in the derived graph.
-In \cite{fin13b}, it was observed that many (unavoidable) crossings scattered along a single edge are also not visually pleasing, 
+In \cite{fin13b}, it was observed that many (unavoidable) crossings scattered along a single edge are also not visually pleasing,
 and hence crossings were grouped into so-called block crossings.
 The problem of minimizing the number of block crossings was shown to be NP-hard on simple graphs just like the original MCLM problem \cite{fin13a}.
 
@@ -528,7 +528,7 @@ Also note that separations are only considered in ILP variant $(S)$ and disregar
 		\noalign{\smallskip}
 		\hline
 		\noalign{\smallskip}
-		Freiburg (Trams)	& 1.54\Hs	& 74	& 6		 & 81	& 5		& 4	&	& 20	& 21	& 5		& 4		\\		
+		Freiburg (Trams)	& 1.54\Hs	& 74	& 6		 & 81	& 5		& 4	&	& 20	& 21	& 5		& 4		\\
 		Dallas (Light Rail) & 9.16\Hs & 108	& 9	 & 118	& 7	& 4	&	& 24	& 24	& 7	& 4		\\
 		Chicago	(`L' Train)		& 21.9\Hs	& 143	& 10	 & 154	& 8		& 6	& 	& 23	& 24	& 8		& 6		\\
 		Stuttgart (Trams)	& 8.79\Hs	& 192	& 31	 & 235	& 15	& 8	& 	& 51	& 60	& 15	& 8		\\
@@ -561,7 +561,7 @@ Also note that separations are only considered in ILP variant $(S)$ and disregar
 
 		&I					& 1,691	& 1.151	 & 19.6\Hs		& 786\Hms		& & 484	& 352	& \textbf{163}\Hms	& 190\Hms	& 22	& 4-7\footnoteref{FN:ordering}	& 120 \\
 
-		&S				& 2,151	& 1,372	 & (( 25\Hm ))		& 22.3\Hs	& & 595	& 405	& 39.2\Hs	& \textbf{4.5\Hs}	& 27	& 0	& 160	\\
+		&S				& 2,151	& 1,372	 & (70\Hm) 	& 22.3\Hs	& & 595	& 405	& 39.2\Hs	& \textbf{4.5\Hs}	& 27	& 0	& 160	\\
 
 
 
@@ -576,7 +576,7 @@ Also note that separations are only considered in ILP variant $(S)$ and disregar
 		New York&B			& 228,596	& 5,181	 & \textgreater 12\Hh& {\textgreater 12 h}& & 95,622		& 2,296	& \textgreater 12\Hh	& \textgreater 12\Hh		& -		& -	& -	\\
 
 
-		&I 					& 10,575& 7,081	 & (( 6.5\Hh )) 	& 3.1\Hs		& & 4,480	& 3,126	& (( ?? ))	& \textbf{741\Hms}	& 127  	& 9\footnoteref{FN:ordering} & 308	\\
+		&I 					& 10,575& 7,081	 & (( 6.5\Hh )) 	& 3.1\Hs		& & 4,480	& 3,126	& 19.3\Hm	& \textbf{741\Hms}	& 127  	& 9\footnoteref{FN:ordering} & 308	\\
 
 
 		&S				& 13,518 & 8,482	 & (( ?? ))	& (( 3.7\Hh )) &	& 5,555	& 3,586	& (( ?? ))	& \textbf{76.5\Hs}& 132	& 2	& 382	\\
@@ -585,7 +585,7 @@ Also note that separations are only considered in ILP variant $(S)$ and disregar
 	\end{tabular*}
 \end{table}
 
-Table~\ref{TBL:evalres} shows that for (I), the optimal order could be found in under 1 second for each dataset, and for (S) in under 1.5 minutes. For medium-sized networks an optimal solution for (S) was usually found in under $5$ seconds. As expected, core graph reduction made the ILPs smaller. On average, the number of rows decreased by $64\,\%$ and the number of columns by $61\,\%$ for (I). For (S), the average decrease for the number of rows was $60\,\%$ and for the number of columns by $57\,\%$. 
+Table~\ref{TBL:evalres} shows that for (I), the optimal order could be found in under 1 second for each dataset, and for (S) in under 1.5 minutes. For medium-sized networks an optimal solution for (S) was usually found in under $5$ seconds. As expected, core graph reduction made the ILPs smaller. On average, the number of rows decreased by $64\,\%$ and the number of columns by $61\,\%$ for (I). For (S), the average decrease for the number of rows was $60\,\%$ and for the number of columns by $57\,\%$.
 Although the ILPs for (S) were only slightly larger than for (I), optimization on the core graph took $35.4$ times longer on average on COIN.
 CBC outperformed glpk for larger datasets, sometimes dramatically. (B) could not be optimized in under $12$ hours for all datasets except Freiburg and Chicago on CBC.
 The time needed for graph extraction exceeded the optimization times for most datasets. This is no surprise, as we focused on the line-ordering optimization in this paper. Still, it indicates that further work is necessary here.

@@ -27,12 +27,12 @@ Node::Node(double x, double y) : _pos(x, y) {
 }
 
 // _____________________________________________________________________________
-Node::Node(Point pos, gtfs::Stop* s) : _pos(pos) {
+Node::Node(Point pos, const gtfs::Stop* s) : _pos(pos) {
   if (s) _stops.insert(s);
 }
 
 // _____________________________________________________________________________
-Node::Node(double x, double y, gtfs::Stop* s) : _pos(x, y) {
+Node::Node(double x, double y, const gtfs::Stop* s) : _pos(x, y) {
   if (s) _stops.insert(s);
 }
 
@@ -72,12 +72,12 @@ Node::~Node() {
 }
 
 // _____________________________________________________________________________
-void Node::addStop(gtfs::Stop* s) {
+void Node::addStop(const gtfs::Stop* s) {
   _stops.insert(s);
 }
 
 // _____________________________________________________________________________
-const std::set<gtfs::Stop*>& Node::getStops() const {
+const std::set<const gtfs::Stop*>& Node::getStops() const {
   return _stops;
 }
 
