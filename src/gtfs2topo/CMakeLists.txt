@@ -20,4 +20,4 @@ configure_file (
 add_executable(gtfs2topo ${gtfs2topo_main})
 add_library(gtfs2topo_dep ${gtfs2topo_SRC})
 
-target_link_libraries(gtfs2topo gtfs2topo_dep pbutil gtfsparser ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} -lproj -lpthread)
+target_link_libraries(gtfs2topo gtfs2topo_dep pbutil cppgtfs ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} -lproj -lpthread)
