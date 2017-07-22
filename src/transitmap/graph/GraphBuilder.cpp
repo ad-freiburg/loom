@@ -15,8 +15,6 @@
 
 using namespace transitmapper;
 using namespace graph;
-using namespace gtfsparser;
-using namespace gtfs;
 using namespace pbutil::geo;
 using json = nlohmann::json;
 

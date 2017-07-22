@@ -13,8 +13,8 @@
 #include "./config/GraphBuilderConfig.h"
 #include "./graph/Graph.h"
 #include "./output/GeoJsonOutput.h"
-#include "gtfsparser/Parser.h"
-#include "gtfsparser/gtfs/Service.h"
+#include "ad/cppgtfs/Parser.h"
+#include "ad/cppgtfs/gtfs/Service.h"
 #include "pbutil/log/Log.h"
 
 using namespace gtfs2topo;
@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   // parse an example feed
-  gtfsparser::Parser parser;
-  gtfsparser::gtfs::Feed feed;
+  ad::cppgtfs::Parser parser;
+  ad::cppgtfs::gtfs::Feed feed;
 
   if (!cfg.inputFeedPath.empty()) {
     parser.parse(&feed, cfg.inputFeedPath);

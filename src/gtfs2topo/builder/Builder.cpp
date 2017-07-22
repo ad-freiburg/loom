@@ -4,14 +4,14 @@
 
 #include <proj_api.h>
 #include "./Builder.h"
-#include "gtfsparser/gtfs/Feed.h"
+#include "ad/cppgtfs/gtfs/Feed.h"
 #include "pbutil/geo/Geo.h"
 #include "pbutil/log/Log.h"
 
 using namespace gtfs2topo;
 using namespace graph;
-using namespace gtfsparser;
-using namespace gtfs;
+using namespace ad::cppgtfs;
+using namespace ad::cppgtfs::gtfs;
 
 using pbutil::geo::Point;
 using pbutil::geo::PolyLine;

@@ -10,10 +10,11 @@
 #include <unordered_map>
 #include "./../config/GraphBuilderConfig.h"
 #include "./../graph/Graph.h"
-#include "gtfsparser/gtfs/Feed.h"
+#include "ad/cppgtfs/gtfs/Feed.h"
 #include "pbutil/geo/PolyLine.h"
 
 using namespace gtfs2topo::graph;
+using namespace ad::cppgtfs;
 using pbutil::geo::PolyLine;
 using pbutil::geo::SharedSegment;
 

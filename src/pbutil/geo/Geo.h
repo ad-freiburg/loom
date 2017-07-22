@@ -429,8 +429,6 @@ inline RotatedBox getOrientedEnvelopeAvg(MultiLine ml) {
 
   rbox.rotateDeg += bestDeg;
 
-  double STEP = 2;
-
 
   // move the box along 45deg angles from its origin until it fits the ml
   // = until the intersection of its hull and the box is largest

@@ -4,7 +4,7 @@
 
 #include <cassert>
 #include <vector>
-#include "gtfsparser/gtfs/Trip.h"
+#include "ad/cppgtfs/gtfs/Trip.h"
 #include "pbutil/geo/PolyLine.h"
 #include "Edge.h"
 #include "Node.h"
@@ -12,7 +12,7 @@
 
 using namespace gtfs2topo;
 using namespace graph;
-using namespace gtfsparser;
+using namespace ad::cppgtfs;
 
 using pbutil::geo::PolyLine;
 

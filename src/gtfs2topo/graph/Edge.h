@@ -10,9 +10,9 @@
 #include "Node.h"
 #include "EdgeTripGeom.h"
 #include "pbutil/geo/PolyLine.h"
-#include "gtfsparser/gtfs/Trip.h"
+#include "ad/cppgtfs/gtfs/Trip.h"
 
-using namespace gtfsparser;
+using namespace ad::cppgtfs;
 
 using std::exception;
 using std::string;

@@ -6,12 +6,12 @@
 #define GTFS2TOPO_GRAPH_NODE_H_
 
 #include <set>
-#include "gtfsparser/gtfs/Stop.h"
-#include "gtfsparser/gtfs/Route.h"
+#include "ad/cppgtfs/gtfs/Stop.h"
+#include "ad/cppgtfs/gtfs/Route.h"
 #include "pbutil/geo/PolyLine.h"
 #include "pbutil/geo/Geo.h"
 
-using namespace gtfsparser;
+using namespace ad::cppgtfs;
 
 namespace gtfs2topo {
 namespace graph {

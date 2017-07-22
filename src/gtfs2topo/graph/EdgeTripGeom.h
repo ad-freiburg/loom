@@ -6,15 +6,15 @@
 #define GTFS2TOPO_GRAPH_EDGETRIPGEOM_H_
 
 #include <vector>
-#include "gtfsparser/gtfs/Trip.h"
-#include "gtfsparser/gtfs/Route.h"
+#include "ad/cppgtfs/gtfs/Trip.h"
+#include "ad/cppgtfs/gtfs/Route.h"
 #include "pbutil/geo/PolyLine.h"
 #include "./Node.h"
 
 namespace gtfs2topo {
 namespace graph {
 
-using namespace gtfsparser;
+using namespace ad::cppgtfs;
 using namespace pbutil::geo;
 
 struct TripOccurance {

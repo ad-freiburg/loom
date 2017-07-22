@@ -7,12 +7,12 @@
 #include "./Edge.h"
 #include "./Graph.h"
 #include "pbutil/geo/Geo.h"
-#include "gtfsparser/gtfs/Stop.h"
+#include "ad/cppgtfs/gtfs/Stop.h"
 #include "./EdgeTripGeom.h"
 
 using namespace gtfs2topo;
 using namespace graph;
-using namespace gtfsparser;
+using namespace ad::cppgtfs;
 
 using pbutil::geo::Point;
 using pbutil::geo::Line;
@@ -178,7 +178,7 @@ void Node::sewConnectionsTogether(Edge* a, Edge* b) {
 }
 
 // _____________________________________________________________________________
-std::vector<const Edge*> Node::getConnectingEdgesFor(const gtfs::Route* to, Edge* a) 
+std::vector<const Edge*> Node::getConnectingEdgesFor(const gtfs::Route* to, Edge* a)
 const {
   std::vector<const Edge*> ret;
 

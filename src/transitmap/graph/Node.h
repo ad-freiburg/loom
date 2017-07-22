@@ -8,11 +8,9 @@
 #include <set>
 #include "./OrderingConfiguration.h"
 #include "./Route.h"
-#include "gtfsparser/gtfs/Stop.h"
 #include "pbutil/geo/Geo.h"
 #include "pbutil/geo/PolyLine.h"
 
-using namespace gtfsparser;
 using namespace pbutil::geo;
 
 namespace transitmapper {

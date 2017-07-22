@@ -13,7 +13,6 @@
 
 using namespace transitmapper;
 using namespace graph;
-using namespace gtfsparser;
 
 using pbutil::geo::Point;
 using pbutil::geo::BezierCurve;
@@ -670,6 +669,8 @@ Edge* Node::getEdge(const Node* other) const {
       return eP;
     }
   }
+
+  return 0;
 }
 
 // _____________________________________________________________________________

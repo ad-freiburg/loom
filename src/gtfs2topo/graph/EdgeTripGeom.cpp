@@ -4,13 +4,13 @@
 
 #include <cassert>
 #include <vector>
-#include "gtfsparser/gtfs/Trip.h"
-#include "gtfsparser/gtfs/Route.h"
+#include "ad/cppgtfs/gtfs/Trip.h"
+#include "ad/cppgtfs/gtfs/Route.h"
 #include "EdgeTripGeom.h"
 
 using namespace gtfs2topo;
 using namespace graph;
-using namespace gtfsparser;
+using namespace ad::cppgtfs;
 
 // _____________________________________________________________________________
 EdgeTripGeom::EdgeTripGeom(PolyLine geom, const Node* geomDir)
