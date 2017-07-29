@@ -7,8 +7,8 @@
 #include <float.h>
 #include <string>
 #include <exception>
-#include "pbutil/log/Log.h"
-#include "./ConfigReader.h"
+#include "util/log/Log.h"
+#include "transitmap/config/ConfigReader.h"
 
 using transitmapper::config::ConfigReader;
 namespace opts = boost::program_options;

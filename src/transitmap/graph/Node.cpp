@@ -3,21 +3,21 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <cassert>
-#include "../graph/OrderingConfiguration.h"
-#include "./Edge.h"
-#include "./Node.h"
-#include "./Route.h"
-#include "./TransitGraph.h"
-#include "pbutil/geo/BezierCurve.h"
-#include "pbutil/geo/Geo.h"
+#include "transitmap/graph/Edge.h"
+#include "transitmap/graph/Node.h"
+#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/Route.h"
+#include "transitmap/graph/TransitGraph.h"
+#include "util/geo/BezierCurve.h"
+#include "util/geo/Geo.h"
 
 using namespace transitmapper;
 using namespace graph;
 
-using pbutil::geo::Point;
-using pbutil::geo::BezierCurve;
-using pbutil::geo::PolyLine;
-using pbutil::geo::Line;
+using util::geo::Point;
+using util::geo::BezierCurve;
+using util::geo::PolyLine;
+using util::geo::Line;
 
 // _____________________________________________________________________________
 Point NodeFront::getTripOccPos(const Route* r,
@@ -26,8 +26,7 @@ Point NodeFront::getTripOccPos(const Route* r,
 }
 
 // _____________________________________________________________________________
-Point NodeFront::getTripOccPos(const Route* r,
-                               const graph::Configuration& c,
+Point NodeFront::getTripOccPos(const Route* r, const graph::Configuration& c,
                                bool origGeom) const {
   RouteOccWithPos rop;
 
@@ -48,7 +47,8 @@ Point NodeFront::getTripPos(const Edge* e, size_t pos, bool inv) const {
 }
 
 // _____________________________________________________________________________
-Point NodeFront::getTripPos(const Edge* e, size_t pos, bool inv, bool origG) const {
+Point NodeFront::getTripPos(const Edge* e, size_t pos, bool inv,
+                            bool origG) const {
   double p;
   if (!inv) {
     p = (e->getWidth() + e->getSpacing()) * pos + e->getWidth() / 2;
@@ -59,7 +59,8 @@ Point NodeFront::getTripPos(const Edge* e, size_t pos, bool inv, bool origG) con
 
   // use interpolate here directly for speed
   if (origG) {
-    return origGeom.interpolate(origGeom.getLine().front(), origGeom.getLine().back(), p);
+    return origGeom.interpolate(origGeom.getLine().front(),
+                                origGeom.getLine().back(), p);
   } else {
     return geom.interpolate(geom.getLine().front(), geom.getLine().back(), p);
   }
@@ -212,7 +213,9 @@ double Node::getCrossingScore(const Configuration& c, double inStatPen,
       const InnerGeometry& iga = igs[i];
       const InnerGeometry& igb = igs[j];
 
-      if (iga.from.front == 0 || iga.to.front == 0 || igb.from.front == 0 || igb.to.front == 0) continue;
+      if (iga.from.front == 0 || iga.to.front == 0 || igb.from.front == 0 ||
+          igb.to.front == 0)
+        continue;
 
       if (iga.from.front == igb.from.front && iga.slotFrom == igb.slotFrom)
         continue;
@@ -226,10 +229,10 @@ double Node::getCrossingScore(const Configuration& c, double inStatPen,
           (iga.from.front == igb.from.front && iga.to.front == igb.to.front) ||
           (iga.to.front == igb.from.front && iga.from.front == igb.to.front);
 
-      if (pbutil::geo::intersects(
+      if (util::geo::intersects(
               iga.geom.getLine().front(), iga.geom.getLine().back(),
               igb.geom.getLine().front(), igb.geom.getLine().back()) ||
-          bgeo::distance(iga.geom.getLine(), igb.geom.getLine()) < 1) {
+          util::geo::dist(iga.geom.getLine(), igb.geom.getLine()) < 1) {
         ret += 1 * getCrossingPenalty(
                        inStatPen, sameSeg ? sameSegPen : diffSegPen, adjpen);
       }
@@ -398,12 +401,12 @@ InnerGeometry Node::getInnerStraightLine(
 
 // _____________________________________________________________________________
 InnerGeometry Node::getTerminusBezier(const Configuration& cf,
-                                   const graph::Partner& partnerFrom,
-                                   double prec) const {
+                                      const graph::Partner& partnerFrom,
+                                      double prec) const {
   InnerGeometry ret = getTerminusStraightLine(cf, partnerFrom);
   Point p = ret.geom.getLine().front();
   Point pp = ret.geom.getLine().back();
-  double d = pbutil::geo::dist(p, pp) / 2;
+  double d = util::geo::dist(p, pp) / 2;
 
   Point b = p;
   Point c = pp;
@@ -436,7 +439,7 @@ InnerGeometry Node::getInnerBezier(const Configuration& cf,
   InnerGeometry ret = getInnerStraightLine(cf, partnerFrom, partnerTo);
   Point p = ret.geom.getLine().front();
   Point pp = ret.geom.getLine().back();
-  double d = pbutil::geo::dist(p, pp);
+  double d = util::geo::dist(p, pp);
 
   Point b = p;
   Point c = pp;
@@ -464,33 +467,41 @@ InnerGeometry Node::getInnerBezier(const Configuration& cf,
   double da = 1;
   double db = 1;
 
-  Point pa = Point(p.get<0>() - slopeA.first * d * 2, p.get<1>() - slopeA.second * d * 2);
-  Point pb = Point(pp.get<0>() - slopeB.first * d * 2, pp.get<1>() - slopeB.second * d * 2);
-  Point ppa = Point(p.get<0>() + slopeA.first * d * 2, p.get<1>() + slopeA.second * d * 2);
-  Point ppb = Point(pp.get<0>() + slopeB.first * d * 2, pp.get<1>() + slopeB.second * d * 2);
+  Point pa = Point(p.get<0>() - slopeA.first * d * 2,
+                   p.get<1>() - slopeA.second * d * 2);
+  Point pb = Point(pp.get<0>() - slopeB.first * d * 2,
+                   pp.get<1>() - slopeB.second * d * 2);
+  Point ppa = Point(p.get<0>() + slopeA.first * d * 2,
+                    p.get<1>() + slopeA.second * d * 2);
+  Point ppb = Point(pp.get<0>() + slopeB.first * d * 2,
+                    pp.get<1>() + slopeB.second * d * 2);
 
-
-  if (d > 0.001 && pbutil::geo::intersects(pa, ppa, pb, ppb)) {
-    Point isect = pbutil::geo::intersection(pa, ppa, pb, ppb);
+  if (d > 0.001 && util::geo::intersects(pa, ppa, pb, ppb)) {
+    Point isect = util::geo::intersection(pa, ppa, pb, ppb);
 
     if (!std::isnan(isect.get<0>()) && !std::isnan(isect.get<1>())) {
-      double degAng = pbutil::geo::innerProd(isect, pa, ppb);
+      double degAng = util::geo::innerProd(isect, pa, ppb);
       double ang = cos(degAng / (180 / M_PI));
 
       ang = ang * ang;
 
       if (std::isnan(ang)) ang = 1;
 
-      if (std::max(partnerFrom.edge->getCardinality(), partnerTo.edge->getCardinality()) > 1) {
-        double fac = fabs((double)((int)partnerFrom.edge->getCardinality() - (int)partnerTo.edge->getCardinality())) / (double)(std::max(partnerFrom.edge->getCardinality(), partnerTo.edge->getCardinality()) - 1);
+      if (std::max(partnerFrom.edge->getCardinality(),
+                   partnerTo.edge->getCardinality()) > 1) {
+        double fac = fabs((double)((int)partnerFrom.edge->getCardinality() -
+                                   (int)partnerTo.edge->getCardinality())) /
+                     (double)(std::max(partnerFrom.edge->getCardinality(),
+                                       partnerTo.edge->getCardinality()) -
+                              1);
 
         fac = pow(fac, 2);
 
         ang = pow(ang, fac);
       }
 
-      double dar = pbutil::geo::dist(isect, p);
-      double dbr = pbutil::geo::dist(isect, pp);
+      double dar = util::geo::dist(isect, p);
+      double dbr = util::geo::dist(isect, pp);
 
       double avg = (dar + dbr) / 2;
 
@@ -504,8 +515,10 @@ InnerGeometry Node::getInnerBezier(const Configuration& cf,
     db = 1;
   }
 
-  b = Point(p.get<0>() + slopeA.first * d * (da / (da+db)), p.get<1>() + slopeA.second * d * (da / (da+db)));
-  c = Point(pp.get<0>() + slopeB.first * d * (db / (da+db)), pp.get<1>() + slopeB.second * d * (db / (da+db)));
+  b = Point(p.get<0>() + slopeA.first * d * (da / (da + db)),
+            p.get<1>() + slopeA.second * d * (da / (da + db)));
+  c = Point(pp.get<0>() + slopeB.first * d * (db / (da + db)),
+            pp.get<1>() + slopeB.second * d * (db / (da + db)));
 
   BezierCurve bc(p, b, c, pp);
   ret.geom = bc.render(prec);
@@ -552,7 +565,7 @@ Polygon Node::getStationHull() const { return _stationHull; }
 
 // _____________________________________________________________________________
 Polygon Node::getConvexFrontHull(double d, bool rectangulize,
-    bool simpleRenderForTwoEdgeNodes) const {
+                                 bool simpleRenderForTwoEdgeNodes) const {
   double cd = d;
 
   MultiPolygon ret;
@@ -581,7 +594,9 @@ Polygon Node::getConvexFrontHull(double d, bool rectangulize,
       for (auto& nf : getMainDirs()) {
         ll.push_back(nf.geom.getLine());
       }
-      Polygon env = pbutil::geo::shrink(pbutil::geo::getOrientedEnvelopeAvg(ll), cd / 2).getPolygon();
+      Polygon env =
+          util::geo::shrink(util::geo::getOrientedEnvelopeAvg(ll), cd / 2)
+              .getPolygon();
 
       double incr = (bgeo::area(env) / bgeo::area(hull)) - 1;
       if (ll.size() < 5 || incr < 0.5) {
@@ -616,8 +631,8 @@ Polygon Node::getConvexFrontHull(double d, bool rectangulize,
     pols.push_back(&a);
     pols.push_back(&b);
 
-    bgeo::buffer(PolyLine::average(pols).getLine(), ret, distanceStrat, sideStrat, joinStrat, endStrat,
-                 circleStrat);
+    bgeo::buffer(PolyLine::average(pols).getLine(), ret, distanceStrat,
+                 sideStrat, joinStrat, endStrat, circleStrat);
   }
 
   assert(ret.size() > 0);

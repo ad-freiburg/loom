@@ -7,7 +7,7 @@
 
 #include <boost/program_options.hpp>
 #include <vector>
-#include "./GraphBuilderConfig.h"
+#include "gtfs2topo/config/GraphBuilderConfig.h"
 
 namespace gtfs2topo {
 namespace config {

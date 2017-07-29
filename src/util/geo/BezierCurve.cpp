@@ -2,27 +2,24 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "./BezierCurve.h"
-#include "./Geo.h"
-#include "./PolyLine.h"
-#include "./CubicSpline.h"
+#include "util/geo/BezierCurve.h"
+#include "util/geo/Geo.h"
+#include "util/geo/PolyLine.h"
 
-using namespace pbutil;
+using namespace util;
 using namespace geo;
 
 // _____________________________________________________________________________
-BezierCurve::BezierCurve(const Point& a, const Point& b,
-  const Point& c, const Point& d)
-: _d(dist(a, d)) {
+BezierCurve::BezierCurve(const Point& a, const Point& b, const Point& c,
+                         const Point& d)
+    : _d(dist(a, d)) {
   assert(_d > 0);
   recalcPolynoms(a, b, c, d);
 }
 
 // _____________________________________________________________________________
-void BezierCurve::recalcPolynoms(const Point& a,
-  const Point& b, const Point& c,
-  const Point& d) {
-
+void BezierCurve::recalcPolynoms(const Point& a, const Point& b, const Point& c,
+                                 const Point& d) {
   _xp.a = a.get<0>();
   _xp.b = 3.0 * (b.get<0>() - a.get<0>());
   _xp.c = 3.0 * (c.get<0>() - b.get<0>()) - _xp.b;
@@ -52,9 +49,7 @@ const PolyLine& BezierCurve::render(double d) {
   }
 
   _rendered.empty();
-  double n = _d / d;
-  double dt = 1 / n;
-  double t = 0;
+  double n = _d / d, dt = 1 / n, t = 0;
 
   bool cancel = false;
   while (true) {
@@ -69,4 +64,10 @@ const PolyLine& BezierCurve::render(double d) {
 
   _didRender = true;
   return _rendered;
+}
+
+// _____________________________________________________________________________
+double CubicPolynom::valueAt(double atx) const {
+  double dx = atx - x;
+  return a + b * dx + c * dx * dx + d * dx * dx * dx;
 }

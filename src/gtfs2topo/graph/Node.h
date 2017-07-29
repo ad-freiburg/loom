@@ -8,8 +8,8 @@
 #include <set>
 #include "ad/cppgtfs/gtfs/Stop.h"
 #include "ad/cppgtfs/gtfs/Route.h"
-#include "pbutil/geo/PolyLine.h"
-#include "pbutil/geo/Geo.h"
+#include "util/geo/PolyLine.h"
+#include "util/geo/Geo.h"
 
 using namespace ad::cppgtfs;
 
@@ -24,7 +24,7 @@ class EdgeTripGeom;
 // forward declaration of TransitGraph
 class Graph;
 
-using pbutil::geo::Point;
+using util::geo::Point;
 
 struct OccuringConnection {
   OccuringConnection(const Edge* from, const Edge* to) : from(from), to(to) {}

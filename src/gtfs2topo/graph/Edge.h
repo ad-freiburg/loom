@@ -6,17 +6,17 @@
 #define GTFS2TOPO_GRAPH_EDGE_H_
 
 #include <vector>
-#include "Edge.h"
-#include "Node.h"
-#include "EdgeTripGeom.h"
-#include "pbutil/geo/PolyLine.h"
+#include "gtfs2topo/graph/Edge.h"
+#include "gtfs2topo/graph/Node.h"
+#include "gtfs2topo/graph/EdgeTripGeom.h"
+#include "util/geo/PolyLine.h"
 #include "ad/cppgtfs/gtfs/Trip.h"
 
 using namespace ad::cppgtfs;
 
 using std::exception;
 using std::string;
-using pbutil::geo::PolyLine;
+using util::geo::PolyLine;
 
 namespace gtfs2topo {
 namespace graph {

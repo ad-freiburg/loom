@@ -7,16 +7,18 @@
 #include <set>
 #include <stack>
 #include <vector>
-#include "./../config/TransitMapConfig.h"
+#include "transitmap/config/TransitMapConfig.h"
 #include "GraphBuilder.h"
 #include "json/json.hpp"
-#include "pbutil/geo/PolyLine.h"
-#include "pbutil/log/Log.h"
+#include "util/geo/PolyLine.h"
+#include "util/log/Log.h"
 
 using namespace transitmapper;
 using namespace graph;
-using namespace pbutil::geo;
+using namespace util::geo;
 using json = nlohmann::json;
+
+const static char* WGS84_PROJ = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
 // _____________________________________________________________________________
 GraphBuilder::GraphBuilder(const config::Config* cfg) : _cfg(cfg) {
@@ -69,8 +71,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
         PolyLine pl;
         for (auto coord : coords) {
-          double x = coord[0];
-          double y = coord[1];
+          double x = coord[0], y = coord[1];
           Point p(x, y);
           pl << p;
           g->expandBBox(p);
@@ -262,7 +263,7 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
 void GraphBuilder::writeStationGeoms(TransitGraph* graph) {
   for (auto n : *graph->getNodes()) {
     n->generateStationHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-        _cfg->simpleRenderForTwoEdgeNodes);
+                           _cfg->simpleRenderForTwoEdgeNodes);
   }
 }
 
@@ -415,7 +416,8 @@ bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
 
   for (const Node* a : potClique) {
     for (const Node* b : potClique) {
-      if (pbutil::geo::dist(a->getPos(), b->getPos()) > (_cfg->lineWidth + _cfg->lineSpacing) * 10) {
+      if (util::geo::dist(a->getPos(), b->getPos()) >
+          (_cfg->lineWidth + _cfg->lineSpacing) * 10) {
         return false;
       }
     }
@@ -454,12 +456,15 @@ bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
 std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(const Node* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->getMainDirs()) {
-     if (nf.edge->getGeom().getLength() > (nf.edge->getWidth() + nf.edge->getSpacing()) ||
-       (nf.edge->getOther(n)->getNodeFrontFor(nf.edge)->geom.distTo(nf.edge->getOther(n)->getPos()) > 6 * (nf.edge->getWidth() + nf.edge->getSpacing())) ||
-       (nf.edge->getTo()->getStops().size() > 0) ||
-       (nf.edge->getFrom()->getStops().size() > 0)) {
-       res.push_back(nf);
-     }
+    if (nf.edge->getGeom().getLength() >
+            (nf.edge->getWidth() + nf.edge->getSpacing()) ||
+        (nf.edge->getOther(n)->getNodeFrontFor(nf.edge)->geom.distTo(
+             nf.edge->getOther(n)->getPos()) >
+         6 * (nf.edge->getWidth() + nf.edge->getSpacing())) ||
+        (nf.edge->getTo()->getStops().size() > 0) ||
+        (nf.edge->getFrom()->getStops().size() > 0)) {
+      res.push_back(nf);
+    }
   }
 
   return res;
@@ -469,10 +474,13 @@ std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(const Node* n) const {
 std::vector<NodeFront> GraphBuilder::getClosedNodeFronts(const Node* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->getMainDirs()) {
-    if (!(nf.edge->getGeom().getLength() > (nf.edge->getWidth() + nf.edge->getSpacing())) &&
-       !(nf.edge->getOther(n)->getNodeFrontFor(nf.edge)->geom.distTo(nf.edge->getOther(n)->getPos()) > 6 * (nf.edge->getWidth() + nf.edge->getSpacing()))&&
-       (nf.edge->getTo()->getStops().size() == 0) &&
-       (nf.edge->getFrom()->getStops().size() == 0)) {
+    if (!(nf.edge->getGeom().getLength() >
+          (nf.edge->getWidth() + nf.edge->getSpacing())) &&
+        !(nf.edge->getOther(n)->getNodeFrontFor(nf.edge)->geom.distTo(
+              nf.edge->getOther(n)->getPos()) >
+          6 * (nf.edge->getWidth() + nf.edge->getSpacing())) &&
+        (nf.edge->getTo()->getStops().size() == 0) &&
+        (nf.edge->getFrom()->getStops().size() == 0)) {
       res.push_back(nf);
     }
   }
@@ -567,8 +575,10 @@ void GraphBuilder::combinePartnerRoutes(graph::TransitGraph* g) {
     if (p.second.size() == 0) continue;
 
     for (const auto pp : p.second) {
-      LOG(INFO) << "Combining " << pp << "(" << pp->getLabel() << "," << pp->getColor() << ")"
-        << " and " << p.first << " (" << p.first->getLabel() << "," << p.first->getColor() << ")." << std::endl;
+      LOG(INFO) << "Combining " << pp << "(" << pp->getLabel() << ","
+                << pp->getColor() << ")"
+                << " and " << p.first << " (" << p.first->getLabel() << ","
+                << p.first->getColor() << ")." << std::endl;
       processed.insert(pp);
       const_cast<Route*>(pp)->setRelativeTo(p.first);
     }
@@ -576,8 +586,8 @@ void GraphBuilder::combinePartnerRoutes(graph::TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-std::map<const Route*, std::set<const Route*> >
-GraphBuilder::getPartnerRoutes(graph::TransitGraph* g) const {
+std::map<const Route*, std::set<const Route*> > GraphBuilder::getPartnerRoutes(
+    graph::TransitGraph* g) const {
   std::map<const Route*, std::set<const Route*> > partners;
 
   for (graph::Node* n : *g->getNodes()) {
@@ -595,8 +605,10 @@ GraphBuilder::getPartnerRoutes(graph::TransitGraph* g) const {
           partners[ra.route] = partnersHere;
         } else {
           std::set<const Route*> interSect;
-          std::set_intersection(partners[ra.route].begin(), partners[ra.route].end(),
-              partnersHere.begin(), partnersHere.end(), std::inserter(interSect, interSect.begin()));
+          std::set_intersection(partners[ra.route].begin(),
+                                partners[ra.route].end(), partnersHere.begin(),
+                                partnersHere.end(),
+                                std::inserter(interSect, interSect.begin()));
           partners[ra.route] = interSect;
         }
       }

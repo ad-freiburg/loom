@@ -4,12 +4,12 @@
 
 #include <glpk.h>
 #include <fstream>
-#include "./../graph/OrderingConfiguration.h"
-#include "./../output/OgrOutput.h"
-#include "./ILPEdgeOrderOptimizer.h"
-#include "./OptGraph.h"
-#include "pbutil/geo/Geo.h"
-#include "pbutil/log/Log.h"
+#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/output/OgrOutput.h"
+#include "transitmap/optim/ILPEdgeOrderOptimizer.h"
+#include "transitmap/optim/OptGraph.h"
+#include "util/geo/Geo.h"
+#include "util/log/Log.h"
 
 using namespace transitmapper;
 using namespace optim;

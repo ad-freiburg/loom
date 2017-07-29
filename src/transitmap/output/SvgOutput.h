@@ -9,16 +9,16 @@
 #include <set>
 #include <string>
 #include <vector>
-#include "./../config/TransitMapConfig.h"
-#include "./../graph/Route.h"
-#include "./../graph/TransitGraph.h"
+#include "transitmap/config/TransitMapConfig.h"
+#include "transitmap/graph/Route.h"
+#include "transitmap/graph/TransitGraph.h"
 #include "Output.h"
-#include "pbutil/geo/Geo.h"
-#include "pbutil/geo/PolyLine.h"
-#include "pbutil/xml/XmlWriter.h"
+#include "util/geo/Geo.h"
+#include "util/geo/PolyLine.h"
+#include "util/xml/XmlWriter.h"
 
-using pbutil::Nullable;
-using namespace pbutil::geo;
+using util::Nullable;
+using namespace util::geo;
 
 namespace transitmapper {
 namespace output {
@@ -98,7 +98,7 @@ class SvgOutput : public Output {
 
  private:
   std::ostream* _o;
-  util::XmlWriter _w;
+  util::xml::XmlWriter _w;
 
   const config::Config* _cfg;
 

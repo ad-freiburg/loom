@@ -9,13 +9,13 @@
 #include "Edge.h"
 #include "Node.h"
 #include "Route.h"
-#include "pbutil/geo/PolyLine.h"
-#include "pbutil/Nullable.h"
-#include "../style/LineStyle.h"
+#include "util/geo/PolyLine.h"
+#include "util/Nullable.h"
+#include "transitmap/style/LineStyle.h"
 
 using std::exception;
 using std::string;
-using namespace pbutil::geo;
+using namespace util::geo;
 
 namespace transitmapper {
 namespace graph {
@@ -32,7 +32,7 @@ struct RouteOccurance {
   const Route* route;
   const Node* direction;  // 0 if in both directions
 
-  pbutil::Nullable<style::LineStyle> style;
+  util::Nullable<style::LineStyle> style;
 };
 
 typedef std::pair<RouteOccurance*, size_t> RouteOccWithPos;

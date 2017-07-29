@@ -3,19 +3,19 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <cassert>
-#include "./Node.h"
-#include "./Edge.h"
-#include "./Graph.h"
-#include "pbutil/geo/Geo.h"
+#include "gtfs2topo/graph/Node.h"
+#include "gtfs2topo/graph/Edge.h"
+#include "gtfs2topo/graph/BuildGraph.h"
+#include "util/geo/Geo.h"
 #include "ad/cppgtfs/gtfs/Stop.h"
-#include "./EdgeTripGeom.h"
+#include "gtfs2topo/graph/EdgeTripGeom.h"
 
 using namespace gtfs2topo;
 using namespace graph;
 using namespace ad::cppgtfs;
 
-using pbutil::geo::Point;
-using pbutil::geo::Line;
+using util::geo::Point;
+using util::geo::Line;
 
 
 // _____________________________________________________________________________

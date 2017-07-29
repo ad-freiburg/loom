@@ -2,15 +2,15 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef PBUTIL_STRING_H_
-#define PBUTIL_STRING_H_
+#ifndef UTIL_STRING_H_
+#define UTIL_STRING_H_
 
 #include <cstring>
 #include <sstream>
 #include <string>
 #include <vector>
 
-namespace pbutil {
+namespace util {
 
 // _____________________________________________________________________________
 inline std::string urlDecode(const std::string& encoded) {
@@ -65,8 +65,8 @@ inline bool replace(std::string& subj, const std::string& from,
 // _____________________________________________________________________________
 inline bool replaceAll(std::string& subj, const std::string& from,
                        const std::string& to) {
+  if (from.empty()) return false;
   bool found = false;
-  if (from.empty()) return found;
   size_t s = subj.find(from, 0);
   for (; s != std::string::npos; s = subj.find(from, s + to.length())) {
     found = true;
@@ -93,4 +93,4 @@ inline std::string toString(T obj) {
 }
 }
 
-#endif  // PBUTIL_STRING_H_
+#endif  // UTIL_STRING_H_

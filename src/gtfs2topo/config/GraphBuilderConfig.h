@@ -20,6 +20,8 @@ struct Config {
   size_t stationAggrLevel;
 
   double maxAggrDistance;
+
+  uint8_t useMots;
 };
 
 }  // namespace config

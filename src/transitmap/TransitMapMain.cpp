@@ -8,19 +8,19 @@
 #include <iostream>
 #include <set>
 #include <string>
-#include "./config/ConfigReader.cpp"
-#include "./config/TransitMapConfig.h"
-#include "./graph/GraphBuilder.h"
-#include "./graph/Node.h"
-#include "./graph/TransitGraph.h"
-#include "./optim/ILPEdgeOrderOptimizer.h"
-#include "./output/OgrOutput.h"
-#include "./output/SvgOutput.h"
-#include "pbutil/geo/PolyLine.h"
-#include "pbutil/log/Log.h"
+#include "transitmap/config/ConfigReader.cpp"
+#include "transitmap/config/TransitMapConfig.h"
+#include "transitmap/graph/GraphBuilder.h"
+#include "transitmap/graph/Node.h"
+#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/optim/ILPEdgeOrderOptimizer.h"
+#include "transitmap/output/OgrOutput.h"
+#include "transitmap/output/SvgOutput.h"
+#include "util/geo/PolyLine.h"
+#include "util/log/Log.h"
 
 using namespace transitmapper;
-using namespace pbutil::geo;
+using namespace util::geo;
 using std::string;
 
 // _____________________________________________________________________________

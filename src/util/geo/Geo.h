@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_UTIL_GEO_H_
-#define TRANSITMAP_UTIL_GEO_H_
+#ifndef UTIL_GEO_GEO_H_
+#define UTIL_GEO_GEO_H_
 
 #define _USE_MATH_DEFINES
 
@@ -17,7 +17,7 @@
 
 namespace bgeo = boost::geometry;
 
-namespace pbutil {
+namespace util {
 namespace geo {
 
 // 2D cartesian coordinate
@@ -27,7 +27,6 @@ typedef bgeo::model::multi_linestring<Line> MultiLine;
 typedef bgeo::model::polygon<Point> Polygon;
 typedef bgeo::model::multi_polygon<Polygon> MultiPolygon;
 typedef bgeo::model::box<Point> Box;
-
 
 // _____________________________________________________________________________
 template <typename Geometry>
@@ -63,7 +62,8 @@ inline Geometry rotate(const Geometry& geo, double deg) {
 template <typename Geometry>
 inline Geometry move(const Geometry& geo, double x, double y) {
   Geometry ret;
-  bgeo::strategy::transform::translate_transformer<double, 2, 2> translate(x, y);
+  bgeo::strategy::transform::translate_transformer<double, 2, 2> translate(x,
+                                                                           y);
   bgeo::transform(geo, ret, translate);
   return ret;
 }
@@ -71,7 +71,8 @@ inline Geometry move(const Geometry& geo, double x, double y) {
 // TODO: outfactor
 
 struct RotatedBox {
-  RotatedBox(const Box& b, double rot, const Point& center) : b(b), rotateDeg(rot), center(center) {}
+  RotatedBox(const Box& b, double rot, const Point& center)
+      : b(b), rotateDeg(rot), center(center) {}
   RotatedBox(const Box& b, double rot) : b(b), rotateDeg(rot) {
     bgeo::centroid(b, center);
   }
@@ -86,6 +87,11 @@ struct RotatedBox {
     return rotate(hull, rotateDeg, center);
   }
 };
+
+// _____________________________________________________________________________
+inline Box maxbox() {
+  return bgeo::make_inverse<Box>();
+}
 
 // _____________________________________________________________________________
 inline RotatedBox shrink(const RotatedBox& b, double d) {
@@ -107,10 +113,9 @@ inline bool doubleEq(double a, double b) { return fabs(a - b) < 0.000001; }
 // _____________________________________________________________________________
 inline bool contains(const Point& p1, const Point& q1, const Point& p2,
                      const Point& q2) {
-  Line a;
+  Line a, b;
   a.push_back(p1);
   a.push_back(q1);
-  Line b;
   b.push_back(p2);
   b.push_back(q2);
 
@@ -134,14 +139,14 @@ inline bool intersects(const Point& p1, const Point& q1, const Point& p2,
   /*
    * checks whether two line segments intersect
    */
-  Line a;
+  Line a, b;
   a.push_back(p1);
   a.push_back(q1);
-  Line b;
   b.push_back(p2);
   b.push_back(q2);
 
-  return !(contains(p1, q1, p2, q2) || contains(p2, q2, p1, q1)) && bgeo::intersects(a, b);
+  return !(contains(p1, q1, p2, q2) || contains(p2, q2, p1, q1)) &&
+         bgeo::intersects(a, b);
 }
 
 // _____________________________________________________________________________
@@ -247,8 +252,31 @@ inline double innerProd(const Point& a, const Point& b, const Point& c) {
 }
 
 // _____________________________________________________________________________
-inline double dist(const Point& p1, const Point& p2) {
+template <typename GeometryA, typename GeometryB>
+inline double dist(const GeometryA& p1, const GeometryB& p2) {
   return bgeo::distance(p1, p2);
+}
+
+// _____________________________________________________________________________
+template <typename Geometry>
+inline std::string getWKT(Geometry g) {
+  std::stringstream ss;
+  ss << bgeo::wkt(g);
+  return ss.str();
+}
+
+// _____________________________________________________________________________
+template <typename Geometry>
+inline double len(Geometry g) {
+  return bgeo::length(g);
+}
+
+// _____________________________________________________________________________
+template <typename Geometry>
+inline Geometry simplify(Geometry g, double d) {
+  Geometry ret;
+  bgeo::simplify(g, ret, d);
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -283,8 +311,7 @@ inline Point projectOn(const Point& a, const Point& b, const Point& c) {
   if (doubleEq(b.get<0>(), c.get<0>()) && doubleEq(b.get<1>(), c.get<1>()))
     return b;
 
-  double x;
-  double y;
+  double x, y;
 
   if (c.get<0>() == a.get<0>()) {
     // infinite slope
@@ -429,7 +456,6 @@ inline RotatedBox getOrientedEnvelopeAvg(MultiLine ml) {
 
   rbox.rotateDeg += bestDeg;
 
-
   // move the box along 45deg angles from its origin until it fits the ml
   // = until the intersection of its hull and the box is largest
   Polygon p = rbox.getPolygon();
@@ -445,8 +471,7 @@ inline RotatedBox getOrientedEnvelopeAvg(MultiLine ml) {
 
   return rbox;
 }
-
 }
 }
 
-#endif  // TRANSITMAP_UTIL_GEO_H_
+#endif  // UTIL_GEO_GEO_H_

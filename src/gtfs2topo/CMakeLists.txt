@@ -21,4 +21,4 @@ add_executable(gtfs2topo ${gtfs2topo_main})
 add_library(gtfs2topo_dep ${gtfs2topo_SRC})
 
 target_include_directories(gtfs2topo_dep PUBLIC ${PROJECT_SOURCE_DIR}/src/cppgtfs/src)
-target_link_libraries(gtfs2topo gtfs2topo_dep pbutil ad_cppgtfs ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} -lproj -lpthread)
+target_link_libraries(gtfs2topo gtfs2topo_dep util ad_cppgtfs ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} -lproj -lpthread)

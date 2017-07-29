@@ -3,25 +3,24 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <proj_api.h>
-#include <string>
 #include <set>
-#include "./Graph.h"
-#include "./Edge.h"
+#include <string>
+#include "util/geo/Geo.h"
+#include "gtfs2topo/graph/Edge.h"
+#include "gtfs2topo/graph/BuildGraph.h"
 
-using gtfs2topo::graph::Graph;
+using gtfs2topo::graph::BuildGraph;
 using gtfs2topo::graph::Node;
 using gtfs2topo::graph::Edge;
-using pbutil::geo::Point;
-using bgeo::make_inverse;
+using util::geo::Point;
 
 // _____________________________________________________________________________
-Graph::Graph(const std::string& name, const std::string& proj)
-: _name(name) {
+BuildGraph::BuildGraph(const std::string& name, const std::string& proj) : _name(name) {
   _proj = pj_init_plus(proj.c_str());
 }
 
 // _____________________________________________________________________________
-Graph::~Graph() {
+BuildGraph::~BuildGraph() {
   // an edge is _deleted_ if either the from or to node is deleted!
   // thus, we don't have to delete edges separately here
   for (auto n : _nodes) {
@@ -33,13 +32,13 @@ Graph::~Graph() {
 }
 
 // _____________________________________________________________________________
-Node* Graph::addNode(Node* n) {
+Node* BuildGraph::addNode(Node* n) {
   auto ins = _nodes.insert(n);
   return *ins.first;
 }
 
 // _____________________________________________________________________________
-Edge* Graph::addEdge(Node* from, Node* to) {
+Edge* BuildGraph::addEdge(Node* from, Node* to) {
   if (from == to) return 0;
   Edge* e = getEdge(from, to);
   if (!e) {
@@ -51,7 +50,7 @@ Edge* Graph::addEdge(Node* from, Node* to) {
 }
 
 // _____________________________________________________________________________
-Edge* Graph::getEdge(Node* from, Node* to) {
+Edge* BuildGraph::getEdge(Node* from, Node* to) {
   for (auto e : from->getAdjListOut()) {
     if (e->getTo() == to) return e;
   }
@@ -66,25 +65,21 @@ Edge* Graph::getEdge(Node* from, Node* to) {
 }
 
 // _____________________________________________________________________________
-const std::set<Node*>& Graph::getNodes() const {
-  return _nodes;
-}
+const std::set<Node*>& BuildGraph::getNodes() const { return _nodes; }
 
 // _____________________________________________________________________________
-std::set<Node*>* Graph::getNodes() {
-  return &_nodes;
-}
+std::set<Node*>* BuildGraph::getNodes() { return &_nodes; }
 
 // _____________________________________________________________________________
-Node* Graph::getNodeByStop(const gtfs::Stop* s, bool getParent) const {
-  if (getParent && s->getParentStation()) return getNodeByStop(
-    s->getParentStation());
+Node* BuildGraph::getNodeByStop(const gtfs::Stop* s, bool getParent) const {
+  if (getParent && s->getParentStation())
+    return getNodeByStop(s->getParentStation());
 
   return getNodeByStop(s);
 }
 
 // _____________________________________________________________________________
-Node* Graph::getNodeByStop(const gtfs::Stop* s) const {
+Node* BuildGraph::getNodeByStop(const gtfs::Stop* s) const {
   for (const auto n : _nodes) {
     if (n->getStops().find(const_cast<gtfs::Stop*>(s)) != n->getStops().end()) {
       return n;
@@ -94,7 +89,7 @@ Node* Graph::getNodeByStop(const gtfs::Stop* s) const {
 }
 
 // _____________________________________________________________________________
-void Graph::deleteEdge(Node* from, Node* to) {
+void BuildGraph::deleteEdge(Node* from, Node* to) {
   Edge* toDel = getEdge(from, to);
   if (!toDel) return;
 
@@ -107,21 +102,18 @@ void Graph::deleteEdge(Node* from, Node* to) {
 }
 
 // _____________________________________________________________________________
-void Graph::deleteNode(Node* n) {
-  _nodes.erase(n);
-}
+void BuildGraph::deleteNode(Node* n) { _nodes.erase(n); }
 
 // _____________________________________________________________________________
-projPJ Graph::getProjection() const {
-  return _proj;
-}
+projPJ BuildGraph::getProjection() const { return _proj; }
 
 // _____________________________________________________________________________
-Node* Graph::getNearestNode(const Point& p, double maxD) const {
-  double curD = DBL_MAX;;
+Node* BuildGraph::getNearestNode(const Point& p, double maxD) const {
+  double curD = DBL_MAX;
+  ;
   Node* curN = 0;
   for (auto n : _nodes) {
-    double d = bgeo::distance(n->getPos(), p);
+    double d = util::geo::dist(n->getPos(), p);
     if (d < maxD && d < curD) {
       curN = n;
       curD = d;

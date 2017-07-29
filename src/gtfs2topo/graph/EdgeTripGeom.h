@@ -8,14 +8,14 @@
 #include <vector>
 #include "ad/cppgtfs/gtfs/Trip.h"
 #include "ad/cppgtfs/gtfs/Route.h"
-#include "pbutil/geo/PolyLine.h"
-#include "./Node.h"
+#include "util/geo/PolyLine.h"
+#include "gtfs2topo/graph/Node.h"
 
 namespace gtfs2topo {
 namespace graph {
 
 using namespace ad::cppgtfs;
-using namespace pbutil::geo;
+using namespace util::geo;
 
 struct TripOccurance {
   TripOccurance(gtfs::Route* r) : route(r), direction(0) {}

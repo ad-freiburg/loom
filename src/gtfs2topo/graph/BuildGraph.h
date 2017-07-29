@@ -2,32 +2,28 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GTFS2TOPO_GRAPH_TRANSITGRAPH_H_
-#define GTFS2TOPO_GRAPH_TRANSITGRAPH_H_
+#ifndef GTFS2TOPO_GRAPH_BUILDGRAPH_H_
+#define GTFS2TOPO_GRAPH_BUILDGRAPH_H_
 
 #include <proj_api.h>
-#include <string>
-#include <set>
 #include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/index/rtree.hpp>
+#include <set>
+#include <string>
 
-#include "pbutil/geo/Geo.h"
-#include "./Node.h"
-#include "./Edge.h"
-
-namespace bg = bgeo;
+#include "gtfs2topo/graph/Edge.h"
+#include "gtfs2topo/graph/Node.h"
+#include "util/geo/Geo.h"
 
 namespace gtfs2topo {
 namespace graph {
 
-class Graph {
-
+class BuildGraph {
  public:
-  explicit Graph(const std::string& name, const std::string& projStr);
-
-  ~Graph();
+  explicit BuildGraph(const std::string& name, const std::string& projStr);
+  ~BuildGraph();
 
   Node* addNode(Node* n);
   Edge* addEdge(Node* from, Node* to);
@@ -42,7 +38,7 @@ class Graph {
   Node* getNodeByStop(const gtfs::Stop* s) const;
   Node* getNodeByStop(const gtfs::Stop* s, bool getParent) const;
 
-  Node* getNearestNode(const pbutil::geo::Point& p, double maxD) const;
+  Node* getNearestNode(const util::geo::Point& p, double maxD) const;
 
   projPJ getProjection() const;
 
@@ -52,7 +48,7 @@ class Graph {
 
   projPJ _proj;
 };
+}
+}
 
-}}
-
-#endif  // GTFS2TOPO_GRAPH_TRANSITGRAPH_H_
+#endif  // GTFS2TOPO_GRAPH_BUILDGRAPH_H_

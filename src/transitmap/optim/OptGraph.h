@@ -8,8 +8,8 @@
 #include <set>
 #include <string>
 
-#include "./../graph/Edge.h"
-#include "./../graph/TransitGraph.h"
+#include "transitmap/graph/Edge.h"
+#include "transitmap/graph/TransitGraph.h"
 
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;

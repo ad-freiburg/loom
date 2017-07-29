@@ -5,7 +5,7 @@
 #ifndef TRANSITMAP_OUTPUT_OUTPUT_H_
 #define TRANSITMAP_OUTPUT_OUTPUT_H_
 
-#include "../graph/TransitGraph.h"
+#include "transitmap/graph/TransitGraph.h"
 
 namespace transitmapper {
 namespace output {

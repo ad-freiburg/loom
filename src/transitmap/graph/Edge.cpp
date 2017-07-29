@@ -6,12 +6,12 @@
 #include <vector>
 #include "Edge.h"
 #include "Node.h"
-#include "pbutil/geo/PolyLine.h"
+#include "util/geo/PolyLine.h"
 
 using namespace transitmapper;
 using namespace graph;
 
-using pbutil::geo::PolyLine;
+using util::geo::PolyLine;
 
 // _____________________________________________________________________________
 Edge::Edge(Node* from, Node* to, PolyLine pl, double w, double s)

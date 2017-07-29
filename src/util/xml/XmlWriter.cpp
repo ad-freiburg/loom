@@ -9,8 +9,9 @@
 #include <algorithm>
 #include "XmlWriter.h"
 
-using namespace transitmapper;
+
 using namespace util;
+using namespace xml;
 
 using std::ostream;
 using std::string;

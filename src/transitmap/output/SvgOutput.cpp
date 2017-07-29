@@ -4,16 +4,16 @@
 
 #include <stdint.h>
 #include <ostream>
-#include "./../config/TransitMapConfig.h"
-#include "./../graph/Route.h"
-#include "./SvgOutput.h"
-#include "pbutil/String.h"
-#include "pbutil/geo/PolyLine.h"
+#include "transitmap/config/TransitMapConfig.h"
+#include "transitmap/graph/Route.h"
+#include "transitmap/output/SvgOutput.h"
+#include "util/String.h"
+#include "util/geo/PolyLine.h"
 
 using namespace transitmapper;
 using namespace output;
 
-using pbutil::toString;
+using util::toString;
 
 // _____________________________________________________________________________
 SvgOutput::SvgOutput(std::ostream* o, const config::Config* cfg)
@@ -135,7 +135,7 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG,
     if (_cfg->renderStations && n->getStops().size() > 0 &&
         n->getMainDirs().size() > 0) {
       params["stroke"] = "black";
-      params["stroke-width"] = pbutil::toString((_cfg->lineWidth / 2) * _cfg->outputResolution);
+      params["stroke-width"] = util::toString((_cfg->lineWidth / 2) * _cfg->outputResolution);
       params["fill"] = "white";
 
       printPolygon(n->getStationHull(), params, rparams);
@@ -163,7 +163,6 @@ void SvgOutput::renderNodeCircles(const graph::TransitGraph& outG,
     std::map<std::string, std::string> params;
     params["style"] = style.str();
     Point center = n->getPos();
-    // bgeo::centroid(n->getConvexFrontHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8, false), center);
 
     printCircle(center, n->getMaxNodeFrontWidth() * 1, params, rparams);
   }
@@ -316,7 +315,7 @@ bool SvgOutput::isNextTo(const graph::InnerGeometry& a,
   if (a.from.front == b.from.front && a.to.front == b.to.front) {
     if ((a.slotFrom - b.slotFrom == 1 || b.slotFrom - a.slotFrom == 1) &&
         (a.slotTo - b.slotTo == 1 || b.slotTo - a.slotTo == 1)) {
-      return !pbutil::geo::intersects(
+      return !util::geo::intersects(
           a.geom.getLine().front(), a.geom.getLine().back(),
           b.geom.getLine().front(), b.geom.getLine().back());
     }
@@ -325,7 +324,7 @@ bool SvgOutput::isNextTo(const graph::InnerGeometry& a,
   if (a.to.front == b.from.front && a.from.front == b.to.front) {
     if ((a.slotTo - b.slotFrom == 1 || b.slotFrom - a.slotTo == 1) &&
         (a.slotFrom - b.slotTo == 1 || b.slotTo - a.slotFrom == 1)) {
-      return !pbutil::geo::intersects(
+      return !util::geo::intersects(
           a.geom.getLine().front(), a.geom.getLine().back(),
           b.geom.getLine().front(), b.geom.getLine().back());
     }
@@ -471,7 +470,7 @@ void SvgOutput::renderLinePart(const PolyLine p, double width,
 
     if (!style.get().getCss().empty()) {
       std::string css = style.get().getCss();
-      pbutil::replaceAll(css, "\"", "&quot;");
+      util::replaceAll(css, "\"", "&quot;");
       styleStr << ";" << css << ";";
     }
   }
@@ -509,7 +508,7 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
     _w.writeText("\n");
   }
 
-  _w.writeText(pbutil::toString(n->getNumCrossings(outG.getConfig())) + "(" + pbutil::toString(n->getNumSeparations(outG.getConfig())) + ")");
+  _w.writeText(util::toString(n->getNumCrossings(outG.getConfig())) + "(" + util::toString(n->getNumSeparations(outG.getConfig())) + ")");
   _w.closeTag();
 }
 

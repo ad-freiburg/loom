@@ -6,12 +6,12 @@
 #include <cstdio>
 #include <fstream>
 #include <chrono>
-#include "./../graph/OrderingConfiguration.h"
-#include "./../output/OgrOutput.h"
-#include "./ILPOptimizer.h"
-#include "./OptGraph.h"
-#include "pbutil/geo/Geo.h"
-#include "pbutil/log/Log.h"
+#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/output/OgrOutput.h"
+#include "transitmap/optim/ILPOptimizer.h"
+#include "transitmap/optim/OptGraph.h"
+#include "util/geo/Geo.h"
+#include "util/log/Log.h"
 
 using namespace transitmapper;
 using namespace optim;
@@ -669,8 +669,8 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
   b.push_back(bInA);
   b.push_back(bInB);
 
-  if (pbutil::geo::intersects(aInA, aInB, bInA, bInB) ||
-      bgeo::distance(a, b) < 1)
+  if (util::geo::intersects(aInA, aInB, bInA, bInB) ||
+      util::geo::dist(a, b) < 1)
     pCrossing = true;
 
   // pCrossing = (posAinA < posBinA && posAinB < posBinB);
@@ -715,8 +715,8 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
       b.push_back(bInA);
       b.push_back(bInC);
 
-      if (pbutil::geo::intersects(aInA, aInB, bInA, bInC) ||
-          bgeo::distance(a, b) < 1)
+      if (util::geo::intersects(aInA, aInB, bInA, bInC) ||
+          util::geo::dist(a, b) < 1)
         return true;
     }
   }

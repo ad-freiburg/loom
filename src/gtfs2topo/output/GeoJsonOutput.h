@@ -7,8 +7,8 @@
 
 #include <ostream>
 #include <string>
-#include "./../config/GraphBuilderConfig.h"
-#include "./../graph/Graph.h"
+#include "gtfs2topo/config/GraphBuilderConfig.h"
+#include "gtfs2topo/graph/BuildGraph.h"
 #include "json/json.hpp"
 
 using json = nlohmann::json;
@@ -18,7 +18,7 @@ namespace gtfs2topo {
 class GeoJsonOutput {
  public:
   GeoJsonOutput(const config::Config* cfg);
-  void print(const graph::Graph& outG);
+  void print(const graph::BuildGraph& outG);
 
  private:
   const config::Config* _cfg;

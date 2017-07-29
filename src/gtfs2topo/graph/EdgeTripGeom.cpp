@@ -6,7 +6,7 @@
 #include <vector>
 #include "ad/cppgtfs/gtfs/Trip.h"
 #include "ad/cppgtfs/gtfs/Route.h"
-#include "EdgeTripGeom.h"
+#include "gtfs2topo/graph/EdgeTripGeom.h"
 
 using namespace gtfs2topo;
 using namespace graph;
@@ -76,9 +76,7 @@ void EdgeTripGeom::setGeom(const PolyLine& p) {
 
 // _____________________________________________________________________________
 bool EdgeTripGeom::containsRoute(gtfs::Route* r) const {
-  if (getTripsForRoute(r)) return true;
-
-  return false;
+  return getTripsForRoute(r);
 }
 
 // _____________________________________________________________________________

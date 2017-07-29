@@ -2,7 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "./OptGraph.h"
+#include "transitmap/optim/OptGraph.h"
 
 using namespace transitmapper;
 using namespace optim;

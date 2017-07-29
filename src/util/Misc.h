@@ -2,10 +2,10 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef PBUTIL_MISC_H_
-#define PBUTIL_MISC_H_
+#ifndef UTIL_MISC_H_
+#define UTIL_MISC_H_
 
-namespace pbutil {
+namespace util {
 
 // _____________________________________________________________________________
 inline uint64_t factorial(uint64_t n) {
@@ -13,8 +13,7 @@ inline uint64_t factorial(uint64_t n) {
   return n * factorial(n - 1);
 }
 
+}  // namespace util
 
-}
 
-
-#endif  // PBUTIL_MISC_H_
+#endif  // UTIL_MISC_H_

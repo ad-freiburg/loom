@@ -6,12 +6,12 @@
 #define TRANSITMAP_GRAPH_NODE_H_
 
 #include <set>
-#include "./OrderingConfiguration.h"
-#include "./Route.h"
-#include "pbutil/geo/Geo.h"
-#include "pbutil/geo/PolyLine.h"
+#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/Route.h"
+#include "util/geo/Geo.h"
+#include "util/geo/PolyLine.h"
 
-using namespace pbutil::geo;
+using namespace util::geo;
 
 namespace transitmapper {
 namespace graph {

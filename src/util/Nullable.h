@@ -2,14 +2,13 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef PBUTIL_NULLABLE_H_
-#define PBUTIL_NULLABLE_H_
+#ifndef UTIL_NULLABLE_H_
+#define UTIL_NULLABLE_H_
 
-namespace pbutil {
+namespace util {
 
 template<typename T>
 class Nullable {
-
  public:
   Nullable()
    : val(), null(true) {}
@@ -112,4 +111,4 @@ private:
 
 }
 
-#endif  // PBUTIL_NULLABLE_H_
+#endif  // UTIL_NULLABLE_H_

@@ -2,16 +2,16 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_UTIL_XMLWRITER_H_
-#define TRANSITMAP_UTIL_XMLWRITER_H_
+#ifndef UTIL_XML_XMLWRITER_H_
+#define UTIL_XML_XMLWRITER_H_
 
 #include <ostream>
 #include <string>
 #include <stack>
 #include <map>
 
-namespace transitmapper {
 namespace util {
+namespace xml {
 
 class XmlWriterException: public std::exception {
  public:
@@ -92,6 +92,7 @@ class XmlWriter {
   void checkTagName(const std::string& str) const;
 };
 
-}}
+}  // namespace xml
+}  // namespace util
 
-#endif  // TRANSITMAP_UTIL_XMLWRITER_H_
+#endif  // UTIL_XML_XMLWRITER_H_

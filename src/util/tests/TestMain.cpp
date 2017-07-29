@@ -3,13 +3,13 @@
 //
 
 #include <string>
-#include "./lest.h"
-#include "./../Nullable.h"
-#include "./../String.h"
-#include "./../geo/Geo.h"
+#include "lest.h"
+#include "util/Nullable.h"
+#include "util/String.h"
+#include "util/geo/Geo.h"
 
 using lest::approx;
-using namespace pbutil::geo;
+using namespace util::geo;
 
 // define LEST cases
 const lest::test specification[] = {
@@ -52,76 +52,76 @@ CASE("geo box alignmengt") {
 
 // ___________________________________________________________________________
 CASE("url decode") {
-  EXPECT("zürich" == pbutil::urlDecode("z%C3%BCrich"));
-  EXPECT("!@$%^*()" == pbutil::urlDecode("!%40%24%25%5E*()"));
-  EXPECT("Løkken" == pbutil::urlDecode("L%C3%B8kken"));
-  EXPECT("á é" == pbutil::urlDecode("%C3%A1%20%C3%A9"));
-  EXPECT("á é" == pbutil::urlDecode("%C3%A1+%C3%A9"));
+  EXPECT("zürich" == util::urlDecode("z%C3%BCrich"));
+  EXPECT("!@$%^*()" == util::urlDecode("!%40%24%25%5E*()"));
+  EXPECT("Løkken" == util::urlDecode("L%C3%B8kken"));
+  EXPECT("á é" == util::urlDecode("%C3%A1%20%C3%A9"));
+  EXPECT("á é" == util::urlDecode("%C3%A1+%C3%A9"));
 },
 
 // ___________________________________________________________________________
 CASE("json escape") {
-  EXPECT("Hello\\\\Goodbye!" == pbutil::jsonStringEscape("Hello\\Goodbye!"));
-  EXPECT("\\\"Hello\\\"" == pbutil::jsonStringEscape("\"Hello\""));
+  EXPECT("Hello\\\\Goodbye!" == util::jsonStringEscape("Hello\\Goodbye!"));
+  EXPECT("\\\"Hello\\\"" == util::jsonStringEscape("\"Hello\""));
 },
 
 // ___________________________________________________________________________
 CASE("toString") {
-  EXPECT(pbutil::toString(34) == "34");
-  EXPECT(pbutil::toString("34") == "34");
+  EXPECT(util::toString(34) == "34");
+  EXPECT(util::toString("34") == "34");
 },
 
 // ___________________________________________________________________________
 CASE("replace") {
   std::string a("lorem ipsum ipsum lorem");
 
-  EXPECT(pbutil::replace(a, "ips", "aa"));
+  EXPECT(util::replace(a, "ips", "aa"));
   EXPECT(a == "lorem aaum ipsum lorem");
 
-  EXPECT(!pbutil::replace(a, "blablabla", ""));
+  EXPECT(!util::replace(a, "blablabla", ""));
   EXPECT(a == "lorem aaum ipsum lorem");
 
-  EXPECT(pbutil::replace(a, "m", ""));
+  EXPECT(util::replace(a, "m", ""));
   EXPECT(a == "lore aaum ipsum lorem");
 
-  EXPECT(!pbutil::replace(a, "", ""));
+  EXPECT(!util::replace(a, "", ""));
   EXPECT(a == "lore aaum ipsum lorem");
 
   std::string b("lorem ipsum ipsum lorem");
-  EXPECT(pbutil::replaceAll(b, "ips", "aa"));
+  EXPECT(util::replaceAll(b, "ips", "aa"));
   EXPECT(b == "lorem aaum aaum lorem");
 
-  EXPECT(pbutil::replaceAll(b, "m", ""));
+  EXPECT(util::replaceAll(b, "m", ""));
   EXPECT(b == "lore aau aau lore");
 
-  EXPECT(pbutil::replaceAll(b, "a", "aa"));
+  EXPECT(util::replaceAll(b, "a", "aa"));
   EXPECT(b == "lore aaaau aaaau lore");
 
-  EXPECT(pbutil::replaceAll(b, "e", "e"));
+  EXPECT(util::replaceAll(b, "e", "e"));
   EXPECT(b == "lore aaaau aaaau lore");
 
-  EXPECT(pbutil::replaceAll(b, "e", "ee"));
+  EXPECT(util::replaceAll(b, "e", "ee"));
   EXPECT(b == "loree aaaau aaaau loree");
 
-  EXPECT(!pbutil::replaceAll(b, "", "ee"));
+  EXPECT(!util::replaceAll(b, "", "ee"));
   EXPECT(b == "loree aaaau aaaau loree");
 },
 
 // ___________________________________________________________________________
 CASE("nullable") {
   {
-    pbutil::Nullable<std::string> nullable;
+    util::Nullable<std::string> nullable;
     EXPECT(nullable.isNull());
   }
 
   {
-    pbutil::Nullable<std::string> nullable(0);
+    util::Nullable<std::string> nullable(0);
     EXPECT(nullable.isNull());
   }
 
   {
     std::string str = "aa";
-    pbutil::Nullable<std::string> nullable(&str);
+    util::Nullable<std::string> nullable(&str);
     EXPECT(!nullable.isNull());
 
     EXPECT(nullable == "aa");
@@ -135,8 +135,8 @@ CASE("nullable") {
 
   {
     int a = 23;
-    pbutil::Nullable<int> nullable(a);
-    pbutil::Nullable<int> nullable2(24);
+    util::Nullable<int> nullable(a);
+    util::Nullable<int> nullable2(24);
     EXPECT(!nullable.isNull());
 
     EXPECT(nullable == 23);
@@ -149,7 +149,7 @@ CASE("nullable") {
     EXPECT(nullable < nullable2);
     EXPECT(nullable2 > nullable);
 
-    pbutil::Nullable<int> nullable3(nullable);
+    util::Nullable<int> nullable3(nullable);
     EXPECT(nullable == nullable3);
 
     nullable3 = nullable2;
@@ -161,7 +161,7 @@ CASE("nullable") {
     EXPECT(!nullable3.isNull());
     EXPECT(!nullable2.isNull());
 
-    pbutil::Nullable<int> voidnull;
+    util::Nullable<int> voidnull;
     EXPECT(voidnull.isNull());
 
     EXPECT_THROWS(nullable == voidnull);

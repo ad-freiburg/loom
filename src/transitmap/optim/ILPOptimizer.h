@@ -6,12 +6,12 @@
 #define TRANSITMAP_OPTIM_ILPOPTIMIZER_H_
 
 #include <glpk.h>
-#include "./../config/TransitMapConfig.h"
-#include "./../graph/OrderingConfiguration.h"
-#include "./../graph/Route.h"
-#include "./../graph/TransitGraph.h"
-#include "./OptGraph.h"
-#include "./Optimizer.h"
+#include "transitmap/config/TransitMapConfig.h"
+#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/Route.h"
+#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/optim/OptGraph.h"
+#include "transitmap/optim/Optimizer.h"
 
 using std::exception;
 using std::string;

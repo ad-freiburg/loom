@@ -2,7 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "./Route.h"
+#include "transitmap/graph/Route.h"
 
 using namespace transitmapper;
 using namespace graph;

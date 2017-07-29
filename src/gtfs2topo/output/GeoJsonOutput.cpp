@@ -4,22 +4,22 @@
 
 #include <stdint.h>
 #include <ostream>
-#include "./../config/GraphBuilderConfig.h"
-#include "./../graph/Graph.h"
-#include "./GeoJsonOutput.h"
+#include "gtfs2topo/config/GraphBuilderConfig.h"
+#include "gtfs2topo/graph/BuildGraph.h"
+#include "gtfs2topo/output/GeoJsonOutput.h"
 #include "json/json.hpp"
-#include "pbutil/String.h"
-#include "pbutil/log/Log.h"
+#include "util/String.h"
+#include "util/log/Log.h"
 
 using json = nlohmann::json;
-using pbutil::toString;
+using util::toString;
 using namespace gtfs2topo;
 
 // _____________________________________________________________________________
 GeoJsonOutput::GeoJsonOutput(const config::Config* cfg) : _cfg(cfg) {}
 
 // _____________________________________________________________________________
-void GeoJsonOutput::print(const graph::Graph& outG) {
+void GeoJsonOutput::print(const graph::BuildGraph& outG) {
   json geoj;
   geoj["type"] = "FeatureCollection";
   geoj["features"] = json::array();

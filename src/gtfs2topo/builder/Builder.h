@@ -8,20 +8,17 @@
 #include <proj_api.h>
 #include <algorithm>
 #include <unordered_map>
-#include "./../config/GraphBuilderConfig.h"
-#include "./../graph/Graph.h"
+#include "gtfs2topo/config/GraphBuilderConfig.h"
+#include "gtfs2topo/graph/BuildGraph.h"
 #include "ad/cppgtfs/gtfs/Feed.h"
-#include "pbutil/geo/PolyLine.h"
+#include "util/geo/PolyLine.h"
 
 using namespace gtfs2topo::graph;
 using namespace ad::cppgtfs;
-using pbutil::geo::PolyLine;
-using pbutil::geo::SharedSegment;
+using util::geo::PolyLine;
+using util::geo::SharedSegment;
 
 namespace gtfs2topo {
-
-const static char* WGS84_PROJ =
-    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
 struct ShrdSegWrap {
   ShrdSegWrap() : e(0), f(0){};
@@ -35,15 +32,15 @@ class Builder {
  public:
   Builder(const config::Config* cfg);
 
-  // build a graph from a gtfs feed
-  void consume(const gtfs::Feed& f, Graph* g);
+  // build a BuildGraph from a gtfs feed
+  void consume(const gtfs::Feed& f, BuildGraph* g);
 
-  // simpliyfy the graph
-  void simplify(Graph* g);
-  bool createTopologicalNodes(Graph* g, bool final);
-  void averageNodePositions(Graph* g);
-  void removeEdgeArtifacts(Graph* g);
-  void removeNodeArtifacts(Graph* g);
+  // simpliyfy the BuildGraph
+  void simplify(BuildGraph* g);
+  bool createTopologicalNodes(BuildGraph* g, bool final);
+  void averageNodePositions(BuildGraph* g);
+  void removeEdgeArtifacts(BuildGraph* g);
+  void removeNodeArtifacts(BuildGraph* g);
 
  private:
   const config::Config* _cfg;
@@ -60,16 +57,16 @@ class Builder {
                                            gtfs::Trip* t, double distA,
                                            double distB, projPJ p);
 
-  ShrdSegWrap getNextSharedSegment(Graph* g, bool final) const;
+  ShrdSegWrap getNextSharedSegment(BuildGraph* g, bool final) const;
   PolyLine getAveragedFromSharedSeg(const ShrdSegWrap& w) const;
 
-  Node* addStop(const gtfs::Stop* curStop, uint8_t aggrLevel, Graph* g);
+  Node* addStop(const gtfs::Stop* curStop, uint8_t aggrLevel, BuildGraph* g);
 
   bool checkTripSanity(gtfs::Trip* t) const;
   bool checkShapeSanity(gtfs::Shape* t) const;
 
-  bool combineNodes(Node* a, Node* b, Graph* g);
-  bool combineEdges(Edge* a, Edge* b, Node* n, Graph* g);
+  bool combineNodes(Node* a, Node* b, BuildGraph* g);
+  bool combineEdges(Edge* a, Edge* b, Node* n, BuildGraph* g);
 
   bool lineCrossesAtNode(const Node* a, const Edge* e, const Edge* f) const;
 

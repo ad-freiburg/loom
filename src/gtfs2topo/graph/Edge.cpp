@@ -5,16 +5,16 @@
 #include <cassert>
 #include <vector>
 #include "ad/cppgtfs/gtfs/Trip.h"
-#include "pbutil/geo/PolyLine.h"
-#include "Edge.h"
-#include "Node.h"
-#include "EdgeTripGeom.h"
+#include "util/geo/PolyLine.h"
+#include "gtfs2topo/graph/Edge.h"
+#include "gtfs2topo/graph/Node.h"
+#include "gtfs2topo/graph/EdgeTripGeom.h"
 
 using namespace gtfs2topo;
 using namespace graph;
 using namespace ad::cppgtfs;
 
-using pbutil::geo::PolyLine;
+using util::geo::PolyLine;
 
 // _____________________________________________________________________________
 Edge::Edge(Node* from, Node* to) : _from(from), _to(to) {
@@ -44,7 +44,7 @@ bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
     if (e.containsRoute(t->getRoute())) {
       for (auto& tr : e.getTripsForRoute(t->getRoute())->trips) {
         // shorcut: if a trip is contained here with the same shape id,
-        // don't require recalc of polyline etc
+        // don't require recalc of polyline
         if (tr->getShape() == t->getShape()) {
           e.addTrip(t, toNode);
           return true;
@@ -103,12 +103,6 @@ void Edge::addEdgeTripGeom(const EdgeTripGeom& e) {
 
 // _____________________________________________________________________________
 void Edge::simplify() {
-  /**
-  for (auto& e : _tripsContained) {
-    e.removeOrphans();
-  }
-  **/
-
   // calculate average cardinalty of geometries on this edge
   double avg = 0;
   for (auto& e : _tripsContained) {

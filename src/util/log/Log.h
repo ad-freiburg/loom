@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef PBUTIL_LOG_LOG_H_
-#define PBUTIL_LOG_LOG_H_
+#ifndef UTIL_LOG_LOG_H_
+#define UTIL_LOG_LOG_H_
 
 #include <sys/timeb.h>
 #include <time.h>
@@ -21,12 +21,12 @@
 #endif
 
 // compiler will optimize statement away if x <= LOGLEVEL
-#define LOG(x) if (x > LOGLEVEL) ; else pbutil::Log::log<x>()
+#define LOG(x) if (x > LOGLEVEL); else util::Log::log<x>()
 
 using std::setfill;
 using std::setw;
 
-namespace pbutil {
+namespace util {
 
 class Log {
  public:
@@ -64,4 +64,4 @@ class Log {
 };
 }
 
-#endif  // PBUTIL_LOG_LOG_H_
+#endif  // UTIL_LOG_LOG_H_

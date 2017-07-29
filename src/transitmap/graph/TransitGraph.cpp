@@ -5,25 +5,26 @@
 #include <proj_api.h>
 #include <set>
 #include <string>
-#include "./Edge.h"
-#include "./OrderingConfiguration.h"
-#include "./Route.h"
-#include "./TransitGraph.h"
-#include "pbutil/Misc.h"
-#include "pbutil/geo/Geo.h"
+#include "transitmap/graph/Edge.h"
+#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/Route.h"
+#include "transitmap/graph/TransitGraph.h"
+#include "util/Misc.h"
+#include "util/geo/Geo.h"
 
-using pbutil::geo::Point;
+using util::geo::Point;
+using util::geo::Box;
+using util::geo::dist;
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
 using transitmapper::graph::Route;
 using transitmapper::graph::Configuration;
-using bgeo::make_inverse;
 
 // _____________________________________________________________________________
 TransitGraph::TransitGraph(const std::string& name, const std::string& proj)
     : _name(name) {
-  _bbox = make_inverse<bgeo::model::box<Point>>();
+  _bbox = util::geo::maxbox();
   _proj = pj_init_plus(proj.c_str());
 }
 
@@ -228,12 +229,12 @@ std::set<Node*>* TransitGraph::getNodes() { return &_nodes; }
 projPJ TransitGraph::getProjection() const { return _proj; }
 
 // _____________________________________________________________________________
-const bgeo::model::box<Point>& TransitGraph::getBoundingBox() const {
+const Box& TransitGraph::getBoundingBox() const {
   return _bbox;
 }
 
 // _____________________________________________________________________________
-bgeo::model::box<Point> TransitGraph::getBoundingBox(double p) const {
+Box TransitGraph::getBoundingBox(double p) const {
   return Box(
       Point(_bbox.min_corner().get<0>() - p, _bbox.min_corner().get<1>() - p),
       Point(_bbox.max_corner().get<0>() + p, _bbox.max_corner().get<1>() + p));
@@ -245,7 +246,7 @@ Node* TransitGraph::getNearestNode(const Point& p, double maxD) const {
   ;
   Node* curN = 0;
   for (auto n : _nodes) {
-    double d = bgeo::distance(n->getPos(), p);
+    double d = dist(n->getPos(), p);
     if (d < maxD && d < curD) {
       curN = n;
       curD = d;
@@ -302,7 +303,7 @@ double TransitGraph::getNumPossSolutions() const {
 
   for (auto n : getNodes()) {
     for (auto e : n->getAdjListOut()) {
-      ret *= pbutil::factorial(e->getCardinality());
+      ret *= util::factorial(e->getCardinality());
     }
   }
 

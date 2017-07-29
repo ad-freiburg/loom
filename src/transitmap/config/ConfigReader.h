@@ -5,9 +5,9 @@
 #ifndef TRANSITMAP_CONFIG_CONFIGREADER_H_
 #define TRANSITMAP_CONFIG_CONFIGREADER_H_
 
-#include <vector>
 #include <boost/program_options.hpp>
-#include "./TransitMapConfig.h"
+#include <vector>
+#include "transitmap/config/TransitMapConfig.h"
 
 namespace transitmapper {
 namespace config {
@@ -17,7 +17,6 @@ class ConfigReader {
   ConfigReader();
   void read(Config* targetConfig, int argc, char** argv) const;
 };
-
 }
 }
 #endif  // TRANSITMAP_CONFIG_CONFIGREADER_H_

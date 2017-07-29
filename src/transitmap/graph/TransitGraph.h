@@ -13,14 +13,13 @@
 #include <set>
 #include <string>
 
-#include "./Edge.h"
-#include "./Node.h"
-#include "./OrderingConfiguration.h"
-#include "./Route.h"
-#include "pbutil/geo/Geo.h"
+#include "transitmap/graph/Edge.h"
+#include "transitmap/graph/Node.h"
+#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/Route.h"
+#include "util/geo/Geo.h"
 
-namespace bg = bgeo;
-using namespace pbutil::geo;
+using namespace util;
 
 namespace transitmapper {
 namespace graph {
@@ -32,7 +31,7 @@ class TransitGraph {
   ~TransitGraph();
 
   void addNode(Node* n);
-  Edge* addEdge(Node* from, Node* to, PolyLine pl, double w, double s);
+  Edge* addEdge(Node* from, Node* to, geo::PolyLine pl, double w, double s);
   Edge* getEdge(Node* from, Node* to);
 
   void deleteEdge(Node* from, Node* to);
@@ -42,11 +41,11 @@ class TransitGraph {
 
   Node* getNodeById(const std::string& id) const;
 
-  Node* getNearestNode(const Point& p, double maxD) const;
+  Node* getNearestNode(const geo::Point& p, double maxD) const;
 
   projPJ getProjection() const;
-  const bgeo::model::box<Point>& getBoundingBox() const;
-  bgeo::model::box<Point> getBoundingBox(double p) const;
+  const geo::Box& getBoundingBox() const;
+  geo::Box getBoundingBox(double p) const;
 
   double getScore(double inStatPen, double sameSegCrossPen,
                   double diffSegCrossPen, double splitPen) const;
@@ -77,7 +76,7 @@ class TransitGraph {
   Route* addRoute(const Route* r);
   const Route* getRoute(const std::string& id) const;
 
-  void expandBBox(const Point& p);
+  void expandBBox(const geo::Point& p);
 
   size_t getNumNodes() const;
   size_t getNumNodes(bool topo) const;
@@ -98,7 +97,7 @@ class TransitGraph {
 
   Configuration _config;
 
-  bgeo::model::box<Point> _bbox;
+  geo::Box _bbox;
 
   projPJ _proj;
 };

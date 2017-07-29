@@ -8,14 +8,14 @@
 #include <iostream>
 #include <set>
 #include <string>
-#include "./builder/Builder.h"
-#include "./config/ConfigReader.h"
-#include "./config/GraphBuilderConfig.h"
-#include "./graph/Graph.h"
-#include "./output/GeoJsonOutput.h"
+#include "gtfs2topo/builder/Builder.h"
+#include "gtfs2topo/config/ConfigReader.h"
+#include "gtfs2topo/config/GraphBuilderConfig.h"
+#include "gtfs2topo/graph/BuildGraph.h"
+#include "gtfs2topo/output/GeoJsonOutput.h"
 #include "ad/cppgtfs/Parser.h"
 #include "ad/cppgtfs/gtfs/Service.h"
-#include "pbutil/log/Log.h"
+#include "util/log/Log.h"
 
 using namespace gtfs2topo;
 using std::string;
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   if (!cfg.inputFeedPath.empty()) {
     parser.parse(&feed, cfg.inputFeedPath);
 
-    gtfs2topo::graph::Graph g("shinygraph", cfg.projectionString);
+    gtfs2topo::graph::BuildGraph g("shinygraph", cfg.projectionString);
     Builder b(&cfg);
 
     b.consume(feed, &g);

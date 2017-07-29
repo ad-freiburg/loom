@@ -3,25 +3,23 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <stdint.h>
-#include <ostream>
 #include <boost/filesystem.hpp>
-#include "pbutil/geo/PolyLine.h"
-#include "pbutil/log/Log.h"
-#include "./../config/TransitMapConfig.h"
+#include <ostream>
 #include "ogrsf_frmts.h"
-#include "./OgrOutput.h"
-#include "./../graph/TransitGraph.h"
-#include "./../graph/Edge.h"
+#include "transitmap/config/TransitMapConfig.h"
+#include "transitmap/graph/Edge.h"
+#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/output/OgrOutput.h"
+#include "util/geo/PolyLine.h"
+#include "util/log/Log.h"
 
-using namespace pbutil::geo;
+using namespace util::geo;
 using namespace transitmapper;
 using namespace output;
 
 // _____________________________________________________________________________
 OgrOutput::OgrOutput(const std::string& outFolder, const config::Config* cfg)
-: _outFolder(outFolder), _cfg(cfg), _t(SHAPEFILE) {
-
-}
+    : _outFolder(outFolder), _cfg(cfg), _t(SHAPEFILE) {}
 
 // _____________________________________________________________________________
 void OgrOutput::print(const graph::TransitGraph& outG) {
@@ -33,7 +31,7 @@ void OgrOutput::print(const graph::TransitGraph& outG) {
     LOG(ERROR) << "Could not init OGR writer.";
   }
 
-  OGRLayer* edgeLayer = createOGREdgeLayer(_t, _outFolder, poDS);
+  OGRLayer* edgeLayer = createOGREdgeLayer(poDS);
 
   if (edgeLayer == 0) {
     return;
@@ -51,7 +49,6 @@ void OgrOutput::print(const graph::TransitGraph& outG) {
     }
   }
 
-
   for (graph::Node* n : outG.getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       addEdge(e, edgeLayer);
@@ -59,13 +56,13 @@ void OgrOutput::print(const graph::TransitGraph& outG) {
   }
 
   // write the node layer
-  OGRLayer* nodeLayer = createOGRNodeLayer(_t, _outFolder, poDS);
+  OGRLayer* nodeLayer = createOGRNodeLayer(poDS);
   if (nodeLayer == 0) {
     return;
   }
 
   for (graph::Node* n : outG.getNodes()) {
-    LOG(INFO) << n->getStops().size()  << std::endl;
+    LOG(INFO) << n->getStops().size() << std::endl;
     addNode(n, nodeLayer);
   }
 
@@ -78,24 +75,15 @@ bool OgrOutput::addEdge(const graph::Edge* e, OGRLayer* layer) const {
   OGRFeature* edge;
   edge = OGRFeature::CreateFeature(layer->GetLayerDefn());
 
-  edge->SetField(
-    "from",
-    boost::lexical_cast<std::string>(
-    e->getFrom()
-    ).c_str()
-  );
-  edge->SetField(
-    "to",
-    boost::lexical_cast<std::string>(
-      e->getTo()
-    ).c_str()
-  );
+  edge->SetField("from",
+                 boost::lexical_cast<std::string>(e->getFrom()).c_str());
+  edge->SetField("to", boost::lexical_cast<std::string>(e->getTo()).c_str());
 
   OGRLineString geom;
 
   std::string wktStr = e->getGeom().getWKT();
 
-  const char *wkt[1];
+  const char* wkt[1];
   wkt[0] = wktStr.c_str();
   geom.importFromWkt(const_cast<char**>(wkt));
   edge->SetGeometry(&geom);
@@ -112,12 +100,7 @@ bool OgrOutput::addNode(const graph::Node* n, OGRLayer* layer) const {
   OGRFeature* node;
   node = OGRFeature::CreateFeature(layer->GetLayerDefn());
 
-  node->SetField(
-    "id",
-    boost::lexical_cast<std::string>(
-    n
-    ).c_str()
-  );
+  node->SetField("id", boost::lexical_cast<std::string>(n).c_str());
 
   OGRPoint geom;
 
@@ -125,7 +108,7 @@ bool OgrOutput::addNode(const graph::Node* n, OGRLayer* layer) const {
   wktStr << std::setprecision(12) << boost::geometry::wkt(n->getPos());
   std::string wktString = wktStr.str();
 
-  const char *wkt[1];
+  const char* wkt[1];
   wkt[0] = wktString.c_str();
   geom.importFromWkt(const_cast<char**>(wkt));
   node->SetGeometry(&geom);
@@ -138,22 +121,14 @@ bool OgrOutput::addNode(const graph::Node* n, OGRLayer* layer) const {
 }
 
 // _____________________________________________________________________________
-OGRLayer* OgrOutput::createOGREdgeLayer(OGROutputType t, const string& folder,
-    OGRDataSource* poDS) const {
-
+OGRLayer* OgrOutput::createOGREdgeLayer(OGRDataSource* poDS) const {
   OGRSpatialReference layerProjection;
-  layerProjection.importFromProj4(
-    _cfg->projectionString.c_str()
-  );
+  layerProjection.importFromProj4(_cfg->projectionString.c_str());
 
   // write the edge layer
   OGRLayer* edgeLayer;
-  edgeLayer = poDS->CreateLayer(
-    "segments",
-    &layerProjection,
-    wkbLineString,
-    NULL
-  );
+  edgeLayer =
+      poDS->CreateLayer("segments", &layerProjection, wkbLineString, NULL);
 
   if (edgeLayer == 0) {
     LOG(ERROR) << "Could not create layer 'segments'";
@@ -173,22 +148,13 @@ OGRLayer* OgrOutput::createOGREdgeLayer(OGROutputType t, const string& folder,
 }
 
 // _____________________________________________________________________________
-OGRLayer* OgrOutput::createOGRNodeLayer(OGROutputType t, const string& folder,
-    OGRDataSource* poDS) const {
-
+OGRLayer* OgrOutput::createOGRNodeLayer(OGRDataSource* poDS) const {
   OGRSpatialReference layerProjection;
-  layerProjection.importFromProj4(
-    _cfg->projectionString.c_str()
-  );
+  layerProjection.importFromProj4(_cfg->projectionString.c_str());
 
   // write the edge layer
   OGRLayer* nodeLayer;
-  nodeLayer = poDS->CreateLayer(
-    "nodes",
-    &layerProjection,
-    wkbPoint,
-    NULL
-  );
+  nodeLayer = poDS->CreateLayer("nodes", &layerProjection, wkbPoint, NULL);
 
   if (nodeLayer == 0) {
     LOG(ERROR) << "Could not create layer 'node'";
@@ -204,18 +170,21 @@ OGRLayer* OgrOutput::createOGRNodeLayer(OGROutputType t, const string& folder,
 }
 
 // _____________________________________________________________________________
-OGRDataSource* OgrOutput::getDataSource(OGROutputType t, const std::string& folder,
+OGRDataSource* OgrOutput::getDataSource(OGROutputType t,
+                                        const std::string& folder,
                                         bool reuse) const {
-  OGRSFDriver* poDriver;
+  OGRSFDriver* poDriver = 0;
 
   OGRRegisterAll();
 
   switch (t) {
     case SHAPEFILE:
-      poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("ESRI Shapefile");
+      poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(
+          "ESRI Shapefile");
       break;
     case GEOJSON:
-      poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("GeoJSON");
+      poDriver =
+          OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("GeoJSON");
       break;
     case GML:
       poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("GML");
@@ -230,19 +199,23 @@ OGRDataSource* OgrOutput::getDataSource(OGROutputType t, const std::string& fold
       poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("KML");
       break;
     case MAPINFO:
-      poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("MapInfo File");
+      poDriver =
+          OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("MapInfo File");
       break;
     case PDF:
       poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("PDF");
       break;
     case POSTGRES:
-      poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("PGDump");
+      poDriver =
+          OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("PGDump");
       break;
     case GEOCONCEPT:
-      poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("Geoconcept");
+      poDriver =
+          OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("Geoconcept");
       break;
     case SQLITE:
-      poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("SQLite");
+      poDriver =
+          OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName("SQLite");
   }
 
   if (poDriver == 0) {
@@ -263,8 +236,10 @@ OGRDataSource* OgrOutput::getDataSource(OGROutputType t, const std::string& fold
         return 0;
       }
 
-      if (!reuse && (boost::filesystem::is_directory(dir) && !boost::filesystem::is_empty(dir))) {
-        LOG(ERROR) << "OGR output directory '" << dir << "' is not empty! Must be!";
+      if (!reuse && (boost::filesystem::is_directory(dir) &&
+                     !boost::filesystem::is_empty(dir))) {
+        LOG(ERROR) << "OGR output directory '" << dir
+                   << "' is not empty! Must be!";
         return 0;
       }
     } catch (boost::filesystem::filesystem_error e) {
@@ -275,18 +250,15 @@ OGRDataSource* OgrOutput::getDataSource(OGROutputType t, const std::string& fold
 
   string ogrDir = dir.string();
 
-  switch(t) {
-    case CSV:
-      {
-        const char *opt[2];
-        opt[0] = "GEOMETRY=AS_WKT";
-        opt[1] = "LINEFORMAT=LF";
-        OGRDataSource* ret = poDriver->CreateDataSource(
-            ogrDir.c_str(),
-            const_cast<char**>(opt)
-        );
-        return ret;
-      }
+  switch (t) {
+    case CSV: {
+      const char* opt[2];
+      opt[0] = "GEOMETRY=AS_WKT";
+      opt[1] = "LINEFORMAT=LF";
+      OGRDataSource* ret =
+          poDriver->CreateDataSource(ogrDir.c_str(), const_cast<char**>(opt));
+      return ret;
+    }
     default:
       return poDriver->CreateDataSource(ogrDir.c_str(), 0);
   }
@@ -302,7 +274,7 @@ void OgrOutput::print(const optim::OptGraph& outG) {
     LOG(ERROR) << "Could not init OGR writer.";
   }
 
-  OGRLayer* edgeLayer = createOGREdgeLayer(_t, _outFolder, poDS);
+  OGRLayer* edgeLayer = createOGREdgeLayer(poDS);
 
   if (edgeLayer == 0) {
     return;
@@ -320,7 +292,6 @@ void OgrOutput::print(const optim::OptGraph& outG) {
     }
   }
 
-
   for (optim::OptNode* n : outG.getNodes()) {
     for (optim::OptEdge* e : n->adjListOut) {
       addEdge(e, edgeLayer);
@@ -328,7 +299,7 @@ void OgrOutput::print(const optim::OptGraph& outG) {
   }
 
   // write the node layer
-  OGRLayer* nodeLayer = createOGRNodeLayer(_t, _outFolder, poDS);
+  OGRLayer* nodeLayer = createOGRNodeLayer(poDS);
   if (nodeLayer == 0) {
     return;
   }
@@ -346,12 +317,7 @@ bool OgrOutput::addNode(const optim::OptNode* n, OGRLayer* layer) const {
   OGRFeature* node;
   node = OGRFeature::CreateFeature(layer->GetLayerDefn());
 
-  node->SetField(
-    "id",
-    boost::lexical_cast<std::string>(
-    n
-    ).c_str()
-  );
+  node->SetField("id", boost::lexical_cast<std::string>(n).c_str());
 
   OGRPoint geom;
 
@@ -359,7 +325,7 @@ bool OgrOutput::addNode(const optim::OptNode* n, OGRLayer* layer) const {
   wktStr << std::setprecision(12) << boost::geometry::wkt(n->node->getPos());
   std::string wktString = wktStr.str();
 
-  const char *wkt[1];
+  const char* wkt[1];
   wkt[0] = wktString.c_str();
   geom.importFromWkt(const_cast<char**>(wkt));
   node->SetGeometry(&geom);
@@ -376,18 +342,8 @@ bool OgrOutput::addEdge(const optim::OptEdge* e, OGRLayer* layer) const {
   OGRFeature* edge;
   edge = OGRFeature::CreateFeature(layer->GetLayerDefn());
 
-  edge->SetField(
-    "from",
-    boost::lexical_cast<std::string>(
-    e->from
-    ).c_str()
-  );
-  edge->SetField(
-    "to",
-    boost::lexical_cast<std::string>(
-      e->to
-    ).c_str()
-  );
+  edge->SetField("from", boost::lexical_cast<std::string>(e->from).c_str());
+  edge->SetField("to", boost::lexical_cast<std::string>(e->to).c_str());
 
   OGRLineString geom;
 
@@ -396,7 +352,7 @@ bool OgrOutput::addEdge(const optim::OptEdge* e, OGRLayer* layer) const {
   a << e->to->node->getPos();
   std::string wktStr = a.getWKT();
 
-  const char *wkt[1];
+  const char* wkt[1];
   wkt[0] = wktStr.c_str();
   geom.importFromWkt(const_cast<char**>(wkt));
   edge->SetGeometry(&geom);
