@@ -12,7 +12,7 @@ class Optimizer {
  public:
   virtual int optimize() const = 0;
 };
-} // namespace optim
-} // namespace transitmapper
+}  // namespace optim
+}  // namespace transitmapper
 
 #endif  // TRANSITMAP_OPTIM_OPTIMIZER_H_

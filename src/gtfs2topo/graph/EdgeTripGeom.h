@@ -41,7 +41,6 @@ class EdgeTripGeom {
   EdgeTripGeom(PolyLine pl, const Node* geomDir);
 
   void addTrip(gtfs::Trip* t, const Node* dirNode, PolyLine& pl);
-
   void addTrip(gtfs::Trip* t, const Node* dirNode);
 
   const std::vector<TripOccurance>& getTripsUnordered() const;

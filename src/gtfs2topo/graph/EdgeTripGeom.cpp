@@ -19,8 +19,7 @@ EdgeTripGeom::EdgeTripGeom(PolyLine geom, const Node* geomDir)
 }
 
 // _____________________________________________________________________________
-void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode,
-    PolyLine& pl) {
+void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode, PolyLine& pl) {
   std::vector<const PolyLine*> vec;
   vec.push_back(&_geom);
   if (dirNode != _geomDir) {

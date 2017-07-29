@@ -72,7 +72,6 @@ void GeoJsonOutput::print(const graph::BuildGraph& outG) {
     }
 
     if (arr.size()) feature["properties"]["excluded_line_conns"] = arr;
-
     geoj["features"].push_back(feature);
   }
 

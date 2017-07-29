@@ -43,7 +43,7 @@ bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
   for (auto& e : _tripsContained) {
     if (e.containsRoute(t->getRoute())) {
       for (auto& tr : e.getTripsForRoute(t->getRoute())->trips) {
-        // shorcut: if a trip is contained here with the same shape id,
+        // shortcut: if a trip is contained here with the same shape id,
         // don't require recalc of polyline
         if (tr->getShape() == t->getShape()) {
           e.addTrip(t, toNode);

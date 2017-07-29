@@ -8,9 +8,9 @@
 #include <proj_api.h>
 #include <algorithm>
 #include <unordered_map>
+#include "ad/cppgtfs/gtfs/Feed.h"
 #include "gtfs2topo/config/GraphBuilderConfig.h"
 #include "gtfs2topo/graph/BuildGraph.h"
-#include "ad/cppgtfs/gtfs/Feed.h"
 #include "util/geo/PolyLine.h"
 
 using namespace gtfs2topo::graph;
@@ -53,9 +53,10 @@ class Builder {
 
   Point getProjectedPoint(double lat, double lng, projPJ p) const;
 
-  std::pair<bool, PolyLine> getSubPolyLine(const gtfs::Stop* a, const gtfs::Stop* b,
-                                           gtfs::Trip* t, double distA,
-                                           double distB, projPJ p);
+  std::pair<bool, PolyLine> getSubPolyLine(const gtfs::Stop* a,
+                                           const gtfs::Stop* b, gtfs::Trip* t,
+                                           double distA, double distB,
+                                           projPJ p);
 
   ShrdSegWrap getNextSharedSegment(BuildGraph* g, bool final) const;
   PolyLine getAveragedFromSharedSeg(const ShrdSegWrap& w) const;

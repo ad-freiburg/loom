@@ -94,13 +94,6 @@ std::vector<RouteOccurance> Edge::getSameDirRoutesIn(
         if (n->connOccurs(r, fromEdge, this)) {
           ret.push_back(to);
         }
-      } else {
-        if (n->getId() == "0x2e138380") {
-          std::cout << "fail" << std::endl;
-          std::cout << to.route->getId() << " vs " << r->getId() << std::endl;
-          std::cout << to.direction->getId() << " vs " << dir->getId() << std::endl;
-          exit(0);
-        }
       }
     }
   }

@@ -883,12 +883,8 @@ PolyLine Builder::getAveragedFromSharedSeg(const ShrdSegWrap& w) const {
     }
   }
 
-  std::vector<const PolyLine*> avg;
-  std::vector<double> weights;
-  avg.push_back(&a);
-  avg.push_back(&b);
-  weights.push_back(geomA.getCardinality() * geomA.getCardinality());
-  weights.push_back(geomB.getCardinality() * geomB.getCardinality());
+  std::vector<const PolyLine*> avg{&a, &b};
+  std::vector<double> weights{geomA.getCardinality() * geomA.getCardinality(), geomB.getCardinality() * geomB.getCardinality()};
 
   PolyLine ret = PolyLine::average(avg, weights);
   ret.simplify(5);
