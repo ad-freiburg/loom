@@ -4,9 +4,12 @@
 
 #include <proj_api.h>
 #include "gtfs2topo/builder/Builder.h"
+#include "gtfs2topo/graph/BuildGraph.h"
 #include "ad/cppgtfs/gtfs/Feed.h"
 #include "util/geo/Geo.h"
 #include "util/log/Log.h"
+#include "gtfs2topo/graph/EdgePL.h"
+#include "gtfs2topo/graph/NodePL.h"
 
 using namespace gtfs2topo;
 using namespace graph;
@@ -30,6 +33,7 @@ const static char* WGS84_PROJ =
 // _____________________________________________________________________________
 Builder::Builder(const config::Config* cfg) : _cfg(cfg) {
   _mercProj = pj_init_plus(WGS84_PROJ);
+  _graphProj = pj_init_plus(cfg->projectionString.c_str());
 }
 
 // _____________________________________________________________________________
@@ -54,7 +58,7 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
     for (; st != t->second->getStopTimes().end(); ++st) {
       const StopTime& cur = *st;
 
-      Node* fromNode = g->getNodeByStop(prev.getStop(), AGGREGATE_STOPS);
+      Node* fromNode = getNodeByStop(g, prev.getStop(), AGGREGATE_STOPS);
       Node* toNode = addStop(cur.getStop(), AGGREGATE_STOPS, g);
 
       // TODO: we should also allow this, for round-trips
@@ -63,12 +67,13 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
       Edge* exE = g->getEdge(fromNode, toNode);
 
       if (!exE) {
-        exE = g->addEdge(fromNode, toNode);
+        exE = g->addEdge(fromNode, toNode, EdgePL());
+        exE->pl().setEdge(exE);
       }
 
       Node* directionNode = toNode;
 
-      if (!exE->addTrip(t->second, directionNode)) {
+      if (!exE->pl().addTrip(t->second, directionNode)) {
         std::pair<bool, PolyLine> edgeGeom;
         if (AGGREGATE_STOPS) {
           const Stop* frs = prev.getStop()->getParentStation()
@@ -79,22 +84,22 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
                           : cur.getStop();
           edgeGeom = getSubPolyLine(
               frs, tos, t->second, prev.getShapeDistanceTravelled(),
-              cur.getShapeDistanceTravelled(), g->getProjection());
+              cur.getShapeDistanceTravelled(), _graphProj);
         } else {
           edgeGeom = getSubPolyLine(prev.getStop(), cur.getStop(), t->second,
                                     prev.getShapeDistanceTravelled(),
                                     cur.getShapeDistanceTravelled(),
-                                    g->getProjection());
+                                    _graphProj);
         }
 
         // only take geometries that could be found using the
         // shape geometry, not some fallback
         if (edgeGeom.first) {
           if (prevEdge) {
-            fromNode->connOccurs(t->second->getRoute(), prevEdge, exE);
+            fromNode->pl().connOccurs(t->second->getRoute(), prevEdge, exE);
           }
 
-          exE->addTrip(t->second, edgeGeom.second, directionNode);
+          exE->pl().addTrip(t->second, edgeGeom.second, directionNode);
         }
       }
       prev = cur;
@@ -116,7 +121,7 @@ void Builder::simplify(BuildGraph* g) {
 
   for (auto n : *g->getNodes()) {
     for (auto e : n->getAdjListOut()) {
-      e->simplify();
+      e->pl().simplify();
     }
   }
 }
@@ -129,7 +134,7 @@ ShrdSegWrap Builder::getNextSharedSegment(BuildGraph* g, bool final) const {
     for (auto e : n->getAdjListOut()) {
       i++;
       if (_indEdges.find(e) != _indEdges.end() ||
-          e->getEdgeTripGeoms()->size() != 1) {
+          e->pl().getEdgeTripGeoms()->size() != 1) {
         continue;
       }
       // TODO: outfactor this _______
@@ -139,7 +144,7 @@ ShrdSegWrap Builder::getNextSharedSegment(BuildGraph* g, bool final) const {
           // above
           if (_indEdgesPairs.find(std::pair<const Edge*, const Edge*>(e, toTest)) != _indEdgesPairs.end() ||
               _indEdges.find(toTest) != _indEdges.end() ||
-              toTest->getEdgeTripGeoms()->size() != 1) {
+              toTest->pl().getEdgeTripGeoms()->size() != 1) {
             continue;
           }
 
@@ -149,15 +154,15 @@ ShrdSegWrap Builder::getNextSharedSegment(BuildGraph* g, bool final) const {
             if (final) {
               // set dmax according to the width of the etg
               dmax = fmax(
-                  dmin, e->getEdgeTripGeoms()->front().getCardinality() *
+                  dmin, e->pl().getEdgeTripGeoms()->front().getCardinality() *
                               (dmin / 2) +
-                          toTest->getEdgeTripGeoms()->front().getCardinality() *
+                          toTest->pl().getEdgeTripGeoms()->front().getCardinality() *
                               (dmin / 2));
             }
 
             SharedSegments s =
-                e->getEdgeTripGeoms()->front().getGeom().getSharedSegments(
-                    toTest->getEdgeTripGeoms()->front().getGeom(), dmax);
+                e->pl().getEdgeTripGeoms()->front().getGeom().getSharedSegments(
+                    toTest->pl().getEdgeTripGeoms()->front().getGeom(), dmax);
 
             if (s.segments.size() > 0) {
               _pEdges[std::pair<const Edge*, const Edge*>(e, toTest)]++;
@@ -191,8 +196,8 @@ bool Builder::lineCrossesAtNode(const Node* a, const Edge* ea,
 
   double lookDist = 100, minInAngle = 0.2;
 
-  const EdgeTripGeom& e = ea->getEdgeTripGeoms().front();
-  const EdgeTripGeom& f = eb->getEdgeTripGeoms().front();
+  const EdgeTripGeom& e = ea->pl().getEdgeTripGeoms().front();
+  const EdgeTripGeom& f = eb->pl().getEdgeTripGeoms().front();
 
   double angleE = 0, angleF = 0, angleEPartner = 0, angleFPartner = 0;
 
@@ -230,8 +235,8 @@ bool Builder::lineCrossesAtNode(const Node* a, const Edge* ea,
 
   for (auto edge : a->getAdjList()) {
     if (edge == ea || edge == eb) continue;
-    if (edge->getEdgeTripGeoms()->size() == 0) continue;
-    const EdgeTripGeom& etg = edge->getEdgeTripGeoms()->front();
+    if (edge->pl().getEdgeTripGeoms()->size() == 0) continue;
+    const EdgeTripGeom& etg = edge->pl().getEdgeTripGeoms()->front();
 
     if (etg.routeEquivalent(e)) {
       if (etg.getGeomDir() != a) {
@@ -254,8 +259,8 @@ bool Builder::lineCrossesAtNode(const Node* a, const Edge* ea,
 
   for (auto edge : a->getAdjList()) {
     if (edge == ea || edge == eb) continue;
-    if (edge->getEdgeTripGeoms()->size() == 0) continue;
-    const EdgeTripGeom& etg = edge->getEdgeTripGeoms()->front();
+    if (edge->pl().getEdgeTripGeoms()->size() == 0) continue;
+    const EdgeTripGeom& etg = edge->pl().getEdgeTripGeoms()->front();
 
     if (etg.routeEquivalent(f)) {
       if (etg.getGeomDir() != a) {
@@ -300,8 +305,8 @@ bool Builder::createTopologicalNodes(BuildGraph* g, bool final) {
   bool found = false;
 
   while ((w = getNextSharedSegment(g, final)).e) {
-    const EdgeTripGeom& curEdgeGeom = w.e->getEdgeTripGeoms()->front();
-    const EdgeTripGeom& compEdgeGeom = w.f->getEdgeTripGeoms()->front();
+    const EdgeTripGeom& curEdgeGeom = w.e->pl().getEdgeTripGeoms()->front();
+    const EdgeTripGeom& compEdgeGeom = w.f->pl().getEdgeTripGeoms()->front();
 
     const LinePoint& eap = w.s.first.first;
     const LinePoint& ebp = w.s.second.first;
@@ -346,8 +351,8 @@ bool Builder::createTopologicalNodes(BuildGraph* g, bool final) {
       b = !(fap.totalPos > fbp.totalPos) ? w.f->getTo() : w.f->getFrom();
     }
 
-    if (!a) a = new Node(w.s.first.first.p);
-    if (!b) b = new Node(w.s.second.first.p);
+    if (!a) a = new Node(NodePL(w.s.first.first.p));
+    if (!b) b = new Node(NodePL(w.s.second.first.p));
 
     if (a == b) {
       continue;
@@ -441,90 +446,97 @@ bool Builder::createTopologicalNodes(BuildGraph* g, bool final) {
     // add new edges
     g->addNode(a);
     g->addNode(b);
-    Edge* eaE = g->addEdge(wefrom, a);
-    Edge* abE = g->addEdge(a, b);
-    Edge* ebE = g->addEdge(b, weto);
+    Edge* eaE = g->addEdge(wefrom, a, EdgePL());
+    if (eaE) eaE->pl().setEdge(eaE);
+    Edge* abE = g->addEdge(a, b, EdgePL());
+    if (abE) abE->pl().setEdge(abE);
+    Edge* ebE = g->addEdge(b, weto, EdgePL());
+    if (ebE) ebE->pl().setEdge(ebE);
 
     if (eaE) {
-      wefrom->replaceEdgeInConnections(w.e, eaE);
+      wefrom->pl().replaceEdgeInConnections(w.e, eaE);
     } else {
       assert(a == wefrom);
-      a->replaceEdgeInConnections(w.e, abE);
+      a->pl().replaceEdgeInConnections(w.e, abE);
     }
 
     if (ebE) {
-      weto->replaceEdgeInConnections(w.e, ebE);
+      weto->pl().replaceEdgeInConnections(w.e, ebE);
     } else {
       assert(b == weto);
-      b->replaceEdgeInConnections(w.e, abE);
+      b->pl().replaceEdgeInConnections(w.e, abE);
     }
 
     Edge *faE = 0, *fbE = 0;
 
     if (fap.totalPos > fbp.totalPos) {
-      faE = g->addEdge(a, wfto);
-      fbE = g->addEdge(wffrom, b);
+      faE = g->addEdge(a, wfto, EdgePL());
+      if (faE) faE->pl().setEdge(faE);
+      fbE = g->addEdge(wffrom, b, EdgePL());
+      if (fbE) fbE->pl().setEdge(fbE);
 
       if (faE) {
-        wfto->replaceEdgeInConnections(w.f, faE);
+        wfto->pl().replaceEdgeInConnections(w.f, faE);
       } else {
         assert(a == wfto);
-        a->replaceEdgeInConnections(w.f, abE);
+        a->pl().replaceEdgeInConnections(w.f, abE);
       }
 
       if (fbE) {
-        wffrom->replaceEdgeInConnections(w.f, fbE);
+        wffrom->pl().replaceEdgeInConnections(w.f, fbE);
       } else {
         assert(b == wffrom);
-        b->replaceEdgeInConnections(w.f, abE);
+        b->pl().replaceEdgeInConnections(w.f, abE);
       }
     } else {
-      faE = g->addEdge(wffrom, a);
-      fbE = g->addEdge(b, wfto);
+      faE = g->addEdge(wffrom, a, EdgePL());
+      if (faE) faE->pl().setEdge(faE);
+      fbE = g->addEdge(b, wfto, EdgePL());
+      if (fbE) fbE->pl().setEdge(fbE);
 
       if (faE) {
-        wffrom->replaceEdgeInConnections(w.f, faE);
+        wffrom->pl().replaceEdgeInConnections(w.f, faE);
       } else {
         assert(a == wffrom);
-        a->replaceEdgeInConnections(w.f, abE);
+        a->pl().replaceEdgeInConnections(w.f, abE);
       }
 
       if (fbE) {
-        wfto->replaceEdgeInConnections(w.f, fbE);
+        wfto->pl().replaceEdgeInConnections(w.f, fbE);
       } else {
         assert(b == wfto);
-        b->replaceEdgeInConnections(w.f, abE);
+        b->pl().replaceEdgeInConnections(w.f, abE);
       }
     }
 
     if (abE) {
-      abE->addEdgeTripGeom(abEdgeGeom);
-      abE->simplify();
+      abE->pl().addEdgeTripGeom(abEdgeGeom);
+      abE->pl().simplify();
     } else {
       // we use abE below without checking!
       assert(false);
     }
 
     if (eaE) {
-      eaE->addEdgeTripGeom(eaEdgeGeom);
-      eaE->simplify();
-      a->sewConnectionsTogether(eaE, abE);
+      eaE->pl().addEdgeTripGeom(eaEdgeGeom);
+      eaE->pl().simplify();
+      a->pl().sewConnectionsTogether(eaE, abE);
     }
     if (ebE) {
-      ebE->addEdgeTripGeom(ecEdgeGeom);
-      ebE->simplify();
-      b->sewConnectionsTogether(abE, ebE);
+      ebE->pl().addEdgeTripGeom(ecEdgeGeom);
+      ebE->pl().simplify();
+      b->pl().sewConnectionsTogether(abE, ebE);
     }
 
     if (faE) {
-      faE->addEdgeTripGeom(faEdgeGeom);
-      faE->simplify();
-      a->sewConnectionsTogether(faE, abE);
+      faE->pl().addEdgeTripGeom(faEdgeGeom);
+      faE->pl().simplify();
+      a->pl().sewConnectionsTogether(faE, abE);
     }
     if (fbE) {
-      fbE->addEdgeTripGeom(fcEdgeGeom);
-      fbE->simplify();
-      b->sewConnectionsTogether(abE, fbE);
+      fbE->pl().addEdgeTripGeom(fcEdgeGeom);
+      fbE->pl().simplify();
+      b->pl().sewConnectionsTogether(abE, fbE);
     }
 
     found = true;
@@ -596,7 +608,7 @@ void Builder::averageNodePositions(BuildGraph* g) {
     size_t c = 0;
 
     for (auto e : n->getAdjList()) {
-      for (auto eg : *e->getEdgeTripGeoms()) {
+      for (auto eg : *e->pl().getEdgeTripGeoms()) {
         if (eg.getGeomDir() != n) {
           x += eg.getGeom().getLine().front().get<0>();
           y += eg.getGeom().getLine().front().get<1>();
@@ -608,7 +620,7 @@ void Builder::averageNodePositions(BuildGraph* g) {
       }
     }
 
-    if (c > 0) n->setPos(Point(x / c, y / c));
+    if (c > 0) n->pl().setPos(Point(x / c, y / c));
   }
 }
 
@@ -618,21 +630,21 @@ Node* Builder::addStop(const Stop* curStop, uint8_t aggrLevel, BuildGraph* g) {
     return addStop(curStop->getParentStation(), aggrLevel, g);
   }
 
-  Node* n = g->getNodeByStop(curStop, aggrLevel);
+  Node* n = getNodeByStop(g, curStop, aggrLevel);
 
   if (n) return n;
 
   Point p = getProjectedPoint(curStop->getLat(), curStop->getLng(),
-                              g->getProjection());
+                              _graphProj);
 
   if (aggrLevel > 1) {
-    n = g->getNearestNode(p, 100);
+    n = getNearestNode(g, p, 100);
   }
 
   if (n) {
-    n->addStop(curStop);
+    n->pl().addStop(curStop);
   } else {
-    n = g->addNode(new Node(p, curStop));
+    n = g->addNode(new Node(NodePL(p, curStop)));
   }
 
   return n;
@@ -656,11 +668,11 @@ void Builder::removeEdgeArtifacts(BuildGraph* g) {
 restart:
   for (Node* n : *g->getNodes()) {
     for (Edge* e : n->getAdjListOut()) {
-      for (auto etg : *e->getEdgeTripGeoms()) {
+      for (auto etg : *e->pl().getEdgeTripGeoms()) {
         if (etg.getGeom().getLength() < MIN_SEG_LENGTH) {
           Node* from = e->getFrom();
           Node* to = e->getTo();
-          if (from->getStops().size() == 0 || to->getStops().size() == 0) {
+          if (from->pl().getStops().size() == 0 || to->pl().getStops().size() == 0) {
             combineNodes(from, to, g);
             // OMG really
             goto restart;
@@ -680,12 +692,12 @@ restart:
                  n->getAdjListIn().end());
     edges.insert(edges.end(), n->getAdjListOut().begin(),
                  n->getAdjListOut().end());
-    if (edges.size() == 2 && n->getStops().size() == 0) {
-      const EdgeTripGeom& etga = *edges[0]->getEdgeTripGeoms()->begin();
-      const EdgeTripGeom& etgb = *edges[1]->getEdgeTripGeoms()->begin();
+    if (edges.size() == 2 && n->pl().getStops().size() == 0) {
+      const EdgeTripGeom& etga = *edges[0]->pl().getEdgeTripGeoms()->begin();
+      const EdgeTripGeom& etgb = *edges[1]->pl().getEdgeTripGeoms()->begin();
 
-      if (edges[0]->getEdgeTripGeoms()->size() == 1 &&
-          edges[1]->getEdgeTripGeoms()->size() == 1 &&
+      if (edges[0]->pl().getEdgeTripGeoms()->size() == 1 &&
+          edges[1]->pl().getEdgeTripGeoms()->size() == 1 &&
           etga.routeEquivalent(etgb)) {
         combineEdges(edges[0], edges[1], n, g);
         // TODO: OMG really
@@ -700,11 +712,11 @@ bool Builder::combineEdges(Edge* a, Edge* b, Node* n, BuildGraph* g) {
   assert((a->getTo() == n || a->getFrom() == n) &&
          (b->getTo() == n || b->getFrom() == n));
 
-  if (a->getEdgeTripGeoms()->size() != 1 || b->getEdgeTripGeoms()->size() != 1)
+  if (a->pl().getEdgeTripGeoms()->size() != 1 || b->pl().getEdgeTripGeoms()->size() != 1)
     return false;
 
-  EdgeTripGeom etga = *a->getEdgeTripGeoms()->begin();
-  const EdgeTripGeom& etgb = *b->getEdgeTripGeoms()->begin();
+  EdgeTripGeom etga = *a->pl().getEdgeTripGeoms()->begin();
+  const EdgeTripGeom& etgb = *b->pl().getEdgeTripGeoms()->begin();
 
   PolyLine p = etga.getGeom();
 
@@ -745,25 +757,26 @@ bool Builder::combineEdges(Edge* a, Edge* b, Node* n, BuildGraph* g) {
 
   etga.setGeom(p);
 
-  Edge* e = g->addEdge(newFrom, newTo);
-  e->addEdgeTripGeom(etga);
+  Edge* e = g->addEdge(newFrom, newTo, EdgePL());
+  e->pl().setEdge(e);
+  e->pl().addEdgeTripGeom(etga);
 
   g->deleteEdge(a->getFrom(), a->getTo());
   g->deleteEdge(b->getFrom(), b->getTo());
   delete (n);
   g->deleteNode(n);
 
-  newFrom->replaceEdgeInConnections(a, e);
-  newTo->replaceEdgeInConnections(b, e);
+  newFrom->pl().replaceEdgeInConnections(a, e);
+  newTo->pl().replaceEdgeInConnections(b, e);
 
   return true;
 }
 
 // _____________________________________________________________________________
 bool Builder::combineNodes(Node* a, Node* b, BuildGraph* g) {
-  assert(a->getStops().size() == 0 || b->getStops().size() == 0);
+  assert(a->pl().getStops().size() == 0 || b->pl().getStops().size() == 0);
 
-  if (a->getStops().size() != 0) {
+  if (a->pl().getStops().size() != 0) {
     Node* c = a;
     a = b;
     b = c;
@@ -775,22 +788,23 @@ bool Builder::combineNodes(Node* a, Node* b, BuildGraph* g) {
 
   for (Edge* e : a->getAdjListOut()) {
     if (connecting == e) continue;
-    Edge* newE = g->addEdge(b, e->getTo());
+    Edge* newE = g->addEdge(b, e->getTo(), EdgePL());
+    newE->pl().setEdge(newE);
     b->addEdge(newE);
     e->getTo()->removeEdge(e);
 
     oldNew[e] = newE;
 
-    e->getTo()->replaceEdgeInConnections(e, newE);
+    e->getTo()->pl().replaceEdgeInConnections(e, newE);
 
-    for (auto etg : *e->getEdgeTripGeoms()) {
+    for (auto etg : *e->pl().getEdgeTripGeoms()) {
       EdgeTripGeom etgNew(etg.getGeom(),
                           etg.getGeomDir() == a ? b : etg.getGeomDir());
       for (auto to : *etg.getTripsUnordered()) {
-        if (a->isConnOccuring(to.route, e, connecting)) {
+        if (a->pl().isConnOccuring(to.route, e, connecting)) {
           for (const auto edge :
-               b->getConnectingEdgesFor(to.route, connecting)) {
-            b->connOccurs(to.route, newE, edge);
+               b->pl().getConnectingEdgesFor(to.route, connecting)) {
+            b->pl().connOccurs(to.route, newE, edge);
           }
         }
 
@@ -799,29 +813,30 @@ bool Builder::combineNodes(Node* a, Node* b, BuildGraph* g) {
         }
       }
 
-      newE->addEdgeTripGeom(etgNew);
-      newE->simplify();
+      newE->pl().addEdgeTripGeom(etgNew);
+      newE->pl().simplify();
     }
   }
 
   for (Edge* e : a->getAdjListIn()) {
     if (connecting == e) continue;
-    Edge* newE = g->addEdge(e->getFrom(), b);
+    Edge* newE = g->addEdge(e->getFrom(), b, EdgePL());
+    newE->pl().setEdge(newE);
     b->addEdge(newE);
     e->getFrom()->removeEdge(e);
 
     oldNew[e] = newE;
 
-    e->getFrom()->replaceEdgeInConnections(e, newE);
+    e->getFrom()->pl().replaceEdgeInConnections(e, newE);
 
-    for (auto etg : *e->getEdgeTripGeoms()) {
+    for (auto etg : *e->pl().getEdgeTripGeoms()) {
       EdgeTripGeom etgNew(etg.getGeom(),
                           etg.getGeomDir() == a ? b : etg.getGeomDir());
       for (auto to : *etg.getTripsUnordered()) {
-        if (a->isConnOccuring(to.route, e, connecting)) {
+        if (a->pl().isConnOccuring(to.route, e, connecting)) {
           for (const auto edge :
-               b->getConnectingEdgesFor(to.route, connecting)) {
-            b->connOccurs(to.route, newE, edge);
+               b->pl().getConnectingEdgesFor(to.route, connecting)) {
+            b->pl().connOccurs(to.route, newE, edge);
           }
         }
         for (auto trip : to.trips) {
@@ -829,15 +844,15 @@ bool Builder::combineNodes(Node* a, Node* b, BuildGraph* g) {
         }
       }
 
-      newE->addEdgeTripGeom(etgNew);
-      newE->simplify();
+      newE->pl().addEdgeTripGeom(etgNew);
+      newE->pl().simplify();
     }
   }
 
-  for (const auto& occs : a->getOccuringConnections()) {
+  for (const auto& occs : a->pl().getOccuringConnections()) {
     for (const auto& occ : occs.second) {
       if (occ.from != connecting && occ.to != connecting) {
-        b->connOccurs(occs.first, oldNew[occ.from], oldNew[occ.to]);
+        b->pl().connOccurs(occs.first, oldNew[occ.from], oldNew[occ.to]);
       }
     }
   }
@@ -851,8 +866,8 @@ bool Builder::combineNodes(Node* a, Node* b, BuildGraph* g) {
 
 // _____________________________________________________________________________
 PolyLine Builder::getAveragedFromSharedSeg(const ShrdSegWrap& w) const {
-  const EdgeTripGeom& geomA = w.e->getEdgeTripGeoms()->front();
-  const EdgeTripGeom& geomB = w.f->getEdgeTripGeoms()->front();
+  const EdgeTripGeom& geomA = w.e->pl().getEdgeTripGeoms()->front();
+  const EdgeTripGeom& geomB = w.f->pl().getEdgeTripGeoms()->front();
 
   PolyLine a = geomA.getGeom().getSegment(w.s.first.first.totalPos,
                                           w.s.second.first.totalPos);
@@ -900,14 +915,14 @@ bool Builder::lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const {
   Point a, b, c, d;
 
   if (e == w.e) {
-    const EdgeTripGeom& geom = w.e->getEdgeTripGeoms()->front();
+    const EdgeTripGeom& geom = w.e->pl().getEdgeTripGeoms()->front();
     double lookAhead = LOOKAHEAD / geom.getGeom().getLength();
     a = geom.getGeom().getPointAt(w.s.first.first.totalPos - lookAhead).p;
     b = geom.getGeom().getPointAt(w.s.first.first.totalPos).p;
     c = geom.getGeom().getPointAt(w.s.second.first.totalPos).p;
     d = geom.getGeom().getPointAt(w.s.second.first.totalPos + lookAhead).p;
   } else if (e == w.f) {
-    const EdgeTripGeom& geom = w.f->getEdgeTripGeoms()->front();
+    const EdgeTripGeom& geom = w.f->pl().getEdgeTripGeoms()->front();
     double lookAhead = LOOKAHEAD / geom.getGeom().getLength();
     if (w.s.first.second.totalPos > w.s.second.second.totalPos) {
       a = geom.getGeom().getPointAt(w.s.first.second.totalPos + lookAhead).p;
@@ -924,4 +939,38 @@ bool Builder::lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const {
   double tang = fabs(tan(ang));
 
   return tang < DELTA;
+}
+
+// _____________________________________________________________________________
+Node* Builder::getNodeByStop(const BuildGraph* g, const gtfs::Stop* s, bool getParent) const {
+  if (getParent && s->getParentStation())
+    return getNodeByStop(g, s->getParentStation());
+
+  return getNodeByStop(g, s);
+}
+
+// _____________________________________________________________________________
+Node* Builder::getNodeByStop(const BuildGraph* g, const gtfs::Stop* s) const {
+  for (const auto n : g->getNodes()) {
+    if (n->pl().getStops().find(const_cast<gtfs::Stop*>(s)) != n->pl().getStops().end()) {
+      return n;
+    }
+  }
+  return 0;
+}
+
+// _____________________________________________________________________________
+Node* Builder::getNearestNode(const BuildGraph* g, const Point& p, double maxD) const {
+  double curD = DBL_MAX;
+  ;
+  Node* curN = 0;
+  for (auto n : g->getNodes()) {
+    double d = util::geo::dist(n->pl().getPos(), p);
+    if (d < maxD && d < curD) {
+      curN = n;
+      curD = d;
+    }
+  }
+
+  return curN;
 }

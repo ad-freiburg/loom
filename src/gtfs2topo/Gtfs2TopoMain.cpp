@@ -16,6 +16,8 @@
 #include "ad/cppgtfs/Parser.h"
 #include "ad/cppgtfs/gtfs/Service.h"
 #include "util/log/Log.h"
+#include "gtfs2topo/graph/EdgePL.h"
+#include "gtfs2topo/graph/NodePL.h"
 
 using namespace gtfs2topo;
 using std::string;
@@ -40,7 +42,7 @@ int main(int argc, char** argv) {
   if (!cfg.inputFeedPath.empty()) {
     parser.parse(&feed, cfg.inputFeedPath);
 
-    gtfs2topo::graph::BuildGraph g("shinygraph", cfg.projectionString);
+    gtfs2topo::graph::BuildGraph g;
     Builder b(&cfg);
 
     b.consume(feed, &g);

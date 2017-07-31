@@ -9,7 +9,7 @@
 #include "ad/cppgtfs/gtfs/Trip.h"
 #include "ad/cppgtfs/gtfs/Route.h"
 #include "util/geo/PolyLine.h"
-#include "gtfs2topo/graph/Node.h"
+#include "gtfs2topo/graph/BuildGraph.h"
 
 namespace gtfs2topo {
 namespace graph {

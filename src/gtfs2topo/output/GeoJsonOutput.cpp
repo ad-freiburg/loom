@@ -10,6 +10,8 @@
 #include "json/json.hpp"
 #include "util/String.h"
 #include "util/log/Log.h"
+#include "gtfs2topo/graph/NodePL.h"
+#include "gtfs2topo/graph/EdgePL.h"
 
 using json = nlohmann::json;
 using util::toString;
@@ -31,33 +33,33 @@ void GeoJsonOutput::print(const graph::BuildGraph& outG) {
 
     feature["geometry"]["type"] = "Point";
     std::vector<double> coords;
-    coords.push_back(n->getPos().get<0>());
-    coords.push_back(n->getPos().get<1>());
+    coords.push_back(n->pl().getPos().get<0>());
+    coords.push_back(n->pl().getPos().get<1>());
     feature["geometry"]["coordinates"] = coords;
 
     feature["properties"] = json::object();
     feature["properties"]["id"] = toString(n);
 
-    if (n->getStops().size() > 0) {
-      feature["properties"]["station_id"] = (*n->getStops().begin())->getId();
+    if (n->pl().getStops().size() > 0) {
+      feature["properties"]["station_id"] = (*n->pl().getStops().begin())->getId();
       feature["properties"]["station_label"] =
-          (*n->getStops().begin())->getName();
+          (*n->pl().getStops().begin())->getName();
     }
 
     auto arr = json::array();
 
     for (graph::Edge* e : n->getAdjList()) {
-      if (e->getEdgeTripGeoms()->size() == 0) continue;
-      for (auto r : *e->getEdgeTripGeoms()->front().getTripsUnordered()) {
+      if (e->pl().getEdgeTripGeoms()->size() == 0) continue;
+      for (auto r : *e->pl().getEdgeTripGeoms()->front().getTripsUnordered()) {
         for (graph::Edge* f : n->getAdjList()) {
           if (e == f) continue;
-          if (f->getEdgeTripGeoms()->size() == 0) continue;
-          for (auto rr : *f->getEdgeTripGeoms()->front().getTripsUnordered()) {
+          if (f->pl().getEdgeTripGeoms()->size() == 0) continue;
+          for (auto rr : *f->pl().getEdgeTripGeoms()->front().getTripsUnordered()) {
             if (!_cfg->ignoreDirections && r.route == rr.route &&
                 (r.direction == 0 || rr.direction == 0 ||
                  (r.direction == n && rr.direction != n) ||
                  (r.direction != n && rr.direction == n)) &&
-                !n->isConnOccuring(r.route, e, f)) {
+                !n->pl().isConnOccuring(r.route, e, f)) {
               auto obj = json::object();
               obj["route"] = toString(r.route);
               obj["edge1_node"] =
@@ -78,7 +80,7 @@ void GeoJsonOutput::print(const graph::BuildGraph& outG) {
   // second pass, edges
   for (graph::Node* n : outG.getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
-      if (e->getEdgeTripGeoms()->size() > 0) {
+      if (e->pl().getEdgeTripGeoms()->size() > 0) {
         json feature;
         feature["type"] = "Feature";
         feature["properties"]["from"] = toString(e->getFrom());
@@ -87,7 +89,7 @@ void GeoJsonOutput::print(const graph::BuildGraph& outG) {
         feature["geometry"]["type"] = "LineString";
         feature["geometry"]["coordinates"] = json::array();
 
-        for (auto p : e->getEdgeTripGeoms()->front().getGeom().getLine()) {
+        for (auto p : e->pl().getEdgeTripGeoms()->front().getGeom().getLine()) {
           std::vector<double> coords;
           coords.push_back(p.get<0>());
           coords.push_back(p.get<1>());
@@ -96,7 +98,7 @@ void GeoJsonOutput::print(const graph::BuildGraph& outG) {
 
         feature["properties"]["lines"] = json::array();
 
-        for (auto r : *e->getEdgeTripGeoms()->front().getTripsUnordered()) {
+        for (auto r : *e->pl().getEdgeTripGeoms()->front().getTripsUnordered()) {
           json route = json::object();
           route["id"] = toString(r.route);
           route["label"] = r.route->getShortName();

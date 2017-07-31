@@ -7,15 +7,32 @@
 #include "util/Nullable.h"
 #include "util/String.h"
 #include "util/geo/Geo.h"
+#include "util/graph/Graph.h"
 
 using lest::approx;
 using namespace util::geo;
+using namespace util::graph;
 
 // define LEST cases
 const lest::test specification[] = {
 
+  // ___________________________________________________________________________
+CASE("graph") {
+  Graph<int, int> g;
+
+  Node<int, int>* a = new Node<int, int>(0);
+  Node<int, int>* b = new Node<int, int>(0);
+  g.addNode(a);
+  EXPECT(g.getNodes()->size() == 1);
+  g.addNode(b);
+  EXPECT(g.getNodes()->size() == 2);
+
+
+  // TODO: more test cases 
+},
+
 // ___________________________________________________________________________
-CASE("geo box alignmengt") {
+CASE("geo box alignment") {
   Line a;
   a.push_back(Point(1, 1));
   a.push_back(Point(1, 2));

@@ -10,12 +10,15 @@
 #include <unordered_map>
 #include "ad/cppgtfs/gtfs/Feed.h"
 #include "gtfs2topo/config/GraphBuilderConfig.h"
-#include "gtfs2topo/graph/BuildGraph.h"
+#include "util/graph/Graph.h"
 #include "util/geo/PolyLine.h"
+#include "util/geo/Geo.h"
+#include "gtfs2topo/graph/BuildGraph.h"
 
 using namespace gtfs2topo::graph;
 using namespace ad::cppgtfs;
 using util::geo::PolyLine;
+using util::geo::Point;
 using util::geo::SharedSegment;
 
 namespace gtfs2topo {
@@ -45,6 +48,7 @@ class Builder {
  private:
   const config::Config* _cfg;
   projPJ _mercProj;
+  projPJ _graphProj;
 
   bool lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const;
 
@@ -70,6 +74,10 @@ class Builder {
   bool combineEdges(Edge* a, Edge* b, Node* n, BuildGraph* g);
 
   bool lineCrossesAtNode(const Node* a, const Edge* e, const Edge* f) const;
+
+  Node* getNodeByStop(const BuildGraph* g, const gtfs::Stop* s, bool getParent) const;
+  Node* getNodeByStop(const BuildGraph* g, const gtfs::Stop* s) const;
+  Node* getNearestNode(const BuildGraph* g, const Point& p, double maxD) const;
 
   mutable std::set<const Edge*> _indEdges;
   mutable std::set<std::pair<const Edge*, const Edge*> > _indEdgesPairs;

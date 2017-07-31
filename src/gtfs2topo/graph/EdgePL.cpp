@@ -6,9 +6,8 @@
 #include <vector>
 #include "ad/cppgtfs/gtfs/Trip.h"
 #include "util/geo/PolyLine.h"
-#include "gtfs2topo/graph/Edge.h"
-#include "gtfs2topo/graph/Node.h"
 #include "gtfs2topo/graph/EdgeTripGeom.h"
+#include "gtfs2topo/graph/EdgePL.h"
 
 using namespace gtfs2topo;
 using namespace graph;
@@ -17,29 +16,23 @@ using namespace ad::cppgtfs;
 using util::geo::PolyLine;
 
 // _____________________________________________________________________________
-Edge::Edge(Node* from, Node* to) : _from(from), _to(to) {
+EdgePL::EdgePL(const Edge* e) : _e(e) {
 
 }
 
 // _____________________________________________________________________________
-Node* Edge::getFrom() const {
-  return _from;
+EdgePL::EdgePL() : _e(0) {
+
 }
 
 // _____________________________________________________________________________
-Node* Edge::getTo() const {
-  return _to;
+void EdgePL::setEdge(const Edge* e) {
+  _e = e;
 }
 
 // _____________________________________________________________________________
-Node* Edge::getOtherNode(const Node* notNode) const {
-  if (_to == notNode) return _from;
-  return _to;
-}
-
-// _____________________________________________________________________________
-bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
-  assert(toNode == _from || toNode == _to);
+bool EdgePL::addTrip(gtfs::Trip* t, Node* toNode) {
+  assert(toNode == _e->getFrom() || toNode == _e->getTo());
   for (auto& e : _tripsContained) {
     if (e.containsRoute(t->getRoute())) {
       for (auto& tr : e.getTripsForRoute(t->getRoute())->trips) {
@@ -57,8 +50,8 @@ bool Edge::addTrip(gtfs::Trip* t, Node* toNode) {
 }
 
 // _____________________________________________________________________________
-bool Edge::addTrip(gtfs::Trip* t, PolyLine pl, Node* toNode) {
-  assert(toNode == _from || toNode == _to);
+bool EdgePL::addTrip(gtfs::Trip* t, PolyLine pl, Node* toNode) {
+  assert(toNode == _e->getFrom() || toNode == _e->getTo());
   bool inserted = false;
   for (auto& e : _tripsContained) {
     if (e.getGeom() == pl) {
@@ -77,32 +70,32 @@ bool Edge::addTrip(gtfs::Trip* t, PolyLine pl, Node* toNode) {
 }
 
 // _____________________________________________________________________________
-const std::vector<EdgeTripGeom>& Edge::getEdgeTripGeoms() const {
+const std::vector<EdgeTripGeom>& EdgePL::getEdgeTripGeoms() const {
   return _tripsContained;
 }
 
 // _____________________________________________________________________________
-std::vector<EdgeTripGeom>* Edge::getEdgeTripGeoms() {
+std::vector<EdgeTripGeom>* EdgePL::getEdgeTripGeoms() {
   return &_tripsContained;
 }
 
 // _____________________________________________________________________________
-void Edge::addEdgeTripGeom(const EdgeTripGeom& e) {
-  assert(e.getGeomDir() == _from || e.getGeomDir() ==  _to);
+void EdgePL::addEdgeTripGeom(const EdgeTripGeom& e) {
+  assert(e.getGeomDir() == _e->getFrom() || e.getGeomDir() ==  _e->getTo());
 
   for (const auto& to : e.getTripsUnordered()) {
-    assert(to.direction == 0 || to.direction == _from || to.direction == _to);
+    assert(to.direction == 0 || to.direction == _e->getFrom() || to.direction == _e->getTo());
   }
 
   _tripsContained.push_back(e);
-  if (e.getGeomDir() != _to) {
+  if (e.getGeomDir() != _e->getTo()) {
     const_cast<PolyLine*>(&_tripsContained.back().getGeom())->reverse();
-    _tripsContained.back().setGeomDir(_to);
+    _tripsContained.back().setGeomDir(_e->getTo());
   }
 }
 
 // _____________________________________________________________________________
-void Edge::simplify() {
+void EdgePL::simplify() {
   // calculate average cardinalty of geometries on this edge
   double avg = 0;
   for (auto& e : _tripsContained) {
@@ -122,7 +115,7 @@ void Edge::simplify() {
 }
 
 // _____________________________________________________________________________
-void Edge::averageCombineGeom() {
+void EdgePL::averageCombineGeom() {
   if (_tripsContained.size() < 2) {
     return;
   }
@@ -130,13 +123,13 @@ void Edge::averageCombineGeom() {
   std::vector<const PolyLine*> lines;
 
   for (auto& et : _tripsContained) {
-    assert(et.getGeomDir() == _to);
+    assert(et.getGeomDir() == _e->getTo());
     lines.push_back(&et.getGeom());
   }
 
   PolyLine pl = PolyLine::average(lines);
 
-  EdgeTripGeom combined(pl, _to);
+  EdgeTripGeom combined(pl, _e->getTo());
 
   for (auto& et : _tripsContained) {
     for (auto& r : *et.getTripsUnordered()) {
@@ -151,7 +144,7 @@ void Edge::averageCombineGeom() {
 }
 
 // _____________________________________________________________________________
-void Edge::combineIncludedGeoms() {
+void EdgePL::combineIncludedGeoms() {
   if (_tripsContained.size() < 2) {
     return;
   }

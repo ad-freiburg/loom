@@ -2,39 +2,29 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GTFS2TOPO_GRAPH_EDGE_H_
-#define GTFS2TOPO_GRAPH_EDGE_H_
+#ifndef GTFS2TOPO_GRAPH_EDGEPL_H_
+#define GTFS2TOPO_GRAPH_EDGEPL_H_
 
 #include <vector>
-#include "gtfs2topo/graph/Edge.h"
-#include "gtfs2topo/graph/Node.h"
 #include "gtfs2topo/graph/EdgeTripGeom.h"
 #include "util/geo/PolyLine.h"
 #include "ad/cppgtfs/gtfs/Trip.h"
+#include "gtfs2topo/graph/BuildGraph.h"
 
 using namespace ad::cppgtfs;
-
-using std::exception;
-using std::string;
-using util::geo::PolyLine;
 
 namespace gtfs2topo {
 namespace graph {
 
-// forward declaration of Node
-class Node;
-
-class Edge {
+class EdgePL {
  public:
-  Edge(Node* from, Node* to);
-
-  Node* getFrom() const;
-  Node* getTo() const;
-
-  Node* getOtherNode(const Node* notNode) const;
+  EdgePL(const Edge* e);
+  EdgePL();
 
   bool addTrip(gtfs::Trip* t, Node* toNode);
   bool addTrip(gtfs::Trip* t, PolyLine pl, Node* toNode);
+
+  void setEdge(const Edge* e);
 
   const std::vector<EdgeTripGeom>& getEdgeTripGeoms() const;
   std::vector<EdgeTripGeom>* getEdgeTripGeoms();
@@ -42,13 +32,8 @@ class Edge {
   void addEdgeTripGeom(const EdgeTripGeom& e);
 
   void simplify();
-
-  void setFrom(Node* from);
   void setTo(Node* to);
  private:
-  Node* _from;
-  Node* _to;
-
   // Map of EdgeTripGeometries in this graph edge.
   // An EdgeTripGeometry is a geometry holding N trips.
   // This is meant as a multi-stage structure, where in the first
@@ -66,9 +51,11 @@ class Edge {
 
   void combineIncludedGeoms();
   void averageCombineGeom();
+
+  const Edge* _e;
 };
 
 }}
 
-#endif  // GTFS2TOPO_GRAPH_EDGE_H_
+#endif  // GTFS2TOPO_GRAPH_EDGEPL_H_
 
