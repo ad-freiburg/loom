@@ -24,7 +24,7 @@ using transitmapper::graph::Configuration;
 // _____________________________________________________________________________
 TransitGraph::TransitGraph(const std::string& name, const std::string& proj)
     : _name(name) {
-  _bbox = util::geo::maxbox();
+  _bbox = util::geo::minbox();
   _proj = pj_init_plus(proj.c_str());
 }
 

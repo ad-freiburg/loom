@@ -316,8 +316,8 @@ bool SvgOutput::isNextTo(const graph::InnerGeometry& a,
     if ((a.slotFrom - b.slotFrom == 1 || b.slotFrom - a.slotFrom == 1) &&
         (a.slotTo - b.slotTo == 1 || b.slotTo - a.slotTo == 1)) {
       return !util::geo::intersects(
-          a.geom.getLine().front(), a.geom.getLine().back(),
-          b.geom.getLine().front(), b.geom.getLine().back());
+          a.geom.front(), a.geom.back(),
+          b.geom.front(), b.geom.back());
     }
   }
 
@@ -325,8 +325,8 @@ bool SvgOutput::isNextTo(const graph::InnerGeometry& a,
     if ((a.slotTo - b.slotFrom == 1 || b.slotFrom - a.slotTo == 1) &&
         (a.slotFrom - b.slotTo == 1 || b.slotTo - a.slotFrom == 1)) {
       return !util::geo::intersects(
-          a.geom.getLine().front(), a.geom.getLine().back(),
-          b.geom.getLine().front(), b.geom.getLine().back());
+          a.geom.front(), a.geom.back(),
+          b.geom.front(), b.geom.back());
     }
   }
 
@@ -653,7 +653,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
     if (iSects.size() > 0) {
       p = p.getSegment(0, iSects.begin()->totalPos);
     } else {
-      p << nfTo->geom.projectOn(p.getLine().back()).p;
+      p << nfTo->geom.projectOn(p.back()).p;
     }
 
     std::set<LinePoint, LinePointCmp> iSects2 =
@@ -661,7 +661,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
     if (iSects2.size() > 0) {
       p = p.getSegment(iSects2.begin()->totalPos, 1);
     } else {
-      p >> nfFrom->geom.projectOn(p.getLine().front()).p;
+      p >> nfFrom->geom.projectOn(p.front()).p;
     }
 
     double arrowLength = (_cfg->lineWidth * 2.5);

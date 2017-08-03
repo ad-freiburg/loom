@@ -3,4 +3,4 @@ include_directories(
 )
 
 add_executable(utilTest TestMain.cpp)
-target_link_libraries(utilTest)
+target_link_libraries(utilTest util)

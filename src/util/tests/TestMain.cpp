@@ -8,6 +8,7 @@
 #include "util/String.h"
 #include "util/geo/Geo.h"
 #include "util/graph/Graph.h"
+#include "util/geo/Grid.h"
 
 using lest::approx;
 using namespace util::geo;
@@ -16,7 +17,7 @@ using namespace util::graph;
 // define LEST cases
 const lest::test specification[] = {
 
-  // ___________________________________________________________________________
+// ___________________________________________________________________________
 CASE("graph") {
   Graph<int, int> g;
 
@@ -26,6 +27,39 @@ CASE("graph") {
   EXPECT(g.getNodes()->size() == 1);
   g.addNode(b);
   EXPECT(g.getNodes()->size() == 2);
+
+
+  // TODO: more test cases 
+},
+
+// ___________________________________________________________________________
+CASE("grid") {
+  Grid<int, Line> g(.5, .5, Box(Point(0, 0), Point(3, 3)));
+
+  Line l;
+  l.push_back(Point(0, 0));
+  l.push_back(Point(1.5, 2));
+
+  Line l2;
+  l.push_back(Point(2.5, 1));
+  l.push_back(Point(2.5, 2));
+
+  g.add(l, 1);
+  g.add(l2, 2);
+
+  std::set<int> ret;
+
+  Box req(Point(.5, 1), Point(1, 1.5));
+  g.get(req, &ret);
+  EXPECT(ret.size() == 1);
+
+  ret.clear();
+  g.getNeighbors(1, 0, &ret);
+  EXPECT(ret.size() == 1);
+
+  ret.clear();
+  g.getNeighbors(1, 0.55, &ret);
+  EXPECT(ret.size() == 2);
 
 
   // TODO: more test cases 

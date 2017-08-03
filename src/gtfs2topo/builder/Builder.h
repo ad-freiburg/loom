@@ -12,11 +12,15 @@
 #include "gtfs2topo/config/GraphBuilderConfig.h"
 #include "util/graph/Graph.h"
 #include "util/geo/PolyLine.h"
+#include "util/geo/Grid.h"
 #include "util/geo/Geo.h"
 #include "gtfs2topo/graph/BuildGraph.h"
 
 using namespace gtfs2topo::graph;
 using namespace ad::cppgtfs;
+using util::geo::Grid;
+using util::geo::Box;
+using util::geo::Line;
 using util::geo::PolyLine;
 using util::geo::Point;
 using util::geo::SharedSegment;
@@ -59,10 +63,9 @@ class Builder {
 
   std::pair<bool, PolyLine> getSubPolyLine(const gtfs::Stop* a,
                                            const gtfs::Stop* b, gtfs::Trip* t,
-                                           double distA, double distB,
-                                           projPJ p);
+                                           double distA, double distB);
 
-  ShrdSegWrap getNextSharedSegment(BuildGraph* g, bool final) const;
+  ShrdSegWrap getNextSharedSegment(BuildGraph* g, bool final, Grid<Edge*, Line>* grid) const;
   PolyLine getAveragedFromSharedSeg(const ShrdSegWrap& w) const;
 
   Node* addStop(const gtfs::Stop* curStop, uint8_t aggrLevel, BuildGraph* g);
@@ -78,6 +81,9 @@ class Builder {
   Node* getNodeByStop(const BuildGraph* g, const gtfs::Stop* s, bool getParent) const;
   Node* getNodeByStop(const BuildGraph* g, const gtfs::Stop* s) const;
   Node* getNearestNode(const BuildGraph* g, const Point& p, double maxD) const;
+
+  Box getGraphBoundingBox(const BuildGraph* g) const;
+  Grid<Edge*, Line>  getGeoIndex(const BuildGraph* g) const;
 
   mutable std::set<const Edge*> _indEdges;
   mutable std::set<std::pair<const Edge*, const Edge*> > _indEdgesPairs;

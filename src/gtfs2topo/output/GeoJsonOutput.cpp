@@ -49,12 +49,12 @@ void GeoJsonOutput::print(const graph::BuildGraph& outG) {
     auto arr = json::array();
 
     for (graph::Edge* e : n->getAdjList()) {
-      if (e->pl().getEdgeTripGeoms()->size() == 0) continue;
-      for (auto r : *e->pl().getEdgeTripGeoms()->front().getTripsUnordered()) {
+      if (!e->pl().getRefETG()) continue;
+      for (auto r : *e->pl().getRefETG()->getTripsUnordered()) {
         for (graph::Edge* f : n->getAdjList()) {
           if (e == f) continue;
-          if (f->pl().getEdgeTripGeoms()->size() == 0) continue;
-          for (auto rr : *f->pl().getEdgeTripGeoms()->front().getTripsUnordered()) {
+          if (!f->pl().getRefETG()) continue;
+          for (auto rr : *f->pl().getRefETG()->getTripsUnordered()) {
             if (!_cfg->ignoreDirections && r.route == rr.route &&
                 (r.direction == 0 || rr.direction == 0 ||
                  (r.direction == n && rr.direction != n) ||
@@ -80,7 +80,7 @@ void GeoJsonOutput::print(const graph::BuildGraph& outG) {
   // second pass, edges
   for (graph::Node* n : outG.getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
-      if (e->pl().getEdgeTripGeoms()->size() > 0) {
+      if (e->pl().getRefETG()) {
         json feature;
         feature["type"] = "Feature";
         feature["properties"]["from"] = toString(e->getFrom());
@@ -89,7 +89,7 @@ void GeoJsonOutput::print(const graph::BuildGraph& outG) {
         feature["geometry"]["type"] = "LineString";
         feature["geometry"]["coordinates"] = json::array();
 
-        for (auto p : e->pl().getEdgeTripGeoms()->front().getGeom().getLine()) {
+        for (auto p : e->pl().getRefETG()->getGeom().getLine()) {
           std::vector<double> coords;
           coords.push_back(p.get<0>());
           coords.push_back(p.get<1>());
@@ -98,7 +98,7 @@ void GeoJsonOutput::print(const graph::BuildGraph& outG) {
 
         feature["properties"]["lines"] = json::array();
 
-        for (auto r : *e->pl().getEdgeTripGeoms()->front().getTripsUnordered()) {
+        for (auto r : *e->pl().getRefETG()->getTripsUnordered()) {
           json route = json::object();
           route["id"] = toString(r.route);
           route["label"] = r.route->getShortName();

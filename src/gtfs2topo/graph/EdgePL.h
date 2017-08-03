@@ -8,10 +8,13 @@
 #include <vector>
 #include "gtfs2topo/graph/EdgeTripGeom.h"
 #include "util/geo/PolyLine.h"
+
+#include "util/Nullable.h"
 #include "ad/cppgtfs/gtfs/Trip.h"
 #include "gtfs2topo/graph/BuildGraph.h"
 
 using namespace ad::cppgtfs;
+using util::Nullable;
 
 namespace gtfs2topo {
 namespace graph {
@@ -28,6 +31,9 @@ class EdgePL {
 
   const std::vector<EdgeTripGeom>& getEdgeTripGeoms() const;
   std::vector<EdgeTripGeom>* getEdgeTripGeoms();
+
+  const EdgeTripGeom* getRefETG() const;
+  EdgeTripGeom* getRefETG();
 
   void addEdgeTripGeom(const EdgeTripGeom& e);
 

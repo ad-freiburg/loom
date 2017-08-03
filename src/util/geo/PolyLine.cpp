@@ -105,8 +105,8 @@ void PolyLine::offsetPerp(double units) {
         pl = pl.getSegment(0, (d - (fabs(units))) / pl.getLength());
         pll = pll.getSegment(0, (d - (fabs(units))) / pll.getLength());
 
-        ret.push_back(pll.getLine().back());
-        *lastIns = pl.getLine().back();
+        ret.push_back(pll.back());
+        *lastIns = pl.back();
 
         ret.push_back(curP);
       } else {
@@ -397,8 +397,8 @@ bool PolyLine::equals(const PolyLine& rhs, double dmax) const {
   if (_line.size() == 2 && _line.size() == rhs.getLine().size()) {
     // trivial case, straight line, implement directly
     return (dist(_line[0], rhs.getLine()[0]) < dmax &&
-            dist(_line.back(), rhs.getLine().back()) < dmax) ||
-           (dist(_line[0], rhs.getLine().back()) < dmax &&
+            dist(_line.back(), rhs.back()) < dmax) ||
+           (dist(_line[0], rhs.back()) < dmax &&
             dist(_line.back(), rhs.getLine()[0]) < dmax);
   } else {
     return contains(rhs, dmax) && rhs.contains(*this, dmax);
@@ -448,11 +448,11 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
   double curDist = 0;
   double curTotalSegDist = 0;
   size_t skips;
-  LinePoint curStartCand, curEndCand;
 
-  LinePoint curStartCandCmp, curEndCandCmp;
+  LinePoint curStartCand, curEndCand, curStartCandCmp, curEndCandCmp;
 
   double comp = 0, curSegDist = 0;
+  double length = getLength(), plLength = pl.getLength();
 
   for (size_t i = 1; i < _line.size(); ++i) {
     const Point& s = _line[i - 1];
@@ -475,10 +475,10 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
 
           single = false;
 
-          comp = fabs(curStartCand.totalPos * getLength() -
-                      curEndCand.totalPos * getLength()) /
-                 fabs(curStartCandCmp.totalPos * pl.getLength() -
-                      curEndCandCmp.totalPos * pl.getLength());
+          comp = fabs(curStartCand.totalPos * length -
+                      curEndCand.totalPos * length) /
+                 fabs(curStartCandCmp.totalPos * plLength -
+                      curEndCandCmp.totalPos * plLength);
         } else {
           in = true;
           curStartCand = curBackProjectedPointer;
@@ -489,10 +489,10 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
           skips++;
           if (skips > MAX_SKIPS) {  // TODO: make configurable
             if (comp > 0.8 && comp < 1.2 && !single &&
-                (fabs(curStartCand.totalPos * getLength() -
-                      curEndCand.totalPos * getLength()) > MIN_SEG_LENGTH &&
-                 fabs(curStartCandCmp.totalPos * pl.getLength() -
-                      curEndCandCmp.totalPos * pl.getLength()) >
+                (fabs(curStartCand.totalPos * length -
+                      curEndCand.totalPos * length) > MIN_SEG_LENGTH &&
+                 fabs(curStartCandCmp.totalPos * plLength -
+                      curEndCandCmp.totalPos * plLength) >
                      MIN_SEG_LENGTH)) {
               ret.segments.push_back(SharedSegment(
                   std::pair<LinePoint, LinePoint>(curStartCand,
@@ -525,10 +525,10 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
   }
 
   if (comp > 0.8 && comp < 1.2 && in && !single &&
-      (fabs(curStartCand.totalPos * getLength() -
-            curEndCand.totalPos * getLength()) > MIN_SEG_LENGTH &&
-       fabs(curStartCandCmp.totalPos * pl.getLength() -
-            curEndCandCmp.totalPos * pl.getLength()) > MIN_SEG_LENGTH)) {
+      (fabs(curStartCand.totalPos * length -
+            curEndCand.totalPos * length) > MIN_SEG_LENGTH &&
+       fabs(curStartCandCmp.totalPos * plLength -
+            curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
     ret.segments.push_back(SharedSegment(
         std::pair<LinePoint, LinePoint>(curStartCand, curStartCandCmp),
         std::pair<LinePoint, LinePoint>(curEndCand, curEndCandCmp)));
@@ -665,4 +665,14 @@ void PolyLine::applyChaikinSmooth(size_t depth) {
     smooth.push_back(_line.back());
     _line = smooth;
   }
+}
+
+// _____________________________________________________________________________
+const Point& PolyLine::front() const {
+  return _line.front();
+}
+
+// _____________________________________________________________________________
+const Point& PolyLine::back() const {
+  return _line.back();
 }

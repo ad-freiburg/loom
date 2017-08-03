@@ -89,7 +89,7 @@ struct RotatedBox {
 };
 
 // _____________________________________________________________________________
-inline Box maxbox() {
+inline Box minbox() {
   return bgeo::make_inverse<Box>();
 }
 
@@ -373,6 +373,12 @@ inline double parallelity(const Box& box, const MultiLine& multiline) {
 }
 
 // _____________________________________________________________________________
+template <typename GeomA, typename GeomB>
+inline bool intersects(const GeomA& a, const GeomB& b) {
+  return bgeo::intersects(a, b);
+}
+
+// _____________________________________________________________________________
 template <typename Geometry>
 inline RotatedBox getOrientedEnvelope(Geometry pol) {
   // TODO: implement this nicer, works for now, but inefficient
@@ -383,8 +389,7 @@ inline RotatedBox getOrientedEnvelope(Geometry pol) {
   Point center;
   bgeo::centroid(pol, center);
 
-  Box tmpBox;
-  bgeo::envelope(pol, tmpBox);
+  Box tmpBox = getBoundingBox(pol);
   double rotateDeg = 0;
 
   // rotate in 5 deg steps
@@ -399,6 +404,23 @@ inline RotatedBox getOrientedEnvelope(Geometry pol) {
   }
 
   return RotatedBox(tmpBox, -rotateDeg, center);
+}
+
+// _____________________________________________________________________________
+template <typename Geometry>
+inline Box getBoundingBox(Geometry pol) {
+  Box tmpBox;
+  bgeo::envelope(pol, tmpBox);
+  return tmpBox;
+}
+
+// _____________________________________________________________________________
+template <typename Geometry>
+inline Box extendBox(Geometry pol, Box b) {
+  Box tmp;
+  bgeo::envelope(pol, tmp);
+  bgeo::expand(b, tmp);
+  return b;
 }
 
 // _____________________________________________________________________________

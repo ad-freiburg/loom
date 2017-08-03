@@ -75,4 +75,7 @@ void Graph<N, E>::deleteEdge(Node<N, E>* from, Node<N, E>* to) {
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-void Graph<N, E>::deleteNode(Node<N, E>* n) { _nodes.erase(n); }
+void Graph<N, E>::deleteNode(Node<N, E>* n) {\
+  _nodes.erase(n); 
+  delete n;
+}

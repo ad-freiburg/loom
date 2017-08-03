@@ -114,6 +114,9 @@ class PolyLine {
   void fixTopology(double maxl);
   void applyChaikinSmooth(size_t depth);
 
+  const Point& front() const;
+  const Point& back() const;
+
  private:
   std::set<LinePoint, LinePointCmp> getIntersections(const PolyLine& p,
                                                      size_t a, size_t b) const;

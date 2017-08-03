@@ -80,6 +80,18 @@ std::vector<EdgeTripGeom>* EdgePL::getEdgeTripGeoms() {
 }
 
 // _____________________________________________________________________________
+const EdgeTripGeom* EdgePL::getRefETG() const {
+  if (_tripsContained.size()) return &_tripsContained.front();
+  return 0;
+}
+
+// _____________________________________________________________________________
+EdgeTripGeom* EdgePL::getRefETG() {
+  if (_tripsContained.size()) return &_tripsContained.front();
+  return 0;
+}
+
+// _____________________________________________________________________________
 void EdgePL::addEdgeTripGeom(const EdgeTripGeom& e) {
   assert(e.getGeomDir() == _e->getFrom() || e.getGeomDir() ==  _e->getTo());
 

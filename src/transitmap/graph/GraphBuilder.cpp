@@ -92,8 +92,8 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
           continue;
         }
 
-        if (dist(fromN->getPos(), pl.getLine().back()) <
-            dist(fromN->getPos(), pl.getLine().front())) {
+        if (dist(fromN->getPos(), pl.back()) <
+            dist(fromN->getPos(), pl.front())) {
           LOG(WARN) << "Geometry for edge from " << fromN->getId() << " to "
                     << toN->getId() << " seems "
                     << " to have the wrong orientation! This may lead to "
@@ -523,10 +523,10 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
                                      const NodeFront& b) const {
   size_t numShr = a.edge->getSharedRoutes(*b.edge).size();
 
-  Point aa = a.geom.getLine().front();
-  Point ab = a.geom.getLine().back();
-  Point ba = b.geom.getLine().front();
-  Point bb = b.geom.getLine().back();
+  Point aa = a.geom.front();
+  Point ab = a.geom.back();
+  Point ba = b.geom.front();
+  Point bb = b.geom.back();
 
   bool intersects = lineIntersects(aa, ab, ba, bb);
   if (!intersects) return false;
@@ -554,13 +554,13 @@ void GraphBuilder::freeNodeFront(NodeFront* f) {
       // cut at beginning
       f->edge->setGeom(
           f->edge->getGeom().getSegment(iSects.begin()->totalPos, 1));
-      assert(cutLine.distTo(f->edge->getGeom().getLine().front()) < 0.1);
+      assert(cutLine.distTo(f->edge->getGeom().front()) < 0.1);
 
     } else {
       // cut at end
       f->edge->setGeom(
           f->edge->getGeom().getSegment(0, (--iSects.end())->totalPos));
-      assert(cutLine.distTo(f->edge->getGeom().getLine().back()) < 0.1);
+      assert(cutLine.distTo(f->edge->getGeom().back()) < 0.1);
     }
   }
 }

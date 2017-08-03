@@ -40,13 +40,22 @@ int main(int argc, char** argv) {
   ad::cppgtfs::gtfs::Feed feed;
 
   if (!cfg.inputFeedPath.empty()) {
+    std::cerr << "Parsing... ";
     parser.parse(&feed, cfg.inputFeedPath);
+    std::cerr << " done." << std::endl;
 
     gtfs2topo::graph::BuildGraph g;
     Builder b(&cfg);
 
+    std::cerr << "Consuming... ";
     b.consume(feed, &g);
+    std::cerr << " done." << std::endl;
+
+    std::cerr << "Simplifying... ";
     b.simplify(&g);
+    std::cerr << " done." << std::endl;
+
+    std::cerr << "Topo building... ";
 
     // first pass, with strict distance values (clearing things up first)
     b.createTopologicalNodes(&g, false);
@@ -59,6 +68,7 @@ int main(int argc, char** argv) {
     b.removeEdgeArtifacts(&g);
     b.removeNodeArtifacts(&g);
     b.averageNodePositions(&g);
+    std::cerr << " done." << std::endl;
 
     GeoJsonOutput out(&cfg);
     out.print(g);
