@@ -42,6 +42,11 @@ Builder::Builder(const config::Config* cfg) : _cfg(cfg) {
 
 // _____________________________________________________________________________
 void Builder::consume(const Feed& f, BuildGraph* g) {
+  Box graphBox(getProjectedPoint(f.getMinLat(), f.getMinLon(), _graphProj),
+    getProjectedPoint(f.getMaxLat(), f.getMaxLon(), _graphProj));
+
+  NodeGrid ngrid(200, 200, graphBox);
+
   for (auto t = f.getTrips().begin(); t != f.getTrips().end(); ++t) {
     if (t->second->getStopTimes().size() < 2) continue;
     if (!(_cfg->useMots & (t->second->getRoute()->getType() + 1))) continue;
@@ -51,14 +56,14 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
 
     StopTime prev = *st;
     const Edge* prevEdge = 0;
-    addStop(prev.getStop(), _cfg->stationAggrLevel, g);
+    addStop(prev.getStop(), _cfg->stationAggrLevel, g, &ngrid);
     ++st;
 
     for (; st != t->second->getStopTimes().end(); ++st) {
       const StopTime& cur = *st;
 
       Node* fromNode = getNodeByStop(g, prev.getStop(), _cfg->stationAggrLevel);
-      Node* toNode = addStop(cur.getStop(), _cfg->stationAggrLevel, g);
+      Node* toNode = addStop(cur.getStop(), _cfg->stationAggrLevel, g, &ngrid);
 
       // TODO: we should also allow this, for round-trips
       if (fromNode == toNode) continue;
@@ -629,25 +634,29 @@ void Builder::averageNodePositions(BuildGraph* g) {
 }
 
 // _____________________________________________________________________________
-Node* Builder::addStop(const Stop* curStop, uint8_t aggrLevel, BuildGraph* g) {
+Node* Builder::addStop(const Stop* curStop, uint8_t aggrLevel, BuildGraph* g, NodeGrid* grid) {
   if (aggrLevel && curStop->getParentStation() != 0) {
-    return addStop(curStop->getParentStation(), aggrLevel, g);
+    Node* n = addStop(curStop->getParentStation(), aggrLevel, g, grid);
+    _stopNodes[curStop] = n;
+    return n;
   }
 
   Node* n = getNodeByStop(g, curStop, aggrLevel);
-
   if (n) return n;
 
   Point p = getProjectedPoint(curStop->getLat(), curStop->getLng(), _graphProj);
 
   if (aggrLevel > 1) {
-    n = getNearestNode(g, p, 100);
+    n = getNearestStop(g, p, 100, grid);
   }
 
   if (n) {
     n->pl().addStop(curStop);
+    _stopNodes[curStop] = n;
   } else {
     n = g->addNode(new Node(NodePL(p, curStop)));
+    grid->add(n->pl().getPos(), n);
+    _stopNodes[curStop] = n;
   }
 
   return n;
@@ -957,6 +966,8 @@ Node* Builder::getNodeByStop(const BuildGraph* g, const gtfs::Stop* s,
 
 // _____________________________________________________________________________
 Node* Builder::getNodeByStop(const BuildGraph* g, const gtfs::Stop* s) const {
+  if (_stopNodes.find(s) != _stopNodes.end()) return _stopNodes.find(s)->second;
+
   for (const auto n : g->getNodes()) {
     if (n->pl().getStops().find(const_cast<gtfs::Stop*>(s)) !=
         n->pl().getStops().end()) {
@@ -967,12 +978,15 @@ Node* Builder::getNodeByStop(const BuildGraph* g, const gtfs::Stop* s) const {
 }
 
 // _____________________________________________________________________________
-Node* Builder::getNearestNode(const BuildGraph* g, const Point& p,
-                              double maxD) const {
+Node* Builder::getNearestStop(const BuildGraph* g, const Point& p,
+                              double maxD, const NodeGrid* grid) const {
   double curD = DBL_MAX;
-  ;
+
   Node* curN = 0;
-  for (auto n : g->getNodes()) {
+  std::set<Node*> neighbors;
+  grid->get(p, maxD, &neighbors);
+
+  for (auto n : neighbors) {
     double d = util::geo::dist(n->pl().getPos(), p);
     if (d < maxD && d < curD) {
       curN = n;
@@ -984,8 +998,8 @@ Node* Builder::getNearestNode(const BuildGraph* g, const Point& p,
 }
 
 // _____________________________________________________________________________
-Grid<Edge*, Line> Builder::getGeoIndex(const BuildGraph* g) const {
-  Grid<Edge*, Line> grid(120, 120, getGraphBoundingBox(g));
+EdgeGrid Builder::getGeoIndex(const BuildGraph* g) const {
+  EdgeGrid grid(120, 120, getGraphBoundingBox(g));
 
   for (auto n : g->getNodes()) {
     for (auto e : n->getAdjListOut()) {
@@ -998,7 +1012,6 @@ Grid<Edge*, Line> Builder::getGeoIndex(const BuildGraph* g) const {
 
   return grid;
 }
-
 
 // _____________________________________________________________________________
 Box Builder::getGraphBoundingBox(const BuildGraph* g) const {

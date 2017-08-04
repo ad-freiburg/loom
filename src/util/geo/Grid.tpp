@@ -59,6 +59,15 @@ void Grid<V, G>::get(const Box& box, std::set<V>* s) const {
 
 // _____________________________________________________________________________
 template <typename V, typename G>
+void Grid<V, G>::get(const G& geom, double d, std::set<V>* s) const {
+  Box a = getBoundingBox(geom);
+  Box b(Point(a.min_corner().get<0>() - d, a.min_corner().get<1>() - d), 
+    Point(a.max_corner().get<0>() + d, a.max_corner().get<1>() + d));
+  return get(b, s);
+}
+
+// _____________________________________________________________________________
+template <typename V, typename G>
 void Grid<V, G>::remove(V val) {
   auto i = _index.find(val);
   if (i == _index.end()) return;

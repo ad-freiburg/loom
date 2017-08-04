@@ -23,6 +23,7 @@ class Grid {
   void add(G geom, V val);
 
   void get(const Box& btbox, std::set<V>* s) const;
+  void get(const G& geom, double d, std::set<V>* s) const;
   void remove(V val);
 
   void getNeighbors(const V& val, double d, std::set<V>* s) const;
