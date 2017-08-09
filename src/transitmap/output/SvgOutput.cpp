@@ -606,6 +606,12 @@ void SvgOutput::renderStats(const graph::TransitGraph& outG, double solveTime,
   _w.writeText("diff-seg-cross-pen=" + std::to_string(_cfg->crossPenMultiDiffSeg));
   _w.closeTag();
   _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
+  _w.writeText("in-station-same-seg-cross-pen=" + std::to_string(_cfg->stationCrossWeightSameSeg));
+  _w.closeTag();
+  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
+  _w.writeText("in-station-diff-seg-cross-pen=" + std::to_string(_cfg->stationCrossWeightDiffSeg));
+  _w.closeTag();
+  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
   _w.writeText("separation-pen=" + std::to_string(_cfg->splitPenWeight));
   _w.closeTag();
   _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
