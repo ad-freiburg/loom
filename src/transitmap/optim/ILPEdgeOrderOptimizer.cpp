@@ -371,7 +371,10 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenaltySameSeg(node, pens));
+                           getCrossingPenaltySameSeg(node, pens)
+                           // multiply the penalty with the number of collapsed lines!
+                           * (linepair.first->getNumCollapsedPartners() + 1)
+                           * (linepair.second->getNumCollapsedPartners() + 1));
 
           size_t aSmallerBinL1 = 0;
           size_t aSmallerBinL2 = 0;
@@ -557,7 +560,10 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const OptGraph& g,
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenaltyDiffSeg(node, pens));
+                           getCrossingPenaltyDiffSeg(node, pens)
+                           // multiply the penalty with the number of collapsed lines!
+                           * (linepair.first->getNumCollapsedPartners() + 1)
+                           * (linepair.second->getNumCollapsedPartners() + 1));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
             if (crosses(node, segmentA, segments, poscomb)) {

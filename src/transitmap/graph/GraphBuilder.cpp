@@ -574,6 +574,8 @@ void GraphBuilder::combinePartnerRoutes(graph::TransitGraph* g) {
     if (processed.find(p.first) != processed.end()) continue;
     if (p.second.size() == 0) continue;
 
+    const_cast<Route*>(p.first)->setNumCollapsedPartners(p.second.size());
+
     for (const auto pp : p.second) {
       LOG(INFO) << "Combining " << pp << "(" << pp->getLabel() << ","
                 << pp->getColor() << ")"

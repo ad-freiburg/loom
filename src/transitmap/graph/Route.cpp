@@ -31,3 +31,13 @@ void Route::setRelativeTo(const Route* r) {
 const Route* Route::relativeTo() const {
    return _orderRelativeTo;
 }
+
+// _____________________________________________________________________________
+size_t Route::getNumCollapsedPartners() const {
+	return _numPartners;
+}
+
+// _____________________________________________________________________________
+void Route::setNumCollapsedPartners(size_t n) {
+	_numPartners = n;
+}

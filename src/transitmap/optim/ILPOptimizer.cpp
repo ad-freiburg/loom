@@ -340,7 +340,9 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenaltySameSeg(node, pens));
+                           getCrossingPenaltySameSeg(node, pens)
+                           // multiply the penalty with the number of collapsed lines!
+                           * (linepair.first->getNumCollapsedPartners() + 1) * (linepair.second->getNumCollapsedPartners() + 1));
 
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
@@ -418,7 +420,9 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenaltyDiffSeg(node, pens));
+                           getCrossingPenaltyDiffSeg(node, pens)
+                           // multiply the penalty with the number of collapsed lines!
+                           * (linepair.first->getNumCollapsedPartners() + 1) * (linepair.second->getNumCollapsedPartners() + 1));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
             if (crosses(node, segmentA, segments, poscomb)) {
