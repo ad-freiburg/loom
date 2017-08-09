@@ -11,6 +11,14 @@ Grid<V, G>::Grid(double w, double h, const Box& bbox)
   _width = bbox.max_corner().get<0>() - bbox.min_corner().get<0>();
   _height = bbox.max_corner().get<1>() - bbox.min_corner().get<1>();
 
+  if (_width < 0 || _height < 0) {
+    _width = 0;
+    _height = 0;
+    _xWidth = 0;
+    _yHeight = 0;
+    return;
+  }
+
   _xWidth = ceil(_width / _cellWidth);
   _yHeight = ceil(_height / _cellHeight);
 

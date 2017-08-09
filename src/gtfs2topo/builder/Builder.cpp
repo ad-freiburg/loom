@@ -49,7 +49,7 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
 
   for (auto t = f.getTrips().begin(); t != f.getTrips().end(); ++t) {
     if (t->second->getStopTimes().size() < 2) continue;
-    if (!(_cfg->useMots & (t->second->getRoute()->getType() + 1))) continue;
+    if (!(_cfg->useMots & (1 << t->second->getRoute()->getType()))) continue;
     if (!checkTripSanity(t->second)) continue;
 
     auto st = t->second->getStopTimes().begin();
