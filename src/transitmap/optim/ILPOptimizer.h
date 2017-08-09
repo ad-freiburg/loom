@@ -40,7 +40,7 @@ class ILPOptimizer : public Optimizer {
  public:
   ILPOptimizer(TransitGraph* g, const config::Config* cfg) : _g(g), _cfg(cfg){};
 
-  int optimize() const;
+  int optimize(double maxCrossPen, double maxSplitPen) const;
 
  protected:
   TransitGraph* _g;
@@ -91,8 +91,8 @@ class ILPOptimizer : public Optimizer {
   bool crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
                PosCom postcomb) const;
 
-  int getCrossingPenalty(const OptNode* n, int coef) const;
-  int getSplittingPenalty(const OptNode* n, int coef) const;
+  int getCrossingPenalty(const OptNode* n, int coef, double statPen) const;
+  int getSplittingPenalty(const OptNode* n, int coef, double statPen) const;
 
   Point getPos(OptNode* n, OptEdge* segment, size_t p) const;
 };

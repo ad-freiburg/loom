@@ -18,9 +18,9 @@ using namespace optim;
 using namespace graph;
 
 // _____________________________________________________________________________
-int ILPOptimizer::optimize() const {
+int ILPOptimizer::optimize(double maxCrossPen, double maxSplitPen) const {
   // create optim graph
-  OptGraph g(_g);
+  OptGraph g(_g, maxCrossPen, maxSplitPen);
 
   if (_cfg->createCoreOptimGraph) {
     g.simplify();
@@ -95,13 +95,14 @@ int ILPOptimizer::optimize() const {
 }
 
 // _____________________________________________________________________________
-int ILPOptimizer::getCrossingPenalty(const OptNode* n, int coef) const {
-  return n->node->getCrossingPenalty(_cfg->inStationCrossPenalty,  coef, true);
+int ILPOptimizer::getCrossingPenalty(const OptNode* n, int coef, double statPen) const {
+  return n->node->getCrossingPenalty(statPen, coef, true);
 }
 
 // _____________________________________________________________________________
-int ILPOptimizer::getSplittingPenalty(const OptNode* n, int coef) const {
-  return n->node->getSplittingPenalty(_cfg->inStationCrossPenalty, coef, true) * 2;
+int ILPOptimizer::getSplittingPenalty(const OptNode* n, int coef, double statPen) const {
+  // double the value because we only count a splitting once for each pair!
+  return n->node->getSplittingPenalty(statPen, coef, true) * 2;
 }
 
 // _____________________________________________________________________________
@@ -333,7 +334,7 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenalty(node, _cfg->crossPenMultiSameSeg));
+                           getCrossingPenalty(node, _cfg->crossPenMultiSameSeg, g.getMaxCrossPen()));
 
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
@@ -410,7 +411,7 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenalty(node, _cfg->crossPenMultiDiffSeg));
+                           getCrossingPenalty(node, _cfg->crossPenMultiDiffSeg, g.getMaxCrossPen()));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
             if (crosses(node, segmentA, segments, poscomb)) {

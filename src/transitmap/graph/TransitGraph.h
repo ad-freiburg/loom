@@ -47,9 +47,9 @@ class TransitGraph {
   const geo::Box& getBoundingBox() const;
   geo::Box getBoundingBox(double p) const;
 
-  double getScore(double inStatPen, double sameSegCrossPen,
+  double getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
                   double diffSegCrossPen, double splitPen) const;
-  double getScore(double inStatPen, double sameSegCrossPen,
+  double getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
                   double diffSegCrossPen, double splitPen,
                   const Configuration& c) const;
 
@@ -69,6 +69,9 @@ class TransitGraph {
   size_t getNumSeparations(const Configuration& c) const;
 
   double getNumPossSolutions() const;
+  size_t getMaxDegree() const;
+  size_t getMaxCrossPenalty() const;
+  size_t getMaxSplitPenalty() const;
 
   const Configuration& getConfig() const;
   void setConfig(const Configuration&);

@@ -44,10 +44,21 @@ graph::Edge* OptEdge::getAdjacentEdge(const OptNode* n) const {
 }
 
 // _____________________________________________________________________________
-OptGraph::OptGraph(TransitGraph* toOptim) : _g(toOptim) { build(); }
+OptGraph::OptGraph(TransitGraph* toOptim, double maxCrossPen, double maxSplitPen)
+ : _g(toOptim), _maxCrossPen(maxCrossPen), _maxSplitPen(maxSplitPen) { build(); }
 
 // _____________________________________________________________________________
 void OptGraph::addNode(OptNode* n) { _nodes.insert(n); }
+
+// _____________________________________________________________________________
+double OptGraph::getMaxCrossPen() const {
+  return _maxCrossPen;
+}
+
+// _____________________________________________________________________________
+double OptGraph::getMaxSplitPen() const {
+  return _maxSplitPen;
+}
 
 // _____________________________________________________________________________
 void OptGraph::build() {

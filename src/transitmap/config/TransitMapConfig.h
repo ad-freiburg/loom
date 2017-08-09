@@ -33,8 +33,6 @@ struct Config {
 
   double outputPadding;
 
-  double inStationCrossPenalty;
-
   double outlineWidth;
   std::string outlineColor;
 
@@ -68,6 +66,7 @@ struct Config {
   double crossPenMultiSameSeg;
   double crossPenMultiDiffSeg;
   double splitPenWeight;
+  double stationCrossWeight;
 
   std::string worldFilePath;
 };

@@ -100,7 +100,7 @@ class Node {
   void addMainDir(NodeFront f);
 
   const NodeFront* getNodeFrontFor(const Edge* e) const;
-  double getScore(double inStatPen, double sameSegCrossPen,
+  double getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
                   double diffSegCrossPen, double splittingPen, bool crossAdjPen,
                   bool splitAdjPen,
                   const graph::Configuration& cfg) const;

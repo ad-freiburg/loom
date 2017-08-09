@@ -50,20 +50,20 @@ const Configuration& TransitGraph::getConfig() const { return _config; }
 void TransitGraph::setConfig(const Configuration& c) { _config = c; }
 
 // _____________________________________________________________________________
-double TransitGraph::getScore(double inStatPen, double sameSegCrossPen,
+double TransitGraph::getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
                               double diffSegCrossPen, double splitPen) const {
-  return getScore(inStatPen, sameSegCrossPen, diffSegCrossPen, splitPen,
+  return getScore(inStatCrossPen, inStatSplitPen, sameSegCrossPen, diffSegCrossPen, splitPen,
                   _config);
 }
 
 // _____________________________________________________________________________
-double TransitGraph::getScore(double inStatPen, double sameSegCrossPen,
+double TransitGraph::getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
                               double diffSegCrossPen, double splitPen,
                               const Configuration& c) const {
   double ret = 0;
 
   for (auto n : getNodes()) {
-    ret += n->getScore(inStatPen, sameSegCrossPen, diffSegCrossPen, splitPen,
+    ret += n->getScore(inStatCrossPen, inStatSplitPen, sameSegCrossPen, diffSegCrossPen, splitPen,
                        true, true, c);
   }
 
@@ -270,6 +270,17 @@ size_t TransitGraph::getMaxCardinality() const {
   for (auto n : getNodes()) {
     for (auto e : n->getAdjListOut()) {
       if (e->getCardinality() > ret) ret = e->getCardinality();
+    }
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::getMaxDegree() const {
+  size_t ret = 0;
+  for (auto n : getNodes()) {
+    if (n->getAdjListOut().size() + n->getAdjListIn().size() > ret) {
+      ret = n->getAdjListOut().size() + n->getAdjListIn().size();
     }
   }
   return ret;

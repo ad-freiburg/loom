@@ -59,10 +59,10 @@ Point NodeFront::getTripPos(const Edge* e, size_t pos, bool inv,
 
   // use interpolate here directly for speed
   if (origG) {
-    return origGeom.interpolate(origGeom.front(),
-                                origGeom.back(), p);
+    return origGeom.interpolate(origGeom.getLine().front(),
+                                origGeom.getLine().back(), p);
   } else {
-    return geom.interpolate(geom.front(), geom.back(), p);
+    return geom.interpolate(geom.getLine().front(), geom.getLine().back(), p);
   }
 }
 
@@ -187,13 +187,13 @@ const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
 }
 
 // _____________________________________________________________________________
-double Node::getScore(double inStatPen, double sameSegCrossPen,
+double Node::getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
                       double diffSegCrossPen, double splittingPen,
                       bool crossAdjPen, bool splitAdjPen,
                       const graph::Configuration& cfg) const {
-  return getCrossingScore(cfg, inStatPen, sameSegCrossPen, diffSegCrossPen,
+  return getCrossingScore(cfg, inStatCrossPen, sameSegCrossPen, diffSegCrossPen,
                           crossAdjPen) +
-         getSeparationScore(cfg, inStatPen, splittingPen, splitAdjPen);
+         getSeparationScore(cfg, inStatSplitPen, splittingPen, splitAdjPen);
 }
 
 // _____________________________________________________________________________
@@ -230,8 +230,8 @@ double Node::getCrossingScore(const Configuration& c, double inStatPen,
           (iga.to.front == igb.from.front && iga.from.front == igb.to.front);
 
       if (util::geo::intersects(
-              iga.geom.front(), iga.geom.back(),
-              igb.geom.front(), igb.geom.back()) ||
+              iga.geom.getLine().front(), iga.geom.getLine().back(),
+              igb.geom.getLine().front(), igb.geom.getLine().back()) ||
           util::geo::dist(iga.geom.getLine(), igb.geom.getLine()) < 1) {
         ret += 1 * getCrossingPenalty(
                        inStatPen, sameSeg ? sameSegPen : diffSegPen, adjpen);
@@ -404,8 +404,8 @@ InnerGeometry Node::getTerminusBezier(const Configuration& cf,
                                       const graph::Partner& partnerFrom,
                                       double prec) const {
   InnerGeometry ret = getTerminusStraightLine(cf, partnerFrom);
-  Point p = ret.geom.front();
-  Point pp = ret.geom.back();
+  Point p = ret.geom.getLine().front();
+  Point pp = ret.geom.getLine().back();
   double d = util::geo::dist(p, pp) / 2;
 
   Point b = p;
@@ -437,8 +437,8 @@ InnerGeometry Node::getInnerBezier(const Configuration& cf,
                                    const graph::Partner& partnerTo,
                                    double prec) const {
   InnerGeometry ret = getInnerStraightLine(cf, partnerFrom, partnerTo);
-  Point p = ret.geom.front();
-  Point pp = ret.geom.back();
+  Point p = ret.geom.getLine().front();
+  Point pp = ret.geom.getLine().back();
   double d = util::geo::dist(p, pp);
 
   Point b = p;

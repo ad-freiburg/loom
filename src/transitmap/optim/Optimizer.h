@@ -10,7 +10,7 @@ namespace optim {
 
 class Optimizer {
  public:
-  virtual int optimize() const = 0;
+  virtual int optimize(double maxCrossPen, double maxSplitPen) const = 0;
 };
 }  // namespace optim
 }  // namespace transitmapper

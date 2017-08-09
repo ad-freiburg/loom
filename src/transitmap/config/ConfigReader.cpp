@@ -152,10 +152,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->innerGeometryPrecision))
       ->default_value(3),
       "rendering precision of inner node geometries")
-    ("in-station-cross-penalty-factor",
-      opts::value<double>(&(cfg->inStationCrossPenalty))
-      ->default_value(3),
-      "penalty factor during optimization for crossings that occur in stations")
     ("same-seg-cross-penalty-factor",
       opts::value<double>(&(cfg->crossPenMultiSameSeg))
       ->default_value(4),
@@ -164,14 +160,14 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->splitPenWeight))
       ->default_value(3),
       "penalty factor during optimization for splittings")
+    ("in-station-crossing-penalty-factor",
+      opts::value<double>(&(cfg->stationCrossWeight))
+      ->default_value(3),
+      "penalty factor during optimization for splittings")
     ("diff-seg-cross-penalty-factor",
       opts::value<double>(&(cfg->crossPenMultiDiffSeg))
       ->default_value(1),
       "penalty factor during optimization for crossings that occur between two lines that travel through 3 segments")
-    ("in-station-cross-penalty-factor",
-      opts::value<double>(&(cfg->inStationCrossPenalty))
-      ->default_value(3),
-      "penalty factor during optimization for crossings that occur in stations")
     ("glpk-time-limit",
       opts::value<int>(&(cfg->glpkTimeLimit))
       ->default_value(60000 + 60000),
