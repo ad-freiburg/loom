@@ -8,6 +8,7 @@
 #include "transitmap/graph/OrderingConfiguration.h"
 #include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/Penalties.h"
 #include "util/geo/BezierCurve.h"
 #include "util/geo/Geo.h"
 
@@ -187,23 +188,20 @@ const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
 }
 
 // _____________________________________________________________________________
-double Node::getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
-                      double diffSegCrossPen, double splittingPen,
+double Node::getScore(const Penalties& pens,
                       bool crossAdjPen, bool splitAdjPen,
                       const graph::Configuration& cfg) const {
-  return getCrossingScore(cfg, inStatCrossPen, sameSegCrossPen, diffSegCrossPen,
-                          crossAdjPen) +
-         getSeparationScore(cfg, inStatSplitPen, splittingPen, splitAdjPen);
+  return getCrossingScore(cfg, pens, crossAdjPen) +
+         getSeparationScore(cfg, pens, splitAdjPen);
 }
 
 // _____________________________________________________________________________
 size_t Node::getNumCrossings(const Configuration& c) const {
-  return getCrossingScore(c, 1, 1, 1, false);
+  return getCrossingScore(c, IDENTITY_PENALTIES, false);
 }
 
 // _____________________________________________________________________________
-double Node::getCrossingScore(const Configuration& c, double inStatPen,
-                              double sameSegPen, double diffSegPen,
+double Node::getCrossingScore(const Configuration& c, const Penalties& pens,
                               bool adjpen) const {
   std::vector<InnerGeometry> igs = getInnerGeometries(c, -1);
   size_t ret = 0;
@@ -233,8 +231,11 @@ double Node::getCrossingScore(const Configuration& c, double inStatPen,
               iga.geom.getLine().front(), iga.geom.getLine().back(),
               igb.geom.getLine().front(), igb.geom.getLine().back()) ||
           util::geo::dist(iga.geom.getLine(), igb.geom.getLine()) < 1) {
-        ret += 1 * getCrossingPenalty(
-                       inStatPen, sameSeg ? sameSegPen : diffSegPen, adjpen);
+        if (sameSeg) {
+          ret += 1 * getCrossingPenaltySameSeg(pens, adjpen);
+        } else {
+          ret += 1 * getCrossingPenaltyDiffSeg(pens, adjpen);
+        }
       }
     }
   }
@@ -244,12 +245,11 @@ double Node::getCrossingScore(const Configuration& c, double inStatPen,
 
 // _____________________________________________________________________________
 size_t Node::getNumSeparations(const Configuration& c) const {
-  return getSeparationScore(c, 1, 1, false);
+  return getSeparationScore(c, IDENTITY_PENALTIES, false);
 }
 
 // _____________________________________________________________________________
-size_t Node::getSeparationScore(const Configuration& c, double inStatPen,
-                                double pen, bool adjpen) const {
+size_t Node::getSeparationScore(const Configuration& c, const Penalties& pens, bool adjpen) const {
   size_t ret = 0;
   for (auto nf : getMainDirs()) {
     const Edge* e = nf.edge;
@@ -272,7 +272,7 @@ size_t Node::getSeparationScore(const Configuration& c, double inStatPen,
                           .second) -
                   int(f->getRouteOccWithPosUnder(p.second, c.find(f)->second)
                           .second)) > 1) {
-            ret += 1 * getSplittingPenalty(inStatPen, pen, adjpen);
+            ret += 1 * getSplittingPenalty(pens, adjpen);
           }
         }
       }
@@ -689,24 +689,44 @@ Edge* Node::getEdge(const Node* other) const {
 }
 
 // _____________________________________________________________________________
-int Node::getCrossingPenalty(double inStatPen, double coef, bool adjpen) const {
-  if (adjpen) coef *= _adjListIn.size() + _adjListOut.size();
+int Node::getCrossingPenaltySameSeg(const Penalties& pens, bool adjpen) const {
+  double ret = 1;
+  if (adjpen) ret *= _adjListIn.size() + _adjListOut.size();
 
   if (getStops().size() > 0) {
-    return inStatPen * coef;
+    if (_adjListIn.size() + _adjListOut.size() == 2)
+      return pens.inStatCrossPenDegTwo;
+    return pens.inStatCrossPenSameSeg * ret;
   }
 
-  return coef;
+  return ret * pens.sameSegCrossPen;
 }
 
 // _____________________________________________________________________________
-int Node::getSplittingPenalty(double inStatPen, double coef,
-                              bool adjpen) const {
-  if (adjpen) coef *= _adjListIn.size() + _adjListOut.size();
+int Node::getCrossingPenaltyDiffSeg(const Penalties& pens, bool adjpen) const {
+  double ret = 1;
+  if (adjpen) ret *= _adjListIn.size() + _adjListOut.size();
 
   if (getStops().size() > 0) {
-    return inStatPen * coef;
+    if (_adjListIn.size() + _adjListOut.size() == 2)
+      return pens.inStatCrossPenDegTwo;
+    return pens.inStatCrossPenDiffSeg * ret;
   }
 
-  return coef;
+  return ret * pens.diffSegCrossPen;
+}
+
+
+// _____________________________________________________________________________
+int Node::getSplittingPenalty(const Penalties& pens, bool adjpen) const {
+  double ret = 1;
+  if (adjpen) ret *= _adjListIn.size() + _adjListOut.size();
+
+  if (getStops().size() > 0) {
+    if (_adjListIn.size() + _adjListOut.size() == 2)
+      return pens.inStatSplitPenDegTwo;
+    return pens.inStatSplitPen * ret;
+  }
+
+  return ret * pens.splitPen;
 }

@@ -18,9 +18,9 @@ using namespace optim;
 using namespace graph;
 
 // _____________________________________________________________________________
-int ILPOptimizer::optimize(double maxCrossPen, double maxSplitPen) const {
+int ILPOptimizer::optimize(const Penalties& pens) const {
   // create optim graph
-  OptGraph g(_g, maxCrossPen, maxSplitPen);
+  OptGraph g(_g);
 
   if (_cfg->createCoreOptimGraph) {
     g.simplify();
@@ -42,7 +42,7 @@ int ILPOptimizer::optimize(double maxCrossPen, double maxSplitPen) const {
    */
 
   LOG(DEBUG) << "Creating ILP problem... " << std::endl;
-  glp_prob* lp = createProblem(g);
+  glp_prob* lp = createProblem(g, pens);
   LOG(DEBUG) << " .. done" << std::endl;
 
   LOG(INFO) << "(stats) ILP has " << glp_get_num_cols(lp) << " cols and "
@@ -95,14 +95,19 @@ int ILPOptimizer::optimize(double maxCrossPen, double maxSplitPen) const {
 }
 
 // _____________________________________________________________________________
-int ILPOptimizer::getCrossingPenalty(const OptNode* n, int coef, double statPen) const {
-  return n->node->getCrossingPenalty(statPen, coef, true);
+int ILPOptimizer::getCrossingPenaltySameSeg(const OptNode* n, const Penalties& pens) const {
+  return n->node->getCrossingPenaltySameSeg(pens, true);
 }
 
 // _____________________________________________________________________________
-int ILPOptimizer::getSplittingPenalty(const OptNode* n, int coef, double statPen) const {
+int ILPOptimizer::getCrossingPenaltyDiffSeg(const OptNode* n, const Penalties& pens) const {
+  return n->node->getCrossingPenaltyDiffSeg(pens, true);
+}
+
+// _____________________________________________________________________________
+int ILPOptimizer::getSplittingPenalty(const OptNode* n, const Penalties& pens) const {
   // double the value because we only count a splitting once for each pair!
-  return n->node->getSplittingPenalty(statPen, coef, true) * 2;
+  return n->node->getSplittingPenalty(pens, true) * 2;
 }
 
 // _____________________________________________________________________________
@@ -231,7 +236,7 @@ void ILPOptimizer::expandRelativesFor(Configuration* c, const Route* ref,
 }
 
 // _____________________________________________________________________________
-glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
+glp_prob* ILPOptimizer::createProblem(const OptGraph& g, const Penalties& pens) const {
   glp_prob* lp = glp_create_prob();
 
   glp_set_prob_name(lp, "edgeorder");
@@ -288,8 +293,8 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
 
   glp_create_index(lp);
 
-  writeSameSegConstraints(g, &vm, lp);
-  writeDiffSegConstraints(g, &vm, lp);
+  writeSameSegConstraints(g, pens, &vm, lp);
+  writeDiffSegConstraints(g, pens, &vm, lp);
 
   int* ia = 0;
   int* ja = 0;
@@ -307,6 +312,7 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
 
 // _____________________________________________________________________________
 void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
+  const Penalties& pens,
                                            VariableMatrix* vm,
                                            glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
@@ -334,7 +340,7 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenalty(node, _cfg->crossPenMultiSameSeg, g.getMaxCrossPen()));
+                           getCrossingPenaltySameSeg(node, pens));
 
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
@@ -387,6 +393,7 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
 
 // _____________________________________________________________________________
 void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
+  const Penalties& pens,
                                            VariableMatrix* vm,
                                            glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
@@ -411,7 +418,7 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenalty(node, _cfg->crossPenMultiDiffSeg, g.getMaxCrossPen()));
+                           getCrossingPenaltyDiffSeg(node, pens));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
             if (crosses(node, segmentA, segments, poscomb)) {

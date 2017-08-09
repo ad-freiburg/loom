@@ -6,6 +6,7 @@
 #define UTIL_GRAPH_NODE_H_
 
 #include <set>
+#include "transitmap/graph/Penalties.h"
 
 namespace util {
 namespace graph {

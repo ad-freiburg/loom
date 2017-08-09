@@ -72,7 +72,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
 }
 
 // _____________________________________________________________________________
-glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
+glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g, const Penalties& pens) const {
   glp_prob* lp = glp_create_prob();
 
   glp_set_prob_name(lp, "edgeorder_impr");
@@ -131,8 +131,8 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
 
   glp_create_index(lp);
 
-  writeCrossingOracle(g, &vm, lp);
-  writeDiffSegConstraintsImpr(g, &vm, lp);
+  writeCrossingOracle(g, pens, &vm, lp);
+  writeDiffSegConstraintsImpr(g, pens, &vm, lp);
 
   int* ia = 0;
   int* ja = 0;
@@ -150,6 +150,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
+  const Penalties& pens,
                                                 VariableMatrix* vm,
                                                 glp_prob* lp) const {
   // do everything iteratively, otherwise it would be unreadable
@@ -370,7 +371,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenalty(node, _cfg->crossPenMultiSameSeg, g.getMaxCrossPen()));
+                           getCrossingPenaltySameSeg(node, pens));
 
           size_t aSmallerBinL1 = 0;
           size_t aSmallerBinL2 = 0;
@@ -461,7 +462,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
               glp_set_col_kind(lp, decisionVarDist1Change, GLP_BV);
 
               glp_set_obj_coef(lp, decisionVarDist1Change,
-                                getSplittingPenalty(node, _cfg->splitPenWeight, g.getMaxSplitPen()));
+                                getSplittingPenalty(node, pens));
 
               size_t aNearBinL1 = 0;
               size_t aNearBinL2 = 0;
@@ -518,7 +519,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
                       << "<T>" << linepair.second << ")";
               size_t aNearB = glp_find_col(lp, aNearBStr.str().c_str());
               glp_set_obj_coef(lp, aNearB,
-                                getSplittingPenalty(node, _cfg->splitPenWeight, g.getMaxSplitPen()));
+                                getSplittingPenalty(node, pens));
             }
           }
         }
@@ -529,6 +530,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const OptGraph& g,
+  const Penalties& pens,
                                                         VariableMatrix* vm,
                                                         glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
@@ -555,7 +557,7 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const OptGraph& g,
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenalty(node, _cfg->crossPenMultiDiffSeg, g.getMaxCrossPen()));
+                           getCrossingPenaltyDiffSeg(node, pens));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
             if (crosses(node, segmentA, segments, poscomb)) {

@@ -8,6 +8,7 @@
 #include <set>
 #include "transitmap/graph/OrderingConfiguration.h"
 #include "transitmap/graph/Route.h"
+#include "transitmap/graph/Penalties.h"
 #include "util/geo/Geo.h"
 #include "util/geo/PolyLine.h"
 
@@ -100,15 +101,11 @@ class Node {
   void addMainDir(NodeFront f);
 
   const NodeFront* getNodeFrontFor(const Edge* e) const;
-  double getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
-                  double diffSegCrossPen, double splittingPen, bool crossAdjPen,
-                  bool splitAdjPen,
-                  const graph::Configuration& cfg) const;
+  double getScore(const Penalties& pens, bool crossAdjPen, bool splitAdjPen, const graph::Configuration& cfg) const;
   size_t getNumCrossings(const graph::Configuration& c) const;
   size_t getNumSeparations(const graph::Configuration& c) const;
-  size_t getSeparationScore(const Configuration& c, double inStatPen, double pen, bool adjpen) const;
-  double getCrossingScore(const Configuration& c, double inStatPen, double sameSegPen,
-    double diffSegPen, bool adjpen) const;
+  size_t getSeparationScore(const Configuration& c, const Penalties& pens, bool adjpen) const;
+  double getCrossingScore(const Configuration& c, const Penalties& pens, bool adjpen) const;
 
   std::vector<Partner> getPartners(const NodeFront* f,
                                    const RouteOccurance& ro) const;
@@ -140,8 +137,9 @@ class Node {
   double getMaxNodeFrontWidth() const;
   size_t getMaxNodeFrontCardinality() const;
 
-  int getCrossingPenalty(double inStatPen, double coef, bool adjpen) const;
-  int getSplittingPenalty(double inStatPen, double coef, bool adjpen) const;
+  int getCrossingPenaltySameSeg(const Penalties& pens, bool adjpen) const;
+  int getCrossingPenaltyDiffSeg(const Penalties& pens, bool adjpen) const;
+  int getSplittingPenalty(const Penalties& pens, bool adjpen) const;
 
  private:
   std::string _id;

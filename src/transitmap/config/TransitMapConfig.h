@@ -66,7 +66,9 @@ struct Config {
   double crossPenMultiSameSeg;
   double crossPenMultiDiffSeg;
   double splitPenWeight;
-  double stationCrossWeight;
+  double stationCrossWeightSameSeg;
+  double stationCrossWeightDiffSeg;
+  double stationSplitWeight;
 
   std::string worldFilePath;
 };

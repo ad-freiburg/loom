@@ -17,6 +17,7 @@
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/OrderingConfiguration.h"
 #include "transitmap/graph/Route.h"
+#include "transitmap/graph/Penalties.h"
 #include "util/geo/Geo.h"
 
 using namespace util;
@@ -47,20 +48,14 @@ class TransitGraph {
   const geo::Box& getBoundingBox() const;
   geo::Box getBoundingBox(double p) const;
 
-  double getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
-                  double diffSegCrossPen, double splitPen) const;
-  double getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
-                  double diffSegCrossPen, double splitPen,
-                  const Configuration& c) const;
+  double getScore(const Penalties& pens) const;
+  double getScore(const Penalties& pens, const Configuration& c) const;
 
-  double getCrossScore(double inStatPen, double sameSegCrossPen,
-                       double diffSegCrossPen) const;
-  double getCrossScore(double inStatPen, double sameSegCrossPen,
-                       double diffSegCrossPen, const Configuration& c) const;
+  double getCrossScore(const Penalties& pens) const;
+  double getCrossScore(const Penalties& pens, const Configuration& c) const;
 
-  double getSeparationScore(double inStatPen, double splitPen) const;
-  double getSeparationScore(double inStatPen, double splitPen,
-                            const Configuration& c) const;
+  double getSeparationScore(const Penalties& pens) const;
+  double getSeparationScore(const Penalties& pens, const Configuration& c) const;
 
   size_t getNumCrossings() const;
   size_t getNumCrossings(const Configuration& c) const;

@@ -160,10 +160,18 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->splitPenWeight))
       ->default_value(3),
       "penalty factor during optimization for splittings")
-    ("in-station-crossing-penalty-factor",
-      opts::value<double>(&(cfg->stationCrossWeight))
+    ("in-station-crossing-penalty-factor-same-seg",
+      opts::value<double>(&(cfg->stationCrossWeightSameSeg))
+      ->default_value(12),
+      "penalty factor during optimization for crossings in station with degree > 2 that occur between two lines that travel 2 same segments, only applies if degree-based penalty is enabled")
+   ("in-station-crossing-penalty-factor-diff-seg",
+      opts::value<double>(&(cfg->stationCrossWeightDiffSeg))
       ->default_value(3),
-      "penalty factor during optimization for splittings")
+      "penalty factor during optimization for crossings in station with degree > 2 that occur between two lines that travel 2 same segments, only applies if degree-based penalty is enabled")
+    ("in-station-splitting-penalty-factor",
+      opts::value<double>(&(cfg->stationSplitWeight))
+      ->default_value(9),
+      "penalty factor during optimization for splittings in station with degree > 2, only applies if degree-based penalty is enabled")
     ("diff-seg-cross-penalty-factor",
       opts::value<double>(&(cfg->crossPenMultiDiffSeg))
       ->default_value(1),

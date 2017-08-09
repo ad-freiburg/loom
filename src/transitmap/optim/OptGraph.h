@@ -66,7 +66,7 @@ struct OptNode {
 
 class OptGraph {
  public:
-  explicit OptGraph(TransitGraph* toOptim, double maxCrossPen, double maxSplitPen);
+  explicit OptGraph(TransitGraph* toOptim);
 
   const std::set<OptNode*>& getNodes() const;
   TransitGraph* getGraph() const;

@@ -50,58 +50,49 @@ const Configuration& TransitGraph::getConfig() const { return _config; }
 void TransitGraph::setConfig(const Configuration& c) { _config = c; }
 
 // _____________________________________________________________________________
-double TransitGraph::getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
-                              double diffSegCrossPen, double splitPen) const {
-  return getScore(inStatCrossPen, inStatSplitPen, sameSegCrossPen, diffSegCrossPen, splitPen,
-                  _config);
+double TransitGraph::getScore(const Penalties& pens) const {
+  return getScore(pens, _config);
 }
 
 // _____________________________________________________________________________
-double TransitGraph::getScore(double inStatCrossPen, double inStatSplitPen, double sameSegCrossPen,
-                              double diffSegCrossPen, double splitPen,
-                              const Configuration& c) const {
+double TransitGraph::getScore(const Penalties& pens, const Configuration& c) const {
   double ret = 0;
 
   for (auto n : getNodes()) {
-    ret += n->getScore(inStatCrossPen, inStatSplitPen, sameSegCrossPen, diffSegCrossPen, splitPen,
-                       true, true, c);
+    ret += n->getScore(pens, true, true, c);
   }
 
   return ret;
 }
 //
 // _____________________________________________________________________________
-double TransitGraph::getCrossScore(double inStatPen, double sameSegCrossPen,
-                                   double diffSegCrossPen) const {
-  return getCrossScore(inStatPen, sameSegCrossPen, diffSegCrossPen, _config);
+double TransitGraph::getCrossScore(const Penalties& pens) const {
+  return getCrossScore(pens, _config);
 }
 
 // _____________________________________________________________________________
-double TransitGraph::getCrossScore(double inStatPen, double sameSegCrossPen,
-                                   double diffSegCrossPen,
-                                   const Configuration& c) const {
+double TransitGraph::getCrossScore(const Penalties& pens, const Configuration& c) const {
   double ret = 0;
 
   for (auto n : getNodes()) {
-    ret += n->getCrossingScore(c, inStatPen, sameSegCrossPen, diffSegCrossPen,
-                               true);
+    ret += n->getCrossingScore(c, pens, true);
   }
 
   return ret;
 }
 
 // _____________________________________________________________________________
-double TransitGraph::getSeparationScore(double inStatPen, double pen) const {
-  return getSeparationScore(inStatPen, pen, _config);
+double TransitGraph::getSeparationScore(const Penalties& pens) const {
+  return getSeparationScore(pens, _config);
 }
 
 // _____________________________________________________________________________
-double TransitGraph::getSeparationScore(double inStatPen, double pen,
+double TransitGraph::getSeparationScore(const Penalties& pens,
                                         const Configuration& c) const {
   double ret = 0;
 
   for (auto n : getNodes()) {
-    ret += n->getSeparationScore(c, inStatPen, pen, true);
+    ret += n->getSeparationScore(c, pens, true);
   }
 
   return ret;
