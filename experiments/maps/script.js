@@ -40,7 +40,7 @@ var stations = [];
 var edges = [];
 var nodes = [];
 
-var attr = '&copy; <a target="_blank" href="https://ad.informatik.uni-freiburg.de/">University of Freiburg (Chair of Algorithms and Data Structures)</a>';
+var attr = '';
 
 for (var n in networks) {
   var net = networks[n];
