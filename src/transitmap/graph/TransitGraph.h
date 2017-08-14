@@ -86,12 +86,16 @@ class TransitGraph {
   double getLastSolveTime() const;
   void setLastSolveTime(double t) const;
 
+  size_t getLastSolveTarget() const;
+  void setLastSolveTarget(size_t t) const;
+
  private:
   std::string _name;
   std::set<Node*> _nodes;
   std::map<std::string, const Route*> _routes;
 
   mutable double _lastSolveTime;
+  mutable size_t _lastSolveTarget;
 
   Configuration _config;
 

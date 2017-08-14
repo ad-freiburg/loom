@@ -321,3 +321,13 @@ double TransitGraph::getLastSolveTime() const {
 void TransitGraph::setLastSolveTime(double t) const {
   _lastSolveTime = t;
 }
+
+// _____________________________________________________________________________
+size_t TransitGraph::getLastSolveTarget() const {
+  return _lastSolveTarget;
+}
+
+// _____________________________________________________________________________
+void TransitGraph::setLastSolveTarget(size_t t) const {
+  _lastSolveTarget = t;
+}

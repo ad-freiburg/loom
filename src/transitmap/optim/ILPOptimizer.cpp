@@ -76,6 +76,8 @@ int ILPOptimizer::optimize(const Penalties& pens) const {
 		LOG(INFO) << " === Solve done in " << duration << " ms ===" << std::endl;
   }
 
+  _g->setLastSolveTarget(glp_mip_obj_val(lp));
+
   LOG(INFO) << "(stats) ILP obj = " << glp_mip_obj_val(lp) << std::endl;
 
   if (!_cfg->glpkSolutionOutputPath.empty()) {

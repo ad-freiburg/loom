@@ -108,6 +108,7 @@ class SvgOutput : public Output {
   std::vector<EndMarker> _markers;
 
   void renderStats(const graph::TransitGraph& outG, double solveTime,
+                   size_t score,
                    const RenderParams& rparams);
 
   void outputNodes(const graph::TransitGraph& outputGraph,

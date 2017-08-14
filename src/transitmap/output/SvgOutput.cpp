@@ -119,7 +119,7 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
   }
 
   if (_cfg->renderStats) {
-    renderStats(outG, outG.getLastSolveTime(), rparams);
+    renderStats(outG, outG.getLastSolveTime(), outG.getLastSolveTarget(), rparams);
   }
 
   _w.closeTags();
@@ -514,7 +514,7 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
 
 // _____________________________________________________________________________
 void SvgOutput::renderStats(const graph::TransitGraph& outG, double solveTime,
-    const RenderParams& rparams) {
+    size_t score, const RenderParams& rparams) {
   Params params;
   int fontSize = (_cfg->lineWidth + _cfg->lineSpacing) * 4 * _cfg->outputResolution;
   params["x"] = std::to_string(20);
@@ -616,6 +616,9 @@ void SvgOutput::renderStats(const graph::TransitGraph& outG, double solveTime,
   _w.closeTag();
   _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
   _w.writeText("ILP solve time=" + std::to_string(solveTime) + " ms");
+  _w.closeTag();
+  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
+  _w.writeText("ILP target =" + std::to_string(score));
   _w.closeTag();
 
   _w.openTag("tspan", {{"style", "font-weight: bold!important, font-size:2em!important"}, {"x", "0"}, {"dy", std::to_string(-fontSize)}});
