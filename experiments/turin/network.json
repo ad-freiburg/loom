@@ -1746,28 +1746,6 @@
         "type": "Point"
       },
       "properties": {
-        "excluded_line_conns": [
-          {
-            "edge1_node": "0x130797e0",
-            "edge2_node": "0x1305b6a0",
-            "route": "0x19b3700"
-          },
-          {
-            "edge1_node": "0x130797e0",
-            "edge2_node": "0x1305b6a0",
-            "route": "0x19b3550"
-          },
-          {
-            "edge1_node": "0x1305b6a0",
-            "edge2_node": "0x130797e0",
-            "route": "0x19b3700"
-          },
-          {
-            "edge1_node": "0x1305b6a0",
-            "edge2_node": "0x130797e0",
-            "route": "0x19b3550"
-          }
-        ],
         "id": "0x130794a0",
         "station_id": "51487012",
         "station_label": "Fermata 592 - SABOTINO CAP."

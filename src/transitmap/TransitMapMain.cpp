@@ -92,8 +92,8 @@ int main(int argc, char** argv) {
 
     // TODO move this into configuration, at least partially
     graph::Penalties pens{
-      maxCrossPen,
-      maxSplitPen,
+      maxCrossPen + 1,
+      maxSplitPen + 1,
       cfg.crossPenMultiSameSeg,
       cfg.crossPenMultiDiffSeg,
       cfg.splitPenWeight,

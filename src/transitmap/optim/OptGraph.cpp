@@ -117,7 +117,7 @@ bool OptGraph::simplifyStep() {
       for (auto& to : *first->getAdjacentEdge(n)->getTripsUnordered()) {
         if (!second->getAdjacentEdge(n)
                  ->getSameDirRoutesIn(n->node, to.route, to.direction,
-                                      first->etgs.front().etg)
+                                      first->getAdjacentEdge(n))
                  .size()) {
           equal = false;
           break;
