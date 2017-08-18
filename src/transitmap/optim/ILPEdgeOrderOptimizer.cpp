@@ -4,7 +4,7 @@
 
 #include <glpk.h>
 #include <fstream>
-#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/output/OgrOutput.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
@@ -17,7 +17,7 @@ using namespace graph;
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
-    glp_prob* lp, Configuration* c, const OptGraph& g) const {
+    glp_prob* lp, OrderingConfig* c, const OptGraph& g) const {
   // build name index for faster lookup
   glp_create_index(lp);
 

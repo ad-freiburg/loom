@@ -12,6 +12,7 @@
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
+#include "transitmap/optim/Scorer.h"
 #include "Output.h"
 #include "util/geo/Geo.h"
 #include "util/geo/PolyLine.h"
@@ -73,7 +74,7 @@ struct OutlinePrintPair {
 
 class SvgOutput : public Output {
  public:
-  SvgOutput(std::ostream* o, const config::Config* cfg);
+  SvgOutput(std::ostream* o, const config::Config* cfg, const optim::Scorer* scorer);
   virtual ~SvgOutput(){};
 
   virtual void print(const graph::TransitGraph& outputGraph);
@@ -101,6 +102,7 @@ class SvgOutput : public Output {
   util::xml::XmlWriter _w;
 
   const config::Config* _cfg;
+  const optim::Scorer* _scorer;
 
   std::map<uintptr_t, std::vector<OutlinePrintPair> > _delegates;
   std::vector<std::map<uintptr_t, std::vector<OutlinePrintPair> > >

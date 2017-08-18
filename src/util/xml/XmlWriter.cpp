@@ -2,13 +2,12 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include <ostream>
-#include <string>
-#include <stack>
-#include <map>
 #include <algorithm>
+#include <map>
+#include <ostream>
+#include <stack>
+#include <string>
 #include "XmlWriter.h"
-
 
 using namespace util;
 using namespace xml;
@@ -17,22 +16,19 @@ using std::ostream;
 using std::string;
 using std::map;
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 XmlWriter::XmlWriter(std::ostream* out)
-: _out(out), _pretty(false), _indent(4) {
-}
+    : _out(out), _pretty(false), _indent(4) {}
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 XmlWriter::XmlWriter(std::ostream* out, bool pret)
-: _out(out), _pretty(pret), _indent(4) {
-}
+    : _out(out), _pretty(pret), _indent(4) {}
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 XmlWriter::XmlWriter(std::ostream* out, bool pret, size_t indent)
-: _out(out), _pretty(pret), _indent(indent) {
-}
+    : _out(out), _pretty(pret), _indent(indent) {}
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void XmlWriter::openTag(const string& tag, const map<string, string>& attrs) {
   if (!_nstack.empty() && _nstack.top().t == COMMENT) {
     throw XmlWriterException("Opening tags not allowed while inside comment.");
@@ -55,19 +51,19 @@ void XmlWriter::openTag(const string& tag, const map<string, string>& attrs) {
   _nstack.push(XmlNode(TAG, tag, true));
 }
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void XmlWriter::openTag(const string& tag) {
   openTag(tag, map<string, string>());
 }
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void XmlWriter::openTag(const string& tag, const string& k, const string& v) {
   map<string, string> kv;
   kv[k] = v;
   openTag(tag, kv);
 }
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void XmlWriter::openComment() {
   // don't allow nested comments
   if (!_nstack.empty() && _nstack.top().t == COMMENT) return;
@@ -80,7 +76,7 @@ void XmlWriter::openComment() {
   _nstack.push(XmlNode(COMMENT, "", false));
 }
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void XmlWriter::writeText(const string& text) {
   if (_nstack.empty()) {
     throw XmlWriterException("Text content not allowed in prolog / trailing.");
@@ -90,7 +86,7 @@ void XmlWriter::writeText(const string& text) {
   putEsced(_out, text);
 }
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void XmlWriter::closeTag() {
   while (!_nstack.empty() && _nstack.top().t == TEXT) _nstack.pop();
 
@@ -113,12 +109,12 @@ void XmlWriter::closeTag() {
   }
 }
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void XmlWriter::closeTags() {
   while (!_nstack.empty()) closeTag();
 }
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void XmlWriter::doIndent() {
   if (_pretty) {
     *_out << std::endl;
@@ -126,7 +122,7 @@ void XmlWriter::doIndent() {
   }
 }
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void XmlWriter::closeHanging() {
   if (_nstack.empty()) return;
 
@@ -138,7 +134,7 @@ void XmlWriter::closeHanging() {
   }
 }
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void XmlWriter::putEsced(ostream* out, const string& str) {
   if (!_nstack.empty() && _nstack.top().t == COMMENT) {
     *out << str;
@@ -146,31 +142,41 @@ void XmlWriter::putEsced(ostream* out, const string& str) {
   }
 
   for (const char& c : str) {
-    if (c == '"') *out << "&quot;";
-    else if (c == '\'') *out << "&apos;";
-    else if (c == '<') *out << "&lt;";
-    else if (c == '>') *out << "&gt;";
-    else if (c == '&') *out << "&amp;";
-    else *out << c;
+    if (c == '"')
+      *out << "&quot;";
+    else if (c == '\'')
+      *out << "&apos;";
+    else if (c == '<')
+      *out << "&lt;";
+    else if (c == '>')
+      *out << "&gt;";
+    else if (c == '&')
+      *out << "&amp;";
+    else
+      *out << c;
   }
 }
 
-// ____________________________________________________________________________
+// _____________________________________________________________________________
 void XmlWriter::checkTagName(const string& str) const {
   if (!isalpha(str[0]) && str[0] != '_')
-    throw XmlWriterException("XML elements must start with either a letter "
-      "or an underscore");
+    throw XmlWriterException(
+        "XML elements must start with either a letter "
+        "or an underscore");
 
-  string begin = str.substr(0,3);
+  string begin = str.substr(0, 3);
   std::transform(begin.begin(), begin.end(), begin.begin(), ::tolower);
-  if (begin == "xml") throw XmlWriterException("XML elements cannot start with"
-    " XML, xml, Xml etc.");
+  if (begin == "xml")
+    throw XmlWriterException(
+        "XML elements cannot start with"
+        " XML, xml, Xml etc.");
 
   for (const char& c : str) {
     // we allow colons in tag names for primitive namespace support
-    if (!isalpha(c) && !isdigit(c) && c != '-' && c != '_' && c != '.'
-        && c != ':')
-      throw XmlWriterException("XML elements can only contain letters, "
-        "digits, hyphens, underscores and periods.");
+    if (!isalpha(c) && !isdigit(c) && c != '-' && c != '_' && c != '.' &&
+        c != ':')
+      throw XmlWriterException(
+          "XML elements can only contain letters, "
+          "digits, hyphens, underscores and periods.");
   }
 }

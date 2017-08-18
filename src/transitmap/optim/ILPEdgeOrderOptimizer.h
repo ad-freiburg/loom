@@ -7,12 +7,13 @@
 
 #include <glpk.h>
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/ILPOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
 #include "transitmap/optim/Optimizer.h"
+#include "transitmap/optim/Scorer.h"
 
 using std::exception;
 using std::string;
@@ -29,13 +30,13 @@ typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
 class ILPEdgeOrderOptimizer : public ILPOptimizer {
  public:
-  ILPEdgeOrderOptimizer(TransitGraph* g, const config::Config* cfg)
-      : ILPOptimizer(g, cfg){};
+  ILPEdgeOrderOptimizer(TransitGraph* g, const config::Config* cfg, const Scorer* scorer)
+      : ILPOptimizer(g, cfg, scorer){};
 
  private:
   virtual glp_prob* createProblem(const OptGraph& g, const Penalties& pens) const;
 
-  virtual void getConfigurationFromSolution(glp_prob* lp, Configuration* c,
+  virtual void getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
                                             const OptGraph& g) const;
 
   void writeCrossingOracle(const OptGraph& g, const Penalties& pens, VariableMatrix* vm,

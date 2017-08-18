@@ -7,11 +7,12 @@
 
 #include <glpk.h>
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/OptGraph.h"
 #include "transitmap/optim/Optimizer.h"
+#include "transitmap/optim/Scorer.h"
 
 using std::exception;
 using std::string;
@@ -38,25 +39,26 @@ struct VariableMatrix {
 
 class ILPOptimizer : public Optimizer {
  public:
-  ILPOptimizer(TransitGraph* g, const config::Config* cfg) : _g(g), _cfg(cfg){};
+  ILPOptimizer(TransitGraph* g, const config::Config* cfg, const Scorer* scorer) : _g(g), _cfg(cfg), _scorer(scorer){};
 
   int optimize(const Penalties& pens) const;
 
  protected:
   TransitGraph* _g;
   const config::Config* _cfg;
+  const Scorer* _scorer;
 
   virtual glp_prob* createProblem(const OptGraph& g, const Penalties& pens) const;
 
   void solveProblem(glp_prob* lp) const;
   void preSolveCoinCbc(glp_prob* lp) const;
 
-  virtual void getConfigurationFromSolution(glp_prob* lp, Configuration* c,
+  virtual void getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
                                             const OptGraph& g) const;
 
-  void expandRelatives(Configuration* c, TransitGraph* g) const;
+  void expandRelatives(OrderingConfig* c, TransitGraph* g) const;
 
-  void expandRelativesFor(Configuration* c, const Route* ref,
+  void expandRelativesFor(OrderingConfig* c, const Route* ref,
                           graph::Edge* start,
                           const std::set<const Route*>& r) const;
 

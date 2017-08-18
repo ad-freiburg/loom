@@ -5,23 +5,20 @@
 #ifndef UTIL_XML_XMLWRITER_H_
 #define UTIL_XML_XMLWRITER_H_
 
-#include <ostream>
-#include <string>
-#include <stack>
 #include <map>
+#include <ostream>
+#include <stack>
+#include <string>
 
 namespace util {
 namespace xml {
 
-class XmlWriterException: public std::exception {
+class XmlWriterException : public std::exception {
  public:
-  XmlWriterException(std::string msg)
-   : _msg(msg) {}
+  XmlWriterException(std::string msg) : _msg(msg) {}
   ~XmlWriterException() throw() {}
 
-  virtual const char* what() const throw() {
-    return _msg.c_str();
-  };
+  virtual const char* what() const throw() { return _msg.c_str(); };
 
  private:
   std::string _msg;
@@ -29,19 +26,18 @@ class XmlWriterException: public std::exception {
 
 // simple XML writer class without much overhead
 class XmlWriter {
-
  public:
   explicit XmlWriter(std::ostream* out);
   XmlWriter(std::ostream* out, bool pretty);
   XmlWriter(std::ostream* out, bool pretty, size_t indent);
-  ~XmlWriter() {};
+  ~XmlWriter(){};
 
   // open tag without attributes
   void openTag(const std::string& tag);
 
   // open tag with single attribute (for convenience...)
-  void openTag(const std::string& tag,
-          const std::string& key, const std::string& val);
+  void openTag(const std::string& tag, const std::string& key,
+               const std::string& val);
 
   // open tag with attribute list
   void openTag(const std::string& tag,
@@ -60,14 +56,11 @@ class XmlWriter {
   void closeTags();
 
  private:
-
-  enum XML_NODE_T {
-    TAG, TEXT, COMMENT
-  };
+  enum XML_NODE_T { TAG, TEXT, COMMENT };
 
   struct XmlNode {
     XmlNode(XML_NODE_T t, const std::string& pload, bool hanging)
-    : t(t), pload(pload), hanging(hanging) {}
+        : t(t), pload(pload), hanging(hanging) {}
     XML_NODE_T t;
     std::string pload;
     bool hanging;

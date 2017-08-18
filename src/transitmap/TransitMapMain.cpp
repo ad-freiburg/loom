@@ -15,6 +15,7 @@
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/output/OgrOutput.h"
+#include "transitmap/optim/Scorer.h"
 #include "transitmap/graph/Penalties.h"
 #include "transitmap/output/SvgOutput.h"
 #include "util/geo/PolyLine.h"
@@ -41,6 +42,7 @@ int main(int argc, char** argv) {
     LOG(INFO) << "reading graph " << std::endl;
     graph::TransitGraph g(cfg.name, cfg.projectionString);
     graph::GraphBuilder b(&cfg);
+    optim::Scorer scorer(&g);
     if (!b.build(&(std::cin), &g)) {
       exit(1);
     }
@@ -61,7 +63,7 @@ int main(int argc, char** argv) {
       LOG(INFO) << "(stats)   Max edge route cardinality: "
                 << g.getMaxCardinality() << std::endl;
       LOG(INFO) << "(stats)   Number of poss. solutions: "
-                << g.getNumPossSolutions() << std::endl;
+                << scorer.getNumPossSolutions() << std::endl;
       LOG(INFO) << "(stats)   Highest node degree: " << g.getMaxDegree() << std::endl;
     }
 
@@ -92,8 +94,8 @@ int main(int argc, char** argv) {
 
     // TODO move this into configuration, at least partially
     graph::Penalties pens{
-      maxCrossPen + 1,
-      maxSplitPen + 1,
+      maxCrossPen,
+      maxSplitPen,
       cfg.crossPenMultiSameSeg,
       cfg.crossPenMultiDiffSeg,
       cfg.splitPenWeight,
@@ -106,43 +108,43 @@ int main(int argc, char** argv) {
     LOG(INFO) << "(stats) Max splitting pen: " << maxSplitPen << std::endl;
 
     LOG(INFO) << "(stats) Total graph score BEFORE optim is -- "
-              << g.getScore(pens)
+              << scorer.getScore(pens)
               << " --" << std::endl;
     LOG(INFO) << "(stats)   Per node graph score: "
-              << g.getScore(pens) /
+              << scorer.getScore(pens) /
                      g.getNodes()->size()
               << std::endl;
-    LOG(INFO) << "(stats)   Crossings: " << g.getNumCrossings() << " (score: "
-              << g.getCrossScore(pens)
+    LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings() << " (score: "
+              << scorer.getCrossScore(pens)
               << ")" << std::endl;
-    LOG(INFO) << "(stats)   Separations: " << g.getNumSeparations()
+    LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
               << " (score: "
-              << g.getSeparationScore(pens)
+              << scorer.getSeparationScore(pens)
               << ")" << std::endl;
 
     if (cfg.renderMethod != "ogr" && !cfg.noOptim) {
       if (cfg.optimMethod == "ilp_impr") {
-        optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg);
+        optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg, &scorer);
         ilpEoOptim.optimize(pens);
       } else if (cfg.optimMethod == "ilp") {
-        optim::ILPOptimizer ilpEoOptim(&g, &cfg);
+        optim::ILPOptimizer ilpEoOptim(&g, &cfg, &scorer);
         ilpEoOptim.optimize(pens);
       }
     }
 
     LOG(INFO) << "(stats) Total graph score AFTER optim is -- "
-              << g.getScore(pens)
+              << scorer.getScore(pens)
               << " --" << std::endl;
     LOG(INFO) << "(stats)   Per node graph score: "
-              << g.getScore(pens) /
+              << scorer.getScore(pens) /
                      g.getNodes()->size()
               << std::endl;
-    LOG(INFO) << "(stats)   Crossings: " << g.getNumCrossings() << " (score: "
-              << g.getCrossScore(pens)
+    LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings() << " (score: "
+              << scorer.getCrossScore(pens)
               << ")" << std::endl;
-    LOG(INFO) << "(stats)   Separations: " << g.getNumSeparations()
+    LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
               << " (score: "
-              << g.getSeparationScore(pens)
+              << scorer.getSeparationScore(pens)
               << ")" << std::endl;
 
     if (cfg.renderMethod == "ogr") {
@@ -157,7 +159,7 @@ int main(int argc, char** argv) {
       LOG(INFO) << "Outputting to SVG " << path << " ..." << std::endl;
       std::ofstream o;
       o.open(path);
-      output::SvgOutput svgOut(&o, &cfg);
+      output::SvgOutput svgOut(&o, &cfg, &scorer);
       svgOut.print(g);
     }
 
@@ -170,7 +172,7 @@ int main(int argc, char** argv) {
         LOG(INFO) << "Outputting edge SVG to " << path << " ..." << std::endl;
         std::ofstream o;
         o.open(path);
-        output::SvgOutput svgOut(&o, &cfg);
+        output::SvgOutput svgOut(&o, &cfg, &scorer);
         svgOut.print(g);
       }
 
@@ -182,7 +184,7 @@ int main(int argc, char** argv) {
         LOG(INFO) << "Outputting node SVG to " << path << " ..." << std::endl;
         std::ofstream o;
         o.open(path);
-        output::SvgOutput svgOut(&o, &cfg);
+        output::SvgOutput svgOut(&o, &cfg, &scorer);
         svgOut.print(g);
       }
 
@@ -194,7 +196,7 @@ int main(int argc, char** argv) {
         LOG(INFO) << "Outputting station SVG to " << path << " ..." << std::endl;
         std::ofstream o;
         o.open(path);
-        output::SvgOutput svgOut(&o, &cfg);
+        output::SvgOutput svgOut(&o, &cfg, &scorer);
         svgOut.print(g);
       }
     }
@@ -262,7 +264,8 @@ int main(int argc, char** argv) {
     std::ofstream o;
     o.open("/home/patrick/test.svg");
     cfg.outputResolution = 1;
-    output::SvgOutput svgOut(&o, &cfg);
+
+    output::SvgOutput svgOut(&o, &cfg, 0);
 
     o << "<svg width=\"2000\" height=\"2000\">";
 

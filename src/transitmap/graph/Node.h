@@ -6,7 +6,7 @@
 #define TRANSITMAP_GRAPH_NODE_H_
 
 #include <set>
-#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Route.h"
 #include "transitmap/graph/Penalties.h"
 #include "util/geo/Geo.h"
@@ -30,8 +30,8 @@ struct NodeFront {
 
   Node* n;  // pointer to node here also
 
-  Point getTripOccPos(const Route* r, const Configuration& c) const;
-  Point getTripOccPos(const Route* r, const Configuration& c, bool originGeom) const;
+  Point getTripOccPos(const Route* r, const OrderingConfig& c) const;
+  Point getTripOccPos(const Route* r, const OrderingConfig& c, bool originGeom) const;
   Point getTripPos(const Edge* e, size_t pos, bool inv) const;
   Point getTripPos(const Edge* e, size_t pos, bool inv, bool originGeom) const;
 
@@ -101,16 +101,11 @@ class Node {
   void addMainDir(NodeFront f);
 
   const NodeFront* getNodeFrontFor(const Edge* e) const;
-  double getScore(const Penalties& pens, bool crossAdjPen, bool splitAdjPen, const graph::Configuration& cfg) const;
-  size_t getNumCrossings(const graph::Configuration& c) const;
-  size_t getNumSeparations(const graph::Configuration& c) const;
-  size_t getSeparationScore(const Configuration& c, const Penalties& pens, bool adjpen) const;
-  double getCrossingScore(const Configuration& c, const Penalties& pens, bool adjpen) const;
 
   std::vector<Partner> getPartners(const NodeFront* f,
                                    const RouteOccurance& ro) const;
 
-  std::vector<InnerGeometry> getInnerGeometries(const graph::Configuration& c,
+  std::vector<InnerGeometry> getInnerGeometries(const graph::OrderingConfig& c,
                                                 double prec) const;
 
   size_t getConnCardinality() const;
@@ -137,10 +132,6 @@ class Node {
   double getMaxNodeFrontWidth() const;
   size_t getMaxNodeFrontCardinality() const;
 
-  int getCrossingPenaltySameSeg(const Penalties& pens, bool adjpen) const;
-  int getCrossingPenaltyDiffSeg(const Penalties& pens, bool adjpen) const;
-  int getSplittingPenalty(const Penalties& pens, bool adjpen) const;
-
  private:
   std::string _id;
   std::set<Edge*> _adjListIn;
@@ -158,18 +149,18 @@ class Node {
 
   size_t getNodeFrontPos(const NodeFront* a) const;
 
-  InnerGeometry getInnerBezier(const Configuration& c,
+  InnerGeometry getInnerBezier(const OrderingConfig& c,
                                const graph::Partner& partnerFrom,
                                const graph::Partner& partnerTo,
                                double prec) const;
 
-  InnerGeometry getInnerStraightLine(const Configuration& c,
+  InnerGeometry getInnerStraightLine(const OrderingConfig& c,
                                      const graph::Partner& partnerFrom,
                                      const graph::Partner& partnerTo) const;
   InnerGeometry getTerminusStraightLine(
-    const Configuration& c, const graph::Partner& partnerFrom) const;
+    const OrderingConfig& c, const graph::Partner& partnerFrom) const;
   InnerGeometry getTerminusBezier(
-    const Configuration& c, const graph::Partner& partnerFrom, double prec) const;
+    const OrderingConfig& c, const graph::Partner& partnerFrom, double prec) const;
 
   friend class TransitGraph;
 };

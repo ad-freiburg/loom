@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <fstream>
 #include <chrono>
-#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/output/OgrOutput.h"
 #include "transitmap/optim/ILPOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
@@ -86,7 +86,7 @@ int ILPOptimizer::optimize(const Penalties& pens) const {
     glp_print_mip(lp, _cfg->glpkSolutionOutputPath.c_str());
   }
 
-  Configuration c;
+  OrderingConfig c;
   getConfigurationFromSolution(lp, &c, g);
   _g->setConfig(c);
 
@@ -98,18 +98,18 @@ int ILPOptimizer::optimize(const Penalties& pens) const {
 
 // _____________________________________________________________________________
 int ILPOptimizer::getCrossingPenaltySameSeg(const OptNode* n, const Penalties& pens) const {
-  return n->node->getCrossingPenaltySameSeg(pens, true);
+  return _scorer->getCrossingPenaltySameSeg(n->node, pens, true);
 }
 
 // _____________________________________________________________________________
 int ILPOptimizer::getCrossingPenaltyDiffSeg(const OptNode* n, const Penalties& pens) const {
-  return n->node->getCrossingPenaltyDiffSeg(pens, true);
+  return _scorer->getCrossingPenaltyDiffSeg(n->node, pens, true);
 }
 
 // _____________________________________________________________________________
 int ILPOptimizer::getSplittingPenalty(const OptNode* n, const Penalties& pens) const {
   // double the value because we only count a splitting once for each pair!
-  return n->node->getSplittingPenalty(pens, true) * 2;
+  return _scorer->getSplittingPenalty(n->node, pens, true) * 2;
 }
 
 // _____________________________________________________________________________
@@ -127,7 +127,7 @@ double ILPOptimizer::getConstraintCoeff(glp_prob* lp, int constraint,
 }
 
 // _____________________________________________________________________________
-void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, Configuration* c,
+void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
                                                 const OptGraph& g) const {
   // build name index for faster lookup
   glp_create_index(lp);
@@ -166,7 +166,7 @@ void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, Configuration* c,
 }
 
 // _____________________________________________________________________________
-void ILPOptimizer::expandRelatives(Configuration* c, TransitGraph* g) const {
+void ILPOptimizer::expandRelatives(OrderingConfig* c, TransitGraph* g) const {
   std::set<const Route*> proced;
 
   for (graph::Node* n : *g->getNodes()) {
@@ -183,7 +183,7 @@ void ILPOptimizer::expandRelatives(Configuration* c, TransitGraph* g) const {
 }
 
 // _____________________________________________________________________________
-void ILPOptimizer::expandRelativesFor(Configuration* c, const Route* ref,
+void ILPOptimizer::expandRelativesFor(OrderingConfig* c, const Route* ref,
                                       graph::Edge* start,
                                       const std::set<const Route*>& rs) const {
   std::set<graph::Edge*> visited;

@@ -35,7 +35,6 @@ class Graph {
 };
 
 #include "util/graph/Graph.tpp"
-
 }
 }
 

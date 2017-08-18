@@ -6,7 +6,7 @@
 #include <set>
 #include <string>
 #include "transitmap/graph/Edge.h"
-#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "util/Misc.h"
@@ -19,7 +19,7 @@ using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
 using transitmapper::graph::Route;
-using transitmapper::graph::Configuration;
+using transitmapper::graph::OrderingConfig;
 
 // _____________________________________________________________________________
 TransitGraph::TransitGraph(const std::string& name, const std::string& proj)
@@ -44,91 +44,10 @@ TransitGraph::~TransitGraph() {
 const std::string& TransitGraph::getName() const { return _name; }
 
 // _____________________________________________________________________________
-const Configuration& TransitGraph::getConfig() const { return _config; }
+const OrderingConfig& TransitGraph::getConfig() const { return _config; }
 
 // _____________________________________________________________________________
-void TransitGraph::setConfig(const Configuration& c) { _config = c; }
-
-// _____________________________________________________________________________
-double TransitGraph::getScore(const Penalties& pens) const {
-  return getScore(pens, _config);
-}
-
-// _____________________________________________________________________________
-double TransitGraph::getScore(const Penalties& pens, const Configuration& c) const {
-  double ret = 0;
-
-  for (auto n : getNodes()) {
-    ret += n->getScore(pens, true, true, c);
-  }
-
-  return ret;
-}
-//
-// _____________________________________________________________________________
-double TransitGraph::getCrossScore(const Penalties& pens) const {
-  return getCrossScore(pens, _config);
-}
-
-// _____________________________________________________________________________
-double TransitGraph::getCrossScore(const Penalties& pens, const Configuration& c) const {
-  double ret = 0;
-
-  for (auto n : getNodes()) {
-    ret += n->getCrossingScore(c, pens, true);
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
-double TransitGraph::getSeparationScore(const Penalties& pens) const {
-  return getSeparationScore(pens, _config);
-}
-
-// _____________________________________________________________________________
-double TransitGraph::getSeparationScore(const Penalties& pens,
-                                        const Configuration& c) const {
-  double ret = 0;
-
-  for (auto n : getNodes()) {
-    ret += n->getSeparationScore(c, pens, true);
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
-size_t TransitGraph::getNumCrossings() const {
-  return getNumCrossings(_config);
-}
-
-// _____________________________________________________________________________
-size_t TransitGraph::getNumCrossings(const Configuration& c) const {
-  double ret = 0;
-
-  for (auto n : getNodes()) {
-    ret += n->getNumCrossings(c);
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
-size_t TransitGraph::getNumSeparations() const {
-  return getNumSeparations(_config);
-}
-
-// _____________________________________________________________________________
-size_t TransitGraph::getNumSeparations(const Configuration& c) const {
-  double ret = 0;
-
-  for (auto n : getNodes()) {
-    ret += n->getNumSeparations(c);
-  }
-
-  return ret;
-}
+void TransitGraph::setConfig(const OrderingConfig& c) { _config = c; }
 
 // _____________________________________________________________________________
 void TransitGraph::addNode(Node* n) {
@@ -294,19 +213,6 @@ size_t TransitGraph::getNumNodes(bool topo) const {
   for (auto n : _nodes) {
     if (n->getAdjListIn().size() + n->getAdjListOut().size() == 0) continue;
     if ((n->getStops().size() == 0) ^ !topo) ret++;
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
-double TransitGraph::getNumPossSolutions() const {
-  double ret = 1;
-
-  for (auto n : getNodes()) {
-    for (auto e : n->getAdjListOut()) {
-      ret *= util::factorial(e->getCardinality());
-    }
   }
 
   return ret;

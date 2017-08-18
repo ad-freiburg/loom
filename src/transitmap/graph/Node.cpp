@@ -5,7 +5,7 @@
 #include <cassert>
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/Node.h"
-#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/graph/Penalties.h"
@@ -22,12 +22,12 @@ using util::geo::Line;
 
 // _____________________________________________________________________________
 Point NodeFront::getTripOccPos(const Route* r,
-                               const graph::Configuration& c) const {
+                               const OrderingConfig& c) const {
   return getTripOccPos(r, c, false);
 }
 
 // _____________________________________________________________________________
-Point NodeFront::getTripOccPos(const Route* r, const graph::Configuration& c,
+Point NodeFront::getTripOccPos(const Route* r, const OrderingConfig& c,
                                bool origGeom) const {
   RouteOccWithPos rop;
 
@@ -188,101 +188,6 @@ const NodeFront* Node::getNodeFrontFor(const Edge* e) const {
 }
 
 // _____________________________________________________________________________
-double Node::getScore(const Penalties& pens,
-                      bool crossAdjPen, bool splitAdjPen,
-                      const graph::Configuration& cfg) const {
-  return getCrossingScore(cfg, pens, crossAdjPen) +
-         getSeparationScore(cfg, pens, splitAdjPen);
-}
-
-// _____________________________________________________________________________
-size_t Node::getNumCrossings(const Configuration& c) const {
-  return getCrossingScore(c, IDENTITY_PENALTIES, false);
-}
-
-// _____________________________________________________________________________
-double Node::getCrossingScore(const Configuration& c, const Penalties& pens,
-                              bool adjpen) const {
-  std::vector<InnerGeometry> igs = getInnerGeometries(c, -1);
-  size_t ret = 0;
-
-  for (size_t i = 0; i < igs.size(); ++i) {
-    for (size_t j = i + 1; j < igs.size(); ++j) {
-      const InnerGeometry& iga = igs[i];
-      const InnerGeometry& igb = igs[j];
-
-      if (iga.from.front == 0 || iga.to.front == 0 || igb.from.front == 0 ||
-          igb.to.front == 0)
-        continue;
-
-      if (iga.from.front == igb.from.front && iga.slotFrom == igb.slotFrom)
-        continue;
-      if (iga.from.front == igb.to.front && iga.slotFrom == igb.slotTo)
-        continue;
-      if (iga.to.front == igb.to.front && iga.slotTo == igb.slotTo) continue;
-      if (iga.to.front == igb.from.front && iga.slotTo == igb.slotFrom)
-        continue;
-
-      bool sameSeg =
-          (iga.from.front == igb.from.front && iga.to.front == igb.to.front) ||
-          (iga.to.front == igb.from.front && iga.from.front == igb.to.front);
-
-      if (util::geo::intersects(
-              iga.geom.getLine().front(), iga.geom.getLine().back(),
-              igb.geom.getLine().front(), igb.geom.getLine().back()) ||
-          util::geo::dist(iga.geom.getLine(), igb.geom.getLine()) < 1) {
-        if (sameSeg) {
-          ret += 1 * getCrossingPenaltySameSeg(pens, adjpen);
-        } else {
-          ret += 1 * getCrossingPenaltyDiffSeg(pens, adjpen);
-        }
-      }
-    }
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
-size_t Node::getNumSeparations(const Configuration& c) const {
-  return getSeparationScore(c, IDENTITY_PENALTIES, false);
-}
-
-// _____________________________________________________________________________
-size_t Node::getSeparationScore(const Configuration& c, const Penalties& pens, bool adjpen) const {
-  size_t ret = 0;
-  for (auto nf : getMainDirs()) {
-    const Edge* e = nf.edge;
-    std::vector<std::pair<const Route*, const Route*> > curPairs;
-    for (size_t i = 0; i < c.find(e)->second.size() - 1; i++) {
-      size_t p = c.find(e)->second[i];
-      curPairs.push_back(std::pair<const Route*, const Route*>(
-          e->getTripsUnordered().at(p).route,
-          e->getTripsUnordered().at(c.find(e)->second[i + 1]).route));
-    }
-
-    for (auto p : curPairs) {
-      for (auto nf : getMainDirs()) {
-        const Edge* f = nf.edge;
-        if (e == f) continue;
-
-        if (f->containsRoute(p.first) && f->containsRoute(p.second) &&
-            connOccurs(p.first, e, f) && connOccurs(p.second, e, f)) {
-          if (abs(int(f->getRouteOccWithPosUnder(p.first, c.find(f)->second)
-                          .second) -
-                  int(f->getRouteOccWithPosUnder(p.second, c.find(f)->second)
-                          .second)) > 1) {
-            ret += 1 * getSplittingPenalty(pens, adjpen);
-          }
-        }
-      }
-    }
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
 std::set<Edge*> Node::getAdjList() const {
   std::set<Edge*> ret;
   ret.insert(getAdjListIn().begin(), getAdjListIn().end());
@@ -311,13 +216,13 @@ std::vector<Partner> Node::getPartners(const NodeFront* f,
 }
 
 // _____________________________________________________________________________
-std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
+std::vector<InnerGeometry> Node::getInnerGeometries(const OrderingConfig& c,
                                                     double prec) const {
   std::vector<InnerGeometry> ret;
   std::map<const Route*, std::set<const NodeFront*> > processed;
 
   for (size_t i = 0; i < getMainDirs().size(); ++i) {
-    const graph::NodeFront& nf = getMainDirs()[i];
+    const NodeFront& nf = getMainDirs()[i];
 
     const std::vector<size_t>* ordering = &c.find(nf.edge)->second;
 
@@ -325,9 +230,9 @@ std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
       const RouteOccurance& routeOcc = (*nf.edge->getTripsUnordered())[j];
       Partner o(&nf, nf.edge, routeOcc.route);
 
-      std::vector<graph::Partner> partners = getPartners(&nf, routeOcc);
+      std::vector<Partner> partners = getPartners(&nf, routeOcc);
 
-      for (const graph::Partner& p : partners) {
+      for (const Partner& p : partners) {
         if (processed[routeOcc.route].find(p.front) !=
             processed[routeOcc.route].end()) {
           continue;
@@ -364,7 +269,7 @@ std::vector<InnerGeometry> Node::getInnerGeometries(const Configuration& c,
 
 // _____________________________________________________________________________
 InnerGeometry Node::getTerminusStraightLine(
-    const Configuration& c, const graph::Partner& partnerFrom) const {
+    const OrderingConfig& c, const Partner& partnerFrom) const {
   Point p = partnerFrom.front->getTripOccPos(partnerFrom.route, c, false);
   Point pp = partnerFrom.front->getTripOccPos(partnerFrom.route, c, true);
 
@@ -382,8 +287,8 @@ InnerGeometry Node::getTerminusStraightLine(
 
 // _____________________________________________________________________________
 InnerGeometry Node::getInnerStraightLine(
-    const Configuration& c, const graph::Partner& partnerFrom,
-    const graph::Partner& partnerTo) const {
+    const OrderingConfig& c, const Partner& partnerFrom,
+    const Partner& partnerTo) const {
   Point p = partnerFrom.front->getTripOccPos(partnerFrom.route, c);
   Point pp = partnerTo.front->getTripOccPos(partnerTo.route, c);
 
@@ -400,8 +305,8 @@ InnerGeometry Node::getInnerStraightLine(
 }
 
 // _____________________________________________________________________________
-InnerGeometry Node::getTerminusBezier(const Configuration& cf,
-                                      const graph::Partner& partnerFrom,
+InnerGeometry Node::getTerminusBezier(const OrderingConfig& cf,
+                                      const Partner& partnerFrom,
                                       double prec) const {
   InnerGeometry ret = getTerminusStraightLine(cf, partnerFrom);
   Point p = ret.geom.getLine().front();
@@ -432,9 +337,9 @@ InnerGeometry Node::getTerminusBezier(const Configuration& cf,
 }
 
 // _____________________________________________________________________________
-InnerGeometry Node::getInnerBezier(const Configuration& cf,
-                                   const graph::Partner& partnerFrom,
-                                   const graph::Partner& partnerTo,
+InnerGeometry Node::getInnerBezier(const OrderingConfig& cf,
+                                   const Partner& partnerFrom,
+                                   const Partner& partnerTo,
                                    double prec) const {
   InnerGeometry ret = getInnerStraightLine(cf, partnerFrom, partnerTo);
   Point p = ret.geom.getLine().front();
@@ -532,14 +437,14 @@ size_t Node::getConnCardinality() const {
   std::map<const Route*, std::set<const NodeFront*> > processed;
 
   for (size_t i = 0; i < getMainDirs().size(); ++i) {
-    const graph::NodeFront& nf = getMainDirs()[i];
+    const NodeFront& nf = getMainDirs()[i];
 
     for (size_t j = 0; j < nf.edge->getCardinality(); j++) {
       const RouteOccurance& routeOcc = (*nf.edge->getTripsUnordered())[j];
 
-      std::vector<graph::Partner> partners = getPartners(&nf, routeOcc);
+      std::vector<Partner> partners = getPartners(&nf, routeOcc);
 
-      for (const graph::Partner& p : partners) {
+      for (const Partner& p : partners) {
         if (processed[routeOcc.route].find(p.front) !=
             processed[routeOcc.route].end()) {
           continue;
@@ -686,47 +591,4 @@ Edge* Node::getEdge(const Node* other) const {
   }
 
   return 0;
-}
-
-// _____________________________________________________________________________
-int Node::getCrossingPenaltySameSeg(const Penalties& pens, bool adjpen) const {
-  double ret = 1;
-  if (adjpen) ret *= _adjListIn.size() + _adjListOut.size();
-
-  if (getStops().size() > 0) {
-    if (_adjListIn.size() + _adjListOut.size() == 2)
-      return pens.inStatCrossPenDegTwo;
-    return pens.inStatCrossPenSameSeg * ret;
-  }
-
-  return ret * pens.sameSegCrossPen;
-}
-
-// _____________________________________________________________________________
-int Node::getCrossingPenaltyDiffSeg(const Penalties& pens, bool adjpen) const {
-  double ret = 1;
-  if (adjpen) ret *= _adjListIn.size() + _adjListOut.size();
-
-  if (getStops().size() > 0) {
-    if (_adjListIn.size() + _adjListOut.size() == 2)
-      return pens.inStatCrossPenDegTwo;
-    return pens.inStatCrossPenDiffSeg * ret;
-  }
-
-  return ret * pens.diffSegCrossPen;
-}
-
-
-// _____________________________________________________________________________
-int Node::getSplittingPenalty(const Penalties& pens, bool adjpen) const {
-  double ret = 1;
-  if (adjpen) ret *= _adjListIn.size() + _adjListOut.size();
-
-  if (getStops().size() > 0) {
-    if (_adjListIn.size() + _adjListOut.size() == 2)
-      return pens.inStatSplitPenDegTwo;
-    return pens.inStatSplitPen * ret;
-  }
-
-  return ret * pens.splitPen;
 }

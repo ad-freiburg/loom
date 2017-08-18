@@ -15,7 +15,7 @@
 
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/Node.h"
-#include "transitmap/graph/OrderingConfiguration.h"
+#include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Route.h"
 #include "transitmap/graph/Penalties.h"
 #include "util/geo/Geo.h"
@@ -48,28 +48,10 @@ class TransitGraph {
   const geo::Box& getBoundingBox() const;
   geo::Box getBoundingBox(double p) const;
 
-  double getScore(const Penalties& pens) const;
-  double getScore(const Penalties& pens, const Configuration& c) const;
-
-  double getCrossScore(const Penalties& pens) const;
-  double getCrossScore(const Penalties& pens, const Configuration& c) const;
-
-  double getSeparationScore(const Penalties& pens) const;
-  double getSeparationScore(const Penalties& pens, const Configuration& c) const;
-
-  size_t getNumCrossings() const;
-  size_t getNumCrossings(const Configuration& c) const;
-
-  size_t getNumSeparations() const;
-  size_t getNumSeparations(const Configuration& c) const;
-
-  double getNumPossSolutions() const;
   size_t getMaxDegree() const;
-  size_t getMaxCrossPenalty() const;
-  size_t getMaxSplitPenalty() const;
 
-  const Configuration& getConfig() const;
-  void setConfig(const Configuration&);
+  const OrderingConfig& getConfig() const;
+  void setConfig(const OrderingConfig&);
 
   Route* addRoute(const Route* r);
   const Route* getRoute(const std::string& id) const;
@@ -97,7 +79,7 @@ class TransitGraph {
   mutable double _lastSolveTime;
   mutable size_t _lastSolveTarget;
 
-  Configuration _config;
+  OrderingConfig _config;
 
   geo::Box _bbox;
 

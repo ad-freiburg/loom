@@ -633,7 +633,7 @@ std::map<const Route*, std::set<const Route*> > GraphBuilder::getPartnerRoutes(
 
 // _____________________________________________________________________________
 void GraphBuilder::writeInitialConfig(TransitGraph* g) {
-  Configuration c;
+  OrderingConfig c;
   for (graph::Node* n : *g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       Ordering order(e->getCardinality());

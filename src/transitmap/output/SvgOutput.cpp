@@ -16,8 +16,9 @@ using namespace output;
 using util::toString;
 
 // _____________________________________________________________________________
-SvgOutput::SvgOutput(std::ostream* o, const config::Config* cfg)
-    : _o(o), _w(o, true), _cfg(cfg) {}
+SvgOutput::SvgOutput(std::ostream* o, const config::Config* cfg,
+  const optim::Scorer* scorer)
+    : _o(o), _w(o, true), _cfg(cfg), _scorer(scorer) {}
 
 // _____________________________________________________________________________
 void SvgOutput::print(const graph::TransitGraph& outG) {
@@ -508,7 +509,7 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
     _w.writeText("\n");
   }
 
-  _w.writeText(util::toString(n->getNumCrossings(outG.getConfig())) + "(" + util::toString(n->getNumSeparations(outG.getConfig())) + ")");
+  _w.writeText(util::toString(_scorer->getNumCrossings(n, outG.getConfig())) + "(" + util::toString(_scorer->getNumSeparations(n, outG.getConfig())) + ")");
   _w.closeTag();
 }
 
