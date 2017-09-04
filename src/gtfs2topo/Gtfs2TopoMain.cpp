@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     b.removeNodeArtifacts(&g);
     b.averageNodePositions(&g);
 
-    GeoJsonOutput out;
+    util::geo::output::GeoJsonOutput out;
     out.print(g);
   }
 

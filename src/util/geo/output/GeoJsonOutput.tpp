@@ -13,15 +13,15 @@ void GeoJsonOutput::print(const util::graph::Graph<N, E>& outG) {
   geoj["features"] = json::array();
 
   // first pass, nodes
-  for (graph::Node* n : outG.getNodes()) {
+  for (util::graph::Node<N, E>* n : outG.getNodes()) {
     if (!n->pl().getGeom()) continue;
     json feature;
     feature["type"] = "Feature";
 
     feature["geometry"]["type"] = "Point";
     std::vector<double> coords;
-    coords.push_back(n->pl().getGeom()->get<0>());
-    coords.push_back(n->pl().getGeom()->get<1>());
+    coords.push_back(n->pl().getGeom()->template get<0>());
+    coords.push_back(n->pl().getGeom()->template get<1>());
     feature["geometry"]["coordinates"] = coords;
 
     json::object_t props = json::object();
@@ -35,8 +35,8 @@ void GeoJsonOutput::print(const util::graph::Graph<N, E>& outG) {
   }
 
   // second pass, edges
-  for (graph::Node* n : outG.getNodes()) {
-    for (graph::Edge* e : n->getAdjListOut()) {
+  for (graph::Node<N, E>* n : outG.getNodes()) {
+    for (graph::Edge<N, E>* e : n->getAdjListOut()) {
       if (!e->pl().getGeom()) continue;
       json feature;
       feature["type"] = "Feature";
@@ -48,8 +48,8 @@ void GeoJsonOutput::print(const util::graph::Graph<N, E>& outG) {
 
       for (auto p : *e->pl().getGeom()) {
         std::vector<double> coords;
-        coords.push_back(p.get<0>());
-        coords.push_back(p.get<1>());
+        coords.push_back(p.template get<0>());
+        coords.push_back(p.template get<1>());
         feature["geometry"]["coordinates"].push_back(coords);
       }
 

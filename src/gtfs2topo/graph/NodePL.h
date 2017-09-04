@@ -14,12 +14,10 @@
 #include "gtfs2topo/graph/BuildGraph.h"
 
 using namespace ad::cppgtfs;
+using util::geo::Point;
 
 namespace gtfs2topo {
 namespace graph {
-
-
-using util::geo::Point;
 
 struct OccuringConnection {
   OccuringConnection(const Edge* from, const Edge* to) : from(from), to(to) {}

@@ -7,29 +7,31 @@
 
 #include <ostream>
 #include <string>
-#include "gtfs2topo/config/GraphBuilderConfig.h"
-#include "gtfs2topo/graph/BuildGraph.h"
 #include "json/json.hpp"
 #include "util/String.h"
-#include "gtfs2topo/graph/NodePL.h"
-#include "gtfs2topo/graph/EdgePL.h"
+#include "util/graph/Graph.h"
 
 using json = nlohmann::json;
 using util::toString;
+using util::graph::Graph;
 
-namespace gtfs2topo {
+namespace util {
+namespace geo {
+namespace output {
 
 class GeoJsonOutput {
  public:
   GeoJsonOutput();
   template <typename N, typename E>
-  void print(const util::graph::Graph<N, E>& outG);
+  void print(const Graph<N, E>& outG);
 
  private:
 };
 
 #include "util/geo/output/GeoJsonOutput.tpp"
 
+}
+}
 }
 
 #endif  // UTIL_GEO_OUTPUT_GEOJSONOUTPUT_H_

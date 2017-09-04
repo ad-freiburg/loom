@@ -9,6 +9,9 @@
 #include <set>
 #include <string>
 #include "octi/config/ConfigReader.h"
+#include "octi/gridgraph/GridGraph.h"
+#include "util/geo/Geo.h"
+#include "util/geo/output/GeoJsonOutput.h"
 
 using std::string;
 using namespace octi;
@@ -25,6 +28,11 @@ int main(int argc, char** argv) {
 
   config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
+
+  gridgraph::GridGraph g(util::geo::Box(util::geo::Point(0, 0), util::geo::Point(100, 100)), 10);
+  util::geo::output::GeoJsonOutput out;
+
+  out.print(g);
 
   return (0);
 }
