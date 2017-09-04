@@ -9,6 +9,7 @@
 #include "gtfs2topo/graph/EdgeTripGeom.h"
 #include "gtfs2topo/graph/NodePL.h"
 #include "gtfs2topo/graph/EdgePL.h"
+#include "util/String.h"
 
 using namespace gtfs2topo;
 using namespace graph;
@@ -123,4 +124,51 @@ const {
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+const util::geo::Point* NodePL::getGeom() const {
+  return &getPos();
+}
+
+// _____________________________________________________________________________
+void NodePL::setNode(const Node* n) {
+  _n = n;
+}
+
+// _____________________________________________________________________________
+void NodePL::getAttrs(json::object_t& obj) const {
+  if (getStops().size() > 0) {
+    obj["station_id"] = (*getStops().begin())->getId();
+    obj["station_label"] = (*getStops().begin())->getName();
+  }
+
+  auto arr = json::array();
+
+  for (const graph::Edge* e : _n->getAdjList()) {
+    if (!e->pl().getRefETG()) continue;
+    for (auto r : e->pl().getRefETG()->getTripsUnordered()) {
+      for (graph::Edge* f : _n->getAdjList()) {
+        if (e == f) continue;
+        if (!f->pl().getRefETG()) continue;
+        for (auto rr : *f->pl().getRefETG()->getTripsUnordered()) {
+          if (r.route == rr.route &&
+              (r.direction == 0 || rr.direction == 0 ||
+               (r.direction == _n && rr.direction != _n) ||
+               (r.direction != _n && rr.direction == _n)) &&
+              !isConnOccuring(r.route, e, f)) {
+            auto obj = json::object();
+            obj["route"] = util::toString(r.route);
+            obj["edge1_node"] =
+                util::toString(e->getFrom() == _n ? e->getTo() : e->getFrom());
+            obj["edge2_node"] =
+                util::toString(f->getFrom() == _n ? f->getTo() : f->getFrom());
+            arr.push_back(obj);
+          }
+        }
+      }
+    }
+  }
+
+  if (arr.size()) obj["excluded_line_conns"] = arr;
 }

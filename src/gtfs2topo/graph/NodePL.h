@@ -10,6 +10,7 @@
 #include "ad/cppgtfs/gtfs/Route.h"
 #include "util/geo/PolyLine.h"
 #include "util/geo/Geo.h"
+#include "util/geo/GeoGraph.h"
 #include "gtfs2topo/graph/BuildGraph.h"
 
 using namespace ad::cppgtfs;
@@ -26,9 +27,9 @@ struct OccuringConnection {
   const Edge* to;
 };
 
-class NodePL {
+class NodePL : util::geograph::GeoNodePL {
  public:
-  explicit NodePL(Point pos);
+  NodePL(Point pos);
   NodePL(double x, double y);
   NodePL(Point pos, const gtfs::Stop* stop);
   NodePL(double x, double y, const gtfs::Stop* stop);
@@ -50,11 +51,16 @@ class NodePL {
 
   const std::map<const gtfs::Route*, std::vector<OccuringConnection> >& getOccuringConnections() const;
 
+  const util::geo::Point* getGeom() const;
+  void getAttrs(json::object_t& obj) const;
+
+  void setNode(const Node* n);
+
  private:
   Point _pos;
+  const Node* _n; // backpointer to node
 
   std::set<const gtfs::Stop*> _stops;
-
   std::map<const gtfs::Route*, std::vector<OccuringConnection> > _occConns;
 };
 }}

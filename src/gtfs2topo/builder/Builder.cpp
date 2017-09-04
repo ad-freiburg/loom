@@ -353,8 +353,14 @@ bool Builder::createTopologicalNodes(BuildGraph* g, bool final) {
       b = !(fap.totalPos > fbp.totalPos) ? w.f->getTo() : w.f->getFrom();
     }
 
-    if (!a) a = new Node(NodePL(w.s.first.first.p));
-    if (!b) b = new Node(NodePL(w.s.second.first.p));
+    if (!a) {
+      a = new Node(NodePL(w.s.first.first.p));
+      a->pl().setNode(a);
+    }
+    if (!b) {
+      b = new Node(NodePL(w.s.second.first.p));
+      b->pl().setNode(b);
+    }
 
     if (a == b) {
       continue;
@@ -655,6 +661,7 @@ Node* Builder::addStop(const Stop* curStop, uint8_t aggrLevel, BuildGraph* g, No
     _stopNodes[curStop] = n;
   } else {
     n = g->addNode(new Node(NodePL(p, curStop)));
+    n->pl().setNode(n);
     grid->add(n->pl().getPos(), n);
     _stopNodes[curStop] = n;
   }

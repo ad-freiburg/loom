@@ -2,27 +2,34 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GTFS2TOPO_OUTPUT_GEOJSONOUTPUT_H_
-#define GTFS2TOPO_OUTPUT_GEOJSONOUTPUT_H_
+#ifndef UTIL_GEO_OUTPUT_GEOJSONOUTPUT_H_
+#define UTIL_GEO_OUTPUT_GEOJSONOUTPUT_H_
 
 #include <ostream>
 #include <string>
 #include "gtfs2topo/config/GraphBuilderConfig.h"
 #include "gtfs2topo/graph/BuildGraph.h"
 #include "json/json.hpp"
+#include "util/String.h"
+#include "gtfs2topo/graph/NodePL.h"
+#include "gtfs2topo/graph/EdgePL.h"
 
 using json = nlohmann::json;
+using util::toString;
 
 namespace gtfs2topo {
 
 class GeoJsonOutput {
  public:
-  GeoJsonOutput(const config::Config* cfg);
-  void print(const graph::BuildGraph& outG);
+  GeoJsonOutput();
+  template <typename N, typename E>
+  void print(const util::graph::Graph<N, E>& outG);
 
  private:
-  const config::Config* _cfg;
 };
+
+#include "util/geo/output/GeoJsonOutput.tpp"
+
 }
 
-#endif  // GTFS2TOPO_OUTPUT_GEOJSONOUTPUT_H_
+#endif  // UTIL_GEO_OUTPUT_GEOJSONOUTPUT_H_

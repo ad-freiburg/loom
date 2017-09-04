@@ -6,8 +6,10 @@
 #include <vector>
 #include "ad/cppgtfs/gtfs/Trip.h"
 #include "util/geo/PolyLine.h"
+#include "util/String.h"
 #include "gtfs2topo/graph/EdgeTripGeom.h"
 #include "gtfs2topo/graph/EdgePL.h"
+#include "gtfs2topo/graph/NodePL.h"
 
 using namespace gtfs2topo;
 using namespace graph;
@@ -182,5 +184,30 @@ void EdgePL::combineIncludedGeoms() {
     } else {
       et++;
     }
+  }
+}
+
+
+// _____________________________________________________________________________
+const util::geo::Line* EdgePL::getGeom() const {
+  if (!getRefETG()) return 0;
+  return &getRefETG()->getGeom().getLine();
+}
+
+// _____________________________________________________________________________
+void EdgePL::getAttrs(json::object_t& obj) const {
+  obj["lines"] = json::array();
+
+  for (auto r : getRefETG()->getTripsUnordered()) {
+    json route = json::object();
+    route["id"] = util::toString(r.route);
+    route["label"] = r.route->getShortName();
+    route["color"] = r.route->getColorString();
+
+    if (r.direction != 0) {
+      route["direction"] = util::toString(r.direction);
+    }
+
+   obj["lines"].push_back(route);
   }
 }

@@ -39,9 +39,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "ignore-gtfs-distances",
       opts::bool_switch(&(cfg->ignoreGtfsDistances))->default_value(false),
       "ignore the distance values in GTFS feed, useful for buggy feeds")(
-      "ignore-gtfs-directions",
-      opts::bool_switch(&(cfg->ignoreDirections))->default_value(false),
-      "ignore the directions of trips")(
       "station-aggregation-level",
       opts::value<size_t>(&(cfg->stationAggrLevel))->default_value(2),
       "2 = aggregate based on distance, 1 = aggregate based on feed, 0 = no "

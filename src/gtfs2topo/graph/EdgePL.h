@@ -11,6 +11,7 @@
 
 #include "util/Nullable.h"
 #include "ad/cppgtfs/gtfs/Trip.h"
+#include "util/geo/GeoGraph.h"
 #include "gtfs2topo/graph/BuildGraph.h"
 
 using namespace ad::cppgtfs;
@@ -19,7 +20,7 @@ using util::Nullable;
 namespace gtfs2topo {
 namespace graph {
 
-class EdgePL {
+class EdgePL : util::geograph::GeoEdgePL {
  public:
   EdgePL(const Edge* e);
   EdgePL();
@@ -39,6 +40,9 @@ class EdgePL {
 
   void simplify();
   void setTo(Node* to);
+
+  const util::geo::Line* getGeom() const;
+  void getAttrs(json::object_t& obj) const;
  private:
   // Map of EdgeTripGeometries in this graph edge.
   // An EdgeTripGeometry is a geometry holding N trips.
