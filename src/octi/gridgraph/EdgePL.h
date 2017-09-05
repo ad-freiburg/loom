@@ -5,6 +5,7 @@
 #ifndef OCTI_GRIDGRAPH_EDGEPL_H_
 #define OCTI_GRIDGRAPH_EDGEPL_H_
 
+#include <set>
 #include "util/geo/PolyLine.h"
 #include "util/geo/GeoGraph.h"
 
@@ -17,10 +18,14 @@ class EdgePL : util::geograph::GeoEdgePL {
  public:
   EdgePL(const PolyLine& p);
 
+  void addRoute(std::string);
+
   const util::geo::Line* getGeom() const;
   void getAttrs(json::object_t& obj) const;
  private:
   PolyLine _pl;
+
+  std::set<std::string> _routes;
 };
 
 }}

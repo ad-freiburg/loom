@@ -18,6 +18,7 @@ template <typename N, typename E>
 class Graph {
  public:
   explicit Graph();
+  explicit Graph(bool directed);
   ~Graph();
 
   Node<N, E>* addNode(Node<N, E>* n);
@@ -32,6 +33,7 @@ class Graph {
 
  private:
   std::set<Node<N, E>*> _nodes;
+  bool _directed;
 };
 
 #include "util/graph/Graph.tpp"

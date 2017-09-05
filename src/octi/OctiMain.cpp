@@ -11,6 +11,7 @@
 #include "octi/config/ConfigReader.h"
 #include "octi/gridgraph/GridGraph.h"
 #include "util/geo/Geo.h"
+#include "util/graph/Dijkstra.h"
 #include "util/geo/output/GeoJsonOutput.h"
 
 using std::string;
@@ -31,6 +32,18 @@ int main(int argc, char** argv) {
 
   gridgraph::GridGraph g(util::geo::Box(util::geo::Point(0, 0), util::geo::Point(100, 100)), 10);
   util::geo::output::GeoJsonOutput out;
+
+  util::graph::Dijkstra dijkstra;
+
+  std::list<util::graph::Edge<gridgraph::NodePL, gridgraph::EdgePL>*> res;
+
+  if (dijkstra.shortestPath(g.getNode(0, 0), g.getNode(5, 8), &res)) {
+    std::cerr<< "found shortest path" << std::endl;
+  }
+
+  for (auto e : res) {
+    e->pl().addRoute("A");
+  }
 
   out.print(g);
 

@@ -3,22 +3,29 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "util/geo/Geo.h"
+#include "util/geo/Grid.h"
 #include "util/graph/Graph.h"
 #include "octi/gridgraph/NodePL.h"
 #include "octi/gridgraph/EdgePL.h"
 
 using util::graph::Graph;
+using util::graph::Node;
+using util::geo::Grid;
+using util::geo::Point;
 
 namespace octi {
 namespace gridgraph {
 
 class GridGraph : public Graph<NodePL, EdgePL> {
  public:
-  GridGraph(util::geo::Box bbox, double cellSize);
+  GridGraph(const util::geo::Box& bbox, double cellSize);
+
+  Node<NodePL, EdgePL>* getNode(size_t x, size_t y) const;
 
  private:
   util::geo::Box _bbox;
-  double _cellSize;
+
+  Grid<Node<NodePL, EdgePL>*, Point> _grid;
 };
 
 }

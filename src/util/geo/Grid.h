@@ -21,14 +21,21 @@ class Grid {
 
   // add object t to this grid
   void add(G geom, V val);
+  void add(size_t x, size_t y, V val);
 
   void get(const Box& btbox, std::set<V>* s) const;
   void get(const G& geom, double d, std::set<V>* s) const;
+  void get(size_t x, size_t y, std::set<V>* s) const;
   void remove(V val);
 
   void getNeighbors(const V& val, double d, std::set<V>* s) const;
+  void getCellNeighbors(const V& val, size_t d, std::set<V>* s) const;
+  void getCellNeighbors(size_t x, size_t y, size_t xPerm, size_t yPerm, std::set<V>* s) const;
 
   std::set<std::pair<size_t, size_t> > getCells(const V& val) const;
+
+  size_t getXWidth() const;
+  size_t getYHeight() const;
 
  private:
   double _width;

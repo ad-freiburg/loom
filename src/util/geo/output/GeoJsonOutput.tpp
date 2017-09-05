@@ -40,8 +40,9 @@ void GeoJsonOutput::print(const util::graph::Graph<N, E>& outG) {
       if (!e->pl().getGeom()) continue;
       json feature;
       feature["type"] = "Feature";
-      feature["properties"]["from"] = toString(e->getFrom());
-      feature["properties"]["to"] = toString(e->getTo());
+      json::object_t props = json::object();
+      props["from"] = toString(e->getFrom());
+      props["to"] = toString(e->getTo());
 
       feature["geometry"]["type"] = "LineString";
       feature["geometry"]["coordinates"] = json::array();
@@ -53,13 +54,11 @@ void GeoJsonOutput::print(const util::graph::Graph<N, E>& outG) {
         feature["geometry"]["coordinates"].push_back(coords);
       }
 
-      json::object_t props = json::object();
-      props["id"] = toString(n);
+      props["id"] = toString(e);
 
-      n->pl().getAttrs(props);
+      e->pl().getAttrs(props);
 
       feature["properties"] = props;
-
 
       geoj["features"].push_back(feature);
     }

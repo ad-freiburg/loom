@@ -19,5 +19,15 @@ const util::geo::Line* EdgePL::getGeom() const {
 }
 
 // _____________________________________________________________________________
+void EdgePL::addRoute(std::string r) {
+  _routes.insert(r);
+}
+
+// _____________________________________________________________________________
 void EdgePL::getAttrs(json::object_t& obj) const {
+  obj["routes"] = json::array();
+
+  for (auto r : _routes) {
+    obj["routes"].push_back(r);
+  }
 }

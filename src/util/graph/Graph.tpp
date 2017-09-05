@@ -4,7 +4,12 @@
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-Graph<N, E>::Graph() {
+Graph<N, E>::Graph() : _directed(false) {
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
+Graph<N, E>::Graph(bool directed) : _directed(directed) {
 }
 
 // _____________________________________________________________________________
@@ -42,10 +47,10 @@ Edge<N, E>* Graph<N, E>::getEdge(Node<N, E>* from, Node<N, E>* to) {
     if (e->getTo() == to) return e;
   }
 
-  // also search in the opposite direction, we are handling an undirected
-  // graph here
-  for (auto e : from->getAdjListIn()) {
-    if (e->getFrom() == to) return e;
+  if (!_directed) {
+	for (auto e : from->getAdjListIn()) {
+      if (e->getFrom() == to) return e;
+	}
   }
 
   return 0;
