@@ -32,7 +32,7 @@ bool Dijkstra::shortestPath(Node<N, E>* from, Node<N, E>* to,
     // relaxation
     for (auto edge : cur.n->getAdjListOut()) {
       // TODO: real costs!
-      double newC = cur.d + 1;
+      double newC = cur.d + edge->pl().cost();
 
       pq.push(RouteNode<N, E>(edge->getTo(), cur.n, newC, &(*edge)));
     }

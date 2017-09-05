@@ -37,13 +37,20 @@ int main(int argc, char** argv) {
 
   std::list<util::graph::Edge<gridgraph::NodePL, gridgraph::EdgePL>*> res;
 
-  if (dijkstra.shortestPath(g.getNode(0, 0), g.getNode(5, 8), &res)) {
-    std::cerr<< "found shortest path" << std::endl;
-  }
+  dijkstra.shortestPath(g.getNode(0, 0), g.getNode(5, 8), &res);
 
   for (auto e : res) {
     e->pl().addRoute("A");
   }
+
+  res.clear();
+
+  dijkstra.shortestPath(g.getNode(0, 8), g.getNode(9, 0), &res);
+
+  for (auto e : res) {
+    e->pl().addRoute("B");
+  }
+
 
   out.print(g);
 

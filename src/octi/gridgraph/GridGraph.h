@@ -26,6 +26,16 @@ class GridGraph : public Graph<NodePL, EdgePL> {
   util::geo::Box _bbox;
 
   Grid<Node<NodePL, EdgePL>*, Point> _grid;
+
+  Node<NodePL, EdgePL>* getN(Node<NodePL, EdgePL>* n) const;
+  Node<NodePL, EdgePL>* getNE(Node<NodePL, EdgePL>* n) const;
+  Node<NodePL, EdgePL>* getE(Node<NodePL, EdgePL>* n) const;
+  Node<NodePL, EdgePL>* getSE(Node<NodePL, EdgePL>* n) const;
+  Node<NodePL, EdgePL>* getS(Node<NodePL, EdgePL>* n) const;
+  Node<NodePL, EdgePL>* getSW(Node<NodePL, EdgePL>* n) const;
+  Node<NodePL, EdgePL>* getW(Node<NodePL, EdgePL>* n) const;
+  Node<NodePL, EdgePL>* getNW(Node<NodePL, EdgePL>* n) const;
+
 };
 
 }

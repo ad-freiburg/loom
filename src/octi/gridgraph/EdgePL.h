@@ -16,14 +16,17 @@ namespace gridgraph {
 
 class EdgePL : util::geograph::GeoEdgePL {
  public:
-  EdgePL(const PolyLine& p);
+  EdgePL(const PolyLine& p, double c);
 
   void addRoute(std::string);
 
   const util::geo::Line* getGeom() const;
   void getAttrs(json::object_t& obj) const;
+
+  double cost() const;
  private:
   PolyLine _pl;
+  double _c;
 
   std::set<std::string> _routes;
 };
