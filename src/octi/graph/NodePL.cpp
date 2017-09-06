@@ -5,7 +5,7 @@
 #include "octi/gridgraph/NodePL.h"
 
 using util::geo::Point;
-using namespace octi::gridgraph;
+using namespace octi::graph;
 
 // _____________________________________________________________________________
 NodePL::NodePL(Point pos) : _pos(pos) {

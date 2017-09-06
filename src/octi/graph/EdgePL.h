@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRIDGRAPH_EDGEPL_H_
-#define OCTI_GRIDGRAPH_EDGEPL_H_
+#ifndef OCTI_GRAPH_EDGEPL_H_
+#define OCTI_GRAPH_EDGEPL_H_
 
 #include <set>
 #include "util/geo/PolyLine.h"
@@ -12,28 +12,22 @@
 using util::geo::PolyLine;
 
 namespace octi {
-namespace gridgraph {
+namespace graph {
 
 class EdgePL : util::geograph::GeoEdgePL {
  public:
-  EdgePL(const PolyLine& p, double c);
+  EdgePL();
 
-  void addRoute(std::string);
+  void addRoute(const std::string& routeId);
   const std::set<std::string>& getRoutes() const;
 
   const util::geo::Line* getGeom() const;
   void getAttrs(json::object_t& obj) const;
-
-  void setCost(double c);
-  double cost() const;
  private:
-  PolyLine _pl;
-  double _c;
-
   std::set<std::string> _routes;
 };
 
 }}
 
-#endif  // OCTI_GRIDGRAPH_EDGEPL_H_
+#endif  // OCTI_GRAPH_EDGEPL_H_
 

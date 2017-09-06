@@ -9,7 +9,7 @@ using util::geo::PolyLine;
 using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
-EdgePL::EdgePL(const PolyLine& pl, double c) : _pl(pl), _c(c) {
+EdgePL::EdgePL() {
 
 }
 
@@ -30,20 +30,5 @@ const std::set<std::string>& EdgePL::getRoutes() const {
 
 // _____________________________________________________________________________
 void EdgePL::getAttrs(json::object_t& obj) const {
-  obj["routes"] = json::array();
-  obj["cost"] = _c;
 
-  for (auto r : _routes) {
-    obj["routes"].push_back(r);
-  }
-}
-
-// _____________________________________________________________________________
-double EdgePL::cost() const {
-  return _c;
-}
-
-// _____________________________________________________________________________
-void EdgePL::setCost(double c) {
-  _c = c;
 }

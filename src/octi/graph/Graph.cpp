@@ -5,7 +5,7 @@
 #include "octi/graph/Graph.h"
 #include "util/graph/Node.h"
 
-using namespace octi::gridgraph;
+using namespace octi::graph;
 
 // _____________________________________________________________________________
 Graph::Graph(std::istream* s) {

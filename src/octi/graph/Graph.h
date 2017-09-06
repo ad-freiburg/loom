@@ -2,6 +2,9 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#ifndef OCTI_GRAPH_GRAPH_H_
+#define OCTI_GRAPH_GRAPH_H_
+
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/Graph.h"
@@ -23,5 +26,7 @@ class Graph : public Graph<NodePL, EdgePL> {
  private:
 };
 
-}
-}
+}  // graph
+}  // octi
+
+#endif  // OCTI_GRAPH_GRAPH_H_
