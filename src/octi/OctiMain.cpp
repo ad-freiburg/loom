@@ -30,7 +30,8 @@ int main(int argc, char** argv) {
   config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
-  gridgraph::GridGraph g(util::geo::Box(util::geo::Point(0, 0), util::geo::Point(100, 100)), 10);
+  gridgraph::GridGraph g(util::geo::Box(util::geo::Point(0, 0), util::geo::Point(1000, 1000)), 10);
+  g.balance();
   util::geo::output::GeoJsonOutput out;
 
   util::graph::Dijkstra dijkstra;
@@ -44,6 +45,7 @@ int main(int argc, char** argv) {
   }
 
   res.clear();
+  g.balance();
 
   dijkstra.shortestPath(g.getNode(0, 8), g.getNode(9, 0), &res);
 
@@ -51,8 +53,11 @@ int main(int argc, char** argv) {
     e->pl().addRoute("B");
   }
 
+  res.clear();
+  g.balance();
 
   out.print(g);
 
   return (0);
 }
+

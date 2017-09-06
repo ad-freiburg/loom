@@ -22,20 +22,17 @@ class GridGraph : public Graph<NodePL, EdgePL> {
 
   Node<NodePL, EdgePL>* getNode(size_t x, size_t y) const;
 
+  void balance();
+
  private:
   util::geo::Box _bbox;
+  Node<NodePL, EdgePL>* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
   Grid<Node<NodePL, EdgePL>*, Point> _grid;
 
-  Node<NodePL, EdgePL>* getN(Node<NodePL, EdgePL>* n) const;
-  Node<NodePL, EdgePL>* getNE(Node<NodePL, EdgePL>* n) const;
-  Node<NodePL, EdgePL>* getE(Node<NodePL, EdgePL>* n) const;
-  Node<NodePL, EdgePL>* getSE(Node<NodePL, EdgePL>* n) const;
-  Node<NodePL, EdgePL>* getS(Node<NodePL, EdgePL>* n) const;
-  Node<NodePL, EdgePL>* getSW(Node<NodePL, EdgePL>* n) const;
-  Node<NodePL, EdgePL>* getW(Node<NodePL, EdgePL>* n) const;
-  Node<NodePL, EdgePL>* getNW(Node<NodePL, EdgePL>* n) const;
+  std::set<std::string> getRoutes(Node<NodePL, EdgePL>* n) const;
 
+  void writeInitialCosts();
 };
 
 }
