@@ -11,19 +11,23 @@
 #include "octi/graph/NodePL.h"
 #include "octi/graph/EdgePL.h"
 
-using util::graph::Graph;
-using util::graph::Node;
 using util::geo::Grid;
 using util::geo::Point;
 
 namespace octi {
 namespace graph {
 
-class Graph : public Graph<NodePL, EdgePL> {
+class Graph : public util::graph::Graph<NodePL, EdgePL> {
  public:
-  Graph();
+  Graph(std::istream* s);
+
+  const util::geo::Box& getBBox() const;
 
  private:
+  util::geo::Box _bbox;
+
+  void expandBBox(const Point& p);
+  void combineDeg2();
 };
 
 }  // graph

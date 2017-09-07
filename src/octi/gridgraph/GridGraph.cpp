@@ -11,7 +11,24 @@ using namespace octi::gridgraph;
 GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
     : _bbox(bbox), _grid(cellSize, cellSize, bbox), Graph<NodePL, EdgePL>(true) {
 
-  double directNodeCost = 5000;
+  double P_0 = 0;
+  double P_135 = 1;
+  double P_90 = 3;
+  double P_45 = 9;
+
+  assert(P_0 < P_135);
+  assert(P_135 < P_90);
+  assert(P_90 < P_45);
+
+  double c_0 = P_45 - P_135;
+  double c_135 = P_45;
+  double c_90 = P_45 - P_135 + P_90;
+
+  // this value results in following a 0 deg edge and then a 135 deg edge -
+  // the cheapest way to do a 45 degree turn
+  double c_45 = c_0 + c_135;
+
+  double directNodeCost = ceil((c_45 + 1) / 2);
 
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
@@ -75,7 +92,12 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
       for (size_t i = 0; i < 8; i++) {
         for (size_t j = i + 1; j < 8; j++) {
           int d = (int)(i) - (int)(j);
-          double pen = 4 - abs((((d + 4) % 8) + 8) % 8 - 4);
+          size_t deg = abs((((d + 4) % 8) + 8) % 8 - 4);
+          double pen = c_0;
+
+          if (deg == 1) continue;
+          if (deg == 2) pen = c_90;
+          if (deg == 3) pen = c_135;
           addEdge(n->pl().getPort(i), n->pl().getPort(j), EdgePL(util::geo::PolyLine(*n->pl().getPort(i)->pl().getGeom(), *n->pl().getPort(j)->pl().getGeom()), pen));
           addEdge(n->pl().getPort(j), n->pl().getPort(i), EdgePL(util::geo::PolyLine(*n->pl().getPort(j)->pl().getGeom(), *n->pl().getPort(i)->pl().getGeom()), pen));
         }

@@ -3,23 +3,23 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "util/geo/PolyLine.h"
-#include "octi/gridgraph/EdgePL.h"
+#include "octi/graph/EdgePL.h"
 
 using util::geo::PolyLine;
-using namespace octi::gridgraph;
+using namespace octi::graph;
 
 // _____________________________________________________________________________
-EdgePL::EdgePL() {
+EdgePL::EdgePL(const PolyLine& p) : _p(p) {
 
 }
 
 // _____________________________________________________________________________
 const util::geo::Line* EdgePL::getGeom() const {
-  return &_pl.getLine();
+  return &_p.getLine();
 }
 
 // _____________________________________________________________________________
-void EdgePL::addRoute(std::string r) {
+void EdgePL::addRoute(const std::string& r) {
   _routes.insert(r);
 }
 //

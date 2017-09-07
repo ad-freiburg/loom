@@ -16,7 +16,7 @@ namespace graph {
 
 class EdgePL : util::geograph::GeoEdgePL {
  public:
-  EdgePL();
+  EdgePL(const PolyLine& p);
 
   void addRoute(const std::string& routeId);
   const std::set<std::string>& getRoutes() const;
@@ -25,6 +25,8 @@ class EdgePL : util::geograph::GeoEdgePL {
   void getAttrs(json::object_t& obj) const;
  private:
   std::set<std::string> _routes;
+
+  PolyLine _p;
 };
 
 }}

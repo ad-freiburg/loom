@@ -109,7 +109,7 @@ void Grid<V, G>::getNeighbors(const V& val, double d, std::set<V>* s) const {
   size_t yPerm = ceil(d / _cellHeight);
 
   for (auto pair : it->second) {
-	getCellNeighbors(pair.first, pair.second, xPerm, yPerm, s);
+    getCellNeighbors(pair.first, pair.second, xPerm, yPerm, s);
   }
 }
 
@@ -120,7 +120,7 @@ void Grid<V, G>::getCellNeighbors(const V& val, size_t d, std::set<V>* s) const 
   if (it == _index.end()) return;
 
   for (auto pair : it->second) {
-	getCellNeighbors(pair.first, pair.second, d, d, s);
+    getCellNeighbors(pair.first, pair.second, d, d, s);
   }
 }
 
