@@ -71,12 +71,12 @@ int main(int argc, char** argv) {
 
   std::set<util::graph::Node<octi::gridgraph::NodePL, octi::gridgraph::EdgePL>> used;
 
-  for (auto n : *tg.getNodes()) {
+  gridgraph::GridGraph g(tg.getBBox(), 500);
 
+  for (auto n : *tg.getNodes()) {
+    g.get    
   }
 
-  std::cerr << util::geo::getWKT(tg.getBBox()) << std::endl;
-  gridgraph::GridGraph g(tg.getBBox(), 500);
   g.balance();
 
   out.print(g);
