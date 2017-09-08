@@ -11,18 +11,23 @@ using namespace octi::gridgraph;
 GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
     : _bbox(bbox), _grid(cellSize, cellSize, bbox), Graph<NodePL, EdgePL>(true) {
 
-  double P_0 = 0;
-  double P_135 = 1;
-  double P_90 = 3;
-  double P_45 = 9;
+  _c = {
+    0, // cost for 0 degree node traversal
+    9, // cost for 45 degree node traversal
+    3, // cost for 90 degree node traversal
+    1, // cost for 135 degree node traversal
+    5, // cost for vertical edge
+    5, // cost for horizontal edge
+    8 // cost for diagonal edge
+  };
 
-  assert(P_0 < P_135);
-  assert(P_135 < P_90);
-  assert(P_90 < P_45);
+  assert(_c.p_0 < _c.p_135);
+  assert(_c.p_135 < _c.p_90);
+  assert(_c.p_90 < _c.p_45);
 
-  double c_0 = P_45 - P_135;
-  double c_135 = P_45;
-  double c_90 = P_45 - P_135 + P_90;
+  double c_0 = _c.p_45 - _c.p_135;
+  double c_135 = _c.p_45;
+  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
 
   // this value results in following a 0 deg edge and then a 135 deg edge -
   // the cheapest way to do a 45 degree turn
@@ -33,8 +38,8 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
-      double xPos = x * cellSize;
-      double yPos = y * cellSize;
+      double xPos = bbox.min_corner().get<0>() + x * cellSize;
+      double yPos = bbox.min_corner().get<1>() + y * cellSize;
       Node<NodePL, EdgePL>* n = new Node<NodePL, EdgePL>(NodePL(Point(xPos, yPos)));
       _grid.add(x, y, n);
       addNode(n);
@@ -254,8 +259,28 @@ void GridGraph::writeInitialCosts() {
         auto neigh = getNeighbor(x, y, i);
         if (!neigh || !port) continue;
         auto e = getEdge(port, neigh->pl().getPort((i + 4) % 8));
-        e->pl().setCost(1);
+
+        if (i % 4 == 0) e->pl().setCost(_c.verticalCost);
+        if ((i + 2) % 4 == 0) e->pl().setCost(_c.horizontalCost);
+        if (i % 2) e->pl().setCost(_c.diagonalCost);
       }
     }
   }
+}
+
+// _____________________________________________________________________________
+std::priority_queue<Candidate> GridGraph::getNearestCandidatesFor(const util::geo::Point& p, double maxD) const {
+  std::priority_queue<Candidate> ret;
+  std::set<Node<NodePL, EdgePL>*> neigh;
+  util::geo::Box b(util::geo::Point(p.get<0>() - maxD, p.get<1>() - maxD), util::geo::Point(p.get<0>() + maxD, p.get<1>() + maxD));
+  _grid.get(b, &neigh);
+
+  for (auto n : neigh) {
+    double d = util::geo::dist(n->pl().getGeom(), p);
+    if (d < maxD) {
+      ret.push(Candidate(n, d));
+    }
+  }
+
+  return ret;
 }

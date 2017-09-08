@@ -5,6 +5,7 @@
 #ifndef OCTI_GRIDGRAPH_GRIDGRAPH_H_
 #define OCTI_GRIDGRAPH_GRIDGRAPH_H_
 
+#include <queue>
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/Graph.h"
@@ -19,6 +20,20 @@ using util::geo::Point;
 namespace octi {
 namespace gridgraph {
 
+struct Candidate {
+  Candidate(Node<NodePL, EdgePL>* n, double d) : n(n), d(d) {};
+
+  bool operator<(const Candidate& c) const { return d > c.d; }
+
+  Node<NodePL, EdgePL>* n;
+  double d;
+};
+
+struct Costs {
+  double p_0, p_45, p_90, p_135;
+  double verticalCost, horizontalCost, diagonalCost;
+};
+
 class GridGraph : public Graph<NodePL, EdgePL> {
  public:
   GridGraph(const util::geo::Box& bbox, double cellSize);
@@ -29,9 +44,12 @@ class GridGraph : public Graph<NodePL, EdgePL> {
 
   void balance();
 
+  std::priority_queue<Candidate> getNearestCandidatesFor(const util::geo::Point& p, double maxD) const;
+
  private:
   util::geo::Box _bbox;
   Node<NodePL, EdgePL>* getNeighbor(size_t cx, size_t cy, size_t i) const;
+  Costs _c;
 
   Grid<Node<NodePL, EdgePL>*, Point> _grid;
 

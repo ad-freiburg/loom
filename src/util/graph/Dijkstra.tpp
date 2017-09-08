@@ -4,8 +4,8 @@
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-bool Dijkstra::shortestPath(Node<N, E>* from, Node<N, E>* to,
-                                   std::list<Edge<N, E>*>* res) {
+bool Dijkstra::shortestPath(Node<N, E>* from, const std::set<Node<N, E>*>& to,
+                            std::list<Edge<N, E>*>* res, Node<N, E>** target) {
   std::unordered_map<Node<N, E>*, bool> settled;
   std::unordered_map<Node<N, E>*, RouteNode<N, E> > finishedNodes;
   std::priority_queue<RouteNode<N, E> > pq;
@@ -24,7 +24,8 @@ bool Dijkstra::shortestPath(Node<N, E>* from, Node<N, E>* to,
     settled[cur.n] = true;
     finishedNodes[cur.n] = cur;
 
-    if (cur.n == to) {
+    if (to.find(cur.n) != to.end()) {
+      *target = cur.n;
       found = true;
       break;
     }
@@ -52,4 +53,14 @@ bool Dijkstra::shortestPath(Node<N, E>* from, Node<N, E>* to,
 
   // found shortest path
   return true;
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
+bool Dijkstra::shortestPath(Node<N, E>* from, Node<N, E>* to,
+                         std::list<Edge<N, E>*>* res) {
+  Node<N, E>* target;
+  std::set<Node<N, E>*> tos;
+  tos.insert(to);
+  return shortestPath(from, tos, res, &target);
 }
