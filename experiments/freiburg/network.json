@@ -901,21 +901,6 @@
     {
       "geometry": {
         "coordinates": [
-          869593.471989123,
-          6109864.42903905
-        ],
-        "type": "Point"
-      },
-      "properties": {
-        "id": "0x3d9f820",
-        "station_id": "de:8311:30802:0:2",
-        "station_label": "Moosgrund"
-      },
-      "type": "Feature"
-    },
-    {
-      "geometry": {
-        "coordinates": [
           869144.399788834,
           6109128.9949195
         ],
@@ -8351,33 +8336,6 @@
           }
         ],
         "to": "0x3da0080"
-      },
-      "type": "Feature"
-    },
-    {
-      "geometry": {
-        "coordinates": [
-          [
-            869589.430323828,
-            6109858.75171539
-          ],
-          [
-            869593.471989123,
-            6109864.42903905
-          ]
-        ],
-        "type": "LineString"
-      },
-      "properties": {
-        "from": "0x3da0b50",
-        "lines": [
-          {
-            "color": "ff0000",
-            "id": "0x1a42ac0",
-            "label": "1"
-          }
-        ],
-        "to": "0x3d9f820"
       },
       "type": "Feature"
     },
