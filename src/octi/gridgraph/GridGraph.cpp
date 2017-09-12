@@ -13,9 +13,9 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
 
   _c = {
     0, // cost for 0 degree node traversal
-    900, // cost for 45 degree node traversal
-    300, // cost for 90 degree node traversal
-    100, // cost for 135 degree node traversal
+    90, // cost for 45 degree node traversal
+    30, // cost for 90 degree node traversal
+    10, // cost for 135 degree node traversal
     3, // cost for vertical edge
     3, // cost for horizontal edge
     3 // cost for diagonal edge
@@ -29,11 +29,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
   double c_135 = _c.p_45;
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
 
-  // this value results in following a 0 deg edge and then a 135 deg edge -
-  // the cheapest way to do a 45 degree turn
-  double c_45 = c_0 + c_135;
-
-  double directNodeCost = ceil((c_45 + 1) / 2);
+  double directNodeCost = 99999;
 
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
@@ -213,7 +209,7 @@ void GridGraph::balance() {
         auto neigh = getNeighbor(x, y, i);
         if (!neigh || !port) continue;
         auto e = getEdge(port, neigh->pl().getPort((i + 4) % 8));
-        e->pl().setCost(e->pl().cost() + 10000 * numRoutes);
+        e->pl().setCost(e->pl().cost() + 99999999 * numRoutes);
 
         if (i == 1 || i == 3) {
           size_t numRoutesEdge = e->pl().getRoutes().size();
@@ -225,8 +221,8 @@ void GridGraph::balance() {
             auto e = getEdge(a->pl().getPort(port), b->pl().getPort((port + 4) % 8));
             auto f = getEdge(b->pl().getPort((port + 4) % 8), a->pl().getPort(port));
 
-            e->pl().setCost(e->pl().cost() + 10000 * numRoutesEdge);
-            f->pl().setCost(f->pl().cost() + 10000 * numRoutesEdge);
+            e->pl().setCost(e->pl().cost() + 99999999 * numRoutesEdge);
+            f->pl().setCost(f->pl().cost() + 99999999 * numRoutesEdge);
           }
         }
       }
