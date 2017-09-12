@@ -13,12 +13,12 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
 
   _c = {
     0, // cost for 0 degree node traversal
-    9, // cost for 45 degree node traversal
-    3, // cost for 90 degree node traversal
-    1, // cost for 135 degree node traversal
-    5, // cost for vertical edge
-    5, // cost for horizontal edge
-    5 // cost for diagonal edge
+    900, // cost for 45 degree node traversal
+    300, // cost for 90 degree node traversal
+    100, // cost for 135 degree node traversal
+    3, // cost for vertical edge
+    3, // cost for horizontal edge
+    3 // cost for diagonal edge
   };
 
   assert(_c.p_0 < _c.p_135);
@@ -241,12 +241,12 @@ void GridGraph::balance() {
         if (e->pl().getRoutes().size()) {
           if (getNeighbor(x, y, (i+1) % 8)) {
             auto e1 = getEdge(n->pl().getPort((i+1) % 8), getNeighbor(x, y, (i+1) % 8)->pl().getPort((i + 1 + 4) % 8));
-            e1->pl().setCost(e1->pl().cost() + 15);
+            e1->pl().setCost(e1->pl().cost() + 150);
           }
 
           if (getNeighbor(x, y, (i+7) % 8)) {
             auto e2 = getEdge(n->pl().getPort((i+7) % 8), getNeighbor(x, y, (i+7) % 8)->pl().getPort((i + 7 + 4) % 8));
-            e2->pl().setCost(e2->pl().cost() + 15);
+            e2->pl().setCost(e2->pl().cost() + 150);
           }
         }
       }

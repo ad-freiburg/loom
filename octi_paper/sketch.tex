@@ -1,0 +1,53 @@
+\documentclass{sig-alternate-sigmod09}
+
+\usepackage[bookmarks=true,pdfborder= 0 0 0]{hyperref}
+
+\usepackage{tikz}
+\usetikzlibrary{calc,trees,positioning,arrows,chains,shapes.geometric,%
+  decorations.pathreplacing,decorations.pathmorphing,shapes,%
+  matrix,shapes.symbols,plotmarks,decorations.markings,shadows}
+
+
+\DeclareMathOperator{\atantwo}{atan2}
+
+\hypersetup{
+pdfauthor={Patrick Brosi},
+pdfkeywords=,
+pdftitle={A Simple Approximation Algorithm for Metro Map Drawing},
+pdfsubject={},
+pdfcreator={},
+pdfproducer={}
+}
+
+
+\begin{document}
+
+\title{A Simple Approximation Algorithm for Metro Map Drawing}
+
+\numberofauthors{1}
+\author{Patrick Brosi\\\affaddr{University of Freiburg}\\\affaddr{Chair of Algorithms and Data Structures}}
+
+\maketitle
+
+\section{Abstract}
+
+We investigate a novel approximative approach to octilinear Metro Map drawing. Contrary to previous work, which usually relied on either local or global optimization techniques, we state the task as an iterative shortest-path problem on a specially crafted octilinear grid graph, whose edge weights are updated after each iteration. While our results are not perfect, they come surprisingly close to previous work which used Integer Linear Programming to find an optimal solution. We state the basic idea of our approach, give some heuristics to improve the final result and evaluate our method on 5 cities around the world. The resulting maps are rendered using previous work by us and are publicly accessible at http://bla.blubb. 
+
+\section{Problem definition}
+
+\section{Map Generation}
+
+\subsection{Octilinear Grid Graph}
+
+\subsection{Input Ordering}
+
+\section{Preserving Topology}
+
+\section{Evaluation}
+
+\subsection{Penalty Experiments}
+
+\section{Conclusion}
+
+\balancecolumns
+\end{document}
