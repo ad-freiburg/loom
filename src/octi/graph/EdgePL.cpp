@@ -19,6 +19,11 @@ const util::geo::Line* EdgePL::getGeom() const {
 }
 
 // _____________________________________________________________________________
+const PolyLine& EdgePL::getPolyline() const {
+  return _p;
+}
+
+// _____________________________________________________________________________
 void EdgePL::addRoute(const std::string& r) {
   _routes.insert(r);
 }

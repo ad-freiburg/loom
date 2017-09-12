@@ -40,7 +40,7 @@ class GridGraph : public Graph<NodePL, EdgePL> {
 
   Node<NodePL, EdgePL>* getNode(size_t x, size_t y) const;
 
-  const Grid<Node<NodePL, EdgePL>*, Point>& getGrid();
+  const Grid<Node<NodePL, EdgePL>*, Point>& getGrid() const;
 
   void balance();
 

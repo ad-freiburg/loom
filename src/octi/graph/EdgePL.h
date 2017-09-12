@@ -23,6 +23,8 @@ class EdgePL : util::geograph::GeoEdgePL {
 
   const util::geo::Line* getGeom() const;
   void getAttrs(json::object_t& obj) const;
+
+  const PolyLine& getPolyline() const;
  private:
   std::set<std::string> _routes;
 

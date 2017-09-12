@@ -81,6 +81,26 @@ void Graph<N, E>::deleteEdge(Node<N, E>* from, Node<N, E>* to) {
 // _____________________________________________________________________________
 template <typename N, typename E>
 void Graph<N, E>::deleteNode(Node<N, E>* n) {\
-  _nodes.erase(n); 
+  _nodes.erase(n);
   delete n;
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
+Node<N, E>* Graph<N, E>::mergeNodes(Node<N, E>* a, Node<N, E>* b) {
+  for (auto e : a->getAdjListOut()) {
+    if (e->getTo() != b) {
+      addEdge(b, e->getTo(), e->pl());
+    }
+  }
+
+  for (auto e : a->getAdjListIn()) {
+    if (e->getFrom() != b) {
+      addEdge(e->getFrom(), b, e->pl());
+    }
+  }
+
+  deleteNode(a);
+
+  return b;
 }

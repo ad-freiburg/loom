@@ -17,17 +17,32 @@ using util::geo::Point;
 namespace octi {
 namespace graph {
 
+struct ISect {
+  util::graph::Edge<NodePL, EdgePL>* a;
+  util::graph::Edge<NodePL, EdgePL>* b;
+
+  util::geo::LinePoint bp;
+};
+
 class Graph : public util::graph::Graph<NodePL, EdgePL> {
  public:
   Graph(std::istream* s);
+  Graph();
 
   const util::geo::Box& getBBox() const;
 
  private:
   util::geo::Box _bbox;
 
+  void topologizeIsects();
+  ISect getNextIntersection();
+
+  void removeEdgesShorterThan(double d);
+
   void expandBBox(const Point& p);
   void combineDeg2();
+
+  std::set<util::graph::Edge<NodePL, EdgePL>*> proced;
 };
 
 }  // graph

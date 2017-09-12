@@ -31,6 +31,8 @@ class Graph {
   const std::set<Node<N, E>*>& getNodes() const;
   std::set<Node<N, E>*>* getNodes();
 
+  Node<N, E>* mergeNodes(Node<N, E>* a, Node<N, E>* b);
+
  private:
   std::set<Node<N, E>*> _nodes;
   bool _directed;

@@ -18,7 +18,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
     1, // cost for 135 degree node traversal
     5, // cost for vertical edge
     5, // cost for horizontal edge
-    8 // cost for diagonal edge
+    5 // cost for diagonal edge
   };
 
   assert(_c.p_0 < _c.p_135);
@@ -230,6 +230,26 @@ void GridGraph::balance() {
           }
         }
       }
+
+      // if some outgoing edge is taken, dont put new edge next to it
+      for (size_t i = 0; i < 8; i++) {
+        auto port = n->pl().getPort(i);
+        auto neigh = getNeighbor(x, y, i);
+        if (!neigh || !port) continue;
+        auto e = getEdge(port, neigh->pl().getPort((i + 4) % 8));
+
+        if (e->pl().getRoutes().size()) {
+          if (getNeighbor(x, y, (i+1) % 8)) {
+            auto e1 = getEdge(n->pl().getPort((i+1) % 8), getNeighbor(x, y, (i+1) % 8)->pl().getPort((i + 1 + 4) % 8));
+            e1->pl().setCost(e1->pl().cost() + 15);
+          }
+
+          if (getNeighbor(x, y, (i+7) % 8)) {
+            auto e2 = getEdge(n->pl().getPort((i+7) % 8), getNeighbor(x, y, (i+7) % 8)->pl().getPort((i + 7 + 4) % 8));
+            e2->pl().setCost(e2->pl().cost() + 15);
+          }
+        }
+      }
     }
   }
 }
@@ -283,4 +303,9 @@ std::priority_queue<Candidate> GridGraph::getNearestCandidatesFor(const util::ge
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+const Grid<Node<NodePL, EdgePL>*, Point>& GridGraph::getGrid() const {
+  return _grid;
 }

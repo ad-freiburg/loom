@@ -17,6 +17,11 @@ const Point* NodePL::getGeom() const {
 }
 
 // _____________________________________________________________________________
+void NodePL::setGeom(const Point& p) {
+   _pos = p;
+}
+
+// _____________________________________________________________________________
 void NodePL::getAttrs(json::object_t& obj) const {
 
 }

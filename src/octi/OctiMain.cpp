@@ -19,6 +19,10 @@
 using std::string;
 using namespace octi;
 
+using util::graph::Node;
+using octi::graph::NodePL;
+using octi::graph::EdgePL;
+
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
   // disable output buffering for standard output
@@ -73,7 +77,7 @@ int main(int argc, char** argv) {
   std::set<util::graph::Node<octi::gridgraph::NodePL, octi::gridgraph::EdgePL>*>
       used;
 
-  double gridSize = 200;
+  double gridSize = 150;
 
   gridgraph::GridGraph g(tg.getBBox(), gridSize);
 
@@ -100,8 +104,7 @@ int main(int argc, char** argv) {
     pq.push(n);
   }
 
-  std::set<
-      util::graph::Edge<octi::graph::NodePL, octi::graph::EdgePL>*> done;
+  std::set<util::graph::Edge<octi::graph::NodePL, octi::graph::EdgePL>*> done;
 
   while (!pq.empty()) {
     auto n = pq.top();
@@ -121,8 +124,7 @@ int main(int argc, char** argv) {
       }
 
       if (m.find(from) == m.end()) {
-        auto cands =
-            g.getNearestCandidatesFor(*from->pl().getGeom(), 300);
+        auto cands = g.getNearestCandidatesFor(*from->pl().getGeom(), 300);
 
         while (!cands.empty()) {
           if (used.find(cands.top().n) == used.end()) {
@@ -144,10 +146,9 @@ int main(int argc, char** argv) {
           tos;
 
       if (m.find(to) == m.end()) {
-        double maxDis = to->getAdjList().size() == 1 ? 400 : 300;
+        double maxDis = to->getAdjList().size() == 1 ? e->pl().getPolyline().getLength() / 2  : 300;
 
-        auto cands =
-            g.getNearestCandidatesFor(*to->pl().getGeom(), maxDis);
+        auto cands = g.getNearestCandidatesFor(*to->pl().getGeom(), maxDis);
 
         while (!cands.empty()) {
           if (used.find(cands.top().n) == used.end()) {
@@ -180,8 +181,37 @@ int main(int argc, char** argv) {
     }
   }
 
-  out.print(g);
-  // out.print(tg);
+  graph::Graph endGraph;
+
+  std::map<Node<octi::gridgraph::NodePL, octi::gridgraph::EdgePL>*,
+           Node<NodePL, EdgePL>*>
+      a;
+
+  for (auto n : *g.getNodes()) {
+    for (auto e : n->getAdjListOut()) {
+      if (e->pl().getRoutes().size() > 0) {
+        if (a.find(n) == a.end()) {
+          Node<NodePL, EdgePL>* n2 =
+              new Node<NodePL, EdgePL>(NodePL(*n->pl().getGeom()));
+          endGraph.addNode(n2);
+          a[n] = n2;
+        }
+
+        if (a.find(e->getTo()) == a.end()) {
+          Node<NodePL, EdgePL>* n2 =
+              new Node<NodePL, EdgePL>(NodePL(*e->getTo()->pl().getGeom()));
+          endGraph.addNode(n2);
+          a[e->getTo()] = n2;
+        }
+        endGraph.addEdge(a[n], a[e->getTo()],
+                         EdgePL(PolyLine(*a[n]->pl().getGeom(),
+                                         *a[e->getTo()]->pl().getGeom())));
+      }
+    }
+  }
+
+  out.print(endGraph);
+  //out.print(tg);
 
   return (0);
 }

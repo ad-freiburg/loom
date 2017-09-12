@@ -21,6 +21,7 @@ class NodePL : util::geograph::GeoNodePL {
   NodePL(Point pos);
 
   const Point* getGeom() const;
+  void setGeom(const Point& p);
   void getAttrs(json::object_t& obj) const;
 
  private:
