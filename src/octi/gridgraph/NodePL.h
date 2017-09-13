@@ -23,6 +23,9 @@ class NodePL : util::geograph::GeoNodePL {
   const Point* getGeom() const;
   void getAttrs(json::object_t& obj) const;
 
+  Node<NodePL, EdgePL>* getParent() const;
+  void setParent(Node<NodePL, EdgePL>* n);
+
   Node<NodePL, EdgePL>* getNorthPort() const;
   void setNorthPort(Node<NodePL, EdgePL>* n);
 
@@ -50,6 +53,8 @@ class NodePL : util::geograph::GeoNodePL {
   Node<NodePL, EdgePL>* getPort(size_t i) const;
  private:
   Point _pos;
+
+  Node<NodePL, EdgePL>* _parent;
 
   Node<NodePL, EdgePL>* _ports[8];
 };

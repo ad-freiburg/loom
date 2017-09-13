@@ -10,8 +10,11 @@
 #include "util/graph/Node.h"
 #include "octi/graph/EdgePL.h"
 
+#include "transitmap/graph/Node.h"
+
 using util::geo::Point;
 using util::graph::Node;
+using transitmapper::graph::StationInfo;
 
 namespace octi {
 namespace graph {
@@ -24,8 +27,11 @@ class NodePL : util::geograph::GeoNodePL {
   void setGeom(const Point& p);
   void getAttrs(json::object_t& obj) const;
 
+  void addStop(StationInfo i);
+
  private:
   Point _pos;
+  std::vector<StationInfo> _is;
 };
 }}
 

@@ -37,12 +37,13 @@ class Graph : public util::graph::Graph<NodePL, EdgePL> {
   void topologizeIsects();
   ISect getNextIntersection();
 
-  void removeEdgesShorterThan(double d);
+  void addRoute(const Route* r);
+  const Route* getRoute(const std::string& id) const;
 
   void expandBBox(const Point& p);
-  void combineDeg2();
 
   std::set<util::graph::Edge<NodePL, EdgePL>*> proced;
+  std::map<std::string, const Route*> _routes;
 };
 
 }  // graph

@@ -3,7 +3,9 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "util/geo/PolyLine.h"
+#include "util/String.h"
 #include "octi/graph/EdgePL.h"
+#include "octi/graph/NodePL.h"
 
 using util::geo::PolyLine;
 using namespace octi::graph;
@@ -24,16 +26,39 @@ const PolyLine& EdgePL::getPolyline() const {
 }
 
 // _____________________________________________________________________________
-void EdgePL::addRoute(const std::string& r) {
-  _routes.insert(r);
+void EdgePL::setPolyline(const PolyLine& p) {
+  _p = p;
 }
-//
+
 // _____________________________________________________________________________
-const std::set<std::string>& EdgePL::getRoutes() const {
+void EdgePL::addRoute(const Route* r, const Node<NodePL, EdgePL>* dir, const LineStyle& ls) {
+  _routes.insert(RouteOcc(r, dir, ls));
+}
+
+// _____________________________________________________________________________
+void EdgePL::addRoute(const Route* r, const Node<NodePL, EdgePL>* dir) {
+  _routes.insert(RouteOcc(r, dir));
+}
+
+// _____________________________________________________________________________
+const std::set<RouteOcc>& EdgePL::getRoutes() const {
   return _routes;
 }
 
 // _____________________________________________________________________________
 void EdgePL::getAttrs(json::object_t& obj) const {
+  obj["lines"] = json::array();
 
+  for (auto r : getRoutes()) {
+    json route = json::object();
+    route["id"] = r.route->getId();
+    route["label"] = r.route->getLabel();
+    route["color"] = r.route->getColor();
+
+    if (r.direction != 0) {
+      route["direction"] = util::toString(r.direction);
+    }
+
+   obj["lines"].push_back(route);
+  }
 }

@@ -8,7 +8,7 @@ using util::geo::Point;
 using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
-NodePL::NodePL(Point pos) : _pos(pos) {
+NodePL::NodePL(Point pos) : _pos(pos), _parent(0) {
 }
 
 // _____________________________________________________________________________
@@ -99,6 +99,16 @@ Node<NodePL, EdgePL>* NodePL::getNorthEastPort() const {
 // _____________________________________________________________________________
 void NodePL::setNorthEastPort(Node<NodePL, EdgePL>* n) {
   _ports[1] = n;
+}
+
+// _____________________________________________________________________________
+Node<NodePL, EdgePL>* NodePL::getParent() const {
+  return _parent;
+}
+
+// _____________________________________________________________________________
+void NodePL::setParent(Node<NodePL, EdgePL>* n) {
+  _parent = n;
 }
 
 // _____________________________________________________________________________

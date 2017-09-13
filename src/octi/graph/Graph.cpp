@@ -9,14 +9,15 @@
 #include "util/graph/Node.h"
 #include "util/log/Log.h"
 
+#include "transitmap/style/LineStyle.h"
+#include "transitmap/style/LineStyle.h"
+
 using namespace octi::graph;
 using util::graph::Node;
 using util::graph::Edge;
 
 // _____________________________________________________________________________
-Graph::Graph() {
-  _bbox = util::geo::minbox();
-}
+Graph::Graph() { _bbox = util::geo::minbox(); }
 
 // _____________________________________________________________________________
 Graph::Graph(std::istream* s) {
@@ -40,6 +41,15 @@ Graph::Graph(std::istream* s) {
         Node<NodePL, EdgePL>* n = new Node<NodePL, EdgePL>(
             NodePL(util::geo::Point(coords[0], coords[1])));
 
+        StationInfo i("", "");
+        if (!props["station_id"].is_null() ||
+            !props["station_label"].is_null()) {
+          if (!props["station_id"].is_null()) i.id = props["station_id"];
+          if (!props["station_label"].is_null())
+            i.name = props["station_label"];
+          n->pl().addStop(i);
+        }
+
         addNode(n);
         idMap[id] = n;
       }
@@ -54,7 +64,7 @@ Graph::Graph(std::istream* s) {
         std::string from = props["from"];
         std::string to = props["to"];
 
-        std::vector<std::vector<double> > coords = geom["coordinates"];
+        std::vector<std::vector<double>> coords = geom["coordinates"];
 
         PolyLine pl;
         for (auto coord : coords) {
@@ -78,13 +88,56 @@ Graph::Graph(std::istream* s) {
         }
 
         Edge<NodePL, EdgePL>* e = addEdge(fromN, toN, EdgePL(pl));
+
+        for (auto route : props["lines"]) {
+          std::string id;
+          if (!route["id"].is_null()) {
+            id = route["id"];
+          } else if (!route["label"].is_null()) {
+            id = route["label"];
+          } else if (!route["color"].is_null()) {
+            id = route["color"];
+          } else
+            continue;
+
+          const Route* r = getRoute(id);
+          if (!r) {
+            std::string label = route["label"].is_null() ? "" : route["label"];
+            std::string color = route["color"];
+            r = new Route(id, label, color);
+            addRoute(r);
+          }
+
+          Node<NodePL, EdgePL>* dir = 0;
+
+          if (!route["direction"].is_null()) {
+            dir = idMap[route["direction"]];
+          }
+
+          if (!route["style"].is_null()) {
+            transitmapper::style::LineStyle ls;
+            auto style = route["style"];
+            std::string dashArray;
+            if (!style["dash-array"].is_null()) {
+              dashArray = style["dash-array"];
+            }
+
+            if (!style["css"].is_null()) {
+              ls.setCss(style["css"]);
+            }
+
+            ls.setDashArray(dashArray);
+
+            e->pl().addRoute(r, dir, ls);
+          } else {
+            e->pl().addRoute(r, dir);
+          }
+        }
       }
     }
   }
 
   topologizeIsects();
-  combineDeg2();
-  removeEdgesShorterThan(150);
 }
 
 // _____________________________________________________________________________
@@ -94,28 +147,8 @@ void Graph::expandBBox(const Point& p) {
 }
 
 // _____________________________________________________________________________
-const util::geo::Box& Graph::getBBox() const {
-  return _bbox;
-}
+const util::geo::Box& Graph::getBBox() const { return _bbox; }
 
-// _____________________________________________________________________________
-void Graph::combineDeg2() {
-  auto nodes = *getNodes();
-  for (auto n : nodes) {
-    if (n->getAdjList().size() == 2) {
-      Node<NodePL, EdgePL>* a = 0;
-      Node<NodePL, EdgePL>* b = 0;
-
-      for (auto e : n->getAdjList()) {
-        if (!a) a = e->getOtherNode(n);
-        else b = e->getOtherNode(n);
-      }
-
-      addEdge(a, b, EdgePL(PolyLine(*a->pl().getGeom(), *b->pl().getGeom())));
-      deleteNode(n);
-    }
-  }
-}
 
 // _____________________________________________________________________________
 void Graph::topologizeIsects() {
@@ -126,10 +159,13 @@ void Graph::topologizeIsects() {
 
     double pa = i.a->pl().getPolyline().projectOn(i.bp.p).totalPos;
 
-    addEdge(i.b->getFrom(), x, EdgePL(i.b->pl().getPolyline().getSegment(0, i.bp.totalPos)));
-    addEdge(x, i.b->getTo(), EdgePL(i.b->pl().getPolyline().getSegment(i.bp.totalPos, 1)));
+    addEdge(i.b->getFrom(), x,
+            EdgePL(i.b->pl().getPolyline().getSegment(0, i.bp.totalPos)));
+    addEdge(x, i.b->getTo(),
+            EdgePL(i.b->pl().getPolyline().getSegment(i.bp.totalPos, 1)));
 
-    addEdge(i.a->getFrom(), x, EdgePL(i.a->pl().getPolyline().getSegment(0, pa)));
+    addEdge(i.a->getFrom(), x,
+            EdgePL(i.a->pl().getPolyline().getSegment(0, pa)));
     addEdge(x, i.a->getTo(), EdgePL(i.a->pl().getPolyline().getSegment(pa, 1)));
 
     deleteEdge(i.a->getFrom(), i.a->getTo());
@@ -146,7 +182,8 @@ ISect Graph::getNextIntersection() {
         for (auto e2 : n2->getAdjList()) {
           if (proced.find(e2) != proced.end()) continue;
           if (e1 != e2) {
-            auto is = e1->pl().getPolyline().getIntersections(e2->pl().getPolyline());
+            auto is =
+                e1->pl().getPolyline().getIntersections(e2->pl().getPolyline());
             if (is.size()) {
               ISect ret;
               ret.a = e1;
@@ -169,19 +206,12 @@ ISect Graph::getNextIntersection() {
   return ret;
 }
 
+
 // _____________________________________________________________________________
-void Graph::removeEdgesShorterThan(double d) {
- start:
-  for (auto n1 : *getNodes()) {
-    for (auto e1 : n1->getAdjList()) {
-      if (e1->pl().getPolyline().getLength() < d) {
-        if (e1->getOtherNode(n1)->getAdjList().size() > 1 && n1->getAdjList().size() > 1) {
-          auto otherP = e1->getFrom()->pl().getGeom();
-          auto n = mergeNodes(e1->getFrom(), e1->getTo());
-          n->pl().setGeom(util::geo::Point((n->pl().getGeom()->get<0>() + otherP->get<0>()) / 2, (n->pl().getGeom()->get<1>() + otherP->get<1>()) / 2));
-          goto start;
-        }
-      }
-    }
-  }
+void Graph::addRoute(const Route* r) { _routes[r->getId()] = r; }
+
+// _____________________________________________________________________________
+const Route* Graph::getRoute(const std::string& id) const {
+  if (_routes.find(id) != _routes.end()) return _routes.find(id)->second;
+  return 0;
 }

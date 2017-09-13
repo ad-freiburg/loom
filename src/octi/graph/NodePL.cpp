@@ -23,6 +23,13 @@ void NodePL::setGeom(const Point& p) {
 
 // _____________________________________________________________________________
 void NodePL::getAttrs(json::object_t& obj) const {
-
+  if (_is.size() > 0) {
+    obj["station_id"] = _is.begin()->id;
+    obj["station_label"] = _is.begin()->name;
+  }
 }
 
+// _____________________________________________________________________________
+void NodePL::addStop(StationInfo i) {
+  _is.push_back(i);
+}

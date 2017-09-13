@@ -29,7 +29,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
   double c_135 = _c.p_45;
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
 
-  double directNodeCost = 99999;
+  double directNodeCost = 88888;
 
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
@@ -39,8 +39,10 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
       Node<NodePL, EdgePL>* n = new Node<NodePL, EdgePL>(NodePL(Point(xPos, yPos)));
       _grid.add(x, y, n);
       addNode(n);
+      n->pl().setParent(n);
 
       Node<NodePL, EdgePL>* n1 = new Node<NodePL, EdgePL>(NodePL(Point(xPos - cellSize/10.0, yPos)));
+      n1->pl().setParent(n);
       addNode(n1);
       n->pl().setWestPort(n1);
       addEdge(n, n1, EdgePL(util::geo::PolyLine(*n->pl().getGeom(), *n1->pl().getGeom()), directNodeCost));
@@ -48,41 +50,48 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
 
       Node<NodePL, EdgePL>* n2 = new Node<NodePL, EdgePL>(NodePL(Point(xPos - cellSize/10.0, yPos - cellSize/10.0)));
       addNode(n2);
+      n2->pl().setParent(n);
       n->pl().setSouthWestPort(n2);
       addEdge(n, n2, EdgePL(util::geo::PolyLine(*n->pl().getGeom(), *n2->pl().getGeom()), directNodeCost));
       addEdge(n2, n, EdgePL(util::geo::PolyLine(*n2->pl().getGeom(), *n->pl().getGeom()), directNodeCost));
 
       Node<NodePL, EdgePL>* n3 = new Node<NodePL, EdgePL>(NodePL(Point(xPos, yPos - cellSize/10.0)));
       addNode(n3);
+      n3->pl().setParent(n);
       n->pl().setSouthPort(n3);
       addEdge(n, n3, EdgePL(util::geo::PolyLine(*n->pl().getGeom(), *n3->pl().getGeom()), directNodeCost));
       addEdge(n3, n, EdgePL(util::geo::PolyLine(*n3->pl().getGeom(), *n->pl().getGeom()), directNodeCost));
 
       Node<NodePL, EdgePL>* n4 = new Node<NodePL, EdgePL>(NodePL(Point(xPos + cellSize/10.0, yPos)));
       addNode(n4);
+      n4->pl().setParent(n);
       n->pl().setEastPort(n4);
       addEdge(n, n4, EdgePL(util::geo::PolyLine(*n->pl().getGeom(), *n4->pl().getGeom()), directNodeCost));
       addEdge(n4, n, EdgePL(util::geo::PolyLine(*n4->pl().getGeom(), *n->pl().getGeom()), directNodeCost));
 
       Node<NodePL, EdgePL>* n5 = new Node<NodePL, EdgePL>(NodePL(Point(xPos + cellSize/10.0, yPos + cellSize/10.0)));
+      n5->pl().setParent(n);
       addNode(n5);
       n->pl().setNorthEastPort(n5);
       addEdge(n, n5, EdgePL(util::geo::PolyLine(*n->pl().getGeom(), *n5->pl().getGeom()), directNodeCost));
       addEdge(n5, n, EdgePL(util::geo::PolyLine(*n5->pl().getGeom(), *n->pl().getGeom()), directNodeCost));
 
       Node<NodePL, EdgePL>* n6 = new Node<NodePL, EdgePL>(NodePL(Point(xPos, yPos + cellSize/10.0)));
+      n6->pl().setParent(n);
       addNode(n6);
       n->pl().setNorthPort(n6);
       addEdge(n, n6, EdgePL(util::geo::PolyLine(*n->pl().getGeom(), *n6->pl().getGeom()), directNodeCost));
       addEdge(n6, n, EdgePL(util::geo::PolyLine(*n6->pl().getGeom(), *n->pl().getGeom()), directNodeCost));
 
       Node<NodePL, EdgePL>* n7 = new Node<NodePL, EdgePL>(NodePL(Point(xPos - cellSize/10.0, yPos + cellSize/10.0)));
+      n7->pl().setParent(n);
       addNode(n7);
       n->pl().setNorthWestPort(n7);
       addEdge(n, n7, EdgePL(util::geo::PolyLine(*n->pl().getGeom(), *n7->pl().getGeom()), directNodeCost));
       addEdge(n7, n, EdgePL(util::geo::PolyLine(*n7->pl().getGeom(), *n->pl().getGeom()), directNodeCost));
 
       Node<NodePL, EdgePL>* n8 = new Node<NodePL, EdgePL>(NodePL(Point(xPos + cellSize/10.0, yPos - cellSize/10.0)));
+      n8->pl().setParent(n);
       addNode(n8);
       n->pl().setSouthEastPort(n8);
       addEdge(n, n8, EdgePL(util::geo::PolyLine(*n->pl().getGeom(), *n8->pl().getGeom()), directNodeCost));
@@ -209,7 +218,7 @@ void GridGraph::balance() {
         auto neigh = getNeighbor(x, y, i);
         if (!neigh || !port) continue;
         auto e = getEdge(port, neigh->pl().getPort((i + 4) % 8));
-        e->pl().setCost(e->pl().cost() + 99999999 * numRoutes);
+        e->pl().setCost(e->pl().cost() + 99999 * numRoutes);
 
         if (i == 1 || i == 3) {
           size_t numRoutesEdge = e->pl().getRoutes().size();
@@ -221,8 +230,8 @@ void GridGraph::balance() {
             auto e = getEdge(a->pl().getPort(port), b->pl().getPort((port + 4) % 8));
             auto f = getEdge(b->pl().getPort((port + 4) % 8), a->pl().getPort(port));
 
-            e->pl().setCost(e->pl().cost() + 99999999 * numRoutesEdge);
-            f->pl().setCost(f->pl().cost() + 99999999 * numRoutesEdge);
+            e->pl().setCost(e->pl().cost() + 99999 * numRoutesEdge);
+            f->pl().setCost(f->pl().cost() + 99999 * numRoutesEdge);
           }
         }
       }
