@@ -53,8 +53,40 @@ void buildCombGraph(TransitGraph* source, CombGraph* target) {
 
   for (auto n : *nodes) {
     for (auto e : n->getAdjListOut()) {
-      target->addEdge(m[e->getFrom()], m[e->getTo()],
+      auto f = target->addEdge(m[e->getFrom()], m[e->getTo()],
                       octi::graph::CombEdgePL(e));
+
+      // write the edge ordering
+
+      // get the angles
+      double degA = util::geo::angBetween(*m[e->getFrom()]->pl().getGeom(),
+          *m[e->getTo()]->pl().getGeom());
+      double degB = util::geo::angBetween(*m[e->getTo()]->pl().getGeom(),
+          *m[e->getFrom()]->pl().getGeom());
+
+      m[e->getFrom()]->pl().addOrderedEdge(f, degA);
+      m[e->getTo()]->pl().addOrderedEdge(f, degB);
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void writeEdgeOrdering(CombGraph* target) {
+  for (auto n : *target->getNodes()) {
+    for (auto e : n->getAdjListOut()) {
+      auto refEdgeA = e->pl().getChilds().front();
+      auto refEdgeB = e->pl().getChilds().back();
+
+      // get the angles
+      double degA = util::geo::angBetween(
+          *n->pl().getParent()->pl().getGeom(),
+          *refEdgeA->getOtherNode(n->pl().getParent())->pl().getGeom());
+      double degB = util::geo::angBetween(
+          *e->getTo()->pl().getParent()->pl().getGeom(),
+          *refEdgeB->getOtherNode(e->getTo()->pl().getParent())->pl().getGeom());
+
+      n->pl().addOrderedEdge(e, degA);
+      e->getTo()->pl().addOrderedEdge(e, degB);
     }
   }
 }
@@ -206,8 +238,8 @@ int main(int argc, char** argv) {
   CombGraph cg;
   removeEdgesShorterThan(&tg, 150);
   buildCombGraph(&tg, &cg);
-
   combineDeg2(&cg);
+  writeEdgeOrdering(&cg);
 
   std::map<CombNode*, GridNode*> m;
 
@@ -316,6 +348,7 @@ int main(int argc, char** argv) {
       bool first = false;
       for (auto f : res) {
         f->pl().addResidentEdge(e);
+        g.getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
         if (!first) {
           pl << *f->getTo()->pl().getParent()->pl().getGeom();
         }
@@ -331,7 +364,7 @@ int main(int argc, char** argv) {
 
   TransitGraph output;
   buildTransitGraph(&cg, &output);
-  //out.print(cg);
+  //out.print(g);
   out.print(output);
 
   return (0);

@@ -13,13 +13,13 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
       _grid(cellSize, cellSize, bbox),
       Graph<NodePL, EdgePL>(true) {
   _c = {
-      0,     // cost for 0 degree node traversal
-      90,    // cost for 45 degree node traversal
-      30,    // cost for 90 degree node traversal
-      10,    // cost for 135 degree node traversal
-      3,     // cost for vertical edge
-      3,     // cost for horizontal edge
-      3      // cost for diagonal edge
+      0,   // cost for 0 degree node traversal
+      90,  // cost for 45 degree node traversal
+      30,  // cost for 90 degree node traversal
+      10,  // cost for 135 degree node traversal
+      3,   // cost for vertical edge
+      3,   // cost for horizontal edge
+      3    // cost for diagonal edge
   };
 
   assert(_c.p_0 < _c.p_135);
@@ -255,6 +255,13 @@ Node<NodePL, EdgePL>* GridGraph::getNode(size_t x, size_t y) const {
 }
 
 // _____________________________________________________________________________
+std::pair<size_t, size_t> GridGraph::getNodeCoords(GridNode* n) const {
+  auto r = _grid.getCells(n);
+  assert(r.size() == 1);
+  return *r.begin();
+}
+
+// _____________________________________________________________________________
 Node<NodePL, EdgePL>* GridGraph::getNeighbor(size_t cx, size_t cy,
                                              size_t i) const {
   int8_t x = 1;
@@ -302,36 +309,89 @@ void GridGraph::balance() {
           }
         }
       }
-
-      // if some outgoing edge is taken, dont put new edge next to it
-      for (size_t i = 0; i < 8; i++) {
-        auto port = n->pl().getPort(i);
-        auto neigh = getNeighbor(x, y, i);
-        if (!neigh || !port) continue;
-        auto e = getEdge(port, neigh->pl().getPort((i + 4) % 8));
-
-        if (e->pl().getResEdges().size()) {
-          if (getNeighbor(x, y, (i + 1) % 8)) {
-            auto e1 = getEdge(
-                n->pl().getPort((i + 1) % 8),
-                getNeighbor(x, y, (i + 1) % 8)->pl().getPort((i + 1 + 4) % 8));
-            e1->pl().setCost(e1->pl().cost() + 150);
-          }
-
-          if (getNeighbor(x, y, (i + 7) % 8)) {
-            auto e2 = getEdge(
-                n->pl().getPort((i + 7) % 8),
-                getNeighbor(x, y, (i + 7) % 8)->pl().getPort((i + 7 + 4) % 8));
-            e2->pl().setCost(e2->pl().cost() + 150);
-          }
-        }
-      }
     }
   }
 }
 
 // _____________________________________________________________________________
-void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e) {}
+void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e) {
+  auto xy = getNodeCoords(n);
+  size_t x = xy.first;
+  size_t y = xy.second;
+  assert(getNode(x, y) == n);
+
+  size_t origEdgeNumber = origNode->getAdjList().size();
+  size_t optimDistance = (8 / origEdgeNumber) - 1;
+
+  std::cerr << "Orig edge number = " << origEdgeNumber << ", optim distance is "
+            << optimDistance << std::endl;
+
+  std::cerr << std::endl;
+  if (origNode->pl().getParent()->pl().getStops().size()) std::cerr << "Checking station " << origNode->pl().getParent()->pl().getStops().front().name << std::endl;
+
+  CombEdge* outgoing[8];
+
+  bool found = false;
+
+  // if some outgoing edge is taken, dont put new edge next to it
+  for (size_t i = 0; i < 8; i++) {
+    auto port = n->pl().getPort(i);
+    auto neigh = getNeighbor(x, y, i);
+
+    if (neigh &&
+        getEdge(port, neigh->pl().getPort((i + 4) % 8))
+                ->pl()
+                .getResEdges()
+                .size() > 0) {
+      outgoing[i] = *getEdge(port, neigh->pl().getPort((i + 4) % 8))
+                         ->pl()
+                         .getResEdges()
+                         .begin();
+      found = true;
+    } else {
+      outgoing[i] = 0;
+    }
+  }
+
+  std::cerr << "Edge distribution ";
+  if (origNode->pl().getParent()->pl().getStops().size()) std::cerr << "in " << origNode->pl().getParent()->pl().getStops().front().name;
+  std::cerr << " ";
+  for (size_t i = 0; i < 8; i++) {
+    std::cerr << outgoing[i] << ", ";
+  }
+  std::cerr << std::endl;
+
+  if (!found) return;
+
+  double addC[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+
+  for (size_t i = 0; i < 8; i++) {
+    for (int d = optimDistance; d > 0; d--) {
+      if (outgoing[(i + d) % 8]) addC[i] += 500;
+      if (outgoing[(i + (8 - d)) % 8]) addC[i] += 500;
+    }
+  }
+
+
+  std::cerr << "Cost distribution: ";
+  for (size_t i = 0; i < 8; i++) {
+    std::cerr << addC[i] << ", ";
+  }
+  std::cerr << std::endl;
+
+  for (size_t i = 0; i < 8; i++) {
+    auto port = n->pl().getPort(i);
+    auto neigh = getNeighbor(x, y, i);
+
+    if (!neigh) continue;
+    getEdge(port, neigh->pl().getPort((i + 4) % 8))
+        ->pl()
+        .setCost(
+
+            getEdge(port, neigh->pl().getPort((i + 4) % 8))->pl().cost() +
+            addC[i]);
+  }
+}
 
 // _____________________________________________________________________________
 std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*>

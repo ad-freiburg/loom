@@ -70,6 +70,7 @@ class GridGraph : public Graph<NodePL, EdgePL> {
   std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*> getResEdges(Node<NodePL, EdgePL>* n) const;
 
   void writeInitialCosts();
+  std::pair<size_t, size_t> getNodeCoords(GridNode* n) const;
 };
 
 }
