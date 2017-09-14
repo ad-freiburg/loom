@@ -26,3 +26,13 @@ void CombNodePL::getAttrs(json::object_t& obj) const {
   return _parent->pl().getAttrs(obj);
 }
 
+// _____________________________________________________________________________
+void CombNodePL::addOrderedEdge(util::graph::Edge<CombNodePL, CombEdgePL>* e, double deg) {
+  _edgeOrder.insert(std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>(e, deg));
+}
+
+// _____________________________________________________________________________
+int32_t CombNodePL::distBetween(util::graph::Edge<CombNodePL, CombEdgePL>* a, util::graph::Edge<CombNodePL, CombEdgePL>* b) const {
+  return 0;
+}
+

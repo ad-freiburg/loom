@@ -4,6 +4,7 @@
 
 #include "util/geo/PolyLine.h"
 #include "octi/gridgraph/EdgePL.h"
+#include "util/String.h"
 
 using util::geo::PolyLine;
 using namespace octi::gridgraph;
@@ -19,13 +20,13 @@ const util::geo::Line* EdgePL::getGeom() const {
 }
 
 // _____________________________________________________________________________
-void EdgePL::addRoute(std::string r) {
-  _routes.insert(r);
+void EdgePL::addResidentEdge(util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>* e) {
+  _resEdges.insert(e);
 }
 //
 // _____________________________________________________________________________
-const std::set<std::string>& EdgePL::getRoutes() const {
-  return _routes;
+const std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*>& EdgePL::getResEdges() const {
+  return _resEdges;
 }
 
 // _____________________________________________________________________________
@@ -33,8 +34,8 @@ void EdgePL::getAttrs(json::object_t& obj) const {
   obj["routes"] = json::array();
   obj["cost"] = _c;
 
-  for (auto r : _routes) {
-    obj["routes"].push_back(r);
+  for (auto r : _resEdges) {
+    obj["routes"].push_back(util::toString(r));
   }
 }
 

@@ -8,29 +8,34 @@
 #include <set>
 #include "util/geo/PolyLine.h"
 #include "util/geo/GeoGraph.h"
+#include "util/graph/Node.h"
+#include "octi/graph/CombEdgePL.h"
+#include "octi/graph/CombNodePL.h"
 
 using util::geo::PolyLine;
 
 namespace octi {
 namespace gridgraph {
 
+
 class EdgePL : util::geograph::GeoEdgePL {
  public:
   EdgePL(const PolyLine& p, double c);
 
   void addRoute(std::string);
-  const std::set<std::string>& getRoutes() const;
+  const std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*>& getResEdges() const;
 
   const util::geo::Line* getGeom() const;
   void getAttrs(json::object_t& obj) const;
 
   void setCost(double c);
   double cost() const;
+  void addResidentEdge(util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>* e);
  private:
   PolyLine _pl;
   double _c;
 
-  std::set<std::string> _routes;
+  std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*> _resEdges;
 };
 
 }}

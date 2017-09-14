@@ -33,3 +33,8 @@ void NodePL::getAttrs(json::object_t& obj) const {
 void NodePL::addStop(StationInfo i) {
   _is.push_back(i);
 }
+
+// _____________________________________________________________________________
+const std::vector<StationInfo>& NodePL::getStops() const {
+  return _is;
+}

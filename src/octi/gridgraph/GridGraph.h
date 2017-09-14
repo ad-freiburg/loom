@@ -12,6 +12,9 @@
 #include "octi/gridgraph/NodePL.h"
 #include "octi/gridgraph/EdgePL.h"
 
+#include "octi/graph/CombNodePL.h"
+#include "octi/graph/CombEdgePL.h"
+
 using util::graph::Graph;
 using util::graph::Node;
 using util::geo::Grid;
@@ -19,6 +22,16 @@ using util::geo::Point;
 
 namespace octi {
 namespace gridgraph {
+
+typedef util::graph::Node<gridgraph::NodePL, gridgraph::EdgePL> GridNode;
+typedef util::graph::Edge<gridgraph::NodePL, gridgraph::EdgePL> GridEdge;
+
+typedef util::graph::Graph<octi::graph::CombNodePL, octi::graph::CombEdgePL>
+    CombGraph;
+typedef util::graph::Node<octi::graph::CombNodePL, octi::graph::CombEdgePL>
+    CombNode;
+typedef util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>
+    CombEdge;
 
 struct Candidate {
   Candidate(Node<NodePL, EdgePL>* n, double d) : n(n), d(d) {};
@@ -43,6 +56,7 @@ class GridGraph : public Graph<NodePL, EdgePL> {
   const Grid<Node<NodePL, EdgePL>*, Point>& getGrid() const;
 
   void balance();
+  void topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
 
   std::priority_queue<Candidate> getNearestCandidatesFor(const util::geo::Point& p, double maxD) const;
 
@@ -53,7 +67,7 @@ class GridGraph : public Graph<NodePL, EdgePL> {
 
   Grid<Node<NodePL, EdgePL>*, Point> _grid;
 
-  std::set<std::string> getRoutes(Node<NodePL, EdgePL>* n) const;
+  std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*> getResEdges(Node<NodePL, EdgePL>* n) const;
 
   void writeInitialCosts();
 };

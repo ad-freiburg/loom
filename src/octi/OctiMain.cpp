@@ -36,8 +36,8 @@ typedef util::graph::Node<octi::graph::CombNodePL, octi::graph::CombEdgePL>
 typedef util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>
     CombEdge;
 
-typedef util::graph::Node<gridgraph::NodePL, gridgraph::EdgePL> GridNode;
-typedef util::graph::Edge<gridgraph::NodePL, gridgraph::EdgePL> GridEdge;
+using octi::gridgraph::GridNode;
+using octi::gridgraph::GridEdge;
 
 // _____________________________________________________________________________
 void buildCombGraph(TransitGraph* source, CombGraph* target) {
@@ -53,7 +53,7 @@ void buildCombGraph(TransitGraph* source, CombGraph* target) {
 
   for (auto n : *nodes) {
     for (auto e : n->getAdjListOut()) {
-      auto f = target->addEdge(m[e->getFrom()], m[e->getTo()],
+      target->addEdge(m[e->getFrom()], m[e->getTo()],
                       octi::graph::CombEdgePL(e));
     }
   }
@@ -106,7 +106,7 @@ void buildTransitGraph(CombGraph* source, TransitGraph* target) {
 
         auto payload = e->pl();
         payload.setPolyline(pl);
-        auto f = target->addEdge(m[from], m[to], payload);
+        target->addEdge(m[from], m[to], payload);
 
         i++;
       }
@@ -116,8 +116,8 @@ void buildTransitGraph(CombGraph* source, TransitGraph* target) {
 
 // _____________________________________________________________________________
 void combineDeg2(CombGraph* g) {
-  auto nodes = g->getNodes();
-  for (auto n : *nodes) {
+  std::set<CombNode*> nodes = *g->getNodes();
+  for (auto n : nodes) {
     if (n->getAdjList().size() == 2) {
       CombEdge* a = 0;
       CombEdge* b = 0;
@@ -131,7 +131,7 @@ void combineDeg2(CombGraph* g) {
 
       auto pl = a->pl();
 
-      // a is the reference
+      // a is the referen
       if (a->getTo() == n) {
         if (b->getTo() != n) {
           pl.getChilds().insert(pl.getChilds().end(),
@@ -204,12 +204,10 @@ int main(int argc, char** argv) {
 
   TransitGraph tg(&(std::cin));
   CombGraph cg;
-
   removeEdgesShorterThan(&tg, 150);
   buildCombGraph(&tg, &cg);
 
   combineDeg2(&cg);
-
 
   std::map<CombNode*, GridNode*> m;
 
@@ -300,6 +298,10 @@ int main(int argc, char** argv) {
       std::list<GridEdge*> res;
       GridNode* target = 0;
 
+      g.balance();
+      g.topoPenalty(m[from], from, e);
+      if (tos.size() == 1) g.topoPenalty(*tos.begin(), to, e);
+
       dijkstra.shortestPath(m[from], tos, &res, &target);
 
       if (target == 0) {
@@ -312,19 +314,18 @@ int main(int argc, char** argv) {
       // write everything to the result graph
       PolyLine pl;
       bool first = false;
-      for (auto e : res) {
-        e->pl().addRoute("A");
+      for (auto f : res) {
+        f->pl().addResidentEdge(e);
         if (!first) {
-          pl << *e->getTo()->pl().getParent()->pl().getGeom();
+          pl << *f->getTo()->pl().getParent()->pl().getGeom();
         }
-        pl << *e->getFrom()->pl().getParent()->pl().getGeom();
+        pl << *f->getFrom()->pl().getParent()->pl().getGeom();
         first = true;
       }
 
       if (reversed) pl.reverse();
       e->pl().setPolyLine(pl);
 
-      g.balance();
     }
   }
 

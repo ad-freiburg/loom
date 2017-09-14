@@ -29,6 +29,8 @@ class NodePL : util::geograph::GeoNodePL {
 
   void addStop(StationInfo i);
 
+  const std::vector<StationInfo>& getStops() const;
+
  private:
   Point _pos;
   std::vector<StationInfo> _is;
