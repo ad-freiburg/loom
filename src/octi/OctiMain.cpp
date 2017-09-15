@@ -53,19 +53,8 @@ void buildCombGraph(TransitGraph* source, CombGraph* target) {
 
   for (auto n : *nodes) {
     for (auto e : n->getAdjListOut()) {
-      auto f = target->addEdge(m[e->getFrom()], m[e->getTo()],
+      target->addEdge(m[e->getFrom()], m[e->getTo()],
                       octi::graph::CombEdgePL(e));
-
-      // write the edge ordering
-
-      // get the angles
-      double degA = util::geo::angBetween(*m[e->getFrom()]->pl().getGeom(),
-          *m[e->getTo()]->pl().getGeom());
-      double degB = util::geo::angBetween(*m[e->getTo()]->pl().getGeom(),
-          *m[e->getFrom()]->pl().getGeom());
-
-      m[e->getFrom()]->pl().addOrderedEdge(f, degA);
-      m[e->getTo()]->pl().addOrderedEdge(f, degB);
     }
   }
 }
@@ -330,9 +319,11 @@ int main(int argc, char** argv) {
       std::list<GridEdge*> res;
       GridNode* target = 0;
 
+      std::cerr << "Balancing... " << std::endl;
       g.balance();
       g.topoPenalty(m[from], from, e);
       if (tos.size() == 1) g.topoPenalty(*tos.begin(), to, e);
+      std::cerr << "... done. " << std::endl;
 
       dijkstra.shortestPath(m[from], tos, &res, &target);
 

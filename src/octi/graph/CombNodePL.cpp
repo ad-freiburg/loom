@@ -32,7 +32,34 @@ void CombNodePL::addOrderedEdge(util::graph::Edge<CombNodePL, CombEdgePL>* e, do
 }
 
 // _____________________________________________________________________________
-int32_t CombNodePL::distBetween(util::graph::Edge<CombNodePL, CombEdgePL>* a, util::graph::Edge<CombNodePL, CombEdgePL>* b) const {
-  return 0;
+int64_t CombNodePL::distBetween(util::graph::Edge<CombNodePL, CombEdgePL>* a, util::graph::Edge<CombNodePL, CombEdgePL>* b) const {
+  auto aIt = _edgeOrder.begin();
+  auto bIt = _edgeOrder.begin();
+
+  for (; aIt != _edgeOrder.end(); aIt++) {
+    if (aIt->first == a) break;
+  }
+
+  for (; bIt != _edgeOrder.end(); bIt++) {
+    if (bIt->first == b) break;
+  }
+
+  assert(aIt != _edgeOrder.end());
+  assert(bIt != _edgeOrder.end());
+
+  std::cerr << " <<<< pos of " << a << " is " << std::distance(_edgeOrder.begin(), aIt) << std::endl;
+  std::cerr << " <<<< pos of " << b << " is " << std::distance(_edgeOrder.begin(), bIt) << std::endl;
+
+  int32_t ap = std::distance(_edgeOrder.begin(), aIt);
+  int32_t bp = std::distance(_edgeOrder.begin(), bIt);
+
+  int32_t ret = ((ap > bp ? -1 : 1) * (abs(bp - ap)));
+
+  if (ret < 0) return (_edgeOrder.size() + ret) % (_edgeOrder.size());
+  return ret;
 }
 
+// _____________________________________________________________________________
+const std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>, PairCmp>& CombNodePL::getOrderedEdges() const {
+  return _edgeOrder;
+}

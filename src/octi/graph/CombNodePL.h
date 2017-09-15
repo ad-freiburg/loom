@@ -24,7 +24,7 @@ class CombNodePL;
 struct PairCmp {
   bool operator()(const std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>& a,
                   const std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>& b) {
-    return a.second < b.second;
+    return a.second > b.second;
   }
 };
 
@@ -38,8 +38,9 @@ class CombNodePL : util::geograph::GeoNodePL {
 
   void addOrderedEdge(util::graph::Edge<CombNodePL, CombEdgePL>* e, double deg);
 
-  int32_t distBetween(util::graph::Edge<CombNodePL, CombEdgePL>* a, util::graph::Edge<CombNodePL, CombEdgePL>* b) const;
+  int64_t distBetween(util::graph::Edge<CombNodePL, CombEdgePL>* a, util::graph::Edge<CombNodePL, CombEdgePL>* b) const;
 
+  const std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>, PairCmp>& getOrderedEdges() const;
  private:
   octi::graph::Node* _parent;
   std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>, PairCmp>
