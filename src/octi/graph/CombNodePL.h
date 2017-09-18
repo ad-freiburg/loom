@@ -41,6 +41,7 @@ class CombNodePL : util::geograph::GeoNodePL {
   int64_t distBetween(util::graph::Edge<CombNodePL, CombEdgePL>* a, util::graph::Edge<CombNodePL, CombEdgePL>* b) const;
 
   const std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>, PairCmp>& getOrderedEdges() const;
+  bool hasOrderedEdge(util::graph::Edge<CombNodePL, CombEdgePL>* e) const;
  private:
   octi::graph::Node* _parent;
   std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>, PairCmp>

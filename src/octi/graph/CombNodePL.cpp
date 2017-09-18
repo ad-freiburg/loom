@@ -60,6 +60,17 @@ int64_t CombNodePL::distBetween(util::graph::Edge<CombNodePL, CombEdgePL>* a, ut
 }
 
 // _____________________________________________________________________________
+bool CombNodePL::hasOrderedEdge(util::graph::Edge<CombNodePL, CombEdgePL>* e) const {
+  auto aIt = _edgeOrder.begin();
+
+  for (; aIt != _edgeOrder.end(); aIt++) {
+    if (aIt->first == e) return true;
+  }
+
+  return false;
+}
+
+// _____________________________________________________________________________
 const std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>, PairCmp>& CombNodePL::getOrderedEdges() const {
   return _edgeOrder;
 }

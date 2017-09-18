@@ -13,13 +13,13 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
       _grid(cellSize, cellSize, bbox),
       Graph<NodePL, EdgePL>(true) {
   _c = {
-      0,   // cost for 0 degree node traversal
-      90,  // cost for 45 degree node traversal
-      30,  // cost for 90 degree node traversal
-      10,  // cost for 135 degree node traversal
-      3,   // cost for vertical edge
-      3,   // cost for horizontal edge
-      3    // cost for diagonal edge
+      0,    // cost for 0 degree node traversal
+      90,   // cost for 45 degree node traversal
+      30,   // cost for 90 degree node traversal
+      10,   // cost for 135 degree node traversal
+      3,    // cost for vertical edge
+      3,    // cost for horizontal edge
+      3  // cost for diagonal edge
   };
 
   assert(_c.p_0 < _c.p_135);
@@ -320,15 +320,23 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e) {
   size_t y = xy.second;
   assert(getNode(x, y) == n);
 
+  if (origNode->pl().getParent()->pl().getStops().size())
+    std::cerr << "Checking station "
+              << origNode->pl().getParent()->pl().getStops().front().name
+              << std::endl;
+
   size_t origEdgeNumber = origNode->getAdjList().size();
   assert(origNode->pl().getOrderedEdges().size() == origEdgeNumber);
   size_t optimDistance = (8 / origEdgeNumber) - 1;
 
+  if (!origNode->pl().hasOrderedEdge(e)) {
+    std::cerr << "Warning: tried to balance edge " << e << " in node " << origNode << ", but the edge does not appear there." << std::endl;
+    return;
+  }
+
   std::cerr << std::endl;
   std::cerr << "Orig edge number = " << origEdgeNumber << ", optim distance is "
             << optimDistance << std::endl;
-
-  if (origNode->pl().getParent()->pl().getStops().size()) std::cerr << "Checking station " << origNode->pl().getParent()->pl().getStops().front().name << std::endl;
 
   CombEdge* outgoing[8];
 
@@ -349,13 +357,19 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e) {
                          .getResEdges()
                          .begin();
       found = true;
+      if (!origNode->pl().hasOrderedEdge(outgoing[i])) {
+        std::cerr << "Warning: tried to balance edge " << outgoing[i] << " in node " << origNode << ", but the edge does not appear there." << std::endl;
+        return;
+      }
     } else {
       outgoing[i] = 0;
     }
   }
 
   std::cerr << "Edge distribution: ";
-  if (origNode->pl().getParent()->pl().getStops().size()) std::cerr << "in " << origNode->pl().getParent()->pl().getStops().front().name;
+  if (origNode->pl().getParent()->pl().getStops().size())
+    std::cerr << "in "
+              << origNode->pl().getParent()->pl().getStops().front().name;
   std::cerr << " ";
   for (size_t i = 0; i < 8; i++) {
     std::cerr << outgoing[i] << ", ";
@@ -364,8 +378,21 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e) {
 
   std::cerr << "Ordered edges in orig node: ";
   for (auto e : origNode->pl().getOrderedEdges()) {
-    if (e.first->getOtherNode(origNode)->pl().getParent()->pl().getStops().size()) {
-      std::cerr << e.first << "(to " << e.first->getOtherNode(origNode)->pl().getParent()->pl().getStops().front().name << "), ";
+    if (e.first->getOtherNode(origNode)
+            ->pl()
+            .getParent()
+            ->pl()
+            .getStops()
+            .size()) {
+      std::cerr << e.first << "(to "
+                << e.first->getOtherNode(origNode)
+                       ->pl()
+                       .getParent()
+                       ->pl()
+                       .getStops()
+                       .front()
+                       .name
+                << "), ";
     } else {
       std::cerr << e.first << ", ";
     }
@@ -379,23 +406,67 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e) {
   for (size_t i = 0; i < 8; i++) {
     if (!outgoing[i]) continue;
 
-
+    // this is the number of edges that will occur between the currently checked
+    // edge and the inserted edge,
+    // positive if in clockwise direction, negative if in counter-clockwise
+    // direction
     int d = origNode->pl().distBetween(outgoing[i], e) - 1;
-    int dd = ((((d+1) + d) % 8) * optimDistance) % 8;
+
+    // dd and ddd are the optimal distances between outgoing[i] and e, based on
+    // the total number
+    // of edges in this node
+    int dd = ((((d + 1) + d) % 8) * optimDistance) % 8;
     int ddd = (6 - dd) % 8;
 
-    std::cerr << "Distance between the inserted edge (" << e << ") and edge at " << i << " (" << outgoing[i] << ") is " << d
-      << ", optim distance between them is +" << dd << " and -" << ddd << std::endl;
+    std::cerr << "Distance between the inserted edge (" << e << ") and edge at "
+              << i << " (" << outgoing[i] << ") is " << d
+              << ", optim distance between them is +" << dd << " and -" << ddd
+              << std::endl;
 
-    for (; dd > 0; dd--) {
-      addC[(i + dd) % 8] += 15000;
+    for (int j = 0; j <= dd + 1; j++) {
+      addC[(i + j) % 8] += 5 * (dd + 1 - j);
     }
 
-    for (; ddd > 0; ddd--) {
-      addC[(i + (8 - ddd)) % 8] += 15000;
+    for (int j = 0; j <= ddd + 1; j++) {
+      addC[(i + (8 - j)) % 8] += 5 * (ddd + 1 - j);
+    }
+
+    if (d > 0) {
+      for (int j = 1; j <= d; j++) {
+        addC[(i + j) % 8] += 99999;
+      }
+    } else if (d < 0) {
+      for (int j = 1; j <= abs(d); j++) {
+        addC[(i + (8 - j)) % 8] += 99999;
+      }
     }
   }
 
+  // topological blocking
+  for (size_t i = 0; i < 8; i++) {
+    if (!outgoing[i]) continue;
+
+    for (size_t j = i + 1; j < i + 8; j++) {
+      if (!outgoing[j % 8]) continue;
+      if (outgoing[j % 8] == outgoing[i]) break;
+
+      std::cerr << i << " vs " << (j%8) << std::endl;
+      int da = origNode->pl().distBetween(outgoing[i], e);
+      int db = origNode->pl().distBetween(outgoing[j % 8], e);
+
+      std::cerr << "da = " << da << " vs " << "db = " << db << std::endl;
+
+      if (db < da) {
+        // edge does not lie in this segment, block it!
+
+        for (size_t x = i + 1; x < j; x++) {
+          addC[x % 8] = 999999;
+        }
+      }
+    }
+
+    break;
+  }
 
   std::cerr << "Cost distribution: ";
   for (size_t i = 0; i < 8; i++) {
