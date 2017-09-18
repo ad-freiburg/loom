@@ -424,11 +424,11 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e) {
               << std::endl;
 
     for (int j = 0; j <= dd + 1; j++) {
-      addC[(i + j) % 8] += 5 * (dd + 1 - j);
+      addC[(i + j) % 8] += 20 * (dd + 1 - j);
     }
 
     for (int j = 0; j <= ddd + 1; j++) {
-      addC[(i + (8 - j)) % 8] += 5 * (ddd + 1 - j);
+      addC[(i + (8 - j)) % 8] += 20 * (ddd + 1 - j);
     }
 
     if (d > 0) {

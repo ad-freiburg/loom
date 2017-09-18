@@ -57,6 +57,14 @@ void buildCombGraph(TransitGraph* source, CombGraph* target) {
                       octi::graph::CombEdgePL(e));
     }
   }
+
+  for (auto n : *target->getNodes()) {
+    size_t routes = 0;
+    for (auto e : n->getAdjList()) {
+      routes += e->pl().getChilds().front()->pl().getRoutes().size();
+    }
+    n->pl().setRouteNumber(routes);
+  }
 }
 
 // _____________________________________________________________________________
@@ -72,7 +80,9 @@ void writeEdgeOrdering(CombGraph* target) {
           *refEdgeA->getOtherNode(n->pl().getParent())->pl().getGeom());
       double degB = util::geo::angBetween(
           *e->getTo()->pl().getParent()->pl().getGeom(),
-          *refEdgeB->getOtherNode(e->getTo()->pl().getParent())->pl().getGeom());
+          *refEdgeB->getOtherNode(e->getTo()->pl().getParent())
+               ->pl()
+               .getGeom());
 
       n->pl().addOrderedEdge(e, degA);
       e->getTo()->pl().addOrderedEdge(e, degB);
@@ -127,6 +137,7 @@ void buildTransitGraph(CombGraph* source, TransitGraph* target) {
 
         auto payload = e->pl();
         payload.setPolyline(pl);
+        payload.setGeneration(f->pl().getGeneration());
         target->addEdge(m[from], m[to], payload);
 
         i++;
@@ -247,115 +258,134 @@ int main(int argc, char** argv) {
   // comparator for nodes, based on degree
   struct NodeCompare {
     bool operator()(CombNode* a, CombNode* b) {
-      return a->getAdjList().size() < b->getAdjList().size();
+      //return a->getAdjList().size() < b->getAdjList().size();
+      return a->pl().getRouteNumber() < b->pl().getRouteNumber();
     }
   };
 
-  std::priority_queue<CombNode*, std::vector<CombNode*>, NodeCompare> pq;
+  std::priority_queue<CombNode*, std::vector<CombNode*>, NodeCompare> globalPq;
+  std::priority_queue<CombNode*, std::vector<CombNode*>, NodeCompare> dangling;
+
+  std::set<CombNode*> settled;
 
   for (auto n : *cg.getNodes()) {
-    pq.push(n);
+    globalPq.push(n);
   }
 
   std::set<CombEdge*> done;
+  size_t gen = 0;
 
-  while (!pq.empty()) {
-    auto n = pq.top();
-    pq.pop();
+  while (!globalPq.empty()) {
+    auto n = globalPq.top();
+    globalPq.pop();
+    dangling.push(n);
 
-    for (auto e : n->getAdjList()) {
-      if (done.find(e) != done.end()) continue;
-      done.insert(e);
+    while (!dangling.empty()) {
+      auto n = dangling.top();
+      dangling.pop();
 
-      auto from = e->getFrom();
-      auto to = e->getTo();
+      if (settled.find(n) != settled.end()) continue;
 
-      bool reversed = false;
+      for (auto ee : n->pl().getOrderedEdges()) {
+        auto e = ee.first;
+        if (done.find(e) != done.end()) continue;
+        done.insert(e);
 
-      if (from->getAdjList().size() < to->getAdjList().size()) {
-        auto tmp = from;
-        from = to;
-        to = tmp;
-        reversed = true;
-      }
+        dangling.push(e->getOtherNode(n));
 
-      if (m.find(from) == m.end()) {
-        auto cands = g.getNearestCandidatesFor(*from->pl().getGeom(), 300);
+        auto from = e->getFrom();
+        auto to = e->getTo();
 
-        while (!cands.empty()) {
-          if (used.find(cands.top().n) == used.end()) {
-            m[from] = cands.top().n;
-            used.insert(cands.top().n);
-            break;
-          }
-          cands.pop();
+        bool reversed = false;
+
+        if (from->getAdjList().size() < to->getAdjList().size()) {
+          auto tmp = from;
+          from = to;
+          to = tmp;
+          reversed = true;
         }
 
         if (m.find(from) == m.end()) {
-          LOG(ERROR) << "Could not sort in node " << from << std::endl;
-        }
-      }
+          auto cands = g.getNearestCandidatesFor(*from->pl().getGeom(), 300);
 
-      // get surrounding displacement nodes
-      std::set<GridNode*> tos;
-
-      if (m.find(to) == m.end()) {
-        double maxDis = to->getAdjList().size() == 1
-                            ? util::geo::len(*e->pl().getGeom()) / 2
-                            : 300;
-
-        auto cands = g.getNearestCandidatesFor(*to->pl().getGeom(), maxDis);
-
-        while (!cands.empty()) {
-          if (used.find(cands.top().n) == used.end()) {
-            tos.insert(cands.top().n);
+          while (!cands.empty()) {
+            if (used.find(cands.top().n) == used.end()) {
+              m[from] = cands.top().n;
+              used.insert(cands.top().n);
+              break;
+            }
+            cands.pop();
           }
-          cands.pop();
+
+          if (m.find(from) == m.end()) {
+            LOG(ERROR) << "Could not sort in node " << from << std::endl;
+          }
         }
-      } else {
-        tos.insert(m.find(to)->second);
-      }
 
-      std::list<GridEdge*> res;
-      GridNode* target = 0;
+        // get surrounding displacement nodes
+        std::set<GridNode*> tos;
 
-      std::cerr << "Balancing... " << std::endl;
-      g.balance();
-      g.topoPenalty(m[from], from, e);
-      if (tos.size() == 1) g.topoPenalty(*tos.begin(), to, e);
-      std::cerr << "... done. " << std::endl;
+        if (m.find(to) == m.end()) {
+          double maxDis = to->getAdjList().size() == 1
+                              ? util::geo::len(*e->pl().getGeom()) / 2
+                              : 300;
 
-      dijkstra.shortestPath(m[from], tos, &res, &target);
+          auto cands = g.getNearestCandidatesFor(*to->pl().getGeom(), maxDis);
 
-      if (target == 0) {
-        LOG(ERROR) << "Could not sort in node " << to << std::endl;
-      }
-
-      m[to] = target;
-      used.insert(target);
-
-      // write everything to the result graph
-      PolyLine pl;
-      bool first = false;
-      for (auto f : res) {
-        f->pl().addResidentEdge(e);
-        g.getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
-        if (!first) {
-          pl << *f->getTo()->pl().getParent()->pl().getGeom();
+          while (!cands.empty()) {
+            if (used.find(cands.top().n) == used.end()) {
+              tos.insert(cands.top().n);
+            }
+            cands.pop();
+          }
+        } else {
+          tos.insert(m.find(to)->second);
         }
-        pl << *f->getFrom()->pl().getParent()->pl().getGeom();
-        first = true;
+
+        std::list<GridEdge*> res;
+        GridNode* target = 0;
+
+        std::cerr << "Balancing... " << std::endl;
+        g.balance();
+        g.topoPenalty(m[from], from, e);
+        if (tos.size() == 1) g.topoPenalty(*tos.begin(), to, e);
+        std::cerr << "... done. " << std::endl;
+
+        dijkstra.shortestPath(m[from], tos, &res, &target);
+
+        if (target == 0) {
+          LOG(ERROR) << "Could not sort in node " << to << std::endl;
+        }
+
+        m[to] = target;
+        used.insert(target);
+
+        // write everything to the result graph
+        PolyLine pl;
+        bool first = false;
+        for (auto f : res) {
+          f->pl().addResidentEdge(e);
+          g.getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
+          if (!first) {
+            pl << *f->getTo()->pl().getParent()->pl().getGeom();
+          }
+          pl << *f->getFrom()->pl().getParent()->pl().getGeom();
+          first = true;
+        }
+
+        if (reversed) pl.reverse();
+        e->pl().setPolyLine(pl);
+        e->pl().setGeneration(gen);
+        gen++;
       }
 
-      if (reversed) pl.reverse();
-      e->pl().setPolyLine(pl);
-
+      settled.insert(n);
     }
   }
 
   TransitGraph output;
   buildTransitGraph(&cg, &output);
-  //out.print(g);
+  // out.print(g);
   out.print(output);
 
   return (0);

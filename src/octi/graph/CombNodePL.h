@@ -42,10 +42,13 @@ class CombNodePL : util::geograph::GeoNodePL {
 
   const std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>, PairCmp>& getOrderedEdges() const;
   bool hasOrderedEdge(util::graph::Edge<CombNodePL, CombEdgePL>* e) const;
+  size_t getRouteNumber() const;
+  void setRouteNumber(size_t n);
  private:
   octi::graph::Node* _parent;
   std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>, PairCmp>
       _edgeOrder;
+  size_t _routeNumber;
 };
 }
 }

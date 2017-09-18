@@ -32,6 +32,7 @@ void CombEdgePL::setPolyLine(const PolyLine& p) {
 // _____________________________________________________________________________
 void CombEdgePL::getAttrs(json::object_t& obj) const {
   obj["included_edges"] = json::array();
+  obj["generation"] = _generation;
 
   for (auto e : _childs) {
     json::object_t ret;
@@ -49,4 +50,14 @@ void CombEdgePL::getAttrs(json::object_t& obj) const {
 // _____________________________________________________________________________
 std::vector<Edge*>& CombEdgePL::getChilds() {
   return _childs;
+}
+
+// _____________________________________________________________________________
+void CombEdgePL::setGeneration(size_t g) {
+  _generation = g;
+}
+
+// _____________________________________________________________________________
+size_t CombEdgePL::getGeneration() const {
+  return _generation;
 }

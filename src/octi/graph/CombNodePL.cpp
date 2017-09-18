@@ -71,6 +71,16 @@ bool CombNodePL::hasOrderedEdge(util::graph::Edge<CombNodePL, CombEdgePL>* e) co
 }
 
 // _____________________________________________________________________________
+void CombNodePL::setRouteNumber(size_t n) {
+  _routeNumber = n;
+}
+
+// _____________________________________________________________________________
+size_t CombNodePL::getRouteNumber() const {
+  return _routeNumber;
+}
+
+// _____________________________________________________________________________
 const std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>, PairCmp>& CombNodePL::getOrderedEdges() const {
   return _edgeOrder;
 }

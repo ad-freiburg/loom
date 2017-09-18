@@ -653,7 +653,7 @@ Node* Builder::addStop(const Stop* curStop, uint8_t aggrLevel, BuildGraph* g, No
   Point p = getProjectedPoint(curStop->getLat(), curStop->getLng(), _graphProj);
 
   if (aggrLevel > 1) {
-    n = getNearestStop(g, p, 100, grid);
+    n = getNearestStop(g, p, _cfg->stationAggrDistance, grid);
   }
 
   if (n) {

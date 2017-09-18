@@ -20,6 +20,7 @@ struct Config {
   size_t stationAggrLevel;
 
   double maxAggrDistance;
+  double stationAggrDistance;
 
   uint8_t useMots;
 };

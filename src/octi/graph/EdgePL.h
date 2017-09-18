@@ -53,8 +53,12 @@ class EdgePL : util::geograph::GeoEdgePL {
 
   const PolyLine& getPolyline() const;
   void setPolyline(const PolyLine& p);
+
+  void setGeneration(size_t g);
  private:
   std::set<RouteOcc> _routes;
+
+  size_t _generation;
 
   PolyLine _p;
 };

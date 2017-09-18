@@ -42,9 +42,13 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "station-aggregation-level",
       opts::value<size_t>(&(cfg->stationAggrLevel))->default_value(2),
       "2 = aggregate based on distance, 1 = aggregate based on feed, 0 = no "
-      "aggr")("max-aggr-distance,d",
-              opts::value<double>(&(cfg->maxAggrDistance))->default_value(30),
-              "maximum aggregation distance between shared segments")(
+      "aggr")(
+      "max-station-aggr-distance",
+      opts::value<double>(&(cfg->stationAggrDistance))->default_value(100),
+      "maximum aggregation distance between stops (if aggr level > 1)")(
+      "max-aggr-distance,d",
+      opts::value<double>(&(cfg->maxAggrDistance))->default_value(30),
+      "maximum aggregation distance between shared segments")(
       "use-mots,m", opts::value<uint8_t>(&(cfg->useMots))->default_value(255),
       "used mots, as a bitmap (see GTFS reference, 0000001 = 1 means 'only "
       "tram', 0000010 = 2 means 'only subway', 0000100 = 4 means 'only rail', "
