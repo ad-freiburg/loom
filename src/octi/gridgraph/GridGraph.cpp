@@ -32,6 +32,8 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
 
   double directNodeCost = 88888;
 
+  double spacer = cellSize / 20.0;
+
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
@@ -44,7 +46,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
       n->pl().setParent(n);
 
       Node<NodePL, EdgePL>* n1 =
-          new Node<NodePL, EdgePL>(NodePL(Point(xPos - cellSize / 10.0, yPos)));
+          new Node<NodePL, EdgePL>(NodePL(Point(xPos - spacer, yPos)));
       n1->pl().setParent(n);
       addNode(n1);
       n->pl().setWestPort(n1);
@@ -56,7 +58,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
                             directNodeCost, true));
 
       Node<NodePL, EdgePL>* n2 = new Node<NodePL, EdgePL>(
-          NodePL(Point(xPos - cellSize / 10.0, yPos - cellSize / 10.0)));
+          NodePL(Point(xPos - spacer, yPos - spacer)));
       addNode(n2);
       n2->pl().setParent(n);
       n->pl().setSouthWestPort(n2);
@@ -68,7 +70,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
                             directNodeCost, true));
 
       Node<NodePL, EdgePL>* n3 =
-          new Node<NodePL, EdgePL>(NodePL(Point(xPos, yPos - cellSize / 10.0)));
+          new Node<NodePL, EdgePL>(NodePL(Point(xPos, yPos - spacer)));
       addNode(n3);
       n3->pl().setParent(n);
       n->pl().setSouthPort(n3);
@@ -80,7 +82,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
                             directNodeCost, true));
 
       Node<NodePL, EdgePL>* n4 =
-          new Node<NodePL, EdgePL>(NodePL(Point(xPos + cellSize / 10.0, yPos)));
+          new Node<NodePL, EdgePL>(NodePL(Point(xPos + spacer, yPos)));
       addNode(n4);
       n4->pl().setParent(n);
       n->pl().setEastPort(n4);
@@ -92,7 +94,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
                             directNodeCost, true));
 
       Node<NodePL, EdgePL>* n5 = new Node<NodePL, EdgePL>(
-          NodePL(Point(xPos + cellSize / 10.0, yPos + cellSize / 10.0)));
+          NodePL(Point(xPos + spacer, yPos + spacer)));
       n5->pl().setParent(n);
       addNode(n5);
       n->pl().setNorthEastPort(n5);
@@ -104,7 +106,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
                             directNodeCost, true));
 
       Node<NodePL, EdgePL>* n6 =
-          new Node<NodePL, EdgePL>(NodePL(Point(xPos, yPos + cellSize / 10.0)));
+          new Node<NodePL, EdgePL>(NodePL(Point(xPos, yPos + spacer)));
       n6->pl().setParent(n);
       addNode(n6);
       n->pl().setNorthPort(n6);
@@ -116,7 +118,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
                             directNodeCost, true));
 
       Node<NodePL, EdgePL>* n7 = new Node<NodePL, EdgePL>(
-          NodePL(Point(xPos - cellSize / 10.0, yPos + cellSize / 10.0)));
+          NodePL(Point(xPos - spacer, yPos + spacer)));
       n7->pl().setParent(n);
       addNode(n7);
       n->pl().setNorthWestPort(n7);
@@ -127,7 +129,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
                                                 *n->pl().getGeom()),
                             directNodeCost, true));
       Node<NodePL, EdgePL>* n8 = new Node<NodePL, EdgePL>(
-          NodePL(Point(xPos + cellSize / 10.0, yPos - cellSize / 10.0)));
+          NodePL(Point(xPos + spacer, yPos - spacer)));
       n8->pl().setParent(n);
       addNode(n8);
       n->pl().setSouthEastPort(n8);
@@ -348,8 +350,6 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
     }
   }
 
-  return;
-
   double nearPenalty = 100;
 
   std::cerr << x << ", " << y << std::endl;
@@ -528,7 +528,7 @@ GridEdge* GridGraph::getNEdge(GridNode* a, GridNode* b) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e) {
+void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double* addC) {
   auto xy = getNodeCoords(n);
   size_t x = xy.first;
   size_t y = xy.second;
@@ -617,9 +617,7 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e) {
   }
   std::cerr << std::endl;
 
-  if (!found) return;
-
-  double addC[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  if (!found) return;;
 
   for (size_t i = 0; i < 8; i++) {
     if (!outgoing[i]) continue;
@@ -692,6 +690,13 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e) {
     std::cerr << addC[i] << ", ";
   }
   std::cerr << std::endl;
+}
+
+// _____________________________________________________________________________
+void GridGraph::addCostVector(GridNode* n, double addC[8]) {
+  auto xy = getNodeCoords(n);
+  size_t x = xy.first;
+  size_t y = xy.second;
 
   for (size_t i = 0; i < 8; i++) {
     auto port = n->pl().getPort(i);
@@ -711,6 +716,15 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e) {
             getEdge(neigh->pl().getPort((i + 4) % 8), port)->pl().cost() +
             addC[i]);
   }
+}
+
+// _____________________________________________________________________________
+void GridGraph::removeCostVector(GridNode* n, double addC[8]) {
+  for (size_t i = 0; i < 8; i++) {
+    addC[i] = -addC[i];
+  }
+
+  addCostVector(n, addC);
 }
 
 // _____________________________________________________________________________

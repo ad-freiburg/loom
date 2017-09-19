@@ -56,10 +56,13 @@ class GridGraph : public Graph<NodePL, EdgePL> {
   const Grid<Node<NodePL, EdgePL>*, Point>& getGrid() const;
 
   void balanceNode(GridNode* a);
-  void topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
+  void topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double* ret);
   void balanceEdge(GridNode* a, GridNode* b);
 
   std::priority_queue<Candidate> getNearestCandidatesFor(const util::geo::Point& p, double maxD) const;
+
+  void addCostVector(GridNode* n, double addC[8]);
+  void removeCostVector(GridNode* n, double addC[8]);
 
  private:
   util::geo::Box _bbox;

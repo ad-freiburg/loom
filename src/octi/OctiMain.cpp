@@ -13,9 +13,11 @@
 #include "octi/graph/CombNodePL.h"
 #include "octi/graph/Graph.h"
 #include "octi/gridgraph/GridGraph.h"
+#include "util/geo/BezierCurve.h"
 #include "util/geo/Geo.h"
 #include "util/geo/output/GeoJsonOutput.h"
 #include "util/graph/Dijkstra.h"
+#include "util/log/Log.h"
 #include "util/log/Log.h"
 
 using std::string;
@@ -234,41 +236,42 @@ int main(int argc, char** argv) {
 
   util::geo::output::GeoJsonOutput out;
 
-/*
- *   {
- *     gridgraph::GridGraph g(
- *         util::geo::Box(util::geo::Point(0, 0), util::geo::Point(100, 100)), 10);
- * 
- *     util::graph::Dijkstra dijkstra;
- *     std::list<GridEdge*> res;
- * 
- *     dijkstra.shortestPath(g.getNode(4, 2), g.getNode(3, 8), &res);
- * 
- *     for (auto f : res) {
- *       f->pl().addResidentEdge(0);
- *     }
- * 
- *     for (auto f : res) {
- *       g.balanceEdge(f->getFrom()->pl().getParent(),
- *                     f->getTo()->pl().getParent());
- *     }
- * 
- *     res.clear();
- *     dijkstra.shortestPath(g.getNode(8, 2), g.getNode(3, 8), &res);
- * 
- *     for (auto f : res) {
- *       f->pl().addResidentEdge(0);
- *     }
- * 
- *     for (auto f : res) {
- *       g.balanceEdge(f->getFrom()->pl().getParent(),
- *                     f->getTo()->pl().getParent());
- *     }
- * 
- *     out.print(g);
- *     exit(0);
- *   }
- */
+  /*
+   *   {
+   *     gridgraph::GridGraph g(
+   *         util::geo::Box(util::geo::Point(0, 0), util::geo::Point(100, 100)),
+   * 10);
+   *
+   *     util::graph::Dijkstra dijkstra;
+   *     std::list<GridEdge*> res;
+   *
+   *     dijkstra.shortestPath(g.getNode(4, 2), g.getNode(3, 8), &res);
+   *
+   *     for (auto f : res) {
+   *       f->pl().addResidentEdge(0);
+   *     }
+   *
+   *     for (auto f : res) {
+   *       g.balanceEdge(f->getFrom()->pl().getParent(),
+   *                     f->getTo()->pl().getParent());
+   *     }
+   *
+   *     res.clear();
+   *     dijkstra.shortestPath(g.getNode(8, 2), g.getNode(3, 8), &res);
+   *
+   *     for (auto f : res) {
+   *       f->pl().addResidentEdge(0);
+   *     }
+   *
+   *     for (auto f : res) {
+   *       g.balanceEdge(f->getFrom()->pl().getParent(),
+   *                     f->getTo()->pl().getParent());
+   *     }
+   *
+   *     out.print(g);
+   *     exit(0);
+   *   }
+   */
 
   TransitGraph tg(&(std::cin));
   CombGraph cg;
@@ -340,7 +343,7 @@ int main(int argc, char** argv) {
         }
 
         if (m.find(from) == m.end()) {
-          auto cands = g.getNearestCandidatesFor(*from->pl().getGeom(), 300);
+          auto cands = g.getNearestCandidatesFor(*from->pl().getGeom(), 400);
 
           while (!cands.empty()) {
             if (used.find(cands.top().n) == used.end()) {
@@ -362,7 +365,7 @@ int main(int argc, char** argv) {
         if (m.find(to) == m.end()) {
           double maxDis = to->getAdjList().size() == 1
                               ? util::geo::len(*e->pl().getGeom()) / 2
-                              : 300;
+                              : 400;
 
           auto cands = g.getNearestCandidatesFor(*to->pl().getGeom(), maxDis);
 
@@ -380,12 +383,23 @@ int main(int argc, char** argv) {
         GridNode* target = 0;
 
         std::cerr << "Balancing... " << std::endl;
-        g.topoPenalty(m[from], from, e);
-        if (tos.size() == 1) g.topoPenalty(*tos.begin(), to, e);
+        double addCFrom[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+        double addCTo[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+        g.topoPenalty(m[from], from, e, addCFrom);
+        g.addCostVector(m[from], addCFrom);
+        if (tos.size() == 1) {
+          g.topoPenalty(*tos.begin(), to, e, addCTo);
+          g.addCostVector(*tos.begin(), addCTo);
+        }
 
         std::cerr << "... done. " << std::endl;
 
         dijkstra.shortestPath(m[from], tos, &res, &target);
+
+        g.removeCostVector(m[from], addCFrom);
+        if (tos.size() == 1) {
+          g.removeCostVector(*tos.begin(), addCTo);
+        }
 
         if (target == 0) {
           LOG(ERROR) << "Could not sort in node " << to << std::endl;
@@ -396,33 +410,60 @@ int main(int argc, char** argv) {
 
         // write everything to the result graph
         PolyLine pl;
-        std::set<GridNode*> visited;
         for (auto f : res) {
           f->pl().addResidentEdge(e);
           g.getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
 
           if (!f->pl().isSecondary()) {
-            if (visited.find(f->getFrom()->pl().getParent()) == visited.end()) {
+            if (pl.getLine().size() > 0) {
+              BezierCurve bc(pl.getLine().back(),
+                             *f->getFrom()->pl().getParent()->pl().getGeom(),
+                             *f->getFrom()->pl().getParent()->pl().getGeom(),
+                             *f->getFrom()->pl().getGeom());
+
+              for (auto p : bc.render(10).getLine()) {
+                pl << p;
+              }
+            } else {
               pl << *f->getFrom()->pl().getParent()->pl().getGeom();
-              visited.insert(f->getFrom()->pl().getParent());
             }
 
-            if (visited.find(f->getTo()->pl().getParent()) == visited.end()) {
-              pl << *f->getTo()->pl().getParent()->pl().getGeom();
-              visited.insert(f->getTo()->pl().getParent());
-            }
+            pl << *f->getFrom()->pl().getGeom();
+            pl << *f->getTo()->pl().getGeom();
           }
         }
 
+        if (res.size())
+          pl << *res.back()->getTo()->pl().getParent()->pl().getGeom();
+
         for (auto f : res) {
           if (f->pl().isSecondary()) continue;
-          g.balanceEdge(f->getFrom()->pl().getParent(), f->getTo()->pl().getParent());
-          // f->getTo()->pl().getParent());
+          g.balanceEdge(f->getFrom()->pl().getParent(),
+                        f->getTo()->pl().getParent());
         }
 
         if (reversed) pl.reverse();
         e->pl().setPolyLine(pl);
         e->pl().setGeneration(gen);
+
+        if (false && gen == 4) {
+          auto nodes = *g.getNodes();
+          for (auto n : nodes) {
+            if (n->getAdjList().size() == 16) {
+              g.deleteNode(n);
+            } else {
+              for (auto e : n->getAdjListOut()) {
+                if (n->pl().getParent() ==
+                    e->getOtherNode(n)->pl().getParent()) {
+                  g.deleteEdge(n, e->getOtherNode(n));
+                }
+              }
+            }
+          }
+          out.print(g);
+          exit(0);
+        }
+
         gen++;
       }
 
@@ -432,7 +473,7 @@ int main(int argc, char** argv) {
 
   TransitGraph output;
   buildTransitGraph(&cg, &output);
-  //out.print(g);
+  // out.print(g);
   out.print(output);
 
   return (0);
