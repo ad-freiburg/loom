@@ -55,8 +55,9 @@ class GridGraph : public Graph<NodePL, EdgePL> {
 
   const Grid<Node<NodePL, EdgePL>*, Point>& getGrid() const;
 
-  void balance();
+  void balanceNode(GridNode* a);
   void topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
+  void balanceEdge(GridNode* a, GridNode* b);
 
   std::priority_queue<Candidate> getNearestCandidatesFor(const util::geo::Point& p, double maxD) const;
 
@@ -71,6 +72,9 @@ class GridGraph : public Graph<NodePL, EdgePL> {
 
   void writeInitialCosts();
   std::pair<size_t, size_t> getNodeCoords(GridNode* n) const;
+
+  GridEdge* getNEdge(GridNode* a, GridNode* b);
+  GridEdge* getOtherEdge(GridEdge* e);
 };
 
 }

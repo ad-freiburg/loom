@@ -234,6 +234,42 @@ int main(int argc, char** argv) {
 
   util::geo::output::GeoJsonOutput out;
 
+/*
+ *   {
+ *     gridgraph::GridGraph g(
+ *         util::geo::Box(util::geo::Point(0, 0), util::geo::Point(100, 100)), 10);
+ * 
+ *     util::graph::Dijkstra dijkstra;
+ *     std::list<GridEdge*> res;
+ * 
+ *     dijkstra.shortestPath(g.getNode(4, 2), g.getNode(3, 8), &res);
+ * 
+ *     for (auto f : res) {
+ *       f->pl().addResidentEdge(0);
+ *     }
+ * 
+ *     for (auto f : res) {
+ *       g.balanceEdge(f->getFrom()->pl().getParent(),
+ *                     f->getTo()->pl().getParent());
+ *     }
+ * 
+ *     res.clear();
+ *     dijkstra.shortestPath(g.getNode(8, 2), g.getNode(3, 8), &res);
+ * 
+ *     for (auto f : res) {
+ *       f->pl().addResidentEdge(0);
+ *     }
+ * 
+ *     for (auto f : res) {
+ *       g.balanceEdge(f->getFrom()->pl().getParent(),
+ *                     f->getTo()->pl().getParent());
+ *     }
+ * 
+ *     out.print(g);
+ *     exit(0);
+ *   }
+ */
+
   TransitGraph tg(&(std::cin));
   CombGraph cg;
   removeEdgesShorterThan(&tg, 150);
@@ -251,14 +287,12 @@ int main(int argc, char** argv) {
 
   gridgraph::GridGraph g(tg.getBBox(), gridSize);
 
-  g.balance();
-
   util::graph::Dijkstra dijkstra;
 
   // comparator for nodes, based on degree
   struct NodeCompare {
     bool operator()(CombNode* a, CombNode* b) {
-      //return a->getAdjList().size() < b->getAdjList().size();
+      // return a->getAdjList().size() < b->getAdjList().size();
       return a->pl().getRouteNumber() < b->pl().getRouteNumber();
     }
   };
@@ -346,9 +380,9 @@ int main(int argc, char** argv) {
         GridNode* target = 0;
 
         std::cerr << "Balancing... " << std::endl;
-        g.balance();
         g.topoPenalty(m[from], from, e);
         if (tos.size() == 1) g.topoPenalty(*tos.begin(), to, e);
+
         std::cerr << "... done. " << std::endl;
 
         dijkstra.shortestPath(m[from], tos, &res, &target);
@@ -362,15 +396,28 @@ int main(int argc, char** argv) {
 
         // write everything to the result graph
         PolyLine pl;
-        bool first = false;
+        std::set<GridNode*> visited;
         for (auto f : res) {
           f->pl().addResidentEdge(e);
           g.getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
-          if (!first) {
-            pl << *f->getTo()->pl().getParent()->pl().getGeom();
+
+          if (!f->pl().isSecondary()) {
+            if (visited.find(f->getFrom()->pl().getParent()) == visited.end()) {
+              pl << *f->getFrom()->pl().getParent()->pl().getGeom();
+              visited.insert(f->getFrom()->pl().getParent());
+            }
+
+            if (visited.find(f->getTo()->pl().getParent()) == visited.end()) {
+              pl << *f->getTo()->pl().getParent()->pl().getGeom();
+              visited.insert(f->getTo()->pl().getParent());
+            }
           }
-          pl << *f->getFrom()->pl().getParent()->pl().getGeom();
-          first = true;
+        }
+
+        for (auto f : res) {
+          if (f->pl().isSecondary()) continue;
+          g.balanceEdge(f->getFrom()->pl().getParent(), f->getTo()->pl().getParent());
+          // f->getTo()->pl().getParent());
         }
 
         if (reversed) pl.reverse();
@@ -385,7 +432,7 @@ int main(int argc, char** argv) {
 
   TransitGraph output;
   buildTransitGraph(&cg, &output);
-  // out.print(g);
+  //out.print(g);
   out.print(output);
 
   return (0);

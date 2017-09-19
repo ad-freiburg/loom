@@ -10,7 +10,7 @@ using util::geo::PolyLine;
 using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
-EdgePL::EdgePL(const PolyLine& pl, double c) : _pl(pl), _c(c) {
+EdgePL::EdgePL(const PolyLine& pl, double c, bool secondary) : _pl(pl), _c(c), _isSecondary(secondary) {
 
 }
 
@@ -47,4 +47,9 @@ double EdgePL::cost() const {
 // _____________________________________________________________________________
 void EdgePL::setCost(double c) {
   _c = c;
+}
+
+// _____________________________________________________________________________
+bool EdgePL::isSecondary() const {
+  return _isSecondary;
 }
