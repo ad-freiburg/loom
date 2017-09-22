@@ -275,7 +275,7 @@ int main(int argc, char** argv) {
 
   TransitGraph tg(&(std::cin));
   CombGraph cg;
-  removeEdgesShorterThan(&tg, 150);
+  removeEdgesShorterThan(&tg, 300);
   buildCombGraph(&tg, &cg);
   combineDeg2(&cg);
   writeEdgeOrdering(&cg);
@@ -286,17 +286,17 @@ int main(int argc, char** argv) {
 
   std::set<GridNode*> used;
 
-  double gridSize = 150;
+  double gridSize = 300;
 
-  gridgraph::GridGraph g(tg.getBBox(), gridSize);
+  gridgraph::GridGraph g(tg.getBBox(), gridSize, cfg.vertPen, cfg.horiPen, cfg.diagPen);
 
   util::graph::Dijkstra dijkstra;
 
   // comparator for nodes, based on degree
   struct NodeCompare {
     bool operator()(CombNode* a, CombNode* b) {
-      // return a->getAdjList().size() < b->getAdjList().size();
-      return a->pl().getRouteNumber() < b->pl().getRouteNumber();
+      return a->getAdjList().size() < b->getAdjList().size();
+      // return a->pl().getRouteNumber() < b->pl().getRouteNumber();
     }
   };
 
@@ -364,7 +364,7 @@ int main(int argc, char** argv) {
 
         if (m.find(to) == m.end()) {
           double maxDis = to->getAdjList().size() == 1
-                              ? util::geo::len(*e->pl().getGeom()) / 2
+                              ? util::geo::len(*e->pl().getGeom()) / 1.5
                               : 400;
 
           auto cands = g.getNearestCandidatesFor(*to->pl().getGeom(), maxDis);
@@ -446,24 +446,6 @@ int main(int argc, char** argv) {
         e->pl().setPolyLine(pl);
         e->pl().setGeneration(gen);
 
-        if (false && gen == 4) {
-          auto nodes = *g.getNodes();
-          for (auto n : nodes) {
-            if (n->getAdjList().size() == 16) {
-              g.deleteNode(n);
-            } else {
-              for (auto e : n->getAdjListOut()) {
-                if (n->pl().getParent() ==
-                    e->getOtherNode(n)->pl().getParent()) {
-                  g.deleteEdge(n, e->getOtherNode(n));
-                }
-              }
-            }
-          }
-          out.print(g);
-          exit(0);
-        }
-
         gen++;
       }
 
@@ -471,10 +453,30 @@ int main(int argc, char** argv) {
     }
   }
 
+  // out.print(g);
+
+  if (cfg.printMode == "gridgraph") {
+    /*
+     * auto nodes = *g.getNodes();
+     * for (auto n : nodes) {
+     *   if (n->getAdjList().size() == 16) {
+     *     g.deleteNode(n);
+     *   } else {
+     *     for (auto e : n->getAdjListOut()) {
+     *       if (n->pl().getParent() == e->getOtherNode(n)->pl().getParent()) {
+     *         g.deleteEdge(n, e->getOtherNode(n));
+     *       }
+     *     }
+     *   }
+     * }
+     */
+    out.print(g);
+    exit(0);
+  } else {
   TransitGraph output;
   buildTransitGraph(&cg, &output);
-  // out.print(g);
-  out.print(output);
+    out.print(output);
+  }
 
   return (0);
 }

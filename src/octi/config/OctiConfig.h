@@ -12,6 +12,12 @@ namespace config {
 
 struct Config {
   double gridCellWidth;
+
+  std::string printMode;
+
+  double horiPen;
+  double vertPen;
+  double diagPen;
 };
 
 }  // namespace config

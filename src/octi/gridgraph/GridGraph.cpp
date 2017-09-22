@@ -8,7 +8,8 @@
 using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
-GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
+GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize,
+    double vertPen, double horiPen, double diagPen)
     : _bbox(bbox),
       _grid(cellSize, cellSize, bbox),
       Graph<NodePL, EdgePL>(true) {
@@ -17,9 +18,9 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
       90,  // cost for 45 degree node traversal
       30,  // cost for 90 degree node traversal
       10,  // cost for 135 degree node traversal
-      3,   // cost for vertical edge
-      3,   // cost for horizontal edge
-      3    // cost for diagonal edge
+      vertPen,   // cost for vertical edge
+      horiPen,   // cost for horizontal edge
+      diagPen    // cost for diagonal edge
   };
 
   assert(_c.p_0 < _c.p_135);
@@ -32,7 +33,7 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize)
 
   double directNodeCost = 88888;
 
-  double spacer = cellSize / 20.0;
+  double spacer = cellSize / 10.0;
 
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
@@ -640,11 +641,11 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double
               << std::endl;
 
     for (int j = 0; j <= dd + 1; j++) {
-      addC[(i + j) % 8] += 20 * (dd + 1 - j);
+      addC[(i + j) % 8] += 29 * (dd + 1 - j);
     }
 
     for (int j = 0; j <= ddd + 1; j++) {
-      addC[(i + (8 - j)) % 8] += 20 * (ddd + 1 - j);
+      addC[(i + (8 - j)) % 8] += 29 * (ddd + 1 - j);
     }
 
     if (d > 0) {

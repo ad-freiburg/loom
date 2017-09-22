@@ -49,7 +49,7 @@ struct Costs {
 
 class GridGraph : public Graph<NodePL, EdgePL> {
  public:
-  GridGraph(const util::geo::Box& bbox, double cellSize);
+  GridGraph(const util::geo::Box& bbox, double cellSize, double vertPen, double horiPen, double diagPen);
 
   Node<NodePL, EdgePL>* getNode(size_t x, size_t y) const;
 

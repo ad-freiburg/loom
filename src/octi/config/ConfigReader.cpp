@@ -32,7 +32,21 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   config.add_options()(
       "grid-cell-width",
       opts::value<double>(&(cfg->gridCellWidth))->default_value(50.0),
-      "grid cell width");
+      "grid cell width")
+    (
+      "print-mode",
+      opts::value<std::string>(&(cfg->printMode))->default_value("transitgraph"),
+      "print mode: transitgraph, gridgraph")
+        (
+      "vert-pen",
+      opts::value<double>(&(cfg->vertPen))->default_value(3),
+      "penalty for vertical edges")(
+      "hori-pen",
+      opts::value<double>(&(cfg->horiPen))->default_value(3),
+      "penalty for horicontal edges")(
+      "diag-pen",
+      opts::value<double>(&(cfg->diagPen))->default_value(5),
+      "penalty for diagonal edges");
 
   opts::options_description cmdlineOptions;
   cmdlineOptions.add(config).add(generic);
