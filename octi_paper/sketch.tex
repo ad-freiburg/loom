@@ -19,7 +19,7 @@ pdfproducer={}
 }
 
 \begin{document}
-\title{An Approximation Algorithm for Drawing Metro Maps}
+\title{An Approximation Algorithm for Metro Map Drawing}
 
 \numberofauthors{1}
 %\author{Patrick Brosi\\\affaddr{University of Freiburg}\\\affaddr{Chair of Algorithms and Data Structures}}
@@ -28,24 +28,51 @@ pdfproducer={}
 
 \section{Abstract}
 
-We investigate a novel approximative approach to octilinear Metro Map drawing. Contrary to previous work, which usually relied on either local or global optimization techniques, we state the task as a (greedy) iterative shortest-path problem on a specially crafted octilinear grid graph, whose edge weights are updated after each iteration. While our results are not perfect, they come surprisingly close to previous work which used Integer Linear Programming to find a globally optimal solution. We state the basic idea of our approach, give some heuristics to improve the final result and evaluate our method on 5 cities around the world. The resulting maps are rendered using previous work by us and are publicly accessible at http://bla.blubb. 
+We investigate a novel approximative approach to the NP-hard problem of octilinear Metro Map drawing. Contrary to previous work, which usually relied on either local or global optimization techniques, we state the task as a (greedy) iterative shortest-path problem on a specially crafted octilinear grid graph, whose edge weights are updated after each iteration. While our results are not perfect, they come surprisingly close to previous work which used Integer Linear Programming to find a globally optimal solution. We state the basic idea of our approach, give some heuristics to improve the final result and evaluate our method on 10 cities around the world. As far as we are aware, our approach is the first non-global approach which guarantees octilinear results, albeit at the cost of not always finding a solution. The resulting schematic maps are rendered using previous work by us and are publicly accessible at http://bla.blubb. 
+
+\section{Introduction}
+
+Lorem ipsum 
 
 \section{Problem definition}
 
+Given an undirected planar graph $G = (V, E)$. We want to find a schematic representation of $G$ that resembles a classic Metro Map. This is usually formalized as a set of hard and soft constraints \cite{nb, ...}. The hard constraints may be summarized as:
+
+\begin{enumerate}
+\setlength\itemsep{.1em}
+\item \emph{Octilinearity}. Edges may only consist of segments whose orientation is a multiple of $45^{\circ}$.
+\item \emph{Topology preservation}. The input embedding should be respected. In particular, no new crossings between edges should be introduced, non-incident edges should never share common points and nodes should never touch each other. This is often modelled as a minimum distance $d_{V}$ between non-incident edges and a minimum distance $d_{E}$ between nodes.
+\end{enumerate}
+
+Additionally, the following soft constraints are usually employed:
+
+\begin{enumerate}
+\setlength\itemsep{.1em}
+\item \emph{Edge monotony}. Minimize the number of turns an edge has to take. Prefer large angles.
+\item \emph{Geographical accuracy}. The original node positions should be distorted as little as possible.
+\item \emph{} Balance the angular distribution of incident edges in nodes.
+\item \emph{Map density}.
+\end{enumerate}
+
+This list of soft constraints does not claim to be complete. % some more info on additional constraints
+
 \section{Related Work}
 
-Survey Nöllenburg http://i11www.iti.kit.edu/extra/publications/n-asamm-14.pdf
-Survey Wolff http://www1.pub.informatik.uni-wuerzburg.de/pub/wolff/pub/w-dsms-07.pdf
+Survey Nöllenburg %http://i11www.iti.kit.edu/extra/publications/n-asamm-14.pdf
+Survey Wolff %http://www1.pub.informatik.uni-wuerzburg.de/pub/wolff/pub/w-dsms-07.pdf
 Hong et al., force-based approach
 Stott's PhD
-
-
+steiner trees! %https://www.researchgate.net/profile/Matthias_Mueller-Hannemann/publication/225160153_Approximation_of_Octilinear_Steiner_Trees_Constrained_by_Hard_and_Soft_Obstacles/links/0912f50cf248ec1193000000/Approximation-of-Octilinear-Steiner-Trees-Constrained-by-Hard-and-Soft-Obstacles.pdf
 
 \section{Map Generation}
 
+Our algorithm proceeds in three basic steps: 1.) Build a so-called octilinear grid graph $\mathcal{G}$ on which the shortest path between two nodes is guaranteed to be octilinear and as monotone as possible. 2.) For an unsettled edge $e = {u, v}$ in $G$ find suitable positions $u'$ and $v'$ for $u$ and $v$ in $\mathcal{G}$ and greedily search for the shortest path from $u'$ to $v'$ 3.) Based on the path found in step 2, balance $\mathcal{G}$ locally. Continue with step 2.).
+
+This section gives detailed descriptions of all steps involved. Section~\ref{SEC:} describes additional balancing constraints to preserve the original embedding and discusses heuristics to prevent dead-locks.
+
 \subsection{Octilinear Grid Graph}
 
-We want to construct a graph $G$ on which every path is octilinear. The graph in Fig.~\ref{FIG:gridgraph} trivially guarantees this. Additionally, we want the total cost for a path from some node $a$ to another node $b$ to also reflect the total number of turns on this path. The cost of a turn should be weighted by the degree of this turn - either $135^{\circ}$, $90^{\circ}$ or $45^{\circ}$. We call these penalties $p_{135}$, $p_{90}$ and $p_{45}$. A straight pass through a node should go unpunished, that is, $p_{180} = 0$. Since we aim for a ``smooth'' path through $G$ we want to favor obtuse angles and require $p_{180} < p_{135} < p_{90} < p_{45}$.
+As mentioned above, our goal is to construct a graph $\mathcal{G}$ on which every path is octilinear. The graph in Fig.~\ref{FIG:gridgraph} trivially guarantees this. Additionally, we want the total cost for a path from some node $a$ to another node $b$ to also reflect the total number of turns on this path. The cost of a turn should be weighted by the degree of this turn - either $135^{\circ}$, $90^{\circ}$ or $45^{\circ}$. We call these penalties $p_{135}$, $p_{90}$ and $p_{45}$. A straight pass through a node should go unpunished, that is, $p_{180} = 0$. Since we aim for a ``smooth'' path through $G$ we want to favor obtuse angles and require $p_{180} < p_{135} < p_{90} < p_{45}$.
 
 The cost of any edge in Fig.~\ref{FIG:gridgraph}, left then depends on the edge we came from. We model this by adding 8 \emph{port} nodes $v_i^0 ... v_i^7$ to every node $v_i$. Each port corresponds to an outgoing direction - $v_i^0$ is the ``north'', $v_i^1$ is the ``south-west'' port and so on. Each port is connected with a direct edge $e_i^0 ... e_i^7$ and the cost for each of these edges is set to ``infinity minus one'' - that is, the cost has to bigger than the maximum possible cost of any other edge. This ensures that these edges are only used if we actually want to arrive in $v_i$. For passing through $v_i$, we connect each port with its neighbor at $90^{\circ}$ $135^{\circ}$ and $180^{\circ}$ (Fig.~\ref{FIG:port}, middle). It will become apparent later on why we skip $45^{\circ}$ edges here.
 
@@ -71,7 +98,7 @@ c_{45} &= a + p_{45}.
 \end{align}
 
 We choose $a$ in a way such that the following constraints are fullfilled:
-\begin{align}
+\begin{align}[h]
 2a + p_{135} &\geq a + p_{90} \label{CONSTRS:sim90}\\
 2a + p_{135} + p_{90} &\geq a + p_{45}\label{CONSTRS:sim45}.
 \end{align}
@@ -96,10 +123,13 @@ We can thus do without an explicit edge for $45^{\circ}$ turns, as it can always
 	\label{FIG:paths}
 \end{figure*}
 
+\subsection{Shortest-Path Search}
+
+\subsection{Graph Balancing}
+
+\subsection{Preserving Topology}
 
 \subsection{Input Ordering}
-
-\section{Preserving Topology}
 
 \section{Evaluation}
 
