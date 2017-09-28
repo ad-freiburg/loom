@@ -12,7 +12,7 @@
 \hypersetup{
 pdfauthor={Patrick Brosi},
 pdfkeywords=,
-pdftitle={A Simple Approximation Algorithm for Metro Map Drawing},
+pdftitle={An Approximation Algorithm for Metro Map Drawing},
 pdfsubject={},
 pdfcreator={},
 pdfproducer={}
@@ -36,12 +36,12 @@ Lorem ipsum
 
 \section{Problem definition}
 
-Given an undirected planar graph $G = (V, E)$. We want to find a schematic representation of $G$ that resembles a classic Metro Map. This is usually formalized as a set of hard and soft constraints \cite{nb, ...}. The hard constraints may be summarized as:
+Given an undirected planar graph $G = \{V, E\}$. We say $\mathcal{D}_G = \{p, c\}$ is a drawing of $G$, where $p(v) \in \mathbb{R}^2$ assigns a position to every node $v \in V$ and $c(e) = (q_0, q_1, ..., q_n)$, $q_i \in \mathbb{R}^2$ assigns a piecewise linear curve to every edge $e \in E$. Our goal is to find a schematic drawing of $G$ that resembles a classic Metro Map. This is usually formalized as a set of hard and soft constraints \cite{nb, ...}. The hard constraints may be summarized as:
 
 \begin{enumerate}
 \setlength\itemsep{.1em}
-\item \emph{Octilinearity}. Edges may only consist of segments whose orientation is a multiple of $45^{\circ}$.
-\item \emph{Topology preservation}. The input embedding should be respected. In particular, no new crossings between edges should be introduced, non-incident edges should never share common points and nodes should never touch each other. This is often modelled as a minimum distance $d_{V}$ between non-incident edges and a minimum distance $d_{E}$ between nodes.
+\item \emph{Octilinearity}. Each edge curve $c(e)$ may only consist of segments whose orientation is a multiple of $45^{\circ}$.
+\item \emph{Topology preservation}. The input embedding should be respected. In particular, no new crossings between edges should be introduced and non-incident edges should never share common points. This is often modelled as a minimum distance $d_{e}$ between non-incident edge curves and a minimum distance $d_{v}$ between node positions.
 \end{enumerate}
 
 Additionally, the following soft constraints are usually employed:
@@ -66,54 +66,66 @@ steiner trees! %https://www.researchgate.net/profile/Matthias_Mueller-Hannemann/
 
 \section{Map Generation}
 
-Our algorithm proceeds in three basic steps: 1.) Build a so-called octilinear grid graph $\mathcal{G}$ on which the shortest path between two nodes is guaranteed to be octilinear and as monotone as possible. 2.) For an unsettled edge $e = {u, v}$ in $G$ find suitable positions $u'$ and $v'$ for $u$ and $v$ in $\mathcal{G}$ and greedily search for the shortest path from $u'$ to $v'$ 3.) Based on the path found in step 2, balance $\mathcal{G}$ locally. Continue with step 2.).
+To find an octilinear drawing for some graph $G$, our algorithm proceeds in three basic steps: 1. Build a so-called octilinear grid graph $\Omega$ on which the drawing of a shortest path between two nodes is guaranteed to be octilinear and as smooth as possible. 2.) For an unsettled edge $e = \{u, v\}$ in $G$ find suitable nodes $u'$ and $v'$ in $\Omega$ and search for the shortest path from $u'$ to $v'$. 3. Based on the path found for $e$ in step 2, balance $\Omega$ locally. Mark $e$ as settled and greedily continue with step 2.
 
 This section gives detailed descriptions of all steps involved. Section~\ref{SEC:} describes additional balancing constraints to preserve the original embedding and discusses heuristics to prevent dead-locks.
 
 \subsection{Octilinear Grid Graph}
 
-As mentioned above, our goal is to construct a graph $\mathcal{G}$ on which every path is octilinear. The graph in Fig.~\ref{FIG:gridgraph} trivially guarantees this. Additionally, we want the total cost for a path from some node $a$ to another node $b$ to also reflect the total number of turns on this path. The cost of a turn should be weighted by the degree of this turn - either $135^{\circ}$, $90^{\circ}$ or $45^{\circ}$. We call these penalties $p_{135}$, $p_{90}$ and $p_{45}$. A straight pass through a node should go unpunished, that is, $p_{180} = 0$. Since we aim for a ``smooth'' path through $G$ we want to favor obtuse angles and require $p_{180} < p_{135} < p_{90} < p_{45}$.
+We start by constructing an auxiliary directed graph $\Omega = \{V_\omega, E_\omega\}$ with a drawing $\mathcal{D}_\Omega = \{p_\omega, c_\omega\}$ in such a way that every possible path $(e_0, e_1, ..., e_n), e_i \in E_\Omega$ is automatically represented as an octilinear curve by concatenating $c_\omega(e_0), c_\omega(e_0),...,c_\omega(e_n)$. The graph in Fig.~\ref{FIG:gridgraph} trivially satisfies this: we simply define a $n\times m$ grid, add nodes $v_{n,m}$ to $V_\omega$ for every grid point and set $p_\omega(v_{n,m}) = (n, m)$. Each node $v_{n,m}$ is connected with its 8 direct neighbors (except at the grid boundaries, where some neighbors are not present).
 
-The cost of any edge in Fig.~\ref{FIG:gridgraph}, left then depends on the edge we came from. We model this by adding 8 \emph{port} nodes $v_i^0 ... v_i^7$ to every node $v_i$. Each port corresponds to an outgoing direction - $v_i^0$ is the ``north'', $v_i^1$ is the ``south-west'' port and so on. Each port is connected with a direct edge $e_i^0 ... e_i^7$ and the cost for each of these edges is set to ``infinity minus one'' - that is, the cost has to bigger than the maximum possible cost of any other edge. This ensures that these edges are only used if we actually want to arrive in $v_i$. For passing through $v_i$, we connect each port with its neighbor at $90^{\circ}$ $135^{\circ}$ and $180^{\circ}$ (Fig.~\ref{FIG:port}, middle). It will become apparent later on why we skip $45^{\circ}$ edges here.
+% TODO: labelling!
+% We relate to these neighbors by their relative position, beginning with 0 (``north'' or $0^{\circ}$) and continuing clock-wise. The edges are labeled accordingly. So, $e_{n,m}^0 = (v_{n,m}, v_{n,m}^0) = (v_{n,m}, v_{n, m+1})$, $e_{n,m}^1 = (v_{n,m}, v_{n,1}^1) = (v_{n,m}, v_{n+1,m+1})$, and so on (Fig. TODO). For each such edge $e_{n, m}^i = (v_{n, m}, v_{n, m}^i), i \in [0, 7]$, we simply set $c_\omega(e_{n, m}^i) = \left(p_\omega\left(v_{n, m}\right), p_\omega\left(v_{n, m}^i\right)\right)$. Since for each edge $(v_{n, m}, v_{n, m}^i)$ there will be an opposite edge $(v_{n, m}^, v_{n, m})$, $\Omega$ is effectively an undirected graph. Edge directions are thus not indicated in Figures ?? and ??.
 
-A $180^{\circ}$ pass through $v_i$ can now take the direct edge connecting each port $v_i^k$ with its $180^{\circ}$ neighbor $v_i^{(k + 4) \mod 8}$ (Fig.~\ref{FIG:paths}, 1). Equally, a $90^{\circ}$ degree turn in $v_i$, coming from $v_i^k$ can take the edge to $v_i^{(k + 2) \mod 8}$ (Fig.~\ref{FIG:paths}, 2) and so on.
+To optimize soft constraint (1), we additionally want the total cost for a path from some node $v \in V_\omega$ to $u \in V_\omega$ to also reflect the total number of necessary turns. The cost of a turn should be weighted by its degree - either $135^{\circ}$, $90^{\circ}$ or $45^{\circ}$. We call these penalties $p_{135}$, $p_{90}$ and $p_{45}$. A straight pass through a node should go unpunished, that is, $p_{180} = 0$. Since we aim for a ``smooth'' path through $G$ and want to favor obtuse angles, we require $p_{180} < p_{135} < p_{90} < p_{45}$. The smoothest octilinear path from $u$ to $v$ in $\Omega$ would then be just the shortest path between them.
 
-As both a $45^{\circ}$ turn and a $90^{\circ}$ turn can be simulated by two (or more) cheaper turns, special care has to be applied to the modelling of the actual edge costs. A $45^{\circ}$ turn can be simulated by first passing $v_i$ on a $180^{\circ}$ edge, and then again on a $135^{\circ}$ edge (Fig.~\ref{FIG:paths}, 3). As $p_{180} < p_{135} < p_{45}$, this path may be cheaper than $p_{45}$. Similarily, a $90^{\circ}$ degree turn can be simulated by two cheaper $135^{\circ}$ edges (Fig.~\ref{FIG:paths}, 4).
-
-We call the actual edge costs for the 4 classes of port-to-port edges $c_0$, $c_{135}$, $c_{90}$ and $c_{45}$. To prevent the shortcuts described above, we make use of the fact that the absolute costs of these edges are irrelevant - since they are modeled the same in every node in $G$ and a path passing through (not going to) $v$ has to take one of them, we just have to make sure that the relative costs reflect the penalties we want to apply to the different angles, that is, $c_{135} - c_{180} = p_{135}$, $c_{90} - c_{180} = p_{90} = p_{135} + (c_{90}-c_{135})$ and so on. 
-
-\begin{figure*}[h]
+\begin{figure}
   \centering
-	$\vcenter{\hbox{\includegraphics[width=0.85\textwidth]{figures/node.pdf}}}$
+	$\vcenter{\hbox{\includegraphics[width=0.474\textwidth]{figures/grid.pdf}}}$
+	\caption{Left: A shortest path between $t$ and $u$ on a grid graph with uniform edge cost. Path turns are not minimized. Right: Two shortest path between $(t, u)$, and $(v, w)$ on our octilinear grid graph, $(t, u)$ acts as an obstacle for $(v, w)$. Path turns are minimized.}
+	\label{FIG:paths}
+\end{figure}
+
+We model this by adding 8 \emph{port} nodes $v_{n,m}^{0} ... v_{n,m}^{7}$ to every node $v_{n,m}$. Each port again corresponds to an outgoing direction and is connected with a direct edge $e_{n,m}^0 ... e_{n,m}^7$. We make sure that the cost for each of these edges bigger than the maximum cost of any other edge. This ensures that these edges are only used if we actually want to arrive in $v_{n,m}$. For paths passing through $v_{n,m}$, we connect each port with its sibling ports at $90^{\circ}$ $135^{\circ}$ and $180^{\circ}$ (Fig.~\ref{FIG:port}, middle).
+
+A $180^{\circ}$ pass through $v_i$ can now take the direct edge connecting each port $v_i^k$ with its $180^{\circ}$ sibling $v_i^{(k + 4) \mod 8}$ (Fig.~\ref{FIG:paths}, 1). Equally, a $90^{\circ}$ degree turn in $v_i$, coming from $v_i^k$ can take the edge to $v_i^{(k + 2) \mod 8}$ (Fig.~\ref{FIG:paths}, 2) and so on.
+
+As both a $45^{\circ}$ edge and a $90^{\circ}$ edge may be replaced by two (or more) cheaper edges, special care has to be applied to the modelling of the actual edge costs. A $45^{\circ}$ turn can be simulated by first passing $v_i$ on a $180^{\circ}$ edge, and then again on a $135^{\circ}$ edge (Fig.~\ref{FIG:paths}, 3). As $p_{180} < p_{135} < p_{45}$, this path may be cheaper than $p_{45}$. Similarily, a $90^{\circ}$ degree turn can be simulated by two cheaper $135^{\circ}$ edges (Fig.~\ref{FIG:paths}, 4).
+
+We call the actual edge costs for the 4 classes of port-to-port edges $c_0$, $c_{135}$, $c_{90}$ and $c_{45}$. To prevent the shortcuts described above, we make use of the fact that the absolute costs of these edges are irrelevant - since they are modeled the same in every node in $\Omega$ and a path passing through (not going to) some $v_{n,m}$ has to take one of them, we just have to make sure that the relative costs reflect the penalties we want to apply to the different angles, that is, $c_{135} - c_{180} = p_{135}$, $c_{90} - c_{180} = p_{90} = p_{135} + (c_{90}-c_{135})$ and so on. 
+
+\begin{figure}[h]
+  \centering
+	$\vcenter{\hbox{\includegraphics[width=0.45\textwidth]{figures/node.pdf}}}$
 	\caption{A $3\times3$ grid graph. Each node $v_i$ has 8 ports $v_i^0 ... v_i^7$ which are connected to $v_i$ by a direct edge. Each port is additionally connected to its $180^{\circ}$, $135^{\circ}$ and $35^{\circ}$ neighbor ports.}
 	\label{FIG:gridgraph}
-\end{figure*}
+\end{figure}
 
-Following this insight, we introduce a constant $a \geq 0$ and calculate the inter-port edge costs as follows:
+Following this insight, we introduce a constant $a \geq 0$ and set the inter-port edge costs as follows:
 \begin{align}
-c_{180} &= a \\
+c_{180} &= a + p_{180} = a \\
 c_{135} &= a + p_{135} \\
 c_{90} &= a + p_{90} \\
 c_{45} &= a + p_{45}.
 \end{align}
 
-We choose $a$ in a way such that the following constraints are fullfilled:
-\begin{align}[h]
+We choose $a$ in a way such that the following inequalities are fullfilled:
+\begin{align}
 2a + p_{135} &\geq a + p_{90} \label{CONSTRS:sim90}\\
 2a + p_{135} + p_{90} &\geq a + p_{45}\label{CONSTRS:sim45}.
 \end{align}
 (\ref{CONSTRS:sim90}) ensures that simulating a $90^{\circ}$ pass with two $135^{\circ}$ passes is never cheaper than $c_{90}$. (\ref{CONSTRS:sim45}) ensures that simulating a $45^{\circ}$ pass with a $135^{\circ}$ pass and a $180^{\circ}$ pass is never cheaper than $c_{90}$.
 
-(\ref{CONSTRS:sim45}) and (\ref{CONSTRS:sim90}) are fullfilled for $a = p_{45} - p_{135} \geq 0$, leading to the following edge costs in $G$:
+(\ref{CONSTRS:sim45}) and (\ref{CONSTRS:sim90}) are fullfilled for $a = p_{45} - p_{135} \geq 0$, leading to the following edge costs in $\Omega$:
 
 \begin{align}
 c_{180} &= p_{45} - p_{135} \\
 c_{135} &= p_{45} \\
-c_{90} &= c_{180} + p_{90} \\
-c_{45} &= 2p_{45} - p_{135} = c_{180} + c_{135}.
+c_{90} &= p_{45} - p_{135} + p_{90} = c_{180} + p_{90} \\
+c_{45} &= 2 p_{45} - p_{135} = c_{180} + c_{135}.
 \end{align}
 
-We can thus do without an explicit edge for $45^{\circ}$ turns, as it can always be exactly simulated.
+We can thus omit explicit edges for $45^{\circ}$ turns, as they can always be exactly replaced by a $180^{\circ}$ and a $135^{\circ}$ edge.
 
 
 \begin{figure*}
@@ -123,7 +135,7 @@ We can thus do without an explicit edge for $45^{\circ}$ turns, as it can always
 	\label{FIG:paths}
 \end{figure*}
 
-\subsection{Shortest-Path Search}
+\subsection{Shortest-Path Iteration}
 
 \subsection{Graph Balancing}
 
