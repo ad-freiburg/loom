@@ -519,7 +519,7 @@ GridEdge* GridGraph::getOtherEdge(GridEdge* e) {
 // _____________________________________________________________________________
 GridEdge* GridGraph::getNEdge(GridNode* a, GridNode* b) {
   for (size_t i = 0; i < 8; i++) {
-    if (a->pl().getPort(i) && b->pl().getPort((i + 4) % 8)) {
+    if (a && b && a->pl().getPort(i) && b->pl().getPort((i + 4) % 8)) {
       auto e = getEdge(a->pl().getPort(i), b->pl().getPort((i + 4) % 8));
       if (e) return e;
     }

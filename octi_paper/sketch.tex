@@ -28,11 +28,11 @@ pdfproducer={}
 
 \section{Abstract}
 
-We investigate a novel approximative approach to the NP-hard problem of octilinear Metro Map drawing. Contrary to previous work, which usually relied on either local or global optimization techniques, we state the task as a (greedy) iterative shortest-path problem on a specially crafted octilinear grid graph, whose edge weights are locally updated after each iteration. While our results are not perfect, they come surprisingly close to previous work which used Integer Linear Programming to find a globally optimal solution. We state the basic idea of our approach, give some heuristics to improve the final result and evaluate our method on 10 cities around the world. As far as we are aware, our approach is the first non-global approach which guarantees octilinear results, albeit at the cost of not always finding a solution. The resulting schematic maps are rendered using previous work by us and are publicly accessible at http://bla.blubb. 
+We investigate a novel approximative approach to the NP-hard problem of octilinear Metro Map drawing. Contrary to previous work, which usually relied on either local or global optimization techniques, we state the task as a (greedy) iterative shortest-path problem on a specially crafted octilinear grid graph, whose edge weights are locally updated after each iteration. While our results are not perfect, they come surprisingly close to previous work which used Integer Linear Programming to find a globally optimal solution, and do so fast. We state the basic idea of our approach, give some heuristics to improve the final result and evaluate our method on 10 cities around the world. As far as we are aware, our approach is the first non-global approach which guarantees octilinear results, albeit at the cost of not always finding a solution. The resulting schematic maps are rendered using previous work by us and are publicly accessible at http://bla.blubb.
 
 \section{Introduction}
 
-Lorem ipsum 
+Lorem ipsum
 
 \section{Problem definition}
 
@@ -55,6 +55,13 @@ Additionally, the following soft constraints are usually employed:
 \end{enumerate}
 
 This list of soft constraints does not claim to be complete. % some more info on additional constraints
+
+\begin{figure}[t]
+  \centering
+	$\vcenter{\hbox{\includegraphics[width=0.474\textwidth]{figures/octi.pdf}}}$
+	\caption{The subway network of Vienna, rendered with our approach from raw timetable (GTFS) data (including stop positions).}
+	\label{FIG:examplewien}
+\end{figure}
 
 \section{Related Work}
 
@@ -91,7 +98,7 @@ A $180^{\circ}$ pass through $v_{n,m}$ coming from $N^k(v_{n, m})$ can now take 
 
 As both a $45^{\circ}$ port edge and a $90^{\circ}$ port edge may be substituted by two (or more) cheaper edges, special care has to be applied to the modelling of the actual edge costs. For example, a $45^{\circ}$ turn can be simulated by first passing $v_{n, m}$ on a $180^{\circ}$ port edge, and then again on a $135^{\circ}$ port edge (Fig.~\ref{FIG:paths}, 3). As $p_{180} < p_{135} < p_{45}$, this path will be cheaper than $p_{45}$, undermining our penalty system. Similarily, a $90^{\circ}$ degree turn can be simulated by two cheaper $135^{\circ}$ port edges (Fig.~\ref{FIG:paths}, 4).
 
-We call the actual edge costs for the 4 classes of port edges $c_0$, $c_{135}$, $c_{90}$ and $c_{45}$. To prevent the shortcuts described above, we make use of the fact that the absolute costs of these edges are irrelevant. Since they are modeled the same in every grid node and a path passing through (not going to) some $v_{n,m}$ has to take \emph{one} of them, we just have to make sure that the relative costs reflect the penalties we want to apply to the different turn angles, that is, $c_{135} - c_{180} = p_{135}$, $c_{90} - c_{180} = p_{90} = p_{135} + (c_{90}-c_{135})$ etc. 
+We call the actual edge costs for the 4 classes of port edges $c_0$, $c_{135}$, $c_{90}$ and $c_{45}$. To prevent the shortcuts described above, we make use of the fact that the absolute costs of these edges are irrelevant. Since they are modeled the same in every grid node and a path passing through (not going to) some $v_{n,m}$ has to take \emph{one} of them, we just have to make sure that the relative costs reflect the penalties we want to apply to the different turn angles, that is, $c_{135} - c_{180} = p_{135}$, $c_{90} - c_{180} = p_{90} = p_{135} + (c_{90}-c_{135})$ etc.
 
 \begin{figure}[h]
   \centering
@@ -137,7 +144,7 @@ Figure~\ref{FIG:grids}, left provides two example of paths through an octilinear
 
 \subsection{Shortest-Path Iteration}
 
-At the core of our approach lies an iterative shortest-path search, using a straight-forward implementation of Dijkstra's algorithm. We recall that the input to our algorithm is an undirected planar graph $G = \{V, E\}$. We say a an edge $e \in E$ is ``settled'' if $e \in S$ and initialize $S = \emptyset$. Additionally, we define a function $\omega(v) \in V_\omega$ which assigns $v$ the nearest node in $\Omega$.  The intuitive idea behind our algorithm is to calculate 
+At the core of our approach lies an iterative shortest-path search, using a straight-forward implementation of Dijkstra's algorithm. We recall that the input to our algorithm is an undirected planar graph $G = \{V, E\}$. We say a an edge $e \in E$ is ``settled'' if $e \in S$ and initialize $S = \emptyset$. Additionally, we define a function $\omega(v) \in V_\omega$ which assigns $v$ the nearest node in $\Omega$.  The intuitive idea behind our algorithm is to calculate
 $|E|$ shortest paths $\left(\omega\left(v\right), \omega\left(u\right)\right)$ in $\Omega$ for each edge $e = \{u, v\}, e \in E$ until all edges are settled. This would already give us an octilinear, locally turn-optimized drawing. The following challenges prevent a straight-forward implementation of this idea:
 \begin{enumerate}
 \item Edges are not allowed to cross each other in the final drawing.
@@ -151,7 +158,7 @@ We adress the first problem by adding the path found after each iteration as an 
 
 To give nodes some slack to snap into an optimal position, we don't actually calculate the shortest path between two nodes $\omega(u)$ and $\omega(v)$ if one of them has not already been chosen in a previous iteration. Instead, but between $\omega(u)$ and all possible target nodes in $\Omega$ that have a distance to $u$ that is less than $\hat d_v$. This can easily be integrated into our shortest-path search - we just abort Dijkstra's algorithm as soon as we have reached \emph{some} of the target nodes. This node is then guaranteed to be the closest of all target nodes to $\omega(v)$ in terms of the cost function. Fig.~TODO gives an example of this approach.
 
-A negative side-effect of this trick is that it shortens 
+A negative side-effect of this trick is that it shortens
 
 \subsection{Graph Balancing}
 \label{SEC:balancing}

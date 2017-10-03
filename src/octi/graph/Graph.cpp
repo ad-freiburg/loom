@@ -159,14 +159,37 @@ void Graph::topologizeIsects() {
 
     double pa = i.a->pl().getPolyline().projectOn(i.bp.p).totalPos;
 
-    addEdge(i.b->getFrom(), x,
+    size_t as = i.a->pl().getRoutes().size();
+    size_t bs = i.b->pl().getRoutes().size();
+
+    auto ba = addEdge(i.b->getFrom(), x,
             EdgePL(i.b->pl().getPolyline().getSegment(0, i.bp.totalPos)));
-    addEdge(x, i.b->getTo(),
+    auto bb = addEdge(x, i.b->getTo(),
             EdgePL(i.b->pl().getPolyline().getSegment(i.bp.totalPos, 1)));
 
-    addEdge(i.a->getFrom(), x,
+    for (auto r : i.b->pl().getRoutes()) {
+      if (r.direction == i.b->getFrom()) {
+        ba->pl().addRoute(r.route, i.b->getFrom());
+        bb->pl().addRoute(r.route, x);
+      } else {
+        ba->pl().addRoute(r.route, x);
+        bb->pl().addRoute(r.route, i.b->getTo());
+      }
+    }
+
+    auto aa = addEdge(i.a->getFrom(), x,
             EdgePL(i.a->pl().getPolyline().getSegment(0, pa)));
-    addEdge(x, i.a->getTo(), EdgePL(i.a->pl().getPolyline().getSegment(pa, 1)));
+    auto ab = addEdge(x, i.a->getTo(), EdgePL(i.a->pl().getPolyline().getSegment(pa, 1)));
+
+    for (auto r : i.a->pl().getRoutes()) {
+      if (r.direction == i.b->getFrom()) {
+        aa->pl().addRoute(r.route, i.a->getFrom());
+        ab->pl().addRoute(r.route, x);
+      } else {
+        aa->pl().addRoute(r.route, x);
+        ab->pl().addRoute(r.route, i.a->getTo());
+      }
+    }
 
     deleteEdge(i.a->getFrom(), i.a->getTo());
     deleteEdge(i.b->getFrom(), i.b->getTo());
@@ -189,7 +212,7 @@ ISect Graph::getNextIntersection() {
               ret.a = e1;
               ret.b = e2;
               ret.bp = *is.begin();
-              if (ret.bp.totalPos > 0.0001 && 1 - ret.bp.totalPos > 0.0001) {
+              if (ret.bp.totalPos > 0.001 && 1 - ret.bp.totalPos > 0.001) {
                 return ret;
               }
             }

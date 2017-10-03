@@ -129,6 +129,7 @@ void buildTransitGraph(CombGraph* source, TransitGraph* target) {
           m[from] = tfrom;
           target->addNode(tfrom);
         }
+
         if (m.find(to) == m.end()) {
           auto payload = to->pl();
           payload.setGeom(pl.getLine().back());
@@ -165,7 +166,7 @@ void combineDeg2(CombGraph* g) {
 
       auto pl = a->pl();
 
-      // a is the referen
+      // a is the reference
       if (a->getTo() == n) {
         if (b->getTo() != n) {
           pl.getChilds().insert(pl.getChilds().end(),
@@ -208,9 +209,17 @@ start:
     for (auto e1 : n1->getAdjList()) {
       if (e1->pl().getPolyline().getLength() < d) {
         if (e1->getOtherNode(n1)->getAdjList().size() > 1 &&
-            n1->getAdjList().size() > 1) {
+            n1->getAdjList().size() > 1 && (n1->pl().getStops().size() == 0 || e1->getOtherNode(n1)->pl().getStops().size() == 0)) {
           auto otherP = e1->getFrom()->pl().getGeom();
-          auto n = g->mergeNodes(e1->getFrom(), e1->getTo());
+
+          TransitNode* n = 0;
+
+          if (e1->getTo()->pl().getStops().size() > 0) {
+            n = g->mergeNodes(e1->getFrom(), e1->getTo());
+          } else {
+            n = g->mergeNodes(e1->getTo(), e1->getFrom());
+          }
+
           n->pl().setGeom(util::geo::Point(
               (n->pl().getGeom()->get<0>() + otherP->get<0>()) / 2,
               (n->pl().getGeom()->get<1>() + otherP->get<1>()) / 2));
@@ -219,6 +228,24 @@ start:
       }
     }
   }
+}
+
+// _____________________________________________________________________________
+double getMaxDis(CombNode* to, CombEdge* e) {
+
+  double tooMuch = 1000;
+
+  if (to->getAdjList().size() == 1) {
+    return util::geo::len(*e->pl().getGeom()) / 1.5;
+  }
+
+  if (to->getAdjList().size() > 1) {
+    if (e->pl().getChilds().size() > 5 && util::geo::len(*e->pl().getGeom()) / e->pl().getChilds().size() > tooMuch) {
+      return ((util::geo::len(*e->pl().getGeom()) / e->pl().getChilds().size()) - tooMuch) * e->pl().getChilds().size();
+    }
+  }
+
+  return 400;
 }
 
 // _____________________________________________________________________________
@@ -275,8 +302,9 @@ int main(int argc, char** argv) {
 
   TransitGraph tg(&(std::cin));
   CombGraph cg;
-  removeEdgesShorterThan(&tg, 300);
+  removeEdgesShorterThan(&tg, 200);
   buildCombGraph(&tg, &cg);
+
   combineDeg2(&cg);
   writeEdgeOrdering(&cg);
 
@@ -295,8 +323,8 @@ int main(int argc, char** argv) {
   // comparator for nodes, based on degree
   struct NodeCompare {
     bool operator()(CombNode* a, CombNode* b) {
-      return a->getAdjList().size() < b->getAdjList().size();
-      // return a->pl().getRouteNumber() < b->pl().getRouteNumber();
+      // return a->getAdjList().size() < b->getAdjList().size();
+      return a->getAdjList().size() < b->getAdjList().size() || (a->getAdjList().size() == b->getAdjList().size() && a->pl().getRouteNumber() < b->pl().getRouteNumber());
     }
   };
 
@@ -339,7 +367,14 @@ int main(int argc, char** argv) {
           auto tmp = from;
           from = to;
           to = tmp;
-          reversed = true;
+          reversed = !reversed;
+        }
+
+        if (m.find(from) == m.end() && m.find(to) != m.end()) {
+          auto tmp = from;
+          from = to;
+          to = tmp;
+          reversed = !reversed;
         }
 
         if (m.find(from) == m.end()) {
@@ -363,9 +398,7 @@ int main(int argc, char** argv) {
         std::set<GridNode*> tos;
 
         if (m.find(to) == m.end()) {
-          double maxDis = to->getAdjList().size() == 1
-                              ? util::geo::len(*e->pl().getGeom()) / 1.5
-                              : 400;
+          double maxDis = getMaxDis(to, e);
 
           auto cands = g.getNearestCandidatesFor(*to->pl().getGeom(), maxDis);
 
@@ -403,6 +436,7 @@ int main(int argc, char** argv) {
 
         if (target == 0) {
           LOG(ERROR) << "Could not sort in node " << to << std::endl;
+          continue;
         }
 
         m[to] = target;
@@ -473,8 +507,8 @@ int main(int argc, char** argv) {
     out.print(g);
     exit(0);
   } else {
-  TransitGraph output;
-  buildTransitGraph(&cg, &output);
+    TransitGraph output;
+    buildTransitGraph(&cg, &output);
     out.print(output);
   }
 
