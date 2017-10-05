@@ -1,3 +1,7 @@
+// Copyright 2016
+// University of Freiburg - Chair of Algorithms and Data Structures
+// Author: Patrick Brosi <brosi@informatik.uni-freiburg.de>
+
 var networks = [
   {
     'id' : 'stuttgart',

@@ -157,11 +157,18 @@ void combineDeg2(CombGraph* g) {
       CombEdge* a = 0;
       CombEdge* b = 0;
 
-      for (auto e : n->getAdjList()) {
+      for (auto e : n->getAdjListOut()) {
         if (!a)
           a = g->getEdge(n, e->getOtherNode(n));
         else
           b = g->getEdge(n, e->getOtherNode(n));
+      }
+
+      for (auto e : n->getAdjListIn()) {
+        if (!a)
+          a = g->getEdge(e->getOtherNode(n), n);
+        else if (!b)
+          b = g->getEdge(e->getOtherNode(n), n);
       }
 
       auto pl = a->pl();
@@ -301,7 +308,7 @@ int main(int argc, char** argv) {
    */
 
   TransitGraph tg(&(std::cin));
-  CombGraph cg;
+  CombGraph cg(true);
   removeEdgesShorterThan(&tg, 200);
   buildCombGraph(&tg, &cg);
 
