@@ -7,7 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <set>
-#include <string>
+#include <chrono>
 #include "octi/config/ConfigReader.h"
 #include "octi/graph/CombEdgePL.h"
 #include "octi/graph/CombNodePL.h"
@@ -40,6 +40,11 @@ typedef util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>
 
 using octi::gridgraph::GridNode;
 using octi::gridgraph::GridEdge;
+
+// _____________________________________________________________________________
+void rotate(CombGraph*, double deg ) {
+
+}
 
 // _____________________________________________________________________________
 void buildCombGraph(TransitGraph* source, CombGraph* target) {
@@ -306,24 +311,54 @@ int main(int argc, char** argv) {
    *     exit(0);
    *   }
    */
+  std::chrono::steady_clock::time_point begin;
+  std::chrono::steady_clock::time_point end;
 
+  std::cerr << "Reading graph file... ";
+  begin = std::chrono::steady_clock::now();
   TransitGraph tg(&(std::cin));
-  CombGraph cg(true);
-  removeEdgesShorterThan(&tg, 200);
-  buildCombGraph(&tg, &cg);
+  end = std::chrono::steady_clock::now();
+  std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
 
+  std::cerr << "Planarize graph... ";
+  begin = std::chrono::steady_clock::now();
+  tg.topologizeIsects();
+  end = std::chrono::steady_clock::now();
+  std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
+
+  std::cerr << "Removing short edges... ";
+  begin = std::chrono::steady_clock::now();
+  removeEdgesShorterThan(&tg, 200);
+  end = std::chrono::steady_clock::now();
+  std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
+
+  std::cerr << "Building combination graph... ";
+  begin = std::chrono::steady_clock::now();
+  CombGraph cg(true);
+  buildCombGraph(&tg, &cg);
+  end = std::chrono::steady_clock::now();
+  std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
+
+  std::cerr << "Combining deg 2 nodes...";
+  begin = std::chrono::steady_clock::now();
   combineDeg2(&cg);
+  end = std::chrono::steady_clock::now();
+  std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
+
+  std::cerr << "Writing edge ordering...";
   writeEdgeOrdering(&cg);
+  end = std::chrono::steady_clock::now();
+  std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
 
   std::map<CombNode*, GridNode*> m;
-
   std::map<CombNode*, TransitNode*> oldNew;
-
   std::set<GridNode*> used;
 
   double gridSize = 300;
 
   gridgraph::GridGraph g(tg.getBBox(), gridSize, cfg.vertPen, cfg.horiPen, cfg.diagPen);
+
+  std::cerr << "Number of nodes in grid graph: " << g.getNodes()->size() << std::endl;
 
   util::graph::Dijkstra dijkstra;
 
@@ -346,6 +381,7 @@ int main(int argc, char** argv) {
 
   std::set<CombEdge*> done;
   size_t gen = 0;
+  uint64_t totalCost = 0;
 
   while (!globalPq.empty()) {
     auto n = globalPq.top();
@@ -402,7 +438,7 @@ int main(int argc, char** argv) {
         }
 
         // get surrounding displacement nodes
-        std::set<GridNode*> tos;
+        std::unordered_map<GridNode*, bool> tos;
 
         if (m.find(to) == m.end()) {
           double maxDis = getMaxDis(to, e);
@@ -411,34 +447,40 @@ int main(int argc, char** argv) {
 
           while (!cands.empty()) {
             if (used.find(cands.top().n) == used.end()) {
-              tos.insert(cands.top().n);
+              tos[cands.top().n] = true;
             }
             cands.pop();
           }
         } else {
-          tos.insert(m.find(to)->second);
+          tos[m.find(to)->second] = true;
         }
 
         std::list<GridEdge*> res;
         GridNode* target = 0;
 
-        std::cerr << "Balancing... " << std::endl;
+        std::cerr << "Calculating topo penalties... ";
+        begin = std::chrono::steady_clock::now();
         double addCFrom[8] = {0, 0, 0, 0, 0, 0, 0, 0};
         double addCTo[8] = {0, 0, 0, 0, 0, 0, 0, 0};
         g.topoPenalty(m[from], from, e, addCFrom);
         g.addCostVector(m[from], addCFrom);
         if (tos.size() == 1) {
-          g.topoPenalty(*tos.begin(), to, e, addCTo);
-          g.addCostVector(*tos.begin(), addCTo);
+          g.topoPenalty(tos.begin()->first, to, e, addCTo);
+          g.addCostVector(tos.begin()->first, addCTo);
         }
 
-        std::cerr << "... done. " << std::endl;
+        end = std::chrono::steady_clock::now();
+        std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
 
+        std::cerr << "Finding shortest path... ";
+        begin = std::chrono::steady_clock::now();
         dijkstra.shortestPath(m[from], tos, &res, &target);
+        end = std::chrono::steady_clock::now();
+        std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
 
         g.removeCostVector(m[from], addCFrom);
         if (tos.size() == 1) {
-          g.removeCostVector(*tos.begin(), addCTo);
+          g.removeCostVector(tos.begin()->first, addCTo);
         }
 
         if (target == 0) {
@@ -450,8 +492,12 @@ int main(int argc, char** argv) {
         used.insert(target);
 
         // write everything to the result graph
+        std::cerr << "Writing found path as edge to result graph... ";
+        begin = std::chrono::steady_clock::now();
         PolyLine pl;
+        uint64_t cost = 0;
         for (auto f : res) {
+          cost += f->pl().cost();
           f->pl().addResidentEdge(e);
           g.getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
 
@@ -473,15 +519,23 @@ int main(int argc, char** argv) {
             pl << *f->getTo()->pl().getGeom();
           }
         }
+        end = std::chrono::steady_clock::now();
+        std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms), path cost " << cost << std::endl;
+
+        totalCost += cost;
 
         if (res.size())
           pl << *res.back()->getTo()->pl().getParent()->pl().getGeom();
 
+        std::cerr << "Balance edge...";
+        begin = std::chrono::steady_clock::now();
         for (auto f : res) {
           if (f->pl().isSecondary()) continue;
           g.balanceEdge(f->getFrom()->pl().getParent(),
                         f->getTo()->pl().getParent());
         }
+        end = std::chrono::steady_clock::now();
+        std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
 
         if (reversed) pl.reverse();
         e->pl().setPolyLine(pl);
@@ -493,6 +547,8 @@ int main(int argc, char** argv) {
       settled.insert(n);
     }
   }
+
+  std::cerr << " === Total edge cost in graph is " << totalCost << " === " <<  std::endl;
 
   // out.print(g);
 

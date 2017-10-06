@@ -137,7 +137,20 @@ Graph::Graph(std::istream* s) {
     }
   }
 
-  topologizeIsects();
+  buildGrids();
+}
+
+// _____________________________________________________________________________
+void Graph::buildGrids() {
+  _nodeGrid = NodeGrid(200, 200, _bbox);
+  _edgeGrid = EdgeGrid(200, 200, _bbox);
+
+  for (auto n : *getNodes()) {
+    _nodeGrid.add(*n->pl().getGeom(), n);
+    for (auto e : n->getAdjListOut()) {
+      _edgeGrid.add(*e->pl().getGeom(), e);
+    }
+  }
 }
 
 // _____________________________________________________________________________
@@ -152,6 +165,7 @@ const util::geo::Box& Graph::getBBox() const { return _bbox; }
 
 // _____________________________________________________________________________
 void Graph::topologizeIsects() {
+  proced.clear();
   while (getNextIntersection().a) {
     auto i = getNextIntersection();
     auto x = new util::graph::Node<NodePL, EdgePL>(NodePL(i.bp.p));
@@ -159,13 +173,13 @@ void Graph::topologizeIsects() {
 
     double pa = i.a->pl().getPolyline().projectOn(i.bp.p).totalPos;
 
-    size_t as = i.a->pl().getRoutes().size();
-    size_t bs = i.b->pl().getRoutes().size();
-
     auto ba = addEdge(i.b->getFrom(), x,
             EdgePL(i.b->pl().getPolyline().getSegment(0, i.bp.totalPos)));
     auto bb = addEdge(x, i.b->getTo(),
             EdgePL(i.b->pl().getPolyline().getSegment(i.bp.totalPos, 1)));
+
+    _edgeGrid.add(*ba->pl().getGeom(), ba);
+    _edgeGrid.add(*bb->pl().getGeom(), bb);
 
     for (auto r : i.b->pl().getRoutes()) {
       if (r.direction == i.b->getFrom()) {
@@ -181,6 +195,9 @@ void Graph::topologizeIsects() {
             EdgePL(i.a->pl().getPolyline().getSegment(0, pa)));
     auto ab = addEdge(x, i.a->getTo(), EdgePL(i.a->pl().getPolyline().getSegment(pa, 1)));
 
+    _edgeGrid.add(*aa->pl().getGeom(), aa);
+    _edgeGrid.add(*ab->pl().getGeom(), ab);
+
     for (auto r : i.a->pl().getRoutes()) {
       if (r.direction == i.b->getFrom()) {
         aa->pl().addRoute(r.route, i.a->getFrom());
@@ -191,6 +208,8 @@ void Graph::topologizeIsects() {
       }
     }
 
+    _edgeGrid.remove(i.a);
+    _edgeGrid.remove(i.b);
     deleteEdge(i.a->getFrom(), i.a->getTo());
     deleteEdge(i.b->getFrom(), i.b->getTo());
   }
@@ -199,22 +218,24 @@ void Graph::topologizeIsects() {
 // _____________________________________________________________________________
 ISect Graph::getNextIntersection() {
   for (auto n1 : *getNodes()) {
-    for (auto e1 : n1->getAdjList()) {
+    for (auto e1 : n1->getAdjListOut()) {
       if (proced.find(e1) != proced.end()) continue;
-      for (auto n2 : *getNodes()) {
-        for (auto e2 : n2->getAdjList()) {
-          if (proced.find(e2) != proced.end()) continue;
-          if (e1 != e2) {
-            auto is =
-                e1->pl().getPolyline().getIntersections(e2->pl().getPolyline());
-            if (is.size()) {
-              ISect ret;
-              ret.a = e1;
-              ret.b = e2;
-              ret.bp = *is.begin();
-              if (ret.bp.totalPos > 0.001 && 1 - ret.bp.totalPos > 0.001) {
-                return ret;
-              }
+
+      std::set<util::graph::Edge<NodePL, EdgePL>*> neighbors;
+      _edgeGrid.getNeighbors(e1, 0, &neighbors);
+
+      for (auto e2 : neighbors) {
+        if (proced.find(e2) != proced.end()) continue;
+        if (e1 != e2) {
+          auto is =
+              e1->pl().getPolyline().getIntersections(e2->pl().getPolyline());
+          if (is.size()) {
+            ISect ret;
+            ret.a = e1;
+            ret.b = e2;
+            ret.bp = *is.begin();
+            if (ret.bp.totalPos > 0.001 && 1 - ret.bp.totalPos > 0.001) {
+              return ret;
             }
           }
         }

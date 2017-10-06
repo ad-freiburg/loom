@@ -4,6 +4,10 @@
 
 // _____________________________________________________________________________
 template <typename V, typename G>
+Grid<V, G>::Grid() : _width(0), _height(0), _cellWidth(0), _cellHeight(0), _xWidth(0), _yHeight(0) {}
+
+// _____________________________________________________________________________
+template <typename V, typename G>
 Grid<V, G>::Grid(double w, double h, const Box& bbox)
     : _cellWidth(fabs(w)),
       _cellHeight(fabs(h)),

@@ -353,7 +353,7 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
 
   double nearPenalty = 100;
 
-  std::cerr << x << ", " << y << std::endl;
+  // std::cerr << x << ", " << y << std::endl;
 
   if (dir == 0) {
     auto a = getNEdge(getNode(x - 1, y), getNode(x - 1, y + 1));
@@ -508,7 +508,7 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
     }
   }
 
-  std::cerr << dir << std::endl;
+  // std::cerr << dir << std::endl;
 }
 
 // _____________________________________________________________________________
@@ -535,10 +535,12 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double
   size_t y = xy.second;
   assert(getNode(x, y) == n);
 
-  if (origNode->pl().getParent()->pl().getStops().size())
-    std::cerr << "Checking station "
-              << origNode->pl().getParent()->pl().getStops().front().name
-              << std::endl;
+  /*
+   * if (origNode->pl().getParent()->pl().getStops().size())
+   *   std::cerr << "Checking station "
+   *             << origNode->pl().getParent()->pl().getStops().front().name
+   *             << std::endl;
+   */
 
   size_t origEdgeNumber = origNode->getAdjList().size();
   assert(origNode->pl().getOrderedEdges().size() == origEdgeNumber);
@@ -551,9 +553,11 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double
     return;
   }
 
-  std::cerr << std::endl;
-  std::cerr << "Orig edge number = " << origEdgeNumber << ", optim distance is "
-            << optimDistance << std::endl;
+  /*
+   * std::cerr << std::endl;
+   * std::cerr << "Orig edge number = " << origEdgeNumber << ", optim distance is "
+   *           << optimDistance << std::endl;
+   */
 
   CombEdge* outgoing[8];
 
@@ -585,38 +589,42 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double
     }
   }
 
-  std::cerr << "Edge distribution: ";
-  if (origNode->pl().getParent()->pl().getStops().size())
-    std::cerr << "in "
-              << origNode->pl().getParent()->pl().getStops().front().name;
-  std::cerr << " ";
-  for (size_t i = 0; i < 8; i++) {
-    std::cerr << outgoing[i] << ", ";
-  }
-  std::cerr << std::endl;
+  /*
+   * std::cerr << "Edge distribution: ";
+   * if (origNode->pl().getParent()->pl().getStops().size())
+   *   std::cerr << "in "
+   *             << origNode->pl().getParent()->pl().getStops().front().name;
+   * std::cerr << " ";
+   * for (size_t i = 0; i < 8; i++) {
+   *   std::cerr << outgoing[i] << ", ";
+   * }
+   * std::cerr << std::endl;
+   */
 
-  std::cerr << "Ordered edges in orig node: ";
-  for (auto e : origNode->pl().getOrderedEdges()) {
-    if (e.first->getOtherNode(origNode)
-            ->pl()
-            .getParent()
-            ->pl()
-            .getStops()
-            .size()) {
-      std::cerr << e.first << "(to "
-                << e.first->getOtherNode(origNode)
-                       ->pl()
-                       .getParent()
-                       ->pl()
-                       .getStops()
-                       .front()
-                       .name
-                << "), ";
-    } else {
-      std::cerr << e.first << ", ";
-    }
-  }
-  std::cerr << std::endl;
+  /*
+   * std::cerr << "Ordered edges in orig node: ";
+   * for (auto e : origNode->pl().getOrderedEdges()) {
+   *   if (e.first->getOtherNode(origNode)
+   *           ->pl()
+   *           .getParent()
+   *           ->pl()
+   *           .getStops()
+   *           .size()) {
+   *     std::cerr << e.first << "(to "
+   *               << e.first->getOtherNode(origNode)
+   *                      ->pl()
+   *                      .getParent()
+   *                      ->pl()
+   *                      .getStops()
+   *                      .front()
+   *                      .name
+   *               << "), ";
+   *   } else {
+   *     std::cerr << e.first << ", ";
+   *   }
+   * }
+   * std::cerr << std::endl;
+   */
 
   if (!found) return;;
 
@@ -635,10 +643,12 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double
     int dd = ((((d + 1) + d) % 8) * optimDistance) % 8;
     int ddd = (6 - dd) % 8;
 
-    std::cerr << "Distance between the inserted edge (" << e << ") and edge at "
-              << i << " (" << outgoing[i] << ") is " << d
-              << ", optim distance between them is +" << dd << " and -" << ddd
-              << std::endl;
+    /*
+     * std::cerr << "Distance between the inserted edge (" << e << ") and edge at "
+     *           << i << " (" << outgoing[i] << ") is " << d
+     *           << ", optim distance between them is +" << dd << " and -" << ddd
+     *           << std::endl;
+     */
 
     for (int j = 0; j <= dd + 1; j++) {
       addC[(i + j) % 8] += 29 * (dd + 1 - j);
@@ -667,12 +677,14 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double
       if (!outgoing[j % 8]) continue;
       if (outgoing[j % 8] == outgoing[i]) break;
 
-      std::cerr << i << " vs " << (j % 8) << std::endl;
+      // std::cerr << i << " vs " << (j % 8) << std::endl;
       int da = origNode->pl().distBetween(outgoing[i], e);
       int db = origNode->pl().distBetween(outgoing[j % 8], e);
 
-      std::cerr << "da = " << da << " vs "
-                << "db = " << db << std::endl;
+      /*
+       * std::cerr << "da = " << da << " vs "
+       *           << "db = " << db << std::endl;
+       */
 
       if (db < da) {
         // edge does not lie in this segment, block it!
@@ -686,11 +698,13 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double
     break;
   }
 
-  std::cerr << "Cost distribution: ";
-  for (size_t i = 0; i < 8; i++) {
-    std::cerr << addC[i] << ", ";
-  }
-  std::cerr << std::endl;
+  /*
+   * std::cerr << "Cost distribution: ";
+   * for (size_t i = 0; i < 8; i++) {
+   *   std::cerr << addC[i] << ", ";
+   * }
+   * std::cerr << std::endl;
+   */
 }
 
 // _____________________________________________________________________________

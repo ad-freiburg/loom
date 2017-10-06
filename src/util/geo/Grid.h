@@ -19,6 +19,9 @@ class Grid {
   // that covers the area of bounding box bbox
   Grid(double w, double h, const Box& bbox);
 
+  // the empty grid
+  Grid();
+
   // add object t to this grid
   void add(G geom, V val);
   void add(size_t x, size_t y, V val);

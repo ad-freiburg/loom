@@ -5,9 +5,9 @@
 #ifndef UTIL_GRAPH_DIJKSTRA_H_
 #define UTIL_GRAPH_DIJKSTRA_H_
 
-#include <set>
 #include <list>
 #include <queue>
+#include <set>
 #include <unordered_map>
 #include "util/graph/Edge.h"
 #include "util/graph/Graph.h"
@@ -42,7 +42,8 @@ class Dijkstra {
                            std::list<Edge<N, E>*>* res);
 
   template <typename N, typename E>
-  static bool shortestPath(Node<N, E>* from, const std::set<Node<N, E>*>& to,
+  static bool shortestPath(Node<N, E>* from,
+                           const std::unordered_map<Node<N, E>*, bool>& to,
                            std::list<Edge<N, E>*>* res, Node<N, E>** target);
 };
 

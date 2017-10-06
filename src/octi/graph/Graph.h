@@ -17,6 +17,9 @@ using util::geo::Point;
 namespace octi {
 namespace graph {
 
+typedef Grid<util::graph::Node<NodePL, EdgePL>*, Point> NodeGrid;
+typedef Grid<util::graph::Edge<NodePL, EdgePL>*, Line> EdgeGrid;
+
 struct ISect {
   util::graph::Edge<NodePL, EdgePL>* a;
   util::graph::Edge<NodePL, EdgePL>* b;
@@ -30,12 +33,14 @@ class Graph : public util::graph::Graph<NodePL, EdgePL> {
   Graph();
 
   const util::geo::Box& getBBox() const;
+  void topologizeIsects();
 
  private:
   util::geo::Box _bbox;
 
-  void topologizeIsects();
   ISect getNextIntersection();
+
+  void buildGrids();
 
   void addRoute(const Route* r);
   const Route* getRoute(const std::string& id) const;
@@ -44,6 +49,9 @@ class Graph : public util::graph::Graph<NodePL, EdgePL> {
 
   std::set<util::graph::Edge<NodePL, EdgePL>*> proced;
   std::map<std::string, const Route*> _routes;
+
+  NodeGrid _nodeGrid;
+  EdgeGrid _edgeGrid;
 };
 
 }  // graph

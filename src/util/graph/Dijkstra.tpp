@@ -4,10 +4,10 @@
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-bool Dijkstra::shortestPath(Node<N, E>* from, const std::set<Node<N, E>*>& to,
+bool Dijkstra::shortestPath(Node<N, E>* from,
+                            const std::unordered_map<Node<N, E>*, bool>& to,
                             std::list<Edge<N, E>*>* res, Node<N, E>** target) {
-  std::unordered_map<Node<N, E>*, bool> settled;
-  std::unordered_map<Node<N, E>*, RouteNode<N, E> > finishedNodes;
+  std::unordered_map<Node<N, E>*, RouteNode<N, E> > settled;
   std::priority_queue<RouteNode<N, E> > pq;
   bool found = false;
 
@@ -19,22 +19,17 @@ bool Dijkstra::shortestPath(Node<N, E>* from, const std::set<Node<N, E>*>& to,
     cur = pq.top();
     pq.pop();
 
-    if (settled[cur.n]) continue;
-
-    settled[cur.n] = true;
-    finishedNodes[cur.n] = cur;
+    if (settled.find(cur.n) != settled.end()) continue;
+    settled[cur.n] = cur;
 
     if (to.find(cur.n) != to.end()) {
-      *target = cur.n;
       found = true;
       break;
     }
 
     // relaxation
     for (auto edge : cur.n->getAdjListOut()) {
-      // TODO: real costs!
       double newC = cur.d + edge->pl().cost();
-
       pq.push(RouteNode<N, E>(edge->getTo(), cur.n, newC, &(*edge)));
     }
   }
@@ -43,24 +38,24 @@ bool Dijkstra::shortestPath(Node<N, E>* from, const std::set<Node<N, E>*>& to,
 
   // traverse the parents backwards beginning at current target node
   Node<N, E>* curN = cur.n;
+  *target = cur.n;
 
   while (true) {
-    const RouteNode<N, E>& curNode = finishedNodes[curN];
+    const RouteNode<N, E>& curNode = settled[curN];
     if (curN == from) break;
     res->push_front(curNode.e);
     curN = curNode.parent;
   }
 
-  // found shortest path
   return true;
 }
 
 // _____________________________________________________________________________
 template <typename N, typename E>
 bool Dijkstra::shortestPath(Node<N, E>* from, Node<N, E>* to,
-                         std::list<Edge<N, E>*>* res) {
+                            std::list<Edge<N, E>*>* res) {
   Node<N, E>* target;
-  std::set<Node<N, E>*> tos;
-  tos.insert(to);
+  std::unordered_map<Node<N, E>*, bool> tos;
+  tos[to] = true;
   return shortestPath(from, tos, res, &target);
 }
