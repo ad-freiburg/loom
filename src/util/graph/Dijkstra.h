@@ -35,11 +35,34 @@ struct RouteNode {
   bool operator<(const RouteNode<N, E>& p) const { return d > p.d; }
 };
 
+template <typename N, typename E>
+struct RouteNodeAStar {
+  RouteNodeAStar() : n(0), parent(0), h(0), d(0), e(0) {}
+  RouteNodeAStar(Node<N, E>* n, Node<N, E>* parent, double h, double d, Edge<N, E>* e)
+      : n(n), parent(parent), h(h), d(d), e(e) {}
+
+  Node<N, E>* n;
+  Node<N, E>* parent;
+
+  // heuristical distance
+  double h;
+  double d;
+  Edge<N, E>* e;
+
+  bool operator<(const RouteNodeAStar<N, E>& p) const { return h > p.h || (h == p.h && d > p.d); }
+};
+
 class Dijkstra {
  public:
   template <typename N, typename E>
   static bool shortestPath(Node<N, E>* from, Node<N, E>* to,
                            std::list<Edge<N, E>*>* res);
+
+  template <typename N, typename E, typename H>
+  static bool shortestPathAStar(Node<N, E>* from,
+                           const std::unordered_map<Node<N, E>*, bool>& to,
+                           H heurFunc,
+                           std::list<Edge<N, E>*>* res, Node<N, E>** target);
 
   template <typename N, typename E>
   static bool shortestPath(Node<N, E>* from,

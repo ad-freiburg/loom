@@ -41,9 +41,55 @@ typedef util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>
 using octi::gridgraph::GridNode;
 using octi::gridgraph::GridEdge;
 
-// _____________________________________________________________________________
-void rotate(CombGraph*, double deg ) {
+struct GridHeur {
+  GridHeur(octi::gridgraph::GridGraph* g, const std::unordered_map<GridNode*, bool>& to) : g(g) {
+/*
+ *     minX = std::numeric_limits<size_t>::max();
+ *     minY = std::numeric_limits<size_t>::max();
+ *     maxX = 0;
+ *     maxY = 0;
+ * 
+ *     for (auto n : to) {
+ *       auto xy = g->getNodeCoords(n.first->pl().getParent());
+ *       if (xy.first < minX) minX = xy.first;
+ *       if (xy.second < minY) minY = xy.second;
+ *       if (xy.first > maxX) maxX = xy.first;
+ *       if (xy.second > maxY) maxY = xy.second;
+ *     }
+ * 
+ *     for (auto n : to) {
+ *       auto xy = g->getNodeCoords(n.first->pl().getParent());
+ *       if (xy.first == minX || xy.first == maxX || xy.second == minY || xy.second == maxY) hull[n.first] = true;
+ *     }
+ */
+  }
 
+  double operator()(GridNode* from, const std::unordered_map<GridNode*, bool>& to) {
+    size_t ret = std::numeric_limits<size_t>::max();
+    auto xy = g->getNodeCoords(from->pl().getParent());
+
+    for (auto t : to) {
+      auto txy = g->getNodeCoords(t.first);
+      size_t temp = g->heurCost(xy.first, xy.second, txy.first, txy.second);
+      if (temp < ret) ret = temp;
+    }
+
+    return ret;
+  }
+
+  octi::gridgraph::GridGraph* g;
+  std::unordered_map<GridNode*, bool> hull;
+  size_t minX;
+  size_t minY;
+  size_t maxX;
+  size_t maxY;
+};
+
+// _____________________________________________________________________________
+void rotate(CombGraph* g, Point center, double deg ) {
+  for (auto n : *g->getNodes()) {
+    n->pl().getParent()->pl().setGeom(util::geo::rotate(*n->pl().getGeom(), deg, center));
+  }
 }
 
 // _____________________________________________________________________________
@@ -345,6 +391,11 @@ int main(int argc, char** argv) {
   end = std::chrono::steady_clock::now();
   std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
 
+  // std::cerr << "Rotating around 15 deg" << std::endl;
+  // Point center;
+  // bgeo::centroid(tg.getBBox(), center);
+  // rotate(&cg, center, -10);
+
   std::cerr << "Writing edge ordering...";
   writeEdgeOrdering(&cg);
   end = std::chrono::steady_clock::now();
@@ -355,7 +406,6 @@ int main(int argc, char** argv) {
   std::set<GridNode*> used;
 
   double gridSize = 300;
-
   gridgraph::GridGraph g(tg.getBBox(), gridSize, cfg.vertPen, cfg.horiPen, cfg.diagPen);
 
   std::cerr << "Number of nodes in grid graph: " << g.getNodes()->size() << std::endl;
@@ -381,7 +431,9 @@ int main(int argc, char** argv) {
 
   std::set<CombEdge*> done;
   size_t gen = 0;
-  uint64_t totalCost = 0;
+  double totalCost = 0;
+
+  auto totalBegin = std::chrono::steady_clock::now();
 
   while (!globalPq.empty()) {
     auto n = globalPq.top();
@@ -419,6 +471,8 @@ int main(int argc, char** argv) {
           to = tmp;
           reversed = !reversed;
         }
+
+        std::cerr << "++ Generation " << gen << std::endl;
 
         if (m.find(from) == m.end()) {
           auto cands = g.getNearestCandidatesFor(*from->pl().getGeom(), 400);
@@ -472,9 +526,20 @@ int main(int argc, char** argv) {
         end = std::chrono::steady_clock::now();
         std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
 
-        std::cerr << "Finding shortest path... ";
+
+        // open to target node
+        for (auto n : tos) {
+          g.openNodeSink(n.first);
+          g.openNode(n.first);
+        }
+
+        // open from source node
+        g.openNodeSink(m[from]);
+        g.openNode(m[from]);
+
+        std::cerr << "Finding shortest path (w heur)... ";
         begin = std::chrono::steady_clock::now();
-        dijkstra.shortestPath(m[from], tos, &res, &target);
+        dijkstra.shortestPathAStar(m[from], tos, GridHeur(&g, tos), &res, &target);
         end = std::chrono::steady_clock::now();
         std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
 
@@ -495,9 +560,11 @@ int main(int argc, char** argv) {
         std::cerr << "Writing found path as edge to result graph... ";
         begin = std::chrono::steady_clock::now();
         PolyLine pl;
-        uint64_t cost = 0;
+        double cost = 0;
+        size_t c = 0;
         for (auto f : res) {
-          cost += f->pl().cost();
+          cost += c > 0 ? f->pl().cost() :0;
+          c++;
           f->pl().addResidentEdge(e);
           g.getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
 
@@ -520,12 +587,25 @@ int main(int argc, char** argv) {
           }
         }
         end = std::chrono::steady_clock::now();
-        std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms), path cost " << cost << std::endl;
+        size_t estimatedCost = g.heurCost(g.getNodeCoords(m[from]).first, g.getNodeCoords(m[from]).second, g.getNodeCoords(target).first, g.getNodeCoords(target).second);
+
+
+        std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms), path cost (excluding take off and touch down) " << cost << ", estimated cost was " << estimatedCost << std::endl;
+        assert(cost >= estimatedCost);
 
         totalCost += cost;
 
         if (res.size())
           pl << *res.back()->getTo()->pl().getParent()->pl().getGeom();
+
+        // close to target node
+        for (auto n : tos) {
+          g.closeNodeSink(n.first);
+        }
+        g.closeNode(target);
+        g.closeNodeSink(m[from]);
+        g.closeNode(m[from]);
+
 
         std::cerr << "Balance edge...";
         begin = std::chrono::steady_clock::now();
@@ -548,6 +628,9 @@ int main(int argc, char** argv) {
     }
   }
 
+  auto totalend = std::chrono::steady_clock::now();
+
+  std::cerr << " octilinearized input in " << std::chrono::duration_cast<std::chrono::milliseconds>(totalend - totalBegin).count() << "ms"<< std::endl;
   std::cerr << " === Total edge cost in graph is " << totalCost << " === " <<  std::endl;
 
   // out.print(g);

@@ -115,3 +115,19 @@ void NodePL::setParent(Node<NodePL, EdgePL>* n) {
 Node<NodePL, EdgePL>* NodePL::getPort(size_t i) const {
   return _ports[i];
 }
+
+// _____________________________________________________________________________
+void NodePL::setXY(size_t x, size_t y) {
+  _x = x;
+  _y = y;
+}
+
+// _____________________________________________________________________________
+size_t NodePL::getX() const {
+  return _parent->pl()._x;
+}
+
+// _____________________________________________________________________________
+size_t NodePL::getY() const {
+  return _parent->pl()._y;
+}

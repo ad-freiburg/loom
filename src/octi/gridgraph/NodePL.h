@@ -51,12 +51,18 @@ class NodePL : util::geograph::GeoNodePL {
   void setNorthWestPort(Node<NodePL, EdgePL>* n);
 
   Node<NodePL, EdgePL>* getPort(size_t i) const;
+
+  void setXY(size_t x, size_t y);
+  size_t getX() const;
+  size_t getY() const;
  private:
   Point _pos;
 
   Node<NodePL, EdgePL>* _parent;
 
   Node<NodePL, EdgePL>* _ports[8];
+
+  size_t _x, _y;
 };
 }}
 

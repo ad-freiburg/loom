@@ -55,14 +55,21 @@ class GridGraph : public Graph<NodePL, EdgePL> {
 
   const Grid<Node<NodePL, EdgePL>*, Point>& getGrid() const;
 
-  void balanceNode(GridNode* a);
   void topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double* ret);
   void balanceEdge(GridNode* a, GridNode* b);
+
+  double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
   std::priority_queue<Candidate> getNearestCandidatesFor(const util::geo::Point& p, double maxD) const;
 
   void addCostVector(GridNode* n, double addC[8]);
   void removeCostVector(GridNode* n, double addC[8]);
+  std::pair<size_t, size_t> getNodeCoords(GridNode* n) const;
+
+  void openNodeSink(GridNode* n);
+  void closeNodeSink(GridNode* n);
+  void openNode(GridNode* n);
+  void closeNode(GridNode* n);
 
  private:
   util::geo::Box _bbox;
@@ -74,7 +81,6 @@ class GridGraph : public Graph<NodePL, EdgePL> {
   std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*> getResEdges(Node<NodePL, EdgePL>* n) const;
 
   void writeInitialCosts();
-  std::pair<size_t, size_t> getNodeCoords(GridNode* n) const;
 
   GridEdge* getNEdge(GridNode* a, GridNode* b);
   GridEdge* getOtherEdge(GridEdge* e);

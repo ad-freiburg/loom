@@ -21,6 +21,7 @@ namespace gridgraph {
 class EdgePL : util::geograph::GeoEdgePL {
  public:
   EdgePL(const PolyLine& p, double c, bool secondar);
+  EdgePL(const PolyLine& p, double c, bool secondar, bool closed);
 
   void addRoute(std::string);
   const std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*>& getResEdges() const;
@@ -30,13 +31,18 @@ class EdgePL : util::geograph::GeoEdgePL {
 
   void setCost(double c);
   double cost() const;
+  double rawCost() const;
   void addResidentEdge(util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>* e);
   bool isSecondary() const;
+
+  void close();
+  void open();
  private:
   PolyLine _pl;
   double _c;
 
   bool _isSecondary;
+  bool _closed;
 
   std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*> _resEdges;
 };
