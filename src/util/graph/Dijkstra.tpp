@@ -15,9 +15,7 @@ bool Dijkstra::shortestPath(Node<N, E>* from,
   pq.push(start);
   RouteNode<N, E> cur = start;
 
-  size_t iters= 0;
   while (!pq.empty()) {
-    iters++;
     cur = pq.top();
     pq.pop();
 
@@ -36,7 +34,6 @@ bool Dijkstra::shortestPath(Node<N, E>* from,
     }
   }
 
-  std::cerr << iters << " Iterations" << std::endl;
   if (!found) return false;
 
   // traverse the parents backwards beginning at current target node
@@ -67,9 +64,7 @@ bool Dijkstra::shortestPathAStar(Node<N, E>* from,
   pq.push(start);
   RouteNodeAStar<N, E> cur = start;
 
-  size_t iters = 0;
   while (!pq.empty()) {
-    iters++;
     cur = pq.top();
     pq.pop();
 
@@ -92,7 +87,6 @@ bool Dijkstra::shortestPathAStar(Node<N, E>* from,
     }
   }
 
-  std::cerr << iters << " Iterations" << std::endl;
   if (!found) return false;
 
   // traverse the parents backwards beginning at current target node

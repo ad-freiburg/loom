@@ -51,7 +51,8 @@ int64_t CombNodePL::distBetween(
 
   int32_t ret = ((ap > bp ? -1 : 1) * (abs(bp - ap)));
 
-  if (ret < 0) return (_edgeOrder.size() + ret) % (_edgeOrder.size());
+  if (ret < 0) ret = (_edgeOrder.size() + ret);
+
   return ret;
 }
 
@@ -74,8 +75,9 @@ void CombNodePL::setRouteNumber(size_t n) { _routeNumber = n; }
 size_t CombNodePL::getRouteNumber() const { return _routeNumber; }
 
 // _____________________________________________________________________________
-const std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>,
+std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>,
                PairCmp>&
-CombNodePL::getOrderedEdges() const {
+CombNodePL::getOrderedEdges() {
   return _edgeOrder;
 }
+

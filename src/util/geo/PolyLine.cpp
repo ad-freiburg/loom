@@ -16,6 +16,9 @@ PolyLine::PolyLine() {}
 PolyLine::PolyLine(const Point& from, const Point& to) { *this << from << to; }
 
 // _____________________________________________________________________________
+PolyLine::PolyLine(const Line& l) : _line(l) {}
+
+// _____________________________________________________________________________
 PolyLine& PolyLine::operator<<(const Point& p) {
   _line.push_back(p);
   return *this;
@@ -231,9 +234,7 @@ double PolyLine::distTo(const PolyLine& g) const {
 }
 
 // _____________________________________________________________________________
-double PolyLine::distTo(const Point& p) const {
-  return dist(_line, p);
-}
+double PolyLine::distTo(const Point& p) const { return dist(_line, p); }
 
 // _____________________________________________________________________________
 double PolyLine::getLength() const { return len(_line); }
@@ -358,9 +359,7 @@ LinePoint PolyLine::projectOnAfter(const Point& p, size_t a) const {
 }
 
 // _____________________________________________________________________________
-void PolyLine::simplify(double d) {
-  _line = geo::simplify(_line, d);
-}
+void PolyLine::simplify(double d) { _line = geo::simplify(_line, d); }
 
 // _____________________________________________________________________________
 void PolyLine::smoothenOutliers(double d) {
@@ -492,8 +491,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
                 (fabs(curStartCand.totalPos * length -
                       curEndCand.totalPos * length) > MIN_SEG_LENGTH &&
                  fabs(curStartCandCmp.totalPos * plLength -
-                      curEndCandCmp.totalPos * plLength) >
-                     MIN_SEG_LENGTH)) {
+                      curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
               ret.segments.push_back(SharedSegment(
                   std::pair<LinePoint, LinePoint>(curStartCand,
                                                   curStartCandCmp),
@@ -525,8 +523,8 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
   }
 
   if (comp > 0.8 && comp < 1.2 && in && !single &&
-      (fabs(curStartCand.totalPos * length -
-            curEndCand.totalPos * length) > MIN_SEG_LENGTH &&
+      (fabs(curStartCand.totalPos * length - curEndCand.totalPos * length) >
+           MIN_SEG_LENGTH &&
        fabs(curStartCandCmp.totalPos * plLength -
             curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
     ret.segments.push_back(SharedSegment(
@@ -668,11 +666,7 @@ void PolyLine::applyChaikinSmooth(size_t depth) {
 }
 
 // _____________________________________________________________________________
-const Point& PolyLine::front() const {
-  return _line.front();
-}
+const Point& PolyLine::front() const { return _line.front(); }
 
 // _____________________________________________________________________________
-const Point& PolyLine::back() const {
-  return _line.back();
-}
+const Point& PolyLine::back() const { return _line.back(); }

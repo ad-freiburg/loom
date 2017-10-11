@@ -44,6 +44,7 @@ class PolyLine {
  public:
   PolyLine();
   PolyLine(const Point& from, const Point& to);
+  PolyLine(const Line& l);
 
   PolyLine& operator<<(const Point& p);
   PolyLine& operator>>(const Point& p);

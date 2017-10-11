@@ -55,6 +55,9 @@ class NodePL : util::geograph::GeoNodePL {
   void setXY(size_t x, size_t y);
   size_t getX() const;
   size_t getY() const;
+
+  bool isClosed() const;
+  void setClosed(bool c);
  private:
   Point _pos;
 
@@ -63,6 +66,7 @@ class NodePL : util::geograph::GeoNodePL {
   Node<NodePL, EdgePL>* _ports[8];
 
   size_t _x, _y;
+  bool _closed;
 };
 }}
 

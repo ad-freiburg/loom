@@ -293,6 +293,9 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
   size_t x = xy.first;
   size_t y = xy.second;
 
+  getNEdge(a, b)->pl().setCost(INF);
+  getNEdge(b, a)->pl().setCost(INF);
+
   closeNode(a);
   closeNode(b);
 
@@ -304,8 +307,8 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
       auto e = getNEdge(na, nb);
       auto f = getNEdge(nb, na);
 
-      e->pl().close();
-      f->pl().close();
+      e->pl().setCost(INF);
+      f->pl().setCost(INF);
     }
   }
 
@@ -502,14 +505,18 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
   size_t y = xy.second;
   assert(getNode(x, y) == n);
 
-  /*
-   * if (origNode->pl().getParent()->pl().getStops().size())
-   *   std::cerr << "Checking station "
-   *             << origNode->pl().getParent()->pl().getStops().front().name
-   *             << std::endl;
-   */
+  if (origNode->pl().getParent()->pl().getStops().size())
+    std::cerr << std::endl
+              << std::endl
+              << "Checking station "
+              << origNode->pl().getParent()->pl().getStops().front().name
+              << std::endl;
+  else
+    std::cerr << std::endl
+              << std::endl
+              << "Checking node " << origNode << std::endl;
 
-  size_t origEdgeNumber = origNode->getAdjList().size();
+  int origEdgeNumber = origNode->getAdjList().size();
   assert(origNode->pl().getOrderedEdges().size() == origEdgeNumber);
   size_t optimDistance = (8 / origEdgeNumber) - 1;
 
@@ -520,12 +527,9 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
     return;
   }
 
-  /*
-   * std::cerr << std::endl;
-   * std::cerr << "Orig edge number = " << origEdgeNumber << ", optim distance
-   * is "
-   *           << optimDistance << std::endl;
-   */
+  std::cerr << std::endl;
+  std::cerr << "Orig edge number = " << origEdgeNumber << ", optim distance is "
+            << optimDistance << std::endl;
 
   CombEdge* outgoing[8];
 
@@ -557,42 +561,38 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
     }
   }
 
-  /*
-   * std::cerr << "Edge distribution: ";
-   * if (origNode->pl().getParent()->pl().getStops().size())
-   *   std::cerr << "in "
-   *             << origNode->pl().getParent()->pl().getStops().front().name;
-   * std::cerr << " ";
-   * for (size_t i = 0; i < 8; i++) {
-   *   std::cerr << outgoing[i] << ", ";
-   * }
-   * std::cerr << std::endl;
-   */
+  std::cerr << "Edge distribution: ";
+  if (origNode->pl().getParent()->pl().getStops().size())
+    std::cerr << "in "
+              << origNode->pl().getParent()->pl().getStops().front().name;
+  std::cerr << " ";
+  for (size_t i = 0; i < 8; i++) {
+    std::cerr << outgoing[i] << ", ";
+  }
+  std::cerr << std::endl;
 
-  /*
-   * std::cerr << "Ordered edges in orig node: ";
-   * for (auto e : origNode->pl().getOrderedEdges()) {
-   *   if (e.first->getOtherNode(origNode)
-   *           ->pl()
-   *           .getParent()
-   *           ->pl()
-   *           .getStops()
-   *           .size()) {
-   *     std::cerr << e.first << "(to "
-   *               << e.first->getOtherNode(origNode)
-   *                      ->pl()
-   *                      .getParent()
-   *                      ->pl()
-   *                      .getStops()
-   *                      .front()
-   *                      .name
-   *               << "), ";
-   *   } else {
-   *     std::cerr << e.first << ", ";
-   *   }
-   * }
-   * std::cerr << std::endl;
-   */
+  std::cerr << "Ordered edges in orig node: ";
+  for (auto e : origNode->pl().getOrderedEdges()) {
+    if (e.first->getOtherNode(origNode)
+            ->pl()
+            .getParent()
+            ->pl()
+            .getStops()
+            .size()) {
+      std::cerr << e.first << "(to "
+                << e.first->getOtherNode(origNode)
+                       ->pl()
+                       .getParent()
+                       ->pl()
+                       .getStops()
+                       .front()
+                       .name
+                << "), ";
+    } else {
+      std::cerr << e.first << ", ";
+    }
+  }
+  std::cerr << std::endl;
 
   if (!found) return;
   ;
@@ -604,7 +604,7 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
     // edge and the inserted edge,
     // positive if in clockwise direction, negative if in counter-clockwise
     // direction
-    int d = origNode->pl().distBetween(outgoing[i], e) - 1;
+    int32_t d = origNode->pl().distBetween(outgoing[i], e) - 1;
 
     // dd and ddd are the optimal distances between outgoing[i] and e, based on
     // the total number
@@ -612,31 +612,27 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
     int dd = ((((d + 1) + d) % 8) * optimDistance) % 8;
     int ddd = (6 - dd) % 8;
 
-    /*
-     * std::cerr << "Distance between the inserted edge (" << e << ") and edge
-     * at "
-     *           << i << " (" << outgoing[i] << ") is " << d
-     *           << ", optim distance between them is +" << dd << " and -" <<
-     * ddd
-     *           << std::endl;
-     */
+    std::cerr << "Distance between the inserted edge (" << e << ") and edge at "
+              << i << " (" << outgoing[i] << ") is " << d
+              << ", optim distance between them is +" << dd << " and -" << ddd
+              << std::endl;
 
-    for (int j = 0; j <= dd + 1; j++) {
-      addC[(i + j) % 8] += 29 * (dd + 1 - j);
+    for (int j = 1; j <= dd + 1; j++) {
+      addC[(i + j) % 8] += 50 * (1.0 - j / (dd + 1.0));
     }
 
-    for (int j = 0; j <= ddd + 1; j++) {
-      addC[(i + (8 - j)) % 8] += 29 * (ddd + 1 - j);
+    for (int j = 1; j <= ddd + 1; j++) {
+      addC[(i + (8 - j)) % 8] += 50 * (1.0 - j / (ddd + 1.0));
     }
 
-    if (d > 0) {
-      for (int j = 1; j <= d; j++) {
-        addC[(i + j) % 8] = 99999;
-      }
-    } else if (d < 0) {
-      for (int j = 1; j <= abs(d); j++) {
-        addC[(i + (8 - j)) % 8] += 99999;
-      }
+    addC[i] = INF;
+
+    for (int j = 1; j <= d; j++) {
+      addC[(i + j) % 8] = INF;
+    }
+
+    for (int j = 1; j <= (origEdgeNumber / 2) - d; j++) {
+      addC[(i + (8 - j)) % 8] = INF;
     }
   }
 
@@ -665,17 +661,13 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
         }
       }
     }
-
-    break;
   }
 
-  /*
-   * std::cerr << "Cost distribution: ";
-   * for (size_t i = 0; i < 8; i++) {
-   *   std::cerr << addC[i] << ", ";
-   * }
-   * std::cerr << std::endl;
-   */
+  std::cerr << "Cost distribution: ";
+  for (size_t i = 0; i < 8; i++) {
+    std::cerr << addC[i] << ", ";
+  }
+  std::cerr << std::endl;
 }
 
 // _____________________________________________________________________________
@@ -768,6 +760,7 @@ std::priority_queue<Candidate> GridGraph::getNearestCandidatesFor(
   _grid.get(b, &neigh);
 
   for (auto n : neigh) {
+    if (n->pl().isClosed()) continue;
     double d = util::geo::dist(n->pl().getGeom(), p);
     if (d < maxD) {
       ret.push(Candidate(n, d));
@@ -797,6 +790,7 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 
 // _____________________________________________________________________________
 void GridGraph::openNode(GridNode* n) {
+  if (!n->pl().isClosed()) return;
   auto xy = getNodeCoords(n);
   size_t x = xy.first;
   size_t y = xy.second;
@@ -810,10 +804,13 @@ void GridGraph::openNode(GridNode* n) {
     e->pl().open();
     f->pl().open();
   }
+
+  n->pl().setClosed(false);
 }
 
 // _____________________________________________________________________________
 void GridGraph::closeNode(GridNode* n) {
+  if (n->pl().isClosed()) return;
   auto xy = getNodeCoords(n);
   size_t x = xy.first;
   size_t y = xy.second;
@@ -828,6 +825,8 @@ void GridGraph::closeNode(GridNode* n) {
     e->pl().close();
     f->pl().close();
   }
+
+  n->pl().setClosed(true);
 }
 
 // _____________________________________________________________________________

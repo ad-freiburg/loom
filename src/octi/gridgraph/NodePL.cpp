@@ -8,7 +8,7 @@ using util::geo::Point;
 using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
-NodePL::NodePL(Point pos) : _pos(pos), _parent(0) {
+NodePL::NodePL(Point pos) : _pos(pos), _parent(0), _closed(false) {
 }
 
 // _____________________________________________________________________________
@@ -130,4 +130,14 @@ size_t NodePL::getX() const {
 // _____________________________________________________________________________
 size_t NodePL::getY() const {
   return _parent->pl()._y;
+}
+
+// _____________________________________________________________________________
+void NodePL::setClosed(bool c) {
+  _closed = c;
+}
+
+// _____________________________________________________________________________
+bool NodePL::isClosed() const {
+  return _closed;
 }

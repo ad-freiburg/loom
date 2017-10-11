@@ -89,6 +89,9 @@ struct GridHeur {
 void rotate(CombGraph* g, Point center, double deg ) {
   for (auto n : *g->getNodes()) {
     n->pl().getParent()->pl().setGeom(util::geo::rotate(*n->pl().getGeom(), deg, center));
+    for (auto e : n->getAdjListOut()) {
+      e->pl().setPolyLine(PolyLine(util::geo::rotate(*e->pl().getGeom(), deg, center)));
+    }
   }
 }
 
@@ -122,6 +125,10 @@ void buildCombGraph(TransitGraph* source, CombGraph* target) {
 
 // _____________________________________________________________________________
 void writeEdgeOrdering(CombGraph* target) {
+  for (auto n : *target->getNodes()) {
+    n->pl().getOrderedEdges().clear();
+  }
+
   for (auto n : *target->getNodes()) {
     for (auto e : n->getAdjListOut()) {
       auto refEdgeA = e->pl().getChilds().front();
@@ -391,247 +398,264 @@ int main(int argc, char** argv) {
   end = std::chrono::steady_clock::now();
   std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
 
-  // std::cerr << "Rotating around 15 deg" << std::endl;
-  // Point center;
-  // bgeo::centroid(tg.getBBox(), center);
-  // rotate(&cg, center, -10);
-
-  std::cerr << "Writing edge ordering...";
   writeEdgeOrdering(&cg);
-  end = std::chrono::steady_clock::now();
-  std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
 
-  std::map<CombNode*, GridNode*> m;
-  std::map<CombNode*, TransitNode*> oldNew;
-  std::set<GridNode*> used;
-
+  auto box = tg.getBBox();
   double gridSize = 300;
-  gridgraph::GridGraph g(tg.getBBox(), gridSize, cfg.vertPen, cfg.horiPen, cfg.diagPen);
 
-  std::cerr << "Number of nodes in grid graph: " << g.getNodes()->size() << std::endl;
+  Point center;
+  bgeo::centroid(box, center);
 
-  util::graph::Dijkstra dijkstra;
+  double maxDeg = 0; //15;
+  double step = 5;
 
-  // comparator for nodes, based on degree
-  struct NodeCompare {
-    bool operator()(CombNode* a, CombNode* b) {
-      // return a->getAdjList().size() < b->getAdjList().size();
-      return a->getAdjList().size() < b->getAdjList().size() || (a->getAdjList().size() == b->getAdjList().size() && a->pl().getRouteNumber() < b->pl().getRouteNumber());
+  rotate(&cg, center, -maxDeg-step);
+  RotatedBox rbox(box, -maxDeg-step, center);
+
+  double bestScore = std::numeric_limits<double>::infinity();
+  TransitGraph bestGraph;
+
+  bool verb = false;
+
+  for (int i = 0; i < 1 + (maxDeg / step) * 2; i++) {
+    rotate(&cg, center, step);
+    rbox.rotateDeg += step;
+
+    std::cerr << "Rotate degree is " << rbox.rotateDeg << std::endl;
+
+    std::map<CombNode*, GridNode*> m;
+    std::map<CombNode*, TransitNode*> oldNew;
+    std::set<GridNode*> used;
+
+    gridgraph::GridGraph g(getBoundingBox(rbox.getPolygon()), gridSize, cfg.vertPen, cfg.horiPen, cfg.diagPen);
+
+    util::graph::Dijkstra dijkstra;
+
+    // comparator for nodes, based on degree
+    struct NodeCompare {
+      bool operator()(CombNode* a, CombNode* b) {
+        // return a->getAdjList().size() < b->getAdjList().size();
+        return a->getAdjList().size() < b->getAdjList().size() || (a->getAdjList().size() == b->getAdjList().size() && a->pl().getRouteNumber() < b->pl().getRouteNumber());
+      }
+    };
+
+    std::priority_queue<CombNode*, std::vector<CombNode*>, NodeCompare> globalPq;
+    std::priority_queue<CombNode*, std::vector<CombNode*>, NodeCompare> dangling;
+
+    std::set<CombNode*> settled;
+
+    for (auto n : *cg.getNodes()) {
+      globalPq.push(n);
     }
-  };
 
-  std::priority_queue<CombNode*, std::vector<CombNode*>, NodeCompare> globalPq;
-  std::priority_queue<CombNode*, std::vector<CombNode*>, NodeCompare> dangling;
+    std::set<CombEdge*> done;
+    size_t gen = 0;
+    double totalCost = 0;
 
-  std::set<CombNode*> settled;
+    auto totalBegin = std::chrono::steady_clock::now();
 
-  for (auto n : *cg.getNodes()) {
-    globalPq.push(n);
-  }
+    while (!globalPq.empty()) {
+      auto n = globalPq.top();
+      globalPq.pop();
+      dangling.push(n);
 
-  std::set<CombEdge*> done;
-  size_t gen = 0;
-  double totalCost = 0;
+      while (!dangling.empty()) {
+        auto n = dangling.top();
+        dangling.pop();
 
-  auto totalBegin = std::chrono::steady_clock::now();
+        if (settled.find(n) != settled.end()) continue;
 
-  while (!globalPq.empty()) {
-    auto n = globalPq.top();
-    globalPq.pop();
-    dangling.push(n);
+        for (auto ee : n->pl().getOrderedEdges()) {
+          auto e = ee.first;
+          if (done.find(e) != done.end()) continue;
+          done.insert(e);
 
-    while (!dangling.empty()) {
-      auto n = dangling.top();
-      dangling.pop();
+          dangling.push(e->getOtherNode(n));
 
-      if (settled.find(n) != settled.end()) continue;
+          auto from = e->getFrom();
+          auto to = e->getTo();
 
-      for (auto ee : n->pl().getOrderedEdges()) {
-        auto e = ee.first;
-        if (done.find(e) != done.end()) continue;
-        done.insert(e);
+          bool reversed = false;
 
-        dangling.push(e->getOtherNode(n));
-
-        auto from = e->getFrom();
-        auto to = e->getTo();
-
-        bool reversed = false;
-
-        if (from->getAdjList().size() < to->getAdjList().size()) {
-          auto tmp = from;
-          from = to;
-          to = tmp;
-          reversed = !reversed;
-        }
-
-        if (m.find(from) == m.end() && m.find(to) != m.end()) {
-          auto tmp = from;
-          from = to;
-          to = tmp;
-          reversed = !reversed;
-        }
-
-        std::cerr << "++ Generation " << gen << std::endl;
-
-        if (m.find(from) == m.end()) {
-          auto cands = g.getNearestCandidatesFor(*from->pl().getGeom(), 400);
-
-          while (!cands.empty()) {
-            if (used.find(cands.top().n) == used.end()) {
-              m[from] = cands.top().n;
-              used.insert(cands.top().n);
-              break;
-            }
-            cands.pop();
+          if (from->getAdjList().size() < to->getAdjList().size()) {
+            auto tmp = from;
+            from = to;
+            to = tmp;
+            reversed = !reversed;
           }
+
+          if (m.find(from) == m.end() && m.find(to) != m.end()) {
+            auto tmp = from;
+            from = to;
+            to = tmp;
+            reversed = !reversed;
+          }
+
+          if (verb) std::cerr << "++ Generation " << gen << std::endl;
 
           if (m.find(from) == m.end()) {
-            LOG(ERROR) << "Could not sort in node " << from << std::endl;
-          }
-        }
+            auto cands = g.getNearestCandidatesFor(*from->pl().getGeom(), 400);
 
-        // get surrounding displacement nodes
-        std::unordered_map<GridNode*, bool> tos;
-
-        if (m.find(to) == m.end()) {
-          double maxDis = getMaxDis(to, e);
-
-          auto cands = g.getNearestCandidatesFor(*to->pl().getGeom(), maxDis);
-
-          while (!cands.empty()) {
-            if (used.find(cands.top().n) == used.end()) {
-              tos[cands.top().n] = true;
-            }
-            cands.pop();
-          }
-        } else {
-          tos[m.find(to)->second] = true;
-        }
-
-        std::list<GridEdge*> res;
-        GridNode* target = 0;
-
-        std::cerr << "Calculating topo penalties... ";
-        begin = std::chrono::steady_clock::now();
-        double addCFrom[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-        double addCTo[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-        g.topoPenalty(m[from], from, e, addCFrom);
-        g.addCostVector(m[from], addCFrom);
-        if (tos.size() == 1) {
-          g.topoPenalty(tos.begin()->first, to, e, addCTo);
-          g.addCostVector(tos.begin()->first, addCTo);
-        }
-
-        end = std::chrono::steady_clock::now();
-        std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
-
-
-        // open to target node
-        for (auto n : tos) {
-          g.openNodeSink(n.first);
-          g.openNode(n.first);
-        }
-
-        // open from source node
-        g.openNodeSink(m[from]);
-        g.openNode(m[from]);
-
-        std::cerr << "Finding shortest path (w heur)... ";
-        begin = std::chrono::steady_clock::now();
-        dijkstra.shortestPathAStar(m[from], tos, GridHeur(&g, tos), &res, &target);
-        end = std::chrono::steady_clock::now();
-        std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
-
-        g.removeCostVector(m[from], addCFrom);
-        if (tos.size() == 1) {
-          g.removeCostVector(tos.begin()->first, addCTo);
-        }
-
-        if (target == 0) {
-          LOG(ERROR) << "Could not sort in node " << to << std::endl;
-          continue;
-        }
-
-        m[to] = target;
-        used.insert(target);
-
-        // write everything to the result graph
-        std::cerr << "Writing found path as edge to result graph... ";
-        begin = std::chrono::steady_clock::now();
-        PolyLine pl;
-        double cost = 0;
-        size_t c = 0;
-        for (auto f : res) {
-          cost += c > 0 ? f->pl().cost() :0;
-          c++;
-          f->pl().addResidentEdge(e);
-          g.getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
-
-          if (!f->pl().isSecondary()) {
-            if (pl.getLine().size() > 0) {
-              BezierCurve bc(pl.getLine().back(),
-                             *f->getFrom()->pl().getParent()->pl().getGeom(),
-                             *f->getFrom()->pl().getParent()->pl().getGeom(),
-                             *f->getFrom()->pl().getGeom());
-
-              for (auto p : bc.render(10).getLine()) {
-                pl << p;
+            while (!cands.empty()) {
+              if (used.find(cands.top().n) == used.end()) {
+                m[from] = cands.top().n;
+                used.insert(cands.top().n);
+                break;
               }
-            } else {
-              pl << *f->getFrom()->pl().getParent()->pl().getGeom();
+              cands.pop();
             }
 
-            pl << *f->getFrom()->pl().getGeom();
-            pl << *f->getTo()->pl().getGeom();
+            if (m.find(from) == m.end()) {
+              LOG(ERROR) << "Could not sort in node " << from << std::endl;
+            }
           }
+
+          // get surrounding displacement nodes
+          std::unordered_map<GridNode*, bool> tos;
+
+          if (m.find(to) == m.end()) {
+            double maxDis = getMaxDis(to, e);
+
+            auto cands = g.getNearestCandidatesFor(*to->pl().getGeom(), maxDis);
+
+            while (!cands.empty()) {
+              if (used.find(cands.top().n) == used.end()) {
+                tos[cands.top().n] = true;
+              }
+              cands.pop();
+            }
+          } else {
+            tos[m.find(to)->second] = true;
+          }
+
+          std::list<GridEdge*> res;
+          GridNode* target = 0;
+
+          if (verb) std::cerr << "Calculating topo penalties... ";
+          begin = std::chrono::steady_clock::now();
+          double addCFrom[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+          double addCTo[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+          g.topoPenalty(m[from], from, e, addCFrom);
+          g.addCostVector(m[from], addCFrom);
+          if (tos.size() == 1) {
+            g.topoPenalty(tos.begin()->first, to, e, addCTo);
+            g.addCostVector(tos.begin()->first, addCTo);
+          }
+
+          end = std::chrono::steady_clock::now();
+          if (verb) std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
+
+
+          // open to target node
+          for (auto n : tos) {
+            g.openNodeSink(n.first);
+            g.openNode(n.first);
+          }
+
+          // open from source node
+          g.openNodeSink(m[from]);
+          g.openNode(m[from]);
+
+          if (verb) std::cerr << "Finding shortest path (w heur)... ";
+          begin = std::chrono::steady_clock::now();
+          dijkstra.shortestPathAStar(m[from], tos, GridHeur(&g, tos), &res, &target);
+          end = std::chrono::steady_clock::now();
+          if (verb) std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
+
+          g.removeCostVector(m[from], addCFrom);
+          if (tos.size() == 1) {
+            g.removeCostVector(tos.begin()->first, addCTo);
+          }
+
+          if (target == 0) {
+            LOG(ERROR) << "Could not sort in node " << to << std::endl;
+            continue;
+          }
+
+          m[to] = target;
+          used.insert(target);
+
+          // write everything to the result graph
+          if (verb) std::cerr << "Writing found path as edge to result graph... ";
+          begin = std::chrono::steady_clock::now();
+          PolyLine pl;
+          double cost = 0;
+          size_t c = 0;
+          for (auto f : res) {
+            cost += c > 0 ? f->pl().cost() :0;
+            c++;
+            f->pl().addResidentEdge(e);
+            g.getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
+
+            if (!f->pl().isSecondary()) {
+              if (pl.getLine().size() > 0) {
+                BezierCurve bc(pl.getLine().back(),
+                               *f->getFrom()->pl().getParent()->pl().getGeom(),
+                               *f->getFrom()->pl().getParent()->pl().getGeom(),
+                               *f->getFrom()->pl().getGeom());
+
+                for (auto p : bc.render(10).getLine()) {
+                  pl << p;
+                }
+              } else {
+                pl << *f->getFrom()->pl().getParent()->pl().getGeom();
+              }
+
+              pl << *f->getFrom()->pl().getGeom();
+              pl << *f->getTo()->pl().getGeom();
+            }
+          }
+          end = std::chrono::steady_clock::now();
+          double estimatedCost = g.heurCost(g.getNodeCoords(m[from]).first, g.getNodeCoords(m[from]).second, g.getNodeCoords(target).first, g.getNodeCoords(target).second);
+
+          std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms), path cost (excluding take off and touch down) " << cost << ", estimated cost was " << estimatedCost << std::endl;
+          assert(std::round(cost) >= std::round(estimatedCost));
+
+          totalCost += cost;
+
+          if (res.size())
+            pl << *res.back()->getTo()->pl().getParent()->pl().getGeom();
+
+          // close to target node
+          for (auto n : tos) {
+            g.closeNodeSink(n.first);
+          }
+          g.closeNode(target);
+          g.closeNodeSink(m[from]);
+          g.closeNode(m[from]);
+
+          if (verb) std::cerr << "Balance edge...";
+          begin = std::chrono::steady_clock::now();
+          for (auto f : res) {
+            if (f->pl().isSecondary()) continue;
+            g.balanceEdge(f->getFrom()->pl().getParent(),
+                          f->getTo()->pl().getParent());
+          }
+          end = std::chrono::steady_clock::now();
+          if (verb) std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
+
+          if (reversed) pl.reverse();
+          e->pl().setPolyLine(pl);
+          e->pl().setGeneration(gen);
+
+          gen++;
         }
-        end = std::chrono::steady_clock::now();
-        size_t estimatedCost = g.heurCost(g.getNodeCoords(m[from]).first, g.getNodeCoords(m[from]).second, g.getNodeCoords(target).first, g.getNodeCoords(target).second);
 
-
-        std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms), path cost (excluding take off and touch down) " << cost << ", estimated cost was " << estimatedCost << std::endl;
-        assert(cost >= estimatedCost);
-
-        totalCost += cost;
-
-        if (res.size())
-          pl << *res.back()->getTo()->pl().getParent()->pl().getGeom();
-
-        // close to target node
-        for (auto n : tos) {
-          g.closeNodeSink(n.first);
-        }
-        g.closeNode(target);
-        g.closeNodeSink(m[from]);
-        g.closeNode(m[from]);
-
-
-        std::cerr << "Balance edge...";
-        begin = std::chrono::steady_clock::now();
-        for (auto f : res) {
-          if (f->pl().isSecondary()) continue;
-          g.balanceEdge(f->getFrom()->pl().getParent(),
-                        f->getTo()->pl().getParent());
-        }
-        end = std::chrono::steady_clock::now();
-        std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
-
-        if (reversed) pl.reverse();
-        e->pl().setPolyLine(pl);
-        e->pl().setGeneration(gen);
-
-        gen++;
+        settled.insert(n);
       }
+    }
 
-      settled.insert(n);
+    auto totalend = std::chrono::steady_clock::now();
+
+    std::cerr << " octilinearized input in " << std::chrono::duration_cast<std::chrono::milliseconds>(totalend - totalBegin).count() << "ms"<< std::endl;
+    std::cerr << " === Total edge cost in graph is " << totalCost << " === " <<  std::endl;
+
+    if (totalCost < bestScore) {
+      bestScore = totalCost;
+      bestGraph = TransitGraph();
+      buildTransitGraph(&cg, &bestGraph);
     }
   }
-
-  auto totalend = std::chrono::steady_clock::now();
-
-  std::cerr << " octilinearized input in " << std::chrono::duration_cast<std::chrono::milliseconds>(totalend - totalBegin).count() << "ms"<< std::endl;
-  std::cerr << " === Total edge cost in graph is " << totalCost << " === " <<  std::endl;
 
   // out.print(g);
 
@@ -650,12 +674,10 @@ int main(int argc, char** argv) {
      *   }
      * }
      */
-    out.print(g);
-    exit(0);
+    //out.print(g);
+    //exit(0);
   } else {
-    TransitGraph output;
-    buildTransitGraph(&cg, &output);
-    out.print(output);
+    out.print(bestGraph);
   }
 
   return (0);
