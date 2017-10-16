@@ -8,23 +8,15 @@
 
 using namespace octi::gridgraph;
 
-double INF = 9999999;  // std::numeric_limits<double>::max();
+double INF = std::numeric_limits<double>::max();
 
 // _____________________________________________________________________________
 GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize,
-                     double vertPen, double horiPen, double diagPen)
+                     const Penalties& pens)
     : _bbox(bbox),
+      _c(pens),
       _grid(cellSize, cellSize, bbox),
       Graph<NodePL, EdgePL>(true) {
-  _c = {
-      0,        // cost for 0 degree node traversal
-      90,       // cost for 45 degree node traversal
-      30,       // cost for 90 degree node traversal
-      10,       // cost for 135 degree node traversal
-      vertPen,  // cost for vertical edge
-      horiPen,  // cost for horizontal edge
-      diagPen   // cost for diagonal edge
-  };
 
   assert(_c.p_0 < _c.p_135);
   assert(_c.p_135 < _c.p_90);
@@ -52,96 +44,96 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize,
           new Node<NodePL, EdgePL>(NodePL(Point(xPos - spacer, yPos)));
       n1->pl().setParent(n);
       addNode(n1);
-      n->pl().setWestPort(n1);
+      n->pl().setPort(6, n1);
       addEdge(n, n1, EdgePL(util::geo::PolyLine(*n->pl().getGeom(),
                                                 *n1->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
       addEdge(n1, n, EdgePL(util::geo::PolyLine(*n1->pl().getGeom(),
                                                 *n->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
 
       Node<NodePL, EdgePL>* n2 =
           new Node<NodePL, EdgePL>(NodePL(Point(xPos - spacer, yPos - spacer)));
       addNode(n2);
       n2->pl().setParent(n);
-      n->pl().setSouthWestPort(n2);
+      n->pl().setPort(5, n2);
       addEdge(n, n2, EdgePL(util::geo::PolyLine(*n->pl().getGeom(),
                                                 *n2->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
       addEdge(n2, n, EdgePL(util::geo::PolyLine(*n2->pl().getGeom(),
                                                 *n->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
 
       Node<NodePL, EdgePL>* n3 =
           new Node<NodePL, EdgePL>(NodePL(Point(xPos, yPos - spacer)));
       addNode(n3);
       n3->pl().setParent(n);
-      n->pl().setSouthPort(n3);
+      n->pl().setPort(4, n3);
       addEdge(n, n3, EdgePL(util::geo::PolyLine(*n->pl().getGeom(),
                                                 *n3->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
       addEdge(n3, n, EdgePL(util::geo::PolyLine(*n3->pl().getGeom(),
                                                 *n->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
 
       Node<NodePL, EdgePL>* n4 =
           new Node<NodePL, EdgePL>(NodePL(Point(xPos + spacer, yPos)));
       addNode(n4);
       n4->pl().setParent(n);
-      n->pl().setEastPort(n4);
+      n->pl().setPort(2, n4);
       addEdge(n, n4, EdgePL(util::geo::PolyLine(*n->pl().getGeom(),
                                                 *n4->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
       addEdge(n4, n, EdgePL(util::geo::PolyLine(*n4->pl().getGeom(),
                                                 *n->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
 
       Node<NodePL, EdgePL>* n5 =
           new Node<NodePL, EdgePL>(NodePL(Point(xPos + spacer, yPos + spacer)));
       n5->pl().setParent(n);
       addNode(n5);
-      n->pl().setNorthEastPort(n5);
+      n->pl().setPort(1, n5);
       addEdge(n, n5, EdgePL(util::geo::PolyLine(*n->pl().getGeom(),
                                                 *n5->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
       addEdge(n5, n, EdgePL(util::geo::PolyLine(*n5->pl().getGeom(),
                                                 *n->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
 
       Node<NodePL, EdgePL>* n6 =
           new Node<NodePL, EdgePL>(NodePL(Point(xPos, yPos + spacer)));
       n6->pl().setParent(n);
       addNode(n6);
-      n->pl().setNorthPort(n6);
+      n->pl().setPort(0, n6);
       addEdge(n, n6, EdgePL(util::geo::PolyLine(*n->pl().getGeom(),
                                                 *n6->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
       addEdge(n6, n, EdgePL(util::geo::PolyLine(*n6->pl().getGeom(),
                                                 *n->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
 
       Node<NodePL, EdgePL>* n7 =
           new Node<NodePL, EdgePL>(NodePL(Point(xPos - spacer, yPos + spacer)));
       n7->pl().setParent(n);
       addNode(n7);
-      n->pl().setNorthWestPort(n7);
+      n->pl().setPort(7, n7);
       addEdge(n, n7, EdgePL(util::geo::PolyLine(*n->pl().getGeom(),
                                                 *n7->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
       addEdge(n7, n, EdgePL(util::geo::PolyLine(*n7->pl().getGeom(),
                                                 *n->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
       Node<NodePL, EdgePL>* n8 =
           new Node<NodePL, EdgePL>(NodePL(Point(xPos + spacer, yPos - spacer)));
       n8->pl().setParent(n);
       addNode(n8);
-      n->pl().setSouthEastPort(n8);
+      n->pl().setPort(3, n8);
       addEdge(n, n8, EdgePL(util::geo::PolyLine(*n->pl().getGeom(),
                                                 *n8->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
       addEdge(n8, n, EdgePL(util::geo::PolyLine(*n8->pl().getGeom(),
                                                 *n->pl().getGeom()),
-                            0, true, true));
+                            INF, true, false));
 
       // in-node connections
       for (size_t i = 0; i < 8; i++) {
@@ -173,76 +165,15 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize,
       Node<NodePL, EdgePL>* center = getNode(x, y);
       if (center == 0) continue;
 
-      Node<NodePL, EdgePL>* from = center->pl().getNorthPort();
-      Node<NodePL, EdgePL>* toN = getNeighbor(x, y, 0);
-      if (from != 0 && toN != 0) {
-        Node<NodePL, EdgePL>* to = toN->pl().getSouthPort();
-        addEdge(from, to, EdgePL(util::geo::PolyLine(*from->pl().getGeom(),
-                                                     *to->pl().getGeom()),
-                                 0, false));
-      }
-
-      from = center->pl().getSouthPort();
-      toN = getNeighbor(x, y, 4);
-      if (from != 0 && toN != 0) {
-        Node<NodePL, EdgePL>* to = toN->pl().getNorthPort();
-        addEdge(from, to, EdgePL(util::geo::PolyLine(*from->pl().getGeom(),
-                                                     *to->pl().getGeom()),
-                                 0, false));
-      }
-
-      from = center->pl().getWestPort();
-      toN = getNeighbor(x, y, 6);
-      if (from != 0 && toN != 0) {
-        Node<NodePL, EdgePL>* to = toN->pl().getEastPort();
-        addEdge(from, to, EdgePL(util::geo::PolyLine(*from->pl().getGeom(),
-                                                     *to->pl().getGeom()),
-                                 0, false));
-      }
-
-      from = center->pl().getEastPort();
-      toN = getNeighbor(x, y, 2);
-      if (from != 0 && toN != 0) {
-        Node<NodePL, EdgePL>* to = toN->pl().getWestPort();
-        addEdge(from, to, EdgePL(util::geo::PolyLine(*from->pl().getGeom(),
-                                                     *to->pl().getGeom()),
-                                 0, false));
-      }
-
-      from = center->pl().getSouthWestPort();
-      toN = getNeighbor(x, y, 5);
-      if (from != 0 && toN != 0) {
-        Node<NodePL, EdgePL>* to = toN->pl().getNorthEastPort();
-        addEdge(from, to, EdgePL(util::geo::PolyLine(*from->pl().getGeom(),
-                                                     *to->pl().getGeom()),
-                                 0, false));
-      }
-
-      from = center->pl().getSouthEastPort();
-      toN = getNeighbor(x, y, 3);
-      if (from != 0 && toN != 0) {
-        Node<NodePL, EdgePL>* to = toN->pl().getNorthWestPort();
-        addEdge(from, to, EdgePL(util::geo::PolyLine(*from->pl().getGeom(),
-                                                     *to->pl().getGeom()),
-                                 0, false));
-      }
-
-      from = center->pl().getNorthWestPort();
-      toN = getNeighbor(x, y, 7);
-      if (from != 0 && toN != 0) {
-        Node<NodePL, EdgePL>* to = toN->pl().getSouthEastPort();
-        addEdge(from, to, EdgePL(util::geo::PolyLine(*from->pl().getGeom(),
-                                                     *to->pl().getGeom()),
-                                 0, false));
-      }
-
-      from = center->pl().getNorthEastPort();
-      toN = getNeighbor(x, y, 1);
-      if (from != 0 && toN != 0) {
-        Node<NodePL, EdgePL>* to = toN->pl().getSouthWestPort();
-        addEdge(from, to, EdgePL(util::geo::PolyLine(*from->pl().getGeom(),
-                                                     *to->pl().getGeom()),
-                                 0, false));
+      for (size_t p = 0; p < 8; p++) {
+        Node<NodePL, EdgePL>* from = center->pl().getPort(p);
+        Node<NodePL, EdgePL>* toN = getNeighbor(x, y, p);
+        if (from != 0 && toN != 0) {
+          Node<NodePL, EdgePL>* to = toN->pl().getPort((p + 4) % 8);
+          addEdge(from, to, EdgePL(util::geo::PolyLine(*from->pl().getGeom(),
+                                                       *to->pl().getGeom()),
+                                   0, false));
+        }
       }
     }
   }
@@ -617,22 +548,25 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
               << ", optim distance between them is +" << dd << " and -" << ddd
               << std::endl;
 
+    double pen = _c.p_45 * 2;
+
     for (int j = 1; j <= dd + 1; j++) {
-      addC[(i + j) % 8] += 50 * (1.0 - j / (dd + 1.0));
+      addC[(i + j) % 8] += pen * (1.0 - (j - 1.0) / (dd));
     }
 
     for (int j = 1; j <= ddd + 1; j++) {
-      addC[(i + (8 - j)) % 8] += 50 * (1.0 - j / (ddd + 1.0));
+      addC[(i + (8 - j)) % 8] += pen * (1.0 - (j - 1.0) / (ddd));
     }
 
-    addC[i] = INF;
+    // negative cost here means that the edge is going to be closed
+    addC[i] = -1.0 * std::numeric_limits<double>::max();
 
     for (int j = 1; j <= d; j++) {
-      addC[(i + j) % 8] = INF;
+      addC[(i + j) % 8] = -1.0 * std::numeric_limits<double>::max();
     }
 
     for (int j = 1; j <= (origEdgeNumber / 2) - d; j++) {
-      addC[(i + (8 - j)) % 8] = INF;
+      addC[(i + (8 - j)) % 8] = -1.0 * std::numeric_limits<double>::max();
     }
   }
 
@@ -657,7 +591,7 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
         // edge does not lie in this segment, block it!
 
         for (size_t x = i + 1; x < j; x++) {
-          addC[x % 8] = INF;
+          addC[x % 8] = -1.0 * std::numeric_limits<double>::max();
         }
       }
     }
@@ -681,28 +615,57 @@ void GridGraph::addCostVector(GridNode* n, double addC[8]) {
     auto neigh = getNeighbor(x, y, i);
 
     if (!neigh) continue;
-    getEdge(port, neigh->pl().getPort((i + 4) % 8))
-        ->pl()
-        .setCost(
 
-            getEdge(port, neigh->pl().getPort((i + 4) % 8))->pl().rawCost() +
-            addC[i]);
-    getEdge(neigh->pl().getPort((i + 4) % 8), port)
-        ->pl()
-        .setCost(
+    auto oPort = neigh->pl().getPort((i + 4) % 8);
 
-            getEdge(neigh->pl().getPort((i + 4) % 8), port)->pl().rawCost() +
-            addC[i]);
+    if (addC[i] < -1) {
+      getEdge(port, oPort)->pl().close();
+      getEdge(oPort, port)->pl().close();
+    } else {
+      getEdge(port, oPort)
+          ->pl()
+          .setCost(
+
+              getEdge(port, oPort)->pl().rawCost() + addC[i]);
+      getEdge(oPort, port)
+          ->pl()
+          .setCost(
+
+              getEdge(oPort, port)->pl().rawCost() + addC[i]);
+    }
   }
 }
 
 // _____________________________________________________________________________
 void GridGraph::removeCostVector(GridNode* n, double addC[8]) {
-  for (size_t i = 0; i < 8; i++) {
-    addC[i] = -addC[i];
-  }
+  auto xy = getNodeCoords(n);
+  size_t x = xy.first;
+  size_t y = xy.second;
 
-  addCostVector(n, addC);
+  for (size_t i = 0; i < 8; i++) {
+    auto port = n->pl().getPort(i);
+    auto neigh = getNeighbor(x, y, i);
+
+    if (!neigh) continue;
+
+    auto oPort = neigh->pl().getPort((i + 4) % 8);
+
+    if (addC[i] < -1) {
+      getEdge(port, oPort)->pl().open();
+      getEdge(oPort, port)->pl().open();
+    } else {
+      getEdge(port, oPort)
+          ->pl()
+          .setCost(
+
+              getEdge(port, oPort)->pl().rawCost() - addC[i]);
+      getEdge(oPort, port)
+          ->pl()
+          .setCost(
+
+              getEdge(oPort, port)->pl().rawCost() - addC[i]);
+    }
+  }
 }
 
 // _____________________________________________________________________________
@@ -734,16 +697,16 @@ void GridGraph::writeInitialCosts() {
         auto f = getEdge(neigh->pl().getPort((i + 4) % 8), port);
 
         if (i % 4 == 0) {
-          e->pl().setCost(_c.verticalCost);
-          f->pl().setCost(_c.verticalCost);
+          e->pl().setCost(_c.verticalPen);
+          f->pl().setCost(_c.verticalPen);
         }
         if ((i + 2) % 4 == 0) {
-          e->pl().setCost(_c.horizontalCost);
-          f->pl().setCost(_c.horizontalCost);
+          e->pl().setCost(_c.horizontalPen);
+          f->pl().setCost(_c.horizontalPen);
         }
         if (i % 2) {
-          e->pl().setCost(_c.diagonalCost);
-          f->pl().setCost(_c.diagonalCost);
+          e->pl().setCost(_c.diagonalPen);
+          f->pl().setCost(_c.diagonalPen);
         }
       }
     }
@@ -782,7 +745,7 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 
   size_t edgeCost =
       minHops *
-      (std::min(_c.verticalCost, std::min(_c.horizontalCost, _c.diagonalCost)));
+      (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
   size_t hopCost = (minHops - 1) * (_c.p_45 - _c.p_135);
 
   return edgeCost + hopCost;
@@ -830,17 +793,17 @@ void GridGraph::closeNode(GridNode* n) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::openNodeSink(GridNode* n) {
+void GridGraph::openNodeSink(GridNode* n, double cost) {
   for (size_t i = 0; i < 8; i++) {
-    getEdge(n->pl().getPort(i), n)->pl().open();
-    getEdge(n, n->pl().getPort(i))->pl().open();
+    getEdge(n->pl().getPort(i), n)->pl().setCost(cost);
+    getEdge(n, n->pl().getPort(i))->pl().setCost(cost);
   }
 }
 
 // _____________________________________________________________________________
 void GridGraph::closeNodeSink(GridNode* n) {
   for (size_t i = 0; i < 8; i++) {
-    getEdge(n->pl().getPort(i), n)->pl().close();
-    getEdge(n, n->pl().getPort(i))->pl().close();
+    getEdge(n->pl().getPort(i), n)->pl().setCost(INF);
+    getEdge(n, n->pl().getPort(i))->pl().setCost(INF);
   }
 }

@@ -46,8 +46,7 @@ void EdgePL::getAttrs(json::object_t& obj) const {
 
 // _____________________________________________________________________________
 double EdgePL::cost() const {
-  // return _closed ? std::numeric_limits<double>::infinity() : rawCost();
-  return _closed ? 999999 : rawCost();
+  return _closed ? std::numeric_limits<double>::infinity() : rawCost();
 }
 
 // _____________________________________________________________________________

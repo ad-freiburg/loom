@@ -42,14 +42,14 @@ struct Candidate {
   double d;
 };
 
-struct Costs {
+struct Penalties {
   double p_0, p_45, p_90, p_135;
-  double verticalCost, horizontalCost, diagonalCost;
+  double verticalPen, horizontalPen, diagonalPen;
 };
 
 class GridGraph : public Graph<NodePL, EdgePL> {
  public:
-  GridGraph(const util::geo::Box& bbox, double cellSize, double vertPen, double horiPen, double diagPen);
+  GridGraph(const util::geo::Box& bbox, double cellSize, const Penalties& pens);
 
   Node<NodePL, EdgePL>* getNode(size_t x, size_t y) const;
 
@@ -66,15 +66,15 @@ class GridGraph : public Graph<NodePL, EdgePL> {
   void removeCostVector(GridNode* n, double addC[8]);
   std::pair<size_t, size_t> getNodeCoords(GridNode* n) const;
 
-  void openNodeSink(GridNode* n);
+  void openNodeSink(GridNode* n, double cost);
   void closeNodeSink(GridNode* n);
   void openNode(GridNode* n);
   void closeNode(GridNode* n);
 
+  Node<NodePL, EdgePL>* getNeighbor(size_t cx, size_t cy, size_t i) const;
  private:
   util::geo::Box _bbox;
-  Node<NodePL, EdgePL>* getNeighbor(size_t cx, size_t cy, size_t i) const;
-  Costs _c;
+  Penalties _c;
 
   Grid<Node<NodePL, EdgePL>*, Point> _grid;
 

@@ -21,7 +21,7 @@ namespace output {
 
 class GeoJsonOutput {
  public:
-  GeoJsonOutput();
+  inline GeoJsonOutput();
   template <typename N, typename E>
   void print(const Graph<N, E>& outG);
 

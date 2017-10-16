@@ -5,10 +5,10 @@
 #ifndef OCTI_GRIDGRAPH_NODEPL_H_
 #define OCTI_GRIDGRAPH_NODEPL_H_
 
+#include "octi/gridgraph/EdgePL.h"
 #include "util/geo/Geo.h"
 #include "util/geo/GeoGraph.h"
 #include "util/graph/Node.h"
-#include "octi/gridgraph/EdgePL.h"
 
 using util::geo::Point;
 using util::graph::Node;
@@ -26,31 +26,8 @@ class NodePL : util::geograph::GeoNodePL {
   Node<NodePL, EdgePL>* getParent() const;
   void setParent(Node<NodePL, EdgePL>* n);
 
-  Node<NodePL, EdgePL>* getNorthPort() const;
-  void setNorthPort(Node<NodePL, EdgePL>* n);
-
-  Node<NodePL, EdgePL>* getSouthPort() const;
-  void setSouthPort(Node<NodePL, EdgePL>* n);
-
-  Node<NodePL, EdgePL>* getEastPort() const;
-  void setEastPort(Node<NodePL, EdgePL>* n);
-
-  Node<NodePL, EdgePL>* getWestPort() const;
-  void setWestPort(Node<NodePL, EdgePL>* n);
-
-  Node<NodePL, EdgePL>* getSouthEastPort() const;
-  void setSouthEastPort(Node<NodePL, EdgePL>* n);
-
-  Node<NodePL, EdgePL>* getSouthWestPort() const;
-  void setSouthWestPort(Node<NodePL, EdgePL>* n);
-
-  Node<NodePL, EdgePL>* getNorthEastPort() const;
-  void setNorthEastPort(Node<NodePL, EdgePL>* n);
-
-  Node<NodePL, EdgePL>* getNorthWestPort() const;
-  void setNorthWestPort(Node<NodePL, EdgePL>* n);
-
   Node<NodePL, EdgePL>* getPort(size_t i) const;
+  void setPort(size_t p, Node<NodePL, EdgePL>* n);
 
   void setXY(size_t x, size_t y);
   size_t getX() const;
@@ -58,6 +35,7 @@ class NodePL : util::geograph::GeoNodePL {
 
   bool isClosed() const;
   void setClosed(bool c);
+
  private:
   Point _pos;
 
@@ -68,6 +46,7 @@ class NodePL : util::geograph::GeoNodePL {
   size_t _x, _y;
   bool _closed;
 };
-}}
+}
+}
 
 #endif  // OCTI_GRIDGRAPH_NODEPL_H_

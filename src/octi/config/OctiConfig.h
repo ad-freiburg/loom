@@ -6,6 +6,7 @@
 #define OCTI_CONFIG_OCTICONFIG_H_
 
 #include <string>
+#include "octi/gridgraph/GridGraph.h"
 
 namespace octi {
 namespace config {
@@ -15,9 +16,7 @@ struct Config {
 
   std::string printMode;
 
-  double horiPen;
-  double vertPen;
-  double diagPen;
+  octi::gridgraph::Penalties pens;
 };
 
 }  // namespace config
