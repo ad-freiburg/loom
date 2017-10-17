@@ -61,8 +61,6 @@ struct GridHeur {
       if (temp < ret) ret = temp;
     }
 
-
-
     return ret;
   }
 

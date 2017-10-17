@@ -434,11 +434,13 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
           begin = std::chrono::steady_clock::now();
           double addCFrom[8] = {0, 0, 0, 0, 0, 0, 0, 0};
           double addCTo[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-          g.topoPenalty(m[from], from, e, addCFrom);
+          g.spacingPenalty(m[from], from, e, addCFrom);
+          g.topoBlockPenalty(m[from], from, e, addCFrom);
           g.addCostVector(m[from], addCFrom);
 
           if (tos.size() == 1) {
-            g.topoPenalty(tos.begin()->first, to, e, addCTo);
+            g.spacingPenalty(tos.begin()->first, to, e, addCTo);
+            g.topoBlockPenalty(tos.begin()->first, to, e, addCTo);
             g.addCostVector(tos.begin()->first, addCTo);
           }
 
@@ -477,8 +479,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
             costB += (*r2)->pl().cost();
             r2++;
           }
-
-          std::cerr << "Costs: " << costA << " vs " << costB << std::endl;
 
           assert(std::round(costA) == std::round(costB));
 

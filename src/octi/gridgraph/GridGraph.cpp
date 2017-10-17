@@ -429,7 +429,32 @@ GridEdge* GridGraph::getNEdge(GridNode* a, GridNode* b) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
+void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
+  auto xy = getNodeCoords(n);
+  size_t x = xy.first;
+  size_t y = xy.second;
+  // if some outgoing edge is taken, dont put new edge next to it
+  for (size_t i = 0; i < 8; i++) {
+    auto port = n->pl().getPort(i);
+    auto neigh = getNeighbor(x, y, i);
+
+    if (neigh &&
+        getEdge(port, neigh->pl().getPort((i + 4) % 8))
+                ->pl()
+                .getResEdges()
+                .size() > 0) {
+      outgoing[i] = *getEdge(port, neigh->pl().getPort((i + 4) % 8))
+                         ->pl()
+                         .getResEdges()
+                         .begin();
+    } else {
+      outgoing[i] = 0;
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
                             double* addC) {
   auto xy = getNodeCoords(n);
   size_t x = xy.first;
@@ -448,7 +473,6 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
               << "Checking node " << origNode << std::endl;
 
   int origEdgeNumber = origNode->getAdjList().size();
-  assert(origNode->pl().getOrderedEdges().size() == origEdgeNumber);
   size_t optimDistance = (8 / origEdgeNumber) - 1;
 
   if (!origNode->pl().hasOrderedEdge(e)) {
@@ -463,34 +487,7 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
             << optimDistance << std::endl;
 
   CombEdge* outgoing[8];
-
-  bool found = false;
-
-  // if some outgoing edge is taken, dont put new edge next to it
-  for (size_t i = 0; i < 8; i++) {
-    auto port = n->pl().getPort(i);
-    auto neigh = getNeighbor(x, y, i);
-
-    if (neigh &&
-        getEdge(port, neigh->pl().getPort((i + 4) % 8))
-                ->pl()
-                .getResEdges()
-                .size() > 0) {
-      outgoing[i] = *getEdge(port, neigh->pl().getPort((i + 4) % 8))
-                         ->pl()
-                         .getResEdges()
-                         .begin();
-      found = true;
-      if (!origNode->pl().hasOrderedEdge(outgoing[i])) {
-        std::cerr << "Warning: tried to balance edge " << outgoing[i]
-                  << " in node " << origNode
-                  << ", but the edge does not appear there." << std::endl;
-        return;
-      }
-    } else {
-      outgoing[i] = 0;
-    }
-  }
+  getSettledOutgoingEdges(n, outgoing);
 
   std::cerr << "Edge distribution: ";
   if (origNode->pl().getParent()->pl().getStops().size())
@@ -524,9 +521,6 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
     }
   }
   std::cerr << std::endl;
-
-  if (!found) return;
-  ;
 
   for (size_t i = 0; i < 8; i++) {
     if (!outgoing[i]) continue;
@@ -570,6 +564,14 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
     }
   }
 
+}
+
+// _____________________________________________________________________________
+void GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
+                            double* addC) {
+  CombEdge* outgoing[8];
+  getSettledOutgoingEdges(n, outgoing);
+
   // topological blocking
   for (size_t i = 0; i < 8; i++) {
     if (!outgoing[i]) continue;
@@ -578,30 +580,17 @@ void GridGraph::topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
       if (!outgoing[j % 8]) continue;
       if (outgoing[j % 8] == outgoing[i]) break;
 
-      // std::cerr << i << " vs " << (j % 8) << std::endl;
       int da = origNode->pl().distBetween(outgoing[i], e);
       int db = origNode->pl().distBetween(outgoing[j % 8], e);
 
-      /*
-       * std::cerr << "da = " << da << " vs "
-       *           << "db = " << db << std::endl;
-       */
-
       if (db < da) {
         // edge does not lie in this segment, block it!
-
         for (size_t x = i + 1; x < j; x++) {
           addC[x % 8] = -1.0 * std::numeric_limits<double>::max();
         }
       }
     }
   }
-
-  std::cerr << "Cost distribution: ";
-  for (size_t i = 0; i < 8; i++) {
-    std::cerr << addC[i] << ", ";
-  }
-  std::cerr << std::endl;
 }
 
 // _____________________________________________________________________________

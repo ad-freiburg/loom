@@ -55,7 +55,8 @@ class GridGraph : public Graph<NodePL, EdgePL> {
 
   const Grid<Node<NodePL, EdgePL>*, Point>& getGrid() const;
 
-  void topoPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double* ret);
+  void spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double* ret);
+  void topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double* ret);
   void balanceEdge(GridNode* a, GridNode* b);
 
   double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
@@ -84,6 +85,7 @@ class GridGraph : public Graph<NodePL, EdgePL> {
 
   GridEdge* getNEdge(GridNode* a, GridNode* b);
   GridEdge* getOtherEdge(GridEdge* e);
+  void getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]);
 };
 
 }
