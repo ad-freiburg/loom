@@ -608,9 +608,13 @@ void GridGraph::outDegDeviationPenalty(GridNode* n, CombNode* origNode, CombEdge
 
   deg = (deg + 90) % 360;
 
+  std::cerr << "deg is " << deg << "(degA: " << degA << ")" << std::endl;
+
   for (int i = 0; i < 8; i++) {
     if (addC[i] < -1) continue;
     double diff = std::min<int>(abs(deg - (45 * i)), 360 - abs(deg - (45 * i)));
+
+    std::cerr << "diff @" << i << ": " << diff << std::endl;
 
     double multiplier = .1;
     addC[i] += multiplier * diff;

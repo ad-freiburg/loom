@@ -385,7 +385,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
             from = to;
             to = tmp;
             reversed = !reversed;
-            std::cerr << "A" << std::endl;
           }
 
           if (m.find(from) == m.end() && m.find(to) != m.end()) {
