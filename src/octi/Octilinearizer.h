@@ -52,6 +52,7 @@ struct GridHeur {
   }
 
   double operator()(GridNode* from, const std::unordered_map<GridNode*, bool>& to) {
+    return 0;
     size_t ret = std::numeric_limits<size_t>::max();
     auto xy = g->getNodeCoords(from->pl().getParent());
 
@@ -80,6 +81,7 @@ class Octilinearizer {
 
   TransitGraph draw(TransitGraph* g, const Penalties& pens);
  private:
+  void normalizeCostVector(double* vec) const;
   double getMaxDis(CombNode* to, CombEdge* e);
   void removeEdgesShorterThan(TransitGraph* g, double d);
   void combineDeg2(CombGraph* g);

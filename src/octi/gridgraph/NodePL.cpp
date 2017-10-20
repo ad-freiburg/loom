@@ -45,3 +45,4 @@ void NodePL::setClosed(bool c) { _closed = c; }
 
 // _____________________________________________________________________________
 bool NodePL::isClosed() const { return _closed; }
+

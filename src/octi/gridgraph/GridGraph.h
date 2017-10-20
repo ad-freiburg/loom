@@ -57,13 +57,14 @@ class GridGraph : public Graph<NodePL, EdgePL> {
 
   void spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double* ret);
   void topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double* ret);
+  void outDegDeviationPenalty(GridNode* n, CombNode* origNode, CombEdge* e, double* addC);
   void balanceEdge(GridNode* a, GridNode* b);
 
   double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
   std::priority_queue<Candidate> getNearestCandidatesFor(const util::geo::Point& p, double maxD) const;
 
-  void addCostVector(GridNode* n, double addC[8]);
+  void addCostVector(GridNode* n, double addC[8], double* invCost);
   void removeCostVector(GridNode* n, double addC[8]);
   std::pair<size_t, size_t> getNodeCoords(GridNode* n) const;
 

@@ -55,17 +55,24 @@ struct RouteNodeAStar {
 class Dijkstra {
  public:
   template <typename N, typename E>
-  static bool shortestPath(Node<N, E>* from, Node<N, E>* to,
+  static int shortestPath(Node<N, E>* from, Node<N, E>* to,
                            std::list<Edge<N, E>*>* res);
 
   template <typename N, typename E, typename H>
-  static bool shortestPathAStar(Node<N, E>* from,
+  static int shortestPathAStar(Node<N, E>* from,
+                           Node<N, E>* to,
+                           H heurFunc,
+                           std::list<Edge<N, E>*>* res);
+
+  template <typename N, typename E, typename H>
+  static int shortestPathAStar(Node<N, E>* from,
                            const std::unordered_map<Node<N, E>*, bool>& to,
                            H heurFunc,
-                           std::list<Edge<N, E>*>* res, Node<N, E>** target);
+                           std::list<Edge<N, E>*>* res, Node<N, E>** target,
+                           bool check);
 
   template <typename N, typename E>
-  static bool shortestPath(Node<N, E>* from,
+  static int shortestPath(Node<N, E>* from,
                            const std::unordered_map<Node<N, E>*, bool>& to,
                            std::list<Edge<N, E>*>* res, Node<N, E>** target);
 };

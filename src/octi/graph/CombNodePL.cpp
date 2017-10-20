@@ -81,3 +81,15 @@ CombNodePL::getOrderedEdges() {
   return _edgeOrder;
 }
 
+// _____________________________________________________________________________
+std::string CombNodePL::toString() const {
+  std::stringstream ret;
+  ret << "<" << this << " (" << getParent() << ")";
+  if (getParent()->pl().getStops().size()) {
+    ret << " " << getParent()->pl().getStops().front().name;
+  }
+
+  ret << ">";
+
+  return ret.str();
+}

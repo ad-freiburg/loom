@@ -250,6 +250,22 @@ double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e) {
 }
 
 // _____________________________________________________________________________
+void Octilinearizer::normalizeCostVector(double* vec) const {
+  double smallest = std::numeric_limits<double>::max();
+  for (int i = 0; i < 8; i++) {
+    if (vec[i] > -1 && vec[i] < smallest) {
+      smallest = vec[i];
+    }
+  }
+
+  for (int i = 0; i < 8; i++) {
+    if (vec[i] > -1) {
+      vec[i] -= smallest;
+    }
+  }
+}
+
+// _____________________________________________________________________________
 TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
   std::cerr << "Removing short edges... ";
   auto begin = std::chrono::steady_clock::now();
@@ -285,7 +301,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
   writeEdgeOrdering(&cg);
 
   auto box = tg->getBBox();
-  double gridSize = 300;
+  double gridSize = 250;
 
   Point center;
   bgeo::centroid(box, center);
@@ -362,11 +378,14 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
 
           bool reversed = false;
 
-          if (from->getAdjList().size() < to->getAdjList().size()) {
+          if (from->getAdjList().size() < to->getAdjList().size() ||
+              (from->getAdjList().size() == to->getAdjList().size() &&
+               from->pl().getRouteNumber() < to->pl().getRouteNumber())) {
             auto tmp = from;
             from = to;
             to = tmp;
             reversed = !reversed;
+            std::cerr << "A" << std::endl;
           }
 
           if (m.find(from) == m.end() && m.find(to) != m.end()) {
@@ -376,13 +395,14 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
             reversed = !reversed;
           }
 
-          if (verb) std::cerr << "++ Generation " << gen << std::endl;
+          std::cerr << "\n\n ++ Generation " << gen << std::endl;
+          std::cerr << "Edge from " << from->pl().toString() << " to " << to->pl().toString() << std::endl;
 
           if (m.find(from) == m.end()) {
             auto cands = g.getNearestCandidatesFor(*from->pl().getGeom(), 400);
 
             while (!cands.empty()) {
-              if (used.find(cands.top().n) == used.end()) {
+              if (!cands.top().n->pl().isClosed() && used.find(cands.top().n) == used.end()) {
                 m[from] = cands.top().n;
                 used.insert(cands.top().n);
                 break;
@@ -404,7 +424,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
             auto cands = g.getNearestCandidatesFor(*to->pl().getGeom(), maxDis);
 
             while (!cands.empty()) {
-              if (used.find(cands.top().n) == used.end()) {
+              if (!cands.top().n->pl().isClosed() && used.find(cands.top().n) == used.end()) {
                 tos[cands.top().n] = true;
               }
               cands.pop();
@@ -416,12 +436,11 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
           std::list<GridEdge*> res;
           GridNode* target = 0;
 
-          double movePenPerGrid = 10;
+          double movePenPerGrid = tos.size() > 1 ? 10 : 0;
 
           // open to target node
           for (auto n : tos) {
-            double gridDist = util::geo::dist(*n.first->pl().getGeom(), *to->pl().getGeom()) / gridSize;
-            std::cerr << gridDist << std::endl;
+            double gridDist = floor(util::geo::dist(*n.first->pl().getGeom(), *to->pl().getGeom()) / gridSize);
             g.openNodeSink(n.first, gridDist * movePenPerGrid);
             g.openNode(n.first);
           }
@@ -434,14 +453,22 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
           begin = std::chrono::steady_clock::now();
           double addCFrom[8] = {0, 0, 0, 0, 0, 0, 0, 0};
           double addCTo[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+          double addCFromInv[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+          double addCToInv[8] = {0, 0, 0, 0, 0, 0, 0, 0};
           g.spacingPenalty(m[from], from, e, addCFrom);
           g.topoBlockPenalty(m[from], from, e, addCFrom);
-          g.addCostVector(m[from], addCFrom);
+          normalizeCostVector(addCFrom);
+          g.outDegDeviationPenalty(m[from], from, e, addCFrom);
+
+          g.addCostVector(m[from], addCFrom, addCFromInv);
 
           if (tos.size() == 1) {
             g.spacingPenalty(tos.begin()->first, to, e, addCTo);
             g.topoBlockPenalty(tos.begin()->first, to, e, addCTo);
-            g.addCostVector(tos.begin()->first, addCTo);
+            normalizeCostVector(addCTo);
+            g.outDegDeviationPenalty(tos.begin()->first, to, e, addCTo);
+
+            g.addCostVector(tos.begin()->first, addCTo, addCToInv);
           }
 
           end = std::chrono::steady_clock::now();
@@ -451,16 +478,21 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
                              end - begin)
                              .count()
                       << "ms)" << std::endl;
+          
+          std::cerr << tos.size() << std::endl;
+
+
+          int STOP_GEN = -1;
 
           if (verb) std::cerr << "Finding shortest path (w heur)... ";
           begin = std::chrono::steady_clock::now();
 
           std::list<GridEdge*> res2;
           GridNode* target2 = 0;
-          dijkstra.shortestPath(m[from], tos, &res2,
-                                     &target2);
-          dijkstra.shortestPathAStar(m[from], tos, GridHeur(&g, m[from], tos), &res,
-                                     &target);
+          // int iters2 = dijkstra.shortestPath(m[from], tos, &res2,
+                                     // &target2);
+          int iters = dijkstra.shortestPathAStar(m[from], tos, GridHeur(&g, m[from], tos), &res,
+                                     &target, gen == STOP_GEN);
           end = std::chrono::steady_clock::now();
           if (verb)
             std::cerr << " done ("
@@ -469,22 +501,31 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
                              .count()
                       << "ms)" << std::endl;
 
+          std::cerr << "HEUR: took " << iters << " iterations." << std::endl;
+          // std::cerr << "BASELINE: took " << iters2 << " iterations." << std::endl;
+
           double costA = 0;
           double costB = 0;
 
-          auto r2 = res2.begin();
           for (auto r : res) {
-            std::cerr << r->pl().cost() << " (" << (*r2)->pl().cost() << ")" << std::endl;
             costA += r->pl().cost();
-            costB += (*r2)->pl().cost();
-            r2++;
           }
 
-          assert(std::round(costA) == std::round(costB));
+          for (auto r2 : res2) {
+            costB += r2->pl().cost();
+          }
+          
+          if (gen == STOP_GEN) {
+            util::geo::output::GeoJsonOutput out;
+            out.print(g);
+            exit(0);
+          }
 
-          g.removeCostVector(m[from], addCFrom);
+          //assert(std::round(costA) == std::round(costB));
+
+          g.removeCostVector(m[from], addCFromInv);
           if (tos.size() == 1) {
-            g.removeCostVector(tos.begin()->first, addCTo);
+            g.removeCostVector(tos.begin()->first, addCToInv);
           }
 
           if (target == 0) {
@@ -505,7 +546,10 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
           for (auto f : res) {
             cost += c > 0 ? f->pl().cost() : 0;
             c++;
+
+            assert(f->pl().getResEdges().size() == 0);
             f->pl().addResidentEdge(e);
+            assert(g.getEdge(f->getTo(), f->getFrom())->pl().getResEdges().size() == 0);
             g.getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
 
             if (!f->pl().isSecondary()) {
@@ -526,6 +570,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
               pl << *f->getTo()->pl().getGeom();
             }
           }
+
           end = std::chrono::steady_clock::now();
           double estimatedCost = g.heurCost(
               g.getNodeCoords(m[from]).first, g.getNodeCoords(m[from]).second,
@@ -545,7 +590,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
           if (res.size())
             pl << *res.back()->getTo()->pl().getParent()->pl().getGeom();
 
-          // close to target node
+          // close the target node
           for (auto n : tos) {
             g.closeNodeSink(n.first);
           }

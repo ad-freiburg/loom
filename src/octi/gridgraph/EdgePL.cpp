@@ -10,12 +10,12 @@ using util::geo::PolyLine;
 using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
-EdgePL::EdgePL(const PolyLine& pl, double c, bool secondary) : _pl(pl), _c(c), _isSecondary(secondary), _closed(false) {
+EdgePL::EdgePL(const PolyLine& pl, double c, bool secondary) : _pl(pl), _c(c), _isSecondary(secondary), _closed(false), _visited(0) {
 
 }
 
 // _____________________________________________________________________________
-EdgePL::EdgePL(const PolyLine& pl, double c, bool secondary, bool closed) : _pl(pl), _c(c), _isSecondary(secondary), _closed(closed) {
+EdgePL::EdgePL(const PolyLine& pl, double c, bool secondary, bool closed) : _pl(pl), _c(c), _isSecondary(secondary), _closed(closed), _visited(0) {
 
 }
 
@@ -38,6 +38,7 @@ const std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgeP
 void EdgePL::getAttrs(json::object_t& obj) const {
   obj["routes"] = json::array();
   obj["cost"] = cost();
+  obj["visited"] = _visited;
 
   for (auto r : _resEdges) {
     obj["routes"].push_back(util::toString(r));
@@ -60,6 +61,11 @@ void EdgePL::close() {
 }
 
 // _____________________________________________________________________________
+bool EdgePL::closed() const {
+  return _closed;
+}
+
+// _____________________________________________________________________________
 void EdgePL::open() {
   _closed = false;
 }
@@ -73,3 +79,6 @@ void EdgePL::setCost(double c) {
 bool EdgePL::isSecondary() const {
   return _isSecondary;
 }
+
+// _____________________________________________________________________________
+void EdgePL::setVisited(int i) { _visited = i; }

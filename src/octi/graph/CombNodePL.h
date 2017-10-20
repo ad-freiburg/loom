@@ -44,6 +44,7 @@ class CombNodePL : util::geograph::GeoNodePL {
   bool hasOrderedEdge(util::graph::Edge<CombNodePL, CombEdgePL>* e) const;
   size_t getRouteNumber() const;
   void setRouteNumber(size_t n);
+  std::string toString() const;
 
  private:
   octi::graph::Node* _parent;

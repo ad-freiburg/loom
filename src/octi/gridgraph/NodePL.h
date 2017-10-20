@@ -36,6 +36,7 @@ class NodePL : util::geograph::GeoNodePL {
   bool isClosed() const;
   void setClosed(bool c);
 
+
  private:
   Point _pos;
 

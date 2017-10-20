@@ -37,6 +37,8 @@ class EdgePL : util::geograph::GeoEdgePL {
 
   void close();
   void open();
+  bool closed() const;
+  void setVisited(int i);
  private:
   PolyLine _pl;
   double _c;
@@ -45,6 +47,7 @@ class EdgePL : util::geograph::GeoEdgePL {
   bool _closed;
 
   std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*> _resEdges;
+  int _visited;
 };
 
 }}

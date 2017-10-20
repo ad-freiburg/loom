@@ -8,7 +8,7 @@
 
 using namespace octi::gridgraph;
 
-double INF = std::numeric_limits<double>::max();
+double INF = std::numeric_limits<double>::infinity();
 
 // _____________________________________________________________________________
 GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize,
@@ -243,7 +243,7 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
     }
   }
 
-  double nearPenalty = 100;
+  double nearPenalty = 10;
 
   // std::cerr << x << ", " << y << std::endl;
 
@@ -532,6 +532,7 @@ void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
     int32_t d = origNode->pl().distBetween(outgoing[i], e) - 1;
 
     // dd and ddd are the optimal distances between outgoing[i] and e, based on
+    // exit(0);
     // the total number
     // of edges in this node
     int dd = ((((d + 1) + d) % 8) * optimDistance) % 8;
@@ -542,13 +543,15 @@ void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
               << ", optim distance between them is +" << dd << " and -" << ddd
               << std::endl;
 
-    double pen = _c.p_45 * 2;
+    double pen = _c.p_45 * 2 - 1;
 
     for (int j = 1; j <= dd + 1; j++) {
+      if (addC[(i + j) % 8] < -1) continue;
       addC[(i + j) % 8] += pen * (1.0 - (j - 1.0) / (dd));
     }
 
     for (int j = 1; j <= ddd + 1; j++) {
+      if (addC[(i + (8 - j)) % 8] < -1) continue;
       addC[(i + (8 - j)) % 8] += pen * (1.0 - (j - 1.0) / (ddd));
     }
 
@@ -594,7 +597,34 @@ void GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
 }
 
 // _____________________________________________________________________________
-void GridGraph::addCostVector(GridNode* n, double addC[8]) {
+void GridGraph::outDegDeviationPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
+                            double* addC) {
+  double degA = util::geo::angBetween(
+      *origNode->pl().getParent()->pl().getGeom(),
+      *e->getOtherNode(origNode)->pl().getParent()->pl().getGeom());
+
+  int deg = -degA * (180.0 / M_PI);
+  if (deg < 0) deg += 360;
+
+  deg = (deg + 90) % 360;
+
+  for (int i = 0; i < 8; i++) {
+    if (addC[i] < -1) continue;
+    double diff = std::min<int>(abs(deg - (45 * i)), 360 - abs(deg - (45 * i)));
+
+    double multiplier = .1;
+    addC[i] += multiplier * diff;
+  }
+}
+
+// _____________________________________________________________________________
+void GridGraph::addCostVector(GridNode* n, double addC[8], double* invCost) {
+  std::cerr << "Adding cost vector ";
+  for (size_t i = 0 ; i < 8; i++) {
+    std::cerr << addC[i] << ",";
+  }
+  std::cerr << std::endl;
+
   auto xy = getNodeCoords(n);
   size_t x = xy.first;
   size_t y = xy.second;
@@ -608,19 +638,24 @@ void GridGraph::addCostVector(GridNode* n, double addC[8]) {
     auto oPort = neigh->pl().getPort((i + 4) % 8);
 
     if (addC[i] < -1) {
-      getEdge(port, oPort)->pl().close();
-      getEdge(oPort, port)->pl().close();
+      if (getEdge(port, oPort)->pl().closed()) {
+        // already closed, so dont remove closedness in inv costs
+        invCost[i] = 0;
+      } else {
+        getEdge(port, oPort)->pl().close();
+        getEdge(oPort, port)->pl().close();
+        invCost[i] = addC[i];
+      }
     } else {
       getEdge(port, oPort)
           ->pl()
           .setCost(
-
               getEdge(port, oPort)->pl().rawCost() + addC[i]);
       getEdge(oPort, port)
           ->pl()
           .setCost(
-
               getEdge(oPort, port)->pl().rawCost() + addC[i]);
+      invCost[i] = addC[i];
     }
   }
 }
@@ -730,6 +765,7 @@ const Grid<Node<NodePL, EdgePL>*, Point>& GridGraph::getGrid() const {
 // _____________________________________________________________________________
 double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
                            int64_t yb) const {
+  if (xa == xb && ya == yb) return 0;
   size_t minHops = std::max(labs(xb - xa), labs(yb - ya));
 
   size_t edgeCost =
@@ -753,8 +789,10 @@ void GridGraph::openNode(GridNode* n) {
     if (!neigh || !port) continue;
     auto e = getEdge(port, neigh->pl().getPort((i + 4) % 8));
     auto f = getEdge(neigh->pl().getPort((i + 4) % 8), port);
-    e->pl().open();
-    f->pl().open();
+    if (e->pl().getResEdges().size() == 0) {
+      e->pl().open();
+      f->pl().open();
+    }
   }
 
   n->pl().setClosed(false);

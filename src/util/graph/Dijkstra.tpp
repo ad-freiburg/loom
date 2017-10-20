@@ -4,18 +4,20 @@
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-bool Dijkstra::shortestPath(Node<N, E>* from,
+int Dijkstra::shortestPath(Node<N, E>* from,
                             const std::unordered_map<Node<N, E>*, bool>& to,
                             std::list<Edge<N, E>*>* res, Node<N, E>** target) {
   std::unordered_map<Node<N, E>*, RouteNode<N, E> > settled;
   std::priority_queue<RouteNode<N, E> > pq;
   bool found = false;
+  int iter = 0;
 
   RouteNode<N, E> start(from, 0, 0, 0);
   pq.push(start);
   RouteNode<N, E> cur = start;
 
   while (!pq.empty()) {
+    iter++;
     cur = pq.top();
     pq.pop();
 
@@ -29,12 +31,13 @@ bool Dijkstra::shortestPath(Node<N, E>* from,
 
     // relaxation
     for (auto edge : cur.n->getAdjListOut()) {
+      if (edge->pl().cost() == std::numeric_limits<double>::infinity()) continue;
       double newC = cur.d + edge->pl().cost();
       pq.push(RouteNode<N, E>(edge->getTo(), cur.n, newC, &(*edge)));
     }
   }
 
-  if (!found) return false;
+  if (!found) return 0;
 
   // traverse the parents backwards beginning at current target node
   Node<N, E>* curN = cur.n;
@@ -47,24 +50,27 @@ bool Dijkstra::shortestPath(Node<N, E>* from,
     curN = curNode.parent;
   }
 
-  return true;
+  return iter;
 }
 
 // _____________________________________________________________________________
 template <typename N, typename E, typename H>
-bool Dijkstra::shortestPathAStar(Node<N, E>* from,
+int Dijkstra::shortestPathAStar(Node<N, E>* from,
                             const std::unordered_map<Node<N, E>*, bool>& to,
                             H heurFunc,
-                            std::list<Edge<N, E>*>* res, Node<N, E>** target) {
+                            std::list<Edge<N, E>*>* res, Node<N, E>** target,
+                            bool check) {
   std::unordered_map<Node<N, E>*, RouteNodeAStar<N, E> > settled;
   std::priority_queue<RouteNodeAStar<N, E> > pq;
   bool found = false;
+  int iter = 0;
 
   RouteNodeAStar<N, E> start(from, 0, 0, 0, 0);
   pq.push(start);
   RouteNodeAStar<N, E> cur = start;
 
   while (!pq.empty()) {
+    iter++;
     cur = pq.top();
     pq.pop();
 
@@ -78,16 +84,19 @@ bool Dijkstra::shortestPathAStar(Node<N, E>* from,
 
     // relaxation
     for (auto edge : cur.n->getAdjListOut()) {
+      if (edge->pl().cost() == std::numeric_limits<double>::infinity()) continue;
       double newC = cur.d + edge->pl().cost();
 
       double hCost = heurFunc(edge->getTo(), to);
       double newH = newC + hCost;
 
+      if(check) edge->pl().setVisited(iter);
+
       pq.push(RouteNodeAStar<N, E>(edge->getTo(), cur.n, newH, newC, &(*edge)));
     }
   }
 
-  if (!found) return false;
+  if (!found) return 0;
 
   // traverse the parents backwards beginning at current target node
   Node<N, E>* curN = cur.n;
@@ -100,15 +109,25 @@ bool Dijkstra::shortestPathAStar(Node<N, E>* from,
     curN = curNode.parent;
   }
 
-  return true;
+  return iter;
 }
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-bool Dijkstra::shortestPath(Node<N, E>* from, Node<N, E>* to,
+int Dijkstra::shortestPath(Node<N, E>* from, Node<N, E>* to,
                             std::list<Edge<N, E>*>* res) {
   Node<N, E>* target;
   std::unordered_map<Node<N, E>*, bool> tos;
   tos[to] = true;
   return shortestPath(from, tos, res, &target);
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E, typename H>
+int Dijkstra::shortestPathAStar(Node<N, E>* from, Node<N, E>* to,
+                            H heur, std::list<Edge<N, E>*>* res) {
+  Node<N, E>* target;
+  std::unordered_map<Node<N, E>*, bool> tos;
+  tos[to] = true;
+  return shortestPathAStar(from, tos, res, heur, &target, false);
 }
