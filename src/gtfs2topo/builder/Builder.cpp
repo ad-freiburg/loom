@@ -47,10 +47,12 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
 
   NodeGrid ngrid(200, 200, graphBox);
 
+  bool SANITY_CHECK = true;
+
   for (auto t = f.getTrips().begin(); t != f.getTrips().end(); ++t) {
     if (t->second->getStopTimes().size() < 2) continue;
     if (!(_cfg->useMots & (1 << t->second->getRoute()->getType()))) continue;
-    if (!checkTripSanity(t->second)) continue;
+    if (SANITY_CHECK && !checkTripSanity(t->second)) continue;
 
     auto st = t->second->getStopTimes().begin();
 
@@ -97,7 +99,7 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
 
         // only take geometries that could be found using the
         // shape geometry, not some fallback
-        if (edgeGeom.first) {
+        if (!SANITY_CHECK || edgeGeom.first) {
           if (prevEdge) {
             fromNode->pl().connOccurs(t->second->getRoute(), prevEdge, exE);
           }

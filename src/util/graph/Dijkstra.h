@@ -8,7 +8,7 @@
 #include <list>
 #include <queue>
 #include <set>
-#include <unordered_map>
+#include <unordered_set>
 #include "util/graph/Edge.h"
 #include "util/graph/Graph.h"
 #include "util/graph/Node.h"
@@ -66,14 +66,14 @@ class Dijkstra {
 
   template <typename N, typename E, typename H>
   static int shortestPathAStar(Node<N, E>* from,
-                           const std::unordered_map<Node<N, E>*, bool>& to,
+                           const std::unordered_set<Node<N, E>*>& to,
                            H heurFunc,
                            std::list<Edge<N, E>*>* res, Node<N, E>** target,
                            bool check);
 
   template <typename N, typename E>
   static int shortestPath(Node<N, E>* from,
-                           const std::unordered_map<Node<N, E>*, bool>& to,
+                           const std::unordered_set<Node<N, E>*>& to,
                            std::list<Edge<N, E>*>* res, Node<N, E>** target);
 };
 

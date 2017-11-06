@@ -5,7 +5,7 @@
 #ifndef OCTI_OCTILINEARIZER_H_
 #define OCTI_OCTILINEARIZER_H_
 
-#include <unordered_map>
+#include <unordered_set>
 #include "octi/graph/Graph.h"
 #include "octi/gridgraph/GridGraph.h"
 
@@ -26,39 +26,36 @@ typedef util::graph::Node<octi::graph::NodePL, octi::graph::EdgePL> TransitNode;
 typedef util::graph::Edge<octi::graph::NodePL, octi::graph::EdgePL> TransitEdge;
 
 struct GridHeur {
-  GridHeur(octi::gridgraph::GridGraph* g, GridNode* from, const std::unordered_map<GridNode*, bool>& to) : g(g), from(from), to(0) {
+  GridHeur(octi::gridgraph::GridGraph* g, GridNode* from, const std::unordered_set<GridNode*>& to) : g(g), from(from), to(0) {
     if (to.size() == 1) {
-      this->to = to.begin()->first;
+      this->to = *to.begin();
     }
-  /*
-   *     minX = std::numeric_limits<size_t>::max();
-   *     minY = std::numeric_limits<size_t>::max();
-   *     maxX = 0;
-   *     maxY = 0;
-   *
-   *     for (auto n : to) {
-   *       auto xy = g->getNodeCoords(n.first->pl().getParent());
-   *       if (xy.first < minX) minX = xy.first;
-   *       if (xy.second < minY) minY = xy.second;
-   *       if (xy.first > maxX) maxX = xy.first;
-   *       if (xy.second > maxY) maxY = xy.second;
-   *     }
-   *
-   *     for (auto n : to) {
-   *       auto xy = g->getNodeCoords(n.first->pl().getParent());
-   *       if (xy.first == minX || xy.first == maxX || xy.second == minY || xy.second == maxY) hull[n.first] = true;
-   *     }
-   */
+
+    for (auto n : to) {
+      auto coords = g->getNodeCoords(n);
+
+      for (size_t i = 0; i < 8; i++) {
+        auto neigh = g->getNeighbor(coords.first, coords.second, i);
+        if (neigh && to.find(neigh) == to.end()) {
+          hull.push_back(g->getNodeCoords(n));
+          break;
+        }
+      }
+    }
+
+    std::cerr << "to size: " << to.size() << ", hull size: " << hull.size() << std::endl;
   }
 
-  double operator()(GridNode* from, const std::unordered_map<GridNode*, bool>& to) {
-    return 0;
+  double operator()(GridNode* from, const std::unordered_set<GridNode*>& to) {
+    //return 0;
+
+    if (to.find(from->pl().getParent()) != to.end()) return 0;
+
     size_t ret = std::numeric_limits<size_t>::max();
     auto xy = g->getNodeCoords(from->pl().getParent());
 
-    for (auto t : to) {
-      auto txy = g->getNodeCoords(t.first);
-      size_t temp = g->heurCost(xy.first, xy.second, txy.first, txy.second);
+    for (auto t : hull) {
+      size_t temp = g->heurCost(xy.first, xy.second, t.first, t.second);
       if (temp < ret) ret = temp;
     }
 
@@ -68,11 +65,7 @@ struct GridHeur {
   octi::gridgraph::GridGraph* g;
   GridNode* from;
   GridNode* to;
-  std::unordered_map<GridNode*, bool> hull;
-  size_t minX;
-  size_t minY;
-  size_t maxX;
-  size_t maxY;
+  std::vector<std::pair<size_t, size_t> > hull;
 };
 
 class Octilinearizer {
@@ -89,9 +82,11 @@ class Octilinearizer {
   void writeEdgeOrdering(CombGraph* target);
   void buildCombGraph(TransitGraph* source, CombGraph* target);
   void rotate(CombGraph* g, Point center, double deg);
+  void buildPolylineFromRes(const std::list<GridEdge*>& l, PolyLine& res);
+  double getCostFromRes(const std::list<GridEdge*>& l);
+  double addResidentEdges(gridgraph::GridGraph* g, CombEdge* e, const std::list<GridEdge*>& res);
 };
 
 }  // namespace octt
-
 
 #endif  // OCTI_OCTILINEARIZER_H_

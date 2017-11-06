@@ -80,7 +80,6 @@ int main(int argc, char** argv) {
    */
   std::chrono::steady_clock::time_point begin;
   std::chrono::steady_clock::time_point end;
-  auto totalBegin = std::chrono::steady_clock::now();
 
   std::cerr << "Reading graph file... ";
   begin = std::chrono::steady_clock::now();
@@ -94,8 +93,11 @@ int main(int argc, char** argv) {
   end = std::chrono::steady_clock::now();
   std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
 
+  auto totalBegin = std::chrono::steady_clock::now();
   Octilinearizer oct;
   TransitGraph res = oct.draw(&tg, cfg.pens);
+  auto totalend = std::chrono::steady_clock::now();
+  std::cerr << " octilinearized input in " << std::chrono::duration_cast<std::chrono::milliseconds>(totalend - totalBegin).count() << "ms"<< std::endl;
 
   if (cfg.printMode == "gridgraph") {
     /*
@@ -118,8 +120,6 @@ int main(int argc, char** argv) {
     out.print(res);
   }
 
-  auto totalend = std::chrono::steady_clock::now();
-  std::cerr << " octilinearized input in " << std::chrono::duration_cast<std::chrono::milliseconds>(totalend - totalBegin).count() << "ms"<< std::endl;
 
   return (0);
 }

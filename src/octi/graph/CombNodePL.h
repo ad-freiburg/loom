@@ -51,6 +51,7 @@ class CombNodePL : util::geograph::GeoNodePL {
   std::set<std::pair<util::graph::Edge<CombNodePL, CombEdgePL>*, double>, PairCmp>
       _edgeOrder;
   size_t _routeNumber;
+
 };
 }
 }

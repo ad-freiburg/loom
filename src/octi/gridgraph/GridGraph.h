@@ -6,6 +6,8 @@
 #define OCTI_GRIDGRAPH_GRIDGRAPH_H_
 
 #include <queue>
+#include <unordered_set>
+#include <unordered_map>
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/Graph.h"
@@ -74,11 +76,18 @@ class GridGraph : public Graph<NodePL, EdgePL> {
   void closeNode(GridNode* n);
 
   Node<NodePL, EdgePL>* getNeighbor(size_t cx, size_t cy, size_t i) const;
+
+  GridNode* getGridNodeFrom(CombNode* n);
+  std::unordered_set<GridNode*> getGridNodesTo(CombNode* n, double maxDis);
+
+  void settleGridNode(GridNode* n, CombNode* cn);
+  bool isSettled(CombNode* cn);
  private:
   util::geo::Box _bbox;
   Penalties _c;
 
   Grid<Node<NodePL, EdgePL>*, Point> _grid;
+  std::unordered_map<CombNode*, GridNode*> _settled;
 
   std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*> getResEdges(Node<NodePL, EdgePL>* n) const;
 

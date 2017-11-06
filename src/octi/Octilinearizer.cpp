@@ -3,9 +3,9 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <chrono>
-#include "util/geo/output/GeoJsonOutput.h"
 #include "octi/Octilinearizer.h"
 #include "util/geo/BezierCurve.h"
+#include "util/geo/output/GeoJsonOutput.h"
 #include "util/graph/Dijkstra.h"
 #include "util/log/Log.h"
 
@@ -314,7 +314,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
 
   TransitGraph bestGraph;
   double bestScore = std::numeric_limits<double>::infinity();
-  bool verb = false;
 
   for (int i = 0; i < 1 + (maxDeg / step) * 2; i++) {
     rotate(&cg, center, step);
@@ -322,12 +321,11 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
 
     std::cerr << "Rotate degree is " << rbox.rotateDeg << std::endl;
 
-    std::map<CombNode*, GridNode*> m;
-    std::map<CombNode*, TransitNode*> oldNew;
-    std::set<GridNode*> used;
-
+    auto gStart = std::chrono::steady_clock::now();
     gridgraph::GridGraph g(getBoundingBox(rbox.getPolygon()), gridSize, pens);
-
+    auto gEnd = std::chrono::steady_clock::now();
+    std::cerr << "Build grid graph in " << std::chrono::duration_cast<std::chrono::milliseconds>(
+                       gEnd - gStart).count() << " ms " << std::endl;
     util::graph::Dijkstra dijkstra;
 
     // comparator for nodes, based on degree
@@ -354,6 +352,10 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
     std::set<CombEdge*> done;
     size_t gen = 0;
     double totalCost = 0;
+    size_t totalIters = 0;
+    int dTime = 0;
+    int costVecTime = 0;
+    int postTime = 0;
 
     while (!globalPq.empty()) {
       auto n = globalPq.top();
@@ -387,7 +389,10 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
             reversed = !reversed;
           }
 
-          if (m.find(from) == m.end() && m.find(to) != m.end()) {
+          // TODO: move into if clause above
+          if (!g.isSettled(from) &&
+              g.isSettled(
+                  to)) {  // m.find(from) == m.end() && m.find(to) != m.end()) {
             auto tmp = from;
             from = to;
             to = tmp;
@@ -395,41 +400,22 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
           }
 
           std::cerr << "\n\n ++ Generation " << gen << std::endl;
-          std::cerr << "Edge from " << from->pl().toString() << " to " << to->pl().toString() << std::endl;
+          std::cerr << "Edge from " << from->pl().toString() << " to "
+                    << to->pl().toString() << std::endl;
 
-          if (m.find(from) == m.end()) {
-            auto cands = g.getNearestCandidatesFor(*from->pl().getGeom(), 400);
+          GridNode* fromGridNode = g.getGridNodeFrom(from);
 
-            while (!cands.empty()) {
-              if (!cands.top().n->pl().isClosed() && used.find(cands.top().n) == used.end()) {
-                m[from] = cands.top().n;
-                used.insert(cands.top().n);
-                break;
-              }
-              cands.pop();
-            }
-
-            if (m.find(from) == m.end()) {
-              LOG(ERROR) << "Could not sort in node " << from << std::endl;
-            }
+          if (!fromGridNode) {
+            LOG(ERROR) << "Could not sort in source node " << from << std::endl;
           }
 
+          auto costVecBegin = std::chrono::steady_clock::now();
           // get surrounding displacement nodes
-          std::unordered_map<GridNode*, bool> tos;
+          double maxDis = getMaxDis(to, e);
+          std::unordered_set<GridNode*> tos = g.getGridNodesTo(to, maxDis);
 
-          if (m.find(to) == m.end()) {
-            double maxDis = getMaxDis(to, e);
-
-            auto cands = g.getNearestCandidatesFor(*to->pl().getGeom(), maxDis);
-
-            while (!cands.empty()) {
-              if (!cands.top().n->pl().isClosed() && used.find(cands.top().n) == used.end()) {
-                tos[cands.top().n] = true;
-              }
-              cands.pop();
-            }
-          } else {
-            tos[m.find(to)->second] = true;
+          if (tos.size() == 0) {
+            LOG(ERROR) << "Could not sort in target node " << to << std::endl;
           }
 
           std::list<GridEdge*> res;
@@ -439,92 +425,65 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
 
           // open to target node
           for (auto n : tos) {
-            double gridDist = floor(util::geo::dist(*n.first->pl().getGeom(), *to->pl().getGeom()) / gridSize);
-            g.openNodeSink(n.first, gridDist * movePenPerGrid);
-            g.openNode(n.first);
+            double gridDist =
+                floor(util::geo::dist(*n->pl().getGeom(), *to->pl().getGeom()) /
+                      gridSize);
+            g.openNodeSink(n, gridDist * movePenPerGrid);
+            g.openNode(n);
           }
 
           // open from source node
-          g.openNodeSink(m[from], 0);
-          g.openNode(m[from]);
+          g.openNodeSink(fromGridNode, 0);
+          g.openNode(fromGridNode);
 
-          std::cerr << " === Calculating topo penalties... ";
-          begin = std::chrono::steady_clock::now();
           double addCFrom[8] = {0, 0, 0, 0, 0, 0, 0, 0};
           double addCTo[8] = {0, 0, 0, 0, 0, 0, 0, 0};
           double addCFromInv[8] = {0, 0, 0, 0, 0, 0, 0, 0};
           double addCToInv[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-          g.spacingPenalty(m[from], from, e, addCFrom);
-          g.topoBlockPenalty(m[from], from, e, addCFrom);
-          normalizeCostVector(addCFrom);
-          g.outDegDeviationPenalty(m[from], from, e, addCFrom);
 
-          g.addCostVector(m[from], addCFrom, addCFromInv);
+          g.spacingPenalty(fromGridNode, from, e, addCFrom);
+          g.topoBlockPenalty(fromGridNode, from, e, addCFrom);
+          normalizeCostVector(addCFrom);
+          g.outDegDeviationPenalty(fromGridNode, from, e, addCFrom);
+
+          g.addCostVector(fromGridNode, addCFrom, addCFromInv);
 
           if (tos.size() == 1) {
-            g.spacingPenalty(tos.begin()->first, to, e, addCTo);
-            g.topoBlockPenalty(tos.begin()->first, to, e, addCTo);
+            g.spacingPenalty(*tos.begin(), to, e, addCTo);
+            g.topoBlockPenalty(*tos.begin(), to, e, addCTo);
             normalizeCostVector(addCTo);
-            g.outDegDeviationPenalty(tos.begin()->first, to, e, addCTo);
+            g.outDegDeviationPenalty(*tos.begin(), to, e, addCTo);
 
-            g.addCostVector(tos.begin()->first, addCTo, addCToInv);
+            g.addCostVector(*tos.begin(), addCTo, addCToInv);
           }
-
-          end = std::chrono::steady_clock::now();
-          if (verb)
-            std::cerr << " done ("
-                      << std::chrono::duration_cast<std::chrono::milliseconds>(
-                             end - begin)
-                             .count()
-                      << "ms)" << std::endl;
-          
-          std::cerr << tos.size() << std::endl;
-
+          auto costVecEnd = std::chrono::steady_clock::now();
+          costVecTime += std::chrono::duration_cast<std::chrono::milliseconds>(
+                             costVecEnd - costVecBegin)
+                             .count();
 
           int STOP_GEN = -1;
 
-          if (verb) std::cerr << "Finding shortest path (w heur)... ";
-          begin = std::chrono::steady_clock::now();
+          auto dBegin = std::chrono::steady_clock::now();
+          int iters = dijkstra.shortestPathAStar(
+              fromGridNode, tos, GridHeur(&g, fromGridNode, tos), &res, &target,
+              gen == STOP_GEN);
+          auto dEnd = std::chrono::steady_clock::now();
+          dTime += std::chrono::duration_cast<std::chrono::milliseconds>(dEnd -
+                                                                         dBegin)
+                       .count();
 
-          std::list<GridEdge*> res2;
-          GridNode* target2 = 0;
-          // int iters2 = dijkstra.shortestPath(m[from], tos, &res2,
-                                     // &target2);
-          int iters = dijkstra.shortestPathAStar(m[from], tos, GridHeur(&g, m[from], tos), &res,
-                                     &target, gen == STOP_GEN);
-          end = std::chrono::steady_clock::now();
-          if (verb)
-            std::cerr << " done ("
-                      << std::chrono::duration_cast<std::chrono::milliseconds>(
-                             end - begin)
-                             .count()
-                      << "ms)" << std::endl;
+          totalIters += iters;
 
-          std::cerr << "HEUR: took " << iters << " iterations." << std::endl;
-          // std::cerr << "BASELINE: took " << iters2 << " iterations." << std::endl;
-
-          double costA = 0;
-          double costB = 0;
-
-          for (auto r : res) {
-            costA += r->pl().cost();
-          }
-
-          for (auto r2 : res2) {
-            costB += r2->pl().cost();
-          }
-          
           if (gen == STOP_GEN) {
             util::geo::output::GeoJsonOutput out;
             out.print(g);
             exit(0);
           }
 
-          //assert(std::round(costA) == std::round(costB));
-
-          g.removeCostVector(m[from], addCFromInv);
+          auto postBegin = std::chrono::steady_clock::now();
+          g.removeCostVector(fromGridNode, addCFromInv);
           if (tos.size() == 1) {
-            g.removeCostVector(tos.begin()->first, addCToInv);
+            g.removeCostVector(*tos.begin(), addCToInv);
           }
 
           if (target == 0) {
@@ -532,89 +491,48 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
             continue;
           }
 
-          m[to] = target;
-          used.insert(target);
+          g.settleGridNode(target, to);
+          g.settleGridNode(fromGridNode, from);
 
           // write everything to the result graph
-          if (verb)
-            std::cerr << "Writing found path as edge to result graph... ";
-          begin = std::chrono::steady_clock::now();
           PolyLine pl;
-          double cost = 0;
-          size_t c = 0;
-          for (auto f : res) {
-            cost += c > 0 ? f->pl().cost() : 0;
-            c++;
+          buildPolylineFromRes(res, pl);
+          if (reversed) pl.reverse();
 
-            assert(f->pl().getResEdges().size() == 0);
-            f->pl().addResidentEdge(e);
-            assert(g.getEdge(f->getTo(), f->getFrom())->pl().getResEdges().size() == 0);
-            g.getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
+          double cost = getCostFromRes(res);
+          addResidentEdges(&g, e, res);
 
-            if (!f->pl().isSecondary()) {
-              if (pl.getLine().size() > 0) {
-                BezierCurve bc(pl.getLine().back(),
-                               *f->getFrom()->pl().getParent()->pl().getGeom(),
-                               *f->getFrom()->pl().getParent()->pl().getGeom(),
-                               *f->getFrom()->pl().getGeom());
-
-                for (auto p : bc.render(10).getLine()) {
-                  pl << p;
-                }
-              } else {
-                pl << *f->getFrom()->pl().getParent()->pl().getGeom();
-              }
-
-              pl << *f->getFrom()->pl().getGeom();
-              pl << *f->getTo()->pl().getGeom();
-            }
-          }
-
-          end = std::chrono::steady_clock::now();
           double estimatedCost = g.heurCost(
-              g.getNodeCoords(m[from]).first, g.getNodeCoords(m[from]).second,
+              g.getNodeCoords(fromGridNode).first,
+              g.getNodeCoords(fromGridNode).second,
               g.getNodeCoords(target).first, g.getNodeCoords(target).second);
 
-          std::cerr << " done ("
-                    << std::chrono::duration_cast<std::chrono::milliseconds>(
-                           end - begin)
-                           .count()
-                    << "ms), path cost (excluding take off and touch down) "
-                    << cost << ", estimated cost was " << estimatedCost
-                    << std::endl;
+          std::cerr << std::round(cost) << " vs " << std::round(estimatedCost) << std::endl;
           assert(std::round(cost) >= std::round(estimatedCost));
 
           totalCost += cost;
 
-          if (res.size())
-            pl << *res.back()->getTo()->pl().getParent()->pl().getGeom();
-
           // close the target node
           for (auto n : tos) {
-            g.closeNodeSink(n.first);
+            g.closeNodeSink(n);
           }
           g.closeNode(target);
-          g.closeNodeSink(m[from]);
-          g.closeNode(m[from]);
+          g.closeNodeSink(fromGridNode);
+          g.closeNode(fromGridNode);
 
-          if (verb) std::cerr << "Balance edge...";
-          begin = std::chrono::steady_clock::now();
           for (auto f : res) {
             if (f->pl().isSecondary()) continue;
             g.balanceEdge(f->getFrom()->pl().getParent(),
                           f->getTo()->pl().getParent());
           }
-          end = std::chrono::steady_clock::now();
-          if (verb)
-            std::cerr << " done ("
-                      << std::chrono::duration_cast<std::chrono::milliseconds>(
-                             end - begin)
-                             .count()
-                      << "ms)" << std::endl;
 
-          if (reversed) pl.reverse();
           e->pl().setPolyLine(pl);
           e->pl().setGeneration(gen);
+
+          auto postEnd = std::chrono::steady_clock::now();
+          postTime += std::chrono::duration_cast<std::chrono::milliseconds>(
+                          postEnd - postBegin)
+                          .count();
 
           gen++;
         }
@@ -626,6 +544,17 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
     std::cerr << " === Total edge cost in graph is " << totalCost
               << " === " << std::endl;
 
+    std::cerr << " === Total dijkstra iterations were " << totalIters
+              << " === " << std::endl;
+
+    std::cerr << " === Total dijkstra time was " << dTime
+              << " ms === " << std::endl;
+
+    std::cerr << " === Total cost vector calc time was " << costVecTime
+              << " ms === " << std::endl;
+    std::cerr << " === Total post time was " << postTime
+              << " ms === " << std::endl;
+
     if (totalCost < bestScore) {
       bestScore = totalCost;
       bestGraph = TransitGraph();
@@ -634,4 +563,53 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, const Penalties& pens) {
   }
 
   return bestGraph;
+}
+
+// _____________________________________________________________________________
+void Octilinearizer::buildPolylineFromRes(const std::list<GridEdge*>& res,
+                                          PolyLine& pl) {
+  for (auto f : res) {
+    if (!f->pl().isSecondary()) {
+      if (pl.getLine().size() > 0) {
+        BezierCurve bc(pl.getLine().back(),
+                       *f->getFrom()->pl().getParent()->pl().getGeom(),
+                       *f->getFrom()->pl().getParent()->pl().getGeom(),
+                       *f->getFrom()->pl().getGeom());
+
+        for (auto p : bc.render(10).getLine()) {
+          pl << p;
+        }
+      } else {
+        pl << *f->getFrom()->pl().getParent()->pl().getGeom();
+      }
+
+      pl << *f->getFrom()->pl().getGeom();
+      pl << *f->getTo()->pl().getGeom();
+    }
+  }
+
+  if (res.size()) pl << *res.back()->getTo()->pl().getParent()->pl().getGeom();
+}
+
+// _____________________________________________________________________________
+double Octilinearizer::getCostFromRes(const std::list<GridEdge*>& res) {
+  size_t c = 0;
+  double cost = 0;
+  for (auto f : res) {
+    cost += c > 0 ? f->pl().cost() : 0;
+    c++;
+  }
+  return cost;
+}
+
+// _____________________________________________________________________________
+double Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* e,
+                                        const std::list<GridEdge*>& res) {
+  for (auto f : res) {
+    assert(f->pl().getResEdges().size() == 0);
+    f->pl().addResidentEdge(e);
+    assert(g->getEdge(f->getTo(), f->getFrom())->pl().getResEdges().size() ==
+           0);
+    g->getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
+  }
 }

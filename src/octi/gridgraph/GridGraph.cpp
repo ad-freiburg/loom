@@ -3,6 +3,8 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <algorithm>
+#include <unordered_set>
+#include <unordered_map>
 #include "octi/gridgraph/GridGraph.h"
 #include "util/graph/Node.h"
 
@@ -17,7 +19,6 @@ GridGraph::GridGraph(const util::geo::Box& bbox, double cellSize,
       _c(pens),
       _grid(cellSize, cellSize, bbox),
       Graph<NodePL, EdgePL>(true) {
-
   assert(_c.p_0 < _c.p_135);
   assert(_c.p_135 < _c.p_90);
   assert(_c.p_90 < _c.p_45);
@@ -455,7 +456,7 @@ void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
 
 // _____________________________________________________________________________
 void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
-                            double* addC) {
+                               double* addC) {
   auto xy = getNodeCoords(n);
   size_t x = xy.first;
   size_t y = xy.second;
@@ -566,12 +567,11 @@ void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
       addC[(i + (8 - j)) % 8] = -1.0 * std::numeric_limits<double>::max();
     }
   }
-
 }
 
 // _____________________________________________________________________________
 void GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
-                            double* addC) {
+                                 double* addC) {
   CombEdge* outgoing[8];
   getSettledOutgoingEdges(n, outgoing);
 
@@ -597,8 +597,8 @@ void GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
 }
 
 // _____________________________________________________________________________
-void GridGraph::outDegDeviationPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
-                            double* addC) {
+void GridGraph::outDegDeviationPenalty(GridNode* n, CombNode* origNode,
+                                       CombEdge* e, double* addC) {
   double degA = util::geo::angBetween(
       *origNode->pl().getParent()->pl().getGeom(),
       *e->getOtherNode(origNode)->pl().getParent()->pl().getGeom());
@@ -624,7 +624,7 @@ void GridGraph::outDegDeviationPenalty(GridNode* n, CombNode* origNode, CombEdge
 // _____________________________________________________________________________
 void GridGraph::addCostVector(GridNode* n, double addC[8], double* invCost) {
   std::cerr << "Adding cost vector ";
-  for (size_t i = 0 ; i < 8; i++) {
+  for (size_t i = 0; i < 8; i++) {
     std::cerr << addC[i] << ",";
   }
   std::cerr << std::endl;
@@ -653,12 +653,10 @@ void GridGraph::addCostVector(GridNode* n, double addC[8], double* invCost) {
     } else {
       getEdge(port, oPort)
           ->pl()
-          .setCost(
-              getEdge(port, oPort)->pl().rawCost() + addC[i]);
+          .setCost(getEdge(port, oPort)->pl().rawCost() + addC[i]);
       getEdge(oPort, port)
           ->pl()
-          .setCost(
-              getEdge(oPort, port)->pl().rawCost() + addC[i]);
+          .setCost(getEdge(oPort, port)->pl().rawCost() + addC[i]);
       invCost[i] = addC[i];
     }
   }
@@ -837,4 +835,51 @@ void GridGraph::closeNodeSink(GridNode* n) {
     getEdge(n->pl().getPort(i), n)->pl().setCost(INF);
     getEdge(n, n->pl().getPort(i))->pl().setCost(INF);
   }
+}
+
+// _____________________________________________________________________________
+GridNode* GridGraph::getGridNodeFrom(CombNode* n) {
+  if (!isSettled(n)) {
+    auto cands = getNearestCandidatesFor(*n->pl().getGeom(), 400);
+    std::cerr << cands.size() << std::endl;
+
+    while (!cands.empty()) {
+      std::cerr << cands.top().n->pl().isClosed() << std::endl;
+      if (!cands.top().n->pl().isClosed()) {
+        return cands.top().n;
+      }
+      cands.pop();
+    }
+    return 0;
+  }
+  return _settled[n];
+}
+
+// _____________________________________________________________________________
+std::unordered_set<GridNode*> GridGraph::getGridNodesTo(CombNode* n, double maxDis) {
+  std::unordered_set<GridNode*> tos;
+  if (!isSettled(n)) {
+    auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis);
+
+    while (!cands.empty()) {
+      if (!cands.top().n->pl().isClosed()) {
+        tos.insert(cands.top().n);
+      }
+      cands.pop();
+    }
+  } else {
+    tos.insert(_settled.find(n)->second);
+  }
+
+  return tos;
+}
+
+// _____________________________________________________________________________
+void GridGraph::settleGridNode(GridNode* n, CombNode* cn) {
+  _settled[cn] = n;
+}
+
+// _____________________________________________________________________________
+bool GridGraph::isSettled(CombNode* cn) {
+  return _settled.find(cn) != _settled.end();
 }

@@ -2,8 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/graph/CombNodePL.h"
-
+#include "octi/graph/CombNodePL.h" 
 using util::geo::Point;
 using namespace octi::graph;
 

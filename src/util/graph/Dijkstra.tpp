@@ -5,7 +5,7 @@
 // _____________________________________________________________________________
 template <typename N, typename E>
 int Dijkstra::shortestPath(Node<N, E>* from,
-                            const std::unordered_map<Node<N, E>*, bool>& to,
+                            const std::unordered_set<Node<N, E>*>& to,
                             std::list<Edge<N, E>*>* res, Node<N, E>** target) {
   std::unordered_map<Node<N, E>*, RouteNode<N, E> > settled;
   std::priority_queue<RouteNode<N, E> > pq;
@@ -56,7 +56,7 @@ int Dijkstra::shortestPath(Node<N, E>* from,
 // _____________________________________________________________________________
 template <typename N, typename E, typename H>
 int Dijkstra::shortestPathAStar(Node<N, E>* from,
-                            const std::unordered_map<Node<N, E>*, bool>& to,
+                            const std::unordered_set<Node<N, E>*>& to,
                             H heurFunc,
                             std::list<Edge<N, E>*>* res, Node<N, E>** target,
                             bool check) {
@@ -117,8 +117,8 @@ template <typename N, typename E>
 int Dijkstra::shortestPath(Node<N, E>* from, Node<N, E>* to,
                             std::list<Edge<N, E>*>* res) {
   Node<N, E>* target;
-  std::unordered_map<Node<N, E>*, bool> tos;
-  tos[to] = true;
+  std::unordered_set<Node<N, E>*, bool> tos;
+  tos.insert(to);
   return shortestPath(from, tos, res, &target);
 }
 
@@ -127,7 +127,7 @@ template <typename N, typename E, typename H>
 int Dijkstra::shortestPathAStar(Node<N, E>* from, Node<N, E>* to,
                             H heur, std::list<Edge<N, E>*>* res) {
   Node<N, E>* target;
-  std::unordered_map<Node<N, E>*, bool> tos;
-  tos[to] = true;
+  std::unordered_set<Node<N, E>*, bool> tos;
+  tos.insert(to);
   return shortestPathAStar(from, tos, res, heur, &target, false);
 }
