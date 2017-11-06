@@ -5278,25 +5278,8 @@
             "color": "00873f",
             "id": "0x1d9b960",
             "label": "GREEN"
-          },
-          {
-            "color": "cc6600",
-            "id": "0x1d9ba90",
-            "label": "ORANGE"
-          },
-          {
-            "color": "cc0000",
-            "direction": "0x9a6ec10",
-            "id": "0x1d9bbc0",
-            "label": "RED"
-          },
-          {
-            "color": "0275a4",
-            "direction": "0x9a6ec10",
-            "id": "0x1d9b830",
-            "label": "BLUE"
           }
-        ],
+		],
         "to": "0x9a70250"
       },
       "type": "Feature"
@@ -5414,25 +5397,8 @@
             "color": "00873f",
             "id": "0x1d9b960",
             "label": "GREEN"
-          },
-          {
-            "color": "cc6600",
-            "id": "0x1d9ba90",
-            "label": "ORANGE"
-          },
-          {
-            "color": "cc0000",
-            "direction": "0x9a70250",
-            "id": "0x1d9bbc0",
-            "label": "RED"
-          },
-          {
-            "color": "0275a4",
-            "direction": "0x9a70250",
-            "id": "0x1d9b830",
-            "label": "BLUE"
           }
-        ],
+		],
         "to": "0x9af1d20"
       },
       "type": "Feature"
@@ -5981,25 +5947,8 @@
             "color": "00873f",
             "id": "0x1d9b960",
             "label": "GREEN"
-          },
-          {
-            "color": "cc6600",
-            "id": "0x1d9ba90",
-            "label": "ORANGE"
-          },
-          {
-            "color": "cc0000",
-            "direction": "0x9a72910",
-            "id": "0x1d9bbc0",
-            "label": "RED"
-          },
-          {
-            "color": "0275a4",
-            "direction": "0x9a72910",
-            "id": "0x1d9b830",
-            "label": "BLUE"
           }
-        ],
+		],
         "to": "0x9a6ec10"
       },
       "type": "Feature"
