@@ -743,7 +743,6 @@ Point ILPOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) const {
   const NodeFront* nf = 0;
   for (auto etg : segment->etgs) {
     const NodeFront* test = n->node->getNodeFrontFor(etg.etg);
-    std::cerr << "looking for edge " << etg.etg->getFrom()->getId() << ":" << etg.etg->getTo()->getId() << std::endl;
     if (test) {
       nf = test;
       break;
