@@ -42,7 +42,6 @@ int main(int argc, char** argv) {
     LOG(INFO) << "reading graph " << std::endl;
     graph::TransitGraph g(cfg.name, cfg.projectionString);
     graph::GraphBuilder b(&cfg);
-    optim::Scorer scorer(&g);
     if (!b.build(&(std::cin), &g)) {
       exit(1);
     }
@@ -51,21 +50,6 @@ int main(int argc, char** argv) {
       b.combinePartnerRoutes(&g);
     }
 
-    if (cfg.outputStats) {
-      LOG(INFO) << "(stats) Stats for graph '" << g.getName() << std::endl;
-      LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
-                << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
-                << " non-topo)" << std::endl;
-      LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges()
-                << std::endl;
-      LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes()
-                << std::endl;
-      LOG(INFO) << "(stats)   Max edge route cardinality: "
-                << g.getMaxCardinality() << std::endl;
-      LOG(INFO) << "(stats)   Number of poss. solutions: "
-                << scorer.getNumPossSolutions() << std::endl;
-      LOG(INFO) << "(stats)   Highest node degree: " << g.getMaxDegree() << std::endl;
-    }
 
     LOG(INFO) << "Creating node fronts..." << std::endl;
     b.writeMainDirs(&g);
@@ -101,50 +85,70 @@ int main(int argc, char** argv) {
       cfg.splitPenWeight,
       cfg.stationCrossWeightSameSeg,
       cfg.stationCrossWeightDiffSeg,
-      cfg.stationSplitWeight
+      cfg.stationSplitWeight,
+      true,
+      true
     };
+
+    optim::Scorer scorer(&g, pens);
+
+    if (cfg.outputStats) {
+      LOG(INFO) << "(stats) Stats for graph '" << g.getName() << std::endl;
+      LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
+                << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
+                << " non-topo)" << std::endl;
+      LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges()
+                << std::endl;
+      LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes()
+                << std::endl;
+      LOG(INFO) << "(stats)   Max edge route cardinality: "
+                << g.getMaxCardinality() << std::endl;
+      LOG(INFO) << "(stats)   Number of poss. solutions: "
+                << scorer.getNumPossSolutions() << std::endl;
+      LOG(INFO) << "(stats)   Highest node degree: " << g.getMaxDegree() << std::endl;
+    }
 
     LOG(INFO) << "(stats) Max crossing pen: " << maxCrossPen << std::endl;
     LOG(INFO) << "(stats) Max splitting pen: " << maxSplitPen << std::endl;
 
     LOG(INFO) << "(stats) Total graph score BEFORE optim is -- "
-              << scorer.getScore(pens)
-              << " --" << std::endl;
+              << scorer.getScore()
+              << " -- (incl. unavoidable crossings!)" << std::endl;
     LOG(INFO) << "(stats)   Per node graph score: "
-              << scorer.getScore(pens) /
+              << scorer.getScore() /
                      g.getNodes()->size()
               << std::endl;
     LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings() << " (score: "
-              << scorer.getCrossScore(pens)
+              << scorer.getCrossScore()
               << ")" << std::endl;
     LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
               << " (score: "
-              << scorer.getSeparationScore(pens)
+              << scorer.getSeparationScore()
               << ")" << std::endl;
 
     if (cfg.renderMethod != "ogr" && !cfg.noOptim) {
       if (cfg.optimMethod == "ilp_impr") {
         optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg, &scorer);
-        ilpEoOptim.optimize(pens);
+        ilpEoOptim.optimize();
       } else if (cfg.optimMethod == "ilp") {
         optim::ILPOptimizer ilpEoOptim(&g, &cfg, &scorer);
-        ilpEoOptim.optimize(pens);
+        ilpEoOptim.optimize();
       }
     }
 
     LOG(INFO) << "(stats) Total graph score AFTER optim is -- "
-              << scorer.getScore(pens)
-              << " --" << std::endl;
+              << scorer.getScore()
+              << " -- (incl. unavoidable crossings!)" << std::endl;
     LOG(INFO) << "(stats)   Per node graph score: "
-              << scorer.getScore(pens) /
+              << scorer.getScore() /
                      g.getNodes()->size()
               << std::endl;
     LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings() << " (score: "
-              << scorer.getCrossScore(pens)
+              << scorer.getCrossScore()
               << ")" << std::endl;
     LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
               << " (score: "
-              << scorer.getSeparationScore(pens)
+              << scorer.getSeparationScore()
               << ")" << std::endl;
 
     if (cfg.renderMethod == "ogr") {

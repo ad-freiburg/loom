@@ -17,9 +17,11 @@ struct Penalties {
   double inStatCrossPenSameSeg;
   double inStatCrossPenDiffSeg;
   double inStatSplitPen;
+  bool crossAdjPen;
+  bool splitAdjPen;
 };
 
-const Penalties IDENTITY_PENALTIES = Penalties {1, 1, 1, 1, 1, 1, 1, 1};
+const Penalties IDENTITY_PENALTIES = Penalties {1, 1, 1, 1, 1, 1, 1, 1, 0, 0};
 
 }  // namespace graph
 }  // namespace transitmapper

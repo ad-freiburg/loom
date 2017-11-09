@@ -509,7 +509,7 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
     _w.writeText("\n");
   }
 
-  _w.writeText(util::toString(_scorer->getNumCrossings(n, outG.getConfig())) + "(" + util::toString(_scorer->getNumSeparations(n, outG.getConfig())) + ")");
+  _w.writeText(util::toString(_scorer->getNumCrossings(n, outG.getConfig())) + "(" + util::toString(_scorer->getCrossingScore(n, outG.getConfig())) + ")/" + util::toString(_scorer->getNumSeparations(n, outG.getConfig())) + "(" + util::toString(_scorer->getSeparationScore(n, outG.getConfig()))+ ")");
   _w.closeTag();
 }
 

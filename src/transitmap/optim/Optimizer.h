@@ -5,14 +5,12 @@
 #ifndef TRANSITMAP_OPTIM_OPTIMIZER_H_
 #define TRANSITMAP_OPTIM_OPTIMIZER_H_
 
-#include "transitmap/graph/Penalties.h"
-
 namespace transitmapper {
 namespace optim {
 
 class Optimizer {
  public:
-  virtual int optimize(const graph::Penalties& pens) const = 0;
+  virtual int optimize() const = 0;
 };
 }  // namespace optim
 }  // namespace transitmapper

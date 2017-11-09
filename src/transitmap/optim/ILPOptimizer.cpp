@@ -18,7 +18,7 @@ using namespace optim;
 using namespace graph;
 
 // _____________________________________________________________________________
-int ILPOptimizer::optimize(const Penalties& pens) const {
+int ILPOptimizer::optimize() const {
   // create optim graph
   OptGraph g(_g);
 
@@ -42,7 +42,7 @@ int ILPOptimizer::optimize(const Penalties& pens) const {
    */
 
   LOG(DEBUG) << "Creating ILP problem... " << std::endl;
-  glp_prob* lp = createProblem(g, pens);
+  glp_prob* lp = createProblem(g);
   LOG(DEBUG) << " .. done" << std::endl;
 
   LOG(INFO) << "(stats) ILP has " << glp_get_num_cols(lp) << " cols and "
@@ -97,19 +97,19 @@ int ILPOptimizer::optimize(const Penalties& pens) const {
 }
 
 // _____________________________________________________________________________
-int ILPOptimizer::getCrossingPenaltySameSeg(const OptNode* n, const Penalties& pens) const {
-  return _scorer->getCrossingPenaltySameSeg(n->node, pens, true);
+int ILPOptimizer::getCrossingPenaltySameSeg(const OptNode* n) const {
+  return _scorer->getCrossingPenaltySameSeg(n->node);
 }
 
 // _____________________________________________________________________________
-int ILPOptimizer::getCrossingPenaltyDiffSeg(const OptNode* n, const Penalties& pens) const {
-  return _scorer->getCrossingPenaltyDiffSeg(n->node, pens, true);
+int ILPOptimizer::getCrossingPenaltyDiffSeg(const OptNode* n) const {
+  return _scorer->getCrossingPenaltyDiffSeg(n->node);
 }
 
 // _____________________________________________________________________________
-int ILPOptimizer::getSplittingPenalty(const OptNode* n, const Penalties& pens) const {
+int ILPOptimizer::getSplittingPenalty(const OptNode* n) const {
   // double the value because we only count a splitting once for each pair!
-  return _scorer->getSplittingPenalty(n->node, pens, true) * 2;
+  return _scorer->getSplittingPenalty(n->node) * 1;
 }
 
 // _____________________________________________________________________________
@@ -238,7 +238,7 @@ void ILPOptimizer::expandRelativesFor(OrderingConfig* c, const Route* ref,
 }
 
 // _____________________________________________________________________________
-glp_prob* ILPOptimizer::createProblem(const OptGraph& g, const Penalties& pens) const {
+glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
   glp_prob* lp = glp_create_prob();
 
   glp_set_prob_name(lp, "edgeorder");
@@ -295,8 +295,8 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g, const Penalties& pens) 
 
   glp_create_index(lp);
 
-  writeSameSegConstraints(g, pens, &vm, lp);
-  writeDiffSegConstraints(g, pens, &vm, lp);
+  writeSameSegConstraints(g, &vm, lp);
+  writeDiffSegConstraints(g, &vm, lp);
 
   int* ia = 0;
   int* ja = 0;
@@ -314,7 +314,6 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g, const Penalties& pens) 
 
 // _____________________________________________________________________________
 void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
-  const Penalties& pens,
                                            VariableMatrix* vm,
                                            glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
@@ -342,7 +341,7 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenaltySameSeg(node, pens)
+                           getCrossingPenaltySameSeg(node)
                            // multiply the penalty with the number of collapsed lines!
                            * (linepair.first->getNumCollapsedPartners() + 1) * (linepair.second->getNumCollapsedPartners() + 1));
 
@@ -397,7 +396,6 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
 
 // _____________________________________________________________________________
 void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
-  const Penalties& pens,
                                            VariableMatrix* vm,
                                            glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
@@ -422,7 +420,7 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenaltyDiffSeg(node, pens)
+                           getCrossingPenaltyDiffSeg(node)
                            // multiply the penalty with the number of collapsed lines!
                            * (linepair.first->getNumCollapsedPartners() + 1) * (linepair.second->getNumCollapsedPartners() + 1));
 
@@ -616,7 +614,7 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
   LOG(INFO) << "Calling external solver CBC..." << std::endl;
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
   cmd << _cfg->coinCbcBinary << " " << f
-			<< " -threads 4 -printingOptions all -solve -solution " << outf << "";
+			<< " -threads 4 -printingOptions all -randomCbcSeed=0 -solve -solution " << outf << "";
 	int r = system(cmd.str().c_str());
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();

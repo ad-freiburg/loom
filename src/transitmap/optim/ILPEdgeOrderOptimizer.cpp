@@ -72,7 +72,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
 }
 
 // _____________________________________________________________________________
-glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g, const Penalties& pens) const {
+glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
   glp_prob* lp = glp_create_prob();
 
   glp_set_prob_name(lp, "edgeorder_impr");
@@ -131,8 +131,8 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g, const Penaltie
 
   glp_create_index(lp);
 
-  writeCrossingOracle(g, pens, &vm, lp);
-  writeDiffSegConstraintsImpr(g, pens, &vm, lp);
+  writeCrossingOracle(g, &vm, lp);
+  writeDiffSegConstraintsImpr(g, &vm, lp);
 
   int* ia = 0;
   int* ja = 0;
@@ -150,7 +150,6 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g, const Penaltie
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
-  const Penalties& pens,
                                                 VariableMatrix* vm,
                                                 glp_prob* lp) const {
   // do everything iteratively, otherwise it would be unreadable
@@ -346,12 +345,13 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
 
   // crossing constraints
   for (OptNode* node : g.getNodes()) {
+    std::cout << "----" << std::endl;
     std::set<OptEdge*> processed;
     for (OptEdge* segmentA : node->adjList) {
       processed.insert(segmentA);
 
       // iterate over all possible line pairs in this segment
-      for (LinePair linepair : getLinePairs(segmentA)) {
+      for (LinePair linepair : getLinePairs(segmentA, true)) {
         // iterate over all edges this
         // pair traverses to _TOGETHER_
         // (its possible that there are multiple edges if a line continues
@@ -359,6 +359,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
         for (OptEdge* segmentB : getEdgePartners(node, segmentA, linepair)) {
           if (processed.find(segmentB) != processed.end()) continue;
 
+          std::cout << linepair.first->getLabel() << "|" << linepair.second->getLabel() << std::endl;
           // introduce dec var
           size_t decisionVar = glp_add_cols(lp, 1);
           std::stringstream ss;
@@ -371,7 +372,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenaltySameSeg(node, pens)
+                           getCrossingPenaltySameSeg(node)
                            // multiply the penalty with the number of collapsed lines!
                            * (linepair.first->getNumCollapsedPartners() + 1)
                            * (linepair.second->getNumCollapsedPartners() + 1));
@@ -465,7 +466,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
               glp_set_col_kind(lp, decisionVarDist1Change, GLP_BV);
 
               glp_set_obj_coef(lp, decisionVarDist1Change,
-                                getSplittingPenalty(node, pens));
+                                getSplittingPenalty(node));
 
               size_t aNearBinL1 = 0;
               size_t aNearBinL2 = 0;
@@ -522,7 +523,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
                       << "<T>" << linepair.second << ")";
               size_t aNearB = glp_find_col(lp, aNearBStr.str().c_str());
               glp_set_obj_coef(lp, aNearB,
-                                getSplittingPenalty(node, pens));
+                                getSplittingPenalty(node));
             }
           }
         }
@@ -533,7 +534,6 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const OptGraph& g,
-  const Penalties& pens,
                                                         VariableMatrix* vm,
                                                         glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
@@ -542,7 +542,7 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const OptGraph& g,
     for (OptEdge* segmentA : node->adjList) {
       processed.insert(segmentA);
       // iterate over all possible line pairs in this segment
-      for (LinePair linepair : getLinePairs(segmentA)) {
+      for (LinePair linepair : getLinePairs(segmentA, true)) {
         for (EdgePair segments :
              getEdgePartnerPairs(node, segmentA, linepair)) {
 
@@ -560,7 +560,7 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const OptGraph& g,
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
           glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenaltyDiffSeg(node, pens)
+                           getCrossingPenaltyDiffSeg(node)
                            // multiply the penalty with the number of collapsed lines!
                            * (linepair.first->getNumCollapsedPartners() + 1)
                            * (linepair.second->getNumCollapsedPartners() + 1));

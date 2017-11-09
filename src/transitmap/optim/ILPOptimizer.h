@@ -41,14 +41,14 @@ class ILPOptimizer : public Optimizer {
  public:
   ILPOptimizer(TransitGraph* g, const config::Config* cfg, const Scorer* scorer) : _g(g), _cfg(cfg), _scorer(scorer){};
 
-  int optimize(const Penalties& pens) const;
+  int optimize() const;
 
  protected:
   TransitGraph* _g;
   const config::Config* _cfg;
   const Scorer* _scorer;
 
-  virtual glp_prob* createProblem(const OptGraph& g, const Penalties& pens) const;
+  virtual glp_prob* createProblem(const OptGraph& g) const;
 
   void solveProblem(glp_prob* lp) const;
   void preSolveCoinCbc(glp_prob* lp) const;
@@ -64,10 +64,10 @@ class ILPOptimizer : public Optimizer {
 
   std::string getILPVarName(OptEdge* e, const Route* r, size_t p) const;
 
-  void writeSameSegConstraints(const OptGraph& g, const Penalties& pens, VariableMatrix* vm,
+  void writeSameSegConstraints(const OptGraph& g, VariableMatrix* vm,
                                glp_prob* lp) const;
 
-  void writeDiffSegConstraints(const OptGraph& g, const Penalties& pens, VariableMatrix* vm,
+  void writeDiffSegConstraints(const OptGraph& g, VariableMatrix* vm,
                                glp_prob* lp) const;
 
   bool printHumanReadable(glp_prob* lp, const std::string& path) const;
@@ -93,9 +93,9 @@ class ILPOptimizer : public Optimizer {
   bool crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
                PosCom postcomb) const;
 
-  int getCrossingPenaltySameSeg(const OptNode* n, const Penalties& pens) const;
-  int getCrossingPenaltyDiffSeg(const OptNode* n, const Penalties& pens) const;
-  int getSplittingPenalty(const OptNode* n, const Penalties& pens) const;
+  int getCrossingPenaltySameSeg(const OptNode* n) const;
+  int getCrossingPenaltyDiffSeg(const OptNode* n) const;
+  int getSplittingPenalty(const OptNode* n) const;
 
   Point getPos(OptNode* n, OptEdge* segment, size_t p) const;
 };

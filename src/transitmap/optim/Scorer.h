@@ -22,16 +22,16 @@ namespace optim {
 
 class Scorer {
  public:
-  Scorer(const TransitGraph* g) : _g(g) {}
+  Scorer(const TransitGraph* g, const Penalties& pens) : _g(g), _pens(pens) {}
 
-  double getScore(const Penalties& pens) const;
-  double getScore(const Penalties& pens, const OrderingConfig& c) const;
+  double getScore() const;
+  double getScore(const OrderingConfig& c) const;
 
-  double getCrossScore(const Penalties& pens) const;
-  double getCrossScore(const Penalties& pens, const OrderingConfig& c) const;
+  double getCrossScore() const;
+  double getCrossScore(const OrderingConfig& c) const;
 
-  double getSeparationScore(const Penalties& pens) const;
-  double getSeparationScore(const Penalties& pens, const OrderingConfig& c) const;
+  double getSeparationScore() const;
+  double getSeparationScore(const OrderingConfig& c) const;
 
   size_t getNumCrossings() const;
   size_t getNumCrossings(const OrderingConfig& c) const;
@@ -43,18 +43,26 @@ class Scorer {
   size_t getMaxCrossPenalty() const;
   size_t getMaxSplitPenalty() const;
 
-  double getScore(const Node* n, const Penalties& pens, bool crossAdjPen, bool splitAdjPen, const graph::OrderingConfig& cfg) const;
+  double getScore(const Node* n, const graph::OrderingConfig& cfg) const;
   size_t getNumCrossings(const Node* n, const graph::OrderingConfig& c) const;
   size_t getNumSeparations(const Node* n, const graph::OrderingConfig& c) const;
-  size_t getSeparationScore(const Node* n, const OrderingConfig& c, const Penalties& pens, bool adjpen) const;
-  double getCrossingScore(const Node* n, const OrderingConfig& c, const Penalties& pens, bool adjpen) const;
+  double getSeparationScore(const Node* n, const OrderingConfig& c, const Penalties& pens) const;
+  double getCrossingScore(const Node* n, const OrderingConfig& c, const Penalties& pens) const;
 
-  int getCrossingPenaltySameSeg(const Node* n, const Penalties& pens, bool adjpen) const;
-  int getCrossingPenaltyDiffSeg(const Node* n, const Penalties& pens, bool adjpen) const;
-  int getSplittingPenalty(const Node* n, const Penalties& pens, bool adjpen) const;
+  double getSeparationScore(const Node* n, const OrderingConfig& c) const;
+  double getCrossingScore(const Node* n, const OrderingConfig& c) const;
+
+  int getCrossingPenaltySameSeg(const Node* n, const Penalties& pens) const;
+  int getCrossingPenaltyDiffSeg(const Node* n, const Penalties& pens) const;
+  int getSplittingPenalty(const Node* n, const Penalties& pens) const;
+
+  int getCrossingPenaltySameSeg(const Node* n) const;
+  int getCrossingPenaltyDiffSeg(const Node* n) const;
+  int getSplittingPenalty(const Node* n) const;
 
  private:
  	const TransitGraph* _g;
+  Penalties _pens;
 };
 
 }}

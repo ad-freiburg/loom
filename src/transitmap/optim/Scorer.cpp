@@ -2,12 +2,12 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "transitmap/optim/Scorer.h"
-#include "transitmap/graph/TransitGraph.h"
-#include "transitmap/graph/Node.h"
 #include "transitmap/graph/Edge.h"
-#include "transitmap/graph/Route.h"
+#include "transitmap/graph/Node.h"
 #include "transitmap/graph/Penalties.h"
+#include "transitmap/graph/Route.h"
+#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/optim/Scorer.h"
 #include "util/Misc.h"
 
 using namespace transitmapper;
@@ -20,49 +20,44 @@ using transitmapper::graph::InnerGeometry;
 using transitmapper::graph::IDENTITY_PENALTIES;
 
 // _____________________________________________________________________________
-double Scorer::getScore(const Penalties& pens) const {
-  return getScore(pens, _g->getConfig());
-}
+double Scorer::getScore() const { return getScore(_g->getConfig()); }
 
 // _____________________________________________________________________________
-double Scorer::getScore(const Penalties& pens, const OrderingConfig& c) const {
+double Scorer::getScore(const OrderingConfig& c) const {
   double ret = 0;
 
   for (auto n : _g->getNodes()) {
-    ret += getScore(n, pens, true, true, c);
+    ret += getScore(n, c);
   }
 
   return ret;
 }
 //
 // _____________________________________________________________________________
-double Scorer::getCrossScore(const Penalties& pens) const {
-  return getCrossScore(pens, _g->getConfig());
-}
+double Scorer::getCrossScore() const { return getCrossScore(_g->getConfig()); }
 
 // _____________________________________________________________________________
-double Scorer::getCrossScore(const Penalties& pens, const OrderingConfig& c) const {
+double Scorer::getCrossScore(const OrderingConfig& c) const {
   double ret = 0;
 
   for (auto n : _g->getNodes()) {
-    ret += getCrossingScore(n, c, pens, true);
+    ret += getCrossingScore(n, c, _pens);
   }
 
   return ret;
 }
 
 // _____________________________________________________________________________
-double Scorer::getSeparationScore(const Penalties& pens) const {
-  return getSeparationScore(pens, _g->getConfig());
+double Scorer::getSeparationScore() const {
+  return getSeparationScore(_g->getConfig());
 }
 
 // _____________________________________________________________________________
-double Scorer::getSeparationScore(const Penalties& pens,
-                                        const OrderingConfig& c) const {
+double Scorer::getSeparationScore(const OrderingConfig& c) const {
   double ret = 0;
 
   for (auto n : _g->getNodes()) {
-    ret += getSeparationScore(n, c, pens, true);
+    ret += getSeparationScore(n, c, _pens);
   }
 
   return ret;
@@ -114,21 +109,18 @@ double Scorer::getNumPossSolutions() const {
 }
 
 // _____________________________________________________________________________
-double Scorer::getScore(const Node* n, const Penalties& pens,
-                      bool crossAdjPen, bool splitAdjPen,
-                      const graph::OrderingConfig& cfg) const {
-  return getCrossingScore(n, cfg, pens, crossAdjPen) +
-         getSeparationScore(n, cfg, pens, splitAdjPen);
+double Scorer::getScore(const Node* n, const graph::OrderingConfig& cfg) const {
+  return getCrossingScore(n, cfg, _pens) + getSeparationScore(n, cfg, _pens);
 }
 
 // _____________________________________________________________________________
 size_t Scorer::getNumCrossings(const Node* n, const OrderingConfig& c) const {
-  return getCrossingScore(n, c, IDENTITY_PENALTIES, false);
+  return getCrossingScore(n, c, IDENTITY_PENALTIES);
 }
 
 // _____________________________________________________________________________
-double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c, const Penalties& pens,
-                              bool adjpen) const {
+double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c,
+                                const Penalties& pens) const {
   std::vector<InnerGeometry> igs = n->getInnerGeometries(c, -1);
   size_t ret = 0;
 
@@ -158,9 +150,9 @@ double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c, const Pe
               igb.geom.getLine().front(), igb.geom.getLine().back()) ||
           util::geo::dist(iga.geom.getLine(), igb.geom.getLine()) < 1) {
         if (sameSeg) {
-          ret += 1 * getCrossingPenaltySameSeg(n, pens, adjpen);
+          ret += getCrossingPenaltySameSeg(n, pens);
         } else {
-          ret += 1 * getCrossingPenaltyDiffSeg(n, pens, adjpen);
+          ret += getCrossingPenaltyDiffSeg(n, pens);
         }
       }
     }
@@ -171,11 +163,12 @@ double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c, const Pe
 
 // _____________________________________________________________________________
 size_t Scorer::getNumSeparations(const Node* n, const OrderingConfig& c) const {
-  return getSeparationScore(n, c, IDENTITY_PENALTIES, false);
+  return getSeparationScore(n, c, IDENTITY_PENALTIES);
 }
 
 // _____________________________________________________________________________
-size_t Scorer::getSeparationScore(const Node* n, const OrderingConfig& c, const Penalties& pens, bool adjpen) const {
+double Scorer::getSeparationScore(const Node* n, const OrderingConfig& c,
+                                  const Penalties& pens) const {
   size_t ret = 0;
   for (auto nf : n->getMainDirs()) {
     const Edge* e = nf.edge;
@@ -198,7 +191,7 @@ size_t Scorer::getSeparationScore(const Node* n, const OrderingConfig& c, const 
                           .second) -
                   int(f->getRouteOccWithPosUnder(p.second, c.find(f)->second)
                           .second)) > 1) {
-            ret += 1 * getSplittingPenalty(n, pens, adjpen);
+            ret += getSplittingPenalty(n, pens);
           }
         }
       }
@@ -209,12 +202,14 @@ size_t Scorer::getSeparationScore(const Node* n, const OrderingConfig& c, const 
 }
 
 // _____________________________________________________________________________
-int Scorer::getCrossingPenaltySameSeg(const Node* n, const Penalties& pens, bool adjpen) const {
+int Scorer::getCrossingPenaltySameSeg(const Node* n,
+                                      const Penalties& pens) const {
   double ret = 1;
-  if (adjpen) ret *= n->getAdjListIn().size() + n->getAdjListIn().size();
+  if (pens.crossAdjPen)
+    ret *= n->getAdjListOut().size() + n->getAdjListIn().size();
 
   if (n->getStops().size() > 0) {
-    if (n->getAdjListIn().size() + n->getAdjListIn().size() == 2)
+    if (n->getAdjListOut().size() + n->getAdjListIn().size() == 2)
       return pens.inStatCrossPenDegTwo;
     return pens.inStatCrossPenSameSeg * ret;
   }
@@ -223,12 +218,14 @@ int Scorer::getCrossingPenaltySameSeg(const Node* n, const Penalties& pens, bool
 }
 
 // _____________________________________________________________________________
-int Scorer::getCrossingPenaltyDiffSeg(const Node* n, const Penalties& pens, bool adjpen) const {
+int Scorer::getCrossingPenaltyDiffSeg(const Node* n,
+                                      const Penalties& pens) const {
   double ret = 1;
-  if (adjpen) ret *= n->getAdjListIn().size() + n->getAdjListIn().size();
+  if (pens.crossAdjPen)
+    ret *= n->getAdjListOut().size() + n->getAdjListIn().size();
 
   if (n->getStops().size() > 0) {
-    if (n->getAdjListIn().size() + n->getAdjListIn().size() == 2)
+    if (n->getAdjListOut().size() + n->getAdjListIn().size() == 2)
       return pens.inStatCrossPenDegTwo;
     return pens.inStatCrossPenDiffSeg * ret;
   }
@@ -236,17 +233,43 @@ int Scorer::getCrossingPenaltyDiffSeg(const Node* n, const Penalties& pens, bool
   return ret * pens.diffSegCrossPen;
 }
 
-
 // _____________________________________________________________________________
-int Scorer::getSplittingPenalty(const Node* n, const Penalties& pens, bool adjpen) const {
+int Scorer::getSplittingPenalty(const Node* n, const Penalties& pens) const {
   double ret = 1;
-  if (adjpen) ret *= n->getAdjListIn().size() + n->getAdjListIn().size();
+  if (pens.splitAdjPen)
+    ret *= n->getAdjListOut().size() + n->getAdjListIn().size();
 
   if (n->getStops().size() > 0) {
-    if (n->getAdjListIn().size() + n->getAdjListIn().size() == 2)
+    if (n->getAdjListOut().size() + n->getAdjListIn().size() == 2)
       return pens.inStatSplitPenDegTwo;
     return pens.inStatSplitPen * ret;
   }
 
   return ret * pens.splitPen;
+}
+
+// _____________________________________________________________________________
+double Scorer::getSeparationScore(const Node* n,
+                                  const OrderingConfig& c) const {
+  return getSeparationScore(n, c, _pens);
+}
+
+// _____________________________________________________________________________
+double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c) const {
+  return getCrossingScore(n, c, _pens);
+}
+
+// _____________________________________________________________________________
+int Scorer::getCrossingPenaltySameSeg(const Node* n) const {
+  return getCrossingPenaltySameSeg(n, _pens);
+}
+
+// _____________________________________________________________________________
+int Scorer::getCrossingPenaltyDiffSeg(const Node* n) const {
+  return getCrossingPenaltyDiffSeg(n, _pens);
+}
+
+// _____________________________________________________________________________
+int Scorer::getSplittingPenalty(const Node* n) const {
+  return getSplittingPenalty(n, _pens);
 }
