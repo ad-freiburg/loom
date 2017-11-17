@@ -92,10 +92,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->createCoreOptimGraph))
       ->default_value(true),
       "simplify optimization graph prior to optimization")
-    ("use-cbc",
-     opts::value<bool>(&(cfg->useCbc))
-      ->default_value(true),
-      "use the COIN-CBC solver for optimization instead of GLPK")
     ("render-node-circles",
      opts::value<bool>(&(cfg->renderNodeCircles))
       ->default_value(false),
@@ -204,10 +200,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<std::string>(&(cfg->glpkSolutionOutputPath))
       ->default_value(""),
       "output path for ILP solution. If empty, no output will be generated.")
-    ("coin-cbc-binary",
-      opts::value<std::string>(&(cfg->coinCbcBinary))
-     ->default_value("/home/patrick/repos/Cbc-2.9/build/bin/cbc"),
-      "coin cbc binary path")
+    ("external-solver",
+      opts::value<std::string>(&(cfg->externalSolver))
+     ->default_value("cbc {INPUT} -threads {THREADS} -printingOptions all -solve -solution {OUTPUT}"),
+      "command for an external solver. {INPUT} will be replaced by an MPS file, {THREADS} by the number of threads (optional), {OUTPUT} will be replaced with the path a solution should be written to")
     ("world-file-path",
       opts::value<std::string>(&(cfg->worldFilePath))
       ->default_value(""),

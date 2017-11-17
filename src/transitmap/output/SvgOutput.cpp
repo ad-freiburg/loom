@@ -595,7 +595,7 @@ void SvgOutput::renderStats(const graph::TransitGraph& outG, double solveTime,
   _w.writeText("expand-node-fronts=" + std::string(_cfg->expandFronts ? "yes" : "no"));
   _w.closeTag();
   _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("solver=" + std::string(_cfg->useCbc ? "COIN-OR CBC" : "glpk"));
+  _w.writeText("solver=" + std::string(_cfg->externalSolver.empty() ? "glpk" : "(external)"));
   _w.closeTag();
   _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
   _w.writeText("create-core-graph=" + std::string(_cfg->createCoreOptimGraph ? "yes" : "no"));

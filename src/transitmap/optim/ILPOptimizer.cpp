@@ -5,12 +5,14 @@
 #include <glpk.h>
 #include <cstdio>
 #include <fstream>
+#include <thread>
 #include <chrono>
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/output/OgrOutput.h"
 #include "transitmap/optim/ILPOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
 #include "util/geo/Geo.h"
+#include "util/String.h"
 #include "util/log/Log.h"
 
 using namespace transitmapper;
@@ -62,7 +64,7 @@ int ILPOptimizer::optimize() const {
 
   LOG(DEBUG) << "Solving problem..." << std::endl;
 
-  if (_cfg->useCbc) {
+  if (!_cfg->externalSolver.empty()) {
     preSolveCoinCbc(lp);
   }
 
@@ -71,7 +73,7 @@ int ILPOptimizer::optimize() const {
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-	if (!_cfg->useCbc) {
+	if (_cfg->externalSolver.empty()) {
     _g->setLastSolveTime(duration);
 		LOG(INFO) << " === Solve done in " << duration << " ms ===" << std::endl;
   }
@@ -596,7 +598,7 @@ void ILPOptimizer::solveProblem(glp_prob* lp) const {
   params.binarize = GLP_ON;
   params.ps_tm_lim = _cfg->glpkPSTimeLimit;
   params.tm_lim = _cfg->glpkTimeLimit;
-  if (!_cfg->useCbc) {
+  if (_cfg->externalSolver.empty()) {
     params.fp_heur = _cfg->useGlpkFeasibilityPump ? GLP_ON : GLP_OFF;
     params.ps_heur = _cfg->useGlpkProximSearch ? GLP_ON : GLP_OFF;
   }
@@ -607,19 +609,24 @@ void ILPOptimizer::solveProblem(glp_prob* lp) const {
 // _____________________________________________________________________________
 void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
   // write temporary file
-  std::string f = std::tmpnam(0);
-  std::string outf = std::tmpnam(0);
+  std::string f = std::string(std::tmpnam(0)) + ".mps";
+  std::string outf = std::string(std::tmpnam(0)) + ".sol";
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
-  std::stringstream cmd;
-  LOG(INFO) << "Calling external solver CBC..." << std::endl;
+  LOG(INFO) << "Calling external solver..." << std::endl;
+
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-  cmd << _cfg->coinCbcBinary << " " << f
-			<< " -threads 4 -printingOptions all -randomCbcSeed=0 -solve -solution " << outf << "";
-	int r = system(cmd.str().c_str());
+
+  std::string cmd = _cfg->externalSolver;
+  util::replaceAll(cmd, "{INPUT}", f);
+  util::replaceAll(cmd, "{OUTPUT}", outf);
+  util::replaceAll(cmd, "{THREADS}", util::toString(std::thread::hardware_concurrency()));
+  LOG(INFO) << "Cmd: '" << cmd << "'" << std::endl;
+	int r = system(cmd.c_str());
+
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
   _g->setLastSolveTime(duration);
-	LOG(INFO) << " === COIN solve done (ret=" << r << ") in " << duration << " ms ===" << std::endl;
+	LOG(INFO) << " === External solve done (ret=" << r << ") in " << duration << " ms ===" << std::endl;
   LOG(INFO) << "Parsing solution..." << std::endl;
 
   std::ifstream fin;
@@ -638,6 +645,12 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
     iss >> number;
     iss >> name;
     iss >> value;
+
+    std::cout << line << std::endl;
+
+    std::cout << number << std::endl;
+    std::cout << name << std::endl;
+    std::cout << value << std::endl;
 
     int intVal = value;
 

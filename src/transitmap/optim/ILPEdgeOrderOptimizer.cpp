@@ -345,7 +345,6 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
 
   // crossing constraints
   for (OptNode* node : g.getNodes()) {
-    std::cout << "----" << std::endl;
     std::set<OptEdge*> processed;
     for (OptEdge* segmentA : node->adjList) {
       processed.insert(segmentA);
@@ -359,7 +358,6 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
         for (OptEdge* segmentB : getEdgePartners(node, segmentA, linepair)) {
           if (processed.find(segmentB) != processed.end()) continue;
 
-          std::cout << linepair.first->getLabel() << "|" << linepair.second->getLabel() << std::endl;
           // introduce dec var
           size_t decisionVar = glp_add_cols(lp, 1);
           std::stringstream ss;

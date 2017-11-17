@@ -52,8 +52,6 @@ struct Config {
 
   bool renderDirMarkers;
 
-  bool useCbc;
-
   bool createCoreOptimGraph;
   bool simpleRenderForTwoEdgeNodes;
 
@@ -61,7 +59,7 @@ struct Config {
   bool useGlpkProximSearch;
   int glpkPSTimeLimit;
   int glpkTimeLimit;
-  std::string coinCbcBinary;
+  std::string externalSolver;
 
   double crossPenMultiSameSeg;
   double crossPenMultiDiffSeg;
