@@ -643,10 +643,12 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
     double value;
 
     iss >> number;
+
+    // could not read line number, is missing, which is fine for us
+    if (iss.fail()) iss.clear();
+
     iss >> name;
     iss >> value;
-
-    std::cout << line << std::endl;
 
     std::cout << number << std::endl;
     std::cout << name << std::endl;
