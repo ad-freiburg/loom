@@ -626,7 +626,8 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
   _g->setLastSolveTime(duration);
-	LOG(INFO) << " === External solve done (ret=" << r << ") in " << duration << " ms ===" << std::endl;
+	LOG(INFO) << " === External solve done (ret=" << r << ") in " << duration
+    << " ms ===" << std::endl;
   LOG(INFO) << "Parsing solution..." << std::endl;
 
   std::ifstream fin;
@@ -649,10 +650,6 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
 
     iss >> name;
     iss >> value;
-
-    std::cout << number << std::endl;
-    std::cout << name << std::endl;
-    std::cout << value << std::endl;
 
     int intVal = value;
 
@@ -762,7 +759,8 @@ Point ILPOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) const {
     }
   }
 
-  if (!nf) std::cerr << n->node->getId() << " node fronts: " << n->node->getMainDirs().size() << std::endl;
+  if (!nf) std::cerr << n->node->getId() << " node fronts: "
+    << n->node->getMainDirs().size() << std::endl;
   assert(nf);
 
   return nf->getTripPos(segment->etgs.front().etg, p, false);

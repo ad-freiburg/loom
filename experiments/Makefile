@@ -2,17 +2,26 @@ TRANSITMAP_BIN := ../build/transitmap
 OPTIM := ilp_impr
 CORE_GRAPH := 1
 SPLITTING_OPTIM := 1
-CBC := 1
-CBC_BIN := /home/patrick/repos/Cbc-2.9/build/bin/cbc
+
+EXTBINARY :=
+METHOD := gu
+
+ifeq ($(METHOD),gu)
+	EXTBINARY = --external-solver='/home/patrick/gurobi/gurobi751/linux64/bin/gurobi_cl ResultFile={OUTPUT} {INPUT}'
+endif
+
+ifeq ($(METHOD),cbc)
+	EXTBINARY = --external-solver='/home/patrick/repos/Cbc-2.9/build/bin/cbc {INPUT} -randomCbcSeed 0 -threads {THREADS} -printingOptions rows -solve -solution {OUTPUT}'
+endif
 
 MAPS := maps/freiburg maps/chicago maps/stuttgart maps/turin maps/nyc_subway maps/busses_manhattan maps/dallas maps/boston
 
-PARAMS := --coin-cbc-binary=$(CBC_BIN) --render-stations=0 --render-station-names=1 --glpk-time-limit=100000000 --output-stats=1  --render-node-fronts=0
-RPARAMS := --coin-cbc-binary=$(CBC_BIN) --outline-width=1 --render-edges=0 --render-station-names=0 --glpk-time-limit=100000000 --output-stats=0  --render-node-fronts=0 --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
+PARAMS := --render-stations=1  $(EXTBINARY) --render-station-names=0 --glpk-time-limit=100000000 --output-stats=1  --render-node-fronts=0
+RPARAMS := --outline-width=1 $(EXTBINARY) --render-edges=0 --render-station-names=0 --glpk-time-limit=100000000 --output-stats=0  --render-node-fronts=0 --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
 
 
 %/network.svg: %/network.json
-	cat $< | $(TRANSITMAP_BIN) -o $@ $(PARAMS) --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH} | sed '/stats/w $(dir $<)/stats'
+	cat $< | $(TRANSITMAP_BIN) -o $@ $(PARAMS) --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH} | sed '/stats/w $(dir $<)/stats'
 
 clean:
 	rm -f freiburg/network.svg
@@ -45,7 +54,7 @@ maps/%: %/network.json
 	cp $< $@/export/
 
 	# the reference used for download as3
-	cat $< | $(TRANSITMAP_BIN) --coin-cbc-binary=$(CBC_BIN) --outline-width=3 --line-width=20 --line-spacing=10 -o $@/export/network.svg --glpk-mps-output-path=$@/export/network.mps --world-file-path=$@/export/  --resolution=0.1 --use-cbc=${CBC} --splitting-optim=${SPLITTING_OPTIM} --name=$(shell basename $@ | tr /a-z/ /A-Z/) --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
+	cat $< | $(TRANSITMAP_BIN) --outline-width=3 --line-width=20 --line-spacing=10 -o $@/export/network.svg --glpk-mps-output-path=$@/export/network.mps --world-file-path=$@/export/  --resolution=0.1 $(EXTBINARY) --splitting-optim=${SPLITTING_OPTIM} --name=$(shell basename $@ | tr /a-z/ /A-Z/) --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
 	inkscape $@/export/network.svg  --export-pdf=$@/export/network.pdf
 
 	# z16

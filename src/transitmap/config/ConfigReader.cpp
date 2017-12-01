@@ -202,7 +202,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "output path for ILP solution. If empty, no output will be generated.")
     ("external-solver",
       opts::value<std::string>(&(cfg->externalSolver))
-     ->default_value("cbc {INPUT} -threads {THREADS} -printingOptions all -solve -solution {OUTPUT}"),
+     ->default_value(""),
       "command for an external solver. {INPUT} will be replaced by an MPS file, {THREADS} by the number of threads (optional), {OUTPUT} will be replaced with the path a solution should be written to")
     ("world-file-path",
       opts::value<std::string>(&(cfg->worldFilePath))
@@ -225,6 +225,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     if (cfg->outputPadding < 0) {
       cfg->outputPadding = (cfg->lineWidth + cfg->lineSpacing);
     }
+
+    if (cfg->externalSolver == " ") cfg->externalSolver = "";
 
   } catch (exception e) {
     LOG(ERROR) << e.what() << std::endl;
