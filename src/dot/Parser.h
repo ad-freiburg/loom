@@ -15,43 +15,63 @@ namespace parser {
 
 enum State {
   NONE,
-  IN_TAG_NAME,
-  IN_TAG_NAME_META,
-  IN_TAG,
-  IN_TAG_CLOSE,
-  IN_TAG_NAME_CLOSE,
-  IN_TAG_TENTATIVE,
-  IN_ATTRKEY,
-  AFTER_ATTRKEY,
-  AW_IN_ATTRVAL,
-  IN_ATTRVAL_SQ,
-  IN_ATTRVAL_DQ,
-  IN_TEXT,
-  AW_CLOSING,
-  WS_SKIP
+  KW_STRICT,
+  KW_GRAPH,
+  AW_KW_GRAPH,
+  KW_DIRGRAPH,
+  AW_GRAPH_ID,
+  IN_GRAPH_ID,
+  AW_LL_ID,
+  IN_ID,
+  IN_QUOTED_ID,
+  AW_OPEN,
+  AW_STMT_DEC,
+  AW_ID,
+  AW_EDGE_OP,
+  AW_ATTR_KEY
 };
 
 enum EntityType {
+  EMPTY,
   EDGE,
-  NODE
+  NODE,
+  ATTR,
+  ATTR_NODE,
+  ATTR_EDGE,
+  ATTR_GRAPH
 };
 
-typedef std::pair<std::string, std::string> Attribute;
+enum GraphType {
+  STRICT_GRAPH,
+  STRICT_DIGRAPH,
+  GRAPH,
+  DIGRAPH
+};
 
 struct Entity {
   EntityType type;
   std::vector<std::string> ids;
-  std::vector<Attribute> attrs;
+  std::map<std::string, std::string> attrs;
+
+  GraphType graphType;
+  std::string graphName;
 };
 
 class Parser {
  public:
   Parser(std::istream* s);
+  const Entity& get();
 
   bool has();
 
  private:
+  std::istream* _is;
   State _s;
+  Entity _ret;
+  char _c;
+  bool _has;
+
+  bool isIDChar(const char& c) const;
 };
 
 }  // graph

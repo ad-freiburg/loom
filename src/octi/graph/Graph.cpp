@@ -7,9 +7,9 @@
 #include "octi/graph/NodePL.h"
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
+#include "dot/Parser.h"
 #include "util/log/Log.h"
 
-#include "transitmap/style/LineStyle.h"
 #include "transitmap/style/LineStyle.h"
 
 using namespace octi::graph;
@@ -23,119 +23,138 @@ Graph::Graph() { _bbox = util::geo::minbox(); }
 Graph::Graph(std::istream* s) {
   _bbox = util::geo::minbox();
 
-  json j;
-  (*s) >> j;
+  dot::parser::Parser dp(s);
 
-  std::map<std::string, Node<NodePL, EdgePL>*> idMap;
+  while (dp.has()) {
+    auto ent = dp.get();
 
-  if (j["type"] == "FeatureCollection") {
-    // first pass, nodes
-    for (auto feature : j["features"]) {
-      auto props = feature["properties"];
-      auto geom = feature["geometry"];
-      if (geom["type"] == "Point") {
-        std::string id = props["id"];
-
-        std::vector<double> coords = geom["coordinates"];
-
-        Node<NodePL, EdgePL>* n = new Node<NodePL, EdgePL>(
-            NodePL(util::geo::Point(coords[0], coords[1])));
-
-        StationInfo i("", "");
-        if (!props["station_id"].is_null() ||
-            !props["station_label"].is_null()) {
-          if (!props["station_id"].is_null()) i.id = props["station_id"];
-          if (!props["station_label"].is_null())
-            i.name = props["station_label"];
-          n->pl().addStop(i);
-        }
-
-        addNode(n);
-        idMap[id] = n;
+    if (ent.type == dot::parser::EDGE) {
+      std::cout << ent.graphName << ": edge from " << ent.ids[0];
+      for (size_t i = 1; i < ent.ids.size(); i++) {
+        std::cout << " to " << ent.ids[i];
       }
-    }
 
-    // second pass, edges
-    for (auto feature : j["features"]) {
-      auto props = feature["properties"];
-      auto geom = feature["geometry"];
-      if (geom["type"] == "LineString") {
-        if (props["lines"].is_null() || props["lines"].size() == 0) continue;
-        std::string from = props["from"];
-        std::string to = props["to"];
-
-        std::vector<std::vector<double>> coords = geom["coordinates"];
-
-        PolyLine pl;
-        for (auto coord : coords) {
-          double x = coord[0], y = coord[1];
-          Point p(x, y);
-          pl << p;
-          expandBBox(p);
-        }
-
-        Node<NodePL, EdgePL>* fromN = idMap[from];
-        Node<NodePL, EdgePL>* toN = idMap[to];
-
-        if (!fromN) {
-          LOG(ERROR) << "Node \"" << from << "\" not found." << std::endl;
-          continue;
-        }
-
-        if (!toN) {
-          LOG(ERROR) << "Node \"" << to << "\" not found." << std::endl;
-          continue;
-        }
-
-        Edge<NodePL, EdgePL>* e = addEdge(fromN, toN, EdgePL(pl));
-
-        for (auto route : props["lines"]) {
-          std::string id;
-          if (!route["id"].is_null()) {
-            id = route["id"];
-          } else if (!route["label"].is_null()) {
-            id = route["label"];
-          } else if (!route["color"].is_null()) {
-            id = route["color"];
-          } else
-            continue;
-
-          const Route* r = getRoute(id);
-          if (!r) {
-            std::string label = route["label"].is_null() ? "" : route["label"];
-            std::string color = route["color"];
-            r = new Route(id, label, color);
-            addRoute(r);
-          }
-
-          Node<NodePL, EdgePL>* dir = 0;
-
-          if (!route["direction"].is_null()) {
-            dir = idMap[route["direction"]];
-          }
-
-          if (!route["style"].is_null()) {
-            transitmapper::style::LineStyle ls;
-            auto style = route["style"];
-            std::string dashArray;
-            if (!style["dash-array"].is_null()) {
-              dashArray = style["dash-array"];
-            }
-
-            if (!style["css"].is_null()) {
-              ls.setCss(style["css"]);
-            }
-
-            ls.setDashArray(dashArray);
-
-            e->pl().addRoute(r, dir, ls);
-          } else {
-            e->pl().addRoute(r, dir);
-          }
-        }
-      }
+      std::cout << std::endl;
+    } else if (ent.type == dot::parser::ATTR) {
+      std::cout << ent.graphName << ": attribute " << ent.ids[0] << " = " << ent.ids[1] << std::endl;
+    }else {
+      std::cout << ent.graphName << ": " << ent.type << std::endl;
     }
   }
+
+  // json j;
+  // (*s) >> j;
+
+  // std::map<std::string, Node<NodePL, EdgePL>*> idMap;
+
+  // if (j["type"] == "FeatureCollection") {
+    // // first pass, nodes
+    // for (auto feature : j["features"]) {
+      // auto props = feature["properties"];
+      // auto geom = feature["geometry"];
+      // if (geom["type"] == "Point") {
+        // std::string id = props["id"];
+
+        // std::vector<double> coords = geom["coordinates"];
+
+        // Node<NodePL, EdgePL>* n = new Node<NodePL, EdgePL>(
+            // NodePL(util::geo::Point(coords[0], coords[1])));
+
+        // StationInfo i("", "");
+        // if (!props["station_id"].is_null() ||
+            // !props["station_label"].is_null()) {
+          // if (!props["station_id"].is_null()) i.id = props["station_id"];
+          // if (!props["station_label"].is_null())
+            // i.name = props["station_label"];
+          // n->pl().addStop(i);
+        // }
+
+        // addNode(n);
+        // idMap[id] = n;
+      // }
+    // }
+
+    // // second pass, edges
+    // for (auto feature : j["features"]) {
+      // auto props = feature["properties"];
+      // auto geom = feature["geometry"];
+      // if (geom["type"] == "LineString") {
+        // if (props["lines"].is_null() || props["lines"].size() == 0) continue;
+        // std::string from = props["from"];
+        // std::string to = props["to"];
+
+        // std::vector<std::vector<double>> coords = geom["coordinates"];
+
+        // PolyLine pl;
+        // for (auto coord : coords) {
+          // double x = coord[0], y = coord[1];
+          // Point p(x, y);
+          // pl << p;
+          // expandBBox(p);
+        // }
+
+        // Node<NodePL, EdgePL>* fromN = idMap[from];
+        // Node<NodePL, EdgePL>* toN = idMap[to];
+
+        // if (!fromN) {
+          // LOG(ERROR) << "Node \"" << from << "\" not found." << std::endl;
+          // continue;
+        // }
+
+        // if (!toN) {
+          // LOG(ERROR) << "Node \"" << to << "\" not found." << std::endl;
+          // continue;
+        // }
+
+        // Edge<NodePL, EdgePL>* e = addEdge(fromN, toN, EdgePL(pl));
+
+        // for (auto route : props["lines"]) {
+          // std::string id;
+          // if (!route["id"].is_null()) {
+            // id = route["id"];
+          // } else if (!route["label"].is_null()) {
+            // id = route["label"];
+          // } else if (!route["color"].is_null()) {
+            // id = route["color"];
+          // } else
+            // continue;
+
+          // const Route* r = getRoute(id);
+          // if (!r) {
+            // std::string label = route["label"].is_null() ? "" : route["label"];
+            // std::string color = route["color"];
+            // r = new Route(id, label, color);
+            // addRoute(r);
+          // }
+
+          // Node<NodePL, EdgePL>* dir = 0;
+
+          // if (!route["direction"].is_null()) {
+            // dir = idMap[route["direction"]];
+          // }
+
+          // if (!route["style"].is_null()) {
+            // transitmapper::style::LineStyle ls;
+            // auto style = route["style"];
+            // std::string dashArray;
+            // if (!style["dash-array"].is_null()) {
+              // dashArray = style["dash-array"];
+            // }
+
+            // if (!style["css"].is_null()) {
+              // ls.setCss(style["css"]);
+            // }
+
+            // ls.setDashArray(dashArray);
+
+            // e->pl().addRoute(r, dir, ls);
+          // } else {
+            // e->pl().addRoute(r, dir);
+          // }
+        // }
+      // }
+    // }
+  // }
 
   buildGrids();
 }

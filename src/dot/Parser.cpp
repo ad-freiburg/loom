@@ -2,230 +2,298 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <cstring>
 #include <fstream>
 #include <iostream>
-#include <cstring>
 #include <map>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include "dot/Parser.h"
 
 using namespace dot;
 using namespace parser;
 
 // _____________________________________________________________________________
-File::File(const std::string& path) : _s(NONE), _c(0), _lastBytes(0), _which(0) {
-}
+Parser::Parser(std::istream* is) : _is(is), _s(NONE), _has(true) {}
 
 // _____________________________________________________________________________
-bool File::has() {
-  return _tagStack.size();
-}
+bool Parser::has() { return _has; }
 
 // _____________________________________________________________________________
-const Tag& File::get() {
-  _ret.name = 0;
+const Entity& Parser::get() {
+  _ret.ids.clear();
   _ret.attrs.clear();
-  while (_lastBytes) {
-    for (; _c - _buffer[_which] < _lastBytes; ++_c) {
-      switch (_s) {
-        case NONE:
-          if (*_c == '<') {
-            _s = IN_TAG_TENTATIVE;
-            continue;
-          }
+  _ret.type = EMPTY;
+  std::string tmp;
 
-          if (std::isspace(*_c)) continue;
-        case IN_TAG_TENTATIVE:
-          if (*_c == '/') {
-            _s = IN_TAG_NAME_CLOSE;
-            _tmp = _c + 1;
-            continue;
-          }
-          if (*_c == '?') {
-            _s = IN_TAG_NAME_META;
-            continue;
-          }
-          if (std::isalnum(*_c)) {
-            _s = IN_TAG_NAME;
-            _ret.name = _c;
-            continue;
-          }
-
-        case IN_TAG:
-          if (std::isspace(*_c)) continue;
-
-          if (std::isalnum(*_c)) {
-            _s = IN_ATTRKEY;
-            _tmp = _c;
-            continue;
-          }
-          if (*_c == '/') {
-            _s = AW_CLOSING;
-            continue;
-          }
-          if (*_c == '>') {
-            _tagStack.push(_ret.name);
-            _s = WS_SKIP;
-            continue;
-          }
-
-        case IN_ATTRVAL_SQ:
-          if (*_c == '\'') {
-            _s = IN_TAG;
-            *_c = 0;
-            _ret.attrs[_tmp] = _tmp2;
-            continue;
-          }
-
+  while (_is->get(_c)) {
+    std::cout << "state: " << _s << " char: " << _c << std::endl;
+    switch (_s) {
+      case NONE:
+        if (std::isspace(_c)) continue;
+        tmp.clear();
+        if (_c == 'd' || _c == 'D') {
+          _s = KW_DIRGRAPH;
           continue;
-
-        case IN_ATTRVAL_DQ:
-          if (*_c == '"') {
-            _s = IN_TAG;
-            *_c = 0;
-            _ret.attrs[_tmp] = _tmp2;
-            continue;
-          }
-
+        }
+        if (_c == 'g' || _c == 'G') {
+          _s = KW_GRAPH;
           continue;
-
-        case AW_IN_ATTRVAL:
-          if (std::isspace(*_c)) continue;
-
-          if (*_c == '\'') {
-            _s = IN_ATTRVAL_SQ;
-            _tmp2 = _c + 1;
-            continue;
-          }
-
-          if (*_c == '"') {
-            _s = IN_ATTRVAL_DQ;
-            _tmp2 = _c + 1;
-            continue;
-          }
-
-          // TODO: error!
-          std::cout << "ERROR 3!" << std::endl;
-          std::cout << *_c << std::endl;
-          exit(1);
-
-        case IN_ATTRKEY:
-          if (std::isspace(*_c)) {
-            *_c = 0;
-            _s = AFTER_ATTRKEY;
-            continue;
-          }
-          if (std::isalnum(*_c)) {
-            continue;
-          }
-          if (*_c == '=') {
-            *_c = 0;
-            _s = AW_IN_ATTRVAL;
-            continue;
-          }
-
-          std::cout << "ERROR 5" << std::endl;
-          exit(0);
-
-        case AFTER_ATTRKEY:
-          if (std::isspace(*_c)) continue;
-
-          if (*_c == '=') {
-            _s = AW_IN_ATTRVAL;
-            continue;
-          }
-
-          // TODO: error
+        }
+        if (_c == 's' || _c == 'S') {
+          _s = KW_STRICT;
           continue;
+        }
 
-        case IN_TAG_NAME:
-          if (std::isspace(*_c)) {
-            *_c = 0;
-            _s = IN_TAG;
-            continue;
-          }
-          if (*_c == '>') {
-            *_c = 0;
-            _tagStack.push(_ret.name);
-            _s = WS_SKIP;
-            continue;
-          }
-          if (*_c == '/') {
-            *_c = 0;
-            _s = AW_CLOSING;
-            continue;
-          }
-          if (std::isalnum(*_c)) {
-            continue;
-          }
+        std::cerr << "Expected keywords 'strict', 'graph' or 'digraph'" << std::endl;
+        exit(1);
+      case KW_STRICT:
+        tmp += _c;
+        while (_is->get(_c)) {
+          if (std::isalpha(_c)) {
+            tmp += std::tolower(_c);
+          } else break;
+        }
 
-        case IN_TAG_NAME_META:
-          // TODO: read meta tags!
-          if (*_c == '>') {
-            _s = NONE;
-            continue;
-          }
-
+        if (tmp == "trict" && std::isspace(_c)) {
+          _ret.graphType = STRICT_GRAPH;
+          tmp.clear();
+          _s = AW_KW_GRAPH;
           continue;
+        }
 
-        case IN_TAG_NAME_CLOSE:
-          if (std::isspace(*_c)) {
-            *_c = 0;
-            _s = IN_TAG_CLOSE;
-            continue;
+        std::cerr << "Expected keyword 'strict'" << std::endl;
+        exit(1);
+      case KW_GRAPH:
+        tmp += _c;
+        while (_is->get(_c)) {
+          if (std::isalpha(_c)) {
+            tmp += std::tolower(_c);
+            if (tmp == "raph") break;
+          } else break;
+        }
+
+        if (tmp == "raph") {
+          if (_ret.graphType == STRICT_GRAPH) {
+            _ret.graphType = STRICT_GRAPH;
+          } else {
+            _ret.graphType = GRAPH;
           }
+          tmp.clear();
+          _s = AW_GRAPH_ID;
+          continue;
+        }
 
-          if (std::isalnum(*_c)) {
-            continue;
+        std::cerr << "Expected keyword 'graph'" << std::endl;
+        exit(1);
+      case KW_DIRGRAPH:
+        tmp += _c;
+        while (_is->get(_c)) {
+          if (std::isalpha(_c)) {
+            tmp += std::tolower(_c);
+            if (tmp == "igraph") break;
+          } else break;
+        }
+
+        if (tmp == "igraph") {
+          if (_ret.graphType == STRICT_GRAPH) {
+            _ret.graphType = STRICT_DIGRAPH;
+          } else {
+            _ret.graphType = DIGRAPH;
           }
+          tmp.clear();
+          _s = AW_GRAPH_ID;
+          continue;
+        }
 
-          if (*_c == '>') {
-            *_c = 0;
-            if (_tmp != _tagStack.top()) {
-              // TODO: error!
-              std::cout << "ERROR 6!" << std::endl;
-              exit(1);
-            }
-            _tagStack.pop();
-            _s = NONE;
-            continue;
+        std::cerr << tmp << std::endl;
+
+        std::cerr << "Expected keyword 'digraph'" << std::endl;
+        exit(1);
+      case AW_KW_GRAPH:
+        if (std::isspace(_c)) continue;
+        if (_c == 'g' || _c == 'G') {
+          _s = KW_GRAPH;
+          continue;
+        }
+        if (_c == 'd' || _c == 'D') {
+          _s = KW_DIRGRAPH;
+          continue;
+        }
+      case AW_GRAPH_ID:
+        if (std::isspace(_c)) continue;
+        if (isIDChar(_c)) {
+          tmp += _c;
+          _s = IN_GRAPH_ID;
+          continue;
+        } else if (_c == '{') {
+          _s = AW_LL_ID;
+          continue;
+        }
+
+        std::cerr << "Expected graph id or opening {" << std::endl;
+        exit(1);
+      case IN_GRAPH_ID:
+        if (isIDChar(_c)) {
+          tmp += _c;
+          continue;
+        }
+
+        if (_c == '{') {
+          _ret.graphName = tmp;
+          tmp.clear();
+          _s = AW_LL_ID;
+          continue;
+        }
+
+        if (std::isspace(_c)) {
+          _ret.graphName = tmp;
+          tmp.clear();
+          _s = AW_OPEN;
+          continue;
+        }
+
+        std::cerr << "Expected ID characters" << std::endl;
+        exit(1);
+      case AW_OPEN:
+        if (std::isspace(_c)) continue;
+        if (_c == '{') {
+          tmp.clear();
+          _s = AW_LL_ID;
+          continue;
+        }
+        std::cerr << "Expected opening {" << std::endl;
+        exit(1);
+      case AW_LL_ID:
+        if (std::isspace(_c)) continue;
+        if (isIDChar(_c)) {
+          tmp += _c;
+          _s = IN_ID;
+          continue;
+        }
+        if (_c == '"') {
+          _s = IN_QUOTED_ID;
+          continue;
+        }
+        if (_c == '}') {
+          _has = false;
+          return _ret;
+        }
+
+        std::cerr << "Expected statement" << std::endl;
+        exit(1);
+
+      case AW_ID:
+        if (std::isspace(_c)) continue;
+        if (isIDChar(_c)) {
+          tmp += _c;
+          _s = IN_ID;
+          continue;
+        }
+        if (_c == '"') {
+          _s = IN_QUOTED_ID;
+          continue;
+        }
+
+        std::cerr << "Expected ID" << std::endl;
+        exit(1);
+
+      case IN_ID:
+        if (isIDChar(_c)) {
+          tmp += _c;
+          continue;
+        }
+        _ret.ids.push_back(tmp);
+        tmp.clear();
+
+        _s = AW_STMT_DEC;
+        // slip down
+
+      case AW_STMT_DEC:
+        if (std::isspace(_c)) continue;
+        if (_c == '=') {
+          if (_ret.type != EMPTY) {
+            std::cerr << "Syntax error." << std::endl;
+            exit(1);
           }
+          tmp.clear();
+          _ret.type = ATTR;
+          _s = AW_ID;
+          continue;
+        }
 
-        case IN_TAG_CLOSE:
-          if (std::isspace(*_c)) continue;
-
-          if (*_c == '>') {
-            if (_tmp != _tagStack.top()) {
-              // TODO: error!
-              std::cout << "ERROR 1!" << std::endl;
-              exit(1);
-            }
-            _tagStack.pop();
-            _s = NONE;
-            continue;
+        if (_c == '-') {
+          if (_ret.type != EMPTY && _ret.type != EDGE) {
+            std::cerr << "Syntax error." << std::endl;
+            exit(1);
           }
+          _s = AW_EDGE_OP;
+          continue;
+        }
 
-          // TODO: error
-          std::cout << "ERROR 4" << std::endl;
-          exit(1);
+        if (_c == '[') {
+          _s = AW_ATTR_KEY;
+          continue;
+        }
 
-        case AW_CLOSING:
-          if (*_c == '>') {
-            _s = WS_SKIP;
-            continue;
+        if (_c == '"') {
+          _s = IN_QUOTED_ID;
+          return _ret;
+        }
+
+        if (_c == ';' || _c == ',') {
+          _s = AW_LL_ID;
+          return _ret;
+        }
+
+        if (_c == '}') {
+          _has = false;
+          return _ret;
+        }
+
+        std::cerr << "Expected edge operator, = or [" << std::endl;
+        exit(1);
+
+      case IN_QUOTED_ID:
+        if (_c != '"' || tmp.back() == '\\') {
+          tmp += _c;
+          continue;
+        } else {
+          _ret.ids.push_back(tmp);
+          tmp.clear();
+          _s = AW_STMT_DEC;
+          continue;
+        }
+
+      case AW_EDGE_OP:
+        if (_c == '>') {
+          if (_ret.graphType == STRICT_GRAPH || _ret.graphType == GRAPH) {
+            std::cerr << "No directed edges allowed in undirected graph." << std::endl;
+            exit(1);
           }
+          _ret.type = EDGE;
+          _s = AW_ID;
+          continue;
+        }
 
-        case WS_SKIP:
-          if (std::isspace(*_c)) continue;
-          else {
-            _s = NONE;
-            return _ret;
+        if (_c == '-') {
+          if (_ret.graphType == STRICT_DIGRAPH || _ret.graphType == DIGRAPH) {
+            std::cerr << "No undirected edges allowed in directed graph." << std::endl;
+            exit(1);
           }
-      }
+          _ret.type = EDGE;
+          _s = AW_ID;
+          continue;
+        }
+
+        std::cerr << "Expected edge operator" << std::endl;
+        exit(1);
+
     }
-
- }
+  }
 }
+
+// _____________________________________________________________________________
+bool Parser::isIDChar(const char& c) const { return std::isalnum(c) || c == '_'; }
