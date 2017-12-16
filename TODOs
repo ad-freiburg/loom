@@ -1,0 +1,1 @@
+* Problem beim topologischen Blockieren: der nächste Knoten der geblockten ausgehenden Kante muss auch blockiert werden - ansonsten ist die Blockierung effektiv sinnlos.
