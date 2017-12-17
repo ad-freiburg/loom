@@ -9,6 +9,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <map>
 #include "dot/Parser.h"
 
@@ -16,20 +17,22 @@ using namespace dot;
 using namespace parser;
 
 // _____________________________________________________________________________
-Parser::Parser(std::istream* is) : _is(is), _s(NONE), _has(true) {}
+Parser::Parser(std::istream* is)
+    : _is(is), _s(NONE), _level(std::numeric_limits<size_t>::max()) {}
 
 // _____________________________________________________________________________
-bool Parser::has() { return _has; }
+bool Parser::has() { return _level > 0; }
 
 // _____________________________________________________________________________
 const Entity& Parser::get() {
   _ret.ids.clear();
   _ret.attrs.clear();
   _ret.type = EMPTY;
-  std::string tmp;
+  _level = _level == std::numeric_limits<size_t>::max() ? 0 : _level;
 
   while (_is->get(_c)) {
-    std::cout << "state: " << _s << " char: " << _c << std::endl;
+    // std::cout << "state: " << _s << " level: " << _level << " char: " << _c << std::endl;
+    _ret.level = _level;
     switch (_s) {
       case NONE:
         if (std::isspace(_c)) continue;
@@ -47,14 +50,16 @@ const Entity& Parser::get() {
           continue;
         }
 
-        std::cerr << "Expected keywords 'strict', 'graph' or 'digraph'" << std::endl;
+        std::cerr << "Expected keywords 'strict', 'graph' or 'digraph'"
+                  << std::endl;
         exit(1);
       case KW_STRICT:
         tmp += _c;
         while (_is->get(_c)) {
           if (std::isalpha(_c)) {
             tmp += std::tolower(_c);
-          } else break;
+          } else
+            break;
         }
 
         if (tmp == "trict" && std::isspace(_c)) {
@@ -72,7 +77,8 @@ const Entity& Parser::get() {
           if (std::isalpha(_c)) {
             tmp += std::tolower(_c);
             if (tmp == "raph") break;
-          } else break;
+          } else
+            break;
         }
 
         if (tmp == "raph") {
@@ -94,7 +100,8 @@ const Entity& Parser::get() {
           if (std::isalpha(_c)) {
             tmp += std::tolower(_c);
             if (tmp == "igraph") break;
-          } else break;
+          } else
+            break;
         }
 
         if (tmp == "igraph") {
@@ -128,6 +135,9 @@ const Entity& Parser::get() {
           tmp += _c;
           _s = IN_GRAPH_ID;
           continue;
+        } else if (_c == '"') {
+          _s = IN_QUOTED_GRAPH_ID;
+          continue;
         } else if (_c == '{') {
           _s = AW_LL_ID;
           continue;
@@ -135,6 +145,16 @@ const Entity& Parser::get() {
 
         std::cerr << "Expected graph id or opening {" << std::endl;
         exit(1);
+      case IN_QUOTED_GRAPH_ID:
+        if (_c != '"' || tmp.back() == '\\') {
+          tmp += _c;
+          continue;
+        } else {
+          _ret.graphName = tmp;
+          tmp.clear();
+          _s = AW_OPEN;
+          continue;
+        }
       case IN_GRAPH_ID:
         if (isIDChar(_c)) {
           tmp += _c;
@@ -160,6 +180,7 @@ const Entity& Parser::get() {
       case AW_OPEN:
         if (std::isspace(_c)) continue;
         if (_c == '{') {
+          _level += 1;
           tmp.clear();
           _s = AW_LL_ID;
           continue;
@@ -178,8 +199,15 @@ const Entity& Parser::get() {
           continue;
         }
         if (_c == '}') {
-          _has = false;
+          _level -= 1;
           return _ret;
+        }
+        if (_c == '{') {
+          _level += 1;
+          continue;
+        }
+        if (_c == ';') {
+          continue;
         }
 
         std::cerr << "Expected statement" << std::endl;
@@ -197,6 +225,12 @@ const Entity& Parser::get() {
           continue;
         }
 
+        if (_c == '{') {
+          std::cerr << "Subgraphs in edge statements not yet supported."
+                    << std::endl;
+          exit(1);
+        }
+
         std::cerr << "Expected ID" << std::endl;
         exit(1);
 
@@ -205,11 +239,51 @@ const Entity& Parser::get() {
           tmp += _c;
           continue;
         }
+
+        if (tmp == "subgraph") {
+          if (_ret.type != EMPTY) {
+            std::cerr << "Subgraphs in edge statements not yet supported."
+                      << std::endl;
+            exit(1);
+          }
+          _s = AW_GRAPH_ID;
+          tmp.clear();
+          continue;
+        }
+
+        if (tmp == "graph") {
+          if (_ret.type != EMPTY) {
+            std::cerr << "'graph' is a reserved keyword"
+                      << std::endl;
+            exit(1);
+          }
+          _ret.type = ATTR_GRAPH;
+        }
+
+        if (tmp == "node") {
+          if (_ret.type != EMPTY) {
+            std::cerr << "'node' is a reserved keyword"
+                      << std::endl;
+            exit(1);
+          }
+          _ret.type = ATTR_NODE;
+        }
+
+        if (tmp == "edge") {
+          if (_ret.type != EMPTY) {
+            std::cerr << "'edge' is a reserved keyword"
+                      << std::endl;
+            exit(1);
+          }
+          _ret.type = ATTR_EDGE;
+        }
+
         _ret.ids.push_back(tmp);
         tmp.clear();
 
         _s = AW_STMT_DEC;
         // slip down
+
 
       case AW_STMT_DEC:
         if (std::isspace(_c)) continue;
@@ -234,26 +308,159 @@ const Entity& Parser::get() {
         }
 
         if (_c == '[') {
+          if (_ret.type == EMPTY) _ret.type = NODE;
           _s = AW_ATTR_KEY;
           continue;
         }
 
-        if (_c == '"') {
-          _s = IN_QUOTED_ID;
+        if (_c == '{') {
+          _level += 1;
+          _s = AW_LL_ID;
+          if (_ret.type == EMPTY && _ret.ids.size()) _ret.type = NODE;
           return _ret;
         }
 
-        if (_c == ';' || _c == ',') {
+        if (_c == '"') {
+          _s = IN_QUOTED_ID;
+          if (_ret.type == EMPTY && _ret.ids.size()) _ret.type = NODE;
+          return _ret;
+        }
+
+        if (isIDChar(_c)) {
+          tmp.clear();
+          tmp += _c;
+          _s = IN_ID;
+          return _ret;
+        }
+
+        if (_c == ';') {
           _s = AW_LL_ID;
           return _ret;
         }
 
         if (_c == '}') {
-          _has = false;
+          _level -= 1;
+          _s = AW_LL_ID;
           return _ret;
         }
 
-        std::cerr << "Expected edge operator, = or [" << std::endl;
+        std::cerr << "Expected edge operator, id, = or [" << std::endl;
+        exit(1);
+
+      case AW_ATTR_KEY:
+        if (std::isspace(_c)) continue;
+        if (isIDChar(_c)) {
+          tmp += _c;
+          _s = IN_ATTR_KEY;
+          continue;
+        }
+        if (_c == '"') {
+          _s = IN_QUOTED_ATTR_KEY;
+          continue;
+        }
+        if (_c == ']') {
+          _s = AW_LL_ID;
+          return _ret;
+        }
+
+        std::cerr << "Expected attribute key" << std::endl;
+        exit(1);
+
+      case IN_ATTR_KEY:
+        if (isIDChar(_c)) {
+          tmp += _c;
+          continue;
+        }
+
+        _s = AW_ATTR_ASSIGN;
+
+        if (_c == '=') {
+          _s = AW_ATTR_VAL;
+        }
+
+        _ret.attrs[tmp] = "";
+        continue;
+
+      case IN_QUOTED_ATTR_KEY:
+        if (_c != '"' || tmp.back() == '\\') {
+          tmp += _c;
+          continue;
+        }
+
+        _ret.attrs[tmp] = "";
+        _s = AW_ATTR_ASSIGN;
+        continue;
+
+      case IN_ATTR_VAL:
+        if (isIDChar(_c)) {
+          tmp2 += _c;
+          continue;
+        }
+
+        _ret.attrs[tmp] = tmp2;
+        tmp.clear();
+        tmp2.clear();
+        _s = AW_CONT_ATTR_KEY;
+        // slip through
+
+      case AW_CONT_ATTR_KEY:
+        if (std::isspace(_c)) continue;
+        if (_c == ';' || _c == ',') {
+          _s = AW_ATTR_KEY;
+          continue;
+        }
+        if (isIDChar(_c)) {
+          tmp += _c;
+          _s = IN_ATTR_KEY;
+          continue;
+        }
+        if (_c == '"') {
+          _s = IN_QUOTED_ATTR_KEY;
+          continue;
+        }
+        if (_c == ']') {
+          _s = AW_LL_ID;
+          return _ret;
+        }
+
+        std::cerr << "Expected attribute key" << std::endl;
+        exit(1);
+
+      case IN_QUOTED_ATTR_VAL:
+        if (_c != '"' || tmp.back() == '\\') {
+          tmp2 += _c;
+          continue;
+        }
+
+        _ret.attrs[tmp] = tmp2;
+        tmp.clear();
+        tmp2.clear();
+        _s = AW_CONT_ATTR_KEY;
+        continue;
+
+      case AW_ATTR_ASSIGN:
+        if (std::isspace(_c)) continue;
+        if (_c == '=') {
+          _s = AW_ATTR_VAL;
+          continue;
+        }
+
+        std::cerr << "Expected '='" << std::endl;
+        exit(1);
+
+      case AW_ATTR_VAL:
+        if (std::isspace(_c)) continue;
+        if (isIDChar(_c)) {
+          tmp2 += _c;
+          _s = IN_ATTR_VAL;
+          continue;
+        }
+        if (_c == '"') {
+          _s = IN_QUOTED_ATTR_VAL;
+          continue;
+        }
+
+        std::cerr << "Expected attribute value" << std::endl;
         exit(1);
 
       case IN_QUOTED_ID:
@@ -270,7 +477,8 @@ const Entity& Parser::get() {
       case AW_EDGE_OP:
         if (_c == '>') {
           if (_ret.graphType == STRICT_GRAPH || _ret.graphType == GRAPH) {
-            std::cerr << "No directed edges allowed in undirected graph." << std::endl;
+            std::cerr << "No directed edges allowed in undirected graph."
+                      << std::endl;
             exit(1);
           }
           _ret.type = EDGE;
@@ -280,7 +488,8 @@ const Entity& Parser::get() {
 
         if (_c == '-') {
           if (_ret.graphType == STRICT_DIGRAPH || _ret.graphType == DIGRAPH) {
-            std::cerr << "No undirected edges allowed in directed graph." << std::endl;
+            std::cerr << "No undirected edges allowed in directed graph."
+                      << std::endl;
             exit(1);
           }
           _ret.type = EDGE;
@@ -290,10 +499,14 @@ const Entity& Parser::get() {
 
         std::cerr << "Expected edge operator" << std::endl;
         exit(1);
-
     }
   }
+
+  std::cerr << "Syntax error." << std::endl;
+  exit(1);
 }
 
 // _____________________________________________________________________________
-bool Parser::isIDChar(const char& c) const { return std::isalnum(c) || c == '_'; }
+bool Parser::isIDChar(const char& c) const {
+  return std::isalnum(c) || c == '_' || c == '.';
+}

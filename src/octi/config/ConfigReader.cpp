@@ -29,7 +29,12 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "help,?", "show this message")("verbose,v", "verbosity level");
 
   opts::options_description config("Output");
-  config.add_options()(
+  config.add_options()
+    (
+      "from-dot,D",
+      opts::bool_switch(&(cfg->fromDot))->default_value(false),
+      "input is in dot format")
+    (
       "grid-cell-width",
       opts::value<double>(&(cfg->gridCellWidth))->default_value(50.0),
       "grid cell width")

@@ -15,6 +15,7 @@ struct Config {
   double gridCellWidth;
 
   std::string printMode;
+  bool fromDot;
 
   octi::gridgraph::Penalties pens;
 };

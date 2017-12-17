@@ -37,7 +37,10 @@ void GeoJsonOutput::print(const util::graph::Graph<N, E>& outG) {
   // second pass, edges
   for (graph::Node<N, E>* n : outG.getNodes()) {
     for (graph::Edge<N, E>* e : n->getAdjListOut()) {
-      if (!e->pl().getGeom()) continue;
+      if (!e->pl().getGeom()) {
+        std::cerr << "WARNING: edge " << e << " has no geometry! Ignoring on output..." << std::endl;
+        continue;
+      }
       json feature;
       feature["type"] = "Feature";
       json::object_t props = json::object();

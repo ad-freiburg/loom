@@ -28,7 +28,15 @@ enum State {
   AW_STMT_DEC,
   AW_ID,
   AW_EDGE_OP,
-  AW_ATTR_KEY
+  AW_ATTR_KEY,
+  IN_QUOTED_GRAPH_ID,
+  IN_ATTR_KEY,
+  AW_ATTR_ASSIGN,
+  IN_QUOTED_ATTR_KEY,
+  AW_ATTR_VAL,
+  IN_ATTR_VAL,
+  IN_QUOTED_ATTR_VAL,
+  AW_CONT_ATTR_KEY
 };
 
 enum EntityType {
@@ -55,6 +63,7 @@ struct Entity {
 
   GraphType graphType;
   std::string graphName;
+  size_t level;
 };
 
 class Parser {
@@ -69,7 +78,10 @@ class Parser {
   State _s;
   Entity _ret;
   char _c;
+  size_t _level;
   bool _has;
+  std::string tmp;
+  std::string tmp2;
 
   bool isIDChar(const char& c) const;
 };

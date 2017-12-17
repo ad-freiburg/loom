@@ -18,6 +18,7 @@ typedef util::graph::Node<octi::graph::CombNodePL, octi::graph::CombEdgePL>
 typedef util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>
     CombEdge;
 
+using octi::gridgraph::GridGraph;
 using octi::gridgraph::GridNode;
 using octi::gridgraph::GridEdge;
 using octi::gridgraph::Penalties;
@@ -72,7 +73,7 @@ class Octilinearizer {
  public:
   Octilinearizer() {}
 
-  TransitGraph draw(TransitGraph* g, const Penalties& pens);
+  TransitGraph draw(TransitGraph* g, GridGraph** gg, const Penalties& pens);
  private:
   void normalizeCostVector(double* vec) const;
   double getMaxDis(CombNode* to, CombEdge* e);

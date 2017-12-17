@@ -29,8 +29,10 @@ struct ISect {
 
 class Graph : public util::graph::Graph<NodePL, EdgePL> {
  public:
-  Graph(std::istream* s);
   Graph();
+
+  void readFromJson(std::istream* s);
+  void readFromDot(std::istream* s);
 
   const util::geo::Box& getBBox() const;
   void topologizeIsects();

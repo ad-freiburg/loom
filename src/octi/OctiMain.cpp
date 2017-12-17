@@ -21,6 +21,7 @@
 using std::string;
 using namespace octi;
 
+using octi::gridgraph::GridGraph;
 using util::graph::Node;
 using octi::graph::NodePL;
 using octi::graph::EdgePL;
@@ -83,9 +84,13 @@ int main(int argc, char** argv) {
 
   std::cerr << "Reading graph file... ";
   begin = std::chrono::steady_clock::now();
-  TransitGraph tg(&(std::cin));
+  TransitGraph tg;
+  GridGraph* gg;
+  if (cfg.fromDot) tg.readFromDot(&(std::cin));
+  else tg.readFromJson(&(std::cin));
   end = std::chrono::steady_clock::now();
   std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
+
 
   std::cerr << "Planarize graph... ";
   begin = std::chrono::steady_clock::now();
@@ -95,31 +100,15 @@ int main(int argc, char** argv) {
 
   auto totalBegin = std::chrono::steady_clock::now();
   Octilinearizer oct;
-  TransitGraph res = oct.draw(&tg, cfg.pens);
+  TransitGraph res = oct.draw(&tg, &gg, cfg.pens);
   auto totalend = std::chrono::steady_clock::now();
   std::cerr << " octilinearized input in " << std::chrono::duration_cast<std::chrono::milliseconds>(totalend - totalBegin).count() << "ms"<< std::endl;
 
   if (cfg.printMode == "gridgraph") {
-    /*
-     * auto nodes = *g.getNodes();
-     * for (auto n : nodes) {
-     *   if (n->getAdjList().size() == 16) {
-     *     g.deleteNode(n);
-     *   } else {
-     *     for (auto e : n->getAdjListOut()) {
-     *       if (n->pl().getParent() == e->getOtherNode(n)->pl().getParent()) {
-     *         g.deleteEdge(n, e->getOtherNode(n));
-     *       }
-     *     }
-     *   }
-     * }
-     */
-    //out.print(g);
-    //exit(0);
+    out.print(*gg);
   } else {
     out.print(res);
   }
-
 
   return (0);
 }

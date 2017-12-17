@@ -2,12 +2,12 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include "dot/Parser.h"
 #include "octi/graph/EdgePL.h"
 #include "octi/graph/Graph.h"
 #include "octi/graph/NodePL.h"
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
-#include "dot/Parser.h"
 #include "util/log/Log.h"
 
 #include "transitmap/style/LineStyle.h"
@@ -20,141 +20,237 @@ using util::graph::Edge;
 Graph::Graph() { _bbox = util::geo::minbox(); }
 
 // _____________________________________________________________________________
-Graph::Graph(std::istream* s) {
+void Graph::readFromDot(std::istream* s) {
+  _bbox = util::geo::minbox();
+
+  dot::parser::Parser dp(s);
+  std::map<std::string, Node<NodePL, EdgePL>*> idMap;
+
+  while (dp.has()) {
+    auto ent = dp.get();
+
+    if (ent.type == dot::parser::EMPTY) {
+      continue;
+    } else if (ent.type == dot::parser::NODE) {
+      // only use nodes with a position atm
+      if (ent.attrs.find("pos") == ent.attrs.end()) continue;
+      std::string coords = ent.attrs["pos"];
+      std::replace(coords.begin(), coords.end(), ',', ' ');
+
+      std::stringstream ss;
+      ss << coords;
+
+      double x, y;
+
+      ss >> x;
+      ss >> y;
+
+      Node<NodePL, EdgePL>* n = 0;
+      if (idMap.find(ent.ids.front()) != idMap.end()) {
+        n = idMap[ent.ids.front()];
+      }
+
+      if (!n) {
+        n = new Node<NodePL, EdgePL>(NodePL(util::geo::Point(x, y)));
+        idMap[ent.ids[0]] = n;
+      }
+
+      StationInfo i("", "");
+      if (ent.attrs.find("station_id") != ent.attrs.end() ||
+          ent.attrs.find("label") != ent.attrs.end()) {
+        if (ent.attrs.find("station_id") != ent.attrs.end())
+          i.id = ent.attrs["station_id"];
+        if (ent.attrs.find("label") != ent.attrs.end())
+          i.name = ent.attrs["label"];
+        n->pl().addStop(i);
+      }
+
+      addNode(n);
+    } else if (ent.type == dot::parser::EDGE) {
+      std::string prevId = ent.ids.front();
+      if (idMap.find(prevId) == idMap.end())
+        idMap[prevId] =
+            new Node<NodePL, EdgePL>(NodePL(util::geo::Point(0, 0)));
+
+      for (size_t i = 1; i < ent.ids.size(); ++i) {
+        std::string curId = ent.ids[i];
+
+        if (idMap.find(curId) == idMap.end())
+          idMap[curId] =
+              new Node<NodePL, EdgePL>(NodePL(util::geo::Point(0, 0)));
+        auto e = getEdge(idMap[prevId], idMap[curId]);
+
+        if (!e) {
+          PolyLine pl;
+          e = addEdge(idMap[curId], idMap[prevId], EdgePL(pl));
+        }
+          std::string id;
+          if (ent.attrs.find("id") != ent.attrs.end()) {
+            id = ent.attrs["id"];
+          } else if (ent.attrs.find("label") != ent.attrs.end()) {
+            id = ent.attrs["label"];
+          } else {
+            id = prevId + ":" + curId;
+          }
+
+          const Route* r = getRoute(id);
+          if (!r) {
+            std::string label = ent.attrs.find("label") != ent.attrs.end() ? "" : ent.attrs["label"];
+            std::string color = ent.attrs.find("label") != ent.attrs.end() ? "" : ent.attrs["label"];
+            r = new Route(id, label, color);
+            addRoute(r);
+          }
+
+          Node<NodePL, EdgePL>* dir = 0;
+
+          if (ent.graphType == dot::parser::DIGRAPH || ent.graphType == dot::parser::STRICT_DIGRAPH) {
+            dir = idMap[curId];
+          }
+
+          e->pl().addRoute(r, dir);
+      }
+    }
+  }
+
+  for (auto n : *getNodes()) {
+    for (auto e : n->getAdjListOut()) {
+      PolyLine pl;
+      pl << *e->getFrom()->pl().getGeom();
+      pl << *e->getTo()->pl().getGeom();
+
+      e->pl().setPolyline(pl);
+      expandBBox(pl.front());
+      expandBBox(pl.back());
+    }
+  }
+
+
+  buildGrids();
+}
+
+// _____________________________________________________________________________
+void Graph::readFromJson(std::istream* s) {
   _bbox = util::geo::minbox();
 
   dot::parser::Parser dp(s);
 
   while (dp.has()) {
     auto ent = dp.get();
-
-    if (ent.type == dot::parser::EDGE) {
-      std::cout << ent.graphName << ": edge from " << ent.ids[0];
-      for (size_t i = 1; i < ent.ids.size(); i++) {
-        std::cout << " to " << ent.ids[i];
-      }
-
-      std::cout << std::endl;
-    } else if (ent.type == dot::parser::ATTR) {
-      std::cout << ent.graphName << ": attribute " << ent.ids[0] << " = " << ent.ids[1] << std::endl;
-    }else {
-      std::cout << ent.graphName << ": " << ent.type << std::endl;
-    }
   }
 
-  // json j;
-  // (*s) >> j;
+  json j;
+  (*s) >> j;
 
-  // std::map<std::string, Node<NodePL, EdgePL>*> idMap;
+  std::map<std::string, Node<NodePL, EdgePL>*> idMap;
 
-  // if (j["type"] == "FeatureCollection") {
-    // // first pass, nodes
-    // for (auto feature : j["features"]) {
-      // auto props = feature["properties"];
-      // auto geom = feature["geometry"];
-      // if (geom["type"] == "Point") {
-        // std::string id = props["id"];
+  if (j["type"] == "FeatureCollection") {
+    // first pass, nodes
+    for (auto feature : j["features"]) {
+      auto props = feature["properties"];
+      auto geom = feature["geometry"];
+      if (geom["type"] == "Point") {
+        std::string id = props["id"];
 
-        // std::vector<double> coords = geom["coordinates"];
+        std::vector<double> coords = geom["coordinates"];
 
-        // Node<NodePL, EdgePL>* n = new Node<NodePL, EdgePL>(
-            // NodePL(util::geo::Point(coords[0], coords[1])));
+        Node<NodePL, EdgePL>* n = new Node<NodePL, EdgePL>(
+            NodePL(util::geo::Point(coords[0], coords[1])));
 
-        // StationInfo i("", "");
-        // if (!props["station_id"].is_null() ||
-            // !props["station_label"].is_null()) {
-          // if (!props["station_id"].is_null()) i.id = props["station_id"];
-          // if (!props["station_label"].is_null())
-            // i.name = props["station_label"];
-          // n->pl().addStop(i);
-        // }
+        StationInfo i("", "");
+        if (!props["station_id"].is_null() ||
+            !props["station_label"].is_null()) {
+          if (!props["station_id"].is_null()) i.id = props["station_id"];
+          if (!props["station_label"].is_null())
+            i.name = props["station_label"];
+          n->pl().addStop(i);
+        }
 
-        // addNode(n);
-        // idMap[id] = n;
-      // }
-    // }
+        addNode(n);
+        idMap[id] = n;
+      }
+    }
 
-    // // second pass, edges
-    // for (auto feature : j["features"]) {
-      // auto props = feature["properties"];
-      // auto geom = feature["geometry"];
-      // if (geom["type"] == "LineString") {
-        // if (props["lines"].is_null() || props["lines"].size() == 0) continue;
-        // std::string from = props["from"];
-        // std::string to = props["to"];
+    // second pass, edges
+    for (auto feature : j["features"]) {
+      auto props = feature["properties"];
+      auto geom = feature["geometry"];
+      if (geom["type"] == "LineString") {
+        if (props["lines"].is_null() || props["lines"].size() == 0) continue;
+        std::string from = props["from"];
+        std::string to = props["to"];
 
-        // std::vector<std::vector<double>> coords = geom["coordinates"];
+        std::vector<std::vector<double>> coords = geom["coordinates"];
 
-        // PolyLine pl;
-        // for (auto coord : coords) {
-          // double x = coord[0], y = coord[1];
-          // Point p(x, y);
-          // pl << p;
-          // expandBBox(p);
-        // }
+        PolyLine pl;
+        for (auto coord : coords) {
+          double x = coord[0], y = coord[1];
+          Point p(x, y);
+          pl << p;
+          expandBBox(p);
+        }
 
-        // Node<NodePL, EdgePL>* fromN = idMap[from];
-        // Node<NodePL, EdgePL>* toN = idMap[to];
+        Node<NodePL, EdgePL>* fromN = idMap[from];
+        Node<NodePL, EdgePL>* toN = idMap[to];
 
-        // if (!fromN) {
-          // LOG(ERROR) << "Node \"" << from << "\" not found." << std::endl;
-          // continue;
-        // }
+        if (!fromN) {
+          LOG(ERROR) << "Node \"" << from << "\" not found." << std::endl;
+          continue;
+        }
 
-        // if (!toN) {
-          // LOG(ERROR) << "Node \"" << to << "\" not found." << std::endl;
-          // continue;
-        // }
+        if (!toN) {
+          LOG(ERROR) << "Node \"" << to << "\" not found." << std::endl;
+          continue;
+        }
 
-        // Edge<NodePL, EdgePL>* e = addEdge(fromN, toN, EdgePL(pl));
+        Edge<NodePL, EdgePL>* e = addEdge(fromN, toN, EdgePL(pl));
 
-        // for (auto route : props["lines"]) {
-          // std::string id;
-          // if (!route["id"].is_null()) {
-            // id = route["id"];
-          // } else if (!route["label"].is_null()) {
-            // id = route["label"];
-          // } else if (!route["color"].is_null()) {
-            // id = route["color"];
-          // } else
-            // continue;
+        for (auto route : props["lines"]) {
+          std::string id;
+          if (!route["id"].is_null()) {
+            id = route["id"];
+          } else if (!route["label"].is_null()) {
+            id = route["label"];
+          } else if (!route["color"].is_null()) {
+            id = route["color"];
+          } else
+            continue;
 
-          // const Route* r = getRoute(id);
-          // if (!r) {
-            // std::string label = route["label"].is_null() ? "" : route["label"];
-            // std::string color = route["color"];
-            // r = new Route(id, label, color);
-            // addRoute(r);
-          // }
+          const Route* r = getRoute(id);
+          if (!r) {
+            std::string label = route["label"].is_null() ? "" : route["label"];
+            std::string color = route["color"];
+            r = new Route(id, label, color);
+            addRoute(r);
+          }
 
-          // Node<NodePL, EdgePL>* dir = 0;
+          Node<NodePL, EdgePL>* dir = 0;
 
-          // if (!route["direction"].is_null()) {
-            // dir = idMap[route["direction"]];
-          // }
+          if (!route["direction"].is_null()) {
+            dir = idMap[route["direction"]];
+          }
 
-          // if (!route["style"].is_null()) {
-            // transitmapper::style::LineStyle ls;
-            // auto style = route["style"];
-            // std::string dashArray;
-            // if (!style["dash-array"].is_null()) {
-              // dashArray = style["dash-array"];
-            // }
+          if (!route["style"].is_null()) {
+            transitmapper::style::LineStyle ls;
+            auto style = route["style"];
+            std::string dashArray;
+            if (!style["dash-array"].is_null()) {
+              dashArray = style["dash-array"];
+            }
 
-            // if (!style["css"].is_null()) {
-              // ls.setCss(style["css"]);
-            // }
+            if (!style["css"].is_null()) {
+              ls.setCss(style["css"]);
+            }
 
-            // ls.setDashArray(dashArray);
+            ls.setDashArray(dashArray);
 
-            // e->pl().addRoute(r, dir, ls);
-          // } else {
-            // e->pl().addRoute(r, dir);
-          // }
-        // }
-      // }
-    // }
-  // }
+            e->pl().addRoute(r, dir, ls);
+          } else {
+            e->pl().addRoute(r, dir);
+          }
+        }
+      }
+    }
+  }
 
   buildGrids();
 }
@@ -181,7 +277,6 @@ void Graph::expandBBox(const Point& p) {
 // _____________________________________________________________________________
 const util::geo::Box& Graph::getBBox() const { return _bbox; }
 
-
 // _____________________________________________________________________________
 void Graph::topologizeIsects() {
   proced.clear();
@@ -192,10 +287,12 @@ void Graph::topologizeIsects() {
 
     double pa = i.a->pl().getPolyline().projectOn(i.bp.p).totalPos;
 
-    auto ba = addEdge(i.b->getFrom(), x,
-            EdgePL(i.b->pl().getPolyline().getSegment(0, i.bp.totalPos)));
-    auto bb = addEdge(x, i.b->getTo(),
-            EdgePL(i.b->pl().getPolyline().getSegment(i.bp.totalPos, 1)));
+    auto ba =
+        addEdge(i.b->getFrom(), x,
+                EdgePL(i.b->pl().getPolyline().getSegment(0, i.bp.totalPos)));
+    auto bb =
+        addEdge(x, i.b->getTo(),
+                EdgePL(i.b->pl().getPolyline().getSegment(i.bp.totalPos, 1)));
 
     _edgeGrid.add(*ba->pl().getGeom(), ba);
     _edgeGrid.add(*bb->pl().getGeom(), bb);
@@ -211,8 +308,9 @@ void Graph::topologizeIsects() {
     }
 
     auto aa = addEdge(i.a->getFrom(), x,
-            EdgePL(i.a->pl().getPolyline().getSegment(0, pa)));
-    auto ab = addEdge(x, i.a->getTo(), EdgePL(i.a->pl().getPolyline().getSegment(pa, 1)));
+                      EdgePL(i.a->pl().getPolyline().getSegment(0, pa)));
+    auto ab = addEdge(x, i.a->getTo(),
+                      EdgePL(i.a->pl().getPolyline().getSegment(pa, 1)));
 
     _edgeGrid.add(*aa->pl().getGeom(), aa);
     _edgeGrid.add(*ab->pl().getGeom(), ab);
@@ -229,6 +327,9 @@ void Graph::topologizeIsects() {
 
     _edgeGrid.remove(i.a);
     _edgeGrid.remove(i.b);
+
+    assert(getEdge(i.a->getFrom(), i.a->getTo()));
+    assert(getEdge(i.b->getFrom(), i.b->getTo()));
     deleteEdge(i.a->getFrom(), i.a->getTo());
     deleteEdge(i.b->getFrom(), i.b->getTo());
   }
@@ -268,7 +369,6 @@ ISect Graph::getNextIntersection() {
   ret.b = 0;
   return ret;
 }
-
 
 // _____________________________________________________________________________
 void Graph::addRoute(const Route* r) { _routes[r->getId()] = r; }

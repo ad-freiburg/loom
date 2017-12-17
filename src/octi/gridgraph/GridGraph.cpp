@@ -434,6 +434,7 @@ void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
   auto xy = getNodeCoords(n);
   size_t x = xy.first;
   size_t y = xy.second;
+
   // if some outgoing edge is taken, dont put new edge next to it
   for (size_t i = 0; i < 8; i++) {
     auto port = n->pl().getPort(i);
@@ -467,6 +468,7 @@ void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
               << std::endl
               << "Checking station "
               << origNode->pl().getParent()->pl().getStops().front().name
+              << "(" << origNode << ")"
               << std::endl;
   else
     std::cerr << std::endl
@@ -527,31 +529,29 @@ void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
     if (!outgoing[i]) continue;
 
     // this is the number of edges that will occur between the currently checked
-    // edge and the inserted edge,
-    // positive if in clockwise direction, negative if in counter-clockwise
-    // direction
-    int32_t d = origNode->pl().distBetween(outgoing[i], e) - 1;
+    // edge and the inserted edge, in clockwise and counter-clockwise dir
+    int32_t dCw = origNode->pl().distBetween(outgoing[i], e) - 1;
+    int32_t dCCw = origNode->pl().distBetween(e, outgoing[i]) - 1;
 
     // dd and ddd are the optimal distances between outgoing[i] and e, based on
-    // exit(0);
     // the total number
     // of edges in this node
-    int dd = ((((d + 1) + d) % 8) * optimDistance) % 8;
+    int dd = ((((dCw + 1) + dCw) % 8) * optimDistance) % 8;
     int ddd = (6 - dd) % 8;
 
     std::cerr << "Distance between the inserted edge (" << e << ") and edge at "
-              << i << " (" << outgoing[i] << ") is " << d
+              << i << " (" << outgoing[i] << ") is " << dCw << " (cw) and " << dCCw << " (ccw)"
               << ", optim distance between them is +" << dd << " and -" << ddd
               << std::endl;
 
     double pen = _c.p_45 * 2 - 1;
 
-    for (int j = 1; j <= dd + 1; j++) {
+    for (int j = 1; dd != 0 && j <= dd + 1; j++) {
       if (addC[(i + j) % 8] < -1) continue;
       addC[(i + j) % 8] += pen * (1.0 - (j - 1.0) / (dd));
     }
 
-    for (int j = 1; j <= ddd + 1; j++) {
+    for (int j = 1; ddd != 0 && j <= ddd + 1; j++) {
       if (addC[(i + (8 - j)) % 8] < -1) continue;
       addC[(i + (8 - j)) % 8] += pen * (1.0 - (j - 1.0) / (ddd));
     }
@@ -559,11 +559,11 @@ void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
     // negative cost here means that the edge is going to be closed
     addC[i] = -1.0 * std::numeric_limits<double>::max();
 
-    for (int j = 1; j <= d; j++) {
+    for (int j = 1; j <= dCw; j++) {
       addC[(i + j) % 8] = -1.0 * std::numeric_limits<double>::max();
     }
 
-    for (int j = 1; j <= (origEdgeNumber / 2) - d; j++) {
+    for (int j = 1; j <= dCCw; j++) {
       addC[(i + (8 - j)) % 8] = -1.0 * std::numeric_limits<double>::max();
     }
   }
@@ -646,8 +646,17 @@ void GridGraph::addCostVector(GridNode* n, double addC[8], double* invCost) {
         // already closed, so dont remove closedness in inv costs
         invCost[i] = 0;
       } else {
+        // close edges
         getEdge(port, oPort)->pl().close();
         getEdge(oPort, port)->pl().close();
+
+        // close the other node to avoid "stealing" the edge
+        // IMPORTANT: because we check if this edge is already close
+        // above, it is impossible for this node to be already closed -
+        // then the edge would also be close, too. So we can close this node
+        // here without danger of re-opening an already closed node later on.
+        closeNode(getNeighbor(x, y, i));
+
         invCost[i] = addC[i];
       }
     } else {
@@ -679,6 +688,7 @@ void GridGraph::removeCostVector(GridNode* n, double addC[8]) {
     if (addC[i] < -1) {
       getEdge(port, oPort)->pl().open();
       getEdge(oPort, port)->pl().open();
+      openNode(getNeighbor(x, y, i));
     } else {
       getEdge(port, oPort)
           ->pl()
