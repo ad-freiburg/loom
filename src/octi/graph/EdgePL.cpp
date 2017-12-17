@@ -11,7 +11,12 @@ using util::geo::PolyLine;
 using namespace octi::graph;
 
 // _____________________________________________________________________________
-EdgePL::EdgePL(const PolyLine& p) : _p(p), _generation(0) {
+EdgePL::EdgePL() : _generation(-1) {
+
+}
+
+// _____________________________________________________________________________
+EdgePL::EdgePL(const PolyLine& p) : _p(p), _generation(-1) {
 
 }
 
@@ -46,7 +51,7 @@ const std::set<RouteOcc>& EdgePL::getRoutes() const {
 }
 
 // _____________________________________________________________________________
-void EdgePL::setGeneration(size_t g) {
+void EdgePL::setGeneration(int64_t g) {
   _generation = g;
 }
 
@@ -67,4 +72,9 @@ void EdgePL::getAttrs(json::object_t& obj) const {
 
    obj["lines"].push_back(route);
   }
+}
+
+// _____________________________________________________________________________
+int64_t EdgePL::getGeneration() const {
+  return _generation;
 }

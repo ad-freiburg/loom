@@ -27,12 +27,12 @@ class CombEdgePL : util::geograph::GeoEdgePL {
 
   const PolyLine& getPolyLine() const;
   void setPolyLine(const PolyLine& p);
-  void setGeneration(size_t g);
-  size_t getGeneration() const;
+  void setGeneration(int64_t g);
+  int64_t getGeneration() const;
  private:
   std::vector<Edge*> _childs;
 
-  size_t _generation;
+  int64_t _generation;
 
   PolyLine _geom;
 };

@@ -9,7 +9,7 @@ using util::geo::PolyLine;
 using namespace octi::graph;
 
 // _____________________________________________________________________________
-CombEdgePL::CombEdgePL(Edge* child) {
+CombEdgePL::CombEdgePL(Edge* child) : _generation(-1) {
   _childs.push_back(child);
   _geom = PolyLine(*child->getFrom()->pl().getGeom(), *child->getTo()->pl().getGeom());
 }
@@ -53,12 +53,12 @@ std::vector<Edge*>& CombEdgePL::getChilds() {
 }
 
 // _____________________________________________________________________________
-void CombEdgePL::setGeneration(size_t g) {
+void CombEdgePL::setGeneration(int64_t g) {
   _generation = g;
 }
 
 // _____________________________________________________________________________
-size_t CombEdgePL::getGeneration() const {
+int64_t CombEdgePL::getGeneration() const {
   return _generation;
 }
 

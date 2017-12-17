@@ -109,6 +109,7 @@ void Octilinearizer::buildTransitGraph(CombGraph* source,
 
   for (auto n : *nodes) {
     for (auto f : n->getAdjListOut()) {
+      if (f->pl().getGeneration() < 0) continue;
       double tot = f->pl().getChilds().size();
       double d = f->pl().getPolyLine().getLength();
       double step = d / tot;
@@ -390,7 +391,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
     }
 
     std::set<CombEdge*> done;
-    size_t gen = 0;
+    int64_t gen = 0;
     double totalCost = 0;
     size_t totalIters = 0;
     int dTime = 0;
