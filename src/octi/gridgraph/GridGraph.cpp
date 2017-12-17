@@ -503,26 +503,7 @@ void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
   std::cerr << std::endl;
 
   std::cerr << "Ordered edges in orig node: ";
-  for (auto e : origNode->pl().getEdgeOrdering().getOrderedSet()) {
-    if (e.first->getOtherNode(origNode)
-            ->pl()
-            .getParent()
-            ->pl()
-            .getStops()
-            .size()) {
-      std::cerr << e.first << "(to "
-                << e.first->getOtherNode(origNode)
-                       ->pl()
-                       .getParent()
-                       ->pl()
-                       .getStops()
-                       .front()
-                       .name
-                << "), ";
-    } else {
-      std::cerr << e.first << ", ";
-    }
-  }
+  std::cerr << origNode->pl().getEdgeOrdering().toString(origNode);
   std::cerr << std::endl;
 
   for (size_t i = 0; i < 8; i++) {
@@ -651,7 +632,7 @@ void GridGraph::addCostVector(GridNode* n, double addC[8], double* invCost) {
         getEdge(oPort, port)->pl().close();
 
         // close the other node to avoid "stealing" the edge
-        // IMPORTANT: because we check if this edge is already close
+        // IMPORTANT: because we check if this edge is already closed
         // above, it is impossible for this node to be already closed -
         // then the edge would also be close, too. So we can close this node
         // here without danger of re-opening an already closed node later on.
@@ -673,6 +654,11 @@ void GridGraph::addCostVector(GridNode* n, double addC[8], double* invCost) {
 
 // _____________________________________________________________________________
 void GridGraph::removeCostVector(GridNode* n, double addC[8]) {
+  std::cerr << "Removing cost vector ";
+  for (size_t i = 0; i < 8; i++) {
+    std::cerr << addC[i] << ",";
+  }
+  std::cerr << std::endl;
   auto xy = getNodeCoords(n);
   size_t x = xy.first;
   size_t y = xy.second;
@@ -798,7 +784,7 @@ void GridGraph::openNode(GridNode* n) {
   for (size_t i = 0; i < 8; i++) {
     auto port = n->pl().getPort(i);
     auto neigh = getNeighbor(x, y, i);
-    if (!neigh || !port) continue;
+    if (!neigh || !port || neigh->pl().isClosed()) continue;
     auto e = getEdge(port, neigh->pl().getPort((i + 4) % 8));
     auto f = getEdge(neigh->pl().getPort((i + 4) % 8), port);
     if (e->pl().getResEdges().size() == 0) {

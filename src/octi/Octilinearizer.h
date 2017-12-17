@@ -26,6 +26,16 @@ typedef octi::graph::Graph TransitGraph;
 typedef util::graph::Node<octi::graph::NodePL, octi::graph::EdgePL> TransitNode;
 typedef util::graph::Edge<octi::graph::NodePL, octi::graph::EdgePL> TransitEdge;
 
+struct GraphMeasures {
+  double maxNodeDist;
+  double minNodeDist;
+  double avgNodeDist;
+  double maxEdgeLength;
+  double minEdgeLength;
+  double avgEdgeLength;
+  size_t maxDeg;
+};
+
 struct GridHeur {
   GridHeur(octi::gridgraph::GridGraph* g, GridNode* from, const std::unordered_set<GridNode*>& to) : g(g), from(from), to(0) {
     if (to.size() == 1) {
@@ -76,18 +86,19 @@ class Octilinearizer {
   TransitGraph draw(TransitGraph* g, GridGraph** gg, const Penalties& pens);
  private:
   void normalizeCostVector(double* vec) const;
-  double getMaxDis(CombNode* to, CombEdge* e);
+  double getMaxDis(CombNode* to, CombEdge* e, double gridSize);
   void removeEdgesShorterThan(TransitGraph* g, double d);
   void combineDeg2(CombGraph* g);
   void buildTransitGraph(CombGraph* source, TransitGraph* target);
   void writeEdgeOrdering(CombGraph* target);
-  graph::EdgeOrdering getEdgeOrderingForNode(CombNode* n);
+  graph::EdgeOrdering getEdgeOrderingForNode(CombNode* n) const;
+  graph::EdgeOrdering getEdgeOrderingForNode(CombNode* n, bool useOrigNextNode, const std::map<CombNode*, Point>& newPos) const;
   void buildCombGraph(TransitGraph* source, CombGraph* target);
   void rotate(CombGraph* g, Point center, double deg);
   void buildPolylineFromRes(const std::list<GridEdge*>& l, PolyLine& res);
   double getCostFromRes(const std::list<GridEdge*>& l);
   double addResidentEdges(gridgraph::GridGraph* g, CombEdge* e, const std::list<GridEdge*>& res);
-  bool introducesCrossings(CombEdge* e, Point p, const std::map<CombNode*, Point>& newPos, const CombGraph& cg) const;
+  size_t changesTopology(CombEdge* e, Point p, const std::map<CombNode*, Point>& newPos) const;
 };
 
 }  // namespace octt

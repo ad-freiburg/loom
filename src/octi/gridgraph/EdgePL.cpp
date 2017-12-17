@@ -37,7 +37,7 @@ const std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgeP
 // _____________________________________________________________________________
 void EdgePL::getAttrs(json::object_t& obj) const {
   obj["routes"] = json::array();
-  obj["cost"] = cost();
+  obj["cost"] = cost() == std::numeric_limits<double>::infinity() ? "inf" : util::toString(cost());
   obj["visited"] = _visited;
 
   for (auto r : _resEdges) {

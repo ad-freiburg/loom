@@ -60,26 +60,39 @@ void Octilinearizer::writeEdgeOrdering(CombGraph* target) {
 }
 
 // _____________________________________________________________________________
-graph::EdgeOrdering Octilinearizer::getEdgeOrderingForNode(CombNode* n) {
+graph::EdgeOrdering Octilinearizer::getEdgeOrderingForNode(CombNode* n) const {
+  return getEdgeOrderingForNode(n, true, std::map<CombNode*, Point>());
+}
+
+// _____________________________________________________________________________
+graph::EdgeOrdering Octilinearizer::getEdgeOrderingForNode(CombNode* n,
+    bool useOrigNextNode, const std::map<CombNode*, Point>& newPos) const {
   graph::EdgeOrdering order;
-  for (auto e : n->getAdjListOut()) {
+  for (auto e : n->getAdjList()) {
     auto r = e->pl().getChilds().front();
+    Point a = *n->pl().getGeom();
+    if (newPos.find(n) != newPos.end()) a = newPos.find(n)->second;
+
+    Point b;
+    if (useOrigNextNode) {
+      b = *r->getOtherNode(n->pl().getParent())->pl().getGeom();
+    } else {
+      auto other = e->getOtherNode(n);
+      if (e->pl().getGeom()->size() > 2) {
+        if (e->getTo() == n) {
+          b = e->pl().getGeom()->at(e->pl().getGeom()->size()-2);
+        } else {
+          b = e->pl().getGeom()->at(1);
+        }
+      } else {
+        b = *other->pl().getGeom();
+        if (newPos.find(other) != newPos.end()) b = newPos.find(other)->second;
+
+      }
+    }
 
     // get the angles
-    double deg = util::geo::angBetween(
-        *n->pl().getParent()->pl().getGeom(),
-        *r->getOtherNode(n->pl().getParent())->pl().getGeom());
-
-    order.add(e, deg);
-  }
-
-  for (auto e : n->getAdjListIn()) {
-    auto r = e->pl().getChilds().front();
-
-    // get the angles
-    double deg = util::geo::angBetween(
-        *n->pl().getParent()->pl().getGeom(),
-        *r->getOtherNode(n->pl().getParent())->pl().getGeom());
+    double deg = util::geo::angBetween(a, b);
 
     order.add(e, deg);
   }
@@ -242,8 +255,8 @@ start:
 }
 
 // _____________________________________________________________________________
-double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e) {
-  double tooMuch = 100;  // 1000;
+double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e, double gridSize) {
+  double tooMuch = gridSize * 4;
 
   if (to->getAdjList().size() == 1) {
     return util::geo::len(*e->pl().getGeom()) / 1.5;
@@ -260,7 +273,7 @@ double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e) {
     }
   }
 
-  return 40;  // 400;
+  return gridSize * 1.7;
 }
 
 // _____________________________________________________________________________
@@ -282,9 +295,10 @@ void Octilinearizer::normalizeCostVector(double* vec) const {
 // _____________________________________________________________________________
 TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
                                   const Penalties& pens) {
+  double gridSize = 50;
   std::cerr << "Removing short edges... ";
   auto begin = std::chrono::steady_clock::now();
-  removeEdgesShorterThan(tg, 20);
+  removeEdgesShorterThan(tg, gridSize / 2);
   auto end = std::chrono::steady_clock::now();
   std::cerr << " done ("
             << std::chrono::duration_cast<std::chrono::milliseconds>(end -
@@ -315,8 +329,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
 
   writeEdgeOrdering(&cg);
 
-  // double gridSize = 250;
-  double gridSize = 25;
 
   auto box = tg->getBBox();
 
@@ -431,7 +443,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
           std::cerr << "Edge from " << from->pl().toString() << " to "
                     << to->pl().toString() << std::endl;
 
-          GridNode* fromGridNode = g->getGridNodeFrom(from, 400);
+          GridNode* fromGridNode = g->getGridNodeFrom(from, gridSize * 1.7);
 
           if (!fromGridNode) {
             LOG(ERROR) << "Could not sort in source node " << from << std::endl;
@@ -439,7 +451,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
 
           auto costVecBegin = std::chrono::steady_clock::now();
           // get surrounding displacement nodes
-          double maxDis = getMaxDis(to, e);
+          double maxDis = getMaxDis(to, e, gridSize);
           std::unordered_set<GridNode*> tos = g->getGridNodesTo(to, maxDis);
 
           if (tos.size() == 0) {
@@ -449,7 +461,9 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
           std::list<GridEdge*> res;
           GridNode* target = 0;
 
+          // why not distance based? (TODO)
           double movePenPerGrid = tos.size() > 1 ? 10 : 0;
+
 
           // open to target node
           for (auto n : tos) {
@@ -457,16 +471,16 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
                 floor(util::geo::dist(*n->pl().getGeom(), *to->pl().getGeom()) /
                       gridSize);
 
-            if(introducesCrossings(e, *n->pl().getGeom(), newPositions, cg)) continue;
+            double topoPen = 0; //changesTopology(e, *n->pl().getGeom(), newPositions) * 50;
 
-
-            g->openNodeSink(n, gridDist * movePenPerGrid);
+            g->openNodeSink(n, gridDist * movePenPerGrid + topoPen);
             g->openNode(n);
           }
 
           // open from source node
           g->openNodeSink(fromGridNode, 0);
           g->openNode(fromGridNode);
+
 
           double addCFrom[8] = {0, 0, 0, 0, 0, 0, 0, 0};
           double addCTo[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -477,6 +491,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
           g->topoBlockPenalty(fromGridNode, from, e, addCFrom);
           normalizeCostVector(addCFrom);
           g->outDegDeviationPenalty(fromGridNode, from, e, addCFrom);
+
 
           g->addCostVector(fromGridNode, addCFrom, addCFromInv);
 
@@ -506,9 +521,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
 
           totalIters += iters;
 
-          if (gen == STOP_GEN) {
-            goto breakpoint;
-          }
 
           auto postBegin = std::chrono::steady_clock::now();
           g->removeCostVector(fromGridNode, addCFromInv);
@@ -516,8 +528,20 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
             g->removeCostVector(*tos.begin(), addCToInv);
           }
 
+          if (gen == STOP_GEN) {
+            util::geo::output::GeoJsonOutput out;
+            out.print(*g);
+            exit(0);
+          }
+
+
           if (target == 0) {
             LOG(ERROR) << "Could not sort in node " << to << std::endl;
+            for (auto n : tos) {
+              g->closeNodeSink(n);
+            }
+            g->closeNodeSink(fromGridNode);
+            g->closeNode(fromGridNode);
             continue;
           }
 
@@ -573,8 +597,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
         settled.insert(n);
       }
     }
-
-  breakpoint:
 
     std::cerr << " === Total edge cost in graph is " << totalCost
               << " === " << std::endl;
@@ -652,51 +674,24 @@ double Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* e,
 }
 
 // _____________________________________________________________________________
-bool Octilinearizer::introducesCrossings(
-    CombEdge* eCheck, Point p, const std::map<CombNode*, Point>& newPos,
-    const CombGraph& cg) const {
-  return false;
+size_t Octilinearizer::changesTopology(
+    CombEdge* eCheck, Point p, const std::map<CombNode*, Point>& newPos) const {
+  // collect the affected nodes
+  size_t ret = 0;
+  std::set<CombNode*> aff;
+  CombNode* nOrig= eCheck->getTo();
+  auto newPosA = newPos;
+  newPosA[nOrig] = p;
+  for (auto e : nOrig->getAdjList()) {
+    aff.insert(e->getFrom());
+    aff.insert(e->getTo());
+  }
 
-  std::map<CombEdge*, std::pair<Point, Point> > changedEdges;
-  for (auto e : eCheck->getTo()->getAdjList()) {
-    changedEdges[e] = std::pair<Point, Point>(*e->getFrom()->pl().getGeom(), *e->getTo()->pl().getGeom());
-
-    if (newPos.find(e->getFrom()) != newPos.end()) {
-      changedEdges[e].first = newPos.find(e->getFrom())->second;
-    }
-
-    if (newPos.find(e->getTo()) != newPos.end()) {
-      changedEdges[e].second = newPos.find(e->getTo())->second;
-    }
-
-    if (e->getTo() == eCheck->getTo()) {
-      changedEdges[e].second = p;
-    } else {
-      changedEdges[e].first = p;
+  for (auto n : aff) {
+    if (!getEdgeOrderingForNode(n, false, newPosA).equals(getEdgeOrderingForNode(n, false, newPos))) {
+      ret += 1;
     }
   }
 
-  for (auto ce : changedEdges) {
-    for (auto n : cg.getNodes()) {
-      for (auto e : n->getAdjListOut()) {
-        if (e == ce.first) continue;
-
-        Point from = *e->getFrom()->pl().getGeom();
-        Point to = *e->getTo()->pl().getGeom();
-
-        if (newPos.find(e->getFrom()) != newPos.end()) {
-          from = newPos.find(e->getFrom())->second;
-        }
-
-        if (newPos.find(e->getTo()) != newPos.end()) {
-          to = newPos.find(e->getTo())->second;
-        }
-
-        if (util::geo::intersects(from, to, ce.second.first, ce.second.second)) {
-          return true;
-        }
-      }
-    }
- }
-  return false;
+  return ret;
 }
