@@ -81,11 +81,13 @@ class Octilinearizer {
   void combineDeg2(CombGraph* g);
   void buildTransitGraph(CombGraph* source, TransitGraph* target);
   void writeEdgeOrdering(CombGraph* target);
+  graph::EdgeOrdering getEdgeOrderingForNode(CombNode* n);
   void buildCombGraph(TransitGraph* source, CombGraph* target);
   void rotate(CombGraph* g, Point center, double deg);
   void buildPolylineFromRes(const std::list<GridEdge*>& l, PolyLine& res);
   double getCostFromRes(const std::list<GridEdge*>& l);
   double addResidentEdges(gridgraph::GridGraph* g, CombEdge* e, const std::list<GridEdge*>& res);
+  bool introducesCrossings(CombEdge* e, Point p, const std::map<CombNode*, Point>& newPos, const CombGraph& cg) const;
 };
 
 }  // namespace octt

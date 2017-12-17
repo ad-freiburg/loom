@@ -77,7 +77,7 @@ class GridGraph : public Graph<NodePL, EdgePL> {
 
   Node<NodePL, EdgePL>* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
-  GridNode* getGridNodeFrom(CombNode* n);
+  GridNode* getGridNodeFrom(CombNode* n, double maxDis);
   std::unordered_set<GridNode*> getGridNodesTo(CombNode* n, double maxDis);
 
   void settleGridNode(GridNode* n, CombNode* cn);

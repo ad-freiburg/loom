@@ -55,28 +55,36 @@ void Octilinearizer::buildCombGraph(TransitGraph* source, CombGraph* target) {
 // _____________________________________________________________________________
 void Octilinearizer::writeEdgeOrdering(CombGraph* target) {
   for (auto n : *target->getNodes()) {
-    n->pl().getOrderedEdges().clear();
+    n->pl().setEdgeOrdering(getEdgeOrderingForNode(n));
+  }
+}
+
+// _____________________________________________________________________________
+graph::EdgeOrdering Octilinearizer::getEdgeOrderingForNode(CombNode* n) {
+  graph::EdgeOrdering order;
+  for (auto e : n->getAdjListOut()) {
+    auto r = e->pl().getChilds().front();
+
+    // get the angles
+    double deg = util::geo::angBetween(
+        *n->pl().getParent()->pl().getGeom(),
+        *r->getOtherNode(n->pl().getParent())->pl().getGeom());
+
+    order.add(e, deg);
   }
 
-  for (auto n : *target->getNodes()) {
-    for (auto e : n->getAdjListOut()) {
-      auto refEdgeA = e->pl().getChilds().front();
-      auto refEdgeB = e->pl().getChilds().back();
+  for (auto e : n->getAdjListIn()) {
+    auto r = e->pl().getChilds().front();
 
-      // get the angles
-      double degA = util::geo::angBetween(
-          *n->pl().getParent()->pl().getGeom(),
-          *refEdgeA->getOtherNode(n->pl().getParent())->pl().getGeom());
-      double degB = util::geo::angBetween(
-          *e->getTo()->pl().getParent()->pl().getGeom(),
-          *refEdgeB->getOtherNode(e->getTo()->pl().getParent())
-               ->pl()
-               .getGeom());
+    // get the angles
+    double deg = util::geo::angBetween(
+        *n->pl().getParent()->pl().getGeom(),
+        *r->getOtherNode(n->pl().getParent())->pl().getGeom());
 
-      n->pl().addOrderedEdge(e, degA);
-      e->getTo()->pl().addOrderedEdge(e, degB);
-    }
+    order.add(e, deg);
   }
+
+  return order;
 }
 
 // _____________________________________________________________________________
@@ -161,7 +169,9 @@ void Octilinearizer::combineDeg2(CombGraph* g) {
 
       // if this combination would turn our graph into a multigraph,
       // dont do it!
-      if (g->getEdge(a->getFrom(), b->getOtherNode(n)) || g->getEdge(b->getOtherNode(n), a->getTo())) continue;
+      if (g->getEdge(a->getFrom(), b->getOtherNode(n)) ||
+          g->getEdge(b->getOtherNode(n), a->getTo()))
+        continue;
 
       auto pl = a->pl();
 
@@ -233,7 +243,7 @@ start:
 
 // _____________________________________________________________________________
 double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e) {
-  double tooMuch = 100;//1000;
+  double tooMuch = 100;  // 1000;
 
   if (to->getAdjList().size() == 1) {
     return util::geo::len(*e->pl().getGeom()) / 1.5;
@@ -250,7 +260,7 @@ double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e) {
     }
   }
 
-  return 40;//400;
+  return 40;  // 400;
 }
 
 // _____________________________________________________________________________
@@ -270,7 +280,8 @@ void Octilinearizer::normalizeCostVector(double* vec) const {
 }
 
 // _____________________________________________________________________________
-TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalties& pens) {
+TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
+                                  const Penalties& pens) {
   std::cerr << "Removing short edges... ";
   auto begin = std::chrono::steady_clock::now();
   removeEdgesShorterThan(tg, 20);
@@ -304,12 +315,12 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalt
 
   writeEdgeOrdering(&cg);
 
-  //double gridSize = 250;
+  // double gridSize = 250;
   double gridSize = 25;
 
   auto box = tg->getBBox();
 
-  // pad bbox with 2 grid sizes
+  // pad bbox with 4 grid cell sizes
   box.max_corner().set<0>(box.max_corner().get<0>() + 4 * gridSize);
   box.max_corner().set<1>(box.max_corner().get<1>() + 4 * gridSize);
   box.min_corner().set<0>(box.min_corner().get<0>() - 4 * gridSize);
@@ -337,8 +348,11 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalt
     auto gStart = std::chrono::steady_clock::now();
     g = new GridGraph(getBoundingBox(rbox.getPolygon()), gridSize, pens);
     auto gEnd = std::chrono::steady_clock::now();
-    std::cerr << "Build grid graph in " << std::chrono::duration_cast<std::chrono::milliseconds>(
-                       gEnd - gStart).count() << " ms " << std::endl;
+    std::cerr << "Build grid graph in "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(gEnd -
+                                                                       gStart)
+                     .count()
+              << " ms " << std::endl;
     util::graph::Dijkstra dijkstra;
 
     // comparator for nodes, based on degree
@@ -357,6 +371,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalt
         dangling;
 
     std::set<CombNode*> settled;
+    std::map<CombNode*, Point> newPositions;
 
     for (auto n : *cg.getNodes()) {
       globalPq.push(n);
@@ -381,7 +396,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalt
 
         if (settled.find(n) != settled.end()) continue;
 
-        for (auto ee : n->pl().getOrderedEdges()) {
+        for (auto ee : n->pl().getEdgeOrdering().getOrderedSet()) {
           auto e = ee.first;
           if (done.find(e) != done.end()) continue;
           done.insert(e);
@@ -416,7 +431,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalt
           std::cerr << "Edge from " << from->pl().toString() << " to "
                     << to->pl().toString() << std::endl;
 
-          GridNode* fromGridNode = g->getGridNodeFrom(from);
+          GridNode* fromGridNode = g->getGridNodeFrom(from, 400);
 
           if (!fromGridNode) {
             LOG(ERROR) << "Could not sort in source node " << from << std::endl;
@@ -441,6 +456,10 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalt
             double gridDist =
                 floor(util::geo::dist(*n->pl().getGeom(), *to->pl().getGeom()) /
                       gridSize);
+
+            if(introducesCrossings(e, *n->pl().getGeom(), newPositions, cg)) continue;
+
+
             g->openNodeSink(n, gridDist * movePenPerGrid);
             g->openNode(n);
           }
@@ -502,6 +521,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalt
             continue;
           }
 
+          newPositions[to] = *target->pl().getGeom();
+          newPositions[from] = *fromGridNode->pl().getGeom();
           g->settleGridNode(target, to);
           g->settleGridNode(fromGridNode, from);
 
@@ -518,7 +539,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalt
               g->getNodeCoords(fromGridNode).second,
               g->getNodeCoords(target).first, g->getNodeCoords(target).second);
 
-          std::cerr << std::round(cost) << " vs " << std::round(estimatedCost) << std::endl;
+          std::cerr << std::round(cost) << " vs " << std::round(estimatedCost)
+                    << std::endl;
           assert(std::round(cost) >= std::round(estimatedCost));
 
           totalCost += cost;
@@ -534,7 +556,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalt
           for (auto f : res) {
             if (f->pl().isSecondary()) continue;
             g->balanceEdge(f->getFrom()->pl().getParent(),
-                          f->getTo()->pl().getParent());
+                           f->getTo()->pl().getParent());
           }
 
           e->pl().setPolyLine(pl);
@@ -545,7 +567,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalt
                           postEnd - postBegin)
                           .count();
 
-
           gen++;
         }
 
@@ -553,7 +574,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg, const Penalt
       }
     }
 
-    breakpoint:
+  breakpoint:
 
     std::cerr << " === Total edge cost in graph is " << totalCost
               << " === " << std::endl;
@@ -628,4 +649,54 @@ double Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* e,
            0);
     g->getEdge(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
   }
+}
+
+// _____________________________________________________________________________
+bool Octilinearizer::introducesCrossings(
+    CombEdge* eCheck, Point p, const std::map<CombNode*, Point>& newPos,
+    const CombGraph& cg) const {
+  return false;
+
+  std::map<CombEdge*, std::pair<Point, Point> > changedEdges;
+  for (auto e : eCheck->getTo()->getAdjList()) {
+    changedEdges[e] = std::pair<Point, Point>(*e->getFrom()->pl().getGeom(), *e->getTo()->pl().getGeom());
+
+    if (newPos.find(e->getFrom()) != newPos.end()) {
+      changedEdges[e].first = newPos.find(e->getFrom())->second;
+    }
+
+    if (newPos.find(e->getTo()) != newPos.end()) {
+      changedEdges[e].second = newPos.find(e->getTo())->second;
+    }
+
+    if (e->getTo() == eCheck->getTo()) {
+      changedEdges[e].second = p;
+    } else {
+      changedEdges[e].first = p;
+    }
+  }
+
+  for (auto ce : changedEdges) {
+    for (auto n : cg.getNodes()) {
+      for (auto e : n->getAdjListOut()) {
+        if (e == ce.first) continue;
+
+        Point from = *e->getFrom()->pl().getGeom();
+        Point to = *e->getTo()->pl().getGeom();
+
+        if (newPos.find(e->getFrom()) != newPos.end()) {
+          from = newPos.find(e->getFrom())->second;
+        }
+
+        if (newPos.find(e->getTo()) != newPos.end()) {
+          to = newPos.find(e->getTo())->second;
+        }
+
+        if (util::geo::intersects(from, to, ce.second.first, ce.second.second)) {
+          return true;
+        }
+      }
+    }
+ }
+  return false;
 }

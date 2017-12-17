@@ -478,7 +478,7 @@ void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
   int origEdgeNumber = origNode->getAdjList().size();
   size_t optimDistance = (8 / origEdgeNumber) - 1;
 
-  if (!origNode->pl().hasOrderedEdge(e)) {
+  if (!origNode->pl().getEdgeOrdering().has(e)) {
     std::cerr << "Warning: tried to balance edge " << e << " in node "
               << origNode << ", but the edge does not appear there."
               << std::endl;
@@ -503,7 +503,7 @@ void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
   std::cerr << std::endl;
 
   std::cerr << "Ordered edges in orig node: ";
-  for (auto e : origNode->pl().getOrderedEdges()) {
+  for (auto e : origNode->pl().getEdgeOrdering().getOrderedSet()) {
     if (e.first->getOtherNode(origNode)
             ->pl()
             .getParent()
@@ -530,8 +530,8 @@ void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
 
     // this is the number of edges that will occur between the currently checked
     // edge and the inserted edge, in clockwise and counter-clockwise dir
-    int32_t dCw = origNode->pl().distBetween(outgoing[i], e) - 1;
-    int32_t dCCw = origNode->pl().distBetween(e, outgoing[i]) - 1;
+    int32_t dCw = origNode->pl().getEdgeOrdering().dist(outgoing[i], e) - 1;
+    int32_t dCCw = origNode->pl().getEdgeOrdering().dist(e, outgoing[i]) - 1;
 
     // dd and ddd are the optimal distances between outgoing[i] and e, based on
     // the total number
@@ -583,8 +583,8 @@ void GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
       if (!outgoing[j % 8]) continue;
       if (outgoing[j % 8] == outgoing[i]) break;
 
-      int da = origNode->pl().distBetween(outgoing[i], e);
-      int db = origNode->pl().distBetween(outgoing[j % 8], e);
+      int da = origNode->pl().getEdgeOrdering().dist(outgoing[i], e);
+      int db = origNode->pl().getEdgeOrdering().dist(outgoing[j % 8], e);
 
       if (db < da) {
         // edge does not lie in this segment, block it!
@@ -848,13 +848,12 @@ void GridGraph::closeNodeSink(GridNode* n) {
 }
 
 // _____________________________________________________________________________
-GridNode* GridGraph::getGridNodeFrom(CombNode* n) {
+GridNode* GridGraph::getGridNodeFrom(CombNode* n, double maxDis) {
   if (!isSettled(n)) {
-    auto cands = getNearestCandidatesFor(*n->pl().getGeom(), 400);
+    auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis);
     std::cerr << cands.size() << std::endl;
 
     while (!cands.empty()) {
-      std::cerr << cands.top().n->pl().isClosed() << std::endl;
       if (!cands.top().n->pl().isClosed()) {
         return cands.top().n;
       }
