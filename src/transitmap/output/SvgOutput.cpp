@@ -417,6 +417,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
                << ref.from.edge->getWidth() * _cfg->outputResolution;
       Params params;
       params["style"] = styleStr.str();
+      std::cout << styleStr.str() << std::endl;
 
       _innerDelegates.back()[(uintptr_t)c.geoms[i].from.route].push_back(
           OutlinePrintPair(PrintDelegate(params, pl),

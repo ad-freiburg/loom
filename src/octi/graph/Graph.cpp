@@ -9,6 +9,7 @@
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
 #include "util/log/Log.h"
+#include "util/String.h"
 
 #include "transitmap/style/LineStyle.h"
 
@@ -25,6 +26,8 @@ void Graph::readFromDot(std::istream* s) {
 
   dot::parser::Parser dp(s);
   std::map<std::string, Node<NodePL, EdgePL>*> idMap;
+
+  size_t eid = 0;
 
   while (dp.has()) {
     auto ent = dp.get();
@@ -67,6 +70,7 @@ void Graph::readFromDot(std::istream* s) {
 
       addNode(n);
     } else if (ent.type == dot::parser::EDGE) {
+      eid++;
       std::string prevId = ent.ids.front();
       if (idMap.find(prevId) == idMap.end())
         idMap[prevId] =
@@ -90,7 +94,7 @@ void Graph::readFromDot(std::istream* s) {
           } else if (ent.attrs.find("label") != ent.attrs.end()) {
             id = ent.attrs["label"];
           } else {
-            id = prevId + ":" + curId;
+            id = util::toString(eid);
           }
 
           const Route* r = getRoute(id);

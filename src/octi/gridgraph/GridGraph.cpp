@@ -463,17 +463,7 @@ void GridGraph::spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
   size_t y = xy.second;
   assert(getNode(x, y) == n);
 
-  if (origNode->pl().getParent()->pl().getStops().size())
-    std::cerr << std::endl
-              << std::endl
-              << "Checking station "
-              << origNode->pl().getParent()->pl().getStops().front().name
-              << "(" << origNode << ")"
-              << std::endl;
-  else
-    std::cerr << std::endl
-              << std::endl
-              << "Checking node " << origNode << std::endl;
+  std::cerr << "Checking " << origNode->pl().toString() << std::endl;
 
   int origEdgeNumber = origNode->getAdjList().size();
   size_t optimDistance = (8 / origEdgeNumber) - 1;

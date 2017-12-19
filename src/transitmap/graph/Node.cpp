@@ -57,7 +57,6 @@ Point NodeFront::getTripPos(const Edge* e, size_t pos, bool inv,
     p = (e->getWidth() + e->getSpacing()) * (e->getCardinality() - 1 - pos) +
         e->getWidth() / 2;
   }
-
   // use interpolate here directly for speed
   if (origG) {
     return origGeom.interpolate(origGeom.getLine().front(),

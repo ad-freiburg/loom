@@ -296,7 +296,7 @@ void Octilinearizer::normalizeCostVector(double* vec) const {
 // _____________________________________________________________________________
 TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
                                   const Penalties& pens) {
-  double gridSize = 50;
+  double gridSize = 25;
   std::cerr << "Removing short edges... ";
   auto begin = std::chrono::steady_clock::now();
   removeEdgesShorterThan(tg, gridSize / 2);
@@ -472,7 +472,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
                 floor(util::geo::dist(*n->pl().getGeom(), *to->pl().getGeom()) /
                       gridSize);
 
-            double topoPen = 0; //changesTopology(e, *n->pl().getGeom(), newPositions) * 50;
+            double topoPen = changesTopology(to, *n->pl().getGeom(), newPositions) * 50;
 
             g->openNodeSink(n, gridDist * movePenPerGrid + topoPen);
             g->openNode(n);
@@ -481,7 +481,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
           // open from source node
           g->openNodeSink(fromGridNode, 0);
           g->openNode(fromGridNode);
-
 
           double addCFrom[8] = {0, 0, 0, 0, 0, 0, 0, 0};
           double addCTo[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -676,20 +675,25 @@ double Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* e,
 
 // _____________________________________________________________________________
 size_t Octilinearizer::changesTopology(
-    CombEdge* eCheck, Point p, const std::map<CombNode*, Point>& newPos) const {
+    CombNode* nOrig, Point p, const std::map<CombNode*, Point>& newPos) const {
+  std::cerr << std::endl << " ++++++ Checking topology change for " << nOrig->pl().toString() << " on position "
+    << util::geo::getWKT(p) << std::endl;
   // collect the affected nodes
   size_t ret = 0;
   std::set<CombNode*> aff;
-  CombNode* nOrig= eCheck->getTo();
   auto newPosA = newPos;
   newPosA[nOrig] = p;
   for (auto e : nOrig->getAdjList()) {
-    aff.insert(e->getFrom());
-    aff.insert(e->getTo());
+    if (newPos.find(e->getFrom()) != newPos.end()) aff.insert(e->getFrom());
+    if (newPos.find(e->getTo()) != newPos.end()) aff.insert(e->getTo());
   }
 
   for (auto n : aff) {
-    if (!getEdgeOrderingForNode(n, false, newPosA).equals(getEdgeOrderingForNode(n, false, newPos))) {
+    if (!getEdgeOrderingForNode(n, false, newPosA).equals(getEdgeOrderingForNode(n))) {
+      std::cerr << "Changes ordering in " << n->pl().toString() << ":" << std::endl;
+      std::cerr << "New: " << getEdgeOrderingForNode(n, false, newPosA).toString(n) << std::endl;
+      std::cerr << "Old: " << getEdgeOrderingForNode(n).toString(n) << std::endl;
+
       ret += 1;
     }
   }
