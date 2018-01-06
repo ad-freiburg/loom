@@ -98,7 +98,7 @@ class Octilinearizer {
   void buildPolylineFromRes(const std::list<GridEdge*>& l, PolyLine& res);
   double getCostFromRes(const std::list<GridEdge*>& l);
   double addResidentEdges(gridgraph::GridGraph* g, CombEdge* e, const std::list<GridEdge*>& res);
-  size_t changesTopology(CombEdge* e, Point p, const std::map<CombNode*, Point>& newPos) const;
+  size_t changesTopology(CombNode* n, Point p, const std::map<CombNode*, Point>& newPos) const;
 };
 
 }  // namespace octt
