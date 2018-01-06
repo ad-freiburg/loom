@@ -7,13 +7,55 @@
 
 namespace util {
 
+static int pow10[10] = {1,      10,      100,      1000,      10000,
+                        100000, 1000000, 10000000, 100000000, 1000000000};
+
 // _____________________________________________________________________________
 inline uint64_t factorial(uint64_t n) {
   if (n == 1) return n;
   return n * factorial(n - 1);
 }
 
-}  // namespace util
 
+// _____________________________________________________________________________
+float atof(const char *p, uint8_t mn) {
+  // this atof implementation works only on "normal" float strings like
+  // 56.445 or -345.00, but should be much faster than std::atof
+  float r = 0.0;
+  bool neg = false;
+  if (*p == '-') {
+    neg = true;
+    ++p;
+  }
+
+  while (*p >= '0' && *p <= '9') {
+    r = (r * 10.0) + (*p - '0');
+    ++p;
+  }
+
+  if (*p == '.') {
+    float f = 0;
+    uint8_t n = 0;
+    ++p;
+    while (n < mn && *p >= '0' && *p <= '9') {
+      f = (f * 10.0) + (*p - '0');
+      ++p;
+      ++n;
+    }
+
+    if (n < 11) r += f / pow10[n];
+    else r += f / std::pow(10, n);
+  }
+
+  if (neg) return -r;
+  return r;
+}
+
+// _____________________________________________________________________________
+double atof(const char *p) {
+	return atof(p, 38);
+}
+
+}  // namespace util
 
 #endif  // UTIL_MISC_H_

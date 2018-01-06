@@ -9,13 +9,28 @@
 #include "util/geo/Geo.h"
 #include "util/graph/Graph.h"
 #include "util/geo/Grid.h"
+#include "util/Misc.h"
 
 using lest::approx;
+using namespace util;
 using namespace util::geo;
 using namespace util::graph;
 
 // define LEST cases
 const lest::test specification[] = {
+
+// ___________________________________________________________________________
+CASE("atof") {
+  EXPECT(util::atof("45.534215") == approx(45.534215));
+  EXPECT(util::atof("5.534") == approx(5.534));
+  EXPECT(util::atof("534") == approx(534));
+  EXPECT(util::atof("-534") == approx(-534));
+  EXPECT(util::atof("-45.534215") == approx(-45.534215));
+  EXPECT(util::atof("-45.534215", 2) == approx(-45.53));
+
+
+  // TODO: more test cases 
+},
 
 // ___________________________________________________________________________
 CASE("graph") {
