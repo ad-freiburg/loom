@@ -214,46 +214,46 @@ int main(int argc, char** argv) {
       }
     }
   } else if (false) {
-    PolyLine a;
-    PolyLine b;
+    PolyLine<float> a;
+    PolyLine<float> b;
 
-    a << Point(1, 1);
-    a << Point(1, 2);
-    a << Point(1, 3);
-    a << Point(1, 4);
-    a << Point(1, 5);
+    a << FPoint(1, 1);
+    a << FPoint(1, 2);
+    a << FPoint(1, 3);
+    a << FPoint(1, 4);
+    a << FPoint(1, 5);
 
-    b << Point(2, 3);
-    b << Point(2, 4);
-    b << Point(2, 5);
-    b << Point(2, 6);
-    b << Point(2, 7);
+    b << FPoint(2, 3);
+    b << FPoint(2, 4);
+    b << FPoint(2, 5);
+    b << FPoint(2, 6);
+    b << FPoint(2, 7);
 
-    SharedSegments ss = a.getSharedSegments(b, 3);
+    SharedSegments<float> ss = a.getSharedSegments(b, 3);
     LOG(INFO) << "RESULT: " << ss.segments.size() << std::endl;
 
   } else {
     // just testing parallel drawing...
-    PolyLine p;
-    PolyLine a;
-    PolyLine b;
-    PolyLine c;
+    PolyLine<float> p;
+    PolyLine<float> a;
+    PolyLine<float> b;
+    PolyLine<float> c;
 
     for (double i = 0; i < 2000; i += 20) {
       // sin
-      a << Point(i, 1000 + sin(0.006 * i) * 500);
+      a << FPoint(i, 1000 + sin(0.006 * i) * 500);
 
       // cos
-      b << Point(i, 1000 + cos(0.003 * i) * 500);
+      b << FPoint(i, 1000 + cos(0.003 * i) * 500);
 
       // linear
       // a << Point(i, 1000);
 
       // triangle
       if (i < 1000) {
-        p << Point(i, 1000 - (i / 2));
+        p << FPoint(i, 1000 - (i / 2));
       } else {
-        p << Point(i, (i / 2));
+        p << FPoint(i, (i / 2));
       }
     }
 
@@ -265,15 +265,15 @@ int main(int argc, char** argv) {
 
     o << "<svg width=\"2000\" height=\"2000\">";
 
-    Point pp(500, 470);
-    Point ppp(550, 500);
-    c << Point(400, 400) << Point(450, 450) << Point(550, 450)
-      << Point(600, 700);
+    FPoint pp(500, 470);
+    FPoint ppp(550, 500);
+    c << FPoint(400, 400) << FPoint(450, 450) << FPoint(550, 450)
+      << FPoint(600, 700);
 
     c = c.getSegment(pp, ppp);
 
-    Point projected = c.projectOn(pp).p;
-    Point projectedB = c.projectOn(ppp).p;
+    FPoint projected = c.projectOn(pp).p;
+    FPoint projectedB = c.projectOn(ppp).p;
 
     transitmapper::output::RenderParams rmp;
     rmp.height = 2000;
@@ -289,11 +289,11 @@ int main(int argc, char** argv) {
 
     // svgOut.printLine(p, "fill:none;stroke:black;stroke-width:10");
 
-    std::vector<const PolyLine*> ls;
+    std::vector<const PolyLine<float>*> ls;
     ls.push_back(&a);
     ls.push_back(&p);
     ls.push_back(&b);
-    PolyLine avg = PolyLine::average(ls);
+    PolyLine<float> avg = PolyLine<float>::average(ls);
 
     svgOut.printLine(avg, "fill:none;stroke:#8844AA;stroke-width:15", rmp);
 
@@ -301,25 +301,25 @@ int main(int argc, char** argv) {
     svgOut.printLine(p, "fill:none;stroke:red;stroke-width:5", rmp);
     svgOut.printLine(b, "fill:none;stroke:red;stroke-width:5", rmp);
 
-    PolyLine ptest;
+    PolyLine<float> ptest;
 
-    ptest << Point(90, 100);
-    ptest << Point(100, 100);
-    ptest << Point(95, 102);
-    ptest << Point(101, 103);
-    ptest << Point(121, 103);
+    ptest << FPoint(90, 100);
+    ptest << FPoint(100, 100);
+    ptest << FPoint(95, 102);
+    ptest << FPoint(101, 103);
+    ptest << FPoint(121, 103);
 
     ptest.smoothenOutliers(10);
     svgOut.printLine(ptest, "fill:none;stroke:red;stroke-width:1", rmp);
 
-    PolyLine ptest2;
+    PolyLine<float> ptest2;
 
-    ptest2 << Point(130, 100);
-    ptest2 << Point(190, 100);
-    ptest2 << Point(192, 180);
-    ptest2 << Point(210, 103);
-    ptest2 << Point(280, 193);
-    ptest2 << Point(290, 183);
+    ptest2 << FPoint(130, 100);
+    ptest2 << FPoint(190, 100);
+    ptest2 << FPoint(192, 180);
+    ptest2 << FPoint(210, 103);
+    ptest2 << FPoint(280, 193);
+    ptest2 << FPoint(290, 183);
 
     svgOut.printLine(ptest2, "fill:none;stroke:red;stroke-width:1", rmp);
 
@@ -327,7 +327,7 @@ int main(int argc, char** argv) {
     svgOut.printLine(ptest2, "fill:none;stroke:red;stroke-width:1", rmp);
 
     for (size_t i = 1; i < 5; i++) {
-      PolyLine pl = avg;
+      PolyLine<float> pl = avg;
 
       pl.offsetPerp(18 * i);
       if (i % 2)
@@ -337,7 +337,7 @@ int main(int argc, char** argv) {
     }
 
     for (int i = 1; i < 5; i++) {
-      PolyLine pl = avg;
+      PolyLine<float> pl = avg;
 
       pl.offsetPerp(-18 * i);
       if (i % 2)
@@ -346,15 +346,15 @@ int main(int argc, char** argv) {
         svgOut.printLine(pl, "fill:none;stroke:orange;stroke-width:15", rmp);
     }
 
-    PolyLine ptest3;
-    PolyLine ptest4;
+    PolyLine<float> ptest3;
+    PolyLine<float> ptest4;
 
-    ptest3 << Point(130, 300);
-    ptest3 << Point(150, 300);
-    ptest3 << Point(160, 305);
-    ptest3 << Point(165, 310);
-    ptest3 << Point(170, 320);
-    ptest3 << Point(170, 353);
+    ptest3 << FPoint(130, 300);
+    ptest3 << FPoint(150, 300);
+    ptest3 << FPoint(160, 305);
+    ptest3 << FPoint(165, 310);
+    ptest3 << FPoint(170, 320);
+    ptest3 << FPoint(170, 353);
 
     ptest4 = ptest3;
 
@@ -364,17 +364,17 @@ int main(int argc, char** argv) {
     ptest3.offsetPerp(39);
     svgOut.printLine(ptest3, "fill:none;stroke:red;stroke-width:1", rmp);
 
-    PolyLine ptest5;
+    PolyLine<float> ptest5;
 
-    ptest5 << Point(210, 300);
-    ptest5 << Point(230, 300);
-    ptest5 << Point(250, 300);
-    ptest5 << Point(260, 305);
-    ptest5 << Point(265, 310);
-    ptest5 << Point(270, 320);
-    ptest5 << Point(270, 353);
-    ptest5 << Point(240, 353);
-    ptest5 << Point(240, 253);
+    ptest5 << FPoint(210, 300);
+    ptest5 << FPoint(230, 300);
+    ptest5 << FPoint(250, 300);
+    ptest5 << FPoint(260, 305);
+    ptest5 << FPoint(265, 310);
+    ptest5 << FPoint(270, 320);
+    ptest5 << FPoint(270, 353);
+    ptest5 << FPoint(240, 353);
+    ptest5 << FPoint(240, 253);
     std::cout << ptest5.getLine().size() << std::endl;
     ptest5.fixTopology(100);
     std::cout << ptest5.getLine().size() << std::endl;
@@ -384,26 +384,26 @@ int main(int argc, char** argv) {
                                               12.198, 10.008, 14.676, 10.332)
               << std::endl;
 
-    PolyLine ptest6;
-    PolyLine ptest7;
+    PolyLine<float> ptest6;
+    PolyLine<float> ptest7;
 
-    ptest6 << Point(500, 500) << Point(600, 600);
-    ptest7 << Point(500, 480) << Point(600, 620);
+    ptest6 << FPoint(500, 500) << FPoint(600, 600);
+    ptest7 << FPoint(500, 480) << FPoint(600, 620);
 
     svgOut.printLine(ptest6, "fill:none;stroke:red;stroke-width:1", rmp);
     svgOut.printLine(ptest7, "fill:none;stroke:blue;stroke-width:1", rmp);
 
-    SharedSegments ss = ptest6.getSharedSegments(ptest7, 2);
+    SharedSegments<float> ss = ptest6.getSharedSegments(ptest7, 2);
     for (auto seg : ss.segments) {
       svgOut.printPoint(seg.first.first.p, "fill:green;r:4", rmp);
       svgOut.printPoint(seg.second.first.p, "fill:green;r:4", rmp);
     }
 
-    PolyLine ptest8;
-    PolyLine ptest9;
+    PolyLine<float> ptest8;
+    PolyLine<float> ptest9;
 
-    ptest8 << Point(700, 300) << Point(800, 400);
-    ptest9 << Point(700, 280) << Point(750, 350) << Point(800, 380);
+    ptest8 << FPoint(700, 300) << FPoint(800, 400);
+    ptest9 << FPoint(700, 280) << FPoint(750, 350) << FPoint(800, 380);
 
     svgOut.printLine(ptest8, "fill:none;stroke:red;stroke-width:1", rmp);
     svgOut.printLine(ptest9, "fill:none;stroke:blue;stroke-width:1", rmp);

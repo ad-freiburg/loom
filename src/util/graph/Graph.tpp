@@ -4,53 +4,62 @@
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-Graph<N, E>::Graph() : _directed(false) {
-}
-
-// _____________________________________________________________________________
-template <typename N, typename E>
-Graph<N, E>::Graph(bool directed) : _directed(directed) {
-}
-
-// _____________________________________________________________________________
-template <typename N, typename E>
 Graph<N, E>::~Graph() {
-  for (auto n : _nodes) {
-    delete n;
-  }
+  for (auto n : _nodes) delete n;
 }
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-Node<N, E>* Graph<N, E>::addNode(Node<N, E>* n) {
-  auto ins = _nodes.insert(n);
-  return *ins.first;
+Edge<N, E>* Graph<N, E>::addEdg(Node<N, E>* from, Node<N, E>* to) {
+  return addEdg(from, to, E());
 }
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-Edge<N, E>* Graph<N, E>::addEdge(Node<N, E>* from, Node<N, E>* to, const E& p) {
-  if (from == to) return 0;
-  Edge<N, E>* e = getEdge(from, to);
-  if (!e) {
-    e = new Edge<N, E>(from, to, p);
-    from->addEdge(e);
-    to->addEdge(e);
-  }
-  return e;
+const std::set<Node<N, E>*>& Graph<N, E>::getNds() const {
+  return _nodes;
 }
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-Edge<N, E>* Graph<N, E>::getEdge(Node<N, E>* from, Node<N, E>* to) {
-  for (auto e : from->getAdjListOut()) {
-    if (e->getTo() == to) return e;
-  }
+std::set<Node<N, E>*>* Graph<N, E>::getNds() {
+  return &_nodes;
+}
 
-  if (!_directed) {
-	for (auto e : from->getAdjListIn()) {
-      if (e->getFrom() == to) return e;
-	}
+// _____________________________________________________________________________
+template <typename N, typename E>
+typename std::set<Node<N, E>*>::iterator Graph<N, E>::delNd(
+    Node<N, E>* n) {
+  return delNd(_nodes.find(n));
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
+typename std::set<Node<N, E>*>::iterator Graph<N, E>::delNd(
+    typename std::set<Node<N, E>*>::iterator i) {
+  delete *i;
+  return _nodes.erase(i);
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
+void Graph<N, E>::delEdg(Node<N, E>* from, Node<N, E>* to) {
+  Edge<N, E>* toDel = getEdg(from, to);
+  if (!toDel) return;
+
+  from->removeEdge(toDel);
+  to->removeEdge(toDel);
+
+  assert(!getEdg(from, to));
+
+  delete toDel;
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
+Edge<N, E>* Graph<N, E>::getEdg(Node<N, E>* from, Node<N, E>* to) {
+  for (auto e : from->getAdjList()) {
+    if (e->getOtherNd(from) == to) return e;
   }
 
   return 0;
@@ -58,49 +67,10 @@ Edge<N, E>* Graph<N, E>::getEdge(Node<N, E>* from, Node<N, E>* to) {
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-const std::set<Node<N, E>*>& Graph<N, E>::getNodes() const { return _nodes; }
-
-// _____________________________________________________________________________
-template <typename N, typename E>
-std::set<Node<N, E>*>* Graph<N, E>::getNodes() { return &_nodes; }
-
-// _____________________________________________________________________________
-template <typename N, typename E>
-void Graph<N, E>::deleteEdge(Node<N, E>* from, Node<N, E>* to) {
-  Edge<N, E>* toDel = getEdge(from, to);
-  if (!toDel) return;
-
-  from->removeEdge(toDel);
-  to->removeEdge(toDel);
-
-  assert(!getEdge(from, to));
-
-  delete toDel;
-}
-
-// _____________________________________________________________________________
-template <typename N, typename E>
-void Graph<N, E>::deleteNode(Node<N, E>* n) {\
-  _nodes.erase(n);
-  delete n;
-}
-
-// _____________________________________________________________________________
-template <typename N, typename E>
-Node<N, E>* Graph<N, E>::mergeNodes(Node<N, E>* a, Node<N, E>* b) {
-  for (auto e : a->getAdjListOut()) {
-    if (e->getTo() != b) {
-      addEdge(b, e->getTo(), e->pl());
-    }
+const Edge<N, E>* Graph<N, E>::getEdg(Node<N, E>* from, Node<N, E>* to) const {
+  for (auto e : from->getAdjList()) {
+    if (e->getOtherNd(from) == to) return e;
   }
 
-  for (auto e : a->getAdjListIn()) {
-    if (e->getFrom() != b) {
-      addEdge(e->getFrom(), b, e->pl());
-    }
-  }
-
-  deleteNode(a);
-
-  return b;
+  return 0;
 }

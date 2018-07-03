@@ -24,11 +24,12 @@ struct CubicPolynom {
 /**
  * Bezier curve
  */
+template <typename T>
 class BezierCurve {
  public:
-  BezierCurve(const Point& a, const Point& b, const Point& c, const Point& d);
+  BezierCurve(const Point<T>& a, const Point<T>& b, const Point<T>& c, const Point<T>& d);
 
-  const PolyLine& render(double d);
+  const PolyLine<T>& render(double d);
 
  private:
   double _d;
@@ -37,14 +38,16 @@ class BezierCurve {
   CubicPolynom _xp, _yp;
 
   // store the rendered polyline for quicker access
-  PolyLine _rendered;
+  PolyLine<T> _rendered;
   bool _didRender;
 
-  void recalcPolynoms(const Point& x, const Point& b, const Point& c,
-                      const Point& d);
+  void recalcPolynoms(const Point<T>& x, const Point<T>& b, const Point<T>& c,
+                      const Point<T>& d);
 
-  Point valueAt(double t) const;
+  Point<T> valueAt(double t) const;
 };
+
+#include "util/geo/BezierCurve.tpp"
 }
 }
 

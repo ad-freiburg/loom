@@ -163,7 +163,7 @@ void SvgOutput::renderNodeCircles(const graph::TransitGraph& outG,
              "miter;stroke-opacity:1;stroke-width:.3";
     std::map<std::string, std::string> params;
     params["style"] = style.str();
-    Point center = n->getPos();
+    FPoint center = n->getPos();
 
     printCircle(center, n->getMaxNodeFrontWidth() * 1, params, rparams);
   }
@@ -184,7 +184,7 @@ void SvgOutput::renderNodePolygons(const graph::TransitGraph& outG,
              "miter;stroke-opacity:1;stroke-width:.3";
     std::map<std::string, std::string> params;
     params["style"] = style.str();
-    Polygon p = n->getConvexFrontHull(1, false, false);
+    FPolygon p = n->getConvexFrontHull(1, false, false);
 
     printPolygon(p, params, rparams);
   }
@@ -198,7 +198,7 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG,
   for (graph::Node* n : outG.getNodes()) {
     std::string color = n->getStops().size() > 0 ? "red" : "black";
     for (auto& f : n->getMainDirs()) {
-      const PolyLine p = f.geom;
+      const PolyLine<float> p = f.geom;
       std::stringstream style;
       style << "fill:none;stroke:" << color
             << ";stroke-linejoin: "
@@ -207,7 +207,7 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG,
       params["style"] = style.str();
       printLine(p, params, rparams);
 
-      Point a = p.getPointAt(.5).p;
+      FPoint a = p.getPointAt(.5).p;
 
       std::stringstream styleA;
       styleA << "fill:none;stroke:" << color
@@ -215,7 +215,7 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG,
                 "miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
       params["style"] = styleA.str();
 
-      printLine(PolyLine(n->getPos(), a), params, rparams);
+      printLine(PolyLine<float>(n->getPos(), a), params, rparams);
     }
   }
   _w.closeTag();
@@ -375,7 +375,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
     }
 
     for (size_t i = 0; i < c.geoms.size(); i++) {
-      PolyLine pl = c.geoms[i].geom;
+      PolyLine<float> pl = c.geoms[i].geom;
 
       if (!raw) {
         double off = -(ref.from.edge->getWidth() + ref.from.edge->getSpacing()) *
@@ -386,8 +386,8 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
 
         pl = ref.geom.getPerpOffsetted(off);
 
-        std::set<LinePoint, LinePointCmp> a;
-        std::set<LinePoint, LinePointCmp> b;
+        std::set<LinePoint<float>, LinePointCmp<float>> a;
+        std::set<LinePoint<float>, LinePointCmp<float>> b;
 
         if (ref.from.front) a = ref.from.front->geom.getIntersections(pl);
         if (ref.to.front) b = ref.to.front->geom.getIntersections(pl);
@@ -426,7 +426,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
 }
 
 // _____________________________________________________________________________
-void SvgOutput::renderLinePart(const PolyLine p, double width,
+void SvgOutput::renderLinePart(const PolyLine<float> p, double width,
                                const graph::Route& route,
                                const graph::Edge* edge,
                                const Nullable<style::LineStyle> style) {
@@ -434,7 +434,7 @@ void SvgOutput::renderLinePart(const PolyLine p, double width,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::renderLinePart(const PolyLine p, double width,
+void SvgOutput::renderLinePart(const PolyLine<float> p, double width,
                                const graph::Route& route,
                                const graph::Edge* edge,
                                const std::string& endMarker,
@@ -635,7 +635,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   const graph::NodeFront* nfTo = e->getTo()->getNodeFrontFor(e);
   const graph::NodeFront* nfFrom = e->getFrom()->getNodeFrontFor(e);
 
-  PolyLine center = e->getGeom();
+  PolyLine<float> center = e->getGeom();
 
   double lineW = e->getWidth();
   double lineSpc = e->getSpacing();
@@ -651,7 +651,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
     const graph::RouteOccurance& ro = e->getTripsUnordered()[i];
 
     const graph::Route* route = ro.route;
-    PolyLine p = center;
+    PolyLine<float> p = center;
 
     if (p.getLength() < 0.01) continue;
 
@@ -659,14 +659,14 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
     p.offsetPerp(offset);
 
-    std::set<LinePoint, LinePointCmp> iSects = nfTo->geom.getIntersections(p);
+    std::set<LinePoint<float>, LinePointCmp<float>> iSects = nfTo->geom.getIntersections(p);
     if (iSects.size() > 0) {
       p = p.getSegment(0, iSects.begin()->totalPos);
     } else {
       p << nfTo->geom.projectOn(p.back()).p;
     }
 
-    std::set<LinePoint, LinePointCmp> iSects2 =
+    std::set<LinePoint<float>, LinePointCmp<float>> iSects2 =
         nfFrom->geom.getIntersections(p);
     if (iSects2.size() > 0) {
       p = p.getSegment(iSects2.begin()->totalPos, 1);
@@ -691,9 +691,9 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       _markers.push_back(emm);
       _markers.push_back(emf);
 
-      PolyLine firstPart =
+      PolyLine<float> firstPart =
           p.getSegmentAtDist(0, p.getLength() / 2 - arrowLength / 2);
-      PolyLine secondPart = p.getSegmentAtDist(
+      PolyLine<float> secondPart = p.getSegmentAtDist(
           p.getLength() / 2 + arrowLength / 2, p.getLength());
 
       if (ro.direction == e->getTo()) {
@@ -768,7 +768,7 @@ void SvgOutput::renderDelegates(const graph::TransitGraph& outG,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printPoint(const Point& p, const std::string& style,
+void SvgOutput::printPoint(const FPoint& p, const std::string& style,
                            const RenderParams& rparams) {
   std::map<std::string, std::string> params;
   params["cx"] =
@@ -782,7 +782,7 @@ void SvgOutput::printPoint(const Point& p, const std::string& style,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printLine(const PolyLine& l, const std::string& style,
+void SvgOutput::printLine(const PolyLine<float>& l, const std::string& style,
                           const RenderParams& rparams) {
   std::map<std::string, std::string> params;
   params["style"] = style;
@@ -790,7 +790,7 @@ void SvgOutput::printLine(const PolyLine& l, const std::string& style,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printLine(const PolyLine& l,
+void SvgOutput::printLine(const PolyLine<float>& l,
                           const std::map<std::string, std::string>& ps,
                           const RenderParams& rparams) {
   std::map<std::string, std::string> params = ps;
@@ -809,7 +809,7 @@ void SvgOutput::printLine(const PolyLine& l,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printPolygon(const Polygon& g,
+void SvgOutput::printPolygon(const Polygon<float>& g,
                              const std::map<std::string, std::string>& ps,
                              const RenderParams& rparams) {
   std::map<std::string, std::string> params = ps;
@@ -828,7 +828,7 @@ void SvgOutput::printPolygon(const Polygon& g,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printCircle(const Point& center, double rad,
+void SvgOutput::printCircle(const FPoint& center, double rad,
                             const std::string& style,
                              const RenderParams& rparams) {
   std::map<std::string, std::string> params;
@@ -837,7 +837,7 @@ void SvgOutput::printCircle(const Point& center, double rad,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printCircle(const Point& center, double rad,
+void SvgOutput::printCircle(const FPoint& center, double rad,
                              const std::map<std::string, std::string>& ps,
                              const RenderParams& rparams) {
   std::map<std::string, std::string> params = ps;
@@ -854,7 +854,7 @@ void SvgOutput::printCircle(const Point& center, double rad,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::printPolygon(const Polygon& g, const std::string& style,
+void SvgOutput::printPolygon(const FPolygon& g, const std::string& style,
                              const RenderParams& rparams) {
   std::map<std::string, std::string> params;
   params["style"] = style;

@@ -19,14 +19,14 @@ class Edge {
   Node<N, E>* getFrom() const;
   Node<N, E>* getTo() const;
 
-  Node<N, E>* getOtherNode(const Node<N, E>* notNode) const;
+  Node<N, E>* getOtherNd(const Node<N, E>* notNode) const;
 
   void setFrom(Node<N, E>* from);
   void setTo(Node<N, E>* to);
 
   E& pl();
   const E& pl() const;
- 
+
  private:
   Node<N, E>* _from;
   Node<N, E>* _to;

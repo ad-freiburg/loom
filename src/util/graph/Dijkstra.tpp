@@ -3,25 +3,31 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 // _____________________________________________________________________________
-template <typename N, typename E>
-int Dijkstra::shortestPath(Node<N, E>* from,
-                            const std::unordered_set<Node<N, E>*>& to,
-                            std::list<Edge<N, E>*>* res, Node<N, E>** target) {
-  std::unordered_map<Node<N, E>*, RouteNode<N, E> > settled;
-  std::priority_queue<RouteNode<N, E> > pq;
-  bool found = false;
-  int iter = 0;
+template <typename N, typename E, typename C>
+C Dijkstra::shortestPathImpl(Node<N, E>* from, const std::set<Node<N, E>*>& to,
+                             const ShortestPath::CostFunc<N, E, C>& costFunc,
+                             const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                             EList<N, E>* resEdges, NList<N, E>* resNodes) {
+  if (from->getOutDeg() == 0) return costFunc.inf();
 
-  RouteNode<N, E> start(from, 0, 0, 0);
-  pq.push(start);
-  RouteNode<N, E> cur = start;
+  Settled<N, E, C> settled;
+  PQ<N, E, C> pq;
+  bool found = false;
+
+  pq.emplace(from);
+  RouteNode<N, E, C> cur;
 
   while (!pq.empty()) {
-    iter++;
+    Dijkstra::ITERS++;
+
+    if (settled.find(pq.top().n) != settled.end()) {
+      pq.pop();
+      continue;
+    }
+
     cur = pq.top();
     pq.pop();
 
-    if (settled.find(cur.n) != settled.end()) continue;
     settled[cur.n] = cur;
 
     if (to.find(cur.n) != to.end()) {
@@ -29,52 +35,42 @@ int Dijkstra::shortestPath(Node<N, E>* from,
       break;
     }
 
-    // relaxation
-    for (auto edge : cur.n->getAdjListOut()) {
-      if (edge->pl().cost() == std::numeric_limits<double>::infinity()) continue;
-      double newC = cur.d + edge->pl().cost();
-      pq.push(RouteNode<N, E>(edge->getTo(), cur.n, newC, &(*edge)));
-    }
+    relax(cur, to, costFunc, heurFunc, pq);
   }
 
-  if (!found) return 0;
+  if (!found) return costFunc.inf();
 
-  // traverse the parents backwards beginning at current target node
-  Node<N, E>* curN = cur.n;
-  *target = cur.n;
+  buildPath(cur.n, settled, resNodes, resEdges);
 
-  while (true) {
-    const RouteNode<N, E>& curNode = settled[curN];
-    if (curN == from) break;
-    res->push_front(curNode.e);
-    curN = curNode.parent;
-  }
-
-  return iter;
+  return cur.d;
 }
 
 // _____________________________________________________________________________
-template <typename N, typename E, typename H>
-int Dijkstra::shortestPathAStar(Node<N, E>* from,
-                            const std::unordered_set<Node<N, E>*>& to,
-                            H heurFunc,
-                            std::list<Edge<N, E>*>* res, Node<N, E>** target,
-                            bool check) {
-  std::unordered_map<Node<N, E>*, RouteNodeAStar<N, E> > settled;
-  std::priority_queue<RouteNodeAStar<N, E> > pq;
+template <typename N, typename E, typename C>
+C Dijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
+                             const std::set<Node<N, E>*>& to,
+                             const ShortestPath::CostFunc<N, E, C>& costFunc,
+                             const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                             EList<N, E>* resEdges, NList<N, E>* resNodes) {
+  Settled<N, E, C> settled;
+  PQ<N, E, C> pq;
   bool found = false;
-  int iter = 0;
 
-  RouteNodeAStar<N, E> start(from, 0, 0, 0, 0);
-  pq.push(start);
-  RouteNodeAStar<N, E> cur = start;
+  // put all nodes in from onto PQ
+  for (auto n : from) pq.emplace(n);
+  RouteNode<N, E, C> cur;
 
   while (!pq.empty()) {
-    iter++;
+    Dijkstra::ITERS++;
+
+    if (settled.find(pq.top().n) != settled.end()) {
+      pq.pop();
+      continue;
+    }
+
     cur = pq.top();
     pq.pop();
 
-    if (settled.find(cur.n) != settled.end()) continue;
     settled[cur.n] = cur;
 
     if (to.find(cur.n) != to.end()) {
@@ -82,52 +78,98 @@ int Dijkstra::shortestPathAStar(Node<N, E>* from,
       break;
     }
 
-    // relaxation
-    for (auto edge : cur.n->getAdjListOut()) {
-      if (edge->pl().cost() == std::numeric_limits<double>::infinity()) continue;
-      double newC = cur.d + edge->pl().cost();
-
-      double hCost = heurFunc(edge->getTo(), to);
-      double newH = newC + hCost;
-
-      if(check) edge->pl().setVisited(iter);
-
-      pq.push(RouteNodeAStar<N, E>(edge->getTo(), cur.n, newH, newC, &(*edge)));
-    }
+    relax(cur, to, costFunc, heurFunc, pq);
   }
 
-  if (!found) return 0;
+  if (!found) return costFunc.inf();
 
-  // traverse the parents backwards beginning at current target node
-  Node<N, E>* curN = cur.n;
-  *target = cur.n;
+  buildPath(cur.n, settled, resNodes, resEdges);
 
+  return cur.d;
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E, typename C>
+std::unordered_map<Node<N, E>*, C> Dijkstra::shortestPathImpl(
+    Node<N, E>* from, const std::set<Node<N, E>*>& to,
+    const ShortestPath::CostFunc<N, E, C>& costFunc,
+    const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+    std::unordered_map<Node<N, E>*, EList<N, E>*> resEdges,
+    std::unordered_map<Node<N, E>*, NList<N, E>*> resNodes) {
+  std::unordered_map<Node<N, E>*, C> costs;
+  if (to.size() == 0) return costs;
+  // init costs with inf
+  for (auto n : to) costs[n] = costFunc.inf();
+
+  if (from->getOutDeg() == 0) return costs;
+
+  Settled<N, E, C> settled;
+  PQ<N, E, C> pq;
+
+  size_t found = 0;
+
+  pq.emplace(from);
+  RouteNode<N, E, C> cur;
+
+  while (!pq.empty()) {
+    Dijkstra::ITERS++;
+
+    if (settled.find(pq.top().n) != settled.end()) {
+      pq.pop();
+      continue;
+    }
+
+    cur = pq.top();
+    pq.pop();
+
+    settled[cur.n] = cur;
+
+    if (to.find(cur.n) != to.end()) {
+      found++;
+    }
+
+    if (found == to.size()) break;
+
+    relax(cur, to, costFunc, heurFunc, pq);
+  }
+
+  for (auto nto : to) {
+    if (!settled.count(nto)) continue;
+    Node<N, E>* curN = nto;
+    costs[nto] = settled[curN].d;
+
+    buildPath(nto, settled, resNodes[nto], resEdges[nto]);
+  }
+
+  return costs;
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E, typename C>
+void Dijkstra::relax(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
+                     const ShortestPath::CostFunc<N, E, C>& costFunc,
+                     const ShortestPath::HeurFunc<N, E, C>& heurFunc, PQ<N, E, C>& pq) {
+  for (auto edge : cur.n->getAdjListOut()) {
+    C newC = costFunc(cur.n, edge, edge->getOtherNd(cur.n));
+    newC = cur.d + newC;
+    if (costFunc.inf() <= newC) continue;
+
+    const C& newH = newC + heurFunc(edge->getOtherNd(cur.n), to);
+
+    pq.emplace(edge->getOtherNd(cur.n), cur.n, newC, newH, &(*edge));
+  }
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E, typename C>
+void Dijkstra::buildPath(Node<N, E>* curN,
+                         Settled<N, E, C>& settled, NList<N, E>* resNodes,
+                         EList<N, E>* resEdges) {
   while (true) {
-    const RouteNodeAStar<N, E>& curNode = settled[curN];
-    if (curN == from) break;
-    res->push_front(curNode.e);
+    const RouteNode<N, E, C>& curNode = settled[curN];
+    if (resNodes) resNodes->push_back(curNode.n);
+    if (!curNode.parent) break;
+    if (resEdges) resEdges->push_back(curNode.e);
     curN = curNode.parent;
   }
-
-  return iter;
-}
-
-// _____________________________________________________________________________
-template <typename N, typename E>
-int Dijkstra::shortestPath(Node<N, E>* from, Node<N, E>* to,
-                            std::list<Edge<N, E>*>* res) {
-  Node<N, E>* target;
-  std::unordered_set<Node<N, E>*, bool> tos;
-  tos.insert(to);
-  return shortestPath(from, tos, res, &target);
-}
-
-// _____________________________________________________________________________
-template <typename N, typename E, typename H>
-int Dijkstra::shortestPathAStar(Node<N, E>* from, Node<N, E>* to,
-                            H heur, std::list<Edge<N, E>*>* res) {
-  Node<N, E>* target;
-  std::unordered_set<Node<N, E>*, bool> tos;
-  tos.insert(to);
-  return shortestPathAStar(from, tos, res, heur, &target, false);
 }

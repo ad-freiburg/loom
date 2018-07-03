@@ -7,6 +7,7 @@
 
 #include <set>
 #include <string>
+#include <iostream>
 
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
@@ -17,25 +18,26 @@ namespace graph {
 template <typename N, typename E>
 class Graph {
  public:
-  explicit Graph();
-  explicit Graph(bool directed);
   ~Graph();
+  virtual Node<N, E>* addNd() = 0;
+  virtual Node<N, E>* addNd(const N& pl) = 0;
+  Edge<N, E>* addEdg(Node<N, E>* from, Node<N, E>* to);
+  virtual Edge<N, E>* addEdg(Node<N, E>* from, Node<N, E>* to, const E& p) = 0;
+  Edge<N, E>* getEdg(Node<N, E>* from, Node<N, E>* to);
+  const Edge<N, E>* getEdg(Node<N, E>* from, Node<N, E>* to) const;
 
-  Node<N, E>* addNode(Node<N, E>* n);
-  Edge<N, E>* addEdge(Node<N, E>* from, Node<N, E>* to, const E& p);
-  Edge<N, E>* getEdge(Node<N, E>* from, Node<N, E>* to);
+  virtual Node<N, E>* mergeNds(Node<N, E>* a, Node<N, E>* b) = 0;
 
-  void deleteNode(Node<N, E>* n);
-  void deleteEdge(Node<N, E>* from, Node<N, E>* to);
+  const std::set<Node<N, E>*>& getNds() const;
+  std::set<Node<N, E>*>* getNds();
 
-  const std::set<Node<N, E>*>& getNodes() const;
-  std::set<Node<N, E>*>* getNodes();
-
-  Node<N, E>* mergeNodes(Node<N, E>* a, Node<N, E>* b);
+  typename std::set<Node<N, E>*>::iterator delNd(Node<N, E>* n);
+  typename std::set<Node<N, E>*>::iterator delNd(
+      typename std::set<Node<N, E>*>::iterator i);
+  void delEdg(Node<N, E>* from, Node<N, E>* to);
 
  private:
   std::set<Node<N, E>*> _nodes;
-  bool _directed;
 };
 
 #include "util/graph/Graph.tpp"

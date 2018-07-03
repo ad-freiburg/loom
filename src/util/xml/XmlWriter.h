@@ -79,7 +79,7 @@ class XmlWriter {
   void closeHanging();
 
   // pushes XML escaped text to stream
-  void putEsced(std::ostream* out, const std::string& str);
+  void putEsced(std::ostream* out, const std::string& str, char quot);
 
   // checks tag names for validiy
   void checkTagName(const std::string& str) const;

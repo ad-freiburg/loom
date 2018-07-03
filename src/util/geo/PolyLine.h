@@ -16,38 +16,45 @@ namespace geo {
 static const double MAX_EQ_DISTANCE = 15;
 static const double AVERAGING_STEP = 20;
 
+template <typename T>
 struct LinePoint {
   LinePoint() : lastIndex(0), totalPos(-1), p() {}
 
-  LinePoint(size_t i, double pos, const Point& p)
+  LinePoint(size_t i, double pos, const Point<T>& p)
       : lastIndex(i), totalPos(pos), p(p) {}
   size_t lastIndex;
   double totalPos;
-  Point p;
+  Point<T> p;
 };
 
+template <typename T>
 struct LinePointCmp {
-  bool operator()(const LinePoint& lh, const LinePoint& rh) const {
+  bool operator()(const LinePoint<T>& lh, const LinePoint<T>& rh) const {
     return lh.totalPos < rh.totalPos;
   }
 };
 
-typedef std::pair<LinePoint, LinePoint> LinePointPair;
-typedef std::pair<LinePointPair, LinePointPair> SharedSegment;
 
+template <typename T>
+using LinePointPair = std::pair<LinePoint<T>, LinePoint<T>>;
+template <typename T>
+using SharedSegment = std::pair<LinePointPair<T>, LinePointPair<T>>;
+
+template <typename T>
 struct SharedSegments {
-  std::vector<SharedSegment> segments;
+  std::vector<SharedSegment<T>> segments;
 };
 
 // TODO: maybe let this class inherit from a more generic geometry class
+template <typename T>
 class PolyLine {
  public:
   PolyLine();
-  PolyLine(const Point& from, const Point& to);
-  PolyLine(const Line& l);
+  PolyLine(const Point<T>& from, const Point<T>& to);
+  PolyLine(const Line<T>& l);
 
-  PolyLine& operator<<(const Point& p);
-  PolyLine& operator>>(const Point& p);
+  PolyLine& operator<<(const Point<T>& p);
+  PolyLine& operator>>(const Point<T>& p);
 
   void reverse();
   PolyLine getReversed() const;
@@ -56,30 +63,30 @@ class PolyLine {
 
   PolyLine getPerpOffsetted(double units) const;
 
-  const Line& getLine() const;
+  const Line<T>& getLine() const;
 
-  double distTo(const PolyLine& g) const;
-  double distTo(const Point& p) const;
+  double distTo(const PolyLine<T>& g) const;
+  double distTo(const Point<T>& p) const;
 
-  SharedSegments getSharedSegments(const PolyLine& pl, double dmax) const;
+  SharedSegments<T> getSharedSegments(const PolyLine<T>& pl, double dmax) const;
 
   double getLength() const;
 
   // return point at dist
-  LinePoint getPointAtDist(double dist) const;
+  LinePoint<T> getPointAtDist(double dist) const;
 
   // return point at [0..1]
-  LinePoint getPointAt(double dist) const;
+  LinePoint<T> getPointAt(double dist) const;
 
-  PolyLine getSegment(double a, double b) const;
-  PolyLine getSegmentAtDist(double dista, double distb) const;
-  PolyLine getSegment(const LinePoint& start, const LinePoint& end) const;
-  PolyLine getSegment(const Point& a, const Point& b) const;
+  PolyLine<T> getSegment(double a, double b) const;
+  PolyLine<T> getSegmentAtDist(double dista, double distb) const;
+  PolyLine<T> getSegment(const LinePoint<T>& start, const LinePoint<T>& end) const;
+  PolyLine<T> getSegment(const Point<T>& a, const Point<T>& b) const;
 
-  std::set<LinePoint, LinePointCmp> getIntersections(const PolyLine& g) const;
+  std::set<LinePoint<T>, LinePointCmp<T>> getIntersections(const PolyLine<T>& g) const;
 
-  static PolyLine average(const std::vector<const PolyLine*>& lines);
-  static PolyLine average(const std::vector<const PolyLine*>& lines,
+  static PolyLine<T> average(const std::vector<const PolyLine<T>*>& lines);
+  static PolyLine<T> average(const std::vector<const PolyLine<T>*>& lines,
                           const std::vector<double>& weights);
 
   void simplify(double d);
@@ -87,12 +94,12 @@ class PolyLine {
 
   void smoothenOutliers(double d);
 
-  std::pair<size_t, double> nearestSegment(const Point& p) const;
-  std::pair<size_t, double> nearestSegmentAfter(const Point& p,
+  std::pair<size_t, double> nearestSegment(const Point<T>& p) const;
+  std::pair<size_t, double> nearestSegmentAfter(const Point<T>& p,
                                                 size_t after) const;
 
-  LinePoint projectOn(const Point& p) const;
-  LinePoint projectOnAfter(const Point& p, size_t after) const;
+  LinePoint<T> projectOn(const Point<T>& p) const;
+  LinePoint<T> projectOnAfter(const Point<T>& p, size_t after) const;
 
   void move(double vx, double vy);
 
@@ -110,19 +117,22 @@ class PolyLine {
 
   PolyLine getOrthoLineAtDist(double d, double lengt) const;
 
-  Point interpolate(const Point& a, const Point& b, double p) const;
+  Point<T> interpolate(const Point<T>& a, const Point<T>& b, double p) const;
 
   void fixTopology(double maxl);
   void applyChaikinSmooth(size_t depth);
 
-  const Point& front() const;
-  const Point& back() const;
+  const Point<T>& front() const;
+  const Point<T>& back() const;
 
  private:
-  std::set<LinePoint, LinePointCmp> getIntersections(const PolyLine& p,
+  std::set<LinePoint<T>, LinePointCmp<T>> getIntersections(const PolyLine& p,
                                                      size_t a, size_t b) const;
-  Line _line;
+  Line<T> _line;
 };
+
+#include "util/geo/PolyLine.tpp"
+
 }  // namespace geo
 }  // namespace util
 

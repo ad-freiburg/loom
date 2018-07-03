@@ -97,7 +97,7 @@ class ILPOptimizer : public Optimizer {
   int getCrossingPenaltyDiffSeg(const OptNode* n) const;
   int getSplittingPenalty(const OptNode* n) const;
 
-  Point getPos(OptNode* n, OptEdge* segment, size_t p) const;
+  FPoint getPos(OptNode* n, OptEdge* segment, size_t p) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

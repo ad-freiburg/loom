@@ -674,16 +674,16 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
 
   bool pCrossing = false;
 
-  Point aInA = getPos(node, segmentA, posAinA);
-  Point bInA = getPos(node, segmentA, posBinA);
-  Point aInB = getPos(node, segmentB, posAinB);
-  Point bInB = getPos(node, segmentB, posBinB);
+  FPoint aInA = getPos(node, segmentA, posAinA);
+  FPoint bInA = getPos(node, segmentA, posBinA);
+  FPoint aInB = getPos(node, segmentB, posAinB);
+  FPoint bInB = getPos(node, segmentB, posBinB);
 
-  Line a;
+  FLine a;
   a.push_back(aInA);
   a.push_back(aInB);
 
-  Line b;
+  FLine b;
   b.push_back(bInA);
   b.push_back(bInB);
 
@@ -712,8 +712,8 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
   size_t posAinA = otherWayA ? cardA - 1 - postcomb.first : postcomb.first;
   size_t posBinA = otherWayA ? cardA - 1 - postcomb.second : postcomb.second;
 
-  Point aInA = getPos(node, segmentA, posAinA);
-  Point bInA = getPos(node, segmentA, posBinA);
+  FPoint aInA = getPos(node, segmentA, posAinA);
+  FPoint bInA = getPos(node, segmentA, posBinA);
 
   for (size_t i = 0; i < segments.first->etgs.front().etg->getCardinality(true);
        ++i) {
@@ -722,14 +722,14 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
       size_t posAinB = otherWayB ? cardB - 1 - i : i;
       size_t posBinC = otherWayC ? cardC - 1 - j : j;
 
-      Point aInB = getPos(node, segments.first, posAinB);
-      Point bInC = getPos(node, segments.second, posBinC);
+      FPoint aInB = getPos(node, segments.first, posAinB);
+      FPoint bInC = getPos(node, segments.second, posBinC);
 
-      Line a;
+      FLine a;
       a.push_back(aInA);
       a.push_back(aInB);
 
-      Line b;
+      FLine b;
       b.push_back(bInA);
       b.push_back(bInC);
 
@@ -742,7 +742,7 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
 }
 
 // _____________________________________________________________________________
-Point ILPOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) const {
+FPoint ILPOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) const {
   // look for correct nodefront
   const NodeFront* nf = 0;
   for (auto etg : segment->etgs) {

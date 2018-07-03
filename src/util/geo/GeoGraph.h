@@ -5,24 +5,24 @@
 #ifndef UTIL_GEOGRAPH_H_
 #define UTIL_GEOGRAPH_H_
 
+#include <map>
 #include "util/geo/Geo.h"
-#include "json/json.hpp"
-
-using json = nlohmann::json;
 
 namespace util {
 namespace geograph {
 
+template<typename T>
 class GeoEdgePL {
  public:
-  virtual const util::geo::Line* getGeom() const = 0;
-  virtual void getAttrs(json::object_t& obj) const = 0;
+  virtual const util::geo::Line<T>* getGeom() const = 0;
+  virtual void getAttrs(std::map<std::string, std::string>* m) const = 0;
 };
 
+template<typename T>
 class GeoNodePL {
  public:
-  virtual const util::geo::Point* getGeom() const = 0;
-  virtual void getAttrs(json::object_t& obj) const = 0;
+  virtual const util::geo::Point<T>* getGeom() const = 0;
+  virtual void getAttrs(std::map<std::string, std::string>* m) const = 0;
 };
 
 }  // namespace geograph

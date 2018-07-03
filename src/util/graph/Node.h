@@ -5,7 +5,7 @@
 #ifndef UTIL_GRAPH_NODE_H_
 #define UTIL_GRAPH_NODE_H_
 
-#include <set>
+#include <vector>
 
 namespace util {
 namespace graph {
@@ -17,30 +17,27 @@ class Edge;
 template <typename N, typename E>
 class Node {
  public:
-  Node(const N& pl);
-  ~Node();
+  virtual const std::vector<Edge<N, E>*>& getAdjList() const = 0;
+  virtual const std::vector<Edge<N, E>*>& getAdjListOut() const = 0;
+  virtual const std::vector<Edge<N, E>*>& getAdjListIn() const = 0;
 
-  const std::set<Edge<N, E>*>& getAdjListOut() const;
-  const std::set<Edge<N, E>*>& getAdjListIn() const;
+  virtual size_t getDeg() const = 0;
+  virtual size_t getInDeg() const = 0;
+  virtual size_t getOutDeg() const = 0;
 
-  std::set<Edge<N, E>*> getAdjList() const;
+  virtual bool hasEdgeIn(const Edge<N, E>* e) const = 0;
+  virtual bool hasEdgeOut(const Edge<N, E>* e) const = 0;
+  virtual bool hasEdge(const Edge<N, E>* e) const = 0;
 
   // add edge to this node's adjacency lists
-  void addEdge(Edge<N, E>* e);
+  virtual void addEdge(Edge<N, E>* e) = 0;
+  virtual void removeEdge(Edge<N, E>* e) = 0;
 
-  // remove edge from this node's adjacency lists
-  void removeEdge(Edge<N, E>* e);
+  virtual ~Node() {};
 
-  N& pl();
-  const N& pl() const;
-
- private:
-  std::set<Edge<N, E>*> _adjListIn;
-  std::set<Edge<N, E>*> _adjListOut;
-  N _pl;
+  virtual N& pl() = 0;
+  virtual const N& pl() const = 0;
 };
-
-#include "util/graph/Node.tpp"
 
 }}
 

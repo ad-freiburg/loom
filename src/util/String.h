@@ -5,6 +5,7 @@
 #ifndef UTIL_STRING_H_
 #define UTIL_STRING_H_
 
+#include <algorithm>
 #include <cstring>
 #include <sstream>
 #include <string>
@@ -89,6 +90,67 @@ template <typename T>
 inline std::string toString(T obj) {
   std::stringstream ss;
   ss << obj;
+  return ss.str();
+}
+
+// _____________________________________________________________________________
+inline std::vector<std::string> split(std::string in, char sep) {
+  std::stringstream ss(in);
+  std::vector<std::string> ret(1);
+  while (std::getline(ss, ret.back(), sep)) {
+    ret.push_back("");
+  }
+  ret.pop_back();
+  return ret;
+}
+
+// _____________________________________________________________________________
+inline std::string ltrim(std::string str) {
+  str.erase(0, str.find_first_not_of(" \t\n\v\f\r"));
+  return str;
+}
+
+// _____________________________________________________________________________
+inline std::string rtrim(std::string str) {
+  str.erase(str.find_last_not_of(" \t\n\v\f\r") + 1);
+  return str;
+}
+
+// _____________________________________________________________________________
+inline std::string trim(std::string str) { return ltrim(rtrim(str)); }
+
+// _____________________________________________________________________________
+inline size_t editDist(const std::string& s1, const std::string& s2) {
+  // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C++
+  size_t len1 = s1.size();
+  size_t len2 = s2.size();
+  std::vector<size_t> cur(len2 + 1);
+  std::vector<size_t> prev(len2 + 1);
+
+  for (size_t i = 0; i < prev.size(); i++) prev[i] = i;
+
+  for (size_t i = 0; i < len1; i++) {
+    cur[0] = i + 1;
+    for (size_t j = 0; j < len2; j++) {
+      cur[j + 1] =
+          std::min(prev[1 + j] + 1,
+                   std::min(cur[j] + 1, prev[j] + (s1[i] == s2[j] ? 0 : 1)));
+    }
+    std::swap(cur, prev);
+  }
+
+  return prev[len2];
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline std::string implode(const std::vector<T>& vec, const char* del) {
+  std::stringstream ss;
+  for (size_t i = 0; i < vec.size(); i++) {
+    if (i != 0) ss << del;
+    ss << vec[i];
+  }
+
   return ss.str();
 }
 }

@@ -69,10 +69,10 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
         std::vector<std::vector<double> > coords = geom["coordinates"];
 
-        PolyLine pl;
+        PolyLine<float> pl;
         for (auto coord : coords) {
           double x = coord[0], y = coord[1];
-          Point p(x, y);
+          FPoint p(x, y);
           pl << p;
           g->expandBBox(p);
         }
@@ -237,7 +237,7 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
       if (e->getGeom().getLength() == 0) continue;
 
       NodeFront f(e, n);
-      PolyLine pl;
+      PolyLine<float> pl;
 
       f.refEtgLengthBefExp = e->getGeom().getLength();
 
@@ -523,15 +523,15 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
                                      const NodeFront& b) const {
   size_t numShr = a.edge->getSharedRoutes(*b.edge).size();
 
-  Point aa = a.geom.front();
-  Point ab = a.geom.back();
-  Point ba = b.geom.front();
-  Point bb = b.geom.back();
+  FPoint aa = a.geom.front();
+  FPoint ab = a.geom.back();
+  FPoint ba = b.geom.front();
+  FPoint bb = b.geom.back();
 
   bool intersects = lineIntersects(aa, ab, ba, bb);
   if (!intersects) return false;
 
-  Point i = intersection(aa, ab, ba, bb);
+  FPoint i = intersection(aa, ab, ba, bb);
 
   if (numShr && a.geom.distTo(i) < (a.edge->getWidth() + a.edge->getSpacing()))
     return true;
@@ -545,9 +545,9 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
 
 // _____________________________________________________________________________
 void GraphBuilder::freeNodeFront(NodeFront* f) {
-  PolyLine cutLine = f->geom;
+  PolyLine<float> cutLine = f->geom;
 
-  std::set<LinePoint, LinePointCmp> iSects =
+  std::set<LinePoint<float>, LinePointCmp<float>> iSects =
       cutLine.getIntersections(f->edge->getGeom());
   if (iSects.size() > 0) {
     if (f->edge->getTo() != f->n) {

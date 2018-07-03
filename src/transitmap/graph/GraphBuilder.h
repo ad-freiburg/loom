@@ -21,10 +21,10 @@ using util::geo::SharedSegment;
 
 struct ShrdSegWrap {
   ShrdSegWrap() : e(0), f(0) {};
-  ShrdSegWrap(Edge* e, Edge* f, SharedSegment s) : e(e), f(f), s(s) {};
+  ShrdSegWrap(Edge* e, Edge* f, SharedSegment<float> s) : e(e), f(f), s(s) {};
   Edge* e;
   Edge* f;
-  SharedSegment s;
+  SharedSegment<float> s;
 };
 
 class GraphBuilder {

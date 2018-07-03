@@ -42,9 +42,9 @@ void XmlWriter::openTag(const string& tag, const map<string, string>& attrs) {
 
   for (auto kv : attrs) {
     *_out << " ";
-    putEsced(_out, kv.first);
+    putEsced(_out, kv.first, '"');
     *_out << "=\"";
-    putEsced(_out, kv.second);
+    putEsced(_out, kv.second, '"');
     *_out << "\"";
   }
 
@@ -83,7 +83,7 @@ void XmlWriter::writeText(const string& text) {
   }
   closeHanging();
   doIndent();
-  putEsced(_out, text);
+  putEsced(_out, text, ' ');
 }
 
 // _____________________________________________________________________________
@@ -135,16 +135,16 @@ void XmlWriter::closeHanging() {
 }
 
 // _____________________________________________________________________________
-void XmlWriter::putEsced(ostream* out, const string& str) {
+void XmlWriter::putEsced(ostream* out, const string& str, char quot) {
   if (!_nstack.empty() && _nstack.top().t == COMMENT) {
     *out << str;
     return;
   }
 
   for (const char& c : str) {
-    if (c == '"')
+    if (quot == '"' && c == '"')
       *out << "&quot;";
-    else if (c == '\'')
+    else if (quot == '\'' && c == '\'')
       *out << "&apos;";
     else if (c == '<')
       *out << "&lt;";

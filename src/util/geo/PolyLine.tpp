@@ -2,56 +2,65 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "util/geo/Geo.h"
-#include "util/geo/PolyLine.h"
-#include "util/log/Log.h"
-
-using namespace util;
-using namespace geo;
+// _____________________________________________________________________________
+template <typename T>
+PolyLine<T>::PolyLine() {}
 
 // _____________________________________________________________________________
-PolyLine::PolyLine() {}
+template <typename T>
+PolyLine<T>::PolyLine(const Point<T>& from, const Point<T>& to) {
+  *this << from << to;
+}
 
 // _____________________________________________________________________________
-PolyLine::PolyLine(const Point& from, const Point& to) { *this << from << to; }
+template <typename T>
+PolyLine<T>::PolyLine(const Line<T>& l) : _line(l) {}
 
 // _____________________________________________________________________________
-PolyLine::PolyLine(const Line& l) : _line(l) {}
-
-// _____________________________________________________________________________
-PolyLine& PolyLine::operator<<(const Point& p) {
+template <typename T>
+PolyLine<T>& PolyLine<T>::operator<<(const Point<T>& p) {
   _line.push_back(p);
   return *this;
 }
 
 // _____________________________________________________________________________
-PolyLine& PolyLine::operator>>(const Point& p) {
+template <typename T>
+PolyLine<T>& PolyLine<T>::operator>>(const Point<T>& p) {
   _line.insert(_line.begin(), p);
   return *this;
 }
 
 // _____________________________________________________________________________
-void PolyLine::reverse() { std::reverse(_line.begin(), _line.end()); }
+template <typename T>
+void PolyLine<T>::reverse() {
+  std::reverse(_line.begin(), _line.end());
+}
 
 // _____________________________________________________________________________
-PolyLine PolyLine::getReversed() const {
+template <typename T>
+PolyLine<T> PolyLine<T>::getReversed() const {
   PolyLine ret = *this;
   ret.reverse();
   return ret;
 }
 
 // _____________________________________________________________________________
-const Line& PolyLine::getLine() const { return _line; }
+template <typename T>
+const Line<T>& PolyLine<T>::getLine() const {
+  return _line;
+}
 
 // _____________________________________________________________________________
-PolyLine PolyLine::getPerpOffsetted(double units) const {
+template <typename T>
+PolyLine<T> PolyLine<T>::getPerpOffsetted(double units) const {
   PolyLine p = *this;
   p.offsetPerp(units);
   return p;
 }
 
 // _____________________________________________________________________________
-void PolyLine::offsetPerp(double units) {
+template <typename T>
+void PolyLine<T>::offsetPerp(double units) {
   /*
    * calculate perpendicular offset of a polyline
    *
@@ -70,16 +79,16 @@ void PolyLine::offsetPerp(double units) {
 
   if (_line.size() < 2) return;
 
-  Line ret;
-  Point lastP = _line.front();
+  Line<T> ret;
+  Point<T> lastP = _line.front();
 
-  Point *lastIns = 0, *befLastIns = 0;
+  Point<T> *lastIns = 0, *befLastIns = 0;
 
   for (size_t i = 1; i < _line.size(); i++) {
-    Point curP = _line[i];
+    Point<T> curP = _line[i];
 
-    double n1 = lastP.get<1>() - curP.get<1>();
-    double n2 = curP.get<0>() - lastP.get<0>();
+    double n1 = lastP.template get<1>() - curP.template get<1>();
+    double n2 = curP.template get<0>() - lastP.template get<0>();
     double n = sqrt(n1 * n1 + n2 * n2);
 
     // if n == 0, the segment is effectively a point
@@ -89,11 +98,11 @@ void PolyLine::offsetPerp(double units) {
     n1 = n1 / n;
     n2 = n2 / n;
 
-    lastP.set<0>(lastP.get<0>() + (n1 * units));
-    lastP.set<1>(lastP.get<1>() + (n2 * units));
+    lastP.template set<0>(lastP.template get<0>() + (n1 * units));
+    lastP.template set<1>(lastP.template get<1>() + (n2 * units));
 
-    curP.set<0>(curP.get<0>() + (n1 * units));
-    curP.set<1>(curP.get<1>() + (n2 * units));
+    curP.template set<0>(curP.template get<0>() + (n1 * units));
+    curP.template set<1>(curP.template get<1>() + (n2 * units));
 
     if (lastIns && befLastIns &&
         lineIntersects(*lastIns, *befLastIns, lastP, curP)) {
@@ -134,42 +143,47 @@ void PolyLine::offsetPerp(double units) {
 }
 
 // _____________________________________________________________________________
-PolyLine PolyLine::getSegment(double a, double b) const {
+template <typename T>
+PolyLine<T> PolyLine<T>::getSegment(double a, double b) const {
   if (a > b) {
     double c = a;
     a = b;
     b = c;
   }
-  LinePoint start = getPointAt(a);
-  LinePoint end = getPointAt(b);
+  LinePoint<T> start = getPointAt(a);
+  LinePoint<T> end = getPointAt(b);
 
   return getSegment(start, end);
 }
 
 // _____________________________________________________________________________
-PolyLine PolyLine::getSegmentAtDist(double a, double b) const {
+template <typename T>
+PolyLine<T> PolyLine<T>::getSegmentAtDist(double a, double b) const {
   if (a > b) {
     double c = a;
     a = b;
     b = c;
   }
-  LinePoint start = getPointAtDist(a);
-  LinePoint end = getPointAtDist(b);
+  LinePoint<T> start = getPointAtDist(a);
+  LinePoint<T> end = getPointAtDist(b);
 
   return getSegment(start, end);
 }
 
 // _____________________________________________________________________________
-PolyLine PolyLine::getSegment(const Point& a, const Point& b) const {
-  LinePoint start = projectOn(a);
-  LinePoint end = projectOnAfter(b, start.lastIndex);
+template <typename T>
+PolyLine<T> PolyLine<T>::getSegment(const Point<T>& a,
+                                    const Point<T>& b) const {
+  LinePoint<T> start = projectOn(a);
+  LinePoint<T> end = projectOnAfter(b, start.lastIndex);
 
   return getSegment(start, end);
 }
 
 // _____________________________________________________________________________
-PolyLine PolyLine::getSegment(const LinePoint& start,
-                              const LinePoint& end) const {
+template <typename T>
+PolyLine<T> PolyLine<T>::getSegment(const LinePoint<T>& start,
+                                    const LinePoint<T>& end) const {
   PolyLine ret;
   ret << start.p;
 
@@ -186,62 +200,76 @@ PolyLine PolyLine::getSegment(const LinePoint& start,
 }
 
 // _____________________________________________________________________________
-LinePoint PolyLine::getPointAtDist(double atDist) const {
+template <typename T>
+LinePoint<T> PolyLine<T>::getPointAtDist(double atDist) const {
   if (atDist > getLength()) atDist = getLength();
   if (atDist < 0) atDist = 0;
 
   double dist = 0;
 
-  if (_line.size() == 1) return LinePoint(0, 0, _line[0]);
+  if (_line.size() == 1) return LinePoint<T>(0, 0, _line[0]);
 
-  const Point* last = &_line[0];
+  const Point<T>* last = &_line[0];
 
   for (size_t i = 1; i < _line.size(); i++) {
-    const Point& cur = _line[i];
+    const Point<T>& cur = _line[i];
     double d = geo::dist(last, cur);
     dist += d;
 
     if (dist > atDist) {
       double p = (d - (dist - atDist));
-      return LinePoint(i - 1, atDist / getLength(), interpolate(*last, cur, p));
+      return LinePoint<T>(i - 1, atDist / getLength(),
+                          interpolate(*last, cur, p));
     }
 
     last = &_line[i];
   }
 
-  return LinePoint(_line.size() - 1, 1, _line.back());
+  return LinePoint<T>(_line.size() - 1, 1, _line.back());
 }
 
 // _____________________________________________________________________________
-LinePoint PolyLine::getPointAt(double at) const {
+template <typename T>
+LinePoint<T> PolyLine<T>::getPointAt(double at) const {
   at *= getLength();
   return getPointAtDist(at);
 }
 
 // _____________________________________________________________________________
-Point PolyLine::interpolate(const Point& a, const Point& b, double p) const {
-  double n1 = b.get<0>() - a.get<0>();
-  double n2 = b.get<1>() - a.get<1>();
+template <typename T>
+Point<T> PolyLine<T>::interpolate(const Point<T>& a, const Point<T>& b,
+                                  double p) const {
+  double n1 = b.template get<0>() - a.template get<0>();
+  double n2 = b.template get<1>() - a.template get<1>();
   double n = sqrt(n1 * n1 + n2 * n2);
   n1 = n1 / n;
   n2 = n2 / n;
-  return Point(a.get<0>() + (n1 * p), a.get<1>() + (n2 * p));
+  return Point<T>(a.template get<0>() + (n1 * p),
+                  a.template get<1>() + (n2 * p));
 }
 
 // _____________________________________________________________________________
-double PolyLine::distTo(const PolyLine& g) const {
+template <typename T>
+double PolyLine<T>::distTo(const PolyLine<T>& g) const {
   return dist(_line, g.getLine());
 }
 
 // _____________________________________________________________________________
-double PolyLine::distTo(const Point& p) const { return dist(_line, p); }
+template <typename T>
+double PolyLine<T>::distTo(const Point<T>& p) const {
+  return dist(_line, p);
+}
 
 // _____________________________________________________________________________
-double PolyLine::getLength() const { return len(_line); }
+template <typename T>
+double PolyLine<T>::getLength() const {
+  return len(_line);
+}
 
 // _____________________________________________________________________________
-PolyLine PolyLine::average(const std::vector<const PolyLine*>& lines,
-                           const std::vector<double>& weights) {
+template <typename T>
+PolyLine<T> PolyLine<T>::average(const std::vector<const PolyLine<T>*>& lines,
+                                 const std::vector<double>& weights) {
   bool weighted = lines.size() == weights.size();
   double stepSize;
 
@@ -274,16 +302,16 @@ PolyLine PolyLine::average(const std::vector<const PolyLine*>& lines,
 
     for (size_t i = 0; i < lines.size(); ++i) {
       const PolyLine* pl = lines[i];
-      Point p = pl->getPointAt(a).p;
+      Point<T> p = pl->getPointAt(a).p;
       if (weighted) {
-        x += p.get<0>() * weights[i];
-        y += p.get<1>() * weights[i];
+        x += p.template get<0>() * weights[i];
+        y += p.template get<1>() * weights[i];
       } else {
-        x += p.get<0>();
-        y += p.get<1>();
+        x += p.template get<0>();
+        y += p.template get<1>();
       }
     }
-    ret << Point(x / total, y / total);
+    ret << Point<T>(x / total, y / total);
   }
 
   ret.simplify(0);
@@ -292,13 +320,15 @@ PolyLine PolyLine::average(const std::vector<const PolyLine*>& lines,
 }
 
 // _____________________________________________________________________________
-PolyLine PolyLine::average(const std::vector<const PolyLine*>& lines) {
+template <typename T>
+PolyLine<T> PolyLine<T>::average(const std::vector<const PolyLine<T>*>& lines) {
   return average(lines, std::vector<double>());
 }
 
 // _____________________________________________________________________________
-std::pair<size_t, double> PolyLine::nearestSegmentAfter(const Point& p,
-                                                        size_t a) const {
+template <typename T>
+std::pair<size_t, double> PolyLine<T>::nearestSegmentAfter(const Point<T>& p,
+                                                           size_t a) const {
   // returns the index of the starting point of the nearest segment of p
   assert(a < _line.size());
 
@@ -309,8 +339,8 @@ std::pair<size_t, double> PolyLine::nearestSegmentAfter(const Point& p,
   double smallestDist = 0;
 
   for (size_t i = smallest + 1; i < _line.size(); i++) {
-    Point startP(_line[i - 1]);
-    Point endP(_line[i]);
+    Point<T> startP(_line[i - 1]);
+    Point<T> endP(_line[i]);
 
     if (i > 1) {
       totalDist += geo::dist(_line[i - 2], _line[i - 1]);
@@ -335,34 +365,41 @@ std::pair<size_t, double> PolyLine::nearestSegmentAfter(const Point& p,
 }
 
 // _____________________________________________________________________________
-std::pair<size_t, double> PolyLine::nearestSegment(const Point& p) const {
+template <typename T>
+std::pair<size_t, double> PolyLine<T>::nearestSegment(const Point<T>& p) const {
   return nearestSegmentAfter(p, 0);
 }
 
 // _____________________________________________________________________________
-LinePoint PolyLine::projectOn(const Point& p) const {
+template <typename T>
+LinePoint<T> PolyLine<T>::projectOn(const Point<T>& p) const {
   return projectOnAfter(p, 0);
 }
 
 // _____________________________________________________________________________
-LinePoint PolyLine::projectOnAfter(const Point& p, size_t a) const {
+template <typename T>
+LinePoint<T> PolyLine<T>::projectOnAfter(const Point<T>& p, size_t a) const {
   assert(a < _line.size());
   std::pair<size_t, double> bc = nearestSegmentAfter(p, a);
 
-  Point ret = geo::projectOn(_line[bc.first], p, _line[bc.first + 1]);
+  Point<T> ret = geo::projectOn(_line[bc.first], p, _line[bc.first + 1]);
 
   if (getLength() > 0) {
     bc.second += dist(_line[bc.first], ret) / getLength();
   }
 
-  return LinePoint(bc.first, bc.second, ret);
+  return LinePoint<T>(bc.first, bc.second, ret);
 }
 
 // _____________________________________________________________________________
-void PolyLine::simplify(double d) { _line = geo::simplify(_line, d); }
+template <typename T>
+void PolyLine<T>::simplify(double d) {
+  _line = geo::simplify(_line, d);
+}
 
 // _____________________________________________________________________________
-void PolyLine::smoothenOutliers(double d) {
+template <typename T>
+void PolyLine<T>::smoothenOutliers(double d) {
   if (_line.size() < 3) return;
   for (size_t i = 1; i < _line.size() - 3; ++i) {
     double ang = innerProd(_line[i], _line[i - 1], _line[i + 1]);
@@ -376,21 +413,24 @@ void PolyLine::smoothenOutliers(double d) {
 }
 
 // _____________________________________________________________________________
-bool PolyLine::equals(const PolyLine& rhs) const {
+template <typename T>
+bool PolyLine<T>::equals(const PolyLine<T>& rhs) const {
   // TODO: why 100? make global static or configurable or determine in some
   //       way!
   return equals(rhs, 100);
 }
 
 // _____________________________________________________________________________
-bool PolyLine::operator==(const PolyLine& rhs) const {
+template <typename T>
+bool PolyLine<T>::operator==(const PolyLine<T>& rhs) const {
   // TODO: why 100? make global static or configurable or determine in some
   //       way!
   return equals(rhs, 100);
 }
 
 // _____________________________________________________________________________
-bool PolyLine::equals(const PolyLine& rhs, double dmax) const {
+template <typename T>
+bool PolyLine<T>::equals(const PolyLine<T>& rhs, double dmax) const {
   // check if two lines are equal, THE DIRECTION DOES NOT MATTER HERE!!!!!
 
   if (_line.size() == 2 && _line.size() == rhs.getLine().size()) {
@@ -407,7 +447,8 @@ bool PolyLine::equals(const PolyLine& rhs, double dmax) const {
 }
 
 // _____________________________________________________________________________
-bool PolyLine::contains(const PolyLine& rhs, double dmax) const {
+template <typename T>
+bool PolyLine<T>::contains(const PolyLine<T>& rhs, double dmax) const {
   // check if two lines are equal. Line direction does not matter here.
 
   for (size_t i = 0; i < rhs.getLine().size(); ++i) {
@@ -421,16 +462,18 @@ bool PolyLine::contains(const PolyLine& rhs, double dmax) const {
 }
 
 // _____________________________________________________________________________
-void PolyLine::move(double vx, double vy) {
+template <typename T>
+void PolyLine<T>::move(double vx, double vy) {
   for (size_t i = 0; i < _line.size(); i++) {
-    _line[i].set<0>(_line[i].get<0>() + vx);
-    _line[i].set<1>(_line[i].get<1>() + vy);
+    _line[i].set<0>(_line[i].template get<0>() + vx);
+    _line[i].set<1>(_line[i].template get<1>() + vy);
   }
 }
 
 // _____________________________________________________________________________
-SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
-                                           double dmax) const {
+template <typename T>
+SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
+                                                 double dmax) const {
   /**
    * Returns the segments this polyline share with pl
    * atm, this is a very simple distance-based algorithm
@@ -439,7 +482,7 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
   double MAX_SKIPS = 4;
   double MIN_SEG_LENGTH = 1;  // dmax / 2;  // make this configurable!
 
-  SharedSegments ret;
+  SharedSegments<T> ret;
 
   if (distTo(pl) > dmax) return ret;
 
@@ -448,24 +491,24 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
   double curTotalSegDist = 0;
   size_t skips;
 
-  LinePoint curStartCand, curEndCand, curStartCandCmp, curEndCandCmp;
+  LinePoint<T> curStartCand, curEndCand, curStartCandCmp, curEndCandCmp;
 
   double comp = 0, curSegDist = 0;
   double length = getLength(), plLength = pl.getLength();
 
   for (size_t i = 1; i < _line.size(); ++i) {
-    const Point& s = _line[i - 1];
-    const Point& e = _line[i];
+    const Point<T>& s = _line[i - 1];
+    const Point<T>& e = _line[i];
 
     bool lastRound = false;
 
     double totalDist = dist(s, e);
     while (curSegDist <= totalDist) {
-      const Point& curPointer = interpolate(s, e, curSegDist);
+      const Point<T>& curPointer = interpolate(s, e, curSegDist);
 
       if (pl.distTo(curPointer) <= dmax) {
-        LinePoint curCmpPointer = pl.projectOn(curPointer);
-        LinePoint curBackProjectedPointer = projectOn(curCmpPointer.p);
+        LinePoint<T> curCmpPointer = pl.projectOn(curPointer);
+        LinePoint<T> curBackProjectedPointer = projectOn(curCmpPointer.p);
         skips = 0;
 
         if (in) {
@@ -492,10 +535,11 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
                       curEndCand.totalPos * length) > MIN_SEG_LENGTH &&
                  fabs(curStartCandCmp.totalPos * plLength -
                       curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
-              ret.segments.push_back(SharedSegment(
-                  std::pair<LinePoint, LinePoint>(curStartCand,
-                                                  curStartCandCmp),
-                  std::pair<LinePoint, LinePoint>(curEndCand, curEndCandCmp)));
+              ret.segments.push_back(
+                  SharedSegment<T>(std::pair<LinePoint<T>, LinePoint<T>>(
+                                       curStartCand, curStartCandCmp),
+                                   std::pair<LinePoint<T>, LinePoint<T>>(
+                                       curEndCand, curEndCandCmp)));
 
               // TODO: only return the FIRST one, make this configuralbe
               return ret;
@@ -527,22 +571,24 @@ SharedSegments PolyLine::getSharedSegments(const PolyLine& pl,
            MIN_SEG_LENGTH &&
        fabs(curStartCandCmp.totalPos * plLength -
             curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
-    ret.segments.push_back(SharedSegment(
-        std::pair<LinePoint, LinePoint>(curStartCand, curStartCandCmp),
-        std::pair<LinePoint, LinePoint>(curEndCand, curEndCandCmp)));
+    ret.segments.push_back(SharedSegment<T>(
+        std::pair<LinePoint<T>, LinePoint<T>>(curStartCand, curStartCandCmp),
+        std::pair<LinePoint<T>, LinePoint<T>>(curEndCand, curEndCandCmp)));
   }
 
   return ret;
 }
 
 // _____________________________________________________________________________
-std::set<LinePoint, LinePointCmp> PolyLine::getIntersections(
-    const PolyLine& g) const {
-  std::set<LinePoint, LinePointCmp> ret;
+template <typename T>
+std::set<LinePoint<T>, LinePointCmp<T>> PolyLine<T>::getIntersections(
+    const PolyLine<T>& g) const {
+  std::set<LinePoint<T>, LinePointCmp<T>> ret;
 
   for (size_t i = 1; i < g.getLine().size(); ++i) {
     // for each line segment, check if it intersects with a line segment in g
-    const std::set<LinePoint, LinePointCmp> a = getIntersections(g, i - 1, i);
+    const std::set<LinePoint<T>, LinePointCmp<T>> a =
+        getIntersections(g, i - 1, i);
     ret.insert(a.begin(), a.end());
   }
 
@@ -550,10 +596,10 @@ std::set<LinePoint, LinePointCmp> PolyLine::getIntersections(
 }
 
 // _____________________________________________________________________________
-std::set<LinePoint, LinePointCmp> PolyLine::getIntersections(const PolyLine& p,
-                                                             size_t a,
-                                                             size_t b) const {
-  std::set<LinePoint, LinePointCmp> ret;
+template <typename T>
+std::set<LinePoint<T>, LinePointCmp<T>> PolyLine<T>::getIntersections(
+    const PolyLine<T>& p, size_t a, size_t b) const {
+  std::set<LinePoint<T>, LinePointCmp<T>> ret;
 
   if (dist(p.getLine()[a], p.getLine()[b]) == 0) {
     // we cannot intersect with a point
@@ -562,7 +608,7 @@ std::set<LinePoint, LinePointCmp> PolyLine::getIntersections(const PolyLine& p,
 
   for (size_t i = 1; i < _line.size(); ++i) {
     if (intersects(_line[i - 1], _line[i], p.getLine()[a], p.getLine()[b])) {
-      Point isect =
+      Point<T> isect =
           intersection(_line[i - 1], _line[i], p.getLine()[a], p.getLine()[b]);
       ret.insert(p.projectOn(isect));
     }
@@ -572,45 +618,52 @@ std::set<LinePoint, LinePointCmp> PolyLine::getIntersections(const PolyLine& p,
 }
 
 // _____________________________________________________________________________
-PolyLine PolyLine::getOrthoLineAtDist(double d, double length) const {
-  Point avgP = getPointAtDist(d).p;
+template <typename T>
+PolyLine<T> PolyLine<T>::getOrthoLineAtDist(double d, double length) const {
+  Point<T> avgP = getPointAtDist(d).p;
 
   double angle = angBetween(getPointAtDist(d - 5).p, getPointAtDist(d + 5).p);
 
-  double angleX1 = avgP.get<0>() + cos(angle + M_PI / 2) * length / 2;
-  double angleY1 = avgP.get<1>() + sin(angle + M_PI / 2) * length / 2;
+  double angleX1 = avgP.template get<0>() + cos(angle + M_PI / 2) * length / 2;
+  double angleY1 = avgP.template get<1>() + sin(angle + M_PI / 2) * length / 2;
 
-  double angleX2 = avgP.get<0>() + cos(angle + M_PI / 2) * -length / 2;
-  double angleY2 = avgP.get<1>() + sin(angle + M_PI / 2) * -length / 2;
+  double angleX2 = avgP.template get<0>() + cos(angle + M_PI / 2) * -length / 2;
+  double angleY2 = avgP.template get<1>() + sin(angle + M_PI / 2) * -length / 2;
 
-  return PolyLine(Point(angleX1, angleY1), Point(angleX2, angleY2));
+  return PolyLine(Point<T>(angleX1, angleY1), Point<T>(angleX2, angleY2));
 }
 
 // _____________________________________________________________________________
-void PolyLine::empty() { _line.empty(); }
+template <typename T>
+void PolyLine<T>::empty() {
+  _line.empty();
+}
 
 // _____________________________________________________________________________
-std::pair<double, double> PolyLine::getSlopeBetween(double ad,
-                                                    double bd) const {
-  LinePoint a = getPointAt(ad);
-  LinePoint b = getPointAt(bd);
+template <typename T>
+std::pair<double, double> PolyLine<T>::getSlopeBetween(double ad,
+                                                       double bd) const {
+  LinePoint<T> a = getPointAt(ad);
+  LinePoint<T> b = getPointAt(bd);
 
   double d = dist(a.p, b.p);
 
-  double dx = (b.p.get<0>() - a.p.get<0>()) / d;
-  double dy = (b.p.get<1>() - a.p.get<1>()) / d;
+  double dx = (b.p.template get<0>() - a.p.template get<0>()) / d;
+  double dy = (b.p.template get<1>() - a.p.template get<1>()) / d;
 
   return std::pair<double, double>(dx, dy);
 }
 
 // _____________________________________________________________________________
-std::pair<double, double> PolyLine::getSlopeBetweenDists(double ad,
-                                                         double bd) const {
+template <typename T>
+std::pair<double, double> PolyLine<T>::getSlopeBetweenDists(double ad,
+                                                            double bd) const {
   return getSlopeBetween(ad / getLength(), bd / getLength());
 }
 
 // _____________________________________________________________________________
-std::string PolyLine::getWKT() const {
+template <typename T>
+std::string PolyLine<T>::getWKT() const {
   std::stringstream ss;
   ss << std::setprecision(12) << geo::getWKT(_line);
 
@@ -618,7 +671,8 @@ std::string PolyLine::getWKT() const {
 }
 
 // _____________________________________________________________________________
-void PolyLine::fixTopology(double maxl) {
+template <typename T>
+void PolyLine<T>::fixTopology(double maxl) {
   double distA = 0;
 
   for (size_t i = 1; i < _line.size() - 1; i++) {
@@ -626,7 +680,8 @@ void PolyLine::fixTopology(double maxl) {
         distA + dist(_line[i - 1], _line[i]) + dist(_line[i], _line[i + 1]);
     for (size_t j = i + 2; j < _line.size(); j++) {
       if (intersects(_line[i - 1], _line[i], _line[j - 1], _line[j])) {
-        Point p = intersection(_line[i - 1], _line[i], _line[j - 1], _line[j]);
+        Point<T> p =
+            intersection(_line[i - 1], _line[i], _line[j - 1], _line[j]);
 
         double posA = dist(_line[i - 1], p) + distA;
         double posB = dist(_line[j - 1], p) + distB;
@@ -644,20 +699,23 @@ void PolyLine::fixTopology(double maxl) {
 }
 
 // _____________________________________________________________________________
-void PolyLine::applyChaikinSmooth(size_t depth) {
+template <typename T>
+void PolyLine<T>::applyChaikinSmooth(size_t depth) {
   for (size_t i = 0; i < depth; i++) {
-    Line smooth;
+    Line<T> smooth;
 
     smooth.push_back(_line.front());
 
     for (size_t i = 1; i < _line.size(); i++) {
-      Point pA = _line[i - 1];
-      Point pB = _line[i];
+      Point<T> pA = _line[i - 1];
+      Point<T> pB = _line[i];
 
-      smooth.push_back(Point(0.75 * pA.get<0>() + 0.25 * pB.get<0>(),
-                             0.75 * pA.get<1>() + 0.25 * pB.get<1>()));
-      smooth.push_back(Point(0.25 * pA.get<0>() + 0.75 * pB.get<0>(),
-                             0.25 * pA.get<1>() + 0.75 * pB.get<1>()));
+      smooth.push_back(
+          Point<T>(0.75 * pA.template get<0>() + 0.25 * pB.template get<0>(),
+                   0.75 * pA.template get<1>() + 0.25 * pB.template get<1>()));
+      smooth.push_back(
+          Point<T>(0.25 * pA.template get<0>() + 0.75 * pB.template get<0>(),
+                   0.25 * pA.template get<1>() + 0.75 * pB.template get<1>()));
     }
 
     smooth.push_back(_line.back());
@@ -666,7 +724,13 @@ void PolyLine::applyChaikinSmooth(size_t depth) {
 }
 
 // _____________________________________________________________________________
-const Point& PolyLine::front() const { return _line.front(); }
+template <typename T>
+const Point<T>& PolyLine<T>::front() const {
+  return _line.front();
+}
 
 // _____________________________________________________________________________
-const Point& PolyLine::back() const { return _line.back(); }
+template <typename T>
+const Point<T>& PolyLine<T>::back() const {
+  return _line.back();
+}

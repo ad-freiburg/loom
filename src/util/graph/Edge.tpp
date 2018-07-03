@@ -4,7 +4,7 @@
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-Edge<N, E>::Edge(Node<N, E>* from, Node<N, E>* to, const E& pl) 
+Edge<N, E>::Edge(Node<N, E>* from, Node<N, E>* to, const E& pl)
  : _from(from), _to(to), _pl(pl) {
 
 }
@@ -23,7 +23,7 @@ Node<N, E>* Edge<N, E>::getTo() const {
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-Node<N, E>* Edge<N, E>::getOtherNode(const Node<N, E>* notNode) const {
+Node<N, E>* Edge<N, E>::getOtherNd(const Node<N, E>* notNode) const {
   if (_to == notNode) return _from;
   return _to;
 }

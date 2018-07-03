@@ -7,25 +7,29 @@
 
 #include <ostream>
 #include <string>
-#include "json/json.hpp"
+#include <map>
 #include "util/String.h"
-#include "util/graph/Graph.h"
-
-using json = nlohmann::json;
-using util::toString;
-using util::graph::Graph;
+#include "util/geo/Geo.h"
+#include "util/json/JsonWriter.h"
 
 namespace util {
 namespace geo {
 namespace output {
 
+typedef std::map<std::string, std::string> Attrs;
+
 class GeoJsonOutput {
  public:
-  inline GeoJsonOutput();
-  template <typename N, typename E>
-  void print(const Graph<N, E>& outG);
+  GeoJsonOutput(std::ostream& str);
+  ~GeoJsonOutput();
+  template <typename T>
+  void print(const Point<T>& p, Attrs attrs);
+  template <typename T>
+  void print(const Line<T>& l, Attrs attrs);
+  void flush();
 
  private:
+  json::JsonWriter _wr;
 };
 
 #include "util/geo/output/GeoJsonOutput.tpp"

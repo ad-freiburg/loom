@@ -30,21 +30,21 @@ struct NodeFront {
 
   Node* n;  // pointer to node here also
 
-  Point getTripOccPos(const Route* r, const OrderingConfig& c) const;
-  Point getTripOccPos(const Route* r, const OrderingConfig& c, bool originGeom) const;
-  Point getTripPos(const Edge* e, size_t pos, bool inv) const;
-  Point getTripPos(const Edge* e, size_t pos, bool inv, bool originGeom) const;
+  FPoint getTripOccPos(const Route* r, const OrderingConfig& c) const;
+  FPoint getTripOccPos(const Route* r, const OrderingConfig& c, bool originGeom) const;
+  FPoint getTripPos(const Edge* e, size_t pos, bool inv) const;
+  FPoint getTripPos(const Edge* e, size_t pos, bool inv, bool originGeom) const;
 
   Edge* edge;
 
   // geometry after expansion
-  PolyLine geom;
+  PolyLine<float> geom;
 
   // geometry before expansion
-  PolyLine origGeom;
+  PolyLine<float> origGeom;
 
-  void setInitialGeom(const PolyLine& g) { geom = g; origGeom=g; };
-  void setGeom(const PolyLine& g) { geom = g; };
+  void setInitialGeom(const PolyLine<float>& g) { geom = g; origGeom=g; };
+  void setGeom(const PolyLine<float>& g) { geom = g; };
 
   // TODO
   double refEtgLengthBefExp;
@@ -61,9 +61,9 @@ struct Partner {
 };
 
 struct InnerGeometry {
-  InnerGeometry(PolyLine g, Partner a, Partner b, size_t slotF, size_t slotT)
+  InnerGeometry(PolyLine<float> g, Partner a, Partner b, size_t slotF, size_t slotT)
       : geom(g), from(a), to(b), slotFrom(slotF), slotTo(slotT){};
-  PolyLine geom;
+  PolyLine<float> geom;
   Partner from;
   Partner to;
   size_t slotFrom;
@@ -78,17 +78,17 @@ struct StationInfo {
 
 class Node {
  public:
-  Node(const std::string& id, Point pos);
+  Node(const std::string& id, FPoint pos);
   Node(const std::string& id, double x, double y);
-  Node(const std::string& id, Point pos, StationInfo stop);
+  Node(const std::string& id, FPoint pos, StationInfo stop);
   Node(const std::string& id, double x, double y, StationInfo stop);
 
   ~Node();
 
   const std::vector<StationInfo>& getStops() const;
   void addStop(StationInfo s);
-  const Point& getPos() const;
-  void setPos(const Point& p);
+  const FPoint& getPos() const;
+  void setPos(const FPoint& p);
 
   const std::string& getId() const;
 
@@ -110,11 +110,11 @@ class Node {
 
   size_t getConnCardinality() const;
 
-  Polygon getConvexFrontHull(double d, bool rectangulize, bool simple) const;
+  Polygon<float> getConvexFrontHull(double d, bool rectangulize, bool simple) const;
 
   void generateStationHull(double d, bool useSimple);
 
-  Polygon getStationHull() const;
+  Polygon<float> getStationHull() const;
 
   // add edge to this node's adjacency lists
   void addEdge(Edge* e);
@@ -136,9 +136,9 @@ class Node {
   std::string _id;
   std::set<Edge*> _adjListIn;
   std::set<Edge*> _adjListOut;
-  Point _pos;
+  FPoint _pos;
 
-  Polygon _stationHull;
+  Polygon<float> _stationHull;
 
   std::vector<NodeFront> _mainDirs;
 
