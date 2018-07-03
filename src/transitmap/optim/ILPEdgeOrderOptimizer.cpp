@@ -5,7 +5,6 @@
 #include <glpk.h>
 #include <fstream>
 #include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/output/OgrOutput.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
 #include "util/geo/Geo.h"

@@ -136,12 +136,6 @@ void Graph::readFromDot(std::istream* s) {
 void Graph::readFromJson(std::istream* s) {
   _bbox = util::geo::minbox();
 
-  dot::parser::Parser dp(s);
-
-  while (dp.has()) {
-    auto ent = dp.get();
-  }
-
   json j;
   (*s) >> j;
 

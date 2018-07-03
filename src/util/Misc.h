@@ -26,7 +26,7 @@ uint64_t atol(const char *p) {
 }
 
 // _____________________________________________________________________________
-float atof(const char *p, uint8_t mn) {
+inline float atof(const char *p, uint8_t mn) {
   // this atof implementation works only on "normal" float strings like
   // 56.445 or -345.00, but should be much faster than std::atof
   float r = 0.0;
@@ -60,7 +60,7 @@ float atof(const char *p, uint8_t mn) {
 }
 
 // _____________________________________________________________________________
-double atof(const char *p) {
+inline double atof(const char *p) {
 	return atof(p, 38);
 }
 
