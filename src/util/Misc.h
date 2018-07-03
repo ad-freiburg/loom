@@ -17,11 +17,11 @@ inline uint64_t factorial(uint64_t n) {
 }
 
 // _____________________________________________________________________________
-uint64_t atol(const char *p) {
+inline uint64_t atol(const char *p) {
   uint64_t ret;
 
   while (*p) {
-    ret = ret * 10 + (*p++ - '0'); 
+    ret = ret * 10 + (*p++ - '0');
   }
 }
 
