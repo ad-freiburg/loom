@@ -53,8 +53,8 @@ maps/%: %/network.json
 
 	cp $< $@/export/
 
-	# the reference used for download as3
-	cat $< | $(TRANSITMAP_BIN) --outline-width=3 --line-width=20 --line-spacing=10 -o $@/export/network.svg --glpk-mps-output-path=$@/export/network.mps --world-file-path=$@/export/  --resolution=0.1 $(EXTBINARY) --splitting-optim=${SPLITTING_OPTIM} --name=$(shell basename $@ | tr /a-z/ /A-Z/) --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
+	# the reference used for download
+	cat $< | $(TRANSITMAP_BIN) --outline-width=3 --line-width=20 --line-spacing=10 -o $@/export/network.svg --render-stats=1 --glpk-mps-output-path=$@/export/network.mps --world-file-path=$@/export/  --resolution=0.1 $(EXTBINARY) --splitting-optim=${SPLITTING_OPTIM} --name=$(shell basename $@ | tr /a-z/ /A-Z/) --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
 	inkscape $@/export/network.svg  --export-pdf=$@/export/network.pdf
 
 	# z16

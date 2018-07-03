@@ -16,6 +16,14 @@ inline uint64_t factorial(uint64_t n) {
   return n * factorial(n - 1);
 }
 
+// _____________________________________________________________________________
+uint64_t atol(const char *p) {
+  uint64_t ret;
+
+  while (*p) {
+    ret = ret * 10 + (*p++ - '0'); 
+  }
+}
 
 // _____________________________________________________________________________
 float atof(const char *p, uint8_t mn) {
