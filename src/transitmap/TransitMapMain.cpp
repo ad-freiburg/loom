@@ -14,7 +14,6 @@
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
-#include "transitmap/output/OgrOutput.h"
 #include "transitmap/optim/Scorer.h"
 #include "transitmap/graph/Penalties.h"
 #include "transitmap/output/SvgOutput.h"
@@ -150,13 +149,6 @@ int main(int argc, char** argv) {
               << " (score: "
               << scorer.getSeparationScore()
               << ")" << std::endl;
-
-    if (cfg.renderMethod == "ogr") {
-      std::string path = cfg.outputPath;
-      LOG(INFO) << "Outputting to OGR " << path << " ..." << std::endl;
-      output::OgrOutput ogrOut(path, &cfg);
-      ogrOut.print(g);
-    }
 
     if (cfg.renderMethod == "svg") {
       std::string path = cfg.outputPath;

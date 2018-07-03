@@ -8,7 +8,6 @@
 #include <thread>
 #include <chrono>
 #include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/output/OgrOutput.h"
 #include "transitmap/optim/ILPOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
 #include "util/geo/Geo.h"
@@ -37,11 +36,6 @@ int ILPOptimizer::optimize() const {
     LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes() << std::endl;
     LOG(INFO) << "(stats)   Max edge route cardinality: " << g.getMaxCardinality() << std::endl;
   }
-
-  /*
-   * output::OgrOutput ogrOut("/home/patrick/optimgraph", _cfg);
-   * ogrOut.print(g);
-   */
 
   LOG(DEBUG) << "Creating ILP problem... " << std::endl;
   glp_prob* lp = createProblem(g);
