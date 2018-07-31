@@ -6,7 +6,7 @@
 #define GTFS2TOPO_GRAPH_BUILDGRAPH_H_
 
 
-#include "util/graph/Graph.h"
+#include "util/graph/UndirGraph.h"
 
 namespace gtfs2topo {
 namespace graph {
@@ -14,7 +14,7 @@ namespace graph {
 class NodePL;
 class EdgePL;
 
-typedef util::graph::Graph<NodePL, EdgePL> BuildGraph;
+typedef util::graph::UndirGraph<NodePL, EdgePL> BuildGraph;
 typedef util::graph::Node<NodePL, EdgePL> Node;
 typedef util::graph::Edge<NodePL, EdgePL> Edge;
 

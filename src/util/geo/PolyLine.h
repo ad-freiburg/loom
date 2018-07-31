@@ -5,7 +5,9 @@
 #ifndef UTIL_GEO_POLYLINE_H_
 #define UTIL_GEO_POLYLINE_H_
 
+#include <cfloat>
 #include <ostream>
+#include <iomanip>
 #include <string>
 #include <vector>
 #include "Geo.h"
@@ -15,6 +17,8 @@ namespace geo {
 
 static const double MAX_EQ_DISTANCE = 15;
 static const double AVERAGING_STEP = 20;
+
+// legacy code, will be removed in the future
 
 template <typename T>
 struct LinePoint {
@@ -45,7 +49,6 @@ struct SharedSegments {
   std::vector<SharedSegment<T>> segments;
 };
 
-// TODO: maybe let this class inherit from a more generic geometry class
 template <typename T>
 class PolyLine {
  public:

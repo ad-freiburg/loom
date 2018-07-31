@@ -2,8 +2,6 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-using util::geo::output::Attrs;
-
 // _____________________________________________________________________________
 template <typename T>
 Line<T> GeoGraphJsonOutput::createLine(const util::geo::Point<T>& a,
@@ -24,11 +22,13 @@ void GeoGraphJsonOutput::print(const util::graph::Graph<N, E>& outG,
   for (util::graph::Node<N, E>* n : outG.getNds()) {
     if (!n->pl().getGeom()) continue;
 
-    Attrs props = {{"id", toString(n)},
+    json::Dict props{{"id", toString(n)},
                    {"deg", toString(n->getInDeg() + n->getOutDeg())},
                    {"deg_out", toString(n->getOutDeg())},
                    {"deg_in", toString(n->getInDeg())}};
-    n->pl().getAttrs(&props);
+
+    auto addProps = n->pl().getAttrs();
+    props.insert(addProps.begin(), addProps.end());
 
     _out.print(*n->pl().getGeom(), props);
   }
@@ -38,11 +38,12 @@ void GeoGraphJsonOutput::print(const util::graph::Graph<N, E>& outG,
     for (graph::Edge<N, E>* e : n->getAdjListOut()) {
       // to avoid double output for undirected graphs
       if (e->getFrom() != n) continue;
-      Attrs props{{"from", toString(e->getFrom())},
+      json::Dict props{{"from", toString(e->getFrom())},
                   {"to", toString(e->getTo())},
                   {"id", toString(e)}};
 
-      e->pl().getAttrs(&props);
+      auto addProps = e->pl().getAttrs();
+      props.insert(addProps.begin(), addProps.end());
 
       if (!e->pl().getGeom() || !e->pl().getGeom()->size()) {
         if (e->getFrom()->pl().getGeom()) {

@@ -8,10 +8,10 @@
 #include <vector>
 #include "gtfs2topo/graph/EdgeTripGeom.h"
 #include "util/geo/PolyLine.h"
-
 #include "util/Nullable.h"
 #include "ad/cppgtfs/gtfs/Trip.h"
 #include "util/geo/GeoGraph.h"
+#include "util/json/Writer.h"
 #include "gtfs2topo/graph/BuildGraph.h"
 
 using namespace ad::cppgtfs;
@@ -20,13 +20,13 @@ using util::Nullable;
 namespace gtfs2topo {
 namespace graph {
 
-class EdgePL : util::geograph::GeoEdgePL {
+class EdgePL : public util::geograph::GeoEdgePL<float> {
  public:
   EdgePL(const Edge* e);
   EdgePL();
 
   bool addTrip(gtfs::Trip* t, Node* toNode);
-  bool addTrip(gtfs::Trip* t, PolyLine pl, Node* toNode);
+  bool addTrip(gtfs::Trip* t, PolyLine<float> pl, Node* toNode);
 
   void setEdge(const Edge* e);
 
@@ -41,8 +41,8 @@ class EdgePL : util::geograph::GeoEdgePL {
   void simplify();
   void setTo(Node* to);
 
-  const util::geo::Line* getGeom() const;
-  void getAttrs(json::object_t& obj) const;
+  const util::geo::Line<float>* getGeom() const;
+  util::json::Dict getAttrs() const;
  private:
   // Map of EdgeTripGeometries in this graph edge.
   // An EdgeTripGeometry is a geometry holding N trips.

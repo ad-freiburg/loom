@@ -52,7 +52,7 @@ bool EdgePL::addTrip(gtfs::Trip* t, Node* toNode) {
 }
 
 // _____________________________________________________________________________
-bool EdgePL::addTrip(gtfs::Trip* t, PolyLine pl, Node* toNode) {
+bool EdgePL::addTrip(gtfs::Trip* t, PolyLine<float> pl, Node* toNode) {
   assert(toNode == _e->getFrom() || toNode == _e->getTo());
   bool inserted = false;
   for (auto& e : _tripsContained) {
@@ -103,7 +103,7 @@ void EdgePL::addEdgeTripGeom(const EdgeTripGeom& e) {
 
   _tripsContained.push_back(e);
   if (e.getGeomDir() != _e->getTo()) {
-    const_cast<PolyLine*>(&_tripsContained.back().getGeom())->reverse();
+    const_cast<PolyLine<float>*>(&_tripsContained.back().getGeom())->reverse();
     _tripsContained.back().setGeomDir(_e->getTo());
   }
 }
@@ -134,14 +134,14 @@ void EdgePL::averageCombineGeom() {
     return;
   }
 
-  std::vector<const PolyLine*> lines;
+  std::vector<const PolyLine<float>*> lines;
 
   for (auto& et : _tripsContained) {
     assert(et.getGeomDir() == _e->getTo());
     lines.push_back(&et.getGeom());
   }
 
-  PolyLine pl = PolyLine::average(lines);
+  PolyLine<float> pl = PolyLine<float>::average(lines);
 
   EdgeTripGeom combined(pl, _e->getTo());
 
@@ -189,17 +189,18 @@ void EdgePL::combineIncludedGeoms() {
 
 
 // _____________________________________________________________________________
-const util::geo::Line* EdgePL::getGeom() const {
+const util::geo::FLine* EdgePL::getGeom() const {
   if (!getRefETG()) return 0;
   return &getRefETG()->getGeom().getLine();
 }
 
 // _____________________________________________________________________________
-void EdgePL::getAttrs(json::object_t& obj) const {
-  obj["lines"] = json::array();
+util::json::Dict EdgePL::getAttrs() const {
+  util::json::Dict obj;
+  util::json::Array lines;
 
   for (auto r : getRefETG()->getTripsUnordered()) {
-    json route = json::object();
+    util::json::Dict route;
     route["id"] = util::toString(r.route);
     route["label"] = r.route->getShortName();
     route["color"] = r.route->getColorString();
@@ -208,6 +209,9 @@ void EdgePL::getAttrs(json::object_t& obj) const {
       route["direction"] = util::toString(r.direction);
     }
 
-   obj["lines"].push_back(route);
+    lines.push_back(route);
   }
+  obj["lines"] = lines;
+
+  return obj;
 }

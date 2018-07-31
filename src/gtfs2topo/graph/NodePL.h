@@ -14,7 +14,7 @@
 #include "gtfs2topo/graph/BuildGraph.h"
 
 using namespace ad::cppgtfs;
-using util::geo::Point;
+using util::geo::FPoint;
 
 namespace gtfs2topo {
 namespace graph {
@@ -25,17 +25,18 @@ struct OccuringConnection {
   const Edge* to;
 };
 
-class NodePL : util::geograph::GeoNodePL {
+class NodePL : util::geograph::GeoNodePL<float> {
  public:
-  NodePL(Point pos);
+  NodePL() {};
+  NodePL(FPoint pos);
   NodePL(double x, double y);
-  NodePL(Point pos, const gtfs::Stop* stop);
+  NodePL(FPoint pos, const gtfs::Stop* stop);
   NodePL(double x, double y, const gtfs::Stop* stop);
 
   const std::set<const gtfs::Stop*>& getStops() const;
   void addStop(const gtfs::Stop* s);
-  const Point& getPos() const;
-  void setPos(const Point& p);
+  const FPoint& getPos() const;
+  void setPos(const FPoint& p);
 
   bool isConnOccuring(const gtfs::Route*, const Edge* from, const Edge* to) const;
 
@@ -49,13 +50,13 @@ class NodePL : util::geograph::GeoNodePL {
 
   const std::map<const gtfs::Route*, std::vector<OccuringConnection> >& getOccuringConnections() const;
 
-  const util::geo::Point* getGeom() const;
-  void getAttrs(json::object_t& obj) const;
+  const util::geo::FPoint* getGeom() const;
+  util::json::Dict getAttrs() const;
 
   void setNode(const Node* n);
 
  private:
-  Point _pos;
+  FPoint _pos;
   const Node* _n; // backpointer to node
 
   std::set<const gtfs::Stop*> _stops;

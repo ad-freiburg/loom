@@ -15,15 +15,15 @@ BezierCurve<T>::BezierCurve(const Point<T>& a, const Point<T>& b,
 template <typename T>
 void BezierCurve<T>::recalcPolynoms(const Point<T>& a, const Point<T>& b,
                                     const Point<T>& c, const Point<T>& d) {
-  _xp.a = a.template get<0>();
-  _xp.b = 3.0 * (b.template get<0>() - a.template get<0>());
-  _xp.c = 3.0 * (c.template get<0>() - b.template get<0>()) - _xp.b;
-  _xp.d = d.template get<0>() - a.template get<0>() - _xp.c - _xp.b;
+  _xp.a = a.getX();
+  _xp.b = 3.0 * (b.getX() - a.getX());
+  _xp.c = 3.0 * (c.getX() - b.getX()) - _xp.b;
+  _xp.d = d.getX() - a.getX() - _xp.c - _xp.b;
 
-  _yp.a = a.template get<1>();
-  _yp.b = 3.0 * (b.template get<1>() - a.template get<1>());
-  _yp.c = 3.0 * (c.template get<1>() - b.template get<1>()) - _yp.b;
-  _yp.d = d.template get<1>() - a.template get<1>() - _yp.c - _yp.b;
+  _yp.a = a.getY();
+  _yp.b = 3.0 * (b.getY() - a.getY());
+  _yp.c = 3.0 * (c.getY() - b.getY()) - _yp.b;
+  _yp.d = d.getY() - a.getY() - _yp.c - _yp.b;
 
   _didRender = false;
 }

@@ -24,7 +24,7 @@ using transitmapper::graph::OrderingConfig;
 // _____________________________________________________________________________
 TransitGraph::TransitGraph(const std::string& name, const std::string& proj)
     : _name(name) {
-  _bbox = util::geo::minbox();
+  _bbox = util::geo::minbox<float>();
   _proj = pj_init_plus(proj.c_str());
 }
 
@@ -57,9 +57,8 @@ void TransitGraph::addNode(Node* n) {
 }
 
 // _____________________________________________________________________________
-void TransitGraph::expandBBox(const Point& p) {
-  bgeo::expand(_bbox, boost::geometry::make<bgeo::model::box<Point>>(
-                          p.get<0>(), p.get<1>(), p.get<0>(), p.get<1>()));
+void TransitGraph::expandBBox(const FPoint& p) {
+  _bbox = util::geo::extendBox(p, _bbox);
 }
 
 // _____________________________________________________________________________
@@ -72,7 +71,7 @@ Node* TransitGraph::getNodeById(const std::string& id) const {
 }
 
 // _____________________________________________________________________________
-Edge* TransitGraph::addEdge(Node* from, Node* to, PolyLine pl, double w,
+Edge* TransitGraph::addEdge(Node* from, Node* to, PolyLine<float> pl, double w,
                             double s) {
   if (from == to) return 0;
   Edge* e = getEdge(from, to);
@@ -80,8 +79,7 @@ Edge* TransitGraph::addEdge(Node* from, Node* to, PolyLine pl, double w,
     e = new Edge(from, to, pl, w, s);
     from->addEdge(e);
     to->addEdge(e);
-    bgeo::expand(_bbox,
-                 bgeo::return_envelope<bgeo::model::box<Point>>(pl.getLine()));
+    _bbox = util::geo::extendBox(util::geo::getBoundingBox(pl.getLine()), _bbox);
   }
   return e;
 }
@@ -139,19 +137,19 @@ std::set<Node*>* TransitGraph::getNodes() { return &_nodes; }
 projPJ TransitGraph::getProjection() const { return _proj; }
 
 // _____________________________________________________________________________
-const Box& TransitGraph::getBoundingBox() const {
+const FBox& TransitGraph::getBoundingBox() const {
   return _bbox;
 }
 
 // _____________________________________________________________________________
-Box TransitGraph::getBoundingBox(double p) const {
-  return Box(
-      Point(_bbox.min_corner().get<0>() - p, _bbox.min_corner().get<1>() - p),
-      Point(_bbox.max_corner().get<0>() + p, _bbox.max_corner().get<1>() + p));
+FBox TransitGraph::getBoundingBox(double p) const {
+  return FBox(
+      FPoint(_bbox.getLowerLeft().getX() - p, _bbox.getLowerLeft().getY() - p),
+      FPoint(_bbox.getUpperRight().getX() + p, _bbox.getUpperRight().getY() + p));
 }
 
 // _____________________________________________________________________________
-Node* TransitGraph::getNearestNode(const Point& p, double maxD) const {
+Node* TransitGraph::getNearestNode(const FPoint& p, double maxD) const {
   double curD = DBL_MAX;
   ;
   Node* curN = 0;

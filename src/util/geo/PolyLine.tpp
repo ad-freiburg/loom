@@ -66,11 +66,6 @@ void PolyLine<T>::offsetPerp(double units) {
    *
    * there doesn't seem to be any library which reliably does that,
    * so we do it ourself here until we find one...
-   * boost::geometry only supports buffering a line, resulting in a
-   * polygon. An offsetted line is part of that polygon, but retrieving
-   * it reliably could result in some geometrical diffing hocus pocus which is
-   * bound to go wrong at /some/ point (self intersections, numerical
-   * instability etc)
    */
 
   if (fabs(units) < 0.001) return;
@@ -87,8 +82,8 @@ void PolyLine<T>::offsetPerp(double units) {
   for (size_t i = 1; i < _line.size(); i++) {
     Point<T> curP = _line[i];
 
-    double n1 = lastP.template get<1>() - curP.template get<1>();
-    double n2 = curP.template get<0>() - lastP.template get<0>();
+    double n1 = lastP.getY() - curP.getY();
+    double n2 = curP.getX() - lastP.getX();
     double n = sqrt(n1 * n1 + n2 * n2);
 
     // if n == 0, the segment is effectively a point
@@ -98,11 +93,11 @@ void PolyLine<T>::offsetPerp(double units) {
     n1 = n1 / n;
     n2 = n2 / n;
 
-    lastP.template set<0>(lastP.template get<0>() + (n1 * units));
-    lastP.template set<1>(lastP.template get<1>() + (n2 * units));
+    lastP.setX(lastP.getX() + (n1 * units));
+    lastP.setY(lastP.getY() + (n2 * units));
 
-    curP.template set<0>(curP.template get<0>() + (n1 * units));
-    curP.template set<1>(curP.template get<1>() + (n2 * units));
+    curP.setX(curP.getX() + (n1 * units));
+    curP.setY(curP.getY() + (n2 * units));
 
     if (lastIns && befLastIns &&
         lineIntersects(*lastIns, *befLastIns, lastP, curP)) {
@@ -213,7 +208,7 @@ LinePoint<T> PolyLine<T>::getPointAtDist(double atDist) const {
 
   for (size_t i = 1; i < _line.size(); i++) {
     const Point<T>& cur = _line[i];
-    double d = geo::dist(last, cur);
+    double d = geo::dist(*last, cur);
     dist += d;
 
     if (dist > atDist) {
@@ -239,13 +234,13 @@ LinePoint<T> PolyLine<T>::getPointAt(double at) const {
 template <typename T>
 Point<T> PolyLine<T>::interpolate(const Point<T>& a, const Point<T>& b,
                                   double p) const {
-  double n1 = b.template get<0>() - a.template get<0>();
-  double n2 = b.template get<1>() - a.template get<1>();
+  double n1 = b.getX() - a.getX();
+  double n2 = b.getY() - a.getY();
   double n = sqrt(n1 * n1 + n2 * n2);
   n1 = n1 / n;
   n2 = n2 / n;
-  return Point<T>(a.template get<0>() + (n1 * p),
-                  a.template get<1>() + (n2 * p));
+  return Point<T>(a.getX() + (n1 * p),
+                  a.getY() + (n2 * p));
 }
 
 // _____________________________________________________________________________
@@ -304,11 +299,11 @@ PolyLine<T> PolyLine<T>::average(const std::vector<const PolyLine<T>*>& lines,
       const PolyLine* pl = lines[i];
       Point<T> p = pl->getPointAt(a).p;
       if (weighted) {
-        x += p.template get<0>() * weights[i];
-        y += p.template get<1>() * weights[i];
+        x += p.getX() * weights[i];
+        y += p.getY() * weights[i];
       } else {
-        x += p.template get<0>();
-        y += p.template get<1>();
+        x += p.getX();
+        y += p.getY();
       }
     }
     ret << Point<T>(x / total, y / total);
@@ -465,8 +460,8 @@ bool PolyLine<T>::contains(const PolyLine<T>& rhs, double dmax) const {
 template <typename T>
 void PolyLine<T>::move(double vx, double vy) {
   for (size_t i = 0; i < _line.size(); i++) {
-    _line[i].set<0>(_line[i].template get<0>() + vx);
-    _line[i].set<1>(_line[i].template get<1>() + vy);
+    _line[i].setX(_line[i].getX() + vx);
+    _line[i].setY(_line[i].getY() + vy);
   }
 }
 
@@ -624,11 +619,11 @@ PolyLine<T> PolyLine<T>::getOrthoLineAtDist(double d, double length) const {
 
   double angle = angBetween(getPointAtDist(d - 5).p, getPointAtDist(d + 5).p);
 
-  double angleX1 = avgP.template get<0>() + cos(angle + M_PI / 2) * length / 2;
-  double angleY1 = avgP.template get<1>() + sin(angle + M_PI / 2) * length / 2;
+  double angleX1 = avgP.getX() + cos(angle + M_PI / 2) * length / 2;
+  double angleY1 = avgP.getY() + sin(angle + M_PI / 2) * length / 2;
 
-  double angleX2 = avgP.template get<0>() + cos(angle + M_PI / 2) * -length / 2;
-  double angleY2 = avgP.template get<1>() + sin(angle + M_PI / 2) * -length / 2;
+  double angleX2 = avgP.getX() + cos(angle + M_PI / 2) * -length / 2;
+  double angleY2 = avgP.getY() + sin(angle + M_PI / 2) * -length / 2;
 
   return PolyLine(Point<T>(angleX1, angleY1), Point<T>(angleX2, angleY2));
 }
@@ -648,8 +643,8 @@ std::pair<double, double> PolyLine<T>::getSlopeBetween(double ad,
 
   double d = dist(a.p, b.p);
 
-  double dx = (b.p.template get<0>() - a.p.template get<0>()) / d;
-  double dy = (b.p.template get<1>() - a.p.template get<1>()) / d;
+  double dx = (b.p.getX() - a.p.getX()) / d;
+  double dy = (b.p.getY() - a.p.getY()) / d;
 
   return std::pair<double, double>(dx, dy);
 }
@@ -711,11 +706,11 @@ void PolyLine<T>::applyChaikinSmooth(size_t depth) {
       Point<T> pB = _line[i];
 
       smooth.push_back(
-          Point<T>(0.75 * pA.template get<0>() + 0.25 * pB.template get<0>(),
-                   0.75 * pA.template get<1>() + 0.25 * pB.template get<1>()));
+          Point<T>(0.75 * pA.getX() + 0.25 * pB.getX(),
+                   0.75 * pA.getY() + 0.25 * pB.getY()));
       smooth.push_back(
-          Point<T>(0.25 * pA.template get<0>() + 0.75 * pB.template get<0>(),
-                   0.25 * pA.template get<1>() + 0.75 * pB.template get<1>()));
+          Point<T>(0.25 * pA.getX() + 0.75 * pB.getX(),
+                   0.25 * pA.getY() + 0.75 * pB.getY()));
     }
 
     smooth.push_back(_line.back());

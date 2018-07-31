@@ -20,11 +20,16 @@ find_package(GDAL REQUIRED)
 find_package(GLPK REQUIRED)
 
 # set compiler flags, see http://stackoverflow.com/questions/7724569/debug-vs-release-in-cmake
-set(CMAKE_CXX_FLAGS                "-fopenmp -O3 -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wformat-security -Wformat=2")
-set(CMAKE_CXX_FLAGS_DEBUG          "-Og -g -DLOGLEVEL=5")
-set(CMAKE_CXX_FLAGS_MINSIZEREL     "-DLOGLEVEL=3")
-set(CMAKE_CXX_FLAGS_RELEASE        "-DLOGLEVEL=2")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -DLOGLEVEL=5")
+if(OPENMP_FOUND)
+	set(CMAKE_CXX_FLAGS            "-fopenmp -Ofast -fno-signed-zeros -fno-trapping-math -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wformat-security -Wformat=2")
+else()
+	message(WARNING "Configuring without OpenMP!")
+	set(CMAKE_CXX_FLAGS            "-Ofast -fno-signed-zeros -fno-trapping-math -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wformat-security -Wformat=2")
+endif()
+set(CMAKE_CXX_FLAGS_DEBUG          "-Og -g -DLOGLEVEL=3")
+set(CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2")
+set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -g -DLOGLEVEL=3")
 
 # export compile commands to tools like clang
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

@@ -10,17 +10,18 @@
 #include "gtfs2topo/graph/NodePL.h"
 #include "gtfs2topo/graph/EdgePL.h"
 #include "util/String.h"
+#include "util/json/Writer.h"
 
 using namespace gtfs2topo;
 using namespace graph;
 using namespace ad::cppgtfs;
 
-using util::geo::Point;
-using util::geo::Line;
+using util::geo::FPoint;
+using util::geo::FLine;
 
 
 // _____________________________________________________________________________
-NodePL::NodePL(Point pos) : _pos(pos) {
+NodePL::NodePL(FPoint pos) : _pos(pos) {
 }
 
 // _____________________________________________________________________________
@@ -28,7 +29,7 @@ NodePL::NodePL(double x, double y) : _pos(x, y) {
 }
 
 // _____________________________________________________________________________
-NodePL::NodePL(Point pos, const gtfs::Stop* s) : _pos(pos) {
+NodePL::NodePL(FPoint pos, const gtfs::Stop* s) : _pos(pos) {
   if (s) _stops.insert(s);
 }
 
@@ -48,12 +49,12 @@ const std::set<const gtfs::Stop*>& NodePL::getStops() const {
 }
 
 // _____________________________________________________________________________
-const Point& NodePL::getPos() const {
+const FPoint& NodePL::getPos() const {
   return _pos;
 }
 
 // _____________________________________________________________________________
-void NodePL::setPos(const Point& p) {
+void NodePL::setPos(const FPoint& p) {
   _pos = p;
 }
 
@@ -127,7 +128,7 @@ const {
 }
 
 // _____________________________________________________________________________
-const util::geo::Point* NodePL::getGeom() const {
+const util::geo::FPoint* NodePL::getGeom() const {
   return &getPos();
 }
 
@@ -137,13 +138,14 @@ void NodePL::setNode(const Node* n) {
 }
 
 // _____________________________________________________________________________
-void NodePL::getAttrs(json::object_t& obj) const {
+util::json::Dict NodePL::getAttrs() const {
+  util::json::Dict obj;
   if (getStops().size() > 0) {
     obj["station_id"] = (*getStops().begin())->getId();
     obj["station_label"] = (*getStops().begin())->getName();
   }
 
-  auto arr = json::array();
+  auto arr = util::json::Array();
 
   for (const graph::Edge* e : _n->getAdjList()) {
     if (!e->pl().getRefETG()) continue;
@@ -157,7 +159,7 @@ void NodePL::getAttrs(json::object_t& obj) const {
                (r.direction == _n && rr.direction != _n) ||
                (r.direction != _n && rr.direction == _n)) &&
               !isConnOccuring(r.route, e, f)) {
-            auto obj = json::object();
+            auto obj = util::json::Dict();
             obj["route"] = util::toString(r.route);
             obj["edge1_node"] =
                 util::toString(e->getFrom() == _n ? e->getTo() : e->getFrom());
@@ -171,4 +173,5 @@ void NodePL::getAttrs(json::object_t& obj) const {
   }
 
   if (arr.size()) obj["excluded_line_conns"] = arr;
+  return obj;
 }

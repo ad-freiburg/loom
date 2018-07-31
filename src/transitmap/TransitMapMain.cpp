@@ -207,9 +207,9 @@ int main(int argc, char** argv) {
                 << 0 << std::endl
                 << 0 << std::endl
                 << -1 / cfg.outputResolution << std::endl
-                << std::fixed << g.getBoundingBox(cfg.outputPadding).min_corner().get<0>()
+                << std::fixed << g.getBoundingBox(cfg.outputPadding).getLowerLeft().getX()
                 << std::endl
-                << g.getBoundingBox(cfg.outputPadding).max_corner().get<1>() << std::endl;
+                << g.getBoundingBox(cfg.outputPadding).getUpperRight().getY() << std::endl;
         file.close();
       }
     }
@@ -380,8 +380,8 @@ int main(int argc, char** argv) {
     std::cout << ptest5.getLine().size() << std::endl;
     svgOut.printLine(ptest5, "fill:none;stroke:red;stroke-width:1", rmp);
 
-    std::cout << "Intersects: " << intersects(4.914, 8.505, 7.316, 9.094,
-                                              12.198, 10.008, 14.676, 10.332)
+    std::cout << "Intersects: " << intersects(FPoint(4.914, 8.505), FPoint(7.316, 9.094),
+                                              FPoint(12.198, 10.008), FPoint(14.676, 10.332))
               << std::endl;
 
     PolyLine<float> ptest6;

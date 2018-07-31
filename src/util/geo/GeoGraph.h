@@ -7,6 +7,7 @@
 
 #include <map>
 #include "util/geo/Geo.h"
+#include "util/json/Writer.h"
 
 namespace util {
 namespace geograph {
@@ -15,14 +16,14 @@ template<typename T>
 class GeoEdgePL {
  public:
   virtual const util::geo::Line<T>* getGeom() const = 0;
-  virtual void getAttrs(std::map<std::string, std::string>* m) const = 0;
+  virtual json::Dict getAttrs() const = 0;
 };
 
 template<typename T>
 class GeoNodePL {
  public:
   virtual const util::geo::Point<T>* getGeom() const = 0;
-  virtual void getAttrs(std::map<std::string, std::string>* m) const = 0;
+  virtual json::Dict getAttrs() const = 0;
 };
 
 }  // namespace geograph

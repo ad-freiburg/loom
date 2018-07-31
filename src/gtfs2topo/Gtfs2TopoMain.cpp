@@ -12,7 +12,7 @@
 #include "gtfs2topo/config/ConfigReader.h"
 #include "gtfs2topo/config/GraphBuilderConfig.h"
 #include "gtfs2topo/graph/BuildGraph.h"
-#include "util/geo/output/GeoJsonOutput.h"
+#include "util/geo/output/GeoGraphJsonOutput.h"
 #include "ad/cppgtfs/Parser.h"
 #include "ad/cppgtfs/gtfs/Service.h"
 #include "util/log/Log.h"
@@ -58,8 +58,8 @@ int main(int argc, char** argv) {
     b.removeNodeArtifacts(&g);
     b.averageNodePositions(&g);
 
-    util::geo::output::GeoJsonOutput out;
-    out.print(g);
+    util::geo::output::GeoGraphJsonOutput out;
+    out.print(g, std::cout);
   }
 
   return (0);

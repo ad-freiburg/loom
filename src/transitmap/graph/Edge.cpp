@@ -14,7 +14,7 @@ using namespace graph;
 using util::geo::PolyLine;
 
 // _____________________________________________________________________________
-Edge::Edge(Node* from, Node* to, PolyLine pl, double w, double s)
+Edge::Edge(Node* from, Node* to, PolyLine<float> pl, double w, double s)
     : _from(from), _to(to), _width(w), _spacing(s) {
   setGeom(pl);
 }
@@ -194,7 +194,7 @@ std::vector<const Route*> Edge::getSharedRoutes(const Edge& e) const {
 }
 
 // _____________________________________________________________________________
-const PolyLine& Edge::getGeom() const { return _geom; }
+const PolyLine<float>& Edge::getGeom() const { return _geom; }
 
 // _____________________________________________________________________________
-void Edge::setGeom(const PolyLine& p) { _geom = p; }
+void Edge::setGeom(const PolyLine<float>& p) { _geom = p; }

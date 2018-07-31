@@ -27,11 +27,11 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
 
   double p = _cfg->outputPadding;
 
-  rparams.xOff = outG.getBoundingBox(p).min_corner().get<0>();
-  rparams.yOff = outG.getBoundingBox(p).min_corner().get<1>();
+  rparams.xOff = outG.getBoundingBox(p).getLowerLeft().getX();
+  rparams.yOff = outG.getBoundingBox(p).getLowerLeft().getY();
 
-  rparams.width = outG.getBoundingBox(p).max_corner().get<0>() - rparams.xOff;
-  rparams.height = outG.getBoundingBox(p).max_corner().get<1>() - rparams.yOff;
+  rparams.width = outG.getBoundingBox(p).getUpperRight().getX() - rparams.xOff;
+  rparams.height = outG.getBoundingBox(p).getUpperRight().getY() - rparams.yOff;
 
   rparams.width *= _cfg->outputResolution;
   rparams.height *= _cfg->outputResolution;
@@ -495,10 +495,10 @@ void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
                                 const RenderParams& rparams) {
   Params params;
   params["x"] = std::to_string(
-      (n->getPos().get<0>() - rparams.xOff) * _cfg->outputResolution + 0);
+      (n->getPos().getX() - rparams.xOff) * _cfg->outputResolution + 0);
   params["y"] = std::to_string(
       rparams.height -
-      (n->getPos().get<1>() - rparams.yOff) * _cfg->outputResolution - 0);
+      (n->getPos().getY() - rparams.yOff) * _cfg->outputResolution - 0);
   params["style"] =
       "font-family:Verdana;font-size:8px; font-style:normal; font-weight: "
       "normal; fill: red; stroke-width: 0.25px; stroke-linecap: butt; "
@@ -772,9 +772,9 @@ void SvgOutput::printPoint(const FPoint& p, const std::string& style,
                            const RenderParams& rparams) {
   std::map<std::string, std::string> params;
   params["cx"] =
-      std::to_string((p.get<0>() - rparams.xOff) * _cfg->outputResolution);
+      std::to_string((p.getX() - rparams.xOff) * _cfg->outputResolution);
   params["cy"] = std::to_string(
-      rparams.height - (p.get<1>() - rparams.yOff) * _cfg->outputResolution);
+      rparams.height - (p.getY() - rparams.yOff) * _cfg->outputResolution);
   params["r"] = "2";
   params["style"] = style;
   _w.openTag("circle", params);
@@ -797,9 +797,9 @@ void SvgOutput::printLine(const PolyLine<float>& l,
   std::stringstream points;
 
   for (auto& p : l.getLine()) {
-    points << " " << (p.get<0>() - rparams.xOff) * _cfg->outputResolution << ","
+    points << " " << (p.getX() - rparams.xOff) * _cfg->outputResolution << ","
            << rparams.height -
-                  (p.get<1>() - rparams.yOff) * _cfg->outputResolution;
+                  (p.getY() - rparams.yOff) * _cfg->outputResolution;
   }
 
   params["points"] = points.str();
@@ -815,10 +815,10 @@ void SvgOutput::printPolygon(const Polygon<float>& g,
   std::map<std::string, std::string> params = ps;
   std::stringstream points;
 
-  for (auto& p : g.outer()) {
-    points << " " << (p.get<0>() - rparams.xOff) * _cfg->outputResolution << ","
+  for (auto& p : g.getOuter()) {
+    points << " " << (p.getX() - rparams.xOff) * _cfg->outputResolution << ","
            << rparams.height -
-                  (p.get<1>() - rparams.yOff) * _cfg->outputResolution;
+                  (p.getY() - rparams.yOff) * _cfg->outputResolution;
   }
 
   params["points"] = points.str();
@@ -844,9 +844,9 @@ void SvgOutput::printCircle(const FPoint& center, double rad,
   std::stringstream points;
 
 
-  params["cx"] = std::to_string((center.get<0>() - rparams.xOff) * _cfg->outputResolution);
+  params["cx"] = std::to_string((center.getX() - rparams.xOff) * _cfg->outputResolution);
   params["cy"] = std::to_string(rparams.height -
-                  (center.get<1>() - rparams.yOff) * _cfg->outputResolution);
+                  (center.getY() - rparams.yOff) * _cfg->outputResolution);
   params["r"] = std::to_string(rad * _cfg->outputResolution);
 
   _w.openTag("circle", params);

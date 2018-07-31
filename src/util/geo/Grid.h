@@ -7,6 +7,7 @@
 
 #include <set>
 #include <vector>
+#include <map>
 #include "util/geo/Geo.h"
 
 namespace util {
@@ -17,7 +18,7 @@ class GridException : public std::runtime_error {
   GridException(std::string const& msg) : std::runtime_error(msg) {}
 };
 
-template <typename V, template <typename> typename G, typename T>
+template <typename V, template <typename> class G, typename T>
 class Grid {
  public:
   // initialization of a point grid with cell width w and cell height h

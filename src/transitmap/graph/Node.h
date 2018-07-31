@@ -7,8 +7,8 @@
 
 #include <set>
 #include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/Route.h"
 #include "transitmap/graph/Penalties.h"
+#include "transitmap/graph/Route.h"
 #include "util/geo/Geo.h"
 #include "util/geo/PolyLine.h"
 
@@ -31,7 +31,8 @@ struct NodeFront {
   Node* n;  // pointer to node here also
 
   FPoint getTripOccPos(const Route* r, const OrderingConfig& c) const;
-  FPoint getTripOccPos(const Route* r, const OrderingConfig& c, bool originGeom) const;
+  FPoint getTripOccPos(const Route* r, const OrderingConfig& c,
+                       bool originGeom) const;
   FPoint getTripPos(const Edge* e, size_t pos, bool inv) const;
   FPoint getTripPos(const Edge* e, size_t pos, bool inv, bool originGeom) const;
 
@@ -43,7 +44,10 @@ struct NodeFront {
   // geometry before expansion
   PolyLine<float> origGeom;
 
-  void setInitialGeom(const PolyLine<float>& g) { geom = g; origGeom=g; };
+  void setInitialGeom(const PolyLine<float>& g) {
+    geom = g;
+    origGeom = g;
+  };
   void setGeom(const PolyLine<float>& g) { geom = g; };
 
   // TODO
@@ -51,8 +55,7 @@ struct NodeFront {
 };
 
 struct Partner {
-  Partner()
-      : front(0), edge(0), route(0){};
+  Partner() : front(0), edge(0), route(0){};
   Partner(const NodeFront* f, const Edge* e, const Route* r)
       : front(f), edge(e), route(r){};
   const NodeFront* front;
@@ -61,7 +64,8 @@ struct Partner {
 };
 
 struct InnerGeometry {
-  InnerGeometry(PolyLine<float> g, Partner a, Partner b, size_t slotF, size_t slotT)
+  InnerGeometry(PolyLine<float> g, Partner a, Partner b, size_t slotF,
+                size_t slotT)
       : geom(g), from(a), to(b), slotFrom(slotF), slotTo(slotT){};
   PolyLine<float> geom;
   Partner from;
@@ -110,7 +114,8 @@ class Node {
 
   size_t getConnCardinality() const;
 
-  Polygon<float> getConvexFrontHull(double d, bool rectangulize, bool simple) const;
+  Polygon<float> getConvexFrontHull(double d, bool rectangulize,
+                                    bool simple) const;
 
   void generateStationHull(double d, bool useSimple);
 
@@ -158,9 +163,10 @@ class Node {
                                      const graph::Partner& partnerFrom,
                                      const graph::Partner& partnerTo) const;
   InnerGeometry getTerminusStraightLine(
-    const OrderingConfig& c, const graph::Partner& partnerFrom) const;
-  InnerGeometry getTerminusBezier(
-    const OrderingConfig& c, const graph::Partner& partnerFrom, double prec) const;
+      const OrderingConfig& c, const graph::Partner& partnerFrom) const;
+  InnerGeometry getTerminusBezier(const OrderingConfig& c,
+                                  const graph::Partner& partnerFrom,
+                                  double prec) const;
 
   friend class TransitGraph;
 };
