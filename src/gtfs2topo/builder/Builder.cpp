@@ -460,68 +460,64 @@ bool Builder::createTopologicalNodes(BuildGraph* g, bool final) {
     g->delEdg(w.e->getFrom(), w.e->getTo());
     g->delEdg(w.f->getFrom(), w.f->getTo());
 
-    // add new edges
-    // g->addNode(a);
-    // g->addNode(b);
-    Edge* eaE = g->addEdg(wefrom, a, EdgePL());
-    if (eaE) eaE->pl().setEdge(eaE);
-    Edge* abE = g->addEdg(a, b, EdgePL());
-    if (abE) abE->pl().setEdge(abE);
-    Edge* ebE = g->addEdg(b, weto, EdgePL());
-    if (ebE) ebE->pl().setEdge(ebE);
+    Edge *eaE = 0, *abE = 0, *ebE = 0, *faE = 0, *fbE = 0;
 
-    if (eaE) {
+    // add new edges
+    assert(a != b);
+    abE = g->addEdg(a, b, EdgePL());
+    if (abE) abE->pl().setEdge(abE);
+
+    if (a != wefrom) {
+      eaE = g->addEdg(wefrom, a, EdgePL());
+      eaE->pl().setEdge(eaE);
       wefrom->pl().replaceEdgeInConnections(w.e, eaE);
     } else {
-      assert(a == wefrom);
       a->pl().replaceEdgeInConnections(w.e, abE);
     }
 
-    if (ebE) {
+    if (b != weto) {
+      ebE = g->addEdg(b, weto, EdgePL());
+      ebE->pl().setEdge(ebE);
       weto->pl().replaceEdgeInConnections(w.e, ebE);
     } else {
       assert(b == weto);
       b->pl().replaceEdgeInConnections(w.e, abE);
     }
 
-    Edge *faE = 0, *fbE = 0;
 
     if (fap.totalPos > fbp.totalPos) {
-      faE = g->addEdg(a, wfto, EdgePL());
-      if (faE) faE->pl().setEdge(faE);
-      fbE = g->addEdg(wffrom, b, EdgePL());
-      if (fbE) fbE->pl().setEdge(fbE);
-
-      if (faE) {
+      if (a != wfto) {
+        faE = g->addEdg(a, wfto, EdgePL());
+        faE->pl().setEdge(faE);
         wfto->pl().replaceEdgeInConnections(w.f, faE);
       } else {
         assert(a == wfto);
         a->pl().replaceEdgeInConnections(w.f, abE);
       }
 
-      if (fbE) {
+      if (b != wffrom) {
+        fbE = g->addEdg(wffrom, b, EdgePL());
+        if (fbE) fbE->pl().setEdge(fbE);
         wffrom->pl().replaceEdgeInConnections(w.f, fbE);
       } else {
-        assert(b == wffrom);
         b->pl().replaceEdgeInConnections(w.f, abE);
       }
     } else {
-      faE = g->addEdg(wffrom, a, EdgePL());
-      if (faE) faE->pl().setEdge(faE);
-      fbE = g->addEdg(b, wfto, EdgePL());
-      if (fbE) fbE->pl().setEdge(fbE);
 
-      if (faE) {
+      if (a != wffrom) {
+        faE = g->addEdg(wffrom, a, EdgePL());
+        faE->pl().setEdge(faE);
         wffrom->pl().replaceEdgeInConnections(w.f, faE);
       } else {
         assert(a == wffrom);
         a->pl().replaceEdgeInConnections(w.f, abE);
       }
 
-      if (fbE) {
+      if (b != wfto) {
+        fbE = g->addEdg(b, wfto, EdgePL());
+        fbE->pl().setEdge(fbE);
         wfto->pl().replaceEdgeInConnections(w.f, fbE);
       } else {
-        assert(b == wfto);
         b->pl().replaceEdgeInConnections(w.f, abE);
       }
     }
@@ -784,6 +780,8 @@ bool Builder::combineEdges(Edge* a, Edge* b, Node* n, BuildGraph* g) {
 
   etga.setGeom(p);
 
+  assert(newFrom != newTo);
+
   Edge* e = g->addEdg(newFrom, newTo, EdgePL());
   e->pl().setEdge(e);
   e->pl().addEdgeTripGeom(etga);
@@ -815,6 +813,7 @@ bool Builder::combineNodes(Node* a, Node* b, BuildGraph* g) {
   for (Edge* e : a->getAdjList()) {
     if (e->getFrom() != a) continue;
     if (connecting == e) continue;
+    assert(b != e->getTo());
     Edge* newE = g->addEdg(b, e->getTo(), EdgePL());
     newE->pl().setEdge(newE);
     b->addEdge(newE);
@@ -848,6 +847,7 @@ bool Builder::combineNodes(Node* a, Node* b, BuildGraph* g) {
   for (Edge* e : a->getAdjListIn()) {
     if (e->getTo() != a) continue;
     if (connecting == e) continue;
+    assert(b != e->getFrom());
     Edge* newE = g->addEdg(e->getFrom(), b, EdgePL());
     newE->pl().setEdge(newE);
     b->addEdge(newE);
@@ -1019,9 +1019,7 @@ EdgeGrid Builder::getGeoIndex(const BuildGraph* g) const {
   for (auto n : g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      if (!e->pl().getRefETG()) {
-        continue;
-      }
+      if (!e->pl().getRefETG()) continue;
       grid.add(e->pl().getRefETG()->getGeom().getLine(), e);
     }
   }

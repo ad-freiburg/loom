@@ -16,7 +16,7 @@ class Box {
   // maximum inverse box as default value of box
   Box()
       : _ll(std::numeric_limits<T>::max(), std::numeric_limits<T>::max()),
-        _ur(std::numeric_limits<T>::min(), std::numeric_limits<T>::min()) {}
+        _ur(std::numeric_limits<T>::lowest(), std::numeric_limits<T>::lowest()) {}
   Box(const Point<T>& ll, const Point<T>& ur) : _ll(ll), _ur(ur) {}
   const Point<T>& getLowerLeft() const { return _ll; }
   const Point<T>& getUpperRight() const { return _ur; }

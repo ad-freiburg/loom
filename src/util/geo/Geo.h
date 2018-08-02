@@ -1167,7 +1167,7 @@ inline Polygon<T> convexHull(const MultiPoint<T>& l) {
   if (l.size() == 1) return convexHull(l[0]);
 
   Point<T> left(std::numeric_limits<T>::max(), 0);
-  Point<T> right(std::numeric_limits<T>::min(), 0);
+  Point<T> right(std::numeric_limits<T>::lowest(), 0);
   for (const auto& p : l) {
     if (p.getX() <= left.getX()) left = p;
     if (p.getX() >= right.getX()) right = p;
