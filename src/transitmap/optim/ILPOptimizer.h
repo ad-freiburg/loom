@@ -39,7 +39,8 @@ struct VariableMatrix {
 
 class ILPOptimizer : public Optimizer {
  public:
-  ILPOptimizer(TransitGraph* g, const config::Config* cfg, const Scorer* scorer) : _g(g), _cfg(cfg), _scorer(scorer){};
+  ILPOptimizer(TransitGraph* g, const config::Config* cfg, const Scorer* scorer)
+      : _g(g), _cfg(cfg), _scorer(scorer){};
 
   int optimize() const;
 
@@ -97,7 +98,7 @@ class ILPOptimizer : public Optimizer {
   int getCrossingPenaltyDiffSeg(const OptNode* n) const;
   int getSplittingPenalty(const OptNode* n) const;
 
-  FPoint getPos(OptNode* n, OptEdge* segment, size_t p) const;
+  DPoint getPos(OptNode* n, OptEdge* segment, size_t p) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

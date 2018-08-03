@@ -32,7 +32,7 @@ class TransitGraph {
   ~TransitGraph();
 
   void addNode(Node* n);
-  Edge* addEdge(Node* from, Node* to, geo::PolyLine<float> pl, double w, double s);
+  Edge* addEdge(Node* from, Node* to, geo::PolyLine<double> pl, double w, double s);
   Edge* getEdge(Node* from, Node* to);
 
   void deleteEdge(Node* from, Node* to);
@@ -42,11 +42,11 @@ class TransitGraph {
 
   Node* getNodeById(const std::string& id) const;
 
-  Node* getNearestNode(const geo::FPoint& p, double maxD) const;
+  Node* getNearestNode(const geo::DPoint& p, double maxD) const;
 
   projPJ getProjection() const;
-  const geo::FBox& getBoundingBox() const;
-  geo::FBox getBoundingBox(double p) const;
+  const geo::DBox& getBoundingBox() const;
+  geo::DBox getBoundingBox(double p) const;
 
   size_t getMaxDegree() const;
 
@@ -56,7 +56,7 @@ class TransitGraph {
   Route* addRoute(const Route* r);
   const Route* getRoute(const std::string& id) const;
 
-  void expandBBox(const geo::FPoint& p);
+  void expandBBox(const geo::DPoint& p);
 
   size_t getNumNodes() const;
   size_t getNumNodes(bool topo) const;
@@ -81,7 +81,7 @@ class TransitGraph {
 
   OrderingConfig _config;
 
-  geo::FBox _bbox;
+  geo::DBox _bbox;
 
   projPJ _proj;
 };

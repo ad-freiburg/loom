@@ -3,15 +3,15 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <glpk.h>
+#include <chrono>
 #include <cstdio>
 #include <fstream>
 #include <thread>
-#include <chrono>
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/optim/ILPOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
-#include "util/geo/Geo.h"
 #include "util/String.h"
+#include "util/geo/Geo.h"
 #include "util/log/Log.h"
 
 using namespace transitmapper;
@@ -28,13 +28,16 @@ int ILPOptimizer::optimize() const {
   }
 
   if (_cfg->outputStats) {
-    LOG(INFO) << "(stats) Stats for optim graph of '" << _g->getName() << std::endl;
+    LOG(INFO) << "(stats) Stats for optim graph of '" << _g->getName()
+              << std::endl;
     LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
-      << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
-      << " non-topo)" << std::endl;
+              << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
+              << " non-topo)" << std::endl;
     LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges() << std::endl;
-    LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes() << std::endl;
-    LOG(INFO) << "(stats)   Max edge route cardinality: " << g.getMaxCardinality() << std::endl;
+    LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes()
+              << std::endl;
+    LOG(INFO) << "(stats)   Max edge route cardinality: "
+              << g.getMaxCardinality() << std::endl;
   }
 
   LOG(DEBUG) << "Creating ILP problem... " << std::endl;
@@ -42,7 +45,7 @@ int ILPOptimizer::optimize() const {
   LOG(DEBUG) << " .. done" << std::endl;
 
   LOG(INFO) << "(stats) ILP has " << glp_get_num_cols(lp) << " cols and "
-    << glp_get_num_rows(lp) << " rows." << std::endl;
+            << glp_get_num_rows(lp) << " rows." << std::endl;
 
   if (!_cfg->glpkHOutputPath.empty()) {
     LOG(DEBUG) << "Writing human readable ILP to '" << _cfg->glpkHOutputPath
@@ -62,14 +65,17 @@ int ILPOptimizer::optimize() const {
     preSolveCoinCbc(lp);
   }
 
-	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+  std::chrono::high_resolution_clock::time_point t1 =
+      std::chrono::high_resolution_clock::now();
   solveProblem(lp);
-	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+  std::chrono::high_resolution_clock::time_point t2 =
+      std::chrono::high_resolution_clock::now();
+  auto duration =
+      std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-	if (_cfg->externalSolver.empty()) {
+  if (_cfg->externalSolver.empty()) {
     _g->setLastSolveTime(duration);
-		LOG(INFO) << " === Solve done in " << duration << " ms ===" << std::endl;
+    LOG(INFO) << " === Solve done in " << duration << " ms ===" << std::endl;
   }
 
   _g->setLastSolveTarget(glp_mip_obj_val(lp));
@@ -336,10 +342,12 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
              << linepair.second->getId() << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
-          glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenaltySameSeg(node)
-                           // multiply the penalty with the number of collapsed lines!
-                           * (linepair.first->getNumCollapsedPartners() + 1) * (linepair.second->getNumCollapsedPartners() + 1));
+          glp_set_obj_coef(
+              lp, decisionVar,
+              getCrossingPenaltySameSeg(node)
+                  // multiply the penalty with the number of collapsed lines!
+                  * (linepair.first->getNumCollapsedPartners() + 1) *
+                  (linepair.second->getNumCollapsedPartners() + 1));
 
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
@@ -415,10 +423,12 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
              << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
-          glp_set_obj_coef(lp, decisionVar,
-                           getCrossingPenaltyDiffSeg(node)
-                           // multiply the penalty with the number of collapsed lines!
-                           * (linepair.first->getNumCollapsedPartners() + 1) * (linepair.second->getNumCollapsedPartners() + 1));
+          glp_set_obj_coef(
+              lp, decisionVar,
+              getCrossingPenaltyDiffSeg(node)
+                  // multiply the penalty with the number of collapsed lines!
+                  * (linepair.first->getNumCollapsedPartners() + 1) *
+                  (linepair.second->getNumCollapsedPartners() + 1));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
             if (crosses(node, segmentA, segments, poscomb)) {
@@ -564,7 +574,8 @@ std::vector<LinePair> ILPOptimizer::getLinePairs(OptEdge* segment) const {
 }
 
 // _____________________________________________________________________________
-std::vector<LinePair> ILPOptimizer::getLinePairs(OptEdge* segment, bool unique) const {
+std::vector<LinePair> ILPOptimizer::getLinePairs(OptEdge* segment,
+                                                 bool unique) const {
   std::set<const Route*> processed;
   std::vector<LinePair> ret;
   for (auto& toA : *segment->etgs[0].etg->getTripsUnordered()) {
@@ -577,8 +588,10 @@ std::vector<LinePair> ILPOptimizer::getLinePairs(OptEdge* segment, bool unique) 
 
       // this is to make sure that we always get the same line pairs in unique
       // mode -> take the smaller pointer first
-      if (!unique || toA.route < toB.route) ret.push_back(LinePair(toA.route, toB.route));
-      else ret.push_back(LinePair(toB.route, toA.route));
+      if (!unique || toA.route < toB.route)
+        ret.push_back(LinePair(toA.route, toB.route));
+      else
+        ret.push_back(LinePair(toB.route, toA.route));
     }
   }
   return ret;
@@ -608,20 +621,24 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
   LOG(INFO) << "Calling external solver..." << std::endl;
 
-	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+  std::chrono::high_resolution_clock::time_point t1 =
+      std::chrono::high_resolution_clock::now();
 
   std::string cmd = _cfg->externalSolver;
   util::replaceAll(cmd, "{INPUT}", f);
   util::replaceAll(cmd, "{OUTPUT}", outf);
-  util::replaceAll(cmd, "{THREADS}", util::toString(std::thread::hardware_concurrency()));
+  util::replaceAll(cmd, "{THREADS}",
+                   util::toString(std::thread::hardware_concurrency()));
   LOG(INFO) << "Cmd: '" << cmd << "'" << std::endl;
-	int r = system(cmd.c_str());
+  int r = system(cmd.c_str());
 
-	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+  std::chrono::high_resolution_clock::time_point t2 =
+      std::chrono::high_resolution_clock::now();
+  auto duration =
+      std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
   _g->setLastSolveTime(duration);
-	LOG(INFO) << " === External solve done (ret=" << r << ") in " << duration
-    << " ms ===" << std::endl;
+  LOG(INFO) << " === External solve done (ret=" << r << ") in " << duration
+            << " ms ===" << std::endl;
   LOG(INFO) << "Parsing solution..." << std::endl;
 
   std::ifstream fin;
@@ -674,16 +691,16 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
 
   bool pCrossing = false;
 
-  FPoint aInA = getPos(node, segmentA, posAinA);
-  FPoint bInA = getPos(node, segmentA, posBinA);
-  FPoint aInB = getPos(node, segmentB, posAinB);
-  FPoint bInB = getPos(node, segmentB, posBinB);
+  DPoint aInA = getPos(node, segmentA, posAinA);
+  DPoint bInA = getPos(node, segmentA, posBinA);
+  DPoint aInB = getPos(node, segmentB, posAinB);
+  DPoint bInB = getPos(node, segmentB, posBinB);
 
-  FLine a;
+  DLine a;
   a.push_back(aInA);
   a.push_back(aInB);
 
-  FLine b;
+  DLine b;
   b.push_back(bInA);
   b.push_back(bInB);
 
@@ -712,8 +729,8 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
   size_t posAinA = otherWayA ? cardA - 1 - postcomb.first : postcomb.first;
   size_t posBinA = otherWayA ? cardA - 1 - postcomb.second : postcomb.second;
 
-  FPoint aInA = getPos(node, segmentA, posAinA);
-  FPoint bInA = getPos(node, segmentA, posBinA);
+  DPoint aInA = getPos(node, segmentA, posAinA);
+  DPoint bInA = getPos(node, segmentA, posBinA);
 
   for (size_t i = 0; i < segments.first->etgs.front().etg->getCardinality(true);
        ++i) {
@@ -722,14 +739,14 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
       size_t posAinB = otherWayB ? cardB - 1 - i : i;
       size_t posBinC = otherWayC ? cardC - 1 - j : j;
 
-      FPoint aInB = getPos(node, segments.first, posAinB);
-      FPoint bInC = getPos(node, segments.second, posBinC);
+      DPoint aInB = getPos(node, segments.first, posAinB);
+      DPoint bInC = getPos(node, segments.second, posBinC);
 
-      FLine a;
+      DLine a;
       a.push_back(aInA);
       a.push_back(aInB);
 
-      FLine b;
+      DLine b;
       b.push_back(bInA);
       b.push_back(bInC);
 
@@ -742,7 +759,7 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
 }
 
 // _____________________________________________________________________________
-FPoint ILPOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) const {
+DPoint ILPOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) const {
   // look for correct nodefront
   const NodeFront* nf = 0;
   for (auto etg : segment->etgs) {
@@ -753,8 +770,9 @@ FPoint ILPOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) const {
     }
   }
 
-  if (!nf) std::cerr << n->node->getId() << " node fronts: "
-    << n->node->getMainDirs().size() << std::endl;
+  if (!nf)
+    std::cerr << n->node->getId()
+              << " node fronts: " << n->node->getMainDirs().size() << std::endl;
   assert(nf);
 
   return nf->getTripPos(segment->etgs.front().etg, p, false);

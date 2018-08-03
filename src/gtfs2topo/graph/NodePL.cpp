@@ -16,12 +16,12 @@ using namespace gtfs2topo;
 using namespace graph;
 using namespace ad::cppgtfs;
 
-using util::geo::FPoint;
-using util::geo::FLine;
+using util::geo::DPoint;
+using util::geo::DLine;
 
 
 // _____________________________________________________________________________
-NodePL::NodePL(FPoint pos) : _pos(pos) {
+NodePL::NodePL(DPoint pos) : _pos(pos) {
 }
 
 // _____________________________________________________________________________
@@ -29,7 +29,7 @@ NodePL::NodePL(double x, double y) : _pos(x, y) {
 }
 
 // _____________________________________________________________________________
-NodePL::NodePL(FPoint pos, const gtfs::Stop* s) : _pos(pos) {
+NodePL::NodePL(DPoint pos, const gtfs::Stop* s) : _pos(pos) {
   if (s) _stops.insert(s);
 }
 
@@ -49,12 +49,12 @@ const std::set<const gtfs::Stop*>& NodePL::getStops() const {
 }
 
 // _____________________________________________________________________________
-const FPoint& NodePL::getPos() const {
+const DPoint& NodePL::getPos() const {
   return _pos;
 }
 
 // _____________________________________________________________________________
-void NodePL::setPos(const FPoint& p) {
+void NodePL::setPos(const DPoint& p) {
   _pos = p;
 }
 
@@ -128,7 +128,7 @@ const {
 }
 
 // _____________________________________________________________________________
-const util::geo::FPoint* NodePL::getGeom() const {
+const util::geo::DPoint* NodePL::getGeom() const {
   return &getPos();
 }
 

@@ -731,7 +731,7 @@ inline double dist(const Point<T>& p1, const Point<T>& p2) {
 template <typename T>
 inline std::string getWKT(const Point<T>& p) {
   std::stringstream ss;
-  ss << "POINT (" << p.getX() << " " << p.getY() << ")";
+  ss << "POINT (" << std::fixed << p.getX() << " " << p.getY() << ")";
   return ss.str();
 }
 
@@ -742,7 +742,7 @@ inline std::string getWKT(const std::vector<Point<T>>& p) {
   ss << "MULTIPOINT (";
   for (size_t i = 0; i < p.size(); i++) {
     if (i) ss << ", ";
-    ss << "(" << p[i].getX() << " " << p[i].getY() << ")";
+    ss << "(" << std::fixed << p[i].getX() << " " << p[i].getY() << ")";
   }
   ss << ")";
   return ss.str();
@@ -755,7 +755,7 @@ inline std::string getWKT(const Line<T>& l) {
   ss << "LINESTRING (";
   for (size_t i = 0; i < l.size(); i++) {
     if (i) ss << ", ";
-    ss << l[i].getX() << " " << l[i].getY();
+    ss << std::fixed << l[i].getX() << " " << l[i].getY();
   }
   ss << ")";
   return ss.str();
@@ -772,7 +772,7 @@ inline std::string getWKT(const std::vector<Line<T>>& ls) {
     ss << "(";
     for (size_t i = 0; i < ls[j].size(); i++) {
       if (i) ss << ", ";
-      ss << ls[j][i].getX() << " " << ls[j][i].getY();
+      ss << std::fixed << ls[j][i].getX() << " " << ls[j][i].getY();
     }
     ss << ")";
   }
@@ -792,6 +792,7 @@ template <typename T>
 inline std::string getWKT(const Box<T>& l) {
   std::stringstream ss;
   ss << "POLYGON ((";
+  ss << std::fixed;
   ss << l.getLowerLeft().getX() << " " << l.getLowerLeft().getY();
   ss << ", " << l.getUpperRight().getX() << " " << l.getLowerLeft().getY();
   ss << ", " << l.getUpperRight().getX() << " " << l.getUpperRight().getY();
@@ -806,6 +807,7 @@ template <typename T>
 inline std::string getWKT(const Polygon<T>& p) {
   std::stringstream ss;
   ss << "POLYGON ((";
+  ss << std::fixed;
   for (size_t i = 0; i < p.getOuter().size(); i++) {
     ss << p.getOuter()[i].getX() << " " << p.getOuter()[i].getY() << ", ";
   }
@@ -819,6 +821,7 @@ template <typename T>
 inline std::string getWKT(const std::vector<Polygon<T>>& ls) {
   std::stringstream ss;
   ss << "MULTIPOLYGON (";
+  ss << std::fixed;
 
   for (size_t j = 0; j < ls.size(); j++) {
     if (j) ss << ", ";
@@ -953,7 +956,7 @@ inline Point<T> projectOn(const Point<T>& a, const Point<T>& b,
   if (doubleEq(a.getX(), c.getX()) && doubleEq(a.getY(), c.getY())) return a;
   if (doubleEq(b.getX(), c.getX()) && doubleEq(b.getY(), c.getY())) return b;
 
-  double x, y;
+  T x, y;
 
   if (c.getX() == a.getX()) {
     // infinite slope
@@ -963,8 +966,8 @@ inline Point<T> projectOn(const Point<T>& a, const Point<T>& b,
     double m = (double)(c.getY() - a.getY()) / (c.getX() - a.getX());
     double bb = (double)a.getY() - (m * a.getX());
 
-    x = (m * b.getY() + b.getX() - m * bb) / (m * m + 1);
-    y = (m * m * b.getY() + m * b.getX() + bb) / (m * m + 1);
+    x = (m * b.getY() + b.getX() - m * bb) / (m * m + 1.0);
+    y = (m * m * b.getY() + m * b.getX() + bb) / (m * m + 1.0);
   }
 
   Point<T> ret = Point<T>(x, y);
@@ -1017,7 +1020,7 @@ inline double parallelity(const Box<T>& box, const MultiLine<T>& multiline) {
     ret += parallelity(box, l);
   }
 
-  return ret / multiline.size();
+  return ret / static_cast<float>(multiline.size());
 }
 
 // _____________________________________________________________________________

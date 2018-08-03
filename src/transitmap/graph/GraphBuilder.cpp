@@ -69,10 +69,10 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
         std::vector<std::vector<double> > coords = geom["coordinates"];
 
-        PolyLine<float> pl;
+        PolyLine<double> pl;
         for (auto coord : coords) {
           double x = coord[0], y = coord[1];
-          FPoint p(x, y);
+          DPoint p(x, y);
           pl << p;
           g->expandBBox(p);
         }
@@ -237,7 +237,7 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
       if (e->getGeom().getLength() == 0) continue;
 
       NodeFront f(e, n);
-      PolyLine<float> pl;
+      PolyLine<double> pl;
 
       f.refEtgLengthBefExp = e->getGeom().getLength();
 
@@ -523,15 +523,15 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
                                      const NodeFront& b) const {
   size_t numShr = a.edge->getSharedRoutes(*b.edge).size();
 
-  FPoint aa = a.geom.front();
-  FPoint ab = a.geom.back();
-  FPoint ba = b.geom.front();
-  FPoint bb = b.geom.back();
+  DPoint aa = a.geom.front();
+  DPoint ab = a.geom.back();
+  DPoint ba = b.geom.front();
+  DPoint bb = b.geom.back();
 
   bool intersects = lineIntersects(aa, ab, ba, bb);
   if (!intersects) return false;
 
-  FPoint i = intersection(aa, ab, ba, bb);
+  DPoint i = intersection(aa, ab, ba, bb);
 
   if (numShr && a.geom.distTo(i) < (a.edge->getWidth() + a.edge->getSpacing()))
     return true;
@@ -545,21 +545,23 @@ bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
 
 // _____________________________________________________________________________
 void GraphBuilder::freeNodeFront(NodeFront* f) {
-  PolyLine<float> cutLine = f->geom;
+  PolyLine<double> cutLine = f->geom;
 
-  std::set<LinePoint<float>, LinePointCmp<float>> iSects =
+  std::set<LinePoint<double>, LinePointCmp<double>> iSects =
       cutLine.getIntersections(f->edge->getGeom());
   if (iSects.size() > 0) {
     if (f->edge->getTo() != f->n) {
       // cut at beginning
       f->edge->setGeom(
           f->edge->getGeom().getSegment(iSects.begin()->totalPos, 1));
+
       assert(cutLine.distTo(f->edge->getGeom().front()) < 0.1);
 
     } else {
       // cut at end
       f->edge->setGeom(
           f->edge->getGeom().getSegment(0, (--iSects.end())->totalPos));
+
       assert(cutLine.distTo(f->edge->getGeom().back()) < 0.1);
     }
   }

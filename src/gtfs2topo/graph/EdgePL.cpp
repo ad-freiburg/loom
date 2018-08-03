@@ -52,7 +52,7 @@ bool EdgePL::addTrip(gtfs::Trip* t, Node* toNode) {
 }
 
 // _____________________________________________________________________________
-bool EdgePL::addTrip(gtfs::Trip* t, PolyLine<float> pl, Node* toNode) {
+bool EdgePL::addTrip(gtfs::Trip* t, PolyLine<double> pl, Node* toNode) {
   assert(toNode == _e->getFrom() || toNode == _e->getTo());
   bool inserted = false;
   for (auto& e : _tripsContained) {
@@ -103,7 +103,7 @@ void EdgePL::addEdgeTripGeom(const EdgeTripGeom& e) {
 
   _tripsContained.push_back(e);
   if (e.getGeomDir() != _e->getTo()) {
-    const_cast<PolyLine<float>*>(&_tripsContained.back().getGeom())->reverse();
+    const_cast<PolyLine<double>*>(&_tripsContained.back().getGeom())->reverse();
     _tripsContained.back().setGeomDir(_e->getTo());
   }
 }
@@ -134,14 +134,14 @@ void EdgePL::averageCombineGeom() {
     return;
   }
 
-  std::vector<const PolyLine<float>*> lines;
+  std::vector<const PolyLine<double>*> lines;
 
   for (auto& et : _tripsContained) {
     assert(et.getGeomDir() == _e->getTo());
     lines.push_back(&et.getGeom());
   }
 
-  PolyLine<float> pl = PolyLine<float>::average(lines);
+  PolyLine<double> pl = PolyLine<double>::average(lines);
 
   EdgeTripGeom combined(pl, _e->getTo());
 
@@ -189,7 +189,7 @@ void EdgePL::combineIncludedGeoms() {
 
 
 // _____________________________________________________________________________
-const util::geo::FLine* EdgePL::getGeom() const {
+const util::geo::DLine* EdgePL::getGeom() const {
   if (!getRefETG()) return 0;
   return &getRefETG()->getGeom().getLine();
 }

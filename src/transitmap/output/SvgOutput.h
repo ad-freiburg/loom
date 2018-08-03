@@ -62,7 +62,7 @@ struct EndMarker {
 };
 
 typedef std::map<std::string, std::string> Params;
-typedef std::pair<Params, PolyLine<float>> PrintDelegate;
+typedef std::pair<Params, PolyLine<double>> PrintDelegate;
 
 struct OutlinePrintPair {
   OutlinePrintPair(PrintDelegate front, PrintDelegate back)
@@ -79,22 +79,22 @@ class SvgOutput : public Output {
 
   virtual void print(const graph::TransitGraph& outputGraph);
 
-  void printLine(const PolyLine<float>& l,
+  void printLine(const PolyLine<double>& l,
                  const std::map<std::string, std::string>& ps,
                  const RenderParams& params);
-  void printLine(const PolyLine<float>& l, const std::string& style,
+  void printLine(const PolyLine<double>& l, const std::string& style,
                  const RenderParams& params);
-  void printPoint(const FPoint& p, const std::string& style,
+  void printPoint(const DPoint& p, const std::string& style,
                   const RenderParams& params);
-  void printPolygon(const Polygon<float>& g, const std::string& style,
+  void printPolygon(const Polygon<double>& g, const std::string& style,
                     const RenderParams& params);
-  void printPolygon(const Polygon<float>& g,
+  void printPolygon(const Polygon<double>& g,
                     const std::map<std::string, std::string>& ps,
                     const RenderParams& params);
-  void printCircle(const FPoint& center, double rad,
+  void printCircle(const DPoint& center, double rad,
                    const std::map<std::string, std::string>& ps,
                    const RenderParams& rparams);
-  void printCircle(const FPoint& center, double rad, const std::string& style,
+  void printCircle(const DPoint& center, double rad, const std::string& style,
                    const RenderParams& rparams);
 
  private:
@@ -127,11 +127,11 @@ class SvgOutput : public Output {
   void renderNodeScore(const graph::TransitGraph& outG, const graph::Node* n,
                        const RenderParams& params);
 
-  void renderLinePart(const PolyLine<float> p, double width, const graph::Route& route,
+  void renderLinePart(const PolyLine<double> p, double width, const graph::Route& route,
                       const graph::Edge* e,
                       const Nullable<style::LineStyle> style);
 
-  void renderLinePart(const PolyLine<float> p, double width, const graph::Route& route,
+  void renderLinePart(const PolyLine<double> p, double width, const graph::Route& route,
                       const graph::Edge* edge, const std::string& endMarker,
                       const Nullable<style::LineStyle> style);
 

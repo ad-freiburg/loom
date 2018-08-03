@@ -13,20 +13,20 @@ using namespace graph;
 using namespace ad::cppgtfs;
 
 // _____________________________________________________________________________
-EdgeTripGeom::EdgeTripGeom(PolyLine<float> geom, const Node* geomDir)
+EdgeTripGeom::EdgeTripGeom(PolyLine<double> geom, const Node* geomDir)
 : _geomDir(geomDir) {
   setGeom(geom);
 }
 
 // _____________________________________________________________________________
-void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode, PolyLine<float>& pl) {
-  std::vector<const PolyLine<float>*> vec;
+void EdgeTripGeom::addTrip(gtfs::Trip* t, const Node* dirNode, PolyLine<double>& pl) {
+  std::vector<const PolyLine<double>*> vec;
   vec.push_back(&_geom);
   if (dirNode != _geomDir) {
     pl.reverse();
   }
   vec.push_back(&pl);
-  setGeom(PolyLine<float>::average(vec));
+  setGeom(PolyLine<double>::average(vec));
 
   addTrip(t, dirNode);
 }
@@ -64,12 +64,12 @@ TripOccurance* EdgeTripGeom::getTripsForRoute(const gtfs::Route* r) const {
 }
 
 // _____________________________________________________________________________
-const PolyLine<float>& EdgeTripGeom::getGeom() const {
+const PolyLine<double>& EdgeTripGeom::getGeom() const {
   return _geom;
 }
 
 // _____________________________________________________________________________
-void EdgeTripGeom::setGeom(const PolyLine<float>& p) {
+void EdgeTripGeom::setGeom(const PolyLine<double>& p) {
   _geom = p;
 }
 

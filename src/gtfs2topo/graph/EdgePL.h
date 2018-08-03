@@ -20,13 +20,13 @@ using util::Nullable;
 namespace gtfs2topo {
 namespace graph {
 
-class EdgePL : public util::geograph::GeoEdgePL<float> {
+class EdgePL : public util::geograph::GeoEdgePL<double> {
  public:
   EdgePL(const Edge* e);
   EdgePL();
 
   bool addTrip(gtfs::Trip* t, Node* toNode);
-  bool addTrip(gtfs::Trip* t, PolyLine<float> pl, Node* toNode);
+  bool addTrip(gtfs::Trip* t, PolyLine<double> pl, Node* toNode);
 
   void setEdge(const Edge* e);
 
@@ -41,7 +41,7 @@ class EdgePL : public util::geograph::GeoEdgePL<float> {
   void simplify();
   void setTo(Node* to);
 
-  const util::geo::Line<float>* getGeom() const;
+  const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;
  private:
   // Map of EdgeTripGeometries in this graph edge.

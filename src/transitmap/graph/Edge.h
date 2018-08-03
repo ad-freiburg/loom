@@ -39,7 +39,7 @@ typedef std::pair<RouteOccurance*, size_t> RouteOccWithPos;
 
 class Edge {
  public:
-  Edge(Node* from, Node* to, PolyLine<float> pl, double w, double s);
+  Edge(Node* from, Node* to, PolyLine<double> pl, double w, double s);
 
   Node* getFrom() const;
   Node* getTo() const;
@@ -52,8 +52,8 @@ class Edge {
   void addRoute(const Route* r, const Node* dir, const LineStyle& ls);
   void addRoute(const Route* r, const Node* dir);
 
-  const PolyLine<float>& getGeom() const;
-  void setGeom(const PolyLine<float>& p);
+  const PolyLine<double>& getGeom() const;
+  void setGeom(const PolyLine<double>& p);
 
   const std::vector<RouteOccurance>& getTripsUnordered() const;
   std::vector<RouteOccurance>* getTripsUnordered();
@@ -96,7 +96,7 @@ class Edge {
 
   std::vector<RouteOccurance> _routes;
 
-  PolyLine<float> _geom;
+  PolyLine<double> _geom;
 
   double _width, _spacing;
 };
