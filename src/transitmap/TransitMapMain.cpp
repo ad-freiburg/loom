@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   if (true) {
-    LOG(INFO) << "reading graph " << std::endl;
+    LOG(INFO) << "reading graph ";
     graph::TransitGraph g(cfg.name, cfg.projectionString);
     graph::GraphBuilder b(&cfg);
     if (!b.build(&(std::cin), &g)) {
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     }
 
 
-    LOG(INFO) << "Creating node fronts..." << std::endl;
+    LOG(INFO) << "Creating node fronts...";
     b.writeMainDirs(&g);
 
     if (cfg.dontExpandStations) {
@@ -67,10 +67,10 @@ int main(int argc, char** argv) {
 
     b.createMetaNodes(&g);
 
-    LOG(INFO) << "Writing initial ordering configuration..." << std::endl;
+    LOG(INFO) << "Writing initial ordering configuration...";
     b.writeInitialConfig(&g);
 
-    LOG(INFO) << "Optimizing..." << std::endl;
+    LOG(INFO) << "Optimizing...";
 
     double maxCrossPen = g.getMaxDegree() * (cfg.crossPenMultiSameSeg > cfg.crossPenMultiDiffSeg ? cfg.crossPenMultiSameSeg : cfg.crossPenMultiDiffSeg);
     double maxSplitPen = g.getMaxDegree() * cfg.splitPenWeight;
@@ -92,38 +92,37 @@ int main(int argc, char** argv) {
     optim::Scorer scorer(&g, pens);
 
     if (cfg.outputStats) {
-      LOG(INFO) << "(stats) Stats for graph '" << g.getName() << std::endl;
+      LOG(INFO) << "(stats) Stats for graph '" << g.getName();
       LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
                 << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
-                << " non-topo)" << std::endl;
+                << " non-topo)";
       LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges()
-                << std::endl;
+                ;
       LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes()
-                << std::endl;
+                ;
       LOG(INFO) << "(stats)   Max edge route cardinality: "
-                << g.getMaxCardinality() << std::endl;
+                << g.getMaxCardinality();
       LOG(INFO) << "(stats)   Number of poss. solutions: "
-                << scorer.getNumPossSolutions() << std::endl;
-      LOG(INFO) << "(stats)   Highest node degree: " << g.getMaxDegree() << std::endl;
+                << scorer.getNumPossSolutions();
+      LOG(INFO) << "(stats)   Highest node degree: " << g.getMaxDegree();
     }
 
-    LOG(INFO) << "(stats) Max crossing pen: " << maxCrossPen << std::endl;
-    LOG(INFO) << "(stats) Max splitting pen: " << maxSplitPen << std::endl;
+    LOG(INFO) << "(stats) Max crossing pen: " << maxCrossPen;
+    LOG(INFO) << "(stats) Max splitting pen: " << maxSplitPen;
 
     LOG(INFO) << "(stats) Total graph score BEFORE optim is -- "
               << scorer.getScore()
-              << " -- (incl. unavoidable crossings!)" << std::endl;
+              << " -- (incl. unavoidable crossings!)";
     LOG(INFO) << "(stats)   Per node graph score: "
               << scorer.getScore() /
-                     g.getNodes()->size()
-              << std::endl;
+                     g.getNodes()->size();
     LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings() << " (score: "
               << scorer.getCrossScore()
-              << ")" << std::endl;
+              << ")";
     LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
               << " (score: "
               << scorer.getSeparationScore()
-              << ")" << std::endl;
+              << ")";
 
     if (cfg.renderMethod != "ogr" && !cfg.noOptim) {
       if (cfg.optimMethod == "ilp_impr") {
@@ -137,18 +136,18 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "(stats) Total graph score AFTER optim is -- "
               << scorer.getScore()
-              << " -- (incl. unavoidable crossings!)" << std::endl;
+              << " -- (incl. unavoidable crossings!)";
     LOG(INFO) << "(stats)   Per node graph score: "
               << scorer.getScore() /
                      g.getNodes()->size()
-              << std::endl;
+              ;
     LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings() << " (score: "
               << scorer.getCrossScore()
-              << ")" << std::endl;
+              << ")";
     LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
               << " (score: "
               << scorer.getSeparationScore()
-              << ")" << std::endl;
+              << ")";
 
     if (cfg.renderMethod == "svg") {
       std::string path = cfg.outputPath;
@@ -198,7 +197,7 @@ int main(int argc, char** argv) {
     }
 
     if (!cfg.worldFilePath.empty()) {
-      LOG(INFO) << "Writing world file for this map to " << cfg.worldFilePath << std::endl;
+      LOG(INFO) << "Writing world file for this map to " << cfg.worldFilePath;
 
       std::ofstream file;
       file.open(cfg.worldFilePath);
@@ -230,7 +229,7 @@ int main(int argc, char** argv) {
     b << DPoint(2, 7);
 
     SharedSegments<double> ss = a.getSharedSegments(b, 3);
-    LOG(INFO) << "RESULT: " << ss.segments.size() << std::endl;
+    LOG(INFO) << "RESULT: " << ss.segments.size();
 
   } else {
     // just testing parallel drawing...

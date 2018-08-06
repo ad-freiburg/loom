@@ -83,12 +83,12 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
         Node* toN = g->getNodeById(to);
 
         if (!fromN) {
-          LOG(WARN) << "Node \"" << from << "\" not found." << std::endl;
+          LOG(WARN) << "Node \"" << from << "\" not found.";
           continue;
         }
 
         if (!toN) {
-          LOG(WARN) << "Node \"" << to << "\" not found." << std::endl;
+          LOG(WARN) << "Node \"" << to << "\" not found.";
           continue;
         }
 
@@ -97,7 +97,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
           LOG(WARN) << "Geometry for edge from " << fromN->getId() << " to "
                     << toN->getId() << " seems "
                     << " to have the wrong orientation! This may lead to "
-                    << " strange results." << std::endl;
+                    << " strange results.";
         }
 
         Edge* e =
@@ -173,8 +173,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
             if (!r) {
               LOG(WARN) << "line connection exclude defined in node " << id
-                        << " for line " << rid << ", but no such line exists."
-                        << std::endl;
+                        << " for line " << rid << ", but no such line exists.";
               continue;
             }
 
@@ -184,14 +183,14 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
             if (!n1) {
               LOG(WARN) << "line connection exclude defined in node " << id
                         << " for edge from " << nid1
-                        << ", but no such node exists." << std::endl;
+                        << ", but no such node exists.";
               continue;
             }
 
             if (!n2) {
               LOG(WARN) << "line connection exclude defined in node " << id
                         << " for edge from " << nid2
-                        << ", but no such node exists." << std::endl;
+                        << ", but no such node exists.";
               continue;
             }
 
@@ -201,14 +200,14 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
             if (!a) {
               LOG(WARN) << "line connection exclude defined in node " << id
                         << " for edge from " << nid1
-                        << ", but no such edge exists." << std::endl;
+                        << ", but no such edge exists.";
               continue;
             }
 
             if (!b) {
               LOG(WARN) << "line connection exclude defined in node " << id
                         << " for edge from " << nid2
-                        << ", but no such edge exists." << std::endl;
+                        << ", but no such edge exists.";
               continue;
             }
 
@@ -219,7 +218,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
     }
 
   } else {
-    LOG(ERROR) << "Could not read input." << std::endl;
+    LOG(ERROR) << "Could not read input.";
     return false;
   }
 
@@ -582,7 +581,7 @@ void GraphBuilder::combinePartnerRoutes(graph::TransitGraph* g) {
       LOG(INFO) << "Combining " << pp << "(" << pp->getLabel() << ","
                 << pp->getColor() << ")"
                 << " and " << p.first << " (" << p.first->getLabel() << ","
-                << p.first->getColor() << ")." << std::endl;
+                << p.first->getColor() << ").";
       processed.insert(pp);
       const_cast<Route*>(pp)->setRelativeTo(p.first);
     }
