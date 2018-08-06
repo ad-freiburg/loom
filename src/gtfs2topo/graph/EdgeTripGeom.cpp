@@ -95,22 +95,6 @@ size_t EdgeTripGeom::getCardinality() const {
 }
 
 // _____________________________________________________________________________
-void EdgeTripGeom::removeOrphans() {
-  double avgTrips = 0;
-
-  for (auto& to : _trips) {
-    avgTrips += to.trips.size();
-  }
-  avgTrips /= _trips.size();
-
-  for (auto it = _trips.begin(); it != _trips.end(); it++) {
-    if (it->trips.size() < avgTrips * 0.15) {
-      it = removeTripOccurance(it);
-      it--;
-    }
-  }
-}
-// _____________________________________________________________________________
 std::vector<TripOccurance>::iterator
 EdgeTripGeom::removeTripOccurance(std::vector<TripOccurance>::const_iterator pos) {
   return _trips.erase(pos);

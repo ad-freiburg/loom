@@ -120,7 +120,7 @@ void EdgePL::simplify() {
 
   for (auto it = _tripsContained.begin(); it < _tripsContained.end(); ++it) {
     if (it->getTripCardinality() < avg*0.1) {
-      //it = _tripsContained.erase(it);
+      it = _tripsContained.erase(it);
     }
   }
 

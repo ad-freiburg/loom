@@ -54,8 +54,6 @@ class EdgeTripGeom {
   const PolyLine<double>& getGeom() const;
   void setGeom(const PolyLine<double>& p);
 
-  void removeOrphans();
-
   bool containsRoute(gtfs::Route* r) const;
   size_t getTripCardinality() const;
   size_t getCardinality() const;
