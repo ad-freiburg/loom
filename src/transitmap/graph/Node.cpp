@@ -334,7 +334,7 @@ InnerGeometry Node::getTerminusBezier(const OrderingConfig& cf,
   }
 
   b = DPoint(p.getX() + slopeA.first * d, p.getY() + slopeA.second * d);
-  c = DPoint(pp.getY(), pp.getY());
+  c = DPoint(pp.getX(), pp.getY());
 
   BezierCurve<double> bc(p, b, c, pp);
   ret.geom = bc.render(prec);
