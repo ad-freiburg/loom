@@ -492,6 +492,7 @@ Polygon<double> Node::getConvexFrontHull(
   bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
   bgeo::strategy::buffer::side_straight sideStrat;
 
+
   if (!simpleRenderForTwoEdgeNodes || getMainDirs().size() != 2) {
     MultiLine<double> l;
     for (auto& nf : getMainDirs()) {
@@ -553,8 +554,10 @@ Polygon<double> Node::getConvexFrontHull(
     pols.push_back(&a);
     pols.push_back(&b);
 
+    auto avg = PolyLine<double>::average(pols).getLine();
+
     BoostLine lineBgeo;
-    for (const auto& p : PolyLine<double>::average(pols).getLine()) {
+    for (const auto& p : avg) {
       lineBgeo.push_back({p.getX(), p.getY()});
     }
 
@@ -568,6 +571,7 @@ Polygon<double> Node::getConvexFrontHull(
   for (const auto& p : ret[0].outer()) {
     retPoly.getOuter().push_back({p.get<0>(), p.get<1>()});
   }
+
   return retPoly;
 }
 
