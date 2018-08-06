@@ -44,22 +44,16 @@ int main(int argc, char** argv) {
     gtfs2topo::graph::BuildGraph g;
     Builder b(&cfg);
 
-    std::cerr << "Consuming... " << std::endl;
     b.consume(feed, &g);
-    std::cerr << "Simplifying... " << std::endl;
     b.simplify(&g);
 
     // first pass, with strict distance values (clearing things up first)
-    std::cerr << "Topo 1... " << std::endl;
     b.createTopologicalNodes(&g, false);
-    std::cerr << "Removing artifacts... " << std::endl;
     b.removeEdgeArtifacts(&g);
 
-    std::cerr << "Topo 2... " << std::endl;
     while (b.createTopologicalNodes(&g, true)) {
     }
 
-    std::cerr << "Removing artifacts... " << std::endl;
     b.removeEdgeArtifacts(&g);
     b.removeNodeArtifacts(&g);
     b.averageNodePositions(&g);
