@@ -23,7 +23,7 @@ void GeoGraphJsonOutput::print(const util::graph::Graph<N, E>& outG,
     if (!n->pl().getGeom()) continue;
 
     json::Dict props{{"id", toString(n)},
-                   {"deg", toString(n->getInDeg() + n->getOutDeg())},
+                   {"deg", toString(n->getDeg())},
                    {"deg_out", toString(n->getOutDeg())},
                    {"deg_in", toString(n->getInDeg())}};
 

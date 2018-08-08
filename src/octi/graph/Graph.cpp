@@ -3,13 +3,14 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "dot/Parser.h"
+#include "json/json.hpp"
 #include "octi/graph/EdgePL.h"
 #include "octi/graph/Graph.h"
 #include "octi/graph/NodePL.h"
+#include "util/String.h"
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
 #include "util/log/Log.h"
-#include "util/String.h"
 
 #include "transitmap/style/LineStyle.h"
 
@@ -18,11 +19,11 @@ using util::graph::Node;
 using util::graph::Edge;
 
 // _____________________________________________________________________________
-Graph::Graph() { _bbox = util::geo::minbox(); }
+Graph::Graph() {}
 
 // _____________________________________________________________________________
 void Graph::readFromDot(std::istream* s) {
-  _bbox = util::geo::minbox();
+  _bbox = util::geo::Box<double>();
 
   dot::parser::Parser dp(s);
   std::map<std::string, Node<NodePL, EdgePL>*> idMap;
@@ -54,7 +55,7 @@ void Graph::readFromDot(std::istream* s) {
       }
 
       if (!n) {
-        n = new Node<NodePL, EdgePL>(NodePL(util::geo::Point(x, y)));
+        n = addNd(NodePL(util::geo::Point<double>(x, y)));
         idMap[ent.ids[0]] = n;
       }
 
@@ -67,58 +68,59 @@ void Graph::readFromDot(std::istream* s) {
           i.name = ent.attrs["label"];
         n->pl().addStop(i);
       }
-
-      addNode(n);
     } else if (ent.type == dot::parser::EDGE) {
       eid++;
       std::string prevId = ent.ids.front();
       if (idMap.find(prevId) == idMap.end())
-        idMap[prevId] =
-            new Node<NodePL, EdgePL>(NodePL(util::geo::Point(0, 0)));
+        idMap[prevId] = addNd(NodePL(util::geo::Point<double>(0, 0)));
 
       for (size_t i = 1; i < ent.ids.size(); ++i) {
         std::string curId = ent.ids[i];
 
         if (idMap.find(curId) == idMap.end())
-          idMap[curId] =
-              new Node<NodePL, EdgePL>(NodePL(util::geo::Point(0, 0)));
-        auto e = getEdge(idMap[prevId], idMap[curId]);
+          idMap[curId] = addNd(NodePL(util::geo::Point<double>(0, 0)));
+        auto e = getEdg(idMap[prevId], idMap[curId]);
 
         if (!e) {
-          PolyLine pl;
-          e = addEdge(idMap[curId], idMap[prevId], EdgePL(pl));
+          PolyLine<double> pl;
+          e = addEdg(idMap[curId], idMap[prevId], EdgePL(pl));
         }
-          std::string id;
-          if (ent.attrs.find("id") != ent.attrs.end()) {
-            id = ent.attrs["id"];
-          } else if (ent.attrs.find("label") != ent.attrs.end()) {
-            id = ent.attrs["label"];
-          } else {
-            id = util::toString(eid);
-          }
+        std::string id;
+        if (ent.attrs.find("id") != ent.attrs.end()) {
+          id = ent.attrs["id"];
+        } else if (ent.attrs.find("label") != ent.attrs.end()) {
+          id = ent.attrs["label"];
+        } else {
+          id = util::toString(eid);
+        }
 
-          const Route* r = getRoute(id);
-          if (!r) {
-            std::string label = ent.attrs.find("label") != ent.attrs.end() ? "" : ent.attrs["label"];
-            std::string color = ent.attrs.find("label") != ent.attrs.end() ? "" : ent.attrs["label"];
-            r = new Route(id, label, color);
-            addRoute(r);
-          }
+        const Route* r = getRoute(id);
+        if (!r) {
+          std::string label = ent.attrs.find("label") != ent.attrs.end()
+                                  ? ""
+                                  : ent.attrs["label"];
+          std::string color = ent.attrs.find("label") != ent.attrs.end()
+                                  ? ""
+                                  : ent.attrs["label"];
+          r = new Route(id, label, color);
+          addRoute(r);
+        }
 
-          Node<NodePL, EdgePL>* dir = 0;
+        Node<NodePL, EdgePL>* dir = 0;
 
-          if (ent.graphType == dot::parser::DIGRAPH || ent.graphType == dot::parser::STRICT_DIGRAPH) {
-            dir = idMap[curId];
-          }
+        if (ent.graphType == dot::parser::DIGRAPH ||
+            ent.graphType == dot::parser::STRICT_DIGRAPH) {
+          dir = idMap[curId];
+        }
 
-          e->pl().addRoute(r, dir);
+        e->pl().addRoute(r, dir);
       }
     }
   }
 
-  for (auto n : *getNodes()) {
+  for (auto n : *getNds()) {
     for (auto e : n->getAdjListOut()) {
-      PolyLine pl;
+      PolyLine<double> pl;
       pl << *e->getFrom()->pl().getGeom();
       pl << *e->getTo()->pl().getGeom();
 
@@ -128,15 +130,14 @@ void Graph::readFromDot(std::istream* s) {
     }
   }
 
-
   buildGrids();
 }
 
 // _____________________________________________________________________________
 void Graph::readFromJson(std::istream* s) {
-  _bbox = util::geo::minbox();
+  _bbox = util::geo::Box<double>();
 
-  json j;
+  nlohmann::json j;
   (*s) >> j;
 
   std::map<std::string, Node<NodePL, EdgePL>*> idMap;
@@ -151,8 +152,8 @@ void Graph::readFromJson(std::istream* s) {
 
         std::vector<double> coords = geom["coordinates"];
 
-        Node<NodePL, EdgePL>* n = new Node<NodePL, EdgePL>(
-            NodePL(util::geo::Point(coords[0], coords[1])));
+        Node<NodePL, EdgePL>* n =
+            addNd(NodePL(util::geo::DPoint(coords[0], coords[1])));
 
         StationInfo i("", "");
         if (!props["station_id"].is_null() ||
@@ -163,7 +164,6 @@ void Graph::readFromJson(std::istream* s) {
           n->pl().addStop(i);
         }
 
-        addNode(n);
         idMap[id] = n;
       }
     }
@@ -179,10 +179,10 @@ void Graph::readFromJson(std::istream* s) {
 
         std::vector<std::vector<double>> coords = geom["coordinates"];
 
-        PolyLine pl;
+        PolyLine<double> pl;
         for (auto coord : coords) {
           double x = coord[0], y = coord[1];
-          Point p(x, y);
+          Point<double> p(x, y);
           pl << p;
           expandBBox(p);
         }
@@ -200,7 +200,7 @@ void Graph::readFromJson(std::istream* s) {
           continue;
         }
 
-        Edge<NodePL, EdgePL>* e = addEdge(fromN, toN, EdgePL(pl));
+        Edge<NodePL, EdgePL>* e = addEdg(fromN, toN, EdgePL(pl));
 
         for (auto route : props["lines"]) {
           std::string id;
@@ -258,7 +258,7 @@ void Graph::buildGrids() {
   _nodeGrid = NodeGrid(200, 200, _bbox);
   _edgeGrid = EdgeGrid(200, 200, _bbox);
 
-  for (auto n : *getNodes()) {
+  for (auto n : *getNds()) {
     _nodeGrid.add(*n->pl().getGeom(), n);
     for (auto e : n->getAdjListOut()) {
       _edgeGrid.add(*e->pl().getGeom(), e);
@@ -267,30 +267,28 @@ void Graph::buildGrids() {
 }
 
 // _____________________________________________________________________________
-void Graph::expandBBox(const Point& p) {
-  bgeo::expand(_bbox, boost::geometry::make<bgeo::model::box<Point>>(
-                          p.get<0>(), p.get<1>(), p.get<0>(), p.get<1>()));
+void Graph::expandBBox(const Point<double>& p) {
+  _bbox = util::geo::extendBox(p, _bbox);
 }
 
 // _____________________________________________________________________________
-const util::geo::Box& Graph::getBBox() const { return _bbox; }
+const util::geo::DBox& Graph::getBBox() const { return _bbox; }
 
 // _____________________________________________________________________________
 void Graph::topologizeIsects() {
   proced.clear();
   while (getNextIntersection().a) {
     auto i = getNextIntersection();
-    auto x = new util::graph::Node<NodePL, EdgePL>(NodePL(i.bp.p));
-    addNode(x);
+    auto x = addNd(NodePL(i.bp.p));
 
     double pa = i.a->pl().getPolyline().projectOn(i.bp.p).totalPos;
 
     auto ba =
-        addEdge(i.b->getFrom(), x,
-                EdgePL(i.b->pl().getPolyline().getSegment(0, i.bp.totalPos)));
+        addEdg(i.b->getFrom(), x,
+               EdgePL(i.b->pl().getPolyline().getSegment(0, i.bp.totalPos)));
     auto bb =
-        addEdge(x, i.b->getTo(),
-                EdgePL(i.b->pl().getPolyline().getSegment(i.bp.totalPos, 1)));
+        addEdg(x, i.b->getTo(),
+               EdgePL(i.b->pl().getPolyline().getSegment(i.bp.totalPos, 1)));
 
     _edgeGrid.add(*ba->pl().getGeom(), ba);
     _edgeGrid.add(*bb->pl().getGeom(), bb);
@@ -305,10 +303,10 @@ void Graph::topologizeIsects() {
       }
     }
 
-    auto aa = addEdge(i.a->getFrom(), x,
-                      EdgePL(i.a->pl().getPolyline().getSegment(0, pa)));
-    auto ab = addEdge(x, i.a->getTo(),
-                      EdgePL(i.a->pl().getPolyline().getSegment(pa, 1)));
+    auto aa = addEdg(i.a->getFrom(), x,
+                     EdgePL(i.a->pl().getPolyline().getSegment(0, pa)));
+    auto ab = addEdg(x, i.a->getTo(),
+                     EdgePL(i.a->pl().getPolyline().getSegment(pa, 1)));
 
     _edgeGrid.add(*aa->pl().getGeom(), aa);
     _edgeGrid.add(*ab->pl().getGeom(), ab);
@@ -326,17 +324,18 @@ void Graph::topologizeIsects() {
     _edgeGrid.remove(i.a);
     _edgeGrid.remove(i.b);
 
-    assert(getEdge(i.a->getFrom(), i.a->getTo()));
-    assert(getEdge(i.b->getFrom(), i.b->getTo()));
-    deleteEdge(i.a->getFrom(), i.a->getTo());
-    deleteEdge(i.b->getFrom(), i.b->getTo());
+    assert(getEdg(i.a->getFrom(), i.a->getTo()));
+    assert(getEdg(i.b->getFrom(), i.b->getTo()));
+    delEdg(i.a->getFrom(), i.a->getTo());
+    delEdg(i.b->getFrom(), i.b->getTo());
   }
 }
 
 // _____________________________________________________________________________
 ISect Graph::getNextIntersection() {
-  for (auto n1 : *getNodes()) {
-    for (auto e1 : n1->getAdjListOut()) {
+  for (auto n1 : *getNds()) {
+    for (auto e1 : n1->getAdjList()) {
+      if (e1->getFrom() != n1) continue;
       if (proced.find(e1) != proced.end()) continue;
 
       std::set<util::graph::Edge<NodePL, EdgePL>*> neighbors;
@@ -347,6 +346,7 @@ ISect Graph::getNextIntersection() {
         if (e1 != e2) {
           auto is =
               e1->pl().getPolyline().getIntersections(e2->pl().getPolyline());
+
           if (is.size()) {
             ISect ret;
             ret.a = e1;

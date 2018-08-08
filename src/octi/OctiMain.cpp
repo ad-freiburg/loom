@@ -15,7 +15,7 @@
 #include "octi/graph/Graph.h"
 #include "octi/gridgraph/GridGraph.h"
 #include "util/geo/Geo.h"
-#include "util/geo/output/GeoJsonOutput.h"
+#include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
 using std::string;
@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
   config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
-  util::geo::output::GeoJsonOutput out;
+  util::geo::output::GeoGraphJsonOutput out;
 
   /*
    *   {
@@ -105,9 +105,9 @@ int main(int argc, char** argv) {
   std::cerr << " octilinearized input in " << std::chrono::duration_cast<std::chrono::milliseconds>(totalend - totalBegin).count() << "ms"<< std::endl;
 
   if (cfg.printMode == "gridgraph") {
-    out.print(*gg);
+    out.print(*gg, std::cout);
   } else {
-    out.print(res);
+    out.print(res, std::cout);
   }
 
   return (0);

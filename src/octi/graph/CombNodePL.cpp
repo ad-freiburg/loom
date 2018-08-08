@@ -11,16 +11,17 @@ using namespace octi::graph;
 CombNodePL::CombNodePL(octi::graph::Node* parent) : _parent(parent) {}
 
 // _____________________________________________________________________________
-const Point* CombNodePL::getGeom() const { return _parent->pl().getGeom(); }
+const Point<double>* CombNodePL::getGeom() const {
+  return _parent->pl().getGeom();
+}
 
 // _____________________________________________________________________________
 octi::graph::Node* CombNodePL::getParent() const { return _parent; }
 
 // _____________________________________________________________________________
-void CombNodePL::getAttrs(json::object_t& obj) const {
-  return _parent->pl().getAttrs(obj);
+util::json::Dict CombNodePL::getAttrs() const {
+  return _parent->pl().getAttrs();
 }
-
 
 // _____________________________________________________________________________
 void CombNodePL::setRouteNumber(size_t n) { _routeNumber = n; }
@@ -29,9 +30,7 @@ void CombNodePL::setRouteNumber(size_t n) { _routeNumber = n; }
 size_t CombNodePL::getRouteNumber() const { return _routeNumber; }
 
 // _____________________________________________________________________________
-const EdgeOrdering& CombNodePL::getEdgeOrdering() {
-  return _ordering;
-}
+const EdgeOrdering& CombNodePL::getEdgeOrdering() { return _ordering; }
 
 // _____________________________________________________________________________
 void CombNodePL::setEdgeOrdering(const EdgeOrdering& ordering) {

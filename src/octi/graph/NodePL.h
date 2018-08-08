@@ -19,20 +19,21 @@ using transitmapper::graph::StationInfo;
 namespace octi {
 namespace graph {
 
-class NodePL : util::geograph::GeoNodePL {
+class NodePL : util::geograph::GeoNodePL<double> {
  public:
-  NodePL(Point pos);
+  NodePL() {};
+  NodePL(Point<double> pos);
 
-  const Point* getGeom() const;
-  void setGeom(const Point& p);
-  void getAttrs(json::object_t& obj) const;
+  const Point<double>* getGeom() const;
+  void setGeom(const Point<double>& p);
+  util::json::Dict getAttrs() const;
 
   void addStop(StationInfo i);
 
   const std::vector<StationInfo>& getStops() const;
 
  private:
-  Point _pos;
+  Point<double> _pos;
   std::vector<StationInfo> _is;
 };
 }}

@@ -39,21 +39,21 @@ inline bool operator<(const RouteOcc& x, const RouteOcc& y) {
   return x.route < y.route;
 };
 
-class EdgePL : util::geograph::GeoEdgePL {
+class EdgePL : util::geograph::GeoEdgePL<double> {
  public:
   EdgePL();
-  EdgePL(const PolyLine& p);
+  EdgePL(const PolyLine<double>& p);
 
   void addRoute(const Route* r, const Node<NodePL, EdgePL>* dir, const LineStyle& ls);
   void addRoute(const Route* r, const Node<NodePL, EdgePL>* dir);
 
   const std::set<RouteOcc>& getRoutes() const;
 
-  const util::geo::Line* getGeom() const;
-  void getAttrs(json::object_t& obj) const;
+  const util::geo::Line<double>* getGeom() const;
+  util::json::Dict getAttrs() const;
 
-  const PolyLine& getPolyline() const;
-  void setPolyline(const PolyLine& p);
+  const PolyLine<double>& getPolyline() const;
+  void setPolyline(const PolyLine<double>& p);
 
   void setGeneration(int64_t g);
   int64_t getGeneration() const;
@@ -62,7 +62,7 @@ class EdgePL : util::geograph::GeoEdgePL {
 
   int64_t _generation;
 
-  PolyLine _p;
+  PolyLine<double> _p;
 };
 
 }}

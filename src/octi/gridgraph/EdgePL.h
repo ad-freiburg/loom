@@ -18,16 +18,16 @@ namespace octi {
 namespace gridgraph {
 
 
-class EdgePL : util::geograph::GeoEdgePL {
+class EdgePL : util::geograph::GeoEdgePL<double> {
  public:
-  EdgePL(const PolyLine& p, double c, bool secondar);
-  EdgePL(const PolyLine& p, double c, bool secondar, bool closed);
+  EdgePL(const PolyLine<double>& p, double c, bool secondar);
+  EdgePL(const PolyLine<double>& p, double c, bool secondar, bool closed);
 
   void addRoute(std::string);
   const std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*>& getResEdges() const;
 
-  const util::geo::Line* getGeom() const;
-  void getAttrs(json::object_t& obj) const;
+  const util::geo::Line<double>* getGeom() const;
+  util::json::Dict getAttrs() const;
 
   void setCost(double c);
   double cost() const;
@@ -40,7 +40,7 @@ class EdgePL : util::geograph::GeoEdgePL {
   bool closed() const;
   void setVisited(int i);
  private:
-  PolyLine _pl;
+  PolyLine<double> _pl;
   double _c;
 
   bool _isSecondary;

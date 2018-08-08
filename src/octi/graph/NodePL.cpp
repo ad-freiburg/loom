@@ -8,25 +8,27 @@ using util::geo::Point;
 using namespace octi::graph;
 
 // _____________________________________________________________________________
-NodePL::NodePL(Point pos) : _pos(pos) {
+NodePL::NodePL(Point<double> pos) : _pos(pos) {
 }
 
 // _____________________________________________________________________________
-const Point* NodePL::getGeom() const {
+const Point<double>* NodePL::getGeom() const {
   return &_pos;
 }
 
 // _____________________________________________________________________________
-void NodePL::setGeom(const Point& p) {
+void NodePL::setGeom(const Point<double>& p) {
    _pos = p;
 }
 
 // _____________________________________________________________________________
-void NodePL::getAttrs(json::object_t& obj) const {
+util::json::Dict NodePL::getAttrs() const {
+  util::json::Dict obj;
   if (_is.size() > 0) {
     obj["station_id"] = _is.begin()->id;
     obj["station_label"] = _is.begin()->name;
   }
+  return obj;
 }
 
 // _____________________________________________________________________________

@@ -2,23 +2,19 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/graph/EdgeOrdering.h"
 #include "octi/graph/CombNodePL.h"
+#include "octi/graph/EdgeOrdering.h"
 
 using util::geo::Point;
 using namespace octi::graph;
 
 // _____________________________________________________________________________
-void EdgeOrdering::add(CombEdge* e,
-                                double deg) {
-  _edgeOrder.insert(
-      std::pair<CombEdge*, double>(e, deg));
+void EdgeOrdering::add(CombEdge* e, double deg) {
+  _edgeOrder.insert(std::pair<CombEdge*, double>(e, deg));
 }
 
 // _____________________________________________________________________________
-int64_t EdgeOrdering::dist(
-    CombEdge* a,
-    CombEdge* b) const {
+int64_t EdgeOrdering::dist(CombEdge* a, CombEdge* b) const {
   auto aIt = _edgeOrder.begin();
   auto bIt = _edgeOrder.begin();
 
@@ -44,13 +40,13 @@ int64_t EdgeOrdering::dist(
 }
 
 // _____________________________________________________________________________
-const std::set<std::pair<CombEdge*, double>, PairCmp>& EdgeOrdering::getOrderedSet() const {
+const std::set<std::pair<CombEdge*, double>, PairCmp>&
+EdgeOrdering::getOrderedSet() const {
   return _edgeOrder;
 }
 
 // _____________________________________________________________________________
-bool EdgeOrdering::has(
-    CombEdge* e) const {
+bool EdgeOrdering::has(CombEdge* e) const {
   auto aIt = _edgeOrder.begin();
 
   for (; aIt != _edgeOrder.end(); aIt++) {
@@ -81,21 +77,21 @@ bool EdgeOrdering::equals(const EdgeOrdering& e) const {
 std::string EdgeOrdering::toString(CombNode* origNode) const {
   std::stringstream ss;
   for (auto e : getOrderedSet()) {
-    if (e.first->getOtherNode(origNode)
+    if (e.first->getOtherNd(origNode)
             ->pl()
             .getParent()
             ->pl()
             .getStops()
             .size()) {
       ss << e.first << "(to "
-                << e.first->getOtherNode(origNode)
-                       ->pl()
-                       .getParent()
-                       ->pl()
-                       .getStops()
-                       .front()
-                       .name
-                << "), ";
+         << e.first->getOtherNd(origNode)
+                ->pl()
+                .getParent()
+                ->pl()
+                .getStops()
+                .front()
+                .name
+         << "), ";
     } else {
       ss << e.first << ", ";
     }

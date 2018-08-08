@@ -398,9 +398,9 @@ inline bool intersects(const LineSegment<T>& ls1, const LineSegment<T>& ls2) {
   return intersects(getBoundingBox(ls1), getBoundingBox(ls2)) &&
          (contains(ls1.first, ls2) || contains(ls1.second, ls2) ||
           contains(ls2.first, ls1) || contains(ls2.second, ls1) ||
-          ((crossProd(ls1.first, ls2) < 0) ^
-           (crossProd(ls1.second, ls2) < 0)) ||
-          ((crossProd(ls2.first, ls1) < 0) ^ (crossProd(ls2.second, ls1) < 0)));
+          (((crossProd(ls1.first, ls2) < 0) ^
+           (crossProd(ls1.second, ls2) < 0)) &&
+          ((crossProd(ls2.first, ls1) < 0) ^ (crossProd(ls2.second, ls1) < 0))));
 }
 
 // _____________________________________________________________________________
@@ -731,7 +731,7 @@ inline double dist(const Point<T>& p1, const Point<T>& p2) {
 template <typename T>
 inline std::string getWKT(const Point<T>& p) {
   std::stringstream ss;
-  ss << "POINT (" << std::fixed << p.getX() << " " << p.getY() << ")";
+  ss << "POINT (" << p.getX() << " " << p.getY() << ")";
   return ss.str();
 }
 
@@ -742,7 +742,7 @@ inline std::string getWKT(const std::vector<Point<T>>& p) {
   ss << "MULTIPOINT (";
   for (size_t i = 0; i < p.size(); i++) {
     if (i) ss << ", ";
-    ss << "(" << std::fixed << p[i].getX() << " " << p[i].getY() << ")";
+    ss << "(" << p[i].getX() << " " << p[i].getY() << ")";
   }
   ss << ")";
   return ss.str();
@@ -755,7 +755,7 @@ inline std::string getWKT(const Line<T>& l) {
   ss << "LINESTRING (";
   for (size_t i = 0; i < l.size(); i++) {
     if (i) ss << ", ";
-    ss << std::fixed << l[i].getX() << " " << l[i].getY();
+    ss << l[i].getX() << " " << l[i].getY();
   }
   ss << ")";
   return ss.str();
@@ -772,7 +772,7 @@ inline std::string getWKT(const std::vector<Line<T>>& ls) {
     ss << "(";
     for (size_t i = 0; i < ls[j].size(); i++) {
       if (i) ss << ", ";
-      ss << std::fixed << ls[j][i].getX() << " " << ls[j][i].getY();
+      ss << ls[j][i].getX() << " " << ls[j][i].getY();
     }
     ss << ")";
   }
@@ -792,7 +792,6 @@ template <typename T>
 inline std::string getWKT(const Box<T>& l) {
   std::stringstream ss;
   ss << "POLYGON ((";
-  ss << std::fixed;
   ss << l.getLowerLeft().getX() << " " << l.getLowerLeft().getY();
   ss << ", " << l.getUpperRight().getX() << " " << l.getLowerLeft().getY();
   ss << ", " << l.getUpperRight().getX() << " " << l.getUpperRight().getY();
@@ -807,7 +806,6 @@ template <typename T>
 inline std::string getWKT(const Polygon<T>& p) {
   std::stringstream ss;
   ss << "POLYGON ((";
-  ss << std::fixed;
   for (size_t i = 0; i < p.getOuter().size(); i++) {
     ss << p.getOuter()[i].getX() << " " << p.getOuter()[i].getY() << ", ";
   }
@@ -821,7 +819,6 @@ template <typename T>
 inline std::string getWKT(const std::vector<Polygon<T>>& ls) {
   std::stringstream ss;
   ss << "MULTIPOLYGON (";
-  ss << std::fixed;
 
   for (size_t j = 0; j < ls.size(); j++) {
     if (j) ss << ", ";

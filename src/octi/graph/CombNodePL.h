@@ -22,12 +22,13 @@ typedef util::graph::Node<NodePL, EdgePL> Node;
 // forward declaration
 class CombNodePL;
 
-class CombNodePL : util::geograph::GeoNodePL {
+class CombNodePL : util::geograph::GeoNodePL<double> {
  public:
+  CombNodePL() {};
   CombNodePL(octi::graph::Node* parent);
 
-  const Point* getGeom() const;
-  void getAttrs(json::object_t& obj) const;
+  const Point<double>* getGeom() const;
+  util::json::Dict getAttrs() const;
   Node* getParent() const;
 
   const EdgeOrdering& getEdgeOrdering();
@@ -40,7 +41,6 @@ class CombNodePL : util::geograph::GeoNodePL {
   octi::graph::Node* _parent;
   size_t _routeNumber;
   EdgeOrdering _ordering;
-
 };
 }
 }

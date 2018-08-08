@@ -8,13 +8,13 @@ using util::geo::Point;
 using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
-NodePL::NodePL(Point pos) : _pos(pos), _parent(0), _closed(false) {}
+NodePL::NodePL(Point<double> pos) : _pos(pos), _parent(0), _closed(false) {}
 
 // _____________________________________________________________________________
-const Point* NodePL::getGeom() const { return &_pos; }
+const Point<double>* NodePL::getGeom() const { return &_pos; }
 
 // _____________________________________________________________________________
-void NodePL::getAttrs(json::object_t& obj) const {}
+util::json::Dict NodePL::getAttrs() const { return util::json::Dict(); }
 
 // _____________________________________________________________________________
 Node<NodePL, EdgePL>* NodePL::getParent() const { return _parent; }

@@ -16,12 +16,13 @@ using util::graph::Node;
 namespace octi {
 namespace gridgraph {
 
-class NodePL : util::geograph::GeoNodePL {
+class NodePL : util::geograph::GeoNodePL<double> {
  public:
-  NodePL(Point pos);
+  NodePL() {};
+  NodePL(Point<double> pos);
 
-  const Point* getGeom() const;
-  void getAttrs(json::object_t& obj) const;
+  const Point<double>* getGeom() const;
+  util::json::Dict getAttrs() const;
 
   Node<NodePL, EdgePL>* getParent() const;
   void setParent(Node<NodePL, EdgePL>* n);
@@ -38,7 +39,7 @@ class NodePL : util::geograph::GeoNodePL {
 
 
  private:
-  Point _pos;
+  Point<double> _pos;
 
   Node<NodePL, EdgePL>* _parent;
 

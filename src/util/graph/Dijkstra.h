@@ -75,6 +75,7 @@ class Dijkstra : public ShortestPath<Dijkstra> {
     };
   };
 
+
   template <typename N, typename E, typename C>
   static std::unordered_map<Node<N, E>*, C> shortestPathImpl(
       Node<N, E>* from, const std::set<Node<N, E>*>& to,

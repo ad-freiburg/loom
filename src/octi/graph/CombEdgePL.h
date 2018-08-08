@@ -6,8 +6,8 @@
 #define OCTI_GRAPH_COMBEDGEPL_H_
 
 #include <set>
-#include "util/geo/GeoGraph.h"
 #include "octi/graph/Graph.h"
+#include "util/geo/GeoGraph.h"
 
 using util::geo::PolyLine;
 
@@ -16,28 +16,28 @@ namespace graph {
 
 typedef util::graph::Edge<NodePL, EdgePL> Edge;
 
-class CombEdgePL : util::geograph::GeoEdgePL {
+class CombEdgePL : util::geograph::GeoEdgePL<double> {
  public:
   CombEdgePL(Edge* child);
 
-  const util::geo::Line* getGeom() const;
-  void getAttrs(json::object_t& obj) const;
+  const util::geo::Line<double>* getGeom() const;
+  util::json::Dict getAttrs() const;
 
   std::vector<Edge*>& getChilds();
 
-  const PolyLine& getPolyLine() const;
-  void setPolyLine(const PolyLine& p);
+  const PolyLine<double>& getPolyLine() const;
+  void setPolyLine(const PolyLine<double>& p);
   void setGeneration(int64_t g);
   int64_t getGeneration() const;
+
  private:
   std::vector<Edge*> _childs;
 
   int64_t _generation;
 
-  PolyLine _geom;
+  PolyLine<double> _geom;
 };
-
-}}
+}
+}
 
 #endif  // OCTI_GRAPH_COMBEDGEPL_H_
-
