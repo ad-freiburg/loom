@@ -2,16 +2,16 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRAPH_EDGEPL_H_
-#define OCTI_GRAPH_EDGEPL_H_
+#ifndef OCTI_TRANSITGRAPH_TRANSITEDGEPL_H_
+#define OCTI_TRANSITGRAPH_TRANSITEDGEPL_H_
 
 #include <set>
-#include "util/geo/PolyLine.h"
-#include "util/geo/GeoGraph.h"
-#include "util/graph/Node.h"
 #include "transitmap/graph/Route.h"
 #include "transitmap/style/LineStyle.h"
 #include "util/Nullable.h"
+#include "util/geo/GeoGraph.h"
+#include "util/geo/PolyLine.h"
+#include "util/graph/Node.h"
 
 using util::geo::PolyLine;
 using transitmapper::graph::Route;
@@ -20,17 +20,19 @@ using util::graph::Node;
 using util::Nullable;
 
 namespace octi {
-namespace graph {
+namespace transitgraph {
 
-class EdgePL;
-class NodePL;
+class TransitEdgePL;
+class TransitNodePL;
 
 struct RouteOcc {
-  RouteOcc(const Route* r, const Node<NodePL, EdgePL>* dir) : route(r), direction(dir) {}
-  RouteOcc(const Route* r, const Node<NodePL, EdgePL>* dir, const transitmapper::style::LineStyle& ls)
-   : route(r), direction(dir), style(ls) {}
+  RouteOcc(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir)
+      : route(r), direction(dir) {}
+  RouteOcc(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir,
+           const transitmapper::style::LineStyle& ls)
+      : route(r), direction(dir), style(ls) {}
   const Route* route;
-  const Node<NodePL, EdgePL>* direction;  // 0 if in both directions
+  const Node<TransitNodePL, TransitEdgePL>* direction;  // 0 if in both directions
 
   util::Nullable<transitmapper::style::LineStyle> style;
 };
@@ -39,13 +41,14 @@ inline bool operator<(const RouteOcc& x, const RouteOcc& y) {
   return x.route < y.route;
 };
 
-class EdgePL : util::geograph::GeoEdgePL<double> {
+class TransitEdgePL : util::geograph::GeoEdgePL<double> {
  public:
-  EdgePL();
-  EdgePL(const PolyLine<double>& p);
+  TransitEdgePL();
+  TransitEdgePL(const PolyLine<double>& p);
 
-  void addRoute(const Route* r, const Node<NodePL, EdgePL>* dir, const LineStyle& ls);
-  void addRoute(const Route* r, const Node<NodePL, EdgePL>* dir);
+  void addRoute(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir,
+                const LineStyle& ls);
+  void addRoute(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir);
 
   const std::set<RouteOcc>& getRoutes() const;
 
@@ -57,6 +60,7 @@ class EdgePL : util::geograph::GeoEdgePL<double> {
 
   void setGeneration(int64_t g);
   int64_t getGeneration() const;
+
  private:
   std::set<RouteOcc> _routes;
 
@@ -64,8 +68,7 @@ class EdgePL : util::geograph::GeoEdgePL<double> {
 
   PolyLine<double> _p;
 };
+}
+}
 
-}}
-
-#endif  // OCTI_GRAPH_EDGEPL_H_
-
+#endif  // OCTI_TRANSITGRAPH_TRANSITEDGEPL_H_

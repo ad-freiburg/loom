@@ -2,21 +2,24 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/graph/CombEdgePL.h"
+#include "octi/combgraph/CombEdgePL.h"
 #include "util/geo/PolyLine.h"
 
 using util::geo::PolyLine;
-using namespace octi::graph;
+using octi::combgraph::CombEdgePL;
 
 // _____________________________________________________________________________
-CombEdgePL::CombEdgePL(Edge* child) : _generation(-1) {
+CombEdgePL::CombEdgePL(octi::transitgraph::TransitEdge* child)
+    : _generation(-1) {
   _childs.push_back(child);
   _geom = PolyLine<double>(*child->getFrom()->pl().getGeom(),
-                   *child->getTo()->pl().getGeom());
+                           *child->getTo()->pl().getGeom());
 }
 
 // _____________________________________________________________________________
-const util::geo::Line<double>* CombEdgePL::getGeom() const { return &_geom.getLine(); }
+const util::geo::Line<double>* CombEdgePL::getGeom() const {
+  return &_geom.getLine();
+}
 
 // _____________________________________________________________________________
 const PolyLine<double>& CombEdgePL::getPolyLine() const { return _geom; }
@@ -46,7 +49,9 @@ util::json::Dict CombEdgePL::getAttrs() const {
 }
 
 // _____________________________________________________________________________
-std::vector<Edge*>& CombEdgePL::getChilds() { return _childs; }
+std::vector<octi::transitgraph::TransitEdge*>& CombEdgePL::getChilds() {
+  return _childs;
+}
 
 // _____________________________________________________________________________
 void CombEdgePL::setGeneration(int64_t g) { _generation = g; }

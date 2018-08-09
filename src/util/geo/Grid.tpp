@@ -64,7 +64,6 @@ void Grid<V, G, T>::add(G<T> geom, V val) {
   size_t neX = getCellXFromX(box.getUpperRight().getX());
   size_t neY = getCellYFromY(box.getUpperRight().getY());
 
-
   for (size_t x = swX; x <= neX && x < _grid.size(); x++) {
     for (size_t y = swY; y <= neY && y < _grid[x].size(); y++) {
       if (intersects(geom, getBox(x, y))) {

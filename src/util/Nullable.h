@@ -2,6 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include <stdexcept>
+
 #ifndef UTIL_NULLABLE_H_
 #define UTIL_NULLABLE_H_
 

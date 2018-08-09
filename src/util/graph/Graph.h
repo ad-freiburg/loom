@@ -8,6 +8,7 @@
 #include <set>
 #include <string>
 #include <iostream>
+#include <cassert>
 
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
@@ -18,7 +19,7 @@ namespace graph {
 template <typename N, typename E>
 class Graph {
  public:
-  ~Graph();
+  virtual ~Graph();
   virtual Node<N, E>* addNd() = 0;
   virtual Node<N, E>* addNd(const N& pl) = 0;
   Edge<N, E>* addEdg(Node<N, E>* from, Node<N, E>* to);

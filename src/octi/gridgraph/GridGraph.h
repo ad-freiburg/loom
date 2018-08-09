@@ -6,41 +6,38 @@
 #define OCTI_GRIDGRAPH_GRIDGRAPH_H_
 
 #include <queue>
-#include <unordered_map>
 #include <set>
-#include "octi/gridgraph/EdgePL.h"
-#include "octi/gridgraph/NodePL.h"
+#include <unordered_map>
+#include "octi/combgraph/CombGraph.h"
+#include "octi/gridgraph/GridEdgePL.h"
+#include "octi/gridgraph/GridNodePL.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/DirGraph.h"
 
-#include "octi/graph/CombEdgePL.h"
-#include "octi/graph/CombNodePL.h"
+#include "octi/combgraph/CombEdgePL.h"
+#include "octi/combgraph/CombNodePL.h"
 
 using util::graph::DirGraph;
 using util::graph::Node;
 using util::geo::Grid;
 using util::geo::Point;
 
+using octi::combgraph::CombNode;
+using octi::combgraph::CombEdge;
+
 namespace octi {
 namespace gridgraph {
 
-typedef util::graph::Node<gridgraph::NodePL, gridgraph::EdgePL> GridNode;
-typedef util::graph::Edge<gridgraph::NodePL, gridgraph::EdgePL> GridEdge;
-
-typedef util::graph::Graph<octi::graph::CombNodePL, octi::graph::CombEdgePL>
-    CombGraph;
-typedef util::graph::Node<octi::graph::CombNodePL, octi::graph::CombEdgePL>
-    CombNode;
-typedef util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>
-    CombEdge;
+typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
+typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
 
 struct Candidate {
-  Candidate(Node<NodePL, EdgePL>* n, double d) : n(n), d(d){};
+  Candidate(GridNode* n, double d) : n(n), d(d){};
 
   bool operator<(const Candidate& c) const { return d > c.d; }
 
-  Node<NodePL, EdgePL>* n;
+  GridNode* n;
   double d;
 };
 
@@ -49,14 +46,14 @@ struct Penalties {
   double verticalPen, horizontalPen, diagonalPen;
 };
 
-class GridGraph : public DirGraph<NodePL, EdgePL> {
+class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
  public:
   GridGraph(const util::geo::DBox& bbox, double cellSize,
             const Penalties& pens);
 
-  Node<NodePL, EdgePL>* getNode(size_t x, size_t y) const;
+  GridNode* getNode(size_t x, size_t y) const;
 
-  const Grid<Node<NodePL, EdgePL>*, Point, double>& getGrid() const;
+  const Grid<GridNode*, Point, double>& getGrid() const;
 
   void spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
                       double* ret);
@@ -80,7 +77,7 @@ class GridGraph : public DirGraph<NodePL, EdgePL> {
   void openNode(GridNode* n);
   void closeNode(GridNode* n);
 
-  Node<NodePL, EdgePL>* getNeighbor(size_t cx, size_t cy, size_t i) const;
+  GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
   GridNode* getGridNodeFrom(CombNode* n, double maxDis);
   std::set<GridNode*> getGridNodesTo(CombNode* n, double maxDis);
@@ -92,11 +89,12 @@ class GridGraph : public DirGraph<NodePL, EdgePL> {
   util::geo::DBox _bbox;
   Penalties _c;
 
-  Grid<Node<NodePL, EdgePL>*, Point, double> _grid;
+  Grid<GridNode*, Point, double> _grid;
   std::unordered_map<CombNode*, GridNode*> _settled;
 
-  std::set<util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>*>
-  getResEdges(Node<NodePL, EdgePL>* n) const;
+  std::set<util::graph::Edge<octi::combgraph::CombNodePL,
+                             octi::combgraph::CombEdgePL>*>
+  getResEdges(GridNode* n) const;
 
   void writeInitialCosts();
 

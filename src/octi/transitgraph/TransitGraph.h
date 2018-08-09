@@ -2,34 +2,37 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRAPH_GRAPH_H_
-#define OCTI_GRAPH_GRAPH_H_
+#ifndef OCTI_TRANSITGRAPH_TRANSITGRAPH_H_
+#define OCTI_TRANSITGRAPH_TRANSITGRAPH_H_
 
+#include "octi/transitgraph/TransitEdgePL.h"
+#include "octi/transitgraph/TransitNodePL.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/UndirGraph.h"
-#include "octi/graph/NodePL.h"
-#include "octi/graph/EdgePL.h"
 
 using util::geo::Grid;
 using util::geo::Point;
 
 namespace octi {
-namespace graph {
+namespace transitgraph {
 
-typedef Grid<util::graph::Node<NodePL, EdgePL>*, Point, double> NodeGrid;
-typedef Grid<util::graph::Edge<NodePL, EdgePL>*, Line, double> EdgeGrid;
+typedef util::graph::Node<TransitNodePL, TransitEdgePL> TransitNode;
+typedef util::graph::Edge<TransitNodePL, TransitEdgePL> TransitEdge;
+
+typedef Grid<TransitNode*, Point, double> NodeGrid;
+typedef Grid<TransitEdge*, Line, double> EdgeGrid;
 
 struct ISect {
-  util::graph::Edge<NodePL, EdgePL>* a;
-  util::graph::Edge<NodePL, EdgePL>* b;
+  TransitEdge *a, *b;
 
   util::geo::LinePoint<double> bp;
 };
 
-class Graph : public util::graph::UndirGraph<NodePL, EdgePL> {
+class TransitGraph
+    : public util::graph::UndirGraph<TransitNodePL, TransitEdgePL> {
  public:
-  Graph();
+  TransitGraph();
 
   void readFromJson(std::istream* s);
   void readFromDot(std::istream* s);
@@ -49,14 +52,14 @@ class Graph : public util::graph::UndirGraph<NodePL, EdgePL> {
 
   void expandBBox(const Point<double>& p);
 
-  std::set<util::graph::Edge<NodePL, EdgePL>*> proced;
+  std::set<TransitEdge*> proced;
   std::map<std::string, const Route*> _routes;
 
   NodeGrid _nodeGrid;
   EdgeGrid _edgeGrid;
 };
 
-}  // graph
+}  // transitgraph
 }  // octi
 
-#endif  // OCTI_GRAPH_GRAPH_H_
+#endif  // OCTI_TRANSITGRAPH_TRANSITGRAPH_H_

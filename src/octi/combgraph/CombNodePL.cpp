@@ -2,13 +2,14 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/graph/CombNodePL.h"
-#include "octi/graph/EdgeOrdering.h"
+#include "octi/combgraph/CombNodePL.h"
+#include "octi/transitgraph/EdgeOrdering.h"
 using util::geo::Point;
-using namespace octi::graph;
+using octi::combgraph::CombNodePL;
 
 // _____________________________________________________________________________
-CombNodePL::CombNodePL(octi::graph::Node* parent) : _parent(parent) {}
+CombNodePL::CombNodePL(octi::transitgraph::TransitNode* parent)
+    : _parent(parent) {}
 
 // _____________________________________________________________________________
 const Point<double>* CombNodePL::getGeom() const {
@@ -16,7 +17,9 @@ const Point<double>* CombNodePL::getGeom() const {
 }
 
 // _____________________________________________________________________________
-octi::graph::Node* CombNodePL::getParent() const { return _parent; }
+octi::transitgraph::TransitNode* CombNodePL::getParent() const {
+  return _parent;
+}
 
 // _____________________________________________________________________________
 util::json::Dict CombNodePL::getAttrs() const {
@@ -30,10 +33,13 @@ void CombNodePL::setRouteNumber(size_t n) { _routeNumber = n; }
 size_t CombNodePL::getRouteNumber() const { return _routeNumber; }
 
 // _____________________________________________________________________________
-const EdgeOrdering& CombNodePL::getEdgeOrdering() { return _ordering; }
+const octi::transitgraph::EdgeOrdering& CombNodePL::getEdgeOrdering() {
+  return _ordering;
+}
 
 // _____________________________________________________________________________
-void CombNodePL::setEdgeOrdering(const EdgeOrdering& ordering) {
+void CombNodePL::setEdgeOrdering(
+    const octi::transitgraph::EdgeOrdering& ordering) {
   _ordering = ordering;
 }
 

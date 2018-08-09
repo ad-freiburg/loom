@@ -2,48 +2,54 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/graph/EdgePL.h"
-#include "octi/graph/NodePL.h"
+#include "octi/transitgraph/TransitEdgePL.h"
+#include "octi/transitgraph/TransitNodePL.h"
+#include "octi/transitgraph/TransitGraph.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
 
 using util::geo::PolyLine;
-using namespace octi::graph;
+using octi::transitgraph::TransitNode;
+using octi::transitgraph::TransitEdgePL;
+using octi::transitgraph::RouteOcc;
 
 // _____________________________________________________________________________
-EdgePL::EdgePL() : _generation(-1) {}
+TransitEdgePL::TransitEdgePL() : _generation(-1) {}
 
 // _____________________________________________________________________________
-EdgePL::EdgePL(const PolyLine<double>& p) : _p(p), _generation(-1) {}
+TransitEdgePL::TransitEdgePL(const PolyLine<double>& p)
+    : _p(p), _generation(-1) {}
 
 // _____________________________________________________________________________
-const util::geo::Line<double>* EdgePL::getGeom() const { return &_p.getLine(); }
+const util::geo::Line<double>* TransitEdgePL::getGeom() const {
+  return &_p.getLine();
+}
 
 // _____________________________________________________________________________
-const PolyLine<double>& EdgePL::getPolyline() const { return _p; }
+const PolyLine<double>& TransitEdgePL::getPolyline() const { return _p; }
 
 // _____________________________________________________________________________
-void EdgePL::setPolyline(const PolyLine<double>& p) { _p = p; }
+void TransitEdgePL::setPolyline(const PolyLine<double>& p) { _p = p; }
 
 // _____________________________________________________________________________
-void EdgePL::addRoute(const Route* r, const Node<NodePL, EdgePL>* dir,
-                      const LineStyle& ls) {
+void TransitEdgePL::addRoute(const Route* r, const TransitNode* dir,
+                             const LineStyle& ls) {
   _routes.insert(RouteOcc(r, dir, ls));
 }
 
 // _____________________________________________________________________________
-void EdgePL::addRoute(const Route* r, const Node<NodePL, EdgePL>* dir) {
+void TransitEdgePL::addRoute(const Route* r, const TransitNode* dir) {
   _routes.insert(RouteOcc(r, dir));
 }
 
 // _____________________________________________________________________________
-const std::set<RouteOcc>& EdgePL::getRoutes() const { return _routes; }
+const std::set<RouteOcc>& TransitEdgePL::getRoutes() const { return _routes; }
 
 // _____________________________________________________________________________
-void EdgePL::setGeneration(int64_t g) { _generation = g; }
+void TransitEdgePL::setGeneration(int64_t g) { _generation = g; }
 
 // _____________________________________________________________________________
-util::json::Dict EdgePL::getAttrs() const {
+util::json::Dict TransitEdgePL::getAttrs() const {
   util::json::Dict obj;
   auto arr = util::json::Array();
   obj["generation"] = (int)_generation;
@@ -67,4 +73,4 @@ util::json::Dict EdgePL::getAttrs() const {
 }
 
 // _____________________________________________________________________________
-int64_t EdgePL::getGeneration() const { return _generation; }
+int64_t TransitEdgePL::getGeneration() const { return _generation; }

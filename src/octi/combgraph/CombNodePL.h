@@ -2,11 +2,11 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRAPH_COMBNODEPL_H_
-#define OCTI_GRAPH_COMBNODEPL_H_
+#ifndef OCTI_COMBGRAPH_COMBNODEPL_H_
+#define OCTI_COMBGRAPH_COMBNODEPL_H_
 
-#include "octi/graph/CombEdgePL.h"
-#include "octi/graph/EdgeOrdering.h"
+#include "octi/combgraph/CombEdgePL.h"
+#include "octi/transitgraph/EdgeOrdering.h"
 #include "util/geo/Geo.h"
 #include "util/geo/GeoGraph.h"
 #include "util/graph/Node.h"
@@ -15,34 +15,29 @@ using util::geo::Point;
 using util::graph::Node;
 
 namespace octi {
-namespace graph {
-
-typedef util::graph::Node<NodePL, EdgePL> Node;
-
-// forward declaration
-class CombNodePL;
+namespace combgraph {
 
 class CombNodePL : util::geograph::GeoNodePL<double> {
  public:
-  CombNodePL() {};
-  CombNodePL(octi::graph::Node* parent);
+  CombNodePL(){};
+  CombNodePL(octi::transitgraph::TransitNode* parent);
 
   const Point<double>* getGeom() const;
   util::json::Dict getAttrs() const;
-  Node* getParent() const;
+  octi::transitgraph::TransitNode* getParent() const;
 
-  const EdgeOrdering& getEdgeOrdering();
-  void setEdgeOrdering(const EdgeOrdering& e);
+  const transitgraph::EdgeOrdering& getEdgeOrdering();
+  void setEdgeOrdering(const transitgraph::EdgeOrdering& e);
   size_t getRouteNumber() const;
   void setRouteNumber(size_t n);
   std::string toString() const;
 
  private:
-  octi::graph::Node* _parent;
+  octi::transitgraph::TransitNode* _parent;
   size_t _routeNumber;
-  EdgeOrdering _ordering;
+  transitgraph::EdgeOrdering _ordering;
 };
 }
 }
 
-#endif  // OCTI_GRAPH_COMBNODEPL_H_
+#endif  // OCTI_COMBGRAPH_COMBNODEPL_H_

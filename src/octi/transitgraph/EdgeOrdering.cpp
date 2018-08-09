@@ -2,11 +2,11 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/graph/CombNodePL.h"
-#include "octi/graph/EdgeOrdering.h"
+#include "octi/combgraph/CombNodePL.h"
+#include "octi/transitgraph/EdgeOrdering.h"
 
 using util::geo::Point;
-using namespace octi::graph;
+using namespace octi::transitgraph;
 
 // _____________________________________________________________________________
 void EdgeOrdering::add(CombEdge* e, double deg) {

@@ -2,27 +2,22 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/graph/NodePL.h"
+#include "octi/transitgraph/TransitNodePL.h"
 
 using util::geo::Point;
-using namespace octi::graph;
+using namespace octi::transitgraph;
 
 // _____________________________________________________________________________
-NodePL::NodePL(Point<double> pos) : _pos(pos) {
-}
+TransitNodePL::TransitNodePL(Point<double> pos) : _pos(pos) {}
 
 // _____________________________________________________________________________
-const Point<double>* NodePL::getGeom() const {
-  return &_pos;
-}
+const Point<double>* TransitNodePL::getGeom() const { return &_pos; }
 
 // _____________________________________________________________________________
-void NodePL::setGeom(const Point<double>& p) {
-   _pos = p;
-}
+void TransitNodePL::setGeom(const Point<double>& p) { _pos = p; }
 
 // _____________________________________________________________________________
-util::json::Dict NodePL::getAttrs() const {
+util::json::Dict TransitNodePL::getAttrs() const {
   util::json::Dict obj;
   if (_is.size() > 0) {
     obj["station_id"] = _is.begin()->id;
@@ -32,11 +27,7 @@ util::json::Dict NodePL::getAttrs() const {
 }
 
 // _____________________________________________________________________________
-void NodePL::addStop(StationInfo i) {
-  _is.push_back(i);
-}
+void TransitNodePL::addStop(StationInfo i) { _is.push_back(i); }
 
 // _____________________________________________________________________________
-const std::vector<StationInfo>& NodePL::getStops() const {
-  return _is;
-}
+const std::vector<StationInfo>& TransitNodePL::getStops() const { return _is; }

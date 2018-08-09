@@ -5,24 +5,29 @@
 #ifndef OCTI_GRAPH_EDGEORDERING_H_
 #define OCTI_GRAPH_EDGEORDERING_H_
 
-#include "octi/graph/CombEdgePL.h"
-#include "util/graph/Node.h"
-#include "util/geo/GeoGraph.h"
+#include "octi/combgraph/CombEdgePL.h"
 #include "util/geo/Geo.h"
+#include "util/geo/GeoGraph.h"
+#include "util/graph/Node.h"
 
 using util::geo::Point;
 using util::graph::Node;
+using octi::combgraph::CombEdgePL;
 
 namespace octi {
-namespace graph {
-
+namespace combgraph {
 // forward declaration
 class CombNodePL;
+}
+}
 
-typedef util::graph::Node<NodePL, EdgePL> Node;
+using octi::combgraph::CombNodePL;
+
+namespace octi {
+namespace transitgraph {
+
 typedef util::graph::Node<CombNodePL, CombEdgePL> CombNode;
 typedef util::graph::Edge<CombNodePL, CombEdgePL> CombEdge;
-
 
 struct PairCmp {
   bool operator()(const std::pair<CombEdge*, double>& a,
@@ -35,16 +40,15 @@ class EdgeOrdering {
  public:
   void add(CombEdge* e, double deg);
   bool has(CombEdge* e) const;
-  int64_t dist(CombEdge* a, CombEdge * b) const;
+  int64_t dist(CombEdge* a, CombEdge* b) const;
   const std::set<std::pair<CombEdge*, double>, PairCmp>& getOrderedSet() const;
   bool equals(const EdgeOrdering& e) const;
   std::string toString(CombNode* from) const;
 
  private:
-  std::set<std::pair<CombEdge*, double>, PairCmp>
-      _edgeOrder;
+  std::set<std::pair<CombEdge*, double>, PairCmp> _edgeOrder;
 };
-
-}}
+}
+}
 
 #endif  // OCTI_GRAPH_EDGEORDERING_H_

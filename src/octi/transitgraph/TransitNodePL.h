@@ -2,13 +2,13 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRAPH_NODEPL_H_
-#define OCTI_GRAPH_NODEPL_H_
+#ifndef OCTI_TRANSITGRAPH_TRANSITNODEPL_H_
+#define OCTI_TRANSITGRAPH_TRANSITNODEPL_H_
 
+#include "octi/transitgraph/TransitEdgePL.h"
 #include "util/geo/Geo.h"
 #include "util/geo/GeoGraph.h"
 #include "util/graph/Node.h"
-#include "octi/graph/EdgePL.h"
 
 #include "transitmap/graph/Node.h"
 
@@ -17,12 +17,12 @@ using util::graph::Node;
 using transitmapper::graph::StationInfo;
 
 namespace octi {
-namespace graph {
+namespace transitgraph {
 
-class NodePL : util::geograph::GeoNodePL<double> {
+class TransitNodePL : util::geograph::GeoNodePL<double> {
  public:
-  NodePL() {};
-  NodePL(Point<double> pos);
+  TransitNodePL(){};
+  TransitNodePL(Point<double> pos);
 
   const Point<double>* getGeom() const;
   void setGeom(const Point<double>& p);
@@ -36,6 +36,7 @@ class NodePL : util::geograph::GeoNodePL<double> {
   Point<double> _pos;
   std::vector<StationInfo> _is;
 };
-}}
+}
+}
 
-#endif  // OCTI_GRAPH_NODEPL_H_
+#endif  // OCTI_TRANSITGRAPH_TRANSITNODEPL_H_

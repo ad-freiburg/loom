@@ -2,28 +2,26 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRAPH_COMBEDGEPL_H_
-#define OCTI_GRAPH_COMBEDGEPL_H_
+#ifndef OCTI_COMBGRAPH_COMBEDGEPL_H_
+#define OCTI_COMBGRAPH_COMBEDGEPL_H_
 
 #include <set>
-#include "octi/graph/Graph.h"
+#include "octi/transitgraph/TransitGraph.h"
 #include "util/geo/GeoGraph.h"
 
 using util::geo::PolyLine;
 
 namespace octi {
-namespace graph {
-
-typedef util::graph::Edge<NodePL, EdgePL> Edge;
+namespace combgraph {
 
 class CombEdgePL : util::geograph::GeoEdgePL<double> {
  public:
-  CombEdgePL(Edge* child);
+  CombEdgePL(octi::transitgraph::TransitEdge* child);
 
   const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;
 
-  std::vector<Edge*>& getChilds();
+  std::vector<octi::transitgraph::TransitEdge*>& getChilds();
 
   const PolyLine<double>& getPolyLine() const;
   void setPolyLine(const PolyLine<double>& p);
@@ -31,7 +29,7 @@ class CombEdgePL : util::geograph::GeoEdgePL<double> {
   int64_t getGeneration() const;
 
  private:
-  std::vector<Edge*> _childs;
+  std::vector<octi::transitgraph::TransitEdge*> _childs;
 
   int64_t _generation;
 
@@ -40,4 +38,4 @@ class CombEdgePL : util::geograph::GeoEdgePL<double> {
 }
 }
 
-#endif  // OCTI_GRAPH_COMBEDGEPL_H_
+#endif  // OCTI_COMBGRAPH_COMBEDGEPL_H_

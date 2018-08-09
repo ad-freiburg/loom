@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include <chrono>
 #include "octi/Octilinearizer.h"
+#include "util/Misc.h"
 #include "util/geo/BezierCurve.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Dijkstra.h"
@@ -12,33 +12,7 @@
 using namespace octi;
 using namespace gridgraph;
 
-// _____________________________________________________________________________
-void Octilinearizer::buildCombGraph(TransitGraph* source, CombGraph* target) {
-  auto nodes = source->getNds();
-
-  std::map<TransitNode*, CombNode*> m;
-
-  for (auto n : *nodes) {
-    CombNode* cn = target->addNd(n);
-    m[n] = cn;
-  }
-
-  for (auto n : *nodes) {
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-      target->addEdg(m[e->getFrom()], m[e->getTo()],
-                     octi::graph::CombEdgePL(e));
-    }
-  }
-
-  for (auto n : *target->getNds()) {
-    size_t routes = 0;
-    for (auto e : n->getAdjList()) {
-      routes += e->pl().getChilds().front()->pl().getRoutes().size();
-    }
-    n->pl().setRouteNumber(routes);
-  }
-}
+using transitgraph::EdgeOrdering;
 
 // _____________________________________________________________________________
 void Octilinearizer::writeEdgeOrdering(CombGraph* target) {
@@ -48,15 +22,15 @@ void Octilinearizer::writeEdgeOrdering(CombGraph* target) {
 }
 
 // _____________________________________________________________________________
-graph::EdgeOrdering Octilinearizer::getEdgeOrderingForNode(CombNode* n) const {
+EdgeOrdering Octilinearizer::getEdgeOrderingForNode(CombNode* n) const {
   return getEdgeOrderingForNode(n, true, std::map<CombNode*, DPoint>());
 }
 
 // _____________________________________________________________________________
-graph::EdgeOrdering Octilinearizer::getEdgeOrderingForNode(
+EdgeOrdering Octilinearizer::getEdgeOrderingForNode(
     CombNode* n, bool useOrigNextNode,
     const std::map<CombNode*, DPoint>& newPos) const {
-  graph::EdgeOrdering order;
+  EdgeOrdering order;
   for (auto e : n->getAdjList()) {
     auto r = e->pl().getChilds().front();
     DPoint a = *n->pl().getGeom();
@@ -86,114 +60,6 @@ graph::EdgeOrdering Octilinearizer::getEdgeOrderingForNode(
   }
 
   return order;
-}
-
-// _____________________________________________________________________________
-void Octilinearizer::buildTransitGraph(CombGraph* source,
-                                       TransitGraph* target) {
-  auto nodes = source->getNds();
-
-  std::map<TransitNode*, TransitNode*> m;
-
-  for (auto n : *nodes) {
-    for (auto f : n->getAdjListOut()) {
-      if (f->getFrom() != n) continue;
-      if (f->pl().getGeneration() < 0) continue;
-      double tot = f->pl().getChilds().size();
-      double d = f->pl().getPolyLine().getLength();
-      double step = d / tot;
-
-      int i = 0;
-
-      auto pre = n->pl().getParent();
-
-      for (auto e : f->pl().getChilds()) {
-        auto from = e->getFrom();
-        auto to = e->getTo();
-
-        PolyLine<double> pl = f->pl().getPolyLine().getSegment(
-            (step * i) / d, (step * (i + 1)) / d);
-
-        if (from == pre) {
-          pre = to;
-        } else {
-          pl.reverse();
-          pre = from;
-        }
-
-        if (m.find(from) == m.end()) {
-          auto payload = from->pl();
-          payload.setGeom(pl.getLine().front());
-          auto tfrom = target->addNd(payload);
-          m[from] = tfrom;
-        }
-
-        if (m.find(to) == m.end()) {
-          auto payload = to->pl();
-          payload.setGeom(pl.getLine().back());
-          auto tto = target->addNd(payload);
-          m[to] = tto;
-        }
-
-        auto payload = e->pl();
-        payload.setPolyline(pl);
-        payload.setGeneration(f->pl().getGeneration());
-        target->addEdg(m[from], m[to], payload);
-
-        i++;
-      }
-    }
-  }
-}
-
-// _____________________________________________________________________________
-void Octilinearizer::combineDeg2(CombGraph* g) {
-  std::set<CombNode*> nodes = *g->getNds();
-  for (auto n : nodes) {
-    if (n->getAdjList().size() == 2) {
-      CombEdge* a = n->getAdjList().front();
-      CombEdge* b = n->getAdjList().back();
-
-      // if this combination would turn our graph into a multigraph,
-      // dont do it!
-      if (g->getEdg(a->getOtherNd(n), b->getOtherNd(n))) continue;
-
-      auto pl = a->pl();
-
-      // a is the reference
-      if (a->getTo() == n) {
-        if (b->getTo() != n) {
-          pl.getChilds().insert(pl.getChilds().end(),
-                                b->pl().getChilds().begin(),
-                                b->pl().getChilds().end());
-        } else {
-          pl.getChilds().insert(pl.getChilds().end(),
-                                b->pl().getChilds().rbegin(),
-                                b->pl().getChilds().rend());
-        }
-
-        pl.setPolyLine(PolyLine<double>(*a->getFrom()->pl().getGeom(),
-                                        *b->getOtherNd(n)->pl().getGeom()));
-        g->addEdg(a->getFrom(), b->getOtherNd(n), pl);
-      } else {
-        if (b->getTo() == n) {
-          pl.getChilds().insert(pl.getChilds().begin(),
-                                b->pl().getChilds().begin(),
-                                b->pl().getChilds().end());
-        } else {
-          pl.getChilds().insert(pl.getChilds().begin(),
-                                b->pl().getChilds().rbegin(),
-                                b->pl().getChilds().rend());
-        }
-
-        pl.setPolyLine(PolyLine<double>(*b->getOtherNd(n)->pl().getGeom(),
-                                        *a->getTo()->pl().getGeom()));
-        g->addEdg(b->getOtherNd(n), a->getTo(), pl);
-      }
-
-      g->delNd(n);
-    }
-  }
 }
 
 // _____________________________________________________________________________
@@ -267,41 +133,17 @@ void Octilinearizer::normalizeCostVector(double* vec) const {
 // _____________________________________________________________________________
 TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
                                   const Penalties& pens) {
-  double gridSize = 100;
-  std::cerr << "Removing short edges... ";
-  auto begin = std::chrono::steady_clock::now();
-  removeEdgesShorterThan(tg, gridSize / 2);
-  auto end = std::chrono::steady_clock::now();
-  std::cerr << " done ("
-            << std::chrono::duration_cast<std::chrono::milliseconds>(end -
-                                                                     begin)
-                   .count()
-            << "ms)" << std::endl;
+  double gridSize = 250;
 
+  std::cerr << "Removing short edges... ";
+  T_START(remshortegs);
+  removeEdgesShorterThan(tg, gridSize / 2);
+  std::cerr << " done (" << T_STOP(remshortegs) << "ms)" << std::endl;
 
   std::cerr << "Building combination graph... ";
-  begin = std::chrono::steady_clock::now();
-  CombGraph cg;
-  buildCombGraph(tg, &cg);
-  end = std::chrono::steady_clock::now();
-  std::cerr << " done ("
-            << std::chrono::duration_cast<std::chrono::milliseconds>(end -
-                                                                     begin)
-                   .count()
-            << "ms)" << std::endl;
-
-
-  std::cerr << "Combining deg 2 nodes...";
-  begin = std::chrono::steady_clock::now();
-  combineDeg2(&cg);
-
-
-  end = std::chrono::steady_clock::now();
-  std::cerr << " done ("
-            << std::chrono::duration_cast<std::chrono::milliseconds>(end -
-                                                                     begin)
-                   .count()
-            << "ms)" << std::endl;
+  T_START(combgraph);
+  CombGraph cg(tg);
+  std::cerr << " done (" << T_STOP(combgraph) << "ms)" << std::endl;
 
   writeEdgeOrdering(&cg);
 
@@ -310,14 +152,10 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
   TransitGraph bestGraph;
   GridGraph* g;
 
-  auto gStart = std::chrono::steady_clock::now();
+  T_START(gridgraph);
   g = new GridGraph(box, gridSize, pens);
-  auto gEnd = std::chrono::steady_clock::now();
-  std::cerr << "Build grid graph in "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(gEnd -
-                                                                     gStart)
-                   .count()
-            << " ms " << std::endl;
+  std::cerr << "Build grid graph in " << T_STOP(gridgraph) << " ms "
+            << std::endl;
 
   // comparator for nodes, based on degree
   struct NodeCompare {
@@ -342,10 +180,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
   std::set<CombEdge*> done;
   int64_t gen = 0;
   double totalCost = 0;
-  size_t totalIters = 0;
-  int dTime = 0;
-  int costVecTime = 0;
-  int postTime = 0;
 
   while (!globalPq.empty()) {
     auto n = globalPq.top();
@@ -399,7 +233,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
           LOG(ERROR) << "Could not sort in source node " << from << std::endl;
         }
 
-        auto costVecBegin = std::chrono::steady_clock::now();
         // get surrounding displacement nodes
         double maxDis = getMaxDis(to, e, gridSize);
         std::set<GridNode*> tos = g->getGridNodesTo(to, maxDis);
@@ -448,31 +281,18 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
 
           g->addCostVector(*tos.begin(), addCTo, addCToInv);
         }
-        auto costVecEnd = std::chrono::steady_clock::now();
-        costVecTime += std::chrono::duration_cast<std::chrono::milliseconds>(
-                           costVecEnd - costVecBegin)
-                           .count();
-
         int STOP_GEN = -1;
 
-        auto dBegin = std::chrono::steady_clock::now();
-        util::graph::Dijkstra::EList<gridgraph::NodePL, gridgraph::EdgePL> res;
-        util::graph::Dijkstra::NList<gridgraph::NodePL, gridgraph::EdgePL>
-            nList;
+        util::graph::Dijkstra::EList<GridNodePL, GridEdgePL> res;
+        util::graph::Dijkstra::NList<GridNodePL, GridEdgePL> nList;
         GridNode* target = 0;
         util::graph::Dijkstra::shortestPath(fromGridNode, tos, GridCost(),
                                             GridHeur(g, fromGridNode, tos),
                                             &res, &nList);
-        auto dEnd = std::chrono::steady_clock::now();
-        dTime +=
-            std::chrono::duration_cast<std::chrono::milliseconds>(dEnd - dBegin)
-                .count();
-
-        // totalIters += iters;
+        std::reverse(res.begin(), res.end());
 
         if (nList.size()) target = nList.front();
 
-        auto postBegin = std::chrono::steady_clock::now();
         g->removeCostVector(fromGridNode, addCFromInv);
         if (tos.size() == 1) {
           g->removeCostVector(*tos.begin(), addCToInv);
@@ -535,11 +355,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
         e->pl().setPolyLine(pl);
         e->pl().setGeneration(gen);
 
-        auto postEnd = std::chrono::steady_clock::now();
-        postTime += std::chrono::duration_cast<std::chrono::milliseconds>(
-                        postEnd - postBegin)
-                        .count();
-
         gen++;
       }
 
@@ -547,22 +362,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** gg,
     }
   }
 
-  std::cerr << " === Total edge cost in graph is " << totalCost
-            << " === " << std::endl;
-
-  std::cerr << " === Total dijkstra iterations were " << totalIters
-            << " === " << std::endl;
-
-  std::cerr << " === Total dijkstra time was " << dTime
-            << " ms === " << std::endl;
-
-  std::cerr << " === Total cost vector calc time was " << costVecTime
-            << " ms === " << std::endl;
-  std::cerr << " === Total post time was " << postTime
-            << " ms === " << std::endl;
-
   bestGraph = TransitGraph();
-  buildTransitGraph(&cg, &bestGraph);
+  cg.getTransitGraph(&bestGraph);
 
   *gg = g;
 
@@ -634,14 +435,6 @@ size_t Octilinearizer::changesTopology(
   for (auto n : aff) {
     if (!getEdgeOrderingForNode(n, false, newPosA)
              .equals(getEdgeOrderingForNode(n))) {
-      std::cerr << "Changes ordering in " << n->pl().toString() << ":"
-                << std::endl;
-      std::cerr << "New: "
-                << getEdgeOrderingForNode(n, false, newPosA).toString(n)
-                << std::endl;
-      std::cerr << "Old: " << getEdgeOrderingForNode(n).toString(n)
-                << std::endl;
-
       ret += 1;
     }
   }

@@ -7,26 +7,20 @@
 #include <fstream>
 #include <iostream>
 #include <set>
-#include <chrono>
 #include "octi/Octilinearizer.h"
 #include "octi/config/ConfigReader.h"
-#include "octi/graph/CombEdgePL.h"
-#include "octi/graph/CombNodePL.h"
-#include "octi/graph/Graph.h"
+#include "octi/combgraph/CombGraph.h"
+#include "octi/transitgraph/TransitGraph.h"
 #include "octi/gridgraph/GridGraph.h"
 #include "util/geo/Geo.h"
+#include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
 using std::string;
 using namespace octi;
 
-using octi::gridgraph::GridGraph;
-using util::graph::Node;
-using octi::graph::NodePL;
-using octi::graph::EdgePL;
 using octi::Octilinearizer;
-
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
@@ -43,66 +37,26 @@ int main(int argc, char** argv) {
 
   util::geo::output::GeoGraphJsonOutput out;
 
-  /*
-   *   {
-   *     gridgraph::GridGraph g(
-   *         util::geo::Box(util::geo::Point(0, 0), util::geo::Point(100, 100)),
-   * 10);
-   *
-   *     util::graph::Dijkstra dijkstra;
-   *     std::list<GridEdge*> res;
-   *
-   *     dijkstra.shortestPath(g.getNode(4, 2), g.getNode(3, 8), &res);
-   *
-   *     for (auto f : res) {
-   *       f->pl().addResidentEdge(0);
-   *     }
-   *
-   *     for (auto f : res) {
-   *       g.balanceEdge(f->getFrom()->pl().getParent(),
-   *                     f->getTo()->pl().getParent());
-   *     }
-   *
-   *     res.clear();
-   *     dijkstra.shortestPath(g.getNode(8, 2), g.getNode(3, 8), &res);
-   *
-   *     for (auto f : res) {
-   *       f->pl().addResidentEdge(0);
-   *     }
-   *
-   *     for (auto f : res) {
-   *       g.balanceEdge(f->getFrom()->pl().getParent(),
-   *                     f->getTo()->pl().getParent());
-   *     }
-   *
-   *     out.print(g);
-   *     exit(0);
-   *   }
-   */
-  std::chrono::steady_clock::time_point begin;
-  std::chrono::steady_clock::time_point end;
-
   std::cerr << "Reading graph file... ";
-  begin = std::chrono::steady_clock::now();
+  T_START(read);
   TransitGraph tg;
   GridGraph* gg;
-  if (cfg.fromDot) tg.readFromDot(&(std::cin));
-  else tg.readFromJson(&(std::cin));
-  end = std::chrono::steady_clock::now();
-  std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
-
+  if (cfg.fromDot)
+    tg.readFromDot(&(std::cin));
+  else
+    tg.readFromJson(&(std::cin));
+  std::cerr << " done (" << T_STOP(read) << "ms)" << std::endl;
 
   std::cerr << "Planarize graph... ";
-  begin = std::chrono::steady_clock::now();
+  T_START(planarize);
   tg.topologizeIsects();
-  end = std::chrono::steady_clock::now();
-  std::cerr << " done (" << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms)"<< std::endl;
+  std::cerr << " done (" << T_STOP(planarize) << "ms)" << std::endl;
 
-  auto totalBegin = std::chrono::steady_clock::now();
+  T_START(octilinearize);
   Octilinearizer oct;
   TransitGraph res = oct.draw(&tg, &gg, cfg.pens);
-  auto totalend = std::chrono::steady_clock::now();
-  std::cerr << " octilinearized input in " << std::chrono::duration_cast<std::chrono::milliseconds>(totalend - totalBegin).count() << "ms"<< std::endl;
+  std::cerr << " octilinearized input in " << T_STOP(octilinearize) << "ms"
+            << std::endl;
 
   if (cfg.printMode == "gridgraph") {
     out.print(*gg, std::cout);

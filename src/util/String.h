@@ -143,15 +143,24 @@ inline size_t editDist(const std::string& s1, const std::string& s2) {
 }
 
 // _____________________________________________________________________________
-template <typename T>
-inline std::string implode(const std::vector<T>& vec, const char* del) {
+template <class Iter>
+inline std::string implode(Iter begin, const Iter& end, const char* del) {
   std::stringstream ss;
-  for (size_t i = 0; i < vec.size(); i++) {
+  size_t i = 0;
+  while (begin != end) {
     if (i != 0) ss << del;
-    ss << vec[i];
+    ss << *begin;
+    begin++;
+    i++;
   }
 
   return ss.str();
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline std::string implode(const std::vector<T>& vec, const char* del) {
+  return implode(vec.begin(), vec.end(), del);
 }
 }
 

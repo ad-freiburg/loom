@@ -5,11 +5,14 @@
 #ifndef UTIL_MISC_H_
 #define UTIL_MISC_H_
 
+#include <cmath>
 #include <chrono>
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 #define TIME() std::chrono::high_resolution_clock::now()
 #define TOOK(t1, t2) (std::chrono::duration_cast<microseconds>(t2 - t1).count() / 1000.0)
+#define T_START(n)  auto _tstart_##n = std::chrono::high_resolution_clock::now()
+#define T_STOP(n) (std::chrono::duration_cast<microseconds>(std::chrono::high_resolution_clock::now() - _tstart_##n).count() / 1000.0)
 
 namespace util {
 

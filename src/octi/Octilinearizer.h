@@ -5,28 +5,32 @@
 #ifndef OCTI_OCTILINEARIZER_H_
 #define OCTI_OCTILINEARIZER_H_
 
-#include <vector>
 #include <unordered_set>
-#include "octi/graph/Graph.h"
-#include "util/graph/Dijkstra.h"
+#include <vector>
+#include "octi/combgraph/CombGraph.h"
 #include "octi/gridgraph/GridGraph.h"
+#include "octi/transitgraph/TransitGraph.h"
+#include "util/graph/Dijkstra.h"
 
 namespace octi {
-
-typedef util::graph::UndirGraph<octi::graph::CombNodePL, octi::graph::CombEdgePL>
-    CombGraph;
-typedef util::graph::Node<octi::graph::CombNodePL, octi::graph::CombEdgePL>
-    CombNode;
-typedef util::graph::Edge<octi::graph::CombNodePL, octi::graph::CombEdgePL>
-    CombEdge;
 
 using octi::gridgraph::GridGraph;
 using octi::gridgraph::GridNode;
 using octi::gridgraph::GridEdge;
+using octi::gridgraph::GridNodePL;
+using octi::gridgraph::GridEdgePL;
 using octi::gridgraph::Penalties;
-typedef octi::graph::Graph TransitGraph;
-typedef util::graph::Node<octi::graph::NodePL, octi::graph::EdgePL> TransitNode;
-typedef util::graph::Edge<octi::graph::NodePL, octi::graph::EdgePL> TransitEdge;
+
+using octi::transitgraph::TransitGraph;
+using octi::transitgraph::TransitNode;
+using octi::transitgraph::TransitEdge;
+using octi::transitgraph::EdgeOrdering;
+
+using octi::combgraph::CombGraph;
+using octi::combgraph::CombNode;
+using octi::combgraph::CombEdge;
+
+using util::graph::Dijkstra;
 
 struct GraphMeasures {
   double maxNodeDist;
@@ -38,9 +42,9 @@ struct GraphMeasures {
   size_t maxDeg;
 };
 
-struct GridCost : public util::graph::Dijkstra::CostFunc<gridgraph::NodePL, gridgraph::EdgePL, double> {
+struct GridCost : public Dijkstra::CostFunc<GridNodePL, GridEdgePL, double> {
   virtual double operator()(const GridNode* from, const GridEdge* e,
-                       const GridNode* to) const {
+                            const GridNode* to) const {
     UNUSED(from);
     UNUSED(to);
     return e->pl().cost();
@@ -49,9 +53,8 @@ struct GridCost : public util::graph::Dijkstra::CostFunc<gridgraph::NodePL, grid
   virtual double inf() const { return std::numeric_limits<double>::infinity(); }
 };
 
-struct GridHeur : public util::graph::Dijkstra::HeurFunc<gridgraph::NodePL, gridgraph::EdgePL, double> {
-  GridHeur(octi::gridgraph::GridGraph* g, GridNode* from,
-           const std::set<GridNode*>& to)
+struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
+  GridHeur(GridGraph* g, GridNode* from, const std::set<GridNode*>& to)
       : g(g), from(from), to(0) {
     if (to.size() == 1) {
       this->to = *to.begin();
@@ -71,8 +74,6 @@ struct GridHeur : public util::graph::Dijkstra::HeurFunc<gridgraph::NodePL, grid
   }
 
   double operator()(const GridNode* from, const std::set<GridNode*>& to) const {
-    // return 0;
-
     if (to.find(from->pl().getParent()) != to.end()) return 0;
 
     size_t ret = std::numeric_limits<size_t>::max();
@@ -95,30 +96,26 @@ struct GridHeur : public util::graph::Dijkstra::HeurFunc<gridgraph::NodePL, grid
 class Octilinearizer {
  public:
   Octilinearizer() {}
-
   TransitGraph draw(TransitGraph* g, GridGraph** gg, const Penalties& pens);
 
  private:
   void normalizeCostVector(double* vec) const;
   double getMaxDis(CombNode* to, CombEdge* e, double gridSize);
   void removeEdgesShorterThan(TransitGraph* g, double d);
-  void combineDeg2(CombGraph* g);
-  void buildTransitGraph(CombGraph* source, TransitGraph* target);
   void writeEdgeOrdering(CombGraph* target);
-  graph::EdgeOrdering getEdgeOrderingForNode(CombNode* n) const;
-  graph::EdgeOrdering getEdgeOrderingForNode(
+  EdgeOrdering getEdgeOrderingForNode(CombNode* n) const;
+  EdgeOrdering getEdgeOrderingForNode(
       CombNode* n, bool useOrigNextNode,
       const std::map<CombNode*, DPoint>& newPos) const;
-  void buildCombGraph(TransitGraph* source, CombGraph* target);
   void buildPolylineFromRes(const std::vector<GridEdge*>& l,
                             PolyLine<double>& res);
   double getCostFromRes(const std::vector<GridEdge*>& l);
   void addResidentEdges(gridgraph::GridGraph* g, CombEdge* e,
-                          const std::vector<GridEdge*>& res);
+                        const std::vector<GridEdge*>& res);
   size_t changesTopology(CombNode* n, DPoint p,
                          const std::map<CombNode*, DPoint>& newPos) const;
 };
 
-}  // namespace octt
+}  // namespace octi
 
 #endif  // OCTI_OCTILINEARIZER_H_

@@ -2,10 +2,10 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRIDGRAPH_NODEPL_H_
-#define OCTI_GRIDGRAPH_NODEPL_H_
+#ifndef OCTI_GRIDGRAPH_GRIDNODEPL_H_
+#define OCTI_GRIDGRAPH_GRIDNODEPL_H_
 
-#include "octi/gridgraph/EdgePL.h"
+#include "octi/gridgraph/GridEdgePL.h"
 #include "util/geo/Geo.h"
 #include "util/geo/GeoGraph.h"
 #include "util/graph/Node.h"
@@ -16,19 +16,23 @@ using util::graph::Node;
 namespace octi {
 namespace gridgraph {
 
-class NodePL : util::geograph::GeoNodePL<double> {
+class GridNodePL;
+typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
+typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
+
+class GridNodePL : util::geograph::GeoNodePL<double> {
  public:
-  NodePL() {};
-  NodePL(Point<double> pos);
+  GridNodePL(){};
+  GridNodePL(Point<double> pos);
 
   const Point<double>* getGeom() const;
   util::json::Dict getAttrs() const;
 
-  Node<NodePL, EdgePL>* getParent() const;
-  void setParent(Node<NodePL, EdgePL>* n);
+  GridNode* getParent() const;
+  void setParent(GridNode* n);
 
-  Node<NodePL, EdgePL>* getPort(size_t i) const;
-  void setPort(size_t p, Node<NodePL, EdgePL>* n);
+  GridNode* getPort(size_t i) const;
+  void setPort(size_t p, GridNode* n);
 
   void setXY(size_t x, size_t y);
   size_t getX() const;
@@ -37,13 +41,12 @@ class NodePL : util::geograph::GeoNodePL<double> {
   bool isClosed() const;
   void setClosed(bool c);
 
-
  private:
   Point<double> _pos;
 
-  Node<NodePL, EdgePL>* _parent;
+  GridNode* _parent;
 
-  Node<NodePL, EdgePL>* _ports[8];
+  GridNode* _ports[8];
 
   size_t _x, _y;
   bool _closed;
@@ -51,4 +54,4 @@ class NodePL : util::geograph::GeoNodePL<double> {
 }
 }
 
-#endif  // OCTI_GRIDGRAPH_NODEPL_H_
+#endif  // OCTI_GRIDGRAPH_GRIDNODEPL_H_
