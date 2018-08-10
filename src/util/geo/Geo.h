@@ -174,20 +174,20 @@ inline std::vector<Geometry<T>> rotate(std::vector<Geometry<T>> multigeo,
 
 // _____________________________________________________________________________
 template <typename T>
-inline Point<T> move(const Point<T>& geo, T x, T y) {
+inline Point<T> move(const Point<T>& geo, double x, double y) {
   return Point<T>(geo.getX() + x, geo.getY() + y);
 }
 
 // _____________________________________________________________________________
 template <typename T>
-inline Line<T> move(Line<T> geo, T x, T y) {
+inline Line<T> move(Line<T> geo, double x, double y) {
   for (size_t i = 0; i < geo.size(); i++) geo[i] = move(geo[i], x, y);
   return geo;
 }
 
 // _____________________________________________________________________________
 template <typename T>
-inline LineSegment<T> move(LineSegment<T> geo, T x, T y) {
+inline LineSegment<T> move(LineSegment<T> geo, double x, double y) {
   geo.first = move(geo.first, x, y);
   geo.second = move(geo.second, x, y);
   return geo;
@@ -195,7 +195,7 @@ inline LineSegment<T> move(LineSegment<T> geo, T x, T y) {
 
 // _____________________________________________________________________________
 template <typename T>
-inline Polygon<T> move(Polygon<T> geo, T x, T y) {
+inline Polygon<T> move(Polygon<T> geo, double x, double y) {
   for (size_t i = 0; i < geo.getOuter().size(); i++)
     geo.getOuter()[i] = move(geo.getOuter()[i], x, y);
   return geo;
@@ -203,8 +203,8 @@ inline Polygon<T> move(Polygon<T> geo, T x, T y) {
 
 // _____________________________________________________________________________
 template <template <typename> class Geometry, typename T>
-inline std::vector<Geometry<T>> move(std::vector<Geometry<T>> multigeo, T x,
-                                     T y) {
+inline std::vector<Geometry<T>> move(std::vector<Geometry<T>> multigeo, double x,
+                                     double y) {
   for (size_t i = 0; i < multigeo.size(); i++)
     multigeo[i] = move(multigeo[i], x, y);
   return multigeo;
@@ -536,8 +536,8 @@ inline bool intersects(const Box<T>& b, const Point<T>& p) {
 
 // _____________________________________________________________________________
 template <typename T>
-inline Point<T> intersection(T p1x, T p1y, T q1x, T q1y, T p2x, T p2y, T q2x,
-                             T q2y) {
+inline Point<T> intersection(double p1x, double p1y, double q1x, double q1y, double p2x, double p2y, double q2x,
+                             double q2y) {
   /*
    * calculates the intersection between two line segments
    */
@@ -574,8 +574,8 @@ inline Point<T> intersection(const LineSegment<T>& s1,
 
 // _____________________________________________________________________________
 template <typename T>
-inline bool lineIntersects(T p1x, T p1y, T q1x, T q1y, T p2x, T p2y, T q2x,
-                           T q2y) {
+inline bool lineIntersects(double p1x, double p1y, double q1x, double q1y, double p2x, double p2y, double q2x,
+                           double q2y) {
   /*
    * checks whether two lines intersect
    */
@@ -953,7 +953,7 @@ inline Point<T> projectOn(const Point<T>& a, const Point<T>& b,
   if (doubleEq(a.getX(), c.getX()) && doubleEq(a.getY(), c.getY())) return a;
   if (doubleEq(b.getX(), c.getX()) && doubleEq(b.getY(), c.getY())) return b;
 
-  T x, y;
+  double x, y;
 
   if (c.getX() == a.getX()) {
     // infinite slope
@@ -1266,10 +1266,10 @@ inline double area(const Polygon<T>& b) {
 // _____________________________________________________________________________
 template <typename T>
 inline double commonArea(const Box<T>& ba, const Box<T>& bb) {
-  T l = std::max(ba.getLowerLeft().getX(), bb.getLowerLeft().getX());
-  T r = std::min(ba.getUpperRight().getX(), bb.getUpperRight().getX());
-  T b = std::max(ba.getLowerLeft().getY(), bb.getLowerLeft().getY());
-  T t = std::min(ba.getUpperRight().getY(), bb.getUpperRight().getY());
+  double l = std::max(ba.getLowerLeft().getX(), bb.getLowerLeft().getX());
+  double r = std::min(ba.getUpperRight().getX(), bb.getUpperRight().getX());
+  double b = std::max(ba.getLowerLeft().getY(), bb.getLowerLeft().getY());
+  double t = std::min(ba.getUpperRight().getY(), bb.getUpperRight().getY());
 
   if (l > r || b > t) return 0;
   return (r - l) * (t - b);

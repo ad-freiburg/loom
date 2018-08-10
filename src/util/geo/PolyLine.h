@@ -9,6 +9,7 @@
 #include <ostream>
 #include <iomanip>
 #include <string>
+#include <set>
 #include <vector>
 #include "Geo.h"
 
