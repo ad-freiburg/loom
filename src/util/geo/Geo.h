@@ -203,8 +203,8 @@ inline Polygon<T> move(Polygon<T> geo, double x, double y) {
 
 // _____________________________________________________________________________
 template <template <typename> class Geometry, typename T>
-inline std::vector<Geometry<T>> move(std::vector<Geometry<T>> multigeo, double x,
-                                     double y) {
+inline std::vector<Geometry<T>> move(std::vector<Geometry<T>> multigeo,
+                                     double x, double y) {
   for (size_t i = 0; i < multigeo.size(); i++)
     multigeo[i] = move(multigeo[i], x, y);
   return multigeo;
@@ -219,15 +219,18 @@ inline Box<T> minbox() {
 // _____________________________________________________________________________
 template <typename T>
 inline RotatedBox<T> shrink(const RotatedBox<T>& b, double d) {
-  double xd = b.getBox().getUpperRight().getX() - b.getBox().getLowerLeft().getX();
-  double yd = b.getBox().getUpperRight().getY() - b.getBox().getLowerLeft().getY();
+  double xd =
+      b.getBox().getUpperRight().getX() - b.getBox().getLowerLeft().getX();
+  double yd =
+      b.getBox().getUpperRight().getY() - b.getBox().getLowerLeft().getY();
 
   if (xd <= 2 * d) d = xd / 2 - 1;
   if (yd <= 2 * d) d = yd / 2 - 1;
 
-  Box<T> r(
-      Point<T>(b.getBox().getLowerLeft().getX() + d, b.getBox().getLowerLeft().getY() + d),
-      Point<T>(b.getBox().getUpperRight().getX() - d, b.getBox().getUpperRight().getY() - d));
+  Box<T> r(Point<T>(b.getBox().getLowerLeft().getX() + d,
+                    b.getBox().getLowerLeft().getY() + d),
+           Point<T>(b.getBox().getUpperRight().getX() - d,
+                    b.getBox().getUpperRight().getY() - d));
 
   return RotatedBox<T>(r, b.getDegree(), b.getCenter());
 }
@@ -399,8 +402,9 @@ inline bool intersects(const LineSegment<T>& ls1, const LineSegment<T>& ls2) {
          (contains(ls1.first, ls2) || contains(ls1.second, ls2) ||
           contains(ls2.first, ls1) || contains(ls2.second, ls1) ||
           (((crossProd(ls1.first, ls2) < 0) ^
-           (crossProd(ls1.second, ls2) < 0)) &&
-          ((crossProd(ls2.first, ls1) < 0) ^ (crossProd(ls2.second, ls1) < 0))));
+            (crossProd(ls1.second, ls2) < 0)) &&
+           ((crossProd(ls2.first, ls1) < 0) ^
+            (crossProd(ls2.second, ls1) < 0))));
 }
 
 // _____________________________________________________________________________
@@ -536,8 +540,8 @@ inline bool intersects(const Box<T>& b, const Point<T>& p) {
 
 // _____________________________________________________________________________
 template <typename T>
-inline Point<T> intersection(double p1x, double p1y, double q1x, double q1y, double p2x, double p2y, double q2x,
-                             double q2y) {
+inline Point<T> intersection(T p1x, T p1y, T q1x, T q1y, T p2x, T p2y, T q2x,
+                             T q2y) {
   /*
    * calculates the intersection between two line segments
    */
@@ -574,8 +578,8 @@ inline Point<T> intersection(const LineSegment<T>& s1,
 
 // _____________________________________________________________________________
 template <typename T>
-inline bool lineIntersects(double p1x, double p1y, double q1x, double q1y, double p2x, double p2y, double q2x,
-                           double q2y) {
+inline bool lineIntersects(T p1x, T p1y, T q1x, T q1y, T p2x, T p2y, T q2x,
+                           T q2y) {
   /*
    * checks whether two lines intersect
    */
@@ -641,7 +645,7 @@ template <typename T>
 inline double dist(const Point<T>& p, const Line<T>& l) {
   double d = std::numeric_limits<double>::infinity();
   for (size_t i = 1; i < l.size(); i++) {
-    double dTmp = distToSegment(l[i-1], l[i], p);
+    double dTmp = distToSegment(l[i - 1], l[i], p);
     if (dTmp < EPSILON) return 0;
     if (dTmp < d) d = dTmp;
   }
@@ -659,7 +663,7 @@ template <typename T>
 inline double dist(const LineSegment<T>& ls, const Line<T>& l) {
   double d = std::numeric_limits<double>::infinity();
   for (size_t i = 1; i < l.size(); i++) {
-    double dTmp = dist(ls, LineSegment<T>(l[i-1], l[i]));
+    double dTmp = dist(ls, LineSegment<T>(l[i - 1], l[i]));
     if (dTmp < EPSILON) return 0;
     if (dTmp < d) d = dTmp;
   }
@@ -677,13 +681,12 @@ template <typename T>
 inline double dist(const Line<T>& la, const Line<T>& lb) {
   double d = std::numeric_limits<double>::infinity();
   for (size_t i = 1; i < la.size(); i++) {
-    double dTmp = dist(LineSegment<T>(la[i-1], la[i]), lb);
+    double dTmp = dist(LineSegment<T>(la[i - 1], la[i]), lb);
     if (dTmp < EPSILON) return 0;
     if (dTmp < d) d = dTmp;
   }
   return d;
 }
-
 
 // _____________________________________________________________________________
 inline double innerProd(double x1, double y1, double x2, double y2, double x3,
