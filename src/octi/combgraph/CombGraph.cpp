@@ -7,11 +7,13 @@
 using octi::combgraph::CombGraph;
 using octi::transitgraph::TransitGraph;
 using octi::transitgraph::TransitNode;
+using octi::transitgraph::EdgeOrdering;
 
 // _____________________________________________________________________________
 CombGraph::CombGraph(const TransitGraph* g) {
   build(g);
   combineDeg2();
+  writeEdgeOrdering();
 }
 
 // _____________________________________________________________________________
@@ -28,8 +30,7 @@ void CombGraph::build(const TransitGraph* source) {
   for (auto n : nodes) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      addEdg(m[e->getFrom()], m[e->getTo()],
-                     octi::combgraph::CombEdgePL(e));
+      addEdg(m[e->getFrom()], m[e->getTo()], octi::combgraph::CombEdgePL(e));
     }
   }
 
@@ -145,4 +146,76 @@ void CombGraph::getTransitGraph(TransitGraph* target) const {
       }
     }
   }
+}
+
+// _____________________________________________________________________________
+void CombGraph::writeEdgeOrdering() {
+  for (auto n : *getNds()) {
+    n->pl().setEdgeOrdering(getEdgeOrderingForNode(n));
+  }
+}
+
+// _____________________________________________________________________________
+EdgeOrdering CombGraph::getEdgeOrderingForNode(CombNode* n) const {
+  return getEdgeOrderingForNode(n, true, std::map<CombNode*, DPoint>());
+}
+
+// _____________________________________________________________________________
+EdgeOrdering CombGraph::getEdgeOrderingForNode(
+    CombNode* n, bool useOrigNextNode,
+    const std::map<CombNode*, DPoint>& newPos) const {
+  EdgeOrdering order;
+  for (auto e : n->getAdjList()) {
+    auto r = e->pl().getChilds().front();
+    DPoint a = *n->pl().getGeom();
+    if (newPos.find(n) != newPos.end()) a = newPos.find(n)->second;
+
+    DPoint b;
+    if (useOrigNextNode) {
+      b = *r->getOtherNd(n->pl().getParent())->pl().getGeom();
+    } else {
+      auto other = e->getOtherNd(n);
+      if (e->pl().getGeom()->size() > 2) {
+        if (e->getTo() == n) {
+          b = e->pl().getGeom()->at(e->pl().getGeom()->size() - 2);
+        } else {
+          b = e->pl().getGeom()->at(1);
+        }
+      } else {
+        b = *other->pl().getGeom();
+        if (newPos.find(other) != newPos.end()) b = newPos.find(other)->second;
+      }
+    }
+
+    // get the angles
+    double deg = util::geo::angBetween(a, b);
+
+    order.add(e, deg);
+  }
+
+  return order;
+}
+
+// _____________________________________________________________________________
+size_t CombGraph::changesTopology(
+    CombNode* nOrig, DPoint p,
+    const std::map<CombNode*, DPoint>& newPos) const {
+  // collect the affected nodes
+  size_t ret = 0;
+  std::set<CombNode*> aff;
+  auto newPosA = newPos;
+  newPosA[nOrig] = p;
+  for (auto e : nOrig->getAdjList()) {
+    if (newPos.find(e->getFrom()) != newPos.end()) aff.insert(e->getFrom());
+    if (newPos.find(e->getTo()) != newPos.end()) aff.insert(e->getTo());
+  }
+
+  for (auto n : aff) {
+    if (!getEdgeOrderingForNode(n, false, newPosA)
+             .equals(getEdgeOrderingForNode(n))) {
+      ret += 1;
+    }
+  }
+
+  return ret;
 }

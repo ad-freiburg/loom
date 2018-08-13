@@ -20,6 +20,7 @@ using octi::gridgraph::GridEdge;
 using octi::gridgraph::GridNodePL;
 using octi::gridgraph::GridEdgePL;
 using octi::gridgraph::Penalties;
+using octi::gridgraph::NodeCost;
 
 using octi::transitgraph::TransitGraph;
 using octi::transitgraph::TransitNode;
@@ -31,6 +32,18 @@ using octi::combgraph::CombNode;
 using octi::combgraph::CombEdge;
 
 using util::graph::Dijkstra;
+
+// comparator for nodes, based on degree
+struct NodeCmp {
+  bool operator()(CombNode* a, CombNode* b) {
+    // return a->getAdjList().size() < b->getAdjList().size();
+    return a->getAdjList().size() < b->getAdjList().size() ||
+           (a->getAdjList().size() == b->getAdjList().size() &&
+            a->pl().getRouteNumber() < b->pl().getRouteNumber());
+  }
+};
+
+typedef std::priority_queue<CombNode*, std::vector<CombNode*>, NodeCmp> NodePQ;
 
 struct GraphMeasures {
   double maxNodeDist;
@@ -99,21 +112,14 @@ class Octilinearizer {
   TransitGraph draw(TransitGraph* g, GridGraph** gg, const Penalties& pens);
 
  private:
-  void normalizeCostVector(double* vec) const;
   double getMaxDis(CombNode* to, CombEdge* e, double gridSize);
   void removeEdgesShorterThan(TransitGraph* g, double d);
-  void writeEdgeOrdering(CombGraph* target);
-  EdgeOrdering getEdgeOrderingForNode(CombNode* n) const;
-  EdgeOrdering getEdgeOrderingForNode(
-      CombNode* n, bool useOrigNextNode,
-      const std::map<CombNode*, DPoint>& newPos) const;
-  void buildPolylineFromRes(const std::vector<GridEdge*>& l,
-                            PolyLine<double>& res);
+  PolyLine<double> buildPolylineFromRes(const std::vector<GridEdge*>& l);
   double getCostFromRes(const std::vector<GridEdge*>& l);
   void addResidentEdges(gridgraph::GridGraph* g, CombEdge* e,
                         const std::vector<GridEdge*>& res);
-  size_t changesTopology(CombNode* n, DPoint p,
-                         const std::map<CombNode*, DPoint>& newPos) const;
+
+  NodeCost writeNodeCosts(GridNode* n, CombNode* origNode, CombEdge* e, GridGraph* g);
 };
 
 }  // namespace octi

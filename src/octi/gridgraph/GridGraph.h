@@ -11,6 +11,7 @@
 #include "octi/combgraph/CombGraph.h"
 #include "octi/gridgraph/GridEdgePL.h"
 #include "octi/gridgraph/GridNodePL.h"
+#include "octi/gridgraph/NodeCost.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/DirGraph.h"
@@ -55,12 +56,9 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   const Grid<GridNode*, Point, double>& getGrid() const;
 
-  void spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
-                      double* ret);
-  void topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
-                        double* ret);
-  void outDegDeviationPenalty(GridNode* n, CombNode* origNode, CombEdge* e,
-                              double* addC);
+  NodeCost spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
+  NodeCost topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
+  NodeCost outDegDeviationPenalty(CombNode* origNode, CombEdge* e);
   void balanceEdge(GridNode* a, GridNode* b);
 
   double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
@@ -68,8 +66,8 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   std::priority_queue<Candidate> getNearestCandidatesFor(
       const util::geo::DPoint& p, double maxD) const;
 
-  void addCostVector(GridNode* n, double addC[8], double* invCost);
-  void removeCostVector(GridNode* n, double addC[8]);
+  NodeCost addCostVector(GridNode* n, const NodeCost& addC);
+  void removeCostVector(GridNode* n, const NodeCost& addC);
   std::pair<size_t, size_t> getNodeCoords(GridNode* n) const;
 
   void openNodeSink(GridNode* n, double cost);
