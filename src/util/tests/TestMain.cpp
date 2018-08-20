@@ -51,35 +51,35 @@ CASE("json") {
 
   util::json::Val f({1, json::Array{2, 3, 4}, 3});
 
-  ss = std::stringstream();
+  ss.str("");
   wr = util::json::Writer(&ss, 2, false);
   util::json::Val i({1, json::Array{2, json::Null(), 4}, true});
   wr.val(i);
   wr.closeAll();
   EXPECT(ss.str() == "[1,[2,null,4],true]");
 
-  ss = std::stringstream();
+  ss.str("");
   wr = util::json::Writer(&ss, 2, false);
   i = util::json::Val({1, json::Array{2, json::Null(), 4}, false});
   wr.val(i);
   wr.closeAll();
   EXPECT(ss.str() == "[1,[2,null,4],false]");
 
-  ss = std::stringstream();
+  ss.str("");
   wr = util::json::Writer(&ss, 2, false);
   i = util::json::Val({1, json::Array{2, json::Null(), 4}, false});
   wr.val(i);
   wr.closeAll();
   EXPECT(ss.str() == "[1,[2,null,4],false]");
 
-  ss = std::stringstream();
+  ss.str("");
   wr = util::json::Writer(&ss, 2, false);
   i = util::json::Val({1, json::Array{2.13, "", 4}, 0});
   wr.val(i);
   wr.closeAll();
   EXPECT(ss.str() == "[1,[2.13,\"\",4],0]");
 
-  ss = std::stringstream();
+  ss.str("");
   wr = util::json::Writer(&ss, 2, false);
   i = util::json::Val({1, json::Array{2.13, json::Dict{{"a", 1}, {"B", 2.123}}, 4}, 0});
   wr.val(i);
@@ -972,11 +972,13 @@ CASE("geometry") {
 
   EXPECT(geo::intersects(lsa, lsb));
 
-  EXPECT(geo::intersects(lsa, lsa));
-  EXPECT(geo::intersects(lsb, lsb));
+  EXPECT(!geo::intersects(lsa, lsa));
+  EXPECT(!geo::intersects(lsb, lsb));
   EXPECT(!geo::intersects(lsa, lsc));
 
   EXPECT(!geo::intersects(geo::Point<double>(871569.2, 6104550.4), geo::Point<double>(871581.2, 6104536), geo::Point<double>(871580.3, 6104541.3), geo::Point<double>(871625.7, 6104510.1)));
+
+  EXPECT(!geo::intersects(geo::Point<double>(0, 0), geo::Point<double>(1, 1), geo::Point<double>(0.5, 0.5), geo::Point<double>(1.5, 1.5)));
 
   geo::Line<double> l{geo::Point<double>(1, 1), geo::Point<double>(2, 2), geo::Point<double>(2, 4)};
   EXPECT(!geo::contains(geo::Point<double>(1, 2), l));

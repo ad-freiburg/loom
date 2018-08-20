@@ -33,6 +33,9 @@ using octi::combgraph::CombEdge;
 
 using util::graph::Dijkstra;
 
+typedef Dijkstra::EList<GridNodePL, GridEdgePL>  GrEdgList;
+typedef Dijkstra::NList<GridNodePL, GridEdgePL>  GrNdList;
+
 // comparator for nodes, based on degree
 struct NodeCmp {
   bool operator()(CombNode* a, CombNode* b) {
@@ -119,7 +122,8 @@ class Octilinearizer {
   void addResidentEdges(gridgraph::GridGraph* g, CombEdge* e,
                         const std::vector<GridEdge*>& res);
 
-  NodeCost writeNodeCosts(GridNode* n, CombNode* origNode, CombEdge* e, GridGraph* g);
+  NodeCost writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e, GridGraph* g);
+  void settleRes(GridNode* startGridNd, GridNode* toGridNd, GridGraph* gg, CombNode* from, CombNode* to, const GrEdgList& res, CombEdge* e, size_t gen);
 };
 
 }  // namespace octi

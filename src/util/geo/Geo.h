@@ -398,9 +398,13 @@ inline bool contains(const std::vector<GeometryA<T>>& multigeo,
 // _____________________________________________________________________________
 template <typename T>
 inline bool intersects(const LineSegment<T>& ls1, const LineSegment<T>& ls2) {
+  // two line segments intersect of there is a single, well-defined intersection
+  // point between them. If more than 1 endpoint is colinear with any line,
+  // the segments have infinite intersections. We handle this case as non-
+  // intersecting
   return intersects(getBoundingBox(ls1), getBoundingBox(ls2)) &&
-         (contains(ls1.first, ls2) || contains(ls1.second, ls2) ||
-          contains(ls2.first, ls1) || contains(ls2.second, ls1) ||
+         (((contains(ls1.first, ls2) ^ contains(ls1.second, ls2)) ^
+          (contains(ls2.first, ls1) ^ contains(ls2.second, ls1))) ||
           (((crossProd(ls1.first, ls2) < 0) ^
             (crossProd(ls1.second, ls2) < 0)) &&
            ((crossProd(ls2.first, ls1) < 0) ^

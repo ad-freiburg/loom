@@ -347,6 +347,7 @@ InnerGeometry Node::getInnerBezier(const OrderingConfig& cf,
                                    const Partner& partnerFrom,
                                    const Partner& partnerTo,
                                    double prec) const {
+  double EPSI = 0.001;
   InnerGeometry ret = getInnerStraightLine(cf, partnerFrom, partnerTo);
   DPoint p = ret.geom.getLine().front();
   DPoint pp = ret.geom.getLine().back();
@@ -387,7 +388,7 @@ InnerGeometry Node::getInnerBezier(const OrderingConfig& cf,
   DPoint ppb = DPoint(pp.getX() + slopeB.first * d * 2,
                       pp.getY() + slopeB.second * d * 2);
 
-  if (d > 0.001 && util::geo::intersects(pa, ppa, pb, ppb)) {
+  if (d > EPSI && util::geo::intersects(pa, ppa, pb, ppb)) {
     DPoint isect = util::geo::intersection(pa, ppa, pb, ppb);
 
     if (!std::isnan(isect.getX()) && !std::isnan(isect.getY())) {
@@ -407,7 +408,6 @@ InnerGeometry Node::getInnerBezier(const OrderingConfig& cf,
                               1);
 
         fac = pow(fac, 2);
-
         ang = pow(ang, fac);
       }
 
@@ -421,7 +421,7 @@ InnerGeometry Node::getInnerBezier(const OrderingConfig& cf,
     }
   }
 
-  if ((da + db) < 0.001 || (da + db) > d * 2) {
+  if ((da + db) < EPSI || (da + db) > d * 2) {
     da = 1;
     db = 1;
   }

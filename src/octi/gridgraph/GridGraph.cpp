@@ -147,9 +147,12 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
   size_t x = xy.first;
   size_t y = xy.second;
 
+  // this closes the grid edge
   getNEdge(a, b)->pl().setCost(INF);
   getNEdge(b, a)->pl().setCost(INF);
 
+  // this closes both nodes
+  // a close means that all major edges reaching this node are closed
   closeNode(a);
   closeNode(b);
 
@@ -161,6 +164,15 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
       auto e = getNEdge(na, nb);
       auto f = getNEdge(nb, na);
 
+      // this closes edges b that cross this edge a - we never want to
+      // allow that
+      // +-----------+
+      // | \       / |
+      // |   \   /a  |
+      // |     \     |
+      // |   /   \   |
+      // | /      b\ |
+      // +-----------+
       e->pl().setCost(INF);
       f->pl().setCost(INF);
     }
@@ -375,7 +387,7 @@ NodeCost GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
         // close the other node to avoid "stealing" the edge
         // IMPORTANT: because we check if this edge is already closed
         // above, it is impossible for this node to be already closed -
-        // then the edge would also be close, too. So we can close this node
+        // then the edge would also be closed, too. So we can close this node
         // here without danger of re-opening an already closed node later on.
         closeNode(getNeighbor(x, y, i));
 
@@ -396,11 +408,6 @@ NodeCost GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
 
 // _____________________________________________________________________________
 void GridGraph::removeCostVector(GridNode* n, const NodeCost& addC) {
-  std::cerr << "Removing cost vector ";
-  for (size_t i = 0; i < 8; i++) {
-    std::cerr << addC[i] << ",";
-  }
-  std::cerr << std::endl;
   auto xy = getNodeCoords(n);
   size_t x = xy.first;
   size_t y = xy.second;
