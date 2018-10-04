@@ -156,8 +156,6 @@ bool OptGraph::simplifyStep() {
         assert(newTo != n);
 
         delNd(n);
-        // delEdg(first->getFrom(), first->getTo());
-        // delEdg(second->getFrom(), second->getTo());
 
         newFrom->addEdge(newEdge);
         newTo->addEdge(newEdge);
