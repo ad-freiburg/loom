@@ -6,6 +6,7 @@
 #define UTIL_GRAPH_UNDIRNODE_H_
 
 #include <vector>
+#include <algorithm>
 #include "util/graph/Node.h"
 
 namespace util {

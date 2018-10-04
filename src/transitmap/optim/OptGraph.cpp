@@ -8,25 +8,25 @@ using namespace transitmapper;
 using namespace optim;
 
 // _____________________________________________________________________________
-EtgPart OptEdge::getFirstEdge() const {
-  for (const auto e : etgs) {
-    if (e.etg->getFrom() == from->node || e.etg->getTo() == from->node) {
+EtgPart OptGraph::getFirstEdge(const OptEdge* optEdg) {
+  for (const auto e : optEdg->pl().etgs) {
+    if (e.etg->getFrom() == optEdg->getFrom()->pl().node || e.etg->getTo() == optEdg->getFrom()->pl().node) {
       return e;
     }
   }
 }
 
 // _____________________________________________________________________________
-EtgPart OptEdge::getLastEdge() const {
-  for (const auto e : etgs) {
-    if (e.etg->getFrom() == to->node || e.etg->getTo() == to->node) {
+EtgPart OptGraph::getLastEdge(const OptEdge* optEdg) {
+  for (const auto e : optEdg->pl().etgs) {
+    if (e.etg->getFrom() == optEdg->getTo()->pl().node || e.etg->getTo() == optEdg->getTo()->pl().node) {
       return e;
     }
   }
 }
 
 // _____________________________________________________________________________
-std::string OptEdge::getStrRepr() const {
+std::string OptEdgePL::getStrRepr() const {
   const void* address = static_cast<const void*>(this);
   std::stringstream ss;
   ss << address;
@@ -35,20 +35,17 @@ std::string OptEdge::getStrRepr() const {
 }
 
 // _____________________________________________________________________________
-graph::Edge* OptEdge::getAdjacentEdge(const OptNode* n) const {
-  if (from == n) {
-    return getFirstEdge().etg;
+Edge* OptGraph::getAdjacentEdge(const OptEdge* e, const OptNode* n) {
+  if (e->getFrom() == n) {
+    return getFirstEdge(e).etg;
   } else {
-    return getLastEdge().etg;
+    return getLastEdge(e).etg;
   }
 }
 
 // _____________________________________________________________________________
 OptGraph::OptGraph(TransitGraph* toOptim)
  : _g(toOptim) { build(); }
-
-// _____________________________________________________________________________
-void OptGraph::addNode(OptNode* n) { _nodes.insert(n); }
 
 // _____________________________________________________________________________
 void OptGraph::build() {
@@ -61,31 +58,24 @@ void OptGraph::build() {
       OptNode* to = getNodeForTransitNode(toTn);
 
       if (!from) {
-        from = new OptNode(fromTn);
-        addNode(from);
+        from = addNd(fromTn);
       }
 
       if (!to) {
-        to = new OptNode(toTn);
-        addNode(to);
+        to = addNd(toTn);
       }
 
-      OptEdge* edge = new OptEdge(from, to);
-      from->addEdge(edge);
-      to->addEdge(edge);
+      OptEdge* edge = addEdg(from, to);
 
-      edge->etgs.push_back(EtgPart(e, e->getTo() == toTn));
+      edge->pl().etgs.push_back(EtgPart(e, e->getTo() == toTn));
     }
   }
 }
 
 // _____________________________________________________________________________
-const std::set<OptNode*>& OptGraph::getNodes() const { return _nodes; }
-
-// _____________________________________________________________________________
 OptNode* OptGraph::getNodeForTransitNode(const Node* tn) const {
-  for (auto n : _nodes) {
-    if (n->node == tn) return n;
+  for (auto n : getNds()) {
+    if (n->pl().node == tn) return n;
   }
 
   return 0;
@@ -99,25 +89,25 @@ void OptGraph::simplify() {
 
 // _____________________________________________________________________________
 bool OptGraph::simplifyStep() {
-  for (OptNode* n : _nodes) {
-    if (n->adjList.size() == 2) {
+  for (OptNode* n : *getNds()) {
+    if (n->getDeg() == 2) {
       OptEdge* first = 0;
       OptEdge* second = 0;
 
-      for (OptEdge* e : n->adjList) {
+      for (OptEdge* e : n->getAdjList()) {
         if (!first)
           first = e;
         else
           second = e;
       }
 
-      bool equal = first->etgs.front().etg->getCardinality() ==
-                   second->etgs.front().etg->getCardinality();
+      bool equal = first->pl().etgs.front().etg->getCardinality() ==
+                   second->pl().etgs.front().etg->getCardinality();
 
-      for (auto& to : *first->getAdjacentEdge(n)->getTripsUnordered()) {
-        if (!second->getAdjacentEdge(n)
-                 ->getSameDirRoutesIn(n->node, to.route, to.direction,
-                                      first->getAdjacentEdge(n))
+      for (auto& to : *getAdjacentEdge(first, n)->getTripsUnordered()) {
+        if (!getAdjacentEdge(second, n)
+                 ->getSameDirRoutesIn(n->pl().node, to.route, to.direction,
+                                      getAdjacentEdge(first, n))
                  .size()) {
           equal = false;
           break;
@@ -132,46 +122,42 @@ bool OptGraph::simplifyStep() {
         bool secondReverted;
 
         // add new edge
-        if (first->to != n) {
-          newFrom = first->to;
+        if (first->getTo() != n) {
+          newFrom = first->getTo();
           firstReverted = true;
         } else {
-          newFrom = first->from;
+          newFrom = first->getFrom();
           firstReverted = false;
         }
 
-        if (second->to != n) {
-          newTo = second->to;
+        if (second->getTo() != n) {
+          newTo = second->getTo();
           secondReverted = false;
         } else {
-          newTo = second->from;
+          newTo = second->getFrom();
           secondReverted = true;
         }
 
         if (newFrom == newTo) continue;
 
-        OptEdge* newEdge = new OptEdge(newFrom, newTo);
+        OptEdge* newEdge = addEdg(newFrom, newTo);
 
         // add etgs...
-        for (EtgPart& etgp : first->etgs) {
-          newEdge->etgs.push_back(
+        for (EtgPart& etgp : first->pl().etgs) {
+          newEdge->pl().etgs.push_back(
               EtgPart(etgp.etg, (etgp.dir ^ firstReverted)));
         }
-        for (EtgPart& etgp : second->etgs) {
-          newEdge->etgs.push_back(
+        for (EtgPart& etgp : second->pl().etgs) {
+          newEdge->pl().etgs.push_back(
               EtgPart(etgp.etg, (etgp.dir ^ secondReverted)));
         }
 
         assert(newFrom != n);
         assert(newTo != n);
 
-        delete (n);
-        _nodes.erase(n);
-
-        newFrom->deleteEdge(first);
-        newFrom->deleteEdge(second);
-        newTo->deleteEdge(first);
-        newTo->deleteEdge(second);
+        delNd(n);
+        // delEdg(first->getFrom(), first->getTo());
+        // delEdg(second->getFrom(), second->getTo());
 
         newFrom->addEdge(newEdge);
         newTo->addEdge(newEdge);
@@ -186,13 +172,13 @@ bool OptGraph::simplifyStep() {
 TransitGraph* OptGraph::getGraph() const { return _g; }
 
 // _____________________________________________________________________________
-size_t OptGraph::getNumNodes() const { return _nodes.size(); }
+size_t OptGraph::getNumNodes() const { return getNds().size(); }
 
 // _____________________________________________________________________________
 size_t OptGraph::getNumNodes(bool topo) const {
   size_t ret = 0;
-  for (auto n : _nodes) {
-    if ((n->node->getStops().size() == 0) ^ !topo) ret++;
+  for (auto n : getNds()) {
+    if ((n->pl().node->getStops().size() == 0) ^ !topo) ret++;
   }
 
   return ret;
@@ -202,8 +188,11 @@ size_t OptGraph::getNumNodes(bool topo) const {
 size_t OptGraph::getNumEdges() const {
   size_t ret = 0;
 
-  for (auto n : getNodes()) {
-    ret += n->adjListOut.size();
+  for (auto n : getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      ret +=1;
+    }
   }
 
   return ret;
@@ -213,9 +202,10 @@ size_t OptGraph::getNumEdges() const {
 size_t OptGraph::getNumRoutes() const {
   std::set<const graph::Route*> routes;
 
-  for (auto n : getNodes()) {
-    for (auto e : n->adjListOut) {
-      for (const auto& to : *e->getFirstEdge().etg->getTripsUnordered()) {
+  for (auto n : getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      for (const auto& to : *getFirstEdge(e).etg->getTripsUnordered()) {
         if (to.route->relativeTo()) continue;
         routes.insert(to.route);
       }
@@ -227,10 +217,11 @@ size_t OptGraph::getNumRoutes() const {
 // _____________________________________________________________________________
 size_t OptGraph::getMaxCardinality() const {
   size_t ret = 0;
-  for (auto n : getNodes()) {
-    for (auto e : n->adjListOut) {
-      if (e->getFirstEdge().etg->getCardinality(true) > ret) {
-        ret = e->getFirstEdge().etg->getCardinality(true);
+  for (auto n : getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      if (getFirstEdge(e).etg->getCardinality(true) > ret) {
+        ret = getFirstEdge(e).etg->getCardinality(true);
       }
     }
   }

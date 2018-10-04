@@ -16,7 +16,7 @@
 
 using namespace transitmapper;
 using namespace optim;
-using namespace graph;
+using namespace transitmapper::graph;
 
 // _____________________________________________________________________________
 int ILPOptimizer::optimize() const {
@@ -100,18 +100,18 @@ int ILPOptimizer::optimize() const {
 
 // _____________________________________________________________________________
 int ILPOptimizer::getCrossingPenaltySameSeg(const OptNode* n) const {
-  return _scorer->getCrossingPenaltySameSeg(n->node);
+  return _scorer->getCrossingPenaltySameSeg(n->pl().node);
 }
 
 // _____________________________________________________________________________
 int ILPOptimizer::getCrossingPenaltyDiffSeg(const OptNode* n) const {
-  return _scorer->getCrossingPenaltyDiffSeg(n->node);
+  return _scorer->getCrossingPenaltyDiffSeg(n->pl().node);
 }
 
 // _____________________________________________________________________________
 int ILPOptimizer::getSplittingPenalty(const OptNode* n) const {
   // double the value because we only count a splitting once for each pair!
-  return _scorer->getSplittingPenalty(n->node) * 1;
+  return _scorer->getSplittingPenalty(n->pl().node) * 1;
 }
 
 // _____________________________________________________________________________
@@ -134,9 +134,10 @@ void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
   // build name index for faster lookup
   glp_create_index(lp);
 
-  for (OptNode* n : g.getNodes()) {
-    for (OptEdge* e : n->adjListOut) {
-      for (auto etgp : e->etgs) {
+  for (OptNode* n : g.getNds()) {
+    for (OptEdge* e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      for (auto etgp : e->pl().etgs) {
         for (size_t tp = 0; tp < etgp.etg->getCardinality(true); tp++) {
           bool found = false;
           for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
@@ -149,7 +150,7 @@ void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
             double val = glp_mip_col_val(lp, i);
 
             if (val > 0.5) {
-              if (!(etgp.dir ^ e->etgs.front().dir)) {
+              if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
                 (*c)[etgp.etg].insert((*c)[etgp.etg].begin(), p);
               } else {
                 (*c)[etgp.etg].push_back(p);
@@ -249,10 +250,11 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
   VariableMatrix vm;
 
   // for every segment s, we define |L(s)|^2 decision variables x_slp
-  for (OptNode* n : g.getNodes()) {
-    for (OptEdge* e : n->adjListOut) {
+  for (OptNode* n : g.getNds()) {
+    for (OptEdge* e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
       // the first stored etg is always the ref
-      graph::Edge* etg = e->etgs[0].etg;
+      graph::Edge* etg = e->pl().etgs[0].etg;
 
       // get string repr of etg
 
@@ -264,7 +266,7 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
       for (size_t p = 0; p < etg->getCardinality(true); p++) {
         std::stringstream varName;
 
-        varName << "sum(" << e->getStrRepr() << ",p=" << p << ")";
+        varName << "sum(" << e->pl().getStrRepr() << ",p=" << p << ")";
         glp_set_row_name(lp, rowA + p, varName.str().c_str());
         glp_set_row_bnds(lp, rowA + p, GLP_FX, 1, 1);
       }
@@ -274,7 +276,7 @@ glp_prob* ILPOptimizer::createProblem(const OptGraph& g) const {
         // constraint: the sum of all x_slp over p must be 1 for equal sl
         size_t row = glp_add_rows(lp, 1);
         std::stringstream varName;
-        varName << "sum(" << e->getStrRepr() << ",l=" << r.route << ")";
+        varName << "sum(" << e->pl().getStrRepr() << ",l=" << r.route << ")";
         glp_set_row_name(lp, row, varName.str().c_str());
         glp_set_row_bnds(lp, row, GLP_FX, 1, 1);
 
@@ -319,9 +321,9 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
                                            VariableMatrix* vm,
                                            glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
-  for (OptNode* node : g.getNodes()) {
+  for (OptNode* node : g.getNds()) {
     std::set<OptEdge*> processed;
-    for (OptEdge* segmentA : node->adjList) {
+    for (OptEdge* segmentA : node->getAdjList()) {
       processed.insert(segmentA);
       // iterate over all possible line pairs in this segment
       for (LinePair linepair : getLinePairs(segmentA)) {
@@ -336,8 +338,8 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
 
           // introduce dec var
           std::stringstream ss;
-          ss << "x_dec(" << segmentA->getStrRepr() << ","
-             << segmentB->getStrRepr() << "," << linepair.first << "("
+          ss << "x_dec(" << segmentA->pl().getStrRepr() << ","
+             << segmentB->pl().getStrRepr() << "," << linepair.first << "("
              << linepair.first->getId() << ")," << linepair.second << "("
              << linepair.second->getId() << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
@@ -376,8 +378,8 @@ void ILPOptimizer::writeSameSegConstraints(const OptGraph& g,
 
               size_t row = glp_add_rows(lp, 1);
               std::stringstream ss;
-              ss << "dec_sum(" << segmentA->getStrRepr() << ","
-                 << segmentB->getStrRepr() << "," << linepair.first << ","
+              ss << "dec_sum(" << segmentA->pl().getStrRepr() << ","
+                 << segmentB->pl().getStrRepr() << "," << linepair.first << ","
                  << linepair.second << "pa=" << poscomb.first.first
                  << ",pb=" << poscomb.second.first
                  << ",pa'=" << poscomb.first.second
@@ -403,9 +405,9 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
                                            VariableMatrix* vm,
                                            glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
-  for (OptNode* node : g.getNodes()) {
+  for (OptNode* node : g.getNds()) {
     std::set<OptEdge*> processed;
-    for (OptEdge* segmentA : node->adjList) {
+    for (OptEdge* segmentA : node->getAdjList()) {
       processed.insert(segmentA);
       // iterate over all possible line pairs in this segment
       for (LinePair linepair : getLinePairs(segmentA)) {
@@ -416,8 +418,8 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
 
           // introduce dec var
           std::stringstream ss;
-          ss << "x_dec(" << segmentA->getStrRepr() << ","
-             << segments.first->getStrRepr() << segments.second->getStrRepr()
+          ss << "x_dec(" << segmentA->pl().getStrRepr() << ","
+             << segments.first->pl().getStrRepr() << segments.second->pl().getStrRepr()
              << "," << linepair.first << "(" << linepair.first->getId() << "),"
              << linepair.second << "(" << linepair.second->getId() << "),"
              << node << ")";
@@ -444,9 +446,9 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
 
               size_t row = glp_add_rows(lp, 1);
               std::stringstream ss;
-              ss << "dec_sum(" << segmentA->getStrRepr() << ","
-                 << segments.first->getStrRepr()
-                 << segments.second->getStrRepr() << "," << linepair.first
+              ss << "dec_sum(" << segmentA->pl().getStrRepr() << ","
+                 << segments.first->pl().getStrRepr()
+                 << segments.second->pl().getStrRepr() << "," << linepair.first
                  << "," << linepair.second << "pa=" << poscomb.first
                  << ",pb=" << poscomb.second << ",n=" << node << ")";
               glp_set_row_name(lp, row, ss.str().c_str());
@@ -467,8 +469,8 @@ void ILPOptimizer::writeDiffSegConstraints(const OptGraph& g,
 std::vector<PosComPair> ILPOptimizer::getPositionCombinations(
     OptEdge* a, OptEdge* b) const {
   std::vector<PosComPair> ret;
-  graph::Edge* etgA = a->etgs[0].etg;
-  graph::Edge* etgB = b->etgs[0].etg;
+  graph::Edge* etgA = a->pl().etgs[0].etg;
+  graph::Edge* etgB = b->pl().etgs[0].etg;
   for (size_t posLineAinA = 0; posLineAinA < etgA->getCardinality(true);
        posLineAinA++) {
     for (size_t posLineBinA = 0; posLineBinA < etgA->getCardinality(true);
@@ -493,7 +495,7 @@ std::vector<PosComPair> ILPOptimizer::getPositionCombinations(
 // _____________________________________________________________________________
 std::vector<PosCom> ILPOptimizer::getPositionCombinations(OptEdge* a) const {
   std::vector<PosCom> ret;
-  graph::Edge* etgA = a->etgs[0].etg;
+  graph::Edge* etgA = a->pl().etgs[0].etg;
   for (size_t posLineAinA = 0; posLineAinA < etgA->getCardinality(true);
        posLineAinA++) {
     for (size_t posLineBinA = 0; posLineBinA < etgA->getCardinality(true);
@@ -509,7 +511,7 @@ std::vector<PosCom> ILPOptimizer::getPositionCombinations(OptEdge* a) const {
 std::string ILPOptimizer::getILPVarName(OptEdge* seg, const Route* r,
                                         size_t p) const {
   std::stringstream varName;
-  varName << "x_(" << seg->getStrRepr() << ",l=" << r << ",p=" << p << ")";
+  varName << "x_(" << seg->pl().getStrRepr() << ",l=" << r << ",p=" << p << ")";
   return varName.str();
 }
 
@@ -518,17 +520,17 @@ std::vector<OptEdge*> ILPOptimizer::getEdgePartners(
     OptNode* node, OptEdge* segmentA, const LinePair& linepair) const {
   std::vector<OptEdge*> ret;
 
-  graph::Edge* fromEtg = segmentA->getAdjacentEdge(node);
+  graph::Edge* fromEtg = OptGraph::getAdjacentEdge(segmentA, node);
   const Node* dirA = fromEtg->getRouteOcc(linepair.first)->direction;
   const Node* dirB = fromEtg->getRouteOcc(linepair.second)->direction;
 
-  for (OptEdge* segmentB : node->adjList) {
+  for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;
-    graph::Edge* e = segmentB->getAdjacentEdge(node);
+    graph::Edge* e = OptGraph::getAdjacentEdge(segmentB, node);
 
-    if (e->getContinuedRoutesIn(node->node, linepair.first, dirA, fromEtg)
+    if (e->getContinuedRoutesIn(node->pl().node, linepair.first, dirA, fromEtg)
             .size() &&
-        e->getContinuedRoutesIn(node->node, linepair.second, dirB, fromEtg)
+        e->getContinuedRoutesIn(node->pl().node, linepair.second, dirB, fromEtg)
             .size()) {
       ret.push_back(segmentB);
     }
@@ -541,23 +543,23 @@ std::vector<EdgePair> ILPOptimizer::getEdgePartnerPairs(
     OptNode* node, OptEdge* segmentA, const LinePair& linepair) const {
   std::vector<EdgePair> ret;
 
-  graph::Edge* fromEtg = segmentA->getAdjacentEdge(node);
+  graph::Edge* fromEtg = OptGraph::getAdjacentEdge(segmentA, node);
   const Node* dirA = fromEtg->getRouteOcc(linepair.first)->direction;
   const Node* dirB = fromEtg->getRouteOcc(linepair.second)->direction;
 
-  for (OptEdge* segmentB : node->adjList) {
+  for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;
-    graph::Edge* etg = segmentB->getAdjacentEdge(node);
+    graph::Edge* etg = OptGraph::getAdjacentEdge(segmentB, node);
 
-    if (etg->getContinuedRoutesIn(node->node, linepair.first, dirA, fromEtg)
+    if (etg->getContinuedRoutesIn(node->pl().node, linepair.first, dirA, fromEtg)
             .size()) {
       EdgePair curPair;
       curPair.first = segmentB;
-      for (OptEdge* segmentC : node->adjList) {
+      for (OptEdge* segmentC : node->getAdjList()) {
         if (segmentC == segmentA || segmentC == segmentB) continue;
-        graph::Edge* e = segmentC->getAdjacentEdge(node);
+        graph::Edge* e = OptGraph::getAdjacentEdge(segmentC, node);
 
-        if (e->getContinuedRoutesIn(node->node, linepair.second, dirB, fromEtg)
+        if (e->getContinuedRoutesIn(node->pl().node, linepair.second, dirB, fromEtg)
                 .size()) {
           curPair.second = segmentC;
           ret.push_back(curPair);
@@ -578,10 +580,10 @@ std::vector<LinePair> ILPOptimizer::getLinePairs(OptEdge* segment,
                                                  bool unique) const {
   std::set<const Route*> processed;
   std::vector<LinePair> ret;
-  for (auto& toA : *segment->etgs[0].etg->getTripsUnordered()) {
+  for (auto& toA : *segment->pl().etgs[0].etg->getTripsUnordered()) {
     if (toA.route->relativeTo()) continue;
     processed.insert(toA.route);
-    for (auto& toB : *segment->etgs[0].etg->getTripsUnordered()) {
+    for (auto& toB : *segment->pl().etgs[0].etg->getTripsUnordered()) {
       if (unique && processed.find(toB.route) != processed.end()) continue;
       if (toB.route->relativeTo()) continue;
       if (toA.route == toB.route) continue;
@@ -674,11 +676,11 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
 // _____________________________________________________________________________
 bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
                            PosComPair poscomb) const {
-  bool otherWayA = (segmentA->from != node) ^ segmentA->etgs.front().dir;
-  bool otherWayB = (segmentB->from != node) ^ segmentB->etgs.front().dir;
+  bool otherWayA = (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
+  bool otherWayB = (segmentB->getFrom() != node) ^ segmentB->pl().etgs.front().dir;
 
-  size_t cardA = segmentA->etgs.front().etg->getCardinality(true);
-  size_t cardB = segmentB->etgs.front().etg->getCardinality(true);
+  size_t cardA = segmentA->pl().etgs.front().etg->getCardinality(true);
+  size_t cardB = segmentB->pl().etgs.front().etg->getCardinality(true);
 
   size_t posAinA =
       otherWayA ? cardA - 1 - poscomb.first.first : poscomb.first.first;
@@ -716,15 +718,15 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
 // _____________________________________________________________________________
 bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
                            PosCom postcomb) const {
-  bool otherWayA = (segmentA->from != node) ^ segmentA->etgs.front().dir;
+  bool otherWayA = (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
   bool otherWayB =
-      (segments.first->from != node) ^ segments.first->etgs.front().dir;
+      (segments.first->getFrom() != node) ^ segments.first->pl().etgs.front().dir;
   bool otherWayC =
-      (segments.second->from != node) ^ segments.second->etgs.front().dir;
+      (segments.second->getFrom() != node) ^ segments.second->pl().etgs.front().dir;
 
-  size_t cardA = segmentA->etgs.front().etg->getCardinality(true);
-  size_t cardB = segments.first->etgs.front().etg->getCardinality(true);
-  size_t cardC = segments.second->etgs.front().etg->getCardinality(true);
+  size_t cardA = segmentA->pl().etgs.front().etg->getCardinality(true);
+  size_t cardB = segments.first->pl().etgs.front().etg->getCardinality(true);
+  size_t cardC = segments.second->pl().etgs.front().etg->getCardinality(true);
 
   size_t posAinA = otherWayA ? cardA - 1 - postcomb.first : postcomb.first;
   size_t posBinA = otherWayA ? cardA - 1 - postcomb.second : postcomb.second;
@@ -732,10 +734,10 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
   DPoint aInA = getPos(node, segmentA, posAinA);
   DPoint bInA = getPos(node, segmentA, posBinA);
 
-  for (size_t i = 0; i < segments.first->etgs.front().etg->getCardinality(true);
+  for (size_t i = 0; i < segments.first->pl().etgs.front().etg->getCardinality(true);
        ++i) {
     for (size_t j = 0;
-         j < segments.second->etgs.front().etg->getCardinality(true); ++j) {
+         j < segments.second->pl().etgs.front().etg->getCardinality(true); ++j) {
       size_t posAinB = otherWayB ? cardB - 1 - i : i;
       size_t posBinC = otherWayC ? cardC - 1 - j : j;
 
@@ -762,8 +764,8 @@ bool ILPOptimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
 DPoint ILPOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) const {
   // look for correct nodefront
   const NodeFront* nf = 0;
-  for (auto etg : segment->etgs) {
-    const NodeFront* test = n->node->getNodeFrontFor(etg.etg);
+  for (auto etg : segment->pl().etgs) {
+    const NodeFront* test = n->pl().node->getNodeFrontFor(etg.etg);
     if (test) {
       nf = test;
       break;
@@ -771,11 +773,11 @@ DPoint ILPOptimizer::getPos(OptNode* n, OptEdge* segment, size_t p) const {
   }
 
   if (!nf)
-    std::cerr << n->node->getId()
-              << " node fronts: " << n->node->getMainDirs().size() << std::endl;
+    std::cerr << n->pl().node->getId()
+              << " node fronts: " << n->pl().node->getMainDirs().size() << std::endl;
   assert(nf);
 
-  return nf->getTripPos(segment->etgs.front().etg, p, false);
+  return nf->getTripPos(segment->pl().etgs.front().etg, p, false);
 }
 
 // _____________________________________________________________________________

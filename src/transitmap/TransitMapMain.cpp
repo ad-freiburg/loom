@@ -39,8 +39,8 @@ int main(int argc, char** argv) {
 
   if (true) {
     LOG(INFO) << "reading graph ";
-    graph::TransitGraph g(cfg.name, cfg.projectionString);
-    graph::GraphBuilder b(&cfg);
+    transitmapper::graph::TransitGraph g(cfg.name, cfg.projectionString);
+    transitmapper::graph::GraphBuilder b(&cfg);
     if (!b.build(&(std::cin), &g)) {
       exit(1);
     }
@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     double maxSplitPen = g.getMaxDegree() * cfg.splitPenWeight;
 
     // TODO move this into configuration, at least partially
-    graph::Penalties pens{
+    transitmapper::graph::Penalties pens{
       maxCrossPen,
       maxSplitPen,
       cfg.crossPenMultiSameSeg,
