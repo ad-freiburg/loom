@@ -14,6 +14,7 @@ EtgPart OptGraph::getFirstEdge(const OptEdge* optEdg) {
       return e;
     }
   }
+  assert(false);
 }
 
 // _____________________________________________________________________________
@@ -23,6 +24,7 @@ EtgPart OptGraph::getLastEdge(const OptEdge* optEdg) {
       return e;
     }
   }
+  assert(false);
 }
 
 // _____________________________________________________________________________
@@ -79,6 +81,10 @@ OptNode* OptGraph::getNodeForTransitNode(const Node* tn) const {
   }
 
   return 0;
+}
+
+// _____________________________________________________________________________
+void OptGraph::split() {
 }
 
 // _____________________________________________________________________________

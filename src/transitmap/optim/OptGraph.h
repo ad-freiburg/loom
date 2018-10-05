@@ -66,6 +66,9 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   static graph::Edge* getAdjacentEdge(const OptEdge* e, const OptNode* n);
 
+  // apply splitting rules
+  void split();
+
  private:
   TransitGraph* _g;
 
@@ -73,6 +76,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   void build();
   bool simplifyStep();
+
 
   static EtgPart getFirstEdge(const OptEdge*);
   static EtgPart getLastEdge(const OptEdge*);
