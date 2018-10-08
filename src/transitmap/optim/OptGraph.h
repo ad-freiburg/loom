@@ -31,7 +31,10 @@ struct EtgPart {
   Edge* etg;
   bool dir;
 
-  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir){};
+  // this edge is only a view (a continuous block) for the original edge
+  std::pair<size_t, size_t> view;
+
+  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir), view(0, 0){};
 };
 
 struct OptEdgePL {
