@@ -61,7 +61,8 @@ int ILPOptimizer::optimize() const {
 }
 
 // _____________________________________________________________________________
-int ILPOptimizer::optimize(const std::set<OptNode*>& g, OrderingConfig* c) const {
+int ILPOptimizer::optimize(const std::set<OptNode*>& g,
+                           OrderingConfig* c) const {
   LOG(DEBUG) << "Creating ILP problem... " << std::endl;
   glp_prob* lp = createProblem(g);
   LOG(DEBUG) << " .. done" << std::endl;
@@ -149,8 +150,8 @@ double ILPOptimizer::getConstraintCoeff(glp_prob* lp, int constraint,
 }
 
 // _____________________________________________________________________________
-void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
-                                                const std::set<OptNode*>& g) const {
+void ILPOptimizer::getConfigurationFromSolution(
+    glp_prob* lp, OrderingConfig* c, const std::set<OptNode*>& g) const {
   // build name index for faster lookup
   glp_create_index(lp);
 
@@ -279,12 +280,12 @@ glp_prob* ILPOptimizer::createProblem(const std::set<OptNode*>& g) const {
 
       // get string repr of etg
 
-      size_t newCols = etg->getCardinality(true) * etg->getCardinality(true);
+      size_t newCols = e->pl().getCardinality() * e->pl().getCardinality();
       size_t cols = glp_add_cols(lp, newCols);
       size_t i = 0;
-      size_t rowA = glp_add_rows(lp, etg->getCardinality(true));
+      size_t rowA = glp_add_rows(lp, e->pl().getCardinality());
 
-      for (size_t p = 0; p < etg->getCardinality(true); p++) {
+      for (size_t p = 0; p < e->pl().getCardinality(); p++) {
         std::stringstream varName;
 
         varName << "sum(" << e->pl().getStrRepr() << ",p=" << p << ")";
@@ -301,7 +302,7 @@ glp_prob* ILPOptimizer::createProblem(const std::set<OptNode*>& g) const {
         glp_set_row_name(lp, row, varName.str().c_str());
         glp_set_row_bnds(lp, row, GLP_FX, 1, 1);
 
-        for (size_t p = 0; p < etg->getCardinality(true); p++) {
+        for (size_t p = 0; p < e->pl().getCardinality(); p++) {
           std::string varName = getILPVarName(e, r.route, p);
           size_t curCol = cols + i;
           glp_set_col_name(lp, curCol, varName.c_str());
@@ -490,17 +491,15 @@ void ILPOptimizer::writeDiffSegConstraints(const std::set<OptNode*>& g,
 std::vector<PosComPair> ILPOptimizer::getPositionCombinations(
     OptEdge* a, OptEdge* b) const {
   std::vector<PosComPair> ret;
-  graph::Edge* etgA = a->pl().etgs[0].etg;
-  graph::Edge* etgB = b->pl().etgs[0].etg;
-  for (size_t posLineAinA = 0; posLineAinA < etgA->getCardinality(true);
+  for (size_t posLineAinA = 0; posLineAinA < a->pl().getCardinality();
        posLineAinA++) {
-    for (size_t posLineBinA = 0; posLineBinA < etgA->getCardinality(true);
+    for (size_t posLineBinA = 0; posLineBinA < a->pl().getCardinality();
          posLineBinA++) {
       if (posLineAinA == posLineBinA) continue;
 
-      for (size_t posLineAinB = 0; posLineAinB < etgB->getCardinality(true);
+      for (size_t posLineAinB = 0; posLineAinB < b->pl().getCardinality();
            posLineAinB++) {
-        for (size_t posLineBinB = 0; posLineBinB < etgB->getCardinality(true);
+        for (size_t posLineBinB = 0; posLineBinB < b->pl().getCardinality();
              posLineBinB++) {
           if (posLineAinB == posLineBinB) continue;
 
@@ -516,10 +515,9 @@ std::vector<PosComPair> ILPOptimizer::getPositionCombinations(
 // _____________________________________________________________________________
 std::vector<PosCom> ILPOptimizer::getPositionCombinations(OptEdge* a) const {
   std::vector<PosCom> ret;
-  graph::Edge* etgA = a->pl().etgs[0].etg;
-  for (size_t posLineAinA = 0; posLineAinA < etgA->getCardinality(true);
+  for (size_t posLineAinA = 0; posLineAinA < a->pl().getCardinality();
        posLineAinA++) {
-    for (size_t posLineBinA = 0; posLineBinA < etgA->getCardinality(true);
+    for (size_t posLineBinA = 0; posLineBinA < a->pl().getCardinality();
          posLineBinA++) {
       if (posLineAinA == posLineBinA) continue;
       ret.push_back(PosCom(posLineAinA, posLineBinA));

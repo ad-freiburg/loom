@@ -38,6 +38,8 @@ struct OptEdgePL {
   OptEdgePL() : siameseSibl(0) {};
   std::vector<EtgPart> etgs;
 
+  size_t getCardinality() const;
+
   // there is another edge with determines the
   // ordering in this edge - important to prevent double
   // writing of ordering later on

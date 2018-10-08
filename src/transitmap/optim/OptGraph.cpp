@@ -31,6 +31,11 @@ EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) {
 }
 
 // _____________________________________________________________________________
+size_t OptEdgePL::getCardinality() const {
+  return etgs[0].etg->getCardinality(true);
+}
+
+// _____________________________________________________________________________
 std::string OptEdgePL::getStrRepr() const {
   const void* address = static_cast<const void*>(this);
   std::stringstream ss;

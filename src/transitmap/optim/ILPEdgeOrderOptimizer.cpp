@@ -91,8 +91,8 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const std::set<OptNode*>& g) cons
       // constraint: the sum of all x_sl<=p over the set of lines
       // must be p+1
 
-      size_t rowA = glp_add_rows(lp, etg->getCardinality(true));
-      for (size_t p = 0; p < etg->getCardinality(true); p++) {
+      size_t rowA = glp_add_rows(lp, e->pl().getCardinality());
+      for (size_t p = 0; p < e->pl().getCardinality(); p++) {
         std::stringstream rowName;
         rowName << "sum(" << e->pl().getStrRepr() << ",<=" << p << ")";
         glp_set_row_name(lp, rowA + p, rowName.str().c_str());
@@ -101,7 +101,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const std::set<OptNode*>& g) cons
 
       for (auto r : *etg->getRoutes()) {
         if (r.route->relativeTo()) continue;
-        for (size_t p = 0; p < etg->getCardinality(true); p++) {
+        for (size_t p = 0; p < e->pl().getCardinality(); p++) {
           std::stringstream varName;
           varName << "x_(" << e->pl().getStrRepr() << ",l=" << r.route << ",p<=" << p
                   << ")";
@@ -162,12 +162,12 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
   for (OptNode* node : g) {
     for (OptEdge* segment : node->getAdjList()) {
       if (segment->getFrom() != node) continue;
-      if (segment->pl().etgs[0].etg->getCardinality(true) > m) {
-        m = segment->pl().etgs[0].etg->getCardinality(true);
+      if (segment->pl().getCardinality() > m) {
+        m = segment->pl().getCardinality();
       }
 
       size_t rowDistanceRangeKeeper = 0;
-      size_t c = segment->pl().etgs[0].etg->getCardinality(true);
+      size_t c = segment->pl().getCardinality();
       // constraint is only needed for segments with more than 2 lines
       if (_cfg->splittingOpt && c > 2) {
         std::stringstream rowName;
@@ -265,7 +265,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
 
         vm->addVar(rowSmallerThan, decVar, m);
 
-        for (size_t p = 0; p < segment->pl().etgs[0].etg->getCardinality(true); ++p) {
+        for (size_t p = 0; p < segment->pl().getCardinality(); ++p) {
           std::stringstream ss;
           ss << "x_(" << segment->pl().getStrRepr() << ",l=" << linepair.first
              << ",p<=" << p << ")";
@@ -300,7 +300,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
 
         size_t rowDistance1 = 0;
         size_t rowDistance2 = 0;
-        if (_cfg->splittingOpt && segment->pl().etgs[0].etg->getCardinality(true) > 2) {
+        if (_cfg->splittingOpt && segment->pl().getCardinality() > 2) {
           rowName.str("");
           rowName << "sum_distancor1(e=" << segment->pl().getStrRepr()
                   << ",A=" << linepair.first << ",B=" << linepair.second << ")";
@@ -325,7 +325,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
           vm->addVar(rowDistance1, decVarDistance, -static_cast<int>(m));
           vm->addVar(rowDistance2, decVarDistance, -static_cast<int>(m));
 
-          for (size_t p = 0; p < segment->pl().etgs[0].etg->getCardinality(true); ++p) {
+          for (size_t p = 0; p < segment->pl().getCardinality(); ++p) {
             std::stringstream ss;
             ss << "x_(" << segment->pl().getStrRepr() << ",l=" << linepair.first
                << ",p<=" << p << ")";
@@ -453,8 +453,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
           // _____________________________________
           // introduce dec var for distance 1 between lines changes
           if (_cfg->splittingOpt) {
-            if (segmentA->pl().etgs[0].etg->getCardinality(true) > 2 &&
-                  segmentB->pl().etgs[0].etg->getCardinality(true) > 2) {
+            if (segmentA->pl().getCardinality() > 2 &&
+                  segmentB->pl().getCardinality() > 2) {
               // the interesting case where the line continue together from
               // segment A to segment B and the cardinality of both A and B
               // is > 2 (that is, it is possible in A or B that the two lines
@@ -515,12 +515,12 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
               vm->addVar(rowT2, aNearBinL1, 1);
               vm->addVar(rowT2, aNearBinL2, -1);
               vm->addVar(rowT2, decisionVarDist1Change, 1);
-            } else if ((segmentA->pl().etgs[0].etg->getCardinality(true) == 2) ^
-                  (segmentB->pl().etgs[0].etg->getCardinality(true) == 2)) {
+            } else if ((segmentA->pl().getCardinality() == 2) ^
+                  (segmentB->pl().getCardinality() == 2)) {
               // the trivial case where one of the two segments only has
               // cardinality = 2, so the lines will always be together
 
-              OptEdge* segment = segmentA->pl().etgs[0].etg->getCardinality(true) != 2 ? segmentA : segmentB;
+              OptEdge* segment = segmentA->pl().getCardinality() != 2 ? segmentA : segmentB;
 
               std::stringstream aNearBStr;
               aNearBStr << "x_(" << segment->pl().getStrRepr() << "," << linepair.first
