@@ -126,34 +126,21 @@ void OptGraph::simplify() {
 }
 
 // _____________________________________________________________________________
+void OptGraph::untangle() {
+  while (untangleYStep()) {
+  }
+}
+
+// _____________________________________________________________________________
 bool OptGraph::simplifyStep() {
   for (OptNode* n : *getNds()) {
     if (n->getDeg() == 2) {
-      OptEdge* first = 0;
-      OptEdge* second = 0;
+      OptEdge* first = n->getAdjList().front();
+      OptEdge* second = n->getAdjList().back();
 
-      for (OptEdge* e : n->getAdjList()) {
-        if (!first)
-          first = e;
-        else
-          second = e;
-      }
+      assert(n->pl().node);
 
-      bool equal = first->pl().etgs.front().etg->getCardinality() ==
-                   second->pl().etgs.front().etg->getCardinality();
-
-      for (auto& to : *getAdjEdg(first, n)->getRoutes()) {
-        if (!getAdjEdg(second, n)
-                 ->getSameDirRoutesIn(n->pl().node, to.route, to.direction,
-                                      getAdjEdg(first, n))
-                 .size()) {
-          equal = false;
-          break;
-        }
-      }
-
-
-      if (equal) {
+      if (getAdjEdg(first, n)->dirRouteEqualIn(getAdjEdg(second, n), n->pl().node)) {
         OptNode* newFrom = 0;
         OptNode* newTo = 0;
 
@@ -301,4 +288,72 @@ util::json::Dict OptNodePL::getAttrs() {
     }
   }
   return ret;
+}
+
+// _____________________________________________________________________________
+bool OptGraph::untangleYStep() {
+  // for now, just untangle deg 3 nodes!
+  for (OptNode* na : *getNds()) {
+    if (na->getDeg() != 1) continue;  // only look at terminus nodes
+
+    // the only outgoing edge
+    OptEdge* ea = na->getAdjList().front();
+    OptNode* nb = ea->getOtherNd(na);
+
+    if (nb->getDeg() < 2) continue;
+
+    assert(nb->pl().node);
+
+    bool isY = true;
+    for (OptEdge* e : nb->getAdjList()) {
+      if (e == ea) continue;
+
+      // std::cout << "--" << std::endl;
+      // std::cout << getAdjEdg(ea, nb)->toString() << std::endl;
+      // std::cout << getAdjEdg(e, nb)->toString() << std::endl;
+
+      if (!getAdjEdg(ea, nb)->dirRouteContains(getAdjEdg(e, nb), nb->pl().node)) {
+        isY = false;
+        break;
+      }
+    }
+
+    if (isY) {
+      std::cout << "Found Y at node " << nb << std::endl;
+
+      // the geometry of the main leg
+      util::geo::PolyLine<double> pl(*nb->pl().getGeom(), *na->pl().getGeom());
+      auto orthoPl = pl.getOrthoLineAtDist(0, (nb->getDeg() - 1) * 10);
+
+      std::vector<OptNode*> nds(nb->getDeg() - 1);
+
+      // for each minor leg of the Y, create a new node
+      for (size_t i = 0; i < nds.size(); i++) {
+        nds[i] = addNd(orthoPl.getPointAt(((double)i) / (double)(nds.size())).p);
+      }
+
+
+      // delEdg(na, nb);
+
+      return false;
+    }
+
+  }
+  return false;
+}
+
+// _____________________________________________________________________________
+bool OptGraph::untangleDogBoneStep() {
+  // for now, just untangle deg 3 nodes!
+  for (OptNode* n : *getNds()) {
+    if (n->getDeg() != 3) continue;
+    for (OptEdge* e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      if (e->getTo()->getDeg() != e->getFrom()->getDeg()) continue;
+
+
+
+    }
+  }
+  return false;
 }

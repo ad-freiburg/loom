@@ -16,11 +16,11 @@ using namespace transitmapper::graph;
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
-    glp_prob* lp, OrderingConfig* c, const OptGraph& g) const {
+    glp_prob* lp, OrderingConfig* c, const std::set<OptNode*>& g) const {
   // build name index for faster lookup
   glp_create_index(lp);
 
-  for (OptNode* n : g.getNds()) {
+  for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       if (e->pl().siameseSibl) continue;
@@ -69,11 +69,11 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
     }
   }
 
-  expandRelatives(c, g.getGraph());
+  expandRelatives(c);
 }
 
 // _____________________________________________________________________________
-glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
+glp_prob* ILPEdgeOrderOptimizer::createProblem(const std::set<OptNode*>& g) const {
   glp_prob* lp = glp_create_prob();
 
   glp_set_prob_name(lp, "edgeorder_impr");
@@ -82,7 +82,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
   VariableMatrix vm;
   std::set<OptEdge*> processed;
 
-  for (OptNode* n : g.getNds()) {
+  for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       // the first stored etg is always the ref
@@ -151,7 +151,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
 }
 
 // _____________________________________________________________________________
-void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
+void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
                                                 VariableMatrix* vm,
                                                 glp_prob* lp) const {
   // do everything iteratively, otherwise it would be unreadable
@@ -159,7 +159,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
   size_t m = 0;
 
   // introduce crossing constraint variables
-  for (OptNode* node : g.getNds()) {
+  for (OptNode* node : g) {
     for (OptEdge* segment : node->getAdjList()) {
       if (segment->getFrom() != node) continue;
       if (segment->pl().etgs[0].etg->getCardinality(true) > m) {
@@ -212,7 +212,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
   }
 
   // write constraints for the A>B variable, both can never be 1...
-  for (OptNode* node : g.getNds()) {
+  for (OptNode* node : g) {
     for (OptEdge* segment : node->getAdjList()) {
       if (segment->getFrom() != node) continue;
       // iterate over all possible line pairs in this segment
@@ -245,7 +245,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
 
 
   // sum constraint
-  for (OptNode* node : g.getNds()) {
+  for (OptNode* node : g) {
     for (OptEdge* segment : node->getAdjList()) {
       if (segment->getFrom() != node) continue;
       for (LinePair linepair : getLinePairs(segment)) {
@@ -292,7 +292,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
   }
 
   // sum constraint for separation
-  for (OptNode* node : g.getNds()) {
+  for (OptNode* node : g) {
     for (OptEdge* segment : node->getAdjList()) {
       if (segment->getFrom() != node) continue;
       for (LinePair linepair : getLinePairs(segment, true)) {
@@ -350,7 +350,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
   }
 
   // crossing constraints
-  for (OptNode* node : g.getNds()) {
+  for (OptNode* node : g) {
     std::set<OptEdge*> processed;
     for (OptEdge* segmentA : node->getAdjList()) {
       processed.insert(segmentA);
@@ -537,11 +537,11 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const OptGraph& g,
 }
 
 // _____________________________________________________________________________
-void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const OptGraph& g,
+void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(const std::set<OptNode*>& g,
                                                         VariableMatrix* vm,
                                                         glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
-  for (OptNode* node : g.getNds()) {
+  for (OptNode* node : g) {
     std::set<OptEdge*> processed;
     for (OptEdge* segmentA : node->getAdjList()) {
       processed.insert(segmentA);

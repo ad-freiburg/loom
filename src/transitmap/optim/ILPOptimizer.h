@@ -57,9 +57,9 @@ class ILPOptimizer : public Optimizer {
   int optimize(const std::set<OptNode*>& g, OrderingConfig* c) const;
 
   virtual void getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
-                                            const OptGraph& g) const;
+                                            const std::set<OptNode*>& g) const;
 
-  void expandRelatives(OrderingConfig* c, TransitGraph* g) const;
+  void expandRelatives(OrderingConfig* c) const;
 
   void expandRelativesFor(OrderingConfig* c, const Route* ref,
                           graph::Edge* start,

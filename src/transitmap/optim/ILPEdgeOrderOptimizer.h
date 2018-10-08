@@ -35,15 +35,15 @@ class ILPEdgeOrderOptimizer : public ILPOptimizer {
       : ILPOptimizer(g, cfg, scorer){};
 
  private:
-  virtual glp_prob* createProblem(const OptGraph& g) const;
+  virtual glp_prob* createProblem(const std::set<OptNode*>& g) const;
 
   virtual void getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
-                                            const OptGraph& g) const;
+                                            const std::set<OptNode*>& g) const;
 
-  void writeCrossingOracle(const OptGraph& g, VariableMatrix* vm,
+  void writeCrossingOracle(const std::set<OptNode*>& g, VariableMatrix* vm,
                            glp_prob* lp) const;
 
-  void writeDiffSegConstraintsImpr(const OptGraph& g, VariableMatrix* vm,
+  void writeDiffSegConstraintsImpr(const std::set<OptNode*>& g, VariableMatrix* vm,
                                    glp_prob* lp) const;
 };
 }  // namespace optim

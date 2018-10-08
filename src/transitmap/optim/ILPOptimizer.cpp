@@ -27,6 +27,8 @@ int ILPOptimizer::optimize() const {
   if (_cfg->createCoreOptimGraph) {
     g.simplify();
 
+    g.untangle();
+
     g.split();
   }
 
@@ -148,11 +150,11 @@ double ILPOptimizer::getConstraintCoeff(glp_prob* lp, int constraint,
 
 // _____________________________________________________________________________
 void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
-                                                const OptGraph& g) const {
+                                                const std::set<OptNode*>& g) const {
   // build name index for faster lookup
   glp_create_index(lp);
 
-  for (OptNode* n : g.getNds()) {
+  for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       if (e->pl().siameseSibl) continue;
@@ -184,14 +186,14 @@ void ILPOptimizer::getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
     }
   }
 
-  expandRelatives(c, g.getGraph());
+  expandRelatives(c);
 }
 
 // _____________________________________________________________________________
-void ILPOptimizer::expandRelatives(OrderingConfig* c, TransitGraph* g) const {
+void ILPOptimizer::expandRelatives(OrderingConfig* c) const {
   std::set<const Route*> proced;
 
-  for (graph::Node* n : *g->getNodes()) {
+  for (graph::Node* n : *_g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       for (const auto& ra : *(e->getRoutes())) {
         if (ra.route->relativeTo()) {
@@ -570,8 +572,7 @@ std::vector<EdgePair> ILPOptimizer::getEdgePartnerPairs(
     if (segmentB == segmentA) continue;
     graph::Edge* etg = OptGraph::getAdjEdg(segmentB, node);
 
-    if (etg->getCtdRoutesIn(node->pl().node, linepair.first, dirA,
-                                  fromEtg)
+    if (etg->getCtdRoutesIn(node->pl().node, linepair.first, dirA, fromEtg)
             .size()) {
       EdgePair curPair;
       curPair.first = segmentB;
@@ -579,8 +580,7 @@ std::vector<EdgePair> ILPOptimizer::getEdgePartnerPairs(
         if (segmentC == segmentA || segmentC == segmentB) continue;
         graph::Edge* e = OptGraph::getAdjEdg(segmentC, node);
 
-        if (e->getCtdRoutesIn(node->pl().node, linepair.second, dirB,
-                                    fromEtg)
+        if (e->getCtdRoutesIn(node->pl().node, linepair.second, dirB, fromEtg)
                 .size()) {
           curPair.second = segmentC;
           ret.push_back(curPair);

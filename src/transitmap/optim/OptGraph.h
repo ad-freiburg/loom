@@ -78,6 +78,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   double getMaxSplitPen() const;
 
   void simplify();
+  void untangle();
 
   static graph::Edge* getAdjEdg(const OptEdge* e, const OptNode* n);
 
@@ -91,6 +92,9 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   void build();
   bool simplifyStep();
+
+  bool untangleYStep();
+  bool untangleDogBoneStep();
 
 
   static EtgPart getFirstEdg(const OptEdge*);

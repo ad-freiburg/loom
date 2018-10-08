@@ -212,3 +212,28 @@ std::string Edge::toString() const {
   ret << " }-- [" << _to << "]";
   return ret.str();
 }
+
+// _____________________________________________________________________________
+bool Edge::dirRouteEqualIn(const Edge* b, const Node* n) const {
+
+  // not necessary to consider collapsed edges here - if equal, they wouldve
+  // been collapsed in both edges
+  if (getCardinality() != b->getCardinality()) return false;
+
+  for (auto& to : b->getRoutes()) {
+    if (!getSameDirRoutesIn(n, to.route, to.direction, this).size()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// _____________________________________________________________________________
+bool Edge::dirRouteContains(const Edge* b, const Node* n) const {
+  for (auto& to : b->getRoutes()) {
+    if (!getSameDirRoutesIn(n, to.route, to.direction, this).size()) {
+      return false;
+    }
+  }
+  return true;
+}
