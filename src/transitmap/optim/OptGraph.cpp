@@ -3,14 +3,16 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "transitmap/optim/OptGraph.h"
+#include "util/graph/Algorithm.h"
 
 using namespace transitmapper;
 using namespace optim;
 
 // _____________________________________________________________________________
-EtgPart OptGraph::getFirstEdge(const OptEdge* optEdg) {
+EtgPart OptGraph::getFirstEdg(const OptEdge* optEdg) {
   for (const auto e : optEdg->pl().etgs) {
-    if (e.etg->getFrom() == optEdg->getFrom()->pl().node || e.etg->getTo() == optEdg->getFrom()->pl().node) {
+    if (e.etg->getFrom() == optEdg->getFrom()->pl().node ||
+        e.etg->getTo() == optEdg->getFrom()->pl().node) {
       return e;
     }
   }
@@ -18,9 +20,10 @@ EtgPart OptGraph::getFirstEdge(const OptEdge* optEdg) {
 }
 
 // _____________________________________________________________________________
-EtgPart OptGraph::getLastEdge(const OptEdge* optEdg) {
+EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) {
   for (const auto e : optEdg->pl().etgs) {
-    if (e.etg->getFrom() == optEdg->getTo()->pl().node || e.etg->getTo() == optEdg->getTo()->pl().node) {
+    if (e.etg->getFrom() == optEdg->getTo()->pl().node ||
+        e.etg->getTo() == optEdg->getTo()->pl().node) {
       return e;
     }
   }
@@ -37,17 +40,16 @@ std::string OptEdgePL::getStrRepr() const {
 }
 
 // _____________________________________________________________________________
-Edge* OptGraph::getAdjacentEdge(const OptEdge* e, const OptNode* n) {
+Edge* OptGraph::getAdjEdg(const OptEdge* e, const OptNode* n) {
   if (e->getFrom() == n) {
-    return getFirstEdge(e).etg;
+    return getFirstEdg(e).etg;
   } else {
-    return getLastEdge(e).etg;
+    return getLastEdg(e).etg;
   }
 }
 
 // _____________________________________________________________________________
-OptGraph::OptGraph(TransitGraph* toOptim)
- : _g(toOptim) { build(); }
+OptGraph::OptGraph(TransitGraph* toOptim) : _g(toOptim) { build(); }
 
 // _____________________________________________________________________________
 void OptGraph::build() {
@@ -85,6 +87,36 @@ OptNode* OptGraph::getNodeForTransitNode(const Node* tn) const {
 
 // _____________________________________________________________________________
 void OptGraph::split() {
+  std::vector<OptEdge*> toCut;
+
+  // collect edges to cut
+  for (OptNode* n : *getNds()) {
+    for (OptEdge* e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+
+      // we only cut if both nodes have a deg > 1
+      if (e->getFrom()->getDeg() < 2 || e->getTo()->getDeg() < 2) continue;
+
+      if (e->pl().etgs.front().etg->getCardinality(true) == 1) toCut.push_back(e);
+    }
+  }
+
+  for (OptEdge* e : toCut) {
+    // cut this edge
+
+    // add two new opt nodes, with slight offsets at the center of this
+    // edge (this is for debug visualization purposes only)
+
+    util::geo::PolyLine<double> edgeGeom(*e->getFrom()->pl().getGeom(), *e->getTo()->pl().getGeom());
+
+    OptNode* leftN = addNd(edgeGeom.getPointAt(0.45).p);
+    OptNode* rightN = addNd(edgeGeom.getPointAt(0.55).p);
+
+    OptEdge* sibling = addEdg(e->getFrom(), leftN, e->pl());
+    addEdg(rightN, e->getTo(), e->pl())->pl().siameseSibl = sibling;
+
+    delEdg(e->getFrom(), e->getTo());
+  }
 }
 
 // _____________________________________________________________________________
@@ -110,15 +142,16 @@ bool OptGraph::simplifyStep() {
       bool equal = first->pl().etgs.front().etg->getCardinality() ==
                    second->pl().etgs.front().etg->getCardinality();
 
-      for (auto& to : *getAdjacentEdge(first, n)->getTripsUnordered()) {
-        if (!getAdjacentEdge(second, n)
+      for (auto& to : *getAdjEdg(first, n)->getRoutes()) {
+        if (!getAdjEdg(second, n)
                  ->getSameDirRoutesIn(n->pl().node, to.route, to.direction,
-                                      getAdjacentEdge(first, n))
+                                      getAdjEdg(first, n))
                  .size()) {
           equal = false;
           break;
         }
       }
+
 
       if (equal) {
         OptNode* newFrom = 0;
@@ -195,7 +228,7 @@ size_t OptGraph::getNumEdges() const {
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      ret +=1;
+      ret += 1;
     }
   }
 
@@ -209,7 +242,7 @@ size_t OptGraph::getNumRoutes() const {
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      for (const auto& to : *getFirstEdge(e).etg->getTripsUnordered()) {
+      for (const auto& to : *getFirstEdg(e).etg->getRoutes()) {
         if (to.route->relativeTo()) continue;
         routes.insert(to.route);
       }
@@ -224,11 +257,48 @@ size_t OptGraph::getMaxCardinality() const {
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      if (getFirstEdge(e).etg->getCardinality(true) > ret) {
-        ret = getFirstEdge(e).etg->getCardinality(true);
+      if (getFirstEdg(e).etg->getCardinality(true) > ret) {
+        ret = getFirstEdg(e).etg->getCardinality(true);
       }
     }
   }
 
+  return ret;
+}
+
+// _____________________________________________________________________________
+const util::geo::Line<double>* OptEdgePL::getGeom() {
+  return 0;
+}
+
+// _____________________________________________________________________________
+util::json::Dict OptEdgePL::getAttrs() {
+  util::json::Dict ret;
+  std::string lines;
+  for (const auto& r : *etgs.front().etg->getRoutes()) {
+    lines += r.route->getLabel() + ", ";
+  }
+  ret["lines"] = lines;
+  return ret;
+}
+
+// _____________________________________________________________________________
+const util::geo::Point<double>* OptNodePL::getGeom() {
+  if (node) return &node->getPos();
+  return &p;
+}
+
+// _____________________________________________________________________________
+util::json::Dict OptNodePL::getAttrs() {
+  util::json::Dict ret;
+  if (!node) {
+    ret["stat_name"] = "<dummy>";
+  } else {
+    if (node->getStops().size()) {
+      ret["stat_name"] = node->getStops().front().name;
+    } else {
+      ret["stat_name"] = "";
+    }
+  }
   return ret;
 }

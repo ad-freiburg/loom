@@ -40,7 +40,7 @@ DPoint NodeFront::getTripOccPos(const Route* r, const OrderingConfig& c,
 
   assert(c.find(edge) != c.end());
 
-  rop = edge->getRouteOccWithPosUnder(r, c.find(edge)->second);
+  rop = edge->getRouteWithPosUnder(r, c.find(edge)->second);
 
   if (rop.first) {
     return getTripPos(edge, rop.second, n == edge->getTo(), origGeom);
@@ -210,7 +210,7 @@ std::vector<Partner> Node::getPartners(const NodeFront* f,
     if (&nf == f) continue;
 
     for (const RouteOccurance& to :
-         nf.edge->getContinuedRoutesIn(this, ro.route, ro.direction, f->edge)) {
+         nf.edge->getCtdRoutesIn(this, ro.route, ro.direction, f->edge)) {
       Partner p(f, nf.edge, to.route);
       p.front = &nf;
       p.edge = nf.edge;
@@ -233,7 +233,7 @@ std::vector<InnerGeometry> Node::getInnerGeometries(const OrderingConfig& c,
     const std::vector<size_t>* ordering = &c.find(nf.edge)->second;
 
     for (size_t j : *ordering) {
-      const RouteOccurance& routeOcc = (*nf.edge->getTripsUnordered())[j];
+      const RouteOccurance& routeOcc = (*nf.edge->getRoutes())[j];
       Partner o(&nf, nf.edge, routeOcc.route);
 
       std::vector<Partner> partners = getPartners(&nf, routeOcc);
@@ -280,11 +280,11 @@ InnerGeometry Node::getTerminusStraightLine(const OrderingConfig& c,
   DPoint pp = partnerFrom.front->getTripOccPos(partnerFrom.route, c, true);
 
   size_t s = partnerFrom.edge
-                 ->getRouteOccWithPosUnder(partnerFrom.route,
+                 ->getRouteWithPosUnder(partnerFrom.route,
                                            c.find(partnerFrom.edge)->second)
                  .second;
   size_t ss = partnerFrom.edge
-                  ->getRouteOccWithPosUnder(partnerFrom.route,
+                  ->getRouteWithPosUnder(partnerFrom.route,
                                             c.find(partnerFrom.edge)->second)
                   .second;
 
@@ -299,11 +299,11 @@ InnerGeometry Node::getInnerStraightLine(const OrderingConfig& c,
   DPoint pp = partnerTo.front->getTripOccPos(partnerTo.route, c);
 
   size_t s = partnerFrom.edge
-                 ->getRouteOccWithPosUnder(partnerFrom.route,
+                 ->getRouteWithPosUnder(partnerFrom.route,
                                            c.find(partnerFrom.edge)->second)
                  .second;
   size_t ss = partnerTo.edge
-                  ->getRouteOccWithPosUnder(partnerTo.route,
+                  ->getRouteWithPosUnder(partnerTo.route,
                                             c.find(partnerTo.edge)->second)
                   .second;
 
@@ -446,7 +446,7 @@ size_t Node::getConnCardinality() const {
     const NodeFront& nf = getMainDirs()[i];
 
     for (size_t j = 0; j < nf.edge->getCardinality(); j++) {
-      const RouteOccurance& routeOcc = (*nf.edge->getTripsUnordered())[j];
+      const RouteOccurance& routeOcc = (*nf.edge->getRoutes())[j];
 
       std::vector<Partner> partners = getPartners(&nf, routeOcc);
 

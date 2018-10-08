@@ -23,11 +23,12 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
   for (OptNode* n : g.getNds()) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
+      if (e->pl().siameseSibl) continue;
       for (auto etgp : e->pl().etgs) {
         for (size_t tp = 0; tp < etgp.etg->getCardinality(true); tp++) {
           bool found = false;
           for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
-            auto r = (*etgp.etg->getTripsUnordered())[p];
+            auto r = (*etgp.etg->getRoutes())[p];
             if (r.route->relativeTo()) continue;
 
             // check if this route (r) switch from 0 to 1 at tp-1 and tp
@@ -98,7 +99,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const OptGraph& g) const {
         glp_set_row_bnds(lp, rowA + p, GLP_FX, p + 1, p + 1);
       }
 
-      for (auto r : *etg->getTripsUnordered()) {
+      for (auto r : *etg->getRoutes()) {
         if (r.route->relativeTo()) continue;
         for (size_t p = 0; p < etg->getCardinality(true); p++) {
           std::stringstream varName;

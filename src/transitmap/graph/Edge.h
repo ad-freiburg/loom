@@ -55,19 +55,19 @@ class Edge {
   const PolyLine<double>& getGeom() const;
   void setGeom(const PolyLine<double>& p);
 
-  const std::vector<RouteOccurance>& getTripsUnordered() const;
-  std::vector<RouteOccurance>* getTripsUnordered();
+  const std::vector<RouteOccurance>& getRoutes() const;
+  std::vector<RouteOccurance>* getRoutes();
 
-  RouteOccWithPos getRouteOccWithPosUnder(const Route* r,
+  RouteOccWithPos getRouteWithPosUnder(const Route* r,
     const std::vector<size_t> ordering) const;
 
-  RouteOccWithPos getRouteOccWithPos(const Route* r) const;
+  RouteOccWithPos getRouteWithPos(const Route* r) const;
 
-  RouteOccurance* getRouteOcc(const Route* r) const;
+  RouteOccurance* getRoute(const Route* r) const;
 
   std::set<const Route*> getRoutesRelTo(const Route* ref) const;
 
-  std::vector<RouteOccurance> getContinuedRoutesIn(const Node* n,
+  std::vector<RouteOccurance> getCtdRoutesIn(const Node* n,
     const Route* r, const Node* dir, const Edge* fromEdge) const;
 
   std::vector<RouteOccurance> getSameDirRoutesIn(const Node* n,
@@ -82,13 +82,15 @@ class Edge {
 
   double getTotalWidth() const;
 
-  std::vector<const Route*> getSharedRoutes(const Edge& e) const;
+  std::vector<const Route*> getShrdRoutes(const Edge& e) const;
 
   bool replaceRoute(const Route* r, const Route* n);
   bool removeRoute(const Route* r);
 
+  std::string toString() const;
 
-  // TODO: store this here atm, but find better plcae...
+
+  // TODO: store this here atm, but find better place...
   std::vector<std::vector<size_t> > permutations;
  private:
   Node* _from;

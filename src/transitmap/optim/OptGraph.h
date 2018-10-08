@@ -9,6 +9,7 @@
 #include <string>
 
 #include "util/graph/UndirGraph.h"
+#include "util/json/Writer.h"
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/TransitGraph.h"
 
@@ -20,6 +21,12 @@ using util::graph::UndirGraph;
 namespace transitmapper {
 namespace optim {
 
+struct OptNodePL;
+struct OptEdgePL;
+
+typedef util::graph::Node<OptNodePL, OptEdgePL> OptNode;
+typedef util::graph::Edge<OptNodePL, OptEdgePL> OptEdge;
+
 struct EtgPart {
   Edge* etg;
   bool dir;
@@ -28,24 +35,32 @@ struct EtgPart {
 };
 
 struct OptEdgePL {
-  OptEdgePL() {};
+  OptEdgePL() : siameseSibl(0) {};
   std::vector<EtgPart> etgs;
 
-  EtgPart getFirstEdge() const;
-  EtgPart getLastEdge() const;
+  // there is another edge with determines the
+  // ordering in this edge - important to prevent double
+  // writing of ordering later on
+  OptEdge* siameseSibl;
 
   std::string getStrRepr() const;
+
+  const util::geo::Line<double>* getGeom();
+  util::json::Dict getAttrs();
 };
 
 struct OptNodePL {
   const Node* node;
+  util::geo::Point<double> p;
 
+  OptNodePL(util::geo::Point<double> p) : node(0), p(p) {};
   OptNodePL(const Node* node) : node(node){};
   OptNodePL() : node(0){};
+
+  const util::geo::Point<double>* getGeom();
+  util::json::Dict getAttrs();
 };
 
-typedef util::graph::Node<OptNodePL, OptEdgePL> OptNode;
-typedef util::graph::Edge<OptNodePL, OptEdgePL> OptEdge;
 
 class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
  public:
@@ -64,7 +79,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   void simplify();
 
-  static graph::Edge* getAdjacentEdge(const OptEdge* e, const OptNode* n);
+  static graph::Edge* getAdjEdg(const OptEdge* e, const OptNode* n);
 
   // apply splitting rules
   void split();
@@ -78,8 +93,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool simplifyStep();
 
 
-  static EtgPart getFirstEdge(const OptEdge*);
-  static EtgPart getLastEdge(const OptEdge*);
+  static EtgPart getFirstEdg(const OptEdge*);
+  static EtgPart getLastEdg(const OptEdge*);
 };
 }
 }

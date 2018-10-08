@@ -49,10 +49,12 @@ class ILPOptimizer : public Optimizer {
   const config::Config* _cfg;
   const Scorer* _scorer;
 
-  virtual glp_prob* createProblem(const OptGraph& g) const;
+  virtual glp_prob* createProblem(const std::set<OptNode*>& g) const;
 
   void solveProblem(glp_prob* lp) const;
   void preSolveCoinCbc(glp_prob* lp) const;
+
+  int optimize(const std::set<OptNode*>& g, OrderingConfig* c) const;
 
   virtual void getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
                                             const OptGraph& g) const;
@@ -65,10 +67,10 @@ class ILPOptimizer : public Optimizer {
 
   std::string getILPVarName(OptEdge* e, const Route* r, size_t p) const;
 
-  void writeSameSegConstraints(const OptGraph& g, VariableMatrix* vm,
+  void writeSameSegConstraints(const std::set<OptNode*>& g, VariableMatrix* vm,
                                glp_prob* lp) const;
 
-  void writeDiffSegConstraints(const OptGraph& g, VariableMatrix* vm,
+  void writeDiffSegConstraints(const std::set<OptNode*>& g, VariableMatrix* vm,
                                glp_prob* lp) const;
 
   bool printHumanReadable(glp_prob* lp, const std::string& path) const;

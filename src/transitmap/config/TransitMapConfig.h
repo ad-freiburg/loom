@@ -17,6 +17,7 @@ struct Config {
   std::string name;
   std::string projectionString;
   std::string outputPath;
+  std::string dbgPath;
 
   std::string renderMethod;
   std::string optimMethod;
@@ -26,6 +27,7 @@ struct Config {
 
   bool noOptim;
   bool splittingOpt;
+  bool outOptGraph;
 
   double outputResolution;
   double inputSmoothing;

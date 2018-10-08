@@ -176,8 +176,8 @@ double Scorer::getSeparationScore(const Node* n, const OrderingConfig& c,
     for (size_t i = 0; i < c.find(e)->second.size() - 1; i++) {
       size_t p = c.find(e)->second[i];
       curPairs.push_back(std::pair<const Route*, const Route*>(
-          e->getTripsUnordered().at(p).route,
-          e->getTripsUnordered().at(c.find(e)->second[i + 1]).route));
+          e->getRoutes().at(p).route,
+          e->getRoutes().at(c.find(e)->second[i + 1]).route));
     }
 
     for (auto p : curPairs) {
@@ -187,9 +187,9 @@ double Scorer::getSeparationScore(const Node* n, const OrderingConfig& c,
 
         if (f->containsRoute(p.first) && f->containsRoute(p.second) &&
             n->connOccurs(p.first, e, f) && n->connOccurs(p.second, e, f)) {
-          if (abs(int(f->getRouteOccWithPosUnder(p.first, c.find(f)->second)
+          if (abs(int(f->getRouteWithPosUnder(p.first, c.find(f)->second)
                           .second) -
-                  int(f->getRouteOccWithPosUnder(p.second, c.find(f)->second)
+                  int(f->getRouteWithPosUnder(p.second, c.find(f)->second)
                           .second)) > 1) {
             ret += getSplittingPenalty(n, pens);
           }

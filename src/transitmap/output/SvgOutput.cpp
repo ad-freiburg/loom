@@ -648,7 +648,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
   size_t a = 0;
   for (size_t i : outG.getConfig().find(e)->second) {
-    const graph::RouteOccurance& ro = e->getTripsUnordered()[i];
+    const graph::RouteOccurance& ro = e->getRoutes()[i];
 
     const graph::Route* route = ro.route;
     PolyLine<double> p = center;

@@ -208,6 +208,14 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<std::string>(&(cfg->worldFilePath))
       ->default_value(""),
       "if set, output world file of rendered map to this location")
+    ("dbg-output-path",
+      opts::value<std::string>(&(cfg->dbgPath))
+      ->default_value("."),
+      "folder the debug information will be written to")
+    ("output-optgraph",
+      opts::value<bool>(&(cfg->outOptGraph))
+      ->default_value(false),
+      "write optimization graph to debug path (--dbg-output-path)")
   ;
 
   opts::options_description cmdlineOptions;

@@ -8,6 +8,7 @@
 #include "util/String.h"
 #include "util/geo/Geo.h"
 #include "util/json/Writer.h"
+#include "util/graph/Algorithm.h"
 #include "util/graph/DirGraph.h"
 #include "util/graph/UndirGraph.h"
 #include "util/graph/Dijkstra.h"
@@ -445,6 +446,51 @@ CASE("replace") {
 
   EXPECT(!util::replaceAll(b, "", "ee"));
   EXPECT(b == "loree aaaau aaaau loree");
+}},
+
+// ___________________________________________________________________________
+{
+CASE("Connected components undirected") {
+  UndirGraph<std::string, int> g;
+
+  auto a = g.addNd("A");
+  auto b = g.addNd("B");
+  auto c = g.addNd("C");
+  auto d = g.addNd("D");
+  auto e = g.addNd("E");
+
+  g.addEdg(a, c, 1);
+  g.addEdg(a, b, 5);
+  g.addEdg(d, c, 1);
+  g.addEdg(d, b, 3);
+  g.addEdg(e, d, 1);
+  g.addEdg(e, b, 1);
+
+  auto comps = util::graph::Algorithm::connectedComponents(g);
+
+  EXPECT(comps.size() == 1);
+  EXPECT(comps[0].count(a));
+  EXPECT(comps[0].count(b));
+  EXPECT(comps[0].count(c));
+  EXPECT(comps[0].count(d));
+  EXPECT(comps[0].count(e));
+
+  auto f = g.addNd("F");
+  comps = util::graph::Algorithm::connectedComponents(g);
+  EXPECT(comps.size() == 2);
+
+  auto gn = g.addNd("G");
+  comps = util::graph::Algorithm::connectedComponents(g);
+  EXPECT(comps.size() == 3);
+
+  g.addEdg(f, gn, 1);
+  comps = util::graph::Algorithm::connectedComponents(g);
+  EXPECT(comps.size() == 2);
+
+  g.addEdg(f, a, 1);
+  comps = util::graph::Algorithm::connectedComponents(g);
+  EXPECT(comps.size() == 1);
+
 }},
 
 // ___________________________________________________________________________

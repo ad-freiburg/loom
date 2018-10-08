@@ -340,7 +340,7 @@ void GraphBuilder::createMetaNodes(TransitGraph* g) {
           onf.edge->setFrom(ref);
         }
 
-        for (auto& to : *onf.edge->getTripsUnordered()) {
+        for (auto& to : *onf.edge->getRoutes()) {
           if (to.direction == nf.n) {
             to.direction = ref;
           }
@@ -520,7 +520,7 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 // _____________________________________________________________________________
 bool GraphBuilder::nodeFrontsOverlap(const NodeFront& a,
                                      const NodeFront& b) const {
-  size_t numShr = a.edge->getSharedRoutes(*b.edge).size();
+  size_t numShr = a.edge->getShrdRoutes(*b.edge).size();
 
   DPoint aa = a.geom.front();
   DPoint ab = a.geom.back();
@@ -595,10 +595,10 @@ std::map<const Route*, std::set<const Route*> > GraphBuilder::getPartnerRoutes(
 
   for (graph::Node* n : *g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
-      for (const auto& ra : *(e->getTripsUnordered())) {
+      for (const auto& ra : *(e->getRoutes())) {
         std::set<const Route*> partnersHere;
 
-        for (const auto& rb : *(e->getTripsUnordered())) {
+        for (const auto& rb : *(e->getRoutes())) {
           if (ra.direction == rb.direction) {
             partnersHere.insert(rb.route);
           }

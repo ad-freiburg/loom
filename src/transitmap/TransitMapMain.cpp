@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
               << scorer.getSeparationScore()
               << ")";
 
-    if (cfg.renderMethod != "ogr" && !cfg.noOptim) {
+    if (!cfg.noOptim) {
       if (cfg.optimMethod == "ilp_impr") {
         optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg, &scorer);
         ilpEoOptim.optimize();
