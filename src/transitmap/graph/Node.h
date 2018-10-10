@@ -5,6 +5,7 @@
 #ifndef TRANSITMAP_GRAPH_NODE_H_
 #define TRANSITMAP_GRAPH_NODE_H_
 
+#include <cmath>
 #include <set>
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Penalties.h"
@@ -55,10 +56,6 @@ struct NodeFront {
   // TODO
   double refEtgLengthBefExp;
 };
-
-inline bool cmpNodeFront(const NodeFront& a, const NodeFront& b) {
-  return a.getOutAngle() < b.getOutAngle();
-}
 
 struct Partner {
   Partner() : front(0), edge(0), route(0){};
@@ -143,8 +140,6 @@ class Node {
 
   double getMaxNodeFrontWidth() const;
   size_t getMaxNodeFrontCardinality() const;
-
-  void sortNodeFronts();
 
  private:
   std::string _id;

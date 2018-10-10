@@ -29,7 +29,7 @@ int ILPOptimizer::optimize() const {
 
     g.untangle();
 
-    g.split();
+//    g.split();
   }
 
   if (_cfg->outOptGraph) {

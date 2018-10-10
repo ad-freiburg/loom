@@ -296,13 +296,6 @@ void GraphBuilder::expandOverlappinFronts(TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::sortNodeFronts(TransitGraph* g) {
-  for (auto n : *g->getNodes()) {
-    n->sortNodeFronts();
-  }
-}
-
-// _____________________________________________________________________________
 void GraphBuilder::createMetaNodes(TransitGraph* g) {
   std::vector<NodeFront> cands;
   while ((cands = getNextMetaNodeCand(g)).size() > 0) {

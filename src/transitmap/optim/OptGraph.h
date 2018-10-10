@@ -31,26 +31,27 @@ struct EtgPart {
   Edge* etg;
   bool dir;
 
-  // this edge is only a view (a continuous block) for the original edge
-  std::pair<size_t, size_t> view;
-
-  // partial routes
-  std::vector<graph::RouteOccurance> partialRoutes;
-
-  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir), view(1, 0){};
+  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir){};
 };
 
 struct OptEdgePL {
-  OptEdgePL() : siameseSibl(0){};
+  OptEdgePL() : siameseSibl(0), view(1, 0) {};
   std::vector<EtgPart> etgs;
 
   size_t getCardinality() const;
   std::vector<graph::RouteOccurance> getRoutes() const;
 
+
   // there is another edge with determines the
   // ordering in this edge - important to prevent double
   // writing of ordering later on
   OptEdge* siameseSibl;
+
+  // this edge is only a view (a continuous block) for the original edge
+  std::pair<size_t, size_t> view;
+
+  // partial routes
+  std::vector<graph::RouteOccurance> partialRoutes;
 
   std::string getStrRepr() const;
 
@@ -62,13 +63,18 @@ struct OptNodePL {
   const Node* node;
   util::geo::Point<double> p;
 
+  // the edges arriving at this node, in clockwise fashion, based
+  // on the geometry in the original graph
+  std::vector<OptEdge*> orderedEdges;
+
   OptNodePL(util::geo::Point<double> p) : node(0), p(p){};
-  OptNodePL(const Node* node) : node(node){};
+  OptNodePL(const Node* node) : node(node), p(node->getPos()) {};
   OptNodePL() : node(0){};
 
   const util::geo::Point<double>* getGeom();
   util::json::Dict getAttrs();
 };
+
 
 class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
  public:
@@ -99,6 +105,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   OptNode* getNodeForTransitNode(const Node* tn) const;
 
   void build();
+  void writeEdgeOrder();
+  void updateEdgeOrder(OptNode* n);
   bool simplifyStep();
 
   bool untangleYStep();
@@ -107,6 +115,28 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);
 };
+
+inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
+  double angA, angB;
+
+  // n is the shared node
+  OptNode* n = 0;
+  if (a->getFrom() == b->getFrom() || a->getFrom() == b->getTo()) n = a->getFrom();
+  else n = a->getTo();
+  assert(n->pl().node);
+
+  auto tgEdgeA = OptGraph::getAdjEdg(a, n);
+  assert(tgEdgeA);
+  angA = n->pl().node->getNodeFrontFor(tgEdgeA)->getOutAngle();
+
+  auto tgEdgeB = OptGraph::getAdjEdg(b, n);
+  assert(tgEdgeB);
+  angB = n->pl().node->getNodeFrontFor(tgEdgeB)->getOutAngle();
+
+  return fmod(angA + M_PI * 1.5, 2 * M_PI) >
+         fmod(angB + M_PI * 1.5, 2 * M_PI);
+}
+
 }
 }
 

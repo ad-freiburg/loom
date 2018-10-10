@@ -67,9 +67,6 @@ int main(int argc, char** argv) {
 
     b.createMetaNodes(&g);
 
-    // order the nodefronts in clockwise fashion
-    b.sortNodeFronts(&g);
-
     LOG(INFO) << "Writing initial ordering configuration...";
     b.writeInitialConfig(&g);
 

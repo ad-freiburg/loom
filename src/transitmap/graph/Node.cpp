@@ -639,8 +639,3 @@ Edge* Node::getEdge(const Node* other) const {
 
   return 0;
 }
-
-// _____________________________________________________________________________
-void Node::sortNodeFronts() {
-  std::sort(_mainDirs.begin(), _mainDirs.end(), cmpNodeFront);
-}

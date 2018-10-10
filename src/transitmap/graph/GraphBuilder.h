@@ -39,7 +39,6 @@ class GraphBuilder {
   void writeInitialConfig(TransitGraph* g);
   void createMetaNodes(TransitGraph* g);
   void writeStationGeoms(TransitGraph* graph);
-  void sortNodeFronts(TransitGraph* g);
 
  private:
   const config::Config* _cfg;

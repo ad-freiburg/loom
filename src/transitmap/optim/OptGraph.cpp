@@ -4,6 +4,7 @@
 
 #include "transitmap/optim/OptGraph.h"
 #include "util/graph/Algorithm.h"
+#include "util/String.h"
 
 using namespace transitmapper;
 using namespace optim;
@@ -20,8 +21,7 @@ EtgPart OptGraph::getFirstEdg(const OptEdge* optEdg) {
 }
 
 // _____________________________________________________________________________
-EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) {
-  for (const auto e : optEdg->pl().etgs) {
+EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) { for (const auto e : optEdg->pl().etgs) {
     if (e.etg->getFrom() == optEdg->getTo()->pl().node ||
         e.etg->getTo() == optEdg->getTo()->pl().node) {
       return e;
@@ -32,18 +32,18 @@ EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) {
 
 // _____________________________________________________________________________
 std::vector<transitmapper::graph::RouteOccurance> OptEdgePL::getRoutes() const {
-  if (etgs[0].view.first > etgs[0].view.second)
+  if (view.first > view.second)
     return *etgs[0].etg->getRoutes();
-  return etgs[0].partialRoutes;
+  return partialRoutes;
 }
 
 // _____________________________________________________________________________
 size_t OptEdgePL::getCardinality() const {
-  if (etgs[0].view.first > etgs[0].view.second)
+  if (view.first > view.second)
     return etgs[0].etg->getCardinality(true);
 
   // TODO: dont count collapsed edges here!
-  return etgs[0].partialRoutes.size();
+  return partialRoutes.size();
 }
 
 // _____________________________________________________________________________
@@ -59,9 +59,11 @@ std::string OptEdgePL::getStrRepr() const {
 Edge* OptGraph::getAdjEdg(const OptEdge* e, const OptNode* n) {
   if (e->getFrom() == n) {
     return getFirstEdg(e).etg;
-  } else {
+  } else if (e->getTo() == n) {
     return getLastEdg(e).etg;
   }
+
+  return 0;
 }
 
 // _____________________________________________________________________________
@@ -90,6 +92,8 @@ void OptGraph::build() {
       edge->pl().etgs.push_back(EtgPart(e, e->getTo() == toTn));
     }
   }
+
+  writeEdgeOrder();
 }
 
 // _____________________________________________________________________________
@@ -129,11 +133,19 @@ void OptGraph::split() {
 
     OptNode* leftN = addNd(edgeGeom.getPointAt(0.45).p);
     OptNode* rightN = addNd(edgeGeom.getPointAt(0.55).p);
+    OptNode* eFrom = e->getFrom();
+    OptNode* eTo = e->getTo();
 
-    OptEdge* sibling = addEdg(e->getFrom(), leftN, e->pl());
-    addEdg(rightN, e->getTo(), e->pl())->pl().siameseSibl = sibling;
+    OptEdge* sibling = addEdg(eFrom, leftN, e->pl());
+    addEdg(rightN, eTo, e->pl())->pl().siameseSibl = sibling;
 
-    delEdg(e->getFrom(), e->getTo());
+    delEdg(eFrom, eTo);
+
+    updateEdgeOrder(leftN);
+    updateEdgeOrder(rightN);
+
+    updateEdgeOrder(eFrom);
+    updateEdgeOrder(eTo);
   }
 }
 
@@ -192,6 +204,7 @@ bool OptGraph::simplifyStep() {
           newEdge->pl().etgs.push_back(
               EtgPart(etgp.etg, (etgp.dir ^ firstReverted)));
         }
+
         for (EtgPart& etgp : second->pl().etgs) {
           newEdge->pl().etgs.push_back(
               EtgPart(etgp.etg, (etgp.dir ^ secondReverted)));
@@ -202,8 +215,9 @@ bool OptGraph::simplifyStep() {
 
         delNd(n);
 
-        newFrom->addEdge(newEdge);
-        newTo->addEdge(newEdge);
+        updateEdgeOrder(newFrom);
+        updateEdgeOrder(newTo);
+
         return true;
       }
     }
@@ -282,12 +296,12 @@ util::json::Dict OptEdgePL::getAttrs() {
   for (const auto& r : getRoutes()) {
     lines += r.route->getLabel() + ", ";
   }
+  ret["lines"] = lines;
   return ret;
 }
 
 // _____________________________________________________________________________
 const util::geo::Point<double>* OptNodePL::getGeom() {
-  if (node) return &node->getPos();
   return &p;
 }
 
@@ -303,6 +317,12 @@ util::json::Dict OptNodePL::getAttrs() {
       ret["stat_name"] = "";
     }
   }
+  std::string edges;
+  for (auto e : orderedEdges) {
+    edges += util::toString(e) + ",";
+  }
+
+  ret["edge_order"] = edges;
   return ret;
 }
 
@@ -319,6 +339,7 @@ bool OptGraph::untangleYStep() {
     if (nb->getDeg() < 2) continue;
 
     assert(nb->pl().node);
+    assert(na->pl().node);
 
     bool isY = true;
     for (OptEdge* e : nb->getAdjList()) {
@@ -336,17 +357,54 @@ bool OptGraph::untangleYStep() {
 
       // the geometry of the main leg
       util::geo::PolyLine<double> pl(*nb->pl().getGeom(), *na->pl().getGeom());
-      auto orthoPl = pl.getOrthoLineAtDist(0, (nb->getDeg() - 1) * 10);
+      auto orthoPl = pl.getOrthoLineAtDist(0, (nb->getDeg() - 1) * 200);
+      auto orthoPlOrig = pl.getOrthoLineAtDist(pl.getLength(), (nb->getDeg() - 1) * 200);
 
-      std::vector<OptNode*> nds(nb->getDeg() - 1);
+      std::vector<OptNode*> centerNds(nb->getDeg() - 1);
+      std::vector<OptNode*> origNds(nb->getDeg() - 1);
 
-      // for each minor leg of the Y, create a new node
-      for (size_t i = 0; i < nds.size(); i++) {
-        nds[i] =
-            addNd(orthoPl.getPointAt(((double)i) / (double)(nds.size())).p);
+      // for each minor leg of the Y, create a new node at the Y center
+      for (size_t i = 0; i < centerNds.size(); i++) {
+        centerNds[i] =
+            addNd(orthoPl.getPointAt(((double)(centerNds.size() - 1 - i)) / (double)(centerNds.size())).p);
+        centerNds[i]->pl().node = nb->pl().node;
       }
 
-      // delEdg(na, nb);
+      // for each minor leg of the Y, create a new node at the Y center
+      for (size_t i = 0; i < origNds.size(); i++) {
+        origNds[i] =
+            addNd(orthoPlOrig.getPointAt(((double)(origNds.size() - 1 - i)) / (double)(origNds.size())).p);
+        origNds[i]->pl().node = na->pl().node;
+      }
+
+      // each leg, in clockwise fashion
+      std::vector<OptEdge*> minLegs(nb->getDeg() - 1);
+      assert(minLegs.size() == nb->pl().orderedEdges.size() - 1);
+
+      size_t passed = nb->getDeg();
+      for (size_t i = 0; i < nb->pl().orderedEdges.size(); i++) {
+        auto e = nb->pl().orderedEdges[i];
+        if (e == ea) {
+          passed = i;
+          continue;
+        }
+        if (passed > minLegs.size()) minLegs[minLegs.size() - 1 - i] = e;
+        else minLegs[i - 1 - passed] = e;
+      }
+
+      for (auto e : minLegs) std::cout << e << std::endl;
+
+      for (size_t i = 0; i < minLegs.size(); i++) {
+        if (minLegs[i]->getFrom() == nb) addEdg(centerNds[i], minLegs[i]->getTo(), minLegs[i]->pl());
+        else addEdg(minLegs[i]->getFrom(), centerNds[i], minLegs[i]->pl());
+        delEdg(minLegs[i]->getFrom(), minLegs[i]->getTo());
+      }
+
+      for (size_t i = 0; i < minLegs.size(); i++) {
+        addEdg(centerNds[i], origNds[i], ea->pl());
+      }
+
+      delEdg(na, nb);
 
       return false;
     }
@@ -365,4 +423,26 @@ bool OptGraph::untangleDogBoneStep() {
     }
   }
   return false;
+}
+
+// _____________________________________________________________________________
+void OptGraph::writeEdgeOrder() {
+  for (auto nd : *getNds()) {
+    updateEdgeOrder(nd);
+  }
+}
+
+// _____________________________________________________________________________
+void OptGraph::updateEdgeOrder(OptNode* n) {
+  n->pl().orderedEdges.clear();
+
+  if (n->getDeg() == 1) {
+    n->pl().orderedEdges.push_back(n->getAdjList().front());
+    return;
+  }
+
+  for (auto e : n->getAdjList()) {
+    n->pl().orderedEdges.push_back(e);
+  }
+  std::sort(n->pl().orderedEdges.begin(), n->pl().orderedEdges.end(), cmpEdge);
 }
