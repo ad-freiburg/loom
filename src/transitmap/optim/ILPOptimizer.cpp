@@ -275,9 +275,6 @@ glp_prob* ILPOptimizer::createProblem(const std::set<OptNode*>& g) const {
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      // the first stored etg is always the ref
-      graph::Edge* etg = e->pl().etgs[0].etg;
-
       // get string repr of etg
 
       size_t newCols = e->pl().getCardinality() * e->pl().getCardinality();
@@ -293,7 +290,7 @@ glp_prob* ILPOptimizer::createProblem(const std::set<OptNode*>& g) const {
         glp_set_row_bnds(lp, rowA + p, GLP_FX, 1, 1);
       }
 
-      for (auto r : *etg->getRoutes()) {
+      for (auto r : e->pl().getRoutes()) {
         if (r.route->relativeTo()) continue;
         // constraint: the sum of all x_slp over p must be 1 for equal sl
         size_t row = glp_add_rows(lp, 1);
@@ -599,10 +596,10 @@ std::vector<LinePair> ILPOptimizer::getLinePairs(OptEdge* segment,
                                                  bool unique) const {
   std::set<const Route*> processed;
   std::vector<LinePair> ret;
-  for (auto& toA : *segment->pl().etgs[0].etg->getRoutes()) {
+  for (auto& toA : segment->pl().getRoutes()) {
     if (toA.route->relativeTo()) continue;
     processed.insert(toA.route);
-    for (auto& toB : *segment->pl().etgs[0].etg->getRoutes()) {
+    for (auto& toB : segment->pl().getRoutes()) {
       if (unique && processed.find(toB.route) != processed.end()) continue;
       if (toB.route->relativeTo()) continue;
       if (toA.route == toB.route) continue;

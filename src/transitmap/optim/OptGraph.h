@@ -8,10 +8,10 @@
 #include <set>
 #include <string>
 
-#include "util/graph/UndirGraph.h"
-#include "util/json/Writer.h"
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/TransitGraph.h"
+#include "util/graph/UndirGraph.h"
+#include "util/json/Writer.h"
 
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
@@ -34,14 +34,18 @@ struct EtgPart {
   // this edge is only a view (a continuous block) for the original edge
   std::pair<size_t, size_t> view;
 
-  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir), view(0, 0){};
+  // partial routes
+  std::vector<graph::RouteOccurance> partialRoutes;
+
+  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir), view(1, 0){};
 };
 
 struct OptEdgePL {
-  OptEdgePL() : siameseSibl(0) {};
+  OptEdgePL() : siameseSibl(0){};
   std::vector<EtgPart> etgs;
 
   size_t getCardinality() const;
+  std::vector<graph::RouteOccurance> getRoutes() const;
 
   // there is another edge with determines the
   // ordering in this edge - important to prevent double
@@ -58,14 +62,13 @@ struct OptNodePL {
   const Node* node;
   util::geo::Point<double> p;
 
-  OptNodePL(util::geo::Point<double> p) : node(0), p(p) {};
+  OptNodePL(util::geo::Point<double> p) : node(0), p(p){};
   OptNodePL(const Node* node) : node(node){};
   OptNodePL() : node(0){};
 
   const util::geo::Point<double>* getGeom();
   util::json::Dict getAttrs();
 };
-
 
 class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
  public:
@@ -100,7 +103,6 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   bool untangleYStep();
   bool untangleDogBoneStep();
-
 
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);

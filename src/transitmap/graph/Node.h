@@ -36,6 +36,8 @@ struct NodeFront {
   DPoint getTripPos(const Edge* e, size_t pos, bool inv) const;
   DPoint getTripPos(const Edge* e, size_t pos, bool inv, bool originGeom) const;
 
+  double getOutAngle() const;
+
   Edge* edge;
 
   // geometry after expansion
@@ -53,6 +55,10 @@ struct NodeFront {
   // TODO
   double refEtgLengthBefExp;
 };
+
+inline bool cmpNodeFront(const NodeFront& a, const NodeFront& b) {
+  return a.getOutAngle() < b.getOutAngle();
+}
 
 struct Partner {
   Partner() : front(0), edge(0), route(0){};
@@ -99,6 +105,7 @@ class Node {
   const std::set<Edge*>& getAdjListOut() const { return _adjListOut; }
   const std::set<Edge*>& getAdjListIn() const { return _adjListIn; }
   std::set<Edge*> getAdjList() const;
+
   const std::vector<NodeFront>& getMainDirs() const { return _mainDirs; }
   std::vector<NodeFront>& getMainDirs() { return _mainDirs; }
 
@@ -115,7 +122,7 @@ class Node {
   size_t getConnCardinality() const;
 
   Polygon<double> getConvexFrontHull(double d, bool rectangulize,
-                                    bool simple) const;
+                                     bool simple) const;
 
   void generateStationHull(double d, bool useSimple);
 
@@ -136,6 +143,8 @@ class Node {
 
   double getMaxNodeFrontWidth() const;
   size_t getMaxNodeFrontCardinality() const;
+
+  void sortNodeFronts();
 
  private:
   std::string _id;

@@ -3,6 +3,7 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <cassert>
+#include <algorithm>
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/OrderingConfig.h"
@@ -52,6 +53,20 @@ DPoint NodeFront::getTripOccPos(const Route* r, const OrderingConfig& c,
 // _____________________________________________________________________________
 DPoint NodeFront::getTripPos(const Edge* e, size_t pos, bool inv) const {
   return getTripPos(e, pos, inv, false);
+}
+
+// _____________________________________________________________________________
+double NodeFront::getOutAngle() const {
+  double checkDist = 10;
+  if (edge->getFrom() == n) {
+    return angBetween(n->getPos(), edge->getGeom().getPointAtDist(checkDist).p);
+  } else {
+    return angBetween(
+        n->getPos(),
+        edge->getGeom()
+            .getPointAtDist(edge->getGeom().getLength() - checkDist)
+            .p);
+  }
 }
 
 // _____________________________________________________________________________
@@ -281,11 +296,11 @@ InnerGeometry Node::getTerminusStraightLine(const OrderingConfig& c,
 
   size_t s = partnerFrom.edge
                  ->getRouteWithPosUnder(partnerFrom.route,
-                                           c.find(partnerFrom.edge)->second)
+                                        c.find(partnerFrom.edge)->second)
                  .second;
   size_t ss = partnerFrom.edge
                   ->getRouteWithPosUnder(partnerFrom.route,
-                                            c.find(partnerFrom.edge)->second)
+                                         c.find(partnerFrom.edge)->second)
                   .second;
 
   return InnerGeometry(PolyLine<double>(p, pp), partnerFrom, Partner(), s, ss);
@@ -300,11 +315,11 @@ InnerGeometry Node::getInnerStraightLine(const OrderingConfig& c,
 
   size_t s = partnerFrom.edge
                  ->getRouteWithPosUnder(partnerFrom.route,
-                                           c.find(partnerFrom.edge)->second)
+                                        c.find(partnerFrom.edge)->second)
                  .second;
   size_t ss = partnerTo.edge
                   ->getRouteWithPosUnder(partnerTo.route,
-                                            c.find(partnerTo.edge)->second)
+                                         c.find(partnerTo.edge)->second)
                   .second;
 
   return InnerGeometry(PolyLine<double>(p, pp), partnerFrom, partnerTo, s, ss);
@@ -321,7 +336,7 @@ InnerGeometry Node::getTerminusBezier(const OrderingConfig& cf,
 
   DPoint b = p;
   DPoint c = pp;
-  std::pair<double, double> slopeA, slopeB;
+  std::pair<double, double> slopeA;
 
   assert(partnerFrom.front->edge->getGeom().getLength() > 5);
 
@@ -479,10 +494,10 @@ Polygon<double> Node::getConvexFrontHull(
     double d, bool rectangulize, bool simpleRenderForTwoEdgeNodes) const {
   double cd = d;
 
-  typedef  bgeo::model::point<double, 2, bgeo::cs::cartesian> BoostPoint;
-  typedef  bgeo::model::linestring<BoostPoint> BoostLine;
-  typedef  bgeo::model::polygon<BoostPoint> BoostPoly;
-  typedef  bgeo::model::multi_polygon<BoostPoly> BoostMultiPoly;
+  typedef bgeo::model::point<double, 2, bgeo::cs::cartesian> BoostPoint;
+  typedef bgeo::model::linestring<BoostPoint> BoostLine;
+  typedef bgeo::model::polygon<BoostPoint> BoostPoly;
+  typedef bgeo::model::multi_polygon<BoostPoly> BoostMultiPoly;
 
   BoostMultiPoly ret;
   double pointsPerCircle = 36;
@@ -491,7 +506,6 @@ Polygon<double> Node::getConvexFrontHull(
   bgeo::strategy::buffer::end_round endStrat(pointsPerCircle);
   bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
   bgeo::strategy::buffer::side_straight sideStrat;
-
 
   if (!simpleRenderForTwoEdgeNodes || getMainDirs().size() != 2) {
     MultiLine<double> l;
@@ -510,8 +524,8 @@ Polygon<double> Node::getConvexFrontHull(
       for (auto& nf : getMainDirs()) {
         ll.push_back(nf.geom.getLine());
       }
-      Polygon<double> env =
-          util::geo::convexHull(util::geo::shrink(util::geo::getOrientedEnvelopeAvg(ll), cd / 2));
+      Polygon<double> env = util::geo::convexHull(
+          util::geo::shrink(util::geo::getOrientedEnvelopeAvg(ll), cd / 2));
 
       double incr = (util::geo::area(env) / util::geo::area(hull)) - 1;
       if (ll.size() < 5 || incr < 0.5) {
@@ -520,8 +534,10 @@ Polygon<double> Node::getConvexFrontHull(
     }
 
     BoostPoly hullBgeo;
-    for (const auto& p : hull.getOuter()) hullBgeo.outer().push_back({p.getX(), p.getY()});
-    hullBgeo.outer().push_back({hull.getOuter().front().getX(), hull.getOuter().front().getY()});
+    for (const auto& p : hull.getOuter())
+      hullBgeo.outer().push_back({p.getX(), p.getY()});
+    hullBgeo.outer().push_back(
+        {hull.getOuter().front().getX(), hull.getOuter().front().getY()});
 
     // boost geometry expects polygons in clockwise fashion
     bgeo::correct(hullBgeo);
@@ -561,8 +577,8 @@ Polygon<double> Node::getConvexFrontHull(
       lineBgeo.push_back({p.getX(), p.getY()});
     }
 
-    bgeo::buffer(lineBgeo, ret, distanceStrat,
-                 sideStrat, joinStrat, endStrat, circleStrat);
+    bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat, endStrat,
+                 circleStrat);
   }
 
   assert(ret.size() > 0);
@@ -622,4 +638,9 @@ Edge* Node::getEdge(const Node* other) const {
   }
 
   return 0;
+}
+
+// _____________________________________________________________________________
+void Node::sortNodeFronts() {
+  std::sort(_mainDirs.begin(), _mainDirs.end(), cmpNodeFront);
 }

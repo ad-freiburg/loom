@@ -197,7 +197,8 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG,
   _w.openTag("g");
   for (graph::Node* n : outG.getNodes()) {
     std::string color = n->getStops().size() > 0 ? "red" : "black";
-    for (auto& f : n->getMainDirs()) {
+    for (size_t i = 0; i < n->getMainDirs().size(); i++) {
+      auto& f = n->getMainDirs()[i];
       const PolyLine<double> p = f.geom;
       std::stringstream style;
       style << "fill:none;stroke:" << color
@@ -216,6 +217,21 @@ void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG,
       params["style"] = styleA.str();
 
       printLine(PolyLine<double>(n->getPos(), a), params, rparams);
+
+      // render node front text info
+      params.clear();
+      params["x"] = std::to_string(
+          (p.front().getX() - rparams.xOff) * _cfg->outputResolution + 0);
+      params["y"] = std::to_string(
+          rparams.height -
+          (p.front().getY() - rparams.yOff) * _cfg->outputResolution - 0);
+      params["style"] =
+          "font-family:Verdana;font-size:3px; font-style:normal; font-weight: "
+          "normal; fill: red; stroke-width: 0.05px; stroke-linecap: butt; "
+          "stroke-linejoin: miter; stroke: black";
+      _w.openTag("text", params);
+      _w.writeText(util::toString(i));
+      _w.closeTag();
     }
   }
   _w.closeTag();

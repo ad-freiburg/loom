@@ -31,8 +31,19 @@ EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) {
 }
 
 // _____________________________________________________________________________
+std::vector<transitmapper::graph::RouteOccurance> OptEdgePL::getRoutes() const {
+  if (etgs[0].view.first > etgs[0].view.second)
+    return *etgs[0].etg->getRoutes();
+  return etgs[0].partialRoutes;
+}
+
+// _____________________________________________________________________________
 size_t OptEdgePL::getCardinality() const {
-  return etgs[0].etg->getCardinality(true);
+  if (etgs[0].view.first > etgs[0].view.second)
+    return etgs[0].etg->getCardinality(true);
+
+  // TODO: dont count collapsed edges here!
+  return etgs[0].partialRoutes.size();
 }
 
 // _____________________________________________________________________________
@@ -102,7 +113,8 @@ void OptGraph::split() {
       // we only cut if both nodes have a deg > 1
       if (e->getFrom()->getDeg() < 2 || e->getTo()->getDeg() < 2) continue;
 
-      if (e->pl().etgs.front().etg->getCardinality(true) == 1) toCut.push_back(e);
+      if (e->pl().etgs.front().etg->getCardinality(true) == 1)
+        toCut.push_back(e);
     }
   }
 
@@ -112,7 +124,8 @@ void OptGraph::split() {
     // add two new opt nodes, with slight offsets at the center of this
     // edge (this is for debug visualization purposes only)
 
-    util::geo::PolyLine<double> edgeGeom(*e->getFrom()->pl().getGeom(), *e->getTo()->pl().getGeom());
+    util::geo::PolyLine<double> edgeGeom(*e->getFrom()->pl().getGeom(),
+                                         *e->getTo()->pl().getGeom());
 
     OptNode* leftN = addNd(edgeGeom.getPointAt(0.45).p);
     OptNode* rightN = addNd(edgeGeom.getPointAt(0.55).p);
@@ -145,7 +158,8 @@ bool OptGraph::simplifyStep() {
 
       assert(n->pl().node);
 
-      if (getAdjEdg(first, n)->dirRouteEqualIn(getAdjEdg(second, n), n->pl().node)) {
+      if (getAdjEdg(first, n)->dirRouteEqualIn(getAdjEdg(second, n),
+                                               n->pl().node)) {
         OptNode* newFrom = 0;
         OptNode* newTo = 0;
 
@@ -259,18 +273,15 @@ size_t OptGraph::getMaxCardinality() const {
 }
 
 // _____________________________________________________________________________
-const util::geo::Line<double>* OptEdgePL::getGeom() {
-  return 0;
-}
+const util::geo::Line<double>* OptEdgePL::getGeom() { return 0; }
 
 // _____________________________________________________________________________
 util::json::Dict OptEdgePL::getAttrs() {
   util::json::Dict ret;
   std::string lines;
-  for (const auto& r : *etgs.front().etg->getRoutes()) {
+  for (const auto& r : getRoutes()) {
     lines += r.route->getLabel() + ", ";
   }
-  ret["lines"] = lines;
   return ret;
 }
 
@@ -313,11 +324,8 @@ bool OptGraph::untangleYStep() {
     for (OptEdge* e : nb->getAdjList()) {
       if (e == ea) continue;
 
-      // std::cout << "--" << std::endl;
-      // std::cout << getAdjEdg(ea, nb)->toString() << std::endl;
-      // std::cout << getAdjEdg(e, nb)->toString() << std::endl;
-
-      if (!getAdjEdg(ea, nb)->dirRouteContains(getAdjEdg(e, nb), nb->pl().node)) {
+      if (!getAdjEdg(ea, nb)->dirRouteContains(getAdjEdg(e, nb),
+                                               nb->pl().node)) {
         isY = false;
         break;
       }
@@ -334,15 +342,14 @@ bool OptGraph::untangleYStep() {
 
       // for each minor leg of the Y, create a new node
       for (size_t i = 0; i < nds.size(); i++) {
-        nds[i] = addNd(orthoPl.getPointAt(((double)i) / (double)(nds.size())).p);
+        nds[i] =
+            addNd(orthoPl.getPointAt(((double)i) / (double)(nds.size())).p);
       }
-
 
       // delEdg(na, nb);
 
       return false;
     }
-
   }
   return false;
 }
@@ -355,9 +362,6 @@ bool OptGraph::untangleDogBoneStep() {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       if (e->getTo()->getDeg() != e->getFrom()->getDeg()) continue;
-
-
-
     }
   }
   return false;

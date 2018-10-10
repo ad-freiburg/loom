@@ -25,7 +25,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
       if (e->getFrom() != n) continue;
       if (e->pl().siameseSibl) continue;
       for (auto etgp : e->pl().etgs) {
-        for (size_t tp = 0; tp < etgp.etg->getCardinality(true); tp++) {
+        for (size_t tp = 0; tp < e->pl().getCardinality(); tp++) {
           bool found = false;
           for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
             auto r = (*etgp.etg->getRoutes())[p];
@@ -85,9 +85,6 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const std::set<OptNode*>& g) cons
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      // the first stored etg is always the ref
-      graph::Edge* etg = e->pl().etgs[0].etg;
-
       // constraint: the sum of all x_sl<=p over the set of lines
       // must be p+1
 
@@ -99,7 +96,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(const std::set<OptNode*>& g) cons
         glp_set_row_bnds(lp, rowA + p, GLP_FX, p + 1, p + 1);
       }
 
-      for (auto r : *etg->getRoutes()) {
+      for (auto r : e->pl().getRoutes()) {
         if (r.route->relativeTo()) continue;
         for (size_t p = 0; p < e->pl().getCardinality(); p++) {
           std::stringstream varName;
