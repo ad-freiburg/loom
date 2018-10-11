@@ -33,6 +33,10 @@ struct RouteOccurance {
   const Node* direction;  // 0 if in both directions
 
   util::Nullable<style::LineStyle> style;
+
+  bool operator==(const RouteOccurance& b) const {
+    return b.route == route && b.direction == direction;
+  }
 };
 
 typedef std::pair<RouteOccurance*, size_t> RouteOccWithPos;

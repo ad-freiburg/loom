@@ -20,18 +20,24 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
   // build name index for faster lookup
   glp_create_index(lp);
 
+  HierarchOrderingConfig hc;
+
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       if (e->pl().siameseSibl) continue;
+
       for (auto etgp : e->pl().etgs) {
         for (size_t tp = 0; tp < e->pl().getCardinality(); tp++) {
           bool found = false;
           for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
             auto r = (*etgp.etg->getRoutes())[p];
+
+            if (std::find(e->pl().getRoutes().begin(), e->pl().getRoutes().end(), r) == e->pl().getRoutes().end()) continue;
+
             if (r.route->relativeTo()) continue;
 
-            // check if this route (r) switch from 0 to 1 at tp-1 and tp
+            // check if this route (r) switches from 0 to 1 at tp-1 and tp
             double valPrev = 0;
             std::stringstream varName;
 
@@ -52,12 +58,17 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
             assert(i > 0);
             double val = glp_mip_col_val(lp, i);
 
+            size_t offset = etgp.etg->getCardinality() + 1;
+
             if (valPrev < 0.5 && val > 0.5) {
               // first time p is eq/greater, so it is this p
+              // TODO: the latter dir is checking the 'main' direction here,
+              // put this into a method in the pl()! (there, the [0] etg is
+              // already taken as a ref). THIS IS A POTENTIAL BUG HERE
               if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
-                (*c)[etgp.etg].insert((*c)[etgp.etg].begin(), p);
+                hc[etgp.etg][e->pl().order].insert(hc[etgp.etg][e->pl().order].begin(), p);
               } else {
-                (*c)[etgp.etg].push_back(p);
+                hc[etgp.etg][offset - e->pl().order].push_back(p);
               }
               assert(!found);  // should be assured by ILP constraints
               found = true;
@@ -69,6 +80,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
     }
   }
 
+  hc.writeFlatCfg(c);
   expandRelatives(c);
 }
 

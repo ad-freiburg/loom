@@ -35,11 +35,11 @@ struct EtgPart {
 };
 
 struct OptEdgePL {
-  OptEdgePL() : siameseSibl(0), view(1, 0) {};
+  OptEdgePL() : siameseSibl(0), order(0) {};
   std::vector<EtgPart> etgs;
 
   size_t getCardinality() const;
-  std::vector<graph::RouteOccurance> getRoutes() const;
+  const std::vector<graph::RouteOccurance>& getRoutes() const;
 
 
   // there is another edge with determines the
@@ -47,8 +47,7 @@ struct OptEdgePL {
   // writing of ordering later on
   OptEdge* siameseSibl;
 
-  // this edge is only a view (a continuous block) for the original edge
-  std::pair<size_t, size_t> view;
+  size_t order;
 
   // partial routes
   std::vector<graph::RouteOccurance> partialRoutes;
@@ -114,6 +113,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);
+
+  static OptEdgePL getOptEdgePLView(OptEdge* parent, OptNode* origin, OptEdge* leg, size_t offset);
 };
 
 inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
