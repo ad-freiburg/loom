@@ -30,9 +30,9 @@ typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
 class ILPEdgeOrderOptimizer : public ILPOptimizer {
  public:
-  ILPEdgeOrderOptimizer(TransitGraph* g, const config::Config* cfg,
+  ILPEdgeOrderOptimizer(const config::Config* cfg,
                         const Scorer* scorer)
-      : ILPOptimizer(g, cfg, scorer){};
+      : ILPOptimizer(cfg, scorer){};
 
  private:
   virtual glp_prob* createProblem(const std::set<OptNode*>& g) const;

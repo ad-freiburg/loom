@@ -39,32 +39,24 @@ struct VariableMatrix {
 
 class ILPOptimizer : public Optimizer {
  public:
-  ILPOptimizer(TransitGraph* g, const config::Config* cfg, const Scorer* scorer)
-      : _g(g), _cfg(cfg), _scorer(scorer){};
+  ILPOptimizer(const config::Config* cfg, const Scorer* scorer)
+      : _cfg(cfg), _scorer(scorer){};
 
-  int optimize() const;
+  int optimize(TransitGraph* tg) const;
 
  protected:
-  TransitGraph* _g;
   const config::Config* _cfg;
   const Scorer* _scorer;
+
+  int optimize(const std::set<OptNode*>& g, OrderingConfig* c) const;
 
   virtual glp_prob* createProblem(const std::set<OptNode*>& g) const;
 
   void solveProblem(glp_prob* lp) const;
   void preSolveCoinCbc(glp_prob* lp) const;
 
-  int optimize(const std::set<OptNode*>& g, OrderingConfig* c) const;
-
   virtual void getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
                                             const std::set<OptNode*>& g) const;
-
-  void expandRelatives(OrderingConfig* c) const;
-
-  void expandRelativesFor(OrderingConfig* c, const Route* ref,
-                          graph::Edge* start,
-                          const std::set<const Route*>& r,
-                          std::set<std::pair<graph::Edge*, const Route*>>& visited) const;
 
   std::string getILPVarName(OptEdge* e, const Route* r, size_t p) const;
 

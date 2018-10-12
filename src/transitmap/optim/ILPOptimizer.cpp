@@ -20,16 +20,16 @@ using namespace optim;
 using namespace transitmapper::graph;
 
 // _____________________________________________________________________________
-int ILPOptimizer::optimize() const {
+int ILPOptimizer::optimize(TransitGraph* tg) const {
   // create optim graph
-  OptGraph g(_g);
+  OptGraph g(tg);
 
   if (_cfg->createCoreOptimGraph) {
     g.simplify();
 
     g.untangle();
 
-//    g.split();
+    g.split();
   }
 
   if (_cfg->outOptGraph) {
@@ -39,7 +39,7 @@ int ILPOptimizer::optimize() const {
   }
 
   if (_cfg->outputStats) {
-    LOG(INFO) << "(stats) Stats for optim graph of '" << _g->getName()
+    LOG(INFO) << "(stats) Stats for optim graph of '" << tg->getName()
               << std::endl;
     LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
               << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
@@ -55,7 +55,9 @@ int ILPOptimizer::optimize() const {
 
   optimize(*g.getNds(), &c);
 
-  _g->setConfig(c);
+  Optimizer::expandRelatives(tg, &c);
+
+  tg->setConfig(c);
 
   return 0;
 }
@@ -97,11 +99,8 @@ int ILPOptimizer::optimize(const std::set<OptNode*>& g,
       std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
   if (_cfg->externalSolver.empty()) {
-    _g->setLastSolveTime(duration);
     LOG(INFO) << " === Solve done in " << duration << " ms ===" << std::endl;
   }
-
-  _g->setLastSolveTarget(glp_mip_obj_val(lp));
 
   LOG(INFO) << "(stats) ILP obj = " << glp_mip_obj_val(lp) << std::endl;
 
@@ -187,78 +186,9 @@ void ILPOptimizer::getConfigurationFromSolution(
     }
   }
 
-  expandRelatives(c);
+  // hc.writeFlatCfg(c);
 }
 
-// _____________________________________________________________________________
-void ILPOptimizer::expandRelatives(OrderingConfig* c) const {
-  std::set<std::pair<graph::Edge*, const Route*>> visited;
-  for (graph::Node* n : *_g->getNodes()) {
-    for (graph::Edge* e : n->getAdjListOut()) {
-      for (const auto& ra : *(e->getRoutes())) {
-        if (ra.route->relativeTo()) {
-          const Route* ref = ra.route->relativeTo();
-          expandRelativesFor(c, ref, e, e->getRoutesRelTo(ref), visited);
-        }
-      }
-    }
-  }
-}
-
-// _____________________________________________________________________________
-void ILPOptimizer::expandRelativesFor(OrderingConfig* c, const Route* ref,
-                                      graph::Edge* start,
-                                      const std::set<const Route*>& rs,
-                                      std::set<std::pair<graph::Edge*, const Route*>>& visited) const {
-  std::stack<std::pair<graph::Edge*, graph::Edge*> > todo;
-
-  todo.push(std::pair<graph::Edge*, graph::Edge*>(0, start));
-  while (!todo.empty()) {
-    auto cur = todo.top();
-    todo.pop();
-
-    if (!visited.insert(std::pair<graph::Edge*, const Route*>(cur.second, ref)).second) continue;
-
-    for (auto r : rs) {
-      size_t index = cur.second->getRouteWithPos(ref).second;
-      auto it =
-          std::find((*c)[cur.second].begin(), (*c)[cur.second].end(), index);
-
-      size_t p = cur.second->getRouteWithPos(r).second;
-
-      assert(it != (*c)[cur.second].end());
-
-      if (cur.first != 0 &&
-          ((cur.first->getTo() == cur.second->getTo() ||
-            cur.first->getFrom() == cur.second->getFrom()) ^
-           (cur.first->getRouteWithPosUnder(r, (*c)[cur.first]).second >
-            cur.first->getRouteWithPosUnder(ref, (*c)[cur.first]).second))) {
-        (*c)[cur.second].insert(it + 1, p);
-      } else {
-        (*c)[cur.second].insert(it, p);
-      }
-    }
-
-    for (const Node* n : {cur.second->getFrom(), cur.second->getTo()}) {
-      if (cur.first != 0 &&
-          (cur.first->getTo() == n || cur.first->getFrom() == n)) {
-        continue;
-      }
-
-      for (auto e : n->getAdjListIn()) {
-        if (e->containsRoute(ref) && visited.find(std::pair<graph::Edge*, const Route*>(e, ref)) == visited.end()) {
-          todo.push(std::pair<graph::Edge*, graph::Edge*>(cur.second, e));
-        }
-      }
-
-      for (auto e : n->getAdjListOut()) {
-        if (e->containsRoute(ref) && visited.find(std::pair<graph::Edge*, const Route*>(e, ref)) == visited.end()) {
-          todo.push(std::pair<graph::Edge*, graph::Edge*>(cur.second, e));
-        }
-      }
-    }
-  }
-}
 
 // _____________________________________________________________________________
 glp_prob* ILPOptimizer::createProblem(const std::set<OptNode*>& g) const {
@@ -652,7 +582,6 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
       std::chrono::high_resolution_clock::now();
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-  _g->setLastSolveTime(duration);
   LOG(INFO) << " === External solve done (ret=" << r << ") in " << duration
             << " ms ===" << std::endl;
   LOG(INFO) << "Parsing solution..." << std::endl;

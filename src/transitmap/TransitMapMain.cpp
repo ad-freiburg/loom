@@ -125,11 +125,14 @@ int main(int argc, char** argv) {
 
     if (!cfg.noOptim) {
       if (cfg.optimMethod == "ilp_impr") {
-        optim::ILPEdgeOrderOptimizer ilpEoOptim(&g, &cfg, &scorer);
-        ilpEoOptim.optimize();
+        optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, &scorer);
+        ilpEoOptim.optimize(&g);
       } else if (cfg.optimMethod == "ilp") {
-        optim::ILPOptimizer ilpEoOptim(&g, &cfg, &scorer);
-        ilpEoOptim.optimize();
+        optim::ILPOptimizer ilpEoOptim(&cfg, &scorer);
+        ilpEoOptim.optimize(&g);
+      } else if (cfg.optimMethod == "combi") {
+        // optim::CombiOptimizer ilpCombiOptim(&cfg, &scorer);
+        // ilpCombiOptim.optimize(&g);
       }
     }
 

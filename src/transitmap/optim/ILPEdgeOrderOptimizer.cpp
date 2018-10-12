@@ -80,7 +80,6 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
   }
 
   hc.writeFlatCfg(c);
-  expandRelatives(c);
 }
 
 // _____________________________________________________________________________
