@@ -192,15 +192,13 @@ void ILPOptimizer::getConfigurationFromSolution(
 
 // _____________________________________________________________________________
 void ILPOptimizer::expandRelatives(OrderingConfig* c) const {
-  std::set<const Route*> proced;
-
+  std::set<std::pair<graph::Edge*, const Route*>> visited;
   for (graph::Node* n : *_g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       for (const auto& ra : *(e->getRoutes())) {
         if (ra.route->relativeTo()) {
           const Route* ref = ra.route->relativeTo();
-          if (!proced.insert(ref).second) continue;
-          expandRelativesFor(c, ref, e, e->getRoutesRelTo(ref));
+          expandRelativesFor(c, ref, e, e->getRoutesRelTo(ref), visited);
         }
       }
     }
@@ -210,8 +208,8 @@ void ILPOptimizer::expandRelatives(OrderingConfig* c) const {
 // _____________________________________________________________________________
 void ILPOptimizer::expandRelativesFor(OrderingConfig* c, const Route* ref,
                                       graph::Edge* start,
-                                      const std::set<const Route*>& rs) const {
-  std::set<graph::Edge*> visited;
+                                      const std::set<const Route*>& rs,
+                                      std::set<std::pair<graph::Edge*, const Route*>>& visited) const {
   std::stack<std::pair<graph::Edge*, graph::Edge*> > todo;
 
   todo.push(std::pair<graph::Edge*, graph::Edge*>(0, start));
@@ -219,7 +217,7 @@ void ILPOptimizer::expandRelativesFor(OrderingConfig* c, const Route* ref,
     auto cur = todo.top();
     todo.pop();
 
-    if (!visited.insert(cur.second).second) continue;
+    if (!visited.insert(std::pair<graph::Edge*, const Route*>(cur.second, ref)).second) continue;
 
     for (auto r : rs) {
       size_t index = cur.second->getRouteWithPos(ref).second;
@@ -248,13 +246,13 @@ void ILPOptimizer::expandRelativesFor(OrderingConfig* c, const Route* ref,
       }
 
       for (auto e : n->getAdjListIn()) {
-        if (e->containsRoute(ref) && visited.find(e) == visited.end()) {
+        if (e->containsRoute(ref) && visited.find(std::pair<graph::Edge*, const Route*>(e, ref)) == visited.end()) {
           todo.push(std::pair<graph::Edge*, graph::Edge*>(cur.second, e));
         }
       }
 
       for (auto e : n->getAdjListOut()) {
-        if (e->containsRoute(ref) && visited.find(e) == visited.end()) {
+        if (e->containsRoute(ref) && visited.find(std::pair<graph::Edge*, const Route*>(e, ref)) == visited.end()) {
           todo.push(std::pair<graph::Edge*, graph::Edge*>(cur.second, e));
         }
       }

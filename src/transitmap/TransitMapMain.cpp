@@ -49,7 +49,6 @@ int main(int argc, char** argv) {
       b.combinePartnerRoutes(&g);
     }
 
-
     LOG(INFO) << "Creating node fronts...";
     b.writeMainDirs(&g);
 

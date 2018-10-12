@@ -45,8 +45,13 @@ size_t OptEdgePL::getCardinality() const {
     return etgs[0].etg->getCardinality(true);
   }
 
-  // TODO: dont count collapsed edges here!
-  return getRoutes().size();
+  size_t ret = 0;
+
+  for (const auto& ro : getRoutes()) {
+    if (ro.route->relativeTo() == 0) ret++;
+  }
+
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -380,8 +385,7 @@ bool OptGraph::untangleYStep() {
       }
 
       // each leg, in clockwise fashion
-      std::vector<OptEdge*> minLegs(nb->getDeg() - 1);
-      assert(minLegs.size() == nb->pl().orderedEdges.size() - 1);
+      std::vector<OptEdge*> minLegs;
 
       size_t passed = nb->getDeg();
       for (size_t i = 0; i < nb->pl().orderedEdges.size(); i++) {
@@ -390,9 +394,17 @@ bool OptGraph::untangleYStep() {
           passed = i;
           continue;
         }
-        if (passed > minLegs.size()) minLegs[minLegs.size() - 1 - i] = e;
-        else minLegs[i - 1 - passed] = e;
+        if (passed > nb->getDeg() - 1) minLegs.push_back(e);
+        else {
+          std::cout << (passed + 1 - i) << std::endl; 
+          minLegs.insert(minLegs.begin() + (i - 1 - passed), e);
+        }
       }
+
+      assert(minLegs.size() == nb->pl().orderedEdges.size() - 1);
+
+      std::cout << std::endl;
+      for (auto e : minLegs) std::cout << e->pl().getRoutes().front().route->getLabel() << std::endl;
 
       for (size_t i = 0; i < minLegs.size(); i++) {
         OptEdge* newLeg = 0;
@@ -404,13 +416,20 @@ bool OptGraph::untangleYStep() {
 
       size_t offset = 0;
       for (size_t i = 0; i < minLegs.size(); i++) {
-        size_t j = minLegs.size() - 1 - i;
-        if (ea->getFrom() != nb) j = i;
-        addEdg(centerNds[j], origNds[j], OptGraph::getOptEdgePLView(ea, nb, minLegs[j], offset));
+        size_t j = i;
+        if (ea->getFrom() == nb) {
+          if (ea->pl().etgs.front().dir) j = minLegs.size() - 1 - i;
+          addEdg(centerNds[j], origNds[j], OptGraph::getOptEdgePLView(ea, nb, minLegs[j], offset));
+        } else {
+          if (!ea->pl().etgs.front().dir) j = minLegs.size() - 1 - i;
+          addEdg(origNds[j], centerNds[j], OptGraph::getOptEdgePLView(ea, nb, minLegs[j], offset));
+        }
         offset += minLegs[j]->pl().getRoutes().size();
       }
 
       delEdg(na, nb);
+      delNd(nb);
+      delNd(na);
 
       for (auto n : centerNds) {
         updateEdgeOrder(n);
@@ -431,15 +450,6 @@ OptEdgePL OptGraph::getOptEdgePLView(OptEdge* parent, OptNode* origin, OptEdge* 
   OptEdgePL ret(parent->pl());
 
   ret.order = offset;
-
-  bool inv = parent->getFrom() != origin;
-
-  // invert all contained edges if necessary
-  if (inv) {
-    for (size_t i = 0; i < ret.etgs.size(); i++) {
-      ret.etgs[i].dir = !ret.etgs[i].dir;
-    }
-  }
 
   for (auto ro : leg->pl().getRoutes()) {
     auto e = getAdjEdg(parent, origin);

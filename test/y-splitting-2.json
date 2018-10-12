@@ -57,7 +57,7 @@
       }, 
       "properties": {
         "from": "A", 
-		"to": "B",
+        "to": "B",
         "id": "1", 
         "lines": [
           {
@@ -67,6 +67,10 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
           }]
       }
     },
@@ -78,12 +82,16 @@
       }, 
       "properties": {
         "from": "B", 
-		"to": "C",
+    "to": "C",
         "id": "2", 
         "lines": [
           {
             "color": "ff0000",
             "label": "1"
+          },
+          {
+            "color": "0000ff",
+            "label": "3"
           }
       ]
       }
@@ -96,7 +104,7 @@
       }, 
       "properties": {
         "from": "B", 
-		"to": "D",
+    "to": "D",
         "id": "2", 
         "lines": [
           {
@@ -165,7 +173,7 @@
       }, 
       "properties": {
         "from": "BB", 
-		"to": "AA",
+    "to": "AA",
         "id": "11", 
         "lines": [
           {
@@ -175,6 +183,10 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
           }]
       }
     },
@@ -186,12 +198,16 @@
       }, 
       "properties": {
         "from": "BB", 
-		"to": "CC",
+    "to": "CC",
         "id": "22", 
         "lines": [
           {
             "color": "ff0000",
             "label": "1"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
           }
       ]
       }
@@ -204,7 +220,7 @@
       }, 
       "properties": {
         "from": "BB", 
-		"to": "DD",
+    "to": "DD",
         "id": "22", 
         "lines": [
           {
@@ -221,7 +237,18 @@
 
 
 
-
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [7000, 500]
+      }, 
+      "properties": {
+        "id": "XXX", 
+        "station_id": "XXX", 
+        "station_label": "XXX"
+      }
+   },
    {
       "type": "Feature", 
       "geometry": {
@@ -278,7 +305,7 @@
       }, 
       "properties": {
         "from": "BBB", 
-		"to": "AAA",
+    "to": "AAA",
         "id": "111", 
         "lines": [
           {
@@ -288,6 +315,35 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }]
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[7000, 500], [7000, 1000]]
+      }, 
+      "properties": {
+        "from": "XXX", 
+    "to": "AAA",
+        "id": "111", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
           }]
       }
     },
@@ -299,12 +355,16 @@
       }, 
       "properties": {
         "from": "CCC", 
-		"to": "BBB",
+    "to": "BBB",
         "id": "222", 
         "lines": [
           {
             "color": "ff0000",
             "label": "1"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
           }
       ]
       }
@@ -317,7 +377,7 @@
       }, 
       "properties": {
         "from": "BBB", 
-		"to": "DDD",
+    "to": "DDD",
         "id": "222", 
         "lines": [
           {
@@ -325,13 +385,322 @@
             "label": "2"
           }]
       }
+   },
+
+
+
+
+
+
+
+
+
+
+
+
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [10000, 500]
+      }, 
+      "properties": {
+        "id": "XXXX", 
+        "station_id": "XXXX", 
+        "station_label": "XXXX"
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [10000, 1000]
+      }, 
+      "properties": {
+        "id": "AAAA", 
+        "station_id": "AAAA", 
+        "station_label": "AAAA"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [10000, 2000]
+      }, 
+      "properties": {
+        "id": "BBBB", 
+        "station_id": "BBBB", 
+        "station_label": "BBBB"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [9000, 3000]
+      }, 
+      "properties": {
+        "id": "CCCC", 
+        "station_id": "CCCC", 
+        "station_label": "CCCC"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [11000, 3000]
+      }, 
+      "properties": {
+        "id": "DDDD", 
+        "station_id": "DDDD", 
+        "station_label": "DDDD"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[10000, 2000], [10000, 1000]]
+      }, 
+      "properties": {
+        "from": "BBBB", 
+    "to": "AAAA",
+        "id": "1111", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }]
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[10000, 1000], [10000, 500]]
+      }, 
+      "properties": {
+        "from": "AAAA", 
+    "to": "XXXX",
+        "id": "1111", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }]
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[9000, 3000], [10000, 2000]]
+      }, 
+      "properties": {
+        "from": "CCCC", 
+    "to": "BBBB",
+        "id": "2222", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }
+      ]
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[10000, 2000], [11000, 3000]]
+      }, 
+      "properties": {
+        "from": "BBBB", 
+    "to": "DDDD",
+        "id": "2222", 
+        "lines": [
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }]
+      }
+   },
+
+
+
+
+
+
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [13000, 500]
+      }, 
+      "properties": {
+        "id": "XXXXX", 
+        "station_id": "XXXXX", 
+        "station_label": "XXXXX"
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [13000, 1000]
+      }, 
+      "properties": {
+        "id": "AAAAA", 
+        "station_id": "AAAAA", 
+        "station_label": "AAAAA"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [13000, 2000]
+      }, 
+      "properties": {
+        "id": "BBBBB", 
+        "station_id": "BBBBB", 
+        "station_label": "BBBBB"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [12000, 3000]
+      }, 
+      "properties": {
+        "id": "CCCCC", 
+        "station_id": "CCCCC", 
+        "station_label": "CCCCC"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [14000, 3000]
+      }, 
+      "properties": {
+        "id": "DDDDD", 
+        "station_id": "DDDDD", 
+        "station_label": "DDDDD"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[13000, 1000], [13000, 2000]]
+      }, 
+      "properties": {
+        "from": "AAAAA", 
+        "to": "BBBBB",
+        "id": "11111", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }]
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[13000, 500], [13000, 1000]]
+      }, 
+      "properties": {
+        "from": "XXXXX", 
+    "to": "AAAAA",
+        "id": "11111", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }]
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[12000, 3000], [13000, 2000]]
+      }, 
+      "properties": {
+        "from": "CCCCC", 
+    "to": "BBBBB",
+        "id": "22222", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }
+      ]
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[13000, 2000], [14000, 3000]]
+      }, 
+      "properties": {
+        "from": "BBBBB", 
+    "to": "DDDDD",
+        "id": "22222", 
+        "lines": [
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }]
+      }
    }
-
-
-
-
-
-
-
 ]
 }

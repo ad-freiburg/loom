@@ -63,7 +63,8 @@ class ILPOptimizer : public Optimizer {
 
   void expandRelativesFor(OrderingConfig* c, const Route* ref,
                           graph::Edge* start,
-                          const std::set<const Route*>& r) const;
+                          const std::set<const Route*>& r,
+                          std::set<std::pair<graph::Edge*, const Route*>>& visited) const;
 
   std::string getILPVarName(OptEdge* e, const Route* r, size_t p) const;
 

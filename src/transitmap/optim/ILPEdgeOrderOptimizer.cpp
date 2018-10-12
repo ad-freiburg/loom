@@ -34,7 +34,6 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
             auto r = (*etgp.etg->getRoutes())[p];
 
             if (std::find(e->pl().getRoutes().begin(), e->pl().getRoutes().end(), r) == e->pl().getRoutes().end()) continue;
-
             if (r.route->relativeTo()) continue;
 
             // check if this route (r) switches from 0 to 1 at tp-1 and tp
@@ -58,7 +57,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
             assert(i > 0);
             double val = glp_mip_col_val(lp, i);
 
-            size_t offset = etgp.etg->getCardinality() + 1;
+            size_t offset = etgp.etg->getCardinality() * 2;
 
             if (valPrev < 0.5 && val > 0.5) {
               // first time p is eq/greater, so it is this p

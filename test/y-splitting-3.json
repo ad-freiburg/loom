@@ -57,7 +57,7 @@
       }, 
       "properties": {
         "from": "A", 
-		"to": "B",
+        "to": "B",
         "id": "1", 
         "lines": [
           {
@@ -67,6 +67,14 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
     },
@@ -78,12 +86,16 @@
       }, 
       "properties": {
         "from": "B", 
-		"to": "C",
+    "to": "C",
         "id": "2", 
         "lines": [
           {
             "color": "ff0000",
             "label": "1"
+          },
+          {
+            "color": "0000ff",
+            "label": "3"
           }
       ]
       }
@@ -96,12 +108,16 @@
       }, 
       "properties": {
         "from": "B", 
-		"to": "D",
+    "to": "D",
         "id": "2", 
         "lines": [
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
    },
@@ -165,7 +181,7 @@
       }, 
       "properties": {
         "from": "BB", 
-		"to": "AA",
+    "to": "AA",
         "id": "11", 
         "lines": [
           {
@@ -175,6 +191,14 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
     },
@@ -186,12 +210,16 @@
       }, 
       "properties": {
         "from": "BB", 
-		"to": "CC",
+    "to": "CC",
         "id": "22", 
         "lines": [
           {
             "color": "ff0000",
             "label": "1"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
           }
       ]
       }
@@ -204,12 +232,16 @@
       }, 
       "properties": {
         "from": "BB", 
-		"to": "DD",
+    "to": "DD",
         "id": "22", 
         "lines": [
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
    },
@@ -289,7 +321,7 @@
       }, 
       "properties": {
         "from": "BBB", 
-		"to": "AAA",
+    "to": "AAA",
         "id": "111", 
         "lines": [
           {
@@ -299,6 +331,14 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
     },
@@ -310,7 +350,7 @@
       }, 
       "properties": {
         "from": "XXX", 
-		"to": "AAA",
+    "to": "AAA",
         "id": "111", 
         "lines": [
           {
@@ -320,6 +360,14 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
     },
@@ -331,12 +379,16 @@
       }, 
       "properties": {
         "from": "CCC", 
-		"to": "BBB",
+    "to": "BBB",
         "id": "222", 
         "lines": [
           {
             "color": "ff0000",
             "label": "1"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
           }
       ]
       }
@@ -349,12 +401,16 @@
       }, 
       "properties": {
         "from": "BBB", 
-		"to": "DDD",
+    "to": "DDD",
         "id": "222", 
         "lines": [
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
    },
@@ -438,7 +494,7 @@
       }, 
       "properties": {
         "from": "BBBB", 
-		"to": "AAAA",
+    "to": "AAAA",
         "id": "1111", 
         "lines": [
           {
@@ -448,6 +504,14 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
     },
@@ -459,7 +523,7 @@
       }, 
       "properties": {
         "from": "AAAA", 
-		"to": "XXXX",
+    "to": "XXXX",
         "id": "1111", 
         "lines": [
           {
@@ -469,6 +533,14 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
     },
@@ -480,12 +552,16 @@
       }, 
       "properties": {
         "from": "CCCC", 
-		"to": "BBBB",
+    "to": "BBBB",
         "id": "2222", 
         "lines": [
           {
             "color": "ff0000",
             "label": "1"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
           }
       ]
       }
@@ -498,12 +574,16 @@
       }, 
       "properties": {
         "from": "BBBB", 
-		"to": "DDDD",
+    "to": "DDDD",
         "id": "2222", 
         "lines": [
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
    },
@@ -591,6 +671,14 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
     },
@@ -612,6 +700,14 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
     },
@@ -629,6 +725,10 @@
           {
             "color": "ff0000",
             "label": "1"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
           }
       ]
       }
@@ -647,6 +747,10 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
    },
@@ -734,6 +838,14 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
     },
@@ -741,11 +853,11 @@
       "type": "Feature", 
       "geometry": {
         "type": "LineString", 
-        "coordinates": [[16000, 1000], [16000, 500]]
+        "coordinates": [[16000, 500], [16000, 1000]]
       }, 
       "properties": {
-        "from": "AAAAAA", 
-    "to": "XXXXXX",
+        "from": "XXXXXX", 
+    "to": "AAAAAA",
         "id": "111111", 
         "lines": [
           {
@@ -755,6 +867,14 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
     },
@@ -762,16 +882,20 @@
       "type": "Feature", 
       "geometry": {
         "type": "LineString", 
-        "coordinates": [[15000, 3000], [16000, 2000]]
+        "coordinates": [[16000, 2000], [15000, 3000]]
       }, 
       "properties": {
-        "from": "CCCCCC", 
-    "to": "BBBBBB",
+        "from": "BBBBBB", 
+    "to": "CCCCCC",
         "id": "222222", 
         "lines": [
           {
             "color": "ff0000",
             "label": "1"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
           }
       ]
       }
@@ -790,6 +914,344 @@
           {
             "color": "00ff00", 
             "label": "2"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
+          }]
+      }
+   },
+
+
+
+
+
+
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [19000, 500]
+      }, 
+      "properties": {
+        "id": "XXXXXXX", 
+        "station_id": "XXXXXXX", 
+        "station_label": "XXXXXXX"
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [19000, 1000]
+      }, 
+      "properties": {
+        "id": "AAAAAAA", 
+        "station_id": "AAAAAAA", 
+        "station_label": "AAAAAAA"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [19000, 2000]
+      }, 
+      "properties": {
+        "id": "BBBBBBB", 
+        "station_id": "BBBBBBB", 
+        "station_label": "BBBBBBB"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [18000, 3000]
+      }, 
+      "properties": {
+        "id": "CCCCCCC", 
+        "station_id": "CCCCCCC", 
+        "station_label": "CCCCCCC"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [20000, 3000]
+      }, 
+      "properties": {
+        "id": "DDDDDDD", 
+        "station_id": "DDDDDDD", 
+        "station_label": "DDDDDDD"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[19000, 1000], [19000, 2000]]
+      }, 
+      "properties": {
+        "from": "AAAAAAA", 
+        "to": "BBBBBBB",
+        "id": "1111111", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
+          }]
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[19000, 500], [19000, 1000]]
+      }, 
+      "properties": {
+        "from": "XXXXXXX", 
+    "to": "AAAAAAA",
+        "id": "1111111", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
+          }]
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[18000, 3000], [19000, 2000]]
+      }, 
+      "properties": {
+        "from": "CCCCCCC", 
+    "to": "BBBBBBB",
+        "id": "2222222", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }
+      ]
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[20000, 3000], [19000, 2000]]
+      }, 
+      "properties": {
+        "from": "DDDDDDD", 
+    "to": "BBBBBBB",
+        "id": "2222222", 
+        "lines": [
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
+          }]
+      }
+   },
+
+
+
+
+
+
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [22000, 500]
+      }, 
+      "properties": {
+        "id": "XXXXXXXX", 
+        "station_id": "XXXXXXXX", 
+        "station_label": "XXXXXXXX"
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [22000, 1000]
+      }, 
+      "properties": {
+        "id": "AAAAAAAA", 
+        "station_id": "AAAAAAAA", 
+        "station_label": "AAAAAAAA"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [22000, 2000]
+      }, 
+      "properties": {
+        "id": "BBBBBBBB", 
+        "station_id": "BBBBBBBB", 
+        "station_label": "BBBBBBBB"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [21000, 3000]
+      }, 
+      "properties": {
+        "id": "CCCCCCCC", 
+        "station_id": "CCCCCCCC", 
+        "station_label": "CCCCCCCC"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [23000, 3000]
+      }, 
+      "properties": {
+        "id": "DDDDDDDD", 
+        "station_id": "DDDDDDDD", 
+        "station_label": "DDDDDDDD"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[22000, 2000], [22000, 1000]]
+      }, 
+      "properties": {
+        "from": "BBBBBBBB", 
+        "to": "AAAAAAAA",
+        "id": "11111111", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
+          }]
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[22000, 500], [22000, 1000]]
+      }, 
+      "properties": {
+        "from": "XXXXXXXX", 
+    "to": "AAAAAAAA",
+        "id": "11111111", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
+          }]
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[21000, 3000], [22000, 2000]]
+      }, 
+      "properties": {
+        "from": "CCCCCCCC", 
+    "to": "BBBBBBBB",
+        "id": "22222222", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }, 
+          {
+            "color": "0000ff", 
+            "label": "3"
+          }
+      ]
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[23000, 3000], [22000, 2000]]
+      }, 
+      "properties": {
+        "from": "DDDDDDDD", 
+    "to": "BBBBBBBB",
+        "id": "22222222", 
+        "lines": [
+          {
+            "color": "00ff00", 
+            "label": "2"
+          }, 
+          {
+            "color": "ff00ff", 
+            "label": "4"
           }]
       }
    }
