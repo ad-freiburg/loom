@@ -93,10 +93,6 @@ class Edge {
 
   std::string toString() const;
 
-  bool dirRouteEqualIn(const Edge* b, const Node* n) const;
-  bool dirRouteContains(const Edge* b, const Node* n) const;
-
-
   // TODO: store this here atm, but find better place...
   std::vector<std::vector<size_t> > permutations;
  private:

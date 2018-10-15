@@ -60,18 +60,16 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
             assert(i > 0);
             double val = glp_mip_col_val(lp, i);
 
-            size_t offset = etgp.etg->getCardinality() * 2;
-
             if (valPrev < 0.5 && val > 0.5) {
               // first time p is eq/greater, so it is this p
               // TODO: the latter dir is checking the 'main' direction here,
               // put this into a method in the pl()! (there, the [0] etg is
               // already taken as a ref). THIS IS A POTENTIAL BUG HERE
               if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
-                (*hc)[etgp.etg][e->pl().order].insert(
-                    (*hc)[etgp.etg][e->pl().order].begin(), p);
+                (*hc)[etgp.etg][etgp.order].insert(
+                    (*hc)[etgp.etg][etgp.order].begin(), p);
               } else {
-                (*hc)[etgp.etg][offset - e->pl().order].push_back(p);
+                (*hc)[etgp.etg][etgp.order].push_back(p);
               }
               assert(!found);  // should be assured by ILP constraints
               found = true;

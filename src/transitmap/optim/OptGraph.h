@@ -30,26 +30,34 @@ typedef util::graph::Edge<OptNodePL, OptEdgePL> OptEdge;
 struct EtgPart {
   Edge* etg;
   bool dir;
+  size_t order;
 
-  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir){};
+  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir), order(0) {};
+  EtgPart(Edge* etg, bool dir, size_t order) : etg(etg), dir(dir), order(order) {};
 };
 
 struct OptEdgePL {
-  OptEdgePL() : siameseSibl(0), order(0) {};
+  OptEdgePL() : siameseSibl(0), depth(0) {};
+
+  // all original ETGs from the transit graph contained in this edge
+  // Guarantee: they are all equal in terms of (directed) routes
   std::vector<EtgPart> etgs;
 
   size_t getCardinality() const;
   const std::vector<graph::RouteOccurance>& getRoutes() const;
-
 
   // there is another edge with determines the
   // ordering in this edge - important to prevent double
   // writing of ordering later on
   OptEdge* siameseSibl;
 
-  size_t order;
+  size_t depth;
+
 
   // partial routes
+  // For the ETGs contained in .etgs, only these route occurances are
+  // actually contained in this edge. Their relative ordering is defined by
+  // .order
   std::vector<graph::RouteOccurance> partialRoutes;
 
   std::string getStrRepr() const;
@@ -117,6 +125,9 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   static EtgPart getLastEdg(const OptEdge*);
 
   static OptEdgePL getOptEdgePLView(OptEdge* parent, OptNode* origin, OptEdge* leg, size_t offset);
+
+  static bool dirRouteContains(const OptEdge* a, const OptNode* dirN, const OptEdge* b);
+  static bool dirRouteEqualIn(const OptEdge* a, const OptNode* dirN, const OptEdge* b);
 };
 
 inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {

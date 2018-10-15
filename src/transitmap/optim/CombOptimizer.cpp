@@ -28,9 +28,12 @@ int CombOptimizer::optimize(TransitGraph* tg) const {
   OptGraph g(tg);
 
   if (_cfg->createCoreOptimGraph) {
-    g.simplify();
-    g.untangle();
-    g.split();
+    // TODO: do this exactly as often as M - this should be enough (prove this!)
+    for (size_t i = 0; i < 10; i++) {
+      g.simplify();
+      g.untangle();
+      g.split();
+    }
   }
 
   if (_cfg->outOptGraph) {

@@ -158,13 +158,11 @@ void ILPOptimizer::getConfigurationFromSolution(
             assert(i > 0);
             double val = glp_mip_col_val(lp, i);
 
-            size_t offset = etgp.etg->getCardinality() * 2;
-
             if (val > 0.5) {
               if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
-                (*hc)[etgp.etg][e->pl().order].insert((*hc)[etgp.etg][e->pl().order].begin(), p);
+                (*hc)[etgp.etg][etgp.order].insert((*hc)[etgp.etg][etgp.order].begin(), p);
               } else {
-                (*hc)[etgp.etg][offset - e->pl().order].push_back(p);
+                (*hc)[etgp.etg][etgp.order].push_back(p);
               }
               assert(!found);  // should be assured by ILP constraints
               found = true;
