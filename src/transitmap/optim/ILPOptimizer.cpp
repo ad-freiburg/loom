@@ -26,9 +26,7 @@ int ILPOptimizer::optimize(TransitGraph* tg) const {
 
   if (_cfg->createCoreOptimGraph) {
     g.simplify();
-
     g.untangle();
-
     g.split();
   }
 
@@ -38,22 +36,12 @@ int ILPOptimizer::optimize(TransitGraph* tg) const {
     out.print(g, fstr);
   }
 
-  if (_cfg->outputStats) {
-    LOG(INFO) << "(stats) Stats for optim graph of '" << tg->getName()
-              << std::endl;
-    LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
-              << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
-              << " non-topo)" << std::endl;
-    LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges() << std::endl;
-    LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes()
-              << std::endl;
-    LOG(INFO) << "(stats)   Max edge route cardinality: "
-              << g.getMaxCardinality() << std::endl;
-  }
-
+  HierarchOrderingConfig hc;
   OrderingConfig c;
 
-  optimize(*g.getNds(), &c);
+  optimize(*g.getNds(), &hc);
+
+  hc.writeFlatCfg(&c);
 
   Optimizer::expandRelatives(tg, &c);
 
@@ -64,7 +52,7 @@ int ILPOptimizer::optimize(TransitGraph* tg) const {
 
 // _____________________________________________________________________________
 int ILPOptimizer::optimize(const std::set<OptNode*>& g,
-                           OrderingConfig* c) const {
+                           HierarchOrderingConfig* hc) const {
   LOG(DEBUG) << "Creating ILP problem... " << std::endl;
   glp_prob* lp = createProblem(g);
   LOG(DEBUG) << " .. done" << std::endl;
@@ -110,7 +98,7 @@ int ILPOptimizer::optimize(const std::set<OptNode*>& g,
     glp_print_mip(lp, _cfg->glpkSolutionOutputPath.c_str());
   }
 
-  getConfigurationFromSolution(lp, c, g);
+  getConfigurationFromSolution(lp, hc, g);
 
   glp_delete_prob(lp);
   glp_free_env();
@@ -150,7 +138,7 @@ double ILPOptimizer::getConstraintCoeff(glp_prob* lp, int constraint,
 
 // _____________________________________________________________________________
 void ILPOptimizer::getConfigurationFromSolution(
-    glp_prob* lp, OrderingConfig* c, const std::set<OptNode*>& g) const {
+    glp_prob* lp, HierarchOrderingConfig* hc, const std::set<OptNode*>& g) const {
   // build name index for faster lookup
   glp_create_index(lp);
 
@@ -170,11 +158,13 @@ void ILPOptimizer::getConfigurationFromSolution(
             assert(i > 0);
             double val = glp_mip_col_val(lp, i);
 
+            size_t offset = etgp.etg->getCardinality() * 2;
+
             if (val > 0.5) {
               if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
-                (*c)[etgp.etg].insert((*c)[etgp.etg].begin(), p);
+                (*hc)[etgp.etg][e->pl().order].insert((*hc)[etgp.etg][e->pl().order].begin(), p);
               } else {
-                (*c)[etgp.etg].push_back(p);
+                (*hc)[etgp.etg][offset - e->pl().order].push_back(p);
               }
               assert(!found);  // should be assured by ILP constraints
               found = true;
@@ -185,8 +175,6 @@ void ILPOptimizer::getConfigurationFromSolution(
       }
     }
   }
-
-  // hc.writeFlatCfg(c);
 }
 
 

@@ -37,7 +37,7 @@ class ILPEdgeOrderOptimizer : public ILPOptimizer {
  private:
   virtual glp_prob* createProblem(const std::set<OptNode*>& g) const;
 
-  virtual void getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
+  virtual void getConfigurationFromSolution(glp_prob* lp, HierarchOrderingConfig* c,
                                             const std::set<OptNode*>& g) const;
 
   void writeCrossingOracle(const std::set<OptNode*>& g, VariableMatrix* vm,

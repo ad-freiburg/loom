@@ -14,6 +14,7 @@
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
+#include "transitmap/optim/CombOptimizer.h"
 #include "transitmap/optim/Scorer.h"
 #include "transitmap/graph/Penalties.h"
 #include "transitmap/output/SvgOutput.h"
@@ -130,9 +131,9 @@ int main(int argc, char** argv) {
       } else if (cfg.optimMethod == "ilp") {
         optim::ILPOptimizer ilpEoOptim(&cfg, &scorer);
         ilpEoOptim.optimize(&g);
-      } else if (cfg.optimMethod == "combi") {
-        // optim::CombiOptimizer ilpCombiOptim(&cfg, &scorer);
-        // ilpCombiOptim.optimize(&g);
+      } else if (cfg.optimMethod == "comb") {
+        optim::CombOptimizer ilpCombiOptim(&cfg, &scorer);
+        ilpCombiOptim.optimize(&g);
       }
     }
 

@@ -11,6 +11,7 @@
 #define TRANSITMAP_OPTIM_OPTIMIZER_H_
 
 using transitmapper::graph::OrderingConfig;
+using transitmapper::graph::HierarchOrderingConfig;
 using transitmapper::graph::Route;
 using transitmapper::graph::TransitGraph;
 using transitmapper::optim::OptNode;
@@ -22,10 +23,10 @@ namespace optim {
 class Optimizer {
  public:
   virtual int optimize(TransitGraph* tg) const = 0;
+  virtual int optimize(const std::set<OptNode*>& g,
+                       HierarchOrderingConfig* c) const = 0;
 
  protected:
-  virtual int optimize(const std::set<OptNode*>& g,
-                       OrderingConfig* c) const = 0;
   static void expandRelatives(TransitGraph* g, OrderingConfig* c);
   static void expandRelativesFor(
       OrderingConfig* c, const Route* ref, graph::Edge* start,

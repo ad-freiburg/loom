@@ -111,6 +111,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool untangleYStep();
   bool untangleDogBoneStep();
 
+  bool isYAt(OptEdge* e, OptNode* n) const;
+
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);
 

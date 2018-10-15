@@ -43,19 +43,19 @@ class ILPOptimizer : public Optimizer {
       : _cfg(cfg), _scorer(scorer){};
 
   int optimize(TransitGraph* tg) const;
+  int optimize(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
 
  protected:
   const config::Config* _cfg;
   const Scorer* _scorer;
 
-  int optimize(const std::set<OptNode*>& g, OrderingConfig* c) const;
 
   virtual glp_prob* createProblem(const std::set<OptNode*>& g) const;
 
   void solveProblem(glp_prob* lp) const;
   void preSolveCoinCbc(glp_prob* lp) const;
 
-  virtual void getConfigurationFromSolution(glp_prob* lp, OrderingConfig* c,
+  virtual void getConfigurationFromSolution(glp_prob* lp, HierarchOrderingConfig* c,
                                             const std::set<OptNode*>& g) const;
 
   std::string getILPVarName(OptEdge* e, const Route* r, size_t p) const;
