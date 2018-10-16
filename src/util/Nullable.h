@@ -26,7 +26,7 @@ class Nullable {
    : val(other.val), null(other.isNull()) {}
 
   Nullable& operator=(const Nullable& other) {
-    val = other.get();
+    if (!other.isNull()) val = other.get();
     null = other.isNull();
     return *this;
   }

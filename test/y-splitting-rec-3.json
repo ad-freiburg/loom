@@ -5,6 +5,54 @@
       "type": "Feature", 
       "geometry": {
         "type": "Point", 
+        "coordinates": [1000, 4000]
+      }, 
+      "properties": {
+        "id": "T2", 
+        "station_id": "T1", 
+        "station_label": "T1"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [2000, 4000]
+      }, 
+      "properties": {
+        "id": "T3", 
+        "station_id": "T2", 
+        "station_label": "T2"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [0, 4000]
+      }, 
+      "properties": {
+        "id": "T1", 
+        "station_id": "T3", 
+        "station_label": "T3"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [1000, 3000]
+      }, 
+      "properties": {
+        "id": "X", 
+        "station_id": "X", 
+        "station_label": "X"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
         "coordinates": [1000, 0]
       }, 
       "properties": {
@@ -136,6 +184,22 @@
           {
             "color": "00ff00", 
             "label": "2"
+          },
+          {
+            "color": "ffff00", 
+            "label": "7"
+          },
+           {
+            "color": "00ffff", 
+            "label": "5"
+          },
+          {
+            "color": "00aa0a", 
+            "label": "8"
+          },
+          {
+            "color": "aa000a", 
+            "label": "9"
           }]
       }
     },
@@ -157,6 +221,10 @@
           {
             "color": "00ff00", 
             "label": "2"
+          },  
+          {
+            "color": "ffff00", 
+            "label": "7"
           },
           {
             "color": "ff00ff",
@@ -165,6 +233,18 @@
           {
             "color": "0000ff",
             "label": "4"
+          },
+          {
+            "color": "00ffff", 
+            "label": "5"
+          },
+          {
+            "color": "00aa0a", 
+            "label": "8"
+          },
+          {
+            "color": "aa000a", 
+            "label": "9"
           }]
       }
     },
@@ -200,9 +280,88 @@
           {
             "color": "00ff00", 
             "label": "2"
+          },
+          {
+            "color": "ffff00", 
+            "label": "7"
           }]
       }
-   }
-
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[1000, 3000], [1000, 2000]]
+      }, 
+      "properties": {
+        "from": "X", 
+		"to": "B",
+        "id": "2", 
+        "lines": [
+          {
+            "color": "00ffff", 
+            "label": "5"
+          },
+          {
+            "color": "00aa0a", 
+            "label": "8"
+          },
+          {
+            "color": "aa000a", 
+            "label": "9"
+          }]
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[0, 4000], [1000, 3000]]
+      }, 
+      "properties": {
+        "from": "T1", 
+		"to": "X",
+        "id": "2t1", 
+        "lines": [
+          {
+            "color": "00ffff", 
+            "label": "5"
+          }]
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[1000, 4000], [1000, 3000]]
+      }, 
+      "properties": {
+        "from": "T2", 
+		"to": "X",
+        "id": "2t2", 
+        "lines": [
+          {
+            "color": "00aa0a", 
+            "label": "8"
+          }]
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[2000, 4000], [1000, 3000]]
+      }, 
+      "properties": {
+        "from": "T3", 
+		"to": "X",
+        "id": "2t3", 
+        "lines": [
+          {
+            "color": "aa000a", 
+            "label": "9"
+          }]
+      }
+    }
 ]
 }
