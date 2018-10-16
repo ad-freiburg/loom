@@ -124,12 +124,15 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);
 
-  static OptEdgePL getOptEdgePLView(OptEdge* parent, OptNode* origin, OptEdge* leg, size_t offset);
+  static OptEdgePL getView(OptEdge* parent, OptNode* origin, OptEdge* leg, size_t offset);
 
   static bool dirRouteContains(const OptEdge* a, const OptNode* dirN, const OptEdge* b);
   static bool dirRouteEqualIn(const OptEdge* a, const OptNode* dirN, const OptEdge* b);
+
+  static std::vector<OptEdge*> clockwEdges(OptEdge* noon, OptNode* n);
 };
 
+// compare the orientation of two edges adjacent to some shared node
 inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
   double angA, angB;
 
