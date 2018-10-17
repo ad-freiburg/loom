@@ -82,7 +82,6 @@ struct OptNodePL {
   util::json::Dict getAttrs();
 };
 
-
 class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
  public:
   explicit OptGraph(TransitGraph* toOptim);
@@ -120,6 +119,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool untangleDogBoneStep();
 
   bool isYAt(OptEdge* e, OptNode* n) const;
+  bool isDogBone(OptEdge* e) const;
 
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);
@@ -128,6 +128,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   static bool dirRouteContains(const OptEdge* a, const OptNode* dirN, const OptEdge* b);
   static bool dirRouteEqualIn(const OptEdge* a, const OptNode* dirN, const OptEdge* b);
+  static bool dirContinuedOver(const OptEdge* a, const OptEdge* b, const OptEdge* c);
 
   static std::vector<OptEdge*> clockwEdges(OptEdge* noon, OptNode* n);
 };
