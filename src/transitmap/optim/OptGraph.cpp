@@ -124,7 +124,8 @@ void OptGraph::split() {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
 
-      // we only cut if both nodes have a deg > 1
+      // we only cut if both nodes have a deg > 1 - otherwise, we cut
+      // forever...
       if (e->getFrom()->getDeg() < 2 || e->getTo()->getDeg() < 2) continue;
 
       if (e->pl().getCardinality() == 1) toCut.push_back(e);
@@ -145,8 +146,9 @@ void OptGraph::split() {
     OptNode* eFrom = e->getFrom();
     OptNode* eTo = e->getTo();
 
-    OptEdge* sibling = addEdg(eFrom, leftN, e->pl());
-    addEdg(rightN, eTo, e->pl())->pl().siameseSibl = sibling;
+    addEdg(eFrom, leftN, e->pl());
+    auto newE = addEdg(rightN, eTo, e->pl());
+    for (auto& etg : newE->pl().etgs) etg.wasCut = true;
 
     delEdg(eFrom, eTo);
 
@@ -213,12 +215,12 @@ bool OptGraph::simplifyStep() {
         // add etgs...
         for (EtgPart& etgp : first->pl().etgs) {
           newEdge->pl().etgs.push_back(
-              EtgPart(etgp.etg, (etgp.dir ^ firstReverted), etgp.order));
+              EtgPart(etgp.etg, (etgp.dir ^ firstReverted), etgp.order, etgp.wasCut));
         }
 
         for (EtgPart& etgp : second->pl().etgs) {
           newEdge->pl().etgs.push_back(
-              EtgPart(etgp.etg, (etgp.dir ^ secondReverted), etgp.order));
+              EtgPart(etgp.etg, (etgp.dir ^ secondReverted), etgp.order, etgp.wasCut));
         }
 
         newEdge->pl().depth = std::max(first->pl().depth, second->pl().depth);
@@ -307,7 +309,8 @@ util::json::Dict OptEdgePL::getAttrs() {
   util::json::Dict ret;
   std::string lines;
   for (const auto& r : getRoutes()) {
-    lines += r.route->getLabel() + ", ";
+    if (r.route->relativeTo()) lines += "(" + r.route->relativeTo()->getLabel() + "+" + r.route->getLabel() + "), ";
+    else lines += r.route->getLabel() + ", ";
   }
   ret["lines"] = lines;
   ret["depth"] = util::toString(depth);
@@ -348,10 +351,10 @@ bool OptGraph::untangleYStep() {
     OptEdge* ea = na->getAdjList().front();
     OptNode* nb = ea->getOtherNd(na);
 
-    assert(nb->pl().node);
-    assert(na->pl().node);
-
     if (isYAt(ea, nb)) {
+      assert(nb->pl().node);
+      assert(na->pl().node);
+
       // the geometry of the main leg
       util::geo::PolyLine<double> pl(*nb->pl().getGeom(), *na->pl().getGeom());
       double bandW = (nb->getDeg() - 1) * (DO / (ea->pl().depth + 1));
@@ -636,7 +639,7 @@ bool OptGraph::isDogBone(OptEdge* leg) const {
   for (OptEdge* ea : leg->getTo()->getAdjList()) {
     if (ea == leg) continue;
     bool found = false;
-    for (OptEdge* eb : leg->getTo()->getAdjList()) {
+    for (OptEdge* eb : leg->getFrom()->getAdjList()) {
       if (eb == leg) continue;
       if (dirContinuedOver(ea, leg, eb)) {
         found = true;

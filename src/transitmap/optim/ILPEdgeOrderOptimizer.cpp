@@ -24,9 +24,9 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      if (e->pl().siameseSibl) continue;
 
       for (auto etgp : e->pl().etgs) {
+        if (etgp.wasCut) continue;
         for (size_t tp = 0; tp < e->pl().getCardinality(); tp++) {
           bool found = false;
           for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {

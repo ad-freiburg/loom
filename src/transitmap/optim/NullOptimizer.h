@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_OPTIM_COMBOPTIMIZER_H_
-#define TRANSITMAP_OPTIM_COMBOPTIMIZER_H_
+#ifndef TRANSITMAP_OPTIM_NULLOPTIMIZER_H_
+#define TRANSITMAP_OPTIM_NULLOPTIMIZER_H_
 
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderingConfig.h"
@@ -21,24 +21,12 @@ using std::string;
 namespace transitmapper {
 namespace optim {
 
-class CombOptimizer : public Optimizer {
+class NullOptimizer : public Optimizer {
  public:
-  CombOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : _cfg(cfg), _scorer(scorer), _ilpOpt(cfg, scorer) {};
-
   int optimize(TransitGraph* tg) const;
   int optimize(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
-
- private:
-  const config::Config* _cfg;
-  const Scorer* _scorer;
-  const ILPEdgeOrderOptimizer _ilpOpt;
-  const NullOptimizer _nullOpt;
-
-  static size_t maxCard(const std::set<OptNode*>& g);
-
 };
 }  // namespace optim
 }  // namespace transitmapper
 
-#endif  // TRANSITMAP_OPTIM_COMBOPTIMIZER_H_
+#endif  // TRANSITMAP_OPTIM_NULLOPTIMIZER_H_

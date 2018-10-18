@@ -32,12 +32,17 @@ struct EtgPart {
   bool dir;
   size_t order;
 
-  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir), order(0) {};
-  EtgPart(Edge* etg, bool dir, size_t order) : etg(etg), dir(dir), order(order) {};
+  // there is another edge with determines the
+  // ordering in this edge - important to prevent double
+  // writing of ordering later on
+  bool wasCut;
+
+  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir), order(0), wasCut(false) {};
+  EtgPart(Edge* etg, bool dir, size_t order, bool wasCut) : etg(etg), dir(dir), order(order), wasCut(wasCut) {};
 };
 
 struct OptEdgePL {
-  OptEdgePL() : siameseSibl(0), depth(0) {};
+  OptEdgePL() : depth(0) {};
 
   // all original ETGs from the transit graph contained in this edge
   // Guarantee: they are all equal in terms of (directed) routes
@@ -45,11 +50,6 @@ struct OptEdgePL {
 
   size_t getCardinality() const;
   const std::vector<graph::RouteOccurance>& getRoutes() const;
-
-  // there is another edge with determines the
-  // ordering in this edge - important to prevent double
-  // writing of ordering later on
-  OptEdge* siameseSibl;
 
   size_t depth;
 

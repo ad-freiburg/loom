@@ -60,7 +60,6 @@ int CombOptimizer::optimize(TransitGraph* tg) const {
 
   // iterate over components and optimize all of them separately
   for (const auto nds : util::graph::Algorithm::connectedComponents(g)) {
-    LOG(INFO) << "Optimizing component of size " << nds.size();
     optimize(nds, &hc);
   }
 
@@ -75,6 +74,25 @@ int CombOptimizer::optimize(TransitGraph* tg) const {
 // _____________________________________________________________________________
 int CombOptimizer::optimize(const std::set<OptNode*>& g,
                            HierarchOrderingConfig* hc) const {
-  _ilpOpt.optimize(g, hc);
+  size_t maxC = maxCard(g);
+  LOG(INFO) << "Optimizing component of size " << g.size() <<
+    " with max cardinality = " << maxC;
+  if (maxC == 1) {
+    _nullOpt.optimize(g, hc);
+  } else {
+    _ilpOpt.optimize(g, hc);
+  }
   return 0;
+}
+
+// _____________________________________________________________________________
+size_t CombOptimizer::maxCard(const std::set<OptNode*>& g) {
+  size_t ret = 0;
+  for (const auto* n : g) {
+    for (const auto* e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      if (e->pl().getCardinality() > ret) ret = e->pl().getCardinality();
+    }
+  }
+  return ret;
 }

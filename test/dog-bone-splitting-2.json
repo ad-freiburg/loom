@@ -791,7 +791,7 @@
       "type": "Feature", 
       "geometry": {
         "type": "Point", 
-        "coordinates": [13000, 0]
+        "coordinates": [12000, 0]
       }, 
       "properties": {
         "id": "EEEEE", 
