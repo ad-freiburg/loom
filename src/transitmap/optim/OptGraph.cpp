@@ -488,8 +488,12 @@ bool OptGraph::untangleDogBoneStep() {
         std::reverse(minLgsB.begin(), minLgsB.end());
 
         if (!dirContinuedOver(minLgsA.front(), mainLeg, minLgsB.front())) {
-          std::cout << "NOT: " << minLgsA.front()->pl().getRoutes().front().route << " -> " << minLgsB.front()->pl().getRoutes().front().route << std::endl;
-          for (size_t i = 0; i < bNds.size(); i++) bToA[i] = bNds.size() - 1 - i;
+          std::cout << "NOT: "
+                    << minLgsA.front()->pl().getRoutes().front().route << " -> "
+                    << minLgsB.front()->pl().getRoutes().front().route
+                    << std::endl;
+          for (size_t i = 0; i < bNds.size(); i++)
+            bToA[i] = bNds.size() - 1 - i;
         } else {
           for (size_t i = 0; i < bNds.size(); i++) bToA[i] = i;
         }
@@ -519,10 +523,12 @@ bool OptGraph::untangleDogBoneStep() {
           size_t j = i;
           if (mainLeg->getFrom() == na) {
             if (mainLeg->pl().etgs[0].dir) j = minLgsA.size() - 1 - i;
-            addEdg(aNds[j], bNds[bToA[j]], getView(mainLeg, na, minLgsA[j], offset));
+            addEdg(aNds[j], bNds[bToA[j]],
+                   getView(mainLeg, na, minLgsA[j], offset));
           } else {
             if (!mainLeg->pl().etgs[0].dir) j = minLgsA.size() - 1 - i;
-            addEdg(bNds[bToA[j]], aNds[j], getView(mainLeg, na, minLgsA[j], offset));
+            addEdg(bNds[bToA[j]], aNds[j],
+                   getView(mainLeg, na, minLgsA[j], offset));
           }
           offset += minLgsA[j]->pl().getRoutes().size();
         }
@@ -599,6 +605,7 @@ bool OptGraph::dirRouteEqualIn(const OptEdge* a, const OptNode* dirN,
 bool OptGraph::isYAt(OptEdge* eLeg, OptNode* n) const {
   if (n->getDeg() < 3) return false;
   if (eLeg->getOtherNd(n)->getDeg() != 1) return false;
+  // if (eLeg->pl().getCardinality() < 2) return false;
 
   for (OptEdge* e : n->getAdjList()) {
     if (e == eLeg) continue;
@@ -613,15 +620,32 @@ bool OptGraph::isDogBone(OptEdge* leg) const {
   if (leg->getFrom()->getDeg() != leg->getTo()->getDeg()) return false;
   if (leg->getFrom()->getDeg() < 3) return false;
 
-  for (OptEdge* e : leg->getFrom()->getAdjList()) {
-    if (e == leg) continue;
-    if (!dirRouteContains(leg, leg->getFrom(), e)) return false;
+  for (OptEdge* ea : leg->getFrom()->getAdjList()) {
+    if (ea == leg) continue;
+    bool found = false;
+    for (OptEdge* eb : leg->getTo()->getAdjList()) {
+      if (eb == leg) continue;
+      if (dirContinuedOver(ea, leg, eb)) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) return false;
   }
 
-  for (OptEdge* e : leg->getTo()->getAdjList()) {
-    if (e == leg) continue;
-    if (!dirRouteContains(leg, leg->getTo(), e)) return false;
+  for (OptEdge* ea : leg->getTo()->getAdjList()) {
+    if (ea == leg) continue;
+    bool found = false;
+    for (OptEdge* eb : leg->getTo()->getAdjList()) {
+      if (eb == leg) continue;
+      if (dirContinuedOver(ea, leg, eb)) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) return false;
   }
+
   return true;
 }
 
@@ -647,17 +671,32 @@ std::vector<OptEdge*> OptGraph::clockwEdges(OptEdge* noon, OptNode* n) {
 }
 
 // _____________________________________________________________________________
-bool OptGraph::dirContinuedOver(const OptEdge* a, const OptEdge* b, const OptEdge* c) {
-  OptNode* ab = 0;
-  OptNode* bc = 0;
-  if (a->getFrom() == b->getFrom() || a->getFrom() == b->getTo()) ab = a->getFrom();
-  if (a->getTo() == b->getFrom() || a->getTo() == b->getTo()) ab = a->getTo();
-  if (b->getFrom() == c->getFrom() || b->getFrom() == c->getTo()) bc = b->getFrom();
-  if (b->getTo() == c->getFrom() || b->getTo() == c->getTo()) bc = b->getTo();
+bool OptGraph::dirContinuedOver(const OptEdge* a, const OptEdge* b,
+                                const OptEdge* c) {
+  OptNode* ab = sharedNode(a, b);
+  OptNode* bc = sharedNode(b, c);
   assert(ab);
   assert(bc);
 
-  std::cout << "CHECKING: " << a->pl().getRoutes().front().route->getLabel() << " -> " << c->pl().getRoutes().front().route->getLabel() << std::endl;
+  for (auto& to : a->pl().getRoutes()) {
+    for (auto& too : getAdjEdg(a, ab)->getSameDirRoutesIn(
+             ab->pl().node, to.route, to.direction, getAdjEdg(b, ab))) {
+      if (!getAdjEdg(c, bc)
+               ->getSameDirRoutesIn(bc->pl().node, too.route, too.direction,
+                                    getAdjEdg(c, bc))
+               .size()) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
-  return dirRouteContains(b, ab, a) && dirRouteContains(b, bc, c);
+// _____________________________________________________________________________
+OptNode* OptGraph::sharedNode(const OptEdge* a, const OptEdge* b) {
+  OptNode* r = 0;
+  if (a->getFrom() == b->getFrom() || a->getFrom() == b->getTo())
+    r = a->getFrom();
+  if (a->getTo() == b->getFrom() || a->getTo() == b->getTo()) r = a->getTo();
+  return r;
 }

@@ -130,6 +130,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   static bool dirRouteEqualIn(const OptEdge* a, const OptNode* dirN, const OptEdge* b);
   static bool dirContinuedOver(const OptEdge* a, const OptEdge* b, const OptEdge* c);
 
+  static OptNode* sharedNode(const OptEdge* a, const OptEdge* b);
+
   static std::vector<OptEdge*> clockwEdges(OptEdge* noon, OptNode* n);
 };
 
