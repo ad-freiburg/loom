@@ -27,6 +27,12 @@ int CombOptimizer::optimize(TransitGraph* tg) const {
   // create optim graph
   OptGraph g(tg);
 
+  size_t maxC = maxCard(*g.getNds());
+  double solSp = solutionSpaceSize(*g.getNds());
+  LOG(INFO) << "Optimizing graph of size " << tg->getNodes()->size() <<
+    " with max cardinality = " << maxC << " and solution space size = "
+    << solSp;
+
   if (_cfg->createCoreOptimGraph) {
     // TODO: do this exactly as often as M - this should be enough (prove this!)
     for (size_t i = 0; i < 10; i++) {
@@ -58,6 +64,7 @@ int CombOptimizer::optimize(TransitGraph* tg) const {
   OrderingConfig c;
   HierarchOrderingConfig hc;
 
+
   // iterate over components and optimize all of them separately
   for (const auto nds : util::graph::Algorithm::connectedComponents(g)) {
     optimize(nds, &hc);
@@ -75,13 +82,17 @@ int CombOptimizer::optimize(TransitGraph* tg) const {
 int CombOptimizer::optimize(const std::set<OptNode*>& g,
                            HierarchOrderingConfig* hc) const {
   size_t maxC = maxCard(g);
-  LOG(INFO) << "Optimizing component of size " << g.size() <<
-    " with max cardinality = " << maxC;
+  double solSp = solutionSpaceSize(g);
+  LOG(INFO) << "Optimizing subgraph component of size " << g.size() <<
+    " with max cardinality = " << maxC << " and solution space size = "
+    << solSp;
+
   if (maxC == 1) {
     _nullOpt.optimize(g, hc);
   } else {
     _ilpOpt.optimize(g, hc);
   }
+
   return 0;
 }
 
@@ -92,6 +103,19 @@ size_t CombOptimizer::maxCard(const std::set<OptNode*>& g) {
     for (const auto* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       if (e->pl().getCardinality() > ret) ret = e->pl().getCardinality();
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+double CombOptimizer::solutionSpaceSize(const std::set<OptNode*>& g) {
+  double ret = 1;
+  for (const auto* n : g) {
+    for (const auto* e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      ret *= factorial(e->pl().getCardinality());
     }
   }
   return ret;

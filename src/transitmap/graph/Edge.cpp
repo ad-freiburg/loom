@@ -80,28 +80,6 @@ std::set<const Route*> Edge::getRoutesRelTo(const Route* ref) const {
 }
 
 // _____________________________________________________________________________
-std::vector<RouteOccurance> Edge::getSameDirRoutesIn(
-    const Node* n, const Route* r, const Node* dir,
-    const Edge* fromEdge) const {
-  std::vector<RouteOccurance> ret;
-
-  for (const RouteOccurance& to : _routes) {
-    if (to.route == r) {
-
-      if ((to.direction == 0 && dir == 0) ||
-          (to.direction == n && dir != 0 && dir != n) ||
-          (to.direction != n && to.direction != 0 && dir == n)) {
-        if (n->connOccurs(r, fromEdge, this)) {
-          ret.push_back(to);
-        }
-      }
-    }
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
 RouteOccurance* Edge::getRoute(const Route* r) const {
   for (size_t i = 0; i < _routes.size(); i++) {
     RouteOccurance* to = const_cast<RouteOccurance*>(&_routes[i]);

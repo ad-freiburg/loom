@@ -74,9 +74,6 @@ class Edge {
   std::vector<RouteOccurance> getCtdRoutesIn(const Node* n,
     const Route* r, const Node* dir, const Edge* fromEdge) const;
 
-  std::vector<RouteOccurance> getSameDirRoutesIn(const Node* n,
-    const Route* r, const Node* dir, const Edge* fromEdge) const;
-
   bool containsRoute(const Route* r) const;
   size_t getCardinality() const;
   size_t getCardinality(bool woRelatives) const;

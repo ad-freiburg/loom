@@ -399,17 +399,23 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
                   << linepair.first << "<" << linepair.second << ")";
           aSmallerBinL1 = glp_find_col(lp, aSmBStr.str().c_str());
 
+          assert(aSmallerBinL1);
+
           std::stringstream aBgBStr;
           aBgBStr << "x_(" << segmentB->pl().getStrRepr() << ","
                   << linepair.first << "<" << linepair.second << ")";
           aSmallerBinL2 = glp_find_col(lp, aBgBStr.str().c_str());
+
+          std::cout << "Segment: " << segmentB << std::endl;
+          std::cout << "Pair: " << linepair.first->getLabel() << ":" << linepair.second->getLabel() << std::endl;
+          assert(aSmallerBinL2);
 
           std::stringstream bBgAStr;
           bBgAStr << "x_(" << segmentB->pl().getStrRepr() << ","
                   << linepair.second << "<" << linepair.first << ")";
           bSmallerAinL2 = glp_find_col(lp, bBgAStr.str().c_str());
 
-          assert(aSmallerBinL1 && aSmallerBinL2 && bSmallerAinL2);
+          assert(bSmallerAinL2);
 
           std::stringstream rowName;
           rowName << "sum_dec(e1=" << segmentA->pl().getStrRepr()

@@ -36,6 +36,7 @@ class CombOptimizer : public Optimizer {
   const NullOptimizer _nullOpt;
 
   static size_t maxCard(const std::set<OptNode*>& g);
+  static double solutionSpaceSize(const std::set<OptNode*>& g);
 
 };
 }  // namespace optim

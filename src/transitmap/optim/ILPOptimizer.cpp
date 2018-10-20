@@ -456,11 +456,10 @@ std::vector<OptEdge*> ILPOptimizer::getEdgePartners(
 
   for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;
-    graph::Edge* e = OptGraph::getAdjEdg(segmentB, node);
 
-    if (e->getCtdRoutesIn(node->pl().node, linepair.first, dirA, fromEtg)
+    if (OptGraph::getCtdRoutesIn(linepair.first, dirA, segmentA, segmentB)
             .size() &&
-        e->getCtdRoutesIn(node->pl().node, linepair.second, dirB, fromEtg)
+        OptGraph::getCtdRoutesIn(linepair.second, dirB, segmentA, segmentB)
             .size()) {
       ret.push_back(segmentB);
     }
@@ -479,17 +478,15 @@ std::vector<EdgePair> ILPOptimizer::getEdgePartnerPairs(
 
   for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;
-    graph::Edge* etg = OptGraph::getAdjEdg(segmentB, node);
 
-    if (etg->getCtdRoutesIn(node->pl().node, linepair.first, dirA, fromEtg)
+    if (OptGraph::getCtdRoutesIn(linepair.first, dirA, segmentA, segmentB)
             .size()) {
       EdgePair curPair;
       curPair.first = segmentB;
       for (OptEdge* segmentC : node->getAdjList()) {
         if (segmentC == segmentA || segmentC == segmentB) continue;
-        graph::Edge* e = OptGraph::getAdjEdg(segmentC, node);
 
-        if (e->getCtdRoutesIn(node->pl().node, linepair.second, dirB, fromEtg)
+        if (OptGraph::getCtdRoutesIn(linepair.second, dirB, segmentA, segmentC)
                 .size()) {
           curPair.second = segmentC;
           ret.push_back(curPair);
