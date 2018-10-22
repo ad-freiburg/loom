@@ -22,7 +22,7 @@ using namespace transitmapper::graph;
 // _____________________________________________________________________________
 int ILPOptimizer::optimize(TransitGraph* tg) const {
   // create optim graph
-  OptGraph g(tg);
+  OptGraph g(tg, _scorer);
 
   if (_cfg->createCoreOptimGraph) {
     g.simplify();

@@ -10,6 +10,7 @@
 
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/TransitGraph.h"
+#include "transitmap/optim/Scorer.h"
 #include "util/graph/UndirGraph.h"
 #include "util/json/Writer.h"
 
@@ -85,7 +86,7 @@ struct OptNodePL {
 
 class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
  public:
-  explicit OptGraph(TransitGraph* toOptim);
+  OptGraph(TransitGraph* toOptim, const Scorer* scorer);
 
   TransitGraph* getGraph() const;
 
@@ -112,6 +113,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
  private:
   TransitGraph* _g;
+  const Scorer* _scorer;
 
   OptNode* getNodeForTransitNode(const Node* tn) const;
 
@@ -126,8 +128,10 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool untanglePartialDogBoneStep();
 
   std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n) const;
-  bool branchesAtInto(OptEdge* e, OptNode* n, std::vector<OptEdge*> branchesA) const;
-  bool partiallyBranchesAtInto(OptEdge* e, OptNode* n, std::vector<OptEdge*> branchesA) const;
+  bool branchesAtInto(OptEdge* e, OptNode* n,
+                      std::vector<OptEdge*> branchesA) const;
+  bool partiallyBranchesAtInto(OptEdge* e, OptNode* n,
+                               std::vector<OptEdge*> branchesA) const;
   std::vector<OptEdge*> partiallyBranchesAt(OptEdge* e, OptNode* n) const;
 
   bool isYAt(OptEdge* e, OptNode* n) const;
@@ -139,10 +143,11 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);
 
-  static OptEdgePL getView(OptEdge* parent, OptNode* origin, OptEdge* leg,
-                           size_t offset);
-  static OptEdgePL getPartialView(OptEdge* parent, OptNode* origin,
-                                  OptEdge* leg, size_t offset);
+  static OptEdgePL getView(OptEdge* parent, OptEdge* leg, size_t offset);
+  static OptEdgePL getPartialView(OptEdge* parent, OptEdge* leg, size_t offset);
+
+  std::vector<size_t> mapPositions(std::vector<OptEdge*> a, OptEdge* leg,
+                                   std::vector<OptEdge*> b) const;
 
   static bool dirRouteContains(const OptEdge* a, const OptEdge* b);
   static bool dirRouteEqualIn(const OptEdge* a, const OptEdge* b);

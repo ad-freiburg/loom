@@ -25,7 +25,7 @@ using transitmapper::optim::CombOptimizer;
 int CombOptimizer::optimize(TransitGraph* tg) const {
   LOG(INFO) << " == CombOptimizer ==";
   // create optim graph
-  OptGraph g(tg);
+  OptGraph g(tg, _scorer);
 
   size_t maxC = maxCard(*g.getNds());
   double solSp = solutionSpaceSize(*g.getNds());
