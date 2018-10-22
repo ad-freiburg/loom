@@ -488,6 +488,10 @@
           {
             "color": "666600",
             "label": "5"
+          },
+          {
+            "color": "330033",
+            "label": "7"
           }
       ]
       }
@@ -535,6 +539,10 @@
           {
             "color": "660066",
             "label": "6"
+          },
+          {
+            "color": "330033",
+            "label": "7"
           }]
       }
    },
@@ -696,6 +704,14 @@
           {
             "color": "0000ff", 
             "label": "3"
+          },
+          {
+            "color": "330033",
+            "label": "7"
+          },
+          {
+            "color": "666600",
+            "label": "5"
           }
       ]
       }
@@ -714,6 +730,14 @@
           {
             "color": "ff00ff", 
             "label": "4"
+          },
+          {
+            "color": "660066",
+            "label": "6"
+          },
+          {
+            "color": "666600",
+            "label": "5"
           }]
       }
    },
@@ -731,6 +755,14 @@
           {
             "color": "00ff00", 
             "label": "2"
+          },
+          {
+            "color": "660066",
+            "label": "6"
+          },
+          {
+            "color": "330033",
+            "label": "7"
           }]
       }
    },
@@ -882,6 +914,14 @@
           {
             "color": "0000ff", 
             "label": "3"
+          },
+          {
+            "color": "666600",
+            "label": "5"
+          },
+          {
+            "color": "660066",
+            "label": "6"
           }
       ]
       }
@@ -900,6 +940,14 @@
           {
             "color": "ff0000",
             "label": "1"
+          },
+          {
+            "color": "666600",
+            "label": "5"
+          },
+          {
+            "color": "330033",
+            "label": "7"
           }
       ]
       }
@@ -922,6 +970,14 @@
           {
             "color": "ff00ff", 
             "label": "4"
+          },
+          {
+            "color": "660066",
+            "label": "6"
+          },
+          {
+            "color": "330033",
+            "label": "7"
           }]
       }
    },
@@ -969,7 +1025,7 @@
       "type": "Feature", 
       "geometry": {
         "type": "Point", 
-        "coordinates": [15000, 3000]
+        "coordinates": [15000, 2000]
       }, 
       "properties": {
         "id": "CCCCCC", 
@@ -981,12 +1037,36 @@
       "type": "Feature", 
       "geometry": {
         "type": "Point", 
-        "coordinates": [17000, 3000]
+        "coordinates": [14500, 2000]
+      }, 
+      "properties": {
+        "id": "CCCCCCstr", 
+        "station_id": "CCCCCCstr", 
+        "station_label": "CCCCCCstr"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [17000, 2000]
       }, 
       "properties": {
         "id": "DDDDDD", 
         "station_id": "DDDDDD", 
         "station_label": "DDDDDD"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [17500, 2000]
+      }, 
+      "properties": {
+        "id": "DDDDDDstr", 
+        "station_id": "DDDDDDstr", 
+        "station_label": "DDDDDDstr"
       }
     },
     {
@@ -1075,7 +1155,7 @@
       "type": "Feature", 
       "geometry": {
         "type": "LineString", 
-        "coordinates": [[16000, 2000], [15000, 3000]]
+        "coordinates": [[16000, 2000], [15000, 2000]]
       }, 
       "properties": {
         "from": "BBBBBB", 
@@ -1085,6 +1165,48 @@
           {
             "color": "ff0000",
             "label": "1"
+          },
+          {
+            "color": "666600",
+            "label": "5"
+          },
+          {
+            "color": "660066",
+            "label": "6"
+          },
+          {
+            "color": "667766",
+            "label": "7"
+          }
+      ]
+      }
+   },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[14500, 2000], [15000, 2000]]
+      }, 
+      "properties": {
+        "from": "CCCCCCstr", 
+    "to": "CCCCCC",
+        "id": "222222", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          },
+          {
+            "color": "666600",
+            "label": "5"
+          },
+          {
+            "color": "660066",
+            "label": "6"
+          },
+          {
+            "color": "667766",
+            "label": "7"
           }
       ]
       }
@@ -1103,6 +1225,18 @@
           {
             "color": "0000ff", 
             "label": "3"
+          },
+          {
+            "color": "666600",
+            "label": "5"
+          },
+          {
+            "color": "003300",
+            "label": "8"
+          },
+          {
+            "color": "6600aa",
+            "label": "9"
           }
       ]
       }
@@ -1111,7 +1245,7 @@
       "type": "Feature", 
       "geometry": {
         "type": "LineString", 
-        "coordinates": [[16000, 2000], [17000, 3000]]
+        "coordinates": [[16000, 2000], [17000, 2000]]
       }, 
       "properties": {
         "from": "BBBBBB", 
@@ -1121,6 +1255,47 @@
           {
             "color": "00ff00", 
             "label": "2"
+          },
+          {
+            "color": "660066",
+            "label": "6"
+          },
+          {
+            "color": "6600aa",
+            "label": "9"
+          },
+          {
+            "color": "6633cc",
+            "label": "10"
+          }]
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[17000, 2000], [17500, 2000]]
+      }, 
+      "properties": {
+        "from": "DDDDDD", 
+    "to": "DDDDDDstr",
+        "id": "222222", 
+        "lines": [
+          {
+            "color": "00ff00", 
+            "label": "2"
+          },
+          {
+            "color": "660066",
+            "label": "6"
+          },
+          {
+            "color": "6600aa",
+            "label": "9"
+          },
+          {
+            "color": "6633cc",
+            "label": "10"
           }]
       }
    },
@@ -1138,6 +1313,18 @@
           {
             "color": "ff00ff", 
             "label": "4"
+          },
+          {
+            "color": "667766",
+            "label": "7"
+          },
+          {
+            "color": "003300",
+            "label": "8"
+          },
+          {
+            "color": "6633cc",
+            "label": "10"
           }]
       }
    },
@@ -1218,19 +1405,27 @@
         "lines": [
           {
             "color": "ff0000",
-            "label": "1"
+            "label": "11"
           }, 
           {
             "color": "00ff00", 
-            "label": "2"
+            "label": "22"
           }, 
           {
             "color": "0000ff", 
-            "label": "3"
+            "label": "33"
           }, 
           {
             "color": "ff00ff", 
-            "label": "4"
+            "label": "44"
+          },
+          {
+            "color": "003300",
+            "label": "88"
+          },
+          {
+            "color": "6600aa",
+            "label": "99"
           }]
       }
     },
@@ -1247,19 +1442,27 @@
         "lines": [
           {
             "color": "ff0000",
-            "label": "1"
+            "label": "11"
           }, 
           {
             "color": "00ff00", 
-            "label": "2"
+            "label": "22"
           }, 
           {
             "color": "0000ff", 
-            "label": "3"
+            "label": "33"
           }, 
           {
             "color": "ff00ff", 
-            "label": "4"
+            "label": "44"
+          },
+          {
+            "color": "003300",
+            "label": "88"
+          },
+          {
+            "color": "6600aa",
+            "label": "99"
           }]
       }
     },
@@ -1276,7 +1479,27 @@
         "lines": [
           {
             "color": "0000ff", 
-            "label": "3"
+            "label": "33"
+          },
+          {
+            "color": "666600",
+            "label": "55"
+          },
+          {
+            "color": "660066",
+            "label": "66"
+          },
+          {
+            "color": "667766",
+            "label": "77"
+          },
+          {
+            "color": "003300",
+            "label": "88"
+          },
+          {
+            "color": "6600aa",
+            "label": "99"
           }
       ]
       }
@@ -1294,15 +1517,27 @@
         "lines": [
           {
             "color": "ff0000",
-            "label": "1"
+            "label": "11"
           }, 
           {
             "color": "00ff00", 
-            "label": "2"
+            "label": "22"
           }, 
           {
             "color": "ff00ff", 
-            "label": "4"
+            "label": "44"
+          },
+          {
+            "color": "666600",
+            "label": "55"
+          },
+          {
+            "color": "660066",
+            "label": "66"
+          },
+          {
+            "color": "667766",
+            "label": "77"
           }]
       }
    },
@@ -1396,6 +1631,10 @@
           {
             "color": "ff00ff", 
             "label": "4"
+          },
+          {
+            "color": "660066",
+            "label": "666"
           }]
       }
     },
@@ -1425,6 +1664,10 @@
           {
             "color": "ff00ff", 
             "label": "4"
+          },
+          {
+            "color": "660066",
+            "label": "666"
           }]
       }
     },
@@ -1442,6 +1685,14 @@
           {
             "color": "ff0000",
             "label": "1"
+          },
+          {
+            "color": "660066",
+            "label": "666"
+          },
+          {
+            "color": "667766",
+            "label": "777"
           }
       ]
       }
@@ -1468,6 +1719,10 @@
           {
             "color": "0000ff", 
             "label": "3"
+          },
+          {
+            "color": "667766",
+            "label": "777"
           }]
       }
    }

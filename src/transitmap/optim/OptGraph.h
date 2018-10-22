@@ -123,11 +123,18 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool untangleYStep();
   bool untanglePartialYStep();
   bool untangleDogBoneStep();
+  bool untanglePartialDogBoneStep();
+
+  std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n) const;
+  bool branchesAtInto(OptEdge* e, OptNode* n, std::vector<OptEdge*> branchesA) const;
+  bool partiallyBranchesAtInto(OptEdge* e, OptNode* n, std::vector<OptEdge*> branchesA) const;
+  std::vector<OptEdge*> partiallyBranchesAt(OptEdge* e, OptNode* n) const;
 
   bool isYAt(OptEdge* e, OptNode* n) const;
   bool isPartialYAt(OptEdge* e, OptNode* n) const;
 
   bool isDogBone(OptEdge* e) const;
+  OptNode* isPartialDogBone(OptEdge* e) const;
 
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);
