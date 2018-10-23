@@ -128,6 +128,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool untangleDogBoneStep();
   bool untanglePartialDogBoneStep();
 
+  bool extendStump();
+
   std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n) const;
   bool branchesAtInto(OptEdge* e, OptNode* n,
                       std::vector<OptEdge*> branchesA) const;
@@ -137,6 +139,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   std::pair<OptEdge*, OptEdge*> isFullCross(OptNode* n) const;
   bool isYAt(OptEdge* e, OptNode* n) const;
+  OptNode* isStump(OptEdge* e) const;
   bool isPartialYAt(OptEdge* e, OptNode* n) const;
 
   bool isDogBone(OptEdge* e) const;
@@ -151,6 +154,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   std::vector<size_t> mapPositions(std::vector<OptEdge*> a, OptEdge* leg,
                                    std::vector<OptEdge*> b) const;
 
+  static bool dirRouteEndsIn(const OptEdge* a, const OptEdge* b);
   static bool dirRouteContains(const OptEdge* a, const OptEdge* b);
   static bool dirRouteEqualIn(const OptEdge* a, const OptEdge* b);
   static bool dirContinuedOver(const OptEdge* a, const OptEdge* b,

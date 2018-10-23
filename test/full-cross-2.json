@@ -64,6 +64,18 @@
     {
       "type": "Feature", 
       "geometry": {
+        "type": "Point", 
+        "coordinates": [2000, 1000]
+      }, 
+      "properties": {
+        "id": "F", 
+        "station_id": "F", 
+        "station_label": "F"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
         "type": "LineString", 
         "coordinates": [[1000, 1000], [1000, 2000]]
       }, 
@@ -87,6 +99,24 @@
       "properties": {
         "from": "B", 
 		"to": "C",
+        "id": "2", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          }
+      ]
+      }
+   },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[1000, 2000], [2000, 1000]]
+      }, 
+      "properties": {
+        "from": "B", 
+		"to": "F",
         "id": "2", 
         "lines": [
           {
@@ -212,6 +242,18 @@
     {
       "type": "Feature", 
       "geometry": {
+        "type": "Point", 
+        "coordinates": [5000, 1000]
+      }, 
+      "properties": {
+        "id": "FF", 
+        "station_id": "FF", 
+        "station_label": "FF"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
         "type": "LineString", 
         "coordinates": [[4000, 1000], [4000, 2000]]
       }, 
@@ -252,6 +294,28 @@
       ]
       }
    },
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[4000, 2000], [5000, 1000]]
+      }, 
+      "properties": {
+        "from": "BB", 
+		"to": "FF",
+        "id": "2", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1"
+          },
+          {
+            "color": "ff0055", 
+            "label": "4"
+          }
+      ]
+      }
+   },
    {
       "type": "Feature", 
       "geometry": {
@@ -266,10 +330,6 @@
           {
             "color": "00ff00", 
             "label": "2"
-          },
-          {
-            "color": "0000ff", 
-            "label": "3"
           }]
       }
    }

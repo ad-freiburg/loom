@@ -1,7 +1,1 @@
-* DONE Problem beim topologischen Blockieren: der nächste Knoten der geblockten ausgehenden Kante muss auch blockiert werden - ansonsten ist die Blockierung effektiv sinnlos, da der Knoten von einer Kante die in dieselbe "Richtung" will sofort belegt werden kann
-* Maße für Distanzen / Gridgröße: minimale Distanz zwischen 2 Knoten, Durchschnittliche Distanz zwischen 2 Knoten. UNBEDINGT umsetzen ASAP.
-* DONE Padding: eine bestimmte Anzahl von Grids muss noch außen rum sein, mindestens 2!
-* im LOOM Paper: die periphery constraint ist vermutlich nicht garantiert für deg 2 nodes, sondern wird nur belohnt (kann man vermutlich Gegenbeispiel konstruieren)
-* schauen ob eine mögliche node position irgendwo kreuzungen einführt, falls ja: hart bestrafen! (umgesetzt mit den ordnungen der ausgehenden Kanten, funktioniert nicht ganz so gut wie erhofft)
-* fortführung dieser idee: wenn beim bauen des kombinationsgraphen das entfernen einer station (oder sogar das entfernen der Geometry) eine Kreuzung einführt, Station behalten (oder "binärbaumartig" versuchen, positionen als knoten einzuführen (also erst bei p=0.5, dann p=0.25, dann p=0.75 und so weiter))
-* um die sekundärkanten kommt man wohl mittelfristig nicht rum, hat wohl einfach zu viele benefits
+* wichtig: das ersetzen von 2 linien die immer miteinander vorkommen mit einer linie funktioniert nicht bei self-loops des linienpaars, siehe chicago! hier ist es nötig, dass sich 2 gleich verlaufende linien "mitten drin" kreuzen, weil es sonst an der großen kreuzung ein same-segment-crossing gibt!

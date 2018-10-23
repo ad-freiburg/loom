@@ -183,20 +183,23 @@ void OptGraph::simplify() {
 
 // _____________________________________________________________________________
 void OptGraph::untangle() {
-  while (untangleFullCross()) {
+  while (extendStump()) {
   }
 
-  while (untangleYStep()) {
-  }
+  // while (untangleFullCross()) {
+  // }
 
-  while (untanglePartialYStep()) {
-  }
+  // while (untangleYStep()) {
+  // }
 
-  while (untangleDogBoneStep()) {
-  }
+  // while (untanglePartialYStep()) {
+  // }
 
-  while (untanglePartialDogBoneStep()) {
-  }
+  // while (untangleDogBoneStep()) {
+  // }
+
+  // while (untanglePartialDogBoneStep()) {
+  // }
 }
 
 // _____________________________________________________________________________
@@ -396,8 +399,13 @@ std::pair<OptEdge*, OptEdge*> OptGraph::isFullCross(OptNode* n) const {
     for (auto eb : n->getAdjList()) {
       if (ea == eb) continue;
       if (dirRouteEqualIn(ea, eb)) {
-        ret.first = ea;
-        ret.second = eb;
+        if (ret.first) {
+          ret.first = 0;
+          ret.second = 0;
+        } else {
+          ret.first = ea;
+          ret.second = eb;
+        }
       } else if (dirPartialContinuedOver(ea, eb)) {
         ret.first = 0;
         ret.second = 0;
@@ -651,6 +659,59 @@ OptEdgePL OptGraph::getPartialView(OptEdge* parent, OptEdge* leg,
 }
 
 // _____________________________________________________________________________
+bool OptGraph::extendStump() {
+  double DO = 400;  // only relevant for debug output
+  for (OptNode* na : *getNds()) {
+
+    for (OptEdge* mainLeg : na->getAdjList()) {
+      if (mainLeg->getFrom() != na) continue;
+      OptNode* stumpN = 0;
+      if ((stumpN = isStump(mainLeg))) {
+        LOG(DEBUG) << "Found stump with main leg " << mainLeg << " ("
+                   << mainLeg->pl().toStr() << ") at node " << stumpN;
+
+        OptNode* partN = mainLeg->getOtherNd(stumpN);
+
+        // the geometry of the main leg
+        util::geo::PolyLine<double> pl(*stumpN->pl().getGeom(),
+                                       *partN->pl().getGeom());
+        double bandW = (partN->getDeg() - 1) * (DO / (mainLeg->pl().depth + 1));
+        auto orthoPlStump = pl.getOrthoLineAtDist(0, bandW);
+
+        // each leg, in clockwise fashion
+        auto stumpLegs = partialClockwEdges(mainLeg, partN);
+
+        for (auto i = stumpLegs.begin(); i != stumpLegs.end(); i++) {
+          if (!dirRouteEndsIn(*i, mainLeg)) i = stumpLegs.erase(i) - 1;
+        }
+
+        std::cout << "Stump legs: " << stumpLegs.size() << std::endl;
+
+        std::vector<OptEdge*> minLgsNew(stumpLegs.size());
+        std::vector<OptNode*> stumpNds(stumpLegs.size());
+
+        // for each minor leg of the Y, create a new node at the stump node,
+        // add an edge
+        for (size_t i = 0; i < stumpLegs.size(); i++) {
+          double p = (stumpLegs.size() - 1 - i) / (double)(stumpLegs.size());
+          stumpNds[i] = addNd(orthoPlStump.getPointAt(p).p);
+          auto e = addEdg(stumpN, stumpNds[i], getPartialView(mainLeg, stumpLegs[i], 0));
+          e->pl().depth = 0;
+          e->pl().etgs.clear();
+          for (auto& to : e->pl().partialRoutes) {
+            to.direction = 0;
+          }
+        }
+
+        return false;
+      }
+    }
+  }
+
+  return false;
+}
+
+// _____________________________________________________________________________
 bool OptGraph::untanglePartialDogBoneStep() {
   double DO = 400;  // only relevant for debug output
   for (OptNode* na : *getNds()) {
@@ -874,6 +935,24 @@ void OptGraph::updateEdgeOrder(OptNode* n) {
 }
 
 // _____________________________________________________________________________
+bool OptGraph::dirRouteEndsIn(const OptEdge* a, const OptEdge* b) {
+
+  OptNode* na = sharedNode(a, b);
+  if (!na) return false;
+  OptNode* nb = b->getOtherNd(na);
+
+  for (auto& to : b->pl().getRoutes()) {
+    if (!dirContinuedOver(to, b, a)) continue;
+
+    for (auto c : nb->getAdjList()) {
+      if (b == c) continue;
+      if (dirContinuedOver(to, b, c)) return false;
+    }
+  }
+  return true;
+}
+
+// _____________________________________________________________________________
 bool OptGraph::dirRouteContains(const OptEdge* a, const OptEdge* b) {
   for (auto& to : b->pl().getRoutes()) {
     if (!getCtdRoutesIn(to.route, to.direction, b, a).size()) {
@@ -927,6 +1006,31 @@ OptNode* OptGraph::isPartialDogBone(OptEdge* leg) const {
   if (branchesA.size() &&
       partiallyBranchesAtInto(leg, leg->getFrom(), branchesA))
     return leg->getFrom();
+
+  return 0;
+}
+
+// _____________________________________________________________________________
+OptNode* OptGraph::isStump(OptEdge* leg) const {
+  if (leg->getFrom()->getDeg() < 2 || leg->getTo()->getDeg() < 2) return 0;
+
+  auto branchesA = branchesAt(leg, leg->getFrom());
+  if (!branchesA.size()) branchesA = partiallyBranchesAt(leg, leg->getFrom());
+
+  if (branchesA.size()) {
+    for (auto branch : branchesA) {
+      if (dirRouteEndsIn(branch, leg)) return leg->getTo();
+    }
+  }
+
+  branchesA = branchesAt(leg, leg->getTo());
+  if (!branchesA.size()) branchesA = partiallyBranchesAt(leg, leg->getTo());
+
+  if (branchesA.size()) {
+    for (auto branch : branchesA) {
+      if (dirRouteEndsIn(branch, leg)) return leg->getFrom();
+    }
+  }
 
   return 0;
 }
@@ -1027,6 +1131,8 @@ std::vector<OptEdge*> OptGraph::partiallyBranchesAt(OptEdge* eMain,
       if (e == eMain) continue;
 
       if (dirContinuedOver(ro, eMain, e)) {
+        if (found) return std::vector<OptEdge*>();
+
         found = true;
         if (first && first != e) branches = true;
         if (!first) first = e;
@@ -1038,6 +1144,7 @@ std::vector<OptEdge*> OptGraph::partiallyBranchesAt(OptEdge* eMain,
     }
     if (!found) return std::vector<OptEdge*>();
   }
+
   if (onlyPartial && branches)
     return std::vector<OptEdge*>(ret.begin(), ret.end());
   return std::vector<OptEdge*>();
@@ -1135,7 +1242,7 @@ std::vector<RouteOccurance> OptGraph::getCtdRoutesIn(const graph::Route* r,
                                                      const OptEdge* toEdge) {
   std::vector<RouteOccurance> ret;
   const OptNode* n = sharedNode(fromEdge, toEdge);
-  if (!n || !n->pl().node) return ret;
+  if (!n || !n->pl().node || n->getDeg() == 1) return ret;
 
   for (const RouteOccurance& to : toEdge->pl().getRoutes()) {
     if (to.route == r) {
