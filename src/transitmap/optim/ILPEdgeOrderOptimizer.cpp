@@ -75,6 +75,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
               found = true;
             }
           }
+
           assert(found);
         }
       }

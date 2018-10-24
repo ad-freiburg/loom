@@ -107,6 +107,9 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   static std::vector<graph::RouteOccurance> getCtdRoutesIn(
       const graph::Route* r, const Node* dir, const OptEdge* fromEdge,
       const OptEdge* toEdge);
+  static std::vector<graph::RouteOccurance> getSameDirRoutesIn(
+      const graph::Route* r, const Node* dir, const OptEdge* fromEdge,
+      const OptEdge* toEdge);
 
   // apply splitting rules
   void split();
@@ -156,6 +159,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   static bool dirRouteEndsIn(const OptEdge* a, const OptEdge* b);
   static bool dirRouteContains(const OptEdge* a, const OptEdge* b);
+
   static bool dirRouteEqualIn(const OptEdge* a, const OptEdge* b);
   static bool dirContinuedOver(const OptEdge* a, const OptEdge* b,
                                const OptEdge* c);

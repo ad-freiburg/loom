@@ -35,7 +35,7 @@ struct RouteOccurance {
   util::Nullable<style::LineStyle> style;
 
   bool operator==(const RouteOccurance& b) const {
-    return b.route == route && b.direction == direction;
+    return b.route == route;// && b.direction == direction;
   }
 };
 

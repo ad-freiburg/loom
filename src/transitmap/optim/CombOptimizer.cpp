@@ -37,7 +37,7 @@ int CombOptimizer::optimize(TransitGraph* tg) const {
     // TODO: do this exactly as often as M - this should be enough (prove this!)
     for (size_t i = 0; i < 10; i++) {
       // g.untangle();
-      // g.simplify();
+      g.simplify();
       // g.split();
     }
   }

@@ -349,6 +349,7 @@ util::json::Dict OptEdgePL::getAttrs() {
       lines += r.route->getLabel() + ", ";
   }
   ret["lines"] = lines;
+  ret["num_etgs"] = util::toString(etgs.size()); 
   ret["depth"] = util::toString(depth);
   return ret;
 }
@@ -399,7 +400,7 @@ std::pair<OptEdge*, OptEdge*> OptGraph::isFullCross(OptNode* n) const {
   for (auto ea : n->getAdjList()) {
     for (auto eb : n->getAdjList()) {
       if (ea == eb) continue;
-      if (dirRouteEqualIn(ea, eb)) {
+      if (dirRouteContains(eb, ea) && dirRouteContains(ea, eb)) {
         if (ret.first) {
           ret.first = 0;
           ret.second = 0;
@@ -1043,7 +1044,13 @@ bool OptGraph::dirRouteEqualIn(const OptEdge* a, const OptEdge* b) {
   if (a->pl().getCardinality() != b->pl().getCardinality()) return false;
 
   for (auto& to : a->pl().getRoutes()) {
-    if (!getCtdRoutesIn(to.route, to.direction, a, b).size()) {
+    if (!getSameDirRoutesIn(to.route, to.direction, a, b).size()) {
+      return false;
+    }
+  }
+
+  for (auto& to : b->pl().getRoutes()) {
+    if (!getSameDirRoutesIn(to.route, to.direction, b, a).size()) {
       return false;
     }
   }
@@ -1287,7 +1294,7 @@ OptNode* OptGraph::sharedNode(const OptEdge* a, const OptEdge* b) {
 }
 
 // _____________________________________________________________________________
-std::vector<RouteOccurance> OptGraph::getCtdRoutesIn(const graph::Route* r,
+std::vector<RouteOccurance> OptGraph::getSameDirRoutesIn(const graph::Route* r,
                                                      const Node* dir,
                                                      const OptEdge* fromEdge,
                                                      const OptEdge* toEdge) {
@@ -1301,6 +1308,31 @@ std::vector<RouteOccurance> OptGraph::getCtdRoutesIn(const graph::Route* r,
           (to.direction == n->pl().node && dir != 0 && dir != n->pl().node) ||
           (to.direction != n->pl().node && to.direction != 0 &&
            dir == n->pl().node)) {
+        if (n->pl().node->connOccurs(r, getAdjEdg(fromEdge, n),
+                                     getAdjEdg(toEdge, n))) {
+          ret.push_back(to);
+        }
+      }
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::vector<RouteOccurance> OptGraph::getCtdRoutesIn(const graph::Route* r,
+                                                     const Node* dir,
+                                                     const OptEdge* fromEdge,
+                                                     const OptEdge* toEdge) {
+  std::vector<RouteOccurance> ret;
+  const OptNode* n = sharedNode(fromEdge, toEdge);
+  if (!n || !n->pl().node || n->getDeg() == 1) return ret;
+
+  for (const RouteOccurance& to : toEdge->pl().getRoutes()) {
+    if (to.route == r) {
+      if (to.direction == 0 || dir == 0 ||
+          (to.direction == n->pl().node && dir != n->pl().node) ||
+          (to.direction != n->pl().node && dir == n->pl().node)) {
         if (n->pl().node->connOccurs(r, getAdjEdg(fromEdge, n),
                                      getAdjEdg(toEdge, n))) {
           ret.push_back(to);
