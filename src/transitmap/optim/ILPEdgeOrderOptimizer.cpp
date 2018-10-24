@@ -406,8 +406,6 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
                   << linepair.first << "<" << linepair.second << ")";
           aSmallerBinL2 = glp_find_col(lp, aBgBStr.str().c_str());
 
-          std::cout << "Segment: " << segmentB << std::endl;
-          std::cout << "Pair: " << linepair.first->getLabel() << ":" << linepair.second->getLabel() << std::endl;
           assert(aSmallerBinL2);
 
           std::stringstream bBgAStr;

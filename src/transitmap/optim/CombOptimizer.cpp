@@ -23,22 +23,22 @@ using transitmapper::optim::CombOptimizer;
 
 // _____________________________________________________________________________
 int CombOptimizer::optimize(TransitGraph* tg) const {
-  LOG(INFO) << " == CombOptimizer ==";
+  LOG(DEBUG) << " == CombOptimizer ==";
   // create optim graph
   OptGraph g(tg, _scorer);
 
   size_t maxC = maxCard(*g.getNds());
   double solSp = solutionSpaceSize(*g.getNds());
-  LOG(INFO) << "Optimizing graph of size " << tg->getNodes()->size() <<
+  LOG(DEBUG) << "Optimizing graph of size " << tg->getNodes()->size() <<
     " with max cardinality = " << maxC << " and solution space size = "
     << solSp;
 
   if (_cfg->createCoreOptimGraph) {
     // TODO: do this exactly as often as M - this should be enough (prove this!)
-    for (size_t i = 0; i < 1; i++) {
+    for (size_t i = 0; i < 10; i++) {
       g.untangle();
-      // g.simplify();
-      // g.split();
+      g.simplify();
+      g.split();
     }
   }
 
@@ -83,7 +83,7 @@ int CombOptimizer::optimize(const std::set<OptNode*>& g,
                            HierarchOrderingConfig* hc) const {
   size_t maxC = maxCard(g);
   double solSp = solutionSpaceSize(g);
-  LOG(INFO) << "Optimizing subgraph component of size " << g.size() <<
+  LOG(DEBUG) << "Optimizing subgraph component of size " << g.size() <<
     " with max cardinality = " << maxC << " and solution space size = "
     << solSp;
 

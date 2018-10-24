@@ -127,8 +127,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool untanglePartialYStep();
   bool untangleDogBoneStep();
   bool untanglePartialDogBoneStep();
-
-  bool extendStump();
+  bool untangleStumpStep();
 
   std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n) const;
   bool branchesAtInto(OptEdge* e, OptNode* n,
@@ -139,8 +138,9 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   std::pair<OptEdge*, OptEdge*> isFullCross(OptNode* n) const;
   bool isYAt(OptEdge* e, OptNode* n) const;
-  OptNode* isStump(OptEdge* e) const;
   bool isPartialYAt(OptEdge* e, OptNode* n) const;
+  OptEdge* isStump(OptEdge* e) const;
+  OptEdge* isStumpAt(OptEdge* e, OptNode* n) const;
 
   bool isDogBone(OptEdge* e) const;
   OptNode* isPartialDogBone(OptEdge* e) const;
