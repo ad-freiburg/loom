@@ -186,10 +186,14 @@ inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
 
   auto tgEdgeA = OptGraph::getAdjEdg(a, n);
   assert(tgEdgeA);
+  assert(n->pl().node->getNodeFrontFor(tgEdgeA));
+
   angA = n->pl().node->getNodeFrontFor(tgEdgeA)->getOutAngle();
 
   auto tgEdgeB = OptGraph::getAdjEdg(b, n);
   assert(tgEdgeB);
+  assert(n->pl().node->getNodeFrontFor(tgEdgeB));
+
   angB = n->pl().node->getNodeFrontFor(tgEdgeB)->getOutAngle();
 
   if (tgEdgeA == tgEdgeB) {

@@ -1153,7 +1153,7 @@ inline size_t convexHullImpl(const MultiPoint<T>& a, size_t p1, size_t p2,
   for (const auto& p : a) {
     double tmpDist = distToSegment((*h)[p1], (*h)[p2], p);
     double cp = crossProd(p, LineSegment<T>((*h)[p1], (*h)[p2]));
-    if (((cp > 0 && !d) || (cp < 0 && d)) && tmpDist > maxDist) {
+    if (((cp > 0 && !d) || (cp < 0 && d)) && tmpDist >= maxDist) {
       pa = p;
       found = true;
       maxDist = tmpDist;

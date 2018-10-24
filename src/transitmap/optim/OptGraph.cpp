@@ -797,11 +797,17 @@ bool OptGraph::untanglePartialDogBoneStep() {
         orthoPlOrig.reverse();
 
         // each leg, in clockwise fashion
-        auto minLgs = partialClockwEdges(mainLeg, partN);
+        auto minLgs = clockwEdges(mainLeg, partN);
+        auto minLgsNotPart = partialClockwEdges(mainLeg, notPartN);
+        std::reverse(minLgsNotPart.begin(), minLgsNotPart.end());
         std::vector<OptEdge*> minLgsNew(minLgs.size());
         std::vector<OptNode*> partNds(minLgs.size());
 
         assert(minLgs.size() <= mainLeg->pl().getCardinality());
+        // map positions in b to positions in a
+        std::vector<size_t> aToB = mapPositions(minLgsNotPart, mainLeg, minLgs);
+        std::vector<size_t> iden(aToB.size());
+        for (size_t i = 0; i < iden.size(); i++) iden[i] = i;
 
         // for each minor leg of the Y, create a new node at the origin
         for (size_t i = 0; i < minLgs.size(); i++) {
@@ -819,18 +825,26 @@ bool OptGraph::untanglePartialDogBoneStep() {
                 addEdg(minLgs[i]->getFrom(), partNds[i], minLgs[i]->pl());
         }
 
+        std::vector<OptEdge*>& refLegs = minLgs;
+        std::vector<size_t>& toB = iden;
+        if (_scorer->getCrossingPenaltyDiffSeg(partN->pl().node) <
+            _scorer->getCrossingPenaltyDiffSeg(notPartN->pl().node)) {
+          refLegs = minLgsNotPart;
+          toB = aToB;
+        }
+
         size_t offset = 0;
         for (size_t i = 0; i < minLgs.size(); i++) {
           size_t j = i;
           OptEdgePL pl;
           if (mainLeg->getFrom() == partN) {
             if (mainLeg->pl().etgs[0].dir) j = minLgs.size() - 1 - i;
-            pl = getPartialView(mainLeg, minLgs[j], offset);
-            addEdg(partNds[j], notPartN, pl);
+            pl = getPartialView(mainLeg, refLegs[j], offset);
+            addEdg(partNds[toB[j]], notPartN, pl);
           } else {
             if (!mainLeg->pl().etgs[0].dir) j = minLgs.size() - 1 - i;
-            pl = getPartialView(mainLeg, minLgs[j], offset);
-            addEdg(notPartN, partNds[j], pl);
+            pl = getPartialView(mainLeg, refLegs[j], offset);
+            addEdg(notPartN, partNds[toB[j]], pl);
           }
           offset += pl.getRoutes().size();
         }

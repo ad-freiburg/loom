@@ -233,8 +233,6 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
     eSet.insert(n->getAdjListOut().begin(), n->getAdjListOut().end());
 
     for (Edge* e : eSet) {
-      if (e->getGeom().getLength() == 0) continue;
-
       NodeFront f(e, n);
       PolyLine<double> pl;
 
@@ -249,9 +247,6 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
       }
 
       f.setInitialGeom(pl);
-
-      // initial free
-      // freeNodeFront(&f);
 
       n->addMainDir(f);
     }
