@@ -28,6 +28,19 @@ struct OptEdgePL;
 typedef util::graph::Node<OptNodePL, OptEdgePL> OptNode;
 typedef util::graph::Edge<OptNodePL, OptEdgePL> OptEdge;
 
+struct OptRO {
+  OptRO(const graph::Route* r, const Node* dir) : route(r), direction(dir) {}
+  const graph::Route* route;
+  const Node* direction;  // 0 if in both directions
+
+  bool operator==(const OptRO& b) const {
+    return b.route == route;
+  }
+  bool operator==(const graph::RouteOccurance& b) const {
+    return b.route == route;
+  }
+};
+
 struct EtgPart {
   Edge* etg;
   bool dir;
@@ -52,7 +65,7 @@ struct OptEdgePL {
 
   size_t getCardinality() const;
   std::string toStr() const;
-  const std::vector<graph::RouteOccurance>& getRoutes() const;
+  const std::vector<OptRO>& getRoutes() const;
 
   size_t depth;
 
@@ -60,7 +73,7 @@ struct OptEdgePL {
   // For the ETGs contained in .etgs, only these route occurances are
   // actually contained in this edge. Their relative ordering is defined by
   // .order
-  std::vector<graph::RouteOccurance> partialRoutes;
+  std::vector<OptRO> routes;
 
   std::string getStrRepr() const;
 
@@ -104,10 +117,10 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   static graph::Edge* getAdjEdg(const OptEdge* e, const OptNode* n);
   static EtgPart getAdjEtgp(const OptEdge* e, const OptNode* n);
-  static std::vector<graph::RouteOccurance> getCtdRoutesIn(
+  static std::vector<OptRO> getCtdRoutesIn(
       const graph::Route* r, const Node* dir, const OptEdge* fromEdge,
       const OptEdge* toEdge);
-  static std::vector<graph::RouteOccurance> getSameDirRoutesIn(
+  static std::vector<OptRO> getSameDirRoutesIn(
       const graph::Route* r, const Node* dir, const OptEdge* fromEdge,
       const OptEdge* toEdge);
 
@@ -164,10 +177,10 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   static bool dirContinuedOver(const OptEdge* a, const OptEdge* b,
                                const OptEdge* c);
   static bool dirPartialContinuedOver(const OptEdge* a, const OptEdge* b);
-  static bool dirContinuedOver(const graph::RouteOccurance& ro,
+  static bool dirContinuedOver(const OptRO& ro,
                                const OptEdge* a, const OptEdge* b);
 
-  static std::vector<graph::RouteOccurance> getCtdRoutesIn(
+  static std::vector<OptRO> getCtdRoutesIn(
       const OptEdge* fromEdge, const OptEdge* toEdge);
 
   static OptNode* sharedNode(const OptEdge* a, const OptEdge* b);

@@ -40,6 +40,18 @@
     {
       "type": "Feature", 
       "geometry": {
+        "type": "Point", 
+        "coordinates": [0, 4000]
+      }, 
+      "properties": {
+        "id": "D", 
+        "station_id": "D", 
+        "station_label": "D"
+      }
+    },
+    {
+      "type": "Feature", 
+      "geometry": {
         "type": "LineString", 
         "coordinates": [[1000, 1000], [1000, 2000]]
       }, 
@@ -52,6 +64,11 @@
             "color": "ff0000",
             "label": "1",
             "direction": "B"
+          },
+          {
+            "color": "00ff00",
+            "label": "2",
+            "direction": "A"
           }]
       }
     },
@@ -70,6 +87,34 @@
             "color": "ff0000",
             "label": "1",
             "direction": "C"
+          },
+          {
+            "color": "00ff00",
+            "label": "2"
+          }
+      ]
+      }
+   },
+   {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[0, 4000], [0, 3000]]
+      }, 
+      "properties": {
+        "from": "D", 
+		"to": "C",
+        "id": "2", 
+        "lines": [
+          {
+            "color": "ff0000",
+            "label": "1",
+            "direction": "D"
+          },
+          {
+            "color": "00ff00",
+            "label": "2",
+            "direction": "D"
           }
       ]
       }
