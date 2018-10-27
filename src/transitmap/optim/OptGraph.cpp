@@ -254,11 +254,10 @@ bool OptGraph::simplifyStep() {
         newEdge->pl().depth = std::max(first->pl().depth, second->pl().depth);
 
         newEdge->pl().routes = first->pl().routes;
+
         for (auto& ro : newEdge->pl().routes) {
-          assert(ro.direction == 0 || ro.direction == first->getFrom()->pl().node || ro.direction == first->getTo()->pl().node);
           if (ro.direction == n->pl().node) {
-            if (firstReverted) ro.direction = newFrom->pl().node;
-            else ro.direction = newTo->pl().node;
+            ro.direction = newTo->pl().node;
           }
         }
 
