@@ -145,6 +145,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool untanglePartialDogBoneStep();
   bool untangleStumpStep();
 
+  std::vector<OptNode*> explodeNodeAlong(OptNode* nd, const PolyLine<double>& pl, size_t n);
+
   std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n) const;
   bool branchesAtInto(OptEdge* e, OptNode* n,
                       std::vector<OptEdge*> branchesA) const;
