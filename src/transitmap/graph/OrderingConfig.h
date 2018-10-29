@@ -16,6 +16,7 @@ class Edge;
 typedef std::vector<size_t> Ordering;
 typedef std::map<const Edge*, Ordering> OrderingConfig;
 
+
 class HierarchOrderingConfig
     : public std::map<const Edge*, std::map<size_t, Ordering>> {
  public:

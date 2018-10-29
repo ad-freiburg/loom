@@ -23,8 +23,15 @@ namespace optim {
 
 class ExhaustiveOptimizer : public Optimizer {
  public:
+  ExhaustiveOptimizer(const config::Config* cfg) : _cfg(cfg) {};
+
   int optimize(TransitGraph* tg) const;
   int optimize(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
+ private:
+  const config::Config* _cfg;
+
+  void initialConfig(const std::set<OptNode*>& g, OptOrderingConfig* cfg) const;
+  void writeHierarch(OptOrderingConfig* cfg, HierarchOrderingConfig* c) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

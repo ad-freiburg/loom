@@ -28,6 +28,9 @@ struct OptEdgePL;
 typedef util::graph::Node<OptNodePL, OptEdgePL> OptNode;
 typedef util::graph::Edge<OptNodePL, OptEdgePL> OptEdge;
 
+typedef std::map<const transitmapper::optim::OptEdge*, std::vector<size_t>>
+    OptOrderingConfig;
+
 struct OptRO {
   OptRO(const graph::Route* r, const Node* dir) : route(r), direction(dir) {}
   const graph::Route* route;

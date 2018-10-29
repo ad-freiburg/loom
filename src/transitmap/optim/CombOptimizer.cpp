@@ -89,7 +89,8 @@ int CombOptimizer::optimize(const std::set<OptNode*>& g,
   if (maxC == 1) {
     _nullOpt.optimize(g, hc);
   } else {
-    _ilpOpt.optimize(g, hc);
+    // _ilpOpt.optimize(g, hc);
+    _exhausOpt.optimize(g, hc);
   }
 
   return 0;
