@@ -149,6 +149,7 @@ double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c,
               iga.geom.getLine().front(), iga.geom.getLine().back(),
               igb.geom.getLine().front(), igb.geom.getLine().back()) ||
           util::geo::dist(iga.geom.getLine(), igb.geom.getLine()) < 1) {
+
         if (sameSeg) {
           ret += getCrossingPenaltySameSeg(n, pens);
         } else {

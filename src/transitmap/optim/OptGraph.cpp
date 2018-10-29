@@ -870,27 +870,15 @@ bool OptGraph::untangleDogBoneStep() {
         auto orthoPlA = pl.getOrthoLineAtDist(0, bandW);
         auto orthoPlB = pl.getOrthoLineAtDist(pl.getLength(), bandW);
 
-        std::vector<OptNode*> aNds(na->getDeg() - 1);
-        std::vector<OptNode*> bNds(nb->getDeg() - 1);
-
         // for each minor leg at node a, create a new node
-        for (size_t i = 0; i < aNds.size(); i++) {
-          double p = (aNds.size() - 1 - i) / (double)(aNds.size());
-          aNds[i] = addNd(orthoPlA.getPointAt(p).p);
-          aNds[i]->pl().node = na->pl().node;
-        }
+        std::vector<OptNode*> aNds = explodeNodeAlong(na, orthoPlA, na->getDeg() - 1);
 
         // each leg in a, in clockwise fashion
         auto minLgsA = clockwEdges(mainLeg, na);
         std::vector<OptEdge*> minLgsANew(minLgsA.size());
         assert(minLgsA.size() == na->pl().orderedEdges.size() - 1);
 
-        // for each minor leg at node b, create a new node
-        for (size_t i = 0; i < bNds.size(); i++) {
-          double p = (bNds.size() - 1 - i) / (double)(bNds.size());
-          bNds[i] = addNd(orthoPlB.getPointAt(p).p);
-          bNds[i]->pl().node = nb->pl().node;
-        }
+        std::vector<OptNode*> bNds = explodeNodeAlong(nb, orthoPlB, nb->getDeg() - 1);
 
         // each leg in b, in counter-clockwise fashion
         auto minLgsB = clockwEdges(mainLeg, nb);

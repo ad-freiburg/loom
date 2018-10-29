@@ -34,11 +34,7 @@ int NullOptimizer::optimize(const std::set<OptNode*>& g,
                         ro) == e->pl().getRoutes().end())
             continue;
 
-          std::cout << etgp.etg << std::endl;
-
-
           if (ro.route->relativeTo()) continue;
-
 
           assert((*hc)[etgp.etg][etgp.order].size() == 0);
           (*hc)[etgp.etg][etgp.order].push_back(p);

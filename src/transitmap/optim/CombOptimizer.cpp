@@ -64,7 +64,6 @@ int CombOptimizer::optimize(TransitGraph* tg) const {
   OrderingConfig c;
   HierarchOrderingConfig hc;
 
-
   // iterate over components and optimize all of them separately
   for (const auto nds : util::graph::Algorithm::connectedComponents(g)) {
     optimize(nds, &hc);

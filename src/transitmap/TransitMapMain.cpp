@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
     b.createMetaNodes(&g);
 
     LOG(INFO) << "Writing initial ordering configuration...";
-    b.writeInitialConfig(&g);
+    // b.writeInitialConfig(&g);
 
     LOG(INFO) << "Optimizing...";
 
@@ -109,20 +109,6 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "(stats) Max crossing pen: " << maxCrossPen;
     LOG(INFO) << "(stats) Max splitting pen: " << maxSplitPen;
-
-    LOG(INFO) << "(stats) Total graph score BEFORE optim is -- "
-              << scorer.getScore()
-              << " -- (incl. unavoidable crossings!)";
-    LOG(INFO) << "(stats)   Per node graph score: "
-              << scorer.getScore() /
-                     g.getNodes()->size();
-    LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings() << " (score: "
-              << scorer.getCrossScore()
-              << ")";
-    LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
-              << " (score: "
-              << scorer.getSeparationScore()
-              << ")";
 
     if (!cfg.noOptim) {
       if (cfg.optimMethod == "ilp_impr") {
