@@ -12,11 +12,11 @@
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/GraphBuilder.h"
 #include "transitmap/graph/Node.h"
-#include "transitmap/graph/TransitGraph.h"
-#include "transitmap/optim/ILPEdgeOrderOptimizer.h"
-#include "transitmap/optim/CombOptimizer.h"
-#include "transitmap/optim/Scorer.h"
 #include "transitmap/graph/Penalties.h"
+#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/optim/CombOptimizer.h"
+#include "transitmap/optim/ILPEdgeOrderOptimizer.h"
+#include "transitmap/optim/Scorer.h"
 #include "transitmap/output/SvgOutput.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
@@ -72,22 +72,23 @@ int main(int argc, char** argv) {
 
     LOG(INFO) << "Optimizing...";
 
-    double maxCrossPen = g.getMaxDegree() * (cfg.crossPenMultiSameSeg > cfg.crossPenMultiDiffSeg ? cfg.crossPenMultiSameSeg : cfg.crossPenMultiDiffSeg);
+    double maxCrossPen =
+        g.getMaxDegree() * (cfg.crossPenMultiSameSeg > cfg.crossPenMultiDiffSeg
+                                ? cfg.crossPenMultiSameSeg
+                                : cfg.crossPenMultiDiffSeg);
     double maxSplitPen = g.getMaxDegree() * cfg.splitPenWeight;
 
     // TODO move this into configuration, at least partially
-    transitmapper::graph::Penalties pens{
-      maxCrossPen,
-      maxSplitPen,
-      cfg.crossPenMultiSameSeg,
-      cfg.crossPenMultiDiffSeg,
-      cfg.splitPenWeight,
-      cfg.stationCrossWeightSameSeg,
-      cfg.stationCrossWeightDiffSeg,
-      cfg.stationSplitWeight,
-      true,
-      true
-    };
+    transitmapper::graph::Penalties pens{maxCrossPen,
+                                         maxSplitPen,
+                                         cfg.crossPenMultiSameSeg,
+                                         cfg.crossPenMultiDiffSeg,
+                                         cfg.splitPenWeight,
+                                         cfg.stationCrossWeightSameSeg,
+                                         cfg.stationCrossWeightDiffSeg,
+                                         cfg.stationSplitWeight,
+                                         true,
+                                         true};
 
     optim::Scorer scorer(&g, pens);
 
@@ -96,10 +97,8 @@ int main(int argc, char** argv) {
       LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
                 << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
                 << " non-topo)";
-      LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges()
-                ;
-      LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes()
-                ;
+      LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges();
+      LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes();
       LOG(INFO) << "(stats)   Max edge route cardinality: "
                 << g.getMaxCardinality();
       LOG(INFO) << "(stats)   Number of poss. solutions: "
@@ -121,22 +120,16 @@ int main(int argc, char** argv) {
         optim::CombOptimizer ilpCombiOptim(&cfg, &scorer);
         ilpCombiOptim.optimize(&g);
       }
-    }
 
-    LOG(INFO) << "(stats) Total graph score AFTER optim is -- "
-              << scorer.getScore()
-              << " -- (incl. unavoidable crossings!)";
-    LOG(INFO) << "(stats)   Per node graph score: "
-              << scorer.getScore() /
-                     g.getNodes()->size()
-              ;
-    LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings() << " (score: "
-              << scorer.getCrossScore()
-              << ")";
-    LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
-              << " (score: "
-              << scorer.getSeparationScore()
-              << ")";
+      LOG(INFO) << "(stats) Total graph score AFTER optim is -- "
+                << scorer.getScore() << " -- (incl. unavoidable crossings!)";
+      LOG(INFO) << "(stats)   Per node graph score: "
+                << scorer.getScore() / g.getNodes()->size();
+      LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings()
+                << " (score: " << scorer.getCrossScore() << ")";
+      LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
+                << " (score: " << scorer.getSeparationScore() << ")";
+    }
 
     if (cfg.renderMethod == "svg") {
       std::string path = cfg.outputPath;
@@ -177,7 +170,8 @@ int main(int argc, char** argv) {
         cfg.renderEdges = 0;
         cfg.renderStations = 1;
         cfg.renderNodeConnections = 0;
-        LOG(INFO) << "Outputting station SVG to " << path << " ..." << std::endl;
+        LOG(INFO) << "Outputting station SVG to " << path << " ..."
+                  << std::endl;
         std::ofstream o;
         o.open(path);
         output::SvgOutput svgOut(&o, &cfg, &scorer);
@@ -192,12 +186,14 @@ int main(int argc, char** argv) {
       file.open(cfg.worldFilePath);
       if (file) {
         file << 1 / cfg.outputResolution << std::endl
-                << 0 << std::endl
-                << 0 << std::endl
-                << -1 / cfg.outputResolution << std::endl
-                << std::fixed << g.getBoundingBox(cfg.outputPadding).getLowerLeft().getX()
-                << std::endl
-                << g.getBoundingBox(cfg.outputPadding).getUpperRight().getY() << std::endl;
+             << 0 << std::endl
+             << 0 << std::endl
+             << -1 / cfg.outputResolution << std::endl
+             << std::fixed
+             << g.getBoundingBox(cfg.outputPadding).getLowerLeft().getX()
+             << std::endl
+             << g.getBoundingBox(cfg.outputPadding).getUpperRight().getY()
+             << std::endl;
         file.close();
       }
     }
@@ -368,8 +364,9 @@ int main(int argc, char** argv) {
     std::cout << ptest5.getLine().size() << std::endl;
     svgOut.printLine(ptest5, "fill:none;stroke:red;stroke-width:1", rmp);
 
-    std::cout << "Intersects: " << intersects(DPoint(4.914, 8.505), DPoint(7.316, 9.094),
-                                              DPoint(12.198, 10.008), DPoint(14.676, 10.332))
+    std::cout << "Intersects: "
+              << intersects(DPoint(4.914, 8.505), DPoint(7.316, 9.094),
+                            DPoint(12.198, 10.008), DPoint(14.676, 10.332))
               << std::endl;
 
     PolyLine<double> ptest6;

@@ -36,7 +36,7 @@ int CombOptimizer::optimize(TransitGraph* tg) const {
   if (_cfg->createCoreOptimGraph) {
     // TODO: do this exactly as often as M - this should be enough (prove this!)
     for (size_t i = 0; i < 10; i++) {
-      g.untangle();
+      // g.untangle();
       g.simplify();
       g.split();
     }
@@ -89,8 +89,8 @@ int CombOptimizer::optimize(const std::set<OptNode*>& g,
   if (maxC == 1) {
     _nullOpt.optimize(g, hc);
   } else {
-    // _ilpOpt.optimize(g, hc);
-    _exhausOpt.optimize(g, hc);
+    _ilpOpt.optimize(g, hc);
+    // _exhausOpt.optimize(g, hc);
   }
 
   return 0;

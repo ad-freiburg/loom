@@ -2,6 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include "transitmap/optim/Optimizer.h"
 #include "transitmap/optim/OptGraph.h"
 #include "transitmap/graph/Penalties.h"
 #include "transitmap/optim/OptGraphScorer.h"
@@ -17,7 +18,7 @@ using transitmapper::graph::IDENTITY_PENALTIES;
 
 // _____________________________________________________________________________
 double OptGraphScorer::getScore(const std::set<OptNode*>& g,
-                                const OrderingConfig& c) const {
+                                const OptOrderingConfig& c) const {
   double ret = 0;
 
   for (auto n : g) {
@@ -25,4 +26,9 @@ double OptGraphScorer::getScore(const std::set<OptNode*>& g,
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+double OptGraphScorer::getScore(const OptNode* n, const OptOrderingConfig& c) const {
+
 }

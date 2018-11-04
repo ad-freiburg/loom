@@ -20,11 +20,26 @@ using transitmapper::optim::OptEdge;
 namespace transitmapper {
 namespace optim {
 
+typedef std::pair<const Route*, const Route*> LinePair;
+typedef std::pair<size_t, size_t> PosCom;
+typedef std::pair<PosCom, PosCom> PosComPair;
+typedef std::pair<OptEdge*, OptEdge*> EdgePair;
+
 class Optimizer {
  public:
   virtual int optimize(TransitGraph* tg) const = 0;
   virtual int optimize(const std::set<OptNode*>& g,
                        HierarchOrderingConfig* c) const = 0;
+
+  static std::vector<LinePair> getLinePairs(OptEdge* segment);
+  static std::vector<LinePair> getLinePairs(OptEdge* segment, bool unique);
+
+  static bool crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
+               PosComPair postcomb);
+
+  static bool crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
+               PosCom postcomb);
+  static DPoint getPos(OptNode* n, OptEdge* segment, size_t p);
 
  protected:
   static void expandRelatives(TransitGraph* g, OrderingConfig* c);

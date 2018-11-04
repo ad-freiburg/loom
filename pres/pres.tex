@@ -3,6 +3,7 @@
 \usepackage{arevmath}
 \usepackage{varwidth}   
 \usepackage{tikz}
+\usetikzlibrary{shapes.arrows}
 \setsansfont[
 	  BoldFont={Fira Sans SemiBold},
 	    ItalicFont={Fira Sans BookItalic},
@@ -14,7 +15,8 @@
 
 \DeclareMathOperator{\dist}{dist}
 \newcommand{\light}[1]{\textcolor{gray}{#1}}
-
+\newcommand{\arrowr}{%
+\tikz [baseline=-0.5ex]{\node [draw, fill=blue, single arrow, minimum height=3.5ex, rotate=0] {};}}
 
 \title{Efficient Generation of Geographically Accurate Transit Maps}
 \date{}
@@ -35,57 +37,280 @@
 	\end{tikzpicture}
 \end{frame}
 
+
+\begin{frame}{Goal}
+	\textbf{Goal:} Generate these maps \alert{automatically}, in \alert{high quality}
+
+	"Bag of trips"
+	\pause
+	\includegraphics[width=0.25\paperwidth]{figures/chicago_linegraph.pdf}
+	\pause
+	\includegraphics[width=0.25\paperwidth]{figures/chicago_loop.pdf}
+
+\end{frame}
+
+
 \begin{frame}{Challenges}
-	\begin{tikzpicture}[xshift=.2cm, yshift=.4cm, overlay]
+	\begin{tikzpicture}[xshift=.4cm, yshift=.4cm, overlay]
 		\begin{scope}[yshift=1.5cm]
-			\node at (0.3, 1.7) {\small Official};
-			\node at (2.6, 1.7) {\small HERE};
-			\node at (4.9, 1.7) {\small Google};
+			\node at (0.3, 1.6) {\small Official};
+			\node at (2.6, 1.6) {\small HERE};
+			\node at (4.9, 1.6) {\small Google};
 
-			\node[circle, draw=black!60!green, line width=1pt,inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-2.09, 1.5) {\includegraphics[width=6.5cm]{figures/chicago_loop.pdf}};}] at (0.3, 0) {};
-			\node[circle, draw=black!40!red, line width=1pt, inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-4.45, 3) {\includegraphics[width=12cm]{figures/chicago_here.png}};}] at (2.6, 0) {};
-			\node[circle, draw=black!40!red, line width=1pt, inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-4.45, 3) {\includegraphics[width=12cm]{figures/chicago_google.png}};}] at (4.9, 0) {};
+			\node[circle, draw=black!60!green, line width=1.5pt,inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-2.09, 1.5) {\includegraphics[width=6.5cm]{figures/chicago_loop.pdf}};}] at (0.3, 0) {};
+			\node[circle, draw=black!40!red, line width=1.5pt, inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-4.45, 3) {\includegraphics[width=12cm]{figures/chicago_here.png}};}] at (2.6, 0) {};
+			\node[circle, draw=black!40!red, line width=1.5pt, inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-4.45, 3) {\includegraphics[width=12cm]{figures/chicago_google.png}};}] at (4.9, 0) {};
 
-			\node at (11.3, 0) {
+			\node at (11.5, 0) {
 			\vbox{\begin{varwidth}{0.5\textwidth}
-				\begin{itemize}
-					\item Avoid overlapping lines
-				\end{itemize}
+				\begin{enumerate}[I.]
+					\item Avoid line overlaps
+				\end{enumerate}
 			\end{varwidth}}};
 		\end{scope}
 
 		\pause
 
 		\begin{scope}[yshift=-1.0cm]
-			\node[circle, draw, inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-1.387, -3.25) {\includegraphics[width=6.75cm]{figures/chicago_loop.pdf}};}] at (0.3, 0) {};
-			\node[circle, draw, inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-3.75, 8.9) {\includegraphics[width=18cm]{figures/chicago_here.png}};}] at (2.6, 0) {};
-			\node[circle, draw, inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-4.25, -7.9) {\includegraphics[width=18cm]{figures/chicago_google.png}};}] at (4.9, 0) {};
-			\node at (11.3, 0) {
+			\node[circle, draw=black!60!green, line width=1.5pt, inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-1.387, -3.25) {\includegraphics[width=6.75cm]{figures/chicago_loop.pdf}};}] at (0.3, 0) {};
+			\node[circle, draw=black!40!red, line width=1.5pt,inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-3.75, 8.9) {\includegraphics[width=18cm]{figures/chicago_here.png}};}] at (2.6, 0) {};
+			\node[circle, draw=black!40!red, line width=1.5pt,inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-4.25, -7.9) {\includegraphics[width=18cm]{figures/chicago_google.png}};}] at (4.9, 0) {};
+			\node at (11.5, 0) {
 			\vbox{
-				\begin{itemize}
+				\begin{enumerate}[I.]\setcounter{enumi}{1}
 					\item Match line orderings
-				\end{itemize}
+				\end{enumerate}
 			}};
 		\end{scope}
 
 		\pause
 
 		\begin{scope}[yshift=-3.5cm]
-			\node[circle, draw, inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-2.03, 2.9) {\includegraphics[width=6.5cm]{figures/chicago_loop.pdf}};}] at (0.3, 0) {};
-			\node[circle, draw, inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-6.75, 8.9) {\includegraphics[width=18cm]{figures/chicago_here.png}};}] at (2.6, 0) {};
-			\node[circle, draw, inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-6.75, 8.9) {\includegraphics[width=18cm]{figures/chicago_google.png}};}] at (4.9, 0) {};
-			\node at (11.3, 0) {
+			\node[circle, draw=black!60!green, line width=1.5pt,inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-2.03, 2.9) {\includegraphics[width=6.5cm]{figures/chicago_loop.pdf}};}] at (0.3, 0) {};
+			\node[circle, draw=black!40!red, line width=1.5pt,inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-6.75, 8.9) {\includegraphics[width=18cm]{figures/chicago_here.png}};}] at (2.6, 0) {};
+			\node[circle, draw=black!40!red, line width=1.5pt,inner sep=0.7cm, path picture={\node at (path picture bounding box.center) at (-6.75, 8.9) {\includegraphics[width=18cm]{figures/chicago_google.png}};}] at (4.9, 0) {};
+			\node at (11.5, 0) {
 			\vbox{\begin{varwidth}{0.5\textwidth}
-				\begin{itemize}
+				\begin{enumerate}[I.]\setcounter{enumi}{2}
 					\item Clearly indicate line continuations
-				\end{itemize}
+				\end{enumerate}
 			\end{varwidth}}};
 		\end{scope}
+	\end{tikzpicture}
 
+
+
+\end{frame}
+
+\begin{frame}{Line graph construction}
+	\begin{columns}[T]
+		\begin{column}[T]{0.5\textwidth}
+			Line graph:
+			\begin{itemize}
+				\item Undirected labeled graph $G = (V, E, L)$
+				\item Edge labels are subsets of the network lines $\cal L$ ($L(e) \subseteq \cal L$)
+				\item Nodes are \alert{usually} stations
+			\end{itemize}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\centering\includegraphics[width=0.6\textwidth]{figures/chicago_linegraph.pdf}
+		\end{column}
+	\end{columns}
+
+
+			Example: $\cal L = \{\}$ and $L((a, b)) = \{\}$
+\end{frame}
+
+\begin{frame}{Line graph construction - Input data}
+	\begin{tikzpicture}[xshift=0cm, yshift=0cm, overlay]
+		\node[opacity=0.4] at (5, -0.2) {\includegraphics[width=1.1\textwidth]{figures/freiburg_input.png}};
+
+		\node[circle, draw=gray, line width=0.8pt,inner sep=1.1cm, path picture={\node at (path picture bounding box.center) at (0.7, 0.2) {\includegraphics[width=0.5\textwidth]{figures/freiburg_input_bbrunnen.png}};}] at (8.9, 2.2) {};
+
+		\node[circle, draw=gray, line width=0.8pt,inner sep=1.1cm, path picture={\node at (path picture bounding box.center) at (0.7, 0.2) {\includegraphics[width=0.5\textwidth]{figures/freiburg_input_runzmattenweg.png}};}] at (8.9, -1.5) {};
 	\end{tikzpicture}
 \end{frame}
 
 
+\begin{frame}{Line graph construction - Shared segment collapsing}
+	\begin{columns}
+	    \column{\dimexpr\paperwidth-10pt}
 
+	\centering
+	\includegraphics[width=0.3\textwidth,page=1]{figures/linegraph.pdf}
+	\includegraphics[width=0.3\textwidth,page=2]{figures/linegraph.pdf}
+
+	\begin{itemize}
+		\item Repeatedly collapse (segments of) two edges $e$ and $f$ within a distance $\hat d$
+		\item Sweep over some edge $e$ in steps of 10\,m, measure distance $d$ of current point on $e$ to $f$
+		\item If $d < \hat d$, start new segment. If not, end current (if open)
+		\item Take average between the two "shared segments" on $e$ and $f$
+		\item Add \alert{additional non-station nodes} at segment boundaries
+	\end{itemize}
+
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Line graph construction - Why non-station nodes?}
+	$\begin{array}{l}\includegraphics[width=0.4\textwidth,page=3]{figures/linegraph.pdf}\end{array}$
+	\pause
+	\arrowr
+	$\begin{array}{l}\includegraphics[width=0.4\textwidth]{figures/example.pdf}\end{array}$
+	\pause
+	\vfill
+
+	$\begin{array}{l}\includegraphics[width=0.4\textwidth,page=2]{figures/linegraph.pdf}\end{array}$
+	\pause
+	\arrowr
+	$\begin{array}{l}\includegraphics[width=0.4\textwidth]{figures/example2.pdf}\end{array}$
+\end{frame}
+
+\begin{frame}{Results so far (1)}
+	\only<1>{\includegraphics[width=0.8\textwidth]{figures/interim1.pdf}}
+	\pause
+	\only<2>{\includegraphics[width=0.861\textwidth]{figures/interim2.pdf}}
+\end{frame}
+
+\begin{frame}{Line-ordering optimization}
+	\begin{columns}[T]
+		\begin{column}{0.3\textwidth}
+			\centering\includegraphics[width=1\textwidth]{figures/chicago_linegraph.pdf}
+		\end{column}
+		\begin{column}[T]{0.7\textwidth}			
+			\begin{itemize}
+				\item 23 edges
+				\item Each edge $e$ has $|L(e)|!$ possible line permutations
+				\item Possible configurations for the graph on the left: \alert{$> 2\times 10^{17}$}
+			\end{itemize}
+			\textbf{$\Rightarrow$ Naive exhaustive search infeasible}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Line-ordering optimization - Baseline ILP}
+	\begin{columns}[T]
+		\begin{column}{0.25\textwidth}
+			\centering\includegraphics[width=0.9\textwidth, page=1]{figures/crossing.pdf}
+
+			\centering\includegraphics[width=0.9\textwidth, page=2]{figures/crossing.pdf}
+		\end{column}
+		\begin{column}[T]{0.75\textwidth}			
+			\begin{itemize}
+				\item For each edge $e$, line $l$ and position $p$, introduce variable $x_{elp} \in {0, 1}$
+				\item \alert{Example}: $x_{eA1}$ and $x_{eA2}$ for line $A$
+				\item Constraint: all $x_{elp}$ have to sum up to 1 for a single line $l$ on a single edge $e$
+				\item \alert{Standard crossing:} Objective variable $x_{ee'AB}$ which is 1 if $p_e(A) < p_{e}(B)$ and $p_{e'}(A) > p_{e'}(B)$, or else 0
+				\item \alert{Split crossing:} Objective variable $x_{ee'e''AB}$ which is 1 if $p_e(A) < p_{e}(B)$, or else 0
+			\end{itemize}
+			\vspace{0.5cm}
+			$\Rightarrow \mathcal{O}(|E|M^2)$ variables, \textcolor{red}{$\mathcal{O}(|E|M^6)$} constraints
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Line-ordering optimization - Improved ILP}	
+	\begin{itemize}
+		\item \textbf{Observation:} we only need to check if $p_e(A) < p_e(B)$ (or vice versa) for both types of crossings
+		\item But we explicitly enumerate all possible line positions of $A$ and $B$ on $e$
+		\item \alert{Basic idea:} introduce binary variables $x_{eA<B}$ and $x_{eB<A}$ which can be efficiently checked
+	\end{itemize}
+	\vspace{0.5cm}
+	$\Rightarrow \mathcal{O}(|E|M^2)$ variables, \textcolor{black!40!green}{$\mathcal{O}(|E|M^2)$} constraints
+\end{frame}
+
+\begin{frame}{Results so far (2)}
+	\only<1>{\includegraphics[width=0.8\textwidth]{figures/interim3.pdf}}
+	\pause
+	\only<2>{\includegraphics[width=0.8\textwidth]{figures/interim4.pdf}}
+	\pause
+	\only<3>{\includegraphics[width=0.804\textwidth]{figures/interim5.pdf}}
+\end{frame}
+
+\begin{frame}{Line-ordering optimization - Line separations}	
+	\begin{columns}[T]
+		\begin{column}[T]{0.45\textwidth}
+			\centering \includegraphics[width=0.7\textwidth]{figures/splitting_example_nonopt.pdf}
+
+			1 crossing, \textcolor{red}{1 separation}
+
+			\vspace{1.5cm}
+
+			\centering \includegraphics[width=0.7\textwidth]{figures/splitting_example2_nonopt.pdf}
+
+			2 crossings, \textcolor{red}{1 separation}
+		\end{column}
+		\begin{column}[T]{0.1\textwidth}
+			\centering vs
+
+			\centering vs
+		\end{column}
+		\begin{column}[T]{0.45\textwidth}			
+			\centering \includegraphics[width=0.7\textwidth]{figures/splitting_example.pdf}
+
+			2 crossings, \textcolor{black!40!green}{0 separations}
+
+			\vspace{1.5cm}
+
+			\centering \includegraphics[width=0.7\textwidth]{figures/splitting_example2.pdf}
+
+			2 crossings, \textcolor{black!40!green}{0 separations}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+
+\begin{frame}{Line-ordering optimization - Line separations (ctd.)}	
+	\begin{columns}[T]
+		\begin{column}{0.25\textwidth}
+			\centering\includegraphics[width=0.9\textwidth, page=3]{figures/crossing.pdf}
+		\end{column}
+		\begin{column}[T]{0.75\textwidth}			
+			\begin{itemize}
+				\item \alert{\textbf{Idea:}} If two lines $A, B$ continue from $e$ to $e'$, set a binary splitting variable $x_{ee'A\|B} = 1$ if they are next to each other in $e$, but no in $e'$
+				\item Add $x_{ee'A\|B}$ to the objective function
+			\end{itemize}
+		\end{column}
+	\end{columns}
+
+			\vspace{1cm}
+			$\Rightarrow$ Still $\mathcal{O}(|E|M^2)$ variables, $\mathcal{O}(|E|M^2)$ constraints
+\end{frame}
+
+\begin{frame}{Results so far (3)}
+	\only<1>{\includegraphics[width=0.804\textwidth]{figures/interim5.pdf}}
+	\pause
+	\only<2>{\includegraphics[width=0.804\textwidth]{figures/interim6.pdf}}
+\end{frame}
+
+\begin{frame}{Line-ordering optimization - Core optim graph}	
+
+\end{frame}
+
+
+\begin{frame}{Rendering}	
+	\includegraphics[width=0.35\textwidth]{figures/render_example1.pdf}\hfill
+	\includegraphics[width=0.35\textwidth]{figures/render_example2.pdf}
+
+	\vspace{1cm}
+
+	\includegraphics[width=0.35\textwidth]{figures/render_example3.pdf}\hfill
+	\includegraphics[width=0.35\textwidth]{figures/render_example4.pdf}
+\end{frame}
+
+\begin{frame}{Results so far (4)}	
+	\only<1>{\includegraphics[width=0.9\textwidth]{figures/final.pdf}}
+\end{frame}
+
+\begin{frame}{Evaluation}	
+
+\end{frame}
+
+\begin{frame}{Future work}	
+	\begin{itemize}
+		\item Additional rules for core graph reduction \alert{(work in progress)}
+		\item Faster construction times of line graph
+		\item TODO
+	\end{itemize}
+\end{frame}
 
 \end{document}

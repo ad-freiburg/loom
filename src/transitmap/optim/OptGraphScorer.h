@@ -19,12 +19,13 @@ namespace optim {
 
 class OptGraphScorer {
  public:
-  OptGraphScorer(const Penalties& pens) : _pens(pens) {}
+  OptGraphScorer(const Scorer* scorer) : _scorer(scorer) {}
 
-  double getScore(const std::set<OptNode*>& g, const OrderingConfig& c) const;
+  double getScore(const std::set<OptNode*>& g, const OptOrderingConfig& c) const;
+  double getScore(const OptNode* n, const OptOrderingConfig& c) const;
 
  private:
-  Penalties _pens;
+  const Scorer* _scorer;
 };
 }
 }

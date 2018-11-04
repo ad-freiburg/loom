@@ -22,10 +22,6 @@ namespace optim {
 
 using namespace graph;
 
-typedef std::pair<const Route*, const Route*> LinePair;
-typedef std::pair<size_t, size_t> PosCom;
-typedef std::pair<PosCom, PosCom> PosComPair;
-typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
 struct VariableMatrix {
   std::vector<int> rowNum;
@@ -69,8 +65,6 @@ class ILPOptimizer : public Optimizer {
   bool printHumanReadable(glp_prob* lp, const std::string& path) const;
   double getConstraintCoeff(glp_prob* lp, int constraint, int col) const;
 
-  std::vector<LinePair> getLinePairs(OptEdge* segment) const;
-  std::vector<LinePair> getLinePairs(OptEdge* segment, bool unique) const;
 
   /*
    * For a node A, and edge e and a pair or routes return all the
@@ -83,17 +77,10 @@ class ILPOptimizer : public Optimizer {
   std::vector<PosComPair> getPositionCombinations(OptEdge* a, OptEdge* b) const;
   std::vector<PosCom> getPositionCombinations(OptEdge* a) const;
 
-  bool crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
-               PosComPair postcomb) const;
-
-  bool crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
-               PosCom postcomb) const;
-
   int getCrossingPenaltySameSeg(const OptNode* n) const;
   int getCrossingPenaltyDiffSeg(const OptNode* n) const;
   int getSplittingPenalty(const OptNode* n) const;
 
-  DPoint getPos(OptNode* n, OptEdge* segment, size_t p) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

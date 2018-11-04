@@ -3,6 +3,7 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "transitmap/optim/ExhaustiveOptimizer.h"
+#include "util/log/Log.h"
 
 using namespace transitmapper;
 using namespace optim;
@@ -26,7 +27,8 @@ int ExhaustiveOptimizer::optimize(const std::set<OptNode*>& g,
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
 
-      // double score = _scorer.getScore(
+      double score = _optScorer.getScore(g, best);
+      LOG(DEBUG) << "Current score: " << score;
     }
   }
 
@@ -37,11 +39,17 @@ int ExhaustiveOptimizer::optimize(const std::set<OptNode*>& g,
 // _____________________________________________________________________________
 void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
                                         OptOrderingConfig* cfg) const {
+  bool rev = false;
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       (*cfg)[e] = std::vector<size_t>(e->pl().getCardinality());
-      for (size_t i = 0; i < (*cfg)[e].size(); i++) (*cfg)[e][i] = i;
+      if (rev) {
+        for (size_t i = 0; i < (*cfg)[e].size(); i++) (*cfg)[e][i] = i;
+      } else {
+        for (size_t i = 0; i < (*cfg)[e].size(); i++) (*cfg)[e][i] = (*cfg)[e].size() - 1 - i;
+      }
+      rev = !rev;
     }
   }
 }

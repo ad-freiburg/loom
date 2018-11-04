@@ -25,7 +25,7 @@ namespace optim {
 class CombOptimizer : public Optimizer {
  public:
   CombOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : _cfg(cfg), _scorer(scorer), _ilpOpt(cfg, scorer), _exhausOpt(cfg) {};
+      : _cfg(cfg), _scorer(scorer), _ilpOpt(cfg, scorer), _exhausOpt(cfg, scorer) {};
 
   int optimize(TransitGraph* tg) const;
   int optimize(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;

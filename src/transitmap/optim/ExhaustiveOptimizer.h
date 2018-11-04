@@ -9,11 +9,11 @@
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
-#include "transitmap/optim/OptGraph.h"
-#include "transitmap/optim/Optimizer.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/NullOptimizer.h"
-#include "transitmap/optim/Scorer.h"
+#include "transitmap/optim/OptGraph.h"
+#include "transitmap/optim/OptGraphScorer.h"
+#include "transitmap/optim/Optimizer.h"
 
 using std::exception;
 using std::string;
@@ -23,12 +23,15 @@ namespace optim {
 
 class ExhaustiveOptimizer : public Optimizer {
  public:
-  ExhaustiveOptimizer(const config::Config* cfg) : _cfg(cfg) {};
+  ExhaustiveOptimizer(const config::Config* cfg, const Scorer* scorer)
+      : _cfg(cfg), _optScorer(scorer) {};
 
   int optimize(TransitGraph* tg) const;
   int optimize(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
+
  private:
   const config::Config* _cfg;
+  OptGraphScorer _optScorer;
 
   void initialConfig(const std::set<OptNode*>& g, OptOrderingConfig* cfg) const;
   void writeHierarch(OptOrderingConfig* cfg, HierarchOrderingConfig* c) const;
