@@ -2,6 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include <algorithm>
 #include "transitmap/optim/ExhaustiveOptimizer.h"
 #include "util/log/Log.h"
 
@@ -21,16 +22,54 @@ int ExhaustiveOptimizer::optimize(TransitGraph* tg) const {
 int ExhaustiveOptimizer::optimize(const std::set<OptNode*>& g,
                                   HierarchOrderingConfig* hc) const {
   OptOrderingConfig best;
-  initialConfig(g, &best);
+  OptOrderingConfig cur;
+  double bestScore = DBL_MAX;
 
-  for (OptNode* n : g) {
-    for (OptEdge* e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
+  // fixed order list of optim graph edges
+  std::vector<OptEdge*> edges;
 
-      double score = _optScorer.getScore(g, best);
-      LOG(DEBUG) << "Current score: " << score;
+  for (auto n : g) {
+    for (auto e : n->getAdjList()) {
+      if (n == e->getFrom()) edges.push_back(e);
     }
   }
+
+  // this guarantees that all the orderings are sorted!
+  initialConfig(g, &cur);
+
+  size_t iters = 0;
+  bool running = true;
+
+  while (running) {
+    double score = _optScorer.getScore(g, cur);
+    // LOG(DEBUG) << "Iteration " << iters << ", current score: " << score;
+    iters++;
+
+    if (score < bestScore) {
+      bestScore = score;
+      best = cur;
+    }
+
+    if (score == 0) {
+      LOG(DEBUG) << "Found optimal score 0 prematurely after " << iters << " iterations!";
+      writeHierarch(&best, hc);
+      return 0;
+    }
+
+    for (size_t i = 0; i < edges.size(); i++) {
+      if (std::next_permutation(cur[edges[i]].begin(), cur[edges[i]].end())) {
+        break;
+      } else if (i == edges.size() - 1) {
+        running = false;
+      } else {
+        // reset
+        std::sort(cur[edges[i]].begin(), cur[edges[i]].end());
+      }
+    }
+
+  }
+
+  LOG(DEBUG) << "Found optimal score " << bestScore << " after " << iters << " iterations!";
 
   writeHierarch(&best, hc);
   return 0;
@@ -39,36 +78,32 @@ int ExhaustiveOptimizer::optimize(const std::set<OptNode*>& g,
 // _____________________________________________________________________________
 void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
                                         OptOrderingConfig* cfg) const {
-  bool rev = false;
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      (*cfg)[e] = std::vector<size_t>(e->pl().getCardinality());
-      if (rev) {
-        for (size_t i = 0; i < (*cfg)[e].size(); i++) (*cfg)[e][i] = i;
-      } else {
-        for (size_t i = 0; i < (*cfg)[e].size(); i++) (*cfg)[e][i] = (*cfg)[e].size() - 1 - i;
-      }
-      rev = !rev;
+      (*cfg)[e] = std::vector<const graph::Route*>(e->pl().getCardinality());
+      for (size_t i = 0; i < (*cfg)[e].size(); i++)
+        (*cfg)[e][i] = e->pl().getRoutes()[i].route;
+
+      std::sort((*cfg)[e].begin(), (*cfg)[e].end());
     }
   }
 }
 
 // _____________________________________________________________________________
-void ExhaustiveOptimizer::writeHierarch(OptOrderingConfig* cfg, HierarchOrderingConfig* hc) const {
+void ExhaustiveOptimizer::writeHierarch(OptOrderingConfig* cfg,
+                                        HierarchOrderingConfig* hc) const {
   for (auto ep : *cfg) {
     auto e = ep.first;
 
     for (auto etgp : e->pl().etgs) {
       if (etgp.wasCut) continue;
-      for (auto tp : ep.second) {
-        auto r = ep.first->pl().getRoutes()[tp];
+      for (auto r : ep.second) {
         for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
           auto ro = (*etgp.etg->getRoutes())[p];
-          if (!(r == ro)) continue;
+          if (!(r == ro.route)) continue;
 
-          if (std::find(e->pl().getRoutes().begin(),
-                        e->pl().getRoutes().end(),
+          if (std::find(e->pl().getRoutes().begin(), e->pl().getRoutes().end(),
                         ro) == e->pl().getRoutes().end())
             continue;
 
@@ -82,22 +117,6 @@ void ExhaustiveOptimizer::writeHierarch(OptOrderingConfig* cfg, HierarchOrdering
           }
         }
       }
-
-      std::cout << std::endl;
-      std::cout << "From ";
-
-      if (etgp.etg->getFrom()->getStops().size())
-      std::cout << etgp.etg->getFrom()->getStops().front().name;
-      std::cout << " to ";
-      if (etgp.etg->getTo()->getStops().size())
-      std::cout << etgp.etg->getTo()->getStops().front().name;
-      std::cout << " " << etgp.order << ": [";
-      for (auto p : (*hc)[etgp.etg][etgp.order]) std::cout << p << ", ";
-      std::cout << "] ";
-      std::cout << "(" << ep.second.size() << ")";
-      std::cout << "(" << ep.first->pl().getCardinality() << ")";
     }
   }
-
-  std::cout << std::endl;
 }

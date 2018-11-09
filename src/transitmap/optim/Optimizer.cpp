@@ -7,6 +7,7 @@
 using transitmapper::optim::Optimizer;
 using transitmapper::optim::LinePair;
 using transitmapper::optim::PosComPair;
+using transitmapper::optim::EdgePair;
 using transitmapper::graph::NodeFront;
 
 // _____________________________________________________________________________
@@ -218,4 +219,56 @@ DPoint Optimizer::getPos(OptNode* n, OptEdge* segment, size_t p) {
   }
 
   return nf->getTripPos(segment->pl().etgs.front().etg, p, false);
+}
+
+// _____________________________________________________________________________
+std::vector<OptEdge*> Optimizer::getEdgePartners(
+    OptNode* node, OptEdge* segmentA, const LinePair& linepair) {
+  std::vector<OptEdge*> ret;
+
+  graph::Edge* fromEtg = OptGraph::getAdjEdg(segmentA, node);
+  const Node* dirA = fromEtg->getRoute(linepair.first)->direction;
+  const Node* dirB = fromEtg->getRoute(linepair.second)->direction;
+
+  for (OptEdge* segmentB : node->getAdjList()) {
+    if (segmentB == segmentA) continue;
+
+    if (OptGraph::getCtdRoutesIn(linepair.first, dirA, segmentA, segmentB)
+            .size() &&
+        OptGraph::getCtdRoutesIn(linepair.second, dirB, segmentA, segmentB)
+            .size()) {
+      ret.push_back(segmentB);
+    }
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::vector<EdgePair> Optimizer::getEdgePartnerPairs(
+    OptNode* node, OptEdge* segmentA, const LinePair& linepair) {
+  std::vector<EdgePair> ret;
+
+  graph::Edge* fromEtg = OptGraph::getAdjEdg(segmentA, node);
+  const Node* dirA = fromEtg->getRoute(linepair.first)->direction;
+  const Node* dirB = fromEtg->getRoute(linepair.second)->direction;
+
+  for (OptEdge* segmentB : node->getAdjList()) {
+    if (segmentB == segmentA) continue;
+
+    if (OptGraph::getCtdRoutesIn(linepair.first, dirA, segmentA, segmentB)
+            .size()) {
+      EdgePair curPair;
+      curPair.first = segmentB;
+      for (OptEdge* segmentC : node->getAdjList()) {
+        if (segmentC == segmentA || segmentC == segmentB) continue;
+
+        if (OptGraph::getCtdRoutesIn(linepair.second, dirB, segmentA, segmentC)
+                .size()) {
+          curPair.second = segmentC;
+          ret.push_back(curPair);
+        }
+      }
+    }
+  }
+  return ret;
 }

@@ -28,7 +28,7 @@ struct OptEdgePL;
 typedef util::graph::Node<OptNodePL, OptEdgePL> OptNode;
 typedef util::graph::Edge<OptNodePL, OptEdgePL> OptEdge;
 
-typedef std::map<const transitmapper::optim::OptEdge*, std::vector<size_t>>
+typedef std::map<const transitmapper::optim::OptEdge*, std::vector<const graph::Route*>>
     OptOrderingConfig;
 
 struct OptRO {

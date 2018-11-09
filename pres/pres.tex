@@ -37,7 +37,7 @@
 	\end{tikzpicture}
 \end{frame}
 
-
+% --------------------------------------------------------------------------------
 \begin{frame}{Goal}
 	\textbf{Goal:} Generate these maps \alert{automatically}, in \alert{high quality}
 
@@ -49,7 +49,7 @@
 
 \end{frame}
 
-
+% --------------------------------------------------------------------------------
 \begin{frame}{Challenges}
 	\begin{tikzpicture}[xshift=.4cm, yshift=.4cm, overlay]
 		\begin{scope}[yshift=1.5cm]
@@ -97,11 +97,9 @@
 			\end{varwidth}}};
 		\end{scope}
 	\end{tikzpicture}
-
-
-
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Line graph construction}
 	\begin{columns}[T]
 		\begin{column}[T]{0.5\textwidth}
@@ -118,20 +116,27 @@
 	\end{columns}
 
 
-			Example: $\cal L = \{\}$ and $L((a, b)) = \{\}$
+	Example: $\cal L = \{\}$ and $L((a, b)) = \{\}$
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Line graph construction - Input data}
-	\begin{tikzpicture}[xshift=0cm, yshift=0cm, overlay]
-		\node[opacity=0.4] at (5, -0.2) {\includegraphics[width=1.1\textwidth]{figures/freiburg_input.png}};
+	\only<1> {
+		\begin{tikzpicture}[xshift=0cm, yshift=0cm, overlay]
+			\node[opacity=1] at (5, -0.2) {\includegraphics[width=1.1\textwidth]{figures/freiburg_input.png}};
+		\end{tikzpicture}
+	}
+	\only<2>{
+		\begin{tikzpicture}[xshift=0cm, yshift=0cm, overlay]
 
-		\node[circle, draw=gray, line width=0.8pt,inner sep=1.1cm, path picture={\node at (path picture bounding box.center) at (0.7, 0.2) {\includegraphics[width=0.5\textwidth]{figures/freiburg_input_bbrunnen.png}};}] at (8.9, 2.2) {};
 
-		\node[circle, draw=gray, line width=0.8pt,inner sep=1.1cm, path picture={\node at (path picture bounding box.center) at (0.7, 0.2) {\includegraphics[width=0.5\textwidth]{figures/freiburg_input_runzmattenweg.png}};}] at (8.9, -1.5) {};
-	\end{tikzpicture}
+			\draw[line width=0.8pt, draw=gray] (8.9, 2.2) -- (3.3, 0.05);
+		\end{tikzpicture}
+	}
+	\pause
 \end{frame}
 
-
+% --------------------------------------------------------------------------------
 \begin{frame}{Line graph construction - Shared segment collapsing}
 	\begin{columns}
 	    \column{\dimexpr\paperwidth-10pt}
@@ -151,6 +156,7 @@
 	\end{columns}
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Line graph construction - Why non-station nodes?}
 	$\begin{array}{l}\includegraphics[width=0.4\textwidth,page=3]{figures/linegraph.pdf}\end{array}$
 	\pause
@@ -165,12 +171,14 @@
 	$\begin{array}{l}\includegraphics[width=0.4\textwidth]{figures/example2.pdf}\end{array}$
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Results so far (1)}
 	\only<1>{\includegraphics[width=0.8\textwidth]{figures/interim1.pdf}}
 	\pause
 	\only<2>{\includegraphics[width=0.861\textwidth]{figures/interim2.pdf}}
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Line-ordering optimization}
 	\begin{columns}[T]
 		\begin{column}{0.3\textwidth}
@@ -187,6 +195,7 @@
 	\end{columns}
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Line-ordering optimization - Baseline ILP}
 	\begin{columns}[T]
 		\begin{column}{0.25\textwidth}
@@ -208,6 +217,7 @@
 	\end{columns}
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Line-ordering optimization - Improved ILP}	
 	\begin{itemize}
 		\item \textbf{Observation:} we only need to check if $p_e(A) < p_e(B)$ (or vice versa) for both types of crossings
@@ -218,6 +228,7 @@
 	$\Rightarrow \mathcal{O}(|E|M^2)$ variables, \textcolor{black!40!green}{$\mathcal{O}(|E|M^2)$} constraints
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Results so far (2)}
 	\only<1>{\includegraphics[width=0.8\textwidth]{figures/interim3.pdf}}
 	\pause
@@ -226,6 +237,7 @@
 	\only<3>{\includegraphics[width=0.804\textwidth]{figures/interim5.pdf}}
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Line-ordering optimization - Line separations}	
 	\begin{columns}[T]
 		\begin{column}[T]{0.45\textwidth}
@@ -258,7 +270,7 @@
 	\end{columns}
 \end{frame}
 
-
+% --------------------------------------------------------------------------------
 \begin{frame}{Line-ordering optimization - Line separations (ctd.)}	
 	\begin{columns}[T]
 		\begin{column}{0.25\textwidth}
@@ -272,22 +284,185 @@
 		\end{column}
 	\end{columns}
 
-			\vspace{1cm}
-			$\Rightarrow$ Still $\mathcal{O}(|E|M^2)$ variables, $\mathcal{O}(|E|M^2)$ constraints
+	\vspace{1cm}
+	$\Rightarrow$ Still $\mathcal{O}(|E|M^2)$ variables, $\mathcal{O}(|E|M^2)$ constraints
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Results so far (3)}
 	\only<1>{\includegraphics[width=0.804\textwidth]{figures/interim5.pdf}}
 	\pause
 	\only<2>{\includegraphics[width=0.804\textwidth]{figures/interim6.pdf}}
 \end{frame}
 
-\begin{frame}{Line-ordering optimization - Core optim graph}	
+% --------------------------------------------------------------------------------
+\begin{frame}{Line-ordering optimization - Core optim graph}
+	\centering
+	\tikzstyle{graphnode}=[minimum size=14pt, inner sep=0, circle, draw=black, solid, fill=white]
 
+	\only<1> {
+		\begin{tikzpicture}[font=\small]
+			\foreach \place/\x in {{(9.5, 3.8)/1}, {(11.3,3)/2},{(10.4,1.5)/3},{(9,2.3)/4}, {(8, 3.8)/5}, {(6.3, 3.3)/6}, {(8.3, 1)/7}, {(7.3, 2.5)/8}, {(6.5, 1)/9}}
+			\node[graphnode] (\x) at \place {$\x$};
+
+			\draw (1) .. controls (10.5,4) and (11, 3.7) .. (2) node [xshift=2,yshift=10, midway, below right] {$\{A,B,C\}$};
+			\draw (2) .. controls (11.5,2) and (11.5, 2).. (3) node [midway, below right, xshift=-13, yshift=-5] {$\{A,B,C\}$};
+			\draw (3) .. controls (9.9, 2) .. (4) node [midway, above right, yshift=-1, xshift=-4] {$\{A, B\}$};
+			\draw (1) .. controls (10.3, 3) and (10.4, 2.7) .. (4) node [midway, right] {$\{C\}$};
+			\draw (5) .. controls (9, 3.8) .. (1) node [xshift=-3.5, yshift=-5, midway, below] {$\{D, E, F\}$};
+			\draw (4) .. controls (8, 2.3) .. (8) node [midway, below] {$\{A, B\}$};
+			\draw (4) .. controls (8.6, 1.8) .. (7) node [yshift=-1, xshift=1,midway, right] {$\{E\}$};
+			\draw (7) .. controls (7.35, .8) .. (9) node [midway, above] {$\{E\}$};
+			\draw (9) .. controls (6.7, 2.1) .. (8) node [yshift=-3, xshift=-3, midway, below right] {$\{F\}$};
+			\draw (6) .. controls (5.7, 2.3) .. (9) node [yshift=7, xshift=-1, midway, right] {$\{E,F\}$};
+			\draw (6) .. controls (7.3, 3.5) .. (5) node [yshift=1, xshift=-10, midway, above] {$\{E,F\}$};
+			\draw (8) .. controls (7.6, 3.3) .. (5) node [yshift=-2, xshift=-4, midway, below right] {$\{D\}$};
+			\draw (7) .. controls (9.35, .8) .. (3) node [xshift=-5.5, yshift=-1, midway, above] {$\{G\}$};
+		\end{tikzpicture}
+	}
+
+	\only<2> {
+		\begin{tikzpicture}[font=\small]
+			\foreach \place/\x in {{(9.5, 3.8)/1}, {(11.3,3)/2},{(10.4,1.5)/3},{(9,2.3)/4}, {(8, 3.8)/5}, {(6.3, 3.3)/6}, {(8.3, 1)/7}, {(7.3, 2.5)/8}, {(6.5, 1)/9}}
+			\node[graphnode] (\x) at \place {$\x$};
+
+			\draw (1) .. controls (10.5,4) and (11, 3.7) .. (2) node [xshift=2,yshift=10, midway, below right] {$\{$\textcolor{red}{$A,B$}$,C\}$};
+			\draw (2) .. controls (11.5,2) and (11.5, 2).. (3) node [midway, below right, xshift=-13, yshift=-5] {$\{$\textcolor{red}{$A,B$}$,C\}$};
+			\draw (3) .. controls (9.9, 2) .. (4) node [midway, above right, yshift=-1, xshift=-4] {$\{$\textcolor{red}{$A,B$}$\}$};
+			\draw (1) .. controls (10.3, 3) and (10.4, 2.7) .. (4) node [midway, right] {$\{C\}$};
+			\draw (5) .. controls (9, 3.8) .. (1) node [xshift=-3.5, yshift=-5, midway, below] {$\{D, E, F\}$};
+			\draw (4) .. controls (8, 2.3) .. (8) node [midway, below] {$\{$\textcolor{red}{$A,B$}$\}$};
+			\draw (4) .. controls (8.6, 1.8) .. (7) node [yshift=-1, xshift=1,midway, right] {$\{E\}$};
+			\draw (7) .. controls (7.35, .8) .. (9) node [midway, above] {$\{E\}$};
+			\draw (9) .. controls (6.7, 2.1) .. (8) node [yshift=-3, xshift=-3, midway, below right] {$\{F\}$};
+			\draw (6) .. controls (5.7, 2.3) .. (9) node [yshift=7, xshift=-1, midway, right] {$\{E,F\}$};
+			\draw (6) .. controls (7.3, 3.5) .. (5) node [yshift=1, xshift=-10, midway, above] {$\{E,F\}$};
+			\draw (8) .. controls (7.6, 3.3) .. (5) node [yshift=-2, xshift=-4, midway, below right] {$\{D\}$};
+			\draw (7) .. controls (9.35, .8) .. (3) node [xshift=-5.5, yshift=-1, midway, above] {$\{G\}$};
+		\end{tikzpicture}
+	}
+
+	\only<3> {
+		\begin{tikzpicture}[font=\small]			
+			\node[fill=blue, circle, minimum size=18pt] at (6.3, 3.3) {};
+			\node[fill=blue, circle, minimum size=18pt] at (11.3,3) {};
+
+			\foreach \place/\x in {{(9.5, 3.8)/1}, {(11.3,3)/2},{(10.4,1.5)/3},{(9,2.3)/4}, {(8, 3.8)/5}, {(6.3, 3.3)/6}, {(8.3, 1)/7}, {(7.3, 2.5)/8}, {(6.5, 1)/9}}
+			\node[graphnode] (\x) at \place {$\x$};
+
+			\draw (1) .. controls (10.5,4) and (11, 3.7) .. (2) node [xshift=2,yshift=10, midway, below right] {$\{$\textcolor{red}{$A,B$}$,C\}$};
+			\draw (2) .. controls (11.5,2) and (11.5, 2).. (3) node [midway, below right, xshift=-13, yshift=-5] {$\{$\textcolor{red}{$A,B$}$,C\}$};
+			\draw (3) .. controls (9.9, 2) .. (4) node [midway, above right, yshift=-1, xshift=-4] {$\{$\textcolor{red}{$A,B$}$\}$};
+			\draw (1) .. controls (10.3, 3) and (10.4, 2.7) .. (4) node [midway, right] {$\{C\}$};
+			\draw (5) .. controls (9, 3.8) .. (1) node [xshift=-3.5, yshift=-5, midway, below] {$\{D, E, F\}$};
+			\draw (4) .. controls (8, 2.3) .. (8) node [midway, below] {$\{$\textcolor{red}{$A,B$}$\}$};
+			\draw (4) .. controls (8.6, 1.8) .. (7) node [yshift=-1, xshift=1,midway, right] {$\{E\}$};
+			\draw (7) .. controls (7.35, .8) .. (9) node [midway, above] {$\{E\}$};
+			\draw (9) .. controls (6.7, 2.1) .. (8) node [yshift=-3, xshift=-3, midway, below right] {$\{F\}$};
+			\draw (6) .. controls (5.7, 2.3) .. (9) node [yshift=7, xshift=-1, midway, right] {$\{E,F\}$};
+			\draw (6) .. controls (7.3, 3.5) .. (5) node [yshift=1, xshift=-10, midway, above] {$\{E,F\}$};
+			\draw (8) .. controls (7.6, 3.3) .. (5) node [yshift=-2, xshift=-4, midway, below right] {$\{D\}$};
+			\draw (7) .. controls (9.35, .8) .. (3) node [xshift=-5.5, yshift=-1, midway, above] {$\{G\}$};
+		\end{tikzpicture}
+	}
+
+	\only<4> {
+		\begin{tikzpicture}[font=\small]			
+			\node[fill=blue, circle, minimum size=18pt] at (6.3, 3.3) {};
+			\node[fill=blue, circle, minimum size=18pt] at (11.3,3) {};
+			\node[fill=blue!50, circle, minimum size=18pt] at (8.3, 1) {};
+
+			\foreach \place/\x in {{(9.5, 3.8)/1}, {(11.3,3)/2},{(10.4,1.5)/3},{(9,2.3)/4}, {(8, 3.8)/5}, {(6.3, 3.3)/6}, {(8.3, 1)/7}, {(7.3, 2.5)/8}, {(6.5, 1)/9}}
+			\node[graphnode] (\x) at \place {$\x$};
+
+			\draw (1) .. controls (10.5,4) and (11, 3.7) .. (2) node [xshift=2,yshift=10, midway, below right] {$\{$\textcolor{red}{$A,B$}$,C\}$};
+			\draw (2) .. controls (11.5,2) and (11.5, 2).. (3) node [midway, below right, xshift=-13, yshift=-5] {$\{$\textcolor{red}{$A,B$}$,C\}$};
+			\draw (3) .. controls (9.9, 2) .. (4) node [midway, above right, yshift=-1, xshift=-4] {$\{$\textcolor{red}{$A,B$}$\}$};
+			\draw (1) .. controls (10.3, 3) and (10.4, 2.7) .. (4) node [midway, right] {$\{C\}$};
+			\draw (5) .. controls (9, 3.8) .. (1) node [xshift=-3.5, yshift=-5, midway, below] {$\{D, E, F\}$};
+			\draw (4) .. controls (8, 2.3) .. (8) node [midway, below] {$\{$\textcolor{red}{$A,B$}$\}$};
+			\draw (4) .. controls (8.6, 1.8) .. (7) node [yshift=-1, xshift=1,midway, right] {$\{E\}$};
+			\draw (7) .. controls (7.35, .8) .. (9) node [midway, above] {$\{E\}$};
+			\draw (9) .. controls (6.7, 2.1) .. (8) node [yshift=-3, xshift=-3, midway, below right] {$\{F\}$};
+			\draw (6) .. controls (5.7, 2.3) .. (9) node [yshift=7, xshift=-1, midway, right] {$\{E,F\}$};
+			\draw (6) .. controls (7.3, 3.5) .. (5) node [yshift=1, xshift=-10, midway, above] {$\{E,F\}$};
+			\draw (8) .. controls (7.6, 3.3) .. (5) node [yshift=-2, xshift=-4, midway, below right] {$\{D\}$};
+			\draw (7) .. controls (9.35, .8) .. (3) [draw=black!30!green, line width=2pt] node [xshift=-5.5, yshift=-1, midway, above] {$\{G\}$};
+		\end{tikzpicture}
+	}
+
+	\only<5> {
+		\begin{tikzpicture}[font=\small]
+			\foreach \place/\x in {{(9.5,4)/1}, {(10.3,2.3)/3},{(9,2.3)/4}, {(7, 4)/5}, {(8.1, 3.1)/8}, {(6.5, 2)/9}}
+			\node[graphnode] (\x) at \place {$\x$};
+
+			\draw (1) -- (3) node [midway, above right] {$\{X,C\}$};
+			\draw (3) -- (4) node [midway, below] {$\{X\}$};
+			\draw (1) -- (4) node [midway, below right, xshift=-2pt, yshift=4pt] {$\{C\}$};
+			\draw (5) -- (1) node [midway, above] {$\{D,E,F\}$};
+			\draw (4) -- (8) node [midway, below left, yshift=3pt, xshift=2pt] {$\{X\}$};
+			\draw (4) -- (9) node [midway, below right] {$\{E\}$};
+			\draw (9) -- (8) node [midway, above, yshift=3pt] {$\{F\}$};
+			\draw (5) -- (9) node [midway, above left] {$\{E,F\}$};
+			\draw (8) -- (5) node [midway, right, xshift=1pt, yshift=2pt] {$\{D\}$};
+		\end{tikzpicture}
+	}
+
+	\only<6> {
+		\begin{tikzpicture}[font=\small]
+			\foreach \place/\x in {{(9.5,4)/1}, {(10.3,2.3)/3},{(9,2.3)/4}, {(7, 4)/5}, {(8.1, 3.1)/8}, {(6.5, 2)/9}}
+			\node[graphnode] (\x) at \place {$\x$};
+
+			\draw (1) -- (3) node [midway, above right] {$\{X,C\}$};
+			\draw (3) -- (4) [draw=blue!40!red, line width=2pt] node [midway, below] {$\{X\}$};
+			\draw (1) -- (4) [draw=blue!40!red, line width=2pt] node [midway, below right, xshift=-2pt, yshift=4pt] {$\{C\}$};
+			\draw (5) -- (1) node [midway, above] {$\{D,E,F\}$};
+			\draw (4) -- (8) node [midway, below left, yshift=3pt, xshift=2pt] {$\{X\}$};
+			\draw (4) -- (9) [draw=blue!40!red, line width=2pt]  node [midway, below right] {$\{E\}$};
+			\draw (9) -- (8) [draw=blue!40!red, line width=2pt] node [midway, above, yshift=3pt] {$\{F\}$};
+			\draw (5) -- (9) node [midway, above left] {$\{E,F\}$};
+			\draw (8) -- (5) [draw=blue!40!red, line width=2pt] node [midway, right, xshift=1pt, yshift=2pt] {$\{D\}$};
+		\end{tikzpicture}
+	}
+
+	\only<7> {
+		\tikzstyle{graphnode}=[minimum size=14pt, inner sep=0, circle, draw=black, solid, fill=white]
+		\tikzstyle{connnode}=[minimum size=6pt, inner sep=0, circle, draw=black, solid, fill=white]
+		\begin{tikzpicture}[font=\small]
+			\foreach \place/\x in {{(10.1,3.7)/1}, {(10.9,2)/3}, {(7, 3.7)/5}, {(6.5, 2)/9}}
+			\node[graphnode] (\x) at \place {$\x$};
+
+			\foreach \place/\x in {{(8, 3.7)/11}, {(9.6,2)/4}, {(9.9,2.7)/41}, {(7.8, 2.9)/13}, {(7.8, 2.5)/14}, {(8,2.1)/15}}
+			\node[connnode] (\x) at \place {};
+
+			\draw (1) -- (3) node [midway, above right] {$\{X,C\}$};
+			\draw (3) -- (4) node [midway, below] {$\{X\}$};
+			\draw (1) -- (41) node [midway, left, xshift=0pt, yshift=1pt] {$\{C\}$};
+
+			\draw (5) -- (9) node [midway, above left] {$\{E,F\}$};
+
+			\draw (13) -- (5) node [midway, right, xshift=1pt, yshift=0pt] {$\{D\}$};
+			\draw (9) -- (14) node [midway, above, yshift=3pt] {$\{F\}$};
+
+			\draw (15) -- (9) node [midway, below right] {$\{E\}$};
+
+			\draw (5) -- (11) node [midway, above, yshift=4pt] {$\{D,E,F\}$};
+		\end{tikzpicture}
+	}
+
+	\pause
+
+	\begin{itemize}[<+->]
+		\item Combine lines \textcolor{red}{$A,B$} that \alert{always occur together} into a single new line ($A,B \rightarrow X$)
+		\item Delete \textcolor{blue}{nodes with degree 2} and merge their adjacent edges
+		\item Remove edges \textcolor{black!30!green}{$(u, v)$} where $u$ and $v$ are \alert{termini} for all $L((u, v))$\pause
+		\item Cut \textcolor{blue!40!red}{edges} with $|L(e)| = 1$
+	\end{itemize}
 \end{frame}
 
-
-\begin{frame}{Rendering}	
+% --------------------------------------------------------------------------------
+\begin{frame}{Rendering}
+	% TODO: maybe numbering? or arrows?
 	\includegraphics[width=0.35\textwidth]{figures/render_example1.pdf}\hfill
 	\includegraphics[width=0.35\textwidth]{figures/render_example2.pdf}
 
@@ -297,20 +472,28 @@
 	\includegraphics[width=0.35\textwidth]{figures/render_example4.pdf}
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Results so far (4)}	
 	\only<1>{\includegraphics[width=0.9\textwidth]{figures/final.pdf}}
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Evaluation}	
-
+	% TODO
 \end{frame}
 
+% --------------------------------------------------------------------------------
 \begin{frame}{Future work}	
 	\begin{itemize}
 		\item Additional rules for core graph reduction \alert{(work in progress)}
 		\item Faster construction times of line graph
 		\item TODO
 	\end{itemize}
+\end{frame}
+
+% --------------------------------------------------------------------------------
+\begin{frame}{}	
+	\centering \huge Thank you!
 \end{frame}
 
 \end{document}
