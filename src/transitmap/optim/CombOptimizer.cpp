@@ -87,10 +87,16 @@ int CombOptimizer::optimize(const std::set<OptNode*>& g,
     << solSp;
 
   if (maxC == 1) {
+    LOG(DEBUG) << "(Null optimizer)";
     _nullOpt.optimize(g, hc);
+  // } else if (solSp < 5000) {
+    // LOG(DEBUG) << "(Exhaustive optimizer)";
+    // _exhausOpt.optimize(g, hc);
   } else {
+    // LOG(DEBUG) << "(ILP optimizer)";
     // _ilpOpt.optimize(g, hc);
-    _exhausOpt.optimize(g, hc);
+    LOG(DEBUG) << "(Sim. Annealing optimizer)";
+    _annealOpt.optimize(g, hc);
   }
 
   return 0;

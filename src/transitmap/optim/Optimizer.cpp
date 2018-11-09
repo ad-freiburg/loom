@@ -100,7 +100,7 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment,
     if (toA.route->relativeTo()) continue;
     processed.insert(toA.route);
     for (auto& toB : segment->pl().getRoutes()) {
-      if (unique && processed.find(toB.route) != processed.end()) continue;
+      if (unique && processed.count(toB.route)) continue;
       if (toB.route->relativeTo()) continue;
       if (toA.route == toB.route) continue;
 

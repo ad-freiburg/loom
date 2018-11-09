@@ -3,6 +3,7 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <algorithm>
+#include <unordered_map>
 #include "transitmap/optim/ExhaustiveOptimizer.h"
 #include "util/log/Log.h"
 
@@ -21,39 +22,42 @@ int ExhaustiveOptimizer::optimize(TransitGraph* tg) const {
 // _____________________________________________________________________________
 int ExhaustiveOptimizer::optimize(const std::set<OptNode*>& g,
                                   HierarchOrderingConfig* hc) const {
-  OptOrderingConfig best;
-  OptOrderingConfig cur;
+  OptOrderingConfig best, cur, null;
   double bestScore = DBL_MAX;
 
   // fixed order list of optim graph edges
   std::vector<OptEdge*> edges;
 
-  for (auto n : g) {
-    for (auto e : n->getAdjList()) {
+  for (auto n : g)
+    for (auto e : n->getAdjList())
       if (n == e->getFrom()) edges.push_back(e);
-    }
-  }
 
   // this guarantees that all the orderings are sorted!
-  initialConfig(g, &cur);
+  initialConfig(g, &null);
+  cur = null;
 
   size_t iters = 0;
+  size_t last = 0;
   bool running = true;
 
-  while (running) {
-    double score = _optScorer.getScore(g, cur);
-    // LOG(DEBUG) << "Iteration " << iters << ", current score: " << score;
-    iters++;
+  double curScore = _optScorer.getCrossingScore(g, cur);
+  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
 
-    if (score < bestScore) {
-      bestScore = score;
-      best = cur;
-    }
+  bestScore = curScore;
 
-    if (score == 0) {
-      LOG(DEBUG) << "Found optimal score 0 prematurely after " << iters << " iterations!";
+  while (true) {
+    if (bestScore == 0) {
+      LOG(DEBUG) << "Found optimal score 0 prematurely after " << iters
+                 << " iterations!";
       writeHierarch(&best, hc);
       return 0;
+    }
+
+    iters++;
+
+    if (iters - last == 10000) {
+      LOG(DEBUG) << "@ " << iters;
+      last = iters;
     }
 
     for (size_t i = 0; i < edges.size(); i++) {
@@ -63,17 +67,28 @@ int ExhaustiveOptimizer::optimize(const std::set<OptNode*>& g,
         running = false;
       } else {
         // reset
-        std::sort(cur[edges[i]].begin(), cur[edges[i]].end());
+        cur[edges[i]] = null[edges[i]];
       }
     }
 
+    if (!running) break;
+
+    double curScore = _optScorer.getCrossingScore(g, cur);
+    if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
+
+    if (curScore < bestScore) {
+      bestScore = curScore;
+      best = cur;
+    }
   }
 
-  LOG(DEBUG) << "Found optimal score " << bestScore << " after " << iters << " iterations!";
+  LOG(DEBUG) << "Found optimal score " << bestScore << " after " << iters
+             << " iterations!";
 
   writeHierarch(&best, hc);
   return 0;
 }
+
 
 // _____________________________________________________________________________
 void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
