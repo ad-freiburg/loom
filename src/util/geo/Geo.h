@@ -47,7 +47,7 @@ typedef Polygon<double> DPolygon;
 typedef Polygon<float> FPolygon;
 typedef Polygon<int> IPolygon;
 
-const static double EPSILON = 0.00000000001;
+const static double EPSILON = 0.00001;
 const static double RAD = 0.017453292519943295;  // PI/180
 
 // _____________________________________________________________________________
@@ -236,7 +236,7 @@ inline RotatedBox<T> shrink(const RotatedBox<T>& b, double d) {
 }
 
 // _____________________________________________________________________________
-inline bool doubleEq(double a, double b) { return fabs(a - b) < 0.000001; }
+inline bool doubleEq(double a, double b) { return fabs(a - b) < EPSILON; }
 
 // _____________________________________________________________________________
 template <typename T>
@@ -1153,7 +1153,7 @@ inline size_t convexHullImpl(const MultiPoint<T>& a, size_t p1, size_t p2,
   for (const auto& p : a) {
     double tmpDist = distToSegment((*h)[p1], (*h)[p2], p);
     double cp = crossProd(p, LineSegment<T>((*h)[p1], (*h)[p2]));
-    if (((cp > 0 && !d) || (cp < 0 && d)) && tmpDist >= maxDist) {
+    if (((cp > 0 && !d) || (cp < 0 && d)) && tmpDist >= maxDist + EPSILON) {
       pa = p;
       found = true;
       maxDist = tmpDist;

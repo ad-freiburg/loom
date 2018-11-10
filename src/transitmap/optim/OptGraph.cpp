@@ -199,6 +199,22 @@ bool OptGraph::simplifyStep() {
 
       assert(n->pl().node);
 
+      bool cheaper = false;
+      if (first->getOtherNd(n)->pl().node) {
+        if (_scorer->getSplittingPenalty(n->pl().node) >= _scorer->getSplittingPenalty(first->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltySameSeg(n->pl().node) >= _scorer->getCrossingPenaltySameSeg(first->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltyDiffSeg(n->pl().node) >= _scorer->getCrossingPenaltyDiffSeg(first->getOtherNd(n)->pl().node)) {
+          cheaper = true;
+        }
+      }
+      if (!cheaper) {
+        if (second->getOtherNd(n)->pl().node) {
+          if (_scorer->getSplittingPenalty(n->pl().node) >= _scorer->getSplittingPenalty(second->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltySameSeg(n->pl().node) >= _scorer->getCrossingPenaltySameSeg(second->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltyDiffSeg(n->pl().node) >= _scorer->getCrossingPenaltyDiffSeg(second->getOtherNd(n)->pl().node)) {
+            cheaper = true;
+          }
+        }
+      }
+
+      if (!cheaper) continue;
+
       if (dirRouteEqualIn(first, second)) {
         OptNode* newFrom = 0;
         OptNode* newTo = 0;
@@ -401,20 +417,21 @@ std::pair<OptEdge*, OptEdge*> OptGraph::isFullCross(OptNode* n) const {
     for (auto eb : n->getAdjList()) {
       if (ea == eb) continue;
       if (dirRouteContains(eb, ea) && dirRouteContains(ea, eb)) {
-        if (ret.first) {
-          ret.first = 0;
-          ret.second = 0;
-        } else {
-          ret.first = ea;
-          ret.second = eb;
-        }
-      } else if (dirPartialContinuedOver(ea, eb)) {
-        ret.first = 0;
-        ret.second = 0;
-        break;
+        ret.first = ea;
+        ret.second = eb;
       }
     }
-    if (ret.first) return ret;
+
+    if (ret.first) {
+      bool nope = false;
+      for (auto e : n->getAdjList()) {
+        if (dirPartialContinuedOver(ret.first, e) || dirPartialContinuedOver(ret.second, e)) {
+          nope = true;
+          break;
+        }
+      }
+      if (!nope) return ret;
+    }
   }
 
   return std::pair<OptEdge*, OptEdge*>(0, 0);
@@ -547,14 +564,12 @@ OptEdge* OptGraph::isStumpAt(OptEdge* e, OptNode* n) const {
 
   OptEdge* mainBranch = 0;
 
-  if (branches.size()) {
-    for (auto branch : branches) {
-      for (auto otherBranch : n->getAdjList()) {
-        if (otherBranch == e) continue;
-        if (dirContinuedOver(otherBranch, e, branch)) {
-          if (mainBranch) return 0;
-          mainBranch = otherBranch;
-        }
+  for (auto branch : branches) {
+    for (auto otherBranch : n->getAdjList()) {
+      if (otherBranch == e) continue;
+      if (dirContinuedOver(otherBranch, e, branch)) {
+        if (mainBranch) return 0;
+        mainBranch = otherBranch;
       }
     }
   }
@@ -1011,6 +1026,8 @@ bool OptGraph::dirRouteContains(const OptEdge* a, const OptEdge* b) {
 
 // _____________________________________________________________________________
 bool OptGraph::dirRouteEqualIn(const OptEdge* a, const OptEdge* b) {
+
+
   if (a->pl().getCardinality() != b->pl().getCardinality()) {
     return false;
   }
