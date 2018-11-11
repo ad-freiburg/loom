@@ -123,8 +123,11 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
   bool otherWayB =
       (segmentB->getFrom() != node) ^ segmentB->pl().etgs.front().dir;
 
-  size_t cardA = segmentA->pl().etgs.front().etg->getCardinality(true);
-  size_t cardB = segmentB->pl().etgs.front().etg->getCardinality(true);
+  // size_t cardA = segmentA->pl().etgs.front().etg->getCardinality(true);
+  // size_t cardB = segmentB->pl().etgs.front().etg->getCardinality(true);
+
+  size_t cardA = segmentA->pl().getCardinality();
+  size_t cardB = segmentB->pl().getCardinality();
 
   size_t posAinA =
       otherWayA ? cardA - 1 - poscomb.first.first : poscomb.first.first;
@@ -169,20 +172,36 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
   bool otherWayC = (segments.second->getFrom() != node) ^
                    segments.second->pl().etgs.front().dir;
 
-  size_t cardA = segmentA->pl().etgs.front().etg->getCardinality(true);
-  size_t cardB = segments.first->pl().etgs.front().etg->getCardinality(true);
-  size_t cardC = segments.second->pl().etgs.front().etg->getCardinality(true);
+  // size_t cardA = segmentA->pl().etgs.front().etg->getCardinality(true);
+  // size_t cardB = segments.first->pl().etgs.front().etg->getCardinality(true);
+  // size_t cardC = segments.second->pl().etgs.front().etg->getCardinality(true);
+
+  size_t cardA = segmentA->pl().getCardinality();
+  size_t cardB = segments.first->pl().getCardinality();
+  size_t cardC = segments.second->pl().getCardinality();
 
   size_t posAinA = otherWayA ? cardA - 1 - postcomb.first : postcomb.first;
   size_t posBinA = otherWayA ? cardA - 1 - postcomb.second : postcomb.second;
 
+
+  size_t posEdgeA = std::distance(node->pl().orderedEdges.begin(), std::find(node->pl().orderedEdges.begin(), node->pl().orderedEdges.end(), segments.first));
+  size_t posEdgeB = std::distance(node->pl().orderedEdges.begin(), std::find(node->pl().orderedEdges.begin(), node->pl().orderedEdges.end(), segments.second));
+
+  bool retB = false;
+
+  if (posAinA > posBinA && posEdgeA < posEdgeB) retB = true;;
+  retB = false;
+
+
   DPoint aInA = getPos(node, segmentA, posAinA);
   DPoint bInA = getPos(node, segmentA, posBinA);
 
+  bool ret = false;
+
   for (size_t i = 0;
-       i < segments.first->pl().etgs.front().etg->getCardinality(true); ++i) {
+       i < segments.first->pl().getCardinality(); ++i) {
     for (size_t j = 0;
-         j < segments.second->pl().etgs.front().etg->getCardinality(true);
+         j < segments.second->pl().getCardinality();
          ++j) {
       size_t posAinB = otherWayB ? cardB - 1 - i : i;
       size_t posBinC = otherWayC ? cardC - 1 - j : j;
@@ -199,11 +218,20 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
       b.push_back(bInC);
 
       if (util::geo::intersects(aInA, aInB, bInA, bInC) ||
-          util::geo::dist(a, b) < 1)
-        return true;
+          util::geo::dist(a, b) < 1) {
+        ret = true;
+        break;
+      }
     }
   }
-  return false;
+
+  // std::cout << "---" << std::endl;
+  // std::cout << segmentA->pl().toStr() << std::endl;
+  // std::cout << segments.first->pl().toStr() << std::endl;
+  // std::cout << segments.second->pl().toStr() << std::endl;
+  // std::cout << postcomb.first << ":" << postcomb.second << std::endl;
+  // assert(ret == retB);
+  return ret;
 }
 
 // _____________________________________________________________________________

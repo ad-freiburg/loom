@@ -215,6 +215,8 @@ bool OptGraph::simplifyStep() {
 
       if (!cheaper) continue;
 
+      // if (n->pl().node && n->pl().node->getStops().size() && n->pl().node->getStops().front().name == "Hoyt St") continue;
+
       if (dirRouteEqualIn(first, second)) {
         OptNode* newFrom = 0;
         OptNode* newTo = 0;
