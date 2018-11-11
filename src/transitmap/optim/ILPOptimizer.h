@@ -65,15 +65,6 @@ class ILPOptimizer : public Optimizer {
   bool printHumanReadable(glp_prob* lp, const std::string& path) const;
   double getConstraintCoeff(glp_prob* lp, int constraint, int col) const;
 
-
-  /*
-   * For a node A, and edge e and a pair or routes return all the
-   * edges != e where the route-pair continues in
-   */
-  std::vector<OptEdge*> getEdgePartners(OptNode* node, OptEdge* segmentA,
-                                        const LinePair& linepair) const;
-  std::vector<EdgePair> getEdgePartnerPairs(OptNode* node, OptEdge* segmentA,
-                                            const LinePair& linepair) const;
   std::vector<PosComPair> getPositionCombinations(OptEdge* a, OptEdge* b) const;
   std::vector<PosCom> getPositionCombinations(OptEdge* a) const;
 

@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_OPTIM_EXHAUSTIVEOPTIMIZER_H_
-#define TRANSITMAP_OPTIM_EXHAUSTIVEOPTIMIZER_H_
+#ifndef TRANSITMAP_OPTIM_SIMULATEDANNEALINGOPTIMIZER_H_
+#define TRANSITMAP_OPTIM_SIMULATEDANNEALINGOPTIMIZER_H_
 
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderingConfig.h"
@@ -14,6 +14,7 @@
 #include "transitmap/optim/OptGraph.h"
 #include "transitmap/optim/OptGraphScorer.h"
 #include "transitmap/optim/Optimizer.h"
+#include "transitmap/optim/HillClimbOptimizer.h"
 
 using std::exception;
 using std::string;
@@ -21,23 +22,17 @@ using std::string;
 namespace transitmapper {
 namespace optim {
 
-class ExhaustiveOptimizer : public Optimizer {
+class SimulatedAnnealingOptimizer : public HillClimbOptimizer {
  public:
-  ExhaustiveOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : _cfg(cfg), _optScorer(scorer) {};
+  SimulatedAnnealingOptimizer(const config::Config* cfg, const Scorer* scorer)
+      : HillClimbOptimizer(cfg, scorer) {};
 
-  virtual int optimize(TransitGraph* tg) const;
   virtual int optimize(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
 
- protected:
-  const config::Config* _cfg;
-  OptGraphScorer _optScorer;
-
-  void initialConfig(const std::set<OptNode*>& g, OptOrderingConfig* cfg) const;
-  void writeHierarch(OptOrderingConfig* cfg, HierarchOrderingConfig* c) const;
-
+ private:
+  double getScore(OptEdge* e, OptOrderingConfig& cur) const;
 };
 }  // namespace optim
 }  // namespace transitmapper
 
-#endif  // TRANSITMAP_OPTIM_EXHAUSTIVEOPTIMIZER_H_
+#endif  // TRANSITMAP_OPTIM_SIMULATEDANNEALINGOPTIMIZER_H_

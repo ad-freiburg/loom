@@ -14,6 +14,8 @@
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/NullOptimizer.h"
 #include "transitmap/optim/ExhaustiveOptimizer.h"
+#include "transitmap/optim/HillClimbOptimizer.h"
+#include "transitmap/optim/SimulatedAnnealingOptimizer.h"
 #include "transitmap/optim/Scorer.h"
 
 using std::exception;
@@ -25,7 +27,7 @@ namespace optim {
 class CombOptimizer : public Optimizer {
  public:
   CombOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : _cfg(cfg), _scorer(scorer), _ilpOpt(cfg, scorer), _exhausOpt(cfg, scorer) {};
+      : _cfg(cfg), _scorer(scorer), _ilpOpt(cfg, scorer), _exhausOpt(cfg, scorer), _hillcOpt(cfg, scorer), _annealOpt(cfg, scorer) {};
 
   int optimize(TransitGraph* tg) const;
   int optimize(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
@@ -36,6 +38,8 @@ class CombOptimizer : public Optimizer {
   const ILPEdgeOrderOptimizer _ilpOpt;
   const NullOptimizer _nullOpt;
   const ExhaustiveOptimizer _exhausOpt;
+  const HillClimbOptimizer _hillcOpt;
+  const SimulatedAnnealingOptimizer _annealOpt;
 
   static size_t maxCard(const std::set<OptNode*>& g);
   static double solutionSpaceSize(const std::set<OptNode*>& g);

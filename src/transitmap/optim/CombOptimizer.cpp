@@ -36,7 +36,7 @@ int CombOptimizer::optimize(TransitGraph* tg) const {
   if (_cfg->createCoreOptimGraph) {
     // TODO: do this exactly as often as M - this should be enough (prove this!)
     for (size_t i = 0; i < 10; i++) {
-      // g.untangle();
+      g.untangle();
       g.simplify();
       g.split();
     }
@@ -86,11 +86,17 @@ int CombOptimizer::optimize(const std::set<OptNode*>& g,
     " with max cardinality = " << maxC << " and solution space size = "
     << solSp;
 
-  if (maxC == 1) {
+  if (false && maxC == 1) {
+    LOG(DEBUG) << "(Null optimizer)";
     _nullOpt.optimize(g, hc);
-  } else {
-    _ilpOpt.optimize(g, hc);
+  // } else if (solSp < 5000) {
+    // LOG(DEBUG) << "(Exhaustive optimizer)";
     // _exhausOpt.optimize(g, hc);
+  } else {
+    LOG(DEBUG) << "(ILP optimizer)";
+    _ilpOpt.optimize(g, hc);
+    // LOG(DEBUG) << "(Sim. Annealing optimizer)";
+    // _annealOpt.optimize(g, hc);
   }
 
   return 0;

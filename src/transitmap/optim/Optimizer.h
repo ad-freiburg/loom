@@ -41,6 +41,12 @@ class Optimizer {
                PosCom postcomb);
   static DPoint getPos(OptNode* n, OptEdge* segment, size_t p);
 
+  static std::vector<EdgePair> getEdgePartnerPairs(
+      OptNode* node, OptEdge* segmentA, const LinePair& linepair);
+
+  static std::vector<OptEdge*> getEdgePartners(
+      OptNode* node, OptEdge* segmentA, const LinePair& linepair);
+
  protected:
   static void expandRelatives(TransitGraph* g, OrderingConfig* c);
   static void expandRelativesFor(
