@@ -245,6 +245,10 @@ std::vector<InnerGeometry> Node::getInnerGeometries(const OrderingConfig& c,
   for (size_t i = 0; i < getMainDirs().size(); ++i) {
     const NodeFront& nf = getMainDirs()[i];
 
+    if (!c.count(nf.edge)) {
+      std::cout << "No ordering for edge " << nf.edge << " found!" << std::endl;
+      assert(false);
+    }
     const std::vector<size_t>* ordering = &c.find(nf.edge)->second;
 
     for (size_t j : *ordering) {

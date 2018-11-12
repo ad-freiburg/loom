@@ -427,6 +427,7 @@ std::pair<OptEdge*, OptEdge*> OptGraph::isFullCross(OptNode* n) const {
     if (ret.first) {
       bool nope = false;
       for (auto e : n->getAdjList()) {
+        if (e == ret.second || e == ret.first) continue;
         if (dirPartialContinuedOver(ret.first, e) || dirPartialContinuedOver(ret.second, e)) {
           nope = true;
           break;
