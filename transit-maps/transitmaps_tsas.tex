@@ -512,14 +512,14 @@ If for some edge $e$ all $l \in L(e)$ end in a node $v$ or $|L(e)| = 1$, the ord
 In the first case, no $l \in L(e)$ extends over $v$, so they cannot introduce any crossing or separation. In the second case, all orderings of $L(e)$ are equivalent (there is only one).
 \end{proof}
 
-\subsection{Pruning Rules}
+\subsection{Pruning Rules}\label{SEC:pruning}
 
 Using the lemmata from above, we may simplify the input line graph with the following pruning rules:
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
 	\setlength\itemsep{1pt}
-	\item delete each node $v$ with degree 2 and $L(e) = L(e')$, and combine the adjacent edges $e = \{u, v\}$, $e' = \{v, w\}$ into a single new edge $ee' = \{u, w\}$ with $L(ee') = L(e) = L(e')$ (Lemma \ref{LEM:crossingmoveing}).
-	\item collapse lines that always occur together into a single new line $k$ (Lemma~\ref{LEM:linepairing}). Weight crossings with $k$ by the number of lines it combines to avoid distorting penalties.
-	\item remove each edge $e = \{u, v\}$ where $u$ and $v$ are termini for all $l \in L(e)$ (Lemma~\ref{LEM:termini}).
+	\item[\emph{(Pruning rule 1)}] delete each node $v$ with degree 2 and $L(e) = L(e')$, and combine the adjacent edges $e = \{u, v\}$, $e' = \{v, w\}$ into a single new edge $ee' = \{u, w\}$ with $L(ee') = L(e) = L(e')$ (Lemma \ref{LEM:crossingmoveing}).
+	\item[\emph{(Pruning rule 2)}] collapse lines that always occur together into a single new line $k$ (Lemma~\ref{LEM:linepairing}). Weight crossings with $k$ by the number of lines it combines to avoid distorting penalties.
+	\item[\emph{(Pruning rule 3)}] remove each edge $e = \{u, v\}$ where $u$ and $v$ are termini for all $l \in L(e)$ (Lemma~\ref{LEM:termini}).
 \end{enumerate}
 \noindent
 
@@ -530,16 +530,29 @@ We call the resulting graph the core graph of $G$. Fig.~\ref{FIG:coreoptimgraph}
 The core graph may then be further broken down into ordering-relevant connected components using the cutting rules below. The components can then be optimized separately and in parallel (Fig.~\ref{FIG:coreoptimgraph}, right).
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
 	\setlength\itemsep{1pt}
-    \item cut each edge $e = \{u, v\}$ with $\left|L\left(e\right)\right| = 1$ into two edges $e' = \{u, v'\}$ and $e'' = \{v'', v\}$ (Lemma~\ref{LEM:termini}).
-    \item replace each edge $e = \{u, v\}$ where $v$ has a degree $>1$ and is a terminus node for each $l \in L(e)$ with an edge $e' = \{u, v'\}$ where $v'$ is only connected to $e'$ (Lemma~\ref{LEM:termini}).
+    \item[\emph{(Cutting rule 1)}] cut each edge $e = \{u, v\}$ with $\left|L\left(e\right)\right| = 1$ into two edges $e' = \{u, v'\}$ and $e'' = \{v'', v\}$ (Lemma~\ref{LEM:termini}).
+    \item[\emph{(Cutting rule 2)}] replace each edge $e = \{u, v\}$ where $v$ has a degree $>1$ and is a terminus node for each $l \in L(e)$ with an edge $e' = \{u, v'\}$ where $v'$ is only connected to $e'$ (Lemma~\ref{LEM:termini}). Special care has to be taken to not make $v$ eligible for a pruning rule (1) contraction, as this may prohibit crossings and thus compromise optimality.
 \end{enumerate}
 
 
-\subsection{Graph Untangling}
+\subsection{Graph Untangling Rules}
+
+The pruning rules described so far may greatly help to reduce the size of the search space for the line ordering optimization and thus bring down the time required to find an optimal solution. Section \ref{SEC:eval} evaluates the effects of these rules. However, there are still some simplification situations not covered by these rules. This section will describe 4 simple graph untangling rules which further help to bring down the degrees of freedom of the line ordering optimization problem. As we will see, these untangling rules are able to completely solve the optimization problem for specific line graph instances by cutting it down to many ordering-relevant connected components with a search space size of 1. In many cases, they are able to reduce the search space to a size which can be explored by a simple exhaustive search in minimal time.
+
+As these graph untangling rules always break up nodes in the original line graph into multiple nodes in the core optimization graph, we have to update pruning rule 2 from Section~\ref{SEC:pruning}. There, we always contracted degree 2 nodes because Lemma~\ref{LEM:crossingmoveing} guaranteed that a same-segment crossing in these nodes could be moved to another node without affecting optimality. If we break up nodes, this may no longer be the case: degree 2 nodes in the core optimization graph may now stand for nodes of higher degree in the original line graph. Therefore, we first define $v^*(v)$ to be original line graph node we constructed $v$ from. Note that for many nodes which were not eligible for any pruning or untangling rule, $v^*(v) = v$. Using this, we add an additional check to pruning rule 2 and state this updated pruning rule 2a it as follow:
+\begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
+  \setlength\itemsep{1pt}
+  \item[(Pruning rule 2a)] delete each node $v$ with degree 2 and adjacent edges $e = \{u, v\}$, $e' = \{v, w\}$,
+  where 
+  $L(e) = L(e')$ (the lines in both edges are the same). We additionally check if
+  $w_\times(v^*(v)) \geq w_\times(v^*(u))$ and $w_\|(v^*(v)) \geq w_\|(v^*(u))$ (crossings and separations in $v$ can be moved to $u$ at equal or lower cost) 
+  or
+  $w_\times(v^*(v)) \geq w_\times(v^*(w))$ and $w_\|(v^*(v)) \geq w_\|(v^*(w))$ (crossings and separations in $v$ can be moved to $w$ at equal or lower cost). If that is the case, combine the adjacent edges $e = \{u, v\}$, $e' = \{v, w\}$ into a single new edge $ee' = \{u, w\}$ with $L(ee') = L(e) = L(e')$.
+\end{enumerate}
 
 \subsubsection{Full Crossings}
 
-\begin{figure}[t]
+\begin{figure}
   \centering
   \includegraphics[width=0.48\textwidth]{untangling/fullcross.pdf}
   \caption{Left: Full cross situation in a line graph. $\{A, B\}$ continue from $e$ to $f$ through node $v$ without interfering with $\{C, D\}$ on $h$ and $f$. Right: Node $v$ has been split into two nodes $v'$ and $v''$, without affecting line ordering optimality.}  
@@ -547,9 +560,67 @@ The core graph may then be further broken down into ordering-relevant connected 
   %\vspace{-0.4cm}
 \end{figure}
 
+We now consider the situation in Figure~\ref{FIG:untangle_fullcross}, left. It is easy to see that if in some node $v$ we can identify a pair $\{e, f\}$ of adjacent edges with $L(e) = L(f)$, and if neither $e$ or $f$ (partially) continue over into another adjacent edge, the orderings in $e$ and $f$ cannot affect the number of crossing between any $l \in L(e)$ and any $l' \not\in L(e)$, only the number of crossings between themselves. We can thus state 
+\begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
+  \setlength\itemsep{1pt}
+  \item[\emph{(Untangling rule 1)}] For some node $v$ in the line graph and its adjacent edges $e_1, e_2, ..., e_{\deg(v)-1}$, if we can identify two edges $e_a = \{v, u\}$ and $e_b = \{v, w\}$ with $L(e_a) = L(e_b)$ and both $e_a$ and $e_b$ do not (partially) continue into any other edge $e_i \not\in \{e_a, e_b\}$, break $v$ into two nodes $v'$ and $v''$. Node $v'$ gets connected to $u$ with an edge $e'_a$ and to $w$ via $e'_b$, where $L(e'_a) = L(e_a)$ and $L(e'_b) = L(e_b)$. Node $v''$ gets connected to the remaining nodes $u_i$ $v$ was originally connected to via $e'_i = \{v'', u_i\}$. We set $L(e'_i) = L(e_i)$. Figure~\ref{FIG:untangle_fullcross}, right gives an example.
+\end{enumerate}
+
+Note that this rule alone will not have any effect on the ILP sizes, as we would for example not add any constraints or variables for crossings between edge $e_a$ and some $e_i \not\in \{e_a, e_b\}$, as described in Sections~\ref{SEC:baseline} and \ref{SEC:improved}. However, $v'$ and $v''$ may now be eligible for contraction according to pruning rule 2a. Additionally, this rule may cause the optimization graph to break down into two connected components.
+
 \subsubsection{Y Structures}
 
+\begin{figure}
+  \centering
+  \includegraphics[width=0.48\textwidth]{untangling/y.pdf}
+  \caption{Left: TODO. Right: Note that if $g$ was the segment with the largest number of lines in the graph, we now have brought down $M$ from 3 to 2.}  
+  \label{FIG:untangle_y}
+  %\vspace{-0.4cm}
+\end{figure}
+
+Figure~\ref{FIG:untangle_y}, left gives an example of an Y structure in the line graph. Here, a main leg $e = \{u, v\}$ branches at $v$ into two minor legs $f$ and $g$. As $u$ is a terminus, the line ordering in $e$ can always be adjusted to match the line orderings of the minor legs $f$ and $g$ with zero crossings. More specifically, the relative ordering of minor legs $f$ and $g$ already induces a partial optimal ordering of the lines on $e$, namely that $p_e(A) < p_e(C)$ and $p_e(B) < p_e(C)$. Any ordering violating these constraints would induce an unnecessary crossing (or separation) in $v$.
+
+For easier notation, we say that $\rho^v_e(f)$ is the clockwise position of $f$ in node $v$, beginning at edge $e$. For example, in Figure~\ref{FIG:untangle_y}, left, $\rho^v_e(f) = 0$ and $\rho^v_e(g) = 1$.
+\begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
+  \setlength\itemsep{1pt}
+  \item[\emph{(Untangling rule 2)}] For some node $v$, if we can identify a main leg edge $e = \{v, u\}$ where $u$ is a terminus and which completely branches at $v$ into $\deg(v) - 1$ minor leg edges $e_{b_0}, e_{b_0}, ..., e_{b_{\deg(v) - 2}}$ such that $L(e_{b_0}) \cup L(e_{b_1}) ... \cup L(e_{b_{\deg(v) - 2}}) = L(e_a)$ and all $L(e_{b_i})$ are pairwise disjoint, split $v$ and $u$ into nodes $v'$, $v''$ and $u'$, $u''$. For simplicity, we assume that the minor leg edges are already sorted in ascending order by their $\rho^v_{e}$ values. Nodes $v'$ and $u'$ are connected with an edge $e'$, where $L(e') = L(e_{b_0})$ (the lines of the leftmost minor leg). Nodes $v''$ and $u''$ are connected with an edge $e''$, where $L(e'') = \bigcup^{\deg(v) - 2}_{i = 1} L(e_{b_i})$ (the lines of the remaining minor legs to the right). Additionally, $v'$ gets connected to the nodes it was originally connected to via the first minor leg with $e'_{b_0}$, where $L(e_{b_0}) = e'_{b_0}$. Similarly, all remaining branches are re-connected to $v''$ (Fig.~\ref{FIG:untangle_y}, right).
+\end{enumerate}
+
+To be able to later deduce the ordering of the original main leg $e$, we additionally store an ordering of the new main leg edges $e'$ and $e''$, which is just the original clockwise ordering of $e_{b_0}$ and the remainder of the minor legs. The ordering of the lines in the original edge $e$ is then just the ordered lines (after optimization) in $e'$, followed by the ordering lines (after optimization) in $e''$.
+
+Note that this rule only untangles the leftmost minor branch and that a repeated application is necessary to completely untangle more than 2 branches.
+
+\subsubsection{Partial Y Structures}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.48\textwidth]{untangling/y_partial.pdf}
+  \caption{Left: Partial Y structure. Right: TODO}  
+  \label{FIG:untangle_y_partial}
+  %\vspace{-0.4cm}
+\end{figure}
+
+
+A special case of Y structure can be seen in Figure~\ref{FIG:untangle_y_partial}, left. Here, $e$ completely branches into 2 minor legs $f$ and $g$ at $v$. However, the lines of the minor legs are not completely contained in the main leg: line $D$ continues through $v$ from $f$ to $g$, not through $e$. But the ordering of $f$ and $g$ still induce a partial ordering of $e$. We call this situation a \emph{partial} Y.
+
+\begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
+  \setlength\itemsep{1pt}
+  \item[\emph{(Untangling rule 3)}] For some node $v$, if we can identify a main leg edge $e = \{v, u\}$ where $u$ is a terminus and which completely branches at $v$ into $n$ minor leg edges $e_{b_0}, e_{b_0}, ..., e_{b_{n-1}}$ such that $L(e_{b_0}) \cup L(e_{b_1}) ... \cup L(e_{n-1}) \subsetneq L(e_a)$, split $u$ into nodes $u'$, $u''$. For simplicity, we again assume that the minor leg edges are already sorted in ascending order by their $\rho^v_e$ values. Similar as in untangling rule 2, $v$ and $u'$ are connected with an edge $e'$, where $L(e') = L(e_{b_0})$, and $v$ and $u''$ are connected with an edge $e''$, where $L(e'') = \bigcup^{n}_{i = 1} L(e_{b_i})$  (Fig.~\ref{FIG:untangle_y_partial}, right).
+\end{enumerate}
+
+Just like with full Y structures, we store the order of $e'$ and $e''$ to be able to later deduce the line ordering in the original main leg $e$.
+
 \subsubsection{Dog-Bone Structures}
+
+\begin{figure*}[t]
+  \includegraphics[width=0.49\textwidth, page=1]{untangling/dogbone.pdf}
+  \hfill
+  \includegraphics[width=0.49\textwidth, page=2]{untangling/dogbone.pdf}
+  \caption{Left: TODO. Right: TODO}  
+  \label{FIG:untangle_dogbone}
+\end{figure*}
+
+A more complex structure that is commonly found in real-world line graphs is depicted in Figure~\ref{FIG:untangle_dogbone}, left. Two line threads (in the example, $\{C\}$ and $\{A, B\}$) on two segments $h$ and $i$ join at some node $u$, continue for a single segment $e$, and branch again at some node $v$ into $g$ and $f$. It is obvious to see that there is no reason for $\{C\}$ and $\{A, B\}$ to be intertwined in $e$: this would only induce an unnecessary splitting between $\{A, B\}$, and would not be optimal, regardless of how the rest of the line graph looks like. Additionally, it is also easy to see the ordering of the two threads at $u$ and $v$ imposes a lower bound on the sum of crossings in $u$ and $v$. In Figure~\ref{FIG:untangle_dogbone}, because $\rho^u_e(i) < \rho^u_e(h)$ and $\rho^v_e(g) < \rho^v_e(f)$, two crossings between $C$ and $A$, as well as $C$ and $B$ in either $u$ or $v$ are unavoidable, regardless of the actual orderings in $h$, $i$, $g$ or $f$. In Figure~\ref{FIG:untangle_dogbone_2}, because $\rho^u_e(i) < \rho^u_e(h)$, but $\rho^v_e(f) > \rho^v_e(g)$, no crossing is necessary at all - the two line threads can always continue through $u$ and $v$ next to each other, regardless of their internal ordering. 
 
 \subsubsection{Stump Structures}
 
