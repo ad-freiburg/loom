@@ -44,6 +44,7 @@ int ExhaustiveOptimizer::optimize(const std::set<OptNode*>& g,
   if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
 
   bestScore = curScore;
+  best = cur;
 
   while (true) {
     if (bestScore == 0) {

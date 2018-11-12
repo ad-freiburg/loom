@@ -89,9 +89,9 @@ int CombOptimizer::optimize(const std::set<OptNode*>& g,
   if (false && maxC == 1) {
     LOG(DEBUG) << "(Null optimizer)";
     _nullOpt.optimize(g, hc);
-  // } else if (solSp < 5000) {
-    // LOG(DEBUG) << "(Exhaustive optimizer)";
-    // _exhausOpt.optimize(g, hc);
+  } else if (solSp < 5000) {
+    LOG(DEBUG) << "(Exhaustive optimizer)";
+    _exhausOpt.optimize(g, hc);
   } else {
     LOG(DEBUG) << "(ILP optimizer)";
     _ilpOpt.optimize(g, hc);

@@ -1,0 +1,50 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\begin{document}
+
+\begin{tikzpicture}[scale=1.5]
+   \tikzstyle{node}=[inner sep=1pt, circle, draw=black, solid, fill=white];
+   \tikzstyle{anc}=[inner sep=0.3pt, circle, draw=black, solid, fill=black];
+   \draw[->] (-1.2,0) -- (4.2,0) node[right] {$x$};
+   \draw[->] (-1,-0.2) -- (-1,2.2) node[above] {$y$};
+
+
+	\draw (-0.5,1) -- (-0.25, 0.95) node[anc]{} -- (-0.15, 0.93) node[anc]{}
+		-- (-0, 0.98) node[anc]{} -- (0.1, 0.97) node[anc]{} -- (0.41, 0.94) node[anc]{} -- (0.51, 0.97) node[anc]{}
+		-- (1.11, 0.99) node[anc]{} -- (1.31, 1.06) node[anc]{} -- (1.41, 1.09) node[anc]{} -- (1.59, 1.1) node[anc]{}
+		-- (1.77, 1.04) node[anc]{} -- (1.97, 1.01) node[anc]{} -- (2.07, 1.02) node[anc]{} -- (2.77, 0.94) node[anc]{}
+		-- (2.77, 0.94) node[anc]{} -- (2.97, 0.84) node[anc]{} -- (3.17, 0.54) node[anc]{} -- (3.27, 0.24) node[node]{\tiny B};
+
+	\draw (-0.5,1) -- (-0.1, 1.05) node[anc]{} -- (0.2, 1.03) node[anc]{} -- (0.35, 1.06) node[anc]{} -- (0.45, 1.096) node[anc]{}
+		-- (0.55, 1.14) node[anc]{}
+		-- (0.7, 1.18) node[anc]{}
+		-- (0.8, 1.2) node[anc]{}
+		-- (0.9, 1.2) node[anc]{}
+		-- (1.1, 1.15) node[anc]{}
+		-- (1.25, 0.985) node[anc]{}
+		-- (1.35, 0.965) node[anc]{}
+		-- (1.45, 0.967) node[anc]{}
+		-- (1.6, 0.98) node[anc]{}
+		-- (1.79, 1.12) node[anc]{}
+		-- (2.02, 1.09) node[anc]{}
+		-- (2.32, 1.07) node[anc]{}
+		-- (2.52, 1.02) node[anc]{}
+		-- (2.92, 1.1) node[anc]{}
+		-- (3.12, 1.3) node[anc]{}
+		-- (3.19, 1.5) node[anc]{}
+		-- (3.25, 1.8) node[node]{\tiny C};
+
+
+    \draw[dotted] (-0.5,0) node[below] {$d_0$} -- (-0.5,2) ;
+    \draw[dotted] (-0.2,0) node[below] {$d_1$} -- (-0.2,2) ;
+    \draw[dotted] (0.4,0) node[below] {$d_3$} -- (0.4,2) ;
+    \draw[dotted] (0.7,0) node[below] {$d_4$} -- (0.7,2) ;
+    \draw[dotted] (1,0) node[below] {$d_5$} -- (1,2) ;
+
+
+
+	\node at (-0.5, 1)[node]{\tiny $A$};
+	;
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg height="35.200000px" width="45.200000px">
+    <defs />
+    <g>
+        <polyline points=" 2.6,15.1 14.7,15.1" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 2.6,15.1 14.7,15.1" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 2.6,17.6 14.7,17.6" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 2.6,17.6 14.7,17.6" style="fill:none;stroke:#f8da00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 2.6,20.1 2.6,20.1 14.7,20.1" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 2.6,20.1 2.6,20.1 14.7,20.1" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 30,16.35 42.6,16.35" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 30,16.35 42.6,16.35" style="fill:none;stroke:#f8da00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 30,18.85 42.6,18.85" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 30,18.85 42.6,18.85" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 21.35,9.7 21.35,2.6" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 21.35,9.7 21.35,2.6" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 23.85,9.7 23.85,2.6" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 23.85,9.7 23.85,2.6" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 22.6,24.8 22.6,32.6" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 22.6,24.8 22.6,32.6" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+    </g>
+    <g>
+        <polyline points=" 2.6,15.1 2.6,15.1" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 2.6,15.1 2.6,15.1" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 2.6,17.6 2.6,17.6" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 2.6,17.6 2.6,17.6" style="fill:none;stroke:#f8da00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 2.6,20.1 2.6,20.1" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 2.6,20.1 2.6,20.1" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+    </g>
+    <g>
+        <polyline points=" 14.6839,17.6001 18.7969,17.4363 25.7067,16.5115 29.9906,16.35" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 14.6839,17.6001 18.7969,17.4363 25.7067,16.5115 29.9906,16.35" style="fill:none;stroke:#f8da00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 14.7,20.1 15.5655,20.0944 16.3657,20.0783 17.1062,20.0525 17.7925,20.0179 18.4301,19.9754 19.0245,19.926 19.5814,19.8705 20.1061,19.8098 20.6044,19.7448 21.0816,19.6764 21.5434,19.6055 21.9953,19.533 22.4428,19.4598 22.8914,19.3868 23.3467,19.3148 23.8142,19.2449 24.2995,19.1778 24.8081,19.1144 25.3455,19.0558 25.9173,19.0027 26.529,18.956 27.1861,18.9167 27.8942,18.8857 28.6588,18.8638 29.4855,18.8519 30,18.85" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 14.7,20.1 15.5655,20.0944 16.3657,20.0783 17.1062,20.0525 17.7925,20.0179 18.4301,19.9754 19.0245,19.926 19.5814,19.8705 20.1061,19.8098 20.6044,19.7448 21.0816,19.6764 21.5434,19.6055 21.9953,19.533 22.4428,19.4598 22.8914,19.3868 23.3467,19.3148 23.8142,19.2449 24.2995,19.1778 24.8081,19.1144 25.3455,19.0558 25.9173,19.0027 26.529,18.956 27.1861,18.9167 27.8942,18.8857 28.6588,18.8638 29.4855,18.8519 30,18.85" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+    </g>
+    <g>
+        <polyline points=" 14.7,15.1 15.5716,15.0829 16.3859,15.0286 17.142,14.9331 17.8388,14.7919 18.4756,14.6011 19.0512,14.3562 19.5649,14.053 20.0157,13.6875 20.4027,13.2552 20.7248,12.7521 20.9813,12.1738 21.1712,11.5162 21.2935,10.775 21.3473,9.94597 21.35,9.7" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 14.7,15.1 15.5716,15.0829 16.3859,15.0286 17.142,14.9331 17.8388,14.7919 18.4756,14.6011 19.0512,14.3562 19.5649,14.053 20.0157,13.6875 20.4027,13.2552 20.7248,12.7521 20.9813,12.1738 21.1712,11.5162 21.2935,10.775 21.3473,9.94597 21.35,9.7" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+    </g>
+    <g>
+        <polyline points=" 23.85,9.7 23.8443,10.5651 23.8277,11.364 23.8013,12.1026 23.7658,12.7865 23.7224,13.4213 23.6718,14.0128 23.6151,14.5667 23.5531,15.0885 23.4869,15.5841 23.4172,16.059 23.3451,16.519 23.2715,16.9698 23.1973,17.417 23.1234,17.8664 23.0508,18.3235 22.9805,18.7942 22.9132,19.284 22.8501,19.7986 22.792,20.3438 22.7398,20.9253 22.6944,21.5486 22.6569,22.2196 22.6281,22.9438 22.6089,23.727 22.6004,24.5748 22.6,24.8" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 23.85,9.7 23.8443,10.5651 23.8277,11.364 23.8013,12.1026 23.7658,12.7865 23.7224,13.4213 23.6718,14.0128 23.6151,14.5667 23.5531,15.0885 23.4869,15.5841 23.4172,16.059 23.3451,16.519 23.2715,16.9698 23.1973,17.417 23.1234,17.8664 23.0508,18.3235 22.9805,18.7942 22.9132,19.284 22.8501,19.7986 22.792,20.3438 22.7398,20.9253 22.6944,21.5486 22.6569,22.2196 22.6281,22.9438 22.6089,23.727 22.6004,24.5748 22.6,24.8" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+    </g>
+    <g>
+        <polyline points=" 42.6,16.35 42.6,16.35" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 42.6,16.35 42.6,16.35" style="fill:none;stroke:#f8da00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 42.6,18.85 42.6,18.85" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 42.6,18.85 42.6,18.85" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+    </g>
+    <g>
+        <polyline points=" 21.35,2.6 21.35,2.6" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 21.35,2.6 21.35,2.6" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 23.85,2.6 23.85,2.6" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 23.85,2.6 23.85,2.6" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+    </g>
+    <g>
+        <polyline points=" 22.6,32.6 22.6,32.6" style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-width:1.7" />
+        <polyline points=" 22.6,32.6 22.6,32.6" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+    </g>
+    <g>
+        <polygon fill="white" points=" 0.529065,20.9397 0.471095,14.2969 0.492987,13.9839 0.563585,13.6781 0.68115,13.3871 0.842787,13.1181 1.04452,12.8777 1.28137,12.6718 1.54752,12.5055 1.83641,12.3828 2.14092,12.3069 2.45357,12.2796 2.65356,12.2778 3.00111,12.3052 3.33862,12.3925 3.65586,12.537 3.94317,12.7345 4.19182,12.9788 4.39427,13.2627 4.54436,13.5773 4.63752,13.9133 4.67093,14.2603 4.72891,20.9031 4.70701,21.2161 4.63642,21.5219 4.51885,21.8129 4.35721,22.0819 4.15548,22.3223 3.91863,22.5282 3.65248,22.6945 3.36359,22.8172 3.05908,22.8931 2.74643,22.9204 2.54644,22.9222 2.19889,22.8948 1.86138,22.8075 1.54414,22.663 1.25683,22.4655 1.00818,22.2212 0.805731,21.9373 0.655645,21.6227 0.562479,21.2867 0.529065,20.9397" stroke="black" stroke-width="0.75" />
+        <polygon fill="white" points=" 40.5183,19.7007 40.4819,15.5359 40.5038,15.2229 40.5744,14.9171 40.692,14.6261 40.8536,14.3571 41.0553,14.1167 41.2922,13.9108 41.5583,13.7445 41.8472,13.6218 42.1517,13.5459 42.4644,13.5186 42.6644,13.5168 43.0119,13.5442 43.3494,13.6315 43.6667,13.776 43.954,13.9735 44.2026,14.2178 44.4051,14.5017 44.5552,14.8163 44.6483,15.1523 44.6817,15.4993 44.7181,19.6641 44.6962,19.9771 44.6256,20.2829 44.508,20.5739 44.3464,20.8429 44.1447,21.0833 43.9078,21.2892 43.6417,21.4555 43.3528,21.5782 43.0483,21.6541 42.7356,21.6814 42.5356,21.6832 42.1881,21.6558 41.8506,21.5685 41.5333,21.424 41.246,21.2265 40.9974,20.9822 40.7949,20.6983 40.6448,20.3837 40.5517,20.0477 40.5183,19.7007" stroke="black" stroke-width="0.75" />
+        <polygon fill="white" points=" 18.5186,2.73562 18.5168,2.53563 18.5387,2.22256 18.6093,1.91676 18.7269,1.62578 18.8885,1.35677 19.0902,1.11636 19.3271,0.910463 19.5932,0.744155 19.8821,0.621529 20.1866,0.545605 20.4993,0.518253 24.6641,0.481907 25.0116,0.50926 25.3491,0.596548 25.6664,0.74112 25.9537,0.938582 26.2023,1.18293 26.4048,1.46675 26.5549,1.78142 26.648,2.11736 26.6814,2.46438 26.6832,2.66437 26.6613,2.97744 26.5907,3.28324 26.4731,3.57422 26.3115,3.84323 26.1098,4.08364 25.8729,4.28954 25.6068,4.45585 25.3179,4.57847 25.0134,4.65439 24.7007,4.68175 20.5359,4.71809 20.1884,4.69074 19.8509,4.60345 19.5336,4.45888 19.2463,4.26142 18.9977,4.01707 18.7952,3.73325 18.6451,3.41858 18.552,3.08264 18.5186,2.73562" stroke="black" stroke-width="0.75" />
+        <polygon fill="white" points=" 22.35,30.6 22.85,30.6 23.1973,30.6304 23.534,30.7206 23.85,30.8679 24.1356,31.0679 24.3821,31.3144 24.5821,31.6 24.7294,31.916 24.8196,32.2527 24.85,32.6 24.8196,32.9473 24.7294,33.284 24.5821,33.6 24.3821,33.8856 24.1356,34.1321 23.85,34.3321 23.534,34.4794 23.1973,34.5696 22.85,34.6 22.35,34.6 22.0027,34.5696 21.666,34.4794 21.35,34.3321 21.0644,34.1321 20.8179,33.8856 20.6179,33.6 20.4706,33.284 20.3804,32.9473 20.35,32.6 20.3804,32.2527 20.4706,31.916 20.6179,31.6 20.8179,31.3144 21.0644,31.0679 21.35,30.8679 21.666,30.7206 22.0027,30.6304 22.35,30.6" stroke="black" stroke-width="0.75" />
+    </g>
+</svg>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg height="32.000000px" width="42.000000px">
+    <defs />
+    <g>
+        <polygon points=" 13,19.2 13,12.8 13.0011,12.785 13.0045,12.7704 13.01,12.7564 13.0176,12.7434 13.027,12.7317 13.038,12.7215 18.988,8.02153 19.0019,8.01231 19.0172,8.00554 19.0334,8.00139 19.05,8 22.95,8 22.9665,8.00137 22.9826,8.00545 22.9977,8.01212 23.0116,8.02121 23.0237,8.03246 28.4737,13.9825 28.4829,13.9941 28.4903,14.007 28.4956,14.0208 28.4989,14.0352 28.5,14.05 28.5,17.95 28.4989,17.965 28.4955,17.9797 28.4899,17.9938 28.4823,18.0068 28.4728,18.0185 28.4617,18.0287 21.7617,23.2787 21.7478,23.2878 21.7326,23.2945 21.7165,23.2986 21.7,23.3 20.3,23.3 20.2832,23.2986 20.2668,23.2943 20.2514,23.2874 13.0514,19.2874 13.0388,19.2791 13.0275,19.2689 13.0179,19.2571 13.0102,19.244 13.0046,19.2299 13.0012,19.2151 13,19.2" style="fill:#CCC;stroke:#888;stroke-dasharray:1,.5;stroke-linejoin: miter;stroke-opacity:1;stroke-width:.3" />
+    </g>
+    <g>
+        <polyline points=" 1,13.5 13.1,13.5" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 1,13.5 13.1,13.5" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 1,16 13.1,16" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 1,16 13.1,16" style="fill:none;stroke:#f8da00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 1,18.5 1,18.5 13.1,18.5" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 1,18.5 1,18.5 13.1,18.5" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 28.4,14.75 41,14.75" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 28.4,14.75 41,14.75" style="fill:none;stroke:#f8da00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 28.4,17.25 41,17.25" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 28.4,17.25 41,17.25" style="fill:none;stroke:#0000FF;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 19.75,8.1 19.75,1" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 19.75,8.1 19.75,1" style="fill:none;stroke:#FF0000;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 22.25,8.1 22.25,1" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 22.25,8.1 22.25,1" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+        <polyline points=" 21,23.2 21,31" style="fill:none;stroke:#000000;stroke-linecap:round;stroke-width:1.7" />
+        <polyline points=" 21,23.2 21,31" style="fill:none;stroke:#00FF00;stroke-linecap:round;stroke-opacity:1;stroke-width:1.5" />
+    </g>
+    <g />
+    <g>
+        <polyline points=" 1,19.25 1,12.75" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1" />
+        <polyline points=" 1,16 1,16" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5" />
+        <polyline points=" 13.1,12.75 13.1,19.25" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1" />
+        <polyline points=" 21,16 13.1,16" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5" />
+        <polyline points=" 23,8.1 19,8.1" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1" />
+        <polyline points=" 21,16 21,8.1" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5" />
+        <polyline points=" 28.4,18 28.4,14" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1" />
+        <polyline points=" 21,16 28.4,16" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5" />
+        <polyline points=" 20.25,23.2 21.75,23.2" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1" />
+        <polyline points=" 21,16 21,23.2" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5" />
+        <polyline points=" 41,14 41,18" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1" />
+        <polyline points=" 41,16 41,16" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5" />
+        <polyline points=" 19,1 23,1" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1" />
+        <polyline points=" 21,1 21,1" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5" />
+        <polyline points=" 21.75,31 20.25,31" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1" />
+        <polyline points=" 21,31 21,31" style="fill:none;stroke:black;stroke-linejoin: miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5" />
+    </g>
+</svg>

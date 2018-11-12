@@ -1,0 +1,122 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\gincltex@bb{render_examples/vvs_transit_graph.tex}{0}{0}{230.54686}{169.63716}
+\providecommand \oddpage@label [2]{}
+\@writefile{toc}{\contentsline {section}{Abstract}{}{section*.1}}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{}{section.1}}
+\newlabel{SEC:intro}{{1}{}{Introduction}{section.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Left: Google transit map cutout for Chicago. Right: LOOM map for the same area.\relax }}{}{figure.caption.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Overview and Definitions}{}{subsection.1.1}}
+\newlabel{SEC:intro:definition}{{1.1}{}{Overview and Definitions}{subsection.1.1}{}}
+\citation{ben06}
+\citation{bek07}
+\citation{arg08,arg10,nol09}
+\citation{asq08}
+\citation{fin13b}
+\citation{fin13a}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Left: Excerpt from a line graph which LOOM constructs for the 2015 light rail network of the city of Stuttgart from the given GTFS data. Each edge corresponds to a segment of the network where the same set of lines takes the same geographical course. Segment boundaries are often station nodes (large) but may also be intermediate nodes (small). The line ids for each segment are given in ascending order. LOOM's central optimization step computes a line ordering that determines how the lines are drawn in the map, and where line crossings and separations occur. Right: The corresponding excerpt from LOOM's transit map.\relax }}{}{figure.caption.4}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{FIG:transitgraphvvs}{{2}{}{Left: Excerpt from a line graph which LOOM constructs for the 2015 light rail network of the city of Stuttgart from the given GTFS data. Each edge corresponds to a segment of the network where the same set of lines takes the same geographical course. Segment boundaries are often station nodes (large) but may also be intermediate nodes (small). The line ids for each segment are given in ascending order. LOOM's central optimization step computes a line ordering that determines how the lines are drawn in the map, and where line crossings and separations occur. Right: The corresponding excerpt from LOOM's transit map.\relax }{figure.caption.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Contributions}{}{subsection.1.2}}
+\newlabel{SEC:intro:contrib}{{1.2}{}{Contributions}{subsection.1.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Related Work}{}{subsection.1.3}}
+\newlabel{SEC:related}{{1.3}{}{Related Work}{subsection.1.3}{}}
+\citation{hol09}
+\citation{pup11}
+\citation{pup11}
+\citation{hon06}
+\citation{fin12}
+\citation{nol14}
+\citation{dub16}
+\citation{gtfs}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Line Graph Construction}{}{section.2}}
+\newlabel{SEC:graph}{{2}{}{Line Graph Construction}{section.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Line Ordering Optimization}{}{section.3}}
+\newlabel{SEC:ordering}{{3}{}{Line Ordering Optimization}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Baseline ILP}{}{subsection.3.1}}
+\newlabel{SEC:baseline}{{3.1}{}{Baseline ILP}{subsection.3.1}{}}
+\newlabel{EQ:p_constr1_bl}{{2}{}{Baseline ILP}{equation.3.2}{}}
+\newlabel{EQ:p_constr2_bl}{{3}{}{Baseline ILP}{equation.3.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Example instances. Both station polygons have 4 \emph  {node fronts}, each corresponding to an incident edge. Each node front has exactly one port ($1, 2, ...$) for each line traversing through its edge.\relax }}{}{figure.caption.5}}
+\newlabel{FIG:crossings}{{3}{}{Example instances. Both station polygons have 4 \emph {node fronts}, each corresponding to an incident edge. Each node front has exactly one port ($1, 2, ...$) for each line traversing through its edge.\relax }{figure.caption.5}{}}
+\newlabel{EQ:crossdec_constr_bl}{{4}{}{Baseline ILP}{equation.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Improved ILP Formulation}{}{subsection.3.2}}
+\newlabel{SEC:improved}{{3.2}{}{Improved ILP Formulation}{subsection.3.2}{}}
+\newlabel{EQ:up_constr}{{5}{}{Improved ILP Formulation}{equation.3.5}{}}
+\newlabel{EQ:01_constr}{{6}{}{Improved ILP Formulation}{equation.3.6}{}}
+\newlabel{EQ:abs_upper}{{10}{}{Improved ILP Formulation}{equation.3.10}{}}
+\newlabel{EQ:abs_lower}{{11}{}{Improved ILP Formulation}{equation.3.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Preventing Line Partner Separation}{}{subsection.3.3}}
+\newlabel{SEC:separation}{{3.3}{}{Preventing Line Partner Separation}{subsection.3.3}{}}
+\citation{asq08}
+\gincltex@bb{tikz/transitgraph_optim.tex}{0}{0}{188.08214}{95.53743}
+\gincltex@bb{tikz/coreoptimgraph.tex}{0}{0}{148.49844}{78.32631}
+\gincltex@bb{tikz/connected_components.tex}{0}{0}{167.74585}{90.2311}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Minimized crossings in the left example, but the right example better indicates line pairings.\relax }}{}{figure.caption.6}}
+\newlabel{FIG:linesplitting}{{4}{}{Minimized crossings in the left example, but the right example better indicates line pairings.\relax }{figure.caption.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Both orderings have 2 crossings, but in the right example they are done in one pass.\relax }}{}{figure.caption.6}}
+\newlabel{FIG:linesplitting2}{{5}{}{Both orderings have 2 crossings, but in the right example they are done in one pass.\relax }{figure.caption.6}{}}
+\newlabel{EQ:sep_cstr_1}{{12}{}{Preventing Line Partner Separation}{equation.3.12}{}}
+\newlabel{EQ:sep_cstr_2}{{13}{}{Preventing Line Partner Separation}{equation.3.13}{}}
+\newlabel{EQ:sep_cstr_3}{{14}{}{Preventing Line Partner Separation}{equation.3.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Placement of Crossings or Separations}{}{subsection.3.4}}
+\newlabel{SEC:crossing_placement}{{3.4}{}{Placement of Crossings or Separations}{subsection.3.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Left: Periphery condition guaranteed by separation penalty. Right: Periphery condition not guaranteed by separation penalty.\relax }}{}{figure.caption.7}}
+\newlabel{FIG:periphery}{{6}{}{Left: Periphery condition guaranteed by separation penalty. Right: Periphery condition not guaranteed by separation penalty.\relax }{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Core Graph Reduction}{}{section.4}}
+\newlabel{SEC:coreprobgraph}{{4}{}{Core Graph Reduction}{section.4}{}}
+\newlabel{LEM:linepairing}{{4.1}{}{}{theorem.4.1}{}}
+\newlabel{LEM:crossingmoveing}{{4.2}{}{}{theorem.4.2}{}}
+\newlabel{LEM:termini}{{4.3}{}{}{theorem.4.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Left: line graph $G$ with 7 lines. Middle: core graph of $G$ after applying pruning rules, $\{A, B\}$ was collapsed into $\{X\}$. Right: ordering-relevant connected components of $G$ after applying splitting rules.\relax }}{}{figure.caption.8}}
+\newlabel{FIG:coreoptimgraph}{{7}{}{Left: line graph $G$ with 7 lines. Middle: core graph of $G$ after applying pruning rules, $\{A, B\}$ was collapsed into $\{X\}$. Right: ordering-relevant connected components of $G$ after applying splitting rules.\relax }{figure.caption.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Rendering}{}{section.5}}
+\newlabel{SEC:rendering}{{5}{}{Rendering}{section.5}{}}
+\newlabel{TBL:datasets}{{1}{}{}{table.caption.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Evaluation}{}{section.6}}
+\bibstyle{ACM-Reference-Format}
+\bibdata{transitmaps}
+\bibcite{arg08}{{1}{2008}{{Argyriou et~al\unhbox \voidb@x \hbox {.}}}{{Argyriou, Bekos, Kaufmann, and Symvonis}}}
+\bibcite{arg10}{{2}{2010}{{Argyriou et~al\unhbox \voidb@x \hbox {.}}}{{Argyriou, Bekos, Kaufmann, and Symvonis}}}
+\bibcite{asq08}{{3}{2008}{{Asquith et~al\unhbox \voidb@x \hbox {.}}}{{Asquith, Gudmundsson, and Merrick}}}
+\bibcite{bek07}{{4}{2007}{{Bekos et~al\unhbox \voidb@x \hbox {.}}}{{Bekos, Kaufmann, Potika, and Symvonis}}}
+\bibcite{ben06}{{5}{2006}{{Benkert et~al\unhbox \voidb@x \hbox {.}}}{{Benkert, N{\"o}llenburg, Uno, and Wolff}}}
+\bibcite{dub16}{{6}{2016}{{Dubreau}}{{Dubreau}}}
+\bibcite{fin12}{{7}{2012}{{Fink et~al\unhbox \voidb@x \hbox {.}}}{{Fink, Haverkort, N{\"o}llenburg, Roberts, Schuhmann, and Wolff}}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces The four steps of rendering a given line graph: (1) render ordered lines as edges, (2) free node area, (3) render inner connections, (4) render station overlays.\relax }}{}{figure.caption.9}}
+\newlabel{FIG:renderingproc}{{8}{}{The four steps of rendering a given line graph: (1) render ordered lines as edges, (2) free node area, (3) render inner connections, (4) render station overlays.\relax }{figure.caption.9}{}}
+\newlabel{TBL:evalres}{{2}{}{}{table.caption.11}{}}
+\newlabel{TBL:rweval}{{3}{}{}{table.caption.12}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusions and Future Work}{}{section.7}}
+\newlabel{SEC:conclusions}{{7}{}{Conclusions and Future Work}{section.7}{}}
+\@writefile{toc}{\contentsline {section}{References}{}{section*.14}}
+\bibcite{fin13a}{{8}{2013a}{{Fink and Pupyrev}}{{Fink and Pupyrev}}}
+\bibcite{fin13b}{{9}{2013b}{{Fink and Pupyrev}}{{Fink and Pupyrev}}}
+\bibcite{gtfs}{{10}{[n. d.]}{{GTFS}}{{GTFS}}}
+\bibcite{hol09}{{11}{2009}{{Holten and Van~Wijk}}{{Holten and Van~Wijk}}}
+\bibcite{hon06}{{12}{2006}{{Hong et~al\unhbox \voidb@x \hbox {.}}}{{Hong, Merrick, and do~Nascimento}}}
+\bibcite{nol09}{{13}{2009}{{N{\"o}llenburg}}{{N{\"o}llenburg}}}
+\bibcite{nol14}{{14}{2014}{{N{\"o}llenburg}}{{N{\"o}llenburg}}}
+\bibcite{pup11}{{15}{2011}{{Pupyrev et~al\unhbox \voidb@x \hbox {.}}}{{Pupyrev, Nachmanson, Bereg, and Holroyd}}}
+\newlabel{tocindent-1}{0pt}
+\newlabel{tocindent0}{0pt}
+\newlabel{tocindent1}{4.185pt}
+\newlabel{tocindent2}{10.34999pt}
+\newlabel{tocindent3}{0pt}
+\newlabel{TotPages}{{8}{}{}{page.}{}}

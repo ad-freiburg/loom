@@ -1,0 +1,38 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usetikzlibrary{hobby,backgrounds}
+\begin{document}
+	\tikzstyle{graphnode}=[minimum size=14pt, inner sep=0, circle, draw=black, solid, fill=white]
+	\tikzstyle{connnode}=[minimum size=6pt, inner sep=0, circle, draw=black, solid, fill=white]
+	\begin{tikzpicture}[font=\small]
+		\newcommand{\highlight}[3]{
+			\path [line cap = round, line join = round, line width = #1, draw = #2!30] #3;
+			\pgfmathsetmacro{\innerlinewidth}{0.95 * #1}
+			\path [line cap = round, line join = round, line width = \innerlinewidth, draw = #2!15] #3;
+		}
+
+		\foreach \place/\x in {{(10.1,3.7)/1}, {(10.9,2)/3}, {(7, 3.7)/5}, {(6.5, 2)/9}}
+		\node[graphnode] (\x) at \place {$\x$};
+
+		\foreach \place/\x in {{(8, 3.7)/11}, {(9.6,2)/4}, {(9.9,2.7)/41}, {(7.8, 2.9)/13}, {(7.8, 2.5)/14}, {(8,2.1)/15}}
+		\node[connnode] (\x) at \place {};
+
+		\draw (1) -- (3) node [midway, above right] {$\{X,C\}$};
+		\draw (3) -- (4) node [midway, below] {$\{X\}$};
+		\draw (1) -- (41) node [midway, left, xshift=0pt, yshift=1pt] {$\{C\}$};
+
+		\draw (5) -- (9) node [midway, above left] {$\{E,F\}$};
+
+		\draw (13) -- (5) node [midway, right, xshift=1pt, yshift=0pt] {$\{D\}$};
+		\draw (9) -- (14) node [midway, above, yshift=3pt] {$\{F\}$};
+
+		\draw (15) -- (9) node [midway, below right] {$\{E\}$};
+
+		\draw (5) -- (11) node [midway, above, yshift=4pt] {$\{D,E,F\}$};
+
+		\begin{pgfonlayer}{background}
+			\highlight{15mm}{blue}{(15) -- (9) -- (5) -- (11) -- (13);}
+			\highlight{14mm}{red}{(1) -- (3) -- (4) -- (1);}
+		\end{pgfonlayer}
+	\end{tikzpicture}
+\end{document}
