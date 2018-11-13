@@ -9,7 +9,8 @@
 \usepackage{array}
 \usepackage[inline]{enumitem}
 \usepackage{footnote}
-
+\usepackage{booktabs}
+\usepackage{multirow}
 
 
 % Copyright
@@ -678,21 +679,21 @@ It remains to show that an additional class of structures, which we call \emph{s
 
 The real power of the untangling rules described in the previous section lies in their repeated application, together with the pruning and cutting rules described in Sections~\ref{SEC:pruning} and \ref{SEC:cutting}. But how long does it take until an input line graph is fully untangled and reduced?
 
-We first consider the complexity of the untangling rules and assume that the lines in each $L(e)$ are already ordered (for example, by some internal line id). We denote the maximum degree of our input line graph $G$ as $\Delta(G)$. We can safely remove nodes with degree 1 from the line graph prior to optimization and thus assume that $2|E|$ is an upper bound for $|V|$. Finding an edge eligible for any of the untangling rules described in Section~\ref{SEC:untangling} is a matter of iterating over all edges or all nodes, an thus always takes $\mathcal{O}(|E|)$. Each rule breaks up an edge $e$ into two edges $e'$ and $e''$, which can only be done at most $M$ times in the worst case (if $|L(e)| = M$ and we only detach a single line per untangling rule application). No untangling rule increases the number of lines per edge, so a single untangling rule can be applied at most $\mathcal{O}(|E|M)$ times.
+We first consider the complexity of the untangling rules and assume that the lines in each $L(e)$ are already ordered (for example, by some internal line id). We denote the maximum degree of our input line graph $G$ as $D$. We can safely remove nodes with degree 1 from the line graph prior to optimization and thus assume that $2|E|$ is an upper bound for $|V|$. Finding an edge eligible for any of the untangling rules described in Section~\ref{SEC:untangling} is a matter of iterating over all edges or all nodes, an thus always takes $\mathcal{O}(|E|)$. Each rule breaks up an edge $e$ into two edges $e'$ and $e''$, which can only be done at most $M$ times in the worst case (if $|L(e)| = M$ and we only detach a single line per untangling rule application). No untangling rule increases the number of lines per edge, so a single untangling rule can be applied at most $\mathcal{O}(|E|M)$ times.
 
-In untangling rule 1 (full crossings), we have to check ${\Delta(G) \choose 2} < \Delta(G)^2$ partners of adjacent edges for line equivalency in the worst case, which can always be done in $\mathcal{O}(M)$ because we assume the $L(e)$ to be ordered.
+In untangling rule 1 (full crossings), we have to check ${D \choose 2} < D^2$ partners of adjacent edges for line equivalency in the worst case, which can always be done in $\mathcal{O}(M)$ because we assume the $L(e)$ to be ordered.
 
-%Applying untangling rule 1 to the entire graph thus takes $\mathcal{O}(|E|M^2\Delta(G)^2)$.
+%Applying untangling rule 1 to the entire graph thus takes $\mathcal{O}(|E|M^2D^2)$.
 
-In untangling rule 2 (Y structures), we have to check for the non-terminus node if the $L(e)$ of all minor leg edges are completely contained in the main leg, which can be done in $\mathcal{O}(M\Delta(G))$, again assuming the $L(e)$ are ordered. We also have to check of the minor leg edges are pairwise disjoint, which takes $\mathcal{O}(M\Delta(G)^2)$ in the worst case. 
+In untangling rule 2 (Y structures), we have to check for the non-terminus node if the $L(e)$ of all minor leg edges are completely contained in the main leg, which can be done in $\mathcal{O}(MD)$, again assuming the $L(e)$ are ordered. We also have to check of the minor leg edges are pairwise disjoint, which takes $\mathcal{O}(MD^2)$ in the worst case. 
 
-%Applying untangling rule 2 to the entire graph thus also takes $\mathcal{O}(|E|M^2\Delta(G)^2)$. Untangling rule 3 makes the same checks as 3, and has thus the same complexity.
+%Applying untangling rule 2 to the entire graph thus also takes $\mathcal{O}(|E|M^2D^2)$. Untangling rule 3 makes the same checks as 3, and has thus the same complexity.
 
 In untangling rule 4 and 5 (dog bone structures), it is easy to see that we have to apply the same checks as for rules 2 and 3, but we also have to establish the mapping $m$ between the left and the right legs, which can be considered an intersection problem and solved in $\mathcal{O}(M\Delta(G))$ if we assume that the adjacency lists are already ordered in clockwise fashion based on their outgoing angle.
 
 Untangling rule 6 (stump structures) has the same complexity as rule 4 and 5, as the identification has the same complexity as there and the extension by dummy node and edge can be done in constant time.
 
-A single round of each untangling rule can thus always be done in $\mathcal{O}(|E|M\Delta(G)^2)$.
+A single round of each untangling rule can thus always be done in $\mathcal{O}(|E|MD^2)$.
 
 Now we consider the complexity of the pruning rules. For each contraction, we have to check if $L(e) = L(e')$, which can be solved in $\mathcal{O}(M)$ as we assumed that $L(e)$ and $L(e')$ are sorted and can at least have size $M$. Pruning rule 1 can thus be applied in $\mathcal{O}(|E|M)$, as we have to contract at most $2|E|$ nodes. Pruning rule 2 is a matter of doing at most ${M \choose 2} < M^2$ depth-first searches in the line graph, which can be done in $\mathcal{O}(|E|M^2)$ (again assuming $2|E|$ as an upper bound for $|V|$). Pruning rule 3 is a matter of checking each line in each edge $(u, v)$ if it terminates in either $u$ or $v$, which can again be done in $\mathcal{O}(|E|M)$ as we have to check at least $M$ lines per edges, twice (for $u$ and $v$).
 
@@ -712,42 +713,25 @@ We may apply all of the rules in the following fashion:
 
 First, we note that no cutting, no pruning and no untangling rules increase the number of lines in any edge, so pruning rule 2 has to be applied only once at the beginning.
 
-Second, we note that pruning rule 1 and 3 always \emph{decrease} the number of edges. In the worst case, the cutting rules may double the number of edges. The untangling rules may increase the number of edge by a factor of $M$ in the worst case, so if $|E|$ is the number of edges in the input line graph, the maximum number of edges in the intermediate optimization graph at any state during the iteration above will be $\mathcal{O}(|E|M)$. We assumed that each edge $L(e)$ and each adjacency list in the input line graph was ordered. The former can be sorted in $\mathcal{O}(|E|M\log M)$, the latter in $\mathcal{O}(|E|\Delta(G)\log\Delta(G))$.
+Second, we note that pruning rule 1 and 3 always \emph{decrease} the number of edges. In the worst case, the cutting rules may double the number of edges. The untangling rules may increase the number of edge by a factor of $M$ in the worst case, so if $|E|$ is the number of edges in the input line graph, the maximum number of edges $|E'|$ in any intermediate optimization graph will be $\mathcal{O}(|E|M)$. We assumed that each edge $L(e)$ and each adjacency list in the input line graph was sorted. The former can be sorted in $\mathcal{O}(|E|M\log M)$, the latter in $\mathcal{O}(|E|D\log D)$.
 
-The worst case complexity of the entire core graph reduction process, including untangling is thus $\mathcal{O}(|E|M^3\Delta(G)^2)$. We note, however, that in practice, both $M$ and $\Delta(G)$ are usually very small. For all our testing datasets, the maximum $M$ was 9 (Table~\ref{TBL:datasets}), and $\Delta(G)$ was always below 10.
+The worst case complexity of the entire core graph reduction process, including untangling is thus $\mathcal{O}(|E|M^3D^2)$. We note, however, that in practice, both $M$ and $D$ are usually very small. For our testing datasets, the maximum $M$ was 9 (Table~\ref{TBL:datasets}), and $D$ was always below 10. For all practical purposes, we are confident that both $D$ and $M$ can be considered a constant factor.
 
 %
 \section{Rendering}\label{SEC:rendering}
 %
 \begin{figure}[b]
   \centering
-  	\scalebox{1} {
-	  	\begin{picture}(99, 65)
-			\put(0,0){\includegraphics[width=0.40\textwidth]{render_examples/rendering/render_example1.pdf}}
-			\put(0,3){(1)}
-		\end{picture}
-	}
-	\hfill
-	\scalebox{1} {
-	  	\begin{picture}(99, 65)
-			\put(0,0){\includegraphics[width=0.40\textwidth]{render_examples/rendering/render_example2.pdf}}
-			\put(0,3){(2)}
-		\end{picture}
-	}
-    \hfill
-    \scalebox{1} {
-	  	\begin{picture}(99, 90)
-			\put(0,0){\includegraphics[width=0.40\textwidth]{render_examples/rendering/render_example3.pdf}}
-			\put(0,3){(3)}
-		\end{picture}
-    }
-    \hfill
-    \scalebox{1} {
-	    \begin{picture}(99, 90)
-			\put(0,0){\includegraphics[width=0.40\textwidth]{render_examples/rendering/render_example4.pdf}}
-			\put(0,3){(4)}
-		\end{picture}
-	}
+  \includegraphics[width=0.35\textwidth]{render_examples/rendering/render_example1.pdf}
+  \hspace{1cm}
+  \includegraphics[width=0.35\textwidth]{render_examples/rendering/render_example2.pdf}
+
+  \vspace{0.8cm}
+  \centering
+  \includegraphics[width=0.35\textwidth]{render_examples/rendering/render_example3.pdf}
+  \hspace{1cm}
+  \includegraphics[width=0.35\textwidth]{render_examples/rendering/render_example4.pdf}
+
 	\caption{The four steps of rendering a given line graph: (1) render ordered lines as edges, (2) free node area, (3) render inner connections, (4) render station overlays.}
 	\label{FIG:renderingproc}
 \end{figure}
@@ -784,15 +768,15 @@ Table~\ref{TBL:datasets} provides the dimensions of each dataset and the time ne
   %\footnotesize
   {\renewcommand{\baselinestretch}{1.13}\normalsize
   \setlength\tabcolsep{3pt}
-  \begin{tabular*}{0.48\textwidth}{@{\extracolsep{\fill}} l r r r r r r} \hline
-              & $t_{\text{extr}}$ & $|{\cal S}|$ & $|V|$ & $|E|$ & $|{\cal L}|$ & $M$ \Hhline
+  \begin{tabular*}{0.48\textwidth}{@{\extracolsep{\fill}} l r r r r r r} \toprule
+              & $t_{\text{extr}}$ & $|{\cal S}|$ & $|V|$ & $|E|$ & $|{\cal L}|$ & $M$ \\\midrule
     Freiburg    & 0.7\Hs  & 74  &  80 &  81 &  5 & 4 \\
     Dallas & 3\Hs & 108 & 117 & 118 &  7 & 4  \\
     Chicago & 13.5\Hs & 143 & 153 & 154 &  8 & 6 \\
     Stuttgart   & 7.7\Hs  & 192 & 219 & 229 & 15 & 8  \\
     Turin       & 4.9\Hs & 339  & 398 & 435 & 14 & 5  \\
     New York
-                        & 3.7\Hs & 456  &  517  & 548 & 26 & 9 \Hhline
+                        & 3.7\Hs & 456  &  517  & 548 & 26 & 9 \\\bottomrule
   \end{tabular*}}
 
 \end{table}
@@ -803,25 +787,25 @@ Table~\ref{TBL:datasets} provides the dimensions of each dataset and the time ne
   %\footnotesize
   {\renewcommand{\baselinestretch}{1.13}\normalsize
   \setlength\tabcolsep{3pt}
-  \begin{tabular*}{0.48\textwidth}{@{\extracolsep{\fill}} l r r r r r}\hline
-               & $|V|$ & $|E|$ & $|{\cal L}|$ & $M$ \Hhline
+  \begin{tabular*}{0.48\textwidth}{@{\extracolsep{\fill}} l r r r r r}\toprule
+               & $|V|$ & $|E|$ & $|{\cal L}|$ & $M$ \\\midrule
     Freiburg    & 20  & 21  &   5 & 4 \\
     Dallas & 24  & 24  &   7 & 4 \\
     Chicago & 23  & 24  &   8 & 6 \\
     Stuttgart   & 50  & 58  &  15 & 8 \\
     Turin       & 91  & 124 &  14 & 5 \\
     New York
-                        & 110 & 138 &  23 & 9 \Hhline
+                        & 110 & 138 &  23 & 9 \\\bottomrule
   \end{tabular*}}
   %\vspace{-2mm}
 \end{table}
 
 For each dataset, we considered two versions of the line graph: the baseline graph and the core graph.
-For each graph, we considered three ILP variants: the baseline ILP (B), the improved ILP (I) and the improved ILP with added separation penalty (S).
+For each graph, we considered three ILP variants: the baseline ILP (B), the improved ILP (I) and the improved ILP with added separation penalty (I+S).
 For each ILP, we evaluated three solvers: the GNU Linear Programming Kit (GLPK), the COIN-OR CBC solver and gurobi (GU).
 As most of the datasets (except Turin) still only had one connected component after applying the splitting rules described in Sect.~\ref{SEC:coreprobgraph}, we did not evaluate their application.
 
-For each node $v$, the penalty for a crossing between edge pairs ($\{A, B\}$ in Fig.~\ref{FIG:crossings}, left) was $4 \cdot \degv$, for other crossings ($\{A, B\}$ in Fig.~\ref{FIG:crossings}, right) it was $\degv$. The line separation penalty was $3\cdot\degv$. We found that these penalties produced nicer maps than a uniform penalty. This would imply $w_{\cal S\times} = 4 \cdot \max_{v\in V} \degv$ and $w_{\cal S\|} = 3 \cdot \max_{v\in V} \degv$. However, we found that moving some crossings or separations to stations with a degree greater than $2$ yielded better looking results. Hence, crossings in $v \in \mathcal{S}$ were punished with $w_{\cal S\times}$ if $\degv = 2$ and otherwise with $3\cdot\degv$ (normal crossing) or $12\cdot\degv$ (edge-pair crossing). Similarly, in-station line separations where punished with $w_{\cal S\|}$ if $\degv = 2$ and $9\cdot\degv$ otherwise. Note that Lemma~\ref{LEM:crossingmoveing} still holds because we did not change the punishment for degree 2 stations. Also note that separations were only considered in $(S)$ and thus depended on the solver and the input order in $(B)$ and $(I)$.
+For each node $v$, the penalty for a crossing between edge pairs ($\{A, B\}$ in Fig.~\ref{FIG:crossings}, left) was $4 \cdot \degv$, for other crossings ($\{A, B\}$ in Fig.~\ref{FIG:crossings}, right) it was $\degv$. The line separation penalty was $3\cdot\degv$. We found that these penalties produced nicer maps than a uniform penalty. This would imply $w_{\cal S\times} = 4 \cdot \max_{v\in V} \degv$ and $w_{\cal S\|} = 3 \cdot \max_{v\in V} \degv$. However, we found that moving some crossings or separations to stations with a degree greater than $2$ yielded better looking results. Hence, crossings in $v \in \mathcal{S}$ were punished with $w_{\cal S\times}$ if $\degv = 2$ and otherwise with $3\cdot\degv$ (normal crossing) or $12\cdot\degv$ (edge-pair crossing). Similarly, in-station line separations where punished with $w_{\cal S\|}$ if $\degv = 2$ and $9\cdot\degv$ otherwise. Note that Lemma~\ref{LEM:crossingmoveing} still holds because we did not change the punishment for degree 2 stations. Also note that separations were only considered in (I+S) and thus depended on the solver and the input order in (B) and (I).
 
 
 \begin{figure*}
@@ -847,8 +831,8 @@ For each node $v$, the penalty for a crossing between edge pairs ($\{A, B\}$ in 
 Table~\ref{TBL:evalres} shows the results of the ordering optimizations for 4 of our 6 datasets: Chicago, Stuttgart, Turin and New York. Tests were run on an Intel Core i5-6300U machine with 4 cores \`{a} 2.4 GHz and 12 GB RAM.
 The CBC solver was compiled with multithreading support, and used with the default parameters and \texttt{threads=4}.
 The GLPK solver was used with the feasibility pump heuristic (\texttt{fp\_heur=ON}), the proximity search heuristic (\texttt{ps\_heur=ON}) and the presolver enabled (\texttt{presolve=ON}). We used gurobi with the default parameters.
-\subsubsection{ILP Solution Times} With our improved ILP (I), the optimal orderings on the core graph could be found in under 50 milliseconds with gurobi, and in under 1 second with CBC, on any dataset. If line separation was also punished (S), the ILP could be solved on the core graph in under 2.5 seconds with gurobi for any dataset, and in under 1 minute with CBC. Although the ILPs for (S) were only slightly larger than for (I), optimization on the core graph took $28$ times longer on average with the fastest solver.
-\subsubsection{Effects of Core Graph Reduction} On the baseline graph, (B) could not be optimized for all datasets except Turin with gurobi, and only after core graph reduction was a solution for Stuttgart and Chicago found in under 12 hours. As expected in Sect.~\ref{SEC:coreprobgraph}, core graph reduction made the ILPs significantly smaller. On average, the number of rows decreased by $61\,\%$ and the number of columns by $59\,\%$ for (I). For (S), the decrease was $62\,\%$ and $60\,\%$, respectively. With the fastest solver and the improved ILP (I), core graph reduction lead to speedup by a factor between $4$ for Chicago, and 2 for New York. For (S), this speedup was between $22.4$ for Stuttgart, and $2.5$ for Turin.
+\subsubsection{ILP Solution Times} With our improved ILP (I), the optimal orderings on the core graph could be found in under 50 milliseconds with gurobi, and in under 1 second with CBC, on any dataset. If line separation was also punished (I+S), the ILP could be solved on the core graph in under 2.5 seconds with gurobi for any dataset, and in under 1 minute with CBC. Although the ILPs for (I+S) were only slightly larger than for (I), optimization on the core graph took $28$ times longer on average with the fastest solver.
+\subsubsection{Effects of Core Graph Reduction} On the baseline graph, (B) could not be optimized for all datasets except Turin with gurobi, and only after core graph reduction was a solution for Stuttgart and Chicago found in under 12 hours. As expected in Sect.~\ref{SEC:coreprobgraph}, core graph reduction made the ILPs significantly smaller. On average, the number of rows decreased by $61\,\%$ and the number of columns by $59\,\%$ for (I). For (I+S), the decrease was $62\,\%$ and $60\,\%$, respectively. With the fastest solver and the improved ILP (I), core graph reduction lead to speedup by a factor between $4$ for Chicago, and 2 for New York. For (I+S), this speedup was between $22.4$ for Stuttgart, and $2.5$ for Turin.
 
 \subsection{Impact of Graph Untangling}
 
@@ -865,12 +849,12 @@ The GLPK solver was used with the feasibility pump heuristic (\texttt{fp\_heur=O
   \setlength\tabcolsep{3pt}
   \begin{tabular*}{.48\textwidth}{@{\extracolsep{\fill}} l r r r r r r r}
               & \multicolumn{3}{ c }{\footnotesize Official map} & \multicolumn{3}{ c }{\footnotesize Our map} \\
-              \cline{2-4} \cline{5-7} \\[-2ex] \hline\noalign{\smallskip}
-              & $\times$ & $||$ & pen. & $\times$ & $||$ & pen. & $T$  \Hhline
+              \cline{2-4} \cline{5-7} \\[-2ex] \toprule\noalign{\smallskip}
+              & $\times$ & $||$ & pen. & $\times$ & $||$ & pen. & $T$  \\\midrule
     Freiburg    & 7  & 1  & 132 & 7  &  0 & 96 & 2\\
     Dallas   & 3  & 1  & 27 &  3  &  0 & 9 & 1\\
     Chicago    & 26  & 0  & 80 &  27  &  0 & 80 & 1\\
-    Stuttgart    & 65  & 5 & 264 &  64  &  2  & 156 & 4 \Hhline
+    Stuttgart    & 65  & 5 & 264 &  64  &  2  & 156 & 4 \\\bottomrule
   \end{tabular*}}
   %\vspace{-2mm}
 \end{table}
@@ -896,35 +880,58 @@ We also found that our maps always scored better or equal in our penalty system 
 \def\Hgr{$>$}
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 \begin{table*}
-  \caption[]{Dimensions and solution times for Chicago, Stuttgart, Turin and New York and our three ILPs: baseline (B), improved (I), and with line separation penalty (S), with or without reduction to the core graph, solved with GLPK, COIN-OR CBC and gurobi (GU). A time of --- means we aborted after 12 hours. The last two columns show the number of crossings ($\times$) and separations ($||$) after optimization.\label{TBL:evalres}}
+  \caption[]{Dimensions, solution times and final graph scores (pen) for Chicago, Stuttgart, Turin and New York and three baseline heuristics for the line ordering problem: exhaustive search with (E+S) and without (E) separation penalty and, hill climbing with (H+S) and without (H) separation penalty and simulated annealing with (A+S) and without separation penalty (A), all with or without reduction to the core graph. A time of --- means we aborted after 12 hours. $|S|$ is the search space size. The last two columns show the number of crossings ($\times$) and separations ($||$) after optimization.\label{TBL:evalres_heur}}
   \vspace{-3.6mm}
+  \centering
+  %\footnotesize
+  {\renewcommand{\baselinestretch}{1.13}\normalsize
+    \setlength\tabcolsep{2pt}
+  \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l@{\hskip 1.2mm} c r r r@{\hskip 2.5mm} r r r r r@{\hskip 1.5mm}r@{\hskip 1mm}r r r r}
+              && \multicolumn{6}{c}{\footnotesize On baseline graph} & & \multicolumn{6}{c}{\footnotesize On core graph} \\
+              \cline{3-8} \cline{10-15} \\[-2ex] \toprule
+              && $|S|$ & $t$ & iters & $\times$ & $||$ & pen & & $|S|$ & $t$ & iters & $\times$ & $||$ & pen \\\midrule
+
+    Chicago   & E & \multirow{6}{*}{?} & ? & ? & ? & ? & ? & & \multirow{6}{*}{?} & ? & ? &   ? &   ? & ?\\
+              & H &  &  ? & ? & ? & ? & ? & &  & ? & ? &   ? &   ? & ?\\
+              & A &  &  ? & ? & ? & ? & ? & &  & ? & ? &   ? &     ? & ?\\
+              & E+S &  & ? & ? & ? & ? & ? & &  & ? & ? &   ? &   ? & ?\\
+              & H+S &  &  ? & ? & ? & ? & ? & &  & ? & ? &   ? &   ? & ?\\
+              & A+S &  &  ? & ? & ? & ? & ? & &  & ? & ? &   ? &     ? & ?\\\midrule
+  \end{tabular*}}
+  \vspace{3.6mm}
+\end{table*}
+
+\begin{table*}
+  \caption[]{Dimensions and solution times for Chicago, Stuttgart, Turin and New York and our three ILPs: baseline (B), improved (I), and with line separation penalty (I+S), with or without reduction to the core graph, solved with GLPK, COIN-OR CBC and gurobi (GU). A time of --- means we aborted after 12 hours. The last two columns show the number of crossings ($\times$) and separations ($||$) after optimization. Optimal graph scores can be found in Table~\ref{TBL:rweval}\label{TBL:evalres}}.
+  %\vspace{-50mm}
   \centering
   %\footnotesize
   {\renewcommand{\baselinestretch}{1.13}\normalsize
     \setlength\tabcolsep{2pt}
   \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l@{\hskip 1.2mm} c r r r@{\hskip 2.5mm} r r r r r@{\hskip 1.5mm}r@{\hskip 1mm}r r r}
               && \multicolumn{4}{c}{\footnotesize On baseline graph} & & \multicolumn{4}{c}{\footnotesize On core graph} \\
-              \cline{3-6} \cline{8-11} \\[-2ex] \hline\noalign{\smallskip}
-              && \Hdimh & \Htglpk & \Htcbc & \Htgo &  & \Hdimh & \Htglpk & \Htcbc & \Htgo & $\times$ & $||$ \Hhline
+              \cline{3-6} \cline{8-11} \\[-2ex] \toprule
+              && \Hdimh & \Htglpk & \Htcbc & \Htgo &  & \Hdimh & \Htglpk & \Htcbc & \Htgo & $\times$ & $||$ \\\midrule
 
     Chicago   & B & \Hdim{41\Hk}{861}   & \Hlong &  \Hlong & \Hlong & &  \Hdim{8.2\Hk}{266} &  \Hlong & 47\Hm & 2\Hm &   22 &   4-7 \\
               & I & \Hdim{1.4\Hk}{982} &  9\Hs & 1\Hs & 41\Hms & &   \Hdim{394}{285} & 0.8\Hs &  0.1\Hs & 10\Hms &   22 &   4-7 \\
-              & S & \Hdim{1.9\Hk}{1.2\Hk} &  47\Hm &   19\Hs & 1.8\Hs & &   \Hdim{505}{338} &   23\Hs &  3.8\Hs & 0.3\Hs &   27 &     0\Hhline
+              & I+S & \Hdim{1.9\Hk}{1.2\Hk} &  47\Hm &   19\Hs & 1.8\Hs & &   \Hdim{505}{338} &   23\Hs &  3.8\Hs & 0.3\Hs &   27 &     0\\\midrule
 
     Stuttgart & B & \Hdim{224\Hk}{2.4\Hk} & \Hlong &  \Hlong & \Hlong & &   \Hdim{44\Hk}{950} &  \Hlong &  \Hlong & 10\Hh & 60 &  11 \\
               & I & \Hdim{4.1\Hk}{2.8\Hk} & \Hlong &  3.5\Hs & 0.1\Hs & & \Hdim{1.5\Hk}{1\Hk} &   8\Hs &  0.2\Hs &  36\Hms &  60 & 7-15 \\
-              & S & \Hdim{5.6\Hk}{3.5\Hk} & \Hlong &  2\Hm & 47\Hs & & \Hdim{2.1\Hk}{1.3\Hk} &  \Hlong &   36\Hs & 2.1\Hs &   64 &     2 \Hhline
+              & I+S & \Hdim{5.6\Hk}{3.5\Hk} & \Hlong &  2\Hm & 47\Hs & & \Hdim{2.1\Hk}{1.3\Hk} &  \Hlong &   36\Hs & 2.1\Hs &   64 &     2 \\\midrule
 
     Turin     & B & \Hdim{24\Hk}{2.1\Hk}  & \Hlong &   \Hlong & 14\Hm & &   \Hdim{13\Hk}{1\Hk}     &  \Hlong  &  \Hlong &2\Hm & 79 & 6  \\
               & I & \Hdim{3.3\Hk}{2.4\Hk}   & 2\Hm & 0.6\Hs   & 0.1\Hs & &   \Hdim{1.6\Hk}{1.1\Hk}  &  16\Hs &  0.3\Hs & 41\Hms &    79     &   6-10\\
-              & S & \Hdim{4.3\Hk}{2.9\Hk}   & \Hlong  &  14\Hs   & 1\Hs & &   \Hdim{2\Hk}{1.4\Hk} &  \Hlong   &  4.2\Hs & 0.4\Hs &    81     &     2 \Hhline
+              & I+S & \Hdim{4.3\Hk}{2.9\Hk}   & \Hlong  &  14\Hs   & 1\Hs & &   \Hdim{2\Hk}{1.4\Hk} &  \Hlong   &  4.2\Hs & 0.4\Hs &    81     &     2 \\\midrule
 
     New York  & B & \Hdim{229\Hk}{5.2\Hk} & \Hlong &  \Hlong & \Hlong & &  \Hdim{96\Hk}{2.3\Hk} &  \Hlong &  \Hlong & \Hlong & \Hno &  \Hno \\
               & I &  \Hdim{8.6\Hk}{6\Hk} & \Hlong &  1.8\Hs & 0.2\Hs & & \Hdim{3.7\Hk}{2.5\Hk} &   \Hlong &  0.7\Hs & 0.1\Hs &  127 &     6-14 \\
-              & S &  \Hdim{12\Hk}{7.4\Hk} & \Hlong &  2.5\Hm & 12\Hs & & \Hdim{4.9\Hk}{3.2\Hk} &  \Hlong &   50\Hs &  1.5\Hs & 132  &     2 \Hhline
+              & I+S &  \Hdim{12\Hk}{7.4\Hk} & \Hlong &  2.5\Hm & 12\Hs & & \Hdim{4.9\Hk}{3.2\Hk} &  \Hlong &   50\Hs &  1.5\Hs & 132  &     2 \\\bottomrule
   \end{tabular*}}
-  %\vspace{-1mm}
+  %\vspace{50mm}
 \end{table*}
+  
 
 \section{Conclusions and Future Work}\label{SEC:conclusions}
 
