@@ -824,6 +824,14 @@ For each node $v$, the penalty for a crossing between edge pairs ($\{A, B\}$ in 
 
 \subsection{Performance of Optimization Heuristics}
 
+We first evaluate the results of 3 baseline heuristics for the line ordering optimization: an exhaustive search (E), steepest hill climbing (H) and simulated annealing (A).
+
+The exhaustive search (E) always explores the entire search space $S$ and takes the optimal line ordering solution. Even for small input graphs, the size of $S$ can be immense. For the Freiburg dataset, the size of $S$ is $\sim 6 \times 10^{13}$, for Stuttgart, is is $\sim 3 \times 10^{103}$.
+
+Our steepest hill climbing approach (H) always explores the entire neighborhood of the current ordering state in each iteration and chooses the one closest to the solution.
+
+Our simulated annealing approach (A) selects a neighbor at random and stops if the value of the target function has not changed for $k = 5000$ iterations. Additionally, 
+
 \TODO{Same table as table 4, but with exhaustive search, hillclimbing and simulated annealing}
 
 \subsection{Comparison of ILP Variants}
@@ -906,10 +914,10 @@ We also found that our maps always scored better or equal in our penalty system 
               & A+S &  &  0.4\Hs & 15.1k & 40.7 & 15 & 556.2 & &  & 0.7\Hs & 7.9k & 21.3 & 3.1 & 133.6\\\midrule
 
     Stuttgart   & E & \multirow{6}{*}{\Hsci{3}{103}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & & \multirow{6}{*}{\Hsci{2}{38}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong\\
-              & H & & ? & ? & ? & ? & ? & &  & ? & ? & ? & ? & ?\\
+              & H &  & 8\Hm & 52.4 & 127 & 114.6 & 1648.7 & &  & ? & ? & ? & ? & ?\\
               & A &  &  1\Hs & 20k & 139.5 & 128.6 & 1749.8 & &  & 1.1\Hs & 10.1k & 67.2 & 43.4 & 548.9\\
               & E+S &  & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & &  & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong\\
-              & H+S &  & ? & ? & ? & ? & ? & &  & ? & ? & ? & ? & ?\\
+              & H+S & & ? & ? & ? & ? & ? & &  & ? & ? & ? & ? & ?\\
               & A+S &  &  1.6\Hs & 25.6k & 123.3 & 55.7 & 1819.3 & &  & 1.6\Hs & 12.5k & 65 & 17.1 & 519.3\\\midrule
   \end{tabular*}}
   \vspace{3.6mm}
