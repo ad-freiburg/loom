@@ -145,6 +145,10 @@ double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c,
           (iga.from.front == igb.from.front && iga.to.front == igb.to.front) ||
           (iga.to.front == igb.from.front && iga.from.front == igb.to.front);
 
+      bool unavoidable =
+          iga.from.front != igb.from.front && iga.from.front != igb.to.front &&
+          iga.to.front != igb.from.front && iga.to.front != igb.to.front;
+
       if (util::geo::intersects(
               iga.geom.getLine().front(), iga.geom.getLine().back(),
               igb.geom.getLine().front(), igb.geom.getLine().back()) ||
@@ -152,7 +156,7 @@ double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c,
 
         if (sameSeg) {
           ret += getCrossingPenaltySameSeg(n, pens);
-        } else {
+        } else if (!unavoidable) {
           ret += getCrossingPenaltyDiffSeg(n, pens);
         }
       }

@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
       }
 
       LOG(INFO) << "(stats) Total graph score AFTER optim is -- "
-                << scorer.getScore() << " -- (incl. unavoidable crossings!)";
+                << scorer.getScore() << " -- (excl. unavoidable crossings!)";
       LOG(INFO) << "(stats)   Per node graph score: "
                 << scorer.getScore() / g.getNodes()->size();
       LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings()
