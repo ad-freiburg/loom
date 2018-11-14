@@ -25,6 +25,8 @@ struct Config {
   std::string glpkHOutputPath;
   std::string glpkSolutionOutputPath;
 
+  size_t optimRuns;
+
   bool noOptim;
   bool splittingOpt;
   bool outOptGraph;
@@ -55,6 +57,7 @@ struct Config {
   bool renderDirMarkers;
 
   bool createCoreOptimGraph;
+  bool untangleGraph;
   bool simpleRenderForTwoEdgeNodes;
 
   bool useGlpkFeasibilityPump;

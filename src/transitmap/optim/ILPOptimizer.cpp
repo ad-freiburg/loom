@@ -20,38 +20,7 @@ using namespace optim;
 using namespace transitmapper::graph;
 
 // _____________________________________________________________________________
-int ILPOptimizer::optimize(TransitGraph* tg) const {
-  // create optim graph
-  OptGraph g(tg, _scorer);
-
-  if (_cfg->createCoreOptimGraph) {
-    g.simplify();
-    g.untangle();
-    g.split();
-  }
-
-  if (_cfg->outOptGraph) {
-    util::geo::output::GeoGraphJsonOutput out;
-    std::ofstream fstr(_cfg->dbgPath + "/optgraph.json");
-    out.print(g, fstr);
-  }
-
-  HierarchOrderingConfig hc;
-  OrderingConfig c;
-
-  optimize(*g.getNds(), &hc);
-
-  hc.writeFlatCfg(&c);
-
-  Optimizer::expandRelatives(tg, &c);
-
-  tg->setConfig(c);
-
-  return 0;
-}
-
-// _____________________________________________________________________________
-int ILPOptimizer::optimize(const std::set<OptNode*>& g,
+int ILPOptimizer::optimizeComp(const std::set<OptNode*>& g,
                            HierarchOrderingConfig* hc) const {
   LOG(DEBUG) << "Creating ILP problem... " << std::endl;
   glp_prob* lp = createProblem(g);

@@ -2,6 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
@@ -27,25 +28,31 @@ typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
 class Optimizer {
  public:
-  virtual int optimize(TransitGraph* tg) const = 0;
-  virtual int optimize(const std::set<OptNode*>& g,
+  Optimizer(const config::Config* cfg, const Scorer* scorer)
+      : _cfg(cfg), _scorer(scorer){};
+
+  virtual int optimize(TransitGraph* tg) const;
+  virtual int optimizeComp(const std::set<OptNode*>& g,
                        HierarchOrderingConfig* c) const = 0;
 
   static std::vector<LinePair> getLinePairs(OptEdge* segment);
   static std::vector<LinePair> getLinePairs(OptEdge* segment, bool unique);
 
   static bool crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
-               PosComPair postcomb);
+                      PosComPair postcomb);
 
   static bool crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
-               PosCom postcomb);
+                      PosCom postcomb);
   static DPoint getPos(OptNode* n, OptEdge* segment, size_t p);
 
-  static std::vector<EdgePair> getEdgePartnerPairs(
-      OptNode* node, OptEdge* segmentA, const LinePair& linepair);
+  static std::vector<EdgePair> getEdgePartnerPairs(OptNode* node,
+                                                   OptEdge* segmentA,
+                                                   const LinePair& linepair);
 
-  static std::vector<OptEdge*> getEdgePartners(
-      OptNode* node, OptEdge* segmentA, const LinePair& linepair);
+  static std::vector<OptEdge*> getEdgePartners(OptNode* node, OptEdge* segmentA,
+                                               const LinePair& linepair);
+  static size_t maxCard(const std::set<OptNode*>& g);
+  static double solutionSpaceSize(const std::set<OptNode*>& g);
 
  protected:
   static void expandRelatives(TransitGraph* g, OrderingConfig* c);
@@ -53,6 +60,9 @@ class Optimizer {
       OrderingConfig* c, const Route* ref, graph::Edge* start,
       const std::set<const Route*>& rs,
       std::set<std::pair<graph::Edge*, const Route*>>& visited);
+
+  const config::Config* _cfg;
+  const Scorer* _scorer;
 };
 }  // namespace optim
 }  // namespace transitmapper

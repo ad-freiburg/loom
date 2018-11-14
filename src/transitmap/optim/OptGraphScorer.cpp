@@ -46,13 +46,6 @@ double OptGraphScorer::getCrossingScore(OptNode* n,
   if (!n->pl().node) return 0;
   auto numCrossings = getNumCrossings(n, c);
 
-  // std::cout << "Number of crossings in node " << n;
-  // if (n->pl().node && n->pl().node->getStops().size()) std::cout << " (" <<
-  // n->pl().node->getStops().front().name << ")" << std::endl;
-
-  // std::cout << ": " << numCrossings.first
-  // << ", " << numCrossings.second << std::endl;
-
   return numCrossings.first * _scorer->getCrossingPenaltySameSeg(n->pl().node) +
          numCrossings.second * _scorer->getCrossingPenaltyDiffSeg(n->pl().node);
 }

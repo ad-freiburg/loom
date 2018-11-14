@@ -2,13 +2,134 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include <fstream>
 #include "transitmap/optim/Optimizer.h"
+#include "util/Misc.h"
+#include "util/geo/output/GeoGraphJsonOutput.h"
+#include "util/graph/Algorithm.h"
+#include "util/log/Log.h"
 
 using transitmapper::optim::Optimizer;
 using transitmapper::optim::LinePair;
 using transitmapper::optim::PosComPair;
 using transitmapper::optim::EdgePair;
 using transitmapper::graph::NodeFront;
+
+// _____________________________________________________________________________
+int Optimizer::optimize(TransitGraph* tg) const {
+  // create optim graph
+  OptGraph g(tg, _scorer);
+
+  size_t maxC = maxCard(*g.getNds());
+  double solSp = solutionSpaceSize(*g.getNds());
+  LOG(DEBUG) << "Optimizing line graph of size " << tg->getNodes()->size()
+             << " with max cardinality = " << maxC
+             << " and solution space size = " << solSp;
+
+  if (_cfg->untangleGraph) {
+    // do full untangling
+    LOG(DEBUG) << "Untangling graph...";
+    T_START(1);
+    for (size_t i = 0; i < maxC; i++) {
+      g.untangle();
+      g.simplify();
+      g.split();
+    }
+    LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
+  } else if (_cfg->createCoreOptimGraph) {
+    // only apply core graph rules
+    T_START(1);
+    LOG(DEBUG) << "Creating core optimization graph...";
+    g.simplify();
+    LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
+  }
+
+  if (_cfg->outOptGraph) {
+    util::geo::output::GeoGraphJsonOutput out;
+    std::ofstream fstr(_cfg->dbgPath + "/optgraph.json");
+    out.print(g, fstr);
+  }
+
+  if (_cfg->outputStats) {
+    LOG(INFO) << "(stats) Stats for optim graph of '" << tg->getName()
+              << std::endl;
+    LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
+              << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
+              << " non-topo)" << std::endl;
+    LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges() << std::endl;
+    LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes()
+              << std::endl;
+    LOG(INFO) << "(stats)   Max edge route cardinality: "
+              << g.getMaxCardinality() << std::endl;
+  }
+
+
+  size_t maxCompSolSpace = 0;
+  size_t maxCompC = 0;
+
+  // iterate over components and optimize all of them separately
+  const auto& comps = util::graph::Algorithm::connectedComponents(g);
+
+  size_t runs = _cfg->optimRuns;
+  double tSum = 0;
+  double iterSum = 0;
+  double scoreSum = 0;
+  double crossSum = 0;
+  double sepSum = 0;
+
+  for (size_t run = 0; run <= runs; run++) {
+    OrderingConfig c;
+    HierarchOrderingConfig hc;
+
+    T_START(1);
+    size_t iters = 0;
+    for (const auto nds : comps) {
+      size_t maxC = maxCard(nds);
+      double solSp = solutionSpaceSize(nds);
+      if (maxC > maxCompC) maxCompC = maxC;
+      if (solSp > maxCompSolSpace) maxCompSolSpace = solSp;
+
+      LOG(DEBUG) << "Optimizing subgraph of size " << nds.size()
+                 << " with max cardinality = " << maxC
+                 << " and solution space size = " << solSp;
+      iters += optimizeComp(nds, &hc);
+    }
+
+    double t = T_STOP(1);
+
+    LOG(DEBUG) << " -- Optimization took " << t << " ms -- ";
+    LOG(DEBUG) << "Max cardinality of all components: " << maxCompC;
+    LOG(DEBUG) << "Max solution space size of all components: "
+               << maxCompSolSpace;
+
+    tSum += t;
+    iterSum += iters;
+
+    hc.writeFlatCfg(&c);
+
+    Optimizer::expandRelatives(tg, &c);
+    tg->setConfig(c);
+
+    if (runs > 1) {
+      if (_cfg->splittingOpt) scoreSum += _scorer->getScore();
+      else scoreSum += _scorer->getCrossScore();
+      crossSum += _scorer->getNumCrossings();
+      sepSum += _scorer->getNumSeparations();
+    }
+  }
+
+  if (runs > 1) {
+    LOG(DEBUG) << "";
+    LOG(DEBUG) << "(multiple opt runs stats) avg time: " << tSum / (1.0 * runs) << " ms";
+    LOG(DEBUG) << "(multiple opt runs stats) avg iters: " << iterSum / (1.0 * runs);
+    LOG(DEBUG) << "(multiple opt runs stats) avg score: -- " << scoreSum / (1.0 * runs) << " --";
+    LOG(DEBUG) << "(multiple opt runs stats) avg num crossings: -- " << crossSum / (1.0 * runs) << " --";
+    LOG(DEBUG) << "(multiple opt runs stats) avg num separations: -- " << sepSum / (1.0 * runs) << " --";
+    LOG(DEBUG) << "";
+  }
+
+  return 0;
+}
 
 // _____________________________________________________________________________
 void Optimizer::expandRelatives(TransitGraph* g, OrderingConfig* c) {
@@ -92,8 +213,7 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment) {
 }
 
 // _____________________________________________________________________________
-std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment,
-                                                 bool unique) {
+std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
   std::set<const Route*> processed;
   std::vector<LinePair> ret;
   for (auto& toA : segment->pl().getRoutes()) {
@@ -117,7 +237,7 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment,
 
 // _____________________________________________________________________________
 bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
-                           PosComPair poscomb) {
+                        PosComPair poscomb) {
   bool otherWayA =
       (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
   bool otherWayB =
@@ -164,7 +284,7 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
 
 // _____________________________________________________________________________
 bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
-                           PosCom postcomb) {
+                        PosCom postcomb) {
   bool otherWayA =
       (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
   bool otherWayB = (segments.first->getFrom() != node) ^
@@ -174,7 +294,8 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
 
   // size_t cardA = segmentA->pl().etgs.front().etg->getCardinality(true);
   // size_t cardB = segments.first->pl().etgs.front().etg->getCardinality(true);
-  // size_t cardC = segments.second->pl().etgs.front().etg->getCardinality(true);
+  // size_t cardC =
+  // segments.second->pl().etgs.front().etg->getCardinality(true);
 
   size_t cardA = segmentA->pl().getCardinality();
   size_t cardB = segments.first->pl().getCardinality();
@@ -183,26 +304,27 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
   size_t posAinA = otherWayA ? cardA - 1 - postcomb.first : postcomb.first;
   size_t posBinA = otherWayA ? cardA - 1 - postcomb.second : postcomb.second;
 
-
-  size_t posEdgeA = std::distance(node->pl().orderedEdges.begin(), std::find(node->pl().orderedEdges.begin(), node->pl().orderedEdges.end(), segments.first));
-  size_t posEdgeB = std::distance(node->pl().orderedEdges.begin(), std::find(node->pl().orderedEdges.begin(), node->pl().orderedEdges.end(), segments.second));
+  size_t posEdgeA =
+      std::distance(node->pl().orderedEdges.begin(),
+                    std::find(node->pl().orderedEdges.begin(),
+                              node->pl().orderedEdges.end(), segments.first));
+  size_t posEdgeB =
+      std::distance(node->pl().orderedEdges.begin(),
+                    std::find(node->pl().orderedEdges.begin(),
+                              node->pl().orderedEdges.end(), segments.second));
 
   bool retB = false;
 
-  if (posAinA > posBinA && posEdgeA < posEdgeB) retB = true;;
+  if (posAinA > posBinA && posEdgeA < posEdgeB) retB = true;
   retB = false;
-
 
   DPoint aInA = getPos(node, segmentA, posAinA);
   DPoint bInA = getPos(node, segmentA, posBinA);
 
   bool ret = false;
 
-  for (size_t i = 0;
-       i < segments.first->pl().getCardinality(); ++i) {
-    for (size_t j = 0;
-         j < segments.second->pl().getCardinality();
-         ++j) {
+  for (size_t i = 0; i < segments.first->pl().getCardinality(); ++i) {
+    for (size_t j = 0; j < segments.second->pl().getCardinality(); ++j) {
       size_t posAinB = otherWayB ? cardB - 1 - i : i;
       size_t posBinC = otherWayC ? cardC - 1 - j : j;
 
@@ -250,8 +372,9 @@ DPoint Optimizer::getPos(OptNode* n, OptEdge* segment, size_t p) {
 }
 
 // _____________________________________________________________________________
-std::vector<OptEdge*> Optimizer::getEdgePartners(
-    OptNode* node, OptEdge* segmentA, const LinePair& linepair) {
+std::vector<OptEdge*> Optimizer::getEdgePartners(OptNode* node,
+                                                 OptEdge* segmentA,
+                                                 const LinePair& linepair) {
   std::vector<OptEdge*> ret;
 
   graph::Edge* fromEtg = OptGraph::getAdjEdg(segmentA, node);
@@ -261,10 +384,8 @@ std::vector<OptEdge*> Optimizer::getEdgePartners(
   for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;
 
-    if (OptGraph::getCtdRoutesIn(linepair.first, dirA, segmentA, segmentB)
-            .size() &&
-        OptGraph::getCtdRoutesIn(linepair.second, dirB, segmentA, segmentB)
-            .size()) {
+    if (OptGraph::hasCtdRoutesIn(linepair.first, dirA, segmentA, segmentB) &&
+        OptGraph::hasCtdRoutesIn(linepair.second, dirB, segmentA, segmentB)) {
       ret.push_back(segmentB);
     }
   }
@@ -272,8 +393,9 @@ std::vector<OptEdge*> Optimizer::getEdgePartners(
 }
 
 // _____________________________________________________________________________
-std::vector<EdgePair> Optimizer::getEdgePartnerPairs(
-    OptNode* node, OptEdge* segmentA, const LinePair& linepair) {
+std::vector<EdgePair> Optimizer::getEdgePartnerPairs(OptNode* node,
+                                                     OptEdge* segmentA,
+                                                     const LinePair& linepair) {
   std::vector<EdgePair> ret;
 
   graph::Edge* fromEtg = OptGraph::getAdjEdg(segmentA, node);
@@ -283,19 +405,43 @@ std::vector<EdgePair> Optimizer::getEdgePartnerPairs(
   for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;
 
-    if (OptGraph::getCtdRoutesIn(linepair.first, dirA, segmentA, segmentB)
-            .size()) {
+    if (OptGraph::hasCtdRoutesIn(linepair.first, dirA, segmentA, segmentB)) {
       EdgePair curPair;
       curPair.first = segmentB;
       for (OptEdge* segmentC : node->getAdjList()) {
         if (segmentC == segmentA || segmentC == segmentB) continue;
 
-        if (OptGraph::getCtdRoutesIn(linepair.second, dirB, segmentA, segmentC)
-                .size()) {
+        if (OptGraph::hasCtdRoutesIn(linepair.second, dirB, segmentA,
+                                     segmentC)) {
           curPair.second = segmentC;
           ret.push_back(curPair);
         }
       }
+    }
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t Optimizer::maxCard(const std::set<OptNode*>& g) {
+  size_t ret = 0;
+  for (const auto* n : g) {
+    for (const auto* e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      if (e->pl().getCardinality() > ret) ret = e->pl().getCardinality();
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+double Optimizer::solutionSpaceSize(const std::set<OptNode*>& g) {
+  double ret = 1;
+  for (const auto* n : g) {
+    for (const auto* e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      ret *= factorial(e->pl().getCardinality());
     }
   }
   return ret;

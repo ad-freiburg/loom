@@ -540,12 +540,12 @@ The core graph may then be further broken down into ordering-relevant connected 
 
 The pruning rules described so far may greatly help to reduce the size of the search space for the line ordering optimization and thus bring down the time required to find an optimal solution. Section \ref{SEC:eval} evaluates the effects of these rules. However, there are still some simplification situations not covered by these rules. This section will describe 4 simple graph untangling rules which further help to bring down the degrees of freedom of the line ordering optimization problem. As we will see, these untangling rules are able to completely solve the optimization problem for specific line graph instances by cutting it down to many ordering-relevant connected components with a search space size of 1. In many cases, they are able to reduce the search space to a size which can be explored by a simple exhaustive search in minimal time.
 
-As these graph untangling rules always break up nodes in the original line graph into multiple nodes in the core optimization graph, we have to update pruning rule 2 from Section~\ref{SEC:pruning}. There, we always contracted degree 2 nodes because Lemma~\ref{LEM:crossingmoveing} guaranteed that a same-segment crossing in these nodes could be moved to another node without affecting optimality. If we break up nodes, this may no longer be the case: degree 2 nodes in the core optimization graph may now stand for nodes of higher degree in the original line graph. Therefore, we first define $v^*(v)$ to be original line graph node we constructed $v$ from. Note that for many nodes which were not eligible for any pruning or untangling rule, $v^*(v) = v$. Using this, we add an additional check to pruning rule 2 and state this updated pruning rule 2a it as follow:
+As these graph untangling rules always break up nodes in the original line graph into multiple nodes in the core optimization graph, we have to update pruning rule 2 from Section~\ref{SEC:pruning}. There, we always contracted degree 2 nodes because Lemma~\ref{LEM:crossingmoveing} guaranteed that a same-segment crossing in these nodes could be moved to another node without affecting optimality. If we break up nodes, this may no longer be the case: degree 2 nodes in the core optimization graph may now stand for nodes of higher degree in the original line graph, and we cannot contract them blindly. Therefore, we first define $v^*(v)$ to be original line graph node we constructed $v$ from. Note that for many nodes which were not eligible for any pruning or untangling rule, $v^*(v) = v$. Using this, we add an additional check to pruning rule 2 and state this updated pruning rule 2a it as follow:
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
   \setlength\itemsep{1pt}
   \item[\emph{(Pruning rule 2a)}] delete each node $v$ with degree 2 and adjacent edges $e = \{u, v\}$, $e' = \{v, w\}$,
   where 
-  $L(e) = L(e')$ (the lines in both edges are the same). We additionally check if
+  $L(e) = L(e')$ (the lines in both edges are the same). If $\deg(v^*(v)) \neq 2$ and $|L(e)| = L(e') > 1$, we additionally check if
   $w_\times(v^*(v)) \geq w_\times(v^*(u))$ and $w_\|(v^*(v)) \geq w_\|(v^*(u))$ (crossings and separations in $v$ can be moved to $u$ at equal or lower cost) 
   or
   $w_\times(v^*(v)) \geq w_\times(v^*(w))$ and $w_\|(v^*(v)) \geq w_\|(v^*(w))$ (crossings and separations in $v$ can be moved to $w$ at equal or lower cost). If that is the case, combine the adjacent edges $e = \{u, v\}$, $e' = \{v, w\}$ into a single new edge $ee' = \{u, w\}$ with $L(ee') = L(e) = L(e')$.
@@ -870,6 +870,7 @@ We also found that our maps always scored better or equal in our penalty system 
 
 \def\Hdimh{rows\hspace{0.3mm}{\scriptsize$\times$}\hspace{0.3mm}cols}
 \def\Hdim#1#2{#1\hspace{0.1mm}{\scriptsize$\times$}\hspace{0.1mm}#2}
+\def\Hsci#1#2{$#1${\scriptsize$\times$}$10^{#2}$}
 \def\Htglpk{GLPK}
 \def\Htcbc{CBC}
 \def\Htgo{GU}
@@ -880,7 +881,7 @@ We also found that our maps always scored better or equal in our penalty system 
 \def\Hgr{$>$}
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 \begin{table*}
-  \caption[]{Dimensions, solution times and final graph scores (pen) for Chicago, Stuttgart, Turin and New York and three baseline heuristics for the line ordering problem: exhaustive search with (E+S) and without (E) separation penalty and, hill climbing with (H+S) and without (H) separation penalty and simulated annealing with (A+S) and without separation penalty (A), all with or without reduction to the core graph. A time of --- means we aborted after 12 hours. $|S|$ is the search space size. The last two columns show the number of crossings ($\times$) and separations ($||$) after optimization.\label{TBL:evalres_heur}}
+  \caption[]{Dimensions, solution times and final graph scores (pen) for Chicago, Stuttgart, Turin and New York and three baseline heuristics for the line ordering problem: exhaustive search with (E+S) and without (E) separation penalty and, hill climbing with (H+S) and without (H) separation penalty and simulated annealing with (A+S) and without separation penalty (A), all with or without reduction to the core graph. $|S|$ is the search space size, $t$ the solution time. A time of --- means we aborted after 12 hours. The number of iterations is shown in column \emph{iters}, $\times$ is the number of crossings in the optimized graph, $\|$ the number of separations, \emph{pen} is the final graph score. For optimization without separation penalty, the final graph scores only include crossing penalties. Optimal graph scores can be found in Table~\ref{TBL:rweval}. \label{TBL:evalres_heur}}
   \vspace{-3.6mm}
   \centering
   %\footnotesize
@@ -890,19 +891,25 @@ We also found that our maps always scored better or equal in our penalty system 
               && \multicolumn{6}{c}{\footnotesize On baseline graph} & & \multicolumn{6}{c}{\footnotesize On core graph} \\
               \cline{3-8} \cline{10-15} \\[-2ex] \toprule
               && $|S|$ & $t$ & iters & $\times$ & $||$ & pen & & $|S|$ & $t$ & iters & $\times$ & $||$ & pen \\\midrule
-
-    Chicago   & E & \multirow{6}{*}{?} & ? & ? & ? & ? & ? & & \multirow{6}{*}{?} & ? & ? &   ? &   ? & ?\\
-              & H &  &  ? & ? & ? & ? & ? & &  & ? & ? &   ? &   ? & ?\\
-              & A &  &  ? & ? & ? & ? & ? & &  & ? & ? &   ? &     ? & ?\\
-              & E+S &  & ? & ? & ? & ? & ? & &  & ? & ? &   ? &   ? & ?\\
-              & H+S &  &  ? & ? & ? & ? & ? & &  & ? & ? &   ? &   ? & ?\\
-              & A+S &  &  ? & ? & ? & ? & ? & &  & ? & ? &   ? &     ? & ?\\\midrule
+    Freiburg    & E & \multirow{6}{*}{\Hsci{6}{13}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & & \multirow{6}{*}{55k} &  4.2\Hs & 55k & 5 & 2 & 42\\
+              & H & & 0.2\Hs & 9.5 & 16.9 & 11.2 & 229.9 & &  & 11\Hms & 5.3 & 5.4 & 1.8 & 47.3\\
+              & A &  &  90\Hms & 7k & 16.9 & 12.4 & 230.3 & &  & 0.2\Hs & 6.2k & 5.6 & 2 & 49.4\\
+              & E+S &  & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & &  & 55k & \Hlong & \Hlong & \Hlong & \Hlong\\
+              & H+S &  & 4.3\Hs & 16.9 & 44.6 & 14.3 & 547.2 & &  & 1.1\Hs & 6.9 &  27.3 & 3 & 189.1\\
+              & A+S &  &  0.4\Hs & 14.5k & 51.9 & 15.6 & 704.3 & &  & 0.7\Hs & 7.6k & 27.9 & 2.8 & 197.7\\\midrule
+    
+    Chicago   & E & \multirow{6}{*}{\Hsci{4}{33}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & & \multirow{6}{*}{\Hsci{5}{9}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong\\
+              & H & & 3\Hs &  16.8 & 48.1 & 38.5 & 592.7 & &  & 1.2\Hs & 7.4 & 25.5 & 8.7 & 182.4\\
+              & A &  &  0.2\Hs & 11k & 55.6 & 43.6 & 687.9 & &  & 0.7\Hs & 9k & 25.4 & 9.1 & 183.7\\
+              & E+S &  & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & &  & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong\\
+              & H+S &  & 4.3\Hs & 16.9 & 44.6 & 14.3 & 547.2 & &  & 1.1\Hs & 6.9 &  27.3 & 3 & 189.1\\
+              & A+S &  &  0.4\Hs & 14.5k & 51.9 & 15.6 & 704.3 & &  & 0.7\Hs & 7.6k & 27.9 & 2.8 & 197.7\\\midrule
   \end{tabular*}}
   \vspace{3.6mm}
 \end{table*}
 
 \begin{table*}
-  \caption[]{Dimensions and solution times for Chicago, Stuttgart, Turin and New York and our three ILPs: baseline (B), improved (I), and with line separation penalty (I+S), with or without reduction to the core graph, solved with GLPK, COIN-OR CBC and gurobi (GU). A time of --- means we aborted after 12 hours. The last two columns show the number of crossings ($\times$) and separations ($||$) after optimization. Optimal graph scores can be found in Table~\ref{TBL:rweval}\label{TBL:evalres}}.
+  \caption[]{Dimensions and solution times for Chicago, Stuttgart, Turin and New York and our three ILPs: baseline (B), improved (I), and with line separation penalty (I+S), with or without reduction to the core graph, solved with GLPK, COIN-OR CBC and gurobi (GU). A time of --- means we aborted after 12 hours. The last two columns show the number of crossings ($\times$) and separations ($||$) after optimization. Optimal graph scores can be found in Table~\ref{TBL:rweval}.\label{TBL:evalres}}.
   %\vspace{-50mm}
   \centering
   %\footnotesize

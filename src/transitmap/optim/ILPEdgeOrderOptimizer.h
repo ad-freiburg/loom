@@ -30,21 +30,21 @@ typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
 class ILPEdgeOrderOptimizer : public ILPOptimizer {
  public:
-  ILPEdgeOrderOptimizer(const config::Config* cfg,
-                        const Scorer* scorer)
+  ILPEdgeOrderOptimizer(const config::Config* cfg, const Scorer* scorer)
       : ILPOptimizer(cfg, scorer){};
 
  private:
   virtual glp_prob* createProblem(const std::set<OptNode*>& g) const;
 
-  virtual void getConfigurationFromSolution(glp_prob* lp, HierarchOrderingConfig* c,
+  virtual void getConfigurationFromSolution(glp_prob* lp,
+                                            HierarchOrderingConfig* c,
                                             const std::set<OptNode*>& g) const;
 
   void writeCrossingOracle(const std::set<OptNode*>& g, VariableMatrix* vm,
                            glp_prob* lp) const;
 
-  void writeDiffSegConstraintsImpr(const std::set<OptNode*>& g, VariableMatrix* vm,
-                                   glp_prob* lp) const;
+  void writeDiffSegConstraintsImpr(const std::set<OptNode*>& g,
+                                   VariableMatrix* vm, glp_prob* lp) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

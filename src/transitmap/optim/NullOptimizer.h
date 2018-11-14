@@ -23,8 +23,9 @@ namespace optim {
 
 class NullOptimizer : public Optimizer {
  public:
-  int optimize(TransitGraph* tg) const;
-  int optimize(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
+  NullOptimizer(const config::Config* cfg, const Scorer* scorer)
+      : Optimizer(cfg, scorer) {};
+  int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

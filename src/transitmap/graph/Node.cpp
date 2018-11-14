@@ -617,6 +617,7 @@ bool Node::connOccurs(const Route* r, const Edge* edgeA,
                       const Edge* edgeB) const {
   const auto& i = _routeConnExceptions.find(r);
   if (i == _routeConnExceptions.end()) return true;
+
   const auto& ii = i->second.find(edgeA);
   if (ii == i->second.end()) return true;
 

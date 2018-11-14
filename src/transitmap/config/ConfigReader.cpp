@@ -92,6 +92,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->createCoreOptimGraph))
       ->default_value(true),
       "simplify optimization graph prior to optimization")
+    ("untangle-optim-graph",
+     opts::value<bool>(&(cfg->untangleGraph))
+      ->default_value(true),
+      "untangle line graph")
     ("render-node-circles",
      opts::value<bool>(&(cfg->renderNodeCircles))
       ->default_value(false),
@@ -208,6 +212,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<std::string>(&(cfg->worldFilePath))
       ->default_value(""),
       "if set, output world file of rendered map to this location")
+    ("optim-runs",
+      opts::value<size_t>(&(cfg->optimRuns))
+      ->default_value(1),
+      "number of optimization runs (use for evaluation, avg stats will be printed if > 1)")
     ("dbg-output-path",
       opts::value<std::string>(&(cfg->dbgPath))
       ->default_value("."),

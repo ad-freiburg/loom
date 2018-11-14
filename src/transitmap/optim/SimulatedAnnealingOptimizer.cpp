@@ -13,7 +13,7 @@ using namespace transitmapper::graph;
 using transitmapper::optim::SimulatedAnnealingOptimizer;
 
 // _____________________________________________________________________________
-int SimulatedAnnealingOptimizer::optimize(const std::set<OptNode*>& g,
+int SimulatedAnnealingOptimizer::optimizeComp(const std::set<OptNode*>& g,
                                           HierarchOrderingConfig* hc) const {
   OptOrderingConfig cur, null;
 
@@ -25,26 +25,29 @@ int SimulatedAnnealingOptimizer::optimize(const std::set<OptNode*>& g,
       if (n == e->getFrom()) edges.push_back(e);
 
   // this guarantees that all the orderings are sorted!
-  initialConfig(g, &null);
-  cur = null;
+  initialConfig(g, &null, true);
+
+  // this is the starting ordering, which is random
+  initialConfig(g, &cur, false);
 
   size_t iters = 0;
   size_t last = 0;
 
-  size_t k = 10000;
+  size_t k = 0;
+
+  size_t ABORT_AFTER_UNCH = 5000;
 
   while (true) {
     iters++;
 
-    double temp = 10000.0 / iters;
+    double temp = 1000.0 / iters;
 
     if (iters - last == 10000) {
-      LOG(DEBUG) << "@ " << iters << ", temp = " << temp;
+      LOG(DEBUG) << "@ " << iters << ", temp = " << temp << ", last change was at " << k << " iters.";
       last = iters;
     }
 
     int i = rand() % edges.size();
-    assert(i < edges.size() && i > -1);
 
     double oldScore = getScore(edges[i], cur);
     auto old = cur[edges[i]];
@@ -60,22 +63,27 @@ int SimulatedAnnealingOptimizer::optimize(const std::set<OptNode*>& g,
     double r = rand() / (RAND_MAX + 1.0);
     double e = exp(-(1.0 * (s - oldScore)) / temp);
 
-    if (s < oldScore || (e > r)) {
+    if (s < oldScore) {
+      // found a better solution
+      k = iters;
+    } else if (s != oldScore && e > r) {
+      // take this value, despite not bringing any local gain
+      k = iters;
     } else {
       // reverting
       cur[edges[i]] = old;
     }
 
-    if (iters > k) break;
+    if (iters - k > ABORT_AFTER_UNCH) break;
   }
 
   double curScore = _optScorer.getCrossingScore(g, cur);
   if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
 
-  LOG(DEBUG) << "Done. Final target = " << curScore;
+  LOG(DEBUG) << "Stopped after " << iters << " iterations. Final target = " << curScore;
 
   writeHierarch(&cur, hc);
-  return 0;
+  return iters;
 }
 
 // _____________________________________________________________________________

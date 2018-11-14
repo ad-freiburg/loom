@@ -36,16 +36,11 @@ struct VariableMatrix {
 class ILPOptimizer : public Optimizer {
  public:
   ILPOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : _cfg(cfg), _scorer(scorer){};
+      : Optimizer(cfg, scorer) {};
 
-  int optimize(TransitGraph* tg) const;
-  int optimize(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
+  int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
 
  protected:
-  const config::Config* _cfg;
-  const Scorer* _scorer;
-
-
   virtual glp_prob* createProblem(const std::set<OptNode*>& g) const;
 
   void solveProblem(glp_prob* lp) const;

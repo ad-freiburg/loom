@@ -10,14 +10,7 @@ using namespace transitmapper::graph;
 using transitmapper::optim::NullOptimizer;
 
 // _____________________________________________________________________________
-int NullOptimizer::optimize(TransitGraph* tg) const {
-  // TODO
-
-  return 0;
-}
-
-// _____________________________________________________________________________
-int NullOptimizer::optimize(const std::set<OptNode*>& g,
+int NullOptimizer::optimizeComp(const std::set<OptNode*>& g,
                            HierarchOrderingConfig* hc) const {
 
   for (OptNode* n : g) {

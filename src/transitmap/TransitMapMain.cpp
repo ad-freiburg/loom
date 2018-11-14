@@ -67,9 +67,6 @@ int main(int argc, char** argv) {
 
     b.createMetaNodes(&g);
 
-    LOG(INFO) << "Writing initial ordering configuration...";
-    // b.writeInitialConfig(&g);
-
     LOG(INFO) << "Optimizing...";
 
     double maxCrossPen =
@@ -111,14 +108,29 @@ int main(int argc, char** argv) {
 
     if (!cfg.noOptim) {
       if (cfg.optimMethod == "ilp_impr") {
+        LOG(DEBUG) << "(ILP impr optimizer)";
         optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, &scorer);
         ilpEoOptim.optimize(&g);
       } else if (cfg.optimMethod == "ilp") {
-        optim::ILPOptimizer ilpEoOptim(&cfg, &scorer);
-        ilpEoOptim.optimize(&g);
+        LOG(DEBUG) << "(ILP optimizer)";
+        optim::ILPOptimizer ilpOptim(&cfg, &scorer);
+        ilpOptim.optimize(&g);
       } else if (cfg.optimMethod == "comb") {
+        LOG(DEBUG) << "(Comb optimizer)";
         optim::CombOptimizer ilpCombiOptim(&cfg, &scorer);
         ilpCombiOptim.optimize(&g);
+      } else if (cfg.optimMethod == "exhaust") {
+        LOG(DEBUG) << "(Exhaustive optimizer)";
+        optim::ExhaustiveOptimizer exhausOptim(&cfg, &scorer);
+        exhausOptim.optimize(&g);
+      } else if (cfg.optimMethod == "hillc") {
+        LOG(DEBUG) << "(Hillclimbing optimizer)";
+        optim::HillClimbOptimizer hillcOptim(&cfg, &scorer);
+        hillcOptim.optimize(&g);
+      } else if (cfg.optimMethod == "anneal") {
+        LOG(DEBUG) << "(Simulated annealing optimizer)";
+        optim::SimulatedAnnealingOptimizer annealOptim(&cfg, &scorer);
+        annealOptim.optimize(&g);
       }
 
       LOG(INFO) << "(stats) Total graph score AFTER optim is -- "

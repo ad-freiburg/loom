@@ -60,17 +60,20 @@ struct EtgPart {
 };
 
 struct OptEdgePL {
-  OptEdgePL() : depth(0){};
+  OptEdgePL() : depth(0), firstEtg(0), lastEtg(0) {};
 
   // all original ETGs from the transit graph contained in this edge
   // Guarantee: they are all equal in terms of (directed) routes
   std::vector<EtgPart> etgs;
 
+  size_t depth;
+
+  size_t firstEtg;
+  size_t lastEtg;
+
   size_t getCardinality() const;
   std::string toStr() const;
   const std::vector<OptRO>& getRoutes() const;
-
-  size_t depth;
 
   // partial routes
   // For the ETGs contained in .etgs, only these route occurances are
@@ -120,6 +123,10 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   static graph::Edge* getAdjEdg(const OptEdge* e, const OptNode* n);
   static EtgPart getAdjEtgp(const OptEdge* e, const OptNode* n);
+  static bool hasCtdRoutesIn(const graph::Route* r,
+                                              const Node* dir,
+                                              const OptEdge* fromEdge,
+                                              const OptEdge* toEdge);
   static std::vector<OptRO> getCtdRoutesIn(
       const graph::Route* r, const Node* dir, const OptEdge* fromEdge,
       const OptEdge* toEdge);
@@ -168,6 +175,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);
+
+  static void upFirstLastEdg(OptEdge*);
 
   static OptEdgePL getView(OptEdge* parent, OptEdge* leg, size_t offset);
   static OptEdgePL getPartialView(OptEdge* parent, OptEdge* leg, size_t offset);

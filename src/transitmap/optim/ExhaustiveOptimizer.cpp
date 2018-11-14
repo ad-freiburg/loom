@@ -13,14 +13,7 @@ using namespace transitmapper::graph;
 using transitmapper::optim::ExhaustiveOptimizer;
 
 // _____________________________________________________________________________
-int ExhaustiveOptimizer::optimize(TransitGraph* tg) const {
-  // TODO
-
-  return 0;
-}
-
-// _____________________________________________________________________________
-int ExhaustiveOptimizer::optimize(const std::set<OptNode*>& g,
+int ExhaustiveOptimizer::optimizeComp(const std::set<OptNode*>& g,
                                   HierarchOrderingConfig* hc) const {
   OptOrderingConfig best, cur, null;
   double bestScore = DBL_MAX;
@@ -33,7 +26,7 @@ int ExhaustiveOptimizer::optimize(const std::set<OptNode*>& g,
       if (n == e->getFrom()) edges.push_back(e);
 
   // this guarantees that all the orderings are sorted!
-  initialConfig(g, &null);
+  initialConfig(g, &null, true);
   cur = null;
 
   size_t iters = 0;
@@ -87,13 +80,18 @@ int ExhaustiveOptimizer::optimize(const std::set<OptNode*>& g,
              << " iterations!";
 
   writeHierarch(&best, hc);
-  return 0;
+  return iters;
 }
-
 
 // _____________________________________________________________________________
 void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
                                         OptOrderingConfig* cfg) const {
+  initialConfig(g, cfg, false);
+}
+
+// _____________________________________________________________________________
+void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
+                                        OptOrderingConfig* cfg, bool sorted) const {
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
@@ -101,7 +99,11 @@ void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
       for (size_t i = 0; i < (*cfg)[e].size(); i++)
         (*cfg)[e][i] = e->pl().getRoutes()[i].route;
 
-      std::sort((*cfg)[e].begin(), (*cfg)[e].end());
+      if (sorted) {
+        std::sort((*cfg)[e].begin(), (*cfg)[e].end());
+      } else {
+        std::random_shuffle((*cfg)[e].begin(), (*cfg)[e].end());
+      }
     }
   }
 }

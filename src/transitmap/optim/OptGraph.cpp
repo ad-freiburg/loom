@@ -12,25 +12,55 @@ using namespace optim;
 using transitmapper::graph::RouteOccurance;
 
 // _____________________________________________________________________________
-EtgPart OptGraph::getFirstEdg(const OptEdge* optEdg) {
+void OptGraph::upFirstLastEdg(OptEdge* optEdg) {
+  size_t i = 0;
   for (const auto e : optEdg->pl().etgs) {
     if (e.etg->getFrom() == optEdg->getFrom()->pl().node ||
         e.etg->getTo() == optEdg->getFrom()->pl().node) {
-      return e;
+      break;
     }
+    i++;
   }
-  assert(false);
+
+  size_t j = 0;
+  for (const auto e : optEdg->pl().etgs) {
+    if (e.etg->getFrom() == optEdg->getTo()->pl().node ||
+        e.etg->getTo() == optEdg->getTo()->pl().node) {
+      break;
+    }
+    j++;
+  }
+  optEdg->pl().firstEtg = i;
+  optEdg->pl().lastEtg = j;
+}
+
+// _____________________________________________________________________________
+EtgPart OptGraph::getFirstEdg(const OptEdge* optEdg) {
+  size_t i = 0;
+  for (const auto e : optEdg->pl().etgs) {
+    if (e.etg->getFrom() == optEdg->getFrom()->pl().node ||
+        e.etg->getTo() == optEdg->getFrom()->pl().node) {
+      break;
+    }
+    i++;
+  }
+
+  assert(i == optEdg->pl().firstEtg);
+  return optEdg->pl().etgs[optEdg->pl().firstEtg];
 }
 
 // _____________________________________________________________________________
 EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) {
+  size_t i = 0;
   for (const auto e : optEdg->pl().etgs) {
     if (e.etg->getFrom() == optEdg->getTo()->pl().node ||
         e.etg->getTo() == optEdg->getTo()->pl().node) {
-      return e;
+      break;
     }
+    i++;
   }
-  assert(false);
+  assert(i == optEdg->pl().lastEtg);
+  return optEdg->pl().etgs[optEdg->pl().lastEtg];
 }
 
 // _____________________________________________________________________________
@@ -199,23 +229,24 @@ bool OptGraph::simplifyStep() {
 
       assert(n->pl().node);
 
-      bool cheaper = false;
-      if (first->getOtherNd(n)->pl().node) {
-        if (_scorer->getSplittingPenalty(n->pl().node) >= _scorer->getSplittingPenalty(first->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltySameSeg(n->pl().node) >= _scorer->getCrossingPenaltySameSeg(first->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltyDiffSeg(n->pl().node) >= _scorer->getCrossingPenaltyDiffSeg(first->getOtherNd(n)->pl().node)) {
-          cheaper = true;
-        }
-      }
-      if (!cheaper) {
-        if (second->getOtherNd(n)->pl().node) {
-          if (_scorer->getSplittingPenalty(n->pl().node) >= _scorer->getSplittingPenalty(second->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltySameSeg(n->pl().node) >= _scorer->getCrossingPenaltySameSeg(second->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltyDiffSeg(n->pl().node) >= _scorer->getCrossingPenaltyDiffSeg(second->getOtherNd(n)->pl().node)) {
+      if (first->pl().getCardinality() > 1 && first->pl().getCardinality() > 1 && n->pl().node->getAdjList().size() != 2) {
+        bool cheaper = false;
+        if (first->getOtherNd(n)->pl().node) {
+          if (_scorer->getSplittingPenalty(n->pl().node) >= _scorer->getSplittingPenalty(first->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltySameSeg(n->pl().node) >= _scorer->getCrossingPenaltySameSeg(first->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltyDiffSeg(n->pl().node) >= _scorer->getCrossingPenaltyDiffSeg(first->getOtherNd(n)->pl().node)) {
             cheaper = true;
           }
         }
+        if (!cheaper) {
+          if (second->getOtherNd(n)->pl().node) {
+            if (_scorer->getSplittingPenalty(n->pl().node) >= _scorer->getSplittingPenalty(second->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltySameSeg(n->pl().node) >= _scorer->getCrossingPenaltySameSeg(second->getOtherNd(n)->pl().node)  && _scorer->getCrossingPenaltyDiffSeg(n->pl().node) >= _scorer->getCrossingPenaltyDiffSeg(second->getOtherNd(n)->pl().node)) {
+              cheaper = true;
+            }
+          }
+        }
+
+        if (!cheaper) continue;
       }
 
-      if (!cheaper) continue;
-
-      // if (n->pl().node && n->pl().node->getStops().size() && n->pl().node->getStops().front().name == "Hoyt St") continue;
 
       if (dirRouteEqualIn(first, second)) {
         OptNode* newFrom = 0;
@@ -256,6 +287,8 @@ bool OptGraph::simplifyStep() {
           newEdge->pl().etgs.push_back(EtgPart(
               etgp.etg, (etgp.dir ^ secondReverted), etgp.order, etgp.wasCut));
         }
+
+        upFirstLastEdg(newEdge);
 
         newEdge->pl().depth = std::max(first->pl().depth, second->pl().depth);
 
@@ -1305,6 +1338,30 @@ std::vector<OptRO> OptGraph::getSameDirRoutesIn(const graph::Route* r,
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+bool OptGraph::hasCtdRoutesIn(const graph::Route* r,
+                                            const Node* dir,
+                                            const OptEdge* fromEdge,
+                                            const OptEdge* toEdge) {
+  const OptNode* n = sharedNode(fromEdge, toEdge);
+  if (!n || !n->pl().node || n->getDeg() == 1) return false;
+
+  for (const OptRO& to : toEdge->pl().getRoutes()) {
+    if (to.route == r) {
+      if (to.direction == 0 || dir == 0 ||
+          (to.direction == n->pl().node && dir != n->pl().node) ||
+          (to.direction != n->pl().node && dir == n->pl().node)) {
+        if (n->pl().node->connOccurs(r, getAdjEdg(fromEdge, n),
+                                     getAdjEdg(toEdge, n))) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
 }
 
 // _____________________________________________________________________________

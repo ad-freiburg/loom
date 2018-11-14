@@ -13,7 +13,7 @@ using namespace transitmapper::graph;
 using transitmapper::optim::HillClimbOptimizer;
 
 // _____________________________________________________________________________
-int HillClimbOptimizer::optimize(const std::set<OptNode*>& g,
+int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
                                   HierarchOrderingConfig* hc) const {
   OptOrderingConfig cur, null;
 
@@ -25,8 +25,10 @@ int HillClimbOptimizer::optimize(const std::set<OptNode*>& g,
       if (n == e->getFrom() && e->pl().getCardinality() > 1) edges.push_back(e);
 
   // this guarantees that all the orderings are sorted!
-  initialConfig(g, &null);
-  cur = null;
+  initialConfig(g, &null, true);
+
+  // this is the starting ordering, which is random
+  initialConfig(g, &cur, false);
 
   size_t iters = 0;
   size_t last = 0;
@@ -50,9 +52,7 @@ int HillClimbOptimizer::optimize(const std::set<OptNode*>& g,
       cur[edges[i]] = null[edges[i]];
 
       do {
-        for (auto r : cur[edges[i]]) std::cout << r->getLabel() << ", ";
         double s = getScore(edges[i], cur);
-        std::cout << " " << oldScore << "->" << s << std::endl;
         if (s < oldScore && oldScore - s > bestChange) {
           found = true;
           bestChange = oldScore - s;
@@ -73,18 +73,13 @@ int HillClimbOptimizer::optimize(const std::set<OptNode*>& g,
       break;
     }
 
-    LOG(DEBUG) << "Changing " << bestEdge << " gives gain of " << bestChange;
-    std::cout << "To: ";
-    for (auto r : bestOrder) std::cout << r->getLabel() << ", ";
-    std::cout << std::endl;
-
     cur[bestEdge] = bestOrder;
 
     LOG(DEBUG) << "At round " << iters << ", target=" << curScore;
   }
 
   writeHierarch(&cur, hc);
-  return 0;
+  return iters;
 }
 
 // _____________________________________________________________________________

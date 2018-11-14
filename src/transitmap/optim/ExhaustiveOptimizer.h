@@ -24,16 +24,14 @@ namespace optim {
 class ExhaustiveOptimizer : public Optimizer {
  public:
   ExhaustiveOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : _cfg(cfg), _optScorer(scorer) {};
+      : Optimizer(cfg, scorer), _optScorer(scorer) {};
 
-  virtual int optimize(TransitGraph* tg) const;
-  virtual int optimize(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
+  virtual int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
 
  protected:
-  const config::Config* _cfg;
   OptGraphScorer _optScorer;
-
   void initialConfig(const std::set<OptNode*>& g, OptOrderingConfig* cfg) const;
+  void initialConfig(const std::set<OptNode*>& g, OptOrderingConfig* cfg, bool sorted) const;
   void writeHierarch(OptOrderingConfig* cfg, HierarchOrderingConfig* c) const;
 
 };
