@@ -51,21 +51,17 @@ int Optimizer::optimize(TransitGraph* tg) const {
   }
 
   if (_cfg->outputStats) {
-    LOG(INFO) << "(stats) Stats for optim graph of '" << tg->getName()
-              << std::endl;
-    LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes() << " ("
-              << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
-              << " non-topo)" << std::endl;
-    LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges() << std::endl;
-    LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes()
-              << std::endl;
+    LOG(INFO) << "(stats) Stats for <optim> graph of '" << tg->getName() << "'";
+    LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes();
+    LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges();
+    // LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes();
     LOG(INFO) << "(stats)   Max edge route cardinality: "
-              << g.getMaxCardinality() << std::endl;
+              << maxCard(*g.getNds());
+    LOG(INFO) << "(stats)   Solution space: "
+              << solutionSpaceSize(*g.getNds());
   }
 
 
-  size_t maxCompSolSpace = 0;
-  size_t maxCompC = 0;
 
   // iterate over components and optimize all of them separately
   const auto& comps = util::graph::Algorithm::connectedComponents(g);
@@ -83,24 +79,42 @@ int Optimizer::optimize(TransitGraph* tg) const {
 
     T_START(1);
     size_t iters = 0;
-    for (const auto nds : comps) {
-      size_t maxC = maxCard(nds);
-      double solSp = solutionSpaceSize(nds);
-      if (maxC > maxCompC) maxCompC = maxC;
-      if (solSp > maxCompSolSpace) maxCompSolSpace = solSp;
+    double maxCompSolSpace = 0;
+    size_t maxCompC = 0;
+    size_t maxNumNodes = 0;
+    size_t maxNumEdges = 0;
+    size_t numM1Comps = 0;
 
-      LOG(DEBUG) << "Optimizing subgraph of size " << nds.size()
-                 << " with max cardinality = " << maxC
-                 << " and solution space size = " << solSp;
+    for (const auto nds : comps) {
+      if (_cfg->outputStats) {
+        size_t maxC = maxCard(nds);
+        double solSp = solutionSpaceSize(nds);
+        if (maxC > maxCompC) maxCompC = maxC;
+        if (solSp > maxCompSolSpace) maxCompSolSpace = solSp;
+        if (solSp == 1) numM1Comps++;
+        if (nds.size() > maxNumNodes) maxNumNodes = nds.size();
+        if (numEdges(nds) > maxNumEdges) maxNumEdges = numEdges(nds);
+
+        LOG(INFO) << " (stats) Optimizing subgraph of size " << nds.size()
+                   << " with max cardinality = " << maxC
+                   << " and solution space size = " << solSp;
+      }
       iters += optimizeComp(nds, &hc);
     }
 
     double t = T_STOP(1);
 
-    LOG(DEBUG) << " -- Optimization took " << t << " ms -- ";
-    LOG(DEBUG) << "Max cardinality of all components: " << maxCompC;
-    LOG(DEBUG) << "Max solution space size of all components: "
-               << maxCompSolSpace;
+    LOG(INFO) << " -- Optimization took " << t << " ms -- ";
+
+    if (_cfg->outputStats) {
+      LOG(INFO) << " (stats) Number of components: " << comps.size();
+      LOG(INFO) << " (stats) Number of components with M=1: " << numM1Comps;
+      LOG(INFO) << " (stats) Max number of nodes of all components: " << maxNumNodes;
+      LOG(INFO) << " (stats) Max number of edges of all components: " << maxNumEdges;
+      LOG(INFO) << " (stats) Max cardinality of all components: " << maxCompC;
+      LOG(INFO) << " (stats) Max solution space size of all components: "
+                 << maxCompSolSpace;
+    }
 
     tSum += t;
     iterSum += iters;
@@ -118,14 +132,14 @@ int Optimizer::optimize(TransitGraph* tg) const {
     }
   }
 
-  if (runs > 1) {
-    LOG(DEBUG) << "";
-    LOG(DEBUG) << "(multiple opt runs stats) avg time: " << tSum / (1.0 * runs) << " ms";
-    LOG(DEBUG) << "(multiple opt runs stats) avg iters: " << iterSum / (1.0 * runs);
-    LOG(DEBUG) << "(multiple opt runs stats) avg score: -- " << scoreSum / (1.0 * runs) << " --";
-    LOG(DEBUG) << "(multiple opt runs stats) avg num crossings: -- " << crossSum / (1.0 * runs) << " --";
-    LOG(DEBUG) << "(multiple opt runs stats) avg num separations: -- " << sepSum / (1.0 * runs) << " --";
-    LOG(DEBUG) << "";
+  if (runs > 1 && _cfg->outputStats) {
+    LOG(INFO) << "";
+    LOG(INFO) << "(multiple opt runs stats) avg time: " << tSum / (1.0 * runs) << " ms";
+    LOG(INFO) << "(multiple opt runs stats) avg iters: " << iterSum / (1.0 * runs);
+    LOG(INFO) << "(multiple opt runs stats) avg score: -- " << scoreSum / (1.0 * runs) << " --";
+    LOG(INFO) << "(multiple opt runs stats) avg num crossings: -- " << crossSum / (1.0 * runs) << " --";
+    LOG(INFO) << "(multiple opt runs stats) avg num separations: -- " << sepSum / (1.0 * runs) << " --";
+    LOG(INFO) << "";
   }
 
   return 0;
@@ -432,6 +446,18 @@ size_t Optimizer::maxCard(const std::set<OptNode*>& g) {
     }
   }
 
+  return ret;
+}
+
+// _____________________________________________________________________________
+double Optimizer::numEdges(const std::set<OptNode*>& g) {
+  double ret = 0;
+  for (const auto* n : g) {
+    for (const auto* e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      ret++;
+    }
+  }
   return ret;
 }
 

@@ -25,14 +25,14 @@ using transitmapper::optim::CombOptimizer;
 int CombOptimizer::optimizeComp(const std::set<OptNode*>& g,
                            HierarchOrderingConfig* hc) const {
   size_t maxC = maxCard(g);
-  double solSp = solutionSpaceSize(g);
+  // double solSp = solutionSpaceSize(g);
 
   if (maxC == 1) {
     LOG(DEBUG) << "(Null optimizer)";
     _nullOpt.optimizeComp(g, hc);
-  } else if (solSp < 5000) {
-    LOG(DEBUG) << "(Exhaustive optimizer)";
-    _exhausOpt.optimizeComp(g, hc);
+  // } else if (solSp < 5000) {
+    // LOG(DEBUG) << "(Exhaustive optimizer)";
+    // _exhausOpt.optimizeComp(g, hc);
   } else {
     LOG(DEBUG) << "(ILP optimizer)";
     _ilpOpt.optimizeComp(g, hc);

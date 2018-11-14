@@ -53,6 +53,7 @@ class Optimizer {
                                                const LinePair& linepair);
   static size_t maxCard(const std::set<OptNode*>& g);
   static double solutionSpaceSize(const std::set<OptNode*>& g);
+  static double numEdges(const std::set<OptNode*>& g);
 
  protected:
   static void expandRelatives(TransitGraph* g, OrderingConfig* c);

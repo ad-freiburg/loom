@@ -127,6 +127,9 @@ void OptGraph::build() {
       if (!from) from = addNd(fromTn);
       if (!to) to = addNd(toTn);
 
+      // if (getEdg(from, to)) std::cout << fromTn << "->" << toTn << " induces multi edge!" << std::endl;
+      // assert(!getEdg(from, to));
+
       OptEdge* edge = addEdg(from, to);
 
       edge->pl().etgs.push_back(EtgPart(e, e->getTo() == toTn));

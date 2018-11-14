@@ -133,6 +133,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   static std::vector<OptRO> getSameDirRoutesIn(
       const graph::Route* r, const Node* dir, const OptEdge* fromEdge,
       const OptEdge* toEdge);
+  static EtgPart getFirstEdg(const OptEdge*);
+  static EtgPart getLastEdg(const OptEdge*);
 
   // apply splitting rules
   void split();
@@ -173,8 +175,6 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool isDogBone(OptEdge* e) const;
   OptNode* isPartialDogBone(OptEdge* e) const;
 
-  static EtgPart getFirstEdg(const OptEdge*);
-  static EtgPart getLastEdg(const OptEdge*);
 
   static void upFirstLastEdg(OptEdge*);
 
