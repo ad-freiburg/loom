@@ -36,30 +36,30 @@ void OptGraph::upFirstLastEdg(OptEdge* optEdg) {
 
 // _____________________________________________________________________________
 EtgPart OptGraph::getFirstEdg(const OptEdge* optEdg) {
-  size_t i = 0;
-  for (const auto e : optEdg->pl().etgs) {
-    if (e.etg->getFrom() == optEdg->getFrom()->pl().node ||
-        e.etg->getTo() == optEdg->getFrom()->pl().node) {
-      break;
-    }
-    i++;
-  }
+  // size_t i = 0;
+  // for (const auto e : optEdg->pl().etgs) {
+    // if (e.etg->getFrom() == optEdg->getFrom()->pl().node ||
+        // e.etg->getTo() == optEdg->getFrom()->pl().node) {
+      // break;
+    // }
+    // i++;
+  // }
 
-  assert(i == optEdg->pl().firstEtg);
+  // assert(i == optEdg->pl().firstEtg);
   return optEdg->pl().etgs[optEdg->pl().firstEtg];
 }
 
 // _____________________________________________________________________________
 EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) {
-  size_t i = 0;
-  for (const auto e : optEdg->pl().etgs) {
-    if (e.etg->getFrom() == optEdg->getTo()->pl().node ||
-        e.etg->getTo() == optEdg->getTo()->pl().node) {
-      break;
-    }
-    i++;
-  }
-  assert(i == optEdg->pl().lastEtg);
+  // size_t i = 0;
+  // for (const auto e : optEdg->pl().etgs) {
+    // if (e.etg->getFrom() == optEdg->getTo()->pl().node ||
+        // e.etg->getTo() == optEdg->getTo()->pl().node) {
+      // break;
+    // }
+    // i++;
+  // }
+  // assert(i == optEdg->pl().lastEtg);
   return optEdg->pl().etgs[optEdg->pl().lastEtg];
 }
 

@@ -722,15 +722,15 @@ The worst case complexity of the entire core graph reduction process, including 
 %
 \begin{figure}[b]
   \centering
-  \includegraphics[width=0.35\textwidth]{render_examples/rendering/render_example1.pdf}
-  \hspace{1cm}
-  \includegraphics[width=0.35\textwidth]{render_examples/rendering/render_example2.pdf}
+  \includegraphics[width=0.3\textwidth]{render_examples/rendering/render_example1.pdf}
+  \hspace{1.5cm}
+  \includegraphics[width=0.3\textwidth]{render_examples/rendering/render_example2.pdf}
 
   \vspace{0.8cm}
   \centering
-  \includegraphics[width=0.35\textwidth]{render_examples/rendering/render_example3.pdf}
-  \hspace{1cm}
-  \includegraphics[width=0.35\textwidth]{render_examples/rendering/render_example4.pdf}
+  \includegraphics[width=0.3\textwidth]{render_examples/rendering/render_example3.pdf}
+  \hspace{1.5cm}
+  \includegraphics[width=0.3\textwidth]{render_examples/rendering/render_example4.pdf}
 
 	\caption{The four steps of rendering a given line graph: (1) render ordered lines as edges, (2) free node area, (3) render inner connections, (4) render station overlays.}
 	\label{FIG:renderingproc}
@@ -851,7 +851,7 @@ The GLPK solver was used with the feasibility pump heuristic (\texttt{fp\_heur=O
               & \multicolumn{3}{ c }{\footnotesize Official map} & \multicolumn{3}{ c }{\footnotesize Our map} \\
               \cline{2-4} \cline{5-7} \\[-2ex] \toprule\noalign{\smallskip}
               & $\times$ & $||$ & pen. & $\times$ & $||$ & pen. & $T$  \\\midrule
-    Freiburg    & 7  & 1  & 132 & 7  &  0 & 48 & 2\\
+    Freiburg    & 7  & 1  & 132 & 6  &  0 & 48 & 2\\
     Dallas   & 3  & 1  & 27 &  3  &  0 & 9 & 1\\
     Chicago    & 26  & 0  & 80 &  27  &  0 & 80 & 1\\
     Stuttgart    & 65  & 5 & 264 &  64  &  2  & 156 & 4 \\\bottomrule
@@ -891,19 +891,26 @@ We also found that our maps always scored better or equal in our penalty system 
               && \multicolumn{6}{c}{\footnotesize On baseline graph} & & \multicolumn{6}{c}{\footnotesize On core graph} \\
               \cline{3-8} \cline{10-15} \\[-2ex] \toprule
               && $|S|$ & $t$ & iters & $\times$ & $||$ & pen & & $|S|$ & $t$ & iters & $\times$ & $||$ & pen \\\midrule
-    Freiburg    & E & \multirow{6}{*}{\Hsci{6}{13}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & & \multirow{6}{*}{55k} &  4.2\Hs & 55k & 5 & 2 & 42\\
-              & H & & 0.2\Hs & 9.5 & 16.9 & 11.2 & 229.9 & &  & 11\Hms & 5.3 & 5.4 & 1.8 & 47.3\\
-              & A &  &  90\Hms & 7k & 16.9 & 12.4 & 230.3 & &  & 0.2\Hs & 6.2k & 5.6 & 2 & 49.4\\
-              & E+S &  & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & &  & 5.6\Hs & 55k &  & \Hlong & \Hlong\\
-              & H+S &  & 4.3\Hs & 16.9 & 44.6 & 14.3 & 547.2 & &  & 1.1\Hs & 6.9 &  27.3 & 3 & 189.1\\
-              & A+S &  &  0.4\Hs & 14.5k & 51.9 & 15.6 & 704.3 & &  & 0.7\Hs & 7.6k & 27.9 & 2.8 & 197.7\\\midrule
+    Freiburg    & E & \multirow{6}{*}{\Hsci{6}{13}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & & \multirow{6}{*}{55k} &  4.2\Hs & 55k & 5 & 2 & 30\\
+              & H & & 0.3\Hs & 9.4 & 13.8 & 10.1 & 163.8 & &  & 9\Hms & 4.12 & 5.6 & 1.8 & 44.8\\
+              & A &  &  89\Hms & 7.2k & 13.8 & 10.9 & 168.7 & &  & 0.2\Hs & 5.9k & 5.8 & 2 & 43.9\\
+              & E+S &  & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & &  & 5.3\Hs & 55k & 6 & 0 & 48\\
+              & H+S &  & 60\Hms & 9.5 & 12.7 & 4.1 & 188.4 & &  & 10\Hms & 4.1 & 7.1 & 1.1 & 70.6\\
+              & A+S &  &  0.1\Hs & 7.6k & 12.1 & 4.7 & 195.6 & &  & 0.2\Hs & 5.8k & 6.9 & 1.2 & 70.9\\\midrule
     
     Chicago   & E & \multirow{6}{*}{\Hsci{4}{33}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & & \multirow{6}{*}{\Hsci{5}{9}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong\\
-              & H & & 3\Hs &  16.8 & 48.1 & 38.5 & 592.7 & &  & 1.2\Hs & 7.4 & 25.5 & 8.7 & 182.4\\
-              & A &  &  0.2\Hs & 11k & 55.6 & 43.6 & 687.9 & &  & 0.7\Hs & 9k & 25.4 & 9.1 & 183.7\\
+              & H & & 3\Hs &  17.4 & 41.7 & 37.6 & 481.4 & &  & 0.9\Hs & 6.8 & 20.4 & 7.4 & 125.6\\
+              & A &  &  0.2\Hs & 12k & 45 & 39 & 512.6 & &  & 0.7\Hs & 8.7k & 20.1 & 7.1 & 120.6\\
               & E+S &  & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & &  & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong\\
-              & H+S &  & 4.3\Hs & 16.9 & 44.6 & 14.3 & 547.2 & &  & 1.1\Hs & 6.9 &  27.3 & 3 & 189.1\\
-              & A+S &  &  0.4\Hs & 14.5k & 51.9 & 15.6 & 704.3 & &  & 0.7\Hs & 7.6k & 27.9 & 2.8 & 197.7\\\midrule
+              & H+S &  & 4.1\Hs & 16.6 & 38.5 & 13.3 & 463.3 & &  & 0.9\Hs & 6 &  21.6 & 3.2 & 131.3\\
+              & A+S &  &  0.4\Hs & 15.1k & 40.7 & 15 & 556.2 & &  & 0.7\Hs & 7.9k & 21.3 & 3.1 & 133.6\\\midrule
+
+    Stuttgart   & E & \multirow{6}{*}{\Hsci{3}{103}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & & \multirow{6}{*}{\Hsci{2}{38}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong\\
+              & H & & 3\Hs &  17.4 & 41.7 & 37.6 & 481.4 & &  & 0.9\Hs & 6.8 & 20.4 & 7.4 & 125.6\\
+              & A &  &  0.2\Hs & 12k & 45 & 39 & 512.6 & &  & 0.7\Hs & 8.7k & 20.1 & 7.1 & 120.6\\
+              & E+S &  & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & &  & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong\\
+              & H+S &  & 4.1\Hs & 16.6 & 38.5 & 13.3 & 463.3 & &  & 0.9\Hs & 6 &  21.6 & 3.2 & 131.3\\
+              & A+S &  &  0.4\Hs & 15.1k & 40.7 & 15 & 556.2 & &  & 0.7\Hs & 7.9k & 21.3 & 3.1 & 133.6\\\midrule
   \end{tabular*}}
   \vspace{3.6mm}
 \end{table*}
@@ -919,6 +926,10 @@ We also found that our maps always scored better or equal in our penalty system 
               && \multicolumn{4}{c}{\footnotesize On baseline graph} & & \multicolumn{4}{c}{\footnotesize On core graph} \\
               \cline{3-6} \cline{8-11} \\[-2ex] \toprule
               && \Hdimh & \Htglpk & \Htcbc & \Htgo &  & \Hdimh & \Htglpk & \Htcbc & \Htgo & $\times$ & $||$ \\\midrule
+
+    Freiburg   & B & \Hdim{?}{?}   & ? & ? & ? & &  \Hdim{?}{?} & ? & ? & ? &   ? & ? \\
+              & I & \Hdim{?}{?} & ? & ? & ? & &   \Hdim{?}{?} & ? &  ? & ? &   ? & ?\\
+              & I+S & \Hdim{?}{?} & ? & ? & ? & &   \Hdim{?}{?} &  ? & ? & ? &   ? & ? \\\midrule
 
     Chicago   & B & \Hdim{41\Hk}{861}   & \Hlong &  \Hlong & \Hlong & &  \Hdim{8.2\Hk}{266} &  \Hlong & 47\Hm & 2\Hm &   22 &   4-7 \\
               & I & \Hdim{1.4\Hk}{982} &  9\Hs & 1\Hs & 41\Hms & &   \Hdim{394}{285} & 0.8\Hs &  0.1\Hs & 10\Hms &   22 &   4-7 \\

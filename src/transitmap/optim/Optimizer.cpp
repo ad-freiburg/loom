@@ -77,7 +77,7 @@ int Optimizer::optimize(TransitGraph* tg) const {
   double crossSum = 0;
   double sepSum = 0;
 
-  for (size_t run = 0; run <= runs; run++) {
+  for (size_t run = 0; run < runs; run++) {
     OrderingConfig c;
     HierarchOrderingConfig hc;
 
