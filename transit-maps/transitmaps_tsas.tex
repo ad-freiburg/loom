@@ -144,7 +144,7 @@ Such a map should satisfy the following main criteria:\vspace{0pt}
 
 % \begin{figure}
 % \centering
-% \includegraphics[width=0.47\textwidth]{newyork.pdf}
+% \includegraphics[width=0.47\textwidth]{figures/newyork.pdf}
 % \caption{Automatically generated map of the NYC subway. Express lines have been uncollapsed to artificially increase the line graph complexity.}
 %\vspace{-1em}
 % \end{figure}
@@ -152,9 +152,9 @@ Such a map should satisfy the following main criteria:\vspace{0pt}
 
 \begin{figure*}[t]
   \centering
-  \includestandalone[trim={19pt, 3pt, 0, 0}, clip, width=0.46\textwidth]{render_examples/vvs_transit_graph}
+  \includestandalone[trim={19pt, 3pt, 0, 0}, clip, width=0.46\textwidth]{figures/render_examples/vvs_transit_graph}
   \hspace{0.5cm}
-  \includegraphics[trim={0cm 0 2.47cm 4.07cm},clip,width=0.46\textwidth]{render_examples/vvs_cropped.pdf}
+  \includegraphics[trim={0cm 0 2.47cm 4.07cm},clip,width=0.46\textwidth]{figures/render_examples/vvs_cropped.pdf}
   \caption{Left: Excerpt from a line graph which LOOM constructed from the GTFS data for the 2015 light rail network of the city of Stuttgart. Each edge corresponds to a segment of the network where the same set of lines takes the same geographical course. Segment boundaries are often station nodes (large) but may also be intermediate nodes (small). The line ids for each segment are given in ascending order. LOOM's central optimization step computes a line ordering for each segment. This determines how the lines are drawn in the map, and where line crossings and separations occur. Right: The corresponding excerpt from LOOM's transit map.}
   \label{FIG:transitgraphvvs}  
   %\vspace{-0.4cm}
@@ -289,7 +289,7 @@ One approach that seems to use a model similar to ours was described by Anton Du
 %
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.7\textwidth]{linegraph.pdf}
+  \includegraphics[width=0.7\textwidth]{figures/linegraph.pdf}
   \caption{Left: Input multigraph $G^0$ created from schedule data (GTFS). Nodes represent stations, and each edge holds a single line that occurs between two stations. There may be many overlapping edge segments. Right: Line graph $G$ constructed from $G^0$ by repeatedly combining shared edge segments into a single, new edge. The overlapping segments have been collapsed, and a new node $u'$ was introduced at the segment boundaries.}  
   \label{FIG:linegraph}
   %\vspace{-0.4cm}
@@ -328,7 +328,7 @@ This section describes stage 2 of LOOM, namely how to solve MLNCM: given a line 
 \subsection{Baseline ILP}\label{SEC:baseline}
 \begin{figure}
   \centering
-  $\vcenter{\hbox{\includegraphics[width=0.75\textwidth]{crossing.pdf}}}$
+  $\vcenter{\hbox{\includegraphics[width=0.75\textwidth]{figures/crossing.pdf}}}$
   \caption{Example instances. Both station polygons have 4 \emph{node fronts}, each corresponding to an incident edge. Each node front has exactly one port ($1, 2, ...$) for each line traversing through its edge. Gray lines depict possible inner node connections. Left: $A, B$ extend from $e$ to $e'$ over $w$ and may introduce a crossing, if the position of $A$ is smaller than the position of $B$ in $e$, but not in $e'$ (or vice versa). Right: a crossing between $A$ and $B$ only depends on the line ordering in $e$, but not on the orderings in $e'$ and $e''$.}
   \label{FIG:crossings}
 \end{figure}
@@ -369,10 +369,10 @@ In summary, we have $\mathcal{O}(|E|M^{2})$ variables and $\mathcal{O}(|E|M^{6})
 \centering
 \begin{minipage}{.48\textwidth}
   \centering
-  %\includegraphics[trim={2.25 0 2.25 0},clip,angle=270,origin=c,width=.25\textwidth]{render_examples/splitting_example_nonopt.pdf}\hspace{19pt}
-  \includegraphics[trim={2.25 2.2 2.25 2.2},clip,width=.45\textwidth]{render_examples/splitting_example_nonopt.pdf}\hfill
-  %\includegraphics[trim={2.25 0 2.25 0},clip,angle=270,origin=c,width=.25\textwidth]{render_examples/splitting_example.pdf}
-  \includegraphics[trim={2.25 2.2 2.25 2.2},clip,width=.45\textwidth]{render_examples/splitting_example.pdf}
+  %\includegraphics[trim={2.25 0 2.25 0},clip,angle=270,origin=c,width=.25\textwidth]{figures/render_examples/splitting_example_nonopt.pdf}\hspace{19pt}
+  \includegraphics[trim={2.25 2.2 2.25 2.2},clip,width=.45\textwidth]{figures/render_examples/splitting_example_nonopt.pdf}\hfill
+  %\includegraphics[trim={2.25 0 2.25 0},clip,angle=270,origin=c,width=.25\textwidth]{figures/render_examples/splitting_example.pdf}
+  \includegraphics[trim={2.25 2.2 2.25 2.2},clip,width=.45\textwidth]{figures/render_examples/splitting_example.pdf}
   %\caption{Crossings are minimized in the left example (1), but the right example with 2 crossings better indicates line pairings.}
   \caption{Minimized crossings in the left example, but the right example better indicates line pairings.}
   \label{FIG:linesplitting}
@@ -380,10 +380,10 @@ In summary, we have $\mathcal{O}(|E|M^{2})$ variables and $\mathcal{O}(|E|M^{6})
 \hfill
 \begin{minipage}{.48\textwidth}
   \centering
-  %\includegraphics[trim={2.25 0 2.25 0},clip,angle=90,origin=c,width=.25\textwidth]{render_examples/splitting_example2_nonopt.pdf}\hspace{19pt}
-  \includegraphics[trim={2.25 2.2 2.25 2.2},clip,width=.45\textwidth]{render_examples/splitting_example2_nonopt.pdf}\hfill
-  %\includegraphics[trim={2.25 0 2.25 0},clip,angle=90,origin=c,width=.25\textwidth]{render_examples/splitting_example2.pdf}
-  \includegraphics[trim={2.25 2.2 2.25 2.2},clip,width=.45\textwidth]{render_examples/splitting_example2.pdf}
+  %\includegraphics[trim={2.25 0 2.25 0},clip,angle=90,origin=c,width=.25\textwidth]{figures/render_examples/splitting_example2_nonopt.pdf}\hspace{19pt}
+  \includegraphics[trim={2.25 2.2 2.25 2.2},clip,width=.45\textwidth]{figures/render_examples/splitting_example2_nonopt.pdf}\hfill
+  %\includegraphics[trim={2.25 0 2.25 0},clip,angle=90,origin=c,width=.25\textwidth]{figures/render_examples/splitting_example2.pdf}
+  \includegraphics[trim={2.25 2.2 2.25 2.2},clip,width=.45\textwidth]{figures/render_examples/splitting_example2.pdf}
   \caption{Both orderings have 2 crossings, but in the right example they are done in one pass.}
   \label{FIG:linesplitting2}
 \end{minipage}
@@ -459,9 +459,9 @@ As we only add 1 constraint per edge and a constant number of constraints and va
 \centering
 \begin{minipage}{.68\textwidth}
   \centering
-  \includegraphics[trim={0 0.9 0 1.8},clip,width=.49\textwidth]{render_examples/periphery/periphery_example1.pdf}
+  \includegraphics[trim={0 0.9 0 1.8},clip,width=.49\textwidth]{figures/render_examples/periphery/periphery_example1.pdf}
   \hfill
-  \includegraphics[width=.48\textwidth]{render_examples/periphery/periphery_example2.pdf}
+  \includegraphics[width=.48\textwidth]{figures/render_examples/periphery/periphery_example2.pdf}
   \caption{Left: Periphery condition guaranteed by separation penalty. Right: Periphery condition not guaranteed by separation penalty.}
   \label{FIG:periphery}
 \end{minipage}
@@ -470,11 +470,11 @@ As we only add 1 constraint per edge and a constant number of constraints and va
 
 \begin{figure*}[t]
 \centering
-  \includestandalone[width=6.5cm]{tikz/transitgraph_optim}
+  \includestandalone[width=6.5cm]{figures/tikz/transitgraph_optim}
   \hfill
-  \includestandalone[width=5.5cm]{tikz/coreoptimgraph}
+  \includestandalone[width=5.5cm]{figures/tikz/coreoptimgraph}
   \hfill
-  \includestandalone[width=6cm]{tikz/connected_components}
+  \includestandalone[width=6cm]{figures/tikz/connected_components}
   \caption{Top left: line graph $G$ with 7 lines. Bottom: pruned graph of $G$ after applying pruning rules, $\{A, B\}$ was collapsed into $\{X\}$. Top right: ordering-relevant connected components of $G$ after applying cutting rules.}
   \label{FIG:coreoptimgraph}
 \end{figure*}
@@ -585,7 +585,7 @@ Using this, we add an additional check to pruning rule 2 and state this updated 
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.64\textwidth]{untangling/fullcross.pdf}
+  \includegraphics[width=0.64\textwidth]{figures/untangling/fullcross.pdf}
   \caption{Left: Full cross situation in a line graph. $\{A, B\}$ continue from $e$ to $f$ through node $v$ without interfering with $\{C, D\}$ on $h$ and $f$. Right: Node $v$ has been split into two nodes $v'$ and $v''$, without affecting line ordering optimality.}  
   \label{FIG:untangle_fullcross}
   %\vspace{-0.4cm}
@@ -608,7 +608,7 @@ Additionally, this rule may cause the optimization graph to break down into two 
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.64\textwidth]{untangling/y.pdf}
+  \includegraphics[width=0.64\textwidth]{figures/untangling/y.pdf}
   \caption{Left: Y structure in the line graph. The relative ordering of $\{A, B\}$ and $\{C\}$ in $e$ is determined by the ordering of $f$ and $g$ at $v$. Right: $v$ and $u$ have been split to settle the relative ordering of $\{A, B\}$ and $\{C\}$. Note that if $g$ was the segment with the largest number of lines in the graph, we now have brought down $M$ from 3 to 2.}  
   \label{FIG:untangle_y}
   %\vspace{-0.4cm}
@@ -637,7 +637,7 @@ Note that this rule only untangles the leftmost minor branch and that a repeated
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.64\textwidth]{untangling/y_partial.pdf}
+  \includegraphics[width=0.64\textwidth]{figures/untangling/y_partial.pdf}
   \caption{Left: Partial Y structure. The relative ordering of $\{A, B\}$ and $\{C\}$ in $e$ is again determined by the ordering of $f$ and $g$ at $v$, just like in a full Y structure. However, we cannot split $v$, because an additional line $D$ passes through it. Right: only $u$ has been split to settle the relative ordering of $\{A, B\}$ and $\{C\}$}  
   \label{FIG:untangle_y_partial}
   %\vspace{-0.4cm}
@@ -664,14 +664,14 @@ Note that untangling rule 2 (full Y) is equivalent to an application of untangli
 
 \begin{figure}
 \centering
-  \includegraphics[width=.7\textwidth, page=1]{untangling/dogbone.pdf}
+  \includegraphics[width=.7\textwidth, page=1]{figures/untangling/dogbone.pdf}
   \caption{Left: Full dog-bone structure. $\{A, B\}$ and $\{C\}$ joing at node $u$, follow $e$ together, and depart again at $v$, in inverted directions. Crossings in either $u$ or $v$ between $\{A, B\}$ and $\{C\}$ are unavoidable. Right: $u$ and $v$ have been split up to settle the relative ordering of $\{A, B\}$ and $\{C\}$ in $e$.}  
   \label{FIG:untangle_dogbone}
 
 \end{figure}
 \begin{figure}
 \centering
-  \includegraphics[width=.7\textwidth, page=2]{untangling/dogbone.pdf}
+  \includegraphics[width=.7\textwidth, page=2]{figures/untangling/dogbone.pdf}
   \caption{Left: Full dog-bone structure like in Figure~\ref{FIG:untangle_dogbone}, but a crossing between $\{A, B\}$ and $\{C\}$ is not necessary. Right: $u$ and $v$ have been split up to settle the relative ordering of $\{A, B\}$ and $\{C\}$ in $e$.}  
   \label{FIG:untangle_dogbone2}
 \end{figure}
@@ -682,9 +682,9 @@ An example of such a structure in the real-world map of the Stuttgart light rail
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.42\textwidth, page=1]{untangling/vvs_dogbone.pdf}
+  \includegraphics[width=0.42\textwidth, page=1]{figures/untangling/vvs_dogbone.pdf}
   \hfill
-  \includegraphics[width=0.45\textwidth, page=1, trim={0.2cm 0.5cm 0.2cm 0.5cm}, clip]{untangling/ny_cross.pdf}
+  \includegraphics[width=0.45\textwidth, page=1, trim={0.2cm 0.5cm 0.2cm 0.5cm}, clip]{figures/untangling/ny_cross.pdf}
   \caption{Left: Dog bone structure in the map of the Stuttgart light rail system. Untangling reduces the number of possible orderings in the highlighted central segment of the network from $8! = 40,320$ to $4! \times 3! = 144$. Right: full cross in the subway network of New York.}  
   \label{FIG:untangle_dogbone_stuttgart}
 \end{figure}
@@ -713,7 +713,7 @@ The unavoidable crossings between threads $\{A, B\}$ and $\{C\}$ would then occu
 \subsubsection{Partial Dog-Bone Structures}
 
 \begin{figure}
-  \includegraphics[width=0.7\textwidth, page=1]{untangling/dogbone_partial.pdf}
+  \includegraphics[width=0.7\textwidth, page=1]{figures/untangling/dogbone_partial.pdf}
   \caption{Left: Partial dog-bone structure. The relative ordering of $\{A, B\}$ and $\{C\}$ in $e$ can be determined from the ordering of $h$, $i$, $g$ and $f$ at $u$ and $v$, bet we cannot split $u$ because $D$ passes through it. Right: Only $v$ has been split up, settling the relative ordering of $\{A, B\}$ and $\{C\}$ in $e$.}  
   \label{FIG:untangle_dogbone_partial}
 \end{figure}
@@ -728,7 +728,7 @@ These are dog-bone structures where \emph{one} of the nodes $u$ and $v$ fullfill
 \subsubsection{Stump Structures}
 
 \begin{figure}
-  \includegraphics[width=0.7\textwidth, page=1]{untangling/stump.pdf}
+  \includegraphics[width=0.7\textwidth, page=1]{figures/untangling/stump.pdf}
   \caption{Left: Stump structure. $C$ ends in $v$ and its optimal position in $e$ is determined by the position of $g$ at $u$. Right: Stump structure transformed into a full dog-bone.}  
   \label{FIG:untangle_stump}
 \end{figure}
@@ -805,8 +805,8 @@ The worst case complexity of the entire untangling process is thus $\mathcal{O}(
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.69\textwidth,page=1]{untangling/tree.pdf}
-  \includegraphics[width=0.25\textwidth,page=1]{untangling/tree_map.pdf}
+  \includegraphics[width=0.69\textwidth,page=1]{figures/untangling/tree.pdf}
+  \includegraphics[width=0.25\textwidth,page=1]{figures/untangling/tree_map.pdf}
 
   \caption{Left: a tree-like line graph. Middle: optimization graph after full untangling (in this case: repeated application of pruning rule 2 (node contraction) and untangling rule 1 (Y structure), the search space size is now 1. Right: graph rendered with the ordering obtained from untangling.}
   \label{FIG:untangle_tree}
@@ -828,8 +828,8 @@ In both cases, the input line graph is untangled until we only have single threa
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.64\textwidth,page=1]{untangling/main_leg.pdf}
-  \includegraphics[width=0.235\textwidth,page=1]{untangling/bone.pdf}
+  \includegraphics[width=0.64\textwidth,page=1]{figures/untangling/main_leg.pdf}
+  \includegraphics[width=0.235\textwidth,page=1]{figures/untangling/bone.pdf}
 
   \caption{Left: special class of line graph in which lines join and leave a main branch in the same order. Middle: optimization graph after full untangling (in this case: repeated application of pruning rule 2 (node contraction) and untangling rule 4 (dog-bone-structure), the search space size is now 1. Right: graph rendered with the ordering stored for $e_1$, $e_2$ and $e_3$ from untangling.}
   \label{FIG:untangle_main_branch}
@@ -840,15 +840,15 @@ In both cases, the input line graph is untangled until we only have single threa
 %
 \begin{figure}[b]
   \centering
-  (1)\includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example1.pdf}
+  (1)\includegraphics[width=0.25\textwidth]{figures/render_examples/rendering/render_example1.pdf}
   \hspace{1.5cm}
-  (2)\includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example2.pdf}
+  (2)\includegraphics[width=0.25\textwidth]{figures/render_examples/rendering/render_example2.pdf}
 
   \vspace{0.4cm}
   \centering
-  (3)\includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example3.pdf}
+  (3)\includegraphics[width=0.25\textwidth]{figures/render_examples/rendering/render_example3.pdf}
   \hspace{1.5cm}
-  (4)\includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example4.pdf}
+  (4)\includegraphics[width=0.25\textwidth]{figures/render_examples/rendering/render_example4.pdf}
 
 	\caption{The four steps of rendering a given line graph: (1) render ordered lines as edges, (2) free node area, (3) render inner connections, (4) render station overlays.}
 	\label{FIG:renderingproc}
@@ -934,11 +934,11 @@ Also note that separations were only considered in (I+S) and thus depended on th
 \begin{figure*}
 \centering
 %\vspace{1em}
-\includegraphics[width=0.32\textwidth]{google.pdf}
+\includegraphics[width=0.32\textwidth]{figures/google.pdf}
 \hfill
-\includegraphics[width=0.32\textwidth]{loom.pdf}
+\includegraphics[width=0.32\textwidth]{figures/loom.pdf}
 \hfill
-\includegraphics[width=0.32\textwidth]{chicago_loop.pdf}
+\includegraphics[width=0.32\textwidth]{figures/chicago_loop.pdf}
 \caption{Left: Google transit map cutout for Chicago. Center: Same area in our automatically generated map. Right: Official CTA map for the same area. Note the near-perfect match of the line orderings in the official map and our map.}
 %\vspace{-1em}
 \label{FIG:chicagofull}  
