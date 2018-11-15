@@ -11,6 +11,7 @@
 \usepackage{footnote}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{algpseudocode}
 
 
 % Copyright
@@ -102,7 +103,7 @@ LOOM proceeds in three stages:
 	(1) construct a so-called line graph, where edges correspond to segments of the network with the same set of lines following the same course;
 	(2) construct an ILP that yields a line ordering for each edge which minimizes the total number of line crossings and line separations;
 	(3) based on the line graph and the ILP solution, draw the map.
-As a naive ILP formulation is too demanding, we derive a new custom-tailored formulation which requires significantly fewer constraints. Furthermore, we present engineering techniques which use structural properties of the line graph to further reduce the ILP size. For the subway network of New York, we can reduce the number of constraints from 229,000 in the naive ILP formulation to about 3,700 with our techniques, enabling solution times of less than a second. Since our maps respect the geography of the transit network, they can be used for tiles and overlays in typical map services. Previous research work either did not take the geographical course of the lines into account, or was concerned with schematic maps without optimizing line crossings or line separations.
+As a naive ILP formulation is too demanding, we derive a new custom-tailored formulation which requires significantly fewer constraints. Furthermore, we present engineering techniques which use structural properties of the line graph to further reduce the ILP size. For the subway network of New York, we can reduce the number of constraints from 229,000 in the naive ILP formulation to about 3,700 \TODO{update, add to untangling table} with our techniques, enabling solution times of less than a second. Since our maps respect the geography of the transit network, they can be used for tiles and overlays in map services. Previous research work either did not take the geographical course of the lines into account, or was concerned with schematic maps without optimizing line crossings or separations.
 \end{abstract}
 
 \def\UrlFont{\normalsize}
@@ -247,6 +248,7 @@ For each city, line graph construction, ILP solution and rendering together take
 %
 \subsection{Related Work}\label{SEC:related}
 %
+Our work is related to previous work on line graph construction, edge bundling, crossing minimization in metro maps, and drawing of schematic metro maps.
 \subsubsection{Map Construction and Edge Bundling}
 
 The first step in our pipeline -- the line graph construction -- is closely related to map construction and edge bundling. 
@@ -468,7 +470,7 @@ As we only add 1 constraint per edge and a constant number of constraints and va
 
 \begin{figure*}[t]
 \centering
-  \includestandalone[width=6.1cm]{tikz/transitgraph_optim}
+  \includestandalone[width=6.5cm]{tikz/transitgraph_optim}
   \hfill
   \includestandalone[width=5.5cm]{tikz/coreoptimgraph}
   \hfill
@@ -488,7 +490,9 @@ As described above, we especially want to prevent crossings or separations in st
 %
 \section{Line Graph Simplification}\label{SEC:coreprobgraph}
 %
-It is possible to further simplify the optimization problem. In this section, we describe a set of transformations that may be applied to the line graph without affecting the global optimality of the line ordering and thus the ILP solution. In our experiments, these transformations reduced the size of the resulting ILPs by a factor between 2 and 4 and led to significantly lower solution times (see Sect.~\ref{SEC:eval}). We first prove Lemmata \ref{LEM:linepairing} - \ref{LEM:termini} and use them to derive a set of pruning and cutting rules.
+It is possible to further simplify the optimization problem. In this section, we describe a set of transformations that may be applied to the line graph without affecting the global optimality of the line ordering and thus the ILP solution.
+In our experiments, these transformations reduced the size of the resulting ILPs by a factor between 2 and 4 and led to significantly lower solution times (see Sect.~\ref{SEC:eval}).
+We first prove Lemmata \ref{LEM:linepairing} - \ref{LEM:termini} and use them to derive a set of pruning and cutting rules.
 \begin{lemma}\label{LEM:linepairing}
 If for some set $\mathcal{B} = \{A, B, C, ...\} \subseteq \mathcal{L}$ it holds for all $l \in \mathcal{B}, e \in E: l \in L(e) \Rightarrow \mathcal{B} \subseteq L(e)$, then it always exists an optimal ordering in which $A, B, C, ...$ are bundled next to each other with a fixed, global ordering.
 \end{lemma}
@@ -506,13 +510,20 @@ Let $L \in \mathcal{B}$ be the line that induces the minimal number of crossings
 %\begin{proof} If no such $v_{JK}$ exists, $J$ and $K$ either both extend over each $v$ on the same (two) edges or do not extend together over $v$ at all. In the latter case, no crossing can occur and we can thus disregard it. In the former case, the relative ordering is irrelevant - we use Lemma~\ref{LEM:linepairing} and combine $J$ and $K$ into a new bundle line $I$ with an arbitrary internal ordering.
 %\end{proof}
 \begin{lemma}\label{LEM:crossingmoveing}
-	Given an optimal ordering for each $L(e)$. We say a node $v$ belongs to $W$ if $\text{deg}(v) = 2$ and for its adjacent edges $e$ and $e'$ the set of lines $L(e)$ is equal to $L(e')$. A crossing or a separation in some $v \in W$ can always be moved from $v$ to a node $v' \not\in W$ without negatively affecting optimality.
+	Given an optimal ordering for each $L(e)$.
+  We say a node $v$ belongs to $W$ if $\text{deg}(v) = 2$ and for its adjacent edges $e$ and $e'$ the set of lines $L(e)$ is equal to $L(e')$.
+  A crossing or a separation in some $v \in W$ can always be moved from $v$ to a node $v' \not\in W$ without negatively affecting optimality.
 \end{lemma}
 \begin{proof}
 We set $L^* = L(e) = L(e')$ and first consider crossings. There are two possible cases:
 \begin{enumerate*}
-	\item all $l \in L^*$ always occur together in each edge. Then Lemma~\ref{LEM:linepairing} holds, and the optimal ordering of $L(e)$ is the same as of $L(e')$, inhibiting any crossings in $v$. We can thus ignore this case.
-	\item Lemma~\ref{LEM:linepairing} does not hold and the lines in $L^*$ separate in some node $v' \neq v$. Then they either diverge into separate edges at $v'$, or a subset of them ends in $v'$. If they diverge, the degree of $v'$ has to be at least 3, implicating $v' \not\in W$. If some (not all) of them end in $v'$, then $v'$ has to be adjacent to at least 2 edges $e, e'$ with $L(e) \neq L(e')$, again implicating $v' \not\in W$. Such a $v'$ will thus indeed always exist. Under a uniform crossing penalty, we can trivially move the crossing from $v$ to $v'$ without affecting optimality. Under the penalty described in Sect.~\ref{SEC:crossing_placement}, optimality will also not be affected negatively, because $\text{deg}(v)$ is always 2, implying that $v$ is a station (Sect.~\ref{SEC:graph}).
+	\item all $l \in L^*$ always occur together in each edge. Then Lemma~\ref{LEM:linepairing} holds, and the optimal ordering of $L(e)$ is the same as of $L(e')$, inhibiting any crossings in $v$.
+  We can thus ignore this case.
+	\item Lemma~\ref{LEM:linepairing} does not hold and the lines in $L^*$ separate in some node $v' \neq v$.
+  Then they either diverge into separate edges at $v'$, or a subset of them ends in $v'$.
+  If they diverge, the degree of $v'$ has to be at least 3, implicating $v' \not\in W$. If some (not all) of them end in $v'$, then $v'$ has to be adjacent to at least 2 edges $e, e'$ with $L(e) \neq L(e')$, again implicating $v' \not\in W$. Such a $v'$ will thus indeed always exist.
+  Under a uniform crossing penalty, we can trivially move the crossing from $v$ to $v'$ without affecting optimality.
+  Under the penalty described in Sect.~\ref{SEC:crossing_placement}, optimality will also not be affected negatively, because $\text{deg}(v)$ is always 2, implying that $v$ is a station (Sect.~\ref{SEC:graph}).
 \end{enumerate*} The same argument holds for line separations.
 \end{proof}
 \begin{lemma}\label{LEM:termini}
@@ -527,7 +538,7 @@ In the first case, no $l \in L(e)$ extends over $v$, so they cannot introduce an
 Using the lemmata from above, we may simplify the input line graph with the following pruning rules:
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
 	\setlength\itemsep{1pt}
-	\item[\emph{(Pruning rule 1)}] delete each node $v$ with degree 2 and $L(e) = L(e')$, and combine the adjacent edges $e = \{u, v\}$, $e' = \{v, w\}$ into a single new edge $ee' = \{u, w\}$ with $L(ee') = L(e) = L(e')$ (Lemma \ref{LEM:crossingmoveing}).
+	\item[\emph{(Pruning rule 1)}] contract each node $v$ with degree 2 and $L(e) = L(e')$, and combine adjacent edges $e = \{u, v\}$, $e' = \{v, w\}$ into a single new edge $ee' = \{u, w\}$ with $L(ee') = L(e) = L(e')$ (Lemma \ref{LEM:crossingmoveing}).
 	\item[\emph{(Pruning rule 2)}] collapse lines that always occur together into a single new line $k$ (Lemma~\ref{LEM:linepairing}). Weight crossings with $k$ by the number of lines it combines to avoid distorting penalties.
 	\item[\emph{(Pruning rule 3)}] remove each edge $e = \{u, v\}$ where $u$ and $v$ are termini for all $l \in L(e)$ (Lemma~\ref{LEM:termini}).
 \end{enumerate}
@@ -547,9 +558,19 @@ The pruned graph may then be further broken down into ordering-relevant connecte
 
 \subsection{Graph Untangling Rules}\label{SEC:untangling}
 
-The pruning rules described so far may greatly help to reduce the size of the search space for the line ordering optimization and thus bring down the time required to find an optimal solution. Section \ref{SEC:eval} evaluates the effects of these rules. However, there are still some simplification situations not covered by these rules. This section will describe 4 simple graph untangling rules which further help to bring down the degrees of freedom of the line ordering optimization problem. As we will see, these untangling rules are able to completely solve the optimization problem for specific line graph instances by cutting it down to many ordering-relevant connected components with a search space size of 1. In many cases, they are able to reduce the search space to a size which can be explored by a simple exhaustive search in minimal time.
+The pruning rules described so far may greatly help to reduce the size of the search space for the line ordering optimization.
+Section \ref{SEC:eval} evaluates the effects of these rules.
+However, there are still some simplification situations not covered by these rules.
+This section will describe 6 graph untangling rules which further help to bring down the degrees of freedom of the line ordering optimization problem.
+As we will see, these untangling rules are able to completely solve the optimization problem for specific line graph instances by cutting it down to many ordering-relevant connected components with a search space size of 1.
+In many cases, they are able to reduce the search space to a size which can be explored by a simple exhaustive search in minimal time.
 
-As these graph untangling rules always break up nodes in the original line graph into multiple nodes in the core optimization graph, we have to update pruning rule 2 from Section~\ref{SEC:pruning}. There, we always contracted degree 2 nodes because Lemma~\ref{LEM:crossingmoveing} guaranteed that a same-segment crossing in these nodes could be moved to another node without affecting optimality. If we break up nodes, this may no longer be the case: degree 2 nodes in the core optimization graph may now stand for nodes of higher degree in the original line graph, and we cannot contract them blindly. Therefore, we first define $v^*(v)$ to be original line graph node we constructed $v$ from. Note that for many nodes which were not eligible for any pruning or untangling rule, $v^*(v) = v$. Using this, we add an additional check to pruning rule 2 and state this updated pruning rule 2a it as follow:
+As these graph untangling rules always break up nodes in the original line graph into multiple nodes in the core optimization graph, we have to update pruning rule 2 from Section~\ref{SEC:pruning}.
+There, we always contracted degree 2 nodes because Lemma~\ref{LEM:crossingmoveing} guaranteed that a same-segment crossing in these nodes could be moved to another node without affecting optimality.
+If we break up nodes, this may no longer be the case: degree 2 nodes in the core optimization graph may now stand for nodes of higher degree in the original line graph, and we cannot contract them blindly.
+Therefore, we first define $v^*(v)$ to be original line graph node we constructed $v$ from.
+Note that for many nodes which were not eligible for any pruning or untangling rule, $v^*(v) = v$.
+Using this, we add an additional check to pruning rule 2 and state this updated pruning rule 2a it as follow:
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
   \setlength\itemsep{1pt}
   \item[\emph{(Pruning rule 2a)}] delete each node $v$ with degree 2 and adjacent edges $e = \{u, v\}$, $e' = \{v, w\}$,
@@ -564,39 +585,51 @@ As these graph untangling rules always break up nodes in the original line graph
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.68\textwidth]{untangling/fullcross.pdf}
+  \includegraphics[width=0.64\textwidth]{untangling/fullcross.pdf}
   \caption{Left: Full cross situation in a line graph. $\{A, B\}$ continue from $e$ to $f$ through node $v$ without interfering with $\{C, D\}$ on $h$ and $f$. Right: Node $v$ has been split into two nodes $v'$ and $v''$, without affecting line ordering optimality.}  
   \label{FIG:untangle_fullcross}
   %\vspace{-0.4cm}
 \end{figure}
 
-We now consider the situation in Figure~\ref{FIG:untangle_fullcross}, left. It is easy to see that if in some node $v$ we can identify a pair $\{e, f\}$ of adjacent edges with $L(e) = L(f)$, and if neither $e$ or $f$ (partially) continue over into another adjacent edge, the orderings in $e$ and $f$ cannot affect the number of crossing between any $l \in L(e)$ and any $l' \not\in L(e)$, only the number of crossings between themselves. We can thus state the following untangling rule:
+We now consider the situation in Figure~\ref{FIG:untangle_fullcross}, left.
+It is easy to see that if in some node $v$ we can identify a pair $\{e, f\}$ of adjacent edges with $L(e) = L(f)$, and if neither $e$ or $f$ (partially) continue over into another adjacent edge, the orderings in $e$ and $f$ cannot affect the number of crossing between any $l \in L(e)$ and any $l' \not\in L(e)$, only the number of crossings between themselves.
+We can thus state the following untangling rule:
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
   \setlength\itemsep{1pt}
-  \item[\emph{(Untangling rule 1)}] For some node $v$ in the line graph and its adjacent edges $e_1, e_2, ..., e_{\deg(v)-1}$, if we can identify two edges $e_a = \{v, u\}$ and $e_b = \{v, w\}$ with $L(e_a) = L(e_b)$ and both $e_a$ and $e_b$ do not (partially) continue into any other edge $e_i \not\in \{e_a, e_b\}$, break $v$ into two nodes $v'$ and $v''$. Node $v'$ gets connected to $u$ with an edge $e'_a$ and to $w$ via $e'_b$, where $L(e'_a) = L(e_a)$ and $L(e'_b) = L(e_b)$. Node $v''$ gets connected to the remaining nodes $u_i$ $v$ was originally connected to via $e'_i = \{v'', u_i\}$. We set $L(e'_i) = L(e_i)$. Figure~\ref{FIG:untangle_fullcross}, right gives an example.
+  \item[\emph{(Untangling rule 1)}] For some node $v$ in the line graph and its adjacent edges $e_1, e_2, ..., e_{\deg(v)-1}$, if we can identify two edges $e_a = \{v, u\}$ and $e_b = \{v, w\}$ with $L(e_a) = L(e_b)$ and both $e_a$ and $e_b$ do not (partially) continue into any other edge $e_i \not\in \{e_a, e_b\}$, break $v$ into two nodes $v'$ and $v''$.
+  Node $v'$ gets connected to $u$ with an edge $e'_a$ and to $w$ via $e'_b$, where $L(e'_a) = L(e_a)$ and $L(e'_b) = L(e_b)$. Node $v''$ gets connected to the remaining nodes $u_i$ $v$ was originally connected to via $e'_i = \{v'', u_i\}$. We set $L(e'_i) = L(e_i)$. Figure~\ref{FIG:untangle_fullcross}, right gives an example.
 \end{enumerate}
 
-Note that this rule alone will not have any effect on the ILP sizes, as we would for example not add any constraints or variables for crossings between edge $e_a$ and some $e_i \not\in \{e_a, e_b\}$, as described in Sections~\ref{SEC:baseline} and \ref{SEC:improved}. However, $v'$ and $v''$ may now be eligible for contraction according to pruning rule 2a. Additionally, this rule may cause the optimization graph to break down into two connected components.
+Note that this rule alone will not have any effect on the ILP sizes, as we would for example not add any constraints or variables for crossings between edge $e_a$ and some $e_i \not\in \{e_a, e_b\}$, as described in Sections~\ref{SEC:baseline} and \ref{SEC:improved}.
+However, $v'$ and $v''$ may now be eligible for contraction according to pruning rule 2a.
+Additionally, this rule may cause the optimization graph to break down into two connected components.
 
 \subsubsection{Y Structures}
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.68\textwidth]{untangling/y.pdf}
+  \includegraphics[width=0.64\textwidth]{untangling/y.pdf}
   \caption{Left: TODO. Right: Note that if $g$ was the segment with the largest number of lines in the graph, we now have brought down $M$ from 3 to 2.}  
   \label{FIG:untangle_y}
   %\vspace{-0.4cm}
 \end{figure}
 
-Figure~\ref{FIG:untangle_y}, left gives an example of an Y structure in the line graph. Here, a main leg $e = \{u, v\}$ branches at $v$ into two minor legs $f$ and $g$. As $u$ is a terminus, the line ordering in $e$ can always be adjusted to match the line orderings of the minor legs $f$ and $g$ with zero crossings. More specifically, the relative ordering of minor legs $f$ and $g$ already induces a partial optimal ordering of the lines on $e$, namely that $p_e(A) < p_e(C)$ and $p_e(B) < p_e(C)$. Any ordering violating these constraints would induce an unnecessary crossing (or separation) in $v$.
+Figure~\ref{FIG:untangle_y}, left gives an example of an Y structure in the line graph.
+A main leg $e = \{u, v\}$ branches at $v$ into two minor legs $f$ and $g$.
+As $u$ is a terminus, the line ordering in $e$ can always be adjusted to match the line orderings of the minor legs $f$ and $g$ with zero crossings.
+More specifically, the relative ordering of minor legs $f$ and $g$ already induces a partial optimal ordering of the lines on $e$, namely that $p_e(A) < p_e(C)$ and $p_e(B) < p_e(C)$.
+Any ordering violating these constraints would induce an unnecessary crossing (or separation) in $v$.
 
 For easier notation, we say that $\rho^v_e(f)$ is the clockwise position of $f$ in node $v$, beginning at edge $e$. For example, in Figure~\ref{FIG:untangle_y}, left, $\rho^v_e(f) = 0$ and $\rho^v_e(g) = 1$.
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
   \setlength\itemsep{1pt}
-  \item[\emph{(Untangling rule 2)}] For some node $v$, if we can identify a main leg edge $e = \{v, u\}$ where $u$ is a terminus and which completely branches at $v$ into $\deg(v) - 1$ minor leg edges $e_{0}, e_{1}, ..., e_{\deg(v) - 2}$ such that $L(e_{0}) \cup L(e_{1}) ... \cup L(e_{\deg(v) - 2}) = L(e)$ and all $L(e_{i})$ are pairwise disjoint, split $v$ and $u$ into nodes $v'$, $v''$ and $u'$, $u''$. For simplicity, we assume that the minor leg edges are already sorted in ascending order by their $\rho^v_{e}$ values. Nodes $v'$ and $u'$ are connected with an edge $e'$, where $L(e') = L(e_{b_0})$ (the lines of the leftmost minor leg). Nodes $v''$ and $u''$ are connected with an edge $e''$, where $L(e'') = \bigcup^{\deg(v) - 2}_{i = 1} L(e_{i})$ (the lines of the remaining minor legs to the right). Additionally, $v'$ gets connected to the nodes it was originally connected to via the first minor leg with $e'_{0}$, where $L(e_{0}) = e'_{0}$. Similarly, all remaining branches are re-connected to $v''$ (Fig.~\ref{FIG:untangle_y}, right).
+  \item[\emph{(Untangling rule 2)}] For some node $v$, if we can identify a main leg edge $e = \{v, u\}$ where $u$ is a terminus and which completely branches at $v$ into $\deg(v) - 1$ minor leg edges $e_{0}, e_{1}, ..., e_{\deg(v) - 2}$ such that $L(e_{0}) \cup L(e_{1}) ... \cup L(e_{\deg(v) - 2}) = L(e)$ and all $L(e_{i})$ are pairwise disjoint, split $v$ and $u$ into nodes $v'$, $v''$ and $u'$, $u''$.
+  For simplicity, we assume that the minor leg edges are already sorted in ascending order by their $\rho^v_{e}$ values. Nodes $v'$ and $u'$ are connected with an edge $e'$, where $L(e') = L(e_{b_0})$ (the lines of the leftmost minor leg). Nodes $v''$ and $u''$ are connected with an edge $e''$, where $L(e'') = \bigcup^{\deg(v) - 2}_{i = 1} L(e_{i})$ (the lines of the remaining minor legs to the right).
+  Additionally, $v'$ gets connected to the nodes it was originally connected to via the first minor leg with $e'_{0}$, where $L(e_{0}) = e'_{0}$. Similarly, all remaining branches are re-connected to $v''$ (Fig.~\ref{FIG:untangle_y}, right).
 \end{enumerate}
 
-To be able to later deduce the ordering of the original main leg $e$, we additionally store an ordering of the new main leg edges $e'$ and $e''$, which is just the original clockwise ordering of $e_{b_0}$ and the remainder of the minor legs. The ordering of the lines in the original edge $e$ is then just the ordered lines (after optimization) in $e'$, followed by the ordering lines (after optimization) in $e''$.
+To be able to later deduce the ordering of the original main leg $e$, we additionally store an ordering of the new main leg edges $e'$ and $e''$, which is just the original clockwise ordering of $e_{b_0}$ and the remainder of the minor legs.
+The ordering of the lines in the original edge $e$ is then just the ordered lines (after optimization) in $e'$, followed by the ordering lines (after optimization) in $e''$.
 
 Note that this rule only untangles the leftmost minor branch and that a repeated application is necessary to completely untangle more than 2 branches.
 
@@ -604,18 +637,23 @@ Note that this rule only untangles the leftmost minor branch and that a repeated
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.68\textwidth]{untangling/y_partial.pdf}
+  \includegraphics[width=0.64\textwidth]{untangling/y_partial.pdf}
   \caption{Left: Partial Y structure. Right: TODO}  
   \label{FIG:untangle_y_partial}
   %\vspace{-0.4cm}
 \end{figure}
 
-
-A special case of Y structure can be seen in Figure~\ref{FIG:untangle_y_partial}, left. Here, $e$ completely branches into 2 minor legs $f$ and $g$ at $v$. However, the lines of the minor legs are not completely contained in the main leg: line $D$ continues through node $v$ from $f$ to $g$, not to $e$. But the ordering of $f$ and $g$ still induce a partial ordering of $e$. We call this situation a \emph{partial} Y.
+A special case of Y structure can be seen in Figure~\ref{FIG:untangle_y_partial}, left.
+There, $e$ completely branches into 2 minor legs $f$ and $g$ at $v$.
+However, the lines of the minor legs are not completely contained in the main leg: line $D$ continues through node $v$ from $f$ to $g$, not to $e$.
+But the ordering of $f$ and $g$ still induce a partial ordering of $e$.
+We call this situation a \emph{partial} Y.
 
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
   \setlength\itemsep{1pt}
-  \item[\emph{(Untangling rule 3)}] For some node $v$, if we can identify a main leg edge $e = \{v, u\}$ where $u$ is a terminus and which completely branches at $v$ into $n$ minor leg edges $e_{0}, e_{1}, ..., e_{n-1}$ such that $L(e_{0}) \cup L(e_{1}) ... \cup L(e_{n-1}) \subsetneq L(e)$, split $u$ into nodes $u'$, $u''$. For simplicity, we again assume that the minor leg edges are already sorted in ascending order by their $\rho^v_e$ values. Similar as in untangling rule 2, $v$ and $u'$ are connected with an edge $e'$, where $L(e') = L(e_{0})$, and $v$ and $u''$ are connected with an edge $e''$, where $L(e'') = \bigcup^{n}_{i = 1} L(e_{i})$  (Fig.~\ref{FIG:untangle_y_partial}, right).
+  \item[\emph{(Untangling rule 3)}] For some node $v$, if we can identify a main leg edge $e = \{v, u\}$ where $u$ is a terminus and which completely branches at $v$ into $n$ minor leg edges $e_{0}, e_{1}, ..., e_{n-1}$ such that $L(e_{0}) \cup L(e_{1}) ... \cup L(e_{n-1}) \subsetneq L(e)$, split $u$ into nodes $u'$, $u''$.
+  For simplicity, we again assume that the minor leg edges are already sorted in ascending order by their $\rho^v_e$ values. 
+  Similar as in untangling rule 2, $v$ and $u'$ are connected with an edge $e'$, where $L(e') = L(e_{0})$, and $v$ and $u''$ are connected with an edge $e''$, where $L(e'') = \bigcup^{n}_{i = 1} L(e_{i})$  (Fig.~\ref{FIG:untangle_y_partial}, right).
 \end{enumerate}
 
 Just like with full Y structures, we store the order of $e'$ and $e''$ to be able to later deduce the line ordering in the original main leg $e$.
@@ -636,7 +674,9 @@ Just like with full Y structures, we store the order of $e'$ and $e''$ to be abl
   \label{FIG:untangle_dogbone2}
 \end{figure}
 
-A more complex structure that is commonly found in real-world input data is depicted in Figure~\ref{FIG:untangle_dogbone}, left. Two line threads (in the example, $\{C\}$ and $\{A, B\}$) on two segments $h$ and $i$ join at some node $u$, continue together for a single segment $e$, and branch again at some node $v$ into $g$ and $f$. We call situations like this dog-bone structures. An example of such a structure in the real-world map of the Stuttgart light rail network is shown in Figure~\ref{FIG:untangle_dogbone_stuttgart}.
+A more complex structure that is commonly found in real-world input data is depicted in Figure~\ref{FIG:untangle_dogbone}, left.
+Two line threads (in the example, $\{C\}$ and $\{A, B\}$) on two segments $h$ and $i$ join at some node $u$, continue together for a single segment $e$, and branch again at some node $v$ into $g$ and $f$. We call situations like this dog-bone structures.
+An example of such a structure in the real-world map of the Stuttgart light rail network is shown in Figure~\ref{FIG:untangle_dogbone_stuttgart}.
 
 \begin{figure}
   \centering
@@ -647,26 +687,37 @@ A more complex structure that is commonly found in real-world input data is depi
   \label{FIG:untangle_dogbone_stuttgart}
 \end{figure}
 
-Figure~\ref{FIG:untangle_dogbone}, it is obvious to see that there is no reason for $\{C\}$ and $\{A, B\}$ to be intertwined in $e$, for example by setting the ordering on $e$ to $(A, C, B)$: this would only induce an unnecessary splitting between $A$ and $B$, and would not be optimal, regardless of how the rest of the line graph looks like. Additionally, it is also easy to see the ordering of the two threads at $u$ and $v$ imposes a lower bound on the sum of crossings in $u$ and $v$. In Figure~\ref{FIG:untangle_dogbone}, because $\rho^u_e(i) < \rho^u_e(h)$ and $\rho^v_e(g) < \rho^v_e(f)$, two crossings between $C$ and $A$, as well as $C$ and $B$ in either $u$ or $v$ are unavoidable, regardless of the actual orderings in $h$, $i$, $g$ or $f$. In Figure~\ref{FIG:untangle_dogbone_2}, because $\rho^u_e(i) < \rho^u_e(h)$, but $\rho^v_e(f) > \rho^v_e(g)$, no crossing is necessary at all - the two line threads can always continue through $u$ and $v$ next to each other, regardless of their internal ordering. 
+Figure~\ref{FIG:untangle_dogbone}, it is obvious to see that there is no reason for $\{C\}$ and $\{A, B\}$ to be intertwined in $e$, for example by setting the ordering on $e$ to $(A, C, B)$: this would only induce an unnecessary splitting between $A$ and $B$, and would not be optimal, regardless of how the rest of the line graph looks like.
+Additionally, it is also easy to see the ordering of the two threads at $u$ and $v$ imposes a lower bound on the sum of crossings in $u$ and $v$.
+In Figure~\ref{FIG:untangle_dogbone}, because $\rho^u_e(i) < \rho^u_e(h)$ and $\rho^v_e(g) < \rho^v_e(f)$, two crossings between $C$ and $A$, as well as $C$ and $B$ in either $u$ or $v$ are unavoidable, regardless of the actual orderings in $h$, $i$, $g$ or $f$.
+In Figure~\ref{FIG:untangle_dogbone_2}, because $\rho^u_e(i) < \rho^u_e(h)$, but $\rho^v_e(f) > \rho^v_e(g)$, no crossing is necessary at all - the two line threads can always continue through $u$ and $v$ next to each other, regardless of their internal ordering. 
 
 We transform structures like this with the following rule:
 
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
   \setlength\itemsep{1pt}
-  \item[\emph{(Untangling rule 4)}] If some main leg edge $e = (u, v)$, with a degree $\deg(u) = \deg(v) = n \geq 3$ branches at $u$ into $\deg(u) - 1$ minor left leg edges $e^u_{0}, e^u_{1}, ..., e^u_{n}$ and at $v$ into $n$ minor right leg edges $e^v_{0}, e^v_{1}, ..., e^v_{n}$ and if there is a mapping $m(i) \mapsto j$ with $i, j \in [0, n]$ such that $L(e^v_i) = L(e^u_{m(i)})$ ($e$ branches into the exact same left and right branches), we say $e$ is a \emph{dog bone}. We additionally require that $\bigcup^{n}_{i = 0} L(e^u_{i}) = \bigcup^{n}_{j = 0} L(e^v_{j}) = L(e)$ (the combined lines of all left and of all right minor legs are exactly the same as the lines contained in the main leg) and that for both the right and left minor legs, both the $L(e^v_i)$ and the $L(e^u_j)$ are pairwise disjoint (there are no lines continuing through $u$ and $v$ to any other edge than $e$). We then untangle both $u$ and $v$ like $u$ and $v$ in untangling rule 2 (but $u'$ and $u''$ are now also connected to the original left minor leg edges adjacent to $u$) and split $e$ into two edges $e'$ and $e''$, where $e'$ now holds the lines of the first left minor leg, and $e''$ the lines of the remaining minor legs. Figure~\ref{FIG:untangle_dogbone}, right gives an example.
+  \item[\emph{(Untangling rule 4)}] If some main leg edge $e = (u, v)$, with a degree $\deg(u) = \deg(v) = n \geq 3$ branches at $u$ into $\deg(u) - 1$ minor left leg edges $e^u_{0}, e^u_{1}, ..., e^u_{n}$ and at $v$ into $n$ minor right leg edges $e^v_{0}, e^v_{1}, ..., e^v_{n}$ and if there is a mapping $m(i) \mapsto j$ with $i, j \in [0, n]$ such that $L(e^v_i) = L(e^u_{m(i)})$ ($e$ branches into the exact same left and right branches), we say $e$ is a \emph{dog-bone}.
+  We additionally require that $\bigcup^{n}_{i = 0} L(e^u_{i}) = \bigcup^{n}_{j = 0} L(e^v_{j}) = L(e)$ (the combined lines of all left and of all right minor legs are exactly the same as the lines contained in the main leg) and that for both the right and left minor legs, both the $L(e^v_i)$ and the $L(e^u_j)$ are pairwise disjoint (there are no lines continuing through $u$ and $v$ to any other edge than $e$).
+  We then untangle both $u$ and $v$ like $u$ and $v$ in untangling rule 2 (but $u'$ and $u''$ are now also connected to the original left minor leg edges adjacent to $u$) and split $e$ into two edges $e'$ and $e''$, where $e'$ now holds the lines of the first left minor leg, and $e''$ the lines of the remaining minor legs. Figure~\ref{FIG:untangle_dogbone}, right gives an example.
 \end{enumerate}
 
-Just like with untangling rule 2 and 3, we have to store an ordering of $e'$ and $e''$ to later deduce the line ordering in the original line graph edge $e$. However, there are now 2 possible orderings we could store: we can either base the ordering of $e'$ and $e''$ on the ordering position of the left minor leg $e^u_0$ in $u$, or on the ordering position of the right minor leg $e^v_0$ in $v$. If the two orderings are inverse, that is if for all $1 \leq i < n$ it holds that $\rho^u_e(e_0) < \rho^u_e(e_i) \Rightarrow \rho^u_e(e_{m(0)}) > \rho^u_e(e_{m(i)})$, it does not matter, because there are no unavoidable crossings we have to consider (Fig.~\ref{FIG:untangle_dogbone2}, right). However, if that is not the case, and an unavoidable crossing occurs (Fig.~\ref{FIG:untangle_dogbone}), right), we have to base the ordering on the node with smaller crossing penalty to not compromise optimality of the final line ordering. For example, in Figure~\ref{FIG:untangle_dogbone}, right, $\rho^u_e(h) > \rho^u_e(i)$. If we assume that $w_\times(u) > w_\times(v)$, we set the ordering of $e'$ and $e''$ in the original line graph edge $e$ to $(e'', e')$, making sure that that after optimization, the ordering in $e$ is either $(C, A, B)$ or $(C, B, A)$, depending on the final ordering of $A$ and $B$. The unavoidable crossings between threads $\{A, B\}$ and $\{C\}$ would then occur in $v$. If $w_\times(u) < w_\times(v)$, the ordering would be set to $(e', e'')$, and the crossings would appear in $u$.
+Just like with untangling rule 2 and 3, we have to store an ordering of $e'$ and $e''$ to later deduce the line ordering in the original line graph edge $e$.
+However, there are now 2 possible orderings we could store: we can either base the ordering of $e'$ and $e''$ on the ordering position of the left minor leg $e^u_0$ in $u$, or on the ordering position of the right minor leg $e^v_0$ in $v$. If the two orderings are inverse, that is if for all $1 \leq i < n$ it holds that $\rho^u_e(e_0) < \rho^u_e(e_i) \Rightarrow \rho^u_e(e_{m(0)}) > \rho^u_e(e_{m(i)})$, it does not matter, because there are no unavoidable crossings we have to consider (Fig.~\ref{FIG:untangle_dogbone2}, right).
+However, if that is not the case, and an unavoidable crossing occurs (Fig.~\ref{FIG:untangle_dogbone}), right), we have to base the ordering on the node with smaller crossing penalty to not compromise optimality of the final line ordering.
+For example, in Figure~\ref{FIG:untangle_dogbone}, right, $\rho^u_e(h) > \rho^u_e(i)$.
+If we assume that $w_\times(u) > w_\times(v)$, we set the ordering of $e'$ and $e''$ in the original line graph edge $e$ to $(e'', e')$, making sure that that after optimization, the ordering in $e$ is either $(C, A, B)$ or $(C, B, A)$, depending on the final ordering of $A$ and $B$.
+The unavoidable crossings between threads $\{A, B\}$ and $\{C\}$ would then occur in $v$. If $w_\times(u) < w_\times(v)$, the ordering would be set to $(e', e'')$, and the crossings would appear in $u$.
 
 \subsubsection{Partial Dog-Bone Structures}
 
 \begin{figure}
   \includegraphics[width=0.7\textwidth, page=1]{untangling/dogbone_partial.pdf}
-  \caption{Left: Partial dog bone structure. Right: TODO}  
+  \caption{Left: Partial dog-bone structure. Right: TODO}  
   \label{FIG:untangle_dogbone_partial}
 \end{figure}
 
-For completeness, we note that just as with Y structures, there may also be partial dog-bone structures (Fig.~\ref{FIG:untangle_dogbone_partial}, left). These are dog-bone structures where \emph{one} of the nodes $u$ and $v$ fullfills the criteria described in Section~\ref{SEC:dogbone}, and the other node fullfills the criteria described for $v$ in partial Y structures (Sec.~\ref{SEC:ypartial}) (that is, the main leg branches at $v$ into the same minor legs as at $u$, but $v$ may have additional edges or lines on the minor legs that are not contained in the main leg). 
+For completeness, we note that just as with Y structures, there may also be partial dog-bone structures (Fig.~\ref{FIG:untangle_dogbone_partial}, left).
+These are dog-bone structures where \emph{one} of the nodes $u$ and $v$ fullfills the criteria described in Section~\ref{SEC:dogbone}, and the other node fullfills the criteria described for $v$ in partial Y structures (Sec.~\ref{SEC:ypartial}) (that is, the main leg branches at $v$ into the same minor legs as at $u$, but $v$ may have additional edges or lines on the minor legs that are not contained in the main leg). 
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
   \setlength\itemsep{1pt}
   \item[\emph{(Untangling rule 6)}] In cases like the one described above, we only break up the node fullfilling the criteria described in Section~\ref{SEC:dogbone}, just like we broke up only $u$ in Section~\ref{SEC:ypartial} (Fig.~\ref{FIG:untangle_dogbone_partial}, right). By applying untangling rule 4 afterwards, we can then detach the stump line from the main leg.
@@ -676,55 +727,75 @@ For completeness, we note that just as with Y structures, there may also be part
 
 \begin{figure}
   \includegraphics[width=0.7\textwidth, page=1]{untangling/stump.pdf}
-  \caption{Left: Stump structure. Right: Stump structure transformed into dog bone.}  
+  \caption{Left: Stump structure. Right: Stump structure transformed into dog-bone.}  
   \label{FIG:untangle_stump}
 \end{figure}
 
-It remains to show that an additional class of structures, which we call \emph{stumps}, can be transformed into a dog bone structure with minimal changes to the graph. Figure \ref{FIG:untangle_stump}, left gives an example. Line $C$ on minor leg $g$ attaches itself to the main leg $e$ in node $u$, but already terminates in node $v$, $\{C\}$ is a stump in $e$. Regardless of the ordering of $A$ and $B$ in $h$, $e$ and $f$, the optimal ordering in $e$ is either $(A, B, C)$, or $(B, A, C)$, because we can always put $C$ at the `bottom' of $e$ without introducing a line crossing or a line separation.
+It remains to show that an additional class of structures, which we call \emph{stumps}, can be transformed into a dog-bone structure with minimal changes to the graph.
+Figure \ref{FIG:untangle_stump}, left gives an example. Line $C$ on minor leg $g$ attaches itself to the main leg $e$ in node $u$, but already terminates in node $v$, $\{C\}$ is a stump in $e$.
+Regardless of the ordering of $A$ and $B$ in $h$, $e$ and $f$, the optimal ordering in $e$ is either $(A, B, C)$, or $(B, A, C)$, because we can always put $C$ at the `bottom' of $e$ without introducing a line crossing or a line separation.
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
   \setlength\itemsep{1pt}
-  \item[\emph{(Untangling rule 6)}]We can easily transform a situation like this into a standard dog bone by introducing an additional dummy edge $i$ with the same lines as $g$ from $v$ to an additional dummy node $w$ in such a way that $\rho^v_e(i) = \deg(u) - 1 - \rho^u_e(g)$ ($i$ will be at a position in $v$ that is inverse to the position of $g$ in $u$). 
+  \item[\emph{(Untangling rule 6)}]We can transform a situation like this into a standard dog-bone by introducing an additional dummy edge $i$ with the same lines as $g$ from $v$ to an additional dummy node $w$ in such a way that $\rho^v_e(i) = \deg(u) - 1 - \rho^u_e(g)$ ($i$ will be at a position in $v$ that is inverse to the position of $g$ in $u$). 
 \end{enumerate}
 
 \subsection{Complexity of Line Graph Simplification}
 
-The real power of the untangling rules described in the previous section lies in their repeated application, together with the pruning and cutting rules described in Sections~\ref{SEC:pruning} and \ref{SEC:cutting}. But how long does it take until an input line graph is fully untangled, pruned and cut into connected components?
+The real power of the untangling rules described in the previous section lies in their repeated application, together with the pruning and cutting rules described in Sections~\ref{SEC:pruning} and \ref{SEC:cutting}.
+But how long does it take until an input line graph is fully untangled, pruned and cut into connected components?
 
-We first consider the complexity of the untangling rules and assume that the lines in each $L(e)$ are already ordered (for example, by some internal line id). We denote the maximum degree of our input line graph $G$ as $D$. We can safely remove nodes with degree 1 from the line graph prior to optimization and thus assume that $2|E|$ is an upper bound for $|V|$. Finding an edge eligible for any of the untangling rules described in Section~\ref{SEC:untangling} is a matter of iterating over all edges or all nodes, an thus always takes $\mathcal{O}(|E|)$. Each rule breaks up an edge $e$ into two edges $e'$ and $e''$, which can only be done at most $M$ times in the worst case (if $|L(e)| = M$ and we only detach a single line per untangling rule application). No untangling rule increases the number of lines per edge, so a single untangling rule can be applied at most $\mathcal{O}(|E|M)$ times.
+We first consider the complexity of the untangling rules and assume that the lines in each $L(e)$ are already ordered (for example, by some internal line id).
+We denote the maximum degree of our input line graph $G$ as $D$.
+We can safely remove nodes with degree 1 from the line graph prior to optimization and thus assume that $2|E|$ is an upper bound for $|V|$.
+Finding an edge eligible for any of the untangling rules described in Section~\ref{SEC:untangling} is a matter of iterating over all edges or all nodes, an thus takes $\mathcal{O}(|E|)$.
+Each rule splits an edge $e$ into two edges $e'$ and $e''$ (untangling rules 1-6), or detaches a line pair from a single node (untangling rule 1).
+Both can be done at most $M$ times.
+No untangling rule increases the number of lines per edge, so a single untangling rule can be applied at most $\mathcal{O}(|E|M)$ times.
 
-In untangling rule 1 (full crossings), we have to check ${D \choose 2} < D^2$ partners of adjacent edges for line equivalency in the worst case, which can always be done in $\mathcal{O}(M)$ because we assume the $L(e)$ to be ordered.
+In untangling rule 1 (full crossings), we have to check ${D \choose 2} < D^2$ partners of adjacent edges for line equivalency in the worst case, which can be done in $\mathcal{O}(M)$ (we assumed $L(e)$ to be ordered).
 
 %Applying untangling rule 1 to the entire graph thus takes $\mathcal{O}(|E|M^2D^2)$.
 
-In untangling rule 2 (Y structures), we have to check for the non-terminus node if the $L(e)$ of all minor leg edges are completely contained in the main leg, which can be done in $\mathcal{O}(MD)$, again assuming the $L(e)$ are ordered. We also have to check of the minor leg edges are pairwise disjoint, which takes $\mathcal{O}(MD^2)$ in the worst case. 
+In untangling rule 2 (Y structures), we have to check for the non-terminus node if the $L(e)$ of all minor leg edges are completely contained in the main leg.
+This can be done in $\mathcal{O}(MD)$.
+We also have to check of the minor leg edges are pairwise disjoint, which takes $\mathcal{O}(MD^2)$ in the worst case. 
 
 %Applying untangling rule 2 to the entire graph thus also takes $\mathcal{O}(|E|M^2D^2)$. Untangling rule 3 makes the same checks as 3, and has thus the same complexity.
 
-In untangling rule 4 and 5 (dog bone structures), it is easy to see that we have to apply the same checks as for rules 2 and 3, but we also have to establish the mapping $m$ between the left and the right legs, which can be considered an intersection problem and solved in $\mathcal{O}(M\Delta(G))$ if we assume that the adjacency lists are already ordered in clockwise fashion based on their outgoing angle.
+In untangling rule 4 and 5 (dog-bone structures), we have to apply the same checks as for rules 2 and 3, but we also have to establish the mapping $m$ between the left and the right legs.
+This can be considered an intersection problem and solved in $\mathcal{O}(M\Delta(G))$ if we assume that the adjacency lists are already ordered in clockwise fashion based on their outgoing angle.
 
-Untangling rule 6 (stump structures) has the same complexity as rule 4 and 5, as the identification has the same complexity as there and the extension by dummy node and edge can be done in constant time.
+Untangling rule 6 (stump structures) has the same complexity as rule 4 and 5 (finding such structures has the same complexity, and dummy edge extension can be done in constant time.)
 
 A single round of each untangling rule can thus always be done in $\mathcal{O}(|E|MD^2)$.
 
-Now we consider the complexity of the pruning rules. For each contraction, we have to check if $L(e) = L(e')$, which can be solved in $\mathcal{O}(M)$ as we assumed that $L(e)$ and $L(e')$ are sorted and can at least have size $M$. Pruning rule 1 can thus be applied in $\mathcal{O}(|E|M)$, as we have to contract at most $2|E|$ nodes. Pruning rule 2 is a matter of doing at most ${M \choose 2} < M^2$ depth-first searches in the line graph, which can be done in $\mathcal{O}(|E|M^2)$ (again assuming $2|E|$ as an upper bound for $|V|$). Pruning rule 3 is a matter of checking each line in each edge $(u, v)$ if it terminates in either $u$ or $v$, which can again be done in $\mathcal{O}(|E|M)$ as we have to check at least $M$ lines per edges, twice (for $u$ and $v$).
+Next, we consider the complexity of the pruning rules.
+For each contraction, we have to check if $L(e) = L(e')$, which can be solved in $\mathcal{O}(M)$.
+Pruning rule 1 can thus be applied in $\mathcal{O}(|E|M)$, as we have to contract at most $2|E|$ nodes.
+Pruning rule 2 is a matter of doing at most ${M \choose 2} < M^2$ depth-first searches in the line graph, which can be done in $\mathcal{O}(|E|M^2)$.
+Pruning rule 3 is a matter of checking each line in each edge $(u, v)$ if it terminates in either $u$ or $v$, which can again be done in $\mathcal{O}(|E|M)$ as we have to check at least $M$ lines per edges, twice (for $u$ and $v$).
 
 The complexity of cutting rule 1 is trivially $\mathcal{O}(|E|)$, and for cutting rule 2 we have to again check every line in every edge, which can be done in $\mathcal{O}(|E|M)$.
 
-We may apply all of the rules in the following fashion:
+We apply the rules in the following fashion:
 
 \begin{enumerate}
-  \item Set n to M.
-  \item Apply pruning rule 2 (collapsing of line partners).
-  \item Set n to n - 1
-  \item Apply pruning rule 1 and 3, apply all cutting rules.
+  \item Set $n$ to $M$.
+  \item Apply pruning rule 2 (node contraction).
+  \item Set $n$ to $n - 1$.
+  \item Apply pruning rule $1$ and $3$, apply all cutting rules.
   \item Apply untangling rules 1 - 6.
-  \item While n > 0, goto 3.
-  \item Apply pruning rule 1 and 3, apply all cutting rules.
+  \item While $n > 0$, go to $3$.
+  \item Apply pruning rule 1 and 3, apply cutting rules.
 \end{enumerate}
 
 First, we note that no cutting, no pruning and no untangling rules increase the number of lines in any edge, so pruning rule 2 has to be applied only once at the beginning.
 
-Second, we note that pruning rule 1 and 3 always \emph{decrease} the number of edges. In the worst case, the cutting rules may double the number of edges. The untangling rules may increase the number of edge by a factor of $M$ in the worst case, so if $|E|$ is the number of edges in the input line graph, the maximum number of edges $|E'|$ in any intermediate optimization graph will be $\mathcal{O}(|E|M)$. We assumed that each edge $L(e)$ and each adjacency list in the input line graph was sorted. The former can be sorted in $\mathcal{O}(|E|M\log M)$, the latter in $\mathcal{O}(|E|D\log D)$.
+Second, we note that pruning rule 1 and 3 always decrease the number of edges.
+In the worst case, the cutting rules may double the number of edges.
+The untangling rules may increase the number of edge by a factor of $M$ in the worst case.
+So, if $|E|$ is the number of edges in the input line graph, the maximum number of edges $|E'|$ in any intermediate optimization graph will be $\mathcal{O}(|E|M)$.
+We assumed that each edge $L(e)$ and each adjacency list in the input line graph was sorted. The former can be sorted in $\mathcal{O}(|E|M\log M)$, the latter in $\mathcal{O}(|E|D\log D)$.
 
 The worst case complexity of the entire untangling process is thus $\mathcal{O}(|E|M^3D^2)$. We note, however, that in practice, both $M$ and $D$ are usually very small. For our testing datasets, the maximum $M$ was 9 (Table~\ref{TBL:datasets}), and $D$ was always below 10. For all practical purposes, we are confident that both $D$ and $M$ can be considered a constant factor.
 
@@ -735,20 +806,28 @@ The worst case complexity of the entire untangling process is thus $\mathcal{O}(
   \includegraphics[width=0.69\textwidth,page=1]{untangling/tree.pdf}
   \includegraphics[width=0.25\textwidth,page=1]{untangling/tree_map.pdf}
 
-  \caption{Left: a tree-like line graph. Middle: optimization graph after full untangling (in this case: repeated application of pruning rule 2 (node contraction) and untangling rule 1 (Y-structure), the search space size is now 1. Right: graph rendered with the ordering obtained from untangling.}
+  \caption{Left: a tree-like line graph. Middle: optimization graph after full untangling (in this case: repeated application of pruning rule 2 (node contraction) and untangling rule 1 (Y structure), the search space size is now 1. Right: graph rendered with the ordering obtained from untangling.}
   \label{FIG:untangle_tree}
 \end{figure}
 
-For special classes of input line graphs, applying graph untangling and pruning rules is enough to solve the line ordering optimization problem. For an example, consider Figure~\ref{FIG:untangle_tree}, left. The input line graph has a tree-like structure, where the children of each node $v$ are connected by edges $e_i$ in such a way that a the $L(e_i)$ are pairwise disjoint, and their union is exactly the set of lines on the edge connect $v$ to its parent. A repeated application of our pruning and cutting rules will then lead to a graph consisting of components of 2 nodes $u, v$, 1 edge $\{u, v\}$ and $|\{u, v\}| = 1$. For example, in Figure~\ref{FIG:untangle_tree}, untangling rule 1 breaks up $b$ and $a$ into $b'$, $b''$, $a'$ and $a''$ and adds two edges with $L(\{a', b'\})=\{A, B\}$ and $L(\{a'', b''\}) = \{C\}$, then pruning rule 2 contracts $a''$ and $b''$. The same happens at $c$.
+For special classes of input line graphs, applying graph untangling and pruning rules is enough to solve the line ordering optimization problem.
+We consider Figure~\ref{FIG:untangle_tree}, left.
+The input line graph is a tree, where the children of each node $v$ are connected by edges $e_i$ in such a way that a the $L(e_i)$ are pairwise disjoint, and their union is exactly the set of lines on the edge connect $v$ to its parent.
+A repeated application of our pruning and cutting rules will then lead to a graph consisting of components of 2 nodes $u, v$, 1 edge $\{u, v\}$ and $|\{u, v\}| = 1$.
+In the example shown in Figure~\ref{FIG:untangle_tree}, left, untangling rule 1 breaks up $b$ and $a$ into $b'$, $b''$, $a'$ and $a''$ and adds two edges with $L(\{a', b'\})=\{A, B\}$ and $L(\{a'', b''\}) = \{C\}$, then pruning rule 2 contracts $a''$ and $b''$.
+The same happens at $c$.
 
-Another class of line graphs that are more likely to occur in real-world transit networks is shown in Figure~\ref{FIG:untangle_main_branch}, left. Lines leave a main branch ($e_2$ in the example) in both directions, in the exact same order. In the example in Figure~\ref{FIG:untangle_main_branch}, left, the main branch with lines $A, B, C$ is first left by $C$ at node $b$, then by $B$ at node $c$ (upwards direction). Equally, $C$ leaves at $a$, and $B$ at $h$ (downwards direction). A repeated application of pruning rule 2 (node contraction) and untangling rule 4 (dog-bone structure) will lead to the optimization graph depicted in Figure~\ref{FIG:untangle_tree}, middle. 
+Another class of line graphs that are more likely to occur in real-world transit networks is depicted in Figure~\ref{FIG:untangle_main_branch}, left.
+Lines progressively leave a main branch ($e_2$ in the example) in both directions, in the exact same order.
+For example, in Figure~\ref{FIG:untangle_main_branch}, left, the main branch with lines $A, B, C$ is first left by $C$ at node $b$, then by $B$ at node $c$ (upwards direction). Equally, $C$ leaves at $a$, and $B$ at $h$ (downwards direction).
+A repeated application of pruning rule 2 (node contraction) and untangling rule 4 (dog-bone structure) will lead to the optimization graph depicted in Figure~\ref{FIG:untangle_tree}, middle. 
 
 In both cases, the input line graph is slowly untangled until we only have single threads left which can be trivially optimized.
 
 \begin{figure}
   \centering
   \includegraphics[width=0.64\textwidth,page=1]{untangling/main_leg.pdf}
-  \includegraphics[width=0.25\textwidth,page=1]{untangling/bone.pdf}
+  \includegraphics[width=0.235\textwidth,page=1]{untangling/bone.pdf}
 
   \caption{Left: special class of line graph in which lines join and leave a main branch in the same order. Middle: optimization graph after full untangling (in this case: repeated application of pruning rule 2 (node contraction) and untangling rule 4 (dog-bone-structure), the search space size is now 1. Right: graph rendered with the ordering stored for $e_1$, $e_2$ and $e_3$ from untangling.}
   \label{FIG:untangle_main_branch}
@@ -759,15 +838,15 @@ In both cases, the input line graph is slowly untangled until we only have singl
 %
 \begin{figure}[b]
   \centering
-  \includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example1.pdf}
+  (1)\includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example1.pdf}
   \hspace{1.5cm}
-  \includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example2.pdf}
+  (2)\includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example2.pdf}
 
-  \vspace{0.8cm}
+  \vspace{0.4cm}
   \centering
-  \includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example3.pdf}
+  (3)\includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example3.pdf}
   \hspace{1.5cm}
-  \includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example4.pdf}
+  (4)\includegraphics[width=0.25\textwidth]{render_examples/rendering/render_example4.pdf}
 
 	\caption{The four steps of rendering a given line graph: (1) render ordered lines as edges, (2) free node area, (3) render inner connections, (4) render station overlays.}
 	\label{FIG:renderingproc}
@@ -785,7 +864,12 @@ In the last step (4), we render the stations. This is trivial for nodes of degre
 
 \subsection{Station Merging}
 
-\TODO{This was asked during the conference: what if stations touch during expansion? MERGE THEM}
+In Figure~\ref{FIG:renderingproc}, 2, it may happen that during expansion of some node $u$, we may reach the node front of a neighboring node $v$.
+In such a case, the current node front expansion of $u$ has to stop on edge $\{u, v\}$.
+This incomplete node front expansion may lead to rendering artifacts, if not enough space was freed to actually render smooth B\'ezier curves.
+A solution to this problem is to merge neighboring nodes if their node fronts collide during expansion.
+To avoid overlapping station markers on maps with small resolutions, merged station nodes could only be rendered as a simple station marker.
+The selection of this \emph{master} station marker is a matter of station ranking and can be based, for example, on the number of lines serving a station.
 
 \section{Evaluation}\label{SEC:eval}
 %
@@ -811,7 +895,7 @@ In the last step (4), we render the stations. This is trivial for nodes of degre
 We tested LOOM on the public transit schedules of six cities in Europe and the US: Freiburg, Dallas, Chicago, Stuttgart, Turin and New York.
 Table~\ref{TBL:datasets} provides the dimensions of each dataset and the time needed to extract the line graph.
 
-\begin{table}[t]
+\begin{table}
   \caption[]{Line graph dimensions and line ordering search space sizes $|S|$ for our testing datasets with extraction times from GTFS. ${\cal S}$ are the stations, $V$ the graph nodes, $E$ the graph edges and ${\cal L}$ the transit lines. $M$ is the maximum number of lines per edge.\label{TBL:datasets}}
   \centering
   %\footnotesize
@@ -829,8 +913,71 @@ Table~\ref{TBL:datasets} provides the dimensions of each dataset and the time ne
   \end{tabular*}}
 
 \end{table}
-%
-\begin{table}[t]
+
+For each dataset, we first considered two versions of the line graph: the baseline graph and the pruned graph. After that, we evaluated the effects of full graph untangling.
+For each graph, we first considered 6 heuristical optimization methods: exhaustive search (E), exhaustive search with line separation penalty (E+S), steepest ascent hill climbing (H), steepest ascent hill climbing with line separation penalty (H+S), simulated annealing (A) and simulated annealing with separation penalty (A+S).
+After that, we considered 3 ILP variants: the baseline ILP (B), the improved ILP (I) and the improved ILP with added separation penalty (I+S).
+For each ILP, we evaluated three solvers: the GNU Linear Programming Kit (GLPK), the COIN-OR CBC solver and gurobi (GU).
+As most of the datasets still only had one connected component after applying the splitting rules described in Sect.~\ref{SEC:coreprobgraph} on the core optimization graph, we did only evaluate their application in the context of graph untangling.
+
+For each node $v$, the penalty for a crossing between edge pairs ($\{A, B\}$ in Fig.~\ref{FIG:crossings}, left) was $4 \cdot \degv$, for other crossings ($\{A, B\}$ in Fig.~\ref{FIG:crossings}, right) it was $\degv$.
+The line separation penalty was $3\cdot\degv$. We found that these penalties produced nicer maps than a uniform penalty.
+This would imply $w_{\cal S\times} = 4 \cdot \max_{v\in V} \degv$ and $w_{\cal S\|} = 3 \cdot \max_{v\in V} \degv$.
+However, we found that moving some crossings or separations to stations with a degree greater than $2$ yielded better looking results.
+Hence, crossings in $v \in \mathcal{S}$ were punished with $w_{\cal S\times}$ if $\degv = 2$ and otherwise with $3\cdot\degv$ (normal crossing) or $12\cdot\degv$ (edge-pair crossing).
+Similarly, in-station line separations where punished with $w_{\cal S\|}$ if $\degv = 2$ and $9\cdot\degv$ otherwise.
+Note that Lemma~\ref{LEM:crossingmoveing} still holds because we did not change the punishment for degree 2 stations.
+Also note that separations were only considered in (I+S) and thus depended on the solver and the input order in (B) and (I).
+
+\begin{figure*}
+\centering
+%\vspace{1em}
+\includegraphics[width=0.32\textwidth]{google.pdf}
+\hfill
+\includegraphics[width=0.32\textwidth]{loom.pdf}
+\hfill
+\includegraphics[width=0.32\textwidth]{chicago_loop.pdf}
+\caption{Left: Google transit map cutout for Chicago. Center: Same area in our automatically generated map. Right: Official CTA map for the same area. Note the near-perfect match of the line orderings in the official map and our map.}
+%\vspace{-1em}
+\label{FIG:chicagofull}  
+\end{figure*}
+
+\subsection{Performance of Optimization Heuristics}\label{SEC:baseline}
+
+We first evaluated the results of 3 baseline heuristics for the line ordering optimization: an exhaustive search (E), steepest ascent hill climbing (H) and simulated annealing (A).
+
+The exhaustive search (E) always explored the entire search space $S$ and took the optimal line ordering solution.
+Even for small input graphs, the size of $S$ was immense. For the Freiburg dataset, the size of $S$ was $\sim 6 \times 10^{13}$, for Stuttgart, it was $\sim 3 \times 10^{103}$.
+
+Our steepest ascent hill climbing approach (H) always explored the entire neighborhood of the current ordering state in each iteration and chose the one closest to the solution.
+
+In contrast, our simulated annealing approach (A) selected a neighbor at random and stopped if the value of the target function had not changed for $k = 5,000$ iterations.
+At state $s$, we chose the randomly selected neighbor as the next state $s'$ if it improved the overall target function $\theta(s)$ (that is, if $\theta(s') < \theta(s)$), or else with probability $P(s, s', T) = e^{-(\theta(s') - \theta(s)) / T}$, where $T$ is the current annealing temperature.
+At iteration $i$, we set $T = 1000 / n$, allowing to system to escape early local optima.
+
+Each method was evaluated 50 times and the results were averaged.
+For each evaluation, the initial line orderings of the graph were randomized.
+
+\subsubsection{Solution Times} Table~\ref{TBL:evalres_heur} shows the results of the heuristic ordering optimizations for 3 of our 6 datasets: Freiburg, Chicago and Stuttgart.
+On the baseline graph (without any simplification), an exhaustive search (E) was infeasible even for the small dataset of Freiburg.
+If we assume that we can check 10,000 ordering configurations per second, an exhaustive search for Freiburg would still take about $70,000$ days on the baseline graph.
+
+Final ordering configurations and graph scores of both simulated annealing (A) and steepest ascent hill climbing (H) were comparable, but steepest ascent hill climbing generally produced slightly better orderings on average.
+However, the cost of exploring the entire local neighborhood at each iteration may get very high.
+The effect of this can be seen in the evaluation for Stuttgart, where (H) took 8 minutes on average.
+We also experimented with probabilistic hill climbing, which is equivalent to our simulated annealing approach with $T = 0$, but found the results to be generally inferior than both (H) and (A).
+With added line separation penalty (E+S, H+S, A+S), solution times where generally slightly larger, even if the number of iterations was smaller.
+This is because of the additional overhead of checking each ordering configuration for line separations.
+
+\subsubsection{Effects of Core Graph Reduction} If the input line graph was first reduced to the core optimization graph with pruning rules 1-3 (Sect.~\ref{SEC:pruning}), an optimal solution could be found with an exhaustive search (E) for Freiburg in $4.2$ seconds.
+For (A), (A+S), (H) and (H+S), prior graph prunung enhanced the final graph scores by a factor of $\sim 3.5$ on average.
+This was to be expected, as pruning lead to a significant reduction of the search space size (for example, pruning reduced the solution space size of Freiburg by 9 orders of magnitude).
+For (H) and (H+S), soluction times were on average ten times faster on the core optimization graph than on the baseline graph (with a large improvement for H on the Freiburg dataset).
+Interestingly, solution times for simulated annealing did not improve much or got worse after pruning, despite a lower number of iterations.
+This is because before pruning, the probability of choosing an edge with only a single line on it (or where both nodes have a degree of 2) as the random candidate for the next state is greater than after pruning, as pruning only leaves intersection nodes in the graph.
+Checking the scores of these larger nodes takes more time, which leads to larger average iteration times.
+
+\begin{table}
   \caption[]{Core graph dimensions and line ordering search space sizes $|S|$ for our testing datasets after applying pruning rules.\label{TBL:datasetscore}}
   \centering
   %\footnotesize
@@ -849,71 +996,25 @@ Table~\ref{TBL:datasets} provides the dimensions of each dataset and the time ne
   %\vspace{-2mm}
 \end{table}
 
-For each dataset, we first considered two versions of the line graph: the baseline graph and the pruned graph. After that, we evaluated the effects of full graph untangling.
-For each graph, we first considered 6 heuristical optimization methods: exhaustive search (E), exhaustive search with line separation penalty (E+S), steepest hill climbing (H), steepest hill climbing with line separation penalty (H+S), simulated annealing (A) and simulated annealing with separation penalty (A+S). After that, we considered 3 ILP variants: the baseline ILP (B), the improved ILP (I) and the improved ILP with added separation penalty (I+S).
-For each ILP, we evaluated three solvers: the GNU Linear Programming Kit (GLPK), the COIN-OR CBC solver and gurobi (GU).
-As most of the datasets still only had one connected component after applying the splitting rules described in Sect.~\ref{SEC:coreprobgraph} on the core optimization graph, we did only evaluate their application in the context of graph untangling.
-
-For each node $v$, the penalty for a crossing between edge pairs ($\{A, B\}$ in Fig.~\ref{FIG:crossings}, left) was $4 \cdot \degv$, for other crossings ($\{A, B\}$ in Fig.~\ref{FIG:crossings}, right) it was $\degv$. The line separation penalty was $3\cdot\degv$. We found that these penalties produced nicer maps than a uniform penalty. This would imply $w_{\cal S\times} = 4 \cdot \max_{v\in V} \degv$ and $w_{\cal S\|} = 3 \cdot \max_{v\in V} \degv$. However, we found that moving some crossings or separations to stations with a degree greater than $2$ yielded better looking results. Hence, crossings in $v \in \mathcal{S}$ were punished with $w_{\cal S\times}$ if $\degv = 2$ and otherwise with $3\cdot\degv$ (normal crossing) or $12\cdot\degv$ (edge-pair crossing). Similarly, in-station line separations where punished with $w_{\cal S\|}$ if $\degv = 2$ and $9\cdot\degv$ otherwise. Note that Lemma~\ref{LEM:crossingmoveing} still holds because we did not change the punishment for degree 2 stations. Also note that separations were only considered in (I+S) and thus depended on the solver and the input order in (B) and (I).
-
-
-\begin{figure*}
-\centering
-%\vspace{1em}
-\includegraphics[width=0.32\textwidth]{google.pdf}
-\hfill
-\includegraphics[width=0.32\textwidth]{loom.pdf}
-\hfill
-\includegraphics[width=0.32\textwidth]{chicago_loop.pdf}
-\caption{Left: Google transit map cutout for Chicago. Center: Same area in our automatically generated map. Right: Official CTA map for the same area. Note the near-perfect match of the line orderings in the official map and our map.}
-%\vspace{-1em}
-\label{FIG:chicagofull}  
-\end{figure*}
-
-
-\subsection{Performance of Optimization Heuristics}\label{SEC:baseline}
-
-We first evaluated the results of 3 baseline heuristics for the line ordering optimization: an exhaustive search (E), steepest hill climbing (H) and simulated annealing (A).
-
-The exhaustive search (E) always explored the entire search space $S$ and took the optimal line ordering solution. Even for small input graphs, the size of $S$ was immense. For the Freiburg dataset, the size of $S$ was $\sim 6 \times 10^{13}$, for Stuttgart, it was $\sim 3 \times 10^{103}$.
-
-Our steepest hill climbing approach (H) always explored the entire neighborhood of the current ordering state in each iteration and chose the one closest to the solution.
-
-In contrast, our simulated annealing approach (A) selected a neighbor at random and stopped if the value of the target function had not changed for $k = 5,000$ iterations. At state $s$, we chose the randomly selected neighbor as the next state $s'$ if it improved the overall target function $\theta(s)$ (that is, if $\theta(s') < \theta(s)$), or else with probability $P(s, s', T) = e^{-(\theta(s') - \theta(s)) / T}$, where $T$ is the current annealing temperature. At iteration $i$, we set $T = 1000 / n$, allowing to system to escape early local optima.
-
-Each method was evaluated 50 times and the results were averaged. For each evaluation, the initial line orderings of the graph were randomized.
-
-\subsubsection{Solution Times} Table~\ref{TBL:evalres_heur} shows the results of the heuristic ordering optimizations for 3 of our 6 datasets: Freiburg, Chicago and Stuttgart. On the baseline graph (without any simplification), an exhaustive search (E) was infeasible even for the small dataset of Freiburg. If we assume that we can check 10,000 ordering configurations per second, an exhaustive search for Freiburg would still take about $70,000$ days on the baseline graph.
-
-Final ordering configurations and graph scores of both simulated annealing (A) and steepest hill climbing (H) were comparable, but steepest hill climbing generally produced slightly better orderings on average. However, the cost of exploring the entire local neighborhood at each iteration may get very high. The effect of this can be seen in the evaluation for Stuttgart, where (H) took 8 minutes on average. We also experimented with probabilistic hill climbing, which is equivalent to our simulated annealing approach with $T = 0$, but found the results to be generally inferior than both (H) and (A). With added line separation penalty (E+S, H+S, A+S), solution times where generally slightly larger, even if the number of iterations was smaller. This is because of the additional overhead of checking each ordering configuration for line separations.
-
-\subsubsection{Effects of Core Graph Reduction} If the input line graph was first reduced to the core optimization graph with pruning rules 1-3 (Sect.~\ref{SEC:pruning}), an optimal solution could be found with an exhaustive search (E) for Freiburg in $4.2$ seconds. For (A), (A+S), (H) and (H+S), prior graph prunung enhanced the final graph scores by a factor of $\sim 3.5$ on average. This was to be expected, as pruning lead to a significant reduction of the search space size (for example, pruning reduced the solution space size of Freiburg by 9 orders of magnitude). For (H) and (H+S), soluction times were on average ten times faster on the core optimization graph than on the baseline graph (with a large improvement for H on the Freiburg dataset). Interestingly, solution times for simulated annealing did not improve much or got worse after pruning, despite a lower number of iterations. This is because before pruning, the probability of choosing an edge with only a single line on it (or where both nodes have a degree of 2) as the random candidate for the next state is greater than after pruning, as pruning only leaves intersection nodes in the graph. Checking the scores of these larger nodes takes more time, which leads to larger average iteration times.
-
 \subsubsection{Optimality of Results} With prior pruning and added separation penalty, the local optima found by our simulated annealing approach where on average a factor of 2.16 higher than the optimal solutions (which can be seen in Table~\ref{TBL:rweval}). The average Freiburg score for (A+S) on the pruned graph (70.6) was closest to the optimal score (48), but for Stuttgart, the average (A+S) score on the pruned graph (519.3) was 3.33 times higher than the optimal score (156).
 
 \TODO{Times for hillc when Stuttgart eval is finished}
 
 \subsection{Comparison of ILP Variants}
 
-Table~\ref{TBL:evalres} shows the results of the ordering optimizations with ILPs for 4 of our 6 datasets: Chicago, Stuttgart, Turin and New York. Tests were run on an Intel Core i5-6300U machine with 4 cores \`{a} 2.4 GHz and 12 GB RAM.
+Table~\ref{TBL:evalres} shows the results of the ordering optimizations with ILPs for 4 of our 6 datasets: Chicago, Stuttgart, Turin and New York.
+Tests were run on an Intel Core i5-6300U machine with 4 cores \`{a} 2.4 GHz and 12 GB RAM.
 The CBC solver was compiled with multithreading support, and used with the default parameters and \texttt{threads=4}.
-The GLPK solver was used with the feasibility pump heuristic (\texttt{fp\_heur=ON}), the proximity search heuristic (\texttt{ps\_heur=ON}) and the presolver enabled (\texttt{presolve=ON}). We used gurobi with the default parameters.
-\subsubsection{ILP Solution Times} With our improved ILP (I), the optimal orderings on the pruned graph could be found in under 50 milliseconds with gurobi, and in under 1 second with CBC, on any dataset. If line separation was also punished (I+S), the ILP could be solved on the pruned graph in under 2.5 seconds with gurobi for any dataset, and in under 1 minute with CBC. Although the ILPs for (I+S) were only slightly larger than for (I), optimization on the pruned graph took $28$ times longer on average with the fastest solver.
-\subsubsection{Effects of Graph Pruning} On the baseline graph, (B) could not be optimized for all datasets except Turin with gurobi, and only after graph pruning  was a solution for Stuttgart and Chicago found in under 12 hours. As expected in Sect.~\ref{SEC:coreprobgraph}, graph pruning made the ILPs  significantly smaller. On average, the number of rows decreased by $61\,\%$ and the number of columns by $59\,\%$ for (I). For (I+S), the decrease was $62\,\%$ and $60\,\%$, respectively. With the fastest solver and the improved ILP (I), graph pruning lead to speedup by a factor between $4$ for Chicago, and 2 for New York. For (I+S), this speedup was between $22.4$ for Stuttgart, and $2.5$ for Turin.
+The GLPK solver was used with the feasibility pump heuristic (\texttt{fp\_heur=ON}), the proximity search heuristic (\texttt{ps\_heur=ON}) and the presolver enabled (\texttt{presolve=ON}).
+We used gurobi with the default parameters.
+\subsubsection{ILP Solution Times} With our improved ILP (I), the optimal orderings on the pruned graph could be found in under 50 milliseconds with gurobi, and in under 1 second with CBC, on any dataset.
+If line separation was also punished (I+S), the ILP could be solved on the pruned graph in under 2.5 seconds with gurobi for any dataset, and in under 1 minute with CBC.
+Although the ILPs for (I+S) were only slightly larger than for (I), optimization on the pruned graph took $28$ times longer on average with the fastest solver.
+\subsubsection{Effects of Graph Pruning} On the baseline graph, (B) could not be optimized for all datasets except Turin with gurobi, and only after graph pruning  was a solution for Stuttgart and Chicago found in under 12 hours.
+As expected in Sect.~\ref{SEC:coreprobgraph}, graph pruning made the ILPs  significantly smaller.
+On average, the number of rows decreased by $61\,\%$ and the number of columns by $59\,\%$ for (I). For (I+S), the decrease was $62\,\%$ and $60\,\%$, respectively. With the fastest solver and the improved ILP (I), graph pruning lead to speedup by a factor between $4$ for Chicago, and 2 for New York. For (I+S), this speedup was between $22.4$ for Stuttgart, and $2.5$ for Turin.
 
 \subsection{Effects of Graph Untangling}
-
-To measure the effects of our graph untangling rules described in Section~\ref{SEC:untangling}, we re-ran all of our 6 heuristical optimizations and our 3 ILPs on the untangled core optimization graph of our datasets. We followed the algorithm described in XX and thus also applied cutting rules.
-
-\subsubsection{Effect on Graph Size} 
-
-Table~\ref{TBL:untangling} shows the optimization graph dimensions after full untangling for all of our input datasets, compared to the sizes of the optimization graph with only pruning rules applied. For each dataset, we measured the time $t$ needed for full untangling, the overall number of nodes after untangling, the overall number of edges after untangling, the maximum number of lines per edge $M$ and the solution space size $|S|$. Additionally, we counted the number of connected components $C$, the number $C^1$ of connected components with $|S| = 1$ (which do not need optimization) and the dimensions of the \emph{largest} connected component.
-
-Compared to just applying pruning rules, graph untangling further reduced the size of the search space $S$, sometimes dramatically. For New York, the search size space was reduced by 56 orders of magnitude compared to the pruned graph. Compared to the original line graph, the search size space was reduced by 212 orders of magnitude with graph untangling. For Freiburg, untangling further reduced the search space size to just $\sim 9,200$, which can easily be explored with an exhaustive search.
-
-The number of connected components retrieved from graph untangling was always larger than 2. For 3 of our datasets (Freiburg, Dallas and Chicago), all but one connected component hat a solution size of exactly 1, meaning that they did not need any ordering optimization. For the remaining networks, the search space of the largest connected component was again $2 - 10$ orders of magnitudes smaller than the combined search space of the untangled graph.
-
-For some datasets, the number of nodes and edges in the untangled graph was higher than in the core optimization graph. This was to be expected, as we are splitting both nodes and edges in our untangling rules. However, even for those datasets, the search space sizes still went down significantly, because breaking up edges in our untangling rules always reduces the number of lines per edge.
 
 \begin{table}
   \caption[]{Dimensions of line graphs with only pruning rules applied (pruned graph) and after full untangling was applied (untangled graph), as well as time needed for untangling. \label{TBL:untangling}}
@@ -935,13 +1036,40 @@ For some datasets, the number of nodes and edges in the untangled graph was high
   %\vspace{-2mm}
 \end{table}
 
+To measure the effects of our graph untangling rules described in Section~\ref{SEC:untangling}, we re-ran all of our 6 heuristical optimizations and our 3 ILPs on the untangled core optimization graph of our datasets. We followed the algorithm described in XX and thus also applied cutting rules.
+
+\subsubsection{Effect on Graph Size} 
+
+Table~\ref{TBL:untangling} shows the optimization graph dimensions after full untangling for all of our input datasets, compared to the sizes of the optimization graph with only pruning rules applied.
+For each dataset, we measured the time $t$ needed for full untangling, the overall number of nodes after untangling, the overall number of edges after untangling, the maximum number of lines per edge $M$ and the solution space size $|S|$. Additionally, we counted the number of connected components $C$, the number $C^1$ of connected components with $|S| = 1$ (which do not need optimization) and the dimensions of the \emph{largest} connected component.
+
+Compared to just applying pruning rules, graph untangling further reduced the size of the search space $S$, sometimes dramatically.
+For New York, the search size space was reduced by 56 orders of magnitude compared to the pruned graph.
+Compared to the original line graph, the search size space was reduced by 212 orders of magnitude with graph untangling.
+For Freiburg, untangling further reduced the search space size to just $\sim 9,200$, which can easily be explored with an exhaustive search.
+
+The number of connected components retrieved from graph untangling was always larger than 2.
+For 3 of our datasets (Freiburg, Dallas and Chicago), all but one connected component hat a solution size of exactly 1, meaning that they did not need any ordering optimization.
+For the remaining networks, the search space of the largest connected component was again $2 - 10$ orders of magnitudes smaller than the combined search space of the untangled graph.
+
+For some datasets, the number of nodes and edges in the untangled graph was higher than in the core optimization graph.
+This was to be expected, as we are splitting both nodes and edges in our untangling rules.
+However, even for those datasets, the search space sizes still went down significantly, because breaking up edges in our untangling rules always reduces the number of lines per edge.
+
 \subsubsection{Effect on ILP Solution Times}
 
-Table~\ref{TBL:untangling_solve} shows the solution times of some of our ILPs after applying our untangling rules, compared to our initial approach of just applying pruning rules. If multiple components had to be optimized after untangling, optimization was done iteratively. For datasets where this was the case, solution times in Table~\ref{TBL:untangling_solve} are the summed solution times of all ILP solves.
+Table~\ref{TBL:untangling_solve} shows the solution times of some of our ILPs after applying our untangling rules, compared to our initial approach of just applying pruning rules.
+If multiple components had to be optimized after untangling, optimization was done iteratively.
+For datasets where this was the case, solution times in Table~\ref{TBL:untangling_solve} are the summed solution times of all ILP solves.
 
-For Freiburg and Chicago, an improvement noticable with GLPK. With gurobi, none of the solution times were better than the solution times on the pruned graph with (I) and (I+S) for Freiburg and Chicago. For Chicago, the solution time for (I) even went slightly up. This was because of the additional overhead of solving multiple ILPs, one for each connected component with $|S| > 1$.
+For Freiburg and Chicago, an improvement noticable with GLPK.
+With gurobi, none of the solution times were better than the solution times on the pruned graph with (I) and (I+S) for Freiburg and Chicago.
+For Chicago, the solution time for (I) even went slightly up.
+This was because of the additional overhead of solving multiple ILPs, one for each connected component with $|S| > 1$.
 
-However, graph untangling gave signficant performance gains for larger networks if we added separation penalties. The solution time of (I+S) on New York and Stuttgart was $>$ 12\,h with GLPK on the pruned graph, but after graph untangling, the ILPs could be solved in 21.5\,s for Stuttgart, and 4\,m for New York. For Stuttgart, solving (I+S) with gurobi was 7 times faster after graph untangling, and for New York, it was 3 times faster.
+However, graph untangling gave signficant performance gains for larger networks if we added separation penalties.
+The solution time of (I+S) on New York and Stuttgart was $>$ 12\,h with GLPK on the pruned graph, but after graph untangling, the ILPs could be solved in 21.5\,s for Stuttgart, and 4\,m for New York.
+For Stuttgart, solving (I+S) with gurobi was 7 times faster after graph untangling, and for New York, it was 3 times faster.
 
 \begin{table}
   \caption[]{Impact of graph untangling on selected ILP solution times. \label{TBL:untangling_solve}}
@@ -969,11 +1097,16 @@ However, graph untangling gave signficant performance gains for larger networks 
 
 \subsubsection{Effect on Baseline Heuristics}
 
-We also evaluated the effect of graph untangling on our 6 baseline heuristics from Section~\ref{SEC:baseline}. In addition to the time needed for the optimization, we also measured the effect of untangling on the final graph scores. Table~\ref{TBL:untangling_baseline} gives an overview of the effects of graph untangling for (E+S), (H+S) and (A+S) on our datasets Freiburg, Chicago and Stuttgart.
+We also evaluated the effect of graph untangling on our 6 baseline heuristics from Section~\ref{SEC:baseline}. In addition to the time needed for the optimization, we also measured the effect of untangling on the final graph scores.
+Table~\ref{TBL:untangling_baseline} gives an overview of the effects of graph untangling for (E+S), (H+S) and (A+S) on our datasets Freiburg, Chicago and Stuttgart.
 
-For Freiburg, applying graph untangling brought down the solution time of a simple exhaustive search to 200\,ms. This is evidence that even for modestly complex real-world line graphs, an ILP may not be necessary to find a solution in acceptable time. For all our other datasets, however, exhaustive search was not able to find a solution in under 12\,h, even after graph untangling.
+For Freiburg, applying graph untangling brought down the solution time of a simple exhaustive search to 200\,ms.
+This is evidence that even for modestly complex real-world line graphs, an ILP may not be necessary to find a solution in acceptable time.
+For all our other datasets, however, exhaustive search was not able to find a solution in under 12\,h, even after graph untangling.
 
-Generally, all our baseline heuristics performed better after applying graph untangling, both in terms of running time and in terms of the final graph score. For Stuttgart, for example, the final graph score averaged from 50 runs went down from 519.3 on the pruned graph to 328 on the untangled graph. However, this was still over 2 times bigger than the optimal score (156).
+Generally, all our baseline heuristics performed better after applying graph untangling, both in terms of running time and in terms of the final graph score.
+For Stuttgart, for example, the final graph score averaged from 50 runs went down from 519.3 on the pruned graph to 328 on the untangled graph
+ However, this was still over 2 times bigger than the optimal score (156).
 
 \begin{table}
   \caption[]{Impact of graph untangling on selected baseline heuristic solution times and graph scores. \label{TBL:untangling_baseline}}
@@ -1003,6 +1136,24 @@ Generally, all our baseline heuristics performed better after applying graph unt
 
 \subsection{Comparison to Manually Designed Maps}
 
+We also did a manual analysis to evaluate the esthetic quality of our work. For our datasets Freiburg, Dallas, Chicago and Stuttgart, we compared our automatically generated maps to the official maps published by the respective transit agencies\footnote{\url{http://loom.informatik.uni-freiburg.de/officialmaps/vag.pdf}\\\url{http://loom.informatik.uni-freiburg.de/officialmaps/dart.pdf}\\\url{http://loom.informatik.uni-freiburg.de/officialmaps/cta.pdf}\\\url{http://loom.informatik.uni-freiburg.de/officialmaps/vvs.pdf}}.
+These maps are usually highly simplified and only respect the geographical course of a line to a limited extent.
+However, they still provide valuable ground truth for the line orderings computed by our ILP (Sect.~\ref{SEC:ordering}).
+
+For each official map, we hand-counted the number of line crossings as well as the number of line separations and calculated the overall score in our penalty system.
+In addition, we counted the number of line swaps $T$ necessary to transform the line ordering of our map into the line ordering of the official map.
+Line swaps on multiple consecutive edges were only counted once. Fig.~\ref{FIG:chicagofull} gives an example of that: although we have to swap the brown and the purple line on multiple edges between stations to match the official CTA map, we only count a single, consecutive swap. 
+
+For our 4 manually evaluated datasets, we found that a surprisingly low number of line swaps was necessary to transform the line orderings found by our ILP to the line orderings of the official map.
+Even for the highly complex 2015 Stuttgart map, only 4 line swaps were required.
+This is strong evidence that our combination of penalizing line crossings and line separations closely models the esthetics of professional, hand-drawn transit maps.
+
+We also found that our maps always scored better or equal in our penalty system than the official maps, and that only minimal changes to the official map (missed by the designers) would be required to improve the readability.
+The results can be seen in Table~\ref{TBL:rweval}.
+For Dallas, our ILP found a single (trivial) line swap that prevented a line separation at no cost and lowered the penalty by 66\%.
+For Chicago, our orderings nearly match the ones in the official map, but our ILP found a solution with one additional crossing, but equivalent score.
+For Stuttgart, 4 line swaps could reduce both the number of crossings and the number of separations and lower the penalty by nearly 59\%.
+
 \begin{table}
   \caption[]{Comparison of the line orderings in our maps and in manually designed official maps published by transportation authorities. For the official maps, we hand-counted the number of crossings ($\times$) and separations ($||$) and calculated the score in our penalty system. $T$ is the number of line swaps necessary to transform the line orderings in our map into those of the official map. Swaps between the same two lines on consecutive edges were only counted once. \label{TBL:rweval}}
   \vspace{-3mm}
@@ -1022,17 +1173,9 @@ Generally, all our baseline heuristics performed better after applying graph unt
   %\vspace{-2mm}
 \end{table}
 
-We also did a manual analysis to evaluate the esthetic quality of our work. For our datasets Freiburg, Dallas, Chicago and Stuttgart, we compared our automatically generated maps to the official maps published by the respective transit agencies\footnote{\url{http://loom.informatik.uni-freiburg.de/officialmaps/vag.pdf}\\\url{http://loom.informatik.uni-freiburg.de/officialmaps/dart.pdf}\\\url{http://loom.informatik.uni-freiburg.de/officialmaps/cta.pdf}\\\url{http://loom.informatik.uni-freiburg.de/officialmaps/vvs.pdf}}. These maps are usually highly simplified and only respect the geographical course of a line to a limited extent. However, they still provide valuable ground truth for the line orderings computed by our ILP (Sect.~\ref{SEC:ordering}).
-
-For each official map, we hand-counted the number of line crossings as well as the number of line separations and calculated the overall score in our penalty system. In addition, we counted the number of line swaps $T$ necessary to transform the line ordering of our map into the line ordering of the official map. Line swaps on multiple consecutive edges were only counted once. Fig.~\ref{FIG:chicagofull} gives an example of that: although we have to swap the brown and the purple line on multiple edges between stations to match the official CTA map, we only count a single, consecutive swap. 
-
-For our 4 manually evaluated datasets, we found that a surprisingly low number of line swaps was necessary to transform the line orderings found by our ILP to the line orderings of the official map. Even for the highly complex 2015 Stuttgart map, only 4 line swaps were required. This is strong evidence that our combination of penalizing line crossings and line separations closely models the esthetics of professional, hand-drawn transit maps.
-
-We also found that our maps always scored better or equal in our penalty system than the official maps, and that only minimal changes to the official map (missed by the designers) would be required to improve the readability. The results can be seen in Table~\ref{TBL:rweval}. For Dallas, our ILP found a single (trivial) line swap that prevented a line separation at no cost and lowered the penalty by 66\%. For Chicago, our orderings nearly match the ones in the official map, but our ILP found a solution with one additional crossing, but equivalent score. For Stuttgart, 4 line swaps could reduce both the number of crossings and the number of separations and lower the penalty by nearly 59\%.
-
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 \begin{table*}
-  \caption[]{Dimensions, solution times and final graph scores (pen) for Chicago, Stuttgart, Turin and New York and 6 baseline heuristics for the line ordering problem: exhaustive search with (E+S) and without (E) separation penalty, steepest hill climbing with (H+S) and without (H) separation penalty and simulated annealing with (A+S) and without separation penalty (A), all with or without graph pruning. $|S|$ is the search space size, $t$ the solution time. A time of --- means we aborted after 12 hours. The number of iterations is shown in column \emph{iters}, $\times$ is the number of crossings in the optimized graph, $\|$ the number of separations, \emph{pen} is the final graph score. For optimization without separation penalty, the final graph scores only include crossing penalties. Optimal graph scores can be found in Table~\ref{TBL:rweval}. \label{TBL:evalres_heur}}
+  \caption[]{Dimensions, solution times and final graph scores (pen) for Chicago, Stuttgart, Turin and New York and 6 baseline heuristics for the line ordering problem: exhaustive search with (E+S) and without (E) separation penalty, steepest ascent hill climbing with (H+S) and without (H) separation penalty and simulated annealing with (A+S) and without separation penalty (A), all with or without graph pruning. $|S|$ is the search space size, $t$ the solution time. A time of --- means we aborted after 12 hours. The number of iterations is shown in column \emph{iters}, $\times$ is the number of crossings in the optimized graph, $\|$ the number of separations, \emph{pen} is the final graph score. For optimization without separation penalty, the final graph scores only include crossing penalties. Optimal graph scores can be found in Table~\ref{TBL:rweval}. \label{TBL:evalres_heur}}
   \vspace{-3.6mm}
   \centering
   %\footnotesize
@@ -1104,17 +1247,25 @@ We also found that our maps always scored better or equal in our penalty system 
 
 \section{Conclusions and Future Work}\label{SEC:conclusions}
 
-This work presented a complete end-to-end method for producing geographically accurate transit maps from raw schedule data. We evaluated LOOM, a full implementation of this method, and showed that it produces geographically accurate transit maps fast. We demonstrated that our intuition of punishing both line crossings and line separations lead to results that closely resemble the esthetics of manually designed maps.
+This work presented a complete end-to-end method for producing geographically accurate transit maps from raw schedule data.
+We evaluated LOOM, a full implementation of this method, and showed that it produces geographically accurate transit maps fast.
+We demonstrated that our intuition of punishing both line crossings and line separations lead to results that closely resemble the esthetics of manually designed maps.
 
-The biggest challenge was getting the optimal line orderings in acceptable time. We have shown that with an improved formulation of our ILP and several pruning, cutting and untangling rules we could reduce the solve time by several orders of magnitude for some datasets, compared to our initial approach. The whole pipeline (including line graph construction from GTFS schedule data, line ordering optimization and rendering) took less than 15 seconds for all considered inputs.
+The biggest challenge was getting the optimal line orderings in acceptable time.
+We have shown that with an improved formulation of our ILP and several pruning, cutting and untangling rules we could reduce the solve time by several orders of magnitude for some datasets, compared to our initial approach.
+The whole pipeline (including line graph construction from GTFS schedule data, line ordering optimization and rendering) took less than 15 seconds for all considered inputs.
 
-Compared to two baseline optimization heuristics (steepest hill climbing and simulated annealing), our ILPs produced maps with a final score that was on average XX times better then the results steepest hill climbing, and XX times better than the results of simulated annealing. However, we showed that even for real world public transit networks, a simple exhaustive search may be enough to optimize both the number of crossings and the number of separations in minimal time, if graph untangling is applied first.
+Compared to two baseline optimization heuristics (steepest ascent hill climbing and simulated annealing), our ILPs produced maps with a final score that was on average XX times better then the results steepest ascent hill climbing, and XX times better than the results of simulated annealing.
+However, we showed that even for real world public transit networks, a simple exhaustive search may be enough to optimize both the number of crossings and the number of separations in minimal time, if graph untangling is applied first.
 
-Since the line graph construction required more time than the subsequent ILP solution for some datasets, faster algorithms for extracting the line graph would help to further decrease the running time. It would be interesting to evaluate the adaptability of other map construction algorithms to this problem, both in terms of running time and quality.
+Since the line graph construction required more time than the subsequent ILP solution for some datasets, faster algorithms for extracting the line graph would help to further decrease the running time.
+It would be interesting to evaluate the adaptability of other map construction algorithms to this problem, both in terms of running time and quality.
 
-As mentioned in Sect.~\ref{SEC:rendering}, we see room for improvement in the rendering of station polygons. It may be necessary to enforce a local octilinearity on edges leaving stations for a cleaner look. Another open problem is that of overlapping station nodes on very small resolutions.
+As mentioned in Sect.~\ref{SEC:rendering}, we see room for improvement in the rendering of station polygons.
+It may be necessary to enforce a local octilinearity on edges leaving stations for a cleaner look. 
 
-Both our line-ordering and rendering steps may be used with any multigraph as input and are not restricted to a geographically accurate network. It may be interesting to evaluate LOOM on schematic transit networks as well.
+Both our line-ordering and rendering steps may be used with any multigraph as input and are not restricted to a geographically accurate network.
+It may be interesting to evaluate LOOM on schematic transit networks as well.
 
 Lastly, the ideas behind LOOM may be useful also in a non-transit scenario.
 For example, one closely related problem is that of wire routing in integrated-circuit design.
