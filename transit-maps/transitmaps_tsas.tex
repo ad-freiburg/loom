@@ -39,6 +39,15 @@
 \acmDOI{10.1145/3274895.3274955}
 \acmISBN{978-1-4503-5889-7/18/11}
 
+%Journal
+\acmJournal{TSAS}
+\acmVolume{}
+\acmNumber{}
+\acmArticle{}
+\acmYear{2019}
+\acmMonth{7}
+\copyrightyear{2018}
+
 \makesavenoteenv{table}
 
 \newcommand{\ignore}[1]{}
@@ -317,7 +326,7 @@ This section describes stage 2 of LOOM, namely how to solve MLNCM: given a line 
 \subsection{Baseline ILP}\label{SEC:baseline}
 \begin{figure}
   \centering
-  $\vcenter{\hbox{\includegraphics[width=0.67\textwidth]{crossing.pdf}}}$
+  $\vcenter{\hbox{\includegraphics[width=0.75\textwidth]{crossing.pdf}}}$
   \caption{Example instances. Both station polygons have 4 \emph{node fronts}, each corresponding to an incident edge. Each node front has exactly one port ($1, 2, ...$) for each line traversing through its edge. Gray lines depict possible inner node connections. Left: $A, B$ extend from $e$ to $e'$ over $w$ and may introduce a crossing, if the position of $A$ is smaller than the position of $B$ in $e$, but not in $e'$ (or vice versa). Right: a crossing between $A$ and $B$ only depends on the line ordering in $e$, but not on the orderings in $e'$ and $e''$.}
   \label{FIG:crossings}
 \end{figure}
@@ -464,7 +473,7 @@ As we only add 1 constraint per edge and a constant number of constraints and va
   \includestandalone[width=5.5cm]{tikz/coreoptimgraph}
   \hfill
   \includestandalone[width=6cm]{tikz/connected_components}
-  \caption{Top left: line graph $G$ with 7 lines. Bottom: core graph of $G$ after applying pruning rules, $\{A, B\}$ was collapsed into $\{X\}$. Top right: ordering-relevant connected components of $G$ after applying cutting rules.}
+  \caption{Top left: line graph $G$ with 7 lines. Bottom: pruned graph of $G$ after applying pruning rules, $\{A, B\}$ was collapsed into $\{X\}$. Top right: ordering-relevant connected components of $G$ after applying cutting rules.}
   \label{FIG:coreoptimgraph}
 \end{figure*}
 
@@ -477,7 +486,7 @@ The placement of crossings or separations may be fine-tuned by adding node-based
 As described above, we especially want to prevent crossings or separations in station nodes. This can be achieved by adding constant global weighting factors $w_{\cal S\times}$ and $w_{\cal S\|}$ to each $x_{ee'll'}$ and $x_{ee'l\|l'}$ in the objective function if $l$ and $l'$ continue over a node $v_s \in \cal S$. These factors have to be chosen high enough so that a crossing or separation in any other node $v \not\in \cal S$ is never more expensive than in $v_s$. As all $w_\times(v)$ and $w_\|(v)$ appear as coefficients in the objective function, they have to be invariant to the actual line orderings. We can thus determine the maximum possible costs $\hat w_\times$ and $\hat w_{\|}$ prior to optimization and choose $w_{\cal S\times} = \hat w_\times$ and $w_{\cal S\|} = \hat w_{\|}$.
 
 %
-\section{Core Graph Reduction}\label{SEC:coreprobgraph}
+\section{Line Graph Simplification}\label{SEC:coreprobgraph}
 %
 It is possible to further simplify the optimization problem. In this section, we describe a set of transformations that may be applied to the line graph without affecting the global optimality of the line ordering and thus the ILP solution. In our experiments, these transformations reduced the size of the resulting ILPs by a factor between 2 and 4 and led to significantly lower solution times (see Sect.~\ref{SEC:eval}). We first prove Lemmata \ref{LEM:linepairing} - \ref{LEM:termini} and use them to derive a set of pruning and cutting rules.
 \begin{lemma}\label{LEM:linepairing}
@@ -524,11 +533,11 @@ Using the lemmata from above, we may simplify the input line graph with the foll
 \end{enumerate}
 \noindent
 
-We call the resulting graph the core graph of $G$. Fig.~\ref{FIG:coreoptimgraph},~bottom gives an example of a core graph after applying pruning rules $1-3$.
+We call the resulting graph the pruned graph of $G$. Fig.~\ref{FIG:coreoptimgraph},~bottom gives an example of a pruned graph after applying pruning rules $1-3$.
 
 \subsection{Cutting Rules}\label{SEC:cutting}
 
-The core graph may then be further broken down into ordering-relevant connected components using the cutting rules below. The components can then be optimized separately and in parallel (Fig.~\ref{FIG:coreoptimgraph}, top right).
+The pruned graph may then be further broken down into ordering-relevant connected components using the cutting rules below. The components can then be optimized separately and in parallel (Fig.~\ref{FIG:coreoptimgraph}, top right).
 \begin{enumerate}[parsep=0.5mm, wide, labelwidth=0mm, itemindent=2.3mm]
 	\setlength\itemsep{1pt}
     \item[\emph{(Cutting rule 1)}] cut each edge $e = \{u, v\}$ with $\left|L\left(e\right)\right| = 1$ into two edges $e' = \{u, v'\}$ and $e'' = \{v'', v\}$ (Lemma~\ref{LEM:termini}).
@@ -631,8 +640,10 @@ A more complex structure that is commonly found in real-world input data is depi
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.49\textwidth, page=1]{untangling/vvs_dogbone.pdf}
-  \caption{Dog bone structure in the map of the Stuttgart light rail system. Untangling reduces the number of possible orderings in the highlighted central segment of the network from $8! = 40,320$ to $4! \times 3! = 144$. }  
+  \includegraphics[width=0.42\textwidth, page=1]{untangling/vvs_dogbone.pdf}
+  \hfill
+  \includegraphics[width=0.45\textwidth, page=1, trim={0.2cm 0.5cm 0.2cm 0.5cm}, clip]{untangling/ny_cross.pdf}
+  \caption{Left: Dog bone structure in the map of the Stuttgart light rail system. Untangling reduces the number of possible orderings in the highlighted central segment of the network from $8! = 40,320$ to $4! \times 3! = 144$. Right: full cross in the subway network of New York.}  
   \label{FIG:untangle_dogbone_stuttgart}
 \end{figure}
 
@@ -675,9 +686,9 @@ It remains to show that an additional class of structures, which we call \emph{s
   \item[\emph{(Untangling rule 6)}]We can easily transform a situation like this into a standard dog bone by introducing an additional dummy edge $i$ with the same lines as $g$ from $v$ to an additional dummy node $w$ in such a way that $\rho^v_e(i) = \deg(u) - 1 - \rho^u_e(g)$ ($i$ will be at a position in $v$ that is inverse to the position of $g$ in $u$). 
 \end{enumerate}
 
-\subsection{Complexity of Core Graph Reduction}
+\subsection{Complexity of Line Graph Simplification}
 
-The real power of the untangling rules described in the previous section lies in their repeated application, together with the pruning and cutting rules described in Sections~\ref{SEC:pruning} and \ref{SEC:cutting}. But how long does it take until an input line graph is fully untangled and reduced?
+The real power of the untangling rules described in the previous section lies in their repeated application, together with the pruning and cutting rules described in Sections~\ref{SEC:pruning} and \ref{SEC:cutting}. But how long does it take until an input line graph is fully untangled, pruned and cut into connected components?
 
 We first consider the complexity of the untangling rules and assume that the lines in each $L(e)$ are already ordered (for example, by some internal line id). We denote the maximum degree of our input line graph $G$ as $D$. We can safely remove nodes with degree 1 from the line graph prior to optimization and thus assume that $2|E|$ is an upper bound for $|V|$. Finding an edge eligible for any of the untangling rules described in Section~\ref{SEC:untangling} is a matter of iterating over all edges or all nodes, an thus always takes $\mathcal{O}(|E|)$. Each rule breaks up an edge $e$ into two edges $e'$ and $e''$, which can only be done at most $M$ times in the worst case (if $|L(e)| = M$ and we only detach a single line per untangling rule application). No untangling rule increases the number of lines per edge, so a single untangling rule can be applied at most $\mathcal{O}(|E|M)$ times.
 
@@ -715,7 +726,33 @@ First, we note that no cutting, no pruning and no untangling rules increase the 
 
 Second, we note that pruning rule 1 and 3 always \emph{decrease} the number of edges. In the worst case, the cutting rules may double the number of edges. The untangling rules may increase the number of edge by a factor of $M$ in the worst case, so if $|E|$ is the number of edges in the input line graph, the maximum number of edges $|E'|$ in any intermediate optimization graph will be $\mathcal{O}(|E|M)$. We assumed that each edge $L(e)$ and each adjacency list in the input line graph was sorted. The former can be sorted in $\mathcal{O}(|E|M\log M)$, the latter in $\mathcal{O}(|E|D\log D)$.
 
-The worst case complexity of the entire core graph reduction process, including untangling is thus $\mathcal{O}(|E|M^3D^2)$. We note, however, that in practice, both $M$ and $D$ are usually very small. For our testing datasets, the maximum $M$ was 9 (Table~\ref{TBL:datasets}), and $D$ was always below 10. For all practical purposes, we are confident that both $D$ and $M$ can be considered a constant factor.
+The worst case complexity of the entire untangling process is thus $\mathcal{O}(|E|M^3D^2)$. We note, however, that in practice, both $M$ and $D$ are usually very small. For our testing datasets, the maximum $M$ was 9 (Table~\ref{TBL:datasets}), and $D$ was always below 10. For all practical purposes, we are confident that both $D$ and $M$ can be considered a constant factor.
+
+\subsection{Full Solve Through Untangling}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.69\textwidth,page=1]{untangling/tree.pdf}
+  \includegraphics[width=0.25\textwidth,page=1]{untangling/tree_map.pdf}
+
+  \caption{Left: a tree-like line graph. Middle: optimization graph after full untangling (in this case: repeated application of pruning rule 2 (node contraction) and untangling rule 1 (Y-structure), the search space size is now 1. Right: graph rendered with the ordering obtained from untangling.}
+  \label{FIG:untangle_tree}
+\end{figure}
+
+For special classes of input line graphs, applying graph untangling and pruning rules is enough to solve the line ordering optimization problem. For an example, consider Figure~\ref{FIG:untangle_tree}, left. The input line graph has a tree-like structure, where the children of each node $v$ are connected by edges $e_i$ in such a way that a the $L(e_i)$ are pairwise disjoint, and their union is exactly the set of lines on the edge connect $v$ to its parent. A repeated application of our pruning and cutting rules will then lead to a graph consisting of components of 2 nodes $u, v$, 1 edge $\{u, v\}$ and $|\{u, v\}| = 1$. For example, in Figure~\ref{FIG:untangle_tree}, untangling rule 1 breaks up $b$ and $a$ into $b'$, $b''$, $a'$ and $a''$ and adds two edges with $L(\{a', b'\})=\{A, B\}$ and $L(\{a'', b''\}) = \{C\}$, then pruning rule 2 contracts $a''$ and $b''$. The same happens at $c$.
+
+Another class of line graphs that are more likely to occur in real-world transit networks is shown in Figure~\ref{FIG:untangle_main_branch}, left. Lines leave a main branch ($e_2$ in the example) in both directions, in the exact same order. In the example in Figure~\ref{FIG:untangle_main_branch}, left, the main branch with lines $A, B, C$ is first left by $C$ at node $b$, then by $B$ at node $c$ (upwards direction). Equally, $C$ leaves at $a$, and $B$ at $h$ (downwards direction). A repeated application of pruning rule 2 (node contraction) and untangling rule 4 (dog-bone structure) will lead to the optimization graph depicted in Figure~\ref{FIG:untangle_tree}, middle. 
+
+In both cases, the input line graph is slowly untangled until we only have single threads left which can be trivially optimized.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.64\textwidth,page=1]{untangling/main_leg.pdf}
+  \includegraphics[width=0.25\textwidth,page=1]{untangling/bone.pdf}
+
+  \caption{Left: special class of line graph in which lines join and leave a main branch in the same order. Middle: optimization graph after full untangling (in this case: repeated application of pruning rule 2 (node contraction) and untangling rule 4 (dog-bone-structure), the search space size is now 1. Right: graph rendered with the ordering stored for $e_1$, $e_2$ and $e_3$ from untangling.}
+  \label{FIG:untangle_main_branch}
+\end{figure}
 
 %
 \section{Rendering}\label{SEC:rendering}
@@ -812,7 +849,7 @@ Table~\ref{TBL:datasets} provides the dimensions of each dataset and the time ne
   %\vspace{-2mm}
 \end{table}
 
-For each dataset, we first considered two versions of the line graph: the baseline graph and the core graph after pruning rules were applied. After that, we evaluated the effects of full graph untangling.
+For each dataset, we first considered two versions of the line graph: the baseline graph and the pruned graph. After that, we evaluated the effects of full graph untangling.
 For each graph, we first considered 6 heuristical optimization methods: exhaustive search (E), exhaustive search with line separation penalty (E+S), steepest hill climbing (H), steepest hill climbing with line separation penalty (H+S), simulated annealing (A) and simulated annealing with separation penalty (A+S). After that, we considered 3 ILP variants: the baseline ILP (B), the improved ILP (I) and the improved ILP with added separation penalty (I+S).
 For each ILP, we evaluated three solvers: the GNU Linear Programming Kit (GLPK), the COIN-OR CBC solver and gurobi (GU).
 As most of the datasets still only had one connected component after applying the splitting rules described in Sect.~\ref{SEC:coreprobgraph} on the core optimization graph, we did only evaluate their application in the context of graph untangling.
@@ -846,13 +883,13 @@ In contrast, our simulated annealing approach (A) selected a neighbor at random 
 
 Each method was evaluated 50 times and the results were averaged. For each evaluation, the initial line orderings of the graph were randomized.
 
-\subsubsection{Solution Times} Table~\ref{TBL:evalres_heur} shows the results of the heuristic ordering optimizations for 3 of our 6 datasets: Freiburg, Chicago and Stuttgart. On the baseline graph (without reduction to core optimization graph or untangling), an exhaustive search (E) was infeasible even for the small dataset of Freiburg. If we assume that we can check 10,000 ordering configurations per second, an exhaustive search for Freiburg would still take about $70,000$ days on the baseline graph.
+\subsubsection{Solution Times} Table~\ref{TBL:evalres_heur} shows the results of the heuristic ordering optimizations for 3 of our 6 datasets: Freiburg, Chicago and Stuttgart. On the baseline graph (without any simplification), an exhaustive search (E) was infeasible even for the small dataset of Freiburg. If we assume that we can check 10,000 ordering configurations per second, an exhaustive search for Freiburg would still take about $70,000$ days on the baseline graph.
 
 Final ordering configurations and graph scores of both simulated annealing (A) and steepest hill climbing (H) were comparable, but steepest hill climbing generally produced slightly better orderings on average. However, the cost of exploring the entire local neighborhood at each iteration may get very high. The effect of this can be seen in the evaluation for Stuttgart, where (H) took 8 minutes on average. We also experimented with probabilistic hill climbing, which is equivalent to our simulated annealing approach with $T = 0$, but found the results to be generally inferior than both (H) and (A). With added line separation penalty (E+S, H+S, A+S), solution times where generally slightly larger, even if the number of iterations was smaller. This is because of the additional overhead of checking each ordering configuration for line separations.
 
-\subsubsection{Effects of Core Graph Reduction} If the input line graph was first reduced to the core optimization graph with pruning rules 1-3 (Sect.~\ref{SEC:pruning}), an optimal solution could be found with an exhaustive search (E) for Freiburg in $4.2$ seconds. For (A), (A+S), (H) and (H+S), prior core graph reduction enhanced the final graph scores by a factor of $\sim 3.5$ on average. This was to be expected, as core graph reduction lead to a significant reduction of the search space size (for example, core grap reduction reduced the solution space size of Freiburg by 9 orders of magnitude). For (H) and (H+S), soluction times were on average ten times faster on the core optimization graph than on the baseline graph (with a large improvement for H on the Freiburg dataset). Interestingly, solution times for simulated annealing did not improve much or got worse after core graph reduction, despite a lower number of iterations. This is because before core graph reduction, the probability of choosing an edge with only a single line on it (or where both nodes have a degree of 2) as the random candidate for the next state is greater than after core graph reduction, as core graph reduction only leaves intersection nodes in the graph. Checking the scores of these larger nodes takes more time, which leads to larger average iteration times.
+\subsubsection{Effects of Core Graph Reduction} If the input line graph was first reduced to the core optimization graph with pruning rules 1-3 (Sect.~\ref{SEC:pruning}), an optimal solution could be found with an exhaustive search (E) for Freiburg in $4.2$ seconds. For (A), (A+S), (H) and (H+S), prior graph prunung enhanced the final graph scores by a factor of $\sim 3.5$ on average. This was to be expected, as pruning lead to a significant reduction of the search space size (for example, pruning reduced the solution space size of Freiburg by 9 orders of magnitude). For (H) and (H+S), soluction times were on average ten times faster on the core optimization graph than on the baseline graph (with a large improvement for H on the Freiburg dataset). Interestingly, solution times for simulated annealing did not improve much or got worse after pruning, despite a lower number of iterations. This is because before pruning, the probability of choosing an edge with only a single line on it (or where both nodes have a degree of 2) as the random candidate for the next state is greater than after pruning, as pruning only leaves intersection nodes in the graph. Checking the scores of these larger nodes takes more time, which leads to larger average iteration times.
 
-\subsubsection{Optimality of Results} With prior core graph reduction and added separation penalty, the local optima found by our simulated annealing approach where on average a factor of 2.16 higher than the optimal solutions (which can be seen in Table~\ref{TBL:rweval}). The average Freiburg score for (A+S) on the core graph (70.6) was closest to the optimal score (48), but for Stuttgart, the average (A+S) score on the core graph (519.3) was 3.33 times higher than the optimal score (156).
+\subsubsection{Optimality of Results} With prior pruning and added separation penalty, the local optima found by our simulated annealing approach where on average a factor of 2.16 higher than the optimal solutions (which can be seen in Table~\ref{TBL:rweval}). The average Freiburg score for (A+S) on the pruned graph (70.6) was closest to the optimal score (48), but for Stuttgart, the average (A+S) score on the pruned graph (519.3) was 3.33 times higher than the optimal score (156).
 
 \TODO{Times for hillc when Stuttgart eval is finished}
 
@@ -861,8 +898,8 @@ Final ordering configurations and graph scores of both simulated annealing (A) a
 Table~\ref{TBL:evalres} shows the results of the ordering optimizations with ILPs for 4 of our 6 datasets: Chicago, Stuttgart, Turin and New York. Tests were run on an Intel Core i5-6300U machine with 4 cores \`{a} 2.4 GHz and 12 GB RAM.
 The CBC solver was compiled with multithreading support, and used with the default parameters and \texttt{threads=4}.
 The GLPK solver was used with the feasibility pump heuristic (\texttt{fp\_heur=ON}), the proximity search heuristic (\texttt{ps\_heur=ON}) and the presolver enabled (\texttt{presolve=ON}). We used gurobi with the default parameters.
-\subsubsection{ILP Solution Times} With our improved ILP (I), the optimal orderings on the core graph could be found in under 50 milliseconds with gurobi, and in under 1 second with CBC, on any dataset. If line separation was also punished (I+S), the ILP could be solved on the core graph in under 2.5 seconds with gurobi for any dataset, and in under 1 minute with CBC. Although the ILPs for (I+S) were only slightly larger than for (I), optimization on the core graph took $28$ times longer on average with the fastest solver.
-\subsubsection{Effects of Core Graph Reduction} On the baseline graph, (B) could not be optimized for all datasets except Turin with gurobi, and only after core graph reduction was a solution for Stuttgart and Chicago found in under 12 hours. As expected in Sect.~\ref{SEC:coreprobgraph}, core graph reduction made the ILPs significantly smaller. On average, the number of rows decreased by $61\,\%$ and the number of columns by $59\,\%$ for (I). For (I+S), the decrease was $62\,\%$ and $60\,\%$, respectively. With the fastest solver and the improved ILP (I), core graph reduction lead to speedup by a factor between $4$ for Chicago, and 2 for New York. For (I+S), this speedup was between $22.4$ for Stuttgart, and $2.5$ for Turin.
+\subsubsection{ILP Solution Times} With our improved ILP (I), the optimal orderings on the pruned graph could be found in under 50 milliseconds with gurobi, and in under 1 second with CBC, on any dataset. If line separation was also punished (I+S), the ILP could be solved on the pruned graph in under 2.5 seconds with gurobi for any dataset, and in under 1 minute with CBC. Although the ILPs for (I+S) were only slightly larger than for (I), optimization on the pruned graph took $28$ times longer on average with the fastest solver.
+\subsubsection{Effects of Graph Pruning} On the baseline graph, (B) could not be optimized for all datasets except Turin with gurobi, and only after graph pruning  was a solution for Stuttgart and Chicago found in under 12 hours. As expected in Sect.~\ref{SEC:coreprobgraph}, graph pruning made the ILPs  significantly smaller. On average, the number of rows decreased by $61\,\%$ and the number of columns by $59\,\%$ for (I). For (I+S), the decrease was $62\,\%$ and $60\,\%$, respectively. With the fastest solver and the improved ILP (I), graph pruning lead to speedup by a factor between $4$ for Chicago, and 2 for New York. For (I+S), this speedup was between $22.4$ for Stuttgart, and $2.5$ for Turin.
 
 \subsection{Effects of Graph Untangling}
 
@@ -872,20 +909,20 @@ To measure the effects of our graph untangling rules described in Section~\ref{S
 
 Table~\ref{TBL:untangling} shows the optimization graph dimensions after full untangling for all of our input datasets, compared to the sizes of the optimization graph with only pruning rules applied. For each dataset, we measured the time $t$ needed for full untangling, the overall number of nodes after untangling, the overall number of edges after untangling, the maximum number of lines per edge $M$ and the solution space size $|S|$. Additionally, we counted the number of connected components $C$, the number $C^1$ of connected components with $|S| = 1$ (which do not need optimization) and the dimensions of the \emph{largest} connected component.
 
-Compared to just applying pruning rules, graph untangling further reduced the size of the search space $S$, sometimes dramatically. For New York, the search size space was reduced by 56 orders of magnitude compared to the core graph. Compared to the original line graph, the search size space was reduced by 212 orders of magnitude with graph untangling. For Freiburg, untangling further reduced the search space size to just $\sim 9,200$, which can easily be explored with an exhaustive search.
+Compared to just applying pruning rules, graph untangling further reduced the size of the search space $S$, sometimes dramatically. For New York, the search size space was reduced by 56 orders of magnitude compared to the pruned graph. Compared to the original line graph, the search size space was reduced by 212 orders of magnitude with graph untangling. For Freiburg, untangling further reduced the search space size to just $\sim 9,200$, which can easily be explored with an exhaustive search.
 
 The number of connected components retrieved from graph untangling was always larger than 2. For 3 of our datasets (Freiburg, Dallas and Chicago), all but one connected component hat a solution size of exactly 1, meaning that they did not need any ordering optimization. For the remaining networks, the search space of the largest connected component was again $2 - 10$ orders of magnitudes smaller than the combined search space of the untangled graph.
 
 For some datasets, the number of nodes and edges in the untangled graph was higher than in the core optimization graph. This was to be expected, as we are splitting both nodes and edges in our untangling rules. However, even for those datasets, the search space sizes still went down significantly, because breaking up edges in our untangling rules always reduces the number of lines per edge.
 
 \begin{table}
-  \caption[]{Dimensions of line graphs with only pruning rules applied (core graph) and after full untangling was applied (untangled graph), as well as time needed for untangling. \label{TBL:untangling}}
+  \caption[]{Dimensions of line graphs with only pruning rules applied (pruned graph) and after full untangling was applied (untangled graph), as well as time needed for untangling. \label{TBL:untangling}}
   \centering
   %\footnotesize
   {\renewcommand{\baselinestretch}{1.13}\normalsize
   \setlength\tabcolsep{3pt}
   \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l r r r r r r r r r r r r r r r}
-                & \multicolumn{4}{c}{\footnotesize Core graph} & & \multicolumn{4}{c}{\footnotesize Untangled graph}  & & & \multicolumn{4}{c}{\footnotesize Largest component} \\
+                & \multicolumn{4}{c}{\footnotesize Pruned graph} & & \multicolumn{4}{c}{\footnotesize Untangled graph}  & & & \multicolumn{4}{c}{\footnotesize Largest component} \\
               \cline{2-5} \cline{7-10} \cline{13-16}  \\[-2ex] \toprule
                & $|V_c|$ & $|E_c|$ & $M_c$ & $|S_c|$ & $t$ & $|V|$ & $|E|$ & $M$ & $|S|$ & $C$ & $C^1$ & $|\hat{V}|$ & $|\hat{E}|$ & $\hat{M}$ &  $|\hat{S}|$ \\\midrule
     Freiburg    & 20  & 21  & 4 & 55k & 3\Hms & 22 & 19 & 4 & 9.2k  & 3  & 2 & 18 & 17  & 4  & 9.2k\\
@@ -902,9 +939,9 @@ For some datasets, the number of nodes and edges in the untangled graph was high
 
 Table~\ref{TBL:untangling_solve} shows the solution times of some of our ILPs after applying our untangling rules, compared to our initial approach of just applying pruning rules. If multiple components had to be optimized after untangling, optimization was done iteratively. For datasets where this was the case, solution times in Table~\ref{TBL:untangling_solve} are the summed solution times of all ILP solves.
 
-For Freiburg and Chicago, an improvement noticable with GLPK. With gurobi, none of the solution times were better than the core graph solution times with (I) and (I+S) for Freiburg and Chicago. For Chicago, the solution time for (I) even went slightly up. This was because of the additional overhead of solving multiple ILPs, one for each connected component with $|S| > 1$.
+For Freiburg and Chicago, an improvement noticable with GLPK. With gurobi, none of the solution times were better than the solution times on the pruned graph with (I) and (I+S) for Freiburg and Chicago. For Chicago, the solution time for (I) even went slightly up. This was because of the additional overhead of solving multiple ILPs, one for each connected component with $|S| > 1$.
 
-However, graph untangling gave signficant performance gains for larger networks if we added separation penalties. The solution time of (I+S) on New York and Stuttgart was $>$ 12\,h with GLPK on the core graph, but after graph untangling, the ILPs could be solved in 21.5\,s for Stuttgart, and 4\,m for New York. For Stuttgart, solving (I+S) with gurobi was 7 times faster after graph untangling, and for New York, it was 3 times faster.
+However, graph untangling gave signficant performance gains for larger networks if we added separation penalties. The solution time of (I+S) on New York and Stuttgart was $>$ 12\,h with GLPK on the pruned graph, but after graph untangling, the ILPs could be solved in 21.5\,s for Stuttgart, and 4\,m for New York. For Stuttgart, solving (I+S) with gurobi was 7 times faster after graph untangling, and for New York, it was 3 times faster.
 
 \begin{table}
   \caption[]{Impact of graph untangling on selected ILP solution times. \label{TBL:untangling_solve}}
@@ -936,7 +973,7 @@ We also evaluated the effect of graph untangling on our 6 baseline heuristics fr
 
 For Freiburg, applying graph untangling brought down the solution time of a simple exhaustive search to 200\,ms. This is evidence that even for modestly complex real-world line graphs, an ILP may not be necessary to find a solution in acceptable time. For all our other datasets, however, exhaustive search was not able to find a solution in under 12\,h, even after graph untangling.
 
-Generally, all our baseline heuristics performed better after applying graph untangling, both in terms of running time and in terms of the final graph score. For Stuttgart, for example, the final graph score averaged from 50 runs went down from 519.3 on the core graph to 328 on the untangled graph. However, this was still over 2 times bigger than the optimal score (156).
+Generally, all our baseline heuristics performed better after applying graph untangling, both in terms of running time and in terms of the final graph score. For Stuttgart, for example, the final graph score averaged from 50 runs went down from 519.3 on the pruned graph to 328 on the untangled graph. However, this was still over 2 times bigger than the optimal score (156).
 
 \begin{table}
   \caption[]{Impact of graph untangling on selected baseline heuristic solution times and graph scores. \label{TBL:untangling_baseline}}
@@ -995,14 +1032,14 @@ We also found that our maps always scored better or equal in our penalty system 
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 \begin{table*}
-  \caption[]{Dimensions, solution times and final graph scores (pen) for Chicago, Stuttgart, Turin and New York and 6 baseline heuristics for the line ordering problem: exhaustive search with (E+S) and without (E) separation penalty, steepest hill climbing with (H+S) and without (H) separation penalty and simulated annealing with (A+S) and without separation penalty (A), all with or without reduction to the core graph. $|S|$ is the search space size, $t$ the solution time. A time of --- means we aborted after 12 hours. The number of iterations is shown in column \emph{iters}, $\times$ is the number of crossings in the optimized graph, $\|$ the number of separations, \emph{pen} is the final graph score. For optimization without separation penalty, the final graph scores only include crossing penalties. Optimal graph scores can be found in Table~\ref{TBL:rweval}. \label{TBL:evalres_heur}}
+  \caption[]{Dimensions, solution times and final graph scores (pen) for Chicago, Stuttgart, Turin and New York and 6 baseline heuristics for the line ordering problem: exhaustive search with (E+S) and without (E) separation penalty, steepest hill climbing with (H+S) and without (H) separation penalty and simulated annealing with (A+S) and without separation penalty (A), all with or without graph pruning. $|S|$ is the search space size, $t$ the solution time. A time of --- means we aborted after 12 hours. The number of iterations is shown in column \emph{iters}, $\times$ is the number of crossings in the optimized graph, $\|$ the number of separations, \emph{pen} is the final graph score. For optimization without separation penalty, the final graph scores only include crossing penalties. Optimal graph scores can be found in Table~\ref{TBL:rweval}. \label{TBL:evalres_heur}}
   \vspace{-3.6mm}
   \centering
   %\footnotesize
   {\renewcommand{\baselinestretch}{1.13}\normalsize
     \setlength\tabcolsep{2pt}
   \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l@{\hskip 1.2mm} c r r r@{\hskip 2.5mm} r r r r r@{\hskip 1.5mm}r@{\hskip 1mm}r r r r}
-              && \multicolumn{6}{c}{\footnotesize On baseline graph} & & \multicolumn{6}{c}{\footnotesize On core graph} \\
+              && \multicolumn{6}{c}{\footnotesize On baseline graph} & & \multicolumn{6}{c}{\footnotesize On pruned graph} \\
               \cline{3-8} \cline{10-15} \\[-2ex] \toprule
               && $|S|$ & $t$ & iters & $\times$ & $||$ & pen & & $|S|$ & $t$ & iters & $\times$ & $||$ & pen \\\midrule
     Freiburg    & E & \multirow{6}{*}{\Hsci{6}{13}} & \Hlong & \Hlong & \Hlong & \Hlong & \Hlong & & \multirow{6}{*}{55k} &  2\Hs & 55k & 5 & 2 & 30\\
@@ -1030,14 +1067,14 @@ We also found that our maps always scored better or equal in our penalty system 
 \end{table*}
 
 \begin{table*}
-  \caption[]{Dimensions and solution times for Chicago, Stuttgart, Turin and New York and our three ILPs: baseline (B), improved (I), and with line separation penalty (I+S), with or without reduction to the core graph, solved with GLPK, COIN-OR CBC and gurobi (GU). A time of --- means we aborted after 12 hours. The last two columns show the number of crossings ($\times$) and separations ($||$) after optimization. \TODO{The number of crossings and separations for New York must be updated} Optimal graph scores can be found in Table~\ref{TBL:rweval}.\label{TBL:evalres}}.
+  \caption[]{Dimensions and solution times for Chicago, Stuttgart, Turin and New York and our three ILPs: baseline (B), improved (I), and with line separation penalty (I+S), with or without graph pruning, solved with GLPK, COIN-OR CBC and gurobi (GU). A time of --- means we aborted after 12 hours. The last two columns show the number of crossings ($\times$) and separations ($||$) after optimization. \TODO{The number of crossings and separations for New York must be updated} Optimal graph scores can be found in Table~\ref{TBL:rweval}.\label{TBL:evalres}}.
   %\vspace{-50mm}
   \centering
   %\footnotesize
   {\renewcommand{\baselinestretch}{1.13}\normalsize
     \setlength\tabcolsep{2pt}
   \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l@{\hskip 1.2mm} c r r r@{\hskip 2.5mm} r r r r r@{\hskip 1.5mm}r@{\hskip 1mm}r r r}
-              && \multicolumn{4}{c}{\footnotesize On baseline graph} & & \multicolumn{4}{c}{\footnotesize On core graph} \\
+              && \multicolumn{4}{c}{\footnotesize On baseline graph} & & \multicolumn{4}{c}{\footnotesize On pruned graph} \\
               \cline{3-6} \cline{8-11} \\[-2ex] \toprule
               && \Hdimh & \Htglpk & \Htcbc & \Htgo &  & \Hdimh & \Htglpk & \Htcbc & \Htgo & $\times$ & $||$ \\\midrule
 
@@ -1082,16 +1119,6 @@ Both our line-ordering and rendering steps may be used with any multigraph as in
 Lastly, the ideas behind LOOM may be useful also in a non-transit scenario.
 For example, one closely related problem is that of wire routing in integrated-circuit design.
 There, stations correspond to chips and other elements (which in wire routing are indeed of polygonal form), lines correspond to wires, and the geographical course of the lines may correspond to a pre-existing wiring.
-
-%TODO: mention octilinear maps
-
-%\TODO{mention thorough aesthetical evaluation via crowd-sourcing?}
-%
-%\TODO{mention station rendering, which is sub par atm}
-%
-%\TODO{mention that transit maps are not only useful for transit, but also to visualize for example flowcharts or storylines, layouts of electronic circuits}
-%
-%\TODO{maybe mention stability across zoom levels}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{transitmaps}
