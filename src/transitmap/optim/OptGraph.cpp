@@ -502,11 +502,20 @@ bool OptGraph::untangleFullCross() {
         addEdg(cross.second->getFrom(), newN, cross.second->pl());
       }
 
+      auto fa = cross.first->getFrom();
+      auto fb = cross.first->getTo();
+      auto sa = cross.second->getFrom();
+      auto sb = cross.second->getTo();
+
       delEdg(cross.first->getFrom(), cross.first->getTo());
       delEdg(cross.second->getFrom(), cross.second->getTo());
 
       updateEdgeOrder(n);
       updateEdgeOrder(newN);
+      updateEdgeOrder(fa);
+      updateEdgeOrder(fb);
+      updateEdgeOrder(sa);
+      updateEdgeOrder(sb);
 
       return true;
     }
@@ -826,7 +835,7 @@ bool OptGraph::untanglePartialDogBoneStep() {
       if (mainLeg->getFrom() != na) continue;
       OptNode* notPartN = 0;
       if ((notPartN = isPartialDogBone(mainLeg))) {
-        LOG(DEBUG) << "Found partial dog bone with main leg " << mainLeg << " ("
+        LOG(INFO) << "Found partial dog bone with main leg " << mainLeg << " ("
                    << mainLeg->pl().toStr() << ") at node " << notPartN;
 
         OptNode* partN = mainLeg->getOtherNd(notPartN);
@@ -913,7 +922,7 @@ bool OptGraph::untangleDogBoneStep() {
     for (OptEdge* mainLeg : na->getAdjList()) {
       if (mainLeg->getFrom() != na) continue;
       if (isDogBone(mainLeg)) {
-        LOG(DEBUG) << "Found full dog bone with main leg " << mainLeg << " ("
+        LOG(INFO) << "Found full dog bone with main leg " << mainLeg << " ("
                    << mainLeg->pl().toStr() << ")";
 
         OptNode* nb = mainLeg->getOtherNd(na);

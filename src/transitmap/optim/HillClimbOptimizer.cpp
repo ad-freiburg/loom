@@ -69,7 +69,7 @@ int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
     if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
 
     if (!found) {
-      LOG(DEBUG) << "Local optimum found after " << iters << ", target=" << curScore;
+      LOG(INFO) << "Local optimum found after " << iters << ", target=" << curScore;
       break;
     }
 

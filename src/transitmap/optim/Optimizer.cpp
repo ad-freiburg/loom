@@ -61,8 +61,6 @@ int Optimizer::optimize(TransitGraph* tg) const {
               << solutionSpaceSize(*g.getNds());
   }
 
-
-
   // iterate over components and optimize all of them separately
   const auto& comps = util::graph::Algorithm::connectedComponents(g);
 

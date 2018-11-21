@@ -178,7 +178,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "penalty factor during optimization for crossings that occur between two lines that travel through 3 segments")
     ("glpk-time-limit",
       opts::value<int>(&(cfg->glpkTimeLimit))
-      ->default_value(60000 + 60000),
+      ->default_value(60000 * 60 * 12),
       "GLPK: overall time limit for search, in ms")
     ("glpk-proximity-search-time-limit",
       opts::value<int>(&(cfg->glpkPSTimeLimit))

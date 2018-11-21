@@ -417,6 +417,8 @@ bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
     }
   }
 
+  std::set<const Node*> periphery;
+
   for (const Node* n : potClique) {
     for (auto nf : getClosedNodeFronts(n)) {
       if (nf.edge->getTo() == n) {
@@ -429,6 +431,19 @@ bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
         }
       }
     }
+
+    // catch cases where two clique nodes share the same node at teir
+    // open front
+    for (auto nf : getOpenNodeFronts(n)) {
+      if (nf.edge->getTo() == n) {
+        if (periphery.count(nf.edge->getFrom())) return false;
+        periphery.insert(nf.edge->getFrom());
+      } else {
+        if (periphery.count(nf.edge->getTo())) return false;
+        periphery.insert(nf.edge->getTo());
+      }
+    }
+
 
     for (auto nf : getOpenNodeFronts(n)) {
       if (nf.edge->getTo() == n) {

@@ -14,7 +14,7 @@ using transitmapper::optim::ExhaustiveOptimizer;
 
 // _____________________________________________________________________________
 int ExhaustiveOptimizer::optimizeComp(const std::set<OptNode*>& g,
-                                  HierarchOrderingConfig* hc) const {
+                                      HierarchOrderingConfig* hc) const {
   OptOrderingConfig best, cur, null;
   double bestScore = DBL_MAX;
 
@@ -91,13 +91,18 @@ void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
-                                        OptOrderingConfig* cfg, bool sorted) const {
+                                        OptOrderingConfig* cfg,
+                                        bool sorted) const {
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       (*cfg)[e] = std::vector<const graph::Route*>(e->pl().getCardinality());
-      for (size_t i = 0; i < (*cfg)[e].size(); i++)
-        (*cfg)[e][i] = e->pl().getRoutes()[i].route;
+      size_t p = 0;
+      for (size_t i = 0; i < e->pl().getRoutes().size(); i++) {
+        if (e->pl().getRoutes()[i].route->relativeTo()) continue;
+        (*cfg)[e][p] = e->pl().getRoutes()[i].route;
+        p++;
+      }
 
       if (sorted) {
         std::sort((*cfg)[e].begin(), (*cfg)[e].end());
