@@ -14,7 +14,7 @@ using transitmapper::optim::HillClimbOptimizer;
 
 // _____________________________________________________________________________
 int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
-                                  HierarchOrderingConfig* hc) const {
+                                     HierarchOrderingConfig* hc) const {
   OptOrderingConfig cur, null;
 
   // fixed order list of optim graph edges
@@ -37,7 +37,7 @@ int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
     iters++;
 
     if (iters - last == 10000) {
-      LOG(DEBUG) << "@ " << iters;
+      LOG(INFO) << "@ " << iters;
       last = iters;
     }
 
@@ -51,15 +51,36 @@ int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
       auto old = cur[edges[i]];
       cur[edges[i]] = null[edges[i]];
 
-      do {
-        double s = getScore(edges[i], cur);
-        if (s < oldScore && oldScore - s > bestChange) {
-          found = true;
-          bestChange = oldScore - s;
-          bestEdge = edges[i];
-          bestOrder = cur[edges[i]];
+      int c = util::factorial(edges[i]->pl().getCardinality());
+
+      if (c > 300000) {
+        // heuristic: is the neighboordhood is too large, simply take
+        // 1000 random choices
+        for (size_t k = 0; k < 1000; k++) {
+          int steps = rand() % c;
+          for (int j = 0; j < steps; j++)
+            std::next_permutation(cur[edges[i]].begin(), cur[edges[i]].end());
+
+          double s = getScore(edges[i], cur);
+          if (s < oldScore && oldScore - s > bestChange) {
+            found = true;
+            bestChange = oldScore - s;
+            bestEdge = edges[i];
+            bestOrder = cur[edges[i]];
+          }
         }
-      } while (std::next_permutation(cur[edges[i]].begin(), cur[edges[i]].end()));
+      } else {
+        do {
+          double s = getScore(edges[i], cur);
+          if (s < oldScore && oldScore - s > bestChange) {
+            found = true;
+            bestChange = oldScore - s;
+            bestEdge = edges[i];
+            bestOrder = cur[edges[i]];
+          }
+        } while (
+            std::next_permutation(cur[edges[i]].begin(), cur[edges[i]].end()));
+      }
 
       // reverting
       cur[edges[i]] = old;
@@ -69,7 +90,8 @@ int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
     if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
 
     if (!found) {
-      LOG(INFO) << "Local optimum found after " << iters << ", target=" << curScore;
+      LOG(INFO) << "Local optimum found after " << iters
+                << ", target=" << curScore;
       break;
     }
 
