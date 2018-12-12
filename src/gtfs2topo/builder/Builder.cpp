@@ -58,13 +58,13 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
 
     auto st = t->second->getStopTimes().begin();
 
-    StopTime prev = *st;
+    auto prev = *st;
     const Edge* prevEdge = 0;
     addStop(prev.getStop(), _cfg->stationAggrLevel, g, &ngrid);
     ++st;
 
     for (; st != t->second->getStopTimes().end(); ++st) {
-      const StopTime& cur = *st;
+      const auto& cur = *st;
 
       Node* fromNode = getNodeByStop(g, prev.getStop(), _cfg->stationAggrLevel);
       Node* toNode = addStop(cur.getStop(), _cfg->stationAggrLevel, g, &ngrid);

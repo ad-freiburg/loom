@@ -379,6 +379,8 @@ InnerGeometry Node::getInnerBezier(const OrderingConfig& cf,
   if (partnerFrom.front->edge->getGeom().getLength() <= 5) return ret;
   if (partnerTo.front->edge->getGeom().getLength() <= 5) return ret;
 
+  if (d <= 5) return ret;
+
   if (partnerFrom.front->edge->getTo() == this) {
     slopeA = partnerFrom.front->edge->getGeom().getSlopeBetweenDists(
         partnerFrom.front->edge->getGeom().getLength() - 5,

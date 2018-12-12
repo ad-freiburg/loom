@@ -143,6 +143,39 @@ inline size_t editDist(const std::string& s1, const std::string& s2) {
 }
 
 // _____________________________________________________________________________
+inline size_t prefixEditDist(const std::string& prefix, const std::string& s,
+                             size_t deltaMax) {
+  // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C++
+  size_t len1 = prefix.size();
+  size_t len2 = std::min(s.size(), prefix.size() + deltaMax + 1);
+  std::vector<size_t> d((len1 + 1) * (len2 + 1));
+
+  d[0] = 0;
+  for (size_t i = 1; i <= len1; ++i) d[i * (len2 + 1)] = i;
+  for (size_t i = 1; i <= len2; ++i) d[ i] = i;
+
+  for (size_t i = 1; i <= len1; i++) {
+    for (size_t j = 1; j <= len2; j++) {
+      d[i * (len2 + 1) + j] = std::min(std::min(d[(i - 1) * (len2 + 1) + j] + 1, d[i * (len2 + 1) + j - 1] + 1),
+                         d[(i - 1) * (len2 + 1) + j - 1] + (prefix[i - 1] == s[j - 1] ? 0 : 1));
+    }
+  }
+
+  // take min of last row
+  size_t deltaMin = std::max(std::max(deltaMax + 1, prefix.size()), s.size());
+  for (size_t i = 0; i <= len2; i++) {
+    if (d[len1 * (len2 + 1) + i] < deltaMin) deltaMin = d[len1 * (len2 + 1) + i];
+  }
+
+  return deltaMin;
+}
+
+// _____________________________________________________________________________
+inline size_t prefixEditDist(const std::string& prefix, const std::string& s) {
+  return prefixEditDist(prefix, s, s.size());
+}
+
+// _____________________________________________________________________________
 template <class Iter>
 inline std::string implode(Iter begin, const Iter& end, const char* del) {
   std::stringstream ss;
