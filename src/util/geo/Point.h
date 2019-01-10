@@ -5,6 +5,8 @@
 #ifndef UTIL_GEO_POINT_H_
 #define UTIL_GEO_POINT_H_
 
+#include <vector>
+
 namespace util {
 namespace geo {
 

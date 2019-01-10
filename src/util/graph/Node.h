@@ -33,11 +33,14 @@ class Node {
   virtual void addEdge(Edge<N, E>* e) = 0;
   virtual void removeEdge(Edge<N, E>* e) = 0;
 
-  virtual ~Node() {};
+  virtual ~Node() = 0;
 
   virtual N& pl() = 0;
   virtual const N& pl() const = 0;
 };
+
+template <typename N, typename E>
+inline Node<N, E>::~Node() {}
 
 }}
 

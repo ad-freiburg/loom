@@ -404,7 +404,7 @@ inline bool intersects(const LineSegment<T>& ls1, const LineSegment<T>& ls2) {
   // intersecting
   return intersects(getBoundingBox(ls1), getBoundingBox(ls2)) &&
          (((contains(ls1.first, ls2) ^ contains(ls1.second, ls2)) ^
-          (contains(ls2.first, ls1) ^ contains(ls2.second, ls1))) ||
+           (contains(ls2.first, ls1) ^ contains(ls2.second, ls1))) ||
           (((crossProd(ls1.first, ls2) < 0) ^
             (crossProd(ls1.second, ls2) < 0)) &&
            ((crossProd(ls2.first, ls1) < 0) ^
@@ -1462,7 +1462,8 @@ inline Point<T> latLngToWebMerc(double lat, double lng) {
 // _____________________________________________________________________________
 template <typename T>
 inline Point<T> webMercToLatLng(double x, double y) {
-  double lat = 114.591559026 * (atan(exp(y / 6378137.0)) - 0.78539825);
+  double lat =
+      (1.5707963267948966 - (2.0 * atan(exp(-y / 6378137.0)))) * (180.0 / M_PI);
   double lon = x / 111319.4907932735677;
   return Point<T>(lon, lat);
 }
