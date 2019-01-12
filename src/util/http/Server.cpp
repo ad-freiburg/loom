@@ -45,8 +45,6 @@ Socket::Socket(int port) {
   memset(&(addr.sin_zero), '\0', 8);
 
   setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, &y, sizeof(y));
-  // https://news.ycombinator.com/item?id=10608356
-  setsockopt(_sock, IPPROTO_TCP, TCP_QUICKACK, &y, sizeof(y));
 
   if (bind(_sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) {
     throw std::runtime_error(std::string("Could not bind to port ") +
@@ -85,9 +83,6 @@ void HttpServer::send(int sock, Answer* aw) {
   std::string buff = ss.str();
 
   size_t writes = 0;
-  // https://news.ycombinator.com/item?id=10608356
-  int y = 1;
-  setsockopt(sock, IPPROTO_TCP, TCP_QUICKACK, &y, sizeof(y));
 
   while (writes != buff.size()) {
     int64_t out = write(sock, buff.c_str() + writes, buff.size() - writes);
@@ -110,11 +105,11 @@ void HttpServer::handle() {
       answ = _handler->handle(req, connection);
       answ.gzip = gzipSupport(req);
     } catch (HttpErr err) {
-      answ = Answer{err.what(), err.what(), false, {}};
+      answ = Answer(err.what(), err.what());
     } catch (...) {
       // catch everything to make sure the server continues running
-      answ = Answer{
-          "500 Internal Server Error", "500 Internal Server Error", false, {}};
+      answ = Answer(
+          "500 Internal Server Error", "500 Internal Server Error");
     }
 
     send(connection, &answ);
@@ -150,8 +145,9 @@ Req HttpServer::getReq(int connection) {
   size_t rcvd = 0;
   int64_t curRcvd = 0;
   HeaderState state = NONE;
-  Req ret{"", "", "", "", {}};
-  char *tmp, *tmp2;
+  Req ret;
+  char *tmp = 0;
+  char *tmp2 = 0;
   char* brk = 0;
 
   while ((curRcvd = read(connection, buf + rcvd, BSIZE - rcvd))) {

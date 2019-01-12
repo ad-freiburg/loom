@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <unordered_map>
 #include <vector>
 
 #include <unistd.h>
@@ -62,6 +63,11 @@ struct Req {
  * HTTP Answer
  */
 struct Answer {
+  Answer() : status(""), pl(""), gzip(false) {}
+  Answer(const std::string& status, const std::string& pl)
+      : status(status), pl(pl), gzip(false) {}
+  Answer(const std::string& status, const std::string& pl, bool gz)
+      : status(status), pl(pl), gzip(gz) {}
   std::string status, pl;
   bool gzip;
   std::unordered_map<std::string, std::string> params;
