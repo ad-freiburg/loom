@@ -17,9 +17,18 @@ GeoJsonOutput::GeoJsonOutput(std::ostream& str) : _wr(&str, 10, true) {
 }
 
 // _____________________________________________________________________________
-GeoJsonOutput::~GeoJsonOutput() {
-  flush();
+GeoJsonOutput::GeoJsonOutput(std::ostream& str, json::Val attrs)
+    : _wr(&str, 10, true) {
+  _wr.obj();
+  _wr.keyVal("type", "FeatureCollection");
+  _wr.key("properties");
+  _wr.val(attrs);
+  _wr.key("features");
+  _wr.arr();
 }
+
+// _____________________________________________________________________________
+GeoJsonOutput::~GeoJsonOutput() { flush(); }
 
 // _____________________________________________________________________________
 void GeoJsonOutput::flush() { _wr.closeAll(); }

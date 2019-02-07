@@ -11,9 +11,6 @@
 #include "util/geo/output/GeoJsonOutput.h"
 #include "util/graph/Graph.h"
 
-using util::toString;
-using util::graph::Graph;
-
 namespace util {
 namespace geo {
 namespace output {
@@ -22,7 +19,7 @@ class GeoGraphJsonOutput {
  public:
   inline GeoGraphJsonOutput(){};
   template <typename N, typename E>
-  void print(const Graph<N, E>& outG, std::ostream& str);
+  void print(const util::graph::Graph<N, E>& outG, std::ostream& str);
 
  private:
   template <typename T>

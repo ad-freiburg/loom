@@ -1003,7 +1003,80 @@ CASE("nullable") {
 
 // ___________________________________________________________________________
 {
+CASE("geomwkt") {
+  auto p = pointFromWKT<double>("POINT(10 50)");
+  EXPECT(p.getX() == approx(10));
+  EXPECT(p.getY() == approx(50));
+
+  p = pointFromWKT<double>("POINT( 10 50)");
+  EXPECT(p.getX() == approx(10));
+  EXPECT(p.getY() == approx(50));
+
+  p = pointFromWKT<double>("POINT (10 50 30)");
+  EXPECT(p.getX() == approx(10));
+  EXPECT(p.getY() == approx(50));
+
+  p = pointFromWKT<double>("POINT (10     50 30)");
+  EXPECT(p.getX() == approx(10));
+  EXPECT(p.getY() == approx(50));
+
+  p = pointFromWKT<double>("POINT(10 50 30)");
+  EXPECT(p.getX() == approx(10));
+  EXPECT(p.getY() == approx(50));
+
+  p = pointFromWKT<double>("POINT (10    50) ");
+  EXPECT(p.getX() == approx(10));
+  EXPECT(p.getY() == approx(50));
+
+  p = pointFromWKT<double>("MPOINT(10 50 30)");
+  EXPECT(p.getX() == approx(10));
+  EXPECT(p.getY() == approx(50));
+
+  p = pointFromWKT<double>("MPOINT(10 50)");
+  EXPECT(p.getX() == approx(10));
+  EXPECT(p.getY() == approx(50));
+
+  p = pointFromWKT<double>("POINT(10.05 50.05)");
+  EXPECT(p.getX() == approx(10.05));
+  EXPECT(p.getY() == approx(50.05));
+
+  auto wktl = lineFromWKT<double>("LINESTRING(0 0, 1 1,2 3, 0 1)");
+  EXPECT(wktl.size() == (size_t)4);
+  EXPECT(wktl[0].getX() == approx(0));
+  EXPECT(wktl[0].getY() == approx(0));
+  EXPECT(wktl[1].getX() == approx(1));
+  EXPECT(wktl[1].getY() == approx(1));
+  EXPECT(wktl[2].getX() == approx(2));
+  EXPECT(wktl[2].getY() == approx(3));
+  EXPECT(wktl[3].getX() == approx(0));
+  EXPECT(wktl[3].getY() == approx(1));
+
+  wktl = lineFromWKT<double>("MLINESTRING(0 0, 1 1,2 3, 0 1)");
+  EXPECT(wktl.size() == (size_t)4);
+  EXPECT(wktl[0].getX() == approx(0));
+  EXPECT(wktl[0].getY() == approx(0));
+  EXPECT(wktl[1].getX() == approx(1));
+  EXPECT(wktl[1].getY() == approx(1));
+  EXPECT(wktl[2].getX() == approx(2));
+  EXPECT(wktl[2].getY() == approx(3));
+  EXPECT(wktl[3].getX() == approx(0));
+  EXPECT(wktl[3].getY() == approx(1));
+
+  wktl = lineFromWKT<double>("MLINESTRING (0 0, 1  1,2   3, 0 1 )");
+  EXPECT(wktl.size() == (size_t)4);
+  EXPECT(wktl[0].getX() == approx(0));
+  EXPECT(wktl[0].getY() == approx(0));
+  EXPECT(wktl[1].getX() == approx(1));
+  EXPECT(wktl[1].getY() == approx(1));
+  EXPECT(wktl[2].getX() == approx(2));
+  EXPECT(wktl[2].getY() == approx(3));
+  EXPECT(wktl[3].getX() == approx(0));
+  EXPECT(wktl[3].getY() == approx(1));
+}},
+// ___________________________________________________________________________
+{
 CASE("geometry") {
+
   geo::Point<double> a(1, 2);
   geo::Point<double> b(2, 3);
   geo::Point<double> c(4, 5);

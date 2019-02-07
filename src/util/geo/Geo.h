@@ -13,6 +13,7 @@
 #include <iostream>
 #include <sstream>
 #include "util/Misc.h"
+#include "util/String.h"
 #include "util/geo/Box.h"
 #include "util/geo/Line.h"
 #include "util/geo/Point.h"
@@ -732,6 +733,45 @@ inline double crossProd(const Point<T>& p, const LineSegment<T>& ls) {
 template <typename T>
 inline double dist(const Point<T>& p1, const Point<T>& p2) {
   return dist(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline Point<T> pointFromWKT(std::string wkt) {
+  wkt = util::normalizeWhiteSpace(util::trim(wkt));
+  if (wkt.rfind("POINT") == 0 || wkt.rfind("MPOINT") == 0) {
+    size_t b = wkt.find("(") + 1;
+    size_t e = wkt.find(")", b);
+    if (b > e) throw std::runtime_error("Could not parse WKT");
+    auto xy = util::split(util::trim(wkt.substr(b, e - b)), ' ');
+    if (xy.size() < 2) throw std::runtime_error("Could not parse WKT");
+    double x = atof(xy[0].c_str());
+    double y = atof(xy[1].c_str());
+    return Point<T>(x, y);
+  }
+  throw std::runtime_error("Could not parse WKT");
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline Line<T> lineFromWKT(std::string wkt) {
+  wkt = util::normalizeWhiteSpace(util::trim(wkt));
+  if (wkt.rfind("LINESTRING") == 0 || wkt.rfind("MLINESTRING") == 0) {
+    Line<T> ret;
+    size_t b = wkt.find("(") + 1;
+    size_t e = wkt.find(")", b);
+    if (b > e) throw std::runtime_error("Could not parse WKT");
+    auto pairs = util::split(wkt.substr(b, e - b), ',');
+    for (const auto& p : pairs) {
+      auto xy = util::split(util::trim(p), ' ');
+      if (xy.size() < 2) throw std::runtime_error("Could not parse WKT");
+      double x = atof(xy[0].c_str());
+      double y = atof(xy[1].c_str());
+      ret.push_back({x, y});
+    }
+    return ret;
+  }
+  throw std::runtime_error("Could not parse WKT");
 }
 
 // _____________________________________________________________________________
@@ -1478,6 +1518,24 @@ inline double webMercMeterDist(const G1& a, const G2& b) {
   double latB = 2 * atan(exp(b.getY() / 6378137.0)) - 1.5707965;
 
   return util::geo::dist(a, b) * cos((latA + latB) / 2.0);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline double webMercLen(const Line<T>& g) {
+  double ret = 0;
+  for (size_t i = 1; i < g.size(); i++) ret += webMercMeterDist(g[i - 1], g[i]);
+  return ret;
+}
+
+// _____________________________________________________________________________
+template <typename G>
+inline double webMercDistFactor(const G& a) {
+  // euclidean distance on web mercator is in meters on equator,
+  // and proportional to cos(lat) in both y directions
+
+  double lat = 2 * atan(exp(a.getY() / 6378137.0)) - 1.5707965;
+  return cos(lat);
 }
 }
 }

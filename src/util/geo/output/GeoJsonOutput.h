@@ -19,6 +19,7 @@ namespace output {
 class GeoJsonOutput {
  public:
   GeoJsonOutput(std::ostream& str);
+  GeoJsonOutput(std::ostream& str, json::Val attrs);
   ~GeoJsonOutput();
   template <typename T>
   void print(const Point<T>& p, json::Val attrs);

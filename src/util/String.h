@@ -176,6 +176,18 @@ inline size_t prefixEditDist(const std::string& prefix, const std::string& s) {
 }
 
 // _____________________________________________________________________________
+inline std::string toUpper(std::string str) {
+  std::transform(str.begin(), str.end(),str.begin(), toupper);
+  return str;
+}
+
+// _____________________________________________________________________________
+inline std::string toLower(std::string str) {
+  std::transform(str.begin(), str.end(),str.begin(), tolower);
+  return str;
+}
+
+// _____________________________________________________________________________
 template <class Iter>
 inline std::string implode(Iter begin, const Iter& end, const char* del) {
   std::stringstream ss;
@@ -188,6 +200,25 @@ inline std::string implode(Iter begin, const Iter& end, const char* del) {
   }
 
   return ss.str();
+}
+
+// _____________________________________________________________________________
+inline std::string normalizeWhiteSpace(const std::string& input) {
+  std::string ret;
+  bool ws = false;
+  for (size_t i = 0; i < input.size(); i++) {
+    if (std::isspace(input[i])) {
+      if (!ws) {
+        ret += " ";
+        ws = true;
+      }
+      continue;
+    } else {
+      ws = false;
+      ret += input[i];
+    }
+  }
+  return ret;
 }
 
 // _____________________________________________________________________________

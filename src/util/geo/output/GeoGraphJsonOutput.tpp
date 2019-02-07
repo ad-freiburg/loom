@@ -22,10 +22,10 @@ void GeoGraphJsonOutput::print(const util::graph::Graph<N, E>& outG,
   for (util::graph::Node<N, E>* n : outG.getNds()) {
     if (!n->pl().getGeom()) continue;
 
-    json::Dict props{{"id", toString(n)},
-                   {"deg", toString(n->getDeg())},
-                   {"deg_out", toString(n->getOutDeg())},
-                   {"deg_in", toString(n->getInDeg())}};
+    json::Dict props{{"id", util::toString(n)},
+                     {"deg", util::toString(n->getDeg())},
+                     {"deg_out", util::toString(n->getOutDeg())},
+                     {"deg_in", util::toString(n->getInDeg())}};
 
     auto addProps = n->pl().getAttrs();
     props.insert(addProps.begin(), addProps.end());
@@ -38,9 +38,9 @@ void GeoGraphJsonOutput::print(const util::graph::Graph<N, E>& outG,
     for (graph::Edge<N, E>* e : n->getAdjListOut()) {
       // to avoid double output for undirected graphs
       if (e->getFrom() != n) continue;
-      json::Dict props{{"from", toString(e->getFrom())},
-                  {"to", toString(e->getTo())},
-                  {"id", toString(e)}};
+      json::Dict props{{"from", util::toString(e->getFrom())},
+                       {"to", util::toString(e->getTo())},
+                       {"id", util::toString(e)}};
 
       auto addProps = e->pl().getAttrs();
       props.insert(addProps.begin(), addProps.end());

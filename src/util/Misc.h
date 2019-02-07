@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <chrono>
+#include <sstream>
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 #define TIME() std::chrono::high_resolution_clock::now()
@@ -39,10 +40,18 @@ inline uint64_t atoul(const char* p) {
 }
 
 // _____________________________________________________________________________
-inline float atof(const char* p, uint8_t mn) {
+inline bool isFloatingPoint(const std::string& str) {
+  std::stringstream ss(str);
+  double f;
+  ss >> std::noskipws >> f;
+  return ss.eof() && ! ss.fail();
+}
+
+// _____________________________________________________________________________
+inline double atof(const char* p, uint8_t mn) {
   // this atof implementation works only on "normal" float strings like
   // 56.445 or -345.00, but should be faster than std::atof
-  float ret = 0.0;
+  double ret = 0.0;
   bool neg = false;
   if (*p == '-') {
     neg = true;
@@ -56,14 +65,14 @@ inline float atof(const char* p, uint8_t mn) {
 
   if (*p == '.') {
     p++;
-    float f = 0;
+    double f = 0;
     uint8_t n = 0;
 
     for (; n < mn && *p >= '0' && *p <= '9'; n++, p++) {
       f = f * 10.0 + (*p - '0');
     }
 
-    if (n < 11)
+    if (n < 10)
       ret += f / pow10[n];
     else
       ret += f / std::pow(10, n);
