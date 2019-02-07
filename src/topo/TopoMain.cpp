@@ -8,18 +8,18 @@
 #include <iostream>
 #include <set>
 #include <string>
-#include "gtfs2topo/builder/Builder.h"
-#include "gtfs2topo/config/ConfigReader.h"
-#include "gtfs2topo/config/GraphBuilderConfig.h"
-#include "gtfs2topo/graph/BuildGraph.h"
+#include "gtfs2geo/builder/Builder.h"
+#include "gtfs2geo/config/ConfigReader.h"
+#include "gtfs2geo/config/GraphBuilderConfig.h"
+#include "gtfs2geo/graph/BuildGraph.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "ad/cppgtfs/Parser.h"
 #include "ad/cppgtfs/gtfs/Service.h"
 #include "util/log/Log.h"
-#include "gtfs2topo/graph/EdgePL.h"
-#include "gtfs2topo/graph/NodePL.h"
+#include "gtfs2geo/graph/EdgePL.h"
+#include "gtfs2geo/graph/NodePL.h"
 
-using namespace gtfs2topo;
+using namespace gtfs2geo;
 using std::string;
 
 // _____________________________________________________________________________
@@ -35,13 +35,8 @@ int main(int argc, char** argv) {
   config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
-  // parse an example feed
-  ad::cppgtfs::Parser parser;
-  ad::cppgtfs::gtfs::Feed feed;
-
   if (!cfg.inputFeedPath.empty()) {
-    parser.parse(&feed, cfg.inputFeedPath);
-    gtfs2topo::graph::BuildGraph g;
+    gtfs2geo::graph::BuildGraph g;
     Builder b(&cfg);
 
     b.consume(feed, &g);

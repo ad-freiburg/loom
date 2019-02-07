@@ -2,16 +2,16 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GTFS2TOPO_GRAPH_EDGETRIPGEOM_H_
-#define GTFS2TOPO_GRAPH_EDGETRIPGEOM_H_
+#ifndef GTFS2GEO_GRAPH_EDGETRIPGEOM_H_
+#define GTFS2GEO_GRAPH_EDGETRIPGEOM_H_
 
 #include <vector>
 #include "ad/cppgtfs/gtfs/Trip.h"
 #include "ad/cppgtfs/gtfs/Route.h"
 #include "util/geo/PolyLine.h"
-#include "gtfs2topo/graph/BuildGraph.h"
+#include "gtfs2geo/graph/BuildGraph.h"
 
-namespace gtfs2topo {
+namespace gtfs2geo {
 namespace graph {
 
 using namespace ad::cppgtfs;
@@ -72,5 +72,5 @@ class EdgeTripGeom {
 
 }}
 
-#endif  // GTFS2TOPO_GRAPH_EDGETRIPGEOM_H_
+#endif  // GTFS2GEO_GRAPH_EDGETRIPGEOM_H_
 

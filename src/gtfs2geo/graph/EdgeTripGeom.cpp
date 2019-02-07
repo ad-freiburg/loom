@@ -6,9 +6,9 @@
 #include <vector>
 #include "ad/cppgtfs/gtfs/Trip.h"
 #include "ad/cppgtfs/gtfs/Route.h"
-#include "gtfs2topo/graph/EdgeTripGeom.h"
+#include "gtfs2geo/graph/EdgeTripGeom.h"
 
-using namespace gtfs2topo;
+using namespace gtfs2geo;
 using namespace graph;
 using namespace ad::cppgtfs;
 

@@ -7,11 +7,11 @@
 #include "ad/cppgtfs/gtfs/Trip.h"
 #include "util/geo/PolyLine.h"
 #include "util/String.h"
-#include "gtfs2topo/graph/EdgeTripGeom.h"
-#include "gtfs2topo/graph/EdgePL.h"
-#include "gtfs2topo/graph/NodePL.h"
+#include "gtfs2geo/graph/EdgeTripGeom.h"
+#include "gtfs2geo/graph/EdgePL.h"
+#include "gtfs2geo/graph/NodePL.h"
 
-using namespace gtfs2topo;
+using namespace gtfs2geo;
 using namespace graph;
 using namespace ad::cppgtfs;
 

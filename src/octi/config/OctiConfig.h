@@ -21,6 +21,6 @@ struct Config {
 };
 
 }  // namespace config
-}  // namespace gtfs2topo
+}  // namespace octi
 
 #endif  // OCTI_CONFIG_OCTICONFIG_H_

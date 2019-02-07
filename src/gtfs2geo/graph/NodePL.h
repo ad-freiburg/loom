@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GTFS2TOPO_GRAPH_NODE_H_
-#define GTFS2TOPO_GRAPH_NODE_H_
+#ifndef GTFS2GEO_GRAPH_NODE_H_
+#define GTFS2GEO_GRAPH_NODE_H_
 
 #include <set>
 #include "ad/cppgtfs/gtfs/Stop.h"
@@ -11,12 +11,12 @@
 #include "util/geo/PolyLine.h"
 #include "util/geo/Geo.h"
 #include "util/geo/GeoGraph.h"
-#include "gtfs2topo/graph/BuildGraph.h"
+#include "gtfs2geo/graph/BuildGraph.h"
 
 using namespace ad::cppgtfs;
 using util::geo::DPoint;
 
-namespace gtfs2topo {
+namespace gtfs2geo {
 namespace graph {
 
 struct OccuringConnection {
@@ -64,4 +64,4 @@ class NodePL : util::geograph::GeoNodePL<double> {
 };
 }}
 
-#endif  // GTFS2TOPO_GRAPH_NODE_H_
+#endif  // GTFS2GEO_GRAPH_NODE_H_

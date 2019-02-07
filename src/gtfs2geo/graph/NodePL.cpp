@@ -3,16 +3,16 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <cassert>
-#include "gtfs2topo/graph/BuildGraph.h"
+#include "gtfs2geo/graph/BuildGraph.h"
 #include "util/geo/Geo.h"
 #include "ad/cppgtfs/gtfs/Stop.h"
-#include "gtfs2topo/graph/EdgeTripGeom.h"
-#include "gtfs2topo/graph/NodePL.h"
-#include "gtfs2topo/graph/EdgePL.h"
+#include "gtfs2geo/graph/EdgeTripGeom.h"
+#include "gtfs2geo/graph/NodePL.h"
+#include "gtfs2geo/graph/EdgePL.h"
 #include "util/String.h"
 #include "util/json/Writer.h"
 
-using namespace gtfs2topo;
+using namespace gtfs2geo;
 using namespace graph;
 using namespace ad::cppgtfs;
 

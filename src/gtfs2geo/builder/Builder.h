@@ -2,21 +2,21 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GTFS2TOPO_BUILDER_BUILDER_H_
-#define GTFS2TOPO_BUILDER_BUILDER_H_
+#ifndef GTFS2GEO_BUILDER_BUILDER_H_
+#define GTFS2GEO_BUILDER_BUILDER_H_
 
 #include <proj_api.h>
 #include <algorithm>
 #include <unordered_map>
 #include "ad/cppgtfs/gtfs/Feed.h"
-#include "gtfs2topo/config/GraphBuilderConfig.h"
+#include "gtfs2geo/config/GraphBuilderConfig.h"
 #include "util/graph/Graph.h"
 #include "util/geo/PolyLine.h"
 #include "util/geo/Grid.h"
 #include "util/geo/Geo.h"
-#include "gtfs2topo/graph/BuildGraph.h"
+#include "gtfs2geo/graph/BuildGraph.h"
 
-using namespace gtfs2topo::graph;
+using namespace gtfs2geo::graph;
 using namespace ad::cppgtfs;
 using util::geo::Grid;
 using util::geo::Box;
@@ -32,7 +32,7 @@ using util::geo::SharedSegment;
 typedef Grid<Node*, Point, double> NodeGrid;
 typedef Grid<Edge*, Line, double> EdgeGrid;
 
-namespace gtfs2topo {
+namespace gtfs2geo {
 
 struct ShrdSegWrap {
   ShrdSegWrap() : e(0), f(0){};
@@ -99,6 +99,6 @@ class Builder {
   mutable std::map<std::pair<const Edge*, const Edge*>, size_t> _pEdges;
 };
 
-}  // namespace gtfs2topo
+}  // namespace gtfs2geo
 
-#endif  // GTFS2TOPO_BUILDER_BUILDER_H_
+#endif  // GTFS2GEO_BUILDER_BUILDER_H_
