@@ -4,15 +4,15 @@
 
 #include <proj_api.h>
 #include "ad/cppgtfs/gtfs/Feed.h"
-#include "gtfs2geo/builder/Builder.h"
-#include "gtfs2geo/graph/BuildGraph.h"
-#include "gtfs2geo/graph/EdgePL.h"
-#include "gtfs2geo/graph/NodePL.h"
+#include "gtfs2graph/builder/Builder.h"
+#include "gtfs2graph/graph/BuildGraph.h"
+#include "gtfs2graph/graph/EdgePL.h"
+#include "gtfs2graph/graph/NodePL.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/log/Log.h"
 
-using namespace gtfs2geo;
+using namespace gtfs2graph;
 using namespace graph;
 
 using util::geo::Point;

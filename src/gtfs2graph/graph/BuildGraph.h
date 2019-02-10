@@ -2,13 +2,13 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GTFS2GEO_GRAPH_BUILDGRAPH_H_
-#define GTFS2GEO_GRAPH_BUILDGRAPH_H_
+#ifndef GTFS2GRAPH_GRAPH_BUILDGRAPH_H_
+#define GTFS2GRAPH_GRAPH_BUILDGRAPH_H_
 
 
 #include "util/graph/UndirGraph.h"
 
-namespace gtfs2geo {
+namespace gtfs2graph {
 namespace graph {
 
 class NodePL;
@@ -21,4 +21,4 @@ typedef util::graph::Edge<NodePL, EdgePL> Edge;
 }
 }
 
-#endif  // GTFS2GEO_GRAPH_BUILDGRAPH_H_
+#endif  // GTFS2GRAPH_GRAPH_BUILDGRAPH_H_

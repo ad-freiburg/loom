@@ -231,7 +231,7 @@ NodeCost GridGraph::spacingPenalty(GridNode* n, CombNode* origNode,
   size_t y = xy.second;
   assert(getNode(x, y) == n);
 
-  std::cerr << "Checking " << origNode->pl().toString() << std::endl;
+  // std::cerr << "Checking " << origNode->pl().toString() << std::endl;
 
   int origEdgeNumber = origNode->getAdjList().size();
   size_t optimDistance = (8 / origEdgeNumber) - 1;
@@ -243,26 +243,26 @@ NodeCost GridGraph::spacingPenalty(GridNode* n, CombNode* origNode,
     return addC;
   }
 
-  std::cerr << std::endl;
-  std::cerr << "Orig edge number = " << origEdgeNumber << ", optim distance is "
-            << optimDistance << std::endl;
+  // std::cerr << std::endl;
+  // std::cerr << "Orig edge number = " << origEdgeNumber << ", optim distance is "
+            // << optimDistance << std::endl;
 
   CombEdge* outgoing[8];
   getSettledOutgoingEdges(n, outgoing);
 
-  std::cerr << "Edge distribution: ";
-  if (origNode->pl().getParent()->pl().getStops().size())
-    std::cerr << "in "
-              << origNode->pl().getParent()->pl().getStops().front().name;
-  std::cerr << " ";
-  for (size_t i = 0; i < 8; i++) {
-    std::cerr << outgoing[i] << ", ";
-  }
-  std::cerr << std::endl;
+  // std::cerr << "Edge distribution: ";
+  // if (origNode->pl().getParent()->pl().getStops().size())
+    // std::cerr << "in "
+              // << origNode->pl().getParent()->pl().getStops().front().name;
+  // std::cerr << " ";
+  // for (size_t i = 0; i < 8; i++) {
+    // std::cerr << outgoing[i] << ", ";
+  // }
+  // std::cerr << std::endl;
 
-  std::cerr << "Ordered comb edges in orig node: ";
-  std::cerr << origNode->pl().getEdgeOrdering().toString(origNode);
-  std::cerr << std::endl;
+  // std::cerr << "Ordered comb edges in orig node: ";
+  // std::cerr << origNode->pl().getEdgeOrdering().toString(origNode);
+  // std::cerr << std::endl;
 
   for (size_t i = 0; i < 8; i++) {
     if (!outgoing[i]) continue;
@@ -278,11 +278,11 @@ NodeCost GridGraph::spacingPenalty(GridNode* n, CombNode* origNode,
     int dd = ((((dCw + 1) + dCw) % 8) * optimDistance) % 8;
     int ddd = (6 - dd) % 8;
 
-    std::cerr << "Distance between the inserted edge (" << e << ") and edge at "
-              << i << " (" << outgoing[i] << ") is " << dCw << " (cw) and "
-              << dCCw << " (ccw)"
-              << ", optim distance between them is +" << dd << " and -" << ddd
-              << std::endl;
+    // std::cerr << "Distance between the inserted edge (" << e << ") and edge at "
+              // << i << " (" << outgoing[i] << ") is " << dCw << " (cw) and "
+              // << dCCw << " (ccw)"
+              // << ", optim distance between them is +" << dd << " and -" << ddd
+              // << std::endl;
 
     double pen = _c.p_45 * 2 - 1;
 
@@ -498,9 +498,7 @@ std::priority_queue<Candidate> GridGraph::getNearestCandidatesFor(
   for (auto n : neigh) {
     if (n->pl().isClosed()) continue;
     double d = dist(*n->pl().getGeom(), p);
-    if (d < maxD) {
-      ret.push(Candidate(n, d));
-    }
+    if (d < maxD) ret.push(Candidate(n, d));
   }
 
   return ret;
@@ -588,12 +586,9 @@ void GridGraph::closeNodeSink(GridNode* n) {
 GridNode* GridGraph::getGridNodeFrom(CombNode* n, double maxDis) {
   if (!isSettled(n)) {
     auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis);
-    std::cerr << cands.size() << std::endl;
 
     while (!cands.empty()) {
-      if (!cands.top().n->pl().isClosed()) {
-        return cands.top().n;
-      }
+      if (!cands.top().n->pl().isClosed()) return cands.top().n;
       cands.pop();
     }
     return 0;
@@ -608,9 +603,7 @@ std::set<GridNode*> GridGraph::getGridNodesTo(CombNode* n, double maxDis) {
     auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis);
 
     while (!cands.empty()) {
-      if (!cands.top().n->pl().isClosed()) {
-        tos.insert(cands.top().n);
-      }
+      if (!cands.top().n->pl().isClosed()) tos.insert(cands.top().n);
       cands.pop();
     }
   } else {

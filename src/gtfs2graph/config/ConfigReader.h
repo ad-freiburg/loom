@@ -2,14 +2,14 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GTFS2GEO_CONFIG_CONFIGREADER_H_
-#define GTFS2GEO_CONFIG_CONFIGREADER_H_
+#ifndef gtfs2graph_CONFIG_CONFIGREADER_H_
+#define gtfs2graph_CONFIG_CONFIGREADER_H_
 
 #include <boost/program_options.hpp>
 #include <vector>
-#include "gtfs2geo/config/GraphBuilderConfig.h"
+#include "gtfs2graph/config/GraphBuilderConfig.h"
 
-namespace gtfs2geo {
+namespace gtfs2graph {
 namespace config {
 
 class ConfigReader {
@@ -19,4 +19,4 @@ class ConfigReader {
 };
 }
 }
-#endif  // GTFS2GEO_CONFIG_CONFIGREADER_H_
+#endif  // gtfs2graph_CONFIG_CONFIGREADER_H_

@@ -2,22 +2,22 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GTFS2GEO_GRAPH_EDGEPL_H_
-#define GTFS2GEO_GRAPH_EDGEPL_H_
+#ifndef GTFS2GRAPH_GRAPH_EDGEPL_H_
+#define GTFS2GRAPH_GRAPH_EDGEPL_H_
 
 #include <vector>
-#include "gtfs2geo/graph/EdgeTripGeom.h"
+#include "gtfs2graph/graph/EdgeTripGeom.h"
 #include "util/geo/PolyLine.h"
 #include "util/Nullable.h"
 #include "ad/cppgtfs/gtfs/Trip.h"
 #include "util/geo/GeoGraph.h"
 #include "util/json/Writer.h"
-#include "gtfs2geo/graph/BuildGraph.h"
+#include "gtfs2graph/graph/BuildGraph.h"
 
 using namespace ad::cppgtfs;
 using util::Nullable;
 
-namespace gtfs2geo {
+namespace gtfs2graph {
 namespace graph {
 
 class EdgePL : public util::geograph::GeoEdgePL<double> {
@@ -67,5 +67,4 @@ class EdgePL : public util::geograph::GeoEdgePL<double> {
 
 }}
 
-#endif  // GTFS2GEO_GRAPH_EDGEPL_H_
-
+#endif  // GTFS2GRAPH_GRAPH_EDGEPL_H_

@@ -2,12 +2,12 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GTFS2GEO_CONFIG_GTFS2GEOCONFIG_H_
-#define GTFS2GEO_CONFIG_GTFS2GEOCONFIG_H_
+#ifndef GTFS2GRAPH_CONFIG_GTFS2GEOCONFIG_H_
+#define GTFS2GRAPH_CONFIG_GTFS2GEOCONFIG_H_
 
 #include <string>
 
-namespace gtfs2geo {
+namespace gtfs2graph {
 namespace config {
 
 struct Config {
@@ -26,6 +26,6 @@ struct Config {
 };
 
 }  // namespace config
-}  // namespace gtfs2geo
+}  // namespace gtfs2graph
 
-#endif  // GTFS2GEO_CONFIG_GTFS2TOPOCONFIG_H_
+#endif  // GTFS2GRAPH_CONFIG_GTFS2TOPOCONFIG_H_

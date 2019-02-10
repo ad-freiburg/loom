@@ -75,7 +75,7 @@ double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e, double gridSize) {
 // _____________________________________________________________________________
 TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
                                   const Penalties& pens) {
-  double gridSize = 250;
+  double gridSize = 650;
 
   std::cerr << "Removing short edges... ";
   T_START(remshortegs);
@@ -129,15 +129,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
         if (frCmbNd->getDeg() < toCmbNd->getDeg() ||
             (frCmbNd->getDeg() == toCmbNd->getDeg() &&
-             frCmbNd->pl().getRouteNumber() < toCmbNd->pl().getRouteNumber())) {
-          auto tmp = frCmbNd;
-          frCmbNd = toCmbNd;
-          toCmbNd = tmp;
-          reversed = !reversed;
-        }
-
-        // TODO: move into if clause above
-        if (!gg->isSettled(frCmbNd) && gg->isSettled(toCmbNd)) {
+             frCmbNd->pl().getRouteNumber() < toCmbNd->pl().getRouteNumber()) ||
+            (!gg->isSettled(frCmbNd) && gg->isSettled(toCmbNd))) {
           auto tmp = frCmbNd;
           frCmbNd = toCmbNd;
           toCmbNd = tmp;
@@ -147,17 +140,27 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         GridNode* frGrNd = gg->getGridNodeFrom(frCmbNd, gridSize * 1.7);
 
         if (!frGrNd) {
-          LOG(ERROR) << "Could not sort in source node " << frCmbNd
-                     << std::endl;
-          exit(1);
+          LOG(ERROR) << "Could not sort in source node " << frCmbNd << " ("
+                     << frCmbNd->pl().getParent()->pl().getStops().front().name
+                     << ")" << std::endl;
+          break;
         }
 
         // get surrounding displacement nodes
         double maxDis = getMaxDis(toCmbNd, cmbEdg, gridSize);
         std::set<GridNode*> toGrNds = gg->getGridNodesTo(toCmbNd, maxDis);
 
+        // TODO: abort criteria
+        while (!toGrNds.size()) {
+          maxDis *= 2;
+          toGrNds = gg->getGridNodesTo(toCmbNd, maxDis);
+        }
+
         if (toGrNds.size() == 0) {
-          LOG(ERROR) << "Could not sort in target node " << toCmbNd;
+          LOG(ERROR) << "Could not sort in target node " << toCmbNd << " ("
+                     << toCmbNd->pl().getParent()->pl().getStops().front().name
+                     << ") with displacement distance " << maxDis << std::endl;
+          break;
         }
 
         // why not distance based? (TODO)
@@ -199,8 +202,10 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         gg->removeCostVector(*toGrNds.begin(), addCToInv);
 
         if (toGrNd == 0) {
-          LOG(ERROR) << "Could not sort in node " << toCmbNd << std::endl;
-          exit(1);
+          LOG(ERROR) << "Could not route to target node " << toCmbNd << " ("
+                     << toCmbNd->pl().getParent()->pl().getStops().front().name
+                     << ")" << std::endl;
+          break;
         }
 
         newPositions[toCmbNd] = *toGrNd->pl().getGeom();
@@ -267,9 +272,7 @@ PolyLine<double> Octilinearizer::buildPolylineFromRes(
                                *f->getFrom()->pl().getParent()->pl().getGeom(),
                                *f->getFrom()->pl().getGeom());
 
-        for (auto p : bc.render(10).getLine()) {
-          pl << p;
-        }
+        for (auto p : bc.render(10).getLine()) pl << p;
       } else {
         pl << *f->getFrom()->pl().getParent()->pl().getGeom();
       }
@@ -308,7 +311,7 @@ void Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* e,
 
 // _____________________________________________________________________________
 NodeCost Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode,
-                                        CombEdge* e, GridGraph* g) {
+                                      CombEdge* e, GridGraph* g) {
   NodeCost c = g->spacingPenalty(n, origNode, e);
   c += g->topoBlockPenalty(n, origNode, e);
   // c.normalize();

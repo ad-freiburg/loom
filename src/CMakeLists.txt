@@ -8,6 +8,6 @@ include_directories(
 add_subdirectory(util)
 add_subdirectory(transitmap)
 add_subdirectory(cppgtfs)
-add_subdirectory(gtfs2geo)
+add_subdirectory(gtfs2graph)
 add_subdirectory(octi)
 add_subdirectory(dot)
