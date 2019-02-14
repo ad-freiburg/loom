@@ -75,7 +75,7 @@ double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e, double gridSize) {
 // _____________________________________________________________________________
 TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
                                   const Penalties& pens) {
-  double gridSize = 650;
+  double gridSize = 450;
 
   std::cerr << "Removing short edges... ";
   T_START(remshortegs);

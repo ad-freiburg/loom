@@ -8,16 +8,16 @@
 #include <iostream>
 #include <set>
 #include <string>
+#include "ad/cppgtfs/Parser.h"
+#include "ad/cppgtfs/gtfs/Service.h"
 #include "gtfs2graph/builder/Builder.h"
 #include "gtfs2graph/config/ConfigReader.h"
 #include "gtfs2graph/config/GraphBuilderConfig.h"
 #include "gtfs2graph/graph/BuildGraph.h"
-#include "util/geo/output/GeoGraphJsonOutput.h"
-#include "ad/cppgtfs/Parser.h"
-#include "ad/cppgtfs/gtfs/Service.h"
-#include "util/log/Log.h"
 #include "gtfs2graph/graph/EdgePL.h"
 #include "gtfs2graph/graph/NodePL.h"
+#include "util/geo/output/GeoGraphJsonOutput.h"
+#include "util/log/Log.h"
 
 using namespace gtfs2graph;
 using std::string;

@@ -34,14 +34,6 @@ typedef Grid<Edge*, Line, double> EdgeGrid;
 
 namespace gtfs2graph {
 
-struct ShrdSegWrap {
-  ShrdSegWrap() : e(0), f(0){};
-  ShrdSegWrap(Edge* e, Edge* f, SharedSegment<double> s) : e(e), f(f), s(s){};
-  Edge* e;
-  Edge* f;
-  SharedSegment<double> s;
-};
-
 class Builder {
  public:
   Builder(const config::Config* cfg);
@@ -63,8 +55,6 @@ class Builder {
 
   std::map<const gtfs::Stop*, Node*> _stopNodes;
 
-  bool lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const;
-
   // map of compiled polylines, to avoid calculating them each time
   std::unordered_map<gtfs::Shape*, PolyLine<double>> _polyLines;
 
@@ -75,25 +65,16 @@ class Builder {
                                                    gtfs::Trip* t, double distA,
                                                    double distB);
 
-  ShrdSegWrap getNextSharedSegment(BuildGraph* g, bool final,
-                                   EdgeGrid* grid) const;
-  PolyLine<double> getAveragedFromSharedSeg(const ShrdSegWrap& w) const;
-
   Node* addStop(const gtfs::Stop* curStop, uint8_t aggrLevel, BuildGraph* g,
                 NodeGrid* grid);
 
   bool checkTripSanity(gtfs::Trip* t) const;
   bool checkShapeSanity(gtfs::Shape* t) const;
 
-  bool combineNodes(Node* a, Node* b, BuildGraph* g);
-  bool combineEdges(Edge* a, Edge* b, Node* n, BuildGraph* g);
-
-  bool lineCrossesAtNode(const Node* a, const Edge* e, const Edge* f) const;
-
   Node* getNodeByStop(const BuildGraph* g, const gtfs::Stop* s,
                       bool getParent) const;
   Node* getNodeByStop(const BuildGraph* g, const gtfs::Stop* s) const;
-  Node* getNearestStop(const BuildGraph* g, const DPoint& p, double maxD,
+  Node* getNearestStop(const DPoint& p, double maxD,
                        const NodeGrid* grid) const;
 
   DBox getGraphBoundingBox(const BuildGraph* g) const;

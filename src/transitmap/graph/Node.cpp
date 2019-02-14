@@ -437,8 +437,8 @@ InnerGeometry Node::getInnerBezier(const OrderingConfig& cf,
 
       double avg = (dar + dbr) / 2;
 
-      da = (dar * 2 * (1 - ang) + avg * 2 * (ang)) / 2;
-      db = (dbr * 2 * (1 - ang) + avg * 2 * (ang)) / 2;
+      da = (dar * 2 * (1 - ang) + avg * 2 * ang) / 2;
+      db = (dbr * 2 * (1 - ang) + avg * 2 * ang) / 2;
     }
   }
 

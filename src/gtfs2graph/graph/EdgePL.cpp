@@ -5,11 +5,11 @@
 #include <cassert>
 #include <vector>
 #include "ad/cppgtfs/gtfs/Trip.h"
-#include "util/geo/PolyLine.h"
-#include "util/String.h"
-#include "gtfs2graph/graph/EdgeTripGeom.h"
 #include "gtfs2graph/graph/EdgePL.h"
+#include "gtfs2graph/graph/EdgeTripGeom.h"
 #include "gtfs2graph/graph/NodePL.h"
+#include "util/String.h"
+#include "util/geo/PolyLine.h"
 
 using namespace gtfs2graph;
 using namespace graph;
@@ -18,19 +18,13 @@ using namespace ad::cppgtfs;
 using util::geo::PolyLine;
 
 // _____________________________________________________________________________
-EdgePL::EdgePL(const Edge* e) : _e(e) {
-
-}
+EdgePL::EdgePL(const Edge* e) : _e(e) {}
 
 // _____________________________________________________________________________
-EdgePL::EdgePL() : _e(0) {
-
-}
+EdgePL::EdgePL() : _e(0) {}
 
 // _____________________________________________________________________________
-void EdgePL::setEdge(const Edge* e) {
-  _e = e;
-}
+void EdgePL::setEdge(const Edge* e) { _e = e; }
 
 // _____________________________________________________________________________
 bool EdgePL::addTrip(gtfs::Trip* t, Node* toNode) {
@@ -43,7 +37,7 @@ bool EdgePL::addTrip(gtfs::Trip* t, Node* toNode) {
         if (tr->getShape() == t->getShape()) {
           e.addTrip(t, toNode);
           return true;
-       }
+        }
       }
     }
   }
@@ -95,10 +89,11 @@ EdgeTripGeom* EdgePL::getRefETG() {
 
 // _____________________________________________________________________________
 void EdgePL::addEdgeTripGeom(const EdgeTripGeom& e) {
-  assert(e.getGeomDir() == _e->getFrom() || e.getGeomDir() ==  _e->getTo());
+  assert(e.getGeomDir() == _e->getFrom() || e.getGeomDir() == _e->getTo());
 
   for (const auto& to : e.getTripsUnordered()) {
-    assert(to.direction == 0 || to.direction == _e->getFrom() || to.direction == _e->getTo());
+    assert(to.direction == 0 || to.direction == _e->getFrom() ||
+           to.direction == _e->getTo());
   }
 
   _tripsContained.push_back(e);
@@ -119,7 +114,7 @@ void EdgePL::simplify() {
   avg /= _tripsContained.size();
 
   for (auto it = _tripsContained.begin(); it < _tripsContained.end(); ++it) {
-    if (it->getTripCardinality() < avg*0.1) {
+    if (it->getTripCardinality() < avg * 0.1) {
       it = _tripsContained.erase(it);
     }
   }
@@ -166,9 +161,9 @@ void EdgePL::combineIncludedGeoms() {
   for (auto et = _tripsContained.begin(); et != _tripsContained.end();) {
     bool combined = false;
     for (auto& toCheckAgainst : _tripsContained) {
-      if (toCheckAgainst.getGeom().getLength() > et->getGeom().getLength()
-          && toCheckAgainst.getGeom().contains(et->getGeom(), 50)
-          && !et->getGeom().contains(toCheckAgainst.getGeom(), 50)) {
+      if (toCheckAgainst.getGeom().getLength() > et->getGeom().getLength() &&
+          toCheckAgainst.getGeom().contains(et->getGeom(), 50) &&
+          !et->getGeom().contains(toCheckAgainst.getGeom(), 50)) {
         for (auto& r : *et->getTripsUnordered()) {
           for (auto& t : r.trips) {
             toCheckAgainst.addTrip(t, r.direction);
@@ -186,7 +181,6 @@ void EdgePL::combineIncludedGeoms() {
     }
   }
 }
-
 
 // _____________________________________________________________________________
 const util::geo::DLine* EdgePL::getGeom() const {
