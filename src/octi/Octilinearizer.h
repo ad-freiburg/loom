@@ -33,8 +33,8 @@ using octi::combgraph::CombEdge;
 
 using util::graph::Dijkstra;
 
-typedef Dijkstra::EList<GridNodePL, GridEdgePL>  GrEdgList;
-typedef Dijkstra::NList<GridNodePL, GridEdgePL>  GrNdList;
+typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
+typedef Dijkstra::NList<GridNodePL, GridEdgePL> GrNdList;
 
 // comparator for nodes, based on degree
 struct NodeCmp {
@@ -112,7 +112,8 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
 class Octilinearizer {
  public:
   Octilinearizer() {}
-  TransitGraph draw(TransitGraph* g, GridGraph** gg, const Penalties& pens);
+  TransitGraph draw(TransitGraph* g, GridGraph** gg, const Penalties& pens,
+                    double gridSize, double borderRad);
 
  private:
   double getMaxDis(CombNode* to, CombEdge* e, double gridSize);
@@ -122,8 +123,11 @@ class Octilinearizer {
   void addResidentEdges(gridgraph::GridGraph* g, CombEdge* e,
                         const std::vector<GridEdge*>& res);
 
-  NodeCost writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e, GridGraph* g);
-  void settleRes(GridNode* startGridNd, GridNode* toGridNd, GridGraph* gg, CombNode* from, CombNode* to, const GrEdgList& res, CombEdge* e, size_t gen);
+  NodeCost writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
+                        GridGraph* g);
+  void settleRes(GridNode* startGridNd, GridNode* toGridNd, GridGraph* gg,
+                 CombNode* from, CombNode* to, const GrEdgList& res,
+                 CombEdge* e, size_t gen);
 };
 
 }  // namespace octi

@@ -49,7 +49,7 @@ struct Penalties {
 
 class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
  public:
-  GridGraph(const util::geo::DBox& bbox, double cellSize,
+  GridGraph(const util::geo::DBox& bbox, double cellSize, double spacer,
             const Penalties& pens);
 
   GridNode* getNode(size_t x, size_t y) const;

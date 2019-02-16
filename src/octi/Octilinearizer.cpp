@@ -74,9 +74,8 @@ double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e, double gridSize) {
 
 // _____________________________________________________________________________
 TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
-                                  const Penalties& pens) {
-  double gridSize = 450;
-
+                                  const Penalties& pens, double gridSize,
+                                  double borderRad) {
   std::cerr << "Removing short edges... ";
   T_START(remshortegs);
   removeEdgesShorterThan(tg, gridSize / 2);
@@ -89,7 +88,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
   auto box = tg->getBBox();
 
-  auto gg = new GridGraph(box, gridSize, pens);
+  auto gg = new GridGraph(box, gridSize, borderRad, pens);
 
   T_START(grid);
   std::cerr << "Build grid graph in " << T_STOP(grid) << " ms " << std::endl;
@@ -266,7 +265,9 @@ PolyLine<double> Octilinearizer::buildPolylineFromRes(
   for (auto revIt = res.rbegin(); revIt != res.rend(); revIt++) {
     auto f = *revIt;
     if (!f->pl().isSecondary()) {
-      if (pl.getLine().size() > 0) {
+      if (pl.getLine().size() > 0 &&
+          util::geo::dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) >
+              0) {
         BezierCurve<double> bc(pl.getLine().back(),
                                *f->getFrom()->pl().getParent()->pl().getGeom(),
                                *f->getFrom()->pl().getParent()->pl().getGeom(),

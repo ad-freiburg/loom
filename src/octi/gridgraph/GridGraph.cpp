@@ -20,7 +20,8 @@ using util::geo::dist;
 double INF = std::numeric_limits<double>::infinity();
 
 // _____________________________________________________________________________
-GridGraph::GridGraph(const DBox& bbox, double cellSize, const Penalties& pens)
+GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
+                     const Penalties& pens)
     : _bbox(bbox), _c(pens), _grid(cellSize, cellSize, bbox) {
   assert(_c.p_0 < _c.p_135);
   assert(_c.p_135 < _c.p_90);
@@ -30,7 +31,8 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, const Penalties& pens)
   double c_135 = _c.p_45;
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
 
-  double spacer = cellSize / 10.0;
+  // cut off illegal spacer values
+  if (spacer > cellSize / 2) spacer = cellSize / 2;
 
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
@@ -244,19 +246,20 @@ NodeCost GridGraph::spacingPenalty(GridNode* n, CombNode* origNode,
   }
 
   // std::cerr << std::endl;
-  // std::cerr << "Orig edge number = " << origEdgeNumber << ", optim distance is "
-            // << optimDistance << std::endl;
+  // std::cerr << "Orig edge number = " << origEdgeNumber << ", optim distance
+  // is "
+  // << optimDistance << std::endl;
 
   CombEdge* outgoing[8];
   getSettledOutgoingEdges(n, outgoing);
 
   // std::cerr << "Edge distribution: ";
   // if (origNode->pl().getParent()->pl().getStops().size())
-    // std::cerr << "in "
-              // << origNode->pl().getParent()->pl().getStops().front().name;
+  // std::cerr << "in "
+  // << origNode->pl().getParent()->pl().getStops().front().name;
   // std::cerr << " ";
   // for (size_t i = 0; i < 8; i++) {
-    // std::cerr << outgoing[i] << ", ";
+  // std::cerr << outgoing[i] << ", ";
   // }
   // std::cerr << std::endl;
 
@@ -278,11 +281,12 @@ NodeCost GridGraph::spacingPenalty(GridNode* n, CombNode* origNode,
     int dd = ((((dCw + 1) + dCw) % 8) * optimDistance) % 8;
     int ddd = (6 - dd) % 8;
 
-    // std::cerr << "Distance between the inserted edge (" << e << ") and edge at "
-              // << i << " (" << outgoing[i] << ") is " << dCw << " (cw) and "
-              // << dCCw << " (ccw)"
-              // << ", optim distance between them is +" << dd << " and -" << ddd
-              // << std::endl;
+    // std::cerr << "Distance between the inserted edge (" << e << ") and edge
+    // at "
+    // << i << " (" << outgoing[i] << ") is " << dCw << " (cw) and "
+    // << dCCw << " (ccw)"
+    // << ", optim distance between them is +" << dd << " and -" << ddd
+    // << std::endl;
 
     double pen = _c.p_45 * 2 - 1;
 

@@ -12,7 +12,7 @@ namespace octi {
 namespace config {
 
 struct Config {
-  double gridCellWidth;
+  double gridSize, borderRad;
 
   std::string printMode;
   bool fromDot;

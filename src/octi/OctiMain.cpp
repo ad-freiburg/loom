@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 
   T_START(octilinearize);
   Octilinearizer oct;
-  TransitGraph res = oct.draw(&tg, &gg, cfg.pens);
+  TransitGraph res = oct.draw(&tg, &gg, cfg.pens, cfg.gridSize, cfg.borderRad);
   std::cerr << " octilinearized input in " << T_STOP(octilinearize) << "ms"
             << std::endl;
 

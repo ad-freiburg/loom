@@ -35,40 +35,46 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::bool_switch(&(cfg->fromDot))->default_value(false),
       "input is in dot format")
     (
-      "grid-cell-width",
-      opts::value<double>(&(cfg->gridCellWidth))->default_value(50.0),
-      "grid cell width")
+      "grid-size",
+      opts::value<double>(&(cfg->gridSize))->default_value(450.0),
+      "grid size")
+    (
+      "border-rad",
+      opts::value<double>(&(cfg->borderRad))->default_value(45),
+      "border rad")
     (
       "print-mode",
       opts::value<std::string>(&(cfg->printMode))->default_value("transitgraph"),
       "print mode: transitgraph, gridgraph")
-        (
+    (
       "vert-pen",
       opts::value<double>(&(cfg->pens.verticalPen))->default_value(3),
-      "penalty for vertical edges")(
+      "penalty for vertical edges")
+    (
       "hori-pen",
       opts::value<double>(&(cfg->pens.horizontalPen))->default_value(3),
-      "penalty for horicontal edges")(
+      "penalty for horicontal edges")
+    (
       "diag-pen",
       opts::value<double>(&(cfg->pens.diagonalPen))->default_value(5),
       "penalty for diagonal edges")
-        (
+    (
       "pen-180",
       opts::value<double>(&(cfg->pens.p_0))->default_value(0),
       "penalty for 180 deg traversal")
-        (
+    (
       "pen-135",
       opts::value<double>(&(cfg->pens.p_135))->default_value(1),
       "penalty for 135 deg traversal")
-        (
+    (
       "pen-90",
       opts::value<double>(&(cfg->pens.p_90))->default_value(3),
       "penalty for 90 deg traversal")
-        (
+    (
       "pen-45",
       opts::value<double>(&(cfg->pens.p_45))->default_value(9),
       "penalty for 45 deg traversal")
-        ;
+    ;
 
   opts::options_description cmdlineOptions;
   cmdlineOptions.add(config).add(generic);
