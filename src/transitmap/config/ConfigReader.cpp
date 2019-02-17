@@ -63,7 +63,11 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     ("dont-expand-stations",
      opts::value<bool>(&(cfg->dontExpandStations))
       ->default_value(true),
-      "dont expand node fronts for station rendering")
+      "render stations on original, non-expanded nodes")
+    ("tight-stations",
+     opts::value<bool>(&(cfg->tightStations))
+      ->default_value(false),
+      "dont expand station nodes at all")
     ("render-station-names",
      opts::value<bool>(&(cfg->renderStationNames))
       ->default_value(false),

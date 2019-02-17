@@ -270,6 +270,7 @@ void GraphBuilder::expandOverlappinFronts(TransitGraph* g) {
   while (true) {
     bool stillFree = false;
     for (auto n : *g->getNodes()) {
+      if (n->getStops().size() && _cfg->tightStations) continue;
       std::set<NodeFront*> overlaps = nodeGetOverlappingFronts(n);
       for (auto f : overlaps) {
         stillFree = true;
