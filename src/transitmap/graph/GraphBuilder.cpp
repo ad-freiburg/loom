@@ -7,9 +7,9 @@
 #include <set>
 #include <stack>
 #include <vector>
-#include "transitmap/config/TransitMapConfig.h"
 #include "GraphBuilder.h"
 #include "json/json.hpp"
+#include "transitmap/config/TransitMapConfig.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
 
@@ -18,7 +18,8 @@ using namespace graph;
 using namespace util::geo;
 using json = nlohmann::json;
 
-const static char* WGS84_PROJ = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+const static char* WGS84_PROJ =
+    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
 // _____________________________________________________________________________
 GraphBuilder::GraphBuilder(const config::Config* cfg) : _cfg(cfg) {
@@ -36,7 +37,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
       auto props = feature["properties"];
       auto geom = feature["geometry"];
       if (geom["type"] == "Point") {
-        std::string id = props["id"];
+        std::string id = util::toString(props["id"]);
 
         // check if node already exists
         if (g->getNodeById(id)) continue;
@@ -48,9 +49,10 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
         StationInfo i("", "");
         if (!props["station_id"].is_null() ||
             !props["station_label"].is_null()) {
-          if (!props["station_id"].is_null()) i.id = props["station_id"];
+          if (!props["station_id"].is_null())
+            i.id = util::toString(props["station_id"]);
           if (!props["station_label"].is_null())
-            i.name = props["station_label"];
+            i.name = util::toString(props["station_label"]);
           n->addStop(i);
         }
 
@@ -64,10 +66,10 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
       auto geom = feature["geometry"];
       if (geom["type"] == "LineString") {
         if (props["lines"].is_null() || props["lines"].size() == 0) continue;
-        std::string from = props["from"];
-        std::string to = props["to"];
+        std::string from = util::toString(props["from"]);
+        std::string to = util::toString(props["to"]);
 
-        std::vector<std::vector<double> > coords = geom["coordinates"];
+        std::vector<std::vector<double>> coords = geom["coordinates"];
 
         PolyLine<double> pl;
         for (auto coord : coords) {
@@ -81,6 +83,8 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
         Node* fromN = g->getNodeById(from);
         Node* toN = g->getNodeById(to);
+
+        std::cout << from << " vs " << to << std::endl;
 
         if (!fromN) {
           LOG(WARN) << "Node \"" << from << "\" not found.";
@@ -103,12 +107,14 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
         Edge* e =
             g->addEdge(fromN, toN, pl, _cfg->lineWidth, _cfg->lineSpacing);
 
+        assert(e);
+
         for (auto route : props["lines"]) {
           std::string id;
           if (!route["id"].is_null()) {
-            id = route["id"];
+            id = util::toString(route["id"]);
           } else if (!route["label"].is_null()) {
-            id = route["label"];
+            id = util::toString(route["label"]);
           } else if (!route["color"].is_null()) {
             id = route["color"];
           } else
@@ -157,7 +163,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
       auto props = feature["properties"];
       auto geom = feature["geometry"];
       if (geom["type"] == "Point") {
-        std::string id = props["id"];
+        std::string id = util::toString(props["id"]);
 
         Node* n = g->getNodeById(id);
 
@@ -165,9 +171,9 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
         if (!props["excluded_line_conns"].is_null()) {
           for (auto excl : props["excluded_line_conns"]) {
-            std::string rid = excl["route"];
-            std::string nid1 = excl["edge1_node"];
-            std::string nid2 = excl["edge2_node"];
+            std::string rid = util::toString(excl["route"]);
+            std::string nid1 = util::toString(excl["edge1_node"]);
+            std::string nid2 = util::toString(excl["edge2_node"]);
 
             const Route* r = g->getRoute(rid);
 
@@ -445,7 +451,6 @@ bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
       }
     }
 
-
     for (auto nf : getOpenNodeFronts(n)) {
       if (nf.edge->getTo() == n) {
         if (potClique.find(nf.edge->getFrom()) != potClique.end()) {
@@ -600,9 +605,9 @@ void GraphBuilder::combinePartnerRoutes(graph::TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-std::map<const Route*, std::set<const Route*> > GraphBuilder::getPartnerRoutes(
+std::map<const Route*, std::set<const Route*>> GraphBuilder::getPartnerRoutes(
     graph::TransitGraph* g) const {
-  std::map<const Route*, std::set<const Route*> > partners;
+  std::map<const Route*, std::set<const Route*>> partners;
 
   for (graph::Node* n : *g->getNodes()) {
     for (graph::Edge* e : n->getAdjListOut()) {
