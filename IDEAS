@@ -25,3 +25,8 @@ Preprocessing
 
 * maybe auto-generate colors if no colors are present? or move to gtfstidy?????
 * join routes that serve the same routes, but in different directions (new york feed...)
+
+Thesis
+=====
+
+* If same-route lines are combined into a single new line K, it may not be a good idea to assign a random ordering to them. Instead, order them so that they can be distinguished easily (dont put an orange next to a red color)
