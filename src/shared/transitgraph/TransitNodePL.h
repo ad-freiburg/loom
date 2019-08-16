@@ -5,7 +5,7 @@
 #ifndef SHARED_TRANSITGRAPH_TRANSITNODEPL_H_
 #define SHARED_TRANSITGRAPH_TRANSITNODEPL_H_
 
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/transitgraph/TransitEdgePL.h"
 #include "util/geo/Geo.h"
 #include "util/geo/GeoGraph.h"
 #include "util/graph/Node.h"

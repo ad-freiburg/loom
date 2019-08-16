@@ -12,9 +12,6 @@
 #include "topo/builder/Builder.h"
 #include "topo/config/ConfigReader.h"
 #include "topo/config/GraphBuilderConfig.h"
-#include "topo/graph/BuildGraph.h"
-#include "topo/graph/EdgePL.h"
-#include "topo/graph/NodePL.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
@@ -34,30 +31,28 @@ int main(int argc, char** argv) {
   config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
-  if (!cfg.inputFeedPath.empty()) {
-    shared::transitgraph::TransitGraph tg;
-    tg.readFromJson(&(std::cin));
+  shared::transitgraph::TransitGraph tg;
+  tg.readFromJson(&(std::cin));
 
-    // TODO: read graph
+  // TODO: read graph
 
-    // Builder b(&cfg);
+  // Builder b(&cfg);
 
-    // b.simplify(&g);
+  // b.simplify(&g);
 
-    // // first pass, with strict distance values (clearing things up first)
-    // b.createTopologicalNodes(&g, false);
-    // b.removeEdgeArtifacts(&g);
+  // // first pass, with strict distance values (clearing things up first)
+  // b.createTopologicalNodes(&g, false);
+  // b.removeEdgeArtifacts(&g);
 
-    // while (b.createTopologicalNodes(&g, true)) {
-    // }
+  // while (b.createTopologicalNodes(&g, true)) {
+  // }
 
-    // b.removeEdgeArtifacts(&g);
-    // b.removeNodeArtifacts(&g);
-    // b.averageNodePositions(&g);
+  // b.removeEdgeArtifacts(&g);
+  // b.removeNodeArtifacts(&g);
+  // b.averageNodePositions(&g);
 
-    util::geo::output::GeoGraphJsonOutput out;
-    out.print(tg, std::cout);
-  }
+  util::geo::output::GeoGraphJsonOutput out;
+  out.print(tg, std::cout);
 
   return (0);
 }

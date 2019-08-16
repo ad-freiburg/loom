@@ -46,6 +46,9 @@ void TransitEdgePL::addRoute(const Route* r, const TransitNode* dir) {
 const std::set<RouteOcc>& TransitEdgePL::getRoutes() const { return _routes; }
 
 // _____________________________________________________________________________
+std::set<RouteOcc>& TransitEdgePL::getRoutes() { return _routes; }
+
+// _____________________________________________________________________________
 void TransitEdgePL::setGeneration(int64_t g) { _generation = g; }
 
 // _____________________________________________________________________________

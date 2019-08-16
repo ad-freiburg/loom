@@ -60,6 +60,8 @@ class Builder {
   projPJ _mercProj;
   projPJ _graphProj;
 
+  void edgeRpl(TransitNode* n, const TransitEdge* oldE, const TransitEdge* newE) const;
+
   bool lineDominatesSharedSeg(const ShrdSegWrap& w, TransitEdge* e) const;
 
   DPoint getProjectedPoint(double lat, double lng, projPJ p) const;
