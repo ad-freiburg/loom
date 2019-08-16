@@ -9,7 +9,7 @@ using util::geo::PolyLine;
 using octi::combgraph::CombEdgePL;
 
 // _____________________________________________________________________________
-CombEdgePL::CombEdgePL(octi::transitgraph::TransitEdge* child)
+CombEdgePL::CombEdgePL(shared::transitgraph::TransitEdge* child)
     : _generation(-1) {
   _childs.push_back(child);
   _geom = PolyLine<double>(*child->getFrom()->pl().getGeom(),
@@ -49,7 +49,7 @@ util::json::Dict CombEdgePL::getAttrs() const {
 }
 
 // _____________________________________________________________________________
-std::vector<octi::transitgraph::TransitEdge*>& CombEdgePL::getChilds() {
+std::vector<shared::transitgraph::TransitEdge*>& CombEdgePL::getChilds() {
   return _childs;
 }
 

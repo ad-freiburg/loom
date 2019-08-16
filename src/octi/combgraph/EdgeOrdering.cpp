@@ -3,10 +3,10 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "octi/combgraph/CombNodePL.h"
-#include "octi/transitgraph/EdgeOrdering.h"
+#include "octi/combgraph/EdgeOrdering.h"
 
 using util::geo::Point;
-using namespace octi::transitgraph;
+using namespace octi::combgraph;
 
 // _____________________________________________________________________________
 void EdgeOrdering::add(CombEdge* e, double deg) {

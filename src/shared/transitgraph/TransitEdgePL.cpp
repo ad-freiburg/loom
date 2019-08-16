@@ -2,16 +2,16 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/transitgraph/TransitEdgePL.h"
-#include "octi/transitgraph/TransitNodePL.h"
-#include "octi/transitgraph/TransitGraph.h"
+#include "shared/transitgraph/TransitEdgePL.h"
+#include "shared/transitgraph/TransitNodePL.h"
+#include "shared/transitgraph/TransitGraph.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
 
 using util::geo::PolyLine;
-using octi::transitgraph::TransitNode;
-using octi::transitgraph::TransitEdgePL;
-using octi::transitgraph::RouteOcc;
+using shared::transitgraph::TransitNode;
+using shared::transitgraph::TransitEdgePL;
+using shared::transitgraph::RouteOcc;
 
 // _____________________________________________________________________________
 TransitEdgePL::TransitEdgePL() : _generation(-1) {}
@@ -33,7 +33,7 @@ void TransitEdgePL::setPolyline(const PolyLine<double>& p) { _p = p; }
 
 // _____________________________________________________________________________
 void TransitEdgePL::addRoute(const Route* r, const TransitNode* dir,
-                             const LineStyle& ls) {
+                             util::Nullable<transitmapper::style::LineStyle> ls) {
   _routes.insert(RouteOcc(r, dir, ls));
 }
 

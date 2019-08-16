@@ -1,9 +1,9 @@
-file(GLOB_RECURSE gtfs2geo_SRC *.cpp)
+file(GLOB_RECURSE topo_SRC *.cpp)
 
-set(gtfs2geo_main Gtfs2GeoMain.cpp)
+set(topo_main TopoMain.cpp)
 
-list(REMOVE_ITEM gtfs2geo_SRC ${gtfs2geo_main})
-list(REMOVE_ITEM gtfs2geo_SRC TestMain.cpp)
+list(REMOVE_ITEM topo_SRC ${topo_main})
+list(REMOVE_ITEM topo_SRC TestMain.cpp)
 
 include_directories(
 	${TRANSITMAP_INCLUDE_DIR}
@@ -17,8 +17,7 @@ configure_file (
   "_config.h"
 )
 
-add_executable(gtfs2geo ${gtfs2geo_main})
-add_library(gtfs2geo_dep ${gtfs2geo_SRC})
+add_executable(topo ${topo_main})
+add_library(topo_dep ${topo_SRC})
 
-target_include_directories(gtfs2geo_dep PUBLIC ${PROJECT_SOURCE_DIR}/src/cppgtfs/src)
-target_link_libraries(gtfs2geo gtfs2geo_dep util ad_cppgtfs ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} -lproj -lpthread)
+target_link_libraries(topo topo_dep shared_dep util ${Boost_LIBRARIES} -lproj -lpthread)

@@ -5,9 +5,9 @@
 #include "octi/combgraph/CombGraph.h"
 
 using octi::combgraph::CombGraph;
-using octi::transitgraph::TransitGraph;
-using octi::transitgraph::TransitNode;
-using octi::transitgraph::EdgeOrdering;
+using shared::transitgraph::TransitGraph;
+using shared::transitgraph::TransitNode;
+using octi::combgraph::EdgeOrdering;
 
 // _____________________________________________________________________________
 CombGraph::CombGraph(const TransitGraph* g) {

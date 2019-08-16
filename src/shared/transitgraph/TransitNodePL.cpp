@@ -2,10 +2,10 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/transitgraph/TransitNodePL.h"
+#include "shared/transitgraph/TransitNodePL.h"
 
 using util::geo::Point;
-using namespace octi::transitgraph;
+using namespace shared::transitgraph;
 
 // _____________________________________________________________________________
 TransitNodePL::TransitNodePL(Point<double> pos) : _pos(pos) {}

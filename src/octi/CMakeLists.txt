@@ -21,4 +21,4 @@ add_executable(octi ${octi_main})
 add_library(octi_dep ${octi_SRC})
 
 target_include_directories(octi_dep PUBLIC ${PROJECT_SOURCE_DIR}/src/cppgtfs/src)
-target_link_libraries(octi octi_dep util dot_dep transitmap_dep ad_cppgtfs ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} -lproj -lpthread)
+target_link_libraries(octi octi_dep shared_dep util dot_dep transitmap_dep ad_cppgtfs ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} -lproj -lpthread)

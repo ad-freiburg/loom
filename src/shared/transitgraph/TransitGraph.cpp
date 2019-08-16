@@ -4,9 +4,9 @@
 
 #include "dot/Parser.h"
 #include "json/json.hpp"
-#include "octi/transitgraph/TransitEdgePL.h"
-#include "octi/transitgraph/TransitGraph.h"
-#include "octi/transitgraph/TransitNodePL.h"
+#include "shared/transitgraph/TransitEdgePL.h"
+#include "shared/transitgraph/TransitGraph.h"
+#include "shared/transitgraph/TransitNodePL.h"
 #include "util/String.h"
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
@@ -14,9 +14,9 @@
 
 #include "transitmap/style/LineStyle.h"
 
-using namespace octi::transitgraph;
-using octi::transitgraph::TransitNode;
-using octi::transitgraph::TransitEdge;
+using namespace shared::transitgraph;
+using shared::transitgraph::TransitNode;
+using shared::transitgraph::TransitEdge;
 
 // _____________________________________________________________________________
 TransitGraph::TransitGraph() {}
@@ -36,7 +36,7 @@ void TransitGraph::readFromDot(std::istream* s) {
     if (ent.type == dot::parser::EMPTY) {
       continue;
     } else if (ent.type == dot::parser::NODE) {
-      // only use nodes with a position atm
+      // only use nodes with a position
       if (ent.attrs.find("pos") == ent.attrs.end()) continue;
       std::string coords = ent.attrs["pos"];
       std::replace(coords.begin(), coords.end(), ',', ' ');

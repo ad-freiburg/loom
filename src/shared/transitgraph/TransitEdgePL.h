@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_TRANSITGRAPH_TRANSITEDGEPL_H_
-#define OCTI_TRANSITGRAPH_TRANSITEDGEPL_H_
+#ifndef SHARED_TRANSITGRAPH_TRANSITEDGEPL_H_
+#define SHARED_TRANSITGRAPH_TRANSITEDGEPL_H_
 
 #include <set>
 #include "transitmap/graph/Route.h"
@@ -19,7 +19,7 @@ using transitmapper::style::LineStyle;
 using util::graph::Node;
 using util::Nullable;
 
-namespace octi {
+namespace shared {
 namespace transitgraph {
 
 class TransitEdgePL;
@@ -32,7 +32,8 @@ struct RouteOcc {
            const transitmapper::style::LineStyle& ls)
       : route(r), direction(dir), style(ls) {}
   const Route* route;
-  const Node<TransitNodePL, TransitEdgePL>* direction;  // 0 if in both directions
+  const Node<TransitNodePL, TransitEdgePL>*
+      direction;  // 0 if in both directions
 
   util::Nullable<transitmapper::style::LineStyle> style;
 };
@@ -47,7 +48,7 @@ class TransitEdgePL : util::geograph::GeoEdgePL<double> {
   TransitEdgePL(const PolyLine<double>& p);
 
   void addRoute(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir,
-                const LineStyle& ls);
+                util::Nullable<transitmapper::style::LineStyle> ls);
   void addRoute(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir);
 
   const std::set<RouteOcc>& getRoutes() const;
@@ -71,4 +72,4 @@ class TransitEdgePL : util::geograph::GeoEdgePL<double> {
 }
 }
 
-#endif  // OCTI_TRANSITGRAPH_TRANSITEDGEPL_H_
+#endif  // SHARED_TRANSITGRAPH_TRANSITEDGEPL_H_

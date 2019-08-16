@@ -7,7 +7,7 @@
 
 #include "octi/combgraph/CombEdgePL.h"
 #include "octi/combgraph/CombNodePL.h"
-#include "octi/transitgraph/TransitGraph.h"
+#include "shared/transitgraph/TransitGraph.h"
 #include "util/graph/UndirGraph.h"
 
 namespace octi {
@@ -16,8 +16,8 @@ namespace combgraph {
 typedef util::graph::Node<CombNodePL, CombEdgePL> CombNode;
 typedef util::graph::Edge<CombNodePL, CombEdgePL> CombEdge;
 
-using octi::transitgraph::TransitGraph;
-using octi::transitgraph::EdgeOrdering;
+using shared::transitgraph::TransitGraph;
+using octi::combgraph::EdgeOrdering;
 
 class CombGraph : public util::graph::UndirGraph<CombNodePL, CombEdgePL> {
  public:

@@ -5,9 +5,11 @@ include_directories(
 	${GDAL_INCLUDE_DIR}
 )
 
+add_subdirectory(shared)
 add_subdirectory(util)
 add_subdirectory(transitmap)
 add_subdirectory(cppgtfs)
 add_subdirectory(gtfs2graph)
+add_subdirectory(topo)
 add_subdirectory(octi)
 add_subdirectory(dot)

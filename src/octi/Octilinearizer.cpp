@@ -13,7 +13,7 @@
 using namespace octi;
 using namespace gridgraph;
 
-using transitgraph::EdgeOrdering;
+using combgraph::EdgeOrdering;
 using util::graph::Dijkstra;
 using util::graph::Dijkstra;
 using util::geo::len;

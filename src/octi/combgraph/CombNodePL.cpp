@@ -3,12 +3,12 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "octi/combgraph/CombNodePL.h"
-#include "octi/transitgraph/EdgeOrdering.h"
+#include "octi/combgraph/EdgeOrdering.h"
 using util::geo::Point;
 using octi::combgraph::CombNodePL;
 
 // _____________________________________________________________________________
-CombNodePL::CombNodePL(octi::transitgraph::TransitNode* parent)
+CombNodePL::CombNodePL(shared::transitgraph::TransitNode* parent)
     : _parent(parent) {}
 
 // _____________________________________________________________________________
@@ -17,7 +17,7 @@ const Point<double>* CombNodePL::getGeom() const {
 }
 
 // _____________________________________________________________________________
-octi::transitgraph::TransitNode* CombNodePL::getParent() const {
+shared::transitgraph::TransitNode* CombNodePL::getParent() const {
   return _parent;
 }
 
@@ -33,13 +33,13 @@ void CombNodePL::setRouteNumber(size_t n) { _routeNumber = n; }
 size_t CombNodePL::getRouteNumber() const { return _routeNumber; }
 
 // _____________________________________________________________________________
-const octi::transitgraph::EdgeOrdering& CombNodePL::getEdgeOrdering() {
+const octi::combgraph::EdgeOrdering& CombNodePL::getEdgeOrdering() {
   return _ordering;
 }
 
 // _____________________________________________________________________________
 void CombNodePL::setEdgeOrdering(
-    const octi::transitgraph::EdgeOrdering& ordering) {
+    const octi::combgraph::EdgeOrdering& ordering) {
   _ordering = ordering;
 }
 

@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRAPH_EDGEORDERING_H_
-#define OCTI_GRAPH_EDGEORDERING_H_
+#ifndef OCTI_COMBGRAPH_EDGEORDERING_H_
+#define OCTI_COMBGRAPH_EDGEORDERING_H_
 
 #include "octi/combgraph/CombEdgePL.h"
 #include "util/geo/Geo.h"
@@ -24,7 +24,7 @@ class CombNodePL;
 using octi::combgraph::CombNodePL;
 
 namespace octi {
-namespace transitgraph {
+namespace combgraph {
 
 typedef util::graph::Node<CombNodePL, CombEdgePL> CombNode;
 typedef util::graph::Edge<CombNodePL, CombEdgePL> CombEdge;
@@ -51,4 +51,4 @@ class EdgeOrdering {
 }
 }
 
-#endif  // OCTI_GRAPH_EDGEORDERING_H_
+#endif  // OCTI_COMBGRAPH_EDGEORDERING_H_

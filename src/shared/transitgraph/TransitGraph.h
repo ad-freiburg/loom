@@ -2,11 +2,11 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_TRANSITGRAPH_TRANSITGRAPH_H_
-#define OCTI_TRANSITGRAPH_TRANSITGRAPH_H_
+#ifndef SHARED_TRANSITGRAPH_TRANSITGRAPH_H_
+#define SHARED_TRANSITGRAPH_TRANSITGRAPH_H_
 
-#include "octi/transitgraph/TransitEdgePL.h"
-#include "octi/transitgraph/TransitNodePL.h"
+#include "shared/transitgraph/TransitEdgePL.h"
+#include "shared/transitgraph/TransitNodePL.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/UndirGraph.h"
@@ -14,18 +14,17 @@
 using util::geo::Grid;
 using util::geo::Point;
 
-namespace octi {
+namespace shared {
 namespace transitgraph {
 
 typedef util::graph::Node<TransitNodePL, TransitEdgePL> TransitNode;
 typedef util::graph::Edge<TransitNodePL, TransitEdgePL> TransitEdge;
 
-typedef Grid<TransitNode*, Point, double> NodeGrid;
-typedef Grid<TransitEdge*, Line, double> EdgeGrid;
+typedef Grid<TransitNode*, util::geo::Point, double> NodeGrid;
+typedef Grid<TransitEdge*, util::geo::Line, double> EdgeGrid;
 
 struct ISect {
   TransitEdge *a, *b;
-
   util::geo::LinePoint<double> bp;
 };
 
@@ -50,7 +49,7 @@ class TransitGraph
   void addRoute(const Route* r);
   const Route* getRoute(const std::string& id) const;
 
-  void expandBBox(const Point<double>& p);
+  void expandBBox(const util::geo::Point<double>& p);
 
   std::set<TransitEdge*> proced;
   std::map<std::string, const Route*> _routes;
@@ -60,6 +59,6 @@ class TransitGraph
 };
 
 }  // transitgraph
-}  // octi
+}  // shared
 
-#endif  // OCTI_TRANSITGRAPH_TRANSITGRAPH_H_
+#endif  // SHARED_TRANSITGRAPH_TRANSITGRAPH_H_

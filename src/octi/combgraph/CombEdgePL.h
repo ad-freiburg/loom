@@ -6,7 +6,7 @@
 #define OCTI_COMBGRAPH_COMBEDGEPL_H_
 
 #include <set>
-#include "octi/transitgraph/TransitGraph.h"
+#include "shared/transitgraph/TransitGraph.h"
 #include "util/geo/GeoGraph.h"
 
 using util::geo::PolyLine;
@@ -16,12 +16,12 @@ namespace combgraph {
 
 class CombEdgePL : util::geograph::GeoEdgePL<double> {
  public:
-  CombEdgePL(octi::transitgraph::TransitEdge* child);
+  CombEdgePL(shared::transitgraph::TransitEdge* child);
 
   const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;
 
-  std::vector<octi::transitgraph::TransitEdge*>& getChilds();
+  std::vector<shared::transitgraph::TransitEdge*>& getChilds();
 
   const PolyLine<double>& getPolyLine() const;
   void setPolyLine(const PolyLine<double>& p);
@@ -29,7 +29,7 @@ class CombEdgePL : util::geograph::GeoEdgePL<double> {
   int64_t getGeneration() const;
 
  private:
-  std::vector<octi::transitgraph::TransitEdge*> _childs;
+  std::vector<shared::transitgraph::TransitEdge*> _childs;
 
   int64_t _generation;
 

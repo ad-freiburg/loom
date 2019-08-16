@@ -7,10 +7,10 @@
 #include <exception>
 #include <iostream>
 #include <string>
-#include "gtfs2geo/config/ConfigReader.h"
+#include "topo/config/ConfigReader.h"
 #include "util/log/Log.h"
 
-using gtfs2geo::config::ConfigReader;
+using topo::config::ConfigReader;
 namespace opts = boost::program_options;
 
 using std::string;

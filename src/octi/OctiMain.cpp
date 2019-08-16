@@ -8,12 +8,12 @@
 #include <iostream>
 #include <set>
 #include "octi/Octilinearizer.h"
-#include "octi/config/ConfigReader.h"
 #include "octi/combgraph/CombGraph.h"
-#include "octi/transitgraph/TransitGraph.h"
+#include "octi/config/ConfigReader.h"
 #include "octi/gridgraph/GridGraph.h"
-#include "util/geo/Geo.h"
+#include "shared/transitgraph/TransitGraph.h"
 #include "util/Misc.h"
+#include "util/geo/Geo.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 

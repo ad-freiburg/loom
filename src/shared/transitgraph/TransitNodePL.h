@@ -2,10 +2,10 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_TRANSITGRAPH_TRANSITNODEPL_H_
-#define OCTI_TRANSITGRAPH_TRANSITNODEPL_H_
+#ifndef SHARED_TRANSITGRAPH_TRANSITNODEPL_H_
+#define SHARED_TRANSITGRAPH_TRANSITNODEPL_H_
 
-#include "octi/transitgraph/TransitEdgePL.h"
+#include "shared/transitgraph/TransitGraph.h"
 #include "util/geo/Geo.h"
 #include "util/geo/GeoGraph.h"
 #include "util/graph/Node.h"
@@ -16,8 +16,18 @@ using util::geo::Point;
 using util::graph::Node;
 using transitmapper::graph::StationInfo;
 
-namespace octi {
+namespace shared {
 namespace transitgraph {
+
+typedef util::graph::Node<TransitNodePL, TransitEdgePL> TransitNode;
+typedef util::graph::Edge<TransitNodePL, TransitEdgePL> TransitEdge;
+
+struct ConnException {
+  ConnException(const TransitEdge* from, const TransitEdge* to)
+      : fr(from), to(to) {}
+  const TransitEdge* fr;
+  const TransitEdge* to;
+};
 
 class TransitNodePL : util::geograph::GeoNodePL<double> {
  public:
@@ -29,7 +39,6 @@ class TransitNodePL : util::geograph::GeoNodePL<double> {
   util::json::Dict getAttrs() const;
 
   void addStop(StationInfo i);
-
   const std::vector<StationInfo>& getStops() const;
 
  private:
@@ -39,4 +48,4 @@ class TransitNodePL : util::geograph::GeoNodePL<double> {
 }
 }
 
-#endif  // OCTI_TRANSITGRAPH_TRANSITNODEPL_H_
+#endif  // SHARED_TRANSITGRAPH_TRANSITNODEPL_H_

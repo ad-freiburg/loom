@@ -9,7 +9,7 @@
 #include <vector>
 #include "octi/combgraph/CombGraph.h"
 #include "octi/gridgraph/GridGraph.h"
-#include "octi/transitgraph/TransitGraph.h"
+#include "shared/transitgraph/TransitGraph.h"
 #include "util/graph/Dijkstra.h"
 
 namespace octi {
@@ -22,11 +22,11 @@ using octi::gridgraph::GridEdgePL;
 using octi::gridgraph::Penalties;
 using octi::gridgraph::NodeCost;
 
-using octi::transitgraph::TransitGraph;
-using octi::transitgraph::TransitNode;
-using octi::transitgraph::TransitEdge;
-using octi::transitgraph::EdgeOrdering;
+using shared::transitgraph::TransitGraph;
+using shared::transitgraph::TransitNode;
+using shared::transitgraph::TransitEdge;
 
+using octi::combgraph::EdgeOrdering;
 using octi::combgraph::CombGraph;
 using octi::combgraph::CombNode;
 using octi::combgraph::CombEdge;

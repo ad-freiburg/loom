@@ -27,7 +27,8 @@ struct CubicPolynom {
 template <typename T>
 class BezierCurve {
  public:
-  BezierCurve(const Point<T>& a, const Point<T>& b, const Point<T>& c, const Point<T>& d);
+  BezierCurve(const Point<T>& a, const Point<T>& b, const Point<T>& c,
+              const Point<T>& d);
 
   const PolyLine<T>& render(double d);
 

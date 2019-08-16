@@ -8,18 +8,17 @@
 #include <iostream>
 #include <set>
 #include <string>
-#include "ad/cppgtfs/Parser.h"
-#include "ad/cppgtfs/gtfs/Service.h"
-#include "gtfs2geo/builder/Builder.h"
-#include "gtfs2geo/config/ConfigReader.h"
-#include "gtfs2geo/config/GraphBuilderConfig.h"
-#include "gtfs2geo/graph/BuildGraph.h"
-#include "gtfs2geo/graph/EdgePL.h"
-#include "gtfs2geo/graph/NodePL.h"
+#include "shared/transitgraph/TransitGraph.h"
+#include "topo/builder/Builder.h"
+#include "topo/config/ConfigReader.h"
+#include "topo/config/GraphBuilderConfig.h"
+#include "topo/graph/BuildGraph.h"
+#include "topo/graph/EdgePL.h"
+#include "topo/graph/NodePL.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
-using namespace gtfs2geo;
+using namespace topo;
 using std::string;
 
 // _____________________________________________________________________________
@@ -36,25 +35,28 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   if (!cfg.inputFeedPath.empty()) {
-    gtfs2geo::graph::BuildGraph g;
-    Builder b(&cfg);
+    shared::transitgraph::TransitGraph tg;
+    tg.readFromJson(&(std::cin));
 
-    b.consume(feed, &g);
-    b.simplify(&g);
+    // TODO: read graph
 
-    // first pass, with strict distance values (clearing things up first)
-    b.createTopologicalNodes(&g, false);
-    b.removeEdgeArtifacts(&g);
+    // Builder b(&cfg);
 
-    while (b.createTopologicalNodes(&g, true)) {
-    }
+    // b.simplify(&g);
 
-    b.removeEdgeArtifacts(&g);
-    b.removeNodeArtifacts(&g);
-    b.averageNodePositions(&g);
+    // // first pass, with strict distance values (clearing things up first)
+    // b.createTopologicalNodes(&g, false);
+    // b.removeEdgeArtifacts(&g);
+
+    // while (b.createTopologicalNodes(&g, true)) {
+    // }
+
+    // b.removeEdgeArtifacts(&g);
+    // b.removeNodeArtifacts(&g);
+    // b.averageNodePositions(&g);
 
     util::geo::output::GeoGraphJsonOutput out;
-    out.print(g, std::cout);
+    out.print(tg, std::cout);
   }
 
   return (0);

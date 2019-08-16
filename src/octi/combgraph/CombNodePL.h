@@ -6,7 +6,7 @@
 #define OCTI_COMBGRAPH_COMBNODEPL_H_
 
 #include "octi/combgraph/CombEdgePL.h"
-#include "octi/transitgraph/EdgeOrdering.h"
+#include "octi/combgraph/EdgeOrdering.h"
 #include "util/geo/Geo.h"
 #include "util/geo/GeoGraph.h"
 #include "util/graph/Node.h"
@@ -20,22 +20,22 @@ namespace combgraph {
 class CombNodePL : util::geograph::GeoNodePL<double> {
  public:
   CombNodePL(){};
-  CombNodePL(octi::transitgraph::TransitNode* parent);
+  CombNodePL(shared::transitgraph::TransitNode* parent);
 
   const Point<double>* getGeom() const;
   util::json::Dict getAttrs() const;
-  octi::transitgraph::TransitNode* getParent() const;
+  shared::transitgraph::TransitNode* getParent() const;
 
-  const transitgraph::EdgeOrdering& getEdgeOrdering();
-  void setEdgeOrdering(const transitgraph::EdgeOrdering& e);
+  const combgraph::EdgeOrdering& getEdgeOrdering();
+  void setEdgeOrdering(const combgraph::EdgeOrdering& e);
   size_t getRouteNumber() const;
   void setRouteNumber(size_t n);
   std::string toString() const;
 
  private:
-  octi::transitgraph::TransitNode* _parent;
+  shared::transitgraph::TransitNode* _parent;
   size_t _routeNumber;
-  transitgraph::EdgeOrdering _ordering;
+  combgraph::EdgeOrdering _ordering;
 };
 }
 }

@@ -2,22 +2,19 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef GTFS2GEO_BUILDER_BUILDER_H_
-#define GTFS2GEO_BUILDER_BUILDER_H_
+#ifndef TOPO_BUILDER_BUILDER_H_
+#define TOPO_BUILDER_BUILDER_H_
 
 #include <proj_api.h>
 #include <algorithm>
 #include <unordered_map>
-#include "ad/cppgtfs/gtfs/Feed.h"
-#include "gtfs2geo/config/GraphBuilderConfig.h"
+#include "topo/config/GraphBuilderConfig.h"
 #include "util/graph/Graph.h"
 #include "util/geo/PolyLine.h"
 #include "util/geo/Grid.h"
 #include "util/geo/Geo.h"
-#include "gtfs2geo/graph/BuildGraph.h"
+#include "shared/transitgraph/TransitGraph.h"
 
-using namespace gtfs2geo::graph;
-using namespace ad::cppgtfs;
 using util::geo::Grid;
 using util::geo::Box;
 using util::geo::Line;
@@ -29,16 +26,22 @@ using util::geo::DLine;
 using util::geo::DBox;
 using util::geo::SharedSegment;
 
-typedef Grid<Node*, Point, double> NodeGrid;
-typedef Grid<Edge*, Line, double> EdgeGrid;
+using shared::transitgraph::TransitGraph;
+using shared::transitgraph::TransitNode;
+using shared::transitgraph::TransitEdge;
+using shared::transitgraph::TransitNodePL;
+using shared::transitgraph::TransitEdgePL;
 
-namespace gtfs2geo {
+typedef Grid<TransitNode*, Point, double> NodeGrid;
+typedef Grid<TransitEdge*, Line, double> EdgeGrid;
+
+namespace topo {
 
 struct ShrdSegWrap {
   ShrdSegWrap() : e(0), f(0){};
-  ShrdSegWrap(Edge* e, Edge* f, SharedSegment<double> s) : e(e), f(f), s(s){};
-  Edge* e;
-  Edge* f;
+  ShrdSegWrap(TransitEdge* e, TransitEdge* f, SharedSegment<double> s) : e(e), f(f), s(s){};
+  TransitEdge* e;
+  TransitEdge* f;
   SharedSegment<double> s;
 };
 
@@ -46,59 +49,39 @@ class Builder {
  public:
   Builder(const config::Config* cfg);
 
-  // build a BuildGraph from a gtfs feed
-  void consume(const gtfs::Feed& f, BuildGraph* g);
-
-  // simpliyfy the BuildGraph
-  void simplify(BuildGraph* g);
-  bool createTopologicalNodes(BuildGraph* g, bool final);
-  void averageNodePositions(BuildGraph* g);
-  void removeEdgeArtifacts(BuildGraph* g);
-  void removeNodeArtifacts(BuildGraph* g);
+  void simplify(TransitGraph* g);
+  bool createTopologicalNodes(TransitGraph* g, bool final);
+  void averageNodePositions(TransitGraph* g);
+  void removeEdgeArtifacts(TransitGraph* g);
+  void removeNodeArtifacts(TransitGraph* g);
 
  private:
   const config::Config* _cfg;
   projPJ _mercProj;
   projPJ _graphProj;
 
-  std::map<const gtfs::Stop*, Node*> _stopNodes;
-
-  bool lineDominatesSharedSeg(const ShrdSegWrap& w, Edge* e) const;
-
-  // map of compiled polylines, to avoid calculating them each time
-  std::unordered_map<gtfs::Shape*, PolyLine<double>> _polyLines;
+  bool lineDominatesSharedSeg(const ShrdSegWrap& w, TransitEdge* e) const;
 
   DPoint getProjectedPoint(double lat, double lng, projPJ p) const;
 
-  std::pair<bool, PolyLine<double>> getSubPolyLine(const gtfs::Stop* a,
-                                           const gtfs::Stop* b, gtfs::Trip* t,
-                                           double distA, double distB);
-
-  ShrdSegWrap getNextSharedSegment(BuildGraph* g, bool final, EdgeGrid* grid) const;
+  ShrdSegWrap getNextSharedSegment(TransitGraph* g, bool final, EdgeGrid* grid) const;
   PolyLine<double> getAveragedFromSharedSeg(const ShrdSegWrap& w) const;
 
-  Node* addStop(const gtfs::Stop* curStop, uint8_t aggrLevel, BuildGraph* g, NodeGrid* grid);
+  bool combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g);
+  bool combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n, TransitGraph* g);
 
-  bool checkTripSanity(gtfs::Trip* t) const;
-  bool checkShapeSanity(gtfs::Shape* t) const;
+  bool lineCrossesAtNode(const TransitNode* a, const TransitEdge* e, const TransitEdge* f) const;
 
-  bool combineNodes(Node* a, Node* b, BuildGraph* g);
-  bool combineEdges(Edge* a, Edge* b, Node* n, BuildGraph* g);
+  bool routeEq(const TransitEdge* a, const TransitEdge* b) const;
 
-  bool lineCrossesAtNode(const Node* a, const Edge* e, const Edge* f) const;
+  DBox getGraphBoundingBox(const TransitGraph* g) const;
+  EdgeGrid getGeoIndex(const TransitGraph* g) const;
 
-  Node* getNodeByStop(const BuildGraph* g, const gtfs::Stop* s, bool getParent) const;
-  Node* getNodeByStop(const BuildGraph* g, const gtfs::Stop* s) const;
-  Node* getNearestStop(const BuildGraph* g, const DPoint& p, double maxD, const NodeGrid* grid) const;
-
-  DBox getGraphBoundingBox(const BuildGraph* g) const;
-  EdgeGrid getGeoIndex(const BuildGraph* g) const;
-
-  mutable std::set<const Edge*> _indEdges;
-  mutable std::set<std::pair<const Edge*, const Edge*> > _indEdgesPairs;
-  mutable std::map<std::pair<const Edge*, const Edge*>, size_t> _pEdges;
+  mutable std::set<const TransitEdge*> _indEdges;
+  mutable std::set<std::pair<const TransitEdge*, const TransitEdge*> > _indEdgesPairs;
+  mutable std::map<std::pair<const TransitEdge*, const TransitEdge*>, size_t> _pEdges;
 };
 
-}  // namespace gtfs2geo
+}  // namespace topo
 
-#endif  // GTFS2GEO_BUILDER_BUILDER_H_
+#endif  // TOPO_BUILDER_BUILDER_H_
