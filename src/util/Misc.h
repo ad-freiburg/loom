@@ -6,8 +6,12 @@
 #define UTIL_MISC_H_
 
 #include <cmath>
+#include <cstring>
 #include <chrono>
 #include <sstream>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 #define TIME() std::chrono::high_resolution_clock::now()
@@ -84,6 +88,48 @@ inline double atof(const char* p, uint8_t mn) {
 
 // _____________________________________________________________________________
 inline double atof(const char* p) { return atof(p, 38); }
+
+// _____________________________________________________________________________
+inline std::string getHomeDir() {
+  // parse implicit paths
+  const char* homedir = 0;
+  char* buf = 0;
+
+  if ((homedir = getenv("HOME")) == 0) {
+    homedir = "";
+    struct passwd pwd;
+    struct passwd* result;
+    size_t bufsize;
+    bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+    if (bufsize == static_cast<size_t>(-1)) bufsize = 0x4000;
+    buf = static_cast<char*>(malloc(bufsize));
+    if (buf != 0) {
+      getpwuid_r(getuid(), &pwd, buf, bufsize, &result);
+      if (result != NULL) homedir = result->pw_dir;
+    }
+  }
+
+  std::string ret(homedir);
+  if (buf) free(buf);
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+inline std::string getTmpDir() {
+  // first, check if an env variable is set
+  const char* tmpdir = getenv("TMPDIR");
+  if (tmpdir && std::strlen(tmpdir)) return std::string(tmpdir);
+
+  // second, check if /tmp is writable
+  if (access("/tmp/", W_OK) == 0) return "/tmp";
+
+  // third, check if the cwd is writable
+  if (access(".", W_OK) == 0)  return ".";
+
+  // lastly, return the users home directory as a fallback
+  return getHomeDir();
+}
 
 }  // namespace util
 

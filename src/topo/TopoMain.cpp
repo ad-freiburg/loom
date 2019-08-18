@@ -11,7 +11,7 @@
 #include "shared/transitgraph/TransitGraph.h"
 #include "topo/builder/Builder.h"
 #include "topo/config/ConfigReader.h"
-#include "topo/config/GraphBuilderConfig.h"
+#include "topo/config/TopoConfig.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
   // initialize randomness
   srand(time(NULL) + rand());
 
-  config::Config cfg;
+  config::TopoConfig cfg;
 
   config::ConfigReader cr;
   cr.read(&cfg, argc, argv);

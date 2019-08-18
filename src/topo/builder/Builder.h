@@ -8,7 +8,7 @@
 #include <proj_api.h>
 #include <algorithm>
 #include <unordered_map>
-#include "topo/config/GraphBuilderConfig.h"
+#include "topo/config/TopoConfig.h"
 #include "util/graph/Graph.h"
 #include "util/geo/PolyLine.h"
 #include "util/geo/Grid.h"
@@ -47,7 +47,7 @@ struct ShrdSegWrap {
 
 class Builder {
  public:
-  Builder(const config::Config* cfg);
+  Builder(const config::TopoConfig* cfg);
 
   void simplify(TransitGraph* g);
   bool createTopologicalNodes(TransitGraph* g, bool final);
@@ -56,15 +56,13 @@ class Builder {
   void removeNodeArtifacts(TransitGraph* g);
 
  private:
-  const config::Config* _cfg;
+  const config::TopoConfig* _cfg;
   projPJ _mercProj;
   projPJ _graphProj;
 
   void edgeRpl(TransitNode* n, const TransitEdge* oldE, const TransitEdge* newE) const;
 
   bool lineDominatesSharedSeg(const ShrdSegWrap& w, TransitEdge* e) const;
-
-  DPoint getProjectedPoint(double lat, double lng, projPJ p) const;
 
   ShrdSegWrap getNextSharedSegment(TransitGraph* g, bool final, EdgeGrid* grid) const;
   PolyLine<double> getAveragedFromSharedSeg(const ShrdSegWrap& w) const;

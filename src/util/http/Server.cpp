@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 #include <thread>
 #include <unordered_map>
 #ifdef ZLIB_FOUND
@@ -104,12 +105,11 @@ void HttpServer::handle() {
       Req req = getReq(connection);
       answ = _handler->handle(req, connection);
       answ.gzip = gzipSupport(req);
-    } catch (HttpErr err) {
+    } catch (const HttpErr& err) {
       answ = Answer(err.what(), err.what());
     } catch (...) {
       // catch everything to make sure the server continues running
-      answ = Answer(
-          "500 Internal Server Error", "500 Internal Server Error");
+      answ = Answer("500 Internal Server Error", "500 Internal Server Error");
     }
 
     send(connection, &answ);
@@ -146,8 +146,8 @@ Req HttpServer::getReq(int connection) {
   int64_t curRcvd = 0;
   HeaderState state = NONE;
   Req ret;
-  char *tmp = 0;
-  char *tmp2 = 0;
+  char* tmp = 0;
+  char* tmp2 = 0;
   char* brk = 0;
 
   while ((curRcvd = read(connection, buf + rcvd, BSIZE - rcvd))) {

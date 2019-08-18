@@ -21,7 +21,7 @@ using std::vector;
 ConfigReader::ConfigReader() {}
 
 // _____________________________________________________________________________
-void ConfigReader::read(Config* cfg, int argc, char** argv) const {
+void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
   string VERSION_STR = " - unversioned - ";
 
   opts::options_description generic("General");
@@ -36,9 +36,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                           "+lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m "
                           "+nadgrids=@null +wktext  +no_defs"),
       "map projection as proj4 string")(
-      "ignore-gtfs-distances",
-      opts::bool_switch(&(cfg->ignoreGtfsDistances))->default_value(false),
-      "ignore the distance values in GTFS feed, useful for buggy feeds")(
       "station-aggregation-level",
       opts::value<size_t>(&(cfg->stationAggrLevel))->default_value(2),
       "2 = aggregate based on distance, 1 = aggregate based on feed, 0 = no "
@@ -48,11 +45,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "maximum aggregation distance between stops (if aggr level > 1)")(
       "max-aggr-distance,d",
       opts::value<double>(&(cfg->maxAggrDistance))->default_value(30),
-      "maximum aggregation distance between shared segments")(
-      "use-mots,m", opts::value<uint8_t>(&(cfg->useMots))->default_value(255),
-      "used mots, as a bitmap (see GTFS reference, 0000001 = 1 means 'only "
-      "tram', 0000010 = 2 means 'only subway', 0000100 = 4 means 'only rail', "
-      "0001000 = 8 means 'only bus', 0001001 = 3 means 'tram and bus' etc");
+      "maximum aggregation distance between shared segments");
 
   opts::options_description positional("Positional arguments");
   positional.add_options()("input-feed",

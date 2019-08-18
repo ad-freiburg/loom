@@ -24,16 +24,7 @@ const static char* WGS84_PROJ =
     "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
 // _____________________________________________________________________________
-Builder::Builder(const config::Config* cfg) : _cfg(cfg) {
-  _mercProj = pj_init_plus(WGS84_PROJ);
-  _graphProj = pj_init_plus(cfg->projectionString.c_str());
-}
-
-// _____________________________________________________________________________
-DPoint Builder::getProjectedPoint(double lat, double lng, projPJ p) const {
-  double x = lng * DEG_TO_RAD, y = lat * DEG_TO_RAD;
-  pj_transform(_mercProj, p, 1, 1, &x, &y, 0);
-  return DPoint(x, y);
+Builder::Builder(const config::TopoConfig* cfg) : _cfg(cfg) {
 }
 
 // _____________________________________________________________________________
@@ -805,5 +796,5 @@ DBox Builder::getGraphBoundingBox(const TransitGraph* g) const {
 // _____________________________________________________________________________
 void Builder::edgeRpl(TransitNode* n, const TransitEdge* oldE,
                       const TransitEdge* newE) const {
-  std::cout << "Replacing in node " << n << " edges " << oldE << "to " << newE << std::endl;
+  std::cerr << "Replacing in node " << n << " edges " << oldE << "to " << newE << std::endl;
 }

@@ -12,6 +12,7 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include "util/Misc.h"
 #include "util/String.h"
 #include "util/geo/Box.h"
@@ -242,15 +243,21 @@ inline bool doubleEq(double a, double b) { return fabs(a - b) < EPSILON; }
 // _____________________________________________________________________________
 template <typename T>
 inline bool contains(const Point<T>& p, const Box<T>& box) {
-  return p.getX() >= box.getLowerLeft().getX() &&
-         p.getX() <= box.getUpperRight().getX() &&
-         p.getY() >= box.getLowerLeft().getY() &&
-         p.getY() <= box.getUpperRight().getY();
+  // check if point lies in box
+  return (fabs(p.getX() - box.getLowerLeft().getX()) < EPSILON ||
+          p.getX() > box.getLowerLeft().getX()) &&
+         (fabs(p.getX() - box.getUpperRight().getX()) < EPSILON ||
+          p.getX() < box.getUpperRight().getX()) &&
+         (fabs(p.getY() - box.getLowerLeft().getY()) < EPSILON ||
+          p.getY() > box.getLowerLeft().getY()) &&
+         (fabs(p.getY() - box.getUpperRight().getY()) < EPSILON ||
+          p.getY() < box.getUpperRight().getY());
 }
 
 // _____________________________________________________________________________
 template <typename T>
 inline bool contains(const Line<T>& l, const Box<T>& box) {
+  // check if line lies in box
   for (const auto& p : l)
     if (!contains(p, box)) return false;
   return true;
@@ -259,24 +266,35 @@ inline bool contains(const Line<T>& l, const Box<T>& box) {
 // _____________________________________________________________________________
 template <typename T>
 inline bool contains(const LineSegment<T>& l, const Box<T>& box) {
+  // check if line segment lies in box
   return contains(l.first, box) && contains(l.second, box);
 }
 
 // _____________________________________________________________________________
 template <typename T>
 inline bool contains(const Box<T>& b, const Box<T>& box) {
+  // check if box b lies in box
   return contains(b.getLowerLeft(), box) && contains(b.getUpperRight(), box);
 }
 
 // _____________________________________________________________________________
 template <typename T>
 inline bool contains(const Point<T>& p, const LineSegment<T>& ls) {
+  // check if point p lies in (on) line segment ls
   return fabs(crossProd(p, ls)) < EPSILON && contains(p, getBoundingBox(ls));
 }
 
 // _____________________________________________________________________________
 template <typename T>
+inline bool contains(const LineSegment<T>& a, const LineSegment<T>& b) {
+  // check if line segment a is contained in line segment b
+  return contains(a.first, b) && contains(a.second, b);
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline bool contains(const Point<T>& p, const Line<T>& l) {
+  // check if point p lies in line l
   for (size_t i = 1; i < l.size(); i++) {
     if (contains(p, LineSegment<T>(l[i - 1], l[i]))) return true;
   }
@@ -286,6 +304,8 @@ inline bool contains(const Point<T>& p, const Line<T>& l) {
 // _____________________________________________________________________________
 template <typename T>
 inline bool contains(const Point<T>& p, const Polygon<T>& poly) {
+  // check if point p lies in polygon
+
   // see https://de.wikipedia.org/wiki/Punkt-in-Polygon-Test_nach_Jordan
   int8_t c = -1;
 
@@ -327,19 +347,53 @@ inline int8_t polyContCheck(const Point<T>& a, Point<T> b, Point<T> c) {
 // _____________________________________________________________________________
 template <typename T>
 inline bool contains(const Polygon<T>& polyC, const Polygon<T>& poly) {
-  for (const auto& p : polyC.getOuter()) {
-    if (!contains(p, poly)) {
+  // check if polygon polyC lies in polygon poly
+
+  for (size_t i = 1; i < polyC.getOuter().size(); i++) {
+    if (!contains(LineSegment<T>(polyC.getOuter()[i - 1], polyC.getOuter()[i]),
+                  poly))
+      return false;
+  }
+
+  // also check the last hop
+  if (!contains(LineSegment<T>(polyC.getOuter().back(), polyC.getOuter().front()),
+                poly))
+    return false;
+
+  return true;
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline bool contains(const LineSegment<T>& ls, const Polygon<T>& p) {
+  // check if linesegment ls lies in polygon poly
+
+  // if one of the endpoints lies outside, abort
+  if (!contains(ls.first, p)) return false;
+  if (!contains(ls.second, p)) return false;
+
+  for (size_t i = 1; i < p.getOuter().size(); i++) {
+    auto seg = LineSegment<T>(p.getOuter()[i - 1], p.getOuter()[i]);
+    if (!(contains(ls.first, seg) || contains(ls.second, seg)) &&
+        intersects(seg, ls)) {
       return false;
     }
   }
+
+  auto seg = LineSegment<T>(p.getOuter().back(), p.getOuter().front());
+  if (!(contains(ls.first, seg) || contains(ls.second, seg)) &&
+      intersects(seg, ls)) {
+    return false;
+  }
+
   return true;
 }
 
 // _____________________________________________________________________________
 template <typename T>
 inline bool contains(const Line<T>& l, const Polygon<T>& poly) {
-  for (const auto& p : l) {
-    if (!contains(p, poly)) {
+  for (size_t i = 1; i < l.size(); i++) {
+    if (!contains(LineSegment<T>(l[i - 1], l[i]), poly)) {
       return false;
     }
   }
@@ -350,9 +404,7 @@ inline bool contains(const Line<T>& l, const Polygon<T>& poly) {
 template <typename T>
 inline bool contains(const Line<T>& l, const Line<T>& other) {
   for (const auto& p : l) {
-    if (!contains(p, other)) {
-      return false;
-    }
+    if (!contains(p, other)) return false;
   }
   return true;
 }
@@ -360,17 +412,13 @@ inline bool contains(const Line<T>& l, const Line<T>& other) {
 // _____________________________________________________________________________
 template <typename T>
 inline bool contains(const Box<T>& b, const Polygon<T>& poly) {
-  return contains(b.getLowerLeft(), poly) &&
-         contains(b.getUpperRight(), poly) &&
-         contains(Point<T>(b.getUpperRight().getX(), b.getLowerLeft().getY()),
-                  poly) &&
-         contains(Point<T>(b.getLowerLeft().getX(), b.getUpperRight().getY()),
-                  poly);
+  return contains(convexHull(b), poly);
 }
 
 // _____________________________________________________________________________
 template <typename T>
 inline bool contains(const Polygon<T>& poly, const Box<T>& b) {
+  // check of poly lies in box
   for (const auto& p : poly.getOuter()) {
     if (!contains(p, b)) return false;
   }
@@ -399,6 +447,8 @@ inline bool contains(const std::vector<GeometryA<T>>& multigeo,
 // _____________________________________________________________________________
 template <typename T>
 inline bool intersects(const LineSegment<T>& ls1, const LineSegment<T>& ls2) {
+  // check if two linesegments intersect
+
   // two line segments intersect of there is a single, well-defined intersection
   // point between them. If more than 1 endpoint is colinear with any line,
   // the segments have infinite intersections. We handle this case as non-
@@ -469,6 +519,39 @@ inline bool intersects(const Box<T>& b1, const Box<T>& b2) {
 
 // _____________________________________________________________________________
 template <typename T>
+inline bool intersects(const Box<T>& b, const Polygon<T>& poly) {
+  return intersects(b, poly);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline bool intersects(const Polygon<T>& poly, const Box<T>& b) {
+  if (intersects(
+          LineSegment<T>(b.getLowerLeft(), Point<T>(b.getUpperRight().getX(),
+                                                    b.getLowerLeft().getY())),
+          poly))
+    return true;
+  if (intersects(
+          LineSegment<T>(b.getLowerLeft(), Point<T>(b.getLowerLeft().getX(),
+                                                    b.getUpperRight().getY())),
+          poly))
+    return true;
+  if (intersects(
+          LineSegment<T>(b.getUpperRight(), Point<T>(b.getLowerLeft().getX(),
+                                                     b.getUpperRight().getY())),
+          poly))
+    return true;
+  if (intersects(
+          LineSegment<T>(b.getUpperRight(), Point<T>(b.getUpperRight().getX(),
+                                                     b.getLowerLeft().getY())),
+          poly))
+    return true;
+
+  return contains(poly, b) || contains(b, poly);
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline bool intersects(const LineSegment<T>& ls, const Box<T>& b) {
   if (intersects(ls, LineSegment<T>(b.getLowerLeft(),
                                     Point<T>(b.getUpperRight().getX(),
@@ -498,6 +581,7 @@ inline bool intersects(const LineSegment<T>& ls, const Polygon<T>& p) {
       return true;
   }
 
+  // also check the last hop
   if (intersects(LineSegment<T>(p.getOuter().back(), p.getOuter().front()), ls))
     return true;
 
@@ -1185,7 +1269,7 @@ inline Polygon<T> convexHull(const RotatedBox<T>& b) {
 // _____________________________________________________________________________
 template <typename T>
 inline size_t convexHullImpl(const MultiPoint<T>& a, size_t p1, size_t p2,
-                             Line<T>* h, uint8_t d) {
+                             Line<T>* h) {
   // quickhull by Barber, Dobkin & Huhdanpaa
   Point<T> pa;
   bool found = false;
@@ -1193,7 +1277,7 @@ inline size_t convexHullImpl(const MultiPoint<T>& a, size_t p1, size_t p2,
   for (const auto& p : a) {
     double tmpDist = distToSegment((*h)[p1], (*h)[p2], p);
     double cp = crossProd(p, LineSegment<T>((*h)[p1], (*h)[p2]));
-    if (((cp > 0 && !d) || (cp < 0 && d)) && tmpDist >= maxDist + EPSILON) {
+    if ((cp > 0) && tmpDist > maxDist) {
       pa = p;
       found = true;
       maxDist = tmpDist;
@@ -1202,9 +1286,9 @@ inline size_t convexHullImpl(const MultiPoint<T>& a, size_t p1, size_t p2,
 
   if (!found) return 0;
 
-  h->insert(h->begin() + p2 + !d, pa);
-  size_t in = 1 + convexHullImpl(a, p1, p2 + !d, h, d);
-  return in + convexHullImpl(a, p2 + in * d + 1 - 2 * d, p2 + in * d, h, d);
+  h->insert(h->begin() + p2, pa);
+  size_t in = 1 + convexHullImpl(a, p1, p2, h);
+  return in + convexHullImpl(a, p2 + in - 1, p2 + in, h);
 }
 
 // _____________________________________________________________________________
@@ -1216,13 +1300,16 @@ inline Polygon<T> convexHull(const MultiPoint<T>& l) {
   Point<T> left(std::numeric_limits<T>::max(), 0);
   Point<T> right(std::numeric_limits<T>::lowest(), 0);
   for (const auto& p : l) {
-    if (p.getX() <= left.getX()) left = p;
-    if (p.getX() >= right.getX()) right = p;
+    if (p.getX() < left.getX()) left = p;
+    if (p.getX() > right.getX()) right = p;
   }
 
   Line<T> hull{left, right};
-  convexHullImpl(l, 0, 1, &hull, 1);
-  convexHullImpl(l, 0, hull.size() - 1, &hull, 0);
+  convexHullImpl(l, 0, 1, &hull);
+  hull.push_back(hull.front());
+  convexHullImpl(l, hull.size() - 2, hull.size() - 1, &hull);
+	hull.pop_back();
+
   return Polygon<T>(hull);
 }
 

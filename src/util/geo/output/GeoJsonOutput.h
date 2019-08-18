@@ -5,9 +5,9 @@
 #ifndef UTIL_GEO_OUTPUT_GEOJSONOUTPUT_H_
 #define UTIL_GEO_OUTPUT_GEOJSONOUTPUT_H_
 
+#include <map>
 #include <ostream>
 #include <string>
-#include <map>
 #include "util/String.h"
 #include "util/geo/Geo.h"
 #include "util/json/Writer.h"
@@ -21,10 +21,19 @@ class GeoJsonOutput {
   GeoJsonOutput(std::ostream& str);
   GeoJsonOutput(std::ostream& str, json::Val attrs);
   ~GeoJsonOutput();
+
   template <typename T>
   void print(const Point<T>& p, json::Val attrs);
+
   template <typename T>
   void print(const Line<T>& l, json::Val attrs);
+
+  template <typename T>
+  void printLatLng(const Point<T>& p, json::Val attrs);
+
+  template <typename T>
+  void printLatLng(const Line<T>& l, json::Val attrs);
+
   void flush();
 
  private:
@@ -32,7 +41,6 @@ class GeoJsonOutput {
 };
 
 #include "util/geo/output/GeoJsonOutput.tpp"
-
 }
 }
 }

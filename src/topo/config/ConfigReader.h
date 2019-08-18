@@ -7,7 +7,7 @@
 
 #include <boost/program_options.hpp>
 #include <vector>
-#include "topo/config/GraphBuilderConfig.h"
+#include "topo/config/TopoConfig.h"
 
 namespace topo {
 namespace config {
@@ -15,7 +15,7 @@ namespace config {
 class ConfigReader {
  public:
   ConfigReader();
-  void read(Config* targetConfig, int argc, char** argv) const;
+  void read(TopoConfig* targetConfig, int argc, char** argv) const;
 };
 }
 }

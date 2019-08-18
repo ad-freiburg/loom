@@ -10,19 +10,16 @@
 namespace topo {
 namespace config {
 
-struct Config {
+struct TopoConfig {
   std::string projectionString;
   std::string inputFeedPath;
 
-  bool ignoreGtfsDistances;
   bool ignoreDirections;
 
   size_t stationAggrLevel;
 
   double maxAggrDistance;
   double stationAggrDistance;
-
-  uint8_t useMots;
 };
 
 }  // namespace config

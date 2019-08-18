@@ -48,7 +48,6 @@ class HttpErr : public std::exception {
 
  private:
   std::string _msg;
-  uint16_t _code;
 };
 
 /*
