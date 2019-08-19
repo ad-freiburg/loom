@@ -39,6 +39,15 @@ class TransitGraph
   const util::geo::Box<double>& getBBox() const;
   void topologizeIsects();
 
+  static TransitNode* sharedNode(const TransitEdge* a, const TransitEdge* b);
+  static std::vector<RouteOcc> getCtdRoutesIn(const Route* r,
+                                              const TransitNode* dir,
+                                              const TransitEdge* fromEdge,
+                                              const TransitEdge* toEdge);
+
+  static std::vector<RouteOcc> getCtdRoutesIn(const TransitEdge* fromEdge,
+                                       const TransitEdge* toEdge);
+
  private:
   util::geo::Box<double> _bbox;
 

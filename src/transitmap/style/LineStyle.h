@@ -5,15 +5,15 @@
 #ifndef TRANSITMAP_STYLE_LINESTYLE_H_
 #define TRANSITMAP_STYLE_LINESTYLE_H_
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace transitmapper {
 namespace style {
 
 class LineStyle {
  public:
-  LineStyle() {};
+  LineStyle(){};
 
   const std::vector<double>& getDashArray() const;
   std::string getDashArrayString() const;
@@ -21,14 +21,17 @@ class LineStyle {
   void setDashArray(const std::string& doubleArrayString);
 
   void setCss(const std::string& css);
-  const std::string& getCss();
+  const std::string& getCss() const;
+
+  bool operator==(const LineStyle& other) const {
+    return _dashArray == other.getDashArray() && _css == other.getCss();
+  }
 
  private:
   std::vector<double> _dashArray;
   std::string _css;
 };
-
-}}
-
+}
+}
 
 #endif  // TRANSITMAP_STYLE_LINESTYLE_H_

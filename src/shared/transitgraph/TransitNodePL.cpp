@@ -23,6 +23,21 @@ util::json::Dict TransitNodePL::getAttrs() const {
     obj["station_id"] = _is.begin()->id;
     obj["station_label"] = _is.begin()->name;
   }
+
+  auto arr = util::json::Array();
+
+  for (const auto& ro : _connEx) {
+    for (const auto& exFr : ro.second) {
+      for (const auto* exTo : exFr.second) {
+        obj["route"] = util::toString(ro.first->getId());
+        obj["edge1_node"] = util::toString(exFr.first);
+        obj["edge2_node"] = util::toString(exTo);
+        arr.push_back(obj);
+      }
+    }
+  }
+
+  if (arr.size()) obj["excluded_line_conns"] = arr;
   return obj;
 }
 
@@ -31,3 +46,23 @@ void TransitNodePL::addStop(StationInfo i) { _is.push_back(i); }
 
 // _____________________________________________________________________________
 const std::vector<StationInfo>& TransitNodePL::getStops() const { return _is; }
+
+// _____________________________________________________________________________
+void TransitNodePL::addConnExc(const Route* r, const TransitEdge* edgeA,
+                               const TransitEdge* edgeB) {
+  _connEx[r][edgeA].insert(edgeB);
+  // index the other direction also, will lead to faster lookups later on
+  _connEx[r][edgeB].insert(edgeA);
+}
+
+// _____________________________________________________________________________
+bool TransitNodePL::connOccurs(const Route* r, const TransitEdge* edgeA,
+                               const TransitEdge* edgeB) const {
+  const auto& i = _connEx.find(r);
+  if (_connEx.find(r) == _connEx.end()) return true;
+
+  const auto& ii = i->second.find(edgeA);
+  if (ii == i->second.end()) return true;
+
+  return ii->second.find(edgeB) == ii->second.end();
+}

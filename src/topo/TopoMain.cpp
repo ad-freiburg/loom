@@ -34,22 +34,17 @@ int main(int argc, char** argv) {
   shared::transitgraph::TransitGraph tg;
   tg.readFromJson(&(std::cin));
 
-  // TODO: read graph
+  Builder b(&cfg);
 
-  // Builder b(&cfg);
+  // // // first pass, with strict distance values (clearing things up first)
+  b.createTopologicalNodes(&tg, false);
+  b.removeEdgeArtifacts(&tg);
 
-  // b.simplify(&g);
+  while (b.createTopologicalNodes(&tg, true));
 
-  // // first pass, with strict distance values (clearing things up first)
-  // b.createTopologicalNodes(&g, false);
-  // b.removeEdgeArtifacts(&g);
-
-  // while (b.createTopologicalNodes(&g, true)) {
-  // }
-
-  // b.removeEdgeArtifacts(&g);
-  // b.removeNodeArtifacts(&g);
-  // b.averageNodePositions(&g);
+  b.removeEdgeArtifacts(&tg);
+  b.removeNodeArtifacts(&tg);
+  b.averageNodePositions(&tg);
 
   util::geo::output::GeoGraphJsonOutput out;
   out.print(tg, std::cout);

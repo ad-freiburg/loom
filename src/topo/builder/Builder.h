@@ -61,6 +61,7 @@ class Builder {
   projPJ _graphProj;
 
   void edgeRpl(TransitNode* n, const TransitEdge* oldE, const TransitEdge* newE) const;
+  void routeDirRepl(TransitNode* oldN, TransitNode* newN, TransitEdge* e) const;
 
   bool lineDominatesSharedSeg(const ShrdSegWrap& w, TransitEdge* e) const;
 
@@ -73,6 +74,9 @@ class Builder {
   bool lineCrossesAtNode(const TransitNode* a, const TransitEdge* e, const TransitEdge* f) const;
 
   bool routeEq(const TransitEdge* a, const TransitEdge* b) const;
+
+  bool contractNodes(TransitGraph* g);
+  bool contractEdges(TransitGraph* g);
 
   DBox getGraphBoundingBox(const TransitGraph* g) const;
   EdgeGrid getGeoIndex(const TransitGraph* g) const;

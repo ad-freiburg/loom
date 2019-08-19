@@ -22,15 +22,10 @@ std::string LineStyle::getDashArrayString() const {
 }
 
 // ____________________________________________________________________________
-void LineStyle::setCss(const std::string& css) {
-  _css = css;
-}
+void LineStyle::setCss(const std::string& css) { _css = css; }
 
 // ____________________________________________________________________________
-const std::string& LineStyle::getCss() {
-  return _css;
-}
-
+const std::string& LineStyle::getCss() const { return _css; }
 
 // ____________________________________________________________________________
 void LineStyle::setDashArray(const std::vector<double>& arr) {
@@ -41,7 +36,5 @@ void LineStyle::setDashArray(const std::vector<double>& arr) {
 void LineStyle::setDashArray(const std::string& doubleArrayString) {
   _dashArray.clear();
   std::stringstream ss(doubleArrayString);
-  for (double a; ss >> a;) {
-    _dashArray.push_back(a);
-  }
+  for (double a; ss >> a;) _dashArray.push_back(a);
 }

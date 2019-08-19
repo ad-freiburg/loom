@@ -175,7 +175,6 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool isDogBone(OptEdge* e) const;
   OptNode* isPartialDogBone(OptEdge* e) const;
 
-
   static void upFirstLastEdg(OptEdge*);
 
   static OptEdgePL getView(OptEdge* parent, OptEdge* leg, size_t offset);

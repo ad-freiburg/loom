@@ -21,6 +21,9 @@ namespace transitgraph {
 
 typedef util::graph::Node<TransitNodePL, TransitEdgePL> TransitNode;
 typedef util::graph::Edge<TransitNodePL, TransitEdgePL> TransitEdge;
+typedef std::map<const Route*,
+                 std::map<const TransitEdge*, std::set<const TransitEdge*>>>
+    ConnEx;
 
 struct ConnException {
   ConnException(const TransitEdge* from, const TransitEdge* to)
@@ -41,9 +44,20 @@ class TransitNodePL : util::geograph::GeoNodePL<double> {
   void addStop(StationInfo i);
   const std::vector<StationInfo>& getStops() const;
 
+  void addConnExc(const Route* r, const TransitEdge* edgeA,
+                  const TransitEdge* edgeB);
+
+  bool connOccurs(const Route* r, const TransitEdge* edgeA,
+                  const TransitEdge* edgeB) const;
+
+  ConnEx& getConnExc() { return _connEx; }
+  const ConnEx& getConnExc() const { return _connEx; }
+
  private:
   Point<double> _pos;
   std::vector<StationInfo> _is;
+
+  ConnEx _connEx;
 };
 }
 }

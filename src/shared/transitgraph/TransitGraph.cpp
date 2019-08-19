@@ -373,3 +373,49 @@ const Route* TransitGraph::getRoute(const std::string& id) const {
   if (_routes.find(id) != _routes.end()) return _routes.find(id)->second;
   return 0;
 }
+
+// _____________________________________________________________________________
+TransitNode* TransitGraph::sharedNode(const TransitEdge* a,
+                                      const TransitEdge* b) {
+  TransitNode* r = 0;
+  if (a->getFrom() == b->getFrom() || a->getFrom() == b->getTo())
+    r = a->getFrom();
+  if (a->getTo() == b->getFrom() || a->getTo() == b->getTo()) r = a->getTo();
+  return r;
+}
+
+// _____________________________________________________________________________
+std::vector<RouteOcc> TransitGraph::getCtdRoutesIn(const Route* r,
+                                                   const TransitNode* dir,
+                                                   const TransitEdge* fromEdge,
+                                                   const TransitEdge* toEdge) {
+  std::vector<RouteOcc> ret;
+  const auto* n = sharedNode(fromEdge, toEdge);
+  if (!n || n->getDeg() == 1) return ret;
+
+  for (const auto& to : toEdge->pl().getRoutes()) {
+    if (to.route == r) {
+      if (to.direction == 0 || dir == 0 || (to.direction == n && dir != n) ||
+          (to.direction != n && dir == n)) {
+        if (n->pl().connOccurs(r, fromEdge, toEdge)) ret.push_back(to);
+      }
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::vector<RouteOcc> TransitGraph::getCtdRoutesIn(const TransitEdge* fromEdge,
+                                            const TransitEdge* toEdge) {
+  std::vector<RouteOcc> ret;
+  const auto* n = sharedNode(fromEdge, toEdge);
+  if (!n) return ret;
+
+  for (const auto& to : fromEdge->pl().getRoutes()) {
+    auto r = getCtdRoutesIn(to.route, to.direction, fromEdge, toEdge);
+    ret.insert(ret.end(), r.begin(), r.end());
+  }
+
+  return ret;
+}

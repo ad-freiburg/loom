@@ -76,4 +76,9 @@ util::json::Dict TransitEdgePL::getAttrs() const {
 }
 
 // _____________________________________________________________________________
+bool TransitEdgePL::hasRoute(const Route* r) const {
+  return _routes.count(RouteOcc(r, 0)) > 0;
+}
+
+// _____________________________________________________________________________
 int64_t TransitEdgePL::getGeneration() const { return _generation; }

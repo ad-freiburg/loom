@@ -88,29 +88,6 @@ const {
 }
 
 // _____________________________________________________________________________
-void NodePL::replaceEdgeInConnections(const Edge* oldE, const Edge* newE) {
-  for (auto it = _occConns.begin(); it != _occConns.end(); it++) {
-    for (auto itt = it->second.begin(); itt != it->second.end(); itt++) {
-      if (itt->from == oldE) itt->from = newE;
-      if (itt->to == oldE) itt->to = newE;
-    }
-  }
-}
-
-// _____________________________________________________________________________
-void NodePL::sewConnectionsTogether(Edge* a, Edge* b) {
-  for (const auto& ega : *a->pl().getEdgeTripGeoms()) {
-    for (const auto& to : ega.getTripsUnordered()) {
-      for (const auto& egb : *b->pl().getEdgeTripGeoms()) {
-        if (egb.containsRoute(to.route)) {
-          connOccurs(to.route, a, b);
-        }
-      }
-    }
-  }
-}
-
-// _____________________________________________________________________________
 std::vector<const Edge*> NodePL::getConnectingEdgesFor(const gtfs::Route* to, Edge* a)
 const {
   std::vector<const Edge*> ret;

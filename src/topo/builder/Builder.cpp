@@ -24,8 +24,7 @@ const static char* WGS84_PROJ =
     "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
 // _____________________________________________________________________________
-Builder::Builder(const config::TopoConfig* cfg) : _cfg(cfg) {
-}
+Builder::Builder(const config::TopoConfig* cfg) : _cfg(cfg) {}
 
 // _____________________________________________________________________________
 void Builder::simplify(TransitGraph* g) {
@@ -50,8 +49,6 @@ ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g, bool final,
       grid->getNeighbors(e, fmax(5, dmin * 10), &neighbors);
 
       for (auto toTest : neighbors) {
-        // TODO: only check edges with a SINGLE geometry atm, see also check
-        // above
         if (_indEdgesPairs.find(
                 std::pair<const TransitEdge*, const TransitEdge*>(e, toTest)) !=
                 _indEdgesPairs.end() ||
@@ -213,7 +210,39 @@ bool Builder::lineCrossesAtNode(const TransitNode* a, const TransitEdge* ea,
 
 // _____________________________________________________________________________
 bool Builder::routeEq(const TransitEdge* a, const TransitEdge* b) const {
-  return false;
+  // shortcut
+  if (a->pl().getRoutes().size() != a->pl().getRoutes().size()) return false;
+
+  const auto shrNd = TransitGraph::sharedNode(a, b);
+
+  // TODO: remove quadratic code
+  for (const auto& ra : a->pl().getRoutes()) {
+    bool found = false;
+    for (const auto& rb : b->pl().getRoutes()) {
+      if (ra.route == rb.route && ra.style == rb.style) {
+        // if the route does not continue over the shared node, the routes
+        // are not equivalent!
+        if (!shrNd->pl().connOccurs(ra.route, a, b)) return false;
+
+        if (ra.direction == 0 && rb.direction == 0) {
+          found = true;
+          break;
+        }
+        if (ra.direction == shrNd && rb.direction != 0 &&
+            rb.direction != shrNd) {
+          found = true;
+          break;
+        }
+        if (ra.direction != shrNd && ra.direction != 0 &&
+            rb.direction == shrNd) {
+          found = true;
+          break;
+        }
+      }
+    }
+    if (!found) return false;
+  }
+  return true;
 }
 
 // _____________________________________________________________________________
@@ -451,7 +480,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     }
 
     if (fbE) {
-      fbE->pl()=fcEdgeGeom;
+      fbE->pl() = fcEdgeGeom;
       // fbE->pl().simplify();
       grid.add(*fbE->pl().getGeom(), fbE);
       // b->pl().sewConnectionsTogether(abE, fbE);
@@ -470,14 +499,14 @@ void Builder::averageNodePositions(TransitGraph* g) {
     size_t c = 0;
 
     for (auto e : n->getAdjList()) {
-        if (e->getTo() != n) {
-          x += e->pl().getPolyline().front().getX();
-          y += e->pl().getPolyline().front().getY();
-        } else {
-          x += e->pl().getPolyline().back().getX();
-          y += e->pl().getPolyline().back().getY();
-        }
-        c++;
+      if (e->getTo() != n) {
+        x += e->pl().getPolyline().front().getX();
+        y += e->pl().getPolyline().front().getY();
+      } else {
+        x += e->pl().getPolyline().back().getX();
+        y += e->pl().getPolyline().back().getY();
+      }
+      c++;
     }
 
     if (c > 0)
@@ -485,107 +514,136 @@ void Builder::averageNodePositions(TransitGraph* g) {
           DPoint(x / static_cast<double>(c), y / static_cast<double>(c)));
   }
 }
+
 // _____________________________________________________________________________
 void Builder::removeEdgeArtifacts(TransitGraph* g) {
-  double MIN_SEG_LENGTH = 20;
-
-restart:
-  for (auto n : *g->getNds()) {
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-        if (e->pl().getPolyline().getLength() < MIN_SEG_LENGTH) {
-          auto from = e->getFrom();
-          auto to = e->getTo();
-          if (from->pl().getStops().size() == 0 ||
-              to->pl().getStops().size() == 0) {
-            combineNodes(from, to, g);
-            // OMG really
-            goto restart;
-          }
-        }
-    }
-  }
+  while(contractNodes(g));
 }
 
 // _____________________________________________________________________________
 void Builder::removeNodeArtifacts(TransitGraph* g) {
-restart:
+  while(contractEdges(g));
+}
+
+// _____________________________________________________________________________
+bool Builder::contractNodes(TransitGraph* g) {
+  double MIN_SEG_LENGTH = 20;
+
+  for (auto n : *g->getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      if (e->pl().getPolyline().getLength() < MIN_SEG_LENGTH) {
+        auto from = e->getFrom();
+        auto to = e->getTo();
+        if (from->pl().getStops().size() == 0 ||
+            to->pl().getStops().size() == 0) {
+          combineNodes(from, to, g);
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+// _____________________________________________________________________________
+bool Builder::contractEdges(TransitGraph* g) {
   for (auto n : *g->getNds()) {
     std::vector<TransitEdge*> edges;
     edges.insert(edges.end(), n->getAdjList().begin(), n->getAdjList().end());
     if (edges.size() == 2 && n->pl().getStops().size() == 0) {
       if (routeEq(edges[0], edges[1])) {
         combineEdges(edges[0], edges[1], n, g);
-        // TODO: OMG really
-        goto restart;
+        return true;
       }
     }
   }
+  return false;
 }
 
 // _____________________________________________________________________________
-bool Builder::combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n, TransitGraph* g) {
+bool Builder::combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n,
+                           TransitGraph* g) {
   assert((a->getTo() == n || a->getFrom() == n) &&
          (b->getTo() == n || b->getFrom() == n));
 
-  auto p = a->pl().getPolyline();
+  TransitEdge* newEdge = 0;
+  util::geo::PolyLine<double> newPl;
 
-  if (a->getTo() == n) {
-    if (b->getTo() == n) {
-      for (size_t i = b->pl().getPolyline().getLine().size(); i > 0; i--) {
-        p << b->pl().getPolyline().getLine()[i - 1];
-      }
-    } else {
-      for (size_t i = 0; i < b->pl().getPolyline().getLine().size(); i++) {
-        p << b->pl().getPolyline().getLine()[i];
-      }
-    }
-  } else {
-    if (b->getTo() == n) {
-      for (size_t i = b->pl().getPolyline().getLine().size(); i > 0; i--) {
-        p >> b->pl().getPolyline().getLine()[i - 1];
-      }
-    } else {
-      for (size_t i = 0; i < b->pl().getPolyline().getLine().size(); i++) {
-        p >> b->pl().getPolyline().getLine()[i];
-      }
-    }
+  // TODO: there is some copying going on below, which is not always necessary.
+  // insert a non-const getLine to polyline and re-use existing polylines where
+  // possible
+
+  if (a->getTo() == n && b->getTo() != n) {
+    //   a       b
+    // ----> n ---->
+    auto lineA = a->pl().getPolyline().getLine();
+    const auto& lineB = b->pl().getPolyline().getLine();
+    lineA.insert(lineA.end(), lineB.begin(), lineB.end());
+    newPl = util::geo::PolyLine<double>(lineA);
+
+    newEdge = g->addEdg(a->getFrom(), b->getTo(), a->pl());
+    routeDirRepl(n, newEdge->getTo(), newEdge);
+
+    edgeRpl(newEdge->getFrom(), a, newEdge);
+    edgeRpl(newEdge->getTo(), b, newEdge);
   }
 
-  p.smoothenOutliers(50);
-  p.applyChaikinSmooth(3);
-  p.simplify(3);
+  if (a->getTo() != n && b->getTo() == n) {
+    //   a       b
+    // <---- n <----
+    auto lineB = b->pl().getPolyline().getLine();
+    const auto& lineA = a->pl().getPolyline().getLine();
+    lineB.insert(lineB.end(), lineA.begin(), lineA.end());
+    newPl = util::geo::PolyLine<double>(lineB);
 
-  auto newFrom = a->getTo() == n ? a->getFrom() : a->getTo();
-  auto newTo = b->getFrom() == n ? b->getTo() : b->getFrom();
+    newEdge = g->addEdg(b->getFrom(), a->getTo(), b->pl());
+    routeDirRepl(n, newEdge->getTo(), newEdge);
 
-  // TODO!!!!!!!!!
-  // if (a->getTo() == n) etga.setGeomDir(newTo);
-
-  for (auto& ro : a->pl().getRoutes()) {
-    if (ro.direction == n) {
-      shared::transitgraph::RouteOcc newRo = ro;
-      newRo.direction = newTo;
-      // add new
-      a->pl().getRoutes().insert(newRo);
-
-      // delete old
-      a->pl().getRoutes().erase(ro);
-    }
+    edgeRpl(newEdge->getFrom(), b, newEdge);
+    edgeRpl(newEdge->getTo(), a, newEdge);
   }
 
-  a->pl().setPolyline(p);
+  if (a->getFrom() == n && b->getFrom() == n) {
+    //   a       b
+    // <---- n ---->
+    auto lineA = a->pl().getPolyline().getLine();
+    std::reverse(lineA.begin(), lineA.end());
+    const auto& lineB = b->pl().getPolyline().getLine();
+    lineA.insert(lineA.end(), lineB.begin(), lineB.end());
+    newPl = util::geo::PolyLine<double>(lineA);
 
-  assert(newFrom != newTo);
+    newEdge = g->addEdg(a->getTo(), b->getTo(), b->pl());
+    routeDirRepl(n, newEdge->getFrom(), newEdge);
 
-  auto e = g->addEdg(newFrom, newTo, a->pl());
+    edgeRpl(newEdge->getFrom(), a, newEdge);
+    edgeRpl(newEdge->getTo(), b, newEdge);
+  }
+
+  if (a->getTo() == n && b->getTo() == n) {
+    //   a       b
+    // ----> n <----
+    auto lineA = a->pl().getPolyline().getLine();
+    const auto& lineB = b->pl().getPolyline().getLine();
+    lineA.insert(lineA.end(), lineB.rbegin(), lineB.rend());
+    newPl = util::geo::PolyLine<double>(lineA);
+
+    newEdge = g->addEdg(a->getFrom(), b->getFrom(), a->pl());
+    routeDirRepl(n, newEdge->getTo(), newEdge);
+
+    edgeRpl(newEdge->getFrom(), a, newEdge);
+    edgeRpl(newEdge->getTo(), b, newEdge);
+  }
+
+  // set new polyline and smoothen a bit
+  newPl.smoothenOutliers(50);
+  newPl.applyChaikinSmooth(3);
+  newPl.simplify(3);
+  newEdge->pl().setPolyline(newPl);
 
   g->delEdg(a->getFrom(), a->getTo());
   g->delEdg(b->getFrom(), b->getTo());
   g->delNd(n);
-
-  edgeRpl(newFrom, a, e);
-  edgeRpl(newTo, b, e);
 
   return true;
 }
@@ -594,95 +652,105 @@ bool Builder::combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n, Trans
 bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
   assert(a->pl().getStops().size() == 0 || b->pl().getStops().size() == 0);
 
-  // if (a->pl().getStops().size() != 0) {
-    // Node* c = a;
-    // a = b;
-    // b = c;
-  // }
+  if (a->pl().getStops().size() != 0) {
+    TransitNode* c = a;
+    a = b;
+    b = c;
+  }
 
-  // Edge* connecting = g->getEdg(a, b);
+  TransitEdge* connecting = g->getEdg(a, b);
+  assert(connecting);
 
-  // std::map<const Edge*, const Edge*> oldNew;
+  // we will delete a and the connecting edge {a, b}.
+  // b will be the contracted node
 
-  // for (Edge* e : a->getAdjList()) {
-    // if (e->getFrom() != a) continue;
-    // if (connecting == e) continue;
-    // assert(b != e->getTo());
-    // Edge* newE = g->addEdg(b, e->getTo(), EdgePL());
-    // newE->pl().setEdge(newE);
-    // b->addEdge(newE);
-    // e->getTo()->removeEdge(e);
+  // go through all route exceptions in a
+  for (const auto& ro : a->pl().getConnExc()) {
+    for (const auto& exFr : ro.second) {
+      for (const auto& exTo : exFr.second) {
+        if (exFr.first == connecting) {
+          for (auto e : b->getAdjList()) {
+            if (e == connecting) continue;
+            if (e == exTo) continue;
+            if (!e->pl().hasRoute(ro.first)) continue;
+            b->pl().addConnExc(ro.first, e, exTo);
+          }
+        } else if (exTo == connecting) {
+          for (auto e : b->getAdjList()) {
+            if (e == connecting) continue;
+            if (e == exFr.first) continue;
+            if (!e->pl().hasRoute(ro.first)) continue;
+            b->pl().addConnExc(ro.first, e, exFr.first);
+          }
+        } else {
+          b->pl().addConnExc(ro.first, exFr.first, exTo);
+        }
+      }
+    }
+  }
 
-    // oldNew[e] = newE;
+  // go through all route exceptions in b
+  for (const auto& ro : b->pl().getConnExc()) {
+    for (const auto& exFr : ro.second) {
+      for (const auto& exTo : exFr.second) {
+        if (exFr.first == connecting) {
+          for (auto e : a->getAdjList()) {
+            if (e == connecting) continue;
+            if (e == exTo) continue;
+            if (!e->pl().hasRoute(ro.first)) continue;
+            b->pl().addConnExc(ro.first, e, exTo);
+          }
+        } else if (exTo == connecting) {
+          for (auto e : a->getAdjList()) {
+            if (e == connecting) continue;
+            if (e == exFr.first) continue;
+            if (!e->pl().hasRoute(ro.first)) continue;
+            b->pl().addConnExc(ro.first, e, exFr.first);
+          }
+        } else {
+          b->pl().addConnExc(ro.first, exFr.first, exTo);
+        }
+      }
+    }
+  }
 
-    // edgeRpl(e->getTo(), e, newE);
+  for (auto* oldE : a->getAdjList()) {
+    if (oldE->getFrom() != a) continue;
+    if (connecting == oldE) continue;
 
-    // for (auto etg : *e->pl().getEdgeTripGeoms()) {
-      // EdgeTripGeom etgNew(etg.getGeom(),
-                          // etg.getGeomDir() == a ? b : etg.getGeomDir());
-      // for (auto to : *etg.getTripsUnordered()) {
-        // if (a->pl().isConnOccuring(to.route, e, connecting)) {
-          // for (const auto edge :
-               // b->pl().getConnectingEdgesFor(to.route, connecting)) {
-            // b->pl().connOccurs(to.route, newE, edge);
-          // }
-        // }
+    assert(b != oldE->getTo());
 
-        // for (auto trip : to.trips) {
-          // etgNew.addTrip(trip, to.direction == a ? b : to.direction);
-        // }
-      // }
+    // add a new edge going from b to the non-a node
+    auto* newE = g->addEdg(b, oldE->getTo(), oldE->pl());
 
-      // newE->pl().addEdgeTripGeom(etgNew);
-      // newE->pl().simplify();
-    // }
-  // }
+    // update route dirs
+    routeDirRepl(a, b, newE);
 
-  // for (Edge* e : a->getAdjListIn()) {
-    // if (e->getTo() != a) continue;
-    // if (connecting == e) continue;
-    // assert(b != e->getFrom());
-    // Edge* newE = g->addEdg(e->getFrom(), b, EdgePL());
-    // newE->pl().setEdge(newE);
-    // b->addEdge(newE);
-    // e->getFrom()->removeEdge(e);
+    // replace each occurance of oldE in the non-a node with the newE
+    edgeRpl(newE->getTo(), oldE, newE);
+    edgeRpl(newE->getFrom(), oldE, newE);
+  }
 
-    // oldNew[e] = newE;
+  for (auto* oldE : a->getAdjList()) {
+    if (oldE->getTo() != a) continue;
+    if (connecting == oldE) continue;
 
-    // edgeRpl(e->getFrom(), e, newE);
+    assert(b != oldE->getFrom());
 
-    // for (auto etg : *e->pl().getEdgeTripGeoms()) {
-      // EdgeTripGeom etgNew(etg.getGeom(),
-                          // etg.getGeomDir() == a ? b : etg.getGeomDir());
-      // for (auto to : *etg.getTripsUnordered()) {
-        // if (a->pl().isConnOccuring(to.route, e, connecting)) {
-          // for (const auto edge :
-               // b->pl().getConnectingEdgesFor(to.route, connecting)) {
-            // b->pl().connOccurs(to.route, newE, edge);
-          // }
-        // }
-        // for (auto trip : to.trips) {
-          // etgNew.addTrip(trip, to.direction == a ? b : to.direction);
-        // }
-      // }
+    auto* newE = g->addEdg(oldE->getFrom(), b, oldE->pl());
 
-      // newE->pl().addEdgeTripGeom(etgNew);
-      // newE->pl().simplify();
-    // }
-  // }
+    // update route dirs
+    routeDirRepl(a, b, newE);
 
-  // for (const auto& occs : a->pl().getOccuringConnections()) {
-    // for (const auto& occ : occs.second) {
-      // if (occ.from != connecting && occ.to != connecting) {
-        // b->pl().connOccurs(occs.first, oldNew[occ.from], oldNew[occ.to]);
-      // }
-    // }
-  // }
+    // replace each occurance of oldE in the non-a node with the newE
+    edgeRpl(newE->getTo(), oldE, newE);
+    edgeRpl(newE->getFrom(), oldE, newE);
+  }
 
-  // g->delEdg(a, b);
-  // g->delNd(a);
+  g->delEdg(a, b);
+  g->delNd(a);
 
-  // return true;
+  return true;
 }
 
 // _____________________________________________________________________________
@@ -690,18 +758,18 @@ PolyLine<double> Builder::getAveragedFromSharedSeg(const ShrdSegWrap& w) const {
   const auto& geomA = w.e;
   const auto& geomB = w.f;
 
-  PolyLine<double> a = geomA->pl().getPolyline().getSegment(w.s.first.first.totalPos,
-                                                  w.s.second.first.totalPos);
+  PolyLine<double> a = geomA->pl().getPolyline().getSegment(
+      w.s.first.first.totalPos, w.s.second.first.totalPos);
 
   PolyLine<double> b;
 
   if (w.s.first.second.totalPos > w.s.second.second.totalPos) {
     b = geomB->pl().getPolyline().getSegment(w.s.second.second.totalPos,
-                                   w.s.first.second.totalPos);
+                                             w.s.first.second.totalPos);
     b.reverse();
   } else {
     b = geomB->pl().getPolyline().getSegment(w.s.first.second.totalPos,
-                                   w.s.second.second.totalPos);
+                                             w.s.second.second.totalPos);
   }
 
   bool dominationHeuristic = false;
@@ -730,7 +798,8 @@ PolyLine<double> Builder::getAveragedFromSharedSeg(const ShrdSegWrap& w) const {
 }
 
 // _____________________________________________________________________________
-bool Builder::lineDominatesSharedSeg(const ShrdSegWrap& w, TransitEdge* e) const {
+bool Builder::lineDominatesSharedSeg(const ShrdSegWrap& w,
+                                     TransitEdge* e) const {
   if (e != w.e && e != w.f) return false;
 
   double LOOKAHEAD = 50, DELTA = .5;
@@ -740,19 +809,37 @@ bool Builder::lineDominatesSharedSeg(const ShrdSegWrap& w, TransitEdge* e) const
   if (e == w.e) {
     const auto& geom = w.e;
     double lookAhead = LOOKAHEAD / geom->pl().getPolyline().getLength();
-    a = geom->pl().getPolyline().getPointAt(w.s.first.first.totalPos - lookAhead).p;
+    a = geom->pl()
+            .getPolyline()
+            .getPointAt(w.s.first.first.totalPos - lookAhead)
+            .p;
     b = geom->pl().getPolyline().getPointAt(w.s.first.first.totalPos).p;
     c = geom->pl().getPolyline().getPointAt(w.s.second.first.totalPos).p;
-    d = geom->pl().getPolyline().getPointAt(w.s.second.first.totalPos + lookAhead).p;
+    d = geom->pl()
+            .getPolyline()
+            .getPointAt(w.s.second.first.totalPos + lookAhead)
+            .p;
   } else if (e == w.f) {
     const auto& geom = w.f;
     double lookAhead = LOOKAHEAD / geom->pl().getPolyline().getLength();
     if (w.s.first.second.totalPos > w.s.second.second.totalPos) {
-      a = geom->pl().getPolyline().getPointAt(w.s.first.second.totalPos + lookAhead).p;
-      d = geom->pl().getPolyline().getPointAt(w.s.second.second.totalPos - lookAhead).p;
+      a = geom->pl()
+              .getPolyline()
+              .getPointAt(w.s.first.second.totalPos + lookAhead)
+              .p;
+      d = geom->pl()
+              .getPolyline()
+              .getPointAt(w.s.second.second.totalPos - lookAhead)
+              .p;
     } else {
-      a = geom->pl().getPolyline().getPointAt(w.s.first.second.totalPos - lookAhead).p;
-      d = geom->pl().getPolyline().getPointAt(w.s.second.second.totalPos + lookAhead).p;
+      a = geom->pl()
+              .getPolyline()
+              .getPointAt(w.s.first.second.totalPos - lookAhead)
+              .p;
+      d = geom->pl()
+              .getPolyline()
+              .getPointAt(w.s.second.second.totalPos + lookAhead)
+              .p;
     }
     b = geom->pl().getPolyline().getPointAt(w.s.first.second.totalPos).p;
     c = geom->pl().getPolyline().getPointAt(w.s.second.second.totalPos).p;
@@ -796,5 +883,42 @@ DBox Builder::getGraphBoundingBox(const TransitGraph* g) const {
 // _____________________________________________________________________________
 void Builder::edgeRpl(TransitNode* n, const TransitEdge* oldE,
                       const TransitEdge* newE) const {
-  std::cerr << "Replacing in node " << n << " edges " << oldE << "to " << newE << std::endl;
+  // replace in from
+  for (auto& r : n->pl().getConnExc()) {
+    for (auto& exFr : r.second) {
+      if (exFr.first == oldE) {
+        std::swap(r.second[newE], exFr.second);
+        r.second.erase(exFr.first);
+      }
+    }
+  }
+
+  // replace in to
+  for (auto& r : n->pl().getConnExc()) {
+    for (auto& exFr : r.second) {
+      for (auto& exTo : exFr.second) {
+        if (exTo == oldE) {
+          exFr.second.erase(exTo);
+          exFr.second.insert(newE);
+        }
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void Builder::routeDirRepl(TransitNode* oldN, TransitNode* newN,
+                           TransitEdge* e) const {
+  for (auto& ro : e->pl().getRoutes()) {
+    if (ro.direction == oldN) {
+      shared::transitgraph::RouteOcc newRo = ro;
+      newRo.direction = newN;
+
+      // delete old
+      e->pl().getRoutes().erase(ro);
+
+      // add new
+      e->pl().getRoutes().insert(newRo);
+    }
+  }
 }

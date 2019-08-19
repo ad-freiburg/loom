@@ -42,10 +42,6 @@ class NodePL : util::geograph::GeoNodePL<double> {
 
   void connOccurs(const gtfs::Route*, const Edge* from, const Edge* to);
 
-  void replaceEdgeInConnections(const Edge* oldE, const Edge* newE);
-
-  void sewConnectionsTogether(Edge* a, Edge* b);
-
   std::vector<const Edge*> getConnectingEdgesFor(const gtfs::Route* to, Edge* a) const;
 
   const std::map<const gtfs::Route*, std::vector<OccuringConnection> >& getOccuringConnections() const;

@@ -29,7 +29,7 @@ struct RouteOcc {
   RouteOcc(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir)
       : route(r), direction(dir) {}
   RouteOcc(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir,
-           const transitmapper::style::LineStyle& ls)
+           const util::Nullable<transitmapper::style::LineStyle>& ls)
       : route(r), direction(dir), style(ls) {}
   const Route* route;
   const Node<TransitNodePL, TransitEdgePL>*
@@ -53,6 +53,8 @@ class TransitEdgePL : util::geograph::GeoEdgePL<double> {
 
   const std::set<RouteOcc>& getRoutes() const;
   std::set<RouteOcc>& getRoutes();
+
+  bool hasRoute(const Route* r) const;
 
   const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;
