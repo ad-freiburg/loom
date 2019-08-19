@@ -57,6 +57,128 @@ class approx {
 int main(int argc, char** argv) {
   UNUSED(argc);
   UNUSED(argv);
+  // ___________________________________________________________________________
+  {
+    //     1
+    // a ------> b
+    // c ------> d
+    //     2
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 10.0}});
+    auto b = tg.addNd({{50.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{50.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 10.0}, {50.0, 10.0}}});
+    auto cd = tg.addEdg(c, d, {{{0.0, 0.0}, {50.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+    builder.removeEdgeArtifacts(&tg);
+
+    //     1, 2
+    // a ------> b
+
+    assert(tg.getNds()->size() == 2);
+    assert((*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes().size() == 2);
+
+    for (auto r : (*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes()) {
+      if (r.route == &l1) assert(r.direction == 0);
+      if (r.route == &l2) assert(r.direction == 0);
+    }
+  }
+
+  // ___________________________________________________________________________
+  {
+    //     1
+    // a ------> b
+    // c <------ d
+    //     2
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 10.0}});
+    auto b = tg.addNd({{50.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{50.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 10.0}, {50.0, 10.0}}});
+    auto cd = tg.addEdg(d, c, {{{50.0, 0.0}, {0.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+    builder.removeEdgeArtifacts(&tg);
+
+    //     1, 2
+    // a ------> b
+
+    assert(tg.getNds()->size() == 2);
+    assert((*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes().size() == 2);
+
+    for (auto r : (*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes()) {
+      if (r.route == &l1) assert(r.direction == 0);
+      if (r.route == &l2) assert(r.direction == 0);
+    }
+  }
+
+  // ___________________________________________________________________________
+  {
+    //     1
+    // a ------> b
+    // c <------ d
+    //     2
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 10.0}});
+    auto b = tg.addNd({{50.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{50.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 10.0}, {50.0, 10.0}}});
+    auto cd = tg.addEdg(d, c, {{{50.0, 0.0}, {0.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, d);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+    builder.removeEdgeArtifacts(&tg);
+
+    //     1, 2
+    // a ------> b
+
+    assert(tg.getNds()->size() == 2);
+    assert((*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes().size() == 2);
+
+    for (auto r : (*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes()) {
+      if (r.route == &l1) assert(r.direction == 0);
+      if (r.route == &l2) {
+        assert(r.direction != 0);
+        assert(r.direction->pl().getGeom()->getX() == approx(50));
+      }
+    }
+  }
 
   // ___________________________________________________________________________
   {
@@ -1053,8 +1175,6 @@ int main(int argc, char** argv) {
 
     assert(contred->pl().getConnExc().size() == 1);
     assert(contred->pl().getConnExc().begin()->first == &l2);
-    assert(*contred->pl().getConnExc().begin()->second.begin()->second.begin() == e->getAdjList().front());
-    assert(contred->pl().getConnExc().begin()->second.begin()->first == c->getAdjList().front());
 
     assert(!contred->pl().connOccurs(&l2, c->getAdjList().front(), e->getAdjList().front()));
   }

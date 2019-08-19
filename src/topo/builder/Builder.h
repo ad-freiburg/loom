@@ -49,7 +49,6 @@ class Builder {
  public:
   Builder(const config::TopoConfig* cfg);
 
-  void simplify(TransitGraph* g);
   bool createTopologicalNodes(TransitGraph* g, bool final);
   void averageNodePositions(TransitGraph* g);
   void removeEdgeArtifacts(TransitGraph* g);
@@ -71,7 +70,7 @@ class Builder {
   bool combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g);
   bool combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n, TransitGraph* g);
 
-  bool lineCrossesAtNode(const TransitNode* a, const TransitEdge* e, const TransitEdge* f) const;
+  bool crossesAt(const TransitNode* a, const TransitEdge* e, const TransitEdge* f) const;
 
   bool routeEq(const TransitEdge* a, const TransitEdge* b) const;
 

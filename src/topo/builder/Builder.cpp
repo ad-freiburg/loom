@@ -20,38 +20,26 @@ using util::geo::extendBox;
 using util::geo::PolyLine;
 using util::geo::SharedSegments;
 
-const static char* WGS84_PROJ =
-    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
-
 // _____________________________________________________________________________
 Builder::Builder(const config::TopoConfig* cfg) : _cfg(cfg) {}
-
-// _____________________________________________________________________________
-void Builder::simplify(TransitGraph* g) {
-  // try to merge both-direction edges into a single one
-  // TODO!
-}
 
 // _____________________________________________________________________________
 ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g, bool final,
                                           EdgeGrid* grid) const {
   int i = 0;
   double dmin = _cfg->maxAggrDistance;
+
   for (auto n : *g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       i++;
-      if (_indEdges.find(e) != _indEdges.end()) {
-        continue;
-      }
+      if (_indEdges.find(e) != _indEdges.end()) continue;
 
       std::set<TransitEdge*> neighbors;
       grid->getNeighbors(e, fmax(5, dmin * 10), &neighbors);
 
       for (auto toTest : neighbors) {
-        if (_indEdgesPairs.find(
-                std::pair<const TransitEdge*, const TransitEdge*>(e, toTest)) !=
-                _indEdgesPairs.end() ||
+        if (_indEdgesPairs.find({e, toTest}) != _indEdgesPairs.end() ||
             _indEdges.find(toTest) != _indEdges.end()) {
           continue;
         }
@@ -64,21 +52,16 @@ ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g, bool final,
                                   toTest->pl().getRoutes().size() * (dmin / 2));
           }
 
-          SharedSegments<double> s = e->pl().getPolyline().getSharedSegments(
+          const auto& s = e->pl().getPolyline().getSharedSegments(
               toTest->pl().getPolyline(), dmax);
 
           if (s.segments.size() > 0) {
-            _pEdges[std::pair<const TransitEdge*, const TransitEdge*>(
-                e, toTest)]++;
-            _pEdges[std::pair<const TransitEdge*, const TransitEdge*>(toTest,
-                                                                      e)]++;
+            _pEdges[{e, toTest}]++;
+            _pEdges[{toTest, e}]++;
 
-            if (_pEdges[std::pair<const TransitEdge*, const TransitEdge*>(
-                    e, toTest)] > 20) {
-              _indEdgesPairs.insert(
-                  std::pair<const TransitEdge*, const TransitEdge*>(e, toTest));
-              _indEdgesPairs.insert(
-                  std::pair<const TransitEdge*, const TransitEdge*>(toTest, e));
+            if (_pEdges[{e, toTest}] > 20) {
+              _indEdgesPairs.insert({e, toTest});
+              _indEdgesPairs.insert({toTest, e});
             }
 
             return ShrdSegWrap(e, toTest, s.segments.front());
@@ -95,7 +78,7 @@ ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g, bool final,
 }
 
 // _____________________________________________________________________________
-bool Builder::lineCrossesAtNode(const TransitNode* a, const TransitEdge* ea,
+bool Builder::crossesAt(const TransitNode* a, const TransitEdge* ea,
                                 const TransitEdge* eb) const {
   if (!(ea->getTo() == a || ea->getFrom() == a) ||
       !(eb->getTo() == a || eb->getFrom() == a))
@@ -258,14 +241,14 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     const auto curEdgeGeom = w.e;
     const auto cmpEdgeGeom = w.f;
 
-    const LinePoint<double>& eap = w.s.first.first;
-    const LinePoint<double>& ebp = w.s.second.first;
-    const LinePoint<double>& fap = w.s.first.second;
-    const LinePoint<double>& fbp = w.s.second.second;
+    const auto& eap = w.s.first.first;
+    const auto& ebp = w.s.second.first;
+    const auto& fap = w.s.first.second;
+    const auto& fbp = w.s.second.second;
 
-    PolyLine<double> ea =
+    auto ea =
         curEdgeGeom->pl().getPolyline().getSegment(0, eap.totalPos);
-    PolyLine<double> ec =
+    auto ec =
         curEdgeGeom->pl().getPolyline().getSegment(ebp.totalPos, 1);
 
     PolyLine<double> fa, fc;
@@ -278,7 +261,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
       fc = cmpEdgeGeom->pl().getPolyline().getSegment(fbp.totalPos, 1);
     }
 
-    PolyLine<double> ab = getAveragedFromSharedSeg(w);
+    auto ab = getAveragedFromSharedSeg(w);
 
     // new nodes at the start and end of the shared segment
     TransitNode *a = 0, *b = 0;
@@ -304,6 +287,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     if (!a) {
       a = g->addNd({w.s.first.first.p});
     }
+
     if (!b) {
       b = g->addNd({w.s.second.first.p});
     }
@@ -313,8 +297,8 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     }
 
     // TODO: what about the nodes we added above??
-    if (lineCrossesAtNode(a, w.e, w.f)) continue;
-    if (lineCrossesAtNode(b, w.e, w.f)) continue;
+    if (crossesAt(a, w.e, w.f)) continue;
+    if (crossesAt(b, w.e, w.f)) continue;
 
     TransitEdgePL eaEdgeGeom(ea);
     TransitEdgePL abEdgeGeom(ab);
@@ -333,10 +317,10 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     TransitEdgePL faEdgeGeom(fa);
     TransitEdgePL fcEdgeGeom(fc);
 
-    TransitNode* wefrom = w.e->getFrom();
-    TransitNode* weto = w.e->getTo();
-    TransitNode* wffrom = w.f->getFrom();
-    TransitNode* wfto = w.f->getTo();
+    auto wefrom = w.e->getFrom();
+    auto weto = w.e->getTo();
+    auto wffrom = w.f->getFrom();
+    auto wfto = w.f->getTo();
 
     for (const auto& r : curEdgeGeom->pl().getRoutes()) {
       if (!r.direction) {
@@ -397,7 +381,6 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
 
     if (a != wefrom) {
       eaE = g->addEdg(wefrom, a);
-      // eaE->pl().setEdge(eaE);
       edgeRpl(wefrom, w.e, eaE);
     } else {
       edgeRpl(a, w.e, abE);
@@ -405,7 +388,6 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
 
     if (b != weto) {
       ebE = g->addEdg(b, weto);
-      // ebE->pl().setEdge(ebE);
       edgeRpl(weto, w.e, ebE);
     } else {
       assert(b == weto);
@@ -415,7 +397,6 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     if (fap.totalPos > fbp.totalPos) {
       if (a != wfto) {
         faE = g->addEdg(a, wfto);
-        // faE->pl().setEdge(faE);
         edgeRpl(wfto, w.f, faE);
       } else {
         assert(a == wfto);
@@ -424,7 +405,6 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
 
       if (b != wffrom) {
         fbE = g->addEdg(wffrom, b);
-        // if (fbE) fbE->pl().setEdge(fbE);
         edgeRpl(wffrom, w.f, fbE);
       } else {
         edgeRpl(b, w.f, abE);
@@ -432,7 +412,6 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     } else {
       if (a != wffrom) {
         faE = g->addEdg(wffrom, a);
-        // faE->pl().setEdge(faE);
         edgeRpl(wffrom, w.f, faE);
       } else {
         assert(a == wffrom);
@@ -441,7 +420,6 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
 
       if (b != wfto) {
         fbE = g->addEdg(b, wfto);
-        // fbE->pl().setEdge(fbE);
         edgeRpl(wfto, w.f, fbE);
       } else {
         edgeRpl(b, w.f, abE);
@@ -450,7 +428,6 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
 
     if (abE) {
       abE->pl() = abEdgeGeom;
-      // abE->pl().simplify();
       grid.add(*abE->pl().getGeom(), abE);
     } else {
       // we use abE below without checking!
@@ -517,12 +494,14 @@ void Builder::averageNodePositions(TransitGraph* g) {
 
 // _____________________________________________________________________________
 void Builder::removeEdgeArtifacts(TransitGraph* g) {
-  while(contractNodes(g));
+  while (contractNodes(g)) {}
+    ;
 }
 
 // _____________________________________________________________________________
 void Builder::removeNodeArtifacts(TransitGraph* g) {
-  while(contractEdges(g));
+  while (contractEdges(g)) {}
+    ;
 }
 
 // _____________________________________________________________________________
@@ -808,37 +787,27 @@ bool Builder::lineDominatesSharedSeg(const ShrdSegWrap& w,
 
   if (e == w.e) {
     const auto& geom = w.e;
-    double lookAhead = LOOKAHEAD / geom->pl().getPolyline().getLength();
-    a = geom->pl()
-            .getPolyline()
-            .getPointAt(w.s.first.first.totalPos - lookAhead)
-            .p;
+    double la = LOOKAHEAD / geom->pl().getPolyline().getLength();
+
+    a = geom->pl().getPolyline().getPointAt(w.s.first.first.totalPos - la).p;
     b = geom->pl().getPolyline().getPointAt(w.s.first.first.totalPos).p;
     c = geom->pl().getPolyline().getPointAt(w.s.second.first.totalPos).p;
-    d = geom->pl()
-            .getPolyline()
-            .getPointAt(w.s.second.first.totalPos + lookAhead)
-            .p;
+    d = geom->pl().getPolyline().getPointAt(w.s.second.first.totalPos + la).p;
   } else if (e == w.f) {
     const auto& geom = w.f;
-    double lookAhead = LOOKAHEAD / geom->pl().getPolyline().getLength();
+    double la = LOOKAHEAD / geom->pl().getPolyline().getLength();
+
     if (w.s.first.second.totalPos > w.s.second.second.totalPos) {
-      a = geom->pl()
-              .getPolyline()
-              .getPointAt(w.s.first.second.totalPos + lookAhead)
-              .p;
+      a = geom->pl().getPolyline().getPointAt(w.s.first.second.totalPos + la).p;
       d = geom->pl()
               .getPolyline()
-              .getPointAt(w.s.second.second.totalPos - lookAhead)
+              .getPointAt(w.s.second.second.totalPos - la)
               .p;
     } else {
-      a = geom->pl()
-              .getPolyline()
-              .getPointAt(w.s.first.second.totalPos - lookAhead)
-              .p;
+      a = geom->pl().getPolyline().getPointAt(w.s.first.second.totalPos - la).p;
       d = geom->pl()
               .getPolyline()
-              .getPointAt(w.s.second.second.totalPos + lookAhead)
+              .getPointAt(w.s.second.second.totalPos + la)
               .p;
     }
     b = geom->pl().getPolyline().getPointAt(w.s.first.second.totalPos).p;

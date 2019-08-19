@@ -11,13 +11,6 @@ namespace topo {
 namespace config {
 
 struct TopoConfig {
-  std::string projectionString;
-  std::string inputFeedPath;
-
-  bool ignoreDirections;
-
-  size_t stationAggrLevel;
-
   double maxAggrDistance;
   double stationAggrDistance;
 };
