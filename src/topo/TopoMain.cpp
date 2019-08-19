@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
 
   Builder b(&cfg);
 
-  // // // first pass, with strict distance values (clearing things up first)
+  // first pass, with strict distance values (clearing things up first)
   b.createTopologicalNodes(&tg, false);
   b.removeEdgeArtifacts(&tg);
 

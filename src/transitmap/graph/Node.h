@@ -30,8 +30,7 @@ struct NodeFront {
   NodeFront(Edge* e, Node* n) : n(n), edge(e) {}
 
   Node* n;  // pointer to node here also
-
-  DPoint getTripOccPos(const Route* r, const OrderingConfig& c) const;
+DPoint getTripOccPos(const Route* r, const OrderingConfig& c) const;
   DPoint getTripOccPos(const Route* r, const OrderingConfig& c,
                        bool originGeom) const;
   DPoint getTripPos(const Edge* e, size_t pos, bool inv) const;
