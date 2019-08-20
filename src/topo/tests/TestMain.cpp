@@ -579,42 +579,33 @@ int main(int argc, char** argv) {
   {
     //      2->
     //     a<-- b
-    // c <----- d <---e
-    //     <-2    <-2
+    // c <----- d
+    //     <-2
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{30.0, 10.0}});
     auto b = tg.addNd({{100.0, 10.0}});
     auto c = tg.addNd({{0.0, 0.0}});
     auto d = tg.addNd({{100.0, 0.0}});
-    auto e = tg.addNd({{200.0, 0.0}});
 
-    auto ba = tg.addEdg(a, b, {{{100.0, 10.0}, {30.0, 10.0}}});
+    auto ba = tg.addEdg(b, a, {{{100.0, 10.0}, {30.0, 10.0}}});
     auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
-    auto ed = tg.addEdg(e, d, {{{200.0, 0.0}, {100, 0.0}}});
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
 
     ba->pl().addRoute(&l2, b);
     dc->pl().addRoute(&l2, c);
-    ed->pl().addRoute(&l2, d);
-
-    d->pl().addConnExc(&l2, ed, dc);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    std::cerr << "START" << std::endl;
-
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
 
-    //    <-2   2        <-2
-    // c ----a-----> d < --- e
+    //    <-2   2
+    // c ----a-----> d
 
     // update the node variables, may have changed
     for (auto nd : *tg.getNds()) {
@@ -622,7 +613,6 @@ int main(int argc, char** argv) {
         if (nd->getAdjList().front()->pl().getRoutes().begin()->direction == nd) {
           c = nd;
         }
-        else e = nd;
       }
     }
 
@@ -630,10 +620,9 @@ int main(int argc, char** argv) {
 
     assert(a->pl().getGeom()->getX() == approx(30));
 
-    assert(tg.getNds()->size() == 4);
+    assert(tg.getNds()->size() == 3);
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
     assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 1);
 
     for (auto e : a->getAdjList()) {
       std::cerr << e->getFrom() << " -> " << e->getTo() << std::endl;
@@ -642,8 +631,6 @@ int main(int argc, char** argv) {
       assert(e->pl().getRoutes().begin()->direction == 0);
     }
 
-    assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().getGeom()->getX() == approx(100));
-    assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().connOccurs(&l2, e->getAdjList().front(), c->getAdjList().front()));
   }
 
   // ___________________________________________________________________________
@@ -679,8 +666,10 @@ int main(int argc, char** argv) {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
 
     //    <-2   2        1,<-2
     // c ----a-----> d < --- e
@@ -690,16 +679,18 @@ int main(int argc, char** argv) {
     assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
     assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
 
-    for (auto e : a->getAdjList()) {
-      if (e->getOtherNd(a) == c) continue;
-      assert(e->pl().getRoutes().size() == 1);
-      assert(e->pl().getRoutes().begin()->direction == 0);
+    for (auto edg : a->getAdjList()) {
+      if (edg->getOtherNd(a) == c) continue;
+      assert(edg->pl().getRoutes().size() == 1);
+      assert(edg->pl().getRoutes().begin()->direction == 0);
+      assert(!edg->getOtherNd(a)->pl().connOccurs(&l2, e->getAdjList().front(), edg));
     }
 
     for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
       if (ro.route == &l1) assert(ro.direction == 0);
       if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
     }
+
   }
 
   // ___________________________________________________________________________

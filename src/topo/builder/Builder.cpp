@@ -268,28 +268,43 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     double maxSnapDist = 20;
 
     if (ea.getLength() < maxSnapDist) {
+      std::cerr << "snap A" << std::endl;
       a = w.e->getFrom();
     }
 
     if (ec.getLength() < maxSnapDist) {
+      std::cerr << "snap B" << std::endl;
       b = w.e->getTo();
     }
 
+    std::cerr << fap.totalPos << " vs " << fbp.totalPos << std::endl;
+    std::cerr << w.f->getFrom() << " -> " << w.e->getTo() << std::endl;
+
     if (fa.getLength() < maxSnapDist) {
-      a = !(fap.totalPos > fbp.totalPos) ? w.f->getFrom() : w.f->getTo();
+      std::cerr << "snap A2" << std::endl;
+      a = (fap.totalPos <= fbp.totalPos) ? w.f->getFrom() : w.f->getTo();
+      std::cerr << (fap.totalPos <= fbp.totalPos) << std::endl;
+      std::cerr << "A is now " << a << std::endl;
     }
 
     if (fc.getLength() < maxSnapDist) {
-      b = !(fap.totalPos > fbp.totalPos) ? w.f->getTo() : w.f->getFrom();
+      std::cerr << "snap B2" << std::endl;
+      b = (fap.totalPos <= fbp.totalPos) ? w.f->getTo() : w.f->getFrom();
+      std::cerr << (fap.totalPos <= fbp.totalPos) << std::endl;
+      std::cerr << "B is now " << b << std::endl;
     }
 
     if (!a) {
+      std::cerr << "new A" << std::endl;
       a = g->addNd({w.s.first.first.p});
     }
 
     if (!b) {
+      std::cerr << "new B" << std::endl;
       b = g->addNd({w.s.second.first.p});
     }
+
+    std::cerr << "a = " << a << ", b = " << b << std::endl;
 
     if (a == b) {
       continue;
@@ -377,9 +392,11 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     assert(a != b);
     abE = g->addEdg(a, b, TransitEdgePL());
 
+    assert(eap.totalPos < ebp.totalPos);
+
     if (a != wefrom) {
       eaE = g->addEdg(wefrom, a);
-      std::cout << "A" << std::endl;
+      std::cerr << "A " << wefrom << " -> " << a << std::endl;
       edgeRpl(wefrom, w.e, eaE);
     } else {
       edgeRpl(a, w.e, abE);
@@ -387,7 +404,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
 
     if (b != weto) {
       ebE = g->addEdg(b, weto);
-      std::cout << "B" << std::endl;
+      std::cerr << "B "  << b << " -> " << weto <<  std::endl;
       edgeRpl(weto, w.e, ebE);
     } else {
       assert(b == weto);
@@ -397,7 +414,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     if (fap.totalPos > fbp.totalPos) {
       if (a != wfto) {
         faE = g->addEdg(a, wfto);
-        std::cout << "C" << std::endl;
+        std::cerr << "C" << std::endl;
         edgeRpl(wfto, w.f, faE);
       } else {
         assert(a == wfto);
@@ -406,7 +423,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
 
       if (b != wffrom) {
         fbE = g->addEdg(wffrom, b);
-        std::cout << "D" << std::endl;
+        std::cerr << "D" << std::endl;
         edgeRpl(wffrom, w.f, fbE);
       } else {
         edgeRpl(b, w.f, abE);
@@ -414,7 +431,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     } else {
       if (a != wffrom) {
         faE = g->addEdg(wffrom, a);
-        std::cout << "E" << std::endl;
+        std::cerr << "E" << std::endl;
         edgeRpl(wffrom, w.f, faE);
       } else {
         assert(a == wffrom);
@@ -423,7 +440,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
 
       if (b != wfto) {
         fbE = g->addEdg(b, wfto);
-        std::cout << "F" << std::endl;
+        std::cerr << "F" << std::endl;
         edgeRpl(wfto, w.f, fbE);
       } else {
         edgeRpl(b, w.f, abE);
