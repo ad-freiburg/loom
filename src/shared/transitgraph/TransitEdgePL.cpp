@@ -34,12 +34,28 @@ void TransitEdgePL::setPolyline(const PolyLine<double>& p) { _p = p; }
 // _____________________________________________________________________________
 void TransitEdgePL::addRoute(const Route* r, const TransitNode* dir,
                              util::Nullable<transitmapper::style::LineStyle> ls) {
-  _routes.insert(RouteOcc(r, dir, ls));
+  RouteOcc occ(r, dir, ls);
+  auto f = _routes.find(occ);
+  if (f != _routes.end()) {
+    const auto& prev = *f;
+    // the route is already present in both directions, ignore newly inserted
+    if (prev.direction == 0) return;
+
+    // the route is already present in the same direction, ignore newly inserted
+    if (prev.direction == dir) return;
+
+    // the route is already present in the other direction, make two-way
+    if (prev.direction != dir)  {
+      occ.direction = 0;
+      _routes.erase(f);
+    }
+  }
+  _routes.insert(occ);
 }
 
 // _____________________________________________________________________________
 void TransitEdgePL::addRoute(const Route* r, const TransitNode* dir) {
-  _routes.insert(RouteOcc(r, dir));
+  addRoute(r, dir, util::Nullable<transitmapper::style::LineStyle>());
 }
 
 // _____________________________________________________________________________
