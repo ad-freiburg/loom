@@ -47,6 +47,9 @@ class TransitNodePL : util::geograph::GeoNodePL<double> {
   void addConnExc(const Route* r, const TransitEdge* edgeA,
                   const TransitEdge* edgeB);
 
+  void delConnExc(const Route* r, const TransitEdge* edgeA,
+                                 const TransitEdge* edgeB);
+
   bool connOccurs(const Route* r, const TransitEdge* edgeA,
                   const TransitEdge* edgeB) const;
 

@@ -56,6 +56,14 @@ void TransitNodePL::addConnExc(const Route* r, const TransitEdge* edgeA,
 }
 
 // _____________________________________________________________________________
+void TransitNodePL::delConnExc(const Route* r, const TransitEdge* edgeA,
+                               const TransitEdge* edgeB) {
+  _connEx[r][edgeA].erase(edgeB);
+  // index the other direction also, will lead to faster lookups later on
+  _connEx[r][edgeB].erase(edgeA);
+}
+
+// _____________________________________________________________________________
 bool TransitNodePL::connOccurs(const Route* r, const TransitEdge* edgeA,
                                const TransitEdge* edgeB) const {
   const auto& i = _connEx.find(r);

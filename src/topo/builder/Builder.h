@@ -50,6 +50,7 @@ class Builder {
   Builder(const config::TopoConfig* cfg);
 
   bool createTopologicalNodes(TransitGraph* g, bool final);
+  bool createTopologicalNodes(TransitGraph* g, bool final, size_t steps);
   void averageNodePositions(TransitGraph* g);
   void removeEdgeArtifacts(TransitGraph* g);
   void removeNodeArtifacts(TransitGraph* g);

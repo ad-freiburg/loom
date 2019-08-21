@@ -57,67 +57,449 @@ class approx {
 int main(int argc, char** argv) {
   UNUSED(argc);
   UNUSED(argv);
+
+  // ___________________________________________________________________________
+  {
+    //      2->     1
+    //     a--> b <---|
+    // c -----> d <---e
+    //     <-2    <-2
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{30.0, 10.0}});
+    auto b = tg.addNd({{100.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{100.0, 0.0}});
+    auto e = tg.addNd({{200.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
+    auto cd = tg.addEdg(d, c, {{{0.0, 0.0}, {100.0, 0.0}}});
+    auto ed = tg.addEdg(e, d, {{{200.0, 0.0}, {100, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l2, b);
+    cd->pl().addRoute(&l2, c);
+    eb->pl().addRoute(&l1, 0);
+    ed->pl().addRoute(&l2, d);
+
+    d->pl().addConnExc(&l2, ed, cd);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+
+    for (auto nd : *tg.getNds()) {
+      for (auto ex : nd->pl().getConnExc()) {
+        for (auto fr : ex.second) {
+          for (auto to : fr.second) {
+            assert(fr.first != to);
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
+          }
+        }
+      }
+    }
+
+    builder.removeEdgeArtifacts(&tg);
+
+    for (auto nd : *tg.getNds()) {
+      for (auto ex : nd->pl().getConnExc()) {
+        for (auto fr : ex.second) {
+          for (auto to : fr.second) {
+            assert(fr.first != to);
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
+          }
+        }
+      }
+    }
+  }
+
+  // ___________________________________________________________________________
+  {
+    //      2->     1
+    //     a--> b <---|
+    // c <----- d <---e
+    //     <-2    <-2
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{30.0, 10.0}});
+    auto b = tg.addNd({{100.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{100.0, 0.0}});
+    auto e = tg.addNd({{200.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
+    auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
+    auto ed = tg.addEdg(e, d, {{{200.0, 0.0}, {100, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l2, b);
+    dc->pl().addRoute(&l2, c);
+    eb->pl().addRoute(&l1, 0);
+    ed->pl().addRoute(&l2, d);
+
+    d->pl().addConnExc(&l2, ed, dc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+
+    for (auto nd : *tg.getNds()) {
+      for (auto ex : nd->pl().getConnExc()) {
+        for (auto fr : ex.second) {
+          for (auto to : fr.second) {
+            assert(fr.first != to);
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
+          }
+        }
+      }
+    }
+
+    builder.removeEdgeArtifacts(&tg);
+
+    for (auto nd : *tg.getNds()) {
+      for (auto ex : nd->pl().getConnExc()) {
+        for (auto fr : ex.second) {
+          for (auto to : fr.second) {
+            assert(fr.first != to);
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
+          }
+        }
+      }
+    }
+  }
+
   // ___________________________________________________________________________
   {
     //      2->     1
     //     a--> b <---|
     // c <----- d --->e
     //     <-2    <-2
-    // shared::transitgraph::TransitGraph tg;
-    // auto a = tg.addNd({{30.0, 10.0}});
-    // auto b = tg.addNd({{100.0, 10.0}});
-    // auto c = tg.addNd({{0.0, 0.0}});
-    // auto d = tg.addNd({{100.0, 0.0}});
-    // auto e = tg.addNd({{200.0, 0.0}});
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{30.0, 10.0}});
+    auto b = tg.addNd({{100.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{100.0, 0.0}});
+    auto e = tg.addNd({{200.0, 0.0}});
 
-    // auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
-    // auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
-    // auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
-    // auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
+    auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
+    auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
+    auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
 
-    // transitmapper::graph::Route l1("1", "1", "red");
-    // transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
 
-    // ab->pl().addRoute(&l2, b);
-    // dc->pl().addRoute(&l2, c);
-    // eb->pl().addRoute(&l1, 0);
-    // de->pl().addRoute(&l2, d);
+    ab->pl().addRoute(&l2, b);
+    dc->pl().addRoute(&l2, c);
+    eb->pl().addRoute(&l1, 0);
+    de->pl().addRoute(&l2, d);
 
-    // d->pl().addConnExc(&l2, de, dc);
+    d->pl().addConnExc(&l2, de, dc);
 
-    // topo::config::TopoConfig cfg;
-    // cfg.maxAggrDistance = 50;
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
 
-    // topo::Builder builder(&cfg);
-    // builder.createTopologicalNodes(&tg, true);
-    // // builder.removeEdgeArtifacts(&tg);
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true, 1);
+    builder.createTopologicalNodes(&tg, true, 1);
 
-    // util::geo::output::GeoGraphJsonOutput gout;
-    // gout.print(tg, std::cout);
+    for (auto nd : *tg.getNds()) {
+      for (auto ex : nd->pl().getConnExc()) {
+        for (auto fr : ex.second) {
+          for (auto to : fr.second) {
+            assert(fr.first != to);
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
+          }
+        }
+      }
+    }
 
-    // exit(1);
+    builder.removeEdgeArtifacts(&tg);
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+
+    exit(1);
+
+
+
+
+    for (auto nd : *tg.getNds()) {
+      for (auto ex : nd->pl().getConnExc()) {
+        for (auto fr : ex.second) {
+          for (auto to : fr.second) {
+            assert(fr.first != to);
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
+            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
+          }
+        }
+      }
+    }
 
     // //    <-2   2        1,<-2
     // // c ----a-----> d < --- e
 
-    // assert(tg.getNds()->size() == 4);
-    // assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    // assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
-    // assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+    assert(tg.getNds()->size() == 4);
+    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
+    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
 
-    // for (auto edg : a->getAdjList()) {
-      // if (edg->getOtherNd(a) == c) continue;
+    for (auto edg : a->getAdjList()) {
+      if (edg->getOtherNd(a) == c) continue;
 
-      // assert(edg->pl().getRoutes().size() == 1);
-      // assert(edg->pl().getRoutes().begin()->direction == 0);
-      // assert(!edg->getOtherNd(a)->pl().connOccurs(&l2, e->getAdjList().front(), edg));
-    // }
+      assert(edg->pl().getRoutes().size() == 1);
+      assert(edg->pl().getRoutes().begin()->direction == 0);
+      assert(edg->pl().getRoutes().begin()->route == &l2);
+      std::cerr << "KNURR: " << e->getAdjList().front() << " " << edg << std::endl;
+      assert(!edg->getOtherNd(a)->pl().connOccurs(&l2, e->getAdjList().front(), edg));
+    }
 
-    // for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
-      // if (ro.route == &l1) assert(ro.direction == 0);
-      // if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
-    // }
+    for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
+      if (ro.route == &l1) assert(ro.direction == 0);
+      if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
+    }
+    exit(1);
   }
+
+  // ___________________________________________________________________________
+  {
+    //             1
+    //          b <---|
+    // c -----> d <---e
+    //     <-2    <-2
+    shared::transitgraph::TransitGraph tg;
+    auto b = tg.addNd({{100.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{100.0, 0.0}});
+    auto e = tg.addNd({{200.0, 0.0}});
+
+    auto cd = tg.addEdg(d, c, {{{0.0, 0.0}, {100.0, 0.0}}});
+    auto ed = tg.addEdg(e, d, {{{200, 0.0}, {100.0, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    cd->pl().addRoute(&l2, c);
+    eb->pl().addRoute(&l1, 0);
+    ed->pl().addRoute(&l2, d);
+
+    d->pl().addConnExc(&l2, ed, cd);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+
+    cd  = c->getAdjList().front();
+    ed = e->getAdjList().front();
+
+    d = cd->getOtherNd(c);
+
+    for (auto ex : d->pl().getConnExc()) {
+      for (auto fr : ex.second) {
+        for (auto to : fr.second) {
+          assert(std::find(d->getAdjList().begin(), d->getAdjList().end(), fr.first) != d->getAdjList().end());
+          assert(std::find(d->getAdjList().begin(), d->getAdjList().end(), to) != d->getAdjList().end());
+        }
+      }
+    }
+
+    builder.removeEdgeArtifacts(&tg);
+
+    //      <-2       1,<-2
+    // c ---------> d < --- e
+
+
+    d = cd->getOtherNd(c);
+
+    for (auto ex : d->pl().getConnExc()) {
+      for (auto fr : ex.second) {
+        for (auto to : fr.second) {
+          assert(std::find(d->getAdjList().begin(), d->getAdjList().end(), fr.first) != d->getAdjList().end());
+          assert(std::find(d->getAdjList().begin(), d->getAdjList().end(), to) != d->getAdjList().end());
+        }
+      }
+    }
+
+    assert(tg.getNds()->size() == 3);
+    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
+    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+
+    assert(!c->getAdjList().front()->getOtherNd(c)->pl().connOccurs(&l2, c->getAdjList().front(), e->getAdjList().front()));
+
+    for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
+      if (ro.route == &l1) assert(ro.direction == 0);
+      if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
+    }
+  }
+  // ___________________________________________________________________________
+  {
+    //             1
+    //          b <---|
+    // c <----- d --->e
+    //     <-2    <-2
+    shared::transitgraph::TransitGraph tg;
+    auto b = tg.addNd({{100.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{100.0, 0.0}});
+    auto e = tg.addNd({{200.0, 0.0}});
+
+    auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
+    auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    dc->pl().addRoute(&l2, c);
+    eb->pl().addRoute(&l1, 0);
+    de->pl().addRoute(&l2, d);
+
+    d->pl().addConnExc(&l2, de, dc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+    builder.removeEdgeArtifacts(&tg);
+
+    // //    <-2          1,<-2
+    // // c ---------> d < --- e
+
+    assert(tg.getNds()->size() == 3);
+    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
+    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+
+    assert(!c->getAdjList().front()->getOtherNd(c)->pl().connOccurs(&l2, c->getAdjList().front(), e->getAdjList().front()));
+
+    for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
+      if (ro.route == &l1) assert(ro.direction == 0);
+      if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
+    }
+  }
+  // ___________________________________________________________________________
+  {
+    //             1
+    //          b <---|
+    // c <----- d <---e
+    //     <-2    <-2
+    shared::transitgraph::TransitGraph tg;
+    auto b = tg.addNd({{100.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{100.0, 0.0}});
+    auto e = tg.addNd({{200.0, 0.0}});
+
+    auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
+    auto ed = tg.addEdg(e, d, {{{200, 0.0}, {100.0, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    dc->pl().addRoute(&l2, c);
+    eb->pl().addRoute(&l1, 0);
+    ed->pl().addRoute(&l2, d);
+
+    d->pl().addConnExc(&l2, ed, dc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+    builder.removeEdgeArtifacts(&tg);
+
+
+    // //    <-2          1,<-2
+    // // c ---------> d < --- e
+
+    assert(tg.getNds()->size() == 3);
+    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
+    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+
+    assert(!c->getAdjList().front()->getOtherNd(c)->pl().connOccurs(&l2, c->getAdjList().front(), e->getAdjList().front()));
+
+    for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
+      if (ro.route == &l1) assert(ro.direction == 0);
+      if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
+    }
+  }
+  // ___________________________________________________________________________
+  {
+    //      2->     1
+    //     a<-- b <---|
+    // c <----- d --->e
+    //     <-2    <-2
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{30.0, 10.0}});
+    auto b = tg.addNd({{100.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{100.0, 0.0}});
+    auto e = tg.addNd({{200.0, 0.0}});
+
+    auto ba = tg.addEdg(b, a, {{{100.0, 10.0}, {30.0, 10.0}}});
+    auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
+    auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ba->pl().addRoute(&l2, b);
+    dc->pl().addRoute(&l2, c);
+    eb->pl().addRoute(&l1, 0);
+    de->pl().addRoute(&l2, d);
+
+    d->pl().addConnExc(&l2, de, dc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+    builder.removeEdgeArtifacts(&tg);
+
+    // //    <-2   2        1,<-2
+    // // c ----a-----> d < --- e
+
+    assert(tg.getNds()->size() == 4);
+    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
+    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+
+    for (auto edg : a->getAdjList()) {
+      if (edg->getOtherNd(a) == c) continue;
+
+      assert(edg->pl().getRoutes().size() == 1);
+      assert(edg->pl().getRoutes().begin()->direction == 0);
+      assert(!edg->getOtherNd(a)->pl().connOccurs(&l2, e->getAdjList().front(), edg));
+    }
+
+    for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
+      if (ro.route == &l1) assert(ro.direction == 0);
+      if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
+    }
+  }
+
   // ___________________________________________________________________________
   {
     //     1
@@ -1972,9 +2354,6 @@ int main(int argc, char** argv) {
     // there should now be _no_ connection possible from a to d, as such a
     // connection was previously also not possible
     assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
-
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
   }
 
   // ___________________________________________________________________________
@@ -2007,8 +2386,188 @@ int main(int argc, char** argv) {
     // there should now be _no_ connection possible from a to d, as such a
     // connection was previously also not possible
     assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+  }
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
+  // ___________________________________________________________________________
+  {
+    // node contraction of b, c
+    //   1->    1->     1
+    // a ---> b ---> c ---> d
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{100.0, 0.0}});
+    auto d = tg.addNd({{150.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, b);
+    bc->pl().addRoute(&l1, c);
+    cd->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(b, c, &tg);
+
+    // there should now be _no_ connection possible from a to d, as such a
+    // connection was previously also not possible
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+  }
+
+  // ___________________________________________________________________________
+  {
+    // node contraction of b, c
+    //   <-1    <-1     1
+    // a ---> b ---> c ---> d
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{100.0, 0.0}});
+    auto d = tg.addNd({{150.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, a);
+    bc->pl().addRoute(&l1, b);
+    cd->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(b, c, &tg);
+
+    // there should now be _no_ connection possible from a to d, as such a
+    // connection was previously also not possible
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+  }
+
+  // ___________________________________________________________________________
+  {
+    // node contraction of b, c
+    //   1->    <-1     1
+    // a ---> b ---> c ---> d
+    //        ^
+    // e -----|
+    //    1
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{100.0, 0.0}});
+    auto d = tg.addNd({{150.0, 0.0}});
+    auto e = tg.addNd({{0.0, -20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{0.0, -20.0}, {50.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, b);
+    bc->pl().addRoute(&l1, b);
+    cd->pl().addRoute(&l1, 0);
+    eb->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(b, c, &tg);
+
+    // there should now be _no_ connection possible from a to d, as such a
+    // connection was previously also not possible
+    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+    assert(e->getAdjList().front()->getOtherNd(e)->pl().connOccurs(&l1, e->getAdjList().front(), d->getAdjList().front()));
+  }
+
+  // ___________________________________________________________________________
+  {
+    // node contraction of b, c
+    //   <-1    1->     1
+    // a ---> b ---> c ---> d
+    //        ^
+    // e -----|
+    //    1->
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{100.0, 0.0}});
+    auto d = tg.addNd({{150.0, 0.0}});
+    auto e = tg.addNd({{0.0, -20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{0.0, -20.0}, {50.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, a);
+    bc->pl().addRoute(&l1, c);
+    cd->pl().addRoute(&l1, 0);
+    eb->pl().addRoute(&l1, b);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(b, c, &tg);
+
+    // there should now be _no_ connection possible from a to d, as such a
+    // connection was previously also not possible
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), e->getAdjList().front()));
+    assert(e->getAdjList().front()->getOtherNd(e)->pl().connOccurs(&l1, e->getAdjList().front(), d->getAdjList().front()));
+    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+  }
+
+  // ___________________________________________________________________________
+  {
+    // node contraction of c, b
+    //   <-1    1->     1
+    // a ---> b ---> c ---> d
+    //        ^
+    // e -----|
+    //    1->
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{100.0, 0.0}});
+    auto d = tg.addNd({{150.0, 0.0}});
+    auto e = tg.addNd({{0.0, -20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{0.0, -20.0}, {50.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, a);
+    bc->pl().addRoute(&l1, c);
+    cd->pl().addRoute(&l1, 0);
+    eb->pl().addRoute(&l1, b);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(c, b, &tg);
+
+    // there should now be _no_ connection possible from a to d, as such a
+    // connection was previously also not possible
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), e->getAdjList().front()));
+    assert(e->getAdjList().front()->getOtherNd(e)->pl().connOccurs(&l1, e->getAdjList().front(), d->getAdjList().front()));
+    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
   }
 }

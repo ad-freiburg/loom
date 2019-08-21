@@ -230,6 +230,11 @@ bool Builder::routeEq(const TransitEdge* a, const TransitEdge* b) const {
 
 // _____________________________________________________________________________
 bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
+  return createTopologicalNodes(g, final, 10000000);
+}
+
+// _____________________________________________________________________________
+bool Builder::createTopologicalNodes(TransitGraph* g, bool final, size_t steps) {
   ShrdSegWrap w;
   _indEdges.clear();
   _pEdges.clear();
@@ -237,8 +242,9 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
 
   EdgeGrid grid = getGeoIndex(g);
 
-  while ((w = getNextSharedSegment(g, final, &grid)).e) {
+  while (steps > 0 && (w = getNextSharedSegment(g, final, &grid)).e) {
     std::cerr << "STEP" << std::endl;
+    steps--;
     const auto curEdgeGeom = w.e;
     const auto cmpEdgeGeom = w.f;
 
@@ -267,31 +273,40 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
 
     double maxSnapDist = 20;
 
-    if (ea.getLength() < maxSnapDist) {
+    if (ea.getLength() < maxSnapDist && !g->getEdg(w.e->getFrom(), w.f->getTo()) && !g->getEdg(w.e->getFrom(), w.f->getFrom())) {
       std::cerr << "snap A" << std::endl;
       a = w.e->getFrom();
     }
 
-    if (ec.getLength() < maxSnapDist) {
+    if (ec.getLength() < maxSnapDist && !g->getEdg(w.e->getTo(), w.f->getTo()) && !g->getEdg(w.e->getTo(), w.f->getFrom())) {
       std::cerr << "snap B" << std::endl;
       b = w.e->getTo();
     }
 
-    std::cerr << fap.totalPos << " vs " << fbp.totalPos << std::endl;
-    std::cerr << w.f->getFrom() << " -> " << w.e->getTo() << std::endl;
+    if (fap.totalPos <= fbp.totalPos) {
+      if (fa.getLength() < maxSnapDist && !g->getEdg(w.f->getFrom(), w.e->getTo()) && !g->getEdg(w.f->getFrom(), w.e->getFrom())) {
+        std::cerr << "snap A2" << std::endl;
+        a = w.f->getFrom() ;
+        std::cerr << "A is now " << a << std::endl;
+      }
 
-    if (fa.getLength() < maxSnapDist) {
-      std::cerr << "snap A2" << std::endl;
-      a = (fap.totalPos <= fbp.totalPos) ? w.f->getFrom() : w.f->getTo();
-      std::cerr << (fap.totalPos <= fbp.totalPos) << std::endl;
-      std::cerr << "A is now " << a << std::endl;
-    }
+      if (fc.getLength() < maxSnapDist && !g->getEdg(w.f->getTo(), w.e->getTo()) && !g->getEdg(w.f->getTo(), w.e->getFrom())) {
+        std::cerr << "snap B2" << std::endl;
+        b = w.f->getTo();
+        std::cerr << "B is now " << b << std::endl;
+      }
+    } else {
+      if (fa.getLength() < maxSnapDist && !g->getEdg(w.f->getTo(), w.e->getTo()) && !g->getEdg(w.f->getTo(), w.e->getFrom())) {
+        std::cerr << "snap A2" << std::endl;
+        a = w.f->getTo();
+        std::cerr << "A is now " << a << std::endl;
+      }
 
-    if (fc.getLength() < maxSnapDist) {
-      std::cerr << "snap B2" << std::endl;
-      b = (fap.totalPos <= fbp.totalPos) ? w.f->getTo() : w.f->getFrom();
-      std::cerr << (fap.totalPos <= fbp.totalPos) << std::endl;
-      std::cerr << "B is now " << b << std::endl;
+      if (fc.getLength() < maxSnapDist && !g->getEdg(w.f->getFrom(), w.e->getTo()) && !g->getEdg(w.f->getFrom(), w.e->getFrom())) {
+        std::cerr << "snap B2" << std::endl;
+        b =  w.f->getFrom();
+        std::cerr << "B is now " << b << std::endl;
+      }
     }
 
     if (!a) {
@@ -396,11 +411,11 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
 
     if (a != wefrom) {
       eaE = g->addEdg(wefrom, a);
-      std::cerr << "A " << wefrom << " -> " << a << std::endl;
+      std::cerr << "A " << wefrom << " -> " << a << " (" << eaE << ")" << std::endl;
       edgeRpl(wefrom, w.e, eaE);
     } else {
       // this is the case when e.from->a was below the merge threshold
-      std::cerr << "A1" << std::endl;
+      std::cerr << "A1" << "(" << abE << ")" << std::endl;
       edgeRpl(a, w.e, abE);
     }
 
@@ -411,7 +426,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
     } else {
       assert(b == weto);
       // this is the case when b->e.to was below the merge threshold
-      std::cerr << "B1" << std::endl;
+      std::cerr << "B1" << "(" << abE << ")" << std::endl;
       edgeRpl(b, w.e, abE);
     }
 
@@ -674,6 +689,9 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
   // a ------> b -----> c
   // these have to be integrated as explicit connection exceptions to b
   // to prevent their loss later on
+  //
+  // this will lead to some superfluous connection exceptions - it may be
+  // good to filter them out at some point :)
   explicateNonCons(connecting, b);
   explicateNonCons(connecting, a);
 
@@ -705,6 +723,8 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     }
   }
 
+  std::vector<std::pair<const Route*, std::pair<const TransitEdge*, const TransitEdge*>>> toDel;
+
   // go through all route exceptions in b
   for (const auto& ro : b->pl().getConnExc()) {
     for (const auto& exFr : ro.second) {
@@ -715,6 +735,7 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
             if (e == exTo) continue;
             if (!e->pl().hasRoute(ro.first)) continue;
             b->pl().addConnExc(ro.first, e, exTo);
+            toDel.push_back({ro.first, {exFr.first, exTo}});
           }
         } else if (exTo == connecting) {
           for (auto e : a->getAdjList()) {
@@ -722,12 +743,19 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
             if (e == exFr.first) continue;
             if (!e->pl().hasRoute(ro.first)) continue;
             b->pl().addConnExc(ro.first, e, exFr.first);
+            toDel.push_back({ro.first, {exFr.first, exTo}});
           }
         } else {
-          b->pl().addConnExc(ro.first, exFr.first, exTo);
+          // not needed!
+          // b->pl().addConnExc(ro.first, exFr.first, exTo);
         }
       }
     }
+  }
+
+  // remove the original exceptions
+  for (const auto& ro : toDel) {
+    b->pl().delConnExc(ro.first, ro.second.first, ro.second.second);
   }
 
   for (auto* oldE : a->getAdjList()) {
@@ -892,6 +920,7 @@ DBox Builder::getGraphBoundingBox(const TransitGraph* g) const {
 // _____________________________________________________________________________
 void Builder::edgeRpl(TransitNode* n, const TransitEdge* oldE,
                       const TransitEdge* newE) const {
+  if (oldE == newE) return;
   // replace in from
   for (auto& r : n->pl().getConnExc()) {
     for (auto& exFr : r.second) {
