@@ -557,10 +557,10 @@ bool Builder::contractNodes(TransitGraph* g) {
         auto from = e->getFrom();
         auto to = e->getTo();
         if ((from->pl().getStops().size() == 0 ||
-             to->pl().getStops().size() == 0) &&
-            !isTriFace(e)) {
-          combineNodes(from, to, g);
-          return true;
+             to->pl().getStops().size() == 0)
+           // && !isTriFace(e)
+            ) {
+          if (combineNodes(from, to, g)) return true;
         }
       }
     }
@@ -706,14 +706,12 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
           for (auto e : b->getAdjList()) {
             if (e == connecting) continue;
             if (e == exTo) continue;
-            if (!e->pl().hasRoute(ro.first)) continue;
             b->pl().addConnExc(ro.first, e, exTo);
           }
         } else if (exTo == connecting) {
           for (auto e : b->getAdjList()) {
             if (e == connecting) continue;
             if (e == exFr.first) continue;
-            if (!e->pl().hasRoute(ro.first)) continue;
             b->pl().addConnExc(ro.first, e, exFr.first);
           }
         } else {
@@ -733,7 +731,6 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
           for (auto e : a->getAdjList()) {
             if (e == connecting) continue;
             if (e == exTo) continue;
-            if (!e->pl().hasRoute(ro.first)) continue;
             b->pl().addConnExc(ro.first, e, exTo);
             toDel.push_back({ro.first, {exFr.first, exTo}});
           }
@@ -741,7 +738,6 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
           for (auto e : a->getAdjList()) {
             if (e == connecting) continue;
             if (e == exFr.first) continue;
-            if (!e->pl().hasRoute(ro.first)) continue;
             b->pl().addConnExc(ro.first, e, exFr.first);
             toDel.push_back({ro.first, {exFr.first, exTo}});
           }
@@ -763,18 +759,38 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     if (connecting == oldE) continue;
 
     assert(b != oldE->getTo());
-    assert(!g->getEdg(b, oldE->getTo()));
+    auto* newE = g->getEdg(b, oldE->getTo());
 
-    // add a new edge going from b to the non-a node, will
-    // retrieve the existing edge with the routes in it from above if existing
-    auto* newE = g->addEdg(b, oldE->getTo(), oldE->pl());
+    if (!newE) {
+      // add a new edge going from b to the non-a node
+      newE = g->addEdg(b, oldE->getTo(), oldE->pl());
 
-    // update route dirs
-    routeDirRepl(a, b, newE);
+      // update route dirs
+      routeDirRepl(a, b, newE);
 
-    // replace each occurance of oldE in the non-a node with the newE
-    edgeRpl(newE->getTo(), oldE, newE);
-    edgeRpl(newE->getFrom(), oldE, newE);
+      // replace each occurance of oldE in the non-a node with the newE
+      edgeRpl(newE->getTo(), oldE, newE);
+      edgeRpl(newE->getFrom(), oldE, newE);
+    } else {
+      // update route dirs
+      routeDirRepl(a, b, newE);
+
+      // replace each occurance of oldE in the non-a node with the newE
+      edgeRpl(newE->getTo(), oldE, newE);
+      edgeRpl(newE->getFrom(), oldE, newE);
+
+      // edge is already existing, check if both oldE and newE are short
+      // enough for contraction
+      //
+      // TODO!!! this has to be the same as MIN_SEG_LENGTH in contractNodes()
+      // and should be defined globally
+      if (oldE->pl().getPolyline().getLength() < 20 && newE->pl().getPolyline().getLength() < 20) {
+        foldEdges(oldE, newE);
+      } else {
+        return false;
+      }
+    }
+
   }
 
   for (auto* oldE : a->getAdjList()) {
@@ -782,7 +798,7 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     if (connecting == oldE) continue;
 
     assert(b != oldE->getFrom());
-    assert(!g->getEdg(oldE->getFrom(), b));
+    // assert(!g->getEdg(oldE->getFrom(), b));
 
     auto* newE = g->addEdg(oldE->getFrom(), b, oldE->pl());
 
@@ -969,7 +985,7 @@ bool Builder::isTriFace(const TransitEdge* a) const {
   //  1  |        ^
   //     c -------|
   //          2
-  // where the contraction of any two nodes would lead to a multigraph
+  // where the contraction of any two nodes would lead to a multigraph.
 
   std::set<const TransitNode *> frNds, toNds;
 
@@ -994,10 +1010,8 @@ void Builder::explicateNonCons(const TransitEdge* m, TransitNode* hub) const {
 
   for (const auto& ro : m->pl().getRoutes()) {
     if (ro.direction == 0) continue;
-
     for (auto ea : hub->getAdjList()) {
       if (ea == m) continue;
-      if (!ea->pl().hasRoute(ro.route)) continue;
       const auto& ero = ea->pl().getRouteOcc(ro.route);
 
       if (ro.direction == ero.direction ||
@@ -1006,4 +1020,38 @@ void Builder::explicateNonCons(const TransitEdge* m, TransitNode* hub) const {
       }
     }
   }
+
+  for (auto ea : hub->getAdjList()) {
+    for (const auto& ro : ea->pl().getRoutes()) {
+      if (ea == m) continue;
+      if (!m->pl().hasRoute(ro.route)) {
+        hub->pl().addConnExc(ro.route, m, ea);
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
+bool Builder::foldEdges(const TransitEdge* a, TransitEdge* b) {
+  std::cerr << "Folding " << a << " and " << b << std::endl;
+  const auto shrNd = TransitGraph::sharedNode(a, b);
+  assert(shrNd);
+
+  // b is the new edge
+
+  for (auto ro : a->pl().getRoutes()) {
+    if (!b->pl().hasRoute(ro.route)) {
+      // simply add the route
+      if (ro.direction == 0) b->pl().addRoute(ro.route, 0);
+      else if (ro.direction == shrNd) b->pl().addRoute(ro.route, shrNd);
+      else if (ro.direction != shrNd) b->pl().addRoute(ro.route, b->getOtherNd(shrNd));
+    } else {
+      // TODO
+    }
+  }
+
+  // TODO:  go through all the exceptions in a and b for all three nodes and
+  // decide which ones are still valid, then re-add them
+
+  return true;
 }

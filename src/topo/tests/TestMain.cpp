@@ -57,6 +57,162 @@ class approx {
 int main(int argc, char** argv) {
   UNUSED(argc);
   UNUSED(argv);
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 1
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+
+    assert(tg.getNds()->size() == 4);
+    assert(a->getAdjList().front()->getOtherNd(a)->getAdjList().front()->pl().getRoutes().size() == 2);
+
+    exit(1);
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 1
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(b, e, &tg);
+
+    assert(tg.getNds()->size() == 4);
+    assert(a->getAdjList().front()->getOtherNd(a)->getAdjList().front()->pl().getRoutes().size() == 2);
+    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //    2        1          2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{100.0, 0.0}});
+    auto b = tg.addNd({{200.0, 0.0}});
+    auto c = tg.addNd({{300.0, 0.0}});
+    auto d = tg.addNd({{400.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{100.0, 0.0}, {200.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{200.0, 0.0}, {300.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{300.0, 0.0}, {400.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(b, c, &tg);
+
+    assert(tg.getNds()->size() == 3);
+    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //    2        1          2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{100.0, 0.0}});
+    auto b = tg.addNd({{200.0, 0.0}});
+    auto c = tg.addNd({{300.0, 0.0}});
+    auto d = tg.addNd({{400.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{100.0, 0.0}, {200.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{200.0, 0.0}, {300.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{300.0, 0.0}, {400.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, b, &tg);
+
+    assert(tg.getNds()->size() == 3);
+    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+
+  }
+
+
 
   // ___________________________________________________________________________
   {

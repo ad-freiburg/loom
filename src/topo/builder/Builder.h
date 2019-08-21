@@ -78,6 +78,8 @@ class Builder {
   bool contractNodes(TransitGraph* g);
   bool contractEdges(TransitGraph* g);
 
+  bool foldEdges(const TransitEdge* a, TransitEdge* b);
+
   bool isTriFace(const TransitEdge* a) const;
   void explicateNonCons(const TransitEdge* m, TransitNode* hub) const;
 
