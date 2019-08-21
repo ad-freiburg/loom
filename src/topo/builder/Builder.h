@@ -77,6 +77,9 @@ class Builder {
   bool contractNodes(TransitGraph* g);
   bool contractEdges(TransitGraph* g);
 
+  bool isTriFace(const TransitEdge* a) const;
+  void explicateNonCons(const TransitEdge* m, TransitNode* hub) const;
+
   DBox getGraphBoundingBox(const TransitGraph* g) const;
   EdgeGrid getGeoIndex(const TransitGraph* g) const;
 

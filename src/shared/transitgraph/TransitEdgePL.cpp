@@ -97,4 +97,9 @@ bool TransitEdgePL::hasRoute(const Route* r) const {
 }
 
 // _____________________________________________________________________________
+const RouteOcc& TransitEdgePL::getRouteOcc(const Route* r) const {
+  return *_routes.find(RouteOcc(r, 0));
+}
+
+// _____________________________________________________________________________
 int64_t TransitEdgePL::getGeneration() const { return _generation; }

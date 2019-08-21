@@ -79,7 +79,7 @@ ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g, bool final,
 
 // _____________________________________________________________________________
 bool Builder::crossesAt(const TransitNode* a, const TransitEdge* ea,
-                                const TransitEdge* eb) const {
+                        const TransitEdge* eb) const {
   if (!(ea->getTo() == a || ea->getFrom() == a) ||
       !(eb->getTo() == a || eb->getFrom() == a))
     return false;
@@ -399,19 +399,24 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
       std::cerr << "A " << wefrom << " -> " << a << std::endl;
       edgeRpl(wefrom, w.e, eaE);
     } else {
+      // this is the case when e.from->a was below the merge threshold
+      std::cerr << "A1" << std::endl;
       edgeRpl(a, w.e, abE);
     }
 
     if (b != weto) {
       ebE = g->addEdg(b, weto);
-      std::cerr << "B "  << b << " -> " << weto <<  std::endl;
+      std::cerr << "B " << b << " -> " << weto << std::endl;
       edgeRpl(weto, w.e, ebE);
     } else {
       assert(b == weto);
+      // this is the case when b->e.to was below the merge threshold
+      std::cerr << "B1" << std::endl;
       edgeRpl(b, w.e, abE);
     }
 
     if (fap.totalPos > fbp.totalPos) {
+      std::cerr << "(rev)" << std::endl;
       if (a != wfto) {
         faE = g->addEdg(a, wfto);
         std::cerr << "C" << std::endl;
@@ -429,6 +434,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
         edgeRpl(b, w.f, abE);
       }
     } else {
+      std::cerr << "(not rev)" << std::endl;
       if (a != wffrom) {
         faE = g->addEdg(wffrom, a);
         std::cerr << "E" << std::endl;
@@ -515,14 +521,14 @@ void Builder::averageNodePositions(TransitGraph* g) {
 
 // _____________________________________________________________________________
 void Builder::removeEdgeArtifacts(TransitGraph* g) {
-  while (contractNodes(g)) {}
-    ;
+  while (contractNodes(g)) {
+  };
 }
 
 // _____________________________________________________________________________
 void Builder::removeNodeArtifacts(TransitGraph* g) {
-  while (contractEdges(g)) {}
-    ;
+  while (contractEdges(g)) {
+  };
 }
 
 // _____________________________________________________________________________
@@ -535,8 +541,9 @@ bool Builder::contractNodes(TransitGraph* g) {
       if (e->pl().getPolyline().getLength() < MIN_SEG_LENGTH) {
         auto from = e->getFrom();
         auto to = e->getTo();
-        if (from->pl().getStops().size() == 0 ||
-            to->pl().getStops().size() == 0) {
+        if ((from->pl().getStops().size() == 0 ||
+             to->pl().getStops().size() == 0) &&
+            !isTriFace(e)) {
           combineNodes(from, to, g);
           return true;
         }
@@ -661,6 +668,15 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
   TransitEdge* connecting = g->getEdg(a, b);
   assert(connecting);
 
+  // look for lines on {a, b} which serve as a continuation blocker,
+  // for example
+  //     1->      <-1
+  // a ------> b -----> c
+  // these have to be integrated as explicit connection exceptions to b
+  // to prevent their loss later on
+  explicateNonCons(connecting, b);
+  explicateNonCons(connecting, a);
+
   // we will delete a and the connecting edge {a, b}.
   // b will be the contracted node
 
@@ -719,8 +735,10 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     if (connecting == oldE) continue;
 
     assert(b != oldE->getTo());
+    assert(!g->getEdg(b, oldE->getTo()));
 
-    // add a new edge going from b to the non-a node
+    // add a new edge going from b to the non-a node, will
+    // retrieve the existing edge with the routes in it from above if existing
     auto* newE = g->addEdg(b, oldE->getTo(), oldE->pl());
 
     // update route dirs
@@ -736,6 +754,7 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     if (connecting == oldE) continue;
 
     assert(b != oldE->getFrom());
+    assert(!g->getEdg(oldE->getFrom(), b));
 
     auto* newE = g->addEdg(oldE->getFrom(), b, oldE->pl());
 
@@ -909,6 +928,53 @@ void Builder::routeDirRepl(TransitNode* oldN, TransitNode* newN,
 
       // add new
       e->pl().getRoutes().insert(newRo);
+    }
+  }
+}
+
+// _____________________________________________________________________________
+bool Builder::isTriFace(const TransitEdge* a) const {
+  // checks whether an edge is part of something like this:
+  //         1
+  //     a -----> b
+  //  1  |        ^
+  //     c -------|
+  //          2
+  // where the contraction of any two nodes would lead to a multigraph
+
+  std::set<const TransitNode *> frNds, toNds;
+
+  for (auto e : a->getFrom()->getAdjList()) {
+    frNds.insert(e->getOtherNd(a->getFrom()));
+  }
+
+  for (auto e : a->getTo()->getAdjList()) {
+    toNds.insert(e->getOtherNd(a->getTo()));
+  }
+
+  std::vector<const TransitNode*> iSect;
+  set_intersection(frNds.begin(), frNds.end(), toNds.begin(), toNds.end(),
+                   std::back_inserter(iSect));
+
+  return iSect.size() > 0;
+}
+
+// _____________________________________________________________________________
+void Builder::explicateNonCons(const TransitEdge* m, TransitNode* hub) const {
+  assert(m->getFrom() == hub || m->getTo() == hub);
+
+  for (const auto& ro : m->pl().getRoutes()) {
+    if (ro.direction == 0) continue;
+
+    for (auto ea : hub->getAdjList()) {
+      if (ea == m) continue;
+      if (!ea->pl().hasRoute(ro.route)) continue;
+      const auto& ero = ea->pl().getRouteOcc(ro.route);
+
+      if (ro.direction == ero.direction ||
+          m->getOtherNd(ro.direction) == ea->getOtherNd(ero.direction)) {
+        hub->pl().addConnExc(ro.route, m, ea);
+      }
     }
   }
 }

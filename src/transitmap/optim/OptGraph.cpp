@@ -1074,8 +1074,6 @@ bool OptGraph::dirRouteContains(const OptEdge* a, const OptEdge* b) {
 
 // _____________________________________________________________________________
 bool OptGraph::dirRouteEqualIn(const OptEdge* a, const OptEdge* b) {
-
-
   if (a->pl().getCardinality() != b->pl().getCardinality()) {
     return false;
   }

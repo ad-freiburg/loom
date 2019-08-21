@@ -55,6 +55,7 @@ class TransitEdgePL : util::geograph::GeoEdgePL<double> {
   std::set<RouteOcc>& getRoutes();
 
   bool hasRoute(const Route* r) const;
+  const RouteOcc& getRouteOcc(const Route* r) const;
 
   const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;
