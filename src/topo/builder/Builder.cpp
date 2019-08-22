@@ -749,11 +749,6 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     }
   }
 
-  // remove the original exceptions
-  for (const auto& ro : toDel) {
-    b->pl().delConnExc(ro.first, ro.second.first, ro.second.second);
-  }
-
   for (auto* oldE : a->getAdjList()) {
     if (oldE->getFrom() != a) continue;
     if (connecting == oldE) continue;
@@ -772,6 +767,20 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       edgeRpl(newE->getTo(), oldE, newE);
       edgeRpl(newE->getFrom(), oldE, newE);
     } else {
+      // edge is already existing, check if both oldE and newE are short
+      // enough for contraction
+      //
+      // TODO!!! this has to be the same as MIN_SEG_LENGTH in contractNodes()
+      // and should be defined globally
+      //
+      // TODO!!! we cannot just abort here, because we changed stuff above
+      // This check has to be done in isTriFace()!
+      if (oldE->pl().getPolyline().getLength() < 20 && newE->pl().getPolyline().getLength() < 20) {
+        foldEdges(oldE, newE);
+      } else {
+        return false;
+      }
+
       // update route dirs
       routeDirRepl(a, b, newE);
 
@@ -779,16 +788,6 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       edgeRpl(newE->getTo(), oldE, newE);
       edgeRpl(newE->getFrom(), oldE, newE);
 
-      // edge is already existing, check if both oldE and newE are short
-      // enough for contraction
-      //
-      // TODO!!! this has to be the same as MIN_SEG_LENGTH in contractNodes()
-      // and should be defined globally
-      if (oldE->pl().getPolyline().getLength() < 20 && newE->pl().getPolyline().getLength() < 20) {
-        foldEdges(oldE, newE);
-      } else {
-        return false;
-      }
     }
 
   }
@@ -809,6 +808,12 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     edgeRpl(newE->getTo(), oldE, newE);
     edgeRpl(newE->getFrom(), oldE, newE);
   }
+
+  // remove the original exceptions
+  for (const auto& ro : toDel) {
+    b->pl().delConnExc(ro.first, ro.second.first, ro.second.second);
+  }
+
 
   g->delEdg(a, b);
   g->delNd(a);
@@ -1032,12 +1037,104 @@ void Builder::explicateNonCons(const TransitEdge* m, TransitNode* hub) const {
 }
 
 // _____________________________________________________________________________
-bool Builder::foldEdges(const TransitEdge* a, TransitEdge* b) {
+bool Builder::lostIn(const Route* r, const TransitEdge* a) const {
+  auto fr = a->getFrom();
+  auto to = a->getTo();
+
+  auto aro = a->pl().getRouteOcc(r);
+
+  bool lost = true;
+
+  for (auto e : fr->getAdjList()) {
+    if (e == a) continue;
+    if (!e->pl().hasRoute(r)) continue;
+    if (!fr->pl().connOccurs(r, e, a)) continue;
+
+    const auto& ero = e->pl().getRouteOcc(r);
+    if (ero.direction == 0) {
+      lost = false;
+      break;
+    }
+    if (aro.direction == 0) {
+      lost = false;
+      break;
+    }
+
+    if (ero.direction == fr && aro.direction != fr) {
+      lost = false;
+      break;
+    }
+    if (aro.direction == fr && ero.direction != fr) {
+      lost = false;
+      break;
+    }
+  }
+
+  if (lost) return true;
+
+  for (auto e : to->getAdjList()) {
+    if (e == a) continue;
+    if (!e->pl().hasRoute(r)) continue;
+    if (!fr->pl().connOccurs(r, e, a)) continue;
+
+    const auto& ero = e->pl().getRouteOcc(r);
+    if (ero.direction == 0) return false;
+    if (aro.direction == 0) return false;
+
+    if (ero.direction == fr && aro.direction != fr) return false;
+    if (aro.direction == fr && ero.direction != fr) return false;
+  }
+
+  return true;
+}
+
+// _____________________________________________________________________________
+bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
   std::cerr << "Folding " << a << " and " << b << std::endl;
   const auto shrNd = TransitGraph::sharedNode(a, b);
+  const auto minNonShrNd = a->getOtherNd(shrNd);
+  const auto majNonShrNd = b->getOtherNd(shrNd);
   assert(shrNd);
 
   // b is the new edge
+  //
+  // TODO:  go through all the exceptions in a and b for all three nodes and
+  // decide which ones are still valid, then re-add them
+
+  explicateNonCons(a, shrNd);
+  explicateNonCons(b, shrNd);
+
+  // remove "lost lines" which are on one of the fold edges, but cannot
+  // leave it
+  std::vector<const Route*> lostA, lostB;
+  for (auto ro : a->pl().getRoutes()) {
+    if (lostIn(ro.route, a)) {
+      std::cerr << ro.route->getId() << " lost in fold edge " << a << std::endl;
+      lostA.push_back(ro.route);
+    }
+  }
+  for (auto ro : b->pl().getRoutes()) {
+    if (lostIn(ro.route, b)) {
+      std::cerr << ro.route->getId() << " lost in fold edge " << b << std::endl;
+      lostB.push_back(ro.route);
+    }
+  }
+
+  for (auto r : lostA) a->pl().delRoute(r);
+  for (auto r : lostB) b->pl().delRoute(r);
+
+  auto keptExcsShrd = keptExcs(shrNd, a, b);
+  auto keptExcsMajNonShrd = keptExcs(majNonShrNd, a, b);
+
+  shrNd->pl().getConnExc().clear();
+  for (auto  ex : keptExcsShrd) {
+    shrNd->pl().addConnExc(ex.first, ex.second.first, ex.second.second);
+  }
+
+  majNonShrNd->pl().getConnExc().clear();
+  for (auto  ex : keptExcsMajNonShrd) {
+    majNonShrNd->pl().addConnExc(ex.first, ex.second.first, ex.second.second);
+  }
 
   for (auto ro : a->pl().getRoutes()) {
     if (!b->pl().hasRoute(ro.route)) {
@@ -1050,8 +1147,102 @@ bool Builder::foldEdges(const TransitEdge* a, TransitEdge* b) {
     }
   }
 
-  // TODO:  go through all the exceptions in a and b for all three nodes and
-  // decide which ones are still valid, then re-add them
-
   return true;
+}
+
+// _____________________________________________________________________________
+std::vector<std::pair<const Route*, std::pair<const TransitEdge*, const TransitEdge*>>> Builder::keptExcs(TransitNode* nd, const TransitEdge* a, const TransitEdge* b) {
+  std::vector<std::pair<const Route*, std::pair<const TransitEdge*, const TransitEdge*>>> ret;
+  for (auto ex : nd->pl().getConnExc()) {
+    for (auto fr : ex.second) {
+      for (auto to : fr.second) {
+        if (fr.first == to) continue;
+        if (fr.first == a && to == b) continue;
+        if (fr.first == b && to == a) continue;
+
+        // the exception does not concern the folded edges, so we
+        // keep the exception
+        if (a != fr.first && a != to && b != fr.first && b != to) {
+          ret.push_back({ex.first, {fr.first, to}});
+          continue;
+        }
+
+        // if the route is not contained in any edge, continue
+        if (!a->pl().hasRoute(ex.first) && !b->pl().hasRoute(ex.first)) continue;
+
+        // if the route is only contained in one edge
+        if (a->pl().hasRoute(ex.first) ^ b->pl().hasRoute(ex.first)) {
+          if (a->pl().hasRoute(ex.first) && a != fr.first && a != to) {
+            // but the edge doesnt occur in the exceptions, so drop it
+            continue;
+          }
+          if (b->pl().hasRoute(ex.first) && b != fr.first && b != to) {
+            // but the edge doesnt occur in the exceptions, so drop it
+            continue;
+          }
+          auto nfr = fr.first;
+          auto nto = to;
+          if (nfr == a) nfr = b;
+          if (nto == a) nto = b;
+
+          std::cerr << "ex -A" << std::endl;
+          ret.push_back({ex.first, {nfr, nto}});
+          continue;
+        }
+
+        // if the route is contained in both edges, we must check if the
+        // exception is overridden by the other edge
+        if (a->pl().hasRoute(ex.first) && b->pl().hasRoute(ex.first)) {
+          if (fr.first == a || to == a) {
+            // concerns a
+            auto otherEdge = fr.first == a ? to : fr.first;
+            if (nd->pl().connOccurs(ex.first, b, otherEdge)) {
+              // okay, there is no exception.
+              // Important: we can be sure that a connection is possible then,
+              // because we explicated direction-induced restrictions before!
+
+              // -> drop this exception!
+              std::cerr << "ex A+ (" << ex.first->getId() << ", " << fr.first << " -> " << to << std::endl;
+            } else {
+              // else, keep it
+              auto nfr = fr.first;
+              auto nto = to;
+              if (nfr == a) nfr = b;
+              if (nto == a) nto = b;
+              std::cerr << "ex A" << std::endl;
+              ret.push_back({ex.first, {nfr, nto}});
+            }
+
+          } else if (fr.first == b || to == b) {
+            // concerns b
+
+            auto otherEdge = fr.first == b ? to : fr.first;
+
+            std::cerr << a << " vs " << otherEdge << std::endl;
+
+            std::cerr << nd->pl().getConnExc().begin()->second.begin()->first << std::endl;
+            std::cerr << *nd->pl().getConnExc().begin()->second.begin()->second.begin() << std::endl;
+            if (nd->pl().connOccurs(ex.first, a, otherEdge)) {
+              // okay, there is no exception.
+              // Important: we can be sure that a connection is possible then,
+              // because we explicated direction-induced restrictions before!
+
+              // -> drop this exception!
+              std::cerr << "ex B+ (" << ex.first->getId() << ", " << fr.first << " -> " << to << std::endl;
+            } else {
+              // else, keep it
+              auto nfr = fr.first;
+              auto nto = to;
+              if (nfr == a) nfr = b;
+              if (nto == a) nto = b;
+              std::cerr << "ex B" << std::endl;
+              ret.push_back({ex.first, {nfr, nto}});
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return ret;
 }

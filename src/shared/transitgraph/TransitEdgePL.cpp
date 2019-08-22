@@ -59,6 +59,12 @@ void TransitEdgePL::addRoute(const Route* r, const TransitNode* dir) {
 }
 
 // _____________________________________________________________________________
+void TransitEdgePL::delRoute(const Route* r) {
+  RouteOcc occ(r, 0);
+  _routes.erase(occ);
+}
+
+// _____________________________________________________________________________
 const std::set<RouteOcc>& TransitEdgePL::getRoutes() const { return _routes; }
 
 // _____________________________________________________________________________

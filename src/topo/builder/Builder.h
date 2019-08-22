@@ -78,13 +78,17 @@ class Builder {
   bool contractNodes(TransitGraph* g);
   bool contractEdges(TransitGraph* g);
 
-  bool foldEdges(const TransitEdge* a, TransitEdge* b);
+  bool foldEdges(TransitEdge* a, TransitEdge* b);
 
   bool isTriFace(const TransitEdge* a) const;
   void explicateNonCons(const TransitEdge* m, TransitNode* hub) const;
 
+  std::vector<std::pair<const Route*, std::pair<const TransitEdge*, const TransitEdge*>>> keptExcs(TransitNode* nd, const TransitEdge* a, const TransitEdge* b);
+
   DBox getGraphBoundingBox(const TransitGraph* g) const;
   EdgeGrid getGeoIndex(const TransitGraph* g) const;
+
+  bool lostIn(const Route* r, const TransitEdge* a) const;
 
   mutable std::set<const TransitEdge*> _indEdges;
   mutable std::set<std::pair<const TransitEdge*, const TransitEdge*> > _indEdgesPairs;
