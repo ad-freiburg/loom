@@ -797,16 +797,40 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     if (connecting == oldE) continue;
 
     assert(b != oldE->getFrom());
-    // assert(!g->getEdg(oldE->getFrom(), b));
+    auto* newE = g->getEdg(oldE->getFrom(), b);
 
-    auto* newE = g->addEdg(oldE->getFrom(), b, oldE->pl());
+    if (!newE) {
+      newE = g->addEdg(oldE->getFrom(), b, oldE->pl());
 
-    // update route dirs
-    routeDirRepl(a, b, newE);
+      // update route dirs
+      routeDirRepl(a, b, newE);
 
-    // replace each occurance of oldE in the non-a node with the newE
-    edgeRpl(newE->getTo(), oldE, newE);
-    edgeRpl(newE->getFrom(), oldE, newE);
+      // replace each occurance of oldE in the non-a node with the newE
+      edgeRpl(newE->getTo(), oldE, newE);
+      edgeRpl(newE->getFrom(), oldE, newE);
+    } else {
+      // edge is already existing, check if both oldE and newE are short
+      // enough for contraction
+      //
+      // TODO!!! this has to be the same as MIN_SEG_LENGTH in contractNodes()
+      // and should be defined globally
+      //
+      // TODO!!! we cannot just abort here, because we changed stuff above
+      // This check has to be done in isTriFace()!
+      if (oldE->pl().getPolyline().getLength() < 20 && newE->pl().getPolyline().getLength() < 20) {
+        std::cerr << "knurr" << std::endl;
+        foldEdges(oldE, newE);
+      } else {
+        return false;
+      }
+
+      // update route dirs
+      routeDirRepl(a, b, newE);
+
+      // replace each occurance of oldE in the non-a node with the newE
+      edgeRpl(newE->getTo(), oldE, newE);
+      edgeRpl(newE->getFrom(), oldE, newE);
+    }
   }
 
   // remove the original exceptions
@@ -1075,14 +1099,14 @@ bool Builder::lostIn(const Route* r, const TransitEdge* a) const {
   for (auto e : to->getAdjList()) {
     if (e == a) continue;
     if (!e->pl().hasRoute(r)) continue;
-    if (!fr->pl().connOccurs(r, e, a)) continue;
+    if (!to->pl().connOccurs(r, e, a)) continue;
 
     const auto& ero = e->pl().getRouteOcc(r);
     if (ero.direction == 0) return false;
     if (aro.direction == 0) return false;
 
-    if (ero.direction == fr && aro.direction != fr) return false;
-    if (aro.direction == fr && ero.direction != fr) return false;
+    if (ero.direction == to && aro.direction != to) return false;
+    if (aro.direction == to && ero.direction != to) return false;
   }
 
   return true;
@@ -1108,12 +1132,14 @@ bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
   // leave it
   std::vector<const Route*> lostA, lostB;
   for (auto ro : a->pl().getRoutes()) {
+    std::cerr << "Checking " << ro.route->getId() << " on " << a << std::endl;
     if (lostIn(ro.route, a)) {
       std::cerr << ro.route->getId() << " lost in fold edge " << a << std::endl;
       lostA.push_back(ro.route);
     }
   }
   for (auto ro : b->pl().getRoutes()) {
+    std::cerr << "Checking " << ro.route->getId() << " on " << b << std::endl;
     if (lostIn(ro.route, b)) {
       std::cerr << ro.route->getId() << " lost in fold edge " << b << std::endl;
       lostB.push_back(ro.route);
@@ -1143,7 +1169,24 @@ bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
       else if (ro.direction == shrNd) b->pl().addRoute(ro.route, shrNd);
       else if (ro.direction != shrNd) b->pl().addRoute(ro.route, b->getOtherNd(shrNd));
     } else {
-      // TODO
+      auto old = b->pl().getRouteOcc(ro.route);
+      if (ro.direction == 0 && old.direction != 0) {
+        // now goes in both directions
+        b->pl().delRoute(ro.route);
+        b->pl().addRoute(ro.route, 0);
+      }
+
+      if (ro.direction == shrNd && old.direction != shrNd) {
+        // now goes in both directions
+        b->pl().delRoute(ro.route);
+        b->pl().addRoute(ro.route, 0);
+      }
+
+      if (ro.direction != shrNd && old.direction == shrNd) {
+        // now goes in both directions
+        b->pl().delRoute(ro.route);
+        b->pl().addRoute(ro.route, 0);
+      }
     }
   }
 
