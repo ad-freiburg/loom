@@ -58,7 +58,6 @@ int main(int argc, char** argv) {
   UNUSED(argc);
   UNUSED(argv);
 
-
   // ___________________________________________________________________________
   {
     // node contraction of c, b
@@ -365,7 +364,7 @@ int main(int argc, char** argv) {
     ce->pl().addRoute(&l2, 0);
     fe->pl().addRoute(&l2, 0);
 
-    b->pl().addConnExc(&l2, ce, be);
+    e->pl().addConnExc(&l2, ce, be);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -373,17 +372,318 @@ int main(int argc, char** argv) {
     topo::Builder builder(&cfg);
     builder.combineNodes(b, c, &tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
-
-    assert(false);
-
-    // TODO: write assertions
-
-    exit(1);
+    assert(tg.getNds()->size() == 5);
+    assert(tg.getEdg(a, c)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(c, e)->pl().getRoutes().begin()->route == &l2);
+    assert(tg.getEdg(c, e)->pl().getRoutes().begin()->direction == 0);
+    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
   }
 
+  // ___________________________________________________________________________
+  {
+    //               f
+    //               |
+    //               |  2
+    //               |
+    //               v
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+    auto f = tg.addNd({{25.0, 20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+    auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+    fe->pl().addRoute(&l2, 0);
+
+    e->pl().addConnExc(&l2, ce, be);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, b, &tg);
+
+    assert(tg.getNds()->size() == 5);
+    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(b, d)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(b, e)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(b, e)->pl().getRoutes().begin()->route == &l2);
+    assert(tg.getEdg(b, e)->pl().getRoutes().begin()->direction == 0);
+    assert(!b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, d)));
+    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //               f
+    //               |
+    //               |  2
+    //               |
+    //               v
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+    auto f = tg.addNd({{25.0, 20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+    auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+    fe->pl().addRoute(&l2, 0);
+
+    e->pl().addConnExc(&l2, ce, be);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+    assert(tg.getNds()->size() == 5);
+    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(b, e)->pl().getRoutes().size() == 2);
+
+    assert(b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, e)));
+    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, e)));
+    assert(!e->pl().connOccurs(&l2, tg.getEdg(b, e), tg.getEdg(d, e)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //               f
+    //               |
+    //               |  2
+    //               |
+    //               v
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+    auto f = tg.addNd({{25.0, 20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+    auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+    fe->pl().addRoute(&l2, 0);
+
+    e->pl().addConnExc(&l2, ce, be);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+    assert(tg.getNds()->size() == 5);
+    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(b, c)->pl().getRoutes().size() == 2);
+
+    assert(b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, c)));
+    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, c)));
+    assert(!c->pl().connOccurs(&l2, tg.getEdg(b, c), tg.getEdg(d, c)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //               f
+    //               |
+    //               |  2
+    //               |
+    //               v
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+    auto f = tg.addNd({{25.0, 20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+    auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+    fe->pl().addRoute(&l2, 0);
+
+    e->pl().addConnExc(&l2, ce, be);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, b, &tg);
+
+    assert(tg.getNds()->size() == 5);
+    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(f, b)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(f, b)->pl().getRoutes().begin()->route == &l2);
+    assert(tg.getEdg(f, b)->pl().getRoutes().begin()->direction == 0);
+
+    assert(tg.getEdg(b, c)->pl().getRoutes().size() == 2);
+
+    assert(b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(f, b)));
+    assert(!b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(c, b)));
+
+    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(c, b)));
+    assert(c->pl().connOccurs(&l1, tg.getEdg(c, d), tg.getEdg(c, b)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //               f
+    //               |
+    //               |  2
+    //               |
+    //               v
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+    auto f = tg.addNd({{25.0, 20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+    auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+    fe->pl().addRoute(&l2, 0);
+
+    e->pl().addConnExc(&l2, ce, be);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(b, e, &tg);
+
+    assert(tg.getNds()->size() == 5);
+    assert(tg.getEdg(a, e)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(f, e)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(f, e)->pl().getRoutes().begin()->route == &l2);
+    assert(tg.getEdg(f, e)->pl().getRoutes().begin()->direction == 0);
+
+    assert(tg.getEdg(e, c)->pl().getRoutes().size() == 2);
+
+    assert(e->pl().connOccurs(&l2, tg.getEdg(a, e), tg.getEdg(f, e)));
+    assert(!e->pl().connOccurs(&l2, tg.getEdg(a, e), tg.getEdg(c, e)));
+
+    assert(e->pl().connOccurs(&l1, tg.getEdg(a, e), tg.getEdg(c, e)));
+    assert(c->pl().connOccurs(&l1, tg.getEdg(c, d), tg.getEdg(c, e)));
+  }
 
   // ==========================================================================
 
