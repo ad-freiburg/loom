@@ -695,6 +695,13 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
   explicateNonCons(connecting, b);
   explicateNonCons(connecting, a);
 
+  // remove restrictions in a which are circumvented because b is a terminus
+  terminusPass(a, connecting);
+
+  // remove restrictions in a which are circumvented because b is a terminus
+  terminusPass(b, connecting);
+
+
   // we will delete a and the connecting edge {a, b}.
   // b will be the contracted node
 
@@ -749,12 +756,6 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     }
   }
 
-  // remove restrictions in a which are circumvented because b is a terminus
-  terminusPass(a, connecting);
-
-  // remove restrictions in a which are circumvented because b is a terminus
-  terminusPass(b, connecting);
-
   for (auto* oldE : a->getAdjList()) {
     if (oldE->getFrom() != a) continue;
     if (connecting == oldE) continue;
@@ -795,7 +796,6 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       edgeRpl(newE->getFrom(), oldE, newE);
 
     }
-
   }
 
   for (auto* oldE : a->getAdjList()) {
@@ -1305,7 +1305,7 @@ void Builder::terminusPass(TransitNode* nd, const TransitEdge* edg) {
     for (const auto& exFr : ro.second) {
       for (const auto& exTo : exFr.second) {
         // don't handle exceptions to/from the connecting edge
-        if (exFr.first == edg || exTo != edg) continue;
+        if (exFr.first == edg || exTo == edg) continue;
 
         if (edg->pl().hasRoute(ro.first)) {
           auto edgRo = edg->pl().getRouteOcc(ro.first);
@@ -1317,14 +1317,14 @@ void Builder::terminusPass(TransitNode* nd, const TransitEdge* edg) {
           bool term = true;
           for (auto eEdg : otherNd->getAdjList()) {
             if (eEdg == edg) continue;
-            if (eEdg->pl().hasRoute(edgRo.route)) {
+            if (eEdg->pl().hasRoute(edgRo.route) && otherNd->pl().connOccurs(edgRo.route, eEdg, edg)) {
               term = false;
               break;
             }
           }
 
           if (term) {
-            std::cerr << "Connection exception for line " << ro.first->getId() << " in node " << nd << " from edge " << exFr.first << " to node " << exTo << " is circumvented because " << ro.first->getId() << " is a terminus in " << otherNd << std::endl;
+            std::cerr << "Connection exception for line " << ro.first->getId() << " in node " << nd << " from edge " << exFr.first << " to edge " << exTo << " is circumvented because " << ro.first->getId() << " is a terminus in " << otherNd << std::endl;
             toDel.push_back({ro.first, {exFr.first, exTo}});
           }
         }

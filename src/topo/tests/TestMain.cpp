@@ -92,18 +92,300 @@ int main(int argc, char** argv) {
 
     builder.combineNodes(b, d, &tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
+    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+
+    assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    // node contraction of c, b
+    //    1      1
+    // a ---> b ---> c
+    //        ^
+    //        |  1|
+    //        d   v
+    //           (d is a terminus for 1, but 1 doesn leave d)
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{100.0, 0.0}});
+    auto d = tg.addNd({{50.0, -50.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {50.0, -50.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l1, 0);
+    bd->pl().addRoute(&l1, d);
+
+    b->pl().addConnExc(&l1, ab, bc);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(b, d, &tg);
+
+    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+
+    assert(!d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    // node contraction of c, b
+    //    1      1
+    // a ---> b ---> c
+    //        ^
+    //        |  1|
+    //        d   v
+    //        |  (d is a terminus for 1, but 1 doesn leave d)
+    //     2  |
+    //        v
+    //        e
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{100.0, 0.0}});
+    auto d = tg.addNd({{50.0, -50.0}});
+    auto e = tg.addNd({{50.0, -100.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {50.0, -50.0}}});
+    auto de = tg.addEdg(d, e, {{{50.0, -50.0}, {50.0, -100.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l1, 0);
+    bd->pl().addRoute(&l1, d);
+    de->pl().addRoute(&l2, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(b, d, &tg);
+
+    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+
+    assert(!d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    // node contraction of c, b
+    //    1      1
+    // a ---> b ---> c
+    //        ^
+    //        |  1
+    //        d
+    //        |  (d is a terminus for 1)
+    //     2  |
+    //        v
+    //        e
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{100.0, 0.0}});
+    auto d = tg.addNd({{50.0, -50.0}});
+    auto e = tg.addNd({{50.0, -100.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {50.0, -50.0}}});
+    auto de = tg.addEdg(d, e, {{{50.0, -50.0}, {50.0, -100.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l1, 0);
+    bd->pl().addRoute(&l1, 0);
+    de->pl().addRoute(&l2, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(b, d, &tg);
+
+
+    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+
+    assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    // node contraction of c, b
+    //    1      1
+    // a ---> b ---> c
+    //        ^
+    //        |  1
+    //        d
+    //        |  (d is a terminus for 1 because of an exception)
+    //     1  |
+    //        v
+    //        e
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{100.0, 0.0}});
+    auto d = tg.addNd({{50.0, -50.0}});
+    auto e = tg.addNd({{50.0, -100.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {50.0, -50.0}}});
+    auto de = tg.addEdg(d, e, {{{50.0, -50.0}, {50.0, -100.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l1, 0);
+    bd->pl().addRoute(&l1, 0);
+    de->pl().addRoute(&l1, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+    d->pl().addConnExc(&l1, de, bd);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(b, d, &tg);
 
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
 
     assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
 
+    // this is prevented by the original exception in d
+    assert(!d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(d, e)));
+    assert(!d->pl().connOccurs(&l1, tg.getEdg(d, c), tg.getEdg(d, e)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    // node contraction of c, b
+    //    1      1
+    // a ---> b ---> c
+    //        ^    /
+    //        | 1 / 1
+    //        d -/
+    //               (d is a terminus for 1 because of an exception)
+
+    std::cerr << "------------" << std::endl;
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{5.0, 0.0}});
+    auto c = tg.addNd({{10.0, 0.0}});
+    auto d = tg.addNd({{5.0, -5.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {5.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{5.0, 0.0}, {10.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{5.0, 0.0}, {5.0, -5.0}}});
+    auto dc = tg.addEdg(d, c, {{{5.0, -5.0}, {10.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l1, 0);
+    bd->pl().addRoute(&l1, 0);
+    dc->pl().addRoute(&l1, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+    d->pl().addConnExc(&l1, dc, bd);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(b, d, &tg);
+
+    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+
+    assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //               f
+    //               |
+    //               |  2
+    //               |
+    //               v
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+    auto f = tg.addNd({{25.0, 20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+    auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+    fe->pl().addRoute(&l2, 0);
+
+    b->pl().addConnExc(&l2, ce, be);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(b, c, &tg);
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
+    assert(false);
+
+    // TODO: write assertions
+
     exit(1);
   }
 
+
+  // ==========================================================================
 
   // ___________________________________________________________________________
   {
@@ -310,8 +592,8 @@ int main(int argc, char** argv) {
   {
     //               e
     //              ^ ^
-    //             /   \
-    //          3 /     \ 2
+    //             /   \   ^
+    //          3 /     \ 2|
     //           /       \
     //    1,2   /   2     \    1,2
     // a -----> b ------> c ------> d
@@ -338,7 +620,7 @@ int main(int argc, char** argv) {
     cd->pl().addRoute(&l1, 0);
     cd->pl().addRoute(&l2, 0);
     be->pl().addRoute(&l3, 0);
-    ce->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, e);
 
     c->pl().addConnExc(&l2, cd, bc);
 
@@ -348,13 +630,15 @@ int main(int argc, char** argv) {
     topo::Builder builder(&cfg);
     builder.combineNodes(c, e, &tg);
 
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
     assert(tg.getNds()->size() == 4);
 
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
   }
@@ -450,9 +734,6 @@ int main(int argc, char** argv) {
     topo::Builder builder(&cfg);
     builder.combineNodes(b, c, &tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
 
     // c will be the kept node
     for (auto edg : c->getAdjList()) {
