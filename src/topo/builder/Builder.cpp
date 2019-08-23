@@ -749,6 +749,12 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     }
   }
 
+  // remove restrictions in a which are circumvented because b is a terminus
+  terminusPass(a, connecting);
+
+  // remove restrictions in a which are circumvented because b is a terminus
+  terminusPass(b, connecting);
+
   for (auto* oldE : a->getAdjList()) {
     if (oldE->getFrom() != a) continue;
     if (connecting == oldE) continue;
@@ -1285,4 +1291,48 @@ std::vector<std::pair<const Route*, std::pair<const TransitEdge*, const TransitE
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+void Builder::terminusPass(TransitNode* nd, const TransitEdge* edg) {
+  assert(nd == edg->getFrom() || nd == edg->getTo());
+
+  auto otherNd = edg->getOtherNd(nd);
+
+  std::vector<std::pair<const Route*, std::pair<const TransitEdge*, const TransitEdge*>>> toDel;
+
+  for (const auto& ro : nd->pl().getConnExc()) {
+    for (const auto& exFr : ro.second) {
+      for (const auto& exTo : exFr.second) {
+        // don't handle exceptions to/from the connecting edge
+        if (exFr.first == edg || exTo != edg) continue;
+
+        if (edg->pl().hasRoute(ro.first)) {
+          auto edgRo = edg->pl().getRouteOcc(ro.first);
+
+          // only handle lines which go in both directions on edg
+          if (edgRo.direction != 0) continue;
+
+          // check if line has a terminus in nd
+          bool term = true;
+          for (auto eEdg : otherNd->getAdjList()) {
+            if (eEdg == edg) continue;
+            if (eEdg->pl().hasRoute(edgRo.route)) {
+              term = false;
+              break;
+            }
+          }
+
+          if (term) {
+            std::cerr << "Connection exception for line " << ro.first->getId() << " in node " << nd << " from edge " << exFr.first << " to node " << exTo << " is circumvented because " << ro.first->getId() << " is a terminus in " << otherNd << std::endl;
+            toDel.push_back({ro.first, {exFr.first, exTo}});
+          }
+        }
+      }
+    }
+  }
+
+  for (const auto& ro : toDel) {
+    nd->pl().delConnExc(ro.first, ro.second.first, ro.second.second);
+  }
 }

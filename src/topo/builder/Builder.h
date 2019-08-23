@@ -71,6 +71,8 @@ class Builder {
   bool combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g);
   bool combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n, TransitGraph* g);
 
+  void terminusPass(TransitNode* b, const TransitEdge* connecting);
+
   bool crossesAt(const TransitNode* a, const TransitEdge* e, const TransitEdge* f) const;
 
   bool routeEq(const TransitEdge* a, const TransitEdge* b) const;
