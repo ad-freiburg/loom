@@ -1121,9 +1121,6 @@ bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
   assert(shrNd);
 
   // b is the new edge
-  //
-  // TODO:  go through all the exceptions in a and b for all three nodes and
-  // decide which ones are still valid, then re-add them
 
   explicateNonCons(a, shrNd);
   explicateNonCons(b, shrNd);

@@ -57,6 +57,54 @@ class approx {
 int main(int argc, char** argv) {
   UNUSED(argc);
   UNUSED(argv);
+
+
+  // ___________________________________________________________________________
+  {
+    // node contraction of c, b
+    //    1      1
+    // a ---> b ---> c
+    //        ^
+    //        |  1
+    //        d
+    //           (d is a terminus for 1)
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{100.0, 0.0}});
+    auto d = tg.addNd({{50.0, -50.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {50.0, -50.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l1, 0);
+    bd->pl().addRoute(&l1, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(b, d, &tg);
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
+    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+
+    assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
+
+    exit(1);
+  }
+
+
   // ___________________________________________________________________________
   {
     //               e
@@ -97,7 +145,8 @@ int main(int argc, char** argv) {
 
 
     topo::Builder builder(&cfg);
-    builder.combineNodes(e, b, &tg);
+    builder.combineNodes(c, e, &tg);
+
 
     assert(tg.getNds()->size() == 4);
     // line 1 on bc is deleted because it cannot leave bc
@@ -108,7 +157,6 @@ int main(int argc, char** argv) {
     assert(d->getAdjList().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
-
   }
   // ___________________________________________________________________________
   {
@@ -149,7 +197,7 @@ int main(int argc, char** argv) {
     cfg.maxAggrDistance = 50;
 
     topo::Builder builder(&cfg);
-    builder.combineNodes(e, b, &tg);
+    builder.combineNodes(c, e, &tg);
 
     assert(tg.getNds()->size() == 4);
     // line 2 is deleted because it is lost
@@ -201,16 +249,15 @@ int main(int argc, char** argv) {
     cfg.maxAggrDistance = 50;
 
     topo::Builder builder(&cfg);
-    builder.combineNodes(e, b, &tg);
+    builder.combineNodes(c, e, &tg);
 
     assert(tg.getNds()->size() == 4);
 
-    // line 3 is contracted,  line 2 on ce is a dead end, but line 2 on bc is
-    // not (can continue to ce)
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == d->getAdjList().front()->getOtherNd(d));
-    assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
+    // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
   }
   // ___________________________________________________________________________
@@ -252,11 +299,12 @@ int main(int argc, char** argv) {
     cfg.maxAggrDistance = 50;
 
     topo::Builder builder(&cfg);
-    builder.combineNodes(e, b, &tg);
+    builder.combineNodes(c, e, &tg);
 
     assert(tg.getNds()->size() == 4);
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+
   }
   // ___________________________________________________________________________
   {
@@ -298,13 +346,14 @@ int main(int argc, char** argv) {
     cfg.maxAggrDistance = 50;
 
     topo::Builder builder(&cfg);
-    builder.combineNodes(e, b, &tg);
+    builder.combineNodes(c, e, &tg);
 
     assert(tg.getNds()->size() == 4);
 
-    // 3 on be and 2 on ce are lost, but 2 on bc is not (can continue to ce)
+    // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    // TODO: fix this as soon as connOccurs does what its name suggests
     assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
@@ -346,17 +395,1290 @@ int main(int argc, char** argv) {
     cfg.maxAggrDistance = 50;
 
     topo::Builder builder(&cfg);
-    builder.combineNodes(b, e, &tg);
+    builder.combineNodes(c, e, &tg);
 
     assert(tg.getNds()->size() == 4);
     // 1 on ec was deleted, 2 on be was deleted
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
 
-    assert(c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
 
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(b, c, &tg);
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
+    // c will be the kept node
+    for (auto edg : c->getAdjList()) {
+      if (edg->getOtherNd(c) != d) {
+        if (edg->pl().getRoutes().size() == 0) e = edg->getOtherNd(c);
+        else a = edg->getOtherNd(c);
+      }
+    }
+
+    assert(tg.getNds()->size() == 4);
+
+    assert(tg.getEdg(a, c));
+    assert(tg.getEdg(a, c)->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(c, d));
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(c, e));
+    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 1);
+
+    // this is prohibited by the connection exception
+    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
+
+    // there may be an edge with 2 going out of e, in which case
+    // we dont want to restore a connection between b and c
+    // the case where e is a terminus is handled by the subsequent contraction
+    // (if be and ce are short enough)
+    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+
+
+    exit(1);
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    e->pl().addConnExc(&l2, be, ce);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(b, c, &tg);
+
+    // c will be the kept node
+    for (auto edg : c->getAdjList()) {
+      if (edg->getOtherNd(c) != d) {
+        if (edg->pl().getRoutes().size() == 0) e = edg->getOtherNd(c);
+        else a = edg->getOtherNd(c);
+      }
+    }
+
+    assert(tg.getNds()->size() == 4);
+
+    assert(tg.getEdg(a, c));
+    assert(tg.getEdg(a, c)->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(c, d));
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(c, e));
+    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 0);
+
+    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+
+    assert(c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          3 /     \ 2
+    //           /       \
+    //    1,2   /   2->   \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, c);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l3, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    c->pl().addConnExc(&l2, cd, ce);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(b, c, &tg);
+
+    // c will be the kept node
+    for (auto edg : c->getAdjList()) {
+      if (edg->getOtherNd(c) != d) {
+        if (edg->pl().getRoutes().size() == 0) e = edg->getOtherNd(c);
+        else a = edg->getOtherNd(c);
+      }
+    }
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
+    assert(tg.getNds()->size() == 4);
+    // all 3 lines in the triangle are lost
+    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 0);
+
+    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 1
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l1, 0);
+
+    c->pl().addConnExc(&l2, cd, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(b, c, &tg);
+
+    // c will be the kept node
+    for (auto edg : c->getAdjList()) {
+      if (edg->getOtherNd(c) != d) {
+        if (edg->pl().getRoutes().size() == 0) e = edg->getOtherNd(c);
+        else a = edg->getOtherNd(c);
+      }
+    }
+
+    assert(tg.getNds()->size() == 4);
+    // all 3 lines in the triangle are lost
+    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 0);
+
+    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          3 /     \ 2
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l3, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    c->pl().addConnExc(&l2, cd, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(b, c, &tg);
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
+    // c will be the kept node
+    for (auto edg : c->getAdjList()) {
+      if (edg->getOtherNd(c) != d) {
+        if (edg->pl().getRoutes().size() == 0) e = edg->getOtherNd(c);
+        else a = edg->getOtherNd(c);
+      }
+    }
+
+    // bc will now be contracted and be and ce will be folded into one edge
+    // with no lines on it, because 2 and 3 are lost on it
+    // neither 1 nor 2 can continue from ab to cd because 1 cannot continue
+    // through the triangle, and 2 is restricted by the exception from cd to bc
+
+    assert(tg.getNds()->size() == 4);
+
+    assert(tg.getEdg(a, c));
+    assert(tg.getEdg(a, c)->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(c, d));
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(c, e));
+    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 0);
+
+    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 1
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(b, c, &tg);
+
+    // bc will now be contracted and be and ce will be folded into one edge
+    // with no lines on it, because 2 and 1 are lost on it
+
+
+    assert(c->getAdjList().size() == 3);
+
+    // c will be the kept node
+    for (auto edg : c->getAdjList()) {
+      if (edg->getOtherNd(c) != d) {
+        if (edg->pl().getRoutes().size() == 0) e = edg->getOtherNd(c);
+        else a = edg->getOtherNd(c);
+      }
+    }
+
+    assert(tg.getNds()->size() == 4);
+
+    assert(tg.getEdg(a, c));
+    assert(tg.getEdg(a, c)->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(c, d));
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(c, e));
+    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 0);
+
+    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
+  }
+
+  // ===========================================================================
+
+
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+
+    assert(tg.getNds()->size() == 4);
+    // line 1 on bc is deleted because it cannot leave bc
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(d->getAdjList().size() == 1);
+    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
+    assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    e->pl().addConnExc(&l2, be, ce);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+    assert(tg.getNds()->size() == 4);
+    // line 2 is deleted because it is lost
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l1);
+
+    // TODO: fix as soon as connOccurs does what its name says
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          3 /     \ 2
+    //           /       \
+    //    1,2   /   2->   \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, c);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l3, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    c->pl().addConnExc(&l2, cd, ce);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+    assert(tg.getNds()->size() == 4);
+
+    // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 1
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l1, 0);
+
+    c->pl().addConnExc(&l2, cd, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+    assert(tg.getNds()->size() == 4);
+    // all 3 lines in the triangle are lost
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          3 /     \ 2
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l3, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    c->pl().addConnExc(&l2, cd, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+    assert(tg.getNds()->size() == 4);
+
+    // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 1
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+    assert(tg.getNds()->size() == 4);
+    // 1 on ec was deleted, 2 on be was deleted
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+
+    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+
+    assert(tg.getNds()->size() == 4);
+    // line 1 on bc is deleted because it cannot leave bc
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(d->getAdjList().size() == 1);
+    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
+    assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    e->pl().addConnExc(&l2, be, ce);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+    assert(tg.getNds()->size() == 4);
+    // line 2 is deleted because it is lost
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l1);
+
+    // TODO: fix as soon as connOccurs does what its name says
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          3 /     \ 2
+    //           /       \
+    //    1,2   /   2->   \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, c);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l3, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    c->pl().addConnExc(&l2, cd, ce);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+    assert(tg.getNds()->size() == 4);
+
+    // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 1
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l1, 0);
+
+    c->pl().addConnExc(&l2, cd, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+    assert(tg.getNds()->size() == 4);
+    // all 3 lines in the triangle are lost
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          3 /     \ 2
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l3, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    c->pl().addConnExc(&l2, cd, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+    assert(tg.getNds()->size() == 4);
+
+    // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 1
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, e, &tg);
+
+    assert(tg.getNds()->size() == 4);
+    // 1 on ec was deleted, 2 on be was deleted
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+
+    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+
+  // ===========================================================================
+
+
+
+
+
+
+
+
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+
+    assert(tg.getNds()->size() == 4);
+    // line 1 on bc is deleted because it cannot leave bc
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(d->getAdjList().size() == 1);
+    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
+    assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    e->pl().addConnExc(&l2, be, ce);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+    assert(tg.getNds()->size() == 4);
+    // line 2 is deleted because it is lost
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l1);
+
+    // TODO: fix as soon as connOccurs does what its name says
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          3 /     \ 2
+    //           /       \
+    //    1,2   /   2->   \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, c);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l3, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    c->pl().addConnExc(&l2, cd, ce);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+    assert(tg.getNds()->size() == 4);
+
+    // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 1
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l1, 0);
+
+    c->pl().addConnExc(&l2, cd, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+    assert(tg.getNds()->size() == 4);
+    // all 3 lines in the triangle are lost
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          3 /     \ 2
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l3, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    c->pl().addConnExc(&l2, cd, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+
+    assert(tg.getNds()->size() == 4);
+
+    // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
   }
   // ___________________________________________________________________________
   {
@@ -399,9 +1721,319 @@ int main(int argc, char** argv) {
 
 
     assert(tg.getNds()->size() == 4);
+    // 1 on ec was deleted, 2 on be was deleted
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == 0);
+
+    assert(c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+
+    assert(tg.getNds()->size() == 4);
+    // line 1 on bc is deleted because it cannot leave bc
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(d->getAdjList().size() == 1);
+    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
+    assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2
+    //           /       \
+    //    1,2   /   1     \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    e->pl().addConnExc(&l2, be, ce);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+    assert(tg.getNds()->size() == 4);
+    // line 2 is deleted because it is lost
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l1);
+
+    // TODO: fix as soon as connOccurs does what its name says
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          3 /     \ 2
+    //           /       \
+    //    1,2   /   2->   \    1,<-2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, c);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, c);
+    be->pl().addRoute(&l3, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    c->pl().addConnExc(&l2, cd, ce);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+    assert(tg.getNds()->size() == 4);
+
+    // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
+    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 1
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l1, 0);
+
+    c->pl().addConnExc(&l2, cd, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+    assert(tg.getNds()->size() == 4);
+    // all 3 lines in the triangle are lost
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          3 /     \ 2
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l3, 0);
+    ce->pl().addRoute(&l2, 0);
+
+    c->pl().addConnExc(&l2, cd, bc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+
+    assert(tg.getNds()->size() == 4);
+
+    // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+  }
+  // ___________________________________________________________________________
+  {
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 1
+    //           /       \
+    //    1,2   /   2     \    1,2
+    // a -----> b ------> c ------> d
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l2, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(e, c, &tg);
+
+
+    assert(tg.getNds()->size() == 4);
+    // 1 on ec was deleted, 2 on be was deleted
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+
+    assert(c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    // TODO: fix this as soon as connOccurs does what its name suggests
+    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
   }
 
   // ===========================================================================
