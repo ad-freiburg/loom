@@ -60,6 +60,220 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
+    //               f
+    //               |
+    //               |  2,3
+    //               |
+    //               v
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2,3
+    //           /       \
+    //    1,2   /    3    \    1,2
+    // a -----> b ------> c ------> d
+    //          \         /
+    //           \1,3    / 1
+    //            \     /
+    //             \   /
+    //              v v
+    //               g
+    //               |
+    //               | 1,3
+    //               v
+    //               h
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+    auto f = tg.addNd({{25.0, 20.0}});
+
+    auto g = tg.addNd({{25.0, -10.0}});
+    auto h = tg.addNd({{25.0, -20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+    auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
+
+    auto bg = tg.addEdg(b, g, {{{20.0, 0.0}, {25.0, -10.0}}});
+    auto cg = tg.addEdg(c, g, {{{30.0, 0.0}, {25.0, -10.0}}});
+    auto gh = tg.addEdg(g, h, {{{25.0, -10.0}, {25.0, -20.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+
+    bc->pl().addRoute(&l3, 0);
+
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+
+    bg->pl().addRoute(&l1, 0);
+    bg->pl().addRoute(&l3, 0);
+
+    cg->pl().addRoute(&l1, 0);
+
+    gh->pl().addRoute(&l1, 0);
+    gh->pl().addRoute(&l3, 0);
+
+    ce->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l3, 0);
+
+    fe->pl().addRoute(&l2, 0);
+    fe->pl().addRoute(&l3, 0);
+
+    be->pl().addRoute(&l2, 0);
+
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(b, c, &tg);
+
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
+    //
+    assert(c->getAdjList().size() == 4);
+
+    assert(tg.getEdg(a,c)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(c,d)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(f,e)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(g,h)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(c,g)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(c,e)->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(c,g)->pl().hasRoute(&l3));
+    assert(tg.getEdg(c,g)->pl().hasRoute(&l1));
+
+    assert(tg.getEdg(e,c)->pl().hasRoute(&l3));
+    assert(tg.getEdg(e,c)->pl().hasRoute(&l2));
+
+    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+
+    assert(c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //               f
+    //               |
+    //               |  2,3
+    //               |
+    //               v
+    //               e
+    //              ^ ^
+    //             /   \
+    //          2 /     \ 2,3
+    //           /       \
+    //    1,2   /    3    \    1,2
+    // a -----> b ------> c ------> d
+    //          \         /
+    //           \1,3    / 1
+    //            \     /
+    //             \   /
+    //              v v
+    //               g
+    //               |
+    //               | 1,3
+    //               v
+    //               h
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{25.0, 10.0}});
+    auto f = tg.addNd({{25.0, 20.0}});
+
+    auto g = tg.addNd({{25.0, -10.0}});
+    auto h = tg.addNd({{25.0, -20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
+    auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
+
+    auto bg = tg.addEdg(b, g, {{{20.0, 0.0}, {25.0, -10.0}}});
+    auto cg = tg.addEdg(c, g, {{{30.0, 0.0}, {25.0, -10.0}}});
+    auto gh = tg.addEdg(g, h, {{{25.0, -10.0}, {25.0, -20.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+    transitmapper::graph::Route l3("3", "3", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+
+    bc->pl().addRoute(&l3, 0);
+
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+
+    bg->pl().addRoute(&l1, 0);
+    bg->pl().addRoute(&l3, 0);
+
+    cg->pl().addRoute(&l1, 0);
+
+    gh->pl().addRoute(&l1, 0);
+    gh->pl().addRoute(&l3, 0);
+
+    ce->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l3, 0);
+
+    fe->pl().addRoute(&l2, 0);
+    fe->pl().addRoute(&l3, 0);
+
+    be->pl().addRoute(&l2, 0);
+
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.combineNodes(c, b, &tg);
+
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
+    //
+    assert(b->getAdjList().size() == 4);
+
+    assert(tg.getEdg(a,b)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(b,d)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(f,e)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(g,h)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(b,g)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(b,e)->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(b,g)->pl().hasRoute(&l3));
+    assert(tg.getEdg(b,g)->pl().hasRoute(&l1));
+
+    assert(tg.getEdg(e,b)->pl().hasRoute(&l3));
+    assert(tg.getEdg(e,b)->pl().hasRoute(&l2));
+
+    assert(!b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
+    assert(!b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, d)));
+
+    assert(b->pl().connOccurs(&l3, tg.getEdg(b, g), tg.getEdg(b, e)));
+  }
+
+  // ___________________________________________________________________________
+  {
     // node contraction of c, b
     //    1      1
     // a ---> b ---> c
