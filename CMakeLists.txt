@@ -71,11 +71,6 @@ add_test(ctest_build_transitmapper_test "${CMAKE_COMMAND}" --build ${CMAKE_BINAR
 add_test(transitmapper_test ${EXECUTABLE_OUTPUT_PATH}/transitmapperTest)
 set_tests_properties (transitmapper_test PROPERTIES DEPENDS ctest_build_transitmapper_test)
 
-
-add_test(ctest_build_pbutil_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target pbutilTest)
-add_test(pbutil_test ${EXECUTABLE_OUTPUT_PATH}/pbutilTest)
-set_tests_properties (pbutil_test PROPERTIES DEPENDS ctest_build_pbutil_test)
-
 # handles install target
 
 install(

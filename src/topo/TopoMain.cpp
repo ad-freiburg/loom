@@ -15,9 +15,6 @@
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
-using namespace topo;
-using std::string;
-
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
   // disable output buffering for standard output
@@ -26,21 +23,22 @@ int main(int argc, char** argv) {
   // initialize randomness
   srand(time(NULL) + rand());
 
-  config::TopoConfig cfg;
+  topo::config::TopoConfig cfg;
 
-  config::ConfigReader cr;
+  topo::config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
   shared::transitgraph::TransitGraph tg;
   tg.readFromJson(&(std::cin));
 
-  Builder b(&cfg);
+  topo::Builder b(&cfg);
 
   // first pass, with strict distance values (clearing things up first)
   b.createTopologicalNodes(&tg, false);
   b.removeEdgeArtifacts(&tg);
 
-  while (b.createTopologicalNodes(&tg, true));
+  while (b.createTopologicalNodes(&tg, true)) {
+  };
 
   b.removeEdgeArtifacts(&tg);
   b.removeNodeArtifacts(&tg);

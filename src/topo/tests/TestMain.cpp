@@ -60,28 +60,30 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               f
-    //               |
-    //               |  2,3
-    //               |
-    //               v
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2,3
-    //           /       \
-    //    1,2   /    3    \    1,2
-    // a -----> b ------> c ------> d
-    //          \         /
-    //           \1,3    / 1
-    //            \     /
-    //             \   /
-    //              v v
-    //               g
-    //               |
-    //               | 1,3
-    //               v
-    //               h
+    /*
+     *                f
+     *                |
+     *                |  2,3
+     *                |
+     *                v
+     *                e
+     *               ^ ^
+     *              /   \
+     *           2 /     \ 2,3
+     *            /       \
+     *     1,2   /    3    \    1,2
+     *  a -----> b ------> c ------> d
+     *           \         /
+     *            \1,3    / 1
+     *             \     /
+     *              \   /
+     *               v v
+     *                g
+     *                |
+     *                | 1,3
+     *                v
+     *                h
+     */
 
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
@@ -167,28 +169,30 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               f
-    //               |
-    //               |  2,3
-    //               |
-    //               v
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2,3
-    //           /       \
-    //    1,2   /    3    \    1,2
-    // a -----> b ------> c ------> d
-    //          \         /
-    //           \1,3    / 1
-    //            \     /
-    //             \   /
-    //              v v
-    //               g
-    //               |
-    //               | 1,3
-    //               v
-    //               h
+    /*
+     *               f
+     *               |
+     *               |  2,3
+     *               |
+     *               v
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2,3
+     *           /       \
+     *    1,2   /    3    \    1,2
+     * a -----> b ------> c ------> d
+     *          \         /
+     *           \1,3    / 1
+     *            \     /
+     *             \   /
+     *              v v
+     *               g
+     *               |
+     *               | 1,3
+     *               v
+     *               h
+     */
 
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
@@ -276,28 +280,30 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               f
-    //               |
-    //               |  2,3
-    //               |
-    //               v
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2,3
-    //           /       \
-    //    1,2   /    3    \    1,2
-    // a -----> b ------> c ------> d
-    //          \         /
-    //           \1,3    / 1
-    //            \     /
-    //             \   /
-    //              v v
-    //               g
-    //               |
-    //               | 1,3
-    //               v
-    //               h
+    /*
+     *               f
+     *               |
+     *               |  2,3
+     *               |
+     *               v
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2,3
+     *           /       \
+     *    1,2   /    3    \    1,2
+     * a -----> b ------> c ------> d
+     *          \         /
+     *           \1,3    / 1
+     *            \     /
+     *             \   /
+     *              v v
+     *               g
+     *               |
+     *               | 1,3
+     *               v
+     *               h
+     */
 
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
@@ -382,28 +388,30 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               f
-    //               |
-    //               |  2,3
-    //               |
-    //               v
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2,3
-    //           /       \
-    //    1,2   /    3    \    1,2
-    // a -----> b ------> c ------> d
-    //          \         /
-    //           \1,3    / 1
-    //            \     /
-    //             \   /
-    //              v v
-    //               g
-    //               |
-    //               | 1,3
-    //               v
-    //               h
+    /*
+     *               f
+     *               |
+     *               |  2,3
+     *               |
+     *               v
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2,3
+     *           /       \
+     *    1,2   /    3    \    1,2
+     * a -----> b ------> c ------> d
+     *          \         /
+     *           \1,3    / 1
+     *            \     /
+     *             \   /
+     *              v v
+     *               g
+     *               |
+     *               | 1,3
+     *               v
+     *               h
+     */
 
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
@@ -710,13 +718,15 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    // node contraction of c, b
-    //    1      1
-    // a ---> b ---> c
-    //        ^    /
-    //        | 1 / 1
-    //        d -/
-    //               (d is a terminus for 1 because of an exception)
+    /*
+     * node contraction of c, b
+     *    1      1
+     * a ---> b ---> c
+     *        ^    /
+     *        | 1 / 1
+     *        d -/
+     *               (d is a terminus for 1 because of an exception)
+     */
 
     std::cerr << "------------" << std::endl;
 
@@ -754,18 +764,21 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               f
-    //               |
-    //               |  2
-    //               |
-    //               v
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               f
+     *               |
+     *               |  2
+     *               |
+     *               v
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -813,18 +826,21 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               f
-    //               |
-    //               |  2
-    //               |
-    //               v
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               f
+     *               |
+     *               |  2
+     *               |
+     *               v
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -872,18 +888,21 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               f
-    //               |
-    //               |  2
-    //               |
-    //               v
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               f
+     *               |
+     *               |  2
+     *               |
+     *               v
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -930,18 +949,21 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               f
-    //               |
-    //               |  2
-    //               |
-    //               v
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               f
+     *               |
+     *               |  2
+     *               |
+     *               v
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -988,18 +1010,21 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               f
-    //               |
-    //               |  2
-    //               |
-    //               v
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               f
+     *               |
+     *               |  2
+     *               |
+     *               v
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1052,18 +1077,21 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               f
-    //               |
-    //               |  2
-    //               |
-    //               v
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               f
+     *               |
+     *               |  2
+     *               |
+     *               v
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1118,13 +1146,16 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1171,13 +1202,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1222,13 +1256,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2->   \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2->   \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1273,13 +1310,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1319,13 +1359,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \   ^
-    //          3 /     \ 2|
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \   ^
+     *          3 /     \ 2|
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1359,10 +1402,6 @@ int main(int argc, char** argv) {
     topo::Builder builder(&cfg);
     builder.combineNodes(c, e, &tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
-
     assert(tg.getNds()->size() == 4);
 
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
@@ -1373,13 +1412,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1423,13 +1465,16 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1494,13 +1539,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1560,13 +1608,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2->   \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2->   \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1608,10 +1659,6 @@ int main(int argc, char** argv) {
       }
     }
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
-
     assert(tg.getNds()->size() == 4);
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(c, e)->pl().getRoutes().size() == 0);
@@ -1621,13 +1668,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1677,13 +1727,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1717,10 +1770,6 @@ int main(int argc, char** argv) {
     topo::Builder builder(&cfg);
     builder.combineNodes(b, c, &tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
-
     // c will be the kept node
     for (auto edg : c->getAdjList()) {
       if (edg->getOtherNd(c) != d) {
@@ -1750,13 +1799,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1820,13 +1872,16 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1873,13 +1928,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1924,13 +1982,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2->   \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2->   \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -1975,13 +2036,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2021,13 +2085,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2064,22 +2131,32 @@ int main(int argc, char** argv) {
     assert(tg.getNds()->size() == 4);
 
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
+    // and has a terminus in e, which is why we continue it from ab to cd despite
+    // the connection exception vom bd to bc
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    // TODO: remove this as soon as connOccurs below tests this
+    assert(tg.getEdg(b, e)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(b, e)->pl().getRoutes().begin()->route == &l2);
+
+    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2123,13 +2200,16 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2176,13 +2256,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2227,13 +2310,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2->   \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2->   \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2278,13 +2364,15 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2324,13 +2412,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2369,20 +2460,21 @@ int main(int argc, char** argv) {
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    // because 2 is a terminus in e and we are contractin c and e
+    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2427,21 +2519,18 @@ int main(int argc, char** argv) {
   // ===========================================================================
 
 
-
-
-
-
-
-
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2488,13 +2577,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2539,13 +2631,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2->   \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2->   \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2590,13 +2685,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2636,13 +2734,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2682,20 +2783,22 @@ int main(int argc, char** argv) {
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    // because 2 is a terminus in e
+    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2740,13 +2843,16 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2793,13 +2899,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2844,13 +2953,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2->   \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2->   \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2895,13 +3007,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2941,13 +3056,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -2987,20 +3105,22 @@ int main(int argc, char** argv) {
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    // because 2 is a terminus in e
+    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -3047,13 +3167,16 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -3095,13 +3218,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 2
-    //           /       \
-    //    1,2   /   1     \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -3149,13 +3275,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2->   \    1,<-2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2->   \    1,<-2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -3203,13 +3332,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -3250,13 +3382,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          3 /     \ 2
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          3 /     \ 2
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -3305,13 +3440,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -3356,13 +3494,16 @@ int main(int argc, char** argv) {
   }
   // ___________________________________________________________________________
   {
-    //               e
-    //              ^ ^
-    //             /   \
-    //          2 /     \ 1
-    //           /       \
-    //    1,2   /   2     \    1,2
-    // a -----> b ------> c ------> d
+    /*
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 1
+     *           /       \
+     *    1,2   /   2     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
@@ -3478,8 +3619,6 @@ int main(int argc, char** argv) {
 
     assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
     assert(d->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
-
-    exit(1);
   }
 
 
@@ -3500,7 +3639,7 @@ int main(int argc, char** argv) {
     auto e = tg.addNd({{200.0, 0.0}});
 
     auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
-    auto cd = tg.addEdg(d, c, {{{0.0, 0.0}, {100.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{0.0, 0.0}, {100.0, 0.0}}});
     auto ed = tg.addEdg(e, d, {{{200.0, 0.0}, {100, 0.0}}});
     auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
 
@@ -3519,187 +3658,149 @@ int main(int argc, char** argv) {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
-
-    for (auto nd : *tg.getNds()) {
-      for (auto ex : nd->pl().getConnExc()) {
-        for (auto fr : ex.second) {
-          for (auto to : fr.second) {
-            assert(fr.first != to);
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
-          }
-        }
-      }
-    }
-
     builder.removeEdgeArtifacts(&tg);
 
-    for (auto nd : *tg.getNds()) {
-      for (auto ex : nd->pl().getConnExc()) {
-        for (auto fr : ex.second) {
-          for (auto to : fr.second) {
-            assert(fr.first != to);
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
-          }
-        }
-      }
+    a = c->getAdjList().front()->getOtherNd(c);
+    for (auto edg : a->getAdjList()) {
+      if (edg->getOtherNd(a) != c) d = edg->getOtherNd(a);
     }
-  }
-
-  // ___________________________________________________________________________
-  {
-    //      2->     1
-    //     a--> b <---|
-    // c <----- d <---e
-    //     <-2    <-2
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{30.0, 10.0}});
-    auto b = tg.addNd({{100.0, 10.0}});
-    auto c = tg.addNd({{0.0, 0.0}});
-    auto d = tg.addNd({{100.0, 0.0}});
-    auto e = tg.addNd({{200.0, 0.0}});
-
-    auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
-    auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
-    auto ed = tg.addEdg(e, d, {{{200.0, 0.0}, {100, 0.0}}});
-    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-
-    ab->pl().addRoute(&l2, b);
-    dc->pl().addRoute(&l2, c);
-    eb->pl().addRoute(&l1, 0);
-    ed->pl().addRoute(&l2, d);
-
-    d->pl().addConnExc(&l2, ed, dc);
-
-    topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
-
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true);
-
-    for (auto nd : *tg.getNds()) {
-      for (auto ex : nd->pl().getConnExc()) {
-        for (auto fr : ex.second) {
-          for (auto to : fr.second) {
-            assert(fr.first != to);
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
-          }
-        }
-      }
+    for (auto edg : d->getAdjList()) {
+      if (edg->getOtherNd(d) != a) e = edg->getOtherNd(d);
     }
-
-    builder.removeEdgeArtifacts(&tg);
-
-    for (auto nd : *tg.getNds()) {
-      for (auto ex : nd->pl().getConnExc()) {
-        for (auto fr : ex.second) {
-          for (auto to : fr.second) {
-            assert(fr.first != to);
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
-          }
-        }
-      }
-    }
-  }
-
-  // ___________________________________________________________________________
-  {
-    //      2->     1
-    //     a--> b <---|
-    // c <----- d --->e
-    //     <-2    <-2
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{30.0, 10.0}});
-    auto b = tg.addNd({{100.0, 10.0}});
-    auto c = tg.addNd({{0.0, 0.0}});
-    auto d = tg.addNd({{100.0, 0.0}});
-    auto e = tg.addNd({{200.0, 0.0}});
-
-    auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
-    auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
-    auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
-    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-
-    ab->pl().addRoute(&l2, b);
-    dc->pl().addRoute(&l2, c);
-    eb->pl().addRoute(&l1, 0);
-    de->pl().addRoute(&l2, d);
-
-    d->pl().addConnExc(&l2, de, dc);
-
-    topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
-
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.createTopologicalNodes(&tg, true, 1);
-
-    for (auto nd : *tg.getNds()) {
-      for (auto ex : nd->pl().getConnExc()) {
-        for (auto fr : ex.second) {
-          for (auto to : fr.second) {
-            assert(fr.first != to);
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
-          }
-        }
-      }
-    }
-
-    builder.removeEdgeArtifacts(&tg);
-
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-
-    exit(1);
-
-
-
-
-    for (auto nd : *tg.getNds()) {
-      for (auto ex : nd->pl().getConnExc()) {
-        for (auto fr : ex.second) {
-          for (auto to : fr.second) {
-            assert(fr.first != to);
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), fr.first) != nd->getAdjList().end());
-            assert(std::find(nd->getAdjList().begin(), nd->getAdjList().end(), to) != nd->getAdjList().end());
-          }
-        }
-      }
-    }
-
-    // //    <-2   2        1,<-2
-    // // c ----a-----> d < --- e
 
     assert(tg.getNds()->size() == 4);
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
+    assert(c->getAdjList().front()->pl().getRouteOcc(&l2).direction == c);
+
     assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
 
+    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a, d)->pl().getRouteOcc(&l2).direction == 0);
+
+    assert(tg.getEdg(d, e)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction == d);
+    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
+
+    assert(!d->pl().connOccurs(&l2, tg.getEdg(a, d), tg.getEdg(d, e)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //      2->     1
+    //     a--> b <---|
+    // c <----- d <---e
+    //     <-2    <-2
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{30.0, 10.0}});
+    auto b = tg.addNd({{100.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{100.0, 0.0}});
+    auto e = tg.addNd({{200.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
+    auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
+    auto ed = tg.addEdg(e, d, {{{200.0, 0.0}, {100, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l2, b);
+    dc->pl().addRoute(&l2, c);
+    eb->pl().addRoute(&l1, 0);
+    ed->pl().addRoute(&l2, d);
+
+    d->pl().addConnExc(&l2, ed, dc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+    builder.removeEdgeArtifacts(&tg);
+
+
+    a = c->getAdjList().front()->getOtherNd(c);
     for (auto edg : a->getAdjList()) {
-      if (edg->getOtherNd(a) == c) continue;
-
-      assert(edg->pl().getRoutes().size() == 1);
-      assert(edg->pl().getRoutes().begin()->direction == 0);
-      assert(edg->pl().getRoutes().begin()->route == &l2);
-      std::cerr << "KNURR: " << e->getAdjList().front() << " " << edg << std::endl;
-      assert(!edg->getOtherNd(a)->pl().connOccurs(&l2, e->getAdjList().front(), edg));
+      if (edg->getOtherNd(a) != c) d = edg->getOtherNd(a);
+    }
+    for (auto edg : d->getAdjList()) {
+      if (edg->getOtherNd(d) != a) e = edg->getOtherNd(d);
     }
 
-    for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
-      if (ro.route == &l1) assert(ro.direction == 0);
-      if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
+    assert(tg.getNds()->size() == 4);
+    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(c->getAdjList().front()->pl().getRouteOcc(&l2).direction == c);
+
+    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a, d)->pl().getRouteOcc(&l2).direction == 0);
+
+    assert(tg.getEdg(d, e)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction == d);
+    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
+
+    assert(!d->pl().connOccurs(&l2, tg.getEdg(a, d), tg.getEdg(d, e)));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //      2->     1
+    //     a--> b <---|
+    // c <----- d --->e
+    //     <-2    <-2
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{30.0, 10.0}});
+    auto b = tg.addNd({{100.0, 10.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{100.0, 0.0}});
+    auto e = tg.addNd({{200.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
+    auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
+    auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
+    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l2, b);
+    dc->pl().addRoute(&l2, c);
+    eb->pl().addRoute(&l1, 0);
+    de->pl().addRoute(&l2, d);
+
+    d->pl().addConnExc(&l2, de, dc);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+    builder.removeEdgeArtifacts(&tg);
+
+    a = c->getAdjList().front()->getOtherNd(c);
+    for (auto edg : a->getAdjList()) {
+      if (edg->getOtherNd(a) != c) d = edg->getOtherNd(a);
     }
-    exit(1);
+    for (auto edg : d->getAdjList()) {
+      if (edg->getOtherNd(d) != a) e = edg->getOtherNd(d);
+    }
+
+    assert(tg.getNds()->size() == 4);
+    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(c->getAdjList().front()->pl().getRouteOcc(&l2).direction == c);
+
+    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+
+    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a, d)->pl().getRouteOcc(&l2).direction == 0);
+
+    assert(tg.getEdg(d, e)->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction == d);
+    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
+
+    assert(!d->pl().connOccurs(&l2, tg.getEdg(a, d), tg.getEdg(d, e)));
   }
 
   // ___________________________________________________________________________
@@ -3732,50 +3833,19 @@ int main(int argc, char** argv) {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
-
-    cd  = c->getAdjList().front();
-    ed = e->getAdjList().front();
-
-    d = cd->getOtherNd(c);
-
-    for (auto ex : d->pl().getConnExc()) {
-      for (auto fr : ex.second) {
-        for (auto to : fr.second) {
-          assert(std::find(d->getAdjList().begin(), d->getAdjList().end(), fr.first) != d->getAdjList().end());
-          assert(std::find(d->getAdjList().begin(), d->getAdjList().end(), to) != d->getAdjList().end());
-        }
-      }
-    }
-
     builder.removeEdgeArtifacts(&tg);
 
-    //      <-2       1,<-2
-    // c ---------> d < --- e
-
-
-    d = cd->getOtherNd(c);
-
-    for (auto ex : d->pl().getConnExc()) {
-      for (auto fr : ex.second) {
-        for (auto to : fr.second) {
-          assert(std::find(d->getAdjList().begin(), d->getAdjList().end(), fr.first) != d->getAdjList().end());
-          assert(std::find(d->getAdjList().begin(), d->getAdjList().end(), to) != d->getAdjList().end());
-        }
-      }
+    cd = c->getAdjList().front();
+    for (auto* nd : *tg.getNds()) {
+      if (nd->getDeg() == 1 && nd != c) e = nd;
+      if (nd->getDeg() == 2) d = nd;
     }
-
-    assert(tg.getNds()->size() == 3);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
-
-    assert(!c->getAdjList().front()->getOtherNd(c)->pl().connOccurs(&l2, c->getAdjList().front(), e->getAdjList().front()));
-
-    for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
-      if (ro.route == &l1) assert(ro.direction == 0);
-      if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
-    }
+    ed = e->getAdjList().front();
+    assert(!d->pl().connOccurs(&l2, cd, ed));
+    assert(cd->pl().hasRoute(&l2) && cd->pl().getRouteOcc(&l2).direction == c);
+    assert(ed->pl().hasRoute(&l2) && ed->pl().getRouteOcc(&l2).direction != 0 && ed->pl().getRouteOcc(&l2).direction != e);
   }
+
   // ___________________________________________________________________________
   {
     //             1
@@ -3822,6 +3892,7 @@ int main(int argc, char** argv) {
       if (ro.route == &l1) assert(ro.direction == 0);
       if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
     }
+
   }
   // ___________________________________________________________________________
   {
@@ -3855,9 +3926,13 @@ int main(int argc, char** argv) {
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
 
-
     // //    <-2          1,<-2
     // // c ---------> d < --- e
+
+    for (auto* nd : *tg.getNds()) {
+      if (nd->getDeg() == 1 && nd != c) e = nd;
+      if (nd->getDeg() == 2) d = nd;
+    }
 
     assert(tg.getNds()->size() == 3);
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);

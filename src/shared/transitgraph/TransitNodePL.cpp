@@ -29,10 +29,11 @@ util::json::Dict TransitNodePL::getAttrs() const {
   for (const auto& ro : _connEx) {
     for (const auto& exFr : ro.second) {
       for (const auto* exTo : exFr.second) {
-        obj["route"] = util::toString(ro.first->getId());
-        obj["edge1_node"] = util::toString(exFr.first);
-        obj["edge2_node"] = util::toString(exTo);
-        arr.push_back(obj);
+        util::json::Dict ex;
+        ex["route"] = util::toString(ro.first->getId());
+        ex["edge1_node"] = util::toString(exFr.first);
+        ex["edge2_node"] = util::toString(exTo);
+        arr.push_back(ex);
       }
     }
   }
