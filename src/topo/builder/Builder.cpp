@@ -1402,7 +1402,7 @@ void Builder::terminusPass(TransitNode* nd, const TransitEdge* edg) {
 void Builder::plMerge(TransitEdgePL& a, const TransitEdgePL& b) const {
   for (auto ro : b.getRoutes()) {
     if (!a.hasRoute(ro.route)) {
-      a.addRoute(ro.route, 0);
+      a.addRoute(ro.route, ro.direction);
     } else {
       auto old = a.getRouteOcc(ro.route);
       if (ro.direction != old.direction) {
