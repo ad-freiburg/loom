@@ -728,8 +728,6 @@ int main(int argc, char** argv) {
      *               (d is a terminus for 1 because of an exception)
      */
 
-    std::cerr << "------------" << std::endl;
-
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{5.0, 0.0}});
@@ -3878,8 +3876,13 @@ int main(int argc, char** argv) {
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
 
-    // //    <-2          1,<-2
-    // // c ---------> d < --- e
+    //    <-2          1,<-2
+    // c ---------> d < --- e
+
+    for (auto* nd : *tg.getNds()) {
+      if (nd->getDeg() == 1 && nd != c) e = nd;
+      if (nd->getDeg() == 2) d = nd;
+    }
 
     assert(tg.getNds()->size() == 3);
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
@@ -3981,8 +3984,13 @@ int main(int argc, char** argv) {
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
 
-    // //    <-2   2        1,<-2
-    // // c ----a-----> d < --- e
+    //    <-2   2        1,<-2
+    // c ----a-----> d < --- e
+
+    for (auto* nd : *tg.getNds()) {
+      if (nd->getDeg() == 1 && nd != c) e = nd;
+      if (nd->getDeg() == 2) d = nd;
+    }
 
     assert(tg.getNds()->size() == 4);
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
@@ -4571,7 +4579,6 @@ int main(int argc, char** argv) {
     assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
 
     for (auto e : a->getAdjList()) {
-      std::cerr << e->getFrom() << " -> " << e->getTo() << std::endl;
       if (e->getOtherNd(a) == c) continue;
       assert(e->pl().getRoutes().size() == 1);
       assert(e->pl().getRoutes().begin()->direction == 0);

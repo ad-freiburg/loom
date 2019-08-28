@@ -244,7 +244,6 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
   EdgeGrid grid = getGeoIndex(g);
 
   while (steps > 0 && (w = getNextSharedSegment(g, final, &grid)).e) {
-    std::cerr << "STEP" << std::endl;
     steps--;
     const auto curEdgeGeom = w.e;
     const auto cmpEdgeGeom = w.f;
@@ -277,14 +276,12 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     if (ea.getLength() < maxSnapDist &&
         !g->getEdg(w.e->getFrom(), w.f->getTo()) &&
         !g->getEdg(w.e->getFrom(), w.f->getFrom())) {
-      std::cerr << "snap A" << std::endl;
       a = w.e->getFrom();
     }
 
     if (ec.getLength() < maxSnapDist &&
         !g->getEdg(w.e->getTo(), w.f->getTo()) &&
         !g->getEdg(w.e->getTo(), w.f->getFrom())) {
-      std::cerr << "snap B" << std::endl;
       b = w.e->getTo();
     }
 
@@ -292,47 +289,36 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       if (fa.getLength() < maxSnapDist &&
           !g->getEdg(w.f->getFrom(), w.e->getTo()) &&
           !g->getEdg(w.f->getFrom(), w.e->getFrom())) {
-        std::cerr << "snap A2" << std::endl;
         a = w.f->getFrom();
-        std::cerr << "A is now " << a << std::endl;
       }
 
       if (fc.getLength() < maxSnapDist &&
           !g->getEdg(w.f->getTo(), w.e->getTo()) &&
           !g->getEdg(w.f->getTo(), w.e->getFrom())) {
-        std::cerr << "snap B2" << std::endl;
         b = w.f->getTo();
-        std::cerr << "B is now " << b << std::endl;
       }
     } else {
       if (fa.getLength() < maxSnapDist &&
           !g->getEdg(w.f->getTo(), w.e->getTo()) &&
           !g->getEdg(w.f->getTo(), w.e->getFrom())) {
-        std::cerr << "snap A2" << std::endl;
         a = w.f->getTo();
-        std::cerr << "A is now " << a << std::endl;
       }
 
       if (fc.getLength() < maxSnapDist &&
           !g->getEdg(w.f->getFrom(), w.e->getTo()) &&
           !g->getEdg(w.f->getFrom(), w.e->getFrom())) {
-        std::cerr << "snap B2" << std::endl;
         b = w.f->getFrom();
-        std::cerr << "B is now " << b << std::endl;
       }
     }
 
     if (!a) {
-      std::cerr << "new A" << std::endl;
       a = g->addNd({w.s.first.first.p});
     }
 
     if (!b) {
-      std::cerr << "new B" << std::endl;
       b = g->addNd({w.s.second.first.p});
     }
 
-    std::cerr << "a = " << a << ", b = " << b << std::endl;
 
     if (a == b) {
       continue;
@@ -420,38 +406,28 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     assert(a != b);
     abE = g->addEdg(a, b, TransitEdgePL());
 
-    std::cerr << util::geo::getWKT(eap.p) << " (" << eap.totalPos << "), " << util::geo::getWKT(ebp.p) << " (" << ebp.totalPos << ")" << std::endl;
     assert(eap.totalPos < ebp.totalPos);
 
     if (a != wefrom) {
       eaE = g->addEdg(wefrom, a);
-      std::cerr << "A " << wefrom << " -> " << a << " (" << eaE << ")"
-                << std::endl;
       edgeRpl(wefrom, w.e, eaE);
     } else {
       // this is the case when e.from->a was below the merge threshold
-      std::cerr << "A1"
-                << "(" << abE << ")" << std::endl;
       edgeRpl(a, w.e, abE);
     }
 
     if (b != weto) {
       ebE = g->addEdg(b, weto);
-      std::cerr << "B " << b << " -> " << weto << std::endl;
       edgeRpl(weto, w.e, ebE);
     } else {
       assert(b == weto);
       // this is the case when b->e.to was below the merge threshold
-      std::cerr << "B1"
-                << "(" << abE << ")" << std::endl;
       edgeRpl(b, w.e, abE);
     }
 
     if (fap.totalPos > fbp.totalPos) {
-      std::cerr << "(rev)" << std::endl;
       if (a != wfto) {
         faE = g->addEdg(a, wfto);
-        std::cerr << "C" << std::endl;
         edgeRpl(wfto, w.f, faE);
       } else {
         assert(a == wfto);
@@ -460,16 +436,13 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
 
       if (b != wffrom) {
         fbE = g->addEdg(wffrom, b);
-        std::cerr << "D" << std::endl;
         edgeRpl(wffrom, w.f, fbE);
       } else {
         edgeRpl(b, w.f, abE);
       }
     } else {
-      std::cerr << "(not rev)" << std::endl;
       if (a != wffrom) {
         faE = g->addEdg(wffrom, a);
-        std::cerr << "E" << std::endl;
         edgeRpl(wffrom, w.f, faE);
       } else {
         assert(a == wffrom);
@@ -478,7 +451,6 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
 
       if (b != wfto) {
         fbE = g->addEdg(b, wfto);
-        std::cerr << "F" << std::endl;
         edgeRpl(wfto, w.f, fbE);
       } else {
         edgeRpl(b, w.f, abE);
@@ -843,7 +815,6 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       // This check has to be done in isTriFace()!
       if (oldE->pl().getPolyline().getLength() < 20 &&
           newE->pl().getPolyline().getLength() < 20) {
-        std::cerr << "knurr" << std::endl;
         foldEdges(oldE, newE);
       } else {
         return false;
@@ -1138,7 +1109,6 @@ bool Builder::lostIn(const Route* r, const TransitEdge* a) const {
 
 // _____________________________________________________________________________
 bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
-  std::cerr << "Folding " << a << " and " << b << std::endl;
   const auto shrNd = TransitGraph::sharedNode(a, b);
   const auto minNonShrNd = a->getOtherNd(shrNd);
   const auto majNonShrNd = b->getOtherNd(shrNd);
@@ -1153,16 +1123,12 @@ bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
   // leave it
   std::vector<const Route *> lostA, lostB;
   for (auto ro : a->pl().getRoutes()) {
-    std::cerr << "Checking " << ro.route->getId() << " on " << a << std::endl;
     if (lostIn(ro.route, a)) {
-      std::cerr << ro.route->getId() << " lost in fold edge " << a << std::endl;
       lostA.push_back(ro.route);
     }
   }
   for (auto ro : b->pl().getRoutes()) {
-    std::cerr << "Checking " << ro.route->getId() << " on " << b << std::endl;
     if (lostIn(ro.route, b)) {
-      std::cerr << ro.route->getId() << " lost in fold edge " << b << std::endl;
       lostB.push_back(ro.route);
     }
   }
@@ -1257,7 +1223,6 @@ Builder::keptExcs(TransitNode* nd, const TransitEdge* a, const TransitEdge* b) {
           if (nfr == a) nfr = b;
           if (nto == a) nto = b;
 
-          std::cerr << "ex -A" << std::endl;
           ret.push_back({ex.first, {nfr, nto}});
           continue;
         }
@@ -1274,15 +1239,12 @@ Builder::keptExcs(TransitNode* nd, const TransitEdge* a, const TransitEdge* b) {
               // because we explicated direction-induced restrictions before!
 
               // -> drop this exception!
-              std::cerr << "ex A+ (" << ex.first->getId() << ", " << fr.first
-                        << " -> " << to << std::endl;
             } else {
               // else, keep it
               auto nfr = fr.first;
               auto nto = to;
               if (nfr == a) nfr = b;
               if (nto == a) nto = b;
-              std::cerr << "ex A" << std::endl;
               ret.push_back({ex.first, {nfr, nto}});
             }
 
@@ -1290,32 +1252,18 @@ Builder::keptExcs(TransitNode* nd, const TransitEdge* a, const TransitEdge* b) {
             // concerns b
 
             auto otherEdge = fr.first == b ? to : fr.first;
-
-            std::cerr << a << " vs " << otherEdge << std::endl;
-
-            std::cerr << nd->pl().getConnExc().begin()->second.begin()->first
-                      << std::endl;
-            std::cerr << *nd->pl()
-                              .getConnExc()
-                              .begin()
-                              ->second.begin()
-                              ->second.begin()
-                      << std::endl;
             if (nd->pl().connOccurs(ex.first, a, otherEdge)) {
               // okay, there is no exception.
               // Important: we can be sure that a connection is possible then,
               // because we explicated direction-induced restrictions before!
 
               // -> drop this exception!
-              std::cerr << "ex B+ (" << ex.first->getId() << ", " << fr.first
-                        << " -> " << to << std::endl;
             } else {
               // else, keep it
               auto nfr = fr.first;
               auto nto = to;
               if (nfr == a) nfr = b;
               if (nto == a) nto = b;
-              std::cerr << "ex B" << std::endl;
               ret.push_back({ex.first, {nfr, nto}});
             }
           }
@@ -1361,11 +1309,6 @@ void Builder::terminusPass(TransitNode* nd, const TransitEdge* edg) {
           }
 
           if (term) {
-            std::cerr << "Connection exception for line " << ro.first->getId()
-                      << " in node " << nd << " from edge " << exFr.first
-                      << " to edge " << exTo << " is circumvented because "
-                      << ro.first->getId() << " is a terminus in " << otherNd
-                      << std::endl;
             toDel.push_back({ro.first, {exFr.first, exTo}});
           }
         }

@@ -499,16 +499,22 @@ SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
 
     double totalDist = dist(s, e);
     while (curSegDist <= totalDist) {
-      const Point<T>& curPointer = interpolate(s, e, curSegDist);
+      const auto& curPointer = interpolate(s, e, curSegDist);
 
       if (pl.distTo(curPointer) <= dmax) {
         LinePoint<T> curCmpPointer = pl.projectOn(curPointer);
         LinePoint<T> curBackProjectedPointer = projectOn(curCmpPointer.p);
+
+
         skips = 0;
 
         if (in) {
           curEndCand = curBackProjectedPointer;
           curEndCandCmp = curCmpPointer;
+
+          if (curEndCand.totalPos < curStartCand.totalPos) {
+            curEndCand = curStartCand;
+          }
 
           single = false;
 
@@ -530,6 +536,7 @@ SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
                       curEndCand.totalPos * length) > MIN_SEG_LENGTH &&
                  fabs(curStartCandCmp.totalPos * plLength -
                       curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
+              assert(curStartCand.totalPos < curEndCand.totalPos);
               ret.segments.push_back(
                   SharedSegment<T>(std::pair<LinePoint<T>, LinePoint<T>>(
                                        curStartCand, curStartCandCmp),
@@ -566,6 +573,7 @@ SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
            MIN_SEG_LENGTH &&
        fabs(curStartCandCmp.totalPos * plLength -
             curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
+    assert(curStartCand.totalPos < curEndCand.totalPos);
     ret.segments.push_back(SharedSegment<T>(
         std::pair<LinePoint<T>, LinePoint<T>>(curStartCand, curStartCandCmp),
         std::pair<LinePoint<T>, LinePoint<T>>(curEndCand, curEndCandCmp)));
