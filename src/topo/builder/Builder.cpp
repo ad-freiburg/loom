@@ -244,6 +244,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
   EdgeGrid grid = getGeoIndex(g);
 
   while (steps > 0 && (w = getNextSharedSegment(g, final, &grid)).e) {
+    std::cerr << "---------------------" << std::endl;
     steps--;
     const auto curEdgeGeom = w.e;
     const auto cmpEdgeGeom = w.f;
@@ -276,12 +277,14 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     if (ea.getLength() < maxSnapDist &&
         !g->getEdg(w.e->getFrom(), w.f->getTo()) &&
         !g->getEdg(w.e->getFrom(), w.f->getFrom())) {
+      std::cerr << "SNAP A" << std::endl;
       a = w.e->getFrom();
     }
 
     if (ec.getLength() < maxSnapDist &&
         !g->getEdg(w.e->getTo(), w.f->getTo()) &&
         !g->getEdg(w.e->getTo(), w.f->getFrom())) {
+      std::cerr << "SNAP B" << std::endl;
       b = w.e->getTo();
     }
 
@@ -289,36 +292,41 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       if (fa.getLength() < maxSnapDist &&
           !g->getEdg(w.f->getFrom(), w.e->getTo()) &&
           !g->getEdg(w.f->getFrom(), w.e->getFrom())) {
+        std::cerr << "SNAP A" << std::endl;
         a = w.f->getFrom();
       }
 
       if (fc.getLength() < maxSnapDist &&
           !g->getEdg(w.f->getTo(), w.e->getTo()) &&
           !g->getEdg(w.f->getTo(), w.e->getFrom())) {
+        std::cerr << "SNAP B" << std::endl;
         b = w.f->getTo();
       }
     } else {
       if (fa.getLength() < maxSnapDist &&
           !g->getEdg(w.f->getTo(), w.e->getTo()) &&
           !g->getEdg(w.f->getTo(), w.e->getFrom())) {
+        std::cerr << "SNAP A" << std::endl;
         a = w.f->getTo();
       }
 
       if (fc.getLength() < maxSnapDist &&
           !g->getEdg(w.f->getFrom(), w.e->getTo()) &&
           !g->getEdg(w.f->getFrom(), w.e->getFrom())) {
+        std::cerr << "SNAP B" << std::endl;
         b = w.f->getFrom();
       }
     }
 
     if (!a) {
+      std::cerr << "NOSNAP A" << std::endl;
       a = g->addNd({w.s.first.first.p});
     }
 
     if (!b) {
+      std::cerr << "NOSNAP B" << std::endl;
       b = g->addNd({w.s.second.first.p});
     }
-
 
     if (a == b) {
       continue;
@@ -350,7 +358,10 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     auto wffrom = w.f->getFrom();
     auto wfto = w.f->getTo();
 
+    std::cerr << "====" << std::endl;
+
     for (const auto& r : curEdgeGeom->pl().getRoutes()) {
+      std::cerr << r.route->getLabel()<< std::endl;
       if (!r.direction) {
         eaEdgeGeom.addRoute(r.route, 0, r.style);
         abEdgeGeom.addRoute(r.route, 0, r.style);
@@ -367,6 +378,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     }
 
     for (const auto& r : cmpEdgeGeom->pl().getRoutes()) {
+      std::cerr << r.route->getLabel() << std::endl;
       if (!r.direction) {
         faEdgeGeom.addRoute(r.route, 0, r.style);
         abEdgeGeom.addRoute(r.route, 0, r.style);
@@ -394,6 +406,14 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       }
     }
 
+    std::cerr << "---" << std::endl;
+
+    for (const auto& r : abEdgeGeom.getRoutes()) {
+      std::cerr << r.route->getLabel() << std::endl;
+    }
+
+    std::cerr << "====" << std::endl;
+
     // delete old edges
     grid.remove(g->getEdg(w.e->getFrom(), w.e->getTo()));
     grid.remove(g->getEdg(w.f->getFrom(), w.f->getTo()));
@@ -409,7 +429,9 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     assert(eap.totalPos < ebp.totalPos);
 
     if (a != wefrom) {
+      std::cerr << "Add eaE" << std::endl;
       eaE = g->addEdg(wefrom, a);
+      assert(eaE != abE);
       edgeRpl(wefrom, w.e, eaE);
     } else {
       // this is the case when e.from->a was below the merge threshold
@@ -417,7 +439,9 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     }
 
     if (b != weto) {
+      std::cerr << "Add ebE" << std::endl;
       ebE = g->addEdg(b, weto);
+      assert(ebE != abE);
       edgeRpl(weto, w.e, ebE);
     } else {
       assert(b == weto);
@@ -427,7 +451,9 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
 
     if (fap.totalPos > fbp.totalPos) {
       if (a != wfto) {
+        std::cerr << "Add faE" << std::endl;
         faE = g->addEdg(a, wfto);
+        assert(faE != abE);
         edgeRpl(wfto, w.f, faE);
       } else {
         assert(a == wfto);
@@ -435,14 +461,18 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       }
 
       if (b != wffrom) {
+        std::cerr << "Add fbE" << std::endl;
         fbE = g->addEdg(wffrom, b);
+        assert(fbE != abE);
         edgeRpl(wffrom, w.f, fbE);
       } else {
         edgeRpl(b, w.f, abE);
       }
     } else {
       if (a != wffrom) {
+        std::cerr << "Add faE" << std::endl;
         faE = g->addEdg(wffrom, a);
+        assert(faE != abE);
         edgeRpl(wffrom, w.f, faE);
       } else {
         assert(a == wffrom);
@@ -450,7 +480,9 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       }
 
       if (b != wfto) {
+        std::cerr << "Add fbE" << std::endl;
         fbE = g->addEdg(b, wfto);
+        assert(fbE != abE);
         edgeRpl(wfto, w.f, fbE);
       } else {
         edgeRpl(b, w.f, abE);
@@ -458,6 +490,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     }
 
     if (abE) {
+      std::cerr << "abE" << std::endl;
       abE->pl() = abEdgeGeom;
       grid.add(*abE->pl().getGeom(), abE);
     } else {
@@ -466,6 +499,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     }
 
     if (eaE) {
+      std::cerr << "eaE" << std::endl;
       // eaE->pl().addEdgeTripGeom(eaEdgeGeom);
       eaE->pl() = eaEdgeGeom;
       // eaE->pl().simplify();
@@ -474,6 +508,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     }
 
     if (ebE) {
+      std::cerr << "ebE" << std::endl;
       ebE->pl() = ecEdgeGeom;
       // ebE->pl().simplify();
       grid.add(*ebE->pl().getGeom(), ebE);
@@ -481,6 +516,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     }
 
     if (faE) {
+      std::cerr << "faE" << std::endl;
       faE->pl() = faEdgeGeom;
       // faE->pl().simplify();
       grid.add(*faE->pl().getGeom(), faE);
@@ -488,6 +524,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     }
 
     if (fbE) {
+      std::cerr << "fbE" << std::endl;
       fbE->pl() = fcEdgeGeom;
       // fbE->pl().simplify();
       grid.add(*fbE->pl().getGeom(), fbE);
@@ -526,12 +563,14 @@ void Builder::averageNodePositions(TransitGraph* g) {
 // _____________________________________________________________________________
 void Builder::removeEdgeArtifacts(TransitGraph* g) {
   while (contractNodes(g)) {
+    std::cerr << g->getNds()->size() << std::endl;
   };
 }
 
 // _____________________________________________________________________________
 void Builder::removeNodeArtifacts(TransitGraph* g) {
   while (contractEdges(g)) {
+    std::cerr << g->getNds()->size() << std::endl;
   };
 }
 
@@ -672,6 +711,8 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
   TransitEdge* connecting = g->getEdg(a, b);
   assert(connecting);
 
+  std::cerr << "A" << std::flush;
+
   // look for lines on {a, b} which serve as a continuation blocker,
   // for example
   //     1->      <-1
@@ -684,14 +725,20 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
   explicateNonCons(connecting, b);
   explicateNonCons(connecting, a);
 
+  std::cerr << "B" << std::flush;
+
   // remove restrictions in a which are circumvented because b is a terminus
   terminusPass(a, connecting);
+
+  std::cerr << "C" << std::flush;
 
   // remove restrictions in a which are circumvented because b is a terminus
   terminusPass(b, connecting);
 
   // we will delete a and the connecting edge {a, b}.
   // b will be the contracted node
+
+  std::cerr << "D" << std::flush;
 
   // go through all route exceptions in a
   for (const auto& ro : a->pl().getConnExc()) {
@@ -746,24 +793,34 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     }
   }
 
+  std::cerr << "E" << std::flush;
+
   for (auto* oldE : a->getAdjList()) {
     if (oldE->getFrom() != a) continue;
     if (connecting == oldE) continue;
+
+    std::cerr << a->getAdjList().size() << std::endl;
 
     assert(b != oldE->getTo());
     auto* newE = g->getEdg(b, oldE->getTo());
 
     if (!newE) {
+      std::cerr << "  a" << std::endl;
       // add a new edge going from b to the non-a node
       newE = g->addEdg(b, oldE->getTo(), oldE->pl());
 
       // update route dirs
+      std::cerr << "  a'" << std::endl;
       routeDirRepl(a, b, newE);
 
       // replace each occurance of oldE in the non-a node with the newE
+      std::cerr << "  a''" << std::endl;
       edgeRpl(newE->getTo(), oldE, newE);
+      std::cerr << "  a'''" << std::endl;
       edgeRpl(newE->getFrom(), oldE, newE);
+      std::cerr << "  a''''" << std::endl;
     } else {
+      std::cerr << "  b" << std::endl;
       // edge is already existing, check if both oldE and newE are short
       // enough for contraction
       //
@@ -774,8 +831,11 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       // This check has to be done in isTriFace()!
       if (oldE->pl().getPolyline().getLength() < 20 &&
           newE->pl().getPolyline().getLength() < 20) {
+        std::cerr << "  fold" << std::endl;
         foldEdges(oldE, newE);
+        std::cerr << "  fold'" << std::endl;
       } else {
+        std::cerr << "  false" << std::endl;
         return false;
       }
 
@@ -785,8 +845,12 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       // replace each occurance of oldE in the non-a node with the newE
       edgeRpl(newE->getTo(), oldE, newE);
       edgeRpl(newE->getFrom(), oldE, newE);
+
+      std::cerr << "  b'" << std::endl;
     }
   }
+
+  std::cerr << "F" << std::flush;
 
   for (auto* oldE : a->getAdjList()) {
     if (oldE->getTo() != a) continue;
@@ -829,6 +893,8 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     }
   }
 
+  std::cerr << "G" << std::flush;
+
   // remove the original exceptions
   for (const auto& ro : toDel) {
     b->pl().delConnExc(ro.first, ro.second.first, ro.second.second);
@@ -836,6 +902,8 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
 
   g->delEdg(a, b);
   g->delNd(a);
+
+  std::cerr << " done" << std::endl;
 
   return true;
 }
@@ -963,10 +1031,13 @@ void Builder::edgeRpl(TransitNode* n, const TransitEdge* oldE,
   if (oldE == newE) return;
   // replace in from
   for (auto& r : n->pl().getConnExc()) {
-    for (auto& exFr : r.second) {
-      if (exFr.first == oldE) {
-        std::swap(r.second[newE], exFr.second);
-        r.second.erase(exFr.first);
+    auto exFr = r.second.begin();
+    while (exFr != r.second.end()) {
+      if (exFr->first == oldE) {
+        std::swap(r.second[newE], exFr->second);
+        exFr = r.second.erase(exFr);
+      } else {
+        exFr++;
       }
     }
   }
@@ -974,10 +1045,13 @@ void Builder::edgeRpl(TransitNode* n, const TransitEdge* oldE,
   // replace in to
   for (auto& r : n->pl().getConnExc()) {
     for (auto& exFr : r.second) {
-      for (auto& exTo : exFr.second) {
-        if (exTo == oldE) {
-          exFr.second.erase(exTo);
+      auto exTo = exFr.second.begin();
+      while (exTo != exFr.second.end()) {
+        if (*exTo == oldE) {
           exFr.second.insert(newE);
+          exTo = exFr.second.erase(exTo);
+        } else {
+          exTo++;
         }
       }
     }
@@ -987,16 +1061,19 @@ void Builder::edgeRpl(TransitNode* n, const TransitEdge* oldE,
 // _____________________________________________________________________________
 void Builder::routeDirRepl(TransitNode* oldN, TransitNode* newN,
                            TransitEdge* e) const {
-  for (auto& ro : e->pl().getRoutes()) {
-    if (ro.direction == oldN) {
-      shared::transitgraph::RouteOcc newRo = ro;
+  auto ro = e->pl().getRoutes().begin();
+  while (ro != e->pl().getRoutes().end()) {
+    if (ro->direction == oldN) {
+      shared::transitgraph::RouteOcc newRo = *ro;
       newRo.direction = newN;
 
       // delete old
-      e->pl().getRoutes().erase(ro);
+      ro = e->pl().getRoutes().erase(ro);
 
       // add new
       e->pl().getRoutes().insert(newRo);
+    } else {
+      ro++;
     }
   }
 }
