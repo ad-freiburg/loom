@@ -92,6 +92,8 @@ class Builder {
 
   bool lostIn(const Route* r, const TransitEdge* a) const;
 
+  void plMerge(TransitEdgePL& a, const TransitEdgePL& b) const;
+
   mutable std::set<const TransitEdge*> _indEdges;
   mutable std::set<std::pair<const TransitEdge*, const TransitEdge*> > _indEdgesPairs;
   mutable std::map<std::pair<const TransitEdge*, const TransitEdge*>, size_t> _pEdges;

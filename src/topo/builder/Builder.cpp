@@ -491,7 +491,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
 
     if (abE) {
       std::cerr << "abE" << std::endl;
-      abE->pl() = abEdgeGeom;
+      abE->pl() = abEdgeGeom;  // no merge needed here
       grid.add(*abE->pl().getGeom(), abE);
     } else {
       // we use abE below without checking!
@@ -501,7 +501,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     if (eaE) {
       std::cerr << "eaE" << std::endl;
       // eaE->pl().addEdgeTripGeom(eaEdgeGeom);
-      eaE->pl() = eaEdgeGeom;
+      plMerge(eaE->pl() , eaEdgeGeom);
       // eaE->pl().simplify();
       grid.add(*eaE->pl().getGeom(), eaE);
       // a->pl().sewConnectionsTogether(eaE, abE);
@@ -509,7 +509,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
 
     if (ebE) {
       std::cerr << "ebE" << std::endl;
-      ebE->pl() = ecEdgeGeom;
+      plMerge(ebE->pl() , ecEdgeGeom);
       // ebE->pl().simplify();
       grid.add(*ebE->pl().getGeom(), ebE);
       // b->pl().sewConnectionsTogether(abE, ebE);
@@ -517,7 +517,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
 
     if (faE) {
       std::cerr << "faE" << std::endl;
-      faE->pl() = faEdgeGeom;
+      plMerge(faE->pl() , faEdgeGeom);
       // faE->pl().simplify();
       grid.add(*faE->pl().getGeom(), faE);
       // a->pl().sewConnectionsTogether(faE, abE);
@@ -525,7 +525,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
 
     if (fbE) {
       std::cerr << "fbE" << std::endl;
-      fbE->pl() = fcEdgeGeom;
+      plMerge(fbE->pl() , fcEdgeGeom);
       // fbE->pl().simplify();
       grid.add(*fbE->pl().getGeom(), fbE);
       // b->pl().sewConnectionsTogether(abE, fbE);
@@ -1395,5 +1395,21 @@ void Builder::terminusPass(TransitNode* nd, const TransitEdge* edg) {
 
   for (const auto& ro : toDel) {
     nd->pl().delConnExc(ro.first, ro.second.first, ro.second.second);
+  }
+}
+
+// _____________________________________________________________________________
+void Builder::plMerge(TransitEdgePL& a, const TransitEdgePL& b) const {
+  for (auto ro : b.getRoutes()) {
+    if (!a.hasRoute(ro.route)) {
+      a.addRoute(ro.route, 0);
+    } else {
+      auto old = a.getRouteOcc(ro.route);
+      if (ro.direction != old.direction) {
+        // now goes in both directions
+        a.delRoute(ro.route);
+        a.addRoute(ro.route, 0);
+      }
+    }
   }
 }
