@@ -275,44 +275,38 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     double maxSnapDist = 20;
 
     if (ea.getLength() < maxSnapDist &&
-        !g->getEdg(w.e->getFrom(), w.f->getTo()) &&
-        !g->getEdg(w.e->getFrom(), w.f->getFrom())) {
+        snapElig(w.e->getFrom(), w.f, g)) {
       std::cerr << "SNAP A" << std::endl;
       a = w.e->getFrom();
     }
 
     if (ec.getLength() < maxSnapDist &&
-        !g->getEdg(w.e->getTo(), w.f->getTo()) &&
-        !g->getEdg(w.e->getTo(), w.f->getFrom())) {
+        snapElig(w.e->getTo(), w.f, g)) {
       std::cerr << "SNAP B" << std::endl;
       b = w.e->getTo();
     }
 
     if (fap.totalPos <= fbp.totalPos) {
       if (fa.getLength() < maxSnapDist &&
-          !g->getEdg(w.f->getFrom(), w.e->getTo()) &&
-          !g->getEdg(w.f->getFrom(), w.e->getFrom())) {
+        snapElig(w.f->getFrom(), w.e, g)) {
         std::cerr << "SNAP A" << std::endl;
         a = w.f->getFrom();
       }
 
       if (fc.getLength() < maxSnapDist &&
-          !g->getEdg(w.f->getTo(), w.e->getTo()) &&
-          !g->getEdg(w.f->getTo(), w.e->getFrom())) {
+        snapElig(w.f->getTo(), w.e, g)) {
         std::cerr << "SNAP B" << std::endl;
         b = w.f->getTo();
       }
     } else {
       if (fa.getLength() < maxSnapDist &&
-          !g->getEdg(w.f->getTo(), w.e->getTo()) &&
-          !g->getEdg(w.f->getTo(), w.e->getFrom())) {
+        snapElig(w.f->getTo(), w.e, g)) {
         std::cerr << "SNAP A" << std::endl;
         a = w.f->getTo();
       }
 
       if (fc.getLength() < maxSnapDist &&
-          !g->getEdg(w.f->getFrom(), w.e->getTo()) &&
-          !g->getEdg(w.f->getFrom(), w.e->getFrom())) {
+        snapElig(w.f->getFrom(), w.e, g)) {
         std::cerr << "SNAP B" << std::endl;
         b = w.f->getFrom();
       }
@@ -358,10 +352,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     auto wffrom = w.f->getFrom();
     auto wfto = w.f->getTo();
 
-    std::cerr << "====" << std::endl;
-
     for (const auto& r : curEdgeGeom->pl().getRoutes()) {
-      std::cerr << r.route->getLabel()<< std::endl;
       if (!r.direction) {
         eaEdgeGeom.addRoute(r.route, 0, r.style);
         abEdgeGeom.addRoute(r.route, 0, r.style);
@@ -378,30 +369,33 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     }
 
     for (const auto& r : cmpEdgeGeom->pl().getRoutes()) {
-      std::cerr << r.route->getLabel() << std::endl;
       if (!r.direction) {
         faEdgeGeom.addRoute(r.route, 0, r.style);
         abEdgeGeom.addRoute(r.route, 0, r.style);
         fcEdgeGeom.addRoute(r.route, 0, r.style);
       } else if ((r.direction == wfto)) {
         if (fap.totalPos > fbp.totalPos) {
+          std::cerr << "A " << r.route->getId() << std::endl;
           faEdgeGeom.addRoute(r.route, wfto, r.style);
           abEdgeGeom.addRoute(r.route, a, r.style);
           fcEdgeGeom.addRoute(r.route, b, r.style);
         } else {
+          std::cerr << "B " << r.route->getId() << std::endl;
           faEdgeGeom.addRoute(r.route, a, r.style);
           abEdgeGeom.addRoute(r.route, b, r.style);
           fcEdgeGeom.addRoute(r.route, wfto, r.style);
         }
       } else {
         if (fap.totalPos > fbp.totalPos) {
+          std::cerr << "C " << r.route->getId() << std::endl;
           faEdgeGeom.addRoute(r.route, a, r.style);
           abEdgeGeom.addRoute(r.route, b, r.style);
-          fcEdgeGeom.addRoute(r.route, b, r.style);
+          fcEdgeGeom.addRoute(r.route, wffrom, r.style);
         } else {
+          std::cerr << "D " << r.route->getId() << std::endl;
           faEdgeGeom.addRoute(r.route, wffrom, r.style);
           abEdgeGeom.addRoute(r.route, a, r.style);
-          fcEdgeGeom.addRoute(r.route, wfto, r.style);
+          fcEdgeGeom.addRoute(r.route, b, r.style);
         }
       }
     }
@@ -429,106 +423,109 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     assert(eap.totalPos < ebp.totalPos);
 
     if (a != wefrom) {
-      std::cerr << "Add eaE" << std::endl;
-      eaE = g->addEdg(wefrom, a);
-      assert(eaE != abE);
-      edgeRpl(wefrom, w.e, eaE);
+      if (g->getEdg(wefrom, a)) {
+        eaE = split(eaEdgeGeom, wefrom, a, g);
+      } else {
+        eaE = g->addEdg(wefrom, a);
+        assert(eaE != abE);
+        edgeRpl(wefrom, w.e, eaE);
+      }
     } else {
       // this is the case when e.from->a was below the merge threshold
       edgeRpl(a, w.e, abE);
     }
 
     if (b != weto) {
-      std::cerr << "Add ebE" << std::endl;
-      ebE = g->addEdg(b, weto);
-      assert(ebE != abE);
-      edgeRpl(weto, w.e, ebE);
+      if (g->getEdg(b, weto)) {
+        ebE = split(ecEdgeGeom, b, weto, g);
+      } else {
+        ebE = g->addEdg(b, weto);
+        edgeRpl(weto, w.e, ebE);
+      }
     } else {
       assert(b == weto);
-      // this is the case when b->e.to was below the merge threshold
       edgeRpl(b, w.e, abE);
     }
 
     if (fap.totalPos > fbp.totalPos) {
       if (a != wfto) {
-        std::cerr << "Add faE" << std::endl;
-        faE = g->addEdg(a, wfto);
-        assert(faE != abE);
-        edgeRpl(wfto, w.f, faE);
+        if (g->getEdg(a, wfto)) {
+          faE = split(faEdgeGeom, a, wfto, g);
+        } else {
+          faE = g->addEdg(a, wfto);
+          assert(faE != abE);
+          edgeRpl(wfto, w.f, faE);
+        }
       } else {
         assert(a == wfto);
         edgeRpl(a, w.f, abE);
       }
 
       if (b != wffrom) {
-        std::cerr << "Add fbE" << std::endl;
-        fbE = g->addEdg(wffrom, b);
-        assert(fbE != abE);
-        edgeRpl(wffrom, w.f, fbE);
+        if (g->getEdg(wffrom, b)) {
+          fbE = split(fcEdgeGeom, wffrom, b, g);
+        } else {
+          fbE = g->addEdg(wffrom, b);
+          assert(fbE != abE);
+          edgeRpl(wffrom, w.f, fbE);
+        }
       } else {
+        assert(b == wffrom);
         edgeRpl(b, w.f, abE);
       }
     } else {
       if (a != wffrom) {
-        std::cerr << "Add faE" << std::endl;
-        faE = g->addEdg(wffrom, a);
-        assert(faE != abE);
-        edgeRpl(wffrom, w.f, faE);
+        if (g->getEdg(wffrom, a)) {
+          faE = split(faEdgeGeom, wffrom, a, g);
+        } else {
+          faE = g->addEdg(wffrom, a);
+          assert(faE != abE);
+          edgeRpl(wffrom, w.f, faE);
+        }
       } else {
         assert(a == wffrom);
         edgeRpl(a, w.f, abE);
       }
 
       if (b != wfto) {
-        std::cerr << "Add fbE" << std::endl;
-        fbE = g->addEdg(b, wfto);
-        assert(fbE != abE);
-        edgeRpl(wfto, w.f, fbE);
+        if (g->getEdg(b, wfto)) {
+          fbE = split(fcEdgeGeom, b, wfto, g);
+        } else {
+          fbE = g->addEdg(b, wfto);
+          assert(fbE != abE);
+          edgeRpl(wfto, w.f, fbE);
+        }
       } else {
+        assert(b == wfto);
         edgeRpl(b, w.f, abE);
       }
     }
 
     if (abE) {
-      std::cerr << "abE" << std::endl;
       abE->pl() = abEdgeGeom;  // no merge needed here
       grid.add(*abE->pl().getGeom(), abE);
     } else {
-      // we use abE below without checking!
       assert(false);
     }
 
     if (eaE) {
-      std::cerr << "eaE" << std::endl;
-      // eaE->pl().addEdgeTripGeom(eaEdgeGeom);
-      plMerge(eaE->pl() , eaEdgeGeom);
-      // eaE->pl().simplify();
+      plMerge(eaE->pl(), eaEdgeGeom);
       grid.add(*eaE->pl().getGeom(), eaE);
-      // a->pl().sewConnectionsTogether(eaE, abE);
     }
 
     if (ebE) {
-      std::cerr << "ebE" << std::endl;
-      plMerge(ebE->pl() , ecEdgeGeom);
-      // ebE->pl().simplify();
+      plMerge(ebE->pl(), ecEdgeGeom);
       grid.add(*ebE->pl().getGeom(), ebE);
-      // b->pl().sewConnectionsTogether(abE, ebE);
     }
 
     if (faE) {
-      std::cerr << "faE" << std::endl;
-      plMerge(faE->pl() , faEdgeGeom);
-      // faE->pl().simplify();
+      plMerge(faE->pl(), faEdgeGeom);
       grid.add(*faE->pl().getGeom(), faE);
-      // a->pl().sewConnectionsTogether(faE, abE);
     }
 
     if (fbE) {
-      std::cerr << "fbE" << std::endl;
-      plMerge(fbE->pl() , fcEdgeGeom);
-      // fbE->pl().simplify();
+      plMerge(fbE->pl(), fcEdgeGeom);
       grid.add(*fbE->pl().getGeom(), fbE);
-      // b->pl().sewConnectionsTogether(abE, fbE);
     }
 
     found = true;
@@ -1400,6 +1397,7 @@ void Builder::terminusPass(TransitNode* nd, const TransitEdge* edg) {
 
 // _____________________________________________________________________________
 void Builder::plMerge(TransitEdgePL& a, const TransitEdgePL& b) const {
+  // merge routes
   for (auto ro : b.getRoutes()) {
     if (!a.hasRoute(ro.route)) {
       a.addRoute(ro.route, ro.direction);
@@ -1412,4 +1410,52 @@ void Builder::plMerge(TransitEdgePL& a, const TransitEdgePL& b) const {
       }
     }
   }
+
+  // merge geom
+  if (a.getPolyline().getLine().size() == 0) {
+    // a did not yet have a polyline
+    a.setPolyline(b.getPolyline());
+  } else {
+    // average the two
+    std::vector<const PolyLine<double>*> lines{&a.getPolyline(),
+                                               &b.getPolyline()};
+    a.setPolyline(PolyLine<double>::average(lines));
+  }
+}
+
+// _____________________________________________________________________________
+TransitEdge* Builder::split(TransitEdgePL& a, TransitNode* fr, TransitNode* to,
+                            TransitGraph* g) const {
+  TransitEdge* ret;
+  auto right = a.getPolyline().getSegment(0.5, 1);
+  a.setPolyline(a.getPolyline().getSegment(0, 0.5));
+  auto helper = g->addNd(a.getPolyline().back());
+  ret = g->addEdg(fr, helper);
+  auto ro = a.getRoutes().begin();
+  auto helperEdg = g->addEdg(helper, to, right);
+
+  while (ro != a.getRoutes().end()) {
+    if (ro->direction == to) {
+      auto* route = ro->route;  // store because of deletion below
+      ro = a.getRoutes().erase(ro);
+      a.addRoute(route, helper);
+      helperEdg->pl().addRoute(route, to);
+    } else if (ro->direction == fr) {
+      helperEdg->pl().addRoute(ro->route, helper);
+      ro++;
+    } else {
+      helperEdg->pl().addRoute(ro->route, 0);
+      ro++;
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+bool Builder::snapElig(TransitNode* nat,
+                       const TransitEdge* eOther, const TransitGraph* g) const {
+  return (!g->getEdg(nat, eOther->getTo()) ||
+          !g->getEdg(nat, eOther->getFrom()) ||
+          g->getEdg(nat, eOther->getTo()) == g->getEdg(nat, eOther->getFrom()));
 }

@@ -94,6 +94,9 @@ class Builder {
 
   void plMerge(TransitEdgePL& a, const TransitEdgePL& b) const;
 
+  TransitEdge* split(TransitEdgePL& a, TransitNode* fr, TransitNode* to, TransitGraph* g) const;
+  bool snapElig(TransitNode* nat, const TransitEdge* eOther, const TransitGraph* g) const;
+
   mutable std::set<const TransitEdge*> _indEdges;
   mutable std::set<std::pair<const TransitEdge*, const TransitEdge*> > _indEdgesPairs;
   mutable std::map<std::pair<const TransitEdge*, const TransitEdge*>, size_t> _pEdges;

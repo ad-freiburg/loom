@@ -18,7 +18,7 @@ TransitEdgePL::TransitEdgePL() : _generation(-1) {}
 
 // _____________________________________________________________________________
 TransitEdgePL::TransitEdgePL(const PolyLine<double>& p)
-    : _p(p), _generation(-1) {}
+    : _generation(-1), _p(p) {}
 
 // _____________________________________________________________________________
 const util::geo::Line<double>* TransitEdgePL::getGeom() const {
