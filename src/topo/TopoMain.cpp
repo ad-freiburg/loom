@@ -38,9 +38,9 @@ int main(int argc, char** argv) {
   // first pass, with strict distance values (clearing things up first)
   std::cerr << "Creating topological nodes (first round)..." << std::endl;
   b.createTopologicalNodes(&tg, false);
-  // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-  // std::cerr << "Removing edge artifacts..." << std::endl;
-  // b.removeEdgeArtifacts(&tg);
+  std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
+  std::cerr << "Removing edge artifacts..." << std::endl;
+  b.removeEdgeArtifacts(&tg);
 
   // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
 
@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
   // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   // std::cerr << "Averaging node positions..." << std::endl;
 
-  // b.averageNodePositions(&tg);
+  b.averageNodePositions(&tg);
 
   util::geo::output::GeoGraphJsonOutput out;
   out.print(tg, std::cout);

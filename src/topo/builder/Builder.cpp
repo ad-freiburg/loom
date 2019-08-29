@@ -583,7 +583,7 @@ bool Builder::contractNodes(TransitGraph* g) {
         auto to = e->getTo();
         if ((from->pl().getStops().size() == 0 ||
              to->pl().getStops().size() == 0)
-            // && !isTriFace(e)
+             // && !isTriFace(e)
             ) {
           if (combineNodes(from, to, g)) return true;
         }
@@ -616,6 +616,8 @@ bool Builder::combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n,
 
   TransitEdge* newEdge = 0;
   util::geo::PolyLine<double> newPl;
+
+  std::cerr << "Combining " << a << " and " << b << " at node " << n << std::endl;
 
   // TODO: there is some copying going on below, which is not always necessary.
   // insert a non-const getLine to polyline and re-use existing polylines where
@@ -1098,6 +1100,11 @@ bool Builder::isTriFace(const TransitEdge* a) const {
   std::vector<const TransitNode*> iSect;
   set_intersection(frNds.begin(), frNds.end(), toNds.begin(), toNds.end(),
                    std::back_inserter(iSect));
+
+
+  // for (const auto& a : iSect) {
+    // oldE->pl().getPolyline().getLength() < 20
+  // }
 
   return iSect.size() > 0;
 }

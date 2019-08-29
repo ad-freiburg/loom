@@ -852,7 +852,7 @@ void TopologicalTest2::run() {
     //                  |     |
     //       B ---------      |-C
     //  A --------------      |
-    //           2->    |     |
+    //          <-2     |     |
     //                  |-----|
     //
     shared::transitgraph::TransitGraph tg;
@@ -876,10 +876,6 @@ void TopologicalTest2::run() {
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
     // builder.removeEdgeArtifacts(&tg);
-
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
 
     //                     1
     //                  --(F)--
@@ -939,6 +935,477 @@ void TopologicalTest2::run() {
 
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
+    }
+  }
+
+  // ___________________________________________________________________________
+  {
+    //                     1
+    //                  -------
+    //                  |     |
+    //       B ---------      |-C
+    //  A --------------      |
+    //          <-2     |     |
+    //                  |-----|
+    //
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{250.0, 0.0}});
+
+    auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
+    auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ac->pl().addRoute(&l2, a);
+    bc->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true, 1);
+    // builder.removeEdgeArtifacts(&tg);
+
+    //                     1
+    //                  --(F)--
+    //                  |     |
+    //    <-2           |     |-C
+    //  A ---B----------E     |
+    //           1,<-2  |     |
+    //                  |-(F)-|
+    //                    <-2
+
+    b = a->getAdjList().front()->getOtherNd(a);
+    TransitNode *e = 0, *f = 0;
+    for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+
+    assert(tg.getNds()->size() == 5);
+    assert(a->getAdjList().front()->pl().hasRoute(&l2));
+    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == a);
+
+    assert(c->getAdjList().size() == 2);
+
+    assert(e->getAdjList().size() == 3);
+    assert(f->getAdjList().size() == 2);
+
+    auto ec = tg.getEdg(e, c);
+    auto ef = tg.getEdg(e, f);
+    auto fc = tg.getEdg(f, c);
+    auto be = tg.getEdg(b, e);
+
+    assert(ec);
+    assert(ef);
+    assert(fc);
+    assert(be);
+
+    assert(be->pl().hasRoute(&l1));
+    assert(be->pl().getRouteOcc(&l1).direction == 0);
+
+    assert(be->pl().hasRoute(&l2));
+    assert(be->pl().getRouteOcc(&l2).direction == b);
+
+    if (f->pl().getGeom()->getY() > 0) {
+      assert(ef->pl().hasRoute(&l1));
+      assert(ef->pl().getRouteOcc(&l1).direction == 0);
+
+      assert(fc->pl().hasRoute(&l1));
+      assert(fc->pl().getRouteOcc(&l1).direction == 0);
+
+      assert(ec->pl().hasRoute(&l2));
+      assert(ec->pl().getRouteOcc(&l2).direction == e);
+    } else {
+      assert(ef->pl().hasRoute(&l2));
+      assert(ef->pl().getRouteOcc(&l2).direction == e);
+
+      assert(fc->pl().hasRoute(&l2));
+      assert(fc->pl().getRouteOcc(&l2).direction == f);
+
+      assert(ec->pl().hasRoute(&l1));
+      assert(ec->pl().getRouteOcc(&l1).direction == 0);
+    }
+  }
+
+  // ___________________________________________________________________________
+  {
+    //                     1
+    //                  -------
+    //                  |     |
+    //       B ---------      |-C
+    //  A --------------      |
+    //           <-2    |     |
+    //                  |-----|
+    //
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{250.0, 0.0}});
+
+    auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
+    auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
+    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ca->pl().addRoute(&l2, a);
+    bc->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true, 1);
+    // builder.removeEdgeArtifacts(&tg);
+
+    //                     1
+    //                  --(F)--
+    //                  |     |
+    //    <-2           |     |-C
+    //  A ---B----------E     |
+    //           1,<-2  |     |
+    //                  |-(F)-|
+    //                    <-2
+
+    b = a->getAdjList().front()->getOtherNd(a);
+    TransitNode *e = 0, *f = 0;
+    for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+
+    assert(tg.getNds()->size() == 5);
+    assert(a->getAdjList().front()->pl().hasRoute(&l2));
+    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == a);
+
+    assert(c->getAdjList().size() == 2);
+
+    assert(e->getAdjList().size() == 3);
+    assert(f->getAdjList().size() == 2);
+
+    auto ec = tg.getEdg(e, c);
+    auto ef = tg.getEdg(e, f);
+    auto fc = tg.getEdg(f, c);
+    auto be = tg.getEdg(b, e);
+
+    assert(ec);
+    assert(ef);
+    assert(fc);
+    assert(be);
+
+    assert(be->pl().hasRoute(&l1));
+    assert(be->pl().getRouteOcc(&l1).direction == 0);
+
+    assert(be->pl().hasRoute(&l2));
+    assert(be->pl().getRouteOcc(&l2).direction == b);
+
+    if (f->pl().getGeom()->getY() > 0) {
+      assert(ef->pl().hasRoute(&l1));
+      assert(ef->pl().getRouteOcc(&l1).direction == 0);
+
+      assert(fc->pl().hasRoute(&l1));
+      assert(fc->pl().getRouteOcc(&l1).direction == 0);
+
+      assert(ec->pl().hasRoute(&l2));
+      assert(ec->pl().getRouteOcc(&l2).direction == e);
+    } else {
+      assert(ef->pl().hasRoute(&l2));
+      assert(ef->pl().getRouteOcc(&l2).direction == e);
+
+      assert(fc->pl().hasRoute(&l2));
+      assert(fc->pl().getRouteOcc(&l2).direction == f);
+
+      assert(ec->pl().hasRoute(&l1));
+      assert(ec->pl().getRouteOcc(&l1).direction == 0);
+    }
+  }
+
+  // ___________________________________________________________________________
+  {
+    //                     1
+    //                  -------
+    //                  |     |
+    //       B ---------      |-C
+    //  A --------------      |
+    //           <-2    |     |
+    //                  |-----|
+    //
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{250.0, 0.0}});
+
+    auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
+    auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
+    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
+    cb->pl().setPolyline(cb->pl().getPolyline().getReversed());
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ca->pl().addRoute(&l2, a);
+    cb->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true, 1);
+    // builder.removeEdgeArtifacts(&tg);
+
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
+
+    //                     1
+    //                  --(F)--
+    //                  |     |
+    //    <-2           |     |-C
+    //  A ---B----------E     |
+    //           1,<-2  |     |
+    //                  |-(F)-|
+    //                    <-2
+
+    b = a->getAdjList().front()->getOtherNd(a);
+    TransitNode *e = 0, *f = 0;
+    for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+
+    assert(tg.getNds()->size() == 5);
+    assert(a->getAdjList().front()->pl().hasRoute(&l2));
+    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == a);
+
+    assert(c->getAdjList().size() == 2);
+
+    assert(e->getAdjList().size() == 3);
+    assert(f->getAdjList().size() == 2);
+
+    auto ec = tg.getEdg(e, c);
+    auto ef = tg.getEdg(e, f);
+    auto fc = tg.getEdg(f, c);
+    auto be = tg.getEdg(b, e);
+
+    assert(ec);
+    assert(ef);
+    assert(fc);
+    assert(be);
+
+    assert(be->pl().hasRoute(&l1));
+    assert(be->pl().getRouteOcc(&l1).direction == 0);
+
+    assert(be->pl().hasRoute(&l2));
+    assert(be->pl().getRouteOcc(&l2).direction == b);
+
+    if (f->pl().getGeom()->getY() > 0) {
+      assert(ef->pl().hasRoute(&l1));
+      assert(ef->pl().getRouteOcc(&l1).direction == 0);
+
+      assert(fc->pl().hasRoute(&l1));
+      assert(fc->pl().getRouteOcc(&l1).direction == 0);
+
+      assert(ec->pl().hasRoute(&l2));
+      assert(ec->pl().getRouteOcc(&l2).direction == e);
+    } else {
+      assert(ef->pl().hasRoute(&l2));
+      assert(ef->pl().getRouteOcc(&l2).direction == e);
+
+      assert(fc->pl().hasRoute(&l2));
+      assert(fc->pl().getRouteOcc(&l2).direction == f);
+
+      assert(ec->pl().hasRoute(&l1));
+      assert(ec->pl().getRouteOcc(&l1).direction == 0);
+    }
+  }
+
+  // ___________________________________________________________________________
+  {
+    //                     <-2
+    //                  -------
+    //                  |     |
+    //       B ---------      |-C
+    //  A --------------      |
+    //           <-2    |     |
+    //                  |-----|
+    //
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{250.0, 0.0}});
+
+    auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
+    auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
+    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
+    cb->pl().setPolyline(cb->pl().getPolyline().getReversed());
+
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ca->pl().addRoute(&l2, a);
+    cb->pl().addRoute(&l2, b);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true, 1);
+    // builder.removeEdgeArtifacts(&tg);
+
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
+
+    //                    <-2
+    //                  --(F)--
+    //                  |     |
+    //    <-2           |     |-C
+    //  A ---B----------E     |
+    //           <-2    |     |
+    //                  |-(F)-|
+    //                    <-2
+
+    b = a->getAdjList().front()->getOtherNd(a);
+    TransitNode *e = 0, *f = 0;
+    for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+
+    assert(tg.getNds()->size() == 5);
+    assert(a->getAdjList().front()->pl().hasRoute(&l2));
+    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == a);
+
+    assert(c->getAdjList().size() == 2);
+
+    assert(e->getAdjList().size() == 3);
+    assert(f->getAdjList().size() == 2);
+
+    auto ec = tg.getEdg(e, c);
+    auto ef = tg.getEdg(e, f);
+    auto fc = tg.getEdg(f, c);
+    auto be = tg.getEdg(b, e);
+
+    assert(ec);
+    assert(ef);
+    assert(fc);
+    assert(be);
+
+    assert(be->pl().hasRoute(&l2));
+    assert(be->pl().getRouteOcc(&l2).direction == b);
+
+    if (f->pl().getGeom()->getY() > 0) {
+      assert(ef->pl().hasRoute(&l2));
+      assert(ef->pl().getRouteOcc(&l2).direction == e);
+
+      assert(fc->pl().hasRoute(&l2));
+      assert(fc->pl().getRouteOcc(&l2).direction == f);
+
+      assert(ec->pl().hasRoute(&l2));
+      assert(ec->pl().getRouteOcc(&l2).direction == e);
+    } else {
+      assert(ef->pl().hasRoute(&l2));
+      assert(ef->pl().getRouteOcc(&l2).direction == e);
+
+      assert(fc->pl().hasRoute(&l2));
+      assert(fc->pl().getRouteOcc(&l2).direction == f);
+
+      assert(ec->pl().hasRoute(&l2));
+      assert(ec->pl().getRouteOcc(&l2).direction == e);
+    }
+  }
+
+  // ___________________________________________________________________________
+  {
+    //                    2->
+    //                  -------
+    //                  |     |
+    //       B ---------      |-C
+    //  A --------------      |
+    //           <-2    |     |
+    //                  |-----|
+    //
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{50.0, 0.0}});
+    auto c = tg.addNd({{250.0, 0.0}});
+
+    auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
+    auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
+    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
+    cb->pl().setPolyline(cb->pl().getPolyline().getReversed());
+
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ca->pl().addRoute(&l2, a);
+    cb->pl().addRoute(&l2, c);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true, 1);
+    // builder.removeEdgeArtifacts(&tg);
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
+    //                    2->
+    //                  --(F)--
+    //                  |     |
+    //    <-2           |     |-C
+    //  A ---B----------E     |
+    //           2      |     |
+    //                  |-(F)-|
+    //                    <-2
+
+    b = a->getAdjList().front()->getOtherNd(a);
+    TransitNode *e = 0, *f = 0;
+    for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+
+    assert(tg.getNds()->size() == 5);
+    assert(a->getAdjList().front()->pl().hasRoute(&l2));
+    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == a);
+
+    assert(c->getAdjList().size() == 2);
+
+    assert(e->getAdjList().size() == 3);
+    assert(f->getAdjList().size() == 2);
+
+    auto ec = tg.getEdg(e, c);
+    auto ef = tg.getEdg(e, f);
+    auto fc = tg.getEdg(f, c);
+    auto be = tg.getEdg(b, e);
+
+    assert(ec);
+    assert(ef);
+    assert(fc);
+    assert(be);
+
+    assert(be->pl().hasRoute(&l2));
+    assert(be->pl().getRouteOcc(&l2).direction == 0);
+
+    if (f->pl().getGeom()->getY() > 0) {
+      assert(ef->pl().hasRoute(&l2));
+      assert(ef->pl().getRouteOcc(&l2).direction == f);
+
+      assert(fc->pl().hasRoute(&l2));
+      assert(fc->pl().getRouteOcc(&l2).direction == c);
+
+      assert(ec->pl().hasRoute(&l2));
+      assert(ec->pl().getRouteOcc(&l2).direction == e);
+    } else {
+      assert(ef->pl().hasRoute(&l2));
+      assert(ef->pl().getRouteOcc(&l2).direction == e);
+
+      assert(fc->pl().hasRoute(&l2));
+      assert(fc->pl().getRouteOcc(&l2).direction == f);
+
+      assert(ec->pl().hasRoute(&l2));
+      assert(ec->pl().getRouteOcc(&l2).direction == e);
     }
   }
 }
