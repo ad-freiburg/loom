@@ -138,6 +138,8 @@ void ContractTest::run() {
     cfg.maxAggrDistance = 50;
 
     topo::Builder builder(&cfg);
+    assert(!builder.isTriFace(be, &tg));
+
     builder.combineNodes(b, c, &tg);
 
     assert(c->getAdjList().size() == 4);
@@ -5106,5 +5108,58 @@ void ContractTest::run() {
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), e->getAdjList().front()));
     assert(e->getAdjList().front()->getOtherNd(e)->pl().connOccurs(&l1, e->getAdjList().front(), d->getAdjList().front()));
     assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+  }
+
+  // ___________________________________________________________________________
+  {
+    /*
+     *               f
+     *               |
+     *               |  2
+     *               |
+     *               v
+     *               e
+     *              ^ ^
+     *             /   \
+     *          2 /     \ 2
+     *           /       \
+     *    1,2   /   1     \    1,2
+     * a -----> b ------> c ------> d
+     */
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{10.0, 0.0}});
+    auto b = tg.addNd({{20.0, 0.0}});
+    auto c = tg.addNd({{30.0, 0.0}});
+    auto d = tg.addNd({{40.0, 0.0}});
+    auto e = tg.addNd({{40.0, 20.0}});
+    auto f = tg.addNd({{25.0, 20.0}});
+
+    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
+    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
+    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {40.0, 10.0}}});
+    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {40.0, 10.0}}});
+    auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {40.0, 10.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "blue");
+
+    ab->pl().addRoute(&l1, 0);
+    ab->pl().addRoute(&l2, 0);
+    bc->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l1, 0);
+    cd->pl().addRoute(&l2, 0);
+    be->pl().addRoute(&l2, 0);
+    ce->pl().addRoute(&l2, 0);
+    fe->pl().addRoute(&l2, 0);
+
+    e->pl().addConnExc(&l2, ce, be);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    assert(builder.isTriFace(bc, &tg));
   }
 }

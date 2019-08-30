@@ -1347,9 +1347,9 @@ void TopologicalTest2::run() {
     builder.createTopologicalNodes(&tg, true, 1);
     // builder.removeEdgeArtifacts(&tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
 
     //                    2->
     //                  --(F)--

@@ -20,6 +20,9 @@ using util::geo::extendBox;
 using util::geo::PolyLine;
 using util::geo::SharedSegments;
 
+double MAX_SNAP_DIST = 20;
+double MIN_SEG_LENGTH = 20;
+
 // _____________________________________________________________________________
 Builder::Builder(const config::TopoConfig* cfg) : _cfg(cfg) {}
 
@@ -272,41 +275,33 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     // new nodes at the start and end of the shared segment
     TransitNode *a = 0, *b = 0;
 
-    double maxSnapDist = 20;
-
-    if (ea.getLength() < maxSnapDist &&
-        snapElig(w.e->getFrom(), w.f, g)) {
+    if (ea.getLength() < MAX_SNAP_DIST && snapElig(w.e->getFrom(), w.f, g)) {
       std::cerr << "SNAP A" << std::endl;
       a = w.e->getFrom();
     }
 
-    if (ec.getLength() < maxSnapDist &&
-        snapElig(w.e->getTo(), w.f, g)) {
+    if (ec.getLength() < MAX_SNAP_DIST && snapElig(w.e->getTo(), w.f, g)) {
       std::cerr << "SNAP B" << std::endl;
       b = w.e->getTo();
     }
 
     if (fap.totalPos <= fbp.totalPos) {
-      if (fa.getLength() < maxSnapDist &&
-        snapElig(w.f->getFrom(), w.e, g)) {
+      if (fa.getLength() < MAX_SNAP_DIST && snapElig(w.f->getFrom(), w.e, g)) {
         std::cerr << "SNAP A" << std::endl;
         a = w.f->getFrom();
       }
 
-      if (fc.getLength() < maxSnapDist &&
-        snapElig(w.f->getTo(), w.e, g)) {
+      if (fc.getLength() < MAX_SNAP_DIST && snapElig(w.f->getTo(), w.e, g)) {
         std::cerr << "SNAP B" << std::endl;
         b = w.f->getTo();
       }
     } else {
-      if (fa.getLength() < maxSnapDist &&
-        snapElig(w.f->getTo(), w.e, g)) {
+      if (fa.getLength() < MAX_SNAP_DIST && snapElig(w.f->getTo(), w.e, g)) {
         std::cerr << "SNAP A" << std::endl;
         a = w.f->getTo();
       }
 
-      if (fc.getLength() < maxSnapDist &&
-        snapElig(w.f->getFrom(), w.e, g)) {
+      if (fc.getLength() < MAX_SNAP_DIST && snapElig(w.f->getFrom(), w.e, g)) {
         std::cerr << "SNAP B" << std::endl;
         b = w.f->getFrom();
       }
@@ -573,8 +568,6 @@ void Builder::removeNodeArtifacts(TransitGraph* g) {
 
 // _____________________________________________________________________________
 bool Builder::contractNodes(TransitGraph* g) {
-  double MIN_SEG_LENGTH = 20;
-
   for (auto n : *g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
@@ -582,9 +575,8 @@ bool Builder::contractNodes(TransitGraph* g) {
         auto from = e->getFrom();
         auto to = e->getTo();
         if ((from->pl().getStops().size() == 0 ||
-             to->pl().getStops().size() == 0)
-             // && !isTriFace(e)
-            ) {
+             to->pl().getStops().size() == 0) &&
+            !isTriFace(e, g)) {
           if (combineNodes(from, to, g)) return true;
         }
       }
@@ -617,7 +609,8 @@ bool Builder::combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n,
   TransitEdge* newEdge = 0;
   util::geo::PolyLine<double> newPl;
 
-  std::cerr << "Combining " << a << " and " << b << " at node " << n << std::endl;
+  std::cerr << "Combining " << a << " and " << b << " at node " << n
+            << std::endl;
 
   // TODO: there is some copying going on below, which is not always necessary.
   // insert a non-const getLine to polyline and re-use existing polylines where
@@ -820,23 +813,8 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       std::cerr << "  a''''" << std::endl;
     } else {
       std::cerr << "  b" << std::endl;
-      // edge is already existing, check if both oldE and newE are short
-      // enough for contraction
-      //
-      // TODO!!! this has to be the same as MIN_SEG_LENGTH in contractNodes()
-      // and should be defined globally
-      //
-      // TODO!!! we cannot just abort here, because we changed stuff above
-      // This check has to be done in isTriFace()!
-      if (oldE->pl().getPolyline().getLength() < 20 &&
-          newE->pl().getPolyline().getLength() < 20) {
-        std::cerr << "  fold" << std::endl;
-        foldEdges(oldE, newE);
-        std::cerr << "  fold'" << std::endl;
-      } else {
-        std::cerr << "  false" << std::endl;
-        return false;
-      }
+      // edge is already existing
+      foldEdges(oldE, newE);
 
       // update route dirs
       routeDirRepl(a, b, newE);
@@ -868,20 +846,8 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       edgeRpl(newE->getTo(), oldE, newE);
       edgeRpl(newE->getFrom(), oldE, newE);
     } else {
-      // edge is already existing, check if both oldE and newE are short
-      // enough for contraction
-      //
-      // TODO!!! this has to be the same as MIN_SEG_LENGTH in contractNodes()
-      // and should be defined globally
-      //
-      // TODO!!! we cannot just abort here, because we changed stuff above
-      // This check has to be done in isTriFace()!
-      if (oldE->pl().getPolyline().getLength() < 20 &&
-          newE->pl().getPolyline().getLength() < 20) {
-        foldEdges(oldE, newE);
-      } else {
-        return false;
-      }
+      // edge is already existing
+      foldEdges(oldE, newE);
 
       // update route dirs
       routeDirRepl(a, b, newE);
@@ -1078,7 +1044,7 @@ void Builder::routeDirRepl(TransitNode* oldN, TransitNode* newN,
 }
 
 // _____________________________________________________________________________
-bool Builder::isTriFace(const TransitEdge* a) const {
+bool Builder::isTriFace(const TransitEdge* a, const TransitGraph* g) const {
   // checks whether an edge is part of something like this:
   //         1
   //     a -----> b
@@ -1087,7 +1053,7 @@ bool Builder::isTriFace(const TransitEdge* a) const {
   //          2
   // where the contraction of any two nodes would lead to a multigraph.
 
-  std::set<const TransitNode *> frNds, toNds;
+  std::set<TransitNode *> frNds, toNds;
 
   for (auto e : a->getFrom()->getAdjList()) {
     frNds.insert(e->getOtherNd(a->getFrom()));
@@ -1101,12 +1067,21 @@ bool Builder::isTriFace(const TransitEdge* a) const {
   set_intersection(frNds.begin(), frNds.end(), toNds.begin(), toNds.end(),
                    std::back_inserter(iSect));
 
+  assert(iSect.size() == 0 || iSect.size() == 1);
 
-  // for (const auto& a : iSect) {
-    // oldE->pl().getPolyline().getLength() < 20
-  // }
+  if (iSect.size() == 0) return false;
 
-  return iSect.size() > 0;
+  // TODO!!! this has to be the same as MIN_SEG_LENGTH in contractNodes()
+  // and should be defined globally
+
+  return g->getEdg(const_cast<TransitNode*>(iSect.front()), a->getFrom())
+                 ->pl()
+                 .getPolyline()
+                 .getLength() > MIN_SEG_LENGTH ||
+         g->getEdg(const_cast<TransitNode*>(iSect.front()), a->getTo())
+                 ->pl()
+                 .getPolyline()
+                 .getLength() > MIN_SEG_LENGTH;
 }
 
 // _____________________________________________________________________________
@@ -1460,8 +1435,8 @@ TransitEdge* Builder::split(TransitEdgePL& a, TransitNode* fr, TransitNode* to,
 }
 
 // _____________________________________________________________________________
-bool Builder::snapElig(TransitNode* nat,
-                       const TransitEdge* eOther, const TransitGraph* g) const {
+bool Builder::snapElig(TransitNode* nat, const TransitEdge* eOther,
+                       const TransitGraph* g) const {
   return (!g->getEdg(nat, eOther->getTo()) ||
           !g->getEdg(nat, eOther->getFrom()) ||
           g->getEdg(nat, eOther->getTo()) == g->getEdg(nat, eOther->getFrom()));

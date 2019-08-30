@@ -1029,6 +1029,5 @@ void TopologicalTest::run() {
       assert(e->pl().getRoutes().size() == 1);
       assert(e->pl().getRoutes().begin()->direction == 0);
     }
-
   }
 }

@@ -82,7 +82,7 @@ class Builder {
 
   bool foldEdges(TransitEdge* a, TransitEdge* b);
 
-  bool isTriFace(const TransitEdge* a) const;
+  bool isTriFace(const TransitEdge* a, const TransitGraph* g) const;
   void explicateNonCons(const TransitEdge* m, TransitNode* hub) const;
 
   std::vector<std::pair<const Route*, std::pair<const TransitEdge*, const TransitEdge*>>> keptExcs(TransitNode* nd, const TransitEdge* a, const TransitEdge* b);

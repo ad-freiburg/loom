@@ -3,8 +3,8 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "shared/transitgraph/TransitEdgePL.h"
-#include "shared/transitgraph/TransitNodePL.h"
 #include "shared/transitgraph/TransitGraph.h"
+#include "shared/transitgraph/TransitNodePL.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
 
@@ -32,8 +32,9 @@ const PolyLine<double>& TransitEdgePL::getPolyline() const { return _p; }
 void TransitEdgePL::setPolyline(const PolyLine<double>& p) { _p = p; }
 
 // _____________________________________________________________________________
-void TransitEdgePL::addRoute(const Route* r, const TransitNode* dir,
-                             util::Nullable<transitmapper::style::LineStyle> ls) {
+void TransitEdgePL::addRoute(
+    const Route* r, const TransitNode* dir,
+    util::Nullable<transitmapper::style::LineStyle> ls) {
   RouteOcc occ(r, dir, ls);
   auto f = _routes.find(occ);
   if (f != _routes.end()) {
@@ -45,7 +46,7 @@ void TransitEdgePL::addRoute(const Route* r, const TransitNode* dir,
     if (prev.direction == dir) return;
 
     // the route is already present in the other direction, make two-way
-    if (prev.direction != dir)  {
+    if (prev.direction != dir) {
       occ.direction = 0;
       _routes.erase(f);
     }
@@ -79,6 +80,9 @@ util::json::Dict TransitEdgePL::getAttrs() const {
   auto arr = util::json::Array();
   obj["generation"] = (int)_generation;
 
+  std::string dbg_lines = "";
+  bool first = true;
+
   for (auto r : getRoutes()) {
     auto route = util::json::Dict();
     route["id"] = r.route->getId();
@@ -87,12 +91,17 @@ util::json::Dict TransitEdgePL::getAttrs() const {
 
     if (r.direction != 0) {
       route["direction"] = util::toString(r.direction);
+      dbg_lines += (first ? "" : "$") + r.route->getLabel() + ">";
+    } else {
+      dbg_lines += (first ? "" : "$") + r.route->getLabel();
     }
 
     arr.push_back(route);
+    first = false;
   }
 
   obj["lines"] = arr;
+  obj["dbg_lines"] = dbg_lines;
 
   return obj;
 }

@@ -42,21 +42,21 @@ int main(int argc, char** argv) {
   std::cerr << "Removing edge artifacts..." << std::endl;
   b.removeEdgeArtifacts(&tg);
 
-  // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
+  std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
 
-  // std::cerr << "Removing edge artifacts..." << std::endl;
-  // while (b.createTopologicalNodes(&tg, true)) {
-    // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-  // };
+  std::cerr << "Removing edge artifacts..." << std::endl;
+  while (b.createTopologicalNodes(&tg, true)) {
+    std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
+  };
 
-  // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-  // std::cerr << "Removing edge artifacts..." << std::endl;
-  // b.removeEdgeArtifacts(&tg);
-  // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-  // std::cerr << "Removing node artifacts..." << std::endl;
-  // b.removeNodeArtifacts(&tg);
-  // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-  // std::cerr << "Averaging node positions..." << std::endl;
+  std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
+  std::cerr << "Removing edge artifacts..." << std::endl;
+  b.removeEdgeArtifacts(&tg);
+  std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
+  std::cerr << "Removing node artifacts..." << std::endl;
+  b.removeNodeArtifacts(&tg);
+  std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
+  std::cerr << "Averaging node positions..." << std::endl;
 
   b.averageNodePositions(&tg);
 
