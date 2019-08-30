@@ -1063,25 +1063,23 @@ bool Builder::isTriFace(const TransitEdge* a, const TransitGraph* g) const {
     toNds.insert(e->getOtherNd(a->getTo()));
   }
 
-  std::vector<const TransitNode*> iSect;
-  set_intersection(frNds.begin(), frNds.end(), toNds.begin(), toNds.end(),
+  std::vector<TransitNode*> iSect;
+  std::set_intersection(frNds.begin(), frNds.end(), toNds.begin(), toNds.end(),
                    std::back_inserter(iSect));
-
-  assert(iSect.size() == 0 || iSect.size() == 1);
 
   if (iSect.size() == 0) return false;
 
-  // TODO!!! this has to be the same as MIN_SEG_LENGTH in contractNodes()
-  // and should be defined globally
-
-  return g->getEdg(const_cast<TransitNode*>(iSect.front()), a->getFrom())
+  for (auto nd : iSect) {
+    if (g->getEdg(nd, a->getFrom())
                  ->pl()
                  .getPolyline()
-                 .getLength() > MIN_SEG_LENGTH ||
-         g->getEdg(const_cast<TransitNode*>(iSect.front()), a->getTo())
+                 .getLength() > MIN_SEG_LENGTH) return true;
+    if (g->getEdg(nd, a->getTo())
                  ->pl()
                  .getPolyline()
-                 .getLength() > MIN_SEG_LENGTH;
+                 .getLength() > MIN_SEG_LENGTH) return true;
+  }
+  return false;
 }
 
 // _____________________________________________________________________________
