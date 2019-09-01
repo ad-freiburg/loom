@@ -88,7 +88,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     //                     1
     //                  -------
@@ -142,7 +142,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -234,7 +234,11 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
+
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
 
     //                     1
     //                  --(F)--
@@ -248,8 +252,10 @@ void TopologicalTest2::run() {
 
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
+
+    for (auto nd : *tg.getNds()) if (nd->getAdjList().size() == 2 && nd->pl().getGeom()->getX() > 249) c = nd;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -323,7 +329,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
 
     //                     1
@@ -339,7 +345,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -416,7 +422,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     //                     1
     //                  --(F)--
@@ -431,7 +437,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -503,7 +509,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -521,7 +527,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -601,7 +607,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     //                     1
     //                  --(F)--
@@ -615,7 +621,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -696,7 +702,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
 
     //                     1
@@ -711,7 +717,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -791,7 +797,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     //                     1
     //                  --(F)--
@@ -805,7 +811,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -888,7 +894,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     //                     1
     //                  --(F)--
@@ -902,7 +908,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -981,7 +987,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     //                     1
     //                  --(F)--
@@ -995,7 +1001,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -1075,7 +1081,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     //                     1
     //                  --(F)--
@@ -1089,7 +1095,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -1170,7 +1176,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -1188,7 +1194,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -1269,7 +1275,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -1287,7 +1293,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -1364,7 +1370,7 @@ void TopologicalTest2::run() {
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    builder.removeEdgeArtifacts(&tg);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -1382,7 +1388,7 @@ void TopologicalTest2::run() {
     b = a->getAdjList().front()->getOtherNd(a);
     TransitNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
-    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
+    for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     assert(tg.getNds()->size() == 5);
     assert(a->getAdjList().front()->pl().hasRoute(&l2));
@@ -1426,6 +1432,100 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l2));
       assert(ec->pl().getRouteOcc(&l2).direction == e);
     }
+
+    assert(validExceptions(&tg));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //           E
+    //           |
+    //           |
+    //           |
+    //           |    1
+    //           --------------------> B
+    //  A --------------
+    //            1    |
+    //                 |
+    //                 v
+    //                 C
+    //
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{500.0, 0.0}});
+    auto c = tg.addNd({{250.0, -200.0}});
+    auto e = tg.addNd({{150.0, 200.0}});
+
+    auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {250.0, 0.0}, {250.0, -200.0}}));
+    auto eb = tg.addEdg(e, b, util::geo::PolyLine<double>({{150.0, 200.0}, {150.0, 0}, {500.0, 0.0}}));
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ac->pl().addRoute(&l1, 0);
+    eb->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true, 1);
+    // builder.removeEdgeArtifacts(&tg);
+
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
+
+    assert(validExceptions(&tg));
+  }
+
+  // ___________________________________________________________________________
+  {
+    //                           2
+    //                    C <------------- E
+    //                    |
+    //         2, 1 ->    v    1->
+    //  A --------------> B --------------------> D
+    //  F --------------------------------------> G
+    //                     1
+    //
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{250.0, 0.0}});
+    auto c = tg.addNd({{250.0, 0}});
+    auto e = tg.addNd({{400.0, 1.0}});
+    auto d = tg.addNd({{500.0, 0.0}});
+
+    auto f = tg.addNd({{0.0, 0.0}});
+    auto g = tg.addNd({{500.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0},  {250.0, 0.0}}});
+    auto cb = tg.addEdg(c, b, {{{250.0, 0.0},  {250.0, 0.0}}});
+    auto ec = tg.addEdg(e, c, {{{400.0, 1.0},  {250.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{250.0, 0.0},  {500.0, 0.0}}});
+    auto fg = tg.addEdg(f, g, {{{0.0, 0.0},  {500.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "green");
+
+    ab->pl().addRoute(&l1, b);
+    ab->pl().addRoute(&l2, 0);
+    cb->pl().addRoute(&l2, 0);
+    ec->pl().addRoute(&l2, 0);
+    bd->pl().addRoute(&l1, d);
+    fg->pl().addRoute(&l1, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, true);
+    builder.removeEdgeArtifacts(&tg);
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
+    // TODO more tests
 
     assert(validExceptions(&tg));
   }

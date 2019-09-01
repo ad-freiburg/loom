@@ -3,6 +3,7 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "shared/transitgraph/TransitNodePL.h"
+#include "shared/transitgraph/TransitGraph.h"
 
 using util::geo::Point;
 using namespace shared::transitgraph;
@@ -31,8 +32,12 @@ util::json::Dict TransitNodePL::getAttrs() const {
       for (const auto* exTo : exFr.second) {
         util::json::Dict ex;
         ex["route"] = util::toString(ro.first->getId());
-        ex["edge1_node"] = util::toString(exFr.first);
-        ex["edge2_node"] = util::toString(exTo);
+        if (exFr.first == exTo) continue;
+        auto shrd = TransitGraph::sharedNode(exFr.first, exTo);
+        auto nd1 = exFr.first->getOtherNd(shrd);
+        auto nd2 = exTo->getOtherNd(shrd);
+        ex["edge1_node"] = util::toString(nd1);
+        ex["edge2_node"] = util::toString(nd2);
         arr.push_back(ex);
       }
     }

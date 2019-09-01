@@ -153,6 +153,9 @@ void TopologicalTest::run() {
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
 
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
 
     a = c->getAdjList().front()->getOtherNd(c);
     for (auto edg : a->getAdjList()) {
@@ -651,7 +654,8 @@ void TopologicalTest::run() {
       if (r.route == &l1) assert(r.direction == 0);
       if (r.route == &l2) {
         assert(r.direction != 0);
-        assert(r.direction->pl().getGeom()->getX() == approx(50));
+        assert(r.direction->pl().getGeom()->getX() > 49);
+        assert(r.direction->pl().getGeom()->getX() < 51);
       }
       if (r.route == &l3) {
         assert(r.direction == 0);
@@ -689,9 +693,11 @@ void TopologicalTest::run() {
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
 
-
     //    2   1,2    2
     // c ----a--->b----> d
+
+    a = c->getAdjList().front()->getOtherNd(c);
+    b = d->getAdjList().front()->getOtherNd(d);
 
     assert(tg.getNds()->size() == 4);
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
@@ -734,6 +740,9 @@ void TopologicalTest::run() {
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
+
+    a = c->getAdjList().front()->getOtherNd(c);
+    b = d->getAdjList().front()->getOtherNd(d);
 
 
     //    2   1,2    2
@@ -781,12 +790,14 @@ void TopologicalTest::run() {
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
 
     //    2     1,2
     // c ----a-----> d
+
+    a = c->getAdjList().front()->getOtherNd(c);
 
     assert(tg.getNds()->size() == 3);
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
@@ -833,6 +844,8 @@ void TopologicalTest::run() {
 
     //    <-2   2
     // c ----a-----> d
+
+    a = c->getAdjList().front()->getOtherNd(c);
 
     assert(tg.getNds()->size() == 3);
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
@@ -887,6 +900,8 @@ void TopologicalTest::run() {
     //    <-2   2        1,<-2
     // c ----a-----> d < --- e
 
+    a = c->getAdjList().front()->getOtherNd(c);
+
     assert(tg.getNds()->size() == 4);
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
     assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
@@ -940,6 +955,7 @@ void TopologicalTest::run() {
     builder.removeEdgeArtifacts(&tg);
 
 
+    a = c->getAdjList().front()->getOtherNd(c);
 
     //    <-2   2        <-2
     // c ----a-----> d < --- e
@@ -994,6 +1010,7 @@ void TopologicalTest::run() {
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
 
+    a = c->getAdjList().front()->getOtherNd(c);
 
     //    <-2   2        <-2
     // c ----a-----> d < --- e

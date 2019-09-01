@@ -93,8 +93,9 @@ class Builder {
   bool lostIn(const Route* r, const TransitEdge* a) const;
 
   void plMerge(TransitEdgePL& a, const TransitEdgePL& b) const;
+  void cleanEx(TransitNode* nd) const;
 
-  TransitEdge* split(TransitEdgePL& a, TransitNode* fr, TransitNode* to, TransitGraph* g) const;
+  std::pair<TransitEdge*, TransitEdge*> split(TransitEdgePL& a, TransitNode* fr, TransitNode* to, TransitGraph* g) const;
   bool snapElig(TransitNode* nat, const TransitEdge* eOther, const TransitGraph* g) const;
 
   mutable std::set<const TransitEdge*> _indEdges;
