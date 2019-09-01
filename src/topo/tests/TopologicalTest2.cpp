@@ -12,6 +12,7 @@
 #include "util/Nullable.h"
 #include "util/String.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
+#include "topo/tests/TopoTestUtil.h"
 
 #define private public
 #include "topo/builder/Builder.h"
@@ -108,6 +109,7 @@ void TopologicalTest2::run() {
 
     assert(c->getAdjList().front()->pl().hasRoute(&l1));
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -198,6 +200,7 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -286,6 +289,7 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -375,6 +379,8 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -406,6 +412,7 @@ void TopologicalTest2::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true, 1);
@@ -444,7 +451,6 @@ void TopologicalTest2::run() {
     assert(ef);
     assert(fc);
 
-
     if (f->pl().getGeom()->getY() > 0) {
       assert(ef->pl().hasRoute(&l1));
       assert(ef->pl().getRouteOcc(&l1).direction == 0);
@@ -464,6 +470,8 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -560,6 +568,7 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -653,6 +662,7 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -748,6 +758,7 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -841,6 +852,8 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // -----------------------------
@@ -936,6 +949,7 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1028,6 +1042,7 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1121,6 +1136,7 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1219,6 +1235,8 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l1));
       assert(ec->pl().getRouteOcc(&l1).direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1313,6 +1331,7 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l2));
       assert(ec->pl().getRouteOcc(&l2).direction == e);
     }
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1407,5 +1426,7 @@ void TopologicalTest2::run() {
       assert(ec->pl().hasRoute(&l2));
       assert(ec->pl().getRouteOcc(&l2).direction == e);
     }
+
+    assert(validExceptions(&tg));
   }
 }

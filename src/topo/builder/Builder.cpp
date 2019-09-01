@@ -386,11 +386,13 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
           faEdgeGeom.addRoute(r.route, a, r.style);
           abEdgeGeom.addRoute(r.route, b, r.style);
           fcEdgeGeom.addRoute(r.route, wffrom, r.style);
+          // fcEdgeGeom.addRoute(r.route, b, r.style);
         } else {
           std::cerr << "D " << r.route->getId() << std::endl;
           faEdgeGeom.addRoute(r.route, wffrom, r.style);
           abEdgeGeom.addRoute(r.route, a, r.style);
           fcEdgeGeom.addRoute(r.route, b, r.style);
+          // fcEdgeGeom.addRoute(r.route, wfto, r.style);
         }
       }
     }
@@ -768,8 +770,8 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
             if (e == connecting) continue;
             if (e == exTo) continue;
             b->pl().addConnExc(ro.first, e, exTo);
-            toDel.push_back({ro.first, {exFr.first, exTo}});
           }
+          toDel.push_back({ro.first, {exFr.first, exTo}});
         } else if (exTo == connecting) {
           for (auto e : a->getAdjList()) {
             if (e == connecting) continue;
@@ -777,6 +779,7 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
             b->pl().addConnExc(ro.first, e, exFr.first);
             toDel.push_back({ro.first, {exFr.first, exTo}});
           }
+          toDel.push_back({ro.first, {exFr.first, exTo}});
         } else {
           // not needed!
           // b->pl().addConnExc(ro.first, exFr.first, exTo);
@@ -784,8 +787,6 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       }
     }
   }
-
-  std::cerr << "E" << std::flush;
 
   for (auto* oldE : a->getAdjList()) {
     if (oldE->getFrom() != a) continue;
@@ -797,22 +798,16 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     auto* newE = g->getEdg(b, oldE->getTo());
 
     if (!newE) {
-      std::cerr << "  a" << std::endl;
       // add a new edge going from b to the non-a node
       newE = g->addEdg(b, oldE->getTo(), oldE->pl());
 
       // update route dirs
-      std::cerr << "  a'" << std::endl;
       routeDirRepl(a, b, newE);
 
       // replace each occurance of oldE in the non-a node with the newE
-      std::cerr << "  a''" << std::endl;
       edgeRpl(newE->getTo(), oldE, newE);
-      std::cerr << "  a'''" << std::endl;
       edgeRpl(newE->getFrom(), oldE, newE);
-      std::cerr << "  a''''" << std::endl;
     } else {
-      std::cerr << "  b" << std::endl;
       // edge is already existing
       foldEdges(oldE, newE);
 
@@ -822,12 +817,9 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       // replace each occurance of oldE in the non-a node with the newE
       edgeRpl(newE->getTo(), oldE, newE);
       edgeRpl(newE->getFrom(), oldE, newE);
-
-      std::cerr << "  b'" << std::endl;
     }
   }
 
-  std::cerr << "F" << std::flush;
 
   for (auto* oldE : a->getAdjList()) {
     if (oldE->getTo() != a) continue;
@@ -858,8 +850,6 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     }
   }
 
-  std::cerr << "G" << std::flush;
-
   // remove the original exceptions
   for (const auto& ro : toDel) {
     b->pl().delConnExc(ro.first, ro.second.first, ro.second.second);
@@ -867,8 +857,6 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
 
   g->delEdg(a, b);
   g->delNd(a);
-
-  std::cerr << " done" << std::endl;
 
   return true;
 }

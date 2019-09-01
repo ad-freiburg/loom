@@ -247,6 +247,8 @@ void TransitGraph::readFromJson(std::istream* s) {
         }
       }
     }
+
+    // TODO: Third pass, exceptions
   }
 
   buildGrids();

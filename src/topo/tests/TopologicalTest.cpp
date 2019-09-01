@@ -12,6 +12,7 @@
 #include "util/Nullable.h"
 #include "util/String.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
+#include "topo/tests/TopoTestUtil.h"
 
 #define private public
 #include "topo/builder/Builder.h"
@@ -113,6 +114,8 @@ void TopologicalTest::run() {
     assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
 
     assert(!d->pl().connOccurs(&l2, tg.getEdg(a, d), tg.getEdg(d, e)));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -173,6 +176,8 @@ void TopologicalTest::run() {
     assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
 
     assert(!d->pl().connOccurs(&l2, tg.getEdg(a, d), tg.getEdg(d, e)));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -232,6 +237,8 @@ void TopologicalTest::run() {
     assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
 
     assert(!d->pl().connOccurs(&l2, tg.getEdg(a, d), tg.getEdg(d, e)));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -275,6 +282,8 @@ void TopologicalTest::run() {
     assert(!d->pl().connOccurs(&l2, cd, ed));
     assert(cd->pl().hasRoute(&l2) && cd->pl().getRouteOcc(&l2).direction == c);
     assert(ed->pl().hasRoute(&l2) && ed->pl().getRouteOcc(&l2).direction != 0 && ed->pl().getRouteOcc(&l2).direction != e);
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -329,6 +338,7 @@ void TopologicalTest::run() {
       if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
     }
 
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -381,6 +391,8 @@ void TopologicalTest::run() {
       if (ro.route == &l1) assert(ro.direction == 0);
       if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
     }
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -451,6 +463,8 @@ void TopologicalTest::run() {
         assert(ro.direction->pl().getGeom()->getX() > 70);
       }
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -491,6 +505,8 @@ void TopologicalTest::run() {
       if (r.route == &l1) assert(r.direction == 0);
       if (r.route == &l2) assert(r.direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -531,6 +547,8 @@ void TopologicalTest::run() {
       if (r.route == &l1) assert(r.direction == 0);
       if (r.route == &l2) assert(r.direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -574,6 +592,8 @@ void TopologicalTest::run() {
         assert(r.direction->pl().getGeom()->getX() == approx(50));
       }
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -637,6 +657,8 @@ void TopologicalTest::run() {
         assert(r.direction == 0);
       }
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -681,6 +703,8 @@ void TopologicalTest::run() {
       if (r.route == &l1) assert(r.direction == 0);
       if (r.route == &l2) assert(r.direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -725,6 +749,8 @@ void TopologicalTest::run() {
       if (r.route == &l1) assert(r.direction == 0);
       if (r.route == &l2) assert(r.direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -755,6 +781,10 @@ void TopologicalTest::run() {
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
 
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
     //    2     1,2
     // c ----a-----> d
 
@@ -770,6 +800,8 @@ void TopologicalTest::run() {
         if (r.route == &l2) assert(r.direction == 0);
       }
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -811,6 +843,8 @@ void TopologicalTest::run() {
       assert(e->pl().getRoutes().size() == 1);
       assert(e->pl().getRoutes().begin()->direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -868,6 +902,8 @@ void TopologicalTest::run() {
       if (ro.route == &l1) assert(ro.direction == 0);
       if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -921,6 +957,8 @@ void TopologicalTest::run() {
 
     assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().getGeom()->getX() == approx(100));
     assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().connOccurs(&l2, e->getAdjList().front(), c->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -973,6 +1011,8 @@ void TopologicalTest::run() {
 
     assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().getGeom()->getX() == approx(100));
     assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().connOccurs(&l2, e->getAdjList().front(), c->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1029,5 +1069,7 @@ void TopologicalTest::run() {
       assert(e->pl().getRoutes().size() == 1);
       assert(e->pl().getRoutes().begin()->direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 }

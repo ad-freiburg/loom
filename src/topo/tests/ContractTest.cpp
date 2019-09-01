@@ -11,6 +11,7 @@
 #include "util/Nullable.h"
 #include "util/String.h"
 #include "topo/tests/ContractTest.h"
+#include "topo/tests/TopoTestUtil.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 
 #define private public
@@ -162,6 +163,8 @@ void ContractTest::run() {
     // TODO: fix this as seeon as connOccurs does what its name suggests
     // assert(!c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
     assert(!tg.getEdg(e,c)->pl().hasRoute(&l3));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -252,7 +255,7 @@ void ContractTest::run() {
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
-    //
+
     assert(c->getAdjList().size() == 4);
 
     assert(tg.getEdg(a,c)->pl().getRoutes().size() == 2);
@@ -273,6 +276,7 @@ void ContractTest::run() {
     // TODO: fix this as seeon as connOccurs does what its name suggests
     // assert(!c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
     assert(!tg.getEdg(e,c)->pl().hasRoute(&l3));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -381,6 +385,7 @@ void ContractTest::run() {
     assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
 
     assert(c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -490,6 +495,7 @@ void ContractTest::run() {
     assert(!b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, d)));
 
     assert(b->pl().connOccurs(&l3, tg.getEdg(b, g), tg.getEdg(b, e)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -529,6 +535,7 @@ void ContractTest::run() {
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
 
     assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -568,6 +575,7 @@ void ContractTest::run() {
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
 
     assert(!d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -614,6 +622,7 @@ void ContractTest::run() {
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
 
     assert(!d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -661,6 +670,7 @@ void ContractTest::run() {
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
 
     assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -711,6 +721,7 @@ void ContractTest::run() {
     // this is prevented by the original exception in d
     assert(!d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(d, e)));
     assert(!d->pl().connOccurs(&l1, tg.getEdg(d, c), tg.getEdg(d, e)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -755,6 +766,7 @@ void ContractTest::run() {
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
 
     assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -817,6 +829,7 @@ void ContractTest::run() {
     assert(tg.getEdg(c, e)->pl().getRoutes().begin()->direction == 0);
     assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
     assert(c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -879,6 +892,7 @@ void ContractTest::run() {
     assert(tg.getEdg(b, e)->pl().getRoutes().begin()->direction == 0);
     assert(!b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, d)));
     assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -940,6 +954,7 @@ void ContractTest::run() {
     assert(b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, e)));
     assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, e)));
     assert(!e->pl().connOccurs(&l2, tg.getEdg(b, e), tg.getEdg(d, e)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1001,6 +1016,7 @@ void ContractTest::run() {
     assert(b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, c)));
     assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, c)));
     assert(!c->pl().connOccurs(&l2, tg.getEdg(b, c), tg.getEdg(d, c)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1068,6 +1084,7 @@ void ContractTest::run() {
 
     assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(c, b)));
     assert(c->pl().connOccurs(&l1, tg.getEdg(c, d), tg.getEdg(c, b)));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1135,6 +1152,7 @@ void ContractTest::run() {
 
     assert(e->pl().connOccurs(&l1, tg.getEdg(a, e), tg.getEdg(c, e)));
     assert(c->pl().connOccurs(&l1, tg.getEdg(c, d), tg.getEdg(c, e)));
+    assert(validExceptions(&tg));
   }
 
   // ==========================================================================
@@ -1194,6 +1212,7 @@ void ContractTest::run() {
     assert(d->getAdjList().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1248,6 +1267,7 @@ void ContractTest::run() {
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1302,6 +1322,7 @@ void ContractTest::run() {
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1351,6 +1372,7 @@ void ContractTest::run() {
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
 
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1404,6 +1426,7 @@ void ContractTest::run() {
 
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1456,6 +1479,7 @@ void ContractTest::run() {
 
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1531,6 +1555,7 @@ void ContractTest::run() {
     // the case where e is a terminus is handled by the subsequent contraction
     // (if be and ce are short enough)
     assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1600,6 +1625,7 @@ void ContractTest::run() {
 
     assert(c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
     assert(c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1660,6 +1686,7 @@ void ContractTest::run() {
 
     assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
     assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1719,6 +1746,7 @@ void ContractTest::run() {
 
     assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
     assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1791,6 +1819,7 @@ void ContractTest::run() {
 
     assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
     assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1860,6 +1889,7 @@ void ContractTest::run() {
     assert(tg.getEdg(c, e)->pl().getRoutes().size() == 0);
 
     assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(validExceptions(&tg));
   }
 
   // ===========================================================================
@@ -1920,6 +1950,7 @@ void ContractTest::run() {
     assert(d->getAdjList().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1974,6 +2005,7 @@ void ContractTest::run() {
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2028,6 +2060,8 @@ void ContractTest::run() {
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2077,6 +2111,7 @@ void ContractTest::run() {
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
 
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2139,6 +2174,8 @@ void ContractTest::run() {
 
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2191,6 +2228,8 @@ void ContractTest::run() {
 
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -2248,6 +2287,8 @@ void ContractTest::run() {
     assert(d->getAdjList().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2302,6 +2343,8 @@ void ContractTest::run() {
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2356,6 +2399,8 @@ void ContractTest::run() {
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2404,6 +2449,7 @@ void ContractTest::run() {
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
 
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2457,6 +2503,8 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
     // because 2 is a terminus in e and we are contractin c and e
     assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2509,6 +2557,8 @@ void ContractTest::run() {
 
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
 
   // ===========================================================================
@@ -2569,6 +2619,7 @@ void ContractTest::run() {
     assert(d->getAdjList().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2623,6 +2674,8 @@ void ContractTest::run() {
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2677,6 +2730,8 @@ void ContractTest::run() {
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2726,6 +2781,7 @@ void ContractTest::run() {
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
 
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2781,6 +2837,8 @@ void ContractTest::run() {
 
     // because 2 is a terminus in e
     assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2831,6 +2889,8 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
 
     assert(c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
 
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
@@ -2891,6 +2951,7 @@ void ContractTest::run() {
     assert(d->getAdjList().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2945,6 +3006,7 @@ void ContractTest::run() {
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2999,6 +3061,7 @@ void ContractTest::run() {
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3048,6 +3111,7 @@ void ContractTest::run() {
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
 
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3103,6 +3167,7 @@ void ContractTest::run() {
 
     // because 2 is a terminus in e
     assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3154,6 +3219,7 @@ void ContractTest::run() {
 
     assert(c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
 
+    assert(validExceptions(&tg));
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
   }
@@ -3210,6 +3276,7 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == 0);
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3261,6 +3328,7 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == 0);
+    assert(validExceptions(&tg));
 
     // TODO: fix as soon as connOccurs does what its name suggest
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
@@ -3324,6 +3392,8 @@ void ContractTest::run() {
     // TODO: fix as soon as connOccurs does what it says
     // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3374,6 +3444,8 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3432,6 +3504,8 @@ void ContractTest::run() {
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3486,6 +3560,8 @@ void ContractTest::run() {
 
     // TODO: fix this as soon as connOccurs does what its name suggests
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3536,6 +3612,8 @@ void ContractTest::run() {
 
     assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3575,6 +3653,8 @@ void ContractTest::run() {
 
     assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
     assert(d->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3614,6 +3694,8 @@ void ContractTest::run() {
 
     assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
     assert(d->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3669,6 +3751,7 @@ void ContractTest::run() {
       assert(r.direction == 0);
     }
 
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3723,6 +3806,8 @@ void ContractTest::run() {
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
       assert(r.direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3777,6 +3862,8 @@ void ContractTest::run() {
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
       assert(r.direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3831,6 +3918,8 @@ void ContractTest::run() {
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
       assert(r.direction == 0);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3887,6 +3976,8 @@ void ContractTest::run() {
       if (r.route == &l2) assert(r.direction == b);
       if (r.route == &l3) assert(r.direction == c);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3943,6 +4034,8 @@ void ContractTest::run() {
       if (r.route == &l2) assert(r.direction == b);
       if (r.route == &l3) assert(r.direction == c);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3999,6 +4092,8 @@ void ContractTest::run() {
       if (r.route == &l2) assert(r.direction == b);
       if (r.route == &l3) assert(r.direction == c);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4055,6 +4150,8 @@ void ContractTest::run() {
       if (r.route == &l2) assert(r.direction == b);
       if (r.route == &l3) assert(r.direction == c);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4094,6 +4191,8 @@ void ContractTest::run() {
     topo::Builder builder(&cfg);
 
     assert(!builder.routeEq(ca, ab));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4163,6 +4262,8 @@ void ContractTest::run() {
 
     assert(!b->pl().connOccurs(&l3, bd, c->getAdjList().front()));
     assert(!b->pl().connOccurs(&l2, bd, c->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4232,6 +4333,8 @@ void ContractTest::run() {
 
     assert(!b->pl().connOccurs(&l3, bd, c->getAdjList().front()));
     assert(!b->pl().connOccurs(&l2, bd, c->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4301,6 +4404,8 @@ void ContractTest::run() {
 
     assert(!b->pl().connOccurs(&l3, bd, c->getAdjList().front()));
     assert(!b->pl().connOccurs(&l2, bd, c->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4370,6 +4475,8 @@ void ContractTest::run() {
 
     assert(!b->pl().connOccurs(&l3, bd, c->getAdjList().front()));
     assert(!b->pl().connOccurs(&l2, bd, c->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4436,6 +4543,8 @@ void ContractTest::run() {
     assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
     assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(e->getAdjList().front()->pl().getRoutes().size() == 3);
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4517,6 +4626,8 @@ void ContractTest::run() {
     for (auto r : a->getAdjList().front()->pl().getRoutes()) {
       if (r.route == &l1) assert(r.direction == d);
     }
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4611,6 +4722,8 @@ void ContractTest::run() {
     assert(contred->pl().getConnExc().begin()->first == &l2);
 
     assert(!contred->pl().connOccurs(&l2, c->getAdjList().front(), e->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4717,6 +4830,8 @@ void ContractTest::run() {
     assert(contred->pl().getConnExc().begin()->first == &l3);
 
     assert(!contred->pl().connOccurs(&l3, c->getAdjList().front(), e->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4823,6 +4938,8 @@ void ContractTest::run() {
     assert(contred->pl().getConnExc().begin()->first == &l3);
 
     assert(!contred->pl().connOccurs(&l3, c->getAdjList().front(), e->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4861,6 +4978,7 @@ void ContractTest::run() {
     // should be handled by the edge merging mechanism, and there should be
     // checks which prevent such a contraction
 
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4893,6 +5011,8 @@ void ContractTest::run() {
     // there should now be _no_ connection possible from a to d, as such a
     // connection was previously also not possible
     assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4925,6 +5045,8 @@ void ContractTest::run() {
     // there should now be _no_ connection possible from a to d, as such a
     // connection was previously also not possible
     assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4957,6 +5079,8 @@ void ContractTest::run() {
     // there should now be _no_ connection possible from a to d, as such a
     // connection was previously also not possible
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4989,6 +5113,8 @@ void ContractTest::run() {
     // there should now be _no_ connection possible from a to d, as such a
     // connection was previously also not possible
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -5028,6 +5154,8 @@ void ContractTest::run() {
     // connection was previously also not possible
     assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
     assert(e->getAdjList().front()->getOtherNd(e)->pl().connOccurs(&l1, e->getAdjList().front(), d->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -5068,6 +5196,8 @@ void ContractTest::run() {
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), e->getAdjList().front()));
     assert(e->getAdjList().front()->getOtherNd(e)->pl().connOccurs(&l1, e->getAdjList().front(), d->getAdjList().front()));
     assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -5108,6 +5238,8 @@ void ContractTest::run() {
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), e->getAdjList().front()));
     assert(e->getAdjList().front()->getOtherNd(e)->pl().connOccurs(&l1, e->getAdjList().front(), d->getAdjList().front()));
     assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -5161,6 +5293,8 @@ void ContractTest::run() {
 
     topo::Builder builder(&cfg);
     assert(builder.isTriFace(bc, &tg));
+
+    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -5245,5 +5379,7 @@ void ContractTest::run() {
 
     topo::Builder builder(&cfg);
     assert(!builder.isTriFace(bc, &tg));
+
+    assert(validExceptions(&tg));
   }
 }
