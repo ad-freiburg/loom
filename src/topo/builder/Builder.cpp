@@ -278,38 +278,6 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     // new nodes at the start and end of the shared segment
     TransitNode *a = 0, *b = 0;
 
-    // if (ea.getLength() < MAX_SNAP_DIST && snapElig(w.e->getFrom(), w.f, g)) {
-      // std::cerr << "SNAP A" << std::endl;
-      // a = w.e->getFrom();
-    // }
-
-    // if (ec.getLength() < MAX_SNAP_DIST && snapElig(w.e->getTo(), w.f, g)) {
-      // std::cerr << "SNAP B" << std::endl;
-      // b = w.e->getTo();
-    // }
-
-    // if (fap.totalPos <= fbp.totalPos) {
-      // if (fa.getLength() < MAX_SNAP_DIST && snapElig(w.f->getFrom(), w.e, g)) {
-        // std::cerr << "SNAP A" << std::endl;
-        // a = w.f->getFrom();
-      // }
-
-      // if (fc.getLength() < MAX_SNAP_DIST && snapElig(w.f->getTo(), w.e, g)) {
-        // std::cerr << "SNAP B" << std::endl;
-        // b = w.f->getTo();
-      // }
-    // } else {
-      // if (fa.getLength() < MAX_SNAP_DIST && snapElig(w.f->getTo(), w.e, g)) {
-        // std::cerr << "SNAP A" << std::endl;
-        // a = w.f->getTo();
-      // }
-
-      // if (fc.getLength() < MAX_SNAP_DIST && snapElig(w.f->getFrom(), w.e, g)) {
-        // std::cerr << "SNAP B" << std::endl;
-        // b = w.f->getFrom();
-      // }
-    // }
-
     if (!a) {
       std::cerr << "NOSNAP A" << std::endl;
       a = g->addNd({w.s.first.first.p});
@@ -530,22 +498,22 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     // TODO: plmerge is not necessary here
 
     if (eaE) {
-      plMerge(eaE->pl(), eaEdgeGeom);
+      eaE->pl() = eaEdgeGeom;
       grid.add(*eaE->pl().getGeom(), eaE);
     }
 
     if (ebE) {
-      plMerge(ebE->pl(), ecEdgeGeom);
+      ebE->pl() = ecEdgeGeom;
       grid.add(*ebE->pl().getGeom(), ebE);
     }
 
     if (faE) {
-      plMerge(faE->pl(), faEdgeGeom);
+      faE->pl() = faEdgeGeom;
       grid.add(*faE->pl().getGeom(), faE);
     }
 
     if (fbE) {
-      plMerge(fbE->pl(), fcEdgeGeom);
+      fbE->pl() = fcEdgeGeom;
       grid.add(*fbE->pl().getGeom(), fbE);
     }
 
@@ -1121,58 +1089,6 @@ void Builder::explicateNonCons(const TransitEdge* m, TransitNode* hub) const {
 }
 
 // _____________________________________________________________________________
-bool Builder::lostIn(const Route* r, const TransitEdge* a) const {
-  auto fr = a->getFrom();
-  auto to = a->getTo();
-
-  auto aro = a->pl().getRouteOcc(r);
-
-  bool lost = true;
-
-  for (auto e : fr->getAdjList()) {
-    if (e == a) continue;
-    if (!e->pl().hasRoute(r)) continue;
-    if (!fr->pl().connOccurs(r, e, a)) continue;
-
-    const auto& ero = e->pl().getRouteOcc(r);
-    if (ero.direction == 0) {
-      lost = false;
-      break;
-    }
-    if (aro.direction == 0) {
-      lost = false;
-      break;
-    }
-
-    if (ero.direction == fr && aro.direction != fr) {
-      lost = false;
-      break;
-    }
-    if (aro.direction == fr && ero.direction != fr) {
-      lost = false;
-      break;
-    }
-  }
-
-  if (lost) return true;
-
-  for (auto e : to->getAdjList()) {
-    if (e == a) continue;
-    if (!e->pl().hasRoute(r)) continue;
-    if (!to->pl().connOccurs(r, e, a)) continue;
-
-    const auto& ero = e->pl().getRouteOcc(r);
-    if (ero.direction == 0) return false;
-    if (aro.direction == 0) return false;
-
-    if (ero.direction == to && aro.direction != to) return false;
-    if (aro.direction == to && ero.direction != to) return false;
-  }
-
-  return true;
-}
-
-// _____________________________________________________________________________
 bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
   const auto shrNd = TransitGraph::sharedNode(a, b);
   const auto majNonShrNd = b->getOtherNd(shrNd);
@@ -1198,23 +1114,6 @@ bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
 
   explicateNonCons(a, shrNd);
   explicateNonCons(b, shrNd);
-
-  // remove "lost lines" which are on one of the fold edges, but cannot
-  // leave it
-  // std::vector<const Route *> lostA, lostB;
-  // for (auto ro : a->pl().getRoutes()) {
-    // if (lostIn(ro.route, a)) {
-      // lostA.push_back(ro.route);
-    // }
-  // }
-  // for (auto ro : b->pl().getRoutes()) {
-    // if (lostIn(ro.route, b)) {
-      // lostB.push_back(ro.route);
-    // }
-  // }
-
-  // for (auto r : lostA) a->pl().delRoute(r);
-  // for (auto r : lostB) b->pl().delRoute(r);
 
   auto keptExcsShrd = keptExcs(shrNd, a, b);
   auto keptExcsMajNonShrd = keptExcs(majNonShrNd, a, b);
@@ -1402,35 +1301,6 @@ void Builder::terminusPass(TransitNode* nd, const TransitEdge* edg) {
 }
 
 // _____________________________________________________________________________
-void Builder::plMerge(TransitEdgePL& a, const TransitEdgePL& b) const {
-  // merge routes
-  for (auto ro : b.getRoutes()) {
-    if (!a.hasRoute(ro.route)) {
-      a.addRoute(ro.route, ro.direction);
-    } else {
-      auto old = a.getRouteOcc(ro.route);
-      if (ro.direction != old.direction) {
-        // now goes in both directions
-        a.delRoute(ro.route);
-        a.addRoute(ro.route, 0);
-      }
-    }
-  }
-
-  // merge geom
-  if (a.getPolyline().getLine().size() == 0) {
-    // a did not yet have a polyline
-    a.setPolyline(b.getPolyline());
-  } else {
-    assert(false);
-    // average the two
-    std::vector<const PolyLine<double>*> lines{&a.getPolyline(),
-                                               &b.getPolyline()};
-    a.setPolyline(PolyLine<double>::average(lines));
-  }
-}
-
-// _____________________________________________________________________________
  std::pair<TransitEdge*, TransitEdge*> Builder::split(TransitEdgePL& a, TransitNode* fr, TransitNode* to,
                             TransitGraph* g) const {
   TransitEdge* ret;
@@ -1457,14 +1327,6 @@ void Builder::plMerge(TransitEdgePL& a, const TransitEdgePL& b) const {
   }
 
   return std::pair<TransitEdge*, TransitEdge*>(ret,helperEdg);
-}
-
-// _____________________________________________________________________________
-bool Builder::snapElig(TransitNode* nat, const TransitEdge* eOther,
-                       const TransitGraph* g) const {
-  return (!g->getEdg(nat, eOther->getTo()) ||
-          !g->getEdg(nat, eOther->getFrom()) ||
-          g->getEdg(nat, eOther->getTo()) == g->getEdg(nat, eOther->getFrom()));
 }
 
 // _____________________________________________________________________________

@@ -90,13 +90,9 @@ class Builder {
   DBox getGraphBoundingBox(const TransitGraph* g) const;
   EdgeGrid getGeoIndex(const TransitGraph* g) const;
 
-  bool lostIn(const Route* r, const TransitEdge* a) const;
-
-  void plMerge(TransitEdgePL& a, const TransitEdgePL& b) const;
   void cleanEx(TransitNode* nd) const;
 
   std::pair<TransitEdge*, TransitEdge*> split(TransitEdgePL& a, TransitNode* fr, TransitNode* to, TransitGraph* g) const;
-  bool snapElig(TransitNode* nat, const TransitEdge* eOther, const TransitGraph* g) const;
 
   mutable std::set<const TransitEdge*> _indEdges;
   mutable std::set<std::pair<const TransitEdge*, const TransitEdge*> > _indEdgesPairs;
