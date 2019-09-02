@@ -57,6 +57,73 @@ class approx {
 
 // _____________________________________________________________________________
 void TopologicalTest2::run() {
+
+  // ___________________________________________________________________________
+  {
+    //
+    //    1,2           1, 2->               1, 2->            1,2
+    //                       <----------------------------- D ^ -----> Y
+    // X -----> A <-------------- B                           |
+    // //       |-----------------------------------------> E |
+    //                             2
+    //
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{250.0, 0.0}});
+    auto e = tg.addNd({{500.0, 1.0}});
+    auto d = tg.addNd({{500.0, 0.0}});
+    // auto x = tg.addNd({{-100.0, 0.0}});
+    // auto y = tg.addNd({{600.0, 0.0}});
+
+    a->pl().addStop(transitmapper::graph::StationInfo("1", "1"));
+    b->pl().addStop(transitmapper::graph::StationInfo("2", "2"));
+    d->pl().addStop(transitmapper::graph::StationInfo("3", "3"));
+
+    auto ba = tg.addEdg(b, a, {{{250.0, 0.0}, {0.0, 0.0}}});
+    auto db = tg.addEdg(d, b, {{{500.0, 0.0}, {200.0, 0.0}}});
+
+    // auto ae = tg.addEdg(a, e, {{{0.0, 0.0}, {500.0, 1.0}}});
+    // auto ed = tg.addEdg(e, d, {{{500.0, 1.0}, {500.0, 0.0}}});
+
+    // auto xa = tg.addEdg(x, a, {{{-100.0, 0.0}, {0.0, 0.0}}});
+    // auto dy = tg.addEdg(d, y, {{{500.0, 0.0}, {600.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "green");
+
+    // xa->pl().addRoute(&l1, 0);
+    // xa->pl().addRoute(&l2, 0);
+
+    // dy->pl().addRoute(&l1, 0);
+    // dy->pl().addRoute(&l2, 0);
+
+    ba->pl().addRoute(&l1, 0);
+    ba->pl().addRoute(&l2, b);
+    ba->pl().addRoute(&l1, 0);
+    ba->pl().addRoute(&l2, b);
+    db->pl().addRoute(&l2, d);
+    db->pl().addRoute(&l1, 0);
+
+    // ae->pl().addRoute(&l2, 0);
+    // ed->pl().addRoute(&l2, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 50;
+
+    topo::Builder builder(&cfg);
+    builder.createTopologicalNodes(&tg, false);
+    builder.removeEdgeArtifacts(&tg);
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
+    // TODO more tests
+
+    assert(validExceptions(&tg));
+    exit(1);
+  }
+
   // ___________________________________________________________________________
   {
     //                     1
@@ -1520,10 +1587,6 @@ void TopologicalTest2::run() {
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
-
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
 
     // TODO more tests
 

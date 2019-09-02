@@ -825,7 +825,6 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
     }
   }
 
-
   for (auto* oldE : a->getAdjList()) {
     if (oldE->getTo() != a) continue;
     if (connecting == oldE) continue;
@@ -1168,6 +1167,19 @@ bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
   const auto majNonShrNd = b->getOtherNd(shrNd);
   assert(shrNd);
 
+  //
+  //                  b
+  //         shrNd --------> v
+  //          \             /
+  //           \           /
+  //            \         /
+  //           a \       /
+  //              \     /
+  //               \   /
+  //                \ /
+  //            majNonShrNd
+  //
+
 
   // b is the new edge
 
@@ -1196,13 +1208,11 @@ bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
 
   shrNd->pl().getConnExc().clear();
   for (auto ex : keptExcsShrd) {
-    assert(ex.second.first->getFrom() == shrNd || ex.second.first->getTo() == shrNd);
     shrNd->pl().addConnExc(ex.first, ex.second.first, ex.second.second);
   }
 
   majNonShrNd->pl().getConnExc().clear();
   for (auto ex : keptExcsMajNonShrd) {
-    assert(ex.second.first->getFrom() == majNonShrNd || ex.second.first->getTo() == majNonShrNd);
     majNonShrNd->pl().addConnExc(ex.first, ex.second.first, ex.second.second);
   }
 
