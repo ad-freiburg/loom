@@ -37,10 +37,10 @@ int main(int argc, char** argv) {
 
   // first pass, with strict distance values (clearing things up first)
   std::cerr << "Creating topological nodes (first round)..." << std::endl;
-  b.createTopologicalNodes(&tg, false, 62);
+  b.createTopologicalNodes(&tg, false);
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Removing edge artifacts..." << std::endl;
-  b.removeEdgeArtifacts(&tg);
+  // b.removeEdgeArtifacts(&tg);
 
   // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
 

@@ -350,19 +350,31 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     auto wffrom = w.f->getFrom();
     auto wfto = w.f->getTo();
 
+    bool eaShort = false;
+    bool ecShort = false;
+    bool faShort = false;
+    bool fcShort = false;
+    bool abShort = false;
+
+    // bool eaShort = eaEdgeGeom.getPolyline().getLength() < 5000;
+    // bool ecShort = ecEdgeGeom.getPolyline().getLength() < 5000;
+    // bool faShort = faEdgeGeom.getPolyline().getLength() < 5000;
+    // bool fcShort = fcEdgeGeom.getPolyline().getLength() < 5000;
+    // bool abShort = abEdgeGeom.getPolyline().getLength() < 5000;
+
     for (const auto& r : curEdgeGeom->pl().getRoutes()) {
       if (!r.direction) {
         eaEdgeGeom.addRoute(r.route, 0, r.style);
         abEdgeGeom.addRoute(r.route, 0, r.style);
         ecEdgeGeom.addRoute(r.route, 0, r.style);
       } else if (r.direction == weto) {
-        eaEdgeGeom.addRoute(r.route, a, r.style);
-        abEdgeGeom.addRoute(r.route, b, r.style);
-        ecEdgeGeom.addRoute(r.route, weto, r.style);
+        eaEdgeGeom.addRoute(r.route, eaShort ? 0 : a, r.style);
+        abEdgeGeom.addRoute(r.route, abShort ? 0 : b, r.style);
+        ecEdgeGeom.addRoute(r.route, ecShort ? 0 : weto, r.style);
       } else {
-        eaEdgeGeom.addRoute(r.route, wefrom, r.style);
-        abEdgeGeom.addRoute(r.route, a, r.style);
-        ecEdgeGeom.addRoute(r.route, b, r.style);
+        eaEdgeGeom.addRoute(r.route, eaShort ? 0 : wefrom, r.style);
+        abEdgeGeom.addRoute(r.route, abShort ? 0 : a, r.style);
+        ecEdgeGeom.addRoute(r.route, ecShort ? 0 : b, r.style);
       }
     }
 
@@ -374,27 +386,28 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       } else if ((r.direction == wfto)) {
         if (fap.totalPos > fbp.totalPos) {
           std::cerr << "A " << r.route->getId() << std::endl;
-          faEdgeGeom.addRoute(r.route, wfto, r.style);
-          abEdgeGeom.addRoute(r.route, a, r.style);
-          fcEdgeGeom.addRoute(r.route, b, r.style);
+          faEdgeGeom.addRoute(r.route, faShort ? 0 : wfto, r.style);
+          abEdgeGeom.addRoute(r.route, abShort ? 0 : a, r.style);
+          fcEdgeGeom.addRoute(r.route, fcShort ? 0 : b, r.style);
         } else {
           std::cerr << "B " << r.route->getId() << std::endl;
-          faEdgeGeom.addRoute(r.route, a, r.style);
-          abEdgeGeom.addRoute(r.route, b, r.style);
-          fcEdgeGeom.addRoute(r.route, wfto, r.style);
+          faEdgeGeom.addRoute(r.route, faShort ? 0 : a, r.style);
+          abEdgeGeom.addRoute(r.route, abShort ? 0 : b, r.style);
+          fcEdgeGeom.addRoute(r.route, fcShort ? 0 : wfto, r.style);
         }
       } else {
         if (fap.totalPos > fbp.totalPos) {
+          std::cerr << fap.totalPos << " vs " << fbp.totalPos << std::endl;
           std::cerr << "C " << r.route->getId() << std::endl;
-          faEdgeGeom.addRoute(r.route, a, r.style);
+          faEdgeGeom.addRoute(r.route, faShort ? 0 : a, r.style);
           abEdgeGeom.addRoute(r.route, b, r.style);
-          fcEdgeGeom.addRoute(r.route, wffrom, r.style);
+          fcEdgeGeom.addRoute(r.route, fcShort ? 0 : wffrom, r.style);
           // fcEdgeGeom.addRoute(r.route, b, r.style);
         } else {
           std::cerr << "D " << r.route->getId() << std::endl;
-          faEdgeGeom.addRoute(r.route, wffrom, r.style);
+          faEdgeGeom.addRoute(r.route, faShort ? 0 : wffrom, r.style);
           abEdgeGeom.addRoute(r.route, a, r.style);
-          fcEdgeGeom.addRoute(r.route, b, r.style);
+          fcEdgeGeom.addRoute(r.route, fcShort ? 0 : b, r.style);
           // fcEdgeGeom.addRoute(r.route, wfto, r.style);
         }
       }
@@ -1409,6 +1422,7 @@ void Builder::plMerge(TransitEdgePL& a, const TransitEdgePL& b) const {
     // a did not yet have a polyline
     a.setPolyline(b.getPolyline());
   } else {
+    assert(false);
     // average the two
     std::vector<const PolyLine<double>*> lines{&a.getPolyline(),
                                                &b.getPolyline()};
