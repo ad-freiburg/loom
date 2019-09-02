@@ -110,15 +110,10 @@ void ContractTest2::run() {
     builder.combineNodes(d, b, &tg);
     builder.combineNodes(b, c, &tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
 
     // TODO: fix figure above and add tests
 
     assert(validExceptions(&tg));
-
-    exit(1);
   }
   // ___________________________________________________________________________
   {

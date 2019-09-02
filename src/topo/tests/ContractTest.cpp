@@ -69,9 +69,9 @@ void ContractTest::run() {
      *                e
      *               ^ ^
      *              /   \
-     *           2 /     \ 2,3
+     *           2 /     \ 2,3->c
      *            /       \
-     *     1,2   /    3    \    1,2
+     *     1,2   /    3->c \    1,2
      *  a -----> b ------> c ------> d
      *           \         /
      *            \1,3    / 1
@@ -143,6 +143,10 @@ void ContractTest::run() {
 
     builder.combineNodes(b, c, &tg);
 
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
+
     assert(c->getAdjList().size() == 4);
 
     assert(tg.getEdg(a,c)->pl().getRoutes().size() == 2);
@@ -150,7 +154,7 @@ void ContractTest::run() {
     assert(tg.getEdg(f,e)->pl().getRoutes().size() == 2);
     assert(tg.getEdg(g,h)->pl().getRoutes().size() == 2);
     assert(tg.getEdg(c,g)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c,e)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(c,e)->pl().getRoutes().size() == 2);
 
     assert(tg.getEdg(c,g)->pl().hasRoute(&l3));
     assert(tg.getEdg(c,g)->pl().hasRoute(&l1));
@@ -159,10 +163,9 @@ void ContractTest::run() {
 
     assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
     assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
+    assert(!c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
 
-    // TODO: fix this as seeon as connOccurs does what its name suggests
-    // assert(!c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
-    assert(!tg.getEdg(e,c)->pl().hasRoute(&l3));
+    assert(tg.getEdg(e,c)->pl().hasRoute(&l3));
 
     assert(validExceptions(&tg));
   }
@@ -263,7 +266,7 @@ void ContractTest::run() {
     assert(tg.getEdg(f,e)->pl().getRoutes().size() == 2);
     assert(tg.getEdg(g,h)->pl().getRoutes().size() == 2);
     assert(tg.getEdg(c,g)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c,e)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(c,e)->pl().getRoutes().size() == 2);
 
     assert(tg.getEdg(c,g)->pl().hasRoute(&l3));
     assert(tg.getEdg(c,g)->pl().hasRoute(&l1));
@@ -275,7 +278,9 @@ void ContractTest::run() {
 
     // TODO: fix this as seeon as connOccurs does what its name suggests
     // assert(!c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
-    assert(!tg.getEdg(e,c)->pl().hasRoute(&l3));
+    assert(tg.getEdg(e,c)->pl().hasRoute(&l3));
+
+    assert(!c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
     assert(validExceptions(&tg));
   }
 
@@ -1202,12 +1207,12 @@ void ContractTest::run() {
     topo::Builder builder(&cfg);
     builder.combineNodes(c, e, &tg);
 
-
     assert(tg.getNds()->size() == 4);
-    // line 1 on bc is deleted because it cannot leave bc
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
 
     assert(d->getAdjList().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
@@ -1258,15 +1263,19 @@ void ContractTest::run() {
     topo::Builder builder(&cfg);
     builder.combineNodes(c, e, &tg);
 
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
+
     assert(tg.getNds()->size() == 4);
-    // line 2 is deleted because it is lost
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l1);
 
     // TODO: fix as soon as connOccurs does what its name says
     // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
     assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
@@ -1314,14 +1323,21 @@ void ContractTest::run() {
     topo::Builder builder(&cfg);
     builder.combineNodes(c, e, &tg);
 
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
+
     assert(tg.getNds()->size() == 4);
 
-    // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 0);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
+    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+    assert(tg.getEdg(d, d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
 
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
     assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
+
+
     assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________

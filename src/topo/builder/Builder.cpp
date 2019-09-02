@@ -1104,9 +1104,7 @@ void Builder::explicateNonCons(const TransitEdge* m, TransitNode* hub) const {
       assert(ero.direction == 0 || ero.direction == ea->getTo() || ero.direction == ea->getFrom());
 
       if (ro.direction == ero.direction ||
-          m->getOtherNd(ro.direction) == ea->getOtherNd(ero.direction)) {
-        // TODO: something is wrong here, this prohibits allowed connections,
-        // check this!
+          (ero.direction != 0 && m->getOtherNd(ro.direction) == ea->getOtherNd(ero.direction))) {
         hub->pl().addConnExc(ro.route, m, ea);
       }
     }
@@ -1194,6 +1192,8 @@ bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
   //
 
 
+  std::cerr << "Folding " << a << " and " << b << std::endl;
+
   // b is the new edge
 
   explicateNonCons(a, shrNd);
@@ -1201,20 +1201,20 @@ bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
 
   // remove "lost lines" which are on one of the fold edges, but cannot
   // leave it
-  std::vector<const Route *> lostA, lostB;
-  for (auto ro : a->pl().getRoutes()) {
-    if (lostIn(ro.route, a)) {
-      lostA.push_back(ro.route);
-    }
-  }
-  for (auto ro : b->pl().getRoutes()) {
-    if (lostIn(ro.route, b)) {
-      lostB.push_back(ro.route);
-    }
-  }
+  // std::vector<const Route *> lostA, lostB;
+  // for (auto ro : a->pl().getRoutes()) {
+    // if (lostIn(ro.route, a)) {
+      // lostA.push_back(ro.route);
+    // }
+  // }
+  // for (auto ro : b->pl().getRoutes()) {
+    // if (lostIn(ro.route, b)) {
+      // lostB.push_back(ro.route);
+    // }
+  // }
 
-  for (auto r : lostA) a->pl().delRoute(r);
-  for (auto r : lostB) b->pl().delRoute(r);
+  // for (auto r : lostA) a->pl().delRoute(r);
+  // for (auto r : lostB) b->pl().delRoute(r);
 
   auto keptExcsShrd = keptExcs(shrNd, a, b);
   auto keptExcsMajNonShrd = keptExcs(majNonShrNd, a, b);
@@ -1278,7 +1278,7 @@ Builder::keptExcs(TransitNode* nd, const TransitEdge* a, const TransitEdge* b) {
         if (fr.first == b && to == a) continue;
 
         // the exception does not concern the folded edges, so we
-        // keep the exception
+        // keep it
         if (a != fr.first && a != to && b != fr.first && b != to) {
           ret.push_back({ex.first, {fr.first, to}});
           continue;
@@ -1291,19 +1291,19 @@ Builder::keptExcs(TransitNode* nd, const TransitEdge* a, const TransitEdge* b) {
         // if the route is only contained in one edge
         if (a->pl().hasRoute(ex.first) ^ b->pl().hasRoute(ex.first)) {
           if (a->pl().hasRoute(ex.first) && a != fr.first && a != to) {
-            // but the edge doesnt occur in the exceptions, so drop it
+            // but the edge doesnt occur in the exception, so drop it
             continue;
           }
           if (b->pl().hasRoute(ex.first) && b != fr.first && b != to) {
             // but the edge doesnt occur in the exceptions, so drop it
             continue;
           }
-          auto nfr = fr.first;
-          auto nto = to;
-          if (nfr == a) nfr = b;
-          if (nto == a) nto = b;
+          auto efr = fr.first;
+          auto eto = to;
+          if (efr == a) efr = b;
+          if (eto == a) eto = b;
 
-          ret.push_back({ex.first, {nfr, nto}});
+          ret.push_back({ex.first, {efr, eto}});
           continue;
         }
 
