@@ -153,9 +153,9 @@ void TopologicalTest::run() {
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
 
     a = c->getAdjList().front()->getOtherNd(c);
     for (auto edg : a->getAdjList()) {
@@ -236,8 +236,6 @@ void TopologicalTest::run() {
     assert(tg.getEdg(d, e)->pl().getRoutes().size() == 2);
     assert(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction == d);
     assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
-
-    assert(!d->pl().connOccurs(&l2, tg.getEdg(a, d), tg.getEdg(d, e)));
 
     assert(validExceptions(&tg));
   }
@@ -452,7 +450,9 @@ void TopologicalTest::run() {
 
       assert(edg->pl().getRoutes().size() == 1);
       assert(edg->pl().getRoutes().begin()->direction == 0);
-      assert(!edg->getOtherNd(a)->pl().connOccurs(&l2, e->getAdjList().front(), edg));
+
+      // exception is circumvented by dead end in a
+      assert(edg->getOtherNd(a)->pl().connOccurs(&l2, e->getAdjList().front(), edg));
     }
 
     for (auto ro : e->getAdjList().front()->pl().getRoutes()) {

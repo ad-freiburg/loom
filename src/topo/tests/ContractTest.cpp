@@ -777,6 +777,147 @@ void ContractTest::run() {
   // ___________________________________________________________________________
   {
     /*
+     * node contraction of c, b
+     *    1      1
+     * a ---> b ---> c
+     *        ^    /
+     *        | 1 / 1
+     *        d -/
+     *               (d is a terminus for 1 because of an exception)
+     */
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{5.0, 0.0}});
+    auto c = tg.addNd({{10.0, 0.0}});
+    auto d = tg.addNd({{5.0, -5.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {5.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{5.0, 0.0}, {10.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{5.0, 0.0}, {5.0, -5.0}}});
+    auto dc = tg.addEdg(d, c, {{{5.0, -5.0}, {10.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l1, 0);
+    bd->pl().addRoute(&l1, 0);
+    dc->pl().addRoute(&l1, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+    d->pl().addConnExc(&l1, dc, bd);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(c, d, &tg);
+
+    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
+
+    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
+    assert(validExceptions(&tg));
+  }
+
+  // ___________________________________________________________________________
+  {
+    /*
+     * node contraction of c, b
+     *    1      1
+     * a ---> b ---> c
+     *        ^    /
+     *        | 1 / 2
+     *        d -/
+     *
+     */
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{5.0, 0.0}});
+    auto c = tg.addNd({{10.0, 0.0}});
+    auto d = tg.addNd({{5.0, -5.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {5.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{5.0, 0.0}, {10.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{5.0, 0.0}, {5.0, -5.0}}});
+    auto dc = tg.addEdg(d, c, {{{5.0, -5.0}, {10.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l1, 0);
+    bd->pl().addRoute(&l1, 0);
+    dc->pl().addRoute(&l2, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(c, d, &tg);
+
+
+    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
+
+    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
+    assert(validExceptions(&tg));
+  }
+
+  // ___________________________________________________________________________
+  {
+    /*
+     * node contraction of c, b
+     *    1      1
+     * a ---> b ---> c
+     *        ^    /
+     *        | 1 / 2
+     *        d -/
+     *
+     */
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{5.0, 0.0}});
+    auto c = tg.addNd({{10.0, 0.0}});
+    auto d = tg.addNd({{5.0, -5.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {5.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{5.0, 0.0}, {10.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{5.0, 0.0}, {5.0, -5.0}}});
+    auto dc = tg.addEdg(d, c, {{{5.0, -5.0}, {10.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+    transitmapper::graph::Route l2("2", "2", "green");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l1, 0);
+    bd->pl().addRoute(&l1, 0);
+    dc->pl().addRoute(&l2, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+    b->pl().addConnExc(&l1, ab, bd);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(c, d, &tg);
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
+    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
+
+    assert(!b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
+    assert(validExceptions(&tg));
+  }
+
+  // ___________________________________________________________________________
+  {
+    /*
      *               f
      *               |
      *               |  2
