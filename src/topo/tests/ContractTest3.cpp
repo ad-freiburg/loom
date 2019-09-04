@@ -98,9 +98,9 @@ void ContractTest3::run() {
 
     builder.combineNodes(c, d, &tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
 
     // assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
     // assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
@@ -108,7 +108,7 @@ void ContractTest3::run() {
     // assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
     // assert(validExceptions(&tg));
 
-    exit(1);
+    // exit(1);
   }
   // ___________________________________________________________________________
   {
