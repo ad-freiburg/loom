@@ -49,8 +49,8 @@ int main(int argc, char** argv) {
     std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   };
 
-  std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-  std::cerr << "Removing edge artifacts..." << std::endl;
+  // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
+  // std::cerr << "Removing edge artifacts..." << std::endl;
 
   b.removeEdgeArtifacts(&tg);
 
