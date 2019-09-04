@@ -57,6 +57,59 @@ class approx {
 
 // _____________________________________________________________________________
 void ContractTest3::run() {
+
+  // ___________________________________________________________________________
+  {
+    /*
+     * node contraction of c, b
+     *      1      1      1
+     *  a ---> b ---> c ----> e
+     *         ^ -> /
+     *         | 1 / 1 ->
+     *         d -/
+     *
+     */
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{5.0, 0.0}});
+    auto c = tg.addNd({{10.0, 0.0}});
+    auto d = tg.addNd({{5.0, -5.0}});
+    auto e = tg.addNd({{15.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {5.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{5.0, 0.0}, {10.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{5.0, 0.0}, {5.0, -5.0}}});
+    auto dc = tg.addEdg(d, c, {{{5.0, -5.0}, {10.0, 0.0}}});
+    auto ce = tg.addEdg(c, e, {{{10.0, 0.0}, {15.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l1, 0);
+    bd->pl().addRoute(&l1, d);
+    dc->pl().addRoute(&l1, d);
+    ce->pl().addRoute(&l1, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+
+    topo::config::TopoConfig cfg;
+    topo::Builder builder(&cfg);
+
+    builder.combineNodes(c, d, &tg);
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
+
+    // assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
+    // assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
+
+    // assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
+    // assert(validExceptions(&tg));
+
+    exit(1);
+  }
   // ___________________________________________________________________________
   {
     /*
@@ -288,12 +341,9 @@ void ContractTest3::run() {
     builder.combineNodes(b, c, &tg);
     builder.combineNodes(c, d, &tg);
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
+    assert(d->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(d, e)));
+    assert(d->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(d, e)));
 
     assert(validExceptions(&tg));
-
-    exit(1);
   }
 }

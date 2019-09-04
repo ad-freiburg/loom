@@ -1200,6 +1200,7 @@ Builder::keptExcs(TransitNode* nd, const TransitEdge* a, const TransitEdge* b) {
 
         // if the route is only contained in one edge
         if (a->pl().hasRoute(ex.first) ^ b->pl().hasRoute(ex.first)) {
+          std::cerr << "A!!" << std::endl;
           if (a->pl().hasRoute(ex.first) && a != fr.first && a != to) {
             // but the edge doesnt occur in the exception, so drop it
             continue;
@@ -1220,16 +1221,19 @@ Builder::keptExcs(TransitNode* nd, const TransitEdge* a, const TransitEdge* b) {
         // if the route is contained in both edges, we must check if the
         // exception is overridden by the other edge
         if (a->pl().hasRoute(ex.first) && b->pl().hasRoute(ex.first)) {
+          std::cerr << "B!!" << std::endl;
           if (fr.first == a || to == a) {
             // concerns a
             auto otherEdge = fr.first == a ? to : fr.first;
             if (nd->pl().connOccurs(ex.first, b, otherEdge)) {
+              std::cerr << "B'" << std::endl;
               // okay, there is no exception.
               // Important: we can be sure that a connection is possible then,
               // because we explicated direction-induced restrictions before!
 
               // -> drop this exception!
             } else {
+              std::cerr << "B''" << std::endl;
               // else, keep it
               auto nfr = fr.first;
               auto nto = to;
@@ -1243,12 +1247,15 @@ Builder::keptExcs(TransitNode* nd, const TransitEdge* a, const TransitEdge* b) {
 
             auto otherEdge = fr.first == b ? to : fr.first;
             if (nd->pl().connOccurs(ex.first, a, otherEdge)) {
+              std::cerr << "B'''" << std::endl;
+              std::cerr << "Occurs between " << a << " and " << otherEdge << std::endl;
               // okay, there is no exception.
               // Important: we can be sure that a connection is possible then,
               // because we explicated direction-induced restrictions before!
 
               // -> drop this exception!
             } else {
+              std::cerr << "B''''" << std::endl;
               // else, keep it
               auto nfr = fr.first;
               auto nto = to;

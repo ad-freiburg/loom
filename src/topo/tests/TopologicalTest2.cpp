@@ -122,7 +122,6 @@ void TopologicalTest2::run() {
     // TODO more tests
 
     assert(validExceptions(&tg));
-    exit(1);
   }
 
   // ___________________________________________________________________________

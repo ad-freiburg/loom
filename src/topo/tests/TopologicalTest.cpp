@@ -398,19 +398,19 @@ void TopologicalTest::run() {
   {
     //      2->     1
     //     a<-- b <---|
-    // c <----- d --->e
+    // c <------ d --->e
     //     <-2    <-2
     shared::transitgraph::TransitGraph tg;
     auto a = tg.addNd({{30.0, 10.0}});
-    auto b = tg.addNd({{100.0, 10.0}});
+    auto b = tg.addNd({{96.0, 10.0}});
     auto c = tg.addNd({{0.0, 0.0}});
     auto d = tg.addNd({{100.0, 0.0}});
     auto e = tg.addNd({{200.0, 0.0}});
 
-    auto ba = tg.addEdg(b, a, {{{100.0, 10.0}, {30.0, 10.0}}});
+    auto ba = tg.addEdg(b, a, {{{95.0, 10.0}, {30.0, 10.0}}});
     auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
     auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
-    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
+    auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {95, 10.0}}});
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -426,8 +426,9 @@ void TopologicalTest::run() {
     cfg.maxAggrDistance = 50;
 
     topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true);
-    builder.removeEdgeArtifacts(&tg);
+    builder.createTopologicalNodes(&tg, true, 2);
+    // builder.removeEdgeArtifacts(&tg);
+    builder.cleanEx(&tg);
 
     util::geo::output::GeoGraphJsonOutput gout;
     gout.print(tg, std::cout);
@@ -466,7 +467,6 @@ void TopologicalTest::run() {
     }
 
     assert(validExceptions(&tg));
-    // exit(1);
   }
 
   // ___________________________________________________________________________
