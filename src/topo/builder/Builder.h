@@ -56,6 +56,9 @@ class Builder {
   void removeNodeArtifacts(TransitGraph* g);
   void cleanEx(TransitGraph* tg) const;
 
+  // TODO: make private
+  bool contractNodes(TransitGraph* g);
+
  private:
   const config::TopoConfig* _cfg;
   projPJ _mercProj;
@@ -78,7 +81,6 @@ class Builder {
 
   bool routeEq(const TransitEdge* a, const TransitEdge* b) const;
 
-  bool contractNodes(TransitGraph* g);
   bool contractEdges(TransitGraph* g);
 
   bool foldEdges(TransitEdge* a, TransitEdge* b);

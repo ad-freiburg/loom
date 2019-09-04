@@ -406,7 +406,9 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     if (a != wefrom) {
       if (g->getEdg(wefrom, a)) {
         std::tie(eaE, helper) = split(eaEdgeGeom, wefrom, a, g);
-        edgeRpl(wefrom, w.e, helper);
+        edgeRpl(wefrom, w.e, eaE);
+        // std::tie(eaE, helper) = split(eaEdgeGeom, wefrom, a, g);
+        // edgeRpl(wefrom, w.e, eaE);
       } else {
         eaE = g->addEdg(wefrom, a);
         assert(eaE != abE);
@@ -421,6 +423,8 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       if (g->getEdg(b, weto)) {
         std::tie(ebE, helper) = split(ecEdgeGeom, b, weto, g);
         edgeRpl(weto, w.e, helper);
+        // std::tie(ebE, helper) = split(ecEdgeGeom, weto, b, g);
+        // edgeRpl(weto, w.e, ebE);
       } else {
         ebE = g->addEdg(b, weto);
         edgeRpl(weto, w.e, ebE);
@@ -435,6 +439,8 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
         if (g->getEdg(a, wfto)) {
           std::tie(faE, helper) = split(faEdgeGeom, a, wfto, g);
           edgeRpl(wfto, w.f, helper);
+          // std::tie(faE, helper) = split(faEdgeGeom, wfto, a, g);
+          // edgeRpl(wfto, w.f, faE);
         } else {
           faE = g->addEdg(a, wfto);
           assert(faE != abE);
@@ -448,7 +454,9 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       if (b != wffrom) {
         if (g->getEdg(wffrom, b)) {
           std::tie(fbE, helper) = split(fcEdgeGeom, wffrom, b, g);
-          edgeRpl(wffrom, w.f, helper);
+          edgeRpl(wffrom, w.f, fbE);
+          // std::tie(fbE, helper) = split(fcEdgeGeom, wffrom, b, g);
+          // edgeRpl(wffrom, w.f, fbE);
         } else {
           fbE = g->addEdg(wffrom, b);
           assert(fbE != abE);
@@ -462,7 +470,9 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       if (a != wffrom) {
         if (g->getEdg(wffrom, a)) {
           std::tie(faE, helper) = split(faEdgeGeom, wffrom, a, g);
-          edgeRpl(wffrom, w.f, helper);
+          edgeRpl(wffrom, w.f, faE);
+          // std::tie(faE, helper) = split(faEdgeGeom, wffrom, a, g);
+          // edgeRpl(wffrom, w.f, faE);
         } else {
           faE = g->addEdg(wffrom, a);
           assert(faE != abE);
@@ -477,6 +487,8 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
         if (g->getEdg(b, wfto)) {
           std::tie(fbE, helper) = split(fcEdgeGeom, b, wfto, g);
           edgeRpl(wfto, w.f, helper);
+          // std::tie(fbE, helper) = split(fcEdgeGeom, wfto, b, g);
+          // edgeRpl(wfto, w.f, fbE);
         } else {
           fbE = g->addEdg(b, wfto);
           assert(fbE != abE);

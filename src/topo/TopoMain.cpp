@@ -31,7 +31,8 @@ int main(int argc, char** argv) {
   shared::transitgraph::TransitGraph tg;
   tg.readFromJson(&(std::cin));
 
-  std::cerr << "Topoying graph with " << tg.getNds()->size() << " nodes..." << std::endl;
+  std::cerr << "Topoying graph with " << tg.getNds()->size() << " nodes..."
+            << std::endl;
 
   topo::Builder b(&cfg);
 
@@ -50,16 +51,18 @@ int main(int argc, char** argv) {
 
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Removing edge artifacts..." << std::endl;
-  // b.removeEdgeArtifacts(&tg);
+
+  b.removeEdgeArtifacts(&tg);
+
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Removing node artifacts..." << std::endl;
-  // b.removeNodeArtifacts(&tg);
+  b.removeNodeArtifacts(&tg);
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Averaging node positions..." << std::endl;
 
   b.cleanEx(&tg);
 
-  // b.averageNodePositions(&tg);
+  b.averageNodePositions(&tg);
 
   util::geo::output::GeoGraphJsonOutput out;
   out.print(tg, std::cout);
