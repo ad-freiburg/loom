@@ -549,11 +549,7 @@ void Builder::averageNodePositions(TransitGraph* g) {
 
 // _____________________________________________________________________________
 void Builder::removeEdgeArtifacts(TransitGraph* g) {
-  size_t i = 0;
   while (contractNodes(g)) {
-    if (i == 0) return;
-    std::cerr << g->getNds()->size() << std::endl;
-    i--;
   };
 }
 

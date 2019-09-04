@@ -44,14 +44,13 @@ int main(int argc, char** argv) {
 
   // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
 
-  while (b.createTopologicalNodes(&tg, true, 26)) {
-    break;
+  while (b.createTopologicalNodes(&tg, true)) {
     std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   };
 
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Removing edge artifacts..." << std::endl;
-  b.removeEdgeArtifacts(&tg);
+  // b.removeEdgeArtifacts(&tg);
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Removing node artifacts..." << std::endl;
   // b.removeNodeArtifacts(&tg);
@@ -60,7 +59,7 @@ int main(int argc, char** argv) {
 
   b.cleanEx(&tg);
 
-  b.averageNodePositions(&tg);
+  // b.averageNodePositions(&tg);
 
   util::geo::output::GeoGraphJsonOutput out;
   out.print(tg, std::cout);
