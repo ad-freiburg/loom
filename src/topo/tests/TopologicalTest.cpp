@@ -393,6 +393,7 @@ void TopologicalTest::run() {
 
     assert(validExceptions(&tg));
   }
+
   // ___________________________________________________________________________
   {
     //      2->     1
@@ -428,9 +429,9 @@ void TopologicalTest::run() {
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
 
-    // util::geo::output::GeoGraphJsonOutput gout;
-    // gout.print(tg, std::cout);
-    // std::cout << std::flush;
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
 
     //    <-2   2        1,<-2
     // c ----a-----> d < --- e
@@ -451,8 +452,7 @@ void TopologicalTest::run() {
       assert(edg->pl().getRoutes().size() == 1);
       assert(edg->pl().getRoutes().begin()->direction == 0);
 
-      // exception is circumvented by dead end in a
-      assert(edg->getOtherNd(a)->pl().connOccurs(&l2, e->getAdjList().front(), edg));
+      assert(!edg->getOtherNd(a)->pl().connOccurs(&l2, e->getAdjList().front(), edg));
     }
 
     for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
@@ -466,6 +466,7 @@ void TopologicalTest::run() {
     }
 
     assert(validExceptions(&tg));
+    // exit(1);
   }
 
   // ___________________________________________________________________________

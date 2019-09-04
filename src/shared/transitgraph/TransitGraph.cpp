@@ -223,7 +223,6 @@ void TransitGraph::readFromJson(std::istream* s) {
           TransitNode* dir = 0;
 
           if (!route["direction"].is_null()) {
-            std::cerr << "TODO: direction is not parsed!!" << std::endl;
             dir = idMap[route["direction"]];
           }
 

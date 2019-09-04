@@ -42,10 +42,10 @@ int main(int argc, char** argv) {
   std::cerr << "Removing edge artifacts..." << std::endl;
   b.removeEdgeArtifacts(&tg);
 
-  std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
+  // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
 
-  std::cerr << "Removing edge artifacts..." << std::endl;
-  while (b.createTopologicalNodes(&tg, true)) {
+  while (b.createTopologicalNodes(&tg, true, 26)) {
+    break;
     std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   };
 
@@ -54,9 +54,11 @@ int main(int argc, char** argv) {
   b.removeEdgeArtifacts(&tg);
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Removing node artifacts..." << std::endl;
-  b.removeNodeArtifacts(&tg);
+  // b.removeNodeArtifacts(&tg);
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Averaging node positions..." << std::endl;
+
+  b.cleanEx(&tg);
 
   b.averageNodePositions(&tg);
 

@@ -3,15 +3,18 @@
 
 #include "topo/tests/ContractTest.h"
 #include "topo/tests/ContractTest2.h"
+#include "topo/tests/ContractTest3.h"
 #include "topo/tests/TopologicalTest.h"
 #include "topo/tests/TopologicalTest2.h"
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
+  ContractTest3 ct3;
   ContractTest2 ct2;
   ContractTest ct;
   TopologicalTest tt;
   TopologicalTest2 tt2;
+  ct3.run();
   ct2.run();
   ct.run();
   tt.run();

@@ -549,8 +549,11 @@ void Builder::averageNodePositions(TransitGraph* g) {
 
 // _____________________________________________________________________________
 void Builder::removeEdgeArtifacts(TransitGraph* g) {
+  size_t i = 0;
   while (contractNodes(g)) {
+    if (i == 0) return;
     std::cerr << g->getNds()->size() << std::endl;
+    i--;
   };
 }
 
@@ -843,7 +846,7 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
   g->delEdg(a, b);
   g->delNd(a);
 
-  cleanEx(b);
+  // cleanEx(b);
 
   return true;
 }
@@ -1276,7 +1279,11 @@ void Builder::terminusPass(TransitNode* nd, const TransitEdge* edg) {
           // only handle lines which go in both directions on edg
           if (edgRo.direction != 0) continue;
 
-          // check if line has a terminus in nd
+          // only handle lines which continue in both edges of the exception
+          if (!nd->pl().connOccurs(ro.first, exFr.first, edg)) continue;
+          if (!nd->pl().connOccurs(ro.first, exTo, edg)) continue;
+
+          // check if line has a terminus in otherNd
           bool term = true;
           for (auto eEdg : otherNd->getAdjList()) {
             if (eEdg == edg) continue;
@@ -1330,6 +1337,11 @@ void Builder::terminusPass(TransitNode* nd, const TransitEdge* edg) {
 }
 
 // _____________________________________________________________________________
+void Builder::cleanEx(TransitGraph* tg) const {
+  for (auto nd : *tg->getNds()) cleanEx(nd);
+}
+
+// _____________________________________________________________________________
 void Builder::cleanEx(TransitNode* nd) const {
   std::vector<std::pair<const Route*,
                         std::pair<const TransitEdge*, const TransitEdge*>>>
@@ -1342,11 +1354,15 @@ void Builder::cleanEx(TransitNode* nd) const {
         std::cerr << nd << ", exFr " << exFr.first->getFrom() << ", " << exFr.first->getTo() << ", exTo "  << exTo->getFrom() << ", " << exTo->getTo() << std::endl;
         if (!(exFr.first->getFrom() == nd || exFr.first->getTo() == nd)) {
           std::cerr << "ALERT!" << std::endl;
-          assert(false);
+          // assert(false);
+          toDel.push_back({ro.first, {exFr.first, exTo}});
+          continue;
         }
         if (!(exTo->getFrom() == nd || exTo->getTo() == nd)) {
           std::cerr << "ALERT!" << std::endl;
-          assert(false);
+          // assert(false);
+          toDel.push_back({ro.first, {exFr.first, exTo}});
+          continue;
         }
 
         // exception from edge to itself

@@ -54,6 +54,7 @@ class Builder {
   void averageNodePositions(TransitGraph* g);
   void removeEdgeArtifacts(TransitGraph* g);
   void removeNodeArtifacts(TransitGraph* g);
+  void cleanEx(TransitGraph* tg) const;
 
  private:
   const config::TopoConfig* _cfg;
