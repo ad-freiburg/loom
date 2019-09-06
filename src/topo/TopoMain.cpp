@@ -44,9 +44,9 @@ int main(int argc, char** argv) {
 
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
 
-  while (b.createTopologicalNodes(&tg, true)) {
-    std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-  };
+  // while (b.createTopologicalNodes(&tg, true)) {
+    // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
+  // };
 
   // b.removeEdgeArtifacts(&tg);
 	std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
