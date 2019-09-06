@@ -16,20 +16,6 @@ Line<T> GeoGraphJsonOutput::createLine(const util::geo::Point<T>& a,
 template <typename N, typename E>
 void GeoGraphJsonOutput::print(const util::graph::Graph<N, E>& outG,
                                std::ostream& str) {
-  printImpl(outG, str, false);
-}
-
-// _____________________________________________________________________________
-template <typename N, typename E>
-void GeoGraphJsonOutput::printLatLng(const util::graph::Graph<N, E>& outG,
-                               std::ostream& str) {
-  printImpl(outG, str, true);
-}
-
-// _____________________________________________________________________________
-template <typename N, typename E>
-void GeoGraphJsonOutput::printImpl(const util::graph::Graph<N, E>& outG,
-                               std::ostream& str, bool proj) {
   GeoJsonOutput _out(str);
 
   // first pass, nodes
@@ -44,11 +30,7 @@ void GeoGraphJsonOutput::printImpl(const util::graph::Graph<N, E>& outG,
     auto addProps = n->pl().getAttrs();
     props.insert(addProps.begin(), addProps.end());
 
-    if (proj) {
-      _out.printLatLng(*n->pl().getGeom(), props);
-    } else {
-      _out.print(*n->pl().getGeom(), props);
-    }
+    _out.print(*n->pl().getGeom(), props);
   }
 
   // second pass, edges
@@ -68,19 +50,11 @@ void GeoGraphJsonOutput::printImpl(const util::graph::Graph<N, E>& outG,
           auto a = *e->getFrom()->pl().getGeom();
           if (e->getTo()->pl().getGeom()) {
             auto b = *e->getTo()->pl().getGeom();
-            if (proj) {
-              _out.printLatLng(createLine(a, b), props);
-            } else {
-              _out.print(createLine(a, b), props);
-            }
+            _out.print(createLine(a, b), props);
           }
         }
       } else {
-        if (proj) {
-          _out.printLatLng(*e->pl().getGeom(), props);
-        } else {
-          _out.print(*e->pl().getGeom(), props);
-        }
+        _out.print(*e->pl().getGeom(), props);
       }
     }
   }

@@ -41,26 +41,22 @@ int main(int argc, char** argv) {
   b.createTopologicalNodes(&tg, false);
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Removing edge artifacts..." << std::endl;
-  b.removeEdgeArtifacts(&tg);
 
-  // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
+  std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
 
   while (b.createTopologicalNodes(&tg, true)) {
     std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   };
 
-  // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-  // std::cerr << "Removing edge artifacts..." << std::endl;
-
-  b.removeEdgeArtifacts(&tg);
+  // b.removeEdgeArtifacts(&tg);
+	std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
+	std::cerr << "Removing edge artifacts..." << std::endl;
 
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Removing node artifacts..." << std::endl;
   b.removeNodeArtifacts(&tg);
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Averaging node positions..." << std::endl;
-
-  b.cleanEx(&tg);
 
   b.averageNodePositions(&tg);
 

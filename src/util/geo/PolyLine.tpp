@@ -475,7 +475,7 @@ SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
    */
   double STEP_SIZE = 2;
   double MAX_SKIPS = 4;
-  double MIN_SEG_LENGTH = 1;  // dmax / 2;  // make this configurable!
+  double MIN_SEG_LENGTH = 0.1;  // dmax / 2;  // make this configurable!
 
   SharedSegments<T> ret;
 
@@ -504,7 +504,6 @@ SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
       if (pl.distTo(curPointer) <= dmax) {
         LinePoint<T> curCmpPointer = pl.projectOn(curPointer);
         LinePoint<T> curBackProjectedPointer = projectOn(curCmpPointer.p);
-
 
         skips = 0;
 
@@ -574,6 +573,7 @@ SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
        fabs(curStartCandCmp.totalPos * plLength -
             curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
     assert(curStartCand.totalPos < curEndCand.totalPos);
+    std::cerr << "LAST" << std::endl;
     ret.segments.push_back(SharedSegment<T>(
         std::pair<LinePoint<T>, LinePoint<T>>(curStartCand, curStartCandCmp),
         std::pair<LinePoint<T>, LinePoint<T>>(curEndCand, curEndCandCmp)));
