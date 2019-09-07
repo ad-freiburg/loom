@@ -38,19 +38,25 @@ int main(int argc, char** argv) {
 
   // first pass, with strict distance values (clearing things up first)
   std::cerr << "Creating topological nodes (first round)..." << std::endl;
-  b.createTopologicalNodes(&tg, false);
+
+  // first run, with 0 perc of line width, and offset of 5
+  b.createTopologicalNodes(&tg, 5.0);
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Removing edge artifacts..." << std::endl;
+      b.removeNodeArtifacts(&tg);
+  b.removeEdgeArtifacts(&tg);
 
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
 
-  // while (b.createTopologicalNodes(&tg, true)) {
-    // std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-  // };
+  double step = cfg.maxAggrDistance;
 
-  // b.removeEdgeArtifacts(&tg);
-	std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-	std::cerr << "Removing edge artifacts..." << std::endl;
+  for (double d = 15; d <= (cfg.maxAggrDistance * 10); d += step) {
+    std::cerr << d  << std::endl;
+    while (b.createTopologicalNodes(&tg, d)) {
+      b.removeNodeArtifacts(&tg);
+      b.removeEdgeArtifacts(&tg);
+    };
+  }
 
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Removing node artifacts..." << std::endl;

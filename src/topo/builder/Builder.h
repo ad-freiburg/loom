@@ -50,8 +50,9 @@ class Builder {
  public:
   Builder(const config::TopoConfig* cfg);
 
-  bool createTopologicalNodes(TransitGraph* g, bool final);
-  bool createTopologicalNodes(TransitGraph* g, bool final, size_t steps);
+  bool createTopologicalNodes(TransitGraph* g, bool a);
+  bool createTopologicalNodes(TransitGraph* g, double dCut);
+  bool createTopologicalNodes(TransitGraph* g, double dCut, size_t steps);
   void averageNodePositions(TransitGraph* g);
   void removeEdgeArtifacts(TransitGraph* g);
   void removeNodeArtifacts(TransitGraph* g);
@@ -69,7 +70,7 @@ class Builder {
 
   void routeDirRepl(TransitNode* oldN, TransitNode* newN, TransitEdge* e) const;
 
-  ShrdSegWrap getNextSharedSegment(TransitGraph* g, bool final,
+  ShrdSegWrap getNextSharedSegment(TransitGraph* g, double dCut,
                                    EdgeGrid* grid) const;
   PolyLine<double> getAveragedFromSharedSeg(const ShrdSegWrap& w) const;
 

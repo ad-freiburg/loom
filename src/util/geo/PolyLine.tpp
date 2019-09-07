@@ -535,7 +535,6 @@ SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
                       curEndCand.totalPos * length) > MIN_SEG_LENGTH &&
                  fabs(curStartCandCmp.totalPos * plLength -
                       curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
-              assert(curStartCand.totalPos < curEndCand.totalPos);
               ret.segments.push_back(
                   SharedSegment<T>(std::pair<LinePoint<T>, LinePoint<T>>(
                                        curStartCand, curStartCandCmp),
@@ -572,8 +571,6 @@ SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
            MIN_SEG_LENGTH &&
        fabs(curStartCandCmp.totalPos * plLength -
             curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
-    assert(curStartCand.totalPos < curEndCand.totalPos);
-    std::cerr << "LAST" << std::endl;
     ret.segments.push_back(SharedSegment<T>(
         std::pair<LinePoint<T>, LinePoint<T>>(curStartCand, curStartCandCmp),
         std::pair<LinePoint<T>, LinePoint<T>>(curEndCand, curEndCandCmp)));

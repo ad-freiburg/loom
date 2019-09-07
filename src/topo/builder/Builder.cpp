@@ -20,26 +20,30 @@ using util::geo::extendBox;
 using util::geo::PolyLine;
 using util::geo::SharedSegments;
 
-double MIN_SEG_LENGTH = 20;
+double MIN_SEG_LENGTH = 35;
 double MAX_SNAP_DIST = 1;
 
 // _____________________________________________________________________________
 Builder::Builder(const config::TopoConfig* cfg) : _cfg(cfg) {}
 
 // _____________________________________________________________________________
-ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g, bool final,
+bool Builder::createTopologicalNodes(TransitGraph* g, bool a) {
+  // TODO: only fallback for tests
+  return createTopologicalNodes(g, 999.0);
+}
+
+// _____________________________________________________________________________
+ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g, double dCut,
                                           EdgeGrid* grid) const {
-  int i = 0;
   double dmin = _cfg->maxAggrDistance;
 
   for (auto n : *g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      i++;
       if (_indEdges.find(e) != _indEdges.end()) continue;
 
       std::set<TransitEdge*> neighbors;
-      grid->getNeighbors(e, fmax(5, dmin * 10), &neighbors);
+      grid->getNeighbors(e, fmax(5, dmin * 20), &neighbors);
 
       for (auto toTest : neighbors) {
         if (_indEdgesPairs.find({e, toTest}) != _indEdgesPairs.end() ||
@@ -48,12 +52,9 @@ ShrdSegWrap Builder::getNextSharedSegment(TransitGraph* g, bool final,
         }
 
         if (e != toTest) {
-          double dmax = 5;
-
-          if (final) {
-            dmax = fmax(dmin, e->pl().getRoutes().size() * (dmin / 2) +
+          double dmax = fmax(dmin, e->pl().getRoutes().size() * (dmin / 2) +
                                   toTest->pl().getRoutes().size() * (dmin / 2));
-          }
+          dmax = fmin(dmax, dCut);
 
           const auto& s = e->pl().getPolyline().getSharedSegments(
               toTest->pl().getPolyline(), dmax);
@@ -118,21 +119,22 @@ bool Builder::routeEq(const TransitEdge* a, const TransitEdge* b) const {
 }
 
 // _____________________________________________________________________________
-bool Builder::createTopologicalNodes(TransitGraph* g, bool final) {
-  return createTopologicalNodes(g, final, 10000000);
+bool Builder::createTopologicalNodes(TransitGraph* g, double dCut) {
+  return createTopologicalNodes(g, dCut, 10000000);
 }
 
 // _____________________________________________________________________________
-bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
+bool Builder::createTopologicalNodes(TransitGraph* g, double dCut,
                                      size_t steps) {
   ShrdSegWrap w;
   _indEdges.clear();
+  _indEdgesPairs.clear();
   _pEdges.clear();
   bool found = false;
 
   EdgeGrid grid = getGeoIndex(g);
 
-  while (steps > 0 && (w = getNextSharedSegment(g, final, &grid)).e) {
+  while (steps > 0 && (w = getNextSharedSegment(g, dCut, &grid)).e) {
     steps--;
     const auto curEdgeGeom = w.e;
     const auto cmpEdgeGeom = w.f;
@@ -169,19 +171,19 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     }
 
     if (fap.totalPos <= fbp.totalPos) {
-      if (fa.getLength() < MAX_SNAP_DIST) {
+      if (fa.getLength() < MAX_SNAP_DIST && b != w.f->getFrom()) {
         a = w.f->getFrom();
       }
 
-      if (fc.getLength() < MAX_SNAP_DIST) {
+      if (fc.getLength() < MAX_SNAP_DIST && a != w.f->getTo()) {
         b = w.f->getTo();
       }
     } else {
-      if (fa.getLength() < MAX_SNAP_DIST) {
+      if (fa.getLength() < MAX_SNAP_DIST && b != w.f->getTo()) {
         a = w.f->getTo();
       }
 
-      if (fc.getLength() < MAX_SNAP_DIST) {
+      if (fc.getLength() < MAX_SNAP_DIST && a != w.f->getFrom()) {
         b = w.f->getFrom();
       }
     }
@@ -195,6 +197,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     }
 
     if (a == b) {
+      std::cerr << "a == b, continue" << std::endl;
       continue;
     }
 
@@ -256,17 +259,26 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     // delete old edges
     grid.remove(g->getEdg(w.e->getFrom(), w.e->getTo()));
     grid.remove(g->getEdg(w.f->getFrom(), w.f->getTo()));
+    _indEdges.erase(g->getEdg(w.e->getFrom(), w.e->getTo()));
+    _indEdges.erase(g->getEdg(w.f->getFrom(), w.f->getTo()));
     g->delEdg(w.e->getFrom(), w.e->getTo());
     g->delEdg(w.f->getFrom(), w.f->getTo());
 
     TransitEdge *eaE = 0, *abE = 0, *ebE = 0, *faE = 0, *fbE = 0, *helper = 0;
 
     // add new edges
-    abE = g->addEdg(a, b, abEdgeGeom);
+    // assert(!g->getEdg(a, b));
+    if (g->getEdg(a, b)) {
+      std::tie(helper, abE) = split(abEdgeGeom, a, b, g);
+      grid.add(*helper->pl().getGeom(), helper);
+    } else {
+      abE = g->addEdg(a, b, abEdgeGeom);
+    }
 
     if (a != wefrom) {
       if (g->getEdg(wefrom, a)) {
-          std::tie(helper, eaE) = split(eaEdgeGeom, wefrom, a, g);
+        std::tie(helper, eaE) = split(eaEdgeGeom, wefrom, a, g);
+        grid.add(*helper->pl().getGeom(), helper);
       } else {
         eaE = g->addEdg(wefrom, a, eaEdgeGeom);
       }
@@ -275,6 +287,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
     if (b != weto) {
       if (g->getEdg(b, weto)) {
         std::tie(ebE, helper) = split(ecEdgeGeom, b, weto, g);
+        grid.add(*helper->pl().getGeom(), helper);
       } else {
         ebE = g->addEdg(b, weto, ecEdgeGeom);
       }
@@ -284,6 +297,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       if (a != wfto) {
         if (g->getEdg(a, wfto)) {
           std::tie(faE, helper) = split(faEdgeGeom, a, wfto, g);
+          grid.add(*helper->pl().getGeom(), helper);
         } else {
           faE = g->addEdg(a, wfto, faEdgeGeom);
           assert(faE != abE);
@@ -293,6 +307,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       if (b != wffrom) {
         if (g->getEdg(wffrom, b)) {
           std::tie(helper, fbE) = split(fcEdgeGeom, wffrom, b, g);
+          grid.add(*helper->pl().getGeom(), helper);
         } else {
           fbE = g->addEdg(wffrom, b, fcEdgeGeom);
         }
@@ -301,6 +316,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       if (a != wffrom) {
         if (g->getEdg(wffrom, a)) {
           std::tie(helper, faE) = split(faEdgeGeom, wffrom, a, g);
+          grid.add(*helper->pl().getGeom(), helper);
         } else {
           faE = g->addEdg(wffrom, a, faEdgeGeom);
         }
@@ -309,11 +325,14 @@ bool Builder::createTopologicalNodes(TransitGraph* g, bool final,
       if (b != wfto) {
         if (g->getEdg(b, wfto)) {
           std::tie(fbE, helper) = split(fcEdgeGeom, b, wfto, g);
+          grid.add(*helper->pl().getGeom(), helper);
         } else {
           fbE = g->addEdg(b, wfto, fcEdgeGeom);
         }
       }
     }
+
+    // TODO: the helper edge from above is not added to the index!
 
     if (abE) grid.add(*abE->pl().getGeom(), abE);
     if (eaE) grid.add(*eaE->pl().getGeom(), eaE);
@@ -697,14 +716,11 @@ bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
   // average
   // of both geometries
 
-  // if (a->pl().getPolyline().getLength() > MIN_SEG_LENGTH &&
-  // b->pl().getPolyline().getLength() > MIN_SEG_LENGTH) {
   if (b->getTo() == a->getTo() || a->getFrom() == b->getFrom()) {
     b->pl().setPolyline(geomAvg(b->pl(), 0, 1, a->pl(), 0, 1));
   } else {
     b->pl().setPolyline(geomAvg(b->pl(), 0, 1, a->pl(), 1, 0));
   }
-  // }
 
   for (auto ro : a->pl().getRoutes()) {
     if (!b->pl().hasRoute(ro.route)) {
