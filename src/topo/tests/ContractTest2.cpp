@@ -69,7 +69,7 @@ void ContractTest2::run() {
     auto x = tg.addNd({{0, 200.0}});
     auto y = tg.addNd({{0, -200.0}});
 
-    c->pl().addStop(transitmapper::graph::StationInfo("Thorndale", "Thorndale"));
+    c->pl().addStop(shared::transitgraph::Station("Thorndale", "Thorndale", *c->pl().getGeom()));
 
     auto ax = tg.addEdg(a, x, {{{0.0, 0.0}, {0.0, 200.0}}});
     auto yb = tg.addEdg(y, b, {{{0.0, -200.0}, {0.0, -1.0}}});
@@ -135,7 +135,7 @@ void ContractTest2::run() {
     auto d = tg.addNd({{40.0, 0.0}});
     auto e = tg.addNd({{25.0, 10.0}});
 
-    e->pl().addStop(transitmapper::graph::StationInfo("1", "1"));
+    e->pl().addStop(shared::transitgraph::Station("1", "1", *e->pl().getGeom()));
 
     auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});

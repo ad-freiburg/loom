@@ -59,7 +59,7 @@ void TransitGraph::readFromDot(std::istream* s) {
         idMap[ent.ids[0]] = n;
       }
 
-      StationInfo i("", "");
+      Station i("", "", *n->pl().getGeom());
       if (ent.attrs.find("station_id") != ent.attrs.end() ||
           ent.attrs.find("label") != ent.attrs.end()) {
         if (ent.attrs.find("station_id") != ent.attrs.end())
@@ -154,7 +154,7 @@ void TransitGraph::readFromJson(std::istream* s) {
 
         TransitNode* n = addNd(util::geo::DPoint(coords[0], coords[1]));
 
-        StationInfo i("", "");
+        Station i("", "", *n->pl().getGeom());
         if (!props["station_id"].is_null() ||
             !props["station_label"].is_null()) {
           if (!props["station_id"].is_null()) i.id = props["station_id"];

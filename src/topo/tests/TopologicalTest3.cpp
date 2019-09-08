@@ -102,7 +102,6 @@ void TopologicalTest3::run() {
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
-    builder.cleanEx(&tg);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -171,7 +170,6 @@ void TopologicalTest3::run() {
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
-    builder.cleanEx(&tg);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -240,7 +238,6 @@ void TopologicalTest3::run() {
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
-    builder.cleanEx(&tg);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);

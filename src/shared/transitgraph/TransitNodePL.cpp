@@ -48,10 +48,13 @@ util::json::Dict TransitNodePL::getAttrs() const {
 }
 
 // _____________________________________________________________________________
-void TransitNodePL::addStop(StationInfo i) { _is.push_back(i); }
+void TransitNodePL::addStop(const Station& i) { _is.push_back(i); }
 
 // _____________________________________________________________________________
-const std::vector<StationInfo>& TransitNodePL::getStops() const { return _is; }
+const std::vector<Station>& TransitNodePL::getStops() const { return _is; }
+
+// _____________________________________________________________________________
+void TransitNodePL::clearStops() { _is.clear(); }
 
 // _____________________________________________________________________________
 void TransitNodePL::addConnExc(const Route* r, const TransitEdge* edgeA,

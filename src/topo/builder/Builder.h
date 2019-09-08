@@ -28,6 +28,7 @@ using util::geo::SharedSegment;
 
 using shared::transitgraph::TransitGraph;
 using shared::transitgraph::TransitNode;
+using shared::transitgraph::Station;
 using shared::transitgraph::TransitEdge;
 using shared::transitgraph::TransitNodePL;
 using shared::transitgraph::TransitEdgePL;
@@ -46,9 +47,24 @@ struct ShrdSegWrap {
   SharedSegment<double> s;
 };
 
+struct StationOcc {
+  Station station;
+  std::set<const TransitEdge*> edges;
+};
+
+struct StationCand {
+  TransitEdge* edg;
+  double pos;
+
+  double dist;
+  double percEdgsServed;
+};
+
 class Builder {
  public:
   Builder(const config::TopoConfig* cfg);
+
+  void collectStations(TransitGraph* g);
 
   bool createTopologicalNodes(TransitGraph* g, bool a);
   bool createTopologicalNodes(TransitGraph* g, double dCut);
@@ -56,12 +72,11 @@ class Builder {
   void averageNodePositions(TransitGraph* g);
   void removeEdgeArtifacts(TransitGraph* g);
   void removeNodeArtifacts(TransitGraph* g);
-  void cleanEx(TransitGraph* tg) const;
 
   // TODO: make private
   bool contractNodes(TransitGraph* g);
 
-  void inferRestrictions(TransitGraph* g) const;
+  bool insertStations(TransitGraph* g);
 
  private:
   const config::TopoConfig* _cfg;
@@ -70,18 +85,11 @@ class Builder {
 
   void routeDirRepl(TransitNode* oldN, TransitNode* newN, TransitEdge* e) const;
 
-  ShrdSegWrap getNextSharedSegment(TransitGraph* g, double dCut,
+  ShrdSegWrap nextShrdSeg(TransitGraph* g, double dCut,
                                    EdgeGrid* grid) const;
-  PolyLine<double> getAveragedFromSharedSeg(const ShrdSegWrap& w) const;
-
   bool combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g);
   bool combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n,
                     TransitGraph* g);
-
-  void terminusPass(TransitNode* b, const TransitEdge* connecting);
-
-  bool crossesAt(const TransitNode* a, const TransitEdge* e,
-                 const TransitEdge* f) const;
 
   bool routeEq(const TransitEdge* a, const TransitEdge* b) const;
 
@@ -89,17 +97,17 @@ class Builder {
 
   bool foldEdges(TransitEdge* a, TransitEdge* b);
 
-  bool isTriFace(const TransitEdge* a, const TransitGraph* g) const;
+  std::vector<StationCand> candidates(const StationOcc& occ, const EdgeGrid& idx);
 
   PolyLine<double> geomAvg(const TransitEdgePL& geomA, double startA,
                            double endA, const TransitEdgePL& geomB,
                            double startB, double endB) const;
 
-  DBox getGraphBoundingBox(const TransitGraph* g) const;
-  EdgeGrid getGeoIndex(const TransitGraph* g) const;
+  DBox bbox(const TransitGraph* g) const;
+  EdgeGrid geoIndex(const TransitGraph* g) const;
 
   std::pair<TransitEdge*, TransitEdge*> split(TransitEdgePL& a, TransitNode* fr,
-                                              TransitNode* to,
+                                              TransitNode* to, double p,
                                               TransitGraph* g) const;
 
   mutable std::set<const TransitEdge*> _indEdges;
@@ -107,6 +115,8 @@ class Builder {
       _indEdgesPairs;
   mutable std::map<std::pair<const TransitEdge*, const TransitEdge*>, size_t>
       _pEdges;
+
+  std::vector<std::vector<StationOcc>> _statClusters;
 };
 
 }  // namespace topo

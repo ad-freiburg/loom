@@ -139,7 +139,6 @@ void ContractTest::run() {
     cfg.maxAggrDistance = 50;
 
     topo::Builder builder(&cfg);
-    assert(!builder.isTriFace(be, &tg));
 
     builder.combineNodes(b, c, &tg);
 
@@ -5475,7 +5474,6 @@ void ContractTest::run() {
     cfg.maxAggrDistance = 50;
 
     topo::Builder builder(&cfg);
-    assert(builder.isTriFace(bc, &tg));
 
     assert(validExceptions(&tg));
   }
@@ -5561,7 +5559,6 @@ void ContractTest::run() {
     cfg.maxAggrDistance = 50;
 
     topo::Builder builder(&cfg);
-    assert(!builder.isTriFace(bc, &tg));
 
     assert(validExceptions(&tg));
   }

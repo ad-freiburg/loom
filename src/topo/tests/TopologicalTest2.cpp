@@ -75,9 +75,9 @@ void TopologicalTest2::run() {
     // auto x = tg.addNd({{-100.0, 0.0}});
     // auto y = tg.addNd({{600.0, 0.0}});
 
-    a->pl().addStop(transitmapper::graph::StationInfo("1", "1"));
-    b->pl().addStop(transitmapper::graph::StationInfo("2", "2"));
-    d->pl().addStop(transitmapper::graph::StationInfo("3", "3"));
+    a->pl().addStop(shared::transitgraph::Station("1", "1", *a->pl().getGeom()));
+    b->pl().addStop(shared::transitgraph::Station("2", "2", *b->pl().getGeom()));
+    d->pl().addStop(shared::transitgraph::Station("3", "3", *d->pl().getGeom()));
 
     auto ba = tg.addEdg(b, a, {{{250.0, 5.0}, {0.0, 5.0}}});
     auto db = tg.addEdg(d, b, {{{500.0, 0.0}, {200.0, 0.0}}});

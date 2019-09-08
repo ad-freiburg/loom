@@ -36,6 +36,11 @@ int main(int argc, char** argv) {
 
   topo::Builder b(&cfg);
 
+  b.collectStations(&tg);
+
+  b.removeNodeArtifacts(&tg);
+  b.removeEdgeArtifacts(&tg);
+
   // first pass, with strict distance values (clearing things up first)
   std::cerr << "Creating topological nodes (first round)..." << std::endl;
 
@@ -43,14 +48,12 @@ int main(int argc, char** argv) {
   b.createTopologicalNodes(&tg, 5.0);
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
   std::cerr << "Removing edge artifacts..." << std::endl;
-      b.removeNodeArtifacts(&tg);
-  b.removeEdgeArtifacts(&tg);
 
   std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
 
   double step = cfg.maxAggrDistance;
 
-  for (double d = 15; d <= (cfg.maxAggrDistance * 10); d += step) {
+  for (double d = cfg.maxAggrDistance; d <= (cfg.maxAggrDistance * 10); d += step) {
     std::cerr << d  << std::endl;
     while (b.createTopologicalNodes(&tg, d)) {
       b.removeNodeArtifacts(&tg);
@@ -65,6 +68,8 @@ int main(int argc, char** argv) {
   std::cerr << "Averaging node positions..." << std::endl;
 
   b.averageNodePositions(&tg);
+
+  b.insertStations(&tg);
 
   util::geo::output::GeoGraphJsonOutput out;
   out.print(tg, std::cout);
