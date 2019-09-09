@@ -113,8 +113,11 @@ void EdgePL::simplify() {
 
   avg /= _tripsContained.size();
 
+  std::cerr << avg << " (" << _tripsContained.size() << ")" << std::endl;
+
   for (auto it = _tripsContained.begin(); it < _tripsContained.end(); ++it) {
     if (it->getTripCardinality() < avg * 0.1) {
+      std::cerr << "Erasing..." << std::endl;
       it = _tripsContained.erase(it);
     }
   }

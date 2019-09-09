@@ -43,10 +43,6 @@ class Builder {
 
   // simpliyfy the BuildGraph
   void simplify(BuildGraph* g);
-  bool createTopologicalNodes(BuildGraph* g, bool final);
-  void averageNodePositions(BuildGraph* g);
-  void removeEdgeArtifacts(BuildGraph* g);
-  void removeNodeArtifacts(BuildGraph* g);
 
  private:
   const config::Config* _cfg;
@@ -76,9 +72,6 @@ class Builder {
   Node* getNodeByStop(const BuildGraph* g, const gtfs::Stop* s) const;
   Node* getNearestStop(const DPoint& p, double maxD,
                        const NodeGrid* grid) const;
-
-  DBox getGraphBoundingBox(const BuildGraph* g) const;
-  EdgeGrid getGeoIndex(const BuildGraph* g) const;
 
   mutable std::set<const Edge*> _indEdges;
   mutable std::set<std::pair<const Edge*, const Edge*>> _indEdgesPairs;

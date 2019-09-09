@@ -53,7 +53,8 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
 
   for (auto t = f.getTrips().begin(); t != f.getTrips().end(); ++t) {
     if (t->second->getStopTimes().size() < 2) continue;
-    if (!(_cfg->useMots & (1 << t->second->getRoute()->getType()))) continue;
+    if (!_cfg->useMots.count(t->second->getRoute()->getType())) continue;
+
     if (SANITY_CHECK && !checkTripSanity(t->second)) continue;
 
     auto st = t->second->getStopTimes().begin();
@@ -203,31 +204,6 @@ std::pair<bool, PolyLine<double>> Builder::getSubPolyLine(const Stop* a,
 }
 
 // _____________________________________________________________________________
-void Builder::averageNodePositions(BuildGraph* g) {
-  for (auto n : *g->getNds()) {
-    double x = 0, y = 0;
-    size_t c = 0;
-
-    for (auto e : n->getAdjList()) {
-      for (auto eg : *e->pl().getEdgeTripGeoms()) {
-        if (eg.getGeomDir() != n) {
-          x += eg.getGeom().front().getX();
-          y += eg.getGeom().front().getY();
-        } else {
-          x += eg.getGeom().back().getX();
-          y += eg.getGeom().back().getY();
-        }
-        c++;
-      }
-    }
-
-    if (c > 0)
-      n->pl().setPos(
-          DPoint(x / static_cast<double>(c), y / static_cast<double>(c)));
-  }
-}
-
-// _____________________________________________________________________________
 Node* Builder::addStop(const Stop* curStop, uint8_t aggrLevel, BuildGraph* g,
                        NodeGrid* grid) {
   if (aggrLevel && curStop->getParentStation() != 0) {
@@ -310,37 +286,4 @@ Node* Builder::getNearestStop(const DPoint& p, double maxD,
   }
 
   return curN;
-}
-
-// _____________________________________________________________________________
-EdgeGrid Builder::getGeoIndex(const BuildGraph* g) const {
-  EdgeGrid grid(120, 120, getGraphBoundingBox(g));
-
-  for (auto n : g->getNds()) {
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-      if (!e->pl().getRefETG()) continue;
-      grid.add(e->pl().getRefETG()->getGeom().getLine(), e);
-    }
-  }
-
-  return grid;
-}
-
-// _____________________________________________________________________________
-DBox Builder::getGraphBoundingBox(const BuildGraph* g) const {
-  DBox b;
-
-  for (auto n : g->getNds()) {
-    b = extendBox(n->pl().getPos(), b);
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-      if (!e->pl().getRefETG()) {
-        continue;
-      }
-      b = extendBox(e->pl().getRefETG()->getGeom().getLine(), b);
-    }
-  }
-
-  return b;
 }

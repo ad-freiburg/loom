@@ -268,6 +268,8 @@ bool Builder::createTopologicalNodes(TransitGraph* g, double dCut,
     if (g->getEdg(a, b)) {
       std::tie(helper, abE) = split(abEdgeGeom, a, b, .5, g);
       grid.add(*helper->pl().getGeom(), helper);
+      combContEdgs(helper, w.e);
+      combContEdgs(helper, w.f);
     } else {
       abE = g->addEdg(a, b, abEdgeGeom);
     }
@@ -276,6 +278,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, double dCut,
       if (g->getEdg(wefrom, a)) {
         std::tie(helper, eaE) = split(eaEdgeGeom, wefrom, a, .5, g);
         grid.add(*helper->pl().getGeom(), helper);
+        combContEdgs(helper, w.e);
       } else {
         eaE = g->addEdg(wefrom, a, eaEdgeGeom);
       }
@@ -285,6 +288,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, double dCut,
       if (g->getEdg(b, weto)) {
         std::tie(ebE, helper) = split(ecEdgeGeom, b, weto, .5, g);
         grid.add(*helper->pl().getGeom(), helper);
+        combContEdgs(helper, w.e);
       } else {
         ebE = g->addEdg(b, weto, ecEdgeGeom);
       }
@@ -295,6 +299,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, double dCut,
         if (g->getEdg(a, wfto)) {
           std::tie(faE, helper) = split(faEdgeGeom, a, wfto, .5, g);
           grid.add(*helper->pl().getGeom(), helper);
+          combContEdgs(helper, w.f);
         } else {
           faE = g->addEdg(a, wfto, faEdgeGeom);
           assert(faE != abE);
@@ -305,6 +310,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, double dCut,
         if (g->getEdg(wffrom, b)) {
           std::tie(helper, fbE) = split(fcEdgeGeom, wffrom, b, .5, g);
           grid.add(*helper->pl().getGeom(), helper);
+          combContEdgs(helper, w.f);
         } else {
           fbE = g->addEdg(wffrom, b, fcEdgeGeom);
         }
@@ -314,6 +320,7 @@ bool Builder::createTopologicalNodes(TransitGraph* g, double dCut,
         if (g->getEdg(wffrom, a)) {
           std::tie(helper, faE) = split(faEdgeGeom, wffrom, a, .5, g);
           grid.add(*helper->pl().getGeom(), helper);
+          combContEdgs(helper, w.f);
         } else {
           faE = g->addEdg(wffrom, a, faEdgeGeom);
         }
@@ -323,17 +330,34 @@ bool Builder::createTopologicalNodes(TransitGraph* g, double dCut,
         if (g->getEdg(b, wfto)) {
           std::tie(fbE, helper) = split(fcEdgeGeom, b, wfto, .5, g);
           grid.add(*helper->pl().getGeom(), helper);
+          combContEdgs(helper, w.f);
         } else {
           fbE = g->addEdg(b, wfto, fcEdgeGeom);
         }
       }
     }
 
-    if (abE) grid.add(*abE->pl().getGeom(), abE);
-    if (eaE) grid.add(*eaE->pl().getGeom(), eaE);
-    if (ebE) grid.add(*ebE->pl().getGeom(), ebE);
-    if (faE) grid.add(*faE->pl().getGeom(), faE);
-    if (fbE) grid.add(*fbE->pl().getGeom(), fbE);
+    if (abE) {
+      grid.add(*abE->pl().getGeom(), abE);
+      combContEdgs(abE, w.e);
+      combContEdgs(abE, w.f);
+    }
+    if (eaE) {
+      grid.add(*eaE->pl().getGeom(), eaE);
+      combContEdgs(eaE, w.e);
+    }
+    if (ebE) {
+      grid.add(*ebE->pl().getGeom(), ebE);
+      combContEdgs(ebE, w.e);
+    }
+    if (faE) {
+      grid.add(*faE->pl().getGeom(), faE);
+      combContEdgs(faE, w.f);
+    }
+    if (fbE) {
+      grid.add(*fbE->pl().getGeom(), fbE);
+      combContEdgs(fbE, w.f);
+    }
 
     found = true;
   }
@@ -481,11 +505,29 @@ bool Builder::combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n,
   newPl.simplify(3);
   newEdge->pl().setPolyline(newPl);
 
+  combContEdgs(newEdge, a);
+  combContEdgs(newEdge, b);
+
   g->delEdg(a->getFrom(), a->getTo());
   g->delEdg(b->getFrom(), b->getTo());
   g->delNd(n);
 
   return true;
+}
+
+// _____________________________________________________________________________
+void Builder::initEdges(TransitGraph* g) {
+  for (auto nd : *g->getNds()) {
+    for (auto* edg : nd->getAdjList()) {
+      if (edg->getFrom() != nd) continue;
+      _origEdgs[edg].insert(edg);
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void Builder::combContEdgs(const TransitEdge* a, const TransitEdge* b) {
+  _origEdgs[a].insert(_origEdgs[b].begin(), _origEdgs[b].end());
 }
 
 // _____________________________________________________________________________
@@ -524,6 +566,8 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       // update route dirs
       routeDirRepl(a, b, newE);
     }
+
+    combContEdgs(newE, oldE);
   }
 
   for (auto* oldE : a->getAdjList()) {
@@ -545,6 +589,8 @@ bool Builder::combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g) {
       // update route dirs
       routeDirRepl(a, b, newE);
     }
+
+    combContEdgs(newE, oldE);
   }
 
   g->delEdg(a, b);
@@ -636,30 +682,22 @@ bool Builder::foldEdges(TransitEdge* a, TransitEdge* b) {
   const auto shrNd = TransitGraph::sharedNode(a, b);
   assert(shrNd);
 
-  //
-  //                  b
-  //         shrNd --------> v
-  //          \             /
-  //           \           /
-  //            \         /
-  //           a \       /
-  //              \     /
-  //               \   /
-  //                \ /
-  //            majNonShrNd
-  //
-
-  // b is the new edge
-
-  // if the geometry length of a is below the threshold, we use the
-  // b geometry without change TODO
-
-  // if the geometry length of b is below the threshold, we use the
-  // a geometry without change TODO
-
-  // if the geometry length of a and b are above the threshold, we take the
-  // average
-  // of both geometries
+  /*
+   *
+   *                    b
+   *           shrNd --------> v
+   *            \             /
+   *             \           /
+   *              \         /
+   *             a \       /
+   *                \     /
+   *                 \   /
+   *                  \ /
+   *              majNonShrNd
+   *
+   *
+   *   b is the new edge
+   */
 
   if (b->getTo() == a->getTo() || a->getFrom() == b->getFrom()) {
     b->pl().setPolyline(geomAvg(b->pl(), 0, 1, a->pl(), 0, 1));
@@ -716,19 +754,84 @@ void Builder::collectStations(TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
+std::pair<size_t, size_t> Builder::served(
+    const std::vector<TransitEdge*>& adj,
+    const std::set<const TransitEdge*>& toServe) {
+  std::set<const TransitEdge*> contained;
+
+  for (auto e : adj) contained.insert(_origEdgs[e].begin(), _origEdgs[e].end());
+
+  std::set<const TransitEdge*> iSect;
+  set_intersection(contained.begin(), contained.end(), toServe.begin(),
+                   toServe.end(), std::inserter(iSect, iSect.begin()));
+
+  // TODO: second return value should be falsely served lines
+  return {iSect.size(), 0};
+}
+
+// _____________________________________________________________________________
+double Builder::candScore(const StationCand& c) {
+  double score = 0;
+
+  score += c.dist;
+  score += static_cast<double>(c.shouldServ) / static_cast<double>(c.truelyServ) * 100;
+
+  // add a penalty if a station is too close to an existing node
+  if (c.edg && c.edg->pl().getPolyline().getLength() * (1 - c.pos) < 100) score += 200;
+  if (c.edg && c.edg->pl().getPolyline().getLength() * (c.pos) < 100) score += 200;
+
+  return score;
+}
+
+// _____________________________________________________________________________
 std::vector<StationCand> Builder::candidates(const StationOcc& occ,
-                                              const EdgeGrid& idx) {
+                                             const EdgeGrid& idx) {
   std::vector<StationCand> ret;
   std::set<TransitEdge*> neighbors;
-  idx.get(util::geo::pad(util::geo::getBoundingBox(occ.station.pos), 100), &neighbors);
+  idx.get(util::geo::pad(util::geo::getBoundingBox(occ.station.pos), 100),
+          &neighbors);
 
   std::cerr << "Got " << neighbors.size() << " candidates..." << std::endl;
 
   for (auto edg : neighbors) {
     auto pos = edg->pl().getPolyline().projectOn(occ.station.pos);
-    double d = util::geo::dist(pos.p, *edg->pl().getGeom());
+    double d = util::geo::dist(pos.p, occ.station.pos);
 
-    ret.push_back(StationCand{edg, pos.totalPos, d, 1});
+    size_t truelyServed, falselyServed;
+    std::tie(truelyServed, falselyServed) = served({edg}, occ.edges);
+
+    ret.push_back(
+        StationCand{edg, pos.totalPos, 0, d, occ.edges.size(), truelyServed, falselyServed});
+
+    std::tie(truelyServed, falselyServed) =
+        served(edg->getFrom()->getAdjList(), occ.edges);
+    ret.push_back(StationCand{
+        0, 0, edg->getFrom(),
+        util::geo::dist(*edg->getFrom()->pl().getGeom(), occ.station.pos),  occ.edges.size(),
+        truelyServed, falselyServed});
+    std::tie(truelyServed, falselyServed) =
+        served(edg->getTo()->getAdjList(), occ.edges);
+    ret.push_back(StationCand{
+        0, 0, edg->getTo(),
+        util::geo::dist(*edg->getTo()->pl().getGeom(), occ.station.pos),  occ.edges.size(),
+        truelyServed, falselyServed});
+  }
+
+  struct {
+    bool operator()(const StationCand& a, const StationCand& b) const {
+      return candScore(a) < candScore(b);
+    }
+  } cmp;
+
+  std::sort(ret.begin(), ret.end(), cmp);
+
+  std::cerr << "  Cands: " << std::endl;
+  for (auto cand : ret) {
+    if (cand.edg) {
+      std::cerr << "    Edg " << cand.edg << " at position " << cand.pos << " with dist = " << cand.dist << " truely serving " << cand.truelyServ << " edges, falsely serving " << cand.falselyServ << " edges." << std::endl;
+    } else {
+      std::cerr << "    Nd " << cand.nd << " with dist = " << cand.dist << " truely serving " << cand.truelyServ << " edges, falsely serving " << cand.falselyServ << " edges." << std::endl;
+    }
   }
 
   return ret;
@@ -748,16 +851,25 @@ bool Builder::insertStations(TransitGraph* g) {
 
     if (cands.size() == 0) continue;
 
-    auto e = cands.front().edg;
+    if (cands.front().edg) {
+      auto e = cands.front().edg;
 
+      auto spl = split(e->pl(), e->getFrom(), e->getTo(), cands.front().pos, g);
 
-    auto spl = split(e->pl(), e->getFrom(), e->getTo(), cands.front().pos, g);
-    g->delEdg(e->getFrom(), e->getTo());
-    idx.remove(e);
-    shared::transitgraph::TransitGraph::sharedNode(spl.first, spl.second)->pl().addStop(repr.station);
+      combContEdgs(spl.first, e);
+      combContEdgs(spl.second, e);
 
-    idx.add(*spl.first->pl().getGeom(), spl.first);
-    idx.add(*spl.second->pl().getGeom(), spl.second);
+      g->delEdg(e->getFrom(), e->getTo());
+      idx.remove(e);
+      shared::transitgraph::TransitGraph::sharedNode(spl.first, spl.second)
+          ->pl()
+          .addStop(repr.station);
+
+      idx.add(*spl.first->pl().getGeom(), spl.first);
+      idx.add(*spl.second->pl().getGeom(), spl.second);
+    } else {
+      cands.front().nd->pl().addStop(repr.station);
+    }
   }
 
   return true;
@@ -766,8 +878,7 @@ bool Builder::insertStations(TransitGraph* g) {
 // _____________________________________________________________________________
 std::pair<TransitEdge*, TransitEdge*> Builder::split(TransitEdgePL& a,
                                                      TransitNode* fr,
-                                                     TransitNode* to,
-                                                     double p,
+                                                     TransitNode* to, double p,
                                                      TransitGraph* g) const {
   TransitEdge* ret;
   auto right = a.getPolyline().getSegment(p, 1);
@@ -794,4 +905,14 @@ std::pair<TransitEdge*, TransitEdge*> Builder::split(TransitEdgePL& a,
   ret = g->addEdg(fr, helper, a);
 
   return std::pair<TransitEdge*, TransitEdge*>(ret, helperEdg);
+}
+
+// _____________________________________________________________________________
+bool Builder::cleanUpGeoms(TransitGraph* g) {
+  for (auto n : *g->getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      e->pl().setPolyline(e->pl().getPolyline().getSegment(e->pl().getPolyline().projectOn(*e->getFrom()->pl().getGeom()).totalPos, e->pl().getPolyline().projectOn(*e->getTo()->pl().getGeom()).totalPos));
+    }
+  }
 }

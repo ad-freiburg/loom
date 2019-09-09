@@ -6,6 +6,7 @@
 #define GTFS2GRAPH_CONFIG_GTFS2GEOCONFIG_H_
 
 #include <string>
+#include "ad/cppgtfs/gtfs/flat/Route.h"
 
 namespace gtfs2graph {
 namespace config {
@@ -22,7 +23,7 @@ struct Config {
   double maxAggrDistance;
   double stationAggrDistance;
 
-  uint8_t useMots;
+  std::set<ad::cppgtfs::gtfs::flat::Route::TYPE> useMots;
 };
 
 }  // namespace config

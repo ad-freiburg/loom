@@ -9,6 +9,8 @@
 #include <string>
 #include "gtfs2graph/config/ConfigReader.h"
 #include "util/log/Log.h"
+#include "util/String.h"
+#include "ad/cppgtfs/gtfs/flat/Route.h"
 
 using gtfs2graph::config::ConfigReader;
 namespace opts = boost::program_options;
@@ -27,6 +29,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   opts::options_description generic("General");
   generic.add_options()("version", "output version")(
       "help,?", "show this message")("verbose,v", "verbosity level");
+
+  std::string motStr;
 
   opts::options_description config("Output");
   config.add_options()(
@@ -49,7 +53,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "max-aggr-distance,d",
       opts::value<double>(&(cfg->maxAggrDistance))->default_value(30),
       "maximum aggregation distance between shared segments")(
-      "use-mots,m", opts::value<uint8_t>(&(cfg->useMots))->default_value(255),
+      "use-mots,m", opts::value<string>(&motStr)->default_value("all"),
       "used mots, as a bitmap (see GTFS reference, 0000001 = 1 means 'only "
       "tram', 0000010 = 2 means 'only subway', 0000100 = 4 means 'only rail', "
       "0001000 = 8 means 'only bus', 0001001 = 3 means 'tram and bus' etc");
@@ -80,6 +84,12 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     LOG(ERROR) << e.what() << std::endl;
     std::cout << visibleDesc << "\n";
     exit(1);
+  }
+
+  for (auto sMotStr : util::split(motStr, ',')) {
+    for (auto mot : ad::cppgtfs::gtfs::flat::Route::getTypesFromString(sMotStr)) {
+      cfg->useMots.insert(mot);
+    }
   }
 
   if (vm.count("help")) {

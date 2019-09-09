@@ -109,22 +109,3 @@ const Node* EdgeTripGeom::getGeomDir() const {
 void EdgeTripGeom::setGeomDir(const Node* n) {
   _geomDir = n;
 }
-
-// _____________________________________________________________________________
-bool EdgeTripGeom::routeEquivalent(const EdgeTripGeom& g) const {
-  if (_trips.size() != g._trips.size()) return false;
-
-  for (auto to : _trips) {
-    if (!g.containsRoute(to.route)) {
-      return false;
-    }
-  }
-
-  for (auto to : g._trips) {
-    if (!containsRoute(to.route)) {
-      return false;
-    }
-  }
-
-  return true;
-}

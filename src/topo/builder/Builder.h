@@ -36,6 +36,8 @@ using shared::transitgraph::TransitEdgePL;
 typedef Grid<TransitNode*, Point, double> NodeGrid;
 typedef Grid<TransitEdge*, Line, double> EdgeGrid;
 
+typedef std::map<const TransitEdge*, std::set<const TransitEdge*>> OrigEdgs;
+
 namespace topo {
 
 struct ShrdSegWrap {
@@ -53,11 +55,19 @@ struct StationOcc {
 };
 
 struct StationCand {
+  // either an edge
   TransitEdge* edg;
   double pos;
 
+  // or a node
+  TransitNode* nd;
+
   double dist;
-  double percEdgsServed;
+
+  size_t shouldServ;
+
+  size_t truelyServ;
+  size_t falselyServ;
 };
 
 class Builder {
@@ -78,6 +88,10 @@ class Builder {
 
   bool insertStations(TransitGraph* g);
 
+  void initEdges(TransitGraph* g);
+
+  bool cleanUpGeoms(TransitGraph* g);
+
  private:
   const config::TopoConfig* _cfg;
   projPJ _mercProj;
@@ -90,6 +104,8 @@ class Builder {
   bool combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g);
   bool combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n,
                     TransitGraph* g);
+
+  void combContEdgs(const TransitEdge* a, const TransitEdge* b);
 
   bool routeEq(const TransitEdge* a, const TransitEdge* b) const;
 
@@ -106,6 +122,10 @@ class Builder {
   DBox bbox(const TransitGraph* g) const;
   EdgeGrid geoIndex(const TransitGraph* g) const;
 
+  static double candScore(const StationCand& c);
+
+  std::pair<size_t, size_t> served(const std::vector<TransitEdge*>& adj, const std::set<const TransitEdge*>& toServe);
+
   std::pair<TransitEdge*, TransitEdge*> split(TransitEdgePL& a, TransitNode* fr,
                                               TransitNode* to, double p,
                                               TransitGraph* g) const;
@@ -117,6 +137,8 @@ class Builder {
       _pEdges;
 
   std::vector<std::vector<StationOcc>> _statClusters;
+
+  OrigEdgs _origEdgs;
 };
 
 }  // namespace topo

@@ -48,15 +48,6 @@ class EdgePL : public util::geograph::GeoEdgePL<double> {
   // An EdgeTripGeometry is a geometry holding N trips.
   // This is meant as a multi-stage structure, where in the first
   // (trivial) stage, each EdgeTripGeometry holds exactly 1 trip.
-  //
-  // In a 2nd step, the EdgeTripGeometries are combined based on
-  // geometrical equivalence.
-  //
-  // In a 3rd step, we split those edges with |_tripsContained| > 1
-  // into single edges. This creates either multiple distinct edges from
-  // _from to _to, OR, in case the geometries have partial equivalence,
-  // introduces new topological nodes which mark the position where two
-  // lines part or join.
   std::vector<EdgeTripGeom> _tripsContained;
 
   void combineIncludedGeoms();

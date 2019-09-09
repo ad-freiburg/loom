@@ -61,8 +61,6 @@ class EdgeTripGeom {
 
   void setGeomDir(const Node* newDir);
 
-  bool routeEquivalent(const EdgeTripGeom& g) const;
-
  private:
   std::vector<TripOccurance> _trips;
 
