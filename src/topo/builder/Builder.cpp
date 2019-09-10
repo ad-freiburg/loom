@@ -859,14 +859,18 @@ bool Builder::insertStations(TransitGraph* g) {
       combContEdgs(spl.first, e);
       combContEdgs(spl.second, e);
 
-      g->delEdg(e->getFrom(), e->getTo());
-      idx.remove(e);
       shared::transitgraph::TransitGraph::sharedNode(spl.first, spl.second)
           ->pl()
           .addStop(repr.station);
 
       idx.add(*spl.first->pl().getGeom(), spl.first);
       idx.add(*spl.second->pl().getGeom(), spl.second);
+
+			edgeRpl(e->getFrom(), e, spl.first);
+			edgeRpl(e->getTo(), e, spl.second);
+
+      g->delEdg(e->getFrom(), e->getTo());
+      idx.remove(e);
     } else {
       cands.front().nd->pl().addStop(repr.station);
     }
@@ -916,3 +920,37 @@ bool Builder::cleanUpGeoms(TransitGraph* g) {
     }
   }
 }
+
+// _____________________________________________________________________________
+void Builder::edgeRpl(TransitNode* n, const TransitEdge* oldE,
+                      const TransitEdge* newE) const {
+  if (oldE == newE) return;
+  // replace in from
+  for (auto& r : n->pl().getConnExc()) {
+    auto exFr = r.second.begin();
+    while (exFr != r.second.end()) {
+      if (exFr->first == oldE) {
+        std::swap(r.second[newE], exFr->second);
+        exFr = r.second.erase(exFr);
+      } else {
+        exFr++;
+      }
+    }
+  }
+
+  // replace in to
+  for (auto& r : n->pl().getConnExc()) {
+    for (auto& exFr : r.second) {
+      auto exTo = exFr.second.begin();
+      while (exTo != exFr.second.end()) {
+        if (*exTo == oldE) {
+          exFr.second.insert(newE);
+          exTo = exFr.second.erase(exTo);
+        } else {
+          exTo++;
+        }
+      }
+    }
+  }
+}
+

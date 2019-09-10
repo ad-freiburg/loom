@@ -84,8 +84,6 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
         Node* fromN = g->getNodeById(from);
         Node* toN = g->getNodeById(to);
 
-        std::cout << from << " vs " << to << std::endl;
-
         if (!fromN) {
           LOG(WARN) << "Node \"" << from << "\" not found.";
           continue;
@@ -108,6 +106,8 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
             g->addEdge(fromN, toN, pl, _cfg->lineWidth, _cfg->lineSpacing);
 
         assert(e);
+        assert(g->getNodeById(from));
+        assert(g->getNodeById(to));
 
         for (auto route : props["lines"]) {
           std::string id;
@@ -131,7 +131,11 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
           Node* dir = 0;
 
           if (!route["direction"].is_null()) {
-            dir = g->getNodeById(route["direction"]);
+            dir = g->getNodeById(util::toString(route["direction"]));
+            if (!dir)
+              LOG(WARN) << "Direction " << route["direction"]
+                        << " defined in edge " << util::toString(props["id"])
+                        << " is not valid.";
           }
 
           if (!route["style"].is_null()) {

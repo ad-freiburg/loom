@@ -10,6 +10,7 @@
 #include <string>
 #include "shared/transitgraph/TransitGraph.h"
 #include "topo/builder/Builder.h"
+#include "topo/restr/RestrInferrer.h"
 #include "topo/config/ConfigReader.h"
 #include "topo/config/TopoConfig.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -34,7 +35,11 @@ int main(int argc, char** argv) {
   std::cerr << "Topoying graph with " << tg.getNds()->size() << " nodes..."
             << std::endl;
 
+  topo::restr::RestrInferrer ri(&cfg);
   topo::Builder b(&cfg);
+
+  // init restriction inferrer
+  ri.init(&tg);
 
 
   b.initEdges(&tg);
@@ -69,7 +74,11 @@ int main(int argc, char** argv) {
   std::cerr << "Averaging node positions..." << std::endl;
 
   b.averageNodePositions(&tg);
-  b.insertStations(&tg);
+
+  // infer restrictions
+  ri.infer(&tg, b.getOrigEdgs());
+
+  // b.insertStations(&tg);
 
   util::geo::output::GeoGraphJsonOutput out;
   out.print(tg, std::cout);

@@ -92,6 +92,8 @@ class Builder {
 
   bool cleanUpGeoms(TransitGraph* g);
 
+	const OrigEdgs& getOrigEdgs() const { return _origEdgs; }
+
  private:
   const config::TopoConfig* _cfg;
   projPJ _mercProj;
@@ -99,8 +101,7 @@ class Builder {
 
   void routeDirRepl(TransitNode* oldN, TransitNode* newN, TransitEdge* e) const;
 
-  ShrdSegWrap nextShrdSeg(TransitGraph* g, double dCut,
-                                   EdgeGrid* grid) const;
+  ShrdSegWrap nextShrdSeg(TransitGraph* g, double dCut, EdgeGrid* grid) const;
   bool combineNodes(TransitNode* a, TransitNode* b, TransitGraph* g);
   bool combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n,
                     TransitGraph* g);
@@ -113,7 +114,8 @@ class Builder {
 
   bool foldEdges(TransitEdge* a, TransitEdge* b);
 
-  std::vector<StationCand> candidates(const StationOcc& occ, const EdgeGrid& idx);
+  std::vector<StationCand> candidates(const StationOcc& occ,
+                                      const EdgeGrid& idx);
 
   PolyLine<double> geomAvg(const TransitEdgePL& geomA, double startA,
                            double endA, const TransitEdgePL& geomB,
@@ -122,16 +124,20 @@ class Builder {
   DBox bbox(const TransitGraph* g) const;
   EdgeGrid geoIndex(const TransitGraph* g) const;
 
+  void edgeRpl(TransitNode* n, const TransitEdge* oldE,
+               const TransitEdge* newE) const;
+
   static double candScore(const StationCand& c);
 
-  std::pair<size_t, size_t> served(const std::vector<TransitEdge*>& adj, const std::set<const TransitEdge*>& toServe);
+  std::pair<size_t, size_t> served(const std::vector<TransitEdge*>& adj,
+                                   const std::set<const TransitEdge*>& toServe);
 
   std::pair<TransitEdge*, TransitEdge*> split(TransitEdgePL& a, TransitNode* fr,
                                               TransitNode* to, double p,
                                               TransitGraph* g) const;
 
   mutable std::set<const TransitEdge*> _indEdges;
-  mutable std::set<std::pair<const TransitEdge*, const TransitEdge*> >
+  mutable std::set<std::pair<const TransitEdge*, const TransitEdge*>>
       _indEdgesPairs;
   mutable std::map<std::pair<const TransitEdge*, const TransitEdge*>, size_t>
       _pEdges;
