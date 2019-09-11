@@ -7,6 +7,7 @@
 #include "topo/tests/TopologicalTest.h"
 #include "topo/tests/TopologicalTest2.h"
 #include "topo/tests/TopologicalTest3.h"
+#include "topo/tests/RestrInfTest.h"
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
@@ -16,12 +17,14 @@ int main(int argc, char** argv) {
   TopologicalTest tt;
   TopologicalTest2 tt2;
   TopologicalTest3 tt3;
+  RestrInfTest rt;
 
-  ct3.run();
-  tt3.run();
-  ct2.run();
-  ct.run();
-  tt.run();
-  tt2.run();
-  tt3.run();
+  rt.run();
+  // ct3.run();
+  // tt3.run();
+  // ct2.run();
+  // ct.run();
+  // tt.run();
+  // tt2.run();
+  // tt3.run();
 }

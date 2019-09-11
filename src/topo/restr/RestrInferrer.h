@@ -30,22 +30,30 @@ namespace restr {
 typedef std::map<const TransitEdge*, std::set<const TransitEdge*>> OrigEdgs;
 
 struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
-  CostFunc(std::map<const RestrEdge*, double> sourcePos,
-           std::map<const RestrEdge*, double> targetPos)
-      : _sourcePos(sourcePos), _targetPos(targetPos) {}
+  CostFunc(const Route* r, double max)
+      : _max(max) , _route(r){}
+  double inf() const { return _max; };
   double operator()(const RestrEdge* from, const RestrNode* n,
                     const RestrEdge* to) const {
+
+    if (!from) return 0;
+    if (!to->pl().routes.count(_route)) return inf();
+
+    double c = 0;
+
     if (n) {
-      // for edges in _targetPos, add cost to arrive at edge
-      return to->pl().geom.getLength();
-    } else {
-      // for edges in _sourcePos, add cost to leave the edge
+      c += 0; // turn restrictions
+
+      // dont allow going back the same edge
+      if (from->getOtherNd(n) == to->getOtherNd(n)) return inf();
     }
-    return 0;
+
+    return c + to->pl().geom.getLength();
   };
-  double inf() const { return std::numeric_limits<double>::infinity(); };
 
   std::map<const RestrEdge *, double> _sourcePos, _targetPos;
+  double _max;
+  const Route* _route;
 };
 
 class RestrInferrer {
@@ -63,7 +71,7 @@ class RestrInferrer {
 
   // mapping from the edges in the original graph to our internal
   // graph representation
-  std::unordered_map<TransitEdge*, std::pair<RestrEdge*, RestrEdge*>> _eMap;
+  std::unordered_map<TransitEdge*, std::vector<RestrEdge*>> _eMap;
 
   // mapping from the nodes in the original graph to our internal
   // graph representation
@@ -72,6 +80,11 @@ class RestrInferrer {
   // check whether a connection ocurred in the original graph
   bool check(const Route* r, const TransitEdge* edg1, const TransitEdge* edg2,
              const OrigEdgs& origEdgs) const;
+
+  void insertHandles(TransitGraph* g, const OrigEdgs& origEdgs);
+  void insertHandles(const TransitEdge* e, const OrigEdgs& origEdgs);
+
+  std::map<const TransitEdge*, std::set<RestrEdge*>> _handlesA, _handlesB;
 };
 }
 }

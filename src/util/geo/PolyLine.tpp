@@ -191,6 +191,8 @@ PolyLine<T> PolyLine<T>::getSegment(const LinePoint<T>& start,
   // find a more performant way to clear the result of above
   ret.simplify(0);
 
+  assert(ret.getLine().size());
+
   return ret;
 }
 
