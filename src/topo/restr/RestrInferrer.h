@@ -61,11 +61,11 @@ struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
   const Route* _route;
 };
 
-struct {
+struct HndlCmp {
   bool operator()(const Hndl& a, const Hndl& b) const {
     return a.second < b.second;
   }
-} HndlCmp;
+};
 
 class RestrInferrer {
  public:

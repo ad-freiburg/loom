@@ -92,7 +92,7 @@ void RestrInferrer::addHndls(const OrigEdgs& origEdgs) {
 
   // add them to the edge
   for (auto edgHndl : handles) {
-    std::sort(edgHndl.second.begin(), edgHndl.second.end(), HndlCmp);
+    std::sort(edgHndl.second.begin(), edgHndl.second.end(), HndlCmp());
 
     auto lastNd = edgHndl.first->getFrom();
     double lastPos = 0;
@@ -118,8 +118,8 @@ void RestrInferrer::addHndls(const TransitEdge* e, const OrigEdgs& origEdgs,
                              std::map<RestrEdge*, HndlLst>* handles) {
   double MAX_DIST = _cfg->maxAggrDistance;
 
-  auto hndlPA = e->pl().getPolyline().getPointAt(1.0/3.0).p;
-  auto hndlPB = e->pl().getPolyline().getPointAt(2.0/3.0).p;
+  auto hndlPA = e->pl().getPolyline().getPointAt(1.0 / 3.0).p;
+  auto hndlPB = e->pl().getPolyline().getPointAt(2.0 / 3.0).p;
 
   auto hndlLA =
       e->pl()
@@ -197,6 +197,6 @@ bool RestrInferrer::check(const Route* r, const TransitEdge* edg1,
 
   // curdist + 500 is the inf. We do not have to check any further as we
   // only return true below if cost - curD < 500 <=> cost < curD + 500
-  CostFunc cFunc(r, curD + 500);
-  return EDijkstra::shortestPath(from, to, cFunc) - curD < 500;
+  CostFunc cFunc(r, curD + _cfg->maxLengthDev);
+  return EDijkstra::shortestPath(from, to, cFunc) - curD < _cfg->maxLengthDev;
 }
