@@ -88,11 +88,11 @@ class Builder {
 
   bool insertStations(TransitGraph* g);
 
-  void initEdges(TransitGraph* g);
+  size_t freeze(TransitGraph* g);
 
   bool cleanUpGeoms(TransitGraph* g);
 
-	const OrigEdgs& getOrigEdgs() const { return _origEdgs; }
+	const OrigEdgs& freezeTrack(size_t i) const { return _origEdgs[i]; }
 
  private:
   const config::TopoConfig* _cfg;
@@ -144,7 +144,7 @@ class Builder {
 
   std::vector<std::vector<StationOcc>> _statClusters;
 
-  OrigEdgs _origEdgs;
+  std::vector<OrigEdgs> _origEdgs;
 };
 
 }  // namespace topo

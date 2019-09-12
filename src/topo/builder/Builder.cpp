@@ -516,18 +516,23 @@ bool Builder::combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n,
 }
 
 // _____________________________________________________________________________
-void Builder::initEdges(TransitGraph* g) {
+size_t Builder::freeze(TransitGraph* g) {
+  _origEdgs.push_back(OrigEdgs());
   for (auto nd : *g->getNds()) {
     for (auto* edg : nd->getAdjList()) {
       if (edg->getFrom() != nd) continue;
-      _origEdgs[edg].insert(edg);
+      _origEdgs.back()[edg].insert(edg);
     }
   }
+
+  return _origEdgs.size() - 1;
 }
 
 // _____________________________________________________________________________
 void Builder::combContEdgs(const TransitEdge* a, const TransitEdge* b) {
-  _origEdgs[a].insert(_origEdgs[b].begin(), _origEdgs[b].end());
+  for (auto& oe : _origEdgs) {
+    oe[a].insert(oe[b].begin(), oe[b].end());
+  }
 }
 
 // _____________________________________________________________________________
@@ -759,7 +764,7 @@ std::pair<size_t, size_t> Builder::served(
     const std::set<const TransitEdge*>& toServe) {
   std::set<const TransitEdge*> contained;
 
-  for (auto e : adj) contained.insert(_origEdgs[e].begin(), _origEdgs[e].end());
+  for (auto e : adj) contained.insert(_origEdgs[0][e].begin(), _origEdgs[0][e].end());
 
   std::set<const TransitEdge*> iSect;
   set_intersection(contained.begin(), contained.end(), toServe.begin(),

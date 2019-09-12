@@ -1,4 +1,4 @@
-// Copyright 2017
+// Copyright 2016
 // University of Freiburg - Chair of Algorithms and Datastructures
 // Author: Patrick Brosi
 
@@ -10,9 +10,9 @@
 #include <string>
 #include "shared/transitgraph/TransitGraph.h"
 #include "topo/builder/Builder.h"
-#include "topo/restr/RestrInferrer.h"
 #include "topo/config/ConfigReader.h"
 #include "topo/config/TopoConfig.h"
+#include "topo/restr/RestrInferrer.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
@@ -32,16 +32,11 @@ int main(int argc, char** argv) {
   shared::transitgraph::TransitGraph tg;
   tg.readFromJson(&(std::cin));
 
-  std::cerr << "Topoying graph with " << tg.getNds()->size() << " nodes..."
-            << std::endl;
-
-  topo::restr::RestrInferrer ri(&cfg);
+  topo::restr::RestrInferrer ri(&cfg, &tg);
   topo::Builder b(&cfg);
 
-  // init restriction inferrer
-  ri.init(&tg);
-
-  b.initEdges(&tg);
+  size_t statFr = b.freeze(&tg);
+  UNUSED(statFr);
   b.collectStations(&tg);
 
   b.averageNodePositions(&tg);
@@ -50,32 +45,32 @@ int main(int argc, char** argv) {
   b.removeNodeArtifacts(&tg);
   b.removeEdgeArtifacts(&tg);
 
+  // init restriction inferrer
+  ri.init();
+  size_t restrFr = b.freeze(&tg);
+
   // first pass, with strict distance values (clearing things up first)
-  std::cerr << "Creating topological nodes (first round)..." << std::endl;
 
   // first run, with 0 perc of line width, and offset of 5
   b.createTopologicalNodes(&tg, 5.0);
 
   double step = cfg.maxAggrDistance;
 
-  for (double d = cfg.maxAggrDistance; d <= (cfg.maxAggrDistance * 15); d += step) {
-    std::cerr << d  << std::endl;
+  for (double d = cfg.maxAggrDistance; d <= (cfg.maxAggrDistance * 15);
+       d += step) {
+    std::cerr << d << std::endl;
     while (b.createTopologicalNodes(&tg, d)) {
       b.removeNodeArtifacts(&tg);
       b.removeEdgeArtifacts(&tg);
     };
   }
 
-  std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-  std::cerr << "Removing node artifacts..." << std::endl;
   b.removeNodeArtifacts(&tg);
-  std::cerr << tg.getNds()->size() << " nodes..." << std::endl;
-  std::cerr << "Averaging node positions..." << std::endl;
 
   b.averageNodePositions(&tg);
 
   // infer restrictions
-  ri.infer(&tg, b.getOrigEdgs());
+  ri.infer(b.freezeTrack(restrFr));
 
   b.insertStations(&tg);
 
