@@ -2,9 +2,9 @@
 // Author: Patrick Brosi
 
 #include <cassert>
-#include <string>
-#include <set>
 #include <map>
+#include <set>
+#include <string>
 
 #include "shared/transitgraph/TransitGraph.h"
 #include "topo/config/TopoConfig.h"
@@ -82,9 +82,7 @@ void RestrInfTest::run() {
     std::set<RestrEdge*> to = {cd};
 
     topo::restr::CostFunc cFunc(&l1, 100);
-    double cost = EDijkstra::shortestPath(
-        from, to, cFunc,
-        EDijkstra::ZeroHeurFunc<RestrNodePL, RestrEdgePL, double>());
+    double cost = EDijkstra::shortestPath(from, to, cFunc);
 
     assert(cost == approx(20));
   }

@@ -61,11 +61,11 @@ class PolyLine {
   PolyLine& operator>>(const Point<T>& p);
 
   void reverse();
-  PolyLine getReversed() const;
+  PolyLine reversed() const;
 
   void offsetPerp(double units);
 
-  PolyLine getPerpOffsetted(double units) const;
+  PolyLine offsetted(double units) const;
 
   const Line<T>& getLine() const;
 

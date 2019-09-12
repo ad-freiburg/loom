@@ -407,7 +407,7 @@ bool Builder::contractNodes(TransitGraph* g) {
       if (e->getFrom() != n) continue;
       // contract edges below minimum length, and dead end edges ending in a
       // non-station node
-      if (e->pl().getPolyline().getLength() < MIN_SEG_LENGTH) {
+      if (e->pl().getPolyline().getLength() < _cfg->minSegLength) {
         auto from = e->getFrom();
         auto to = e->getTo();
         if ((from->pl().getStops().size() == 0 ||

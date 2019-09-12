@@ -29,10 +29,13 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
       "help,?", "show this message")("verbose,v", "verbosity level");
 
   opts::options_description config("Output");
-  config.add_options()(
-      "max-aggr-distance,d",
+  config.add_options()
+    ("max-aggr-distance,d",
       opts::value<double>(&(cfg->maxAggrDistance))->default_value(30),
-      "maximum aggregation distance between shared segments");
+      "maximum aggregation distance between shared segments")
+    ("min-seg-length",
+      opts::value<double>(&(cfg->minSegLength))->default_value(35),
+      "minimum segment length for topologize");
 
   opts::options_description cmdlineOptions;
   cmdlineOptions.add(config).add(generic);

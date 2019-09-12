@@ -38,7 +38,7 @@ void PolyLine<T>::reverse() {
 
 // _____________________________________________________________________________
 template <typename T>
-PolyLine<T> PolyLine<T>::getReversed() const {
+PolyLine<T> PolyLine<T>::reversed() const {
   PolyLine ret = *this;
   ret.reverse();
   return ret;
@@ -52,7 +52,7 @@ const Line<T>& PolyLine<T>::getLine() const {
 
 // _____________________________________________________________________________
 template <typename T>
-PolyLine<T> PolyLine<T>::getPerpOffsetted(double units) const {
+PolyLine<T> PolyLine<T>::offsetted(double units) const {
   PolyLine p = *this;
   p.offsetPerp(units);
   return p;

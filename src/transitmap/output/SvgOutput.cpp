@@ -385,7 +385,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
 
         if (ref.from.edge->getTo() == n) off = -off;
 
-        pl = ref.geom.getPerpOffsetted(off);
+        pl = ref.geom.offsetted(off);
 
         std::set<LinePoint<double>, LinePointCmp<double>> a;
         std::set<LinePoint<double>, LinePointCmp<double>> b;
@@ -700,12 +700,12 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
       if (ro.direction == e->getTo()) {
         renderLinePart(firstPart, lineW, *route, e, markerName.str() + "_m",
                        ro.style);
-        renderLinePart(secondPart.getReversed(), lineW, *route, e,
+        renderLinePart(secondPart.reversed(), lineW, *route, e,
                        markerName.str() + "_f", ro.style);
       } else {
         renderLinePart(firstPart, lineW, *route, e, markerName.str() + "_f",
                        ro.style);
-        renderLinePart(secondPart.getReversed(), lineW, *route, e,
+        renderLinePart(secondPart.reversed(), lineW, *route, e,
                        markerName.str() + "_m", ro.style);
       }
     } else {

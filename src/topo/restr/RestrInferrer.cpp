@@ -29,7 +29,7 @@ void RestrInferrer::init() {
       const auto& pl = edg->pl().getPolyline();
       _eMap[edg] = {_rg.addEdg(_nMap[edg->getFrom()], _nMap[edg->getTo()], pl),
                     _rg.addEdg(_nMap[edg->getTo()], _nMap[edg->getFrom()],
-                               pl.getReversed())};
+                               pl.reversed())};
 
       for (auto r : edg->pl().getRoutes()) {
         if (r.direction == 0 || r.direction == edg->getTo()) {
@@ -118,8 +118,8 @@ void RestrInferrer::addHndls(const TransitEdge* e, const OrigEdgs& origEdgs,
                              std::map<RestrEdge*, HndlLst>* handles) {
   double MAX_DIST = _cfg->maxAggrDistance;
 
-  auto hndlPA = e->pl().getPolyline().getPointAt(0.33).p;
-  auto hndlPB = e->pl().getPolyline().getPointAt(0.66).p;
+  auto hndlPA = e->pl().getPolyline().getPointAt(1.0/3.0).p;
+  auto hndlPB = e->pl().getPolyline().getPointAt(2.0/3.0).p;
 
   auto hndlLA =
       e->pl()
@@ -162,9 +162,7 @@ void RestrInferrer::addHndls(const TransitEdge* e, const OrigEdgs& origEdgs,
 bool RestrInferrer::check(const Route* r, const TransitEdge* edg1,
                           const TransitEdge* edg2) const {
   std::set<RestrEdge *> from, to;
-
   auto shrdNd = shared::transitgraph::TransitGraph::sharedNode(edg1, edg2);
-  assert(shrdNd);
 
   double curD = edg1->pl().getPolyline().getLength() * 0.33 +
                 edg2->pl().getPolyline().getLength() * 0.33;

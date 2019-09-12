@@ -288,7 +288,7 @@ void TopologicalTest2::run() {
 
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
-    cb->pl().setPolyline(cb->pl().getPolyline().getReversed());
+    cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -383,7 +383,7 @@ void TopologicalTest2::run() {
 
     auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
-    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
+    ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -474,8 +474,8 @@ void TopologicalTest2::run() {
 
     auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
-    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
-    cb->pl().setPolyline(cb->pl().getPolyline().getReversed());
+    ca->pl().setPolyline(ca->pl().getPolyline().reversed());
+    cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -661,7 +661,7 @@ void TopologicalTest2::run() {
 
     auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
-    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
+    ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -755,8 +755,8 @@ void TopologicalTest2::run() {
 
     auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
-    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
-    cb->pl().setPolyline(cb->pl().getPolyline().getReversed());
+    ca->pl().setPolyline(ca->pl().getPolyline().reversed());
+    cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -851,7 +851,7 @@ void TopologicalTest2::run() {
 
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
-    cb->pl().setPolyline(cb->pl().getPolyline().getReversed());
+    cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -948,7 +948,7 @@ void TopologicalTest2::run() {
 
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
-    cb->pl().setPolyline(cb->pl().getPolyline().getReversed());
+    cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -1135,7 +1135,7 @@ void TopologicalTest2::run() {
 
     auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
-    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
+    ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -1229,8 +1229,8 @@ void TopologicalTest2::run() {
 
     auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
-    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
-    cb->pl().setPolyline(cb->pl().getPolyline().getReversed());
+    ca->pl().setPolyline(ca->pl().getPolyline().reversed());
+    cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -1329,8 +1329,8 @@ void TopologicalTest2::run() {
 
     auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
-    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
-    cb->pl().setPolyline(cb->pl().getPolyline().getReversed());
+    ca->pl().setPolyline(ca->pl().getPolyline().reversed());
+    cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
     transitmapper::graph::Route l2("2", "2", "blue");
 
@@ -1424,8 +1424,8 @@ void TopologicalTest2::run() {
 
     auto ca = tg.addEdg(c, a, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
-    ca->pl().setPolyline(ca->pl().getPolyline().getReversed());
-    cb->pl().setPolyline(cb->pl().getPolyline().getReversed());
+    ca->pl().setPolyline(ca->pl().getPolyline().reversed());
+    cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
     transitmapper::graph::Route l2("2", "2", "blue");
 

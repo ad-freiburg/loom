@@ -83,15 +83,19 @@ void TopologicalTest::run() {
     eb->pl().addRoute(&l1, 0);
     ed->pl().addRoute(&l2, d);
 
-    d->pl().addConnExc(&l2, ed, cd);
-
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
 
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
+
+    assert(c->getAdjList().size());
     a = c->getAdjList().front()->getOtherNd(c);
     for (auto edg : a->getAdjList()) {
       if (edg->getOtherNd(a) != c) d = edg->getOtherNd(a);
@@ -112,10 +116,6 @@ void TopologicalTest::run() {
     assert(tg.getEdg(d, e)->pl().getRoutes().size() == 2);
     assert(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction == d);
     assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
-
-    assert(!d->pl().connOccurs(&l2, tg.getEdg(a, d), tg.getEdg(d, e)));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -144,10 +144,9 @@ void TopologicalTest::run() {
     eb->pl().addRoute(&l1, 0);
     ed->pl().addRoute(&l2, d);
 
-    d->pl().addConnExc(&l2, ed, dc);
-
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -177,8 +176,6 @@ void TopologicalTest::run() {
     assert(tg.getEdg(d, e)->pl().getRoutes().size() == 2);
     assert(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction == d);
     assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1086,7 +1083,5 @@ void TopologicalTest::run() {
       assert(e->pl().getRoutes().size() == 1);
       assert(e->pl().getRoutes().begin()->direction == 0);
     }
-
-    assert(validExceptions(&tg));
   }
 }
