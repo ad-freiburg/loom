@@ -78,11 +78,13 @@ void RestrInferrer::infer(TransitGraph* g, const OrigEdgs& origEdgs) {
 
           if (ro1.direction != 0 && ro2.direction != 0 &&
               edg1->getOtherNd(ro1.direction) ==
-                  edg2->getOtherNd(ro2.direction))
+                  edg2->getOtherNd(ro2.direction)) {
             continue;
+          }
 
           if (!check(ro1.route, edg1, edg2, origEdgs) &&
               !check(ro1.route, edg2, edg1, origEdgs)) {
+            std::cerr << " ==> INFER" << std::endl;
             nd->pl().addConnExc(ro1.route, edg1, edg2);
           }
         }
@@ -93,80 +95,80 @@ void RestrInferrer::infer(TransitGraph* g, const OrigEdgs& origEdgs) {
 
 // _____________________________________________________________________________
 void RestrInferrer::insertHandles(TransitGraph* g, const OrigEdgs& origEdgs) {
+  std::map<RestrEdge*, std::vector<std::pair<RestrNode*, double>>> handles;
+
   for (auto nd : *g->getNds()) {
     for (auto edg : nd->getAdjList()) {
       if (edg->getFrom() != nd) continue;
-      insertHandles(edg, origEdgs);
+      insertHandles(edg, origEdgs, &handles);
     }
+  }
+
+  struct {
+    bool operator()(const std::pair<RestrNode*, double>& a,
+                    const std::pair<RestrNode*, double>& b) const {
+      return a.second < b.second;
+    }
+  } cmp;
+
+  for (auto edgHndl : handles) {
+    std::sort(edgHndl.second.begin(), edgHndl.second.end(), cmp);
+
+    auto lastNd = edgHndl.first->getFrom();
+    double lastPos = 0;
+    for (auto hndl : edgHndl.second) {
+      std::cerr << hndl.second << std::endl;
+      auto e =
+          _g.addEdg(lastNd, hndl.first,
+                    edgHndl.first->pl().geom.getSegment(lastPos, hndl.second));
+      e->pl().routes = edgHndl.first->pl().routes;
+      lastNd = hndl.first;
+      lastPos = hndl.second;
+    }
+    auto e = _g.addEdg(lastNd, edgHndl.first->getTo(),
+                       edgHndl.first->pl().geom.getSegment(lastPos, 1));
+    e->pl().routes = edgHndl.first->pl().routes;
+
+    _g.delEdg(edgHndl.first->getFrom(), edgHndl.first->getTo());
   }
 }
 
 // _____________________________________________________________________________
-void RestrInferrer::insertHandles(const TransitEdge* e,
-                                  const OrigEdgs& origEdgs) {
+void RestrInferrer::insertHandles(
+    const TransitEdge* e, const OrigEdgs& origEdgs,
+    std::map<RestrEdge*, std::vector<std::pair<RestrNode*, double>>>* handles) {
   // TODO: use max_aggr_dist here
-  double MAX_DIST = 10;
+  double MAX_DIST = 60;
 
   auto handlePointA = e->pl().getPolyline().getPointAt(0.33).p;
   auto handlePointB = e->pl().getPolyline().getPointAt(0.66).p;
 
+  auto handleLineA = e->pl().getPolyline().getOrthoLineAtDist(0.33 * e->pl().getPolyline().getLength(), e->pl().getRoutes().size() * MAX_DIST).getLine();
+  auto handleLineB = e->pl().getPolyline().getOrthoLineAtDist(0.66 * e->pl().getPolyline().getLength(), e->pl().getRoutes().size() * MAX_DIST).getLine();
+
   for (auto edg : origEdgs.find(e)->second) {
     auto origFr = const_cast<TransitEdge*>(edg);
 
-    // copy, because we add new edges to the eMap below
-    auto edgs = _eMap.find(origFr)->second;
+    const auto& edgs = _eMap.find(origFr)->second;
 
-    for (size_t i = 0; i < edgs.size(); i++) {
-      auto restrEa = edgs[i];
-      if (util::geo::dist(handlePointA, restrEa->pl().geom.getLine()) <
-          MAX_DIST * e->pl().getRoutes().size()) {
-        auto proj = restrEa->pl().geom.projectOn(handlePointA);
-        auto handleNd1 = _g.addNd();
 
-        // TODO: restrictions!
-        auto edgeA1 =
-            _g.addEdg(restrEa->getFrom(), handleNd1,
-                      restrEa->pl().geom.getSegment(0, proj.totalPos));
-        auto edgeA2 =
-            _g.addEdg(handleNd1, restrEa->getTo(),
-                      restrEa->pl().geom.getSegment(proj.totalPos, 1));
+    for (auto restrE : edgs) {
+      if (util::geo::intersects(handleLineA, restrE->pl().geom.getLine())) {
+        auto projA = restrE->pl().geom.projectOn(handlePointA);
+        auto handleNdA = _g.addNd();
 
-        edgeA1->pl().routes = restrEa->pl().routes;
-        edgeA2->pl().routes = restrEa->pl().routes;
+        _handlesA[e].insert(handleNdA);
 
-        _eMap[origFr][i] = edgeA1;
-        _eMap[origFr].push_back(edgeA2);
-        // _g.delEdg(restrEa->getFrom(), restrEa->getTo());
-
-        _handlesA[e].insert(edgeA1);
+        (*handles)[restrE].push_back({handleNdA, projA.totalPos});
       }
-    }
 
-    // copy, because we add new edges to the eMap below
-    edgs = _eMap.find(origFr)->second;
+      if (util::geo::intersects(handleLineB, restrE->pl().geom.getLine())) {
+        auto projB = restrE->pl().geom.projectOn(handlePointB);
+        auto handleNdB = _g.addNd();
 
-    for (size_t i = 0; i < edgs.size(); i++) {
-      auto restrEa = edgs[i];
-      if (util::geo::dist(handlePointB, restrEa->pl().geom.getLine()) <
-          MAX_DIST * e->pl().getRoutes().size()) {
-        auto proj = restrEa->pl().geom.projectOn(handlePointB);
-        auto handleNd1 = _g.addNd();
+        _handlesB[e].insert(handleNdB);
 
-        // TODO: restrictions!
-        auto edgeA1 =
-            _g.addEdg(restrEa->getFrom(), handleNd1,
-                      restrEa->pl().geom.getSegment(0, proj.totalPos));
-        auto edgeA2 =
-            _g.addEdg(handleNd1, restrEa->getTo(),
-                      restrEa->pl().geom.getSegment(proj.totalPos, 1));
-
-        edgeA1->pl().routes = restrEa->pl().routes;
-        edgeA2->pl().routes = restrEa->pl().routes;
-
-        _eMap[origFr][i] = edgeA1;
-        _eMap[origFr].push_back(edgeA2);
-
-        _handlesB[e].insert(edgeA1);
+        (*handles)[restrE].push_back({handleNdB, projB.totalPos});
       }
     }
   }
@@ -188,15 +190,31 @@ bool RestrInferrer::check(const Route* r, const TransitEdge* edg1,
                    edg2->pl().getPolyline().getLength() * 0.33;
 
   if (shrdNd == edg1->getFrom()) {
-    if (_handlesA.count(edg1)) from = _handlesA.find(edg1)->second;
+    if (_handlesA.count(edg1)) {
+      for (auto nd : _handlesA.find(edg1)->second) {
+        from.insert(nd->getAdjListIn().begin(), nd->getAdjListIn().end());
+      }
+    }
   } else {
-    if (_handlesB.count(edg1)) from = _handlesB.find(edg1)->second;
+    if (_handlesB.count(edg1)) {
+      for (auto nd : _handlesB.find(edg1)->second) {
+        from.insert(nd->getAdjListIn().begin(), nd->getAdjListIn().end());
+      }
+    }
   }
 
   if (shrdNd == edg2->getFrom()) {
-    if (_handlesA.count(edg2)) to = _handlesA.find(edg2)->second;
+    if (_handlesA.count(edg2)) {
+      for (auto nd : _handlesA.find(edg2)->second) {
+        to.insert(nd->getAdjListIn().begin(), nd->getAdjListIn().end());
+      }
+    }
   } else {
-    if (_handlesB.count(edg2)) to = _handlesB.find(edg2)->second;
+    if (_handlesB.count(edg2)) {
+      for (auto nd : _handlesB.find(edg2)->second) {
+        to.insert(nd->getAdjListIn().begin(), nd->getAdjListIn().end());
+      }
+    }
   }
 
   EDijkstra::EList<RestrNodePL, RestrEdgePL> resEdges;
@@ -207,8 +225,8 @@ bool RestrInferrer::check(const Route* r, const TransitEdge* edg1,
       EDijkstra::ZeroHeurFunc<RestrNodePL, RestrEdgePL, double>(), &resEdges);
 
   std::cerr << "From " << edg1 << " to " << edg2 << " and line "
-            << r->getLabel() << "(" << r->getId() << "), " << from.size() << " x " << to.size()
-            << " orig distance is ";
+            << r->getLabel() << "(" << r->getId() << "), " << from.size()
+            << " x " << to.size() << " orig distance is ";
   std::cerr << cost << ", cur distance is " << curDist << std::endl;
   std::cerr << "From: ";
   for (auto edg : from) std::cerr << edg << ", ";

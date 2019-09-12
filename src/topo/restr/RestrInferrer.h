@@ -30,19 +30,18 @@ namespace restr {
 typedef std::map<const TransitEdge*, std::set<const TransitEdge*>> OrigEdgs;
 
 struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
-  CostFunc(const Route* r, double max)
-      : _max(max) , _route(r){}
+  CostFunc(const Route* r, double max) : _max(max), _route(r) {}
   double inf() const { return _max; };
   double operator()(const RestrEdge* from, const RestrNode* n,
                     const RestrEdge* to) const {
-
     if (!from) return 0;
+    if (!from->pl().routes.count(_route)) return inf();
     if (!to->pl().routes.count(_route)) return inf();
 
     double c = 0;
 
     if (n) {
-      c += 0; // turn restrictions
+      c += 0;  // turn restrictions
 
       // dont allow going back the same edge
       if (from->getOtherNd(n) == to->getOtherNd(n)) return inf();
@@ -82,9 +81,12 @@ class RestrInferrer {
              const OrigEdgs& origEdgs) const;
 
   void insertHandles(TransitGraph* g, const OrigEdgs& origEdgs);
-  void insertHandles(const TransitEdge* e, const OrigEdgs& origEdgs);
+  void insertHandles(
+      const TransitEdge* e, const OrigEdgs& origEdgs,
+      std::map<RestrEdge*, std::vector<std::pair<RestrNode*, double>>>*
+          handles);
 
-  std::map<const TransitEdge*, std::set<RestrEdge*>> _handlesA, _handlesB;
+  std::map<const TransitEdge *, std::set<RestrNode *>> _handlesA, _handlesB;
 };
 }
 }

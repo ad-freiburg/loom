@@ -41,7 +41,6 @@ int main(int argc, char** argv) {
   // init restriction inferrer
   ri.init(&tg);
 
-
   b.initEdges(&tg);
   b.collectStations(&tg);
 
@@ -78,7 +77,7 @@ int main(int argc, char** argv) {
   // infer restrictions
   ri.infer(&tg, b.getOrigEdgs());
 
-  // b.insertStations(&tg);
+  b.insertStations(&tg);
 
   util::geo::output::GeoGraphJsonOutput out;
   out.print(tg, std::cout);

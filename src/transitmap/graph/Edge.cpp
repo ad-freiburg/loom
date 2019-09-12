@@ -32,9 +32,7 @@ void Edge::setFrom(Node* f) { _from = f; }
 void Edge::setTo(Node* t) { _to = t; }
 
 // _____________________________________________________________________________
-const std::vector<RouteOccurance>& Edge::getRoutes() const {
-  return _routes;
-}
+const std::vector<RouteOccurance>& Edge::getRoutes() const { return _routes; }
 
 // _____________________________________________________________________________
 Node* Edge::getOther(const Node* n) const {
@@ -47,20 +45,22 @@ Node* Edge::getOther(const Node* n) const {
 std::vector<RouteOccurance>* Edge::getRoutes() { return &_routes; }
 
 // _____________________________________________________________________________
-std::vector<RouteOccurance> Edge::getCtdRoutesIn(
-    const Node* n, const Route* r, const Node* dir,
-    const Edge* fromEdge) const {
+std::vector<RouteOccurance> Edge::getCtdRoutesIn(const Node* n, const Route* r,
+                                                 const Node* dir,
+                                                 const Edge* fromEdge) const {
   std::vector<RouteOccurance> ret;
 
   for (const RouteOccurance& to : _routes) {
-    if (to.route == r) {
-      if (to.direction == 0 || dir == 0 || (to.direction == n && dir != n) ||
-          (to.direction != n && dir == n)) {
-        if (n->connOccurs(r, fromEdge, this)) {
-          ret.push_back(to);
-        }
-      }
-    }
+    if (to.route != r) continue;
+    if (to.direction != 0 && dir != 0 && to.direction == n && dir == n)
+      continue;
+
+    if (to.direction != 0 && dir != 0 && to.direction != n && dir != n)
+      continue;
+
+    if (!n->connOccurs(r, fromEdge, this)) continue;
+
+    ret.push_back(to);
   }
 
   return ret;
@@ -130,9 +130,7 @@ void Edge::addRoute(const Route* r, const Node* dir) {
 }
 
 // _____________________________________________________________________________
-bool Edge::containsRoute(const Route* r) const {
-  return getRoute(r) != 0;
-}
+bool Edge::containsRoute(const Route* r) const { return getRoute(r) != 0; }
 
 // _____________________________________________________________________________
 size_t Edge::getCardinality() const { return _routes.size(); }
