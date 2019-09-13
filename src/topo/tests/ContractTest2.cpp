@@ -110,10 +110,6 @@ void ContractTest2::run() {
     builder.combineNodes(d, b, &tg);
     builder.combineNodes(b, c, &tg);
 
-
-    // TODO: fix figure above and add tests
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -169,8 +165,6 @@ void ContractTest2::run() {
     // std::cout << std::flush;
 
     // TODO: fix figure above and add tests
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -197,35 +191,5 @@ void ContractTest2::run() {
     topo::Builder builder(&cfg);
 
     builder.combineNodes(b, c, &tg);
-
-    assert(validExceptions(&tg));
-  }
-
-  // ___________________________________________________________________________
-  {
-    // node contraction of b, c
-    //    1      2
-    // a ---> b ---> c
-
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{0.0, 0.0}});
-    auto b = tg.addNd({{50.0, 0.0}});
-    auto c = tg.addNd({{100.0, 0.0}});
-
-    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
-    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "green");
-
-    ab->pl().addRoute(&l1, 0);
-    bc->pl().addRoute(&l2, 0);
-
-    topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
-
-    builder.combineNodes(a, b, &tg);
-
-    assert(validExceptions(&tg));
   }
 }

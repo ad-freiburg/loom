@@ -204,10 +204,9 @@ void TopologicalTest::run() {
     eb->pl().addRoute(&l1, 0);
     de->pl().addRoute(&l2, d);
 
-    d->pl().addConnExc(&l2, de, dc);
-
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -260,10 +259,9 @@ void TopologicalTest::run() {
     eb->pl().addRoute(&l1, 0);
     ed->pl().addRoute(&l2, d);
 
-    d->pl().addConnExc(&l2, ed, cd);
-
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -275,11 +273,8 @@ void TopologicalTest::run() {
       if (nd->getDeg() == 2) d = nd;
     }
     ed = e->getAdjList().front();
-    assert(!d->pl().connOccurs(&l2, cd, ed));
     assert(cd->pl().hasRoute(&l2) && cd->pl().getRouteOcc(&l2).direction == c);
     assert(ed->pl().hasRoute(&l2) && ed->pl().getRouteOcc(&l2).direction != 0 && ed->pl().getRouteOcc(&l2).direction != e);
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -305,10 +300,9 @@ void TopologicalTest::run() {
     eb->pl().addRoute(&l1, 0);
     de->pl().addRoute(&l2, d);
 
-    d->pl().addConnExc(&l2, de, dc);
-
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -326,8 +320,6 @@ void TopologicalTest::run() {
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
     assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
     assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
-
-    assert(!c->getAdjList().front()->getOtherNd(c)->pl().connOccurs(&l2, c->getAdjList().front(), e->getAdjList().front()));
 
     for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
       if (ro.route == &l1) assert(ro.direction == 0);
@@ -359,10 +351,9 @@ void TopologicalTest::run() {
     eb->pl().addRoute(&l1, 0);
     ed->pl().addRoute(&l2, d);
 
-    d->pl().addConnExc(&l2, ed, dc);
-
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -380,8 +371,6 @@ void TopologicalTest::run() {
     assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
     assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
     assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
-
-    assert(!c->getAdjList().front()->getOtherNd(c)->pl().connOccurs(&l2, c->getAdjList().front(), e->getAdjList().front()));
 
     for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
       if (ro.route == &l1) assert(ro.direction == 0);
@@ -417,14 +406,14 @@ void TopologicalTest::run() {
     eb->pl().addRoute(&l1, 0);
     de->pl().addRoute(&l2, d);
 
-    d->pl().addConnExc(&l2, de, dc);
-
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
     builder.removeEdgeArtifacts(&tg);
+    builder.removeNodeArtifacts(&tg);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -448,17 +437,12 @@ void TopologicalTest::run() {
 
       assert(edg->pl().getRoutes().size() == 1);
       assert(edg->pl().getRoutes().begin()->direction == 0);
-
-      // currently not deterministic because of the primitive node-cluster
-      // resolution
-      // assert(!edg->getOtherNd(a)->pl().connOccurs(&l2, e->getAdjList().front(), edg));
     }
 
     for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
       if (ro.route == &l1) assert(ro.direction == 0);
 
       if (ro.route == &l2) {
-        std::cerr << ro.direction->pl().getGeom()->getX() << std::endl;
         assert(ro.direction->pl().getGeom()->getX() < 130);
         assert(ro.direction->pl().getGeom()->getX() > 70);
       }
@@ -490,6 +474,7 @@ void TopologicalTest::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -532,6 +517,7 @@ void TopologicalTest::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -574,6 +560,7 @@ void TopologicalTest::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -636,6 +623,7 @@ void TopologicalTest::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -685,6 +673,7 @@ void TopologicalTest::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -733,6 +722,7 @@ void TopologicalTest::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -782,6 +772,7 @@ void TopologicalTest::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -834,6 +825,7 @@ void TopologicalTest::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -885,6 +877,7 @@ void TopologicalTest::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -942,10 +935,9 @@ void TopologicalTest::run() {
     dc->pl().addRoute(&l2, c);
     de->pl().addRoute(&l2, d);
 
-    d->pl().addConnExc(&l2, de, dc);
-
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -969,7 +961,6 @@ void TopologicalTest::run() {
     }
 
     assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().getGeom()->getX() == approx(100));
-    assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().connOccurs(&l2, e->getAdjList().front(), c->getAdjList().front()));
 
     assert(validExceptions(&tg));
   }
@@ -998,10 +989,9 @@ void TopologicalTest::run() {
     dc->pl().addRoute(&l2, c);
     ed->pl().addRoute(&l2, d);
 
-    d->pl().addConnExc(&l2, ed, dc);
-
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);
@@ -1024,7 +1014,6 @@ void TopologicalTest::run() {
     }
 
     assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().getGeom()->getX() == approx(100));
-    assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().connOccurs(&l2, e->getAdjList().front(), c->getAdjList().front()));
 
     assert(validExceptions(&tg));
   }
@@ -1052,6 +1041,7 @@ void TopologicalTest::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
+    cfg.minSegLength = 20;
 
     topo::Builder builder(&cfg);
     builder.createTopologicalNodes(&tg, true);

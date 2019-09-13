@@ -3,7 +3,6 @@
 
 #include "topo/tests/ContractTest.h"
 #include "topo/tests/ContractTest2.h"
-#include "topo/tests/ContractTest3.h"
 #include "topo/tests/TopologicalTest.h"
 #include "topo/tests/TopologicalTest2.h"
 #include "topo/tests/TopologicalTest3.h"
@@ -11,7 +10,6 @@
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
-  ContractTest3 ct3;
   ContractTest2 ct2;
   ContractTest ct;
   TopologicalTest tt;
@@ -20,11 +18,9 @@ int main(int argc, char** argv) {
   RestrInfTest rt;
 
   rt.run();
-  // ct3.run();
-  // tt3.run();
-  // ct2.run();
-  // ct.run();
+  ct2.run();
+  ct.run();
   tt.run();
-  // tt2.run();
-  // tt3.run();
+  tt2.run();
+  tt3.run();
 }

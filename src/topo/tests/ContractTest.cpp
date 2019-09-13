@@ -160,10 +160,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(e,c)->pl().hasRoute(&l2));
 
-    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(!c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
-
     assert(tg.getEdg(e,c)->pl().hasRoute(&l3));
 
     assert(validExceptions(&tg));
@@ -272,15 +268,7 @@ void ContractTest::run() {
 
     assert(tg.getEdg(e,c)->pl().hasRoute(&l2));
 
-    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
-
-    // TODO: fix this as seeon as connOccurs does what its name suggests
-    // assert(!c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
     assert(tg.getEdg(e,c)->pl().hasRoute(&l3));
-
-    assert(!c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -384,12 +372,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(e,c)->pl().hasRoute(&l3));
     assert(tg.getEdg(e,c)->pl().hasRoute(&l2));
-
-    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
-
-    assert(c->pl().connOccurs(&l3, tg.getEdg(c, g), tg.getEdg(c, e)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -494,12 +476,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(e,b)->pl().hasRoute(&l3));
     assert(tg.getEdg(e,b)->pl().hasRoute(&l2));
-
-    assert(!b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
-    assert(!b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, d)));
-
-    assert(b->pl().connOccurs(&l3, tg.getEdg(b, g), tg.getEdg(b, e)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -537,9 +513,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
-
-    assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -577,9 +550,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
-
-    assert(!d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -624,9 +594,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
-
-    assert(!d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -662,19 +629,13 @@ void ContractTest::run() {
     bd->pl().addRoute(&l1, 0);
     de->pl().addRoute(&l2, 0);
 
-    b->pl().addConnExc(&l1, ab, bc);
-
     topo::config::TopoConfig cfg;
     topo::Builder builder(&cfg);
 
     builder.combineNodes(b, d, &tg);
 
-
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
-
-    assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -719,13 +680,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
-
-    assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
-
-    // this is prevented by the original exception in d
-    assert(!d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(d, e)));
-    assert(!d->pl().connOccurs(&l1, tg.getEdg(d, c), tg.getEdg(d, e)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -768,9 +722,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
-
-    assert(d->pl().connOccurs(&l1, tg.getEdg(a, d), tg.getEdg(c, d)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -813,9 +764,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
-
-    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -859,9 +807,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
-
-    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -909,9 +854,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
-
-    assert(!b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -972,9 +914,6 @@ void ContractTest::run() {
     assert(tg.getEdg(c, e)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, e)->pl().getRoutes().begin()->route == &l2);
     assert(tg.getEdg(c, e)->pl().getRoutes().begin()->direction == 0);
-    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1035,9 +974,6 @@ void ContractTest::run() {
     assert(tg.getEdg(b, e)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(b, e)->pl().getRoutes().begin()->route == &l2);
     assert(tg.getEdg(b, e)->pl().getRoutes().begin()->direction == 0);
-    assert(!b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, d)));
-    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, d)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1095,11 +1031,6 @@ void ContractTest::run() {
     assert(tg.getNds()->size() == 5);
     assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
     assert(tg.getEdg(b, e)->pl().getRoutes().size() == 2);
-
-    assert(b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, e)));
-    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, e)));
-    assert(!e->pl().connOccurs(&l2, tg.getEdg(b, e), tg.getEdg(d, e)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1157,11 +1088,6 @@ void ContractTest::run() {
     assert(tg.getNds()->size() == 5);
     assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
     assert(tg.getEdg(b, c)->pl().getRoutes().size() == 2);
-
-    assert(b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(b, c)));
-    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(b, c)));
-    assert(!c->pl().connOccurs(&l2, tg.getEdg(b, c), tg.getEdg(d, c)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1223,13 +1149,6 @@ void ContractTest::run() {
     assert(tg.getEdg(f, b)->pl().getRoutes().begin()->direction == 0);
 
     assert(tg.getEdg(b, c)->pl().getRoutes().size() == 2);
-
-    assert(b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(f, b)));
-    assert(!b->pl().connOccurs(&l2, tg.getEdg(a, b), tg.getEdg(c, b)));
-
-    assert(b->pl().connOccurs(&l1, tg.getEdg(a, b), tg.getEdg(c, b)));
-    assert(c->pl().connOccurs(&l1, tg.getEdg(c, d), tg.getEdg(c, b)));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1291,13 +1210,6 @@ void ContractTest::run() {
     assert(tg.getEdg(f, e)->pl().getRoutes().begin()->direction == 0);
 
     assert(tg.getEdg(e, c)->pl().getRoutes().size() == 2);
-
-    assert(e->pl().connOccurs(&l2, tg.getEdg(a, e), tg.getEdg(f, e)));
-    assert(!e->pl().connOccurs(&l2, tg.getEdg(a, e), tg.getEdg(c, e)));
-
-    assert(e->pl().connOccurs(&l1, tg.getEdg(a, e), tg.getEdg(c, e)));
-    assert(c->pl().connOccurs(&l1, tg.getEdg(c, d), tg.getEdg(c, e)));
-    assert(validExceptions(&tg));
   }
 
   // ==========================================================================
@@ -1351,13 +1263,10 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
 
     assert(d->getAdjList().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1410,13 +1319,6 @@ void ContractTest::run() {
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l1);
-
-    // TODO: fix as soon as connOccurs does what its name says
-    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1475,9 +1377,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
     assert(tg.getEdg(d, d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
 
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-
     assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
@@ -1527,10 +1426,6 @@ void ContractTest::run() {
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1584,10 +1479,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
-
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1635,12 +1526,6 @@ void ContractTest::run() {
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -1707,16 +1592,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(c, e));
     assert(tg.getEdg(c, e)->pl().getRoutes().size() == 1);
-
-    // this is prohibited by the connection exception
-    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
-
-    // there may be an edge with 2 going out of e, in which case
-    // we dont want to restore a connection between b and c
-    // the case where e is a terminus is handled by the subsequent contraction
-    // (if be and ce are short enough)
-    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1782,14 +1657,8 @@ void ContractTest::run() {
     assert(tg.getEdg(c, e));
     assert(tg.getEdg(c, e)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, e)->pl().hasRoute(&l2));
-
-    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
-
-    assert(c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(validExceptions(&tg));
   }
+
   // ___________________________________________________________________________
   {
     /*
@@ -1846,10 +1715,6 @@ void ContractTest::run() {
     assert(tg.getNds()->size() == 4);
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(c, e)->pl().getRoutes().size() == 2);
-
-    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1906,10 +1771,6 @@ void ContractTest::run() {
     assert(tg.getNds()->size() == 4);
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(c, e)->pl().getRoutes().size() == 2);
-
-    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1980,13 +1841,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(c, e));
     assert(tg.getEdg(c, e)->pl().getRoutes().size() == 2);
-
-    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(!c->pl().connOccurs(&l2, tg.getEdg(a, c), tg.getEdg(c, d)));
-
-    assert(c->pl().connOccurs(&l2, tg.getEdg(e, c), tg.getEdg(c, d)));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2054,13 +1908,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(c, e));
     assert(tg.getEdg(c, e)->pl().getRoutes().size() == 2);
-
-    assert(!c->pl().connOccurs(&l1, tg.getEdg(a, c), tg.getEdg(c, d)));
-    assert(c->pl().connOccurs(&l1, tg.getEdg(c, e), tg.getEdg(c, d)));
-    assert(c->pl().connOccurs(&l2, tg.getEdg(c, e), tg.getEdg(c, d)));
-    assert(c->pl().connOccurs(&l2, tg.getEdg(c, a), tg.getEdg(c, e)));
-    assert(!c->pl().connOccurs(&l1, tg.getEdg(c, a), tg.getEdg(c, e)));
-    assert(validExceptions(&tg));
   }
 
   // ===========================================================================
@@ -2116,13 +1963,9 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
     assert(d->getAdjList().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2173,13 +2016,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-
-    // TODO: fix as soon as connOccurs does what its name says
-    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2229,12 +2065,6 @@ void ContractTest::run() {
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2336,13 +2166,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
-
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    // 2 has a terminus at e that makes a connection through c (where an exception is added) possible 
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2391,11 +2214,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
 
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
     assert(validExceptions(&tg));
   }
 
@@ -2435,30 +2253,23 @@ void ContractTest::run() {
     be->pl().addRoute(&l2, 0);
     ce->pl().addRoute(&l2, 0);
 
-    b->pl().addConnExc(&l1, ab, bc);
-
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-
     topo::Builder builder(&cfg);
     builder.combineNodes(c, e, &tg);
-
 
     assert(tg.getNds()->size() == 4);
     // line 1 on bc is deleted because it cannot leave bc
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
 
     assert(d->getAdjList().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
-
-    assert(validExceptions(&tg));
   }
+
   // ___________________________________________________________________________
   {
     /*
@@ -2494,8 +2305,6 @@ void ContractTest::run() {
     cd->pl().addRoute(&l2, c);
     be->pl().addRoute(&l2, 0);
     ce->pl().addRoute(&l2, 0);
-
-    e->pl().addConnExc(&l2, be, ce);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -2508,12 +2317,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2564,13 +2367,8 @@ void ContractTest::run() {
 
     // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
+
   // ___________________________________________________________________________
   {
     /*
@@ -2617,8 +2415,6 @@ void ContractTest::run() {
     assert(tg.getNds()->size() == 4);
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2671,10 +2467,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
-    // because 2 is a terminus in e and we are contractin c and e
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2721,13 +2513,6 @@ void ContractTest::run() {
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
 
   // ===========================================================================
@@ -2778,17 +2563,14 @@ void ContractTest::run() {
     topo::Builder builder(&cfg);
     builder.combineNodes(e, c, &tg);
 
-
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
 
     assert(d->getAdjList().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2840,12 +2622,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2896,12 +2672,6 @@ void ContractTest::run() {
 
     // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2951,8 +2721,6 @@ void ContractTest::run() {
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3006,11 +2774,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
-
-    // because 2 is a terminus in e
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3059,13 +2822,6 @@ void ContractTest::run() {
     // 1 on ec was deleted, 2 on be was deleted
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-
-    assert(c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
-
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
   }
 
   // ___________________________________________________________________________
@@ -3118,13 +2874,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(d->getAdjList().size() == 1);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3175,12 +2924,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-
-    // TODO: fix as soon as connOccurs does what its name says
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l1, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3231,11 +2974,6 @@ void ContractTest::run() {
 
     // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3284,8 +3022,6 @@ void ContractTest::run() {
     assert(tg.getNds()->size() == 4);
     // all 3 lines in the triangle are lost
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3339,10 +3075,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
-
-    // because 2 is a terminus in e
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3390,12 +3122,6 @@ void ContractTest::run() {
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-
-    assert(c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
   }
 
   // ===========================================================================
@@ -3449,9 +3175,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == 0);
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3504,13 +3227,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == 0);
-    assert(validExceptions(&tg));
-
-    // TODO: fix as soon as connOccurs does what its name suggest
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
   }
   // ___________________________________________________________________________
   {
@@ -3564,12 +3280,6 @@ void ContractTest::run() {
 
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
-
-    // TODO: fix as soon as connOccurs does what it says
-    // assert(!c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), c)));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3621,10 +3331,6 @@ void ContractTest::run() {
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(!d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3678,14 +3384,6 @@ void ContractTest::run() {
 
     assert(a->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
-
-    // 2 has a terminus in e and thus circumvents the exception at c
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    // assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3736,14 +3434,6 @@ void ContractTest::run() {
 
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction == 0);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l1).direction == 0);
-
-    assert(c->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    // TODO: fix this as soon as connOccurs does what its name suggests
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -3791,11 +3481,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == 0);
-
-    assert(d->getAdjList().front()->getOtherNd(d)->pl().connOccurs(&l2, d->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l2, a->getAdjList().front(), tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3826,7 +3511,6 @@ void ContractTest::run() {
     builder.combineNodes(b, c, &tg);
 
     assert(tg.getNds()->size() == 3);
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
     assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 1);
 
@@ -3835,8 +3519,6 @@ void ContractTest::run() {
 
     assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
     assert(d->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3867,7 +3549,6 @@ void ContractTest::run() {
     builder.combineNodes(c, b, &tg);
 
     assert(tg.getNds()->size() == 3);
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
     assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
     assert(d->getAdjList().front()->pl().getRoutes().size() == 1);
 
@@ -3876,8 +3557,6 @@ void ContractTest::run() {
 
     assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
     assert(d->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3932,8 +3611,6 @@ void ContractTest::run() {
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
       assert(r.direction == 0);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -3988,8 +3665,6 @@ void ContractTest::run() {
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
       assert(r.direction == 0);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4044,8 +3719,6 @@ void ContractTest::run() {
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
       assert(r.direction == 0);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4100,8 +3773,6 @@ void ContractTest::run() {
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
       assert(r.direction == 0);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4158,8 +3829,6 @@ void ContractTest::run() {
       if (r.route == &l2) assert(r.direction == b);
       if (r.route == &l3) assert(r.direction == c);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4216,8 +3885,6 @@ void ContractTest::run() {
       if (r.route == &l2) assert(r.direction == b);
       if (r.route == &l3) assert(r.direction == c);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4274,8 +3941,6 @@ void ContractTest::run() {
       if (r.route == &l2) assert(r.direction == b);
       if (r.route == &l3) assert(r.direction == c);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4332,8 +3997,6 @@ void ContractTest::run() {
       if (r.route == &l2) assert(r.direction == b);
       if (r.route == &l3) assert(r.direction == c);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4373,8 +4036,6 @@ void ContractTest::run() {
     topo::Builder builder(&cfg);
 
     assert(!builder.routeEq(ca, ab));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4438,14 +4099,6 @@ void ContractTest::run() {
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
       assert(r.direction == 0);
     }
-
-    assert(!b->pl().connOccurs(&l3, c->getAdjList().front(), bd));
-    assert(!b->pl().connOccurs(&l2, c->getAdjList().front(), bd));
-
-    assert(!b->pl().connOccurs(&l3, bd, c->getAdjList().front()));
-    assert(!b->pl().connOccurs(&l2, bd, c->getAdjList().front()));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4509,14 +4162,6 @@ void ContractTest::run() {
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
       assert(r.direction == 0);
     }
-
-    assert(!b->pl().connOccurs(&l3, c->getAdjList().front(), bd));
-    assert(!b->pl().connOccurs(&l2, c->getAdjList().front(), bd));
-
-    assert(!b->pl().connOccurs(&l3, bd, c->getAdjList().front()));
-    assert(!b->pl().connOccurs(&l2, bd, c->getAdjList().front()));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4580,14 +4225,6 @@ void ContractTest::run() {
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
       assert(r.direction == 0);
     }
-
-    assert(!b->pl().connOccurs(&l3, c->getAdjList().front(), bd));
-    assert(!b->pl().connOccurs(&l2, c->getAdjList().front(), bd));
-
-    assert(!b->pl().connOccurs(&l3, bd, c->getAdjList().front()));
-    assert(!b->pl().connOccurs(&l2, bd, c->getAdjList().front()));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4651,14 +4288,6 @@ void ContractTest::run() {
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
       assert(r.direction == 0);
     }
-
-    assert(!b->pl().connOccurs(&l2, c->getAdjList().front(), bd));
-    assert(!b->pl().connOccurs(&l3, c->getAdjList().front(), bd));
-
-    assert(!b->pl().connOccurs(&l3, bd, c->getAdjList().front()));
-    assert(!b->pl().connOccurs(&l2, bd, c->getAdjList().front()));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4725,8 +4354,6 @@ void ContractTest::run() {
     assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
     assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
     assert(e->getAdjList().front()->pl().getRoutes().size() == 3);
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4808,8 +4435,6 @@ void ContractTest::run() {
     for (auto r : a->getAdjList().front()->pl().getRoutes()) {
       if (r.route == &l1) assert(r.direction == d);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4860,8 +4485,6 @@ void ContractTest::run() {
     // no connection of line 2 from cb -> bd
     b->pl().addConnExc(&l2, bc, bd);
 
-    assert(!b->pl().connOccurs(&l2, bc, bd));
-
     assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
 
     topo::config::TopoConfig cfg;
@@ -4896,16 +4519,6 @@ void ContractTest::run() {
     for (auto r : a->getAdjList().front()->pl().getRoutes()) {
       if (r.route == &l1) assert(r.direction == 0);
     }
-
-    //
-    auto contred = e->getAdjList().front()->getFrom();
-
-    assert(contred->pl().getConnExc().size() == 1);
-    assert(contred->pl().getConnExc().begin()->first == &l2);
-
-    assert(!contred->pl().connOccurs(&l2, c->getAdjList().front(), e->getAdjList().front()));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -4962,8 +4575,6 @@ void ContractTest::run() {
     // no connection of line 3 from cb -> bd
     b->pl().addConnExc(&l3, bc, bd);
 
-    assert(!b->pl().connOccurs(&l3, bc, bd));
-
     assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
 
     topo::config::TopoConfig cfg;
@@ -5004,16 +4615,6 @@ void ContractTest::run() {
     for (auto r : f->getAdjList().front()->pl().getRoutes()) {
       if (r.route == &l2) assert(r.direction == 0);
     }
-
-
-    auto contred = e->getAdjList().front()->getFrom();
-
-    assert(contred->pl().getConnExc().size() == 1);
-    assert(contred->pl().getConnExc().begin()->first == &l3);
-
-    assert(!contred->pl().connOccurs(&l3, c->getAdjList().front(), e->getAdjList().front()));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -5070,8 +4671,6 @@ void ContractTest::run() {
     // no connection of line 3 from cb -> bd
     b->pl().addConnExc(&l3, bc, bd);
 
-    assert(!b->pl().connOccurs(&l3, bc, bd));
-
     assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
 
     topo::config::TopoConfig cfg;
@@ -5114,14 +4713,6 @@ void ContractTest::run() {
     }
 
     //
-    auto contred = e->getAdjList().front()->getFrom();
-
-    assert(contred->pl().getConnExc().size() == 1);
-    assert(contred->pl().getConnExc().begin()->first == &l3);
-
-    assert(!contred->pl().connOccurs(&l3, c->getAdjList().front(), e->getAdjList().front()));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -5159,407 +4750,5 @@ void ContractTest::run() {
     // that this is even possible - their geometries may differ vastly. This
     // should be handled by the edge merging mechanism, and there should be
     // checks which prevent such a contraction
-
-    assert(validExceptions(&tg));
-  }
-
-  // ___________________________________________________________________________
-  {
-    // node contraction of b, c
-    //   1->    <-1     1
-    // a ---> b ---> c ---> d
-
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{0.0, 0.0}});
-    auto b = tg.addNd({{50.0, 0.0}});
-    auto c = tg.addNd({{100.0, 0.0}});
-    auto d = tg.addNd({{150.0, 0.0}});
-
-    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
-    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
-    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-
-    ab->pl().addRoute(&l1, b);
-    bc->pl().addRoute(&l1, b);
-    cd->pl().addRoute(&l1, 0);
-
-    topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
-
-    builder.combineNodes(b, c, &tg);
-
-    // there should now be _no_ connection possible from a to d, as such a
-    // connection was previously also not possible
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
-
-    assert(validExceptions(&tg));
-  }
-
-  // ___________________________________________________________________________
-  {
-    // node contraction of b, c
-    //   <-1    1->     1
-    // a ---> b ---> c ---> d
-
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{0.0, 0.0}});
-    auto b = tg.addNd({{50.0, 0.0}});
-    auto c = tg.addNd({{100.0, 0.0}});
-    auto d = tg.addNd({{150.0, 0.0}});
-
-    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
-    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
-    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-
-    ab->pl().addRoute(&l1, a);
-    bc->pl().addRoute(&l1, c);
-    cd->pl().addRoute(&l1, 0);
-
-    topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
-
-    builder.combineNodes(b, c, &tg);
-
-    // there should now be _no_ connection possible from a to d, as such a
-    // connection was previously also not possible
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
-
-    assert(validExceptions(&tg));
-  }
-
-  // ___________________________________________________________________________
-  {
-    // node contraction of b, c
-    //   1->    1->     1
-    // a ---> b ---> c ---> d
-
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{0.0, 0.0}});
-    auto b = tg.addNd({{50.0, 0.0}});
-    auto c = tg.addNd({{100.0, 0.0}});
-    auto d = tg.addNd({{150.0, 0.0}});
-
-    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
-    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
-    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-
-    ab->pl().addRoute(&l1, b);
-    bc->pl().addRoute(&l1, c);
-    cd->pl().addRoute(&l1, 0);
-
-    topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
-
-    builder.combineNodes(b, c, &tg);
-
-    // there should now be _no_ connection possible from a to d, as such a
-    // connection was previously also not possible
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
-
-    assert(validExceptions(&tg));
-  }
-
-  // ___________________________________________________________________________
-  {
-    // node contraction of b, c
-    //   <-1    <-1     1
-    // a ---> b ---> c ---> d
-
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{0.0, 0.0}});
-    auto b = tg.addNd({{50.0, 0.0}});
-    auto c = tg.addNd({{100.0, 0.0}});
-    auto d = tg.addNd({{150.0, 0.0}});
-
-    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
-    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
-    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-
-    ab->pl().addRoute(&l1, a);
-    bc->pl().addRoute(&l1, b);
-    cd->pl().addRoute(&l1, 0);
-
-    topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
-
-    builder.combineNodes(b, c, &tg);
-
-    // there should now be _no_ connection possible from a to d, as such a
-    // connection was previously also not possible
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
-
-    assert(validExceptions(&tg));
-  }
-
-  // ___________________________________________________________________________
-  {
-    // node contraction of b, c
-    //   1->    <-1     1
-    // a ---> b ---> c ---> d
-    //        ^
-    // e -----|
-    //    1
-
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{0.0, 0.0}});
-    auto b = tg.addNd({{50.0, 0.0}});
-    auto c = tg.addNd({{100.0, 0.0}});
-    auto d = tg.addNd({{150.0, 0.0}});
-    auto e = tg.addNd({{0.0, -20.0}});
-
-    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
-    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
-    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
-    auto eb = tg.addEdg(e, b, {{{0.0, -20.0}, {50.0, 0.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-
-    ab->pl().addRoute(&l1, b);
-    bc->pl().addRoute(&l1, b);
-    cd->pl().addRoute(&l1, 0);
-    eb->pl().addRoute(&l1, 0);
-
-    topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
-
-    builder.combineNodes(b, c, &tg);
-
-    // there should now be _no_ connection possible from a to d, as such a
-    // connection was previously also not possible
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
-    assert(e->getAdjList().front()->getOtherNd(e)->pl().connOccurs(&l1, e->getAdjList().front(), d->getAdjList().front()));
-
-    assert(validExceptions(&tg));
-  }
-
-  // ___________________________________________________________________________
-  {
-    // node contraction of b, c
-    //   <-1    1->     1
-    // a ---> b ---> c ---> d
-    //        ^
-    // e -----|
-    //    1->
-
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{0.0, 0.0}});
-    auto b = tg.addNd({{50.0, 0.0}});
-    auto c = tg.addNd({{100.0, 0.0}});
-    auto d = tg.addNd({{150.0, 0.0}});
-    auto e = tg.addNd({{0.0, -20.0}});
-
-    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
-    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
-    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
-    auto eb = tg.addEdg(e, b, {{{0.0, -20.0}, {50.0, 0.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-
-    ab->pl().addRoute(&l1, a);
-    bc->pl().addRoute(&l1, c);
-    cd->pl().addRoute(&l1, 0);
-    eb->pl().addRoute(&l1, b);
-
-    topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
-
-    builder.combineNodes(b, c, &tg);
-
-    // there should now be _no_ connection possible from a to d, as such a
-    // connection was previously also not possible
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), e->getAdjList().front()));
-    assert(e->getAdjList().front()->getOtherNd(e)->pl().connOccurs(&l1, e->getAdjList().front(), d->getAdjList().front()));
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
-
-    assert(validExceptions(&tg));
-  }
-
-  // ___________________________________________________________________________
-  {
-    // node contraction of c, b
-    //   <-1    1->     1
-    // a ---> b ---> c ---> d
-    //        ^
-    // e -----|
-    //    1->
-
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{0.0, 0.0}});
-    auto b = tg.addNd({{50.0, 0.0}});
-    auto c = tg.addNd({{100.0, 0.0}});
-    auto d = tg.addNd({{150.0, 0.0}});
-    auto e = tg.addNd({{0.0, -20.0}});
-
-    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
-    auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
-    auto cd = tg.addEdg(c, d, {{{100.0, 0.0}, {150.0, 0.0}}});
-    auto eb = tg.addEdg(e, b, {{{0.0, -20.0}, {50.0, 0.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-
-    ab->pl().addRoute(&l1, a);
-    bc->pl().addRoute(&l1, c);
-    cd->pl().addRoute(&l1, 0);
-    eb->pl().addRoute(&l1, b);
-
-    topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
-
-    builder.combineNodes(c, b, &tg);
-
-    // there should now be _no_ connection possible from a to d, as such a
-    // connection was previously also not possible
-    assert(a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), e->getAdjList().front()));
-    assert(e->getAdjList().front()->getOtherNd(e)->pl().connOccurs(&l1, e->getAdjList().front(), d->getAdjList().front()));
-    assert(!a->getAdjList().front()->getOtherNd(a)->pl().connOccurs(&l1, a->getAdjList().front(), d->getAdjList().front()));
-
-    assert(validExceptions(&tg));
-  }
-
-  // ___________________________________________________________________________
-  {
-    /*
-     *               f
-     *               |
-     *               |  2
-     *               |
-     *               v
-     *               e
-     *              ^ ^
-     *             /   \
-     *          2 /     \ 2
-     *           /       \
-     *    1,2   /   1     \    1,2
-     * a -----> b ------> c ------> d
-     */
-
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{10.0, 0.0}});
-    auto b = tg.addNd({{20.0, 0.0}});
-    auto c = tg.addNd({{30.0, 0.0}});
-    auto d = tg.addNd({{40.0, 0.0}});
-    auto e = tg.addNd({{40.0, 20.0}});
-    auto f = tg.addNd({{25.0, 20.0}});
-
-    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
-    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
-    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
-    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {40.0, 10.0}}});
-    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {40.0, 10.0}}});
-    auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {40.0, 10.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-
-    ab->pl().addRoute(&l1, 0);
-    ab->pl().addRoute(&l2, 0);
-    bc->pl().addRoute(&l1, 0);
-    cd->pl().addRoute(&l1, 0);
-    cd->pl().addRoute(&l2, 0);
-    be->pl().addRoute(&l2, 0);
-    ce->pl().addRoute(&l2, 0);
-    fe->pl().addRoute(&l2, 0);
-
-    e->pl().addConnExc(&l2, ce, be);
-
-    topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
-
-    topo::Builder builder(&cfg);
-
-    assert(validExceptions(&tg));
-  }
-
-  // ___________________________________________________________________________
-  {
-    /*
-     *                f
-     *                |
-     *                |  2,3
-     *                |
-     *                v
-     *                e
-     *               ^ ^
-     *              /   \
-     *           2 /     \ 2,3
-     *            /       \
-     *     1,2   /    3    \    1,2
-     *  a -----> b ------> c ------> d
-     *           \         /
-     *            \1,3    / 1
-     *             \     /
-     *              \   /
-     *               v v
-     *                g
-     *                |
-     *                | 1,3
-     *                v
-     *                h
-     */
-
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{10.0, 0.0}});
-    auto b = tg.addNd({{20.0, 0.0}});
-    auto c = tg.addNd({{30.0, 0.0}});
-    auto d = tg.addNd({{40.0, 0.0}});
-    auto e = tg.addNd({{25.0, 10.0}});
-    auto f = tg.addNd({{25.0, 20.0}});
-
-    auto g = tg.addNd({{25.0, -10.0}});
-    auto h = tg.addNd({{25.0, -20.0}});
-
-    auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
-    auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
-    auto cd = tg.addEdg(c, d, {{{30.0, 0.0}, {40.0, 0.0}}});
-    auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
-    auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
-    auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
-
-    auto bg = tg.addEdg(b, g, {{{20.0, 0.0}, {25.0, -10.0}}});
-    auto cg = tg.addEdg(c, g, {{{30.0, 0.0}, {25.0, -10.0}}});
-    auto gh = tg.addEdg(g, h, {{{25.0, -10.0}, {25.0, -20.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
-
-    ab->pl().addRoute(&l1, 0);
-    ab->pl().addRoute(&l2, 0);
-
-    bc->pl().addRoute(&l3, c);
-
-    cd->pl().addRoute(&l1, 0);
-    cd->pl().addRoute(&l2, 0);
-
-    bg->pl().addRoute(&l1, 0);
-    bg->pl().addRoute(&l3, 0);
-
-    cg->pl().addRoute(&l1, 0);
-
-    gh->pl().addRoute(&l1, 0);
-    gh->pl().addRoute(&l3, 0);
-
-    ce->pl().addRoute(&l2, 0);
-    ce->pl().addRoute(&l3, c);
-
-    fe->pl().addRoute(&l2, 0);
-    fe->pl().addRoute(&l3, 0);
-
-    be->pl().addRoute(&l2, 0);
-
-    topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
-
-    topo::Builder builder(&cfg);
-
-    assert(validExceptions(&tg));
   }
 }
