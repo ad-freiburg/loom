@@ -15,45 +15,9 @@
 #include "util/geo/output/GeoGraphJsonOutput.h"
 
 #define private public
-#include "topo/builder/Builder.h"
+#include "topo/mapconstructor/MapConstructor.h"
 
-class approx {
- public:
-  explicit approx(double magnitude)
-      : _epsilon{std::numeric_limits<float>::epsilon() * 100},
-        _magnitude{magnitude} {}
-
-  friend bool operator==(double lhs, approx const& rhs) {
-    return std::abs(lhs - rhs._magnitude) < rhs._epsilon;
-  }
-
-  friend bool operator==(approx const& lhs, double rhs) {
-    return operator==(rhs, lhs);
-  }
-  friend bool operator!=(double lhs, approx const& rhs) {
-    return !operator==(lhs, rhs);
-  }
-  friend bool operator!=(approx const& lhs, double rhs) {
-    return !operator==(rhs, lhs);
-  }
-
-  friend bool operator<=(double lhs, approx const& rhs) {
-    return lhs < rhs._magnitude || lhs == rhs;
-  }
-  friend bool operator<=(approx const& lhs, double rhs) {
-    return lhs._magnitude < rhs || lhs == rhs;
-  }
-  friend bool operator>=(double lhs, approx const& rhs) {
-    return lhs > rhs._magnitude || lhs == rhs;
-  }
-  friend bool operator>=(approx const& lhs, double rhs) {
-    return lhs._magnitude > rhs || lhs == rhs;
-  }
-
- private:
-  double _epsilon;
-  double _magnitude;
-};
+using util::approx;
 
 // _____________________________________________________________________________
 void ContractTest2::run() {
@@ -103,12 +67,12 @@ void ContractTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(a, d, &tg);
-    builder.combineNodes(e, c, &tg);
-    builder.combineNodes(d, b, &tg);
-    builder.combineNodes(b, c, &tg);
+    mc.combineNodes(a, d);
+    mc.combineNodes(e, c);
+    mc.combineNodes(d, b);
+    mc.combineNodes(b, c);
 
   }
   // ___________________________________________________________________________
@@ -157,8 +121,8 @@ void ContractTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -188,8 +152,8 @@ void ContractTest2::run() {
     bc->pl().addRoute(&l2, 0);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(b, c, &tg);
+    mc.combineNodes(b, c);
   }
 }

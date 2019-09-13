@@ -8,14 +8,22 @@
 #include "topo/tests/TopologicalTest3.h"
 #include "topo/tests/RestrInfTest.h"
 
+#include "util/Misc.h"
+
+#define TEST(s, o, e) if (!(s o e)) {  std::stringstream ss;  ss << "\n" << __FILE__ << ":" << __LINE__ << ": Test failed!\n  Expected " << #s << " " << #o << " <" << std::to_string(e) << ">, got <" << std::to_string(s) << ">";  throw std::runtime_error(ss.str());}
+
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
+  UNUSED(argc);
+  UNUSED(argv);
   ContractTest2 ct2;
   ContractTest ct;
   TopologicalTest tt;
   TopologicalTest2 tt2;
   TopologicalTest3 tt3;
   RestrInfTest rt;
+
+  TEST(1, ==, util::approx(2.0));
 
   rt.run();
   ct2.run();

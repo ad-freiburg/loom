@@ -20,6 +20,8 @@ namespace transitgraph {
 typedef util::graph::Node<TransitNodePL, TransitEdgePL> TransitNode;
 typedef util::graph::Edge<TransitNodePL, TransitEdgePL> TransitEdge;
 
+typedef std::pair<TransitEdge*, TransitEdge*> TransitEdgePair;
+
 typedef Grid<TransitNode*, util::geo::Point, double> NodeGrid;
 typedef Grid<TransitEdge*, util::geo::Line, double> EdgeGrid;
 

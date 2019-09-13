@@ -18,43 +18,7 @@
 #define private public
 #include "topo/restr/RestrInferrer.h"
 
-class approx {
- public:
-  explicit approx(double magnitude)
-      : _epsilon{std::numeric_limits<float>::epsilon() * 100},
-        _magnitude{magnitude} {}
-
-  friend bool operator==(double lhs, approx const& rhs) {
-    return std::abs(lhs - rhs._magnitude) < rhs._epsilon;
-  }
-
-  friend bool operator==(approx const& lhs, double rhs) {
-    return operator==(rhs, lhs);
-  }
-  friend bool operator!=(double lhs, approx const& rhs) {
-    return !operator==(lhs, rhs);
-  }
-  friend bool operator!=(approx const& lhs, double rhs) {
-    return !operator==(rhs, lhs);
-  }
-
-  friend bool operator<=(double lhs, approx const& rhs) {
-    return lhs < rhs._magnitude || lhs == rhs;
-  }
-  friend bool operator<=(approx const& lhs, double rhs) {
-    return lhs._magnitude < rhs || lhs == rhs;
-  }
-  friend bool operator>=(double lhs, approx const& rhs) {
-    return lhs > rhs._magnitude || lhs == rhs;
-  }
-  friend bool operator>=(approx const& lhs, double rhs) {
-    return lhs._magnitude > rhs || lhs == rhs;
-  }
-
- private:
-  double _epsilon;
-  double _magnitude;
-};
+using util::approx;
 
 // _____________________________________________________________________________
 void RestrInfTest::run() {

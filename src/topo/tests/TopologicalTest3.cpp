@@ -15,47 +15,10 @@
 #include "topo/tests/TopoTestUtil.h"
 
 #define private public
-#include "topo/builder/Builder.h"
+#include "topo/mapconstructor/MapConstructor.h"
 
-class approx {
- public:
-  explicit approx(double magnitude)
-      : _epsilon{std::numeric_limits<float>::epsilon() * 100},
-        _magnitude{magnitude} {}
+using util::approx;
 
-  friend bool operator==(double lhs, approx const& rhs) {
-    return std::abs(lhs - rhs._magnitude) < rhs._epsilon;
-  }
-
-  friend bool operator==(approx const& lhs, double rhs) {
-    return operator==(rhs, lhs);
-  }
-  friend bool operator!=(double lhs, approx const& rhs) {
-    return !operator==(lhs, rhs);
-  }
-  friend bool operator!=(approx const& lhs, double rhs) {
-    return !operator==(rhs, lhs);
-  }
-
-  friend bool operator<=(double lhs, approx const& rhs) {
-    return lhs < rhs._magnitude || lhs == rhs;
-  }
-  friend bool operator<=(approx const& lhs, double rhs) {
-    return lhs._magnitude < rhs || lhs == rhs;
-  }
-  friend bool operator>=(double lhs, approx const& rhs) {
-    return lhs > rhs._magnitude || lhs == rhs;
-  }
-  friend bool operator>=(approx const& lhs, double rhs) {
-    return lhs._magnitude > rhs || lhs == rhs;
-  }
-
- private:
-  double _epsilon;
-  double _magnitude;
-};
-
-// _____________________________________________________________________________
 void TopologicalTest3::run() {
   // ___________________________________________________________________________
   {
@@ -95,9 +58,9 @@ void TopologicalTest3::run() {
     cfg.maxAggrDistance = 50;
     cfg.minSegLength = 20;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs();
+    mc.removeEdgeArtifacts();
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -147,14 +110,14 @@ void TopologicalTest3::run() {
     cfg.maxAggrDistance = 50;
     cfg.minSegLength = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true);
-    builder.removeEdgeArtifacts(&tg);
-    builder.removeNodeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs();
+    mc.removeEdgeArtifacts();
+    mc.removeNodeArtifacts();
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cout << std::flush;
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
 
     assert(tg.getNds()->size() == 2);
 

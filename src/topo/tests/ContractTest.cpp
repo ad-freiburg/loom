@@ -15,45 +15,9 @@
 #include "util/geo/output/GeoGraphJsonOutput.h"
 
 #define private public
-#include "topo/builder/Builder.h"
+#include "topo/mapconstructor/MapConstructor.h"
 
-class approx {
- public:
-  explicit approx(double magnitude)
-      : _epsilon{std::numeric_limits<float>::epsilon() * 100},
-        _magnitude{magnitude} {}
-
-  friend bool operator==(double lhs, approx const& rhs) {
-    return std::abs(lhs - rhs._magnitude) < rhs._epsilon;
-  }
-
-  friend bool operator==(approx const& lhs, double rhs) {
-    return operator==(rhs, lhs);
-  }
-  friend bool operator!=(double lhs, approx const& rhs) {
-    return !operator==(lhs, rhs);
-  }
-  friend bool operator!=(approx const& lhs, double rhs) {
-    return !operator==(rhs, lhs);
-  }
-
-  friend bool operator<=(double lhs, approx const& rhs) {
-    return lhs < rhs._magnitude || lhs == rhs;
-  }
-  friend bool operator<=(approx const& lhs, double rhs) {
-    return lhs._magnitude < rhs || lhs == rhs;
-  }
-  friend bool operator>=(double lhs, approx const& rhs) {
-    return lhs > rhs._magnitude || lhs == rhs;
-  }
-  friend bool operator>=(approx const& lhs, double rhs) {
-    return lhs._magnitude > rhs || lhs == rhs;
-  }
-
- private:
-  double _epsilon;
-  double _magnitude;
-};
+using util::approx;
 
 // _____________________________________________________________________________
 void ContractTest::run() {
@@ -138,9 +102,9 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(b, c, &tg);
+    mc.combineNodes(b, c);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -161,8 +125,6 @@ void ContractTest::run() {
     assert(tg.getEdg(e,c)->pl().hasRoute(&l2));
 
     assert(tg.getEdg(e,c)->pl().hasRoute(&l3));
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -247,8 +209,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, c);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -351,8 +313,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, c);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -455,8 +417,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, b, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, b);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -507,9 +469,9 @@ void ContractTest::run() {
     b->pl().addConnExc(&l1, ab, bc);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(b, d, &tg);
+    mc.combineNodes(b, d);
 
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
@@ -544,9 +506,9 @@ void ContractTest::run() {
     b->pl().addConnExc(&l1, ab, bc);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(b, d, &tg);
+    mc.combineNodes(b, d);
 
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
@@ -588,9 +550,9 @@ void ContractTest::run() {
     b->pl().addConnExc(&l1, ab, bc);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(b, d, &tg);
+    mc.combineNodes(b, d);
 
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
@@ -630,9 +592,9 @@ void ContractTest::run() {
     de->pl().addRoute(&l2, 0);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(b, d, &tg);
+    mc.combineNodes(b, d);
 
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
@@ -674,51 +636,9 @@ void ContractTest::run() {
     d->pl().addConnExc(&l1, de, bd);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(b, d, &tg);
-
-    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
-  }
-
-  // ___________________________________________________________________________
-  {
-    /*
-     * node contraction of c, b
-     *    1      1
-     * a ---> b ---> c
-     *        ^    /
-     *        | 1 / 1
-     *        d -/
-     *               (d is a terminus for 1 because of an exception)
-     */
-
-    shared::transitgraph::TransitGraph tg;
-    auto a = tg.addNd({{0.0, 0.0}});
-    auto b = tg.addNd({{5.0, 0.0}});
-    auto c = tg.addNd({{10.0, 0.0}});
-    auto d = tg.addNd({{5.0, -5.0}});
-
-    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {5.0, 0.0}}});
-    auto bc = tg.addEdg(b, c, {{{5.0, 0.0}, {10.0, 0.0}}});
-    auto bd = tg.addEdg(b, d, {{{5.0, 0.0}, {5.0, -5.0}}});
-    auto dc = tg.addEdg(d, c, {{{5.0, -5.0}, {10.0, 0.0}}});
-
-    transitmapper::graph::Route l1("1", "1", "red");
-
-    ab->pl().addRoute(&l1, 0);
-    bc->pl().addRoute(&l1, 0);
-    bd->pl().addRoute(&l1, 0);
-    dc->pl().addRoute(&l1, 0);
-
-    b->pl().addConnExc(&l1, ab, bc);
-    d->pl().addConnExc(&l1, dc, bd);
-
-    topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
-
-    builder.combineNodes(b, d, &tg);
+    mc.combineNodes(b, d);
 
     assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
@@ -758,9 +678,51 @@ void ContractTest::run() {
     d->pl().addConnExc(&l1, dc, bd);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(c, d, &tg);
+    mc.combineNodes(b, d);
+
+    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
+    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+  }
+
+  // ___________________________________________________________________________
+  {
+    /*
+     * node contraction of c, b
+     *    1      1
+     * a ---> b ---> c
+     *        ^    /
+     *        | 1 / 1
+     *        d -/
+     *               (d is a terminus for 1 because of an exception)
+     */
+
+    shared::transitgraph::TransitGraph tg;
+    auto a = tg.addNd({{0.0, 0.0}});
+    auto b = tg.addNd({{5.0, 0.0}});
+    auto c = tg.addNd({{10.0, 0.0}});
+    auto d = tg.addNd({{5.0, -5.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {5.0, 0.0}}});
+    auto bc = tg.addEdg(b, c, {{{5.0, 0.0}, {10.0, 0.0}}});
+    auto bd = tg.addEdg(b, d, {{{5.0, 0.0}, {5.0, -5.0}}});
+    auto dc = tg.addEdg(d, c, {{{5.0, -5.0}, {10.0, 0.0}}});
+
+    transitmapper::graph::Route l1("1", "1", "red");
+
+    ab->pl().addRoute(&l1, 0);
+    bc->pl().addRoute(&l1, 0);
+    bd->pl().addRoute(&l1, 0);
+    dc->pl().addRoute(&l1, 0);
+
+    b->pl().addConnExc(&l1, ab, bc);
+    d->pl().addConnExc(&l1, dc, bd);
+
+    topo::config::TopoConfig cfg;
+    topo::MapConstructor mc(&cfg, &tg);
+
+    mc.combineNodes(c, d);
 
     assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
     assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
@@ -800,9 +762,9 @@ void ContractTest::run() {
     b->pl().addConnExc(&l1, ab, bc);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(c, d, &tg);
+    mc.combineNodes(c, d);
 
 
     assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
@@ -844,9 +806,9 @@ void ContractTest::run() {
     b->pl().addConnExc(&l1, ab, bd);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(c, d, &tg);
+    mc.combineNodes(c, d);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -905,8 +867,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, c);
 
     assert(tg.getNds()->size() == 5);
     assert(tg.getEdg(a, c)->pl().getRoutes().size() == 2);
@@ -965,8 +927,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, b, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, b);
 
     assert(tg.getNds()->size() == 5);
     assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
@@ -1025,8 +987,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 5);
     assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
@@ -1082,8 +1044,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
     assert(tg.getNds()->size() == 5);
     assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
@@ -1139,8 +1101,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, b, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, b);
 
     assert(tg.getNds()->size() == 5);
     assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
@@ -1200,8 +1162,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, e);
 
     assert(tg.getNds()->size() == 5);
     assert(tg.getEdg(a, e)->pl().getRoutes().size() == 2);
@@ -1256,8 +1218,8 @@ void ContractTest::run() {
     cfg.maxAggrDistance = 50;
 
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
@@ -1309,8 +1271,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -1362,8 +1324,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -1376,8 +1338,6 @@ void ContractTest::run() {
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
     assert(tg.getEdg(d, d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -1420,8 +1380,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
@@ -1469,8 +1429,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
 
     assert(tg.getNds()->size() == 4);
@@ -1520,8 +1480,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
@@ -1570,8 +1530,8 @@ void ContractTest::run() {
     cfg.maxAggrDistance = 50;
 
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, c);
 
 
     // c will be the kept node
@@ -1634,8 +1594,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, c);
 
 
     // c will be the kept node
@@ -1701,8 +1661,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, c);
 
     // c will be the kept node
     for (auto edg : c->getAdjList()) {
@@ -1757,8 +1717,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, c);
 
     // c will be the kept node
     for (auto edg : c->getAdjList()) {
@@ -1814,8 +1774,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, c);
 
 
     // c will be the kept node
@@ -1881,8 +1841,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, c);
 
     // bc will now be contracted and be and ce will be folded into one edge
     // with no lines on it, because 2 and 1 are lost on it
@@ -1955,8 +1915,8 @@ void ContractTest::run() {
     cfg.maxAggrDistance = 50;
 
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
     // line 1 on bc is deleted because it cannot leave bc
@@ -2008,8 +1968,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
     // line 2 is deleted because it is lost
@@ -2059,8 +2019,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
 
     assert(tg.getNds()->size() == 4);
@@ -2107,14 +2067,12 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -2158,8 +2116,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
 
@@ -2206,15 +2164,13 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
     // 1 on ec was deleted, 2 on be was deleted
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -2256,8 +2212,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
     // line 1 on bc is deleted because it cannot leave bc
@@ -2309,8 +2265,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
     // line 2 is deleted because it is lost
@@ -2360,8 +2316,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
 
@@ -2409,8 +2365,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
     // all 3 lines in the triangle are lost
@@ -2458,8 +2414,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
 
@@ -2507,8 +2463,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
@@ -2560,8 +2516,8 @@ void ContractTest::run() {
     cfg.maxAggrDistance = 50;
 
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
@@ -2613,8 +2569,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
 
     assert(tg.getNds()->size() == 4);
@@ -2665,8 +2621,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
     assert(tg.getNds()->size() == 4);
 
@@ -2714,8 +2670,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
     assert(tg.getNds()->size() == 4);
     // all 3 lines in the triangle are lost
@@ -2764,8 +2720,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
 
     assert(tg.getNds()->size() == 4);
@@ -2814,8 +2770,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
 
     assert(tg.getNds()->size() == 4);
@@ -2866,8 +2822,8 @@ void ContractTest::run() {
     cfg.maxAggrDistance = 50;
 
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
 
     assert(tg.getNds()->size() == 4);
@@ -2916,8 +2872,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
     assert(tg.getNds()->size() == 4);
     // line 2 is deleted because it is lost
@@ -2967,8 +2923,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
     assert(tg.getNds()->size() == 4);
 
@@ -3016,8 +2972,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
     assert(tg.getNds()->size() == 4);
     // all 3 lines in the triangle are lost
@@ -3065,8 +3021,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
 
     assert(tg.getNds()->size() == 4);
@@ -3115,8 +3071,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(e, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(e, c);
 
 
     assert(tg.getNds()->size() == 4);
@@ -3167,8 +3123,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, e);
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
@@ -3217,8 +3173,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, e);
 
     assert(tg.getNds()->size() == 4);
 
@@ -3270,8 +3226,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, e);
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
@@ -3322,8 +3278,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, e);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -3374,8 +3330,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, e);
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
@@ -3424,8 +3380,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, e);
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
@@ -3474,8 +3430,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, e, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, e);
 
     assert(tg.getNds()->size() == 4);
     assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
@@ -3507,8 +3463,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(b, c, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(b, c);
 
     assert(tg.getNds()->size() == 3);
     assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
@@ -3545,8 +3501,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.combineNodes(c, b, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.combineNodes(c, b);
 
     assert(tg.getNds()->size() == 3);
     assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
@@ -3591,11 +3547,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ca, ab));
+    assert(mc.routeEq(ca, ab));
 
-    builder.combineEdges(ca, ab, a, &tg);
+    mc.combineEdges(ca, ab, a);
 
     assert(tg.getNds()->size() == 2);
     assert(b->getAdjList().size() == 1);
@@ -3645,11 +3601,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ab, ac));
+    assert(mc.routeEq(ab, ac));
 
-    builder.combineEdges(ab, ac, a, &tg);
+    mc.combineEdges(ab, ac, a);
 
     assert(tg.getNds()->size() == 2);
     assert(b->getAdjList().size() == 1);
@@ -3699,11 +3655,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ac, ba));
+    assert(mc.routeEq(ac, ba));
 
-    builder.combineEdges(ac, ba, a, &tg);
+    mc.combineEdges(ac, ba, a);
 
     assert(tg.getNds()->size() == 2);
     assert(b->getAdjList().size() == 1);
@@ -3753,11 +3709,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ca, ba));
+    assert(mc.routeEq(ca, ba));
 
-    builder.combineEdges(ca, ba, a, &tg);
+    mc.combineEdges(ca, ba, a);
 
     assert(tg.getNds()->size() == 2);
     assert(b->getAdjList().size() == 1);
@@ -3807,11 +3763,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ca, ab));
+    assert(mc.routeEq(ca, ab));
 
-    builder.combineEdges(ca, ab, a, &tg);
+    mc.combineEdges(ca, ab, a);
 
     assert(tg.getNds()->size() == 2);
     assert(b->getAdjList().size() == 1);
@@ -3863,11 +3819,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ac, ab));
+    assert(mc.routeEq(ac, ab));
 
-    builder.combineEdges(ab, ac, a, &tg);
+    mc.combineEdges(ab, ac, a);
 
     assert(tg.getNds()->size() == 2);
     assert(b->getAdjList().size() == 1);
@@ -3919,11 +3875,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ba, ac));
+    assert(mc.routeEq(ba, ac));
 
-    builder.combineEdges(ac, ba, a, &tg);
+    mc.combineEdges(ac, ba, a);
 
     assert(tg.getNds()->size() == 2);
     assert(b->getAdjList().size() == 1);
@@ -3975,11 +3931,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ba, ca));
+    assert(mc.routeEq(ba, ca));
 
-    builder.combineEdges(ca, ba, a, &tg);
+    mc.combineEdges(ca, ba, a);
 
     assert(tg.getNds()->size() == 2);
     assert(b->getAdjList().size() == 1);
@@ -4033,9 +3989,9 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(!builder.routeEq(ca, ab));
+    assert(!mc.routeEq(ca, ab));
   }
 
   // ___________________________________________________________________________
@@ -4079,11 +4035,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ca, ab));
+    assert(mc.routeEq(ca, ab));
 
-    builder.combineEdges(ca, ab, a, &tg);
+    mc.combineEdges(ca, ab, a);
 
     assert(tg.getNds()->size() == 3);
     assert(b->getAdjList().size() == 2);
@@ -4142,11 +4098,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ac, ab));
+    assert(mc.routeEq(ac, ab));
 
-    builder.combineEdges(ac, ab, a, &tg);
+    mc.combineEdges(ac, ab, a);
 
     assert(tg.getNds()->size() == 3);
     assert(b->getAdjList().size() == 2);
@@ -4205,11 +4161,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ba, ba));
+    assert(mc.routeEq(ba, ba));
 
-    builder.combineEdges(ca, ba, a, &tg);
+    mc.combineEdges(ca, ba, a);
 
     assert(tg.getNds()->size() == 3);
     assert(b->getAdjList().size() == 2);
@@ -4268,11 +4224,11 @@ void ContractTest::run() {
 
     topo::config::TopoConfig cfg;
 
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    assert(builder.routeEq(ba, ba));
+    assert(mc.routeEq(ba, ba));
 
-    builder.combineEdges(ac, ba, a, &tg);
+    mc.combineEdges(ac, ba, a);
 
     assert(tg.getNds()->size() == 3);
     assert(b->getAdjList().size() == 2);
@@ -4338,9 +4294,9 @@ void ContractTest::run() {
     assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(b, d, &tg);
+    mc.combineNodes(b, d);
 
     // should now be
     //        c
@@ -4404,9 +4360,9 @@ void ContractTest::run() {
     assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(b, d, &tg);
+    mc.combineNodes(b, d);
 
     // should now be
     //        c
@@ -4488,9 +4444,9 @@ void ContractTest::run() {
     assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(b, d, &tg);
+    mc.combineNodes(b, d);
 
     // should now be
     //        c
@@ -4578,9 +4534,9 @@ void ContractTest::run() {
     assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(b, d, &tg);
+    mc.combineNodes(b, d);
 
     // should now be
     //        c
@@ -4674,9 +4630,9 @@ void ContractTest::run() {
     assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
 
     topo::config::TopoConfig cfg;
-    topo::Builder builder(&cfg);
+    topo::MapConstructor mc(&cfg, &tg);
 
-    builder.combineNodes(d, b, &tg);
+    mc.combineNodes(d, b);
 
     // should now be
     //        c
@@ -4742,8 +4698,8 @@ void ContractTest::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.removeEdgeArtifacts();
 
     // this should've done nothing - it may look like we can contract a and c
     // and merge edges ab and cb into one, but in general, we cannot be sure

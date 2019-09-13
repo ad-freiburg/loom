@@ -19,6 +19,7 @@
 #define T_START(n)  auto _tstart_##n = std::chrono::high_resolution_clock::now()
 #define T_STOP(n) (std::chrono::duration_cast<microseconds>(std::chrono::high_resolution_clock::now() - _tstart_##n).count() / 1000.0)
 
+
 namespace util {
 
 // cached first 10 powers of 10
@@ -130,6 +131,45 @@ inline std::string getTmpDir() {
   // lastly, return the users home directory as a fallback
   return getHomeDir();
 }
+
+// _____________________________________________________________________________
+class approx {
+ public:
+  explicit approx(double magnitude)
+      : _epsilon{std::numeric_limits<float>::epsilon() * 100},
+        _magnitude{magnitude} {}
+
+  friend bool operator==(double lhs, approx const& rhs) {
+    return std::abs(lhs - rhs._magnitude) < rhs._epsilon;
+  }
+
+  friend bool operator==(approx const& lhs, double rhs) {
+    return operator==(rhs, lhs);
+  }
+  friend bool operator!=(double lhs, approx const& rhs) {
+    return !operator==(lhs, rhs);
+  }
+  friend bool operator!=(approx const& lhs, double rhs) {
+    return !operator==(rhs, lhs);
+  }
+
+  friend bool operator<=(double lhs, approx const& rhs) {
+    return lhs < rhs._magnitude || lhs == rhs;
+  }
+  friend bool operator<=(approx const& lhs, double rhs) {
+    return lhs._magnitude < rhs || lhs == rhs;
+  }
+  friend bool operator>=(double lhs, approx const& rhs) {
+    return lhs > rhs._magnitude || lhs == rhs;
+  }
+  friend bool operator>=(approx const& lhs, double rhs) {
+    return lhs._magnitude > rhs || lhs == rhs;
+  }
+
+ private:
+  double _epsilon;
+  double _magnitude;
+};
 
 }  // namespace util
 

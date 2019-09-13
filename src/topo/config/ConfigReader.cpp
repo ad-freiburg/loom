@@ -37,7 +37,7 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->minSegLength))->default_value(35),
       "minimum segment length for topologize")
     ("max-length-dev",
-      opts::value<double>(&(cfg->minSegLength))->default_value(500),
+      opts::value<double>(&(cfg->maxLengthDev))->default_value(500),
       "maximal distance deviation for turn restriction infer");
 
   opts::options_description cmdlineOptions;

@@ -9,7 +9,8 @@
 #include <set>
 #include <string>
 #include "shared/transitgraph/TransitGraph.h"
-#include "topo/builder/Builder.h"
+#include "topo/mapconstructor/MapConstructor.h"
+#include "topo/statinserter/StatInserter.h"
 #include "topo/config/ConfigReader.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/restr/RestrInferrer.h"
@@ -25,55 +26,55 @@ int main(int argc, char** argv) {
   srand(time(NULL) + rand());
 
   topo::config::TopoConfig cfg;
+  shared::transitgraph::TransitGraph tg;
+  topo::restr::RestrInferrer ri(&cfg, &tg);
+  topo::MapConstructor mc(&cfg, &tg);
+  topo::StatInserter si(&cfg, &tg);
 
+  // read config
   topo::config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
-  shared::transitgraph::TransitGraph tg;
+  // read input graph
   tg.readFromJson(&(std::cin));
 
-  topo::restr::RestrInferrer ri(&cfg, &tg);
-  topo::Builder b(&cfg);
+  size_t statFr = mc.freeze();
+  si.init();
 
-  size_t statFr = b.freeze(&tg);
-  UNUSED(statFr);
-  b.collectStations(&tg);
+  mc.averageNodePositions();
+  mc.cleanUpGeoms();
 
-  b.averageNodePositions(&tg);
-  b.cleanUpGeoms(&tg);
-
-  b.removeNodeArtifacts(&tg);
-  b.removeEdgeArtifacts(&tg);
+  mc.removeNodeArtifacts();
+  mc.removeEdgeArtifacts();
 
   // init restriction inferrer
   ri.init();
-  size_t restrFr = b.freeze(&tg);
-
-  // first pass, with strict distance values (clearing things up first)
+  size_t restrFr = mc.freeze();
 
   // first run, with 0 perc of line width, and offset of 5
-  b.createTopologicalNodes(&tg, 5.0);
+  mc.collapseShrdSegs(5.0);
 
   double step = cfg.maxAggrDistance;
 
   for (double d = cfg.maxAggrDistance; d <= (cfg.maxAggrDistance * 15);
        d += step) {
     std::cerr << d << std::endl;
-    while (b.createTopologicalNodes(&tg, d)) {
-      b.removeNodeArtifacts(&tg);
-      b.removeEdgeArtifacts(&tg);
+    while (mc.collapseShrdSegs(d)) {
+      mc.removeNodeArtifacts();
+      mc.removeEdgeArtifacts();
     };
   }
 
-  b.removeNodeArtifacts(&tg);
-
-  b.averageNodePositions(&tg);
+  mc.removeNodeArtifacts();
+  mc.averageNodePositions();
 
   // infer restrictions
-  ri.infer(b.freezeTrack(restrFr));
+  ri.infer(mc.freezeTrack(restrFr));
 
-  b.insertStations(&tg);
+  // insert stations
+  si.insertStations(mc.freezeTrack(statFr));
 
+  // output
   util::geo::output::GeoGraphJsonOutput out;
   out.print(tg, std::cout);
 

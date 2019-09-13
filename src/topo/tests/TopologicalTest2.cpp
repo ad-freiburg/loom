@@ -15,45 +15,9 @@
 #include "topo/tests/TopoTestUtil.h"
 
 #define private public
-#include "topo/builder/Builder.h"
+#include "topo/mapconstructor/MapConstructor.h"
 
-class approx {
- public:
-  explicit approx(double magnitude)
-      : _epsilon{std::numeric_limits<float>::epsilon() * 100},
-        _magnitude{magnitude} {}
-
-  friend bool operator==(double lhs, approx const& rhs) {
-    return std::abs(lhs - rhs._magnitude) < rhs._epsilon;
-  }
-
-  friend bool operator==(approx const& lhs, double rhs) {
-    return operator==(rhs, lhs);
-  }
-  friend bool operator!=(double lhs, approx const& rhs) {
-    return !operator==(lhs, rhs);
-  }
-  friend bool operator!=(approx const& lhs, double rhs) {
-    return !operator==(rhs, lhs);
-  }
-
-  friend bool operator<=(double lhs, approx const& rhs) {
-    return lhs < rhs._magnitude || lhs == rhs;
-  }
-  friend bool operator<=(approx const& lhs, double rhs) {
-    return lhs._magnitude < rhs || lhs == rhs;
-  }
-  friend bool operator>=(double lhs, approx const& rhs) {
-    return lhs > rhs._magnitude || lhs == rhs;
-  }
-  friend bool operator>=(approx const& lhs, double rhs) {
-    return lhs._magnitude > rhs || lhs == rhs;
-  }
-
- private:
-  double _epsilon;
-  double _magnitude;
-};
+using util::approx;
 
 // _____________________________________________________________________________
 void TopologicalTest2::run() {
@@ -111,9 +75,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, false);
-    builder.removeEdgeArtifacts(&tg)                                                                                                                        ;
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs();
+    mc.removeEdgeArtifacts()                                                                                                                        ;
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -153,9 +117,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs();
+    mc.removeEdgeArtifacts();
 
     //                     1
     //                  -------
@@ -207,9 +171,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(99999, 1);
+    mc.removeEdgeArtifacts();
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -299,9 +263,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(999999, 1);
+    mc.removeEdgeArtifacts();
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -394,9 +358,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(999999, 1);
+    mc.removeEdgeArtifacts();
 
 
     //                     1
@@ -487,9 +451,9 @@ void TopologicalTest2::run() {
     cfg.maxAggrDistance = 50;
 
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(999999, 1);
+    mc.removeEdgeArtifacts();
 
     //                     1
     //                  --(F)--
@@ -574,9 +538,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(999999, 1);
+    mc.removeEdgeArtifacts();
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -672,9 +636,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(999999, 1);
+    mc.removeEdgeArtifacts();
 
     //                     1
     //                  --(F)--
@@ -767,9 +731,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(999999, 1);
+    mc.removeEdgeArtifacts();
 
 
     //                     1
@@ -862,9 +826,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(999999, 1);
+    mc.removeEdgeArtifacts();
 
     //                     1
     //                  --(F)--
@@ -959,9 +923,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(999999, 1);
+    mc.removeEdgeArtifacts();
 
     //                     1
     //                  --(F)--
@@ -1052,9 +1016,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(999999, 1);
+    mc.removeEdgeArtifacts();
 
     //                     1
     //                  --(F)--
@@ -1146,9 +1110,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(9999999, 1);
+    mc.removeEdgeArtifacts();
 
     //                     1
     //                  --(F)--
@@ -1241,9 +1205,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(99999, 1);
+    mc.removeEdgeArtifacts();
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -1340,9 +1304,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(999999, 1);
+    mc.removeEdgeArtifacts();
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -1435,9 +1399,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(9999999, 1);
+    mc.removeEdgeArtifacts();
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -1534,9 +1498,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true, 1);
-    // builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs(999999, 1);
+    // mc.removeEdgeArtifacts(&tg);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
@@ -1584,9 +1548,9 @@ void TopologicalTest2::run() {
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
 
-    topo::Builder builder(&cfg);
-    builder.createTopologicalNodes(&tg, true);
-    builder.removeEdgeArtifacts(&tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs();
+    mc.removeEdgeArtifacts();
 
     // TODO more tests
 
