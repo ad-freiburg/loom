@@ -2,7 +2,6 @@
 // Author: Patrick Brosi
 
 
-#include <cassert>
 #include <string>
 
 #include "shared/transitgraph/TransitGraph.h"
@@ -59,7 +58,7 @@ void TopologicalTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    assert(c->getAdjList().size());
+    TEST(c->getAdjList().size(), !=, 0);
     a = c->getAdjList().front()->getOtherNd(c);
     for (auto edg : a->getAdjList()) {
       if (edg->getOtherNd(a) != c) d = edg->getOtherNd(a);
@@ -68,18 +67,18 @@ void TopologicalTest::run() {
       if (edg->getOtherNd(d) != a) e = edg->getOtherNd(d);
     }
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRouteOcc(&l2).direction == c);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRouteOcc(&l2).direction, ==, c);
 
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a, d)->pl().getRouteOcc(&l2).direction == 0);
+    TEST(tg.getEdg(a, d)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a, d)->pl().getRouteOcc(&l2).direction, ==, 0);
 
-    assert(tg.getEdg(d, e)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction == d);
-    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
+    TEST(tg.getEdg(d, e)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction, ==, d);
+    TEST(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction, ==, 0);
   }
 
   // ___________________________________________________________________________
@@ -128,18 +127,18 @@ void TopologicalTest::run() {
       if (edg->getOtherNd(d) != a) e = edg->getOtherNd(d);
     }
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRouteOcc(&l2).direction == c);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRouteOcc(&l2).direction, ==, c);
 
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a, d)->pl().getRouteOcc(&l2).direction == 0);
+    TEST(tg.getEdg(a, d)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a, d)->pl().getRouteOcc(&l2).direction, ==, 0);
 
-    assert(tg.getEdg(d, e)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction == d);
-    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
+    TEST(tg.getEdg(d, e)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction, ==, d);
+    TEST(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction, ==, 0);
   }
 
   // ___________________________________________________________________________
@@ -184,20 +183,18 @@ void TopologicalTest::run() {
       if (edg->getOtherNd(d) != a) e = edg->getOtherNd(d);
     }
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRouteOcc(&l2).direction == c);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRouteOcc(&l2).direction, ==, c);
 
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a, d)->pl().getRouteOcc(&l2).direction == 0);
+    TEST(tg.getEdg(a, d)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a, d)->pl().getRouteOcc(&l2).direction, ==, 0);
 
-    assert(tg.getEdg(d, e)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction == d);
-    assert(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction == 0);
-
-    assert(validExceptions(&tg));
+    TEST(tg.getEdg(d, e)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(d, e)->pl().getRouteOcc(&l2).direction, ==, d);
+    TEST(tg.getEdg(d, e)->pl().getRouteOcc(&l1).direction, ==, 0);
   }
 
   // ___________________________________________________________________________
@@ -237,8 +234,9 @@ void TopologicalTest::run() {
       if (nd->getDeg() == 2) d = nd;
     }
     ed = e->getAdjList().front();
-    assert(cd->pl().hasRoute(&l2) && cd->pl().getRouteOcc(&l2).direction == c);
-    assert(ed->pl().hasRoute(&l2) && ed->pl().getRouteOcc(&l2).direction != 0 && ed->pl().getRouteOcc(&l2).direction != e);
+    TEST(cd->pl().hasRoute(&l2) && cd->pl().getRouteOcc(&l2).direction, ==, c);
+    TEST(ed->pl().hasRoute(&l2) && ed->pl().getRouteOcc(&l2).direction, !=, 0);
+    TEST(ed->pl().getRouteOcc(&l2).direction, !=, e);
   }
 
   // ___________________________________________________________________________
@@ -280,17 +278,15 @@ void TopologicalTest::run() {
       if (nd->getDeg() == 2) d = nd;
     }
 
-    assert(tg.getNds()->size() == 3);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 3);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().begin()->direction, ==, c);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
-      if (ro.route == &l1) assert(ro.direction == 0);
-      if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
+      if (ro.route == &l1) TEST(ro.direction, ==, 0);
+      if (ro.route == &l2) TEST(ro.direction->pl().getGeom()->getX(), ==, approx(100));
     }
-
-    assert(validExceptions(&tg));
   }
   // ___________________________________________________________________________
   {
@@ -331,17 +327,15 @@ void TopologicalTest::run() {
       if (nd->getDeg() == 2) d = nd;
     }
 
-    assert(tg.getNds()->size() == 3);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 3);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().begin()->direction, ==, c);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
-      if (ro.route == &l1) assert(ro.direction == 0);
-      if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
+      if (ro.route == &l1) TEST(ro.direction, ==, 0);
+      if (ro.route == &l2) TEST(ro.direction->pl().getGeom()->getX(), ==, approx(100));
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -391,28 +385,26 @@ void TopologicalTest::run() {
       if (nd->getDeg() == 2) d = nd;
     }
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().begin()->direction, ==, c);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     for (auto edg : a->getAdjList()) {
       if (edg->getOtherNd(a) == c) continue;
 
-      assert(edg->pl().getRoutes().size() == 1);
-      assert(edg->pl().getRoutes().begin()->direction == 0);
+      TEST(edg->pl().getRoutes().size(), ==, 1);
+      TEST(edg->pl().getRoutes().begin()->direction, ==, 0);
     }
 
     for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
-      if (ro.route == &l1) assert(ro.direction == 0);
+      if (ro.route == &l1) TEST(ro.direction, ==, 0);
 
       if (ro.route == &l2) {
-        assert(ro.direction->pl().getGeom()->getX() < 130);
-        assert(ro.direction->pl().getGeom()->getX() > 70);
+        TEST(ro.direction->pl().getGeom()->getX(), <, 130);
+        TEST(ro.direction->pl().getGeom()->getX(), >, 70);
       }
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -447,15 +439,13 @@ void TopologicalTest::run() {
     //     1, 2
     // a ------> b
 
-    assert(tg.getNds()->size() == 2);
-    assert((*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST((*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     for (auto r : (*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
-      if (r.route == &l2) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
+      if (r.route == &l2) TEST(r.direction, ==, 0);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -490,15 +480,13 @@ void TopologicalTest::run() {
     //     1, 2
     // a ------> b
 
-    assert(tg.getNds()->size() == 2);
-    assert((*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST((*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     for (auto r : (*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
-      if (r.route == &l2) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
+      if (r.route == &l2) TEST(r.direction, ==, 0);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -533,18 +521,16 @@ void TopologicalTest::run() {
     //     1, 2
     // a ------> b
 
-    assert(tg.getNds()->size() == 2);
-    assert((*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST((*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     for (auto r : (*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
       if (r.route == &l2) {
-        assert(r.direction != 0);
-        assert(r.direction->pl().getGeom()->getX() == approx(50));
+        TEST(r.direction, !=, 0);
+        TEST(r.direction->pl().getGeom()->getX(), ==, approx(50));
       }
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -596,22 +582,20 @@ void TopologicalTest::run() {
     //  1, 2->, 3
     // a ------> b
 
-    assert(tg.getNds()->size() == 2);
-    assert((*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST((*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes().size(), ==, 3);
 
     for (auto r : (*tg.getNds()->begin())->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
       if (r.route == &l2) {
-        assert(r.direction != 0);
-        assert(r.direction->pl().getGeom()->getX() > 49);
-        assert(r.direction->pl().getGeom()->getX() < 51);
+        TEST(r.direction, !=, 0);
+        TEST(r.direction->pl().getGeom()->getX(), >, 49);
+        TEST(r.direction->pl().getGeom()->getX(), <, 51);
       }
       if (r.route == &l3) {
-        assert(r.direction == 0);
+        TEST(r.direction, ==, 0);
       }
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -649,18 +633,16 @@ void TopologicalTest::run() {
     a = c->getAdjList().front()->getOtherNd(c);
     b = d->getAdjList().front()->getOtherNd(d);
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a, b) != 0);
-    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a, b), !=, 0);
+    TEST(tg.getEdg(a, b)->pl().getRoutes().size(), ==, 2);
 
     for (auto r : tg.getEdg(a, b)->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
-      if (r.route == &l2) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
+      if (r.route == &l2) TEST(r.direction, ==, 0);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -699,18 +681,16 @@ void TopologicalTest::run() {
     //    2   1,2    2
     // c ----a--->b----> d
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a, b) != 0);
-    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a, b), !=, 0);
+    TEST(tg.getEdg(a, b)->pl().getRoutes().size(), ==, 2);
 
     for (auto r : tg.getEdg(a, b)->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
-      if (r.route == &l2) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
+      if (r.route == &l2) TEST(r.direction, ==, 0);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -751,20 +731,18 @@ void TopologicalTest::run() {
 
     a = c->getAdjList().front()->getOtherNd(c);
 
-    assert(tg.getNds()->size() == 3);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
+    TEST(tg.getNds()->size(), ==, 3);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
 
     for (auto e : a->getAdjList()) {
       if (e->getOtherNd(a) == c) continue;
-      assert(e->pl().getRoutes().size() == 2);
+      TEST(e->pl().getRoutes().size(), ==, 2);
 
       for (auto r : e->pl().getRoutes()) {
-        if (r.route == &l1) assert(r.direction == 0);
-        if (r.route == &l2) assert(r.direction == 0);
+        if (r.route == &l1) TEST(r.direction, ==, 0);
+        if (r.route == &l2) TEST(r.direction, ==, 0);
       }
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -800,17 +778,15 @@ void TopologicalTest::run() {
 
     a = c->getAdjList().front()->getOtherNd(c);
 
-    assert(tg.getNds()->size() == 3);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
+    TEST(tg.getNds()->size(), ==, 3);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().begin()->direction, ==, c);
 
     for (auto e : a->getAdjList()) {
       if (e->getOtherNd(a) == c) continue;
-      assert(e->pl().getRoutes().size() == 1);
-      assert(e->pl().getRoutes().begin()->direction == 0);
+      TEST(e->pl().getRoutes().size(), ==, 1);
+      TEST(e->pl().getRoutes().begin()->direction, ==, 0);
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -856,23 +832,21 @@ void TopologicalTest::run() {
 
     a = c->getAdjList().front()->getOtherNd(c);
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().begin()->direction, ==, c);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     for (auto e : a->getAdjList()) {
       if (e->getOtherNd(a) == c) continue;
-      assert(e->pl().getRoutes().size() == 1);
-      assert(e->pl().getRoutes().begin()->direction == 0);
+      TEST(e->pl().getRoutes().size(), ==, 1);
+      TEST(e->pl().getRoutes().begin()->direction, ==, 0);
     }
 
     for (auto ro : e->getAdjList().front()->pl().getRoutes()) {
-      if (ro.route == &l1) assert(ro.direction == 0);
-      if (ro.route == &l2) assert(ro.direction->pl().getGeom()->getX() == approx(100));
+      if (ro.route == &l1) TEST(ro.direction, ==, 0);
+      if (ro.route == &l2) TEST(ro.direction->pl().getGeom()->getX(), ==, approx(100));
     }
-
-    assert(validExceptions(&tg));
   }
 
   // ___________________________________________________________________________
@@ -913,20 +887,18 @@ void TopologicalTest::run() {
     //    <-2   2        <-2
     // c ----a-----> d < --- e
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 1);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().begin()->direction, ==, c);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 1);
 
     for (auto e : a->getAdjList()) {
       if (e->getOtherNd(a) == c) continue;
-      assert(e->pl().getRoutes().size() == 1);
-      assert(e->pl().getRoutes().begin()->direction == 0);
+      TEST(e->pl().getRoutes().size(), ==, 1);
+      TEST(e->pl().getRoutes().begin()->direction, ==, 0);
     }
 
-    assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().getGeom()->getX() == approx(100));
-
-    assert(validExceptions(&tg));
+    TEST(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().getGeom()->getX(), ==, approx(100));
   }
 
   // ___________________________________________________________________________
@@ -966,20 +938,18 @@ void TopologicalTest::run() {
     //    <-2   2        <-2
     // c ----a-----> d < --- e
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 1);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().begin()->direction, ==, c);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 1);
 
     for (auto e : a->getAdjList()) {
       if (e->getOtherNd(a) == c) continue;
-      assert(e->pl().getRoutes().size() == 1);
-      assert(e->pl().getRoutes().begin()->direction == 0);
+      TEST(e->pl().getRoutes().size(), ==, 1);
+      TEST(e->pl().getRoutes().begin()->direction, ==, 0);
     }
 
-    assert(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().getGeom()->getX() == approx(100));
-
-    assert(validExceptions(&tg));
+    TEST(e->getAdjList().front()->pl().getRoutes().begin()->direction->pl().getGeom()->getX(), ==, approx(100));
   }
 
   // ___________________________________________________________________________
@@ -1026,16 +996,16 @@ void TopologicalTest::run() {
 
     a = c->getAdjList().front()->getOtherNd(c);
 
-    assert(a->pl().getGeom()->getX() == approx(30));
+    TEST(a->pl().getGeom()->getX(), ==, approx(30));
 
-    assert(tg.getNds()->size() == 3);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().begin()->direction == c);
+    TEST(tg.getNds()->size(), ==, 3);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().begin()->direction, ==, c);
 
     for (auto e : a->getAdjList()) {
       if (e->getOtherNd(a) == c) continue;
-      assert(e->pl().getRoutes().size() == 1);
-      assert(e->pl().getRoutes().begin()->direction == 0);
+      TEST(e->pl().getRoutes().size(), ==, 1);
+      TEST(e->pl().getRoutes().begin()->direction, ==, 0);
     }
   }
 }

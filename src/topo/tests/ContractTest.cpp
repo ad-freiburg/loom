@@ -110,21 +110,21 @@ void ContractTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    assert(c->getAdjList().size() == 4);
+    TEST(c->getAdjList().size(), ==, 4);
 
-    assert(tg.getEdg(a,c)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c,d)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(f,e)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(g,h)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c,g)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c,e)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(a,c)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(c,d)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(f,e)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(g,h)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(c,g)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(c,e)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(c,g)->pl().hasRoute(&l3));
-    assert(tg.getEdg(c,g)->pl().hasRoute(&l1));
+    TEST(tg.getEdg(c,g)->pl().hasRoute(&l3));
+    TEST(tg.getEdg(c,g)->pl().hasRoute(&l1));
 
-    assert(tg.getEdg(e,c)->pl().hasRoute(&l2));
+    TEST(tg.getEdg(e,c)->pl().hasRoute(&l2));
 
-    assert(tg.getEdg(e,c)->pl().hasRoute(&l3));
+    TEST(tg.getEdg(e,c)->pl().hasRoute(&l3));
   }
 
   // ___________________________________________________________________________
@@ -216,21 +216,21 @@ void ContractTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    assert(c->getAdjList().size() == 4);
+    TEST(c->getAdjList().size(), ==, 4);
 
-    assert(tg.getEdg(a,c)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c,d)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(f,e)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(g,h)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c,g)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c,e)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(a,c)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(c,d)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(f,e)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(g,h)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(c,g)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(c,e)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(c,g)->pl().hasRoute(&l3));
-    assert(tg.getEdg(c,g)->pl().hasRoute(&l1));
+    TEST(tg.getEdg(c,g)->pl().hasRoute(&l3));
+    TEST(tg.getEdg(c,g)->pl().hasRoute(&l1));
 
-    assert(tg.getEdg(e,c)->pl().hasRoute(&l2));
+    TEST(tg.getEdg(e,c)->pl().hasRoute(&l2));
 
-    assert(tg.getEdg(e,c)->pl().hasRoute(&l3));
+    TEST(tg.getEdg(e,c)->pl().hasRoute(&l3));
   }
 
   // ___________________________________________________________________________
@@ -320,20 +320,20 @@ void ContractTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
     //
-    assert(c->getAdjList().size() == 4);
+    TEST(c->getAdjList().size(), ==, 4);
 
-    assert(tg.getEdg(a,c)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c,d)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(f,e)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(g,h)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c,g)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c,e)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(a,c)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(c,d)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(f,e)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(g,h)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(c,g)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(c,e)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(c,g)->pl().hasRoute(&l3));
-    assert(tg.getEdg(c,g)->pl().hasRoute(&l1));
+    TEST(tg.getEdg(c,g)->pl().hasRoute(&l3));
+    TEST(tg.getEdg(c,g)->pl().hasRoute(&l1));
 
-    assert(tg.getEdg(e,c)->pl().hasRoute(&l3));
-    assert(tg.getEdg(e,c)->pl().hasRoute(&l2));
+    TEST(tg.getEdg(e,c)->pl().hasRoute(&l3));
+    TEST(tg.getEdg(e,c)->pl().hasRoute(&l2));
   }
 
   // ___________________________________________________________________________
@@ -424,20 +424,20 @@ void ContractTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
     //
-    assert(b->getAdjList().size() == 4);
+    TEST(b->getAdjList().size(), ==, 4);
 
-    assert(tg.getEdg(a,b)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(b,d)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(f,e)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(g,h)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(b,g)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(b,e)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(a,b)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(b,d)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(f,e)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(g,h)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(b,g)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(b,e)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(b,g)->pl().hasRoute(&l3));
-    assert(tg.getEdg(b,g)->pl().hasRoute(&l1));
+    TEST(tg.getEdg(b,g)->pl().hasRoute(&l3));
+    TEST(tg.getEdg(b,g)->pl().hasRoute(&l1));
 
-    assert(tg.getEdg(e,b)->pl().hasRoute(&l3));
-    assert(tg.getEdg(e,b)->pl().hasRoute(&l2));
+    TEST(tg.getEdg(e,b)->pl().hasRoute(&l3));
+    TEST(tg.getEdg(e,b)->pl().hasRoute(&l2));
   }
 
   // ___________________________________________________________________________
@@ -473,8 +473,8 @@ void ContractTest::run() {
 
     mc.combineNodes(b, d);
 
-    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(a, d)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(c, d)->pl().getRoutes().size(), ==, 1);
   }
 
   // ___________________________________________________________________________
@@ -510,8 +510,8 @@ void ContractTest::run() {
 
     mc.combineNodes(b, d);
 
-    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(a, d)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(c, d)->pl().getRoutes().size(), ==, 1);
   }
 
   // ___________________________________________________________________________
@@ -554,8 +554,8 @@ void ContractTest::run() {
 
     mc.combineNodes(b, d);
 
-    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(a, d)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(c, d)->pl().getRoutes().size(), ==, 1);
   }
 
   // ___________________________________________________________________________
@@ -596,8 +596,8 @@ void ContractTest::run() {
 
     mc.combineNodes(b, d);
 
-    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(a, d)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(c, d)->pl().getRoutes().size(), ==, 1);
   }
 
   // ___________________________________________________________________________
@@ -640,8 +640,8 @@ void ContractTest::run() {
 
     mc.combineNodes(b, d);
 
-    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(a, d)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(c, d)->pl().getRoutes().size(), ==, 1);
   }
 
   // ___________________________________________________________________________
@@ -682,8 +682,8 @@ void ContractTest::run() {
 
     mc.combineNodes(b, d);
 
-    assert(tg.getEdg(a, d)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(a, d)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(c, d)->pl().getRoutes().size(), ==, 1);
   }
 
   // ___________________________________________________________________________
@@ -724,8 +724,8 @@ void ContractTest::run() {
 
     mc.combineNodes(c, d);
 
-    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(a, b)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(d, b)->pl().getRoutes().size(), ==, 1);
   }
 
   // ___________________________________________________________________________
@@ -767,8 +767,8 @@ void ContractTest::run() {
     mc.combineNodes(c, d);
 
 
-    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(a, b)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(d, b)->pl().getRoutes().size(), ==, 1);
   }
 
   // ___________________________________________________________________________
@@ -814,8 +814,8 @@ void ContractTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(d, b)->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(a, b)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(d, b)->pl().getRoutes().size(), ==, 1);
   }
 
   // ___________________________________________________________________________
@@ -870,12 +870,12 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, c);
 
-    assert(tg.getNds()->size() == 5);
-    assert(tg.getEdg(a, c)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(c, e)->pl().getRoutes().begin()->route == &l2);
-    assert(tg.getEdg(c, e)->pl().getRoutes().begin()->direction == 0);
+    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getEdg(a, c)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(c, d)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(c, e)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(c, e)->pl().getRoutes().begin()->route, ==, &l2);
+    TEST(tg.getEdg(c, e)->pl().getRoutes().begin()->direction, ==, 0);
   }
 
   // ___________________________________________________________________________
@@ -930,12 +930,12 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, b);
 
-    assert(tg.getNds()->size() == 5);
-    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(b, d)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(b, e)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(b, e)->pl().getRoutes().begin()->route == &l2);
-    assert(tg.getEdg(b, e)->pl().getRoutes().begin()->direction == 0);
+    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getEdg(a, b)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(b, d)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(b, e)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(b, e)->pl().getRoutes().begin()->route, ==, &l2);
+    TEST(tg.getEdg(b, e)->pl().getRoutes().begin()->direction, ==, 0);
   }
 
   // ___________________________________________________________________________
@@ -990,9 +990,9 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 5);
-    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(b, e)->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getEdg(a, b)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(b, e)->pl().getRoutes().size(), ==, 2);
   }
 
   // ___________________________________________________________________________
@@ -1047,9 +1047,9 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    assert(tg.getNds()->size() == 5);
-    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(b, c)->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getEdg(a, b)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(b, c)->pl().getRoutes().size(), ==, 2);
   }
 
   // ___________________________________________________________________________
@@ -1104,13 +1104,13 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, b);
 
-    assert(tg.getNds()->size() == 5);
-    assert(tg.getEdg(a, b)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(f, b)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(f, b)->pl().getRoutes().begin()->route == &l2);
-    assert(tg.getEdg(f, b)->pl().getRoutes().begin()->direction == 0);
+    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getEdg(a, b)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(f, b)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(f, b)->pl().getRoutes().begin()->route, ==, &l2);
+    TEST(tg.getEdg(f, b)->pl().getRoutes().begin()->direction, ==, 0);
 
-    assert(tg.getEdg(b, c)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(b, c)->pl().getRoutes().size(), ==, 2);
   }
 
   // ___________________________________________________________________________
@@ -1165,13 +1165,13 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    assert(tg.getNds()->size() == 5);
-    assert(tg.getEdg(a, e)->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(f, e)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(f, e)->pl().getRoutes().begin()->route == &l2);
-    assert(tg.getEdg(f, e)->pl().getRoutes().begin()->direction == 0);
+    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getEdg(a, e)->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(f, e)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(f, e)->pl().getRoutes().begin()->route, ==, &l2);
+    TEST(tg.getEdg(f, e)->pl().getRoutes().begin()->direction, ==, 0);
 
-    assert(tg.getEdg(e, c)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(e, c)->pl().getRoutes().size(), ==, 2);
   }
 
   // ==========================================================================
@@ -1221,14 +1221,14 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
 
-    assert(d->getAdjList().size() == 1);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+    TEST(d->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(d->getAdjList().front()->pl().getRouteOcc(&l2).direction, ==, d->getAdjList().front()->getOtherNd(d));
   }
   // ___________________________________________________________________________
   {
@@ -1278,9 +1278,9 @@ void ContractTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l1);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route, ==, &l1);
   }
   // ___________________________________________________________________________
   {
@@ -1331,13 +1331,13 @@ void ContractTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
-    assert(tg.getEdg(d, d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction, ==, d->getAdjList().front()->getOtherNd(d));
+    TEST(tg.getEdg(d, d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction, ==, d->getAdjList().front()->getOtherNd(d));
   }
   // ___________________________________________________________________________
   {
@@ -1383,9 +1383,9 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
   }
   // ___________________________________________________________________________
   {
@@ -1433,12 +1433,12 @@ void ContractTest::run() {
     mc.combineNodes(c, e);
 
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
   }
 
   // ___________________________________________________________________________
@@ -1483,9 +1483,9 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route, ==, &l2);
   }
 
   // ___________________________________________________________________________
@@ -1542,16 +1542,16 @@ void ContractTest::run() {
       }
     }
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
-    assert(tg.getEdg(a, c));
-    assert(tg.getEdg(a, c)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(a, c));
+    TEST(tg.getEdg(a, c)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(c, d));
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(c, d));
+    TEST(tg.getEdg(c, d)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(c, e));
-    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(c, e));
+    TEST(tg.getEdg(c, e)->pl().getRoutes().size(), ==, 1);
   }
   // ___________________________________________________________________________
   {
@@ -1606,17 +1606,17 @@ void ContractTest::run() {
       }
     }
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
-    assert(tg.getEdg(a, c));
-    assert(tg.getEdg(a, c)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(a, c));
+    TEST(tg.getEdg(a, c)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(c, d));
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(c, d));
+    TEST(tg.getEdg(c, d)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(c, e));
-    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(c, e)->pl().hasRoute(&l2));
+    TEST(tg.getEdg(c, e));
+    TEST(tg.getEdg(c, e)->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(c, e)->pl().hasRoute(&l2));
   }
 
   // ___________________________________________________________________________
@@ -1672,9 +1672,9 @@ void ContractTest::run() {
       }
     }
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // all 3 lines in the triangle are lost
-    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(c, e)->pl().getRoutes().size(), ==, 2);
   }
   // ___________________________________________________________________________
   {
@@ -1728,9 +1728,9 @@ void ContractTest::run() {
       }
     }
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // all 3 lines in the triangle are lost
-    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(c, e)->pl().getRoutes().size(), ==, 2);
   }
   // ___________________________________________________________________________
   {
@@ -1791,16 +1791,16 @@ void ContractTest::run() {
     // neither 1 nor 2 can continue from ab to cd because 1 cannot continue
     // through the triangle, and 2 is restricted by the exception from cd to bc
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
-    assert(tg.getEdg(a, c));
-    assert(tg.getEdg(a, c)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(a, c));
+    TEST(tg.getEdg(a, c)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(c, d));
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(c, d));
+    TEST(tg.getEdg(c, d)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(c, e));
-    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(c, e));
+    TEST(tg.getEdg(c, e)->pl().getRoutes().size(), ==, 2);
   }
   // ___________________________________________________________________________
   {
@@ -1848,7 +1848,7 @@ void ContractTest::run() {
     // with no lines on it, because 2 and 1 are lost on it
 
 
-    assert(c->getAdjList().size() == 3);
+    TEST(c->getAdjList().size(), ==, 3);
 
     // c will be the kept node
     for (auto edg : c->getAdjList()) {
@@ -1858,16 +1858,16 @@ void ContractTest::run() {
       }
     }
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
-    assert(tg.getEdg(a, c));
-    assert(tg.getEdg(a, c)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(a, c));
+    TEST(tg.getEdg(a, c)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(c, d));
-    assert(tg.getEdg(c, d)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(c, d));
+    TEST(tg.getEdg(c, d)->pl().getRoutes().size(), ==, 2);
 
-    assert(tg.getEdg(c, e));
-    assert(tg.getEdg(c, e)->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(c, e));
+    TEST(tg.getEdg(c, e)->pl().getRoutes().size(), ==, 2);
   }
 
   // ===========================================================================
@@ -1918,14 +1918,14 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // line 1 on bc is deleted because it cannot leave bc
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-    assert(d->getAdjList().size() == 1);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(d->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(d->getAdjList().front()->pl().getRouteOcc(&l2).direction, ==, d->getAdjList().front()->getOtherNd(d));
   }
   // ___________________________________________________________________________
   {
@@ -1971,11 +1971,11 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // line 2 is deleted because it is lost
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
   }
   // ___________________________________________________________________________
   {
@@ -2023,8 +2023,8 @@ void ContractTest::run() {
     mc.combineNodes(c, e);
 
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
   }
   // ___________________________________________________________________________
   {
@@ -2071,8 +2071,8 @@ void ContractTest::run() {
     mc.combineNodes(c, e);
 
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
   }
   // ___________________________________________________________________________
   {
@@ -2119,11 +2119,11 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
   }
   // ___________________________________________________________________________
   {
@@ -2167,10 +2167,10 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // 1 on ec was deleted, 2 on be was deleted
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route, ==, &l2);
   }
 
   // ___________________________________________________________________________
@@ -2215,15 +2215,15 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // line 1 on bc is deleted because it cannot leave bc
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
 
-    assert(d->getAdjList().size() == 1);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+    TEST(d->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(d->getAdjList().front()->pl().getRouteOcc(&l2).direction, ==, d->getAdjList().front()->getOtherNd(d));
   }
 
   // ___________________________________________________________________________
@@ -2268,11 +2268,11 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // line 2 is deleted because it is lost
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
   }
   // ___________________________________________________________________________
   {
@@ -2319,10 +2319,10 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
     // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
   }
 
   // ___________________________________________________________________________
@@ -2368,9 +2368,9 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // all 3 lines in the triangle are lost
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
   }
   // ___________________________________________________________________________
   {
@@ -2417,12 +2417,12 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
   }
   // ___________________________________________________________________________
   {
@@ -2466,9 +2466,9 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route, ==, &l2);
   }
 
   // ===========================================================================
@@ -2519,14 +2519,14 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
 
-    assert(d->getAdjList().size() == 1);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+    TEST(d->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(d->getAdjList().front()->pl().getRouteOcc(&l2).direction, ==, d->getAdjList().front()->getOtherNd(d));
   }
   // ___________________________________________________________________________
   {
@@ -2573,11 +2573,11 @@ void ContractTest::run() {
     mc.combineNodes(e, c);
 
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // line 2 is deleted because it is lost
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
   }
   // ___________________________________________________________________________
   {
@@ -2624,10 +2624,10 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
     // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
   }
   // ___________________________________________________________________________
   {
@@ -2673,10 +2673,10 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // all 3 lines in the triangle are lost
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
   }
   // ___________________________________________________________________________
   {
@@ -2724,12 +2724,12 @@ void ContractTest::run() {
     mc.combineNodes(e, c);
 
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
   }
   // ___________________________________________________________________________
   {
@@ -2774,10 +2774,10 @@ void ContractTest::run() {
     mc.combineNodes(e, c);
 
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // 1 on ec was deleted, 2 on be was deleted
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route, ==, &l2);
   }
 
   // ___________________________________________________________________________
@@ -2826,10 +2826,10 @@ void ContractTest::run() {
     mc.combineNodes(e, c);
 
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
   }
   // ___________________________________________________________________________
   {
@@ -2875,11 +2875,11 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // line 2 is deleted because it is lost
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
   }
   // ___________________________________________________________________________
   {
@@ -2926,10 +2926,10 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
     // line 3 and line 2-> on bc are dead ends (because ec is contracted), line 2 on ec is also a dead end
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
   }
   // ___________________________________________________________________________
   {
@@ -2975,9 +2975,9 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
     // all 3 lines in the triangle are lost
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
   }
   // ___________________________________________________________________________
   {
@@ -3025,12 +3025,12 @@ void ContractTest::run() {
     mc.combineNodes(e, c);
 
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l3));
   }
   // ___________________________________________________________________________
   {
@@ -3075,9 +3075,9 @@ void ContractTest::run() {
     mc.combineNodes(e, c);
 
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route, ==, &l2);
   }
 
   // ===========================================================================
@@ -3126,11 +3126,11 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == 0);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction, ==, 0);
   }
   // ___________________________________________________________________________
   {
@@ -3176,13 +3176,13 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
     // 2 on be and 2 on ce are dead ends
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == 0);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction, ==, 0);
   }
   // ___________________________________________________________________________
   {
@@ -3229,13 +3229,13 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == 0);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route, ==, &l2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction, ==, 0);
 
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(d->getAdjList().front()->pl().getRouteOcc(&l2).direction == d->getAdjList().front()->getOtherNd(d));
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(d->getAdjList().front()->pl().getRouteOcc(&l2).direction, ==, d->getAdjList().front()->getOtherNd(d));
   }
   // ___________________________________________________________________________
   {
@@ -3285,8 +3285,8 @@ void ContractTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
   }
   // ___________________________________________________________________________
   {
@@ -3333,13 +3333,13 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == 0);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route, ==, &l2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction, ==, 0);
 
-    assert(a->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 2);
   }
   // ___________________________________________________________________________
   {
@@ -3383,13 +3383,13 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l2));
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().hasRoute(&l1));
 
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction == 0);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l1).direction == 0);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l2).direction, ==, 0);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRouteOcc(&l1).direction, ==, 0);
   }
   // ___________________________________________________________________________
   {
@@ -3433,10 +3433,10 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    assert(tg.getNds()->size() == 4);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size() == 1);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route == &l2);
-    assert(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction == 0);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().size(), ==, 1);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->route, ==, &l2);
+    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a), d->getAdjList().front()->getOtherNd(d))->pl().getRoutes().begin()->direction, ==, 0);
   }
 
   // ___________________________________________________________________________
@@ -3466,15 +3466,15 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, c);
 
-    assert(tg.getNds()->size() == 3);
-    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 1);
+    TEST(tg.getNds()->size(), ==, 3);
+    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 1);
 
-    assert(a->getAdjList().front()->pl().getRoutes().begin()->route == &l1);
-    assert(d->getAdjList().front()->pl().getRoutes().begin()->route == &l1);
+    TEST(a->getAdjList().front()->pl().getRoutes().begin()->route, ==, &l1);
+    TEST(d->getAdjList().front()->pl().getRoutes().begin()->route, ==, &l1);
 
-    assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
-    assert(d->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
+    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, 0);
+    TEST(d->getAdjList().front()->pl().getRoutes().begin()->direction, ==, 0);
   }
 
   // ___________________________________________________________________________
@@ -3504,15 +3504,15 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, b);
 
-    assert(tg.getNds()->size() == 3);
-    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 1);
+    TEST(tg.getNds()->size(), ==, 3);
+    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 1);
 
-    assert(a->getAdjList().front()->pl().getRoutes().begin()->route == &l1);
-    assert(d->getAdjList().front()->pl().getRoutes().begin()->route == &l1);
+    TEST(a->getAdjList().front()->pl().getRoutes().begin()->route, ==, &l1);
+    TEST(d->getAdjList().front()->pl().getRoutes().begin()->route, ==, &l1);
 
-    assert(a->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
-    assert(d->getAdjList().front()->pl().getRoutes().begin()->direction == 0);
+    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, 0);
+    TEST(d->getAdjList().front()->pl().getRoutes().begin()->direction, ==, 0);
   }
 
   // ___________________________________________________________________________
@@ -3524,14 +3524,14 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    assert(tg.getNds()->size() == 3);
+    TEST(tg.getNds()->size(), ==, 3);
 
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -3549,23 +3549,23 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ca, ab));
+    TEST(mc.routeEq(ca, ab));
 
     mc.combineEdges(ca, ab, a);
 
-    assert(tg.getNds()->size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(b->getAdjList().front() == c->getAdjList().front());
-    assert(b->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(b->getAdjList().front(), ==, c->getAdjList().front());
+    TEST(b->getAdjList().front()->pl().getRoutes().size(), ==, 3);
 
     // check geometry orientation
-    assert(b->getAdjList().front()->pl().getGeom()->front().getX() == approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(b->getAdjList().front()->pl().getGeom()->back().getX() == approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
-      assert(r.direction == 0);
+      TEST(r.direction, ==, 0);
     }
   }
 
@@ -3578,14 +3578,14 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    assert(tg.getNds()->size() == 3);
+    TEST(tg.getNds()->size(), ==, 3);
 
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -3603,23 +3603,23 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ab, ac));
+    TEST(mc.routeEq(ab, ac));
 
     mc.combineEdges(ab, ac, a);
 
-    assert(tg.getNds()->size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(b->getAdjList().front() == c->getAdjList().front());
-    assert(b->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(b->getAdjList().front(), ==, c->getAdjList().front());
+    TEST(b->getAdjList().front()->pl().getRoutes().size(), ==, 3);
 
     // check geometry orientation
-    assert(b->getAdjList().front()->pl().getGeom()->front().getX() == approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(b->getAdjList().front()->pl().getGeom()->back().getX() == approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
-      assert(r.direction == 0);
+      TEST(r.direction, ==, 0);
     }
   }
 
@@ -3632,14 +3632,14 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    assert(tg.getNds()->size() == 3);
+    TEST(tg.getNds()->size(), ==, 3);
 
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -3657,23 +3657,23 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ac, ba));
+    TEST(mc.routeEq(ac, ba));
 
     mc.combineEdges(ac, ba, a);
 
-    assert(tg.getNds()->size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(b->getAdjList().front() == c->getAdjList().front());
-    assert(b->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(b->getAdjList().front(), ==, c->getAdjList().front());
+    TEST(b->getAdjList().front()->pl().getRoutes().size(), ==, 3);
 
     // check geometry orientation
-    assert(b->getAdjList().front()->pl().getGeom()->front().getX() == approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(b->getAdjList().front()->pl().getGeom()->back().getX() == approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
-      assert(r.direction == 0);
+      TEST(r.direction, ==, 0);
     }
   }
 
@@ -3686,14 +3686,14 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    assert(tg.getNds()->size() == 3);
+    TEST(tg.getNds()->size(), ==, 3);
 
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -3711,23 +3711,23 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ca, ba));
+    TEST(mc.routeEq(ca, ba));
 
     mc.combineEdges(ca, ba, a);
 
-    assert(tg.getNds()->size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(b->getAdjList().front() == c->getAdjList().front());
-    assert(b->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(b->getAdjList().front(), ==, c->getAdjList().front());
+    TEST(b->getAdjList().front()->pl().getRoutes().size(), ==, 3);
 
     // check geometry orientation
-    assert(b->getAdjList().front()->pl().getGeom()->front().getX() == approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(b->getAdjList().front()->pl().getGeom()->back().getX() == approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
-      assert(r.direction == 0);
+      TEST(r.direction, ==, 0);
     }
   }
 
@@ -3740,14 +3740,14 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    assert(tg.getNds()->size() == 3);
+    TEST(tg.getNds()->size(), ==, 3);
 
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -3765,25 +3765,25 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ca, ab));
+    TEST(mc.routeEq(ca, ab));
 
     mc.combineEdges(ca, ab, a);
 
-    assert(tg.getNds()->size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(b->getAdjList().front() == c->getAdjList().front());
-    assert(b->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(b->getAdjList().front(), ==, c->getAdjList().front());
+    TEST(b->getAdjList().front()->pl().getRoutes().size(), ==, 3);
 
     // check geometry orientation
-    assert(b->getAdjList().front()->pl().getGeom()->front().getX() == approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(b->getAdjList().front()->pl().getGeom()->back().getX() == approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
-      if (r.route == &l2) assert(r.direction == b);
-      if (r.route == &l3) assert(r.direction == c);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
+      if (r.route == &l2) TEST(r.direction, ==, b);
+      if (r.route == &l3) TEST(r.direction, ==, c);
     }
   }
 
@@ -3796,14 +3796,14 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    assert(tg.getNds()->size() == 3);
+    TEST(tg.getNds()->size(), ==, 3);
 
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -3821,25 +3821,25 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ac, ab));
+    TEST(mc.routeEq(ac, ab));
 
     mc.combineEdges(ab, ac, a);
 
-    assert(tg.getNds()->size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(b->getAdjList().front() == c->getAdjList().front());
-    assert(b->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(b->getAdjList().front(), ==, c->getAdjList().front());
+    TEST(b->getAdjList().front()->pl().getRoutes().size(), ==, 3);
 
     // check geometry orientation
-    assert(b->getAdjList().front()->pl().getGeom()->front().getX() == approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(b->getAdjList().front()->pl().getGeom()->back().getX() == approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
-      if (r.route == &l2) assert(r.direction == b);
-      if (r.route == &l3) assert(r.direction == c);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
+      if (r.route == &l2) TEST(r.direction, ==, b);
+      if (r.route == &l3) TEST(r.direction, ==, c);
     }
   }
 
@@ -3852,14 +3852,14 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    assert(tg.getNds()->size() == 3);
+    TEST(tg.getNds()->size(), ==, 3);
 
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -3877,25 +3877,25 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ba, ac));
+    TEST(mc.routeEq(ba, ac));
 
     mc.combineEdges(ac, ba, a);
 
-    assert(tg.getNds()->size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(b->getAdjList().front() == c->getAdjList().front());
-    assert(b->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(b->getAdjList().front(), ==, c->getAdjList().front());
+    TEST(b->getAdjList().front()->pl().getRoutes().size(), ==, 3);
 
     // check geometry orientation
-    assert(b->getAdjList().front()->pl().getGeom()->front().getX() == approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(b->getAdjList().front()->pl().getGeom()->back().getX() == approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
-      if (r.route == &l2) assert(r.direction == b);
-      if (r.route == &l3) assert(r.direction == c);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
+      if (r.route == &l2) TEST(r.direction, ==, b);
+      if (r.route == &l3) TEST(r.direction, ==, c);
     }
   }
 
@@ -3908,14 +3908,14 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    assert(tg.getNds()->size() == 3);
+    TEST(tg.getNds()->size(), ==, 3);
 
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -3933,25 +3933,25 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ba, ca));
+    TEST(mc.routeEq(ba, ca));
 
     mc.combineEdges(ca, ba, a);
 
-    assert(tg.getNds()->size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(b->getAdjList().front() == c->getAdjList().front());
-    assert(b->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(b->getAdjList().front(), ==, c->getAdjList().front());
+    TEST(b->getAdjList().front()->pl().getRoutes().size(), ==, 3);
 
     // check geometry orientation
-    assert(b->getAdjList().front()->pl().getGeom()->front().getX() == approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(b->getAdjList().front()->pl().getGeom()->back().getX() == approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(b->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(b->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(b->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : b->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
-      if (r.route == &l2) assert(r.direction == b);
-      if (r.route == &l3) assert(r.direction == c);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
+      if (r.route == &l2) TEST(r.direction, ==, b);
+      if (r.route == &l3) TEST(r.direction, ==, c);
     }
   }
 
@@ -3964,14 +3964,14 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    assert(tg.getNds()->size() == 3);
+    TEST(tg.getNds()->size(), ==, 3);
 
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 1);
-    assert(c->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 1);
+    TEST(c->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -3991,7 +3991,7 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(!mc.routeEq(ca, ab));
+    TEST(!mc.routeEq(ca, ab));
   }
 
   // ___________________________________________________________________________
@@ -4004,16 +4004,16 @@ void ContractTest::run() {
     auto c = tg.addNd({{20.0, 50.0}});
     auto d = tg.addNd({{200.0, 50.0}});
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
     auto bd = tg.addEdg(b, d, {{{100.0, 50.0}, {200.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 2);
-    assert(c->getAdjList().size() == 1);
-    assert(d->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 2);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -4037,23 +4037,23 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ca, ab));
+    TEST(mc.routeEq(ca, ab));
 
     mc.combineEdges(ca, ab, a);
 
-    assert(tg.getNds()->size() == 3);
-    assert(b->getAdjList().size() == 2);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 3);
+    TEST(b->getAdjList().size(), ==, 2);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 3);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 3);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     // check geometry orientation
-    assert(c->getAdjList().front()->pl().getGeom()->front().getX() == approx(c->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(c->getAdjList().front()->pl().getGeom()->back().getX() == approx(c->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(c->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(c->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(c->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(c->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
-      assert(r.direction == 0);
+      TEST(r.direction, ==, 0);
     }
   }
 
@@ -4067,16 +4067,16 @@ void ContractTest::run() {
     auto c = tg.addNd({{20.0, 50.0}});
     auto d = tg.addNd({{200.0, 50.0}});
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
     auto bd = tg.addEdg(b, d, {{{100.0, 50.0}, {200.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 2);
-    assert(c->getAdjList().size() == 1);
-    assert(d->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 2);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -4100,23 +4100,23 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ac, ab));
+    TEST(mc.routeEq(ac, ab));
 
     mc.combineEdges(ac, ab, a);
 
-    assert(tg.getNds()->size() == 3);
-    assert(b->getAdjList().size() == 2);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 3);
+    TEST(b->getAdjList().size(), ==, 2);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 3);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 3);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     // check geometry orientation
-    assert(c->getAdjList().front()->pl().getGeom()->front().getX() == approx(c->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(c->getAdjList().front()->pl().getGeom()->back().getX() == approx(c->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(c->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(c->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(c->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(c->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
-      assert(r.direction == 0);
+      TEST(r.direction, ==, 0);
     }
   }
 
@@ -4130,16 +4130,16 @@ void ContractTest::run() {
     auto c = tg.addNd({{20.0, 50.0}});
     auto d = tg.addNd({{200.0, 50.0}});
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
     auto bd = tg.addEdg(b, d, {{{100.0, 50.0}, {200.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 2);
-    assert(c->getAdjList().size() == 1);
-    assert(d->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 2);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -4163,23 +4163,23 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ba, ba));
+    TEST(mc.routeEq(ba, ba));
 
     mc.combineEdges(ca, ba, a);
 
-    assert(tg.getNds()->size() == 3);
-    assert(b->getAdjList().size() == 2);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 3);
+    TEST(b->getAdjList().size(), ==, 2);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 3);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 3);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     // check geometry orientation
-    assert(c->getAdjList().front()->pl().getGeom()->front().getX() == approx(c->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(c->getAdjList().front()->pl().getGeom()->back().getX() == approx(c->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(c->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(c->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(c->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(c->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
-      assert(r.direction == 0);
+      TEST(r.direction, ==, 0);
     }
   }
 
@@ -4193,16 +4193,16 @@ void ContractTest::run() {
     auto c = tg.addNd({{20.0, 50.0}});
     auto d = tg.addNd({{200.0, 50.0}});
 
-    assert(tg.getNds()->size() == 4);
+    TEST(tg.getNds()->size(), ==, 4);
 
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
     auto bd = tg.addEdg(b, d, {{{100.0, 50.0}, {200.0, 50.0}}});
 
-    assert(a->getAdjList().size() == 2);
-    assert(b->getAdjList().size() == 2);
-    assert(c->getAdjList().size() == 1);
-    assert(d->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 2);
+    TEST(b->getAdjList().size(), ==, 2);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -4226,23 +4226,23 @@ void ContractTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
 
-    assert(mc.routeEq(ba, ba));
+    TEST(mc.routeEq(ba, ba));
 
     mc.combineEdges(ac, ba, a);
 
-    assert(tg.getNds()->size() == 3);
-    assert(b->getAdjList().size() == 2);
-    assert(c->getAdjList().size() == 1);
+    TEST(tg.getNds()->size(), ==, 3);
+    TEST(b->getAdjList().size(), ==, 2);
+    TEST(c->getAdjList().size(), ==, 1);
 
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 3);
-    assert(d->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 3);
+    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     // check geometry orientation
-    assert(c->getAdjList().front()->pl().getGeom()->front().getX() == approx(c->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
-    assert(c->getAdjList().front()->pl().getGeom()->back().getX() == approx(c->getAdjList().front()->getTo()->pl().getGeom()->getX()));
+    TEST(c->getAdjList().front()->pl().getGeom()->front().getX(), ==, approx(c->getAdjList().front()->getFrom()->pl().getGeom()->getX()));
+    TEST(c->getAdjList().front()->pl().getGeom()->back().getX(), ==, approx(c->getAdjList().front()->getTo()->pl().getGeom()->getX()));
 
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
-      assert(r.direction == 0);
+      TEST(r.direction, ==, 0);
     }
   }
 
@@ -4261,18 +4261,18 @@ void ContractTest::run() {
     auto d = tg.addNd({{100.0, 0.0}});
     auto e = tg.addNd({{150.0, 0.0}});
 
-    assert(tg.getNds()->size() == 5);
+    TEST(tg.getNds()->size(), ==, 5);
 
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {50.0, 50.0}}});
     auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {100.0, 0.0}}});
     auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {150.0, 0.0}}});
 
-    assert(a->getAdjList().size() == 1);
-    assert(b->getAdjList().size() == 3);
-    assert(c->getAdjList().size() == 1);
-    assert(d->getAdjList().size() == 2);
-    assert(e->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 1);
+    TEST(b->getAdjList().size(), ==, 3);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().size(), ==, 2);
+    TEST(e->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -4291,7 +4291,7 @@ void ContractTest::run() {
     de->pl().addRoute(&l2, 0);
     de->pl().addRoute(&l3, 0);
 
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     topo::config::TopoConfig cfg;
     topo::MapConstructor mc(&cfg, &tg);
@@ -4304,12 +4304,12 @@ void ContractTest::run() {
     //    1   |  1,2,3
     // a ---> d ---> e
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().size() == 1);
-    assert(a->getAdjList().size() == 1);
-    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(a->getAdjList().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 3);
   }
 
   // ___________________________________________________________________________
@@ -4327,18 +4327,18 @@ void ContractTest::run() {
     auto d = tg.addNd({{100.0, 0.0}});
     auto e = tg.addNd({{150.0, 0.0}});
 
-    assert(tg.getNds()->size() == 5);
+    TEST(tg.getNds()->size(), ==, 5);
 
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {50.0, 50.0}}});
     auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {100.0, 0.0}}});
     auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {150.0, 0.0}}});
 
-    assert(a->getAdjList().size() == 1);
-    assert(b->getAdjList().size() == 3);
-    assert(c->getAdjList().size() == 1);
-    assert(d->getAdjList().size() == 2);
-    assert(e->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 1);
+    TEST(b->getAdjList().size(), ==, 3);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().size(), ==, 2);
+    TEST(e->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -4357,7 +4357,7 @@ void ContractTest::run() {
     de->pl().addRoute(&l2, d);
     de->pl().addRoute(&l3, d);
 
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     topo::config::TopoConfig cfg;
     topo::MapConstructor mc(&cfg, &tg);
@@ -4370,26 +4370,26 @@ void ContractTest::run() {
     //    1   |  1,2,3
     // a ---> d ---> e
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().size() == 1);
-    assert(a->getAdjList().size() == 1);
-    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(a->getAdjList().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 3);
 
     for (auto r : e->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == e);
-      if (r.route == &l2) assert(r.direction == d);
-      if (r.route == &l3) assert(r.direction == d);
+      if (r.route == &l1) TEST(r.direction, ==, e);
+      if (r.route == &l2) TEST(r.direction, ==, d);
+      if (r.route == &l3) TEST(r.direction, ==, d);
     }
 
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l2) assert(r.direction == c);
-      if (r.route == &l3) assert(r.direction == c);
+      if (r.route == &l2) TEST(r.direction, ==, c);
+      if (r.route == &l3) TEST(r.direction, ==, c);
     }
 
     for (auto r : a->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == d);
+      if (r.route == &l1) TEST(r.direction, ==, d);
     }
   }
 
@@ -4408,18 +4408,18 @@ void ContractTest::run() {
     auto d = tg.addNd({{100.0, 0.0}});
     auto e = tg.addNd({{150.0, 0.0}});
 
-    assert(tg.getNds()->size() == 5);
+    TEST(tg.getNds()->size(), ==, 5);
 
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {50.0, 50.0}}});
     auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {100.0, 0.0}}});
     auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {150.0, 0.0}}});
 
-    assert(a->getAdjList().size() == 1);
-    assert(b->getAdjList().size() == 3);
-    assert(c->getAdjList().size() == 1);
-    assert(d->getAdjList().size() == 2);
-    assert(e->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 1);
+    TEST(b->getAdjList().size(), ==, 3);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().size(), ==, 2);
+    TEST(e->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -4441,7 +4441,7 @@ void ContractTest::run() {
     // no connection of line 2 from cb -> bd
     b->pl().addConnExc(&l2, bc, bd);
 
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     topo::config::TopoConfig cfg;
     topo::MapConstructor mc(&cfg, &tg);
@@ -4454,26 +4454,26 @@ void ContractTest::run() {
     //    1   |  1,2,3
     // a ---> d ---> e
 
-    assert(tg.getNds()->size() == 4);
-    assert(c->getAdjList().size() == 1);
-    assert(a->getAdjList().size() == 1);
-    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 3);
+    TEST(tg.getNds()->size(), ==, 4);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(a->getAdjList().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 3);
 
     for (auto r : e->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
-      if (r.route == &l2) assert(r.direction == 0);
-      if (r.route == &l3) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
+      if (r.route == &l2) TEST(r.direction, ==, 0);
+      if (r.route == &l3) TEST(r.direction, ==, 0);
     }
 
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l2) assert(r.direction == 0);
-      if (r.route == &l3) assert(r.direction == 0);
+      if (r.route == &l2) TEST(r.direction, ==, 0);
+      if (r.route == &l3) TEST(r.direction, ==, 0);
     }
 
     for (auto r : a->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
     }
   }
 
@@ -4495,7 +4495,7 @@ void ContractTest::run() {
     auto e = tg.addNd({{150.0, 0.0}});
     auto f = tg.addNd({{150.0, -50.0}});
 
-    assert(tg.getNds()->size() == 6);
+    TEST(tg.getNds()->size(), ==, 6);
 
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {50.0, 50.0}}});
@@ -4503,12 +4503,12 @@ void ContractTest::run() {
     auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {150.0, 0.0}}});
     auto df = tg.addEdg(d, f, {{{100.0, 0.0}, {150.0, -50.0}}});
 
-    assert(a->getAdjList().size() == 1);
-    assert(b->getAdjList().size() == 3);
-    assert(c->getAdjList().size() == 1);
-    assert(d->getAdjList().size() == 3);
-    assert(e->getAdjList().size() == 1);
-    assert(f->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 1);
+    TEST(b->getAdjList().size(), ==, 3);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().size(), ==, 3);
+    TEST(e->getAdjList().size(), ==, 1);
+    TEST(f->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -4531,7 +4531,7 @@ void ContractTest::run() {
     // no connection of line 3 from cb -> bd
     b->pl().addConnExc(&l3, bc, bd);
 
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     topo::config::TopoConfig cfg;
     topo::MapConstructor mc(&cfg, &tg);
@@ -4546,30 +4546,30 @@ void ContractTest::run() {
     //        |  2
     //        -----> f
 
-    assert(tg.getNds()->size() == 5);
-    assert(c->getAdjList().size() == 1);
-    assert(a->getAdjList().size() == 1);
-    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(f->getAdjList().front()->pl().getRoutes().size() == 1);
+    TEST(tg.getNds()->size(), ==, 5);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(a->getAdjList().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(f->getAdjList().front()->pl().getRoutes().size(), ==, 1);
 
     for (auto r : e->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
-      if (r.route == &l3) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
+      if (r.route == &l3) TEST(r.direction, ==, 0);
     }
 
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l2) assert(r.direction == 0);
-      if (r.route == &l3) assert(r.direction == 0);
+      if (r.route == &l2) TEST(r.direction, ==, 0);
+      if (r.route == &l3) TEST(r.direction, ==, 0);
     }
 
     for (auto r : a->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
     }
 
     for (auto r : f->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l2) assert(r.direction == 0);
+      if (r.route == &l2) TEST(r.direction, ==, 0);
     }
   }
 
@@ -4591,7 +4591,7 @@ void ContractTest::run() {
     auto e = tg.addNd({{150.0, 0.0}});
     auto f = tg.addNd({{150.0, -50.0}});
 
-    assert(tg.getNds()->size() == 6);
+    TEST(tg.getNds()->size(), ==, 6);
 
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {50.0, 50.0}}});
@@ -4599,12 +4599,12 @@ void ContractTest::run() {
     auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {150.0, 0.0}}});
     auto df = tg.addEdg(d, f, {{{100.0, 0.0}, {150.0, -50.0}}});
 
-    assert(a->getAdjList().size() == 1);
-    assert(b->getAdjList().size() == 3);
-    assert(c->getAdjList().size() == 1);
-    assert(d->getAdjList().size() == 3);
-    assert(e->getAdjList().size() == 1);
-    assert(f->getAdjList().size() == 1);
+    TEST(a->getAdjList().size(), ==, 1);
+    TEST(b->getAdjList().size(), ==, 3);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(d->getAdjList().size(), ==, 3);
+    TEST(e->getAdjList().size(), ==, 1);
+    TEST(f->getAdjList().size(), ==, 1);
 
     transitmapper::graph::Route l1("1", "1", "red");
     transitmapper::graph::Route l2("2", "2", "blue");
@@ -4627,7 +4627,7 @@ void ContractTest::run() {
     // no connection of line 3 from cb -> bd
     b->pl().addConnExc(&l3, bc, bd);
 
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 2);
 
     topo::config::TopoConfig cfg;
     topo::MapConstructor mc(&cfg, &tg);
@@ -4642,30 +4642,30 @@ void ContractTest::run() {
     //        |  2
     //        -----> f
 
-    assert(tg.getNds()->size() == 5);
-    assert(c->getAdjList().size() == 1);
-    assert(a->getAdjList().size() == 1);
-    assert(a->getAdjList().front()->pl().getRoutes().size() == 1);
-    assert(c->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(e->getAdjList().front()->pl().getRoutes().size() == 2);
-    assert(f->getAdjList().front()->pl().getRoutes().size() == 1);
+    TEST(tg.getNds()->size(), ==, 5);
+    TEST(c->getAdjList().size(), ==, 1);
+    TEST(a->getAdjList().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(e->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(f->getAdjList().front()->pl().getRoutes().size(), ==, 1);
 
     for (auto r : e->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
-      if (r.route == &l3) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
+      if (r.route == &l3) TEST(r.direction, ==, 0);
     }
 
     for (auto r : c->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l2) assert(r.direction == 0);
-      if (r.route == &l3) assert(r.direction == 0);
+      if (r.route == &l2) TEST(r.direction, ==, 0);
+      if (r.route == &l3) TEST(r.direction, ==, 0);
     }
 
     for (auto r : a->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l1) assert(r.direction == 0);
+      if (r.route == &l1) TEST(r.direction, ==, 0);
     }
 
     for (auto r : f->getAdjList().front()->pl().getRoutes()) {
-      if (r.route == &l2) assert(r.direction == 0);
+      if (r.route == &l2) TEST(r.direction, ==, 0);
     }
 
     //

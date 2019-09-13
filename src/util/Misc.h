@@ -9,6 +9,7 @@
 #include <cstring>
 #include <chrono>
 #include <sstream>
+#include <iostream>
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
@@ -19,6 +20,12 @@
 #define T_START(n)  auto _tstart_##n = std::chrono::high_resolution_clock::now()
 #define T_STOP(n) (std::chrono::duration_cast<microseconds>(std::chrono::high_resolution_clock::now() - _tstart_##n).count() / 1000.0)
 
+#define _TEST3(s, o, e) if (!(s o e)) {  std::cerr << "\n" << __FILE__ << ":" << __LINE__ << ": Test failed!\n  Expected " << #s << " " << #o " " << (e) << ", got " << (s) << std::endl;  exit(1);}
+#define _TEST2(s, e) _TEST3(s, ==, o)
+#define _TEST1(s) _TEST3(static_cast<bool>(s), ==, true)
+
+#define _GET_TEST_MACRO(_1,_2,_3,NAME,...) NAME
+#define TEST(...) _GET_TEST_MACRO(__VA_ARGS__, _TEST3, _TEST2, _TEST1)(__VA_ARGS__)
 
 namespace util {
 
@@ -146,9 +153,11 @@ class approx {
   friend bool operator==(approx const& lhs, double rhs) {
     return operator==(rhs, lhs);
   }
+
   friend bool operator!=(double lhs, approx const& rhs) {
     return !operator==(lhs, rhs);
   }
+
   friend bool operator!=(approx const& lhs, double rhs) {
     return !operator==(rhs, lhs);
   }
@@ -156,14 +165,22 @@ class approx {
   friend bool operator<=(double lhs, approx const& rhs) {
     return lhs < rhs._magnitude || lhs == rhs;
   }
+
   friend bool operator<=(approx const& lhs, double rhs) {
     return lhs._magnitude < rhs || lhs == rhs;
   }
+
   friend bool operator>=(double lhs, approx const& rhs) {
     return lhs > rhs._magnitude || lhs == rhs;
   }
+
   friend bool operator>=(approx const& lhs, double rhs) {
     return lhs._magnitude > rhs || lhs == rhs;
+  }
+
+  friend std::ostream& operator<< (std::ostream &out, const approx &a) {
+    out << "~" << a._magnitude;
+    return out;
   }
 
  private:

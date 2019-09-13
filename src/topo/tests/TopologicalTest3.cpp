@@ -66,7 +66,7 @@ void TopologicalTest3::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    assert(tg.getNds()->size() == 5);
+    TEST(tg.getNds()->size(), ==, 5);
 
     a = x->getAdjList().front()->getOtherNd(x);
     d = y->getAdjList().front()->getOtherNd(y);
@@ -119,10 +119,10 @@ void TopologicalTest3::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    assert(tg.getNds()->size() == 2);
+    TEST(tg.getNds()->size(), ==, 2);
 
     a = x->getAdjList().front()->getOtherNd(x);
     d = y->getAdjList().front()->getOtherNd(y);
-    assert(a->getAdjList().front()->pl().getRoutes().size() == 2);
+    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 2);
   }
 }
