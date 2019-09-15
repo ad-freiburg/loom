@@ -137,14 +137,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         }
 
         GridNode* frGrNd = gg->getGridNodeFrom(frCmbNd, gridSize * 1.7);
-
-        if (!frGrNd) {
-          LOG(ERROR) << "Could not sort in source node " << frCmbNd << " ("
-                     << frCmbNd->pl().getParent()->pl().getStops().front().name
-                     << ")" << std::endl;
-          break;
-        }
-
         // get surrounding displacement nodes
         double maxDis = getMaxDis(toCmbNd, cmbEdg, gridSize);
         std::set<GridNode*> toGrNds = gg->getGridNodesTo(toCmbNd, maxDis);
@@ -155,10 +147,17 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
           toGrNds = gg->getGridNodesTo(toCmbNd, maxDis);
         }
 
+        if (!frGrNd) {
+          LOG(ERROR) << "Could not sort in source node " << frCmbNd << " ("
+                     << frCmbNd->pl().getParent()->pl().getStops().front().name
+                     << ")";
+          break;
+        }
+
         if (toGrNds.size() == 0) {
           LOG(ERROR) << "Could not sort in target node " << toCmbNd << " ("
                      << toCmbNd->pl().getParent()->pl().getStops().front().name
-                     << ") with displacement distance " << maxDis << std::endl;
+                     << ") with displacement distance " << maxDis;
           break;
         }
 
@@ -203,7 +202,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         if (toGrNd == 0) {
           LOG(ERROR) << "Could not route to target node " << toCmbNd << " ("
                      << toCmbNd->pl().getParent()->pl().getStops().front().name
-                     << ")" << std::endl;
+                     << ")";
           break;
         }
 
@@ -266,8 +265,7 @@ PolyLine<double> Octilinearizer::buildPolylineFromRes(
     auto f = *revIt;
     if (!f->pl().isSecondary()) {
       if (pl.getLine().size() > 0 &&
-          util::geo::dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) >
-              0) {
+          dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) > 0) {
         BezierCurve<double> bc(pl.getLine().back(),
                                *f->getFrom()->pl().getParent()->pl().getGeom(),
                                *f->getFrom()->pl().getParent()->pl().getGeom(),
