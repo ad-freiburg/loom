@@ -14,12 +14,12 @@
 #include "octi/gridgraph/NodeCost.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
-#include "util/graph/DirGraph.h"
+#include "util/graph/UndirGraph.h"
 
 #include "octi/combgraph/CombEdgePL.h"
 #include "octi/combgraph/CombNodePL.h"
 
-using util::graph::DirGraph;
+using util::graph::UndirGraph;
 using util::graph::Node;
 using util::geo::Grid;
 using util::geo::Point;
@@ -32,6 +32,9 @@ namespace gridgraph {
 
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
 typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
+typedef std::set<util::graph::Edge<octi::combgraph::CombNodePL,
+                                   octi::combgraph::CombEdgePL>*>
+    CombEdgeSet;
 
 struct Candidate {
   Candidate(GridNode* n, double d) : n(n), d(d){};
@@ -47,7 +50,7 @@ struct Penalties {
   double verticalPen, horizontalPen, diagonalPen;
 };
 
-class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
+class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
  public:
   GridGraph(const util::geo::DBox& bbox, double cellSize, double spacer,
             const Penalties& pens);
@@ -83,21 +86,25 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   void settleGridNode(GridNode* n, CombNode* cn);
   bool isSettled(CombNode* cn);
 
+  void splitNode(GridNode* nd, GridEdge* a, GridEdge* b);
+
+  static GridNode* sharedParentNode(const GridEdge* a, const GridEdge* b);
+
  private:
   util::geo::DBox _bbox;
   Penalties _c;
 
   Grid<GridNode*, Point, double> _grid;
+  double _cellSize, _spacer;
   std::unordered_map<CombNode*, GridNode*> _settled;
 
-  std::set<util::graph::Edge<octi::combgraph::CombNodePL,
-                             octi::combgraph::CombEdgePL>*>
-  getResEdges(GridNode* n) const;
+  CombEdgeSet getResEdges(GridNode* n) const;
 
   void writeInitialCosts();
 
+  GridNode* writeNd(size_t x, size_t y, double xOff, double yOff);
+
   GridEdge* getNEdge(GridNode* a, GridNode* b);
-  GridEdge* getOtherEdge(GridEdge* e);
   void getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]);
 };
 }

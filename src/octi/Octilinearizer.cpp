@@ -246,11 +246,16 @@ void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
   if (e->getFrom() != from) pl.reverse();
 
   addResidentEdges(gg, e, res);
+  GridEdge* last = 0;
 
   for (auto f : res) {
     if (f->pl().isSecondary()) continue;
     gg->balanceEdge(f->getFrom()->pl().getParent(),
                     f->getTo()->pl().getParent());
+    if (last) {
+      gg->splitNode(GridGraph::sharedParentNode(last, f), last, f);
+    }
+    last = f;
   }
 
   e->pl().setPolyLine(pl);
@@ -303,8 +308,6 @@ void Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* e,
   for (auto f : res) {
     assert(f->pl().getResEdges().size() == 0);
     f->pl().addResidentEdge(e);
-    assert(g->getEdg(f->getTo(), f->getFrom())->pl().getResEdges().size() == 0);
-    g->getEdg(f->getTo(), f->getFrom())->pl().addResidentEdge(e);
   }
 }
 

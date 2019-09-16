@@ -10,17 +10,17 @@ using util::geo::PolyLine;
 using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
-GridEdgePL::GridEdgePL(const PolyLine<double>& pl, double c, bool secondary)
-    : _pl(pl), _c(c), _isSecondary(secondary), _closed(false), _visited(0) {}
+GridEdgePL::GridEdgePL(double c, bool secondary)
+    : _c(c), _isSecondary(secondary), _closed(false), _visited(0) {}
 
 // _____________________________________________________________________________
-GridEdgePL::GridEdgePL(const PolyLine<double>& pl, double c, bool secondary,
+GridEdgePL::GridEdgePL(double c, bool secondary,
                        bool closed)
-    : _pl(pl), _c(c), _isSecondary(secondary), _closed(closed), _visited(0) {}
+    : _c(c), _isSecondary(secondary), _closed(closed), _visited(0) {}
 
 // _____________________________________________________________________________
 const util::geo::Line<double>* GridEdgePL::getGeom() const {
-  return &_pl.getLine();
+  return 0;
 }
 
 // _____________________________________________________________________________
@@ -40,7 +40,7 @@ GridEdgePL::getResEdges() const {
 // _____________________________________________________________________________
 util::json::Dict GridEdgePL::getAttrs() const {
   util::json::Dict obj;
-  util::json::Array routes;
+  std::vector<std::string> routes;
   obj["cost"] = cost() == std::numeric_limits<double>::infinity()
                     ? "inf"
                     : util::toString(cost());
@@ -49,7 +49,7 @@ util::json::Dict GridEdgePL::getAttrs() const {
   for (auto r : _resEdges) {
     routes.push_back(util::toString(r));
   }
-  obj["routes"] = routes;
+  obj["routes"] = util::implode(routes.begin(), routes.end(), ",");
 
   return obj;
 }

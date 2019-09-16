@@ -19,8 +19,8 @@ namespace gridgraph {
 
 class GridEdgePL : util::geograph::GeoEdgePL<double> {
  public:
-  GridEdgePL(const PolyLine<double>& p, double c, bool secondar);
-  GridEdgePL(const PolyLine<double>& p, double c, bool secondar, bool closed);
+  GridEdgePL(double c, bool secondar);
+  GridEdgePL(double c, bool secondar, bool closed);
 
   void addRoute(std::string);
   const std::set<util::graph::Edge<octi::combgraph::CombNodePL,
@@ -43,7 +43,6 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   void setVisited(int i);
 
  private:
-  PolyLine<double> _pl;
   double _c;
 
   bool _isSecondary;

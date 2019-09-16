@@ -45,7 +45,6 @@ class GridNodePL : util::geograph::GeoNodePL<double> {
   Point<double> _pos;
 
   GridNode* _parent;
-
   GridNode* _ports[8];
 
   size_t _x, _y;
