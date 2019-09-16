@@ -32,6 +32,27 @@ GridNode* GridNodePL::getPort(size_t i) const {
 void GridNodePL::setPort(size_t p, GridNode* n) { _ports[p] = n; }
 
 // _____________________________________________________________________________
+const std::vector<GridNode*>& GridNodePL::getMetaPorts(size_t i) const {
+  return _metaPorts[i];
+}
+
+// _____________________________________________________________________________
+void GridNodePL::addMetaPort(size_t i, GridNode* nd) {
+  _metaPorts[i].push_back(nd);
+}
+
+// _____________________________________________________________________________
+const std::vector<GridNode*>& GridNodePL::getStepChilds() const {
+  return _stepChilds;
+}
+
+// _____________________________________________________________________________
+void GridNodePL::addStepChild(GridNode* nd) {
+  _stepChilds.push_back(nd);
+}
+
+
+// _____________________________________________________________________________
 void GridNodePL::setXY(size_t x, size_t y) {
   _x = x;
   _y = y;

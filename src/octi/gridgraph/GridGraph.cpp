@@ -91,6 +91,8 @@ GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
 // _____________________________________________________________________________
 void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
   if (a == b) return;
+
+  // search the edge, TODO
   size_t dir = 0;
   for (; dir < 8; dir++) {
     if (getEdg(a->pl().getPort(dir), b->pl().getPort((dir + 4) % 8))) {
@@ -157,7 +159,7 @@ void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
     auto p = n->pl().getPort(i);
     auto neigh = getNeighbor(x, y, i);
 
-    if (neigh && getEdg(p, neigh->pl().getPort((i + 4) % 8)) && 
+    if (neigh && getEdg(p, neigh->pl().getPort((i + 4) % 8)) &&
         getEdg(p, neigh->pl().getPort((i + 4) % 8))->pl().getResEdges().size() >
             0) {
       outgoing[i] = *getEdg(p, neigh->pl().getPort((i + 4) % 8))
