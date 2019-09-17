@@ -15,6 +15,7 @@
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/UndirGraph.h"
+#include "util/graph/Dijkstra.h"
 
 #include "octi/combgraph/CombEdgePL.h"
 #include "octi/combgraph/CombNodePL.h"
@@ -29,6 +30,10 @@ using octi::combgraph::CombEdge;
 
 namespace octi {
 namespace gridgraph {
+
+typedef util::graph::Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
+typedef util::graph::Dijkstra::NList<GridNodePL, GridEdgePL> GrNdList;
+
 
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
 typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
@@ -71,7 +76,6 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
 
   NodeCost addCostVector(GridNode* n, const NodeCost& addC);
   void removeCostVector(GridNode* n, const NodeCost& addC);
-  std::pair<size_t, size_t> getNodeCoords(GridNode* n) const;
 
   void openNodeSink(GridNode* n, double cost);
   void closeNodeSink(GridNode* n);
@@ -86,7 +90,8 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
   void settleGridNode(GridNode* n, CombNode* cn);
   bool isSettled(CombNode* cn);
 
-  void splitNode(GridNode* nd, GridEdge* a, GridEdge* b);
+  std::pair<GridNode*, std::pair<size_t, size_t>> splitNode(GridNode* nd, GridEdge* a, GridEdge* b);
+  void splitAlong(const GrEdgList& path);
 
   static GridNode* sharedParentNode(const GridEdge* a, const GridEdge* b);
 

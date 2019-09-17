@@ -21,6 +21,7 @@ using octi::gridgraph::GridNodePL;
 using octi::gridgraph::GridEdgePL;
 using octi::gridgraph::Penalties;
 using octi::gridgraph::NodeCost;
+using octi::gridgraph::GrEdgList;
 
 using shared::transitgraph::TransitGraph;
 using shared::transitgraph::TransitNode;
@@ -33,8 +34,7 @@ using octi::combgraph::CombEdge;
 
 using util::graph::Dijkstra;
 
-typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
-typedef Dijkstra::NList<GridNodePL, GridEdgePL> GrNdList;
+using octi::gridgraph::GrEdgList;
 
 // comparator for nodes, based on degree
 struct NodeCmp {
@@ -77,12 +77,10 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
     }
 
     for (auto n : to) {
-      auto coords = g->getNodeCoords(n);
-
       for (size_t i = 0; i < 8; i++) {
-        auto neigh = g->getNeighbor(coords.first, coords.second, i);
+        auto neigh = g->getNeighbor(n->pl().getX(), n->pl().getY(), i);
         if (neigh && to.find(neigh) == to.end()) {
-          hull.push_back(g->getNodeCoords(n));
+          hull.push_back({n->pl().getX(), n->pl().getY()});
           break;
         }
       }
@@ -93,10 +91,9 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
     if (to.find(from->pl().getParent()) != to.end()) return 0;
 
     size_t ret = std::numeric_limits<size_t>::max();
-    auto xy = g->getNodeCoords(from->pl().getParent());
 
     for (auto t : hull) {
-      size_t temp = g->heurCost(xy.first, xy.second, t.first, t.second);
+      size_t temp = g->heurCost(from->pl().getX(), from->pl().getY(), t.first, t.second);
       if (temp < ret) ret = temp;
     }
 

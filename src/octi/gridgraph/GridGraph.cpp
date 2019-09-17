@@ -71,11 +71,6 @@ GridNode* GridGraph::getNode(size_t x, size_t y) const {
 }
 
 // _____________________________________________________________________________
-std::pair<size_t, size_t> GridGraph::getNodeCoords(GridNode* n) const {
-  return {n->pl().getX(), n->pl().getY()};
-}
-
-// _____________________________________________________________________________
 GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
   int8_t x = 1;
   if (i % 4 == 0) x = 0;
@@ -90,6 +85,8 @@ GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
 
 // _____________________________________________________________________________
 void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
+  return;
+
   if (a == b) return;
 
   // search the edge, TODO
@@ -100,9 +97,8 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
     }
   }
 
-  auto xy = getNodeCoords(a);
-  size_t x = xy.first;
-  size_t y = xy.second;
+  size_t x = a->pl().getX();
+  size_t y = a->pl().getY();
 
   // this closes the grid edge
   getNEdge(a, b)->pl().setCost(INF);
@@ -150,9 +146,8 @@ GridEdge* GridGraph::getNEdge(GridNode* a, GridNode* b) {
 
 // _____________________________________________________________________________
 void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
-  auto xy = getNodeCoords(n);
-  size_t x = xy.first;
-  size_t y = xy.second;
+  size_t x = n->pl().getX();
+  size_t y = n->pl().getY();
 
   // if some outgoing edge is taken, dont put new edge next to it
   for (size_t i = 0; i < 8; i++) {
@@ -176,9 +171,10 @@ void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
 NodeCost GridGraph::spacingPenalty(GridNode* n, CombNode* origNode,
                                    CombEdge* e) {
   NodeCost addC;
-  auto xy = getNodeCoords(n);
-  size_t x = xy.first;
-  size_t y = xy.second;
+  return addC;
+
+  size_t x = n->pl().getX();
+  size_t y = n->pl().getY();
 
   // std::cerr << "Checking " << origNode->pl().toString() << std::endl;
 
@@ -267,6 +263,7 @@ NodeCost GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode,
                                      CombEdge* e) {
   CombEdge* outgoing[8];
   NodeCost addC;
+  return addC;
   getSettledOutgoingEdges(n, outgoing);
 
   // topological blocking
@@ -294,6 +291,7 @@ NodeCost GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode,
 // _____________________________________________________________________________
 NodeCost GridGraph::outDegDeviationPenalty(CombNode* origNode, CombEdge* e) {
   NodeCost ret;
+  return ret;
   double degA = util::geo::angBetween(
       *origNode->pl().getParent()->pl().getGeom(),
       *e->getOtherNd(origNode)->pl().getParent()->pl().getGeom());
@@ -314,9 +312,9 @@ NodeCost GridGraph::outDegDeviationPenalty(CombNode* origNode, CombEdge* e) {
 // _____________________________________________________________________________
 NodeCost GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
   NodeCost invCost;
-  auto xy = getNodeCoords(n);
-  size_t x = xy.first;
-  size_t y = xy.second;
+  return invCost;
+  size_t x = n->pl().getX();
+  size_t y = n->pl().getY();
 
   for (size_t i = 0; i < 8; i++) {
     auto p = n->pl().getPort(i);
@@ -353,9 +351,9 @@ NodeCost GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
 
 // _____________________________________________________________________________
 void GridGraph::removeCostVector(GridNode* n, const NodeCost& addC) {
-  auto xy = getNodeCoords(n);
-  size_t x = xy.first;
-  size_t y = xy.second;
+  return;
+  size_t x = n->pl().getX();
+  size_t y = n->pl().getY();
 
   for (size_t i = 0; i < 8; i++) {
     auto p = n->pl().getPort(i);
@@ -453,9 +451,8 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 // _____________________________________________________________________________
 void GridGraph::openNode(GridNode* n) {
   if (!n->pl().isClosed()) return;
-  auto xy = getNodeCoords(n);
-  size_t x = xy.first;
-  size_t y = xy.second;
+  size_t x = n->pl().getX();
+  size_t y = n->pl().getY();
 
   for (size_t i = 0; i < 8; i++) {
     auto port = n->pl().getPort(i);
@@ -473,9 +470,8 @@ void GridGraph::openNode(GridNode* n) {
 // _____________________________________________________________________________
 void GridGraph::closeNode(GridNode* n) {
   if (n->pl().isClosed()) return;
-  auto xy = getNodeCoords(n);
-  size_t x = xy.first;
-  size_t y = xy.second;
+  size_t x = n->pl().getX();
+  size_t y = n->pl().getY();
 
   for (size_t i = 0; i < 8; i++) {
     auto port = n->pl().getPort(i);
@@ -545,11 +541,14 @@ bool GridGraph::isSettled(CombNode* cn) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::splitNode(GridNode* nd, GridEdge* a, GridEdge* b) {
+std::pair<GridNode*, std::pair<size_t, size_t>> GridGraph::splitNode(GridNode* nd, GridEdge* a, GridEdge* b) {
   // copy the node
   auto nn = writeNd(nd->pl().getX(), nd->pl().getY(), _spacer * 2.5, _spacer * 2.5);
 
   bool in = false;
+
+  std::pair<GridNode*, std::pair<size_t, size_t>> ret;
+  ret.first = nn;
 
   for (size_t p = 0; p < 8; p++) {
     GridNode* fromN = nd->pl().getPort(p);
@@ -560,14 +559,42 @@ void GridGraph::splitNode(GridNode* nd, GridEdge* a, GridEdge* b) {
     if (!edg) continue;
 
     if ((edg == a || edg == b)) {
-      // copy the edge to the new node
-      addEdg(nn->pl().getPort(p), toN->pl().getPort((p + 4) % 8), edg->pl());
+
+      if (edg == a) ret.second.first = p;
+      if (edg == b) ret.second.second = p;
       if (in) break;
       if (!in) in = true;
     } else if (in) {
       addEdg(nn->pl().getPort(p), toN->pl().getPort((p + 4) % 8), edg->pl());
       delEdg(edg->getFrom(), edg->getTo());
     }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+void GridGraph::splitAlong(const GrEdgList& path) {
+  GridEdge* last = 0;
+  std::vector<std::pair<GridNode*, std::pair<size_t, size_t>>> nodePortPairs;
+  std::vector<GridEdge*> edges;
+
+  for (auto e : path) {
+    if (e->pl().isSecondary()) continue;
+    edges.push_back(e);
+    if (last) {
+      auto nd = GridGraph::sharedParentNode(last, e);
+      assert(nd);
+      auto newNdWithPorts = splitNode(nd, last, e);
+      nodePortPairs.push_back(newNdWithPorts);
+    }
+    last = e;
+  }
+
+  for (size_t i = 1; i < edges.size() - 1; i++) {
+    assert(i < nodePortPairs.size());
+    addEdg(nodePortPairs[i - 1].first->pl().getPort(nodePortPairs[i - 1].second.second),
+nodePortPairs[i].first->pl().getPort(nodePortPairs[i].second.first), edges[i]->pl());
   }
 }
 
