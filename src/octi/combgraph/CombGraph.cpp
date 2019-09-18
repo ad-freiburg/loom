@@ -94,61 +94,6 @@ void CombGraph::combineDeg2() {
 }
 
 // _____________________________________________________________________________
-void CombGraph::getTransitGraph(TransitGraph* target) const {
-  std::map<TransitNode*, TransitNode*> m;
-
-  for (auto n : getNds()) {
-    for (auto f : n->getAdjListOut()) {
-      if (f->getFrom() != n) continue;
-      if (f->pl().getGeneration() < 0) continue;
-      double tot = f->pl().getChilds().size();
-      double d = f->pl().getPolyLine().getLength();
-      double step = d / tot;
-
-      int i = 0;
-
-      auto pre = n->pl().getParent();
-
-      for (auto e : f->pl().getChilds()) {
-        auto from = e->getFrom();
-        auto to = e->getTo();
-
-        PolyLine<double> pl = f->pl().getPolyLine().getSegment(
-            (step * i) / d, (step * (i + 1)) / d);
-
-        if (from == pre) {
-          pre = to;
-        } else {
-          pl.reverse();
-          pre = from;
-        }
-
-        if (m.find(from) == m.end()) {
-          auto payload = from->pl();
-          payload.setGeom(pl.getLine().front());
-          auto tfrom = target->addNd(payload);
-          m[from] = tfrom;
-        }
-
-        if (m.find(to) == m.end()) {
-          auto payload = to->pl();
-          payload.setGeom(pl.getLine().back());
-          auto tto = target->addNd(payload);
-          m[to] = tto;
-        }
-
-        auto payload = e->pl();
-        payload.setPolyline(pl);
-        payload.setGeneration(f->pl().getGeneration());
-        target->addEdg(m[from], m[to], payload);
-
-        i++;
-      }
-    }
-  }
-}
-
-// _____________________________________________________________________________
 void CombGraph::writeEdgeOrdering() {
   for (auto n : *getNds()) {
     n->pl().setEdgeOrdering(getEdgeOrderingForNode(n));

@@ -142,7 +142,9 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         std::set<GridNode*> toGrNds = gg->getGridNodesTo(toCmbNd, maxDis);
 
         // TODO: abort criteria
-        while (!toGrNds.size()) {
+        size_t i = 0;
+        while (!toGrNds.size() && i < 5) {
+          i++;
           maxDis *= 2;
           toGrNds = gg->getGridNodesTo(toCmbNd, maxDis);
         }
@@ -217,7 +219,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         gg->closeNodeSink(frGrNd);
         gg->closeNode(frGrNd);
 
-        settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, res, cmbEdg, gen);
+        settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, res, cmbEdg);
 
         gen++;
       }
@@ -227,9 +229,10 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   }
 
   TransitGraph ret;
-  cg.getTransitGraph(&ret);
 
   *retGg = gg;
+
+  writeTrGraph(gg, &ret);
 
   return ret;
 }
@@ -237,13 +240,10 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 // _____________________________________________________________________________
 void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
                                GridGraph* gg, CombNode* from, CombNode* to,
-                               const GrEdgList& res, CombEdge* e, size_t gen) {
+                               const GrEdgList& res, CombEdge* e) {
   gg->settleGridNode(toGrNd, to);
   gg->settleGridNode(frGrNd, from);
 
-  // write everything to the result graph
-  PolyLine<double> pl = buildPolylineFromRes(res);
-  if (e->getFrom() != from) pl.reverse();
 
   addResidentEdges(gg, e, res);
 
@@ -254,38 +254,6 @@ void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
     gg->balanceEdge(f->getFrom()->pl().getParent(),
                     f->getTo()->pl().getParent());
   }
-
-  e->pl().setPolyLine(pl);
-  e->pl().setGeneration(gen);
-}
-
-// _____________________________________________________________________________
-PolyLine<double> Octilinearizer::buildPolylineFromRes(
-    const std::vector<GridEdge*>& res) {
-  PolyLine<double> pl;
-  for (auto revIt = res.rbegin(); revIt != res.rend(); revIt++) {
-    auto f = *revIt;
-    if (!f->pl().isSecondary()) {
-      if (pl.getLine().size() > 0 &&
-          dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) > 0) {
-        BezierCurve<double> bc(pl.getLine().back(),
-                               *f->getFrom()->pl().getParent()->pl().getGeom(),
-                               *f->getFrom()->pl().getParent()->pl().getGeom(),
-                               *f->getFrom()->pl().getGeom());
-
-        for (auto p : bc.render(10).getLine()) pl << p;
-      } else {
-        pl << *f->getFrom()->pl().getParent()->pl().getGeom();
-      }
-
-      pl << *f->getFrom()->pl().getGeom();
-      pl << *f->getTo()->pl().getGeom();
-    }
-  }
-
-  if (res.size()) pl << *res.front()->getTo()->pl().getParent()->pl().getGeom();
-
-  return pl;
 }
 
 // _____________________________________________________________________________
@@ -303,7 +271,6 @@ double Octilinearizer::getCostFromRes(const std::vector<GridEdge*>& res) {
 void Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* e,
                                       const std::vector<GridEdge*>& res) {
   for (auto f : res) {
-    assert(f->pl().getResEdges().size() == 0);
     f->pl().addResidentEdge(e);
   }
 }
@@ -312,7 +279,12 @@ void Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* e,
 NodeCost Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode,
                                       CombEdge* e, GridGraph* g) {
   NodeCost c = g->spacingPenalty(n, origNode, e);
-  c += g->outDegDeviationPenalty(origNode, e);
+  // c += g->outDegDeviationPenalty(origNode, e);
 
   return g->addCostVector(n, c);
+}
+
+// _____________________________________________________________________________
+void Octilinearizer::writeTrGraph(GridGraph* gg, TransitGraph* tg) {
+  std::cerr << "Writing tr graph..." << std::endl;
 }

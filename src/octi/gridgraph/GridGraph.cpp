@@ -112,13 +112,6 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
 
       // this closes edges b that cross this edge a - we _never_ want to
       // allow that
-      // +-----------+
-      // | \       / |
-      // |   \   /a  |
-      // |     \     |
-      // |   /   \   |
-      // | /      b\ |
-      // +-----------+
       for (auto e : es) e->pl().setCost(INF);
     }
   }
@@ -229,7 +222,6 @@ NodeCost GridGraph::spacingPenalty(GridNode* n, CombNode* origNode,
 // _____________________________________________________________________________
 NodeCost GridGraph::outDegDeviationPenalty(CombNode* origNode, CombEdge* e) {
   NodeCost ret;
-  return ret;
   double degA = util::geo::angBetween(
       *origNode->pl().getParent()->pl().getGeom(),
       *e->getOtherNd(origNode)->pl().getParent()->pl().getGeom());
@@ -391,12 +383,11 @@ void GridGraph::openNode(GridNode* n) {
   size_t x = n->pl().getX();
   size_t y = n->pl().getY();
 
-  for (size_t i = 0; i < 8; i++) {
-    auto port = n->pl().getPort(i);
-    auto neigh = getNeighbor(x, y, i);
-    if (!neigh || !port || neigh->pl().isClosed()) continue;
-    auto e = getEdg(port, neigh->pl().getPort((i + 4) % 8));
-    if (e && e->pl().getResEdges().size() == 0) {
+  for (size_t p = 0; p < 8; p++) {
+    auto neigh = getNeighbor(x, y, p);
+    if (!neigh || neigh->pl().isClosed()) continue;
+    auto es = getNEdges(n, neigh);
+    for (auto e : es) {
       e->pl().open();
     }
   }
@@ -410,13 +401,13 @@ void GridGraph::closeNode(GridNode* n) {
   size_t x = n->pl().getX();
   size_t y = n->pl().getY();
 
-  for (size_t i = 0; i < 8; i++) {
-    auto port = n->pl().getPort(i);
-    auto neigh = getNeighbor(x, y, i);
-    if (!neigh || !port) continue;
-    auto e = getEdg(port, neigh->pl().getPort((i + 4) % 8));
-
-    if (e) e->pl().close();
+  for (size_t p = 0; p < 8; p++) {
+    auto neigh = getNeighbor(x, y, p);
+    if (!neigh) continue;
+    auto es = getNEdges(n, neigh);
+    for (auto e : es) {
+      e->pl().close();
+    }
   }
 
   n->pl().setClosed(true);

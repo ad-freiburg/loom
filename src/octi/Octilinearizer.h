@@ -115,7 +115,6 @@ class Octilinearizer {
  private:
   double getMaxDis(CombNode* to, CombEdge* e, double gridSize);
   void removeEdgesShorterThan(TransitGraph* g, double d);
-  PolyLine<double> buildPolylineFromRes(const std::vector<GridEdge*>& l);
   double getCostFromRes(const std::vector<GridEdge*>& l);
   void addResidentEdges(gridgraph::GridGraph* g, CombEdge* e,
                         const std::vector<GridEdge*>& res);
@@ -124,7 +123,9 @@ class Octilinearizer {
                         GridGraph* g);
   void settleRes(GridNode* startGridNd, GridNode* toGridNd, GridGraph* gg,
                  CombNode* from, CombNode* to, const GrEdgList& res,
-                 CombEdge* e, size_t gen);
+                 CombEdge* e);
+
+  void writeTrGraph(GridGraph* gg, TransitGraph* tg);
 };
 
 }  // namespace octi
