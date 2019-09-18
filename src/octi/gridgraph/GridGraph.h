@@ -14,8 +14,8 @@
 #include "octi/gridgraph/NodeCost.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
-#include "util/graph/UndirGraph.h"
 #include "util/graph/Dijkstra.h"
+#include "util/graph/UndirGraph.h"
 
 #include "octi/combgraph/CombEdgePL.h"
 #include "octi/combgraph/CombNodePL.h"
@@ -33,7 +33,6 @@ namespace gridgraph {
 
 typedef util::graph::Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
 typedef util::graph::Dijkstra::NList<GridNodePL, GridEdgePL> GrNdList;
-
 
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
 typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
@@ -65,7 +64,6 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
   const Grid<GridNode*, Point, double>& getGrid() const;
 
   NodeCost spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
-  NodeCost topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
   NodeCost outDegDeviationPenalty(CombNode* origNode, CombEdge* e);
   void balanceEdge(GridNode* a, GridNode* b);
 
@@ -90,7 +88,9 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
   void settleGridNode(GridNode* n, CombNode* cn);
   bool isSettled(CombNode* cn);
 
-  std::pair<GridNode*, std::pair<size_t, size_t>> splitNode(GridNode* nd, GridEdge* a, GridEdge* b);
+  std::pair<GridNode*, std::pair<size_t, size_t>> splitNode(GridNode* nd,
+                                                            GridEdge* a,
+                                                            GridEdge* b);
   void splitAlong(const GrEdgList& path);
 
   static GridNode* sharedParentNode(const GridEdge* a, const GridEdge* b);
@@ -107,10 +107,11 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
 
   void writeInitialCosts();
 
-  GridNode* writeNd(size_t x, size_t y, double xOff, double yOff);
+  GridNode* writeNd(size_t x, size_t y, double xOff, double yOff,
+                    GridNode* stepMother);
 
-  GridEdge* getNEdge(GridNode* a, GridNode* b);
-  void getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]);
+  std::vector<GridEdge*> getNEdges(GridNode* a, GridNode* b);
+  void getSettledOutgoingEdges(GridNode* n, std::set<CombEdge*> outgoing[8]);
 };
 }
 }

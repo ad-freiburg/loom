@@ -31,11 +31,15 @@ class GridNodePL : util::geograph::GeoNodePL<double> {
   GridNode* getParent() const;
   void setParent(GridNode* n);
 
+  GridNode* getStepMother() const;
+  void setStepMother(GridNode* n);
+
   GridNode* getPort(size_t i) const;
   void setPort(size_t p, GridNode* nd);
 
   const std::vector<GridNode*>& getMetaPorts(size_t i) const;
   void addMetaPort(size_t i, GridNode* nd);
+  void clearMetaPorts();
 
   const std::vector<GridNode*>& getStepChilds() const;
   void addStepChild(GridNode* nd);
@@ -51,6 +55,7 @@ class GridNodePL : util::geograph::GeoNodePL<double> {
   Point<double> _pos;
 
   GridNode* _parent;
+  GridNode* _stepMother;
   GridNode* _ports[8];
 
   // TODO: move out of nodepl

@@ -312,8 +312,6 @@ void Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* e,
 NodeCost Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode,
                                       CombEdge* e, GridGraph* g) {
   NodeCost c = g->spacingPenalty(n, origNode, e);
-  c += g->topoBlockPenalty(n, origNode, e);
-  // c.normalize();
   c += g->outDegDeviationPenalty(origNode, e);
 
   return g->addCostVector(n, c);
