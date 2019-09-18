@@ -287,4 +287,29 @@ NodeCost Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode,
 // _____________________________________________________________________________
 void Octilinearizer::writeTrGraph(GridGraph* gg, TransitGraph* tg) {
   std::cerr << "Writing tr graph..." << std::endl;
+
+  // PolyLine<double> pl;
+  // for (auto revIt = res.rbegin(); revIt != res.rend(); revIt++) {
+    // auto f = *revIt;
+    // if (!f->pl().isSecondary()) {
+      // if (pl.getLine().size() > 0 &&
+          // dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) > 0) {
+        // BezierCurve<double> bc(pl.getLine().back(),
+                               // *f->getFrom()->pl().getParent()->pl().getGeom(),
+                               // *f->getFrom()->pl().getParent()->pl().getGeom(),
+                               // *f->getFrom()->pl().getGeom());
+
+        // for (auto p : bc.render(10).getLine()) pl << p;
+      // } else {
+        // pl << *f->getFrom()->pl().getParent()->pl().getGeom();
+      // }
+
+      // pl << *f->getFrom()->pl().getGeom();
+      // pl << *f->getTo()->pl().getGeom();
+    // }
+  // }
+
+  // if (res.size()) pl << *res.front()->getTo()->pl().getParent()->pl().getGeom();
+
+  // return pl;
 }
