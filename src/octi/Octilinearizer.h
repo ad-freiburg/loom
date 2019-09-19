@@ -93,7 +93,8 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
     size_t ret = std::numeric_limits<size_t>::max();
 
     for (auto t : hull) {
-      size_t temp = g->heurCost(from->pl().getX(), from->pl().getY(), t.first, t.second);
+      size_t temp =
+          g->heurCost(from->pl().getX(), from->pl().getY(), t.first, t.second);
       if (temp < ret) ret = temp;
     }
 
@@ -116,16 +117,14 @@ class Octilinearizer {
   double getMaxDis(CombNode* to, CombEdge* e, double gridSize);
   void removeEdgesShorterThan(TransitGraph* g, double d);
   double getCostFromRes(const std::vector<GridEdge*>& l);
-  void addResidentEdges(gridgraph::GridGraph* g, CombEdge* e,
-                        const std::vector<GridEdge*>& res);
 
   NodeCost writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
                         GridGraph* g);
   void settleRes(GridNode* startGridNd, GridNode* toGridNd, GridGraph* gg,
                  CombNode* from, CombNode* to, const GrEdgList& res,
-                 CombEdge* e);
+                 CombEdge* e, CombGraph* cg);
 
-  void writeTrGraph(GridGraph* gg, TransitGraph* tg);
+  void writeTrGraph(CombGraph* cg, GridGraph* gg, TransitGraph* tg);
 };
 
 }  // namespace octi

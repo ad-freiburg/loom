@@ -83,10 +83,11 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
   GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
   GridNode* getGridNodeFrom(CombNode* n, double maxDis);
-  std::set<GridNode*> getGridNodesTo(CombNode* n, double maxDis);
+  std::set<GridNode*> getGridNodesTo(CombNode* n, GridNode* ex, double maxDis);
 
   void settleGridNode(GridNode* n, CombNode* cn);
   bool isSettled(CombNode* cn);
+  bool isSettled(GridNode* gn);
 
   std::pair<GridNode*, std::pair<size_t, size_t>> splitNode(GridNode* nd,
                                                             GridEdge* a,
@@ -95,6 +96,10 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
 
   static GridNode* sharedParentNode(const GridEdge* a, const GridEdge* b);
 
+  void addResidentEdges(CombEdge* e, GridNode* frGrNd, const std::vector<GridEdge*>& res, GridNode* toGrNd);
+
+  const std::vector<GridNode*>& getGridNodes(const CombEdge* ce) const;
+
  private:
   util::geo::DBox _bbox;
   Penalties _c;
@@ -102,6 +107,9 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
   Grid<GridNode*, Point, double> _grid;
   double _cellSize, _spacer;
   std::unordered_map<CombNode*, GridNode*> _settled;
+
+  std::unordered_map<const CombEdge*, std::vector<GridNode*>> _settledEdges;
+  std::vector<GridNode*> _emptyNdVec;
 
   CombEdgeSet getResEdges(GridNode* n) const;
 

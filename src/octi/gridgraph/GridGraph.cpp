@@ -95,17 +95,23 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
     }
   }
 
-  size_t x = a->pl().getX();
-  size_t y = a->pl().getY();
+  size_t xa = a->pl().getX();
+  size_t ya = a->pl().getY();
 
-  // this closes the grid edge
+  size_t xb = b->pl().getX();
+  size_t yb = b->pl().getY();
 
-  // TODO: add to every ingoing edge the cost of using the same edge twice
-  // getNEdge(a, b)->pl().setCost(INF);
+  for (size_t p = 0; p < 8; p++) {
+    auto neighA = getNeighbor(xa, ya, p);
+    for (auto e : getNEdges(a, neighA)) e->pl().setUsed();
+
+    auto neighB = getNeighbor(xb, yb, p);
+    for (auto e : getNEdges(b, neighB)) e->pl().setUsed();
+  }
 
   if (dir == 1 || dir == 3 || dir == 5 || dir == 7) {
-    auto na = getNeighbor(x, y, (dir + 7) % 8);
-    auto nb = getNeighbor(x, y, (dir + 1) % 8);
+    auto na = getNeighbor(xa, ya, (dir + 7) % 8);
+    auto nb = getNeighbor(xa, ya, (dir + 1) % 8);
 
     if (na && nb) {
       auto es = getNEdges(na, nb);
@@ -121,8 +127,8 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
 std::vector<GridEdge*> GridGraph::getNEdges(GridNode* a, GridNode* b) {
   if (!a) return {};
   if (!b) return {};
-  a = a->pl().getStepMother();
-  b = b->pl().getStepMother();
+  a = a->pl().getParent()->pl().getStepMother();
+  b = b->pl().getParent()->pl().getStepMother();
 
   std::vector<GridEdge*> ret;
 
@@ -148,7 +154,6 @@ void GridGraph::getSettledOutgoingEdges(GridNode* n,
 
   for (size_t i = 0; i < 8; i++) {
     auto neigh = getNeighbor(x, y, i);
-
     auto es = getNEdges(n, neigh);
 
     for (auto e : es) {
@@ -204,16 +209,15 @@ NodeCost GridGraph::spacingPenalty(GridNode* n, CombNode* origNode,
       addC[(i + (8 - j)) % 8] += pen * (1.0 - (j - 1.0) / (ddd));
     }
 
-    // negative cost here means that the edge is going to be closed
-    addC[i] = -1.0 * std::numeric_limits<double>::max();
+    // addC[i] = pen;
 
-    for (int j = 1; j <= dCw; j++) {
-      addC[(i + j) % 8] = -1.0 * std::numeric_limits<double>::max();
-    }
+    // for (int j = 1; j <= dCw; j++) {
+      // addC[(i + j) % 8] = -1.0 * std::numeric_limits<double>::max();
+    // }
 
-    for (int j = 1; j <= dCCw; j++) {
-      addC[(i + (8 - j)) % 8] = -1.0 * std::numeric_limits<double>::max();
-    }
+    // for (int j = 1; j <= dCCw; j++) {
+      // addC[(i + (8 - j)) % 8] = -1.0 * std::numeric_limits<double>::max();
+    // }
   }
 
   return addC;
@@ -435,22 +439,27 @@ GridNode* GridGraph::getGridNodeFrom(CombNode* n, double maxDis) {
     auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis);
 
     while (!cands.empty()) {
-      if (!cands.top().n->pl().isClosed()) return cands.top().n;
+      if (!cands.top().n->pl().isClosed() && cands.top().n->pl().getStepChilds().size() == 0) {
+        return cands.top().n;
+      }
       cands.pop();
     }
     return 0;
   }
+
   return _settled[n];
 }
 
 // _____________________________________________________________________________
-std::set<GridNode*> GridGraph::getGridNodesTo(CombNode* n, double maxDis) {
+std::set<GridNode*> GridGraph::getGridNodesTo(CombNode* n, GridNode* ex, double maxDis) {
   std::set<GridNode*> tos;
   if (!isSettled(n)) {
     auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis);
 
     while (!cands.empty()) {
-      if (!cands.top().n->pl().isClosed()) tos.insert(cands.top().n);
+      if (cands.top().n != ex && !cands.top().n->pl().isClosed() && cands.top().n->pl().getStepChilds().size() == 0) {
+        tos.insert(cands.top().n);
+      }
       cands.pop();
     }
   } else {
@@ -461,11 +470,34 @@ std::set<GridNode*> GridGraph::getGridNodesTo(CombNode* n, double maxDis) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::settleGridNode(GridNode* n, CombNode* cn) { _settled[cn] = n; }
+void GridGraph::settleGridNode(GridNode* n, CombNode* cn) {
+  if (_settled.find(cn) != _settled.end() && _settled.find(cn)->second == n) {
+    assert(_settled[cn] == n);
+    return;
+  }
+  for (auto kv :_settled) {
+    // check for double settle
+    assert(kv.second != n);
+  }
+  std::set<CombEdge*> outgoing[8];
+  getSettledOutgoingEdges(n, outgoing);
+  for (auto o : outgoing) assert(o.size() == 0);
+
+  _settled[cn] = n;
+}
 
 // _____________________________________________________________________________
 bool GridGraph::isSettled(CombNode* cn) {
   return _settled.find(cn) != _settled.end();
+}
+
+// _____________________________________________________________________________
+bool GridGraph::isSettled(GridNode* gn) {
+  for (auto kv :_settled) {
+    // check for double settle
+    if (kv.second == gn) return true;
+  }
+  return false;
 }
 
 // _____________________________________________________________________________
@@ -519,6 +551,7 @@ void GridGraph::splitAlong(const GrEdgList& path) {
     if (last) {
       auto nd = GridGraph::sharedParentNode(last, e);
       assert(nd);
+      assert(!isSettled(nd->pl().getParent()->pl().getStepMother()));
       auto newNdWithPorts = splitNode(nd, last, e);
       nodePortPairs.push_back(newNdWithPorts);
     }
@@ -636,4 +669,26 @@ GridNode* GridGraph::sharedParentNode(const GridEdge* a, const GridEdge* b) {
       a->getTo()->pl().getParent() == b->getTo()->pl().getParent())
     r = a->getTo()->pl().getParent();
   return r;
+}
+
+// _____________________________________________________________________________
+void GridGraph::addResidentEdges(CombEdge* ce, GridNode* frGrNd, const std::vector<GridEdge*>& res, GridNode* toGrNd) {
+  GridEdge* last = 0;
+  _settledEdges[ce].push_back(toGrNd->pl().getParent()->pl().getStepMother());
+  for (auto ge : res) {
+    if (ge->pl().isSecondary()) continue;
+    ge->pl().addResidentEdge(ce);
+    if (last) {
+      _settledEdges[ce].push_back(sharedParentNode(last, ge)->pl().getParent()->pl().getStepMother());
+    }
+    last = ge;
+  }
+  _settledEdges[ce].push_back(frGrNd->pl().getParent()->pl().getStepMother());
+}
+
+// _____________________________________________________________________________
+const std::vector<GridNode*>& GridGraph::getGridNodes(const CombEdge* ce) const {
+  auto it = _settledEdges.find(ce);
+  if (it == _settledEdges.end()) return _emptyNdVec;
+  return it->second;
 }

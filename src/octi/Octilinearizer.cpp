@@ -54,19 +54,9 @@ start:
 double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e, double gridSize) {
   // this is just a collection of displacement heuristics, should be
   // made configurable
-  double tooMuch = gridSize * 4;
 
   if (to->getAdjList().size() == 1) {
     return len(*e->pl().getGeom()) / 1.5;
-  }
-
-  if (to->getAdjList().size() > 1) {
-    if (e->pl().getChilds().size() > 5 &&
-        len(*e->pl().getGeom()) / e->pl().getChilds().size() > tooMuch) {
-      return ((len(*e->pl().getGeom()) / e->pl().getChilds().size()) -
-              tooMuch) *
-             e->pl().getChilds().size();
-    }
   }
 
   return gridSize * 1.7;
@@ -139,35 +129,36 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         GridNode* frGrNd = gg->getGridNodeFrom(frCmbNd, gridSize * 1.7);
         // get surrounding displacement nodes
         double maxDis = getMaxDis(toCmbNd, cmbEdg, gridSize);
-        std::set<GridNode*> toGrNds = gg->getGridNodesTo(toCmbNd, maxDis);
+        std::set<GridNode*> toGrNds = gg->getGridNodesTo(toCmbNd, frGrNd, maxDis);
+
 
         // TODO: abort criteria
         size_t i = 0;
         while (!toGrNds.size() && i < 5) {
           i++;
           maxDis *= 2;
-          toGrNds = gg->getGridNodesTo(toCmbNd, maxDis);
+          toGrNds = gg->getGridNodesTo(toCmbNd, frGrNd, maxDis);
         }
 
         if (!frGrNd) {
-          LOG(ERROR) << "Could not sort in source node " << frCmbNd << " ("
-                     << frCmbNd->pl().getParent()->pl().getStops().front().name
-                     << ")";
+          LOG(ERROR) << "Could not sort in source node " << frCmbNd;
           break;
         }
 
         if (toGrNds.size() == 0) {
-          LOG(ERROR) << "Could not sort in target node " << toCmbNd << " ("
-                     << toCmbNd->pl().getParent()->pl().getStops().front().name
-                     << ") with displacement distance " << maxDis;
+          LOG(ERROR) << "Could not sort in target node " << toCmbNd;
           break;
         }
 
         // why not distance based? (TODO)
         double movePenPerGrid = toGrNds.size() > 1 ? 10 : 0;
 
+        bool frWasClosed = frGrNd->pl().isClosed();
+        bool toWasClosed = false;
+
         // open the target nodes
         for (auto n : toGrNds) {
+          assert(n != frGrNd);
           double gridDist = floor(
               dist(*n->pl().getGeom(), *toCmbNd->pl().getGeom()) / gridSize);
 
@@ -176,7 +167,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
               50;
 
           gg->openNodeSink(n, gridDist * movePenPerGrid + topoPen);
-          gg->openNode(n);
         }
 
         // open from source node
@@ -187,6 +177,9 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         NodeCost addCToInv;
 
         if (toGrNds.size() == 1) {
+          assert(*toGrNds.begin() != frGrNd);
+          toWasClosed = (*toGrNds.begin())->pl().isClosed();
+          gg->openNode(*toGrNds.begin());
           addCToInv = writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
         }
 
@@ -196,30 +189,36 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         Dijkstra::shortestPath(frGrNd, toGrNds, GridCost(),
                                GridHeur(gg, frGrNd, toGrNds), &res, &nList);
 
-        if (nList.size()) toGrNd = nList.front();
+        if (nList.size()) {
+          if (toGrNds.size() == 1) assert(toGrNd = *toGrNds.begin());
+          toGrNd = nList.front();
+        }
 
         gg->removeCostVector(frGrNd, addCFromInv);
         gg->removeCostVector(*toGrNds.begin(), addCToInv);
 
+        // close the target node
+        for (auto n : toGrNds) gg->closeNodeSink(n);
+        // close the start node
+        gg->closeNodeSink(frGrNd);
+
         if (toGrNd == 0) {
-          LOG(ERROR) << "Could not route to target node " << toCmbNd << " ("
-                     << toCmbNd->pl().getParent()->pl().getStops().front().name
-                     << ")";
+          LOG(ERROR) << "Could not route to target node " << toCmbNd;
+
+          // rollback
+          if (frWasClosed) gg->closeNode(frGrNd);
+          if (toGrNds.size() == 1 && toWasClosed) gg->closeNode(*toGrNds.begin());
+
           break;
         }
 
         newPositions[toCmbNd] = *toGrNd->pl().getGeom();
         newPositions[frCmbNd] = *frGrNd->pl().getGeom();
 
-        // close the target node
-        for (auto n : toGrNds) gg->closeNodeSink(n);
         gg->closeNode(toGrNd);
-
-        // close the start node
-        gg->closeNodeSink(frGrNd);
         gg->closeNode(frGrNd);
 
-        settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, res, cmbEdg);
+        settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, res, cmbEdg, &cg);
 
         gen++;
       }
@@ -229,10 +228,9 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   }
 
   TransitGraph ret;
+  writeTrGraph(&cg, gg, &ret);
 
   *retGg = gg;
-
-  writeTrGraph(gg, &ret);
 
   return ret;
 }
@@ -240,20 +238,21 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 // _____________________________________________________________________________
 void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
                                GridGraph* gg, CombNode* from, CombNode* to,
-                               const GrEdgList& res, CombEdge* e) {
+                               const GrEdgList& res, CombEdge* e,
+                               CombGraph* cg) {
   gg->settleGridNode(toGrNd, to);
   gg->settleGridNode(frGrNd, from);
 
-
-  addResidentEdges(gg, e, res);
-
-  gg->splitAlong(res);
+  gg->addResidentEdges(e, frGrNd, res, toGrNd);
 
   for (auto f : res) {
     if (f->pl().isSecondary()) continue;
     gg->balanceEdge(f->getFrom()->pl().getParent(),
                     f->getTo()->pl().getParent());
   }
+
+  gg->splitAlong(res);
+
 }
 
 // _____________________________________________________________________________
@@ -268,14 +267,6 @@ double Octilinearizer::getCostFromRes(const std::vector<GridEdge*>& res) {
 }
 
 // _____________________________________________________________________________
-void Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* e,
-                                      const std::vector<GridEdge*>& res) {
-  for (auto f : res) {
-    f->pl().addResidentEdge(e);
-  }
-}
-
-// _____________________________________________________________________________
 NodeCost Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode,
                                       CombEdge* e, GridGraph* g) {
   NodeCost c = g->spacingPenalty(n, origNode, e);
@@ -285,31 +276,36 @@ NodeCost Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode,
 }
 
 // _____________________________________________________________________________
-void Octilinearizer::writeTrGraph(GridGraph* gg, TransitGraph* tg) {
-  std::cerr << "Writing tr graph..." << std::endl;
+void Octilinearizer::writeTrGraph(CombGraph* cg, GridGraph* gg,
+                                  TransitGraph* tg) {
+  std::map<std::pair<size_t, size_t>, TransitNode*> nodes;
 
-  // PolyLine<double> pl;
-  // for (auto revIt = res.rbegin(); revIt != res.rend(); revIt++) {
-    // auto f = *revIt;
-    // if (!f->pl().isSecondary()) {
-      // if (pl.getLine().size() > 0 &&
-          // dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) > 0) {
-        // BezierCurve<double> bc(pl.getLine().back(),
-                               // *f->getFrom()->pl().getParent()->pl().getGeom(),
-                               // *f->getFrom()->pl().getParent()->pl().getGeom(),
-                               // *f->getFrom()->pl().getGeom());
+  for (auto cn : *cg->getNds()) {
+    for (auto ce : cn->getAdjList()) {
+      if (ce->getFrom() != cn) continue;
 
-        // for (auto p : bc.render(10).getLine()) pl << p;
-      // } else {
-        // pl << *f->getFrom()->pl().getParent()->pl().getGeom();
-      // }
+      for (size_t i = 1; i < gg->getGridNodes(ce).size(); i++) {
+        auto gn1 = gg->getGridNodes(ce)[i - 1];
+        auto gn2 = gg->getGridNodes(ce)[i];
 
-      // pl << *f->getFrom()->pl().getGeom();
-      // pl << *f->getTo()->pl().getGeom();
-    // }
-  // }
+        if (nodes.find({gn1->pl().getX(), gn1->pl().getY()}) == nodes.end()) {
+          nodes[{gn1->pl().getX(), gn1->pl().getY()}] =
+              tg->addNd(*gn1->pl().getGeom());
+        }
 
-  // if (res.size()) pl << *res.front()->getTo()->pl().getParent()->pl().getGeom();
+        if (nodes.find({gn2->pl().getX(), gn2->pl().getY()}) == nodes.end()) {
+          nodes[{gn2->pl().getX(), gn2->pl().getY()}] =
+              tg->addNd(*gn2->pl().getGeom());
+        }
 
-  // return pl;
+        auto e = tg->addEdg(nodes[{gn1->pl().getX(), gn1->pl().getY()}],
+                   nodes[{gn2->pl().getX(), gn2->pl().getY()}]);
+
+        for (auto ro : ce->pl().getChilds().front()->pl().getRoutes()) {
+          e->pl().addRoute(ro.route, 0);
+        }
+      }
+    }
+
+  }
 }

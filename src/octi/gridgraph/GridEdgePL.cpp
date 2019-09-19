@@ -27,7 +27,13 @@ const util::geo::Line<double>* GridEdgePL::getGeom() const {
 void GridEdgePL::addResidentEdge(
     util::graph::Edge<octi::combgraph::CombNodePL, octi::combgraph::CombEdgePL>*
         e) {
+  setUsed();
   _resEdges.insert(e);
+}
+
+// _____________________________________________________________________________
+void GridEdgePL::setUsed() {
+  _used = true;
 }
 
 // _____________________________________________________________________________
@@ -56,7 +62,8 @@ util::json::Dict GridEdgePL::getAttrs() const {
 
 // _____________________________________________________________________________
 double GridEdgePL::cost() const {
-  return _closed ? std::numeric_limits<double>::infinity() : rawCost();
+  // 10 is pen45 + 1, TODO: automate this
+  return _closed ? std::numeric_limits<double>::infinity() : rawCost() + (_used ? 10 : 0);
 }
 
 // _____________________________________________________________________________
