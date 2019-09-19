@@ -39,7 +39,6 @@ using octi::gridgraph::GrEdgList;
 // comparator for nodes, based on degree
 struct NodeCmp {
   bool operator()(CombNode* a, CombNode* b) {
-    // return a->getAdjList().size() < b->getAdjList().size();
     return a->getAdjList().size() < b->getAdjList().size() ||
            (a->getAdjList().size() == b->getAdjList().size() &&
             a->pl().getRouteNumber() < b->pl().getRouteNumber());

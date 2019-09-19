@@ -252,7 +252,6 @@ void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
   }
 
   gg->splitAlong(res);
-
 }
 
 // _____________________________________________________________________________

@@ -63,7 +63,7 @@ util::json::Dict GridEdgePL::getAttrs() const {
 // _____________________________________________________________________________
 double GridEdgePL::cost() const {
   // 10 is pen45 + 1, TODO: automate this
-  return _closed ? std::numeric_limits<double>::infinity() : rawCost() + (_used ? 10 : 0);
+  return _closed ? std::numeric_limits<double>::infinity() : rawCost() + (_used ? 20 : 0);
 }
 
 // _____________________________________________________________________________
