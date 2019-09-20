@@ -14,7 +14,6 @@
 #include "octi/gridgraph/NodeCost.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
-#include "util/graph/Dijkstra.h"
 #include "util/graph/UndirGraph.h"
 
 #include "octi/combgraph/CombEdgePL.h"
@@ -30,9 +29,6 @@ using octi::combgraph::CombEdge;
 
 namespace octi {
 namespace gridgraph {
-
-typedef util::graph::Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
-typedef util::graph::Dijkstra::NList<GridNodePL, GridEdgePL> GrNdList;
 
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
 typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
@@ -64,6 +60,7 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
   const Grid<GridNode*, Point, double>& getGrid() const;
 
   NodeCost spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
+  NodeCost topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
   NodeCost outDegDeviationPenalty(CombNode* origNode, CombEdge* e);
   void balanceEdge(GridNode* a, GridNode* b);
 
@@ -74,6 +71,7 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
 
   NodeCost addCostVector(GridNode* n, const NodeCost& addC);
   void removeCostVector(GridNode* n, const NodeCost& addC);
+  std::pair<size_t, size_t> getNodeCoords(GridNode* n) const;
 
   void openNodeSink(GridNode* n, double cost);
   void closeNodeSink(GridNode* n);
@@ -83,22 +81,10 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
   GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
   GridNode* getGridNodeFrom(CombNode* n, double maxDis);
-  std::set<GridNode*> getGridNodesTo(CombNode* n, GridNode* ex, double maxDis);
+  std::set<GridNode*> getGridNodesTo(CombNode* n, double maxDis);
 
   void settleGridNode(GridNode* n, CombNode* cn);
   bool isSettled(CombNode* cn);
-  bool isSettled(GridNode* gn);
-
-  std::pair<GridNode*, std::pair<size_t, size_t>> splitNode(GridNode* nd,
-                                                            GridEdge* a,
-                                                            GridEdge* b);
-  void splitAlong(const GrEdgList& path);
-
-  static GridNode* sharedParentNode(const GridEdge* a, const GridEdge* b);
-
-  void addResidentEdges(CombEdge* e, GridNode* frGrNd, const std::vector<GridEdge*>& res, GridNode* toGrNd);
-
-  const std::vector<GridNode*>& getGridNodes(const CombEdge* ce) const;
 
  private:
   util::geo::DBox _bbox;
@@ -108,18 +94,14 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
   double _cellSize, _spacer;
   std::unordered_map<CombNode*, GridNode*> _settled;
 
-  std::unordered_map<const CombEdge*, std::vector<GridNode*>> _settledEdges;
-  std::vector<GridNode*> _emptyNdVec;
-
   CombEdgeSet getResEdges(GridNode* n) const;
 
   void writeInitialCosts();
 
-  GridNode* writeNd(size_t x, size_t y, double xOff, double yOff,
-                    GridNode* stepMother);
+  GridNode* writeNd(size_t x, size_t y, double xOff, double yOff);
 
-  std::vector<GridEdge*> getNEdges(GridNode* a, GridNode* b);
-  void getSettledOutgoingEdges(GridNode* n, std::set<CombEdge*> outgoing[8]);
+  GridEdge* getNEdge(GridNode* a, GridNode* b);
+  void getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]);
 };
 }
 }

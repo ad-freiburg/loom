@@ -35,30 +35,21 @@ int main(int argc, char** argv) {
   topo::config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
-  std::cerr << "Parsing..." << std::endl;
-
   // read input graph
   tg.readFromJson(&(std::cin));
 
   size_t statFr = mc.freeze();
-  std::cerr << "Initializing..." << std::endl;
   si.init();
 
-  std::cerr << "Averaging positions..." << std::endl;
   mc.averageNodePositions();
-  std::cerr << "Cleaning up..." << std::endl;
   mc.cleanUpGeoms();
 
-  std::cerr << "Removing artifacts..." << std::endl;
-  mc.cleanUpGeoms();
   mc.removeNodeArtifacts();
   mc.removeEdgeArtifacts();
 
   // init restriction inferrer
   ri.init();
   size_t restrFr = mc.freeze();
-
-  std::cerr << "C" << std::endl;
 
   // first run, with 0 perc of line width, and offset of 5
   mc.collapseShrdSegs(5.0);

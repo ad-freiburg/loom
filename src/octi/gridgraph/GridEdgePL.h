@@ -41,14 +41,12 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   void open();
   bool closed() const;
   void setVisited(int i);
-  void setUsed();
 
  private:
   double _c;
 
   bool _isSecondary;
   bool _closed;
-  bool _used;
 
   std::set<util::graph::Edge<octi::combgraph::CombNodePL,
                              octi::combgraph::CombEdgePL>*>
