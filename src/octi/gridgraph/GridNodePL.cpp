@@ -9,13 +9,19 @@ using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
 GridNodePL::GridNodePL(Point<double> pos)
-    : _pos(pos), _parent(0), _closed(false) {}
+    : _pos(pos), _parent(0), _closed(false), _station(false), _sink(false) {}
 
 // _____________________________________________________________________________
 const Point<double>* GridNodePL::getGeom() const { return &_pos; }
 
 // _____________________________________________________________________________
-util::json::Dict GridNodePL::getAttrs() const { return util::json::Dict(); }
+util::json::Dict GridNodePL::getAttrs() const {
+  util::json::Dict obj;
+  std::vector<std::string> routes;
+  obj["station"] = _station ? "1" : "0";
+
+  return obj;
+}
 
 // _____________________________________________________________________________
 GridNode* GridNodePL::getParent() const { return _parent; }
@@ -24,9 +30,7 @@ GridNode* GridNodePL::getParent() const { return _parent; }
 void GridNodePL::setParent(GridNode* n) { _parent = n; }
 
 // _____________________________________________________________________________
-GridNode* GridNodePL::getPort(size_t i) const {
-  return _ports[i];
-}
+GridNode* GridNodePL::getPort(size_t i) const { return _ports[i]; }
 
 // _____________________________________________________________________________
 void GridNodePL::setPort(size_t p, GridNode* n) { _ports[p] = n; }
@@ -48,3 +52,12 @@ void GridNodePL::setClosed(bool c) { _closed = c; }
 
 // _____________________________________________________________________________
 bool GridNodePL::isClosed() const { return _closed; }
+
+// _____________________________________________________________________________
+void GridNodePL::setSink() { _sink = true; }
+
+// _____________________________________________________________________________
+bool GridNodePL::isSink() const { return _sink; }
+
+// _____________________________________________________________________________
+void GridNodePL::setStation() { _station = true; }

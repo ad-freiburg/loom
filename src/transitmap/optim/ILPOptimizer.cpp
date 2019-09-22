@@ -22,26 +22,25 @@ using namespace transitmapper::graph;
 // _____________________________________________________________________________
 int ILPOptimizer::optimizeComp(const std::set<OptNode*>& g,
                            HierarchOrderingConfig* hc) const {
-  LOG(DEBUG) << "Creating ILP problem... " << std::endl;
+  LOG(DEBUG) << "Creating ILP problem... ";
   glp_prob* lp = createProblem(g);
-  LOG(DEBUG) << " .. done" << std::endl;
+  LOG(DEBUG) << " .. done";
 
   LOG(INFO) << "(stats) ILP has " << glp_get_num_cols(lp) << " cols and "
-            << glp_get_num_rows(lp) << " rows." << std::endl;
+            << glp_get_num_rows(lp) << " rows.";
 
   if (!_cfg->glpkHOutputPath.empty()) {
     LOG(DEBUG) << "Writing human readable ILP to '" << _cfg->glpkHOutputPath
-               << "'" << std::endl;
+               << "'";
     printHumanReadable(lp, _cfg->glpkHOutputPath.c_str());
   }
 
   if (!_cfg->glpkMPSOutputPath.empty()) {
-    LOG(DEBUG) << "Writing ILP as .mps to '" << _cfg->glpkMPSOutputPath << "'"
-               << std::endl;
+    LOG(DEBUG) << "Writing ILP as .mps to '" << _cfg->glpkMPSOutputPath << "'";
     glp_write_mps(lp, GLP_MPS_FILE, 0, _cfg->glpkMPSOutputPath.c_str());
   }
 
-  LOG(DEBUG) << "Solving problem..." << std::endl;
+  LOG(DEBUG) << "Solving problem...";
 
   if (!_cfg->externalSolver.empty()) {
     preSolveCoinCbc(lp);
@@ -56,14 +55,14 @@ int ILPOptimizer::optimizeComp(const std::set<OptNode*>& g,
       std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
   if (_cfg->externalSolver.empty()) {
-    LOG(INFO) << " === Solve done in " << duration << " ms ===" << std::endl;
+    LOG(INFO) << " === Solve done in " << duration << " ms ===";
   }
 
-  LOG(INFO) << "(stats) ILP obj = " << glp_mip_obj_val(lp) << std::endl;
+  LOG(INFO) << "(stats) ILP obj = " << glp_mip_obj_val(lp);
 
   if (!_cfg->glpkSolutionOutputPath.empty()) {
     LOG(DEBUG) << "Writing ILP full solution to '"
-               << _cfg->glpkSolutionOutputPath << "'" << std::endl;
+               << _cfg->glpkSolutionOutputPath << "'";
     glp_print_mip(lp, _cfg->glpkSolutionOutputPath.c_str());
   }
 
@@ -437,7 +436,7 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
   std::string f = std::string(std::tmpnam(0)) + ".mps";
   std::string outf = std::string(std::tmpnam(0)) + ".sol";
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
-  LOG(INFO) << "Calling external solver..." << std::endl;
+  LOG(INFO) << "Calling external solver...";
 
   std::chrono::high_resolution_clock::time_point t1 =
       std::chrono::high_resolution_clock::now();
@@ -447,7 +446,7 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
   util::replaceAll(cmd, "{OUTPUT}", outf);
   util::replaceAll(cmd, "{THREADS}",
                    util::toString(std::thread::hardware_concurrency()));
-  LOG(INFO) << "Cmd: '" << cmd << "'" << std::endl;
+  LOG(INFO) << "Cmd: '" << cmd << "'";
   int r = system(cmd.c_str());
 
   std::chrono::high_resolution_clock::time_point t2 =
@@ -455,8 +454,8 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
   LOG(INFO) << " === External solve done (ret=" << r << ") in " << duration
-            << " ms ===" << std::endl;
-  LOG(INFO) << "Parsing solution..." << std::endl;
+            << " ms ===";
+  LOG(INFO) << "Parsing solution...";
 
   std::ifstream fin;
   fin.open(outf.c_str());

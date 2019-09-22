@@ -2,6 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include <fstream>
 #include "octi/Octilinearizer.h"
 #include "octi/gridgraph/NodeCost.h"
 #include "util/Misc.h"
@@ -9,6 +10,8 @@
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Dijkstra.h"
 #include "util/log/Log.h"
+
+#include "ilp/ILPGridOptimizer.h"
 
 using namespace octi;
 using namespace gridgraph;
@@ -89,6 +92,21 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   auto box = tg->getBBox();
 
   auto gg = new GridGraph(box, gridSize, borderRad, pens);
+
+  /////////////
+  ilp::ILPGridOptimizer ilpoptim;
+
+  ilpoptim.optimize(gg);
+
+  util::geo::output::GeoGraphJsonOutput out;
+  std::ofstream of;
+  of.open("octi.json");
+  out.print(*gg, of);
+  of << std::flush;
+
+  exit(0);
+
+  /////////////
 
   T_START(grid);
   std::cerr << "Build grid graph in " << T_STOP(grid) << " ms " << std::endl;

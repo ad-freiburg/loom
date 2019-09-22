@@ -41,6 +41,11 @@ class GridNodePL : util::geograph::GeoNodePL<double> {
   bool isClosed() const;
   void setClosed(bool c);
 
+  bool isSink() const;
+  void setSink();
+
+  void setStation();
+
  private:
   Point<double> _pos;
 
@@ -48,7 +53,7 @@ class GridNodePL : util::geograph::GeoNodePL<double> {
   GridNode* _ports[8];
 
   size_t _x, _y;
-  bool _closed;
+  bool _closed, _station, _sink;
 };
 }
 }

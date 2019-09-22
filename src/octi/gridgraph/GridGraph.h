@@ -14,12 +14,12 @@
 #include "octi/gridgraph/NodeCost.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
-#include "util/graph/UndirGraph.h"
+#include "util/graph/DirGraph.h"
 
 #include "octi/combgraph/CombEdgePL.h"
 #include "octi/combgraph/CombNodePL.h"
 
-using util::graph::UndirGraph;
+using util::graph::DirGraph;
 using util::graph::Node;
 using util::geo::Grid;
 using util::geo::Point;
@@ -50,7 +50,7 @@ struct Penalties {
   double verticalPen, horizontalPen, diagonalPen;
 };
 
-class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
+class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
  public:
   GridGraph(const util::geo::DBox& bbox, double cellSize, double spacer,
             const Penalties& pens);
@@ -98,7 +98,7 @@ class GridGraph : public UndirGraph<GridNodePL, GridEdgePL> {
 
   void writeInitialCosts();
 
-  GridNode* writeNd(size_t x, size_t y, double xOff, double yOff);
+  GridNode* writeNd(size_t x, size_t y);
 
   GridEdge* getNEdge(GridNode* a, GridNode* b);
   void getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]);
