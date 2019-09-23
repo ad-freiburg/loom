@@ -94,17 +94,17 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   auto gg = new GridGraph(box, gridSize, borderRad, pens);
 
   /////////////
-  ilp::ILPGridOptimizer ilpoptim;
+  // ilp::ILPGridOptimizer ilpoptim;
 
-  ilpoptim.optimize(gg, cg);
+  // ilpoptim.optimize(gg, cg);
 
-  util::geo::output::GeoGraphJsonOutput out;
-  std::ofstream of;
-  of.open("octi.json");
-  out.print(*gg, of);
-  of << std::flush;
+  // util::geo::output::GeoGraphJsonOutput out;
+  // std::ofstream of;
+  // of.open("octi.json");
+  // out.print(*gg, of);
+  // of << std::flush;
 
-  exit(0);
+  // exit(0);
 
   /////////////
 
