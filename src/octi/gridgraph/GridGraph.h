@@ -86,6 +86,8 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   void settleGridNode(GridNode* n, CombNode* cn);
   bool isSettled(CombNode* cn);
 
+  GridEdge* getNEdge(const GridNode* a, const GridNode* b) const;
+
  private:
   util::geo::DBox _bbox;
   Penalties _c;
@@ -100,7 +102,6 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   GridNode* writeNd(size_t x, size_t y);
 
-  GridEdge* getNEdge(GridNode* a, GridNode* b);
   void getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]);
 };
 }

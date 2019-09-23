@@ -96,7 +96,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   /////////////
   ilp::ILPGridOptimizer ilpoptim;
 
-  ilpoptim.optimize(gg);
+  ilpoptim.optimize(gg, cg);
 
   util::geo::output::GeoGraphJsonOutput out;
   std::ofstream of;

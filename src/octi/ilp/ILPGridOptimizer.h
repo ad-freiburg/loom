@@ -7,11 +7,16 @@
 
 #include <glpk.h>
 #include <vector>
+#include "octi/combgraph/CombGraph.h"
 #include "octi/gridgraph/GridGraph.h"
 
 using octi::gridgraph::GridGraph;
 using octi::gridgraph::GridNode;
 using octi::gridgraph::GridEdge;
+
+using octi::combgraph::CombGraph;
+using octi::combgraph::CombNode;
+using octi::combgraph::CombEdge;
 
 namespace octi {
 namespace ilp {
@@ -30,12 +35,17 @@ class ILPGridOptimizer {
  public:
   ILPGridOptimizer() {}
 
-  int optimize(GridGraph* gg) const;
+  int optimize(GridGraph* gg, const CombGraph& cg) const;
 
  protected:
-  virtual glp_prob* createProblem(const GridGraph& gg) const;
+  virtual glp_prob* createProblem(const GridGraph& gg,
+                                  const std::vector<CombNode*>& nds,
+                                  const std::vector<CombEdge*>& edgs) const;
 
-  std::string getEdgeVar(const GridEdge* e, size_t i) const;
+  void preSolve(glp_prob* lp) const;
+
+  std::string getEdgeUseVar(const GridEdge* e, const CombEdge* cg) const;
+  std::string getStatPosVar(const GridNode* e, const CombNode* cg) const;
 
   void solveProblem(glp_prob* lp) const;
 };

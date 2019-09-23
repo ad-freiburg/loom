@@ -127,14 +127,14 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
 }
 
 // _____________________________________________________________________________
-GridEdge* GridGraph::getNEdge(GridNode* a, GridNode* b) {
+GridEdge* GridGraph::getNEdge(const GridNode* a, const GridNode* b) const {
   if (!a) return 0;
   if (!b) return 0;
 
   for (size_t i = 0; i < 8; i++) {
     if (a->pl().getPort(i) && b->pl().getPort((i + 4) % 8)) {
       auto e = getEdg(a->pl().getPort(i), b->pl().getPort((i + 4) % 8));
-      if (e) return e;
+      if (e) return const_cast<GridEdge*>(e);
     }
   }
 
