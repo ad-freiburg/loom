@@ -57,20 +57,20 @@ start:
 double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e, double gridSize) {
   // this is just a collection of displacement heuristics, should be
   // made configurable
-  double tooMuch = gridSize * 4;
+  // double tooMuch = gridSize * 4;
 
-  if (to->getAdjList().size() == 1) {
-    return len(*e->pl().getGeom()) / 1.5;
-  }
+  // if (to->getAdjList().size() == 1) {
+    // return len(*e->pl().getGeom()) / 1.5;
+  // }
 
-  if (to->getAdjList().size() > 1) {
-    if (e->pl().getChilds().size() > 5 &&
-        len(*e->pl().getGeom()) / e->pl().getChilds().size() > tooMuch) {
-      return ((len(*e->pl().getGeom()) / e->pl().getChilds().size()) -
-              tooMuch) *
-             e->pl().getChilds().size();
-    }
-  }
+  // if (to->getAdjList().size() > 1) {
+    // if (e->pl().getChilds().size() > 5 &&
+        // len(*e->pl().getGeom()) / e->pl().getChilds().size() > tooMuch) {
+      // return ((len(*e->pl().getGeom()) / e->pl().getChilds().size()) -
+              // tooMuch) *
+             // e->pl().getChilds().size();
+    // }
+  // }
 
   return gridSize * 1.7;
 }
@@ -92,6 +92,21 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   auto box = tg->getBBox();
 
   auto gg = new GridGraph(box, gridSize, borderRad, pens);
+
+  size_t n = 0, e = 0;
+
+  for (auto nd : *gg->getNds()) {
+    n++;
+    for (auto edg : nd->getAdjList()) {
+      if (edg->getFrom() == nd) e++;
+    }
+  }
+
+  std::cerr << n << " nodes, " << e << " edges." << std::endl;
+
+  // util::geo::output::GeoGraphJsonOutput out;
+  // out.print(*gg, std::cout);
+  // exit(0);
 
   /////////////
   // ilp::ILPGridOptimizer ilpoptim;

@@ -145,18 +145,6 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
   // for every edge, we define a binary variable telling us whether this edge
   // is used in a path for the original edge
   for (auto edg : edgs) {
-    size_t row = 0;
-    if (false && edg->pl().getChilds().size() == 2) {
-      std::stringstream constName;
-      row = glp_add_rows(lp, 1);
-      constName << "elen(" << edg << ")";
-      glp_set_row_name(lp, row, constName.str().c_str());
-      // minimum length = number of stations
-
-      // * 2 + 1 because of sink and pass through edges
-      glp_set_row_bnds(lp, row, GLP_LO, 2 * 2 + 1, 0);
-    }
-
     for (const GridNode* n : gg.getNds()) {
       for (const GridEdge* e : n->getAdjList()) {
         if (e->getFrom() != n) continue;
@@ -170,9 +158,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
         glp_set_col_kind(lp, col, GLP_BV);
         i++;
 
-        // catch infinity cost, as 0 * inf = NaN
         glp_set_obj_coef(lp, col, e->pl().cost());
-        if (row) vm.addVar(row, col, 1);
       }
     }
   }
@@ -187,7 +173,9 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
       size_t row = glp_add_rows(lp, 1);
       constName << "adjsum(" << n << "," << edg << ")";
       glp_set_row_name(lp, row, constName.str().c_str());
-      glp_set_row_bnds(lp, row, GLP_FX, 0, 0);
+
+      // an upper bound is enough here
+      glp_set_row_bnds(lp, row, GLP_UP, 0, 0);
 
       // normally, we count an incoming edge as 1 and an outgoing edge as -1
       // later on, we make sure that each node has a some of all out and in
@@ -249,7 +237,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
     size_t row = glp_add_rows(lp, 1);
     constName << "inneruse(" << n << ")";
     glp_set_row_name(lp, row, constName.str().c_str());
-    glp_set_row_bnds(lp, row, GLP_DB, 0, 1);
+    glp_set_row_bnds(lp, row, GLP_UP, 0, 1);
 
     // a meta grid node can either be a sink for a single input node, or
     // a pass-through
@@ -290,7 +278,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
     size_t row = glp_add_rows(lp, 1);
     constName << "nocross(" << n << ")";
     glp_set_row_name(lp, row, constName.str().c_str());
-    glp_set_row_bnds(lp, row, GLP_DB, 0, 1);
+    glp_set_row_bnds(lp, row, GLP_UP, 0, 1);
 
     auto eOr = gg.getNEdge(n, gg.getNeighbor(x, y, 3));
     auto fOr = gg.getNEdge(gg.getNeighbor(x, y, 3), n);
@@ -372,9 +360,14 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   std::chrono::high_resolution_clock::time_point t1 =
       std::chrono::high_resolution_clock::now();
 
-  std::string cmd = "/home/patrick/gurobi/gurobi751/linux64/bin/gurobi_cl ResultFile={OUTPUT} {INPUT}";
+  // std::string cmd = "/home/patrick/gurobi/gurobi751/linux64/bin/gurobi_cl
+  // ResultFile={OUTPUT} {INPUT}";
+  std::string cmd =
+      "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
+      "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
   util::replaceAll(cmd, "{INPUT}", f);
   util::replaceAll(cmd, "{OUTPUT}", outf);
+  util::replaceAll(cmd, "{THREADS}", "4");
   int r = system(cmd.c_str());
 
   std::chrono::high_resolution_clock::time_point t2 =
