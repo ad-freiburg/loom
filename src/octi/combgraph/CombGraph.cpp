@@ -195,27 +195,3 @@ EdgeOrdering CombGraph::getEdgeOrderingForNode(
 
   return order;
 }
-
-// _____________________________________________________________________________
-size_t CombGraph::changesTopology(
-    CombNode* nOrig, DPoint p,
-    const std::map<CombNode*, DPoint>& newPos) const {
-  // collect the affected nodes
-  size_t ret = 0;
-  std::set<CombNode*> aff;
-  auto newPosA = newPos;
-  newPosA[nOrig] = p;
-  for (auto e : nOrig->getAdjList()) {
-    if (newPos.find(e->getFrom()) != newPos.end()) aff.insert(e->getFrom());
-    if (newPos.find(e->getTo()) != newPos.end()) aff.insert(e->getTo());
-  }
-
-  for (auto n : aff) {
-    if (!getEdgeOrderingForNode(n, false, newPosA)
-             .equals(getEdgeOrderingForNode(n))) {
-      ret += 1;
-    }
-  }
-
-  return ret;
-}

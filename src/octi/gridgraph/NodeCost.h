@@ -15,21 +15,6 @@ namespace gridgraph {
 struct NodeCost {
   double _cost[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-  void normalize() {
-    double smallest = std::numeric_limits<double>::max();
-    for (int i = 0; i < 8; i++) {
-      if (_cost[i] > -1 && _cost[i] < smallest) {
-        smallest = _cost[i];
-      }
-    }
-
-    for (int i = 0; i < 8; i++) {
-      if (_cost[i] > -1) {
-        _cost[i] -= smallest;
-      }
-    }
-  }
-
   std::string toString() {
     std::stringstream ret;
     ret << "{";

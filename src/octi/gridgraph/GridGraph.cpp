@@ -147,12 +147,13 @@ void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
   size_t x = xy.first;
   size_t y = xy.second;
 
-  // if some outgoing edge is taken, dont put new edge next to it
   for (size_t i = 0; i < 8; i++) {
     auto p = n->pl().getPort(i);
     auto neigh = getNeighbor(x, y, i);
 
-    if (neigh && getEdg(p, neigh->pl().getPort((i + 4) % 8)) &&
+    if (!neigh) continue;
+
+    if (getEdg(p, neigh->pl().getPort((i + 4) % 8)) &&
         getEdg(p, neigh->pl().getPort((i + 4) % 8))->pl().getResEdges().size() >
             0) {
       outgoing[i] = *getEdg(p, neigh->pl().getPort((i + 4) % 8))
@@ -166,58 +167,38 @@ void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
 }
 
 // _____________________________________________________________________________
-NodeCost GridGraph::spacingPenalty(GridNode* n, CombNode* origNode,
-                                   CombEdge* e) {
+NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
   NodeCost addC;
 
-  int origEdgeNumber = origNode->getAdjList().size();
-  size_t optimDistance = (8 / origEdgeNumber) - 1;
-
-  if (!origNode->pl().getEdgeOrdering().has(e)) {
-    std::cerr << "Warning: tried to balance edge " << e << " in node "
-              << origNode << ", but the edge does not appear there."
-              << std::endl;
-    return addC;
-  }
+  // TODO: same code as in write nd
+  double c_0 = _c.p_45 - _c.p_135;
+  double c_135 = _c.p_45;
+  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
+  double c_45 = c_0 + c_135;
 
   CombEdge* outgoing[8];
   getSettledOutgoingEdges(n, outgoing);
 
-  for (size_t i = 0; i < 8; i++) {
-    if (!outgoing[i]) continue;
+  for (auto ro : e->pl().getChilds().front()->pl().getRoutes()) {
+    for (int i = 0; i < 8; i++) {
+      if (!outgoing[i]) continue;
 
-    // this is the number of edges that will occur between the currently checked
-    // edge and the inserted edge, in clockwise and counter-clockwise dir
-    int32_t dCw = origNode->pl().getEdgeOrdering().dist(outgoing[i], e) - 1;
-    int32_t dCCw = origNode->pl().getEdgeOrdering().dist(e, outgoing[i]) - 1;
+      // TODO: turn restrictions!
+      if (outgoing[i]->pl().getChilds().front()->pl().hasRoute(ro.route)) {
+        for (int j = 0; j < 8; j++) {
+          // determine angle between port i and j
 
-    // dd and ddd are the optimal distances between outgoing[i] and e, based on
-    // the total number
-    // of edges in this node
-    int dd = ((((dCw + 1) + dCw) % 8) * optimDistance) % 8;
-    int ddd = (6 - dd) % 8;
+          int ang = (8 + (i - j)) % 8;
+          if (ang > 4) ang = 8 - ang;
+          ang = ang % 4;
 
-    double pen = _c.p_45 * 2 - 1;
-
-    for (int j = 1; dd != 0 && j <= dd + 1; j++) {
-      if (addC[(i + j) % 8] < -1) continue;
-      addC[(i + j) % 8] += pen * (1.0 - (j - 1.0) / (dd));
-    }
-
-    for (int j = 1; ddd != 0 && j <= ddd + 1; j++) {
-      if (addC[(i + (8 - j)) % 8] < -1) continue;
-      addC[(i + (8 - j)) % 8] += pen * (1.0 - (j - 1.0) / (ddd));
-    }
-
-    // negative cost here means that the edge is going to be closed
-    addC[i] = -1.0 * std::numeric_limits<double>::max();
-
-    for (int j = 1; j <= dCw; j++) {
-      addC[(i + j) % 8] = -1.0 * std::numeric_limits<double>::max();
-    }
-
-    for (int j = 1; j <= dCCw; j++) {
-      addC[(i + (8 - j)) % 8] = -1.0 * std::numeric_limits<double>::max();
+          // write corresponding cost to addC[j]
+          if (ang == 0) addC[j] += c_0;
+          if (ang == 1) addC[j] += c_45;
+          if (ang == 2) addC[j] += c_90;
+          if (ang == 3) addC[j] += c_135;
+        }
+      }
     }
   }
 
@@ -251,26 +232,6 @@ NodeCost GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode,
     }
   }
   return addC;
-}
-
-// _____________________________________________________________________________
-NodeCost GridGraph::outDegDeviationPenalty(CombNode* origNode, CombEdge* e) {
-  NodeCost ret;
-  double degA = util::geo::angBetween(
-      *origNode->pl().getParent()->pl().getGeom(),
-      *e->getOtherNd(origNode)->pl().getParent()->pl().getGeom());
-
-  int deg = -degA * (180.0 / M_PI);
-  if (deg < 0) deg += 360;
-
-  deg = (deg + 90) % 360;
-
-  for (int i = 0; i < 8; i++) {
-    double diff = std::min<int>(abs(deg - (45 * i)), 360 - abs(deg - (45 * i)));
-    double multiplier = .1;
-    ret[i] += multiplier * diff;
-  }
-  return ret;
 }
 
 // _____________________________________________________________________________
@@ -381,7 +342,7 @@ void GridGraph::writeInitialCosts() {
 
 // _____________________________________________________________________________
 std::priority_queue<Candidate> GridGraph::getNearestCandidatesFor(
-    const DPoint& p, double maxD) const {
+    const DPoint& p, double maxD, const GridNode* ex) const {
   std::priority_queue<Candidate> ret;
   std::set<GridNode*> neigh;
   DBox b(DPoint(p.getX() - maxD, p.getY() - maxD),
@@ -389,7 +350,7 @@ std::priority_queue<Candidate> GridGraph::getNearestCandidatesFor(
   _grid.get(b, &neigh);
 
   for (auto n : neigh) {
-    if (n->pl().isClosed()) continue;
+    if (n->pl().isClosed() || n == ex) continue;
     double d = dist(*n->pl().getGeom(), p);
     if (d < maxD) ret.push(Candidate(n, d));
   }
@@ -477,9 +438,10 @@ void GridGraph::closeNodeSink(GridNode* n) {
 }
 
 // _____________________________________________________________________________
-GridNode* GridGraph::getGridNodeFrom(CombNode* n, double maxDis) {
+GridNode* GridGraph::getGridNodeFrom(CombNode* n, double maxDis,
+                                     const GridNode* ex) {
   if (!isSettled(n)) {
-    auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis);
+    auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis, ex);
 
     while (!cands.empty()) {
       if (!cands.top().n->pl().isClosed()) return cands.top().n;
@@ -491,10 +453,11 @@ GridNode* GridGraph::getGridNodeFrom(CombNode* n, double maxDis) {
 }
 
 // _____________________________________________________________________________
-std::set<GridNode*> GridGraph::getGridNodesTo(CombNode* n, double maxDis) {
+std::set<GridNode*> GridGraph::getGridNodesTo(CombNode* n, double maxDis,
+                                              const GridNode* ex) {
   std::set<GridNode*> tos;
   if (!isSettled(n)) {
-    auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis);
+    auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis, ex);
 
     while (!cands.empty()) {
       if (!cands.top().n->pl().isClosed()) tos.insert(cands.top().n);
@@ -523,6 +486,7 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   double c_0 = _c.p_45 - _c.p_135;
   double c_135 = _c.p_45;
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
+  double c_45 = c_0 + c_135;;
 
   GridNode* n = addNd(DPoint(xPos, yPos));
   n->pl().setSink();
@@ -535,8 +499,7 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
     xi /= abs(abs(xi) - 1) + 1;
     int yi = ((4 - ((i + 2) % 8)) % 4);
     yi /= abs(abs(yi) - 1) + 1;
-    GridNode* nn =
-        addNd(DPoint(xPos + xi * _spacer, yPos + yi * _spacer));
+    GridNode* nn = addNd(DPoint(xPos + xi * _spacer, yPos + yi * _spacer));
     nn->pl().setParent(n);
     n->pl().setPort(i, nn);
     addEdg(n, nn, GridEdgePL(INF, true, false));
@@ -550,7 +513,8 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
       size_t deg = abs((((d + 4) % 8) + 8) % 8 - 4);
       double pen = c_0;
 
-      if (deg == 1) pen = _c.p_45 ;//continue;
+      if (deg == 0) pen = c_0;
+      if (deg == 1) pen = c_45;
       if (deg == 2) pen = c_90;
       if (deg == 3) pen = c_135;
       addEdg(n->pl().getPort(i), n->pl().getPort(j), GridEdgePL(pen, true));
@@ -559,4 +523,21 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   }
 
   return n;
+}
+
+// _____________________________________________________________________________
+void GridGraph::reset() {
+  for (auto n : *getNds()) {
+    for (auto e : n->getAdjListOut()) e->pl().reset();
+    if (!n->pl().isSink()) continue;
+    openNode(n);
+    closeNodeSink(n);
+  }
+
+  writeInitialCosts();
+}
+
+// _____________________________________________________________________________
+double GridGraph::getCellSize() const {
+  return _cellSize;
 }

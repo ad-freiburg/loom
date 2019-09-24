@@ -360,11 +360,10 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   std::chrono::high_resolution_clock::time_point t1 =
       std::chrono::high_resolution_clock::now();
 
-  // std::string cmd = "/home/patrick/gurobi/gurobi751/linux64/bin/gurobi_cl
-  // ResultFile={OUTPUT} {INPUT}";
-  std::string cmd =
-      "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
-      "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
+  std::string cmd = "/home/patrick/gurobi/gurobi751/linux64/bin/gurobi_cl ResultFile={OUTPUT} {INPUT}";
+  // std::string cmd =
+      // "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
+      // "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
   util::replaceAll(cmd, "{INPUT}", f);
   util::replaceAll(cmd, "{OUTPUT}", outf);
   util::replaceAll(cmd, "{THREADS}", "4");

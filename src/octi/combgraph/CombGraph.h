@@ -28,8 +28,6 @@ class CombGraph : public util::graph::UndirGraph<CombNodePL, CombEdgePL> {
   EdgeOrdering getEdgeOrderingForNode(
       CombNode* n, bool useOrigNextNode,
       const std::map<CombNode*, DPoint>& newPos) const;
-  size_t changesTopology(CombNode* nOrig, DPoint p,
-                         const std::map<CombNode*, DPoint>& newPos) const;
 
  private:
   void build(const TransitGraph* source);

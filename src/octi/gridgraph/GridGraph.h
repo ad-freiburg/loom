@@ -55,19 +55,20 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   GridGraph(const util::geo::DBox& bbox, double cellSize, double spacer,
             const Penalties& pens);
 
+  double getCellSize() const;
+
   GridNode* getNode(size_t x, size_t y) const;
 
   const Grid<GridNode*, Point, double>& getGrid() const;
 
-  NodeCost spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
+  NodeCost nodeBendPenalty(GridNode* n, CombEdge* e);
   NodeCost topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
-  NodeCost outDegDeviationPenalty(CombNode* origNode, CombEdge* e);
   void balanceEdge(GridNode* a, GridNode* b);
 
   double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
   std::priority_queue<Candidate> getNearestCandidatesFor(
-      const util::geo::DPoint& p, double maxD) const;
+      const util::geo::DPoint& p, double maxD, const GridNode* ex) const;
 
   NodeCost addCostVector(GridNode* n, const NodeCost& addC);
   void removeCostVector(GridNode* n, const NodeCost& addC);
@@ -80,13 +81,15 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
-  GridNode* getGridNodeFrom(CombNode* n, double maxDis);
-  std::set<GridNode*> getGridNodesTo(CombNode* n, double maxDis);
+  GridNode* getGridNodeFrom(CombNode* n, double maxDis, const GridNode* ex);
+  std::set<GridNode*> getGridNodesTo(CombNode* n, double maxDis,
+                                     const GridNode* ex);
 
   void settleGridNode(GridNode* n, CombNode* cn);
   bool isSettled(CombNode* cn);
 
   GridEdge* getNEdge(const GridNode* a, const GridNode* b) const;
+  void reset();
 
  private:
   util::geo::DBox _bbox;

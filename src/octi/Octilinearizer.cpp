@@ -55,23 +55,6 @@ start:
 
 // _____________________________________________________________________________
 double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e, double gridSize) {
-  // this is just a collection of displacement heuristics, should be
-  // made configurable
-  // double tooMuch = gridSize * 4;
-
-  // if (to->getAdjList().size() == 1) {
-    // return len(*e->pl().getGeom()) / 1.5;
-  // }
-
-  // if (to->getAdjList().size() > 1) {
-    // if (e->pl().getChilds().size() > 5 &&
-        // len(*e->pl().getGeom()) / e->pl().getChilds().size() > tooMuch) {
-      // return ((len(*e->pl().getGeom()) / e->pl().getChilds().size()) -
-              // tooMuch) *
-             // e->pl().getChilds().size();
-    // }
-  // }
-
   return gridSize * 1.7;
 }
 
@@ -93,22 +76,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
   auto gg = new GridGraph(box, gridSize, borderRad, pens);
 
-  size_t n = 0, e = 0;
-
-  for (auto nd : *gg->getNds()) {
-    n++;
-    for (auto edg : nd->getAdjList()) {
-      if (edg->getFrom() == nd) e++;
-    }
-  }
-
-  std::cerr << n << " nodes, " << e << " edges." << std::endl;
-
-  // util::geo::output::GeoGraphJsonOutput out;
-  // out.print(*gg, std::cout);
-  // exit(0);
-
-  /////////////
+  ///////////
   // ilp::ILPGridOptimizer ilpoptim;
 
   // ilpoptim.optimize(gg, cg);
@@ -129,7 +97,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   NodePQ globalPq, dangling;
 
   std::set<CombNode*> settled;
-  std::map<CombNode*, DPoint> newPositions;
+
+  std::vector<CombEdge*> order;
 
   for (auto n : *cg.getNds()) globalPq.push(n);
 
@@ -148,116 +117,52 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
       if (settled.find(n) != settled.end()) continue;
 
       for (auto ee : n->pl().getEdgeOrdering().getOrderedSet()) {
-        auto cmbEdg = ee.first;
-        if (done.find(cmbEdg) != done.end()) continue;
-        done.insert(cmbEdg);
+        if (done.find(ee.first) != done.end()) continue;
+        done.insert(ee.first);
+        dangling.push(ee.first->getOtherNd(n));
 
-        dangling.push(cmbEdg->getOtherNd(n));
-
-        auto frCmbNd = cmbEdg->getFrom();
-        auto toCmbNd = cmbEdg->getTo();
-
-        bool reversed = false;
-
-        if (frCmbNd->getDeg() < toCmbNd->getDeg() ||
-            (frCmbNd->getDeg() == toCmbNd->getDeg() &&
-             frCmbNd->pl().getRouteNumber() < toCmbNd->pl().getRouteNumber()) ||
-            (!gg->isSettled(frCmbNd) && gg->isSettled(toCmbNd))) {
-          auto tmp = frCmbNd;
-          frCmbNd = toCmbNd;
-          toCmbNd = tmp;
-          reversed = !reversed;
-        }
-
-        GridNode* frGrNd = gg->getGridNodeFrom(frCmbNd, gridSize * 1.7);
-        // get surrounding displacement nodes
-        double maxDis = getMaxDis(toCmbNd, cmbEdg, gridSize);
-        std::set<GridNode*> toGrNds = gg->getGridNodesTo(toCmbNd, maxDis);
-
-        // TODO: abort criteria
-        while (!toGrNds.size()) {
-          maxDis *= 2;
-          toGrNds = gg->getGridNodesTo(toCmbNd, maxDis);
-        }
-
-        if (!frGrNd) {
-          LOG(ERROR) << "Could not sort in source node " << frCmbNd << " ("
-                     << frCmbNd->pl().getParent()->pl().getStops().front().name
-                     << ")";
-          break;
-        }
-
-        if (toGrNds.size() == 0) {
-          LOG(ERROR) << "Could not sort in target node " << toCmbNd << " ("
-                     << toCmbNd->pl().getParent()->pl().getStops().front().name
-                     << ") with displacement distance " << maxDis;
-          break;
-        }
-
-        // why not distance based? (TODO)
-        double movePenPerGrid = toGrNds.size() > 1 ? 10 : 0;
-
-        // open the target nodes
-        for (auto n : toGrNds) {
-          double gridDist = floor(
-              dist(*n->pl().getGeom(), *toCmbNd->pl().getGeom()) / gridSize);
-
-          double topoPen =
-              cg.changesTopology(toCmbNd, *n->pl().getGeom(), newPositions) *
-              50;
-
-          gg->openNodeSink(n, gridDist * movePenPerGrid + topoPen);
-          gg->openNode(n);
-        }
-
-        // open from source node
-        gg->openNodeSink(frGrNd, 0);
-        gg->openNode(frGrNd);
-
-        NodeCost addCFromInv = writeNdCosts(frGrNd, frCmbNd, cmbEdg, gg);
-        NodeCost addCToInv;
-
-        if (toGrNds.size() == 1) {
-          addCToInv = writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
-        }
-
-        GrEdgList res;
-        GrNdList nList;
-        GridNode* toGrNd = 0;
-        Dijkstra::shortestPath(frGrNd, toGrNds, GridCost(),
-                               GridHeur(gg, frGrNd, toGrNds), &res, &nList);
-
-        if (nList.size()) toGrNd = nList.front();
-
-        gg->removeCostVector(frGrNd, addCFromInv);
-        gg->removeCostVector(*toGrNds.begin(), addCToInv);
-
-        if (toGrNd == 0) {
-          LOG(ERROR) << "Could not route to target node " << toCmbNd << " ("
-                     << toCmbNd->pl().getParent()->pl().getStops().front().name
-                     << ")";
-          break;
-        }
-
-        newPositions[toCmbNd] = *toGrNd->pl().getGeom();
-        newPositions[frCmbNd] = *frGrNd->pl().getGeom();
-
-        // close the target node
-        for (auto n : toGrNds) gg->closeNodeSink(n);
-        gg->closeNode(toGrNd);
-
-        // close the start node
-        gg->closeNodeSink(frGrNd);
-        gg->closeNode(frGrNd);
-
-        settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, res, cmbEdg, gen);
-
-        gen++;
+        order.push_back(ee.first);
       }
-
       settled.insert(n);
     }
   }
+
+  std::random_shuffle(order.begin(), order.end() );
+  double curCost = draw(order, gg);
+  auto best = order;
+
+  for (size_t iter = 0; iter < 10; iter++) {
+    std::cerr << "+++ ITERATION " << iter << " +++ " << std::endl;
+    double bestBef = curCost;
+    for (size_t i = 1; i < order.size(); i++) {
+      std::random_shuffle(order.begin(), order.end() );
+
+      gg->reset();
+      // util::geo::output::GeoGraphJsonOutput out;
+      // std::ofstream of;
+      // of.open("octi.json");
+      // out.print(*gg, of);
+      // of << std::flush;
+      // exit(0);
+
+      double nextCost = draw(order, gg);
+      std::cerr << "Prev: " << curCost << " This: " << nextCost << std::endl;
+      if (nextCost < curCost) {
+        curCost = nextCost;
+        best = order;
+      }
+    }
+
+    if (fabs(bestBef - curCost) < 1) {
+      std::cerr << "Aborting..." << std::endl;
+      break;
+    }
+  }
+
+  gg->reset();
+  curCost = draw(best, gg);
+
+  std::cerr << "Cost: " << curCost << std::endl;
 
   TransitGraph ret;
   cg.getTransitGraph(&ret);
@@ -331,21 +236,134 @@ double Octilinearizer::getCostFromRes(const std::vector<GridEdge*>& res) {
 }
 
 // _____________________________________________________________________________
-void Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* e,
+void Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* ce,
                                       const std::vector<GridEdge*>& res) {
-  for (auto f : res) {
+  for (auto e : res) {
+    assert(e->pl().getResEdges().size() == 0);
+    e->pl().addResidentEdge(ce);
+
+    auto f = g->getEdg(e->getTo(), e->getFrom());
     assert(f->pl().getResEdges().size() == 0);
-    f->pl().addResidentEdge(e);
+    f->pl().addResidentEdge(ce);
   }
 }
 
 // _____________________________________________________________________________
 NodeCost Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode,
                                       CombEdge* e, GridGraph* g) {
-  NodeCost c = g->spacingPenalty(n, origNode, e);
+  NodeCost c;
   c += g->topoBlockPenalty(n, origNode, e);
-  // c.normalize();
-  c += g->outDegDeviationPenalty(origNode, e);
+  c += g->nodeBendPenalty(n, e);
 
   return g->addCostVector(n, c);
+}
+
+// _____________________________________________________________________________
+double Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg) {
+  double cost = 0;
+  size_t gen = 0;
+
+  for (auto cmbEdg : order) {
+    // if (gen > 16) break;
+
+    auto frCmbNd = cmbEdg->getFrom();
+    auto toCmbNd = cmbEdg->getTo();
+
+    bool reversed = false;
+
+    if (frCmbNd->getDeg() < toCmbNd->getDeg() ||
+        (frCmbNd->getDeg() == toCmbNd->getDeg() &&
+         frCmbNd->pl().getRouteNumber() < toCmbNd->pl().getRouteNumber()) ||
+        (!gg->isSettled(frCmbNd) && gg->isSettled(toCmbNd))) {
+      auto tmp = frCmbNd;
+      frCmbNd = toCmbNd;
+      toCmbNd = tmp;
+      reversed = !reversed;
+    }
+
+    GridNode* frGrNd = gg->getGridNodeFrom(frCmbNd, gg->getCellSize() * 1.7, 0);
+    // get surrounding displacement nodes
+    double maxDis = getMaxDis(toCmbNd, cmbEdg,  gg->getCellSize());
+    std::set<GridNode*> toGrNds = gg->getGridNodesTo(toCmbNd, maxDis, frGrNd);
+
+    // TODO: abort criteria
+    while (!toGrNds.size()) {
+      maxDis *= 2;
+      toGrNds = gg->getGridNodesTo(toCmbNd, maxDis, frGrNd);
+    }
+
+    if (!frGrNd) {
+      LOG(ERROR) << "Could not sort in source node " << frCmbNd << " ("
+                 << frCmbNd->pl().getParent()->pl().getStops().front().name
+                 << ")";
+      cost = std::numeric_limits<double>::infinity();
+      break;
+    }
+
+    if (toGrNds.size() == 0) {
+      LOG(ERROR) << "Could not sort in target node " << toCmbNd << " ("
+                 << toCmbNd->pl().getParent()->pl().getStops().front().name
+                 << ") with displacement distance " << maxDis;
+      cost = std::numeric_limits<double>::infinity();
+      break;
+    }
+
+    // why not distance based? (TODO)
+    double movePenPerGrid = 5;
+
+    // open the target nodes
+    for (auto n : toGrNds) {
+      double gridDist = floor(
+          dist(*n->pl().getGeom(), *toCmbNd->pl().getGeom()) / gg->getCellSize());
+
+      gg->openNodeSink(n, gridDist * movePenPerGrid);
+      gg->openNode(n);
+    }
+
+    // open from source node
+    gg->openNodeSink(frGrNd, 0);
+    gg->openNode(frGrNd);
+
+    NodeCost addCFromInv = writeNdCosts(frGrNd, frCmbNd, cmbEdg, gg);
+    NodeCost addCToInv;
+
+    if (toGrNds.size() == 1) {
+      addCToInv = writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
+    }
+
+    GrEdgList res;
+    GrNdList nList;
+    GridNode* toGrNd = 0;
+    Dijkstra::shortestPath(frGrNd, toGrNds, GridCost(),
+                           GridHeur(gg, frGrNd, toGrNds), &res, &nList);
+
+    cost += getCostFromRes(res);
+
+    if (nList.size()) toGrNd = nList.front();
+
+    gg->removeCostVector(frGrNd, addCFromInv);
+    gg->removeCostVector(*toGrNds.begin(), addCToInv);
+
+    if (toGrNd == 0) {
+      LOG(ERROR) << "Could not route to target node " << toCmbNd << " ("
+                 << toCmbNd->pl().getParent()->pl().getStops().front().name
+                 << ")";
+      cost = std::numeric_limits<double>::infinity();
+      break;
+    }
+
+    // close the target node
+    for (auto n : toGrNds) gg->closeNodeSink(n);
+    gg->closeNode(toGrNd);
+
+    // close the start node
+    gg->closeNodeSink(frGrNd);
+    gg->closeNode(frGrNd);
+
+    settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, res, cmbEdg, gen);
+
+    gen++;
+  }
+
+  return cost;
 }

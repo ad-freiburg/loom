@@ -31,6 +31,13 @@ void GridEdgePL::addResidentEdge(
 }
 
 // _____________________________________________________________________________
+void GridEdgePL::reset() {
+  _resEdges.clear();
+  _closed = false;
+  _visited = 0;
+}
+
+// _____________________________________________________________________________
 const std::set<util::graph::Edge<octi::combgraph::CombNodePL,
                                  octi::combgraph::CombEdgePL>*>&
 GridEdgePL::getResEdges() const {

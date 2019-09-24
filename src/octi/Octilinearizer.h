@@ -90,6 +90,11 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
   }
 
   double operator()(const GridNode* from, const std::set<GridNode*>& to) const {
+    // TODO!!!!!!
+    // //// HEURISTIC DISABLED
+    // ////////////////
+    // ///////////////
+    // return 0;
     if (to.find(from->pl().getParent()) != to.end()) return 0;
 
     size_t ret = std::numeric_limits<size_t>::max();
@@ -128,6 +133,8 @@ class Octilinearizer {
   void settleRes(GridNode* startGridNd, GridNode* toGridNd, GridGraph* gg,
                  CombNode* from, CombNode* to, const GrEdgList& res,
                  CombEdge* e, size_t gen);
+
+  double draw(const std::vector<CombEdge*>& order, GridGraph* gg);
 };
 
 }  // namespace octi

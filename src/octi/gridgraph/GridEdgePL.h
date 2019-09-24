@@ -42,6 +42,8 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   bool closed() const;
   void setVisited(int i);
 
+  void reset();
+
  private:
   double _c;
 
