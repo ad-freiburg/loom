@@ -527,6 +527,7 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
 
 // _____________________________________________________________________________
 void GridGraph::reset() {
+  _settled.clear();
   for (auto n : *getNds()) {
     for (auto e : n->getAdjListOut()) e->pl().reset();
     if (!n->pl().isSink()) continue;

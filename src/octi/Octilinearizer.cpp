@@ -136,14 +136,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
     double bestBef = curCost;
     for (size_t i = 1; i < order.size(); i++) {
       std::random_shuffle(order.begin(), order.end() );
-
       gg->reset();
-      // util::geo::output::GeoGraphJsonOutput out;
-      // std::ofstream of;
-      // of.open("octi.json");
-      // out.print(*gg, of);
-      // of << std::flush;
-      // exit(0);
 
       double nextCost = draw(order, gg);
       std::cerr << "Prev: " << curCost << " This: " << nextCost << std::endl;
@@ -154,13 +147,17 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
     }
 
     if (fabs(bestBef - curCost) < 1) {
-      std::cerr << "Aborting..." << std::endl;
       break;
     }
   }
 
   gg->reset();
   curCost = draw(best, gg);
+
+  if (curCost == std::numeric_limits<double>::infinity()) {
+    LOG(ERROR) << "Could not find planar embedding for input graph.";
+    exit(1);
+  }
 
   std::cerr << "Cost: " << curCost << std::endl;
 
@@ -292,21 +289,13 @@ double Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg) 
       toGrNds = gg->getGridNodesTo(toCmbNd, maxDis, frGrNd);
     }
 
-    if (!frGrNd) {
-      LOG(ERROR) << "Could not sort in source node " << frCmbNd << " ("
-                 << frCmbNd->pl().getParent()->pl().getStops().front().name
-                 << ")";
+    if (!frGrNd || toGrNds.size() == 0) {
+      // could not find to or from node, return inf cost
       cost = std::numeric_limits<double>::infinity();
       break;
     }
 
-    if (toGrNds.size() == 0) {
-      LOG(ERROR) << "Could not sort in target node " << toCmbNd << " ("
-                 << toCmbNd->pl().getParent()->pl().getStops().front().name
-                 << ") with displacement distance " << maxDis;
-      cost = std::numeric_limits<double>::infinity();
-      break;
-    }
+    for (auto to : toGrNds) assert(to != frGrNd);
 
     // why not distance based? (TODO)
     double movePenPerGrid = 5;
@@ -345,9 +334,7 @@ double Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg) 
     gg->removeCostVector(*toGrNds.begin(), addCToInv);
 
     if (toGrNd == 0) {
-      LOG(ERROR) << "Could not route to target node " << toCmbNd << " ("
-                 << toCmbNd->pl().getParent()->pl().getStops().front().name
-                 << ")";
+      // could not find route, return inf cost
       cost = std::numeric_limits<double>::infinity();
       break;
     }
