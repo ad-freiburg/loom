@@ -1,1 +1,4 @@
+* Das Mitgeben der from und to Nodes nach dem Routing ist nicht nötig - der Gridgraph ist gerichtet, und der from-Node der ersten Kante bzw. der to-Node der letzten Kante sind from und to - change this!
+* 
+
 * wichtig: das ersetzen von 2 linien die immer miteinander vorkommen mit einer linie funktioniert nicht bei self-loops des linienpaars, siehe chicago! hier ist es nötig, dass sich 2 gleich verlaufende linien "mitten drin" kreuzen, weil es sonst an der großen kreuzung ein same-segment-crossing gibt!

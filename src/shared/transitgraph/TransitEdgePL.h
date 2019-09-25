@@ -65,13 +65,8 @@ class TransitEdgePL : util::geograph::GeoEdgePL<double> {
   const PolyLine<double>& getPolyline() const;
   void setPolyline(const PolyLine<double>& p);
 
-  void setGeneration(int64_t g);
-  int64_t getGeneration() const;
-
  private:
   std::set<RouteOcc> _routes;
-
-  int64_t _generation;
 
   PolyLine<double> _p;
 };

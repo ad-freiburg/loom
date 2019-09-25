@@ -25,13 +25,9 @@ class CombEdgePL : util::geograph::GeoEdgePL<double> {
 
   const PolyLine<double>& getPolyLine() const;
   void setPolyLine(const PolyLine<double>& p);
-  void setGeneration(int64_t g);
-  int64_t getGeneration() const;
 
  private:
   std::vector<shared::transitgraph::TransitEdge*> _childs;
-
-  int64_t _generation;
 
   PolyLine<double> _geom;
 };

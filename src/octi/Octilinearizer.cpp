@@ -4,9 +4,9 @@
 
 #include <fstream>
 #include "octi/Octilinearizer.h"
+#include "octi/combgraph/Drawing.h"
 #include "octi/gridgraph/NodeCost.h"
 #include "util/Misc.h"
-#include "util/geo/BezierCurve.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Dijkstra.h"
 #include "util/log/Log.h"
@@ -16,6 +16,7 @@
 using namespace octi;
 using namespace gridgraph;
 
+using octi::combgraph::Drawing;
 using combgraph::EdgeOrdering;
 using util::graph::Dijkstra;
 using util::graph::Dijkstra;
@@ -127,42 +128,77 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
     }
   }
 
-  std::random_shuffle(order.begin(), order.end() );
-  double curCost = draw(order, gg);
+  std::random_shuffle(order.begin(), order.end());
+  Drawing curCost = draw(order, gg);
   auto best = order;
 
   for (size_t iter = 0; iter < 10; iter++) {
-    std::cerr << "+++ ITERATION " << iter << " +++ " << std::endl;
-    double bestBef = curCost;
+    // std::cerr << "+++ ITERATION " << iter << " +++ " << std::endl;
+    Drawing bestBef = curCost;
     for (size_t i = 1; i < order.size(); i++) {
-      std::random_shuffle(order.begin(), order.end() );
+      std::random_shuffle(order.begin(), order.end());
       gg->reset();
 
-      double nextCost = draw(order, gg);
-      std::cerr << "Prev: " << curCost << " This: " << nextCost << std::endl;
-      if (nextCost < curCost) {
+      Drawing nextCost = draw(order, gg);
+      // std::cerr << "Prev: " << curCost << " This: " << nextCost << std::endl;
+      if (nextCost.score() < curCost.score()) {
         curCost = nextCost;
         best = order;
       }
     }
 
-    if (fabs(bestBef - curCost) < 1) {
+    if (fabs(bestBef.score() - curCost.score()) < 1) {
       break;
     }
   }
 
+  // TODO: move nodes...
+
   gg->reset();
+  SettledPos curPos;
+
+  // arbitrary, but fixed ordering of nodes
+  // std::vector<CombNode*> orderedNds(cg.getNds()->begin(),
+  // cg.getNds()->end());
+
   curCost = draw(best, gg);
 
-  if (curCost == std::numeric_limits<double>::infinity()) {
+  // now we have the node positions in curPos
+
+  // double bestNeighCost = curCost;
+  // SettledPos bestNeighPos = curPos;
+  // for (size_t i = 0; i < cg.getNds()->size() * 8; i++) {
+  // break;
+  // std::cerr << "Change node " << (i / 8) << " to " << ((i % 8)) << std::endl;
+
+  // SettledPos newPos = getNeighbor(curPos, orderedNds, i);
+
+  // std::cerr << "Redrawing.." << std::endl;
+  // double neighCost = draw(best, gg);
+  // std::cerr << "@ cost " << neighCost << std::endl;
+
+  // if (neighCost < bestNeighCost) {
+  // std::cerr << "MURR" << std::endl;
+  // bestNeighPos = newPos;
+  // neighCost = bestNeighCost;
+  // }
+  // }
+
+  // std::cerr << "Best node position neighbor score was " << bestNeighCost
+  // << std::endl;
+
+  // curCost = draw(best, &curPos, gg);
+  // std::cerr << curCost << std::endl;
+
+  if (curCost.score() == std::numeric_limits<double>::infinity()) {
     LOG(ERROR) << "Could not find planar embedding for input graph.";
     exit(1);
   }
 
-  std::cerr << "Cost: " << curCost << std::endl;
+  std::cerr << "Cost: " << curCost.score() << std::endl;
 
   TransitGraph ret;
-  cg.getTransitGraph(&ret);
+  curCost.getTransitGraph(&ret);
 
   *retGg = gg;
 
@@ -170,79 +206,88 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 }
 
 // _____________________________________________________________________________
+SettledPos Octilinearizer::getNeighbor(const SettledPos& pos,
+                                       const std::vector<CombNode*>& ordered,
+                                       size_t i) const {
+  size_t n = i / 8;
+  size_t p = (i % 8);
+  auto nd = ordered[n];
+
+  SettledPos ret = pos;
+
+  // std::cerr << "Cur: " << ret[nd].first << ", " << ret[nd].second <<
+  // std::endl;
+
+  if (p == 0) {
+    ret[nd].second += 1;
+  }
+
+  if (p == 1) {
+    ret[nd].first += 1;
+    ret[nd].second += 1;
+  }
+
+  if (p == 2) {
+    ret[nd].first += 1;
+  }
+
+  if (p == 3) {
+    ret[nd].first += 1;
+    ret[nd].second -= 1;
+  }
+
+  if (p == 4) {
+    ret[nd].second -= 1;
+  }
+
+  if (p == 5) {
+    ret[nd].first -= 1;
+    ret[nd].second -= 1;
+  }
+
+  if (p == 6) {
+    ret[nd].first -= 1;
+  }
+
+  if (p == 7) {
+    ret[nd].first -= 1;
+    ret[nd].second += 1;
+  }
+
+  // std::cerr << "Neigh: " << ret[nd].first << ", " << ret[nd].second <<
+  // std::endl;
+
+  return ret;
+}
+
+// _____________________________________________________________________________
 void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
                                GridGraph* gg, CombNode* from, CombNode* to,
-                               const GrEdgList& res, CombEdge* e, size_t gen) {
+                               const GrEdgList& res, CombEdge* e) {
   gg->settleGridNode(toGrNd, to);
   gg->settleGridNode(frGrNd, from);
 
-  // write everything to the result graph
-  PolyLine<double> pl = buildPolylineFromRes(res);
-  if (e->getFrom() != from) pl.reverse();
+  // add resident edges to grid graph
+  for (auto ge : res) {
+    assert(ge->pl().getResEdges().size() == 0);
+    ge->pl().addResidentEdge(e);
 
-  addResidentEdges(gg, e, res);
+    auto gf = gg->getEdg(ge->getTo(), ge->getFrom());
+    assert(gf->pl().getResEdges().size() == 0);
+    gf->pl().addResidentEdge(e);
+  }
 
+  // balance edges
   for (auto f : res) {
     if (f->pl().isSecondary()) continue;
     gg->balanceEdge(f->getFrom()->pl().getParent(),
                     f->getTo()->pl().getParent());
   }
 
-  e->pl().setPolyLine(pl);
-  e->pl().setGeneration(gen);
-}
-
-// _____________________________________________________________________________
-PolyLine<double> Octilinearizer::buildPolylineFromRes(
-    const std::vector<GridEdge*>& res) {
-  PolyLine<double> pl;
-  for (auto revIt = res.rbegin(); revIt != res.rend(); revIt++) {
-    auto f = *revIt;
-    if (!f->pl().isSecondary()) {
-      if (pl.getLine().size() > 0 &&
-          dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) > 0) {
-        BezierCurve<double> bc(pl.getLine().back(),
-                               *f->getFrom()->pl().getParent()->pl().getGeom(),
-                               *f->getFrom()->pl().getParent()->pl().getGeom(),
-                               *f->getFrom()->pl().getGeom());
-
-        for (auto p : bc.render(10).getLine()) pl << p;
-      } else {
-        pl << *f->getFrom()->pl().getParent()->pl().getGeom();
-      }
-
-      pl << *f->getFrom()->pl().getGeom();
-      pl << *f->getTo()->pl().getGeom();
-    }
-  }
-
-  if (res.size()) pl << *res.front()->getTo()->pl().getParent()->pl().getGeom();
-
-  return pl;
-}
-
-// _____________________________________________________________________________
-double Octilinearizer::getCostFromRes(const std::vector<GridEdge*>& res) {
-  size_t c = 0;
-  double cost = 0;
-  for (auto f : res) {
-    cost += c > 0 ? f->pl().cost() : 0;
-    c++;
-  }
-  return cost;
-}
-
-// _____________________________________________________________________________
-void Octilinearizer::addResidentEdges(GridGraph* g, CombEdge* ce,
-                                      const std::vector<GridEdge*>& res) {
-  for (auto e : res) {
-    assert(e->pl().getResEdges().size() == 0);
-    e->pl().addResidentEdge(ce);
-
-    auto f = g->getEdg(e->getTo(), e->getFrom());
-    assert(f->pl().getResEdges().size() == 0);
-    f->pl().addResidentEdge(ce);
-  }
+  // write everything to the result graph
+  // PolyLine<double> pl = buildPolylineFromRes(res);
+  // if (e->getFrom() != from) pl.reverse();
+  // e->pl().setPolyLine(pl);
 }
 
 // _____________________________________________________________________________
@@ -256,13 +301,13 @@ NodeCost Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode,
 }
 
 // _____________________________________________________________________________
-double Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg) {
-  double cost = 0;
+Drawing Octilinearizer::draw(const std::vector<CombEdge*>& ord, GridGraph* gg) {
+  Drawing drawing;
   size_t gen = 0;
 
-  for (auto cmbEdg : order) {
-    // if (gen > 16) break;
+  SettledPos retPos;
 
+  for (auto cmbEdg : ord) {
     auto frCmbNd = cmbEdg->getFrom();
     auto toCmbNd = cmbEdg->getTo();
 
@@ -278,10 +323,14 @@ double Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg) 
       reversed = !reversed;
     }
 
-    GridNode* frGrNd = gg->getGridNodeFrom(frCmbNd, gg->getCellSize() * 1.7, 0);
+    GridNode* frGrNd;
+    std::set<GridNode*> toGrNds;
+
+    frGrNd = gg->getGridNodeFrom(frCmbNd, gg->getCellSize() * 1.7, 0);
+
     // get surrounding displacement nodes
-    double maxDis = getMaxDis(toCmbNd, cmbEdg,  gg->getCellSize());
-    std::set<GridNode*> toGrNds = gg->getGridNodesTo(toCmbNd, maxDis, frGrNd);
+    double maxDis = getMaxDis(toCmbNd, cmbEdg, gg->getCellSize());
+    toGrNds = gg->getGridNodesTo(toCmbNd, maxDis, frGrNd);
 
     // TODO: abort criteria
     while (!toGrNds.size()) {
@@ -290,27 +339,40 @@ double Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg) 
     }
 
     if (!frGrNd || toGrNds.size() == 0) {
-      // could not find to or from node, return inf cost
-      cost = std::numeric_limits<double>::infinity();
+      drawing = Drawing(std::numeric_limits<double>::infinity());
       break;
     }
 
     for (auto to : toGrNds) assert(to != frGrNd);
 
     // why not distance based? (TODO)
-    double movePenPerGrid = 5;
+    double penPerGrid = 5;
 
     // open the target nodes
     for (auto n : toGrNds) {
-      double gridDist = floor(
-          dist(*n->pl().getGeom(), *toCmbNd->pl().getGeom()) / gg->getCellSize());
+      double gridD = dist(*n->pl().getGeom(), *toCmbNd->pl().getGeom());
+      gridD = gridD / gg->getCellSize();
 
-      gg->openNodeSink(n, gridDist * movePenPerGrid);
+      if (gg->isSettled(toCmbNd)) {
+        // only count displacement penalty ONCE
+        gg->openNodeSink(n, 0);
+      } else {
+        gg->openNodeSink(n, gridD * penPerGrid);
+      }
+
       gg->openNode(n);
     }
 
     // open from source node
-    gg->openNodeSink(frGrNd, 0);
+    if (gg->isSettled(toCmbNd)) {
+      // only count displacement penalty ONCE
+      gg->openNodeSink(frGrNd, 0);
+    } else {
+      double gridD = dist(*frGrNd->pl().getGeom(), *frCmbNd->pl().getGeom());
+      gridD = gridD / gg->getCellSize();
+      gg->openNodeSink(frGrNd, gridD * penPerGrid);
+    }
+
     gg->openNode(frGrNd);
 
     NodeCost addCFromInv = writeNdCosts(frGrNd, frCmbNd, cmbEdg, gg);
@@ -326,18 +388,17 @@ double Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg) 
     Dijkstra::shortestPath(frGrNd, toGrNds, GridCost(),
                            GridHeur(gg, frGrNd, toGrNds), &res, &nList);
 
-    cost += getCostFromRes(res);
-
     if (nList.size()) toGrNd = nList.front();
+    if (toGrNd == 0) {
+      drawing = Drawing(std::numeric_limits<double>::infinity());
+      break;
+    }
+
+    // draw
+    drawing.draw(cmbEdg, res);
 
     gg->removeCostVector(frGrNd, addCFromInv);
     gg->removeCostVector(*toGrNds.begin(), addCToInv);
-
-    if (toGrNd == 0) {
-      // could not find route, return inf cost
-      cost = std::numeric_limits<double>::infinity();
-      break;
-    }
 
     // close the target node
     for (auto n : toGrNds) gg->closeNodeSink(n);
@@ -347,10 +408,10 @@ double Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg) 
     gg->closeNodeSink(frGrNd);
     gg->closeNode(frGrNd);
 
-    settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, res, cmbEdg, gen);
+    settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, res, cmbEdg);
 
     gen++;
   }
 
-  return cost;
+  return drawing;
 }

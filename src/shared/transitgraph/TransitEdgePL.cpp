@@ -14,11 +14,11 @@ using shared::transitgraph::TransitEdgePL;
 using shared::transitgraph::RouteOcc;
 
 // _____________________________________________________________________________
-TransitEdgePL::TransitEdgePL() : _generation(-1) {}
+TransitEdgePL::TransitEdgePL() {}
 
 // _____________________________________________________________________________
 TransitEdgePL::TransitEdgePL(const PolyLine<double>& p)
-    : _generation(-1), _p(p) {}
+    : _p(p) {}
 
 // _____________________________________________________________________________
 const util::geo::Line<double>* TransitEdgePL::getGeom() const {
@@ -72,13 +72,9 @@ const std::set<RouteOcc>& TransitEdgePL::getRoutes() const { return _routes; }
 std::set<RouteOcc>& TransitEdgePL::getRoutes() { return _routes; }
 
 // _____________________________________________________________________________
-void TransitEdgePL::setGeneration(int64_t g) { _generation = g; }
-
-// _____________________________________________________________________________
 util::json::Dict TransitEdgePL::getAttrs() const {
   util::json::Dict obj;
   auto arr = util::json::Array();
-  obj["generation"] = (int)_generation;
 
   std::string dbg_lines = "";
   bool first = true;
@@ -115,6 +111,3 @@ bool TransitEdgePL::hasRoute(const Route* r) const {
 const RouteOcc& TransitEdgePL::getRouteOcc(const Route* r) const {
   return *_routes.find(RouteOcc(r, 0));
 }
-
-// _____________________________________________________________________________
-int64_t TransitEdgePL::getGeneration() const { return _generation; }

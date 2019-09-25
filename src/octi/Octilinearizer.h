@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <vector>
 #include "octi/combgraph/CombGraph.h"
+#include "octi/combgraph/Drawing.h"
 #include "octi/gridgraph/GridGraph.h"
 #include "shared/transitgraph/TransitGraph.h"
 #include "util/graph/Dijkstra.h"
@@ -30,11 +31,14 @@ using octi::combgraph::EdgeOrdering;
 using octi::combgraph::CombGraph;
 using octi::combgraph::CombNode;
 using octi::combgraph::CombEdge;
+using octi::combgraph::Drawing;
 
 using util::graph::Dijkstra;
 
 typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
 typedef Dijkstra::NList<GridNodePL, GridEdgePL> GrNdList;
+
+typedef std::map<CombNode*, std::pair<size_t, size_t>> SettledPos;
 
 // comparator for nodes, based on degree
 struct NodeCmp {
@@ -111,7 +115,7 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
   octi::gridgraph::GridGraph* g;
   GridNode* from;
   GridNode* to;
-  std::vector<std::pair<size_t, size_t> > hull;
+  std::vector<std::pair<size_t, size_t>> hull;
 };
 
 class Octilinearizer {
@@ -123,18 +127,18 @@ class Octilinearizer {
  private:
   double getMaxDis(CombNode* to, CombEdge* e, double gridSize);
   void removeEdgesShorterThan(TransitGraph* g, double d);
-  PolyLine<double> buildPolylineFromRes(const std::vector<GridEdge*>& l);
-  double getCostFromRes(const std::vector<GridEdge*>& l);
-  void addResidentEdges(gridgraph::GridGraph* g, CombEdge* e,
-                        const std::vector<GridEdge*>& res);
 
   NodeCost writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
                         GridGraph* g);
+
   void settleRes(GridNode* startGridNd, GridNode* toGridNd, GridGraph* gg,
                  CombNode* from, CombNode* to, const GrEdgList& res,
-                 CombEdge* e, size_t gen);
+                 CombEdge* e);
 
-  double draw(const std::vector<CombEdge*>& order, GridGraph* gg);
+  Drawing draw(const std::vector<CombEdge*>& order, GridGraph* gg);
+
+  SettledPos getNeighbor(const SettledPos& pos, const std::vector<CombNode*>&,
+                         size_t i) const;
 };
 
 }  // namespace octi
