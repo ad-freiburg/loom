@@ -286,36 +286,16 @@ NodeCost GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode,
 }
 
 // _____________________________________________________________________________
-NodeCost GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
-  NodeCost invCost;
-
+void GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
   for (size_t i = 0; i < 8; i++) {
     auto p = n->pl().getPort(i);
 
     if (addC[i] < -1) {
       getEdg(p, n)->pl().close();
       getEdg(n, p)->pl().close();
-      invCost[i] = addC[i];
     } else {
       getEdg(p, n)->pl().setCost(getEdg(p, n)->pl().rawCost() + addC[i]);
       getEdg(n, p)->pl().setCost(getEdg(n, p)->pl().rawCost() + addC[i]);
-      invCost[i] = addC[i];
-    }
-  }
-  return invCost;
-}
-
-// _____________________________________________________________________________
-void GridGraph::removeCostVector(GridNode* n, const NodeCost& addC) {
-  for (size_t i = 0; i < 8; i++) {
-    auto p = n->pl().getPort(i);
-
-    if (addC[i] < -1) {
-      getEdg(p, n)->pl().open();
-      getEdg(n, p)->pl().open();
-    } else {
-      getEdg(p, n)->pl().setCost(getEdg(p, n)->pl().rawCost() - addC[i]);
-      getEdg(n, p)->pl().setCost(getEdg(n, p)->pl().rawCost() - addC[i]);
     }
   }
 }
@@ -439,6 +419,8 @@ void GridGraph::closeNode(GridNode* n) {
 // _____________________________________________________________________________
 void GridGraph::openNodeSink(GridNode* n, double cost) {
   for (size_t i = 0; i < 8; i++) {
+    getEdg(n->pl().getPort(i), n)->pl().open();
+    getEdg(n, n->pl().getPort(i))->pl().open();
     getEdg(n->pl().getPort(i), n)->pl().setCost(cost);
     getEdg(n, n->pl().getPort(i))->pl().setCost(cost);
   }
@@ -447,6 +429,8 @@ void GridGraph::openNodeSink(GridNode* n, double cost) {
 // _____________________________________________________________________________
 void GridGraph::closeNodeSink(GridNode* n) {
   for (size_t i = 0; i < 8; i++) {
+    getEdg(n->pl().getPort(i), n)->pl().close();
+    getEdg(n, n->pl().getPort(i))->pl().close();
     getEdg(n->pl().getPort(i), n)->pl().setCost(INF);
     getEdg(n, n->pl().getPort(i))->pl().setCost(INF);
   }

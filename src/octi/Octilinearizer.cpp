@@ -132,12 +132,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   draw(order, gg, &drawing);
 
   std::cerr << "Cost from graph: " << drawing.score() << std::endl;
-  util::geo::output::GeoGraphJsonOutput out;
-  std::ofstream of;
-  of.open("octi.json");
-  out.print(*gg, of);
-  of << std::flush;
-  exit(1);
 
   CombNode* a;
 
@@ -151,27 +145,35 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
   std::vector<CombEdge*> test;
 
+  drawing.erase(a);
   for (auto ce : a->getAdjList()) {
     auto es = drawing.getGrEdgs(ce);
+    drawing.erase(ce);
     test.push_back(ce);
 
     for (auto e : es) {
       gg->unSettleEdg(e->getFrom()->pl().getParent(),
                       e->getTo()->pl().getParent());
     }
+    break;
   }
 
-  SettledPos p;
-  p[a] = {drawing.getGrNd(a)->pl().getX(), drawing.getGrNd(a)->pl().getY() + 1};
+  assert(test.size() == 1);
 
-  draw(test, p, gg, &drawing);
+  // SettledPos p;
+  // p[a] = {drawing.getGrNd(a)->pl().getX(), drawing.getGrNd(a)->pl().getY() + 1};
 
-  // util::geo::output::GeoGraphJsonOutput out;
-  // std::ofstream of;
-  // of.open("octi.json");
-  // out.print(*gg, of);
-  // of << std::flush;
-  // exit(1);
+  // draw(test, p, gg, &drawing);
+  draw(test, gg, &drawing);
+
+  std::cerr << "Cost from graph after: " << drawing.score() << std::endl;
+
+  util::geo::output::GeoGraphJsonOutput out;
+  std::ofstream of;
+  of.open("octi.json");
+  out.print(*gg, of);
+  of << std::flush;
+  exit(1);
   auto best = order;
 
   for (size_t iter = 0; iter < 10; iter++) {
@@ -316,13 +318,13 @@ void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
 }
 
 // _____________________________________________________________________________
-NodeCost Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode,
+void Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode,
                                       CombEdge* e, GridGraph* g) {
   NodeCost c;
   c += g->topoBlockPenalty(n, origNode, e);
   c += g->nodeBendPenalty(n, e);
 
-  return g->addCostVector(n, c);
+  g->addCostVector(n, c);
 }
 
 // _____________________________________________________________________________
@@ -407,10 +409,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       } else {
         gg->openNodeSink(n, gridD * penPerGrid);
       }
-
-      // not needed anymore, if the node was closed, then it cannot be used
-      // as a candidate anymore!
-      // gg->openNode(n);
     }
 
     // open from source node
@@ -423,17 +421,14 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       gg->openNodeSink(frGrNd, gridD * penPerGrid);
     }
 
-    // not needed anymore, if the node was closed, then it cannot be used
-    // as a candidate anymore!
-    // gg->openNode(frGrNd);
+    if (gg->isSettled(frCmbNd)) {
+      writeNdCosts(frGrNd, frCmbNd, cmbEdg, gg);
+    }
 
-    NodeCost addCFromInv = writeNdCosts(frGrNd, frCmbNd, cmbEdg, gg);
-    NodeCost addCToInv;
-
-    if (toGrNds.size() == 1) {
+    if (toGrNds.size() == 1 && gg->isSettled(toCmbNd)) {
       // the size() == 1 check is important, because nd cost writing will
       // not work if the to node is not already settled!
-      addCToInv = writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
+      writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
     }
 
     GrEdgList res;
@@ -443,27 +438,16 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
                            GridHeur(gg, frGrNd, toGrNds), &res, &nList);
 
     if (nList.size()) toGrNd = nList.front();
-    if (toGrNd == 0) {
-      return false;
-    }
+    if (toGrNd == 0) return false;
 
     // draw
     drawing->draw(cmbEdg, res, reversed);
 
-    gg->removeCostVector(frGrNd, addCFromInv);
-    gg->removeCostVector(*toGrNds.begin(), addCToInv);
-
     // close the target node
     for (auto n : toGrNds) gg->closeNodeSink(n);
 
-    // TODO: this is not needed, as settleRes already closes the right nodes
-    // gg->closeNode(toGrNd);
-
     // close the start node
     gg->closeNodeSink(frGrNd);
-
-    // TODO: this is not needed, as settleRes already closes the right nodes
-    // gg->closeNode(frGrNd);
 
     settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, res, cmbEdg);
 

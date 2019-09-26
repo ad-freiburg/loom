@@ -28,6 +28,8 @@ class Drawing {
   double score() const;
 
   void draw(CombEdge* ce, const GrEdgList& ge, bool rev);
+  void erase(CombEdge* ce);
+  void erase(CombNode* ce);
 
   void getTransitGraph(TransitGraph* target) const;
 
@@ -37,8 +39,14 @@ class Drawing {
  private:
   std::map<const CombNode*, const GridNode*> _nds;
   std::map<const CombEdge*, std::vector<const GridEdge*>> _edgs;
+
+  std::map<const CombNode*, double> _ndReachCosts;
+  std::map<std::pair<const CombNode*, const CombEdge*>, double> _ndBndCosts;
+  std::map<const CombEdge*, double> _edgCosts;
   double _c;
   const GridGraph* _gg;
+
+  void recalcBends(CombNode* nd);
 
 PolyLine<double> buildPolylineFromRes(
     const std::vector<const GridEdge*>& res) const;

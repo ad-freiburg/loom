@@ -128,7 +128,7 @@ class Octilinearizer {
   double getMaxDis(CombNode* to, CombEdge* e, double gridSize);
   void removeEdgesShorterThan(TransitGraph* g, double d);
 
-  NodeCost writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
+  void writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
                         GridGraph* g);
 
   void settleRes(GridNode* startGridNd, GridNode* toGridNd, GridGraph* gg,

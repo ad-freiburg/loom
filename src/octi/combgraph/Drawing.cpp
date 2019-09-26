@@ -23,6 +23,7 @@ double Drawing::score() const { return _c; }
 
 // _____________________________________________________________________________
 void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
+  std::cerr << "Drawing " << ce << std::endl;
   _edgs[ce].clear();
   for (size_t i = 0; i < ges.size(); i++) {
     auto ge = ges[i];
@@ -35,11 +36,11 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
       _nds[ce->getFrom()] =  ges.back()->getTo()->pl().getParent();
     }
 
-    // there are three kinds of cost contained in a result
+    // there are three kinds of cost contained in a result:
     //  a) node reach costs, which model the cost it takes to move a node
     //     away from its original position. They are only added to the
     //     first edge reaching this node, to prevent a weight for nodes with
-    //     higher degree. These costs can not be removed if a settled edge
+    //     higher degree. These costs cannot be removed if a settled edge
     //     is removed, and they are exactly the cost of the sink edge
     //  b) node bend costs at input nodes, which are induced by a single edge
     //     and which can be removed if a settled edge is removed.
@@ -50,6 +51,32 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
 
     _c += ge->pl().cost();
 
+
+    if (i == 0) {
+      std::cerr << "0: " << ge->pl().cost() << std::endl;
+      if (!_ndReachCosts.count(rev ? ce->getTo() : ce->getFrom())) {
+        // if the node was not settled before, this is the node move cost
+        _ndReachCosts[rev ? ce->getTo() : ce->getFrom()] = ge->pl().cost();
+        _ndBndCosts[{rev ? ce->getTo() : ce->getFrom(), ce}] = 0;
+      } else {
+        // otherwise it is the reach cost belonging to the edge
+        _ndBndCosts[{rev ? ce->getTo() : ce->getFrom(), ce}] += ge->pl().cost();
+      }
+    } else if (i == ges.size() - 1) {
+      std::cerr << "last: " << ge->pl().cost() << std::endl;
+      if (!_ndReachCosts.count(rev ? ce->getFrom() : ce->getTo())) {
+        // if the node was not settled before, this is the node move cost
+        _ndReachCosts[rev ? ce->getFrom() : ce->getTo()] = ge->pl().cost();
+        _ndBndCosts[{rev ? ce->getFrom() : ce->getTo(), ce}] = 0;
+      } else {
+        // otherwise it is the reach cost belonging to the edge
+        _ndBndCosts[{rev ? ce->getFrom() : ce->getTo(), ce}] += ge->pl().cost();
+      }
+    } else {
+      std::cerr << "in: " << ge->pl().cost() << std::endl;
+        _edgCosts[ce] += ge->pl().cost();
+    }
+
     if (!ge->pl().isSecondary()) {
       if (rev) {
         _edgs[ce].push_back(_gg->getEdg(ges[ges.size() - 1 - i]->getTo(),
@@ -58,6 +85,16 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
         _edgs[ce].push_back(ges[i]);
       }
     }
+  }
+
+  double sum = 0;
+  for (auto a : _ndReachCosts) sum += a.second;
+  for (auto a : _ndBndCosts) sum += a.second;
+  for (auto a : _edgCosts) sum += a.second;
+
+  if (fabs(sum - _c) > 0.0001) {
+    std::cerr << sum << " vs " << _c << std::endl;
+    assert(false);
   }
 }
 
@@ -153,4 +190,29 @@ void Drawing::getTransitGraph(TransitGraph* target) const {
       }
     }
   }
+}
+
+// _____________________________________________________________________________
+void Drawing::recalcBends(CombNode* nd) {
+  std::cerr << "Recalcing bend costs at node " << nd << std::endl;
+}
+
+// _____________________________________________________________________________
+void Drawing::erase(CombEdge* ce) {
+  _edgs.erase(ce);
+  _c -= _edgCosts[ce];
+  _edgCosts.erase(ce);
+
+  // update bend costs
+  recalcBends(ce->getFrom());
+  recalcBends(ce->getTo());
+}
+
+// _____________________________________________________________________________
+void Drawing::erase(CombNode* cn) {
+  _nds.erase(cn);
+  _c -= _ndReachCosts[cn];
+  // _c -= _ndBndCosts[cn];
+  _ndReachCosts.erase(cn);
+  // _ndBndCosts.erase(cn);
 }

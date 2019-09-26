@@ -69,8 +69,7 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   std::priority_queue<Candidate> getNearestCandidatesFor(
       const util::geo::DPoint& p, double maxD, const GridNode* ex) const;
 
-  NodeCost addCostVector(GridNode* n, const NodeCost& addC);
-  void removeCostVector(GridNode* n, const NodeCost& addC);
+  void addCostVector(GridNode* n, const NodeCost& addC);
   std::pair<size_t, size_t> getNodeCoords(GridNode* n) const;
 
   void openNodeSink(GridNode* n, double cost);
