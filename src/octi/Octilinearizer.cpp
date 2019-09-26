@@ -408,7 +408,9 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
         gg->openNodeSink(n, gridD * penPerGrid);
       }
 
-      gg->openNode(n);
+      // not needed anymore, if the node was closed, then it cannot be used
+      // as a candidate anymore!
+      // gg->openNode(n);
     }
 
     // open from source node
@@ -421,12 +423,16 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       gg->openNodeSink(frGrNd, gridD * penPerGrid);
     }
 
-    gg->openNode(frGrNd);
+    // not needed anymore, if the node was closed, then it cannot be used
+    // as a candidate anymore!
+    // gg->openNode(frGrNd);
 
     NodeCost addCFromInv = writeNdCosts(frGrNd, frCmbNd, cmbEdg, gg);
     NodeCost addCToInv;
 
     if (toGrNds.size() == 1) {
+      // the size() == 1 check is important, because nd cost writing will
+      // not work if the to node is not already settled!
       addCToInv = writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
     }
 
@@ -450,45 +456,16 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     // close the target node
     for (auto n : toGrNds) gg->closeNodeSink(n);
 
-    // TODO: this is not needed, as settleRes already closes the nodes
+    // TODO: this is not needed, as settleRes already closes the right nodes
     // gg->closeNode(toGrNd);
 
     // close the start node
     gg->closeNodeSink(frGrNd);
 
-    // TODO: this is not needed, as settleRes already closes the nodes
+    // TODO: this is not needed, as settleRes already closes the right nodes
     // gg->closeNode(frGrNd);
 
     settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, res, cmbEdg);
-
-    assert(frGrNd != toGrNd);
-
-    assert(frGrNd->pl().getParent()->pl().isClosed());
-    assert(toGrNd->pl().getParent()->pl().isClosed());
-
-    for (size_t i = 0; i < 8; i++) {
-      auto portA = toGrNd->pl().getPort(i);
-      for (size_t j = i + 1; j < 8; j++) {
-        auto portB = toGrNd->pl().getPort(j);
-        auto e = gg->getEdg(portA, portB);
-        auto f = gg->getEdg(portB, portA);
-
-        assert(e->pl().closed());
-        assert(f->pl().closed());
-      }
-    }
-
-    for (size_t i = 0; i < 8; i++) {
-      auto portA = frGrNd->pl().getPort(i);
-      for (size_t j = i + 1; j < 8; j++) {
-        auto portB = frGrNd->pl().getPort(j);
-        auto e = gg->getEdg(portA, portB);
-        auto f = gg->getEdg(portB, portA);
-
-        assert(e->pl().closed());
-        assert(f->pl().closed());
-      }
-    }
 
     gen++;
   }

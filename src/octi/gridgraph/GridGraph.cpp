@@ -288,32 +288,17 @@ NodeCost GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode,
 // _____________________________________________________________________________
 NodeCost GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
   NodeCost invCost;
-  auto xy = getNodeCoords(n);
-  size_t x = xy.first;
-  size_t y = xy.second;
 
   for (size_t i = 0; i < 8; i++) {
     auto p = n->pl().getPort(i);
-    auto neigh = getNeighbor(x, y, i);
-
-    if (!neigh) continue;
-
-    auto op = neigh->pl().getPort((i + 4) % 8);
 
     if (addC[i] < -1) {
-      if (getEdg(p, op)->pl().closed()) {
-        // already closed, so dont remove closedness in inv costs
-        invCost[i] = 0;
-      } else {
-        // close edges
-        getEdg(p, op)->pl().close();
-        getEdg(op, p)->pl().close();
-
-        invCost[i] = addC[i];
-      }
+      getEdg(p, n)->pl().close();
+      getEdg(n, p)->pl().close();
+      invCost[i] = addC[i];
     } else {
-      getEdg(p, op)->pl().setCost(getEdg(p, op)->pl().rawCost() + addC[i]);
-      getEdg(op, p)->pl().setCost(getEdg(p, op)->pl().rawCost() + addC[i]);
+      getEdg(p, n)->pl().setCost(getEdg(p, n)->pl().rawCost() + addC[i]);
+      getEdg(n, p)->pl().setCost(getEdg(n, p)->pl().rawCost() + addC[i]);
       invCost[i] = addC[i];
     }
   }
@@ -322,24 +307,15 @@ NodeCost GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
 
 // _____________________________________________________________________________
 void GridGraph::removeCostVector(GridNode* n, const NodeCost& addC) {
-  auto xy = getNodeCoords(n);
-  size_t x = xy.first;
-  size_t y = xy.second;
-
   for (size_t i = 0; i < 8; i++) {
     auto p = n->pl().getPort(i);
-    auto neigh = getNeighbor(x, y, i);
-
-    if (!neigh) continue;
-
-    auto op = neigh->pl().getPort((i + 4) % 8);
 
     if (addC[i] < -1) {
-      getEdg(p, op)->pl().open();
-      getEdg(op, p)->pl().open();
+      getEdg(p, n)->pl().open();
+      getEdg(n, p)->pl().open();
     } else {
-      getEdg(p, op)->pl().setCost(getEdg(p, op)->pl().rawCost() - addC[i]);
-      getEdg(op, p)->pl().setCost(getEdg(p, op)->pl().rawCost() - addC[i]);
+      getEdg(p, n)->pl().setCost(getEdg(p, n)->pl().rawCost() - addC[i]);
+      getEdg(n, p)->pl().setCost(getEdg(n, p)->pl().rawCost() - addC[i]);
     }
   }
 }
@@ -423,11 +399,8 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 // _____________________________________________________________________________
 void GridGraph::openNode(GridNode* n) {
   if (!n->pl().isClosed()) return;
-  auto xy = getNodeCoords(n);
-  size_t x = xy.first;
-  size_t y = xy.second;
 
-  // open all non-sink inner nodes
+  // open all non-sink inner edges
   for (size_t i = 0; i < 8; i++) {
     auto portA = n->pl().getPort(i);
     for (size_t j = i + 1; j < 8; j++) {
@@ -435,29 +408,10 @@ void GridGraph::openNode(GridNode* n) {
       auto e = getEdg(portA, portB);
       auto f = getEdg(portB, portA);
 
-      // auto neighA = getNeighbor(x, y, i);
-      // if (neighA && neighA->pl().isClosed()) continue;
-
-      // auto neighB = getNeighbor(x, y, j);
-      // if (neighB && neighB->pl().isClosed()) continue;
-
       e->pl().open();
       f->pl().open();
     }
   }
-
-  // for (size_t i = 0; i < 8; i++) {
-    // auto port = n->pl().getPort(i);
-    // auto neigh = getNeighbor(x, y, i);
-    // if (!neigh || !port || neigh->pl().isClosed()) continue;
-    // auto e = getEdg(port, neigh->pl().getPort((i + 4) % 8));
-    // auto f = getEdg(neigh->pl().getPort((i + 4) % 8), port);
-
-    // if (e && e->pl().getResEdges().size() == 0) {
-      // e->pl().open();
-      // f->pl().open();
-    // }
-  // }
 
   n->pl().setClosed(false);
 }
@@ -465,11 +419,8 @@ void GridGraph::openNode(GridNode* n) {
 // _____________________________________________________________________________
 void GridGraph::closeNode(GridNode* n) {
   if (n->pl().isClosed()) return;
-  auto xy = getNodeCoords(n);
-  size_t x = xy.first;
-  size_t y = xy.second;
 
-  // close all non-sink inner nodes
+  // close all non-sink inner edges
   for (size_t i = 0; i < 8; i++) {
     auto portA = n->pl().getPort(i);
     for (size_t j = i + 1; j < 8; j++) {
@@ -481,17 +432,6 @@ void GridGraph::closeNode(GridNode* n) {
       f->pl().close();
     }
   }
-
-  // for (size_t i = 0; i < 8; i++) {
-    // auto port = n->pl().getPort(i);
-    // auto neigh = getNeighbor(x, y, i);
-    // if (!neigh || !port) continue;
-    // auto e = getEdg(port, neigh->pl().getPort((i + 4) % 8));
-    // auto f = getEdg(neigh->pl().getPort((i + 4) % 8), port);
-
-    // if (e) e->pl().close();
-    // if (f) f->pl().close();
-  // }
 
   n->pl().setClosed(true);
 }
@@ -564,7 +504,7 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   double c_0 = _c.p_45 - _c.p_135;
   double c_135 = _c.p_45;
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
-  double c_45 = c_0 + c_135;;
+  double c_45 = c_0 + c_135;
 
   GridNode* n = addNd(DPoint(xPos, yPos));
   n->pl().setSink();
@@ -617,6 +557,4 @@ void GridGraph::reset() {
 }
 
 // _____________________________________________________________________________
-double GridGraph::getCellSize() const {
-  return _cellSize;
-}
+double GridGraph::getCellSize() const { return _cellSize; }
