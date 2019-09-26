@@ -23,22 +23,25 @@ typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
 
 class Drawing {
  public:
-  Drawing() : _c(0){};
-  Drawing(double cost) : _c(cost){};
+  Drawing(const GridGraph* gg) : _c(0), _gg(gg) {};
 
   double score() const;
 
-  void draw(CombEdge* ce, const GrEdgList& ge);
+  void draw(CombEdge* ce, const GrEdgList& ge, bool rev);
 
   void getTransitGraph(TransitGraph* target) const;
 
+  const GridNode* getGrNd(const CombNode* cn);
+  const std::vector<const GridEdge*>& getGrEdgs(const CombEdge* ce);
+
  private:
-  std::map<const CombNode*, GridNode*> _nds;
-  std::map<const CombEdge*, std::vector<GridEdge*>> _edgs;
+  std::map<const CombNode*, const GridNode*> _nds;
+  std::map<const CombEdge*, std::vector<const GridEdge*>> _edgs;
   double _c;
+  const GridGraph* _gg;
 
 PolyLine<double> buildPolylineFromRes(
-    const std::vector<GridEdge*>& res) const;
+    const std::vector<const GridEdge*>& res) const;
 };
 }
 }

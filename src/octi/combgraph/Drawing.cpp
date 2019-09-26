@@ -22,26 +22,61 @@ using octi::gridgraph::GridEdgePL;
 double Drawing::score() const { return _c; }
 
 // _____________________________________________________________________________
-void Drawing::draw(CombEdge* ce, const GrEdgList& ges) {
+void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
+  _edgs[ce].clear();
   for (size_t i = 0; i < ges.size(); i++) {
     auto ge = ges[i];
-    _nds[ce->getFrom()] = 0;  // TODO
-    _nds[ce->getTo()] = 0;    // TODO
+
+    if (rev) {
+      _nds[ce->getFrom()] = ges.front()->getFrom()->pl().getParent();
+      _nds[ce->getTo()] =  ges.back()->getTo()->pl().getParent();
+    } else {
+      _nds[ce->getTo()] = ges.front()->getFrom()->pl().getParent();
+      _nds[ce->getFrom()] =  ges.back()->getTo()->pl().getParent();
+    }
+
+    // there are three kinds of cost contained in a result
+    //  a) node reach costs, which model the cost it takes to move a node
+    //     away from its original position. They are only added to the
+    //     first edge reaching this node, to prevent a weight for nodes with
+    //     higher degree. These costs can not be removed if a settled edge
+    //     is removed, and they are exactly the cost of the sink edge
+    //  b) node bend costs at input nodes, which are induced by a single edge
+    //     and which can be removed if a settled edge is removed.
+    //  c) edge bend costs at non-input nodes, these can be safely removed if
+    //     a settled edge is unsettled
+    //  d) edge costs, which can also be safely removed if a settled edge is
+    //     unsettled
+
     _c += ge->pl().cost();
 
     if (!ge->pl().isSecondary()) {
-      _edgs[ce].push_back(ge);
+      if (rev) {
+        _edgs[ce].push_back(_gg->getEdg(ges[ges.size() - 1 - i]->getTo(),
+                                        ges[ges.size() - 1 - i]->getFrom()));
+      } else {
+        _edgs[ce].push_back(ges[i]);
+      }
     }
   }
 }
 
 // _____________________________________________________________________________
+const GridNode* Drawing::getGrNd(const CombNode* cn) {
+  return _nds[cn];
+}
+
+// _____________________________________________________________________________
+const std::vector<const GridEdge*>& Drawing::getGrEdgs(const CombEdge* ce) {
+  return _edgs[ce];
+}
+// _____________________________________________________________________________
 PolyLine<double> Drawing::buildPolylineFromRes(
-    const std::vector<GridEdge*>& res) const {
+    const std::vector<const GridEdge*>& res) const {
   PolyLine<double> pl;
   for (auto revIt = res.rbegin(); revIt != res.rend(); revIt++) {
     auto f = *revIt;
-    // TODO check for isSeonday should not be needed, filtered out by draw()
+    // TODO check for isSeconday should not be needed, filtered out by draw()
     if (!f->pl().isSecondary()) {
       if (pl.getLine().size() > 0 &&
           dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) > 0) {

@@ -9,7 +9,12 @@ using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
 GridNodePL::GridNodePL(Point<double> pos)
-    : _pos(pos), _parent(0), _closed(false), _station(false), _sink(false) {}
+    : _pos(pos),
+      _parent(0),
+      _closed(false),
+      _sink(false),
+      _station(false),
+      _settled(false) {}
 
 // _____________________________________________________________________________
 const Point<double>* GridNodePL::getGeom() const { return &_pos; }
@@ -18,7 +23,6 @@ const Point<double>* GridNodePL::getGeom() const { return &_pos; }
 util::json::Dict GridNodePL::getAttrs() const {
   util::json::Dict obj;
   std::vector<std::string> routes;
-  obj["station"] = _station ? "1" : "0";
 
   return obj;
 }
@@ -52,6 +56,12 @@ void GridNodePL::setClosed(bool c) { _closed = c; }
 
 // _____________________________________________________________________________
 bool GridNodePL::isClosed() const { return _closed; }
+
+// _____________________________________________________________________________
+void GridNodePL::setSettled(bool c) { _settled = c; }
+
+// _____________________________________________________________________________
+bool GridNodePL::isSettled() const { return _settled; }
 
 // _____________________________________________________________________________
 void GridNodePL::setSink() { _sink = true; }

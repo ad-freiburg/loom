@@ -90,7 +90,7 @@ GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
 }
 
 // _____________________________________________________________________________
-void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
+void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   if (a == b) return;
   size_t dir = 0;
   for (; dir < 8; dir++) {
@@ -104,8 +104,59 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
   size_t y = xy.second;
 
   // this closes the grid edge
-  getNEdge(a, b)->pl().setCost(INF);
-  getNEdge(b, a)->pl().setCost(INF);
+  auto ge = getNEdge(a, b);
+  auto gf = getNEdge(b, a);
+
+  assert(ge);
+  assert(gf);
+
+  ge->pl().clearResEdges();
+  gf->pl().clearResEdges();
+
+  if (!a->pl().isSettled()) {
+    openNode(a);
+  }
+  if (!b->pl().isSettled()) {
+    openNode(b);
+  }
+
+  if (dir == 1 || dir == 3 || dir == 5 || dir == 7) {
+    auto na = getNeighbor(x, y, (dir + 7) % 8);
+    auto nb = getNeighbor(x, y, (dir + 1) % 8);
+
+    if (na && nb) {
+      auto e = getNEdge(na, nb);
+      auto f = getNEdge(nb, na);
+
+      e->pl().unblock();
+      f->pl().unblock();
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
+  if (a == b) return;
+  size_t dir = 0;
+  for (; dir < 8; dir++) {
+    if (getEdg(a->pl().getPort(dir), b->pl().getPort((dir + 4) % 8))) {
+      break;
+    }
+  }
+
+  auto xy = getNodeCoords(a);
+  size_t x = xy.first;
+  size_t y = xy.second;
+
+  // this closes the grid edge
+  auto ge = getNEdge(a, b);
+  auto gf = getNEdge(b, a);
+
+  assert(ge->pl().getResEdges().size() == 0);
+  ge->pl().addResidentEdge(e);
+
+  assert(gf->pl().getResEdges().size() == 0);
+  gf->pl().addResidentEdge(e);
 
   // this closes both nodes
   // a close means that all major edges reaching this node are closed
@@ -120,8 +171,8 @@ void GridGraph::balanceEdge(GridNode* a, GridNode* b) {
       auto e = getNEdge(na, nb);
       auto f = getNEdge(nb, na);
 
-      e->pl().setCost(INF);
-      f->pl().setCost(INF);
+      e->pl().block();
+      f->pl().block();
     }
   }
 }
@@ -258,13 +309,6 @@ NodeCost GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
         getEdg(p, op)->pl().close();
         getEdg(op, p)->pl().close();
 
-        // close the other node to avoid "stealing" the edge
-        // IMPORTANT: because we check if this edge is already closed
-        // above, it is impossible for this node to be already closed -
-        // then the edge would also be closed, too. So we can close this node
-        // here without danger of re-opening an already closed node later on.
-        closeNode(getNeighbor(x, y, i));
-
         invCost[i] = addC[i];
       }
     } else {
@@ -293,7 +337,6 @@ void GridGraph::removeCostVector(GridNode* n, const NodeCost& addC) {
     if (addC[i] < -1) {
       getEdg(p, op)->pl().open();
       getEdg(op, p)->pl().open();
-      openNode(getNeighbor(x, y, i));
     } else {
       getEdg(p, op)->pl().setCost(getEdg(p, op)->pl().rawCost() - addC[i]);
       getEdg(op, p)->pl().setCost(getEdg(p, op)->pl().rawCost() - addC[i]);
@@ -384,18 +427,37 @@ void GridGraph::openNode(GridNode* n) {
   size_t x = xy.first;
   size_t y = xy.second;
 
+  // open all non-sink inner nodes
   for (size_t i = 0; i < 8; i++) {
-    auto port = n->pl().getPort(i);
-    auto neigh = getNeighbor(x, y, i);
-    if (!neigh || !port || neigh->pl().isClosed()) continue;
-    auto e = getEdg(port, neigh->pl().getPort((i + 4) % 8));
-    auto f = getEdg(neigh->pl().getPort((i + 4) % 8), port);
+    auto portA = n->pl().getPort(i);
+    for (size_t j = i + 1; j < 8; j++) {
+      auto portB = n->pl().getPort(j);
+      auto e = getEdg(portA, portB);
+      auto f = getEdg(portB, portA);
 
-    if (e && e->pl().getResEdges().size() == 0) {
+      // auto neighA = getNeighbor(x, y, i);
+      // if (neighA && neighA->pl().isClosed()) continue;
+
+      // auto neighB = getNeighbor(x, y, j);
+      // if (neighB && neighB->pl().isClosed()) continue;
+
       e->pl().open();
       f->pl().open();
     }
   }
+
+  // for (size_t i = 0; i < 8; i++) {
+    // auto port = n->pl().getPort(i);
+    // auto neigh = getNeighbor(x, y, i);
+    // if (!neigh || !port || neigh->pl().isClosed()) continue;
+    // auto e = getEdg(port, neigh->pl().getPort((i + 4) % 8));
+    // auto f = getEdg(neigh->pl().getPort((i + 4) % 8), port);
+
+    // if (e && e->pl().getResEdges().size() == 0) {
+      // e->pl().open();
+      // f->pl().open();
+    // }
+  // }
 
   n->pl().setClosed(false);
 }
@@ -407,16 +469,29 @@ void GridGraph::closeNode(GridNode* n) {
   size_t x = xy.first;
   size_t y = xy.second;
 
+  // close all non-sink inner nodes
   for (size_t i = 0; i < 8; i++) {
-    auto port = n->pl().getPort(i);
-    auto neigh = getNeighbor(x, y, i);
-    if (!neigh || !port) continue;
-    auto e = getEdg(port, neigh->pl().getPort((i + 4) % 8));
-    auto f = getEdg(neigh->pl().getPort((i + 4) % 8), port);
+    auto portA = n->pl().getPort(i);
+    for (size_t j = i + 1; j < 8; j++) {
+      auto portB = n->pl().getPort(j);
+      auto e = getEdg(portA, portB);
+      auto f = getEdg(portB, portA);
 
-    if (e) e->pl().close();
-    if (f) f->pl().close();
+      e->pl().close();
+      f->pl().close();
+    }
   }
+
+  // for (size_t i = 0; i < 8; i++) {
+    // auto port = n->pl().getPort(i);
+    // auto neigh = getNeighbor(x, y, i);
+    // if (!neigh || !port) continue;
+    // auto e = getEdg(port, neigh->pl().getPort((i + 4) % 8));
+    // auto f = getEdg(neigh->pl().getPort((i + 4) % 8), port);
+
+    // if (e) e->pl().close();
+    // if (f) f->pl().close();
+  // }
 
   n->pl().setClosed(true);
 }
@@ -471,7 +546,10 @@ std::set<GridNode*> GridGraph::getGridNodesTo(CombNode* n, double maxDis,
 }
 
 // _____________________________________________________________________________
-void GridGraph::settleGridNode(GridNode* n, CombNode* cn) { _settled[cn] = n; }
+void GridGraph::settleNd(GridNode* n, CombNode* cn) {
+  _settled[cn] = n;
+  n->pl().setSettled(true);
+}
 
 // _____________________________________________________________________________
 bool GridGraph::isSettled(CombNode* cn) {

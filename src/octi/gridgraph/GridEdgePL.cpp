@@ -11,12 +11,12 @@ using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
 GridEdgePL::GridEdgePL(double c, bool secondary)
-    : _c(c), _isSecondary(secondary), _closed(false), _visited(0) {}
+    : _c(c), _isSecondary(secondary), _closed(false), _blocked(false), _visited(0) {}
 
 // _____________________________________________________________________________
 GridEdgePL::GridEdgePL(double c, bool secondary,
                        bool closed)
-    : _c(c), _isSecondary(secondary), _closed(closed), _visited(0) {}
+    : _c(c), _isSecondary(secondary), _closed(closed), _blocked(false), _visited(0) {}
 
 // _____________________________________________________________________________
 const util::geo::Line<double>* GridEdgePL::getGeom() const {
@@ -62,8 +62,13 @@ util::json::Dict GridEdgePL::getAttrs() const {
 }
 
 // _____________________________________________________________________________
+void GridEdgePL::clearResEdges() {
+  _resEdges.clear();
+}
+
+// _____________________________________________________________________________
 double GridEdgePL::cost() const {
-  return _closed ? std::numeric_limits<double>::infinity() : rawCost();
+  return (_closed || _blocked) ? std::numeric_limits<double>::infinity() : rawCost();
 }
 
 // _____________________________________________________________________________
@@ -77,6 +82,12 @@ bool GridEdgePL::closed() const { return _closed; }
 
 // _____________________________________________________________________________
 void GridEdgePL::open() { _closed = false; }
+
+// _____________________________________________________________________________
+void GridEdgePL::block() { _blocked = true; }
+
+// _____________________________________________________________________________
+void GridEdgePL::unblock() { _blocked = false; }
 
 // _____________________________________________________________________________
 void GridEdgePL::setCost(double c) { _c = c; }

@@ -63,7 +63,6 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   NodeCost nodeBendPenalty(GridNode* n, CombEdge* e);
   NodeCost topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
-  void balanceEdge(GridNode* a, GridNode* b);
 
   double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
@@ -85,7 +84,11 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   std::set<GridNode*> getGridNodesTo(CombNode* n, double maxDis,
                                      const GridNode* ex);
 
-  void settleGridNode(GridNode* n, CombNode* cn);
+  void settleNd(GridNode* n, CombNode* cn);
+  void settleEdg(GridNode* a, GridNode* b, CombEdge* e);
+
+  void unSettleEdg(GridNode* a, GridNode* b);
+
   bool isSettled(CombNode* cn);
 
   GridEdge* getNEdge(const GridNode* a, const GridNode* b) const;
