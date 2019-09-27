@@ -36,17 +36,19 @@ class Drawing {
   const GridNode* getGrNd(const CombNode* cn);
   const std::vector<const GridEdge*>& getGrEdgs(const CombEdge* ce);
 
+  bool drawn(const CombEdge* ce) const;
+
  private:
   std::map<const CombNode*, const GridNode*> _nds;
   std::map<const CombEdge*, std::vector<const GridEdge*>> _edgs;
 
   std::map<const CombNode*, double> _ndReachCosts;
-  std::map<std::pair<const CombNode*, const CombEdge*>, double> _ndBndCosts;
+  std::map<const CombNode*, double> _ndBndCosts;
   std::map<const CombEdge*, double> _edgCosts;
   double _c;
   const GridGraph* _gg;
 
-  void recalcBends(CombNode* nd);
+  double recalcBends(const CombNode* nd);
 
 PolyLine<double> buildPolylineFromRes(
     const std::vector<const GridEdge*>& res) const;

@@ -23,17 +23,17 @@ double Drawing::score() const { return _c; }
 
 // _____________________________________________________________________________
 void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
-  std::cerr << "Drawing " << ce << std::endl;
-  _edgs[ce].clear();
+  std::cerr << "  Drawing " << ce << " from " << ce->getFrom() << " to " << ce->getTo() << " " << rev << std::endl;
+  if (_edgs.count(ce)) _edgs[ce].clear();
   for (size_t i = 0; i < ges.size(); i++) {
     auto ge = ges[i];
 
     if (rev) {
-      _nds[ce->getFrom()] = ges.front()->getFrom()->pl().getParent();
-      _nds[ce->getTo()] =  ges.back()->getTo()->pl().getParent();
+      _nds[ce->getFrom()] = ges.front()->getTo()->pl().getParent();
+      _nds[ce->getTo()] = ges.back()->getFrom()->pl().getParent();
     } else {
-      _nds[ce->getTo()] = ges.front()->getFrom()->pl().getParent();
-      _nds[ce->getFrom()] =  ges.back()->getTo()->pl().getParent();
+      _nds[ce->getTo()] = ges.front()->getTo()->pl().getParent();
+      _nds[ce->getFrom()] = ges.back()->getFrom()->pl().getParent();
     }
 
     // there are three kinds of cost contained in a result:
@@ -51,30 +51,30 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
 
     _c += ge->pl().cost();
 
-
     if (i == 0) {
-      std::cerr << "0: " << ge->pl().cost() << std::endl;
-      if (!_ndReachCosts.count(rev ? ce->getTo() : ce->getFrom())) {
-        // if the node was not settled before, this is the node move cost
-        _ndReachCosts[rev ? ce->getTo() : ce->getFrom()] = ge->pl().cost();
-        _ndBndCosts[{rev ? ce->getTo() : ce->getFrom(), ce}] = 0;
-      } else {
-        // otherwise it is the reach cost belonging to the edge
-        _ndBndCosts[{rev ? ce->getTo() : ce->getFrom(), ce}] += ge->pl().cost();
-      }
-    } else if (i == ges.size() - 1) {
-      std::cerr << "last: " << ge->pl().cost() << std::endl;
       if (!_ndReachCosts.count(rev ? ce->getFrom() : ce->getTo())) {
         // if the node was not settled before, this is the node move cost
         _ndReachCosts[rev ? ce->getFrom() : ce->getTo()] = ge->pl().cost();
-        _ndBndCosts[{rev ? ce->getFrom() : ce->getTo(), ce}] = 0;
+        _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] = 0;
+        // std::cerr << "Settling node move cost for " << (rev ? ce->getFrom() : ce->getTo()) << std::endl;
       } else {
         // otherwise it is the reach cost belonging to the edge
-        _ndBndCosts[{rev ? ce->getFrom() : ce->getTo(), ce}] += ge->pl().cost();
+        _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] += ge->pl().cost();
+      // std::cerr << "Node bnd costs of " << ge->pl().cost() << " for " << (rev ? ce->getFrom() : ce->getTo()) << std::endl;
+      }
+    } else if (i == ges.size() - 1) {
+      if (!_ndReachCosts.count(rev ? ce->getTo() : ce->getFrom())) {
+        // if the node was not settled before, this is the node move cost
+        _ndReachCosts[rev ? ce->getTo() : ce->getFrom()] = ge->pl().cost();
+        _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] = 0;
+        // std::cerr << "Settling node move cost for " << (rev ? ce->getTo() : ce->getFrom()) << std::endl;
+      } else {
+        // otherwise it is the reach cost belonging to the edge
+        _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] += ge->pl().cost();
+        // std::cerr << "Node bnd costs of " << ge->pl().cost() << " for " << (rev ? ce->getTo() : ce->getFrom()) << std::endl;
       }
     } else {
-      std::cerr << "in: " << ge->pl().cost() << std::endl;
-        _edgCosts[ce] += ge->pl().cost();
+      _edgCosts[ce] += ge->pl().cost();
     }
 
     if (!ge->pl().isSecondary()) {
@@ -96,16 +96,22 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
     std::cerr << sum << " vs " << _c << std::endl;
     assert(false);
   }
+
+  for (auto a : _ndBndCosts) {
+    auto re = recalcBends(a.first);
+    if (fabs(re - a.second) > 0.0001) {
+      std::cerr << "Recalc: " << re << " from edges: " << a.second << std::endl;
+      assert(false);
+    }
+  }
 }
 
 // _____________________________________________________________________________
-const GridNode* Drawing::getGrNd(const CombNode* cn) {
-  return _nds[cn];
-}
+const GridNode* Drawing::getGrNd(const CombNode* cn) { return _nds[cn]; }
 
 // _____________________________________________________________________________
 const std::vector<const GridEdge*>& Drawing::getGrEdgs(const CombEdge* ce) {
-  return _edgs[ce];
+  return _edgs.find(ce)->second;
 }
 // _____________________________________________________________________________
 PolyLine<double> Drawing::buildPolylineFromRes(
@@ -193,8 +199,90 @@ void Drawing::getTransitGraph(TransitGraph* target) const {
 }
 
 // _____________________________________________________________________________
-void Drawing::recalcBends(CombNode* nd) {
-  std::cerr << "Recalcing bend costs at node " << nd << std::endl;
+double Drawing::recalcBends(const CombNode* nd) {
+  // std::cerr << "Recalcing bend costs at node " << nd << std::endl;
+
+  double c_0 = _gg->getPenalties().p_45 - _gg->getPenalties().p_135;
+  double c_135 = _gg->getPenalties().p_45;
+  double c_90 = _gg->getPenalties().p_45 - _gg->getPenalties().p_135 + _gg->getPenalties().p_90;
+  double c_45 = c_0 + c_135;
+
+  double c = 0;
+
+  if (_nds.count(nd) == 0) return 0;
+  auto gnd = _nds.find(nd)->second;
+
+  // TODO: implement this better
+
+  for (auto e : nd->getAdjList()) {
+    if (_edgs.count(e) == 0) {
+      continue;  // dont count edge that havent been drawn
+    }
+    auto ge = _edgs.find(e)->second;
+
+    size_t dirA = 0;
+    for (; dirA < 8; dirA++) {
+      if (
+          gnd->pl().getPort(dirA) == ge.front()->getFrom() ||
+          gnd->pl().getPort(dirA) == ge.front()->getTo() ||
+          gnd->pl().getPort(dirA) == ge.back()->getFrom() ||
+          gnd->pl().getPort(dirA) == ge.back()->getTo()) {
+        break;
+      }
+    }
+
+    assert(dirA < 8);
+
+
+    for (auto ro : e->pl().getChilds().front()->pl().getRoutes()) {
+      // std::cerr << "Route " << ro.route->getLabel() << " at " << dirA << std::endl;
+      for (auto f : nd->getAdjList()) {
+        if (e == f) continue;
+        if (_edgs.count(f) == 0) {
+          continue;  // dont count edge that havent been drawn
+        }
+        auto gf = _edgs.find(f)->second;
+
+        if (f->pl().getChilds().front()->pl().hasRoute(ro.route)) {
+          size_t dirB = 0;
+          for (; dirB < 8; dirB++) {
+            if (
+                gnd->pl().getPort(dirB) == gf.front()->getFrom() ||
+                gnd->pl().getPort(dirB) == gf.front()->getTo() ||
+                gnd->pl().getPort(dirB) == gf.back()->getFrom() ||
+                gnd->pl().getPort(dirB) == gf.back()->getTo()) {
+              break;
+            }
+          }
+
+          assert(dirB < 8);
+
+          // std::cerr << "  continued at dir " << dirB << " ";
+
+          int ang = (8 + (dirA - dirB)) % 8;
+          if (ang > 4) ang = 8 - ang;
+          ang = ang % 4;
+
+          double cc = c;
+
+          // write corresponding cost to addC[j]
+          if (ang == 0) c += c_0;
+          if (ang == 1) c += c_45;
+          if (ang == 2) c += c_90;
+          if (ang == 3) c += c_135;
+
+          // std::cerr << " at cost " << c - cc << std::endl;
+        }
+      }
+    }
+  }
+
+  return c / 2;
+}
+
+// _____________________________________________________________________________
+bool Drawing::drawn(const CombEdge* ce) const {
+  return _edgs.count(ce);
 }
 
 // _____________________________________________________________________________
@@ -203,16 +291,34 @@ void Drawing::erase(CombEdge* ce) {
   _c -= _edgCosts[ce];
   _edgCosts.erase(ce);
 
+  _c -= _ndBndCosts[ce->getFrom()];
+  _c -= _ndBndCosts[ce->getTo()];
+
   // update bend costs
-  recalcBends(ce->getFrom());
-  recalcBends(ce->getTo());
+  _ndBndCosts[ce->getFrom()] = recalcBends(ce->getFrom());
+  _ndBndCosts[ce->getTo()] = recalcBends(ce->getTo());
+
+  _c += _ndBndCosts[ce->getTo()];
+  _c += _ndBndCosts[ce->getFrom()];
+
+  double sum = 0;
+  for (auto a : _ndReachCosts) sum += a.second;
+  for (auto a : _ndBndCosts) sum += a.second;
+  for (auto a : _edgCosts) sum += a.second;
+
+  if (fabs(sum - _c) > 0.0001) {
+    std::cerr << sum << " vs " << _c << std::endl;
+    assert(false);
+  }
+
+  assert(_edgs.count(ce) == 0);
 }
 
 // _____________________________________________________________________________
 void Drawing::erase(CombNode* cn) {
   _nds.erase(cn);
   _c -= _ndReachCosts[cn];
-  // _c -= _ndBndCosts[cn];
+  _c -= _ndBndCosts[cn];
   _ndReachCosts.erase(cn);
-  // _ndBndCosts.erase(cn);
+  _ndBndCosts.erase(cn);
 }

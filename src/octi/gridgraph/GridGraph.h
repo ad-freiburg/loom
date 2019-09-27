@@ -86,9 +86,12 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   void settleNd(GridNode* n, CombNode* cn);
   void settleEdg(GridNode* a, GridNode* b, CombEdge* e);
 
-  void unSettleEdg(GridNode* a, GridNode* b);
+  const Penalties& getPenalties() const;
 
-  bool isSettled(CombNode* cn);
+  void unSettleEdg(GridNode* a, GridNode* b);
+  void unSettleNd(CombNode* a);
+
+  bool isSettled(const CombNode* cn);
 
   GridEdge* getNEdge(const GridNode* a, const GridNode* b) const;
   void reset();
@@ -99,7 +102,7 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   Grid<GridNode*, Point, double> _grid;
   double _cellSize, _spacer;
-  std::unordered_map<CombNode*, GridNode*> _settled;
+  std::unordered_map<const CombNode*, GridNode*> _settled;
 
   CombEdgeSet getResEdges(GridNode* n) const;
 

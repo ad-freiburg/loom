@@ -90,6 +90,13 @@ GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
 }
 
 // _____________________________________________________________________________
+void GridGraph::unSettleNd(CombNode* a) {
+  openNode(_settled[a]);
+  _settled[a]->pl().setSettled(false);
+  _settled.erase(a);
+}
+
+// _____________________________________________________________________________
 void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   if (a == b) return;
   size_t dir = 0;
@@ -215,6 +222,11 @@ void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
       outgoing[i] = 0;
     }
   }
+}
+
+// _____________________________________________________________________________
+const Penalties& GridGraph::getPenalties() const {
+  return _c;
 }
 
 // _____________________________________________________________________________
@@ -476,7 +488,7 @@ void GridGraph::settleNd(GridNode* n, CombNode* cn) {
 }
 
 // _____________________________________________________________________________
-bool GridGraph::isSettled(CombNode* cn) {
+bool GridGraph::isSettled(const CombNode* cn) {
   return _settled.find(cn) != _settled.end();
 }
 
