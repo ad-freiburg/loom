@@ -96,6 +96,8 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   GridEdge* getNEdge(const GridNode* a, const GridNode* b) const;
   void reset();
 
+  GridNode* getSettled(const CombNode* cnd) const;
+
  private:
   util::geo::DBox _bbox;
   Penalties _c;

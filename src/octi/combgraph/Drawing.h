@@ -26,6 +26,7 @@ class Drawing {
   Drawing(const GridGraph* gg) : _c(0), _gg(gg) {};
 
   double score() const;
+  void crumble();
 
   void draw(CombEdge* ce, const GrEdgList& ge, bool rev);
   void erase(CombEdge* ce);
@@ -37,6 +38,14 @@ class Drawing {
   const std::vector<const GridEdge*>& getGrEdgs(const CombEdge* ce);
 
   bool drawn(const CombEdge* ce) const;
+
+  void eraseFromGrid(const CombEdge* ce, GridGraph* gg);
+  void eraseFromGrid(const CombNode* ce, GridGraph* gg);
+  void applyToGrid(const CombEdge* ce, GridGraph *gg);
+  void applyToGrid(const CombNode* ce, GridGraph *gg);
+
+  void eraseFromGrid(GridGraph* gg);
+  void applyToGrid(GridGraph *gg);
 
  private:
   std::map<const CombNode*, const GridNode*> _nds;

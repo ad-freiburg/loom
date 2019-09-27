@@ -129,74 +129,86 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   }
 
   Drawing drawing(gg);
-  draw(order, gg, &drawing);
+  bool found = draw(order, gg, &drawing);
+  double origScore = drawing.score();
 
-  std::cerr << " +++++++ Cost from graph: " << drawing.score() << std::endl;
+  assert(found);
 
-  Drawing bestFromIter = drawing;
+  // for (size_t iter = 0; iter < 0; iter++) {
+    // Drawing bestBef = drawing;
+    // Drawing bestIterDraw = drawing;
+    // bool iterFound = found;
+    // for (size_t i = 1; i < order.size(); i++) {
+      // auto iterOrder = order;
+      // std::random_shuffle(iterOrder.begin(), iterOrder.end());
+      // gg->reset();
 
-  for (auto a : *cg.getNds()) {
-    Drawing drawingCp = drawing;
-    size_t origX = drawing.getGrNd(a)->pl().getX();
-    size_t origY = drawing.getGrNd(a)->pl().getX();
+      // Drawing nextDrawing(gg);
+      // double locFound = draw(iterOrder, gg, &nextDrawing);
 
-    std::cerr << drawingCp.score() << std::endl;
+      // if (locFound && nextDrawing.score() < bestBef.score()) {
+        // bestIterDraw = nextDrawing;
+        // iterFound = locFound;
+      // }
+    // }
 
-    // reverting a
-    std::vector<CombEdge*> test;
-    for (auto ce : a->getAdjList()) {
-      auto es = drawingCp.getGrEdgs(ce);
-      drawingCp.erase(ce);
-      test.push_back(ce);
+    // std::cerr << " +++ Before iter " << iter << ": " << bestBef.score() << std::endl;
+    // std::cerr << " +++ After iter " << iter << ": " << bestIterDraw.score() << std::endl;
+    // std::cerr << " +++ Impr: " << (bestBef.score() - bestIterDraw.score()) << std::endl;
 
-      for (auto e : es) {
-        gg->unSettleEdg(e->getFrom()->pl().getParent(),
-                        e->getTo()->pl().getParent());
-      }
-    }
 
-    drawingCp.erase(a);
-    gg->unSettleNd(a);
+    // if (fabs(bestBef.score() - drawing.score()) < 1) {
+      // std::cerr << "No improvement, aborting..." << std::endl;
+      // break;
+    // } else {
+      // drawing = bestIterDraw;
+      // found = true;
+    // }
+  // }
 
-    std::map<GridEdge*, double> oldCosts;
-    for (auto gn :  *gg->getNds()) {
-      for (auto ge : gn->getAdjListOut()) {
-        oldCosts[ge] = ge->pl().cost();
-      }
-    }
+  // if (!found) {
+    // std::cerr << "No initial solution found..." << std::endl;
+    // exit(1);
+  // }
 
-    for (size_t  pos = 0; pos < 8; pos++) {
-      std::cerr << "Checking " << a << " at " << pos << std::endl;
-      Drawing run = drawingCp;
-      SettledPos p;
+  // gg->reset();
+  // drawing.applyToGrid(gg);
 
-      if (pos == 0) p[a] = {origX, origY + 1};
-      if (pos == 1) p[a] = {origX + 1, origY + 1};
-      if (pos == 2) p[a] = {origX + 1,origY };
-      if (pos == 3) p[a] = {origX + 1,  origY- 1};
-      if (pos == 4) p[a] = {origX,  origY- 1};
-      if (pos == 5) p[a] = {origX - 1, origY - 1};
-      if (pos == 6) p[a] = {origX - 1, origY};
-      if (pos == 7) p[a] = {origX - 1, origY + 1};
+  // std::cerr << " +++++++ Initial cost after edge scramble: " << origScore << std::endl;
 
-      bool found = draw(test, p, gg, &run);
+  // util::geo::output::GeoGraphJsonOutput outa;
+  // std::ofstream ofa;
+  // ofa.open("octi.json");
+  // outa.print(*gg, ofa);
+  // ofa << std::flush;
+  // exit(0);
 
-      if (!found) {
-        std::cerr << "No solution found..." << std::endl;
-      } else {
-        std::cerr << " ++++++ Cost from graph after: " << run.score() << std::endl;
-        if (bestFromIter.score() > run.score()) {
-          std::cerr << "  ----- NEWBEST -----" << std::endl;
-          bestFromIter = run;
-        }
-      }
+  size_t iters = 0;
 
-      // reset grid
+  for (; iters < 100; iters++) {
+
+    // util::geo::output::GeoGraphJsonOutput outa;
+    // std::ofstream ofa;
+    // ofa.open("octi_bef.json");
+    // outa.print(*gg, ofa);
+    // ofa << std::flush;
+
+    Drawing bestFromIter = drawing;
+    for (auto a : *cg.getNds()) {
+      // if (a->pl().getParent()->pl().getStops().size() == 0) continue;
+      // if (a->pl().getParent()->pl().getStops().front().name !=
+      // "Schwedenplatz")
+      // continue;
+      Drawing drawingCp = drawing;
+      size_t origX = drawing.getGrNd(a)->pl().getX();
+      size_t origY = drawing.getGrNd(a)->pl().getY();
+
+      // reverting a
+      std::vector<CombEdge*> test;
       for (auto ce : a->getAdjList()) {
-        if (!run.drawn(ce)) continue;
-        auto es = run.getGrEdgs(ce);
-
-        std::cerr << "Reverting " << ce << std::endl;
+        auto es = drawingCp.getGrEdgs(ce);
+        drawingCp.erase(ce);
+        test.push_back(ce);
 
         for (auto e : es) {
           gg->unSettleEdg(e->getFrom()->pl().getParent(),
@@ -204,40 +216,98 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         }
       }
 
-      if (gg->isSettled(a)) gg->unSettleNd(a);
-    }
+      drawingCp.erase(a);
+      gg->unSettleNd(a);
 
-    for (auto gn :  *gg->getNds()) {
-      for (auto ge : gn->getAdjListOut()) {
-        if (oldCosts[ge] == ge->pl().cost()) continue;
-        if (!(fabs(oldCosts[ge] - ge->pl().cost()) < 0.0001)) {
-          std::cerr << oldCosts[ge] << " vs " << ge->pl().cost() << std::endl;
-          assert(fabs(oldCosts[ge] - ge->pl().cost()) < 0.0001);
+      for (size_t pos = 0; pos < 9; pos++) {
+        // std::cerr << "Checking " << a << " "
+                  // << a->pl().getParent()->pl().getStops().front().name << " at "
+                  // << pos << std::endl;
+        Drawing run = drawingCp;
+        SettledPos p;
+
+        // util::geo::output::GeoGraphJsonOutput out;
+        // std::ofstream of;
+        // of.open("octi.json");
+        // out.print(*gg, of);
+        // of << std::flush;
+
+        if (pos == 9) p[a] = {origX, origY};
+        if (pos == 0) p[a] = {origX, origY + 1};
+        if (pos == 1) p[a] = {origX + 1, origY + 1};
+        if (pos == 2) p[a] = {origX + 1, origY};
+        if (pos == 3) p[a] = {origX + 1, origY - 1};
+        if (pos == 4) p[a] = {origX, origY - 1};
+        if (pos == 5) p[a] = {origX - 1, origY - 1};
+        if (pos == 6) p[a] = {origX - 1, origY};
+        if (pos == 7) p[a] = {origX - 1, origY + 1};
+
+        // std::cerr << " x = " << p[a].first << " y = " << p[a].second
+                  // << std::endl;
+
+        bool found = draw(test, p, gg, &run);
+
+        if (!found) {
+          // std::cerr << "No solution found..." << std::endl;
+        } else {
+          // std::cerr << " ++++++ Cost from graph after: " << run.score()
+                    // << std::endl;
+          if (bestFromIter.score() > run.score()) {
+            // std::cerr << "  ----- NEWBEST -----" << std::endl;
+            bestFromIter = run;
+          }
+        }
+
+        // reset grid
+        for (auto ce : a->getAdjList()) {
+          if (!run.drawn(ce)) continue;
+          auto es = run.getGrEdgs(ce);
+
+          // std::cerr << "Reverting " << ce << std::endl;
+
+          for (auto e : es) {
+            gg->unSettleEdg(e->getFrom()->pl().getParent(),
+                            e->getTo()->pl().getParent());
+          }
+        }
+
+        if (gg->isSettled(a)) gg->unSettleNd(a);
+      }
+
+      gg->settleNd(const_cast<GridNode*>(drawing.getGrNd(a)), a);
+
+      // RE-SETTLE EDGES!
+      for (auto ce : a->getAdjList()) {
+        auto es = drawing.getGrEdgs(ce);
+
+        for (auto e : es) {
+          if (e->pl().isSecondary()) continue;
+          gg->settleEdg(e->getFrom()->pl().getParent(),
+                        e->getTo()->pl().getParent(), ce);
         }
       }
     }
 
-    gg->settleNd(const_cast<GridNode*>(drawing.getGrNd(a)), a);
+    std::cerr << " +++ Before iter " << iters << ": " << drawing.score() << std::endl;
+    std::cerr << " +++ After iter " << iters << ": " << bestFromIter.score() << std::endl;
+    std::cerr << " +++ Impr: " << (drawing.score() - bestFromIter.score()) << std::endl;
 
-    // RE-SETTLE EDGES!
-    for (auto ce : a->getAdjList()) {
-      auto es = drawing.getGrEdgs(ce);
-
-      for (auto e : es) {
-        if (e->pl().isSecondary()) continue;
-        gg->settleEdg(e->getFrom()->pl().getParent(), e->getTo()->pl().getParent(),
-                      ce);
-      }
+    if (fabs(drawing.score() - bestFromIter.score()) < 0.05) {
+      std::cerr << "NO IMPROVEMENT ANYMORE, ABORTING!" << std::endl;
+      break;
     }
+
+    drawing.eraseFromGrid(gg);
+    bestFromIter.applyToGrid(gg);
+    drawing = bestFromIter;
+
+    // iteration ended
   }
 
-  // TODO:
-
-  // drawing.remFromGrid(gg);
-  // bestFromIter.applyToGrid(gg);
-
-  std::cerr << " ++++++ Initial: " << drawing.score() << std::endl;
-  std::cerr << " ++++++ Cost after one iteration: " << bestFromIter.score() << std::endl;
+  std::cerr << " ++++++ Initial: " << origScore << std::endl;
+  std::cerr << " ++++++ Cost after " << iters << " iterations: " << drawing.score()
+            << std::endl;
+  std::cerr << " ++++++ Impr: " << origScore - drawing.score() << std::endl;
 
   util::geo::output::GeoGraphJsonOutput out;
   std::ofstream of;
@@ -245,70 +315,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   out.print(*gg, of);
   of << std::flush;
   exit(1);
-  auto best = order;
 
-  for (size_t iter = 0; iter < 10; iter++) {
-    Drawing bestBef = drawing;
-    for (size_t i = 1; i < order.size(); i++) {
-      std::random_shuffle(order.begin(), order.end());
-      gg->reset();
 
-      Drawing nextDrawing(gg);
-      draw(order, gg, &nextDrawing);
-      if (nextDrawing.score() < drawing.score()) {
-        drawing = nextDrawing;
-        best = order;
-      }
-    }
-
-    if (fabs(bestBef.score() - drawing.score()) < 1) {
-      break;
-    }
-  }
-
-  // TODO: move nodes...
-
-  gg->reset();
-
-  // arbitrary, but fixed ordering of nodes
-  // std::vector<CombNode*> orderedNds(cg.getNds()->begin(),
-  // cg.getNds()->end());
-
-  draw(best, gg, &drawing);
-
-  // now we have the node positions in curPos
-
-  // double bestNeighCost = curCost;
-  // SettledPos bestNeighPos = curPos;
-  // for (size_t i = 0; i < cg.getNds()->size() * 8; i++) {
-  // break;
-  // std::cerr << "Change node " << (i / 8) << " to " << ((i % 8)) << std::endl;
-
-  // SettledPos newPos = getNeighbor(curPos, orderedNds, i);
-
-  // std::cerr << "Redrawing.." << std::endl;
-  // double neighCost = draw(best, gg);
-  // std::cerr << "@ cost " << neighCost << std::endl;
-
-  // if (neighCost < bestNeighCost) {
-  // std::cerr << "MURR" << std::endl;
-  // bestNeighPos = newPos;
-  // neighCost = bestNeighCost;
-  // }
-  // }
-
-  // std::cerr << "Best node position neighbor score was " << bestNeighCost
-  // << std::endl;
-
-  // curCost = draw(best, &curPos, gg);
-  // std::cerr << curCost << std::endl;
-
-  if (drawing.score() == std::numeric_limits<double>::infinity()) {
-    LOG(ERROR) << "Could not find planar embedding for input graph.";
-    exit(1);
-  }
-
-  std::cerr << "Cost: " << drawing.score() << std::endl;
 
   TransitGraph ret;
   drawing.getTransitGraph(&ret);
@@ -334,8 +342,8 @@ void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
 }
 
 // _____________________________________________________________________________
-void Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode,
-                                      CombEdge* e, GridGraph* g) {
+void Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
+                                  GridGraph* g) {
   NodeCost c;
   c += g->topoBlockPenalty(n, origNode, e);
   c += g->nodeBendPenalty(n, e);
@@ -357,6 +365,11 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
   size_t gen = 0;
   bool fail = false;
 
+  double c_0 = gg->getPenalties().p_45 - gg->getPenalties().p_135;
+  double c_135 = gg->getPenalties().p_45;
+  double c_90 = gg->getPenalties().p_45 - gg->getPenalties().p_135 + gg->getPenalties().p_90;
+  double c_45 = c_0 + c_135;
+
   SettledPos retPos;
 
   for (auto cmbEdg : ord) {
@@ -366,10 +379,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     bool reversed = false;
 
-    if (frCmbNd->getDeg() < toCmbNd->getDeg() ||
-        (frCmbNd->getDeg() == toCmbNd->getDeg() &&
-         frCmbNd->pl().getRouteNumber() < toCmbNd->pl().getRouteNumber()) ||
-        (!gg->isSettled(frCmbNd) && gg->isSettled(toCmbNd))) {
+    if ((!gg->isSettled(frCmbNd) && gg->isSettled(toCmbNd))) {
       auto tmp = frCmbNd;
       frCmbNd = toCmbNd;
       toCmbNd = tmp;
@@ -381,7 +391,9 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     // STEP 1
     // grid node selection
-    if (settled.count(frCmbNd)) {
+    if (gg->getSettled(frCmbNd)) {
+      frGrNd = gg->getSettled(frCmbNd);
+    } else if (settled.count(frCmbNd)) {
       frGrNd = gg->getNode(settled.find(frCmbNd)->second.first,
                            settled.find(frCmbNd)->second.second);
       if (!frGrNd || frGrNd->pl().isClosed()) {
@@ -392,7 +404,9 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       frGrNd = gg->getGridNodeFrom(frCmbNd, gg->getCellSize() * 1.7, 0);
     }
 
-    if (settled.count(toCmbNd)) {
+    if (gg->getSettled(toCmbNd)) {
+      toGrNds.insert(gg->getSettled(toCmbNd));
+    } else if (settled.count(toCmbNd)) {
       toGrNds.insert(gg->getNode(settled.find(toCmbNd)->second.first,
                                  settled.find(toCmbNd)->second.second));
       if (!(*toGrNds.begin()) || *toGrNds.begin() == frGrNd) {
@@ -416,20 +430,20 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     }
 
     if (!frGrNd || toGrNds.size() == 0) {
-        fail = true;
-        break;
+      fail = true;
+      break;
     }
 
     for (auto to : toGrNds) assert(to != frGrNd);
 
     // END STEP 1
 
-    // why not distance based? (TODO)
-    double penPerGrid = 5;
+    // why not distance based? (TODO, balance this with edge costs)
+    double penPerGrid = c_0 + fmax(gg->getPenalties().diagonalPen, gg->getPenalties().horizontalPen);
 
     // open the target nodes
     for (auto n : toGrNds) {
-      double gridD = dist(*n->pl().getGeom(), *toCmbNd->pl().getGeom());
+      double gridD = floor(dist(*n->pl().getGeom(), *toCmbNd->pl().getGeom()));
       gridD = gridD / gg->getCellSize();
 
       if (gg->isSettled(toCmbNd)) {
@@ -445,7 +459,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       // only count displacement penalty ONCE
       gg->openNodeSink(frGrNd, 0);
     } else {
-      double gridD = dist(*frGrNd->pl().getGeom(), *frCmbNd->pl().getGeom());
+      double gridD =
+          floor(dist(*frGrNd->pl().getGeom(), *frCmbNd->pl().getGeom()));
       gridD = gridD / gg->getCellSize();
       gg->openNodeSink(frGrNd, gridD * penPerGrid);
     }
@@ -491,8 +506,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
   }
 
   if (fail) {
-    std::cerr << "FAIL!" << std::endl;
-    // undraw...
+    // crumble drawing...
+    drawing->crumble();
 
     return false;
   }

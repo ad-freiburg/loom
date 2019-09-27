@@ -23,14 +23,12 @@ double Drawing::score() const { return _c; }
 
 // _____________________________________________________________________________
 void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
-  std::cerr << "  Drawing " << ce << " from " << ce->getFrom() << " to " << ce->getTo() << " " << rev << std::endl;
+  // std::cerr << "  Drawing " << ce << " from " << ce->getFrom() << " to " << ce->getTo() << " " << rev << std::endl;
   if (_edgs.count(ce)) _edgs[ce].clear();
   for (size_t i = 0; i < ges.size(); i++) {
     auto ge = ges[i];
 
-    if (rev) {
-      _nds[ce->getFrom()] = ges.front()->getTo()->pl().getParent();
-      _nds[ce->getTo()] = ges.back()->getFrom()->pl().getParent();
+    if (rev) { _nds[ce->getFrom()] = ges.front()->getTo()->pl().getParent(); _nds[ce->getTo()] = ges.back()->getFrom()->pl().getParent();
     } else {
       _nds[ce->getTo()] = ges.front()->getTo()->pl().getParent();
       _nds[ce->getFrom()] = ges.back()->getFrom()->pl().getParent();
@@ -93,14 +91,14 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
   for (auto a : _edgCosts) sum += a.second;
 
   if (fabs(sum - _c) > 0.0001) {
-    std::cerr << sum << " vs " << _c << std::endl;
+    // std::cerr << sum << " vs " << _c << std::endl;
     assert(false);
   }
 
   for (auto a : _ndBndCosts) {
     auto re = recalcBends(a.first);
     if (fabs(re - a.second) > 0.0001) {
-      std::cerr << "Recalc: " << re << " from edges: " << a.second << std::endl;
+      // std::cerr << "Recalc: " << re << " from edges: " << a.second << std::endl;
       assert(false);
     }
   }
@@ -196,6 +194,15 @@ void Drawing::getTransitGraph(TransitGraph* target) const {
       }
     }
   }
+}
+// _____________________________________________________________________________
+void Drawing::crumble() {
+  _c = std::numeric_limits<double>::infinity();
+  _nds.clear();
+  _edgs.clear();
+  _ndReachCosts.clear();
+  _ndBndCosts.clear();
+  _edgCosts.clear();
 }
 
 // _____________________________________________________________________________
@@ -321,4 +328,45 @@ void Drawing::erase(CombNode* cn) {
   _c -= _ndBndCosts[cn];
   _ndReachCosts.erase(cn);
   _ndBndCosts.erase(cn);
+}
+
+// _____________________________________________________________________________
+void Drawing::eraseFromGrid(const CombEdge* ce, GridGraph* gg) {
+  auto es = _edgs[ce];
+  for (auto e : es) {
+    gg->unSettleEdg(e->getFrom()->pl().getParent(),
+                    e->getTo()->pl().getParent());
+  }
+}
+
+// _____________________________________________________________________________
+void Drawing::applyToGrid(const CombEdge* ce, GridGraph* gg) {
+  auto es = _edgs[ce];
+  for (auto e : es) {
+    if (e->pl().isSecondary()) continue;
+    gg->settleEdg(e->getFrom()->pl().getParent(), e->getTo()->pl().getParent(),
+                  const_cast<CombEdge*>(ce));
+  }
+}
+
+// _____________________________________________________________________________
+void Drawing::eraseFromGrid(const CombNode* nd, GridGraph* gg) {
+  gg->unSettleNd(const_cast<CombNode*>(nd));
+}
+
+// _____________________________________________________________________________
+void Drawing::applyToGrid(const CombNode* nd, GridGraph* gg) {
+  gg->settleNd(const_cast<GridNode*>(_nds[nd]), const_cast<CombNode*>(nd));
+}
+
+// _____________________________________________________________________________
+void Drawing::eraseFromGrid(GridGraph* gg) {
+  for (auto e : _edgs) eraseFromGrid(e.first, gg);
+  for (auto nd : _nds) eraseFromGrid(nd.first, gg);
+}
+
+// _____________________________________________________________________________
+void Drawing::applyToGrid(GridGraph* gg) {
+  for (auto nd : _nds) applyToGrid(nd.first, gg);
+  for (auto e : _edgs) applyToGrid(e.first, gg);
 }

@@ -206,6 +206,7 @@ void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
   size_t y = xy.second;
 
   for (size_t i = 0; i < 8; i++) {
+    outgoing[i] = 0;
     auto p = n->pl().getPort(i);
     auto neigh = getNeighbor(x, y, i);
 
@@ -218,8 +219,6 @@ void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
                          ->pl()
                          .getResEdges()
                          .begin();
-    } else {
-      outgoing[i] = 0;
     }
   }
 }
@@ -461,6 +460,12 @@ GridNode* GridGraph::getGridNodeFrom(CombNode* n, double maxDis,
     return 0;
   }
   return _settled[n];
+}
+
+// _____________________________________________________________________________
+GridNode* GridGraph::getSettled(const CombNode* cnd) const {
+  if (_settled.count(cnd)) return _settled.find(cnd)->second;
+  return 0;
 }
 
 // _____________________________________________________________________________
