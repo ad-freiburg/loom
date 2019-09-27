@@ -254,11 +254,13 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
           if (ang > 4) ang = 8 - ang;
           ang = ang % 4;
 
+          double mult = 1;
+
           // write corresponding cost to addC[j]
-          if (ang == 0) addC[j] += c_0;
-          if (ang == 1) addC[j] += c_45;
-          if (ang == 2) addC[j] += c_90;
-          if (ang == 3) addC[j] += c_135;
+          if (ang == 0) addC[j] += mult * c_0;
+          if (ang == 1) addC[j] += mult * c_45;
+          if (ang == 2) addC[j] += mult * c_90;
+          if (ang == 3) addC[j] += mult * c_135;
         }
       }
     }

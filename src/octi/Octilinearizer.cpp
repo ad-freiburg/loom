@@ -132,49 +132,45 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   bool found = draw(order, gg, &drawing);
   double origScore = drawing.score();
 
-  assert(found);
+  Drawing bestIterDraw = drawing;
+  drawing.eraseFromGrid(gg);
+  bool iterFound = false;
+  for (size_t i = 0; i < 10; i++) {
+    auto iterOrder = order;
+    std::random_shuffle(iterOrder.begin(), iterOrder.end());
 
-  // for (size_t iter = 0; iter < 0; iter++) {
-    // Drawing bestBef = drawing;
-    // Drawing bestIterDraw = drawing;
-    // bool iterFound = found;
-    // for (size_t i = 1; i < order.size(); i++) {
-      // auto iterOrder = order;
-      // std::random_shuffle(iterOrder.begin(), iterOrder.end());
-      // gg->reset();
+    Drawing nextDrawing(gg);
+    double locFound = draw(iterOrder, gg, &nextDrawing);
 
-      // Drawing nextDrawing(gg);
-      // double locFound = draw(iterOrder, gg, &nextDrawing);
+    if (locFound) {
+      std::cerr << " +++ Before iter " << i << ": " << bestIterDraw.score() << std::endl;
+      std::cerr << " +++ After iter " << i << ": " << nextDrawing.score() << std::endl;
+      std::cerr << " +++ Impr: " << (bestIterDraw.score() - nextDrawing.score()) << std::endl;
 
-      // if (locFound && nextDrawing.score() < bestBef.score()) {
-        // bestIterDraw = nextDrawing;
-        // iterFound = locFound;
-      // }
-    // }
+      if (nextDrawing.score() < bestIterDraw.score()) {
+        bestIterDraw = nextDrawing;
+        iterFound = locFound;
+      }
+    }
 
-    // std::cerr << " +++ Before iter " << iter << ": " << bestBef.score() << std::endl;
-    // std::cerr << " +++ After iter " << iter << ": " << bestIterDraw.score() << std::endl;
-    // std::cerr << " +++ Impr: " << (bestBef.score() - bestIterDraw.score()) << std::endl;
+    nextDrawing.eraseFromGrid(gg);
+  }
 
+  if (iterFound && fabs(bestIterDraw.score() - bestIterDraw.score()) < 1) {
+    std::cerr << "No improvement..." << std::endl;
+  } else {
+    drawing = bestIterDraw;
+    found = true;
+  }
 
-    // if (fabs(bestBef.score() - drawing.score()) < 1) {
-      // std::cerr << "No improvement, aborting..." << std::endl;
-      // break;
-    // } else {
-      // drawing = bestIterDraw;
-      // found = true;
-    // }
-  // }
+  if (!found) {
+    std::cerr << "No initial solution found..." << std::endl;
+    exit(1);
+  }
 
-  // if (!found) {
-    // std::cerr << "No initial solution found..." << std::endl;
-    // exit(1);
-  // }
+  drawing.applyToGrid(gg);
 
-  // gg->reset();
-  // drawing.applyToGrid(gg);
-
-  // std::cerr << " +++++++ Initial cost after edge scramble: " << origScore << std::endl;
+  std::cerr << " +++++++ Initial cost after edge scramble: " << origScore << std::endl;
 
   // util::geo::output::GeoGraphJsonOutput outa;
   // std::ofstream ofa;
@@ -195,11 +191,13 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
     Drawing bestFromIter = drawing;
     for (auto a : *cg.getNds()) {
+      if (a->getDeg() == 0) continue;
       // if (a->pl().getParent()->pl().getStops().size() == 0) continue;
       // if (a->pl().getParent()->pl().getStops().front().name !=
       // "Schwedenplatz")
       // continue;
       Drawing drawingCp = drawing;
+      assert(drawing.getGrNd(a));
       size_t origX = drawing.getGrNd(a)->pl().getX();
       size_t origY = drawing.getGrNd(a)->pl().getY();
 
@@ -309,14 +307,13 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
             << std::endl;
   std::cerr << " ++++++ Impr: " << origScore - drawing.score() << std::endl;
 
-  util::geo::output::GeoGraphJsonOutput out;
-  std::ofstream of;
-  of.open("octi.json");
-  out.print(*gg, of);
-  of << std::flush;
-  exit(1);
 
+  if (drawing.score() == std::numeric_limits<double>::infinity()) {
+    LOG(ERROR) << "Could not find planar embedding for input graph.";
+    exit(1);
+  }
 
+  std::cerr << "Cost: " << drawing.score() << std::endl;
 
   TransitGraph ret;
   drawing.getTransitGraph(&ret);
@@ -506,8 +503,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
   }
 
   if (fail) {
-    // crumble drawing...
-    drawing->crumble();
+    // undraw...
 
     return false;
   }

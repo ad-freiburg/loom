@@ -270,15 +270,13 @@ double Drawing::recalcBends(const CombNode* nd) {
           if (ang > 4) ang = 8 - ang;
           ang = ang % 4;
 
-          double cc = c;
+          double mult = 1;
 
           // write corresponding cost to addC[j]
-          if (ang == 0) c += c_0;
-          if (ang == 1) c += c_45;
-          if (ang == 2) c += c_90;
-          if (ang == 3) c += c_135;
-
-          // std::cerr << " at cost " << c - cc << std::endl;
+          if (ang == 0) c += mult * c_0;
+          if (ang == 1) c += mult * c_45;
+          if (ang == 2) c += mult * c_90;
+          if (ang == 3) c += mult * c_135;
         }
       }
     }
