@@ -77,6 +77,13 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
   auto gg = new GridGraph(box, gridSize, borderRad, pens);
 
+  // util::geo::output::GeoGraphJsonOutput outa;
+  // std::ofstream ofa;
+  // ofa.open("octi.json");
+  // outa.print(*gg, ofa);
+  // ofa << std::flush;
+  // exit(0);
+
   ///////////
   // ilp::ILPGridOptimizer ilpoptim;
 
@@ -102,9 +109,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   std::vector<CombEdge*> order;
 
   for (auto n : *cg.getNds()) globalPq.push(n);
-
   std::set<CombEdge*> done;
-  int64_t gen = 0;
 
   while (!globalPq.empty()) {
     auto n = globalPq.top();
@@ -132,6 +137,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   bool found = draw(order, gg, &drawing);
   double origScore = drawing.score();
 
+  if (!found) std::cerr << "(no initial embedding found)" << std::endl;
+
   Drawing bestIterDraw = drawing;
   drawing.eraseFromGrid(gg);
   bool iterFound = false;
@@ -140,25 +147,23 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
     std::random_shuffle(iterOrder.begin(), iterOrder.end());
 
     Drawing nextDrawing(gg);
-    double locFound = draw(iterOrder, gg, &nextDrawing);
+    bool locFound = draw(iterOrder, gg, &nextDrawing);
 
     if (locFound) {
       std::cerr << " +++ Before iter " << i << ": " << bestIterDraw.score() << std::endl;
       std::cerr << " +++ After iter " << i << ": " << nextDrawing.score() << std::endl;
       std::cerr << " +++ Impr: " << (bestIterDraw.score() - nextDrawing.score()) << std::endl;
 
-      if (nextDrawing.score() < bestIterDraw.score()) {
+      if (!iterFound || nextDrawing.score() < bestIterDraw.score()) {
         bestIterDraw = nextDrawing;
-        iterFound = locFound;
+        iterFound = true;
       }
     }
 
     nextDrawing.eraseFromGrid(gg);
   }
 
-  if (iterFound && fabs(bestIterDraw.score() - bestIterDraw.score()) < 1) {
-    std::cerr << "No improvement..." << std::endl;
-  } else {
+  if (iterFound) {
     drawing = bestIterDraw;
     found = true;
   }
@@ -167,6 +172,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
     std::cerr << "No initial solution found..." << std::endl;
     exit(1);
   }
+
+  assert(found);
 
   drawing.applyToGrid(gg);
 
@@ -192,18 +199,19 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
     Drawing bestFromIter = drawing;
     for (auto a : *cg.getNds()) {
       if (a->getDeg() == 0) continue;
+      assert(drawing.getGrNd(a));
       // if (a->pl().getParent()->pl().getStops().size() == 0) continue;
       // if (a->pl().getParent()->pl().getStops().front().name !=
       // "Schwedenplatz")
       // continue;
       Drawing drawingCp = drawing;
-      assert(drawing.getGrNd(a));
       size_t origX = drawing.getGrNd(a)->pl().getX();
       size_t origY = drawing.getGrNd(a)->pl().getY();
 
       // reverting a
       std::vector<CombEdge*> test;
       for (auto ce : a->getAdjList()) {
+        assert(drawingCp.drawn(ce));
         auto es = drawingCp.getGrEdgs(ce);
         drawingCp.erase(ce);
         test.push_back(ce);
@@ -307,6 +315,11 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
             << std::endl;
   std::cerr << " ++++++ Impr: " << origScore - drawing.score() << std::endl;
 
+  util::geo::output::GeoGraphJsonOutput out;
+  std::ofstream of;
+  of.open("octi.json");
+  out.print(*gg, of);
+  of << std::flush;
 
   if (drawing.score() == std::numeric_limits<double>::infinity()) {
     LOG(ERROR) << "Could not find planar embedding for input graph.";
@@ -436,7 +449,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     // END STEP 1
 
     // why not distance based? (TODO, balance this with edge costs)
-    double penPerGrid = c_0 + fmax(gg->getPenalties().diagonalPen, gg->getPenalties().horizontalPen);
+    double penPerGrid = 5 + c_0 + fmax(gg->getPenalties().diagonalPen, gg->getPenalties().horizontalPen);
 
     // open the target nodes
     for (auto n : toGrNds) {
@@ -507,6 +520,13 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     return false;
   }
+
+  // util::geo::output::GeoGraphJsonOutput outa;
+  // std::ofstream ofa;
+  // ofa.open("octi.json");
+  // outa.print(*gg, ofa);
+  // ofa << std::flush;
+  // exit(0);
 
   return true;
 }

@@ -26,9 +26,19 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
       _grid(cellSize, cellSize, bbox),
       _cellSize(cellSize),
       _spacer(spacer) {
-  assert(_c.p_0 < _c.p_135);
-  assert(_c.p_135 < _c.p_90);
-  assert(_c.p_90 < _c.p_45);
+  assert(_c.p_0 <= _c.p_135);
+  assert(_c.p_135 <= _c.p_90);
+  assert(_c.p_90 <= _c.p_45);
+
+  double c_0 = _c.p_45 - _c.p_135;
+  double c_135 = _c.p_45;
+  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
+  double c_45 = c_0 + c_135;
+
+  std::cerr << "C0: " << c_0 << std::endl;
+  std::cerr << "C135: " << c_135 << std::endl;
+  std::cerr << "C90: " << c_90 << std::endl;
+  std::cerr << "C45: " << c_45 << std::endl;
 
   // cut off illegal spacer values
   if (spacer > cellSize / 2) spacer = cellSize / 2;
@@ -254,7 +264,7 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
           if (ang > 4) ang = 8 - ang;
           ang = ang % 4;
 
-          double mult = 1;
+          double mult= 1;
 
           // write corresponding cost to addC[j]
           if (ang == 0) addC[j] += mult * c_0;
@@ -508,6 +518,11 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   double c_135 = _c.p_45;
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
   double c_45 = c_0 + c_135;
+
+  // std::cerr << "C0: " << c_0 << std::endl;
+  // std::cerr << "C135: " << c_135 << std::endl;
+  // std::cerr << "C90: " << c_90 << std::endl;
+  // std::cerr << "C45: " << c_45 << std::endl;
 
   GridNode* n = addNd(DPoint(xPos, yPos));
   n->pl().setSink();

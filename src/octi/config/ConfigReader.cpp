@@ -68,11 +68,11 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "penalty for 135 deg traversal")
     (
       "pen-90",
-      opts::value<double>(&(cfg->pens.p_90))->default_value(3),
+      opts::value<double>(&(cfg->pens.p_90))->default_value(1.5),
       "penalty for 90 deg traversal")
     (
       "pen-45",
-      opts::value<double>(&(cfg->pens.p_45))->default_value(9),
+      opts::value<double>(&(cfg->pens.p_45))->default_value(2),
       "penalty for 45 deg traversal")
     ;
 

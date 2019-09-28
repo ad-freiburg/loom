@@ -12,7 +12,7 @@ using octi::combgraph::EdgeOrdering;
 // _____________________________________________________________________________
 CombGraph::CombGraph(const TransitGraph* g) {
   build(g);
-  // combineDeg2();
+  combineDeg2();
   writeEdgeOrdering();
 }
 

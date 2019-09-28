@@ -95,13 +95,13 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
     assert(false);
   }
 
-  for (auto a : _ndBndCosts) {
-    auto re = recalcBends(a.first);
-    if (fabs(re - a.second) > 0.0001) {
-      // std::cerr << "Recalc: " << re << " from edges: " << a.second << std::endl;
-      assert(false);
-    }
-  }
+  // for (auto a : _ndBndCosts) {
+    // auto re = recalcBends(a.first);
+    // if (fabs(re - a.second) > 0.0001) {
+      // // std::cerr << "Recalc: " << re << " from edges: " << a.second << std::endl;
+      // assert(false);
+    // }
+  // }
 }
 
 // _____________________________________________________________________________
