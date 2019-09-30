@@ -56,7 +56,7 @@ start:
 
 // _____________________________________________________________________________
 double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e, double gridSize) {
-  return gridSize * 1.7;
+  return gridSize * 3;
 }
 
 // _____________________________________________________________________________
@@ -75,14 +75,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
   auto box = tg->getBBox();
 
+  T_START(grid);
   auto gg = new GridGraph(box, gridSize, borderRad, pens);
-
-  // util::geo::output::GeoGraphJsonOutput outa;
-  // std::ofstream ofa;
-  // ofa.open("octi.json");
-  // outa.print(*gg, ofa);
-  // ofa << std::flush;
-  // exit(0);
 
   ///////////
   // ilp::ILPGridOptimizer ilpoptim;
@@ -99,7 +93,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
   /////////////
 
-  T_START(grid);
   std::cerr << "Build grid graph in " << T_STOP(grid) << " ms " << std::endl;
 
   NodePQ globalPq, dangling;
@@ -173,33 +166,18 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
     exit(1);
   }
 
-  assert(found);
-
   drawing.applyToGrid(gg);
 
   std::cerr << " +++++++ Initial cost after edge scramble: " << origScore << std::endl;
 
-  // util::geo::output::GeoGraphJsonOutput outa;
-  // std::ofstream ofa;
-  // ofa.open("octi.json");
-  // outa.print(*gg, ofa);
-  // ofa << std::flush;
-  // exit(0);
-
   size_t iters = 0;
 
   for (; iters < 100; iters++) {
-
-    // util::geo::output::GeoGraphJsonOutput outa;
-    // std::ofstream ofa;
-    // ofa.open("octi_bef.json");
-    // outa.print(*gg, ofa);
-    // ofa << std::flush;
-
     Drawing bestFromIter = drawing;
     for (auto a : *cg.getNds()) {
       if (a->getDeg() == 0) continue;
       assert(drawing.getGrNd(a));
+
       Drawing drawingCp = drawing;
       size_t origX = drawing.getGrNd(a)->pl().getX();
       size_t origY = drawing.getGrNd(a)->pl().getY();
@@ -208,34 +186,19 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
       std::vector<CombEdge*> test;
       for (auto ce : a->getAdjList()) {
         assert(drawingCp.drawn(ce));
-        // auto es = drawingCp.getGrEdgs(ce);
         test.push_back(ce);
 
         drawingCp.eraseFromGrid(ce, gg);
         drawingCp.erase(ce);
-
-        // for (auto e : es) {
-          // gg->unSettleEdg(e->getFrom()->pl().getParent(),
-                          // e->getTo()->pl().getParent());
-        // }
       }
 
       drawingCp.erase(a);
       gg->unSettleNd(a);
 
       for (size_t pos = 0; pos < 9; pos++) {
-        // std::cerr << "Checking " << a << " "
-                   // " at "
-                  // << pos << std::endl;
         Drawing run = drawingCp;
         SettledPos p;
 
-        // util::geo::output::GeoGraphJsonOutput out;
-        // std::ofstream of;
-        // of.open("octi.json");
-        // out.print(*gg, of);
-        // of << std::flush;
-        //
         if (pos == 1) p[a] = {origX + 1, origY + 1};
         if (pos == 2) p[a] = {origX + 1, origY};
         if (pos == 3) p[a] = {origX + 1, origY - 1};
@@ -248,32 +211,14 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         if (pos == 8) p[a] = {origX, origY};
         if (pos == 4) p[a] = {origX, origY - 1};
 
-        // std::cerr << " x = " << p[a].first << " y = " << p[a].second
-                  // << std::endl;
-
         bool found = draw(test, p, gg, &run);
 
-        if (found) {
-          // std::cerr << " ++++++ Cost from graph after: " << run.score()
-                    // << std::endl;
-          if (bestFromIter.score() > run.score()) {
-            // std::cerr << "  ----- NEWBEST -----" << std::endl;
-            bestFromIter = run;
-          }
+        if (found && bestFromIter.score() > run.score()) {
+          bestFromIter = run;
         }
 
         // reset grid
-        for (auto ce : a->getAdjList()) {
-          run.eraseFromGrid(ce, gg);
-          // auto es = run.getGrEdgs(ce);
-
-          // // std::cerr << "Reverting " << ce << std::endl;
-
-          // for (auto e : es) {
-            // gg->unSettleEdg(e->getFrom()->pl().getParent(),
-                            // e->getTo()->pl().getParent());
-          // }
-        }
+        for (auto ce : a->getAdjList()) run.eraseFromGrid(ce, gg);
 
         if (gg->isSettled(a)) gg->unSettleNd(a);
       }
@@ -281,32 +226,20 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
       gg->settleNd(const_cast<GridNode*>(drawing.getGrNd(a)), a);
 
       // RE-SETTLE EDGES!
-      for (auto ce : a->getAdjList()) {
-        drawing.applyToGrid(ce, gg);
-        // auto es = drawing.getGrEdgs(ce);
-
-        // for (auto e : es) {
-          // gg->settleEdg(e->getFrom()->pl().getParent(),
-                        // e->getTo()->pl().getParent(), ce);
-        // }
-      }
+      for (auto ce : a->getAdjList()) drawing.applyToGrid(ce, gg);
     }
 
     std::cerr << " +++ Before iter " << iters << ": " << drawing.score() << std::endl;
     std::cerr << " +++ After iter " << iters << ": " << bestFromIter.score() << std::endl;
     std::cerr << " +++ Impr: " << (drawing.score() - bestFromIter.score()) << std::endl;
 
-    if (fabs(drawing.score() - bestFromIter.score()) < 0.05) {
-      std::cerr << "NO IMPROVEMENT ANYMORE, ABORTING!" << std::endl;
-      break;
-    }
+    if (fabs(drawing.score() - bestFromIter.score()) < 0.05) break;
 
     drawing.eraseFromGrid(gg);
     bestFromIter.applyToGrid(gg);
     drawing = bestFromIter;
-
-    // iteration ended
   }
+
 
   std::cerr << " ++++++ Initial: " << origScore << std::endl;
   std::cerr << " ++++++ Cost after " << iters << " iterations: " << drawing.score()
@@ -385,14 +318,10 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
   bool fail = false;
 
   double c_0 = gg->getPenalties().p_45 - gg->getPenalties().p_135;
-  double c_135 = gg->getPenalties().p_45;
-  double c_90 = gg->getPenalties().p_45 - gg->getPenalties().p_135 + gg->getPenalties().p_90;
-  double c_45 = c_0 + c_135;
 
   SettledPos retPos;
 
   for (auto cmbEdg : ord) {
-    // if (gen == 5) return true;
     auto frCmbNd = cmbEdg->getFrom();
     auto toCmbNd = cmbEdg->getTo();
 

@@ -81,12 +81,10 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
     }
 
     for (auto n : to) {
-      auto coords = g->getNodeCoords(n);
-
       for (size_t i = 0; i < 8; i++) {
-        auto neigh = g->getNeighbor(coords.first, coords.second, i);
+        auto neigh = g->getNeighbor(n->pl().getX(), n->pl().getY(), i);
         if (neigh && to.find(neigh) == to.end()) {
-          hull.push_back(g->getNodeCoords(n));
+          hull.push_back({n->pl().getX(), n->pl().getY()});
           break;
         }
       }
@@ -94,18 +92,14 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
   }
 
   double operator()(const GridNode* from, const std::set<GridNode*>& to) const {
-    // TODO!!!!!!
-    // //// HEURISTIC DISABLED
-    // ////////////////
-    // ///////////////
-    // return 0;
     if (to.find(from->pl().getParent()) != to.end()) return 0;
 
-    size_t ret = std::numeric_limits<size_t>::max();
-    auto xy = g->getNodeCoords(from->pl().getParent());
+    double ret = std::numeric_limits<double>::infinity();
 
     for (auto t : hull) {
-      size_t temp = g->heurCost(xy.first, xy.second, t.first, t.second);
+      double temp =
+          g->heurCost(from->pl().getParent()->pl().getX(),
+                      from->pl().getParent()->pl().getY(), t.first, t.second);
       if (temp < ret) ret = temp;
     }
 
@@ -128,15 +122,16 @@ class Octilinearizer {
   double getMaxDis(CombNode* to, CombEdge* e, double gridSize);
   void removeEdgesShorterThan(TransitGraph* g, double d);
 
-  void writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
-                        GridGraph* g);
+  void writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e, GridGraph* g);
 
   void settleRes(GridNode* startGridNd, GridNode* toGridNd, GridGraph* gg,
                  CombNode* from, CombNode* to, const GrEdgList& res,
                  CombEdge* e);
 
-  bool draw(const std::vector<CombEdge*>& order, GridGraph* gg, Drawing* drawing);
-  bool draw(const std::vector<CombEdge*>& order, const SettledPos& settled, GridGraph* gg, Drawing* drawing);
+  bool draw(const std::vector<CombEdge*>& order, GridGraph* gg,
+            Drawing* drawing);
+  bool draw(const std::vector<CombEdge*>& order, const SettledPos& settled,
+            GridGraph* gg, Drawing* drawing);
 
   SettledPos getNeighbor(const SettledPos& pos, const std::vector<CombNode*>&,
                          size_t i) const;

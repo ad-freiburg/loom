@@ -70,7 +70,6 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
       const util::geo::DPoint& p, double maxD, const GridNode* ex) const;
 
   void addCostVector(GridNode* n, const NodeCost& addC);
-  std::pair<size_t, size_t> getNodeCoords(GridNode* n) const;
 
   void openNodeSink(GridNode* n, double cost);
   void closeNodeSink(GridNode* n);

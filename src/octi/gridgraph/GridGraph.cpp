@@ -84,11 +84,6 @@ GridNode* GridGraph::getNode(size_t x, size_t y) const {
 }
 
 // _____________________________________________________________________________
-std::pair<size_t, size_t> GridGraph::getNodeCoords(GridNode* n) const {
-  return {n->pl().getX(), n->pl().getY()};
-}
-
-// _____________________________________________________________________________
 GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
   int8_t x = 1;
   if (i % 4 == 0) x = 0;
@@ -118,9 +113,8 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
     }
   }
 
-  auto xy = getNodeCoords(a);
-  size_t x = xy.first;
-  size_t y = xy.second;
+  size_t x = a->pl().getX();
+  size_t y = a->pl().getY();
 
   auto ge = getNEdge(a, b);
   auto gf = getNEdge(b, a);
@@ -162,9 +156,8 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
     }
   }
 
-  auto xy = getNodeCoords(a);
-  size_t x = xy.first;
-  size_t y = xy.second;
+  size_t x = a->pl().getX();
+  size_t y = a->pl().getY();
 
   // this closes the grid edge
   auto ge = getNEdge(a, b);
@@ -212,9 +205,8 @@ GridEdge* GridGraph::getNEdge(const GridNode* a, const GridNode* b) const {
 
 // _____________________________________________________________________________
 void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
-  auto xy = getNodeCoords(n);
-  size_t x = xy.first;
-  size_t y = xy.second;
+  size_t x = n->pl().getX();
+  size_t y = n->pl().getY();
 
   for (size_t i = 0; i < 8; i++) {
     outgoing[i] = 0;
