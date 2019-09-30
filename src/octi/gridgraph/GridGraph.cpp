@@ -3,8 +3,10 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <algorithm>
+#include <fstream>
 #include <unordered_map>
 #include <unordered_set>
+#include "util/geo/output/GeoGraphJsonOutput.h"
 #include "octi/gridgraph/GridGraph.h"
 #include "octi/gridgraph/NodeCost.h"
 #include "util/graph/Node.h"
@@ -120,7 +122,6 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   size_t x = xy.first;
   size_t y = xy.second;
 
-  // this closes the grid edge
   auto ge = getNEdge(a, b);
   auto gf = getNEdge(b, a);
 

@@ -75,13 +75,12 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
       _edgCosts[ce] += ge->pl().cost();
     }
 
-    if (!ge->pl().isSecondary()) {
-      if (rev) {
-        _edgs[ce].push_back(_gg->getEdg(ges[ges.size() - 1 - i]->getTo(),
-                                        ges[ges.size() - 1 - i]->getFrom()));
-      } else {
-        _edgs[ce].push_back(ges[i]);
-      }
+    if (rev) {
+      auto e = _gg->getEdg(ges[ges.size() - 1 - i]->getTo(),
+                                      ges[ges.size() - 1 - i]->getFrom());
+      if (!e->pl().isSecondary()) _edgs[ce].push_back(e);
+    } else {
+      if (!ges[i]->pl().isSecondary()) _edgs[ce].push_back(ges[i]);
     }
   }
 
@@ -330,7 +329,9 @@ void Drawing::erase(CombNode* cn) {
 
 // _____________________________________________________________________________
 void Drawing::eraseFromGrid(const CombEdge* ce, GridGraph* gg) {
-  auto es = _edgs[ce];
+  auto it = _edgs.find(ce);
+  if (it == _edgs.end()) return;
+  const auto& es = it->second;
   for (auto e : es) {
     gg->unSettleEdg(e->getFrom()->pl().getParent(),
                     e->getTo()->pl().getParent());
@@ -339,9 +340,12 @@ void Drawing::eraseFromGrid(const CombEdge* ce, GridGraph* gg) {
 
 // _____________________________________________________________________________
 void Drawing::applyToGrid(const CombEdge* ce, GridGraph* gg) {
-  auto es = _edgs[ce];
+  auto it = _edgs.find(ce);
+  if (it == _edgs.end()) return;
+  const auto& es = it->second;
+
   for (auto e : es) {
-    if (e->pl().isSecondary()) continue;
+    // if (e->pl().isSecondary()) continue;
     gg->settleEdg(e->getFrom()->pl().getParent(), e->getTo()->pl().getParent(),
                   const_cast<CombEdge*>(ce));
   }

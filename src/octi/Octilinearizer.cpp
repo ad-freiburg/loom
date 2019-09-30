@@ -200,10 +200,6 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
     for (auto a : *cg.getNds()) {
       if (a->getDeg() == 0) continue;
       assert(drawing.getGrNd(a));
-      // if (a->pl().getParent()->pl().getStops().size() == 0) continue;
-      // if (a->pl().getParent()->pl().getStops().front().name !=
-      // "Schwedenplatz")
-      // continue;
       Drawing drawingCp = drawing;
       size_t origX = drawing.getGrNd(a)->pl().getX();
       size_t origY = drawing.getGrNd(a)->pl().getY();
@@ -212,14 +208,16 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
       std::vector<CombEdge*> test;
       for (auto ce : a->getAdjList()) {
         assert(drawingCp.drawn(ce));
-        auto es = drawingCp.getGrEdgs(ce);
-        drawingCp.erase(ce);
+        // auto es = drawingCp.getGrEdgs(ce);
         test.push_back(ce);
 
-        for (auto e : es) {
-          gg->unSettleEdg(e->getFrom()->pl().getParent(),
-                          e->getTo()->pl().getParent());
-        }
+        drawingCp.eraseFromGrid(ce, gg);
+        drawingCp.erase(ce);
+
+        // for (auto e : es) {
+          // gg->unSettleEdg(e->getFrom()->pl().getParent(),
+                          // e->getTo()->pl().getParent());
+        // }
       }
 
       drawingCp.erase(a);
@@ -227,7 +225,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
       for (size_t pos = 0; pos < 9; pos++) {
         // std::cerr << "Checking " << a << " "
-                  // << a->pl().getParent()->pl().getStops().front().name << " at "
+                   // " at "
                   // << pos << std::endl;
         Drawing run = drawingCp;
         SettledPos p;
@@ -237,25 +235,25 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         // of.open("octi.json");
         // out.print(*gg, of);
         // of << std::flush;
-
-        if (pos == 9) p[a] = {origX, origY};
-        if (pos == 0) p[a] = {origX, origY + 1};
+        //
         if (pos == 1) p[a] = {origX + 1, origY + 1};
         if (pos == 2) p[a] = {origX + 1, origY};
         if (pos == 3) p[a] = {origX + 1, origY - 1};
-        if (pos == 4) p[a] = {origX, origY - 1};
-        if (pos == 5) p[a] = {origX - 1, origY - 1};
-        if (pos == 6) p[a] = {origX - 1, origY};
+
         if (pos == 7) p[a] = {origX - 1, origY + 1};
+        if (pos == 6) p[a] = {origX - 1, origY};
+        if (pos == 5) p[a] = {origX - 1, origY - 1};
+
+        if (pos == 0) p[a] = {origX, origY + 1};
+        if (pos == 8) p[a] = {origX, origY};
+        if (pos == 4) p[a] = {origX, origY - 1};
 
         // std::cerr << " x = " << p[a].first << " y = " << p[a].second
                   // << std::endl;
 
         bool found = draw(test, p, gg, &run);
 
-        if (!found) {
-          // std::cerr << "No solution found..." << std::endl;
-        } else {
+        if (found) {
           // std::cerr << " ++++++ Cost from graph after: " << run.score()
                     // << std::endl;
           if (bestFromIter.score() > run.score()) {
@@ -266,15 +264,15 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
         // reset grid
         for (auto ce : a->getAdjList()) {
-          if (!run.drawn(ce)) continue;
-          auto es = run.getGrEdgs(ce);
+          run.eraseFromGrid(ce, gg);
+          // auto es = run.getGrEdgs(ce);
 
-          // std::cerr << "Reverting " << ce << std::endl;
+          // // std::cerr << "Reverting " << ce << std::endl;
 
-          for (auto e : es) {
-            gg->unSettleEdg(e->getFrom()->pl().getParent(),
-                            e->getTo()->pl().getParent());
-          }
+          // for (auto e : es) {
+            // gg->unSettleEdg(e->getFrom()->pl().getParent(),
+                            // e->getTo()->pl().getParent());
+          // }
         }
 
         if (gg->isSettled(a)) gg->unSettleNd(a);
@@ -284,13 +282,13 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
       // RE-SETTLE EDGES!
       for (auto ce : a->getAdjList()) {
-        auto es = drawing.getGrEdgs(ce);
+        drawing.applyToGrid(ce, gg);
+        // auto es = drawing.getGrEdgs(ce);
 
-        for (auto e : es) {
-          if (e->pl().isSecondary()) continue;
-          gg->settleEdg(e->getFrom()->pl().getParent(),
-                        e->getTo()->pl().getParent(), ce);
-        }
+        // for (auto e : es) {
+          // gg->settleEdg(e->getFrom()->pl().getParent(),
+                        // e->getTo()->pl().getParent(), ce);
+        // }
       }
     }
 
@@ -315,11 +313,11 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
             << std::endl;
   std::cerr << " ++++++ Impr: " << origScore - drawing.score() << std::endl;
 
-  util::geo::output::GeoGraphJsonOutput out;
-  std::ofstream of;
-  of.open("octi.json");
-  out.print(*gg, of);
-  of << std::flush;
+  // util::geo::output::GeoGraphJsonOutput out;
+  // std::ofstream of;
+  // of.open("octi.json");
+  // out.print(*gg, of);
+  // of << std::flush;
 
   if (drawing.score() == std::numeric_limits<double>::infinity()) {
     LOG(ERROR) << "Could not find planar embedding for input graph.";
@@ -343,8 +341,19 @@ void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
   gg->settleNd(toGrNd, to);
   gg->settleNd(frGrNd, from);
 
+  size_t i = 0;
+
   // balance edges
   for (auto f : res) {
+    if (i == 0) assert(f->pl().isSecondary());
+    if (i == 1) assert(!f->pl().isSecondary());
+    if (i == res.size() - 1) assert(f->pl().isSecondary());
+    if (i == res.size() - 2) assert(!f->pl().isSecondary());
+
+    i++;
+
+    if (i <= res.size() - 1) assert(res[i] != res[i-1]);
+
     if (f->pl().isSecondary()) continue;
     gg->settleEdg(f->getFrom()->pl().getParent(), f->getTo()->pl().getParent(),
                   e);
@@ -515,11 +524,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     gen++;
   }
 
-  if (fail) {
-    // undraw...
-
-    return false;
-  }
+  if (fail) return false;
 
   // util::geo::output::GeoGraphJsonOutput outa;
   // std::ofstream ofa;
