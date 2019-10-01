@@ -88,12 +88,6 @@ int ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg) const {
     }
   }
 
-  for (auto cnd : nodes) {
-    for (auto cedg : edges) {
-      if (cedg->getTo() != cnd || cedg->getFrom() != cnd) continue;
-    }
-  }
-
   glp_delete_prob(lp);
   glp_free_env();
 
