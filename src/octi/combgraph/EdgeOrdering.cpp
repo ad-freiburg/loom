@@ -10,7 +10,8 @@ using namespace octi::combgraph;
 
 // _____________________________________________________________________________
 void EdgeOrdering::add(CombEdge* e, double deg) {
-  _edgeOrder.insert(std::pair<CombEdge*, double>(e, deg));
+  _edgeOrder.push_back(std::pair<CombEdge*, double>(e, deg));
+  std::sort(_edgeOrder.begin(), _edgeOrder.end(), PairCmp());
 }
 
 // _____________________________________________________________________________
@@ -40,7 +41,7 @@ int64_t EdgeOrdering::dist(CombEdge* a, CombEdge* b) const {
 }
 
 // _____________________________________________________________________________
-const std::set<std::pair<CombEdge*, double>, PairCmp>&
+const std::vector<std::pair<CombEdge*, double>>&
 EdgeOrdering::getOrderedSet() const {
   return _edgeOrder;
 }

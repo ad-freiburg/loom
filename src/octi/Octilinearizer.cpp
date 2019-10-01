@@ -79,52 +79,23 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   auto gg = new GridGraph(box, gridSize, borderRad, pens);
 
   ///////////
-  // ilp::ILPGridOptimizer ilpoptim;
+  ilp::ILPGridOptimizer ilpoptim;
 
-  // ilpoptim.optimize(gg, cg);
+  ilpoptim.optimize(gg, cg);
 
-  // util::geo::output::GeoGraphJsonOutput out;
-  // std::ofstream of;
-  // of.open("octi.json");
-  // out.print(*gg, of);
-  // of << std::flush;
+  util::geo::output::GeoGraphJsonOutput out;
+  std::ofstream of;
+  of.open("octi.json");
+  out.print(*gg, of);
+  of << std::flush;
 
-  // exit(0);
+  exit(0);
 
   /////////////
 
   std::cerr << "Build grid graph in " << T_STOP(grid) << " ms " << std::endl;
 
-  NodePQ globalPq, dangling;
-
-  std::set<CombNode*> settled;
-
-  std::vector<CombEdge*> order;
-
-  for (auto n : *cg.getNds()) globalPq.push(n);
-  std::set<CombEdge*> done;
-
-  while (!globalPq.empty()) {
-    auto n = globalPq.top();
-    globalPq.pop();
-    dangling.push(n);
-
-    while (!dangling.empty()) {
-      auto n = dangling.top();
-      dangling.pop();
-
-      if (settled.find(n) != settled.end()) continue;
-
-      for (auto ee : n->pl().getEdgeOrdering().getOrderedSet()) {
-        if (done.find(ee.first) != done.end()) continue;
-        done.insert(ee.first);
-        dangling.push(ee.first->getOtherNd(n));
-
-        order.push_back(ee.first);
-      }
-      settled.insert(n);
-    }
-  }
+  auto order = getOrdering(cg);
 
   Drawing drawing(gg);
   bool found = draw(order, gg, &drawing);
@@ -136,16 +107,16 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   drawing.eraseFromGrid(gg);
   bool iterFound = false;
   for (size_t i = 0; i < 10; i++) {
-    auto iterOrder = order;
-    std::random_shuffle(iterOrder.begin(), iterOrder.end());
+    auto iterOrder = getOrdering(cg);
 
     Drawing nextDrawing(gg);
     bool locFound = draw(iterOrder, gg, &nextDrawing);
 
     if (locFound) {
-      std::cerr << " +++ Before iter " << i << ": " << bestIterDraw.score() << std::endl;
-      std::cerr << " +++ After iter " << i << ": " << nextDrawing.score() << std::endl;
-      std::cerr << " +++ Impr: " << (bestIterDraw.score() - nextDrawing.score()) << std::endl;
+      double imp = (bestIterDraw.score() - nextDrawing.score());
+      std::cerr << " ++ Iter " << i << ", prev " << bestIterDraw.score()
+                << ", next " << nextDrawing.score() << " ("
+                << (imp >= 0 ? "+" : "") << imp << ")" << std::endl;
 
       if (!iterFound || nextDrawing.score() < bestIterDraw.score()) {
         bestIterDraw = nextDrawing;
@@ -162,13 +133,11 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   }
 
   if (!found) {
-    std::cerr << "No initial solution found..." << std::endl;
+    LOG(ERROR) << "Could not find planar embedding for input graph.";
     exit(1);
   }
 
   drawing.applyToGrid(gg);
-
-  std::cerr << " +++++++ Initial cost after edge scramble: " << origScore << std::endl;
 
   size_t iters = 0;
 
@@ -229,35 +198,17 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
       for (auto ce : a->getAdjList()) drawing.applyToGrid(ce, gg);
     }
 
-    std::cerr << " +++ Before iter " << iters << ": " << drawing.score() << std::endl;
-    std::cerr << " +++ After iter " << iters << ": " << bestFromIter.score() << std::endl;
-    std::cerr << " +++ Impr: " << (drawing.score() - bestFromIter.score()) << std::endl;
+    double imp = (drawing.score() - bestFromIter.score());
+    std::cerr << " ++ Iter " << iters << ", prev " << drawing.score()
+              << ", next " << bestFromIter.score() << " ("
+              << (imp >= 0 ? "+" : "") << imp << ")" << std::endl;
 
-    if (fabs(drawing.score() - bestFromIter.score()) < 0.05) break;
+    if (imp < 0.05) break;
 
     drawing.eraseFromGrid(gg);
     bestFromIter.applyToGrid(gg);
     drawing = bestFromIter;
   }
-
-
-  std::cerr << " ++++++ Initial: " << origScore << std::endl;
-  std::cerr << " ++++++ Cost after " << iters << " iterations: " << drawing.score()
-            << std::endl;
-  std::cerr << " ++++++ Impr: " << origScore - drawing.score() << std::endl;
-
-  // util::geo::output::GeoGraphJsonOutput out;
-  // std::ofstream of;
-  // of.open("octi.json");
-  // out.print(*gg, of);
-  // of << std::flush;
-
-  if (drawing.score() == std::numeric_limits<double>::infinity()) {
-    LOG(ERROR) << "Could not find planar embedding for input graph.";
-    exit(1);
-  }
-
-  std::cerr << "Cost: " << drawing.score() << std::endl;
 
   TransitGraph ret;
   drawing.getTransitGraph(&ret);
@@ -303,7 +254,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg,
 bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
                           const SettledPos& settled, GridGraph* gg,
                           Drawing* drawing) {
-  size_t gen = 0;
   bool fail = false;
 
   double c_0 = gg->getPenalties().p_45 - gg->getPenalties().p_135;
@@ -346,11 +296,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     } else if (settled.count(toCmbNd)) {
       toGrNds.insert(gg->getNode(settled.find(toCmbNd)->second.first,
                                  settled.find(toCmbNd)->second.second));
-      if (!(*toGrNds.begin()) || *toGrNds.begin() == frGrNd) {
-        fail = true;
-        break;
-      }
-      if ((*toGrNds.begin())->pl().isClosed()) {
+      if (!(*toGrNds.begin()) || *toGrNds.begin() == frGrNd ||
+          (*toGrNds.begin())->pl().isClosed()) {
         fail = true;
         break;
       }
@@ -376,7 +323,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     // END STEP 1
 
     // why not distance based? (TODO, balance this with edge costs)
-    double penPerGrid = 5 + c_0 + fmax(gg->getPenalties().diagonalPen, gg->getPenalties().horizontalPen);
+    double penPerGrid = 5 + c_0 + fmax(gg->getPenalties().diagonalPen,
+                                       gg->getPenalties().horizontalPen);
 
     // open the target nodes
     for (auto n : toGrNds) {
@@ -412,14 +360,13 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
     }
 
-    GrEdgList res;
-    GrNdList nList;
+    GrEdgList eL;
+    GrNdList nL;
     GridNode* toGrNd = 0;
     Dijkstra::shortestPath(frGrNd, toGrNds, GridCost(),
-                           GridHeur(gg, frGrNd, toGrNds), &res, &nList);
+                           GridHeur(gg, frGrNd, toGrNds), &eL, &nL);
 
-    if (nList.size()) toGrNd = nList.front();
-    if (toGrNd == 0) {
+    if (!nL.size()) {
       // cleanup
       for (auto n : toGrNds) gg->closeNodeSink(n);
       gg->closeNodeSink(frGrNd);
@@ -428,8 +375,10 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       break;
     }
 
+    toGrNd = nL.front();
+
     // draw
-    drawing->draw(cmbEdg, res, reversed);
+    drawing->draw(cmbEdg, eL, reversed);
 
     // close the target node
     for (auto n : toGrNds) gg->closeNodeSink(n);
@@ -437,10 +386,46 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     // close the start node
     gg->closeNodeSink(frGrNd);
 
-    settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, res, cmbEdg);
-
-    gen++;
+    settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg);
   }
 
   return !fail;
+}
+
+// _____________________________________________________________________________
+std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg) const {
+  NodePQ globalPq, dangling;
+
+  std::set<CombNode*> settled;
+  std::vector<CombEdge*> order;
+
+  for (auto n : cg.getNds()) globalPq.push(n);
+  std::set<CombEdge*> done;
+
+  while (!globalPq.empty()) {
+    auto n = globalPq.top();
+    globalPq.pop();
+    dangling.push(n);
+
+    while (!dangling.empty()) {
+      auto n = dangling.top();
+      dangling.pop();
+
+      if (settled.find(n) != settled.end()) continue;
+
+      auto odSet = n->pl().getEdgeOrdering().getOrderedSet();
+      std::random_shuffle(odSet.begin(), odSet.end());
+
+      for (auto ee : odSet) {
+        if (done.find(ee.first) != done.end()) continue;
+        done.insert(ee.first);
+        dangling.push(ee.first->getOtherNd(n));
+
+        order.push_back(ee.first);
+      }
+      settled.insert(n);
+    }
+  }
+
+  return order;
 }

@@ -128,6 +128,8 @@ class Octilinearizer {
                  CombNode* from, CombNode* to, const GrEdgList& res,
                  CombEdge* e);
 
+  std::vector<CombEdge*> getOrdering(const CombGraph& cg) const;
+
   bool draw(const std::vector<CombEdge*>& order, GridGraph* gg,
             Drawing* drawing);
   bool draw(const std::vector<CombEdge*>& order, const SettledPos& settled,
