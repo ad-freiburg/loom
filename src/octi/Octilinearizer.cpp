@@ -274,19 +274,8 @@ void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
   gg->settleNd(toGrNd, to);
   gg->settleNd(frGrNd, from);
 
-  size_t i = 0;
-
   // balance edges
   for (auto f : res) {
-    if (i == 0) assert(f->pl().isSecondary());
-    if (i == 1) assert(!f->pl().isSecondary());
-    if (i == res.size() - 1) assert(f->pl().isSecondary());
-    if (i == res.size() - 2) assert(!f->pl().isSecondary());
-
-    i++;
-
-    if (i <= res.size() - 1) assert(res[i] != res[i-1]);
-
     if (f->pl().isSecondary()) continue;
     gg->settleEdg(f->getFrom()->pl().getParent(), f->getTo()->pl().getParent(),
                   e);
@@ -453,14 +442,5 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     gen++;
   }
 
-  if (fail) return false;
-
-  // util::geo::output::GeoGraphJsonOutput outa;
-  // std::ofstream ofa;
-  // ofa.open("octi.json");
-  // outa.print(*gg, ofa);
-  // ofa << std::flush;
-  // exit(0);
-
-  return true;
+  return !fail;
 }
