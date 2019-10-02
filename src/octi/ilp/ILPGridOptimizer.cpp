@@ -28,9 +28,16 @@ int ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg) const {
     }
   }
 
-  // edges.push_back((*cg.getNds().begin())->getAdjList().front());
-  // nodes.push_back((*cg.getNds().begin())->getAdjList().front()->getFrom());
-  // nodes.push_back((*cg.getNds().begin())->getAdjList().front()->getTo());
+  // auto edgA = (*cg.getNds().begin())->getAdjList().front();
+  // auto edgB = edgA->getFrom()->getAdjList().front();
+  // assert(edgA != edgB);
+
+  // edges.push_back(edgA);
+  // edges.push_back(edgB);
+  // nodes.push_back(edgA->getFrom());
+  // nodes.push_back(edgA->getTo());
+  // if (edgB->getTo() != edgA->getFrom() && edgB->getTo() != edgA->getTo()) nodes.push_back(edgB->getTo());
+  // if (edgB->getFrom() != edgA->getFrom() && edgB->getFrom() != edgA->getTo()) nodes.push_back(edgB->getFrom());
 
   LOG(INFO) << nodes.size() << " nodes, " << edges.size() << " edges.";
 
@@ -110,9 +117,6 @@ glp_prob* ILPGridOptimizer::createProblem(
   size_t i = 0;
 
   for (auto nd : nds) {
-    double nx = nd->pl().getGeom()->getX();
-    double ny = nd->pl().getGeom()->getY();
-
     std::stringstream oneAssignment;
     // must sum up to 1
     size_t rowStat = glp_add_rows(lp, 1);
@@ -123,11 +127,11 @@ glp_prob* ILPGridOptimizer::createProblem(
     for (const GridNode* n : gg.getNds()) {
       if (!n->pl().isSink()) continue;
 
-      double d = sqrt(
-          (nx - n->pl().getGeom()->getX()) * (nx - n->pl().getGeom()->getX()) +
-          (ny - n->pl().getGeom()->getY()) * (ny - n->pl().getGeom()->getY()));
+      double gridD = floor(dist(*n->pl().getGeom(), *nd->pl().getGeom()));
 
-      if (d > 2000) continue;
+      if (gridD > gg.getCellSize() * 3) continue;
+
+      gridD = gridD / gg.getCellSize();
 
       auto varName = getStatPosVar(n, nd);
 
@@ -137,12 +141,11 @@ glp_prob* ILPGridOptimizer::createProblem(
       glp_set_col_kind(lp, col, GLP_BV);
       i++;
 
-      // TODO: correct distance, at the moment eucludian distance based on grid
-      // coord
-      // TODO: the movement penalty must be based on the penalty costs,
-      // keep in mind that the cost given via the command line are CHANGED
-      // later on!
-      glp_set_obj_coef(lp, col, 20 * (d / 1000));
+      double c_0 = gg.getPenalties().p_45 - gg.getPenalties().p_135;
+      double penPerGrid = 5 + c_0 + fmax(gg.getPenalties().diagonalPen,
+                                         gg.getPenalties().horizontalPen);
+
+      glp_set_obj_coef(lp, col, gridD * penPerGrid);
 
       vm.addVar(rowStat, col, 1);
     }
@@ -437,6 +440,105 @@ glp_prob* ILPGridOptimizer::createProblem(
 
   glp_create_index(lp);
 
+  // for each adjacent edge pair, add variables telling the accuteness of the
+  // angle between them
+  for (size_t i = 0; i < edgs.size(); i++) {
+    auto edgA = edgs[i];
+    for (size_t j = i + 1; j < edgs.size(); j++) {
+      auto edgB = edgs[j];
+      CombNode* nd = 0;
+      if (edgA->getFrom() == edgB->getTo() || edgA->getFrom() == edgB->getFrom()) nd = edgA->getFrom();
+      if (edgA->getTo() == edgB->getTo() || edgA->getTo() == edgB->getFrom()) nd = edgA->getTo();
+      if (!nd) continue;
+
+      assert(edgA != edgB);
+
+      // note: we can identify pairs of edges by the edges only as we dont
+      // have a multigraph - we dont need the need for uniqueness
+
+      size_t sharedLines = 0;
+      // TODO: not all lines in getChilds are equal, take the "right" end of the
+      // childs here!
+      for (auto ro : edgA->pl().getChilds().front()->pl().getRoutes()) {
+        if (edgB->pl().getChilds().front()->pl().hasRoute(ro.route)) {
+          sharedLines++;
+        }
+      }
+
+      if (!sharedLines) continue;
+
+      std::stringstream negVar;
+      negVar << "negdist(" << edgA << "," << edgB << ")";
+      size_t colNeg = glp_add_cols(lp, 1);
+      assert(colNeg);
+      glp_set_col_name(lp, colNeg, negVar.str().c_str());
+      glp_set_col_kind(lp, colNeg, GLP_BV);
+
+      std::stringstream constName;
+      // TODO: i dont think the neg const is needed, is enforced by the
+      // const below already!
+      constName << "negconst(" << edgA << "," << edgB << ")";
+      size_t row = glp_add_rows(lp, 1);
+      assert(row);
+      glp_set_row_name(lp, row, constName.str().c_str());
+      glp_set_row_bnds(lp, row, GLP_DB, 0, 7);
+
+      std::stringstream dirNameA;
+      dirNameA<< "dir(" << nd << "," << edgA << ")";
+      std::stringstream dirNameB;
+      dirNameB<< "dir(" << nd << "," << edgB << ")";
+
+      size_t colA = glp_find_col(lp, dirNameA.str().c_str());
+      assert(colA);
+      vm.addVar(row, colA, 1);
+
+      size_t colB = glp_find_col(lp, dirNameB.str().c_str());
+      assert(colB);
+      vm.addVar(row, colB, -1);
+
+      vm.addVar(row, colNeg, 8);
+
+      std::stringstream angConst;
+      angConst << "angconst(" << edgA << "," << edgB << ")";
+      size_t rowAng = glp_add_rows(lp, 1);
+      assert(rowAng);
+      glp_set_row_name(lp, rowAng, angConst.str().c_str());
+      glp_set_row_bnds(lp, rowAng, GLP_FX, 0, 0);
+
+      vm.addVar(rowAng, colA, 1);
+      vm.addVar(rowAng, colB, -1);
+      vm.addVar(rowAng, colNeg, 8);
+
+      std::stringstream sumConst;
+      sumConst << "angsumconst(" << edgA << "," << edgB << ")";
+      size_t rowSum = glp_add_rows(lp, 1);
+      assert(rowSum);
+      glp_set_row_name(lp, rowSum, sumConst.str().c_str());
+      glp_set_row_bnds(lp, rowSum, GLP_UP, 0, 1);
+
+      std::vector<std::string> names = {"d45", "d90", "d135", "d180", "d135'", "d90'", "d45'"};
+
+      // TODO: derive from configuration!!!
+      std::vector<double> pens = {3, 2.5, 2, 1, 2, 2.5, 3};
+
+      for (int k = 0; k < 7; k++) {
+        std::stringstream var;
+        var << names[k] << "(" << edgA << "," << edgB << ")";
+        size_t col = glp_add_cols(lp, 1);
+        glp_set_col_name(lp, col, var.str().c_str());
+        glp_set_col_kind(lp, col, GLP_BV);
+
+        vm.addVar(rowAng, col, -(k + 1));
+        vm.addVar(rowSum, col, 1);
+
+        // multiple per shared lines!
+        // glp_set_obj_coef(lp, col, sharedLines * pens[k]);
+      }
+    }
+  }
+
+  glp_create_index(lp);
+
   int* ia = 0;
   int* ja = 0;
   double* res = 0;
@@ -455,19 +557,19 @@ glp_prob* ILPGridOptimizer::createProblem(
 void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   // write temporary file
   std::string f = std::string(std::tmpnam(0)) + ".mps";
-  std::string outf = "sol";//std::string(std::tmpnam(0)) + ".sol";
+  std::string outf = "sol.sol";//std::string(std::tmpnam(0)) + ".sol";
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
   LOG(INFO) << "Calling external solver...";
 
   std::chrono::high_resolution_clock::time_point t1 =
       std::chrono::high_resolution_clock::now();
 
-  // std::string cmd =
-      // "/home/patrick/gurobi/gurobi751/linux64/bin/gurobi_cl "
-      // "ResultFile={OUTPUT} {INPUT}";
   std::string cmd =
-  "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
-  "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
+      "/home/patrick/gurobi/gurobi751/linux64/bin/gurobi_cl "
+      "ResultFile={OUTPUT} {INPUT}";
+  // std::string cmd =
+  // "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
+  // "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
   util::replaceAll(cmd, "{INPUT}", f);
   util::replaceAll(cmd, "{OUTPUT}", outf);
   util::replaceAll(cmd, "{THREADS}", "4");

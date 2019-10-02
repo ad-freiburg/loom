@@ -326,6 +326,16 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     double penPerGrid = 5 + c_0 + fmax(gg->getPenalties().diagonalPen,
                                        gg->getPenalties().horizontalPen);
 
+    // open from source node
+    if (gg->isSettled(frCmbNd)) {
+      // only count displacement penalty ONCE
+      gg->openNodeSink(frGrNd, 0);
+    } else {
+      double gridD = floor(dist(*frGrNd->pl().getGeom(), *frCmbNd->pl().getGeom()));
+      gridD = gridD / gg->getCellSize();
+      gg->openNodeSink(frGrNd, gridD * penPerGrid);
+    }
+
     // open the target nodes
     for (auto n : toGrNds) {
       double gridD = floor(dist(*n->pl().getGeom(), *toCmbNd->pl().getGeom()));
@@ -337,17 +347,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       } else {
         gg->openNodeSink(n, gridD * penPerGrid);
       }
-    }
-
-    // open from source node
-    if (gg->isSettled(frCmbNd)) {
-      // only count displacement penalty ONCE
-      gg->openNodeSink(frGrNd, 0);
-    } else {
-      double gridD =
-          floor(dist(*frGrNd->pl().getGeom(), *frCmbNd->pl().getGeom()));
-      gridD = gridD / gg->getCellSize();
-      gg->openNodeSink(frGrNd, gridD * penPerGrid);
     }
 
     if (gg->isSettled(frCmbNd)) {

@@ -1,10 +1,7 @@
-Parallel line snapping
-======================
+Grid ILP
+=======
 
-* what if we do 2 steps - one with a small distance value (to catch equal lines), one with the
-  normal one?
-
-* filtering for topological nodes that serve no purpose (1 in, 1 out), just leads to artifacts
+The penalties for angles can be skipped for deg 8 nodes, for nodes of lower degree it is possible to derive a maximum and minimum possible angle between pairs based on the number of edges between them!
 
 Node front expansion
 ===================
