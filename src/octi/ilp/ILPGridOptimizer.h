@@ -39,8 +39,7 @@ class ILPGridOptimizer {
 
  protected:
   virtual glp_prob* createProblem(const GridGraph& gg,
-                                  const std::vector<CombNode*>& nds,
-                                  const std::vector<CombEdge*>& edgs) const;
+                                  const CombGraph& cg) const;
 
   void preSolve(glp_prob* lp) const;
 
