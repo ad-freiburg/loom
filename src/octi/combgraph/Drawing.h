@@ -47,6 +47,10 @@ class Drawing {
   void eraseFromGrid(GridGraph* gg);
   void applyToGrid(GridGraph *gg);
 
+  double getEdgCost(const CombEdge* e) const;
+  double getNdBndCost(const CombNode* e) const;
+  double getNdReachCost(const CombNode* e) const;
+
  private:
   std::map<const CombNode*, const GridNode*> _nds;
   std::map<const CombEdge*, std::vector<const GridEdge*>> _edgs;

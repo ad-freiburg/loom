@@ -15,63 +15,23 @@ using octi::ilp::ILPGridOptimizer;
 using octi::ilp::VariableMatrix;
 
 // _____________________________________________________________________________
-int ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg) const {
+int ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
+                               combgraph::Drawing* d) const {
   for (auto nd : *gg->getNds()) {
     if (!nd->pl().isSink()) continue;
     gg->openNode(nd);
     gg->openNodeSink(nd, 0);
   }
 
-  LOG(INFO) << "Creating ILP problem... ";
   glp_prob* lp = createProblem(*gg, cg);
-  LOG(INFO) << " .. done";
-
-  LOG(INFO) << "(stats) ILP has " << glp_get_num_cols(lp) << " cols and "
-            << glp_get_num_rows(lp) << " rows.";
 
   // TODO: make configurable
   glp_write_mps(lp, GLP_MPS_FILE, 0, "ilp_prob.mps");
 
-  LOG(INFO) << "Solving problem...";
   preSolve(lp);
   solveProblem(lp);
 
-  LOG(INFO) << "(stats) ILP obj = " << glp_mip_obj_val(lp);
-
-  // write solution to grid graph
-  for (GridNode* n : *gg->getNds()) {
-    for (GridEdge* e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-
-      for (auto nd : cg.getNds()) {
-        for (auto edg : nd->getAdjList()) {
-          if (edg->getFrom() != nd) continue;
-          auto varName = getEdgeUseVar(e, edg);
-
-          size_t i = glp_find_col(lp, varName.c_str());
-          if (i) {
-            double val = glp_mip_col_val(lp, i);
-            if (val > 0) e->pl().addResidentEdge(0);
-          }
-        }
-      }
-    }
-  }
-
-  for (GridNode* n : *gg->getNds()) {
-    if (!n->pl().isSink()) continue;
-    for (auto nd : cg.getNds()) {
-      auto varName = getStatPosVar(n, nd);
-
-      size_t i = glp_find_col(lp, varName.c_str());
-      if (i) {
-        double val = glp_mip_col_val(lp, i);
-        if (val > 0) {
-          n->pl().setStation();
-        }
-      }
-    }
-  }
+  extractSolution(lp, gg, cg, d);
 
   glp_delete_prob(lp);
   glp_free_env();
@@ -94,6 +54,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
   size_t i = 0;
 
   for (auto nd : cg.getNds()) {
+    if (nd->getDeg() == 0) continue;
     std::stringstream oneAssignment;
     // must sum up to 1
     size_t rowStat = glp_add_rows(lp, 1);
@@ -106,7 +67,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
       double gridD = floor(dist(*n->pl().getGeom(), *nd->pl().getGeom()));
 
-      if (gridD > gg.getCellSize() * 3) continue;
+      if (gridD >= gg.getCellSize() * 3) continue;
 
       gridD = gridD / gg.getCellSize();
 
@@ -397,6 +358,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
   // for each input node N, define a var x_dirNE which tells the direction of
   // E at N
   for (auto nd : cg.getNds()) {
+    if (nd->getDeg() < 2) continue;  // we don't need this for deg 1 nodes
     for (auto edg : nd->getAdjList()) {
       std::stringstream dirName;
       dirName << "dir(" << nd << "," << edg << ")";
@@ -477,7 +439,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
       if (i == 0) {
         edgA = nd->pl().getEdgeOrdering().getOrderedSet().back().first;
       } else {
-        edgA = nd->pl().getEdgeOrdering().getOrderedSet()[i-1].first;
+        edgA = nd->pl().getEdgeOrdering().getOrderedSet()[i - 1].first;
       }
       auto edgB = nd->pl().getEdgeOrdering().getOrderedSet()[i].first;
 
@@ -526,8 +488,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
         size_t sharedLines = 0;
         // TODO: not all lines in getChilds are equal, take the "right" end of
-        // the
-        // childs here!
+        // the childs here!
         for (auto ro : edgA->pl().getChilds().front()->pl().getRoutes()) {
           if (edgB->pl().getChilds().front()->pl().hasRoute(ro.route)) {
             sharedLines++;
@@ -625,17 +586,18 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 // _____________________________________________________________________________
 void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   // write temporary file
-  std::string f = std::string(std::tmpnam(0)) + ".mps";
+  // std::string f = std::string(std::tmpnam(0)) + ".mps";
+  std::string f = "prob.mps";
   std::string outf = "sol.sol";  // std::string(std::tmpnam(0)) + ".sol";
+  glp_term_out(GLP_OFF);
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
-  LOG(INFO) << "Calling external solver...";
 
   std::chrono::high_resolution_clock::time_point t1 =
       std::chrono::high_resolution_clock::now();
 
   std::string cmd =
       "/home/patrick/gurobi/gurobi751/linux64/bin/gurobi_cl "
-      "ResultFile={OUTPUT} {INPUT}";
+      "ResultFile={OUTPUT} {INPUT} > ./gurobi.log";
   // std::string cmd =
   // "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
   // "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
@@ -648,9 +610,6 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
       std::chrono::high_resolution_clock::now();
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-  LOG(INFO) << " === External solve done (ret=" << r << ") in " << duration
-            << " ms ===";
-  LOG(INFO) << "Parsing solution...";
 
   std::ifstream fin;
   fin.open(outf.c_str());
@@ -658,6 +617,8 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
 
   // skip first line
   std::getline(fin, line);
+
+  glp_term_out(GLP_OFF);
 
   while (std::getline(fin, line)) {
     std::istringstream iss(line);
@@ -693,6 +654,7 @@ void ILPGridOptimizer::solveProblem(glp_prob* lp) const {
   // params.fp_heur = GLP_ON;
   // params.ps_heur = GLP_ON;
 
+  glp_term_out(GLP_OFF);
   glp_simplex(lp, 0);
   glp_intopt(lp, &params);
 }
@@ -737,4 +699,83 @@ std::string ILPGridOptimizer::getStatPosVar(const GridNode* n,
   varName << "statpos(" << n << "," << nd << ")";
 
   return varName.str();
+}
+
+// _____________________________________________________________________________
+void ILPGridOptimizer::extractSolution(glp_prob* lp, GridGraph* gg,
+                                       const CombGraph& cg,
+                                       combgraph::Drawing* d) const {
+  std::map<const CombNode*, const GridNode*> gridNds;
+  std::map<const CombEdge*, std::set<const GridEdge*>> gridEdgs;
+
+  // write solution to grid graph
+  for (GridNode* n : *gg->getNds()) {
+    for (GridEdge* e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+
+      for (auto nd : cg.getNds()) {
+        for (auto edg : nd->getAdjList()) {
+          if (edg->getFrom() != nd) continue;
+          auto varName = getEdgeUseVar(e, edg);
+
+          size_t i = glp_find_col(lp, varName.c_str());
+          if (i) {
+            double val = glp_mip_col_val(lp, i);
+            if (val > 0) {
+              e->pl().addResidentEdge(edg);
+              gridEdgs[edg].insert(e);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (GridNode* n : *gg->getNds()) {
+    if (!n->pl().isSink()) continue;
+    for (auto nd : cg.getNds()) {
+      auto varName = getStatPosVar(n, nd);
+
+      size_t i = glp_find_col(lp, varName.c_str());
+      if (i) {
+        double val = glp_mip_col_val(lp, i);
+        if (val > 0) {
+          n->pl().setStation();
+          gridNds[nd] = n;
+        }
+      }
+    }
+  }
+
+  // draw solution
+  for (auto nd : cg.getNds()) {
+    for (auto edg : nd->getAdjList()) {
+      if (edg->getFrom() != nd) continue;
+
+      std::vector<GridEdge*> edges(gridEdgs[edg].size());
+
+      // get the start and end grid nodes
+      auto grStart = gridNds[edg->getFrom()];
+      auto grEnd = gridNds[edg->getTo()];
+
+      auto curNode = grStart;
+      GridEdge* last = 0;
+
+      size_t i = 0;
+
+      while (curNode != grEnd) {
+        for (auto adj : curNode->getAdjList()) {
+          if (adj != last && gridEdgs[edg].count(adj)) {
+            last = adj;
+            i++;
+            edges[edges.size() - i] = adj;
+            curNode = adj->getOtherNd(curNode);
+            break;
+          }
+        }
+      }
+
+      d->draw(edg, edges, false);
+    }
+  }
 }
