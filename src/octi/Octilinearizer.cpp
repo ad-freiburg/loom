@@ -55,51 +55,40 @@ start:
 }
 
 // _____________________________________________________________________________
-double Octilinearizer::getMaxDis(CombNode* to, CombEdge* e, double gridSize) {
-  return gridSize * 3;
+TransitGraph Octilinearizer::drawILP(TransitGraph* tg, GridGraph** retGg,
+                                  const Penalties& pens, double gridSize,
+                                  double borderRad) {
+  removeEdgesShorterThan(tg, gridSize / 2);
+  CombGraph cg(tg);
+  auto box = tg->getBBox();
+  auto gg = new GridGraph(box, gridSize, borderRad, pens);
+  Drawing drawing(gg);
+
+  ilp::ILPGridOptimizer ilpoptim;
+
+  ilpoptim.optimize(gg, cg, &drawing);
+
+  TransitGraph ret;
+  drawing.getTransitGraph(&ret);
+
+  *retGg = gg;
+
+  return ret;
 }
 
 // _____________________________________________________________________________
 TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
                                   const Penalties& pens, double gridSize,
                                   double borderRad) {
-  std::cerr << "Removing short edges... ";
-  T_START(remshortegs);
   removeEdgesShorterThan(tg, gridSize / 2);
-  std::cerr << " done (" << T_STOP(remshortegs) << "ms)" << std::endl;
-
-  std::cerr << "Building combination graph... ";
-  T_START(combgraph);
   CombGraph cg(tg);
-  std::cerr << " done (" << T_STOP(combgraph) << "ms)" << std::endl;
-
   auto box = tg->getBBox();
-
-  T_START(grid);
   auto gg = new GridGraph(box, gridSize, borderRad, pens);
-
-  ///////////
-  ilp::ILPGridOptimizer ilpoptim;
-
-  ilpoptim.optimize(gg, cg);
-
-  util::geo::output::GeoGraphJsonOutput out;
-  std::ofstream of;
-  of.open("octi.json");
-  out.print(*gg, of);
-  of << std::flush;
-
-  exit(0);
-
-  /////////////
-
-  std::cerr << "Build grid graph in " << T_STOP(grid) << " ms " << std::endl;
 
   auto order = getOrdering(cg);
 
   Drawing drawing(gg);
   bool found = draw(order, gg, &drawing);
-  double origScore = drawing.score();
 
   if (!found) std::cerr << "(no initial embedding found)" << std::endl;
 
@@ -114,7 +103,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
 
     if (locFound) {
       double imp = (bestIterDraw.score() - nextDrawing.score());
-      std::cerr << " ++ Iter " << i << ", prev " << bestIterDraw.score()
+      std::cerr << " ++ Random try " << i << ", best " << bestIterDraw.score()
                 << ", next " << nextDrawing.score() << " ("
                 << (imp >= 0 ? "+" : "") << imp << ")" << std::endl;
 
@@ -122,6 +111,9 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         bestIterDraw = nextDrawing;
         iterFound = true;
       }
+    } else {
+      std::cerr << " ++ Random try " << i << ", best " << bestIterDraw.score()
+                << ", next <not found>" << std::endl;
     }
 
     nextDrawing.eraseFromGrid(gg);
@@ -303,7 +295,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       }
     } else {
       // get surrounding displacement nodes
-      double maxDis = getMaxDis(toCmbNd, cmbEdg, gg->getCellSize());
+      double maxDis = gg->getCellSize() * 3;
       toGrNds = gg->getGridNodesTo(toCmbNd, maxDis, frGrNd);
 
       // TODO: abort criteria
@@ -326,6 +318,16 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     double penPerGrid = 5 + c_0 + fmax(gg->getPenalties().diagonalPen,
                                        gg->getPenalties().horizontalPen);
 
+    // open from source node
+    if (gg->isSettled(frCmbNd)) {
+      // only count displacement penalty ONCE
+      gg->openNodeSink(frGrNd, 0);
+    } else {
+      double gridD = floor(dist(*frGrNd->pl().getGeom(), *frCmbNd->pl().getGeom()));
+      gridD = gridD / gg->getCellSize();
+      gg->openNodeSink(frGrNd, gridD * penPerGrid);
+    }
+
     // open the target nodes
     for (auto n : toGrNds) {
       double gridD = floor(dist(*n->pl().getGeom(), *toCmbNd->pl().getGeom()));
@@ -337,17 +339,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       } else {
         gg->openNodeSink(n, gridD * penPerGrid);
       }
-    }
-
-    // open from source node
-    if (gg->isSettled(frCmbNd)) {
-      // only count displacement penalty ONCE
-      gg->openNodeSink(frGrNd, 0);
-    } else {
-      double gridD =
-          floor(dist(*frGrNd->pl().getGeom(), *frCmbNd->pl().getGeom()));
-      gridD = gridD / gg->getCellSize();
-      gg->openNodeSink(frGrNd, gridD * penPerGrid);
     }
 
     if (gg->isSettled(frCmbNd)) {

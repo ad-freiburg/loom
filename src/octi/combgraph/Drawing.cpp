@@ -206,8 +206,6 @@ void Drawing::crumble() {
 
 // _____________________________________________________________________________
 double Drawing::recalcBends(const CombNode* nd) {
-  // std::cerr << "Recalcing bend costs at node " << nd << std::endl;
-
   double c_0 = _gg->getPenalties().p_45 - _gg->getPenalties().p_135;
   double c_135 = _gg->getPenalties().p_45;
   double c_90 = _gg->getPenalties().p_45 - _gg->getPenalties().p_135 + _gg->getPenalties().p_90;
@@ -241,7 +239,6 @@ double Drawing::recalcBends(const CombNode* nd) {
 
 
     for (auto ro : e->pl().getChilds().front()->pl().getRoutes()) {
-      // std::cerr << "Route " << ro.route->getLabel() << " at " << dirA << std::endl;
       for (auto f : nd->getAdjList()) {
         if (e == f) continue;
         if (_edgs.count(f) == 0) {
@@ -262,8 +259,6 @@ double Drawing::recalcBends(const CombNode* nd) {
           }
 
           assert(dirB < 8);
-
-          // std::cerr << "  continued at dir " << dirB << " ";
 
           int ang = (8 + (dirA - dirB)) % 8;
           if (ang > 4) ang = 8 - ang;
@@ -371,4 +366,22 @@ void Drawing::eraseFromGrid(GridGraph* gg) {
 void Drawing::applyToGrid(GridGraph* gg) {
   for (auto nd : _nds) applyToGrid(nd.first, gg);
   for (auto e : _edgs) applyToGrid(e.first, gg);
+}
+
+// _____________________________________________________________________________
+double Drawing::getEdgCost(const CombEdge* e) const {
+  if (_edgCosts.count(e)) return _edgCosts.find(e)->second;
+  return 0;
+}
+
+// _____________________________________________________________________________
+double Drawing::getNdBndCost(const CombNode* n) const {
+  if (_ndBndCosts.count(n)) return _ndBndCosts.find(n)->second;
+  return 0;
+}
+
+// _____________________________________________________________________________
+double Drawing::getNdReachCost(const CombNode* n) const {
+  if (_ndReachCosts.count(n)) return _ndReachCosts.find(n)->second;
+  return 0;
 }

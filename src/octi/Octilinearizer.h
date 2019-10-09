@@ -118,8 +118,10 @@ class Octilinearizer {
   TransitGraph draw(TransitGraph* g, GridGraph** gg, const Penalties& pens,
                     double gridSize, double borderRad);
 
+  TransitGraph drawILP(TransitGraph* g, GridGraph** gg, const Penalties& pens,
+                    double gridSize, double borderRad);
+
  private:
-  double getMaxDis(CombNode* to, CombEdge* e, double gridSize);
   void removeEdgesShorterThan(TransitGraph* g, double d);
 
   void writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e, GridGraph* g);
