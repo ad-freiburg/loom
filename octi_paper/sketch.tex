@@ -23,6 +23,7 @@ pdfproducer={}
 
 \begin{document}
 \title{Metro Maps on Octilinear Grid Graphs}
+\subtitle{- sketch -}
 
 \numberofauthors{1}
 %\author{Patrick Brosi\\\affaddr{University of Freiburg}\\\affaddr{Chair of Algorithms and Data Structures}}
@@ -36,7 +37,7 @@ We state the problem as a batch of shortest-path calculations on a specially cra
 Our approach can be optimized exactly via an Integer Linear Program (ILP) or approximately by iteratively calculating shortest-paths between node candidates in the octilinear grid graph.
 Most importantly, our approach allows us to revisit earlier work [Stott] which used local search techniques to update the node positions until a (local) optimum was found, but where octilinearity was not guaranteed.
 By recalculating the shortest-path between an updated node and its neighbors on our octilinear grid graph, we can guarantee octilinearity.
-Using this approach, we can calculate maps which are nearly optimal in a fraction of a second for medium-sized networks.
+Using this approach, we can calculate octiliniear maps which are very close to optimal in a fraction of a second even for large networks.
 As far as we are aware, our technique is the first non-global approach which guarantees octilinear results, albeit at the cost of not always finding a solution. The resulting schematic maps are rendered using previous work and are publicly accessible.
 
 \section{Introduction}
@@ -44,15 +45,7 @@ As far as we are aware, our technique is the first non-global approach which gua
 
 \TODO{Write intro}
 
-\begin{figure*}[t]
-  \centering
-	\includegraphics[width=0.474\textwidth]{figures/octi_input.pdf}
-	\includegraphics[width=0.474\textwidth]{figures/octi.pdf}
-	\caption{The subway network of Vienna, rendered with our approach from raw timetable (GTFS) data (including stop positions).}
-	\label{FIG:examplewien}
-\end{figure*}
-
-\section{Problem definition}
+\subsection{Problem definition}
 
 Given an undirected planar graph $G = \{V, E\}$. We say $\mathcal{D}_G = \{p, c\}$ is a drawing of $G$, where $p(v) \in \mathbb{R}^2$ assigns a position to every node $v \in V$ and $c(e) = (q_0, q_1, ..., q_n)$, $q_i \in \mathbb{R}^2$ assigns a piecewise linear curve to every edge $e \in E$. The initial input drawing $\mathcal{D}_G$ assigns each node a geographical real-world position, and each edge an (optional) real-world trajectory.
 Our goal is to find a schematic drawing $\mathcal{D}'_G$ that resembles a classic Metro Map.
@@ -73,8 +66,7 @@ Additionally, the following soft constraints are usually employed:
 
 With respect to edge monotony and octilineary, previous work often stated the problem as finding an octilinear embedding of the input graph, where each edge is represented by a straight octilinear arc.
 
-
-\section{Related Work}
+\subsection{Related Work}
 
 Survey Nöllenburg %http://i11www.iti.kit.edu/extra/publications/n-asamm-14.pdf
 Survey Wolff %http://www1.pub.informatik.uni-wuerzburg.de/pub/wolff/pub/w-dsms-07.pdf
@@ -83,6 +75,20 @@ Stott's PhD
 steiner trees! %https://www.researchgate.net/profile/Matthias_Mueller-Hannemann/publication/225160153_Approximation_of_Octilinear_Steiner_Trees_Constrained_by_Hard_and_Soft_Obstacles/links/0912f50cf248ec1193000000/Approximation-of-Octilinear-Steiner-Trees-Constrained-by-Hard-and-Soft-Obstacles.pdf
 
 \section{Octilinear Grid Graph}
+
+\begin{figure}
+  \centering
+	$\vcenter{\hbox{\includegraphics[width=0.474\textwidth]{figures/grid.pdf}}}$
+	\caption{Left: A shortest path between $t$ and $u$ on a grid graph with uniform edge cost. Path turns are not minimized. Right: Two shortest path between $(t, u)$, and $(v, w)$ on our octilinear grid graph with uniform grid edge cost $1$ and additional path turn penalties $p_{135} = 1$, $p_{90} = 3$ and $p_{45} = 9$. Path $(t, u)$ acts as an obstacle for $(v, w)$.}
+	\label{FIG:grids}
+\end{figure}
+\begin{figure*}[t]
+  \centering
+	\includegraphics[width=0.474\textwidth]{figures/octi_input.pdf}
+	\includegraphics[width=0.474\textwidth]{figures/octi.pdf}
+	\caption{The subway network of Vienna, rendered with our approach from raw timetable (GTFS) data (including stop positions).}
+	\label{FIG:examplewien}
+\end{figure*}
 
 We use an auxiliary undirected graph $\Omega = \{V_\omega, E_\omega\}$ on which every possible path $p = (v_0, v_1, ..., v_n), v_i \in V_\Omega$ with $v_0 \neq v_n$ and $|p| > 1$ represents an octilinear curve with cost $c(p) = (|p| - 1) \cdot c_h$, where $c_h$ is the cost of using a single edge (note that a path consisting of $n$ nodes always uses $n - 1$ edges, so for a uniform edge cost $c_h = 1$, $c(p)$ is exactly the number of used edges).
 The graph in Fig.~\ref{FIG:gridgraph},~left trivially satisfies this: we define a $x\times y$ grid and add nodes $v_{x,y}$ to $V_\omega$ for every grid point.
@@ -100,12 +106,6 @@ Formally, we now search for the path $p = (v_0, v_1, ..., v_i, ..., v_n)$ with m
 \end{align}
 where $t(v_{i-1}, v_{i+1})$ is the angular turn cost between edges $\{v_{i-1}, v_{i}\}$ and $\{v_{i}, v_{i=1}\}$, that is, either 0, $c_{135}$, $c_{90}$ or $c_{45}$.
 
-\begin{figure}
-  \centering
-	$\vcenter{\hbox{\includegraphics[width=0.474\textwidth]{figures/grid.pdf}}}$
-	\caption{Left: A shortest path between $t$ and $u$ on a grid graph with uniform edge cost. Path turns are not minimized. Right: Two shortest path between $(t, u)$, and $(v, w)$ on our octilinear grid graph with uniform grid edge cost $1$ and additional path turn penalties $p_{135} = 1$, $p_{90} = 3$ and $p_{45} = 9$. Path $(t, u)$ acts as an obstacle for $(v, w)$.}
-	\label{FIG:grids}
-\end{figure}
 
 We model this by adding 8 auxiliary port nodes $v_{x,y}^{0} ... v_{x,y}^{7}$ to every grid node $v_{x,y} \in V_\omega$.
 Each port again corresponds to an outgoing angle in clockwise fashion and is connected to $v_{x, y}$ via sink edges $e_{x,y}^0 ... e_{x,y}^7$.
@@ -113,14 +113,17 @@ These sink edges allow us to leave from and arrive at an original node $v_{x, y}
 For paths passing through $v_{x, y}$, we connect each port $v_{x, y}^i$ with its 7 - i suceeding (in clockwise fashion) sibling ports with turn edges $e_{x, y}^{i@45}$, $e_{x, y}^{i@90}$, and so forth.
 For ease of notation, we allow a turn edge to be identified by both its port nodes, for example, $e_{x, y}^{0@45} = e_{x, y}^{1@45}$.
 
-\begin{figure}[h]
+\begin{figure}[b]
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.45\textwidth]{figures/node.pdf}}}$
 	\caption{A $3\times3$ grid graph. Each node $v_i$ has 8 ports $v_i^0 ... v_i^7$ which are connected to $v_i$ by a direct edge. Each port is additionally connected to its $180^{\circ}$, $135^{\circ}$ and $35^{\circ}$ neighbor ports.}
 	\label{FIG:gridgraph}
 \end{figure}
 
-To be able to distinguish the different node and edge types, we define the set of original grid nodes as $V^s_\omega \ni v_{x, y}$, the set of port nodes as $V^p_\omega \ni v_{x,y}^i$, the set of turn edges as $E^t_\omega \ni e_{x, y}^{i@\theta}$ and the set of sink edges as $E^s_\omega \ni e_{x,y}^i$.
+To be able to distinguish the different node and edge types, we define the set of original grid nodes as $V^g_\omega \ni v_{x, y}$, the set of port nodes as $V^p_\omega \ni v_{x,y}^i$, the set of turn edges as $E^t_\omega \ni e_{x, y}^{i@\theta}$, the set of sink edges as $E^s_\omega \ni e_{x,y}^i$ and the set of original grid edges as $E^g_\omega \ni e_{x,y}$.
+Note that $V_\omega = V^g_\omega \cup V^p_\omega$ and $E_\omega = E^t_\omega \cup E^s_\omega \cup E^g_\omega$.
+
+Additionally, for each $v \in V_\omega$, we define $v^* \in ^g_\omega$ as the original grid node belonging to $v$ (note that this may be $v$ itself).
 
 As we want to prevent the use of sink edges in pass-through nodes, we set a uniform sink edge cost $c_s$ high enough so that a sink edge is always more expensive than a turn edge. 
 In a shortest path, the only sink edges are then a leaving sink edge adjacent to $s$ and an arriving sink edge adjacent to $t$.
@@ -153,19 +156,18 @@ The inequalities are fullfilled for $a = c_{45} - c_{135}$.
 The shortest path $p'$ from an original grid node $s = v_0 \in V^s_\omega$ to another original grid node $t=v_n \in V^s_\omega$ on our octilinear grid graph now consists of \emph{two} nodes for each original grid node: for the start and end node, the original node and a single port node appear in the path.
 For pass-through nodes, a port node for arriving at and a port node for leaving the original grid node appears (w.l.o.g., we ignore the case where a turn edge is replaced by two turn costs with similar cost, as this does neither affect the final path on the grid graph, nor the cost of that path).
 
-This shortest path $p'$ thus always describes a path $p$ on the original grid graph with $|p| = |p'| / 2$ and has the cost
+This shortest path $p' = (v_0, v_1, ..., v_n')$ thus always describes a path $p = (v^*_0, v^*_2, v^*_4, ..., v^*_{n'/2})$ on the original grid graph with $|p| = n = |p'| / 2 = n' / 2$ and has the cost
 %
 \begin{align}
-	c'(p') = 2 c_s + \left(|p'| / 2 - 1\right) \cdot c_h + \sum_{i=}^{n - 1} a + t'\left(v_{2i}, v_{2i+1}\right)\label{EQ:cost},
+	c'(p') = 2 c_s + \left(n - 1\right) \cdot c_h + \sum_{i=1}^{n - 1} a + t\left(v^*_{2i - 2}, v^*_{2i+2}\right)\label{EQ:cost}.
 \end{align}
-where $t'$ is now the cost of turn edge $\{v_{i}, v_{j}\}$.
 %
 To get rid of the constant offset $a$, we set $c_{135} = 1$, $c_{90} = 1.5$ and $c_{45} = 2$, which means $a = 1$.
 If we then set the cost of a single grid edge $c_h = 1 = a$ and set the actual grid edge costs to $c'_h = c_h - a = 0$, we can rewrite Eq.~\ref{EQ:cost} as  
 %
 \begin{align}
-	c'(p') &= 2 c_s +  \left(|p'| / 2- 1\right) \cdot c'_h + \sum_{i=1}^{n - 1} c_h + t'\left(v_{2i}, v_{2i+1}\right) \\
-	     &= 2 c_s + \left(|p| - 2\right) \cdot c_h + \sum_{i=1}^{n - 1} t \left(v_{2i}, v_{2i+1}\right) \\
+	c'(p') &= 2 c_s +  \left(n - 1\right) \cdot c'_h + \sum_{i=1}^{n - 1} c_h + t\left(v^*_{2i - 2}, v^*_{2i+2}\right) \\
+	     &= 2 c_s + \left(n - 2\right) \cdot c_h + \sum_{i=1}^{n - 1} t \left(v^*_{2i - 2}, v^*_{2i+2}\right) \\
 	     &= 2 c_s + c(p) - c_h = c(p) + 2 c_s - 1.
 \end{align}
 %
@@ -178,7 +180,12 @@ As $p'$ minimizes $c(p) + 2 c_s - 1$, it also minimizes $c(p)$.
 	\label{FIG:paths}
 \end{figure*}
 
-\section{Optimal Solution via Integer Linear Programming}
+\section{Optimal Solution via ILP}
+
+Using the octilinear grid graph $\Omega$ from the previous section, we can now define the problem of finding the optimal metro-map drawing on the grid defined by $\Omega$ like this: find the grid position for each input station and the shortest paths between adjacent input station nodes which minimizes the sum of (1) all shortest path costs, (2) the distance between the grid position of a station and its original position, and (3) the line bend penalties at stations (which are not covered by the path costs on $\Omega$).
+The input embedding should be preserved, which means that the circular ordering of the input edges at nodes should be preserved, and the shortest paths should be non intersecting.
+
+We first describe how to solve this problem exactly using an Integer Linear Program (ILP).
 
 \subsection{Station Placement}
 
@@ -187,6 +194,8 @@ As $p'$ minimizes $c(p) + 2 c_s - 1$, it also minimizes $c(p)$.
 \subsection{Preservement of Embedding}
 
 \subsection{Avoiding Line Bends}
+
+\subsection{Complexity}
 
 \section{Approximative Solution}
 
