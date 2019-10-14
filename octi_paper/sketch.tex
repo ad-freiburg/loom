@@ -129,7 +129,7 @@ For ease of notation, we allow a turn edge to be identified by both its port nod
 	\label{FIG:gridgraph}
 \end{figure}
 
-To be able to distinguish the different node and edge types, we define the set of original grid nodes as $\Psi^g \ni \psi_{x, y}$, the set of port nodes as $\Psi^p \ni \psi_{x,y}^i$, the set of turn edges as $\Omega^t \ni \omega_{x, y}^{i@\theta}$, the set of sink edges as $\Omega^s \ni \omega_{x,y}^i$ and the set of original grid edges as $\Omega^g \ni \omega_{x,y}$.
+To be able to distinguish the different node and edge types, we define the set of original grid nodes as $\Psi^g \ni \psi_{x, y}$, the set of port nodes as $\Psi^p \ni \psi_{x,y}^i$, the set of turn edges as $\Omega^t \ni \omega_{x, y}^{i@\theta}$, the set of sink edges as $\Omega^s \ni \omega_{x,y}^i$ and the set of original grid edges as $\Omega^g$.
 Note that $\Psi = \Psi^g \cup \Psi^p$ and $\Omega = \Omega^t \cup \Omega^s \cup \Omega^g$.
 
 Additionally, for each $\psi \in \Psi$, we define $\psi^* \in \Psi^g$ as the original grid node belonging to $\psi$ (this may be $\psi$ itself).
@@ -230,7 +230,7 @@ As Equation~\ref{EQ:singleuse} cannot exceed 1, a grid node can then indeed only
 \subsection{Edge Continuity}
 
 To globally compute the shortest paths on the grid graph between all adjacent input nodes, we make use of the standard formulation of the shortest path problem as a Linear Program.
-We first have to make sure that edges assigned to the shortest path from $s$ to $t$ are connected.
+We have to make sure that edges assigned to the shortest path from $s$ to $t$ are connected.
 To ensure this, we introduce the following constraints per grid node and input edge:
 
 \newcommand\Psum[1]{\sum_{\makebox[0pt]{$\scriptstyle#1$}}}
@@ -247,15 +247,39 @@ To ensure this, we introduce the following constraints per grid node and input e
 Equation~\ref{EQ:cont_port} makes sure that the number of outgoing and incoming edges at each port node is the same.
 This ensures a continuous path between the grid node chosen for $s$, and the grid node chosen for $t$.
 
-Equation~\ref{EQ:cont_grid} handles original grid nodes.
+Equation~\ref{EQ:cont_grid} handles the original grid nodes which are chose for $s$ and $t$.
 At these nodes, we count an outgoing edge twice, which means that the grid node could only make up for an outgoing edge with two incoming edges.
 This, however, would mean that our shortest path split somewhere, which is prevented by Equation~\ref{EQ:cont_port}.
 The only way to fullfill the constraint is thus for $\psi$ to be the source node for the input edge.
 Similarily, the only way to counter an incoming edge is for $\psi$ to be the target node for the input edge.
 
-\subsection{Preservement of Embedding}
+\subsection{Preservation of Embedding}
 
+To preserve the input embedding, it is enough to guarantee that no two paths in $\Gamma$ intersect and that the circular ordering of adjacent edges is the same as in the input graph.
+Equation~\ref{EQ:singleuse} already prevents paths crossing at grid nodes.
+There is now exactly one remaining case where paths in $\Gamma$ could create intersections: if two intersecting diagonal grid edges are used.
+To prevent this case, we define $\Omega^d$ as the set of diagonal grid edges in $\Gamma$ and say that for $\omega \in \Omega^d$, $\omega^{\times} \in \Omega_d$ is the diagonal edge crossing $\omega$. 
+We then add the following constraint:
+%
+\begin{equation}
+  \forall \omega \in \Omega^d: \Psum{e \in E} x_{e\omega} + x_{e\omega^{\times}} \leq 1. \label{EQ:crossing}
+\end{equation}
 
+To ensure that the circular edge ordering at nodes remains the same, we would first like to have a variable $x_{ne}$ which tells us the direction of input edge $e$ at adjacent input node $n$ in the final grid graph drawing.
+We first introduce an auxiliary variable $x_{ne\omega}$ which should be one if $\omega$ if the sink edge chosen for input edge $e$ at the grid node chosen for input node $n$.
+To get the desired assignments, we add the following constraints for each input edge $e = (s, t) \in E$ and each outgoing sink edge $\omega = (\psi_{x, y}, \psi_{x,y}^p)$:
+%
+\begin{equation}
+  0 \leq x_{s\psi_{x, y}} + x_{e\omega} - 2x_{se\omega} \leq 1. \label{EQ:adjedgeout}
+\end{equation}
+%
+A similar constraint is added for the target node of $e$ and incoming sink edges:
+%
+\begin{equation}
+  0 \leq x_{t\psi} + x_{e\omega} - 2x_{se\omega} \leq 1. \label{EQ:adjin}
+\end{equation}
+%
+\TODO{why do we need the node use here? A sink edge is only used if the station is settled, to the case where }
 
 \subsection{Avoiding Line Bends}
 
