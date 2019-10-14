@@ -33,12 +33,13 @@ pdfproducer={}
 \section{Abstract}
 
 We investigate a novel approach to the problem of drawing octilinear Metro Maps.
-We state the problem as a batch of shortest-path calculations on a specially crafted octilinear grid graph, where edge bends are implicitely added to the cost metric.
+We state the problem as a batch of shortest-path calculations on a specially crafted octilinear grid graph, where edge bends are added to the total cost of the path by means of explicit turn edges.
 Our approach can be optimized exactly via an Integer Linear Program (ILP) or approximately by iteratively calculating shortest-paths between node candidates in the octilinear grid graph.
-Most importantly, our approach allows us to revisit earlier work [Stott] which used local search techniques to update the node positions until a (local) optimum was found, but where octilinearity was not guaranteed.
+Most importantly, it allows us to revisit earlier work [Stott] which used local search techniques to update the node positions until a (local) optimum was found, but where octilinearity was not guaranteed.
 By recalculating the shortest-path between an updated node and its neighbors on our octilinear grid graph, we can guarantee octilinearity.
-Using this approach, we can calculate octiliniear maps which are very close to optimal in a fraction of a second even for large networks.
-As far as we are aware, our technique is the first non-global approach which guarantees octilinear results, albeit at the cost of not always finding a solution. The resulting schematic maps are rendered using previous work and are publicly accessible.
+Using this approach, we can calculate metro maps which are very close to optimal in a fraction of a second even for large networks.
+As far as we are aware, our technique is the first non-global approach which guarantees octilinear results, albeit at the cost of not always finding a solution.
+%Our maps are rendered using previous work and are publicly accessible.
 
 \section{Introduction}
 
@@ -195,13 +196,15 @@ The input embedding should be preserved, which means that the circular ordering 
 
 We first describe how to solve this problem exactly using an Integer Linear Program (ILP).
 
-To be later able to deduce the placement of stations computed by our ILP, we introduce binary decision variables $x_{v\psi}$ for each input node $v$ and grid node $\psi$ which should be 1 of $v$ was assigned to $\psi$.
-To be able to deduce the course of the shortest path, we define binary variables $x_{e\omega}$ for each input edge $e$ and each grid edge $\omega$ which should be 1 if $\omega$ is used in the octilinear curve for $e$, and 0 if not.
-
 To make it easier to encode the direction of a shortest path from $s$ to $t$ in the ILP, we first model each undirected grid edge ${\psi, \psi'}$ as a pair of directed edges $(\psi, \psi')$, $(\psi', \psi)$.
 This transforms our undirected grid graph into an equivalent directed grid graph.
 Additionally, to get unique start and end nodes for the shortest path calculations, we now treat each undirected input edge $e = \{u, v\}$ as a directed edge $(s, t)$.
 As the shortest paths in our octilinear grid graph are symmetric, it does not matter whether we chose $s = u, t = v$ or vice versa.
+
+To be later able to deduce the placement of stations computed by our ILP, we introduce binary decision variables $x_{v\psi}$ for each input node $v$ and grid node $\psi$ which should be 1 of $v$ was assigned to $\psi$, or 0 otherwise.
+To be able to deduce the course of the shortest path, we define binary variables $x_{e\omega}$ for each input edge $e$ and each grid edge $\omega$ which should be 1 if $\omega$ is used in the octilinear curve for $e$, or 0 otherwise.
+
+We add $x_{e\omega}$ to the objective function with the cost of grid edge $\omega$ as a coefficient.
 
 \subsection{Station Placement}
 
@@ -212,21 +215,22 @@ To achieve this, we first ensure that an input node is assigned to exactly one g
   \forall v \in V: \sum_{\psi \in \Psi^g} x_{v\psi} = 1. \label{EQ:todo}
 \end{equation}
 %
-We then encode the requirement that in our final edge assignment, an original grid node can either be assigned to a single input station, be used as a pass-through node for a single input edge, or be not used at all with the following constraint:
+An original grid node can either be assigned to a single input station, be used as a pass-through node for a single input edge, or be not used at all.
+We encode this requirement with the following constraint:
 %
 \begin{equation}
   \forall \psi \in \Psi^g: \sum_{v \in V} x_{v\psi} + \sum_{e \in E} \sum_{\omega \in \Omega^p_\psi} x_{e\omega} \geq 1, \label{EQ:singleuse}
 \end{equation}
 %
-where $\Omega^p_\psi$ is the set of port nodes belonging to $\psi$. 
+where $\Omega^p_\psi$ is the set of port edges belonging to $\psi$. 
 If $\psi$ is assigned to an input station, the first sum is already 1, forbidding the use of $\psi$ as a pass-through node for the curve of any input edge.
 Similarily, if $\psi$ is used as a pass-through node, it cannot be assigned to an input station node.
-As Equation~\ref{EQ:singleuse} cannot exceed 1, a grid node can then indeed only be assigned a single input node, or be used by a single path as a pass-through node.
+As Equation~\ref{EQ:singleuse} cannot exceed 1, a grid node can then indeed only be assigned a single input node, be used by a single path as a pass-through node, or be not used at all.
 
 \subsection{Edge Continuity}
 
 To globally compute the shortest paths on the grid graph between all adjacent input nodes, we make use of the standard formulation of the shortest path problem as a Linear Program.
-We first have to make sure that edges assigned to the shortest path from $s$ to $t$ is connected.
+We first have to make sure that edges assigned to the shortest path from $s$ to $t$ are connected.
 To ensure this, we introduce the following constraints per grid node and input edge:
 
 \newcommand\Psum[1]{\sum_{\makebox[0pt]{$\scriptstyle#1$}}}
@@ -236,26 +240,22 @@ To ensure this, we introduce the following constraints per grid node and input e
 \end{equation}
 \begin{equation}
 	\begin{split}
-  	\forall e \in E\ \forall \psi \in \Psi^g: x_{s\psi} - 2x_{t\psi} + \Psum{\omega \in \text{out}(\psi)} 2x_{e\omega} - \Psum{\omega \in \text{in}(\psi)} x_{e\omega} = 0. \label{EQ:cont_grid}
+  	\forall e \in E\ \forall \psi \in \Psi^g: x_{t\psi} - 2x_{s\psi} + \Psum{\omega \in \text{out}(\psi)} 2x_{e\omega} - \Psum{\omega \in \text{in}(\psi)} x_{e\omega} = 0. \label{EQ:cont_grid}
   \end{split}
 \end{equation}
 
 Equation~\ref{EQ:cont_port} makes sure that the number of outgoing and incoming edges at each port node is the same.
 This ensures a continuous path between the grid node chosen for $s$, and the grid node chosen for $t$.
 
-Equation~\ref{EQ:cont_grid} handles the original grid nodes.
+Equation~\ref{EQ:cont_grid} handles original grid nodes.
 At these nodes, we count an outgoing edge twice, which means that the grid node could only make up for an outgoing edge with two incoming edges.
 This, however, would mean that our shortest path split somewhere, which is prevented by Equation~\ref{EQ:cont_port}.
-To 
-
-
-
-
-We add $x_{e\omega}$ to the objective function with the cost of grid edge $\omega$ as a coefficient.
-
-
+The only way to fullfill the constraint is thus for $\psi$ to be the source node for the input edge.
+Similarily, the only way to counter an incoming edge is for $\psi$ to be the target node for the input edge.
 
 \subsection{Preservement of Embedding}
+
+
 
 \subsection{Avoiding Line Bends}
 
