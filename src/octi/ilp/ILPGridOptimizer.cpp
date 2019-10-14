@@ -274,87 +274,6 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
   glp_create_index(lp);
 
-  // for each grid edge e and edge input edge E, we define a variable
-  // x_eEadjN which should be 1 if e is the adjacent grid edge for E at input
-  // node N
-  for (auto nd : cg.getNds()) {
-    for (auto edg : nd->getAdjList()) {
-      if (edg->getFrom() != nd) continue;
-      for (GridNode* n : gg.getNds()) {
-        if (!n->pl().isSink()) continue;
-        for (size_t i = 0; i < 8; i++) {
-          ///// for the original <from> node
-          auto e = gg.getEdg(n, n->pl().getPort(i));
-
-          std::stringstream ndPosFromVarName;
-          ndPosFromVarName << "statpos(" << e->getFrom() << ","
-                           << edg->getFrom() << ")";
-          size_t ndColFrom = glp_find_col(lp, ndPosFromVarName.str().c_str());
-
-          // it may be that the node was not marked as a candidate at all
-          if (!ndColFrom) continue;
-
-          std::stringstream x_eEadjNNameFrom;
-          x_eEadjNNameFrom << "adjedge(" << edg->getFrom() << "," << e << ","
-                           << edg << ")";
-
-          size_t colFr = glp_add_cols(lp, 1);
-          glp_set_col_name(lp, colFr, x_eEadjNNameFrom.str().c_str());
-          glp_set_col_kind(lp, colFr, GLP_BV);
-
-          std::stringstream constNameFr;
-          size_t rowFr = glp_add_rows(lp, 1);
-          constNameFr << "adjedgeconst(" << edg->getFrom() << "," << e << ","
-                      << edg << ")";
-          glp_set_row_name(lp, rowFr, constNameFr.str().c_str());
-          glp_set_row_bnds(lp, rowFr, GLP_DB, 0, 1);
-          vm.addVar(rowFr, colFr, -2);
-          size_t colEdgeUse = glp_find_col(lp, getEdgeUseVar(e, edg).c_str());
-          assert(colEdgeUse);
-
-          vm.addVar(rowFr, colEdgeUse, 1);
-          vm.addVar(rowFr, ndColFrom, 1);
-        }
-
-        for (size_t i = 0; i < 8; i++) {
-          // for the original <to> node, edges arriving at n
-          auto e = gg.getEdg(n->pl().getPort(i), n);
-
-          std::stringstream ndPosToVarName;
-          ndPosToVarName << "statpos(" << e->getTo() << "," << edg->getTo()
-                         << ")";
-          size_t ndColTo = glp_find_col(lp, ndPosToVarName.str().c_str());
-
-          // it may be that the node was not marked as a candidate at all
-          if (!ndColTo) continue;
-
-          std::stringstream x_eEadjNNameTo;
-          x_eEadjNNameTo << "adjedge(" << edg->getTo() << "," << e << "," << edg
-                         << ")";
-
-          size_t colTo = glp_add_cols(lp, 1);
-          glp_set_col_name(lp, colTo, x_eEadjNNameTo.str().c_str());
-          glp_set_col_kind(lp, colTo, GLP_BV);
-
-          std::stringstream constNameTo;
-          size_t rowTo = glp_add_rows(lp, 1);
-          constNameTo << "adjedgeconst(" << edg->getTo() << "," << e << ","
-                      << edg << ")";
-          glp_set_row_name(lp, rowTo, constNameTo.str().c_str());
-          glp_set_row_bnds(lp, rowTo, GLP_DB, 0, 1);
-          vm.addVar(rowTo, colTo, -2);
-          size_t colEdgeUse = glp_find_col(lp, getEdgeUseVar(e, edg).c_str());
-          assert(colEdgeUse);
-
-          vm.addVar(rowTo, colEdgeUse, 1);
-          vm.addVar(rowTo, ndColTo, 1);
-        }
-      }
-    }
-  }
-
-  glp_create_index(lp);
-
   // for each input node N, define a var x_dirNE which tells the direction of
   // E at N
   for (auto nd : cg.getNds()) {
@@ -384,20 +303,14 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
           // the 0 can be skipped here
           for (size_t i = 1; i < 8; i++) {
             auto e = gg.getEdg(n, n->pl().getPort(i));
-            std::stringstream adjVar;
-            adjVar << "adjedge(" << edg->getFrom() << "," << e << "," << edg
-                   << ")";
-            size_t col = glp_find_col(lp, adjVar.str().c_str());
+            size_t col = glp_find_col(lp, getEdgeUseVar(e, edg).c_str());
             if (col) vm.addVar(row, col, i);
           }
         } else {
           // the 0 can be skipped here
           for (size_t i = 1; i < 8; i++) {
             auto e = gg.getEdg(n->pl().getPort(i), n);
-            std::stringstream adjVar;
-            adjVar << "adjedge(" << edg->getTo() << "," << e << "," << edg
-                   << ")";
-            size_t col = glp_find_col(lp, adjVar.str().c_str());
+            size_t col = glp_find_col(lp, getEdgeUseVar(e, edg).c_str());
             if (col) vm.addVar(row, col, i);
           }
         }
