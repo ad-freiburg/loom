@@ -226,6 +226,7 @@ where $\Omega^p_\psi$ is the set of port edges belonging to $\psi$.
 If $\psi$ is assigned to an input station, the first sum is already 1, forbidding the use of $\psi$ as a pass-through node for the curve of any input edge.
 Similarily, if $\psi$ is used as a pass-through node, it cannot be assigned to an input station node.
 As Equation~\ref{EQ:singleuse} cannot exceed 1, a grid node can then indeed only be assigned a single input node, be used by a single path as a pass-through node, or be not used at all.
+Note that Equation~\label{EQ:singleuse} also enforces that a grid edge $\omega \in \Omega^g$ can only be used by a single path for an input edge, as a second path using $\omega$ would have to either arrive or cross a grid node that is already used by the other path occupying $\omega$, which Equation~\label{EQ:singleuse} explicitely prevents.
 
 \subsection{Edge Continuity}
 
@@ -247,7 +248,7 @@ To ensure this, we introduce the following constraints per grid node and input e
 Equation~\ref{EQ:cont_port} makes sure that the number of outgoing and incoming edges at each port node is the same.
 This ensures a continuous path between the grid node chosen for $s$, and the grid node chosen for $t$.
 
-Equation~\ref{EQ:cont_grid} handles the original grid nodes which are chose for $s$ and $t$.
+Equation~\ref{EQ:cont_grid} handles the original grid nodes chosen for $s$ and $t$.
 At these nodes, we count an outgoing edge twice, which means that the grid node could only make up for an outgoing edge with two incoming edges.
 This, however, would mean that our shortest path split somewhere, which is prevented by Equation~\ref{EQ:cont_port}.
 The only way to fullfill the constraint is thus for $\psi$ to be the source node for the input edge.
@@ -265,25 +266,67 @@ We then add the following constraint:
   \forall \omega \in \Omega^d: \Psum{e \in E} x_{e\omega} + x_{e\omega^{\times}} \leq 1. \label{EQ:crossing}
 \end{equation}
 
-To ensure that the circular edge ordering at nodes remains the same, we would first like to have a variable $x_{ne}$ which tells us the direction of input edge $e$ at adjacent input node $n$ in the final grid graph drawing.
-We first introduce an auxiliary variable $x_{ne\omega}$ which should be one if $\omega$ if the sink edge chosen for input edge $e$ at the grid node chosen for input node $n$.
-To get the desired assignments, we add the following constraints for each input edge $e = (s, t) \in E$ and each outgoing sink edge $\omega = (\psi_{x, y}, \psi_{x,y}^p)$:
+To ensure that the circular edge ordering at nodes remains the same, we would first like to have a variable $x_{ue} \in \{1, ..., 8\}$ which tells us the direction of input edge $e$ at adjacent input node $u$ in the final grid graph drawing.
+To get the desired assignments, we add the following constraints:
 %
 \begin{equation}
-  0 \leq x_{s\psi_{x, y}} + x_{e\omega} - 2x_{se\omega} \leq 1. \label{EQ:adjedgeout}
+  \forall e = (s, t) \in E: \sum_{\psi_{x, y} \in \Psi^g} \sum_{p = 1}^8 p x_{e(\psi_{x, y},  \psi_{x, y}^{(p - 1)})} - x_{se} = 0\label{EQ:dirfrom}
+\end{equation}
+\begin{equation}
+  \forall e = (s, t) \in E: \sum_{\psi_{x, y} \in \Psi^g} \sum_{p = 1}^8 p x_{e(\psi_{x, y}^{(p - 1)}, \psi_{x, y})} - x_{te} = 0\label{EQ:dirto}
 \end{equation}
 %
-A similar constraint is added for the target node of $e$ and incoming sink edges:
+In Equation~\ref{EQ:dirfrom}, each outgoing sink edge $(\psi_{x, y},  \psi_{x, y}^{(p - 1)}), p \in {1, ..., 8}$ adds $p$ to the sum.
+As Equations~\ref{EQ:cont_grid} and \ref{EQ:singleuse} ensures that only a single outgoing sink edge in the grid graph may be used by the path for an input edge, we can be sure that the left side of the equation always exactly equals the octilinear direction $1, ..., 8$ of $e = (s, t)$ at $s$.
+The only way to fullfil the constraint is thus to set the value of $x_{se}$ to the octilinear direction.
+Equation~\ref{EQ:dirfrom} is modelled equivalently for paths incoming at $t$.
+
+To finally ensure that the edge ordering in the final drawing matches the input drawing, we apply a trick originally used in \cite{noellenburg}.
+If $\text{dir}(u, v)$ is the angular direction of $(u, v)$ in the drawing of input graph and if $v_1, ..., v_p, ..., v_{\text{deg}(u)}$ is the clockwise ordering of nodes adjacent to u in the original embedding, then $\text{dir}(u, v_p) < \text{dir}(u, v_{p + 1})$ has to be true for all but one $p \in \{1, ..., \text{deg}(u)\}$ in the final octilinear drawing.
+
+This can be enforced with the following constraints:
 %
 \begin{equation}
-  0 \leq x_{t\psi} + x_{e\omega} - 2x_{se\omega} \leq 1. \label{EQ:adjin}
+  \forall u \in V, \deg(u) > 2: x_{v(v, u_{p + 1})} - x_{v(v, u_{p})} + 8\beta_p(v) \geq 1\label{EQ:dirs}
+\end{equation}
+\begin{equation} 
+  \forall u \in V, \deg(u) > 2: \sum_{p = 1}^{\deg(u)} \beta_p(v) \geq 1\label{EQ:onedev}.
 \end{equation}
 %
-\TODO{why do we need the node use here? A sink edge is only used if the station is settled, to the case where }
+If $\text{dir}(u, v_p) \not< \text{dir}(u, v_{p + 1})$, then $x_{v(v, u_{p + 1})} - x_{v(v, u_{p})} \leq 0$ and the only way to fullfill Equation~\ref{EQ:dirs} is to set $\beta_p(v)$ to 1.
+Equation~\ref{EQ:onedev} ensures that this can only happen a single time.
 
 \subsection{Avoiding Line Bends}
 
-\subsection{Complexity}
+As our shortest path calculations only penalize line bends along paths, we additionally have to ensure that line bends at input nodes are equivalently penalized.
+We would like to have variables telling us wither edges $e$ and $f$ in the original input graph describe a $45^{\circ}$, $90^{\circ}$, $135^{\circ}$ or $180^{\circ}$ at their joint node (as $G$ is not a multigraph, this joint node is unique).
+
+We first note that for two directional variables $x_{ue}$ and $x_{uf}$, $x_{ue} - x_{uf} \mod 8$ is either 1 or 7 for $45^\circ$ bends, 2 or 6 for $90^\circ$ bends, 3 or 5 for $135^\circ$ bends and 4 for $180^\circ$ bends.
+
+As modulo cannot be used directly in an ILP, we use the following constraint for each pair $e, f$ of edges in the input graph adjacent at node $u$ and sharing a common line:
+\begin{equation} 
+  0 \leq x_{ue} - x_{uf} + 8 \gamma_{ef} \leq 7.
+\end{equation}
+
+The auxiliary variable $\gamma_{ef}$ will be 1 if $x_{uf} > x_{ue}$. As both $x_{ue}$ and $x_{uf}$ are in the range $[1, 8]$ and as $x_{ue} \neq x_{uf}$ per Equation~\ref{EQ:singleuse}, we then have $x_{def} = x_{ue} - x_{uf} + 8 \gamma_{ef} = x_{ue} - x_{uf} \mod 8$.
+
+We then add the following constraint for each of the input edge pairs:
+%
+\begin{equation} 
+  x_{def} - x_{ef}^{45} - 2x_{ef}^{90} - 3x_{ef}^{135} - 4x_{ef}^{180} - 5 {x'}_{ef}^{135} - 6{x'}_{ef}^{90} - 7{x'}_{ef}^{45} = 0.
+\end{equation}
+%
+To make sure that only one of the bend variables is set to 1, we add the following constraint:
+%
+\begin{equation} 
+  x_{ef}^{45} + x_{ef}^{90} + x_{ef}^{135} + x_{ef}^{180} + {x'}_{ef}^{135} + {x'}_{ef}^{90} + {x'}_{ef}^{45} = 1.
+\end{equation}
+
+Each of the 8 bend variables is then added to the objective function with its corresponding penalty.
+
+\subsection{ILP Complexity}
+
+
 
 \section{Approximative Solution}
 
