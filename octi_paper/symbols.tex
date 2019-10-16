@@ -9,6 +9,8 @@
   {\par\vspace{\abovedisplayskip}\noindent\begin{tabular}{>{$}l<{$} @{${}\hspace{0.6cm}{}$} l}}
   {\end{tabular}\par\vspace{\belowdisplayskip}}
 
+\include{definitions}
+
 \begin{document}
 
 \section{Symbology of ``Metro Maps on Octilinear Grid Graphs''}
@@ -16,20 +18,21 @@
 \subsection{General}
 
 \begin{eqdesc}
-	G = (V, E)     &  Input graph with nodes $v \in V$ and edges $e = (u, v) \in E$ \\
-	\mathcal{D}_G = (p, c)     &  Drawing of $G$, $p(v)$ assigns a position to every $v \in V$, $c(e)$ \\
-	 & assigns a curve to every $e \in E$. \\   
-	\mathcal{D}^*_G &  The initial embedding of $G$. \\
+	\iG = (\iV, \iE)     &  Input graph with nodes $\iv \in \iV$ and edges $\ie = (u, v) \in \iE$ \\
+	\drawing{\iG} = (\drawingpossym, \drawingcurvesym)     &  Drawing of $\iG$, $\drawingpos{\iv}$ assigns a position to every $\iv \in \iV$, $\drawingcurve{e}$ \\
+	 & assigns a curve to every $\ie \in \iE$. \\   
+	\initdrawing{\iG} &  The initial embedding of $\iG$. \\
 	L^{\infty} & Uniform norm. \\
-	C & scale factor of our grid, essentially the grid cell dimension
+	\gScale & scale factor of our grid, essentially the grid cell dimension
+	\gmind & min distance between edges in octilinear drawing
 \end{eqdesc}
 
 \subsection{Grid Graph}
 
 \begin{eqdesc}
-	\Gamma  = (\Psi, \Omega)     &  Octilinear grid graph with nodes $\psi \in \Psi$ and edges $\omega \in \Omega$.\\
-	p = (\psi_0, \psi_1, ..., \psi_n)  & path in $\Gamma$.\\
-	\psi_{x, y} & Grid node at position $(x, y)$.
+	\gG  = (\gV, \gE)     &  Octilinear grid graph with nodes $\gv \in \gV$ and edges $\ge \in \gE$.\\
+	\gPath = (\gv_0, \gv_1, ..., \gv_n)  & path in $\gG$.\\
+	\ggv{x}{y} & Original grid node at position $(x, y)$.
 \end{eqdesc}
 
 

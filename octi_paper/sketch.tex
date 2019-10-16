@@ -21,6 +21,8 @@ pdfproducer={}
 \newcommand\todo[1]{\textcolor{blue}{[TODO: #1]}}
 \newcommand\TODO[1]{\textcolor{blue}{\small [TODO: #1]}}
 
+\include{definitions}
+
 \begin{document}
 \title{Metro Maps on Octilinear Grid Graphs}
 \subtitle{- sketch -}
@@ -47,22 +49,24 @@ As far as we are aware, our technique is the first non-global approach which gua
 
 \subsection{Problem definition}
 
-Given an undirected planar graph $G = (V, E)$, where $V$ are stations (or other location of interests in a public transit network) and $E$ are connections between those stations. We say $\mathcal{D}_G = (p, c)$ is a drawing of $G$, where $p(v)$ assigns a position to every node $v \in V$ and $c(e) = (q_0, q_1, ..., q_n)$ assigns a piecewise linear curve to every edge $e \in E$. The initial input drawing $\mathcal{D}_G$ assigns each node a geographical real-world position, and each edge an (optional) real-world trajectory.
+Given an undirected planar input graph $\iG = (\iV, \iE)$, where $\iV$ are stations (or other location of interests in a public transit network) and $\iE$ are connections between those stations.
+We say $\drawing{\iG} = (\drawingpossym, \drawingcurvesym)$ is a drawing of $\iG$, where $\drawingpos{\iv}$ assigns a position to every node $\iv \in \iV$ and $\drawingcurve{\ie} = (q_0, q_1, ..., q_n)$ assigns a piecewise linear curve to every edge $\ie \in \iE$.
+The initial input drawing $\initdrawing{\iG}$ assigns each node a geographical real-world position, and each edge an (optional) real-world trajectory.
 \TODO{mention line labels and use same definition as in LOOM paper}
 Our goal is to find a schematic drawing $\mathcal{D}'_G$ that resembles a classic Metro Map.
 This is usually formalized as a set of hard and soft constraints \cite{nb, ...}.
 The hard constraints may be summarized as:
 \begin{enumerate}
 \setlength\itemsep{.1em}
-\item \emph{Octilinearity}. Each edge curve $c(e)$ may only consist of segments whose orientation is a multiple of $45^{\circ}$.
+\item \emph{Octilinearity}. Each edge curve $\drawingcurve{\ie}$ may only consist of segments whose orientation is a multiple of $45^{\circ}$.
 \item \emph{Topology preservation}. The input embedding should be respected. In particular, no crossings between edges should be introduced and non-incident edges should never share common points.
 \end{enumerate}
 Additionally, the following soft constraints are usually employed:
 \begin{enumerate}
 \setlength\itemsep{.1em}
-\item \emph{Edge monotony}. The number of turns an edge has to take should be minimized and large angles preferred.
+\item \emph{Edge monotony}. The number of edge bends should be minimized and large angles preferred.
 \item \emph{Geographical accuracy}. The original node positions should be changed as little as possible.
-\item \emph{Map density}. There should be a minimum distance $\hat d$ between edges to ensure readability.
+\item \emph{Map density}. There should be a minimum distance $\gmind$ between the anchor points of curves to ensure readability.
 \end{enumerate}
 
 With respect to edge monotony and octilineary, previous work often defined the problem as finding an octilinear embedding of the input graph, where each edge is represented by a straight octilinear arc.
@@ -71,13 +75,12 @@ Most importantly, for two suceeding points $q_i = (x_i, y_i)$ and $q_{i+1} = (x_
 This means that the distance $|q_{i+1} - q_{i}|_{\infty}$ between them is defined as $\max \{|x_{i+1} - x_i|, |y_{i+1} - y_i|\}$.
 For any point on the grid, the distance to all its 8 direct neighbors is thus 1.
 
-To project this grid onto a map plane, we use a scale factor $C$, which is essentially the height and length of a grid cell.
-If $C$ is set to $\hat d$, a minimum distance between any two grid points is guaranteed to be greater or equal to $\hat d$.
-\TODO{mention that the distance beween diagonal lines may be smaller than $\hat d$}
+To project this grid onto a map plane, we use a scale factor $\gScale$, which is essentially the height and length of a grid cell.
+If $\gScale$ is set to $\gmind$, a minimum distance between any two grid points is guaranteed to be greater or equal to $\gmind$.
 
 \subsection{Related Work}
 
-Survey Nöllenburg %http://i11www.iti.kit.edu/extra/publications/n-asamm-14.pdf
+Survey Noellenburg %http://i11www.iti.kit.edu/extra/publications/n-asamm-14.pdf
 Survey Wolff %http://www1.pub.informatik.uni-wuerzburg.de/pub/wolff/pub/w-dsms-07.pdf
 Hong et al., force-based approach
 Stott's PhD
@@ -93,39 +96,41 @@ steiner trees! %https://www.researchgate.net/profile/Matthias_Mueller-Hannemann/
 	\label{FIG:examplewien}
 \end{figure*}
 
-We use an auxiliary undirected graph $\Gamma = (\Psi, \Omega)$, where $\Psi$ is the set of nodes and $\Omega$ is the set of edges and in which every possible path $p = (\psi_0, \psi_1, ..., \psi_n), v_i \in \Psi$ with $\psi_0 \neq \psi_n$ and $|p| > 1$ represents an octilinear curve with cost $c(p) = (|p| - 1) \cdot c_h$, where $c_h$ is the cost of using a single edge.
-The graph in Fig.~\ref{FIG:gridgraph},~left trivially satisfies this: we define a $X\times Y$ grid and add nodes $\psi_{x,y}$ for every grid point.
-Each node $\psi_{x,y}$ is connected with its 8 direct neighbors (except at the grid boundaries) $N^0(\psi_{x,y}) ... N^7(\psi_{x, y})$, where $N^0(\psi_{x, y})$ is the ``north'' neighbor of $\psi_{x, y}$,  $N^1(\psi_{x, y})$ the ``north-east'' neighbor and so on, in clockwise fashion.
+We use an auxiliary undirected graph $\gG = (\gV, \gE)$, where $\gV$ is the set of nodes and $\gE$ is the set of edges and in which every possible path $\gPath = (\gv_0, \gv_1, ..., \gv_n), \gv_i \in \gV$ with $\gv_0 \neq \gv_n$ and $|\gPath| > 1$ represents an octilinear curve with cost $\gPcost{\gPath} = (n - 1) \cdot \gHopcost$, where $\gHopcost$ is the ``hop'' cost of using a single edge.
+The graph in Fig.~\ref{FIG:gridgraph},~left trivially satisfies this: we define a $X\times Y$ grid and add nodes $\ggv{x}{y}$ for every grid point.
+Each node $\psi_{x,y}$ is connected with its 8 direct neighbors (except at the grid boundaries) $N^0(\ggv{x}{y}) ... N^7(\ggv{x}{y})$, where $N^0(\ggv{x}{y})$ is the ``north'' neighbor of $\ggv{x}{y}$, $N^1(\ggv{x}{y})$ the ``north-east'' neighbor etc..
 
-To later be able to optimize soft constraint (1), we additionally want the total cost for a path in $\Gamma$ to reflect the number and accuteness of turns.
+\subsection{Penalizing Line Bends}
+
+To later be able to optimize soft constraint (1), we additionally want the total cost for a path in $\Gamma$ to reflect the number and accuteness of bends.
 The penalty for a turn should be weighted by its degree - either $135^{\circ}$, $90^{\circ}$ or $45^{\circ}$.
-We call these penalties $c_{135}$, $c_{90}$ and $c_{45}$.
-A straight pass through a node should go unpunished, that is, $c_{180} = 0$.
-Since we aim for a ``smooth'' path through $G$ and want to favor obtuse angles, we require $c_{180} \leq c_{135} \leq c_{90} \leq c_{45}$.
+We call these penalties $\gPturn{135}$, $\gPturn{90}$ and $\gPturn{45}$.
+A straight pass through a node should go unpunished, so $\gPturn{180} = 0$.
+Since we aim for a ``smooth'' path through $\gG$ and want to favor obtuse angles, we require $\gPturn{180} \leq \gPturn{135} \leq \gPturn{90} \leq \gPturn{45}$.
 
-Formally, we now search for the path $p = (\psi_0, \psi_1, ..., \psi_i, ..., \psi_n)$ with minimum cost
+We extend our cost function and now search for the path $\gPath = (\gv_0, \gv_1, ..., \gv_i, ..., \gv_n)$ which minimizes
 \begin{align}
-	c(p) = (|p| - 1) \cdot c_h + \sum_{i=1}^{n - 1} t(\psi_{i-1}, \psi_{i+1}),
+	\gPcost{\gPath} = (n - 1) \cdot \gHopcost + \sum_{i=1}^{n - 1} t(\gv_{i-1}, \gv_{i+1}),
 \end{align}
-where $t(\psi_{i-1}, \psi_{i+1})$ is the angular turn cost between edges $\{\psi_{i-1}, \psi_{i}\}$ and $\{\psi_{i}, \psi_{i=1}\}$, that is, either 0, $c_{135}$, $c_{90}$ or $c_{45}$.
+where $t(\gv_{i-1}, \gv_{i+1})$ is the angular turn cost between edges $\{\gv_{i-1}, \gv_{i}\}$ and $\{\gv_{i}, \gv_{i=1}\}$, that is, either 0, $\gPturn{135}$, $\gPturn{90}$ or $\gPturn{45}$.
 
 \begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.474\textwidth]{figures/grid.pdf}}}$
-	\caption{Left: A shortest path between $t$ and $u$ on a grid graph with uniform edge cost. Path turns are not minimized. Right: Two shortest path between $(t, u)$, and $(v, w)$ on our octilinear grid graph with uniform grid edge cost $1$ and additional path turn penalties $p_{135} = 1$, $p_{90} = 1.5$ and $p_{45} = 2$. Path $(t, u)$ acts as an obstacle for $(v, w)$.}
+	\caption{Left: A shortest path between $t$ and $u$ on a grid graph with uniform edge cost. Path bends are not minimized. Right: Two shortest path between $(t, u)$, and $(v, w)$ on our octilinear grid graph with uniform grid edge cost $1$ and additional path turn penalties $p_{135} = 1$, $p_{90} = 1.5$ and $p_{45} = 2$. Path $(t, u)$ acts as an obstacle for $(v, w)$.}
 	\label{FIG:grids}
 \end{figure}
 
-We model this by adding 8 auxiliary port nodes $\psi_{x,y}^{0} ... \psi_{x,y}^{7}$ to every grid node $\psi_{x,y}$.
-Each port again corresponds to an outgoing angle in clockwise fashion and is connected to $\psi_{x, y}$ via sink edges $\omega_{x,y}^0 ... \omega_{x,y}^7$.
+We model this by adding 8 auxiliary port nodes $\gpv{x}{y}{0} ... \gpv{x}{y}{7}$ to every grid node (Fig.~\ref{FIG:gridgraph}).
+Each port again corresponds to an outgoing angle in clockwise fashion and is connected to $\ggv{x}{y}$ via sink edges $\gse{x}{y}{0} ... \gse{x}{y}{7}$.
 These sink edges allow us to leave from and arrive at an original node $\psi_{x, y}$.
-For paths passing through $\psi_{x, y}$, we connect each port $\psi_{x, y}^i$ with its 7 - i suceeding (in clockwise fashion) sibling ports with turn edges $\omega_{x, y}^{i@45}$, $\omega_{x, y}^{i@90}$, and so forth.
+For paths passing through the original grid node $\ggv{x}{y}$, we connect each port $\gpv{x}{y}{i}$ with its 7 - i suceeding (in clockwise fashion) sibling ports with turn edges $\omega_{x, y}^{i@45}$, $\omega_{x, y}^{i@90}$, and so forth.
 For ease of notation, we allow a turn edge to be identified by both its port nodes, for example, $\omega_{x, y}^{0@45} = \omega_{x, y}^{1@45}$.
 
 \begin{figure}[b]
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.45\textwidth]{figures/node.pdf}}}$
-	\caption{A $3\times3$ grid graph. Each node $\psi_i$ has 8 ports $\psi_i^0 ... \psi_i^7$ which are connected to $\psi_i$ by a direct edge. Each port is additionally connected to its $180^{\circ}$, $135^{\circ}$ and $35^{\circ}$ neighbor ports.}
+	\caption{A $3\times5$ octilinear grid graph. Each node $\psi_i$ has 8 ports $\psi_i^0 ... \psi_i^7$ which are connected to $\psi_i$ by a direct edge. Each port is additionally connected to its $180^{\circ}$, $135^{\circ}$ and $35^{\circ}$ neighbor ports.}
 	\label{FIG:gridgraph}
 \end{figure}
 
@@ -136,6 +141,8 @@ Additionally, for each $\psi \in \Psi$, we define $\psi^* \in \Psi^g$ as the ori
 
 As we want to prevent the use of sink edges in pass-through nodes, we set a uniform sink edge cost $c_s$ high enough so that a sink edge is always more expensive than a turn edge. 
 In a shortest path from $s$ to $t$, the only sink edges are then a leaving sink edge adjacent to $s$ and an arriving sink edge adjacent to $t$.
+
+\subsection{Modelling Edge Costs}
 
 As both a $45^{\circ}$ port edge and a $90^{\circ}$ port edge may be substituted by cheaper edges, special care has to be applied to the modelling of the actual edge costs.
 For example, a $45^{\circ}$ turn can be simulated by first passing $v_{x, y}$ on a $180^{\circ}$ port edge, and then again on a $135^{\circ}$ port edge (Fig.~\ref{FIG:paths}, 3).

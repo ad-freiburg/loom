@@ -1,0 +1,43 @@
+% Input Graph
+
+\def\iG{G}  % Input graph
+\def\iV{V}  % Input nodes
+\def\iv{v}  % Input node
+\def\iE{E}  % Input edges
+\def\ie{e}  % Input edge
+
+% Drawing
+
+\newcommand\drawing[1]{\mathcal{D}_{#1}}  % Drawing of graph
+\newcommand\initdrawing[1]{\drawing{#1}^*}  % Drawing of graph
+
+\def\drawingcurvesym{c}  % edge curve part of drawing
+\def\drawingpossym{p}    % node position part of drawing
+
+\newcommand\drawingcurve[1]{\drawingcurvesym(#1)}  % Drawing curve of argument edge
+\newcommand\drawingpos[1]{\drawingpossym(#1)}  % Drawing pos urve of argument node
+
+% Grid
+
+\def\gScale{C}
+\def\gmind{\hat d}
+
+
+% Octilinear grid graph
+
+\def\gG{\Gamma}  % Grid graph
+\def\gV{\Psi}  % Grid graph nodes
+\def\gv{\psi}  % Grid graph node
+\def\gE{\Omega}  % v edges
+\def\ge{\omega}  % Grid graph edge
+
+\newcommand\ggv[2]{\gv_{#1, #2}}  % Grid node at #1, #2
+\newcommand\gpv[3]{\gv_{#1, #2}^{#3}}  % Port #3 node at #1, #2
+\newcommand\gse[3]{\ge_{#1, #2}^{#3}}  % Sink edge #3 node at #1, #2
+
+\def\gPath{p}    % path on grid graph
+
+
+\newcommand\gPturn[1]{c_{#1}}  % Turn penalty
+\def\gHopcost{c_h}    % Hop cost in grid graph
+\newcommand\gPcost[1]{c(#1)}  % Path cost
