@@ -47,7 +47,7 @@ As far as we are aware, our technique is the first non-global approach which gua
 
 \subsection{Problem definition}
 
-Given an undirected planar graph $G = \{V, E\}$, where $V$ are stations (or other location of interests in a public transit network) and $E$ are connections between those stations. We say $\mathcal{D}_G = \{p, c\}$ is a drawing of $G$, where $p(v)$ assigns a position to every node $v \in V$ and $c(e) = (q_0, q_1, ..., q_n)$ assigns a piecewise linear curve to every edge $e \in E$. The initial input drawing $\mathcal{D}_G$ assigns each node a geographical real-world position, and each edge an (optional) real-world trajectory.
+Given an undirected planar graph $G = (V, E)$, where $V$ are stations (or other location of interests in a public transit network) and $E$ are connections between those stations. We say $\mathcal{D}_G = (p, c)$ is a drawing of $G$, where $p(v)$ assigns a position to every node $v \in V$ and $c(e) = (q_0, q_1, ..., q_n)$ assigns a piecewise linear curve to every edge $e \in E$. The initial input drawing $\mathcal{D}_G$ assigns each node a geographical real-world position, and each edge an (optional) real-world trajectory.
 \TODO{mention line labels and use same definition as in LOOM paper}
 Our goal is to find a schematic drawing $\mathcal{D}'_G$ that resembles a classic Metro Map.
 This is usually formalized as a set of hard and soft constraints \cite{nb, ...}.
@@ -93,7 +93,7 @@ steiner trees! %https://www.researchgate.net/profile/Matthias_Mueller-Hannemann/
 	\label{FIG:examplewien}
 \end{figure*}
 
-We use an auxiliary undirected graph $\Gamma = \{\Psi, \Omega\}$, where $\Psi$ is the set of nodes and $\Omega$ is the set of edges and in which every possible path $p = (\psi_0, \psi_1, ..., \psi_n), v_i \in \Psi$ with $\psi_0 \neq \psi_n$ and $|p| > 1$ represents an octilinear curve with cost $c(p) = (|p| - 1) \cdot c_h$, where $c_h$ is the cost of using a single edge.
+We use an auxiliary undirected graph $\Gamma = (\Psi, \Omega)$, where $\Psi$ is the set of nodes and $\Omega$ is the set of edges and in which every possible path $p = (\psi_0, \psi_1, ..., \psi_n), v_i \in \Psi$ with $\psi_0 \neq \psi_n$ and $|p| > 1$ represents an octilinear curve with cost $c(p) = (|p| - 1) \cdot c_h$, where $c_h$ is the cost of using a single edge.
 The graph in Fig.~\ref{FIG:gridgraph},~left trivially satisfies this: we define a $X\times Y$ grid and add nodes $\psi_{x,y}$ for every grid point.
 Each node $\psi_{x,y}$ is connected with its 8 direct neighbors (except at the grid boundaries) $N^0(\psi_{x,y}) ... N^7(\psi_{x, y})$, where $N^0(\psi_{x, y})$ is the ``north'' neighbor of $\psi_{x, y}$,  $N^1(\psi_{x, y})$ the ``north-east'' neighbor and so on, in clockwise fashion.
 
@@ -308,7 +308,7 @@ As modulo cannot be used directly in an ILP, we use the following constraint for
   0 \leq x_{ue} - x_{uf} + 8 \gamma_{ef} \leq 7.
 \end{equation}
 
-The auxiliary variable $\gamma_{ef}$ will be 1 if $x_{uf} > x_{ue}$. As both $x_{ue}$ and $x_{uf}$ are in the range $[1, 8]$ and as $x_{ue} \neq x_{uf}$ per Equation~\ref{EQ:singleuse}, we then have $x_{def} = x_{ue} - x_{uf} + 8 \gamma_{ef} = x_{ue} - x_{uf} \mod 8$.
+The auxiliary variable $\gamma_{ef}$ will be 1 if $x_{uf} > x_{ue}$. As both $x_{ue}$ and $x_{uf}$ are in the range $[1, 8]$ and as $x_{ue} \neq x_{uf}$ (per Eq.~\ref{EQ:singleuse}), we then have $x_{def} = x_{ue} - x_{uf} + 8 \gamma_{ef} = x_{ue} - x_{uf} \mod 8$.
 
 We then add the following constraint for each of the input edge pairs:
 %
@@ -321,7 +321,7 @@ To make sure that only one of the bend variables is set to 1, we add the followi
 \begin{equation} 
   x_{ef}^{45} + x_{ef}^{90} + x_{ef}^{135} + x_{ef}^{180} + {x'}_{ef}^{135} + {x'}_{ef}^{90} + {x'}_{ef}^{45} = 1.
 \end{equation}
-
+%
 Each of the 8 bend variables is then added to the objective function with its corresponding penalty.
 
 \subsection{ILP Complexity}
