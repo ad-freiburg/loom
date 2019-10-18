@@ -1,6 +1,6 @@
 \documentclass{sig-alternate-sigmod09}
 
-\usepackage[bookmarks=true,pdfborder= 0 0 0]{hyperref}
+\usepackage[hidelinks, bookmarks=true,pdfborder= 0 0 0]{hyperref}
 
 \usepackage{tikz}
 \usetikzlibrary{calc,trees,positioning,arrows,chains,shapes.geometric,%
@@ -37,7 +37,7 @@ pdfproducer={}
 We investigate a novel approach to the problem of drawing octilinear Metro Maps.
 Our approach is based on shortest-path calculations on a specially crafted octilinear grid graph, where edge bends are added to the total cost of the path by means of explicit turn edges.
 Our approach can be optimized exactly via an Integer Linear Program (ILP) or approximately by iteratively calculating shortest-paths between node candidates in the octilinear grid graph.
-Most importantly, it allows us to revisit earlier work [Stott] which used local search techniques to update the node positions until a (local) optimum was found, but where octilinearity was not guaranteed.
+Most importantly, it allows us to revisit earlier work [Stott] which used local search techniques to update node positions until a (local) optimum was found, but where octilinearity was not guaranteed.
 By recalculating the shortest-path between an updated node and its neighbors on our octilinear grid graph, we can guarantee octilinearity.
 Using this approach, we can calculate metro maps which are very close to optimal in a fraction of a second even for large networks.
 %As far as we are aware, our technique is the first non-global approach which guarantees octilinear results.
@@ -283,7 +283,7 @@ If $v_0, ..., v_p, ..., v_{\text{deg}(u) - 1}$ is the clockwise ordering of node
 This can be enforced with the following constraints, which we add for all  $u \in \iV$ with $\deg(u) > 2$:
 %
 \begin{align}
-  \dir{v}{(v, u_{p + 1})} - \dir{v}{(v, u_{p})} + 8\beta_p(v) &\geq 1\label{EQ:dirs}\\
+  \dir{v}{(v, u_{p + 1})} - \dir{v}{(v, u_{p})} + 8\beta_p(v) &\geq 1,\label{EQ:dirs}\\
   \sum_{p = 0}^{\deg(u)-1} \beta_p(v) &\geq 1\label{EQ:onedev}.
 \end{align}
 %
@@ -301,7 +301,7 @@ We first note that for two directional variables $\dir{u}{e}$ and $\dir{u}{f}$, 
 As modulo cannot be used directly in an ILP, we use the following equivalent constraint for each pair $e, f$ of edges in the input graph adjacent at node $u$ and sharing a line:
 %
 \begin{equation} 
-  0 \leq \dir{u}{e} - \dir{u}{f} + 8 \gamma_{ef} \leq 7.
+  0 \leq \dir{u}{e} - \dir{u}{f} + 8 \gamma_{ef} \leq 7 \label{EQ:dirneg}.
 \end{equation}
 %
 %The auxiliary binary variable $\gamma_{ef}$ will be 1 if $\dir{u}{f} > \dir{u}{e}$.
@@ -310,20 +310,29 @@ We then have $\dir{u}{e} - \dir{u}{f} + 8 \gamma_{ef} = \dir{u}{e} - \dir{u}{f} 
 We now add binary decision variables $\bend{e}{f}{0}, ..., \bend{e}{f}{7}$ for each of the 8 possible values of $\dirdiff{u}{f}$ and the following constraint for each pair of adjacent input edges:
 %
 \begin{equation} 
-  \dirdiff{e}{f} - \sum_{i = 0}^7 i\bend{e}{f}{i} = 0.
+  \dirdiff{e}{f} - \sum_{i = 0}^7 i\bend{e}{f}{i} = 0 \label{EQ:bendassign}.
 \end{equation}
 %
 To make sure that only one of the bend variables is set to 1, we add the following constraint:
 %
 \begin{equation} 
-  \sum_{i = 0}^7 i\bend{e}{f}{i} = 1.
+  \sum_{i = 0}^7 i\bend{e}{f}{i} = 1 \label{EQ:bendsum}.
 \end{equation}
 %
 Each of the 8 bend variables is then added to the objective function with its corresponding penalty.
 
 \subsection{ILP Complexity}
 
-\TODO{ILP size should be $\mathcal{O}(xy|E|)$}
+For an $X \times Y$ grid, our octilinear grid graph has $\Theta(XY)$ edges and nodes.
+For the station placement, we need ${\Theta}(|V|XY)$ variables.
+Additionally, Equations~\ref{EQ:onegvperiv} and \ref{EQ:singleuse} add ${\Theta}(|V|XY)$ constraints.
+For the shortest path calculations, we need ${\Theta}(|E|XY)$ variables and constraints.
+For the preservement of the embedding, Equation~\ref{EQ:crossing} adds ${\Theta}(XY)$ constraints.
+Equations~\ref{EQ:dirfrom} and \ref{EQ:dirto} add ${\Theta}(|E|)$ constraints.
+Equations~\ref{EQ:dirs} and \ref{EQ:onedef} add ${\Theta}(|V|)$ constraints.
+Finally, for avoiding line bends and input nodes, we add at most number of $8\times7$ auxiliary variables per input node (as there can be at most $8\times7$ edge pairings per input node in our octilinear setting) and at most $8^2\times7$ bend variables per input node.
+Similarily, Equations~\ref{EQ:dirneg}, \ref{EQ:bendassign} and \ref{EQ:bendsum} all add at most $8\times7$ constraints per input node, so the overall number of constraints and variables for the line bend penalty at input nodes is ${\Theta}(|V|)$.
+The total number of constraints and variables in our ILP is thus ${\Theta}(|E|XY + |V|XY)$.
 
 \section{Approximative Solution}
 
