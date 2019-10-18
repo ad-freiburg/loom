@@ -35,12 +35,12 @@ pdfproducer={}
 \section{Abstract}
 
 We investigate a novel approach to the problem of drawing octilinear Metro Maps.
-We state the problem as a batch of shortest-path calculations on a specially crafted octilinear grid graph, where edge bends are added to the total cost of the path by means of explicit turn edges.
+Our approach is based on shortest-path calculations on a specially crafted octilinear grid graph, where edge bends are added to the total cost of the path by means of explicit turn edges.
 Our approach can be optimized exactly via an Integer Linear Program (ILP) or approximately by iteratively calculating shortest-paths between node candidates in the octilinear grid graph.
 Most importantly, it allows us to revisit earlier work [Stott] which used local search techniques to update the node positions until a (local) optimum was found, but where octilinearity was not guaranteed.
 By recalculating the shortest-path between an updated node and its neighbors on our octilinear grid graph, we can guarantee octilinearity.
 Using this approach, we can calculate metro maps which are very close to optimal in a fraction of a second even for large networks.
-As far as we are aware, our technique is the first non-global approach which guarantees octilinear results.
+%As far as we are aware, our technique is the first non-global approach which guarantees octilinear results.
 %Our maps are rendered using previous work and are publicly accessible.
 
 \section{Introduction}
@@ -114,7 +114,7 @@ We extend our cost function and now search for the path $\gPath = (\gv_0, \gv_1,
 \end{align}
 where $t(\gv_{i-1}, \gv_{i+1})$ is the angular turn cost between edges $\{\gv_{i-1}, \gv_{i}\}$ and $\{\gv_{i}, \gv_{i=1}\}$, that is, either 0, $\gPturn{135}$, $\gPturn{90}$ or $\gPturn{45}$.
 
-\begin{figure}
+\begin{figure}[t]
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.474\textwidth]{figures/grid.pdf}}}$
 	\caption{Left: A shortest path between $t$ and $u$ on a grid graph with uniform edge cost. Path bends are not minimized. Right: Two shortest path between $(t, u)$, and $(v, w)$ on our octilinear grid graph with uniform grid edge cost $1$ and additional path turn penalties $\gPturn{135} = 1$, $\gPturn{90} = 1.5$ and $\gPturn{45} = 2$. Path $(t, u)$ acts as an obstacle for $(v, w)$.}
@@ -126,7 +126,7 @@ Each port again corresponds to an outgoing angle in clockwise fashion and is con
 These sink edges allow us to leave from and arrive at an original node $\gv{x}{y}$.
 For paths passing through the original grid node $\ggv{x}{y}$, we connect each port $\gpv{x}{y}{i}$ with its 7 - i succeeding (in clockwise fashion) sibling ports with bend edges $\gbe{x}{y}{i}{45}$, $\gbe{x}{y}{i}{90}$, and so forth.
 
-\begin{figure}[b]
+\begin{figure}[h]
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.45\textwidth]{figures/node.pdf}}}$
 	\caption{A $3\times5$ octilinear grid graph. Each node $\psi_i$ has 8 ports $\gv_i^0 ... \gv_i^7$ which are connected to $\gv_i$ by a direct edge. Each port is additionally connected to its $180^{\circ}$, $135^{\circ}$ and $35^{\circ}$ neighbor ports.}
@@ -143,6 +143,13 @@ In a shortest path from $s$ to $t$, the only sink edges are then a leaving sink 
 
 \subsection{Modelling Edge Costs}
 
+\begin{figure*}
+  \centering
+	$\vcenter{\hbox{\includegraphics[width=0.9\textwidth]{figures/paths.pdf}}}$
+	\caption{1. A $180^{\circ}$ pass through a node $\gv$. 2. A $90^{\circ}$ pass through $\psi$. 3. A $45^{\circ}$ pass through $\gv$ simulated by a $180^{\circ}$ and $135^{\circ}$ pass. 4. A $90^{\circ}$ pass through $\gv$ simulated by two $135^{\circ}$ passes. }
+	\label{FIG:paths}
+\end{figure*}
+%
 As both a $45^{\circ}$ port edge and a $90^{\circ}$ port edge may be substituted by cheaper edges, special care has to be applied to the modelling of the actual edge costs.
 For example, a $45^{\circ}$ turn can be simulated by first passing $v_{x, y}$ on a $180^{\circ}$ port edge, and then again on a $135^{\circ}$ port edge (Fig.~\ref{FIG:paths}.3).
 As $\gPturn{180} \leq \gPturn{135} \leq \gPturn{45}$, this path may be cheaper than $\gPturn{45}$, undermining our penalty system. 
@@ -188,37 +195,28 @@ If we then set the cost of a single grid edge $\gHopcost = 1 = a$ and set the ac
 %
 As the shortest path $p'$ thus minimizes $c(p) + 2 \gSinkcost - 1$, it also minimizes $\gPcost(\gPath)$.
 
-\begin{figure*}[h]
-  \centering
-	$\vcenter{\hbox{\includegraphics[width=0.9\textwidth]{figures/paths.pdf}}}$
-	\caption{1. A $180^{\circ}$ pass through a node $\gv$. 2. A $90^{\circ}$ pass through $\psi$. 3. A $45^{\circ}$ pass through $\gv$ simulated by a $180^{\circ}$ and $135^{\circ}$ pass. 4. A $90^{\circ}$ pass through $\gv$ simulated by two $135^{\circ}$ passes. }
-	\label{FIG:paths}
-\end{figure*}
-
 \section{Optimal Solution via ILP}
 
-Using the octilinear grid graph $\gG$ from the previous section, we can now define the problem of finding the optimal metro-map drawing on the grid defined by $\gG$ like this: find grid nodes for each input station and non-intersecting shortest paths in the grid graph between the grid nodes for adjacent input station nodes.
-The circular ordering of paths at grid node candidates should match the ordering of the original embedding.
-The shortest paths in the grid than form an octilinear drawing of $\gG$ in which the original embedding is preserved.
+Using the octilinear grid graph, we can now define the problem of finding the optimal metro-map drawing on the grid defined by $\gG$ like this: find grid nodes for each input station and non-intersecting shortest paths in the grid graph between the grid nodes for adjacent input station nodes.
+The ordering of paths at grid node candidates should match the original embedding.
+%The shortest paths in the grid than form an octilinear drawing of $\gG$ in which the original embedding is preserved.
 This solution should minimizes the sum of (1) all shortest path costs, (2) the distance between the grid position of a station and its original position, and (3) the line bend penalties at stations (which are not covered by the path costs on $\gG$).
 
 We first describe how to solve this problem exactly using an Integer Linear Program (ILP).
+To encode the direction of a path from $\gv_s$ to $\gv_t$ in the ILP, we first model each undirected grid edge $\{\gv, \gv'\}$ as a pair of directed edges $(\gv, \gv')$ and $(\gv', \gv)$.
+%This transforms our undirected grid graph into an equivalent directed grid graph.
+To get unique start and end nodes for the shortest path calculations, we also treat each input edge $\ie = \{s, t\}$ now as a directed edge $(s, t)$.
+%As the shortest paths in $\gG$ are symmetric, it does not matter whether we chose $\ie = (s, t)$ or $\ie = (t, s)$.
 
-To make it easier to encode the direction of a shortest path from $\gv_s$ to $\gv_t$ in the ILP, we first model each undirected grid edge $\{\gv, \gv'\}$ as a pair of directed edges $(\gv, \gv')$ and $(\gv', \gv)$.
-This transforms our undirected grid graph into an equivalent directed grid graph.
-Additionally, to get unique start and end nodes for the shortest path calculations, we now treat each undirected input edge $\ie = \{s, t\}$ as a directed edge $(s, t)$.
-As the shortest paths in our octilinear grid graph are symmetric, it does not matter whether we chose $\ie = (s, t)$ or $\ie = (t, s)$.
-
-To be later able to deduce the placement of stations computed by our ILP, we introduce binary decision variables $\gvused{\iv}{\gv}$ for each input node $\iv$ and original grid node $\gv \in \gV^g$ which should be 1 of $\iv$ was assigned to $\gv$, or 0 otherwise.
+To be able to later deduce the placement of stations, we add binary decision variables $\gvused{\iv}{\gv}$ for each input node $\iv$ and grid node $\gv \in \gV^g$ which should be 1 of $\iv$ was assigned to $\gv$, or 0 otherwise.
 We say $\gv \in \gV^g$ is activated for $\iv$ if such an assignment took place, and denote this grid node as $\gv_\iv$.
-To be able to deduce the course of the shortest path, we define binary variables $\geused{\ie}{\ge}$ for each input edge $\ie$ and each grid edge $\ge$ which should be 1 if $\ge$ is used in path for $e$, or 0 otherwise.
+To be able to deduce the course of the shortest paths, we define binary variables $\geused{\ie}{\ge}$ for each input edge $\ie$ and each grid edge $\ge$ which should be 1 if $\ge$ is used in path for $e$, or 0 otherwise.
 We say $\ge \in \gE$ is activated for $\ie$ if it us used in the shortest path for $\ie$.
-
-We add $\geused{\ie}{\ge}$ to the objective function with the cost of grid edge $\omega$ as a coefficient.
+$\geused{\ie}{\ge}$ is added to the objective function with the cost of grid edge $\ge$ as a coefficient.
 
 \subsection{Station Placement}
 
-To ensure that each input station node $\iv \in \iV$ is assigned to exactly one grid node $\gv{x}{y} \in \gV^g$, and that no two station nodes are assigned to the same grid node we first add the following constraint:
+To ensure that each input station node $\iv \in \iV$ is assigned to exactly one grid node $\gv{x}{y} \in \gV^g$, we add the following constraint:
 %
 \begin{equation}
   \forall \iv \in \iV: \sum_{\gv \in \gV^g} \gvused{\iv}{\gv} = 1. \label{EQ:onegvperiv}
@@ -237,22 +235,22 @@ Note that Equation~\ref{EQ:singleuse} also enforces that a grid edge $\ge$ can o
 
 \subsection{Edge Continuity}
 
-To globally compute the shortest paths on the grid graph between all adjacent input nodes, we build on the standard formulation of the shortest path problem as a Linear Program.
+To globally compute the shortest paths on $\gG$ between all adjacent input nodes, we build on the standard formulation of the shortest path problem as a Linear Program.
 We first have to make sure that edges assigned to the shortest path from $\gv_s$ to $\gv_t$ are connected.
 To ensure this, we introduce the following constraints (where $e = (s, t)$):
 
 \newcommand\Psum[1]{\sum_{\makebox[0pt]{$\scriptstyle#1$}}}
 
 \begin{equation}
-  \forall e \in E\ \forall \psi \in \Psi^p: \Psum{\omega \in \text{out}(\psi)} x_{e\omega} - \Psum{\omega \in \text{in}(\psi)} x_{e\omega} = 0. \label{EQ:cont_port}
+  \forall \ie \in \iE\ \forall \gv \in \gV^p: \Psum{\ge \in \text{out}(\gv)} \geused{\ie}{\ge} - \Psum{\ge \in \text{in}(\gv)} \geused{\ie}{\ge} = 0. \label{EQ:cont_port}
 \end{equation}
 \begin{equation}
 	\begin{split}
-  	\forall e \in E\ \forall \psi \in \Psi^g: x_{t\psi} - 2x_{s\psi} + \Psum{\omega \in \text{out}(\psi)} 2x_{e\omega} - \Psum{\omega \in \text{in}(\psi)} x_{e\omega} = 0. \label{EQ:cont_grid}
+  	\forall \ie \in \iE\ \forall \gv \in \gV^g: x_{t\psi} - 2x_{s\psi} + \Psum{\ge \in \text{out}(\gv)} 2\geused{\ie}{\ge} - \Psum{\ge \in \text{in}(\gv)} \geused{\ie}{\ge} = 0. \label{EQ:cont_grid}
   \end{split}
 \end{equation}
 
-Equation~\ref{EQ:cont_port} makes sure that the number of outgoing and incoming edges at each port node is the same.
+Equation~\ref{EQ:cont_port} guarantees that the number of outgoing and incoming edges at each port node is the same.
 This ensures a continuous path between $\gv_s$ and $\gv_t$.
 %
 Equation~\ref{EQ:cont_grid} handles $\gv_s$ and $\gv_t$.
@@ -265,25 +263,25 @@ Similarily, the only way to counter an incoming edge is for $\gv$ to be the targ
 
 To preserve the input embedding, it is enough to guarantee that no two paths in $\gG$ intersect and that the circular ordering of adjacent edges is the same as in the input graph.
 Equation~\ref{EQ:singleuse} already prevents paths crossing at grid nodes.
-To prevent that paths cross each other at intersecting grid edges, we define $\gE^d$ as the set of diagonal grid edges in $\gG$ and say that for $\ge \in \Omega^d$, $\ge^{\times} \in \Omega_d$ is the diagonal edge crossing $\ge$. 
+To prevent crossings at intersecting grid edges, we define $\gE^d$ as the set of diagonal grid edges and say that for $\ge \in \gE^d$, $\ge^{\times} \in \gE_d$ is the diagonal edge crossing $\ge$. 
 We then add the following constraint:
 %
 \begin{equation}
-  \forall \omega \in \Omega^d: \Psum{\ie \in \iE} \geused{\ie}{\ge} + \geused{\ie}{\ge^{\times}} \leq 1. \label{EQ:crossing}
+  \forall \ge \in \gE^d: \Psum{\ie \in \iE} \geused{\ie}{\ge} + \geused{\ie}{\ge^{\times}} \leq 1. \label{EQ:crossing}
 \end{equation}
 %
-To ensure that the circular edge ordering at nodes remains the same, we would first like to have a variable $x_{\iv\ie} \in \{0, ..., 7\}$ which tells us the direction of input edge $\ie$ at adjacent input node $\ie$ in the final octilinear drawing.
+To ensure that the edge ordering at nodes remains the same, we would first like to have a variable $x_{\iv\ie} \in \{0, ..., 7\}$ which tells us the direction of input edge $\ie$ at adjacent input node $\ie$ in the final octilinear drawing.
 To get the desired assignments, we add the following constraints:
 %
 \begin{equation}
-  \forall e = (s, t) \in E: \sum_{\psi_{x, y} \in \Psi^g} \sum_{p = 1}^8 p x_{e(\psi_{x, y},  \psi_{x, y}^{(p - 1)})} - x_{se} = 0\label{EQ:dirfrom}
+  \forall \ie = (s, t) \in \gE: \sum_{\gv \in \gV^g} \sum_{p = 1}^7 p x_{e(\psi,  \psi^p)} - x_{se} = 0\label{EQ:dirfrom}
 \end{equation}
 \begin{equation}
-  \forall e = (s, t) \in E: \sum_{\psi_{x, y} \in \Psi^g} \sum_{p = 1}^8 p x_{e(\psi_{x, y}^{(p - 1)}, \psi_{x, y})} - x_{te} = 0\label{EQ:dirto}
+  \forall \ie = (s, t) \in \gE: \sum_{\gv \in \gV^g} \sum_{p = 1}^7 p x_{e(\psi^p, \psi)} - x_{te} = 0\label{EQ:dirto}
 \end{equation}
 %
-In Equation~\ref{EQ:dirfrom}, each outgoing sink edge $(\psi_{x, y},  \psi_{x, y}^{(p - 1)}), p \in {1, ..., 8}$ adds $p$ to the sum.
-As Equations~\ref{EQ:cont_grid} and \ref{EQ:singleuse} ensures that only a single outgoing sink edge in the grid graph may be used by the path for an input edge, we can be sure that the left side of the equation always exactly equals the octilinear direction $1, ..., 8$ of $e = (s, t)$ at $s$.
+In Equation~\ref{EQ:dirfrom}, each outgoing sink edge $(\gv,  \gv^{p}), p \in {0, ..., 7}$ adds $p$ to the sum.
+As Equations~\ref{EQ:cont_grid} and \ref{EQ:singleuse} ensures that only a single outgoing sink edge in the grid graph may be used by the path for an input edge, we can be sure that the left side of the equation always exactly equals the octilinear direction $0, ..., 7$ of $e = (s, t)$ at $s$.
 The only way to fullfil the constraint is thus to set the value of $x_{se}$ to the octilinear direction.
 Equation~\ref{EQ:dirfrom} is modelled equivalently for paths incoming at $t$.
 
@@ -293,10 +291,10 @@ If $\text{dir}(u, v)$ is the angular direction of $(u, v)$ in the drawing of inp
 This can be enforced with the following constraints:
 %
 \begin{equation}
-  \forall u \in V, \deg(u) > 2: x_{v(v, u_{p + 1})} - x_{v(v, u_{p})} + 8\beta_p(v) \geq 1\label{EQ:dirs}
+  \forall u \in \iV, \deg(u) > 2: x_{v(v, u_{p + 1})} - x_{v(v, u_{p})} + 8\beta_p(v) \geq 1\label{EQ:dirs}
 \end{equation}
 \begin{equation} 
-  \forall u \in V, \deg(u) > 2: \sum_{p = 1}^{\deg(u)} \beta_p(v) \geq 1\label{EQ:onedev}.
+  \forall u \in \iV, \deg(u) > 2: \sum_{p = 1}^{\deg(u)} \beta_p(v) \geq 1\label{EQ:onedev}.
 \end{equation}
 %
 If $\text{dir}(u, v_p) \not< \text{dir}(u, v_{p + 1})$, then $x_{v(v, u_{p + 1})} - x_{v(v, u_{p})} \leq 0$ and the only way to fullfill Equation~\ref{EQ:dirs} is to set $\beta_p(v)$ to 1.
@@ -332,7 +330,7 @@ Each of the 8 bend variables is then added to the objective function with its co
 
 \subsection{ILP Complexity}
 
-
+\TODO{ILP size should be $\mathcal{O}(xy|E|)$}
 
 \section{Approximative Solution}
 
