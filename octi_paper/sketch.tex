@@ -197,7 +197,7 @@ As the shortest path $p'$ thus minimizes $c(p) + 2 \gSinkcost - 1$, it also mini
 
 \section{Optimal Solution via ILP}
 
-Using the octilinear grid graph, we can now define the problem of finding the optimal metro-map drawing on the grid defined by $\gG$ like this: find grid nodes for each input station and non-intersecting shortest paths in the grid graph between the grid nodes for adjacent input station nodes.
+Using the octilinear grid graph, we now define the problem of finding the optimal metro-map drawing on the grid defined by $\gG$ like this: find grid nodes for each input node and non-intersecting shortest paths in the grid graph between the grid nodes for adjacent input nodes.
 The ordering of paths at grid node candidates should match the original embedding.
 %The shortest paths in the grid than form an octilinear drawing of $\gG$ in which the original embedding is preserved.
 This solution should minimizes the sum of (1) all shortest path costs, (2) the distance between the grid position of a station and its original position, and (3) the line bend penalties at stations (which are not covered by the path costs on $\gG$).
@@ -206,55 +206,50 @@ We first describe how to solve this problem exactly using an Integer Linear Prog
 To encode the direction of a path from $\gv_s$ to $\gv_t$ in the ILP, we first model each undirected grid edge $\{\gv, \gv'\}$ as a pair of directed edges $(\gv, \gv')$ and $(\gv', \gv)$.
 %This transforms our undirected grid graph into an equivalent directed grid graph.
 To get unique start and end nodes for the shortest path calculations, we also treat each input edge $\ie = \{s, t\}$ now as a directed edge $(s, t)$.
-%As the shortest paths in $\gG$ are symmetric, it does not matter whether we chose $\ie = (s, t)$ or $\ie = (t, s)$.
+As the shortest paths in $\gG$ are symmetric, it does not matter whether we chose $\ie = (s, t)$ or $\ie = (t, s)$.
 
-To be able to later deduce the placement of stations, we add binary decision variables $\gvused{\iv}{\gv}$ for each input node $\iv$ and grid node $\gv \in \gV^g$ which should be 1 of $\iv$ was assigned to $\gv$, or 0 otherwise.
-We say $\gv \in \gV^g$ is activated for $\iv$ if such an assignment took place, and denote this grid node as $\gv_\iv$.
+To be able to later retrieve the placement of stations, we add binary decision variables $\gvused{\iv}{\gv}$ for each input node $\iv$ and grid node $\gv \in \gV^g$ which should be 1 of $\iv$ was assigned to $\gv$, or 0 otherwise.
+We denote this grid node as $\gv_\iv$.
+$\gvused{\iv}{\gv}$ is added to the objective function with the distance between the original position of $\iv$ and the position induced by $\gv$ as a coefficient.
 To be able to deduce the course of the shortest paths, we define binary variables $\geused{\ie}{\ge}$ for each input edge $\ie$ and each grid edge $\ge$ which should be 1 if $\ge$ is used in path for $e$, or 0 otherwise.
-We say $\ge \in \gE$ is activated for $\ie$ if it us used in the shortest path for $\ie$.
 $\geused{\ie}{\ge}$ is added to the objective function with the cost of grid edge $\ge$ as a coefficient.
 
 \subsection{Station Placement}
 
-To ensure that each input station node $\iv \in \iV$ is assigned to exactly one grid node $\gv{x}{y} \in \gV^g$, we add the following constraint:
+To ensure that each input node $\iv \in \iV$ is assigned to exactly one grid node $\gv{x}{y} \in \gV^g$, we add the following constraint:
 %
 \begin{equation}
   \forall \iv \in \iV: \sum_{\gv \in \gV^g} \gvused{\iv}{\gv} = 1. \label{EQ:onegvperiv}
 \end{equation}
 %
-As an original grid node can either be assigned to a single input station, be used as a pass-through node for a single input edge, or be not used at all, we additionally add the following constraint:
+As a grid node can either be assigned a single input station, used as a pass-through for a single input edge, or be not used at all, we additionally add the following constraint:
 %
 \begin{equation}
   \forall \gv \in \gV^g: \sum_{\iv \in \iV} \gvused{\iv}{\gv} + \sum_{\ie \in \iE} \sum_{\ge \in \gE^b_\gv} \geused{\ie}{\ge} \geq 1, \label{EQ:singleuse}
 \end{equation}
 %
-where $\gE^b_\gv$ is the set of bend edges leaving or arriving at $\psi$. 
-If $\gv$ is assigned to an input station, the first sum is already 1, forbidding further use.
+where $\gE^b_\gv$ is the set of bend edges adjacent to $\psi$. 
+If an input station is assigned to $\gv$, the first sum is already 1, forbidding further use.
 Similarily, if $\gv$ is used as a pass-through, it cannot be assigned to an input station node or be used as a pass-through by another path.
 Note that Equation~\ref{EQ:singleuse} also enforces that a grid edge $\ge$ can only be used by a single path, as a second path using $\ge$ would have to either arrive or pass through a grid node that is already used by the other path on $\ge$.
 
 \subsection{Edge Continuity}
 
 To globally compute the shortest paths on $\gG$ between all adjacent input nodes, we build on the standard formulation of the shortest path problem as a Linear Program.
-We first have to make sure that edges assigned to the shortest path from $\gv_s$ to $\gv_t$ are connected.
-To ensure this, we introduce the following constraints (where $e = (s, t)$):
-
+We first have to make sure that edges assigned to the shortest path from $\gv_s$ to $\gv_t$ are connected with the following constraints (where $e = (s, t)$):
+%
 \newcommand\Psum[1]{\sum_{\makebox[0pt]{$\scriptstyle#1$}}}
-
-\begin{equation}
-  \forall \ie \in \iE\ \forall \gv \in \gV^p: \Psum{\ge \in \text{out}(\gv)} \geused{\ie}{\ge} - \Psum{\ge \in \text{in}(\gv)} \geused{\ie}{\ge} = 0. \label{EQ:cont_port}
-\end{equation}
-\begin{equation}
-	\begin{split}
-  	\forall \ie \in \iE\ \forall \gv \in \gV^g: x_{t\psi} - 2x_{s\psi} + \Psum{\ge \in \text{out}(\gv)} 2\geused{\ie}{\ge} - \Psum{\ge \in \text{in}(\gv)} \geused{\ie}{\ge} = 0. \label{EQ:cont_grid}
-  \end{split}
-\end{equation}
-
+%
+\begin{align}
+	&\forall \ie \in \iE\ \forall \gv \in \gV^p:& \Psum{\ge \in \text{out}(\gv)} \geused{\ie}{\ge} - \Psum{\ge \in \text{in}(\gv)} \geused{\ie}{\ge}& = 0, \label{EQ:cont_port} \\
+	&\forall \ie \in \iE\ \forall \gv \in \gV^g:& x_{t\psi} - 2x_{s\psi} + \Psum{\ge \in \text{out}(\gv)} 2\geused{\ie}{\ge} - &\Psum{\ge \in \text{in}(\gv)} \geused{\ie}{\ge} = 0. \label{EQ:cont_grid}
+\end{align}
+%
 Equation~\ref{EQ:cont_port} guarantees that the number of outgoing and incoming edges at each port node is the same.
-This ensures a continuous path between $\gv_s$ and $\gv_t$.
+% This ensures a continuous path between $\gv_s$ and $\gv_t$.
 %
 Equation~\ref{EQ:cont_grid} handles $\gv_s$ and $\gv_t$.
-At these nodes, we count an outgoing edge twice, which means that the grid node could only make up for an outgoing edge with two incoming edges.
+Here we count an outgoing edge twice, which means that the grid node could only make up for an outgoing edge with two incoming edges.
 This, however, would mean that our shortest path split somewhere, which is prevented by Equation~\ref{EQ:cont_port}.
 The only way to fullfill the constraint is thus for $\gv$ to be the source node $\gv_s$ for the input edge.
 Similarily, the only way to counter an incoming edge is for $\gv$ to be the target node $\gv_t$ for the input edge.
@@ -263,67 +258,65 @@ Similarily, the only way to counter an incoming edge is for $\gv$ to be the targ
 
 To preserve the input embedding, it is enough to guarantee that no two paths in $\gG$ intersect and that the circular ordering of adjacent edges is the same as in the input graph.
 Equation~\ref{EQ:singleuse} already prevents paths crossing at grid nodes.
-To prevent crossings at intersecting grid edges, we define $\gE^d$ as the set of diagonal grid edges and say that for $\ge \in \gE^d$, $\ge^{\times} \in \gE_d$ is the diagonal edge crossing $\ge$. 
+To prevent crossings at intersecting grid edges, we define $\gE^d$ as the set of diagonal grid edges and say that for $\ge \in \gE^d$, $\ge^{\times} \in \gE^d$ is the diagonal edge crossing $\ge$. 
 We then add the following constraint:
 %
 \begin{equation}
   \forall \ge \in \gE^d: \Psum{\ie \in \iE} \geused{\ie}{\ge} + \geused{\ie}{\ge^{\times}} \leq 1. \label{EQ:crossing}
 \end{equation}
 %
-To ensure that the edge ordering at nodes remains the same, we would first like to have a variable $x_{\iv\ie} \in \{0, ..., 7\}$ which tells us the direction of input edge $\ie$ at adjacent input node $\ie$ in the final octilinear drawing.
+To ensure that the edge ordering at nodes remains the same, we would first like to have a variable $\dir{\iv}{\ie} \in \{0, ..., 7\}$ which tells us the direction of input edge $\ie$ at adjacent input node $\iv$ in the final octilinear drawing.
 To get the desired assignments, we add the following constraints:
 %
-\begin{equation}
-  \forall \ie = (s, t) \in \gE: \sum_{\gv \in \gV^g} \sum_{p = 1}^7 p x_{e(\psi,  \psi^p)} - x_{se} = 0\label{EQ:dirfrom}
-\end{equation}
-\begin{equation}
-  \forall \ie = (s, t) \in \gE: \sum_{\gv \in \gV^g} \sum_{p = 1}^7 p x_{e(\psi^p, \psi)} - x_{te} = 0\label{EQ:dirto}
-\end{equation}
+\begin{align}
+  \forall \ie = (s, t) \in \gE&: \sum_{\gv \in \gV^g} \sum_{p = 1}^7 p x_{e(\psi,  \psi^p)} - \dir{s}{e} = 0\label{EQ:dirfrom} \\
+  \forall \ie = (s, t) \in \gE&: \sum_{\gv \in \gV^g} \sum_{p = 1}^7 p x_{e(\psi^p, \psi)} - \dir{t}{e} = 0\label{EQ:dirto}
+\end{align}
 %
 In Equation~\ref{EQ:dirfrom}, each outgoing sink edge $(\gv,  \gv^{p}), p \in {0, ..., 7}$ adds $p$ to the sum.
 As Equations~\ref{EQ:cont_grid} and \ref{EQ:singleuse} ensures that only a single outgoing sink edge in the grid graph may be used by the path for an input edge, we can be sure that the left side of the equation always exactly equals the octilinear direction $0, ..., 7$ of $e = (s, t)$ at $s$.
-The only way to fullfil the constraint is thus to set the value of $x_{se}$ to the octilinear direction.
+The only way to fullfil the constraint is thus to set the value of $\dir{s}{e}$ to the octilinear direction.
 Equation~\ref{EQ:dirfrom} is modelled equivalently for paths incoming at $t$.
 
 To finally ensure that the edge ordering in the final drawing matches the input drawing, we apply a trick originally used in \cite{noellenburg}.
-If $\text{dir}(u, v)$ is the angular direction of $(u, v)$ in the drawing of input graph and if $v_1, ..., v_p, ..., v_{\text{deg}(u)}$ is the clockwise ordering of nodes adjacent to u in the original embedding, then $\text{dir}(u, v_p) < \text{dir}(u, v_{p + 1})$ has to be true for all but one $p \in \{1, ..., \text{deg}(u)\}$ in the final octilinear drawing.
-
-This can be enforced with the following constraints:
+If $v_0, ..., v_p, ..., v_{\text{deg}(u) - 1}$ is the clockwise ordering of nodes adjacent to u in the original embedding, then $\dir{v}{(v, u_{p})} < \dir{v}{(v, u_{p + 1})}$ has to be true for all but one $p \in \{0, ..., \text{deg}(u) - 1\}$ in the final octilinear drawing.
+This can be enforced with the following constraints, which we add for all  $u \in \iV$ with $\deg(u) > 2$:
 %
-\begin{equation}
-  \forall u \in \iV, \deg(u) > 2: x_{v(v, u_{p + 1})} - x_{v(v, u_{p})} + 8\beta_p(v) \geq 1\label{EQ:dirs}
-\end{equation}
-\begin{equation} 
-  \forall u \in \iV, \deg(u) > 2: \sum_{p = 1}^{\deg(u)} \beta_p(v) \geq 1\label{EQ:onedev}.
-\end{equation}
+\begin{align}
+  \dir{v}{(v, u_{p + 1})} - \dir{v}{(v, u_{p})} + 8\beta_p(v) &\geq 1\label{EQ:dirs}\\
+  \sum_{p = 0}^{\deg(u)-1} \beta_p(v) &\geq 1\label{EQ:onedev}.
+\end{align}
 %
-If $\text{dir}(u, v_p) \not< \text{dir}(u, v_{p + 1})$, then $x_{v(v, u_{p + 1})} - x_{v(v, u_{p})} \leq 0$ and the only way to fullfill Equation~\ref{EQ:dirs} is to set $\beta_p(v)$ to 1.
+If $\dir{v}{(v, u_{p})} \not< \dir{v}{(v, u_{p + 1})}$, then $\dir{v}{(v, u_{p + 1})} - \dir{v}{(v, u_{p})} \leq 0$ and the only way to fullfill Equation~\ref{EQ:dirs} is to set $\beta_p(v)$ to 1.
 Equation~\ref{EQ:onedev} ensures that this can only happen a single time.
 
 \subsection{Avoiding Line Bends}
 
-As our shortest path calculations only penalize line bends along paths, we additionally have to ensure that line bends at input nodes are equivalently penalized.
-We would like to have variables telling us wither edges $e$ and $f$ in the original input graph describe a $45^{\circ}$, $90^{\circ}$, $135^{\circ}$ or $180^{\circ}$ at their joint node (as $G$ is not a multigraph, this joint node is unique).
+So far, our shortest paths only penalize line bends along paths.
+We have to ensure that line bends at input nodes are equivalently penalized.
+We would like to have binary variables telling us whether edges $e$ and $f$ in the input graph describe a $45^{\circ}$, $90^{\circ}$, $135^{\circ}$ or $180^{\circ}$ bend at their joint node in the final drawing.
+%As $G$ is not a multigraph, this joint node is unique.
 
-We first note that for two directional variables $x_{ue}$ and $x_{uf}$, $x_{ue} - x_{uf} \mod 8$ is either 1 or 7 for $45^\circ$ bends, 2 or 6 for $90^\circ$ bends, 3 or 5 for $135^\circ$ bends and 4 for $180^\circ$ bends.
-
-As modulo cannot be used directly in an ILP, we use the following constraint for each pair $e, f$ of edges in the input graph adjacent at node $u$ and sharing a common line:
-\begin{equation} 
-  0 \leq x_{ue} - x_{uf} + 8 \gamma_{ef} \leq 7.
-\end{equation}
-
-The auxiliary variable $\gamma_{ef}$ will be 1 if $x_{uf} > x_{ue}$. As both $x_{ue}$ and $x_{uf}$ are in the range $[1, 8]$ and as $x_{ue} \neq x_{uf}$ (per Eq.~\ref{EQ:singleuse}), we then have $x_{def} = x_{ue} - x_{uf} + 8 \gamma_{ef} = x_{ue} - x_{uf} \mod 8$.
-
-We then add the following constraint for each of the input edge pairs:
+We first note that for two directional variables $\dir{u}{e}$ and $\dir{u}{f}$, $\dir{u}{e} - \dir{u}{f} \mod 8$ is either 1 or 7 for $45^\circ$ bends, 2 or 6 for $90^\circ$ bends, 3 or 5 for $135^\circ$ bends and 4 for $180^\circ$ bends.
+As modulo cannot be used directly in an ILP, we use the following equivalent constraint for each pair $e, f$ of edges in the input graph adjacent at node $u$ and sharing a line:
 %
 \begin{equation} 
-  x_{def} - x_{ef}^{45} - 2x_{ef}^{90} - 3x_{ef}^{135} - 4x_{ef}^{180} - 5 {x'}_{ef}^{135} - 6{x'}_{ef}^{90} - 7{x'}_{ef}^{45} = 0.
+  0 \leq \dir{u}{e} - \dir{u}{f} + 8 \gamma_{ef} \leq 7.
+\end{equation}
+%
+%The auxiliary binary variable $\gamma_{ef}$ will be 1 if $\dir{u}{f} > \dir{u}{e}$.
+%As both $\dir{u}{e}$ and $\dir{u}{f}$ are in the range $[1, 8]$ and as $\dir{u}{e} \neq \dir{u}{f}$ (per Eq.~\ref{EQ:singleuse})
+We then have $\dir{u}{e} - \dir{u}{f} + 8 \gamma_{ef} = \dir{u}{e} - \dir{u}{f} \mod 8$, which we will denote by $\dirdiff{u}{f}$.
+We now add binary decision variables $\bend{e}{f}{0}, ..., \bend{e}{f}{7}$ for each of the 8 possible values of $\dirdiff{u}{f}$ and the following constraint for each pair of adjacent input edges:
+%
+\begin{equation} 
+  \dirdiff{e}{f} - \sum_{i = 0}^7 i\bend{e}{f}{i} = 0.
 \end{equation}
 %
 To make sure that only one of the bend variables is set to 1, we add the following constraint:
 %
 \begin{equation} 
-  x_{ef}^{45} + x_{ef}^{90} + x_{ef}^{135} + x_{ef}^{180} + {x'}_{ef}^{135} + {x'}_{ef}^{90} + {x'}_{ef}^{45} = 1.
+  \sum_{i = 0}^7 i\bend{e}{f}{i} = 1.
 \end{equation}
 %
 Each of the 8 bend variables is then added to the objective function with its corresponding penalty.
