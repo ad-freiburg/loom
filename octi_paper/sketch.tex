@@ -336,6 +336,16 @@ The total number of constraints and variables in our ILP is thus ${\Theta}(|E|XY
 
 \section{Approximative Solution}
 
+Solution times for the ILP described in the previous section tend to get very big for complex input graphs. \TODO{how big?}
+This section describes a method to solve the problem approximatively, based on iterative shortest-path calculations on the octilinear grid graph described in TODO.
+Our method works as follows:
+  (1) order the edges of the input graph.
+  (2) for each input edge, calculate the shortest path from an
+
+
+
+\subsection{Input Edge Ordering}
+
 \subsection{Station Placement}
 
 \subsection{Edge Continuity}
@@ -347,6 +357,8 @@ The total number of constraints and variables in our ILP is thus ${\Theta}(|E|XY
 \subsection{Optimization via Local Search}
 
 \subsection{Complexity}
+
+\subsection{Speed-up Heuristic}
 
 \section{Evaluation}
 
