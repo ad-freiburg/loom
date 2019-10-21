@@ -63,6 +63,7 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   NodeCost nodeBendPenalty(GridNode* n, CombEdge* e);
   NodeCost topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
+  NodeCost spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
 
   double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 

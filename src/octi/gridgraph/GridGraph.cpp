@@ -265,7 +265,7 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
           if (ang == 2) addC[j] += mult * c_90;
           if (ang == 3) addC[j] += mult * c_135;
         }
-      }
+     }
     }
   }
 
@@ -273,11 +273,39 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
 }
 
 // _____________________________________________________________________________
-NodeCost GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode,
-                                     CombEdge* e) {
+NodeCost GridGraph::spacingPenalty(GridNode* nd, CombNode* origNd,
+                                   CombEdge* edg) {
+  NodeCost addC;
+
+  CombEdge* outgoing[8];
+  getSettledOutgoingEdges(nd, outgoing);
+
+  for (size_t i = 0; i < 8; i++) {
+    if (!outgoing[i]) continue;
+
+    // this is the number of edges that will occur between the currently checked
+    // edge and the inserted edge, in clockwise and counter-clockwise dir
+    int32_t dCw = origNd->pl().getEdgeOrdering().dist(outgoing[i], edg);
+    int32_t dCCw = origNd->pl().getEdgeOrdering().dist(edg, outgoing[i]);
+
+		for (int j = 1; j < dCw; j++) {
+			addC[(i + j) % 8] = -1.0 * std::numeric_limits<double>::max();
+		}
+
+		for (int j = 1; j < dCCw; j++) {
+			addC[(i + (8 - j)) % 8] = -1.0 * std::numeric_limits<double>::max();
+		}
+  }
+
+  return addC;
+}
+
+// _____________________________________________________________________________
+NodeCost GridGraph::topoBlockPenalty(GridNode* nd, CombNode* origNd,
+                                     CombEdge* edg) {
   CombEdge* outgoing[8];
   NodeCost addC;
-  getSettledOutgoingEdges(n, outgoing);
+  getSettledOutgoingEdges(nd, outgoing);
 
   // topological blocking
   for (size_t i = 0; i < 8; i++) {
@@ -287,8 +315,8 @@ NodeCost GridGraph::topoBlockPenalty(GridNode* n, CombNode* origNode,
       if (!outgoing[j % 8]) continue;
       if (outgoing[j % 8] == outgoing[i]) break;
 
-      int da = origNode->pl().getEdgeOrdering().dist(outgoing[i], e);
-      int db = origNode->pl().getEdgeOrdering().dist(outgoing[j % 8], e);
+      int da = origNd->pl().getEdgeOrdering().dist(outgoing[i], edg);
+      int db = origNd->pl().getEdgeOrdering().dist(outgoing[j % 8], edg);
 
       if (db < da) {
         // edge does not lie in this segment, block it!
@@ -511,11 +539,6 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   double c_135 = _c.p_45;
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
   double c_45 = c_0 + c_135;
-
-  // std::cerr << "C0: " << c_0 << std::endl;
-  // std::cerr << "C135: " << c_135 << std::endl;
-  // std::cerr << "C90: " << c_90 << std::endl;
-  // std::cerr << "C45: " << c_45 << std::endl;
 
   GridNode* n = addNd(DPoint(xPos, yPos));
   n->pl().setSink();

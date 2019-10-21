@@ -132,8 +132,9 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   drawing.applyToGrid(gg);
 
   size_t iters = 0;
+  size_t ITERS = 100;
 
-  for (; iters < 100; iters++) {
+  for (; iters < ITERS; iters++) {
     Drawing bestFromIter = drawing;
     for (auto a : *cg.getNds()) {
       if (a->getDeg() == 0) continue;
@@ -230,6 +231,7 @@ void Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
                                   GridGraph* g) {
   NodeCost c;
   c += g->topoBlockPenalty(n, origNode, e);
+  c += g->spacingPenalty(n, origNode, e);
   c += g->nodeBendPenalty(n, e);
 
   g->addCostVector(n, c);

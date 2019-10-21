@@ -216,7 +216,7 @@ $\geused{\ie}{\ge}$ is added to the objective function with the cost of grid edg
 
 \subsection{Station Placement}
 
-To ensure that each input node $\iv \in \iV$ is assigned to exactly one grid node $\gv{x}{y} \in \gV^g$, we add the following constraint:
+To ensure that each input node $\iv \in \iV$ is assigned to exactly one grid node $\ggv{x}{y} \in \gV^g$, we add the following constraint:
 %
 \begin{equation}
   \forall \iv \in \iV: \sum_{\gv \in \gV^g} \gvused{\iv}{\gv} = 1. \label{EQ:onegvperiv}
@@ -339,18 +339,61 @@ The total number of constraints and variables in our ILP is thus ${\Theta}(|E|XY
 Solution times for the ILP described in the previous section tend to get very big for complex input graphs. \TODO{how big?}
 This section describes a method to solve the problem approximatively, based on iterative shortest-path calculations on the octilinear grid graph described in TODO.
 Our method works as follows:
-  (1) order the edges of the input graph.
-  (2) for each input edge, calculate the shortest path from an
+  (1) Order the edges of the input graph.
+  (2) For each ordered input edge $e = \{u, v\}$, calculate the shortest path from a set of possible start nodes to a set of possible target nodes on the grid graph. If the grid node for $u$ or $v$ has already been settled, the corresponding node set has size 1. Paths already calculated act as obstacles.
+  (3) If no initial drawing could be found, randomize the ordering and try again.
+  (4) Optimize the initial drawing via a local search approach where individual nodes are moved to one of their 8 neighboring positions and adjacent edges re-routed.
+  (5) Build the drawing from the shortest paths.
 
-
+Each step is described in detail in this section.
+In particular, we explain how line bends at input nodes can be optimized, how we preserve the initial input embedding and how the shortest path search on the grid graph can be sped up with an $A^*$ heuristic.
 
 \subsection{Input Edge Ordering}
 
-\subsection{Station Placement}
+In addition to the standard degree $\deg(\iv)$ of an input node $\iv$, we define the line degree $\ldeg(\iv)$ of a node a node to be the number of (non-unique) lines on each adjacent edge.
+We then build our initial input edge ordering $o = (e_0, e_1, ..., e_{|E|})$ as follows:
+  (1) Mark all input nodes as unprocessed.
+  (2) Take the unprocessed node $\iv$ with highest line degree $\ldeg(\iv)$ and mark it as dangling.
+  (3) As long as there are dangling nodes, take the dangling node $\iv_d$ with highest line degree and add all adjacent edges $\{\iv_d, u_0\}, ..., \{\iv_d, u_k\}$ leading to an unprocessed node $u_i$ to the edge ordering $o$, where the $u_i$ are sorted in ascending order w.r.t $\ldeg(u_i)$. In other words, we add the edge going to the adjacent node of highest line degree first, then the edge with second highest line degree, and so on. Mark each $u_i$ as dangling, and $\iv_d$ as processed. 
+  (4) If there are no dangling nodes anymore, but unprocessed nodes remain, then the input graph was disconnected. In this case, we start again at (2).
 
-\subsection{Edge Continuity}
+Figure TODO gives an example.
 
-\subsection{Preservement of Embedding}
+\subsection{Edge Routing and Station Placement}
+
+With an initial edge ordering at hand, we can start routing each input edge $\ie_i = \{\iv, u\}$ through the octilinear grid graph.
+To get unique source and target nodes, we again treat each undirected input edge as a directed edge $\ie_i = (s, t)$.
+As the grid positions (and therefore the grid nodes) for $\iv$ and $u$ may be still unknown, we route between sets $S_g$ and $T_g$.
+$S_g$ consists of candidate grid nodes for $s$, $T_g$ are candidate grid node for $t$.
+As candidates, we use all grid nodes within a threshold distance $\hat d$ \TODO{other symbol for that} around the original position of the input node.
+If both $s$ are $t$ are not settled yet, it may happen that $S_g$ and $T_g$ are not disjoint.
+To prevent this, we build a local Voronoi diagram: we first define $ST = S_g \cup T_g$ and say that for each $\ggv{x}{y} \in ST$, $\ggv{x}{y}$ is placed in $S'_g$ if it is nearer to $s$ than $t$, or in $T'_g$ otherwise.
+
+\TODO{sink edge costs}
+
+After that, we calculate the set-to-set shortest path between $S_g$ and $T_g$ using a standard implementation of Dijkstra's algorithm (to find the shortest path out of a set of source nodes to a set of target nodes, it is enough to init all $\ggv{x}{y} \in S_g$ with distance 0 and abort the algorithm as soon as any $\ggv{x}{y} \in T_g$ is settled.)
+
+\subsection{Preservation of Embedding}
+
+\begin{figure}
+  \centering
+	$\vcenter{\hbox{\includegraphics[width=0.479\textwidth]{figures/topoblock.pdf}}}$
+	\caption{1. A $180^{\circ}$ pass through a node $\gv$. 2. A $90^{\circ}$ pass through $\psi$. 3. A $45^{\circ}$ pass through $\gv$ simulated by a $180^{\circ}$ and $135^{\circ}$ pass. 4. A $90^{\circ}$ pass through $\gv$ simulated by two $135^{\circ}$ passes. }
+	\label{FIG:paths}
+\end{figure}
+
+The preserve the input embedding in our final drawing, we have to make sure that the shortest paths never cross each other, and that the initial circular ordering of edges at nodes is preserved.
+
+To prevent paths crossing each other, we update our octilinear grid graph after each Dijkstra run.
+Grid nodes that were used as nodes in the previously found shortest path are \emph{closed} by setting the cost of each adjacent turn edge to $\infty$.
+If a closed node $\ggv{x}{y}$ was the source or target node for the previous path in $\Gamma$, it may later be used again as a source node for another input edge.
+We therefore have to open it again in this case.
+
+To prevent paths crossing each other at crossing diagonal edges in the grid graph, we additionally close for each diagonal grid edge used in the previously found path all crossing diagonal grid edges by setting their cost to $\infty$.
+
+To preserve the circular edge ordering at nodes, we update the costs of adjacent sink edges for the grid node used for $s$, and the grid node used for $t$.
+We consider Figure TODO.
+In particular, we have to make sure that no 
 
 \subsection{Avoiding Line Bends}
 
