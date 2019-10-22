@@ -378,7 +378,8 @@ After that, we calculate the set-to-set shortest path between $S_g$ and $T_g$ us
 \begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.479\textwidth]{figures/topoblock.pdf}}}$
-	\caption{1. A $180^{\circ}$ pass through a node $\gv$. 2. A $90^{\circ}$ pass through $\psi$. 3. A $45^{\circ}$ pass through $\gv$ simulated by a $180^{\circ}$ and $135^{\circ}$ pass. 4. A $90^{\circ}$ pass through $\gv$ simulated by two $135^{\circ}$ passes. }
+	\caption{Left: Part of an input graph $G$ with edges $e, f$ and $g$ adjacent to node $v$. Edges $e$ and $f$ have a clockwise (green) distance of 1 at $v$, meaning that there are no edges between them in an angular, clockwise ordering. Their counterclockwise distance (blue) ist 2. 
+	Center: Paths $p(e)$ and $p(f)$ have already been computed. The red area is now blocked for path $p(e)$. Right: Paths $p(e)$ and $p(g)$ have already been computed, but $p(g)$ is placed in such a way that the original edge ordering cannot be respected anymore. }
 	\label{FIG:paths}
 \end{figure}
 
