@@ -116,8 +116,8 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   size_t x = a->pl().getX();
   size_t y = a->pl().getY();
 
-  auto ge = getNEdge(a, b);
-  auto gf = getNEdge(b, a);
+  auto ge = getNEdg(a, b);
+  auto gf = getNEdg(b, a);
 
   assert(ge);
   assert(gf);
@@ -137,8 +137,8 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
     auto nb = getNeighbor(x, y, (dir + 1) % 8);
 
     if (na && nb) {
-      auto e = getNEdge(na, nb);
-      auto f = getNEdge(nb, na);
+      auto e = getNEdg(na, nb);
+      auto f = getNEdg(nb, na);
 
       e->pl().unblock();
       f->pl().unblock();
@@ -160,8 +160,8 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   size_t y = a->pl().getY();
 
   // this closes the grid edge
-  auto ge = getNEdge(a, b);
-  auto gf = getNEdge(b, a);
+  auto ge = getNEdg(a, b);
+  auto gf = getNEdg(b, a);
 
   assert(ge->pl().getResEdges().size() == 0);
   ge->pl().addResidentEdge(e);
@@ -179,8 +179,8 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
     auto nb = getNeighbor(x, y, (dir + 1) % 8);
 
     if (na && nb) {
-      auto e = getNEdge(na, nb);
-      auto f = getNEdge(nb, na);
+      auto e = getNEdg(na, nb);
+      auto f = getNEdg(nb, na);
 
       e->pl().block();
       f->pl().block();
@@ -189,7 +189,7 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
 }
 
 // _____________________________________________________________________________
-GridEdge* GridGraph::getNEdge(const GridNode* a, const GridNode* b) const {
+GridEdge* GridGraph::getNEdg(const GridNode* a, const GridNode* b) const {
   if (!a) return 0;
   if (!b) return 0;
 
@@ -204,7 +204,7 @@ GridEdge* GridGraph::getNEdge(const GridNode* a, const GridNode* b) const {
 }
 
 // _____________________________________________________________________________
-void GridGraph::getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]) {
+void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
   size_t x = n->pl().getX();
   size_t y = n->pl().getY();
 
@@ -241,15 +241,16 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
   double c_45 = c_0 + c_135;
 
-  CombEdge* outgoing[8];
-  getSettledOutgoingEdges(n, outgoing);
+  CombEdge* out[8];
+  getSettledAdjEdgs(n, out);
 
   for (auto ro : e->pl().getChilds().front()->pl().getRoutes()) {
     for (int i = 0; i < 8; i++) {
-      if (!outgoing[i]) continue;
+      if (!out[i]) continue;
 
-      // TODO: turn restrictions!
-      if (outgoing[i]->pl().getChilds().front()->pl().hasRoute(ro.route)) {
+      // TODO: turn restrictions, if there is actually no connection
+      // between the lines on the edges, dont penalize!!
+      if (out[i]->pl().getChilds().front()->pl().hasRoute(ro.route)) {
         for (int j = 0; j < 8; j++) {
           // determine angle between port i and j
 
@@ -277,16 +278,16 @@ NodeCost GridGraph::spacingPenalty(GridNode* nd, CombNode* origNd,
                                    CombEdge* edg) {
   NodeCost addC;
 
-  CombEdge* outgoing[8];
-  getSettledOutgoingEdges(nd, outgoing);
+  CombEdge* out[8];
+  getSettledAdjEdgs(nd, out);
 
   for (size_t i = 0; i < 8; i++) {
-    if (!outgoing[i]) continue;
+    if (!out[i]) continue;
 
     // this is the number of edges that will occur between the currently checked
     // edge and the inserted edge, in clockwise and counter-clockwise dir
-    int32_t dCw = origNd->pl().getEdgeOrdering().dist(outgoing[i], edg);
-    int32_t dCCw = origNd->pl().getEdgeOrdering().dist(edg, outgoing[i]);
+    int32_t dCw = origNd->pl().getEdgeOrdering().dist(out[i], edg);
+    int32_t dCCw = origNd->pl().getEdgeOrdering().dist(edg, out[i]);
 
 		for (int j = 1; j < dCw; j++) {
 			addC[(i + j) % 8] = -1.0 * std::numeric_limits<double>::max();
@@ -305,7 +306,7 @@ NodeCost GridGraph::topoBlockPenalty(GridNode* nd, CombNode* origNd,
                                      CombEdge* edg) {
   CombEdge* outgoing[8];
   NodeCost addC;
-  getSettledOutgoingEdges(nd, outgoing);
+  getSettledAdjEdgs(nd, outgoing);
 
   // topological blocking
   for (size_t i = 0; i < 8; i++) {
@@ -345,7 +346,7 @@ void GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
 }
 
 // _____________________________________________________________________________
-CombEdgeSet GridGraph::getResEdges(GridNode* n) const {
+CombEdgeSet GridGraph::getResEdgs(GridNode* n) const {
   CombEdgeSet ret;
 
   for (size_t i = 0; i < 8; i++) {

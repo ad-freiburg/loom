@@ -67,8 +67,9 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
-  std::priority_queue<Candidate> getNearestCandidatesFor(
-      const util::geo::DPoint& p, double maxD, const GridNode* ex) const;
+  std::priority_queue<Candidate> getGridNdCands(const util::geo::DPoint& p,
+                                                double maxD,
+                                                const GridNode* ex) const;
 
   void addCostVector(GridNode* n, const NodeCost& addC);
 
@@ -93,7 +94,7 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   bool isSettled(const CombNode* cn);
 
-  GridEdge* getNEdge(const GridNode* a, const GridNode* b) const;
+  GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;
   void reset();
 
   GridNode* getSettled(const CombNode* cnd) const;
@@ -106,13 +107,13 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   double _cellSize, _spacer;
   std::unordered_map<const CombNode*, GridNode*> _settled;
 
-  CombEdgeSet getResEdges(GridNode* n) const;
+  CombEdgeSet getResEdgs(GridNode* n) const;
 
   void writeInitialCosts();
 
   GridNode* writeNd(size_t x, size_t y);
 
-  void getSettledOutgoingEdges(GridNode* n, CombEdge* outgoing[8]);
+  void getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]);
 };
 }
 }
