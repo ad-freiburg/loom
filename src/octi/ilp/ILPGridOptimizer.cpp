@@ -19,7 +19,7 @@ int ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
                                combgraph::Drawing* d) const {
   for (auto nd : *gg->getNds()) {
     if (!nd->pl().isSink()) continue;
-    gg->openNode(nd);
+    gg->openNodeTurns(nd);
     gg->openNodeSink(nd, 0);
   }
 
@@ -241,8 +241,8 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
     glp_set_row_name(lp, row, constName.str().c_str());
     glp_set_row_bnds(lp, row, GLP_UP, 0, 1);
 
-    auto eOr = gg.getNEdge(n, gg.getNeighbor(x, y, 3));
-    auto fOr = gg.getNEdge(gg.getNeighbor(x, y, 3), n);
+    auto eOr = gg.getNEdg(n, gg.getNeighbor(x, y, 3));
+    auto fOr = gg.getNEdg(gg.getNeighbor(x, y, 3), n);
 
     if (!eOr || !fOr) continue;
 
@@ -251,8 +251,8 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
     if (!na || !nb) continue;
 
-    auto e = gg.getNEdge(na, nb);
-    auto f = gg.getNEdge(nb, na);
+    auto e = gg.getNEdg(na, nb);
+    auto f = gg.getNEdg(nb, na);
 
     for (auto nd : cg.getNds()) {
       for (auto edg : nd->getAdjList()) {

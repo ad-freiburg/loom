@@ -75,8 +75,8 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   void openNodeSink(GridNode* n, double cost);
   void closeNodeSink(GridNode* n);
-  void openNode(GridNode* n);
-  void closeNode(GridNode* n);
+  void openNodeTurns(GridNode* n);
+  void closeNodeTurns(GridNode* n);
 
   GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
 

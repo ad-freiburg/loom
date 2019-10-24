@@ -132,7 +132,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   drawing.applyToGrid(gg);
 
   size_t iters = 0;
-  size_t ITERS = 100;
+  // size_t ITERS = 100;
+  size_t ITERS = 0;
 
   for (; iters < ITERS; iters++) {
     Drawing bestFromIter = drawing;
@@ -320,6 +321,9 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     double penPerGrid = 5 + c_0 + fmax(gg->getPenalties().diagonalPen,
                                        gg->getPenalties().horizontalPen);
 
+    // TODO: if we open node sinks, we have to offset their cost by the highest
+    // possible turn cost + 1 to not distort turn penalties
+
     // open from source node
     if (gg->isSettled(frCmbNd)) {
       // only count displacement penalty ONCE
@@ -342,6 +346,14 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
         gg->openNodeSink(n, gridD * penPerGrid);
       }
     }
+
+    // IMPORTANT: node costs are only written to sinks if they are already
+    // settled. There is no need to add node costs before, as they handle
+    // relations between two or more adjacent edges. If the node has not
+    // already been settled, such a relation does not exist.
+    //
+    // Even more importantly, is a node is settled, its turn edges have
+    // already been closed.
 
     if (gg->isSettled(frCmbNd)) {
       writeNdCosts(frGrNd, frCmbNd, cmbEdg, gg);

@@ -6,9 +6,9 @@
 #include <fstream>
 #include <unordered_map>
 #include <unordered_set>
-#include "util/geo/output/GeoGraphJsonOutput.h"
 #include "octi/gridgraph/GridGraph.h"
 #include "octi/gridgraph/NodeCost.h"
+#include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Node.h"
 
 using namespace octi::gridgraph;
@@ -98,7 +98,7 @@ GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
 
 // _____________________________________________________________________________
 void GridGraph::unSettleNd(CombNode* a) {
-  openNode(_settled[a]);
+  openNodeTurns(_settled[a]);
   _settled[a]->pl().setSettled(false);
   _settled.erase(a);
 }
@@ -126,10 +126,10 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   gf->pl().clearResEdges();
 
   if (!a->pl().isSettled()) {
-    openNode(a);
+    openNodeTurns(a);
   }
   if (!b->pl().isSettled()) {
-    openNode(b);
+    openNodeTurns(b);
   }
 
   if (dir == 1 || dir == 3 || dir == 5 || dir == 7) {
@@ -171,8 +171,8 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
 
   // this closes both nodes
   // a close means that all major edges reaching this node are closed
-  closeNode(a);
-  closeNode(b);
+  closeNodeTurns(a);
+  closeNodeTurns(b);
 
   if (dir == 1 || dir == 3 || dir == 5 || dir == 7) {
     auto na = getNeighbor(x, y, (dir + 7) % 8);
@@ -227,9 +227,7 @@ void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
 }
 
 // _____________________________________________________________________________
-const Penalties& GridGraph::getPenalties() const {
-  return _c;
-}
+const Penalties& GridGraph::getPenalties() const { return _c; }
 
 // _____________________________________________________________________________
 NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
@@ -258,7 +256,7 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
           if (ang > 4) ang = 8 - ang;
           ang = ang % 4;
 
-          double mult= 1;
+          double mult = 1;
 
           // write corresponding cost to addC[j]
           if (ang == 0) addC[j] += mult * c_0;
@@ -266,7 +264,7 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
           if (ang == 2) addC[j] += mult * c_90;
           if (ang == 3) addC[j] += mult * c_135;
         }
-     }
+      }
     }
   }
 
@@ -289,13 +287,13 @@ NodeCost GridGraph::spacingPenalty(GridNode* nd, CombNode* origNd,
     int32_t dCw = origNd->pl().getEdgeOrdering().dist(out[i], edg);
     int32_t dCCw = origNd->pl().getEdgeOrdering().dist(edg, out[i]);
 
-		for (int j = 1; j < dCw; j++) {
-			addC[(i + j) % 8] = -1.0 * std::numeric_limits<double>::max();
-		}
+    for (int j = 1; j < dCw; j++) {
+      addC[(i + j) % 8] = -1.0 * std::numeric_limits<double>::max();
+    }
 
-		for (int j = 1; j < dCCw; j++) {
-			addC[(i + (8 - j)) % 8] = -1.0 * std::numeric_limits<double>::max();
-		}
+    for (int j = 1; j < dCCw; j++) {
+      addC[(i + (8 - j)) % 8] = -1.0 * std::numeric_limits<double>::max();
+    }
   }
 
   return addC;
@@ -385,7 +383,7 @@ void GridGraph::writeInitialCosts() {
 }
 
 // _____________________________________________________________________________
-std::priority_queue<Candidate> GridGraph::getNearestCandidatesFor(
+std::priority_queue<Candidate> GridGraph::getGridNdCands(
     const DPoint& p, double maxD, const GridNode* ex) const {
   std::priority_queue<Candidate> ret;
   std::set<GridNode*> neigh;
@@ -422,7 +420,7 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 }
 
 // _____________________________________________________________________________
-void GridGraph::openNode(GridNode* n) {
+void GridGraph::openNodeTurns(GridNode* n) {
   if (!n->pl().isClosed()) return;
 
   // open all non-sink inner edges
@@ -442,7 +440,7 @@ void GridGraph::openNode(GridNode* n) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::closeNode(GridNode* n) {
+void GridGraph::closeNodeTurns(GridNode* n) {
   if (n->pl().isClosed()) return;
 
   // close all non-sink inner edges
@@ -485,7 +483,7 @@ void GridGraph::closeNodeSink(GridNode* n) {
 GridNode* GridGraph::getGridNodeFrom(CombNode* n, double maxDis,
                                      const GridNode* ex) {
   if (!isSettled(n)) {
-    auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis, ex);
+    auto cands = getGridNdCands(*n->pl().getGeom(), maxDis, ex);
 
     while (!cands.empty()) {
       if (!cands.top().n->pl().isClosed()) return cands.top().n;
@@ -507,7 +505,7 @@ std::set<GridNode*> GridGraph::getGridNodesTo(CombNode* n, double maxDis,
                                               const GridNode* ex) {
   std::set<GridNode*> tos;
   if (!isSettled(n)) {
-    auto cands = getNearestCandidatesFor(*n->pl().getGeom(), maxDis, ex);
+    auto cands = getGridNdCands(*n->pl().getGeom(), maxDis, ex);
 
     while (!cands.empty()) {
       if (!cands.top().n->pl().isClosed()) tos.insert(cands.top().n);
@@ -584,7 +582,7 @@ void GridGraph::reset() {
   for (auto n : *getNds()) {
     for (auto e : n->getAdjListOut()) e->pl().reset();
     if (!n->pl().isSink()) continue;
-    openNode(n);
+    openNodeTurns(n);
     closeNodeSink(n);
   }
 

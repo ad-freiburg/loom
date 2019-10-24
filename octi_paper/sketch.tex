@@ -369,38 +369,92 @@ As candidates, we use all grid nodes within a threshold distance $\hat d$ \TODO{
 If both $s$ are $t$ are not settled yet, it may happen that $S_g$ and $T_g$ are not disjoint.
 To prevent this, we build a local Voronoi diagram: we first define $ST = S_g \cup T_g$ and say that for each $\ggv{x}{y} \in ST$, $\ggv{x}{y}$ is placed in $S'_g$ if it is nearer to $s$ than $t$, or in $T'_g$ otherwise.
 
-\TODO{sink edge costs}
+To prefer grid nodes as candidates that are near the original position of the input node, we set the cost of each sink edge adjacent to the candidate grid node to its distance penalty. \TODO{Give an example with full costs and explain offset to prevent stolen sink edges} 
 
 After that, we calculate the set-to-set shortest path between $S_g$ and $T_g$ using a standard implementation of Dijkstra's algorithm (to find the shortest path out of a set of source nodes to a set of target nodes, it is enough to init all $\ggv{x}{y} \in S_g$ with distance 0 and abort the algorithm as soon as any $\ggv{x}{y} \in T_g$ is settled.)
 
 \subsection{Preservation of Embedding}
 
+The preserve the input embedding in our final drawing, we have to make sure that the shortest paths never cross each other, and that the initial circular ordering of edges at nodes is preserved.
+
+To prevent paths crossing each other, we update our octilinear grid graph after each Dijkstra run.
+Grid nodes that were used as nodes in the previously found shortest path are both \emph{turn-closed} by setting the cost of each adjacent turn edge to $\infty$ and \emph{sink-closed} by setting the cost of each adjacent sink edge to $\infty$.
+This effectively prevents any further path to use any of these previously used nodes.
+If a sink-closed grid node $\ggv{x}{y}$ was the source or target node for the previous path in $\Gamma$ (if it is settled), it may later be used again as a source node for another input edge.
+We then have to sink-open it again.
+
+To prevent paths crossing each other at crossing diagonal edges in the grid graph, we additionally close for each diagonal grid edge used in the previously found path all crossing diagonal grid edges by setting their cost to $\infty$.
+
 \begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.479\textwidth]{figures/topoblock.pdf}}}$
-	\caption{Left: Part of an input graph $G$ with edges $e, f$ and $g$ adjacent to node $v$. Edges $e$ and $f$ have a clockwise (green) distance of 1 at $v$, meaning that there are no edges between them in an angular, clockwise ordering. Their counterclockwise distance (blue) ist 2. 
+	\caption{Left: Part of an input graph $G$. Edges $e$ and $f$ have a clockwise (green) distance of 1 at $v$, meaning that there are no edges between them in an angular, clockwise ordering. Their counterclockwise distance (blue) ist 2. 
 	Center: Paths $p(e)$ and $p(f)$ have already been computed. The red area is now blocked for path $p(e)$. Right: Paths $p(e)$ and $p(g)$ have already been computed, but $p(g)$ is placed in such a way that the original edge ordering cannot be respected anymore. }
 	\label{FIG:paths}
 \end{figure}
 
-The preserve the input embedding in our final drawing, we have to make sure that the shortest paths never cross each other, and that the initial circular ordering of edges at nodes is preserved.
-
-To prevent paths crossing each other, we update our octilinear grid graph after each Dijkstra run.
-Grid nodes that were used as nodes in the previously found shortest path are \emph{closed} by setting the cost of each adjacent turn edge to $\infty$.
-If a closed node $\ggv{x}{y}$ was the source or target node for the previous path in $\Gamma$, it may later be used again as a source node for another input edge.
-We therefore have to open it again in this case.
-
-To prevent paths crossing each other at crossing diagonal edges in the grid graph, we additionally close for each diagonal grid edge used in the previously found path all crossing diagonal grid edges by setting their cost to $\infty$.
-
 To preserve the circular edge ordering at nodes, we update the costs of adjacent sink edges for the grid node used for $s$, and the grid node used for $t$.
-We consider Figure TODO.
-In particular, we have to make sure that no 
+We consider Figure~\ref{FIG:paths}.2.
+We assume the rendering order at $v$ to be $(e, f, g$), and paths $p(e)$ and $p(f)$ have already been routed (in particular, this means that $\gv$ is already settled and turn-closed).
+The path for $e$ uses the sink edge $\gse{}{}{0}$, the path for $f$ uses sink edge $\gse{}{}{3}$.
+To respect the input edge ordering at $v$ in the final drawing, we have to make sure that $p(g)$ does not enter or leave $\gv$ in the area marked red.
+For this, we close each sink edge $\gse{}{}{p}$ that lies between $\gse{}{}{0}$ prior to routing $g$ by setting its cost to $\infty$ (including the sink edges used by $p(e)$ and $p(f)$) (Fig.~\ref{FIG:paths}.2a).
+
+We now consider Figure~\ref{FIG:paths}.3 and assume the rendering order at $v$ to be $(e, g, f)$.
+Paths $p(e)$ and $p(g)$ have already been routed.
+However, there is no sink edge left at $\gv$ to route $p(f)$ in such a way that the input edge ordering is preserved.
+To prevent cases like this, we make sure that there are always enough sink edges left in both directions of an already routed path at $v$.
+For example, the clockwise distance between $e$ and $g$ at $v$ is 2 (Fig.~\ref{FIG:paths}.1).
+Their clockwise distance is 1.
+If $p(e)$ is already routed (Fig.~\ref{FIG:paths}.3), we now close the sink edges $\gse{}{}{0}$ used by $p(e)$, but also the succeeding (in clockwise direction) sink edge $\gse{}{}{1}$ (Fig.~\ref{FIG:paths}.3a).
+This guarantees that any path found for $g$ will now leave one sink edge between $p(e)$ and $p(g)$ open, allowing $p(f)$ to be routed in such a way that the original edge order at $v$ will be preserved.
+
+Note again that in both of the above cases, $\gv$ has already been settled.
+This means that the costs of all turn edges adjacent to $\gv$ have been set to $\infty$, which is why they are not depicted in Figures~\ref{FIG:paths}.3a and \ref{FIG:paths}.3b.
+We can thus be sure that our sink edge cost are not circumvented, for example, by a path $p(g)$ using $\gse{}{}{2}$ in Figure~\ref{FIG:paths}.3b, and then using the $45^{\circ}$ turn cost connecting port $\gpv{}{}{2}$ and $\gpv{}{}{1}$.
 
 \subsection{Avoiding Line Bends}
 
-\subsection{Optimization via Local Search}
+\begin{figure}
+  \centering
+	$\vcenter{\hbox{\includegraphics[width=0.479\textwidth]{figures/linebend.pdf}}}$
+	\caption{Bla }
+	\label{FIG:linebends}
+\end{figure}
+
+Just as in the ILP formulation, our shortest path calculations so far only optimize line bends along paths and we have to additionally make sure that line bends at nodes are also penalized.
+We handle this similar to the edge ordering constraints in the previous section.
+If a grid node $\gv$ with has already been settled for an input node $\iv$ with adjacent edges (in rendering order) $\ie_0, ..., \ie_i, ..., \ie_{\deg(v)}$, we calculate for each $\ie_i$, $i > 0$ the line bend penalty between each already routed edge $\ie_j$, $j < i$ at $\gv$ for each of the unused adjacent sink edges prior to routing $\ie_i$.
+The sum of the line bend penalty for each preceeding edge is then used as the cost for the respective sink edge (Figure~\ref{FIG:linebends}).
 
 \subsection{Complexity}
+
+
+\subsection{Further Optimization via Steepest Hill Climbing}
+
+\begin{figure}
+  \centering
+	$\vcenter{\hbox{\includegraphics[width=0.479\textwidth]{figures/optim.pdf}}}$
+	\caption{Bla }
+	\label{FIG:optim}
+\end{figure}
+
+The metro maps rendered by our heuristical approach so far already look acceptable.
+To further polish the look of our final maps, we employ a local search approach.
+Given an octilinear drawing $\drawing{\iG}^0$ on a grid graph $\gG$, we define the local neighborhood of $\drawing{\iG}^0$ as the set of drawings where exactly one grid node position of an input node $v_m$ is moved to one of the 8 neighboring grid position (if free).
+For each neighbor of the current drawing, we remove the shortest paths for each edge adjacent to $v_m$, move $v_m$ to the designated new position, re-route all adjacent edges in clockwise ordering and calculate the overall score of the drawing.
+At the end, the best neighbor is taken, and the optimization proceeds from there.  (Figure~\ref{FIG:optim}).
+
+We note that if the neighborhood is defined this way, the set of drawings that are reachable by navigating from neighbor to neighbor is not necessarily the complete set of possible octilinear drawings.
+In particular, this means that the optimal drawing might not be included in this set.
+There are two reasons for that: 
+(1) The shortest paths are not necessarily unique.
+There might be two (or more) shortest paths between two input nodes which have equivalent cost, but one of them might act as an obstacle which forces a later edge route to follow an adverse path.
+During the exploration of the neighborhood, it will depend largely on the implementation which of two equivalent shortest path is chosen locally, and the optimal placement of a particular path might never be chosen.
+(2) The final map score does not only depend on the placement of nodes, but also on the order in which edges are rendered.
+Our approach so far does not consider this.
+
+Despite these drawbacks, our evaluation shows that our approach can come very close to the optimal solution after just a few hill climbing iterations.
 
 \subsection{Speed-up Heuristic}
 
