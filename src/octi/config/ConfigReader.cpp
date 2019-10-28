@@ -1,4 +1,6 @@
 // Copyright 2017, University of Freiburg,
+// Copyright 2019, University of Freiburg,
+// Chair of Algorithms and Data Structures.
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
@@ -48,15 +50,15 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "print mode: transitgraph, gridgraph")
     (
       "vert-pen",
-      opts::value<double>(&(cfg->pens.verticalPen))->default_value(3),
+      opts::value<double>(&(cfg->pens.verticalPen))->default_value(2),
       "penalty for vertical edges")
     (
       "hori-pen",
-      opts::value<double>(&(cfg->pens.horizontalPen))->default_value(3),
+      opts::value<double>(&(cfg->pens.horizontalPen))->default_value(2),
       "penalty for horicontal edges")
     (
       "diag-pen",
-      opts::value<double>(&(cfg->pens.diagonalPen))->default_value(5),
+      opts::value<double>(&(cfg->pens.diagonalPen))->default_value(2),
       "penalty for diagonal edges")
     (
       "pen-180",

@@ -361,6 +361,13 @@ Figure TODO gives an example.
 
 \subsection{Edge Routing and Station Placement}
 
+\begin{figure}
+  \centering
+	$\vcenter{\hbox{\includegraphics[width=0.479\textwidth]{figures/heur.pdf}}}$
+	\caption{Bla }
+	\label{FIG:heur}
+\end{figure}
+
 With an initial edge ordering at hand, we can start routing each input edge $\ie_i = \{\iv, u\}$ through the octilinear grid graph.
 To get unique source and target nodes, we again treat each undirected input edge as a directed edge $\ie_i = (s, t)$.
 As the grid positions (and therefore the grid nodes) for $\iv$ and $u$ may be still unknown, we route between sets $S_g$ and $T_g$.
@@ -429,6 +436,8 @@ The sum of the line bend penalty for each preceeding edge is then used as the co
 
 \subsection{Complexity}
 
+\TODO{Complexity, should be $|E| \times \text{dijkstra}$}
+
 
 \subsection{Optimization via Steepest Hill Climbing}
 
@@ -446,17 +455,34 @@ For each neighbor of the current drawing, we remove the shortest paths for each 
 At the end, the best neighbor is taken, and the optimization proceeds from there.  (Figure~\ref{FIG:optim}).
 
 We note that if the neighborhood is defined this way, the set of drawings that are reachable by navigating from neighbor to neighbor is not necessarily the complete set of possible octilinear drawings.
-In particular, this means that the optimal drawing might not be included in this set.
+In particular, this means that the optimal drawing might not be included in this set and is therefore impossible to find.
 There are two reasons for that: 
 (1) The shortest paths are not necessarily unique.
 There might be two (or more) shortest paths between two input nodes which have equivalent cost, but one of them might act as an obstacle which forces a later edge route to follow an adverse path.
 During the exploration of the neighborhood, it will depend largely on the implementation which of two equivalent shortest path is chosen locally, and the optimal placement of a particular path might never be chosen.
 (2) The final map score does not only depend on the placement of nodes, but also on the order in which edges are rendered.
-Our approach so far does not consider this.
 
-Despite these drawbacks, our evaluation shows that our approach can come very close to the optimal solution after just a few hill climbing iterations.
+Despite these drawbacks, our evaluation shows that our approach comes very close to the optimal solution after just a few hill climbing iterations.
 
 \subsection{Speed-up Heuristic}
+
+The octilinear grid graph allows for a simple cost heuristic for the path-finding step.
+Given a (set) of target nodes, a cost heuristic $h(\gv)$ gives an estimate of the shortest path cost from $\gv$ to any target node.
+It is called \emph{admissible} if it always smaller or equal to the real shortest path cost.
+
+We reconsider Figure~\ref{FIG:heur}.
+In the right example, it is obvious that the cost (minus the node sink cost) for reaching any grid node candidate in $T$ from a grid node $\gv$ outside of $T$ is at least the cost of reaching one of the nodes that constitute the hull of the node candidates (marked as a full rectangle).
+
+The hull $H_t$ of $T$ is just the set of nodes in $T$ adjacent to a node not in $T$ and be efficiently computed in $\mathcal{O}(|T|)$.
+It can be computed prior to the actual shortest-path calculation.
+
+%On our grid graph, a simple admissible heuristic for any grid node $\gv$ is the minimum distance w.r.t. to uniform norm $L^{\infty}$.
+We can thus use the following heuristic:
+%
+\begin{equation}
+	h(\gv) = \min\{ \text{dist}(\gv, \gv') | \gv' \in H_t \}.
+\end{equation}
+
 
 \section{Evaluation}
 
