@@ -71,9 +71,8 @@ Additionally, the following soft constraints are usually employed:
 
 With respect to edge monotony and octilineary, previous work often defined the problem as finding an octilinear embedding of the input graph, where each edge is represented by a straight octilinear arc.
 We use a slightly different approach and state the problem as finding the optimal posititions $p(v) \in \mathbb{N}^2$ on a grid for each station node and curves $c(e) = (q_0, q_1, ..., q_n)$, $q_i \in \mathbb{N}^2$ connecting them. 
-Most importantly, for two suceeding points $q_i = (x_i, y_i)$ and $q_{i+1} = (x_{i+1}, y_{i+1})$, we require that they have a distance of 1 with respect to the uniform norm $L^{\infty}$.
-This means that the distance $|q_{i+1} - q_{i}|_{\infty}$ between them is defined as $\max \{|x_{i+1} - x_i|, |y_{i+1} - y_i|\}$.
-For any point on the grid, the distance to all its 8 direct neighbors is thus 1.
+Most importantly, for two suceeding points $q_i = (x_i, y_i)$ and $q_{i+1} = (x_{i+1}, y_{i+1})$, we require their Chebyshev distance $D_\text{Cheb}(q_i, q_{i+1}) = \max \{|x_{i+1} - x_i|, |y_{i+1} - y_i|\}$ to be exactly 1.
+Not that for any point on the grid, the Chebyshev distance to all its 8 direct neighbors is 1.
 
 To project this grid onto a map plane, we use a scale factor $\gScale$, which is essentially the height and length of a grid cell.
 If $\gScale$ is set to $\gmind$, a minimum distance between any two grid points is guaranteed to be greater or equal to $\gmind$.
