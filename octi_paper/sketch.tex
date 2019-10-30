@@ -71,8 +71,8 @@ Additionally, the following soft constraints are usually employed:
 
 With respect to edge monotony and octilineary, previous work often defined the problem as finding an octilinear embedding of the input graph, where each edge is represented by a straight octilinear arc.
 We use a slightly different approach and state the problem as finding the optimal posititions $p(v) \in \mathbb{N}^2$ on a grid for each station node and curves $c(e) = (q_0, q_1, ..., q_n)$, $q_i \in \mathbb{N}^2$ connecting them. 
-Most importantly, for two suceeding points $q_i = (x_i, y_i)$ and $q_{i+1} = (x_{i+1}, y_{i+1})$, we require their Chebyshev distance $D_\text{Cheb}(q_i, q_{i+1}) = \max \{|x_{i+1} - x_i|, |y_{i+1} - y_i|\}$ to be exactly 1.
-Not that for any point on the grid, the Chebyshev distance to all its 8 direct neighbors is 1.
+Most importantly, for two succeeding points $q_i = (x_i, y_i)$ and $q_{i+1} = (x_{i+1}, y_{i+1})$, we require their Chebyshev distance $D_\text{Ch}(q_i, q_{i+1}) = \max \{|x_{i+1} - x_i|, |y_{i+1} - y_i|\}$ to be exactly 1.
+Note that for any point on the grid, the Chebyshev distance to all its 8 direct neighbors is 1.
 
 To project this grid onto a map plane, we use a scale factor $\gScale$, which is essentially the height and length of a grid cell.
 If $\gScale$ is set to $\gmind$, a minimum distance between any two grid points is guaranteed to be greater or equal to $\gmind$.
@@ -122,7 +122,7 @@ where $t(\gv_{i-1}, \gv_{i+1})$ is the angular turn cost between edges $\{\gv_{i
 
 We model this by adding 8 auxiliary port nodes $\gpv{x}{y}{0} ... \gpv{x}{y}{7}$ to every grid node (Fig.~\ref{FIG:gridgraph}).
 Each port again corresponds to an outgoing angle in clockwise fashion and is connected to $\ggv{x}{y}$ via sink edges $\gse{x}{y}{0} ... \gse{x}{y}{7}$.
-These sink edges allow us to leave from and arrive at an original node $\gv{x}{y}$.
+These sink edges allow us to leave from and arrive at an original node $\ggv{x}{y}$.
 For paths passing through the original grid node $\ggv{x}{y}$, we connect each port $\gpv{x}{y}{i}$ with its 7 - i succeeding (in clockwise fashion) sibling ports with bend edges $\gbe{x}{y}{i}{45}$, $\gbe{x}{y}{i}{90}$, and so forth.
 
 \begin{figure}[h]
@@ -136,12 +136,19 @@ To be able to distinguish the different node and edge types, we define the set o
 Note that $\gV = \gV^g \cup \gV^p$ and $\gE = \gE^t \cup \gE^s \cup \gE^g$.
 
 Additionally, for each $\gv \in \gV$, we define $\gv^* \in \gV^g$ as the original grid node belonging to $\gv$ (this may be $\gv$ itself).
+For easy of notation, we also denote by $P(\gv)$ the grid coordinates of the original grid node $\gv^* = \ggv{x}{y}$ belonging to $\gv$.
 
 As we want to prevent the use of sink edges in pass-through nodes, we set a uniform sink edge cost $\gSinkcost$ high enough so that a sink edge is always more expensive than a turn edge. 
 In a shortest path from $s$ to $t$, the only sink edges are then a leaving sink edge adjacent to $s$ and an arriving sink edge adjacent to $t$.
 
 \subsection{Modelling Edge Costs}
 
+\begin{figure}
+  \centering
+	$\vcenter{\hbox{\includegraphics[width=0.474\textwidth]{figures/path.pdf}}}$
+	\caption{Lorem}
+	\label{FIG:path}
+\end{figure}
 \begin{figure*}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.9\textwidth]{figures/paths.pdf}}}$
@@ -150,7 +157,7 @@ In a shortest path from $s$ to $t$, the only sink edges are then a leaving sink 
 \end{figure*}
 %
 As both a $45^{\circ}$ port edge and a $90^{\circ}$ port edge may be substituted by cheaper edges, special care has to be applied to the modelling of the actual edge costs.
-For example, a $45^{\circ}$ turn can be simulated by first passing $v_{x, y}$ on a $180^{\circ}$ port edge, and then again on a $135^{\circ}$ port edge (Fig.~\ref{FIG:paths}.3).
+For example, a $45^{\circ}$ turn can be simulated by first passing $\ggv{x}{y}$ on a $180^{\circ}$ port edge, and then again on a $135^{\circ}$ port edge (Fig.~\ref{FIG:paths}.3).
 As $\gPturn{180} \leq \gPturn{135} \leq \gPturn{45}$, this path may be cheaper than $\gPturn{45}$, undermining our penalty system. 
 Similarily, a $90^{\circ}$ degree turn can be simulated by two cheaper $135^{\circ}$ port edges (Fig.~\ref{FIG:paths}.4).
 
@@ -192,7 +199,7 @@ If we then set the cost of a single grid edge $\gHopcost = 1 = a$ and set the ac
 	     &= 2 c_s + \gPcost{\gPath} - \gHopcost = \gPcost{\gPath} + 2 \gSinkcost - 1.
 \end{align}
 %
-As the shortest path $p'$ thus minimizes $c(p) + 2 \gSinkcost - 1$, it also minimizes $\gPcost(\gPath)$.
+As the shortest path $p'$ thus minimizes $c(p) + 2 \gSinkcost - 1$, it also minimizes $\gPcost{\gPath}$.
 
 \section{Optimal Solution via ILP}
 
@@ -363,21 +370,22 @@ Figure TODO gives an example.
 \begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.479\textwidth]{figures/heur.pdf}}}$
+	\vspace{-.3cm}
 	\caption{Bla }
 	\label{FIG:heur}
 \end{figure}
 
 With an initial edge ordering at hand, we can start routing each input edge $\ie_i = \{\iv, u\}$ through the octilinear grid graph.
 To get unique source and target nodes, we again treat each undirected input edge as a directed edge $\ie_i = (s, t)$.
-As the grid positions (and therefore the grid nodes) for $\iv$ and $u$ may be still unknown, we route between sets $S_g$ and $T_g$.
-$S_g$ consists of candidate grid nodes for $s$, $T_g$ are candidate grid node for $t$.
-As candidates, we use all grid nodes within a threshold distance $\hat d$ \TODO{other symbol for that} around the original position of the input node.
-If both $s$ are $t$ are not settled yet, it may happen that $S_g$ and $T_g$ are not disjoint.
-To prevent this, we build a local Voronoi diagram: we first define $ST = S_g \cup T_g$ and say that for each $\ggv{x}{y} \in ST$, $\ggv{x}{y}$ is placed in $S'_g$ if it is nearer to $s$ than $t$, or in $T'_g$ otherwise.
+As the grid positions (and therefore the grid nodes) for $\iv$ and $u$ may be still unknown, we route between sets $S$ and $T$.
+$S$ consists of candidate grid nodes for $s$, $T$ are candidate grid node for $t$.
+As candidates, we use all grid nodes within a threshold distance $\hat d$ \TODO{other symbol for that, also update in figure} around the original position of the input node.
+If both $s$ are $t$ are not settled yet, it may happen that $S$ and $T$ are not disjoint.
+To prevent this, we build a local Voronoi diagram: we first define $ST = S \cup T$ and say that for each $\ggv{x}{y} \in ST$, $\ggv{x}{y}$ is placed in $S'_g$ if it is nearer to $s$ than $t$, or in $T'_g$ otherwise.
 
 To prefer grid nodes as candidates that are near the original position of the input node, we set the cost of each sink edge adjacent to the candidate grid node to its distance penalty. \TODO{Give an example with full costs and explain offset to prevent stolen sink edges} 
 
-After that, we calculate the set-to-set shortest path between $S_g$ and $T_g$ using a standard implementation of Dijkstra's algorithm (to find the shortest path out of a set of source nodes to a set of target nodes, it is enough to init all $\ggv{x}{y} \in S_g$ with distance 0 and abort the algorithm as soon as any $\ggv{x}{y} \in T_g$ is settled.)
+After that, we calculate the set-to-set shortest path between $S$ and $T$ using a standard implementation of Dijkstra's algorithm (to find the shortest path out of a set of source nodes to a set of target nodes, it is enough to init all $\ggv{x}{y} \in S$ with distance 0 and abort the algorithm as soon as any $\ggv{x}{y} \in T_g$ is settled.)
 
 \subsection{Preservation of Embedding}
 
@@ -467,21 +475,25 @@ Despite these drawbacks, our evaluation shows that our approach comes very close
 
 The octilinear grid graph allows for a simple cost heuristic for the path-finding step.
 Given a (set) of target nodes, a cost heuristic $h(\gv)$ gives an estimate of the shortest path cost from $\gv$ to any target node.
-It is called \emph{admissible} if it always smaller or equal to the real shortest path cost.
+It is called \emph{admissible} if it never overestimates the real shortest path cost.
 
 We reconsider Figure~\ref{FIG:heur}.
-In the right example, it is obvious that the cost (minus the node sink cost) for reaching any grid node candidate in $T$ from a grid node $\gv$ outside of $T$ is at least the cost of reaching one of the nodes that constitute the hull of the node candidates (marked as a full rectangle).
+In the right example, it is obvious that the cost for reaching any grid node candidate (or any of its port nodes) in $T$ from a grid node $\gv$ (or any of its port nodes) outside of $T$ is at least the cost of reaching one of the grid nodes that constitute the hull of the node candidates.
 
-The hull $H_t$ of $T$ is just the set of nodes in $T$ adjacent to a node not in $T$ and be efficiently computed in $\mathcal{O}(|T|)$.
-It can be computed prior to the actual shortest-path calculation.
+The hull $H_t$ of $T$ is just the set of grid nodes in $T$ adjacent to a grid node not in $T$ and can be efficiently computed in $\mathcal{O}(|T|)$.
+It can be build prior to the actual shortest-path calculation.
 
-%On our grid graph, a simple admissible heuristic for any grid node $\gv$ is the minimum distance w.r.t. to uniform norm $L^{\infty}$.
+The shortest path cost (minus the arriving sink edge costs) from a node $\gv$ to any node in the hull $H_t$ would thus already be an admissable heuristic.
+To get an efficiently computable estimate for the shortest-path cost from $\gv$ to the hull, we use the fact that to reach a grid node $\ggv{x}{y}$ (or any of its port nodes) from a grid node $\ggv{x'}{y'}$ (or any of its port nodes) we have to pass through at least $D_{\text{Che}}((x', y'), (x, y)) - 1$ grid nodes.
+
 We can thus use the following heuristic:
 %
-\begin{equation}
-	h(\gv) = \min\{ \text{dist}(\gv, \gv') | \gv' \in H_t \}.
-\end{equation}
-
+\begin{align}
+	h(\gv) &= \min\left\{ \left(D_{\text{Ch}}\left(P(\gv), P(\gv') \right) - 1\right) c'_{180}| \gv' \in H_t \right\}\\
+	&= \min\left\{ D_{\text{Ch}}\left(P(\gv), P(\gv') \right) - 1 | \gv' \in H_t \right\},
+\end{align}
+%
+as each shortest path has to take some turn edge at the pass-through nodes and the cost of this turn edge is at least $c'_{180} = 1$.
 
 \section{Evaluation}
 
