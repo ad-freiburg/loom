@@ -80,8 +80,7 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
-  GridNode* getGridNodeFrom(CombNode* n, double maxDis, const GridNode* ex);
-  std::set<GridNode*> getGridNodesTo(CombNode* n, double maxDis,
+  std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis,
                                      const GridNode* ex);
 
   void settleNd(GridNode* n, CombNode* cn);

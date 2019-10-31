@@ -271,6 +271,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     GridNode* frGrNd;
     std::set<GridNode*> toGrNds;
 
+    double maxDis = gg->getCellSize() * 3;
+
     // STEP 1
     // grid node selection
     if (gg->getSettled(frCmbNd)) {
@@ -283,7 +285,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
         break;
       }
     } else {
-      frGrNd = gg->getGridNodeFrom(frCmbNd, gg->getCellSize() * 1.7, 0);
+      frGrNd = gg->getGrNdCands(frCmbNd, maxDis.7, 0);
     }
 
     if (gg->getSettled(toCmbNd)) {
@@ -298,13 +300,12 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       }
     } else {
       // get surrounding displacement nodes
-      double maxDis = gg->getCellSize() * 3;
-      toGrNds = gg->getGridNodesTo(toCmbNd, maxDis, frGrNd);
+      toGrNds = gg->getGrNdCands(toCmbNd, maxDis, frGrNd);
 
-      // TODO: abort criteria
+      // TODO!!!!!!: abort criteria
       while (!toGrNds.size()) {
         maxDis *= 2;
-        toGrNds = gg->getGridNodesTo(toCmbNd, maxDis, frGrNd);
+        toGrNds = gg->getGrNdCands(toCmbNd, maxDis, frGrNd);
       }
     }
 
@@ -433,4 +434,50 @@ std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg) const {
   }
 
   return order;
+}
+
+// _____________________________________________________________________________
+std::pair<std::set<GridNode*, std::set<GridNode*>> getRtPairs(CombNode* frCmbNd, CombNode* toCmbNd, GridGraph* gg) {
+  std::pair<std::set<GridNode*, std::set<GridNode*>> ret;
+
+    GridNode* frGrNd;
+    std::set<GridNode*> toGrNds;
+
+    double maxDis = gg->getCellSize() * 3;
+
+    // STEP 1
+    // grid node selection
+    if (gg->getSettled(frCmbNd)) {
+      frGrNd = gg->getSettled(frCmbNd);
+    } else if (settled.count(frCmbNd)) {
+      frGrNd = gg->getNode(settled.find(frCmbNd)->second.first,
+                           settled.find(frCmbNd)->second.second);
+      if (!frGrNd || frGrNd->pl().isClosed()) {
+        fail = true;
+        break;
+      }
+    } else {
+      frGrNd = gg->getGrNdCands(frCmbNd, maxDis.7, 0);
+    }
+
+    if (gg->getSettled(toCmbNd)) {
+      toGrNds.insert(gg->getSettled(toCmbNd));
+    } else if (settled.count(toCmbNd)) {
+      toGrNds.insert(gg->getNode(settled.find(toCmbNd)->second.first,
+                                 settled.find(toCmbNd)->second.second));
+      if (!(*toGrNds.begin()) || *toGrNds.begin() == frGrNd ||
+          (*toGrNds.begin())->pl().isClosed()) {
+        fail = true;
+        break;
+      }
+    } else {
+      // get surrounding displacement nodes
+      toGrNds = gg->getGrNdCands(toCmbNd, maxDis, frGrNd);
+
+      // TODO!!!!!!: abort criteria
+      while (!toGrNds.size()) {
+        maxDis *= 2;
+        toGrNds = gg->getGrNdCands(toCmbNd, maxDis, frGrNd);
+      }
+    }
 }

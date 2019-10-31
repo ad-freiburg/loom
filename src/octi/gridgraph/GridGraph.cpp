@@ -480,28 +480,13 @@ void GridGraph::closeNodeSink(GridNode* n) {
 }
 
 // _____________________________________________________________________________
-GridNode* GridGraph::getGridNodeFrom(CombNode* n, double maxDis,
-                                     const GridNode* ex) {
-  if (!isSettled(n)) {
-    auto cands = getGridNdCands(*n->pl().getGeom(), maxDis, ex);
-
-    while (!cands.empty()) {
-      if (!cands.top().n->pl().isClosed()) return cands.top().n;
-      cands.pop();
-    }
-    return 0;
-  }
-  return _settled[n];
-}
-
-// _____________________________________________________________________________
 GridNode* GridGraph::getSettled(const CombNode* cnd) const {
   if (_settled.count(cnd)) return _settled.find(cnd)->second;
   return 0;
 }
 
 // _____________________________________________________________________________
-std::set<GridNode*> GridGraph::getGridNodesTo(CombNode* n, double maxDis,
+std::set<GridNode*> GridGraph::getGrNdCands(CombNode* n, double maxDis,
                                               const GridNode* ex) {
   std::set<GridNode*> tos;
   if (!isSettled(n)) {
