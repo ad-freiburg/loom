@@ -68,8 +68,7 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
   std::priority_queue<Candidate> getGridNdCands(const util::geo::DPoint& p,
-                                                double maxD,
-                                                const GridNode* ex) const;
+                                                double maxD) const;
 
   void addCostVector(GridNode* n, const NodeCost& addC);
 
@@ -80,8 +79,7 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
-  std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis,
-                                     const GridNode* ex);
+  std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis);
 
   void settleNd(GridNode* n, CombNode* cn);
   void settleEdg(GridNode* a, GridNode* b, CombEdge* e);

@@ -25,7 +25,7 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
                      const Penalties& pens)
     : _bbox(bbox),
       _c(pens),
-      _grid(cellSize, cellSize, bbox),
+      _grid(cellSize, cellSize, bbox, false),
       _cellSize(cellSize),
       _spacer(spacer) {
   assert(_c.p_0 <= _c.p_135);
@@ -37,10 +37,10 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
   double c_45 = c_0 + c_135;
 
-  std::cerr << "C0: " << c_0 << std::endl;
-  std::cerr << "C135: " << c_135 << std::endl;
-  std::cerr << "C90: " << c_90 << std::endl;
-  std::cerr << "C45: " << c_45 << std::endl;
+  // std::cerr << "C0: " << c_0 << std::endl;
+  // std::cerr << "C135: " << c_135 << std::endl;
+  // std::cerr << "C90: " << c_90 << std::endl;
+  // std::cerr << "C45: " << c_45 << std::endl;
 
   // cut off illegal spacer values
   if (spacer > cellSize / 2) spacer = cellSize / 2;
@@ -383,8 +383,8 @@ void GridGraph::writeInitialCosts() {
 }
 
 // _____________________________________________________________________________
-std::priority_queue<Candidate> GridGraph::getGridNdCands(
-    const DPoint& p, double maxD, const GridNode* ex) const {
+std::priority_queue<Candidate> GridGraph::getGridNdCands(const DPoint& p,
+                                                         double maxD) const {
   std::priority_queue<Candidate> ret;
   std::set<GridNode*> neigh;
   DBox b(DPoint(p.getX() - maxD, p.getY() - maxD),
@@ -392,7 +392,7 @@ std::priority_queue<Candidate> GridGraph::getGridNdCands(
   _grid.get(b, &neigh);
 
   for (auto n : neigh) {
-    if (n->pl().isClosed() || n == ex) continue;
+    if (n->pl().isClosed() || n->pl().isSettled()) continue;
     double d = dist(*n->pl().getGeom(), p);
     if (d < maxD) ret.push(Candidate(n, d));
   }
@@ -486,11 +486,10 @@ GridNode* GridGraph::getSettled(const CombNode* cnd) const {
 }
 
 // _____________________________________________________________________________
-std::set<GridNode*> GridGraph::getGrNdCands(CombNode* n, double maxDis,
-                                              const GridNode* ex) {
+std::set<GridNode*> GridGraph::getGrNdCands(CombNode* n, double maxDis) {
   std::set<GridNode*> tos;
   if (!isSettled(n)) {
-    auto cands = getGridNdCands(*n->pl().getGeom(), maxDis, ex);
+    auto cands = getGridNdCands(*n->pl().getGeom(), maxDis);
 
     while (!cands.empty()) {
       if (!cands.top().n->pl().isClosed()) tos.insert(cands.top().n);

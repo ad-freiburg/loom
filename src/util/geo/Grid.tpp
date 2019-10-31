@@ -107,7 +107,7 @@ void Grid<V, G, T>::get(const G<T>& geom, double d, std::set<V>* s) const {
 // _____________________________________________________________________________
 template <typename V, template <typename> class G, typename T>
 void Grid<V, G, T>::get(size_t x, size_t y, std::set<V>* s) const {
-  if (_hasValIdx) {
+  if (_hasValIdx || _removed.size() == 0) {
     s->insert(_grid[x][y].begin(), _grid[x][y].end());
   } else {
     // if we dont have a value index, we have a set of deleted nodes.

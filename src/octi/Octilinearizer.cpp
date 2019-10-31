@@ -56,8 +56,8 @@ start:
 
 // _____________________________________________________________________________
 TransitGraph Octilinearizer::drawILP(TransitGraph* tg, GridGraph** retGg,
-                                  const Penalties& pens, double gridSize,
-                                  double borderRad) {
+                                     const Penalties& pens, double gridSize,
+                                     double borderRad) {
   removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg);
   auto box = tg->getBBox();
@@ -132,8 +132,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   drawing.applyToGrid(gg);
 
   size_t iters = 0;
-  // size_t ITERS = 100;
-  size_t ITERS = 0;
+  size_t ITERS = 100;
 
   for (; iters < ITERS; iters++) {
     Drawing bestFromIter = drawing;
@@ -250,6 +249,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
                           const SettledPos& settled, GridGraph* gg,
                           Drawing* drawing) {
   bool fail = false;
+  double cutoff = std::numeric_limits<double>::infinity();
 
   double c_0 = gg->getPenalties().p_45 - gg->getPenalties().p_135;
 
@@ -259,80 +259,35 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     auto frCmbNd = cmbEdg->getFrom();
     auto toCmbNd = cmbEdg->getTo();
 
-    bool reversed = false;
+    std::set<GridNode *> frGrNds, toGrNds;
+    std::tie(frGrNds, toGrNds) = getRtPair(frCmbNd, toCmbNd, settled, gg);
 
-    if ((!gg->isSettled(frCmbNd) && gg->isSettled(toCmbNd))) {
-      auto tmp = frCmbNd;
-      frCmbNd = toCmbNd;
-      toCmbNd = tmp;
-      reversed = !reversed;
-    }
-
-    GridNode* frGrNd;
-    std::set<GridNode*> toGrNds;
-
-    double maxDis = gg->getCellSize() * 3;
-
-    // STEP 1
-    // grid node selection
-    if (gg->getSettled(frCmbNd)) {
-      frGrNd = gg->getSettled(frCmbNd);
-    } else if (settled.count(frCmbNd)) {
-      frGrNd = gg->getNode(settled.find(frCmbNd)->second.first,
-                           settled.find(frCmbNd)->second.second);
-      if (!frGrNd || frGrNd->pl().isClosed()) {
-        fail = true;
-        break;
-      }
-    } else {
-      frGrNd = gg->getGrNdCands(frCmbNd, maxDis.7, 0);
-    }
-
-    if (gg->getSettled(toCmbNd)) {
-      toGrNds.insert(gg->getSettled(toCmbNd));
-    } else if (settled.count(toCmbNd)) {
-      toGrNds.insert(gg->getNode(settled.find(toCmbNd)->second.first,
-                                 settled.find(toCmbNd)->second.second));
-      if (!(*toGrNds.begin()) || *toGrNds.begin() == frGrNd ||
-          (*toGrNds.begin())->pl().isClosed()) {
-        fail = true;
-        break;
-      }
-    } else {
-      // get surrounding displacement nodes
-      toGrNds = gg->getGrNdCands(toCmbNd, maxDis, frGrNd);
-
-      // TODO!!!!!!: abort criteria
-      while (!toGrNds.size()) {
-        maxDis *= 2;
-        toGrNds = gg->getGrNdCands(toCmbNd, maxDis, frGrNd);
-      }
-    }
-
-    if (!frGrNd || toGrNds.size() == 0) {
+    if (frGrNds.size() == 0 || toGrNds.size() == 0) {
       fail = true;
       break;
     }
-
-    for (auto to : toGrNds) assert(to != frGrNd);
-
-    // END STEP 1
 
     // why not distance based? (TODO, balance this with edge costs)
     double penPerGrid = 5 + c_0 + fmax(gg->getPenalties().diagonalPen,
                                        gg->getPenalties().horizontalPen);
 
-    // TODO: if we open node sinks, we have to offset their cost by the highest
+    // if we open node sinks, we have to offset their cost by the highest
     // possible turn cost + 1 to not distort turn penalties
+    double costOffsetFrom = 0;
+    double costOffsetTo = 0;
 
-    // open from source node
-    if (gg->isSettled(frCmbNd)) {
-      // only count displacement penalty ONCE
-      gg->openNodeSink(frGrNd, 0);
-    } else {
-      double gridD = floor(dist(*frGrNd->pl().getGeom(), *frCmbNd->pl().getGeom()));
+    // open the source nodes
+    for (auto n : frGrNds) {
+      double gridD = floor(dist(*n->pl().getGeom(), *frCmbNd->pl().getGeom()));
       gridD = gridD / gg->getCellSize();
-      gg->openNodeSink(frGrNd, gridD * penPerGrid);
+
+      if (gg->isSettled(frCmbNd)) {
+        // only count displacement penalty ONCE
+        gg->openNodeSink(n, 0);
+      } else {
+        costOffsetFrom = (gg->getPenalties().p_45 + gg->getPenalties().p_135);
+        gg->openNodeSink(n, costOffsetFrom  + gridD * penPerGrid);
+      }
     }
 
     // open the target nodes
@@ -344,7 +299,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
         // only count displacement penalty ONCE
         gg->openNodeSink(n, 0);
       } else {
-        gg->openNodeSink(n, gridD * penPerGrid);
+        costOffsetTo = (gg->getPenalties().p_45 + gg->getPenalties().p_135);
+        gg->openNodeSink(n, costOffsetTo  + gridD * penPerGrid);
       }
     }
 
@@ -356,8 +312,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     // Even more importantly, is a node is settled, its turn edges have
     // already been closed.
 
-    if (gg->isSettled(frCmbNd)) {
-      writeNdCosts(frGrNd, frCmbNd, cmbEdg, gg);
+    if (frGrNds.size() == 1 && gg->isSettled(frCmbNd)) {
+      writeNdCosts(*frGrNds.begin(), frCmbNd, cmbEdg, gg);
     }
 
     if (toGrNds.size() == 1 && gg->isSettled(toCmbNd)) {
@@ -369,28 +325,36 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     GrEdgList eL;
     GrNdList nL;
     GridNode* toGrNd = 0;
-    Dijkstra::shortestPath(frGrNd, toGrNds, GridCost(),
-                           GridHeur(gg, frGrNd, toGrNds), &eL, &nL);
+    GridNode* frGrNd = 0;
+
+    auto heur = GridHeur(gg, toGrNds);
+    if (heur.cheapestSink < cutoff) {
+      Dijkstra::shortestPath(frGrNds, toGrNds, GridCost(), heur,
+                             &eL, &nL);
+    }
 
     if (!nL.size()) {
       // cleanup
       for (auto n : toGrNds) gg->closeNodeSink(n);
-      gg->closeNodeSink(frGrNd);
+      for (auto n : frGrNds) gg->closeNodeSink(n);
 
       fail = true;
       break;
     }
 
     toGrNd = nL.front();
+    frGrNd = nL.back();
+
+    // remove the cost offsets to not distort final costs
+    eL.front()->pl().setCost(eL.front()->pl().cost() - costOffsetTo);
+    eL.back()->pl().setCost(eL.back()->pl().cost() - costOffsetFrom);
 
     // draw
-    drawing->draw(cmbEdg, eL, reversed);
+    drawing->draw(cmbEdg, eL);
 
-    // close the target node
+    // close the source and target node
     for (auto n : toGrNds) gg->closeNodeSink(n);
-
-    // close the start node
-    gg->closeNodeSink(frGrNd);
+    for (auto n : frGrNds) gg->closeNodeSink(n);
 
     settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg);
   }
@@ -437,47 +401,53 @@ std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg) const {
 }
 
 // _____________________________________________________________________________
-std::pair<std::set<GridNode*, std::set<GridNode*>> getRtPairs(CombNode* frCmbNd, CombNode* toCmbNd, GridGraph* gg) {
-  std::pair<std::set<GridNode*, std::set<GridNode*>> ret;
+RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
+                                 const SettledPos& preSettled, GridGraph* gg) {
+  // shortcut
+  if (gg->getSettled(frCmbNd) && gg->getSettled(toCmbNd)) {
+    return {getCands(frCmbNd, preSettled, gg, 0),
+            getCands(toCmbNd, preSettled, gg, 0)};
+  }
 
-    GridNode* frGrNd;
-    std::set<GridNode*> toGrNds;
+  double maxDis = gg->getCellSize() * 4;
 
-    double maxDis = gg->getCellSize() * 3;
+  std::set<GridNode*> frGrNds;
+  std::set<GridNode*> toGrNds;
 
-    // STEP 1
-    // grid node selection
-    if (gg->getSettled(frCmbNd)) {
-      frGrNd = gg->getSettled(frCmbNd);
-    } else if (settled.count(frCmbNd)) {
-      frGrNd = gg->getNode(settled.find(frCmbNd)->second.first,
-                           settled.find(frCmbNd)->second.second);
-      if (!frGrNd || frGrNd->pl().isClosed()) {
-        fail = true;
-        break;
-      }
-    } else {
-      frGrNd = gg->getGrNdCands(frCmbNd, maxDis.7, 0);
-    }
+  while ((!frGrNds.size() || !toGrNds.size()) &&
+         maxDis < gg->getCellSize() * 25) {
+    std::set<GridNode*> frCands = getCands(frCmbNd, preSettled, gg, maxDis);
+    std::set<GridNode*> toCands = getCands(toCmbNd, preSettled, gg, maxDis);
 
-    if (gg->getSettled(toCmbNd)) {
-      toGrNds.insert(gg->getSettled(toCmbNd));
-    } else if (settled.count(toCmbNd)) {
-      toGrNds.insert(gg->getNode(settled.find(toCmbNd)->second.first,
-                                 settled.find(toCmbNd)->second.second));
-      if (!(*toGrNds.begin()) || *toGrNds.begin() == frGrNd ||
-          (*toGrNds.begin())->pl().isClosed()) {
-        fail = true;
-        break;
-      }
-    } else {
-      // get surrounding displacement nodes
-      toGrNds = gg->getGrNdCands(toCmbNd, maxDis, frGrNd);
+    std::set<GridNode*> isect;
+    std::set_intersection(frCands.begin(), frCands.end(), toCands.begin(),
+                          toCands.end(), std::inserter(isect, isect.begin()));
 
-      // TODO!!!!!!: abort criteria
-      while (!toGrNds.size()) {
-        maxDis *= 2;
-        toGrNds = gg->getGrNdCands(toCmbNd, maxDis, frGrNd);
-      }
-    }
+    std::set_difference(frCands.begin(), frCands.end(), isect.begin(),
+                        isect.end(), std::inserter(frGrNds, frGrNds.begin()));
+    std::set_difference(toCands.begin(), toCands.end(), isect.begin(),
+                        isect.end(), std::inserter(toGrNds, toGrNds.begin()));
+    maxDis *= 2;
+  }
+
+  return {frGrNds, toGrNds};
+}
+
+// _____________________________________________________________________________
+std::set<GridNode*> Octilinearizer::getCands(CombNode* cmbNd,
+                                             const SettledPos& preSettled,
+                                             GridGraph* gg, double maxDis) {
+  std::set<GridNode*> ret;
+
+  if (gg->getSettled(cmbNd)) {
+    ret.insert(gg->getSettled(cmbNd));
+  } else if (preSettled.count(cmbNd)) {
+    auto nd = gg->getNode(preSettled.find(cmbNd)->second.first,
+                           preSettled.find(cmbNd)->second.second);
+    if (nd && !nd->pl().isClosed()) ret.insert(nd);
+  } else {
+    ret = gg->getGrNdCands(cmbNd, maxDis);
+  }
+
+  return ret;
 }

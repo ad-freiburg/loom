@@ -37,7 +37,7 @@ using util::graph::Dijkstra;
 
 typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
 typedef Dijkstra::NList<GridNodePL, GridEdgePL> GrNdList;
-
+typedef std::pair<std::set<GridNode*>, std::set<GridNode*>> RtPair;
 typedef std::map<CombNode*, std::pair<size_t, size_t>> SettledPos;
 
 // comparator for nodes, based on degree
@@ -74,19 +74,23 @@ struct GridCost : public Dijkstra::CostFunc<GridNodePL, GridEdgePL, double> {
 };
 
 struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
-  GridHeur(GridGraph* g, GridNode* from, const std::set<GridNode*>& to)
-      : g(g), from(from), to(0) {
-    if (to.size() == 1) {
-      this->to = *to.begin();
-    }
+  GridHeur(GridGraph* g, const std::set<GridNode*>& to) : g(g), to(0) {
+    if (to.size() == 1) this->to = *to.begin();
+
+    cheapestSink = std::numeric_limits<double>::infinity();
 
     for (auto n : to) {
-      for (size_t i = 0; i < 8; i++) {
+      size_t i = 0;
+      for (; i < 8; i++) {
         auto neigh = g->getNeighbor(n->pl().getX(), n->pl().getY(), i);
         if (neigh && to.find(neigh) == to.end()) {
           hull.push_back({n->pl().getX(), n->pl().getY()});
           break;
         }
+      }
+      for (size_t j = i; j < 8; j++) {
+        double sinkCost = g->getEdg(n, n->pl().getPort(j))->pl().cost();
+        if (sinkCost < cheapestSink) cheapestSink = sinkCost;
       }
     }
   }
@@ -103,13 +107,13 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
       if (temp < ret) ret = temp;
     }
 
-    return ret;
+    return ret + cheapestSink;
   }
 
   octi::gridgraph::GridGraph* g;
-  GridNode* from;
   GridNode* to;
   std::vector<std::pair<size_t, size_t>> hull;
+  double cheapestSink;
 };
 
 class Octilinearizer {
@@ -119,7 +123,7 @@ class Octilinearizer {
                     double gridSize, double borderRad);
 
   TransitGraph drawILP(TransitGraph* g, GridGraph** gg, const Penalties& pens,
-                    double gridSize, double borderRad);
+                       double gridSize, double borderRad);
 
  private:
   void removeEdgesShorterThan(TransitGraph* g, double d);
@@ -139,6 +143,12 @@ class Octilinearizer {
 
   SettledPos getNeighbor(const SettledPos& pos, const std::vector<CombNode*>&,
                          size_t i) const;
+
+  RtPair getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
+                   const SettledPos& settled, GridGraph* gg);
+
+  std::set<GridNode*> getCands(CombNode* cmBnd, const SettledPos& settled,
+                               GridGraph* gg, double maxDis);
 };
 
 }  // namespace octi

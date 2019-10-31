@@ -22,17 +22,13 @@ using octi::gridgraph::GridEdgePL;
 double Drawing::score() const { return _c; }
 
 // _____________________________________________________________________________
-void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
-  // std::cerr << "  Drawing " << ce << " from " << ce->getFrom() << " to " << ce->getTo() << " " << rev << std::endl;
+void Drawing::draw(CombEdge* ce, const GrEdgList& ges) {
   if (_edgs.count(ce)) _edgs[ce].clear();
   for (size_t i = 0; i < ges.size(); i++) {
     auto ge = ges[i];
 
-    if (rev) { _nds[ce->getFrom()] = ges.front()->getTo()->pl().getParent(); _nds[ce->getTo()] = ges.back()->getFrom()->pl().getParent();
-    } else {
       _nds[ce->getTo()] = ges.front()->getTo()->pl().getParent();
       _nds[ce->getFrom()] = ges.back()->getFrom()->pl().getParent();
-    }
 
     // there are three kinds of cost contained in a result:
     //  a) node reach costs, which model the cost it takes to move a node
@@ -50,38 +46,28 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
     _c += ge->pl().cost();
 
     if (i == 0) {
-      if (!_ndReachCosts.count(rev ? ce->getFrom() : ce->getTo())) {
+      if (!_ndReachCosts.count(ce->getTo())) {
         // if the node was not settled before, this is the node move cost
-        _ndReachCosts[rev ? ce->getFrom() : ce->getTo()] = ge->pl().cost();
-        _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] = 0;
-        // std::cerr << "Settling node move cost for " << (rev ? ce->getFrom() : ce->getTo()) << std::endl;
+        _ndReachCosts[ce->getTo()] = ge->pl().cost();
+        _ndBndCosts[ce->getTo()] = 0;
       } else {
         // otherwise it is the reach cost belonging to the edge
-        _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] += ge->pl().cost();
-      // std::cerr << "Node bnd costs of " << ge->pl().cost() << " for " << (rev ? ce->getFrom() : ce->getTo()) << std::endl;
+        _ndBndCosts[ce->getTo()] += ge->pl().cost();
       }
     } else if (i == ges.size() - 1) {
-      if (!_ndReachCosts.count(rev ? ce->getTo() : ce->getFrom())) {
+      if (!_ndReachCosts.count(ce->getFrom())) {
         // if the node was not settled before, this is the node move cost
-        _ndReachCosts[rev ? ce->getTo() : ce->getFrom()] = ge->pl().cost();
-        _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] = 0;
-        // std::cerr << "Settling node move cost for " << (rev ? ce->getTo() : ce->getFrom()) << std::endl;
+        _ndReachCosts[ce->getFrom()] = ge->pl().cost();
+        _ndBndCosts[ce->getFrom()] = 0;
       } else {
         // otherwise it is the reach cost belonging to the edge
-        _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] += ge->pl().cost();
-        // std::cerr << "Node bnd costs of " << ge->pl().cost() << " for " << (rev ? ce->getTo() : ce->getFrom()) << std::endl;
+        _ndBndCosts[ce->getFrom()] += ge->pl().cost();
       }
     } else {
       _edgCosts[ce] += ge->pl().cost();
     }
 
-    if (rev) {
-      auto e = _gg->getEdg(ges[ges.size() - 1 - i]->getTo(),
-                                      ges[ges.size() - 1 - i]->getFrom());
-      if (!e->pl().isSecondary()) _edgs[ce].push_back(e);
-    } else {
       if (!ges[i]->pl().isSecondary()) _edgs[ce].push_back(ges[i]);
-    }
   }
 
   double sum = 0;
