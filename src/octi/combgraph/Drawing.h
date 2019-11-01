@@ -58,6 +58,7 @@ class Drawing {
   std::map<const CombNode*, double> _ndReachCosts;
   std::map<const CombNode*, double> _ndBndCosts;
   std::map<const CombEdge*, double> _edgCosts;
+  std::map<const CombEdge*, double> _springCosts;
   double _c;
   const GridGraph* _gg;
 

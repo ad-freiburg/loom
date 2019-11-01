@@ -242,9 +242,9 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
   CombEdge* out[8];
   getSettledAdjEdgs(n, out);
 
-  for (auto ro : e->pl().getChilds().front()->pl().getRoutes()) {
-    for (int i = 0; i < 8; i++) {
-      if (!out[i]) continue;
+  for (int i = 0; i < 8; i++) {
+    if (!out[i]) continue;
+    for (auto ro : e->pl().getChilds().front()->pl().getRoutes()) {
 
       // TODO: turn restrictions, if there is actually no connection
       // between the lines on the edges, dont penalize!!
@@ -264,6 +264,9 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
           if (ang == 2) addC[j] += mult * c_90;
           if (ang == 3) addC[j] += mult * c_135;
         }
+
+        // only count a single matching line
+        break;
       }
     }
   }

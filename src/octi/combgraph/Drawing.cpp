@@ -24,11 +24,16 @@ double Drawing::score() const { return _c; }
 // _____________________________________________________________________________
 void Drawing::draw(CombEdge* ce, const GrEdgList& ges) {
   if (_edgs.count(ce)) _edgs[ce].clear();
+
+  double l = 0;
+
   for (size_t i = 0; i < ges.size(); i++) {
     auto ge = ges[i];
+    l += util::geo::dist(*ge->getFrom()->pl().getGeom(),
+                         *ge->getTo()->pl().getGeom());
 
-      _nds[ce->getTo()] = ges.front()->getTo()->pl().getParent();
-      _nds[ce->getFrom()] = ges.back()->getFrom()->pl().getParent();
+    _nds[ce->getTo()] = ges.front()->getTo()->pl().getParent();
+    _nds[ce->getFrom()] = ges.back()->getFrom()->pl().getParent();
 
     // there are three kinds of cost contained in a result:
     //  a) node reach costs, which model the cost it takes to move a node
@@ -67,26 +72,16 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges) {
       _edgCosts[ce] += ge->pl().cost();
     }
 
-      if (!ges[i]->pl().isSecondary()) _edgs[ce].push_back(ges[i]);
+    if (!ges[i]->pl().isSecondary()) _edgs[ce].push_back(ges[i]);
   }
 
-  double sum = 0;
-  for (auto a : _ndReachCosts) sum += a.second;
-  for (auto a : _ndBndCosts) sum += a.second;
-  for (auto a : _edgCosts) sum += a.second;
+  double d = (1 * _gg->getCellSize()) - (l / ce->pl().getChilds().size());
+  double pen = 0;
 
-  if (fabs(sum - _c) > 0.0001) {
-    // std::cerr << sum << " vs " << _c << std::endl;
-    assert(false);
-  }
+  if (d > 0) pen = d * 0.02;
 
-  // for (auto a : _ndBndCosts) {
-    // auto re = recalcBends(a.first);
-    // if (fabs(re - a.second) > 0.0001) {
-      // // std::cerr << "Recalc: " << re << " from edges: " << a.second << std::endl;
-      // assert(false);
-    // }
-  // }
+  _springCosts[ce] = pen;
+  _c +=_springCosts[ce];
 }
 
 // _____________________________________________________________________________
@@ -188,13 +183,15 @@ void Drawing::crumble() {
   _ndReachCosts.clear();
   _ndBndCosts.clear();
   _edgCosts.clear();
+  _springCosts.clear();
 }
 
 // _____________________________________________________________________________
 double Drawing::recalcBends(const CombNode* nd) {
   double c_0 = _gg->getPenalties().p_45 - _gg->getPenalties().p_135;
   double c_135 = _gg->getPenalties().p_45;
-  double c_90 = _gg->getPenalties().p_45 - _gg->getPenalties().p_135 + _gg->getPenalties().p_90;
+  double c_90 = _gg->getPenalties().p_45 - _gg->getPenalties().p_135 +
+                _gg->getPenalties().p_90;
   double c_45 = c_0 + c_135;
 
   double c = 0;
@@ -212,8 +209,7 @@ double Drawing::recalcBends(const CombNode* nd) {
 
     size_t dirA = 0;
     for (; dirA < 8; dirA++) {
-      if (
-          gnd->pl().getPort(dirA) == ge.front()->getFrom() ||
+      if (gnd->pl().getPort(dirA) == ge.front()->getFrom() ||
           gnd->pl().getPort(dirA) == ge.front()->getTo() ||
           gnd->pl().getPort(dirA) == ge.back()->getFrom() ||
           gnd->pl().getPort(dirA) == ge.back()->getTo()) {
@@ -222,7 +218,6 @@ double Drawing::recalcBends(const CombNode* nd) {
     }
 
     assert(dirA < 8);
-
 
     for (auto ro : e->pl().getChilds().front()->pl().getRoutes()) {
       for (auto f : nd->getAdjList()) {
@@ -235,8 +230,7 @@ double Drawing::recalcBends(const CombNode* nd) {
         if (f->pl().getChilds().front()->pl().hasRoute(ro.route)) {
           size_t dirB = 0;
           for (; dirB < 8; dirB++) {
-            if (
-                gnd->pl().getPort(dirB) == gf.front()->getFrom() ||
+            if (gnd->pl().getPort(dirB) == gf.front()->getFrom() ||
                 gnd->pl().getPort(dirB) == gf.front()->getTo() ||
                 gnd->pl().getPort(dirB) == gf.back()->getFrom() ||
                 gnd->pl().getPort(dirB) == gf.back()->getTo()) {
@@ -266,15 +260,16 @@ double Drawing::recalcBends(const CombNode* nd) {
 }
 
 // _____________________________________________________________________________
-bool Drawing::drawn(const CombEdge* ce) const {
-  return _edgs.count(ce);
-}
+bool Drawing::drawn(const CombEdge* ce) const { return _edgs.count(ce); }
 
 // _____________________________________________________________________________
 void Drawing::erase(CombEdge* ce) {
   _edgs.erase(ce);
   _c -= _edgCosts[ce];
   _edgCosts.erase(ce);
+
+  _c -= _springCosts[ce];
+  _springCosts.erase(ce);
 
   _c -= _ndBndCosts[ce->getFrom()];
   _c -= _ndBndCosts[ce->getTo()];
@@ -285,18 +280,6 @@ void Drawing::erase(CombEdge* ce) {
 
   _c += _ndBndCosts[ce->getTo()];
   _c += _ndBndCosts[ce->getFrom()];
-
-  double sum = 0;
-  for (auto a : _ndReachCosts) sum += a.second;
-  for (auto a : _ndBndCosts) sum += a.second;
-  for (auto a : _edgCosts) sum += a.second;
-
-  if (fabs(sum - _c) > 0.0001) {
-    std::cerr << sum << " vs " << _c << std::endl;
-    assert(false);
-  }
-
-  assert(_edgs.count(ce) == 0);
 }
 
 // _____________________________________________________________________________

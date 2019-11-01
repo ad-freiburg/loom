@@ -268,7 +268,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     }
 
     // why not distance based? (TODO, balance this with edge costs)
-    double penPerGrid = 5 + c_0 + fmax(gg->getPenalties().diagonalPen,
+    double penPerGrid = 3 + c_0 + fmax(gg->getPenalties().diagonalPen,
                                        gg->getPenalties().horizontalPen);
 
     // if we open node sinks, we have to offset their cost by the highest
@@ -285,8 +285,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
         // only count displacement penalty ONCE
         gg->openNodeSink(n, 0);
       } else {
-        costOffsetFrom = (gg->getPenalties().p_45 + gg->getPenalties().p_135);
-        gg->openNodeSink(n, costOffsetFrom  + gridD * penPerGrid);
+        costOffsetFrom = (gg->getPenalties().p_45 - gg->getPenalties().p_135);
+        gg->openNodeSink(n, costOffsetFrom + gridD * penPerGrid);
       }
     }
 
@@ -299,8 +299,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
         // only count displacement penalty ONCE
         gg->openNodeSink(n, 0);
       } else {
-        costOffsetTo = (gg->getPenalties().p_45 + gg->getPenalties().p_135);
-        gg->openNodeSink(n, costOffsetTo  + gridD * penPerGrid);
+        costOffsetTo = (gg->getPenalties().p_45 - gg->getPenalties().p_135);
+        gg->openNodeSink(n, costOffsetTo + gridD * penPerGrid);
       }
     }
 
@@ -329,8 +329,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     auto heur = GridHeur(gg, toGrNds);
     if (heur.cheapestSink < cutoff) {
-      Dijkstra::shortestPath(frGrNds, toGrNds, GridCost(), heur,
-                             &eL, &nL);
+      Dijkstra::shortestPath(frGrNds, toGrNds, GridCost(), heur, &eL, &nL);
     }
 
     if (!nL.size()) {
@@ -427,6 +426,17 @@ RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
                         isect.end(), std::inserter(frGrNds, frGrNds.begin()));
     std::set_difference(toCands.begin(), toCands.end(), isect.begin(),
                         isect.end(), std::inserter(toGrNds, toGrNds.begin()));
+
+    // this effectively builds a Voronoi diagram
+    for (auto iNd : isect) {
+      if (util::geo::dist(*iNd->pl().getGeom(), *frCmbNd->pl().getGeom()) <
+          util::geo::dist(*iNd->pl().getGeom(), *toCmbNd->pl().getGeom())) {
+        frGrNds.insert(iNd);
+      } else {
+        toGrNds.insert(iNd);
+      }
+    }
+
     maxDis *= 2;
   }
 
@@ -443,7 +453,7 @@ std::set<GridNode*> Octilinearizer::getCands(CombNode* cmbNd,
     ret.insert(gg->getSettled(cmbNd));
   } else if (preSettled.count(cmbNd)) {
     auto nd = gg->getNode(preSettled.find(cmbNd)->second.first,
-                           preSettled.find(cmbNd)->second.second);
+                          preSettled.find(cmbNd)->second.second);
     if (nd && !nd->pl().isClosed()) ret.insert(nd);
   } else {
     ret = gg->getGrNdCands(cmbNd, maxDis);

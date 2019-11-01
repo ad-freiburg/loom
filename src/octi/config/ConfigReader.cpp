@@ -50,15 +50,15 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "print mode: transitgraph, gridgraph")
     (
       "vert-pen",
-      opts::value<double>(&(cfg->pens.verticalPen))->default_value(2),
+      opts::value<double>(&(cfg->pens.verticalPen))->default_value(0),
       "penalty for vertical edges")
     (
       "hori-pen",
-      opts::value<double>(&(cfg->pens.horizontalPen))->default_value(2),
+      opts::value<double>(&(cfg->pens.horizontalPen))->default_value(0),
       "penalty for horicontal edges")
     (
       "diag-pen",
-      opts::value<double>(&(cfg->pens.diagonalPen))->default_value(2),
+      opts::value<double>(&(cfg->pens.diagonalPen))->default_value(.5),
       "penalty for diagonal edges")
     (
       "pen-180",
