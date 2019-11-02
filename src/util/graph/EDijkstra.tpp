@@ -69,12 +69,13 @@ C EDijkstra::shortestPathImpl(const std::set<Edge<N, E>*> from,
   RouteEdge<N, E, C> cur;
 
   while (!pq.empty()) {
-    EDijkstra::ITERS++;
-
+    if (costFunc.inf() <= pq.top().h) return costFunc.inf();
     if (settled.find(pq.top().e) != settled.end()) {
       pq.pop();
       continue;
     }
+
+    EDijkstra::ITERS++;
 
     cur = pq.top();
     pq.pop();
@@ -115,12 +116,12 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
   RouteEdge<N, E, C> cur;
 
   while (!pq.empty()) {
-    EDijkstra::ITERS++;
-
     if (settled.find(pq.top().e) != settled.end()) {
       pq.pop();
       continue;
     }
+
+    EDijkstra::ITERS++;
 
     cur = pq.top();
     pq.pop();
@@ -165,12 +166,13 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
   RouteEdge<N, E, C> cur;
 
   while (!pq.empty()) {
-    EDijkstra::ITERS++;
-
+    if (costFunc.inf() <= pq.top().h) return costs;
     if (settled.find(pq.top().e) != settled.end()) {
       pq.pop();
       continue;
     }
+
+    EDijkstra::ITERS++;
 
     cur = pq.top();
     pq.pop();
@@ -224,6 +226,7 @@ void EDijkstra::relax(RouteEdge<N, E, C>& cur, const std::set<Edge<N, E>*>& to,
       if (costFunc.inf() <= newC) continue;
 
       const C& h = heurFunc(edge, to);
+      // addition done here to avoid it in the PQ
       const C& newH = newC + h;
 
       pq.emplace(edge, cur.e, cur.e->getFrom(), newC, newH);
@@ -237,6 +240,7 @@ void EDijkstra::relax(RouteEdge<N, E, C>& cur, const std::set<Edge<N, E>*>& to,
     if (costFunc.inf() <= newC) continue;
 
     const C& h = heurFunc(edge, to);
+    // addition done here to avoid it in the PQ
     const C& newH = newC + h;
 
     pq.emplace(edge, cur.e, cur.e->getTo(), newC, newH);
@@ -249,7 +253,7 @@ void EDijkstra::buildPath(Edge<N, E>* curE, const Settled<N, E, C>& settled,
                           NList<N, E>* resNodes, EList<N, E>* resEdges) {
   const RouteEdge<N, E, C>* curEdge = &settled.find(curE)->second;
   if (resNodes) resNodes->push_back(curEdge->e->getOtherNd(curEdge->n));
-  while (true) {
+  while (resNodes || resEdges) {
     if (resNodes && curEdge->n) resNodes->push_back(curEdge->n);
     if (resEdges) resEdges->push_back(curEdge->e);
     if (!curEdge->parent) break;

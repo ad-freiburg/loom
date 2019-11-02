@@ -14,7 +14,8 @@ GridNodePL::GridNodePL(Point<double> pos)
       _closed(false),
       _sink(false),
       _station(false),
-      _settled(false) {}
+      _settled(false),
+      visited(false) {}
 
 // _____________________________________________________________________________
 const Point<double>* GridNodePL::getGeom() const { return &_pos; }
@@ -22,7 +23,8 @@ const Point<double>* GridNodePL::getGeom() const { return &_pos; }
 // _____________________________________________________________________________
 util::json::Dict GridNodePL::getAttrs() const {
   util::json::Dict obj;
-  std::vector<std::string> routes;
+
+  obj["visited"] = visited ? "1" : "0";
 
   return obj;
 }

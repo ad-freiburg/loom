@@ -37,6 +37,10 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
   double c_45 = c_0 + c_135;
 
+  _heurECost =
+      (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
+  _heurHopCost = _c.p_45 - _c.p_135;
+
   // std::cerr << "C0: " << c_0 << std::endl;
   // std::cerr << "C135: " << c_135 << std::endl;
   // std::cerr << "C90: " << c_90 << std::endl;
@@ -411,15 +415,8 @@ const Grid<GridNode*, Point, double>& GridGraph::getGrid() const {
 // _____________________________________________________________________________
 double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
                            int64_t yb) const {
-  if (xa == xb && ya == yb) return 0;
-  size_t minHops = std::max(labs(xb - xa), labs(yb - ya));
-
-  size_t edgeCost =
-      minHops *
-      (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
-  size_t hopCost = (minHops - 1) * (_c.p_45 - _c.p_135);
-
-  return edgeCost + hopCost;
+  double minHops = std::max(labs(xb - xa), labs(yb - ya));
+  return minHops * (_heurECost + _heurHopCost) - _heurHopCost;
 }
 
 // _____________________________________________________________________________

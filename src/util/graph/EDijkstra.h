@@ -37,13 +37,16 @@ class EDijkstra : public ShortestPath<EDijkstra> {
     Edge<N, E>* e;
     Edge<N, E>* parent;
 
+    // the cost so far
     C d;
+
+    // the heuristical remaining cost + the cost so far
     C h;
 
     Node<N, E>* n;
 
     bool operator<(const RouteEdge<N, E, C>& p) const {
-      return h > p.h || (h == p.h && d > p.d);
+      return h > p.h;
     }
   };
 

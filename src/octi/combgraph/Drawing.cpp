@@ -22,7 +22,7 @@ using octi::gridgraph::GridEdgePL;
 double Drawing::score() const { return _c; }
 
 // _____________________________________________________________________________
-void Drawing::draw(CombEdge* ce, const GrEdgList& ges) {
+void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
   if (_edgs.count(ce)) _edgs[ce].clear();
 
   double l = 0;
@@ -32,8 +32,13 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges) {
     l += util::geo::dist(*ge->getFrom()->pl().getGeom(),
                          *ge->getTo()->pl().getGeom());
 
-    _nds[ce->getTo()] = ges.front()->getTo()->pl().getParent();
-    _nds[ce->getFrom()] = ges.back()->getFrom()->pl().getParent();
+    if (rev) {
+      _nds[ce->getFrom()] = ges.front()->getTo()->pl().getParent();
+      _nds[ce->getTo()] = ges.back()->getFrom()->pl().getParent();
+    } else {
+      _nds[ce->getTo()] = ges.front()->getTo()->pl().getParent();
+      _nds[ce->getFrom()] = ges.back()->getFrom()->pl().getParent();
+    }
 
     // there are three kinds of cost contained in a result:
     //  a) node reach costs, which model the cost it takes to move a node
@@ -51,28 +56,35 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges) {
     _c += ge->pl().cost();
 
     if (i == 0) {
-      if (!_ndReachCosts.count(ce->getTo())) {
+      if (!_ndReachCosts.count(rev ? ce->getFrom() : ce->getTo())) {
         // if the node was not settled before, this is the node move cost
-        _ndReachCosts[ce->getTo()] = ge->pl().cost();
-        _ndBndCosts[ce->getTo()] = 0;
+        _ndReachCosts[rev ? ce->getFrom() : ce->getTo()] = ge->pl().cost();
+        _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] = 0;
       } else {
         // otherwise it is the reach cost belonging to the edge
-        _ndBndCosts[ce->getTo()] += ge->pl().cost();
+        _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] += ge->pl().cost();
       }
     } else if (i == ges.size() - 1) {
-      if (!_ndReachCosts.count(ce->getFrom())) {
+      if (!_ndReachCosts.count(rev ? ce->getTo() : ce->getFrom())) {
         // if the node was not settled before, this is the node move cost
-        _ndReachCosts[ce->getFrom()] = ge->pl().cost();
-        _ndBndCosts[ce->getFrom()] = 0;
+        _ndReachCosts[rev ? ce->getTo() : ce->getFrom()] = ge->pl().cost();
+        _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] = 0;
       } else {
         // otherwise it is the reach cost belonging to the edge
-        _ndBndCosts[ce->getFrom()] += ge->pl().cost();
+        _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] += ge->pl().cost();
       }
     } else {
       _edgCosts[ce] += ge->pl().cost();
     }
 
-    if (!ges[i]->pl().isSecondary()) _edgs[ce].push_back(ges[i]);
+    if (rev) {
+      auto e = _gg->getEdg(ges[ges.size() - 1 - i]->getTo(),
+                           ges[ges.size() - 1 - i]->getFrom());
+
+      if (!e->pl().isSecondary()) _edgs[ce].push_back(e);
+    } else {
+      if (!ges[i]->pl().isSecondary()) _edgs[ce].push_back(ges[i]);
+    }
   }
 
   double d = (1 * _gg->getCellSize()) - (l / ce->pl().getChilds().size());
@@ -81,7 +93,7 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges) {
   if (d > 0) pen = d * 0.02;
 
   _springCosts[ce] = pen;
-  _c +=_springCosts[ce];
+  _c += _springCosts[ce];
 }
 
 // _____________________________________________________________________________
@@ -97,7 +109,7 @@ PolyLine<double> Drawing::buildPolylineFromRes(
   PolyLine<double> pl;
   for (auto revIt = res.rbegin(); revIt != res.rend(); revIt++) {
     auto f = *revIt;
-    // TODO check for isSeconday should not be needed, filtered out by draw()
+    // TODO check for isSecondary should not be needed, filtered out by draw()
     if (!f->pl().isSecondary()) {
       if (pl.getLine().size() > 0 &&
           dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) > 0) {
@@ -309,7 +321,6 @@ void Drawing::applyToGrid(const CombEdge* ce, GridGraph* gg) {
   const auto& es = it->second;
 
   for (auto e : es) {
-    // if (e->pl().isSecondary()) continue;
     gg->settleEdg(e->getFrom()->pl().getParent(), e->getTo()->pl().getParent(),
                   const_cast<CombEdge*>(ce));
   }

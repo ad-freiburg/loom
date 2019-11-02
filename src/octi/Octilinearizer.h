@@ -62,49 +62,56 @@ struct GraphMeasures {
   size_t maxDeg;
 };
 
-struct GridCost : public Dijkstra::CostFunc<GridNodePL, GridEdgePL, double> {
-  virtual double operator()(const GridNode* from, const GridEdge* e,
-                            const GridNode* to) const {
+struct GridCost : public Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
+  GridCost(float inf) : _inf(inf) {}
+  virtual float operator()(const GridNode* from, const GridEdge* e,
+                           const GridNode* to) const {
     UNUSED(from);
     UNUSED(to);
     return e->pl().cost();
   }
 
-  virtual double inf() const { return std::numeric_limits<double>::infinity(); }
+  float _inf;
+
+  virtual float inf() const { return _inf; }
 };
 
-struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
+struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
   GridHeur(GridGraph* g, const std::set<GridNode*>& to) : g(g), to(0) {
     if (to.size() == 1) this->to = *to.begin();
 
-    cheapestSink = std::numeric_limits<double>::infinity();
+    cheapestSink = std::numeric_limits<float>::infinity();
 
     for (auto n : to) {
       size_t i = 0;
       for (; i < 8; i++) {
+        float sinkCost = g->getEdg(n, n->pl().getPort(i))->pl().cost();
+        if (sinkCost < cheapestSink) cheapestSink = sinkCost;
         auto neigh = g->getNeighbor(n->pl().getX(), n->pl().getY(), i);
         if (neigh && to.find(neigh) == to.end()) {
-          hull.push_back({n->pl().getX(), n->pl().getY()});
+          hull.push_back(n->pl().getX());
+          hull.push_back(n->pl().getY());
           break;
         }
       }
       for (size_t j = i; j < 8; j++) {
-        double sinkCost = g->getEdg(n, n->pl().getPort(j))->pl().cost();
+        float sinkCost = g->getEdg(n, n->pl().getPort(j))->pl().cost();
         if (sinkCost < cheapestSink) cheapestSink = sinkCost;
       }
     }
   }
 
-  double operator()(const GridNode* from, const std::set<GridNode*>& to) const {
+  float operator()(const GridNode* from, const std::set<GridNode*>& to) const {
+    const_cast<GridNode*>(from)->pl().visited = true;
     if (to.find(from->pl().getParent()) != to.end()) return 0;
 
-    double ret = std::numeric_limits<double>::infinity();
+    float ret = std::numeric_limits<float>::infinity();
 
-    for (auto t : hull) {
-      double temp =
+    for (size_t i = 0; i < hull.size(); i+=2) {
+      float tmp =
           g->heurCost(from->pl().getParent()->pl().getX(),
-                      from->pl().getParent()->pl().getY(), t.first, t.second);
-      if (temp < ret) ret = temp;
+                      from->pl().getParent()->pl().getY(), hull[i], hull[i+1]);
+      if (tmp < ret) ret = tmp;
     }
 
     return ret + cheapestSink;
@@ -112,8 +119,8 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, double> {
 
   octi::gridgraph::GridGraph* g;
   GridNode* to;
-  std::vector<std::pair<size_t, size_t>> hull;
-  double cheapestSink;
+  std::vector<size_t> hull;
+  float cheapestSink;
 };
 
 class Octilinearizer {
@@ -137,9 +144,9 @@ class Octilinearizer {
   std::vector<CombEdge*> getOrdering(const CombGraph& cg) const;
 
   bool draw(const std::vector<CombEdge*>& order, GridGraph* gg,
-            Drawing* drawing);
+            Drawing* drawing, double cutoff);
   bool draw(const std::vector<CombEdge*>& order, const SettledPos& settled,
-            GridGraph* gg, Drawing* drawing);
+            GridGraph* gg, Drawing* drawing, double cutoff);
 
   SettledPos getNeighbor(const SettledPos& pos, const std::vector<CombNode*>&,
                          size_t i) const;

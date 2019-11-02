@@ -688,7 +688,7 @@ void ILPGridOptimizer::extractSolution(glp_prob* lp, GridGraph* gg,
         }
       }
 
-      d->draw(edg, edges);
+      d->draw(edg, edges, false);
     }
   }
 }

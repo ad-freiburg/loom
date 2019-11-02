@@ -18,12 +18,12 @@ C Dijkstra::shortestPathImpl(Node<N, E>* from, const std::set<Node<N, E>*>& to,
   RouteNode<N, E, C> cur;
 
   while (!pq.empty()) {
-    Dijkstra::ITERS++;
-
+    if (costFunc.inf() <= pq.top().h) return costFunc.inf();
     if (settled.find(pq.top().n) != settled.end()) {
       pq.pop();
       continue;
     }
+    Dijkstra::ITERS++;
 
     cur = pq.top();
     pq.pop();
@@ -61,12 +61,12 @@ C Dijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
   RouteNode<N, E, C> cur;
 
   while (!pq.empty()) {
-    Dijkstra::ITERS++;
-
+    if (costFunc.inf() <= pq.top().h) return costFunc.inf();
     if (settled.find(pq.top().n) != settled.end()) {
       pq.pop();
       continue;
     }
+    Dijkstra::ITERS++;
 
     cur = pq.top();
     pq.pop();
@@ -112,12 +112,12 @@ std::unordered_map<Node<N, E>*, C> Dijkstra::shortestPathImpl(
   RouteNode<N, E, C> cur;
 
   while (!pq.empty()) {
-    Dijkstra::ITERS++;
-
+    if (costFunc.inf() <= pq.top().h) return costs;
     if (settled.find(pq.top().n) != settled.end()) {
       pq.pop();
       continue;
     }
+    Dijkstra::ITERS++;
 
     cur = pq.top();
     pq.pop();
@@ -154,9 +154,10 @@ void Dijkstra::relax(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
     newC = cur.d + newC;
     if (costFunc.inf() <= newC) continue;
 
+    // addition done here to avoid it in the PQ
     const C& newH = newC + heurFunc(edge->getOtherNd(cur.n), to);
 
-    pq.emplace(edge->getOtherNd(cur.n), cur.n, newC, newH, &(*edge));
+    pq.emplace(edge->getOtherNd(cur.n), cur.n, newC, newH);
   }
 }
 
@@ -165,11 +166,16 @@ template <typename N, typename E, typename C>
 void Dijkstra::buildPath(Node<N, E>* curN,
                          Settled<N, E, C>& settled, NList<N, E>* resNodes,
                          EList<N, E>* resEdges) {
-  while (true) {
+  while (resNodes || resEdges) {
     const RouteNode<N, E, C>& curNode = settled[curN];
     if (resNodes) resNodes->push_back(curNode.n);
     if (!curNode.parent) break;
-    if (resEdges) resEdges->push_back(curNode.e);
+
+    if (resEdges) {
+      for (auto e : curNode.n->getAdjListIn()) {
+        if (e->getOtherNd(curNode.n) == curNode.parent) resEdges->push_back(e);
+      }
+    }
     curN = curNode.parent;
   }
 }

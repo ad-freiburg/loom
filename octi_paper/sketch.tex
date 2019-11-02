@@ -34,14 +34,16 @@ pdfproducer={}
 
 \section{Abstract}
 
-We investigate a novel approach to the problem of drawing octilinear Metro Maps.
-Our approach is based on shortest-path calculations on a specially crafted octilinear grid graph, where edge bends are added to the total cost of the path by means of explicit turn edges.
-Our approach can be optimized exactly via an Integer Linear Program (ILP) or approximately by iteratively calculating shortest-paths between node candidates in the octilinear grid graph.
-Most importantly, it allows us to revisit earlier work [Stott] which used local search techniques to update node positions until a (local) optimum was found, but where octilinearity was not guaranteed.
-By recalculating the shortest-path between an updated node and its neighbors on our octilinear grid graph, we can guarantee octilinearity.
-Using this approach, we can calculate metro maps which are very close to optimal in a fraction of a second even for large networks.
-%As far as we are aware, our technique is the first non-global approach which guarantees octilinear results.
-%Our maps are rendered using previous work and are publicly accessible.
+We investigate the problem of drawing octilinear Metro Maps with a potentially arbitrary number of edge bends on grids.
+Our approach is based on finding a set of non-overlapping optimal paths between station candidate nodes on a specially crafted octilinear grid graph in which path bends are penalized by explicit turn edges.
+We formulate an Integer Linear Program (ILP) to solve the problem exactly.
+Additionally, we describe a fast approximation algorithm for a special class of bend costs by greedily calculating shortest-paths between node candidates in the octilinear grid graph, and also discuss how this algorithm can easily be extended to handle the general case.
+Our approximation algorithm allows us to revisit earlier work in Metro Map drawing [Stott] which used local search techniques to update node positions until a (local) optimum was found, but where octilinearity was not guaranteed.
+By recalculating the shortest-paths between an updated node and its neighbors, we can guarantee octilinearity.
+With this approach, we can calculate Metro Maps which are very close to optimal in a fraction of a second even for complex networks.
+Our approach can naturally account for obstacles that should be respected in the final drawing (POIs, broad rivers, coastlines) and can prefer grid edges  close to the real-world course of a line.
+This allows our drawings to be combined with existing maps, for example as overlays in typical map services.
+
 
 \section{Introduction}
 

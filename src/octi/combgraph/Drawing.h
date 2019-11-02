@@ -28,7 +28,7 @@ class Drawing {
   double score() const;
   void crumble();
 
-  void draw(CombEdge* ce, const GrEdgList& ge);
+  void draw(CombEdge* ce, const GrEdgList& ge, bool rev);
   void erase(CombEdge* ce);
   void erase(CombNode* ce);
 

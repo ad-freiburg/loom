@@ -104,6 +104,8 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   double _cellSize, _spacer;
   std::unordered_map<const CombNode*, GridNode*> _settled;
 
+  double _heurECost, _heurHopCost;
+
   CombEdgeSet getResEdgs(GridNode* n) const;
 
   void writeInitialCosts();

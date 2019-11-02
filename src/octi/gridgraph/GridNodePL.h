@@ -49,6 +49,8 @@ class GridNodePL : util::geograph::GeoNodePL<double> {
 
   void setStation();
 
+  bool visited;
+
  private:
   Point<double> _pos;
 
