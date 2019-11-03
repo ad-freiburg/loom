@@ -1,11 +1,4 @@
-\documentclass{sig-alternate-sigmod09}
-
-\usepackage[hidelinks, bookmarks=true,pdfborder= 0 0 0]{hyperref}
-
-\usepackage{tikz}
-\usetikzlibrary{calc,trees,positioning,arrows,chains,shapes.geometric,%
-  decorations.pathreplacing,decorations.pathmorphing,shapes,%
-  matrix,shapes.symbols,plotmarks,decorations.markings,shadows}
+\documentclass[sigconf]{acmart}
 
 \DeclareMathOperator{\atantwo}{atan2}
 
@@ -27,7 +20,6 @@ pdfproducer={}
 \title{Metro Maps on Octilinear Grid Graphs}
 \subtitle{- sketch -}
 
-\numberofauthors{1}
 %\author{Patrick Brosi\\\affaddr{University of Freiburg}\\\affaddr{Chair of Algorithms and Data Structures}}
 
 \maketitle
@@ -35,112 +27,127 @@ pdfproducer={}
 \section{Abstract}
 
 We investigate the problem of drawing octilinear Metro Maps with a potentially arbitrary number of edge bends on grids.
-Our approach is based on finding a set of non-overlapping optimal paths between station candidate nodes on a specially crafted octilinear grid graph in which path bends are penalized by explicit turn edges.
+Our approach is based on finding a set of non-overlapping optimal paths between station candidate nodes on a specially crafted octilinear grid graph in which path bends are penalized by explicit bend edges.
 We formulate an Integer Linear Program (ILP) to solve the problem exactly.
-Additionally, we describe a fast approximation algorithm for a special class of bend costs by greedily calculating shortest-paths between node candidates in the octilinear grid graph, and also discuss how this algorithm can easily be extended to handle the general case.
-Our approximation algorithm allows us to revisit earlier work in Metro Map drawing [Stott] which used local search techniques to update node positions until a (local) optimum was found, but where octilinearity was not guaranteed.
+Additionally, we describe a fast approximation algorithm for a special class of bend costs by greedily calculating shortest-paths between node candidates in the octilinear grid graph, and also discuss how this algorithm can be extended to handle the general case.
+Our approximation algorithm allows us to revisit earlier work in Metro Map drawing which used local search techniques to update node positions until a (local) optimum was found, but where octilinearity was not guaranteed.
 By recalculating the shortest-paths between an updated node and its neighbors, we can guarantee octilinearity.
 With this approach, we can calculate Metro Maps which are very close to optimal in a fraction of a second even for complex networks.
-Our approach can naturally account for obstacles that should be respected in the final drawing (POIs, broad rivers, coastlines) and can prefer grid edges  close to the real-world course of a line.
+Our approach may naturally account for obstacles that should be respected in the final drawing (POIs, broad rivers, coastlines) and can prefer grid edges  close to the real-world course of a line.
 This allows our drawings to be combined with existing maps, for example as overlays in typical map services.
 
-
 \section{Introduction}
-
-\TODO{Write intro}
-
-\subsection{Problem definition}
-
-Given an undirected planar input graph $\iG = (\iV, \iE)$, where $\iV$ are stations (or other location of interests in a public transit network) and $\iE$ are connections between those stations.
-We say $\drawing{\iG} = (\drawingpossym, \drawingcurvesym)$ is a drawing of $\iG$, where $\drawingpos{\iv}$ assigns a position to every node $\iv \in \iV$ and $\drawingcurve{\ie} = (q_0, q_1, ..., q_n)$ assigns a piecewise linear curve to every edge $\ie \in \iE$.
-The initial input drawing $\initdrawing{\iG}$ assigns each node a geographical real-world position, and each edge an (optional) real-world trajectory.
-\TODO{mention line labels and use same definition as in LOOM paper}
-Our goal is to find a schematic drawing $\mathcal{D}'_G$ that resembles a classic Metro Map.
-This is usually formalized as a set of hard and soft constraints \cite{nb, ...}.
-The hard constraints may be summarized as:
-\begin{enumerate}
-\setlength\itemsep{.1em}
-\item \emph{Octilinearity}. Each edge curve $\drawingcurve{\ie}$ may only consist of segments whose orientation is a multiple of $45^{\circ}$.
-\item \emph{Topology preservation}. The input embedding should be respected. In particular, no crossings between edges should be introduced and non-incident edges should never share common points.
-\end{enumerate}
-Additionally, the following soft constraints are usually employed:
-\begin{enumerate}
-\setlength\itemsep{.1em}
-\item \emph{Edge monotony}. The number of edge bends should be minimized and large angles preferred.
-\item \emph{Geographical accuracy}. The original node positions should be changed as little as possible.
-\item \emph{Map density}. There should be a minimum distance $\gmind$ between the anchor points of curves to ensure readability.
-\end{enumerate}
-
-With respect to edge monotony and octilineary, previous work often defined the problem as finding an octilinear embedding of the input graph, where each edge is represented by a straight octilinear arc.
-We use a slightly different approach and state the problem as finding the optimal posititions $p(v) \in \mathbb{N}^2$ on a grid for each station node and curves $c(e) = (q_0, q_1, ..., q_n)$, $q_i \in \mathbb{N}^2$ connecting them. 
-Most importantly, for two succeeding points $q_i = (x_i, y_i)$ and $q_{i+1} = (x_{i+1}, y_{i+1})$, we require their Chebyshev distance $D_\text{Ch}(q_i, q_{i+1}) = \max \{|x_{i+1} - x_i|, |y_{i+1} - y_i|\}$ to be exactly 1.
-Note that for any point on the grid, the Chebyshev distance to all its 8 direct neighbors is 1.
-
-To project this grid onto a map plane, we use a scale factor $\gScale$, which is essentially the height and length of a grid cell.
-If $\gScale$ is set to $\gmind$, a minimum distance between any two grid points is guaranteed to be greater or equal to $\gmind$.
-
-\subsection{Related Work}
-
-Survey Noellenburg %http://i11www.iti.kit.edu/extra/publications/n-asamm-14.pdf
-Survey Wolff %http://www1.pub.informatik.uni-wuerzburg.de/pub/wolff/pub/w-dsms-07.pdf
-Hong et al., force-based approach
-Stott's PhD
-steiner trees! %https://www.researchgate.net/profile/Matthias_Mueller-Hannemann/publication/225160153_Approximation_of_Octilinear_Steiner_Trees_Constrained_by_Hard_and_Soft_Obstacles/links/0912f50cf248ec1193000000/Approximation-of-Octilinear-Steiner-Trees-Constrained-by-Hard-and-Soft-Obstacles.pdf
-
-\section{Octilinear Grid Graph}
 
 \begin{figure*}[t]
   \centering
 	\includegraphics[width=0.474\textwidth]{figures/octi_input.pdf}
 	\includegraphics[width=0.474\textwidth]{figures/octi.pdf}
-	\caption{The subway network of Vienna, rendered with our approach from raw timetable (GTFS) data (including stop positions).}
+	\caption{Left: the subway network of Vienna, drawn with real-world geographical station positions and line courses. Right: octilinear drawing rendered with our approximative approach. Schematization took around $0.5 s$.}
 	\label{FIG:examplewien}
 \end{figure*}
 
-We use an auxiliary undirected graph $\gG = (\gV, \gE)$, where $\gV$ is the set of nodes and $\gE$ is the set of edges and in which every possible path $\gPath = (\gv_0, \gv_1, ..., \gv_n), \gv_i \in \gV$ with $\gv_0 \neq \gv_n$ and $|\gPath| > 1$ represents an octilinear curve with cost $\gPcost{\gPath} = (n - 1) \cdot \gHopcost$, where $\gHopcost$ is the ``hop'' cost of using a single edge.
-The graph in Fig.~\ref{FIG:gridgraph},~left trivially satisfies this: we define a $X\times Y$ grid and add nodes $\ggv{x}{y}$ for every grid point.
-Each node $\psi_{x,y}$ is connected with its 8 direct neighbors (except at the grid boundaries) $N^0(\ggv{x}{y}) ... N^7(\ggv{x}{y})$, where $N^0(\ggv{x}{y})$ is the ``north'' neighbor of $\ggv{x}{y}$, $N^1(\ggv{x}{y})$ the ``north-east'' neighbor etc..
+\TODO{Write intro}
+
+Basic approach:
+
+\begin{enumerate}
+	\item Input: line graph $\iG = (\iV, \iE, L)$.
+	\item Build a $X\times Y$ grid graph $\gG$ whose bounding box matches that of the input line graph.
+	\item Add special bend edges which penalize line bends along paths in $\gG$.
+	\item For each edge $\{u, v\}$ in the line graph, find grid node pairs $\psi(u)$ and $\psi(v)$ and non-overlapping and non-crossing paths between those pairs such that the sum of the following objectives is minimized: (1) the distance between the geographical position of $u$ and the (pseudo-) geographical position of $\psi(u)$, (2) the path costs between grid node pairs, (3) the line bend costs at grid node pairs. This is strongly related to the (both NP-hard) $k$-Disjoint Paths Problem (DPP) and the Subgraph Homeomorphism Problem (SHP)).
+	\item Optimization can be done exactly via an ILP, or with an efficient approximation algorithm which first defines an order on the input line edges, greedily routes the edges in this order on the grid graph iteratively, and optimizes this initial drawing with a local search approach afterwards.
+\end{enumerate}
+
+\subsection{Problem definition}
+
+Given an undirected labeled input graph $\iG = (\iV, \iE, L)$, where $\iV$ are stations (or other location of interests in a public transit network), $\iE$ are connections between those stations and each edge $\ie \in \iE$ is labelled with a subset $L(e) \in \mathcal{L}$ of lines travelling on this edge.
+We call $\iG$ the $\emph{line graph}$.
+We say $\drawing{\iG} = (\drawingpossym, \drawingcurvesym)$ is a drawing of $\iG$, where $\drawingpos{\iv}$ assigns a position to every node $\iv \in \iV$ and $\drawingcurve{\ie} = (q_0, q_1, ..., q_n)$ assigns a piecewise linear curve to every edge $\ie \in \iE$.
+The initial input drawing $\initdrawing{\iG}$ assigns each node a geographical real-world position.
+Optionally, each edge an may be assigned its real-world course.
+Our goal is to find a schematic drawing $\mathcal{D}'_G$ that resembles a classic Metro Map.
+This is usually formalized as a set of hard and soft constraints \cite{nb, ...}.
+The hard constraints may be summarized as:
+%
+\begin{enumerate}
+\setlength\itemsep{.1em}
+\item \emph{Octilinearity}. Each edge curve $\drawingcurve{\ie}$ may only consist of segments whose orientation is a multiple of $45^{\circ}$.
+\item \emph{Topology preservation}. The topology of the line graph should be respected. In particular, no crossings between edges should be introduced, non-incident edges should never share common points and the circular ordering of edges around adjacent nodes should be preserved.
+\end{enumerate}
+%
+Additionally, the following soft constraints are usually employed:
+%
+\begin{enumerate}
+\setlength\itemsep{.1em}
+\item \emph{Edge monotony}. The number of edge bends should be minimized and large angles preferred.
+\item \emph{Edge length}. The length of the edge curves should be minimized.
+\item \emph{Geographical accuracy}. The original node positions should be changed as little as possible.
+\item \emph{Map density}. There should be a minimum distance $\gmind$ between the anchor points of curves to ensure readability.
+\end{enumerate}
+%
+Previous work defined the problem as finding an octilinear embedding of the input graph, i.e. each edge is represented by a straight octilinear arc.
+We are interested in octilinear drawings and therefore use a slightly different approach.
+We state the problem as finding the optimal posititions $\drawingpos{\iv} \in \mathbb{N}^2$ on a grid for each station node and curves $\drawingcurve{\ie} = (q_0, q_1, ..., q_n)$, $q_i \in \mathbb{N}^2$ connecting them. 
+Most importantly, for two succeeding points $q_i = (x_i, y_i)$ and $q_{i+1} = (x_{i+1}, y_{i+1})$, we require their Chebyshev distance $D_\text{Ch}(q_i, q_{i+1}) = \max \{|x_{i+1} - x_i|, |y_{i+1} - y_i|\}$ to be exactly 1, which ensures octilinearity of the final drawing.
+
+To project this grid onto a map plane, we use a scale factor $\gScale$, which is essentially the height and length of a grid cell.
+If $\gScale$ is set to $\gmind$, a minimum distance between any two grid points is guaranteed to be greater or equal to $\gmind$.
+We choose the dimensions $X\times Y$ of the grid in such a way that it matches the bounding box of the input line graph.
+
+Like previous work, we contract station nodes of degree 2 prior to finding an octilinear drawing to speed up the drawing process.
+They are later re-inserted equidistantly onto the corresponding edge curves.
+
+\subsection{Related Work}
+
+\TODO{todo}
+
+\section{Octilinear Grid Graph}
+
+We use an auxiliary undirected grid graph $\gG = (\gV, \gE)$ with diagonal edges (Fig.~\ref{FIG:grids}, left).
+For every position $(x, y)$ on a $X\times Y$ grid, we add a grid node $\ggv{x}{y}$.
+Each grid node $\ggv{x}{y}$ is connected with its 8 direct neighbors (except at the grid boundaries) $N^0(\ggv{x}{y}) ... N^7(\ggv{x}{y})$, where $N^0(\ggv{x}{y})$ is the ``north'' neighbor of $\ggv{x}{y}$, $N^1(\ggv{x}{y})$ the ``north-east'' neighbor, etc..
+Each path $\gPath = (\gv_0, \gv_1, ..., \gv_n), \gv_i \in \gV$ now represents an octilinear curve with cost $\gPcost{\gPath} = (n - 1) \cdot \gHopcost$, where $\gHopcost$ is the ``hop'' cost of using a single grid edge.
 
 \subsection{Penalizing Line Bends}
 
-To later be able to optimize soft constraint (1), we additionally want the total cost for a path in $\Gamma$ to reflect the number and accuteness of bends.
-The penalty for a turn should be weighted by its degree - either $135^{\circ}$, $90^{\circ}$ or $45^{\circ}$.
+To later be able to optimize soft constraint (1) between stations, we additionally want the total cost for a path in $\Gamma$ to reflect the number and accuteness of bends.
+The penalty for a bend should be weighted by its degree - either $135^{\circ}$, $90^{\circ}$ or $45^{\circ}$.
 We call these penalties $\gPturn{135}$, $\gPturn{90}$ and $\gPturn{45}$.
 A straight pass through a node should go unpunished, so $\gPturn{180} = 0$.
 Since we aim for a ``smooth'' path through $\gG$ and want to favor obtuse angles, we require $\gPturn{180} \leq \gPturn{135} \leq \gPturn{90} \leq \gPturn{45}$.
 
-We extend our cost function and now search for the path $\gPath = (\gv_0, \gv_1, ..., \gv_i, ..., \gv_n)$ which minimizes
+We extend our cost function and now want to search for the path $\gPath = (\gv_0, \gv_1, ..., \gv_i, ..., \gv_n)$ which minimizes
 \begin{align}
 	\gPcost{\gPath} = (n - 1) \cdot \gHopcost + \sum_{i=1}^{n - 1} t(\gv_{i-1}, \gv_{i+1}),
 \end{align}
-where $t(\gv_{i-1}, \gv_{i+1})$ is the angular turn cost between edges $\{\gv_{i-1}, \gv_{i}\}$ and $\{\gv_{i}, \gv_{i=1}\}$, that is, either 0, $\gPturn{135}$, $\gPturn{90}$ or $\gPturn{45}$.
+where $t(\gv_{i-1}, \gv_{i+1})$ is the angular bend cost between edges $\{\gv_{i-1}, \gv_{i}\}$ and $\{\gv_{i}, \gv_{i+1}\}$, that is, either 0, $\gPturn{135}$, $\gPturn{90}$ or $\gPturn{45}$.
 
 \begin{figure}[t]
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.474\textwidth]{figures/grid.pdf}}}$
-	\caption{Left: A shortest path between $t$ and $u$ on a grid graph with uniform edge cost. Path bends are not minimized. Right: Two shortest path between $(t, u)$, and $(v, w)$ on our octilinear grid graph with uniform grid edge cost $1$ and additional path turn penalties $\gPturn{135} = 1$, $\gPturn{90} = 1.5$ and $\gPturn{45} = 2$. Path $(t, u)$ acts as an obstacle for $(v, w)$.}
+	\caption{Left: A shortest path between $t$ and $u$ on a grid graph with uniform edge cost. Path bends are not minimized. Right: Two shortest path between $(t, u)$, and $(v, w)$ on our octilinear grid graph with uniform grid edge cost $1$ and additional path bend penalties $\gPturn{135} = 1$, $\gPturn{90} = 1.5$ and $\gPturn{45} = 2$. Path $(t, u)$ acts as an obstacle for $(v, w)$.}
 	\label{FIG:grids}
 \end{figure}
 
 We model this by adding 8 auxiliary port nodes $\gpv{x}{y}{0} ... \gpv{x}{y}{7}$ to every grid node (Fig.~\ref{FIG:gridgraph}).
 Each port again corresponds to an outgoing angle in clockwise fashion and is connected to $\ggv{x}{y}$ via sink edges $\gse{x}{y}{0} ... \gse{x}{y}{7}$.
-These sink edges allow us to leave from and arrive at an original node $\ggv{x}{y}$.
-For paths passing through the original grid node $\ggv{x}{y}$, we connect each port $\gpv{x}{y}{i}$ with its 7 - i succeeding (in clockwise fashion) sibling ports with bend edges $\gbe{x}{y}{i}{45}$, $\gbe{x}{y}{i}{90}$, and so forth.
+These sink edges allow us to leave from and arrive at an original grid node $\ggv{x}{y}$.
+For paths passing through $\ggv{x}{y}$, we connect each port $\gpv{x}{y}{i}$ with its 7 - i succeeding (in clockwise fashion) sibling ports at position $j$ with bend edges $\gbe{x}{y}{i}{j}$, $\gbe{x}{y}{i}{j}$, and so forth.
 
 \begin{figure}[h]
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.45\textwidth]{figures/node.pdf}}}$
-	\caption{A $3\times5$ octilinear grid graph. Each node $\psi_i$ has 8 ports $\gv_i^0 ... \gv_i^7$ which are connected to $\gv_i$ by a direct edge. Each port is additionally connected to its $180^{\circ}$, $135^{\circ}$ and $35^{\circ}$ neighbor ports.}
+	\caption{A $5\times3$ octilinear grid graph. Each node $\ggv{x}{y}$ has 8 ports $\gpv{x}{y}{0} ... \gpv{x}{y}{7}$ which are connected to $\ggv{x}{y}$ by direct sink edge $\gse{x}{y}{0} ... \gse{x}{y}{7}$. Each port is additionally connected to its $180^{\circ}$, $135^{\circ}$, $90^{\circ}$ and $45^{\circ}$ neighbor ports by bend edges $\gbe{x}{y}{i}{j}$.}
 	\label{FIG:gridgraph}
 \end{figure}
 
-To be able to distinguish the different node and edge types, we define the set of original grid nodes as $\gV^g \ni \ggv{x}{y}$, the set of port nodes as $\gV^p \ni \gpv{x}{y}{i}$, the set of bend edges as $\gE^b \ni \gbe{x}{y}{i}{\theta}$, the set of sink edges as $\gE^s \ni \gse{x}{y}{i}$ and the set of original grid edges as $\gE^g$.
+To be able to distinguish the different node and edge types, we define the set of original grid nodes as $\gV^g \ni \ggv{x}{y}$, the set of port nodes as $\gV^p \ni \gpv{x}{y}{i}$, the set of bend edges as $\gE^b \ni \gbe{x}{y}{i}{j}$, the set of sink edges as $\gE^s \ni \gse{x}{y}{i}$ and the set of original grid edges as $\gE^g$.
 Note that $\gV = \gV^g \cup \gV^p$ and $\gE = \gE^t \cup \gE^s \cup \gE^g$.
 
-Additionally, for each $\gv \in \gV$, we define $\gv^* \in \gV^g$ as the original grid node belonging to $\gv$ (this may be $\gv$ itself).
-For easy of notation, we also denote by $P(\gv)$ the grid coordinates of the original grid node $\gv^* = \ggv{x}{y}$ belonging to $\gv$.
+Additionally, for each $\gv \in \gV$, we define $\gv^* \in \gV^g$ to be the original grid node belonging to $\gv$ (this may be $\gv$ itself).
+For ease of notation, we denote by $P(\gv)$ the grid coordinates of the original grid node $\gv^* = \ggv{x}{y}$ belonging to $\gv$.
 
-As we want to prevent the use of sink edges in pass-through nodes, we set a uniform sink edge cost $\gSinkcost$ high enough so that a sink edge is always more expensive than a turn edge. 
+As we want to prevent the use of sink edges in pass-through nodes, we set a uniform sink edge cost $\gSinkcost$ high enough so that a sink edge is always more expensive than a bend edge, for example $\gSinkcost = \gPturn{45}$
 In a shortest path from $s$ to $t$, the only sink edges are then a leaving sink edge adjacent to $s$ and an arriving sink edge adjacent to $t$.
 
 \subsection{Modelling Edge Costs}
@@ -148,7 +155,7 @@ In a shortest path from $s$ to $t$, the only sink edges are then a leaving sink 
 \begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.474\textwidth]{figures/path.pdf}}}$
-	\caption{Lorem}
+	\caption{Two octilinear grid graphs and the same path $(\ggv{1}{0}, \ggv{1}{1}, \ggv{0}{2})$ on them. Right: without explicit bend edges for penalizing bends. Left: with explicit bend edges and port nodes. Each grid node is now represented by two nodes: for the start and end node, the original grid node and a leaving port edge. For pass-through nodes ($\ggv{1}{1}$), an arriving and a leaving port node with an edge corresponding to the bend at the grid node between.}
 	\label{FIG:path}
 \end{figure}
 \begin{figure*}
@@ -159,20 +166,12 @@ In a shortest path from $s$ to $t$, the only sink edges are then a leaving sink 
 \end{figure*}
 %
 As both a $45^{\circ}$ port edge and a $90^{\circ}$ port edge may be substituted by cheaper edges, special care has to be applied to the modelling of the actual edge costs.
-For example, a $45^{\circ}$ turn can be simulated by first passing $\ggv{x}{y}$ on a $180^{\circ}$ port edge, and then again on a $135^{\circ}$ port edge (Fig.~\ref{FIG:paths}.3).
-As $\gPturn{180} \leq \gPturn{135} \leq \gPturn{45}$, this path may be cheaper than $\gPturn{45}$, undermining our penalty system. 
-Similarily, a $90^{\circ}$ degree turn can be simulated by two cheaper $135^{\circ}$ port edges (Fig.~\ref{FIG:paths}.4).
+For example, a $45^{\circ}$ bend can be simulated by first passing $\ggv{x}{y}$ on a $180^{\circ}$ port edge, and then again on a $135^{\circ}$ port edge (Fig.~\ref{FIG:paths}.3).
+As we only require $\gPturn{180} \leq \gPturn{135} \leq \gPturn{45}$, this path may be cheaper than $\gPturn{45}$, undermining our penalty system. 
+Similarily, a $90^{\circ}$ degree bend can be simulated by two cheaper $135^{\circ}$ port edges (Fig.~\ref{FIG:paths}.4).
 
-To prevent the shortcuts described above, we first introduce a constant $a \geq 0$ and set new port edge costs $\gPturnEdge{180}, ..., \gPturnEdge{45}$ as follows:
-%
-\begin{align}
-	\gPturnEdge{180} &= a + \gPturn{180} = a \\
-	\gPturnEdge{135} &= a + \gPturn{135} \\
-	\gPturnEdge{90} &= a + \gPturn{90} \\
-	\gPturnEdge{45} &= a + \gPturn{45}.
-\end{align}
-%
-We choose $a$ in a way such that the following inequalities are fullfilled:
+To prevent the shortcuts described above, we first introduce a constant $a \geq 0$ and offset the bend costs by $a$.
+We call these updated port edge costs $\gPturnEdge{180}, ..., \gPturnEdge{45}$ and choose $a$ in a way such that the following inequalities are fullfilled:
 %
 \begin{align}
 	2a + 2\gPturn{135} &\geq a + \gPturn{90} \label{CONSTRS:sim90}\\
@@ -183,17 +182,17 @@ Ineq.~(\ref{CONSTRS:sim45}) ensures that simulating a $45^{\circ}$ bend with a $
 
 The inequalities are fullfilled for $a = \gPturn{45} - \gPturn{135}$.
 
-The shortest path $\gPathOcti$ from an original grid node $s = \gv_0$ to another original grid node $t=\gv_{n'}$ on our octilinear grid graph will now consist of \emph{two} nodes for each original grid node: for the start and end node, the original grid node and a single port node appear in the path.
-For pass-through nodes, a port node for arriving at and a port node for leaving the original grid node appears (w.l.o.g., we ignore the case where a turn edge is replaced by two turn costs with similar cost, as this does neither affect the final path on the grid graph, nor the cost of that path).
+The shortest path $\gPathOcti$ from an original grid node $s = \gv_0$ to another original grid node $t=\gv_{n'}$ on our octilinear grid graph with bend penalties will now consist of \emph{two} nodes for each original grid node: for the start and end node, the original grid node and a single port node appear in the path (Fig.~\ref{ref:path}).
+For pass-through nodes, a port node for arriving at and a port node for leaving the original grid node appears (w.l.o.g., we ignore the case where a bend edge is replaced by two bend edges with similar cost, as this does neither affect the final path on the grid graph, nor the cost of that path).
 
-This shortest path $\gPathOcti = (\gv_0, \gv_1, ..., \gv_{n'})$ thus always describes a path $\gPath = (\gv^*_0, \gv^*_2, \gv^*_4, ..., \gv^*_{n})$ on the original grid graph with $|p| = n = |p'| / 2 = n' / 2$ and has the cost
+This shortest path $\gPathOcti = (\gv_0, \gv_1, ..., \gv_{n'})$ thus always describes a path $\gPath = (\gv^*_0, \gv^*_2, \gv^*_4, ..., \gv^*_{n})$ on the corresponding original grid graph \emph{without} bend penalties, with $|p| = n = |p'| / 2 = n' / 2$ and has the cost
 %
 \begin{align}
-	\gPcostOcti{\gPathOcti} = 2 \gSinkcost + \left(n - 1\right) \cdot \gHopcost + \sum_{i=1}^{n - 1} a + t\left(\gv^*_{2i - 2}, \gv^*_{2i+2}\right)\label{EQ:cost}.
+	\gPcostOcti{\gPathOcti} = \overbrace{2 \gSinkcost}^{\makebox[0pt]{$\scriptstyle{\text{sink edges}}$}} + \underbrace{\left(n - 1\right) \cdot \gHopcost}_{\makebox[0pt]{$\scriptstyle{\text{grid hops}}$}} + \overbrace{\sum_{i=1}^{n - 1} a + t\left(\gv^*_{2i - 2}, \gv^*_{2i+2}\right)}^{\makebox[0pt]{$\scriptstyle{\text{offsetted bend costs}}$}}\label{EQ:cost}.
 \end{align}
 %
 To get rid of the constant offset $a$, we set $c_{135} = 1$, $c_{90} = 1.5$ and $c_{45} = 2$, which means $a = 1$.
-If we then set the cost of a single grid edge $\gHopcost = 1 = a$ and set the actual grid edge costs to $\gHopcostOcti = \gHopcost - a = 0$, we can rewrite Eq.~\ref{EQ:cost} as  
+If we then set the cost of a single grid edge $\gHopcost = 1 = a$ and the actual grid edge costs to $\gHopcostOcti = \gHopcost - a = 0$, we can rewrite Eq.~\ref{EQ:cost} as  
 %
 \begin{align}
 	\gPcostOcti{\gPathOcti} &= 2 c_s +  \left(n - 1\right) \cdot \gHopcostOcti + \sum_{i=1}^{n - 1} \gHopcost + t\left(\gv^*_{2i - 2}, \gv^*_{2i+2}\right) \\
@@ -365,39 +364,40 @@ We then build our initial input edge ordering $o = (e_0, e_1, ..., e_{|E|})$ as 
   (3) As long as there are dangling nodes, take the dangling node $\iv_d$ with highest line degree and add all adjacent edges $\{\iv_d, u_0\}, ..., \{\iv_d, u_k\}$ leading to an unprocessed node $u_i$ to the edge ordering $o$, where the $u_i$ are sorted in ascending order w.r.t $\ldeg(u_i)$. In other words, we add the edge going to the adjacent node of highest line degree first, then the edge with second highest line degree, and so on. Mark each $u_i$ as dangling, and $\iv_d$ as processed. 
   (4) If there are no dangling nodes anymore, but unprocessed nodes remain, then the input graph was disconnected. In this case, we start again at (2).
 
-Figure TODO gives an example.
+Figure \todo{add figure} gives an example.
 
 \subsection{Edge Routing and Station Placement}
-
+%
 \begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.479\textwidth]{figures/heur.pdf}}}$
 	\vspace{-.3cm}
-	\caption{Bla }
+	\caption{Left: routing an edge on the grid graph from grid node candidates $S$ for input node $s$ to grid node candidates $T$ for input node $t$ (both within a distance $\hat{d}$ around $t$ and $s$. The grid nodes depicted as full rectangles constitute the hull of the $S$ and $T$, respectively. Right: routing an edge on the grid graph from an already settled grid node $\psi$ to a set $T$ ot target node candidates.}
 	\label{FIG:heur}
 \end{figure}
-
+%
 With an initial edge ordering at hand, we can start routing each input edge $\ie_i = \{\iv, u\}$ through the octilinear grid graph.
 To get unique source and target nodes, we again treat each undirected input edge as a directed edge $\ie_i = (s, t)$.
 As the grid positions (and therefore the grid nodes) for $\iv$ and $u$ may be still unknown, we route between sets $S$ and $T$.
 $S$ consists of candidate grid nodes for $s$, $T$ are candidate grid node for $t$.
-As candidates, we use all grid nodes within a threshold distance $\hat d$ \TODO{other symbol for that, also update in figure} around the original position of the input node.
+As candidates, we use all grid nodes within a threshold distance $\hat d$ \TODO{other symbol for that, also update in figure} around the original position of the input node (Fig.~\ref{FIG:heur}).
 If both $s$ are $t$ are not settled yet, it may happen that $S$ and $T$ are not disjoint.
 To prevent this, we build a local Voronoi diagram: we first define $ST = S \cup T$ and say that for each $\ggv{x}{y} \in ST$, $\ggv{x}{y}$ is placed in $S'_g$ if it is nearer to $s$ than $t$, or in $T'_g$ otherwise.
 
-To prefer grid nodes as candidates that are near the original position of the input node, we set the cost of each sink edge adjacent to the candidate grid node to its distance penalty. \TODO{Give an example with full costs and explain offset to prevent stolen sink edges} 
+To prefer grid nodes as candidates that are near the original position of the input node, we add the corresponding distance penalty to the cost of each sink edge adjacent to the candidate grid node.
 
-After that, we calculate the set-to-set shortest path between $S$ and $T$ using a standard implementation of Dijkstra's algorithm (to find the shortest path out of a set of source nodes to a set of target nodes, it is enough to init all $\ggv{x}{y} \in S$ with distance 0 and abort the algorithm as soon as any $\ggv{x}{y} \in T_g$ is settled.)
+After that, we calculate the set-to-set shortest path between $S$ and $T$ using a standard implementation of Dijkstra's algorithm (to find the shortest path out of a set of source nodes to a set of target nodes, it is enough to init all $\ggv{x}{y} \in S$ with distance 0 and abort the algorithm as soon as any $\ggv{x}{y} \in T_g$ is reached.)
+If $s$ or $t$ were not settled, they are now settled to the start (or end) node of the resulting shortest path.
 
 \subsection{Preservation of Embedding}
 
 The preserve the input embedding in our final drawing, we have to make sure that the shortest paths never cross each other, and that the initial circular ordering of edges at nodes is preserved.
 
 To prevent paths crossing each other, we update our octilinear grid graph after each Dijkstra run.
-Grid nodes that were used as nodes in the previously found shortest path are both \emph{turn-closed} by setting the cost of each adjacent turn edge to $\infty$ and \emph{sink-closed} by setting the cost of each adjacent sink edge to $\infty$.
+Grid nodes that were used as nodes in the previously found shortest path are both \emph{bend-closed} by setting the cost of each adjacent bend edge to $\infty$ and \emph{sink-closed} by setting the cost of each adjacent sink edge to $\infty$.
 This effectively prevents any further path to use any of these previously used nodes.
-If a sink-closed grid node $\ggv{x}{y}$ was the source or target node for the previous path in $\Gamma$ (if it is settled), it may later be used again as a source node for another input edge.
-We then have to sink-open it again.
+If a node $\ggv{x}{y}$ was settled as the source or target node for the previously routed edge, it may later be used again as a source (or target) node for another input edge.
+We then have to open its sink (but not its bend edges) again.
 
 To prevent paths crossing each other at crossing diagonal edges in the grid graph, we additionally close for each diagonal grid edge used in the previously found path all crossing diagonal grid edges by setting their cost to $\infty$.
 
@@ -411,7 +411,7 @@ To prevent paths crossing each other at crossing diagonal edges in the grid grap
 
 To preserve the circular edge ordering at nodes, we update the costs of adjacent sink edges for the grid node used for $s$, and the grid node used for $t$.
 We consider Figure~\ref{FIG:paths}.2.
-We assume the rendering order at $v$ to be $(e, f, g$), and paths $p(e)$ and $p(f)$ have already been routed (in particular, this means that $\gv$ is already settled and turn-closed).
+We assume the rendering order at $v$ to be $(e, f, g$), and paths $p(e)$ and $p(f)$ have already been routed (in particular, this means that $\gv$ is already settled and bend-closed).
 The path for $e$ uses the sink edge $\gse{}{}{0}$, the path for $f$ uses sink edge $\gse{}{}{3}$.
 To respect the input edge ordering at $v$ in the final drawing, we have to make sure that $p(g)$ does not enter or leave $\gv$ in the area marked red.
 For this, we close each sink edge $\gse{}{}{p}$ that lies between $\gse{}{}{0}$ prior to routing $g$ by setting its cost to $\infty$ (including the sink edges used by $p(e)$ and $p(f)$) (Fig.~\ref{FIG:paths}.2a).
@@ -419,22 +419,22 @@ For this, we close each sink edge $\gse{}{}{p}$ that lies between $\gse{}{}{0}$ 
 We now consider Figure~\ref{FIG:paths}.3 and assume the rendering order at $v$ to be $(e, g, f)$.
 Paths $p(e)$ and $p(g)$ have already been routed.
 However, there is no sink edge left at $\gv$ to route $p(f)$ in such a way that the input edge ordering is preserved.
-To prevent cases like this, we make sure that there are always enough sink edges left in both directions of an already routed path at $v$.
+To prevent cases like this, we make sure that there are always enough sink edges left in both directions.
 For example, the clockwise distance between $e$ and $g$ at $v$ is 2 (Fig.~\ref{FIG:paths}.1).
 Their clockwise distance is 1.
 If $p(e)$ is already routed (Fig.~\ref{FIG:paths}.3), we now close the sink edges $\gse{}{}{0}$ used by $p(e)$, but also the succeeding (in clockwise direction) sink edge $\gse{}{}{1}$ (Fig.~\ref{FIG:paths}.3a).
 This guarantees that any path found for $g$ will now leave one sink edge between $p(e)$ and $p(g)$ open, allowing $p(f)$ to be routed in such a way that the original edge order at $v$ will be preserved.
 
 Note again that in both of the above cases, $\gv$ has already been settled.
-This means that the costs of all turn edges adjacent to $\gv$ have been set to $\infty$, which is why they are not depicted in Figures~\ref{FIG:paths}.3a and \ref{FIG:paths}.3b.
-We can thus be sure that our sink edge cost are not circumvented, for example, by a path $p(g)$ using $\gse{}{}{2}$ in Figure~\ref{FIG:paths}.3b, and then using the $45^{\circ}$ turn cost connecting port $\gpv{}{}{2}$ and $\gpv{}{}{1}$.
+This means that the costs of all bend edges adjacent to $\gv$ have been set to $\infty$, which is why they are not depicted in Figures~\ref{FIG:paths}.3a and \ref{FIG:paths}.3b.
+We can thus be sure that our sink edge cost are not circumvented, for example, by a path $p(g)$ using $\gse{}{}{2}$ in Figure~\ref{FIG:paths}.3b, and then using the $45^{\circ}$ bend cost connecting port $\gpv{}{}{2}$ and $\gpv{}{}{1}$.
 
 \subsection{Avoiding Line Bends}
 
 \begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.479\textwidth]{figures/linebend.pdf}}}$
-	\caption{Bla }
+	\caption{(1) part of an input line graph with a node $v$ and three adjacent edges $e, g, f$. (2) $g$ and $f$ have already been drawn on the grid graph, $v$ has been settled at $\psi$. (3) the sink edge costs at $\psi$ prior to routing $e$. As $v$ has been settled at $\psi$, the bend edges at $\psi$ are closed and are not depicted. Already used sink edges (depicted in red) have cost $\infty$. Unused sink edges have costs equal to the bend costs induced by letting $p(e)$ leave in the corresponding direction.}
 	\label{FIG:linebends}
 \end{figure}
 
@@ -453,7 +453,7 @@ The sum of the line bend penalty for each preceeding edge is then used as the co
 \begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.479\textwidth]{figures/optim.pdf}}}$
-	\caption{Bla }
+	\caption{Optimizing an initial drawing (1) by exploring the local search neighborhood, consisting of the 8 neighboring positions (depicted here for node $\psi$) for each settled grid node. All edges adjacent to node under investigation are re-routed after it is moved to a neighboring position, and the position which yields the biggest improvement is taken (2, 3). Afterwards, the local search continues.}
 	\label{FIG:optim}
 \end{figure}
 
@@ -461,7 +461,7 @@ The metro maps rendered by our heuristical approach so far already look acceptab
 To further polish the look of our final maps, we employ a local search approach.
 Given an octilinear drawing $\drawing{\iG}^0$ on a grid graph $\gG$, we define the local neighborhood of $\drawing{\iG}^0$ as the set of drawings where exactly one grid node position of an input node $v_m$ is moved to one of the 8 neighboring grid position (if free).
 For each neighbor of the current drawing, we remove the shortest paths for each edge adjacent to $v_m$, move $v_m$ to the designated new position, re-route all adjacent edges in clockwise ordering and calculate the overall score of the drawing.
-At the end, the best neighbor is taken, and the optimization proceeds from there.  (Figure~\ref{FIG:optim}).
+At the end, the best neighbor is taken, and the optimization proceeds from there (Figure~\ref{FIG:optim}).
 
 We note that if the neighborhood is defined this way, the set of drawings that are reachable by navigating from neighbor to neighbor is not necessarily the complete set of possible octilinear drawings.
 In particular, this means that the optimal drawing might not be included in this set and is therefore impossible to find.
@@ -495,7 +495,7 @@ We can thus use the following heuristic:
 	&= \min\left\{ D_{\text{Ch}}\left(P(\gv), P(\gv') \right) - 1 | \gv' \in H_t \right\},
 \end{align}
 %
-as each shortest path has to take some turn edge at the pass-through nodes and the cost of this turn edge is at least $c'_{180} = 1$.
+as each shortest path has to take some bend edge at the pass-through nodes and the cost of this bend edge is at least $c'_{180} = 1$.
 
 \section{Evaluation}
 
@@ -503,6 +503,4 @@ as each shortest path has to take some turn edge at the pass-through nodes and t
 
 \section{Conclusions}
 
-
-\balancecolumns
 \end{document}
