@@ -44,9 +44,10 @@ This allows our drawings to be combined with existing maps, for example as overl
 
 \begin{figure*}[t]
   \centering
-	\includegraphics[width=0.474\textwidth]{figures/octi_input.pdf}
-	\includegraphics[width=0.474\textwidth]{figures/octi.pdf}
-	\caption{Left: the subway network of Vienna, drawn with real-world geographical station positions and line courses. Right: octilinear drawing rendered with our approximative approach. Schematization took around $0.5 s$.}
+	\includegraphics[width=0.414\textwidth]{figures/octi_input.pdf}
+	\hspace{1cm}
+	\includegraphics[width=0.414\textwidth]{figures/octi.pdf}
+	\caption{Left: the subway network of Vienna, drawn with real-world geographical station positions and line courses. Right: octilinear drawing rendered with our approximative approach. Schematization took around $0.5 s$. \TODO{update}}
 	\label{FIG:examplewien}
 \end{figure*}
 
@@ -127,7 +128,7 @@ We extend our cost function and now want to search for the path $\gPath = (\gv_0
 \end{align}
 where $t(\gv_{i-1}, \gv_{i+1})$ is the angular bend cost between edges $\{\gv_{i-1}, \gv_{i}\}$ and $\{\gv_{i}, \gv_{i+1}\}$, that is, either 0, $\gPturn{135}$, $\gPturn{90}$ or $\gPturn{45}$.
 
-\begin{figure}[t]
+\begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.474\textwidth]{figures/grid.pdf}}}$
 	\caption{Left: A shortest path between $t$ and $u$ on a grid graph with uniform edge cost. Path bends are not minimized. Right: Two shortest path between $(t, u)$, and $(v, w)$ on our octilinear grid graph with uniform grid edge cost $1$ and additional path bend penalties $\gPturn{135} = 1$, $\gPturn{90} = 1.5$ and $\gPturn{45} = 2$. Path $(t, u)$ acts as an obstacle for $(v, w)$.}
@@ -139,7 +140,7 @@ Each port again corresponds to an outgoing angle in clockwise fashion and is con
 These sink edges allow us to leave from and arrive at an original grid node $\ggv{x}{y}$.
 For paths passing through $\ggv{x}{y}$, we connect each port $\gpv{x}{y}{i}$ with its 7 - i succeeding (in clockwise fashion) sibling ports at position $j$ with bend edges $\gbe{x}{y}{i}{j}$, $\gbe{x}{y}{i}{j}$, and so forth.
 
-\begin{figure}[h]
+\begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.45\textwidth]{figures/node.pdf}}}$
 	\caption{A $5\times3$ octilinear grid graph. Each node $\ggv{x}{y}$ has 8 ports $\gpv{x}{y}{0}, \dots, \gpv{x}{y}{7}$ which are connected to $\ggv{x}{y}$ by direct sink edge $\gse{x}{y}{0}, \dots, \gse{x}{y}{7}$. Each port is additionally connected to its $180^{\circ}$, $135^{\circ}$, $90^{\circ}$ and $45^{\circ}$ neighbor ports by bend edges $\gbe{x}{y}{i}{j}$.}
@@ -159,16 +160,16 @@ In a shortest path from $s$ to $t$, the only sink edges are then a leaving sink 
 
 \begin{figure}
   \centering
-	$\vcenter{\hbox{\includegraphics[width=0.474\textwidth]{figures/path.pdf}}}$
+	$\vcenter{\hbox{\includegraphics[width=0.454\textwidth]{figures/path.pdf}}}$
 	\caption{Two octilinear grid graphs and the same path $(\ggv{1}{0}, \ggv{1}{1}, \ggv{0}{2})$ on them. Right: without explicit bend edges for penalizing bends. Left: with explicit bend edges and port nodes. Each grid node is now represented by two nodes: for the start and end node, the original grid node and a leaving port edge. For pass-through nodes ($\ggv{1}{1}$), an arriving and a leaving port node with an edge corresponding to the bend at the grid node between.}
 	\label{FIG:path}
 \end{figure}
-\begin{figure*}
+\begin{figure}
   \centering
-	$\vcenter{\hbox{\includegraphics[width=0.9\textwidth]{figures/paths.pdf}}}$
+	$\vcenter{\hbox{\includegraphics[width=0.48\textwidth]{figures/paths.pdf}}}$
 	\caption{1. A $180^{\circ}$ pass through a node $\gv$. 2. A $90^{\circ}$ pass through $\psi$. 3. A $45^{\circ}$ pass through $\gv$ simulated by a $180^{\circ}$ and $135^{\circ}$ pass. 4. A $90^{\circ}$ pass through $\gv$ simulated by two $135^{\circ}$ passes. }
 	\label{FIG:paths}
-\end{figure*}
+\end{figure}
 %
 As both a $45^{\circ}$ port edge and a $90^{\circ}$ port edge may be substituted by cheaper edges, special care has to be applied to the modelling of the actual edge costs.
 For example, a $45^{\circ}$ bend can be simulated by first passing $\ggv{x}{y}$ on a $180^{\circ}$ port edge, and then again on a $135^{\circ}$ port edge (Fig.~\ref{FIG:paths}.3).
@@ -217,8 +218,8 @@ This solution should minimizes the sum of (1) all shortest path costs, (2) the d
 We first describe how to solve this problem exactly using an Integer Linear Program (ILP).
 To encode the direction of a path from $\gv_s$ to $\gv_t$ in the ILP, we first model each undirected grid edge $\{\gv, \gv'\}$ as a pair of directed edges $(\gv, \gv')$ and $(\gv', \gv)$.
 %This transforms our undirected grid graph into an equivalent directed grid graph.
-To get unique start and end nodes for the shortest path calculations, we also treat each input edge $\ie = \{s, t\}$ now as a directed edge $(s, t)$.
-As the shortest paths in $\gG$ are symmetric, it does not matter whether we chose $\ie = (s, t)$ or $\ie = (t, s)$.
+%To get unique start and end nodes for the shortest path calculations, we also treat each input edge $\ie = \{s, t\}$ now as a directed edge $(s, t)$.
+%As the shortest paths in $\gG$ are symmetric, it does not matter whether we chose $\ie = (s, t)$ or $\ie = (t, s)$.
 
 To be able to later retrieve the placement of stations, we add binary decision variables $\gvused{\iv}{\gv}$ for each input node $\iv$ and grid node $\gv \in \gV^g$ which should be 1 of $\iv$ was assigned to $\gv$, or 0 otherwise.
 We denote this grid node as $\gv_\iv$.
@@ -270,7 +271,8 @@ Similarily, the only way to counter an incoming edge is for $\gv$ to be the targ
 
 To preserve the input embedding, it is enough to guarantee that no two paths in $\gG$ intersect and that the circular ordering of adjacent edges is the same as in the input graph.
 Equation~\ref{EQ:singleuse} already prevents paths crossing at grid nodes.
-To prevent crossings at intersecting grid edges, we define $\gE^d$ as the set of diagonal grid edges and say that for $\ge \in \gE^d$, $\ge^{\times} \in \gE^d$ is the diagonal edge crossing $\ge$. 
+Because our octilinear grid graph is not planar, we also have to prevent crossings at intersecting grid edges.
+We define $\gE^d$ as the set of diagonal grid edges and say that for $\ge \in \gE^d$, $\ge^{\times} \in \gE^d$ is the diagonal edge crossing $\ge$. 
 We then add the following constraint:
 %
 \begin{equation}
@@ -281,8 +283,8 @@ To ensure that the edge ordering at nodes remains the same, we would first like 
 To get the desired assignments, we add the following constraints:
 %
 \begin{align}
-  \forall \ie = (s, t) \in \gE&: \sum_{\gv \in \gV^g} \sum_{p = 1}^7 p x_{e(\psi,  \psi^p)} - \dir{s}{e} = 0\label{EQ:dirfrom} \\
-  \forall \ie = (s, t) \in \gE&: \sum_{\gv \in \gV^g} \sum_{p = 1}^7 p x_{e(\psi^p, \psi)} - \dir{t}{e} = 0\label{EQ:dirto}
+  \forall \ie = \{s, t\} \in \gE&: \sum_{\gv \in \gV^g} \sum_{p = 1}^7 p \geused{\ie}{(\psi,  \psi^p)} - \dir{s}{e} = 0\label{EQ:dirfrom} \\
+  \forall \ie = \{s, t\} \in \gE&: \sum_{\gv \in \gV^g} \sum_{p = 1}^7 p \geused{\ie}{(\psi^p, \psi)} - \dir{t}{e} = 0\label{EQ:dirto}
 \end{align}
 %
 In Equation~\ref{EQ:dirfrom}, each outgoing sink edge $(\gv,  \gv^{p}), p \in {0, \dots, 7}$ adds $p$ to the sum.
@@ -290,17 +292,17 @@ As Equations~\ref{EQ:cont_grid} and \ref{EQ:singleuse} ensures that only a singl
 The only way to fullfil the constraint is thus to set the value of $\dir{s}{e}$ to the octilinear direction.
 Equation~\ref{EQ:dirfrom} is modelled equivalently for paths incoming at $t$.
 
-To finally ensure that the edge ordering in the final drawing matches the input drawing, we apply a trick originally used in \cite{noellenburg}.
+To finally preserve the circular edge ordering, we apply a trick originally used in \cite{noellenburg}.
 If $v_0, \dots, v_p, \dots, v_{\text{deg}(u) - 1}$ is the clockwise ordering of nodes adjacent to u in the original embedding, then $\dir{v}{(v, u_{p})} < \dir{v}{(v, u_{p + 1})}$ has to be true for all but one $p \in \{0, \dots, \text{deg}(u) - 1\}$ in the final octilinear drawing.
 This can be enforced with the following constraints, which we add for all  $u \in \iV$ with $\deg(u) > 2$:
 %
 \begin{align}
-  \dir{v}{(v, u_{p + 1})} - \dir{v}{(v, u_{p})} + 8\beta_p(v) &\geq 1,\label{EQ:dirs}\\
-  \sum_{p = 0}^{\deg(u)-1} \beta_p(v) &\geq 1\label{EQ:onedev}.
+  \dir{v}{(v, u_{p + 1})} - \dir{v}{(v, u_{p})} + 8\cdot\beta_p(v) &\geq 1,\label{EQ:dirs}\\
+  \sum_{p = 0}^{\deg(u)-1} \beta_p(v) &\geq 1\label{EQ:onedef}.
 \end{align}
 %
 If $\dir{v}{(v, u_{p})} \not< \dir{v}{(v, u_{p + 1})}$, then $\dir{v}{(v, u_{p + 1})} - \dir{v}{(v, u_{p})} \leq 0$ and the only way to fullfill Equation~\ref{EQ:dirs} is to set $\beta_p(v)$ to 1.
-Equation~\ref{EQ:onedev} ensures that this can only happen a single time.
+Equation~\ref{EQ:onedef} ensures that this can only happen once.
 
 \subsection{Avoiding Line Bends}
 
@@ -318,8 +320,8 @@ As modulo cannot be used directly in an ILP, we use the following equivalent con
 %
 %The auxiliary binary variable $\gamma_{ef}$ will be 1 if $\dir{u}{f} > \dir{u}{e}$.
 %As both $\dir{u}{e}$ and $\dir{u}{f}$ are in the range $[1, 8]$ and as $\dir{u}{e} \neq \dir{u}{f}$ (per Eq.~\ref{EQ:singleuse})
-We then have $\dir{u}{e} - \dir{u}{f} + 8 \gamma_{ef} = \dir{u}{e} - \dir{u}{f} \mod 8$, which we will denote by $\dirdiff{u}{f}$.
-We now add binary decision variables $\bend{e}{f}{0}, \dots, \bend{e}{f}{7}$ for each of the 8 possible values of $\dirdiff{u}{f}$ and the following constraint for each pair of adjacent input edges:
+We then have $\dir{u}{e} - \dir{u}{f} + 8 \gamma_{ef} = \dir{u}{e} - \dir{u}{f} \mod 8$, which we will denote by $\dirdiff{e}{f}$.
+We now add binary decision variables $\bend{e}{f}{0}, \dots, \bend{e}{f}{7}$ for each of the 8 possible values of $\dirdiff{e}{f}$ and the following constraint for each pair of adjacent input edges:
 %
 \begin{equation} 
   \dirdiff{e}{f} - \sum_{i = 0}^7 i\bend{e}{f}{i} = 0 \label{EQ:bendassign}.
@@ -328,10 +330,16 @@ We now add binary decision variables $\bend{e}{f}{0}, \dots, \bend{e}{f}{7}$ for
 To make sure that only one of the bend variables is set to 1, we add the following constraint:
 %
 \begin{equation} 
-  \sum_{i = 0}^7 i\bend{e}{f}{i} = 1 \label{EQ:bendsum}.
+  \sum_{i = 0}^7 \bend{e}{f}{i} = 1 \label{EQ:bendsum}.
 \end{equation}
 %
 Each of the 8 bend variables is then added to the objective function with its corresponding penalty.
+
+\subsection{Optimizing Distances between Degree Two Stations}
+\label{SEC:ilpmindist}
+
+As our approach contracts degree two stations in the input graph prior to finding an octilinear drawing, it is not guaranteed that the minimum distance between such an degree two station and an adjacent station is at least the minimum distance.
+
 
 \subsection{ILP Complexity}
 
@@ -344,7 +352,7 @@ Equations~\ref{EQ:dirfrom} and \ref{EQ:dirto} add ${\Theta}(|E|)$ constraints.
 Equations~\ref{EQ:dirs} and \ref{EQ:onedef} add ${\Theta}(|V|)$ constraints.
 Finally, for avoiding line bends and input nodes, we add at most number of $8\times7$ auxiliary variables per input node (as there can be at most $8\times7$ edge pairings per input node in our octilinear setting) and at most $8^2\times7$ bend variables per input node.
 Similarily, Equations~\ref{EQ:dirneg}, \ref{EQ:bendassign} and \ref{EQ:bendsum} all add at most $8\times7$ constraints per input node, so the overall number of constraints and variables for the line bend penalty at input nodes is ${\Theta}(|V|)$.
-The total number of constraints and variables in our ILP is thus ${\Theta}(|E|XY + |V|XY)$.
+The total number of constraints and variables in our ILP is thus ${\Theta}(|E|XY + |V|XY) = \mathcal{O}(|E|XY)$.
 
 \section{Approximative Solution}
 
@@ -363,7 +371,7 @@ We additionally explain how the shortest path search on the grid graph can be sp
 %
 \begin{figure}
   \centering
-	\includegraphics[width=0.229\textwidth]{figures/node_order.pdf}
+	\includegraphics[width=0.219\textwidth]{figures/node_order.pdf}
 	\hfill
 	\includegraphics[width=0.229\textwidth]{figures/partial_drawn.pdf}
 	\vspace{-.3cm}
@@ -405,8 +413,6 @@ If $s$ or $t$ were not settled before, they are now settled to the start (and/or
 
 \subsection{Preservation of Embedding}
 
-To preserve the input embedding, we have to make sure that the shortest paths never cross each other, and that the initial circular ordering of edges at nodes is preserved.
-
 To prevent paths crossing each other, we update our octilinear grid graph after each Dijkstra run.
 Grid nodes that were used as nodes in the previously found shortest path are both \emph{bend-closed} by setting the cost of each adjacent bend edge to $\infty$ and \emph{sink-closed} by setting the cost of each adjacent sink edge to $\infty$.
 This effectively prevents any further path to use any of these previously used nodes.
@@ -425,10 +431,10 @@ To prevent paths crossing each other at crossing diagonal edges in the grid grap
 
 To preserve the circular edge ordering at nodes, we update the costs of adjacent sink edges for the grid node used for $s$, and the grid node used for $t$.
 We consider Figure~\ref{FIG:paths}.2.
-We assume the rendering order at $v$ to be $(e, f, g$), and paths $p(e)$ and $p(f)$ have already been routed (this means that $\gv$ is already settled).
-The path for $e$ uses the sink edge $\gse{}{}{0}$, the path for $f$ uses sink edge $\gse{}{}{3}$.
-To respect the input edge ordering at $v$ in the final drawing, we have to make sure that $p(g)$ does not enter or leave $\gv$ in the area marked red.
-To achieve this, we close each sink edge $\gse{}{}{p}$ that lies between $\gse{}{}{0}$ prior to routing $g$ by setting its cost to $\infty$ (including the sink edges used by $p(e)$ and $p(f)$) (Fig.~\ref{FIG:paths}.2a).
+The rendering order at $v$ is $(e, f, g$), and paths $p(e)$ and $p(f)$ have already been routed.
+%The path for $e$ uses the sink edge $\gse{}{}{0}$, the path for $f$ uses sink edge $\gse{}{}{3}$.
+To respect the input edge ordering at $v$, we have to make sure that $p(g)$ does not enter or leave $\gv$ in the area marked red.
+We achieve this by closing each sink edge $\gse{}{}{p}$ that lies between $\gse{}{}{0}$ prior to routing $g$ by setting its cost to $\infty$ (including the sink edges used by $p(e)$ and $p(f)$) (Fig.~\ref{FIG:paths}.2a).
 
 We now consider Figure~\ref{FIG:paths}.3 and assume the rendering order at $v$ to be $(e, g, f)$.
 Paths $p(e)$ and $p(g)$ have already been routed.
@@ -439,9 +445,9 @@ Their clockwise distance is 1.
 If $p(e)$ is already routed (Fig.~\ref{FIG:paths}.3), we now close the sink edges $\gse{}{}{0}$ used by $p(e)$, but also the succeeding (in clockwise direction) sink edge $\gse{}{}{1}$ (Fig.~\ref{FIG:paths}.3a).
 This guarantees that any path found for $g$ will now leave one sink edge between $p(e)$ and $p(g)$ open, allowing $p(f)$ to be routed in such a way that the original edge order at $v$ will be preserved.
 
-Note again that in both of the above cases, $\gv$ has already been settled.
-This means that the costs of all bend edges adjacent to $\gv$ have been set to $\infty$.
-We can thus be sure that our sink edge cost are not circumvented, for example, by a path $p(g)$ using $\gse{}{}{2}$ in Figure~\ref{FIG:paths}.3b, and then using the $45^{\circ}$ bend cost connecting port $\gpv{}{}{2}$ and $\gpv{}{}{1}$.
+%Note again that in both of the above cases, $\gv$ has already been settled.
+%This means that the costs of all bend edges adjacent to $\gv$ have been set to $\infty$.
+%We can thus be sure that our sink edge cost are not circumvented, for example, by a path $p(g)$ using $\gse{}{}{2}$ in Figure~\ref{FIG:paths}.3b, and then using the $45^{\circ}$ bend cost connecting port $\gpv{}{}{2}$ and $\gpv{}{}{1}$.
 
 \subsection{Avoiding Line Bends}
 
@@ -469,7 +475,7 @@ The sum of the line bend penalties on each adjacent sink edge is then used as th
 \begin{figure}
   \centering
 	$\vcenter{\hbox{\includegraphics[width=0.479\textwidth]{figures/optim.pdf}}}$
-	\caption{Optimizing an initial drawing (1) by exploring the local search neighborhood, consisting of the 8 neighboring positions (depicted here for node $\psi$) for each settled grid node. All edges adjacent to node under investigation are re-routed after it is moved to a neighboring position, and the position which yields the biggest improvement is taken (2, 3). Afterwards, the local search continues.}
+	\caption{Optimizing an initial drawing (1) by exploring the local search neighborhood, consisting of the 8 neighboring positions (depicted here for node $\psi$) for each settled grid node. All edges adjacent to the node under investigation are re-routed after it is moved to a neighboring position, and the position which yields the biggest improvement is taken (2, 3). Afterwards, the local search continues.}
 	\label{FIG:optim}
 \end{figure}
 
@@ -487,11 +493,15 @@ There might be two (or more) shortest paths between two input nodes which have e
 During the exploration of the neighborhood, it will depend largely on the implementation which of two equivalent shortest path is chosen locally, and the optimal placement of a particular path might never be chosen.
 (2) The final map score does not only depend on the placement of nodes, but also on the order in which edges are rendered.
 
-Despite these drawbacks, our evaluation shows that our approach comes very close to the optimal solution after just a few hill climbing iterations.
-
 \subsection{Optimizing Distances between Degree Two Stations}
 
-\TODO{}
+Just like with our ILP formulation (Sec.~\ref{SEC:ilpmindist}), we have to enforce that the distance between contracted stations is at least $\hat d$. 
+We reformulate this hard constraint as a soft constraints which is optimized during the steepest hill climbing.
+We consider the octilinear drawing before the contracted nodes are re-inserted again equidistantly.
+For a (contracted) input edge $e$ with an octilinear curve $c(e)$ built of $l$ grid edges and containing $k$ contracted stations, we define a spring force $F_e = c \cdot (k + 1 - l)$.
+This spring is relaxed if the $L^\infty$ (grid edge) length $l$ of $e$ is such that we can insert $k$ stations equidistantly with distance 1. \TODO{figure...}
+If $F_{u, v} > 0$ (that is, if the hypothetical spring is compressed), we add the potential energy $E_e = \frac{1}{2} c \cdot (k + 1 - l)^2$ to our objective function.
+Note that if we also added $E_e$ for $F_e < 0$, we would optimize for a final drawing where the length of any edge is 1.
 
 \subsection{Speed-up Heuristic}
 

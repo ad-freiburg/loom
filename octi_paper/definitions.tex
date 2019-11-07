@@ -49,12 +49,12 @@
 
 % ILP
 
-\newcommand\gvused[2]{x_{#1#2}}	% bin. decision variable whether grid node #1 is assigned to input node #2
-\newcommand\geused[2]{x_{#1#2}}	% bin. decision variable whether grid edge #1 is used be input edge #2
+\newcommand\gvused[2]{x_{#1,#2}}	% bin. decision variable whether grid node #1 is assigned to input node #2
+\newcommand\geused[2]{x_{#1,#2}}	% bin. decision variable whether grid edge #1 is used be input edge #2
 
-\newcommand\dir[2]{\delta_{#1#2}}	% variable telling the direction of edge #2 at node #1
-\newcommand\dirdiff[2]{\Delta_{#1#2}}	% variable telling the direction difference of edge #1 and edge #2
+\newcommand\dir[2]{\delta_{#1,#2}}	% variable telling the direction of edge #2 at node #1
+\newcommand\dirdiff[2]{\Delta_{#1,#2}}	% variable telling the direction difference of edge #1 and edge #2
 
-\newcommand\bend[3]{\Delta_{#1#2}^{#3}}	% variable telling the direction difference of edge #1 and edge #2
+\newcommand\bend[3]{\Delta_{#1,#2}^{#3}}	% variable telling the direction difference of edge #1 and edge #2
 
 \def\ldeg{\text{ldeg}}

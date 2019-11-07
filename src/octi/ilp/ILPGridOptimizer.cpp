@@ -80,7 +80,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
       i++;
 
       double c_0 = gg.getPenalties().p_45 - gg.getPenalties().p_135;
-      double penPerGrid = 3 + c_0 + fmax(gg.getPenalties().diagonalPen,
+      double penPerGrid = 2 + c_0 + fmax(gg.getPenalties().diagonalPen,
                                          gg.getPenalties().horizontalPen);
 
       glp_set_obj_coef(lp, col, gridD * penPerGrid);

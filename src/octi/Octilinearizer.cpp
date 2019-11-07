@@ -87,63 +87,44 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   CombGraph cg(tg);
   auto box = tg->getBBox();
 
-  for (size_t i = 0; i < cores; i++){
+  for (size_t i = 0; i < cores; i++) {
     ggs[i] = new GridGraph(box, gridSize, borderRad, pens);
   }
 
-  auto order = getOrdering(cg);
+  bool found = false;
 
-  Drawing drawing(ggs[0]);
-  bool found = draw(order, ggs[0], &drawing, std::numeric_limits<double>::infinity());
-
-  if (!found) std::cerr << "(no initial embedding found)" << std::endl;
-
-  Drawing bestIterDraw = drawing;
-  drawing.eraseFromGrid(ggs[0]);
-  bool iterFound = false;
-
-  size_t rands = 10;
+  size_t tries = 100;
   size_t ITERS = 100;
 
-  // size_t rands = 0;
+  // size_t tries = 0;
   // size_t ITERS = 0;
 
-  size_t jobs = rands / cores;
-  std::cerr << "Jobs per core: " << jobs << std::endl;
+  Drawing drawing(ggs[0]);
 
-  for (size_t c = 0; c < cores; c++) {
-    for (size_t i = 0; i < jobs; i++) {
-      T_START(draw);
-      auto iterOrder = getOrdering(cg);
+  for (size_t i = 0; i < tries; i++) {
+    T_START(draw);
+    auto iterOrder = getOrdering(cg);
 
-      Drawing nextDrawing(ggs[c]);
-      bool locFound = draw(iterOrder, ggs[c], &nextDrawing, bestIterDraw.score());
+    bool locFound = draw(iterOrder, ggs[0], &drawing, drawing.score());
 
-      if (locFound) {
-        double imp = (bestIterDraw.score() - nextDrawing.score());
-        std::cerr << " ++ Random try " << ((c * jobs) + (i + 1)) << ", best " << bestIterDraw.score()
-                  << ", next " << nextDrawing.score() << " ("
-                  << (imp >= 0 ? "+" : "") << imp << ", took " << T_STOP(draw) << " ms)" << std::endl;
-
-        if (!iterFound || nextDrawing.score() < bestIterDraw.score()) {
-          bestIterDraw = nextDrawing;
-          iterFound = true;
-        }
-      } else {
-        std::cerr << " ++ Random try " << i << ", best " << bestIterDraw.score()
-                  << ", next <not found>" << " (took " << T_STOP(draw) << " ms)" << std::endl;
-      }
-
-      nextDrawing.eraseFromGrid(ggs[c]);
+    if (locFound) {
+      std::cerr << " ++ Try " << i << ", score " << drawing.score()
+                << ", (took " << T_STOP(draw) << " ms)" << std::endl;
+      found = true;
+    } else {
+      std::cerr << " ++ Try " << i << ", score <inf>"
+                << ", next <not found>"
+                << " (took " << T_STOP(draw) << " ms)" << std::endl;
     }
+
+    drawing.eraseFromGrid(ggs[0]);
+    if (found)
+      break;
+    else
+      drawing.crumble();
   }
 
   std::cerr << "Done.." << std::endl;
-
-  if (iterFound) {
-    drawing = bestIterDraw;
-    found = true;
-  }
 
   if (!found) {
     LOG(ERROR) << "Could not find planar embedding for input graph.";
@@ -157,6 +138,7 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
   std::cerr << "Iterating..." << std::endl;
 
   for (; iters < ITERS; iters++) {
+    T_START(iter);
     Drawing bestFromIter = drawing;
     for (auto a : *cg.getNds()) {
       if (a->getDeg() == 0) continue;
@@ -195,7 +177,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
         if (pos == 8) p[a] = {origX, origY};
         if (pos == 4) p[a] = {origX, origY - 1};
 
-        bool found = draw(test, p, ggs[0], &run, std::numeric_limits<double>::infinity());
+        bool found = draw(test, p, ggs[0], &run,
+                          std::numeric_limits<double>::infinity());
 
         if (found && bestFromIter.score() > run.score()) {
           bestFromIter = run;
@@ -216,7 +199,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
     double imp = (drawing.score() - bestFromIter.score());
     std::cerr << " ++ Iter " << iters << ", prev " << drawing.score()
               << ", next " << bestFromIter.score() << " ("
-              << (imp >= 0 ? "+" : "") << imp << ")" << std::endl;
+              << (imp >= 0 ? "+" : "") << imp << ", took " << T_STOP(iter)
+              << " ms)" << std::endl;
 
     if (imp < 0.05) break;
 
@@ -279,6 +263,9 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
   for (auto cmbEdg : ord) {
     double cutoff = globCutoff - drawing->score();
+    if (drawing->score() == std::numeric_limits<double>::infinity()) {
+      cutoff = drawing->score();
+    }
     bool rev = false;
     auto frCmbNd = cmbEdg->getFrom();
     auto toCmbNd = cmbEdg->getTo();
@@ -301,7 +288,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     }
 
     // why not distance based? (TODO, balance this with edge costs)
-    double penPerGrid = 3 + c_0 + fmax(gg->getPenalties().diagonalPen,
+    double penPerGrid = 2 + c_0 + fmax(gg->getPenalties().diagonalPen,
                                        gg->getPenalties().horizontalPen);
 
     // if we open node sinks, we have to offset their cost by the highest
@@ -345,8 +332,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     // Even more importantly, is a node is settled, its turn edges have
     // already been closed.
     //
-      // the size() == 1 check is important, because nd cost writing will
-      // not work if the to node is not already settled!
+    // the size() == 1 check is important, because nd cost writing will
+    // not work if the to node is not already settled!
 
     if (frGrNds.size() == 1 && gg->isSettled(frCmbNd)) {
       writeNdCosts(*frGrNds.begin(), frCmbNd, cmbEdg, gg);
@@ -394,7 +381,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg);
   }
 
-  // std::cerr << "Dijkstra: " << dijCost << ", " << dijIters << " iters, " << dijIters / dijCost << " iters per millisec" << std::endl;
+  // std::cerr << "Dijkstra: " << dijCost << ", " << dijIters << " iters, " <<
+  // dijIters / dijCost << " iters per millisec" << std::endl;
 
   return true;
 }

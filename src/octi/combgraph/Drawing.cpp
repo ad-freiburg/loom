@@ -23,14 +23,13 @@ double Drawing::score() const { return _c; }
 
 // _____________________________________________________________________________
 void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
+  if (_c == std::numeric_limits<double>::infinity()) _c = 0;
   if (_edgs.count(ce)) _edgs[ce].clear();
 
-  double l = 0;
+  int l = 0;
 
   for (size_t i = 0; i < ges.size(); i++) {
     auto ge = ges[i];
-    l += util::geo::dist(*ge->getFrom()->pl().getGeom(),
-                         *ge->getTo()->pl().getGeom());
 
     if (rev) {
       _nds[ce->getFrom()] = ges.front()->getTo()->pl().getParent();
@@ -74,6 +73,7 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
         _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] += ge->pl().cost();
       }
     } else {
+      if (!ge->pl().isSecondary()) l++;
       _edgCosts[ce] += ge->pl().cost();
     }
 
@@ -87,10 +87,16 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
     }
   }
 
-  double d = (1 * _gg->getCellSize()) - (l / ce->pl().getChilds().size());
-  double pen = 0;
+  // variables named as in the paper
+  int k = ce->pl().getChilds().size() - 1;
 
-  if (d > 0) pen = d * 0.02;
+  double c = 4;
+
+  double F = c * (k + 1 - l);
+  double E = 0.5 * c * (k + 1 - l) * (k + 1 - l);
+
+  double pen = 0;
+  if (F > 0) pen = E;
 
   _springCosts[ce] = pen;
   _c += _springCosts[ce];

@@ -23,7 +23,7 @@ typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
 
 class Drawing {
  public:
-  Drawing(const GridGraph* gg) : _c(0), _gg(gg) {};
+  Drawing(const GridGraph* gg) : _c(std::numeric_limits<double>::infinity()), _gg(gg) {};
 
   double score() const;
   void crumble();
