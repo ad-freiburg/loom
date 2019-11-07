@@ -335,12 +335,6 @@ To make sure that only one of the bend variables is set to 1, we add the followi
 %
 Each of the 8 bend variables is then added to the objective function with its corresponding penalty.
 
-\subsection{Optimizing Distances between Degree Two Stations}
-\label{SEC:ilpmindist}
-
-As our approach contracts degree two stations in the input graph prior to finding an octilinear drawing, it is not guaranteed that the minimum distance between such an degree two station and an adjacent station is at least the minimum distance.
-
-
 \subsection{ILP Complexity}
 
 For an $X \times Y$ grid, our octilinear grid graph has $\Theta(XY)$ edges and nodes.
@@ -495,8 +489,8 @@ During the exploration of the neighborhood, it will depend largely on the implem
 
 \subsection{Optimizing Distances between Degree Two Stations}
 
-Just like with our ILP formulation (Sec.~\ref{SEC:ilpmindist}), we have to enforce that the distance between contracted stations is at least $\hat d$. 
-We reformulate this hard constraint as a soft constraints which is optimized during the steepest hill climbing.
+As our approach contracts degree two stations in the input graph prior to finding an octilinear drawing, we have to enforce that the distance between contracted stations is at least $\hat d$ after they have been re-inserted equidistantly. 
+We reformulate this hard constraint as a soft constraint which is optimized during the steepest hill climbing.
 We consider the octilinear drawing before the contracted nodes are re-inserted again equidistantly.
 For a (contracted) input edge $e$ with an octilinear curve $c(e)$ built of $l$ grid edges and containing $k$ contracted stations, we define a spring force $F_e = c \cdot (k + 1 - l)$.
 This spring is relaxed if the $L^\infty$ (grid edge) length $l$ of $e$ is such that we can insert $k$ stations equidistantly with distance 1. \TODO{figure...}
