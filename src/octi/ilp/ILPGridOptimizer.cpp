@@ -51,8 +51,6 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
   glp_create_index(lp);
 
-  size_t i = 0;
-
   for (auto nd : cg.getNds()) {
     if (nd->getDeg() == 0) continue;
     std::stringstream oneAssignment;
@@ -67,9 +65,8 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
       double gridD = floor(dist(*n->pl().getGeom(), *nd->pl().getGeom()));
 
+      // threshold for speedup
       if (gridD >= gg.getCellSize() * 3) continue;
-
-      gridD = gridD / gg.getCellSize();
 
       auto varName = getStatPosVar(n, nd);
 
@@ -77,13 +74,8 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
       glp_set_col_name(lp, col, varName.c_str());
       // binary variable € {0,1}, node is either this station, or not
       glp_set_col_kind(lp, col, GLP_BV);
-      i++;
 
-      double c_0 = gg.getPenalties().p_45 - gg.getPenalties().p_135;
-      double penPerGrid = 2 + c_0 + fmax(gg.getPenalties().diagonalPen,
-                                         gg.getPenalties().horizontalPen);
-
-      glp_set_obj_coef(lp, col, gridD * penPerGrid);
+      glp_set_obj_coef(lp, col, gg.ndMovePen(nd, n));
 
       vm.addVar(rowStat, col, 1);
     }
@@ -106,7 +98,6 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
           glp_set_col_name(lp, col, edgeVarName.c_str());
           // binary variable € {0,1}, edge is either used, or not
           glp_set_col_kind(lp, col, GLP_BV);
-          i++;
 
           glp_set_obj_coef(lp, col, e->pl().cost());
         }

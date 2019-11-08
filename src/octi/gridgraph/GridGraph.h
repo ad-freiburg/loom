@@ -96,6 +96,8 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   GridNode* getSettled(const CombNode* cnd) const;
 
+  double ndMovePen(const CombNode* cbNd, const GridNode* grNd) const;
+
  private:
   util::geo::DBox _bbox;
   Penalties _c;

@@ -254,7 +254,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg,
 bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
                           const SettledPos& settled, GridGraph* gg,
                           Drawing* drawing, double globCutoff) {
-  double c_0 = gg->getPenalties().p_45 - gg->getPenalties().p_135;
 
   SettledPos retPos;
 
@@ -287,9 +286,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       rev = true;
     }
 
-    // why not distance based? (TODO, balance this with edge costs)
-    double penPerGrid = 2 + c_0 + fmax(gg->getPenalties().diagonalPen,
-                                       gg->getPenalties().horizontalPen);
 
     // if we open node sinks, we have to offset their cost by the highest
     // possible turn cost + 1 to not distort turn penalties
@@ -298,29 +294,23 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     // open the source nodes
     for (auto n : frGrNds) {
-      double gridD = floor(dist(*n->pl().getGeom(), *frCmbNd->pl().getGeom()));
-      gridD = gridD / gg->getCellSize();
-
       if (gg->isSettled(frCmbNd)) {
         // only count displacement penalty ONCE
         gg->openNodeSink(n, 0);
       } else {
         costOffsetFrom = (gg->getPenalties().p_45 - gg->getPenalties().p_135);
-        gg->openNodeSink(n, costOffsetFrom + gridD * penPerGrid);
+        gg->openNodeSink(n, costOffsetFrom + gg->ndMovePen(frCmbNd, n));
       }
     }
 
     // open the target nodes
     for (auto n : toGrNds) {
-      double gridD = floor(dist(*n->pl().getGeom(), *toCmbNd->pl().getGeom()));
-      gridD = gridD / gg->getCellSize();
-
       if (gg->isSettled(toCmbNd)) {
         // only count displacement penalty ONCE
         gg->openNodeSink(n, 0);
       } else {
         costOffsetTo = (gg->getPenalties().p_45 - gg->getPenalties().p_135);
-        gg->openNodeSink(n, costOffsetTo + gridD * penPerGrid);
+        gg->openNodeSink(n, costOffsetTo + gg->ndMovePen(toCmbNd, n));
       }
     }
 

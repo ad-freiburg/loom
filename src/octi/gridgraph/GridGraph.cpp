@@ -249,7 +249,6 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
   for (int i = 0; i < 8; i++) {
     if (!out[i]) continue;
     for (auto ro : e->pl().getChilds().front()->pl().getRoutes()) {
-
       // TODO: turn restrictions, if there is actually no connection
       // between the lines on the edges, dont penalize!!
       if (out[i]->pl().getChilds().front()->pl().hasRoute(ro.route)) {
@@ -558,6 +557,17 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   }
 
   return n;
+}
+
+// _____________________________________________________________________________
+double GridGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) const {
+  double c_0 = _c.p_45 - _c.p_135;
+  double penPerGrid = 0.5 + c_0 + fmax(_c.diagonalPen, _c.horizontalPen);
+
+  double gridD = floor(dist(*cbNd->pl().getGeom(), *grNd->pl().getGeom()));
+  gridD = gridD / getCellSize();
+
+  return gridD * penPerGrid;
 }
 
 // _____________________________________________________________________________
