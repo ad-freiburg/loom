@@ -65,7 +65,7 @@ Basic approach:
 
 \subsection{Problem definition}
 
-Given an undirected labeled input graph $\iG = (\iV, \iE, L)$, where $\iV$ are stations (or other location of interests in a public transit network), $\iE$ are connections between those stations and each edge $\ie \in \iE$ is labelled with a subset $L(e) \in \mathcal{L}$ of lines travelling on this edge.
+Given an undirected labeled input graph $\iG = (\iV, \iE, L)$, where $\iV$ are stations, $\iE$ are connections between those stations and each edge $\ie \in \iE$ is labelled with a subset $L(e) \in \mathcal{L}$ of lines travelling on this edge.
 We call $\iG$ the $\emph{line graph}$.
 We say $\drawing{\iG} = (\drawingpossym, \drawingcurvesym)$ is a drawing of $\iG$, where $\drawingpos{\iv}$ assigns a position to every node $\iv \in \iV$ and $\drawingcurve{\ie} = (q_0, q_1, \dots, q_n)$ assigns a piecewise linear curve to every edge $\ie \in \iE$.
 The initial input drawing $\initdrawing{\iG}$ assigns each node a geographical real-world position.
@@ -77,21 +77,24 @@ The hard constraints may be summarized as:
 \begin{enumerate}
 \setlength\itemsep{.1em}
 \item \emph{Octilinearity}. Each edge curve $\drawingcurve{\ie}$ may only consist of segments whose orientation is a multiple of $45^{\circ}$.
-\item \emph{Topology preservation}. The topology of the line graph should be respected. In particular, no crossings between edges should be introduced, non-incident edges should never share common points and the circular ordering of edges around adjacent nodes should be preserved.
+\item \emph{Topology Preservation}. The topology of the line graph should be respected. In particular, no crossings between edges should be introduced, non-incident edges should never share common points and the circular ordering of edges around adjacent nodes should be preserved.
 \end{enumerate}
 %
 Additionally, the following soft constraints are usually employed:
 %
 \begin{enumerate}
 \setlength\itemsep{.1em}
-\item \emph{Edge monotony}. The number of edge bends should be minimized and large angles preferred.
-\item \emph{Edge length}. The length of the edge curves should be minimized.
-\item \emph{Geographical accuracy}. The original node positions should be changed as little as possible.
-\item \emph{Map density}. There should be a minimum distance $\gmind$ between the anchor points of curves to ensure readability.
+\item \emph{Edge Monotony}. The number of edge bends should be minimized and large angles preferred.
+\item \emph{Edge Length}. The length of the edge curves should be minimized.
+\item \emph{Map Density}. There should be a minimum distance $\gmind$ between the anchor points of curves to ensure readability.
+\item \emph{Geographical Accuracy}. The original node positions should be changed as little as possible.
 \end{enumerate}
 %
-Previous work defined the problem as finding an octilinear embedding of the input graph, i.e. each edge is represented by a straight octilinear arc.
-We are interested in octilinear drawings and therefore use a slightly different approach.
+Soft constraint 4 (Geographical Accuracy) is usually weakened to only apply to nodes with a degree different than 2 (intersection nodes and terminus nodes), as this both improves the overall map appearance and simplifies the problem.
+The same is done in this work.
+
+Previous work defined the problem as finding an octilinear \emph{embedding} of the input graph, i.e. each edge is represented by a straight octilinear arc.
+We are interested in octilinear \emph{drawings} and therefore use a slightly different approach.
 We state the problem as finding the optimal posititions $\drawingpos{\iv} \in \mathbb{N}^2$ on a grid for each station node and curves $\drawingcurve{\ie} = (q_0, q_1, \dots, q_n)$, $q_i \in \mathbb{N}^2$ connecting them. 
 Most importantly, for two succeeding points $q_i = (x_i, y_i)$ and $q_{i+1} = (x_{i+1}, y_{i+1})$, we require their Chebyshev distance $D_\text{Ch}(q_i, q_{i+1}) = \max \{|x_{i+1} - x_i|, |y_{i+1} - y_i|\}$ to be exactly 1, which ensures octilinearity of the final drawing.
 
