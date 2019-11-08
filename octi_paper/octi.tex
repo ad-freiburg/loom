@@ -71,13 +71,13 @@ We say $\drawing{\iG} = (\drawingpossym, \drawingcurvesym)$ is a drawing of $\iG
 The initial input drawing $\initdrawing{\iG}$ assigns each node a geographical real-world position.
 Optionally, each edge an may be assigned its real-world course.
 Our goal is to find a schematic drawing $\mathcal{D}'_G$ that resembles a classic Metro Map.
-This is usually formalized as a set of hard and soft constraints \cite{nb, ...}.
+This is usually formalized as a set of hard and soft constraints \cite{noll05, noll11}.
 The hard constraints may be summarized as:
 %
 \begin{enumerate}
 \setlength\itemsep{.1em}
 \item \emph{Octilinearity}. Each edge curve $\drawingcurve{\ie}$ may only consist of segments whose orientation is a multiple of $45^{\circ}$.
-\item \emph{Topology Preservation}. The topology of the line graph should be respected. In particular, no crossings between edges should be introduced, non-incident edges should never share common points and the circular ordering of edges around adjacent nodes should be preserved.
+\item \emph{Topology Preservation}. The topology of the line graph should be respected. No crossings between edges should be introduced, non-incident edges should never share common points and the circular ordering of edges around adjacent nodes should be preserved.
 \end{enumerate}
 %
 Additionally, the following soft constraints are usually employed:
@@ -101,9 +101,6 @@ Most importantly, for two succeeding points $q_i = (x_i, y_i)$ and $q_{i+1} = (x
 To project this grid onto a map plane, we use a scale factor $\gScale$, which is essentially the height and length of a grid cell.
 If $\gScale$ is set to $\gmind$, a minimum distance between any two grid points is guaranteed to be greater or equal to $\gmind$.
 We choose the dimensions $X\times Y$ of the grid in such a way that it matches the bounding box of the input line graph.
-
-Like previous work, we contract station nodes of degree 2 prior to finding an octilinear drawing to speed up the drawing process.
-They are later re-inserted equidistantly onto the corresponding edge curves.
 
 \subsection{Related Work}
 
@@ -216,7 +213,7 @@ As the shortest path $p'$ thus minimizes $c(p) + 2 \gSinkcost - 1$, it also mini
 Using the octilinear grid graph, we now define the problem of finding the optimal metro-map drawing on the grid defined by $\gG$ like this: find grid nodes for each input node and non-intersecting shortest paths in the grid graph between the grid nodes for adjacent input nodes.
 The ordering of paths at grid node candidates should match the original embedding.
 %The shortest paths in the grid than form an octilinear drawing of $\gG$ in which the original embedding is preserved.
-This solution should minimizes the sum of (1) all shortest path costs, (2) the distance between the grid position of a station and its original position, and (3) the line bend penalties at stations (which are not covered by the path costs on $\gG$).
+This solution should minimizes the sum of (1) all path costs, (2) the distance between the original and the grid position of a station node with a degree different than 2, and (3) the line bend penalties at stations (which are not covered by the path costs on $\gG$).
 
 We first describe how to solve this problem exactly using an Integer Linear Program (ILP).
 To encode the direction of a path from $\gv_s$ to $\gv_t$ in the ILP, we first model each undirected grid edge $\{\gv, \gv'\}$ as a pair of directed edges $(\gv, \gv')$ and $(\gv', \gv)$.
@@ -226,7 +223,7 @@ To encode the direction of a path from $\gv_s$ to $\gv_t$ in the ILP, we first m
 
 To be able to later retrieve the placement of stations, we add binary decision variables $\gvused{\iv}{\gv}$ for each input node $\iv$ and grid node $\gv \in \gV^g$ which should be 1 of $\iv$ was assigned to $\gv$, or 0 otherwise.
 We denote this grid node as $\gv_\iv$.
-$\gvused{\iv}{\gv}$ is added to the objective function with the distance between the original position of $\iv$ and the position induced by $\gv$ as a coefficient.
+If $\deg(\iv) \neq 2$, $\gvused{\iv}{\gv}$ is added to the objective function with the distance between the original position of $\iv$ and the position induced by $\gv$ as a coefficient.
 To be able to deduce the course of the shortest paths, we define binary variables $\geused{\ie}{\ge}$ for each input edge $\ie$ and each grid edge $\ge$ which should be 1 if $\ge$ is used in path for $e$, or 0 otherwise.
 $\geused{\ie}{\ge}$ is added to the objective function with the cost of grid edge $\ge$ as a coefficient.
 
@@ -251,8 +248,9 @@ Note that Equation~\ref{EQ:singleuse} also enforces that a grid edge $\ge$ can o
 
 \subsection{Edge Continuity}
 
-To globally compute the shortest paths on $\gG$ between all adjacent input nodes, we build on the standard formulation of the shortest path problem as a Linear Program.
-We first have to make sure that edges assigned to the shortest path from $\gv_s$ to $\gv_t$ are connected with the following constraints (where $e = (s, t)$):
+To globally compute the optimal paths on $\gG$ between all adjacent input nodes, we build on the standard formulation of the shortest path problem as a Linear Program.
+We first have to make sure that edges assigned to the path from $\gv_s$ to $\gv_t$ are connected.
+We add the following constraints (where $e = \{s, t\}$):
 %
 \newcommand\Psum[1]{\sum_{\makebox[0pt]{$\scriptstyle#1$}}}
 %
@@ -354,12 +352,14 @@ The total number of constraints and variables in our ILP is thus ${\Theta}(|E|XY
 \section{Approximative Solution}
 
 ILP solution times tend to get very big for complex input graphs. \TODO{how big?}
-This section describes a method to solve the problem approximatively.
+This section describes a fast method to solve the problem approximatively.
 Our method works as follows:
-  (1) Order the edges of the input graph.
-  (2) For each (ordered) input edge $e = \{u, v\}$, calculate the shortest path from a set of possible start nodes $S$ to a set of possible target nodes $T$ on the grid graph. If the grid node for $u$ or $v$ has already been settled, the corresponding node set has size 1. Paths already calculated act as obstacles.
-  (3) If no initial drawing could be found, randomize the ordering and try again.
-  (4) Optimize the initial drawing via a local search approach where individual nodes are moved to one of their 8 neighboring positions and adjacent edges re-routed.
+  (1) Contract all nodes of degree 2.
+  (2) Order the remaining edges of the input graph.
+  (3) For each (ordered) input edge $e = \{u, v\}$, calculate the shortest path from a set of possible start nodes $S$ to a set of possible target nodes $T$ on the grid graph. If the grid node for $u$ or $v$ has already been settled, the corresponding node set has size 1. Paths already calculated act as obstacles.
+  (4) If no initial drawing could be found, randomize the ordering and try again.
+  (5) Optimize the initial drawing via a local search approach where individual nodes are moved to one of their 8 neighboring positions and adjacent edges re-routed.
+  (6) Re-insert the contracted degree 2 nodes into the corresponding edge curves equidistantly.
 
 Each step is described in detail in this section.
 We additionally explain how the shortest path search on the grid graph can be sped up with an $A^*$ heuristic.
@@ -376,7 +376,7 @@ We additionally explain how the shortest path search on the grid graph can be sp
 	\label{FIG:order}
 \end{figure}
 %
-In addition to the standard degree $\deg(\iv)$ of an input node $\iv$, we define the line degree $\ldeg(\iv)$ of a node a node to be the number of (non-unique) lines on each adjacent edge.
+In addition to the standard degree $\deg(\iv)$ of an input node $\iv$, we define the line degree $\ldeg(\iv)$ of a node to be the number of (non-unique) lines on each adjacent edge.
 We then build our initial input edge ordering $(e_0, e_1, \dots, e_{|E|})$ as follows:
   (1) Mark all input nodes as unprocessed.
   (2) Take the unprocessed node $\iv$ with highest line degree $\ldeg(\iv)$ and mark it as dangling.
@@ -492,10 +492,10 @@ During the exploration of the neighborhood, it will depend largely on the implem
 
 \subsection{Optimizing Distances between Degree Two Stations}
 
-As our approach contracts degree two stations in the input graph prior to finding an octilinear drawing, we have to enforce that the distance between contracted stations is at least $\hat d$ after they have been re-inserted equidistantly. 
-We reformulate this hard constraint as a soft constraint which is optimized during the steepest hill climbing.
-We consider the octilinear drawing before the contracted nodes are re-inserted again equidistantly.
-For a (contracted) input edge $e$ with an octilinear curve $c(e)$ built of $l$ grid edges and containing $k$ contracted stations, we define a spring force $F_e = c \cdot (k + 1 - l)$.
+As our heuristical approach contracts degree two stations in the input graph prior to finding an octilinear drawing, we have to enforce that the distance between contracted stations is at least $\hat d$ after they have been re-inserted into the final drawing. 
+We reformulate hard constraint 4 as a soft constraint which is optimized during the steepest hill climbing.
+We consider the octilinear drawing before the re-insertation of the contracted nodes.
+For an input edge $e$ with an octilinear curve $c(e)$ built of $l$ grid edges and containing $k$ contracted stations, we define a spring force $F_e = c \cdot (k + 1 - l)$.
 This spring is relaxed if the $L^\infty$ (grid edge) length $l$ of $e$ is such that we can insert $k$ stations equidistantly with distance 1. \TODO{figure...}
 If $F_{u, v} > 0$ (that is, if the hypothetical spring is compressed), we add the potential energy $E_e = \frac{1}{2} c \cdot (k + 1 - l)^2$ to our objective function.
 Note that if we also added $E_e$ for $F_e < 0$, we would optimize for a final drawing where the length of any edge is 1.
@@ -529,5 +529,8 @@ as each shortest path has to take some bend edge at the pass-through nodes and t
 \subsection{Penalty Experiments}
 
 \section{Conclusions}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{octi}
 
 \end{document}
