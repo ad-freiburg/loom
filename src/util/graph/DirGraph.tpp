@@ -4,10 +4,6 @@
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-DirGraph<N, E>::DirGraph() {}
-
-// _____________________________________________________________________________
-template <typename N, typename E>
 Node<N, E>* DirGraph<N, E>::addNd(const N& pl) {
   return addNd(new DirNode<N, E>(pl));
 }

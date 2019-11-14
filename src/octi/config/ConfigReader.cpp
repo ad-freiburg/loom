@@ -1,5 +1,4 @@
 // Copyright 2017, University of Freiburg,
-// Copyright 2019, University of Freiburg,
 // Chair of Algorithms and Data Structures.
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
@@ -33,13 +32,25 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   opts::options_description config("Output");
   config.add_options()
     (
+      "optim-mode,o",
+      opts::value<std::string>(&(cfg->optMode))->default_value("heur"),
+      "optimization mode, either 'heur' (fast) or 'ilp' (very slow)")
+    (
       "from-dot,D",
       opts::bool_switch(&(cfg->fromDot))->default_value(false),
       "input is in dot format")
     (
-      "grid-size",
+      "deg2-heur",
+      opts::bool_switch(&(cfg->deg2Heur))->default_value(false),
+      "contract degree 2 nodes and re-insert them equidistantly")
+    (
+      "density-pen",
+      opts::value<double>(&(cfg->pens.densityPen))->default_value(0),
+      "penalty factor for re-inserted contracted stations that are too near, a reasonable value is e.g. 5. Only works with optim mode 'heur'!")
+    (
+      "grid-size,g",
       opts::value<double>(&(cfg->gridSize))->default_value(450.0),
-      "grid size")
+      "grid cell length in map projection")
     (
       "border-rad",
       opts::value<double>(&(cfg->borderRad))->default_value(45),

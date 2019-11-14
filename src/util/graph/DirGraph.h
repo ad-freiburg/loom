@@ -21,8 +21,6 @@ using UndirEdge = Edge<N, E>;
 template <typename N, typename E>
 class DirGraph : public Graph<N, E> {
  public:
-  explicit DirGraph();
-
   using Graph<N, E>::addEdg;
 
   Node<N, E>* addNd();

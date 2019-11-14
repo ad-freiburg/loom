@@ -22,6 +22,7 @@ using octi::combgraph::EdgeOrdering;
 class CombGraph : public util::graph::UndirGraph<CombNodePL, CombEdgePL> {
  public:
   CombGraph(const TransitGraph* g);
+  CombGraph(const TransitGraph* g, bool collapse);
 
   EdgeOrdering getEdgeOrderingForNode(CombNode* n) const;
   EdgeOrdering getEdgeOrderingForNode(

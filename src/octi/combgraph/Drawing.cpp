@@ -90,7 +90,7 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
   // variables named as in the paper
   int k = ce->pl().getChilds().size() - 1;
 
-  double c = 5;
+  double c = _gg->getPenalties().densityPen;
 
   double F = c * (k + 1 - l);
   double E = 0.5 * c * (k + 1 - l) * (k + 1 - l);

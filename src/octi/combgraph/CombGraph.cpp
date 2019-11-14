@@ -10,9 +10,12 @@ using shared::transitgraph::TransitNode;
 using octi::combgraph::EdgeOrdering;
 
 // _____________________________________________________________________________
-CombGraph::CombGraph(const TransitGraph* g) {
+CombGraph::CombGraph(const TransitGraph* g) : CombGraph(g, false) {}
+
+// _____________________________________________________________________________
+CombGraph::CombGraph(const TransitGraph* g, bool collapse) {
   build(g);
-  combineDeg2();
+  if (collapse) combineDeg2();
   writeEdgeOrdering();
 }
 

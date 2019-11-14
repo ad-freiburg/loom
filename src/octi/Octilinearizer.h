@@ -126,11 +126,11 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
 class Octilinearizer {
  public:
   Octilinearizer() {}
-  TransitGraph draw(TransitGraph* g, GridGraph** gg, const Penalties& pens,
-                    double gridSize, double borderRad);
+  void draw(TransitGraph* in, TransitGraph* out, GridGraph** gg, const Penalties& pens,
+                    double gridSize, double borderRad, bool deg2heur);
 
-  TransitGraph drawILP(TransitGraph* g, GridGraph** gg, const Penalties& pens,
-                       double gridSize, double borderRad);
+  void drawILP(TransitGraph* in, TransitGraph* out, GridGraph** gg, const Penalties& pens,
+                       double gridSize, double borderRad, bool deg2heur);
 
  private:
   void removeEdgesShorterThan(TransitGraph* g, double d);

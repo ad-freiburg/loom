@@ -52,12 +52,18 @@ int main(int argc, char** argv) {
   tg.topologizeIsects();
   std::cerr << " done (" << T_STOP(planarize) << "ms)" << std::endl;
 
-  T_START(octilinearize);
+  T_START(octi);
   Octilinearizer oct;
-  // TransitGraph res = oct.drawILP(&tg, &gg, cfg.pens, cfg.gridSize, cfg.borderRad);
-  TransitGraph res = oct.draw(&tg, &gg, cfg.pens, cfg.gridSize, cfg.borderRad);
-  std::cerr << " octilinearized input in " << T_STOP(octilinearize) << "ms"
-            << std::endl;
+  TransitGraph res;
+
+  if (cfg.optMode == "ilp") {
+    oct.drawILP(&tg, &res, &gg, cfg.pens, cfg.gridSize, cfg.borderRad,
+                cfg.deg2Heur);
+  } else if ((cfg.optMode == "heur")) {
+    oct.draw(&tg, &res, &gg, cfg.pens, cfg.gridSize, cfg.borderRad,
+             cfg.deg2Heur);
+  }
+  std::cerr << "Octilinearized in " << T_STOP(octi) << " ms" << std::endl;
 
   if (cfg.printMode == "gridgraph") {
     out.print(*gg, std::cout);

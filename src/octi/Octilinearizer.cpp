@@ -55,11 +55,11 @@ start:
 }
 
 // _____________________________________________________________________________
-TransitGraph Octilinearizer::drawILP(TransitGraph* tg, GridGraph** retGg,
+void Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg, GridGraph** retGg,
                                      const Penalties& pens, double gridSize,
-                                     double borderRad) {
+                                     double borderRad, bool deg2heur) {
   removeEdgesShorterThan(tg, gridSize / 2);
-  CombGraph cg(tg);
+  CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
   auto gg = new GridGraph(box, gridSize, borderRad, pens);
   Drawing drawing(gg);
@@ -68,23 +68,20 @@ TransitGraph Octilinearizer::drawILP(TransitGraph* tg, GridGraph** retGg,
 
   ilpoptim.optimize(gg, cg, &drawing);
 
-  TransitGraph ret;
-  drawing.getTransitGraph(&ret);
+  drawing.getTransitGraph(outTg);
 
   *retGg = gg;
-
-  return ret;
 }
 
 // _____________________________________________________________________________
-TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
+void Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg, GridGraph** retGg,
                                   const Penalties& pens, double gridSize,
-                                  double borderRad) {
+                                  double borderRad, bool deg2heur) {
   size_t cores = 1;
   std::vector<GridGraph*> ggs(cores);
 
   removeEdgesShorterThan(tg, gridSize / 2);
-  CombGraph cg(tg);
+  CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
 
   for (size_t i = 0; i < cores; i++) {
@@ -209,12 +206,8 @@ TransitGraph Octilinearizer::draw(TransitGraph* tg, GridGraph** retGg,
     drawing = bestFromIter;
   }
 
-  TransitGraph ret;
-  drawing.getTransitGraph(&ret);
-
+  drawing.getTransitGraph(outTg);
   *retGg = ggs[0];
-
-  return ret;
 }
 
 // _____________________________________________________________________________

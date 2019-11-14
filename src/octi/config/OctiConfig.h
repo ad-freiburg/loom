@@ -15,7 +15,9 @@ struct Config {
   double gridSize, borderRad;
 
   std::string printMode;
+  std::string optMode;
   bool fromDot;
+  bool deg2Heur;
 
   octi::gridgraph::Penalties pens;
 };

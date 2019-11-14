@@ -48,6 +48,7 @@ struct Candidate {
 struct Penalties {
   double p_0, p_45, p_90, p_135;
   double verticalPen, horizontalPen, diagonalPen;
+  double densityPen;
 };
 
 class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
