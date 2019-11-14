@@ -36,7 +36,7 @@ class ILPGridOptimizer {
  public:
   ILPGridOptimizer() {}
 
-  int optimize(GridGraph* gg, const CombGraph& cg, combgraph::Drawing* d) const;
+  double optimize(GridGraph* gg, const CombGraph& cg, combgraph::Drawing* d) const;
 
  protected:
   virtual glp_prob* createProblem(const GridGraph& gg,

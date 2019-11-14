@@ -1,0 +1,180 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          250,
+          250
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "id": "A",
+        "station_id": "A",
+        "station_label": "A"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          0,
+          250
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "id": "B",
+        "station_id": "B",
+        "station_label": "B"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          250,
+          0
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "id": "C",
+        "station_id": "C",
+        "station_label": "C"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          500,
+          250
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "id": "D",
+        "station_id": "D",
+        "station_label": "D"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          500,
+          1000
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "id": "E",
+        "station_id": "E",
+        "station_label": "E"
+      },
+      "type": "Feature"
+    },{
+      "geometry": {
+        "coordinates": [
+          [
+            250,
+            250
+          ],
+          [
+            0,
+            250
+          ]
+        ],
+        "type": "LineString"
+      },
+      "properties": {
+        "from": "A",
+        "to": "B",
+        "lines": [
+          {
+            "color": "0000ff",
+            "label": "1"
+          }
+        ]
+      },
+      "type": "Feature"
+    },{
+      "geometry": {
+        "coordinates": [
+          [
+            250,
+            250
+          ],
+          [
+            250,
+            0
+          ]
+        ],
+        "type": "LineString"
+      },
+      "properties": {
+        "from": "A",
+        "to": "C",
+        "lines": [
+          {
+            "color": "0000ff",
+            "label": "1"
+          }
+        ]
+      },
+      "type": "Feature"
+    },{
+      "geometry": {
+        "coordinates": [
+          [
+            250,
+            250
+          ],
+          [
+            500,
+            250
+          ]
+        ],
+        "type": "LineString"
+      },
+      "properties": {
+        "from": "A",
+        "to": "D",
+        "lines": [
+          {
+            "color": "00ff00",
+            "label": "2"
+          }
+        ]
+      },
+      "type": "Feature"
+    },{
+      "geometry": {
+        "coordinates": [
+          [
+            250,
+            250
+          ],
+          [
+            500,
+            1000
+          ]
+        ],
+        "type": "LineString"
+      },
+      "properties": {
+        "from": "A",
+        "to": "E",
+        "lines": [
+          {
+            "color": "00ff00",
+            "label": "2"
+          }
+        ]
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

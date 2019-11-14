@@ -1,0 +1,6 @@
+OCTI_BIN := ../build/octi
+
+MAPS := test
+
+%_octi.res: %/network.json
+	$(OCTI_BIN) --grid-size 250 --deg2-heur -o eval < $< 2>&1 | tee $@

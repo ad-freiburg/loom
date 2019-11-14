@@ -52,23 +52,52 @@ int main(int argc, char** argv) {
   tg.topologizeIsects();
   std::cerr << " done (" << T_STOP(planarize) << "ms)" << std::endl;
 
-  T_START(octi);
   Octilinearizer oct;
   TransitGraph res;
 
   if (cfg.optMode == "ilp") {
-    oct.drawILP(&tg, &res, &gg, cfg.pens, cfg.gridSize, cfg.borderRad,
-                cfg.deg2Heur);
+    T_START(octi);
+    double sc = oct.drawILP(&tg, &res, &gg, cfg.pens, cfg.gridSize,
+                            cfg.borderRad, cfg.deg2Heur);
+    std::cerr << "Octilinearized using ILP in " << T_STOP(octi) << " ms, score "
+              << sc << std::endl;
   } else if ((cfg.optMode == "heur")) {
-    oct.draw(&tg, &res, &gg, cfg.pens, cfg.gridSize, cfg.borderRad,
-             cfg.deg2Heur);
-  }
-  std::cerr << "Octilinearized in " << T_STOP(octi) << " ms" << std::endl;
+    T_START(octi);
+    double sc = oct.draw(&tg, &res, &gg, cfg.pens, cfg.gridSize, cfg.borderRad,
+                         cfg.deg2Heur);
+    std::cerr << "Octilinearized using heur approach in " << T_STOP(octi)
+              << " ms, score " << sc << std::endl;
+  } else if ((cfg.optMode == "eval")) {
+    TransitGraph resIlp, resHeur;
+    T_START(octi_ilp);
+    double ilpSc = oct.drawILP(&tg, &resIlp, &gg, cfg.pens, cfg.gridSize,
+                               cfg.borderRad, cfg.deg2Heur);
+    auto ilpT = T_STOP(octi_ilp);
+    T_START(octi_heur);
+    double heurSc = oct.draw(&tg, &resHeur, &gg, cfg.pens, cfg.gridSize,
+                             cfg.borderRad, cfg.deg2Heur);
+    auto heurT = T_STOP(octi_heur);
 
-  if (cfg.printMode == "gridgraph") {
-    out.print(*gg, std::cout);
-  } else {
-    out.print(res, std::cout);
+    std::cerr << "\nOctilinearized using eval approach: " << std::endl;
+    std::cerr << "  ILP  target value: " << ilpSc << std::endl;
+    std::cerr << "  HEUR target value: " << heurSc << " (+"
+              << (((heurSc - ilpSc) / ilpSc) * 100) << "%)" << std::endl;
+    std::cerr << "  ILP  solve time: " << ilpT << " ms" << std::endl;
+    std::cerr << "  HEUR solve time: " << heurT << " ms" << std::endl;
+
+    std::ofstream of;
+    of.open("res_ilp.json");
+    out.print(resIlp, of);
+    of.open("res_heur.json");
+    out.print(resHeur, of);
+  }
+
+  if ((cfg.optMode != "eval")) {
+    if (cfg.printMode == "gridgraph") {
+      out.print(*gg, std::cout);
+    } else {
+      out.print(res, std::cout);
+    }
   }
 
   return (0);

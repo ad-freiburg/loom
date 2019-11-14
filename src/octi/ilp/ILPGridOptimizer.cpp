@@ -15,7 +15,7 @@ using octi::ilp::ILPGridOptimizer;
 using octi::ilp::VariableMatrix;
 
 // _____________________________________________________________________________
-int ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
+double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
                                combgraph::Drawing* d) const {
   for (auto nd : *gg->getNds()) {
     if (!nd->pl().isSink()) continue;
@@ -36,7 +36,7 @@ int ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
   glp_delete_prob(lp);
   glp_free_env();
 
-  return 0;
+  return glp_get_obj_val(lp);
 }
 
 // _____________________________________________________________________________
@@ -499,12 +499,12 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   std::chrono::high_resolution_clock::time_point t1 =
       std::chrono::high_resolution_clock::now();
 
-  std::string cmd =
-      "/home/patrick/gurobi/gurobi751/linux64/bin/gurobi_cl "
-      "ResultFile={OUTPUT} {INPUT} > ./gurobi.log";
   // std::string cmd =
-  // "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
-  // "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
+      // "/home/patrick/gurobi/gurobi751/linux64/bin/gurobi_cl "
+      // "ResultFile={OUTPUT} {INPUT} > ./gurobi.log";
+  std::string cmd =
+  "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
+  "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
   util::replaceAll(cmd, "{INPUT}", f);
   util::replaceAll(cmd, "{OUTPUT}", outf);
   util::replaceAll(cmd, "{THREADS}", "4");
@@ -609,6 +609,7 @@ std::string ILPGridOptimizer::getStatPosVar(const GridNode* n,
 void ILPGridOptimizer::extractSolution(glp_prob* lp, GridGraph* gg,
                                        const CombGraph& cg,
                                        combgraph::Drawing* d) const {
+
   std::map<const CombNode*, const GridNode*> gridNds;
   std::map<const CombEdge*, std::set<const GridEdge*>> gridEdgs;
 

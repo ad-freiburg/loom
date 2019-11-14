@@ -8,6 +8,7 @@ using shared::transitgraph::TransitGraph;
 using shared::transitgraph::TransitNode;
 
 using octi::combgraph::Drawing;
+using octi::combgraph::Costs;
 using octi::combgraph::CombGraph;
 using octi::combgraph::CombNode;
 using octi::combgraph::CombEdge;
@@ -20,6 +21,18 @@ using octi::gridgraph::GridEdgePL;
 
 // _____________________________________________________________________________
 double Drawing::score() const { return _c; }
+
+// _____________________________________________________________________________
+Costs Drawing::fullScore() const {
+  Costs ret{0, 0, 0, 0};
+
+  for (auto c : _ndReachCosts) ret.move += c.second;
+  for (auto c : _ndBndCosts) ret.bend += c.second;
+  for (auto c : _edgCosts) ret.hop += c.second;
+  for (auto c : _springCosts) ret.dense += c.second;
+
+  return ret;
+}
 
 // _____________________________________________________________________________
 void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {

@@ -55,46 +55,51 @@ start:
 }
 
 // _____________________________________________________________________________
-void Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg, GridGraph** retGg,
-                                     const Penalties& pens, double gridSize,
-                                     double borderRad, bool deg2heur) {
-  removeEdgesShorterThan(tg, gridSize / 2);
+double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
+                             GridGraph** retGg, const Penalties& pens,
+                             double gridSize, double borderRad, bool deg2heur) {
+  // removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
+  box = util::geo::pad(box, gridSize + 1);
   auto gg = new GridGraph(box, gridSize, borderRad, pens);
   Drawing drawing(gg);
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  ilpoptim.optimize(gg, cg, &drawing);
+  double score = ilpoptim.optimize(gg, cg, &drawing);
 
   drawing.getTransitGraph(outTg);
 
   *retGg = gg;
+
+  return score;
 }
 
 // _____________________________________________________________________________
-void Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg, GridGraph** retGg,
-                                  const Penalties& pens, double gridSize,
-                                  double borderRad, bool deg2heur) {
+double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
+                          GridGraph** retGg, const Penalties& pens,
+                          double gridSize, double borderRad, bool deg2heur) {
   size_t cores = 1;
   std::vector<GridGraph*> ggs(cores);
 
-  removeEdgesShorterThan(tg, gridSize / 2);
+  // removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
+  box = util::geo::pad(box, gridSize + 1);
+
+  std::cerr << cg.getNds()->size() << std::endl;
 
   for (size_t i = 0; i < cores; i++) {
     ggs[i] = new GridGraph(box, gridSize, borderRad, pens);
   }
 
+  std::cerr << ggs[0]->getNds()->size() << std::endl;
+
   bool found = false;
 
   size_t tries = 100;
   size_t ITERS = 100;
-
-  // size_t tries = 0;
-  // size_t ITERS = 0;
 
   Drawing drawing(ggs[0]);
 
@@ -207,7 +212,14 @@ void Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg, GridGraph** ret
   }
 
   drawing.getTransitGraph(outTg);
+  auto fullScore = drawing.fullScore();
+  std::cerr << "Hop costs: " << fullScore.hop
+            << ", bend costs: " << fullScore.bend
+            << ", mv costs: " << fullScore.move
+            << ", dense costs: " << fullScore.dense << std::endl;
+
   *retGg = ggs[0];
+  return drawing.score();
 }
 
 // _____________________________________________________________________________
@@ -247,7 +259,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg,
 bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
                           const SettledPos& settled, GridGraph* gg,
                           Drawing* drawing, double globCutoff) {
-
   SettledPos retPos;
 
   double dijCost = 0;
@@ -278,7 +289,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       toGrNds = tmp2;
       rev = true;
     }
-
 
     // if we open node sinks, we have to offset their cost by the highest
     // possible turn cost + 1 to not distort turn penalties
