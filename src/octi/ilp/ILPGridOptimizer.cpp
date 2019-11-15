@@ -500,8 +500,7 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
       std::chrono::high_resolution_clock::now();
 
   std::string cmd =
-      "/home/patrick/gurobi/linux64/bin/gurobi_cl "
-      "ResultFile={OUTPUT} {INPUT} > ./gurobi.log";
+      "gurobi_cl ResultFile={OUTPUT} {INPUT} > ./gurobi.log";
   // std::string cmd =
   // "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
   // "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
