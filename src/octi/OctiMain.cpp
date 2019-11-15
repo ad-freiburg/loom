@@ -81,9 +81,12 @@ int main(int argc, char** argv) {
     std::cerr << "\nOctilinearized using eval approach: " << std::endl;
     std::cerr << "  ILP  target value: " << ilpSc << std::endl;
     std::cerr << "  HEUR target value: " << heurSc << " (+"
-              << (((heurSc - ilpSc) / ilpSc) * 100) << "%)" << std::endl;
-    std::cerr << "  ILP  solve time: " << ilpT << " ms" << std::endl;
-    std::cerr << "  HEUR solve time: " << heurT << " ms" << std::endl;
+              << std::setprecision(2) << (((heurSc - ilpSc) / ilpSc) * 100)
+              << "%)" << std::endl;
+    std::cerr << "  ILP  solve time: " << std::setprecision(2) << ilpT << " ms"
+              << std::endl;
+    std::cerr << "  HEUR solve time: " << std::setprecision(2) << heurT << " ms"
+              << std::endl;
 
     std::ofstream of;
     of.open(cfg.evalPath + "/res_ilp" + cfg.evalSuff + ".json");
