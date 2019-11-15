@@ -36,6 +36,14 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<std::string>(&(cfg->optMode))->default_value("heur"),
       "optimization mode, either 'heur' (fast) or 'ilp' (very slow)")
     (
+      "eval-out",
+      opts::value<std::string>(&(cfg->evalPath))->default_value("."),
+      "path to output evaluation files to")
+    (
+      "eval-suffix",
+      opts::value<std::string>(&(cfg->evalSuff))->default_value(""),
+      "suffix for evaluation filenames (octi<suffix>.res)")
+    (
       "from-dot,D",
       opts::bool_switch(&(cfg->fromDot))->default_value(false),
       "input is in dot format")

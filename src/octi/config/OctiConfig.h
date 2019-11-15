@@ -16,6 +16,8 @@ struct Config {
 
   std::string printMode;
   std::string optMode;
+  std::string evalPath;
+  std::string evalSuff;
   bool fromDot;
   bool deg2Heur;
 

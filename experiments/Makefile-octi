@@ -1,6 +1,16 @@
 OCTI_BIN := ../build/octi
 
-MAPS := test
+RES_FILES := test/octi.res freiburg/octi.res wien/octi.res stuttgart/octi.res
 
-%_octi.res: %/network.json
-	$(OCTI_BIN) --grid-size 250 --deg2-heur -o eval < $< 2>&1 | tee $@
+%/octi.res: %/network.json
+	# with deg 2 heur
+	$(OCTI_BIN) --eval-out $* --eval-suff "_500-deg2" --grid-size 500 --deg2-heur -o eval < $< 2>&1 | tee -a $@
+	$(OCTI_BIN) --eval-out $* --eval-suff "_750-deg2" --grid-size 750 --deg2-heur -o eval < $< 2>&1 | tee -a $@
+	$(OCTI_BIN) --eval-out $* --eval-suff "_1000-deg2" --grid-size 1000 --deg2-heur -o eval < $< 2>&1 | tee -a $@
+
+	# without deg 2 heur
+	$(OCTI_BIN) --eval-out $* --eval-suff "_500" --grid-size 500 -o eval < $< 2>&1 | tee -a $@
+	$(OCTI_BIN) --eval-out $* --eval-suff "_750" --grid-size 750 -o eval < $< 2>&1 | tee -a $@
+	$(OCTI_BIN) --eval-out $* --eval-suff "_1000" --grid-size 1000 -o eval < $< 2>&1 | tee -a $@
+
+eval: $(RES_FILES)

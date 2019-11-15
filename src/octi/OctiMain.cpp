@@ -86,10 +86,12 @@ int main(int argc, char** argv) {
     std::cerr << "  HEUR solve time: " << heurT << " ms" << std::endl;
 
     std::ofstream of;
-    of.open("res_ilp.json");
+    of.open(cfg.evalPath + "/res_ilp" + cfg.evalSuff + ".json");
     out.print(resIlp, of);
-    of.open("res_heur.json");
+    of.close();
+    of.open(cfg.evalPath + "/res_heur" + cfg.evalSuff + ".json");
     out.print(resHeur, of);
+    of.close();
   }
 
   if ((cfg.optMode != "eval")) {
