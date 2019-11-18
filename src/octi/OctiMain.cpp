@@ -91,9 +91,11 @@ int main(int argc, char** argv) {
     std::ofstream of;
     of.open(cfg.evalPath + "/res_ilp" + cfg.evalSuff + ".json");
     out.print(resIlp, of);
+    of.flush();
     of.close();
     of.open(cfg.evalPath + "/res_heur" + cfg.evalSuff + ".json");
     out.print(resHeur, of);
+    of.flush();
     of.close();
   }
 
