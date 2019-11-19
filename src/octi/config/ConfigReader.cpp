@@ -57,8 +57,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "penalty factor for re-inserted contracted stations that are too near, a reasonable value is e.g. 5. Only works with optim mode 'heur'!")
     (
       "grid-size,g",
-      opts::value<double>(&(cfg->gridSize))->default_value(450.0),
-      "grid cell length in map projection")
+      opts::value<std::string>(&(cfg->gridSize))->default_value("100%"),
+      "grid cell length, either as exact value (like '500') or as percentage of average adj. station distance (like '75%')")
     (
       "border-rad",
       opts::value<double>(&(cfg->borderRad))->default_value(45),

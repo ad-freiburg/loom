@@ -12,7 +12,8 @@ namespace octi {
 namespace config {
 
 struct Config {
-  double gridSize, borderRad;
+  std::string gridSize;
+  double borderRad;
 
   std::string printMode;
   std::string optMode;

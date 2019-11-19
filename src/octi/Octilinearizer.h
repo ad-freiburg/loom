@@ -141,7 +141,7 @@ class Octilinearizer {
                  CombNode* from, CombNode* to, const GrEdgList& res,
                  CombEdge* e);
 
-  std::vector<CombEdge*> getOrdering(const CombGraph& cg) const;
+  std::vector<CombEdge*> getOrdering(const CombGraph& cg, bool randr) const;
 
   bool draw(const std::vector<CombEdge*>& order, GridGraph* gg,
             Drawing* drawing, double cutoff);

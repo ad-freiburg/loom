@@ -21,6 +21,24 @@ using std::string;
 using namespace octi;
 
 using octi::Octilinearizer;
+using util::geo::dist;
+
+// _____________________________________________________________________________
+double avgStatDist(const TransitGraph& g) {
+  double avg = 0;
+  size_t i = 0;
+  for (const auto nd : g.getNds()) {
+    if (nd->getDeg() == 0) continue;
+    i++;
+    double loc = 0;
+    for (const auto edg : nd->getAdjList()) {
+      loc += dist(*nd->pl().getGeom(), *edg->getOtherNd(nd)->pl().getGeom());
+    }
+    avg += loc / nd->getAdjList().size();
+  }
+  avg /= i++;
+  return avg;
+}
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
@@ -52,41 +70,55 @@ int main(int argc, char** argv) {
   tg.topologizeIsects();
   std::cerr << " done (" << T_STOP(planarize) << "ms)" << std::endl;
 
+  double avgDist = avgStatDist(tg);
+  std::cerr << "Average adj. node distance is " << avgDist << std::endl;
+
   Octilinearizer oct;
   TransitGraph res;
 
+  double gridSize;
+
+  if (util::trim(cfg.gridSize).back() == '%') {
+    double perc = atof(cfg.gridSize.c_str()) / 100;
+    gridSize = avgDist * perc;
+    std::cerr << "Grid size " << gridSize << " (" << perc * 100 << "%)\n";
+  } else {
+    gridSize = atof(cfg.gridSize.c_str());
+    std::cerr << "Grid size " << gridSize << "\n";
+  }
+
   if (cfg.optMode == "ilp") {
     T_START(octi);
-    double sc = oct.drawILP(&tg, &res, &gg, cfg.pens, cfg.gridSize,
-                            cfg.borderRad, cfg.deg2Heur);
+    double sc = oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+                            cfg.deg2Heur);
     std::cerr << "Octilinearized using ILP in " << T_STOP(octi) << " ms, score "
               << sc << std::endl;
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
-    double sc = oct.draw(&tg, &res, &gg, cfg.pens, cfg.gridSize, cfg.borderRad,
+    double sc = oct.draw(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
                          cfg.deg2Heur);
     std::cerr << "Octilinearized using heur approach in " << T_STOP(octi)
               << " ms, score " << sc << std::endl;
   } else if ((cfg.optMode == "eval")) {
     TransitGraph resIlp, resHeur;
     T_START(octi_ilp);
-    double ilpSc = oct.drawILP(&tg, &resIlp, &gg, cfg.pens, cfg.gridSize,
+    double ilpSc = oct.drawILP(&tg, &resIlp, &gg, cfg.pens, gridSize,
                                cfg.borderRad, cfg.deg2Heur);
     auto ilpT = T_STOP(octi_ilp);
     T_START(octi_heur);
-    double heurSc = oct.draw(&tg, &resHeur, &gg, cfg.pens, cfg.gridSize,
+    double heurSc = oct.draw(&tg, &resHeur, &gg, cfg.pens, gridSize,
                              cfg.borderRad, cfg.deg2Heur);
     auto heurT = T_STOP(octi_heur);
 
     std::cerr << "\nOctilinearized using eval approach: " << std::endl;
     std::cerr << "  ILP  target value: " << ilpSc << std::endl;
     std::cerr << "  HEUR target value: " << heurSc << " (+"
-              << std::setprecision(2) << (((heurSc - ilpSc) / ilpSc) * 100)
-              << "%)" << std::endl;
-    std::cerr << "  ILP  solve time: " << std::setprecision(2) << ilpT << " ms"
-              << std::endl;
-    std::cerr << "  HEUR solve time: " << std::setprecision(2) << heurT << " ms"
-              << std::endl;
+              << std::setprecision(2) << std::fixed
+              << (((heurSc - ilpSc) / ilpSc) * 100) << "%)" << std::endl;
+    std::cerr << "  ILP  solve time: " << std::setprecision(2) << std::fixed
+              << ilpT << " ms" << std::endl;
+    std::cerr << "  HEUR solve time: " << std::setprecision(2) << std::fixed
+              << heurT << " ms" << std::endl;
 
     std::ofstream of;
     of.open(cfg.evalPath + "/res_ilp" + cfg.evalSuff + ".json");

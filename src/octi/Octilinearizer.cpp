@@ -58,7 +58,7 @@ start:
 double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
                              GridGraph** retGg, const Penalties& pens,
                              double gridSize, double borderRad, bool deg2heur) {
-  // removeEdgesShorterThan(tg, gridSize / 2);
+  removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
@@ -83,7 +83,7 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
   size_t cores = 1;
   std::vector<GridGraph*> ggs(cores);
 
-  // removeEdgesShorterThan(tg, gridSize / 2);
+  removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
@@ -105,7 +105,7 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
 
   for (size_t i = 0; i < tries; i++) {
     T_START(draw);
-    auto iterOrder = getOrdering(cg);
+    auto iterOrder = getOrdering(cg, i != 0);
 
     bool locFound = draw(iterOrder, ggs[0], &drawing, drawing.score());
 
@@ -381,7 +381,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 }
 
 // _____________________________________________________________________________
-std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg) const {
+std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg, bool randr) const {
   NodePQ globalPq, dangling;
 
   std::set<CombNode*> settled;
@@ -402,7 +402,7 @@ std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg) const {
       if (settled.find(n) != settled.end()) continue;
 
       auto odSet = n->pl().getEdgeOrdering().getOrderedSet();
-      std::random_shuffle(odSet.begin(), odSet.end());
+      if (randr) std::random_shuffle(odSet.begin(), odSet.end());
 
       for (auto ee : odSet) {
         if (done.find(ee.first) != done.end()) continue;

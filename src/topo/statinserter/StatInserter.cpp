@@ -119,7 +119,7 @@ std::vector<StationCand> StatInserter::candidates(const StationOcc& occ,
                                                   const OrigEdgs& origEdgs) {
   std::vector<StationCand> ret;
   std::set<TransitEdge*> neighbors;
-  idx.get(util::geo::pad(util::geo::getBoundingBox(occ.station.pos), 100),
+  idx.get(util::geo::pad(util::geo::getBoundingBox(occ.station.pos), 250),
           &neighbors);
 
   std::cerr << "Got " << neighbors.size() << " candidates..." << std::endl;
@@ -161,13 +161,14 @@ std::vector<StationCand> StatInserter::candidates(const StationOcc& occ,
     if (cand.edg) {
       std::cerr << "    Edg " << cand.edg << " at position " << cand.pos
                 << " with dist = " << cand.dist << " truely serving "
-                << cand.truelyServ << " edges, falsely serving "
-                << cand.falselyServ << " edges." << std::endl;
-    } else {
-      std::cerr << "    Nd " << cand.nd << " with dist = " << cand.dist
-                << " truely serving " << cand.truelyServ
+                << cand.truelyServ << "/" << occ.edges.size()
                 << " edges, falsely serving " << cand.falselyServ << " edges."
                 << std::endl;
+    } else {
+      std::cerr << "    Nd " << cand.nd << " with dist = " << cand.dist
+                << " truely serving " << cand.truelyServ << "/"
+                << occ.edges.size() << " edges, falsely serving "
+                << cand.falselyServ << " edges." << std::endl;
     }
   }
 
@@ -176,6 +177,7 @@ std::vector<StationCand> StatInserter::candidates(const StationOcc& occ,
 
 // _____________________________________________________________________________
 bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
+  OrigEdgs modOrigEdgs = origEdgs;
   auto idx = geoIndex();
 
   for (auto st : _statClusters) {
@@ -184,9 +186,12 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
     auto repr = st.front();
     std::cerr << "Inserting " << repr.station.name << std::endl;
 
-    auto cands = candidates(repr, idx, origEdgs);
+    auto cands = candidates(repr, idx, modOrigEdgs);
 
-    if (cands.size() == 0) continue;
+    if (cands.size() == 0) {
+      std::cerr << "  (No insertion candidate found.)" << std::endl;
+      continue;
+    }
 
     if (cands.front().edg) {
       auto e = cands.front().edg;
@@ -199,6 +204,10 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
 
       idx.add(*spl.first->pl().getGeom(), spl.first);
       idx.add(*spl.second->pl().getGeom(), spl.second);
+
+      // UPDATE ORIGEDGES
+      modOrigEdgs[spl.first] = modOrigEdgs[e];
+      modOrigEdgs[spl.second] = modOrigEdgs[e];
 
       edgeRpl(e->getFrom(), e, spl.first);
       edgeRpl(e->getTo(), e, spl.second);
