@@ -349,20 +349,6 @@ void GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
 }
 
 // _____________________________________________________________________________
-CombEdgeSet GridGraph::getResEdgs(GridNode* n) const {
-  CombEdgeSet ret;
-
-  for (size_t i = 0; i < 8; i++) {
-    auto port = n->pl().getPort(i);
-    for (auto e : port->getAdjList()) {
-      ret.insert(e->pl().getResEdges().begin(), e->pl().getResEdges().end());
-    }
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
 void GridGraph::writeInitialCosts() {
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {

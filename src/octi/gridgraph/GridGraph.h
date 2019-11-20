@@ -32,9 +32,6 @@ namespace gridgraph {
 
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
 typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
-typedef std::set<util::graph::Edge<octi::combgraph::CombNodePL,
-                                   octi::combgraph::CombEdgePL>*>
-    CombEdgeSet;
 
 struct Candidate {
   Candidate(GridNode* n, double d) : n(n), d(d){};
@@ -114,8 +111,6 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   // encoding portable IDs for each node
   std::vector<GridNode*> _nds;
-
-  CombEdgeSet getResEdgs(GridNode* n) const;
 
   void writeInitialCosts();
 
