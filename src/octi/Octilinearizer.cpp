@@ -92,9 +92,12 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
   std::cerr << "Using " << jobs << " jobs." << std::endl;
   std::vector<GridGraph*> ggs(jobs);
 
+  std::cerr << "Creating grid graphs... ";
+  T_START(ggraph);
   for (size_t i = 0; i < jobs; i++) {
     ggs[i] = new GridGraph(box, gridSize, borderRad, pens);
   }
+  std::cerr << " done (" << T_STOP(ggraph) << "ms)" << std::endl;
 
   bool found = false;
 

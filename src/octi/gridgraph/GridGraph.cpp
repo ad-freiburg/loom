@@ -49,6 +49,9 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
   // cut off illegal spacer values
   if (spacer > cellSize / 2) spacer = cellSize / 2;
 
+  std::cerr << _grid.getXWidth() << "x" << _grid.getYHeight() << "grid..."
+            << std::endl;
+
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
@@ -66,9 +69,9 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
         GridNode* toN = getNeighbor(x, y, p);
         if (from != 0 && toN != 0) {
           GridNode* to = toN->pl().getPort((p + 4) % 8);
-          // if the edge already exists, this step is a no-op
-          addEdg(from, to, GridEdgePL(0, false));
-          addEdg(to, from, GridEdgePL(0, false));
+          auto e = new GridEdge(from, to, GridEdgePL(9, false));
+          from->addEdge(e);
+          to->addEdge(e);
         }
       }
     }
@@ -80,11 +83,7 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
 // _____________________________________________________________________________
 GridNode* GridGraph::getNode(size_t x, size_t y) const {
   if (x >= _grid.getXWidth() || y >= _grid.getYHeight()) return 0;
-  std::set<GridNode*> r;
-  _grid.get(x, y, &r);
-
-  if (r.size()) return *r.begin();
-  return 0;
+  return _nds[_grid.getYHeight() * 9 * x + y * 9];
 }
 
 // _____________________________________________________________________________
@@ -513,9 +512,7 @@ bool GridGraph::isSettled(const CombNode* cn) {
 }
 
 // _____________________________________________________________________________
-GridNode* GridGraph::getGrNdById(size_t id) const {
-  return _nds[id];
-}
+GridNode* GridGraph::getGrNdById(size_t id) const { return _nds[id]; }
 
 // _____________________________________________________________________________
 const GridEdge* GridGraph::getGrEdgById(std::pair<size_t, size_t> id) const {
@@ -550,8 +547,14 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
     _nds.push_back(nn);
     nn->pl().setParent(n);
     n->pl().setPort(i, nn);
-    addEdg(n, nn, GridEdgePL(INF, true, false));
-    addEdg(nn, n, GridEdgePL(INF, true, false));
+
+    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, false));
+    n->addEdge(e);
+    nn->addEdge(e);
+
+    e = new GridEdge(nn, n, GridEdgePL(INF, true, false));
+    n->addEdge(e);
+    nn->addEdge(e);
   }
 
   // in-node connections
@@ -565,8 +568,16 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
       if (deg == 1) pen = c_45;
       if (deg == 2) pen = c_90;
       if (deg == 3) pen = c_135;
-      addEdg(n->pl().getPort(i), n->pl().getPort(j), GridEdgePL(pen, true));
-      addEdg(n->pl().getPort(j), n->pl().getPort(i), GridEdgePL(pen, true));
+
+      auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
+                            GridEdgePL(pen, true));
+      e->getFrom()->addEdge(e);
+      e->getTo()->addEdge(e);
+
+      e = new GridEdge(n->pl().getPort(j), n->pl().getPort(i),
+                       GridEdgePL(pen, true));
+      e->getFrom()->addEdge(e);
+      e->getTo()->addEdge(e);
     }
   }
 
