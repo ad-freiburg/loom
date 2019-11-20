@@ -2,7 +2,9 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include <algorithm>
 #include <fstream>
+#include <thread>
 #include "octi/Octilinearizer.h"
 #include "octi/combgraph/Drawing.h"
 #include "octi/gridgraph/NodeCost.h"
@@ -56,8 +58,9 @@ start:
 
 // _____________________________________________________________________________
 double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
-                             GridGraph** retGg, const Penalties& pens,
-                             double gridSize, double borderRad, bool deg2heur) {
+                               GridGraph** retGg, const Penalties& pens,
+                               double gridSize, double borderRad,
+                               bool deg2heur) {
   removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
@@ -78,17 +81,20 @@ double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
 
 // _____________________________________________________________________________
 double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
-                          GridGraph** retGg, const Penalties& pens,
-                          double gridSize, double borderRad, bool deg2heur) {
-  size_t cores = 4;
-  std::vector<GridGraph*> ggs(cores);
-
+                            GridGraph** retGg, const Penalties& pens,
+                            double gridSize, double borderRad, bool deg2heur) {
   removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
 
-  for (size_t i = 0; i < cores; i++) {
+  size_t jobs =
+      std::min(static_cast<size_t>(std::thread::hardware_concurrency()),
+               cg.getNds()->size());
+  std::cerr << "Using " << jobs << " jobs." << std::endl;
+  std::vector<GridGraph*> ggs(jobs);
+
+  for (size_t i = 0; i < jobs; i++) {
     ggs[i] = new GridGraph(box, gridSize, borderRad, pens);
   }
 
@@ -129,26 +135,26 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
     exit(1);
   }
 
-  for (size_t i = 0; i < cores; i++) drawing.applyToGrid(ggs[i]);
+  for (size_t i = 0; i < jobs; i++) drawing.applyToGrid(ggs[i]);
 
   size_t iters = 0;
 
   std::cerr << "Iterating..." << std::endl;
 
-  std::vector<std::vector<CombNode*>> batches(cores);
+  std::vector<std::vector<CombNode*>> batches(jobs);
   size_t c = 0;
   for (auto nd : *cg.getNds()) {
     if (nd->getDeg() == 0) continue;
-    batches[c % cores].push_back(nd);
+    batches[c % jobs].push_back(nd);
     c++;
   }
 
   for (; iters < ITERS; iters++) {
     T_START(iter);
-    std::vector<Drawing> bestFromIters(cores);
+    std::vector<Drawing> bestFromIters(jobs);
 
 #pragma omp parallel for
-    for (size_t btch = 0; btch < cores; btch++) {
+    for (size_t btch = 0; btch < jobs; btch++) {
       for (auto a : batches[btch]) {
         Drawing drawingCp = drawing;
 
@@ -188,8 +194,8 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
 
           // we can use bestFromIter.score() as the limit for the shortest
           // path computation, as we can already do at least as good.
-          bool found = draw(test, p, ggs[btch], &run,
-                            bestFromIters[btch].score());
+          bool found =
+              draw(test, p, ggs[btch], &run, bestFromIters[btch].score());
 
           if (found && bestFromIters[btch].score() > run.score()) {
             bestFromIters[btch] = run;
@@ -200,7 +206,9 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
           if (ggs[btch]->isSettled(a)) ggs[btch]->unSettleNd(a);
         }
 
-        ggs[btch]->settleNd(const_cast<GridNode*>(ggs[btch]->getGrNdById(drawing.getGrNd(a)->pl().getId())), a);
+        ggs[btch]->settleNd(const_cast<GridNode*>(ggs[btch]->getGrNdById(
+                                drawing.getGrNd(a)->pl().getId())),
+                            a);
 
         // re-settle edges
         for (auto ce : a->getAdjList()) drawing.applyToGrid(ce, ggs[btch]);
@@ -209,7 +217,7 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
 
     size_t bestCore;
     double bestScore = std::numeric_limits<double>::infinity();
-    for (size_t i = 0; i < cores; i++) {
+    for (size_t i = 0; i < jobs; i++) {
       if (bestFromIters[i].score() < bestScore) {
         bestScore = bestFromIters[i].score();
         bestCore = i;
@@ -221,7 +229,7 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
               << (imp >= 0 ? "+" : "") << imp << ", took " << T_STOP(iter)
               << " ms)" << std::endl;
 
-    for (size_t i = 0; i < cores; i++) {
+    for (size_t i = 0; i < jobs; i++) {
       drawing.eraseFromGrid(ggs[i]);
       bestFromIters[bestCore].applyToGrid(ggs[i]);
     }
@@ -393,7 +401,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 }
 
 // _____________________________________________________________________________
-std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg, bool randr) const {
+std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg,
+                                                   bool randr) const {
   NodePQ globalPq, dangling;
 
   std::set<CombNode*> settled;
