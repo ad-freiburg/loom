@@ -99,6 +99,9 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   double ndMovePen(const CombNode* cbNd, const GridNode* grNd) const;
 
+  GridNode* getGrNdById(size_t id) const;
+  const GridEdge* getGrEdgById(std::pair<size_t, size_t> id) const;
+
  private:
   util::geo::DBox _bbox;
   Penalties _c;
@@ -108,6 +111,9 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   std::unordered_map<const CombNode*, GridNode*> _settled;
 
   double _heurECost, _heurHopCost;
+
+  // encoding portable IDs for each node
+  std::vector<GridNode*> _nds;
 
   CombEdgeSet getResEdgs(GridNode* n) const;
 

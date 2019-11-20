@@ -1,6 +1,6 @@
 OCTI_BIN := ../build/octi
 
-RES_FILES := test/octi.res freiburg/octi.res wien/octi.res stuttgart/octi.res
+RES_FILES := test/octi.res freiburg/octi.res wien/octi.res berlin/octi.res stuttgart/octi.res
 
 %/octi.res: %/network.json
 	# with deg 2 heur

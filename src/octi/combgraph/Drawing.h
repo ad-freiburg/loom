@@ -31,6 +31,7 @@ struct Costs {
 class Drawing {
  public:
   Drawing(const GridGraph* gg) : _c(std::numeric_limits<double>::infinity()), _gg(gg) {};
+  Drawing() : _c(std::numeric_limits<double>::infinity()), _gg(0) {};
 
   double score() const;
   Costs fullScore() const;
@@ -43,7 +44,6 @@ class Drawing {
   void getTransitGraph(TransitGraph* target) const;
 
   const GridNode* getGrNd(const CombNode* cn);
-  const std::vector<const GridEdge*>& getGrEdgs(const CombEdge* ce);
 
   bool drawn(const CombEdge* ce) const;
 
@@ -59,9 +59,11 @@ class Drawing {
   double getNdBndCost(const CombNode* e) const;
   double getNdReachCost(const CombNode* e) const;
 
+  void setGridGraph(const GridGraph* gg);
+
  private:
-  std::map<const CombNode*, const GridNode*> _nds;
-  std::map<const CombEdge*, std::vector<const GridEdge*>> _edgs;
+  std::map<const CombNode*, size_t> _nds;
+  std::map<const CombEdge*, std::vector<std::pair<size_t, size_t>>> _edgs;
 
   std::map<const CombNode*, double> _ndReachCosts;
   std::map<const CombNode*, double> _ndBndCosts;
@@ -73,7 +75,7 @@ class Drawing {
   double recalcBends(const CombNode* nd);
 
 PolyLine<double> buildPolylineFromRes(
-    const std::vector<const GridEdge*>& res) const;
+    const std::vector<std::pair<size_t, size_t>>& res) const;
 };
 }
 }

@@ -513,6 +513,16 @@ bool GridGraph::isSettled(const CombNode* cn) {
 }
 
 // _____________________________________________________________________________
+GridNode* GridGraph::getGrNdById(size_t id) const {
+  return _nds[id];
+}
+
+// _____________________________________________________________________________
+const GridEdge* GridGraph::getGrEdgById(std::pair<size_t, size_t> id) const {
+  return getEdg(_nds[id.first], _nds[id.second]);
+}
+
+// _____________________________________________________________________________
 GridNode* GridGraph::writeNd(size_t x, size_t y) {
   double xPos = _bbox.getLowerLeft().getX() + x * _cellSize;
   double yPos = _bbox.getLowerLeft().getY() + y * _cellSize;
@@ -523,6 +533,8 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   double c_45 = c_0 + c_135;
 
   GridNode* n = addNd(DPoint(xPos, yPos));
+  n->pl().setId(_nds.size());
+  _nds.push_back(n);
   n->pl().setSink();
   _grid.add(x, y, n);
   n->pl().setXY(x, y);
@@ -534,6 +546,8 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
     int yi = ((4 - ((i + 2) % 8)) % 4);
     yi /= abs(abs(yi) - 1) + 1;
     GridNode* nn = addNd(DPoint(xPos + xi * _spacer, yPos + yi * _spacer));
+    nn->pl().setId(_nds.size());
+    _nds.push_back(nn);
     nn->pl().setParent(n);
     n->pl().setPort(i, nn);
     addEdg(n, nn, GridEdgePL(INF, true, false));

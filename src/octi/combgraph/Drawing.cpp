@@ -23,6 +23,11 @@ using octi::gridgraph::GridEdgePL;
 double Drawing::score() const { return _c; }
 
 // _____________________________________________________________________________
+void Drawing::setGridGraph(const GridGraph* gg) {
+  _gg = gg;
+}
+
+// _____________________________________________________________________________
 Costs Drawing::fullScore() const {
   Costs ret{0, 0, 0, 0};
 
@@ -45,11 +50,13 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
     auto ge = ges[i];
 
     if (rev) {
-      _nds[ce->getFrom()] = ges.front()->getTo()->pl().getParent();
-      _nds[ce->getTo()] = ges.back()->getFrom()->pl().getParent();
+      _nds[ce->getFrom()] =
+          ges.front()->getTo()->pl().getParent()->pl().getId();
+      _nds[ce->getTo()] = ges.back()->getFrom()->pl().getParent()->pl().getId();
     } else {
-      _nds[ce->getTo()] = ges.front()->getTo()->pl().getParent();
-      _nds[ce->getFrom()] = ges.back()->getFrom()->pl().getParent();
+      _nds[ce->getTo()] = ges.front()->getTo()->pl().getParent()->pl().getId();
+      _nds[ce->getFrom()] =
+          ges.back()->getFrom()->pl().getParent()->pl().getId();
     }
 
     // there are three kinds of cost contained in a result:
@@ -94,9 +101,13 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
       auto e = _gg->getEdg(ges[ges.size() - 1 - i]->getTo(),
                            ges[ges.size() - 1 - i]->getFrom());
 
-      if (!e->pl().isSecondary()) _edgs[ce].push_back(e);
+      if (!e->pl().isSecondary())
+        _edgs[ce].push_back(
+            {e->getFrom()->pl().getId(), e->getTo()->pl().getId()});
     } else {
-      if (!ges[i]->pl().isSecondary()) _edgs[ce].push_back(ges[i]);
+      if (!ges[i]->pl().isSecondary())
+        _edgs[ce].push_back(
+            {ges[i]->getFrom()->pl().getId(), ges[i]->getTo()->pl().getId()});
     }
   }
 
@@ -116,18 +127,17 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
 }
 
 // _____________________________________________________________________________
-const GridNode* Drawing::getGrNd(const CombNode* cn) { return _nds[cn]; }
+const GridNode* Drawing::getGrNd(const CombNode* cn) {
+  return _gg->getGrNdById(_nds[cn]);
+}
 
 // _____________________________________________________________________________
-const std::vector<const GridEdge*>& Drawing::getGrEdgs(const CombEdge* ce) {
-  return _edgs.find(ce)->second;
-}
-// _____________________________________________________________________________
 PolyLine<double> Drawing::buildPolylineFromRes(
-    const std::vector<const GridEdge*>& res) const {
+    const std::vector<std::pair<size_t, size_t>>& res) const {
   PolyLine<double> pl;
   for (auto revIt = res.rbegin(); revIt != res.rend(); revIt++) {
-    auto f = *revIt;
+    auto f = _gg->getEdg(_gg->getGrNdById(revIt->first),
+                         _gg->getGrNdById(revIt->second));
     // TODO check for isSecondary should not be needed, filtered out by draw()
     if (!f->pl().isSecondary()) {
       if (pl.getLine().size() > 0 &&
@@ -147,7 +157,14 @@ PolyLine<double> Drawing::buildPolylineFromRes(
     }
   }
 
-  if (res.size()) pl << *res.front()->getTo()->pl().getParent()->pl().getGeom();
+  if (res.size())
+    pl << *_gg->getEdg(_gg->getGrNdById(res.front().first),
+                       _gg->getGrNdById(res.front().second))
+               ->getTo()
+               ->pl()
+               .getParent()
+               ->pl()
+               .getGeom();
 
   return pl;
 }
@@ -228,7 +245,7 @@ double Drawing::recalcBends(const CombNode* nd) {
   double c = 0;
 
   if (_nds.count(nd) == 0) return 0;
-  auto gnd = _nds.find(nd)->second;
+  auto gnd = _gg->getGrNdById(_nds.find(nd)->second);
 
   // TODO: implement this better
 
@@ -240,10 +257,10 @@ double Drawing::recalcBends(const CombNode* nd) {
 
     size_t dirA = 0;
     for (; dirA < 8; dirA++) {
-      if (gnd->pl().getPort(dirA) == ge.front()->getFrom() ||
-          gnd->pl().getPort(dirA) == ge.front()->getTo() ||
-          gnd->pl().getPort(dirA) == ge.back()->getFrom() ||
-          gnd->pl().getPort(dirA) == ge.back()->getTo()) {
+      if (gnd->pl().getPort(dirA) == _gg->getGrEdgById(ge.front())->getFrom() ||
+          gnd->pl().getPort(dirA) == _gg->getGrEdgById(ge.front())->getTo() ||
+          gnd->pl().getPort(dirA) == _gg->getGrEdgById(ge.back())->getFrom() ||
+          gnd->pl().getPort(dirA) == _gg->getGrEdgById(ge.back())->getTo()) {
         break;
       }
     }
@@ -261,10 +278,14 @@ double Drawing::recalcBends(const CombNode* nd) {
         if (f->pl().getChilds().front()->pl().hasRoute(ro.route)) {
           size_t dirB = 0;
           for (; dirB < 8; dirB++) {
-            if (gnd->pl().getPort(dirB) == gf.front()->getFrom() ||
-                gnd->pl().getPort(dirB) == gf.front()->getTo() ||
-                gnd->pl().getPort(dirB) == gf.back()->getFrom() ||
-                gnd->pl().getPort(dirB) == gf.back()->getTo()) {
+            if (gnd->pl().getPort(dirB) ==
+                    _gg->getGrEdgById(gf.front())->getFrom() ||
+                gnd->pl().getPort(dirB) ==
+                    _gg->getGrEdgById(gf.front())->getTo() ||
+                gnd->pl().getPort(dirB) ==
+                    _gg->getGrEdgById(gf.back())->getFrom() ||
+                gnd->pl().getPort(dirB) ==
+                    _gg->getGrEdgById(gf.back())->getTo()) {
               break;
             }
           }
@@ -327,7 +348,8 @@ void Drawing::eraseFromGrid(const CombEdge* ce, GridGraph* gg) {
   auto it = _edgs.find(ce);
   if (it == _edgs.end()) return;
   const auto& es = it->second;
-  for (auto e : es) {
+  for (auto eid : es) {
+    auto e = gg->getGrEdgById(eid);
     gg->unSettleEdg(e->getFrom()->pl().getParent(),
                     e->getTo()->pl().getParent());
   }
@@ -339,7 +361,8 @@ void Drawing::applyToGrid(const CombEdge* ce, GridGraph* gg) {
   if (it == _edgs.end()) return;
   const auto& es = it->second;
 
-  for (auto e : es) {
+  for (auto eid : es) {
+    auto e = gg->getGrEdgById(eid);
     gg->settleEdg(e->getFrom()->pl().getParent(), e->getTo()->pl().getParent(),
                   const_cast<CombEdge*>(ce));
   }
@@ -352,7 +375,8 @@ void Drawing::eraseFromGrid(const CombNode* nd, GridGraph* gg) {
 
 // _____________________________________________________________________________
 void Drawing::applyToGrid(const CombNode* nd, GridGraph* gg) {
-  gg->settleNd(const_cast<GridNode*>(_nds[nd]), const_cast<CombNode*>(nd));
+  gg->settleNd(const_cast<GridNode*>(gg->getGrNdById(_nds[nd])),
+               const_cast<CombNode*>(nd));
 }
 
 // _____________________________________________________________________________

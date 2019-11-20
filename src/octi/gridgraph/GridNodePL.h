@@ -49,6 +49,9 @@ class GridNodePL : util::geograph::GeoNodePL<double> {
 
   void setStation();
 
+  void setId(size_t id);
+  size_t getId() const;
+
   bool visited;
 
  private:
@@ -58,6 +61,7 @@ class GridNodePL : util::geograph::GeoNodePL<double> {
   GridNode* _ports[8];
 
   size_t _x, _y;
+  size_t _id;
   bool _closed, _sink, _station, _settled;
 };
 }

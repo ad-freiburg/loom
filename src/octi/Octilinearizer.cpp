@@ -80,7 +80,7 @@ double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
 double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
                           GridGraph** retGg, const Penalties& pens,
                           double gridSize, double borderRad, bool deg2heur) {
-  size_t cores = 1;
+  size_t cores = 4;
   std::vector<GridGraph*> ggs(cores);
 
   removeEdgesShorterThan(tg, gridSize / 2);
@@ -88,13 +88,9 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
 
-  std::cerr << cg.getNds()->size() << std::endl;
-
   for (size_t i = 0; i < cores; i++) {
     ggs[i] = new GridGraph(box, gridSize, borderRad, pens);
   }
-
-  std::cerr << ggs[0]->getNds()->size() << std::endl;
 
   bool found = false;
 
@@ -133,82 +129,105 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
     exit(1);
   }
 
-  drawing.applyToGrid(ggs[0]);
+  for (size_t i = 0; i < cores; i++) drawing.applyToGrid(ggs[i]);
 
   size_t iters = 0;
 
   std::cerr << "Iterating..." << std::endl;
 
+  std::vector<std::vector<CombNode*>> batches(cores);
+  size_t c = 0;
+  for (auto nd : *cg.getNds()) {
+    if (nd->getDeg() == 0) continue;
+    batches[c % cores].push_back(nd);
+    c++;
+  }
+
   for (; iters < ITERS; iters++) {
     T_START(iter);
-    Drawing bestFromIter = drawing;
-    for (auto a : *cg.getNds()) {
-      if (a->getDeg() == 0) continue;
-      assert(drawing.getGrNd(a));
+    std::vector<Drawing> bestFromIters(cores);
 
-      Drawing drawingCp = drawing;
-      size_t origX = drawing.getGrNd(a)->pl().getX();
-      size_t origY = drawing.getGrNd(a)->pl().getY();
+#pragma omp parallel for
+    for (size_t btch = 0; btch < cores; btch++) {
+      for (auto a : batches[btch]) {
+        Drawing drawingCp = drawing;
 
-      // reverting a
-      std::vector<CombEdge*> test;
-      for (auto ce : a->getAdjList()) {
-        assert(drawingCp.drawn(ce));
-        test.push_back(ce);
+        // use the batches grid graph
+        drawingCp.setGridGraph(ggs[btch]);
 
-        drawingCp.eraseFromGrid(ce, ggs[0]);
-        drawingCp.erase(ce);
-      }
+        size_t origX = drawing.getGrNd(a)->pl().getX();
+        size_t origY = drawingCp.getGrNd(a)->pl().getY();
 
-      drawingCp.erase(a);
-      ggs[0]->unSettleNd(a);
+        // reverting a
+        std::vector<CombEdge*> test;
+        for (auto ce : a->getAdjList()) {
+          test.push_back(ce);
 
-      for (size_t pos = 0; pos < 9; pos++) {
-        Drawing run = drawingCp;
-        SettledPos p;
-
-        if (pos == 1) p[a] = {origX + 1, origY + 1};
-        if (pos == 2) p[a] = {origX + 1, origY};
-        if (pos == 3) p[a] = {origX + 1, origY - 1};
-
-        if (pos == 7) p[a] = {origX - 1, origY + 1};
-        if (pos == 6) p[a] = {origX - 1, origY};
-        if (pos == 5) p[a] = {origX - 1, origY - 1};
-
-        if (pos == 0) p[a] = {origX, origY + 1};
-        if (pos == 8) p[a] = {origX, origY};
-        if (pos == 4) p[a] = {origX, origY - 1};
-
-        bool found = draw(test, p, ggs[0], &run,
-                          std::numeric_limits<double>::infinity());
-
-        if (found && bestFromIter.score() > run.score()) {
-          bestFromIter = run;
+          drawingCp.eraseFromGrid(ce, ggs[btch]);
+          drawingCp.erase(ce);
         }
 
-        // reset grid
-        for (auto ce : a->getAdjList()) run.eraseFromGrid(ce, ggs[0]);
+        drawingCp.erase(a);
+        ggs[btch]->unSettleNd(a);
 
-        if (ggs[0]->isSettled(a)) ggs[0]->unSettleNd(a);
+        for (size_t pos = 0; pos < 9; pos++) {
+          Drawing run = drawingCp;
+          SettledPos p;
+
+          if (pos == 1) p[a] = {origX + 1, origY + 1};
+          if (pos == 2) p[a] = {origX + 1, origY};
+          if (pos == 3) p[a] = {origX + 1, origY - 1};
+
+          if (pos == 7) p[a] = {origX - 1, origY + 1};
+          if (pos == 6) p[a] = {origX - 1, origY};
+          if (pos == 5) p[a] = {origX - 1, origY - 1};
+
+          if (pos == 0) p[a] = {origX, origY + 1};
+          if (pos == 8) p[a] = {origX, origY};
+          if (pos == 4) p[a] = {origX, origY - 1};
+
+          // we can use bestFromIter.score() as the limit for the shortest
+          // path computation, as we can already do at least as good.
+          bool found = draw(test, p, ggs[btch], &run,
+                            bestFromIters[btch].score());
+
+          if (found && bestFromIters[btch].score() > run.score()) {
+            bestFromIters[btch] = run;
+          }
+
+          // reset grid
+          for (auto ce : a->getAdjList()) run.eraseFromGrid(ce, ggs[btch]);
+          if (ggs[btch]->isSettled(a)) ggs[btch]->unSettleNd(a);
+        }
+
+        ggs[btch]->settleNd(const_cast<GridNode*>(ggs[btch]->getGrNdById(drawing.getGrNd(a)->pl().getId())), a);
+
+        // re-settle edges
+        for (auto ce : a->getAdjList()) drawing.applyToGrid(ce, ggs[btch]);
       }
-
-      ggs[0]->settleNd(const_cast<GridNode*>(drawing.getGrNd(a)), a);
-
-      // RE-SETTLE EDGES!
-      for (auto ce : a->getAdjList()) drawing.applyToGrid(ce, ggs[0]);
     }
 
-    double imp = (drawing.score() - bestFromIter.score());
+    size_t bestCore;
+    double bestScore = std::numeric_limits<double>::infinity();
+    for (size_t i = 0; i < cores; i++) {
+      if (bestFromIters[i].score() < bestScore) {
+        bestScore = bestFromIters[i].score();
+        bestCore = i;
+      }
+    }
+    double imp = (drawing.score() - bestFromIters[bestCore].score());
     std::cerr << " ++ Iter " << iters << ", prev " << drawing.score()
-              << ", next " << bestFromIter.score() << " ("
+              << ", next " << bestFromIters[bestCore].score() << " ("
               << (imp >= 0 ? "+" : "") << imp << ", took " << T_STOP(iter)
               << " ms)" << std::endl;
 
-    if (imp < 0.05) break;
+    for (size_t i = 0; i < cores; i++) {
+      drawing.eraseFromGrid(ggs[i]);
+      bestFromIters[bestCore].applyToGrid(ggs[i]);
+    }
+    drawing = bestFromIters[bestCore];
 
-    drawing.eraseFromGrid(ggs[0]);
-    bestFromIter.applyToGrid(ggs[0]);
-    drawing = bestFromIter;
+    if (imp < 0.05) break;
   }
 
   drawing.getTransitGraph(outTg);
@@ -261,11 +280,11 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
                           Drawing* drawing, double globCutoff) {
   SettledPos retPos;
 
-  double dijCost = 0;
-  double dijIters = 0;
+  size_t i = 0;
 
   for (auto cmbEdg : ord) {
     double cutoff = globCutoff - drawing->score();
+    i++;
     if (drawing->score() == std::numeric_limits<double>::infinity()) {
       cutoff = drawing->score();
     }
@@ -343,11 +362,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     auto heur = GridHeur(gg, toGrNds);
     auto cost = GridCost(cutoff);
-    T_START(draw);
-    size_t itt = Dijkstra::ITERS;
     Dijkstra::shortestPath(frGrNds, toGrNds, cost, heur, &eL, &nL);
-    dijCost += T_STOP(draw);
-    dijIters += Dijkstra::ITERS - itt;
 
     if (!nL.size()) {
       // cleanup
@@ -373,9 +388,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg);
   }
-
-  // std::cerr << "Dijkstra: " << dijCost << ", " << dijIters << " iters, " <<
-  // dijIters / dijCost << " iters per millisec" << std::endl;
 
   return true;
 }
