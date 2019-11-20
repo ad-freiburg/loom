@@ -88,9 +88,7 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
 
-  size_t jobs =
-      std::min(static_cast<size_t>(std::thread::hardware_concurrency()),
-               cg.getNds()->size());
+  size_t jobs = 4;
   std::cerr << "Using " << jobs << " jobs." << std::endl;
   std::vector<GridGraph*> ggs(jobs);
 
