@@ -94,6 +94,7 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
 
   std::cerr << "Creating grid graphs... ";
   T_START(ggraph);
+#pragma omp parallel for
   for (size_t i = 0; i < jobs; i++) {
     ggs[i] = new GridGraph(box, gridSize, borderRad, pens);
   }
@@ -178,7 +179,6 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
         ggs[btch]->unSettleNd(a);
 
         for (size_t pos = 0; pos < 9; pos++) {
-          Drawing run = drawingCp;
           SettledPos p;
 
           if (pos == 1) p[a] = {origX + 1, origY + 1};
@@ -192,6 +192,12 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
           if (pos == 0) p[a] = {origX, origY + 1};
           if (pos == 8) p[a] = {origX, origY};
           if (pos == 4) p[a] = {origX, origY - 1};
+
+          double gridD = dist(*a->pl().getGeom(), *ggs[btch]->getNode(p[a].first, p[a].second)->pl().getGeom());
+          double maxDis = ggs[btch]->getCellSize() * 4;
+          if (gridD >= maxDis) continue;
+
+          Drawing run = drawingCp;
 
           // we can use bestFromIter.score() as the limit for the shortest
           // path computation, as we can already do at least as good.

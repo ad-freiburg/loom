@@ -11,12 +11,12 @@ using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
 GridEdgePL::GridEdgePL(double c, bool secondary)
-    : _c(c), _isSecondary(secondary), _closed(false), _blocked(false), _visited(0) {}
+    : _c(c), _isSecondary(secondary), _closed(false), _blocked(false)  {}
 
 // _____________________________________________________________________________
 GridEdgePL::GridEdgePL(double c, bool secondary,
                        bool closed)
-    : _c(c), _isSecondary(secondary), _closed(closed), _blocked(false), _visited(0) {}
+    : _c(c), _isSecondary(secondary), _closed(closed), _blocked(false) {}
 
 // _____________________________________________________________________________
 const util::geo::Line<double>* GridEdgePL::getGeom() const {
@@ -24,48 +24,18 @@ const util::geo::Line<double>* GridEdgePL::getGeom() const {
 }
 
 // _____________________________________________________________________________
-void GridEdgePL::addResidentEdge(
-    util::graph::Edge<octi::combgraph::CombNodePL, octi::combgraph::CombEdgePL>*
-        e) {
-  _resEdges.insert(e);
-}
-
-// _____________________________________________________________________________
 void GridEdgePL::reset() {
-  _resEdges.clear();
   _closed = false;
-  _visited = 0;
-}
-
-// _____________________________________________________________________________
-const std::set<util::graph::Edge<octi::combgraph::CombNodePL,
-                                 octi::combgraph::CombEdgePL>*>&
-GridEdgePL::getResEdges() const {
-  return _resEdges;
 }
 
 // _____________________________________________________________________________
 util::json::Dict GridEdgePL::getAttrs() const {
   util::json::Dict obj;
-  std::vector<std::string> routes;
   obj["cost"] = cost() == std::numeric_limits<double>::infinity()
                     ? "inf"
                     : util::toString(cost());
-  obj["visited"] = _visited;
-
-  for (auto r : _resEdges) {
-    routes.push_back(util::toString(r));
-  }
-  obj["routes"] = util::implode(routes.begin(), routes.end(), ",");
-
   return obj;
 }
-
-// _____________________________________________________________________________
-void GridEdgePL::clearResEdges() {
-  _resEdges.clear();
-}
-
 // _____________________________________________________________________________
 double GridEdgePL::cost() const {
   return (_closed || _blocked) ? std::numeric_limits<double>::infinity() : rawCost();
@@ -94,6 +64,3 @@ void GridEdgePL::setCost(double c) { _c = c; }
 
 // _____________________________________________________________________________
 bool GridEdgePL::isSecondary() const { return _isSecondary; }
-
-// _____________________________________________________________________________
-void GridEdgePL::setVisited(int i) { _visited = i; }

@@ -63,7 +63,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
     for (const GridNode* n : gg.getNds()) {
       if (!n->pl().isSink()) continue;
 
-      double gridD = floor(dist(*n->pl().getGeom(), *nd->pl().getGeom()));
+      double gridD = dist(*n->pl().getGeom(), *nd->pl().getGeom());
 
       // threshold for speedup
       double maxDis = gg.getCellSize() * 4;
@@ -627,7 +627,7 @@ void ILPGridOptimizer::extractSolution(glp_prob* lp, GridGraph* gg,
           if (i) {
             double val = glp_mip_col_val(lp, i);
             if (val > 0) {
-              e->pl().addResidentEdge(edg);
+              gg->addResEdg(e, edg);
               gridEdgs[edg].insert(e);
             }
           }

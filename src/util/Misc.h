@@ -16,9 +16,9 @@
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 #define TIME() std::chrono::high_resolution_clock::now()
-#define TOOK(t1, t2) (std::chrono::duration_cast<microseconds>(t2 - t1).count() / 1000.0)
+#define TOOK(t1, t2) (std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() / 1000.0)
 #define T_START(n)  auto _tstart_##n = std::chrono::high_resolution_clock::now()
-#define T_STOP(n) (std::chrono::duration_cast<microseconds>(std::chrono::high_resolution_clock::now() - _tstart_##n).count() / 1000.0)
+#define T_STOP(n) (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - _tstart_##n).count() / 1000.0)
 
 #define _TEST3(s, o, e) if (!(s o e)) {  std::cerr << "\n" << __FILE__ << ":" << __LINE__ << ": Test failed!\n  Expected " << #s << " " << #o " " << (e) << ", got " << (s) << std::endl;  exit(1);}
 #define _TEST2(s, e) _TEST3(s, ==, o)

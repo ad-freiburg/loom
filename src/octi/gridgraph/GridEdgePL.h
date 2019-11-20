@@ -22,26 +22,17 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   GridEdgePL(double c, bool secondar);
   GridEdgePL(double c, bool secondar, bool closed);
 
-  void addRoute(std::string);
-  const std::set<util::graph::Edge<octi::combgraph::CombNodePL,
-                                   octi::combgraph::CombEdgePL>*>&
-  getResEdges() const;
-
   const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;
 
   void setCost(double c);
   double cost() const;
   double rawCost() const;
-  void addResidentEdge(util::graph::Edge<octi::combgraph::CombNodePL,
-                                         octi::combgraph::CombEdgePL>* e);
-  void clearResEdges();
   bool isSecondary() const;
 
   void close();
   void open();
   bool closed() const;
-  void setVisited(int i);
 
   void block();
   void unblock();
@@ -57,11 +48,6 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
 
   // edges are blocked if they would cross a settled edge
   bool _blocked;
-
-  std::set<util::graph::Edge<octi::combgraph::CombNodePL,
-                             octi::combgraph::CombEdgePL>*>
-      _resEdges;
-  int _visited;
 };
 }
 }

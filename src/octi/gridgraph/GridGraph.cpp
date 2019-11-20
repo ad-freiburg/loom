@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include "octi/gridgraph/GridGraph.h"
 #include "octi/gridgraph/NodeCost.h"
+#include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Node.h"
 
@@ -49,9 +50,6 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
   // cut off illegal spacer values
   if (spacer > cellSize / 2) spacer = cellSize / 2;
 
-  std::cerr << _grid.getXWidth() << "x" << _grid.getYHeight() << "grid..."
-            << std::endl;
-
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
@@ -62,7 +60,6 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       GridNode* center = getNode(x, y);
-      if (!center) continue;
 
       for (size_t p = 0; p < 8; p++) {
         GridNode* from = center->pl().getPort(p);
@@ -109,12 +106,16 @@ void GridGraph::unSettleNd(CombNode* a) {
 // _____________________________________________________________________________
 void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   if (a == b) return;
+  int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
+  int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
+
   size_t dir = 0;
-  for (; dir < 8; dir++) {
-    if (getEdg(a->pl().getPort(dir), b->pl().getPort((dir + 4) % 8))) {
-      break;
-    }
-  }
+  size_t d = aa * 3 + bb;
+
+  if (d == 0) dir = 1;
+  if (d == 2) dir = 3;
+  if (d == 8) dir = 5;
+  if (d == 6) dir = 7;
 
   size_t x = a->pl().getX();
   size_t y = a->pl().getY();
@@ -125,8 +126,8 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   assert(ge);
   assert(gf);
 
-  ge->pl().clearResEdges();
-  gf->pl().clearResEdges();
+  _resEdgs[ge].clear();
+  _resEdgs[gf].clear();
 
   if (!a->pl().isSettled()) {
     openNodeTurns(a);
@@ -135,7 +136,7 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
     openNodeTurns(b);
   }
 
-  if (dir == 1 || dir == 3 || dir == 5 || dir == 7) {
+  if (dir != 0) {
     auto na = getNeighbor(x, y, (dir + 7) % 8);
     auto nb = getNeighbor(x, y, (dir + 1) % 8);
 
@@ -152,12 +153,17 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
 // _____________________________________________________________________________
 void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   if (a == b) return;
+
+  int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
+  int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
+
   size_t dir = 0;
-  for (; dir < 8; dir++) {
-    if (getEdg(a->pl().getPort(dir), b->pl().getPort((dir + 4) % 8))) {
-      break;
-    }
-  }
+  size_t d = aa * 3 + bb;
+
+  if (d == 0) dir = 1;
+  if (d == 2) dir = 3;
+  if (d == 8) dir = 5;
+  if (d == 6) dir = 7;
 
   size_t x = a->pl().getX();
   size_t y = a->pl().getY();
@@ -166,18 +172,15 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   auto ge = getNEdg(a, b);
   auto gf = getNEdg(b, a);
 
-  assert(ge->pl().getResEdges().size() == 0);
-  ge->pl().addResidentEdge(e);
-
-  assert(gf->pl().getResEdges().size() == 0);
-  gf->pl().addResidentEdge(e);
+  addResEdg(ge, e);
+  addResEdg(gf, e);
 
   // this closes both nodes
   // a close means that all major edges reaching this node are closed
   closeNodeTurns(a);
   closeNodeTurns(b);
 
-  if (dir == 1 || dir == 3 || dir == 5 || dir == 7) {
+  if (dir != 0) {
     auto na = getNeighbor(x, y, (dir + 7) % 8);
     auto nb = getNeighbor(x, y, (dir + 1) % 8);
 
@@ -192,15 +195,33 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
 }
 
 // _____________________________________________________________________________
+void GridGraph::addResEdg(GridEdge* ge, CombEdge* ce) {
+  _resEdgs[ge].push_back(ce);
+}
+
+// _____________________________________________________________________________
 GridEdge* GridGraph::getNEdg(const GridNode* a, const GridNode* b) const {
   if (!a) return 0;
   if (!b) return 0;
 
-  for (size_t i = 0; i < 8; i++) {
-    if (a->pl().getPort(i) && b->pl().getPort((i + 4) % 8)) {
-      auto e = getEdg(a->pl().getPort(i), b->pl().getPort((i + 4) % 8));
-      if (e) return const_cast<GridEdge*>(e);
-    }
+  int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
+  int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
+
+  size_t dir = 0;
+  size_t d = aa * 3 + bb;
+
+  if (d == 0) dir = 1;
+  if (d == 1) dir = 2;
+  if (d == 2) dir = 3;
+  if (d == 3) dir = 0;
+  if (d == 5) dir = 4;
+  if (d == 8) dir = 5;
+  if (d == 7) dir = 6;
+  if (d == 6) dir = 7;
+
+  if (a->pl().getPort(dir) && b->pl().getPort((dir + 4) % 8)) {
+    return const_cast<GridEdge*>(
+        getEdg(a->pl().getPort(dir), b->pl().getPort((dir + 4) % 8)));
   }
 
   return 0;
@@ -219,12 +240,9 @@ void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
     if (!neigh) continue;
 
     if (getEdg(p, neigh->pl().getPort((i + 4) % 8)) &&
-        getEdg(p, neigh->pl().getPort((i + 4) % 8))->pl().getResEdges().size() >
-            0) {
-      outgoing[i] = *getEdg(p, neigh->pl().getPort((i + 4) % 8))
-                         ->pl()
-                         .getResEdges()
-                         .begin();
+        _resEdgs[getEdg(p, neigh->pl().getPort((i + 4) % 8))].size() > 0) {
+      outgoing[i] =
+          _resEdgs[getEdg(p, neigh->pl().getPort((i + 4) % 8))].front();
     }
   }
 }
@@ -524,9 +542,9 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   n->pl().setParent(n);
 
   for (int i = 0; i < 8; i++) {
-    int xi = ((4 - (i % 8)) % 4);
+    int xi = (4 - (i % 8)) % 4;
     xi /= abs(abs(xi) - 1) + 1;
-    int yi = ((4 - ((i + 2) % 8)) % 4);
+    int yi = (4 - ((i + 2) % 8)) % 4;
     yi /= abs(abs(yi) - 1) + 1;
     GridNode* nn = addNd(DPoint(xPos + xi * _spacer, yPos + yi * _spacer));
     nn->pl().setId(_nds.size());
