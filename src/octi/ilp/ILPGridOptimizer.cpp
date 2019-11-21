@@ -68,7 +68,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
       double gridD = dist(*n->pl().getGeom(), *nd->pl().getGeom());
 
       // threshold for speedup
-      double maxDis = gg.getCellSize() * 4;
+      double maxDis = gg.getCellSize() * 3;
       if (gridD >= maxDis) continue;
 
       auto varName = getStatPosVar(n, nd);

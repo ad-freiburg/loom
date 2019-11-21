@@ -455,7 +455,7 @@ RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
             getCands(toCmbNd, preSettled, gg, 0)};
   }
 
-  double maxDis = gg->getCellSize() * 4;
+  double maxDis = gg->getCellSize() * 3;
 
   std::set<GridNode*> frGrNds;
   std::set<GridNode*> toGrNds;
