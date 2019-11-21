@@ -16,14 +16,15 @@ using octi::ilp::VariableMatrix;
 
 // _____________________________________________________________________________
 double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
-                               combgraph::Drawing* d) const {
+                                  combgraph::Drawing* d,
+                                  double maxGrDist) const {
   for (auto nd : *gg->getNds()) {
     if (!nd->pl().isSink()) continue;
     gg->openNodeTurns(nd);
     gg->openNodeSink(nd, 0);
   }
 
-  glp_prob* lp = createProblem(*gg, cg);
+  glp_prob* lp = createProblem(*gg, cg, maxGrDist);
 
   // TODO: make configurable
   glp_write_mps(lp, GLP_MPS_FILE, 0, "ilp_prob.mps");
@@ -41,7 +42,8 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
 
 // _____________________________________________________________________________
 glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
-                                          const CombGraph& cg) const {
+                                          const CombGraph& cg,
+                                          double maxGrDist) const {
   glp_prob* lp = glp_create_prob();
 
   glp_set_prob_name(lp, "griddrawing");
@@ -68,7 +70,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
       double gridD = dist(*n->pl().getGeom(), *nd->pl().getGeom());
 
       // threshold for speedup
-      double maxDis = gg.getCellSize() * 3;
+      double maxDis = gg.getCellSize() * maxGrDist;
       if (gridD >= maxDis) continue;
 
       auto varName = getStatPosVar(n, nd);
@@ -504,8 +506,7 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   std::chrono::high_resolution_clock::time_point t1 =
       std::chrono::high_resolution_clock::now();
 
-  std::string cmd =
-      "gurobi_cl ResultFile={OUTPUT} {INPUT} > ./gurobi.log";
+  std::string cmd = "gurobi_cl ResultFile={OUTPUT} {INPUT} > ./gurobi.log";
   // std::string cmd =
   // "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
   // "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
@@ -613,7 +614,6 @@ std::string ILPGridOptimizer::getStatPosVar(const GridNode* n,
 void ILPGridOptimizer::extractSolution(glp_prob* lp, GridGraph* gg,
                                        const CombGraph& cg,
                                        combgraph::Drawing* d) const {
-
   std::map<const CombNode*, const GridNode*> gridNds;
   std::map<const CombEdge*, std::set<const GridEdge*>> gridEdgs;
 

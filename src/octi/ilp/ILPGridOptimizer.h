@@ -8,8 +8,8 @@
 #include <glpk.h>
 #include <vector>
 #include "octi/combgraph/CombGraph.h"
-#include "octi/gridgraph/GridGraph.h"
 #include "octi/combgraph/Drawing.h"
+#include "octi/gridgraph/GridGraph.h"
 
 using octi::gridgraph::GridGraph;
 using octi::gridgraph::GridNode;
@@ -36,11 +36,12 @@ class ILPGridOptimizer {
  public:
   ILPGridOptimizer() {}
 
-  double optimize(GridGraph* gg, const CombGraph& cg, combgraph::Drawing* d) const;
+  double optimize(GridGraph* gg, const CombGraph& cg, combgraph::Drawing* d,
+                  double maxGrDist) const;
 
  protected:
-  virtual glp_prob* createProblem(const GridGraph& gg,
-                                  const CombGraph& cg) const;
+  virtual glp_prob* createProblem(const GridGraph& gg, const CombGraph& cg,
+                                  double maxGrDist) const;
 
   void preSolve(glp_prob* lp) const;
 
@@ -48,7 +49,8 @@ class ILPGridOptimizer {
   std::string getStatPosVar(const GridNode* e, const CombNode* cg) const;
 
   void solveProblem(glp_prob* lp) const;
-  void extractSolution(glp_prob* lp, GridGraph* gg, const CombGraph& cg, combgraph::Drawing* d) const;
+  void extractSolution(glp_prob* lp, GridGraph* gg, const CombGraph& cg,
+                       combgraph::Drawing* d) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

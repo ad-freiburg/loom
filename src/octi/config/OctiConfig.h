@@ -21,6 +21,9 @@ struct Config {
   std::string evalSuff;
   bool fromDot;
   bool deg2Heur;
+  bool restrLocSearch;
+
+  double maxGrDist;
 
   octi::gridgraph::Penalties pens;
 };

@@ -52,6 +52,14 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::bool_switch(&(cfg->deg2Heur))->default_value(false),
       "contract degree 2 nodes and re-insert them equidistantly")
     (
+      "max-grid-dist",
+      opts::value<double>(&(cfg->maxGrDist))->default_value(3),
+      "max grid distance radius for station candidates")
+    (
+      "restr-loc-search",
+      opts::bool_switch(&(cfg->restrLocSearch))->default_value(false),
+      "restrict local search to max grid distance")
+    (
       "density-pen",
       opts::value<double>(&(cfg->pens.densityPen))->default_value(0),
       "penalty factor for re-inserted contracted stations that are too near, a reasonable value is e.g. 5. Only works with optim mode 'heur'!")

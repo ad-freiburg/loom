@@ -59,8 +59,8 @@ start:
 // _____________________________________________________________________________
 double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
                                GridGraph** retGg, const Penalties& pens,
-                               double gridSize, double borderRad,
-                               bool deg2heur) {
+                               double gridSize, double borderRad, bool deg2heur,
+                               double maxGrDist) {
   removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
@@ -70,7 +70,7 @@ double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  double score = ilpoptim.optimize(gg, cg, &drawing);
+  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist);
 
   drawing.getTransitGraph(outTg);
 
@@ -82,7 +82,8 @@ double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
 // _____________________________________________________________________________
 double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
                             GridGraph** retGg, const Penalties& pens,
-                            double gridSize, double borderRad, bool deg2heur) {
+                            double gridSize, double borderRad, bool deg2heur,
+                            double maxGrDist, bool restrLocSearch) {
   removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
@@ -111,7 +112,8 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
     T_START(draw);
     auto iterOrder = getOrdering(cg, i != 0);
 
-    bool locFound = draw(iterOrder, ggs[0], &drawing, drawing.score());
+    bool locFound =
+        draw(iterOrder, ggs[0], &drawing, drawing.score(), maxGrDist);
 
     if (locFound) {
       std::cerr << " ++ Try " << i << ", score " << drawing.score()
@@ -153,7 +155,7 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
 
   for (; iters < ITERS; iters++) {
     T_START(iter);
-    std::vector<Drawing> bestFromIters(jobs);
+    std::vector<Drawing> bestFrIters(jobs);
 
 #pragma omp parallel for
     for (size_t btch = 0; btch < jobs; btch++) {
@@ -193,11 +195,13 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
           if (pos == 8) p[a] = {origX, origY};
           if (pos == 4) p[a] = {origX, origY - 1};
 
-          if (ggs[btch]->getNode(p[a].first, p[a].second)) {
+          if (restrLocSearch && ggs[btch]->getNode(p[a].first, p[a].second)) {
             // dont try positions outside the move radius for consistency with
             // ILP approach
-            double gridD = dist(*a->pl().getGeom(), *ggs[btch]->getNode(p[a].first, p[a].second)->pl().getGeom());
-            double maxDis = ggs[btch]->getCellSize() * 3;
+            double gridD = dist(
+                *a->pl().getGeom(),
+                *ggs[btch]->getNode(p[a].first, p[a].second)->pl().getGeom());
+            double maxDis = ggs[btch]->getCellSize() * maxGrDist;
             if (gridD >= maxDis) continue;
           }
 
@@ -205,11 +209,11 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
 
           // we can use bestFromIter.score() as the limit for the shortest
           // path computation, as we can already do at least as good.
-          bool found =
-              draw(test, p, ggs[btch], &run, bestFromIters[btch].score());
+          bool found = draw(test, p, ggs[btch], &run, bestFrIters[btch].score(),
+                            maxGrDist);
 
-          if (found && bestFromIters[btch].score() > run.score()) {
-            bestFromIters[btch] = run;
+          if (found && bestFrIters[btch].score() > run.score()) {
+            bestFrIters[btch] = run;
           }
 
           // reset grid
@@ -229,22 +233,22 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
     size_t bestCore;
     double bestScore = std::numeric_limits<double>::infinity();
     for (size_t i = 0; i < jobs; i++) {
-      if (bestFromIters[i].score() < bestScore) {
-        bestScore = bestFromIters[i].score();
+      if (bestFrIters[i].score() < bestScore) {
+        bestScore = bestFrIters[i].score();
         bestCore = i;
       }
     }
-    double imp = (drawing.score() - bestFromIters[bestCore].score());
+    double imp = (drawing.score() - bestFrIters[bestCore].score());
     std::cerr << " ++ Iter " << iters << ", prev " << drawing.score()
-              << ", next " << bestFromIters[bestCore].score() << " ("
+              << ", next " << bestFrIters[bestCore].score() << " ("
               << (imp >= 0 ? "+" : "") << imp << ", took " << T_STOP(iter)
               << " ms)" << std::endl;
 
     for (size_t i = 0; i < jobs; i++) {
       drawing.eraseFromGrid(ggs[i]);
-      bestFromIters[bestCore].applyToGrid(ggs[i]);
+      bestFrIters[bestCore].applyToGrid(ggs[i]);
     }
-    drawing = bestFromIters[bestCore];
+    drawing = bestFrIters[bestCore];
 
     if (imp < 0.05) break;
   }
@@ -288,15 +292,16 @@ void Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
 
 // _____________________________________________________________________________
 bool Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg,
-                          Drawing* drawing, double cutoff) {
+                          Drawing* drawing, double cutoff, double maxGrDist) {
   SettledPos emptyPos;
-  return draw(order, emptyPos, gg, drawing, cutoff);
+  return draw(order, emptyPos, gg, drawing, cutoff, maxGrDist);
 }
 
 // _____________________________________________________________________________
 bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
                           const SettledPos& settled, GridGraph* gg,
-                          Drawing* drawing, double globCutoff) {
+                          Drawing* drawing, double globCutoff,
+                          double maxGrDist) {
   SettledPos retPos;
 
   size_t i = 0;
@@ -312,7 +317,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     auto toCmbNd = cmbEdg->getTo();
 
     std::set<GridNode *> frGrNds, toGrNds;
-    std::tie(frGrNds, toGrNds) = getRtPair(frCmbNd, toCmbNd, settled, gg);
+    std::tie(frGrNds, toGrNds) =
+        getRtPair(frCmbNd, toCmbNd, settled, gg, maxGrDist);
 
     if (frGrNds.size() == 0 || toGrNds.size() == 0) {
       return false;
@@ -380,8 +386,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     GridNode* frGrNd = 0;
 
     auto heur = GridHeur(gg, toGrNds);
-    // TODO: add costOffsetTo and costoffsetFrom to cutoff???
-    auto cost = GridCost(cutoff);
+    auto cost = GridCost(cutoff + costOffsetTo + costOffsetFrom);
     Dijkstra::shortestPath(frGrNds, toGrNds, cost, heur, &eL, &nL);
 
     if (!nL.size()) {
@@ -453,20 +458,23 @@ std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg,
 
 // _____________________________________________________________________________
 RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
-                                 const SettledPos& preSettled, GridGraph* gg) {
+                                 const SettledPos& preSettled, GridGraph* gg,
+                                 double maxGrDist) {
   // shortcut
   if (gg->getSettled(frCmbNd) && gg->getSettled(toCmbNd)) {
     return {getCands(frCmbNd, preSettled, gg, 0),
             getCands(toCmbNd, preSettled, gg, 0)};
   }
 
-  double maxDis = gg->getCellSize() * 3;
+  double maxDis = gg->getCellSize() * maxGrDist;
 
   std::set<GridNode*> frGrNds;
   std::set<GridNode*> toGrNds;
 
+  size_t i = 0;
+
   while ((!frGrNds.size() || !toGrNds.size()) &&
-         maxDis < gg->getCellSize() * 25) {
+         i < 10) {
     std::set<GridNode*> frCands = getCands(frCmbNd, preSettled, gg, maxDis);
     std::set<GridNode*> toCands = getCands(toCmbNd, preSettled, gg, maxDis);
 
@@ -489,7 +497,8 @@ RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
       }
     }
 
-    maxDis *= 2;
+    maxDis += i * 2.0;
+    i++;
   }
 
   return {frGrNds, toGrNds};

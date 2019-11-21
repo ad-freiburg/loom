@@ -90,24 +90,25 @@ int main(int argc, char** argv) {
   if (cfg.optMode == "ilp") {
     T_START(octi);
     double sc = oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                            cfg.deg2Heur);
+                            cfg.deg2Heur, cfg.maxGrDist);
     std::cerr << "Octilinearized using ILP in " << T_STOP(octi) << " ms, score "
               << sc << std::endl;
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
     double sc = oct.draw(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                         cfg.deg2Heur);
+                         cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch);
     std::cerr << "Octilinearized using heur approach in " << T_STOP(octi)
               << " ms, score " << sc << std::endl;
   } else if ((cfg.optMode == "eval")) {
     TransitGraph resIlp, resHeur;
     T_START(octi_ilp);
     double ilpSc = oct.drawILP(&tg, &resIlp, &gg, cfg.pens, gridSize,
-                               cfg.borderRad, cfg.deg2Heur);
+                               cfg.borderRad, cfg.deg2Heur, cfg.maxGrDist);
     auto ilpT = T_STOP(octi_ilp);
     T_START(octi_heur);
-    double heurSc = oct.draw(&tg, &resHeur, &gg, cfg.pens, gridSize,
-                             cfg.borderRad, cfg.deg2Heur);
+    double heurSc =
+        oct.draw(&tg, &resHeur, &gg, cfg.pens, gridSize, cfg.borderRad,
+                 cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch);
     auto heurT = T_STOP(octi_heur);
 
     std::cerr << "\nOctilinearized using eval approach: " << std::endl;
@@ -122,11 +123,13 @@ int main(int argc, char** argv) {
 
     std::ofstream of;
     of.open(cfg.evalPath + "/res_ilp" + cfg.evalSuff + ".json");
+    std::cerr << resIlp.getNds()->size() << std::endl;
     out.print(resIlp, of);
     of.flush();
     of.close();
     std::ofstream off;
     off.open(cfg.evalPath + "/res_heur" + cfg.evalSuff + ".json");
+    std::cerr << resHeur.getNds()->size() << std::endl;
     out.print(resHeur, off);
     off.flush();
     off.close();

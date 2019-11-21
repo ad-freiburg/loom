@@ -32,14 +32,9 @@ Costs Drawing::fullScore() const {
   Costs ret{0, 0, 0, 0};
 
   for (auto c : _ndReachCosts) ret.move += c.second;
-  for (auto c : _ndBndCosts) {
-    std::cerr << "@nd " << c.first->pl().toString() << ", bend cost " << c.second << std::endl;
-    ret.bend += c.second;
-  }
+  for (auto c : _ndBndCosts) ret.bend += c.second;
   for (auto c : _edgCosts) ret.hop += c.second;
   for (auto c : _springCosts) ret.dense += c.second;
-
-
 
   return ret;
 }

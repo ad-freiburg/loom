@@ -43,10 +43,7 @@ typedef std::map<CombNode*, std::pair<size_t, size_t>> SettledPos;
 // comparator for nodes, based on degree
 struct NodeCmp {
   bool operator()(CombNode* a, CombNode* b) {
-    // return a->getAdjList().size() < b->getAdjList().size();
-    return a->getAdjList().size() < b->getAdjList().size() ||
-           (a->getAdjList().size() == b->getAdjList().size() &&
-            a->pl().getRouteNumber() < b->pl().getRouteNumber());
+    return a->pl().getRouteNumber() < b->pl().getRouteNumber();
   }
 };
 
@@ -107,10 +104,10 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
 
     float ret = std::numeric_limits<float>::infinity();
 
-    for (size_t i = 0; i < hull.size(); i+=2) {
-      float tmp =
-          g->heurCost(from->pl().getParent()->pl().getX(),
-                      from->pl().getParent()->pl().getY(), hull[i], hull[i+1]);
+    for (size_t i = 0; i < hull.size(); i += 2) {
+      float tmp = g->heurCost(from->pl().getParent()->pl().getX(),
+                              from->pl().getParent()->pl().getY(), hull[i],
+                              hull[i + 1]);
       if (tmp < ret) ret = tmp;
     }
 
@@ -126,11 +123,13 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
 class Octilinearizer {
  public:
   Octilinearizer() {}
-  double draw(TransitGraph* in, TransitGraph* out, GridGraph** gg, const Penalties& pens,
-                    double gridSize, double borderRad, bool deg2heur);
+  double draw(TransitGraph* in, TransitGraph* out, GridGraph** gg,
+              const Penalties& pens, double gridSize, double borderRad,
+              bool deg2heur, double maxGrDist, bool restrLocSearch);
 
-  double drawILP(TransitGraph* in, TransitGraph* out, GridGraph** gg, const Penalties& pens,
-                       double gridSize, double borderRad, bool deg2heur);
+  double drawILP(TransitGraph* in, TransitGraph* out, GridGraph** gg,
+                 const Penalties& pens, double gridSize, double borderRad,
+                 bool deg2heur, double maxGrDist);
 
  private:
   void removeEdgesShorterThan(TransitGraph* g, double d);
@@ -144,15 +143,15 @@ class Octilinearizer {
   std::vector<CombEdge*> getOrdering(const CombGraph& cg, bool randr) const;
 
   bool draw(const std::vector<CombEdge*>& order, GridGraph* gg,
-            Drawing* drawing, double cutoff);
+            Drawing* drawing, double cutoff, double maxGrDist);
   bool draw(const std::vector<CombEdge*>& order, const SettledPos& settled,
-            GridGraph* gg, Drawing* drawing, double cutoff);
+            GridGraph* gg, Drawing* drawing, double cutoff, double maxGrDist);
 
   SettledPos getNeighbor(const SettledPos& pos, const std::vector<CombNode*>&,
                          size_t i) const;
 
   RtPair getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
-                   const SettledPos& settled, GridGraph* gg);
+                   const SettledPos& settled, GridGraph* gg, double maxGrDist);
 
   std::set<GridNode*> getCands(CombNode* cmBnd, const SettledPos& settled,
                                GridGraph* gg, double maxDis);
