@@ -560,11 +560,6 @@ void ILPGridOptimizer::solveProblem(glp_prob* lp) const {
   glp_init_iocp(&params);
   glp_init_smcp(&sparams);
 
-  // to accept gurobi solution
-  params.tol_int = 1e-2;
-  sparams.tol_bnd = 1e-2;
-  sparams.tol_dj = 1e-2;
-
   // params.presolve = GLP_ON;
   // params.binarize = GLP_OFF;
   // params.ps_tm_lim = 10000;
