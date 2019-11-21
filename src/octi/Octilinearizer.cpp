@@ -37,7 +37,9 @@ start:
             (n1->pl().getStops().size() == 0 ||
              e1->getOtherNd(n1)->pl().getStops().size() == 0)) {
           auto otherP = e1->getFrom()->pl().getGeom();
-
+          auto newGeom =
+              DPoint((n1->pl().getGeom()->getX() + otherP->getX()) / 2,
+                     (n1->pl().getGeom()->getY() + otherP->getY()) / 2);
           TransitNode* n = 0;
 
           if (e1->getTo()->pl().getStops().size() > 0) {
@@ -46,9 +48,7 @@ start:
             n = g->mergeNds(e1->getTo(), e1->getFrom());
           }
 
-          n->pl().setGeom(
-              DPoint((n->pl().getGeom()->getX() + otherP->getX()) / 2,
-                     (n->pl().getGeom()->getY() + otherP->getY()) / 2));
+          n->pl().setGeom(newGeom);
           goto start;
         }
       }
@@ -473,8 +473,7 @@ RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
 
   size_t i = 0;
 
-  while ((!frGrNds.size() || !toGrNds.size()) &&
-         i < 10) {
+  while ((!frGrNds.size() || !toGrNds.size()) && i < 10) {
     std::set<GridNode*> frCands = getCands(frCmbNd, preSettled, gg, maxDis);
     std::set<GridNode*> toCands = getCands(toCmbNd, preSettled, gg, maxDis);
 
