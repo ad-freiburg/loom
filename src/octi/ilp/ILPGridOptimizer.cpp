@@ -119,6 +119,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
   std::set<const GridEdge*> proced;
   for (const GridNode* n : gg.getNds()) {
     for (const GridEdge* e : n->getAdjList()) {
+      if (e->pl().isSecondary()) continue;
       if (proced.count(e)) continue;
       auto f = gg.getEdg(e->getTo(), e->getFrom());
       proced.insert(e);
