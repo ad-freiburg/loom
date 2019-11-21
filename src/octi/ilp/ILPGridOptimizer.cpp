@@ -502,7 +502,7 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   // std::string f = std::string(std::tmpnam(0)) + ".mps";
   std::string f = "prob.mps";
   std::string outf = "sol.sol";  // std::string(std::tmpnam(0)) + ".sol";
-  glp_term_out(GLP_OFF);
+  // glp_term_out(GLP_OFF);
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
 
   std::chrono::high_resolution_clock::time_point t1 =
@@ -515,12 +515,7 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   util::replaceAll(cmd, "{INPUT}", f);
   util::replaceAll(cmd, "{OUTPUT}", outf);
   util::replaceAll(cmd, "{THREADS}", "4");
-  int r = system(cmd.c_str());
-
-  std::chrono::high_resolution_clock::time_point t2 =
-      std::chrono::high_resolution_clock::now();
-  auto duration =
-      std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+  system(cmd.c_str());
 
   std::ifstream fin;
   fin.open(outf.c_str());
@@ -529,7 +524,7 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   // skip first line
   std::getline(fin, line);
 
-  glp_term_out(GLP_OFF);
+  // glp_term_out(GLP_OFF);
 
   while (std::getline(fin, line)) {
     std::istringstream iss(line);
@@ -565,7 +560,7 @@ void ILPGridOptimizer::solveProblem(glp_prob* lp) const {
   // params.fp_heur = GLP_ON;
   // params.ps_heur = GLP_ON;
 
-  glp_term_out(GLP_OFF);
+  // glp_term_out(GLP_OFF);
   glp_simplex(lp, 0);
   glp_intopt(lp, &params);
 }
