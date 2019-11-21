@@ -193,9 +193,13 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
           if (pos == 8) p[a] = {origX, origY};
           if (pos == 4) p[a] = {origX, origY - 1};
 
-          double gridD = dist(*a->pl().getGeom(), *ggs[btch]->getNode(p[a].first, p[a].second)->pl().getGeom());
-          double maxDis = ggs[btch]->getCellSize() * 4;
-          if (gridD >= maxDis) continue;
+          if (ggs[btch]->getNode(p[a].first, p[a].second)) {
+            // dont try positions outside the move radius for consistency with
+            // ILP approach
+            double gridD = dist(*a->pl().getGeom(), *ggs[btch]->getNode(p[a].first, p[a].second)->pl().getGeom());
+            double maxDis = ggs[btch]->getCellSize() * 3;
+            if (gridD >= maxDis) continue;
+          }
 
           Drawing run = drawingCp;
 
