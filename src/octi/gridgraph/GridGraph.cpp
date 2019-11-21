@@ -590,12 +590,23 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
 
 // _____________________________________________________________________________
 double GridGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) const {
+  // the move penalty has to be at least the max cost of saving a single
+  // grid hop - otherwise we could move the node closer and closer to the
+  // other node without ever increasing the total cost.
+
+  // additional penalty per grid move
+  double PEN = 0.5;
+
   double c_0 = _c.p_45 - _c.p_135;
-  double penPerGrid = 0.5 + c_0 + fmax(_c.diagonalPen, _c.horizontalPen);
+  double penPerGrid = PEN + c_0 + fmax(_c.diagonalPen, _c.horizontalPen);
 
-  double gridD = floor(dist(*cbNd->pl().getGeom(), *grNd->pl().getGeom()));
-  gridD = gridD / getCellSize();
+  // real distance between grid node and input node
+  double d = dist(*cbNd->pl().getGeom(), *grNd->pl().getGeom());
 
+  // distance normalized to grid length
+  double gridD = d / getCellSize();
+
+  // and multiplied per grid hop penalty
   return gridD * penPerGrid;
 }
 

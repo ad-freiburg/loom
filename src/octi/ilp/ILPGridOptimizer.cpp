@@ -60,6 +60,8 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
     glp_set_row_name(lp, rowStat, oneAssignment.str().c_str());
     glp_set_row_bnds(lp, rowStat, GLP_FX, 1, 1);
 
+    size_t i = 0;
+
     for (const GridNode* n : gg.getNds()) {
       if (!n->pl().isSink()) continue;
 
@@ -79,6 +81,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
       glp_set_obj_coef(lp, col, gg.ndMovePen(nd, n));
 
       vm.addVar(rowStat, col, 1);
+      i++;
     }
   }
 
