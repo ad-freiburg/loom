@@ -39,6 +39,8 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
 
   void reset();
 
+  void addResEdge();
+
  private:
   double _c;
 
@@ -48,6 +50,8 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
 
   // edges are blocked if they would cross a settled edge
   bool _blocked;
+
+  uint8_t _resEdgs;
 };
 }
 }
