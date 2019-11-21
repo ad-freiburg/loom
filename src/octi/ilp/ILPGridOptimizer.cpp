@@ -688,7 +688,9 @@ void ILPGridOptimizer::extractSolution(glp_prob* lp, GridGraph* gg,
         }
       }
 
-      assert(i == edges.size());
+      if (i == edges.size()) {
+        std::cerr << " ++++ FAIL ++++ " << std::endl;
+      }
 
       // d->draw(edg, edges, false);
     }
