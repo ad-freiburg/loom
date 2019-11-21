@@ -105,11 +105,24 @@ int main(int argc, char** argv) {
     double ilpSc = oct.drawILP(&tg, &resIlp, &gg, cfg.pens, gridSize,
                                cfg.borderRad, cfg.deg2Heur, cfg.maxGrDist);
     auto ilpT = T_STOP(octi_ilp);
+
+    std::ofstream of;
+    of.open(cfg.evalPath + "/res_ilp" + cfg.evalSuff + ".json");
+    out.print(resIlp, of);
+    of.flush();
+    of.close();
+
     T_START(octi_heur);
     double heurSc =
         oct.draw(&tg, &resHeur, &gg, cfg.pens, gridSize, cfg.borderRad,
                  cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch);
     auto heurT = T_STOP(octi_heur);
+
+    std::ofstream off;
+    off.open(cfg.evalPath + "/res_heur" + cfg.evalSuff + ".json");
+    out.print(resHeur, off);
+    off.flush();
+    off.close();
 
     std::cerr << "\nOctilinearized using eval approach: " << std::endl;
     std::cerr << "  ILP  target value: " << ilpSc << std::endl;
@@ -120,20 +133,6 @@ int main(int argc, char** argv) {
               << ilpT << " ms" << std::endl;
     std::cerr << "  HEUR solve time: " << std::setprecision(2) << std::fixed
               << heurT << " ms" << std::endl;
-
-    std::ofstream of;
-    of.open(cfg.evalPath + "/res_ilp" + cfg.evalSuff + ".json");
-    std::cerr << resIlp.getNds()->size() << std::endl;
-    out.print(resIlp, of);
-    of.flush();
-    of.close();
-
-    std::ofstream off;
-    off.open(cfg.evalPath + "/res_heur" + cfg.evalSuff + ".json");
-    std::cerr << resHeur.getNds()->size() << std::endl;
-    out.print(resHeur, off);
-    off.flush();
-    off.close();
   }
 
   if ((cfg.optMode != "eval")) {

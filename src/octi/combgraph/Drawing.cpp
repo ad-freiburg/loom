@@ -203,20 +203,20 @@ void Drawing::getTransitGraph(TransitGraph* target) const {
         }
 
         if (m.find(from) == m.end()) {
-          auto payload = from->pl();
+          shared::transitgraph::TransitNodePL payload = from->pl();
           payload.setGeom(pl.getLine().front());
           auto tfrom = target->addNd(payload);
           m[from] = tfrom;
         }
 
         if (m.find(to) == m.end()) {
-          auto payload = to->pl();
+          shared::transitgraph::TransitNodePL payload = to->pl();
           payload.setGeom(pl.getLine().back());
           auto tto = target->addNd(payload);
           m[to] = tto;
         }
 
-        auto payload = e->pl();
+        shared::transitgraph::TransitEdgePL payload = e->pl();
         payload.setPolyline(pl);
         target->addEdg(m[from], m[to], payload);
 
