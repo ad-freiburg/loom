@@ -468,8 +468,9 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
           vm.addVar(rowAng, col, -(k + 1));
           vm.addVar(rowSum, col, 1);
 
-          // multiply per shared lines!
-          glp_set_obj_coef(lp, col, sharedLines * pens[k]);
+          // TODO: maybe multiply per shared lines - but this actually
+          // makes the drawings look worse.
+          glp_set_obj_coef(lp, col, pens[k]);
         }
       }
     }

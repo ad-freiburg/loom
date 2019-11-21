@@ -380,6 +380,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     GridNode* frGrNd = 0;
 
     auto heur = GridHeur(gg, toGrNds);
+    // TODO: add costOffsetTo and costoffsetFrom to cutoff???
     auto cost = GridCost(cutoff);
     Dijkstra::shortestPath(frGrNds, toGrNds, cost, heur, &eL, &nL);
 

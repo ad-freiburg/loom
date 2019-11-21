@@ -32,9 +32,14 @@ Costs Drawing::fullScore() const {
   Costs ret{0, 0, 0, 0};
 
   for (auto c : _ndReachCosts) ret.move += c.second;
-  for (auto c : _ndBndCosts) ret.bend += c.second;
+  for (auto c : _ndBndCosts) {
+    std::cerr << "@nd " << c.first->pl().toString() << ", bend cost " << c.second << std::endl;
+    ret.bend += c.second;
+  }
   for (auto c : _edgCosts) ret.hop += c.second;
   for (auto c : _springCosts) ret.dense += c.second;
+
+
 
   return ret;
 }
@@ -82,6 +87,7 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
       } else {
         // otherwise it is the reach cost belonging to the edge
         _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] += ge->pl().cost();
+        assert(!ges[i + 1]->pl().isSecondary());
       }
     } else if (i == ges.size() - 1) {
       if (!_ndReachCosts.count(rev ? ce->getTo() : ce->getFrom())) {
@@ -91,6 +97,7 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
       } else {
         // otherwise it is the reach cost belonging to the edge
         _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] += ge->pl().cost();
+        assert(!ges[i - 1]->pl().isSecondary());
       }
     } else {
       if (!ge->pl().isSecondary()) l++;
@@ -271,7 +278,7 @@ double Drawing::recalcBends(const CombNode* nd) {
       for (auto f : nd->getAdjList()) {
         if (e == f) continue;
         if (_edgs.count(f) == 0) {
-          continue;  // dont count edge that havent been drawn
+          continue;  // dont count edges that havent been drawn
         }
         auto gf = _edgs.find(f)->second;
 
@@ -308,7 +315,7 @@ double Drawing::recalcBends(const CombNode* nd) {
     }
   }
 
-  return c / 2;
+  return c / 2.0;
 }
 
 // _____________________________________________________________________________
