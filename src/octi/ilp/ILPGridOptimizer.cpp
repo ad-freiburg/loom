@@ -539,6 +539,7 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
     iss >> value;
 
     int intVal = value;
+    std::cerr << "DBL: " << value << " int:" << intVal << std::endl;
 
     size_t col = glp_find_col(lp, name.c_str());
     if (col != 0) {
