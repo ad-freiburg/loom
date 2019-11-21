@@ -40,7 +40,7 @@ util::json::Dict GridEdgePL::getAttrs() const {
   obj["cost"] = cost() == std::numeric_limits<double>::infinity()
                     ? "inf"
                     : util::toString(cost());
-  obj["res_edges"] = util::toString(_resEdgs);
+  obj["res_edges"] = util::toString((int)_resEdgs);
   return obj;
 }
 // _____________________________________________________________________________
