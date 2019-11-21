@@ -31,7 +31,7 @@ const util::geo::Line<double>* GridEdgePL::getGeom() const { return 0; }
 // _____________________________________________________________________________
 void GridEdgePL::reset() {
   _closed = false;
-  _resEdgs = 0;
+  clearResEdges();
 }
 
 // _____________________________________________________________________________
@@ -75,3 +75,9 @@ void GridEdgePL::setCost(double c) { _c = c; }
 
 // _____________________________________________________________________________
 bool GridEdgePL::isSecondary() const { return _isSecondary; }
+
+// _____________________________________________________________________________
+void GridEdgePL::clearResEdges() {
+  _resEdgs = 0;
+}
+

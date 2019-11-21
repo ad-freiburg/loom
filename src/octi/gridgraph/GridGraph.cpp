@@ -126,6 +126,9 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   assert(ge);
   assert(gf);
 
+  ge->pl().clearResEdges();
+  gf->pl().clearResEdges();
+
   _resEdgs[ge].clear();
   _resEdgs[gf].clear();
 
