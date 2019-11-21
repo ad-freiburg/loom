@@ -505,13 +505,11 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   // glp_term_out(GLP_OFF);
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
 
-  std::chrono::high_resolution_clock::time_point t1 =
-      std::chrono::high_resolution_clock::now();
-
-  std::string cmd = "gurobi_cl ResultFile={OUTPUT} {INPUT} > ./gurobi.log";
   // std::string cmd =
   // "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
   // "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
+
+  std::string cmd = "gurobi_cl ResultFile={OUTPUT} {INPUT} > ./gurobi.log";
   util::replaceAll(cmd, "{INPUT}", f);
   util::replaceAll(cmd, "{OUTPUT}", outf);
   util::replaceAll(cmd, "{THREADS}", "4");
@@ -552,6 +550,9 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
 // _____________________________________________________________________________
 void ILPGridOptimizer::solveProblem(glp_prob* lp) const {
   glp_iocp params;
+
+  // to accept gurobi solution
+  params.tol_int = 1e-2;
   glp_init_iocp(&params);
   // params.presolve = GLP_ON;
   // params.binarize = GLP_OFF;
