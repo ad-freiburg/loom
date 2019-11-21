@@ -127,6 +127,7 @@ int main(int argc, char** argv) {
     out.print(resIlp, of);
     of.flush();
     of.close();
+
     std::ofstream off;
     off.open(cfg.evalPath + "/res_heur" + cfg.evalSuff + ".json");
     std::cerr << resHeur.getNds()->size() << std::endl;

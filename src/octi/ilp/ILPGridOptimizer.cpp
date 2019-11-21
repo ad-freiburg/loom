@@ -34,10 +34,12 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
 
   extractSolution(lp, gg, cg, d);
 
+  double score = glp_get_obj_val(lp);
+
   glp_delete_prob(lp);
   glp_free_env();
 
-  return glp_get_obj_val(lp);
+  return score;
 }
 
 // _____________________________________________________________________________
