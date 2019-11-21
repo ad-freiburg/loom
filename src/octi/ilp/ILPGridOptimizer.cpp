@@ -538,6 +538,9 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
     iss >> name;
     iss >> value;
 
+    // gurobi may sometimes write non-integer values to the solution file
+    // (within a small tolerance). Values like 0.999999999 will then be
+    // truncated to 0 without proper rounding
     value = round(value);
 
     int intVal = value;
