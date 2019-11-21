@@ -115,6 +115,39 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
   glp_create_index(lp);
 
+  // an edge can only be used a single time
+  std::set<const GridEdge*> proced;
+  for (const GridNode* n : gg.getNds()) {
+    for (const GridEdge* e : n->getAdjList()) {
+      if (proced.count(e)) continue;
+      auto f = gg.getEdg(e->getTo(), e->getFrom());
+      proced.insert(e);
+      proced.insert(f);
+
+      std::stringstream constName;
+      size_t row = glp_add_rows(lp, 1);
+      constName << "uniqedge(" << e << ")";
+      glp_set_row_name(lp, row, constName.str().c_str());
+      glp_set_row_bnds(lp, row, GLP_UP, 1, 1);
+
+      for (auto nd : cg.getNds()) {
+        for (auto edg : nd->getAdjList()) {
+          if (edg->getFrom() != nd) continue;
+          if (e->pl().cost() == std::numeric_limits<float>::infinity())
+            continue;
+
+          auto eVarName = getEdgeUseVar(e, edg);
+          auto fVarName = getEdgeUseVar(f, edg);
+
+          size_t eCol = glp_find_col(lp, eVarName.c_str());
+          if (eCol > 0) vm.addVar(row, eCol, 1);
+          size_t fCol = glp_find_col(lp, fVarName.c_str());
+          if (fCol > 0) vm.addVar(row, fCol, 1);
+        }
+      }
+    }
+  }
+
   // for every node, the number of outgoing and incoming used edges must be
   // the same, except for the start and end node
   for (const GridNode* n : gg.getNds()) {
@@ -688,7 +721,7 @@ void ILPGridOptimizer::extractSolution(glp_prob* lp, GridGraph* gg,
         }
       }
 
-      if (i == edges.size()) {
+      if (i != edges.size()) {
         std::cerr << " ++++ FAIL ++++ " << std::endl;
       }
 
