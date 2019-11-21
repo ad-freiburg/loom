@@ -196,6 +196,7 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
 
 // _____________________________________________________________________________
 void GridGraph::addResEdg(GridEdge* ge, CombEdge* ce) {
+  ge->pl().addResEdge();
   _resEdgs[ge].push_back(ce);
 }
 
