@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
     double sc = oct.draw(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                         cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch);
+                         cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch, cfg.enfGeoCourse);
     std::cerr << "Octilinearized using heur approach in " << T_STOP(octi)
               << " ms, score " << sc << std::endl;
   } else if ((cfg.optMode == "eval")) {
@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
     T_START(octi_heur);
     double heurSc =
         oct.draw(&tg, &resHeur, &gg, cfg.pens, gridSize, cfg.borderRad,
-                 cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch);
+                 cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch, cfg.enfGeoCourse);
     auto heurT = T_STOP(octi_heur);
 
     std::ofstream off;

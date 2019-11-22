@@ -83,7 +83,7 @@ double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
 double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
                             GridGraph** retGg, const Penalties& pens,
                             double gridSize, double borderRad, bool deg2heur,
-                            double maxGrDist, bool restrLocSearch) {
+                            double maxGrDist, bool restrLocSearch, bool enfGeoCourse) {
   removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
@@ -112,7 +112,7 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
     auto iterOrder = getOrdering(cg, i != 0);
 
     bool locFound =
-        draw(iterOrder, ggs[0], &drawing, drawing.score(), maxGrDist);
+        draw(iterOrder, ggs[0], &drawing, drawing.score(), maxGrDist, enfGeoCourse);
 
     if (locFound) {
       std::cerr << " ++ Try " << i << ", score " << drawing.score()
@@ -209,7 +209,7 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
           // we can use bestFromIter.score() as the limit for the shortest
           // path computation, as we can already do at least as good.
           bool found = draw(test, p, ggs[btch], &run, bestFrIters[btch].score(),
-                            maxGrDist);
+                            maxGrDist, enfGeoCourse);
 
           if (found && bestFrIters[btch].score() > run.score()) {
             bestFrIters[btch] = run;
@@ -291,16 +291,16 @@ void Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
 
 // _____________________________________________________________________________
 bool Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg,
-                          Drawing* drawing, double cutoff, double maxGrDist) {
+                          Drawing* drawing, double cutoff, double maxGrDist, bool enfGeoCourse) {
   SettledPos emptyPos;
-  return draw(order, emptyPos, gg, drawing, cutoff, maxGrDist);
+  return draw(order, emptyPos, gg, drawing, cutoff, maxGrDist, enfGeoCourse);
 }
 
 // _____________________________________________________________________________
 bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
                           const SettledPos& settled, GridGraph* gg,
                           Drawing* drawing, double globCutoff,
-                          double maxGrDist) {
+                          double maxGrDist, bool enfGeoCourse) {
   SettledPos retPos;
 
   size_t i = 0;
@@ -379,7 +379,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
     }
 
-    gg->writeGeoCoursePens(cmbEdg);
+    if (enfGeoCourse) gg->writeGeoCoursePens(cmbEdg);
 
     GrEdgList eL;
     GrNdList nL;
@@ -412,7 +412,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     for (auto n : toGrNds) gg->closeNodeSink(n);
     for (auto n : frGrNds) gg->closeNodeSink(n);
 
-    gg->clearGeoCoursePens();
+    if (enfGeoCourse) gg->clearGeoCoursePens();
 
     settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg);
   }

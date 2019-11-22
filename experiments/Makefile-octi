@@ -1,13 +1,12 @@
 OCTI_BIN := ../build/octi
 
-RES_FILES := test/octi.res freiburg/octi.res wien/octi.res berlin/octi.res stuttgart/octi.res
-
-%/octi.res: %/network.json
+%/octi-deg2.res: %/network.json
 	# with deg 2 heur
 	$(OCTI_BIN) --eval-out $* --eval-suff "_75-deg2" --grid-size "75%" --deg2-heur --restr-loc-search -o eval < $< 2>&1 | tee -a $@
 	$(OCTI_BIN) --eval-out $* --eval-suff "_100-deg2" --grid-size "100%" --deg2-heur --restr-loc-search -o eval < $< 2>&1 | tee -a $@
 	$(OCTI_BIN) --eval-out $* --eval-suff "_125-deg2" --grid-size "125%" --deg2-heur --restr-loc-search -o eval < $< 2>&1 | tee -a $@
 
+%/octi-base.res: %/network.json
 	# without deg 2 heur
 	$(OCTI_BIN) --eval-out $* --eval-suff "_75" --grid-size "75%" --restr-loc-search -o eval < $< 2>&1 | tee -a $@
 	$(OCTI_BIN) --eval-out $* --eval-suff "_100" --grid-size "100%" --restr-loc-search -o eval < $< 2>&1 | tee -a $@
