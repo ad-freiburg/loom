@@ -100,6 +100,9 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   const GridEdge* getGrEdgById(std::pair<size_t, size_t> id) const;
   void addResEdg(GridEdge* ge, CombEdge* cg);
 
+  void writeGeoCoursePens(const CombEdge* ce);
+  void clearGeoCoursePens();
+
  private:
   util::geo::DBox _bbox;
   Penalties _c;

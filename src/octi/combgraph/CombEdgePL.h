@@ -21,6 +21,7 @@ class CombEdgePL : util::geograph::GeoEdgePL<double> {
   const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;
 
+  const std::vector<shared::transitgraph::TransitEdge*>& getChilds() const;
   std::vector<shared::transitgraph::TransitEdge*>& getChilds();
 
   const PolyLine<double>& getPolyLine() const;

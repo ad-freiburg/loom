@@ -1,0 +1,2717 @@
+{
+  "type": "FeatureCollection", 
+  "features": [
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869586.6485053531, 6109860.9676015275]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2a9d8c0", 
+        "station_id": "Parent30802", 
+        "station_label": "Moosgrund"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873576.3959754901, 6104294.4859442059]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2ab86c0", 
+        "station_id": "Parent30405", 
+        "station_label": "Lorettostraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [878248.2377605346, 6104530.5010291170]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2b4e5c0", 
+        "station_id": "Parent30301", 
+        "station_label": "Römerhof"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [877702.3499835311, 6104637.7250795467]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2b9dcc0", 
+        "station_id": "Parent30302", 
+        "station_label": "Hasemannstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869654.6456117653, 6110779.6477080062]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2bb7a00", 
+        "station_id": "Parent30801", 
+        "station_label": "Diakoniekrankenhaus"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872877.8995482655, 6107419.6739061046]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c02970", 
+        "station_id": "Parent30811", 
+        "station_label": "Friedrich-Ebert-Platz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869247.0345421800, 6111660.9619841175]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0x2c131d0", 
+        "station_id": "Parent30800", 
+        "station_label": "Moosweiher"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874288.6404515533, 6108963.9685338782]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c16ee0", 
+        "station_id": "Parent30208", 
+        "station_label": "Komturplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873641.3674495334, 6108343.8053220799]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c1c580", 
+        "station_id": "Parent30206", 
+        "station_label": "Rennweg"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873900.6163704672, 6108567.8714033347]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c1ea80", 
+        "station_id": "Parent30207", 
+        "station_label": "Eichstetter Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869361.3185157187, 6105694.8101851828]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c220c0", 
+        "station_id": "Parent30602", 
+        "station_label": "Krozinger Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874506.9637135926, 6101167.8984277155]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c23330", 
+        "station_id": "Parent30401", 
+        "station_label": "Klosterplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870316.3567191266, 6108007.3998119887]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c23e10", 
+        "station_id": "Parent30502", 
+        "station_label": "Am Bischofskreuz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873110.7139969182, 6105119.2981288536]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c50940", 
+        "station_id": "Parent30123", 
+        "station_label": "Mattenstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873640.8897181046, 6103466.5811024392]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c52ff0", 
+        "station_id": "Parent30404", 
+        "station_label": "Holbeinstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869124.7352969222, 6109139.8059724877]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c559c0", 
+        "station_id": "Parent30504", 
+        "station_label": "Paduaallee"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869477.6195775081, 6108703.7103464855]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c66ac0", 
+        "station_id": "Parent30503", 
+        "station_label": "Betzenhauser Torplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873335.9909052807, 6105614.8580216141]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c6fe80", 
+        "station_id": "Parent30114", 
+        "station_label": "Erbprinzenstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874260.7727849915, 6105810.9325109404]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2c99a00", 
+        "station_id": "Parent30118", 
+        "station_label": "Oberlinden"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874188.5822582762, 6101325.8180308333]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2ce8df0", 
+        "station_id": "Parent30402", 
+        "station_label": "Wiesenweg"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871402.8772274400, 6102567.0784446122]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d13830", 
+        "station_id": "Parent30651", 
+        "station_label": "Paula-Modersohn-Platz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871753.8505823165, 6103318.7720091073]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d1de70", 
+        "station_id": "Parent30131", 
+        "station_label": "Peter-Thumb-Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871557.2906408292, 6104581.2578091295]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d1e960", 
+        "station_id": "Parent30616", 
+        "station_label": "Pressehaus"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870562.9192166178, 6107198.8110763691]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d209d0", 
+        "station_id": "Parent30505", 
+        "station_label": "Bissierstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872375.2199247505, 6104240.5586768892]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d26770", 
+        "station_id": "Parent30415", 
+        "station_label": "Weddigenstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [868011.5149099814, 6105498.7383483853]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d27880", 
+        "station_id": "Parent30715", 
+        "station_label": "VAG-Zentrum"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872409.8289125584, 6107493.2961124573]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0x2d2fad0", 
+        "station_id": "Parent30810", 
+        "station_label": "Robert-Koch-Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872239.8626871626, 6108873.8294388903]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0x2d50d30", 
+        "station_id": "Parent30813", 
+        "station_label": "Technische Fakultät"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873403.4571989948, 6106091.4093074473]
+      }, 
+      "properties": {
+        "deg": "4", 
+        "deg_in": "4", 
+        "deg_out": "4", 
+        "id": "0x2d52780", 
+        "station_id": "Parent30106", 
+        "station_label": "Stadttheater"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874799.5476718615, 6105084.4006231418]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d53560", 
+        "station_id": "Parent30120", 
+        "station_label": "Brauerei Ganter"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [867735.7577141891, 6106447.4122868823]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d56380", 
+        "station_id": "Parent30733", 
+        "station_label": "Geschwister-Scholl-Platz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870059.3372115174, 6105401.6558928294]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d59050", 
+        "station_id": "Parent30603", 
+        "station_label": "Dorfbrunnen"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872322.8287116141, 6104548.9003271963]
+      }, 
+      "properties": {
+        "deg": "4", 
+        "deg_in": "4", 
+        "deg_out": "4", 
+        "excluded_line_conns": [
+          {
+            "edge1_node": "0x2c50940", 
+            "edge2_node": "0x307e980", 
+            "route": "0x26b5690"
+          }, 
+          {
+            "edge1_node": "0x307e980", 
+            "edge2_node": "0x2c50940", 
+            "route": "0x26b5690"
+          }], 
+        "id": "0x2d60810", 
+        "station_id": "Parent30411", 
+        "station_label": "H.-von-Stephan-Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873682.3461896972, 6106594.0060409997]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d72860", 
+        "station_id": "Parent30105", 
+        "station_label": "Fahnenbergplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [878796.0895445138, 6104281.1627054811]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0x2d7e4c0", 
+        "station_id": "Parent30300", 
+        "station_label": "Laßbergstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870516.2607806009, 6105269.6762763150]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d80e90", 
+        "station_id": "Parent30604", 
+        "station_label": "Scherrerplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874319.0560190579, 6105604.0708819581]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0x2d83b50", 
+        "station_id": "Parent30124", 
+        "station_label": "Schwabentorplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874342.7833465884, 6105310.9196884949]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "excluded_line_conns": [
+          {
+            "edge1_node": "0x2c99a00", 
+            "edge2_node": "0x2d83b50", 
+            "route": "0x26648a0"
+          }, 
+          {
+            "edge1_node": "0x2d83b50", 
+            "edge2_node": "0x2c99a00", 
+            "route": "0x26648a0"
+          }], 
+        "id": "0x2d88580", 
+        "station_id": "Parent30119", 
+        "station_label": "Schwabentorbrücke"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871661.3299293298, 6108056.9077198664]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d8b6f0", 
+        "station_id": "Parent30808", 
+        "station_label": "Berliner Allee"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [875504.5200139832, 6104911.1841945536]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d941e0", 
+        "station_id": "Parent30306", 
+        "station_label": "Maria-Hilf-Kirche"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [875991.9653131099, 6104927.0463594794]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2d963d0", 
+        "station_id": "Parent30305", 
+        "station_label": "Alter Messplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [867343.6463753383, 6106717.7559641842]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2da4730", 
+        "station_id": "Parent30734", 
+        "station_label": "Maria-von-Rudloff-Platz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [868653.3736224972, 6105946.7278244952]
+      }, 
+      "properties": {
+        "deg": "4", 
+        "deg_in": "4", 
+        "deg_out": "4", 
+        "id": "0x2dc1220", 
+        "station_id": "Parent30601", 
+        "station_label": "Am Lindenwäldle"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870902.2677734421, 6105094.5526101729]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2dc24a0", 
+        "station_id": "Parent30605", 
+        "station_label": "Haslach Bad"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [876457.5942104155, 6104806.4946411345]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2dc5160", 
+        "station_id": "Parent30304", 
+        "station_label": "Musikhochschule"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [877101.6823362560, 6104714.4957845295]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2dc9400", 
+        "station_id": "Parent30303", 
+        "station_label": "Emil-Gött-Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873592.8511690793, 6102688.2330429293]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2dcef70", 
+        "station_id": "Parent30403", 
+        "station_label": "Wonnhalde"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873385.1972422376, 6108114.0325838616]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x2dd0530", 
+        "station_id": "Parent30205", 
+        "station_label": "Hauptfriedhof"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [866902.3817808026, 6106986.2042387305]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0x2f57e60", 
+        "station_id": "Parent30727", 
+        "station_label": "Bollerstaudenstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874169.8976513623, 6106508.3340624627]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "excluded_line_conns": [
+          {
+            "edge1_node": "0x2d72860", 
+            "edge2_node": "0x3059b70", 
+            "route": "0x26b5690"
+          }, 
+          {
+            "edge1_node": "0x3059b70", 
+            "edge2_node": "0x2d72860", 
+            "route": "0x26b5690"
+          }], 
+        "id": "0x2fe5990", 
+        "station_id": "Parent30101", 
+        "station_label": "Europaplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871789.6273580532, 6108454.8855092805]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x300cac0", 
+        "station_id": "Parent30814", 
+        "station_label": "Elsässer Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871146.3885325261, 6107188.6566001754]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0x300f750", 
+        "station_id": "Parent30501", 
+        "station_label": "Runzmattenweg"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873695.6165071069, 6105503.1800556248]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x3055a50", 
+        "station_id": "Parent30103", 
+        "station_label": "Holzmarkt"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873835.9633840421, 6105994.3201484010]
+      }, 
+      "properties": {
+        "deg": "4", 
+        "deg_in": "4", 
+        "deg_out": "4", 
+        "id": "0x3059b70", 
+        "station_id": "Parent30100", 
+        "station_label": "Bertoldsbrunnen"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872033.0049793652, 6107849.9919512765]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x3065070", 
+        "station_id": "Parent30809", 
+        "station_label": "Freiburg Killianstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872304.5156735877, 6106559.7371469643]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x307a2e0", 
+        "station_id": "Parent30108", 
+        "station_label": "Eschholzstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872682.3481509020, 6104741.7781012356]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x307e980", 
+        "station_id": "Parent30408", 
+        "station_label": "Reiterstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [867865.6475810037, 6104905.4738223562]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0x3088fd0", 
+        "station_id": "Parent30716", 
+        "station_label": "Munzinger Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871900.8856992259, 6106815.4879337549]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "excluded_line_conns": [
+          {
+            "edge1_node": "0x307a2e0", 
+            "edge2_node": "0x300f750", 
+            "route": "0x26489d0"
+          }, 
+          {
+            "edge1_node": "0x300f750", 
+            "edge2_node": "0x307a2e0", 
+            "route": "0x26489d0"
+          }], 
+        "id": "0x308bce0", 
+        "station_id": "Parent30500", 
+        "station_label": "Rathaus im Stühlinger"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873625.9738813373, 6105071.7106562406]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0x308f450", 
+        "station_id": "Parent30104", 
+        "station_label": "Johanneskirche"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [875004.2821288727, 6111231.7226843638]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x30b1090", 
+        "station_id": "Parent30431", 
+        "station_label": "Berggasse"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869397.4668603456, 6106736.7945722751]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x30be780", 
+        "station_id": "Parent30607", 
+        "station_label": "Rohrgraben"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872791.9078914451, 6106286.8600955950]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x30c6000", 
+        "station_id": "Parent30107", 
+        "station_label": "Hauptbahnhof"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870794.6720398746, 6102754.8370843837]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x30c9c80", 
+        "station_id": "Parent30423", 
+        "station_label": "Vauban-Mitte"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874621.7784998292, 6110048.2510020621]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x30d3b80", 
+        "station_id": "Parent30201", 
+        "station_label": "Tullastraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874369.6424690263, 6109441.3406536337]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0x30f3020", 
+        "station_id": "Parent30200", 
+        "station_label": "Hornusstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874358.4954024027, 6107371.4390099039]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x3105e70", 
+        "station_id": "Parent30102", 
+        "station_label": "Tennenbacher Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [875261.5670428309, 6112716.3724136939]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0x3108630", 
+        "station_id": "Parent30430", 
+        "station_label": "Gundelfinger Str."
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870219.0056706029, 6102958.4583582357]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0x310a920", 
+        "station_id": "Parent30424", 
+        "station_label": "Innsbrucker Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874434.7731868800, 6108063.8896272900]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x3131960", 
+        "station_id": "Parent30204", 
+        "station_label": "Hauptstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [875200.3112576621, 6111905.4347941149]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x3133c10", 
+        "station_id": "Parent30432", 
+        "station_label": "Glottertalstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874763.6116523143, 6110550.4446365237]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x3139670", 
+        "station_id": "Parent30202", 
+        "station_label": "Reutebachgasse"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874362.7949852444, 6108692.9193237815]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x3157e50", 
+        "station_id": "Parent30203", 
+        "station_label": "Okenstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874706.2307998305, 6100997.2977824667]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0x324c7c0", 
+        "station_id": "Parent30400", 
+        "station_label": "Dorfstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869076.6967478968, 6106449.9506855616]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x32576b0", 
+        "station_id": "Parent30600", 
+        "station_label": "Bugginger Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869577.7115944115, 6109867.2771956548], [869554.6557171829, 6109834.6292288303], [869543.1277785688, 6109818.3052454181], [869531.5998399544, 6109801.9812620059], [869520.0719013404, 6109785.6572785946], [869497.0160241120, 6109753.0093117701], [869485.4880854981, 6109736.6853283588], [869473.9601469985, 6109720.3613448646], [869462.4323627925, 6109704.0372520499], [869450.9387849071, 6109687.6890327688], [869440.0335796924, 6109670.9582749335], [869429.8063082173, 6109653.8157608546], [869420.2766571515, 6109636.2515139962], [869410.8313903759, 6109618.6407866981], [869401.4043707147, 6109601.0201401124], [869391.9777919053, 6109583.3992542755], [869382.5512150899, 6109565.7783673592], [869363.6980614641, 6109530.5365935247], [869344.8449078386, 6109495.2948196884], [869335.4183310256, 6109477.6739327721], [869325.9917542130, 6109460.0530458540], [869307.1386005874, 6109424.8112720177], [869297.7120237746, 6109407.1903851014], [869288.2854469616, 6109389.5694981832], [869278.8588701490, 6109371.9486112650], [869269.4322933361, 6109354.3277243478], [869260.0057165234, 6109336.7068374297], [869250.5791397104, 6109319.0859505124], [869241.1525628977, 6109301.4650635943], [869231.7259860848, 6109283.8441766771], [869222.2994092719, 6109266.2232897589], [869203.4462556463, 6109230.9815159235], [869194.0196789210, 6109213.3606289588], [869184.5931150647, 6109195.7397350231], [869175.1698248845, 6109178.1170686791], [869166.0352830192, 6109160.3445358686], [869157.0561120340, 6109142.4957458787], [869149.4511875464, 6109127.3599452693]]
+      }, 
+      "properties": {
+        "from": "0x2a9d8c0", 
+        "id": "0x2c4dd60", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2c559c0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873584.9397807332, 6104294.4425248550], [873585.0685656662, 6104314.4401646154], [873585.2015662411, 6104334.4378170557], [873585.3545675642, 6104354.4355055038], [873585.5184954181, 6104374.4331966452], [873585.7189191465, 6104394.4308105847], [873586.5208261254, 6104474.4212655071], [873586.7213028767, 6104494.4188792380], [873586.9217842140, 6104514.4164929502], [873587.1273774500, 6104534.4138623811], [873589.3441985182, 6104554.2879431732], [873591.6423221808, 6104574.1544152349], [873593.9405319549, 6104594.0208774991], [873596.2387417521, 6104613.8873397605], [873600.8351613469, 6104653.6202642843], [873607.7297907390, 6104713.2196510714], [873610.0280005365, 6104733.0861133328], [873612.3262103337, 6104752.9525755951], [873614.6244201311, 6104772.8190378565], [873619.2208397258, 6104812.5519623812], [873623.8172593208, 6104852.2848869041], [873633.0100985102, 6104931.7507359525], [873635.3083083165, 6104951.6171982139], [873637.6065213827, 6104971.4836601038], [873639.9050893730, 6104991.3500815323], [873642.2156385134, 6105011.2151319394], [873644.5473754436, 6105031.0777225168], [873646.8797915922, 6105050.9402334727], [873649.0019774840, 6105069.0124106947]]
+      }, 
+      "properties": {
+        "from": "0x2ab86c0", 
+        "id": "0x2c759e0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x308f450"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[878246.6160395292, 6104524.2883625599], [878265.5648058390, 6104519.3418492638], [878284.5064542261, 6104514.3682325482], [878302.6775837827, 6104507.0693879500], [878320.7908566028, 6104499.6241432009], [878338.8951064711, 6104492.1568951271], [878356.9987836771, 6104484.6882564742], [878375.1024543165, 6104477.2196018845], [878429.4134662349, 6104454.8136381181], [878447.5171368744, 6104447.3449835293], [878465.6208075138, 6104439.8763289396], [878483.7244781534, 6104432.4076743517], [878519.9318194322, 6104417.4703651723], [878538.0354900716, 6104410.0017105844], [878556.1391607113, 6104402.5330559947], [878574.2428313508, 6104395.0644014068], [878610.4501726297, 6104380.1270922292], [878628.5538432691, 6104372.6584376395], [878664.7611845483, 6104357.7211284619], [878682.8648551875, 6104350.2524738722], [878700.9679193853, 6104342.7823481839], [878719.0495647041, 6104335.2607334293], [878736.6672584551, 6104326.7934960984], [878753.7665028921, 6104317.4924057992], [878769.8274880345, 6104306.7393082976], [878782.9141475448, 6104292.1993269753], [878787.1755945929, 6104287.4095205199]]
+      }, 
+      "properties": {
+        "from": "0x2b4e5c0", 
+        "id": "0x2c94830", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2d7e4c0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[877701.2858735032, 6104630.7492853962], [877740.8219950058, 6104624.7115083970], [877760.5900557572, 6104621.6926198965], [877800.1261772597, 6104615.6548428973], [877819.8942380112, 6104612.6359543977], [877839.6622987625, 6104609.6170658991], [877859.4303595137, 6104606.5981773976], [877879.1984202651, 6104603.5792888980], [877898.9664810165, 6104600.5604003994], [877918.7345417679, 6104597.5415118998], [877938.5026025191, 6104594.5226233993], [877978.0387240218, 6104588.4848464001], [877997.8067843757, 6104585.4659553040], [878017.5745775325, 6104582.4454088993], [878037.2515717987, 6104578.9378412692], [878056.6006166309, 6104573.8876521923], [878172.6942292958, 6104543.5840029866], [878192.0431647401, 6104538.5333947865], [878211.3921001842, 6104533.4827865856], [878230.7410356284, 6104528.4321783856], [878246.6160395292, 6104524.2883625599]]
+      }, 
+      "properties": {
+        "from": "0x2b9dcc0", 
+        "id": "0x2b07df0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2b4e5c0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869654.9157968741, 6110779.7595252804], [869668.4016610287, 6110742.1544018369], [869675.1445931061, 6110723.3518401142], [869681.8875251836, 6110704.5492783934], [869688.6304572609, 6110685.7467166716], [869695.3733893384, 6110666.9441549499], [869702.1163214156, 6110648.1415932272], [869708.8592534931, 6110629.3390315063], [869715.6021855704, 6110610.5364697836], [869722.3451176478, 6110591.7339080628], [869735.8309818027, 6110554.1287846193], [869742.5739138799, 6110535.3262228966], [869749.3168459574, 6110516.5236611757], [869756.0597780347, 6110497.7210994530], [869762.8027101110, 6110478.9185377313], [869769.5456420605, 6110460.1159759630], [869776.2885633595, 6110441.3134103362], [869783.0308760814, 6110422.5106244255], [869789.7414489007, 6110403.6972016133], [869795.6737074035, 6110384.6429389995], [869800.1781880796, 6110365.3105742000], [869804.5538509905, 6110345.9666780811], [869803.3143982473, 6110326.1793769579], [869801.4532551045, 6110306.3484311868], [869799.5843973574, 6110286.5176374502], [869797.5791595438, 6110266.6954406695], [869794.1770069398, 6110247.0137183880], [869790.0830911882, 6110227.4766916260], [869785.9743864925, 6110207.9433536455], [869781.8650135919, 6110188.4101829752], [869777.7463754523, 6110168.8793647755], [869773.4214565400, 6110149.4146949630], [869764.3502187652, 6110131.8482490983], [869752.9481870122, 6110115.4474722249], [869741.4401248231, 6110099.1204325212], [869729.9173329838, 6110082.8038077019], [869718.3944939966, 6110066.4872162882], [869706.8716536746, 6110050.1706258208], [869695.3488133529, 6110033.8540353533], [869683.8259730306, 6110017.5374448858], [869649.2574520648, 6109968.5876734834], [869626.2117714206, 6109935.9544925485], [869591.6432504549, 6109887.0047211461], [869580.1204101328, 6109870.6881306786], [869577.7115944115, 6109867.2771956548]]
+      }, 
+      "properties": {
+        "from": "0x2bb7a00", 
+        "id": "0x2c4a830", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2a9d8c0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872866.1846291331, 6107432.7288370896], [872881.0217475665, 6107446.0922568021], [872895.8520797989, 6107459.4632667825], [872910.6823756166, 6107472.8343174746], [872925.5126713198, 6107486.2053682944], [872955.1732627251, 6107512.9474699358], [872970.0035584280, 6107526.3185207564], [872999.6641498338, 6107553.0606223959], [873014.4944455363, 6107566.4316732176], [873044.1550369421, 6107593.1737748571], [873073.8156283477, 6107619.9158764984], [873088.6459240506, 6107633.2869273182], [873103.4762197534, 6107646.6579781389], [873118.3065154562, 6107660.0290289596], [873133.1368111584, 6107673.4000797793], [873147.9671066131, 6107686.7711308775], [873162.7973523007, 6107700.1422375813], [873177.6065397219, 6107713.5367933009], [873186.1476317369, 6107730.6995893130], [873189.4141159575, 6107750.3890127139], [873192.6080613493, 6107770.0957415178], [873195.8015152306, 6107789.8025606191], [873198.9949628396, 6107809.5093808705], [873202.1884124728, 6107829.2162007503], [873205.3819891179, 6107848.9229973331], [873208.5809308790, 6107868.6288081361], [873212.1135542913, 6107888.2566998415], [873224.3428262891, 6107903.9394807145], [873236.9185901831, 6107919.4500400834], [873249.4963754320, 6107934.9589680973], [873262.0741823253, 6107950.4678785950], [873274.6519894680, 6107965.9767888915], [873324.9632180459, 6108028.0124300700], [873337.5410251904, 6108043.5213403655], [873350.1188323349, 6108059.0302506601], [873362.6966394794, 6108074.5391609557], [873375.2744466239, 6108090.0480712503], [873387.8522537684, 6108105.5569815449], [873390.9469132139, 6108109.3728132863]]
+      }, 
+      "properties": {
+        "from": "0x2c02970", 
+        "id": "0x2c0ba90", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2dd0530"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869305.4013636946, 6111597.1948829787], [869324.7395029129, 6111562.3637760831], [869334.4085725222, 6111544.9482226353], [869344.0776421316, 6111527.5326691885], [869363.4157813499, 6111492.7015622929], [869373.0848509592, 6111475.2860088451], [869402.0920597867, 6111423.0393485017], [869411.7611293960, 6111405.6237950549], [869421.4301990013, 6111388.2082416043], [869431.0992678137, 6111370.7926877141], [869440.7682918918, 6111353.3771089818], [869450.4354629300, 6111335.9605027353], [869460.0054647565, 6111318.4942423860], [869467.6098631818, 6111300.1132099945], [869474.3872703945, 6111281.3823799724], [869481.1561426637, 6111262.6484058760], [869487.9247737965, 6111243.9143430982], [869494.6934049188, 6111225.1802803166], [869501.4620360408, 6111206.4462175351], [869528.5365605300, 6111131.5099664088], [869535.3051916484, 6111112.7759036254], [869542.0738215877, 6111094.0418404099], [869548.8424097860, 6111075.3077618424], [869555.6096914066, 6111056.5732031651], [869562.3637241405, 6111037.8338012844], [869569.0888257767, 6111019.0838452056], [869575.8131164722, 6111000.3335951939], [869582.5373705985, 6110981.5833319295], [869589.2616246491, 6110962.8330686372], [869602.7101327500, 6110925.3325420525], [869616.1586408507, 6110887.8320154678], [869622.8828949011, 6110869.0817521764], [869629.6071489516, 6110850.3314888841], [869636.3314030021, 6110831.5812255926], [869643.0556570524, 6110812.8309623003], [869649.7799111030, 6110794.0806990080], [869654.9157968741, 6110779.7595252804]]
+      }, 
+      "properties": {
+        "from": "0x2c131d0", 
+        "id": "0x2bbc7d0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2bb7a00"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874295.9833374241, 6108953.4696863592], [874312.2323811646, 6108964.8661592491], [874328.4814249028, 6108976.2626321428], [874344.7304332871, 6108987.6591561548], [874360.9539502644, 6108999.0924105337], [874376.5895394450, 6109011.2359165400], [874383.2734061305, 6109028.9876333158], [874386.1573208632, 6109048.6240353081], [874388.9692335618, 6109068.2714435263], [874391.7800647350, 6109087.9190128017], [874394.5908926692, 6109107.5665825587], [874397.4016322407, 6109127.2141654687], [874400.2113307968, 6109146.8619032241], [874403.0156464411, 6109166.5104397647], [874405.8058429803, 6109186.1610580925], [874408.5800535551, 6109205.8140093107], [874411.3477035604, 6109225.4679102041], [874419.6489209626, 6109284.4298630292], [874422.4159934248, 6109304.0838473048], [874425.1830646207, 6109323.7378317639], [874427.9239232641, 6109343.3948868979], [874430.1357304940, 6109363.1127164485], [874431.8237406756, 6109382.8563116454], [874431.9218500572, 6109402.5302653462], [874431.0396249031, 6109422.0371303838], [874430.8368435894, 6109426.5621980149]]
+      }, 
+      "properties": {
+        "from": "0x2c16ee0", 
+        "id": "0x2c492e0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x30f3020"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873647.1301739253, 6108329.9205858409], [873665.5702267658, 6108337.5910589453], [873684.0029535010, 6108345.2752092741], [873699.8946297897, 6108357.0261216294], [873713.6995092761, 6108371.4589555049], [873727.4993969450, 6108385.8965506004], [873741.2992282435, 6108400.3341994248], [873755.0990595426, 6108414.7718482483], [873768.8988908411, 6108429.2094970718], [873782.6987221397, 6108443.6471458953], [873796.4985534387, 6108458.0847947188], [873824.0982160359, 6108486.9600923657], [873837.8980473349, 6108501.3977411883], [873851.6978786334, 6108515.8353900127], [873893.0973725296, 6108559.1483364832], [873900.8872922211, 6108567.2983002346]]
+      }, 
+      "properties": {
+        "from": "0x2c1c580", 
+        "id": "0x2c1b790", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2c1ea80"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873901.2953598374, 6108567.2191789262], [873915.1271674340, 6108581.6408135165], [873928.9589750305, 6108596.0624481058], [873942.7907826270, 6108610.4840826960], [873956.6225902234, 6108624.9057172853], [873970.4543978202, 6108639.3273518756], [873984.2862054164, 6108653.7489864659], [874039.6134358023, 6108711.4355248269], [874053.4452433989, 6108725.8571594162], [874067.2770509953, 6108740.2787940064], [874081.1088585921, 6108754.7004285958], [874094.9406661883, 6108769.1220631860], [874108.7724737851, 6108783.5436977763], [874122.6042813814, 6108797.9653323665], [874150.2678965742, 6108826.8086015470], [874177.9315117680, 6108855.6518707257], [874191.7633195492, 6108870.0735051390], [874205.5951892463, 6108884.4950801320], [874219.4389390117, 6108898.9052345846], [874235.5945560851, 6108910.6438185470], [874251.9455407669, 6108922.1294526150], [874268.3003568379, 6108933.6096355096], [874284.6551771696, 6108945.0898122238], [874296.1856049926, 6108953.1835329793]]
+      }, 
+      "properties": {
+        "from": "0x2c1ea80", 
+        "id": "0x2c1f560", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2c16ee0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869360.1623203594, 6105690.6328451615], [869283.6027246779, 6105711.7861194853], [869264.4628257576, 6105717.0744380672], [869245.3229268373, 6105722.3627566472], [869226.1830279169, 6105727.6510752290], [869187.9032300763, 6105738.2277123909], [869168.7633311560, 6105743.5160309728], [869149.6234322353, 6105748.8043495528], [869130.4835333151, 6105754.0926681347], [869111.3436343947, 6105759.3809867157], [869092.2037354747, 6105764.6693052985], [869073.0638365762, 6105769.9576239586], [869053.9239383854, 6105775.2459451854], [869034.7840562314, 6105780.5343245734], [869015.6482191114, 6105785.8369424362], [868996.5963142329, 6105791.3994604722], [868978.4073940732, 6105799.3178537842], [868960.3613192883, 6105807.6028153049], [868942.3156062264, 6105815.8885617908], [868924.2698940929, 6105824.1743102893], [868906.2241819602, 6105832.4600587916], [868888.1784698274, 6105840.7458072919], [868852.0870455620, 6105857.3173042964], [868834.0413334292, 6105865.6030527968], [868797.9499091634, 6105882.1745497994], [868779.9041970214, 6105890.4602982802], [868761.8584846370, 6105898.7460462358], [868743.8127688153, 6105907.0317867324], [868725.7670249800, 6105915.3174664453], [868707.7083032818, 6105923.5743173352], [868689.5429927495, 6105931.5810962375], [868671.1608844292, 6105939.0418255460], [868661.6191102110, 6105942.8581460873]]
+      }, 
+      "properties": {
+        "from": "0x2c220c0", 
+        "id": "0x2d01320", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2dc1220"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874508.5534194887, 6101170.9409269094], [874490.8354539012, 6101180.2162609603], [874455.3995227271, 6101198.7669290621], [874419.9635915525, 6101217.3175971620], [874331.3737636164, 6101263.6942674164], [874313.6557980292, 6101272.9696014673], [874295.9378324419, 6101282.2449355172], [874260.5019012677, 6101300.7956036190], [874242.7839356801, 6101310.0709376689], [874207.3480045059, 6101328.6216057707], [874193.7739068696, 6101335.7276298450]]
+      }, 
+      "properties": {
+        "from": "0x2c23330", 
+        "id": "0x2b9fab0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2ce8df0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870313.6298457319, 6108003.3383747619], [870346.7464772032, 6107981.1098277103], [870363.3047929389, 6107969.9955541864], [870396.4214244103, 6107947.7670071349], [870429.5380558816, 6107925.5384600852], [870446.0963716173, 6107914.4241865594], [870479.2130030887, 6107892.1956395097], [870512.3296345600, 6107869.9670924582], [870528.8879502958, 6107858.8528189342], [870562.0045817671, 6107836.6242718827], [870595.1212132385, 6107814.3957248330], [870611.6795289742, 6107803.2814513072], [870628.2378447091, 6107792.1671777815], [870644.7961517153, 6107781.0528912470], [870661.3537232321, 6107769.9375087731], [870677.7067288838, 6107758.5696399417], [870690.7530455517, 6107743.4942840301], [870703.6418258033, 6107728.2765277401], [870716.4937451666, 6107713.0274968948], [870729.3330064394, 6107697.7678049617], [870742.1715665915, 6107682.5075234137], [870755.0101134854, 6107667.2472307216], [870767.8486602958, 6107651.9869379587], [870780.6872071060, 6107636.7266451959], [870793.5257539167, 6107621.4663524330], [870806.3643007213, 6107606.2060596664], [870819.2028456174, 6107590.9457652941], [870832.0408886309, 6107575.6850491138], [870843.4055575852, 6107559.3812611606], [870852.5594770378, 6107541.6671752930], [870861.6059996455, 6107523.8950461317], [870870.6096200822, 6107506.1008532345], [870879.5867678053, 6107488.2931805030], [870888.5585108175, 6107470.4827672988], [870897.5299047217, 6107452.6721772468], [870906.5012935682, 6107434.8615846327], [870915.4728232300, 6107417.0510633346], [870924.4458732557, 6107399.2413122170], [870933.4312868071, 6107381.4378365697], [870945.3205731459, 6107365.6933611343], [870960.1901914792, 6107352.4222324863], [870975.2020266531, 6107339.3002331406], [870990.2731979231, 6107326.2439620188], [871005.3549305628, 6107313.1995100426], [871020.4372253156, 6107300.1556884134], [871035.5195301702, 6107287.1118781175], [871050.6018354620, 6107274.0680683134], [871065.6841826227, 6107261.0243054852], [871080.7672544766, 6107247.9813558701], [871095.8526458422, 6107234.9410103038], [871110.9441800354, 6107221.9075700920], [871126.5550488008, 6107209.5108253099], [871142.7502245724, 6107197.9846826736], [871147.3847872089, 6107194.7036561463]]
+      }, 
+      "properties": {
+        "from": "0x2c23e10", 
+        "id": "0x2c4be40", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x300f750"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873106.0335707264, 6105124.7445466109], [873090.8000157501, 6105111.8055344997], [873075.5664607738, 6105098.8665223876], [873060.3329057974, 6105085.9275102764], [873045.0993508213, 6105072.9884981643], [873029.8657958448, 6105060.0494860532], [873014.6322408688, 6105047.1104739420], [872999.3986858923, 6105034.1714618299], [872984.1651309161, 6105021.2324497188], [872968.9315759400, 6105008.2934376067], [872953.6980209635, 6104995.3544254955], [872923.2309110111, 6104969.4764012713], [872907.9973560348, 6104956.5373891611], [872892.7638010588, 6104943.5983770490], [872877.5302460821, 6104930.6593649369], [872862.2966911059, 6104917.7203528257], [872847.0631361294, 6104904.7813407145], [872816.5960261771, 6104878.9033164904], [872801.3624712008, 6104865.9643043801], [872786.1289162247, 6104853.0252922680], [872770.8953612482, 6104840.0862801559], [872755.6618062720, 6104827.1472680448], [872740.4282512954, 6104814.2082559336], [872709.9611413432, 6104788.3302317094], [872694.7275863667, 6104775.3912195992], [872679.4940313906, 6104762.4522074871], [872664.2604764141, 6104749.5131953750], [872649.0269214381, 6104736.5741832638], [872633.7933664614, 6104723.6351711527], [872603.3262565093, 6104697.7571469285], [872588.0927015328, 6104684.8181348173], [872572.8572795535, 6104671.8813552028], [872557.2348001064, 6104659.4395764228], [872541.5730038172, 6104647.0503829736], [872524.1491386471, 6104637.5901266001], [872505.7870401661, 6104629.6956380093], [872487.4211460563, 6104621.8098120531], [872469.0552456118, 6104613.9240010483], [872450.6893451673, 6104606.0381900445], [872432.3234447226, 6104598.1523790397], [872413.9575442779, 6104590.2665680367], [872377.2257433890, 6104574.4949460272], [872358.8598429443, 6104566.6091350242], [872340.4939424999, 6104558.7233240195], [872322.0623469576, 6104550.8093053531]]
+      }, 
+      "properties": {
+        "from": "0x2c50940", 
+        "id": "0x2b8a580", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2d60810"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873627.5259674257, 6103467.3242169507], [873628.6439453602, 6103487.2880052589], [873630.8799012292, 6103527.2155818772], [873635.3518129669, 6103607.0707351128], [873636.4697907437, 6103627.0345234303], [873637.5873315994, 6103646.9983357508], [873637.9656567537, 6103666.9611954270], [873636.9225396896, 6103686.9092731867], [873635.0670473083, 6103706.8178332718], [873633.0501033445, 6103726.7107259575], [873631.0326539006, 6103746.6035684403], [873629.0152040718, 6103766.4964108830], [873624.9803044139, 6103806.2820957676], [873618.9279549269, 6103865.9606230929], [873614.8930552690, 6103905.7463079775], [873612.8756054400, 6103925.6391504202], [873608.8407057819, 6103965.4248353038], [873604.8058061241, 6104005.2105201874], [873602.7883562951, 6104025.1033626292], [873600.7709064668, 6104044.9962050728], [873598.7534572529, 6104064.8890475789], [873596.7362572313, 6104084.7819164731], [873594.9166287121, 6104104.6936997045], [873593.4857217090, 6104124.6311683981], [873592.0595810150, 6104144.5689404141], [873590.6334489440, 6104164.5067128297], [873589.2073169092, 6104184.4444852462], [873587.7811848873, 6104204.3822576636], [873586.3550559265, 6104224.3200302217], [873584.9322908684, 6104244.2579576187], [873584.7461392870, 6104264.2418401260], [873584.8740323863, 6104284.2355634440], [873584.9397807332, 6104294.4425248550]]
+      }, 
+      "properties": {
+        "from": "0x2c52ff0", 
+        "id": "0x2c75960", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2ab86c0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869149.4511875464, 6109127.3599452693], [869140.7438813543, 6109109.4728483837], [869132.7313015058, 6109091.3102213144], [869135.1556507429, 6109071.9473734871], [869140.0722389279, 6109052.6615076689], [869145.4402854105, 6109033.4958647648], [869151.5225077352, 6109014.5835621152], [869164.0974724805, 6108999.4292018022], [869178.4695801369, 6108985.6597861219], [869192.8524088755, 6108971.9018258415], [869207.2352376138, 6108958.1438655602], [869221.6180663526, 6108944.3859052788], [869236.0008950908, 6108930.6279449975], [869250.3837238294, 6108916.8699847171], [869307.9150387836, 6108861.8381435918], [869322.2978675221, 6108848.0801833114], [869336.6806962606, 6108834.3222230300], [869351.0635249992, 6108820.5642627496], [869365.4463537503, 6108806.8063024813], [869379.8291832327, 6108793.0483429972], [869394.2120450377, 6108779.2904181071], [869408.5958782919, 6108765.5335339624], [869422.9976863284, 6108751.7961343601], [869437.7112240654, 6108738.4004987013], [869452.8632410078, 6108725.4926179051], [869468.0584082785, 6108712.6360374391], [869478.0519005166, 6108704.1811670447]]
+      }, 
+      "properties": {
+        "from": "0x2c559c0", 
+        "id": "0x2c6b1b0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2c66ac0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869478.0519005166, 6108704.1811670447], [869493.3216778173, 6108691.2676136680], [869508.5914551180, 6108678.3540602904], [869539.1310097193, 6108652.5269535370], [869569.6705643204, 6108626.6998467818], [869584.9403416213, 6108613.7862934060], [869615.4798962227, 6108587.9591866508], [869630.7496735232, 6108575.0456332741], [869661.2892281248, 6108549.2185265208], [869676.5590054177, 6108536.3049731348], [869691.8287769468, 6108523.3914128402], [869707.0967940468, 6108510.4757780433], [869722.2137881458, 6108497.3834335320], [869737.2475220560, 6108484.1971291564], [869752.2812149308, 6108471.0107790586], [869782.3486006409, 6108444.6380788200], [869797.3822934957, 6108431.4517286988], [869812.4159863507, 6108418.2653785795], [869827.4496792061, 6108405.0790284593], [869842.4833720607, 6108391.8926783390], [869887.5844506258, 6108352.3336279783], [869917.6518363359, 6108325.9609277397], [869932.6855291910, 6108312.7745776195], [869977.7866077558, 6108273.2155272588], [869992.8203006110, 6108260.0291771386], [870007.8539934659, 6108246.8428270193], [870022.8876863208, 6108233.6564768991], [870037.9213791760, 6108220.4701267797], [870052.9550720311, 6108207.2837766595], [870067.9887648858, 6108194.0974265393], [870128.1235363060, 6108141.3520260584], [870143.1572291610, 6108128.1656759391], [870158.1909220654, 6108114.9793258738], [870173.2246405634, 6108101.7930043377], [870188.2647822280, 6108088.6141255265], [870204.3165617823, 6108076.7129300358], [870220.9207770689, 6108065.5664651543], [870237.5256380509, 6108054.4209624343], [870254.1305013846, 6108043.2754632179], [870270.7353647186, 6108032.1299640024], [870287.3402280523, 6108020.9844647860], [870303.9450913861, 6108009.8389655706], [870313.6298457319, 6108003.3383747619]]
+      }, 
+      "properties": {
+        "from": "0x2c66ac0", 
+        "id": "0x2c4e840", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2c23e10"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873338.5874853659, 6105613.1186971292], [873338.9235092448, 6105553.4138435591], [873339.0355172043, 6105533.5122257024], [873339.1475251641, 6105513.6106078466], [873339.2595331236, 6105493.7089899899], [873339.3715410833, 6105473.8073721342], [873339.4835490428, 6105453.9057542775], [873339.5955570026, 6105434.0041364208], [873339.7073581144, 6105414.1025181767], [873339.2095982939, 6105394.2982299645], [873335.7533253792, 6105374.9446043205], [873330.5753683089, 6105355.7885451689], [873321.5094384749, 6105338.3794155689], [873312.1934341213, 6105321.0913878102], [873300.6612971222, 6105305.3054332882], [873287.0311575218, 6105290.9413733128], [873273.4010179212, 6105276.5773133384], [873259.7708783210, 6105262.2132533640], [873246.0968915857, 6105247.8833151329], [873232.0027883712, 6105233.9032111261], [873217.6364913550, 6105220.1689936910], [873202.7552694455, 6105206.9613802284], [873187.6160713811, 6105194.0438424591], [873172.4484856841, 6105181.1591728479], [873142.1124221485, 6105155.3908994570], [873126.9443903810, 6105142.5067627616], [873106.0335707264, 6105124.7445466109]]
+      }, 
+      "properties": {
+        "from": "0x2c6fe80", 
+        "id": "0x2ae9d60", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2c50940"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874255.6290817303, 6105806.6698999498], [874268.0831815290, 6105791.7525835112], [874280.0878356309, 6105776.4776370712], [874290.0570680022, 6105759.8888202040], [874299.8670784642, 6105743.2265034486], [874309.2712017210, 6105726.4070418309], [874314.6026166300, 6105707.9118313976], [874318.1212175211, 6105688.8218623213], [874321.2191634290, 6105669.6569817401], [874322.0488547671, 6105650.5845916942], [874319.1696520660, 6105631.9191775005], [874315.8083059501, 6105613.4563732864], [874312.3874969825, 6105595.0215531774], [874308.9650394488, 6105576.5875213780], [874305.5531017466, 6105558.1484690001], [874302.9581228227, 6105539.3838158604], [874301.5031035312, 6105520.2621583715], [874300.8110550696, 6105500.9792344840], [874301.7159378147, 6105481.5948473988], [874306.0264080151, 6105462.8807386803], [874311.1914343943, 6105444.4265570808], [874316.4096230613, 6105425.9970178781], [874321.6308074174, 6105407.5689146686], [874326.8524436108, 6105389.1410284173], [874332.0775823537, 6105370.7148252390], [874337.3267670569, 6105352.3003284065], [874342.8852241882, 6105334.0577742783], [874350.2339623999, 6105316.9077253006], [874352.4319836274, 6105313.2726769811]]
+      }, 
+      "properties": {
+        "from": "0x2c99a00", 
+        "id": "0x2d766a0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2d88580"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874193.7739068696, 6101335.7276298450], [874176.0672260141, 6101344.9969367506], [874158.3605451584, 6101354.2662436552], [874140.6538643076, 6101363.5355505701], [874122.9471888999, 6101372.8048679493], [874105.2439008205, 6101382.0802897504], [874088.8741314294, 6101393.3561676294], [874074.0971260858, 6101406.8112703431], [874059.5145943046, 6101420.4785407120], [874044.9325199466, 6101434.1462956574], [874030.3504461895, 6101447.8140512388], [874015.7683724333, 6101461.4818068212], [874001.1862986786, 6101475.1495624054], [873986.6042254519, 6101488.8173185494], [873972.0222254634, 6101502.4851522557], [873957.4497367842, 6101516.1627661688], [873943.5029058199, 6101530.4185567228], [873932.2446692514, 6101546.9315329790], [873921.0141940836, 6101563.4630638240], [873909.7837845497, 6101579.9946383722], [873898.5533752083, 6101596.5262130480], [873887.3229658667, 6101613.0577877238], [873876.0925565585, 6101629.5893624220], [873864.8621520738, 6101646.1209403323], [873853.6323371376, 6101662.6529103108], [873842.4482912981, 6101679.2131152656], [873833.9980627808, 6101697.2750072237], [873825.7502151777, 6101715.4410775611], [873818.4487909843, 6101734.0456143115], [873811.2487565100, 6101752.6898823567], [873804.0497610751, 6101771.3345505800], [873796.8507731433, 6101789.9792216932], [873789.6517852363, 6101808.6238928158], [873782.4527973293, 6101827.2685639374], [873775.2538094225, 6101845.9132350609], [873768.0548215155, 6101864.5579061834], [873760.8558336087, 6101883.2025773060], [873753.6568457016, 6101901.8472484276], [873746.4578577947, 6101920.4919195501], [873739.2588698878, 6101939.1365906727], [873724.8608940737, 6101976.4259329177], [873717.6619061669, 6101995.0706040394], [873710.4629182599, 6102013.7152751628], [873703.2639303530, 6102032.3599462844], [873696.0649424460, 6102051.0046174079], [873688.8659545390, 6102069.6492885295], [873681.6669666322, 6102088.2939596530], [873674.4679787252, 6102106.9386307746], [873667.2689908184, 6102125.5833018972], [873660.0700029114, 6102144.2279730197], [873652.8710150046, 6102162.8726441422], [873645.6720270975, 6102181.5173152648], [873638.4730399179, 6102200.1619866677], [873631.2741233853, 6102218.8066852707], [873624.0771549849, 6102237.4521327773], [873616.9015555668, 6102256.1057312787], [873609.8409099183, 6102274.8018876277], [873603.8515282010, 6102293.7682691645], [873602.4610712137, 6102313.7054347200], [873601.2157939230, 6102333.6528353617], [873599.9710888707, 6102353.6002716273], [873598.7263995628, 6102373.5477088736], [873596.2370210150, 6102413.4425833691], [873593.7476424675, 6102453.3374578636], [873588.7688853720, 6102533.1272068545], [873587.5241961038, 6102553.0746441036], [873586.2795074866, 6102573.0220813919], [873585.0348572216, 6102592.9695210662], [873583.7913836879, 6102612.9170335885], [873582.5833510984, 6102632.8664095253], [873581.9889556405, 6102652.8256974174], [873583.0327408260, 6102672.7843895452], [873583.9247178849, 6102688.7296980638]]
+      }, 
+      "properties": {
+        "from": "0x2ce8df0", 
+        "id": "0x2a869b0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2dcef70"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871402.9288222387, 6102556.0421192311], [871422.8288679768, 6102556.1351828231], [871442.7289224593, 6102556.2328950623], [871461.5536393241, 6102559.9707909860], [871463.8470230554, 6102579.3052685447], [871467.0850892431, 6102618.9744796492], [871471.9421885246, 6102678.4782963078], [871473.5612216184, 6102698.3129018620], [871475.1802547125, 6102718.1475074142], [871480.0373539939, 6102777.6513240729], [871481.6563870877, 6102797.4859296251], [871483.2754201816, 6102817.3205351774], [871484.8944532759, 6102837.1551407315], [871486.5134864143, 6102856.9897462800], [871488.1325216638, 6102876.8243516479], [871489.7516193485, 6102896.6589516783], [871491.3721523425, 6102916.4934283188], [871493.0254800473, 6102936.3247035118], [871495.1476635112, 6102956.0959511437], [871501.6350474624, 6102974.8992440719], [871508.2935501552, 6102993.6527225012], [871514.9536927505, 6103012.4056277629], [871521.6193884423, 6103031.1565888580], [871528.3168055087, 6103049.8962460160], [871535.3088021608, 6103068.5253240634], [871543.5812037782, 6103086.5104138907], [871556.7288054570, 6103101.4488354158], [871569.9922360694, 6103116.2852734737], [871583.2564807427, 6103131.1209830064], [871609.7849700884, 6103160.7924020737], [871623.0492147617, 6103175.6281116065], [871636.3134594347, 6103190.4638211392], [871662.8419487807, 6103220.1352402065], [871676.1061934538, 6103234.9709497392], [871689.3704381165, 6103249.8066592813], [871702.6346799833, 6103264.6423713267], [871715.8986319758, 6103279.4783428069], [871729.1567261560, 6103294.3195526004], [871741.9620096951, 6103309.5415955875], [871751.0354731376, 6103320.6896651778]]
+      }, 
+      "properties": {
+        "from": "0x2d13830", 
+        "id": "0x2d1b180", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x2d1de70"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871751.0354731376, 6103320.6896651778], [871762.2357042639, 6103337.1427054554], [871771.5891768401, 6103354.8025268391], [871780.8883076237, 6103372.4913002029], [871790.1872680837, 6103390.1801636312], [871799.4862285438, 6103407.8690270614], [871808.7851890038, 6103425.5578904897], [871818.0841494638, 6103443.2467539199], [871827.3831099237, 6103460.9356173491], [871836.6820703840, 6103478.6244807784], [871845.9810308437, 6103496.3133442067], [871855.2799913038, 6103514.0022076368], [871864.5789517639, 6103531.6910710651], [871873.8779122238, 6103549.3799344944], [871883.1768726839, 6103567.0687979236], [871892.4758331438, 6103584.7576613538], [871901.7747936039, 6103602.4465247821], [871911.0737540657, 6103620.1353882104], [871920.3727159491, 6103637.8242508871], [871929.6719459880, 6103655.5129717626], [871939.1624228472, 6103673.0978685748], [871950.9800828820, 6103689.1414045170], [871963.8213549949, 6103704.4532060483], [871976.7569846755, 6103719.6860033255], [871989.6965845763, 6103734.9154327624], [872002.6362006478, 6103750.1448484771], [872015.5758169105, 6103765.3742640279], [872028.5154331734, 6103780.6036795788], [872041.4550494360, 6103795.8330951314], [872054.3946656985, 6103811.0625106823], [872067.3342819614, 6103826.2919262331], [872080.2738982241, 6103841.5213417858], [872093.2135144870, 6103856.7507573366], [872106.1531307497, 6103871.9801728874], [872119.0927470125, 6103887.2095884392], [872132.0323632751, 6103902.4390039910], [872144.9719795380, 6103917.6684195418], [872157.9115958007, 6103932.8978350936], [872170.8512120636, 6103948.1272506453], [872183.7908283259, 6103963.3566661971], [872196.7304445892, 6103978.5860817479], [872209.6700608517, 6103993.8154972997], [872222.6096771143, 6104009.0449128505], [872235.5492933770, 6104024.2743284022], [872248.4889096399, 6104039.5037439540], [872261.4285259028, 6104054.7331595048], [872274.3681421338, 6104069.9625750836], [872287.3077477153, 6104085.1919996999], [872300.2464790532, 6104100.4221662218], [872312.6040234515, 6104116.0825337442], [872322.6047740011, 6104133.3816944901], [872332.3323449807, 6104150.8384052636], [872342.0050046418, 6104168.3252750225], [872351.6734006163, 6104185.8144664047], [872361.3414750309, 6104203.3038326520], [872371.0003033283, 6104220.7982201260], [872376.7095167065, 6104239.7677532565], [872376.8207520557, 6104240.4187616631]]
+      }, 
+      "properties": {
+        "from": "0x2d1de70", 
+        "id": "0x2d28350", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x2d26770"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871555.9346858731, 6104580.4283343703], [871534.8349862748, 6104614.3944630288], [871524.2851364755, 6104631.3775273571], [871513.7352866766, 6104648.3605916854], [871503.1854367396, 6104665.3436559290], [871492.6355537889, 6104682.3266996443], [871482.0830560371, 6104699.3081157599], [871471.4795174124, 6104716.2575648855], [871460.8608115882, 6104733.1974318065], [871450.2419736923, 6104750.1372151189], [871439.6231308541, 6104767.0769953029], [871429.0035736781, 6104784.0163220409], [871418.3145551346, 6104800.9011567049], [871402.1836206876, 6104812.4163153721], [871384.8919356477, 6104822.4523243513], [871367.5998346197, 6104832.4876168082], [871350.3077308962, 6104842.5229046214], [871333.0156271716, 6104852.5581924338], [871315.7235234469, 6104862.5934802443], [871281.1393159978, 6104882.6640558690], [871246.5551085485, 6104902.7346314918], [871229.2630048241, 6104912.7699193042], [871194.6787973747, 6104932.8404949270], [871177.3866936505, 6104942.8757827394], [871160.0945899256, 6104952.9110705508], [871142.8024862012, 6104962.9463583631], [871125.5103824765, 6104972.9816461746], [871108.2182787519, 6104983.0169339869], [871090.9261750274, 6104993.0522217974], [871056.3419675783, 6105013.1227974221], [871021.7577601289, 6105033.1933730450], [871004.4656564043, 6105043.2286608573], [870987.1735526798, 6105053.2639486687], [870969.8814489553, 6105063.2992364811], [870952.5893452307, 6105073.3345242925], [870935.2972415061, 6105083.3698121049], [870918.0051377814, 6105093.4050999153], [870905.7348898925, 6105100.5260072993]]
+      }, 
+      "properties": {
+        "from": "0x2d1e960", 
+        "id": "0x2bd77c0", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2dc24a0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870532.8310221611, 6107242.7018466303], [870516.3391763712, 6107231.3979095323], [870499.8473305081, 6107220.0939725414], [870483.3550841231, 6107208.7906206176], [870464.5845003347, 6107202.0802424736], [870445.4103281567, 6107196.4135780875], [870368.7136322453, 6107173.7469449509], [870349.5394582676, 6107168.0802866658], [870311.1911103120, 6107156.7469700975], [870292.0169363343, 6107151.0803118125], [870196.1460664452, 6107122.7470203917], [870176.9718924675, 6107117.0803621076], [870157.7977184898, 6107111.4137038225], [870138.6235445117, 6107105.7470455393], [870119.4493705340, 6107100.0803872542], [870100.2751965561, 6107094.4137289701], [870081.1010225784, 6107088.7470706850], [870061.9268486004, 6107083.0804124018], [870042.7526746227, 6107077.4137541167], [869927.7076307560, 6107043.4138044119], [869908.5334567782, 6107037.7471461268], [869889.3592828003, 6107032.0804878427], [869870.1851088225, 6107026.4138295576], [869851.0109348448, 6107020.7471712735], [869831.8367608669, 6107015.0805129902], [869812.6625868892, 6107009.4138547052], [869755.1400649559, 6106992.4138798527], [869735.9658909782, 6106986.7472215677], [869716.7917170093, 6106981.0805632528], [869697.6175435190, 6106975.4139033156], [869678.4447612537, 6106969.7425304614], [869659.3615138207, 6106963.7841218412], [869640.5480928270, 6106957.1787984464], [869625.3841968104, 6106944.1475948161], [869610.2536932116, 6106931.0774840992], [869595.1236374935, 6106918.0068542790], [869579.9935846168, 6106904.9362211637], [869564.8635317509, 6106891.8655880364], [869549.7334788846, 6106878.7949549090], [869534.6034260188, 6106865.7243217826], [869519.4733731524, 6106852.6536886552], [869504.3433202861, 6106839.5830555288], [869489.2132674202, 6106826.5124224015], [869474.0832145541, 6106813.4417892750], [869443.8231088218, 6106787.3005230203], [869428.6930559557, 6106774.2298898939], [869398.4329502233, 6106748.0886236392], [869392.2917769870, 6106742.7833531927]]
+      }, 
+      "properties": {
+        "from": "0x2d209d0", 
+        "id": "0x2df8270", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x30be780"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872376.8207520557, 6104240.4187616631], [872379.6336690029, 6104260.2154066926], [872382.4408540337, 6104280.0128885787], [872385.0374118777, 6104299.8373602293], [872384.1297364342, 6104319.6171748545], [872378.9917138419, 6104338.9416913893], [872373.8401292131, 6104358.2625735672], [872368.6880334208, 6104377.5833183546], [872363.5359232896, 6104396.9040592862], [872353.2317026730, 6104435.5455410555], [872348.0795930477, 6104454.8662821241], [872342.9275154455, 6104474.1870317999], [872337.7759511891, 6104493.5079194251], [872332.6547644783, 6104512.8363075126], [872328.1727947401, 6104532.2801191881], [872327.9751566134, 6104540.0659080874]]
+      }, 
+      "properties": {
+        "from": "0x2d26770", 
+        "id": "0x2d283d0", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x2d60810"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[868023.4914942277, 6105496.0277515743], [868032.2925067826, 6105534.8673099345], [868036.6930309769, 6105554.2870850656], [868041.1094783732, 6105573.7032483583], [868053.6382291549, 6105589.0267019663], [868067.3269037572, 6105603.4858137406], [868081.0349367100, 6105617.9279586989], [868094.7430650721, 6105632.3700123783], [868108.4486050212, 6105646.8145424481], [868121.5576394278, 6105661.6785450606], [868128.2046558341, 6105680.3911035191], [868134.2239561575, 6105699.3673080821], [868140.2073714270, 6105718.3563270373], [868146.1901151943, 6105737.3455702160], [868152.1728524548, 6105756.3348155636], [868158.1555896858, 6105775.3240609206], [868164.1383269164, 6105794.3133062795], [868170.1210641471, 6105813.3025516365], [868176.1040724220, 6105832.2917066328], [868182.0977615977, 6105851.2772932500], [868188.7807923785, 6105870.0003577257], [868199.1368570018, 6105886.8528499370], [868210.0916781046, 6105903.3951648111], [868221.0628974440, 6105919.9285897491], [868232.0347312670, 6105936.4616777450], [868245.2321827768, 6105951.2786279619], [868258.9611681614, 6105965.5717968615], [868275.3524180041, 6105976.2063913774], [868293.6663434469, 6105983.9610121688], [868312.0364385659, 6105991.6025752388], [868330.4087146614, 6105999.2394718286], [868348.7810197615, 6106006.8763058446], [868367.1535728541, 6106014.5126047097], [868385.5339154208, 6106022.1320491116], [868404.7601639325, 6106025.5463404562], [868423.9584995362, 6106023.1203517895], [868443.1230519213, 6106017.7173131946], [868462.2745197322, 6106012.2663740953], [868481.4255199841, 6106006.8137945076], [868538.8785069698, 6105990.4560076687], [868558.0295026319, 6105985.0034120549], [868577.1804982938, 6105979.5508164428], [868596.3314939556, 6105974.0982208289], [868656.2671072860, 6105957.0335904527]]
+      }, 
+      "properties": {
+        "from": "0x2d27880", 
+        "id": "0x3249330", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x2dc1220"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872409.6755802413, 6107491.5202089148], [872392.2138450515, 6107492.6592458775], [872377.4368920641, 6107479.7151020672], [872364.2430573765, 6107464.9602637626], [872351.0492650233, 6107450.2053882834], [872337.8554734800, 6107435.4505120926], [872324.6616819429, 6107420.6956358971], [872311.4678904053, 6107405.9407597017], [872298.2740988682, 6107391.1858835062], [872258.6927242565, 6107346.9212549198], [872245.4989327192, 6107332.1663787235], [872232.3051411822, 6107317.4115025289], [872219.1113501088, 6107302.6566259256], [872205.9175845527, 6107287.9017269164], [872192.7241991479, 6107273.1464941241], [872179.5329759589, 6107258.3893636540], [872166.3486731090, 6107243.6261681151], [872153.2054227188, 6107228.8272917978], [872141.7209745232, 6107212.7552784253], [872131.0970137143, 6107196.0696262429], [872120.7623626273, 6107179.1879725326], [872110.4302559983, 6107162.3047850700], [872100.0983279096, 6107145.4214900769], [872089.7664114533, 6107128.5381880775], [872079.4344954131, 6107111.6548858285], [872069.1025793802, 6107094.7715835739], [872048.4387473150, 6107061.0049790666], [872027.7749152501, 6107027.2383745573], [872007.1110831852, 6106993.4717700500], [871996.7791671529, 6106976.5884677954], [871986.4472511283, 6106959.7051655371], [871976.1153352237, 6106942.8218632052], [871965.7834207569, 6106925.9385600081], [871955.4515201047, 6106909.0552484915], [871945.1197109981, 6106892.1718818452], [871934.7848406613, 6106875.2903612964], [871924.3998297560, 6106858.4396284055], [871910.4947309894, 6106846.3177248733], [871903.7011850548, 6106840.8818293661]]
+      }, 
+      "properties": {
+        "from": "0x2d2fad0", 
+        "id": "0x2dac170", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x308bce0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872409.5950254300, 6107491.6633245973], [872427.5579586476, 6107486.2579066856], [872443.5851966334, 6107474.5300994627], [872459.2879331207, 6107462.3867918467], [872474.9878656227, 6107450.2400894184], [872490.6877775111, 6107438.0933620445], [872506.3876892666, 6107425.9466345105], [872522.0876010219, 6107413.7999069747], [872537.7875127773, 6107401.6531794406], [872569.1873362882, 6107377.3597243708], [872584.8872480474, 6107365.2129968414], [872600.5871601151, 6107353.0662696846], [872616.2870852987, 6107340.9195583994], [872632.1643196655, 6107329.0508522950], [872649.4171301373, 6107320.5784790805], [872668.1040550142, 6107325.7099942062], [872686.3351102555, 6107333.3640157171], [872704.0800461316, 6107342.2812396158], [872721.8215701305, 6107351.2054275814], [872739.5630004624, 6107360.1298064841], [872757.3044287098, 6107369.0541896354], [872775.0458304766, 6107377.9786267644], [872792.7864853811, 6107386.9045852553], [872810.3015312321, 6107396.2143659359], [872827.1335533117, 6107406.6313114688], [872843.6360769980, 6107417.4844662175], [872860.1084613681, 6107428.3742140643], [872866.1846291331, 6107432.7288370896]]
+      }, 
+      "properties": {
+        "from": "0x2d2fad0", 
+        "id": "0x2c15240", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2c02970"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872234.1299100403, 6108864.3077587951], [872219.4970221950, 6108850.6740325438], [872204.8641343503, 6108837.0403062925], [872175.5983586600, 6108809.7728537899], [872131.6996951248, 6108768.8716750359], [872102.4339194349, 6108741.6042225333], [872087.8010315897, 6108727.9704962820], [872073.1681437445, 6108714.3367700316], [872058.5352558999, 6108700.7030437794], [872043.9023680545, 6108687.0693175290], [872029.2694802093, 6108673.4355912767], [872014.6365923644, 6108659.8018650254], [871985.3708166741, 6108632.5344125228], [871956.1050409842, 6108605.2669600202], [871941.4721531391, 6108591.6332337689], [871926.8392652939, 6108577.9995075185], [871912.2063774489, 6108564.3657812662], [871897.5734896039, 6108550.7320550159], [871882.9406017587, 6108537.0983287636], [871868.3077139135, 6108523.4646025132], [871853.6748260688, 6108509.8308762610], [871839.0419382235, 6108496.1971500097], [871824.4090503786, 6108482.5634237584], [871791.9862545854, 6108452.3545185290]]
+      }, 
+      "properties": {
+        "from": "0x2d50d30", 
+        "id": "0x2cac030", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x300cac0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873406.6778524499, 6106090.6582349595], [873397.5348299363, 6106051.7566871885], [873383.8202961662, 6105993.4043655321], [873374.6772736526, 6105954.5028177630], [873370.1057623959, 6105935.0520438775], [873365.5342511390, 6105915.6012699921], [873356.3912286256, 6105876.6997222211], [873351.8197173688, 6105857.2489483366], [873342.6766948552, 6105818.3474005656], [873338.1261893648, 6105798.8936028592], [873337.4204209365, 6105778.9579711743], [873337.5221699780, 6105758.9775397992], [873337.6239190197, 6105738.9971084241], [873338.2559555384, 6105614.8842706941]]
+      }, 
+      "properties": {
+        "from": "0x2d52780", 
+        "id": "0x268c050", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2c6fe80"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873404.3241702972, 6106094.1054955469], [873423.3089582231, 6106088.0083993524], [873442.2940246253, 6106081.9121927796], [873461.3210541507, 6106075.9510941040], [873480.4758195563, 6106070.5671300869], [873500.4058585018, 6106069.9879358001], [873520.3376628524, 6106069.4542432157], [873540.2694978274, 6106068.9213912673], [873560.2013332983, 6106068.3885529507], [873580.1331687749, 6106067.8557147812], [873619.9968397277, 6106066.7900384460], [873639.9286752042, 6106066.2572002746], [873659.8605105804, 6106065.7243593503], [873679.7923275064, 6106065.1910183365], [873699.7220073815, 6106064.6217736490], [873718.5445269772, 6106059.0713713057], [873736.5890350905, 6106050.6050765142], [873754.1701584430, 6106041.2173709068], [873771.7289249920, 6106031.7909149965], [873789.2867052727, 6106022.3627594337], [873806.8436038656, 6106012.9330875818], [873824.3173393590, 6106003.3824037518], [873831.2083337193, 6105995.7017427627]]
+      }, 
+      "properties": {
+        "from": "0x2d52780", 
+        "id": "0x2d7ff60", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x3059b70"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874800.8229285926, 6105087.1225692611], [874818.7988268371, 6105078.4141270230], [874837.1843237726, 6105070.6542152995], [874855.7340579377, 6105063.3729217034], [874874.2839446187, 6105056.0921126138], [874892.8338313571, 6105048.8113037087], [874911.3837180960, 6105041.5304948026], [874929.9341086040, 6105034.2513455711], [874949.0518421433, 6105028.5656672623], [874968.3228930965, 6105023.3145226371], [874987.5944754384, 6105018.0652406812], [875006.8663116365, 6105012.8168497607], [875026.1441568756, 6105007.5896254554], [875045.4248903983, 6105002.3726388449], [875064.7057770723, 6104997.1561962655], [875083.9866651190, 6104991.9397585616], [875122.5484412529, 6104981.5068833008], [875161.1102173870, 6104971.0740080383], [875238.2337696552, 6104950.2082575168], [875257.5146577222, 6104944.9918198856], [875276.7955457892, 6104939.7753822552], [875296.0764338598, 6104934.5589446370], [875315.3573223839, 6104929.3425086299], [875334.6382606509, 6104924.1262494642], [875353.9221633892, 6104918.9205795992], [875373.2530231397, 6104913.8912997171], [875392.8526060727, 6104910.3512052149], [875412.6206468916, 6104909.6673084944], [875432.5150576201, 6104911.4607154131], [875452.4039355889, 6104913.3145025261], [875472.2928001699, 6104915.1684309207], [875503.8587859605, 6104918.1108422894]]
+      }, 
+      "properties": {
+        "from": "0x2d53560", 
+        "id": "0x2dbad90", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2d941e0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[867725.0746142315, 6106433.3603250161], [867693.1994462826, 6106457.4986550026], [867661.3242783339, 6106481.6369849890], [867613.5115264114, 6106517.8444799688], [867597.5739424368, 6106529.9136449620], [867581.6363584625, 6106541.9828099543], [867533.8236065394, 6106578.1903049340], [867517.8860225651, 6106590.2594699264], [867501.9484385910, 6106602.3286349196], [867486.0108546165, 6106614.3977999138], [867470.0732706422, 6106626.4669649061], [867454.1356866634, 6106638.5361298937], [867438.1980988698, 6106650.6052897926], [867422.2591111916, 6106662.6725533530], [867405.8634949895, 6106674.0926478868], [867388.8903802590, 6106684.6563933995], [867371.9161996918, 6106695.2184202028], [867354.9420168721, 6106705.7804433722], [867341.4234931290, 6106714.1922156811]]
+      }, 
+      "properties": {
+        "from": "0x2d56380", 
+        "id": "0x2dd9b00", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2da4730"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870059.7252355377, 6105402.5255231094], [870041.4552318132, 6105410.6539294533], [870023.1852280884, 6105418.7823357955], [870004.9152243637, 6105426.9107421394], [869986.6452206390, 6105435.0391484825], [869950.1052131897, 6105451.2959611705], [869931.8352094649, 6105459.4243675135], [869913.5652057403, 6105467.5527738575], [869895.2952020155, 6105475.6811801996], [869858.7551945662, 6105491.9379928876], [869822.2151871169, 6105508.1948055737], [869803.9451833921, 6105516.3232119177], [869785.6751796673, 6105524.4516182607], [869767.4051759429, 6105532.5800246047], [869749.1351722183, 6105540.7084309477], [869730.8651684935, 6105548.8368372917], [869694.3251610440, 6105565.0936499778], [869639.5151498701, 6105589.4788690098], [869621.2451461453, 6105597.6072753519], [869566.4351349715, 6105621.9924943838], [869548.1651312406, 6105630.1209007129], [869529.8951237745, 6105638.2492986545], [869511.6235857783, 6105646.3741507791], [869493.1178790068, 6105653.8953443989], [869473.8439511191, 6105659.2226048801], [869454.5695441447, 6105664.5481283506], [869435.2951359821, 6105669.8736475110], [869360.1623203594, 6105690.6328451615]]
+      }, 
+      "properties": {
+        "from": "0x2d59050", 
+        "id": "0x2cf3ee0", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2c220c0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872323.1832221157, 6104548.0290110717], [872304.9080236605, 6104540.1342952093], [872286.6328252053, 6104532.2395793479], [872268.3576267501, 6104524.3448634855], [872250.0824282952, 6104516.4501476223], [872231.8072298398, 6104508.5554317608], [872140.4312375643, 6104469.0818524491], [872122.1560391084, 6104461.1871365886], [872103.8808405753, 6104453.2924209079], [872085.6056339478, 6104445.3977241023], [872067.3300216688, 6104437.5039733686], [872048.6704057076, 6104430.7301323563], [872029.0658672018, 6104427.2978935242], [872009.3806526819, 6104424.3652982814], [871989.6698801607, 6104421.6523890458], [871969.9418177725, 6104419.1222586501], [871950.2093873171, 6104416.6444187053], [871930.4309496975, 6104415.9902897701], [871910.6027852776, 6104416.8043002822], [871890.7676067200, 6104417.8965393584], [871870.9597597285, 6104419.8174164817], [871851.1933770182, 6104422.1813228112], [871831.4290448122, 6104424.5652997419], [871811.6647469148, 6104426.9495607801], [871772.1361527352, 6104431.7180962227], [871752.3718556458, 6104434.1023639478], [871732.6075585813, 6104436.4866318787], [871712.8432636241, 6104438.8709172457], [871693.0790743559, 6104441.2560767625], [871673.3176731328, 6104443.6640518978], [871653.5965222477, 6104446.3610503534], [871635.7647577818, 6104453.3496760996], [871624.7276150740, 6104469.8849407146], [871614.1487477433, 6104486.7486895602], [871603.6282539662, 6104503.6492998004], [871593.1235821659, 6104520.5597698838], [871582.6191259657, 6104537.4703742713], [871572.1146697758, 6104554.3809786644], [871561.6102135859, 6104571.2915830584], [871555.9346858731, 6104580.4283343703]]
+      }, 
+      "properties": {
+        "from": "0x2d60810", 
+        "id": "0x2bc6550", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2d1e960"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872327.9855421982, 6104540.1223080326], [872345.2709337217, 6104550.1756076375], [872362.5563252453, 6104560.2289072415], [872379.8417167689, 6104570.2822068464], [872414.4124998159, 6104590.3888060544], [872431.6978913293, 6104600.4421056760], [872448.9832813960, 6104610.4954078086], [872466.2685915187, 6104620.5488486756], [872483.5524513840, 6104630.6048054807], [872500.8356579117, 6104640.6618951606], [872518.1186438538, 6104650.7193672359], [872535.3991921558, 6104660.7810626728], [872552.6773592606, 6104670.8468791069], [872569.9553379680, 6104680.9130213950], [872587.2333124443, 6104690.9791710023], [872604.5112868944, 6104701.0453206524], [872621.7892625820, 6104711.1114681643], [872639.0673383505, 6104721.1774424706], [872656.3602907152, 6104731.2125665639], [872675.5862873107, 6104735.7969944682], [872682.6191190621, 6104736.8785735443]]
+      }, 
+      "properties": {
+        "from": "0x2d60810", 
+        "id": "0x2bcee60", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x307e980"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873689.9624549947, 6106588.6970420526], [873678.5600714691, 6106572.2909120601], [873667.1576879441, 6106555.8847820675], [873655.7553044185, 6106539.4786520749], [873632.9505373681, 6106506.6663920898], [873621.5481538423, 6106490.2602620972], [873598.7433867921, 6106457.4480021121], [873587.3410032665, 6106441.0418721195], [873553.1338526909, 6106391.8234821418], [873541.7314691653, 6106375.4173521493], [873530.3290856401, 6106359.0112221567], [873518.9267021148, 6106342.6050921641], [873507.5299102070, 6106326.1951479632], [873496.4714710518, 6106309.5573783815], [873487.8196293573, 6106291.5862108432], [873479.7275048714, 6106273.3189118207], [873463.5442051555, 6106236.7838813663], [873455.4525552976, 6106218.5163661391], [873447.3609054396, 6106200.2488509119], [873439.2692555818, 6106181.9813356847], [873431.1821743596, 6106163.7117863167], [873423.2851315842, 6106145.3609842630], [873416.5916535840, 6106126.5786226178], [873410.6496254189, 6106107.5571964439], [873406.6778524499, 6106090.6582349595]]
+      }, 
+      "properties": {
+        "from": "0x2d72860", 
+        "id": "0x300c830", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2d52780"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870515.9875162574, 6105268.7429942675], [870496.7479782631, 6105274.1863283888], [870477.5084402687, 6105279.6296625109], [870458.2689022743, 6105285.0729966322], [870439.0293642798, 6105290.5163307544], [870419.7898262854, 6105295.9596648756], [870400.5502882909, 6105301.4029989978], [870381.3107502963, 6105306.8463331182], [870362.0712123020, 6105312.2896672413], [870342.8316743076, 6105317.7330013625], [870304.3525983188, 6105328.6196696069], [870285.1130603243, 6105334.0630037282], [870246.6339843355, 6105344.9496719725], [870208.1549083467, 6105355.8363402151], [870188.9153703523, 6105361.2796743372], [870169.6758323577, 6105366.7230084585], [870150.4362943635, 6105372.1663425807], [870131.1967563798, 6105377.6096767411], [870111.9572226694, 6105383.0530260997], [870092.7186663162, 6105388.4998492636], [870074.2318261786, 6105396.0748020299], [870059.7252355377, 6105402.5255231094]]
+      }, 
+      "properties": {
+        "from": "0x2d80e90", 
+        "id": "0x2ce8610", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2d59050"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874346.9092111171, 6105311.6245144103], [874364.1588332371, 6105301.8029624922], [874382.3548416601, 6105293.7354182843], [874400.5808238459, 6105285.7412943561], [874418.8068082675, 6105277.7471759692], [874437.0327927084, 6105269.7530576307], [874473.4847615899, 6105253.7648209520], [874491.7107460275, 6105245.7707026061], [874509.9367303262, 6105237.7765839137], [874528.1627109870, 6105229.7824562062], [874546.3886131116, 6105221.7881338801], [874564.6111395743, 6105213.7855792185], [874582.7540920964, 6105205.6014454551], [874600.3434512891, 6105196.3119831365], [874617.6848474935, 6105186.6197052374], [874635.0145619630, 6105176.9095192365], [874652.3428175997, 6105167.1971030217], [874669.6709541285, 6105157.4845047779], [874686.9990909417, 6105147.7719069682], [874704.3272409935, 6105138.0593293924], [874721.6556611571, 6105128.3471647138], [874738.9928973658, 6105118.6486956850], [874756.4424572326, 6105109.1286485102], [874774.1842020431, 6105100.1088757981], [874792.0734303091, 6105091.3701626761], [874800.8229285926, 6105087.1225692611]]
+      }, 
+      "properties": {
+        "from": "0x2d88580", 
+        "id": "0x2d73b50", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2d53560"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874342.1696254155, 6105309.3689055564], [874333.4410431300, 6105312.8232353767], [874237.1516199996, 6105480.3370143035], [874286.3579569593, 6105593.9182923147], [874319.0560190579, 6105593.9182923147]]
+      }, 
+      "properties": {
+        "from": "0x2d88580", 
+        "id": "0x2bf88a0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2d83b50"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871658.1879303266, 6108050.5948526822], [871729.7849049740, 6108015.2023801841], [871747.6841486362, 6108006.3542620596], [871765.5833922981, 6107997.5061439360], [871783.4826359599, 6107988.6580258114], [871801.3818796217, 6107979.8099076878], [871890.8780979312, 6107935.5693170652], [871908.7773415424, 6107926.7211988382], [871926.6765693985, 6107917.8730483009], [871944.5663174540, 6107909.0085242242], [871961.6294142976, 6107898.7525414573], [871977.7366738217, 6107887.1770150587], [871992.7798716616, 6107874.0474565234], [872007.8178861164, 6107860.9119453849], [872022.8558032052, 6107847.7763225231], [872027.5130645026, 6107843.7082032748]]
+      }, 
+      "properties": {
+        "from": "0x2d8b6f0", 
+        "id": "0x2d8d490", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x3065070"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[875503.8587859605, 6104918.1108422894], [875583.4867818749, 6104925.5338628422], [875603.3937808536, 6104927.3896179814], [875683.0217767681, 6104934.8126385342], [875702.9287757467, 6104936.6683936734], [875722.8357747253, 6104938.5241488107], [875762.6497726826, 6104942.2356590880], [875782.5567716635, 6104944.0914142020], [875802.4637709374, 6104945.9471662240], [875822.3710103352, 6104947.8003812013], [875842.2879401110, 6104949.5446602171], [875862.2289635993, 6104950.9154006969], [875882.1702417019, 6104952.2819398791], [875902.1122182275, 6104953.6328387018], [875922.0611268913, 6104954.7760483455], [875942.0114382866, 6104955.5327945929], [875961.7453144223, 6104952.5209865477], [875981.4484606583, 6104949.1356426682], [875995.2867345754, 6104946.7573847380]]
+      }, 
+      "properties": {
+        "from": "0x2d941e0", 
+        "id": "0x2db6670", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2d963d0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[875995.2867345754, 6104946.7573847380], [876014.8985943410, 6104943.3903082311], [876034.4681876958, 6104939.7773697469], [876054.0301220430, 6104936.1234939080], [876073.5920520963, 6104932.4695953839], [876112.7159120725, 6104925.1617976464], [876132.2778420605, 6104921.5078987759], [876151.8397720486, 6104917.8539999072], [876190.9636320246, 6104910.5462021679], [876210.5255620126, 6104906.8923032992], [876230.0874920005, 6104903.2384044286], [876288.7732819646, 6104892.2767078197], [876308.3352119527, 6104888.6228089500], [876327.8971419407, 6104884.9689100813], [876347.4590719286, 6104881.3150112117], [876367.0210019166, 6104877.6611123411], [876386.5829319046, 6104874.0072134715], [876406.1448618926, 6104870.3533146027], [876425.7067918805, 6104866.6994157322], [876445.2687218686, 6104863.0455168635], [876464.6032792451, 6104859.4340880634]]
+      }, 
+      "properties": {
+        "from": "0x2d963d0", 
+        "id": "0x2dab6a0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2dc5160"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[867341.4234931290, 6106714.1922156811], [867325.0497081944, 6106724.3778689317], [867308.6759232602, 6106734.5635221815], [867292.3021383258, 6106744.7491754321], [867275.9283533912, 6106754.9348286819], [867210.4332136536, 6106795.6774416845], [867194.0594287191, 6106805.8630949333], [867128.5642889815, 6106846.6057079360], [867095.8167191127, 6106866.9770144355], [867046.6953643095, 6106897.5339741874], [867030.3215793751, 6106907.7196274372], [867013.9477944407, 6106917.9052806878], [866997.5740095063, 6106928.0909339376], [866948.9481539902, 6106958.3396580592]]
+      }, 
+      "properties": {
+        "from": "0x2da4730", 
+        "id": "0x2de9db0", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2f57e60"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[868650.0610904788, 6105946.8438745923], [868612.0667839758, 6105958.8455106057], [868574.0724774727, 6105970.8471466210], [868555.0753242214, 6105976.8479646277], [868517.0810177184, 6105988.8496006429], [868498.0838644668, 6105994.8504186496], [868460.0895579639, 6106006.8520546649], [868422.0952514610, 6106018.8536906783], [868384.1009449579, 6106030.8553266935], [868365.1037917067, 6106036.8561447002], [868327.1094852036, 6106048.8577807155], [868308.1123319522, 6106054.8585987221], [868270.1180254491, 6106066.8602347374], [868251.1208721977, 6106072.8610527441], [868232.1237189462, 6106078.8618707517], [868213.1265656947, 6106084.8626887584], [868194.1294183121, 6106090.8635250712], [868175.1328801364, 6106096.8662608303], [868156.1571999247, 6106102.9332124870], [868139.7312441241, 6106114.1143997572], [868123.7117789506, 6106125.9525094591], [868108.1311023207, 6106138.3597850893], [868092.5757596761, 6106150.7997182366], [868061.4650744966, 6106175.6795846634], [868045.9097319068, 6106188.1195178758], [868030.3543893172, 6106200.5594510892], [868014.7981535755, 6106212.9983160533], [867999.2176285834, 6106225.4080050690], [867983.4837337770, 6106237.6277758619], [867967.6116552653, 6106249.6682700031], [867951.7301863588, 6106261.6965344176], [867935.8487174523, 6106273.7247988340], [867919.9672485458, 6106285.7530632485], [867904.0857796394, 6106297.7813276649], [867888.2043107328, 6106309.8095920794], [867872.3228418264, 6106321.8378564948], [867856.4413729197, 6106333.8661209103], [867840.5599040133, 6106345.8943853248], [867824.6784351068, 6106357.9226497412], [867808.7969662003, 6106369.9509141557], [867777.0340283872, 6106394.0074429866], [867761.1525594806, 6106406.0357074011], [867745.2710905743, 6106418.0639718175], [867729.3896216678, 6106430.0922362320], [867725.0746142315, 6106433.3603250161]]
+      }, 
+      "properties": {
+        "from": "0x2dc1220", 
+        "id": "0x2d02bd0", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2d56380"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870905.7348898925, 6105100.5260072993], [870888.4450063165, 6105110.5600017905], [870871.1551227409, 6105120.5939962808], [870853.8652391622, 6105130.6279907674], [870836.5753503236, 6105140.6619761903], [870819.2820828955, 6105150.6896758806], [870801.1837578093, 6105159.1575557254], [870782.8895596589, 6105167.2159791859], [870764.5952331165, 6105175.2741082720], [870746.3009062184, 6105183.3322365424], [870728.0065793197, 6105191.3903648108], [870709.7122524207, 6105199.4484930802], [870691.4179255220, 6105207.5066213487], [870673.1235986005, 6105215.5647495650], [870654.8292659486, 6105223.6228646422], [870636.5324644266, 6105231.6750900419], [870617.9143635379, 6105238.8850990729], [870598.8421166013, 6105244.8519449532], [870579.7326334994, 6105250.7068957500], [870560.4975132133, 6105256.1502660578], [870541.2620325445, 6105261.5923548676], [870522.0265500596, 6105267.0344372196], [870515.9875162574, 6105268.7429942675]]
+      }, 
+      "properties": {
+        "from": "0x2dc24a0", 
+        "id": "0x2cbfd30", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2d80e90"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[876467.5021521703, 6104859.9651348777], [876487.1441795682, 6104856.3269067835], [876526.4282343637, 6104849.0504505932], [876546.0702617613, 6104845.4122224972], [876565.7122891576, 6104841.7739943936], [876585.3543151550, 6104838.1357587762], [876604.9954612765, 6104834.4928022576], [876623.8454629111, 6104828.4789785221], [876640.3172873877, 6104817.1778298113], [876656.7730769669, 6104805.8531381600], [876689.6845030757, 6104783.2035308406], [876706.1402161778, 6104771.8787272498], [876722.5959364718, 6104760.5539341867], [876739.0526347323, 6104749.2305770479], [876755.6758190403, 6104738.2041619327], [876774.7710025022, 6104732.3388821725], [876793.9059851046, 6104726.6031445060], [876813.0423080544, 6104720.8718816321], [876832.1786458006, 6104715.1406681985], [876851.3149845782, 6104709.4094582107], [876870.4514276143, 6104703.6785967294], [876889.5967530063, 6104697.9776695687], [876909.3780608557, 6104695.9954949785], [876929.3541310488, 6104695.9577216292], [876949.3302709043, 6104695.9512914736], [876989.2825511650, 6104695.9393136520], [877009.2586912953, 6104695.9333247403], [877029.2348314256, 6104695.9273358285], [877101.6782222526, 6104695.9056170676]]
+      }, 
+      "properties": {
+        "from": "0x2dc5160", 
+        "id": "0x2dc8ae0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2dc9400"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[877101.6782222526, 6104695.9056170676], [877161.6648747486, 6104695.8875395376], [877181.6604255806, 6104695.8815136952], [877221.6515272446, 6104695.8694620077], [877241.6470780743, 6104695.8634325806], [877261.6425804179, 6104695.8545473069], [877281.5866346266, 6104694.8435243573], [877301.3530752801, 6104691.8252597470], [877321.1194592612, 6104688.8066247012], [877340.8858432423, 6104685.7879896536], [877360.6522272235, 6104682.7693546079], [877380.4186112047, 6104679.7507195603], [877479.2505311102, 6104664.6575443270], [877499.0169150913, 6104661.6389092803], [877518.7832990724, 6104658.6202742327], [877617.6152189779, 6104643.5270989994], [877676.9143709213, 6104634.4711938594], [877696.6807549024, 6104631.4525588118], [877701.2858735032, 6104630.7492853962]]
+      }, 
+      "properties": {
+        "from": "0x2dc9400", 
+        "id": "0x2ddc7f0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2b9dcc0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873583.9247178849, 6102688.7296980638], [873585.0429558039, 6102708.6982522644], [873586.1611937231, 6102728.6668064632], [873587.2794316423, 6102748.6353606638], [873588.3976695612, 6102768.6039148634], [873590.6341453996, 6102808.5410232628], [873591.7523833186, 6102828.5095774624], [873596.2253349952, 6102908.3837942611], [873597.3435729143, 6102928.3523484617], [873600.6982866715, 6102988.2580110598], [873601.8165245906, 6103008.2265652604], [873602.9347625098, 6103028.1951194592], [873605.1712383480, 6103068.1322278595], [873606.2894762672, 6103088.1007820591], [873608.5259521054, 6103128.0378904585], [873609.6441900245, 6103148.0064446591], [873611.8806658628, 6103187.9435530575], [873614.1171417010, 6103227.8806614578], [873615.2353796200, 6103247.8492156565], [873617.4718554583, 6103287.7863240568], [873618.5900933775, 6103307.7548782565], [873620.8265692156, 6103347.6919866558], [873621.9448071348, 6103367.6605408555], [873624.1812829729, 6103407.5976492548], [873626.4177588113, 6103447.5347576551], [873627.5259674257, 6103467.3242169507]]
+      }, 
+      "properties": {
+        "from": "0x2dcef70", 
+        "id": "0x2c67ea0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2c52ff0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873390.9469132139, 6108109.3728132863], [873416.0714738369, 6108140.3522148132], [873428.6337541486, 6108155.8419155777], [873441.1960344603, 6108171.3316163411], [873453.7583147718, 6108186.8213171046], [873466.3205950834, 6108202.3110178690], [873478.8828753950, 6108217.8007186325], [873491.4451557093, 6108233.2904193942], [873504.0074373730, 6108248.7801190633], [873516.5700438756, 6108264.2695558537], [873529.1688617982, 6108279.7295376863], [873547.0576502688, 6108288.2586501800], [873565.4595716223, 6108295.9450987102], [873583.8730068385, 6108303.6052236650], [873602.2864508205, 6108311.2653272469], [873647.1301739253, 6108329.9205858409]]
+      }, 
+      "properties": {
+        "from": "0x2dd0530", 
+        "id": "0x2c11c50", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2c1c580"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874074.4177175929, 6106525.4683929253], [873885.3506642688, 6106561.3924812097], [873866.4439589364, 6106564.9848900381], [873847.5372536040, 6106568.5772988675], [873828.6305482716, 6106572.1697076960], [873809.7238429391, 6106575.7621165235], [873771.9104322743, 6106582.9469341822], [873753.0037269420, 6106586.5393430106], [873734.0970216095, 6106590.1317518381], [873715.1903162771, 6106593.7241606675], [873696.7909876654, 6106592.1669176854], [873689.9624549947, 6106588.6970420526]]
+      }, 
+      "properties": {
+        "from": "0x2fe5990", 
+        "id": "0x2f63480", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x2d72860"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871792.7200126379, 6108451.5872836225], [871763.9343065671, 6108424.6308807842], [871735.1486004966, 6108397.6744779460], [871562.4343640725, 6108235.9360609166], [871548.0415111782, 6108222.4578593466], [871533.6486667464, 6108208.9796487857], [871519.2562065764, 6108195.5010299217], [871504.8792588275, 6108182.0060026124], [871491.9429094309, 6108167.4747948973], [871499.4385374340, 6108151.5018550046], [871511.7259736620, 6108136.0862563215], [871524.1655324476, 6108120.8012159141], [871539.9756507915, 6108109.5503021237], [871557.4374330060, 6108100.4170627436], [871575.1104872476, 6108091.6722886749], [871592.7860192291, 6108082.9325894527], [871658.1879303266, 6108050.5948526822]]
+      }, 
+      "properties": {
+        "from": "0x300cac0", 
+        "id": "0x2f598b0", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x2d8b6f0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871149.8938535873, 6107195.4983817153], [871132.3229108658, 6107204.6274480391], [871116.9583469046, 6107217.0433404129], [871102.1823673926, 6107230.2803506255], [871087.4078972731, 6107243.5190877281], [871072.6334889536, 6107256.7578955190], [871057.8590994908, 6107269.9967248775], [871043.0847583660, 6107283.2356095258], [871028.3104871619, 6107296.4745741459], [871013.5363918163, 6107309.7137398999], [870998.7631729796, 6107322.9539079731], [870983.9921179583, 6107336.1965492647], [870969.2232013552, 6107349.4416331202], [870954.4554135050, 6107362.6880056262], [870939.6879627374, 6107375.9347628783], [870924.9204401651, 6107389.1814381778], [870910.1515442007, 6107402.4265456041], [870895.3750419677, 6107415.6629572380], [870880.5769111000, 6107428.8745273184], [870865.6469915396, 6107441.9308976233], [870850.2257039475, 6107454.3426040597], [870832.5526462927, 6107447.4109850833], [870815.7292196687, 6107436.9348755199], [870799.2369083397, 6107425.9104453176], [870782.9535439510, 6107414.5772682875], [870766.7180793041, 6107403.1768207029], [870750.4861422244, 6107391.7714677192], [870734.2542426316, 6107380.3660626430], [870701.7904460153, 6107357.5552489199], [870685.5585477073, 6107346.1498420592], [870653.0947510912, 6107323.3390283342], [870604.3990561672, 6107289.1228077495], [870588.1671578593, 6107277.7174008880], [870571.9352595509, 6107266.3119940255], [870555.7033612428, 6107254.9065871648], [870539.4714629347, 6107243.5011803024], [870534.4860810456, 6107239.9981822101]]
+      }, 
+      "properties": {
+        "from": "0x300f750", 
+        "id": "0x2da5250", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2d209d0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871149.6529343935, 6107195.8427484687], [871167.8252189839, 6107187.5104582254], [871186.0697079253, 6107179.3341371380], [871204.3306755470, 6107171.1944257133], [871222.5917959533, 6107163.0550555671], [871240.8530033506, 6107154.9158797506], [871259.1142107870, 6107146.7767040227], [871277.3754182234, 6107138.6375282938], [871295.6366256597, 6107130.4983525639], [871313.8978330961, 6107122.3591768350], [871332.1590405324, 6107114.2200011071], [871368.6814554054, 6107097.9416496493], [871386.9426628416, 6107089.8024739213], [871405.2038702779, 6107081.6632981915], [871423.4650777143, 6107073.5241224635], [871459.9874925872, 6107057.2457710057], [871478.2487000236, 6107049.1065952778], [871496.5099074598, 6107040.9674195480], [871533.0323223327, 6107024.6890680902], [871551.2935297682, 6107016.5498923603], [871569.5547367649, 6107008.4107156489], [871587.8158493016, 6107000.2713279240], [871605.3740181671, 6106990.7170415306], [871622.8823805121, 6106981.0663364856], [871640.3906048008, 6106971.4153751200], [871657.8663884588, 6106961.7046330608], [871675.2816953290, 6106951.8849618454], [871692.6953957691, 6106942.0624403106], [871710.1090890297, 6106932.2399060428], [871744.9364754371, 6106912.5948373042], [871762.3501686407, 6106902.7723029340], [871797.1775550480, 6106883.1272341954], [871814.5912482517, 6106873.3046998270], [871832.0049414556, 6106863.4821654577], [871849.4186346610, 6106853.6596310912], [871866.8323278765, 6106843.8370967424], [871884.2460211215, 6106834.0145624466], [871901.6597143975, 6106824.1920282058], [871904.6922122190, 6106822.4814885072]]
+      }, 
+      "properties": {
+        "from": "0x300f750", 
+        "id": "0x2dee8d0", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x308bce0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873694.8619063011, 6105503.3739493163], [873697.7634047612, 6105523.0760178780], [873703.5664016810, 6105562.4801550023], [873709.3693986009, 6105601.8842921257], [873712.2708970611, 6105621.5863606874], [873715.1723955210, 6105641.2884292491], [873720.9753924409, 6105680.6925663725], [873723.8768909011, 6105700.3946349341], [873726.7783893889, 6105720.0967034921], [873729.6798900091, 6105739.7987717651], [873732.5815745557, 6105759.5008154158], [873735.4907782476, 6105779.2018493768], [873739.7426900587, 6105798.6221067617], [873744.4757355039, 6105817.8987623844], [873752.4618915152, 6105836.0932005905], [873761.1914013829, 6105853.9931189716], [873769.9379707787, 6105871.8853619583], [873778.6845677487, 6105889.7775917277], [873787.4311686057, 6105907.6698196325], [873796.1777681686, 6105925.5620481595], [873804.9243549719, 6105943.4542828016], [873813.6708859639, 6105961.3465441959], [873822.4172897604, 6105979.2388665564], [873830.2459709551, 6105995.2541017029]]
+      }, 
+      "properties": {
+        "from": "0x3055a50", 
+        "id": "0x2d5b590", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x3059b70"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873859.5858720121, 6106033.7308210749], [873870.6355838478, 6106049.2950942582], [873881.4666600956, 6106065.0195243722], [873892.2910901508, 6106080.7486793157], [873903.1154903813, 6106096.4778554440], [873913.9398906117, 6106112.2070315713], [873924.7642908419, 6106127.9362076987], [873935.5886910721, 6106143.6653838269], [873957.2374915327, 6106175.1237360816], [873968.0618917630, 6106190.8529122099], [873978.8862919933, 6106206.5820883373], [873989.7106922235, 6106222.3112644646], [874000.5350924539, 6106238.0404405929], [874022.1838929146, 6106269.4987928476], [874033.0082931448, 6106285.2279689759], [874043.8326933749, 6106300.9571451033], [874054.6570936055, 6106316.6863212306], [874065.4814938357, 6106332.4154973589], [874087.1302942962, 6106363.8738496136], [874097.9546945266, 6106379.6030257419], [874119.6034949871, 6106411.0613779966], [874130.4278914891, 6106426.7905567726], [874141.2522227813, 6106442.5197818633], [874152.0760611452, 6106458.2493570205], [874162.8720911341, 6106473.9985531997], [874168.8383014072, 6106490.5947870947], [874169.2393549919, 6106504.2034742311]]
+      }, 
+      "properties": {
+        "from": "0x3059b70", 
+        "id": "0x2db8110", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x2fe5990"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873860.2625416871, 6105970.8846031278], [873877.5172754769, 6105963.3164647510], [873894.7720098757, 6105955.7483274695], [873912.0269702795, 6105948.1805967744], [873929.3209188557, 6105940.6920117438], [873947.0808474094, 6105934.1814687299], [873965.1375574452, 6105928.4790087491], [873983.1947837167, 6105922.7781931777], [874001.2520119241, 6105917.0773837762], [874019.3092401321, 6105911.3765743766], [874037.3664683400, 6105905.6757649761], [874109.5953811724, 6105882.8725273777], [874145.7098375882, 6105871.4709085766], [874163.7670657795, 6105865.7700991239], [874181.8242878765, 6105860.0692702513], [874199.8786716409, 6105854.3594405279], [874216.2210183877, 6105845.6531981826], [874230.0227243388, 6105832.7909088396], [874242.8600602355, 6105818.8900702111], [874254.8764808963, 6105805.7204768602]]
+      }, 
+      "properties": {
+        "from": "0x3059b70", 
+        "id": "0x2d68970", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x2c99a00"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872027.5130645026, 6107843.7082032748], [872057.1553120556, 6107817.8168428112], [872101.6186833854, 6107778.9798021186], [872131.2609309384, 6107753.0884416550], [872160.9031784914, 6107727.1970811933], [872175.7243022681, 6107714.2514009625], [872190.5454260444, 6107701.3057207307], [872205.3665498212, 6107688.3600404989], [872235.0087973744, 6107662.4686800372], [872249.8299211508, 6107649.5229998054], [872264.6510449273, 6107636.5773195745], [872279.4721687038, 6107623.6316393428], [872323.9355400337, 6107584.7945986502], [872338.7566540097, 6107571.8489071727], [872353.5771192695, 6107558.9024715936], [872368.3078034963, 6107545.8579593869], [872380.6192875679, 6107531.6543577360], [872381.6041998528, 6107514.8610233143], [872379.5996263248, 6107510.6552153900]]
+      }, 
+      "properties": {
+        "from": "0x3065070", 
+        "id": "0x2b719f0", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x2d2fad0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872307.4835659920, 6106564.1145392349], [872324.0733675158, 6106552.9601137973], [872340.6631690399, 6106541.8056883626], [872357.2529705635, 6106530.6512629241], [872373.8427720875, 6106519.4968374874], [872390.4325736114, 6106508.3424120517], [872407.0223751352, 6106497.1879866142], [872423.6121766593, 6106486.0335611785], [872440.2019781831, 6106474.8791357419], [872456.7917797070, 6106463.7247103043], [872473.3815812310, 6106452.5702848686], [872489.9713827547, 6106441.4158594310], [872572.9203903743, 6106385.6437322479], [872589.5101919225, 6106374.4893068485], [872606.1000008869, 6106363.3348926455], [872622.6909311074, 6106352.1821717853], [872640.2100460662, 6106342.8544091405], [872658.3282409743, 6106334.6959352838], [872677.0808468038, 6106327.8133268878], [872696.0700045347, 6106321.5635330118], [872715.1037458838, 6106315.4498876808], [872734.1377501814, 6106309.3370510368], [872753.1717549346, 6106303.2242158223], [872793.0556237563, 6106290.4153760318]]
+      }, 
+      "properties": {
+        "from": "0x307a2e0", 
+        "id": "0x2af09a0", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x30c6000"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872682.7453455116, 6104735.9758419953], [872702.6498175086, 6104737.5215551732], [872722.5542895058, 6104739.0672683530], [872762.3632334999, 6104742.1586947106], [872782.2677054883, 6104743.7044079872], [872802.1721756742, 6104745.2501412844], [872822.0764558103, 6104746.7979832068], [872841.6306561204, 6104750.7765865820], [872861.1361451001, 6104755.0389055787], [872880.6414743802, 6104759.3019733308], [872900.1468008652, 6104763.5650541028], [872919.6521273030, 6104767.8281350955], [872958.6627801773, 6104776.3542970866], [872978.1681066141, 6104780.6173780840], [872997.6734330512, 6104784.8804590786], [873017.1787594883, 6104789.1435400741], [873036.6840859252, 6104793.4066210706], [873056.1894123624, 6104797.6697020661], [873095.2000652364, 6104806.1958640590], [873114.7053916735, 6104810.4589450546], [873134.2107181104, 6104814.7220260510], [873153.7160445475, 6104818.9851070466], [873173.2213709846, 6104823.2481880412], [873192.7266974216, 6104827.5112690385], [873231.7373502958, 6104836.0374310296], [873251.2426767326, 6104840.3005120261], [873270.7480031699, 6104844.5635930216], [873290.2533296070, 6104848.8266740181], [873329.2639824809, 6104857.3528360091], [873348.7693089179, 6104861.6159170056], [873368.2746353007, 6104865.8789982535], [873387.7799518516, 6104870.1421253029], [873407.2850392412, 6104874.4063195670], [873426.7718204914, 6104878.7539741639], [873446.1175576422, 6104883.6203991640], [873463.9076853510, 6104892.6765914783], [873481.6595242081, 6104901.8148050252], [873499.4084422991, 6104910.9587275172], [873517.1570724901, 6104920.1032117000], [873534.9056825715, 6104929.2477351110], [873552.6542735335, 6104938.3922958160], [873570.4011303992, 6104947.5402374836], [873588.1303350474, 6104956.7224139031], [873604.8818441723, 6104967.0314853331], [873608.7734824801, 6104986.5916172508], [873612.0106134783, 6105006.2932141470], [873615.1908315998, 6105026.0042041866], [873618.3452637480, 6105045.7193386974], [873621.4954426576, 6105065.4351501483], [873622.5845940816, 6105072.2518353518]]
+      }, 
+      "properties": {
+        "from": "0x307e980", 
+        "id": "0x2d9e940", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x308f450"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[867856.9304338030, 6104921.3233964890], [867869.3803592012, 6104936.6900579249], [867881.8301251805, 6104952.0568290502], [867894.2720134428, 6104967.4289850816], [867906.4759356345, 6104982.9315945441], [867911.5340509239, 6105001.9982324746], [867915.9183952594, 6105021.3442210983], [867920.3023535314, 6105040.6902969647], [867929.0702700752, 6105079.3824486993], [867933.4542283472, 6105098.7285245657], [867942.2221448908, 6105137.4206762994], [867950.9900614347, 6105176.1128280330], [867959.7579779786, 6105214.8049797658], [867968.5258945226, 6105253.4971315004], [867977.2938110663, 6105292.1892832331], [867981.6777693382, 6105311.5353591004], [867986.0617276102, 6105330.8814349677], [867994.8296441539, 6105369.5735867005], [868003.5975606978, 6105408.2657384342], [868007.9815189698, 6105427.6118143015], [868016.7494355135, 6105466.3039660342], [868023.4854031911, 6105496.0292812958]]
+      }, 
+      "properties": {
+        "from": "0x3088fd0", 
+        "id": "0x2d979a0", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x2d27880"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871904.6866802878, 6106821.9074084312], [871921.9859961062, 6106811.9023756022], [871939.2889291502, 6106801.9034520667], [871956.5975715956, 6106791.9141916055], [871973.9062927749, 6106781.9250645731], [871991.2150144933, 6106771.9359384542], [872008.5237361216, 6106761.9468121827], [872025.8323744477, 6106751.9575447589], [872043.0765402131, 6106741.8627586002], [872059.6730912919, 6106730.7299081115], [872076.2595541677, 6106719.5817839624], [872092.8443319227, 6106708.4311144445], [872109.4290213492, 6106697.2803115528], [872126.0137084043, 6106686.1295050802], [872142.5983877052, 6106674.9786868999], [872159.1830090932, 6106663.8277812749], [872175.7675877484, 6106652.6768111289], [872192.3521441100, 6106641.5258073229], [872208.9366981146, 6106630.3747999575], [872225.5212520151, 6106619.2237924347], [872242.1058059135, 6106608.0727849090], [872258.6903598118, 6106596.9217773825], [872275.2749137103, 6106585.7707698569], [872307.4835659920, 6106564.1145392349]]
+      }, 
+      "properties": {
+        "from": "0x308bce0", 
+        "id": "0x2fc8b80", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x307a2e0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873631.1862505728, 6105071.1933030169], [873637.0138777228, 6105110.7466814350], [873642.8415048728, 6105150.3000598531], [873645.7553184479, 6105170.0767490622], [873651.5829455978, 6105209.6301274803], [873657.4105727479, 6105249.1835058983], [873660.3243863229, 6105268.9601951074], [873663.2381998980, 6105288.7368843155], [873666.1520134730, 6105308.5135735255], [873669.0658270479, 6105328.2902627336], [873671.9796406229, 6105348.0669519436], [873674.8934541980, 6105367.8436411517], [873683.6348949228, 6105427.1737087788], [873689.4625220730, 6105466.7270871969], [873692.3763356481, 6105486.5037764059], [873694.8608821372, 6105503.3669361370]]
+      }, 
+      "properties": {
+        "from": "0x308f450", 
+        "id": "0x2daded0", 
+        "lines": [
+          {
+            "color": "008bc5", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x3055a50"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[875009.7761966678, 6111231.4531040303], [875008.8335962307, 6111211.4949004296], [875007.8909957933, 6111191.5366968289], [875006.9483953561, 6111171.5784932282], [875004.1205940442, 6111111.7038824279], [875001.2927927326, 6111051.8292716267], [875000.3501922952, 6111031.8710680269], [874999.4075918412, 6111011.9128644271], [874998.4649857671, 6110991.9546611030], [874997.5206058663, 6110971.9965448398], [874994.5916066968, 6110952.4099345710], [874983.6326020653, 6110935.7030955404], [874972.6254102676, 6110919.0279383454], [874961.6170181127, 6110902.3535755146], [874950.6085066526, 6110885.6792916507], [874939.5999887178, 6110869.0050120726], [874928.5914706045, 6110852.3307326119], [874917.5829524889, 6110835.6564531531], [874895.5659162572, 6110802.3078942355], [874884.5573981421, 6110785.6336147767], [874873.5488800263, 6110768.9593353178], [874862.5403619126, 6110752.2850558572], [874851.5318439953, 6110735.6107762679], [874840.5233536456, 6110718.9364784341], [874829.5202702532, 6110702.2587225335], [874818.9897600566, 6110685.2877635155], [874809.3780768391, 6110667.8419073652], [874799.7947530735, 6110650.3832826056], [874792.7340821605, 6110631.7610256812], [874786.3771657868, 6110612.8372253980], [874780.5453425447, 6110593.7286760500], [874774.7457314427, 6110574.6098765619], [874768.9462474659, 6110555.4910368659], [874767.1076895923, 6110549.4299642779]]
+      }, 
+      "properties": {
+        "from": "0x30b1090", 
+        "id": "0x2bf7e10", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x3139670"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869392.2917769870, 6106742.7833531927], [869377.1647980408, 6106729.7153759282], [869362.0378190945, 6106716.6473986646], [869286.4029243618, 6106651.3075123467], [869271.2759454157, 6106638.2395350821], [869256.1489664692, 6106625.1715578195], [869241.0219875227, 6106612.1035805549], [869225.8950085761, 6106599.0356032923], [869210.7680296304, 6106585.9676260278], [869195.6410508491, 6106572.8996485723], [869180.5141070941, 6106559.8316305317], [869165.3942490341, 6106546.7557403259], [869152.5737295693, 6106531.4943743628], [869140.8346196697, 6106515.3145348597], [869129.1024193030, 6106499.1296543200], [869117.3702644032, 6106482.9447406400], [869105.6381098344, 6106466.7598267170], [869093.9059552674, 6106450.5749127939], [869087.6831090486, 6106441.9902807176]]
+      }, 
+      "properties": {
+        "from": "0x30be780", 
+        "id": "0x312d390", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x32576b0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872793.0556237563, 6106290.4153760318], [872850.1812583217, 6106272.0693519749], [872869.2231365100, 6106265.9540106216], [872888.2650146985, 6106259.8386692693], [872907.3068928871, 6106253.7233279161], [872926.3487710755, 6106247.6079865638], [872945.3906492637, 6106241.4926452106], [872964.4325274524, 6106235.3773038592], [872983.4744056407, 6106229.2619625051], [873078.6837965830, 6106198.6852557436], [873116.7675529600, 6106186.4545730371], [873154.8513093367, 6106174.2238903325], [873192.9350657137, 6106161.9932076260], [873211.9769439022, 6106155.8778662747], [873231.0188220905, 6106149.7625249214], [873269.1025784675, 6106137.5318422168], [873288.1444566557, 6106131.4165008627], [873307.1863348442, 6106125.3011595104], [873326.2282130328, 6106119.1858181590], [873345.2700912212, 6106113.0704768058], [873383.3538475980, 6106100.8397941012], [873402.3957257865, 6106094.7244527470], [873404.3177999719, 6106094.1071743667]]
+      }, 
+      "properties": {
+        "from": "0x30c6000", 
+        "id": "0x2dc6c00", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2d52780"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870792.5698585121, 6102749.3683714997], [870811.2243581704, 6102742.2052418590], [870848.5333574875, 6102727.8789825793], [870867.1878571459, 6102720.7158529386], [870923.1513561213, 6102699.2264640192], [870941.8058557797, 6102692.0633343784], [870979.1148550967, 6102677.7370750988], [871016.4238544132, 6102663.4108158173], [871072.3873533888, 6102641.9214268979], [871091.0418530472, 6102634.7582972571], [871128.3508523642, 6102620.4320379775], [871147.0053520224, 6102613.2689083368], [871184.3143513394, 6102598.9426490571], [871202.9688509977, 6102591.7795194164], [871240.2778503157, 6102577.4532601386], [871258.9323504320, 6102570.2901316956], [871277.5869251305, 6102563.1271981047], [871296.2476395149, 6102555.9803472329], [871316.1938714597, 6102555.6458292706], [871336.1757144963, 6102555.7353269849], [871356.1575629916, 6102555.8271579882], [871376.1394114997, 6102555.9189947862], [871396.1212600081, 6102556.0108315963], [871402.9288222387, 6102556.0421192311]]
+      }, 
+      "properties": {
+        "from": "0x30c9c80", 
+        "id": "0x2d17020", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x2d13830"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874619.3104427180, 6110048.9499010816], [874613.7866378250, 6110029.8127224538], [874608.2628329322, 6110010.6755438251], [874602.7390280392, 6109991.5383651964], [874597.2152231461, 6109972.4011865687], [874591.6914182534, 6109953.2640079400], [874586.1676133603, 6109934.1268293113], [874580.6438084674, 6109914.9896506835], [874575.1200035744, 6109895.8524720548], [874569.5961986815, 6109876.7152934261], [874564.0723937887, 6109857.5781147983], [874558.5485888957, 6109838.4409361687], [874553.0247840027, 6109819.3037575409], [874541.9771742169, 6109781.0294002835], [874536.4533693241, 6109761.8922216557], [874530.9295644311, 6109742.7550430261], [874525.4057595381, 6109723.6178643983], [874514.3581497523, 6109685.3435071409], [874503.3105399662, 6109647.0691498844], [874497.7867350734, 6109627.9319712557], [874492.2629301804, 6109608.7947926279], [874486.7391252876, 6109589.6576139992], [874481.2153203945, 6109570.5204353705], [874475.6915155023, 6109551.3832567427], [874470.1677106527, 6109532.2460781019], [874464.6439122437, 6109513.1088976134], [874459.1203626904, 6109493.9716457687], [874453.6041923990, 6109474.8322814330], [874448.2438371234, 6109455.6498691197], [874443.1439971495, 6109436.4015191123], [874439.8505051925, 6109423.7265435345]]
+      }, 
+      "properties": {
+        "from": "0x30d3b80", 
+        "id": "0x2cd9120", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x30f3020"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874440.5236244975, 6109421.8642491922], [874435.2325334387, 6109402.5853987029], [874431.6892998589, 6109382.9122771155], [874428.2912421558, 6109363.2091693655], [874424.8934781974, 6109343.5060106348], [874418.0979502806, 6109304.0996931754], [874414.7001863223, 6109284.3965344448], [874411.3024223640, 6109264.6933757160], [874407.9046584056, 6109244.9902169853], [874401.1091304888, 6109205.5838995259], [874397.7113665305, 6109185.8807407953], [874390.9158386136, 6109146.4744233359], [874387.5180746554, 6109126.7712646052], [874384.1203106970, 6109107.0681058764], [874377.3247827803, 6109067.6617884152], [874373.9270188218, 6109047.9586296864], [874370.5292548635, 6109028.2554709557], [874363.7337269468, 6108988.8491534963], [874360.3359629887, 6108969.1459947657], [874356.9381992171, 6108949.4428360034], [874353.5404527935, 6108929.7396742310], [874350.1448407584, 6108910.0361486319], [874346.8539263266, 6108890.3173922617], [874345.9288416873, 6108870.6352257505], [874354.5834698293, 6108852.6137469625], [874363.4361414686, 6108834.6865488123], [874372.0280417972, 6108816.6575721884], [874375.3100830179, 6108797.2182200020], [874375.1420624296, 6108777.2249787264], [874374.6455344787, 6108737.2402129956], [874374.1490065278, 6108697.2554472629], [874374.0933679368, 6108692.7749421280]]
+      }, 
+      "properties": {
+        "from": "0x30f3020", 
+        "id": "0x2caf010", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x3157e50"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874371.1256731325, 6107369.6242665639], [874368.3161306103, 6107349.9086504653], [874365.5065880882, 6107330.1930343658], [874359.8875030439, 6107290.7618021667], [874354.2684179996, 6107251.3305699695], [874351.4588752049, 6107231.6149539100], [874348.6488818807, 6107211.8994042389], [874345.4940919137, 6107192.2443001503], [874340.7641973037, 6107172.9001881089], [874336.0074552688, 6107153.5616451409], [874331.2506611939, 6107134.2231150940], [874326.4938669793, 6107114.8845850807], [874321.7370727642, 6107095.5460550692], [874316.9802785493, 6107076.2075250568], [874307.4666901194, 6107037.5304650329], [874302.7098959043, 6107018.1919350196], [874293.1963074743, 6106979.5148749948], [874288.4395132593, 6106960.1763449833], [874283.6827190444, 6106940.8378149709], [874278.9259248294, 6106921.4992849585], [874274.1691306145, 6106902.1607549451], [874264.6555421845, 6106863.4836949212], [874255.1419537546, 6106824.8066348964], [874245.6283653246, 6106786.1295748726], [874240.8715711096, 6106766.7910448592], [874236.1147768946, 6106747.4525148477], [874231.3579826795, 6106728.1139848344], [874226.6011884646, 6106708.7754548229], [874221.8443942497, 6106689.4369248105], [874217.0876000347, 6106670.0983947981], [874198.0604231748, 6106592.7442747485], [874193.3036270931, 6106573.4057451999], [874188.5466153225, 6106554.0672692247], [874183.7824212357, 6106534.7305806298], [874177.3467192563, 6106516.0051964577], [874174.9358948290, 6106511.6991793364]]
+      }, 
+      "properties": {
+        "from": "0x3105e70", 
+        "id": "0x2d54090", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x2fe5990"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[875329.1767019787, 6112646.1460677683], [875327.0124919142, 6112626.7648783438], [875324.8482488755, 6112607.3836883856], [875322.6832032693, 6112588.0024855463], [875320.5029925597, 6112568.6210717419], [875318.0973747708, 6112549.2425433919], [875314.6244753683, 6112529.9632276818], [875310.0869626593, 6112510.8283060556], [875305.5425735870, 6112491.6949443147], [875300.9981638854, 6112472.5615872666], [875296.4539317205, 6112453.4281898327], [875291.9114742372, 6112434.2943889741], [875287.3842209794, 6112415.1571513815], [875283.3166157203, 6112395.9353809748], [875281.9537505877, 6112376.3453327026], [875280.8187860602, 6112356.7262895945], [875279.7144849556, 6112337.1043361016], [875278.7934386492, 6112317.4674088694], [875278.2635941863, 6112297.8097685371], [875277.9379361747, 6112278.1460805899], [875277.6322961838, 6112258.4819888761], [875277.3268270970, 6112238.8178949775], [875277.0213601687, 6112219.1538010519], [875276.4104263193, 6112179.8256132007], [875276.1049593945, 6112160.1615192741], [875275.7994924639, 6112140.4974253485], [875275.4940253429, 6112120.8333314257], [875275.1885526036, 6112101.1692375736], [875274.8829663519, 6112081.5051451642], [875274.5756126378, 6112061.8410755955], [875274.2218851363, 6112042.1778722731], [875271.2774022268, 6112023.0662326738], [875263.0333029230, 6112005.2680281075], [875253.9206263991, 6111987.8417353844], [875244.6612481397, 6111970.4915140821], [875235.3990241580, 6111953.1428265953], [875226.1367298490, 6111935.7941770442], [875216.8744342136, 6111918.4455282092], [875207.7875419981, 6111901.4254169762]]
+      }, 
+      "properties": {
+        "from": "0x3108630", 
+        "id": "0x2bc7290", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x3133c10"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870274.2164114933, 6102948.3807571735], [870292.6444201107, 6102941.3056581654], [870329.5004373463, 6102927.1554601528], [870347.9284459639, 6102920.0803611446], [870384.7844631993, 6102905.9301631320], [870403.2124718170, 6102898.8550641239], [870440.0684890525, 6102884.7048661113], [870476.9245062879, 6102870.5546680968], [870495.3525149056, 6102863.4795690905], [870513.7805235232, 6102856.4044700824], [870550.6365407589, 6102842.2542720698], [870587.4925579942, 6102828.1040740553], [870624.3485752298, 6102813.9538760427], [870661.2045924652, 6102799.8036780283], [870679.6326010829, 6102792.7285790220], [870698.0606097006, 6102785.6534800138], [870734.9166269361, 6102771.5032820012], [870753.3446355537, 6102764.4281829940], [870771.7726441715, 6102757.3530839868], [870790.2006527891, 6102750.2779849805], [870792.5698585121, 6102749.3683714997]]
+      }, 
+      "properties": {
+        "from": "0x310a920", 
+        "id": "0x2cf1430", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x30c9c80"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874423.3248468185, 6108062.1206927020], [874425.4584474037, 6108042.2784376182], [874427.5920479770, 6108022.4361825343], [874429.7256409780, 6108002.5939270221], [874431.8570007645, 6107982.7515586410], [874433.7696981062, 6107962.8992149876], [874435.6212293995, 6107943.0449411087], [874437.4723070799, 6107923.1906543262], [874439.3169456692, 6107903.3362495899], [874438.8441645862, 6107883.4584123809], [874437.1373106947, 6107863.5756354351], [874435.4297380855, 6107843.6928833220], [874433.7221452001, 6107823.8101319093], [874432.0121586417, 6107803.9274710678], [874430.1910752680, 6107784.0503216777], [874427.3775479340, 6107764.2675133245], [874424.5578690337, 6107744.4856094085], [874421.7381850480, 6107724.7037062431], [874410.4594491053, 6107645.5760935787], [874407.6397651196, 6107625.7941904124], [874402.0003971481, 6107586.2303840797], [874399.1807131625, 6107566.4484809134], [874396.3610291767, 6107546.6665777471], [874393.5413451911, 6107526.8846745808], [874390.7216612054, 6107507.1027714154], [874387.9019772199, 6107487.3208682491], [874382.2626092483, 6107447.7570619173], [874379.4429252627, 6107427.9751587510], [874376.6232412769, 6107408.1932555847], [874373.8035572914, 6107388.4113524184], [874371.1256731325, 6107369.6242665639]]
+      }, 
+      "properties": {
+        "from": "0x3131960", 
+        "id": "0x2c48810", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x3105e70"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[875207.7875419981, 6111901.4254169762], [875198.3841014218, 6111883.7995137759], [875179.5772202699, 6111848.5477073733], [875170.1737796938, 6111830.9218041729], [875160.7703391179, 6111813.2959009707], [875151.3668985418, 6111795.6699977703], [875141.9634579658, 6111778.0440945681], [875132.5600173897, 6111760.4181913678], [875123.1565768139, 6111742.7922881665], [875104.3496956618, 6111707.5404817648], [875094.9462550858, 6111689.9145785626], [875085.5428145096, 6111672.2886753622], [875076.1393739335, 6111654.6627721600], [875066.7359333574, 6111637.0368689597], [875057.3324927926, 6111619.4109657519], [875047.9290594400, 6111601.7850586595], [875038.5291513196, 6111584.1572529208], [875030.0990376781, 6111566.0735287480], [875024.6927793405, 6111547.1055041738], [875023.7412137520, 6111527.1506401552], [875022.7987411526, 6111507.1953264512], [875021.8563066085, 6111487.2400108837], [875020.9138721074, 6111467.2846953142], [875019.9714376060, 6111447.3293797430], [875019.0290031049, 6111427.3740641735], [875018.0865686035, 6111407.4187486041], [875017.1441341024, 6111387.4634330329], [875016.2016996010, 6111367.5081174634], [875015.2592650998, 6111347.5528018940], [875014.3168305986, 6111327.5974863237], [875013.3743960973, 6111307.6421707533], [875011.4895270949, 6111267.7315396145], [875009.7761966678, 6111231.4531040303]]
+      }, 
+      "properties": {
+        "from": "0x3133c10", 
+        "id": "0x2bf99f0", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x30b1090"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874767.0984869003, 6110549.3896652833], [874761.2950894095, 6110530.2520094719], [874755.4916919181, 6110511.1143536614], [874749.6882944270, 6110491.9766978510], [874738.0814994448, 6110453.7013862282], [874732.2781019534, 6110434.5637304178], [874726.4747044623, 6110415.4260746073], [874720.6713069712, 6110396.2884187959], [874714.8679094843, 6110377.1507629845], [874709.0645139760, 6110358.0131065464], [874703.2614399489, 6110338.8753485335], [874697.4722398302, 6110319.7332277354], [874691.9257145164, 6110300.5181571934], [874686.3792704474, 6110281.3030633498], [874680.8328263783, 6110262.0879695071], [874675.2863823094, 6110242.8728756635], [874669.7399382403, 6110223.6577818207], [874664.1934941714, 6110204.4426879771], [874658.6470501022, 6110185.2275941335], [874653.1006060333, 6110166.0125002908], [874647.5541619642, 6110146.7974064481], [874636.4612738264, 6110108.3672187608], [874625.3683856883, 6110069.9370310754], [874619.8219416193, 6110050.7219372317], [874619.3104427180, 6110048.9499010816]]
+      }, 
+      "properties": {
+        "from": "0x3139670", 
+        "id": "0x2c0c540", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x30d3b80"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874374.0933679368, 6108692.7749421280], [874372.6030840001, 6108572.7964752484], [874371.8579420317, 6108512.8072418086], [874371.6095613757, 6108492.8108306620], [874371.1128000633, 6108452.8180083688], [874370.8644194074, 6108432.8215972222], [874370.6160388592, 6108412.8251860738], [874370.3681783926, 6108392.8287671246], [874370.7348127476, 6108372.8422464337], [874372.1372015283, 6108352.9581254795], [874375.6186202439, 6108333.3060895754], [874379.4102457440, 6108313.6820560452], [874383.2020616768, 6108294.0580659229], [874386.9938785927, 6108274.4340760242], [874390.7856955098, 6108254.8100861264], [874394.5775124270, 6108235.1860962287], [874398.3693293440, 6108215.5621063309], [874402.1611462613, 6108195.9381164331], [874405.9529631784, 6108176.3141265344], [874409.7447800345, 6108156.6901366226], [874413.5365216804, 6108137.0661296025], [874417.3078022236, 6108117.4383524731], [874419.5086991950, 6108097.5842446713], [874421.6456299691, 6108077.7262947308], [874423.3248468185, 6108062.1206927020]]
+      }, 
+      "properties": {
+        "from": "0x3157e50", 
+        "id": "0x2d10400", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x3131960"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874697.2325639899, 6101006.8448838685], [874676.1487406774, 6101038.4665655680], [874665.6068028572, 6101054.2773877298], [874655.0640197305, 6101070.0876060519], [874644.5068957569, 6101085.8875545543], [874633.6143232994, 6101101.4323456548], [874618.9639592378, 6101112.8798040356], [874602.2146675495, 6101121.8629200198], [874585.3769992902, 6101130.6914195996], [874568.5365799959, 6101139.5146494228], [874518.0150454998, 6101165.9838075778], [874508.5534194887, 6101170.9409269094]]
+      }, 
+      "properties": {
+        "from": "0x324c7c0", 
+        "id": "0x2db7620", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x2c23330"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869087.6831090486, 6106441.9902807176], [869075.9895477516, 6106425.8587345565], [869064.2959864544, 6106409.7271883944], [869052.6024251573, 6106393.5956422333], [869029.2153025630, 6106361.3325499091], [869017.5217412657, 6106345.2010037480], [869005.8281799685, 6106329.0694575869], [868994.1346186715, 6106312.9379114248], [868959.0539347799, 6106264.5432729386], [868947.3603734829, 6106248.4117267774], [868935.6668121857, 6106232.2801806163], [868912.2796895916, 6106200.0170882922], [868900.5861282945, 6106183.8855421310], [868888.8925669973, 6106167.7539959690], [868877.1990057002, 6106151.6224498078], [868865.5054444028, 6106135.4909036458], [868842.1183218086, 6106103.2278113216], [868830.4247605116, 6106087.0962651614], [868818.7311992142, 6106070.9647189993], [868795.3440766201, 6106038.7016266752], [868783.6505153186, 6106022.5700805169], [868771.9569536725, 6106006.4385346100], [868760.2633735246, 6105990.3070021886], [868748.5691395440, 6105974.1759464238], [868736.8181003570, 6105958.0866302671], [868720.4144895459, 6105950.4605187029], [868700.5972007968, 6105951.9959673584], [868680.7811358869, 6105954.0612048488], [868661.0136798691, 6105956.5381315378], [868657.1198829897, 6105957.0419061761]]
+      }, 
+      "properties": {
+        "from": "0x32576b0", 
+        "id": "0x3159660", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x2dc1220"
+      }
+    }]
+}

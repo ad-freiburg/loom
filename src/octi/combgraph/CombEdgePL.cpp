@@ -47,6 +47,11 @@ util::json::Dict CombEdgePL::getAttrs() const {
 }
 
 // _____________________________________________________________________________
+const std::vector<shared::transitgraph::TransitEdge*>& CombEdgePL::getChilds() const {
+  return _childs;
+}
+
+// _____________________________________________________________________________
 std::vector<shared::transitgraph::TransitEdge*>& CombEdgePL::getChilds() {
   return _childs;
 }

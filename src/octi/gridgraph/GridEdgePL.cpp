@@ -46,7 +46,7 @@ util::json::Dict GridEdgePL::getAttrs() const {
 // _____________________________________________________________________________
 double GridEdgePL::cost() const {
   return (_closed || _blocked) ? std::numeric_limits<double>::infinity()
-                               : rawCost();
+                               : rawCost() + _geoC;
 }
 
 // _____________________________________________________________________________
@@ -81,3 +81,12 @@ void GridEdgePL::clearResEdges() {
   _resEdgs = 0;
 }
 
+// _____________________________________________________________________________
+void GridEdgePL::setGeoCourseCost(double d) {
+  _geoC = d;
+}
+
+// _____________________________________________________________________________
+void GridEdgePL::clearGeoCourseCost() {
+  _geoC = 0;
+}

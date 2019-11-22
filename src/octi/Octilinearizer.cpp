@@ -379,6 +379,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
     }
 
+    gg->writeGeoCoursePens(cmbEdg);
+
     GrEdgList eL;
     GrNdList nL;
     GridNode* toGrNd = 0;
@@ -409,6 +411,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     // close the source and target node
     for (auto n : toGrNds) gg->closeNodeSink(n);
     for (auto n : frGrNds) gg->closeNodeSink(n);
+
+    gg->clearGeoCoursePens();
 
     settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg);
   }

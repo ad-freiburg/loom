@@ -154,6 +154,49 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
 }
 
 // _____________________________________________________________________________
+void GridGraph::writeGeoCoursePens(const CombEdge* ce) {
+  for (size_t x = 0; x < _grid.getXWidth(); x++) {
+    for (size_t y = 0; y < _grid.getYHeight(); y++) {
+      auto grNdA = getNode(x, y);
+
+      for (size_t i = 0; i < 8; i++) {
+        auto neigh = getNeighbor(x, y, i);
+        if (!neigh) continue;
+        auto ge = getNEdg(grNdA, neigh);
+
+        double d = std::numeric_limits<double>::infinity();
+
+        for (auto orE : ce->pl().getChilds()) {
+          double dLoc = util::geo::dist(*orE->pl().getGeom(), util::geo::LineSegment<double>(*ge->getFrom()->pl().getGeom(), *ge->getTo()->pl().getGeom())) / getCellSize();
+          if (dLoc < d) d = dLoc;
+        }
+
+        d *= 2 * d;
+
+        ge->pl().setGeoCourseCost(d);
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void GridGraph::clearGeoCoursePens() {
+  for (size_t x = 0; x < _grid.getXWidth(); x++) {
+    for (size_t y = 0; y < _grid.getYHeight(); y++) {
+      auto grNdA = getNode(x, y);
+
+      for (size_t i = 0; i < 8; i++) {
+        auto neigh = getNeighbor(x, y, i);
+        if (!neigh) continue;
+        auto ge = getNEdg(grNdA, neigh);
+
+        ge->pl().clearGeoCourseCost();
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
 void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   if (a == b) return;
 

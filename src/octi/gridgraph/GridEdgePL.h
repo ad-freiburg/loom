@@ -42,8 +42,12 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   void clearResEdges();
   void addResEdge();
 
+  void setGeoCourseCost(double d);
+  void clearGeoCourseCost();
+
  private:
   double _c;
+  double _geoC;
 
   bool _isSecondary;
 
