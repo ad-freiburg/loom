@@ -211,6 +211,7 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
           bool found = draw(test, p, ggs[btch], &run, bestFrIters[btch].score(),
                             maxGrDist, enfGeoCourse);
 
+
           if (found && bestFrIters[btch].score() > run.score()) {
             bestFrIters[btch] = run;
           }
