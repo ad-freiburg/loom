@@ -26,9 +26,6 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
 
   glp_prob* lp = createProblem(*gg, cg, maxGrDist);
 
-  // TODO: make configurable
-  glp_write_mps(lp, GLP_MPS_FILE, 0, "ilp_prob.mps");
-
   preSolve(lp);
   solveProblem(lp);
 
