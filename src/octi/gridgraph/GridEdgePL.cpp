@@ -11,7 +11,7 @@ using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
 GridEdgePL::GridEdgePL(double c, bool secondary)
-    : _c(c),
+    : _c(c), _geoC(0),
       _isSecondary(secondary),
       _closed(false),
       _blocked(false),
@@ -19,7 +19,7 @@ GridEdgePL::GridEdgePL(double c, bool secondary)
 
 // _____________________________________________________________________________
 GridEdgePL::GridEdgePL(double c, bool secondary, bool closed)
-    : _c(c),
+    : _c(c), _geoC(0),
       _isSecondary(secondary),
       _closed(closed),
       _blocked(false),
