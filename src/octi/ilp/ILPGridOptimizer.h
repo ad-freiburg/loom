@@ -40,7 +40,7 @@ class ILPGridOptimizer {
                   double maxGrDist) const;
 
  protected:
-  virtual glp_prob* createProblem(const GridGraph& gg, const CombGraph& cg,
+  virtual glp_prob* createProblem(GridGraph* gg, const CombGraph& cg,
                                   double maxGrDist) const;
 
   void preSolve(glp_prob* lp) const;
@@ -54,6 +54,8 @@ class ILPGridOptimizer {
 
   void extractFeasibleSol(GridGraph* gg, const CombGraph& cg,
                           double maxGrDist) const;
+
+  size_t nonInfDeg(const GridNode* g) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

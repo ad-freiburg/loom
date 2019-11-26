@@ -362,10 +362,10 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     for (auto n : frGrNds) {
       if (gg->isSettled(frCmbNd)) {
         // only count displacement penalty ONCE
-        gg->openNodeSink(n, 0);
+        gg->openNodeSinkFr(n, 0);
       } else {
         costOffsetFrom = (gg->getPenalties().p_45 - gg->getPenalties().p_135);
-        gg->openNodeSink(n, costOffsetFrom + gg->ndMovePen(frCmbNd, n));
+        gg->openNodeSinkFr(n, costOffsetFrom + gg->ndMovePen(frCmbNd, n));
       }
     }
 
@@ -373,10 +373,10 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     for (auto n : toGrNds) {
       if (gg->isSettled(toCmbNd)) {
         // only count displacement penalty ONCE
-        gg->openNodeSink(n, 0);
+        gg->openNodeSinkTo(n, 0);
       } else {
         costOffsetTo = (gg->getPenalties().p_45 - gg->getPenalties().p_135);
-        gg->openNodeSink(n, costOffsetTo + gg->ndMovePen(toCmbNd, n));
+        gg->openNodeSinkTo(n, costOffsetTo + gg->ndMovePen(toCmbNd, n));
       }
     }
 
@@ -412,8 +412,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     if (!nL.size()) {
       // cleanup
-      for (auto n : toGrNds) gg->closeNodeSink(n);
-      for (auto n : frGrNds) gg->closeNodeSink(n);
+      for (auto n : toGrNds) gg->closeNodeSinkTo(n);
+      for (auto n : frGrNds) gg->closeNodeSinkFr(n);
 
       return false;
     }
@@ -429,8 +429,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     drawing->draw(cmbEdg, eL, rev);
 
     // close the source and target node
-    for (auto n : toGrNds) gg->closeNodeSink(n);
-    for (auto n : frGrNds) gg->closeNodeSink(n);
+    for (auto n : toGrNds) gg->closeNodeSinkTo(n);
+    for (auto n : frGrNds) gg->closeNodeSinkFr(n);
 
     if (enfGeoCourse) gg->clearGeoCoursePens();
 

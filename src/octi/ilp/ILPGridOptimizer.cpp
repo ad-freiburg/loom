@@ -29,10 +29,11 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
     }
     if (!nd->pl().isSink()) continue;
     gg->openNodeTurns(nd);
-    gg->openNodeSink(nd, 0);
+    gg->closeNodeSinkFr(nd);
+    gg->closeNodeSinkTo(nd);
   }
 
-  glp_prob* lp = createProblem(*gg, cg, maxGrDist);
+  glp_prob* lp = createProblem(gg, cg, maxGrDist);
 
   preSolve(lp);
   solveProblem(lp);
@@ -48,8 +49,7 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
 }
 
 // _____________________________________________________________________________
-glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
-                                          const CombGraph& cg,
+glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
                                           double maxGrDist) const {
   glp_prob* lp = glp_create_prob();
 
@@ -74,14 +74,17 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
     size_t i = 0;
 
-    for (const GridNode* n : gg.getNds()) {
+    for (const GridNode* n : *gg->getNds()) {
       if (!n->pl().isSink()) continue;
 
       double gridD = dist(*n->pl().getGeom(), *nd->pl().getGeom());
 
       // threshold for speedup
-      double maxDis = gg.getCellSize() * maxGrDist;
+      double maxDis = gg->getCellSize() * maxGrDist;
       if (gridD >= maxDis) continue;
+
+      gg->openNodeSinkFr(const_cast<GridNode*>(n), 0);
+      gg->openNodeSinkTo(const_cast<GridNode*>(n), 0);
 
       auto varName = getStatPosVar(n, nd);
 
@@ -90,7 +93,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
       // binary variable € {0,1}, node is either this station, or not
       glp_set_col_kind(lp, col, GLP_BV);
 
-      glp_set_obj_coef(lp, col, gg.ndMovePen(nd, n));
+      glp_set_obj_coef(lp, col, gg->ndMovePen(nd, n));
 
       vm.addVar(rowStat, col, 1);
       i++;
@@ -102,11 +105,13 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
   for (auto nd : cg.getNds()) {
     for (auto edg : nd->getAdjList()) {
       if (edg->getFrom() != nd) continue;
-      for (const GridNode* n : gg.getNds()) {
+      for (const GridNode* n : *gg->getNds()) {
         for (const GridEdge* e : n->getAdjList()) {
           if (e->getFrom() != n) continue;
           if (e->pl().cost() == std::numeric_limits<float>::infinity()) {
-            std::cerr << e << std::endl;
+            // skip infinite edges, we cannot use them
+            // this also skips sink edges of nodes not used as
+            // candidates
             continue;
           }
 
@@ -127,11 +132,11 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
   // an edge can only be used a single time
   std::set<const GridEdge*> proced;
-  for (const GridNode* n : gg.getNds()) {
+  for (const GridNode* n : *gg->getNds()) {
     for (const GridEdge* e : n->getAdjList()) {
       if (e->pl().isSecondary()) continue;
       if (proced.count(e)) continue;
-      auto f = gg.getEdg(e->getTo(), e->getFrom());
+      auto f = gg->getEdg(e->getTo(), e->getFrom());
       proced.insert(e);
       proced.insert(f);
 
@@ -161,7 +166,9 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
   // for every node, the number of outgoing and incoming used edges must be
   // the same, except for the start and end node
-  for (const GridNode* n : gg.getNds()) {
+  for (const GridNode* n : *gg->getNds()) {
+    if (nonInfDeg(n) == 0) continue;
+
     for (auto nd : cg.getNds()) {
       for (auto edg : nd->getAdjList()) {
         if (edg->getFrom() != nd) continue;
@@ -230,7 +237,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
   // a meta node can either be an activated sink, or a single pass through
   // edge is used
-  for (const GridNode* n : gg.getNds()) {
+  for (const GridNode* n : *gg->getNds()) {
     if (!n->pl().isSink()) continue;
 
     std::stringstream constName;
@@ -256,7 +263,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
         auto to = n->pl().getPort(pt);
         if (from == to) continue;
 
-        auto innerE = gg.getEdg(from, to);
+        auto innerE = gg->getEdg(from, to);
         for (auto nd : cg.getNds()) {
           for (auto edg : nd->getAdjList()) {
             if (edg->getFrom() != nd) continue;
@@ -273,7 +280,7 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
   glp_create_index(lp);
 
   // dont allow crossing edges
-  for (const GridNode* n : gg.getNds()) {
+  for (const GridNode* n : *gg->getNds()) {
     if (!n->pl().isSink()) continue;
     size_t x = n->pl().getX();
     size_t y = n->pl().getY();
@@ -284,18 +291,18 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
     glp_set_row_name(lp, row, constName.str().c_str());
     glp_set_row_bnds(lp, row, GLP_UP, 0, 1);
 
-    auto eOr = gg.getNEdg(n, gg.getNeighbor(x, y, 3));
-    auto fOr = gg.getNEdg(gg.getNeighbor(x, y, 3), n);
+    auto eOr = gg->getNEdg(n, gg->getNeighbor(x, y, 3));
+    auto fOr = gg->getNEdg(gg->getNeighbor(x, y, 3), n);
 
     if (!eOr || !fOr) continue;
 
-    auto na = gg.getNeighbor(x, y, (3 + 7) % 8);
-    auto nb = gg.getNeighbor(x, y, (3 + 1) % 8);
+    auto na = gg->getNeighbor(x, y, (3 + 7) % 8);
+    auto nb = gg->getNeighbor(x, y, (3 + 1) % 8);
 
     if (!na || !nb) continue;
 
-    auto e = gg.getNEdg(na, nb);
-    auto f = gg.getNEdg(nb, na);
+    auto e = gg->getNEdg(na, nb);
+    auto f = gg->getNEdg(nb, na);
 
     for (auto nd : cg.getNds()) {
       for (auto edg : nd->getAdjList()) {
@@ -339,20 +346,20 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
 
       vm.addVar(row, col, -1);
 
-      for (GridNode* n : gg.getNds()) {
+      for (GridNode* n : *gg->getNds()) {
         if (!n->pl().isSink()) continue;
 
         if (edg->getFrom() == nd) {
           // the 0 can be skipped here
           for (size_t i = 1; i < 8; i++) {
-            auto e = gg.getEdg(n, n->pl().getPort(i));
+            auto e = gg->getEdg(n, n->pl().getPort(i));
             size_t col = glp_find_col(lp, getEdgeUseVar(e, edg).c_str());
             if (col) vm.addVar(row, col, i);
           }
         } else {
           // the 0 can be skipped here
           for (size_t i = 1; i < 8; i++) {
-            auto e = gg.getEdg(n->pl().getPort(i), n);
+            auto e = gg->getEdg(n->pl().getPort(i), n);
             size_t col = glp_find_col(lp, getEdgeUseVar(e, edg).c_str());
             if (col) vm.addVar(row, col, i);
           }
@@ -553,7 +560,9 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   // "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
   // "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
 
-  std::string cmd = "gurobi_cl ResultFile={OUTPUT} InputFile=feasible.mst {INPUT} > ./gurobi.log";
+  std::string cmd =
+      "gurobi_cl ResultFile={OUTPUT} InputFile=feasible.mst {INPUT} > "
+      "./gurobi.log";
   util::replaceAll(cmd, "{INPUT}", f);
   util::replaceAll(cmd, "{OUTPUT}", outf);
   util::replaceAll(cmd, "{THREADS}", "4");
@@ -740,8 +749,18 @@ void ILPGridOptimizer::extractSolution(glp_prob* lp, GridGraph* gg,
 }
 
 // _____________________________________________________________________________
-void ILPGridOptimizer::extractFeasibleSol(GridGraph* gg,
-                                          const CombGraph& cg, double maxGrDist) const {
+size_t ILPGridOptimizer::nonInfDeg(const GridNode* g) const {
+  size_t ret = 0;
+  for (auto e : g->getAdjList()) {
+    if (e->pl().cost() != std::numeric_limits<float>::infinity()) ret++;
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+void ILPGridOptimizer::extractFeasibleSol(GridGraph* gg, const CombGraph& cg,
+                                          double maxGrDist) const {
   std::ofstream fo;
   fo.open("feasible.mst");
 
@@ -764,15 +783,15 @@ void ILPGridOptimizer::extractFeasibleSol(GridGraph* gg,
         // if settled, all bend edges are unused
         for (size_t p = 0; p < 8; p++) {
           auto portNd = gnd->pl().getPort(p);
-            for (auto bendEdg : portNd->getAdjList()) {
-              if (!bendEdg->pl().isSecondary()) continue;
-              for (auto cEdg : nd->getAdjList()) {
-                if (cEdg->getFrom() != nd) continue;
-                auto varName = getEdgeUseVar(bendEdg, cEdg);
-                fo << varName << "\t" << 0;
-                fo << "\n";
-              }
+          for (auto bendEdg : portNd->getAdjList()) {
+            if (!bendEdg->pl().isSecondary()) continue;
+            for (auto cEdg : nd->getAdjList()) {
+              if (cEdg->getFrom() != nd) continue;
+              auto varName = getEdgeUseVar(bendEdg, cEdg);
+              fo << varName << "\t" << 0;
+              fo << "\n";
             }
+          }
         }
       } else {
         fo << varName << "\t" << 0 << "\n";

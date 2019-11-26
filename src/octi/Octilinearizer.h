@@ -82,7 +82,7 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
     for (auto n : to) {
       size_t i = 0;
       for (; i < 8; i++) {
-        float sinkCost = g->getEdg(n, n->pl().getPort(i))->pl().cost();
+        float sinkCost = g->getEdg(n->pl().getPort(i), n)->pl().cost();
         if (sinkCost < cheapestSink) cheapestSink = sinkCost;
         auto neigh = g->getNeighbor(n->pl().getX(), n->pl().getY(), i);
         if (neigh && to.find(neigh) == to.end()) {
@@ -92,7 +92,7 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
         }
       }
       for (size_t j = i; j < 8; j++) {
-        float sinkCost = g->getEdg(n, n->pl().getPort(j))->pl().cost();
+        float sinkCost = g->getEdg(n->pl().getPort(j), n)->pl().cost();
         if (sinkCost < cheapestSink) cheapestSink = sinkCost;
       }
     }

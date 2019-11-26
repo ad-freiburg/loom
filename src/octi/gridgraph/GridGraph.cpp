@@ -167,7 +167,11 @@ void GridGraph::writeGeoCoursePens(const CombEdge* ce) {
         double d = std::numeric_limits<double>::infinity();
 
         for (auto orE : ce->pl().getChilds()) {
-          double dLoc = util::geo::dist(*orE->pl().getGeom(), util::geo::LineSegment<double>(*ge->getFrom()->pl().getGeom(), *ge->getTo()->pl().getGeom())) / getCellSize();
+          double dLoc = util::geo::dist(*orE->pl().getGeom(),
+                                        util::geo::LineSegment<double>(
+                                            *ge->getFrom()->pl().getGeom(),
+                                            *ge->getTo()->pl().getGeom())) /
+                        getCellSize();
           if (dLoc < d) d = dLoc;
         }
 
@@ -216,7 +220,7 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
 
   // this closes the grid edge
   auto ge = getNEdg(a, b);
-  auto gf = getNEdg(b, a);
+  // auto gf = getNEdg(b, a);
 
   addResEdg(ge, e);
   // addResEdg(gf, e);
@@ -250,7 +254,7 @@ void GridGraph::addResEdg(GridEdge* ge, CombEdge* ce) {
 // _____________________________________________________________________________
 CombEdge* GridGraph::getResEdg(GridEdge* ge) {
   if (!ge) return 0;
-  if (_resEdgs.count(ge)) return  _resEdgs.find(ge)->second;
+  if (_resEdgs.count(ge)) return _resEdgs.find(ge)->second;
   return 0;
 }
 
@@ -431,16 +435,17 @@ void GridGraph::writeInitialCosts() {
       for (size_t i = 0; i < 8; i++) {
         auto port = n->pl().getPort(i);
         auto neigh = getNeighbor(x, y, i);
+
         if (!neigh || !port) continue;
-        auto e = getEdg(port, neigh->pl().getPort((i + 4) % 8));
+
+        auto oPort = neigh->pl().getPort((i + 4) % 8);
+        auto e = getEdg(port, oPort);
 
         if (i % 4 == 0) {
           e->pl().setCost(_c.verticalPen);
-        }
-        if ((i + 2) % 4 == 0) {
+        } else if ((i + 2) % 4 == 0) {
           e->pl().setCost(_c.horizontalPen);
-        }
-        if (i % 2) {
+        } else if (i % 2) {
           e->pl().setCost(_c.diagonalPen);
         }
       }
@@ -485,8 +490,10 @@ void GridGraph::openNodeTurns(GridNode* n) {
   // open all non-sink inner edges
   for (size_t i = 0; i < 8; i++) {
     auto portA = n->pl().getPort(i);
+    if (portA->getDeg() == 8) continue;
     for (size_t j = i + 1; j < 8; j++) {
       auto portB = n->pl().getPort(j);
+      if (portB->getDeg() == 8) continue;
       auto e = getEdg(portA, portB);
       auto f = getEdg(portB, portA);
 
@@ -519,21 +526,33 @@ void GridGraph::closeNodeTurns(GridNode* n) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::openNodeSink(GridNode* n, double cost) {
+void GridGraph::openNodeSinkTo(GridNode* n, double cost) {
   for (size_t i = 0; i < 8; i++) {
     getEdg(n->pl().getPort(i), n)->pl().open();
-    getEdg(n, n->pl().getPort(i))->pl().open();
     getEdg(n->pl().getPort(i), n)->pl().setCost(cost);
+  }
+}
+
+// _____________________________________________________________________________
+void GridGraph::closeNodeSinkTo(GridNode* n) {
+  for (size_t i = 0; i < 8; i++) {
+    getEdg(n->pl().getPort(i), n)->pl().close();
+    getEdg(n->pl().getPort(i), n)->pl().setCost(INF);
+  }
+}
+
+// _____________________________________________________________________________
+void GridGraph::openNodeSinkFr(GridNode* n, double cost) {
+  for (size_t i = 0; i < 8; i++) {
+    getEdg(n, n->pl().getPort(i))->pl().open();
     getEdg(n, n->pl().getPort(i))->pl().setCost(cost);
   }
 }
 
 // _____________________________________________________________________________
-void GridGraph::closeNodeSink(GridNode* n) {
+void GridGraph::closeNodeSinkFr(GridNode* n) {
   for (size_t i = 0; i < 8; i++) {
-    getEdg(n->pl().getPort(i), n)->pl().close();
     getEdg(n, n->pl().getPort(i))->pl().close();
-    getEdg(n->pl().getPort(i), n)->pl().setCost(INF);
     getEdg(n, n->pl().getPort(i))->pl().setCost(INF);
   }
 }
@@ -630,6 +649,12 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
       if (deg == 2) pen = c_90;
       if (deg == 3) pen = c_135;
 
+      if (x == 0 && (i == 5 || i == 6 || i == 7)) pen = INF;
+      if (y == 0 && (i == 0 || i == 7 || i == 1)) pen = INF;
+      if (x == _grid.getXWidth() - 1 && (i == 1 || i == 2 || i == 3)) pen = INF;
+      if (y == _grid.getYHeight() - 1 && (i == 3 || i == 4 || i == 5))
+        pen = INF;
+
       auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
                             GridEdgePL(pen, true));
       e->getFrom()->addEdge(e);
@@ -674,7 +699,8 @@ void GridGraph::reset() {
     for (auto e : n->getAdjListOut()) e->pl().reset();
     if (!n->pl().isSink()) continue;
     openNodeTurns(n);
-    closeNodeSink(n);
+    closeNodeSinkFr(n);
+    closeNodeSinkTo(n);
   }
 
   writeInitialCosts();

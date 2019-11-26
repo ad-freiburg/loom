@@ -70,8 +70,10 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   void addCostVector(GridNode* n, const NodeCost& addC);
 
-  void openNodeSink(GridNode* n, double cost);
-  void closeNodeSink(GridNode* n);
+  void openNodeSinkTo(GridNode* n, double cost);
+  void closeNodeSinkTo(GridNode* n);
+  void openNodeSinkFr(GridNode* n, double cost);
+  void closeNodeSinkFr(GridNode* n);
   void openNodeTurns(GridNode* n);
   void closeNodeTurns(GridNode* n);
 
