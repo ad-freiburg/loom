@@ -20,6 +20,7 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
                                   double maxGrDist) const {
   // extract first feasible solution from gridgraph
   extractFeasibleSol(gg, cg, maxGrDist);
+  gg->reset();
 
   for (auto nd : *gg->getNds()) {
     // if we presolve, some edges may be blocked
@@ -60,15 +61,16 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
 
   glp_create_index(lp);
 
-  // set of grid nodes that may potentially be a position for an
+  // grid nodes that may potentially be a position for an
   // input station
+  std::map<const CombNode*, std::set<const GridNode*>> cands;
 
   for (auto nd : cg.getNds()) {
     if (nd->getDeg() == 0) continue;
     std::stringstream oneAssignment;
     // must sum up to 1
     size_t rowStat = glp_add_rows(lp, 1);
-    oneAssignment << "oneass(st=" << nd << ")";
+    oneAssignment << "oneass(" << nd << ")";
     glp_set_row_name(lp, rowStat, oneAssignment.str().c_str());
     glp_set_row_bnds(lp, rowStat, GLP_FX, 1, 1);
 
@@ -82,6 +84,8 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
       // threshold for speedup
       double maxDis = gg->getCellSize() * maxGrDist;
       if (gridD >= maxDis) continue;
+
+      cands[nd].insert(n);
 
       gg->openNodeSinkFr(const_cast<GridNode*>(n), 0);
       gg->openNodeSinkTo(const_cast<GridNode*>(n), 0);
@@ -109,9 +113,19 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
         for (const GridEdge* e : n->getAdjList()) {
           if (e->getFrom() != n) continue;
           if (e->pl().cost() == std::numeric_limits<float>::infinity()) {
-            // skip infinite edges, we cannot use them
+            // skip infinite edges, we cannot use them.
             // this also skips sink edges of nodes not used as
             // candidates
+            continue;
+          }
+
+          if (e->getFrom()->pl().isSink() &&
+              !cands[edg->getFrom()].count(e->getFrom())) {
+            continue;
+          }
+
+          if (e->getTo()->pl().isSink() &&
+              !cands[edg->getTo()].count(e->getTo())) {
             continue;
           }
 
@@ -121,7 +135,6 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
           glp_set_col_name(lp, col, edgeVarName.c_str());
           // binary variable € {0,1}, edge is either used, or not
           glp_set_col_kind(lp, col, GLP_BV);
-
           glp_set_obj_coef(lp, col, e->pl().cost());
         }
       }
@@ -142,7 +155,7 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
 
       std::stringstream constName;
       size_t row = glp_add_rows(lp, 1);
-      constName << "uniqedge(" << e << ")";
+      constName << "uniqedge(" << e->getFrom()->pl().getId() << "," << e->getTo()->pl().getId() << ")";
       glp_set_row_name(lp, row, constName.str().c_str());
       glp_set_row_bnds(lp, row, GLP_UP, 1, 1);
 
@@ -174,7 +187,7 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
         if (edg->getFrom() != nd) continue;
         std::stringstream constName;
         size_t row = glp_add_rows(lp, 1);
-        constName << "adjsum(" << n << "," << edg << ")";
+        constName << "adjsum(" << n->pl().getId() << "," << edg << ")";
         glp_set_row_name(lp, row, constName.str().c_str());
 
         // an upper bound is enough here
@@ -198,21 +211,17 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
         // constraints.
         // the only way a sink node can make up for in outgoin edge
         // is thus if we add -2 if the sink is marked as the start station of
-        // this
-        // edge
+        // this edge
         if (n->pl().isSink()) {
           // subtract the variable for this start node and edge, if used
           // as a candidate
-          std::stringstream ndPosFromVarName;
-          ndPosFromVarName << "statpos(" << n << "," << edg->getFrom() << ")";
-          size_t ndColFrom = glp_find_col(lp, ndPosFromVarName.str().c_str());
+          size_t ndColFrom = glp_find_col(lp, getStatPosVar(n, edg->getFrom()).c_str());
           if (ndColFrom > 0) vm.addVar(row, ndColFrom, -2);
 
           // add the variable for this end node and edge, if used
           // as a candidate
           std::stringstream ndPosToVarName;
-          ndPosToVarName << "statpos(" << n << "," << edg->getTo() << ")";
-          size_t ndColTo = glp_find_col(lp, ndPosToVarName.str().c_str());
+          size_t ndColTo = glp_find_col(lp, getStatPosVar(n, edg->getTo()).c_str());
           if (ndColTo > 0) vm.addVar(row, ndColTo, 1);
 
           outCost = 2;
@@ -235,14 +244,60 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
 
   glp_create_index(lp);
 
+  // only a single sink edge can be activated per input edge and settled grid node
+  // THIS RULE IS REDUNDANT AND IMPLICITELY ENFORCED BY OTHER RULES,
+  // BUT SEEMS TO LEAD TO FASTER SOLUTION TIMES
+  for (GridNode* n : *gg->getNds()) {
+    if (!n->pl().isSink()) continue;
+
+    for (auto nd : cg.getNds()) {
+      for (auto e : nd->getAdjList()) {
+        if (e->getFrom() != nd) continue;
+
+        std::stringstream constName;
+        size_t row = glp_add_rows(lp, 1);
+        constName << "singlesink(" << n->pl().getId() << "," << e << ")";
+        glp_set_row_name(lp, row, constName.str().c_str());
+        glp_set_row_bnds(lp, row, GLP_FX, 0, 0);
+
+        if (!cands[e->getFrom()].count(n) && !cands[e->getTo()].count(n)) {
+          // node does not appear as start or end cand, so the number of
+          // sink edges for this node is 0
+
+        } else {
+          if (cands[e->getTo()].count(n)) {
+            size_t ndColTo = glp_find_col(lp, getStatPosVar(n, e->getTo()).c_str());
+            if (ndColTo > 0) vm.addVar(row, ndColTo, -1);
+          }
+
+          if (cands[e->getFrom()].count(n)) {
+            size_t ndColFr = glp_find_col(lp, getStatPosVar(n, e->getFrom()).c_str());
+            if (ndColFr > 0) vm.addVar(row, ndColFr, -1);
+          }
+        };
+
+        for (size_t p = 0; p < 8; p++) {
+          auto varSinkTo = getEdgeUseVar(gg->getEdg(n->pl().getPort(p), n), e);
+          auto varSinkFr = getEdgeUseVar(gg->getEdg(n, n->pl().getPort(p)), e);
+
+          size_t ndColTo = glp_find_col(lp, varSinkTo.c_str());
+          if (ndColTo > 0) vm.addVar(row, ndColTo, 1);
+
+          size_t ndColFr = glp_find_col(lp, varSinkFr.c_str());
+          if (ndColFr > 0) vm.addVar(row, ndColFr, 1);
+        }
+      }
+    }
+  }
+
   // a meta node can either be an activated sink, or a single pass through
   // edge is used
-  for (const GridNode* n : *gg->getNds()) {
+  for (GridNode* n : *gg->getNds()) {
     if (!n->pl().isSink()) continue;
 
     std::stringstream constName;
     size_t row = glp_add_rows(lp, 1);
-    constName << "inneruse(" << n << ")";
+    constName << "inneruse(" << n->pl().getId() << ")";
     glp_set_row_name(lp, row, constName.str().c_str());
     glp_set_row_bnds(lp, row, GLP_UP, 0, 1);
 
@@ -250,10 +305,8 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
     // a pass-through
 
     for (auto nd : cg.getNds()) {
-      std::stringstream ndPosToVarName;
-      ndPosToVarName << "statpos(" << n << "," << nd << ")";
-      size_t ndColTo = glp_find_col(lp, ndPosToVarName.str().c_str());
-      if (ndColTo > 0) vm.addVar(row, ndColTo, 1);
+      size_t ndcolto = glp_find_col(lp, getStatPosVar(n,nd).c_str());
+      if (ndcolto > 0) vm.addVar(row, ndcolto, 1);
     }
 
     // go over all ports
@@ -287,7 +340,7 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
 
     std::stringstream constName;
     size_t row = glp_add_rows(lp, 1);
-    constName << "nocross(" << n << ")";
+    constName << "nocross(" << n->pl().getId() << ")";
     glp_set_row_name(lp, row, constName.str().c_str());
     glp_set_row_bnds(lp, row, GLP_UP, 0, 1);
 
@@ -653,7 +706,7 @@ void VariableMatrix::getGLPKArrs(int** ia, int** ja, double** r) const {
 std::string ILPGridOptimizer::getEdgeUseVar(const GridEdge* e,
                                             const CombEdge* cg) const {
   std::stringstream varName;
-  varName << "edg(" << e->getFrom() << "," << e->getTo() << "," << cg << ")";
+  varName << "edg(" << e->getFrom()->pl().getId() << "," << e->getTo()->pl().getId() << "," << cg << ")";
 
   return varName.str();
 }
@@ -662,7 +715,7 @@ std::string ILPGridOptimizer::getEdgeUseVar(const GridEdge* e,
 std::string ILPGridOptimizer::getStatPosVar(const GridNode* n,
                                             const CombNode* nd) const {
   std::stringstream varName;
-  varName << "statpos(" << n << "," << nd << ")";
+  varName << "statpos(" << n->pl().getId() << "," << nd << ")";
 
   return varName.str();
 }

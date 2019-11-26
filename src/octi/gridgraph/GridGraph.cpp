@@ -695,6 +695,7 @@ double GridGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) const {
 // _____________________________________________________________________________
 void GridGraph::reset() {
   _settled.clear();
+  _resEdgs.clear();
   for (auto n : *getNds()) {
     for (auto e : n->getAdjListOut()) e->pl().reset();
     if (!n->pl().isSink()) continue;
