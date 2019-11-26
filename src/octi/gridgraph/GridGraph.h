@@ -99,6 +99,7 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   GridNode* getGrNdById(size_t id) const;
   const GridEdge* getGrEdgById(std::pair<size_t, size_t> id) const;
   void addResEdg(GridEdge* ge, CombEdge* cg);
+  CombEdge* getResEdg(GridEdge* ge);
 
   void writeGeoCoursePens(const CombEdge* ce);
   void clearGeoCoursePens();
@@ -116,7 +117,7 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   // encoding portable IDs for each node
   std::vector<GridNode*> _nds;
 
-  std::unordered_map<GridEdge*, std::vector<CombEdge*>> _resEdgs;
+  std::unordered_map<GridEdge*, CombEdge*> _resEdgs;
 
   void writeInitialCosts();
 

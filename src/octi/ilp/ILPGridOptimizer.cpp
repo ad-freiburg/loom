@@ -18,7 +18,15 @@ using octi::ilp::VariableMatrix;
 double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
                                   combgraph::Drawing* d,
                                   double maxGrDist) const {
+  // extract first feasible solution from gridgraph
+  extractFeasibleSol(gg, cg, maxGrDist);
+
   for (auto nd : *gg->getNds()) {
+    // if we presolve, some edges may be blocked
+    for (auto e : nd->getAdjList()) {
+      e->pl().open();
+      e->pl().unblock();
+    }
     if (!nd->pl().isSink()) continue;
     gg->openNodeTurns(nd);
     gg->openNodeSink(nd, 0);
@@ -51,6 +59,9 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
   VariableMatrix vm;
 
   glp_create_index(lp);
+
+  // set of grid nodes that may potentially be a position for an
+  // input station
 
   for (auto nd : cg.getNds()) {
     if (nd->getDeg() == 0) continue;
@@ -94,8 +105,10 @@ glp_prob* ILPGridOptimizer::createProblem(const GridGraph& gg,
       for (const GridNode* n : gg.getNds()) {
         for (const GridEdge* e : n->getAdjList()) {
           if (e->getFrom() != n) continue;
-          if (e->pl().cost() == std::numeric_limits<float>::infinity())
+          if (e->pl().cost() == std::numeric_limits<float>::infinity()) {
+            std::cerr << e << std::endl;
             continue;
+          }
 
           auto edgeVarName = getEdgeUseVar(e, edg);
 
@@ -540,7 +553,7 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   // "/home/patrick/repos/Cbc-2.9/bin/cbc {INPUT} -randomCbcSeed 0 -threads "
   // "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
 
-  std::string cmd = "gurobi_cl ResultFile={OUTPUT} {INPUT} > ./gurobi.log";
+  std::string cmd = "gurobi_cl ResultFile={OUTPUT} InputFile=feasible.mst {INPUT} > ./gurobi.log";
   util::replaceAll(cmd, "{INPUT}", f);
   util::replaceAll(cmd, "{OUTPUT}", outf);
   util::replaceAll(cmd, "{THREADS}", "4");
@@ -722,6 +735,82 @@ void ILPGridOptimizer::extractSolution(glp_prob* lp, GridGraph* gg,
       assert(i == edges.size());
 
       d->draw(edg, edges, false);
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void ILPGridOptimizer::extractFeasibleSol(GridGraph* gg,
+                                          const CombGraph& cg, double maxGrDist) const {
+  std::ofstream fo;
+  fo.open("feasible.mst");
+
+  for (auto nd : cg.getNds()) {
+    if (nd->getDeg() == 0) continue;
+    auto settled = gg->getSettled(nd);
+
+    for (auto gnd : *gg->getNds()) {
+      if (!gnd->pl().isSink()) continue;
+      double gridD = dist(*nd->pl().getGeom(), *gnd->pl().getGeom());
+
+      // threshold for speedup
+      double maxDis = gg->getCellSize() * maxGrDist;
+      if (gridD >= maxDis) continue;
+
+      auto varName = getStatPosVar(gnd, nd);
+      if (gnd == settled) {
+        fo << varName << "\t" << 1 << "\n";
+
+        // if settled, all bend edges are unused
+        for (size_t p = 0; p < 8; p++) {
+          auto portNd = gnd->pl().getPort(p);
+            for (auto bendEdg : portNd->getAdjList()) {
+              if (!bendEdg->pl().isSecondary()) continue;
+              for (auto cEdg : nd->getAdjList()) {
+                if (cEdg->getFrom() != nd) continue;
+                auto varName = getEdgeUseVar(bendEdg, cEdg);
+                fo << varName << "\t" << 0;
+                fo << "\n";
+              }
+            }
+        }
+      } else {
+        fo << varName << "\t" << 0 << "\n";
+
+        // if not settled, all sink edges are unused
+        // for all input edges
+        for (auto sinkEdg : gnd->getAdjList()) {
+          assert(sinkEdg->pl().isSecondary());
+          for (auto cEdg : nd->getAdjList()) {
+            if (cEdg->getFrom() != nd) continue;
+            auto varName = getEdgeUseVar(sinkEdg, cEdg);
+            fo << varName << "\t" << 0;
+            fo << "\n";
+          }
+        }
+      }
+    }
+  }
+
+  for (auto grNd : *gg->getNds()) {
+    for (auto grEdg : grNd->getAdjListOut()) {
+      if (grEdg->pl().isSecondary()) continue;
+      auto resEdg = gg->getResEdg(grEdg);
+
+      if (resEdg) {
+        auto varName = getEdgeUseVar(grEdg, resEdg);
+        fo << varName << "\t" << 1;
+        fo << "\n";
+      } else {
+        for (auto cNd : cg.getNds()) {
+          for (auto cEdg : cNd->getAdjList()) {
+            if (cEdg->getFrom() != cNd) continue;
+            auto varName = getEdgeUseVar(grEdg, cEdg);
+            fo << varName << "\t" << 0;
+            fo << "\n";
+          }
+        }
+      }
     }
   }
 }

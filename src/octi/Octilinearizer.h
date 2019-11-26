@@ -125,7 +125,13 @@ class Octilinearizer {
   Octilinearizer() {}
   double draw(TransitGraph* in, TransitGraph* out, GridGraph** gg,
               const Penalties& pens, double gridSize, double borderRad,
-              bool deg2heur, double maxGrDist, bool restrLocSearch, bool enfGeoCourse);
+              bool deg2heur, double maxGrDist, bool restrLocSearch,
+              bool enfGeoCourse);
+
+  double draw(const CombGraph& cg, const util::geo::DBox& box, TransitGraph* out,
+              GridGraph** gg, const Penalties& pens, double gridSize,
+              double borderRad, bool deg2heur, double maxGrDist,
+              bool restrLocSearch, bool enfGeoCourse);
 
   double drawILP(TransitGraph* in, TransitGraph* out, GridGraph** gg,
                  const Penalties& pens, double gridSize, double borderRad,
@@ -143,9 +149,11 @@ class Octilinearizer {
   std::vector<CombEdge*> getOrdering(const CombGraph& cg, bool randr) const;
 
   bool draw(const std::vector<CombEdge*>& order, GridGraph* gg,
-            Drawing* drawing, double cutoff, double maxGrDist, bool enfGeoCourse);
+            Drawing* drawing, double cutoff, double maxGrDist,
+            bool enfGeoCourse);
   bool draw(const std::vector<CombEdge*>& order, const SettledPos& settled,
-            GridGraph* gg, Drawing* drawing, double cutoff, double maxGrDist, bool enfGeoCourse);
+            GridGraph* gg, Drawing* drawing, double cutoff, double maxGrDist,
+            bool enfGeoCourse);
 
   SettledPos getNeighbor(const SettledPos& pos, const std::vector<CombNode*>&,
                          size_t i) const;

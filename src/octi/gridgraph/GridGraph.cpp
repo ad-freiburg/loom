@@ -129,8 +129,8 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   ge->pl().clearResEdges();
   gf->pl().clearResEdges();
 
-  _resEdgs[ge].clear();
-  _resEdgs[gf].clear();
+  _resEdgs[ge] = 0;
+  _resEdgs[gf] = 0;
 
   if (!a->pl().isSettled()) {
     openNodeTurns(a);
@@ -219,7 +219,7 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   auto gf = getNEdg(b, a);
 
   addResEdg(ge, e);
-  addResEdg(gf, e);
+  // addResEdg(gf, e);
 
   // this closes both nodes
   // a close means that all major edges reaching this node are closed
@@ -242,8 +242,16 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
 
 // _____________________________________________________________________________
 void GridGraph::addResEdg(GridEdge* ge, CombEdge* ce) {
+  assert(_resEdgs.count(ge) == 0 || _resEdgs.find(ge)->second == 0);
   ge->pl().addResEdge();
-  _resEdgs[ge].push_back(ce);
+  _resEdgs[ge] = ce;
+}
+
+// _____________________________________________________________________________
+CombEdge* GridGraph::getResEdg(GridEdge* ge) {
+  if (!ge) return 0;
+  if (_resEdgs.count(ge)) return  _resEdgs.find(ge)->second;
+  return 0;
 }
 
 // _____________________________________________________________________________
@@ -286,11 +294,13 @@ void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
 
     if (!neigh) continue;
 
-    if (getEdg(p, neigh->pl().getPort((i + 4) % 8)) &&
-        _resEdgs[getEdg(p, neigh->pl().getPort((i + 4) % 8))].size() > 0) {
-      outgoing[i] =
-          _resEdgs[getEdg(p, neigh->pl().getPort((i + 4) % 8))].front();
-    }
+    auto neighP = neigh->pl().getPort((i + 4) % 8);
+    auto e = getEdg(p, neighP);
+    auto f = getEdg(neighP, p);
+    auto resEdg = getResEdg(e);
+    if (!resEdg) resEdg = getResEdg(f);
+
+    if (resEdg) outgoing[i] = resEdg;
   }
 }
 

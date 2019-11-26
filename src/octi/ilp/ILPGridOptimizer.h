@@ -51,6 +51,9 @@ class ILPGridOptimizer {
   void solveProblem(glp_prob* lp) const;
   void extractSolution(glp_prob* lp, GridGraph* gg, const CombGraph& cg,
                        combgraph::Drawing* d) const;
+
+  void extractFeasibleSol(GridGraph* gg, const CombGraph& cg,
+                          double maxGrDist) const;
 };
 }  // namespace optim
 }  // namespace transitmapper
