@@ -1,0 +1,2761 @@
+{
+  "type": "FeatureCollection", 
+  "features": [
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870895.7425411046, 6107430.8478618590]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0xeea7b0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [868707.4790341319, 6105938.2481224388]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0xeeadc0", 
+        "station_id": "Parent30601", 
+        "station_label": "Am Lindenwäldle"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869305.4013636946, 6111597.1948829787]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0xef5e20", 
+        "station_id": "Parent30800", 
+        "station_label": "Moosweiher"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870514.9230594230, 6105265.2895867871]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0xef63b0", 
+        "station_id": "Parent30604", 
+        "station_label": "Scherrerplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874421.1812958359, 6108061.7930931738]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0xf19570", 
+        "station_id": "Parent30204", 
+        "station_label": "Hauptstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874368.7914890280, 6109017.6469271230]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0xf19ce0", 
+        "station_id": "Parent30208", 
+        "station_label": "Komturplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869478.2080429678, 6108704.3934915764]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0xf22bc0", 
+        "station_id": "Parent30503", 
+        "station_label": "Betzenhauser Torplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872396.1477519210, 6107498.1729684426]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0xf480c0", 
+        "station_id": "Parent30810", 
+        "station_label": "Robert-Koch-Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872234.1299100403, 6108864.3077587951]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0xf48250", 
+        "station_id": "Parent30813", 
+        "station_label": "Technische Fakultät"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873405.9717554587, 6106092.5993010029]
+      }, 
+      "properties": {
+        "deg": "4", 
+        "deg_in": "4", 
+        "deg_out": "4", 
+        "id": "0xf483e0", 
+        "station_id": "Parent30106", 
+        "station_label": "Stadttheater"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872325.7653737431, 6104544.7106894134]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0xf49330", 
+        "station_id": "Parent30411", 
+        "station_label": "H.-von-Stephan-Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [878787.1755945929, 6104287.4095205199]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0xf495a0", 
+        "station_id": "Parent30300", 
+        "station_label": "Laßbergstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [875503.8337669587, 6104921.9598650821]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0xf498e0", 
+        "station_id": "Parent30306", 
+        "station_label": "Maria-Hilf-Kirche"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [866948.9481539902, 6106958.3396580592]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0xf4a360", 
+        "station_id": "Parent30727", 
+        "station_label": "Bollerstaudenstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874171.3576337277, 6106508.0789053440]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0xf4aad0", 
+        "station_id": "Parent30101", 
+        "station_label": "Europaplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873845.3256795934, 6105998.8928171676]
+      }, 
+      "properties": {
+        "deg": "4", 
+        "deg_in": "4", 
+        "deg_out": "4", 
+        "id": "0xf4aeb0", 
+        "station_id": "Parent30100", 
+        "station_label": "Bertoldsbrunnen"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872674.6371274581, 6104746.0729413433]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0xf4b150", 
+        "station_id": "Parent30408", 
+        "station_label": "Reiterstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [867856.9304338030, 6104921.3233964890]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0xf4b230", 
+        "station_id": "Parent30716", 
+        "station_label": "Munzinger Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871903.4284504568, 6106828.9490487548]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0xf4b860", 
+        "station_id": "Parent30500", 
+        "station_label": "Rathaus im Stühlinger"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [875329.1767019787, 6112646.1460677683]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0xf4c0f0", 
+        "station_id": "Parent30430", 
+        "station_label": "Gundelfinger Str."
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870274.2164114933, 6102948.3807571735]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0xf4c1d0", 
+        "station_id": "Parent30424", 
+        "station_label": "Innsbrucker Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874697.2325639899, 6101006.8448838685]
+      }, 
+      "properties": {
+        "deg": "1", 
+        "deg_in": "1", 
+        "deg_out": "1", 
+        "id": "0xf4c630", 
+        "station_id": "Parent30400", 
+        "station_label": "Dorfstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [878243.9304351048, 6104517.5598859414]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0xf4c930", 
+        "station_id": "Parent30301", 
+        "station_label": "Römerhof"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874249.5195484454, 6105800.5906102238]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0xf58400", 
+        "station_id": "Parent30118", 
+        "station_label": "Oberlinden"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870316.3649319753, 6108007.4113346301]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0xf591c0", 
+        "station_id": "Parent30502", 
+        "station_label": "Am Bischofskreuz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873591.2821868120, 6104294.8697084924]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0xfd0ae0", 
+        "station_id": "Parent30405", 
+        "station_label": "Lorettostraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [868371.0302260793, 6106024.8553909212]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0xfd4b30"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874805.5557317059, 6105096.9386899900]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0xfd4d10", 
+        "station_id": "Parent30120", 
+        "station_label": "Brauerei Ganter"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873627.6554554392, 6105009.4528397135]
+      }, 
+      "properties": {
+        "deg": "3", 
+        "deg_in": "3", 
+        "deg_out": "3", 
+        "id": "0xfd5fc0", 
+        "station_id": "Parent30104", 
+        "station_label": "Johanneskirche"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873646.1482506145, 6108336.0277059013]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1006c70", 
+        "station_id": "Parent30206", 
+        "station_label": "Rennweg"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869356.6341118687, 6105681.4190296428]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x10071b0", 
+        "station_id": "Parent30602", 
+        "station_label": "Krozinger Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873623.5037071920, 6103467.1590265054]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1008aa0", 
+        "station_id": "Parent30404", 
+        "station_label": "Holbeinstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [877701.0027002936, 6104629.6141049331]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x100a510", 
+        "station_id": "Parent30302", 
+        "station_label": "Hasemannstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869651.6305236303, 6110778.5583639164]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x100ef60", 
+        "station_id": "Parent30801", 
+        "station_label": "Diakoniekrankenhaus"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872864.0469246696, 6107435.1174924579]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x10116c0", 
+        "station_id": "Parent30811", 
+        "station_label": "Friedrich-Ebert-Platz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869579.7920619419, 6109865.4218478659]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1011a80", 
+        "station_id": "Parent30802", 
+        "station_label": "Moosgrund"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871402.2274797835, 6102558.4298098180]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1011e00", 
+        "station_id": "Parent30651", 
+        "station_label": "Paula-Modersohn-Platz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873104.9565633015, 6105126.1151268091]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x10132c0", 
+        "station_id": "Parent30123", 
+        "station_label": "Mattenstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873899.2090406315, 6108569.2771056350]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x10156c0", 
+        "station_id": "Parent30207", 
+        "station_label": "Eichstetter Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874506.1947591684, 6101166.6888804482]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1017150", 
+        "station_id": "Parent30401", 
+        "station_label": "Klosterplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873338.2237295412, 6105614.8553483728]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x10172a0", 
+        "station_id": "Parent30114", 
+        "station_label": "Erbprinzenstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869158.8369559166, 6109124.9212590726]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1017330", 
+        "station_id": "Parent30504", 
+        "station_label": "Paduaallee"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874197.0412279590, 6101340.1059225239]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1018c00", 
+        "station_id": "Parent30402", 
+        "station_label": "Wiesenweg"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873390.9469132139, 6108109.3728132863]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101a820", 
+        "station_id": "Parent30205", 
+        "station_label": "Hauptfriedhof"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871741.2568561774, 6103326.4062998006]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101ae50", 
+        "station_id": "Parent30131", 
+        "station_label": "Peter-Thumb-Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871555.9979469596, 6104580.4293293478]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101b5f0", 
+        "station_id": "Parent30616", 
+        "station_label": "Pressehaus"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872793.1294302876, 6106290.6585444855]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101c470", 
+        "station_id": "Parent30107", 
+        "station_label": "Hauptbahnhof"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870535.9928071701, 6107248.1729600998]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101caf0", 
+        "station_id": "Parent30505", 
+        "station_label": "Bissierstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872373.5564745428, 6104240.8339512032]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101cb80", 
+        "station_id": "Parent30415", 
+        "station_label": "Weddigenstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [868023.7979536955, 6105495.9366990579]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101ce40", 
+        "station_id": "Parent30715", 
+        "station_label": "VAG-Zentrum"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [867723.7664096544, 6106431.4901772523]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101dfb0", 
+        "station_id": "Parent30733", 
+        "station_label": "Geschwister-Scholl-Platz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870062.6363691376, 6105409.8636971461]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101e270", 
+        "station_id": "Parent30603", 
+        "station_label": "Dorfbrunnen"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873689.9624549947, 6106588.6970420526]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101f1d0", 
+        "station_id": "Parent30105", 
+        "station_label": "Fahnenbergplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874368.0178619499, 6105331.0321573047]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101f750", 
+        "station_id": "Parent30119", 
+        "station_label": "Schwabentorbrücke"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [875992.2908933498, 6104933.0880258307]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x101fff0", 
+        "station_id": "Parent30305", 
+        "station_label": "Alter Messplatz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871659.5622910113, 6108053.5322908908]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x10200b0", 
+        "station_id": "Parent30808", 
+        "station_label": "Berliner Allee"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [867340.9321905655, 6106713.4121599495]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1020760", 
+        "station_id": "Parent30734", 
+        "station_label": "Maria-von-Rudloff-Platz"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [877101.3950703307, 6104696.4287754269]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1020b20", 
+        "station_id": "Parent30303", 
+        "station_label": "Emil-Gött-Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870905.0100308711, 6105099.2905644681]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1021f40", 
+        "station_id": "Parent30605", 
+        "station_label": "Haslach Bad"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [876466.6212734992, 6104856.3424157565]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1022640", 
+        "station_id": "Parent30304", 
+        "station_label": "Musikhochschule"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873585.1509724542, 6102688.6228918396]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1023070", 
+        "station_id": "Parent30403", 
+        "station_label": "Wonnhalde"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871793.4298280807, 6108450.8326681526]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1024320", 
+        "station_id": "Parent30814", 
+        "station_label": "Elsässer Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [871149.3768528251, 6107195.3667129241]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x10245f0", 
+        "station_id": "Parent30501", 
+        "station_label": "Runzmattenweg"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [873696.5718885412, 6105503.0342248837]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x10252a0", 
+        "station_id": "Parent30103", 
+        "station_label": "Holzmarkt"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872025.6489206470, 6107841.4633871801]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1025e50", 
+        "station_id": "Parent30809", 
+        "station_label": "Freiburg Killianstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [872307.7020133580, 6106564.5587426862]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1026070", 
+        "station_id": "Parent30108", 
+        "station_label": "Eschholzstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [875003.2073250349, 6111231.9058228238]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1027260", 
+        "station_id": "Parent30431", 
+        "station_label": "Berggasse"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869393.1123580398, 6106741.9239448356]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1028c00", 
+        "station_id": "Parent30607", 
+        "station_label": "Rohrgraben"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [870792.8733651668, 6102750.1314185243]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x10293b0", 
+        "station_id": "Parent30423", 
+        "station_label": "Vauban-Mitte"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874630.0492611707, 6110045.7845480414]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x1029b30", 
+        "station_id": "Parent30201", 
+        "station_label": "Tullastraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874443.2498296768, 6109419.3899331195]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x102b240", 
+        "station_id": "Parent30200", 
+        "station_label": "Hornusstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874365.9647906219, 6107370.1792671923]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x102bee0", 
+        "station_id": "Parent30102", 
+        "station_label": "Tennenbacher Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [875189.2972055714, 6111909.3750648741]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x102c630", 
+        "station_id": "Parent30432", 
+        "station_label": "Glottertalstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874781.4099618907, 6110544.9666943578]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x102dc20", 
+        "station_id": "Parent30202", 
+        "station_label": "Reutebachgasse"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [874374.0099460027, 6108692.8373381542]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x102e8d0", 
+        "station_id": "Parent30203", 
+        "station_label": "Okenstraße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "Point", 
+        "coordinates": [869087.6789471197, 6106441.9845430432]
+      }, 
+      "properties": {
+        "deg": "2", 
+        "deg_in": "2", 
+        "deg_out": "2", 
+        "id": "0x102efc0", 
+        "station_id": "Parent30600", 
+        "station_label": "Bugginger Straße"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870883.6956334044, 6107423.9346372895], [870880.9308745626, 6107426.3095250912], [870854.2397406519, 6107447.3061589655], [870846.5583927851, 6107447.7298900206], [870808.2225381612, 6107428.8040837925], [870542.0176772726, 6107251.4594659414], [870535.9928071701, 6107248.1729600998]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0xeea7b0", 
+        "id": "0x1014f50", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x101caf0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870895.7425411046, 6107430.8478618581], [870986.4110952587, 6107339.5189970452], [871148.7559269221, 6107195.6432396453], [871149.3768528251, 6107195.3667129241]]
+      }, 
+      "properties": {
+        "dbg_lines": "1$3", 
+        "from": "0xeea7b0", 
+        "id": "0x1024680", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x10245f0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[868707.4790341319, 6105938.2481224388], [868477.8450320326, 6106001.1021793652], [868371.0302260793, 6106024.8553909212]]
+      }, 
+      "properties": {
+        "dbg_lines": "3$5", 
+        "from": "0xeeadc0", 
+        "id": "0xefe9a0", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0xfd4b30"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869305.4013636946, 6111597.1948829787], [869433.5952112733, 6111347.4492284972], [869535.2039472389, 6111100.8040093370], [869651.6305236303, 6110778.5583639164]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0xef5e20", 
+        "id": "0x100ee60", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x100ef60"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870514.9230594230, 6105265.2895867871], [870227.1838314536, 6105353.0356779043], [870077.9117297684, 6105403.7237088513], [870062.6363691376, 6105409.8636971461]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0xef63b0", 
+        "id": "0x101f5c0", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x101e270"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874421.1812958359, 6108061.7930931738], [874425.4446256311, 6108034.1538033588], [874434.2763914882, 6107922.8099951977], [874432.7509088393, 6107850.2198642977], [874388.5670296418, 6107504.1946469741], [874365.9647906219, 6107370.1792671923]]
+      }, 
+      "properties": {
+        "dbg_lines": "4", 
+        "from": "0xf19570", 
+        "id": "0xefeab0", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x102bee0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874368.7914890280, 6109017.6469271239], [874394.8715591679, 6109140.1195996795], [874420.5164293714, 6109311.5828496981], [874440.5910685796, 6109410.4743083753], [874443.2498296768, 6109419.3899331195]]
+      }, 
+      "properties": {
+        "dbg_lines": "2$4", 
+        "from": "0xf19ce0", 
+        "id": "0x1008140", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x102b240"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874370.1303419129, 6109016.3366571292], [874346.3335662170, 6108879.2461735988], [874374.7815121470, 6108798.3812524108], [874374.0099460027, 6108692.8373381542]]
+      }, 
+      "properties": {
+        "dbg_lines": "4", 
+        "from": "0xf19ce0", 
+        "id": "0x102ea40", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x102e8d0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869478.2080429678, 6108704.3934915764], [870042.2133196797, 6108218.5558136506], [870222.6224349657, 6108074.2269976567], [870316.3649319753, 6108007.4113346301]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0xf22bc0", 
+        "id": "0xfdc7f0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0xf591c0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872399.2486040081, 6107492.2003653375], [872392.2138450515, 6107492.6592458775], [872377.4368920641, 6107479.7151020672], [872364.2430573765, 6107464.9602637626], [872351.0492650233, 6107450.2053882834], [872337.8554734800, 6107435.4505120926], [872324.6616819429, 6107420.6956358971], [872311.4678904053, 6107405.9407597017], [872298.2740988682, 6107391.1858835062], [872258.6927242565, 6107346.9212549198], [872245.4989327192, 6107332.1663787235], [872232.3051411822, 6107317.4115025289], [872219.1113501088, 6107302.6566259256], [872205.9175845527, 6107287.9017269164], [872192.7241991479, 6107273.1464941241], [872179.5329759589, 6107258.3893636540], [872166.3486731090, 6107243.6261681151], [872153.2054227188, 6107228.8272917978], [872141.7209745232, 6107212.7552784253], [872131.0970137143, 6107196.0696262429], [872120.7623626273, 6107179.1879725326], [872110.4302559983, 6107162.3047850700], [872100.0983279096, 6107145.4214900769], [872089.7664114533, 6107128.5381880775], [872079.4344954131, 6107111.6548858285], [872069.1025793802, 6107094.7715835739], [872048.4387473150, 6107061.0049790666], [872027.7749152501, 6107027.2383745573], [872007.1110831852, 6106993.4717700500], [871996.7791671529, 6106976.5884677954], [871986.4472511283, 6106959.7051655371], [871976.1153352237, 6106942.8218632052], [871965.7834207569, 6106925.9385600081], [871955.4515201047, 6106909.0552484915], [871945.1197109981, 6106892.1718818452], [871934.7848406613, 6106875.2903612964], [871924.3998297560, 6106858.4396284055], [871910.4947309894, 6106846.3177248733], [871903.7011850548, 6106840.8818293661]]
+      }, 
+      "properties": {
+        "dbg_lines": "2$4", 
+        "from": "0xf480c0", 
+        "id": "0xf50e80", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0xf4b860"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872409.5950254300, 6107491.6633245973], [872448.3547581108, 6107469.1420439389], [872633.3029090010, 6107330.0735071618], [872646.5109223977, 6107325.8771203570], [872664.2522022488, 6107327.7200596221], [872731.5655410518, 6107357.0491433563], [872847.7122743588, 6107420.4656002643], [872864.0469246696, 6107435.1174924579]]
+      }, 
+      "properties": {
+        "dbg_lines": "2", 
+        "from": "0xf480c0", 
+        "id": "0x1014de0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x10116c0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872234.1299100403, 6108864.3077587951], [871793.4298280807, 6108450.8326681526]]
+      }, 
+      "properties": {
+        "dbg_lines": "4", 
+        "from": "0xf48250", 
+        "id": "0x10244a0", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x1024320"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873405.8912123207, 6106093.6022291426], [873423.3089582231, 6106088.0083993524], [873442.2940246253, 6106081.9121927796], [873461.3210541507, 6106075.9510941040], [873480.4758195563, 6106070.5671300869], [873500.4058585018, 6106069.9879358001], [873520.3376628524, 6106069.4542432157], [873540.2694978274, 6106068.9213912673], [873560.2013332983, 6106068.3885529507], [873580.1331687749, 6106067.8557147812], [873619.9968397277, 6106066.7900384460], [873639.9286752042, 6106066.2572002746], [873659.8605105804, 6106065.7243593503], [873679.7923275064, 6106065.1910183365], [873699.7220073815, 6106064.6217736490], [873718.5445269772, 6106059.0713713057], [873736.5890350905, 6106050.6050765142], [873754.1701584430, 6106041.2173709068], [873771.7289249920, 6106031.7909149965], [873789.2867052727, 6106022.3627594337], [873806.8436038656, 6106012.9330875818], [873824.3173393590, 6106003.3824037518], [873831.2083337193, 6105995.7017427627]]
+      }, 
+      "properties": {
+        "dbg_lines": "1$2$3$4", 
+        "from": "0xf483e0", 
+        "id": "0xf55310", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0xf4aeb0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873406.6778524499, 6106090.6582349595], [873338.4425229375, 6105797.6024539433], [873338.2237295412, 6105614.8553483728]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0xf483e0", 
+        "id": "0x1018770", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x10172a0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872323.1832221157, 6104548.0290110717], [872065.7419490146, 6104439.5079139229], [871992.0556281595, 6104422.3876124639], [871937.4292913170, 6104417.2604523804], [871895.0205349831, 6104418.9526806455], [871727.1009606958, 6104439.2925377339], [871643.4542660469, 6104454.6267219083], [871635.1208078729, 6104459.1956128441], [871621.3388348485, 6104478.4766118377], [871555.9979469596, 6104580.4293293478]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0xf49330", 
+        "id": "0xfcbf60", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x101b5f0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[875503.8337669587, 6104921.9598650821], [875752.7913228157, 6104937.8146911515], [875863.9976723607, 6104940.0016379459], [875992.2908933498, 6104933.0880258307]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0xf498e0", 
+        "id": "0x1020bf0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x101fff0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874169.8976513623, 6106508.3340624627], [873723.4619998600, 6106592.1524818037], [873689.9624549947, 6106588.6970420526]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0xf4aad0", 
+        "id": "0x101f260", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x101f1d0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873859.5858720121, 6106033.7308210749], [873870.6355838478, 6106049.2950942582], [873881.4666600956, 6106065.0195243722], [873892.2910901508, 6106080.7486793157], [873903.1154903813, 6106096.4778554440], [873913.9398906117, 6106112.2070315713], [873924.7642908419, 6106127.9362076987], [873935.5886910721, 6106143.6653838269], [873957.2374915327, 6106175.1237360816], [873968.0618917630, 6106190.8529122099], [873978.8862919933, 6106206.5820883373], [873989.7106922235, 6106222.3112644646], [874000.5350924539, 6106238.0404405929], [874022.1838929146, 6106269.4987928476], [874033.0082931448, 6106285.2279689759], [874043.8326933749, 6106300.9571451033], [874054.6570936055, 6106316.6863212306], [874065.4814938357, 6106332.4154973589], [874087.1302942962, 6106363.8738496136], [874097.9546945266, 6106379.6030257419], [874119.6034949871, 6106411.0613779966], [874130.4278914891, 6106426.7905567726], [874141.2522227813, 6106442.5197818633], [874152.0760611452, 6106458.2493570205], [874162.8720911341, 6106473.9985531997], [874168.8383014072, 6106490.5947870947], [874169.2393549919, 6106504.2034742311]]
+      }, 
+      "properties": {
+        "dbg_lines": "4", 
+        "from": "0xf4aeb0", 
+        "id": "0xf590f0", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0xf4aad0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873860.2625416871, 6105970.8846031278], [874202.1366489585, 6105841.9690131266], [874226.0063041188, 6105826.1758587826], [874249.5195484454, 6105800.5906102238]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0xf4aeb0", 
+        "id": "0xfe35f0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0xf58400"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872682.7453455116, 6104735.9758419953], [872702.6498175086, 6104737.5215551732], [872722.5542895058, 6104739.0672683530], [872762.3632334999, 6104742.1586947106], [872782.2677054883, 6104743.7044079872], [872802.1721756742, 6104745.2501412844], [872822.0764558103, 6104746.7979832068], [872841.6306561204, 6104750.7765865820], [872861.1361451001, 6104755.0389055787], [872880.6414743802, 6104759.3019733308], [872900.1468008652, 6104763.5650541028], [872919.6521273030, 6104767.8281350955], [872958.6627801773, 6104776.3542970866], [872978.1681066141, 6104780.6173780840], [872997.6734330512, 6104784.8804590786], [873017.1787594883, 6104789.1435400741], [873036.6840859252, 6104793.4066210706], [873056.1894123624, 6104797.6697020661], [873095.2000652364, 6104806.1958640590], [873114.7053916735, 6104810.4589450546], [873134.2107181104, 6104814.7220260510], [873153.7160445475, 6104818.9851070466], [873173.2213709846, 6104823.2481880412], [873192.7266974216, 6104827.5112690385], [873231.7373502958, 6104836.0374310296], [873251.2426767326, 6104840.3005120261], [873270.7480031699, 6104844.5635930216], [873290.2533296070, 6104848.8266740181], [873329.2639824809, 6104857.3528360091], [873348.7693089179, 6104861.6159170056], [873368.2746353007, 6104865.8789982535], [873387.7799518516, 6104870.1421253029], [873407.2850392412, 6104874.4063195670], [873426.7718204914, 6104878.7539741639], [873446.1175576422, 6104883.6203991640], [873463.9076853510, 6104892.6765914783], [873481.6595242081, 6104901.8148050252], [873499.4084422991, 6104910.9587275172], [873517.1570724901, 6104920.1032117000], [873534.9056825715, 6104929.2477351110], [873552.6542735335, 6104938.3922958160], [873570.4011303992, 6104947.5402374836], [873588.1303350474, 6104956.7224139031], [873604.8818441723, 6104967.0314853331], [873608.7734824801, 6104986.5916172508], [873612.0106134783, 6105006.2932141470], [873612.9043854830, 6105011.8328125048]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0xf4b150", 
+        "id": "0xf5a390", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0xfd5fc0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872674.5929997431, 6104746.3735362459], [872500.5777184742, 6104635.0854473319], [872326.1377425005, 6104546.0371490773]]
+      }, 
+      "properties": {
+        "dbg_lines": "3$5", 
+        "from": "0xf4b150", 
+        "id": "0xfda630", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0xf49330"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[867856.9304338030, 6104921.3233964890], [867908.6888610737, 6104991.2732486390], [868023.7979536955, 6105495.9366990579]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0xf4b230", 
+        "id": "0x101cc80", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x101ce40"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871904.6866802878, 6106821.9074084312], [872079.7850101086, 6106715.1771382857], [872307.7020133580, 6106564.5587426862]]
+      }, 
+      "properties": {
+        "dbg_lines": "1$2$3$4", 
+        "from": "0xf4b860", 
+        "id": "0x10201b0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x1026070"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870274.2164114933, 6102948.3807571735], [870792.8733651668, 6102750.1314185243]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0xf4c1d0", 
+        "id": "0x1029440", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x10293b0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874697.2325639899, 6101006.8448838685], [874658.2120527255, 6101061.6992548183], [874618.9111780524, 6101095.0308383815], [874506.1947591684, 6101166.6888804482]]
+      }, 
+      "properties": {
+        "dbg_lines": "2", 
+        "from": "0xf4c630", 
+        "id": "0xeeb200", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x1017150"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[878243.9304351048, 6104517.5598859414], [878367.9582540283, 6104476.2785113957], [878679.0827261404, 6104348.8402916761], [878750.5321804218, 6104314.0641903793], [878787.1755945929, 6104287.4095205199]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0xf4c930", 
+        "id": "0xf3f140", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0xf495a0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874249.5195484454, 6105800.5906102238], [874259.7583635524, 6105789.4495432656], [874292.8772981013, 6105739.3020793665], [874309.2841690407, 6105694.6468383651], [874314.8666641968, 6105492.4889400369], [874327.4742322969, 6105412.1383766197], [874347.8661117915, 6105356.3159578042], [874368.0178619499, 6105331.0321573047]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0xf58400", 
+        "id": "0x101f7e0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x101f750"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870316.3649319753, 6108007.4113346301], [870571.6076063889, 6107825.4852171531], [870692.9410320446, 6107727.9986469541], [870748.3089811670, 6107673.8198661422], [870805.7199801019, 6107602.0438439446], [870855.1149083398, 6107529.5511506582], [870907.7894488047, 6107437.7610864257]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0xf591c0", 
+        "id": "0x1016f60", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0xeea7b0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873591.2821868120, 6104294.8697084924], [873588.8957597167, 6104387.4391819630], [873603.5689220449, 6104642.3391988659], [873642.4065253955, 6105007.0728669222]]
+      }, 
+      "properties": {
+        "dbg_lines": "2", 
+        "from": "0xfd0ae0", 
+        "id": "0xf40940", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0xfd5fc0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[868374.3012462937, 6106035.0783357117], [868369.3751866862, 6106036.6545195691], [868303.5187547179, 6106062.7252924461], [868234.1805360690, 6106094.9089170918], [868085.0587387276, 6106177.6147216894], [867922.0097946622, 6106284.7719333684], [867835.2626426083, 6106347.5198168624], [867723.7664096544, 6106431.4901772523]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0xfd4b30", 
+        "id": "0x101de20", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x101dfb0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874805.5557317059, 6105096.9386899900], [874811.8522882008, 6105093.9214714114], [874936.7977018429, 6105039.9467206337], [875212.0148861073, 6104963.0267297886], [875406.6275171200, 6104922.1836416088], [875476.7322200355, 6104920.2339069713], [875503.8337669587, 6104921.9598650821]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0xfd4d10", 
+        "id": "0xf48d20", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0xf498e0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873627.6554554392, 6105009.4528397135], [873656.2926921183, 6105239.1529889889], [873696.5718885412, 6105503.0342248837]]
+      }, 
+      "properties": {
+        "dbg_lines": "2$3", 
+        "from": "0xfd5fc0", 
+        "id": "0xfcebd0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x10252a0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873646.1482506145, 6108336.0277059013], [873666.3033935642, 6108348.4168142062], [873719.2981848092, 6108389.1579473196], [873899.2090406315, 6108569.2771056350]]
+      }, 
+      "properties": {
+        "dbg_lines": "2", 
+        "from": "0x1006c70", 
+        "id": "0x1006c00", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x10156c0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869356.6341118687, 6105681.4190296428], [868960.1151293877, 6105820.1266297977], [868706.1279194251, 6105924.5576218180]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0x10071b0", 
+        "id": "0xee6ee0", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0xeeadc0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873623.5037071920, 6103467.1590265054], [873629.8987730739, 6103659.5453478247], [873593.4398536184, 6104211.1738434155], [873591.2821868120, 6104294.8697084924]]
+      }, 
+      "properties": {
+        "dbg_lines": "2", 
+        "from": "0x1008aa0", 
+        "id": "0x1008b40", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0xfd0ae0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[877701.0027002936, 6104629.6141049331], [878013.1175621031, 6104577.7698887307], [878186.8080718580, 6104536.5724727353], [878243.9304351048, 6104517.5598859414]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0x100a510", 
+        "id": "0xf50fc0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0xf4c930"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869651.6305236303, 6110778.5583639164], [869780.1131517745, 6110422.9439611323], [869795.4506042519, 6110365.2857127814], [869797.8415205235, 6110310.9264102262], [869783.2799665933, 6110207.1212960351], [869763.9427491704, 6110148.8859111797], [869579.7920619419, 6109865.4218478659]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0x100ef60", 
+        "id": "0x100ecf0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x1011a80"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872864.0469246696, 6107435.1174924579], [873148.7569939523, 6107690.4973850297], [873182.2767032329, 6107726.4624035489], [873208.4679543098, 6107843.8534599263], [873226.9941080572, 6107887.4022988649], [873254.7955436256, 6107934.9661526540], [873390.9469132139, 6108109.3728132863]]
+      }, 
+      "properties": {
+        "dbg_lines": "2", 
+        "from": "0x10116c0", 
+        "id": "0x1022f80", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x101a820"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869579.7920619419, 6109865.4218478659], [869442.4213619245, 6109653.9664501520], [869321.2173949820, 6109443.7167641725], [869197.3061008861, 6109213.0560875330], [869158.8369559166, 6109124.9212590726]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0x1011a80", 
+        "id": "0x10170e0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x1017330"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871402.2274797835, 6102558.4298098180], [871406.2301332253, 6102558.1291017001], [871447.7483864971, 6102563.1873216461], [871455.4427478507, 6102573.0752809998], [871461.0857021456, 6102595.1332582105], [871507.7748322370, 6102973.6949635856], [871519.3900461544, 6103016.6071917154], [871536.1146099466, 6103055.4779169047], [871568.7314471530, 6103103.9360556705], [871735.2730617712, 6103316.5352756223], [871741.2568561774, 6103326.4062998006]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0x1011e00", 
+        "id": "0x1018ca0", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x101ae50"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873104.9565633015, 6105126.1151268091], [872666.5730371200, 6104755.8694457849], [872325.7653737431, 6104544.7106894134]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0x10132c0", 
+        "id": "0x1011a10", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0xf49330"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873899.2090406315, 6108569.2771056350], [874202.5905595865, 6108873.0098825861], [874340.4699071745, 6108991.3858533073], [874367.4526361432, 6109018.9571971195]]
+      }, 
+      "properties": {
+        "dbg_lines": "2", 
+        "from": "0x10156c0", 
+        "id": "0x1011890", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0xf19ce0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874506.1947591684, 6101166.6888804482], [874505.0638029882, 6101167.4078715798], [874264.2705894925, 6101300.3036099542], [874197.0412279590, 6101340.1059225239]]
+      }, 
+      "properties": {
+        "dbg_lines": "2", 
+        "from": "0x1017150", 
+        "id": "0x101a5b0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x1018c00"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873338.2237295412, 6105614.8553483728], [873337.9673974791, 6105400.7540858854], [873328.4727958430, 6105359.7908376781], [873306.2906729744, 6105317.4909154717], [873269.2745536097, 6105273.0251171077], [873204.3381689304, 6105210.0498735774], [873104.9565633015, 6105126.1151268091]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0x10172a0", 
+        "id": "0x1008880", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x10132c0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869158.8369559166, 6109124.9212590726], [869143.8778880625, 6109090.6492501600], [869139.6371376407, 6109065.0454729181], [869151.4110645710, 6109021.8714125259], [869221.2698776757, 6108945.9177680388], [869444.5550770286, 6108733.3823672170], [869478.2080429678, 6108704.3934915764]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0x1017330", 
+        "id": "0x1009d00", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0xf22bc0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874197.0412279590, 6101340.1059225239], [874117.9976765155, 6101386.9026802108], [874027.1329265141, 6101451.9163349587], [873944.2719186066, 6101537.7137796404], [873890.6112220995, 6101608.9170025866], [873832.8861035057, 6101702.3082090337], [873700.2286101350, 6102042.0031810813], [873655.3145616516, 6102172.0294608353], [873622.4644804841, 6102288.1073422795], [873595.8092974511, 6102436.0709176147], [873583.3879418412, 6102653.7999591380], [873585.1509724542, 6102688.6228918396]]
+      }, 
+      "properties": {
+        "dbg_lines": "2", 
+        "from": "0x1018c00", 
+        "id": "0xf40aa0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x1023070"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873390.9469132139, 6108109.3728132863], [873479.4257401419, 6108212.2473765314], [873542.9561056020, 6108272.5968156345], [873646.1482506145, 6108336.0277059013]]
+      }, 
+      "properties": {
+        "dbg_lines": "2", 
+        "from": "0x101a820", 
+        "id": "0xfd6ea0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x1006c70"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871741.2568561774, 6103326.4062998006], [871892.7405582297, 6103576.2977873944], [871983.9147547386, 6103712.8598168232], [872316.8126358499, 6104131.3980906550], [872371.0997140824, 6104225.9880375341], [872373.5564745428, 6104240.8339512032]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0x101ae50", 
+        "id": "0xeeac70", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x101cb80"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871555.9979469596, 6104580.4293293478], [871507.6902601869, 6104655.8047964126], [871476.5686110255, 6104697.2075689994], [871440.7982684367, 6104738.0120430365], [871355.3115029769, 6104817.8260954618], [871251.2299638075, 6104895.2469536886], [871192.2161540817, 6104933.0599349765], [870905.0100308711, 6105099.2905644681]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0x101b5f0", 
+        "id": "0x10220a0", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x1021f40"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872793.1294302876, 6106290.6585444855], [873404.3177999719, 6106094.1071743667]]
+      }, 
+      "properties": {
+        "dbg_lines": "1$2$3$4", 
+        "from": "0x101c470", 
+        "id": "0x1015b40", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0xf483e0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870535.9928071701, 6107248.1729600998], [870463.4108255067, 6107208.5802215515], [869884.8666752093, 6107025.2697707433], [869764.4009901120, 6106980.6977757290], [869649.6848102057, 6106930.1774902120], [869541.6452179600, 6106868.0186422942], [869393.1123580398, 6106741.9239448356]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0x101caf0", 
+        "id": "0xf517f0", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x1028c00"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872373.5564745428, 6104240.8339512032], [872380.7408815204, 6104284.2484751139], [872377.4683167692, 6104326.9502995769], [872327.9751566134, 6104540.0659080874]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0x101cb80", 
+        "id": "0xf5cba0", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0xf49330"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[868023.7979536955, 6105495.9366990579], [868040.6616587077, 6105569.8708719751], [868122.5010479103, 6105665.3675508266], [868186.7497364134, 6105864.1201723851], [868233.0682236445, 6105937.2268492170], [868256.5117770481, 6105962.7203320190], [868276.6772891817, 6105976.4210576396], [868367.7592058647, 6106014.6324461298]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0x101ce40", 
+        "id": "0xf5a320", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0xfd4b30"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[867723.7664096544, 6106431.4901772523], [867390.8160135380, 6106682.2427274808], [867340.9321905655, 6106713.4121599495]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0x101dfb0", 
+        "id": "0xf5c2d0", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x1020760"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870062.6363691376, 6105409.8636971461], [869591.0952316953, 6105599.4014196480], [869356.6341118687, 6105681.4190296428]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0x101e270", 
+        "id": "0x101e4d0", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0x10071b0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873689.9624549947, 6106588.6970420526], [873497.3882420110, 6106310.4722329220], [873425.7717631510, 6106151.0888667870], [873407.0001570926, 6106092.0295655429]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0x101f1d0", 
+        "id": "0x101b720", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0xf483e0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874368.0178619499, 6105331.0321573047], [874385.3841808878, 6105309.2431543646], [874437.5090741710, 6105276.3962836051], [874573.1350648089, 6105208.3113037013], [874805.5557317059, 6105096.9386899900]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0x101f750", 
+        "id": "0x101e380", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0xfd4d10"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[875992.2908933498, 6104933.0880258307], [875997.0696109759, 6104932.8305048188], [876145.6649856614, 6104914.4652242344], [876466.6212734992, 6104856.3424157565]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0x101fff0", 
+        "id": "0x1009c40", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x1022640"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871659.5622910113, 6108053.5322908908], [871890.4674742327, 6107932.6122973729], [871982.7871956562, 6107878.4324903246], [872025.6489206470, 6107841.4633871801]]
+      }, 
+      "properties": {
+        "dbg_lines": "4", 
+        "from": "0x10200b0", 
+        "id": "0x1025ee0", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x1025e50"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[867340.9321905655, 6106713.4121599495], [866948.9481539902, 6106958.3396580592]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0x1020760", 
+        "id": "0x10206c0", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0xf4a360"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[877101.3950703307, 6104696.4287754269], [877206.3497128024, 6104694.7599938195], [877314.9749972882, 6104685.5683377031], [877625.4981073840, 6104642.1558865588], [877701.0027002936, 6104629.6141049331]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0x1020b20", 
+        "id": "0xfd4ac0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x100a510"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870905.0100308711, 6105099.2905644681], [870826.3036464902, 6105144.8446483240], [870706.8015785789, 6105200.1683459040], [870620.7932980583, 6105233.0044525303], [870514.9230594230, 6105265.2895867871]]
+      }, 
+      "properties": {
+        "dbg_lines": "5", 
+        "from": "0x1021f40", 
+        "id": "0x1022030", 
+        "lines": [
+          {
+            "color": "0000ff", 
+            "id": "0x26b5690", 
+            "label": "5"
+          }], 
+        "to": "0xef63b0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[876466.6212734992, 6104856.3424157565], [876619.7016705768, 6104828.6206887234], [876747.8192736787, 6104748.7621382242], [876812.2547057930, 6104721.8088058382], [876865.4024610913, 6104708.4771288764], [876954.7446494768, 6104698.7605210189], [877101.3950703307, 6104696.4287754269]]
+      }, 
+      "properties": {
+        "dbg_lines": "1", 
+        "from": "0x1022640", 
+        "id": "0x10229a0", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }], 
+        "to": "0x1020b20"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873585.1509724542, 6102688.6228918396], [873621.4708917059, 6103406.0047083925], [873623.5037071920, 6103467.1590265054]]
+      }, 
+      "properties": {
+        "dbg_lines": "2", 
+        "from": "0x1023070", 
+        "id": "0x1020ab0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }], 
+        "to": "0x1008aa0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871793.4298280807, 6108450.8326681526], [871557.8085577905, 6108229.7672994845], [871512.4909453623, 6108185.2930085743], [871499.8308114742, 6108160.4878358170], [871520.7618179918, 6108129.0072217919], [871545.5138064956, 6108113.2569874786], [871659.5622910113, 6108053.5322908908]]
+      }, 
+      "properties": {
+        "dbg_lines": "4", 
+        "from": "0x1024320", 
+        "id": "0x1007010", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x10200b0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[871149.3768528251, 6107195.3667129241], [871586.6086287990, 6107000.6473929072], [871901.8974860280, 6106824.0579084679]]
+      }, 
+      "properties": {
+        "dbg_lines": "1$3", 
+        "from": "0x10245f0", 
+        "id": "0xfcc700", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0xf4b860"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[873696.5718885412, 6105503.0342248837], [873742.8752334778, 6105806.3814853318], [873830.2459709551, 6105995.2541017029]]
+      }, 
+      "properties": {
+        "dbg_lines": "2$3", 
+        "from": "0x10252a0", 
+        "id": "0xf54920", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0xf4aeb0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872025.6489206470, 6107841.4633871801], [872363.6666646729, 6107549.9162586788], [872379.6189784807, 6107530.3619868876], [872379.5996263248, 6107510.6552153900]]
+      }, 
+      "properties": {
+        "dbg_lines": "4", 
+        "from": "0x1025e50", 
+        "id": "0xf5a420", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0xf480c0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[872307.7020133580, 6106564.5587426862], [872643.5620068924, 6106342.6064852811], [872723.2049126297, 6106313.1454902980], [872793.1294302876, 6106290.6585444855]]
+      }, 
+      "properties": {
+        "dbg_lines": "1$2$3$4", 
+        "from": "0x1026070", 
+        "id": "0x101ca80", 
+        "lines": [
+          {
+            "color": "e8001b", 
+            "id": "0x26648a0", 
+            "label": "1"
+          }, 
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x101c470"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[875003.2073250349, 6111231.9058228238], [875049.9450050818, 6111506.2001351118], [875082.9149371067, 6111612.0097521134], [875189.2972055714, 6111909.3750648741]]
+      }, 
+      "properties": {
+        "dbg_lines": "2$4", 
+        "from": "0x1027260", 
+        "id": "0x102c1b0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x102c630"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869393.1123580398, 6106741.9239448356], [869329.3444411908, 6106687.7891480839], [869191.3808731419, 6106563.1582136396], [869134.0736218707, 6106503.2001397889], [869087.6831090486, 6106441.9902807176], [869087.6789471197, 6106441.9845430432]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0x1028c00", 
+        "id": "0x102f1d0", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x102efc0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[870792.8733651668, 6102750.1314185243], [870977.0758935141, 6102679.7225882486], [871203.8731964604, 6102598.1001601331], [871285.5652224619, 6102574.6353227347], [871349.5506346626, 6102562.3872733358], [871402.2274797835, 6102558.4298098180]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0x10293b0", 
+        "id": "0x10294b0", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0x1011e00"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874630.0492611707, 6110045.7845480414], [874701.0389318619, 6110283.8342416640], [874781.4099618907, 6110544.9666943578]]
+      }, 
+      "properties": {
+        "dbg_lines": "2$4", 
+        "from": "0x1029b30", 
+        "id": "0x10272f0", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x102dc20"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874443.2498296768, 6109419.3899331195], [874630.0492611707, 6110045.7845480414]]
+      }, 
+      "properties": {
+        "dbg_lines": "2$4", 
+        "from": "0x102b240", 
+        "id": "0x1027080", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x1029b30"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874365.9647906219, 6107370.1792671923], [874339.9451684712, 6107215.9012091104], [874289.2435481467, 6106979.8803721955], [874174.9358948290, 6106511.6991793364]]
+      }, 
+      "properties": {
+        "dbg_lines": "4", 
+        "from": "0x102bee0", 
+        "id": "0x102c0e0", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0xf4aad0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[875189.2972055714, 6111909.3750648741], [875206.9691513416, 6111958.7726172749], [875255.2627129841, 6112125.9325936399], [875329.1767019787, 6112646.1460677683]]
+      }, 
+      "properties": {
+        "dbg_lines": "2$4", 
+        "from": "0x102c630", 
+        "id": "0x1012880", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0xf4c0f0"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874781.4099618907, 6110544.9666943578], [874799.9609493753, 6110605.2404629039], [874933.5198397448, 6110897.3782041045], [874958.2796617985, 6110968.2341455445], [875003.2073250349, 6111231.9058228238]]
+      }, 
+      "properties": {
+        "dbg_lines": "2$4", 
+        "from": "0x102dc20", 
+        "id": "0xf42230", 
+        "lines": [
+          {
+            "color": "13a538", 
+            "id": "0x26489d0", 
+            "label": "2"
+          }, 
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0x1027260"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[874374.0099460027, 6108692.8373381542], [874372.6479052179, 6108506.5213406542], [874376.2796165630, 6108389.9170066956], [874386.8043576444, 6108284.6597732734], [874421.1812958359, 6108061.7930931738]]
+      }, 
+      "properties": {
+        "dbg_lines": "4", 
+        "from": "0x102e8d0", 
+        "id": "0x102e040", 
+        "lines": [
+          {
+            "color": "ea5297", 
+            "id": "0x26b5810", 
+            "label": "4"
+          }], 
+        "to": "0xf19570"
+      }
+    }, 
+    {
+      "type": "Feature", 
+      "geometry": {
+        "type": "LineString", 
+        "coordinates": [[869087.6789471197, 6106441.9845430432], [868740.4176036713, 6105963.2467791382], [868716.5387317521, 6105951.1778634619], [868708.8301488386, 6105951.9386230595]]
+      }, 
+      "properties": {
+        "dbg_lines": "3", 
+        "from": "0x102efc0", 
+        "id": "0x102f160", 
+        "lines": [
+          {
+            "color": "f59e00", 
+            "id": "0x26b5750", 
+            "label": "3"
+          }], 
+        "to": "0xeeadc0"
+      }
+    }]
+}
