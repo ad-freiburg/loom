@@ -17,12 +17,12 @@ struct Config {
 
   std::string printMode;
   std::string optMode;
-  std::string evalPath;
-  std::string evalSuff;
+  std::string ilpPath;
   bool fromDot;
   bool deg2Heur;
   bool restrLocSearch;
   bool enfGeoCourse;
+  bool ilpNoSolve;
 
   double maxGrDist;
 

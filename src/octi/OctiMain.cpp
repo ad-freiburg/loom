@@ -89,58 +89,18 @@ int main(int argc, char** argv) {
 
   if (cfg.optMode == "ilp") {
     T_START(octi);
-    double sc = oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                            cfg.deg2Heur, cfg.maxGrDist);
+    double sc =
+        oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+                    cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve, cfg.ilpPath);
     std::cerr << "Octilinearized using ILP in " << T_STOP(octi) << " ms, score "
               << sc << std::endl;
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
     double sc = oct.draw(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                         cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch, cfg.enfGeoCourse);
+                         cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch,
+                         cfg.enfGeoCourse);
     std::cerr << "Octilinearized using heur approach in " << T_STOP(octi)
               << " ms, score " << sc << std::endl;
-  } else if ((cfg.optMode == "eval")) {
-    TransitGraph resIlp, resHeur;
-    T_START(octi_ilp);
-    double ilpSc = oct.drawILP(&tg, &resIlp, &gg, cfg.pens, gridSize,
-                               cfg.borderRad, cfg.deg2Heur, cfg.maxGrDist);
-    auto ilpT = T_STOP(octi_ilp);
-
-    std::ofstream of;
-    of.open(cfg.evalPath + "/res_ilp" + cfg.evalSuff + ".json");
-    out.print(resIlp, of);
-    of.flush();
-    of.close();
-
-    T_START(octi_heur);
-    double heurSc =
-        oct.draw(&tg, &resHeur, &gg, cfg.pens, gridSize, cfg.borderRad,
-                 cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch, cfg.enfGeoCourse);
-    auto heurT = T_STOP(octi_heur);
-
-    std::ofstream off;
-    off.open(cfg.evalPath + "/res_heur" + cfg.evalSuff + ".json");
-    out.print(resHeur, off);
-    off.flush();
-    off.close();
-
-    std::cerr << "\nOctilinearized using eval approach: " << std::endl;
-    std::cerr << "  ILP  target value: " << ilpSc << std::endl;
-    std::cerr << "  HEUR target value: " << heurSc << " (+"
-              << std::setprecision(2) << std::fixed
-              << (((heurSc - ilpSc) / ilpSc) * 100) << "%)" << std::endl;
-    std::cerr << "  ILP  solve time: " << std::setprecision(2) << std::fixed
-              << ilpT << " ms" << std::endl;
-    std::cerr << "  HEUR solve time: " << std::setprecision(2) << std::fixed
-              << heurT << " ms" << std::endl;
-  }
-
-  if ((cfg.optMode != "eval")) {
-    if (cfg.printMode == "gridgraph") {
-      out.print(*gg, std::cout);
-    } else {
-      out.print(res, std::cout);
-    }
   }
 
   return (0);

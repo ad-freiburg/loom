@@ -60,7 +60,7 @@ start:
 double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
                                GridGraph** retGg, const Penalties& pens,
                                double gridSize, double borderRad, bool deg2heur,
-                               double maxGrDist) {
+                               double maxGrDist, bool noSolve, const std::string& path) {
   GridGraph* gg;
   removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
@@ -80,7 +80,7 @@ double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist);
+  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, path);
 
   drawing.getTransitGraph(outTg);
 

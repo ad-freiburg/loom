@@ -16,10 +16,10 @@ using octi::ilp::VariableMatrix;
 
 // _____________________________________________________________________________
 double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
-                                  combgraph::Drawing* d,
-                                  double maxGrDist) const {
+                                  combgraph::Drawing* d, double maxGrDist,
+                                  bool noSolve, const std::string& path) const {
   // extract first feasible solution from gridgraph
-  extractFeasibleSol(gg, cg, maxGrDist);
+  extractFeasibleSol(gg, cg, maxGrDist, path);
   gg->reset();
 
   for (auto nd : *gg->getNds()) {
@@ -36,17 +36,25 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
 
   glp_prob* lp = createProblem(gg, cg, maxGrDist);
 
-  preSolve(lp);
-  solveProblem(lp);
+  if (noSolve) {
+    glp_write_mps(lp, GLP_MPS_FILE, 0, path.c_str());
 
-  extractSolution(lp, gg, cg, d);
+    return std::numeric_limits<double>::infinity();
+  } else {
+    preSolve(lp, path);
+    solveProblem(lp);
 
-  double score = glp_get_obj_val(lp);
+    extractSolution(lp, gg, cg, d);
 
-  glp_delete_prob(lp);
-  glp_free_env();
+    double score = glp_get_obj_val(lp);
 
-  return score;
+    glp_delete_prob(lp);
+    glp_free_env();
+
+    return score;
+  }
+
+  return std::numeric_limits<double>::infinity();
 }
 
 // _____________________________________________________________________________
@@ -155,7 +163,8 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
 
       std::stringstream constName;
       size_t row = glp_add_rows(lp, 1);
-      constName << "uniqedge(" << e->getFrom()->pl().getId() << "," << e->getTo()->pl().getId() << ")";
+      constName << "uniqedge(" << e->getFrom()->pl().getId() << ","
+                << e->getTo()->pl().getId() << ")";
       glp_set_row_name(lp, row, constName.str().c_str());
       glp_set_row_bnds(lp, row, GLP_UP, 1, 1);
 
@@ -215,13 +224,15 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
         if (n->pl().isSink()) {
           // subtract the variable for this start node and edge, if used
           // as a candidate
-          size_t ndColFrom = glp_find_col(lp, getStatPosVar(n, edg->getFrom()).c_str());
+          size_t ndColFrom =
+              glp_find_col(lp, getStatPosVar(n, edg->getFrom()).c_str());
           if (ndColFrom > 0) vm.addVar(row, ndColFrom, -2);
 
           // add the variable for this end node and edge, if used
           // as a candidate
           std::stringstream ndPosToVarName;
-          size_t ndColTo = glp_find_col(lp, getStatPosVar(n, edg->getTo()).c_str());
+          size_t ndColTo =
+              glp_find_col(lp, getStatPosVar(n, edg->getTo()).c_str());
           if (ndColTo > 0) vm.addVar(row, ndColTo, 1);
 
           outCost = 2;
@@ -244,7 +255,8 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
 
   glp_create_index(lp);
 
-  // only a single sink edge can be activated per input edge and settled grid node
+  // only a single sink edge can be activated per input edge and settled grid
+  // node
   // THIS RULE IS REDUNDANT AND IMPLICITELY ENFORCED BY OTHER RULES,
   // BUT SEEMS TO LEAD TO FASTER SOLUTION TIMES
   for (GridNode* n : *gg->getNds()) {
@@ -266,12 +278,14 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
 
         } else {
           if (cands[e->getTo()].count(n)) {
-            size_t ndColTo = glp_find_col(lp, getStatPosVar(n, e->getTo()).c_str());
+            size_t ndColTo =
+                glp_find_col(lp, getStatPosVar(n, e->getTo()).c_str());
             if (ndColTo > 0) vm.addVar(row, ndColTo, -1);
           }
 
           if (cands[e->getFrom()].count(n)) {
-            size_t ndColFr = glp_find_col(lp, getStatPosVar(n, e->getFrom()).c_str());
+            size_t ndColFr =
+                glp_find_col(lp, getStatPosVar(n, e->getFrom()).c_str());
             if (ndColFr > 0) vm.addVar(row, ndColFr, -1);
           }
         };
@@ -305,7 +319,7 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
     // a pass-through
 
     for (auto nd : cg.getNds()) {
-      size_t ndcolto = glp_find_col(lp, getStatPosVar(n,nd).c_str());
+      size_t ndcolto = glp_find_col(lp, getStatPosVar(n, nd).c_str());
       if (ndcolto > 0) vm.addVar(row, ndcolto, 1);
     }
 
@@ -601,11 +615,14 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
 }
 
 // _____________________________________________________________________________
-void ILPGridOptimizer::preSolve(glp_prob* lp) const {
-  // write temporary file
-  // std::string f = std::string(std::tmpnam(0)) + ".mps";
-  std::string f = "prob.mps";
-  std::string outf = "sol.sol";  // std::string(std::tmpnam(0)) + ".sol";
+void ILPGridOptimizer::preSolve(glp_prob* lp, const std::string& f) const {
+  std::string basename = f;
+  size_t pos = basename.find_last_of(".");
+  if (pos != std::string::npos) basename = basename.substr(0, pos);
+
+  std::string outf = basename + ".sol";
+  std::string solutionf = basename + ".mst";
+
   // glp_term_out(GLP_OFF);
   glp_write_mps(lp, GLP_MPS_FILE, 0, f.c_str());
 
@@ -614,11 +631,12 @@ void ILPGridOptimizer::preSolve(glp_prob* lp) const {
   // "{THREADS} -printingOptions rows -solve -solution {OUTPUT}";
 
   std::string cmd =
-      "gurobi_cl ResultFile={OUTPUT} InputFile=feasible.mst {INPUT} > "
+      "gurobi_cl ResultFile={OUTPUT} InputFile={SOLUTION} {INPUT} > "
       "./gurobi.log";
   util::replaceAll(cmd, "{INPUT}", f);
   util::replaceAll(cmd, "{OUTPUT}", outf);
   util::replaceAll(cmd, "{THREADS}", "4");
+  util::replaceAll(cmd, "{SOLUTION}", solutionf);
   system(cmd.c_str());
 
   std::ifstream fin;
@@ -706,7 +724,8 @@ void VariableMatrix::getGLPKArrs(int** ia, int** ja, double** r) const {
 std::string ILPGridOptimizer::getEdgeUseVar(const GridEdge* e,
                                             const CombEdge* cg) const {
   std::stringstream varName;
-  varName << "edg(" << e->getFrom()->pl().getId() << "," << e->getTo()->pl().getId() << "," << cg << ")";
+  varName << "edg(" << e->getFrom()->pl().getId() << ","
+          << e->getTo()->pl().getId() << "," << cg << ")";
 
   return varName.str();
 }
@@ -813,9 +832,15 @@ size_t ILPGridOptimizer::nonInfDeg(const GridNode* g) const {
 
 // _____________________________________________________________________________
 void ILPGridOptimizer::extractFeasibleSol(GridGraph* gg, const CombGraph& cg,
-                                          double maxGrDist) const {
+                                          double maxGrDist,
+                                          const std::string& f) const {
+  std::string basename = f;
+  size_t pos = basename.find_last_of(".");
+  if (pos != std::string::npos) basename = basename.substr(0, pos);
+
+  std::string solutionf = basename + ".mst";
   std::ofstream fo;
-  fo.open("feasible.mst");
+  fo.open(solutionf);
 
   for (auto nd : cg.getNds()) {
     if (nd->getDeg() == 0) continue;

@@ -677,6 +677,7 @@ double GridGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) const {
   // other node without ever increasing the total cost.
 
   // additional penalty per grid move
+  // TODO: make configurable
   double PEN = 0.5;
 
   double c_0 = _c.p_45 - _c.p_135;

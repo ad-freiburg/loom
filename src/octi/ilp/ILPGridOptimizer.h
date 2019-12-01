@@ -37,13 +37,13 @@ class ILPGridOptimizer {
   ILPGridOptimizer() {}
 
   double optimize(GridGraph* gg, const CombGraph& cg, combgraph::Drawing* d,
-                  double maxGrDist) const;
+                  double maxGrDist, bool noSolve, const std::string& path) const;
 
  protected:
   virtual glp_prob* createProblem(GridGraph* gg, const CombGraph& cg,
                                   double maxGrDist) const;
 
-  void preSolve(glp_prob* lp) const;
+  void preSolve(glp_prob* lp, const std::string& f) const;
 
   std::string getEdgeUseVar(const GridEdge* e, const CombEdge* cg) const;
   std::string getStatPosVar(const GridNode* e, const CombNode* cg) const;
@@ -53,7 +53,7 @@ class ILPGridOptimizer {
                        combgraph::Drawing* d) const;
 
   void extractFeasibleSol(GridGraph* gg, const CombGraph& cg,
-                          double maxGrDist) const;
+                          double maxGrDist, const std::string& f) const;
 
   size_t nonInfDeg(const GridNode* g) const;
 };

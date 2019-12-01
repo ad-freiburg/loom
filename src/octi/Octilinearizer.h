@@ -128,14 +128,15 @@ class Octilinearizer {
               bool deg2heur, double maxGrDist, bool restrLocSearch,
               bool enfGeoCourse);
 
-  double draw(const CombGraph& cg, const util::geo::DBox& box, TransitGraph* out,
-              GridGraph** gg, const Penalties& pens, double gridSize,
-              double borderRad, bool deg2heur, double maxGrDist,
-              bool restrLocSearch, bool enfGeoCourse);
+  double draw(const CombGraph& cg, const util::geo::DBox& box,
+              TransitGraph* out, GridGraph** gg, const Penalties& pens,
+              double gridSize, double borderRad, bool deg2heur,
+              double maxGrDist, bool restrLocSearch, bool enfGeoCourse);
 
   double drawILP(TransitGraph* in, TransitGraph* out, GridGraph** gg,
                  const Penalties& pens, double gridSize, double borderRad,
-                 bool deg2heur, double maxGrDist);
+                 bool deg2heur, double maxGrDist, bool noSolve,
+                 const std::string& path);
 
  private:
   void removeEdgesShorterThan(TransitGraph* g, double d);

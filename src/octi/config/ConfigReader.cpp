@@ -36,13 +36,14 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<std::string>(&(cfg->optMode))->default_value("heur"),
       "optimization mode, either 'heur' (fast) or 'ilp' (very slow)")
     (
-      "eval-out",
-      opts::value<std::string>(&(cfg->evalPath))->default_value("."),
-      "path to output evaluation files to")
+      "ilp-no-solve",
+      opts::bool_switch(&(cfg->ilpNoSolve))->default_value(false),
+      "if set, the ILP is not solved, only written to file")
     (
-      "eval-suffix",
-      opts::value<std::string>(&(cfg->evalSuff))->default_value(""),
-      "suffix for evaluation filenames (octi<suffix>.res)")
+      "ilp-out",
+      opts::value<std::string>(&(cfg->ilpPath))->default_value("prob.mps"),
+      "path to output the ILP to, a first feasible solution will be written "
+      "to <basename>.mst.")
     (
       "from-dot,D",
       opts::bool_switch(&(cfg->fromDot))->default_value(false),
