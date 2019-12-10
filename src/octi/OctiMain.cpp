@@ -98,9 +98,15 @@ int main(int argc, char** argv) {
     T_START(octi);
     double sc = oct.draw(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
                          cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch,
-                         cfg.enfGeoCourse);
+                         cfg.enfGeoPen);
     std::cerr << "Octilinearized using heur approach in " << T_STOP(octi)
               << " ms, score " << sc << std::endl;
+  }
+
+  if (cfg.printMode == "gridgraph") {
+    out.print(*gg, std::cout);
+  } else {
+    out.print(res, std::cout);
   }
 
   return (0);

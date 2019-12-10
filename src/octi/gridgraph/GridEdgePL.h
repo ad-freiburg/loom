@@ -42,12 +42,11 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   void clearResEdges();
   void addResEdge();
 
-  void setGeoCourseCost(double d);
-  void clearGeoCourseCost();
+  void setId(size_t id);
+  size_t getId() const;
 
  private:
   double _c;
-  double _geoC;
 
   bool _isSecondary;
 
@@ -57,6 +56,7 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   bool _blocked;
 
   uint8_t _resEdgs;
+  size_t _id;
 };
 }
 }

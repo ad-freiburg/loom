@@ -33,6 +33,9 @@ namespace gridgraph {
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
 typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
 
+typedef std::vector<double> GeoPens;
+typedef std::map<const CombEdge*, GeoPens> GeoPensMap;
+
 struct Candidate {
   Candidate(GridNode* n, double d) : n(n), d(d){};
 
@@ -103,8 +106,7 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   void addResEdg(GridEdge* ge, CombEdge* cg);
   CombEdge* getResEdg(GridEdge* ge);
 
-  void writeGeoCoursePens(const CombEdge* ce);
-  void clearGeoCoursePens();
+  void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target, double pen);
 
  private:
   util::geo::DBox _bbox;
@@ -118,6 +120,9 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   // encoding portable IDs for each node
   std::vector<GridNode*> _nds;
+
+  // edge id counter
+  size_t _edgeCount;
 
   std::unordered_map<GridEdge*, CombEdge*> _resEdgs;
 

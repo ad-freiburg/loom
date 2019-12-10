@@ -11,7 +11,7 @@ using namespace octi::gridgraph;
 
 // _____________________________________________________________________________
 GridEdgePL::GridEdgePL(double c, bool secondary)
-    : _c(c), _geoC(0),
+    : _c(c),
       _isSecondary(secondary),
       _closed(false),
       _blocked(false),
@@ -19,7 +19,7 @@ GridEdgePL::GridEdgePL(double c, bool secondary)
 
 // _____________________________________________________________________________
 GridEdgePL::GridEdgePL(double c, bool secondary, bool closed)
-    : _c(c), _geoC(0),
+    : _c(c),
       _isSecondary(secondary),
       _closed(closed),
       _blocked(false),
@@ -46,7 +46,7 @@ util::json::Dict GridEdgePL::getAttrs() const {
 // _____________________________________________________________________________
 double GridEdgePL::cost() const {
   return (_closed || _blocked) ? std::numeric_limits<double>::infinity()
-                               : rawCost() + _geoC;
+                               : rawCost();
 }
 
 // _____________________________________________________________________________
@@ -77,16 +77,10 @@ void GridEdgePL::setCost(double c) { _c = c; }
 bool GridEdgePL::isSecondary() const { return _isSecondary; }
 
 // _____________________________________________________________________________
-void GridEdgePL::clearResEdges() {
-  _resEdgs = 0;
-}
+void GridEdgePL::clearResEdges() { _resEdgs = 0; }
 
 // _____________________________________________________________________________
-void GridEdgePL::setGeoCourseCost(double d) {
-  _geoC = d;
-}
+void GridEdgePL::setId(size_t id) { _id = id; }
 
 // _____________________________________________________________________________
-void GridEdgePL::clearGeoCourseCost() {
-  _geoC = 0;
-}
+size_t GridEdgePL::getId() const { return _id; }

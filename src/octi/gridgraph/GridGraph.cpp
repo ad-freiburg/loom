@@ -28,7 +28,8 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
       _c(pens),
       _grid(cellSize, cellSize, bbox, false),
       _cellSize(cellSize),
-      _spacer(spacer) {
+      _spacer(spacer),
+      _edgeCount(0) {
   assert(_c.p_0 <= _c.p_135);
   assert(_c.p_135 <= _c.p_90);
   assert(_c.p_90 <= _c.p_45);
@@ -67,6 +68,8 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
         if (from != 0 && toN != 0) {
           GridNode* to = toN->pl().getPort((p + 4) % 8);
           auto e = new GridEdge(from, to, GridEdgePL(9, false));
+          e->pl().setId(_edgeCount);
+          _edgeCount++;
           from->addEdge(e);
           to->addEdge(e);
         }
@@ -154,7 +157,8 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::writeGeoCoursePens(const CombEdge* ce) {
+void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target, double pen) {
+  (*target)[ce].resize(_edgeCount);
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       auto grNdA = getNode(x, y);
@@ -175,26 +179,9 @@ void GridGraph::writeGeoCoursePens(const CombEdge* ce) {
           if (dLoc < d) d = dLoc;
         }
 
-        d *= 2 * d;
+        d *= pen * d;
 
-        ge->pl().setGeoCourseCost(d);
-      }
-    }
-  }
-}
-
-// _____________________________________________________________________________
-void GridGraph::clearGeoCoursePens() {
-  for (size_t x = 0; x < _grid.getXWidth(); x++) {
-    for (size_t y = 0; y < _grid.getYHeight(); y++) {
-      auto grNdA = getNode(x, y);
-
-      for (size_t i = 0; i < 8; i++) {
-        auto neigh = getNeighbor(x, y, i);
-        if (!neigh) continue;
-        auto ge = getNEdg(grNdA, neigh);
-
-        ge->pl().clearGeoCourseCost();
+        (*target)[ce][ge->pl().getId()] = d;
       }
     }
   }
@@ -629,10 +616,14 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
     n->pl().setPort(i, nn);
 
     auto e = new GridEdge(n, nn, GridEdgePL(INF, true, false));
+    e->pl().setId(_edgeCount);
+    _edgeCount++;
     n->addEdge(e);
     nn->addEdge(e);
 
     e = new GridEdge(nn, n, GridEdgePL(INF, true, false));
+    e->pl().setId(_edgeCount);
+    _edgeCount++;
     n->addEdge(e);
     nn->addEdge(e);
   }
@@ -657,11 +648,15 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
 
       auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
                             GridEdgePL(pen, true));
+      e->pl().setId(_edgeCount);
+      _edgeCount++;
       e->getFrom()->addEdge(e);
       e->getTo()->addEdge(e);
 
       e = new GridEdge(n->pl().getPort(j), n->pl().getPort(i),
                        GridEdgePL(pen, true));
+      e->pl().setId(_edgeCount);
+      _edgeCount++;
       e->getFrom()->addEdge(e);
       e->getTo()->addEdge(e);
     }

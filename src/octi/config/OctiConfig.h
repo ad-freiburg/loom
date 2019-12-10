@@ -21,7 +21,7 @@ struct Config {
   bool fromDot;
   bool deg2Heur;
   bool restrLocSearch;
-  bool enfGeoCourse;
+  double enfGeoPen;
   bool ilpNoSolve;
 
   double maxGrDist;

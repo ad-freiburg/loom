@@ -53,8 +53,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::bool_switch(&(cfg->deg2Heur))->default_value(false),
       "contract degree 2 nodes and re-insert them equidistantly")
     (
-      "enf-geo-course",
-      opts::bool_switch(&(cfg->enfGeoCourse))->default_value(false),
+      "enf-geo-pen",
+      opts::value<double>(&(cfg->enfGeoPen))->default_value(0),
       "enforce lines to roughly follow original geographical course")
     (
       "max-grid-dist",

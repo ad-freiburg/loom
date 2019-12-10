@@ -22,6 +22,8 @@ using octi::gridgraph::GridNodePL;
 using octi::gridgraph::GridEdgePL;
 using octi::gridgraph::Penalties;
 using octi::gridgraph::NodeCost;
+using octi::gridgraph::GeoPensMap;
+using octi::gridgraph::GeoPens;
 
 using shared::transitgraph::TransitGraph;
 using shared::transitgraph::TransitNode;
@@ -69,6 +71,21 @@ struct GridCost : public Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
   }
 
   float _inf;
+
+  virtual float inf() const { return _inf; }
+};
+
+struct GridCostGeoPen : public Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
+  GridCostGeoPen(float inf, const GeoPens* geoPens) : _inf(inf), _geoPens(geoPens) {}
+  virtual float operator()(const GridNode* from, const GridEdge* e,
+                           const GridNode* to) const {
+    UNUSED(from);
+    UNUSED(to);
+    return e->pl().cost() + (*_geoPens)[e->pl().getId()];
+  }
+
+  float _inf;
+  const GeoPens* _geoPens;
 
   virtual float inf() const { return _inf; }
 };
@@ -126,12 +143,12 @@ class Octilinearizer {
   double draw(TransitGraph* in, TransitGraph* out, GridGraph** gg,
               const Penalties& pens, double gridSize, double borderRad,
               bool deg2heur, double maxGrDist, bool restrLocSearch,
-              bool enfGeoCourse);
+              double enfGeoCourse);
 
   double draw(const CombGraph& cg, const util::geo::DBox& box,
               TransitGraph* out, GridGraph** gg, const Penalties& pens,
               double gridSize, double borderRad, bool deg2heur,
-              double maxGrDist, bool restrLocSearch, bool enfGeoCourse);
+              double maxGrDist, bool restrLocSearch, double enfGeoCourse);
 
   double drawILP(TransitGraph* in, TransitGraph* out, GridGraph** gg,
                  const Penalties& pens, double gridSize, double borderRad,
@@ -151,10 +168,10 @@ class Octilinearizer {
 
   bool draw(const std::vector<CombEdge*>& order, GridGraph* gg,
             Drawing* drawing, double cutoff, double maxGrDist,
-            bool enfGeoCourse);
+            const GeoPensMap* geoPensMap);
   bool draw(const std::vector<CombEdge*>& order, const SettledPos& settled,
             GridGraph* gg, Drawing* drawing, double cutoff, double maxGrDist,
-            bool enfGeoCourse);
+            const GeoPensMap* geoPensMap);
 
   SettledPos getNeighbor(const SettledPos& pos, const std::vector<CombNode*>&,
                          size_t i) const;

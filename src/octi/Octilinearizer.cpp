@@ -60,7 +60,8 @@ start:
 double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
                                GridGraph** retGg, const Penalties& pens,
                                double gridSize, double borderRad, bool deg2heur,
-                               double maxGrDist, bool noSolve, const std::string& path) {
+                               double maxGrDist, bool noSolve,
+                               const std::string& path) {
   GridGraph* gg;
   removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
@@ -70,8 +71,8 @@ double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
     // presolve using heuristical approach to get a first feasible solution
     std::cerr << "Presolving..." << std::endl;
     // important: always use restrLocSearch here!
-    draw(cg, box, outTg, &gg, pens, gridSize, borderRad, deg2heur, maxGrDist, true,
-         false);
+    draw(cg, box, outTg, &gg, pens, gridSize, borderRad, deg2heur, maxGrDist,
+         true, false);
     std::cerr << "Presolving finished." << std::endl;
   } else {
     gg = new GridGraph(box, gridSize, borderRad, pens);
@@ -94,20 +95,21 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
                             GridGraph** retGg, const Penalties& pens,
                             double gridSize, double borderRad, bool deg2heur,
                             double maxGrDist, bool restrLocSearch,
-                            bool enfGeoCourse) {
+                            double enfGeoPen) {
   removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
 
-  return draw(cg, box, outTg, retGg, pens, gridSize, borderRad, deg2heur, maxGrDist, restrLocSearch, enfGeoCourse);
+  return draw(cg, box, outTg, retGg, pens, gridSize, borderRad, deg2heur,
+              maxGrDist, restrLocSearch, enfGeoPen);
 }
 // _____________________________________________________________________________
-double Octilinearizer::draw(const CombGraph& cg, const util::geo::DBox& box, TransitGraph* outTg,
-                            GridGraph** retGg, const Penalties& pens,
-                            double gridSize, double borderRad, bool deg2heur,
-                            double maxGrDist, bool restrLocSearch,
-                            bool enfGeoCourse) {
+double Octilinearizer::draw(const CombGraph& cg, const util::geo::DBox& box,
+                            TransitGraph* outTg, GridGraph** retGg,
+                            const Penalties& pens, double gridSize,
+                            double borderRad, bool deg2heur, double maxGrDist,
+                            bool restrLocSearch, double enfGeoPen) {
   size_t jobs = 4;
   std::vector<GridGraph*> ggs(jobs);
 
@@ -124,14 +126,33 @@ double Octilinearizer::draw(const CombGraph& cg, const util::geo::DBox& box, Tra
   size_t tries = 100;
   size_t ITERS = 100;
 
+  GeoPensMap enfGeoPens;
+  const GeoPensMap* geoPens = 0;
+
+  auto initOrder = getOrdering(cg, false);
+
+  if (enfGeoPen > 0) {
+    std::cerr << "Writing geopens... ";
+    T_START(geopens);
+    for (auto cmbEdg : initOrder) {
+      ggs[0]->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
+    }
+    std::cerr << " done (" << T_STOP(geopens) << "ms)" << std::endl;
+    geoPens = &enfGeoPens;
+  }
+
   Drawing drawing(ggs[0]);
 
   for (size_t i = 0; i < tries; i++) {
     T_START(draw);
-    auto iterOrder = getOrdering(cg, i != 0);
+    std::vector<CombEdge*> iterOrder;
+    if (i != 0)
+      iterOrder = getOrdering(cg, true);
+    else
+      iterOrder = initOrder;
 
-    bool locFound = draw(iterOrder, ggs[0], &drawing, drawing.score(),
-                         maxGrDist, enfGeoCourse);
+    bool locFound =
+        draw(iterOrder, ggs[0], &drawing, drawing.score(), maxGrDist, geoPens);
 
     if (locFound) {
       std::cerr << " ++ Try " << i << ", score " << drawing.score()
@@ -228,7 +249,7 @@ double Octilinearizer::draw(const CombGraph& cg, const util::geo::DBox& box, Tra
           // we can use bestFromIter.score() as the limit for the shortest
           // path computation, as we can already do at least as good.
           bool found = draw(test, p, ggs[btch], &run, bestFrIters[btch].score(),
-                            maxGrDist, enfGeoCourse);
+                            maxGrDist, geoPens);
 
           if (found && bestFrIters[btch].score() > run.score()) {
             bestFrIters[btch] = run;
@@ -311,16 +332,16 @@ void Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
 // _____________________________________________________________________________
 bool Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg,
                           Drawing* drawing, double cutoff, double maxGrDist,
-                          bool enfGeoCourse) {
+                          const GeoPensMap* geoPensMap) {
   SettledPos emptyPos;
-  return draw(order, emptyPos, gg, drawing, cutoff, maxGrDist, enfGeoCourse);
+  return draw(order, emptyPos, gg, drawing, cutoff, maxGrDist, geoPensMap);
 }
 
 // _____________________________________________________________________________
 bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
                           const SettledPos& settled, GridGraph* gg,
                           Drawing* drawing, double globCutoff, double maxGrDist,
-                          bool enfGeoCourse) {
+                          const GeoPensMap* geoPensMap) {
   SettledPos retPos;
 
   size_t i = 0;
@@ -399,16 +420,22 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
     }
 
-    if (enfGeoCourse) gg->writeGeoCoursePens(cmbEdg);
-
     GrEdgList eL;
     GrNdList nL;
     GridNode* toGrNd = 0;
     GridNode* frGrNd = 0;
 
     auto heur = GridHeur(gg, toGrNds);
-    auto cost = GridCost(cutoff + costOffsetTo + costOffsetFrom);
-    Dijkstra::shortestPath(frGrNds, toGrNds, cost, heur, &eL, &nL);
+
+    if (geoPensMap) {
+      // init cost function with geo distance penalties
+      auto cost = GridCostGeoPen(cutoff + costOffsetTo + costOffsetFrom,
+                                 &geoPensMap->find(cmbEdg)->second);
+      Dijkstra::shortestPath(frGrNds, toGrNds, cost, heur, &eL, &nL);
+    } else {
+      auto cost = GridCost(cutoff + costOffsetTo + costOffsetFrom);
+      Dijkstra::shortestPath(frGrNds, toGrNds, cost, heur, &eL, &nL);
+    }
 
     if (!nL.size()) {
       // cleanup
@@ -431,8 +458,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     // close the source and target node
     for (auto n : toGrNds) gg->closeNodeSinkTo(n);
     for (auto n : frGrNds) gg->closeNodeSinkFr(n);
-
-    if (enfGeoCourse) gg->clearGeoCoursePens();
 
     settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg);
   }
