@@ -48,7 +48,7 @@ class TransitGraph
                                               const TransitEdge* toEdge);
 
   static std::vector<RouteOcc> getCtdRoutesIn(const TransitEdge* fromEdge,
-                                       const TransitEdge* toEdge);
+                                              const TransitEdge* toEdge);
 
  private:
   util::geo::Box<double> _bbox;

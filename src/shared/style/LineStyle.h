@@ -2,13 +2,13 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_STYLE_LINESTYLE_H_
-#define TRANSITMAP_STYLE_LINESTYLE_H_
+#ifndef SHARED_STYLE_LINESTYLE_H_
+#define SHARED_STYLE_LINESTYLE_H_
 
 #include <string>
 #include <vector>
 
-namespace transitmapper {
+namespace shared {
 namespace style {
 
 class LineStyle {
@@ -34,4 +34,4 @@ class LineStyle {
 }
 }
 
-#endif  // TRANSITMAP_STYLE_LINESTYLE_H_
+#endif  // SHARED_STYLE_LINESTYLE_H_

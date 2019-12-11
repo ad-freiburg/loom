@@ -51,6 +51,7 @@ typedef Polygon<int> IPolygon;
 
 const static double EPSILON = 0.00001;
 const static double RAD = 0.017453292519943295;  // PI/180
+const static double AVERAGING_STEP = 20;
 
 // _____________________________________________________________________________
 template <typename T>
@@ -356,8 +357,9 @@ inline bool contains(const Polygon<T>& polyC, const Polygon<T>& poly) {
   }
 
   // also check the last hop
-  if (!contains(LineSegment<T>(polyC.getOuter().back(), polyC.getOuter().front()),
-                poly))
+  if (!contains(
+          LineSegment<T>(polyC.getOuter().back(), polyC.getOuter().front()),
+          poly))
     return false;
 
   return true;
@@ -1308,7 +1310,7 @@ inline Polygon<T> convexHull(const MultiPoint<T>& l) {
   convexHullImpl(l, 0, 1, &hull);
   hull.push_back(hull.front());
   convexHullImpl(l, hull.size() - 2, hull.size() - 1, &hull);
-	hull.pop_back();
+  hull.pop_back();
 
   return Polygon<T>(hull);
 }
@@ -1353,6 +1355,179 @@ template <template <typename> class Geometry, typename T>
 inline Box<T> extendBox(const std::vector<Geometry<T>>& multigeom, Box<T> b) {
   for (const auto& g : multigeom) b = extendBox(g, b);
   return b;
+}
+
+// _____________________________________________________________________________
+template <typename T>
+Point<T> pointAt(const Line<T> l, double at) {
+  return pointAtDist(l, at * len(l));
+}
+
+// _____________________________________________________________________________
+template <typename T>
+Point<T> pointAt(const Line<T> l, double at, size_t* lastI, double* totPos) {
+  return pointAtDist(l, at * len(l), lastI, totPos);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+Point<T> pointAtDist(const Line<T> l, double atDist) {
+  return pointAtDist(l, atDist, 0, 0);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+Point<T> pointAtDist(const Line<T> l, double atDist, size_t* lastI,
+                     double* totPos) {
+  if (l.size() == 1) {
+    if (lastI) *lastI = 0;
+    if (totPos) *totPos = 0;
+    return l[1];
+  }
+
+  if (atDist > geo::len(l)) atDist = geo::len(l);
+  if (atDist < 0) atDist = 0;
+
+  double dist = 0;
+
+  const Point<T>* last = &l[0];
+
+  for (size_t i = 1; i < l.size(); i++) {
+    const Point<T>& cur = l[i];
+    double d = geo::dist(*last, cur);
+    dist += d;
+
+    if (dist > atDist) {
+      double p = (d - (dist - atDist));
+      if (lastI) *lastI = i - 1;
+      if (totPos) *totPos = atDist / util::geo::len(l);
+      return interpolate(*last, cur, p / dist);
+    }
+
+    last = &l[i];
+  }
+
+  if (lastI) *lastI = l.size() - 1;
+  if (totPos) *totPos = 1;
+  return l.back();
+}
+
+// _____________________________________________________________________________
+template <typename T>
+Point<T> interpolate(const Point<T>& a, const Point<T>& b, double d) {
+  double n1 = b.getX() - a.getX();
+  double n2 = b.getY() - a.getY();
+  return Point<T>(a.getX() + (n1 * d), a.getY() + (n2 * d));
+}
+
+// _____________________________________________________________________________
+template <typename T>
+Line<T> orthoLineAtDist(const Line<T>& l, double d, double length) {
+  Point<T> avgP = pointAtDist(l, d);
+
+  double angle = angBetween(pointAtDist(l, d - 5), pointAtDist(l, d + 5));
+
+  double angleX1 = avgP.getX() + cos(angle + M_PI / 2) * length / 2;
+  double angleY1 = avgP.getY() + sin(angle + M_PI / 2) * length / 2;
+
+  double angleX2 = avgP.getX() + cos(angle + M_PI / 2) * -length / 2;
+  double angleY2 = avgP.getY() + sin(angle + M_PI / 2) * -length / 2;
+
+  return Line<T>{Point<T>(angleX1, angleY1), Point<T>(angleX2, angleY2)};
+}
+
+// _____________________________________________________________________________
+template <typename T>
+Line<T> segment(const Line<T>& line, double a, double b) {
+  if (a > b) {
+    double c = a;
+    a = b;
+    b = c;
+  }
+  size_t startI, endI;
+  auto start = pointAt(line, a, &startI, 0);
+  auto end = pointAt(line, b, &endI, 0);
+
+  return segment(line, start, startI, end, endI);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+Line<T> segment(const Line<T>& line, const Point<T>& start, size_t startI,
+                const Point<T>& end, size_t endI) {
+  Line<T> ret;
+  ret.push_back(start);
+
+  if (startI + 1 <= endI) {
+    ret.insert(ret.end(), line.begin() + startI + 1, line.begin() + endI + 1);
+  }
+  ret.push_back(end);
+
+  // find a more performant way to clear the result of above
+  ret = util::geo::simplify(ret, 0);
+
+  assert(ret.size());
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+template <typename T>
+Line<T> average(const std::vector<const Line<T>*>& lines) {
+  return average(lines, std::vector<double>());
+}
+
+// _____________________________________________________________________________
+template <typename T>
+Line<T> average(const std::vector<const Line<T>*>& lines,
+                                 const std::vector<double>& weights) {
+  bool weighted = lines.size() == weights.size();
+  double stepSize;
+
+  double longestLength = std::numeric_limits<double>::min();  // avoid recalc of length on each comparision
+  for (auto p : lines) {
+    if (len(*p) > longestLength) {
+      longestLength = len(*p);
+    }
+  }
+
+  Line<T> ret;
+  double total = 0;
+
+  for (size_t i = 0; i < lines.size(); ++i) {
+    if (weighted) {
+      total += weights[i];
+    } else {
+      total += 1;
+    }
+  }
+
+  stepSize = AVERAGING_STEP / longestLength;
+  bool end = false;
+  for (double a = 0; !end; a += stepSize) {
+    if (a > 1) {
+      a = 1;
+      end = true;
+    }
+    double x = 0, y = 0;
+
+    for (size_t i = 0; i < lines.size(); ++i) {
+      auto pl = lines[i];
+      Point<T> p = pointAt(*pl, a);
+      if (weighted) {
+        x += p.getX() * weights[i];
+        y += p.getY() * weights[i];
+      } else {
+        x += p.getX();
+        y += p.getY();
+      }
+    }
+    ret.push_back(Point<T>(x / total, y / total));
+  }
+
+  simplify(ret, 0);
+
+  return ret;
 }
 
 // _____________________________________________________________________________

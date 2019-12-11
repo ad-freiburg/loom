@@ -9,14 +9,19 @@
 #include <vector>
 #include "GraphBuilder.h"
 #include "json/json.hpp"
+#include "shared/style/LineStyle.h"
+#include "shared/transitgraph/Route.h"
 #include "transitmap/config/TransitMapConfig.h"
+#include "transitmap/graph/RenderLineGraph.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
 
-using namespace transitmapper;
-using namespace graph;
+using transitmapper::graph::GraphBuilder;
 using namespace util::geo;
-using json = nlohmann::json;
+
+using transitmapper::graph::RenderLineGraph;
+
+using shared::style::LineStyle;
 
 const static char* WGS84_PROJ =
     "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
@@ -28,7 +33,7 @@ GraphBuilder::GraphBuilder(const config::Config* cfg) : _cfg(cfg) {
 
 // _____________________________________________________________________________
 bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
-  json j;
+  nlohmann::json j;
   (*s) >> j;
 
   if (j["type"] == "FeatureCollection") {
@@ -120,7 +125,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
           } else
             continue;
 
-          const Route* r = g->getRoute(id);
+          auto r = g->getRoute(id);
           if (!r) {
             std::string label = route["label"].is_null() ? "" : route["label"];
             std::string color = route["color"];
@@ -139,7 +144,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
           }
 
           if (!route["style"].is_null()) {
-            style::LineStyle ls;
+            LineStyle ls;
             auto style = route["style"];
             std::string dashArray;
             if (!style["dash-array"].is_null()) {
@@ -233,6 +238,33 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
   }
 
   return true;
+}
+// _____________________________________________________________________________
+void GraphBuilder::writeFronts(RenderLineGraph* g) {
+  for (auto nd : *g->getNds()) {
+    for (auto e : nd->getAdjList()) {
+      DLine pl;
+
+      // f.refEtgLengthBefExp = e->getGeom().getLength();
+
+      // TODO: was set to e->getTotalWidth before
+      double look = 5;
+
+      if (e->getTo() == nd) {
+        pl = geo::orthoLineAtDist(*e->pl().getGeom(), geo::len(*e->pl().getGeom()),
+                              look);
+      } else {
+        pl = geo::orthoLineAtDist(*e->pl().getGeom(), 0, look);
+        std::reverse(pl.begin(), pl.end());
+      }
+
+      RenderLineGraph::Front f(e, pl);
+
+      // f.setInitialGeom(pl);
+
+      g->addFront(nd, f);
+    }
+  }
 }
 
 // _____________________________________________________________________________
@@ -362,7 +394,7 @@ void GraphBuilder::createMetaNodes(TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(
+std::vector<transitmapper::graph::NodeFront> GraphBuilder::getNextMetaNodeCand(
     TransitGraph* g) const {
   for (auto n : *g->getNodes()) {
     if (n->getStops().size()) continue;
@@ -472,7 +504,8 @@ bool GraphBuilder::isClique(std::set<const Node*> potClique) const {
 }
 
 // _____________________________________________________________________________
-std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(const Node* n) const {
+std::vector<transitmapper::graph::NodeFront> GraphBuilder::getOpenNodeFronts(
+    const Node* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->getMainDirs()) {
     if (nf.edge->getGeom().getLength() >
@@ -490,7 +523,8 @@ std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(const Node* n) const {
 }
 
 // _____________________________________________________________________________
-std::vector<NodeFront> GraphBuilder::getClosedNodeFronts(const Node* n) const {
+std::vector<transitmapper::graph::NodeFront> GraphBuilder::getClosedNodeFronts(
+    const Node* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->getMainDirs()) {
     if (!(nf.edge->getGeom().getLength() >
@@ -508,8 +542,8 @@ std::vector<NodeFront> GraphBuilder::getClosedNodeFronts(const Node* n) const {
 }
 
 // _____________________________________________________________________________
-std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
-    const Node* n) const {
+std::set<transitmapper::graph::NodeFront*>
+GraphBuilder::nodeGetOverlappingFronts(const Node* n) const {
   std::set<NodeFront*> ret;
   double minLength = 6;
 
@@ -609,8 +643,9 @@ void GraphBuilder::combinePartnerRoutes(graph::TransitGraph* g) {
 }
 
 // _____________________________________________________________________________
-std::map<const Route*, std::set<const Route*>> GraphBuilder::getPartnerRoutes(
-    graph::TransitGraph* g) const {
+std::map<const shared::transitgraph::Route*,
+         std::set<const shared::transitgraph::Route*>>
+GraphBuilder::getPartnerRoutes(graph::TransitGraph* g) const {
   std::map<const Route*, std::set<const Route*>> partners;
 
   for (graph::Node* n : *g->getNodes()) {

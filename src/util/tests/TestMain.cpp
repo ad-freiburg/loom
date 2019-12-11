@@ -1669,5 +1669,18 @@ int main(int argc, char** argv) {
   auto h = util::geo::convexHull(mp);
 
   TEST(geo::contains(mp, h));
+
+  TEST(geo::dist(geo::interpolate(DPoint(1.0, 1.0), DPoint(1.0, 3.0), 0.5), DPoint(1.0, 2.0)), ==, approx(0));
+  TEST(geo::dist(geo::interpolate(DPoint(1.0, 1.0), DPoint(2.0, 2.0), 0), DPoint(1.0, 1.0)), ==, approx(0));
+  TEST(geo::dist(geo::interpolate(DPoint(1.0, 1.0), DPoint(2.0, 2.0), 0.5), DPoint(1.5, 1.5)), ==, approx(0));
+  TEST(geo::dist(geo::interpolate(DPoint(1.0, 1.0), DPoint(2.0, 2.0), 1), DPoint(2, 2)), ==, approx(0));
+  TEST(geo::dist(geo::pointAtDist(DLine{{0, 0}, {0, 1}, {0, 2}}, 1), DPoint{0, 1}), ==, approx(0));
+  TEST(geo::dist(geo::pointAtDist(DLine{{0, 0}, {0, 1}, {0, 2}}, 2), DPoint{0, 2}), ==, approx(0));
+  TEST(geo::dist(geo::pointAtDist(DLine{{0, 0}, {0, 1}, {0, 2}}, 0), DPoint{0, 0}), ==, approx(0));
+
+  TEST(geo::getWKT(geo::orthoLineAtDist(DLine{{0, 0}, {0, 1}, {0, 2}}, 1, 1)), ==, "LINESTRING (-0.5 1, 0.5 1)");
+
+  TEST(geo::getWKT(geo::segment(DLine{{0, 0}, {0, 1}, {0, 2}}, 0, 0.5)), ==, "LINESTRING (0 0, 0 1)");
+  TEST(geo::getWKT(geo::segment(DLine{{0, 0}, {0, 1}, {0, 2}}, 0.5, 1)), ==, "LINESTRING (0 1, 0 2)");
 }
 }

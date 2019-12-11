@@ -8,7 +8,7 @@
 #include <glpk.h>
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/Route.h"
+#include "shared/transitgraph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/OptGraph.h"
 #include "transitmap/optim/Optimizer.h"

@@ -14,6 +14,8 @@ using transitmapper::optim::LinePair;
 using transitmapper::optim::PosComPair;
 using transitmapper::optim::EdgePair;
 using transitmapper::graph::NodeFront;
+using transitmapper::optim::OptNode;
+using transitmapper::optim::OptEdge;
 
 // _____________________________________________________________________________
 int Optimizer::optimize(TransitGraph* tg) const {

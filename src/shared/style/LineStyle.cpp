@@ -3,10 +3,9 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <sstream>
-#include "LineStyle.h"
+#include "shared/style/LineStyle.h"
 
-using namespace transitmapper;
-using namespace style;
+using shared::style::LineStyle;
 
 // ____________________________________________________________________________
 const std::vector<double>& LineStyle::getDashArray() const {

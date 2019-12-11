@@ -2,10 +2,9 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "transitmap/graph/Route.h"
+#include "shared/transitgraph/Route.h"
 
-using namespace transitmapper;
-using namespace graph;
+using shared::transitgraph::Route;
 
 // _____________________________________________________________________________
 const std::string& Route::getId() const {

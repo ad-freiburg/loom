@@ -12,7 +12,7 @@
 #include "util/graph/Node.h"
 #include "util/log/Log.h"
 
-#include "transitmap/style/LineStyle.h"
+#include "shared/style/LineStyle.h"
 
 using namespace shared::transitgraph;
 using shared::transitgraph::TransitNode;
@@ -227,7 +227,7 @@ void TransitGraph::readFromJson(std::istream* s) {
           }
 
           if (!route["style"].is_null()) {
-            transitmapper::style::LineStyle ls;
+            shared::style::LineStyle ls;
             auto style = route["style"];
             std::string dashArray;
             if (!style["dash-array"].is_null()) {
@@ -409,7 +409,7 @@ std::vector<RouteOcc> TransitGraph::getCtdRoutesIn(const Route* r,
 
 // _____________________________________________________________________________
 std::vector<RouteOcc> TransitGraph::getCtdRoutesIn(const TransitEdge* fromEdge,
-                                            const TransitEdge* toEdge) {
+                                                   const TransitEdge* toEdge) {
   std::vector<RouteOcc> ret;
   const auto* n = sharedNode(fromEdge, toEdge);
   if (!n) return ret;

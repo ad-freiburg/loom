@@ -7,9 +7,9 @@
 
 #include <cmath>
 #include <set>
+#include "shared/transitgraph/Route.h"
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Penalties.h"
-#include "transitmap/graph/Route.h"
 #include "util/geo/Geo.h"
 #include "util/geo/PolyLine.h"
 
@@ -17,6 +17,8 @@ using namespace util::geo;
 
 namespace transitmapper {
 namespace graph {
+
+using shared::transitgraph::Route;
 
 // forward declarations
 class Edge;
@@ -30,7 +32,7 @@ struct NodeFront {
   NodeFront(Edge* e, Node* n) : n(n), edge(e) {}
 
   Node* n;  // pointer to node here also
-DPoint getTripOccPos(const Route* r, const OrderingConfig& c) const;
+  DPoint getTripOccPos(const Route* r, const OrderingConfig& c) const;
   DPoint getTripOccPos(const Route* r, const OrderingConfig& c,
                        bool originGeom) const;
   DPoint getTripPos(const Edge* e, size_t pos, bool inv) const;

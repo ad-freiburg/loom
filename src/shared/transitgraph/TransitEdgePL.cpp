@@ -2,6 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include "shared/style/LineStyle.h"
+#include "shared/transitgraph/Route.h"
 #include "shared/transitgraph/TransitEdgePL.h"
 #include "shared/transitgraph/TransitGraph.h"
 #include "shared/transitgraph/TransitNodePL.h"
@@ -17,8 +19,7 @@ using shared::transitgraph::RouteOcc;
 TransitEdgePL::TransitEdgePL() {}
 
 // _____________________________________________________________________________
-TransitEdgePL::TransitEdgePL(const PolyLine<double>& p)
-    : _p(p) {}
+TransitEdgePL::TransitEdgePL(const PolyLine<double>& p) : _p(p) {}
 
 // _____________________________________________________________________________
 const util::geo::Line<double>* TransitEdgePL::getGeom() const {
@@ -32,9 +33,8 @@ const PolyLine<double>& TransitEdgePL::getPolyline() const { return _p; }
 void TransitEdgePL::setPolyline(const PolyLine<double>& p) { _p = p; }
 
 // _____________________________________________________________________________
-void TransitEdgePL::addRoute(
-    const Route* r, const TransitNode* dir,
-    util::Nullable<transitmapper::style::LineStyle> ls) {
+void TransitEdgePL::addRoute(const Route* r, const TransitNode* dir,
+                             util::Nullable<shared::style::LineStyle> ls) {
   RouteOcc occ(r, dir, ls);
   auto f = _routes.find(occ);
   if (f != _routes.end()) {
@@ -56,7 +56,7 @@ void TransitEdgePL::addRoute(
 
 // _____________________________________________________________________________
 void TransitEdgePL::addRoute(const Route* r, const TransitNode* dir) {
-  addRoute(r, dir, util::Nullable<transitmapper::style::LineStyle>());
+  addRoute(r, dir, util::Nullable<shared::style::LineStyle>());
 }
 
 // _____________________________________________________________________________

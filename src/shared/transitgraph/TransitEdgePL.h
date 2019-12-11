@@ -6,21 +6,19 @@
 #define SHARED_TRANSITGRAPH_TRANSITEDGEPL_H_
 
 #include <set>
-#include "transitmap/graph/Route.h"
-#include "transitmap/style/LineStyle.h"
+#include "shared/style/LineStyle.h"
+#include "shared/transitgraph/Route.h"
 #include "util/Nullable.h"
 #include "util/geo/GeoGraph.h"
 #include "util/geo/PolyLine.h"
 #include "util/graph/Node.h"
 
-using util::geo::PolyLine;
-using transitmapper::graph::Route;
-using transitmapper::style::LineStyle;
-using util::graph::Node;
-using util::Nullable;
-
 namespace shared {
 namespace transitgraph {
+
+using util::geo::PolyLine;
+using util::graph::Node;
+using util::Nullable;
 
 class TransitEdgePL;
 class TransitNodePL;
@@ -29,13 +27,13 @@ struct RouteOcc {
   RouteOcc(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir)
       : route(r), direction(dir) {}
   RouteOcc(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir,
-           const util::Nullable<transitmapper::style::LineStyle>& ls)
+           const util::Nullable<shared::style::LineStyle>& ls)
       : route(r), direction(dir), style(ls) {}
   const Route* route;
   const Node<TransitNodePL, TransitEdgePL>*
       direction;  // 0 if in both directions
 
-  util::Nullable<transitmapper::style::LineStyle> style;
+  util::Nullable<shared::style::LineStyle> style;
 };
 
 inline bool operator<(const RouteOcc& x, const RouteOcc& y) {
@@ -48,7 +46,7 @@ class TransitEdgePL : util::geograph::GeoEdgePL<double> {
   TransitEdgePL(const PolyLine<double>& p);
 
   void addRoute(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir,
-                util::Nullable<transitmapper::style::LineStyle> ls);
+                util::Nullable<shared::style::LineStyle> ls);
   void addRoute(const Route* r, const Node<TransitNodePL, TransitEdgePL>* dir);
 
   const std::set<RouteOcc>& getRoutes() const;

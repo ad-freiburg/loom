@@ -17,7 +17,6 @@ namespace util {
 namespace geo {
 
 static const double MAX_EQ_DISTANCE = 15;
-static const double AVERAGING_STEP = 20;
 
 // legacy code, will be removed in the future
 

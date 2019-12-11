@@ -12,12 +12,15 @@
 #include <proj_api.h>
 #include "util/geo/PolyLine.h"
 #include "TransitGraph.h"
+#include "transitmap/graph/RenderLineGraph.h"
 #include "transitmap/config/TransitMapConfig.h"
 
 namespace transitmapper {
 namespace graph {
 
 using util::geo::SharedSegment;
+
+using transitmapper::graph::RenderLineGraph;
 
 struct ShrdSegWrap {
   ShrdSegWrap() : e(0), f(0) {};
@@ -35,6 +38,8 @@ class GraphBuilder {
   void combinePartnerRoutes(graph::TransitGraph* g);
 
   void writeMainDirs(TransitGraph* g);
+  void writeFronts(RenderLineGraph* g);
+
   void expandOverlappinFronts(TransitGraph* g);
   void writeInitialConfig(TransitGraph* g);
   void createMetaNodes(TransitGraph* g);

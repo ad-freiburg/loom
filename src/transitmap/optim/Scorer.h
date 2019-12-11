@@ -12,13 +12,13 @@
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/Penalties.h"
 
+namespace transitmapper {
+namespace optim {
+
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
 using transitmapper::graph::Penalties;
 using transitmapper::graph::OrderingConfig;
-
-namespace transitmapper {
-namespace optim {
 
 class Scorer {
  public:

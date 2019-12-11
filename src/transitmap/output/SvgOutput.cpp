@@ -4,8 +4,9 @@
 
 #include <stdint.h>
 #include <ostream>
+#include "shared/style/LineStyle.h"
+#include "shared/transitgraph/Route.h"
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/Route.h"
 #include "transitmap/output/SvgOutput.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
@@ -14,6 +15,7 @@ using namespace transitmapper;
 using namespace output;
 
 using util::toString;
+using shared::style::LineStyle;
 
 // _____________________________________________________________________________
 SvgOutput::SvgOutput(std::ostream* o, const config::Config* cfg,
@@ -324,7 +326,6 @@ bool SvgOutput::isNextTo(const graph::InnerGeometry& a,
   if (a.from.front == b.from.front && a.to.front == b.to.front) {
     if ((a.slotFrom - b.slotFrom == 1 || b.slotFrom - a.slotFrom == 1) &&
         (a.slotTo - b.slotTo == 1 || b.slotTo - a.slotTo == 1)) {
-
       double ang1 = fabs(util::geo::angBetween(a.geom.front(), a.geom.back()));
       double ang2 = fabs(util::geo::angBetween(b.geom.front(), b.geom.back()));
 
@@ -335,7 +336,6 @@ bool SvgOutput::isNextTo(const graph::InnerGeometry& a,
   if (a.to.front == b.from.front && a.from.front == b.to.front) {
     if ((a.slotTo - b.slotFrom == 1 || b.slotFrom - a.slotTo == 1) &&
         (a.slotFrom - b.slotTo == 1 || b.slotTo - a.slotFrom == 1)) {
-
       double ang1 = fabs(util::geo::angBetween(a.geom.front(), a.geom.back()));
       double ang2 = fabs(util::geo::angBetween(b.geom.front(), b.geom.back()));
 
@@ -442,7 +442,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
 void SvgOutput::renderLinePart(const PolyLine<double> p, double width,
                                const graph::Route& route,
                                const graph::Edge* edge,
-                               const Nullable<style::LineStyle> style) {
+                               const Nullable<LineStyle> style) {
   renderLinePart(p, width, route, edge, "", style);
 }
 
@@ -451,7 +451,7 @@ void SvgOutput::renderLinePart(const PolyLine<double> p, double width,
                                const graph::Route& route,
                                const graph::Edge* edge,
                                const std::string& endMarker,
-                               const Nullable<style::LineStyle> style) {
+                               const Nullable<LineStyle> style) {
   if (p.getLength() < width / 2) return;
   std::stringstream styleOutline;
   styleOutline << "fill:none;stroke:#000000";

@@ -8,10 +8,10 @@
 #include <vector>
 #include "Edge.h"
 #include "Node.h"
-#include "Route.h"
+#include "shared/transitgraph/Route.h"
 #include "util/geo/PolyLine.h"
 #include "util/Nullable.h"
-#include "transitmap/style/LineStyle.h"
+#include "shared/style/LineStyle.h"
 
 using std::exception;
 using std::string;
@@ -20,19 +20,20 @@ using namespace util::geo;
 namespace transitmapper {
 namespace graph {
 
-using style::LineStyle;
+using shared::style::LineStyle;
+using shared::transitgraph::Route;
 
 // forward declaration of Node
 class Node;
 
 struct RouteOccurance {
   RouteOccurance(const Route* r, const Node* dir) : route(r), direction(dir) {}
-  RouteOccurance(const Route* r, const Node* dir, const style::LineStyle& ls)
+  RouteOccurance(const Route* r, const Node* dir, const LineStyle& ls)
    : route(r), direction(dir), style(ls) {}
   const Route* route;
   const Node* direction;  // 0 if in both directions
 
-  util::Nullable<style::LineStyle> style;
+  util::Nullable<LineStyle> style;
 
   bool operator==(const RouteOccurance& b) const {
     return b.route == route;

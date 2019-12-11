@@ -8,7 +8,7 @@
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Penalties.h"
-#include "transitmap/graph/Route.h"
+#include "shared/transitgraph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "util/geo/BezierCurve.h"
 #include "util/geo/Geo.h"
@@ -17,11 +17,12 @@
 // yet implemented in util/Geo.h
 #include <boost/geometry.hpp>
 #include <boost/geometry/strategies/transform/matrix_transformers.hpp>
+namespace bgeo = boost::geometry;
 
 using namespace transitmapper;
 using namespace graph;
 
-namespace bgeo = boost::geometry;
+using shared::transitgraph::Route;
 
 using util::geo::Point;
 using util::geo::Polygon;
