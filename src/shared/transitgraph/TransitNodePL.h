@@ -10,11 +10,11 @@
 #include "util/geo/GeoGraph.h"
 #include "util/graph/Node.h"
 
-using util::geo::Point;
-using util::graph::Node;
-
 namespace shared {
 namespace transitgraph {
+
+using util::geo::Point;
+using util::graph::Node;
 
 typedef util::graph::Node<TransitNodePL, TransitEdgePL> TransitNode;
 typedef util::graph::Edge<TransitNodePL, TransitEdgePL> TransitEdge;

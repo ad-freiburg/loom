@@ -22,7 +22,7 @@ int Optimizer::optimize(TransitGraph* tg) const {
 
   size_t maxC = maxCard(*g.getNds());
   double solSp = solutionSpaceSize(*g.getNds());
-  LOG(DEBUG) << "Optimizing line graph of size " << tg->getNodes()->size()
+  LOG(DEBUG) << "Optimizing line graph of size " << tg->getNds()->size()
              << " with max cardinality = " << maxC
              << " and solution space size = " << solSp;
 
@@ -51,7 +51,7 @@ int Optimizer::optimize(TransitGraph* tg) const {
   }
 
   if (_cfg->outputStats) {
-    LOG(INFO) << "(stats) Stats for <optim> graph of '" << tg->getName() << "'";
+    LOG(INFO) << "(stats) Stats for <optim> graph of '" << tg << "'";
     LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes();
     LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges();
     // LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes();
@@ -146,7 +146,7 @@ int Optimizer::optimize(TransitGraph* tg) const {
 // _____________________________________________________________________________
 void Optimizer::expandRelatives(TransitGraph* g, OrderingConfig* c) {
   std::set<std::pair<graph::Edge*, const Route*>> visited;
-  for (graph::Node* n : *g->getNodes()) {
+  for (graph::Node* n : *g->getNds()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       for (const auto& ra : *(e->getRoutes())) {
         if (ra.route->relativeTo()) {

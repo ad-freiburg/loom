@@ -94,15 +94,7 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
 
   _w.closeTag();
 
-  if (_cfg->renderNodeCircles) {
-    renderNodeCircles(outG, rparams);
-  }
-
-  if (_cfg->renderNodePolygons) {
-    renderNodePolygons(outG, rparams);
-  }
-
-  for (graph::Node* n : outG.getNodes()) {
+  for (graph::Node* n : outG.getNds()) {
     if (_cfg->renderNodeConnections) {
       renderNodeConnections(outG, n, rparams);
     }
@@ -110,18 +102,9 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
 
   renderDelegates(outG, rparams);
 
-  for (graph::Node* n : outG.getNodes()) {
-    if (_cfg->renderStationNames) renderNodeScore(outG, n, rparams);
-  }
-
   outputNodes(outG, rparams);
   if (_cfg->renderNodeFronts) {
     renderNodeFronts(outG, rparams);
-  }
-
-  if (_cfg->renderStats) {
-    renderStats(outG, outG.getLastSolveTime(), outG.getLastSolveTarget(),
-                rparams);
   }
 
   _w.closeTags();
@@ -131,7 +114,7 @@ void SvgOutput::print(const graph::TransitGraph& outG) {
 void SvgOutput::outputNodes(const graph::TransitGraph& outG,
                             const RenderParams& rparams) {
   _w.openTag("g");
-  for (graph::Node* n : outG.getNodes()) {
+  for (graph::Node* n : outG.getNds()) {
     std::map<std::string, std::string> params;
 
     if (_cfg->renderStations && n->getStops().size() > 0 &&
@@ -151,53 +134,10 @@ void SvgOutput::outputNodes(const graph::TransitGraph& outG,
 }
 
 // _____________________________________________________________________________
-void SvgOutput::renderNodeCircles(const graph::TransitGraph& outG,
-                                  const RenderParams& rparams) {
-  _w.openTag("g");
-  for (graph::Node* n : outG.getNodes()) {
-    if (n->getAdjListOut().size() + n->getAdjListIn().size() < 2) {
-      continue;
-    }
-
-    std::stringstream style;
-    style << "fill:#CCC;stroke:#888"
-          << ";stroke-dasharray:1,.5;stroke-linejoin: "
-             "miter;stroke-opacity:1;stroke-width:.3";
-    std::map<std::string, std::string> params;
-    params["style"] = style.str();
-    DPoint center = n->getPos();
-
-    printCircle(center, n->getMaxNodeFrontWidth() * 1, params, rparams);
-  }
-  _w.closeTag();
-}
-
-// _____________________________________________________________________________
-void SvgOutput::renderNodePolygons(const graph::TransitGraph& outG,
-                                   const RenderParams& rparams) {
-  _w.openTag("g");
-  for (graph::Node* n : outG.getNodes()) {
-    if (n->getAdjListOut().size() + n->getAdjListIn().size() < 2) {
-      continue;
-    }
-    std::stringstream style;
-    style << "fill:#CCC;stroke:#888"
-          << ";stroke-dasharray:1,.5;stroke-linejoin: "
-             "miter;stroke-opacity:1;stroke-width:.3";
-    std::map<std::string, std::string> params;
-    params["style"] = style.str();
-    DPolygon p = n->getConvexFrontHull(1, false, false);
-
-    printPolygon(p, params, rparams);
-  }
-  _w.closeTag();
-}
-
-// _____________________________________________________________________________
 void SvgOutput::renderNodeFronts(const graph::TransitGraph& outG,
                                  const RenderParams& rparams) {
   _w.openTag("g");
-  for (graph::Node* n : outG.getNodes()) {
+  for (graph::Node* n : outG.getNds()) {
     std::string color = n->getStops().size() > 0 ? "red" : "black";
     for (size_t i = 0; i < n->getMainDirs().size(); i++) {
       auto& f = n->getMainDirs()[i];
@@ -246,7 +186,7 @@ void SvgOutput::outputEdges(const graph::TransitGraph& outG,
 
   std::set<const graph::Node*, cmp> nodesOrdered;
   std::set<const graph::Edge*, cmpEdge> edgesOrdered;
-  for (const graph::Node* n : outG.getNodes()) {
+  for (const graph::Node* n : outG.getNds()) {
     nodesOrdered.insert(n);
   }
 
@@ -268,8 +208,6 @@ void SvgOutput::outputEdges(const graph::TransitGraph& outG,
 void SvgOutput::renderNodeConnections(const graph::TransitGraph& outG,
                                       const graph::Node* n,
                                       const RenderParams& rparams) {
-  // if (n->getStops().size() != 0 && n->getMainDirs().size() != 2) return;
-
   auto geoms =
       n->getInnerGeometries(outG.getConfig(), _cfg->innerGeometryPrecision);
 
@@ -307,7 +245,6 @@ size_t SvgOutput::getNextPartner(const InnerClique& forClique,
   for (size_t i = 0; i < pool.size(); i++) {
     const graph::InnerGeometry& ic = pool[i];
     for (auto& ciq : forClique.geoms) {
-      // continue;
       if (isNextTo(ic, ciq) || (level > 1 && hasSameOrigin(ic, ciq))) {
         return i;
       }
@@ -324,7 +261,6 @@ bool SvgOutput::isNextTo(const graph::InnerGeometry& a,
   if (a.from.front == b.from.front && a.to.front == b.to.front) {
     if ((a.slotFrom - b.slotFrom == 1 || b.slotFrom - a.slotFrom == 1) &&
         (a.slotTo - b.slotTo == 1 || b.slotTo - a.slotTo == 1)) {
-
       double ang1 = fabs(util::geo::angBetween(a.geom.front(), a.geom.back()));
       double ang2 = fabs(util::geo::angBetween(b.geom.front(), b.geom.back()));
 
@@ -335,7 +271,6 @@ bool SvgOutput::isNextTo(const graph::InnerGeometry& a,
   if (a.to.front == b.from.front && a.from.front == b.to.front) {
     if ((a.slotTo - b.slotFrom == 1 || b.slotFrom - a.slotTo == 1) &&
         (a.slotFrom - b.slotTo == 1 || b.slotTo - a.slotFrom == 1)) {
-
       double ang1 = fabs(util::geo::angBetween(a.geom.front(), a.geom.back()));
       double ang2 = fabs(util::geo::angBetween(b.geom.front(), b.geom.back()));
 
@@ -390,10 +325,9 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       PolyLine<double> pl = c.geoms[i].geom;
 
       if (!raw) {
-        double off =
-            -(ref.from.edge->getWidth() + ref.from.edge->getSpacing()) *
-            (static_cast<int>(c.geoms[i].slotFrom) -
-             static_cast<int>(ref.slotFrom));
+        double off = -(_cfg->lineWidth + _cfg->lineSpacing) *
+                     (static_cast<int>(c.geoms[i].slotFrom) -
+                      static_cast<int>(ref.slotFrom));
 
         if (ref.from.edge->getTo() == n) off = -off;
 
@@ -418,7 +352,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       styleOutlineCropped << "fill:none;stroke:#000000";
 
       styleOutlineCropped << ";stroke-linecap:butt;stroke-width:"
-                          << (ref.from.edge->getWidth() + _cfg->outlineWidth) *
+                          << (_cfg->lineWidth + _cfg->outlineWidth) *
                                  _cfg->outputResolution;
       Params paramsOutlineCropped;
       paramsOutlineCropped["style"] = styleOutlineCropped.str();
@@ -427,7 +361,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
       styleStr << "fill:none;stroke:#" << c.geoms[i].from.route->getColor();
 
       styleStr << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
-               << ref.from.edge->getWidth() * _cfg->outputResolution;
+               << _cfg->lineWidth * _cfg->outputResolution;
       Params params;
       params["style"] = styleStr.str();
 
@@ -495,177 +429,9 @@ void SvgOutput::renderLinePart(const PolyLine<double> p, double width,
   Params params;
   params["style"] = styleStr.str();
 
-  /*
-   * _delegates[reinterpret_cast<std::uintptr_t>(edge)].push_back(OutlinePrintPair(
-   *     PrintDelegate(params, p), PrintDelegate(paramsOutline, p)));
-   */
   _delegates[0].insert(_delegates[0].begin(),
                        OutlinePrintPair(PrintDelegate(params, p),
                                         PrintDelegate(paramsOutline, p)));
-}
-
-// _____________________________________________________________________________
-void SvgOutput::renderNodeScore(const graph::TransitGraph& outG,
-                                const graph::Node* n,
-                                const RenderParams& rparams) {
-  Params params;
-  params["x"] = std::to_string(
-      (n->getPos().getX() - rparams.xOff) * _cfg->outputResolution + 0);
-  params["y"] = std::to_string(
-      rparams.height -
-      (n->getPos().getY() - rparams.yOff) * _cfg->outputResolution - 0);
-  params["style"] =
-      "font-family:Verdana;font-size:8px; font-style:normal; font-weight: "
-      "normal; fill: red; stroke-width: 0.25px; stroke-linecap: butt; "
-      "stroke-linejoin: miter; stroke: black";
-  _w.openTag("text", params);
-  if (false && n->getStops().size()) {
-    _w.writeText((*n->getStops().begin()).id);
-    _w.writeText("\n");
-  }
-
-  _w.writeText(
-      util::toString(_scorer->getNumCrossings(n, outG.getConfig())) + "(" +
-      util::toString(_scorer->getCrossingScore(n, outG.getConfig())) + ")/" +
-      util::toString(_scorer->getNumSeparations(n, outG.getConfig())) + "(" +
-      util::toString(_scorer->getSeparationScore(n, outG.getConfig())) + ")");
-  _w.closeTag();
-}
-
-// _____________________________________________________________________________
-void SvgOutput::renderStats(const graph::TransitGraph& outG, double solveTime,
-                            size_t score, const RenderParams& rparams) {
-  Params params;
-  int fontSize =
-      (_cfg->lineWidth + _cfg->lineSpacing) * 4 * _cfg->outputResolution;
-  params["x"] = std::to_string(20);
-  params["y"] = std::to_string(rparams.height);
-  params["style"] = std::string("font-size:") + std::to_string(fontSize) +
-                    "px; font-style:normal; font-weight: "
-                    "normal; fill: black; stroke: none";
-  _w.openTag("text", params);
-
-  _w.openTag("tspan", {{"x", "0"}});
-  _w.writeText("line-width=" + std::to_string(_cfg->lineWidth));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("line-spacing=" + std::to_string(_cfg->lineSpacing));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("render-method=" + _cfg->renderMethod);
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("optim-method=" + _cfg->optimMethod);
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("MPS out path=" + _cfg->glpkMPSOutputPath);
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("H-readable ILP out path=" + _cfg->glpkHOutputPath);
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("ILP sol. out path=" + _cfg->glpkSolutionOutputPath);
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("no-optim=" + std::string(_cfg->noOptim ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("splitting-optim=" +
-               std::string(_cfg->splittingOpt ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("resolution=" + std::to_string(_cfg->outputResolution));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("input-line-smoothing=" + std::to_string(_cfg->inputSmoothing));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("inner-geom-prec=" +
-               std::to_string(_cfg->innerGeometryPrecision));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("outline-width=" + std::to_string(_cfg->outlineWidth));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("outline-color=" + _cfg->outlineColor);
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("render-stations=" +
-               std::string(_cfg->renderStations ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("render-node-fronts=" +
-               std::string(_cfg->renderNodeFronts ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("render-node-circles=" +
-               std::string(_cfg->renderNodeCircles ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("render-node-polygons=" +
-               std::string(_cfg->renderNodePolygons ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("render-station-names=" +
-               std::string(_cfg->renderStationNames ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("render-edges=" + std::string(_cfg->renderEdges ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("collapse-line-partners=" +
-               std::string(_cfg->collapseLinePartners ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("render-node-connections=" +
-               std::string(_cfg->renderNodeConnections ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("expand-node-fronts=" +
-               std::string(_cfg->expandFronts ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("solver=" + std::string(_cfg->externalSolver.empty()
-                                           ? "glpk"
-                                           : "(external)"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("create-core-graph=" +
-               std::string(_cfg->createCoreOptimGraph ? "yes" : "no"));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("same-seg-cross-pen=" +
-               std::to_string(_cfg->crossPenMultiSameSeg));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("diff-seg-cross-pen=" +
-               std::to_string(_cfg->crossPenMultiDiffSeg));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("in-station-same-seg-cross-pen=" +
-               std::to_string(_cfg->stationCrossWeightSameSeg));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("in-station-diff-seg-cross-pen=" +
-               std::to_string(_cfg->stationCrossWeightDiffSeg));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("separation-pen=" + std::to_string(_cfg->splitPenWeight));
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("ILP solve time=" + std::to_string(solveTime) + " ms");
-  _w.closeTag();
-  _w.openTag("tspan", {{"x", "0"}, {"dy", std::to_string(-fontSize)}});
-  _w.writeText("ILP target =" + std::to_string(score));
-  _w.closeTag();
-
-  _w.openTag("tspan",
-             {{"style", "font-weight: bold!important, font-size:2em!important"},
-              {"x", "0"},
-              {"dy", std::to_string(-fontSize)}});
-  _w.writeText(outG.getName());
-  _w.closeTag();
-  _w.closeTag();
 }
 
 // _____________________________________________________________________________
@@ -677,8 +443,8 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
   PolyLine<double> center = e->getGeom();
 
-  double lineW = e->getWidth();
-  double lineSpc = e->getSpacing();
+  double lineW = _cfg->lineWidth;
+  double lineSpc = _cfg->lineSpacing;
   double offsetStep = lineW + lineSpc;
   double oo = e->getTotalWidth();
 
@@ -695,7 +461,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
     if (p.getLength() < 0.01) continue;
 
-    double offset = -(o - oo / 2.0 - e->getWidth() / 2.0);
+    double offset = -(o - oo / 2.0 - _cfg->lineWidth / 2.0);
 
     p.offsetPerp(offset);
 

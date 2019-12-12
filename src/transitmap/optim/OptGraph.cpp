@@ -36,30 +36,11 @@ void OptGraph::upFirstLastEdg(OptEdge* optEdg) {
 
 // _____________________________________________________________________________
 EtgPart OptGraph::getFirstEdg(const OptEdge* optEdg) {
-  // size_t i = 0;
-  // for (const auto e : optEdg->pl().etgs) {
-    // if (e.etg->getFrom() == optEdg->getFrom()->pl().node ||
-        // e.etg->getTo() == optEdg->getFrom()->pl().node) {
-      // break;
-    // }
-    // i++;
-  // }
-
-  // assert(i == optEdg->pl().firstEtg);
   return optEdg->pl().etgs[optEdg->pl().firstEtg];
 }
 
 // _____________________________________________________________________________
 EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) {
-  // size_t i = 0;
-  // for (const auto e : optEdg->pl().etgs) {
-    // if (e.etg->getFrom() == optEdg->getTo()->pl().node ||
-        // e.etg->getTo() == optEdg->getTo()->pl().node) {
-      // break;
-    // }
-    // i++;
-  // }
-  // assert(i == optEdg->pl().lastEtg);
   return optEdg->pl().etgs[optEdg->pl().lastEtg];
 }
 
@@ -116,7 +97,7 @@ OptGraph::OptGraph(TransitGraph* toOptim, const Scorer* scorer)
 
 // _____________________________________________________________________________
 void OptGraph::build() {
-  for (graph::Node* n : *_g->getNodes()) {
+  for (graph::Node* n : *_g->getNds()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       graph::Node* fromTn = e->getFrom();
       graph::Node* toTn = e->getTo();
@@ -126,9 +107,6 @@ void OptGraph::build() {
 
       if (!from) from = addNd(fromTn);
       if (!to) to = addNd(toTn);
-
-      // if (getEdg(from, to)) std::cout << fromTn << "->" << toTn << " induces multi edge!" << std::endl;
-      // assert(!getEdg(from, to));
 
       OptEdge* edge = addEdg(from, to);
 

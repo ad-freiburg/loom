@@ -9,11 +9,11 @@
 #include <set>
 #include <string>
 #include <vector>
-#include "transitmap/config/TransitMapConfig.h"
+#include "Output.h"
 #include "transitmap/graph/Route.h"
+#include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/Scorer.h"
-#include "Output.h"
 #include "util/geo/Geo.h"
 #include "util/geo/PolyLine.h"
 #include "util/xml/XmlWriter.h"
@@ -74,7 +74,8 @@ struct OutlinePrintPair {
 
 class SvgOutput : public Output {
  public:
-  SvgOutput(std::ostream* o, const config::Config* cfg, const optim::Scorer* scorer);
+  SvgOutput(std::ostream* o, const config::Config* cfg,
+            const optim::Scorer* scorer);
   virtual ~SvgOutput(){};
 
   virtual void print(const graph::TransitGraph& outputGraph);
@@ -104,14 +105,10 @@ class SvgOutput : public Output {
   const config::Config* _cfg;
   const optim::Scorer* _scorer;
 
-  std::map<uintptr_t, std::vector<OutlinePrintPair> > _delegates;
-  std::vector<std::map<uintptr_t, std::vector<OutlinePrintPair> > >
+  std::map<uintptr_t, std::vector<OutlinePrintPair>> _delegates;
+  std::vector<std::map<uintptr_t, std::vector<OutlinePrintPair>>>
       _innerDelegates;
   std::vector<EndMarker> _markers;
-
-  void renderStats(const graph::TransitGraph& outG, double solveTime,
-                   size_t score,
-                   const RenderParams& rparams);
 
   void outputNodes(const graph::TransitGraph& outputGraph,
                    const RenderParams& params);
@@ -124,14 +121,13 @@ class SvgOutput : public Output {
   void renderNodeConnections(const graph::TransitGraph& outG,
                              const graph::Node* n, const RenderParams& params);
 
-  void renderNodeScore(const graph::TransitGraph& outG, const graph::Node* n,
-                       const RenderParams& params);
-
-  void renderLinePart(const PolyLine<double> p, double width, const graph::Route& route,
+  void renderLinePart(const PolyLine<double> p, double width,
+                      const graph::Route& route,
                       const graph::Edge* e,
                       const Nullable<style::LineStyle> style);
 
-  void renderLinePart(const PolyLine<double> p, double width, const graph::Route& route,
+  void renderLinePart(const PolyLine<double> p, double width,
+                      const graph::Route& route,
                       const graph::Edge* edge, const std::string& endMarker,
                       const Nullable<style::LineStyle> style);
 
@@ -140,10 +136,7 @@ class SvgOutput : public Output {
 
   void renderNodeFronts(const graph::TransitGraph& outG,
                         const RenderParams& params);
-  void renderNodeCircles(const graph::TransitGraph& outG,
-                         const RenderParams& rparams);
-  void renderNodePolygons(const graph::TransitGraph& outG,
-                          const RenderParams& rparams);
+
   std::multiset<InnerClique> getInnerCliques(
       std::vector<graph::InnerGeometry> geoms, size_t level) const;
 

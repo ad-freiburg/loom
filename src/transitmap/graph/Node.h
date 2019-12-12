@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <set>
+#include "shared/transitgraph/TransitNodePL.h"
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Penalties.h"
 #include "transitmap/graph/Route.h"
@@ -30,7 +31,7 @@ struct NodeFront {
   NodeFront(Edge* e, Node* n) : n(n), edge(e) {}
 
   Node* n;  // pointer to node here also
-DPoint getTripOccPos(const Route* r, const OrderingConfig& c) const;
+  DPoint getTripOccPos(const Route* r, const OrderingConfig& c) const;
   DPoint getTripOccPos(const Route* r, const OrderingConfig& c,
                        bool originGeom) const;
   DPoint getTripPos(const Edge* e, size_t pos, bool inv) const;
@@ -70,29 +71,22 @@ struct InnerGeometry {
                 size_t slotT)
       : geom(g), from(a), to(b), slotFrom(slotF), slotTo(slotT){};
   PolyLine<double> geom;
-  Partner from;
-  Partner to;
-  size_t slotFrom;
-  size_t slotTo;
-};
-
-struct StationInfo {
-  StationInfo(const std::string& id, const std::string& name)
-      : id(id), name(name) {}
-  std::string id, name;
+  Partner from, to;
+  size_t slotFrom, slotTo;
 };
 
 class Node {
  public:
   Node(const std::string& id, DPoint pos);
   Node(const std::string& id, double x, double y);
-  Node(const std::string& id, DPoint pos, StationInfo stop);
-  Node(const std::string& id, double x, double y, StationInfo stop);
+  Node(const std::string& id, DPoint pos, shared::transitgraph::Station stop);
+  Node(const std::string& id, double x, double y,
+       shared::transitgraph::Station stop);
 
   ~Node();
 
-  const std::vector<StationInfo>& getStops() const;
-  void addStop(StationInfo s);
+  const std::vector<shared::transitgraph::Station>& getStops() const;
+  void addStop(shared::transitgraph::Station s);
   const DPoint& getPos() const;
   void setPos(const DPoint& p);
 
@@ -125,10 +119,10 @@ class Node {
   Polygon<double> getStationHull() const;
 
   // add edge to this node's adjacency lists
-  void addEdge(Edge* e);
+  void addEdg(Edge* e);
 
   // get edge from or to this node, from or to node "other"
-  Edge* getEdge(const Node* other) const;
+  Edge* getEdg(const Node* other) const;
 
   // remove edge from this node's adjacency lists
   void removeEdge(Edge* e);
@@ -150,12 +144,10 @@ class Node {
 
   std::vector<NodeFront> _mainDirs;
 
-  std::vector<StationInfo> _stops;
+  std::vector<shared::transitgraph::Station> _stops;
 
   std::map<const Route*, std::map<const Edge*, std::set<const Edge*> > >
       _routeConnExceptions;
-
-  size_t getNodeFrontPos(const NodeFront* a) const;
 
   InnerGeometry getInnerBezier(const OrderingConfig& c,
                                const graph::Partner& partnerFrom,

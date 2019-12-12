@@ -8,15 +8,16 @@
 #include <stack>
 #include <vector>
 #include "GraphBuilder.h"
+#include "transitmap/graph/Route.h"
 #include "json/json.hpp"
 #include "transitmap/config/TransitMapConfig.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
 
-using namespace transitmapper;
-using namespace graph;
 using namespace util::geo;
-using json = nlohmann::json;
+using transitmapper::graph::GraphBuilder;
+using transitmapper::graph::NodeFront;
+using transitmapper::graph::Route;
 
 const static char* WGS84_PROJ =
     "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
@@ -28,7 +29,7 @@ GraphBuilder::GraphBuilder(const config::Config* cfg) : _cfg(cfg) {
 
 // _____________________________________________________________________________
 bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
-  json j;
+  nlohmann::json j;
   (*s) >> j;
 
   if (j["type"] == "FeatureCollection") {
@@ -46,7 +47,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
         Node* n = new Node(id, coords[0], coords[1]);
 
-        StationInfo i("", "");
+        shared::transitgraph::Station i("", "", n->getPos());
         if (!props["station_id"].is_null() ||
             !props["station_label"].is_null()) {
           if (!props["station_id"].is_null())
@@ -56,7 +57,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
           n->addStop(i);
         }
 
-        g->addNode(n);
+        g->addNd(n);
       }
     }
 
@@ -103,7 +104,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
         }
 
         Edge* e =
-            g->addEdge(fromN, toN, pl, _cfg->lineWidth, _cfg->lineSpacing);
+            g->addEdg(fromN, toN, pl, _cfg->lineWidth, _cfg->lineSpacing);
 
         assert(e);
         assert(g->getNodeById(from));
@@ -204,8 +205,8 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
               continue;
             }
 
-            Edge* a = n->getEdge(n1);
-            Edge* b = n->getEdge(n2);
+            Edge* a = n->getEdg(n1);
+            Edge* b = n->getEdg(n2);
 
             if (!a) {
               LOG(WARN) << "line connection exclude defined in node " << id
@@ -237,7 +238,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
 // _____________________________________________________________________________
 void GraphBuilder::writeMainDirs(TransitGraph* graph) {
-  for (auto n : *graph->getNodes()) {
+  for (auto n : *graph->getNds()) {
     std::set<Edge*> eSet;
     eSet.insert(n->getAdjListIn().begin(), n->getAdjListIn().end());
     eSet.insert(n->getAdjListOut().begin(), n->getAdjListOut().end());
@@ -265,7 +266,7 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
 
 // _____________________________________________________________________________
 void GraphBuilder::writeStationGeoms(TransitGraph* graph) {
-  for (auto n : *graph->getNodes()) {
+  for (auto n : *graph->getNds()) {
     n->generateStationHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
                            _cfg->simpleRenderForTwoEdgeNodes);
   }
@@ -279,7 +280,7 @@ void GraphBuilder::expandOverlappinFronts(TransitGraph* g) {
 
   while (true) {
     bool stillFree = false;
-    for (auto n : *g->getNodes()) {
+    for (auto n : *g->getNds()) {
       if (n->getStops().size() && _cfg->tightStations) continue;
       std::set<NodeFront*> overlaps = nodeGetOverlappingFronts(n);
       for (auto f : overlaps) {
@@ -336,7 +337,7 @@ void GraphBuilder::createMetaNodes(TransitGraph* g) {
 
     // first node has new ref node id
     Node* ref = new Node(cands[0].n->getId(), cands[0].n->getPos());
-    g->addNode(ref);
+    g->addNd(ref);
 
     for (auto nf : cands) {
       for (auto onf : getOpenNodeFronts(nf.n)) {
@@ -352,10 +353,10 @@ void GraphBuilder::createMetaNodes(TransitGraph* g) {
           }
         }
 
-        g->getNodes()->erase(onf.n);
+        g->getNds()->erase(onf.n);
         onf.n = ref;
         ref->addMainDir(onf);
-        ref->addEdge(onf.edge);
+        ref->addEdg(onf.edge);
       }
     }
   }
@@ -364,7 +365,7 @@ void GraphBuilder::createMetaNodes(TransitGraph* g) {
 // _____________________________________________________________________________
 std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(
     TransitGraph* g) const {
-  for (auto n : *g->getNodes()) {
+  for (auto n : *g->getNds()) {
     if (n->getStops().size()) continue;
     if (getOpenNodeFronts(n).size() != 1) continue;
 
@@ -613,7 +614,7 @@ std::map<const Route*, std::set<const Route*>> GraphBuilder::getPartnerRoutes(
     graph::TransitGraph* g) const {
   std::map<const Route*, std::set<const Route*>> partners;
 
-  for (graph::Node* n : *g->getNodes()) {
+  for (graph::Node* n : *g->getNds()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       for (const auto& ra : *(e->getRoutes())) {
         std::set<const Route*> partnersHere;
@@ -655,7 +656,7 @@ std::map<const Route*, std::set<const Route*>> GraphBuilder::getPartnerRoutes(
 // _____________________________________________________________________________
 void GraphBuilder::writeInitialConfig(TransitGraph* g) {
   OrderingConfig c;
-  for (graph::Node* n : *g->getNodes()) {
+  for (graph::Node* n : *g->getNds()) {
     for (graph::Edge* e : n->getAdjListOut()) {
       Ordering order(e->getCardinality());
       for (size_t i = 0; i < e->getCardinality(); i++) order[i] = i;

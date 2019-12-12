@@ -26,7 +26,7 @@ double Scorer::getScore() const { return getScore(_g->getConfig()); }
 double Scorer::getScore(const OrderingConfig& c) const {
   double ret = 0;
 
-  for (auto n : _g->getNodes()) {
+  for (auto n : _g->getNds()) {
     ret += getScore(n, c);
   }
 
@@ -40,7 +40,7 @@ double Scorer::getCrossScore() const { return getCrossScore(_g->getConfig()); }
 double Scorer::getCrossScore(const OrderingConfig& c) const {
   double ret = 0;
 
-  for (auto n : _g->getNodes()) {
+  for (auto n : _g->getNds()) {
     ret += getCrossingScore(n, c, _pens);
   }
 
@@ -56,7 +56,7 @@ double Scorer::getSeparationScore() const {
 double Scorer::getSeparationScore(const OrderingConfig& c) const {
   double ret = 0;
 
-  for (auto n : _g->getNodes()) {
+  for (auto n : _g->getNds()) {
     ret += getSeparationScore(n, c, _pens);
   }
 
@@ -72,7 +72,7 @@ size_t Scorer::getNumCrossings() const {
 size_t Scorer::getNumCrossings(const OrderingConfig& c) const {
   double ret = 0;
 
-  for (auto n : _g->getNodes()) {
+  for (auto n : _g->getNds()) {
     ret += getNumCrossings(n, c);
   }
 
@@ -88,7 +88,7 @@ size_t Scorer::getNumSeparations() const {
 size_t Scorer::getNumSeparations(const OrderingConfig& c) const {
   double ret = 0;
 
-  for (auto n : _g->getNodes()) {
+  for (auto n : _g->getNds()) {
     ret += getNumSeparations(n, c);
   }
 
@@ -99,7 +99,7 @@ size_t Scorer::getNumSeparations(const OrderingConfig& c) const {
 double Scorer::getNumPossSolutions() const {
   double ret = 1;
 
-  for (auto n : _g->getNodes()) {
+  for (auto n : _g->getNds()) {
     for (auto e : n->getAdjListOut()) {
       ret *= util::factorial(e->getCardinality());
     }

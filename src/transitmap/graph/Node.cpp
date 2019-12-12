@@ -18,8 +18,12 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/strategies/transform/matrix_transformers.hpp>
 
-using namespace transitmapper;
-using namespace graph;
+using transitmapper::graph::NodeFront;
+using transitmapper::graph::Node;
+using transitmapper::graph::Edge;
+using transitmapper::graph::Partner;
+using transitmapper::graph::InnerGeometry;
+using transitmapper::graph::Route;
 
 namespace bgeo = boost::geometry;
 
@@ -113,13 +117,13 @@ Node::Node(const std::string& id, DPoint pos) : _id(id), _pos(pos) {}
 Node::Node(const std::string& id, double x, double y) : _id(id), _pos(x, y) {}
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, DPoint pos, StationInfo s)
+Node::Node(const std::string& id, DPoint pos, shared::transitgraph::Station s)
     : _id(id), _pos(pos) {
   addStop(s);
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, double x, double y, StationInfo s)
+Node::Node(const std::string& id, double x, double y, shared::transitgraph::Station s)
     : _id(id), _pos(x, y) {
   addStop(s);
 }
@@ -160,13 +164,13 @@ Node::~Node() {
 }
 
 // _____________________________________________________________________________
-void Node::addStop(StationInfo s) { _stops.push_back(s); }
+void Node::addStop(shared::transitgraph::Station s) { _stops.push_back(s); }
 
 // _____________________________________________________________________________
-const std::vector<StationInfo>& Node::getStops() const { return _stops; }
+const std::vector<shared::transitgraph::Station>& Node::getStops() const { return _stops; }
 
 // _____________________________________________________________________________
-void Node::addEdge(Edge* e) {
+void Node::addEdg(Edge* e) {
   if (e->getFrom() == this) _adjListOut.insert(e);
   if (e->getTo() == this) _adjListIn.insert(e);
 }
@@ -598,15 +602,6 @@ Polygon<double> Node::getConvexFrontHull(
 }
 
 // _____________________________________________________________________________
-size_t Node::getNodeFrontPos(const NodeFront* a) const {
-  for (size_t i = 0; i < _mainDirs.size(); ++i) {
-    if (&_mainDirs[i] == a) return i;
-  }
-
-  return _mainDirs.size();
-}
-
-// _____________________________________________________________________________
 void Node::addRouteConnException(const Route* r, const Edge* edgeA,
                                  const Edge* edgeB) {
   _routeConnExceptions[r][edgeA].insert(edgeB);
@@ -627,7 +622,7 @@ bool Node::connOccurs(const Route* r, const Edge* edgeA,
 }
 
 // _____________________________________________________________________________
-Edge* Node::getEdge(const Node* other) const {
+Edge* Node::getEdg(const Node* other) const {
   for (auto e = _adjListOut.begin(); e != _adjListOut.end(); ++e) {
     Edge* eP = *e;
 

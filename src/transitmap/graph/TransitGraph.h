@@ -16,7 +16,6 @@
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/Route.h"
 #include "transitmap/graph/Penalties.h"
 #include "util/geo/Geo.h"
 
@@ -27,22 +26,20 @@ namespace graph {
 
 class TransitGraph {
  public:
-  TransitGraph(const std::string& name, const std::string& projStr);
+  TransitGraph(const std::string& projStr);
 
   ~TransitGraph();
 
-  void addNode(Node* n);
-  Edge* addEdge(Node* from, Node* to, geo::PolyLine<double> pl, double w, double s);
-  Edge* getEdge(Node* from, Node* to);
+  void addNd(Node* n);
+  Edge* addEdg(Node* from, Node* to, geo::PolyLine<double> pl, double w, double s);
+  Edge* getEdg(Node* from, Node* to);
 
   void deleteEdge(Node* from, Node* to);
 
-  const std::set<Node*>& getNodes() const;
-  std::set<Node*>* getNodes();
+  const std::set<Node*>& getNds() const;
+  std::set<Node*>* getNds();
 
   Node* getNodeById(const std::string& id) const;
-
-  Node* getNearestNode(const geo::DPoint& p, double maxD) const;
 
   projPJ getProjection() const;
   const geo::DBox& getBoundingBox() const;
@@ -53,7 +50,7 @@ class TransitGraph {
   const OrderingConfig& getConfig() const;
   void setConfig(const OrderingConfig&);
 
-  Route* addRoute(const Route* r);
+  void addRoute(const Route* r);
   const Route* getRoute(const std::string& id) const;
 
   void expandBBox(const geo::DPoint& p);
@@ -64,15 +61,7 @@ class TransitGraph {
   size_t getNumRoutes() const;
   size_t getMaxCardinality() const;
 
-  const std::string& getName() const;
-  double getLastSolveTime() const;
-  void setLastSolveTime(double t) const;
-
-  size_t getLastSolveTarget() const;
-  void setLastSolveTarget(size_t t) const;
-
  private:
-  std::string _name;
   std::set<Node*> _nodes;
   std::map<std::string, const Route*> _routes;
 

@@ -6,8 +6,8 @@
 #include <set>
 #include <string>
 #include "transitmap/graph/Edge.h"
-#include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Route.h"
+#include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "util/Misc.h"
 #include "util/geo/Geo.h"
@@ -22,8 +22,8 @@ using transitmapper::graph::Route;
 using transitmapper::graph::OrderingConfig;
 
 // _____________________________________________________________________________
-TransitGraph::TransitGraph(const std::string& name, const std::string& proj)
-    : _name(name) {
+TransitGraph::TransitGraph(const std::string& proj)
+     {
   _bbox = util::geo::minbox<double>();
   _proj = pj_init_plus(proj.c_str());
 }
@@ -41,16 +41,13 @@ TransitGraph::~TransitGraph() {
 }
 
 // _____________________________________________________________________________
-const std::string& TransitGraph::getName() const { return _name; }
-
-// _____________________________________________________________________________
 const OrderingConfig& TransitGraph::getConfig() const { return _config; }
 
 // _____________________________________________________________________________
 void TransitGraph::setConfig(const OrderingConfig& c) { _config = c; }
 
 // _____________________________________________________________________________
-void TransitGraph::addNode(Node* n) {
+void TransitGraph::addNd(Node* n) {
   _nodes.insert(n);
   // expand the bounding box to hold this new node
   expandBBox(n->getPos());
@@ -71,14 +68,14 @@ Node* TransitGraph::getNodeById(const std::string& id) const {
 }
 
 // _____________________________________________________________________________
-Edge* TransitGraph::addEdge(Node* from, Node* to, PolyLine<double> pl, double w,
+Edge* TransitGraph::addEdg(Node* from, Node* to, PolyLine<double> pl, double w,
                             double s) {
   if (from == to) return 0;
-  Edge* e = getEdge(from, to);
+  Edge* e = getEdg(from, to);
   if (!e) {
     e = new Edge(from, to, pl, w, s);
-    from->addEdge(e);
-    to->addEdge(e);
+    from->addEdg(e);
+    to->addEdg(e);
     _bbox = util::geo::extendBox(util::geo::getBoundingBox(pl.getLine()), _bbox);
   }
   return e;
@@ -86,19 +83,19 @@ Edge* TransitGraph::addEdge(Node* from, Node* to, PolyLine<double> pl, double w,
 
 // _____________________________________________________________________________
 void TransitGraph::deleteEdge(Node* from, Node* to) {
-  Edge* toDel = getEdge(from, to);
+  Edge* toDel = getEdg(from, to);
   if (!toDel) return;
 
   from->removeEdge(toDel);
   to->removeEdge(toDel);
 
-  assert(!getEdge(from, to));
+  assert(!getEdg(from, to));
 
   delete toDel;
 }
 
 // _____________________________________________________________________________
-Route* TransitGraph::addRoute(const Route* r) {
+void TransitGraph::addRoute(const Route* r) {
   if (!getRoute(r->getId())) {
     _routes[r->getId()] = r;
   }
@@ -113,7 +110,7 @@ const Route* TransitGraph::getRoute(const std::string& id) const {
 }
 
 // _____________________________________________________________________________
-Edge* TransitGraph::getEdge(Node* from, Node* to) {
+Edge* TransitGraph::getEdg(Node* from, Node* to) {
   for (auto e : from->getAdjListOut()) {
     if (e->getTo() == to) return e;
   }
@@ -128,10 +125,10 @@ Edge* TransitGraph::getEdge(Node* from, Node* to) {
 }
 
 // _____________________________________________________________________________
-const std::set<Node*>& TransitGraph::getNodes() const { return _nodes; }
+const std::set<Node*>& TransitGraph::getNds() const { return _nodes; }
 
 // _____________________________________________________________________________
-std::set<Node*>* TransitGraph::getNodes() { return &_nodes; }
+std::set<Node*>* TransitGraph::getNds() { return &_nodes; }
 
 // _____________________________________________________________________________
 projPJ TransitGraph::getProjection() const { return _proj; }
@@ -149,22 +146,6 @@ DBox TransitGraph::getBoundingBox(double p) const {
 }
 
 // _____________________________________________________________________________
-Node* TransitGraph::getNearestNode(const DPoint& p, double maxD) const {
-  double curD = DBL_MAX;
-  ;
-  Node* curN = 0;
-  for (auto n : _nodes) {
-    double d = dist(n->getPos(), p);
-    if (d < maxD && d < curD) {
-      curN = n;
-      curD = d;
-    }
-  }
-
-  return curN;
-}
-
-// _____________________________________________________________________________
 size_t TransitGraph::getNumNodes() const {
   return getNumNodes(true) + getNumNodes(false);
 }
@@ -175,7 +156,7 @@ size_t TransitGraph::getNumRoutes() const { return _routes.size(); }
 // _____________________________________________________________________________
 size_t TransitGraph::getMaxCardinality() const {
   size_t ret = 0;
-  for (auto n : getNodes()) {
+  for (auto n : getNds()) {
     for (auto e : n->getAdjListOut()) {
       if (e->getCardinality() > ret) ret = e->getCardinality();
     }
@@ -186,7 +167,7 @@ size_t TransitGraph::getMaxCardinality() const {
 // _____________________________________________________________________________
 size_t TransitGraph::getMaxDegree() const {
   size_t ret = 0;
-  for (auto n : getNodes()) {
+  for (auto n : getNds()) {
     if (n->getAdjListOut().size() + n->getAdjListIn().size() > ret) {
       ret = n->getAdjListOut().size() + n->getAdjListIn().size();
     }
@@ -198,7 +179,7 @@ size_t TransitGraph::getMaxDegree() const {
 size_t TransitGraph::getNumEdges() const {
   size_t ret = 0;
 
-  for (auto n : getNodes()) {
+  for (auto n : getNds()) {
     ret += n->getAdjListOut().size();
   }
 
@@ -214,24 +195,4 @@ size_t TransitGraph::getNumNodes(bool topo) const {
   }
 
   return ret;
-}
-
-// _____________________________________________________________________________
-double TransitGraph::getLastSolveTime() const {
-  return _lastSolveTime;
-}
-
-// _____________________________________________________________________________
-void TransitGraph::setLastSolveTime(double t) const {
-  _lastSolveTime = t;
-}
-
-// _____________________________________________________________________________
-size_t TransitGraph::getLastSolveTarget() const {
-  return _lastSolveTarget;
-}
-
-// _____________________________________________________________________________
-void TransitGraph::setLastSolveTarget(size_t t) const {
-  _lastSolveTarget = t;
 }
