@@ -27,7 +27,7 @@ class CombGraph : public util::graph::UndirGraph<CombNodePL, CombEdgePL> {
   EdgeOrdering getEdgeOrderingForNode(CombNode* n) const;
   EdgeOrdering getEdgeOrderingForNode(
       CombNode* n, bool useOrigNextNode,
-      const std::map<CombNode*, DPoint>& newPos) const;
+      const std::map<CombNode*, util::geo::DPoint>& newPos) const;
 
  private:
   void build(const TransitGraph* source);

@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 #include "shared/transitgraph/TransitGraph.h"
+#include "shared/transitgraph/Route.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/restr/RestrGraph.h"
 #include "util/graph/EDijkstra.h"
@@ -30,6 +31,8 @@ namespace restr {
 typedef std::map<const TransitEdge*, std::set<const TransitEdge*>> OrigEdgs;
 typedef std::pair<RestrNode*, double> Hndl;
 typedef std::vector<Hndl> HndlLst;
+
+using shared::transitgraph::Route;
 
 struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
   CostFunc(const Route* r, double max) : _max(max), _route(r) {}

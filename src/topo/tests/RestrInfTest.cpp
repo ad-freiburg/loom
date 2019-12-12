@@ -34,7 +34,7 @@ void RestrInfTest::run() {
     auto bc = rg.addEdg(b, c, util::geo::PolyLine<double>({0, 20}, {0, 30}));
     auto cd = rg.addEdg(c, d, util::geo::PolyLine<double>({0, 30}, {0, 40}));
 
-    transitmapper::graph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l1("1", "1", "red");
 
     ab->pl().routes.insert(&l1);
     bc->pl().routes.insert(&l1);

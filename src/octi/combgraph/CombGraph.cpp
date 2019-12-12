@@ -105,20 +105,20 @@ void CombGraph::writeEdgeOrdering() {
 
 // _____________________________________________________________________________
 EdgeOrdering CombGraph::getEdgeOrderingForNode(CombNode* n) const {
-  return getEdgeOrderingForNode(n, true, std::map<CombNode*, DPoint>());
+  return getEdgeOrderingForNode(n, true, std::map<CombNode*, util::geo::DPoint>());
 }
 
 // _____________________________________________________________________________
 EdgeOrdering CombGraph::getEdgeOrderingForNode(
     CombNode* n, bool useOrigNextNode,
-    const std::map<CombNode*, DPoint>& newPos) const {
+    const std::map<CombNode*, util::geo::DPoint>& newPos) const {
   EdgeOrdering order;
   for (auto e : n->getAdjList()) {
     auto r = e->pl().getChilds().front();
-    DPoint a = *n->pl().getGeom();
+    util::geo::DPoint a = *n->pl().getGeom();
     if (newPos.find(n) != newPos.end()) a = newPos.find(n)->second;
 
-    DPoint b;
+    util::geo::DPoint b;
     if (useOrigNextNode) {
       b = *r->getOtherNd(n->pl().getParent())->pl().getGeom();
     } else {

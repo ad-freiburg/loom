@@ -71,9 +71,9 @@ void ContractTest::run() {
     auto cg = tg.addEdg(c, g, {{{30.0, 0.0}, {25.0, -10.0}}});
     auto gh = tg.addEdg(g, h, {{{25.0, -10.0}, {25.0, -20.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -176,9 +176,9 @@ void ContractTest::run() {
     auto cg = tg.addEdg(c, g, {{{30.0, 0.0}, {25.0, -10.0}}});
     auto gh = tg.addEdg(g, h, {{{25.0, -10.0}, {25.0, -20.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -282,9 +282,9 @@ void ContractTest::run() {
     auto cg = tg.addEdg(c, g, {{{30.0, 0.0}, {25.0, -10.0}}});
     auto gh = tg.addEdg(g, h, {{{25.0, -10.0}, {25.0, -20.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -385,9 +385,9 @@ void ContractTest::run() {
     auto cg = tg.addEdg(c, g, {{{30.0, 0.0}, {25.0, -10.0}}});
     auto gh = tg.addEdg(g, h, {{{25.0, -10.0}, {25.0, -20.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -460,7 +460,7 @@ void ContractTest::run() {
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
     auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {50.0, -50.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l1("1", "1", "red");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l1, 0);
@@ -497,7 +497,7 @@ void ContractTest::run() {
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
     auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {50.0, -50.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l1("1", "1", "red");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l1, 0);
@@ -539,8 +539,8 @@ void ContractTest::run() {
     auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {50.0, -50.0}}});
     auto de = tg.addEdg(d, e, {{{50.0, -50.0}, {50.0, -100.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "green");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l1, 0);
@@ -583,8 +583,8 @@ void ContractTest::run() {
     auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {50.0, -50.0}}});
     auto de = tg.addEdg(d, e, {{{50.0, -50.0}, {50.0, -100.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "green");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l1, 0);
@@ -625,7 +625,7 @@ void ContractTest::run() {
     auto bd = tg.addEdg(b, d, {{{50.0, 0.0}, {50.0, -50.0}}});
     auto de = tg.addEdg(d, e, {{{50.0, -50.0}, {50.0, -100.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l1("1", "1", "red");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l1, 0);
@@ -667,7 +667,7 @@ void ContractTest::run() {
     auto bd = tg.addEdg(b, d, {{{5.0, 0.0}, {5.0, -5.0}}});
     auto dc = tg.addEdg(d, c, {{{5.0, -5.0}, {10.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l1("1", "1", "red");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l1, 0);
@@ -709,7 +709,7 @@ void ContractTest::run() {
     auto bd = tg.addEdg(b, d, {{{5.0, 0.0}, {5.0, -5.0}}});
     auto dc = tg.addEdg(d, c, {{{5.0, -5.0}, {10.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l1("1", "1", "red");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l1, 0);
@@ -751,8 +751,8 @@ void ContractTest::run() {
     auto bd = tg.addEdg(b, d, {{{5.0, 0.0}, {5.0, -5.0}}});
     auto dc = tg.addEdg(d, c, {{{5.0, -5.0}, {10.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "green");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l1, 0);
@@ -794,8 +794,8 @@ void ContractTest::run() {
     auto bd = tg.addEdg(b, d, {{{5.0, 0.0}, {5.0, -5.0}}});
     auto dc = tg.addEdg(d, c, {{{5.0, -5.0}, {10.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "green");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l1, 0);
@@ -850,8 +850,8 @@ void ContractTest::run() {
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
     auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -910,8 +910,8 @@ void ContractTest::run() {
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
     auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -970,8 +970,8 @@ void ContractTest::run() {
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
     auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1027,8 +1027,8 @@ void ContractTest::run() {
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
     auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1084,8 +1084,8 @@ void ContractTest::run() {
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
     auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1145,8 +1145,8 @@ void ContractTest::run() {
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
     auto fe = tg.addEdg(f, e, {{{25.0, 20.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1201,8 +1201,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1255,8 +1255,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1307,9 +1307,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1364,8 +1364,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1412,9 +1412,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1466,8 +1466,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1513,8 +1513,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1578,8 +1578,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1644,9 +1644,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1701,8 +1701,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1757,9 +1757,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1827,8 +1827,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1898,8 +1898,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -1952,8 +1952,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2002,9 +2002,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2051,8 +2051,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2099,9 +2099,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2150,8 +2150,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2198,8 +2198,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2251,8 +2251,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2299,9 +2299,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2349,8 +2349,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2397,9 +2397,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2449,8 +2449,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2499,8 +2499,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2553,8 +2553,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2604,9 +2604,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2654,8 +2654,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2703,9 +2703,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2756,8 +2756,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2805,8 +2805,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2856,8 +2856,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2906,9 +2906,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -2956,8 +2956,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -3004,9 +3004,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -3057,8 +3057,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -3107,8 +3107,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -3157,8 +3157,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -3209,9 +3209,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -3262,8 +3262,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -3313,9 +3313,9 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -3366,8 +3366,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -3416,8 +3416,8 @@ void ContractTest::run() {
     auto be = tg.addEdg(b, e, {{{20.0, 0.0}, {25.0, 10.0}}});
     auto ce = tg.addEdg(c, e, {{{30.0, 0.0}, {25.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -3453,8 +3453,8 @@ void ContractTest::run() {
     auto bc = tg.addEdg(b, c, {{{200.0, 0.0}, {300.0, 0.0}}});
     auto cd = tg.addEdg(c, d, {{{300.0, 0.0}, {400.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l2, 0);
@@ -3491,8 +3491,8 @@ void ContractTest::run() {
     auto bc = tg.addEdg(b, c, {{{200.0, 0.0}, {300.0, 0.0}}});
     auto cd = tg.addEdg(c, d, {{{300.0, 0.0}, {400.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l2, 0);
@@ -3533,9 +3533,9 @@ void ContractTest::run() {
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ca->pl().addRoute(&l1, 0);
     ca->pl().addRoute(&l2, 0);
@@ -3587,9 +3587,9 @@ void ContractTest::run() {
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, 0);
@@ -3641,9 +3641,9 @@ void ContractTest::run() {
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ba->pl().addRoute(&l1, 0);
     ba->pl().addRoute(&l2, 0);
@@ -3695,9 +3695,9 @@ void ContractTest::run() {
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ba->pl().addRoute(&l1, 0);
     ba->pl().addRoute(&l2, 0);
@@ -3749,9 +3749,9 @@ void ContractTest::run() {
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ca->pl().addRoute(&l1, 0);
     ca->pl().addRoute(&l2, a);
@@ -3805,9 +3805,9 @@ void ContractTest::run() {
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
     ab->pl().addRoute(&l2, b);
@@ -3861,9 +3861,9 @@ void ContractTest::run() {
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ba->pl().addRoute(&l1, 0);
     ba->pl().addRoute(&l2, b);
@@ -3917,9 +3917,9 @@ void ContractTest::run() {
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ba->pl().addRoute(&l1, 0);
     ba->pl().addRoute(&l2, b);
@@ -3973,9 +3973,9 @@ void ContractTest::run() {
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ca->pl().addRoute(&l1, 0);
     ca->pl().addRoute(&l2, 0);
@@ -4015,9 +4015,9 @@ void ContractTest::run() {
     TEST(c->getAdjList().size(), ==, 1);
     TEST(d->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ca->pl().addRoute(&l1, 0);
     ca->pl().addRoute(&l2, 0);
@@ -4078,9 +4078,9 @@ void ContractTest::run() {
     TEST(c->getAdjList().size(), ==, 1);
     TEST(d->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ac->pl().addRoute(&l1, 0);
     ac->pl().addRoute(&l2, 0);
@@ -4141,9 +4141,9 @@ void ContractTest::run() {
     TEST(c->getAdjList().size(), ==, 1);
     TEST(d->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ca->pl().addRoute(&l1, 0);
     ca->pl().addRoute(&l2, 0);
@@ -4204,9 +4204,9 @@ void ContractTest::run() {
     TEST(c->getAdjList().size(), ==, 1);
     TEST(d->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ac->pl().addRoute(&l1, 0);
     ac->pl().addRoute(&l2, 0);
@@ -4274,9 +4274,9 @@ void ContractTest::run() {
     TEST(d->getAdjList().size(), ==, 2);
     TEST(e->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
 
@@ -4340,9 +4340,9 @@ void ContractTest::run() {
     TEST(d->getAdjList().size(), ==, 2);
     TEST(e->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, b);
 
@@ -4421,9 +4421,9 @@ void ContractTest::run() {
     TEST(d->getAdjList().size(), ==, 2);
     TEST(e->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
 
@@ -4510,9 +4510,9 @@ void ContractTest::run() {
     TEST(e->getAdjList().size(), ==, 1);
     TEST(f->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
 
@@ -4606,9 +4606,9 @@ void ContractTest::run() {
     TEST(e->getAdjList().size(), ==, 1);
     TEST(f->getAdjList().size(), ==, 1);
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
 
     ab->pl().addRoute(&l1, 0);
 
@@ -4688,8 +4688,8 @@ void ContractTest::run() {
     auto ac = tg.addEdg(a, c, {{{0.0, 10.0}, {0.0, 5.0}}});
     auto cb = tg.addEdg(c, b, {{{0.0, 5.0}, {100.0, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     ac->pl().addRoute(&l1, 0);

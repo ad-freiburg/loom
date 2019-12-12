@@ -13,6 +13,7 @@ using octi::combgraph::CombGraph;
 using octi::combgraph::CombNode;
 using octi::combgraph::CombEdge;
 using util::graph::Dijkstra;
+using util::geo::BezierCurve;
 using octi::gridgraph::GridGraph;
 using octi::gridgraph::GridNode;
 using octi::gridgraph::GridEdge;

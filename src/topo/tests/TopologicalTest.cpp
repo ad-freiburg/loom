@@ -38,8 +38,8 @@ void TopologicalTest::run() {
     auto ed = tg.addEdg(e, d, {{{200.0, 0.0}, {100, 0.0}}});
     auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l2, b);
     cd->pl().addRoute(&l2, c);
@@ -99,8 +99,8 @@ void TopologicalTest::run() {
     auto ed = tg.addEdg(e, d, {{{200.0, 0.0}, {100, 0.0}}});
     auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l2, b);
     dc->pl().addRoute(&l2, c);
@@ -159,8 +159,8 @@ void TopologicalTest::run() {
     auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
     auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l2, b);
     dc->pl().addRoute(&l2, c);
@@ -213,8 +213,8 @@ void TopologicalTest::run() {
     auto ed = tg.addEdg(e, d, {{{200, 0.0}, {100.0, 0.0}}});
     auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     cd->pl().addRoute(&l2, c);
     eb->pl().addRoute(&l1, 0);
@@ -255,8 +255,8 @@ void TopologicalTest::run() {
     auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
     auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     dc->pl().addRoute(&l2, c);
     eb->pl().addRoute(&l1, 0);
@@ -304,8 +304,8 @@ void TopologicalTest::run() {
     auto ed = tg.addEdg(e, d, {{{200, 0.0}, {100.0, 0.0}}});
     auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     dc->pl().addRoute(&l2, c);
     eb->pl().addRoute(&l1, 0);
@@ -356,8 +356,8 @@ void TopologicalTest::run() {
     auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
     auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {95, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ba->pl().addRoute(&l2, b);
     dc->pl().addRoute(&l2, c);
@@ -422,8 +422,8 @@ void TopologicalTest::run() {
     auto ab = tg.addEdg(a, b, {{{0.0, 10.0}, {50.0, 10.0}}});
     auto cd = tg.addEdg(c, d, {{{0.0, 0.0}, {50.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     cd->pl().addRoute(&l2, 0);
@@ -463,8 +463,8 @@ void TopologicalTest::run() {
     auto ab = tg.addEdg(a, b, {{{0.0, 10.0}, {50.0, 10.0}}});
     auto cd = tg.addEdg(d, c, {{{50.0, 0.0}, {0.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     cd->pl().addRoute(&l2, 0);
@@ -504,8 +504,8 @@ void TopologicalTest::run() {
     auto ab = tg.addEdg(a, b, {{{0.0, 10.0}, {50.0, 10.0}}});
     auto cd = tg.addEdg(d, c, {{{50.0, 0.0}, {0.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     cd->pl().addRoute(&l2, d);
@@ -560,10 +560,10 @@ void TopologicalTest::run() {
     auto fe = tg.addEdg(f, e, {{{50.0, 20.0}, {0.0, 20.0}}});
     auto hg = tg.addEdg(h, g, {{{50.0, 30.0}, {0.0, 30.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
-    transitmapper::graph::Route l3("3", "3", "green");
-    transitmapper::graph::Route l4("4", "4", "black");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l3("3", "3", "green");
+    shared::transitgraph::Route l4("4", "4", "black");
 
     ab->pl().addRoute(&l1, 0);
     cd->pl().addRoute(&l2, d);
@@ -613,8 +613,8 @@ void TopologicalTest::run() {
     auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {70.0, 10.0}}});
     auto cd = tg.addEdg(c, d, {{{0.0, 0.0}, {100.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     cd->pl().addRoute(&l2, 0);
@@ -660,8 +660,8 @@ void TopologicalTest::run() {
     auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {70.0, 10.0}}});
     auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     dc->pl().addRoute(&l2, 0);
@@ -708,8 +708,8 @@ void TopologicalTest::run() {
     auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
     auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l1, 0);
     dc->pl().addRoute(&l2, 0);
@@ -760,7 +760,7 @@ void TopologicalTest::run() {
     auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
     auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
 
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l2, b);
     dc->pl().addRoute(&l2, c);
@@ -807,8 +807,8 @@ void TopologicalTest::run() {
     auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
     auto eb = tg.addEdg(e, b, {{{200.0, 0.0}, {100, 10.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l2, b);
     dc->pl().addRoute(&l2, c);
@@ -866,8 +866,8 @@ void TopologicalTest::run() {
     auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
     auto de = tg.addEdg(d, e, {{{100.0, 0.0}, {200, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l2, b);
     dc->pl().addRoute(&l2, c);
@@ -918,8 +918,8 @@ void TopologicalTest::run() {
     auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
     auto ed = tg.addEdg(e, d, {{{200.0, 0.0}, {100, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ab->pl().addRoute(&l2, b);
     dc->pl().addRoute(&l2, c);
@@ -967,8 +967,8 @@ void TopologicalTest::run() {
     auto ba = tg.addEdg(b, a, {{{100.0, 10.0}, {30.0, 10.0}}});
     auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ba->pl().addRoute(&l2, b);
     dc->pl().addRoute(&l2, c);

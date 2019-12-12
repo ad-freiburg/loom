@@ -50,8 +50,8 @@ void TopologicalTest2::run() {
     // auto xa = tg.addEdg(x, a, {{{-100.0, 0.0}, {0.0, 0.0}}});
     // auto dy = tg.addEdg(d, y, {{{500.0, 0.0}, {600.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "green");
 
     // auto ae = tg.addEdg(a, e, {{{0.0, 0.0}, {500.0, 1.0}}});
     // auto ed = tg.addEdg(e, d, {{{500.0, 1.0}, {500.0, 0.0}}});
@@ -106,8 +106,8 @@ void TopologicalTest2::run() {
     auto ad = tg.addEdg(a, d, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     bc->pl().addRoute(&l1, 0);
     ad->pl().addRoute(&l2, 0);
@@ -159,8 +159,8 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, 0);
     bc->pl().addRoute(&l1, 0);
@@ -250,8 +250,8 @@ void TopologicalTest2::run() {
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, 0);
     cb->pl().addRoute(&l1, 0);
@@ -344,8 +344,8 @@ void TopologicalTest2::run() {
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, 0);
     bc->pl().addRoute(&l1, 0);
@@ -434,8 +434,8 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, 0);
     cb->pl().addRoute(&l1, 0);
@@ -520,8 +520,8 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, c);
     bc->pl().addRoute(&l1, 0);
@@ -617,8 +617,8 @@ void TopologicalTest2::run() {
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, c);
     bc->pl().addRoute(&l1, 0);
@@ -711,8 +711,8 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, c);
     cb->pl().addRoute(&l1, 0);
@@ -805,8 +805,8 @@ void TopologicalTest2::run() {
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, c);
     cb->pl().addRoute(&l1, 0);
@@ -900,8 +900,8 @@ void TopologicalTest2::run() {
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, a);
     cb->pl().addRoute(&l1, 0);
@@ -992,8 +992,8 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, a);
     bc->pl().addRoute(&l1, 0);
@@ -1085,8 +1085,8 @@ void TopologicalTest2::run() {
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, a);
     bc->pl().addRoute(&l1, 0);
@@ -1179,8 +1179,8 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, a);
     cb->pl().addRoute(&l1, 0);
@@ -1277,7 +1277,7 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, a);
     cb->pl().addRoute(&l2, b);
@@ -1371,7 +1371,7 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    transitmapper::graph::Route l2("2", "2", "blue");
+    shared::transitgraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, a);
     cb->pl().addRoute(&l2, c);
@@ -1468,7 +1468,7 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {250.0, 0.0}, {250.0, -200.0}}));
     auto eb = tg.addEdg(e, b, util::geo::PolyLine<double>({{150.0, 200.0}, {150.0, 0}, {500.0, 0.0}}));
 
-    transitmapper::graph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l1("1", "1", "red");
 
     ac->pl().addRoute(&l1, 0);
     eb->pl().addRoute(&l1, 0);
@@ -1511,8 +1511,8 @@ void TopologicalTest2::run() {
     auto bd = tg.addEdg(b, d, {{{250.0, 0.0},  {500.0, 0.0}}});
     auto fg = tg.addEdg(f, g, {{{0.0, 0.0},  {500.0, 0.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "green");
 
     ab->pl().addRoute(&l1, b);
     ab->pl().addRoute(&l2, 0);

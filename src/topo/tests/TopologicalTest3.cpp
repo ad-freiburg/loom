@@ -6,6 +6,7 @@
 #include <string>
 
 #include "shared/transitgraph/TransitGraph.h"
+#include "shared/transitgraph/Route.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/tests/TopologicalTest3.h"
 #include "util/Misc.h"
@@ -42,8 +43,8 @@ void TopologicalTest3::run() {
     auto cy = tg.addEdg(c, y, {{{500.0, 0.0}, {800.0, 1.0}}});
 
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "green");
 
     xa->pl().addRoute(&l1, 0);
     xa->pl().addRoute(&l2, 0);
@@ -94,8 +95,8 @@ void TopologicalTest3::run() {
     auto da = tg.addEdg(d, a, {{{510.0, 5.0}, {0.0, 0.0}}});
     auto cy = tg.addEdg(c, y, {{{500.0, 0.0}, {800.0, 1.0}}});
 
-    transitmapper::graph::Route l1("1", "1", "red");
-    transitmapper::graph::Route l2("2", "2", "green");
+    shared::transitgraph::Route l1("1", "1", "red");
+    shared::transitgraph::Route l2("2", "2", "green");
 
     xa->pl().addRoute(&l1, 0);
     xa->pl().addRoute(&l2, 0);
