@@ -7,7 +7,7 @@
 
 #include <cmath>
 #include <set>
-#include "shared/transitgraph/TransitNodePL.h"
+#include "shared/linegraph/LineNodePL.h"
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Penalties.h"
 #include "transitmap/graph/Route.h"
@@ -79,14 +79,14 @@ class Node {
  public:
   Node(const std::string& id, DPoint pos);
   Node(const std::string& id, double x, double y);
-  Node(const std::string& id, DPoint pos, shared::transitgraph::Station stop);
+  Node(const std::string& id, DPoint pos, shared::linegraph::Station stop);
   Node(const std::string& id, double x, double y,
-       shared::transitgraph::Station stop);
+       shared::linegraph::Station stop);
 
   ~Node();
 
-  const std::vector<shared::transitgraph::Station>& getStops() const;
-  void addStop(shared::transitgraph::Station s);
+  const std::vector<shared::linegraph::Station>& getStops() const;
+  void addStop(shared::linegraph::Station s);
   const DPoint& getPos() const;
   void setPos(const DPoint& p);
 
@@ -144,7 +144,7 @@ class Node {
 
   std::vector<NodeFront> _mainDirs;
 
-  std::vector<shared::transitgraph::Station> _stops;
+  std::vector<shared::linegraph::Station> _stops;
 
   std::map<const Route*, std::map<const Edge*, std::set<const Edge*> > >
       _routeConnExceptions;

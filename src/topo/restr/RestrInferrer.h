@@ -6,18 +6,18 @@
 #define TOPO_RESTR_RESTRINFERRER_H_
 
 #include <unordered_map>
-#include "shared/transitgraph/TransitGraph.h"
-#include "shared/transitgraph/Route.h"
+#include "shared/linegraph/LineGraph.h"
+#include "shared/linegraph/Route.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/restr/RestrGraph.h"
 #include "util/graph/EDijkstra.h"
 
 using topo::config::TopoConfig;
-using shared::transitgraph::TransitGraph;
-using shared::transitgraph::TransitNode;
-using shared::transitgraph::TransitEdge;
-using shared::transitgraph::TransitNodePL;
-using shared::transitgraph::TransitEdgePL;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
+using shared::linegraph::LineEdge;
+using shared::linegraph::LineNodePL;
+using shared::linegraph::LineEdgePL;
 using util::graph::EDijkstra;
 using topo::restr::RestrEdge;
 using topo::restr::RestrNode;
@@ -28,11 +28,11 @@ using topo::restr::RestrGraph;
 namespace topo {
 namespace restr {
 
-typedef std::map<const TransitEdge*, std::set<const TransitEdge*>> OrigEdgs;
+typedef std::map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
 typedef std::pair<RestrNode*, double> Hndl;
 typedef std::vector<Hndl> HndlLst;
 
-using shared::transitgraph::Route;
+using shared::linegraph::Route;
 
 struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
   CostFunc(const Route* r, double max) : _max(max), _route(r) {}
@@ -72,7 +72,7 @@ struct HndlCmp {
 
 class RestrInferrer {
  public:
-  RestrInferrer(const TopoConfig* cfg, TransitGraph* g);
+  RestrInferrer(const TopoConfig* cfg, LineGraph* g);
 
   void init();
   void infer(const OrigEdgs& origEdgs);
@@ -84,25 +84,24 @@ class RestrInferrer {
   RestrGraph _rg;
 
   // the transit graph we operate on, may be modified externally
-  TransitGraph* _tg;
+  LineGraph* _tg;
 
   // mapping from the edges in the original graph to our internal
   // graph representation
-  std::unordered_map<TransitEdge*, std::vector<RestrEdge*>> _eMap;
+  std::unordered_map<LineEdge*, std::vector<RestrEdge*>> _eMap;
 
   // mapping from the nodes in the original graph to our internal
   // graph representation
-  std::unordered_map<TransitNode*, RestrNode*> _nMap;
+  std::unordered_map<LineNode*, RestrNode*> _nMap;
 
   // check whether a connection ocurred in the original graph
-  bool check(const Route* r, const TransitEdge* edg1,
-             const TransitEdge* edg2) const;
+  bool check(const Route* r, const LineEdge* edg1, const LineEdge* edg2) const;
 
   void addHndls(const OrigEdgs& origEdgs);
-  void addHndls(const TransitEdge* e, const OrigEdgs& origEdgs,
+  void addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
                 std::map<RestrEdge*, HndlLst>* handles);
 
-  std::map<const TransitEdge *, std::set<RestrNode *>> _handlesA, _handlesB;
+  std::map<const LineEdge *, std::set<RestrNode *>> _handlesA, _handlesB;
 };
 }
 }

@@ -4,13 +4,13 @@
 #ifndef TOPO_TEST_TOPOTESTUTIL_H_
 #define TOPO_TEST_TOPOTESTUTIL_H_
 
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/linegraph/LineGraph.h"
 
-using shared::transitgraph::TransitGraph;
-using shared::transitgraph::TransitNode;
-using shared::transitgraph::TransitEdge;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
+using shared::linegraph::LineEdge;
 
-inline bool hasEdge(const TransitNode* n, const TransitEdge* f) {
+inline bool hasEdge(const LineNode* n, const LineEdge* f) {
   for (auto e : n->getAdjList())
     if (e == f) return true;
   std::cerr << "Could not find edge " << f << " adjacent to node " << n
@@ -18,7 +18,7 @@ inline bool hasEdge(const TransitNode* n, const TransitEdge* f) {
   return false;
 }
 
-inline bool validExceptions(const TransitNode* n) {
+inline bool validExceptions(const LineNode* n) {
   for (const auto& ro : n->pl().getConnExc()) {
     for (const auto& exFr : ro.second) {
       for (const auto& exTo : exFr.second) {
@@ -30,7 +30,7 @@ inline bool validExceptions(const TransitNode* n) {
   return true;
 }
 
-inline bool validExceptions(const TransitGraph* g) {
+inline bool validExceptions(const LineGraph* g) {
   for (auto nd : g->getNds()) {
     if (!validExceptions(nd)) return false;
   }

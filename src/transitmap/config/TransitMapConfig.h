@@ -15,7 +15,6 @@ struct Config {
   double lineSpacing;
 
   std::string name;
-  std::string projectionString;
   std::string outputPath;
   std::string dbgPath;
 

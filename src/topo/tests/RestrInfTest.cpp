@@ -6,7 +6,7 @@
 #include <set>
 #include <string>
 
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/linegraph/LineGraph.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/tests/RestrInfTest.h"
 #include "topo/tests/TopoTestUtil.h"
@@ -34,7 +34,7 @@ void RestrInfTest::run() {
     auto bc = rg.addEdg(b, c, util::geo::PolyLine<double>({0, 20}, {0, 30}));
     auto cd = rg.addEdg(c, d, util::geo::PolyLine<double>({0, 30}, {0, 40}));
 
-    shared::transitgraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l1("1", "1", "red");
 
     ab->pl().routes.insert(&l1);
     bc->pl().routes.insert(&l1);

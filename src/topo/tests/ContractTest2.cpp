@@ -5,7 +5,7 @@
 #include <cassert>
 #include <string>
 
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/linegraph/LineGraph.h"
 #include "topo/config/TopoConfig.h"
 #include "util/Misc.h"
 #include "util/Nullable.h"
@@ -23,7 +23,7 @@ using util::approx;
 void ContractTest2::run() {
   // ___________________________________________________________________________
   {
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{0.0, -1.0}});
     auto c = tg.addNd({{2.0, 0.0}});
@@ -33,7 +33,7 @@ void ContractTest2::run() {
     auto x = tg.addNd({{0, 200.0}});
     auto y = tg.addNd({{0, -200.0}});
 
-    c->pl().addStop(shared::transitgraph::Station("Thorndale", "Thorndale", *c->pl().getGeom()));
+    c->pl().addStop(shared::linegraph::Station("Thorndale", "Thorndale", *c->pl().getGeom()));
 
     auto ax = tg.addEdg(a, x, {{{0.0, 0.0}, {0.0, 200.0}}});
     auto yb = tg.addEdg(y, b, {{{0.0, -200.0}, {0.0, -1.0}}});
@@ -45,8 +45,8 @@ void ContractTest2::run() {
     auto ea = tg.addEdg(e, a, {{{0.5, -.5}, {0.0, 0.0}}});
     auto eb = tg.addEdg(e, b, {{{0.5, -.5}, {0.0, -1.0}}});
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "green");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "green");
 
     ax->pl().addRoute(&l1, 0);
     ax->pl().addRoute(&l2, 0);
@@ -88,14 +88,14 @@ void ContractTest2::run() {
      * a -----> b ------> c ------> d
      */
 
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{10.0, 0.0}});
     auto b = tg.addNd({{20.0, 0.0}});
     auto c = tg.addNd({{30.0, 0.0}});
     auto d = tg.addNd({{40.0, 0.0}});
     auto e = tg.addNd({{25.0, 10.0}});
 
-    e->pl().addStop(shared::transitgraph::Station("1", "1", *e->pl().getGeom()));
+    e->pl().addStop(shared::linegraph::Station("1", "1", *e->pl().getGeom()));
 
     auto ab = tg.addEdg(a, b, {{{10.0, 0.0}, {20.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{20.0, 0.0}, {30.0, 0.0}}});
@@ -103,8 +103,8 @@ void ContractTest2::run() {
     auto eb = tg.addEdg(e, b, {{{25.0, 10.0}, {20.0, 0.0}}});
     auto ec = tg.addEdg(e, c, {{{25.0, 10.0}, {30.0, 0.0}}});
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "green");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "green");
 
     ab->pl().addRoute(&l1, b);
     bc->pl().addRoute(&l1, c);
@@ -137,7 +137,7 @@ void ContractTest2::run() {
     //    1      2
     // a ---> b ---> c
 
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{100.0, 0.0}});
@@ -145,8 +145,8 @@ void ContractTest2::run() {
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "green");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "green");
 
     ab->pl().addRoute(&l1, 0);
     bc->pl().addRoute(&l2, 0);

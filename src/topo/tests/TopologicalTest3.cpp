@@ -5,8 +5,8 @@
 #include <cassert>
 #include <string>
 
-#include "shared/transitgraph/TransitGraph.h"
-#include "shared/transitgraph/Route.h"
+#include "shared/linegraph/LineGraph.h"
+#include "shared/linegraph/Route.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/tests/TopologicalTest3.h"
 #include "util/Misc.h"
@@ -28,7 +28,7 @@ void TopologicalTest3::run() {
     //          | ----------------------------------------> D
     //                                2
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{250.0, 0.0}});
     auto c = tg.addNd({{500.0, 0}});
@@ -43,8 +43,8 @@ void TopologicalTest3::run() {
     auto cy = tg.addEdg(c, y, {{{500.0, 0.0}, {800.0, 1.0}}});
 
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "green");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "green");
 
     xa->pl().addRoute(&l1, 0);
     xa->pl().addRoute(&l2, 0);
@@ -81,7 +81,7 @@ void TopologicalTest3::run() {
     //          ^ ----------------------------------------- D
     //                                2
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{250.0, 0.0}});
     auto c = tg.addNd({{500.0, 0}});
@@ -95,8 +95,8 @@ void TopologicalTest3::run() {
     auto da = tg.addEdg(d, a, {{{510.0, 5.0}, {0.0, 0.0}}});
     auto cy = tg.addEdg(c, y, {{{500.0, 0.0}, {800.0, 1.0}}});
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "green");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "green");
 
     xa->pl().addRoute(&l1, 0);
     xa->pl().addRoute(&l2, 0);

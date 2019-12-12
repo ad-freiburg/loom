@@ -117,13 +117,13 @@ Node::Node(const std::string& id, DPoint pos) : _id(id), _pos(pos) {}
 Node::Node(const std::string& id, double x, double y) : _id(id), _pos(x, y) {}
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, DPoint pos, shared::transitgraph::Station s)
+Node::Node(const std::string& id, DPoint pos, shared::linegraph::Station s)
     : _id(id), _pos(pos) {
   addStop(s);
 }
 
 // _____________________________________________________________________________
-Node::Node(const std::string& id, double x, double y, shared::transitgraph::Station s)
+Node::Node(const std::string& id, double x, double y, shared::linegraph::Station s)
     : _id(id), _pos(x, y) {
   addStop(s);
 }
@@ -164,10 +164,10 @@ Node::~Node() {
 }
 
 // _____________________________________________________________________________
-void Node::addStop(shared::transitgraph::Station s) { _stops.push_back(s); }
+void Node::addStop(shared::linegraph::Station s) { _stops.push_back(s); }
 
 // _____________________________________________________________________________
-const std::vector<shared::transitgraph::Station>& Node::getStops() const { return _stops; }
+const std::vector<shared::linegraph::Station>& Node::getStops() const { return _stops; }
 
 // _____________________________________________________________________________
 void Node::addEdg(Edge* e) {

@@ -47,7 +47,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 
         Node* n = new Node(id, coords[0], coords[1]);
 
-        shared::transitgraph::Station i("", "", n->getPos());
+        shared::linegraph::Station i("", "", n->getPos());
         if (!props["station_id"].is_null() ||
             !props["station_label"].is_null()) {
           if (!props["station_id"].is_null())

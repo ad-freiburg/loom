@@ -5,7 +5,7 @@
 #include <cassert>
 #include <string>
 
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/linegraph/LineGraph.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/tests/TopologicalTest2.h"
 #include "util/Misc.h"
@@ -31,7 +31,7 @@ void TopologicalTest2::run() {
     // //       |-----------------------------------------> E |
     //                             2
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{250.0, 0.0}});
     auto e = tg.addNd({{500.0, 1.0}});
@@ -39,9 +39,9 @@ void TopologicalTest2::run() {
     // auto x = tg.addNd({{-100.0, 0.0}});
     // auto y = tg.addNd({{600.0, 0.0}});
 
-    a->pl().addStop(shared::transitgraph::Station("1", "1", *a->pl().getGeom()));
-    b->pl().addStop(shared::transitgraph::Station("2", "2", *b->pl().getGeom()));
-    d->pl().addStop(shared::transitgraph::Station("3", "3", *d->pl().getGeom()));
+    a->pl().addStop(shared::linegraph::Station("1", "1", *a->pl().getGeom()));
+    b->pl().addStop(shared::linegraph::Station("2", "2", *b->pl().getGeom()));
+    d->pl().addStop(shared::linegraph::Station("3", "3", *d->pl().getGeom()));
 
     auto ba = tg.addEdg(b, a, {{{250.0, 5.0}, {0.0, 5.0}}});
     auto db = tg.addEdg(d, b, {{{500.0, 0.0}, {200.0, 0.0}}});
@@ -50,8 +50,8 @@ void TopologicalTest2::run() {
     // auto xa = tg.addEdg(x, a, {{{-100.0, 0.0}, {0.0, 0.0}}});
     // auto dy = tg.addEdg(d, y, {{{500.0, 0.0}, {600.0, 0.0}}});
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "green");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "green");
 
     // auto ae = tg.addEdg(a, e, {{{0.0, 0.0}, {500.0, 1.0}}});
     // auto ed = tg.addEdg(e, d, {{{500.0, 1.0}, {500.0, 0.0}}});
@@ -97,7 +97,7 @@ void TopologicalTest2::run() {
     //                  |-----|
     //                     2
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -106,8 +106,8 @@ void TopologicalTest2::run() {
     auto ad = tg.addEdg(a, d, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     bc->pl().addRoute(&l1, 0);
     ad->pl().addRoute(&l2, 0);
@@ -151,7 +151,7 @@ void TopologicalTest2::run() {
     //                  |-----|
     //                     2
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -159,8 +159,8 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, 0);
     bc->pl().addRoute(&l1, 0);
@@ -187,7 +187,7 @@ void TopologicalTest2::run() {
     //
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -241,7 +241,7 @@ void TopologicalTest2::run() {
     //                  |-----|
     //                     2
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -250,8 +250,8 @@ void TopologicalTest2::run() {
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, 0);
     cb->pl().addRoute(&l1, 0);
@@ -278,7 +278,7 @@ void TopologicalTest2::run() {
     //
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
 
     for (auto nd : *tg.getNds()) if (nd->getAdjList().size() == 2 && nd->pl().getGeom()->getX() > 249) c = nd;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
@@ -335,7 +335,7 @@ void TopologicalTest2::run() {
     //                  |-----|
     //                     2
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -344,8 +344,8 @@ void TopologicalTest2::run() {
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, 0);
     bc->pl().addRoute(&l1, 0);
@@ -369,7 +369,7 @@ void TopologicalTest2::run() {
     //
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -424,7 +424,7 @@ void TopologicalTest2::run() {
     //                  |-----|
     //                     2
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -434,8 +434,8 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, 0);
     cb->pl().addRoute(&l1, 0);
@@ -459,7 +459,7 @@ void TopologicalTest2::run() {
     //
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -512,7 +512,7 @@ void TopologicalTest2::run() {
     //           2->    |     |
     //                  |-----|
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -520,8 +520,8 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, c);
     bc->pl().addRoute(&l1, 0);
@@ -547,7 +547,7 @@ void TopologicalTest2::run() {
     //                     2->
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -608,7 +608,7 @@ void TopologicalTest2::run() {
     //           2->    |     |
     //                  |-----|
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -617,8 +617,8 @@ void TopologicalTest2::run() {
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, c);
     bc->pl().addRoute(&l1, 0);
@@ -640,7 +640,7 @@ void TopologicalTest2::run() {
     //                     2->
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -701,7 +701,7 @@ void TopologicalTest2::run() {
     //           2->    |     |
     //                  |-----|
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -711,8 +711,8 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, c);
     cb->pl().addRoute(&l1, 0);
@@ -735,7 +735,7 @@ void TopologicalTest2::run() {
     //                     2->
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -796,7 +796,7 @@ void TopologicalTest2::run() {
     //           2->    |     |
     //                  |-----|
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -805,8 +805,8 @@ void TopologicalTest2::run() {
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, c);
     cb->pl().addRoute(&l1, 0);
@@ -828,7 +828,7 @@ void TopologicalTest2::run() {
     //                     2->
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -891,7 +891,7 @@ void TopologicalTest2::run() {
     //          <-2     |     |
     //                  |-----|
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -900,8 +900,8 @@ void TopologicalTest2::run() {
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, a);
     cb->pl().addRoute(&l1, 0);
@@ -923,7 +923,7 @@ void TopologicalTest2::run() {
     //                    <-2
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -984,7 +984,7 @@ void TopologicalTest2::run() {
     //          <-2     |     |
     //                  |-----|
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -992,8 +992,8 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ac->pl().addRoute(&l2, a);
     bc->pl().addRoute(&l1, 0);
@@ -1015,7 +1015,7 @@ void TopologicalTest2::run() {
     //                    <-2
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -1076,7 +1076,7 @@ void TopologicalTest2::run() {
     //           <-2    |     |
     //                  |-----|
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -1085,8 +1085,8 @@ void TopologicalTest2::run() {
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, a);
     bc->pl().addRoute(&l1, 0);
@@ -1108,7 +1108,7 @@ void TopologicalTest2::run() {
     //                    <-2
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -1169,7 +1169,7 @@ void TopologicalTest2::run() {
     //           <-2    |     |
     //                  |-----|
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -1179,8 +1179,8 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, a);
     cb->pl().addRoute(&l1, 0);
@@ -1206,7 +1206,7 @@ void TopologicalTest2::run() {
     //                    <-2
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -1267,7 +1267,7 @@ void TopologicalTest2::run() {
     //           <-2    |     |
     //                  |-----|
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -1277,7 +1277,7 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, a);
     cb->pl().addRoute(&l2, b);
@@ -1303,7 +1303,7 @@ void TopologicalTest2::run() {
     //                    <-2
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -1361,7 +1361,7 @@ void TopologicalTest2::run() {
     //           <-2    |     |
     //                  |-----|
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{50.0, 0.0}});
     auto c = tg.addNd({{250.0, 0.0}});
@@ -1371,7 +1371,7 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::transitgraph::Route l2("2", "2", "blue");
+    shared::linegraph::Route l2("2", "2", "blue");
 
     ca->pl().addRoute(&l2, a);
     cb->pl().addRoute(&l2, c);
@@ -1397,7 +1397,7 @@ void TopologicalTest2::run() {
     //                    <-2
 
     b = a->getAdjList().front()->getOtherNd(a);
-    TransitNode *e = 0, *f = 0;
+    LineNode *e = 0, *f = 0;
     for (auto edg : b->getAdjList()) if (edg->getOtherNd(b) != a) e = edg->getOtherNd(b);
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
@@ -1459,7 +1459,7 @@ void TopologicalTest2::run() {
     //                 v
     //                 C
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{500.0, 0.0}});
     auto c = tg.addNd({{250.0, -200.0}});
@@ -1468,7 +1468,7 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {250.0, 0.0}, {250.0, -200.0}}));
     auto eb = tg.addEdg(e, b, util::geo::PolyLine<double>({{150.0, 200.0}, {150.0, 0}, {500.0, 0.0}}));
 
-    shared::transitgraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l1("1", "1", "red");
 
     ac->pl().addRoute(&l1, 0);
     eb->pl().addRoute(&l1, 0);
@@ -1495,7 +1495,7 @@ void TopologicalTest2::run() {
     //  F --------------------------------------> G
     //                     1
     //
-    shared::transitgraph::TransitGraph tg;
+    shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 0.0}});
     auto b = tg.addNd({{250.0, 0.0}});
     auto c = tg.addNd({{250.0, 0}});
@@ -1511,8 +1511,8 @@ void TopologicalTest2::run() {
     auto bd = tg.addEdg(b, d, {{{250.0, 0.0},  {500.0, 0.0}}});
     auto fg = tg.addEdg(f, g, {{{0.0, 0.0},  {500.0, 0.0}}});
 
-    shared::transitgraph::Route l1("1", "1", "red");
-    shared::transitgraph::Route l2("2", "2", "green");
+    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Route l2("2", "2", "green");
 
     ab->pl().addRoute(&l1, b);
     ab->pl().addRoute(&l2, 0);

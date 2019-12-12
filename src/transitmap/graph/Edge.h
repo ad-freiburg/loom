@@ -9,9 +9,9 @@
 #include "Edge.h"
 #include "Node.h"
 #include "Route.h"
-#include "util/geo/PolyLine.h"
-#include "util/Nullable.h"
 #include "transitmap/style/LineStyle.h"
+#include "util/Nullable.h"
+#include "util/geo/PolyLine.h"
 
 using std::exception;
 using std::string;
@@ -28,15 +28,13 @@ class Node;
 struct RouteOccurance {
   RouteOccurance(const Route* r, const Node* dir) : route(r), direction(dir) {}
   RouteOccurance(const Route* r, const Node* dir, const style::LineStyle& ls)
-   : route(r), direction(dir), style(ls) {}
+      : route(r), direction(dir), style(ls) {}
   const Route* route;
   const Node* direction;  // 0 if in both directions
 
   util::Nullable<style::LineStyle> style;
 
-  bool operator==(const RouteOccurance& b) const {
-    return b.route == route;
-  }
+  bool operator==(const RouteOccurance& b) const { return b.route == route; }
 };
 
 typedef std::pair<RouteOccurance*, size_t> RouteOccWithPos;
@@ -62,8 +60,8 @@ class Edge {
   const std::vector<RouteOccurance>& getRoutes() const;
   std::vector<RouteOccurance>* getRoutes();
 
-  RouteOccWithPos getRouteWithPosUnder(const Route* r,
-    const std::vector<size_t> ordering) const;
+  RouteOccWithPos getRouteWithPosUnder(
+      const Route* r, const std::vector<size_t> ordering) const;
 
   RouteOccWithPos getRouteWithPos(const Route* r) const;
 
@@ -71,8 +69,9 @@ class Edge {
 
   std::set<const Route*> getRoutesRelTo(const Route* ref) const;
 
-  std::vector<RouteOccurance> getCtdRoutesIn(const Node* n,
-    const Route* r, const Node* dir, const Edge* fromEdge) const;
+  std::vector<RouteOccurance> getCtdRoutesIn(const Node* n, const Route* r,
+                                             const Node* dir,
+                                             const Edge* fromEdge) const;
 
   bool containsRoute(const Route* r) const;
   size_t getCardinality() const;
@@ -85,13 +84,8 @@ class Edge {
 
   std::vector<const Route*> getShrdRoutes(const Edge& e) const;
 
-  bool replaceRoute(const Route* r, const Route* n);
-  bool removeRoute(const Route* r);
-
   std::string toString() const;
 
-  // TODO: store this here atm, but find better place...
-  std::vector<std::vector<size_t> > permutations;
  private:
   Node* _from;
   Node* _to;
@@ -102,8 +96,7 @@ class Edge {
 
   double _width, _spacing;
 };
-
-}}
+}
+}
 
 #endif  // TRANSITMAP_GRAPH_EDGE_H_
-

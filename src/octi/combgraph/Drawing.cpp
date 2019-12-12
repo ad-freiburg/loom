@@ -4,8 +4,8 @@
 #include "octi/gridgraph/GridGraph.h"
 #include "util/geo/BezierCurve.h"
 #include "util/graph/Dijkstra.h"
-using shared::transitgraph::TransitGraph;
-using shared::transitgraph::TransitNode;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
 
 using octi::combgraph::Drawing;
 using octi::combgraph::Costs;
@@ -173,8 +173,8 @@ PolyLine<double> Drawing::buildPolylineFromRes(
 }
 
 // _____________________________________________________________________________
-void Drawing::getTransitGraph(TransitGraph* target) const {
-  std::map<TransitNode*, TransitNode*> m;
+void Drawing::getLineGraph(LineGraph* target) const {
+  std::map<LineNode*, LineNode*> m;
 
   for (auto ndpair : _nds) {
     auto n = ndpair.first;
@@ -204,20 +204,20 @@ void Drawing::getTransitGraph(TransitGraph* target) const {
         }
 
         if (m.find(from) == m.end()) {
-          shared::transitgraph::TransitNodePL payload = from->pl();
+          shared::linegraph::LineNodePL payload = from->pl();
           payload.setGeom(pl.getLine().front());
           auto tfrom = target->addNd(payload);
           m[from] = tfrom;
         }
 
         if (m.find(to) == m.end()) {
-          shared::transitgraph::TransitNodePL payload = to->pl();
+          shared::linegraph::LineNodePL payload = to->pl();
           payload.setGeom(pl.getLine().back());
           auto tto = target->addNd(payload);
           m[to] = tto;
         }
 
-        shared::transitgraph::TransitEdgePL payload = e->pl();
+        shared::linegraph::LineEdgePL payload = e->pl();
         payload.setPolyline(pl);
         target->addEdg(m[from], m[to], payload);
 

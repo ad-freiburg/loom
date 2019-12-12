@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   LOG(INFO) << "Reading graph...";
-  transitmapper::graph::TransitGraph g(cfg.projectionString);
+  transitmapper::graph::TransitGraph g;
   transitmapper::graph::GraphBuilder b(&cfg);
 
   if (!b.build(&(std::cin), &g)) {

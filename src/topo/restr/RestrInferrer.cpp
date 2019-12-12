@@ -4,7 +4,7 @@
 
 #include <fstream>
 #include <unordered_map>
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/linegraph/LineGraph.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/restr/RestrGraph.h"
 #include "topo/restr/RestrInferrer.h"
@@ -14,7 +14,7 @@
 using topo::restr::RestrInferrer;
 
 // _____________________________________________________________________________
-RestrInferrer::RestrInferrer(const TopoConfig* cfg, TransitGraph* g)
+RestrInferrer::RestrInferrer(const TopoConfig* cfg, LineGraph* g)
     : _cfg(cfg), _tg(g) {}
 
 // _____________________________________________________________________________
@@ -114,7 +114,7 @@ void RestrInferrer::addHndls(const OrigEdgs& origEdgs) {
 }
 
 // _____________________________________________________________________________
-void RestrInferrer::addHndls(const TransitEdge* e, const OrigEdgs& origEdgs,
+void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
                              std::map<RestrEdge*, HndlLst>* handles) {
   double MAX_DIST = _cfg->maxAggrDistance;
 
@@ -134,7 +134,7 @@ void RestrInferrer::addHndls(const TransitEdge* e, const OrigEdgs& origEdgs,
           .getLine();
 
   for (auto edg : origEdgs.find(e)->second) {
-    auto origFr = const_cast<TransitEdge*>(edg);
+    auto origFr = const_cast<LineEdge*>(edg);
 
     const auto& edgs = _eMap.find(origFr)->second;
 
@@ -159,10 +159,10 @@ void RestrInferrer::addHndls(const TransitEdge* e, const OrigEdgs& origEdgs,
 }
 
 // _____________________________________________________________________________
-bool RestrInferrer::check(const Route* r, const TransitEdge* edg1,
-                          const TransitEdge* edg2) const {
+bool RestrInferrer::check(const Route* r, const LineEdge* edg1,
+                          const LineEdge* edg2) const {
   std::set<RestrEdge *> from, to;
-  auto shrdNd = shared::transitgraph::TransitGraph::sharedNode(edg1, edg2);
+  auto shrdNd = shared::linegraph::LineGraph::sharedNode(edg1, edg2);
 
   double curD = edg1->pl().getPolyline().getLength() * 0.33 +
                 edg2->pl().getPolyline().getLength() * 0.33;

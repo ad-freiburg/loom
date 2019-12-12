@@ -5,7 +5,6 @@
 #ifndef TRANSITMAP_GRAPH_TRANSITGRAPH_H_
 #define TRANSITMAP_GRAPH_TRANSITGRAPH_H_
 
-#include <proj_api.h>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/point.hpp>
@@ -26,8 +25,7 @@ namespace graph {
 
 class TransitGraph {
  public:
-  TransitGraph(const std::string& projStr);
-
+  TransitGraph();
   ~TransitGraph();
 
   void addNd(Node* n);
@@ -41,7 +39,6 @@ class TransitGraph {
 
   Node* getNodeById(const std::string& id) const;
 
-  projPJ getProjection() const;
   const geo::DBox& getBoundingBox() const;
   geo::DBox getBoundingBox(double p) const;
 
@@ -71,8 +68,6 @@ class TransitGraph {
   OrderingConfig _config;
 
   geo::DBox _bbox;
-
-  projPJ _proj;
 };
 }
 }

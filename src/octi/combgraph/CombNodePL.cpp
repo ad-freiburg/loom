@@ -8,7 +8,7 @@ using util::geo::Point;
 using octi::combgraph::CombNodePL;
 
 // _____________________________________________________________________________
-CombNodePL::CombNodePL(shared::transitgraph::TransitNode* parent)
+CombNodePL::CombNodePL(shared::linegraph::LineNode* parent)
     : _parent(parent) {}
 
 // _____________________________________________________________________________
@@ -17,7 +17,7 @@ const Point<double>* CombNodePL::getGeom() const {
 }
 
 // _____________________________________________________________________________
-shared::transitgraph::TransitNode* CombNodePL::getParent() const {
+shared::linegraph::LineNode* CombNodePL::getParent() const {
   return _parent;
 }
 

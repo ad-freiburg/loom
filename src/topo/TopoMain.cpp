@@ -8,7 +8,7 @@
 #include <iostream>
 #include <set>
 #include <string>
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/linegraph/LineGraph.h"
 #include "topo/mapconstructor/MapConstructor.h"
 #include "topo/statinserter/StatInserter.h"
 #include "topo/config/ConfigReader.h"
@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
   srand(time(NULL) + rand());
 
   topo::config::TopoConfig cfg;
-  shared::transitgraph::TransitGraph tg;
+  shared::linegraph::LineGraph tg;
   topo::restr::RestrInferrer ri(&cfg, &tg);
   topo::MapConstructor mc(&cfg, &tg);
   topo::StatInserter si(&cfg, &tg);

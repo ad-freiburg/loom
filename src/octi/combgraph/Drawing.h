@@ -30,8 +30,9 @@ struct Costs {
 
 class Drawing {
  public:
-  Drawing(const GridGraph* gg) : _c(std::numeric_limits<double>::infinity()), _gg(gg) {};
-  Drawing() : _c(std::numeric_limits<double>::infinity()), _gg(0) {};
+  Drawing(const GridGraph* gg)
+      : _c(std::numeric_limits<double>::infinity()), _gg(gg){};
+  Drawing() : _c(std::numeric_limits<double>::infinity()), _gg(0){};
 
   double score() const;
   Costs fullScore() const;
@@ -41,7 +42,7 @@ class Drawing {
   void erase(CombEdge* ce);
   void erase(CombNode* ce);
 
-  void getTransitGraph(TransitGraph* target) const;
+  void getLineGraph(LineGraph* target) const;
 
   const GridNode* getGrNd(const CombNode* cn);
 
@@ -49,11 +50,11 @@ class Drawing {
 
   void eraseFromGrid(const CombEdge* ce, GridGraph* gg);
   void eraseFromGrid(const CombNode* ce, GridGraph* gg);
-  void applyToGrid(const CombEdge* ce, GridGraph *gg);
-  void applyToGrid(const CombNode* ce, GridGraph *gg);
+  void applyToGrid(const CombEdge* ce, GridGraph* gg);
+  void applyToGrid(const CombNode* ce, GridGraph* gg);
 
   void eraseFromGrid(GridGraph* gg);
-  void applyToGrid(GridGraph *gg);
+  void applyToGrid(GridGraph* gg);
 
   double getEdgCost(const CombEdge* e) const;
   double getNdBndCost(const CombNode* e) const;
@@ -74,8 +75,8 @@ class Drawing {
 
   double recalcBends(const CombNode* nd);
 
-PolyLine<double> buildPolylineFromRes(
-    const std::vector<std::pair<size_t, size_t>>& res) const;
+  PolyLine<double> buildPolylineFromRes(
+      const std::vector<std::pair<size_t, size_t>>& res) const;
 };
 }
 }

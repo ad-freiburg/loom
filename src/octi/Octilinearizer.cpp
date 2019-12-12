@@ -27,7 +27,7 @@ using util::geo::dist;
 using util::geo::DPoint;
 
 // _____________________________________________________________________________
-void Octilinearizer::removeEdgesShorterThan(TransitGraph* g, double d) {
+void Octilinearizer::removeEdgesShorterThan(LineGraph* g, double d) {
 start:
   for (auto n1 : *g->getNds()) {
     for (auto e1 : n1->getAdjList()) {
@@ -40,7 +40,7 @@ start:
           auto newGeom =
               DPoint((n1->pl().getGeom()->getX() + otherP->getX()) / 2,
                      (n1->pl().getGeom()->getY() + otherP->getY()) / 2);
-          TransitNode* n = 0;
+          LineNode* n = 0;
 
           if (e1->getTo()->pl().getStops().size() > 0) {
             n = g->mergeNds(e1->getFrom(), e1->getTo());
@@ -57,7 +57,7 @@ start:
 }
 
 // _____________________________________________________________________________
-double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
+double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
                                GridGraph** retGg, const Penalties& pens,
                                double gridSize, double borderRad, bool deg2heur,
                                double maxGrDist, bool noSolve,
@@ -83,7 +83,7 @@ double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
 
   double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, path);
 
-  drawing.getTransitGraph(outTg);
+  drawing.getLineGraph(outTg);
 
   *retGg = gg;
 
@@ -91,7 +91,7 @@ double Octilinearizer::drawILP(TransitGraph* tg, TransitGraph* outTg,
 }
 
 // _____________________________________________________________________________
-double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
+double Octilinearizer::draw(LineGraph* tg, LineGraph* outTg,
                             GridGraph** retGg, const Penalties& pens,
                             double gridSize, double borderRad, bool deg2heur,
                             double maxGrDist, bool restrLocSearch,
@@ -106,7 +106,7 @@ double Octilinearizer::draw(TransitGraph* tg, TransitGraph* outTg,
 }
 // _____________________________________________________________________________
 double Octilinearizer::draw(const CombGraph& cg, const util::geo::DBox& box,
-                            TransitGraph* outTg, GridGraph** retGg,
+                            LineGraph* outTg, GridGraph** retGg,
                             const Penalties& pens, double gridSize,
                             double borderRad, bool deg2heur, double maxGrDist,
                             bool restrLocSearch, double enfGeoPen) {
@@ -292,7 +292,7 @@ double Octilinearizer::draw(const CombGraph& cg, const util::geo::DBox& box,
     if (imp < 0.05) break;
   }
 
-  drawing.getTransitGraph(outTg);
+  drawing.getLineGraph(outTg);
   auto fullScore = drawing.fullScore();
   std::cerr << "Hop costs: " << fullScore.hop
             << ", bend costs: " << fullScore.bend

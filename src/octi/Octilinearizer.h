@@ -10,7 +10,7 @@
 #include "octi/combgraph/CombGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "octi/gridgraph/GridGraph.h"
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/linegraph/LineGraph.h"
 #include "util/graph/Dijkstra.h"
 
 namespace octi {
@@ -25,9 +25,9 @@ using octi::gridgraph::NodeCost;
 using octi::gridgraph::GeoPensMap;
 using octi::gridgraph::GeoPens;
 
-using shared::transitgraph::TransitGraph;
-using shared::transitgraph::TransitNode;
-using shared::transitgraph::TransitEdge;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
+using shared::linegraph::LineEdge;
 
 using octi::combgraph::EdgeOrdering;
 using octi::combgraph::CombGraph;
@@ -140,23 +140,23 @@ struct GridHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
 class Octilinearizer {
  public:
   Octilinearizer() {}
-  double draw(TransitGraph* in, TransitGraph* out, GridGraph** gg,
+  double draw(LineGraph* in, LineGraph* out, GridGraph** gg,
               const Penalties& pens, double gridSize, double borderRad,
               bool deg2heur, double maxGrDist, bool restrLocSearch,
               double enfGeoCourse);
 
   double draw(const CombGraph& cg, const util::geo::DBox& box,
-              TransitGraph* out, GridGraph** gg, const Penalties& pens,
+              LineGraph* out, GridGraph** gg, const Penalties& pens,
               double gridSize, double borderRad, bool deg2heur,
               double maxGrDist, bool restrLocSearch, double enfGeoCourse);
 
-  double drawILP(TransitGraph* in, TransitGraph* out, GridGraph** gg,
+  double drawILP(LineGraph* in, LineGraph* out, GridGraph** gg,
                  const Penalties& pens, double gridSize, double borderRad,
                  bool deg2heur, double maxGrDist, bool noSolve,
                  const std::string& path);
 
  private:
-  void removeEdgesShorterThan(TransitGraph* g, double d);
+  void removeEdgesShorterThan(LineGraph* g, double d);
 
   void writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e, GridGraph* g);
 

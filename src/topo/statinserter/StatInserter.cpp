@@ -4,7 +4,7 @@
 
 #include <cassert>
 #include <climits>
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/linegraph/LineGraph.h"
 #include "topo/statinserter/StatInserter.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
@@ -23,16 +23,16 @@ using util::geo::extendBox;
 using util::geo::PolyLine;
 using util::geo::SharedSegments;
 
-using shared::transitgraph::TransitGraph;
-using shared::transitgraph::TransitNode;
-using shared::transitgraph::Station;
-using shared::transitgraph::TransitEdge;
-using shared::transitgraph::TransitEdgePair;
-using shared::transitgraph::TransitNodePL;
-using shared::transitgraph::TransitEdgePL;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
+using shared::linegraph::Station;
+using shared::linegraph::LineEdge;
+using shared::linegraph::LineEdgePair;
+using shared::linegraph::LineNodePL;
+using shared::linegraph::LineEdgePL;
 
 // _____________________________________________________________________________
-StatInserter::StatInserter(const TopoConfig* cfg, TransitGraph* g)
+StatInserter::StatInserter(const TopoConfig* cfg, LineGraph* g)
     : _cfg(cfg), _g(g) {}
 
 // _____________________________________________________________________________
@@ -80,15 +80,15 @@ void StatInserter::init() {
 
 // _____________________________________________________________________________
 std::pair<size_t, size_t> StatInserter::served(
-    const std::vector<TransitEdge*>& adj,
-    const std::set<const TransitEdge*>& toServe, const OrigEdgs& origEdgs) {
-  std::set<const TransitEdge*> contained;
+    const std::vector<LineEdge*>& adj,
+    const std::set<const LineEdge*>& toServe, const OrigEdgs& origEdgs) {
+  std::set<const LineEdge*> contained;
 
   for (auto e : adj)
     contained.insert(origEdgs.find(e)->second.begin(),
                      origEdgs.find(e)->second.end());
 
-  std::set<const TransitEdge*> iSect;
+  std::set<const LineEdge*> iSect;
   set_intersection(contained.begin(), contained.end(), toServe.begin(),
                    toServe.end(), std::inserter(iSect, iSect.begin()));
 
@@ -118,7 +118,7 @@ std::vector<StationCand> StatInserter::candidates(const StationOcc& occ,
                                                   const EdgeGrid& idx,
                                                   const OrigEdgs& origEdgs) {
   std::vector<StationCand> ret;
-  std::set<TransitEdge*> neighbors;
+  std::set<LineEdge*> neighbors;
   idx.get(util::geo::pad(util::geo::getBoundingBox(occ.station.pos), 250),
           &neighbors);
 
@@ -198,7 +198,7 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
 
       auto spl = split(e->pl(), e->getFrom(), e->getTo(), cands.front().pos);
 
-      shared::transitgraph::TransitGraph::sharedNode(spl.first, spl.second)
+      shared::linegraph::LineGraph::sharedNode(spl.first, spl.second)
           ->pl()
           .addStop(repr.station);
 
@@ -223,9 +223,9 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
 }
 
 // _____________________________________________________________________________
-TransitEdgePair StatInserter::split(TransitEdgePL& a, TransitNode* fr,
-                                    TransitNode* to, double p) {
-  TransitEdge* ret;
+LineEdgePair StatInserter::split(LineEdgePL& a, LineNode* fr,
+                                    LineNode* to, double p) {
+  LineEdge* ret;
   auto right = a.getPolyline().getSegment(p, 1);
   a.setPolyline(a.getPolyline().getSegment(0, p));
   auto helper = _g->addNd(a.getPolyline().back());
@@ -253,8 +253,8 @@ TransitEdgePair StatInserter::split(TransitEdgePL& a, TransitNode* fr,
 }
 
 // _____________________________________________________________________________
-void StatInserter::edgeRpl(TransitNode* n, const TransitEdge* oldE,
-                           const TransitEdge* newE) {
+void StatInserter::edgeRpl(LineNode* n, const LineEdge* oldE,
+                           const LineEdge* newE) {
   if (oldE == newE) return;
   // replace in from
   for (auto& r : n->pl().getConnExc()) {

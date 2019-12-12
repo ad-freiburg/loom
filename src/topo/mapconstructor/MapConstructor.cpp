@@ -4,7 +4,7 @@
 
 #include <cassert>
 #include <climits>
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/linegraph/LineGraph.h"
 #include "topo/mapconstructor/MapConstructor.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
@@ -23,19 +23,19 @@ using util::geo::extendBox;
 using util::geo::PolyLine;
 using util::geo::SharedSegments;
 
-using shared::transitgraph::TransitGraph;
-using shared::transitgraph::TransitNode;
-using shared::transitgraph::Station;
-using shared::transitgraph::TransitEdge;
-using shared::transitgraph::TransitEdgePair;
-using shared::transitgraph::TransitNodePL;
-using shared::transitgraph::TransitEdgePL;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
+using shared::linegraph::Station;
+using shared::linegraph::LineEdge;
+using shared::linegraph::LineEdgePair;
+using shared::linegraph::LineNodePL;
+using shared::linegraph::LineEdgePL;
 
 double MIN_SEG_LENGTH = 35;
 double MAX_SNAP_DIST = 1;
 
 // _____________________________________________________________________________
-MapConstructor::MapConstructor(const TopoConfig* cfg, TransitGraph* g)
+MapConstructor::MapConstructor(const TopoConfig* cfg, LineGraph* g)
     : _cfg(cfg), _g(g) {}
 
 // _____________________________________________________________________________
@@ -50,7 +50,7 @@ ShrdSegWrap MapConstructor::nextShrdSeg(double dCut, EdgeGrid* grid) {
       if (e->getFrom() != n) continue;
       if (_indEdges.find(e) != _indEdges.end()) continue;
 
-      std::set<TransitEdge*> neighbors;
+      std::set<LineEdge*> neighbors;
       grid->getNeighbors(e, fmax(5, dmin * 20), &neighbors);
 
       for (auto toTest : neighbors) {
@@ -91,11 +91,11 @@ ShrdSegWrap MapConstructor::nextShrdSeg(double dCut, EdgeGrid* grid) {
 }
 
 // _____________________________________________________________________________
-bool MapConstructor::routeEq(const TransitEdge* a, const TransitEdge* b) {
+bool MapConstructor::routeEq(const LineEdge* a, const LineEdge* b) {
   // shortcut
   if (a->pl().getRoutes().size() != b->pl().getRoutes().size()) return false;
 
-  const auto shrNd = TransitGraph::sharedNode(a, b);
+  const auto shrNd = LineGraph::sharedNode(a, b);
 
   // TODO: remove quadratic code
   for (const auto& ra : a->pl().getRoutes()) {
@@ -167,7 +167,7 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
                       w.s.first.second.totalPos, w.s.second.second.totalPos);
 
     // new nodes at the start and end of the shared segment
-    TransitNode *a = 0, *b = 0;
+    LineNode *a = 0, *b = 0;
 
     if (ea.getLength() < MAX_SNAP_DIST) {
       a = w.e->getFrom();
@@ -205,11 +205,11 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
 
     if (a == b) continue;
 
-    TransitEdgePL eaEdgeGeom(ea);
-    TransitEdgePL abEdgeGeom(ab);
-    TransitEdgePL ecEdgeGeom(ec);
-    TransitEdgePL faEdgeGeom(fa);
-    TransitEdgePL fcEdgeGeom(fc);
+    LineEdgePL eaEdgeGeom(ea);
+    LineEdgePL abEdgeGeom(ab);
+    LineEdgePL ecEdgeGeom(ec);
+    LineEdgePL faEdgeGeom(fa);
+    LineEdgePL fcEdgeGeom(fc);
 
     auto wefrom = w.e->getFrom();
     auto weto = w.e->getTo();
@@ -268,7 +268,7 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
     _g->delEdg(w.e->getFrom(), w.e->getTo());
     _g->delEdg(w.f->getFrom(), w.f->getTo());
 
-    TransitEdge *eaE = 0, *abE = 0, *ebE = 0, *faE = 0, *fbE = 0, *helper = 0;
+    LineEdge *eaE = 0, *abE = 0, *ebE = 0, *faE = 0, *fbE = 0, *helper = 0;
 
     // add new edges
     if (_g->getEdg(a, b)) {
@@ -429,7 +429,7 @@ bool MapConstructor::contractNodes() {
 // _____________________________________________________________________________
 bool MapConstructor::contractEdges() {
   for (auto n : *_g->getNds()) {
-    std::vector<TransitEdge*> edges;
+    std::vector<LineEdge*> edges;
     edges.insert(edges.end(), n->getAdjList().begin(), n->getAdjList().end());
     if (edges.size() == 2 && n->pl().getStops().size() == 0) {
       if (!_g->getEdg(edges[0]->getOtherNd(n), edges[1]->getOtherNd(n))) {
@@ -444,12 +444,12 @@ bool MapConstructor::contractEdges() {
 }
 
 // _____________________________________________________________________________
-bool MapConstructor::combineEdges(TransitEdge* a, TransitEdge* b,
-                                  TransitNode* n) {
+bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b,
+                                  LineNode* n) {
   assert((a->getTo() == n || a->getFrom() == n) &&
          (b->getTo() == n || b->getFrom() == n));
 
-  TransitEdge* newEdge = 0;
+  LineEdge* newEdge = 0;
   util::geo::PolyLine<double> newPl;
 
   // TODO: there is some copying going on below, which is not always necessary.
@@ -535,23 +535,23 @@ size_t MapConstructor::freeze() {
 }
 
 // _____________________________________________________________________________
-void MapConstructor::combContEdgs(const TransitEdge* a, const TransitEdge* b) {
+void MapConstructor::combContEdgs(const LineEdge* a, const LineEdge* b) {
   for (auto& oe : _origEdgs) {
     oe[a].insert(oe[b].begin(), oe[b].end());
   }
 }
 
 // _____________________________________________________________________________
-bool MapConstructor::combineNodes(TransitNode* a, TransitNode* b) {
+bool MapConstructor::combineNodes(LineNode* a, LineNode* b) {
   assert(a->pl().getStops().size() == 0 || b->pl().getStops().size() == 0);
 
   if (a->pl().getStops().size() != 0) {
-    TransitNode* c = a;
+    LineNode* c = a;
     a = b;
     b = c;
   }
 
-  TransitEdge* connecting = _g->getEdg(a, b);
+  LineEdge* connecting = _g->getEdg(a, b);
   assert(connecting);
 
   // we will delete a and the connecting edge {a, b}.
@@ -611,9 +611,9 @@ bool MapConstructor::combineNodes(TransitNode* a, TransitNode* b) {
 }
 
 // _____________________________________________________________________________
-PolyLine<double> MapConstructor::geomAvg(const TransitEdgePL& geomA,
+PolyLine<double> MapConstructor::geomAvg(const LineEdgePL& geomA,
                                          double startA, double endA,
-                                         const TransitEdgePL& geomB,
+                                         const LineEdgePL& geomB,
                                          double startB, double endB) {
   PolyLine<double> a, b;
 
@@ -670,12 +670,12 @@ DBox MapConstructor::bbox() const {
 }
 
 // _____________________________________________________________________________
-void MapConstructor::routeDirRepl(TransitNode* oldN, TransitNode* newN,
-                                  TransitEdge* e) {
+void MapConstructor::routeDirRepl(LineNode* oldN, LineNode* newN,
+                                  LineEdge* e) {
   auto ro = e->pl().getRoutes().begin();
   while (ro != e->pl().getRoutes().end()) {
     if (ro->direction == oldN) {
-      shared::transitgraph::RouteOcc newRo = *ro;
+      shared::linegraph::RouteOcc newRo = *ro;
       newRo.direction = newN;
 
       // delete old
@@ -690,8 +690,8 @@ void MapConstructor::routeDirRepl(TransitNode* oldN, TransitNode* newN,
 }
 
 // _____________________________________________________________________________
-bool MapConstructor::foldEdges(TransitEdge* a, TransitEdge* b) {
-  const auto shrNd = TransitGraph::sharedNode(a, b);
+bool MapConstructor::foldEdges(LineEdge* a, LineEdge* b) {
+  const auto shrNd = LineGraph::sharedNode(a, b);
   assert(shrNd);
 
   /*
@@ -752,9 +752,9 @@ bool MapConstructor::foldEdges(TransitEdge* a, TransitEdge* b) {
 }
 
 // _____________________________________________________________________________
-TransitEdgePair MapConstructor::split(TransitEdgePL& a, TransitNode* fr,
-                                      TransitNode* to, double p) {
-  TransitEdge* ret;
+LineEdgePair MapConstructor::split(LineEdgePL& a, LineNode* fr,
+                                      LineNode* to, double p) {
+  LineEdge* ret;
   auto right = a.getPolyline().getSegment(p, 1);
   a.setPolyline(a.getPolyline().getSegment(0, p));
   auto helper = _g->addNd(a.getPolyline().back());
@@ -800,8 +800,8 @@ bool MapConstructor::cleanUpGeoms() {
 }
 
 // _____________________________________________________________________________
-void MapConstructor::edgeRpl(TransitNode* n, const TransitEdge* oldE,
-                             const TransitEdge* newE) {
+void MapConstructor::edgeRpl(LineNode* n, const LineEdge* oldE,
+                             const LineEdge* newE) {
   if (oldE == newE) return;
   // replace in from
   for (auto& r : n->pl().getConnExc()) {

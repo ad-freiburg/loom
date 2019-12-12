@@ -11,7 +11,7 @@
 #include "octi/combgraph/CombGraph.h"
 #include "octi/config/ConfigReader.h"
 #include "octi/gridgraph/GridGraph.h"
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/linegraph/LineGraph.h"
 #include "util/Misc.h"
 #include "util/geo/Geo.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -24,7 +24,7 @@ using octi::Octilinearizer;
 using util::geo::dist;
 
 // _____________________________________________________________________________
-double avgStatDist(const TransitGraph& g) {
+double avgStatDist(const LineGraph& g) {
   double avg = 0;
   size_t i = 0;
   for (const auto nd : g.getNds()) {
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 
   std::cerr << "Reading graph file... ";
   T_START(read);
-  TransitGraph tg;
+  LineGraph tg;
   GridGraph* gg;
   if (cfg.fromDot)
     tg.readFromDot(&(std::cin));
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
   std::cerr << "Average adj. node distance is " << avgDist << std::endl;
 
   Octilinearizer oct;
-  TransitGraph res;
+  LineGraph res;
 
   double gridSize;
 

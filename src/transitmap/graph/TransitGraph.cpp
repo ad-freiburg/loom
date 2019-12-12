@@ -1,8 +1,6 @@
 // Copyright 2016, University of Freiburg,
-// Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
+// Chair of Algorithms and Data Structures.  // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include <proj_api.h>
 #include <set>
 #include <string>
 #include "transitmap/graph/Edge.h"
@@ -22,10 +20,9 @@ using transitmapper::graph::Route;
 using transitmapper::graph::OrderingConfig;
 
 // _____________________________________________________________________________
-TransitGraph::TransitGraph(const std::string& proj)
+TransitGraph::TransitGraph()
      {
   _bbox = util::geo::minbox<double>();
-  _proj = pj_init_plus(proj.c_str());
 }
 
 // _____________________________________________________________________________
@@ -35,9 +32,6 @@ TransitGraph::~TransitGraph() {
   for (auto n : _nodes) {
     delete n;
   }
-
-  // clean up projection stuff
-  pj_free(_proj);
 }
 
 // _____________________________________________________________________________
@@ -129,9 +123,6 @@ const std::set<Node*>& TransitGraph::getNds() const { return _nodes; }
 
 // _____________________________________________________________________________
 std::set<Node*>* TransitGraph::getNds() { return &_nodes; }
-
-// _____________________________________________________________________________
-projPJ TransitGraph::getProjection() const { return _proj; }
 
 // _____________________________________________________________________________
 const DBox& TransitGraph::getBoundingBox() const {

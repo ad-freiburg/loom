@@ -5,25 +5,25 @@
 #include "octi/combgraph/CombGraph.h"
 
 using octi::combgraph::CombGraph;
-using shared::transitgraph::TransitGraph;
-using shared::transitgraph::TransitNode;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
 using octi::combgraph::EdgeOrdering;
 
 // _____________________________________________________________________________
-CombGraph::CombGraph(const TransitGraph* g) : CombGraph(g, false) {}
+CombGraph::CombGraph(const LineGraph* g) : CombGraph(g, false) {}
 
 // _____________________________________________________________________________
-CombGraph::CombGraph(const TransitGraph* g, bool collapse) {
+CombGraph::CombGraph(const LineGraph* g, bool collapse) {
   build(g);
   if (collapse) combineDeg2();
   writeEdgeOrdering();
 }
 
 // _____________________________________________________________________________
-void CombGraph::build(const TransitGraph* source) {
+void CombGraph::build(const LineGraph* source) {
   auto nodes = source->getNds();
 
-  std::map<TransitNode*, CombNode*> m;
+  std::map<LineNode*, CombNode*> m;
 
   for (auto n : nodes) {
     CombNode* cn = addNd(n);

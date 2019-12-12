@@ -8,7 +8,7 @@
 #include <proj_api.h>
 #include <algorithm>
 #include <unordered_map>
-#include "shared/transitgraph/TransitGraph.h"
+#include "shared/linegraph/LineGraph.h"
 #include "topo/config/TopoConfig.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
@@ -28,33 +28,33 @@ using util::geo::SharedSegment;
 
 using topo::config::TopoConfig;
 
-using shared::transitgraph::TransitGraph;
-using shared::transitgraph::TransitNode;
-using shared::transitgraph::Station;
-using shared::transitgraph::TransitEdge;
-using shared::transitgraph::TransitEdgePair;
-using shared::transitgraph::TransitNodePL;
-using shared::transitgraph::TransitEdgePL;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
+using shared::linegraph::Station;
+using shared::linegraph::LineEdge;
+using shared::linegraph::LineEdgePair;
+using shared::linegraph::LineNodePL;
+using shared::linegraph::LineEdgePL;
 
-typedef Grid<TransitNode*, Point, double> NodeGrid;
-typedef Grid<TransitEdge*, Line, double> EdgeGrid;
+typedef Grid<LineNode*, Point, double> NodeGrid;
+typedef Grid<LineEdge*, Line, double> EdgeGrid;
 
-typedef std::map<const TransitEdge*, std::set<const TransitEdge*>> OrigEdgs;
+typedef std::map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
 
 namespace topo {
 
 struct ShrdSegWrap {
   ShrdSegWrap() : e(0), f(0){};
-  ShrdSegWrap(TransitEdge* e, TransitEdge* f, SharedSegment<double> s)
+  ShrdSegWrap(LineEdge* e, LineEdge* f, SharedSegment<double> s)
       : e(e), f(f), s(s){};
-  TransitEdge* e;
-  TransitEdge* f;
+  LineEdge* e;
+  LineEdge* f;
   SharedSegment<double> s;
 };
 
 class MapConstructor {
  public:
-  MapConstructor(const TopoConfig* cfg, TransitGraph* g);
+  MapConstructor(const TopoConfig* cfg, LineGraph* g);
 
   bool collapseShrdSegs();
   bool collapseShrdSegs(double dCut);
@@ -75,38 +75,35 @@ class MapConstructor {
 
  private:
   const config::TopoConfig* _cfg;
-  TransitGraph* _g;
+  LineGraph* _g;
 
-  void routeDirRepl(TransitNode* oldN, TransitNode* newN, TransitEdge* e);
+  void routeDirRepl(LineNode* oldN, LineNode* newN, LineEdge* e);
 
   ShrdSegWrap nextShrdSeg(double dCut, EdgeGrid* grid);
-  bool combineNodes(TransitNode* a, TransitNode* b);
-  bool combineEdges(TransitEdge* a, TransitEdge* b, TransitNode* n);
+  bool combineNodes(LineNode* a, LineNode* b);
+  bool combineEdges(LineEdge* a, LineEdge* b, LineNode* n);
 
-  void combContEdgs(const TransitEdge* a, const TransitEdge* b);
+  void combContEdgs(const LineEdge* a, const LineEdge* b);
 
-  bool routeEq(const TransitEdge* a, const TransitEdge* b);
+  bool routeEq(const LineEdge* a, const LineEdge* b);
 
   bool contractEdges();
 
-  bool foldEdges(TransitEdge* a, TransitEdge* b);
+  bool foldEdges(LineEdge* a, LineEdge* b);
 
-  PolyLine<double> geomAvg(const TransitEdgePL& geomA, double startA,
-                           double endA, const TransitEdgePL& geomB,
-                           double startB, double endB);
+  PolyLine<double> geomAvg(const LineEdgePL& geomA, double startA, double endA,
+                           const LineEdgePL& geomB, double startB, double endB);
 
   DBox bbox() const;
   EdgeGrid geoIndex();
 
-  void edgeRpl(TransitNode* n, const TransitEdge* oldE,
-               const TransitEdge* newE);
+  void edgeRpl(LineNode* n, const LineEdge* oldE, const LineEdge* newE);
 
-  TransitEdgePair split(TransitEdgePL& a, TransitNode* fr, TransitNode* to,
-                        double p);
+  LineEdgePair split(LineEdgePL& a, LineNode* fr, LineNode* to, double p);
 
-  std::set<const TransitEdge*> _indEdges;
-  std::set<TransitEdgePair> _indEdgesPairs;
-  std::map<TransitEdgePair, size_t> _pEdges;
+  std::set<const LineEdge*> _indEdges;
+  std::set<LineEdgePair> _indEdgesPairs;
+  std::map<LineEdgePair, size_t> _pEdges;
 
   std::vector<OrigEdgs> _origEdgs;
 };

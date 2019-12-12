@@ -7,8 +7,8 @@
 
 #include <map>
 #include <set>
-#include "shared/transitgraph/TransitGraph.h"
-#include "shared/transitgraph/Route.h"
+#include "shared/linegraph/LineGraph.h"
+#include "shared/linegraph/Route.h"
 #include "util/graph/DirGraph.h"
 
 namespace topo {
@@ -20,7 +20,7 @@ struct RestrNodePL;
 typedef util::graph::Node<RestrNodePL, RestrEdgePL> RestrNode;
 typedef util::graph::Edge<RestrNodePL, RestrEdgePL> RestrEdge;
 
-typedef std::map<const shared::transitgraph::Route*,
+typedef std::map<const shared::linegraph::Route*,
                  std::map<const RestrEdge*, std::set<const RestrEdge*>>>
     ConnEx;
 
@@ -35,7 +35,7 @@ struct RestrNodePL {
 struct RestrEdgePL {
   RestrEdgePL(const util::geo::PolyLine<double>& geom) : geom(geom){};
   util::geo::PolyLine<double> geom;
-  std::set<const shared::transitgraph::Route*> routes;
+  std::set<const shared::linegraph::Route*> routes;
 
   const util::geo::Line<double>* getGeom() const { return &geom.getLine(); }
   util::json::Dict getAttrs() const {

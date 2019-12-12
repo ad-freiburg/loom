@@ -20,11 +20,11 @@ namespace combgraph {
 class CombNodePL : util::geograph::GeoNodePL<double> {
  public:
   CombNodePL(){};
-  CombNodePL(shared::transitgraph::TransitNode* parent);
+  CombNodePL(shared::linegraph::LineNode* parent);
 
   const Point<double>* getGeom() const;
   util::json::Dict getAttrs() const;
-  shared::transitgraph::TransitNode* getParent() const;
+  shared::linegraph::LineNode* getParent() const;
 
   const combgraph::EdgeOrdering& getEdgeOrdering();
   void setEdgeOrdering(const combgraph::EdgeOrdering& e);
@@ -33,7 +33,7 @@ class CombNodePL : util::geograph::GeoNodePL<double> {
   std::string toString() const;
 
  private:
-  shared::transitgraph::TransitNode* _parent;
+  shared::linegraph::LineNode* _parent;
   size_t _routeNumber;
   combgraph::EdgeOrdering _ordering;
 };
