@@ -22,6 +22,7 @@
 #include <vector>
 #include "Server.h"
 #include "util/String.h"
+#include "util/log/Log.h"
 
 using util::http::Socket;
 using util::http::Queue;
@@ -112,7 +113,12 @@ void HttpServer::handle() {
       answ = Answer("500 Internal Server Error", "500 Internal Server Error");
     }
 
-    send(connection, &answ);
+    try {
+      send(connection, &answ);
+    } catch (const std::runtime_error& err) {
+      LOG(WARN) << err.what();
+    }
+
     close(connection);
   }
 }

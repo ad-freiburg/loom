@@ -18,13 +18,23 @@ namespace output {
 class GeoGraphJsonOutput {
  public:
   inline GeoGraphJsonOutput(){};
+
+  // print a graph to the provided path
   template <typename N, typename E>
   void print(const util::graph::Graph<N, E>& outG, std::ostream& str);
+
+  // print a graph to the provided path, but treat coordinates as Web Mercator coordinates and reproject to WGS84
+  template <typename N, typename E>
+  void printLatLng(const util::graph::Graph<N, E>& outG, std::ostream& str);
 
  private:
   template <typename T>
   Line<T> createLine(const util::geo::Point<T>& a,
                      const util::geo::Point<T>& b);
+
+  // print a graph to the provided path
+  template <typename N, typename E>
+  void printImpl(const util::graph::Graph<N, E>& outG, std::ostream& str, bool proj);
 };
 
 #include "util/geo/output/GeoGraphJsonOutput.tpp"

@@ -46,3 +46,19 @@ void GeoJsonOutput::print(const Line<T>& line, json::Val attrs) {
   _wr.val(attrs);
   _wr.close();
 }
+
+// _____________________________________________________________________________
+template <typename T>
+void GeoJsonOutput::printLatLng(const Point<T>& p, json::Val attrs) {
+  auto projP = util::geo::webMercToLatLng<double>(p.getX(), p.getY());
+  print(projP, attrs);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+void GeoJsonOutput::printLatLng(const Line<T>& line, json::Val attrs) {
+  Line<T> projL;
+  for (auto p : line) projL.push_back(util::geo::webMercToLatLng<double>(p.getX(), p.getY()));
+
+  print(projL, attrs);
+}

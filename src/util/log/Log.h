@@ -8,7 +8,6 @@
 #include <chrono>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
 
 #define VDEBUG 4
 #define DEBUG 3
@@ -35,12 +34,11 @@ template <char LVL>
 class Log {
  public:
   Log() { if (LVL == ERROR) os = &std::cerr; else os = &std::cout; }
-  ~Log() { buf << std::endl; (*os) << buf.str(); }
+  ~Log() { (*os) << std::endl; }
   std::ostream& log() { return ts() << LOGS[(size_t)LVL] << ": "; }
 
  private:
   std::ostream* os;
-  std::stringstream buf;
   std::ostream& ts() {
     char tl[20];
     auto n = system_clock::now();
@@ -48,7 +46,7 @@ class Log {
     int m = duration_cast<milliseconds>(n-time_point_cast<seconds>(n)).count();
     struct tm t = *localtime(&tt);
     strftime(tl, 20, "%Y-%m-%d %H:%M:%S", &t);
-    return buf << "[" << tl << "." << setfill('0') << setw(3) << m << "] ";
+    return (*os) << "[" << tl << "." << setfill('0') << setw(3) << m << "] ";
   }
 };
 }

@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <iomanip>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -36,18 +37,43 @@ inline std::string urlDecode(const std::string& encoded) {
 }
 
 // _____________________________________________________________________________
-inline std::string jsonStringEscape(const std::string& unescaped) {
-  std::string escaped;
-  for (size_t i = 0; i < unescaped.size(); ++i) {
-    if (unescaped[i] == '"' || unescaped[i] == '\\') {
-      escaped += "\\";
+inline std::string jsonStringEscape(const std::string& unesc) {
+  // modified code from
+  // http://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
+  std::ostringstream o;
+  for (auto c = unesc.cbegin(); c != unesc.cend(); c++) {
+    switch (*c) {
+      case '"':
+        o << "\\\"";
+        break;
+      case '\\':
+        o << "\\\\";
+        break;
+      case '\b':
+        o << "\\b";
+        break;
+      case '\f':
+        o << "\\f";
+        break;
+      case '\n':
+        o << "\\n";
+        break;
+      case '\r':
+        o << "\\r";
+        break;
+      case '\t':
+        o << "\\t";
+        break;
+      default:
+        if ('\x00' <= *c && *c <= '\x1f') {
+          o << "\\u" << std::hex << std::setw(4) << std::setfill('0')
+            << static_cast<int>(*c);
+        } else {
+          o << *c;
+        }
     }
-    if (iscntrl(unescaped[i])) {
-      escaped += " ";
-    }
-    escaped += unescaped[i];
   }
-  return escaped;
+  return o.str();
 }
 
 // _____________________________________________________________________________
@@ -152,19 +178,22 @@ inline size_t prefixEditDist(const std::string& prefix, const std::string& s,
 
   d[0] = 0;
   for (size_t i = 1; i <= len1; ++i) d[i * (len2 + 1)] = i;
-  for (size_t i = 1; i <= len2; ++i) d[ i] = i;
+  for (size_t i = 1; i <= len2; ++i) d[i] = i;
 
   for (size_t i = 1; i <= len1; i++) {
     for (size_t j = 1; j <= len2; j++) {
-      d[i * (len2 + 1) + j] = std::min(std::min(d[(i - 1) * (len2 + 1) + j] + 1, d[i * (len2 + 1) + j - 1] + 1),
-                         d[(i - 1) * (len2 + 1) + j - 1] + (prefix[i - 1] == s[j - 1] ? 0 : 1));
+      d[i * (len2 + 1) + j] = std::min(std::min(d[(i - 1) * (len2 + 1) + j] + 1,
+                                                d[i * (len2 + 1) + j - 1] + 1),
+                                       d[(i - 1) * (len2 + 1) + j - 1] +
+                                           (prefix[i - 1] == s[j - 1] ? 0 : 1));
     }
   }
 
   // take min of last row
   size_t deltaMin = std::max(std::max(deltaMax + 1, prefix.size()), s.size());
   for (size_t i = 0; i <= len2; i++) {
-    if (d[len1 * (len2 + 1) + i] < deltaMin) deltaMin = d[len1 * (len2 + 1) + i];
+    if (d[len1 * (len2 + 1) + i] < deltaMin)
+      deltaMin = d[len1 * (len2 + 1) + i];
   }
 
   return deltaMin;
@@ -177,13 +206,13 @@ inline size_t prefixEditDist(const std::string& prefix, const std::string& s) {
 
 // _____________________________________________________________________________
 inline std::string toUpper(std::string str) {
-  std::transform(str.begin(), str.end(),str.begin(), toupper);
+  std::transform(str.begin(), str.end(), str.begin(), toupper);
   return str;
 }
 
 // _____________________________________________________________________________
 inline std::string toLower(std::string str) {
-  std::transform(str.begin(), str.end(),str.begin(), tolower);
+  std::transform(str.begin(), str.end(), str.begin(), tolower);
   return str;
 }
 
