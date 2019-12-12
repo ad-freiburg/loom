@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "shared/transitgraph/TransitNodePL.h"
 #include "shared/transitgraph/TransitGraph.h"
+#include "shared/transitgraph/TransitNodePL.h"
 
 using util::geo::Point;
 using namespace shared::transitgraph;

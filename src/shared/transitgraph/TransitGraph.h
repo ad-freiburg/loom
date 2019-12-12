@@ -41,6 +41,8 @@ class TransitGraph
   const util::geo::Box<double>& getBBox() const;
   void topologizeIsects();
 
+  size_t maxDeg() const;
+
   static TransitNode* sharedNode(const TransitEdge* a, const TransitEdge* b);
   static std::vector<RouteOcc> getCtdRoutesIn(const Route* r,
                                               const TransitNode* dir,
@@ -49,6 +51,8 @@ class TransitGraph
 
   static std::vector<RouteOcc> getCtdRoutesIn(const TransitEdge* fromEdge,
                                               const TransitEdge* toEdge);
+  static size_t getLDeg(const TransitNode* nd);
+  static size_t getMaxLineNum(const TransitNode* nd);
 
  private:
   util::geo::Box<double> _bbox;

@@ -2,10 +2,10 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "shared/transitgraph/Route.h"
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/Penalties.h"
+#include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/Scorer.h"
 #include "util/Misc.h"
@@ -153,6 +153,7 @@ double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c,
               iga.geom.getLine().front(), iga.geom.getLine().back(),
               igb.geom.getLine().front(), igb.geom.getLine().back()) ||
           util::geo::dist(iga.geom.getLine(), igb.geom.getLine()) < 1) {
+
         if (sameSeg) {
           ret += getCrossingPenaltySameSeg(n, pens);
         } else if (!unavoidable) {

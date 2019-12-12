@@ -14,14 +14,13 @@
 #include "util/graph/UndirGraph.h"
 #include "util/json/Writer.h"
 
-namespace transitmapper {
-namespace optim {
-
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
 using util::graph::UndirGraph;
 
+namespace transitmapper {
+namespace optim {
 
 struct OptNodePL;
 struct OptEdgePL;

@@ -111,3 +111,10 @@ bool TransitEdgePL::hasRoute(const Route* r) const {
 const RouteOcc& TransitEdgePL::getRouteOcc(const Route* r) const {
   return *_routes.find(RouteOcc(r, 0));
 }
+
+// _____________________________________________________________________________
+const RouteOcc& TransitEdgePL::routeOccAtPos(size_t i) const {
+  auto it = _routes.begin();
+  for (size_t j = 0; j < i; j++) it++;
+  return *it;
+}

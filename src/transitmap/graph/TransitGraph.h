@@ -16,7 +16,7 @@
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/OrderingConfig.h"
-#include "shared/transitgraph/Route.h"
+#include "transitmap/graph/Route.h"
 #include "transitmap/graph/Penalties.h"
 #include "util/geo/Geo.h"
 

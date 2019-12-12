@@ -2,24 +2,24 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "shared/transitgraph/Route.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderingConfig.h"
+#include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/OptGraph.h"
 
 #ifndef TRANSITMAP_OPTIM_OPTIMIZER_H_
 #define TRANSITMAP_OPTIM_OPTIMIZER_H_
 
-namespace transitmapper {
-namespace optim {
-
 using transitmapper::graph::OrderingConfig;
 using transitmapper::graph::HierarchOrderingConfig;
+using transitmapper::graph::Route;
 using transitmapper::graph::TransitGraph;
 using transitmapper::optim::OptNode;
 using transitmapper::optim::OptEdge;
-using shared::transitgraph::Route;
+
+namespace transitmapper {
+namespace optim {
 
 typedef std::pair<const Route*, const Route*> LinePair;
 typedef std::pair<size_t, size_t> PosCom;
@@ -33,7 +33,7 @@ class Optimizer {
 
   virtual int optimize(TransitGraph* tg) const;
   virtual int optimizeComp(const std::set<OptNode*>& g,
-                           HierarchOrderingConfig* c) const = 0;
+                       HierarchOrderingConfig* c) const = 0;
 
   static std::vector<LinePair> getLinePairs(OptEdge* segment);
   static std::vector<LinePair> getLinePairs(OptEdge* segment, bool unique);

@@ -421,3 +421,26 @@ std::vector<RouteOcc> TransitGraph::getCtdRoutesIn(const TransitEdge* fromEdge,
 
   return ret;
 }
+
+// _____________________________________________________________________________
+size_t TransitGraph::getLDeg(const TransitNode* nd) {
+  size_t ret = 0;
+  for (auto e : nd->getAdjList()) ret += e->pl().getRoutes().size();
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::getMaxLineNum(const TransitNode* nd) {
+  size_t ret = 0;
+  for (auto e : nd->getAdjList())
+    if (e->pl().getRoutes().size() > ret) ret = e->pl().getRoutes().size();
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::maxDeg() const {
+  size_t ret = 0;
+  for (auto nd : getNds())
+    if (nd->getDeg() > ret) ret = nd->getDeg();
+  return ret;
+}

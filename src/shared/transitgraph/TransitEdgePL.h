@@ -56,6 +56,7 @@ class TransitEdgePL : util::geograph::GeoEdgePL<double> {
   void delRoute(const Route* r);
 
   const RouteOcc& getRouteOcc(const Route* r) const;
+  const RouteOcc& routeOccAtPos(size_t i) const;
 
   const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;

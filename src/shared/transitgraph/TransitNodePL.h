@@ -10,8 +10,6 @@
 #include "util/geo/GeoGraph.h"
 #include "util/graph/Node.h"
 
-#include "transitmap/graph/Node.h"
-
 using util::geo::Point;
 using util::graph::Node;
 
@@ -25,7 +23,8 @@ typedef std::map<const Route*,
     ConnEx;
 
 struct Station {
-  Station(const std::string& id, const std::string& name, const util::geo::DPoint& pos)
+  Station(const std::string& id, const std::string& name,
+          const util::geo::DPoint& pos)
       : id(id), name(name), pos(pos) {}
   std::string id, name;
   util::geo::DPoint pos;
@@ -55,7 +54,7 @@ class TransitNodePL : util::geograph::GeoNodePL<double> {
                   const TransitEdge* edgeB);
 
   void delConnExc(const Route* r, const TransitEdge* edgeA,
-                                 const TransitEdge* edgeB);
+                  const TransitEdge* edgeB);
 
   bool connOccurs(const Route* r, const TransitEdge* edgeA,
                   const TransitEdge* edgeB) const;

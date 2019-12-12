@@ -7,7 +7,7 @@
 
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderingConfig.h"
-#include "shared/transitgraph/Route.h"
+#include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/NullOptimizer.h"
