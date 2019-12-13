@@ -26,23 +26,25 @@ int Optimizer::optimize(TransitGraph* tg) const {
              << " with max cardinality = " << maxC
              << " and solution space size = " << solSp;
 
-  if (_cfg->untangleGraph) {
-    // do full untangling
-    LOG(DEBUG) << "Untangling graph...";
-    T_START(1);
-    for (size_t i = 0; i < maxC; i++) {
-      g.untangle();
-      g.simplify();
-      g.split();
-    }
-    LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
-  } else if (_cfg->createCoreOptimGraph) {
-    // only apply core graph rules
-    T_START(1);
-    LOG(DEBUG) << "Creating core optimization graph...";
-    g.simplify();
-    LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
-  }
+  g.partnerLines();
+
+  // if (_cfg->untangleGraph) {
+    // // do full untangling
+    // LOG(DEBUG) << "Untangling graph...";
+    // T_START(1);
+    // for (size_t i = 0; i < maxC; i++) {
+      // g.untangle();
+      // g.simplify();
+      // g.split();
+    // }
+    // LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
+  // } else if (_cfg->createCoreOptimGraph) {
+    // // only apply core graph rules
+    // T_START(1);
+    // LOG(DEBUG) << "Creating core optimization graph...";
+    // g.simplify();
+    // LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
+  // }
 
   if (_cfg->outOptGraph) {
     util::geo::output::GeoGraphJsonOutput out;
@@ -145,17 +147,17 @@ int Optimizer::optimize(TransitGraph* tg) const {
 
 // _____________________________________________________________________________
 void Optimizer::expandRelatives(TransitGraph* g, OrderingConfig* c) {
-  std::set<std::pair<graph::Edge*, const Route*>> visited;
-  for (graph::Node* n : *g->getNds()) {
-    for (graph::Edge* e : n->getAdjListOut()) {
-      for (const auto& ra : *(e->getRoutes())) {
-        if (ra.route->relativeTo()) {
-          const Route* ref = ra.route->relativeTo();
-          expandRelativesFor(c, ref, e, e->getRoutesRelTo(ref), visited);
-        }
-      }
-    }
-  }
+  // std::set<std::pair<graph::Edge*, const Route*>> visited;
+  // for (graph::Node* n : *g->getNds()) {
+    // for (graph::Edge* e : n->getAdjListOut()) {
+      // for (const auto& ra : *(e->getRoutes())) {
+        // if (ra.relativeTo) {
+          // const Route* ref = ra.relativeTo();
+          // expandRelativesFor(c, ref, e, e->getRoutesRelTo(ref), visited);
+        // }
+      // }
+    // }
+  // }
 }
 
 // _____________________________________________________________________________
@@ -175,19 +177,19 @@ void Optimizer::expandRelativesFor(
       continue;
 
     for (auto r : rs) {
-      size_t index = cur.second->getRouteWithPos(ref).second;
+      size_t index = cur.second->getRoutePos(ref);
       auto it =
           std::find((*c)[cur.second].begin(), (*c)[cur.second].end(), index);
 
-      size_t p = cur.second->getRouteWithPos(r).second;
+      size_t p = cur.second->getRoutePos(r);
 
       assert(it != (*c)[cur.second].end());
 
       if (cur.first != 0 &&
           ((cur.first->getTo() == cur.second->getTo() ||
             cur.first->getFrom() == cur.second->getFrom()) ^
-           (cur.first->getRouteWithPosUnder(r, (*c)[cur.first]).second >
-            cur.first->getRouteWithPosUnder(ref, (*c)[cur.first]).second))) {
+           (cur.first->getRoutePosUnder(r, (*c)[cur.first]) >
+            cur.first->getRoutePosUnder(ref, (*c)[cur.first])))) {
         (*c)[cur.second].insert(it + 1, p);
       } else {
         (*c)[cur.second].insert(it, p);
@@ -229,11 +231,11 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
   std::set<const Route*> processed;
   std::vector<LinePair> ret;
   for (auto& toA : segment->pl().getRoutes()) {
-    if (toA.route->relativeTo()) continue;
+    if (toA.relativeTo) continue;
     processed.insert(toA.route);
     for (auto& toB : segment->pl().getRoutes()) {
       if (unique && processed.count(toB.route)) continue;
-      if (toB.route->relativeTo()) continue;
+      if (toB.relativeTo) continue;
       if (toA.route == toB.route) continue;
 
       // this is to make sure that we always get the same line pairs in unique

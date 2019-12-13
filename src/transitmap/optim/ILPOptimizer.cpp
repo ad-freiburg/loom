@@ -115,12 +115,14 @@ void ILPOptimizer::getConfigurationFromSolution(
       if (e->getFrom() != n) continue;
       for (auto etgp : e->pl().etgs) {
         if (etgp.wasCut) continue;
-        for (size_t tp = 0; tp < etgp.etg->getCardinality(true); tp++) {
+        for (size_t tp = 0; tp < e->pl().getCardinality(); tp++) {
           bool found = false;
-          for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
-            auto r = (*etgp.etg->getRoutes())[p];
-            if (r.route->relativeTo()) continue;
-            std::string varName = getILPVarName(e, r.route, tp);
+          for (auto ro : e->pl().getRoutes()) {
+            // retrieve the original route pos
+            size_t p = etgp.etg->getRoutePos(ro.route);
+
+            if (ro.relativeTo) continue;
+            std::string varName = getILPVarName(e, ro.route, tp);
 
             size_t i = glp_find_col(lp, varName.c_str());
             assert(i > 0);
@@ -173,7 +175,9 @@ glp_prob* ILPOptimizer::createProblem(const std::set<OptNode*>& g) const {
       }
 
       for (auto r : e->pl().getRoutes()) {
-        if (r.route->relativeTo()) continue;
+        if (r.relativeTo) continue;
+        // if (r.route->relativeTo()) continue;
+
         // constraint: the sum of all x_slp over p must be 1 for equal sl
         size_t row = glp_add_rows(lp, 1);
         std::stringstream varName;

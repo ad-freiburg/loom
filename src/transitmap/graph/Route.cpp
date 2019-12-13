@@ -23,16 +23,6 @@ const std::string& Route::getColor() const {
 }
 
 // _____________________________________________________________________________
-void Route::setRelativeTo(const Route* r) {
-  _orderRelativeTo = r;
-}
-
-// _____________________________________________________________________________
-const Route* Route::relativeTo() const {
-   return _orderRelativeTo;
-}
-
-// _____________________________________________________________________________
 size_t Route::getNumCollapsedPartners() const {
 	return _numPartners;
 }

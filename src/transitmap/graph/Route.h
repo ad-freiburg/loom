@@ -21,7 +21,7 @@ class Route {
   const std::string& getColor() const;
 
   void setRelativeTo(const Route* r);
-  const Route* relativeTo() const;
+  // const Route* relativeTo() const;
 
   size_t getNumCollapsedPartners() const;
   void setNumCollapsedPartners(size_t n);

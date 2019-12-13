@@ -99,7 +99,7 @@ void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
       (*cfg)[e] = std::vector<const graph::Route*>(e->pl().getCardinality());
       size_t p = 0;
       for (size_t i = 0; i < e->pl().getRoutes().size(); i++) {
-        if (e->pl().getRoutes()[i].route->relativeTo()) continue;
+        if (e->pl().getRoutes()[i].relativeTo) continue;
         (*cfg)[e][p] = e->pl().getRoutes()[i].route;
         p++;
       }
@@ -130,7 +130,7 @@ void ExhaustiveOptimizer::writeHierarch(OptOrderingConfig* cfg,
                         ro) == e->pl().getRoutes().end())
             continue;
 
-          if (ro.route->relativeTo()) continue;
+          // if (ro.route->relativeTo()) continue;
 
           if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
             (*hc)[etgp.etg][etgp.order].insert(

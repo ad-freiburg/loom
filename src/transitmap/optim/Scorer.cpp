@@ -192,10 +192,10 @@ double Scorer::getSeparationScore(const Node* n, const OrderingConfig& c,
 
         if (f->containsRoute(p.first) && f->containsRoute(p.second) &&
             n->connOccurs(p.first, e, f) && n->connOccurs(p.second, e, f)) {
-          if (abs(int(f->getRouteWithPosUnder(p.first, c.find(f)->second)
-                          .second) -
-                  int(f->getRouteWithPosUnder(p.second, c.find(f)->second)
-                          .second)) > 1) {
+          if (abs(int(f->getRoutePosUnder(p.first, c.find(f)->second)
+                          ) -
+                  int(f->getRoutePosUnder(p.second, c.find(f)->second)
+                          )) > 1) {
             ret += getSplittingPenalty(n, pens);
           }
         }

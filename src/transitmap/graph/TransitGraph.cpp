@@ -27,8 +27,6 @@ TransitGraph::TransitGraph()
 
 // _____________________________________________________________________________
 TransitGraph::~TransitGraph() {
-  // an edge is _deleted_ if either the from or to node is deleted!
-  // thus, we don't have to delete edges separately here
   for (auto n : _nodes) {
     delete n;
   }

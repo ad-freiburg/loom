@@ -33,7 +33,7 @@ class Optimizer {
 
   virtual int optimize(TransitGraph* tg) const;
   virtual int optimizeComp(const std::set<OptNode*>& g,
-                       HierarchOrderingConfig* c) const = 0;
+                           HierarchOrderingConfig* c) const = 0;
 
   static std::vector<LinePair> getLinePairs(OptEdge* segment);
   static std::vector<LinePair> getLinePairs(OptEdge* segment, bool unique);
@@ -55,13 +55,13 @@ class Optimizer {
   static double solutionSpaceSize(const std::set<OptNode*>& g);
   static double numEdges(const std::set<OptNode*>& g);
 
- protected:
   static void expandRelatives(TransitGraph* g, OrderingConfig* c);
   static void expandRelativesFor(
       OrderingConfig* c, const Route* ref, graph::Edge* start,
       const std::set<const Route*>& rs,
       std::set<std::pair<graph::Edge*, const Route*>>& visited);
 
+ protected:
   const config::Config* _cfg;
   const Scorer* _scorer;
 };

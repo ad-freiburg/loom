@@ -19,15 +19,11 @@ int NullOptimizer::optimizeComp(const std::set<OptNode*>& g,
       assert(e->pl().getCardinality() == 1);
       for (auto etgp : e->pl().etgs) {
         if (etgp.wasCut) continue;
-        for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
-          auto ro = (*etgp.etg->getRoutes())[p];
+        for (auto ro : e->pl().getRoutes()) {
+          // retrieve the original route pos
+          size_t p = etgp.etg->getRoutePos(ro.route);
 
-          if (std::find(e->pl().getRoutes().begin(),
-                        e->pl().getRoutes().end(),
-                        ro) == e->pl().getRoutes().end())
-            continue;
-
-          if (ro.route->relativeTo()) continue;
+          if (ro.relativeTo) continue;
 
           assert((*hc)[etgp.etg][etgp.order].size() == 0);
           (*hc)[etgp.etg][etgp.order].push_back(p);

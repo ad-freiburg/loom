@@ -6,7 +6,6 @@
 #define TRANSITMAP_GRAPH_EDGE_H_
 
 #include <vector>
-#include "Edge.h"
 #include "Node.h"
 #include "Route.h"
 #include "transitmap/style/LineStyle.h"
@@ -60,14 +59,12 @@ class Edge {
   const std::vector<RouteOccurance>& getRoutes() const;
   std::vector<RouteOccurance>* getRoutes();
 
-  RouteOccWithPos getRouteWithPosUnder(
-      const Route* r, const std::vector<size_t> ordering) const;
+  size_t getRoutePosUnder(const Route* r,
+                          const std::vector<size_t> ordering) const;
 
-  RouteOccWithPos getRouteWithPos(const Route* r) const;
+  size_t getRoutePos(const Route* r) const;
 
   RouteOccurance* getRoute(const Route* r) const;
-
-  std::set<const Route*> getRoutesRelTo(const Route* ref) const;
 
   std::vector<RouteOccurance> getCtdRoutesIn(const Node* n, const Route* r,
                                              const Node* dir,

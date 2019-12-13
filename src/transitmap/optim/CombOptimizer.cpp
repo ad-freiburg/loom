@@ -28,13 +28,13 @@ int CombOptimizer::optimizeComp(const std::set<OptNode*>& g,
   double solSp = solutionSpaceSize(g);
 
   if (maxC == 1) {
-    LOG(DEBUG) << "(Null optimizer)";
+    LOG(INFO) << "(Null optimizer)";
     _nullOpt.optimizeComp(g, hc);
   } else if (solSp < 10) {
-    LOG(DEBUG) << "(Exhaustive optimizer)";
+    LOG(INFO) << "(Exhaustive optimizer)";
     _exhausOpt.optimizeComp(g, hc);
   } else {
-    LOG(DEBUG) << "(ILP optimizer)";
+    LOG(INFO) << "(ILP optimizer)";
     _ilpOpt.optimizeComp(g, hc);
   }
 

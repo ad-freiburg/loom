@@ -29,22 +29,19 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
         if (etgp.wasCut) continue;
         for (size_t tp = 0; tp < e->pl().getCardinality(); tp++) {
           bool found = false;
-          for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
-            auto r = (*etgp.etg->getRoutes())[p];
 
-            if (std::find(e->pl().getRoutes().begin(),
-                          e->pl().getRoutes().end(),
-                          r) == e->pl().getRoutes().end())
-              continue;
+          for (auto ro : e->pl().getRoutes()) {
+            // retrieve the original route pos
+            size_t p = etgp.etg->getRoutePos(ro.route);
 
-            if (r.route->relativeTo()) continue;
+            if (ro.relativeTo) continue;
 
             // check if this route (r) switches from 0 to 1 at tp-1 and tp
             double valPrev = 0;
             std::stringstream varName;
 
             if (tp > 0) {
-              varName << "x_(" << e->pl().getStrRepr() << ",l=" << r.route
+              varName << "x_(" << e->pl().getStrRepr() << ",l=" << ro.route
                       << ",p<=" << tp - 1 << ")";
 
               size_t i = glp_find_col(lp, varName.str().c_str());
@@ -53,7 +50,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
             }
 
             varName.str("");
-            varName << "x_(" << e->pl().getStrRepr() << ",l=" << r.route
+            varName << "x_(" << e->pl().getStrRepr() << ",l=" << ro.route
                     << ",p<=" << tp << ")";
 
             size_t i = glp_find_col(lp, varName.str().c_str());
@@ -109,7 +106,8 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(
       }
 
       for (auto r : e->pl().getRoutes()) {
-        if (r.route->relativeTo()) continue;
+        if (r.relativeTo) continue;
+        // if (r.route->relativeTo()) continue;
         for (size_t p = 0; p < e->pl().getCardinality(); p++) {
           std::stringstream varName;
           varName << "x_(" << e->pl().getStrRepr() << ",l=" << r.route

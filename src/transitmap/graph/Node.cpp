@@ -41,17 +41,10 @@ DPoint NodeFront::getTripOccPos(const Route* r, const OrderingConfig& c) const {
 // _____________________________________________________________________________
 DPoint NodeFront::getTripOccPos(const Route* r, const OrderingConfig& c,
                                 bool origGeom) const {
-  RouteOccWithPos rop;
-
   assert(c.find(edge) != c.end());
 
-  rop = edge->getRouteWithPosUnder(r, c.find(edge)->second);
-
-  if (rop.first) {
-    return getTripPos(edge, rop.second, n == edge->getTo(), origGeom);
-  }
-
-  throw std::runtime_error("route does not occur in this edge");
+  size_t p = edge->getRoutePosUnder(r, c.find(edge)->second);
+  return getTripPos(edge, p, n == edge->getTo(), origGeom);
 }
 
 // _____________________________________________________________________________
@@ -303,13 +296,13 @@ InnerGeometry Node::getTerminusStraightLine(const OrderingConfig& c,
   DPoint pp = partnerFrom.front->getTripOccPos(partnerFrom.route, c, true);
 
   size_t s = partnerFrom.edge
-                 ->getRouteWithPosUnder(partnerFrom.route,
+                 ->getRoutePosUnder(partnerFrom.route,
                                         c.find(partnerFrom.edge)->second)
-                 .second;
+                 ;
   size_t ss = partnerFrom.edge
-                  ->getRouteWithPosUnder(partnerFrom.route,
+                  ->getRoutePosUnder(partnerFrom.route,
                                          c.find(partnerFrom.edge)->second)
-                  .second;
+                  ;
 
   return InnerGeometry(PolyLine<double>(p, pp), partnerFrom, Partner(), s, ss);
 }
@@ -322,13 +315,13 @@ InnerGeometry Node::getInnerStraightLine(const OrderingConfig& c,
   DPoint pp = partnerTo.front->getTripOccPos(partnerTo.route, c);
 
   size_t s = partnerFrom.edge
-                 ->getRouteWithPosUnder(partnerFrom.route,
+                 ->getRoutePosUnder(partnerFrom.route,
                                         c.find(partnerFrom.edge)->second)
-                 .second;
+                 ;
   size_t ss = partnerTo.edge
-                  ->getRouteWithPosUnder(partnerTo.route,
+                  ->getRoutePosUnder(partnerTo.route,
                                          c.find(partnerTo.edge)->second)
-                  .second;
+                  ;
 
   return InnerGeometry(PolyLine<double>(p, pp), partnerFrom, partnerTo, s, ss);
 }

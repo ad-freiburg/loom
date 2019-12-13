@@ -32,9 +32,13 @@ typedef std::map<const transitmapper::optim::OptEdge*, std::vector<const graph::
     OptOrderingConfig;
 
 struct OptRO {
-  OptRO(const graph::Route* r, const Node* dir) : route(r), direction(dir) {}
+  OptRO(const graph::Route* r, const Node* dir) : route(r), direction(dir), relativeTo(0) {}
   const graph::Route* route;
   const Node* direction;  // 0 if in both directions
+
+  const graph::Route* relativeTo;
+
+  std::vector<const graph::Route*> relatives;
 
   bool operator==(const OptRO& b) const {
     return b.route == route;
@@ -49,7 +53,7 @@ struct EtgPart {
   bool dir;
   size_t order;
 
-  // there is another edge with determines the
+  // there is another edge which determines the
   // ordering in this edge - important to prevent double
   // writing of ordering later on
   bool wasCut;
@@ -73,6 +77,7 @@ struct OptEdgePL {
 
   size_t getCardinality() const;
   std::string toStr() const;
+  std::vector<OptRO>& getRoutes();
   const std::vector<OptRO>& getRoutes() const;
 
   // partial routes
@@ -120,6 +125,10 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   void simplify();
   void untangle();
+  void partnerLines();
+
+std::map<const graph::Route*, std::set<const graph::Route*>> getPartnerRoutes(
+) const;
 
   static graph::Edge* getAdjEdg(const OptEdge* e, const OptNode* n);
   static EtgPart getAdjEtgp(const OptEdge* e, const OptNode* n);

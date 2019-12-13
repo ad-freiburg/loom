@@ -2,14 +2,21 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include <set>
 #include "transitmap/optim/OptGraph.h"
 #include "util/String.h"
 #include "util/graph/Algorithm.h"
 #include "util/log/Log.h"
 
-using namespace transitmapper;
-using namespace optim;
+using transitmapper::optim::OptGraph;
+using transitmapper::optim::OptEdge;
+using transitmapper::optim::OptNode;
+using transitmapper::optim::EtgPart;
+using transitmapper::optim::OptEdgePL;
+using transitmapper::optim::OptNodePL;
+using transitmapper::optim::OptRO;
 using transitmapper::graph::RouteOccurance;
+using transitmapper::graph::Route;
 
 // _____________________________________________________________________________
 void OptGraph::upFirstLastEdg(OptEdge* optEdg) {
@@ -48,11 +55,14 @@ EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) {
 const std::vector<OptRO>& OptEdgePL::getRoutes() const { return routes; }
 
 // _____________________________________________________________________________
+std::vector<OptRO>& OptEdgePL::getRoutes() { return routes; }
+
+// _____________________________________________________________________________
 size_t OptEdgePL::getCardinality() const {
   size_t ret = 0;
 
   for (const auto& ro : getRoutes()) {
-    if (ro.route->relativeTo() == 0) ret++;
+    if (ro.relativeTo == 0) ret++;
   }
 
   return ret;
@@ -172,6 +182,87 @@ void OptGraph::split() {
     updateEdgeOrder(eFrom);
     updateEdgeOrder(eTo);
   }
+}
+
+// _____________________________________________________________________________
+void OptGraph::partnerLines() {
+  auto partners = getPartnerRoutes();
+
+  for (const auto& p : partners) {
+    if (p.second.size() == 0) continue;
+
+    for (auto n : *getNds()) {
+      for (auto e : n->getAdjList()) {
+        if (e->getFrom() != n) continue;
+
+        for (auto& ro : e->pl().getRoutes()) {
+          if (ro.route == p.first) {
+            ro.relatives.insert(ro.relatives.begin(), p.second.begin(), p.second.end());
+          } else {
+            if (p.second.count(ro.route)) {
+              ro.relativeTo = p.first;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
+std::map<const Route*, std::set<const Route*>> OptGraph::getPartnerRoutes(
+) const {
+  std::map<const Route*, std::set<const Route*>> partners;
+
+  for (auto n : getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+
+      for (const auto& ra : e->pl().getRoutes()) {
+        std::set<const Route*> partnersHere;
+
+        for (const auto& rb : e->pl().getRoutes()) {
+          if (ra.direction == rb.direction) {
+            partnersHere.insert(rb.route);
+          }
+        }
+
+        if (partners.find(ra.route) == partners.end()) {
+          partners[ra.route] = partnersHere;
+        } else {
+          std::set<const Route*> interSect;
+          std::set_intersection(partners[ra.route].begin(),
+                                partners[ra.route].end(), partnersHere.begin(),
+                                partnersHere.end(),
+                                std::inserter(interSect, interSect.begin()));
+          partners[ra.route] = interSect;
+        }
+      }
+    }
+  }
+
+  std::map<const Route*, std::set<const Route*>> ret;
+  std::set<const Route*> proced;
+  for (const auto& p : partners) {
+    if (proced.count(p.first)) continue;
+    std::set<const Route*> realPartners;
+    for (const auto& pp : p.second) {
+      if (p.first != pp && partners[pp].find(p.first) != partners[pp].end()) {
+        LOG(INFO) << "Combining " << pp << "(" << pp->getLabel() << ","
+                  << pp->getColor() << ")"
+                  << " and " << p.first << " (" << p.first->getLabel() << ","
+                  << p.first->getColor() << ").";
+        proced.insert(pp);
+        realPartners.insert(pp);
+      }
+    }
+
+    ret[p.first] = realPartners;
+  }
+
+  std::cout << ret.size() << std::endl;
+
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -334,7 +425,6 @@ size_t OptGraph::getNumRoutes() const {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       for (const auto& to : *getFirstEdg(e).etg->getRoutes()) {
-        if (to.route->relativeTo()) continue;
         routes.insert(to.route);
       }
     }
@@ -367,13 +457,16 @@ util::json::Dict OptEdgePL::getAttrs() {
   std::string lines;
 
   for (const auto& r : getRoutes()) {
-    if (r.route->relativeTo())
-      lines += "(" + r.route->relativeTo()->getLabel() + "+" +
+    if (r.relativeTo)
+      lines += "(" + r.relativeTo->getLabel() + "+" +
                r.route->getLabel() + "[" + r.route->getColor() + ", -> " +
-               util::toString(r.direction) + "), ";
+               util::toString(r.direction) + "]), ";
+    else if (r.relatives.size() > 0)
+      lines += r.route->getLabel() + "(x" + util::toString(r.relatives.size()) + ")" + "[" + r.route->getColor() + ", -> " +
+               util::toString(r.direction) + "], ";
     else
       lines += r.route->getLabel() + "[" + r.route->getColor() + ", -> " +
-               util::toString(r.direction) + "), ";
+               util::toString(r.direction) + "], ";
   }
 
   ret["lines"] = lines;
@@ -387,13 +480,16 @@ util::json::Dict OptEdgePL::getAttrs() {
 std::string OptEdgePL::toStr() const {
   std::string lines;
   for (const auto& r : getRoutes()) {
-    if (r.route->relativeTo())
-      lines += "(" + r.route->relativeTo()->getLabel() + "+" +
+    if (r.relativeTo)
+      lines += "(" + r.relativeTo->getLabel() + "+" +
                r.route->getLabel() + "[" + r.route->getColor() + ", -> " +
-               util::toString(r.direction) + "), ";
+               util::toString(r.direction) + "]), ";
+    else if (r.relatives.size() > 0)
+      lines += r.route->getLabel() + "(x" + util::toString(r.relatives.size()) + ")" + "[" + r.route->getColor() + ", -> " +
+               util::toString(r.direction) + "], ";
     else
       lines += r.route->getLabel() + "[" + r.route->getColor() + ", -> " +
-               util::toString(r.direction) + "), ";
+               util::toString(r.direction) + "], ";
   }
 
   return "[" + lines + "]";
@@ -460,7 +556,7 @@ bool OptGraph::untangleFullCross() {
   for (OptNode* n : *getNds()) {
     std::pair<OptEdge*, OptEdge*> cross;
     if ((cross = isFullCross(n)).first) {
-      LOG(DEBUG) << "Found full cross at node " << n << " between "
+      LOG(INFO) << "Found full cross at node " << n << " between "
                  << cross.first << "(" << cross.first->pl().toStr() << ") and "
                  << cross.second << " (" << cross.second->pl().toStr() << ")";
 
@@ -527,7 +623,7 @@ bool OptGraph::untanglePartialYStep() {
       assert(nb->pl().node);
       assert(na->pl().node);
 
-      LOG(DEBUG) << "Found partial Y at node " << nb << " with main leg " << ea
+      LOG(INFO) << "Found partial Y at node " << nb << " with main leg " << ea
                  << " (" << ea->pl().toStr() << ")";
 
       // the geometry of the main leg
@@ -617,7 +713,7 @@ bool OptGraph::untangleStumpStep() {
         stumpN = sharedNode(mainLeg, stumpEdg);
         OptNode* notStumpN = mainLeg->getOtherNd(stumpN);
 
-        LOG(DEBUG) << "Found stump with main leg " << mainLeg << " ("
+        LOG(INFO) << "Found stump with main leg " << mainLeg << " ("
                    << mainLeg->pl().toStr() << ") at node " << stumpN
                    << " with main stump branch " << stumpEdg << " ("
                    << stumpEdg->pl().toStr() << ")";
@@ -693,7 +789,7 @@ bool OptGraph::untangleYStep() {
       assert(nb->pl().node);
       assert(na->pl().node);
 
-      LOG(DEBUG) << "Found full Y at node " << nb << " with main leg " << ea
+      LOG(INFO) << "Found full Y at node " << nb << " with main leg " << ea
                  << " (" << ea->pl().toStr() << ")";
 
       // the geometry of the main leg

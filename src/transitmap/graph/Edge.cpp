@@ -67,19 +67,6 @@ std::vector<RouteOccurance> Edge::getCtdRoutesIn(const Node* n, const Route* r,
 }
 
 // _____________________________________________________________________________
-std::set<const Route*> Edge::getRoutesRelTo(const Route* ref) const {
-  std::set<const Route*> ret;
-
-  for (const RouteOccurance& to : _routes) {
-    if (to.route->relativeTo() == ref) {
-      ret.insert(to.route);
-    }
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
 RouteOccurance* Edge::getRoute(const Route* r) const {
   for (size_t i = 0; i < _routes.size(); i++) {
     RouteOccurance* to = const_cast<RouteOccurance*>(&_routes[i]);
@@ -91,30 +78,26 @@ RouteOccurance* Edge::getRoute(const Route* r) const {
 }
 
 // _____________________________________________________________________________
-RouteOccWithPos Edge::getRouteWithPosUnder(
+size_t Edge::getRoutePosUnder(
     const Route* r, const std::vector<size_t> ordering) const {
   for (size_t i = 0; i < _routes.size(); i++) {
     const RouteOccurance& to = _routes[i];
     if (to.route == r) {
       size_t pos =
           std::find(ordering.begin(), ordering.end(), i) - ordering.begin();
-      return std::pair<RouteOccurance*, size_t>(
-          const_cast<RouteOccurance*>(&to), pos);
+      return pos;
     }
   }
-  return std::pair<RouteOccurance*, size_t>(0, 0);
+  return -1;
 }
 
 // _____________________________________________________________________________
-RouteOccWithPos Edge::getRouteWithPos(const Route* r) const {
+size_t Edge::getRoutePos(const Route* r) const {
   for (size_t i = 0; i < _routes.size(); i++) {
     const RouteOccurance& to = _routes[i];
-    if (to.route == r) {
-      return std::pair<RouteOccurance*, size_t>(
-          const_cast<RouteOccurance*>(&to), i);
-    }
+    if (to.route == r) return i;
   }
-  return std::pair<RouteOccurance*, size_t>(0, 0);
+  return -1;
 }
 
 // _____________________________________________________________________________
@@ -137,15 +120,7 @@ size_t Edge::getCardinality() const { return _routes.size(); }
 
 // _____________________________________________________________________________
 size_t Edge::getCardinality(bool woRelatives) const {
-  if (!woRelatives) return getCardinality();
-
-  size_t ret = 0;
-
-  for (const auto& ro : _routes) {
-    if (ro.route->relativeTo() == 0) ret++;
-  }
-
-  return ret;
+  return _routes.size();
 }
 
 // _____________________________________________________________________________

@@ -46,10 +46,6 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
-  if (cfg.collapseLinePartners) {
-    b.combinePartnerRoutes(&g);
-  }
-
   LOG(INFO) << "Creating node fronts...";
   b.writeMainDirs(&g);
 
