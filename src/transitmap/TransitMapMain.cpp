@@ -104,27 +104,27 @@ int main(int argc, char** argv) {
 
   if (!cfg.noOptim) {
     if (cfg.optimMethod == "ilp_impr") {
-      LOG(DEBUG) << "(ILP impr optimizer)";
+      LOG(INFO) << "(ILP impr optimizer)";
       optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, &scorer);
       ilpEoOptim.optimize(&g);
     } else if (cfg.optimMethod == "ilp") {
-      LOG(DEBUG) << "(ILP optimizer)";
+      LOG(INFO) << "(ILP optimizer)";
       optim::ILPOptimizer ilpOptim(&cfg, &scorer);
       ilpOptim.optimize(&g);
     } else if (cfg.optimMethod == "comb") {
-      LOG(DEBUG) << "(Comb optimizer)";
+      LOG(INFO) << "(Comb optimizer)";
       optim::CombOptimizer ilpCombiOptim(&cfg, &scorer);
       ilpCombiOptim.optimize(&g);
     } else if (cfg.optimMethod == "exhaust") {
-      LOG(DEBUG) << "(Exhaustive optimizer)";
+      LOG(INFO) << "(Exhaustive optimizer)";
       optim::ExhaustiveOptimizer exhausOptim(&cfg, &scorer);
       exhausOptim.optimize(&g);
     } else if (cfg.optimMethod == "hillc") {
-      LOG(DEBUG) << "(Hillclimbing optimizer)";
+      LOG(INFO) << "(Hillclimbing optimizer)";
       optim::HillClimbOptimizer hillcOptim(&cfg, &scorer);
       hillcOptim.optimize(&g);
     } else if (cfg.optimMethod == "anneal") {
-      LOG(DEBUG) << "(Simulated annealing optimizer)";
+      LOG(INFO) << "(Simulated annealing optimizer)";
       optim::SimulatedAnnealingOptimizer annealOptim(&cfg, &scorer);
       annealOptim.optimize(&g);
     }

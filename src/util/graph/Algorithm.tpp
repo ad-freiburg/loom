@@ -1,11 +1,18 @@
 // Copyright 2017, University of Freiburg,
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
+//
+// _____________________________________________________________________________
+template <typename N, typename E>
+std::vector<std::set<Node<N, E>*>> Algorithm::connectedComponents(
+    const UndirGraph<N, E>& g) {
+  return connectedComponents(g, EdgeCheckFunc<N, E>());
+}
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-std::vector<std::set<Node<N, E>*> > Algorithm::connectedComponents(
-    const UndirGraph<N, E>& g) {
+std::vector<std::set<Node<N, E>*>> Algorithm::connectedComponents(
+    const UndirGraph<N, E>& g, const EdgeCheckFunc<N, E>& checkFunc) {
   std::vector<std::set<Node<N, E>*>> ret;
   std::set<Node<N, E>*> visited;
 
@@ -22,6 +29,7 @@ std::vector<std::set<Node<N, E>*> > Algorithm::connectedComponents(
         visited.insert(cur);
 
         for (auto* e : cur->getAdjList()) {
+          if (!checkFunc(cur, e)) continue;
           if (!visited.count(e->getOtherNd(cur))) q.push(e->getOtherNd(cur));
         }
       }

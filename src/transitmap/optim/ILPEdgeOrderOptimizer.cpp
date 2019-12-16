@@ -31,9 +31,6 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
           bool found = false;
 
           for (auto ro : e->pl().getRoutes()) {
-            // retrieve the original route pos
-            size_t p = etgp.etg->getRoutePos(ro.route);
-
             if (ro.relativeTo) continue;
 
             // check if this route (r) switches from 0 to 1 at tp-1 and tp
@@ -62,12 +59,18 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
               // TODO: the latter dir is checking the 'main' direction here,
               // put this into a method in the pl()! (there, the [0] etg is
               // already taken as a ref). THIS IS A POTENTIAL BUG HERE
-              if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
-                (*hc)[etgp.etg][etgp.order].insert(
-                    (*hc)[etgp.etg][etgp.order].begin(), p);
-              } else {
-                (*hc)[etgp.etg][etgp.order].push_back(p);
+
+              for (auto rel : ro.relatives) {
+                // retrieve the original route pos
+                size_t p = etgp.etg->getRoutePos(rel);
+
+                if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
+                  (*hc)[etgp.etg][etgp.order].insert((*hc)[etgp.etg][etgp.order].begin(), p);
+                } else {
+                  (*hc)[etgp.etg][etgp.order].push_back(p);
+                }
               }
+
               assert(!found);  // should be assured by ILP constraints
               found = true;
             }

@@ -118,9 +118,6 @@ void ILPOptimizer::getConfigurationFromSolution(
         for (size_t tp = 0; tp < e->pl().getCardinality(); tp++) {
           bool found = false;
           for (auto ro : e->pl().getRoutes()) {
-            // retrieve the original route pos
-            size_t p = etgp.etg->getRoutePos(ro.route);
-
             if (ro.relativeTo) continue;
             std::string varName = getILPVarName(e, ro.route, tp);
 
@@ -129,11 +126,18 @@ void ILPOptimizer::getConfigurationFromSolution(
             double val = glp_mip_col_val(lp, i);
 
             if (val > 0.5) {
-              if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
-                (*hc)[etgp.etg][etgp.order].insert((*hc)[etgp.etg][etgp.order].begin(), p);
-              } else {
-                (*hc)[etgp.etg][etgp.order].push_back(p);
+
+              for (auto rel : ro.relatives) {
+                // retrieve the original route pos
+                size_t p = etgp.etg->getRoutePos(rel);
+
+                if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
+                  (*hc)[etgp.etg][etgp.order].insert((*hc)[etgp.etg][etgp.order].begin(), p);
+                } else {
+                  (*hc)[etgp.etg][etgp.order].push_back(p);
+                }
               }
+
               assert(!found);  // should be assured by ILP constraints
               found = true;
             }

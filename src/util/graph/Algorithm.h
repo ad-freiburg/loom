@@ -7,8 +7,8 @@
 
 #include <stack>
 #include "util/graph/Edge.h"
-#include "util/graph/UndirGraph.h"
 #include "util/graph/Node.h"
+#include "util/graph/UndirGraph.h"
 
 namespace util {
 namespace graph {
@@ -21,12 +21,23 @@ using util::graph::Edge;
 class Algorithm {
  public:
   template <typename N, typename E>
+  struct EdgeCheckFunc {
+    virtual bool operator()(const Node<N, E>* frNd,
+                            const Edge<N, E>* edge) const {
+      return true;
+    };
+  };
+
+  template <typename N, typename E>
   static std::vector<std::set<Node<N, E>*> > connectedComponents(
       const UndirGraph<N, E>& g);
+
+  template <typename N, typename E>
+  static std::vector<std::set<Node<N, E>*> > connectedComponents(
+      const UndirGraph<N, E>& g, const EdgeCheckFunc<N, E>& checkFunc);
 };
 
 #include "util/graph/Algorithm.tpp"
-
 }
 }
 

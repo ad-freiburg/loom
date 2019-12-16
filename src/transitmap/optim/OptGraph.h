@@ -13,6 +13,7 @@
 #include "transitmap/optim/Scorer.h"
 #include "util/graph/UndirGraph.h"
 #include "util/json/Writer.h"
+#include "util/Misc.h"
 
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
@@ -32,7 +33,8 @@ typedef std::map<const transitmapper::optim::OptEdge*, std::vector<const graph::
     OptOrderingConfig;
 
 struct OptRO {
-  OptRO(const graph::Route* r, const Node* dir) : route(r), direction(dir), relativeTo(0) {}
+  OptRO() : route(0), direction(0), relativeTo(0) {}
+  OptRO(const graph::Route* r, const Node* dir) : route(r), direction(dir), relativeTo(0) {relatives.push_back(r);}
   const graph::Route* route;
   const Node* direction;  // 0 if in both directions
 
@@ -43,9 +45,21 @@ struct OptRO {
   bool operator==(const OptRO& b) const {
     return b.route == route;
   }
+  bool operator<(const OptRO& b) const {
+    return b.route < route;
+  }
+  bool operator>(const OptRO& b) const {
+    return b.route > route;
+  }
   bool operator==(const graph::RouteOccurance& b) const {
     return b.route == route;
   }
+};
+
+struct PartnerPath {
+  std::set<OptRO> partners;
+  std::vector<OptEdge*> path;
+  std::vector<bool> inv;
 };
 
 struct EtgPart {
@@ -127,8 +141,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   void untangle();
   void partnerLines();
 
-std::map<const graph::Route*, std::set<const graph::Route*>> getPartnerRoutes(
-) const;
+  std::vector<PartnerPath> getPartnerRoutes() const;
+  PartnerPath pathFromComp(const std::set<OptNode*>& comp) const;
 
   static graph::Edge* getAdjEdg(const OptEdge* e, const OptNode* n);
   static EtgPart getAdjEtgp(const OptEdge* e, const OptNode* n);
@@ -181,6 +195,8 @@ std::map<const graph::Route*, std::set<const graph::Route*>> getPartnerRoutes(
   OptEdge* isStump(OptEdge* e) const;
   OptEdge* isStumpAt(OptEdge* e, OptNode* n) const;
 
+  std::set<const graph::Route*> getRoutes() const;
+
   bool isDogBone(OptEdge* e) const;
   OptNode* isPartialDogBone(OptEdge* e) const;
 
@@ -206,6 +222,8 @@ std::map<const graph::Route*, std::set<const graph::Route*>> getPartnerRoutes(
       const OptEdge* fromEdge, const OptEdge* toEdge);
 
   static OptNode* sharedNode(const OptEdge* a, const OptEdge* b);
+
+  static Nullable<const OptRO> getRO(const OptEdge* a, const graph::Route*);
 
   static std::vector<OptEdge*> clockwEdges(OptEdge* noon, OptNode* n);
   static std::vector<OptEdge*> partialClockwEdges(OptEdge* noon, OptNode* n);

@@ -121,17 +121,12 @@ void ExhaustiveOptimizer::writeHierarch(OptOrderingConfig* cfg,
 
     for (auto etgp : e->pl().etgs) {
       if (etgp.wasCut) continue;
-      for (auto r : ep.second) {
-        for (size_t p = 0; p < etgp.etg->getCardinality(); p++) {
-          auto ro = (*etgp.etg->getRoutes())[p];
-          if (!(r == ro.route)) continue;
+      for (auto ro : e->pl().getRoutes()) {
+        if (ro.relativeTo) continue;
 
-          if (std::find(e->pl().getRoutes().begin(), e->pl().getRoutes().end(),
-                        ro) == e->pl().getRoutes().end())
-            continue;
-
-          // if (ro.route->relativeTo()) continue;
-
+        for (auto rel : ro.relatives) {
+          // retrieve the original route pos
+          size_t p = etgp.etg->getRoutePos(rel);
           if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
             (*hc)[etgp.etg][etgp.order].insert(
                 (*hc)[etgp.etg][etgp.order].begin(), p);
