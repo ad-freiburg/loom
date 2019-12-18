@@ -122,6 +122,7 @@ void ExhaustiveOptimizer::writeHierarch(OptOrderingConfig* cfg,
       if (etgp.wasCut) continue;
       for (auto r : ep.second) {
         // get the corresponding route occurance in the opt graph edge
+        // TODO: replace this as soon as a lookup function is present in OptRO
         OptRO optRO;
         for (auto ro : e->pl().getRoutes()) {
           if (r == ro.route) optRO = ro;
