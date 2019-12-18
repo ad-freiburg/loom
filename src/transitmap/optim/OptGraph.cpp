@@ -184,9 +184,8 @@ void OptGraph::split() {
 void OptGraph::partnerLines() {
   auto partners = getPartnerRoutes();
 
-  std::cout << "A" << std::endl;
-
   for (const auto& p : partners) {
+    std::cout << "Combining " << p.partners.begin()->route->getId() << " and " << p.partners.size() - 1 << " routes." << std::endl;
     for (size_t i = 0; i < p.path.size(); i++) {
       // TODO: why isnt there a getRoute function f or OptEdgePL?
       auto e = p.path[i];
@@ -252,9 +251,10 @@ std::vector<PartnerPath> OptGraph::getPartnerRoutes() const {
     };
 
     auto comps = Algorithm::connectedComponents(*this, Check(rt));
-    std::cout << "Components: " << comps.size() << std::endl;
+    size_t nonNullComps = 0;
     for (auto comp : comps) {
       if (comp.size() < 2) continue;
+      nonNullComps++;
       auto p = pathFromComp(comp);
       std::cout << "Path: " << p.path.size() << std::endl;
       std::cout << "Routes: ";
@@ -263,6 +263,7 @@ std::vector<PartnerPath> OptGraph::getPartnerRoutes() const {
       }
       ret.push_back(p);
     }
+    std::cout << "Components: " << nonNullComps << std::endl;
   }
 
   return ret;
@@ -288,27 +289,34 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
     assert(compDeg != 0);
   }
 
-  if (!entry) entry = *comp.begin();  // we have a cycle, take any node
+  if (!entry) entry = *comp.begin();  // we have a cycle, take any node as start
   auto cur = entry;
 
   // backtrack
   while (true) {
     OptNode* toNd = 0;
 
+    // get the continuing edge cntE
+    OptEdge* cntE = 0;
     for (auto e : cur->getAdjList()) {
+      // dont use the edge we came from
       if (pp.path.size() && e == pp.path.back()) continue;
       auto toNdCand = e->getOtherNd(cur);
       if (comp.count(toNdCand)) {
-        auto ctd = e->pl().getRoutes();
-        if (pp.path.size()) ctd = getCtdRoutesIn(pp.path.back(), e);
-        pp.path.push_back(e);
-        pp.inv.push_back(toNdCand == e->getFrom());
-        pp.partners.clear();
-        pp.partners.insert(ctd.begin(), ctd.end());
-        toNd = toNdCand;
+        cntE = e;
         break;
       }
     }
+
+    if (!cntE) break;
+
+    auto ctd = cntE->pl().getRoutes();
+    if (pp.path.size()) ctd = getCtdRoutesIn(pp.path.back(), cntE);
+    pp.path.push_back(cntE);
+    pp.inv.push_back(cntE->getOtherNd(cur) == cntE->getFrom());
+    pp.partners.clear();
+    pp.partners.insert(ctd.begin(), ctd.end());
+    toNd = cntE->getOtherNd(cur);
 
     cur = toNd;
     if (cur == entry) break;

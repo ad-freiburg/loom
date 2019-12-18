@@ -26,7 +26,7 @@ int Optimizer::optimize(TransitGraph* tg) const {
              << " with max cardinality = " << maxC
              << " and solution space size = " << solSp;
 
-  // g.partnerLines();
+  g.partnerLines();
 
   // if (_cfg->untangleGraph) {
     // // do full untangling

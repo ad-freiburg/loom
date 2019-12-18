@@ -120,12 +120,16 @@ void ExhaustiveOptimizer::writeHierarch(OptOrderingConfig* cfg,
 
     for (auto etgp : e->pl().etgs) {
       if (etgp.wasCut) continue;
-      std::cout << "====" << std::endl;
-      for (auto ro : e->pl().getRoutes()) {
-        for (auto rel : ro.relatives) {
+      for (auto r : ep.second) {
+        // get the corresponding route occurance in the opt graph edge
+        OptRO optRO;
+        for (auto ro : e->pl().getRoutes()) {
+          if (r == ro.route) optRO = ro;
+        }
+
+        for (auto rel : optRO.relatives) {
           // retrieve the original route pos
           size_t p = etgp.etg->getRoutePos(rel);
-          std::cout << p << std::endl;
           if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
             (*hc)[etgp.etg][etgp.order].insert(
                 (*hc)[etgp.etg][etgp.order].begin(), p);
