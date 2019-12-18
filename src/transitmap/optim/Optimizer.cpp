@@ -26,7 +26,7 @@ int Optimizer::optimize(TransitGraph* tg) const {
              << " with max cardinality = " << maxC
              << " and solution space size = " << solSp;
 
-  g.partnerLines();
+  // g.partnerLines();
 
   // if (_cfg->untangleGraph) {
     // // do full untangling
@@ -47,6 +47,8 @@ int Optimizer::optimize(TransitGraph* tg) const {
   // }
 
   if (_cfg->outOptGraph) {
+    LOG(INFO) << "Outputting optimization graph to "
+      << _cfg->dbgPath << "/optgraph.json";
     util::geo::output::GeoGraphJsonOutput out;
     std::ofstream fstr(_cfg->dbgPath + "/optgraph.json");
     out.print(g, fstr);
@@ -72,6 +74,8 @@ int Optimizer::optimize(TransitGraph* tg) const {
   double scoreSum = 0;
   double crossSum = 0;
   double sepSum = 0;
+
+  LOG(INFO) << "Optimization graph has " << comps.size() << " components.";
 
   for (size_t run = 0; run < runs; run++) {
     OrderingConfig c;
@@ -121,7 +125,6 @@ int Optimizer::optimize(TransitGraph* tg) const {
 
     hc.writeFlatCfg(&c);
 
-    Optimizer::expandRelatives(tg, &c);
     tg->setConfig(c);
 
     if (runs > 1) {
@@ -145,81 +148,6 @@ int Optimizer::optimize(TransitGraph* tg) const {
   return 0;
 }
 
-// _____________________________________________________________________________
-void Optimizer::expandRelatives(TransitGraph* g, OrderingConfig* c) {
-  // std::set<std::pair<graph::Edge*, const Route*>> visited;
-  // for (graph::Node* n : *g->getNds()) {
-    // for (graph::Edge* e : n->getAdjListOut()) {
-      // for (const auto& ra : *(e->getRoutes())) {
-        // if (ra.relativeTo) {
-          // const Route* ref = ra.relativeTo();
-          // expandRelativesFor(c, ref, e, e->getRoutesRelTo(ref), visited);
-        // }
-      // }
-    // }
-  // }
-}
-
-// _____________________________________________________________________________
-void Optimizer::expandRelativesFor(
-    OrderingConfig* c, const Route* ref, graph::Edge* start,
-    const std::set<const Route*>& rs,
-    std::set<std::pair<graph::Edge*, const Route*>>& visited) {
-  std::stack<std::pair<graph::Edge*, graph::Edge*>> todo;
-
-  todo.push(std::pair<graph::Edge*, graph::Edge*>(0, start));
-  while (!todo.empty()) {
-    auto cur = todo.top();
-    todo.pop();
-
-    if (!visited.insert(std::pair<graph::Edge*, const Route*>(cur.second, ref))
-             .second)
-      continue;
-
-    for (auto r : rs) {
-      size_t index = cur.second->getRoutePos(ref);
-      auto it =
-          std::find((*c)[cur.second].begin(), (*c)[cur.second].end(), index);
-
-      size_t p = cur.second->getRoutePos(r);
-
-      assert(it != (*c)[cur.second].end());
-
-      if (cur.first != 0 &&
-          ((cur.first->getTo() == cur.second->getTo() ||
-            cur.first->getFrom() == cur.second->getFrom()) ^
-           (cur.first->getRoutePosUnder(r, (*c)[cur.first]) >
-            cur.first->getRoutePosUnder(ref, (*c)[cur.first])))) {
-        (*c)[cur.second].insert(it + 1, p);
-      } else {
-        (*c)[cur.second].insert(it, p);
-      }
-    }
-
-    for (const Node* n : {cur.second->getFrom(), cur.second->getTo()}) {
-      if (cur.first != 0 &&
-          (cur.first->getTo() == n || cur.first->getFrom() == n)) {
-        continue;
-      }
-
-      for (auto e : n->getAdjListIn()) {
-        if (e->containsRoute(ref) &&
-            visited.find(std::pair<graph::Edge*, const Route*>(e, ref)) ==
-                visited.end()) {
-          todo.push(std::pair<graph::Edge*, graph::Edge*>(cur.second, e));
-        }
-      }
-
-      for (auto e : n->getAdjListOut()) {
-        if (e->containsRoute(ref) &&
-            visited.find(std::pair<graph::Edge*, const Route*>(e, ref)) ==
-                visited.end()) {
-          todo.push(std::pair<graph::Edge*, graph::Edge*>(cur.second, e));
-        }
-      }
-    }
-  }
-}
 
 // _____________________________________________________________________________
 std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment) {
@@ -231,11 +159,9 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
   std::set<const Route*> processed;
   std::vector<LinePair> ret;
   for (auto& toA : segment->pl().getRoutes()) {
-    if (toA.relativeTo) continue;
     processed.insert(toA.route);
     for (auto& toB : segment->pl().getRoutes()) {
       if (unique && processed.count(toB.route)) continue;
-      if (toB.relativeTo) continue;
       if (toA.route == toB.route) continue;
 
       // this is to make sure that we always get the same line pairs in unique
@@ -467,7 +393,9 @@ double Optimizer::solutionSpaceSize(const std::set<OptNode*>& g) {
   for (const auto* n : g) {
     for (const auto* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
+      LOG(INFO) << e->pl().getCardinality();
       ret *= factorial(e->pl().getCardinality());
+      LOG(INFO) << ret;
     }
   }
   return ret;

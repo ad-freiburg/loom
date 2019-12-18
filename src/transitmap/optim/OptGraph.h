@@ -33,12 +33,10 @@ typedef std::map<const transitmapper::optim::OptEdge*, std::vector<const graph::
     OptOrderingConfig;
 
 struct OptRO {
-  OptRO() : route(0), direction(0), relativeTo(0) {}
-  OptRO(const graph::Route* r, const Node* dir) : route(r), direction(dir), relativeTo(0) {relatives.push_back(r);}
+  OptRO() : route(0), direction(0) {}
+  OptRO(const graph::Route* r, const Node* dir) : route(r), direction(dir) {relatives.push_back(r);}
   const graph::Route* route;
   const Node* direction;  // 0 if in both directions
-
-  const graph::Route* relativeTo;
 
   std::vector<const graph::Route*> relatives;
 

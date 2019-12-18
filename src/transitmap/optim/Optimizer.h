@@ -55,12 +55,6 @@ class Optimizer {
   static double solutionSpaceSize(const std::set<OptNode*>& g);
   static double numEdges(const std::set<OptNode*>& g);
 
-  static void expandRelatives(TransitGraph* g, OrderingConfig* c);
-  static void expandRelativesFor(
-      OrderingConfig* c, const Route* ref, graph::Edge* start,
-      const std::set<const Route*>& rs,
-      std::set<std::pair<graph::Edge*, const Route*>>& visited);
-
  protected:
   const config::Config* _cfg;
   const Scorer* _scorer;

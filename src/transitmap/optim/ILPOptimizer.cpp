@@ -118,7 +118,6 @@ void ILPOptimizer::getConfigurationFromSolution(
         for (size_t tp = 0; tp < e->pl().getCardinality(); tp++) {
           bool found = false;
           for (auto ro : e->pl().getRoutes()) {
-            if (ro.relativeTo) continue;
             std::string varName = getILPVarName(e, ro.route, tp);
 
             size_t i = glp_find_col(lp, varName.c_str());
@@ -179,9 +178,6 @@ glp_prob* ILPOptimizer::createProblem(const std::set<OptNode*>& g) const {
       }
 
       for (auto r : e->pl().getRoutes()) {
-        if (r.relativeTo) continue;
-        // if (r.route->relativeTo()) continue;
-
         // constraint: the sum of all x_slp over p must be 1 for equal sl
         size_t row = glp_add_rows(lp, 1);
         std::stringstream varName;

@@ -20,9 +20,6 @@ int NullOptimizer::optimizeComp(const std::set<OptNode*>& g,
       for (auto etgp : e->pl().etgs) {
         if (etgp.wasCut) continue;
         for (auto ro : e->pl().getRoutes()) {
-
-          if (ro.relativeTo) continue;
-
           assert((*hc)[etgp.etg][etgp.order].size() == 0);
 
           for (auto rel : ro.relatives) {

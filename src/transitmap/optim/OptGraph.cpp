@@ -61,13 +61,7 @@ std::vector<OptRO>& OptEdgePL::getRoutes() { return routes; }
 
 // _____________________________________________________________________________
 size_t OptEdgePL::getCardinality() const {
-  size_t ret = 0;
-
-  for (const auto& ro : getRoutes()) {
-    if (ro.relativeTo == 0) ret++;
-  }
-
-  return ret;
+  return getRoutes().size();
 }
 
 // _____________________________________________________________________________
@@ -190,23 +184,29 @@ void OptGraph::split() {
 void OptGraph::partnerLines() {
   auto partners = getPartnerRoutes();
 
+  std::cout << "A" << std::endl;
+
   for (const auto& p : partners) {
     for (size_t i = 0; i < p.path.size(); i++) {
       // TODO: why isnt there a getRoute function f or OptEdgePL?
       auto e = p.path[i];
-      for (auto& ro : e->pl().getRoutes()) {
+      auto it = e->pl().getRoutes().begin();
+      while (it != e->pl().getRoutes().end()) {
+        auto& ro = *it;
         if (ro == *p.partners.begin()) {
           ro.relatives.clear();
-          for (auto partner : p.partners) {
-            ro.relatives.push_back(partner.route);
-          }
+          for (auto partner : p.partners) ro.relatives.push_back(partner.route);
           if (p.inv[i]) std::reverse(ro.relatives.begin(), ro.relatives.end());
         } else if (p.partners.count(ro)) {
-          ro.relativeTo = p.partners.begin()->route;
+          it = e->pl().getRoutes().erase(it);
+          continue;
         }
+        it++;
       }
     }
   }
+
+  std::cout << "B" << std::endl;
 }
 
 // _____________________________________________________________________________
@@ -530,11 +530,7 @@ util::json::Dict OptEdgePL::getAttrs() {
   std::string lines;
 
   for (const auto& r : getRoutes()) {
-    if (r.relativeTo)
-      lines += "(" + r.relativeTo->getLabel() + "+" + r.route->getLabel() +
-               "[" + r.route->getColor() + ", -> " +
-               util::toString(r.direction) + "]), ";
-    else if (r.relatives.size() > 0)
+    if (r.relatives.size() > 1)
       lines += r.route->getLabel() + "(x" + util::toString(r.relatives.size()) +
                ")" + "[" + r.route->getColor() + ", -> " +
                util::toString(r.direction) + "], ";
@@ -554,11 +550,7 @@ util::json::Dict OptEdgePL::getAttrs() {
 std::string OptEdgePL::toStr() const {
   std::string lines;
   for (const auto& r : getRoutes()) {
-    if (r.relativeTo)
-      lines += "(" + r.relativeTo->getLabel() + "+" + r.route->getLabel() +
-               "[" + r.route->getColor() + ", -> " +
-               util::toString(r.direction) + "]), ";
-    else if (r.relatives.size() > 0)
+    if (r.relatives.size() > 1)
       lines += r.route->getLabel() + "(x" + util::toString(r.relatives.size()) +
                ")" + "[" + r.route->getColor() + ", -> " +
                util::toString(r.direction) + "], ";

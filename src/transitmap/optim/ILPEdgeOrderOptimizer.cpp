@@ -31,8 +31,6 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
           bool found = false;
 
           for (auto ro : e->pl().getRoutes()) {
-            if (ro.relativeTo) continue;
-
             // check if this route (r) switches from 0 to 1 at tp-1 and tp
             double valPrev = 0;
             std::stringstream varName;
@@ -109,8 +107,6 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(
       }
 
       for (auto r : e->pl().getRoutes()) {
-        if (r.relativeTo) continue;
-        // if (r.route->relativeTo()) continue;
         for (size_t p = 0; p < e->pl().getCardinality(); p++) {
           std::stringstream varName;
           varName << "x_(" << e->pl().getStrRepr() << ",l=" << r.route
