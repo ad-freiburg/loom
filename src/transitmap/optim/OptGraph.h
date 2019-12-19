@@ -55,6 +55,8 @@ struct OptRO {
 };
 
 struct PartnerPath {
+  // Important: OptROs with the same route are r equivalent to each other and
+  // to the original route, see above
   std::set<OptRO> partners;
   std::vector<OptEdge*> path;
   std::vector<bool> inv;
@@ -215,6 +217,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   static bool dirPartialContinuedOver(const OptEdge* a, const OptEdge* b);
   static bool dirContinuedOver(const OptRO& ro,
                                const OptEdge* a, const OptEdge* b);
+  static bool dirContinuedOver(const OptRO& ro,
+                               const OptEdge* a, const OptNode* n);
 
   static std::vector<OptRO> getCtdRoutesIn(
       const OptEdge* fromEdge, const OptEdge* toEdge);

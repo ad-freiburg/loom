@@ -24,6 +24,8 @@ class Algorithm {
   struct EdgeCheckFunc {
     virtual bool operator()(const Node<N, E>* frNd,
                             const Edge<N, E>* edge) const {
+      UNUSED(frNd);
+      UNUSED(edge);
       return true;
     };
   };

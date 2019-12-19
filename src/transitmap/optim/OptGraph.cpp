@@ -185,6 +185,7 @@ void OptGraph::partnerLines() {
   auto partners = getPartnerRoutes();
 
   for (const auto& p : partners) {
+    if (p.partners.size() == 1) continue;
     std::cout << "Combining " << p.partners.begin()->route->getId() << " and " << p.partners.size() - 1 << " routes." << std::endl;
     for (size_t i = 0; i < p.path.size(); i++) {
       // TODO: why isnt there a getRoute function f or OptEdgePL?
@@ -204,8 +205,6 @@ void OptGraph::partnerLines() {
       }
     }
   }
-
-  std::cout << "B" << std::endl;
 }
 
 // _____________________________________________________________________________
@@ -235,8 +234,6 @@ std::vector<PartnerPath> OptGraph::getPartnerRoutes() const {
   std::vector<PartnerPath> ret;
 
   for (auto rt : getRoutes()) {
-    std::cout << "Checking route " << rt << " for partners..." << std::endl;
-
     // create connected components w.r.t. route (each component consists only of
     // edges containing route rt)
 
@@ -245,8 +242,12 @@ std::vector<PartnerPath> OptGraph::getPartnerRoutes() const {
       const Route* rt;
       virtual bool operator()(const OptNode* frNd, const OptEdge* edge) const {
         UNUSED(frNd);
-        // TODO: check if edge continues over frNd!
-        return !getRO(edge, rt).isNull();
+        // TODO: this will put lines not continueing over a particular edge
+        // in one component, as only the lines' presence on the edge is checked.
+        // Later on, we then cannot follow the edge through the entire path,
+        // which may lead to collapsing opportunities being missed.
+        auto ro = getRO(edge, rt);
+        return !ro.isNull();
       };
     };
 
@@ -256,14 +257,8 @@ std::vector<PartnerPath> OptGraph::getPartnerRoutes() const {
       if (comp.size() < 2) continue;
       nonNullComps++;
       auto p = pathFromComp(comp);
-      std::cout << "Path: " << p.path.size() << std::endl;
-      std::cout << "Routes: ";
-      for (auto r : p.partners) {
-        std::cout << " " << r.route->getId() << std::endl;
-      }
-      ret.push_back(p);
+      if (p.partners.size() && p.path.size()) ret.push_back(p);
     }
-    std::cout << "Components: " << nonNullComps << std::endl;
   }
 
   return ret;
@@ -284,13 +279,15 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
       compDeg++;
       pp.partners.insert(e->pl().getRoutes().begin(), e->pl().getRoutes().end());
     }
-    if (compDeg > 2) return PartnerPath();  // shortcut
-    if (compDeg == 1) entry = n;
+    if (compDeg > 2) return PartnerPath();  // not a simple path!
+    if (compDeg == 1 && !entry) entry = n;
     assert(compDeg != 0);
   }
 
   if (!entry) entry = *comp.begin();  // we have a cycle, take any node as start
   auto cur = entry;
+
+  std::set<OptRO> notPartner;
 
   // backtrack
   while (true) {
@@ -299,7 +296,7 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
     // get the continuing edge cntE
     OptEdge* cntE = 0;
     for (auto e : cur->getAdjList()) {
-      // dont use the edge we came from
+      // dont follow edge we came from
       if (pp.path.size() && e == pp.path.back()) continue;
       auto toNdCand = e->getOtherNd(cur);
       if (comp.count(toNdCand)) {
@@ -308,23 +305,51 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
       }
     }
 
+    // check if either the new edge, or the old edge, have any lines
+    // continueing into any other edge and add them to the notPartner set
+    for (auto e : cur->getAdjList()) {
+      // dont use the edge we came from
+      if (pp.path.size() && e == pp.path.back()) continue;
+      if (e == cntE) continue;
+
+      if (pp.path.size()) {
+        auto ctdRoutes = getCtdRoutesIn(pp.path.back(), e);
+        notPartner.insert(ctdRoutes.begin(), ctdRoutes.end());
+      }
+
+      if (cntE) {
+        auto ctdRoutes = getCtdRoutesIn(e, cntE);
+        notPartner.insert(ctdRoutes.begin(), ctdRoutes.end());
+      }
+    }
+
+    // no continuation edge found, break
     if (!cntE) break;
 
-    auto ctd = cntE->pl().getRoutes();
-    if (pp.path.size()) ctd = getCtdRoutesIn(pp.path.back(), cntE);
+    if (pp.path.size()) {
+      auto ctd = getCtdRoutesIn(pp.path.back(), cntE);
+      std::set<OptRO> newPartners;
+      for (auto ctdRt : ctd) {
+        if (pp.partners.count(ctdRt)) newPartners.insert(ctdRt);
+      }
+      pp.partners = newPartners;
+    } else {
+      auto ctd = cntE->pl().getRoutes();
+      pp.partners.insert(ctd.begin(), ctd.end());
+    }
+
     pp.path.push_back(cntE);
     pp.inv.push_back(cntE->getOtherNd(cur) == cntE->getFrom());
-    pp.partners.clear();
-    pp.partners.insert(ctd.begin(), ctd.end());
     toNd = cntE->getOtherNd(cur);
 
     cur = toNd;
+
+    // we had a circle and are back at the beginning
     if (cur == entry) break;
-    if (cur == 0) break;
   }
 
-  // TODO
   // remove routes continuing outside the component from the partners set
+  for (auto r : notPartner) pp.partners.erase(r);
 
   return pp;
 }
@@ -1472,6 +1497,16 @@ bool OptGraph::dirContinuedOver(const OptRO& ro, const OptEdge* a,
   if (!ab) return false;
 
   return getCtdRoutesIn(ro.route, ro.direction, a, b).size();
+}
+
+// _____________________________________________________________________________
+bool OptGraph::dirContinuedOver(const OptRO& ro, const OptEdge* a,
+                                const OptNode* n) {
+  for (auto e : n->getAdjList()) {
+    if (e == a) continue;
+    if (dirContinuedOver(ro, a, e)) return true;
+  }
+  return false;
 }
 
 // _____________________________________________________________________________

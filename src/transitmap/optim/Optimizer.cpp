@@ -26,25 +26,26 @@ int Optimizer::optimize(TransitGraph* tg) const {
              << " with max cardinality = " << maxC
              << " and solution space size = " << solSp;
 
-  g.partnerLines();
+  // g.partnerLines();
 
-  // if (_cfg->untangleGraph) {
-    // // do full untangling
-    // LOG(DEBUG) << "Untangling graph...";
-    // T_START(1);
-    // for (size_t i = 0; i < maxC; i++) {
-      // g.untangle();
-      // g.simplify();
-      // g.split();
-    // }
-    // LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
-  // } else if (_cfg->createCoreOptimGraph) {
-    // // only apply core graph rules
-    // T_START(1);
-    // LOG(DEBUG) << "Creating core optimization graph...";
-    // g.simplify();
-    // LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
-  // }
+  if (_cfg->untangleGraph) {
+    // do full untangling
+    LOG(DEBUG) << "Untangling graph...";
+    LOG(INFO) << "MAX CARD: " << maxC;
+    T_START(1);
+    for (size_t i = 0; i < 2 * maxC; i++) {
+      g.untangle();
+      g.simplify();
+      g.split();
+    }
+    LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
+  } else if (_cfg->createCoreOptimGraph) {
+    // only apply core graph rules
+    T_START(1);
+    LOG(DEBUG) << "Creating core optimization graph...";
+    g.simplify();
+    LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
+  }
 
   if (_cfg->outOptGraph) {
     LOG(INFO) << "Outputting optimization graph to "
@@ -178,6 +179,11 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
 // _____________________________________________________________________________
 bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
                         PosComPair poscomb) {
+  // bool otherWayA =
+      // (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
+  // bool otherWayB =
+      // (segmentB->getFrom() != node) ^ segmentB->pl().etgs.front().dir;
+
   bool otherWayA =
       (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
   bool otherWayB =
@@ -393,9 +399,7 @@ double Optimizer::solutionSpaceSize(const std::set<OptNode*>& g) {
   for (const auto* n : g) {
     for (const auto* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      LOG(INFO) << e->pl().getCardinality();
       ret *= factorial(e->pl().getCardinality());
-      LOG(INFO) << ret;
     }
   }
   return ret;
