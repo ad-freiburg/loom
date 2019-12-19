@@ -24,16 +24,17 @@ namespace optim {
 class ExhaustiveOptimizer : public Optimizer {
  public:
   ExhaustiveOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : Optimizer(cfg, scorer), _optScorer(scorer) {};
+      : Optimizer(cfg, scorer), _optScorer(scorer){};
 
-  virtual int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c, size_t depth) const;
+  virtual int optimizeComp(const std::set<OptNode*>& g,
+                           HierarchOrderingConfig* c, size_t depth) const;
 
  protected:
   OptGraphScorer _optScorer;
   void initialConfig(const std::set<OptNode*>& g, OptOrderingConfig* cfg) const;
-  void initialConfig(const std::set<OptNode*>& g, OptOrderingConfig* cfg, bool sorted) const;
+  void initialConfig(const std::set<OptNode*>& g, OptOrderingConfig* cfg,
+                     bool sorted) const;
   void writeHierarch(OptOrderingConfig* cfg, HierarchOrderingConfig* c) const;
-
 };
 }  // namespace optim
 }  // namespace transitmapper

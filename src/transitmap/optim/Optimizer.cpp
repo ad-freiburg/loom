@@ -406,15 +406,8 @@ int Optimizer::optimizeComp(const std::set<OptNode*>& g,
 }
 
 // _____________________________________________________________________________
-std::string Optimizer::prefix(size_t depth, bool withCon) {
+std::string Optimizer::prefix(size_t depth) {
   std::stringstream ret;
-  if (withCon) {
-    ret << "|";
-    for (size_t i = 0; i < depth + 1; i++) ret << "-";
-    ret << "|";
-  } else {
-    for (size_t i = 0; i <= depth + 1; i++) ret << " ";
-    ret << "|";
-  }
+  for (size_t i = 0; i < depth * 2 + 1; i++) ret << " ";
   return ret.str();
 }

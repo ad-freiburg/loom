@@ -61,7 +61,7 @@ class Optimizer {
   const config::Config* _cfg;
   const Scorer* _scorer;
 
-  static std::string prefix(size_t depth, bool withCon);
+  static std::string prefix(size_t depth);
 };
 }  // namespace optim
 }  // namespace transitmapper

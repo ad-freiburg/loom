@@ -15,10 +15,8 @@ using transitmapper::optim::NullOptimizer;
 int NullOptimizer::optimizeComp(const std::set<OptNode*>& g,
                                 HierarchOrderingConfig* hc,
                                 size_t depth) const {
-  LOG(DEBUG) << prefix(depth, 1) << "(NullOptimizer) Optimizing component with "
+  LOG(DEBUG) << prefix(depth) << "(NullOptimizer) Optimizing component with "
              << g.size() << " nodes.";
-
-  T_START(optim);
 
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
@@ -43,8 +41,5 @@ int NullOptimizer::optimizeComp(const std::set<OptNode*>& g,
       }
     }
   }
-
-  LOG(DEBUG) << prefix(depth, 0) << "(NullOptimizer) Done in " << T_STOP(optim)
-             << " ms";
   return 0;
 }

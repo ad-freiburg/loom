@@ -27,11 +27,9 @@ int CombOptimizer::optimizeComp(const std::set<OptNode*>& g,
   size_t maxC = maxCard(g);
   double solSp = solutionSpaceSize(g);
 
-  LOG(DEBUG) << prefix(depth, 1) << "(CombOptimizer) Optimizing component with " << g.size()
-             << " nodes, max cardinality " << maxC << ", solution space size "
+  LOG(DEBUG) << prefix(depth) << "(CombOptimizer) Optimizing comp with " << g.size()
+             << " nodes, max card " << maxC << ", sol space size "
              << solSp;
-
-  T_START(optim);
 
   if (maxC == 1) {
     _nullOpt.optimizeComp(g, hc, depth + 1);
@@ -40,8 +38,6 @@ int CombOptimizer::optimizeComp(const std::set<OptNode*>& g,
   } else {
     _ilpOpt.optimizeComp(g, hc, depth + 1);
   }
-
-  LOG(DEBUG)  << prefix(depth, 0) << "(CompOptimizer) Done in " << T_STOP(optim) << " ms";
 
   return 0;
 }
