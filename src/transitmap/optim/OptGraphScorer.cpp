@@ -97,21 +97,24 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
   size_t sameSegCrossings = 0;
   size_t diffSegCrossings = 0;
 
-  std::map<const Route*, std::set<OptEdge*>> proced;
+  std::map<LinePair, std::set<OptEdge*>> proced;
 
   for (auto ea : n->getAdjList()) {
+    // line pairs are unique because of the second parameter
+    // they are always sorted by their pointer value
     auto linePairs = Optimizer::getLinePairs(ea, true);
 
     for (auto lp : linePairs) {
       // check if pairs continue in same segments
-      proced[lp.first].insert(ea);
-      proced[lp.second].insert(ea);
+
+      // mark this line pair as processed on ea - we have checked it
+      // into each adjacent edge
+      proced[lp].insert(ea);
 
       for (auto eb : Optimizer::getEdgePartners(n, ea, lp)) {
-        if (proced[lp.first].count(eb) && proced[lp.second].count(eb)) continue;
-
-        proced[lp.first].insert(eb);
-        proced[lp.second].insert(eb);
+        // if we have already fully checked the line pairs on this edge,
+        // don't count the crossing again - skip.
+        if (proced[lp].count(eb)) continue;
 
         PosCom posA(std::distance(
                         c.at(ea).begin(),
@@ -129,9 +132,7 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
 
         PosComPair poses(posA, posB);
 
-        if (Optimizer::crosses(n, ea, eb, poses)) {
-          sameSegCrossings++;
-        }
+        if (Optimizer::crosses(n, ea, eb, poses)) sameSegCrossings++;
       }
 
       for (auto ebc : Optimizer::getEdgePartnerPairs(n, ea, lp)) {

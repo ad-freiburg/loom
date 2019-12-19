@@ -26,12 +26,11 @@ int Optimizer::optimize(TransitGraph* tg) const {
              << " with max cardinality = " << maxC
              << " and solution space size = " << solSp;
 
-  // g.partnerLines();
+  g.partnerLines();
 
   if (_cfg->untangleGraph) {
     // do full untangling
     LOG(DEBUG) << "Untangling graph...";
-    LOG(INFO) << "MAX CARD: " << maxC;
     T_START(1);
     for (size_t i = 0; i < 2 * maxC; i++) {
       g.untangle();
@@ -179,11 +178,6 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
 // _____________________________________________________________________________
 bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
                         PosComPair poscomb) {
-  // bool otherWayA =
-      // (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
-  // bool otherWayB =
-      // (segmentB->getFrom() != node) ^ segmentB->pl().etgs.front().dir;
-
   bool otherWayA =
       (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
   bool otherWayB =
@@ -403,4 +397,24 @@ double Optimizer::solutionSpaceSize(const std::set<OptNode*>& g) {
     }
   }
   return ret;
+}
+
+// _____________________________________________________________________________
+int Optimizer::optimizeComp(const std::set<OptNode*>& g,
+                           HierarchOrderingConfig* c) const {
+  return optimizeComp(g, c, 0);
+}
+
+// _____________________________________________________________________________
+std::string Optimizer::prefix(size_t depth, bool withCon) {
+  std::stringstream ret;
+  if (withCon) {
+    ret << "|";
+    for (size_t i = 0; i < depth + 1; i++) ret << "-";
+    ret << "|";
+  } else {
+    for (size_t i = 0; i <= depth + 1; i++) ret << " ";
+    ret << "|";
+  }
+  return ret.str();
 }

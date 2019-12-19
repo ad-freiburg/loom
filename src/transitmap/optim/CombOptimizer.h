@@ -34,7 +34,7 @@ class CombOptimizer : public Optimizer {
         _hillcOpt(cfg, scorer),
         _annealOpt(cfg, scorer){};
 
-  int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
+  int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c, size_t depth) const;
 
  private:
   const ILPEdgeOrderOptimizer _ilpOpt;

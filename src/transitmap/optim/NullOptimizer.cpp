@@ -3,6 +3,8 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "transitmap/optim/NullOptimizer.h"
+#include "util/Misc.h"
+#include "util/log/Log.h"
 
 using namespace transitmapper;
 using namespace optim;
@@ -11,7 +13,12 @@ using transitmapper::optim::NullOptimizer;
 
 // _____________________________________________________________________________
 int NullOptimizer::optimizeComp(const std::set<OptNode*>& g,
-                           HierarchOrderingConfig* hc) const {
+                                HierarchOrderingConfig* hc,
+                                size_t depth) const {
+  LOG(DEBUG) << prefix(depth, 1) << "(NullOptimizer) Optimizing component with "
+             << g.size() << " nodes.";
+
+  T_START(optim);
 
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
@@ -25,11 +32,19 @@ int NullOptimizer::optimizeComp(const std::set<OptNode*>& g,
           for (auto rel : ro.relatives) {
             // retrieve the original route pos
             size_t p = etgp.etg->getRoutePos(rel);
-            (*hc)[etgp.etg][etgp.order].push_back(p);
+            if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
+              (*hc)[etgp.etg][etgp.order].insert(
+                  (*hc)[etgp.etg][etgp.order].begin(), p);
+            } else {
+              (*hc)[etgp.etg][etgp.order].push_back(p);
+            }
           }
         }
       }
     }
   }
+
+  LOG(DEBUG) << prefix(depth, 0) << "(NullOptimizer) Done in " << T_STOP(optim)
+             << " ms";
   return 0;
 }

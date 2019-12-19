@@ -21,7 +21,7 @@ using namespace transitmapper::graph;
 
 // _____________________________________________________________________________
 int ILPOptimizer::optimizeComp(const std::set<OptNode*>& g,
-                           HierarchOrderingConfig* hc) const {
+                           HierarchOrderingConfig* hc, size_t depth) const {
   LOG(DEBUG) << "Creating ILP problem... ";
   glp_prob* lp = createProblem(g);
   LOG(DEBUG) << " .. done";

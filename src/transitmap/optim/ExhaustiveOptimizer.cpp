@@ -14,7 +14,12 @@ using transitmapper::optim::ExhaustiveOptimizer;
 
 // _____________________________________________________________________________
 int ExhaustiveOptimizer::optimizeComp(const std::set<OptNode*>& g,
-                                      HierarchOrderingConfig* hc) const {
+                                      HierarchOrderingConfig* hc, size_t depth) const {
+  LOG(DEBUG) << "(ExhaustiveOptimizer) Optimizing component with " << g.size()
+             << " nodes.";
+
+  T_START(optim);
+
   OptOrderingConfig best, cur, null;
   double bestScore = DBL_MAX;
 
@@ -80,6 +85,9 @@ int ExhaustiveOptimizer::optimizeComp(const std::set<OptNode*>& g,
              << " iterations!";
 
   writeHierarch(&best, hc);
+
+  LOG(DEBUG) << "(ExhaustiveOptimizer) Done in " << T_STOP(optim) << " ms";
+
   return iters;
 }
 

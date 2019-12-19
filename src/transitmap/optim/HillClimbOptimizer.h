@@ -27,7 +27,7 @@ class HillClimbOptimizer : public ExhaustiveOptimizer {
   HillClimbOptimizer(const config::Config* cfg, const Scorer* scorer)
       : ExhaustiveOptimizer(cfg, scorer) {};
 
-  virtual int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
+  virtual int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c, size_t depth) const;
 
  private:
   double getScore(OptEdge* e, OptOrderingConfig& cur) const;

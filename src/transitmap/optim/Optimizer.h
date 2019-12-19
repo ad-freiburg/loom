@@ -32,8 +32,10 @@ class Optimizer {
       : _cfg(cfg), _scorer(scorer){};
 
   virtual int optimize(TransitGraph* tg) const;
+  int optimizeComp(const std::set<OptNode*>& g,
+                           HierarchOrderingConfig* c) const;
   virtual int optimizeComp(const std::set<OptNode*>& g,
-                           HierarchOrderingConfig* c) const = 0;
+                           HierarchOrderingConfig* c, size_t depth) const = 0;
 
   static std::vector<LinePair> getLinePairs(OptEdge* segment);
   static std::vector<LinePair> getLinePairs(OptEdge* segment, bool unique);
@@ -58,6 +60,8 @@ class Optimizer {
  protected:
   const config::Config* _cfg;
   const Scorer* _scorer;
+
+  static std::string prefix(size_t depth, bool withCon);
 };
 }  // namespace optim
 }  // namespace transitmapper

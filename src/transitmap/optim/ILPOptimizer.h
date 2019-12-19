@@ -22,7 +22,6 @@ namespace optim {
 
 using namespace graph;
 
-
 struct VariableMatrix {
   std::vector<int> rowNum;
   std::vector<int> colNum;
@@ -36,9 +35,10 @@ struct VariableMatrix {
 class ILPOptimizer : public Optimizer {
  public:
   ILPOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : Optimizer(cfg, scorer) {};
+      : Optimizer(cfg, scorer){};
 
-  int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c) const;
+  int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c,
+                   size_t depth) const;
 
  protected:
   virtual glp_prob* createProblem(const std::set<OptNode*>& g) const;
@@ -46,7 +46,8 @@ class ILPOptimizer : public Optimizer {
   void solveProblem(glp_prob* lp) const;
   void preSolveCoinCbc(glp_prob* lp) const;
 
-  virtual void getConfigurationFromSolution(glp_prob* lp, HierarchOrderingConfig* c,
+  virtual void getConfigurationFromSolution(glp_prob* lp,
+                                            HierarchOrderingConfig* c,
                                             const std::set<OptNode*>& g) const;
 
   std::string getILPVarName(OptEdge* e, const Route* r, size_t p) const;
@@ -66,7 +67,6 @@ class ILPOptimizer : public Optimizer {
   int getCrossingPenaltySameSeg(const OptNode* n) const;
   int getCrossingPenaltyDiffSeg(const OptNode* n) const;
   int getSplittingPenalty(const OptNode* n) const;
-
 };
 }  // namespace optim
 }  // namespace transitmapper

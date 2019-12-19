@@ -14,7 +14,7 @@ using transitmapper::optim::SimulatedAnnealingOptimizer;
 
 // _____________________________________________________________________________
 int SimulatedAnnealingOptimizer::optimizeComp(const std::set<OptNode*>& g,
-                                          HierarchOrderingConfig* hc) const {
+                                          HierarchOrderingConfig* hc, size_t depth) const {
   OptOrderingConfig cur, null;
 
   // fixed order list of optim graph edges
