@@ -108,10 +108,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->renderNodePolygons))
       ->default_value(false),
       "render node polygons")
-    ("no-optim,N",
-      opts::value<bool>(&(cfg->noOptim))
-      ->default_value(false),
-      "disable line-ordering optimization")
     ("splitting-optim",
       opts::value<bool>(&(cfg->splittingOpt))
       ->default_value(false),

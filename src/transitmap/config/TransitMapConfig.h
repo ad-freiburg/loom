@@ -26,7 +26,6 @@ struct Config {
 
   size_t optimRuns;
 
-  bool noOptim;
   bool splittingOpt;
   bool outOptGraph;
 

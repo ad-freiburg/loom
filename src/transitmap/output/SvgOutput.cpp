@@ -258,6 +258,10 @@ size_t SvgOutput::getNextPartner(const InnerClique& forClique,
 // _____________________________________________________________________________
 bool SvgOutput::isNextTo(const graph::InnerGeometry& a,
                          const graph::InnerGeometry b) const {
+
+  // TODO!!!!!
+  return false;
+
   double THRESHOLD = 0.5 * M_PI + 0.1;
   if (a.from.front == b.from.front && a.to.front == b.to.front) {
     if ((a.slotFrom - b.slotFrom == 1 || b.slotFrom - a.slotFrom == 1) &&

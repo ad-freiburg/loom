@@ -102,42 +102,37 @@ int main(int argc, char** argv) {
   LOG(INFO) << "(stats) Max crossing pen: " << maxCrossPen;
   LOG(INFO) << "(stats) Max splitting pen: " << maxSplitPen;
 
-  if (!cfg.noOptim) {
-    if (cfg.optimMethod == "ilp_impr") {
-      LOG(INFO) << "(ILP impr optimizer)";
-      optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, &scorer);
-      ilpEoOptim.optimize(&g);
-    } else if (cfg.optimMethod == "ilp") {
-      LOG(INFO) << "(ILP optimizer)";
-      optim::ILPOptimizer ilpOptim(&cfg, &scorer);
-      ilpOptim.optimize(&g);
-    } else if (cfg.optimMethod == "comb") {
-      LOG(INFO) << "(Comb optimizer)";
-      optim::CombOptimizer ilpCombiOptim(&cfg, &scorer);
-      ilpCombiOptim.optimize(&g);
-    } else if (cfg.optimMethod == "exhaust") {
-      LOG(INFO) << "(Exhaustive optimizer)";
-      optim::ExhaustiveOptimizer exhausOptim(&cfg, &scorer);
-      exhausOptim.optimize(&g);
-    } else if (cfg.optimMethod == "hillc") {
-      LOG(INFO) << "(Hillclimbing optimizer)";
-      optim::HillClimbOptimizer hillcOptim(&cfg, &scorer);
-      hillcOptim.optimize(&g);
-    } else if (cfg.optimMethod == "anneal") {
-      LOG(INFO) << "(Simulated annealing optimizer)";
-      optim::SimulatedAnnealingOptimizer annealOptim(&cfg, &scorer);
-      annealOptim.optimize(&g);
-    }
-
-    LOG(INFO) << "(stats) Total graph score AFTER optim is -- "
-              << scorer.getScore() << " -- (excl. unavoidable crossings!)";
-    LOG(INFO) << "(stats)   Per node graph score: "
-              << scorer.getScore() / g.getNds()->size();
-    LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings()
-              << " (score: " << scorer.getCrossScore() << ")";
-    LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
-              << " (score: " << scorer.getSeparationScore() << ")";
+  if (cfg.optimMethod == "ilp_impr") {
+    optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, &scorer);
+    ilpEoOptim.optimize(&g);
+  } else if (cfg.optimMethod == "ilp") {
+    optim::ILPOptimizer ilpOptim(&cfg, &scorer);
+    ilpOptim.optimize(&g);
+  } else if (cfg.optimMethod == "comb") {
+    optim::CombOptimizer ilpCombiOptim(&cfg, &scorer);
+    ilpCombiOptim.optimize(&g);
+  } else if (cfg.optimMethod == "exhaust") {
+    optim::ExhaustiveOptimizer exhausOptim(&cfg, &scorer);
+    exhausOptim.optimize(&g);
+  } else if (cfg.optimMethod == "hillc") {
+    optim::HillClimbOptimizer hillcOptim(&cfg, &scorer);
+    hillcOptim.optimize(&g);
+  } else if (cfg.optimMethod == "anneal") {
+    optim::SimulatedAnnealingOptimizer annealOptim(&cfg, &scorer);
+    annealOptim.optimize(&g);
+  } else if (cfg.optimMethod == "null") {
+    optim::NullOptimizer nullOptim(&cfg, &scorer);
+    nullOptim.optimize(&g);
   }
+
+  LOG(INFO) << "(stats) Total graph score AFTER optim is -- "
+            << scorer.getScore() << " -- (excl. unavoidable crossings!)";
+  LOG(INFO) << "(stats)   Per node graph score: "
+            << scorer.getScore() / g.getNds()->size();
+  LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings()
+            << " (score: " << scorer.getCrossScore() << ")";
+  LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
+            << " (score: " << scorer.getSeparationScore() << ")";
 
   if (cfg.renderMethod == "svg") {
     std::string path = cfg.outputPath;
