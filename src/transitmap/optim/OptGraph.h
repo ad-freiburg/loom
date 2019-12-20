@@ -8,6 +8,7 @@
 #include <set>
 #include <string>
 
+#include "shared/linegraph/LineGraph.h"
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/Scorer.h"
@@ -34,13 +35,18 @@ typedef std::map<const transitmapper::optim::OptEdge*,
     OptOrderingConfig;
 
 struct OptRO {
-  OptRO() : route(0), direction(0) {}
+  OptRO() : route(0), direction(0), ldirection(0) {}
   OptRO(const shared::linegraph::Route* r, const Node* dir)
-      : route(r), direction(dir) {
+      : route(r), direction(dir), ldirection(0) {
+    relatives.push_back(r);
+  }
+  OptRO(const shared::linegraph::Route* r, const shared::linegraph::LineNode* dir)
+      : route(r), direction(0), ldirection(dir) {
     relatives.push_back(r);
   }
   const shared::linegraph::Route* route;
   const Node* direction;  // 0 if in both directions
+  const shared::linegraph::LineNode* ldirection;  // 0 if in both directions
 
   std::vector<const shared::linegraph::Route*> relatives;
 
@@ -62,6 +68,7 @@ struct PartnerPath {
 
 struct EtgPart {
   Edge* etg;
+  shared::linegraph::LineEdge* letg;
   bool dir;
   size_t order;
 
@@ -73,6 +80,10 @@ struct EtgPart {
   EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir), order(0), wasCut(false){};
   EtgPart(Edge* etg, bool dir, size_t order, bool wasCut)
       : etg(etg), dir(dir), order(order), wasCut(wasCut){};
+
+  EtgPart(shared::linegraph::LineEdge* etg, bool dir) : letg(etg), dir(dir), order(0), wasCut(false){};
+  EtgPart(shared::linegraph::LineEdge* etg, bool dir, size_t order, bool wasCut)
+      : letg(etg), dir(dir), order(order), wasCut(wasCut){};
 };
 
 struct OptEdgePL {
@@ -106,15 +117,17 @@ struct OptEdgePL {
 
 struct OptNodePL {
   const Node* node;
+  const shared::linegraph::LineNode* lnode;
   util::geo::Point<double> p;
 
   // the edges arriving at this node, in clockwise fashion, based
   // on the geometry in the original graph
   std::vector<OptEdge*> orderedEdges;
 
-  OptNodePL(util::geo::Point<double> p) : node(0), p(p){};
-  OptNodePL(const Node* node) : node(node), p(node->getPos()){};
-  OptNodePL() : node(0){};
+  OptNodePL(util::geo::Point<double> p) : node(0), lnode(0), p(p){};
+  OptNodePL(const Node* node) : node(node), lnode(0), p(node->getPos()){};
+  OptNodePL(const shared::linegraph::LineNode* lnode) : lnode(lnode), p(*lnode->pl().getGeom()){};
+  OptNodePL() : node(0), lnode(0) {};
 
   const util::geo::Point<double>* getGeom();
   util::json::Dict getAttrs();
@@ -123,6 +136,7 @@ struct OptNodePL {
 class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
  public:
   OptGraph(TransitGraph* toOptim, const Scorer* scorer);
+  OptGraph(shared::linegraph::LineGraph* toOptim, const Scorer* scorer);
 
   TransitGraph* getGraph() const;
 
@@ -161,9 +175,11 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
  private:
   TransitGraph* _g;
+  shared::linegraph::LineGraph* _lg;
   const Scorer* _scorer;
 
   OptNode* getNodeForTransitNode(const Node* tn) const;
+  OptNode* ndForLineNd(const shared::linegraph::LineNode* tn) const;
 
   void build();
   void writeEdgeOrder();

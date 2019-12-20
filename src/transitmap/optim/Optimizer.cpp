@@ -239,11 +239,6 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
   bool otherWayC = (segments.second->getFrom() != node) ^
                    segments.second->pl().etgs.front().dir;
 
-  // size_t cardA = segmentA->pl().etgs.front().etg->getCardinality(true);
-  // size_t cardB = segments.first->pl().etgs.front().etg->getCardinality(true);
-  // size_t cardC =
-  // segments.second->pl().etgs.front().etg->getCardinality(true);
-
   size_t cardA = segmentA->pl().getCardinality();
   size_t cardB = segments.first->pl().getCardinality();
   size_t cardC = segments.second->pl().getCardinality();
@@ -294,12 +289,6 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
     }
   }
 
-  // std::cout << "---" << std::endl;
-  // std::cout << segmentA->pl().toStr() << std::endl;
-  // std::cout << segments.first->pl().toStr() << std::endl;
-  // std::cout << segments.second->pl().toStr() << std::endl;
-  // std::cout << postcomb.first << ":" << postcomb.second << std::endl;
-  // assert(ret == retB);
   return ret;
 }
 
