@@ -6,13 +6,14 @@
 #include "transitmap/optim/OptGraph.h"
 #include "transitmap/optim/OptGraphScorer.h"
 #include "transitmap/optim/Optimizer.h"
+#include "shared/linegraph/Route.h"
 
 using namespace transitmapper;
 using namespace optim;
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
-using transitmapper::graph::Route;
+using shared::linegraph::Route;
 using transitmapper::graph::InnerGeometry;
 using transitmapper::graph::IDENTITY_PENALTIES;
 
@@ -69,17 +70,17 @@ size_t OptGraphScorer::getNumSeparations(OptNode* n,
       for (auto eb : Optimizer::getEdgePartners(n, ea, lp)) {
         int ainA = std::distance(
             c.at(ea).begin(),
-            std::find(c.at(ea).begin(), c.at(ea).end(), lp.first));
+            std::find(c.at(ea).begin(), c.at(ea).end(), lp.first.route));
         int ainB = std::distance(
             c.at(eb).begin(),
-            std::find(c.at(eb).begin(), c.at(eb).end(), lp.first));
+            std::find(c.at(eb).begin(), c.at(eb).end(), lp.first.route));
 
         int binA = std::distance(
             c.at(ea).begin(),
-            std::find(c.at(ea).begin(), c.at(ea).end(), lp.second));
+            std::find(c.at(ea).begin(), c.at(ea).end(), lp.second.route));
         int binB = std::distance(
             c.at(eb).begin(),
-            std::find(c.at(eb).begin(), c.at(eb).end(), lp.second));
+            std::find(c.at(eb).begin(), c.at(eb).end(), lp.second.route));
 
         if (abs(ainA - binA) == 1 && abs(ainB - binB) != 1) {
           seps++;
@@ -118,17 +119,17 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
 
         PosCom posA(std::distance(
                         c.at(ea).begin(),
-                        std::find(c.at(ea).begin(), c.at(ea).end(), lp.first)),
+                        std::find(c.at(ea).begin(), c.at(ea).end(), lp.first.route)),
                     std::distance(
                         c.at(eb).begin(),
-                        std::find(c.at(eb).begin(), c.at(eb).end(), lp.first)));
+                        std::find(c.at(eb).begin(), c.at(eb).end(), lp.first.route)));
 
         PosCom posB(std::distance(
                         c.at(ea).begin(),
-                        std::find(c.at(ea).begin(), c.at(ea).end(), lp.second)),
+                        std::find(c.at(ea).begin(), c.at(ea).end(), lp.second.route)),
                     std::distance(c.at(eb).begin(),
                                   std::find(c.at(eb).begin(), c.at(eb).end(),
-                                            lp.second)));
+                                            lp.second.route)));
 
         PosComPair poses(posA, posB);
 
@@ -138,10 +139,10 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
       for (auto ebc : Optimizer::getEdgePartnerPairs(n, ea, lp)) {
         PosCom posA(std::distance(
                         c.at(ea).begin(),
-                        std::find(c.at(ea).begin(), c.at(ea).end(), lp.first)),
+                        std::find(c.at(ea).begin(), c.at(ea).end(), lp.first.route)),
                     std::distance(c.at(ea).begin(),
                                   std::find(c.at(ea).begin(), c.at(ea).end(),
-                                            lp.second)));
+                                            lp.second.route)));
 
         if (Optimizer::crosses(n, ea, ebc, posA)) diffSegCrossings++;
       }

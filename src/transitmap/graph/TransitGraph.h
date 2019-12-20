@@ -12,6 +12,7 @@
 #include <set>
 #include <string>
 
+#include "shared/linegraph/Route.h"
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/OrderingConfig.h"
@@ -29,7 +30,8 @@ class TransitGraph {
   ~TransitGraph();
 
   void addNd(Node* n);
-  Edge* addEdg(Node* from, Node* to, geo::PolyLine<double> pl, double w, double s);
+  Edge* addEdg(Node* from, Node* to, geo::PolyLine<double> pl, double w,
+               double s);
   Edge* getEdg(Node* from, Node* to);
 
   void deleteEdge(Node* from, Node* to);
@@ -47,8 +49,8 @@ class TransitGraph {
   const OrderingConfig& getConfig() const;
   void setConfig(const OrderingConfig&);
 
-  void addRoute(const Route* r);
-  const Route* getRoute(const std::string& id) const;
+  void addRoute(const shared::linegraph::Route* r);
+  const shared::linegraph::Route* getRoute(const std::string& id) const;
 
   void expandBBox(const geo::DPoint& p);
 
@@ -60,7 +62,7 @@ class TransitGraph {
 
  private:
   std::set<Node*> _nodes;
-  std::map<std::string, const Route*> _routes;
+  std::map<std::string, const shared::linegraph::Route*> _routes;
 
   mutable double _lastSolveTime;
   mutable size_t _lastSolveTarget;

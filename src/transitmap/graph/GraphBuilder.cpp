@@ -8,8 +8,8 @@
 #include <stack>
 #include <vector>
 #include "GraphBuilder.h"
-#include "transitmap/graph/Route.h"
 #include "json/json.hpp"
+#include "shared/linegraph/Route.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
@@ -17,7 +17,7 @@
 using namespace util::geo;
 using transitmapper::graph::GraphBuilder;
 using transitmapper::graph::NodeFront;
-using transitmapper::graph::Route;
+using shared::linegraph::Route;
 
 const static char* WGS84_PROJ =
     "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
@@ -103,8 +103,7 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
                     << " strange results.";
         }
 
-        Edge* e =
-            g->addEdg(fromN, toN, pl, _cfg->lineWidth, _cfg->lineSpacing);
+        Edge* e = g->addEdg(fromN, toN, pl, _cfg->lineWidth, _cfg->lineSpacing);
 
         assert(e);
         assert(g->getNodeById(from));

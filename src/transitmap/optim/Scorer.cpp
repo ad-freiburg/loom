@@ -2,10 +2,10 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include "shared/linegraph/Route.h"
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/Penalties.h"
-#include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/Scorer.h"
 #include "util/Misc.h"
@@ -15,7 +15,7 @@ using namespace optim;
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
-using transitmapper::graph::Route;
+using shared::linegraph::Route;
 using transitmapper::graph::InnerGeometry;
 using transitmapper::graph::IDENTITY_PENALTIES;
 
@@ -153,7 +153,6 @@ double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c,
               iga.geom.getLine().front(), iga.geom.getLine().back(),
               igb.geom.getLine().front(), igb.geom.getLine().back()) ||
           util::geo::dist(iga.geom.getLine(), igb.geom.getLine()) < 1) {
-
         if (sameSeg) {
           ret += getCrossingPenaltySameSeg(n, pens);
         } else if (!unavoidable) {
@@ -192,10 +191,8 @@ double Scorer::getSeparationScore(const Node* n, const OrderingConfig& c,
 
         if (f->containsRoute(p.first) && f->containsRoute(p.second) &&
             n->connOccurs(p.first, e, f) && n->connOccurs(p.second, e, f)) {
-          if (abs(int(f->getRoutePosUnder(p.first, c.find(f)->second)
-                          ) -
-                  int(f->getRoutePosUnder(p.second, c.find(f)->second)
-                          )) > 1) {
+          if (abs(int(f->getRoutePosUnder(p.first, c.find(f)->second)) -
+                  int(f->getRoutePosUnder(p.second, c.find(f)->second))) > 1) {
             ret += getSplittingPenalty(n, pens);
           }
         }

@@ -7,7 +7,6 @@
 
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/ExhaustiveOptimizer.h"
 #include "transitmap/optim/HillClimbOptimizer.h"
@@ -34,7 +33,8 @@ class CombOptimizer : public Optimizer {
         _hillcOpt(cfg, scorer),
         _annealOpt(cfg, scorer){};
 
-  int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c, size_t depth) const;
+  int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c,
+                   size_t depth) const;
 
  private:
   const ILPEdgeOrderOptimizer _ilpOpt;
@@ -42,7 +42,6 @@ class CombOptimizer : public Optimizer {
   const ExhaustiveOptimizer _exhausOpt;
   const HillClimbOptimizer _hillcOpt;
   const SimulatedAnnealingOptimizer _annealOpt;
-
 };
 }  // namespace optim
 }  // namespace transitmapper

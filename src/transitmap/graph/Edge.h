@@ -7,7 +7,7 @@
 
 #include <vector>
 #include "Node.h"
-#include "Route.h"
+#include "shared/linegraph/Route.h"
 #include "transitmap/style/LineStyle.h"
 #include "util/Nullable.h"
 #include "util/geo/PolyLine.h"
@@ -25,10 +25,12 @@ using style::LineStyle;
 class Node;
 
 struct RouteOccurance {
-  RouteOccurance(const Route* r, const Node* dir) : route(r), direction(dir) {}
-  RouteOccurance(const Route* r, const Node* dir, const style::LineStyle& ls)
+  RouteOccurance(const shared::linegraph::Route* r, const Node* dir)
+      : route(r), direction(dir) {}
+  RouteOccurance(const shared::linegraph::Route* r, const Node* dir,
+                 const style::LineStyle& ls)
       : route(r), direction(dir), style(ls) {}
-  const Route* route;
+  const shared::linegraph::Route* route;
   const Node* direction;  // 0 if in both directions
 
   util::Nullable<style::LineStyle> style;
@@ -50,8 +52,9 @@ class Edge {
   void setFrom(Node* from);
   void setTo(Node* to);
 
-  void addRoute(const Route* r, const Node* dir, const LineStyle& ls);
-  void addRoute(const Route* r, const Node* dir);
+  void addRoute(const shared::linegraph::Route* r, const Node* dir,
+                const LineStyle& ls);
+  void addRoute(const shared::linegraph::Route* r, const Node* dir);
 
   const PolyLine<double>& getGeom() const;
   void setGeom(const PolyLine<double>& p);
@@ -59,27 +62,28 @@ class Edge {
   const std::vector<RouteOccurance>& getRoutes() const;
   std::vector<RouteOccurance>* getRoutes();
 
-  size_t getRoutePosUnder(const Route* r,
+  size_t getRoutePosUnder(const shared::linegraph::Route* r,
                           const std::vector<size_t> ordering) const;
 
-  size_t getRoutePos(const Route* r) const;
+  size_t getRoutePos(const shared::linegraph::Route* r) const;
 
-  RouteOccurance* getRoute(const Route* r) const;
+  RouteOccurance* getRoute(const shared::linegraph::Route* r) const;
 
-  std::vector<RouteOccurance> getCtdRoutesIn(const Node* n, const Route* r,
+  std::vector<RouteOccurance> getCtdRoutesIn(const Node* n,
+                                             const shared::linegraph::Route* r,
                                              const Node* dir,
                                              const Edge* fromEdge) const;
 
-  bool containsRoute(const Route* r) const;
+  bool containsRoute(const shared::linegraph::Route* r) const;
   size_t getCardinality() const;
-  size_t getCardinality(bool woRelatives) const;
 
   double getWidth() const;
   double getSpacing() const;
 
   double getTotalWidth() const;
 
-  std::vector<const Route*> getShrdRoutes(const Edge& e) const;
+  std::vector<const shared::linegraph::Route*> getShrdRoutes(
+      const Edge& e) const;
 
   std::string toString() const;
 

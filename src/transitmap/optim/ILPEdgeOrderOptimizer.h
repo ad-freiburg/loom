@@ -8,7 +8,6 @@
 #include <glpk.h>
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/ILPOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
@@ -23,7 +22,6 @@ namespace optim {
 
 using namespace graph;
 
-typedef std::pair<const Route*, const Route*> LinePair;
 typedef std::pair<size_t, size_t> PosCom;
 typedef std::pair<PosCom, PosCom> PosComPair;
 typedef std::pair<OptEdge*, OptEdge*> EdgePair;

@@ -2,9 +2,9 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include "shared/linegraph/Route.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/OptGraph.h"
 
@@ -13,7 +13,7 @@
 
 using transitmapper::graph::OrderingConfig;
 using transitmapper::graph::HierarchOrderingConfig;
-using transitmapper::graph::Route;
+using shared::linegraph::Route;
 using transitmapper::graph::TransitGraph;
 using transitmapper::optim::OptNode;
 using transitmapper::optim::OptEdge;
@@ -21,7 +21,7 @@ using transitmapper::optim::OptEdge;
 namespace transitmapper {
 namespace optim {
 
-typedef std::pair<const Route*, const Route*> LinePair;
+typedef std::pair<const OptRO, const OptRO> LinePair;
 typedef std::pair<size_t, size_t> PosCom;
 typedef std::pair<PosCom, PosCom> PosComPair;
 typedef std::pair<OptEdge*, OptEdge*> EdgePair;
@@ -33,7 +33,7 @@ class Optimizer {
 
   virtual int optimize(TransitGraph* tg) const;
   int optimizeComp(const std::set<OptNode*>& g,
-                           HierarchOrderingConfig* c) const;
+                   HierarchOrderingConfig* c) const;
   virtual int optimizeComp(const std::set<OptNode*>& g,
                            HierarchOrderingConfig* c, size_t depth) const = 0;
 

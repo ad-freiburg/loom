@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <vector>
+#include "shared/linegraph/Route.h"
 #include "Edge.h"
 #include "Node.h"
 #include "util/geo/PolyLine.h"
@@ -12,6 +13,7 @@ using namespace transitmapper;
 using namespace graph;
 
 using util::geo::PolyLine;
+using shared::linegraph::Route;
 
 // _____________________________________________________________________________
 Edge::Edge(Node* from, Node* to, PolyLine<double> pl, double w, double s)
@@ -117,11 +119,6 @@ bool Edge::containsRoute(const Route* r) const { return getRoute(r) != 0; }
 
 // _____________________________________________________________________________
 size_t Edge::getCardinality() const { return _routes.size(); }
-
-// _____________________________________________________________________________
-size_t Edge::getCardinality(bool woRelatives) const {
-  return _routes.size();
-}
 
 // _____________________________________________________________________________
 double Edge::getWidth() const { return _width; }

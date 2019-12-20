@@ -6,9 +6,9 @@
 #define TRANSITMAP_OPTIM_ILPOPTIMIZER_H_
 
 #include <glpk.h>
+#include "shared/linegraph/Route.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/OptGraph.h"
 #include "transitmap/optim/Optimizer.h"
@@ -50,7 +50,8 @@ class ILPOptimizer : public Optimizer {
                                             HierarchOrderingConfig* c,
                                             const std::set<OptNode*>& g) const;
 
-  std::string getILPVarName(OptEdge* e, const Route* r, size_t p) const;
+  std::string getILPVarName(OptEdge* e, const shared::linegraph::Route* r,
+                            size_t p) const;
 
   void writeSameSegConstraints(const std::set<OptNode*>& g, VariableMatrix* vm,
                                glp_prob* lp) const;

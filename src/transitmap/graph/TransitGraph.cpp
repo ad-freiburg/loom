@@ -4,7 +4,7 @@
 #include <set>
 #include <string>
 #include "transitmap/graph/Edge.h"
-#include "transitmap/graph/Route.h"
+#include "shared/linegraph/Route.h"
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "util/Misc.h"
@@ -16,7 +16,7 @@ using util::geo::dist;
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
-using transitmapper::graph::Route;
+using shared::linegraph::Route;
 using transitmapper::graph::OrderingConfig;
 
 // _____________________________________________________________________________

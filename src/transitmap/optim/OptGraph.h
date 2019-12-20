@@ -11,9 +11,9 @@
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/Scorer.h"
+#include "util/Misc.h"
 #include "util/graph/UndirGraph.h"
 #include "util/json/Writer.h"
-#include "util/Misc.h"
 
 using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
@@ -29,26 +29,24 @@ struct OptEdgePL;
 typedef util::graph::Node<OptNodePL, OptEdgePL> OptNode;
 typedef util::graph::Edge<OptNodePL, OptEdgePL> OptEdge;
 
-typedef std::map<const transitmapper::optim::OptEdge*, std::vector<const graph::Route*>>
+typedef std::map<const transitmapper::optim::OptEdge*,
+                 std::vector<const shared::linegraph::Route*>>
     OptOrderingConfig;
 
 struct OptRO {
   OptRO() : route(0), direction(0) {}
-  OptRO(const graph::Route* r, const Node* dir) : route(r), direction(dir) {relatives.push_back(r);}
-  const graph::Route* route;
+  OptRO(const shared::linegraph::Route* r, const Node* dir)
+      : route(r), direction(dir) {
+    relatives.push_back(r);
+  }
+  const shared::linegraph::Route* route;
   const Node* direction;  // 0 if in both directions
 
-  std::vector<const graph::Route*> relatives;
+  std::vector<const shared::linegraph::Route*> relatives;
 
-  bool operator==(const OptRO& b) const {
-    return b.route == route;
-  }
-  bool operator<(const OptRO& b) const {
-    return b.route < route;
-  }
-  bool operator>(const OptRO& b) const {
-    return b.route > route;
-  }
+  bool operator==(const OptRO& b) const { return b.route == route; }
+  bool operator<(const OptRO& b) const { return b.route < route; }
+  bool operator>(const OptRO& b) const { return b.route > route; }
   bool operator==(const graph::RouteOccurance& b) const {
     return b.route == route;
   }
@@ -78,7 +76,7 @@ struct EtgPart {
 };
 
 struct OptEdgePL {
-  OptEdgePL() : depth(0), firstEtg(0), lastEtg(0) {};
+  OptEdgePL() : depth(0), firstEtg(0), lastEtg(0){};
 
   // all original ETGs from the transit graph contained in this edge
   // Guarantee: they are all equal in terms of (directed) routes
@@ -146,16 +144,15 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   static graph::Edge* getAdjEdg(const OptEdge* e, const OptNode* n);
   static EtgPart getAdjEtgp(const OptEdge* e, const OptNode* n);
-  static bool hasCtdRoutesIn(const graph::Route* r,
-                                              const Node* dir,
-                                              const OptEdge* fromEdge,
-                                              const OptEdge* toEdge);
-  static std::vector<OptRO> getCtdRoutesIn(
-      const graph::Route* r, const Node* dir, const OptEdge* fromEdge,
-      const OptEdge* toEdge);
+  static bool hasCtdRoutesIn(const shared::linegraph::Route* r, const Node* dir,
+                             const OptEdge* fromEdge, const OptEdge* toEdge);
+  static std::vector<OptRO> getCtdRoutesIn(const shared::linegraph::Route* r,
+                                           const Node* dir,
+                                           const OptEdge* fromEdge,
+                                           const OptEdge* toEdge);
   static std::vector<OptRO> getSameDirRoutesIn(
-      const graph::Route* r, const Node* dir, const OptEdge* fromEdge,
-      const OptEdge* toEdge);
+      const shared::linegraph::Route* r, const Node* dir,
+      const OptEdge* fromEdge, const OptEdge* toEdge);
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);
 
@@ -180,7 +177,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool untanglePartialDogBoneStep();
   bool untangleStumpStep();
 
-  std::vector<OptNode*> explodeNodeAlong(OptNode* nd, const PolyLine<double>& pl, size_t n);
+  std::vector<OptNode*> explodeNodeAlong(OptNode* nd,
+                                         const PolyLine<double>& pl, size_t n);
 
   std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n) const;
   bool branchesAtInto(OptEdge* e, OptNode* n,
@@ -195,7 +193,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   OptEdge* isStump(OptEdge* e) const;
   OptEdge* isStumpAt(OptEdge* e, OptNode* n) const;
 
-  std::set<const graph::Route*> getRoutes() const;
+  std::set<const shared::linegraph::Route*> getRoutes() const;
 
   bool isDogBone(OptEdge* e) const;
   OptNode* isPartialDogBone(OptEdge* e) const;
@@ -215,17 +213,18 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   static bool dirContinuedOver(const OptEdge* a, const OptEdge* b,
                                const OptEdge* c);
   static bool dirPartialContinuedOver(const OptEdge* a, const OptEdge* b);
-  static bool dirContinuedOver(const OptRO& ro,
-                               const OptEdge* a, const OptEdge* b);
-  static bool dirContinuedOver(const OptRO& ro,
-                               const OptEdge* a, const OptNode* n);
+  static bool dirContinuedOver(const OptRO& ro, const OptEdge* a,
+                               const OptEdge* b);
+  static bool dirContinuedOver(const OptRO& ro, const OptEdge* a,
+                               const OptNode* n);
 
-  static std::vector<OptRO> getCtdRoutesIn(
-      const OptEdge* fromEdge, const OptEdge* toEdge);
+  static std::vector<OptRO> getCtdRoutesIn(const OptEdge* fromEdge,
+                                           const OptEdge* toEdge);
 
   static OptNode* sharedNode(const OptEdge* a, const OptEdge* b);
 
-  static Nullable<const OptRO> getRO(const OptEdge* a, const graph::Route*);
+  static Nullable<const OptRO> getRO(const OptEdge* a,
+                                     const shared::linegraph::Route*);
 
   static std::vector<OptEdge*> clockwEdges(OptEdge* noon, OptNode* n);
   static std::vector<OptEdge*> partialClockwEdges(OptEdge* noon, OptNode* n);

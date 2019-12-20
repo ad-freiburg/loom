@@ -47,8 +47,8 @@ int Optimizer::optimize(TransitGraph* tg) const {
   }
 
   if (_cfg->outOptGraph) {
-    LOG(INFO) << "Outputting optimization graph to "
-      << _cfg->dbgPath << "/optgraph.json";
+    LOG(INFO) << "Outputting optimization graph to " << _cfg->dbgPath
+              << "/optgraph.json";
     util::geo::output::GeoGraphJsonOutput out;
     std::ofstream fstr(_cfg->dbgPath + "/optgraph.json");
     out.print(g, fstr);
@@ -61,8 +61,7 @@ int Optimizer::optimize(TransitGraph* tg) const {
     // LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes();
     LOG(INFO) << "(stats)   Max edge route cardinality: "
               << maxCard(*g.getNds());
-    LOG(INFO) << "(stats)   Solution space: "
-              << solutionSpaceSize(*g.getNds());
+    LOG(INFO) << "(stats)   Solution space: " << solutionSpaceSize(*g.getNds());
   }
 
   // iterate over components and optimize all of them separately
@@ -100,8 +99,8 @@ int Optimizer::optimize(TransitGraph* tg) const {
         if (numEdges(nds) > maxNumEdges) maxNumEdges = numEdges(nds);
 
         LOG(INFO) << " (stats) Optimizing subgraph of size " << nds.size()
-                   << " with max cardinality = " << maxC
-                   << " and solution space size = " << solSp;
+                  << " with max cardinality = " << maxC
+                  << " and solution space size = " << solSp;
       }
       iters += optimizeComp(nds, &hc);
     }
@@ -113,11 +112,13 @@ int Optimizer::optimize(TransitGraph* tg) const {
     if (_cfg->outputStats) {
       LOG(INFO) << " (stats) Number of components: " << comps.size();
       LOG(INFO) << " (stats) Number of components with M=1: " << numM1Comps;
-      LOG(INFO) << " (stats) Max number of nodes of all components: " << maxNumNodes;
-      LOG(INFO) << " (stats) Max number of edges of all components: " << maxNumEdges;
+      LOG(INFO) << " (stats) Max number of nodes of all components: "
+                << maxNumNodes;
+      LOG(INFO) << " (stats) Max number of edges of all components: "
+                << maxNumEdges;
       LOG(INFO) << " (stats) Max cardinality of all components: " << maxCompC;
       LOG(INFO) << " (stats) Max solution space size of all components: "
-                 << maxCompSolSpace;
+                << maxCompSolSpace;
     }
 
     tSum += t;
@@ -128,8 +129,10 @@ int Optimizer::optimize(TransitGraph* tg) const {
     tg->setConfig(c);
 
     if (runs > 1) {
-      if (_cfg->splittingOpt) scoreSum += _scorer->getScore();
-      else scoreSum += _scorer->getCrossScore();
+      if (_cfg->splittingOpt)
+        scoreSum += _scorer->getScore();
+      else
+        scoreSum += _scorer->getCrossScore();
       crossSum += _scorer->getNumCrossings();
       sepSum += _scorer->getNumSeparations();
     }
@@ -137,17 +140,21 @@ int Optimizer::optimize(TransitGraph* tg) const {
 
   if (runs > 1 && _cfg->outputStats) {
     LOG(INFO) << "";
-    LOG(INFO) << "(multiple opt runs stats) avg time: " << tSum / (1.0 * runs) << " ms";
-    LOG(INFO) << "(multiple opt runs stats) avg iters: " << iterSum / (1.0 * runs);
-    LOG(INFO) << "(multiple opt runs stats) avg score: -- " << scoreSum / (1.0 * runs) << " --";
-    LOG(INFO) << "(multiple opt runs stats) avg num crossings: -- " << crossSum / (1.0 * runs) << " --";
-    LOG(INFO) << "(multiple opt runs stats) avg num separations: -- " << sepSum / (1.0 * runs) << " --";
+    LOG(INFO) << "(multiple opt runs stats) avg time: " << tSum / (1.0 * runs)
+              << " ms";
+    LOG(INFO) << "(multiple opt runs stats) avg iters: "
+              << iterSum / (1.0 * runs);
+    LOG(INFO) << "(multiple opt runs stats) avg score: -- "
+              << scoreSum / (1.0 * runs) << " --";
+    LOG(INFO) << "(multiple opt runs stats) avg num crossings: -- "
+              << crossSum / (1.0 * runs) << " --";
+    LOG(INFO) << "(multiple opt runs stats) avg num separations: -- "
+              << sepSum / (1.0 * runs) << " --";
     LOG(INFO) << "";
   }
 
   return 0;
 }
-
 
 // _____________________________________________________________________________
 std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment) {
@@ -167,9 +174,9 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
       // this is to make sure that we always get the same line pairs in unique
       // mode -> take the smaller pointer first
       if (!unique || toA.route < toB.route)
-        ret.push_back(LinePair(toA.route, toB.route));
+        ret.push_back(LinePair(toA, toB));
       else
-        ret.push_back(LinePair(toB.route, toA.route));
+        ret.push_back(LinePair(toB, toA));
     }
   }
   return ret;
@@ -318,14 +325,16 @@ std::vector<OptEdge*> Optimizer::getEdgePartners(OptNode* node,
   std::vector<OptEdge*> ret;
 
   graph::Edge* fromEtg = OptGraph::getAdjEdg(segmentA, node);
-  const Node* dirA = fromEtg->getRoute(linepair.first)->direction;
-  const Node* dirB = fromEtg->getRoute(linepair.second)->direction;
+  const Node* dirA = fromEtg->getRoute(linepair.first.route)->direction;
+  const Node* dirB = fromEtg->getRoute(linepair.second.route)->direction;
 
   for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;
 
-    if (OptGraph::hasCtdRoutesIn(linepair.first, dirA, segmentA, segmentB) &&
-        OptGraph::hasCtdRoutesIn(linepair.second, dirB, segmentA, segmentB)) {
+    if (OptGraph::hasCtdRoutesIn(linepair.first.route, dirA, segmentA,
+                                 segmentB) &&
+        OptGraph::hasCtdRoutesIn(linepair.second.route, dirB, segmentA,
+                                 segmentB)) {
       ret.push_back(segmentB);
     }
   }
@@ -339,19 +348,20 @@ std::vector<EdgePair> Optimizer::getEdgePartnerPairs(OptNode* node,
   std::vector<EdgePair> ret;
 
   graph::Edge* fromEtg = OptGraph::getAdjEdg(segmentA, node);
-  const Node* dirA = fromEtg->getRoute(linepair.first)->direction;
-  const Node* dirB = fromEtg->getRoute(linepair.second)->direction;
+  const Node* dirA = fromEtg->getRoute(linepair.first.route)->direction;
+  const Node* dirB = fromEtg->getRoute(linepair.second.route)->direction;
 
   for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;
 
-    if (OptGraph::hasCtdRoutesIn(linepair.first, dirA, segmentA, segmentB)) {
+    if (OptGraph::hasCtdRoutesIn(linepair.first.route, dirA, segmentA,
+                                 segmentB)) {
       EdgePair curPair;
       curPair.first = segmentB;
       for (OptEdge* segmentC : node->getAdjList()) {
         if (segmentC == segmentA || segmentC == segmentB) continue;
 
-        if (OptGraph::hasCtdRoutesIn(linepair.second, dirB, segmentA,
+        if (OptGraph::hasCtdRoutesIn(linepair.second.route, dirB, segmentA,
                                      segmentC)) {
           curPair.second = segmentC;
           ret.push_back(curPair);
@@ -401,7 +411,7 @@ double Optimizer::solutionSpaceSize(const std::set<OptNode*>& g) {
 
 // _____________________________________________________________________________
 int Optimizer::optimizeComp(const std::set<OptNode*>& g,
-                           HierarchOrderingConfig* c) const {
+                            HierarchOrderingConfig* c) const {
   return optimizeComp(g, c, 0);
 }
 

@@ -3,6 +3,7 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <set>
+#include "shared/linegraph/Route.h"
 #include "transitmap/optim/OptGraph.h"
 #include "util/String.h"
 #include "util/graph/Algorithm.h"
@@ -17,7 +18,7 @@ using transitmapper::optim::OptNodePL;
 using transitmapper::optim::OptRO;
 using transitmapper::optim::PartnerPath;
 using transitmapper::graph::RouteOccurance;
-using transitmapper::graph::Route;
+using shared::linegraph::Route;
 using util::graph::Algorithm;
 
 // _____________________________________________________________________________
@@ -60,9 +61,7 @@ const std::vector<OptRO>& OptEdgePL::getRoutes() const { return routes; }
 std::vector<OptRO>& OptEdgePL::getRoutes() { return routes; }
 
 // _____________________________________________________________________________
-size_t OptEdgePL::getCardinality() const {
-  return getRoutes().size();
-}
+size_t OptEdgePL::getCardinality() const { return getRoutes().size(); }
 
 // _____________________________________________________________________________
 std::string OptEdgePL::getStrRepr() const {
@@ -186,7 +185,8 @@ void OptGraph::partnerLines() {
 
   for (const auto& p : partners) {
     if (p.partners.size() == 1) continue;
-    std::cout << "Combining " << p.partners.begin()->route->getId() << " and " << p.partners.size() - 1 << " routes." << std::endl;
+    std::cout << "Combining " << p.partners.begin()->route->getId() << " and "
+              << p.partners.size() - 1 << " routes." << std::endl;
     for (size_t i = 0; i < p.path.size(); i++) {
       // TODO: why isnt there a getRoute function f or OptEdgePL?
       auto e = p.path[i];
@@ -223,7 +223,7 @@ std::set<const Route*> OptGraph::getRoutes() const {
 }
 
 // _____________________________________________________________________________
-Nullable<const OptRO> OptGraph::getRO(const OptEdge* a, const graph::Route* r) {
+Nullable<const OptRO> OptGraph::getRO(const OptEdge* a, const Route* r) {
   for (auto rt : a->pl().getRoutes())
     if (rt.route == r) return rt;
   return Nullable<const OptRO>();
@@ -277,7 +277,8 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
     for (auto e : n->getAdjList()) {
       if (!comp.count(e->getOtherNd(n))) continue;
       compDeg++;
-      pp.partners.insert(e->pl().getRoutes().begin(), e->pl().getRoutes().end());
+      pp.partners.insert(e->pl().getRoutes().begin(),
+                         e->pl().getRoutes().end());
     }
     if (compDeg > 2) return PartnerPath();  // not a simple path!
     if (compDeg == 1 && !entry) entry = n;
@@ -525,7 +526,7 @@ size_t OptGraph::getNumEdges() const {
 
 // _____________________________________________________________________________
 size_t OptGraph::getNumRoutes() const {
-  std::set<const graph::Route*> routes;
+  std::set<const Route*> routes;
 
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
@@ -545,8 +546,8 @@ size_t OptGraph::getMaxCardinality() const {
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      if (getFirstEdg(e).etg->getCardinality(true) > ret) {
-        ret = getFirstEdg(e).etg->getCardinality(true);
+      if (getFirstEdg(e).etg->getCardinality() > ret) {
+        ret = getFirstEdg(e).etg->getCardinality();
       }
     }
   }
@@ -658,8 +659,8 @@ bool OptGraph::untangleFullCross() {
     std::pair<OptEdge*, OptEdge*> cross;
     if ((cross = isFullCross(n)).first) {
       LOG(DEBUG) << "Found full cross at node " << n << " between "
-                << cross.first << "(" << cross.first->pl().toStr() << ") and "
-                << cross.second << " (" << cross.second->pl().toStr() << ")";
+                 << cross.first << "(" << cross.first->pl().toStr() << ") and "
+                 << cross.second << " (" << cross.second->pl().toStr() << ")";
 
       auto newN = addNd(util::geo::DPoint(n->pl().getGeom()->getX() + DO,
                                           n->pl().getGeom()->getY() + DO));
@@ -727,7 +728,7 @@ bool OptGraph::untanglePartialYStep() {
       assert(na->pl().node);
 
       LOG(DEBUG) << "Found partial Y at node " << nb << " with main leg " << ea
-                << " (" << ea->pl().toStr() << ")";
+                 << " (" << ea->pl().toStr() << ")";
 
       // the geometry of the main leg
       util::geo::PolyLine<double> pl(*nb->pl().getGeom(), *na->pl().getGeom());
@@ -818,9 +819,9 @@ bool OptGraph::untangleStumpStep() {
         OptNode* notStumpN = mainLeg->getOtherNd(stumpN);
 
         LOG(DEBUG) << "Found stump with main leg " << mainLeg << " ("
-                  << mainLeg->pl().toStr() << ") at node " << stumpN
-                  << " with main stump branch " << stumpEdg << " ("
-                  << stumpEdg->pl().toStr() << ")";
+                   << mainLeg->pl().toStr() << ") at node " << stumpN
+                   << " with main stump branch " << stumpEdg << " ("
+                   << stumpEdg->pl().toStr() << ")";
 
         // the geometry of the main leg
         util::geo::PolyLine<double> pl(*notStumpN->pl().getGeom(),
@@ -895,7 +896,7 @@ bool OptGraph::untangleYStep() {
       assert(na->pl().node);
 
       LOG(DEBUG) << "Found full Y at node " << nb << " with main leg " << ea
-                << " (" << ea->pl().toStr() << ")";
+                 << " (" << ea->pl().toStr() << ")";
 
       // the geometry of the main leg
       util::geo::PolyLine<double> pl(*nb->pl().getGeom(), *na->pl().getGeom());
@@ -1017,7 +1018,7 @@ bool OptGraph::untanglePartialDogBoneStep() {
       OptNode* notPartN = 0;
       if ((notPartN = isPartialDogBone(mainLeg))) {
         LOG(DEBUG) << "Found partial dog bone with main leg " << mainLeg << " ("
-                  << mainLeg->pl().toStr() << ") at node " << notPartN;
+                   << mainLeg->pl().toStr() << ") at node " << notPartN;
 
         OptNode* partN = mainLeg->getOtherNd(notPartN);
 
@@ -1105,7 +1106,7 @@ bool OptGraph::untangleDogBoneStep() {
       if (mainLeg->getFrom() != na) continue;
       if (isDogBone(mainLeg)) {
         LOG(DEBUG) << "Found full dog bone with main leg " << mainLeg << " ("
-                  << mainLeg->pl().toStr() << ")";
+                   << mainLeg->pl().toStr() << ")";
 
         OptNode* nb = mainLeg->getOtherNd(na);
         // the geometry of the main leg
@@ -1519,7 +1520,7 @@ OptNode* OptGraph::sharedNode(const OptEdge* a, const OptEdge* b) {
 }
 
 // _____________________________________________________________________________
-std::vector<OptRO> OptGraph::getSameDirRoutesIn(const graph::Route* r,
+std::vector<OptRO> OptGraph::getSameDirRoutesIn(const Route* r,
                                                 const Node* dir,
                                                 const OptEdge* fromEdge,
                                                 const OptEdge* toEdge) {
@@ -1545,7 +1546,7 @@ std::vector<OptRO> OptGraph::getSameDirRoutesIn(const graph::Route* r,
 }
 
 // _____________________________________________________________________________
-bool OptGraph::hasCtdRoutesIn(const graph::Route* r, const Node* dir,
+bool OptGraph::hasCtdRoutesIn(const Route* r, const Node* dir,
                               const OptEdge* fromEdge, const OptEdge* toEdge) {
   const OptNode* n = sharedNode(fromEdge, toEdge);
   if (!n || !n->pl().node || n->getDeg() == 1) return false;
@@ -1567,7 +1568,7 @@ bool OptGraph::hasCtdRoutesIn(const graph::Route* r, const Node* dir,
 }
 
 // _____________________________________________________________________________
-std::vector<OptRO> OptGraph::getCtdRoutesIn(const graph::Route* r,
+std::vector<OptRO> OptGraph::getCtdRoutesIn(const Route* r,
                                             const Node* dir,
                                             const OptEdge* fromEdge,
                                             const OptEdge* toEdge) {

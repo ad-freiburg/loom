@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 #include "Output.h"
-#include "transitmap/graph/Route.h"
+#include "shared/linegraph/Route.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/Scorer.h"
@@ -122,12 +122,12 @@ class SvgOutput : public Output {
                              const graph::Node* n, const RenderParams& params);
 
   void renderLinePart(const PolyLine<double> p, double width,
-                      const graph::Route& route,
+                      const shared::linegraph::Route& route,
                       const graph::Edge* e,
                       const Nullable<style::LineStyle> style);
 
   void renderLinePart(const PolyLine<double> p, double width,
-                      const graph::Route& route,
+                      const shared::linegraph::Route& route,
                       const graph::Edge* edge, const std::string& endMarker,
                       const Nullable<style::LineStyle> style);
 

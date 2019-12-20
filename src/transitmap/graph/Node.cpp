@@ -8,7 +8,7 @@
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Penalties.h"
-#include "transitmap/graph/Route.h"
+#include "shared/linegraph/Route.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "util/geo/BezierCurve.h"
 #include "util/geo/Geo.h"
@@ -23,7 +23,7 @@ using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
 using transitmapper::graph::Partner;
 using transitmapper::graph::InnerGeometry;
-using transitmapper::graph::Route;
+using shared::linegraph::Route;
 
 namespace bgeo = boost::geometry;
 

@@ -8,9 +8,9 @@
 #include <cmath>
 #include <set>
 #include "shared/linegraph/LineNodePL.h"
+#include "shared/linegraph/Route.h"
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Penalties.h"
-#include "transitmap/graph/Route.h"
 #include "util/geo/Geo.h"
 #include "util/geo/PolyLine.h"
 
@@ -31,9 +31,10 @@ struct NodeFront {
   NodeFront(Edge* e, Node* n) : n(n), edge(e) {}
 
   Node* n;  // pointer to node here also
-  DPoint getTripOccPos(const Route* r, const OrderingConfig& c) const;
-  DPoint getTripOccPos(const Route* r, const OrderingConfig& c,
-                       bool originGeom) const;
+  DPoint getTripOccPos(const shared::linegraph::Route* r,
+                       const OrderingConfig& c) const;
+  DPoint getTripOccPos(const shared::linegraph::Route* r,
+                       const OrderingConfig& c, bool originGeom) const;
   DPoint getTripPos(const Edge* e, size_t pos, bool inv) const;
   DPoint getTripPos(const Edge* e, size_t pos, bool inv, bool originGeom) const;
 
@@ -59,11 +60,11 @@ struct NodeFront {
 
 struct Partner {
   Partner() : front(0), edge(0), route(0){};
-  Partner(const NodeFront* f, const Edge* e, const Route* r)
+  Partner(const NodeFront* f, const Edge* e, const shared::linegraph::Route* r)
       : front(f), edge(e), route(r){};
   const NodeFront* front;
   const Edge* edge;
-  const Route* route;
+  const shared::linegraph::Route* route;
 };
 
 struct InnerGeometry {
@@ -127,9 +128,10 @@ class Node {
   // remove edge from this node's adjacency lists
   void removeEdge(Edge* e);
 
-  void addRouteConnException(const Route* r, const Edge* edgeA,
-                             const Edge* edgeB);
-  bool connOccurs(const Route* r, const Edge* edgeA, const Edge* edgeB) const;
+  void addRouteConnException(const shared::linegraph::Route* r,
+                             const Edge* edgeA, const Edge* edgeB);
+  bool connOccurs(const shared::linegraph::Route* r, const Edge* edgeA,
+                  const Edge* edgeB) const;
 
   double getMaxNodeFrontWidth() const;
   size_t getMaxNodeFrontCardinality() const;
@@ -146,7 +148,8 @@ class Node {
 
   std::vector<shared::linegraph::Station> _stops;
 
-  std::map<const Route*, std::map<const Edge*, std::set<const Edge*> > >
+  std::map<const shared::linegraph::Route*,
+           std::map<const Edge*, std::set<const Edge*> > >
       _routeConnExceptions;
 
   InnerGeometry getInnerBezier(const OrderingConfig& c,

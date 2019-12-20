@@ -5,13 +5,14 @@
 #include <stdint.h>
 #include <ostream>
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/Route.h"
+#include "shared/linegraph/Route.h"
 #include "transitmap/output/SvgOutput.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
 
 using namespace transitmapper;
 using namespace output;
+using shared::linegraph::Route;
 
 using util::toString;
 
@@ -374,7 +375,7 @@ void SvgOutput::renderClique(const InnerClique& cc, const graph::Node* n) {
 
 // _____________________________________________________________________________
 void SvgOutput::renderLinePart(const PolyLine<double> p, double width,
-                               const graph::Route& route,
+                               const Route& route,
                                const graph::Edge* edge,
                                const Nullable<style::LineStyle> style) {
   renderLinePart(p, width, route, edge, "", style);
@@ -382,7 +383,7 @@ void SvgOutput::renderLinePart(const PolyLine<double> p, double width,
 
 // _____________________________________________________________________________
 void SvgOutput::renderLinePart(const PolyLine<double> p, double width,
-                               const graph::Route& route,
+                               const Route& route,
                                const graph::Edge* edge,
                                const std::string& endMarker,
                                const Nullable<style::LineStyle> style) {
@@ -456,7 +457,7 @@ void SvgOutput::renderEdgeTripGeom(const graph::TransitGraph& outG,
   for (size_t i : outG.getConfig().find(e)->second) {
     const graph::RouteOccurance& ro = e->getRoutes()[i];
 
-    const graph::Route* route = ro.route;
+    const Route* route = ro.route;
     PolyLine<double> p = center;
 
     if (p.getLength() < 0.01) continue;

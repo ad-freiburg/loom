@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include "shared/linegraph/Route.h"
 #include "transitmap/optim/ExhaustiveOptimizer.h"
 #include "util/log/Log.h"
 
@@ -11,6 +12,7 @@ using namespace transitmapper;
 using namespace optim;
 using namespace transitmapper::graph;
 using transitmapper::optim::ExhaustiveOptimizer;
+using shared::linegraph::Route;
 
 // _____________________________________________________________________________
 int ExhaustiveOptimizer::optimizeComp(const std::set<OptNode*>& g,
@@ -102,7 +104,7 @@ void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      (*cfg)[e] = std::vector<const graph::Route*>(e->pl().getCardinality());
+      (*cfg)[e] = std::vector<const Route*>(e->pl().getCardinality());
       size_t p = 0;
       for (size_t i = 0; i < e->pl().getRoutes().size(); i++) {
         (*cfg)[e][p] = e->pl().getRoutes()[i].route;
