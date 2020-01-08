@@ -58,6 +58,11 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   const RouteOcc& getRouteOcc(const Route* r) const;
   const RouteOcc& routeOccAtPos(size_t i) const;
 
+  size_t getRoutePosUnder(const Route* r,
+                          const std::vector<size_t> ordering) const;
+
+  size_t getRoutePos(const Route* r) const;
+
   const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;
 

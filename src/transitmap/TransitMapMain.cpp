@@ -42,9 +42,7 @@ int main(int argc, char** argv) {
   transitmapper::graph::TransitGraph g;
   transitmapper::graph::GraphBuilder b(&cfg);
 
-  if (!b.build(&(std::cin), &g)) {
-    exit(1);
-  }
+  g.readFromJson(&std::cin);
 
   LOG(INFO) << "Creating node fronts...";
   b.writeMainDirs(&g);

@@ -27,19 +27,11 @@ using transitmapper::graph::TransitGraph;
 using transitmapper::graph::Node;
 using transitmapper::graph::Edge;
 using shared::linegraph::Route;
+using shared::linegraph::LineEdge;
+using shared::linegraph::LineNode;
 using transitmapper::graph::OrderingConfig;
-using transitmapper::graph::InnerGeometry;
+using shared::linegraph::InnerGeometry;
 using util::geo::BezierCurve;
-
-// _____________________________________________________________________________
-TransitGraph::TransitGraph() { _bbox = util::geo::minbox<double>(); }
-
-// _____________________________________________________________________________
-TransitGraph::~TransitGraph() {
-  for (auto n : _nodes) {
-    delete n;
-  }
-}
 
 // _____________________________________________________________________________
 const OrderingConfig& TransitGraph::getConfig() const { return _config; }
@@ -48,334 +40,38 @@ const OrderingConfig& TransitGraph::getConfig() const { return _config; }
 void TransitGraph::setConfig(const OrderingConfig& c) { _config = c; }
 
 // _____________________________________________________________________________
-void TransitGraph::addNd(Node* n) {
-  _nodes.insert(n);
-  // expand the bounding box to hold this new node
-  expandBBox(n->getPos());
-}
-
-// _____________________________________________________________________________
-void TransitGraph::expandBBox(const DPoint& p) {
-  _bbox = util::geo::extendBox(p, _bbox);
-}
-
-// _____________________________________________________________________________
-Node* TransitGraph::getNodeById(const std::string& id) const {
-  for (auto n : _nodes) {
-    if (n->getId() == id) return n;
-  }
-
-  return 0;
-}
-
-// _____________________________________________________________________________
-Edge* TransitGraph::addEdg(Node* from, Node* to, PolyLine<double> pl, double w,
-                           double s) {
-  if (from == to) return 0;
-  Edge* e = getEdg(from, to);
-  if (!e) {
-    e = new Edge(from, to, pl, w, s);
-    from->addEdg(e);
-    to->addEdg(e);
-    _bbox =
-        util::geo::extendBox(util::geo::getBoundingBox(pl.getLine()), _bbox);
-  }
-  return e;
-}
-
-// _____________________________________________________________________________
-void TransitGraph::delEdg(Node* from, Node* to) {
-  Edge* toDel = getEdg(from, to);
-  if (!toDel) return;
-
-  from->removeEdge(toDel);
-  to->removeEdge(toDel);
-
-  assert(!getEdg(from, to));
-
-  delete toDel;
-}
-
-// _____________________________________________________________________________
-void TransitGraph::addRoute(const Route* r) {
-  if (!getRoute(r->getId())) {
-    _routes[r->getId()] = r;
-  }
-}
-
-// _____________________________________________________________________________
-const Route* TransitGraph::getRoute(const std::string& id) const {
-  auto f = _routes.find(id);
-  if (f == _routes.end()) return 0;
-
-  return f->second;
-}
-
-// _____________________________________________________________________________
-Edge* TransitGraph::getEdg(Node* from, Node* to) {
-  for (auto e : from->getAdjListOut()) {
-    if (e->getTo() == to) return e;
-  }
-
-  // also search in the opposite direction, we are handling an undirected
-  // graph here
-  for (auto e : from->getAdjListIn()) {
-    if (e->getFrom() == to) return e;
-  }
-
-  return 0;
-}
-
-// _____________________________________________________________________________
-const std::set<Node*>& TransitGraph::getNds() const { return _nodes; }
-
-// _____________________________________________________________________________
-std::set<Node*>* TransitGraph::getNds() { return &_nodes; }
-
-// _____________________________________________________________________________
-const DBox& TransitGraph::getBBox() const { return _bbox; }
-
-// _____________________________________________________________________________
 size_t TransitGraph::getNumNodes() const {
-  return getNumNodes(true) + getNumNodes(false);
+  return 0;
 }
 
 // _____________________________________________________________________________
-size_t TransitGraph::getNumRoutes() const { return _routes.size(); }
+size_t TransitGraph::getNumRoutes() const {
+  return 0;
+}
 
 // _____________________________________________________________________________
 size_t TransitGraph::getMaxCardinality() const {
-  size_t ret = 0;
-  for (auto n : getNds()) {
-    for (auto e : n->getAdjListOut()) {
-      if (e->getCardinality() > ret) ret = e->getCardinality();
-    }
-  }
-  return ret;
-}
-
-// _____________________________________________________________________________
-size_t TransitGraph::maxDeg() const {
-  size_t ret = 0;
-  for (auto n : getNds()) {
-    if (n->getAdjListOut().size() + n->getAdjListIn().size() > ret) {
-      ret = n->getAdjListOut().size() + n->getAdjListIn().size();
-    }
-  }
-  return ret;
+  return 0;
 }
 
 // _____________________________________________________________________________
 size_t TransitGraph::getNumEdges() const {
-  size_t ret = 0;
-
-  for (auto n : getNds()) {
-    ret += n->getAdjListOut().size();
-  }
-
-  return ret;
+  return 0;
 }
 
 // _____________________________________________________________________________
 size_t TransitGraph::getNumNodes(bool topo) const {
-  size_t ret = 0;
-  for (auto n : _nodes) {
-    if (n->getAdjListIn().size() + n->getAdjListOut().size() == 0) continue;
-    if ((n->getStops().size() == 0) ^ !topo) ret++;
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
-bool TransitGraph::readFromJson(std::istream* s) {
-  nlohmann::json j;
-  (*s) >> j;
-
-  if (j["type"] == "FeatureCollection") {
-    // first pass, nodes
-    for (auto feature : j["features"]) {
-      auto props = feature["properties"];
-      auto geom = feature["geometry"];
-      if (geom["type"] == "Point") {
-        std::string id = util::toString(props["id"]);
-
-        // check if node already exists
-        if (getNodeById(id)) continue;
-
-        std::vector<double> coords = geom["coordinates"];
-
-        Node* n = new Node(id, coords[0], coords[1]);
-
-        shared::linegraph::Station i("", "", n->getPos());
-        if (!props["station_id"].is_null() ||
-            !props["station_label"].is_null()) {
-          if (!props["station_id"].is_null())
-            i.id = util::toString(props["station_id"]);
-          if (!props["station_label"].is_null())
-            i.name = util::toString(props["station_label"]);
-          n->addStop(i);
-        }
-
-        addNd(n);
-      }
-    }
-
-    // second pass, edges
-    for (auto feature : j["features"]) {
-      auto props = feature["properties"];
-      auto geom = feature["geometry"];
-      if (geom["type"] == "LineString") {
-        if (props["lines"].is_null() || props["lines"].size() == 0) continue;
-        std::string from = util::toString(props["from"]);
-        std::string to = util::toString(props["to"]);
-
-        std::vector<std::vector<double>> coords = geom["coordinates"];
-
-        PolyLine<double> pl;
-        for (auto coord : coords) {
-          double x = coord[0], y = coord[1];
-          DPoint p(x, y);
-          pl << p;
-          expandBBox(p);
-        }
-
-        // TODO
-        // pl.applyChaikinSmooth(_cfg->inputSmoothing);
-
-        Node* fromN = getNodeById(from);
-        Node* toN = getNodeById(to);
-
-        if (!fromN) {
-          continue;
-        }
-
-        if (!toN) {
-          continue;
-        }
-
-        // TODO
-        Edge* e = addEdg(fromN, toN, pl, 0, 0);
-
-        assert(e);
-        assert(getNodeById(from));
-        assert(getNodeById(to));
-
-        for (auto route : props["lines"]) {
-          std::string id;
-          if (!route["id"].is_null()) {
-            id = util::toString(route["id"]);
-          } else if (!route["label"].is_null()) {
-            id = util::toString(route["label"]);
-          } else if (!route["color"].is_null()) {
-            id = route["color"];
-          } else
-            continue;
-
-          const Route* r = getRoute(id);
-          if (!r) {
-            std::string label = route["label"].is_null() ? "" : route["label"];
-            std::string color = route["color"];
-            r = new Route(id, label, color);
-            addRoute(r);
-          }
-
-          Node* dir = 0;
-
-          if (!route["direction"].is_null()) {
-            dir = getNodeById(util::toString(route["direction"]));
-          }
-
-          if (!route["style"].is_null()) {
-            style::LineStyle ls;
-            auto style = route["style"];
-            std::string dashArray;
-            if (!style["dash-array"].is_null()) {
-              dashArray = style["dash-array"];
-            }
-
-            if (!style["css"].is_null()) {
-              ls.setCss(style["css"]);
-            }
-
-            ls.setDashArray(dashArray);
-
-            e->addRoute(r, dir, ls);
-          } else {
-            e->addRoute(r, dir);
-          }
-        }
-      }
-    }
-
-    // third pass, exceptions (TODO: do this in the first part, store in some
-    // data strcuture,
-    //  add here!)
-    for (auto feature : j["features"]) {
-      auto props = feature["properties"];
-      auto geom = feature["geometry"];
-      if (geom["type"] == "Point") {
-        std::string id = util::toString(props["id"]);
-
-        Node* n = getNodeById(id);
-
-        if (!n) continue;
-
-        if (!props["excluded_line_conns"].is_null()) {
-          for (auto excl : props["excluded_line_conns"]) {
-            std::string rid = util::toString(excl["route"]);
-            std::string nid1 = util::toString(excl["edge1_node"]);
-            std::string nid2 = util::toString(excl["edge2_node"]);
-
-            const Route* r = getRoute(rid);
-
-            if (!r) {
-              continue;
-            }
-
-            Node* n1 = getNodeById(nid1);
-            Node* n2 = getNodeById(nid2);
-
-            if (!n1) {
-              continue;
-            }
-
-            if (!n2) {
-              continue;
-            }
-
-            Edge* a = n->getEdg(n1);
-            Edge* b = n->getEdg(n2);
-
-            if (!a) {
-              continue;
-            }
-
-            if (!b) {
-              continue;
-            }
-
-            n->addRouteConnException(r, a, b);
-          }
-        }
-      }
-    }
-
-  } else {
-    return false;
-  }
-
-  return true;
+  return 0;
 }
 
 // _____________________________________________________________________________
 std::vector<InnerGeometry> TransitGraph::getInnerGeometries(
-    const Node* n, const OrderingConfig& c, double prec) const {
+    const LineNode* n, const OrderingConfig& c, double prec) const {
   std::vector<InnerGeometry> ret;
   std::map<const Route*, std::set<const NodeFront*>> processed;
 
-  for (size_t i = 0; i < n->getMainDirs().size(); ++i) {
-    const NodeFront& nf = n->getMainDirs()[i];
+  for (size_t i = 0; i < n->pl().getMainDirs().size(); ++i) {
+    const NodeFront& nf = n->pl().getMainDirs()[i];
 
     if (!c.count(nf.edge)) {
       std::cout << "No ordering for edge " << nf.edge << " found!" << std::endl;
@@ -387,7 +83,7 @@ std::vector<InnerGeometry> TransitGraph::getInnerGeometries(
       const RouteOccurance& routeOcc = (*nf.edge->getRoutes())[j];
       Partner o(&nf, nf.edge, routeOcc.route);
 
-      std::vector<Partner> partners = n->getPartners(&nf, routeOcc);
+      std::vector<Partner> partners = n->pl().getPartners(&nf, routeOcc);
 
       for (const Partner& p : partners) {
         if (processed[routeOcc.route].find(p.front) !=
@@ -425,7 +121,7 @@ std::vector<InnerGeometry> TransitGraph::getInnerGeometries(
 }
 
 // _____________________________________________________________________________
-InnerGeometry TransitGraph::getInnerBezier(const Node* n,
+InnerGeometry TransitGraph::getInnerBezier(const LineNode* n,
                                            const OrderingConfig& cf,
                                            const Partner& partnerFrom,
                                            const Partner& partnerTo,
@@ -524,7 +220,7 @@ InnerGeometry TransitGraph::getInnerBezier(const Node* n,
 
 // _____________________________________________________________________________
 InnerGeometry TransitGraph::getTerminusStraightLine(
-    const Node* n, const OrderingConfig& c, const Partner& partnerFrom) const {
+    const LineNode* n, const OrderingConfig& c, const Partner& partnerFrom) const {
   DPoint p = partnerFrom.front->getTripOccPos(partnerFrom.route, c, false);
   DPoint pp = partnerFrom.front->getTripOccPos(partnerFrom.route, c, true);
 
@@ -538,7 +234,7 @@ InnerGeometry TransitGraph::getTerminusStraightLine(
 
 // _____________________________________________________________________________
 InnerGeometry TransitGraph::getInnerStraightLine(
-    const Node* n, const OrderingConfig& c, const Partner& partnerFrom,
+    const LineNode* n, const OrderingConfig& c, const Partner& partnerFrom,
     const Partner& partnerTo) const {
   DPoint p = partnerFrom.front->getTripOccPos(partnerFrom.route, c, false);
   DPoint pp = partnerTo.front->getTripOccPos(partnerTo.route, c, false);
@@ -552,7 +248,7 @@ InnerGeometry TransitGraph::getInnerStraightLine(
 }
 
 // _____________________________________________________________________________
-InnerGeometry TransitGraph::getTerminusBezier(const Node* n,
+InnerGeometry TransitGraph::getTerminusBezier(const LineNode* n,
                                               const OrderingConfig& cf,
                                               const Partner& partnerFrom,
                                               double prec) const {
@@ -586,7 +282,7 @@ InnerGeometry TransitGraph::getTerminusBezier(const Node* n,
 
 // _____________________________________________________________________________
 Polygon<double> TransitGraph::getConvexFrontHull(
-    const Node* n, double d, bool rectangulize,
+    const LineNode* n, double d, bool rectangulize,
     bool simpleRenderForTwoEdgeNodes) const {
   double cd = d;
 
@@ -603,9 +299,9 @@ Polygon<double> TransitGraph::getConvexFrontHull(
   bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
   bgeo::strategy::buffer::side_straight sideStrat;
 
-  if (!simpleRenderForTwoEdgeNodes || n->getMainDirs().size() != 2) {
+  if (!simpleRenderForTwoEdgeNodes || n->pl().getMainDirs().size() != 2) {
     MultiLine<double> l;
-    for (auto& nf : n->getMainDirs()) {
+    for (auto& nf : n->pl().getMainDirs()) {
       l.push_back(
           nf.geom
               .getSegment((cd / 2) / nf.geom.getLength(),
@@ -688,8 +384,36 @@ Polygon<double> TransitGraph::getConvexFrontHull(
 }
 
 // _____________________________________________________________________________
-Polygon<double> TransitGraph::getStationHull(const Node* n, double d,
+Polygon<double> TransitGraph::getStationHull(const LineNode* n, double d,
                                              bool simple) const {
-  if (n->getMainDirs().size() == 0) return Polygon<double>();
+  if (n->pl().getMainDirs().size() == 0) return Polygon<double>();
   return getConvexFrontHull(n, d, true, simple);
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::getConnCardinality(const LineNode* n) {
+  size_t ret = 0;
+  std::map<const Route*, std::set<const shared::linegraph::NodeFront*>> processed;
+
+  for (size_t i = 0; i < n->pl().getMainDirs().size(); ++i) {
+    const auto& nf = n->pl().getMainDirs()[i];
+
+    for (size_t j = 0; j < nf.edge->getCardinality(); j++) {
+      const RouteOccurance& routeOcc = (*nf.edge->getRoutes())[j];
+
+      std::vector<Partner> partners = getPartners(&nf, routeOcc);
+
+      for (const Partner& p : partners) {
+        if (processed[routeOcc.route].find(p.front) !=
+            processed[routeOcc.route].end()) {
+          continue;
+        }
+        ret++;
+      }
+
+      processed[routeOcc.route].insert(&nf);
+    }
+  }
+
+  return ret;
 }

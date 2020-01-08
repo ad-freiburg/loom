@@ -36,11 +36,11 @@ class SvgRendererException : public std::exception {
 };
 
 struct InnerClique {
-  InnerClique(graph::InnerGeometry geom) { geoms.push_back(geom); };
-  std::vector<graph::InnerGeometry> geoms;
+  InnerClique(shared::linegraph::InnerGeometry geom) { geoms.push_back(geom); };
+  std::vector<shared::linegraph::InnerGeometry> geoms;
 
   double getZWeight() const;
-  size_t getNumBranchesIn(const graph::NodeFront* front) const;
+  size_t getNumBranchesIn(const shared::linegraph::NodeFront* front) const;
   bool operator<(const InnerClique& rhs) const;
 };
 
@@ -119,7 +119,7 @@ class SvgRenderer : public Renderer {
                           const RenderParams& params);
 
   void renderNodeConnections(const graph::TransitGraph& outG,
-                             const graph::Node* n, const RenderParams& params);
+                             const shared::linegraph::LineNode* n, const RenderParams& params);
 
   void renderLinePart(const PolyLine<double> p, double width,
                       const shared::linegraph::Route& route,
@@ -138,17 +138,17 @@ class SvgRenderer : public Renderer {
                         const RenderParams& params);
 
   std::multiset<InnerClique> getInnerCliques(
-      std::vector<graph::InnerGeometry> geoms, size_t level) const;
+      std::vector<shared::linegraph::InnerGeometry> geoms, size_t level) const;
 
-  void renderClique(const InnerClique& c, const graph::Node* node);
+  void renderClique(const InnerClique& c, const shared::linegraph::LineNode* node);
 
-  bool isNextTo(const graph::InnerGeometry& a,
-                const graph::InnerGeometry b) const;
-  bool hasSameOrigin(const graph::InnerGeometry& a,
-                     const graph::InnerGeometry b) const;
+  bool isNextTo(const shared::linegraph::InnerGeometry& a,
+                const shared::linegraph::InnerGeometry b) const;
+  bool hasSameOrigin(const shared::linegraph::InnerGeometry& a,
+                     const shared::linegraph::InnerGeometry b) const;
 
   size_t getNextPartner(const InnerClique& forGeom,
-                        const std::vector<graph::InnerGeometry>& pool,
+                        const std::vector<shared::linegraph::InnerGeometry>& pool,
                         size_t level) const;
 
   std::string getMarkerPathMale(double w) const;

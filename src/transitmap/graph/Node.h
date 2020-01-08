@@ -104,8 +104,6 @@ class Node {
   std::vector<Partner> getPartners(const NodeFront* f,
                                    const RouteOccurance& ro) const;
 
-  size_t getConnCardinality() const;
-
   // add edge to this node's adjacency lists
   void addEdg(Edge* e);
 

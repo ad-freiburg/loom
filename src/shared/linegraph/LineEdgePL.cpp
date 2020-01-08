@@ -118,3 +118,28 @@ const RouteOcc& LineEdgePL::routeOccAtPos(size_t i) const {
   for (size_t j = 0; j < i; j++) it++;
   return *it;
 }
+
+// _____________________________________________________________________________
+size_t LineEdgePL::getRoutePosUnder(
+    const Route* r, const std::vector<size_t> ordering) const {
+  size_t i = 0;
+  for (const RouteOcc& ro : _routes) {
+    if (ro.route == r) {
+      size_t pos =
+          std::find(ordering.begin(), ordering.end(), i) - ordering.begin();
+      return pos;
+    }
+    i++;
+  }
+  return -1;
+}
+
+// _____________________________________________________________________________
+size_t LineEdgePL::getRoutePos(const Route* r) const {
+  size_t i = 0;
+  for (const RouteOcc& ro : _routes) {
+    if (ro.route == r) return i;
+    i++;
+  }
+  return -1;
+}

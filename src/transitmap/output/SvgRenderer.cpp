@@ -13,6 +13,7 @@
 using namespace transitmapper;
 using namespace output;
 using shared::linegraph::Route;
+using shared::linegraph::LineNode;
 
 using util::toString;
 
@@ -97,7 +98,7 @@ void SvgRenderer::print(const graph::TransitGraph& outG) {
 
   _w.closeTag();
 
-  for (graph::Node* n : outG.getNds()) {
+  for (auto n : outG.getNds()) {
     if (_cfg->renderNodeConnections) {
       renderNodeConnections(outG, n, rparams);
     }
@@ -117,11 +118,11 @@ void SvgRenderer::print(const graph::TransitGraph& outG) {
 void SvgRenderer::outputNodes(const graph::TransitGraph& outG,
                               const RenderParams& rparams) {
   _w.openTag("g");
-  for (graph::Node* n : outG.getNds()) {
+  for (auto n : outG.getNds()) {
     std::map<std::string, std::string> params;
 
-    if (_cfg->renderStations && n->getStops().size() > 0 &&
-        n->getMainDirs().size() > 0) {
+    if (_cfg->renderStations && n->pl().getStops().size() > 0 &&
+        n->pl().getMainDirs().size() > 0) {
       params["stroke"] = "black";
       params["stroke-width"] =
           util::toString((_cfg->lineWidth / 2) * _cfg->outputResolution);
@@ -143,10 +144,10 @@ void SvgRenderer::outputNodes(const graph::TransitGraph& outG,
 void SvgRenderer::renderNodeFronts(const graph::TransitGraph& outG,
                                    const RenderParams& rparams) {
   _w.openTag("g");
-  for (graph::Node* n : outG.getNds()) {
-    std::string color = n->getStops().size() > 0 ? "red" : "black";
-    for (size_t i = 0; i < n->getMainDirs().size(); i++) {
-      auto& f = n->getMainDirs()[i];
+  for (LineNode* n : outG.getNds()) {
+    std::string color = n->pl().getStops().size() > 0 ? "red" : "black";
+    for (size_t i = 0; i < n->pl().getMainDirs().size(); i++) {
+      auto& f = n->pl().getMainDirs()[i];
       const PolyLine<double> p = f.geom;
       std::stringstream style;
       style << "fill:none;stroke:" << color
@@ -164,7 +165,7 @@ void SvgRenderer::renderNodeFronts(const graph::TransitGraph& outG,
                 "miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
       params["style"] = styleA.str();
 
-      printLine(PolyLine<double>(n->getPos(), a), params, rparams);
+      printLine(PolyLine<double>(*n->pl().getGeom(), a), params, rparams);
     }
   }
   _w.closeTag();
@@ -174,10 +175,10 @@ void SvgRenderer::renderNodeFronts(const graph::TransitGraph& outG,
 void SvgRenderer::outputEdges(const graph::TransitGraph& outG,
                               const RenderParams& rparams) {
   struct cmp {
-    bool operator()(const graph::Node* lhs, const graph::Node* rhs) const {
+    bool operator()(const LineNode* lhs, const LineNode* rhs) const {
       return lhs->getAdjList().size() > rhs->getAdjList().size() ||
              (lhs->getAdjList().size() == rhs->getAdjList().size() &&
-              lhs->getConnCardinality() > rhs->getConnCardinality()) ||
+              graph::TransitGraph::getConnCardinality(lhs) > graph::TransitGraph::getConnCardinality(rhs)) ||
              (lhs->getAdjList().size() == rhs->getAdjList().size() &&
               lhs > rhs);
     }
@@ -190,15 +191,15 @@ void SvgRenderer::outputEdges(const graph::TransitGraph& outG,
     }
   };
 
-  std::set<const graph::Node*, cmp> nodesOrdered;
+  std::set<const LineNode*, cmp> nodesOrdered;
   std::set<const graph::Edge*, cmpEdge> edgesOrdered;
-  for (const graph::Node* n : outG.getNds()) {
+  for (const auto n : outG.getNds()) {
     nodesOrdered.insert(n);
   }
 
   std::set<const graph::Edge*> rendered;
 
-  for (const graph::Node* n : nodesOrdered) {
+  for (const auto n : nodesOrdered) {
     edgesOrdered.insert(n->getAdjListIn().begin(), n->getAdjListIn().end());
     edgesOrdered.insert(n->getAdjListOut().begin(), n->getAdjListOut().end());
 
@@ -212,7 +213,7 @@ void SvgRenderer::outputEdges(const graph::TransitGraph& outG,
 
 // _____________________________________________________________________________
 void SvgRenderer::renderNodeConnections(const graph::TransitGraph& outG,
-                                        const graph::Node* n,
+                                        const LineNode* n,
                                         const RenderParams& rparams) {
   auto geoms = outG.getInnerGeometries(n, outG.getConfig(),
                                        _cfg->innerGeometryPrecision);
@@ -224,7 +225,7 @@ void SvgRenderer::renderNodeConnections(const graph::TransitGraph& outG,
 
 // _____________________________________________________________________________
 std::multiset<InnerClique> SvgRenderer::getInnerCliques(
-    std::vector<graph::InnerGeometry> pool, size_t level) const {
+    std::vector<shared::linegraph::InnerGeometry> pool, size_t level) const {
   std::multiset<InnerClique> ret;
 
   // start with the first geom in pool
@@ -246,10 +247,10 @@ std::multiset<InnerClique> SvgRenderer::getInnerCliques(
 
 // _____________________________________________________________________________
 size_t SvgRenderer::getNextPartner(
-    const InnerClique& forClique, const std::vector<graph::InnerGeometry>& pool,
+    const InnerClique& forClique, const std::vector<shared::linegraph::InnerGeometry>& pool,
     size_t level) const {
   for (size_t i = 0; i < pool.size(); i++) {
-    const graph::InnerGeometry& ic = pool[i];
+    const auto& ic = pool[i];
     for (auto& ciq : forClique.geoms) {
       if (isNextTo(ic, ciq) || (level > 1 && hasSameOrigin(ic, ciq))) {
         return i;
@@ -261,8 +262,8 @@ size_t SvgRenderer::getNextPartner(
 }
 
 // _____________________________________________________________________________
-bool SvgRenderer::isNextTo(const graph::InnerGeometry& a,
-                           const graph::InnerGeometry b) const {
+bool SvgRenderer::isNextTo(const shared::linegraph::InnerGeometry& a,
+                           const shared::linegraph::InnerGeometry b) const {
   // TODO!!!!!
   return false;
 
@@ -291,8 +292,8 @@ bool SvgRenderer::isNextTo(const graph::InnerGeometry& a,
 }
 
 // _____________________________________________________________________________
-bool SvgRenderer::hasSameOrigin(const graph::InnerGeometry& a,
-                                const graph::InnerGeometry b) const {
+bool SvgRenderer::hasSameOrigin(const shared::linegraph::InnerGeometry& a,
+                                const shared::linegraph::InnerGeometry b) const {
   if (a.from.front == b.from.front) {
     return a.slotFrom == b.slotFrom;
   }
@@ -310,13 +311,13 @@ bool SvgRenderer::hasSameOrigin(const graph::InnerGeometry& a,
 }
 
 // _____________________________________________________________________________
-void SvgRenderer::renderClique(const InnerClique& cc, const graph::Node* n) {
+void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
   _innerDelegates.push_back(
       std::map<uintptr_t, std::vector<OutlinePrintPair>>());
   std::multiset<InnerClique> renderCliques = getInnerCliques(cc.geoms, 0);
   for (const auto& c : renderCliques) {
     // the longest geom will be the ref geom
-    graph::InnerGeometry ref = c.geoms[0];
+    shared::linegraph::InnerGeometry ref = c.geoms[0];
     for (size_t i = 1; i < c.geoms.size(); i++) {
       if (c.geoms[i].geom.getLength() > ref.geom.getLength()) ref = c.geoms[i];
     }
@@ -677,7 +678,7 @@ void SvgRenderer::printPolygon(const DPolygon& g, const std::string& style,
 }
 
 // _____________________________________________________________________________
-size_t InnerClique::getNumBranchesIn(const graph::NodeFront* front) const {
+size_t InnerClique::getNumBranchesIn(const shared::linegraph::NodeFront* front) const {
   std::set<size_t> slots;
   size_t ret = 0;
   for (const auto& ig : geoms) {
@@ -699,7 +700,7 @@ double InnerClique::getZWeight() const {
   ret = geoms.size();  // baseline: threads with more lines to the bottom,
                        // because they are easier to follow
 
-  for (const graph::NodeFront& nf :
+  for (const auto& nf :
        geoms.front().from.front->n->getMainDirs()) {
     ret -= getNumBranchesIn(&nf) * BRANCH_WEIGHT;
   }
