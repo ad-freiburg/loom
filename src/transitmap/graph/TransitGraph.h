@@ -13,6 +13,7 @@
 #include <string>
 
 #include "shared/linegraph/Route.h"
+#include "shared/linegraph/LineGraph.h"
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/OrderingConfig.h"
@@ -29,29 +30,40 @@ class TransitGraph {
   TransitGraph();
   ~TransitGraph();
 
+  // +
   void addNd(Node* n);
+  // +
   Edge* addEdg(Node* from, Node* to, geo::PolyLine<double> pl, double w,
                double s);
+  // +
   Edge* getEdg(Node* from, Node* to);
 
-  void deleteEdge(Node* from, Node* to);
+  // +
+  void delEdg(Node* from, Node* to);
 
+  // +
   const std::set<Node*>& getNds() const;
+  // +
   std::set<Node*>* getNds();
+
+  // +
+  void addRoute(const shared::linegraph::Route* r);
 
   Node* getNodeById(const std::string& id) const;
 
-  const geo::DBox& getBoundingBox() const;
-  geo::DBox getBoundingBox(double p) const;
+  // +
+  const geo::DBox& getBBox() const;
 
-  size_t getMaxDegree() const;
+  // +
+  size_t maxDeg() const;
 
   const OrderingConfig& getConfig() const;
   void setConfig(const OrderingConfig&);
 
-  void addRoute(const shared::linegraph::Route* r);
+  // +
   const shared::linegraph::Route* getRoute(const std::string& id) const;
 
+  // +
   void expandBBox(const geo::DPoint& p);
 
   size_t getNumNodes() const;
@@ -59,6 +71,9 @@ class TransitGraph {
   size_t getNumEdges() const;
   size_t getNumRoutes() const;
   size_t getMaxCardinality() const;
+
+  // +
+  bool readFromJson(std::istream* s);
 
  private:
   std::set<Node*> _nodes;

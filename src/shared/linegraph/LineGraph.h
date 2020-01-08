@@ -43,6 +43,12 @@ class LineGraph
 
   size_t maxDeg() const;
 
+  // TODO: make the following functions private
+  void addRoute(const Route* r);
+  const Route* getRoute(const std::string& id) const;
+  void expandBBox(const util::geo::Point<double>& p);
+  //
+
   static LineNode* sharedNode(const LineEdge* a, const LineEdge* b);
   static std::vector<RouteOcc> getCtdRoutesIn(const Route* r,
                                               const LineNode* dir,
@@ -54,17 +60,13 @@ class LineGraph
   static size_t getLDeg(const LineNode* nd);
   static size_t getMaxLineNum(const LineNode* nd);
 
+
  private:
   util::geo::Box<double> _bbox;
 
   ISect getNextIntersection();
 
   void buildGrids();
-
-  void addRoute(const Route* r);
-  const Route* getRoute(const std::string& id) const;
-
-  void expandBBox(const util::geo::Point<double>& p);
 
   std::set<LineEdge*> proced;
   std::map<std::string, const Route*> _routes;

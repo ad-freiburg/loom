@@ -17,7 +17,7 @@
 #include "transitmap/optim/CombOptimizer.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/Scorer.h"
-#include "transitmap/output/SvgOutput.h"
+#include "transitmap/output/SvgRenderer.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
 
@@ -66,10 +66,10 @@ int main(int argc, char** argv) {
   LOG(INFO) << "Optimizing...";
 
   double maxCrossPen =
-      g.getMaxDegree() * (cfg.crossPenMultiSameSeg > cfg.crossPenMultiDiffSeg
+      g.maxDeg() * (cfg.crossPenMultiSameSeg > cfg.crossPenMultiDiffSeg
                               ? cfg.crossPenMultiSameSeg
                               : cfg.crossPenMultiDiffSeg);
-  double maxSplitPen = g.getMaxDegree() * cfg.splitPenWeight;
+  double maxSplitPen = g.maxDeg() * cfg.splitPenWeight;
 
   // TODO move this into configuration, at least partially
   transitmapper::graph::Penalties pens{maxCrossPen,
@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
               << g.getMaxCardinality();
     LOG(INFO) << "(stats)   Number of poss. solutions: "
               << scorer.getNumPossSolutions();
-    LOG(INFO) << "(stats)   Highest node degree: " << g.getMaxDegree();
+    LOG(INFO) << "(stats)   Highest node degree: " << g.maxDeg();
   }
 
   LOG(INFO) << "(stats) Max crossing pen: " << maxCrossPen;
@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
     LOG(INFO) << "Outputting to SVG " << path << " ..." << std::endl;
     std::ofstream o;
     o.open(path);
-    output::SvgOutput svgOut(&o, &cfg, &scorer);
+    output::SvgRenderer svgOut(&o, &cfg, &scorer);
     svgOut.print(g);
   }
 
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
       LOG(INFO) << "Outputting edge SVG to " << path << " ..." << std::endl;
       std::ofstream o;
       o.open(path);
-      output::SvgOutput svgOut(&o, &cfg, &scorer);
+      output::SvgRenderer svgOut(&o, &cfg, &scorer);
       svgOut.print(g);
     }
 
@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
       LOG(INFO) << "Outputting node SVG to " << path << " ..." << std::endl;
       std::ofstream o;
       o.open(path);
-      output::SvgOutput svgOut(&o, &cfg, &scorer);
+      output::SvgRenderer svgOut(&o, &cfg, &scorer);
       svgOut.print(g);
     }
 
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
       LOG(INFO) << "Outputting station SVG to " << path << " ..." << std::endl;
       std::ofstream o;
       o.open(path);
-      output::SvgOutput svgOut(&o, &cfg, &scorer);
+      output::SvgRenderer svgOut(&o, &cfg, &scorer);
       svgOut.print(g);
     }
   }
@@ -186,15 +186,16 @@ int main(int argc, char** argv) {
 
     std::ofstream file;
     file.open(cfg.worldFilePath);
+    auto box = util::geo::pad(g.getBBox(), cfg.outputPadding);
     if (file) {
       file << 1 / cfg.outputResolution << std::endl
            << 0 << std::endl
            << 0 << std::endl
            << -1 / cfg.outputResolution << std::endl
            << std::fixed
-           << g.getBoundingBox(cfg.outputPadding).getLowerLeft().getX()
+           << box.getLowerLeft().getX()
            << std::endl
-           << g.getBoundingBox(cfg.outputPadding).getUpperRight().getY()
+           << box.getUpperRight().getY()
            << std::endl;
       file.close();
     }

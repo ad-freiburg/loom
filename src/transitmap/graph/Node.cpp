@@ -233,61 +233,6 @@ std::vector<Partner> Node::getPartners(const NodeFront* f,
   return ret;
 }
 
-// _____________________________________________________________________________
-std::vector<InnerGeometry> Node::getInnerGeometries(const OrderingConfig& c,
-                                                    double prec) const {
-  std::vector<InnerGeometry> ret;
-  std::map<const Route*, std::set<const NodeFront*>> processed;
-
-  for (size_t i = 0; i < getMainDirs().size(); ++i) {
-    const NodeFront& nf = getMainDirs()[i];
-
-    if (!c.count(nf.edge)) {
-      std::cout << "No ordering for edge " << nf.edge << " found!" << std::endl;
-      assert(false);
-    }
-    const std::vector<size_t>* ordering = &c.find(nf.edge)->second;
-
-    for (size_t j : *ordering) {
-      const RouteOccurance& routeOcc = (*nf.edge->getRoutes())[j];
-      Partner o(&nf, nf.edge, routeOcc.route);
-
-      std::vector<Partner> partners = getPartners(&nf, routeOcc);
-
-      for (const Partner& p : partners) {
-        if (processed[routeOcc.route].find(p.front) !=
-            processed[routeOcc.route].end()) {
-          continue;
-        }
-
-        auto is = getInnerStraightLine(c, o, p);
-        if (is.geom.getLength() == 0) continue;
-
-        if (prec > 0) {
-          ret.push_back(getInnerBezier(c, o, p, prec));
-        } else {
-          ret.push_back(is);
-        }
-      }
-
-      // handle lines where this node is the terminus
-      if (partners.size() == 0) {
-        auto is = getTerminusStraightLine(c, o);
-        if (is.geom.getLength() > 0) {
-          if (prec > 0) {
-            ret.push_back(getTerminusBezier(c, o, prec));
-          } else {
-            ret.push_back(is);
-          }
-        }
-      }
-
-      processed[routeOcc.route].insert(&nf);
-    }
-  }
-
-  return ret;
-}
 
 // _____________________________________________________________________________
 InnerGeometry Node::getTerminusStraightLine(const OrderingConfig& c,
@@ -456,34 +401,6 @@ InnerGeometry Node::getInnerBezier(const OrderingConfig& cf,
 }
 
 // _____________________________________________________________________________
-size_t Node::getConnCardinality() const {
-  size_t ret = 0;
-  std::map<const Route*, std::set<const NodeFront*>> processed;
-
-  for (size_t i = 0; i < getMainDirs().size(); ++i) {
-    const NodeFront& nf = getMainDirs()[i];
-
-    for (size_t j = 0; j < nf.edge->getCardinality(); j++) {
-      const RouteOccurance& routeOcc = (*nf.edge->getRoutes())[j];
-
-      std::vector<Partner> partners = getPartners(&nf, routeOcc);
-
-      for (const Partner& p : partners) {
-        if (processed[routeOcc.route].find(p.front) !=
-            processed[routeOcc.route].end()) {
-          continue;
-        }
-        ret++;
-      }
-
-      processed[routeOcc.route].insert(&nf);
-    }
-  }
-
-  return ret;
-}
-
-// _____________________________________________________________________________
 void Node::generateStationHull(double d, bool useSimple) {
   if (getMainDirs().size() == 0) return;
   _stationHull = getConvexFrontHull(d, true, useSimple);
@@ -633,4 +550,88 @@ Edge* Node::getEdg(const Node* other) const {
   }
 
   return 0;
+}
+
+// _____________________________________________________________________________
+size_t Node::getConnCardinality() const {
+  size_t ret = 0;
+  std::map<const Route*, std::set<const NodeFront*>> processed;
+
+  for (size_t i = 0; i < getMainDirs().size(); ++i) {
+    const NodeFront& nf = getMainDirs()[i];
+
+    for (size_t j = 0; j < nf.edge->getCardinality(); j++) {
+      const RouteOccurance& routeOcc = (*nf.edge->getRoutes())[j];
+
+      std::vector<Partner> partners = getPartners(&nf, routeOcc);
+
+      for (const Partner& p : partners) {
+        if (processed[routeOcc.route].find(p.front) !=
+            processed[routeOcc.route].end()) {
+          continue;
+        }
+        ret++;
+      }
+
+      processed[routeOcc.route].insert(&nf);
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::vector<InnerGeometry> Node::getInnerGeometries(const OrderingConfig& c,
+                                                    double prec) const {
+  std::vector<InnerGeometry> ret;
+  std::map<const Route*, std::set<const NodeFront*>> processed;
+
+  for (size_t i = 0; i < getMainDirs().size(); ++i) {
+    const NodeFront& nf = getMainDirs()[i];
+
+    if (!c.count(nf.edge)) {
+      std::cout << "No ordering for edge " << nf.edge << " found!" << std::endl;
+      assert(false);
+    }
+    const std::vector<size_t>* ordering = &c.find(nf.edge)->second;
+
+    for (size_t j : *ordering) {
+      const RouteOccurance& routeOcc = (*nf.edge->getRoutes())[j];
+      Partner o(&nf, nf.edge, routeOcc.route);
+
+      std::vector<Partner> partners = getPartners(&nf, routeOcc);
+
+      for (const Partner& p : partners) {
+        if (processed[routeOcc.route].find(p.front) !=
+            processed[routeOcc.route].end()) {
+          continue;
+        }
+
+        auto is = getInnerStraightLine(c, o, p);
+        if (is.geom.getLength() == 0) continue;
+
+        if (prec > 0) {
+          ret.push_back(getInnerBezier(c, o, p, prec));
+        } else {
+          ret.push_back(is);
+        }
+      }
+
+      // handle lines where this node is the terminus
+      if (partners.size() == 0) {
+        auto is = getTerminusStraightLine(c, o);
+        if (is.geom.getLength() > 0) {
+          if (prec > 0) {
+            ret.push_back(getTerminusBezier(c, o, prec));
+          } else {
+            ret.push_back(is);
+          }
+        }
+      }
+
+      processed[routeOcc.route].insert(&nf);
+    }
+  }
+
+  return ret;
 }

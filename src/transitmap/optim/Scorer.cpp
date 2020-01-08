@@ -149,10 +149,12 @@ double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c,
           iga.from.front != igb.from.front && iga.from.front != igb.to.front &&
           iga.to.front != igb.from.front && iga.to.front != igb.to.front;
 
-      if (util::geo::intersects(
+      bool iSectGeo = util::geo::intersects(
               iga.geom.getLine().front(), iga.geom.getLine().back(),
               igb.geom.getLine().front(), igb.geom.getLine().back()) ||
-          util::geo::dist(iga.geom.getLine(), igb.geom.getLine()) < 1) {
+          util::geo::dist(iga.geom.getLine(), igb.geom.getLine()) < 1;
+
+      if (iSectGeo) {
         if (sameSeg) {
           ret += getCrossingPenaltySameSeg(n, pens);
         } else if (!unavoidable) {

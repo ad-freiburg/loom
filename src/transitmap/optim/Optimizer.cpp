@@ -224,6 +224,7 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
       util::geo::dist(a, b) < 1)
     pCrossing = true;
 
+  // TODO(patrick): use this instead
   // pCrossing = (posAinA < posBinA && posAinB < posBinB);
 
   return pCrossing;
@@ -258,6 +259,8 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
   bool retB = false;
 
   if (posAinA > posBinA && posEdgeA < posEdgeB) retB = true;
+
+  // TODO(patrick): remove this
   retB = false;
 
   DPoint aInA = getPos(node, segmentA, posAinA);

@@ -20,4 +20,4 @@ configure_file (
 add_executable(transitmap ${transitmap_main})
 add_library(transitmap_dep ${transitmap_SRC})
 
-target_link_libraries(transitmap transitmap_dep shared_dep util ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} -lproj -lpthread)
+target_link_libraries(transitmap transitmap_dep shared_dep dot_dep util ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} -lproj -lpthread)

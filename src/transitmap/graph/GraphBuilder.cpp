@@ -330,7 +330,7 @@ void GraphBuilder::createMetaNodes(TransitGraph* g) {
           }
         }
 
-        g->deleteEdge(e->getTo(), e->getFrom());
+        g->delEdg(e->getTo(), e->getFrom());
       }
     }
 
