@@ -32,10 +32,7 @@ struct NodeFront {
 
   Node* n;  // pointer to node here also
   DPoint getTripOccPos(const shared::linegraph::Route* r,
-                       const OrderingConfig& c) const;
-  DPoint getTripOccPos(const shared::linegraph::Route* r,
-                       const OrderingConfig& c, bool originGeom) const;
-  DPoint getTripPos(const Edge* e, size_t pos, bool inv) const;
+                       const OrderingConfig& c, bool origGeom) const;
   DPoint getTripPos(const Edge* e, size_t pos, bool inv, bool originGeom) const;
 
   double getOutAngle() const;
@@ -140,7 +137,6 @@ class Node {
            std::map<const Edge*, std::set<const Edge*> > >
       _routeConnExceptions;
 
-  friend class TransitGraph;
 };
 }
 }

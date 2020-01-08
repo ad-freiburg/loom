@@ -27,22 +27,12 @@ using util::geo::PolyLine;
 using util::geo::Line;
 
 // _____________________________________________________________________________
-DPoint NodeFront::getTripOccPos(const Route* r, const OrderingConfig& c) const {
-  return getTripOccPos(r, c, false);
-}
-
-// _____________________________________________________________________________
 DPoint NodeFront::getTripOccPos(const Route* r, const OrderingConfig& c,
                                 bool origGeom) const {
   assert(c.find(edge) != c.end());
 
   size_t p = edge->getRoutePosUnder(r, c.find(edge)->second);
   return getTripPos(edge, p, n == edge->getTo(), origGeom);
-}
-
-// _____________________________________________________________________________
-DPoint NodeFront::getTripPos(const Edge* e, size_t pos, bool inv) const {
-  return getTripPos(e, pos, inv, false);
 }
 
 // _____________________________________________________________________________

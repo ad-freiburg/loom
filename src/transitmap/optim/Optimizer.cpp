@@ -307,7 +307,7 @@ DPoint Optimizer::getPos(OptNode* n, OptEdge* segment, size_t p) {
     }
   }
 
-  return nf->getTripPos(segment->pl().etgs.front().etg, p, false);
+  return nf->getTripPos(segment->pl().etgs.front().etg, p, false, false);
 }
 
 // _____________________________________________________________________________

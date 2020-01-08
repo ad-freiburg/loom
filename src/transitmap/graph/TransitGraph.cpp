@@ -540,8 +540,8 @@ InnerGeometry TransitGraph::getTerminusStraightLine(
 InnerGeometry TransitGraph::getInnerStraightLine(
     const Node* n, const OrderingConfig& c, const Partner& partnerFrom,
     const Partner& partnerTo) const {
-  DPoint p = partnerFrom.front->getTripOccPos(partnerFrom.route, c);
-  DPoint pp = partnerTo.front->getTripOccPos(partnerTo.route, c);
+  DPoint p = partnerFrom.front->getTripOccPos(partnerFrom.route, c, false);
+  DPoint pp = partnerTo.front->getTripOccPos(partnerTo.route, c, false);
 
   size_t s = partnerFrom.edge->getRoutePosUnder(
       partnerFrom.route, c.find(partnerFrom.edge)->second);
