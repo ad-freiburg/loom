@@ -60,10 +60,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->renderStations))
       ->default_value(true),
       "render station geometries")
-    ("dont-expand-stations",
-     opts::value<bool>(&(cfg->dontExpandStations))
-      ->default_value(true),
-      "render stations on original, non-expanded nodes")
     ("tight-stations",
      opts::value<bool>(&(cfg->tightStations))
       ->default_value(false),

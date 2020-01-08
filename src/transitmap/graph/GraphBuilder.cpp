@@ -264,14 +264,6 @@ void GraphBuilder::writeMainDirs(TransitGraph* graph) {
 }
 
 // _____________________________________________________________________________
-void GraphBuilder::writeStationGeoms(TransitGraph* graph) {
-  for (auto n : *graph->getNds()) {
-    n->generateStationHull((_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                           _cfg->simpleRenderForTwoEdgeNodes);
-  }
-}
-
-// _____________________________________________________________________________
 void GraphBuilder::expandOverlappinFronts(TransitGraph* g) {
   // now, look at the nodes entire front geometries and expand them
   // until nothing overlaps

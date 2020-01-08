@@ -121,7 +121,7 @@ size_t Scorer::getNumCrossings(const Node* n, const OrderingConfig& c) const {
 // _____________________________________________________________________________
 double Scorer::getCrossingScore(const Node* n, const OrderingConfig& c,
                                 const Penalties& pens) const {
-  std::vector<InnerGeometry> igs = n->getInnerGeometries(c, -1);
+  std::vector<InnerGeometry> igs = _g->getInnerGeometries(n, c, -1);
   size_t ret = 0;
 
   for (size_t i = 0; i < igs.size(); ++i) {

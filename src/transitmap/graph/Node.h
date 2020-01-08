@@ -107,17 +107,7 @@ class Node {
   std::vector<Partner> getPartners(const NodeFront* f,
                                    const RouteOccurance& ro) const;
 
-  std::vector<InnerGeometry> getInnerGeometries(const graph::OrderingConfig& c,
-                                                double prec) const;
-
   size_t getConnCardinality() const;
-
-  Polygon<double> getConvexFrontHull(double d, bool rectangulize,
-                                     bool simple) const;
-
-  void generateStationHull(double d, bool useSimple);
-
-  Polygon<double> getStationHull() const;
 
   // add edge to this node's adjacency lists
   void addEdg(Edge* e);
@@ -142,8 +132,6 @@ class Node {
   std::set<Edge*> _adjListOut;
   DPoint _pos;
 
-  Polygon<double> _stationHull;
-
   std::vector<NodeFront> _mainDirs;
 
   std::vector<shared::linegraph::Station> _stops;
@@ -151,20 +139,6 @@ class Node {
   std::map<const shared::linegraph::Route*,
            std::map<const Edge*, std::set<const Edge*> > >
       _routeConnExceptions;
-
-  InnerGeometry getInnerBezier(const OrderingConfig& c,
-                               const graph::Partner& partnerFrom,
-                               const graph::Partner& partnerTo,
-                               double prec) const;
-
-  InnerGeometry getInnerStraightLine(const OrderingConfig& c,
-                                     const graph::Partner& partnerFrom,
-                                     const graph::Partner& partnerTo) const;
-  InnerGeometry getTerminusStraightLine(
-      const OrderingConfig& c, const graph::Partner& partnerFrom) const;
-  InnerGeometry getTerminusBezier(const OrderingConfig& c,
-                                  const graph::Partner& partnerFrom,
-                                  double prec) const;
 
   friend class TransitGraph;
 };

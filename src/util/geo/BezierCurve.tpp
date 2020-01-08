@@ -64,7 +64,7 @@ const PolyLine<T>& BezierCurve<T>::render(double d) {
 }
 
 // _____________________________________________________________________________
-double CubicPolynom::valueAt(double atx) const {
+inline double CubicPolynom::valueAt(double atx) const {
   double dx = atx - x;
   return a + b * dx + c * dx * dx + d * dx * dx * dx;
 }

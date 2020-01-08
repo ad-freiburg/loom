@@ -50,7 +50,6 @@ struct Config {
   bool collapseLinePartners;
   bool renderNodeConnections;
   bool expandFronts;
-  bool dontExpandStations;
   bool tightStations;
 
   bool renderDirMarkers;

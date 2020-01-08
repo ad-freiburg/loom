@@ -12,8 +12,8 @@
 #include <set>
 #include <string>
 
-#include "shared/linegraph/Route.h"
 #include "shared/linegraph/LineGraph.h"
+#include "shared/linegraph/Route.h"
 #include "transitmap/graph/Edge.h"
 #include "transitmap/graph/Node.h"
 #include "transitmap/graph/OrderingConfig.h"
@@ -32,6 +32,7 @@ class TransitGraph {
 
   // +
   void addNd(Node* n);
+
   // +
   Edge* addEdg(Node* from, Node* to, geo::PolyLine<double> pl, double w,
                double s);
@@ -75,6 +76,12 @@ class TransitGraph {
   // +
   bool readFromJson(std::istream* s);
 
+  std::vector<InnerGeometry> getInnerGeometries(const Node* n,
+                                                const graph::OrderingConfig& c,
+                                                double prec) const;
+
+  Polygon<double> getStationHull(const Node* n, double d,
+                                               bool simple) const;
  private:
   std::set<Node*> _nodes;
   std::map<std::string, const shared::linegraph::Route*> _routes;
@@ -85,6 +92,22 @@ class TransitGraph {
   OrderingConfig _config;
 
   geo::DBox _bbox;
+
+  InnerGeometry getInnerBezier(const Node* n, const OrderingConfig& cf,
+                                     const Partner& partnerFrom,
+                                     const Partner& partnerTo,
+                                     double prec) const;
+  InnerGeometry getInnerStraightLine(const Node* n, const OrderingConfig& c,
+                                     const graph::Partner& partnerFrom,
+                                     const graph::Partner& partnerTo) const;
+  InnerGeometry getTerminusStraightLine(const Node* n,
+      const OrderingConfig& c, const graph::Partner& partnerFrom) const;
+  InnerGeometry getTerminusBezier(const Node* n, const OrderingConfig& c,
+                                  const graph::Partner& partnerFrom,
+                                  double prec) const;
+  Polygon<double> getConvexFrontHull(
+      const Node* n, double d, bool rectangulize, bool simpleRenderForTwoEdgeNodes) const;
+
 };
 }
 }

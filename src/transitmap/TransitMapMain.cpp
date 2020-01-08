@@ -49,16 +49,8 @@ int main(int argc, char** argv) {
   LOG(INFO) << "Creating node fronts...";
   b.writeMainDirs(&g);
 
-  if (cfg.dontExpandStations) {
-    b.writeStationGeoms(&g);
-  }
-
   if (cfg.expandFronts) {
     b.expandOverlappinFronts(&g);
-  }
-
-  if (!cfg.dontExpandStations) {
-    b.writeStationGeoms(&g);
   }
 
   b.createMetaNodes(&g);
