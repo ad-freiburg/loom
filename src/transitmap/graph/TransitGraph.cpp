@@ -653,7 +653,7 @@ Polygon<double> TransitGraph::getConvexFrontHull(
     PolyLine<double> b = n->getMainDirs()[1].geom.getSegment(
         (cd / 2) / n->getMainDirs()[1].geom.getLength(),
         (n->getMainDirs()[1].geom.getLength() - cd / 2) /
-           n->getMainDirs()[1].geom.getLength());
+            n->getMainDirs()[1].geom.getLength());
 
     assert(a.getLine().size() > 1);
     assert(b.getLine().size() > 1);

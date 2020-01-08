@@ -80,8 +80,8 @@ class TransitGraph {
                                                 const graph::OrderingConfig& c,
                                                 double prec) const;
 
-  Polygon<double> getStationHull(const Node* n, double d,
-                                               bool simple) const;
+  Polygon<double> getStationHull(const Node* n, double d, bool simple) const;
+
  private:
   std::set<Node*> _nodes;
   std::map<std::string, const shared::linegraph::Route*> _routes;
@@ -94,20 +94,23 @@ class TransitGraph {
   geo::DBox _bbox;
 
   InnerGeometry getInnerBezier(const Node* n, const OrderingConfig& cf,
-                                     const Partner& partnerFrom,
-                                     const Partner& partnerTo,
-                                     double prec) const;
+                               const Partner& partnerFrom,
+                               const Partner& partnerTo, double prec) const;
+
   InnerGeometry getInnerStraightLine(const Node* n, const OrderingConfig& c,
                                      const graph::Partner& partnerFrom,
                                      const graph::Partner& partnerTo) const;
-  InnerGeometry getTerminusStraightLine(const Node* n,
-      const OrderingConfig& c, const graph::Partner& partnerFrom) const;
+
+  InnerGeometry getTerminusStraightLine(
+      const Node* n, const OrderingConfig& c,
+      const graph::Partner& partnerFrom) const;
+
   InnerGeometry getTerminusBezier(const Node* n, const OrderingConfig& c,
                                   const graph::Partner& partnerFrom,
                                   double prec) const;
-  Polygon<double> getConvexFrontHull(
-      const Node* n, double d, bool rectangulize, bool simpleRenderForTwoEdgeNodes) const;
 
+  Polygon<double> getConvexFrontHull(const Node* n, double d, bool rectangulize,
+                                     bool simpleRenderForTwoEdgeNodes) const;
 };
 }
 }
