@@ -6,7 +6,6 @@
 #include <string>
 #include "json/json.hpp"
 #include "shared/linegraph/Route.h"
-#include "transitmap/graph/Edge.h"
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "util/Misc.h"
@@ -21,17 +20,21 @@
 namespace bgeo = boost::geometry;
 
 using util::geo::Point;
+using util::geo::DPoint;
 using util::geo::Box;
 using util::geo::dist;
 using transitmapper::graph::TransitGraph;
-using transitmapper::graph::Node;
-using transitmapper::graph::Edge;
 using shared::linegraph::Route;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
+using shared::linegraph::RouteOcc;
+using shared::linegraph::Partner;
 using transitmapper::graph::OrderingConfig;
 using shared::linegraph::InnerGeometry;
 using util::geo::BezierCurve;
+using util::geo::PolyLine;
+using util::geo::Polygon;
+using util::geo::MultiLine;
 
 // _____________________________________________________________________________
 const OrderingConfig& TransitGraph::getConfig() const { return _config; }
@@ -40,38 +43,29 @@ const OrderingConfig& TransitGraph::getConfig() const { return _config; }
 void TransitGraph::setConfig(const OrderingConfig& c) { _config = c; }
 
 // _____________________________________________________________________________
-size_t TransitGraph::getNumNodes() const {
-  return 0;
-}
+size_t TransitGraph::getNumNodes() const { return 0; }
 
 // _____________________________________________________________________________
-size_t TransitGraph::getNumRoutes() const {
-  return 0;
-}
+size_t TransitGraph::getNumRoutes() const { return 0; }
 
 // _____________________________________________________________________________
-size_t TransitGraph::getMaxCardinality() const {
-  return 0;
-}
+size_t TransitGraph::getMaxCardinality() const { return 0; }
 
 // _____________________________________________________________________________
-size_t TransitGraph::getNumEdges() const {
-  return 0;
-}
+size_t TransitGraph::getNumEdges() const { return 0; }
 
 // _____________________________________________________________________________
-size_t TransitGraph::getNumNodes(bool topo) const {
-  return 0;
-}
+size_t TransitGraph::getNumNodes(bool topo) const { return 0; }
 
 // _____________________________________________________________________________
 std::vector<InnerGeometry> TransitGraph::getInnerGeometries(
     const LineNode* n, const OrderingConfig& c, double prec) const {
   std::vector<InnerGeometry> ret;
-  std::map<const Route*, std::set<const NodeFront*>> processed;
+  std::map<const Route*, std::set<const shared::linegraph::NodeFront*>>
+      processed;
 
   for (size_t i = 0; i < n->pl().getMainDirs().size(); ++i) {
-    const NodeFront& nf = n->pl().getMainDirs()[i];
+    const shared::linegraph::NodeFront& nf = n->pl().getMainDirs()[i];
 
     if (!c.count(nf.edge)) {
       std::cout << "No ordering for edge " << nf.edge << " found!" << std::endl;
@@ -80,10 +74,10 @@ std::vector<InnerGeometry> TransitGraph::getInnerGeometries(
     const std::vector<size_t>* ordering = &c.find(nf.edge)->second;
 
     for (size_t j : *ordering) {
-      const RouteOccurance& routeOcc = (*nf.edge->getRoutes())[j];
+      const RouteOcc& routeOcc = nf.edge->pl().routeOccAtPos(j);
       Partner o(&nf, nf.edge, routeOcc.route);
 
-      std::vector<Partner> partners = n->pl().getPartners(&nf, routeOcc);
+      std::vector<Partner> partners = getPartners(n, &nf, routeOcc);
 
       for (const Partner& p : partners) {
         if (processed[routeOcc.route].find(p.front) !=
@@ -136,25 +130,30 @@ InnerGeometry TransitGraph::getInnerBezier(const LineNode* n,
   DPoint c = pp;
   std::pair<double, double> slopeA, slopeB;
 
-  if (partnerFrom.front->edge->getGeom().getLength() <= 5) return ret;
-  if (partnerTo.front->edge->getGeom().getLength() <= 5) return ret;
+  if (util::geo::len(*partnerFrom.front->edge->pl().getGeom()) <= 5) return ret;
+  if (util::geo::len(*partnerTo.front->edge->pl().getGeom()) <= 5) return ret;
 
   if (d <= 5) return ret;
 
   if (partnerFrom.front->edge->getTo() == n) {
-    slopeA = partnerFrom.front->edge->getGeom().getSlopeBetweenDists(
-        partnerFrom.front->edge->getGeom().getLength() - 5,
-        partnerFrom.front->edge->getGeom().getLength());
+    slopeA =
+        PolyLine<double>(*partnerFrom.front->edge->pl().getGeom())
+            .getSlopeBetweenDists(
+                util::geo::len(*partnerFrom.front->edge->pl().getGeom()) - 5,
+                util::geo::len(*partnerFrom.front->edge->pl().getGeom()));
   } else {
-    slopeA = partnerFrom.front->edge->getGeom().getSlopeBetweenDists(5, 0);
+    slopeA = PolyLine<double>(*partnerFrom.front->edge->pl().getGeom())
+                 .getSlopeBetweenDists(5, 0);
   }
 
   if (partnerTo.front->edge->getTo() == n) {
-    slopeB = partnerTo.front->edge->getGeom().getSlopeBetweenDists(
-        partnerTo.front->edge->getGeom().getLength() - 5,
-        partnerTo.front->edge->getGeom().getLength());
+    slopeB = PolyLine<double>(*partnerTo.front->edge->pl().getGeom())
+                 .getSlopeBetweenDists(
+                     util::geo::len(*partnerTo.front->edge->pl().getGeom()) - 5,
+                     util::geo::len(*partnerTo.front->edge->pl().getGeom()));
   } else {
-    slopeB = partnerTo.front->edge->getGeom().getSlopeBetweenDists(5, 0);
+    slopeB = PolyLine<double>(*partnerTo.front->edge->pl().getGeom())
+                 .getSlopeBetweenDists(5, 0);
   }
 
   double da = 1;
@@ -180,13 +179,14 @@ InnerGeometry TransitGraph::getInnerBezier(const LineNode* n,
 
       if (std::isnan(ang)) ang = 1;
 
-      if (std::max(partnerFrom.edge->getCardinality(),
-                   partnerTo.edge->getCardinality()) > 1) {
-        double fac = fabs((double)((int)partnerFrom.edge->getCardinality() -
-                                   (int)partnerTo.edge->getCardinality())) /
-                     (double)(std::max(partnerFrom.edge->getCardinality(),
-                                       partnerTo.edge->getCardinality()) -
-                              1);
+      if (std::max(partnerFrom.edge->pl().getRoutes().size(),
+                   partnerTo.edge->pl().getRoutes().size()) > 1) {
+        double fac =
+            fabs((double)((int)partnerFrom.edge->pl().getRoutes().size() -
+                          (int)partnerTo.edge->pl().getRoutes().size())) /
+            (double)(std::max(partnerFrom.edge->pl().getRoutes().size(),
+                              partnerTo.edge->pl().getRoutes().size()) -
+                     1);
 
         fac = pow(fac, 2);
         ang = pow(ang, fac);
@@ -220,13 +220,14 @@ InnerGeometry TransitGraph::getInnerBezier(const LineNode* n,
 
 // _____________________________________________________________________________
 InnerGeometry TransitGraph::getTerminusStraightLine(
-    const LineNode* n, const OrderingConfig& c, const Partner& partnerFrom) const {
+    const LineNode* n, const OrderingConfig& c,
+    const Partner& partnerFrom) const {
   DPoint p = partnerFrom.front->getTripOccPos(partnerFrom.route, c, false);
   DPoint pp = partnerFrom.front->getTripOccPos(partnerFrom.route, c, true);
 
-  size_t s = partnerFrom.edge->getRoutePosUnder(
+  size_t s = partnerFrom.edge->pl().getRoutePosUnder(
       partnerFrom.route, c.find(partnerFrom.edge)->second);
-  size_t ss = partnerFrom.edge->getRoutePosUnder(
+  size_t ss = partnerFrom.edge->pl().getRoutePosUnder(
       partnerFrom.route, c.find(partnerFrom.edge)->second);
 
   return InnerGeometry(PolyLine<double>(p, pp), partnerFrom, Partner(), s, ss);
@@ -239,10 +240,10 @@ InnerGeometry TransitGraph::getInnerStraightLine(
   DPoint p = partnerFrom.front->getTripOccPos(partnerFrom.route, c, false);
   DPoint pp = partnerTo.front->getTripOccPos(partnerTo.route, c, false);
 
-  size_t s = partnerFrom.edge->getRoutePosUnder(
+  size_t s = partnerFrom.edge->pl().getRoutePosUnder(
       partnerFrom.route, c.find(partnerFrom.edge)->second);
-  size_t ss = partnerTo.edge->getRoutePosUnder(partnerTo.route,
-                                               c.find(partnerTo.edge)->second);
+  size_t ss = partnerTo.edge->pl().getRoutePosUnder(
+      partnerTo.route, c.find(partnerTo.edge)->second);
 
   return InnerGeometry(PolyLine<double>(p, pp), partnerFrom, partnerTo, s, ss);
 }
@@ -261,14 +262,17 @@ InnerGeometry TransitGraph::getTerminusBezier(const LineNode* n,
   DPoint c = pp;
   std::pair<double, double> slopeA;
 
-  assert(partnerFrom.front->edge->getGeom().getLength() > 5);
+  assert(util::geo::len(*partnerFrom.front->edge->pl().getGeom()) > 5);
 
   if (partnerFrom.front->edge->getTo() == n) {
-    slopeA = partnerFrom.front->edge->getGeom().getSlopeBetweenDists(
-        partnerFrom.front->edge->getGeom().getLength() - 5,
-        partnerFrom.front->edge->getGeom().getLength());
+    slopeA =
+        PolyLine<double>(*partnerFrom.front->edge->pl().getGeom())
+            .getSlopeBetweenDists(
+                util::geo::len(*partnerFrom.front->edge->pl().getGeom()) - 5,
+                util::geo::len(*partnerFrom.front->edge->pl().getGeom()));
   } else {
-    slopeA = partnerFrom.front->edge->getGeom().getSlopeBetweenDists(5, 0);
+    slopeA = PolyLine<double>(*partnerFrom.front->edge->pl().getGeom())
+                 .getSlopeBetweenDists(5, 0);
   }
 
   b = DPoint(p.getX() + slopeA.first * d, p.getY() + slopeA.second * d);
@@ -311,9 +315,9 @@ Polygon<double> TransitGraph::getConvexFrontHull(
 
     Polygon<double> hull = util::geo::convexHull(l);
 
-    if (rectangulize && n->getMaxNodeFrontCardinality() > 1) {
+    if (rectangulize && getMaxLineNum(n) > 1) {
       MultiLine<double> ll;
-      for (auto& nf : n->getMainDirs()) {
+      for (auto& nf : n->pl().getMainDirs()) {
         ll.push_back(nf.geom.getLine());
       }
       Polygon<double> env = util::geo::convexHull(
@@ -341,15 +345,15 @@ Polygon<double> TransitGraph::getConvexFrontHull(
     // for two main dirs, take average
     std::vector<const PolyLine<double>*> pols;
 
-    PolyLine<double> a = n->getMainDirs()[0].geom.getSegment(
-        (cd / 2) / n->getMainDirs()[0].geom.getLength(),
-        (n->getMainDirs()[0].geom.getLength() - cd / 2) /
-            n->getMainDirs()[0].geom.getLength());
+    PolyLine<double> a = n->pl().getMainDirs()[0].geom.getSegment(
+        (cd / 2) / n->pl().getMainDirs()[0].geom.getLength(),
+        (n->pl().getMainDirs()[0].geom.getLength() - cd / 2) /
+            n->pl().getMainDirs()[0].geom.getLength());
 
-    PolyLine<double> b = n->getMainDirs()[1].geom.getSegment(
-        (cd / 2) / n->getMainDirs()[1].geom.getLength(),
-        (n->getMainDirs()[1].geom.getLength() - cd / 2) /
-            n->getMainDirs()[1].geom.getLength());
+    PolyLine<double> b = n->pl().getMainDirs()[1].geom.getSegment(
+        (cd / 2) / n->pl().getMainDirs()[1].geom.getLength(),
+        (n->pl().getMainDirs()[1].geom.getLength() - cd / 2) /
+            n->pl().getMainDirs()[1].geom.getLength());
 
     assert(a.getLine().size() > 1);
     assert(b.getLine().size() > 1);
@@ -391,17 +395,24 @@ Polygon<double> TransitGraph::getStationHull(const LineNode* n, double d,
 }
 
 // _____________________________________________________________________________
+double TransitGraph::getTotalWidth(const LineEdge* e) const {
+  return _defWidth * e->pl().getRoutes().size() +
+         _defSpacing * (e->pl().getRoutes().size() - 1);
+}
+
+// _____________________________________________________________________________
 size_t TransitGraph::getConnCardinality(const LineNode* n) {
   size_t ret = 0;
-  std::map<const Route*, std::set<const shared::linegraph::NodeFront*>> processed;
+  std::map<const Route*, std::set<const shared::linegraph::NodeFront*>>
+      processed;
 
   for (size_t i = 0; i < n->pl().getMainDirs().size(); ++i) {
     const auto& nf = n->pl().getMainDirs()[i];
 
-    for (size_t j = 0; j < nf.edge->getCardinality(); j++) {
-      const RouteOccurance& routeOcc = (*nf.edge->getRoutes())[j];
+    for (size_t j = 0; j < nf.edge->pl().getRoutes().size(); j++) {
+      const auto& routeOcc = nf.edge->pl().routeOccAtPos(j);
 
-      std::vector<Partner> partners = getPartners(&nf, routeOcc);
+      std::vector<Partner> partners = getPartners(n, &nf, routeOcc);
 
       for (const Partner& p : partners) {
         if (processed[routeOcc.route].find(p.front) !=
@@ -415,5 +426,36 @@ size_t TransitGraph::getConnCardinality(const LineNode* n) {
     }
   }
 
+  return ret;
+}
+
+// _____________________________________________________________________________
+double TransitGraph::getWidth(const shared::linegraph::LineEdge* e) const {
+  return _defWidth;
+}
+
+// _____________________________________________________________________________
+double TransitGraph::getSpacing(const shared::linegraph::LineEdge* e) const {
+  return _defSpacing;
+}
+
+// _____________________________________________________________________________
+double TransitGraph::getMaxNodeFrontWidth(
+    const shared::linegraph::LineNode* n) const {
+  double ret = 0;
+  for (const auto& g : n->pl().getMainDirs()) {
+    if (getTotalWidth(g.edge) > ret) ret = getTotalWidth(g.edge);
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t TransitGraph::getMaxNodeFrontCard(
+    const shared::linegraph::LineNode* n) const {
+  size_t ret = 0;
+  for (const auto& g : n->pl().getMainDirs()) {
+    if (g.edge->pl().getRoutes().size() > ret)
+      ret = g.edge->pl().getRoutes().size();
+  }
   return ret;
 }

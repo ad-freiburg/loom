@@ -130,7 +130,7 @@ void SvgRenderer::outputNodes(const graph::TransitGraph& outG,
 
       printPolygon(
           outG.getStationHull(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                               _cfg->simpleRenderForTwoEdgeNodes),
+                              _cfg->simpleRenderForTwoEdgeNodes),
           params, rparams);
     } else if (false) {
       params["r"] = "5";
@@ -178,32 +178,33 @@ void SvgRenderer::outputEdges(const graph::TransitGraph& outG,
     bool operator()(const LineNode* lhs, const LineNode* rhs) const {
       return lhs->getAdjList().size() > rhs->getAdjList().size() ||
              (lhs->getAdjList().size() == rhs->getAdjList().size() &&
-              graph::TransitGraph::getConnCardinality(lhs) > graph::TransitGraph::getConnCardinality(rhs)) ||
+              graph::TransitGraph::getConnCardinality(lhs) >
+                  graph::TransitGraph::getConnCardinality(rhs)) ||
              (lhs->getAdjList().size() == rhs->getAdjList().size() &&
               lhs > rhs);
     }
   };
 
   struct cmpEdge {
-    bool operator()(const graph::Edge* lhs, const graph::Edge* rhs) const {
-      return lhs->getCardinality() < rhs->getCardinality() ||
-             (lhs->getCardinality() == rhs->getCardinality() && lhs < rhs);
+    bool operator()(const shared::linegraph::LineEdge* lhs, const shared::linegraph::LineEdge* rhs) const {
+      return lhs->pl().getRoutes().size() < rhs->pl().getRoutes().size() ||
+             (lhs->pl().getRoutes().size() == rhs->pl().getRoutes().size() && lhs < rhs);
     }
   };
 
   std::set<const LineNode*, cmp> nodesOrdered;
-  std::set<const graph::Edge*, cmpEdge> edgesOrdered;
+  std::set<const shared::linegraph::LineEdge*, cmpEdge> edgesOrdered;
   for (const auto n : outG.getNds()) {
     nodesOrdered.insert(n);
   }
 
-  std::set<const graph::Edge*> rendered;
+  std::set<const shared::linegraph::LineEdge*> rendered;
 
   for (const auto n : nodesOrdered) {
     edgesOrdered.insert(n->getAdjListIn().begin(), n->getAdjListIn().end());
     edgesOrdered.insert(n->getAdjListOut().begin(), n->getAdjListOut().end());
 
-    for (const graph::Edge* e : edgesOrdered) {
+    for (const auto* e : edgesOrdered) {
       if (rendered.insert(e).second) {
         renderEdgeTripGeom(outG, e, rparams);
       }
@@ -218,19 +219,20 @@ void SvgRenderer::renderNodeConnections(const graph::TransitGraph& outG,
   auto geoms = outG.getInnerGeometries(n, outG.getConfig(),
                                        _cfg->innerGeometryPrecision);
 
-  for (auto& clique : getInnerCliques(geoms, 99)) {
+  for (auto& clique : getInnerCliques(n, geoms, 99)) {
     renderClique(clique, n);
   }
 }
 
 // _____________________________________________________________________________
 std::multiset<InnerClique> SvgRenderer::getInnerCliques(
+    const shared::linegraph::LineNode* n,
     std::vector<shared::linegraph::InnerGeometry> pool, size_t level) const {
   std::multiset<InnerClique> ret;
 
   // start with the first geom in pool
   while (!pool.empty()) {
-    InnerClique cur(pool.front());
+    InnerClique cur(n, pool.front());
     pool.erase(pool.begin());
 
     size_t p;
@@ -247,7 +249,8 @@ std::multiset<InnerClique> SvgRenderer::getInnerCliques(
 
 // _____________________________________________________________________________
 size_t SvgRenderer::getNextPartner(
-    const InnerClique& forClique, const std::vector<shared::linegraph::InnerGeometry>& pool,
+    const InnerClique& forClique,
+    const std::vector<shared::linegraph::InnerGeometry>& pool,
     size_t level) const {
   for (size_t i = 0; i < pool.size(); i++) {
     const auto& ic = pool[i];
@@ -292,8 +295,9 @@ bool SvgRenderer::isNextTo(const shared::linegraph::InnerGeometry& a,
 }
 
 // _____________________________________________________________________________
-bool SvgRenderer::hasSameOrigin(const shared::linegraph::InnerGeometry& a,
-                                const shared::linegraph::InnerGeometry b) const {
+bool SvgRenderer::hasSameOrigin(
+    const shared::linegraph::InnerGeometry& a,
+    const shared::linegraph::InnerGeometry b) const {
   if (a.from.front == b.from.front) {
     return a.slotFrom == b.slotFrom;
   }
@@ -314,7 +318,7 @@ bool SvgRenderer::hasSameOrigin(const shared::linegraph::InnerGeometry& a,
 void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
   _innerDelegates.push_back(
       std::map<uintptr_t, std::vector<OutlinePrintPair>>());
-  std::multiset<InnerClique> renderCliques = getInnerCliques(cc.geoms, 0);
+  std::multiset<InnerClique> renderCliques = getInnerCliques(n, cc.geoms, 0);
   for (const auto& c : renderCliques) {
     // the longest geom will be the ref geom
     shared::linegraph::InnerGeometry ref = c.geoms[0];
@@ -384,28 +388,20 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
 
 // _____________________________________________________________________________
 void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
-                                 const Route& route, const graph::Edge* edge,
-                                 const Nullable<style::LineStyle> style) {
-  renderLinePart(p, width, route, edge, "", style);
+                                 const Route& route, const shared::linegraph::LineEdge* edge) {
+  renderLinePart(p, width, route, edge, "");
 }
 
 // _____________________________________________________________________________
 void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
-                                 const Route& route, const graph::Edge* edge,
-                                 const std::string& endMarker,
-                                 const Nullable<style::LineStyle> style) {
+                                 const Route& route, const shared::linegraph::LineEdge* edge,
+                                 const std::string& endMarker) {
   if (p.getLength() < width / 2) return;
   std::stringstream styleOutline;
   styleOutline << "fill:none;stroke:#000000";
 
   if (!endMarker.empty()) {
     styleOutline << ";marker-end:url(#" << endMarker << "_black)";
-  }
-
-  if (!style.isNull()) {
-    if (style.get().getDashArray().size()) {
-      styleOutline << ";stroke-dasharray:" << style.get().getDashArrayString();
-    }
   }
 
   styleOutline << ";stroke-linecap:round;stroke-width:"
@@ -420,18 +416,6 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
     styleStr << ";marker-end:url(#" << endMarker << ")";
   }
 
-  if (!style.isNull()) {
-    if (style.get().getDashArray().size()) {
-      styleStr << ";stroke-dasharray:" << style.get().getDashArrayString();
-    }
-
-    if (!style.get().getCss().empty()) {
-      std::string css = style.get().getCss();
-      util::replaceAll(css, "\"", "&quot;");
-      styleStr << ";" << css << ";";
-    }
-  }
-
   styleStr << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
            << width * _cfg->outputResolution;
   Params params;
@@ -444,17 +428,17 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
 
 // _____________________________________________________________________________
 void SvgRenderer::renderEdgeTripGeom(const graph::TransitGraph& outG,
-                                     const graph::Edge* e,
+                                     const shared::linegraph::LineEdge* e,
                                      const RenderParams& rparams) {
-  const graph::NodeFront* nfTo = e->getTo()->getNodeFrontFor(e);
-  const graph::NodeFront* nfFrom = e->getFrom()->getNodeFrontFor(e);
+  const shared::linegraph::NodeFront* nfTo = e->getTo()->pl().getNodeFrontFor(e);
+  const shared::linegraph::NodeFront* nfFrom = e->getFrom()->pl().getNodeFrontFor(e);
 
-  PolyLine<double> center = e->getGeom();
+  PolyLine<double> center = *e->pl().getGeom();
 
   double lineW = _cfg->lineWidth;
   double lineSpc = _cfg->lineSpacing;
   double offsetStep = lineW + lineSpc;
-  double oo = e->getTotalWidth();
+  double oo = outG.getTotalWidth(e);
 
   double o = oo;
 
@@ -462,7 +446,7 @@ void SvgRenderer::renderEdgeTripGeom(const graph::TransitGraph& outG,
 
   size_t a = 0;
   for (size_t i : outG.getConfig().find(e)->second) {
-    const graph::RouteOccurance& ro = e->getRoutes()[i];
+    const auto& ro = e->pl().routeOccAtPos(i);
 
     const Route* route = ro.route;
     PolyLine<double> p = center;
@@ -512,18 +496,16 @@ void SvgRenderer::renderEdgeTripGeom(const graph::TransitGraph& outG,
           p.getLength() / 2 + arrowLength / 2, p.getLength());
 
       if (ro.direction == e->getTo()) {
-        renderLinePart(firstPart, lineW, *route, e, markerName.str() + "_m",
-                       ro.style);
+        renderLinePart(firstPart, lineW, *route, e, markerName.str() + "_m");
         renderLinePart(secondPart.reversed(), lineW, *route, e,
-                       markerName.str() + "_f", ro.style);
+                       markerName.str() + "_f");
       } else {
-        renderLinePart(firstPart, lineW, *route, e, markerName.str() + "_f",
-                       ro.style);
+        renderLinePart(firstPart, lineW, *route, e, markerName.str() + "_f");
         renderLinePart(secondPart.reversed(), lineW, *route, e,
-                       markerName.str() + "_m", ro.style);
+                       markerName.str() + "_m");
       }
     } else {
-      renderLinePart(p, lineW, *route, e, ro.style);
+      renderLinePart(p, lineW, *route, e);
     }
 
     a++;
@@ -678,7 +660,8 @@ void SvgRenderer::printPolygon(const DPolygon& g, const std::string& style,
 }
 
 // _____________________________________________________________________________
-size_t InnerClique::getNumBranchesIn(const shared::linegraph::NodeFront* front) const {
+size_t InnerClique::getNumBranchesIn(
+    const shared::linegraph::NodeFront* front) const {
   std::set<size_t> slots;
   size_t ret = 0;
   for (const auto& ig : geoms) {
@@ -700,8 +683,7 @@ double InnerClique::getZWeight() const {
   ret = geoms.size();  // baseline: threads with more lines to the bottom,
                        // because they are easier to follow
 
-  for (const auto& nf :
-       geoms.front().from.front->n->getMainDirs()) {
+  for (const auto& nf : n->pl().getMainDirs()) {
     ret -= getNumBranchesIn(&nf) * BRANCH_WEIGHT;
   }
 

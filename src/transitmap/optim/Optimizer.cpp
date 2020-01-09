@@ -13,7 +13,11 @@ using transitmapper::optim::Optimizer;
 using transitmapper::optim::LinePair;
 using transitmapper::optim::PosComPair;
 using transitmapper::optim::EdgePair;
-using transitmapper::graph::NodeFront;
+using shared::linegraph::NodeFront;
+using shared::linegraph::LineNode;
+using shared::linegraph::LineEdge;
+using util::geo::DPoint;
+using util::geo::DLine;
 
 // _____________________________________________________________________________
 int Optimizer::optimize(TransitGraph* tg) const {
@@ -300,7 +304,7 @@ DPoint Optimizer::getPos(OptNode* n, OptEdge* segment, size_t p) {
   // look for correct nodefront
   const NodeFront* nf = 0;
   for (auto etg : segment->pl().etgs) {
-    const NodeFront* test = n->pl().node->getNodeFrontFor(etg.etg);
+    const NodeFront* test = n->pl().node->pl().getNodeFrontFor(etg.etg);
     if (test) {
       nf = test;
       break;
@@ -316,9 +320,9 @@ std::vector<OptEdge*> Optimizer::getEdgePartners(OptNode* node,
                                                  const LinePair& linepair) {
   std::vector<OptEdge*> ret;
 
-  graph::Edge* fromEtg = OptGraph::getAdjEdg(segmentA, node);
-  const Node* dirA = fromEtg->getRoute(linepair.first.route)->direction;
-  const Node* dirB = fromEtg->getRoute(linepair.second.route)->direction;
+  auto* fromEtg = OptGraph::getAdjEdg(segmentA, node);
+  auto* dirA = fromEtg->pl().getRouteOcc(linepair.first.route).direction;
+  auto* dirB = fromEtg->pl().getRouteOcc(linepair.second.route).direction;
 
   for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;
@@ -339,9 +343,9 @@ std::vector<EdgePair> Optimizer::getEdgePartnerPairs(OptNode* node,
                                                      const LinePair& linepair) {
   std::vector<EdgePair> ret;
 
-  graph::Edge* fromEtg = OptGraph::getAdjEdg(segmentA, node);
-  const Node* dirA = fromEtg->getRoute(linepair.first.route)->direction;
-  const Node* dirB = fromEtg->getRoute(linepair.second.route)->direction;
+  auto* fromEtg = OptGraph::getAdjEdg(segmentA, node);
+  auto* dirA = fromEtg->pl().getRouteOcc(linepair.first.route).direction;
+  auto* dirB = fromEtg->pl().getRouteOcc(linepair.second.route).direction;
 
   for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;

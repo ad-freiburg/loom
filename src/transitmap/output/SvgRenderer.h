@@ -36,12 +36,14 @@ class SvgRendererException : public std::exception {
 };
 
 struct InnerClique {
-  InnerClique(shared::linegraph::InnerGeometry geom) { geoms.push_back(geom); };
+  InnerClique(const shared::linegraph::LineNode* n, shared::linegraph::InnerGeometry geom) : n(n) { geoms.push_back(geom); };
   std::vector<shared::linegraph::InnerGeometry> geoms;
 
   double getZWeight() const;
   size_t getNumBranchesIn(const shared::linegraph::NodeFront* front) const;
   bool operator<(const InnerClique& rhs) const;
+
+  const shared::linegraph::LineNode* n;
 };
 
 struct RenderParams {
@@ -115,7 +117,7 @@ class SvgRenderer : public Renderer {
   void outputEdges(const graph::TransitGraph& outputGraph,
                    const RenderParams& params);
 
-  void renderEdgeTripGeom(const graph::TransitGraph& outG, const graph::Edge* e,
+  void renderEdgeTripGeom(const graph::TransitGraph& outG, const shared::linegraph::LineEdge* e,
                           const RenderParams& params);
 
   void renderNodeConnections(const graph::TransitGraph& outG,
@@ -123,13 +125,11 @@ class SvgRenderer : public Renderer {
 
   void renderLinePart(const PolyLine<double> p, double width,
                       const shared::linegraph::Route& route,
-                      const graph::Edge* e,
-                      const Nullable<style::LineStyle> style);
+                      const shared::linegraph::LineEdge* e);
 
   void renderLinePart(const PolyLine<double> p, double width,
                       const shared::linegraph::Route& route,
-                      const graph::Edge* edge, const std::string& endMarker,
-                      const Nullable<style::LineStyle> style);
+                      const shared::linegraph::LineEdge* edge, const std::string& endMarker);
 
   void renderDelegates(const graph::TransitGraph& outG,
                        const RenderParams& params);
@@ -137,7 +137,7 @@ class SvgRenderer : public Renderer {
   void renderNodeFronts(const graph::TransitGraph& outG,
                         const RenderParams& params);
 
-  std::multiset<InnerClique> getInnerCliques(
+  std::multiset<InnerClique> getInnerCliques(const shared::linegraph::LineNode* n,
       std::vector<shared::linegraph::InnerGeometry> geoms, size_t level) const;
 
   void renderClique(const InnerClique& c, const shared::linegraph::LineNode* node);

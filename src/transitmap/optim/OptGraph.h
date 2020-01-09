@@ -9,7 +9,6 @@
 #include <string>
 
 #include "shared/linegraph/LineGraph.h"
-#include "transitmap/graph/Edge.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/Scorer.h"
 #include "util/Misc.h"
@@ -17,8 +16,6 @@
 #include "util/json/Writer.h"
 
 using transitmapper::graph::TransitGraph;
-using transitmapper::graph::Node;
-using transitmapper::graph::Edge;
 using util::graph::UndirGraph;
 
 namespace transitmapper {
@@ -35,25 +32,20 @@ typedef std::map<const transitmapper::optim::OptEdge*,
     OptOrderingConfig;
 
 struct OptRO {
-  OptRO() : route(0), direction(0), ldirection(0) {}
-  OptRO(const shared::linegraph::Route* r, const Node* dir)
-      : route(r), direction(dir), ldirection(0) {
-    relatives.push_back(r);
-  }
+  OptRO() : route(0), direction(0) {}
   OptRO(const shared::linegraph::Route* r, const shared::linegraph::LineNode* dir)
-      : route(r), direction(0), ldirection(dir) {
+      : route(r), direction(dir) {
     relatives.push_back(r);
   }
   const shared::linegraph::Route* route;
-  const Node* direction;  // 0 if in both directions
-  const shared::linegraph::LineNode* ldirection;  // 0 if in both directions
+  const shared::linegraph::LineNode* direction;  // 0 if in both directions
 
   std::vector<const shared::linegraph::Route*> relatives;
 
   bool operator==(const OptRO& b) const { return b.route == route; }
   bool operator<(const OptRO& b) const { return b.route < route; }
   bool operator>(const OptRO& b) const { return b.route > route; }
-  bool operator==(const graph::RouteOccurance& b) const {
+  bool operator==(const shared::linegraph::RouteOcc& b) const {
     return b.route == route;
   }
 };
@@ -67,8 +59,7 @@ struct PartnerPath {
 };
 
 struct EtgPart {
-  Edge* etg;
-  shared::linegraph::LineEdge* letg;
+  shared::linegraph::LineEdge* etg;
   bool dir;
   size_t order;
 
@@ -77,13 +68,9 @@ struct EtgPart {
   // writing of ordering later on
   bool wasCut;
 
-  EtgPart(Edge* etg, bool dir) : etg(etg), dir(dir), order(0), wasCut(false){};
-  EtgPart(Edge* etg, bool dir, size_t order, bool wasCut)
-      : etg(etg), dir(dir), order(order), wasCut(wasCut){};
-
-  EtgPart(shared::linegraph::LineEdge* etg, bool dir) : letg(etg), dir(dir), order(0), wasCut(false){};
+  EtgPart(shared::linegraph::LineEdge* etg, bool dir) : etg(etg), dir(dir), order(0), wasCut(false){};
   EtgPart(shared::linegraph::LineEdge* etg, bool dir, size_t order, bool wasCut)
-      : letg(etg), dir(dir), order(order), wasCut(wasCut){};
+      : etg(etg), dir(dir), order(order), wasCut(wasCut){};
 };
 
 struct OptEdgePL {
@@ -116,18 +103,16 @@ struct OptEdgePL {
 };
 
 struct OptNodePL {
-  const Node* node;
-  const shared::linegraph::LineNode* lnode;
+  const shared::linegraph::LineNode* node;
   util::geo::Point<double> p;
 
   // the edges arriving at this node, in clockwise fashion, based
   // on the geometry in the original graph
   std::vector<OptEdge*> orderedEdges;
 
-  OptNodePL(util::geo::Point<double> p) : node(0), lnode(0), p(p){};
-  OptNodePL(const Node* node) : node(node), lnode(0), p(node->getPos()){};
-  OptNodePL(const shared::linegraph::LineNode* lnode) : lnode(lnode), p(*lnode->pl().getGeom()){};
-  OptNodePL() : node(0), lnode(0) {};
+  OptNodePL(util::geo::Point<double> p) : node(0), p(p){};
+  OptNodePL(const shared::linegraph::LineNode* node) : node(node), p(*node->pl().getGeom()){};
+  OptNodePL() : node(0) {};
 
   const util::geo::Point<double>* getGeom();
   util::json::Dict getAttrs();
@@ -156,16 +141,16 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   std::vector<PartnerPath> getPartnerRoutes() const;
   PartnerPath pathFromComp(const std::set<OptNode*>& comp) const;
 
-  static graph::Edge* getAdjEdg(const OptEdge* e, const OptNode* n);
+  static shared::linegraph::LineEdge* getAdjEdg(const OptEdge* e, const OptNode* n);
   static EtgPart getAdjEtgp(const OptEdge* e, const OptNode* n);
-  static bool hasCtdRoutesIn(const shared::linegraph::Route* r, const Node* dir,
+  static bool hasCtdRoutesIn(const shared::linegraph::Route* r, const shared::linegraph::LineNode* dir,
                              const OptEdge* fromEdge, const OptEdge* toEdge);
   static std::vector<OptRO> getCtdRoutesIn(const shared::linegraph::Route* r,
-                                           const Node* dir,
+                                           const shared::linegraph::LineNode* dir,
                                            const OptEdge* fromEdge,
                                            const OptEdge* toEdge);
   static std::vector<OptRO> getSameDirRoutesIn(
-      const shared::linegraph::Route* r, const Node* dir,
+      const shared::linegraph::Route* r, const shared::linegraph::LineNode* dir,
       const OptEdge* fromEdge, const OptEdge* toEdge);
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);
@@ -178,7 +163,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   shared::linegraph::LineGraph* _lg;
   const Scorer* _scorer;
 
-  OptNode* getNodeForTransitNode(const Node* tn) const;
+  OptNode* getNodeForTransitNode(const shared::linegraph::LineNode* tn) const;
   OptNode* ndForLineNd(const shared::linegraph::LineNode* tn) const;
 
   void build();
@@ -194,7 +179,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool untangleStumpStep();
 
   std::vector<OptNode*> explodeNodeAlong(OptNode* nd,
-                                         const PolyLine<double>& pl, size_t n);
+                                         const util::geo::PolyLine<double>& pl, size_t n);
 
   std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n) const;
   bool branchesAtInto(OptEdge* e, OptNode* n,
@@ -260,15 +245,15 @@ inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
 
   auto tgEdgeA = OptGraph::getAdjEdg(a, n);
   assert(tgEdgeA);
-  assert(n->pl().node->getNodeFrontFor(tgEdgeA));
+  assert(n->pl().node->pl().getNodeFrontFor(tgEdgeA));
 
-  angA = n->pl().node->getNodeFrontFor(tgEdgeA)->getOutAngle();
+  angA = n->pl().node->pl().getNodeFrontFor(tgEdgeA)->getOutAngle();
 
   auto tgEdgeB = OptGraph::getAdjEdg(b, n);
   assert(tgEdgeB);
-  assert(n->pl().node->getNodeFrontFor(tgEdgeB));
+  assert(n->pl().node->pl().getNodeFrontFor(tgEdgeB));
 
-  angB = n->pl().node->getNodeFrontFor(tgEdgeB)->getOutAngle();
+  angB = n->pl().node->pl().getNodeFrontFor(tgEdgeB)->getOutAngle();
 
   if (tgEdgeA == tgEdgeB) {
     // if these edges originally came from the same node front, use their

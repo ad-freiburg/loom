@@ -4,6 +4,7 @@
 
 #include "shared/linegraph/LineGraph.h"
 #include "shared/linegraph/LineNodePL.h"
+#include "shared/linegraph/NodeFront.h"
 
 using util::geo::Point;
 using namespace shared::linegraph;
@@ -58,7 +59,7 @@ void LineNodePL::clearStops() { _is.clear(); }
 
 // _____________________________________________________________________________
 void LineNodePL::addConnExc(const Route* r, const LineEdge* edgeA,
-                               const LineEdge* edgeB) {
+                            const LineEdge* edgeB) {
   _connEx[r][edgeA].insert(edgeB);
   // index the other direction also, will lead to faster lookups later on
   _connEx[r][edgeB].insert(edgeA);
@@ -66,7 +67,7 @@ void LineNodePL::addConnExc(const Route* r, const LineEdge* edgeA,
 
 // _____________________________________________________________________________
 void LineNodePL::delConnExc(const Route* r, const LineEdge* edgeA,
-                               const LineEdge* edgeB) {
+                            const LineEdge* edgeB) {
   _connEx[r][edgeA].erase(edgeB);
   // index the other direction also, will lead to faster lookups later on
   _connEx[r][edgeB].erase(edgeA);
@@ -74,7 +75,7 @@ void LineNodePL::delConnExc(const Route* r, const LineEdge* edgeA,
 
 // _____________________________________________________________________________
 bool LineNodePL::connOccurs(const Route* r, const LineEdge* edgeA,
-                               const LineEdge* edgeB) const {
+                            const LineEdge* edgeB) const {
   const auto& i = _connEx.find(r);
   if (_connEx.find(r) == _connEx.end()) return true;
 
@@ -83,3 +84,22 @@ bool LineNodePL::connOccurs(const Route* r, const LineEdge* edgeA,
 
   return ii->second.find(edgeB) == ii->second.end();
 }
+
+// _____________________________________________________________________________
+const NodeFront* LineNodePL::getNodeFrontFor(const LineEdge* e) const {
+  for (auto& nf : getMainDirs()) {
+    if (nf.edge == e) {
+      return &nf;
+    }
+  }
+
+  return 0;
+}
+
+// _____________________________________________________________________________
+const std::vector<NodeFront>& LineNodePL::getMainDirs() const {
+  return _mainDirs;
+}
+
+// _____________________________________________________________________________
+std::vector<NodeFront>& LineNodePL::getMainDirs() { return _mainDirs; }

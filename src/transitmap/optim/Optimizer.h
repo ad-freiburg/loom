@@ -11,6 +11,7 @@
 #ifndef TRANSITMAP_OPTIM_OPTIMIZER_H_
 #define TRANSITMAP_OPTIM_OPTIMIZER_H_
 
+// TODO: remove using
 using transitmapper::graph::OrderingConfig;
 using transitmapper::graph::HierarchOrderingConfig;
 using shared::linegraph::Route;
@@ -45,7 +46,7 @@ class Optimizer {
 
   static bool crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
                       PosCom postcomb);
-  static DPoint getPos(OptNode* n, OptEdge* segment, size_t p);
+  static util::geo::DPoint getPos(OptNode* n, OptEdge* segment, size_t p);
 
   static std::vector<EdgePair> getEdgePartnerPairs(OptNode* node,
                                                    OptEdge* segmentA,

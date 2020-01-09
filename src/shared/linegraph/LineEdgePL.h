@@ -64,6 +64,7 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   size_t getRoutePos(const Route* r) const;
 
   const util::geo::Line<double>* getGeom() const;
+  void setGeom(const util::geo::Line<double>& l);
   util::json::Dict getAttrs() const;
 
   const PolyLine<double>& getPolyline() const;

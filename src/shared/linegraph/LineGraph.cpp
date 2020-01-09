@@ -443,3 +443,32 @@ size_t LineGraph::maxDeg() const {
     if (nd->getDeg() > ret) ret = nd->getDeg();
   return ret;
 }
+
+// _____________________________________________________________________________
+std::vector<const Route*> LineGraph::getSharedRoutes(const LineEdge* a,
+                                              const LineEdge* b) {
+  std::vector<const Route*> ret;
+  for (auto& to : a->pl().getRoutes()) {
+    if (b->pl().hasRoute(to.route)) ret.push_back(to.route);
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::vector<Partner> LineGraph::getPartners(const LineNode* n, const NodeFront* f,
+                                       const RouteOcc& ro) {
+  std::vector<Partner> ret;
+  for (const auto& nf : n->pl().getMainDirs()) {
+    if (&nf == f) continue;
+
+    for (const RouteOcc& to : getCtdRoutesIn(ro.route, ro.direction,nf.edge, f->edge)) {
+      Partner p(f, nf.edge, to.route);
+      p.front = &nf;
+      p.edge = nf.edge;
+      p.route = to.route;
+      ret.push_back(p);
+    }
+  }
+  return ret;
+}

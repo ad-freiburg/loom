@@ -18,7 +18,7 @@ using transitmapper::optim::OptEdgePL;
 using transitmapper::optim::OptNodePL;
 using transitmapper::optim::OptRO;
 using transitmapper::optim::PartnerPath;
-using transitmapper::graph::RouteOccurance;
+using shared::linegraph::RouteOcc;
 using shared::linegraph::Route;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
@@ -88,7 +88,7 @@ EtgPart OptGraph::getAdjEtgp(const OptEdge* e, const OptNode* n) {
 }
 
 // _____________________________________________________________________________
-Edge* OptGraph::getAdjEdg(const OptEdge* e, const OptNode* n) {
+LineEdge* OptGraph::getAdjEdg(const OptEdge* e, const OptNode* n) {
   if (e->getFrom() == n) {
     return getFirstEdg(e).etg;
   } else if (e->getTo() == n) {
@@ -113,10 +113,10 @@ OptGraph::OptGraph(LineGraph* toOptim, const Scorer* scorer)
 // _____________________________________________________________________________
 void OptGraph::build() {
   if (_g) {
-    for (graph::Node* n : *_g->getNds()) {
-      for (graph::Edge* e : n->getAdjListOut()) {
-        graph::Node* fromTn = e->getFrom();
-        graph::Node* toTn = e->getTo();
+    for (auto n : *_g->getNds()) {
+      for (auto e : n->getAdjListOut()) {
+        auto fromTn = e->getFrom();
+        auto toTn = e->getTo();
 
         OptNode* from = getNodeForTransitNode(fromTn);
         OptNode* to = getNodeForTransitNode(toTn);
@@ -127,7 +127,7 @@ void OptGraph::build() {
         OptEdge* edge = addEdg(from, to);
 
         edge->pl().etgs.push_back(EtgPart(e, e->getTo() == toTn));
-        for (auto roOld : *e->getRoutes()) {
+        for (auto roOld : e->pl().getRoutes()) {
           edge->pl().routes.push_back(OptRO(roOld.route, roOld.direction));
         }
       }
@@ -159,17 +159,11 @@ void OptGraph::build() {
 }
 
 // _____________________________________________________________________________
-OptNode* OptGraph::getNodeForTransitNode(const Node* tn) const {
+OptNode* OptGraph::getNodeForTransitNode(const LineNode* tn) const {
   for (auto n : getNds()) {
     if (n->pl().node == tn) return n;
   }
 
-  return 0;
-}
-
-// _____________________________________________________________________________
-OptNode* OptGraph::ndForLineNd(const LineNode* tn) const {
-  for (auto n : getNds()) if (n->pl().lnode == tn) return n;
   return 0;
 }
 
@@ -543,7 +537,7 @@ size_t OptGraph::getNumNodes() const { return getNds().size(); }
 size_t OptGraph::getNumNodes(bool topo) const {
   size_t ret = 0;
   for (auto n : getNds()) {
-    if ((n->pl().node->getStops().size() == 0) ^ !topo) ret++;
+    if ((n->pl().node->pl().getStops().size() == 0) ^ !topo) ret++;
   }
 
   return ret;
@@ -570,7 +564,7 @@ size_t OptGraph::getNumRoutes() const {
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      for (const auto& to : *getFirstEdg(e).etg->getRoutes()) {
+      for (const auto& to : getFirstEdg(e).etg->pl().getRoutes()) {
         routes.insert(to.route);
       }
     }
@@ -585,8 +579,8 @@ size_t OptGraph::getMaxCardinality() const {
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      if (getFirstEdg(e).etg->getCardinality() > ret) {
-        ret = getFirstEdg(e).etg->getCardinality();
+      if (getFirstEdg(e).etg->pl().getRoutes().size() > ret) {
+        ret = getFirstEdg(e).etg->pl().getRoutes().size();
       }
     }
   }
@@ -645,8 +639,8 @@ util::json::Dict OptNodePL::getAttrs() {
   if (!node) {
     ret["stat_name"] = "<dummy>";
   } else {
-    if (node->getStops().size()) {
-      ret["stat_name"] = node->getStops()[0].name;
+    if (node->pl().getStops().size()) {
+      ret["stat_name"] = node->pl().getStops()[0].name;
     } else {
       ret["stat_name"] = "";
     }
@@ -740,7 +734,7 @@ bool OptGraph::untangleFullCross() {
 
 // _____________________________________________________________________________
 std::vector<OptNode*> OptGraph::explodeNodeAlong(OptNode* nd,
-                                                 const PolyLine<double>& pl,
+                                                 const util::geo::PolyLine<double>& pl,
                                                  size_t n) {
   std::vector<OptNode*> ret(n);
   for (size_t i = 0; i < n; i++) {
@@ -1559,7 +1553,7 @@ OptNode* OptGraph::sharedNode(const OptEdge* a, const OptEdge* b) {
 }
 
 // _____________________________________________________________________________
-std::vector<OptRO> OptGraph::getSameDirRoutesIn(const Route* r, const Node* dir,
+std::vector<OptRO> OptGraph::getSameDirRoutesIn(const Route* r, const LineNode* dir,
                                                 const OptEdge* fromEdge,
                                                 const OptEdge* toEdge) {
   std::vector<OptRO> ret;
@@ -1572,7 +1566,7 @@ std::vector<OptRO> OptGraph::getSameDirRoutesIn(const Route* r, const Node* dir,
           (to.direction == n->pl().node && dir != 0 && dir != n->pl().node) ||
           (to.direction != n->pl().node && to.direction != 0 &&
            dir == n->pl().node)) {
-        if (n->pl().node->connOccurs(r, getAdjEdg(fromEdge, n),
+        if (n->pl().node->pl().connOccurs(r, getAdjEdg(fromEdge, n),
                                      getAdjEdg(toEdge, n))) {
           ret.push_back(to);
         }
@@ -1584,7 +1578,7 @@ std::vector<OptRO> OptGraph::getSameDirRoutesIn(const Route* r, const Node* dir,
 }
 
 // _____________________________________________________________________________
-bool OptGraph::hasCtdRoutesIn(const Route* r, const Node* dir,
+bool OptGraph::hasCtdRoutesIn(const Route* r, const LineNode* dir,
                               const OptEdge* fromEdge, const OptEdge* toEdge) {
   const OptNode* n = sharedNode(fromEdge, toEdge);
   if (!n || !n->pl().node || n->getDeg() == 1) return false;
@@ -1594,7 +1588,7 @@ bool OptGraph::hasCtdRoutesIn(const Route* r, const Node* dir,
       if (to.direction == 0 || dir == 0 ||
           (to.direction == n->pl().node && dir != n->pl().node) ||
           (to.direction != n->pl().node && dir == n->pl().node)) {
-        if (n->pl().node->connOccurs(r, getAdjEdg(fromEdge, n),
+        if (n->pl().node->pl().connOccurs(r, getAdjEdg(fromEdge, n),
                                      getAdjEdg(toEdge, n))) {
           return true;
         }
@@ -1606,7 +1600,7 @@ bool OptGraph::hasCtdRoutesIn(const Route* r, const Node* dir,
 }
 
 // _____________________________________________________________________________
-std::vector<OptRO> OptGraph::getCtdRoutesIn(const Route* r, const Node* dir,
+std::vector<OptRO> OptGraph::getCtdRoutesIn(const Route* r, const LineNode* dir,
                                             const OptEdge* fromEdge,
                                             const OptEdge* toEdge) {
   std::vector<OptRO> ret;
@@ -1618,7 +1612,7 @@ std::vector<OptRO> OptGraph::getCtdRoutesIn(const Route* r, const Node* dir,
       if (to.direction == 0 || dir == 0 ||
           (to.direction == n->pl().node && dir != n->pl().node) ||
           (to.direction != n->pl().node && dir == n->pl().node)) {
-        if (n->pl().node->connOccurs(r, getAdjEdg(fromEdge, n),
+        if (n->pl().node->pl().connOccurs(r, getAdjEdg(fromEdge, n),
                                      getAdjEdg(toEdge, n))) {
           ret.push_back(to);
         }

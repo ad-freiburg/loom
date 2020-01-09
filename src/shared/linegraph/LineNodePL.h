@@ -5,60 +5,27 @@
 #ifndef SHARED_LINEGRAPH_LINENODEPL_H_
 #define SHARED_LINEGRAPH_LINENODEPL_H_
 
-#include "shared/linegraph/Route.h"
 #include "shared/linegraph/LineEdgePL.h"
-#include "transitmap/graph/OrderingConfig.h"
+#include "shared/linegraph/Route.h"
 #include "util/geo/Geo.h"
 #include "util/geo/GeoGraph.h"
+#include "util/graph/Edge.h"
 #include "util/graph/Node.h"
 
 namespace shared {
 namespace linegraph {
 
-using util::geo::Point;
-using util::geo::DPoint;
-using util::graph::Node;
-
-// TODO: move to shared
-using transitmapper::graph::OrderingConfig;
-
-class LineNodePL;
+struct NodeFront;
 
 typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge;
 typedef std::map<const Route*,
                  std::map<const LineEdge*, std::set<const LineEdge*>>>
     ConnEx;
 
-struct NodeFront {
-  NodeFront(LineEdge* e) : edge(e) {}
-
-  DPoint getTripOccPos(const shared::linegraph::Route* r,
-                       const OrderingConfig& c, bool origGeom) const;
-  DPoint getTripPos(const LineEdge* e, size_t pos, bool inv, bool originGeom) const;
-
-  double getOutAngle() const;
-
-  LineEdge* edge;
-
-  // geometry after expansion
-  PolyLine<double> geom;
-
-  // geometry before expansion
-  PolyLine<double> origGeom;
-
-  void setInitialGeom(const PolyLine<double>& g) {
-    geom = g;
-    origGeom = g;
-  };
-  void setGeom(const PolyLine<double>& g) { geom = g; };
-
-  // TODO
-  double refEtgLengthBefExp;
-};
-
 struct Partner {
   Partner() : front(0), edge(0), route(0){};
-  Partner(const NodeFront* f, const LineEdge* e, const shared::linegraph::Route* r)
+  Partner(const NodeFront* f, const LineEdge* e,
+          const shared::linegraph::Route* r)
       : front(f), edge(e), route(r){};
   const NodeFront* front;
   const LineEdge* edge;
@@ -83,8 +50,7 @@ struct Station {
 };
 
 struct ConnException {
-  ConnException(const LineEdge* from, const LineEdge* to)
-      : fr(from), to(to) {}
+  ConnException(const LineEdge* from, const LineEdge* to) : fr(from), to(to) {}
   const LineEdge* fr;
   const LineEdge* to;
 };
@@ -92,10 +58,10 @@ struct ConnException {
 class LineNodePL : util::geograph::GeoNodePL<double> {
  public:
   LineNodePL(){};
-  LineNodePL(Point<double> pos);
+  LineNodePL(util::geo::Point<double> pos);
 
-  const Point<double>* getGeom() const;
-  void setGeom(const Point<double>& p);
+  const util::geo::Point<double>* getGeom() const;
+  void setGeom(const util::geo::Point<double>& p);
   util::json::Dict getAttrs() const;
 
   void addStop(const Station& i);
@@ -105,16 +71,15 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   size_t getLineDeg() const;
 
   // TODO refactor
-  const std::vector<NodeFront>& getMainDirs() const { return _mainDirs; }
-  std::vector<NodeFront>& getMainDirs() { return _mainDirs; }
+  const std::vector<NodeFront>& getMainDirs() const;
+  std::vector<NodeFront>& getMainDirs();
+  const NodeFront* getNodeFrontFor(const LineEdge* e) const;
 
   void addMainDir(NodeFront f);
 
-  void addConnExc(const Route* r, const LineEdge* edgeA,
-                  const LineEdge* edgeB);
+  void addConnExc(const Route* r, const LineEdge* edgeA, const LineEdge* edgeB);
 
-  void delConnExc(const Route* r, const LineEdge* edgeA,
-                  const LineEdge* edgeB);
+  void delConnExc(const Route* r, const LineEdge* edgeA, const LineEdge* edgeB);
 
   bool connOccurs(const Route* r, const LineEdge* edgeA,
                   const LineEdge* edgeB) const;
@@ -123,7 +88,7 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   const ConnEx& getConnExc() const { return _connEx; }
 
  private:
-  Point<double> _pos;
+  util::geo::Point<double> _pos;
   std::vector<Station> _is;
 
   std::vector<NodeFront> _mainDirs;

@@ -11,10 +11,10 @@
 using namespace transitmapper;
 using namespace optim;
 using transitmapper::graph::TransitGraph;
-using transitmapper::graph::Node;
-using transitmapper::graph::Edge;
 using shared::linegraph::Route;
-using transitmapper::graph::InnerGeometry;
+using shared::linegraph::LineNode;
+using shared::linegraph::LineEdge;
+using shared::linegraph::InnerGeometry;
 using transitmapper::graph::IDENTITY_PENALTIES;
 
 // _____________________________________________________________________________

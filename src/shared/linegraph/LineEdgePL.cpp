@@ -27,6 +27,11 @@ const util::geo::Line<double>* LineEdgePL::getGeom() const {
 }
 
 // _____________________________________________________________________________
+void LineEdgePL::setGeom(const util::geo::Line<double>& l) {
+  _p = l;
+}
+
+// _____________________________________________________________________________
 const PolyLine<double>& LineEdgePL::getPolyline() const { return _p; }
 
 // _____________________________________________________________________________

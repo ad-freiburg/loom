@@ -11,9 +11,6 @@
 #include "util/geo/Grid.h"
 #include "util/graph/UndirGraph.h"
 
-using util::geo::Grid;
-using util::geo::Point;
-
 namespace shared {
 namespace linegraph {
 
@@ -22,8 +19,8 @@ typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge;
 
 typedef std::pair<LineEdge*, LineEdge*> LineEdgePair;
 
-typedef Grid<LineNode*, util::geo::Point, double> NodeGrid;
-typedef Grid<LineEdge*, util::geo::Line, double> EdgeGrid;
+typedef util::geo::Grid<LineNode*, util::geo::Point, double> NodeGrid;
+typedef util::geo::Grid<LineEdge*, util::geo::Line, double> EdgeGrid;
 
 struct ISect {
   LineEdge *a, *b;
@@ -57,9 +54,15 @@ class LineGraph
 
   static std::vector<RouteOcc> getCtdRoutesIn(const LineEdge* fromEdge,
                                               const LineEdge* toEdge);
+
+  static std::vector<const Route*> getSharedRoutes(const LineEdge* a,
+                                              const LineEdge* b);
+
   static size_t getLDeg(const LineNode* nd);
   static size_t getMaxLineNum(const LineNode* nd);
 
+  static std::vector<Partner> getPartners(const LineNode* n, const NodeFront* f,
+                                   const RouteOcc& ro);
 
  private:
   util::geo::Box<double> _bbox;

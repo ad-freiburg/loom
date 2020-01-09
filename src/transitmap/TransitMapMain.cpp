@@ -11,7 +11,6 @@
 #include "transitmap/config/ConfigReader.cpp"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/GraphBuilder.h"
-#include "transitmap/graph/Node.h"
 #include "transitmap/graph/Penalties.h"
 #include "transitmap/graph/TransitGraph.h"
 #include "transitmap/optim/CombOptimizer.h"
@@ -39,7 +38,7 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   LOG(INFO) << "Reading graph...";
-  transitmapper::graph::TransitGraph g;
+  transitmapper::graph::TransitGraph g(cfg.lineWidth, cfg.lineSpacing);
   transitmapper::graph::GraphBuilder b(&cfg);
 
   g.readFromJson(&std::cin);

@@ -7,18 +7,27 @@
 
 #include <map>
 #include <vector>
+#include "shared/linegraph/LineEdgePL.h"
+#include "shared/linegraph/LineNodePL.h"
+#include "util/graph/Edge.h"
+
+namespace shared {
+namespace linegraph {
+
+class LineNodePL;
+class LineEdgePL;
+typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge;
+
+}}
 
 namespace transitmapper {
 namespace graph {
 
-class Edge;
-
 typedef std::vector<size_t> Ordering;
-typedef std::map<const Edge*, Ordering> OrderingConfig;
-
+typedef std::map<const shared::linegraph::LineEdge*, Ordering> OrderingConfig;
 
 class HierarchOrderingConfig
-    : public std::map<const Edge*, std::map<size_t, Ordering>> {
+    : public std::map<const shared::linegraph::LineEdge*, std::map<size_t, Ordering>> {
  public:
   void writeFlatCfg(OrderingConfig* c) const {
     for (auto kv : *this) {

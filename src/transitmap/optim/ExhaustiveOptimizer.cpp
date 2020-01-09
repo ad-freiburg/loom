@@ -138,7 +138,7 @@ void ExhaustiveOptimizer::writeHierarch(OptOrderingConfig* cfg,
 
         for (auto rel : optRO.relatives) {
           // retrieve the original route pos
-          size_t p = etgp.etg->getRoutePos(rel);
+          size_t p = etgp.etg->pl().getRoutePos(rel);
           if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
             (*hc)[etgp.etg][etgp.order].insert(
                 (*hc)[etgp.etg][etgp.order].begin(), p);

@@ -14,8 +14,6 @@
 
 #include "shared/linegraph/LineGraph.h"
 #include "shared/linegraph/Route.h"
-#include "transitmap/graph/Edge.h"
-#include "transitmap/graph/Node.h"
 #include "transitmap/graph/OrderingConfig.h"
 #include "transitmap/graph/Penalties.h"
 #include "util/geo/Geo.h"
@@ -25,11 +23,11 @@ using namespace util;
 namespace transitmapper {
 namespace graph {
 
-using shared::linegraph::LineNode;
-using shared::linegraph::LineEdge;
 
 class TransitGraph : public shared::linegraph::LineGraph {
  public:
+  TransitGraph(double defaultLineWidth, double defaultLineSpacing)
+      : _defWidth(defaultLineWidth), _defSpacing(defaultLineSpacing){};
   const OrderingConfig& getConfig() const;
   void setConfig(const OrderingConfig&);
 
@@ -40,39 +38,48 @@ class TransitGraph : public shared::linegraph::LineGraph {
   size_t getMaxCardinality() const;
 
   std::vector<shared::linegraph::InnerGeometry> getInnerGeometries(
-      const LineNode* n, const graph::OrderingConfig& c, double prec) const;
+      const shared::linegraph::LineNode* n, const graph::OrderingConfig& c,
+      double prec) const;
 
-  Polygon<double> getStationHull(const LineNode* n, double d,
-                                 bool simple) const;
-  static size_t getConnCardinality(const LineNode* n);
+  util::geo::Polygon<double> getStationHull(
+      const shared::linegraph::LineNode* n, double d, bool simple) const;
+  static size_t getConnCardinality(const shared::linegraph::LineNode* n);
+  double getTotalWidth(const shared::linegraph::LineEdge* e) const;
+  double getWidth(const shared::linegraph::LineEdge* e) const;
+  double getSpacing(const shared::linegraph::LineEdge* e) const;
+
+  double getMaxNodeFrontWidth(const shared::linegraph::LineNode* n) const;
+  size_t getMaxNodeFrontCard(const shared::linegraph::LineNode* n) const;
 
  private:
   mutable double _lastSolveTime;
   mutable size_t _lastSolveTarget;
 
+  double _defWidth, _defSpacing;
+
   OrderingConfig _config;
 
-  shared::linegraph::InnerGeometry getInnerBezier(const LineNode* n,
-                                                  const OrderingConfig& cf,
-                                                  const Partner& partnerFrom,
-                                                  const Partner& partnerTo,
-                                                  double prec) const;
+  shared::linegraph::InnerGeometry getInnerBezier(
+      const shared::linegraph::LineNode* n, const OrderingConfig& cf,
+      const shared::linegraph::Partner& partnerFrom,
+      const shared::linegraph::Partner& partnerTo, double prec) const;
 
   shared::linegraph::InnerGeometry getInnerStraightLine(
-      const LineNode* n, const OrderingConfig& c,
-      const graph::Partner& partnerFrom, const graph::Partner& partnerTo) const;
+      const shared::linegraph::LineNode* n, const OrderingConfig& c,
+      const shared::linegraph::Partner& partnerFrom,
+      const shared::linegraph::Partner& partnerTo) const;
 
-  InnerGeometry getTerminusStraightLine(
-      const LineNode* n, const OrderingConfig& c,
-      const graph::Partner& partnerFrom) const;
+  shared::linegraph::InnerGeometry getTerminusStraightLine(
+      const shared::linegraph::LineNode* n, const OrderingConfig& c,
+      const shared::linegraph::Partner& partnerFrom) const;
 
-  InnerGeometry getTerminusBezier(const LineNode* n, const OrderingConfig& c,
-                                  const graph::Partner& partnerFrom,
-                                  double prec) const;
+  shared::linegraph::InnerGeometry getTerminusBezier(
+      const shared::linegraph::LineNode* n, const OrderingConfig& c,
+      const shared::linegraph::Partner& partnerFrom, double prec) const;
 
-  Polygon<double> getConvexFrontHull(const LineNode* n, double d,
-                                     bool rectangulize,
-                                     bool simpleRenderForTwoEdgeNodes) const;
+  util::geo::Polygon<double> getConvexFrontHull(
+      const shared::linegraph::LineNode* n, double d, bool rectangulize,
+      bool simpleRenderForTwoEdgeNodes) const;
 };
 }
 }

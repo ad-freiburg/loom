@@ -8,12 +8,10 @@
 #include <string>
 #include <vector>
 #include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/TransitGraph.h"
-#include "transitmap/graph/Node.h"
 #include "transitmap/graph/Penalties.h"
+#include "transitmap/graph/TransitGraph.h"
 
 using transitmapper::graph::TransitGraph;
-using transitmapper::graph::Node;
 using transitmapper::graph::Penalties;
 using transitmapper::graph::OrderingConfig;
 
@@ -43,28 +41,39 @@ class Scorer {
   size_t getMaxCrossPenalty() const;
   size_t getMaxSplitPenalty() const;
 
-  double getScore(const Node* n, const graph::OrderingConfig& cfg) const;
-  size_t getNumCrossings(const Node* n, const graph::OrderingConfig& c) const;
-  size_t getNumSeparations(const Node* n, const graph::OrderingConfig& c) const;
-  double getSeparationScore(const Node* n, const OrderingConfig& c, const Penalties& pens) const;
-  double getCrossingScore(const Node* n, const OrderingConfig& c, const Penalties& pens) const;
+  double getScore(const shared::linegraph::LineNode* n,
+                  const graph::OrderingConfig& cfg) const;
+  size_t getNumCrossings(const shared::linegraph::LineNode* n,
+                         const graph::OrderingConfig& c) const;
+  size_t getNumSeparations(const shared::linegraph::LineNode* n,
+                           const graph::OrderingConfig& c) const;
+  double getSeparationScore(const shared::linegraph::LineNode* n,
+                            const OrderingConfig& c,
+                            const Penalties& pens) const;
+  double getCrossingScore(const shared::linegraph::LineNode* n,
+                          const OrderingConfig& c, const Penalties& pens) const;
 
-  double getSeparationScore(const Node* n, const OrderingConfig& c) const;
-  double getCrossingScore(const Node* n, const OrderingConfig& c) const;
+  double getSeparationScore(const shared::linegraph::LineNode* n,
+                            const OrderingConfig& c) const;
+  double getCrossingScore(const shared::linegraph::LineNode* n,
+                          const OrderingConfig& c) const;
 
-  int getCrossingPenaltySameSeg(const Node* n, const Penalties& pens) const;
-  int getCrossingPenaltyDiffSeg(const Node* n, const Penalties& pens) const;
-  int getSplittingPenalty(const Node* n, const Penalties& pens) const;
+  int getCrossingPenaltySameSeg(const shared::linegraph::LineNode* n,
+                                const Penalties& pens) const;
+  int getCrossingPenaltyDiffSeg(const shared::linegraph::LineNode* n,
+                                const Penalties& pens) const;
+  int getSplittingPenalty(const shared::linegraph::LineNode* n,
+                          const Penalties& pens) const;
 
-  int getCrossingPenaltySameSeg(const Node* n) const;
-  int getCrossingPenaltyDiffSeg(const Node* n) const;
-  int getSplittingPenalty(const Node* n) const;
+  int getCrossingPenaltySameSeg(const shared::linegraph::LineNode* n) const;
+  int getCrossingPenaltyDiffSeg(const shared::linegraph::LineNode* n) const;
+  int getSplittingPenalty(const shared::linegraph::LineNode* n) const;
 
  private:
- 	const TransitGraph* _g;
+  const TransitGraph* _g;
   Penalties _pens;
 };
-
-}}
+}
+}
 
 #endif  // TRANSITMAP_GRAPH_ROUTE_H_
