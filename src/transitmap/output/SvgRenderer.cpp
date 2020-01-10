@@ -50,7 +50,6 @@ void SvgRenderer::print(const graph::TransitGraph& outG) {
   if (_cfg->renderEdges) {
     outputEdges(outG, rparams);
   }
-
   _w.openTag("svg", params);
 
   _w.openTag("defs");
@@ -95,6 +94,7 @@ void SvgRenderer::print(const graph::TransitGraph& outG) {
     _w.closeTag();
     _w.closeTag();
   }
+
 
   _w.closeTag();
 

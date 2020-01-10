@@ -150,7 +150,7 @@ void LineGraph::readFromJson(std::istream* s) {
       auto props = feature["properties"];
       auto geom = feature["geometry"];
       if (geom["type"] == "Point") {
-        std::string id = props["id"];
+        std::string id = util::toString(props["id"]);
 
         std::vector<double> coords = geom["coordinates"];
 
@@ -159,7 +159,7 @@ void LineGraph::readFromJson(std::istream* s) {
         Station i("", "", *n->pl().getGeom());
         if (!props["station_id"].is_null() ||
             !props["station_label"].is_null()) {
-          if (!props["station_id"].is_null()) i.id = props["station_id"];
+          if (!props["station_id"].is_null()) i.id = util::toString(props["station_id"]);
           if (!props["station_label"].is_null())
             i.name = props["station_label"];
           n->pl().addStop(i);
@@ -175,8 +175,8 @@ void LineGraph::readFromJson(std::istream* s) {
       auto geom = feature["geometry"];
       if (geom["type"] == "LineString") {
         if (props["lines"].is_null() || props["lines"].size() == 0) continue;
-        std::string from = props["from"];
-        std::string to = props["to"];
+        std::string from = util::toString(props["from"]);
+        std::string to = util::toString(props["to"]);
 
         std::vector<std::vector<double>> coords = geom["coordinates"];
 
@@ -206,9 +206,9 @@ void LineGraph::readFromJson(std::istream* s) {
         for (auto route : props["lines"]) {
           std::string id;
           if (!route["id"].is_null()) {
-            id = route["id"];
+            id = util::toString(route["id"]);
           } else if (!route["label"].is_null()) {
-            id = route["label"];
+            id = util::toString(route["label"]);
           } else if (!route["color"].is_null()) {
             id = route["color"];
           } else
@@ -225,7 +225,7 @@ void LineGraph::readFromJson(std::istream* s) {
           LineNode* dir = 0;
 
           if (!route["direction"].is_null()) {
-            dir = idMap[route["direction"]];
+            dir = idMap[util::toString(route["direction"])];
           }
 
           if (!route["style"].is_null()) {
@@ -250,7 +250,72 @@ void LineGraph::readFromJson(std::istream* s) {
       }
     }
 
-    // TODO: Third pass, exceptions
+    // third pass, exceptions (TODO: do this in the first part, store in some
+    // data strcuture,
+    //  add here!)
+    for (auto feature : j["features"]) {
+      auto props = feature["properties"];
+      auto geom = feature["geometry"];
+      if (geom["type"] == "Point") {
+        std::string id = util::toString(props["id"]);
+
+        if (!idMap.count(id)) continue;
+        LineNode* n = idMap[id];
+
+        if (!props["excluded_line_conns"].is_null()) {
+          for (auto excl : props["excluded_line_conns"]) {
+            std::string rid = util::toString(excl["route"]);
+            std::string nid1 = util::toString(excl["edge1_node"]);
+            std::string nid2 = util::toString(excl["edge2_node"]);
+
+            const Route* r = getRoute(rid);
+
+            if (!r) {
+              LOG(WARN) << "line connection exclude defined in node " << id
+                        << " for line " << rid << ", but no such line exists.";
+              continue;
+            }
+
+            if (!idMap.count(nid1)) {
+              LOG(WARN) << "line connection exclude defined in node " << id
+                        << " for edge from " << nid1
+                        << ", but no such node exists.";
+              continue;
+            }
+
+            if (!idMap.count(nid2)) {
+              LOG(WARN) << "line connection exclude defined in node " << id
+                        << " for edge from " << nid2
+                        << ", but no such node exists.";
+              continue;
+            }
+
+            LineNode* n1 = idMap[nid1];
+            LineNode* n2 = idMap[nid2];
+
+
+            LineEdge* a = getEdg(n, n1);
+            LineEdge* b = getEdg(n, n2);
+
+            if (!a) {
+              LOG(WARN) << "line connection exclude defined in node " << id
+                        << " for edge from " << nid1
+                        << ", but no such edge exists.";
+              continue;
+            }
+
+            if (!b) {
+              LOG(WARN) << "line connection exclude defined in node " << id
+                        << " for edge from " << nid2
+                        << ", but no such edge exists.";
+              continue;
+            }
+
+            n->pl().addConnExc(r, a, b);
+          }
+        }
+      }
+    }
   }
 
   buildGrids();
@@ -464,7 +529,10 @@ std::vector<Partner> LineGraph::getPartners(const LineNode* n, const NodeFront* 
   for (const auto& nf : n->pl().getMainDirs()) {
     if (&nf == f) continue;
 
-    for (const RouteOcc& to : getCtdRoutesIn(ro.route, ro.direction,nf.edge, f->edge)) {
+    // TODO: if that is so, then why do we have the parameter n?
+    assert(f->n == n);
+
+    for (const RouteOcc& to : getCtdRoutesIn(ro.route, ro.direction, f->edge, nf.edge)) {
       Partner p(f, nf.edge, to.route);
       p.front = &nf;
       p.edge = nf.edge;

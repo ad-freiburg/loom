@@ -136,6 +136,7 @@ size_t LineEdgePL::getRoutePosUnder(
     }
     i++;
   }
+  assert(false);
   return -1;
 }
 

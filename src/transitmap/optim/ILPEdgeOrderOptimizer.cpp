@@ -518,7 +518,6 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
                        << ")";
 
               size_t check = glp_find_row(lp, rowTName.str().c_str());
-              std::cerr << rowTName.str() << std::endl;
               assert(check == 0);
 
               size_t rowT = glp_add_rows(lp, 1);

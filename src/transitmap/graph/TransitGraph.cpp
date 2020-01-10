@@ -308,9 +308,9 @@ Polygon<double> TransitGraph::getConvexFrontHull(
     MultiLine<double> l;
     for (auto& nf : n->pl().getMainDirs()) {
       l.push_back(
-          nf.geom
-              .getSegment((cd / 2) / nf.geom.getLength(),
-                          (nf.geom.getLength() - cd / 2) / nf.geom.getLength())
+          nf.origGeom
+              .getSegment((cd / 2) / nf.origGeom.getLength(),
+                          (nf.origGeom.getLength() - cd / 2) / nf.origGeom.getLength())
               .getLine());
     }
 
@@ -319,7 +319,7 @@ Polygon<double> TransitGraph::getConvexFrontHull(
     if (rectangulize && getMaxLineNum(n) > 1) {
       MultiLine<double> ll;
       for (auto& nf : n->pl().getMainDirs()) {
-        ll.push_back(nf.geom.getLine());
+        ll.push_back(nf.origGeom.getLine());
       }
       Polygon<double> env = util::geo::convexHull(
           util::geo::shrink(util::geo::getOrientedEnvelopeAvg(ll), cd / 2));
@@ -346,15 +346,15 @@ Polygon<double> TransitGraph::getConvexFrontHull(
     // for two main dirs, take average
     std::vector<const PolyLine<double>*> pols;
 
-    PolyLine<double> a = n->pl().getMainDirs()[0].geom.getSegment(
-        (cd / 2) / n->pl().getMainDirs()[0].geom.getLength(),
-        (n->pl().getMainDirs()[0].geom.getLength() - cd / 2) /
-            n->pl().getMainDirs()[0].geom.getLength());
+    PolyLine<double> a = n->pl().getMainDirs()[0].origGeom.getSegment(
+        (cd / 2) / n->pl().getMainDirs()[0].origGeom.getLength(),
+        (n->pl().getMainDirs()[0].origGeom.getLength() - cd / 2) /
+            n->pl().getMainDirs()[0].origGeom.getLength());
 
-    PolyLine<double> b = n->pl().getMainDirs()[1].geom.getSegment(
-        (cd / 2) / n->pl().getMainDirs()[1].geom.getLength(),
-        (n->pl().getMainDirs()[1].geom.getLength() - cd / 2) /
-            n->pl().getMainDirs()[1].geom.getLength());
+    PolyLine<double> b = n->pl().getMainDirs()[1].origGeom.getSegment(
+        (cd / 2) / n->pl().getMainDirs()[1].origGeom.getLength(),
+        (n->pl().getMainDirs()[1].origGeom.getLength() - cd / 2) /
+            n->pl().getMainDirs()[1].origGeom.getLength());
 
     assert(a.getLine().size() > 1);
     assert(b.getLine().size() > 1);
