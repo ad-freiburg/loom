@@ -21,24 +21,24 @@ class OptGraphScorer {
  public:
   OptGraphScorer(const Scorer* scorer) : _scorer(scorer) {}
 
-  double getCrossingScore(const std::set<OptNode*>& g,
+  double getCrossingScore(OptGraph* og, const std::set<OptNode*>& g,
                   const OptOrderingConfig& c) const;
-  double getCrossingScore(OptNode* n, const OptOrderingConfig& c) const;
+  double getCrossingScore(OptGraph* og, OptNode* n, const OptOrderingConfig& c) const;
 
-  double getCrossingScore(OptEdge* e,
+  double getCrossingScore(OptGraph* og, OptEdge* e,
                   const OptOrderingConfig& c) const;
-  double getSplittingScore(OptEdge* e, const OptOrderingConfig& c) const;
+  double getSplittingScore(OptGraph* og, OptEdge* e, const OptOrderingConfig& c) const;
 
-  double getSplittingScore(const std::set<OptNode*>& g,
+  double getSplittingScore(OptGraph* og, const std::set<OptNode*>& g,
                   const OptOrderingConfig& c) const;
-  double getSplittingScore(OptNode* n, const OptOrderingConfig& c) const;
+  double getSplittingScore(OptGraph* og, OptNode* n, const OptOrderingConfig& c) const;
 
  private:
   const Scorer* _scorer;
 
-  std::pair<size_t, size_t> getNumCrossings(OptNode* n,
+  std::pair<size_t, size_t> getNumCrossings(OptGraph* og, OptNode* n,
                                             const OptOrderingConfig& c) const;
-  size_t getNumSeparations(OptNode* n,
+  size_t getNumSeparations(OptGraph* og, OptNode* n,
                                             const OptOrderingConfig& c) const;
 };
 }

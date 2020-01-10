@@ -33,20 +33,20 @@ class Optimizer {
       : _cfg(cfg), _scorer(scorer){};
 
   virtual int optimize(TransitGraph* tg) const;
-  int optimizeComp(const std::set<OptNode*>& g,
+  int optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
                    HierarchOrderingConfig* c) const;
-  virtual int optimizeComp(const std::set<OptNode*>& g,
+  virtual int optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
                            HierarchOrderingConfig* c, size_t depth) const = 0;
 
   static std::vector<LinePair> getLinePairs(OptEdge* segment);
   static std::vector<LinePair> getLinePairs(OptEdge* segment, bool unique);
 
-  static bool crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
+  static bool crosses(OptGraph* g, OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
                       PosComPair postcomb);
 
-  static bool crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
+  static bool crosses(OptGraph* g, OptNode* node, OptEdge* segmentA, EdgePair segments,
                       PosCom postcomb);
-  static util::geo::DPoint getPos(OptNode* n, OptEdge* segment, size_t p);
+  static util::geo::DPoint getPos(OptGraph* g, OptNode* n, OptEdge* segment, size_t p);
 
   static std::vector<EdgePair> getEdgePartnerPairs(OptNode* node,
                                                    OptEdge* segmentA,

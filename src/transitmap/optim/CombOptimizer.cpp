@@ -22,7 +22,7 @@ using namespace transitmapper::graph;
 using transitmapper::optim::CombOptimizer;
 
 // _____________________________________________________________________________
-int CombOptimizer::optimizeComp(const std::set<OptNode*>& g,
+int CombOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                 HierarchOrderingConfig* hc, size_t depth) const {
   size_t maxC = maxCard(g);
   double solSp = solutionSpaceSize(g);
@@ -32,11 +32,11 @@ int CombOptimizer::optimizeComp(const std::set<OptNode*>& g,
              << solSp;
 
   if (maxC == 1) {
-    _nullOpt.optimizeComp(g, hc, depth + 1);
+    _nullOpt.optimizeComp(og, g, hc, depth + 1);
   } else if (solSp < 10) {
-    _exhausOpt.optimizeComp(g, hc, depth + 1);
+    _exhausOpt.optimizeComp(og, g, hc, depth + 1);
   } else {
-    _ilpOpt.optimizeComp(g, hc, depth + 1);
+    _ilpOpt.optimizeComp(og, g, hc, depth + 1);
   }
 
   return 0;

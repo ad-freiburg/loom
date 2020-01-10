@@ -17,6 +17,8 @@
 using namespace shared::linegraph;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineEdge;
+using util::geo::Point;
+using util::geo::DPoint;
 
 // _____________________________________________________________________________
 LineGraph::LineGraph() {}
@@ -472,3 +474,4 @@ std::vector<Partner> LineGraph::getPartners(const LineNode* n, const NodeFront* 
   }
   return ret;
 }
+

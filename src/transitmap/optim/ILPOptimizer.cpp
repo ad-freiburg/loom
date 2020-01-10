@@ -20,20 +20,14 @@ using namespace optim;
 using namespace transitmapper::graph;
 
 // _____________________________________________________________________________
-int ILPOptimizer::optimizeComp(const std::set<OptNode*>& g,
+int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                HierarchOrderingConfig* hc, size_t depth) const {
   LOG(DEBUG) << "Creating ILP problem... ";
-  glp_prob* lp = createProblem(g);
+  glp_prob* lp = createProblem(og, g);
   LOG(DEBUG) << " .. done";
 
   LOG(INFO) << "(stats) ILP has " << glp_get_num_cols(lp) << " cols and "
             << glp_get_num_rows(lp) << " rows.";
-
-  if (!_cfg->glpkHOutputPath.empty()) {
-    LOG(DEBUG) << "Writing human readable ILP to '" << _cfg->glpkHOutputPath
-               << "'";
-    printHumanReadable(lp, _cfg->glpkHOutputPath.c_str());
-  }
 
   if (!_cfg->glpkMPSOutputPath.empty()) {
     LOG(DEBUG) << "Writing ILP as .mps to '" << _cfg->glpkMPSOutputPath << "'";
@@ -150,7 +144,8 @@ void ILPOptimizer::getConfigurationFromSolution(
 }
 
 // _____________________________________________________________________________
-glp_prob* ILPOptimizer::createProblem(const std::set<OptNode*>& g) const {
+glp_prob* ILPOptimizer::createProblem(OptGraph* og,
+                                      const std::set<OptNode*>& g) const {
   glp_prob* lp = glp_create_prob();
 
   glp_set_prob_name(lp, "edgeorder");
@@ -204,8 +199,8 @@ glp_prob* ILPOptimizer::createProblem(const std::set<OptNode*>& g) const {
 
   glp_create_index(lp);
 
-  writeSameSegConstraints(g, &vm, lp);
-  writeDiffSegConstraints(g, &vm, lp);
+  writeSameSegConstraints(og, g, &vm, lp);
+  writeDiffSegConstraints(og, g, &vm, lp);
 
   int* ia = 0;
   int* ja = 0;
@@ -222,7 +217,8 @@ glp_prob* ILPOptimizer::createProblem(const std::set<OptNode*>& g) const {
 }
 
 // _____________________________________________________________________________
-void ILPOptimizer::writeSameSegConstraints(const std::set<OptNode*>& g,
+void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
+                                           const std::set<OptNode*>& g,
                                            VariableMatrix* vm,
                                            glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
@@ -259,7 +255,7 @@ void ILPOptimizer::writeSameSegConstraints(const std::set<OptNode*>& g,
 
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
-            if (crosses(node, segmentA, segmentB, poscomb)) {
+            if (crosses(og, node, segmentA, segmentB, poscomb)) {
               size_t lineAinAatP =
                   glp_find_col(lp, getILPVarName(segmentA, linepair.first.route,
                                                  poscomb.first.first)
@@ -307,7 +303,8 @@ void ILPOptimizer::writeSameSegConstraints(const std::set<OptNode*>& g,
 }
 
 // _____________________________________________________________________________
-void ILPOptimizer::writeDiffSegConstraints(const std::set<OptNode*>& g,
+void ILPOptimizer::writeDiffSegConstraints(OptGraph* og,
+                                           const std::set<OptNode*>& g,
                                            VariableMatrix* vm,
                                            glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
@@ -340,7 +337,7 @@ void ILPOptimizer::writeDiffSegConstraints(const std::set<OptNode*>& g,
                   (linepair.second.relatives.size()));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
-            if (crosses(node, segmentA, segments, poscomb)) {
+            if (crosses(og, node, segmentA, segments, poscomb)) {
               size_t lineAinAatP = glp_find_col(
                   lp,
                   getILPVarName(segmentA, linepair.first.route, poscomb.first)
@@ -493,79 +490,6 @@ void ILPOptimizer::preSolveCoinCbc(glp_prob* lp) const {
       glp_set_col_bnds(lp, col, GLP_FX, intVal, intVal);
     }
   }
-}
-
-// _____________________________________________________________________________
-bool ILPOptimizer::printHumanReadable(glp_prob* lp,
-                                      const std::string& path) const {
-  double maxDblDst = 0.000001;
-  std::ofstream file;
-  file.open(path);
-  if (!file) return false;
-
-  // get objective function
-  std::stringstream obj;
-
-  for (int i = 0; i < glp_get_num_cols(lp) - 1; ++i) {
-    std::string colName = i > 0 ? glp_get_col_name(lp, i) : "";
-    double coef = glp_get_obj_coef(lp, i);
-    if (fabs(coef) > maxDblDst) {
-      if (coef > maxDblDst && obj.str().size() > 0)
-        obj << " + ";
-      else if (coef < 0 && obj.str().size() > 0)
-        obj << " - ";
-      if (fabs(fabs(coef) - 1) > maxDblDst) {
-        obj << (obj.str().size() > 0 ? fabs(coef) : coef) << " ";
-      }
-      obj << colName;
-    }
-  }
-
-  if (glp_get_obj_dir(lp) == GLP_MIN) {
-    file << "min ";
-  } else {
-    file << "max ";
-  }
-  file << obj.str() << std::endl;
-
-  for (int j = 1; j < glp_get_num_rows(lp) - 1; ++j) {
-    std::stringstream row;
-    for (int i = 1; i < glp_get_num_cols(lp) - 1; ++i) {
-      std::string colName = glp_get_col_name(lp, i);
-      double coef = getConstraintCoeff(lp, j, i);
-      if (fabs(coef) > maxDblDst) {
-        if (coef > maxDblDst && row.str().size() > 0)
-          row << " + ";
-        else if (coef < 0 && row.str().size() > 0)
-          row << " - ";
-        if (fabs(fabs(coef) - 1) > maxDblDst) {
-          row << (row.str().size() > 0 ? fabs(coef) : coef) << " ";
-        }
-        row << colName;
-      }
-    }
-
-    switch (glp_get_row_type(lp, j)) {
-      case GLP_FR:
-        break;
-      case GLP_LO:
-        file << std::endl << row.str() << " >= " << glp_get_row_lb(lp, j);
-        break;
-      case GLP_UP:
-        file << std::endl << row.str() << " <= " << glp_get_row_ub(lp, j);
-        break;
-      case GLP_DB:
-        file << std::endl << row.str() << " >= " << glp_get_row_lb(lp, j);
-        file << std::endl << row.str() << " <= " << glp_get_row_ub(lp, j);
-        break;
-      case GLP_FX:
-        file << std::endl << row.str() << " = " << glp_get_row_lb(lp, j);
-        break;
-    }
-  }
-
-  file.close();
-  return true;
 }
 
 // _____________________________________________________________________________

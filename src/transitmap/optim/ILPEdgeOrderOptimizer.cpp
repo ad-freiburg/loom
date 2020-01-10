@@ -84,7 +84,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
 
 // _____________________________________________________________________________
 glp_prob* ILPEdgeOrderOptimizer::createProblem(
-    const std::set<OptNode*>& g) const {
+    OptGraph* og, const std::set<OptNode*>& g) const {
   glp_prob* lp = glp_create_prob();
 
   glp_set_prob_name(lp, "edgeorder_impr");
@@ -141,7 +141,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(
   glp_create_index(lp);
 
   writeCrossingOracle(g, &vm, lp);
-  writeDiffSegConstraintsImpr(g, &vm, lp);
+  writeDiffSegConstraintsImpr(og, g, &vm, lp);
 
   int* ia = 0;
   int* ja = 0;
@@ -518,6 +518,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
                        << ")";
 
               size_t check = glp_find_row(lp, rowTName.str().c_str());
+              std::cerr << rowTName.str() << std::endl;
               assert(check == 0);
 
               size_t rowT = glp_add_rows(lp, 1);
@@ -566,7 +567,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(
-    const std::set<OptNode*>& g, VariableMatrix* vm, glp_prob* lp) const {
+    OptGraph* og, const std::set<OptNode*>& g, VariableMatrix* vm,
+    glp_prob* lp) const {
   // go into nodes and build crossing constraints for adjacent
   for (OptNode* node : g) {
     std::set<OptEdge*> processed;
@@ -598,7 +600,7 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(
                   (linepair.second.relatives.size()));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
-            if (crosses(node, segmentA, segments, poscomb)) {
+            if (crosses(og, node, segmentA, segments, poscomb)) {
               size_t testVar = 0;
 
               if (poscomb.first > poscomb.second) {

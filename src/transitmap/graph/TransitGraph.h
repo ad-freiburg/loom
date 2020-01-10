@@ -23,7 +23,6 @@ using namespace util;
 namespace transitmapper {
 namespace graph {
 
-
 class TransitGraph : public shared::linegraph::LineGraph {
  public:
   TransitGraph(double defaultLineWidth, double defaultLineSpacing)
@@ -50,6 +49,16 @@ class TransitGraph : public shared::linegraph::LineGraph {
 
   double getMaxNodeFrontWidth(const shared::linegraph::LineNode* n) const;
   size_t getMaxNodeFrontCard(const shared::linegraph::LineNode* n) const;
+
+  double getNodeFrontAngle(const shared::linegraph::NodeFront& nf) const;
+
+  util::geo::DPoint getTripOccPos(const shared::linegraph::NodeFront& nf,
+                                  const shared::linegraph::Route* r,
+                                  const OrderingConfig& c, bool origGeom) const;
+
+  util::geo::DPoint getTripPos(const shared::linegraph::NodeFront& nf,
+                               const shared::linegraph::LineEdge* e, size_t pos,
+                               bool inv, bool origG) const;
 
  private:
   mutable double _lastSolveTime;

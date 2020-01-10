@@ -106,7 +106,7 @@ int Optimizer::optimize(TransitGraph* tg) const {
                   << " with max cardinality = " << maxC
                   << " and solution space size = " << solSp;
       }
-      iters += optimizeComp(nds, &hc);
+      iters += optimizeComp(&g, nds, &hc);
     }
 
     double t = T_STOP(1);
@@ -187,8 +187,8 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
 }
 
 // _____________________________________________________________________________
-bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
-                        PosComPair poscomb) {
+bool Optimizer::crosses(OptGraph* g, OptNode* node, OptEdge* segmentA,
+                        OptEdge* segmentB, PosComPair poscomb) {
   bool otherWayA =
       (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
   bool otherWayB =
@@ -211,10 +211,18 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
 
   bool pCrossing = false;
 
-  DPoint aInA = getPos(node, segmentA, posAinA);
-  DPoint bInA = getPos(node, segmentA, posBinA);
-  DPoint aInB = getPos(node, segmentB, posAinB);
-  DPoint bInB = getPos(node, segmentB, posBinB);
+  // NOTE: as soon as we use the non-geometric version of the crossing calc
+  // here,
+  // delete the getPos() method, as it is only used for this case. As soon as
+  // this
+  // is done, it is no longer necessary to give the OptGraph* g argument to this
+  // (and other) functions, as g is only used to derive the original
+  // TransitGraph
+  // for the position calculation
+  DPoint aInA = getPos(g, node, segmentA, posAinA);
+  DPoint bInA = getPos(g, node, segmentA, posBinA);
+  DPoint aInB = getPos(g, node, segmentB, posAinB);
+  DPoint bInB = getPos(g, node, segmentB, posBinB);
 
   DLine a;
   a.push_back(aInA);
@@ -235,8 +243,8 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
 }
 
 // _____________________________________________________________________________
-bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
-                        PosCom postcomb) {
+bool Optimizer::crosses(OptGraph* g, OptNode* node, OptEdge* segmentA,
+                        EdgePair segments, PosCom postcomb) {
   bool otherWayA =
       (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
   bool otherWayB = (segments.first->getFrom() != node) ^
@@ -267,8 +275,8 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
   // TODO(patrick): remove this
   retB = false;
 
-  DPoint aInA = getPos(node, segmentA, posAinA);
-  DPoint bInA = getPos(node, segmentA, posBinA);
+  DPoint aInA = getPos(g, node, segmentA, posAinA);
+  DPoint bInA = getPos(g, node, segmentA, posBinA);
 
   bool ret = false;
 
@@ -277,8 +285,8 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
       size_t posAinB = otherWayB ? cardB - 1 - i : i;
       size_t posBinC = otherWayC ? cardC - 1 - j : j;
 
-      DPoint aInB = getPos(node, segments.first, posAinB);
-      DPoint bInC = getPos(node, segments.second, posBinC);
+      DPoint aInB = getPos(g, node, segments.first, posAinB);
+      DPoint bInC = getPos(g, node, segments.second, posBinC);
 
       DLine a;
       a.push_back(aInA);
@@ -300,7 +308,7 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
 }
 
 // _____________________________________________________________________________
-DPoint Optimizer::getPos(OptNode* n, OptEdge* segment, size_t p) {
+DPoint Optimizer::getPos(OptGraph* g, OptNode* n, OptEdge* segment, size_t p) {
   // look for correct nodefront
   const NodeFront* nf = 0;
   for (auto etg : segment->pl().etgs) {
@@ -311,7 +319,8 @@ DPoint Optimizer::getPos(OptNode* n, OptEdge* segment, size_t p) {
     }
   }
 
-  return nf->getTripPos(segment->pl().etgs.front().etg, p, false, false);
+  return g->getGraph()->getTripPos(*nf, segment->pl().etgs.front().etg, p,
+                                   false, false);
 }
 
 // _____________________________________________________________________________
@@ -406,9 +415,9 @@ double Optimizer::solutionSpaceSize(const std::set<OptNode*>& g) {
 }
 
 // _____________________________________________________________________________
-int Optimizer::optimizeComp(const std::set<OptNode*>& g,
+int Optimizer::optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
                             HierarchOrderingConfig* c) const {
-  return optimizeComp(g, c, 0);
+  return optimizeComp(g, cmp, c, 0);
 }
 
 // _____________________________________________________________________________

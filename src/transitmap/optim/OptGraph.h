@@ -121,7 +121,6 @@ struct OptNodePL {
 class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
  public:
   OptGraph(TransitGraph* toOptim, const Scorer* scorer);
-  OptGraph(shared::linegraph::LineGraph* toOptim, const Scorer* scorer);
 
   TransitGraph* getGraph() const;
 
@@ -160,11 +159,9 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
  private:
   TransitGraph* _g;
-  shared::linegraph::LineGraph* _lg;
   const Scorer* _scorer;
 
   OptNode* getNodeForTransitNode(const shared::linegraph::LineNode* tn) const;
-  OptNode* ndForLineNd(const shared::linegraph::LineNode* tn) const;
 
   void build();
   void writeEdgeOrder();

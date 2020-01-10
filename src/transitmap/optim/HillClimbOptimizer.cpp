@@ -13,8 +13,9 @@ using namespace transitmapper::graph;
 using transitmapper::optim::HillClimbOptimizer;
 
 // _____________________________________________________________________________
-int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
-                                     HierarchOrderingConfig* hc, size_t depth) const {
+int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+                                     HierarchOrderingConfig* hc,
+                                     size_t depth) const {
   OptOrderingConfig cur, null;
 
   // fixed order list of optim graph edges
@@ -47,7 +48,7 @@ int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
     std::vector<const Route*> bestOrder;
 
     for (size_t i = 0; i < edges.size(); i++) {
-      double oldScore = getScore(edges[i], cur);
+      double oldScore = getScore(og, edges[i], cur);
       auto old = cur[edges[i]];
       cur[edges[i]] = null[edges[i]];
 
@@ -61,7 +62,7 @@ int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
           for (int j = 0; j < steps; j++)
             std::next_permutation(cur[edges[i]].begin(), cur[edges[i]].end());
 
-          double s = getScore(edges[i], cur);
+          double s = getScore(og, edges[i], cur);
           if (s < oldScore && oldScore - s > bestChange) {
             found = true;
             bestChange = oldScore - s;
@@ -71,7 +72,7 @@ int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
         }
       } else {
         do {
-          double s = getScore(edges[i], cur);
+          double s = getScore(og, edges[i], cur);
           if (s < oldScore && oldScore - s > bestChange) {
             found = true;
             bestChange = oldScore - s;
@@ -86,8 +87,9 @@ int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
       cur[edges[i]] = old;
     }
 
-    double curScore = _optScorer.getCrossingScore(g, cur);
-    if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
+    double curScore = _optScorer.getCrossingScore(og, g, cur);
+    if (_cfg->splittingOpt)
+      curScore += _optScorer.getSplittingScore(og, g, cur);
 
     if (!found) {
       LOG(INFO) << "Local optimum found after " << iters
@@ -105,8 +107,9 @@ int HillClimbOptimizer::optimizeComp(const std::set<OptNode*>& g,
 }
 
 // _____________________________________________________________________________
-double HillClimbOptimizer::getScore(OptEdge* e, OptOrderingConfig& cur) const {
-  double curScore = _optScorer.getCrossingScore(e, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(e, cur);
+double HillClimbOptimizer::getScore(OptGraph* og, OptEdge* e,
+                                    OptOrderingConfig& cur) const {
+  double curScore = _optScorer.getCrossingScore(og, e, cur);
+  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, e, cur);
   return curScore;
 }

@@ -241,11 +241,10 @@ bool GraphBuilder::build(std::istream* s, graph::TransitGraph* g) {
 void GraphBuilder::writeMainDirs(TransitGraph* graph) {
   for (auto n : *graph->getNds()) {
     std::set<LineEdge*> eSet;
-    eSet.insert(n->getAdjListIn().begin(), n->getAdjListIn().end());
-    eSet.insert(n->getAdjListOut().begin(), n->getAdjListOut().end());
+    eSet.insert(n->getAdjList().begin(), n->getAdjList().end());
 
     for (LineEdge* e : eSet) {
-      NodeFront f(e);
+      NodeFront f(n, e);
       PolyLine<double> pl;
 
       f.refEtgLengthBefExp = util::geo::len(*e->pl().getGeom());
@@ -583,7 +582,8 @@ void GraphBuilder::freeNodeFront(const LineNode* n, NodeFront* f) {
 void GraphBuilder::writeInitialConfig(TransitGraph* g) {
   OrderingConfig c;
   for (auto n : *g->getNds()) {
-    for (auto e : n->getAdjListOut()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
       Ordering order(e->pl().getRoutes().size());
       for (size_t i = 0; i < e->pl().getRoutes().size(); i++) order[i] = i;
       c[e] = order;

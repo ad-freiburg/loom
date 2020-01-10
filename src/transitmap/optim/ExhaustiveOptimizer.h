@@ -25,7 +25,7 @@ class ExhaustiveOptimizer : public Optimizer {
   ExhaustiveOptimizer(const config::Config* cfg, const Scorer* scorer)
       : Optimizer(cfg, scorer), _optScorer(scorer){};
 
-  virtual int optimizeComp(const std::set<OptNode*>& g,
+  virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                            HierarchOrderingConfig* c, size_t depth) const;
 
  protected:

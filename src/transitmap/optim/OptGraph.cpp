@@ -100,13 +100,7 @@ LineEdge* OptGraph::getAdjEdg(const OptEdge* e, const OptNode* n) {
 
 // _____________________________________________________________________________
 OptGraph::OptGraph(TransitGraph* toOptim, const Scorer* scorer)
-    : _g(toOptim), _lg(0), _scorer(scorer) {
-  build();
-}
-
-// _____________________________________________________________________________
-OptGraph::OptGraph(LineGraph* toOptim, const Scorer* scorer)
-    : _g(0), _lg(toOptim), _scorer(scorer) {
+    : _g(toOptim), _scorer(scorer) {
   build();
 }
 
@@ -114,7 +108,8 @@ OptGraph::OptGraph(LineGraph* toOptim, const Scorer* scorer)
 void OptGraph::build() {
   if (_g) {
     for (auto n : *_g->getNds()) {
-      for (auto e : n->getAdjListOut()) {
+      for (auto e : n->getAdjList()) {
+        if (e->getFrom() != n) continue;
         auto fromTn = e->getFrom();
         auto toTn = e->getTo();
 
@@ -132,29 +127,7 @@ void OptGraph::build() {
         }
       }
     }
-  } else if (_lg) {
-    for (auto n : *_lg->getNds()) {
-      for (auto e : n->getAdjList()) {
-        if (e->getFrom() != n) continue;
-        auto fromTn = e->getFrom();
-        auto toTn = e->getTo();
-
-        OptNode* from = ndForLineNd(fromTn);
-        OptNode* to = ndForLineNd(toTn);
-
-        if (!from) from = addNd(fromTn);
-        if (!to) to = addNd(toTn);
-
-        OptEdge* edge = addEdg(from, to);
-
-        edge->pl().etgs.push_back(EtgPart(e, e->getTo() == toTn));
-        for (auto roOld : e->pl().getRoutes()) {
-          edge->pl().routes.push_back(OptRO(roOld.route, roOld.direction));
-        }
-      }
-    }
   }
-
   writeEdgeOrder();
 }
 
@@ -733,9 +706,8 @@ bool OptGraph::untangleFullCross() {
 }
 
 // _____________________________________________________________________________
-std::vector<OptNode*> OptGraph::explodeNodeAlong(OptNode* nd,
-                                                 const util::geo::PolyLine<double>& pl,
-                                                 size_t n) {
+std::vector<OptNode*> OptGraph::explodeNodeAlong(
+    OptNode* nd, const util::geo::PolyLine<double>& pl, size_t n) {
   std::vector<OptNode*> ret(n);
   for (size_t i = 0; i < n; i++) {
     double p = (n - 1 - i) / (double)n;
@@ -1553,7 +1525,8 @@ OptNode* OptGraph::sharedNode(const OptEdge* a, const OptEdge* b) {
 }
 
 // _____________________________________________________________________________
-std::vector<OptRO> OptGraph::getSameDirRoutesIn(const Route* r, const LineNode* dir,
+std::vector<OptRO> OptGraph::getSameDirRoutesIn(const Route* r,
+                                                const LineNode* dir,
                                                 const OptEdge* fromEdge,
                                                 const OptEdge* toEdge) {
   std::vector<OptRO> ret;
@@ -1567,7 +1540,7 @@ std::vector<OptRO> OptGraph::getSameDirRoutesIn(const Route* r, const LineNode* 
           (to.direction != n->pl().node && to.direction != 0 &&
            dir == n->pl().node)) {
         if (n->pl().node->pl().connOccurs(r, getAdjEdg(fromEdge, n),
-                                     getAdjEdg(toEdge, n))) {
+                                          getAdjEdg(toEdge, n))) {
           ret.push_back(to);
         }
       }
@@ -1589,7 +1562,7 @@ bool OptGraph::hasCtdRoutesIn(const Route* r, const LineNode* dir,
           (to.direction == n->pl().node && dir != n->pl().node) ||
           (to.direction != n->pl().node && dir == n->pl().node)) {
         if (n->pl().node->pl().connOccurs(r, getAdjEdg(fromEdge, n),
-                                     getAdjEdg(toEdge, n))) {
+                                          getAdjEdg(toEdge, n))) {
           return true;
         }
       }
@@ -1613,7 +1586,7 @@ std::vector<OptRO> OptGraph::getCtdRoutesIn(const Route* r, const LineNode* dir,
           (to.direction == n->pl().node && dir != n->pl().node) ||
           (to.direction != n->pl().node && dir == n->pl().node)) {
         if (n->pl().node->pl().connOccurs(r, getAdjEdg(fromEdge, n),
-                                     getAdjEdg(toEdge, n))) {
+                                          getAdjEdg(toEdge, n))) {
           ret.push_back(to);
         }
       }

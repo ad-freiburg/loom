@@ -12,7 +12,7 @@ using namespace transitmapper::graph;
 using transitmapper::optim::NullOptimizer;
 
 // _____________________________________________________________________________
-int NullOptimizer::optimizeComp(const std::set<OptNode*>& g,
+int NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                 HierarchOrderingConfig* hc,
                                 size_t depth) const {
   LOG(DEBUG) << prefix(depth) << "(NullOptimizer) Optimizing component with "

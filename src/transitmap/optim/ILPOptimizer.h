@@ -37,11 +37,11 @@ class ILPOptimizer : public Optimizer {
   ILPOptimizer(const config::Config* cfg, const Scorer* scorer)
       : Optimizer(cfg, scorer){};
 
-  int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c,
-                   size_t depth) const;
+  int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+                   HierarchOrderingConfig* c, size_t depth) const;
 
  protected:
-  virtual glp_prob* createProblem(const std::set<OptNode*>& g) const;
+  virtual glp_prob* createProblem(OptGraph* og, const std::set<OptNode*>& g) const;
 
   void solveProblem(glp_prob* lp) const;
   void preSolveCoinCbc(glp_prob* lp) const;
@@ -53,13 +53,12 @@ class ILPOptimizer : public Optimizer {
   std::string getILPVarName(OptEdge* e, const shared::linegraph::Route* r,
                             size_t p) const;
 
-  void writeSameSegConstraints(const std::set<OptNode*>& g, VariableMatrix* vm,
+  void writeSameSegConstraints(OptGraph* og, const std::set<OptNode*>& g,
+                               VariableMatrix* vm, glp_prob* lp) const;
+
+  void writeDiffSegConstraints(OptGraph* og, const std::set<OptNode*>& g, VariableMatrix* vm,
                                glp_prob* lp) const;
 
-  void writeDiffSegConstraints(const std::set<OptNode*>& g, VariableMatrix* vm,
-                               glp_prob* lp) const;
-
-  bool printHumanReadable(glp_prob* lp, const std::string& path) const;
   double getConstraintCoeff(glp_prob* lp, int constraint, int col) const;
 
   std::vector<PosComPair> getPositionCombinations(OptEdge* a, OptEdge* b) const;

@@ -28,6 +28,7 @@ using shared::linegraph::Route;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
 using shared::linegraph::RouteOcc;
+using shared::linegraph::NodeFront;
 using shared::linegraph::Partner;
 using transitmapper::graph::OrderingConfig;
 using shared::linegraph::InnerGeometry;
@@ -222,8 +223,8 @@ InnerGeometry TransitGraph::getInnerBezier(const LineNode* n,
 InnerGeometry TransitGraph::getTerminusStraightLine(
     const LineNode* n, const OrderingConfig& c,
     const Partner& partnerFrom) const {
-  DPoint p = partnerFrom.front->getTripOccPos(partnerFrom.route, c, false);
-  DPoint pp = partnerFrom.front->getTripOccPos(partnerFrom.route, c, true);
+  DPoint p = getTripOccPos(*partnerFrom.front, partnerFrom.route, c, false);
+  DPoint pp = getTripOccPos(*partnerFrom.front, partnerFrom.route, c, true);
 
   size_t s = partnerFrom.edge->pl().getRoutePosUnder(
       partnerFrom.route, c.find(partnerFrom.edge)->second);
@@ -237,8 +238,8 @@ InnerGeometry TransitGraph::getTerminusStraightLine(
 InnerGeometry TransitGraph::getInnerStraightLine(
     const LineNode* n, const OrderingConfig& c, const Partner& partnerFrom,
     const Partner& partnerTo) const {
-  DPoint p = partnerFrom.front->getTripOccPos(partnerFrom.route, c, false);
-  DPoint pp = partnerTo.front->getTripOccPos(partnerTo.route, c, false);
+  DPoint p = getTripOccPos(*partnerFrom.front, partnerFrom.route, c, false);
+  DPoint pp = getTripOccPos(*partnerTo.front, partnerTo.route, c, false);
 
   size_t s = partnerFrom.edge->pl().getRoutePosUnder(
       partnerFrom.route, c.find(partnerFrom.edge)->second);
@@ -458,4 +459,34 @@ size_t TransitGraph::getMaxNodeFrontCard(
       ret = g.edge->pl().getRoutes().size();
   }
   return ret;
+}
+
+// _____________________________________________________________________________
+DPoint TransitGraph::getTripOccPos(const NodeFront& nf, const Route* r,
+                                   const OrderingConfig& c,
+                                   bool origGeom) const {
+  assert(c.find(nf.edge) != c.end());
+
+  size_t p = nf.edge->pl().getRoutePosUnder(r, c.find(nf.edge)->second);
+  return getTripPos(nf, nf.edge, p, nf.n == nf.edge->getTo(), origGeom);
+}
+
+// _____________________________________________________________________________
+DPoint TransitGraph::getTripPos(const NodeFront& nf, const LineEdge* e,
+                                size_t pos, bool inv, bool origG) const {
+  double p;
+  if (!inv) {
+    p = (getWidth(e) + getSpacing(e)) * pos + getWidth(e) / 2;
+  } else {
+    p = (getWidth(e) + getSpacing(e)) * (e->pl().getRoutes().size() - 1 - pos) +
+        getWidth(e) / 2;
+  }
+  // use interpolate here directly for speed
+  if (origG) {
+    return nf.origGeom.interpolate(nf.origGeom.getLine().front(),
+                                   nf.origGeom.getLine().back(), p);
+  } else {
+    return nf.geom.interpolate(nf.geom.getLine().front(),
+                               nf.geom.getLine().back(), p);
+  }
 }

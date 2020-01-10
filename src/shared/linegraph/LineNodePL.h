@@ -15,12 +15,50 @@
 namespace shared {
 namespace linegraph {
 
-struct NodeFront;
-
 typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge;
+typedef util::graph::Node<LineNodePL, LineEdgePL> LineNode;
 typedef std::map<const Route*,
                  std::map<const LineEdge*, std::set<const LineEdge*>>>
     ConnEx;
+
+typedef std::vector<size_t> Ordering;
+typedef std::map<const shared::linegraph::LineEdge*, Ordering> OrderingConfig;
+
+class HierarchOrderingConfig
+    : public std::map<const shared::linegraph::LineEdge*, std::map<size_t, Ordering>> {
+ public:
+  void writeFlatCfg(OrderingConfig* c) const {
+    for (auto kv : *this) {
+      for (auto ordering : kv.second) {
+        (*c)[kv.first].insert((*c)[kv.first].begin(), ordering.second.begin(),
+                              ordering.second.end());
+      }
+    }
+  }
+};
+
+struct NodeFront {
+  NodeFront(LineNode* n, LineEdge* e) : n(n), edge(e) {}
+
+  LineNode* n;
+  LineEdge* edge;
+
+  double getOutAngle() const;
+  // geometry after expansion
+  PolyLine<double> geom;
+
+  // geometry before expansion
+  PolyLine<double> origGeom;
+
+  void setInitialGeom(const PolyLine<double>& g) {
+    geom = g;
+    origGeom = g;
+  };
+  void setGeom(const PolyLine<double>& g) { geom = g; };
+
+  // TODO
+  double refEtgLengthBefExp;
+};
 
 struct Partner {
   Partner() : front(0), edge(0), route(0){};
@@ -75,7 +113,7 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   std::vector<NodeFront>& getMainDirs();
   const NodeFront* getNodeFrontFor(const LineEdge* e) const;
 
-  void addMainDir(NodeFront f);
+  void addMainDir(const NodeFront& f);
 
   void addConnExc(const Route* r, const LineEdge* edgeA, const LineEdge* edgeB);
 

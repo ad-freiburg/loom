@@ -13,7 +13,7 @@ using namespace transitmapper::graph;
 using transitmapper::optim::SimulatedAnnealingOptimizer;
 
 // _____________________________________________________________________________
-int SimulatedAnnealingOptimizer::optimizeComp(const std::set<OptNode*>& g,
+int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                           HierarchOrderingConfig* hc, size_t depth) const {
   OptOrderingConfig cur, null;
 
@@ -49,7 +49,7 @@ int SimulatedAnnealingOptimizer::optimizeComp(const std::set<OptNode*>& g,
 
     int i = rand() % edges.size();
 
-    double oldScore = getScore(edges[i], cur);
+    double oldScore = getScore(og, edges[i], cur);
     auto old = cur[edges[i]];
     cur[edges[i]] = null[edges[i]];
 
@@ -58,7 +58,7 @@ int SimulatedAnnealingOptimizer::optimizeComp(const std::set<OptNode*>& g,
     for (int j = 0; j < c; j++)
         std::next_permutation(cur[edges[i]].begin(), cur[edges[i]].end());
 
-    double s = getScore(edges[i], cur);
+    double s = getScore(og, edges[i], cur);
 
     double r = rand() / (RAND_MAX + 1.0);
     double e = exp(-(1.0 * (s - oldScore)) / temp);
@@ -77,8 +77,8 @@ int SimulatedAnnealingOptimizer::optimizeComp(const std::set<OptNode*>& g,
     if (iters - k > ABORT_AFTER_UNCH) break;
   }
 
-  double curScore = _optScorer.getCrossingScore(g, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
+  double curScore = _optScorer.getCrossingScore(og, g, cur);
+  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, g, cur);
 
   LOG(DEBUG) << "Stopped after " << iters << " iterations. Final target = " << curScore;
 
@@ -87,9 +87,9 @@ int SimulatedAnnealingOptimizer::optimizeComp(const std::set<OptNode*>& g,
 }
 
 // _____________________________________________________________________________
-double SimulatedAnnealingOptimizer::getScore(OptEdge* e,
+double SimulatedAnnealingOptimizer::getScore(OptGraph* og, OptEdge* e,
                                              OptOrderingConfig& cur) const {
-  double curScore = _optScorer.getCrossingScore(e, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(e, cur);
+  double curScore = _optScorer.getCrossingScore(og, e, cur);
+  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, e, cur);
   return curScore;
 }

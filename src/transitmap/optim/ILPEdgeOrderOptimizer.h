@@ -32,7 +32,7 @@ class ILPEdgeOrderOptimizer : public ILPOptimizer {
       : ILPOptimizer(cfg, scorer){};
 
  private:
-  virtual glp_prob* createProblem(const std::set<OptNode*>& g) const;
+  virtual glp_prob* createProblem(OptGraph* og, const std::set<OptNode*>& g) const;
 
   virtual void getConfigurationFromSolution(glp_prob* lp,
                                             HierarchOrderingConfig* c,
@@ -41,7 +41,7 @@ class ILPEdgeOrderOptimizer : public ILPOptimizer {
   void writeCrossingOracle(const std::set<OptNode*>& g, VariableMatrix* vm,
                            glp_prob* lp) const;
 
-  void writeDiffSegConstraintsImpr(const std::set<OptNode*>& g,
+  void writeDiffSegConstraintsImpr(OptGraph* og, const std::set<OptNode*>& g,
                                    VariableMatrix* vm, glp_prob* lp) const;
 };
 }  // namespace optim

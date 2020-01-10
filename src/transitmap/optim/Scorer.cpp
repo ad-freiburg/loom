@@ -96,7 +96,8 @@ double Scorer::getNumPossSolutions() const {
   double ret = 1;
 
   for (auto n : _g->getNds()) {
-    for (auto e : n->getAdjListOut()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
       ret *= util::factorial(e->pl().getRoutes().size());
     }
   }
@@ -214,10 +215,10 @@ int Scorer::getCrossingPenaltySameSeg(const shared::linegraph::LineNode* n,
                                       const Penalties& pens) const {
   double ret = 1;
   if (pens.crossAdjPen)
-    ret *= n->getAdjListOut().size() + n->getAdjListIn().size();
+    ret *= n->getDeg();
 
   if (n->pl().getStops().size() > 0) {
-    if (n->getAdjListOut().size() + n->getAdjListIn().size() == 2)
+    if (n->getDeg() == 2)
       return pens.inStatCrossPenDegTwo;
     return pens.inStatCrossPenSameSeg * ret;
   }
@@ -230,10 +231,10 @@ int Scorer::getCrossingPenaltyDiffSeg(const shared::linegraph::LineNode* n,
                                       const Penalties& pens) const {
   double ret = 1;
   if (pens.crossAdjPen)
-    ret *= n->getAdjListOut().size() + n->getAdjListIn().size();
+    ret *= n->getDeg();
 
   if (n->pl().getStops().size() > 0) {
-    if (n->getAdjListOut().size() + n->getAdjListIn().size() == 2)
+    if (n->getDeg() == 2)
       return pens.inStatCrossPenDegTwo;
     return pens.inStatCrossPenDiffSeg * ret;
   }
@@ -246,10 +247,10 @@ int Scorer::getSplittingPenalty(const shared::linegraph::LineNode* n,
                                 const Penalties& pens) const {
   double ret = 1;
   if (pens.splitAdjPen)
-    ret *= n->getAdjListOut().size() + n->getAdjListIn().size();
+    ret *= n->getDeg();
 
   if (n->pl().getStops().size() > 0) {
-    if (n->getAdjListOut().size() + n->getAdjListIn().size() == 2)
+    if (n->getDeg() == 2)
       return pens.inStatSplitPenDegTwo;
     return pens.inStatSplitPen * ret;
   }

@@ -33,7 +33,7 @@ class CombOptimizer : public Optimizer {
         _hillcOpt(cfg, scorer),
         _annealOpt(cfg, scorer){};
 
-  int optimizeComp(const std::set<OptNode*>& g, HierarchOrderingConfig* c,
+  int optimizeComp(OptGraph* og, const std::set<OptNode*>& g, HierarchOrderingConfig* c,
                    size_t depth) const;
 
  private:

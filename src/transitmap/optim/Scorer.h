@@ -22,6 +22,8 @@ class Scorer {
  public:
   Scorer(const TransitGraph* g, const Penalties& pens) : _g(g), _pens(pens) {}
 
+  const TransitGraph* getGraph() const { return _g; }
+
   double getScore() const;
   double getScore(const OrderingConfig& c) const;
 

@@ -7,6 +7,7 @@
 #include "shared/linegraph/NodeFront.h"
 
 using util::geo::Point;
+using util::geo::DPoint;
 using namespace shared::linegraph;
 
 // _____________________________________________________________________________
@@ -103,3 +104,23 @@ const std::vector<NodeFront>& LineNodePL::getMainDirs() const {
 
 // _____________________________________________________________________________
 std::vector<NodeFront>& LineNodePL::getMainDirs() { return _mainDirs; }
+
+// _____________________________________________________________________________
+double NodeFront::getOutAngle() const {
+  double checkDist = 10;
+  if (edge->getFrom() == n) {
+    return angBetween(
+        *n->pl().getGeom(),
+        PolyLine<double>(*edge->pl().getGeom()).getPointAtDist(checkDist).p);
+  } else {
+    return angBetween(
+        *n->pl().getGeom(),
+        PolyLine<double>(*edge->pl().getGeom())
+            .getPointAtDist(util::geo::len(*edge->pl().getGeom()) - checkDist)
+            .p);
+  }
+}
+
+// _____________________________________________________________________________
+void LineNodePL::addMainDir(const NodeFront& f) { _mainDirs.push_back(f); }
+

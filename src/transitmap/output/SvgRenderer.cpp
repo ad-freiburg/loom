@@ -201,8 +201,7 @@ void SvgRenderer::outputEdges(const graph::TransitGraph& outG,
   std::set<const shared::linegraph::LineEdge*> rendered;
 
   for (const auto n : nodesOrdered) {
-    edgesOrdered.insert(n->getAdjListIn().begin(), n->getAdjListIn().end());
-    edgesOrdered.insert(n->getAdjListOut().begin(), n->getAdjListOut().end());
+    edgesOrdered.insert(n->getAdjList().begin(), n->getAdjList().end());
 
     for (const auto* e : edgesOrdered) {
       if (rendered.insert(e).second) {

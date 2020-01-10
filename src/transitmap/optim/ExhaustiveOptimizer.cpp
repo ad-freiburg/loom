@@ -15,7 +15,7 @@ using transitmapper::optim::ExhaustiveOptimizer;
 using shared::linegraph::Route;
 
 // _____________________________________________________________________________
-int ExhaustiveOptimizer::optimizeComp(const std::set<OptNode*>& g,
+int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                       HierarchOrderingConfig* hc,
                                       size_t depth) const {
   LOG(DEBUG) << prefix(depth)
@@ -40,8 +40,8 @@ int ExhaustiveOptimizer::optimizeComp(const std::set<OptNode*>& g,
   size_t last = 0;
   bool running = true;
 
-  double curScore = _optScorer.getCrossingScore(g, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
+  double curScore = _optScorer.getCrossingScore(og, g, cur);
+  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, g, cur);
 
   bestScore = curScore;
   best = cur;
@@ -74,8 +74,8 @@ int ExhaustiveOptimizer::optimizeComp(const std::set<OptNode*>& g,
 
     if (!running) break;
 
-    double curScore = _optScorer.getCrossingScore(g, cur);
-    if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
+    double curScore = _optScorer.getCrossingScore(og, g, cur);
+    if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, g, cur);
 
     if (curScore < bestScore) {
       bestScore = curScore;
