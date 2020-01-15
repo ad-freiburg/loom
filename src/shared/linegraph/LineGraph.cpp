@@ -24,7 +24,7 @@ using util::geo::DPoint;
 LineGraph::LineGraph() {}
 
 // _____________________________________________________________________________
-void LineGraph::readFromDot(std::istream* s) {
+void LineGraph::readFromDot(std::istream* s, double smooth) {
   _bbox = util::geo::Box<double>();
 
   dot::parser::Parser dp(s);
@@ -61,6 +61,8 @@ void LineGraph::readFromDot(std::istream* s) {
         idMap[ent.ids[0]] = n;
       }
 
+      expandBBox(*n->pl().getGeom());
+
       Station i("", "", *n->pl().getGeom());
       if (ent.attrs.find("station_id") != ent.attrs.end() ||
           ent.attrs.find("label") != ent.attrs.end()) {
@@ -87,6 +89,7 @@ void LineGraph::readFromDot(std::istream* s) {
           PolyLine<double> pl;
           e = addEdg(idMap[curId], idMap[prevId], pl);
         }
+
         std::string id;
         if (ent.attrs.find("id") != ent.attrs.end()) {
           id = ent.attrs["id"];
@@ -136,7 +139,7 @@ void LineGraph::readFromDot(std::istream* s) {
 }
 
 // _____________________________________________________________________________
-void LineGraph::readFromJson(std::istream* s) {
+void LineGraph::readFromJson(std::istream* s, double smooth) {
   _bbox = util::geo::Box<double>();
 
   nlohmann::json j;
@@ -155,6 +158,7 @@ void LineGraph::readFromJson(std::istream* s) {
         std::vector<double> coords = geom["coordinates"];
 
         LineNode* n = addNd(util::geo::DPoint(coords[0], coords[1]));
+        expandBBox(*n->pl().getGeom());
 
         Station i("", "", *n->pl().getGeom());
         if (!props["station_id"].is_null() ||
@@ -187,6 +191,8 @@ void LineGraph::readFromJson(std::istream* s) {
           pl << p;
           expandBBox(p);
         }
+
+        pl.applyChaikinSmooth(smooth);
 
         LineNode* fromN = idMap[from];
         LineNode* toN = idMap[to];
@@ -504,6 +510,17 @@ size_t LineGraph::getMaxLineNum(const LineNode* nd) {
 }
 
 // _____________________________________________________________________________
+size_t LineGraph::getMaxLineNum() {
+  size_t ret = 0;
+  for (auto nd : *getNds()) {
+    size_t lineNum = getMaxLineNum(nd);
+    if (lineNum > ret) ret = lineNum;
+  }
+  return ret;
+}
+
+
+// _____________________________________________________________________________
 size_t LineGraph::maxDeg() const {
   size_t ret = 0;
   for (auto nd : getNds())
@@ -542,4 +559,15 @@ std::vector<Partner> LineGraph::getPartners(const LineNode* n, const NodeFront* 
   }
   return ret;
 }
+
+// _____________________________________________________________________________
+size_t LineGraph::getNumRoutes() const {
+  return _routes.size();
+}
+
+// _____________________________________________________________________________
+size_t LineGraph::getNumNds() const { return getNds().size(); }
+
+// _____________________________________________________________________________
+size_t LineGraph::getNumNds(bool topo) const { return 0; }
 

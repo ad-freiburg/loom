@@ -7,8 +7,7 @@
 
 #include <glpk.h>
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/OrderCfg.h"
 #include "transitmap/optim/ILPOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
 #include "transitmap/optim/Optimizer.h"
@@ -35,7 +34,7 @@ class ILPEdgeOrderOptimizer : public ILPOptimizer {
   virtual glp_prob* createProblem(OptGraph* og, const std::set<OptNode*>& g) const;
 
   virtual void getConfigurationFromSolution(glp_prob* lp,
-                                            HierarchOrderingConfig* c,
+                                            graph::HierarOrderCfg* c,
                                             const std::set<OptNode*>& g) const;
 
   void writeCrossingOracle(const std::set<OptNode*>& g, VariableMatrix* vm,

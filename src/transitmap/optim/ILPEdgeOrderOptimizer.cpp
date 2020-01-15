@@ -4,7 +4,7 @@
 
 #include <glpk.h>
 #include <fstream>
-#include "transitmap/graph/OrderingConfig.h"
+#include "transitmap/graph/OrderCfg.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
 #include "util/geo/Geo.h"
@@ -16,7 +16,7 @@ using namespace transitmapper::graph;
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
-    glp_prob* lp, HierarchOrderingConfig* hc,
+    glp_prob* lp, HierarOrderCfg* hc,
     const std::set<OptNode*>& g) const {
   // build name index for faster lookup
   glp_create_index(lp);

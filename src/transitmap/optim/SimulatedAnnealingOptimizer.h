@@ -6,8 +6,7 @@
 #define TRANSITMAP_OPTIM_SIMULATEDANNEALINGOPTIMIZER_H_
 
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/OrderCfg.h"
 #include "transitmap/optim/HillClimbOptimizer.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/NullOptimizer.h"
@@ -27,10 +26,10 @@ class SimulatedAnnealingOptimizer : public HillClimbOptimizer {
       : HillClimbOptimizer(cfg, scorer){};
 
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                           HierarchOrderingConfig* c, size_t depth) const;
+                           graph::HierarOrderCfg* c, size_t depth) const;
 
  private:
-  double getScore(OptGraph* og, OptEdge* e, OptOrderingConfig& cur) const;
+  double getScore(OptGraph* og, OptEdge* e, OptOrderCfg& cur) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

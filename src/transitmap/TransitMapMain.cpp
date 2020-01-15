@@ -12,7 +12,7 @@
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/GraphBuilder.h"
 #include "transitmap/graph/Penalties.h"
-#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/RenderGraph.h"
 #include "transitmap/optim/CombOptimizer.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/Scorer.h"
@@ -38,10 +38,10 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   LOG(INFO) << "Reading graph...";
-  transitmapper::graph::TransitGraph g(cfg.lineWidth, cfg.lineSpacing);
+  transitmapper::graph::RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
   transitmapper::graph::GraphBuilder b(&cfg);
 
-  g.readFromJson(&std::cin);
+  g.readFromJson(&std::cin, cfg.inputSmoothing);
 
   LOG(INFO) << "Creating node fronts...";
   b.writeMainDirs(&g);
@@ -77,12 +77,12 @@ int main(int argc, char** argv) {
   if (cfg.outputStats) {
     LOG(INFO) << "(stats) Stats for graph";
     LOG(INFO) << "(stats)   Total node count: " << g.getNds()->size() << " ("
-              << g.getNumNodes(true) << " topo, " << g.getNumNodes(false)
+              << g.getNumNds(true) << " topo, " << g.getNumNds(false)
               << " non-topo)";
-    LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges();
+    LOG(INFO) << "(stats)   Total edge count: " << g.numEdgs();
     LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes();
     LOG(INFO) << "(stats)   Max edge route cardinality: "
-              << g.getMaxCardinality();
+              << g.getMaxLineNum();
     LOG(INFO) << "(stats)   Number of poss. solutions: "
               << scorer.getNumPossSolutions();
     LOG(INFO) << "(stats)   Highest node degree: " << g.maxDeg();

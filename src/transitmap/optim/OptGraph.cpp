@@ -6,6 +6,7 @@
 #include "shared/linegraph/LineGraph.h"
 #include "shared/linegraph/Route.h"
 #include "transitmap/optim/OptGraph.h"
+#include "transitmap/graph/RenderGraph.h"
 #include "util/String.h"
 #include "util/graph/Algorithm.h"
 #include "util/log/Log.h"
@@ -18,12 +19,14 @@ using transitmapper::optim::OptEdgePL;
 using transitmapper::optim::OptNodePL;
 using transitmapper::optim::OptRO;
 using transitmapper::optim::PartnerPath;
+using transitmapper::graph::RenderGraph;
 using shared::linegraph::RouteOcc;
 using shared::linegraph::Route;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineEdge;
 using util::graph::Algorithm;
+using util::Nullable;
 
 // _____________________________________________________________________________
 void OptGraph::upFirstLastEdg(OptEdge* optEdg) {
@@ -99,7 +102,7 @@ LineEdge* OptGraph::getAdjEdg(const OptEdge* e, const OptNode* n) {
 }
 
 // _____________________________________________________________________________
-OptGraph::OptGraph(TransitGraph* toOptim, const Scorer* scorer)
+OptGraph::OptGraph(RenderGraph* toOptim, const Scorer* scorer)
     : _g(toOptim), _scorer(scorer) {
   build();
 }
@@ -501,7 +504,7 @@ bool OptGraph::simplifyStep() {
 }
 
 // _____________________________________________________________________________
-TransitGraph* OptGraph::getGraph() const { return _g; }
+RenderGraph* OptGraph::getGraph() const { return _g; }
 
 // _____________________________________________________________________________
 size_t OptGraph::getNumNodes() const { return getNds().size(); }

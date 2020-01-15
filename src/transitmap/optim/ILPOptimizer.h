@@ -8,8 +8,7 @@
 #include <glpk.h>
 #include "shared/linegraph/Route.h"
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/OrderCfg.h"
 #include "transitmap/optim/OptGraph.h"
 #include "transitmap/optim/Optimizer.h"
 #include "transitmap/optim/Scorer.h"
@@ -38,7 +37,7 @@ class ILPOptimizer : public Optimizer {
       : Optimizer(cfg, scorer){};
 
   int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                   HierarchOrderingConfig* c, size_t depth) const;
+                   HierarOrderCfg* c, size_t depth) const;
 
  protected:
   virtual glp_prob* createProblem(OptGraph* og, const std::set<OptNode*>& g) const;
@@ -47,7 +46,7 @@ class ILPOptimizer : public Optimizer {
   void preSolveCoinCbc(glp_prob* lp) const;
 
   virtual void getConfigurationFromSolution(glp_prob* lp,
-                                            HierarchOrderingConfig* c,
+                                            HierarOrderCfg* c,
                                             const std::set<OptNode*>& g) const;
 
   std::string getILPVarName(OptEdge* e, const shared::linegraph::Route* r,

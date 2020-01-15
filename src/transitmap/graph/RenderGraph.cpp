@@ -6,8 +6,8 @@
 #include <string>
 #include "json/json.hpp"
 #include "shared/linegraph/Route.h"
-#include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/OrderCfg.h"
+#include "transitmap/graph/RenderGraph.h"
 #include "util/Misc.h"
 #include "util/geo/BezierCurve.h"
 #include "util/geo/Geo.h"
@@ -23,14 +23,14 @@ using util::geo::Point;
 using util::geo::DPoint;
 using util::geo::Box;
 using util::geo::dist;
-using transitmapper::graph::TransitGraph;
+using transitmapper::graph::RenderGraph;
 using shared::linegraph::Route;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
 using shared::linegraph::RouteOcc;
 using shared::linegraph::NodeFront;
 using shared::linegraph::Partner;
-using transitmapper::graph::OrderingConfig;
+using transitmapper::graph::OrderCfg;
 using shared::linegraph::InnerGeometry;
 using util::geo::BezierCurve;
 using util::geo::PolyLine;
@@ -38,29 +38,18 @@ using util::geo::Polygon;
 using util::geo::MultiLine;
 
 // _____________________________________________________________________________
-const OrderingConfig& TransitGraph::getConfig() const { return _config; }
+const OrderCfg& RenderGraph::getConfig() const { return _config; }
 
 // _____________________________________________________________________________
-void TransitGraph::setConfig(const OrderingConfig& c) { _config = c; }
+void RenderGraph::setConfig(const OrderCfg& c) { _config = c; }
 
 // _____________________________________________________________________________
-size_t TransitGraph::getNumNodes() const { return 0; }
+size_t RenderGraph::numEdgs() const { return 0; }
 
 // _____________________________________________________________________________
-size_t TransitGraph::getNumRoutes() const { return 0; }
-
-// _____________________________________________________________________________
-size_t TransitGraph::getMaxCardinality() const { return 0; }
-
-// _____________________________________________________________________________
-size_t TransitGraph::getNumEdges() const { return 0; }
-
-// _____________________________________________________________________________
-size_t TransitGraph::getNumNodes(bool topo) const { return 0; }
-
-// _____________________________________________________________________________
-std::vector<InnerGeometry> TransitGraph::getInnerGeometries(
-    const LineNode* n, const OrderingConfig& c, double prec) const {
+std::vector<InnerGeometry> RenderGraph::innerGeoms(const LineNode* n,
+                                                   const OrderCfg& c,
+                                                   double prec) const {
   std::vector<InnerGeometry> ret;
   std::map<const Route*, std::set<const shared::linegraph::NodeFront*>>
       processed;
@@ -116,11 +105,10 @@ std::vector<InnerGeometry> TransitGraph::getInnerGeometries(
 }
 
 // _____________________________________________________________________________
-InnerGeometry TransitGraph::getInnerBezier(const LineNode* n,
-                                           const OrderingConfig& cf,
-                                           const Partner& partnerFrom,
-                                           const Partner& partnerTo,
-                                           double prec) const {
+InnerGeometry RenderGraph::getInnerBezier(const LineNode* n, const OrderCfg& cf,
+                                          const Partner& partnerFrom,
+                                          const Partner& partnerTo,
+                                          double prec) const {
   double EPSI = 0.001;
   InnerGeometry ret = getInnerStraightLine(n, cf, partnerFrom, partnerTo);
   DPoint p = ret.geom.getLine().front();
@@ -220,11 +208,10 @@ InnerGeometry TransitGraph::getInnerBezier(const LineNode* n,
 }
 
 // _____________________________________________________________________________
-InnerGeometry TransitGraph::getTerminusStraightLine(
-    const LineNode* n, const OrderingConfig& c,
-    const Partner& partnerFrom) const {
-  DPoint p = getTripOccPos(*partnerFrom.front, partnerFrom.route, c, false);
-  DPoint pp = getTripOccPos(*partnerFrom.front, partnerFrom.route, c, true);
+InnerGeometry RenderGraph::getTerminusStraightLine(
+    const LineNode* n, const OrderCfg& c, const Partner& partnerFrom) const {
+  DPoint p = linePosOn(*partnerFrom.front, partnerFrom.route, c, false);
+  DPoint pp = linePosOn(*partnerFrom.front, partnerFrom.route, c, true);
 
   size_t s = partnerFrom.edge->pl().getRoutePosUnder(
       partnerFrom.route, c.find(partnerFrom.edge)->second);
@@ -235,11 +222,11 @@ InnerGeometry TransitGraph::getTerminusStraightLine(
 }
 
 // _____________________________________________________________________________
-InnerGeometry TransitGraph::getInnerStraightLine(
-    const LineNode* n, const OrderingConfig& c, const Partner& partnerFrom,
+InnerGeometry RenderGraph::getInnerStraightLine(
+    const LineNode* n, const OrderCfg& c, const Partner& partnerFrom,
     const Partner& partnerTo) const {
-  DPoint p = getTripOccPos(*partnerFrom.front, partnerFrom.route, c, false);
-  DPoint pp = getTripOccPos(*partnerTo.front, partnerTo.route, c, false);
+  DPoint p = linePosOn(*partnerFrom.front, partnerFrom.route, c, false);
+  DPoint pp = linePosOn(*partnerTo.front, partnerTo.route, c, false);
 
   size_t s = partnerFrom.edge->pl().getRoutePosUnder(
       partnerFrom.route, c.find(partnerFrom.edge)->second);
@@ -250,10 +237,10 @@ InnerGeometry TransitGraph::getInnerStraightLine(
 }
 
 // _____________________________________________________________________________
-InnerGeometry TransitGraph::getTerminusBezier(const LineNode* n,
-                                              const OrderingConfig& cf,
-                                              const Partner& partnerFrom,
-                                              double prec) const {
+InnerGeometry RenderGraph::getTerminusBezier(const LineNode* n,
+                                             const OrderCfg& cf,
+                                             const Partner& partnerFrom,
+                                             double prec) const {
   InnerGeometry ret = getTerminusStraightLine(n, cf, partnerFrom);
   DPoint p = ret.geom.getLine().front();
   DPoint pp = ret.geom.getLine().back();
@@ -286,7 +273,7 @@ InnerGeometry TransitGraph::getTerminusBezier(const LineNode* n,
 }
 
 // _____________________________________________________________________________
-Polygon<double> TransitGraph::getConvexFrontHull(
+Polygon<double> RenderGraph::getConvexFrontHull(
     const LineNode* n, double d, bool rectangulize,
     bool simpleRenderForTwoEdgeNodes) const {
   double cd = d;
@@ -307,11 +294,11 @@ Polygon<double> TransitGraph::getConvexFrontHull(
   if (!simpleRenderForTwoEdgeNodes || n->pl().getMainDirs().size() != 2) {
     MultiLine<double> l;
     for (auto& nf : n->pl().getMainDirs()) {
-      l.push_back(
-          nf.origGeom
-              .getSegment((cd / 2) / nf.origGeom.getLength(),
-                          (nf.origGeom.getLength() - cd / 2) / nf.origGeom.getLength())
-              .getLine());
+      l.push_back(nf.origGeom
+                      .getSegment((cd / 2) / nf.origGeom.getLength(),
+                                  (nf.origGeom.getLength() - cd / 2) /
+                                      nf.origGeom.getLength())
+                      .getLine());
     }
 
     Polygon<double> hull = util::geo::convexHull(l);
@@ -389,27 +376,25 @@ Polygon<double> TransitGraph::getConvexFrontHull(
 }
 
 // _____________________________________________________________________________
-Polygon<double> TransitGraph::getStationHull(const LineNode* n, double d,
-                                             bool simple) const {
+Polygon<double> RenderGraph::getStationHull(const LineNode* n, double d,
+                                            bool simple) const {
   if (n->pl().getMainDirs().size() == 0) return Polygon<double>();
   return getConvexFrontHull(n, d, true, simple);
 }
 
 // _____________________________________________________________________________
-double TransitGraph::getTotalWidth(const LineEdge* e) const {
+double RenderGraph::getTotalWidth(const LineEdge* e) const {
   return _defWidth * e->pl().getRoutes().size() +
          _defSpacing * (e->pl().getRoutes().size() - 1);
 }
 
 // _____________________________________________________________________________
-size_t TransitGraph::getConnCardinality(const LineNode* n) {
+size_t RenderGraph::getConnCardinality(const LineNode* n) {
   size_t ret = 0;
   std::map<const Route*, std::set<const shared::linegraph::NodeFront*>>
       processed;
 
-  for (size_t i = 0; i < n->pl().getMainDirs().size(); ++i) {
-    const auto& nf = n->pl().getMainDirs()[i];
-
+  for (const auto& nf : n->pl().getMainDirs()) {
     for (size_t j = 0; j < nf.edge->pl().getRoutes().size(); j++) {
       const auto& routeOcc = nf.edge->pl().routeOccAtPos(j);
 
@@ -431,17 +416,17 @@ size_t TransitGraph::getConnCardinality(const LineNode* n) {
 }
 
 // _____________________________________________________________________________
-double TransitGraph::getWidth(const shared::linegraph::LineEdge* e) const {
+double RenderGraph::getWidth(const shared::linegraph::LineEdge* e) const {
   return _defWidth;
 }
 
 // _____________________________________________________________________________
-double TransitGraph::getSpacing(const shared::linegraph::LineEdge* e) const {
+double RenderGraph::getSpacing(const shared::linegraph::LineEdge* e) const {
   return _defSpacing;
 }
 
 // _____________________________________________________________________________
-double TransitGraph::getMaxNodeFrontWidth(
+double RenderGraph::getMaxNdFrontWidth(
     const shared::linegraph::LineNode* n) const {
   double ret = 0;
   for (const auto& g : n->pl().getMainDirs()) {
@@ -451,7 +436,7 @@ double TransitGraph::getMaxNodeFrontWidth(
 }
 
 // _____________________________________________________________________________
-size_t TransitGraph::getMaxNodeFrontCard(
+size_t RenderGraph::getMaxNdFrontCard(
     const shared::linegraph::LineNode* n) const {
   size_t ret = 0;
   for (const auto& g : n->pl().getMainDirs()) {
@@ -462,18 +447,17 @@ size_t TransitGraph::getMaxNodeFrontCard(
 }
 
 // _____________________________________________________________________________
-DPoint TransitGraph::getTripOccPos(const NodeFront& nf, const Route* r,
-                                   const OrderingConfig& c,
-                                   bool origGeom) const {
+DPoint RenderGraph::linePosOn(const NodeFront& nf, const Route* r,
+                              const OrderCfg& c, bool origGeom) const {
   assert(c.find(nf.edge) != c.end());
 
   size_t p = nf.edge->pl().getRoutePosUnder(r, c.find(nf.edge)->second);
-  return getTripPos(nf, nf.edge, p, nf.n == nf.edge->getTo(), origGeom);
+  return linePosOn(nf, nf.edge, p, nf.n == nf.edge->getTo(), origGeom);
 }
 
 // _____________________________________________________________________________
-DPoint TransitGraph::getTripPos(const NodeFront& nf, const LineEdge* e,
-                                size_t pos, bool inv, bool origG) const {
+DPoint RenderGraph::linePosOn(const NodeFront& nf, const LineEdge* e,
+                              size_t pos, bool inv, bool origG) const {
   double p;
   if (!inv) {
     p = (getWidth(e) + getSpacing(e)) * pos + getWidth(e) / 2;

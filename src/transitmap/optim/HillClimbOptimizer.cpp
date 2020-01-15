@@ -5,18 +5,19 @@
 #include <algorithm>
 #include <unordered_map>
 #include "transitmap/optim/HillClimbOptimizer.h"
+#include "shared/linegraph/Route.h"
 #include "util/log/Log.h"
 
 using namespace transitmapper;
 using namespace optim;
 using namespace transitmapper::graph;
 using transitmapper::optim::HillClimbOptimizer;
+using shared::linegraph::Route;
 
 // _____________________________________________________________________________
 int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                     HierarchOrderingConfig* hc,
-                                     size_t depth) const {
-  OptOrderingConfig cur, null;
+                                     HierarOrderCfg* hc, size_t depth) const {
+  OptOrderCfg cur, null;
 
   // fixed order list of optim graph edges
   std::vector<OptEdge*> edges;
@@ -108,7 +109,7 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 double HillClimbOptimizer::getScore(OptGraph* og, OptEdge* e,
-                                    OptOrderingConfig& cur) const {
+                                    OptOrderCfg& cur) const {
   double curScore = _optScorer.getCrossingScore(og, e, cur);
   if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, e, cur);
   return curScore;

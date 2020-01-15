@@ -16,13 +16,13 @@ using shared::linegraph::Route;
 
 // _____________________________________________________________________________
 int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                      HierarchOrderingConfig* hc,
+                                      HierarOrderCfg* hc,
                                       size_t depth) const {
   LOG(DEBUG) << prefix(depth)
              << "(ExhaustiveOptimizer) Optimizing component with " << g.size()
              << " nodes.";
 
-  OptOrderingConfig best, cur, null;
+  OptOrderCfg best, cur, null;
   double bestScore = DBL_MAX;
 
   // fixed order list of optim graph edges
@@ -93,13 +93,13 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
-                                        OptOrderingConfig* cfg) const {
+                                        OptOrderCfg* cfg) const {
   initialConfig(g, cfg, false);
 }
 
 // _____________________________________________________________________________
 void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
-                                        OptOrderingConfig* cfg,
+                                        OptOrderCfg* cfg,
                                         bool sorted) const {
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
@@ -121,8 +121,8 @@ void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
 }
 
 // _____________________________________________________________________________
-void ExhaustiveOptimizer::writeHierarch(OptOrderingConfig* cfg,
-                                        HierarchOrderingConfig* hc) const {
+void ExhaustiveOptimizer::writeHierarch(OptOrderCfg* cfg,
+                                        HierarOrderCfg* hc) const {
   for (auto ep : *cfg) {
     auto e = ep.first;
 

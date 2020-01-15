@@ -3,6 +3,7 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <fstream>
+#include "transitmap/optim/OptGraph.h"
 #include "transitmap/optim/Optimizer.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -13,14 +14,21 @@ using transitmapper::optim::Optimizer;
 using transitmapper::optim::LinePair;
 using transitmapper::optim::PosComPair;
 using transitmapper::optim::EdgePair;
+using transitmapper::optim::OptGraph;
+using transitmapper::optim::OptNode;
+using transitmapper::optim::OptEdge;
+using transitmapper::graph::RenderGraph;
+using transitmapper::graph::HierarOrderCfg;
 using shared::linegraph::NodeFront;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineEdge;
+using shared::linegraph::Route;
 using util::geo::DPoint;
 using util::geo::DLine;
+using util::factorial;
 
 // _____________________________________________________________________________
-int Optimizer::optimize(TransitGraph* tg) const {
+int Optimizer::optimize(RenderGraph* tg) const {
   // create optim graph
   OptGraph g(tg, _scorer);
 
@@ -81,8 +89,8 @@ int Optimizer::optimize(TransitGraph* tg) const {
   LOG(INFO) << "Optimization graph has " << comps.size() << " components.";
 
   for (size_t run = 0; run < runs; run++) {
-    OrderingConfig c;
-    HierarchOrderingConfig hc;
+    graph::OrderCfg c;
+    graph::HierarOrderCfg hc;
 
     T_START(1);
     size_t iters = 0;
@@ -217,7 +225,7 @@ bool Optimizer::crosses(OptGraph* g, OptNode* node, OptEdge* segmentA,
   // this
   // is done, it is no longer necessary to give the OptGraph* g argument to this
   // (and other) functions, as g is only used to derive the original
-  // TransitGraph
+  // RenderGraph
   // for the position calculation
   DPoint aInA = getPos(g, node, segmentA, posAinA);
   DPoint bInA = getPos(g, node, segmentA, posBinA);
@@ -319,8 +327,8 @@ DPoint Optimizer::getPos(OptGraph* g, OptNode* n, OptEdge* segment, size_t p) {
     }
   }
 
-  return g->getGraph()->getTripPos(*nf, segment->pl().etgs.front().etg, p,
-                                   false, false);
+  return g->getGraph()->linePosOn(*nf, segment->pl().etgs.front().etg, p, false,
+                                  false);
 }
 
 // _____________________________________________________________________________
@@ -416,7 +424,7 @@ double Optimizer::solutionSpaceSize(const std::set<OptNode*>& g) {
 
 // _____________________________________________________________________________
 int Optimizer::optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
-                            HierarchOrderingConfig* c) const {
+                            HierarOrderCfg* c) const {
   return optimizeComp(g, cmp, c, 0);
 }
 

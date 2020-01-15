@@ -49,8 +49,8 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
                 util::Nullable<shared::style::LineStyle> ls);
   void addRoute(const Route* r, const Node<LineNodePL, LineEdgePL>* dir);
 
-  const std::set<RouteOcc>& getRoutes() const;
   std::set<RouteOcc>& getRoutes();
+  const std::set<RouteOcc>& getRoutes() const;
 
   bool hasRoute(const Route* r) const;
   void delRoute(const Route* r);

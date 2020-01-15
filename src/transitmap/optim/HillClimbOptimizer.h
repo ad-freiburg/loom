@@ -6,8 +6,7 @@
 #define TRANSITMAP_OPTIM_HILLCLIMBOPTIMIZER_H_
 
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/OrderCfg.h"
 #include "transitmap/optim/ExhaustiveOptimizer.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/NullOptimizer.h"
@@ -27,10 +26,10 @@ class HillClimbOptimizer : public ExhaustiveOptimizer {
       : ExhaustiveOptimizer(cfg, scorer){};
 
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                           HierarchOrderingConfig* c, size_t depth) const;
+                           HierarOrderCfg* c, size_t depth) const;
 
  private:
-  double getScore(OptGraph* og, OptEdge* e, OptOrderingConfig& cur) const;
+  double getScore(OptGraph* og, OptEdge* e, OptOrderCfg& cur) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

@@ -12,14 +12,13 @@
 #include "Renderer.h"
 #include "shared/linegraph/Route.h"
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/RenderGraph.h"
 #include "transitmap/optim/Scorer.h"
 #include "util/geo/Geo.h"
 #include "util/geo/PolyLine.h"
 #include "util/xml/XmlWriter.h"
 
 using util::Nullable;
-using namespace util::geo;
 
 namespace transitmapper {
 namespace output {
@@ -36,7 +35,11 @@ class SvgRendererException : public std::exception {
 };
 
 struct InnerClique {
-  InnerClique(const shared::linegraph::LineNode* n, shared::linegraph::InnerGeometry geom) : n(n) { geoms.push_back(geom); };
+  InnerClique(const shared::linegraph::LineNode* n,
+              shared::linegraph::InnerGeometry geom)
+      : n(n) {
+    geoms.push_back(geom);
+  };
   std::vector<shared::linegraph::InnerGeometry> geoms;
 
   double getZWeight() const;
@@ -64,7 +67,7 @@ struct EndMarker {
 };
 
 typedef std::map<std::string, std::string> Params;
-typedef std::pair<Params, PolyLine<double>> PrintDelegate;
+typedef std::pair<Params, util::geo::PolyLine<double>> PrintDelegate;
 
 struct OutlinePrintPair {
   OutlinePrintPair(PrintDelegate front, PrintDelegate back)
@@ -80,25 +83,25 @@ class SvgRenderer : public Renderer {
               const optim::Scorer* scorer);
   virtual ~SvgRenderer(){};
 
-  virtual void print(const graph::TransitGraph& outputGraph);
+  virtual void print(const graph::RenderGraph& outputGraph);
 
-  void printLine(const PolyLine<double>& l,
+  void printLine(const util::geo::PolyLine<double>& l,
                  const std::map<std::string, std::string>& ps,
                  const RenderParams& params);
-  void printLine(const PolyLine<double>& l, const std::string& style,
+  void printLine(const util::geo::PolyLine<double>& l, const std::string& style,
                  const RenderParams& params);
-  void printPoint(const DPoint& p, const std::string& style,
+  void printPoint(const util::geo::DPoint& p, const std::string& style,
                   const RenderParams& params);
-  void printPolygon(const Polygon<double>& g, const std::string& style,
-                    const RenderParams& params);
-  void printPolygon(const Polygon<double>& g,
+  void printPolygon(const util::geo::Polygon<double>& g,
+                    const std::string& style, const RenderParams& params);
+  void printPolygon(const util::geo::Polygon<double>& g,
                     const std::map<std::string, std::string>& ps,
                     const RenderParams& params);
-  void printCircle(const DPoint& center, double rad,
+  void printCircle(const util::geo::DPoint& center, double rad,
                    const std::map<std::string, std::string>& ps,
                    const RenderParams& rparams);
-  void printCircle(const DPoint& center, double rad, const std::string& style,
-                   const RenderParams& rparams);
+  void printCircle(const util::geo::DPoint& center, double rad,
+                   const std::string& style, const RenderParams& rparams);
 
  private:
   std::ostream* _o;
@@ -112,44 +115,50 @@ class SvgRenderer : public Renderer {
       _innerDelegates;
   std::vector<EndMarker> _markers;
 
-  void outputNodes(const graph::TransitGraph& outputGraph,
+  void outputNodes(const graph::RenderGraph& outputGraph,
                    const RenderParams& params);
-  void outputEdges(const graph::TransitGraph& outputGraph,
+  void outputEdges(const graph::RenderGraph& outputGraph,
                    const RenderParams& params);
 
-  void renderEdgeTripGeom(const graph::TransitGraph& outG, const shared::linegraph::LineEdge* e,
+  void renderEdgeTripGeom(const graph::RenderGraph& outG,
+                          const shared::linegraph::LineEdge* e,
                           const RenderParams& params);
 
-  void renderNodeConnections(const graph::TransitGraph& outG,
-                             const shared::linegraph::LineNode* n, const RenderParams& params);
+  void renderNodeConnections(const graph::RenderGraph& outG,
+                             const shared::linegraph::LineNode* n,
+                             const RenderParams& params);
 
-  void renderLinePart(const PolyLine<double> p, double width,
+  void renderLinePart(const util::geo::PolyLine<double> p, double width,
                       const shared::linegraph::Route& route,
                       const shared::linegraph::LineEdge* e);
 
-  void renderLinePart(const PolyLine<double> p, double width,
+  void renderLinePart(const util::geo::PolyLine<double> p, double width,
                       const shared::linegraph::Route& route,
-                      const shared::linegraph::LineEdge* edge, const std::string& endMarker);
+                      const shared::linegraph::LineEdge* edge,
+                      const std::string& endMarker);
 
-  void renderDelegates(const graph::TransitGraph& outG,
+  void renderDelegates(const graph::RenderGraph& outG,
                        const RenderParams& params);
 
-  void renderNodeFronts(const graph::TransitGraph& outG,
+  void renderNodeFronts(const graph::RenderGraph& outG,
                         const RenderParams& params);
 
-  std::multiset<InnerClique> getInnerCliques(const shared::linegraph::LineNode* n,
+  std::multiset<InnerClique> getInnerCliques(
+      const shared::linegraph::LineNode* n,
       std::vector<shared::linegraph::InnerGeometry> geoms, size_t level) const;
 
-  void renderClique(const InnerClique& c, const shared::linegraph::LineNode* node);
+  void renderClique(const InnerClique& c,
+                    const shared::linegraph::LineNode* node);
 
   bool isNextTo(const shared::linegraph::InnerGeometry& a,
                 const shared::linegraph::InnerGeometry b) const;
   bool hasSameOrigin(const shared::linegraph::InnerGeometry& a,
                      const shared::linegraph::InnerGeometry b) const;
 
-  size_t getNextPartner(const InnerClique& forGeom,
-                        const std::vector<shared::linegraph::InnerGeometry>& pool,
-                        size_t level) const;
+  size_t getNextPartner(
+      const InnerClique& forGeom,
+      const std::vector<shared::linegraph::InnerGeometry>& pool,
+      size_t level) const;
 
   std::string getMarkerPathMale(double w) const;
   std::string getMarkerPathFemale(double w) const;

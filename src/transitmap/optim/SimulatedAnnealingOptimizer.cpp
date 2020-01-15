@@ -13,9 +13,11 @@ using namespace transitmapper::graph;
 using transitmapper::optim::SimulatedAnnealingOptimizer;
 
 // _____________________________________________________________________________
-int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                          HierarchOrderingConfig* hc, size_t depth) const {
-  OptOrderingConfig cur, null;
+int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
+                                              const std::set<OptNode*>& g,
+                                              HierarOrderCfg* hc,
+                                              size_t depth) const {
+  OptOrderCfg cur, null;
 
   // fixed order list of optim graph edges
   std::vector<OptEdge*> edges;
@@ -43,7 +45,8 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og, const std::set<OptNo
     double temp = 1000.0 / iters;
 
     if (iters - last == 10000) {
-      LOG(DEBUG) << "@ " << iters << ", temp = " << temp << ", last change was at " << k << " iters.";
+      LOG(DEBUG) << "@ " << iters << ", temp = " << temp
+                 << ", last change was at " << k << " iters.";
       last = iters;
     }
 
@@ -56,7 +59,7 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og, const std::set<OptNo
     int c = rand() % util::factorial(edges[i]->pl().getCardinality());
 
     for (int j = 0; j < c; j++)
-        std::next_permutation(cur[edges[i]].begin(), cur[edges[i]].end());
+      std::next_permutation(cur[edges[i]].begin(), cur[edges[i]].end());
 
     double s = getScore(og, edges[i], cur);
 
@@ -80,7 +83,8 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og, const std::set<OptNo
   double curScore = _optScorer.getCrossingScore(og, g, cur);
   if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, g, cur);
 
-  LOG(DEBUG) << "Stopped after " << iters << " iterations. Final target = " << curScore;
+  LOG(DEBUG) << "Stopped after " << iters
+             << " iterations. Final target = " << curScore;
 
   writeHierarch(&cur, hc);
   return iters;
@@ -88,7 +92,7 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og, const std::set<OptNo
 
 // _____________________________________________________________________________
 double SimulatedAnnealingOptimizer::getScore(OptGraph* og, OptEdge* e,
-                                             OptOrderingConfig& cur) const {
+                                             OptOrderCfg& cur) const {
   double curScore = _optScorer.getCrossingScore(og, e, cur);
   if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, e, cur);
   return curScore;

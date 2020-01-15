@@ -7,73 +7,71 @@
 
 #include <string>
 #include <vector>
-#include "transitmap/graph/OrderingConfig.h"
+#include "transitmap/graph/OrderCfg.h"
 #include "transitmap/graph/Penalties.h"
-#include "transitmap/graph/TransitGraph.h"
-
-using transitmapper::graph::TransitGraph;
-using transitmapper::graph::Penalties;
-using transitmapper::graph::OrderingConfig;
+#include "transitmap/graph/RenderGraph.h"
 
 namespace transitmapper {
 namespace optim {
 
 class Scorer {
  public:
-  Scorer(const TransitGraph* g, const Penalties& pens) : _g(g), _pens(pens) {}
+  Scorer(const graph::RenderGraph* g, const graph::Penalties& pens)
+      : _g(g), _pens(pens) {}
 
-  const TransitGraph* getGraph() const { return _g; }
+  const graph::RenderGraph* getGraph() const { return _g; }
 
   double getScore() const;
-  double getScore(const OrderingConfig& c) const;
+  double getScore(const graph::OrderCfg& c) const;
 
   double getCrossScore() const;
-  double getCrossScore(const OrderingConfig& c) const;
+  double getCrossScore(const graph::OrderCfg& c) const;
 
   double getSeparationScore() const;
-  double getSeparationScore(const OrderingConfig& c) const;
+  double getSeparationScore(const graph::OrderCfg& c) const;
 
   size_t getNumCrossings() const;
-  size_t getNumCrossings(const OrderingConfig& c) const;
+  size_t getNumCrossings(const graph::OrderCfg& c) const;
 
   size_t getNumSeparations() const;
-  size_t getNumSeparations(const OrderingConfig& c) const;
+  size_t getNumSeparations(const graph::OrderCfg& c) const;
 
   double getNumPossSolutions() const;
   size_t getMaxCrossPenalty() const;
   size_t getMaxSplitPenalty() const;
 
   double getScore(const shared::linegraph::LineNode* n,
-                  const graph::OrderingConfig& cfg) const;
+                  const graph::OrderCfg& cfg) const;
   size_t getNumCrossings(const shared::linegraph::LineNode* n,
-                         const graph::OrderingConfig& c) const;
+                         const graph::OrderCfg& c) const;
   size_t getNumSeparations(const shared::linegraph::LineNode* n,
-                           const graph::OrderingConfig& c) const;
+                           const graph::OrderCfg& c) const;
   double getSeparationScore(const shared::linegraph::LineNode* n,
-                            const OrderingConfig& c,
-                            const Penalties& pens) const;
+                            const graph::OrderCfg& c,
+                            const graph::Penalties& pens) const;
   double getCrossingScore(const shared::linegraph::LineNode* n,
-                          const OrderingConfig& c, const Penalties& pens) const;
+                          const graph::OrderCfg& c,
+                          const graph::Penalties& pens) const;
 
   double getSeparationScore(const shared::linegraph::LineNode* n,
-                            const OrderingConfig& c) const;
+                            const graph::OrderCfg& c) const;
   double getCrossingScore(const shared::linegraph::LineNode* n,
-                          const OrderingConfig& c) const;
+                          const graph::OrderCfg& c) const;
 
   int getCrossingPenaltySameSeg(const shared::linegraph::LineNode* n,
-                                const Penalties& pens) const;
+                                const graph::Penalties& pens) const;
   int getCrossingPenaltyDiffSeg(const shared::linegraph::LineNode* n,
-                                const Penalties& pens) const;
+                                const graph::Penalties& pens) const;
   int getSplittingPenalty(const shared::linegraph::LineNode* n,
-                          const Penalties& pens) const;
+                          const graph::Penalties& pens) const;
 
   int getCrossingPenaltySameSeg(const shared::linegraph::LineNode* n) const;
   int getCrossingPenaltyDiffSeg(const shared::linegraph::LineNode* n) const;
   int getSplittingPenalty(const shared::linegraph::LineNode* n) const;
 
  private:
-  const TransitGraph* _g;
-  Penalties _pens;
+  const graph::RenderGraph* _g;
+  graph::Penalties _pens;
 };
 }
 }

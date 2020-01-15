@@ -5,7 +5,7 @@
 #ifndef TRANSITMAP_OUTPUT_RENDERER_H_
 #define TRANSITMAP_OUTPUT_RENDERER_H_
 
-#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/RenderGraph.h"
 
 namespace transitmapper {
 namespace output {
@@ -15,7 +15,7 @@ class Renderer {
   virtual ~Renderer() {};
 
   // print the outputGraph
-  virtual void print(const graph::TransitGraph& outputGraph) = 0;
+  virtual void print(const graph::RenderGraph& outG) = 0;
 };
 
 }}

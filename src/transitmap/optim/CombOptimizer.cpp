@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <fstream>
 #include <thread>
-#include "transitmap/graph/OrderingConfig.h"
+#include "transitmap/graph/OrderCfg.h"
 #include "transitmap/optim/CombOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
 #include "util/String.h"
@@ -23,7 +23,7 @@ using transitmapper::optim::CombOptimizer;
 
 // _____________________________________________________________________________
 int CombOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                HierarchOrderingConfig* hc, size_t depth) const {
+                                HierarOrderCfg* hc, size_t depth) const {
   size_t maxC = maxCard(g);
   double solSp = solutionSpaceSize(g);
 

@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_GRAPH_ORDERINGCONFIG_H_
-#define TRANSITMAP_GRAPH_ORDERINGCONFIG_H_
+#ifndef TRANSITMAP_GRAPH_ORDERCFG_H_
+#define TRANSITMAP_GRAPH_ORDERCFG_H_
 
 #include <map>
 #include <vector>
@@ -17,19 +17,19 @@ namespace linegraph {
 class LineNodePL;
 class LineEdgePL;
 typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge;
-
-}}
+}
+}
 
 namespace transitmapper {
 namespace graph {
 
 typedef std::vector<size_t> Ordering;
-typedef std::map<const shared::linegraph::LineEdge*, Ordering> OrderingConfig;
+typedef std::map<const shared::linegraph::LineEdge*, Ordering> OrderCfg;
 
-class HierarchOrderingConfig
-    : public std::map<const shared::linegraph::LineEdge*, std::map<size_t, Ordering>> {
+class HierarOrderCfg : public std::map<const shared::linegraph::LineEdge*,
+                                       std::map<size_t, Ordering>> {
  public:
-  void writeFlatCfg(OrderingConfig* c) const {
+  void writeFlatCfg(OrderCfg* c) const {
     for (auto kv : *this) {
       for (auto ordering : kv.second) {
         (*c)[kv.first].insert((*c)[kv.first].begin(), ordering.second.begin(),
@@ -41,4 +41,4 @@ class HierarchOrderingConfig
 }
 }
 
-#endif  // TRANSITMAP_GRAPH_ORDERINGCONFIG_H_
+#endif  // TRANSITMAP_GRAPH_ORDERCFG_H_

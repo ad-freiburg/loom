@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   // read input graph
-  tg.readFromJson(&(std::cin));
+  tg.readFromJson(&(std::cin), -1);
 
   size_t statFr = mc.freeze();
   si.init();

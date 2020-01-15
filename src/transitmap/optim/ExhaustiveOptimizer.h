@@ -6,8 +6,8 @@
 #define TRANSITMAP_OPTIM_EXHAUSTIVEOPTIMIZER_H_
 
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/OrderCfg.h"
+#include "transitmap/graph/RenderGraph.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/NullOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
@@ -26,14 +26,14 @@ class ExhaustiveOptimizer : public Optimizer {
       : Optimizer(cfg, scorer), _optScorer(scorer){};
 
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                           HierarchOrderingConfig* c, size_t depth) const;
+                           HierarOrderCfg* c, size_t depth) const;
 
  protected:
   OptGraphScorer _optScorer;
-  void initialConfig(const std::set<OptNode*>& g, OptOrderingConfig* cfg) const;
-  void initialConfig(const std::set<OptNode*>& g, OptOrderingConfig* cfg,
+  void initialConfig(const std::set<OptNode*>& g, OptOrderCfg* cfg) const;
+  void initialConfig(const std::set<OptNode*>& g, OptOrderCfg* cfg,
                      bool sorted) const;
-  void writeHierarch(OptOrderingConfig* cfg, HierarchOrderingConfig* c) const;
+  void writeHierarch(OptOrderCfg* cfg, HierarOrderCfg* c) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

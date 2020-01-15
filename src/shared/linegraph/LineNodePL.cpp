@@ -89,9 +89,16 @@ bool LineNodePL::connOccurs(const Route* r, const LineEdge* edgeA,
 // _____________________________________________________________________________
 const NodeFront* LineNodePL::getNodeFrontFor(const LineEdge* e) const {
   for (auto& nf : getMainDirs()) {
-    if (nf.edge == e) {
-      return &nf;
-    }
+    if (nf.edge == e) return &nf;
+  }
+
+  return 0;
+}
+
+// _____________________________________________________________________________
+NodeFront* LineNodePL::getNodeFrontFor(const LineEdge* e) {
+  for (auto& nf : getMainDirs()) {
+    if (nf.edge == e) return &nf;
   }
 
   return 0;
@@ -100,6 +107,17 @@ const NodeFront* LineNodePL::getNodeFrontFor(const LineEdge* e) const {
 // _____________________________________________________________________________
 const std::vector<NodeFront>& LineNodePL::getMainDirs() const {
   return _mainDirs;
+}
+
+// _____________________________________________________________________________
+void LineNodePL::delMainDir(const LineEdge* e) {
+  for (size_t i = 0; i < getMainDirs().size(); i++) {
+    if (_mainDirs[i].edge == e) {
+      _mainDirs[i] = _mainDirs.back();
+      _mainDirs.pop_back();
+      return;
+    }
+  }
 }
 
 // _____________________________________________________________________________

@@ -32,8 +32,8 @@ class LineGraph
  public:
   LineGraph();
 
-  void readFromJson(std::istream* s);
-  void readFromDot(std::istream* s);
+  void readFromJson(std::istream* s, double smooth);
+  void readFromDot(std::istream* s, double smooth);
 
   const util::geo::Box<double>& getBBox() const;
   void topologizeIsects();
@@ -45,6 +45,10 @@ class LineGraph
   const Route* getRoute(const std::string& id) const;
   void expandBBox(const util::geo::Point<double>& p);
   //
+
+  size_t getNumNds() const;
+  size_t getNumNds(bool topo) const;
+  size_t getNumRoutes() const;
 
   static LineNode* sharedNode(const LineEdge* a, const LineEdge* b);
   static std::vector<RouteOcc> getCtdRoutesIn(const Route* r,
@@ -60,6 +64,7 @@ class LineGraph
 
   static size_t getLDeg(const LineNode* nd);
   static size_t getMaxLineNum(const LineNode* nd);
+  size_t getMaxLineNum();
 
   static std::vector<Partner> getPartners(const LineNode* n, const NodeFront* f,
                                    const RouteOcc& ro);

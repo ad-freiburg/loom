@@ -6,12 +6,12 @@
 #define TRANSITMAP_OPTIM_NULLOPTIMIZER_H_
 
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/OrderingConfig.h"
-#include "transitmap/graph/TransitGraph.h"
-#include "transitmap/optim/OptGraph.h"
-#include "transitmap/optim/Optimizer.h"
+#include "transitmap/graph/OrderCfg.h"
+#include "transitmap/graph/RenderGraph.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/NullOptimizer.h"
+#include "transitmap/optim/OptGraph.h"
+#include "transitmap/optim/Optimizer.h"
 #include "transitmap/optim/Scorer.h"
 
 using std::exception;
@@ -23,8 +23,9 @@ namespace optim {
 class NullOptimizer : public Optimizer {
  public:
   NullOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : Optimizer(cfg, scorer) {};
-  int optimizeComp(OptGraph* og, const std::set<OptNode*>& g, HierarchOrderingConfig* c, size_t depth) const;
+      : Optimizer(cfg, scorer){};
+  int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+                   graph::HierarOrderCfg* c, size_t depth) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

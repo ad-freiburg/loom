@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <fstream>
 #include <thread>
-#include "transitmap/graph/OrderingConfig.h"
+#include "transitmap/graph/OrderCfg.h"
 #include "transitmap/optim/ILPOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
 #include "util/String.h"
@@ -18,10 +18,11 @@
 using namespace transitmapper;
 using namespace optim;
 using namespace transitmapper::graph;
+using shared::linegraph::Route;
 
 // _____________________________________________________________________________
 int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                               HierarchOrderingConfig* hc, size_t depth) const {
+                               HierarOrderCfg* hc, size_t depth) const {
   LOG(DEBUG) << "Creating ILP problem... ";
   glp_prob* lp = createProblem(og, g);
   LOG(DEBUG) << " .. done";
@@ -100,7 +101,7 @@ double ILPOptimizer::getConstraintCoeff(glp_prob* lp, int constraint,
 
 // _____________________________________________________________________________
 void ILPOptimizer::getConfigurationFromSolution(
-    glp_prob* lp, HierarchOrderingConfig* hc,
+    glp_prob* lp, HierarOrderCfg* hc,
     const std::set<OptNode*>& g) const {
   // build name index for faster lookup
   glp_create_index(lp);

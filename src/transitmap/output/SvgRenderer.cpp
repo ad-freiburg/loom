@@ -7,6 +7,7 @@
 #include "shared/linegraph/Route.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/output/SvgRenderer.h"
+#include "transitmap/graph/RenderGraph.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
 
@@ -14,6 +15,12 @@ using namespace transitmapper;
 using namespace output;
 using shared::linegraph::Route;
 using shared::linegraph::LineNode;
+using util::geo::DPoint;
+using util::geo::PolyLine;
+using util::geo::DPolygon;
+using util::geo::Polygon;
+using util::geo::LinePoint;
+using util::geo::LinePointCmp;
 
 using util::toString;
 
@@ -23,7 +30,7 @@ SvgRenderer::SvgRenderer(std::ostream* o, const config::Config* cfg,
     : _o(o), _w(o, true), _cfg(cfg), _scorer(scorer) {}
 
 // _____________________________________________________________________________
-void SvgRenderer::print(const graph::TransitGraph& outG) {
+void SvgRenderer::print(const graph::RenderGraph& outG) {
   std::map<std::string, std::string> params;
   RenderParams rparams;
 
@@ -115,7 +122,7 @@ void SvgRenderer::print(const graph::TransitGraph& outG) {
 }
 
 // _____________________________________________________________________________
-void SvgRenderer::outputNodes(const graph::TransitGraph& outG,
+void SvgRenderer::outputNodes(const graph::RenderGraph& outG,
                               const RenderParams& rparams) {
   _w.openTag("g");
   for (auto n : outG.getNds()) {
@@ -141,13 +148,12 @@ void SvgRenderer::outputNodes(const graph::TransitGraph& outG,
 }
 
 // _____________________________________________________________________________
-void SvgRenderer::renderNodeFronts(const graph::TransitGraph& outG,
+void SvgRenderer::renderNodeFronts(const graph::RenderGraph& outG,
                                    const RenderParams& rparams) {
   _w.openTag("g");
   for (LineNode* n : outG.getNds()) {
     std::string color = n->pl().getStops().size() > 0 ? "red" : "black";
-    for (size_t i = 0; i < n->pl().getMainDirs().size(); i++) {
-      auto& f = n->pl().getMainDirs()[i];
+    for (auto& f : n->pl().getMainDirs()) {
       const PolyLine<double> p = f.geom;
       std::stringstream style;
       style << "fill:none;stroke:" << color
@@ -172,14 +178,14 @@ void SvgRenderer::renderNodeFronts(const graph::TransitGraph& outG,
 }
 
 // _____________________________________________________________________________
-void SvgRenderer::outputEdges(const graph::TransitGraph& outG,
+void SvgRenderer::outputEdges(const graph::RenderGraph& outG,
                               const RenderParams& rparams) {
   struct cmp {
     bool operator()(const LineNode* lhs, const LineNode* rhs) const {
       return lhs->getAdjList().size() > rhs->getAdjList().size() ||
              (lhs->getAdjList().size() == rhs->getAdjList().size() &&
-              graph::TransitGraph::getConnCardinality(lhs) >
-                  graph::TransitGraph::getConnCardinality(rhs)) ||
+              graph::RenderGraph::getConnCardinality(lhs) >
+                  graph::RenderGraph::getConnCardinality(rhs)) ||
              (lhs->getAdjList().size() == rhs->getAdjList().size() &&
               lhs > rhs);
     }
@@ -212,10 +218,10 @@ void SvgRenderer::outputEdges(const graph::TransitGraph& outG,
 }
 
 // _____________________________________________________________________________
-void SvgRenderer::renderNodeConnections(const graph::TransitGraph& outG,
+void SvgRenderer::renderNodeConnections(const graph::RenderGraph& outG,
                                         const LineNode* n,
                                         const RenderParams& rparams) {
-  auto geoms = outG.getInnerGeometries(n, outG.getConfig(),
+  auto geoms = outG.innerGeoms(n, outG.getConfig(),
                                        _cfg->innerGeometryPrecision);
 
   for (auto& clique : getInnerCliques(n, geoms, 99)) {
@@ -426,7 +432,7 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
 }
 
 // _____________________________________________________________________________
-void SvgRenderer::renderEdgeTripGeom(const graph::TransitGraph& outG,
+void SvgRenderer::renderEdgeTripGeom(const graph::RenderGraph& outG,
                                      const shared::linegraph::LineEdge* e,
                                      const RenderParams& rparams) {
   const shared::linegraph::NodeFront* nfTo = e->getTo()->pl().getNodeFrontFor(e);
@@ -530,7 +536,7 @@ std::string SvgRenderer::getMarkerPathFemale(double w) const {
 }
 
 // _____________________________________________________________________________
-void SvgRenderer::renderDelegates(const graph::TransitGraph& outG,
+void SvgRenderer::renderDelegates(const graph::RenderGraph& outG,
                                   const RenderParams& rparams) {
   for (auto& a : _delegates) {
     _w.openTag("g");

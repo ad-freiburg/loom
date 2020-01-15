@@ -111,7 +111,9 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   // TODO refactor
   const std::vector<NodeFront>& getMainDirs() const;
   std::vector<NodeFront>& getMainDirs();
+  void delMainDir(const LineEdge* e);
   const NodeFront* getNodeFrontFor(const LineEdge* e) const;
+  NodeFront* getNodeFrontFor(const LineEdge* e);
 
   void addMainDir(const NodeFront& f);
 

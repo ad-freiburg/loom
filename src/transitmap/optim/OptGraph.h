@@ -9,14 +9,11 @@
 #include <string>
 
 #include "shared/linegraph/LineGraph.h"
-#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/RenderGraph.h"
 #include "transitmap/optim/Scorer.h"
 #include "util/Misc.h"
 #include "util/graph/UndirGraph.h"
 #include "util/json/Writer.h"
-
-using transitmapper::graph::TransitGraph;
-using util::graph::UndirGraph;
 
 namespace transitmapper {
 namespace optim {
@@ -29,11 +26,12 @@ typedef util::graph::Edge<OptNodePL, OptEdgePL> OptEdge;
 
 typedef std::map<const transitmapper::optim::OptEdge*,
                  std::vector<const shared::linegraph::Route*>>
-    OptOrderingConfig;
+    OptOrderCfg;
 
 struct OptRO {
   OptRO() : route(0), direction(0) {}
-  OptRO(const shared::linegraph::Route* r, const shared::linegraph::LineNode* dir)
+  OptRO(const shared::linegraph::Route* r,
+        const shared::linegraph::LineNode* dir)
       : route(r), direction(dir) {
     relatives.push_back(r);
   }
@@ -68,7 +66,8 @@ struct EtgPart {
   // writing of ordering later on
   bool wasCut;
 
-  EtgPart(shared::linegraph::LineEdge* etg, bool dir) : etg(etg), dir(dir), order(0), wasCut(false){};
+  EtgPart(shared::linegraph::LineEdge* etg, bool dir)
+      : etg(etg), dir(dir), order(0), wasCut(false){};
   EtgPart(shared::linegraph::LineEdge* etg, bool dir, size_t order, bool wasCut)
       : etg(etg), dir(dir), order(order), wasCut(wasCut){};
 };
@@ -111,18 +110,19 @@ struct OptNodePL {
   std::vector<OptEdge*> orderedEdges;
 
   OptNodePL(util::geo::Point<double> p) : node(0), p(p){};
-  OptNodePL(const shared::linegraph::LineNode* node) : node(node), p(*node->pl().getGeom()){};
-  OptNodePL() : node(0) {};
+  OptNodePL(const shared::linegraph::LineNode* node)
+      : node(node), p(*node->pl().getGeom()){};
+  OptNodePL() : node(0){};
 
   const util::geo::Point<double>* getGeom();
   util::json::Dict getAttrs();
 };
 
-class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
+class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
  public:
-  OptGraph(TransitGraph* toOptim, const Scorer* scorer);
+  OptGraph(graph::RenderGraph* toOptim, const Scorer* scorer);
 
-  TransitGraph* getGraph() const;
+  graph::RenderGraph* getGraph() const;
 
   size_t getNumNodes() const;
   size_t getNumNodes(bool topo) const;
@@ -140,14 +140,15 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   std::vector<PartnerPath> getPartnerRoutes() const;
   PartnerPath pathFromComp(const std::set<OptNode*>& comp) const;
 
-  static shared::linegraph::LineEdge* getAdjEdg(const OptEdge* e, const OptNode* n);
+  static shared::linegraph::LineEdge* getAdjEdg(const OptEdge* e,
+                                                const OptNode* n);
   static EtgPart getAdjEtgp(const OptEdge* e, const OptNode* n);
-  static bool hasCtdRoutesIn(const shared::linegraph::Route* r, const shared::linegraph::LineNode* dir,
+  static bool hasCtdRoutesIn(const shared::linegraph::Route* r,
+                             const shared::linegraph::LineNode* dir,
                              const OptEdge* fromEdge, const OptEdge* toEdge);
-  static std::vector<OptRO> getCtdRoutesIn(const shared::linegraph::Route* r,
-                                           const shared::linegraph::LineNode* dir,
-                                           const OptEdge* fromEdge,
-                                           const OptEdge* toEdge);
+  static std::vector<OptRO> getCtdRoutesIn(
+      const shared::linegraph::Route* r, const shared::linegraph::LineNode* dir,
+      const OptEdge* fromEdge, const OptEdge* toEdge);
   static std::vector<OptRO> getSameDirRoutesIn(
       const shared::linegraph::Route* r, const shared::linegraph::LineNode* dir,
       const OptEdge* fromEdge, const OptEdge* toEdge);
@@ -158,7 +159,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   void split();
 
  private:
-  TransitGraph* _g;
+  graph::RenderGraph* _g;
   const Scorer* _scorer;
 
   OptNode* getNodeForTransitNode(const shared::linegraph::LineNode* tn) const;
@@ -176,7 +177,8 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
   bool untangleStumpStep();
 
   std::vector<OptNode*> explodeNodeAlong(OptNode* nd,
-                                         const util::geo::PolyLine<double>& pl, size_t n);
+                                         const util::geo::PolyLine<double>& pl,
+                                         size_t n);
 
   std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n) const;
   bool branchesAtInto(OptEdge* e, OptNode* n,
@@ -221,7 +223,7 @@ class OptGraph : public UndirGraph<OptNodePL, OptEdgePL> {
 
   static OptNode* sharedNode(const OptEdge* a, const OptEdge* b);
 
-  static Nullable<const OptRO> getRO(const OptEdge* a,
+  static util::Nullable<const OptRO> getRO(const OptEdge* a,
                                      const shared::linegraph::Route*);
 
   static std::vector<OptEdge*> clockwEdges(OptEdge* noon, OptNode* n);

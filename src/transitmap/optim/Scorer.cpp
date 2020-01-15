@@ -4,13 +4,15 @@
 
 #include "shared/linegraph/Route.h"
 #include "transitmap/graph/Penalties.h"
-#include "transitmap/graph/TransitGraph.h"
+#include "transitmap/graph/RenderGraph.h"
 #include "transitmap/optim/Scorer.h"
 #include "util/Misc.h"
 
 using namespace transitmapper;
 using namespace optim;
-using transitmapper::graph::TransitGraph;
+using transitmapper::graph::RenderGraph;
+using transitmapper::graph::OrderCfg;
+using transitmapper::graph::Penalties;
 using shared::linegraph::Route;
 using shared::linegraph::InnerGeometry;
 using transitmapper::graph::IDENTITY_PENALTIES;
@@ -19,7 +21,7 @@ using transitmapper::graph::IDENTITY_PENALTIES;
 double Scorer::getScore() const { return getScore(_g->getConfig()); }
 
 // _____________________________________________________________________________
-double Scorer::getScore(const OrderingConfig& c) const {
+double Scorer::getScore(const OrderCfg& c) const {
   double ret = 0;
 
   for (auto n : _g->getNds()) {
@@ -33,7 +35,7 @@ double Scorer::getScore(const OrderingConfig& c) const {
 double Scorer::getCrossScore() const { return getCrossScore(_g->getConfig()); }
 
 // _____________________________________________________________________________
-double Scorer::getCrossScore(const OrderingConfig& c) const {
+double Scorer::getCrossScore(const OrderCfg& c) const {
   double ret = 0;
 
   for (auto n : _g->getNds()) {
@@ -49,7 +51,7 @@ double Scorer::getSeparationScore() const {
 }
 
 // _____________________________________________________________________________
-double Scorer::getSeparationScore(const OrderingConfig& c) const {
+double Scorer::getSeparationScore(const OrderCfg& c) const {
   double ret = 0;
 
   for (auto n : _g->getNds()) {
@@ -65,7 +67,7 @@ size_t Scorer::getNumCrossings() const {
 }
 
 // _____________________________________________________________________________
-size_t Scorer::getNumCrossings(const OrderingConfig& c) const {
+size_t Scorer::getNumCrossings(const OrderCfg& c) const {
   double ret = 0;
 
   for (auto n : _g->getNds()) {
@@ -81,7 +83,7 @@ size_t Scorer::getNumSeparations() const {
 }
 
 // _____________________________________________________________________________
-size_t Scorer::getNumSeparations(const OrderingConfig& c) const {
+size_t Scorer::getNumSeparations(const OrderCfg& c) const {
   double ret = 0;
 
   for (auto n : _g->getNds()) {
@@ -107,21 +109,21 @@ double Scorer::getNumPossSolutions() const {
 
 // _____________________________________________________________________________
 double Scorer::getScore(const shared::linegraph::LineNode* n,
-                        const graph::OrderingConfig& cfg) const {
+                        const graph::OrderCfg& cfg) const {
   return getCrossingScore(n, cfg, _pens) + getSeparationScore(n, cfg, _pens);
 }
 
 // _____________________________________________________________________________
 size_t Scorer::getNumCrossings(const shared::linegraph::LineNode* n,
-                               const OrderingConfig& c) const {
+                               const OrderCfg& c) const {
   return getCrossingScore(n, c, IDENTITY_PENALTIES);
 }
 
 // _____________________________________________________________________________
 double Scorer::getCrossingScore(const shared::linegraph::LineNode* n,
-                                const OrderingConfig& c,
+                                const OrderCfg& c,
                                 const Penalties& pens) const {
-  std::vector<InnerGeometry> igs = _g->getInnerGeometries(n, c, -1);
+  std::vector<InnerGeometry> igs = _g->innerGeoms(n, c, -1);
   size_t ret = 0;
 
   for (size_t i = 0; i < igs.size(); ++i) {
@@ -170,13 +172,13 @@ double Scorer::getCrossingScore(const shared::linegraph::LineNode* n,
 
 // _____________________________________________________________________________
 size_t Scorer::getNumSeparations(const shared::linegraph::LineNode* n,
-                                 const OrderingConfig& c) const {
+                                 const OrderCfg& c) const {
   return getSeparationScore(n, c, IDENTITY_PENALTIES);
 }
 
 // _____________________________________________________________________________
 double Scorer::getSeparationScore(const shared::linegraph::LineNode* n,
-                                  const OrderingConfig& c,
+                                  const OrderCfg& c,
                                   const Penalties& pens) const {
   size_t ret = 0;
   for (auto nf : n->pl().getMainDirs()) {
@@ -260,13 +262,13 @@ int Scorer::getSplittingPenalty(const shared::linegraph::LineNode* n,
 
 // _____________________________________________________________________________
 double Scorer::getSeparationScore(const shared::linegraph::LineNode* n,
-                                  const OrderingConfig& c) const {
+                                  const OrderCfg& c) const {
   return getSeparationScore(n, c, _pens);
 }
 
 // _____________________________________________________________________________
 double Scorer::getCrossingScore(const shared::linegraph::LineNode* n,
-                                const OrderingConfig& c) const {
+                                const OrderCfg& c) const {
   return getCrossingScore(n, c, _pens);
 }
 

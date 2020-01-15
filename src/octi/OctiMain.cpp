@@ -60,9 +60,9 @@ int main(int argc, char** argv) {
   LineGraph tg;
   GridGraph* gg;
   if (cfg.fromDot)
-    tg.readFromDot(&(std::cin));
+    tg.readFromDot(&(std::cin), -1);
   else
-    tg.readFromJson(&(std::cin));
+    tg.readFromJson(&(std::cin), -1);
   std::cerr << " done (" << T_STOP(read) << "ms)" << std::endl;
 
   std::cerr << "Planarize graph... ";
