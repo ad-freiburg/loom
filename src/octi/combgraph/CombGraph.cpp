@@ -38,11 +38,11 @@ void CombGraph::build(const LineGraph* source) {
   }
 
   for (auto n : *getNds()) {
-    size_t routes = 0;
+    size_t numLines = 0;
     for (auto e : n->getAdjList()) {
-      routes += e->pl().getChilds().front()->pl().getRoutes().size();
+      numLines += e->pl().getChilds().front()->pl().getLines().size();
     }
-    n->pl().setRouteNumber(routes);
+    n->pl().setRouteNumber(numLines);
   }
 }
 

@@ -10,9 +10,9 @@
 #include "util/geo/Grid.h"
 #include "util/log/Log.h"
 
-using namespace topo;
-
 using topo::config::TopoConfig;
+using topo::MapConstructor;
+using topo::ShrdSegWrap;
 
 using util::geo::Point;
 using util::geo::DPoint;
@@ -61,8 +61,8 @@ ShrdSegWrap MapConstructor::nextShrdSeg(double dCut, EdgeGrid* grid) {
 
         if (e != toTest) {
           double dmax =
-              fmax(dmin, e->pl().getRoutes().size() * (dmin / 2) +
-                             toTest->pl().getRoutes().size() * (dmin / 2));
+              fmax(dmin, e->pl().getLines().size() * (dmin / 2) +
+                             toTest->pl().getLines().size() * (dmin / 2));
           dmax = fmin(dmax, dCut);
 
           const auto& s = e->pl().getPolyline().getSharedSegments(
@@ -91,18 +91,18 @@ ShrdSegWrap MapConstructor::nextShrdSeg(double dCut, EdgeGrid* grid) {
 }
 
 // _____________________________________________________________________________
-bool MapConstructor::routeEq(const LineEdge* a, const LineEdge* b) {
+bool MapConstructor::lineEq(const LineEdge* a, const LineEdge* b) {
   // shortcut
-  if (a->pl().getRoutes().size() != b->pl().getRoutes().size()) return false;
+  if (a->pl().getLines().size() != b->pl().getLines().size()) return false;
 
   const auto shrNd = LineGraph::sharedNode(a, b);
 
   // TODO: remove quadratic code
-  for (const auto& ra : a->pl().getRoutes()) {
+  for (const auto& ra : a->pl().getLines()) {
     bool found = false;
-    for (const auto& rb : b->pl().getRoutes()) {
-      if (ra.route == rb.route && ra.style == rb.style) {
-        if (!shrNd->pl().connOccurs(ra.route, a, b)) return false;
+    for (const auto& rb : b->pl().getLines()) {
+      if (ra.line == rb.line && ra.style == rb.style) {
+        if (!shrNd->pl().connOccurs(ra.line, a, b)) return false;
 
         if (ra.direction == 0 && rb.direction == 0) {
           found = true;
@@ -216,46 +216,46 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
     auto wffrom = w.f->getFrom();
     auto wfto = w.f->getTo();
 
-    for (const auto& r : curEdgeGeom->pl().getRoutes()) {
+    for (const auto& r : curEdgeGeom->pl().getLines()) {
       if (!r.direction) {
-        eaEdgeGeom.addRoute(r.route, 0, r.style);
-        abEdgeGeom.addRoute(r.route, 0, r.style);
-        ecEdgeGeom.addRoute(r.route, 0, r.style);
+        eaEdgeGeom.addLine(r.line, 0, r.style);
+        abEdgeGeom.addLine(r.line, 0, r.style);
+        ecEdgeGeom.addLine(r.line, 0, r.style);
       } else if (r.direction == weto) {
-        eaEdgeGeom.addRoute(r.route, a, r.style);
-        abEdgeGeom.addRoute(r.route, b, r.style);
-        ecEdgeGeom.addRoute(r.route, weto, r.style);
+        eaEdgeGeom.addLine(r.line, a, r.style);
+        abEdgeGeom.addLine(r.line, b, r.style);
+        ecEdgeGeom.addLine(r.line, weto, r.style);
       } else {
-        eaEdgeGeom.addRoute(r.route, wefrom, r.style);
-        abEdgeGeom.addRoute(r.route, a, r.style);
-        ecEdgeGeom.addRoute(r.route, b, r.style);
+        eaEdgeGeom.addLine(r.line, wefrom, r.style);
+        abEdgeGeom.addLine(r.line, a, r.style);
+        ecEdgeGeom.addLine(r.line, b, r.style);
       }
     }
 
-    for (const auto& r : cmpEdgeGeom->pl().getRoutes()) {
+    for (const auto& r : cmpEdgeGeom->pl().getLines()) {
       if (!r.direction) {
-        faEdgeGeom.addRoute(r.route, 0, r.style);
-        abEdgeGeom.addRoute(r.route, 0, r.style);
-        fcEdgeGeom.addRoute(r.route, 0, r.style);
+        faEdgeGeom.addLine(r.line, 0, r.style);
+        abEdgeGeom.addLine(r.line, 0, r.style);
+        fcEdgeGeom.addLine(r.line, 0, r.style);
       } else if ((r.direction == wfto)) {
         if (fap.totalPos > fbp.totalPos) {
-          faEdgeGeom.addRoute(r.route, wfto, r.style);
-          abEdgeGeom.addRoute(r.route, a, r.style);
-          fcEdgeGeom.addRoute(r.route, b, r.style);
+          faEdgeGeom.addLine(r.line, wfto, r.style);
+          abEdgeGeom.addLine(r.line, a, r.style);
+          fcEdgeGeom.addLine(r.line, b, r.style);
         } else {
-          faEdgeGeom.addRoute(r.route, a, r.style);
-          abEdgeGeom.addRoute(r.route, b, r.style);
-          fcEdgeGeom.addRoute(r.route, wfto, r.style);
+          faEdgeGeom.addLine(r.line, a, r.style);
+          abEdgeGeom.addLine(r.line, b, r.style);
+          fcEdgeGeom.addLine(r.line, wfto, r.style);
         }
       } else {
         if (fap.totalPos > fbp.totalPos) {
-          faEdgeGeom.addRoute(r.route, a, r.style);
-          abEdgeGeom.addRoute(r.route, b, r.style);
-          fcEdgeGeom.addRoute(r.route, wffrom, r.style);
+          faEdgeGeom.addLine(r.line, a, r.style);
+          abEdgeGeom.addLine(r.line, b, r.style);
+          fcEdgeGeom.addLine(r.line, wffrom, r.style);
         } else {
-          faEdgeGeom.addRoute(r.route, wffrom, r.style);
-          abEdgeGeom.addRoute(r.route, a, r.style);
-          fcEdgeGeom.addRoute(r.route, b, r.style);
+          faEdgeGeom.addLine(r.line, wffrom, r.style);
+          abEdgeGeom.addLine(r.line, a, r.style);
+          fcEdgeGeom.addLine(r.line, b, r.style);
         }
       }
     }
@@ -416,8 +416,7 @@ bool MapConstructor::contractNodes() {
       if (e->pl().getPolyline().getLength() < _cfg->minSegLength) {
         auto from = e->getFrom();
         auto to = e->getTo();
-        if ((from->pl().getStops().size() == 0 ||
-             to->pl().getStops().size() == 0)) {
+        if ((from->pl().stops().size() == 0 || to->pl().stops().size() == 0)) {
           if (combineNodes(from, to)) return true;
         }
       }
@@ -431,9 +430,9 @@ bool MapConstructor::contractEdges() {
   for (auto n : *_g->getNds()) {
     std::vector<LineEdge*> edges;
     edges.insert(edges.end(), n->getAdjList().begin(), n->getAdjList().end());
-    if (edges.size() == 2 && n->pl().getStops().size() == 0) {
+    if (edges.size() == 2 && n->pl().stops().size() == 0) {
       if (!_g->getEdg(edges[0]->getOtherNd(n), edges[1]->getOtherNd(n))) {
-        if (routeEq(edges[0], edges[1])) {
+        if (lineEq(edges[0], edges[1])) {
           combineEdges(edges[0], edges[1], n);
           return true;
         }
@@ -444,8 +443,7 @@ bool MapConstructor::contractEdges() {
 }
 
 // _____________________________________________________________________________
-bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b,
-                                  LineNode* n) {
+bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n) {
   assert((a->getTo() == n || a->getFrom() == n) &&
          (b->getTo() == n || b->getFrom() == n));
 
@@ -465,7 +463,7 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b,
     newPl = util::geo::PolyLine<double>(lineA);
 
     newEdge = _g->addEdg(a->getFrom(), b->getTo(), a->pl());
-    routeDirRepl(n, newEdge->getTo(), newEdge);
+    lineDirRepl(n, newEdge->getTo(), newEdge);
   }
 
   if (a->getTo() != n && b->getTo() == n) {
@@ -477,7 +475,7 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b,
     newPl = util::geo::PolyLine<double>(lineB);
 
     newEdge = _g->addEdg(b->getFrom(), a->getTo(), b->pl());
-    routeDirRepl(n, newEdge->getTo(), newEdge);
+    lineDirRepl(n, newEdge->getTo(), newEdge);
   }
 
   if (a->getFrom() == n && b->getFrom() == n) {
@@ -490,7 +488,7 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b,
     newPl = util::geo::PolyLine<double>(lineA);
 
     newEdge = _g->addEdg(a->getTo(), b->getTo(), b->pl());
-    routeDirRepl(n, newEdge->getFrom(), newEdge);
+    lineDirRepl(n, newEdge->getFrom(), newEdge);
   }
 
   if (a->getTo() == n && b->getTo() == n) {
@@ -502,7 +500,7 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b,
     newPl = util::geo::PolyLine<double>(lineA);
 
     newEdge = _g->addEdg(a->getFrom(), b->getFrom(), a->pl());
-    routeDirRepl(n, newEdge->getTo(), newEdge);
+    lineDirRepl(n, newEdge->getTo(), newEdge);
   }
 
   // set new polyline and smoothen a bit
@@ -543,9 +541,9 @@ void MapConstructor::combContEdgs(const LineEdge* a, const LineEdge* b) {
 
 // _____________________________________________________________________________
 bool MapConstructor::combineNodes(LineNode* a, LineNode* b) {
-  assert(a->pl().getStops().size() == 0 || b->pl().getStops().size() == 0);
+  assert(a->pl().stops().size() == 0 || b->pl().stops().size() == 0);
 
-  if (a->pl().getStops().size() != 0) {
+  if (a->pl().stops().size() != 0) {
     LineNode* c = a;
     a = b;
     b = c;
@@ -569,13 +567,13 @@ bool MapConstructor::combineNodes(LineNode* a, LineNode* b) {
       newE = _g->addEdg(b, oldE->getTo(), oldE->pl());
 
       // update route dirs
-      routeDirRepl(a, b, newE);
+      lineDirRepl(a, b, newE);
     } else {
       // edge is already existing
       foldEdges(oldE, newE);
 
       // update route dirs
-      routeDirRepl(a, b, newE);
+      lineDirRepl(a, b, newE);
     }
 
     combContEdgs(newE, oldE);
@@ -592,13 +590,13 @@ bool MapConstructor::combineNodes(LineNode* a, LineNode* b) {
       newE = _g->addEdg(oldE->getFrom(), b, oldE->pl());
 
       // update route dirs
-      routeDirRepl(a, b, newE);
+      lineDirRepl(a, b, newE);
     } else {
       // edge is already existing
       foldEdges(oldE, newE);
 
       // update route dirs
-      routeDirRepl(a, b, newE);
+      lineDirRepl(a, b, newE);
     }
 
     combContEdgs(newE, oldE);
@@ -611,9 +609,8 @@ bool MapConstructor::combineNodes(LineNode* a, LineNode* b) {
 }
 
 // _____________________________________________________________________________
-PolyLine<double> MapConstructor::geomAvg(const LineEdgePL& geomA,
-                                         double startA, double endA,
-                                         const LineEdgePL& geomB,
+PolyLine<double> MapConstructor::geomAvg(const LineEdgePL& geomA, double startA,
+                                         double endA, const LineEdgePL& geomB,
                                          double startB, double endB) {
   PolyLine<double> a, b;
 
@@ -632,8 +629,8 @@ PolyLine<double> MapConstructor::geomAvg(const LineEdgePL& geomA,
   }
 
   std::vector<double> weights{
-      1.0 * geomA.getRoutes().size() * geomA.getRoutes().size(),
-      1.0 * geomB.getRoutes().size() * geomB.getRoutes().size()};
+      1.0 * geomA.getLines().size() * geomA.getLines().size(),
+      1.0 * geomB.getLines().size() * geomB.getLines().size()};
 
   PolyLine<double> ret = PolyLine<double>::average({&a, &b});
   ret.simplify(5);
@@ -670,19 +667,18 @@ DBox MapConstructor::bbox() const {
 }
 
 // _____________________________________________________________________________
-void MapConstructor::routeDirRepl(LineNode* oldN, LineNode* newN,
-                                  LineEdge* e) {
-  auto ro = e->pl().getRoutes().begin();
-  while (ro != e->pl().getRoutes().end()) {
+void MapConstructor::lineDirRepl(LineNode* oldN, LineNode* newN, LineEdge* e) {
+  auto ro = e->pl().getLines().begin();
+  while (ro != e->pl().getLines().end()) {
     if (ro->direction == oldN) {
-      shared::linegraph::RouteOcc newRo = *ro;
+      shared::linegraph::LineOcc newRo = *ro;
       newRo.direction = newN;
 
       // delete old
-      ro = e->pl().getRoutes().erase(ro);
+      ro = e->pl().getLines().erase(ro);
 
       // add new
-      e->pl().getRoutes().insert(newRo);
+      e->pl().getLines().insert(newRo);
     } else {
       ro++;
     }
@@ -717,33 +713,33 @@ bool MapConstructor::foldEdges(LineEdge* a, LineEdge* b) {
     b->pl().setPolyline(geomAvg(b->pl(), 0, 1, a->pl(), 1, 0));
   }
 
-  for (auto ro : a->pl().getRoutes()) {
-    if (!b->pl().hasRoute(ro.route)) {
+  for (auto ro : a->pl().getLines()) {
+    if (!b->pl().hasLine(ro.line)) {
       // simply add the route
       if (ro.direction == 0)
-        b->pl().addRoute(ro.route, 0);
+        b->pl().addLine(ro.line, 0);
       else if (ro.direction == shrNd)
-        b->pl().addRoute(ro.route, shrNd);
+        b->pl().addLine(ro.line, shrNd);
       else if (ro.direction != shrNd)
-        b->pl().addRoute(ro.route, b->getOtherNd(shrNd));
+        b->pl().addLine(ro.line, b->getOtherNd(shrNd));
     } else {
-      auto old = b->pl().getRouteOcc(ro.route);
+      auto old = b->pl().lineOcc(ro.line);
       if (ro.direction == 0 && old.direction != 0) {
         // now goes in both directions
-        b->pl().delRoute(ro.route);
-        b->pl().addRoute(ro.route, 0);
+        b->pl().delLine(ro.line);
+        b->pl().addLine(ro.line, 0);
       }
 
       if (ro.direction == shrNd && old.direction != shrNd) {
         // now goes in both directions
-        b->pl().delRoute(ro.route);
-        b->pl().addRoute(ro.route, 0);
+        b->pl().delLine(ro.line);
+        b->pl().addLine(ro.line, 0);
       }
 
       if (ro.direction != shrNd && old.direction == shrNd) {
         // now goes in both directions
-        b->pl().delRoute(ro.route);
-        b->pl().addRoute(ro.route, 0);
+        b->pl().delLine(ro.line);
+        b->pl().addLine(ro.line, 0);
       }
     }
   }
@@ -752,26 +748,26 @@ bool MapConstructor::foldEdges(LineEdge* a, LineEdge* b) {
 }
 
 // _____________________________________________________________________________
-LineEdgePair MapConstructor::split(LineEdgePL& a, LineNode* fr,
-                                      LineNode* to, double p) {
+LineEdgePair MapConstructor::split(LineEdgePL& a, LineNode* fr, LineNode* to,
+                                   double p) {
   LineEdge* ret;
   auto right = a.getPolyline().getSegment(p, 1);
   a.setPolyline(a.getPolyline().getSegment(0, p));
   auto helper = _g->addNd(a.getPolyline().back());
-  auto ro = a.getRoutes().begin();
+  auto ro = a.getLines().begin();
   auto helperEdg = _g->addEdg(helper, to, right);
 
-  while (ro != a.getRoutes().end()) {
+  while (ro != a.getLines().end()) {
     if (ro->direction == to) {
-      auto* route = ro->route;  // store because of deletion below
-      ro = a.getRoutes().erase(ro);
-      a.addRoute(route, helper);
-      helperEdg->pl().addRoute(route, to);
+      auto* route = ro->line;  // store because of deletion below
+      ro = a.getLines().erase(ro);
+      a.addLine(route, helper);
+      helperEdg->pl().addLine(route, to);
     } else if (ro->direction == fr) {
-      helperEdg->pl().addRoute(ro->route, helper);
+      helperEdg->pl().addLine(ro->line, helper);
       ro++;
     } else {
-      helperEdg->pl().addRoute(ro->route, 0);
+      helperEdg->pl().addLine(ro->line, 0);
       ro++;
     }
   }
@@ -797,6 +793,8 @@ bool MapConstructor::cleanUpGeoms() {
               .totalPos));
     }
   }
+
+  return true;
 }
 
 // _____________________________________________________________________________

@@ -5,8 +5,8 @@
 #ifndef SHARED_LINEGRAPH_LINENODEPL_H_
 #define SHARED_LINEGRAPH_LINENODEPL_H_
 
+#include "shared/linegraph/Line.h"
 #include "shared/linegraph/LineEdgePL.h"
-#include "shared/linegraph/Route.h"
 #include "util/geo/Geo.h"
 #include "util/geo/GeoGraph.h"
 #include "util/graph/Edge.h"
@@ -15,27 +15,10 @@
 namespace shared {
 namespace linegraph {
 
-typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge;
-typedef util::graph::Node<LineNodePL, LineEdgePL> LineNode;
-typedef std::map<const Route*,
+typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge; typedef util::graph::Node<LineNodePL, LineEdgePL> LineNode;
+typedef std::map<const Line*,
                  std::map<const LineEdge*, std::set<const LineEdge*>>>
     ConnEx;
-
-typedef std::vector<size_t> Ordering;
-typedef std::map<const shared::linegraph::LineEdge*, Ordering> OrderingConfig;
-
-class HierarchOrderingConfig
-    : public std::map<const shared::linegraph::LineEdge*, std::map<size_t, Ordering>> {
- public:
-  void writeFlatCfg(OrderingConfig* c) const {
-    for (auto kv : *this) {
-      for (auto ordering : kv.second) {
-        (*c)[kv.first].insert((*c)[kv.first].begin(), ordering.second.begin(),
-                              ordering.second.end());
-      }
-    }
-  }
-};
 
 struct NodeFront {
   NodeFront(LineNode* n, LineEdge* e) : n(n), edge(e) {}
@@ -61,18 +44,17 @@ struct NodeFront {
 };
 
 struct Partner {
-  Partner() : front(0), edge(0), route(0){};
-  Partner(const NodeFront* f, const LineEdge* e,
-          const shared::linegraph::Route* r)
-      : front(f), edge(e), route(r){};
+  Partner() : front(0), edge(0), line(0){};
+  Partner(const NodeFront* f, const LineEdge* e, const Line* r)
+      : front(f), edge(e), line(r){};
   const NodeFront* front;
   const LineEdge* edge;
-  const shared::linegraph::Route* route;
+  const Line* line;
 };
 
-struct InnerGeometry {
-  InnerGeometry(PolyLine<double> g, Partner a, Partner b, size_t slotF,
-                size_t slotT)
+struct InnerGeom {
+  InnerGeom(PolyLine<double> g, Partner a, Partner b, size_t slotF,
+            size_t slotT)
       : geom(g), from(a), to(b), slotFrom(slotF), slotTo(slotT){};
   PolyLine<double> geom;
   Partner from, to;
@@ -103,25 +85,25 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   util::json::Dict getAttrs() const;
 
   void addStop(const Station& i);
-  const std::vector<Station>& getStops() const;
+  const std::vector<Station>& stops() const;
   void clearStops();
 
-  size_t getLineDeg() const;
+  size_t lineGed() const;
 
   // TODO refactor
-  const std::vector<NodeFront>& getMainDirs() const;
-  std::vector<NodeFront>& getMainDirs();
+  const std::vector<NodeFront>& fronts() const;
+  std::vector<NodeFront>& fronts();
   void delMainDir(const LineEdge* e);
-  const NodeFront* getNodeFrontFor(const LineEdge* e) const;
-  NodeFront* getNodeFrontFor(const LineEdge* e);
+  const NodeFront* frontFor(const LineEdge* e) const;
+  NodeFront* frontFor(const LineEdge* e);
 
   void addMainDir(const NodeFront& f);
 
-  void addConnExc(const Route* r, const LineEdge* edgeA, const LineEdge* edgeB);
+  void addConnExc(const Line* r, const LineEdge* edgeA, const LineEdge* edgeB);
 
-  void delConnExc(const Route* r, const LineEdge* edgeA, const LineEdge* edgeB);
+  void delConnExc(const Line* r, const LineEdge* edgeA, const LineEdge* edgeB);
 
-  bool connOccurs(const Route* r, const LineEdge* edgeA,
+  bool connOccurs(const Line* r, const LineEdge* edgeA,
                   const LineEdge* edgeB) const;
 
   ConnEx& getConnExc() { return _connEx; }

@@ -7,7 +7,7 @@
 
 #include <unordered_map>
 #include "shared/linegraph/LineGraph.h"
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/restr/RestrGraph.h"
 #include "util/graph/EDijkstra.h"
@@ -32,20 +32,20 @@ typedef std::map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
 typedef std::pair<RestrNode*, double> Hndl;
 typedef std::vector<Hndl> HndlLst;
 
-using shared::linegraph::Route;
+using shared::linegraph::Line;
 
 struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
-  CostFunc(const Route* r, double max) : _max(max), _route(r) {}
+  CostFunc(const Line* r, double max) : _max(max), _line(r) {}
   double inf() const { return _max; };
   double operator()(const RestrEdge* from, const RestrNode* n,
                     const RestrEdge* to) const {
     // don't count start edge
     if (!from) return 0;
 
-    // if an edge does not contain the route we are routing for, set
+    // if an edge does not contain the line we are routing for, set
     // cost to inf
-    if (!from->pl().routes.count(_route)) return inf();
-    if (!to->pl().routes.count(_route)) return inf();
+    if (!from->pl().lines.count(_line)) return inf();
+    if (!to->pl().lines.count(_line)) return inf();
 
     double c = 0;
 
@@ -61,7 +61,7 @@ struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
   };
 
   double _max;
-  const Route* _route;
+  const Line* _line;
 };
 
 struct HndlCmp {
@@ -95,7 +95,7 @@ class RestrInferrer {
   std::unordered_map<LineNode*, RestrNode*> _nMap;
 
   // check whether a connection ocurred in the original graph
-  bool check(const Route* r, const LineEdge* edg1, const LineEdge* edg2) const;
+  bool check(const Line* r, const LineEdge* edg1, const LineEdge* edg2) const;
 
   void addHndls(const OrigEdgs& origEdgs);
   void addHndls(const LineEdge* e, const OrigEdgs& origEdgs,

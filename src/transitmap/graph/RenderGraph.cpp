@@ -5,7 +5,7 @@
 #include <set>
 #include <string>
 #include "json/json.hpp"
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 #include "transitmap/graph/OrderCfg.h"
 #include "transitmap/graph/RenderGraph.h"
 #include "util/Misc.h"
@@ -24,14 +24,14 @@ using util::geo::DPoint;
 using util::geo::Box;
 using util::geo::dist;
 using transitmapper::graph::RenderGraph;
-using shared::linegraph::Route;
+using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
-using shared::linegraph::RouteOcc;
+using shared::linegraph::LineOcc;
 using shared::linegraph::NodeFront;
 using shared::linegraph::Partner;
 using transitmapper::graph::OrderCfg;
-using shared::linegraph::InnerGeometry;
+using shared::linegraph::InnerGeom;
 using util::geo::BezierCurve;
 using util::geo::PolyLine;
 using util::geo::Polygon;
@@ -47,15 +47,15 @@ void RenderGraph::setConfig(const OrderCfg& c) { _config = c; }
 size_t RenderGraph::numEdgs() const { return 0; }
 
 // _____________________________________________________________________________
-std::vector<InnerGeometry> RenderGraph::innerGeoms(const LineNode* n,
-                                                   const OrderCfg& c,
-                                                   double prec) const {
-  std::vector<InnerGeometry> ret;
-  std::map<const Route*, std::set<const shared::linegraph::NodeFront*>>
+std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
+                                               const OrderCfg& c,
+                                               double prec) const {
+  std::vector<InnerGeom> ret;
+  std::map<const Line*, std::set<const shared::linegraph::NodeFront*>>
       processed;
 
-  for (size_t i = 0; i < n->pl().getMainDirs().size(); ++i) {
-    const shared::linegraph::NodeFront& nf = n->pl().getMainDirs()[i];
+  for (size_t i = 0; i < n->pl().fronts().size(); ++i) {
+    const shared::linegraph::NodeFront& nf = n->pl().fronts()[i];
 
     if (!c.count(nf.edge)) {
       std::cout << "No ordering for edge " << nf.edge << " found!" << std::endl;
@@ -64,14 +64,14 @@ std::vector<InnerGeometry> RenderGraph::innerGeoms(const LineNode* n,
     const std::vector<size_t>* ordering = &c.find(nf.edge)->second;
 
     for (size_t j : *ordering) {
-      const RouteOcc& routeOcc = nf.edge->pl().routeOccAtPos(j);
-      Partner o(&nf, nf.edge, routeOcc.route);
+      const LineOcc& lineOcc = nf.edge->pl().lineOccAtPos(j);
+      Partner o(&nf, nf.edge, lineOcc.line);
 
-      std::vector<Partner> partners = getPartners(n, &nf, routeOcc);
+      std::vector<Partner> partners = getPartners(n, &nf, lineOcc);
 
       for (const Partner& p : partners) {
-        if (processed[routeOcc.route].find(p.front) !=
-            processed[routeOcc.route].end()) {
+        if (processed[lineOcc.line].find(p.front) !=
+            processed[lineOcc.line].end()) {
           continue;
         }
 
@@ -97,7 +97,7 @@ std::vector<InnerGeometry> RenderGraph::innerGeoms(const LineNode* n,
         }
       }
 
-      processed[routeOcc.route].insert(&nf);
+      processed[lineOcc.line].insert(&nf);
     }
   }
 
@@ -105,12 +105,12 @@ std::vector<InnerGeometry> RenderGraph::innerGeoms(const LineNode* n,
 }
 
 // _____________________________________________________________________________
-InnerGeometry RenderGraph::getInnerBezier(const LineNode* n, const OrderCfg& cf,
-                                          const Partner& partnerFrom,
-                                          const Partner& partnerTo,
-                                          double prec) const {
+InnerGeom RenderGraph::getInnerBezier(const LineNode* n, const OrderCfg& cf,
+                                      const Partner& partnerFrom,
+                                      const Partner& partnerTo,
+                                      double prec) const {
   double EPSI = 0.001;
-  InnerGeometry ret = getInnerStraightLine(n, cf, partnerFrom, partnerTo);
+  InnerGeom ret = getInnerStraightLine(n, cf, partnerFrom, partnerTo);
   DPoint p = ret.geom.getLine().front();
   DPoint pp = ret.geom.getLine().back();
   double d = util::geo::dist(p, pp);
@@ -168,13 +168,13 @@ InnerGeometry RenderGraph::getInnerBezier(const LineNode* n, const OrderCfg& cf,
 
       if (std::isnan(ang)) ang = 1;
 
-      if (std::max(partnerFrom.edge->pl().getRoutes().size(),
-                   partnerTo.edge->pl().getRoutes().size()) > 1) {
+      if (std::max(partnerFrom.edge->pl().getLines().size(),
+                   partnerTo.edge->pl().getLines().size()) > 1) {
         double fac =
-            fabs((double)((int)partnerFrom.edge->pl().getRoutes().size() -
-                          (int)partnerTo.edge->pl().getRoutes().size())) /
-            (double)(std::max(partnerFrom.edge->pl().getRoutes().size(),
-                              partnerTo.edge->pl().getRoutes().size()) -
+            fabs((double)((int)partnerFrom.edge->pl().getLines().size() -
+                          (int)partnerTo.edge->pl().getLines().size())) /
+            (double)(std::max(partnerFrom.edge->pl().getLines().size(),
+                              partnerTo.edge->pl().getLines().size()) -
                      1);
 
         fac = pow(fac, 2);
@@ -208,40 +208,40 @@ InnerGeometry RenderGraph::getInnerBezier(const LineNode* n, const OrderCfg& cf,
 }
 
 // _____________________________________________________________________________
-InnerGeometry RenderGraph::getTerminusStraightLine(
+InnerGeom RenderGraph::getTerminusStraightLine(
     const LineNode* n, const OrderCfg& c, const Partner& partnerFrom) const {
-  DPoint p = linePosOn(*partnerFrom.front, partnerFrom.route, c, false);
-  DPoint pp = linePosOn(*partnerFrom.front, partnerFrom.route, c, true);
+  DPoint p = linePosOn(*partnerFrom.front, partnerFrom.line, c, false);
+  DPoint pp = linePosOn(*partnerFrom.front, partnerFrom.line, c, true);
 
-  size_t s = partnerFrom.edge->pl().getRoutePosUnder(
-      partnerFrom.route, c.find(partnerFrom.edge)->second);
-  size_t ss = partnerFrom.edge->pl().getRoutePosUnder(
-      partnerFrom.route, c.find(partnerFrom.edge)->second);
+  size_t s = partnerFrom.edge->pl().linePosUnder(
+      partnerFrom.line, c.find(partnerFrom.edge)->second);
+  size_t ss = partnerFrom.edge->pl().linePosUnder(
+      partnerFrom.line, c.find(partnerFrom.edge)->second);
 
-  return InnerGeometry(PolyLine<double>(p, pp), partnerFrom, Partner(), s, ss);
+  return InnerGeom(PolyLine<double>(p, pp), partnerFrom, Partner(), s, ss);
 }
 
 // _____________________________________________________________________________
-InnerGeometry RenderGraph::getInnerStraightLine(
-    const LineNode* n, const OrderCfg& c, const Partner& partnerFrom,
-    const Partner& partnerTo) const {
-  DPoint p = linePosOn(*partnerFrom.front, partnerFrom.route, c, false);
-  DPoint pp = linePosOn(*partnerTo.front, partnerTo.route, c, false);
+InnerGeom RenderGraph::getInnerStraightLine(const LineNode* n,
+                                            const OrderCfg& c,
+                                            const Partner& partnerFrom,
+                                            const Partner& partnerTo) const {
+  DPoint p = linePosOn(*partnerFrom.front, partnerFrom.line, c, false);
+  DPoint pp = linePosOn(*partnerTo.front, partnerTo.line, c, false);
 
-  size_t s = partnerFrom.edge->pl().getRoutePosUnder(
-      partnerFrom.route, c.find(partnerFrom.edge)->second);
-  size_t ss = partnerTo.edge->pl().getRoutePosUnder(
-      partnerTo.route, c.find(partnerTo.edge)->second);
+  size_t s = partnerFrom.edge->pl().linePosUnder(
+      partnerFrom.line, c.find(partnerFrom.edge)->second);
+  size_t ss = partnerTo.edge->pl().linePosUnder(partnerTo.line,
+                                                c.find(partnerTo.edge)->second);
 
-  return InnerGeometry(PolyLine<double>(p, pp), partnerFrom, partnerTo, s, ss);
+  return InnerGeom(PolyLine<double>(p, pp), partnerFrom, partnerTo, s, ss);
 }
 
 // _____________________________________________________________________________
-InnerGeometry RenderGraph::getTerminusBezier(const LineNode* n,
-                                             const OrderCfg& cf,
-                                             const Partner& partnerFrom,
-                                             double prec) const {
-  InnerGeometry ret = getTerminusStraightLine(n, cf, partnerFrom);
+InnerGeom RenderGraph::getTerminusBezier(const LineNode* n, const OrderCfg& cf,
+                                         const Partner& partnerFrom,
+                                         double prec) const {
+  InnerGeom ret = getTerminusStraightLine(n, cf, partnerFrom);
   DPoint p = ret.geom.getLine().front();
   DPoint pp = ret.geom.getLine().back();
   double d = util::geo::dist(p, pp) / 2;
@@ -291,9 +291,9 @@ Polygon<double> RenderGraph::getConvexFrontHull(
   bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
   bgeo::strategy::buffer::side_straight sideStrat;
 
-  if (!simpleRenderForTwoEdgeNodes || n->pl().getMainDirs().size() != 2) {
+  if (!simpleRenderForTwoEdgeNodes || n->pl().fronts().size() != 2) {
     MultiLine<double> l;
-    for (auto& nf : n->pl().getMainDirs()) {
+    for (auto& nf : n->pl().fronts()) {
       l.push_back(nf.origGeom
                       .getSegment((cd / 2) / nf.origGeom.getLength(),
                                   (nf.origGeom.getLength() - cd / 2) /
@@ -305,7 +305,7 @@ Polygon<double> RenderGraph::getConvexFrontHull(
 
     if (rectangulize && getMaxLineNum(n) > 1) {
       MultiLine<double> ll;
-      for (auto& nf : n->pl().getMainDirs()) {
+      for (auto& nf : n->pl().fronts()) {
         ll.push_back(nf.origGeom.getLine());
       }
       Polygon<double> env = util::geo::convexHull(
@@ -333,15 +333,15 @@ Polygon<double> RenderGraph::getConvexFrontHull(
     // for two main dirs, take average
     std::vector<const PolyLine<double>*> pols;
 
-    PolyLine<double> a = n->pl().getMainDirs()[0].origGeom.getSegment(
-        (cd / 2) / n->pl().getMainDirs()[0].origGeom.getLength(),
-        (n->pl().getMainDirs()[0].origGeom.getLength() - cd / 2) /
-            n->pl().getMainDirs()[0].origGeom.getLength());
+    PolyLine<double> a = n->pl().fronts()[0].origGeom.getSegment(
+        (cd / 2) / n->pl().fronts()[0].origGeom.getLength(),
+        (n->pl().fronts()[0].origGeom.getLength() - cd / 2) /
+            n->pl().fronts()[0].origGeom.getLength());
 
-    PolyLine<double> b = n->pl().getMainDirs()[1].origGeom.getSegment(
-        (cd / 2) / n->pl().getMainDirs()[1].origGeom.getLength(),
-        (n->pl().getMainDirs()[1].origGeom.getLength() - cd / 2) /
-            n->pl().getMainDirs()[1].origGeom.getLength());
+    PolyLine<double> b = n->pl().fronts()[1].origGeom.getSegment(
+        (cd / 2) / n->pl().fronts()[1].origGeom.getLength(),
+        (n->pl().fronts()[1].origGeom.getLength() - cd / 2) /
+            n->pl().fronts()[1].origGeom.getLength());
 
     assert(a.getLine().size() > 1);
     assert(b.getLine().size() > 1);
@@ -378,37 +378,37 @@ Polygon<double> RenderGraph::getConvexFrontHull(
 // _____________________________________________________________________________
 Polygon<double> RenderGraph::getStationHull(const LineNode* n, double d,
                                             bool simple) const {
-  if (n->pl().getMainDirs().size() == 0) return Polygon<double>();
+  if (n->pl().fronts().size() == 0) return Polygon<double>();
   return getConvexFrontHull(n, d, true, simple);
 }
 
 // _____________________________________________________________________________
 double RenderGraph::getTotalWidth(const LineEdge* e) const {
-  return _defWidth * e->pl().getRoutes().size() +
-         _defSpacing * (e->pl().getRoutes().size() - 1);
+  return _defWidth * e->pl().getLines().size() +
+         _defSpacing * (e->pl().getLines().size() - 1);
 }
 
 // _____________________________________________________________________________
 size_t RenderGraph::getConnCardinality(const LineNode* n) {
   size_t ret = 0;
-  std::map<const Route*, std::set<const shared::linegraph::NodeFront*>>
+  std::map<const Line*, std::set<const shared::linegraph::NodeFront*>>
       processed;
 
-  for (const auto& nf : n->pl().getMainDirs()) {
-    for (size_t j = 0; j < nf.edge->pl().getRoutes().size(); j++) {
-      const auto& routeOcc = nf.edge->pl().routeOccAtPos(j);
+  for (const auto& nf : n->pl().fronts()) {
+    for (size_t j = 0; j < nf.edge->pl().getLines().size(); j++) {
+      const auto& lineOcc = nf.edge->pl().lineOccAtPos(j);
 
-      std::vector<Partner> partners = getPartners(n, &nf, routeOcc);
+      std::vector<Partner> partners = getPartners(n, &nf, lineOcc);
 
       for (const Partner& p : partners) {
-        if (processed[routeOcc.route].find(p.front) !=
-            processed[routeOcc.route].end()) {
+        if (processed[lineOcc.line].find(p.front) !=
+            processed[lineOcc.line].end()) {
           continue;
         }
         ret++;
       }
 
-      processed[routeOcc.route].insert(&nf);
+      processed[lineOcc.line].insert(&nf);
     }
   }
 
@@ -429,7 +429,7 @@ double RenderGraph::getSpacing(const shared::linegraph::LineEdge* e) const {
 double RenderGraph::getMaxNdFrontWidth(
     const shared::linegraph::LineNode* n) const {
   double ret = 0;
-  for (const auto& g : n->pl().getMainDirs()) {
+  for (const auto& g : n->pl().fronts()) {
     if (getTotalWidth(g.edge) > ret) ret = getTotalWidth(g.edge);
   }
   return ret;
@@ -439,19 +439,19 @@ double RenderGraph::getMaxNdFrontWidth(
 size_t RenderGraph::getMaxNdFrontCard(
     const shared::linegraph::LineNode* n) const {
   size_t ret = 0;
-  for (const auto& g : n->pl().getMainDirs()) {
-    if (g.edge->pl().getRoutes().size() > ret)
-      ret = g.edge->pl().getRoutes().size();
+  for (const auto& g : n->pl().fronts()) {
+    if (g.edge->pl().getLines().size() > ret)
+      ret = g.edge->pl().getLines().size();
   }
   return ret;
 }
 
 // _____________________________________________________________________________
-DPoint RenderGraph::linePosOn(const NodeFront& nf, const Route* r,
+DPoint RenderGraph::linePosOn(const NodeFront& nf, const Line* r,
                               const OrderCfg& c, bool origGeom) const {
   assert(c.find(nf.edge) != c.end());
 
-  size_t p = nf.edge->pl().getRoutePosUnder(r, c.find(nf.edge)->second);
+  size_t p = nf.edge->pl().linePosUnder(r, c.find(nf.edge)->second);
   return linePosOn(nf, nf.edge, p, nf.n == nf.edge->getTo(), origGeom);
 }
 
@@ -462,7 +462,7 @@ DPoint RenderGraph::linePosOn(const NodeFront& nf, const LineEdge* e,
   if (!inv) {
     p = (getWidth(e) + getSpacing(e)) * pos + getWidth(e) / 2;
   } else {
-    p = (getWidth(e) + getSpacing(e)) * (e->pl().getRoutes().size() - 1 - pos) +
+    p = (getWidth(e) + getSpacing(e)) * (e->pl().getLines().size() - 1 - pos) +
         getWidth(e) / 2;
   }
   // use interpolate here directly for speed

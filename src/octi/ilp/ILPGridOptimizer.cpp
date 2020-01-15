@@ -519,8 +519,8 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
         size_t sharedLines = 0;
         // TODO: not all lines in getChilds are equal, take the "right" end of
         // the childs here!
-        for (auto ro : edgA->pl().getChilds().front()->pl().getRoutes()) {
-          if (edgB->pl().getChilds().front()->pl().hasRoute(ro.route)) {
+        for (auto lo : edgA->pl().getChilds().front()->pl().getLines()) {
+          if (edgB->pl().getChilds().front()->pl().hasLine(lo.line)) {
             sharedLines++;
           }
         }

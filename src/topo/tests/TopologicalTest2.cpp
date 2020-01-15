@@ -50,26 +50,26 @@ void TopologicalTest2::run() {
     // auto xa = tg.addEdg(x, a, {{{-100.0, 0.0}, {0.0, 0.0}}});
     // auto dy = tg.addEdg(d, y, {{{500.0, 0.0}, {600.0, 0.0}}});
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "green");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "green");
 
     // auto ae = tg.addEdg(a, e, {{{0.0, 0.0}, {500.0, 1.0}}});
     // auto ed = tg.addEdg(e, d, {{{500.0, 1.0}, {500.0, 0.0}}});
-    // ae->pl().addRoute(&l2, 0);
-    // ed->pl().addRoute(&l2, 0);
+    // ae->pl().addLine(&l2, 0);
+    // ed->pl().addLine(&l2, 0);
 
-    // xa->pl().addRoute(&l1, 0);
-    // xa->pl().addRoute(&l2, 0);
+    // xa->pl().addLine(&l1, 0);
+    // xa->pl().addLine(&l2, 0);
 
-    // dy->pl().addRoute(&l1, 0);
-    // dy->pl().addRoute(&l2, 0);
+    // dy->pl().addLine(&l1, 0);
+    // dy->pl().addLine(&l2, 0);
 
-    ba->pl().addRoute(&l1, 0);
-    ba->pl().addRoute(&l2, b);
-    ba->pl().addRoute(&l1, 0);
-    ba->pl().addRoute(&l2, b);
-    db->pl().addRoute(&l2, d);
-    db->pl().addRoute(&l1, 0);
+    ba->pl().addLine(&l1, 0);
+    ba->pl().addLine(&l2, b);
+    ba->pl().addLine(&l1, 0);
+    ba->pl().addLine(&l2, b);
+    db->pl().addLine(&l2, d);
+    db->pl().addLine(&l1, 0);
 
 
     topo::config::TopoConfig cfg;
@@ -106,11 +106,11 @@ void TopologicalTest2::run() {
     auto ad = tg.addEdg(a, d, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    bc->pl().addRoute(&l1, 0);
-    ad->pl().addRoute(&l2, 0);
+    bc->pl().addLine(&l1, 0);
+    ad->pl().addLine(&l2, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -130,14 +130,14 @@ void TopologicalTest2::run() {
     //
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
 
-    TEST(d->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(d->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(d->getAdjList().front()->pl().hasLine(&l2));
+    TEST(d->getAdjList().front()->pl().getLines().size(), ==, 1);
 
-    TEST(c->getAdjList().front()->pl().hasRoute(&l1));
-    TEST(c->getAdjList().front()->pl().getRoutes().size(), ==, 1);
+    TEST(c->getAdjList().front()->pl().hasLine(&l1));
+    TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
   }
 
   // ___________________________________________________________________________
@@ -159,11 +159,11 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ac->pl().addRoute(&l2, 0);
-    bc->pl().addRoute(&l1, 0);
+    ac->pl().addLine(&l2, 0);
+    bc->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -192,9 +192,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != a && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, 0);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, 0);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -210,23 +210,23 @@ void TopologicalTest2::run() {
     TEST(fc);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, 0);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -250,11 +250,11 @@ void TopologicalTest2::run() {
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ac->pl().addRoute(&l2, 0);
-    cb->pl().addRoute(&l1, 0);
+    ac->pl().addLine(&l2, 0);
+    cb->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -285,9 +285,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, 0);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, 0);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -304,23 +304,23 @@ void TopologicalTest2::run() {
 
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, 0);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -344,11 +344,11 @@ void TopologicalTest2::run() {
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ca->pl().addRoute(&l2, 0);
-    bc->pl().addRoute(&l1, 0);
+    ca->pl().addLine(&l2, 0);
+    bc->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -374,9 +374,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, 0);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, 0);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -393,23 +393,23 @@ void TopologicalTest2::run() {
 
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, 0);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -434,11 +434,11 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ca->pl().addRoute(&l2, 0);
-    cb->pl().addRoute(&l1, 0);
+    ca->pl().addLine(&l2, 0);
+    cb->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -464,9 +464,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, 0);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, 0);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -482,23 +482,23 @@ void TopologicalTest2::run() {
     TEST(fc);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, 0);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -520,11 +520,11 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ac->pl().addRoute(&l2, c);
-    bc->pl().addRoute(&l1, 0);
+    ac->pl().addLine(&l2, c);
+    bc->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -552,9 +552,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, b);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, b);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -571,30 +571,30 @@ void TopologicalTest2::run() {
     TEST(fc);
     TEST(be);
 
-    TEST(be->pl().hasRoute(&l1));
-    TEST(be->pl().getRouteOcc(&l1).direction, ==, 0);
+    TEST(be->pl().hasLine(&l1));
+    TEST(be->pl().lineOcc(&l1).direction, ==, 0);
 
-    TEST(be->pl().hasRoute(&l2));
-    TEST(be->pl().getRouteOcc(&l2).direction, ==, e);
+    TEST(be->pl().hasLine(&l2));
+    TEST(be->pl().lineOcc(&l2).direction, ==, e);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, c);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, c);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, c);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, c);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -617,11 +617,11 @@ void TopologicalTest2::run() {
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ca->pl().addRoute(&l2, c);
-    bc->pl().addRoute(&l1, 0);
+    ca->pl().addLine(&l2, c);
+    bc->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -645,9 +645,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, b);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, b);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -664,30 +664,30 @@ void TopologicalTest2::run() {
     TEST(fc);
     TEST(be);
 
-    TEST(be->pl().hasRoute(&l1));
-    TEST(be->pl().getRouteOcc(&l1).direction, ==, 0);
+    TEST(be->pl().hasLine(&l1));
+    TEST(be->pl().lineOcc(&l1).direction, ==, 0);
 
-    TEST(be->pl().hasRoute(&l2));
-    TEST(be->pl().getRouteOcc(&l2).direction, ==, e);
+    TEST(be->pl().hasLine(&l2));
+    TEST(be->pl().lineOcc(&l2).direction, ==, e);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, c);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, c);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, c);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, c);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -711,11 +711,11 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ca->pl().addRoute(&l2, c);
-    cb->pl().addRoute(&l1, 0);
+    ca->pl().addLine(&l2, c);
+    cb->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -740,9 +740,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, b);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, b);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -759,30 +759,30 @@ void TopologicalTest2::run() {
     TEST(fc);
     TEST(be);
 
-    TEST(be->pl().hasRoute(&l1));
-    TEST(be->pl().getRouteOcc(&l1).direction, ==, 0);
+    TEST(be->pl().hasLine(&l1));
+    TEST(be->pl().lineOcc(&l1).direction, ==, 0);
 
-    TEST(be->pl().hasRoute(&l2));
-    TEST(be->pl().getRouteOcc(&l2).direction, ==, e);
+    TEST(be->pl().hasLine(&l2));
+    TEST(be->pl().lineOcc(&l2).direction, ==, e);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, c);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, c);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, c);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, c);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -805,11 +805,11 @@ void TopologicalTest2::run() {
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ac->pl().addRoute(&l2, c);
-    cb->pl().addRoute(&l1, 0);
+    ac->pl().addLine(&l2, c);
+    cb->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -833,9 +833,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, b);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, b);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -852,30 +852,30 @@ void TopologicalTest2::run() {
     TEST(fc);
     TEST(be);
 
-    TEST(be->pl().hasRoute(&l1));
-    TEST(be->pl().getRouteOcc(&l1).direction, ==, 0);
+    TEST(be->pl().hasLine(&l1));
+    TEST(be->pl().lineOcc(&l1).direction, ==, 0);
 
-    TEST(be->pl().hasRoute(&l2));
-    TEST(be->pl().getRouteOcc(&l2).direction, ==, e);
+    TEST(be->pl().hasLine(&l2));
+    TEST(be->pl().lineOcc(&l2).direction, ==, e);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, c);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, c);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, c);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, c);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -900,11 +900,11 @@ void TopologicalTest2::run() {
     auto cb = tg.addEdg(c, b, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ac->pl().addRoute(&l2, a);
-    cb->pl().addRoute(&l1, 0);
+    ac->pl().addLine(&l2, a);
+    cb->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -928,9 +928,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, a);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, a);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -947,30 +947,30 @@ void TopologicalTest2::run() {
     TEST(fc);
     TEST(be);
 
-    TEST(be->pl().hasRoute(&l1));
-    TEST(be->pl().getRouteOcc(&l1).direction, ==, 0);
+    TEST(be->pl().hasLine(&l1));
+    TEST(be->pl().lineOcc(&l1).direction, ==, 0);
 
-    TEST(be->pl().hasRoute(&l2));
-    TEST(be->pl().getRouteOcc(&l2).direction, ==, b);
+    TEST(be->pl().hasLine(&l2));
+    TEST(be->pl().lineOcc(&l2).direction, ==, b);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, e);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, e);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -992,11 +992,11 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {180, 0}, {180.0, -50.0}, {250.0, -50.0}, {250.0, 0.0}}));
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ac->pl().addRoute(&l2, a);
-    bc->pl().addRoute(&l1, 0);
+    ac->pl().addLine(&l2, a);
+    bc->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -1020,9 +1020,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, a);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, a);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -1039,30 +1039,30 @@ void TopologicalTest2::run() {
     TEST(fc);
     TEST(be);
 
-    TEST(be->pl().hasRoute(&l1));
-    TEST(be->pl().getRouteOcc(&l1).direction, ==, 0);
+    TEST(be->pl().hasLine(&l1));
+    TEST(be->pl().lineOcc(&l1).direction, ==, 0);
 
-    TEST(be->pl().hasRoute(&l2));
-    TEST(be->pl().getRouteOcc(&l2).direction, ==, b);
+    TEST(be->pl().hasLine(&l2));
+    TEST(be->pl().lineOcc(&l2).direction, ==, b);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, e);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, e);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -1085,11 +1085,11 @@ void TopologicalTest2::run() {
     auto bc = tg.addEdg(b, c, util::geo::PolyLine<double>({{50.0, 0.0}, {180, 0}, {180.0, 50.0}, {250.0, 50.0}, {250.0, 0.0}}));
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ca->pl().addRoute(&l2, a);
-    bc->pl().addRoute(&l1, 0);
+    ca->pl().addLine(&l2, a);
+    bc->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -1113,9 +1113,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, a);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, a);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -1132,30 +1132,30 @@ void TopologicalTest2::run() {
     TEST(fc);
     TEST(be);
 
-    TEST(be->pl().hasRoute(&l1));
-    TEST(be->pl().getRouteOcc(&l1).direction, ==, 0);
+    TEST(be->pl().hasLine(&l1));
+    TEST(be->pl().lineOcc(&l1).direction, ==, 0);
 
-    TEST(be->pl().hasRoute(&l2));
-    TEST(be->pl().getRouteOcc(&l2).direction, ==, b);
+    TEST(be->pl().hasLine(&l2));
+    TEST(be->pl().lineOcc(&l2).direction, ==, b);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, e);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, e);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -1179,11 +1179,11 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ca->pl().addRoute(&l2, a);
-    cb->pl().addRoute(&l1, 0);
+    ca->pl().addLine(&l2, a);
+    cb->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -1211,9 +1211,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, a);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, a);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -1230,30 +1230,30 @@ void TopologicalTest2::run() {
     TEST(fc);
     TEST(be);
 
-    TEST(be->pl().hasRoute(&l1));
-    TEST(be->pl().getRouteOcc(&l1).direction, ==, 0);
+    TEST(be->pl().hasLine(&l1));
+    TEST(be->pl().lineOcc(&l1).direction, ==, 0);
 
-    TEST(be->pl().hasRoute(&l2));
-    TEST(be->pl().getRouteOcc(&l2).direction, ==, b);
+    TEST(be->pl().hasLine(&l2));
+    TEST(be->pl().lineOcc(&l2).direction, ==, b);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l1));
-      TEST(ef->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ef->pl().hasLine(&l1));
+      TEST(ef->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(fc->pl().hasRoute(&l1));
-      TEST(fc->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(fc->pl().hasLine(&l1));
+      TEST(fc->pl().lineOcc(&l1).direction, ==, 0);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, e);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, e);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(ec->pl().hasRoute(&l1));
-      TEST(ec->pl().getRouteOcc(&l1).direction, ==, 0);
+      TEST(ec->pl().hasLine(&l1));
+      TEST(ec->pl().lineOcc(&l1).direction, ==, 0);
     }
   }
 
@@ -1277,10 +1277,10 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ca->pl().addRoute(&l2, a);
-    cb->pl().addRoute(&l2, b);
+    ca->pl().addLine(&l2, a);
+    cb->pl().addLine(&l2, b);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -1308,9 +1308,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, a);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, a);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -1327,27 +1327,27 @@ void TopologicalTest2::run() {
     TEST(fc);
     TEST(be);
 
-    TEST(be->pl().hasRoute(&l2));
-    TEST(be->pl().getRouteOcc(&l2).direction, ==, b);
+    TEST(be->pl().hasLine(&l2));
+    TEST(be->pl().lineOcc(&l2).direction, ==, b);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, e);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, e);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, e);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, e);
     }
   }
 
@@ -1371,10 +1371,10 @@ void TopologicalTest2::run() {
     ca->pl().setPolyline(ca->pl().getPolyline().reversed());
     cb->pl().setPolyline(cb->pl().getPolyline().reversed());
 
-    shared::linegraph::Route l2("2", "2", "blue");
+    shared::linegraph::Line l2("2", "2", "blue");
 
-    ca->pl().addRoute(&l2, a);
-    cb->pl().addRoute(&l2, c);
+    ca->pl().addLine(&l2, a);
+    cb->pl().addLine(&l2, c);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -1402,9 +1402,9 @@ void TopologicalTest2::run() {
     for (auto edg : e->getAdjList()) if (edg->getOtherNd(e) != b && edg->getOtherNd(e) != c) f = edg->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 5);
-    TEST(a->getAdjList().front()->pl().hasRoute(&l2));
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 1);
-    TEST(a->getAdjList().front()->pl().getRoutes().begin()->direction, ==, a);
+    TEST(a->getAdjList().front()->pl().hasLine(&l2));
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
+    TEST(a->getAdjList().front()->pl().getLines().begin()->direction, ==, a);
 
     TEST(c->getAdjList().size(), ==, 2);
 
@@ -1421,27 +1421,27 @@ void TopologicalTest2::run() {
     TEST(fc);
     TEST(be);
 
-    TEST(be->pl().hasRoute(&l2));
-    TEST(be->pl().getRouteOcc(&l2).direction, ==, 0);
+    TEST(be->pl().hasLine(&l2));
+    TEST(be->pl().lineOcc(&l2).direction, ==, 0);
 
     if (f->pl().getGeom()->getY() > 0) {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, c);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, c);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, e);
     } else {
-      TEST(ef->pl().hasRoute(&l2));
-      TEST(ef->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ef->pl().hasLine(&l2));
+      TEST(ef->pl().lineOcc(&l2).direction, ==, e);
 
-      TEST(fc->pl().hasRoute(&l2));
-      TEST(fc->pl().getRouteOcc(&l2).direction, ==, f);
+      TEST(fc->pl().hasLine(&l2));
+      TEST(fc->pl().lineOcc(&l2).direction, ==, f);
 
-      TEST(ec->pl().hasRoute(&l2));
-      TEST(ec->pl().getRouteOcc(&l2).direction, ==, e);
+      TEST(ec->pl().hasLine(&l2));
+      TEST(ec->pl().lineOcc(&l2).direction, ==, e);
     }
   }
 
@@ -1468,10 +1468,10 @@ void TopologicalTest2::run() {
     auto ac = tg.addEdg(a, c, util::geo::PolyLine<double>({{0.0, 0.0}, {250.0, 0.0}, {250.0, -200.0}}));
     auto eb = tg.addEdg(e, b, util::geo::PolyLine<double>({{150.0, 200.0}, {150.0, 0}, {500.0, 0.0}}));
 
-    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Line l1("1", "1", "red");
 
-    ac->pl().addRoute(&l1, 0);
-    eb->pl().addRoute(&l1, 0);
+    ac->pl().addLine(&l1, 0);
+    eb->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -1511,15 +1511,15 @@ void TopologicalTest2::run() {
     auto bd = tg.addEdg(b, d, {{{250.0, 0.0},  {500.0, 0.0}}});
     auto fg = tg.addEdg(f, g, {{{0.0, 0.0},  {500.0, 0.0}}});
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "green");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "green");
 
-    ab->pl().addRoute(&l1, b);
-    ab->pl().addRoute(&l2, 0);
-    cb->pl().addRoute(&l2, 0);
-    ec->pl().addRoute(&l2, 0);
-    bd->pl().addRoute(&l1, d);
-    fg->pl().addRoute(&l1, 0);
+    ab->pl().addLine(&l1, b);
+    ab->pl().addLine(&l2, 0);
+    cb->pl().addLine(&l2, 0);
+    ec->pl().addLine(&l2, 0);
+    bd->pl().addLine(&l1, d);
+    fg->pl().addLine(&l1, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;

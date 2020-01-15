@@ -14,9 +14,13 @@
 
 #include "shared/style/LineStyle.h"
 
-using namespace shared::linegraph;
+using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineEdge;
+using shared::linegraph::Line;
+using shared::linegraph::Partner;
+using shared::linegraph::LineOcc;
+using shared::linegraph::ISect;
 using util::geo::Point;
 using util::geo::DPoint;
 
@@ -99,7 +103,7 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
           id = util::toString(eid);
         }
 
-        const Route* r = getRoute(id);
+        const Line* r = getLine(id);
         if (!r) {
           std::string label = ent.attrs.find("label") != ent.attrs.end()
                                   ? ""
@@ -107,8 +111,8 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
           std::string color = ent.attrs.find("label") != ent.attrs.end()
                                   ? ""
                                   : ent.attrs["label"];
-          r = new Route(id, label, color);
-          addRoute(r);
+          r = new Line(id, label, color);
+          addLine(r);
         }
 
         LineNode* dir = 0;
@@ -118,7 +122,7 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
           dir = idMap[curId];
         }
 
-        e->pl().addRoute(r, dir);
+        e->pl().addLine(r, dir);
       }
     }
   }
@@ -163,7 +167,8 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
         Station i("", "", *n->pl().getGeom());
         if (!props["station_id"].is_null() ||
             !props["station_label"].is_null()) {
-          if (!props["station_id"].is_null()) i.id = util::toString(props["station_id"]);
+          if (!props["station_id"].is_null())
+            i.id = util::toString(props["station_id"]);
           if (!props["station_label"].is_null())
             i.name = props["station_label"];
           n->pl().addStop(i);
@@ -209,34 +214,34 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
 
         LineEdge* e = addEdg(fromN, toN, pl);
 
-        for (auto route : props["lines"]) {
+        for (auto line : props["lines"]) {
           std::string id;
-          if (!route["id"].is_null()) {
-            id = util::toString(route["id"]);
-          } else if (!route["label"].is_null()) {
-            id = util::toString(route["label"]);
-          } else if (!route["color"].is_null()) {
-            id = route["color"];
+          if (!line["id"].is_null()) {
+            id = util::toString(line["id"]);
+          } else if (!line["label"].is_null()) {
+            id = util::toString(line["label"]);
+          } else if (!line["color"].is_null()) {
+            id = line["color"];
           } else
             continue;
 
-          const Route* r = getRoute(id);
-          if (!r) {
-            std::string label = route["label"].is_null() ? "" : route["label"];
-            std::string color = route["color"];
-            r = new Route(id, label, color);
-            addRoute(r);
+          const Line* l = getLine(id);
+          if (!l) {
+            std::string label = line["label"].is_null() ? "" : line["label"];
+            std::string color = line["color"];
+            l = new Line(id, label, color);
+            addLine(l);
           }
 
           LineNode* dir = 0;
 
-          if (!route["direction"].is_null()) {
-            dir = idMap[util::toString(route["direction"])];
+          if (!line["direction"].is_null()) {
+            dir = idMap[util::toString(line["direction"])];
           }
 
-          if (!route["style"].is_null()) {
+          if (!line["style"].is_null()) {
             shared::style::LineStyle ls;
-            auto style = route["style"];
+            auto style = line["style"];
             std::string dashArray;
             if (!style["dash-array"].is_null()) {
               dashArray = style["dash-array"];
@@ -248,9 +253,9 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
 
             ls.setDashArray(dashArray);
 
-            e->pl().addRoute(r, dir, ls);
+            e->pl().addLine(l, dir, ls);
           } else {
-            e->pl().addRoute(r, dir);
+            e->pl().addLine(l, dir);
           }
         }
       }
@@ -274,7 +279,7 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
             std::string nid1 = util::toString(excl["edge1_node"]);
             std::string nid2 = util::toString(excl["edge2_node"]);
 
-            const Route* r = getRoute(rid);
+            const Line* r = getLine(rid);
 
             if (!r) {
               LOG(WARN) << "line connection exclude defined in node " << id
@@ -298,7 +303,6 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
 
             LineNode* n1 = idMap[nid1];
             LineNode* n2 = idMap[nid2];
-
 
             LineEdge* a = getEdg(n, n1);
             LineEdge* b = getEdg(n, n2);
@@ -365,13 +369,13 @@ void LineGraph::topologizeIsects() {
     _edgeGrid.add(*ba->pl().getGeom(), ba);
     _edgeGrid.add(*bb->pl().getGeom(), bb);
 
-    for (auto r : i.b->pl().getRoutes()) {
-      if (r.direction == i.b->getFrom()) {
-        ba->pl().addRoute(r.route, i.b->getFrom());
-        bb->pl().addRoute(r.route, x);
+    for (auto l : i.b->pl().getLines()) {
+      if (l.direction == i.b->getFrom()) {
+        ba->pl().addLine(l.line, i.b->getFrom());
+        bb->pl().addLine(l.line, x);
       } else {
-        ba->pl().addRoute(r.route, x);
-        bb->pl().addRoute(r.route, i.b->getTo());
+        ba->pl().addLine(l.line, x);
+        bb->pl().addLine(l.line, i.b->getTo());
       }
     }
 
@@ -383,13 +387,13 @@ void LineGraph::topologizeIsects() {
     _edgeGrid.add(*aa->pl().getGeom(), aa);
     _edgeGrid.add(*ab->pl().getGeom(), ab);
 
-    for (auto r : i.a->pl().getRoutes()) {
-      if (r.direction == i.b->getFrom()) {
-        aa->pl().addRoute(r.route, i.a->getFrom());
-        ab->pl().addRoute(r.route, x);
+    for (auto l : i.a->pl().getLines()) {
+      if (l.direction == i.b->getFrom()) {
+        aa->pl().addLine(l.line, i.a->getFrom());
+        ab->pl().addLine(l.line, x);
       } else {
-        aa->pl().addRoute(r.route, x);
-        ab->pl().addRoute(r.route, i.a->getTo());
+        aa->pl().addLine(l.line, x);
+        ab->pl().addLine(l.line, i.a->getTo());
       }
     }
 
@@ -441,11 +445,11 @@ ISect LineGraph::getNextIntersection() {
 }
 
 // _____________________________________________________________________________
-void LineGraph::addRoute(const Route* r) { _routes[r->getId()] = r; }
+void LineGraph::addLine(const Line* l) { _lines[l->id()] = l; }
 
 // _____________________________________________________________________________
-const Route* LineGraph::getRoute(const std::string& id) const {
-  if (_routes.find(id) != _routes.end()) return _routes.find(id)->second;
+const Line* LineGraph::getLine(const std::string& id) const {
+  if (_lines.find(id) != _lines.end()) return _lines.find(id)->second;
   return 0;
 }
 
@@ -459,16 +463,16 @@ LineNode* LineGraph::sharedNode(const LineEdge* a, const LineEdge* b) {
 }
 
 // _____________________________________________________________________________
-std::vector<RouteOcc> LineGraph::getCtdRoutesIn(const Route* r,
-                                                const LineNode* dir,
-                                                const LineEdge* fromEdge,
-                                                const LineEdge* toEdge) {
-  std::vector<RouteOcc> ret;
+std::vector<LineOcc> LineGraph::getCtdLinesIn(const Line* r,
+                                              const LineNode* dir,
+                                              const LineEdge* fromEdge,
+                                              const LineEdge* toEdge) {
+  std::vector<LineOcc> ret;
   const auto* n = sharedNode(fromEdge, toEdge);
   if (!n || n->getDeg() == 1) return ret;
 
-  for (const auto& to : toEdge->pl().getRoutes()) {
-    if (to.route == r) {
+  for (const auto& to : toEdge->pl().getLines()) {
+    if (to.line == r) {
       if (to.direction == 0 || dir == 0 || (to.direction == n && dir != n) ||
           (to.direction != n && dir == n)) {
         if (n->pl().connOccurs(r, fromEdge, toEdge)) ret.push_back(to);
@@ -480,14 +484,14 @@ std::vector<RouteOcc> LineGraph::getCtdRoutesIn(const Route* r,
 }
 
 // _____________________________________________________________________________
-std::vector<RouteOcc> LineGraph::getCtdRoutesIn(const LineEdge* fromEdge,
-                                                const LineEdge* toEdge) {
-  std::vector<RouteOcc> ret;
+std::vector<LineOcc> LineGraph::getCtdLinesIn(const LineEdge* fromEdge,
+                                              const LineEdge* toEdge) {
+  std::vector<LineOcc> ret;
   const auto* n = sharedNode(fromEdge, toEdge);
   if (!n) return ret;
 
-  for (const auto& to : fromEdge->pl().getRoutes()) {
-    auto r = getCtdRoutesIn(to.route, to.direction, fromEdge, toEdge);
+  for (const auto& to : fromEdge->pl().getLines()) {
+    auto r = getCtdLinesIn(to.line, to.direction, fromEdge, toEdge);
     ret.insert(ret.end(), r.begin(), r.end());
   }
 
@@ -497,7 +501,7 @@ std::vector<RouteOcc> LineGraph::getCtdRoutesIn(const LineEdge* fromEdge,
 // _____________________________________________________________________________
 size_t LineGraph::getLDeg(const LineNode* nd) {
   size_t ret = 0;
-  for (auto e : nd->getAdjList()) ret += e->pl().getRoutes().size();
+  for (auto e : nd->getAdjList()) ret += e->pl().getLines().size();
   return ret;
 }
 
@@ -505,7 +509,7 @@ size_t LineGraph::getLDeg(const LineNode* nd) {
 size_t LineGraph::getMaxLineNum(const LineNode* nd) {
   size_t ret = 0;
   for (auto e : nd->getAdjList())
-    if (e->pl().getRoutes().size() > ret) ret = e->pl().getRoutes().size();
+    if (e->pl().getLines().size() > ret) ret = e->pl().getLines().size();
   return ret;
 }
 
@@ -519,7 +523,6 @@ size_t LineGraph::getMaxLineNum() {
   return ret;
 }
 
-
 // _____________________________________________________________________________
 size_t LineGraph::maxDeg() const {
   size_t ret = 0;
@@ -529,31 +532,33 @@ size_t LineGraph::maxDeg() const {
 }
 
 // _____________________________________________________________________________
-std::vector<const Route*> LineGraph::getSharedRoutes(const LineEdge* a,
-                                              const LineEdge* b) {
-  std::vector<const Route*> ret;
-  for (auto& to : a->pl().getRoutes()) {
-    if (b->pl().hasRoute(to.route)) ret.push_back(to.route);
+std::vector<const Line*> LineGraph::getSharedLines(const LineEdge* a,
+                                                   const LineEdge* b) {
+  std::vector<const Line*> ret;
+  for (auto& to : a->pl().getLines()) {
+    if (b->pl().hasLine(to.line)) ret.push_back(to.line);
   }
 
   return ret;
 }
 
 // _____________________________________________________________________________
-std::vector<Partner> LineGraph::getPartners(const LineNode* n, const NodeFront* f,
-                                       const RouteOcc& ro) {
+std::vector<Partner> LineGraph::getPartners(const LineNode* n,
+                                            const NodeFront* f,
+                                            const LineOcc& ro) {
   std::vector<Partner> ret;
-  for (const auto& nf : n->pl().getMainDirs()) {
+  for (const auto& nf : n->pl().fronts()) {
     if (&nf == f) continue;
 
     // TODO: if that is so, then why do we have the parameter n?
     assert(f->n == n);
 
-    for (const RouteOcc& to : getCtdRoutesIn(ro.route, ro.direction, f->edge, nf.edge)) {
-      Partner p(f, nf.edge, to.route);
+    for (const LineOcc& to :
+         getCtdLinesIn(ro.line, ro.direction, f->edge, nf.edge)) {
+      Partner p(f, nf.edge, to.line);
       p.front = &nf;
       p.edge = nf.edge;
-      p.route = to.route;
+      p.line = to.line;
       ret.push_back(p);
     }
   }
@@ -561,13 +566,10 @@ std::vector<Partner> LineGraph::getPartners(const LineNode* n, const NodeFront* 
 }
 
 // _____________________________________________________________________________
-size_t LineGraph::getNumRoutes() const {
-  return _routes.size();
-}
+size_t LineGraph::getNumLines() const { return _lines.size(); }
 
 // _____________________________________________________________________________
 size_t LineGraph::getNumNds() const { return getNds().size(); }
 
 // _____________________________________________________________________________
 size_t LineGraph::getNumNds(bool topo) const { return 0; }
-

@@ -16,8 +16,7 @@ using namespace transitmapper::graph;
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
-    glp_prob* lp, HierarOrderCfg* hc,
-    const std::set<OptNode*>& g) const {
+    glp_prob* lp, HierarOrderCfg* hc, const std::set<OptNode*>& g) const {
   // build name index for faster lookup
   glp_create_index(lp);
 
@@ -30,13 +29,13 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
         for (size_t tp = 0; tp < e->pl().getCardinality(); tp++) {
           bool found = false;
 
-          for (auto ro : e->pl().getRoutes()) {
+          for (auto ro : e->pl().getLines()) {
             // check if this route (r) switches from 0 to 1 at tp-1 and tp
             double valPrev = 0;
             std::stringstream varName;
 
             if (tp > 0) {
-              varName << "x_(" << e->pl().getStrRepr() << ",l=" << ro.route
+              varName << "x_(" << e->pl().getStrRepr() << ",l=" << ro.line
                       << ",p<=" << tp - 1 << ")";
 
               size_t i = glp_find_col(lp, varName.str().c_str());
@@ -45,7 +44,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
             }
 
             varName.str("");
-            varName << "x_(" << e->pl().getStrRepr() << ",l=" << ro.route
+            varName << "x_(" << e->pl().getStrRepr() << ",l=" << ro.line
                     << ",p<=" << tp << ")";
 
             size_t i = glp_find_col(lp, varName.str().c_str());
@@ -60,7 +59,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
 
               for (auto rel : ro.relatives) {
                 // retrieve the original route pos
-                size_t p = etgp.etg->pl().getRoutePos(rel);
+                size_t p = etgp.etg->pl().linePos(rel);
 
                 if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
                   (*hc)[etgp.etg][etgp.order].insert(
@@ -107,10 +106,10 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(
         glp_set_row_bnds(lp, rowA + p, GLP_FX, p + 1, p + 1);
       }
 
-      for (auto r : e->pl().getRoutes()) {
+      for (auto r : e->pl().getLines()) {
         for (size_t p = 0; p < e->pl().getCardinality(); p++) {
           std::stringstream varName;
-          varName << "x_(" << e->pl().getStrRepr() << ",l=" << r.route
+          varName << "x_(" << e->pl().getStrRepr() << ",l=" << r.line
                   << ",p<=" << p << ")";
           size_t curCol = glp_add_cols(lp, 1);
           glp_set_col_name(lp, curCol, varName.str().c_str());
@@ -124,7 +123,7 @@ glp_prob* ILPEdgeOrderOptimizer::createProblem(
 
             std::stringstream rowName;
             rowName.str("");
-            rowName << "sum(" << e->pl().getStrRepr() << ",r=" << r.route
+            rowName << "sum(" << e->pl().getStrRepr() << ",r=" << r.line
                     << ",p<=" << p << ")";
 
             glp_set_row_name(lp, row, rowName.str().c_str());
@@ -194,8 +193,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
         // position of line B (second) in segment
         size_t smallerVar = glp_add_cols(lp, 1);
         std::stringstream ss;
-        ss << "x_(" << segment->pl().getStrRepr() << "," << linepair.first.route
-           << "<" << linepair.second.route << ")";
+        ss << "x_(" << segment->pl().getStrRepr() << "," << linepair.first.line
+           << "<" << linepair.second.line << ")";
         glp_set_col_name(lp, smallerVar, ss.str().c_str());
         glp_set_col_kind(lp, smallerVar, GLP_BV);
       }
@@ -208,7 +207,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
           // of B is > 1
           size_t dist1Var = glp_add_cols(lp, 1);
           ss << "x_(" << segment->pl().getStrRepr() << ","
-             << linepair.first.route << "<T>" << linepair.second.route << ")";
+             << linepair.first.line << "<T>" << linepair.second.line << ")";
           glp_set_col_name(lp, dist1Var, ss.str().c_str());
           glp_set_col_kind(lp, dist1Var, GLP_BV);
 
@@ -225,14 +224,14 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
       // iterate over all possible line pairs in this segment
       for (LinePair linepair : getLinePairs(segment)) {
         std::stringstream ss;
-        ss << "x_(" << segment->pl().getStrRepr() << "," << linepair.first.route
-           << "<" << linepair.second.route << ")";
+        ss << "x_(" << segment->pl().getStrRepr() << "," << linepair.first.line
+           << "<" << linepair.second.line << ")";
         size_t smaller = glp_find_col(lp, ss.str().c_str());
         assert(smaller > 0);
 
         std::stringstream ss2;
         ss2 << "x_(" << segment->pl().getStrRepr() << ","
-            << linepair.second.route << "<" << linepair.first.route << ")";
+            << linepair.second.line << "<" << linepair.first.line << ")";
         size_t bigger = glp_find_col(lp, ss2.str().c_str());
         assert(bigger > 0);
 
@@ -257,15 +256,15 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
       for (LinePair linepair : getLinePairs(segment)) {
         std::stringstream rowName;
         rowName << "sum_crossor(e=" << segment->pl().getStrRepr()
-                << ",A=" << linepair.first.route
-                << ",B=" << linepair.second.route << ")";
+                << ",A=" << linepair.first.line << ",B=" << linepair.second.line
+                << ")";
         size_t rowSmallerThan = glp_add_rows(lp, 1);
         glp_set_row_name(lp, rowSmallerThan, rowName.str().c_str());
         glp_set_row_bnds(lp, rowSmallerThan, GLP_LO, 0, 0);
 
         std::stringstream ss;
-        ss << "x_(" << segment->pl().getStrRepr() << "," << linepair.first.route
-           << "<" << linepair.second.route << ")";
+        ss << "x_(" << segment->pl().getStrRepr() << "," << linepair.first.line
+           << "<" << linepair.second.line << ")";
 
         size_t decVar = glp_find_col(lp, ss.str().c_str());
         assert(decVar > 0);
@@ -275,20 +274,20 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
         for (size_t p = 0; p < segment->pl().getCardinality(); ++p) {
           std::stringstream ss;
           ss << "x_(" << segment->pl().getStrRepr()
-             << ",l=" << linepair.first.route << ",p<=" << p << ")";
+             << ",l=" << linepair.first.line << ",p<=" << p << ")";
           size_t first = glp_find_col(lp, ss.str().c_str());
           assert(first > 0);
 
           std::stringstream ss2;
           ss2 << "x_(" << segment->pl().getStrRepr()
-              << ",l=" << linepair.second.route << ",p<=" << p << ")";
+              << ",l=" << linepair.second.line << ",p<=" << p << ")";
           size_t second = glp_find_col(lp, ss2.str().c_str());
           assert(second > 0);
 
           std::stringstream rowNameSmallerThan;
           rowNameSmallerThan << "sum_crossor(e=" << segment->pl().getStrRepr()
-                             << ",A=" << linepair.first.route
-                             << ",B=" << linepair.second.route << ")";
+                             << ",A=" << linepair.first.line
+                             << ",B=" << linepair.second.line << ")";
           size_t rowSmallerThan =
               glp_find_row(lp, rowNameSmallerThan.str().c_str());
 
@@ -311,23 +310,23 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
         if (_cfg->splittingOpt && segment->pl().getCardinality() > 2) {
           rowName.str("");
           rowName << "sum_distancor1(e=" << segment->pl().getStrRepr()
-                  << ",A=" << linepair.first.route
-                  << ",B=" << linepair.second.route << ")";
+                  << ",A=" << linepair.first.line
+                  << ",B=" << linepair.second.line << ")";
           rowDistance1 = glp_add_rows(lp, 1);
           glp_set_row_name(lp, rowDistance1, rowName.str().c_str());
           glp_set_row_bnds(lp, rowDistance1, GLP_UP, 0, 1);
 
           rowName.str("");
           rowName << "sum_distancor2(e=" << segment->pl().getStrRepr()
-                  << ",A=" << linepair.first.route
-                  << ",B=" << linepair.second.route << ")";
+                  << ",A=" << linepair.first.line
+                  << ",B=" << linepair.second.line << ")";
           rowDistance2 = glp_add_rows(lp, 1);
           glp_set_row_name(lp, rowDistance2, rowName.str().c_str());
           glp_set_row_bnds(lp, rowDistance2, GLP_UP, 0, 1);
 
           std::stringstream sss;
           sss << "x_(" << segment->pl().getStrRepr() << ","
-              << linepair.first.route << "<T>" << linepair.second.route << ")";
+              << linepair.first.line << "<T>" << linepair.second.line << ")";
 
           size_t decVarDistance = glp_find_col(lp, sss.str().c_str());
           assert(decVarDistance > 0);
@@ -338,13 +337,13 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
           for (size_t p = 0; p < segment->pl().getCardinality(); ++p) {
             std::stringstream ss;
             ss << "x_(" << segment->pl().getStrRepr()
-               << ",l=" << linepair.first.route << ",p<=" << p << ")";
+               << ",l=" << linepair.first.line << ",p<=" << p << ")";
             size_t first = glp_find_col(lp, ss.str().c_str());
             assert(first > 0);
 
             std::stringstream ss2;
             ss2 << "x_(" << segment->pl().getStrRepr()
-                << ",l=" << linepair.second.route << ",p<=" << p << ")";
+                << ",l=" << linepair.second.line << ",p<=" << p << ")";
             size_t second = glp_find_col(lp, ss2.str().c_str());
             assert(second > 0);
 
@@ -379,9 +378,9 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
           std::stringstream ss;
           ss << "x_dec(" << segmentA->pl().getStrRepr() << ","
              << segmentA->pl().getStrRepr() << segmentB->pl().getStrRepr()
-             << "," << linepair.first.route << "("
-             << linepair.first.route->getId() << ")," << linepair.second.route
-             << "(" << linepair.second.route->getId() << ")," << node << ")";
+             << "," << linepair.first.line << "(" << linepair.first.line->id()
+             << ")," << linepair.second.line << "("
+             << linepair.second.line->id() << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
@@ -398,24 +397,21 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
 
           std::stringstream aSmBStr;
           aSmBStr << "x_(" << segmentA->pl().getStrRepr() << ","
-                  << linepair.first.route << "<" << linepair.second.route
-                  << ")";
+                  << linepair.first.line << "<" << linepair.second.line << ")";
           aSmallerBinL1 = glp_find_col(lp, aSmBStr.str().c_str());
 
           assert(aSmallerBinL1);
 
           std::stringstream aBgBStr;
           aBgBStr << "x_(" << segmentB->pl().getStrRepr() << ","
-                  << linepair.first.route << "<" << linepair.second.route
-                  << ")";
+                  << linepair.first.line << "<" << linepair.second.line << ")";
           aSmallerBinL2 = glp_find_col(lp, aBgBStr.str().c_str());
 
           assert(aSmallerBinL2);
 
           std::stringstream bBgAStr;
           bBgAStr << "x_(" << segmentB->pl().getStrRepr() << ","
-                  << linepair.second.route << "<" << linepair.first.route
-                  << ")";
+                  << linepair.second.line << "<" << linepair.first.line << ")";
           bSmallerAinL2 = glp_find_col(lp, bBgAStr.str().c_str());
 
           assert(bSmallerAinL2);
@@ -423,8 +419,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
           std::stringstream rowName;
           rowName << "sum_dec(e1=" << segmentA->pl().getStrRepr()
                   << ",e2=" << segmentB->pl().getStrRepr()
-                  << ",A=" << linepair.first.route
-                  << ",B=" << linepair.second.route << ",n=" << node << ")";
+                  << ",A=" << linepair.first.line
+                  << ",B=" << linepair.second.line << ",n=" << node << ")";
 
           size_t row = glp_add_rows(lp, 1);
 
@@ -434,8 +430,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
           std::stringstream rowName2;
           rowName2 << "sum_dec2(e1=" << segmentA->pl().getStrRepr()
                    << ",e2=" << segmentB->pl().getStrRepr()
-                   << ",A=" << linepair.first.route
-                   << ",B=" << linepair.second.route << ",n=" << node << ")";
+                   << ",A=" << linepair.first.line
+                   << ",B=" << linepair.second.line << ",n=" << node << ")";
 
           size_t row2 = glp_add_rows(lp, 1);
 
@@ -483,10 +479,9 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
               std::stringstream sss;
               sss << "x_decT(" << segmentA->pl().getStrRepr() << ","
                   << segmentA->pl().getStrRepr() << segmentB->pl().getStrRepr()
-                  << "," << linepair.first.route << "("
-                  << linepair.first.route->getId() << "),"
-                  << linepair.second.route << "("
-                  << linepair.second.route->getId() << ")," << node << ")";
+                  << "," << linepair.first.line << "("
+                  << linepair.first.line->id() << ")," << linepair.second.line
+                  << "(" << linepair.second.line->id() << ")," << node << ")";
               glp_set_col_name(lp, decisionVarDist1Change, sss.str().c_str());
               glp_set_col_kind(lp, decisionVarDist1Change, GLP_BV);
 
@@ -498,24 +493,23 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
 
               std::stringstream aNearBL1Str;
               aNearBL1Str << "x_(" << segmentA->pl().getStrRepr() << ","
-                          << linepair.first.route << "<T>"
-                          << linepair.second.route << ")";
+                          << linepair.first.line << "<T>"
+                          << linepair.second.line << ")";
               aNearBinL1 = glp_find_col(lp, aNearBL1Str.str().c_str());
               assert(aNearBinL1);
 
               std::stringstream aNearBL2Str;
               aNearBL2Str << "x_(" << segmentB->pl().getStrRepr() << ","
-                          << linepair.first.route << "<T>"
-                          << linepair.second.route << ")";
+                          << linepair.first.line << "<T>"
+                          << linepair.second.line << ")";
               aNearBinL2 = glp_find_col(lp, aNearBL2Str.str().c_str());
               assert(aNearBinL2);
 
               std::stringstream rowTName;
               rowTName << "sum_decT(e1=" << segmentA->pl().getStrRepr()
                        << ",e2=" << segmentB->pl().getStrRepr()
-                       << ",A=" << linepair.first.route
-                       << ",B=" << linepair.second.route << ",n=" << node
-                       << ")";
+                       << ",A=" << linepair.first.line
+                       << ",B=" << linepair.second.line << ",n=" << node << ")";
 
               size_t check = glp_find_row(lp, rowTName.str().c_str());
               assert(check == 0);
@@ -528,8 +522,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
               std::stringstream rowTName2;
               rowTName2 << "sum_decT2(e1=" << segmentA->pl().getStrRepr()
                         << ",e2=" << segmentB->pl().getStrRepr()
-                        << ",A=" << linepair.first.route
-                        << ",B=" << linepair.second.route << ",n=" << node
+                        << ",A=" << linepair.first.line
+                        << ",B=" << linepair.second.line << ",n=" << node
                         << ")";
 
               size_t rowT2 = glp_add_rows(lp, 1);
@@ -552,8 +546,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
 
               std::stringstream aNearBStr;
               aNearBStr << "x_(" << segment->pl().getStrRepr() << ","
-                        << linepair.first.route << "<T>"
-                        << linepair.second.route << ")";
+                        << linepair.first.line << "<T>" << linepair.second.line
+                        << ")";
               size_t aNearB = glp_find_col(lp, aNearBStr.str().c_str());
               glp_set_obj_coef(lp, aNearB, getSplittingPenalty(node));
             }
@@ -584,10 +578,9 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(
           std::stringstream ss;
           ss << "x_dec(" << segmentA->pl().getStrRepr() << ","
              << segments.first->pl().getStrRepr()
-             << segments.second->pl().getStrRepr() << ","
-             << linepair.first.route << "(" << linepair.first.route->getId()
-             << ")," << linepair.second.route << "("
-             << linepair.second.route->getId() << ")," << node << ")";
+             << segments.second->pl().getStrRepr() << "," << linepair.first.line
+             << "(" << linepair.first.line->id() << ")," << linepair.second.line
+             << "(" << linepair.second.line->id() << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
 
@@ -605,13 +598,13 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(
               if (poscomb.first > poscomb.second) {
                 std::stringstream bBgAStr;
                 bBgAStr << "x_(" << segmentA->pl().getStrRepr() << ","
-                        << linepair.first.route << "<" << linepair.second.route
+                        << linepair.first.line << "<" << linepair.second.line
                         << ")";
                 testVar = glp_find_col(lp, bBgAStr.str().c_str());
               } else {
                 std::stringstream bBgAStr;
                 bBgAStr << "x_(" << segmentA->pl().getStrRepr() << ","
-                        << linepair.second.route << "<" << linepair.first.route
+                        << linepair.second.line << "<" << linepair.first.line
                         << ")";
                 testVar = glp_find_col(lp, bBgAStr.str().c_str());
               }
@@ -622,7 +615,7 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(
               ss << "dec_sum(" << segmentA->pl().getStrRepr() << ","
                  << segments.first->pl().getStrRepr()
                  << segments.second->pl().getStrRepr() << ","
-                 << linepair.first.route << "," << linepair.second.route
+                 << linepair.first.line << "," << linepair.second.line
                  << "pa=" << poscomb.first << ",pb=" << poscomb.second
                  << ",n=" << node << ")";
               glp_set_row_name(lp, row, ss.str().c_str());

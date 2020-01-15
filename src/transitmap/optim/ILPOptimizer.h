@@ -6,7 +6,7 @@
 #define TRANSITMAP_OPTIM_ILPOPTIMIZER_H_
 
 #include <glpk.h>
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderCfg.h"
 #include "transitmap/optim/OptGraph.h"
@@ -36,27 +36,27 @@ class ILPOptimizer : public Optimizer {
   ILPOptimizer(const config::Config* cfg, const Scorer* scorer)
       : Optimizer(cfg, scorer){};
 
-  int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                   HierarOrderCfg* c, size_t depth) const;
+  int optimizeComp(OptGraph* og, const std::set<OptNode*>& g, HierarOrderCfg* c,
+                   size_t depth) const;
 
  protected:
-  virtual glp_prob* createProblem(OptGraph* og, const std::set<OptNode*>& g) const;
+  virtual glp_prob* createProblem(OptGraph* og,
+                                  const std::set<OptNode*>& g) const;
 
   void solveProblem(glp_prob* lp) const;
   void preSolveCoinCbc(glp_prob* lp) const;
 
-  virtual void getConfigurationFromSolution(glp_prob* lp,
-                                            HierarOrderCfg* c,
+  virtual void getConfigurationFromSolution(glp_prob* lp, HierarOrderCfg* c,
                                             const std::set<OptNode*>& g) const;
 
-  std::string getILPVarName(OptEdge* e, const shared::linegraph::Route* r,
+  std::string getILPVarName(OptEdge* e, const shared::linegraph::Line* r,
                             size_t p) const;
 
   void writeSameSegConstraints(OptGraph* og, const std::set<OptNode*>& g,
                                VariableMatrix* vm, glp_prob* lp) const;
 
-  void writeDiffSegConstraints(OptGraph* og, const std::set<OptNode*>& g, VariableMatrix* vm,
-                               glp_prob* lp) const;
+  void writeDiffSegConstraints(OptGraph* og, const std::set<OptNode*>& g,
+                               VariableMatrix* vm, glp_prob* lp) const;
 
   double getConstraintCoeff(glp_prob* lp, int constraint, int col) const;
 

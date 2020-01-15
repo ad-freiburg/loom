@@ -77,7 +77,7 @@ class MapConstructor {
   const config::TopoConfig* _cfg;
   LineGraph* _g;
 
-  void routeDirRepl(LineNode* oldN, LineNode* newN, LineEdge* e);
+  void lineDirRepl(LineNode* oldN, LineNode* newN, LineEdge* e);
 
   ShrdSegWrap nextShrdSeg(double dCut, EdgeGrid* grid);
   bool combineNodes(LineNode* a, LineNode* b);
@@ -85,7 +85,7 @@ class MapConstructor {
 
   void combContEdgs(const LineEdge* a, const LineEdge* b);
 
-  bool routeEq(const LineEdge* a, const LineEdge* b);
+  bool lineEq(const LineEdge* a, const LineEdge* b);
 
   bool contractEdges();
 

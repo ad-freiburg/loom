@@ -13,8 +13,7 @@ using transitmapper::optim::NullOptimizer;
 
 // _____________________________________________________________________________
 int NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                HierarOrderCfg* hc,
-                                size_t depth) const {
+                                HierarOrderCfg* hc, size_t depth) const {
   LOG(DEBUG) << prefix(depth) << "(NullOptimizer) Optimizing component with "
              << g.size() << " nodes.";
 
@@ -23,11 +22,10 @@ int NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
       if (e->getFrom() != n) continue;
       for (auto etgp : e->pl().etgs) {
         if (etgp.wasCut) continue;
-        for (auto ro : e->pl().getRoutes()) {
-
+        for (auto ro : e->pl().getLines()) {
           for (auto rel : ro.relatives) {
-            // retrieve the original route pos
-            size_t p = etgp.etg->pl().getRoutePos(rel);
+            // retrieve the original line pos
+            size_t p = etgp.etg->pl().linePos(rel);
             if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
               (*hc)[etgp.etg][etgp.order].insert(
                   (*hc)[etgp.etg][etgp.order].begin(), p);

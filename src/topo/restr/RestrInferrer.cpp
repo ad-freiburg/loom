@@ -31,13 +31,13 @@ void RestrInferrer::init() {
                     _rg.addEdg(_nMap[edg->getTo()], _nMap[edg->getFrom()],
                                pl.reversed())};
 
-      for (auto r : edg->pl().getRoutes()) {
+      for (auto r : edg->pl().getLines()) {
         if (r.direction == 0 || r.direction == edg->getTo()) {
-          _eMap[edg][0]->pl().routes.insert(r.route);
+          _eMap[edg][0]->pl().lines.insert(r.line);
         }
 
         if (r.direction == 0 || r.direction == edg->getFrom()) {
-          _eMap[edg][1]->pl().routes.insert(r.route);
+          _eMap[edg][1]->pl().lines.insert(r.line);
         }
       }
     }
@@ -54,10 +54,10 @@ void RestrInferrer::infer(const OrigEdgs& origEdgs) {
       for (auto edg2 : nd->getAdjList()) {
         if (edg1 == edg2) continue;
 
-        for (auto ro1 : edg1->pl().getRoutes()) {
-          if (!edg2->pl().hasRoute(ro1.route)) continue;
+        for (auto ro1 : edg1->pl().getLines()) {
+          if (!edg2->pl().hasLine(ro1.line)) continue;
 
-          const auto& ro2 = edg2->pl().getRouteOcc(ro1.route);
+          const auto& ro2 = edg2->pl().lineOcc(ro1.line);
 
           if (ro1.direction != 0 && ro2.direction != 0 &&
               ro1.direction == ro2.direction)
@@ -69,8 +69,8 @@ void RestrInferrer::infer(const OrigEdgs& origEdgs) {
             continue;
           }
 
-          if (!check(ro1.route, edg1, edg2) && !check(ro1.route, edg2, edg1)) {
-            nd->pl().addConnExc(ro1.route, edg1, edg2);
+          if (!check(ro1.line, edg1, edg2) && !check(ro1.line, edg2, edg1)) {
+            nd->pl().addConnExc(ro1.line, edg1, edg2);
           }
         }
       }
@@ -100,14 +100,14 @@ void RestrInferrer::addHndls(const OrigEdgs& origEdgs) {
       auto e =
           _rg.addEdg(lastNd, hndl.first,
                      edgHndl.first->pl().geom.getSegment(lastPos, hndl.second));
-      e->pl().routes = edgHndl.first->pl().routes;
+      e->pl().lines = edgHndl.first->pl().lines;
 
       lastNd = hndl.first;
       lastPos = hndl.second;
     }
     auto e = _rg.addEdg(lastNd, edgHndl.first->getTo(),
                         edgHndl.first->pl().geom.getSegment(lastPos, 1));
-    e->pl().routes = edgHndl.first->pl().routes;
+    e->pl().lines = edgHndl.first->pl().lines;
 
     _rg.delEdg(edgHndl.first->getFrom(), edgHndl.first->getTo());
   }
@@ -124,13 +124,13 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
   auto hndlLA =
       e->pl()
           .getPolyline()
-          .getOrthoLineAtDist(MAX_DIST, e->pl().getRoutes().size() * MAX_DIST)
+          .getOrthoLineAtDist(MAX_DIST, e->pl().getLines().size() * MAX_DIST)
           .getLine();
   auto hndlLB =
       e->pl()
           .getPolyline()
           .getOrthoLineAtDist(e->pl().getPolyline().getLength() - MAX_DIST,
-                              e->pl().getRoutes().size() * MAX_DIST)
+                              e->pl().getLines().size() * MAX_DIST)
           .getLine();
 
   for (auto edg : origEdgs.find(e)->second) {
@@ -159,7 +159,7 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
 }
 
 // _____________________________________________________________________________
-bool RestrInferrer::check(const Route* r, const LineEdge* edg1,
+bool RestrInferrer::check(const Line* r, const LineEdge* edg1,
                           const LineEdge* edg2) const {
   std::set<RestrEdge *> from, to;
   auto shrdNd = shared::linegraph::LineGraph::sharedNode(edg1, edg2);

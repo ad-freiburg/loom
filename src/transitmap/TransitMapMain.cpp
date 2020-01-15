@@ -80,8 +80,8 @@ int main(int argc, char** argv) {
               << g.getNumNds(true) << " topo, " << g.getNumNds(false)
               << " non-topo)";
     LOG(INFO) << "(stats)   Total edge count: " << g.numEdgs();
-    LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes();
-    LOG(INFO) << "(stats)   Max edge route cardinality: "
+    LOG(INFO) << "(stats)   Total unique line count: " << g.getNumLines();
+    LOG(INFO) << "(stats)   Max edge line cardinality: "
               << g.getMaxLineNum();
     LOG(INFO) << "(stats)   Number of poss. solutions: "
               << scorer.getNumPossSolutions();

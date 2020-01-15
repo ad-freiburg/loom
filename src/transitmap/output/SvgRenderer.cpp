@@ -4,16 +4,15 @@
 
 #include <stdint.h>
 #include <ostream>
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/output/SvgRenderer.h"
 #include "transitmap/graph/RenderGraph.h"
+#include "transitmap/output/SvgRenderer.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
 
 using namespace transitmapper;
-using namespace output;
-using shared::linegraph::Route;
+using shared::linegraph::Line;
 using shared::linegraph::LineNode;
 using util::geo::DPoint;
 using util::geo::PolyLine;
@@ -21,6 +20,8 @@ using util::geo::DPolygon;
 using util::geo::Polygon;
 using util::geo::LinePoint;
 using util::geo::LinePointCmp;
+using output::SvgRenderer;
+using output::InnerClique;
 
 using util::toString;
 
@@ -102,7 +103,6 @@ void SvgRenderer::print(const graph::RenderGraph& outG) {
     _w.closeTag();
   }
 
-
   _w.closeTag();
 
   for (auto n : outG.getNds()) {
@@ -128,8 +128,8 @@ void SvgRenderer::outputNodes(const graph::RenderGraph& outG,
   for (auto n : outG.getNds()) {
     std::map<std::string, std::string> params;
 
-    if (_cfg->renderStations && n->pl().getStops().size() > 0 &&
-        n->pl().getMainDirs().size() > 0) {
+    if (_cfg->renderStations && n->pl().stops().size() > 0 &&
+        n->pl().fronts().size() > 0) {
       params["stroke"] = "black";
       params["stroke-width"] =
           util::toString((_cfg->lineWidth / 2) * _cfg->outputResolution);
@@ -151,9 +151,9 @@ void SvgRenderer::outputNodes(const graph::RenderGraph& outG,
 void SvgRenderer::renderNodeFronts(const graph::RenderGraph& outG,
                                    const RenderParams& rparams) {
   _w.openTag("g");
-  for (LineNode* n : outG.getNds()) {
-    std::string color = n->pl().getStops().size() > 0 ? "red" : "black";
-    for (auto& f : n->pl().getMainDirs()) {
+  for (auto n : outG.getNds()) {
+    std::string color = n->pl().stops().size() > 0 ? "red" : "black";
+    for (auto& f : n->pl().fronts()) {
       const PolyLine<double> p = f.geom;
       std::stringstream style;
       style << "fill:none;stroke:" << color
@@ -192,9 +192,11 @@ void SvgRenderer::outputEdges(const graph::RenderGraph& outG,
   };
 
   struct cmpEdge {
-    bool operator()(const shared::linegraph::LineEdge* lhs, const shared::linegraph::LineEdge* rhs) const {
-      return lhs->pl().getRoutes().size() < rhs->pl().getRoutes().size() ||
-             (lhs->pl().getRoutes().size() == rhs->pl().getRoutes().size() && lhs < rhs);
+    bool operator()(const shared::linegraph::LineEdge* lhs,
+                    const shared::linegraph::LineEdge* rhs) const {
+      return lhs->pl().getLines().size() < rhs->pl().getLines().size() ||
+             (lhs->pl().getLines().size() == rhs->pl().getLines().size() &&
+              lhs < rhs);
     }
   };
 
@@ -221,8 +223,8 @@ void SvgRenderer::outputEdges(const graph::RenderGraph& outG,
 void SvgRenderer::renderNodeConnections(const graph::RenderGraph& outG,
                                         const LineNode* n,
                                         const RenderParams& rparams) {
-  auto geoms = outG.innerGeoms(n, outG.getConfig(),
-                                       _cfg->innerGeometryPrecision);
+  auto geoms =
+      outG.innerGeoms(n, outG.getConfig(), _cfg->innerGeometryPrecision);
 
   for (auto& clique : getInnerCliques(n, geoms, 99)) {
     renderClique(clique, n);
@@ -232,7 +234,7 @@ void SvgRenderer::renderNodeConnections(const graph::RenderGraph& outG,
 // _____________________________________________________________________________
 std::multiset<InnerClique> SvgRenderer::getInnerCliques(
     const shared::linegraph::LineNode* n,
-    std::vector<shared::linegraph::InnerGeometry> pool, size_t level) const {
+    std::vector<shared::linegraph::InnerGeom> pool, size_t level) const {
   std::multiset<InnerClique> ret;
 
   // start with the first geom in pool
@@ -255,8 +257,7 @@ std::multiset<InnerClique> SvgRenderer::getInnerCliques(
 // _____________________________________________________________________________
 size_t SvgRenderer::getNextPartner(
     const InnerClique& forClique,
-    const std::vector<shared::linegraph::InnerGeometry>& pool,
-    size_t level) const {
+    const std::vector<shared::linegraph::InnerGeom>& pool, size_t level) const {
   for (size_t i = 0; i < pool.size(); i++) {
     const auto& ic = pool[i];
     for (auto& ciq : forClique.geoms) {
@@ -270,8 +271,8 @@ size_t SvgRenderer::getNextPartner(
 }
 
 // _____________________________________________________________________________
-bool SvgRenderer::isNextTo(const shared::linegraph::InnerGeometry& a,
-                           const shared::linegraph::InnerGeometry b) const {
+bool SvgRenderer::isNextTo(const shared::linegraph::InnerGeom& a,
+                           const shared::linegraph::InnerGeom b) const {
   // TODO!!!!!
   return false;
 
@@ -300,9 +301,8 @@ bool SvgRenderer::isNextTo(const shared::linegraph::InnerGeometry& a,
 }
 
 // _____________________________________________________________________________
-bool SvgRenderer::hasSameOrigin(
-    const shared::linegraph::InnerGeometry& a,
-    const shared::linegraph::InnerGeometry b) const {
+bool SvgRenderer::hasSameOrigin(const shared::linegraph::InnerGeom& a,
+                                const shared::linegraph::InnerGeom b) const {
   if (a.from.front == b.from.front) {
     return a.slotFrom == b.slotFrom;
   }
@@ -326,7 +326,7 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
   std::multiset<InnerClique> renderCliques = getInnerCliques(n, cc.geoms, 0);
   for (const auto& c : renderCliques) {
     // the longest geom will be the ref geom
-    shared::linegraph::InnerGeometry ref = c.geoms[0];
+    shared::linegraph::InnerGeom ref = c.geoms[0];
     for (size_t i = 1; i < c.geoms.size(); i++) {
       if (c.geoms[i].geom.getLength() > ref.geom.getLength()) ref = c.geoms[i];
     }
@@ -377,14 +377,14 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       paramsOutlineCropped["style"] = styleOutlineCropped.str();
 
       std::stringstream styleStr;
-      styleStr << "fill:none;stroke:#" << c.geoms[i].from.route->getColor();
+      styleStr << "fill:none;stroke:#" << c.geoms[i].from.line->color();
 
       styleStr << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
                << _cfg->lineWidth * _cfg->outputResolution;
       Params params;
       params["style"] = styleStr.str();
 
-      _innerDelegates.back()[(uintptr_t)c.geoms[i].from.route].push_back(
+      _innerDelegates.back()[(uintptr_t)c.geoms[i].from.line].push_back(
           OutlinePrintPair(PrintDelegate(params, pl),
                            PrintDelegate(paramsOutlineCropped, pl)));
     }
@@ -393,13 +393,15 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
 
 // _____________________________________________________________________________
 void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
-                                 const Route& route, const shared::linegraph::LineEdge* edge) {
-  renderLinePart(p, width, route, edge, "");
+                                 const Line& line,
+                                 const shared::linegraph::LineEdge* edge) {
+  renderLinePart(p, width, line, edge, "");
 }
 
 // _____________________________________________________________________________
 void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
-                                 const Route& route, const shared::linegraph::LineEdge* edge,
+                                 const Line& line,
+                                 const shared::linegraph::LineEdge* edge,
                                  const std::string& endMarker) {
   if (p.getLength() < width / 2) return;
   std::stringstream styleOutline;
@@ -415,7 +417,7 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
   paramsOutline["style"] = styleOutline.str();
 
   std::stringstream styleStr;
-  styleStr << "fill:none;stroke:#" << route.getColor();
+  styleStr << "fill:none;stroke:#" << line.color();
 
   if (!endMarker.empty()) {
     styleStr << ";marker-end:url(#" << endMarker << ")";
@@ -435,8 +437,8 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
 void SvgRenderer::renderEdgeTripGeom(const graph::RenderGraph& outG,
                                      const shared::linegraph::LineEdge* e,
                                      const RenderParams& rparams) {
-  const shared::linegraph::NodeFront* nfTo = e->getTo()->pl().getNodeFrontFor(e);
-  const shared::linegraph::NodeFront* nfFrom = e->getFrom()->pl().getNodeFrontFor(e);
+  const shared::linegraph::NodeFront* nfTo = e->getTo()->pl().frontFor(e);
+  const shared::linegraph::NodeFront* nfFrom = e->getFrom()->pl().frontFor(e);
 
   PolyLine<double> center = *e->pl().getGeom();
 
@@ -451,9 +453,9 @@ void SvgRenderer::renderEdgeTripGeom(const graph::RenderGraph& outG,
 
   size_t a = 0;
   for (size_t i : outG.getConfig().find(e)->second) {
-    const auto& ro = e->pl().routeOccAtPos(i);
+    const auto& lo = e->pl().lineOccAtPos(i);
 
-    const Route* route = ro.route;
+    const Line* line = lo.line;
     PolyLine<double> p = center;
 
     if (p.getLength() < 0.01) continue;
@@ -480,16 +482,16 @@ void SvgRenderer::renderEdgeTripGeom(const graph::RenderGraph& outG,
 
     double arrowLength = (_cfg->lineWidth * 2.5);
 
-    if (_cfg->renderDirMarkers && ro.direction != 0 &&
+    if (_cfg->renderDirMarkers && lo.direction != 0 &&
         center.getLength() > arrowLength * 4) {
       std::stringstream markerName;
-      markerName << e << ":" << route << ":" << i;
+      markerName << e << ":" << line << ":" << i;
 
       std::string markerPathMale = getMarkerPathMale(lineW);
       std::string markerPathFemale = getMarkerPathFemale(lineW);
-      EndMarker emm(markerName.str() + "_m", "#" + route->getColor(),
+      EndMarker emm(markerName.str() + "_m", "#" + line->color(),
                     markerPathMale, lineW, lineW);
-      EndMarker emf(markerName.str() + "_f", "#" + route->getColor(),
+      EndMarker emf(markerName.str() + "_f", "#" + line->color(),
                     markerPathFemale, lineW, lineW);
 
       _markers.push_back(emm);
@@ -500,17 +502,17 @@ void SvgRenderer::renderEdgeTripGeom(const graph::RenderGraph& outG,
       PolyLine<double> secondPart = p.getSegmentAtDist(
           p.getLength() / 2 + arrowLength / 2, p.getLength());
 
-      if (ro.direction == e->getTo()) {
-        renderLinePart(firstPart, lineW, *route, e, markerName.str() + "_m");
-        renderLinePart(secondPart.reversed(), lineW, *route, e,
+      if (lo.direction == e->getTo()) {
+        renderLinePart(firstPart, lineW, *line, e, markerName.str() + "_m");
+        renderLinePart(secondPart.reversed(), lineW, *line, e,
                        markerName.str() + "_f");
       } else {
-        renderLinePart(firstPart, lineW, *route, e, markerName.str() + "_f");
-        renderLinePart(secondPart.reversed(), lineW, *route, e,
+        renderLinePart(firstPart, lineW, *line, e, markerName.str() + "_f");
+        renderLinePart(secondPart.reversed(), lineW, *line, e,
                        markerName.str() + "_m");
       }
     } else {
-      renderLinePart(p, lineW, *route, e);
+      renderLinePart(p, lineW, *line, e);
     }
 
     a++;
@@ -688,7 +690,7 @@ double InnerClique::getZWeight() const {
   ret = geoms.size();  // baseline: threads with more lines to the bottom,
                        // because they are easier to follow
 
-  for (const auto& nf : n->pl().getMainDirs()) {
+  for (const auto& nf : n->pl().fronts()) {
     ret -= getNumBranchesIn(&nf) * BRANCH_WEIGHT;
   }
 

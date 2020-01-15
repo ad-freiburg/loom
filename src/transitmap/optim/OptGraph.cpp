@@ -3,10 +3,10 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <set>
+#include "shared/linegraph/Line.h"
 #include "shared/linegraph/LineGraph.h"
-#include "shared/linegraph/Route.h"
-#include "transitmap/optim/OptGraph.h"
 #include "transitmap/graph/RenderGraph.h"
+#include "transitmap/optim/OptGraph.h"
 #include "util/String.h"
 #include "util/graph/Algorithm.h"
 #include "util/log/Log.h"
@@ -17,11 +17,11 @@ using transitmapper::optim::OptNode;
 using transitmapper::optim::EtgPart;
 using transitmapper::optim::OptEdgePL;
 using transitmapper::optim::OptNodePL;
-using transitmapper::optim::OptRO;
+using transitmapper::optim::OptLO;
 using transitmapper::optim::PartnerPath;
 using transitmapper::graph::RenderGraph;
-using shared::linegraph::RouteOcc;
-using shared::linegraph::Route;
+using shared::linegraph::LineOcc;
+using shared::linegraph::Line;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineEdge;
@@ -62,13 +62,13 @@ EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) {
 }
 
 // _____________________________________________________________________________
-const std::vector<OptRO>& OptEdgePL::getRoutes() const { return routes; }
+const std::vector<OptLO>& OptEdgePL::getLines() const { return lines; }
 
 // _____________________________________________________________________________
-std::vector<OptRO>& OptEdgePL::getRoutes() { return routes; }
+std::vector<OptLO>& OptEdgePL::getLines() { return lines; }
 
 // _____________________________________________________________________________
-size_t OptEdgePL::getCardinality() const { return getRoutes().size(); }
+size_t OptEdgePL::getCardinality() const { return getLines().size(); }
 
 // _____________________________________________________________________________
 std::string OptEdgePL::getStrRepr() const {
@@ -125,8 +125,8 @@ void OptGraph::build() {
         OptEdge* edge = addEdg(from, to);
 
         edge->pl().etgs.push_back(EtgPart(e, e->getTo() == toTn));
-        for (auto roOld : e->pl().getRoutes()) {
-          edge->pl().routes.push_back(OptRO(roOld.route, roOld.direction));
+        for (auto roOld : e->pl().getLines()) {
+          edge->pl().lines.push_back(OptLO(roOld.line, roOld.direction));
         }
       }
     }
@@ -190,24 +190,24 @@ void OptGraph::split() {
 
 // _____________________________________________________________________________
 void OptGraph::partnerLines() {
-  auto partners = getPartnerRoutes();
+  auto partners = getPartnerLines();
 
   for (const auto& p : partners) {
     if (p.partners.size() == 1) continue;
-    std::cout << "Combining " << p.partners.begin()->route->getId() << " and "
-              << p.partners.size() - 1 << " routes." << std::endl;
+    std::cout << "Combining " << p.partners.begin()->line->id() << " and "
+              << p.partners.size() - 1 << " lines." << std::endl;
     for (size_t i = 0; i < p.path.size(); i++) {
-      // TODO: why isnt there a getRoute function f or OptEdgePL?
+      // TODO: why isnt there a getLine function f or OptEdgePL?
       auto e = p.path[i];
-      auto it = e->pl().getRoutes().begin();
-      while (it != e->pl().getRoutes().end()) {
+      auto it = e->pl().getLines().begin();
+      while (it != e->pl().getLines().end()) {
         auto& ro = *it;
         if (ro == *p.partners.begin()) {
           ro.relatives.clear();
-          for (auto partner : p.partners) ro.relatives.push_back(partner.route);
+          for (auto partner : p.partners) ro.relatives.push_back(partner.line);
           if (p.inv[i]) std::reverse(ro.relatives.begin(), ro.relatives.end());
         } else if (p.partners.count(ro)) {
-          it = e->pl().getRoutes().erase(it);
+          it = e->pl().getLines().erase(it);
           continue;
         }
         it++;
@@ -217,45 +217,45 @@ void OptGraph::partnerLines() {
 }
 
 // _____________________________________________________________________________
-std::set<const Route*> OptGraph::getRoutes() const {
-  std::set<const Route*> routes;
+std::set<const Line*> OptGraph::getLines() const {
+  std::set<const Line*> lines;
   // TODO: there has to be a faster way
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
-      for (auto r : e->pl().getRoutes()) {
-        routes.insert(r.route);
+      for (auto l : e->pl().getLines()) {
+        lines.insert(l.line);
       }
     }
   }
 
-  return routes;
+  return lines;
 }
 
 // _____________________________________________________________________________
-Nullable<const OptRO> OptGraph::getRO(const OptEdge* a, const Route* r) {
-  for (auto rt : a->pl().getRoutes())
-    if (rt.route == r) return rt;
-  return Nullable<const OptRO>();
+Nullable<const OptLO> OptGraph::getLO(const OptEdge* a, const Line* r) {
+  for (auto rt : a->pl().getLines())
+    if (rt.line == r) return rt;
+  return Nullable<const OptLO>();
 }
 
 // _____________________________________________________________________________
-std::vector<PartnerPath> OptGraph::getPartnerRoutes() const {
+std::vector<PartnerPath> OptGraph::getPartnerLines() const {
   std::vector<PartnerPath> ret;
 
-  for (auto rt : getRoutes()) {
+  for (auto rt : getLines()) {
     // create connected components w.r.t. route (each component consists only of
     // edges containing route rt)
 
     struct Check : public Algorithm::EdgeCheckFunc<OptNodePL, OptEdgePL> {
-      Check(const Route* r) : rt(r){};
-      const Route* rt;
+      Check(const Line* l) : rt(l){};
+      const Line* rt;
       virtual bool operator()(const OptNode* frNd, const OptEdge* edge) const {
         UNUSED(frNd);
         // TODO: this will put lines not continueing over a particular edge
         // in one component, as only the lines' presence on the edge is checked.
         // Later on, we then cannot follow the edge through the entire path,
         // which may lead to collapsing opportunities being missed.
-        auto ro = getRO(edge, rt);
+        auto ro = getLO(edge, rt);
         return !ro.isNull();
       };
     };
@@ -286,8 +286,7 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
     for (auto e : n->getAdjList()) {
       if (!comp.count(e->getOtherNd(n))) continue;
       compDeg++;
-      pp.partners.insert(e->pl().getRoutes().begin(),
-                         e->pl().getRoutes().end());
+      pp.partners.insert(e->pl().getLines().begin(), e->pl().getLines().end());
     }
     if (compDeg > 2) return PartnerPath();  // not a simple path!
     if (compDeg == 1 && !entry) entry = n;
@@ -297,7 +296,7 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
   if (!entry) entry = *comp.begin();  // we have a cycle, take any node as start
   auto cur = entry;
 
-  std::set<OptRO> notPartner;
+  std::set<OptLO> notPartner;
 
   // backtrack
   while (true) {
@@ -323,13 +322,13 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
       if (e == cntE) continue;
 
       if (pp.path.size()) {
-        auto ctdRoutes = getCtdRoutesIn(pp.path.back(), e);
-        notPartner.insert(ctdRoutes.begin(), ctdRoutes.end());
+        auto ctdLines = getCtdLinesIn(pp.path.back(), e);
+        notPartner.insert(ctdLines.begin(), ctdLines.end());
       }
 
       if (cntE) {
-        auto ctdRoutes = getCtdRoutesIn(e, cntE);
-        notPartner.insert(ctdRoutes.begin(), ctdRoutes.end());
+        auto ctdLines = getCtdLinesIn(e, cntE);
+        notPartner.insert(ctdLines.begin(), ctdLines.end());
       }
     }
 
@@ -337,14 +336,14 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
     if (!cntE) break;
 
     if (pp.path.size()) {
-      auto ctd = getCtdRoutesIn(pp.path.back(), cntE);
-      std::set<OptRO> newPartners;
+      auto ctd = getCtdLinesIn(pp.path.back(), cntE);
+      std::set<OptLO> newPartners;
       for (auto ctdRt : ctd) {
         if (pp.partners.count(ctdRt)) newPartners.insert(ctdRt);
       }
       pp.partners = newPartners;
     } else {
-      auto ctd = cntE->pl().getRoutes();
+      auto ctd = cntE->pl().getLines();
       pp.partners.insert(ctd.begin(), ctd.end());
     }
 
@@ -436,7 +435,7 @@ bool OptGraph::simplifyStep() {
         if (!cheaper) continue;
       }
 
-      if (dirRouteEqualIn(first, second)) {
+      if (dirLineEqualIn(first, second)) {
         OptNode* newFrom = 0;
         OptNode* newTo = 0;
 
@@ -480,10 +479,10 @@ bool OptGraph::simplifyStep() {
 
         newEdge->pl().depth = std::max(first->pl().depth, second->pl().depth);
 
-        newEdge->pl().routes = first->pl().routes;
+        newEdge->pl().lines = first->pl().lines;
 
         // update direction markers
-        for (auto& ro : newEdge->pl().routes) {
+        for (auto& ro : newEdge->pl().lines) {
           if (ro.direction == n->pl().node) ro.direction = newTo->pl().node;
         }
 
@@ -513,7 +512,7 @@ size_t OptGraph::getNumNodes() const { return getNds().size(); }
 size_t OptGraph::getNumNodes(bool topo) const {
   size_t ret = 0;
   for (auto n : getNds()) {
-    if ((n->pl().node->pl().getStops().size() == 0) ^ !topo) ret++;
+    if ((n->pl().node->pl().stops().size() == 0) ^ !topo) ret++;
   }
 
   return ret;
@@ -534,19 +533,19 @@ size_t OptGraph::getNumEdges() const {
 }
 
 // _____________________________________________________________________________
-size_t OptGraph::getNumRoutes() const {
-  std::set<const Route*> routes;
+size_t OptGraph::getNumLines() const {
+  std::set<const Line*> lines;
 
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      for (const auto& to : getFirstEdg(e).etg->pl().getRoutes()) {
-        routes.insert(to.route);
+      for (const auto& to : getFirstEdg(e).etg->pl().getLines()) {
+        lines.insert(to.line);
       }
     }
   }
 
-  return routes.size();
+  return lines.size();
 }
 
 // _____________________________________________________________________________
@@ -555,8 +554,8 @@ size_t OptGraph::getMaxCardinality() const {
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      if (getFirstEdg(e).etg->pl().getRoutes().size() > ret) {
-        ret = getFirstEdg(e).etg->pl().getRoutes().size();
+      if (getFirstEdg(e).etg->pl().getLines().size() > ret) {
+        ret = getFirstEdg(e).etg->pl().getLines().size();
       }
     }
   }
@@ -572,13 +571,13 @@ util::json::Dict OptEdgePL::getAttrs() {
   util::json::Dict ret;
   std::string lines;
 
-  for (const auto& r : getRoutes()) {
+  for (const auto& r : getLines()) {
     if (r.relatives.size() > 1)
-      lines += r.route->getLabel() + "(x" + util::toString(r.relatives.size()) +
-               ")" + "[" + r.route->getColor() + ", -> " +
+      lines += r.line->label() + "(x" + util::toString(r.relatives.size()) +
+               ")" + "[" + r.line->color() + ", -> " +
                util::toString(r.direction) + "], ";
     else
-      lines += r.route->getLabel() + "[" + r.route->getColor() + ", -> " +
+      lines += r.line->label() + "[" + r.line->color() + ", -> " +
                util::toString(r.direction) + "], ";
   }
 
@@ -592,13 +591,13 @@ util::json::Dict OptEdgePL::getAttrs() {
 // _____________________________________________________________________________
 std::string OptEdgePL::toStr() const {
   std::string lines;
-  for (const auto& r : getRoutes()) {
+  for (const auto& r : getLines()) {
     if (r.relatives.size() > 1)
-      lines += r.route->getLabel() + "(x" + util::toString(r.relatives.size()) +
-               ")" + "[" + r.route->getColor() + ", -> " +
+      lines += r.line->label() + "(x" + util::toString(r.relatives.size()) +
+               ")" + "[" + r.line->color() + ", -> " +
                util::toString(r.direction) + "], ";
     else
-      lines += r.route->getLabel() + "[" + r.route->getColor() + ", -> " +
+      lines += r.line->label() + "[" + r.line->color() + ", -> " +
                util::toString(r.direction) + "], ";
   }
 
@@ -615,8 +614,8 @@ util::json::Dict OptNodePL::getAttrs() {
   if (!node) {
     ret["stat_name"] = "<dummy>";
   } else {
-    if (node->pl().getStops().size()) {
-      ret["stat_name"] = node->pl().getStops()[0].name;
+    if (node->pl().stops().size()) {
+      ret["stat_name"] = node->pl().stops()[0].name;
     } else {
       ret["stat_name"] = "";
     }
@@ -638,7 +637,7 @@ std::pair<OptEdge*, OptEdge*> OptGraph::isFullCross(OptNode* n) const {
   for (auto ea : n->getAdjList()) {
     for (auto eb : n->getAdjList()) {
       if (ea == eb) continue;
-      if (dirRouteContains(eb, ea) && dirRouteContains(ea, eb)) {
+      if (dirLineContains(eb, ea) && dirLineContains(ea, eb)) {
         ret.first = ea;
         ret.second = eb;
       }
@@ -765,7 +764,7 @@ bool OptGraph::untanglePartialYStep() {
           pl = getPartialView(ea, minLgs[j], offset);
           addEdg(origNds[j], nb, pl);
         }
-        offset += pl.getRoutes().size();
+        offset += pl.getLines().size();
       }
 
       // delete remaining stuff
@@ -864,7 +863,7 @@ bool OptGraph::untangleStumpStep() {
           }
           if (dirContinuedOver(stumpLegs[j], mainLeg, stumpEdg))
             mainLegNode = j;
-          offset += pl.getRoutes().size();
+          offset += pl.getLines().size();
         }
 
         if (stumpEdg->getFrom() == stumpN)
@@ -945,7 +944,7 @@ bool OptGraph::untangleYStep() {
           pl = getView(ea, minLgs[j], offset);
           addEdg(origNds[j], centerNds[j], pl);
         }
-        offset += pl.getRoutes().size();
+        offset += pl.getLines().size();
       }
 
       // delete remaining stuff
@@ -972,18 +971,18 @@ OptEdgePL OptGraph::getView(OptEdge* parent, OptEdge* leg, size_t offset) {
 
   for (auto& etg : ret.etgs) {
     if (parent->pl().etgs[0].dir ^ etg.dir)
-      etg.order += parent->pl().getRoutes().size() -
-                   leg->pl().getRoutes().size() - offset;
+      etg.order +=
+          parent->pl().getLines().size() - leg->pl().getLines().size() - offset;
     else
       etg.order += offset;
   }
 
-  ret.routes.clear();
+  ret.lines.clear();
 
-  for (auto ro : leg->pl().getRoutes()) {
-    auto routes = getCtdRoutesIn(ro.route, ro.direction, leg, parent);
+  for (auto ro : leg->pl().getLines()) {
+    auto lines = getCtdLinesIn(ro.line, ro.direction, leg, parent);
     assert(sharedNode(leg, parent));
-    ret.routes.insert(ret.routes.begin(), routes.begin(), routes.end());
+    ret.lines.insert(ret.lines.begin(), lines.begin(), lines.end());
   }
 
   return ret;
@@ -995,21 +994,21 @@ OptEdgePL OptGraph::getPartialView(OptEdge* parent, OptEdge* leg,
   OptEdgePL ret(parent->pl());
   ret.depth++;
 
-  auto ctdR = getCtdRoutesIn(parent, leg);
+  auto ctdR = getCtdLinesIn(parent, leg);
   size_t shared = ctdR.size();
 
   for (auto& etg : ret.etgs) {
     if (parent->pl().etgs[0].dir ^ etg.dir)
-      etg.order += parent->pl().getRoutes().size() - shared - offset;
+      etg.order += parent->pl().getLines().size() - shared - offset;
     else
       etg.order += offset;
   }
 
-  ret.routes.clear();
+  ret.lines.clear();
 
-  for (auto ro : leg->pl().getRoutes()) {
-    auto routes = getCtdRoutesIn(ro.route, ro.direction, leg, parent);
-    ret.routes.insert(ret.routes.begin(), routes.begin(), routes.end());
+  for (auto ro : leg->pl().getLines()) {
+    auto routes = getCtdLinesIn(ro.line, ro.direction, leg, parent);
+    ret.lines.insert(ret.lines.begin(), routes.begin(), routes.end());
   }
 
   return ret;
@@ -1083,7 +1082,7 @@ bool OptGraph::untanglePartialDogBoneStep() {
             pl = getPartialView(mainLeg, refLegs[j], offset);
             addEdg(notPartN, partNds[toB[j]], pl);
           }
-          offset += pl.getRoutes().size();
+          offset += pl.getLines().size();
         }
 
         // delete remaining stuff
@@ -1191,7 +1190,7 @@ bool OptGraph::untangleDogBoneStep() {
             pl = getView(mainLeg, refLegs[j], offset);
             addEdg(bNds[toA[j]], aNds[toB[j]], pl);
           }
-          offset += pl.getRoutes().size();
+          offset += pl.getLines().size();
         }
 
         // delete remaining stuff
@@ -1239,12 +1238,12 @@ void OptGraph::updateEdgeOrder(OptNode* n) {
 }
 
 // _____________________________________________________________________________
-bool OptGraph::dirRouteEndsIn(const OptEdge* a, const OptEdge* b) {
+bool OptGraph::dirLineEndsIn(const OptEdge* a, const OptEdge* b) {
   OptNode* na = sharedNode(a, b);
   if (!na) return false;
   OptNode* nb = b->getOtherNd(na);
 
-  for (auto& to : b->pl().getRoutes()) {
+  for (auto& to : b->pl().getLines()) {
     if (!dirContinuedOver(to, b, a)) continue;
 
     for (auto c : nb->getAdjList()) {
@@ -1256,9 +1255,9 @@ bool OptGraph::dirRouteEndsIn(const OptEdge* a, const OptEdge* b) {
 }
 
 // _____________________________________________________________________________
-bool OptGraph::dirRouteContains(const OptEdge* a, const OptEdge* b) {
-  for (auto& to : b->pl().getRoutes()) {
-    if (!getCtdRoutesIn(to.route, to.direction, b, a).size()) {
+bool OptGraph::dirLineContains(const OptEdge* a, const OptEdge* b) {
+  for (auto& to : b->pl().getLines()) {
+    if (!getCtdLinesIn(to.line, to.direction, b, a).size()) {
       return false;
     }
   }
@@ -1266,19 +1265,19 @@ bool OptGraph::dirRouteContains(const OptEdge* a, const OptEdge* b) {
 }
 
 // _____________________________________________________________________________
-bool OptGraph::dirRouteEqualIn(const OptEdge* a, const OptEdge* b) {
+bool OptGraph::dirLineEqualIn(const OptEdge* a, const OptEdge* b) {
   if (a->pl().getCardinality() != b->pl().getCardinality()) {
     return false;
   }
 
-  for (auto& to : a->pl().getRoutes()) {
-    if (!getSameDirRoutesIn(to.route, to.direction, a, b).size()) {
+  for (auto& to : a->pl().getLines()) {
+    if (!getSameDirLinesIn(to.line, to.direction, a, b).size()) {
       return false;
     }
   }
 
-  for (auto& to : b->pl().getRoutes()) {
-    if (!getSameDirRoutesIn(to.route, to.direction, b, a).size()) {
+  for (auto& to : b->pl().getLines()) {
+    if (!getSameDirLinesIn(to.line, to.direction, b, a).size()) {
       return false;
     }
   }
@@ -1386,7 +1385,7 @@ std::vector<OptEdge*> OptGraph::branchesAt(OptEdge* e, OptNode* n) const {
 
   for (OptEdge* ea : n->getAdjList()) {
     if (ea == e) continue;
-    if (!dirRouteContains(e, ea)) return std::vector<OptEdge*>();
+    if (!dirLineContains(e, ea)) return std::vector<OptEdge*>();
     c += ea->pl().getCardinality();
     ret.push_back(ea);
   }
@@ -1410,7 +1409,7 @@ std::vector<OptEdge*> OptGraph::partiallyBranchesAt(OptEdge* eMain,
   bool branches = false;
   OptEdge* first = 0;
 
-  for (auto ro : eMain->pl().getRoutes()) {
+  for (auto ro : eMain->pl().getLines()) {
     bool found = false;
 
     for (OptEdge* e : n->getAdjList()) {
@@ -1422,7 +1421,7 @@ std::vector<OptEdge*> OptGraph::partiallyBranchesAt(OptEdge* eMain,
         found = true;
         if (first && first != e) branches = true;
         if (!first) first = e;
-        if (!onlyPartial && !dirRouteContains(eMain, e)) onlyPartial = true;
+        if (!onlyPartial && !dirLineContains(eMain, e)) onlyPartial = true;
         ret.insert(e);
       } else {
         onlyPartial = true;
@@ -1479,9 +1478,9 @@ bool OptGraph::dirContinuedOver(const OptEdge* a, const OptEdge* b,
   OptNode* bc = sharedNode(b, c);
   if (!ab || !bc) return false;
 
-  for (auto& to : a->pl().getRoutes()) {
-    for (auto& too : getCtdRoutesIn(to.route, to.direction, a, b)) {
-      if (!getCtdRoutesIn(too.route, too.direction, b, c).size()) return false;
+  for (auto& to : a->pl().getLines()) {
+    for (auto& too : getCtdLinesIn(to.line, to.direction, a, b)) {
+      if (!getCtdLinesIn(too.line, too.direction, b, c).size()) return false;
     }
   }
   return true;
@@ -1492,24 +1491,24 @@ bool OptGraph::dirPartialContinuedOver(const OptEdge* a, const OptEdge* b) {
   OptNode* ab = sharedNode(a, b);
   if (!ab) return false;
 
-  for (auto& to : a->pl().getRoutes()) {
-    if (getCtdRoutesIn(to.route, to.direction, a, b).size()) return true;
+  for (auto& to : a->pl().getLines()) {
+    if (getCtdLinesIn(to.line, to.direction, a, b).size()) return true;
   }
 
   return false;
 }
 
 // _____________________________________________________________________________
-bool OptGraph::dirContinuedOver(const OptRO& ro, const OptEdge* a,
+bool OptGraph::dirContinuedOver(const OptLO& ro, const OptEdge* a,
                                 const OptEdge* b) {
   OptNode* ab = sharedNode(a, b);
   if (!ab) return false;
 
-  return getCtdRoutesIn(ro.route, ro.direction, a, b).size();
+  return getCtdLinesIn(ro.line, ro.direction, a, b).size();
 }
 
 // _____________________________________________________________________________
-bool OptGraph::dirContinuedOver(const OptRO& ro, const OptEdge* a,
+bool OptGraph::dirContinuedOver(const OptLO& ro, const OptEdge* a,
                                 const OptNode* n) {
   for (auto e : n->getAdjList()) {
     if (e == a) continue;
@@ -1528,16 +1527,16 @@ OptNode* OptGraph::sharedNode(const OptEdge* a, const OptEdge* b) {
 }
 
 // _____________________________________________________________________________
-std::vector<OptRO> OptGraph::getSameDirRoutesIn(const Route* r,
-                                                const LineNode* dir,
-                                                const OptEdge* fromEdge,
-                                                const OptEdge* toEdge) {
-  std::vector<OptRO> ret;
+std::vector<OptLO> OptGraph::getSameDirLinesIn(const Line* r,
+                                               const LineNode* dir,
+                                               const OptEdge* fromEdge,
+                                               const OptEdge* toEdge) {
+  std::vector<OptLO> ret;
   const OptNode* n = sharedNode(fromEdge, toEdge);
   if (!n || !n->pl().node || n->getDeg() == 1) return ret;
 
-  for (const OptRO& to : toEdge->pl().getRoutes()) {
-    if (to.route == r) {
+  for (const OptLO& to : toEdge->pl().getLines()) {
+    if (to.line == r) {
       if ((to.direction == 0 && dir == 0) ||
           (to.direction == n->pl().node && dir != 0 && dir != n->pl().node) ||
           (to.direction != n->pl().node && to.direction != 0 &&
@@ -1554,13 +1553,13 @@ std::vector<OptRO> OptGraph::getSameDirRoutesIn(const Route* r,
 }
 
 // _____________________________________________________________________________
-bool OptGraph::hasCtdRoutesIn(const Route* r, const LineNode* dir,
-                              const OptEdge* fromEdge, const OptEdge* toEdge) {
+bool OptGraph::hasCtdLinesIn(const Line* r, const LineNode* dir,
+                             const OptEdge* fromEdge, const OptEdge* toEdge) {
   const OptNode* n = sharedNode(fromEdge, toEdge);
   if (!n || !n->pl().node || n->getDeg() == 1) return false;
 
-  for (const OptRO& to : toEdge->pl().getRoutes()) {
-    if (to.route == r) {
+  for (const OptLO& to : toEdge->pl().getLines()) {
+    if (to.line == r) {
       if (to.direction == 0 || dir == 0 ||
           (to.direction == n->pl().node && dir != n->pl().node) ||
           (to.direction != n->pl().node && dir == n->pl().node)) {
@@ -1576,15 +1575,15 @@ bool OptGraph::hasCtdRoutesIn(const Route* r, const LineNode* dir,
 }
 
 // _____________________________________________________________________________
-std::vector<OptRO> OptGraph::getCtdRoutesIn(const Route* r, const LineNode* dir,
-                                            const OptEdge* fromEdge,
-                                            const OptEdge* toEdge) {
-  std::vector<OptRO> ret;
+std::vector<OptLO> OptGraph::getCtdLinesIn(const Line* r, const LineNode* dir,
+                                           const OptEdge* fromEdge,
+                                           const OptEdge* toEdge) {
+  std::vector<OptLO> ret;
   const OptNode* n = sharedNode(fromEdge, toEdge);
   if (!n || !n->pl().node || n->getDeg() == 1) return ret;
 
-  for (const OptRO& to : toEdge->pl().getRoutes()) {
-    if (to.route == r) {
+  for (const OptLO& to : toEdge->pl().getLines()) {
+    if (to.line == r) {
       if (to.direction == 0 || dir == 0 ||
           (to.direction == n->pl().node && dir != n->pl().node) ||
           (to.direction != n->pl().node && dir == n->pl().node)) {
@@ -1600,14 +1599,14 @@ std::vector<OptRO> OptGraph::getCtdRoutesIn(const Route* r, const LineNode* dir,
 }
 
 // _____________________________________________________________________________
-std::vector<OptRO> OptGraph::getCtdRoutesIn(const OptEdge* fromEdge,
-                                            const OptEdge* toEdge) {
-  std::vector<OptRO> ret;
+std::vector<OptLO> OptGraph::getCtdLinesIn(const OptEdge* fromEdge,
+                                           const OptEdge* toEdge) {
+  std::vector<OptLO> ret;
   const OptNode* n = sharedNode(fromEdge, toEdge);
   if (!n || !n->pl().node) return ret;
 
-  for (const OptRO& to : fromEdge->pl().getRoutes()) {
-    auto r = getCtdRoutesIn(to.route, to.direction, fromEdge, toEdge);
+  for (const OptLO& to : fromEdge->pl().getLines()) {
+    auto r = getCtdLinesIn(to.line, to.direction, fromEdge, toEdge);
     ret.insert(ret.end(), r.begin(), r.end());
   }
 

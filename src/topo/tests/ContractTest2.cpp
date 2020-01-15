@@ -45,23 +45,23 @@ void ContractTest2::run() {
     auto ea = tg.addEdg(e, a, {{{0.5, -.5}, {0.0, 0.0}}});
     auto eb = tg.addEdg(e, b, {{{0.5, -.5}, {0.0, -1.0}}});
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "green");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "green");
 
-    ax->pl().addRoute(&l1, 0);
-    ax->pl().addRoute(&l2, 0);
+    ax->pl().addLine(&l1, 0);
+    ax->pl().addLine(&l2, 0);
 
-    yb->pl().addRoute(&l1, 0);
-    yb->pl().addRoute(&l2, 0);
+    yb->pl().addLine(&l1, 0);
+    yb->pl().addLine(&l2, 0);
 
-    ad->pl().addRoute(&l2, 0);
-    bd->pl().addRoute(&l1, 0);
-    bd->pl().addRoute(&l2, 0);
-    ce->pl().addRoute(&l1, 0);
-    dc->pl().addRoute(&l1, 0);
-    ea->pl().addRoute(&l1, 0);
-    ea->pl().addRoute(&l2, 0);
-    eb->pl().addRoute(&l2, 0);
+    ad->pl().addLine(&l2, 0);
+    bd->pl().addLine(&l1, 0);
+    bd->pl().addLine(&l2, 0);
+    ce->pl().addLine(&l1, 0);
+    dc->pl().addLine(&l1, 0);
+    ea->pl().addLine(&l1, 0);
+    ea->pl().addLine(&l2, 0);
+    eb->pl().addLine(&l2, 0);
 
 
     topo::config::TopoConfig cfg;
@@ -103,20 +103,20 @@ void ContractTest2::run() {
     auto eb = tg.addEdg(e, b, {{{25.0, 10.0}, {20.0, 0.0}}});
     auto ec = tg.addEdg(e, c, {{{25.0, 10.0}, {30.0, 0.0}}});
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "green");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "green");
 
-    ab->pl().addRoute(&l1, b);
-    bc->pl().addRoute(&l1, c);
-    cd->pl().addRoute(&l1, d);
-    eb->pl().addRoute(&l1, e);
-    ec->pl().addRoute(&l1, c);
+    ab->pl().addLine(&l1, b);
+    bc->pl().addLine(&l1, c);
+    cd->pl().addLine(&l1, d);
+    eb->pl().addLine(&l1, e);
+    ec->pl().addLine(&l1, c);
 
-    ab->pl().addRoute(&l2, 0);
-    bc->pl().addRoute(&l2, 0);
-    cd->pl().addRoute(&l2, 0);
-    eb->pl().addRoute(&l2, 0);
-    ec->pl().addRoute(&l2, 0);
+    ab->pl().addLine(&l2, 0);
+    bc->pl().addLine(&l2, 0);
+    cd->pl().addLine(&l2, 0);
+    eb->pl().addLine(&l2, 0);
+    ec->pl().addLine(&l2, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -145,11 +145,11 @@ void ContractTest2::run() {
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {100.0, 0.0}}});
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "green");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "green");
 
-    ab->pl().addRoute(&l1, 0);
-    bc->pl().addRoute(&l2, 0);
+    ab->pl().addLine(&l1, 0);
+    bc->pl().addLine(&l2, 0);
 
     topo::config::TopoConfig cfg;
     topo::MapConstructor mc(&cfg, &tg);

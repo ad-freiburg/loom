@@ -34,11 +34,11 @@ void RestrInfTest::run() {
     auto bc = rg.addEdg(b, c, util::geo::PolyLine<double>({0, 20}, {0, 30}));
     auto cd = rg.addEdg(c, d, util::geo::PolyLine<double>({0, 30}, {0, 40}));
 
-    shared::linegraph::Route l1("1", "1", "red");
+    shared::linegraph::Line l1("1", "1", "red");
 
-    ab->pl().routes.insert(&l1);
-    bc->pl().routes.insert(&l1);
-    cd->pl().routes.insert(&l1);
+    ab->pl().lines.insert(&l1);
+    bc->pl().lines.insert(&l1);
+    cd->pl().lines.insert(&l1);
 
     UNUSED(bc);
 

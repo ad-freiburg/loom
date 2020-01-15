@@ -2,18 +2,18 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "shared/style/LineStyle.h"
+#include "shared/linegraph/Line.h"
 #include "shared/linegraph/LineEdgePL.h"
 #include "shared/linegraph/LineGraph.h"
 #include "shared/linegraph/LineNodePL.h"
-#include "shared/linegraph/Route.h"
+#include "shared/style/LineStyle.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
 
 using util::geo::PolyLine;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineEdgePL;
-using shared::linegraph::RouteOcc;
+using shared::linegraph::LineOcc;
 
 // _____________________________________________________________________________
 LineEdgePL::LineEdgePL() {}
@@ -27,9 +27,7 @@ const util::geo::Line<double>* LineEdgePL::getGeom() const {
 }
 
 // _____________________________________________________________________________
-void LineEdgePL::setGeom(const util::geo::Line<double>& l) {
-  _p = l;
-}
+void LineEdgePL::setGeom(const util::geo::Line<double>& l) { _p = l; }
 
 // _____________________________________________________________________________
 const PolyLine<double>& LineEdgePL::getPolyline() const { return _p; }
@@ -38,11 +36,11 @@ const PolyLine<double>& LineEdgePL::getPolyline() const { return _p; }
 void LineEdgePL::setPolyline(const PolyLine<double>& p) { _p = p; }
 
 // _____________________________________________________________________________
-void LineEdgePL::addRoute(const Route* r, const LineNode* dir,
+void LineEdgePL::addLine(const Line* r, const LineNode* dir,
                           util::Nullable<shared::style::LineStyle> ls) {
-  RouteOcc occ(r, dir, ls);
-  auto f = _routes.find(occ);
-  if (f != _routes.end()) {
+  LineOcc occ(r, dir, ls);
+  auto f = _lines.find(occ);
+  if (f != _lines.end()) {
     const auto& prev = *f;
     // the route is already present in both directions, ignore newly inserted
     if (prev.direction == 0) return;
@@ -53,28 +51,28 @@ void LineEdgePL::addRoute(const Route* r, const LineNode* dir,
     // the route is already present in the other direction, make two-way
     if (prev.direction != dir) {
       occ.direction = 0;
-      _routes.erase(f);
+      _lines.erase(f);
     }
   }
-  _routes.insert(occ);
+  _lines.insert(occ);
 }
 
 // _____________________________________________________________________________
-void LineEdgePL::addRoute(const Route* r, const LineNode* dir) {
-  addRoute(r, dir, util::Nullable<shared::style::LineStyle>());
+void LineEdgePL::addLine(const Line* r, const LineNode* dir) {
+  addLine(r, dir, util::Nullable<shared::style::LineStyle>());
 }
 
 // _____________________________________________________________________________
-void LineEdgePL::delRoute(const Route* r) {
-  RouteOcc occ(r, 0);
-  _routes.erase(occ);
+void LineEdgePL::delLine(const Line* r) {
+  LineOcc occ(r, 0);
+  _lines.erase(occ);
 }
 
 // _____________________________________________________________________________
-const std::set<RouteOcc>& LineEdgePL::getRoutes() const { return _routes; }
+const std::set<LineOcc>& LineEdgePL::getLines() const { return _lines; }
 
 // _____________________________________________________________________________
-std::set<RouteOcc>& LineEdgePL::getRoutes() { return _routes; }
+std::set<LineOcc>& LineEdgePL::getLines() { return _lines; }
 
 // _____________________________________________________________________________
 util::json::Dict LineEdgePL::getAttrs() const {
@@ -84,17 +82,17 @@ util::json::Dict LineEdgePL::getAttrs() const {
   std::string dbg_lines = "";
   bool first = true;
 
-  for (auto r : getRoutes()) {
+  for (auto r : getLines()) {
     auto route = util::json::Dict();
-    route["id"] = r.route->getId();
-    route["label"] = r.route->getLabel();
-    route["color"] = r.route->getColor();
+    route["id"] = r.line->id();
+    route["label"] = r.line->label();
+    route["color"] = r.line->color();
 
     if (r.direction != 0) {
       route["direction"] = util::toString(r.direction);
-      dbg_lines += (first ? "" : "$") + r.route->getLabel() + ">";
+      dbg_lines += (first ? "" : "$") + r.line->label() + ">";
     } else {
-      dbg_lines += (first ? "" : "$") + r.route->getLabel();
+      dbg_lines += (first ? "" : "$") + r.line->label();
     }
 
     arr.push_back(route);
@@ -108,28 +106,28 @@ util::json::Dict LineEdgePL::getAttrs() const {
 }
 
 // _____________________________________________________________________________
-bool LineEdgePL::hasRoute(const Route* r) const {
-  return _routes.count(RouteOcc(r, 0)) > 0;
+bool LineEdgePL::hasLine(const Line* r) const {
+  return _lines.count(LineOcc(r, 0)) > 0;
 }
 
 // _____________________________________________________________________________
-const RouteOcc& LineEdgePL::getRouteOcc(const Route* r) const {
-  return *_routes.find(RouteOcc(r, 0));
+const LineOcc& LineEdgePL::lineOcc(const Line* r) const {
+  return *_lines.find(LineOcc(r, 0));
 }
 
 // _____________________________________________________________________________
-const RouteOcc& LineEdgePL::routeOccAtPos(size_t i) const {
-  auto it = _routes.begin();
+const LineOcc& LineEdgePL::lineOccAtPos(size_t i) const {
+  auto it = _lines.begin();
   for (size_t j = 0; j < i; j++) it++;
   return *it;
 }
 
 // _____________________________________________________________________________
-size_t LineEdgePL::getRoutePosUnder(
-    const Route* r, const std::vector<size_t> ordering) const {
+size_t LineEdgePL::linePosUnder(const Line* r,
+                                const std::vector<size_t> ordering) const {
   size_t i = 0;
-  for (const RouteOcc& ro : _routes) {
-    if (ro.route == r) {
+  for (const LineOcc& lo : _lines) {
+    if (lo.line == r) {
       size_t pos =
           std::find(ordering.begin(), ordering.end(), i) - ordering.begin();
       return pos;
@@ -141,10 +139,10 @@ size_t LineEdgePL::getRoutePosUnder(
 }
 
 // _____________________________________________________________________________
-size_t LineEdgePL::getRoutePos(const Route* r) const {
+size_t LineEdgePL::linePos(const Line* r) const {
   size_t i = 0;
-  for (const RouteOcc& ro : _routes) {
-    if (ro.route == r) return i;
+  for (const LineOcc& ro : _lines) {
+    if (ro.line == r) return i;
     i++;
   }
   return -1;

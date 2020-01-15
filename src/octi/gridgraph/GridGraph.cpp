@@ -313,10 +313,10 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
 
   for (int i = 0; i < 8; i++) {
     if (!out[i]) continue;
-    for (auto ro : e->pl().getChilds().front()->pl().getRoutes()) {
+    for (auto lo : e->pl().getChilds().front()->pl().getLines()) {
       // TODO: turn restrictions, if there is actually no connection
       // between the lines on the edges, dont penalize!!
-      if (out[i]->pl().getChilds().front()->pl().hasRoute(ro.route)) {
+      if (out[i]->pl().getChilds().front()->pl().hasLine(lo.line)) {
         for (int j = 0; j < 8; j++) {
           // determine angle between port i and j
 

@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 #include "Renderer.h"
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/RenderGraph.h"
 #include "transitmap/optim/Scorer.h"
@@ -36,11 +36,11 @@ class SvgRendererException : public std::exception {
 
 struct InnerClique {
   InnerClique(const shared::linegraph::LineNode* n,
-              shared::linegraph::InnerGeometry geom)
+              shared::linegraph::InnerGeom geom)
       : n(n) {
     geoms.push_back(geom);
   };
-  std::vector<shared::linegraph::InnerGeometry> geoms;
+  std::vector<shared::linegraph::InnerGeom> geoms;
 
   double getZWeight() const;
   size_t getNumBranchesIn(const shared::linegraph::NodeFront* front) const;
@@ -129,11 +129,11 @@ class SvgRenderer : public Renderer {
                              const RenderParams& params);
 
   void renderLinePart(const util::geo::PolyLine<double> p, double width,
-                      const shared::linegraph::Route& route,
+                      const shared::linegraph::Line& line,
                       const shared::linegraph::LineEdge* e);
 
   void renderLinePart(const util::geo::PolyLine<double> p, double width,
-                      const shared::linegraph::Route& route,
+                      const shared::linegraph::Line& line,
                       const shared::linegraph::LineEdge* edge,
                       const std::string& endMarker);
 
@@ -145,20 +145,19 @@ class SvgRenderer : public Renderer {
 
   std::multiset<InnerClique> getInnerCliques(
       const shared::linegraph::LineNode* n,
-      std::vector<shared::linegraph::InnerGeometry> geoms, size_t level) const;
+      std::vector<shared::linegraph::InnerGeom> geoms, size_t level) const;
 
   void renderClique(const InnerClique& c,
                     const shared::linegraph::LineNode* node);
 
-  bool isNextTo(const shared::linegraph::InnerGeometry& a,
-                const shared::linegraph::InnerGeometry b) const;
-  bool hasSameOrigin(const shared::linegraph::InnerGeometry& a,
-                     const shared::linegraph::InnerGeometry b) const;
+  bool isNextTo(const shared::linegraph::InnerGeom& a,
+                const shared::linegraph::InnerGeom b) const;
+  bool hasSameOrigin(const shared::linegraph::InnerGeom& a,
+                     const shared::linegraph::InnerGeom b) const;
 
-  size_t getNextPartner(
-      const InnerClique& forGeom,
-      const std::vector<shared::linegraph::InnerGeometry>& pool,
-      size_t level) const;
+  size_t getNextPartner(const InnerClique& forGeom,
+                        const std::vector<shared::linegraph::InnerGeom>& pool,
+                        size_t level) const;
 
   std::string getMarkerPathMale(double w) const;
   std::string getMarkerPathFemale(double w) const;

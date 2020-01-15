@@ -34,15 +34,15 @@ start:
       if (e1->pl().getPolyline().getLength() < d) {
         if (e1->getOtherNd(n1)->getAdjList().size() > 1 &&
             n1->getAdjList().size() > 1 &&
-            (n1->pl().getStops().size() == 0 ||
-             e1->getOtherNd(n1)->pl().getStops().size() == 0)) {
+            (n1->pl().stops().size() == 0 ||
+             e1->getOtherNd(n1)->pl().stops().size() == 0)) {
           auto otherP = e1->getFrom()->pl().getGeom();
           auto newGeom =
               DPoint((n1->pl().getGeom()->getX() + otherP->getX()) / 2,
                      (n1->pl().getGeom()->getY() + otherP->getY()) / 2);
           LineNode* n = 0;
 
-          if (e1->getTo()->pl().getStops().size() > 0) {
+          if (e1->getTo()->pl().stops().size() > 0) {
             n = g->mergeNds(e1->getFrom(), e1->getTo());
           } else {
             n = g->mergeNds(e1->getTo(), e1->getFrom());
@@ -91,11 +91,10 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
 }
 
 // _____________________________________________________________________________
-double Octilinearizer::draw(LineGraph* tg, LineGraph* outTg,
-                            GridGraph** retGg, const Penalties& pens,
-                            double gridSize, double borderRad, bool deg2heur,
-                            double maxGrDist, bool restrLocSearch,
-                            double enfGeoPen) {
+double Octilinearizer::draw(LineGraph* tg, LineGraph* outTg, GridGraph** retGg,
+                            const Penalties& pens, double gridSize,
+                            double borderRad, bool deg2heur, double maxGrDist,
+                            bool restrLocSearch, double enfGeoPen) {
   removeEdgesShorterThan(tg, gridSize / 2);
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();

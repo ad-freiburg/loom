@@ -8,7 +8,7 @@
 #include <map>
 #include <set>
 #include "shared/linegraph/LineGraph.h"
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 #include "util/graph/DirGraph.h"
 
 namespace topo {
@@ -20,7 +20,7 @@ struct RestrNodePL;
 typedef util::graph::Node<RestrNodePL, RestrEdgePL> RestrNode;
 typedef util::graph::Edge<RestrNodePL, RestrEdgePL> RestrEdge;
 
-typedef std::map<const shared::linegraph::Route*,
+typedef std::map<const shared::linegraph::Line*,
                  std::map<const RestrEdge*, std::set<const RestrEdge*>>>
     ConnEx;
 
@@ -35,7 +35,7 @@ struct RestrNodePL {
 struct RestrEdgePL {
   RestrEdgePL(const util::geo::PolyLine<double>& geom) : geom(geom){};
   util::geo::PolyLine<double> geom;
-  std::set<const shared::linegraph::Route*> routes;
+  std::set<const shared::linegraph::Line*> lines;
 
   const util::geo::Line<double>* getGeom() const { return &geom.getLine(); }
   util::json::Dict getAttrs() const {
@@ -45,15 +45,15 @@ struct RestrEdgePL {
     std::string dbg_lines = "";
     bool first = true;
 
-    for (auto r : routes) {
-      auto route = util::json::Dict();
-      route["id"] = r->getId();
-      route["label"] = r->getLabel();
-      route["color"] = r->getColor();
+    for (auto l : lines) {
+      auto line = util::json::Dict();
+      line["id"] = l->id();
+      line["label"] = l->label();
+      line["color"] = l->color();
 
-      dbg_lines += (first ? "" : "$") + r->getLabel();
+      dbg_lines += (first ? "" : "$") + l->label();
 
-      arr.push_back(route);
+      arr.push_back(line);
       first = false;
     }
 

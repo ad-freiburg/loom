@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <unordered_map>
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 #include "transitmap/optim/ExhaustiveOptimizer.h"
 #include "util/log/Log.h"
 
@@ -12,12 +12,11 @@ using namespace transitmapper;
 using namespace optim;
 using namespace transitmapper::graph;
 using transitmapper::optim::ExhaustiveOptimizer;
-using shared::linegraph::Route;
+using shared::linegraph::Line;
 
 // _____________________________________________________________________________
 int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                      HierarOrderCfg* hc,
-                                      size_t depth) const {
+                                      HierarOrderCfg* hc, size_t depth) const {
   LOG(DEBUG) << prefix(depth)
              << "(ExhaustiveOptimizer) Optimizing component with " << g.size()
              << " nodes.";
@@ -75,7 +74,8 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
     if (!running) break;
 
     double curScore = _optScorer.getCrossingScore(og, g, cur);
-    if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, g, cur);
+    if (_cfg->splittingOpt)
+      curScore += _optScorer.getSplittingScore(og, g, cur);
 
     if (curScore < bestScore) {
       bestScore = curScore;
@@ -99,15 +99,14 @@ void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
-                                        OptOrderCfg* cfg,
-                                        bool sorted) const {
+                                        OptOrderCfg* cfg, bool sorted) const {
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      (*cfg)[e] = std::vector<const Route*>(e->pl().getCardinality());
+      (*cfg)[e] = std::vector<const Line*>(e->pl().getCardinality());
       size_t p = 0;
-      for (size_t i = 0; i < e->pl().getRoutes().size(); i++) {
-        (*cfg)[e][p] = e->pl().getRoutes()[i].route;
+      for (size_t i = 0; i < e->pl().getLines().size(); i++) {
+        (*cfg)[e][p] = e->pl().getLines()[i].line;
         p++;
       }
 
@@ -130,15 +129,15 @@ void ExhaustiveOptimizer::writeHierarch(OptOrderCfg* cfg,
       if (etgp.wasCut) continue;
       for (auto r : ep.second) {
         // get the corresponding route occurance in the opt graph edge
-        // TODO: replace this as soon as a lookup function is present in OptRO
-        OptRO optRO;
-        for (auto ro : e->pl().getRoutes()) {
-          if (r == ro.route) optRO = ro;
+        // TODO: replace this as soon as a lookup function is present in OptLO
+        OptLO optRO;
+        for (auto ro : e->pl().getLines()) {
+          if (r == ro.line) optRO = ro;
         }
 
         for (auto rel : optRO.relatives) {
-          // retrieve the original route pos
-          size_t p = etgp.etg->pl().getRoutePos(rel);
+          // retrieve the original line pos
+          size_t p = etgp.etg->pl().linePos(rel);
           if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
             (*hc)[etgp.etg][etgp.order].insert(
                 (*hc)[etgp.etg][etgp.order].begin(), p);

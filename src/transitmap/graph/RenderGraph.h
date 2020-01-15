@@ -13,7 +13,7 @@
 #include <string>
 
 #include "shared/linegraph/LineGraph.h"
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 #include "transitmap/graph/OrderCfg.h"
 #include "transitmap/graph/Penalties.h"
 #include "util/geo/Geo.h"
@@ -23,15 +23,15 @@ namespace graph {
 
 class RenderGraph : public shared::linegraph::LineGraph {
  public:
-  RenderGraph(double defaultLineWidth, double defaultLineSpacing)
-      : _defWidth(defaultLineWidth), _defSpacing(defaultLineSpacing){};
+  RenderGraph(double defLineWidth, double defLineSpace)
+      : _defWidth(defLineWidth), _defSpacing(defLineSpace){};
 
   const OrderCfg& getConfig() const;
   void setConfig(const OrderCfg&);
 
   size_t numEdgs() const;
 
-  std::vector<shared::linegraph::InnerGeometry> innerGeoms(
+  std::vector<shared::linegraph::InnerGeom> innerGeoms(
       const shared::linegraph::LineNode* n, const OrderCfg& c,
       double prec) const;
 
@@ -50,7 +50,7 @@ class RenderGraph : public shared::linegraph::LineGraph {
   size_t getMaxNdFrontCard(const shared::linegraph::LineNode* n) const;
 
   util::geo::DPoint linePosOn(const shared::linegraph::NodeFront& nf,
-                              const shared::linegraph::Route* r,
+                              const shared::linegraph::Line* r,
                               const OrderCfg& c, bool origGeom) const;
 
   util::geo::DPoint linePosOn(const shared::linegraph::NodeFront& nf,
@@ -62,21 +62,21 @@ class RenderGraph : public shared::linegraph::LineGraph {
 
   OrderCfg _config;
 
-  shared::linegraph::InnerGeometry getInnerBezier(
+  shared::linegraph::InnerGeom getInnerBezier(
       const shared::linegraph::LineNode* n, const OrderCfg& cf,
       const shared::linegraph::Partner& partnerFrom,
       const shared::linegraph::Partner& partnerTo, double prec) const;
 
-  shared::linegraph::InnerGeometry getInnerStraightLine(
+  shared::linegraph::InnerGeom getInnerStraightLine(
       const shared::linegraph::LineNode* n, const OrderCfg& c,
       const shared::linegraph::Partner& partnerFrom,
       const shared::linegraph::Partner& partnerTo) const;
 
-  shared::linegraph::InnerGeometry getTerminusStraightLine(
+  shared::linegraph::InnerGeom getTerminusStraightLine(
       const shared::linegraph::LineNode* n, const OrderCfg& c,
       const shared::linegraph::Partner& partnerFrom) const;
 
-  shared::linegraph::InnerGeometry getTerminusBezier(
+  shared::linegraph::InnerGeom getTerminusBezier(
       const shared::linegraph::LineNode* n, const OrderCfg& c,
       const shared::linegraph::Partner& partnerFrom, double prec) const;
 

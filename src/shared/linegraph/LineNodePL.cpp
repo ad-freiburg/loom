@@ -8,7 +8,9 @@
 
 using util::geo::Point;
 using util::geo::DPoint;
-using namespace shared::linegraph;
+using shared::linegraph::LineNodePL;
+using shared::linegraph::NodeFront;
+using shared::linegraph::Station;
 
 // _____________________________________________________________________________
 LineNodePL::LineNodePL(Point<double> pos) : _pos(pos) {}
@@ -33,7 +35,7 @@ util::json::Dict LineNodePL::getAttrs() const {
     for (const auto& exFr : ro.second) {
       for (const auto* exTo : exFr.second) {
         util::json::Dict ex;
-        ex["route"] = util::toString(ro.first->getId());
+        ex["route"] = util::toString(ro.first->id());
         if (exFr.first == exTo) continue;
         auto shrd = LineGraph::sharedNode(exFr.first, exTo);
         auto nd1 = exFr.first->getOtherNd(shrd);
@@ -53,13 +55,13 @@ util::json::Dict LineNodePL::getAttrs() const {
 void LineNodePL::addStop(const Station& i) { _is.push_back(i); }
 
 // _____________________________________________________________________________
-const std::vector<Station>& LineNodePL::getStops() const { return _is; }
+const std::vector<Station>& LineNodePL::stops() const { return _is; }
 
 // _____________________________________________________________________________
 void LineNodePL::clearStops() { _is.clear(); }
 
 // _____________________________________________________________________________
-void LineNodePL::addConnExc(const Route* r, const LineEdge* edgeA,
+void LineNodePL::addConnExc(const Line* r, const LineEdge* edgeA,
                             const LineEdge* edgeB) {
   _connEx[r][edgeA].insert(edgeB);
   // index the other direction also, will lead to faster lookups later on
@@ -67,7 +69,7 @@ void LineNodePL::addConnExc(const Route* r, const LineEdge* edgeA,
 }
 
 // _____________________________________________________________________________
-void LineNodePL::delConnExc(const Route* r, const LineEdge* edgeA,
+void LineNodePL::delConnExc(const Line* r, const LineEdge* edgeA,
                             const LineEdge* edgeB) {
   _connEx[r][edgeA].erase(edgeB);
   // index the other direction also, will lead to faster lookups later on
@@ -75,7 +77,7 @@ void LineNodePL::delConnExc(const Route* r, const LineEdge* edgeA,
 }
 
 // _____________________________________________________________________________
-bool LineNodePL::connOccurs(const Route* r, const LineEdge* edgeA,
+bool LineNodePL::connOccurs(const Line* r, const LineEdge* edgeA,
                             const LineEdge* edgeB) const {
   const auto& i = _connEx.find(r);
   if (_connEx.find(r) == _connEx.end()) return true;
@@ -87,8 +89,8 @@ bool LineNodePL::connOccurs(const Route* r, const LineEdge* edgeA,
 }
 
 // _____________________________________________________________________________
-const NodeFront* LineNodePL::getNodeFrontFor(const LineEdge* e) const {
-  for (auto& nf : getMainDirs()) {
+const NodeFront* LineNodePL::frontFor(const LineEdge* e) const {
+  for (auto& nf : fronts()) {
     if (nf.edge == e) return &nf;
   }
 
@@ -96,8 +98,8 @@ const NodeFront* LineNodePL::getNodeFrontFor(const LineEdge* e) const {
 }
 
 // _____________________________________________________________________________
-NodeFront* LineNodePL::getNodeFrontFor(const LineEdge* e) {
-  for (auto& nf : getMainDirs()) {
+NodeFront* LineNodePL::frontFor(const LineEdge* e) {
+  for (auto& nf : fronts()) {
     if (nf.edge == e) return &nf;
   }
 
@@ -105,13 +107,13 @@ NodeFront* LineNodePL::getNodeFrontFor(const LineEdge* e) {
 }
 
 // _____________________________________________________________________________
-const std::vector<NodeFront>& LineNodePL::getMainDirs() const {
+const std::vector<NodeFront>& LineNodePL::fronts() const {
   return _mainDirs;
 }
 
 // _____________________________________________________________________________
 void LineNodePL::delMainDir(const LineEdge* e) {
-  for (size_t i = 0; i < getMainDirs().size(); i++) {
+  for (size_t i = 0; i < fronts().size(); i++) {
     if (_mainDirs[i].edge == e) {
       _mainDirs[i] = _mainDirs.back();
       _mainDirs.pop_back();
@@ -121,7 +123,7 @@ void LineNodePL::delMainDir(const LineEdge* e) {
 }
 
 // _____________________________________________________________________________
-std::vector<NodeFront>& LineNodePL::getMainDirs() { return _mainDirs; }
+std::vector<NodeFront>& LineNodePL::fronts() { return _mainDirs; }
 
 // _____________________________________________________________________________
 double NodeFront::getOutAngle() const {

@@ -9,19 +9,21 @@
 #include <vector>
 #include "GraphBuilder.h"
 #include "json/json.hpp"
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/RenderGraph.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
 
-using namespace util::geo;
 using transitmapper::graph::GraphBuilder;
 using shared::linegraph::NodeFront;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineEdge;
-using shared::linegraph::Route;
+using shared::linegraph::Line;
 using util::geo::PolyLine;
+using util::geo::DPoint;
+using util::geo::LinePoint;
+using util::geo::LinePointCmp;
 
 const static char* WGS84_PROJ =
     "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
@@ -69,7 +71,7 @@ void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
   while (true) {
     bool stillFree = false;
     for (auto n : *g->getNds()) {
-      if (n->pl().getStops().size() && _cfg->tightStations) continue;
+      if (n->pl().stops().size() && _cfg->tightStations) continue;
       std::set<NodeFront*> overlaps = nodeGetOverlappingFronts(g, n);
       for (auto f : overlaps) {
         stillFree = true;
@@ -147,13 +149,13 @@ void GraphBuilder::createMetaNodes(RenderGraph* g) {
         }
 
         // update the directions, if necessary
-        std::set<shared::linegraph::RouteOcc> del;
-        for (auto& to : e->pl().getRoutes()) {
+        std::set<shared::linegraph::LineOcc> del;
+        for (auto& to : e->pl().getLines()) {
           if (to.direction == nf.n) del.insert(to);
         }
 
         // also update the edge of the other node front
-        NodeFront* otherFr = other->pl().getNodeFrontFor(onf.edge);
+        NodeFront* otherFr = other->pl().frontFor(onf.edge);
         assert(otherFr);
         otherFr->edge = e;
 
@@ -163,10 +165,10 @@ void GraphBuilder::createMetaNodes(RenderGraph* g) {
         // update the original edge in the checked node front
         onf.edge = e;
 
-        // update the routes
+        // update the lines
         for (auto ro : del) {
-          e->pl().delRoute(ro.route);
-          e->pl().addRoute(ro.route, ref);
+          e->pl().delLine(ro.line);
+          e->pl().addLine(ro.line, ref);
         }
 
         toDel.insert(onf.n);
@@ -187,7 +189,7 @@ void GraphBuilder::createMetaNodes(RenderGraph* g) {
 // _____________________________________________________________________________
 std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(RenderGraph* g) const {
   for (auto n : *g->getNds()) {
-    if (n->pl().getStops().size()) continue;
+    if (n->pl().stops().size()) continue;
     if (getOpenNodeFronts(g, n).size() != 1) continue;
 
     std::set<const LineNode*> potClique;
@@ -199,7 +201,7 @@ std::vector<NodeFront> GraphBuilder::getNextMetaNodeCand(RenderGraph* g) const {
       const LineNode* n = nodeStack.top();
       nodeStack.pop();
 
-      if (n->pl().getStops().size() == 0) {
+      if (n->pl().stops().size() == 0) {
         potClique.insert(n);
         for (auto nff : getClosedNodeFronts(g, n)) {
           const LineNode* m;
@@ -298,14 +300,14 @@ bool GraphBuilder::isClique(const RenderGraph* g,
 std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(
     const RenderGraph* g, const LineNode* n) const {
   std::vector<NodeFront> res;
-  for (auto nf : n->pl().getMainDirs()) {
+  for (auto nf : n->pl().fronts()) {
     if (util::geo::len(*nf.edge->pl().getGeom()) >
             (g->getWidth(nf.edge) + g->getSpacing(nf.edge)) ||
-        (nf.edge->getOtherNd(n)->pl().getNodeFrontFor(nf.edge)->geom.distTo(
+        (nf.edge->getOtherNd(n)->pl().frontFor(nf.edge)->geom.distTo(
              *nf.edge->getOtherNd(n)->pl().getGeom()) >
          6 * (g->getWidth(nf.edge) + g->getSpacing(nf.edge))) ||
-        (nf.edge->getTo()->pl().getStops().size() > 0) ||
-        (nf.edge->getFrom()->pl().getStops().size() > 0)) {
+        (nf.edge->getTo()->pl().stops().size() > 0) ||
+        (nf.edge->getFrom()->pl().stops().size() > 0)) {
       res.push_back(nf);
     }
   }
@@ -317,14 +319,14 @@ std::vector<NodeFront> GraphBuilder::getOpenNodeFronts(
 std::vector<NodeFront> GraphBuilder::getClosedNodeFronts(
     const RenderGraph* g, const LineNode* n) const {
   std::vector<NodeFront> res;
-  for (auto nf : n->pl().getMainDirs()) {
+  for (auto nf : n->pl().fronts()) {
     if (!(util::geo::len(*nf.edge->pl().getGeom()) >
           (g->getWidth(nf.edge) + g->getSpacing(nf.edge))) &&
-        !(nf.edge->getOtherNd(n)->pl().getNodeFrontFor(nf.edge)->geom.distTo(
+        !(nf.edge->getOtherNd(n)->pl().frontFor(nf.edge)->geom.distTo(
               *nf.edge->getOtherNd(n)->pl().getGeom()) >
           6 * (g->getWidth(nf.edge) + g->getSpacing(nf.edge))) &&
-        (nf.edge->getTo()->pl().getStops().size() == 0) &&
-        (nf.edge->getFrom()->pl().getStops().size() == 0)) {
+        (nf.edge->getTo()->pl().stops().size() == 0) &&
+        (nf.edge->getFrom()->pl().stops().size() == 0)) {
       res.push_back(nf);
     }
   }
@@ -339,11 +341,11 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
   double minLength = 6;
 
   // TODO: why are nodefronts accessed via index?
-  for (size_t i = 0; i < n->pl().getMainDirs().size(); ++i) {
-    const NodeFront& fa = n->pl().getMainDirs()[i];
+  for (size_t i = 0; i < n->pl().fronts().size(); ++i) {
+    const NodeFront& fa = n->pl().fronts()[i];
 
-    for (size_t j = 0; j < n->pl().getMainDirs().size(); ++j) {
-      const NodeFront& fb = n->pl().getMainDirs()[j];
+    for (size_t j = 0; j < n->pl().fronts().size(); ++j) {
+      const NodeFront& fb = n->pl().fronts()[j];
 
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
 
@@ -368,7 +370,7 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 // _____________________________________________________________________________
 bool GraphBuilder::nodeFrontsOverlap(const RenderGraph* g, const NodeFront& a,
                                      const NodeFront& b) const {
-  size_t numShr = g->getSharedRoutes(a.edge, b.edge).size();
+  size_t numShr = g->getSharedLines(a.edge, b.edge).size();
 
   DPoint aa = a.geom.front();
   DPoint ab = a.geom.back();
@@ -423,8 +425,8 @@ void GraphBuilder::writeInitialConfig(RenderGraph* g) {
   for (auto n : *g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      Ordering order(e->pl().getRoutes().size());
-      for (size_t i = 0; i < e->pl().getRoutes().size(); i++) order[i] = i;
+      Ordering order(e->pl().getLines().size());
+      for (size_t i = 0; i < e->pl().getLines().size(); i++) order[i] = i;
       c[e] = order;
     }
   }

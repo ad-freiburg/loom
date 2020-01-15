@@ -6,8 +6,8 @@
 #define SHARED_LINEGRAPH_LINEEDGEPL_H_
 
 #include <set>
+#include "shared/linegraph/Line.h"
 #include "shared/style/LineStyle.h"
-#include "shared/linegraph/Route.h"
 #include "util/Nullable.h"
 #include "util/geo/GeoGraph.h"
 #include "util/geo/PolyLine.h"
@@ -23,21 +23,20 @@ using util::Nullable;
 class LineEdgePL;
 class LineNodePL;
 
-struct RouteOcc {
-  RouteOcc(const Route* r, const Node<LineNodePL, LineEdgePL>* dir)
-      : route(r), direction(dir) {}
-  RouteOcc(const Route* r, const Node<LineNodePL, LineEdgePL>* dir,
-           const util::Nullable<shared::style::LineStyle>& ls)
-      : route(r), direction(dir), style(ls) {}
-  const Route* route;
-  const Node<LineNodePL, LineEdgePL>*
-      direction;  // 0 if in both directions
+struct LineOcc {
+  LineOcc(const Line* r, const Node<LineNodePL, LineEdgePL>* dir)
+      : line(r), direction(dir) {}
+  LineOcc(const Line* r, const Node<LineNodePL, LineEdgePL>* dir,
+          const util::Nullable<shared::style::LineStyle>& ls)
+      : line(r), direction(dir), style(ls) {}
+  const Line* line;
+  const Node<LineNodePL, LineEdgePL>* direction;  // 0 if in both directions
 
   util::Nullable<shared::style::LineStyle> style;
 };
 
-inline bool operator<(const RouteOcc& x, const RouteOcc& y) {
-  return x.route < y.route;
+inline bool operator<(const LineOcc& x, const LineOcc& y) {
+  return x.line < y.line;
 };
 
 class LineEdgePL : util::geograph::GeoEdgePL<double> {
@@ -45,23 +44,23 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   LineEdgePL();
   LineEdgePL(const PolyLine<double>& p);
 
-  void addRoute(const Route* r, const Node<LineNodePL, LineEdgePL>* dir,
+  void addLine(const Line* r, const Node<LineNodePL, LineEdgePL>* dir,
                 util::Nullable<shared::style::LineStyle> ls);
-  void addRoute(const Route* r, const Node<LineNodePL, LineEdgePL>* dir);
+  void addLine(const Line* r, const Node<LineNodePL, LineEdgePL>* dir);
 
-  std::set<RouteOcc>& getRoutes();
-  const std::set<RouteOcc>& getRoutes() const;
+  std::set<LineOcc>& getLines();
+  const std::set<LineOcc>& getLines() const;
 
-  bool hasRoute(const Route* r) const;
-  void delRoute(const Route* r);
+  bool hasLine(const Line* r) const;
+  void delLine(const Line* r);
 
-  const RouteOcc& getRouteOcc(const Route* r) const;
-  const RouteOcc& routeOccAtPos(size_t i) const;
+  const LineOcc& lineOcc(const Line* r) const;
+  const LineOcc& lineOccAtPos(size_t i) const;
 
-  size_t getRoutePosUnder(const Route* r,
-                          const std::vector<size_t> ordering) const;
+  size_t linePosUnder(const Line* r,
+                         const std::vector<size_t> ordering) const;
 
-  size_t getRoutePos(const Route* r) const;
+  size_t linePos(const Line* r) const;
 
   const util::geo::Line<double>* getGeom() const;
   void setGeom(const util::geo::Line<double>& l);
@@ -71,7 +70,7 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   void setPolyline(const PolyLine<double>& p);
 
  private:
-  std::set<RouteOcc> _routes;
+  std::set<LineOcc> _lines;
 
   PolyLine<double> _p;
 };

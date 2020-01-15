@@ -22,7 +22,7 @@ using transitmapper::graph::HierarOrderCfg;
 using shared::linegraph::NodeFront;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineEdge;
-using shared::linegraph::Route;
+using shared::linegraph::Line;
 using util::geo::DPoint;
 using util::geo::DLine;
 using util::factorial;
@@ -70,8 +70,8 @@ int Optimizer::optimize(RenderGraph* tg) const {
     LOG(INFO) << "(stats) Stats for <optim> graph of '" << tg << "'";
     LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes();
     LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges();
-    // LOG(INFO) << "(stats)   Total unique route count: " << g.getNumRoutes();
-    LOG(INFO) << "(stats)   Max edge route cardinality: "
+    // LOG(INFO) << "(stats)   Total unique line count: " << g.getNumLines();
+    LOG(INFO) << "(stats)   Max edge line cardinality: "
               << maxCard(*g.getNds());
     LOG(INFO) << "(stats)   Solution space: " << solutionSpaceSize(*g.getNds());
   }
@@ -175,17 +175,17 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment) {
 
 // _____________________________________________________________________________
 std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
-  std::set<const Route*> processed;
+  std::set<const Line*> processed;
   std::vector<LinePair> ret;
-  for (auto& toA : segment->pl().getRoutes()) {
-    processed.insert(toA.route);
-    for (auto& toB : segment->pl().getRoutes()) {
-      if (unique && processed.count(toB.route)) continue;
-      if (toA.route == toB.route) continue;
+  for (auto& toA : segment->pl().getLines()) {
+    processed.insert(toA.line);
+    for (auto& toB : segment->pl().getLines()) {
+      if (unique && processed.count(toB.line)) continue;
+      if (toA.line == toB.line) continue;
 
       // this is to make sure that we always get the same line pairs in unique
       // mode -> take the smaller pointer first
-      if (!unique || toA.route < toB.route)
+      if (!unique || toA.line < toB.line)
         ret.push_back(LinePair(toA, toB));
       else
         ret.push_back(LinePair(toB, toA));
@@ -320,7 +320,7 @@ DPoint Optimizer::getPos(OptGraph* g, OptNode* n, OptEdge* segment, size_t p) {
   // look for correct nodefront
   const NodeFront* nf = 0;
   for (auto etg : segment->pl().etgs) {
-    const NodeFront* test = n->pl().node->pl().getNodeFrontFor(etg.etg);
+    const NodeFront* test = n->pl().node->pl().frontFor(etg.etg);
     if (test) {
       nf = test;
       break;
@@ -338,16 +338,16 @@ std::vector<OptEdge*> Optimizer::getEdgePartners(OptNode* node,
   std::vector<OptEdge*> ret;
 
   auto* fromEtg = OptGraph::getAdjEdg(segmentA, node);
-  auto* dirA = fromEtg->pl().getRouteOcc(linepair.first.route).direction;
-  auto* dirB = fromEtg->pl().getRouteOcc(linepair.second.route).direction;
+  auto* dirA = fromEtg->pl().lineOcc(linepair.first.line).direction;
+  auto* dirB = fromEtg->pl().lineOcc(linepair.second.line).direction;
 
   for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;
 
-    if (OptGraph::hasCtdRoutesIn(linepair.first.route, dirA, segmentA,
-                                 segmentB) &&
-        OptGraph::hasCtdRoutesIn(linepair.second.route, dirB, segmentA,
-                                 segmentB)) {
+    if (OptGraph::hasCtdLinesIn(linepair.first.line, dirA, segmentA,
+                                segmentB) &&
+        OptGraph::hasCtdLinesIn(linepair.second.line, dirB, segmentA,
+                                segmentB)) {
       ret.push_back(segmentB);
     }
   }
@@ -361,21 +361,21 @@ std::vector<EdgePair> Optimizer::getEdgePartnerPairs(OptNode* node,
   std::vector<EdgePair> ret;
 
   auto* fromEtg = OptGraph::getAdjEdg(segmentA, node);
-  auto* dirA = fromEtg->pl().getRouteOcc(linepair.first.route).direction;
-  auto* dirB = fromEtg->pl().getRouteOcc(linepair.second.route).direction;
+  auto* dirA = fromEtg->pl().lineOcc(linepair.first.line).direction;
+  auto* dirB = fromEtg->pl().lineOcc(linepair.second.line).direction;
 
   for (OptEdge* segmentB : node->getAdjList()) {
     if (segmentB == segmentA) continue;
 
-    if (OptGraph::hasCtdRoutesIn(linepair.first.route, dirA, segmentA,
-                                 segmentB)) {
+    if (OptGraph::hasCtdLinesIn(linepair.first.line, dirA, segmentA,
+                                segmentB)) {
       EdgePair curPair;
       curPair.first = segmentB;
       for (OptEdge* segmentC : node->getAdjList()) {
         if (segmentC == segmentA || segmentC == segmentB) continue;
 
-        if (OptGraph::hasCtdRoutesIn(linepair.second.route, dirB, segmentA,
-                                     segmentC)) {
+        if (OptGraph::hasCtdLinesIn(linepair.second.line, dirB, segmentA,
+                                    segmentC)) {
           curPair.second = segmentC;
           ret.push_back(curPair);
         }

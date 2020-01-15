@@ -13,7 +13,7 @@
 namespace transitmapper {
 namespace optim {
 
-typedef std::pair<const OptRO, const OptRO> LinePair;
+typedef std::pair<const OptLO, const OptLO> LinePair;
 typedef std::pair<size_t, size_t> PosCom;
 typedef std::pair<PosCom, PosCom> PosComPair;
 typedef std::pair<OptEdge*, OptEdge*> EdgePair;

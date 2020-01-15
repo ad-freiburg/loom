@@ -41,25 +41,25 @@ class LineGraph
   size_t maxDeg() const;
 
   // TODO: make the following functions private
-  void addRoute(const Route* r);
-  const Route* getRoute(const std::string& id) const;
+  void addLine(const Line* r);
+  const Line* getLine(const std::string& id) const;
   void expandBBox(const util::geo::Point<double>& p);
   //
 
   size_t getNumNds() const;
   size_t getNumNds(bool topo) const;
-  size_t getNumRoutes() const;
+  size_t getNumLines() const;
 
   static LineNode* sharedNode(const LineEdge* a, const LineEdge* b);
-  static std::vector<RouteOcc> getCtdRoutesIn(const Route* r,
+  static std::vector<LineOcc> getCtdLinesIn(const Line* r,
                                               const LineNode* dir,
                                               const LineEdge* fromEdge,
                                               const LineEdge* toEdge);
 
-  static std::vector<RouteOcc> getCtdRoutesIn(const LineEdge* fromEdge,
+  static std::vector<LineOcc> getCtdLinesIn(const LineEdge* fromEdge,
                                               const LineEdge* toEdge);
 
-  static std::vector<const Route*> getSharedRoutes(const LineEdge* a,
+  static std::vector<const Line*> getSharedLines(const LineEdge* a,
                                               const LineEdge* b);
 
   static size_t getLDeg(const LineNode* nd);
@@ -67,7 +67,7 @@ class LineGraph
   size_t getMaxLineNum();
 
   static std::vector<Partner> getPartners(const LineNode* n, const NodeFront* f,
-                                   const RouteOcc& ro);
+                                   const LineOcc& ro);
 
  private:
   util::geo::Box<double> _bbox;
@@ -77,7 +77,7 @@ class LineGraph
   void buildGrids();
 
   std::set<LineEdge*> proced;
-  std::map<std::string, const Route*> _routes;
+  std::map<std::string, const Line*> _lines;
 
   NodeGrid _nodeGrid;
   EdgeGrid _edgeGrid;

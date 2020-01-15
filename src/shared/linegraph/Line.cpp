@@ -2,21 +2,15 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 
-using shared::linegraph::Route;
-
-// _____________________________________________________________________________
-const std::string& Route::getId() const {
-  return _id;
-}
+using shared::linegraph::Line;
 
 // _____________________________________________________________________________
-const std::string& Route::getLabel() const {
-  return _label;
-}
+const std::string& Line::id() const { return _id; }
 
 // _____________________________________________________________________________
-const std::string& Route::getColor() const {
-  return _color;
-}
+const std::string& Line::label() const { return _label; }
+
+// _____________________________________________________________________________
+const std::string& Line::color() const { return _color; }

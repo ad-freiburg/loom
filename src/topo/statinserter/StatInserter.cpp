@@ -67,8 +67,8 @@ DBox StatInserter::bbox() const {
 // _____________________________________________________________________________
 void StatInserter::init() {
   for (auto nd : *_g->getNds()) {
-    if (nd->pl().getStops().size()) {
-      StationOcc occ{nd->pl().getStops().front(),
+    if (nd->pl().stops().size()) {
+      StationOcc occ{nd->pl().stops().front(),
                      {nd->getAdjList().begin(), nd->getAdjList().end()}};
       _statClusters.push_back({occ});
       nd->pl().clearStops();
@@ -229,20 +229,20 @@ LineEdgePair StatInserter::split(LineEdgePL& a, LineNode* fr,
   auto right = a.getPolyline().getSegment(p, 1);
   a.setPolyline(a.getPolyline().getSegment(0, p));
   auto helper = _g->addNd(a.getPolyline().back());
-  auto ro = a.getRoutes().begin();
+  auto ro = a.getLines().begin();
   auto helperEdg = _g->addEdg(helper, to, right);
 
-  while (ro != a.getRoutes().end()) {
+  while (ro != a.getLines().end()) {
     if (ro->direction == to) {
-      auto* route = ro->route;  // store because of deletion below
-      ro = a.getRoutes().erase(ro);
-      a.addRoute(route, helper);
-      helperEdg->pl().addRoute(route, to);
+      auto* route = ro->line;  // store because of deletion below
+      ro = a.getLines().erase(ro);
+      a.addLine(route, helper);
+      helperEdg->pl().addLine(route, to);
     } else if (ro->direction == fr) {
-      helperEdg->pl().addRoute(ro->route, helper);
+      helperEdg->pl().addLine(ro->line, helper);
       ro++;
     } else {
-      helperEdg->pl().addRoute(ro->route, 0);
+      helperEdg->pl().addLine(ro->line, 0);
       ro++;
     }
   }

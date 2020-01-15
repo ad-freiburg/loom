@@ -5,14 +5,14 @@
 #include <algorithm>
 #include <unordered_map>
 #include "transitmap/optim/HillClimbOptimizer.h"
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 #include "util/log/Log.h"
 
 using namespace transitmapper;
 using namespace optim;
 using namespace transitmapper::graph;
 using transitmapper::optim::HillClimbOptimizer;
-using shared::linegraph::Route;
+using shared::linegraph::Line;
 
 // _____________________________________________________________________________
 int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
@@ -46,7 +46,7 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
     bool found = false;
     double bestChange = 0;
     OptEdge* bestEdge;
-    std::vector<const Route*> bestOrder;
+    std::vector<const Line*> bestOrder;
 
     for (size_t i = 0; i < edges.size(); i++) {
       double oldScore = getScore(og, edges[i], cur);

@@ -6,7 +6,8 @@
 #include "octi/combgraph/EdgeOrdering.h"
 
 using util::geo::Point;
-using namespace octi::combgraph;
+using octi::combgraph::EdgeOrdering;
+using octi::combgraph::CombEdge;
 
 // _____________________________________________________________________________
 void EdgeOrdering::add(CombEdge* e, double deg) {
@@ -41,8 +42,8 @@ int64_t EdgeOrdering::dist(CombEdge* a, CombEdge* b) const {
 }
 
 // _____________________________________________________________________________
-const std::vector<std::pair<CombEdge*, double>>&
-EdgeOrdering::getOrderedSet() const {
+const std::vector<std::pair<CombEdge*, double>>& EdgeOrdering::getOrderedSet()
+    const {
   return _edgeOrder;
 }
 
@@ -78,18 +79,13 @@ bool EdgeOrdering::equals(const EdgeOrdering& e) const {
 std::string EdgeOrdering::toString(CombNode* origNode) const {
   std::stringstream ss;
   for (auto e : getOrderedSet()) {
-    if (e.first->getOtherNd(origNode)
-            ->pl()
-            .getParent()
-            ->pl()
-            .getStops()
-            .size()) {
+    if (e.first->getOtherNd(origNode)->pl().getParent()->pl().stops().size()) {
       ss << e.first << "(to "
          << e.first->getOtherNd(origNode)
                 ->pl()
                 .getParent()
                 ->pl()
-                .getStops()
+                .stops()
                 .front()
                 .name
          << "), ";

@@ -47,8 +47,8 @@ void CombNodePL::setEdgeOrdering(
 std::string CombNodePL::toString() const {
   std::stringstream ret;
   ret << "<" << this << " (" << getParent() << ")";
-  if (getParent()->pl().getStops().size()) {
-    ret << " " << getParent()->pl().getStops().front().name;
+  if (getParent()->pl().stops().size()) {
+    ret << " " << getParent()->pl().stops().front().name;
   }
 
   ret << ">";

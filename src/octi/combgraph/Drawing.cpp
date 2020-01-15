@@ -270,7 +270,7 @@ double Drawing::recalcBends(const CombNode* nd) {
 
     assert(dirA < 8);
 
-    for (auto ro : e->pl().getChilds().front()->pl().getRoutes()) {
+    for (auto lo : e->pl().getChilds().front()->pl().getLines()) {
       for (auto f : nd->getAdjList()) {
         if (e == f) continue;
         if (_edgs.count(f) == 0) {
@@ -278,7 +278,7 @@ double Drawing::recalcBends(const CombNode* nd) {
         }
         auto gf = _edgs.find(f)->second;
 
-        if (f->pl().getChilds().front()->pl().hasRoute(ro.route)) {
+        if (f->pl().getChilds().front()->pl().hasLine(lo.line)) {
           size_t dirB = 0;
           for (; dirB < 8; dirB++) {
             if (gnd->pl().getPort(dirB) ==

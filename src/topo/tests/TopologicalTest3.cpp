@@ -6,7 +6,7 @@
 #include <string>
 
 #include "shared/linegraph/LineGraph.h"
-#include "shared/linegraph/Route.h"
+#include "shared/linegraph/Line.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/tests/TopologicalTest3.h"
 #include "util/Misc.h"
@@ -43,17 +43,17 @@ void TopologicalTest3::run() {
     auto cy = tg.addEdg(c, y, {{{500.0, 0.0}, {800.0, 1.0}}});
 
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "green");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "green");
 
-    xa->pl().addRoute(&l1, 0);
-    xa->pl().addRoute(&l2, 0);
+    xa->pl().addLine(&l1, 0);
+    xa->pl().addLine(&l2, 0);
 
-    ab->pl().addRoute(&l1, 0);
-    bc->pl().addRoute(&l1, 0);
-    ad->pl().addRoute(&l2, 0);
-    cy->pl().addRoute(&l1, 0);
-    cy->pl().addRoute(&l2, 0);
+    ab->pl().addLine(&l1, 0);
+    bc->pl().addLine(&l1, 0);
+    ad->pl().addLine(&l2, 0);
+    cy->pl().addLine(&l1, 0);
+    cy->pl().addLine(&l2, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -95,17 +95,17 @@ void TopologicalTest3::run() {
     auto da = tg.addEdg(d, a, {{{510.0, 5.0}, {0.0, 0.0}}});
     auto cy = tg.addEdg(c, y, {{{500.0, 0.0}, {800.0, 1.0}}});
 
-    shared::linegraph::Route l1("1", "1", "red");
-    shared::linegraph::Route l2("2", "2", "green");
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "green");
 
-    xa->pl().addRoute(&l1, 0);
-    xa->pl().addRoute(&l2, 0);
+    xa->pl().addLine(&l1, 0);
+    xa->pl().addLine(&l2, 0);
 
-    ab->pl().addRoute(&l1, 0);
-    bc->pl().addRoute(&l1, 0);
-    da->pl().addRoute(&l2, 0);
-    cy->pl().addRoute(&l1, 0);
-    cy->pl().addRoute(&l2, 0);
+    ab->pl().addLine(&l1, 0);
+    bc->pl().addLine(&l1, 0);
+    da->pl().addLine(&l2, 0);
+    cy->pl().addLine(&l1, 0);
+    cy->pl().addLine(&l2, 0);
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
@@ -124,6 +124,6 @@ void TopologicalTest3::run() {
 
     a = x->getAdjList().front()->getOtherNd(x);
     d = y->getAdjList().front()->getOtherNd(y);
-    TEST(a->getAdjList().front()->pl().getRoutes().size(), ==, 2);
+    TEST(a->getAdjList().front()->pl().getLines().size(), ==, 2);
   }
 }

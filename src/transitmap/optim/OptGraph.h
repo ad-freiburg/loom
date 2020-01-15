@@ -25,33 +25,33 @@ typedef util::graph::Node<OptNodePL, OptEdgePL> OptNode;
 typedef util::graph::Edge<OptNodePL, OptEdgePL> OptEdge;
 
 typedef std::map<const transitmapper::optim::OptEdge*,
-                 std::vector<const shared::linegraph::Route*>>
+                 std::vector<const shared::linegraph::Line*>>
     OptOrderCfg;
 
-struct OptRO {
-  OptRO() : route(0), direction(0) {}
-  OptRO(const shared::linegraph::Route* r,
+struct OptLO {
+  OptLO() : line(0), direction(0) {}
+  OptLO(const shared::linegraph::Line* r,
         const shared::linegraph::LineNode* dir)
-      : route(r), direction(dir) {
+      : line(r), direction(dir) {
     relatives.push_back(r);
   }
-  const shared::linegraph::Route* route;
+  const shared::linegraph::Line* line;
   const shared::linegraph::LineNode* direction;  // 0 if in both directions
 
-  std::vector<const shared::linegraph::Route*> relatives;
+  std::vector<const shared::linegraph::Line*> relatives;
 
-  bool operator==(const OptRO& b) const { return b.route == route; }
-  bool operator<(const OptRO& b) const { return b.route < route; }
-  bool operator>(const OptRO& b) const { return b.route > route; }
-  bool operator==(const shared::linegraph::RouteOcc& b) const {
-    return b.route == route;
+  bool operator==(const OptLO& b) const { return b.line == line; }
+  bool operator<(const OptLO& b) const { return b.line < line; }
+  bool operator>(const OptLO& b) const { return b.line > line; }
+  bool operator==(const shared::linegraph::LineOcc& b) const {
+    return b.line == line;
   }
 };
 
 struct PartnerPath {
-  // Important: OptROs with the same route are r equivalent to each other and
+  // Important: OptLOs with the same route are r equivalent to each other and
   // to the original route, see above
-  std::set<OptRO> partners;
+  std::set<OptLO> partners;
   std::vector<OptEdge*> path;
   std::vector<bool> inv;
 };
@@ -86,14 +86,14 @@ struct OptEdgePL {
 
   size_t getCardinality() const;
   std::string toStr() const;
-  std::vector<OptRO>& getRoutes();
-  const std::vector<OptRO>& getRoutes() const;
+  std::vector<OptLO>& getLines();
+  const std::vector<OptLO>& getLines() const;
 
   // partial routes
   // For the ETGs contained in .etgs, only these route occurances are
   // actually contained in this edge. Their relative ordering is defined by
   // .order
-  std::vector<OptRO> routes;
+  std::vector<OptLO> lines;
 
   std::string getStrRepr() const;
 
@@ -127,7 +127,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   size_t getNumNodes() const;
   size_t getNumNodes(bool topo) const;
   size_t getNumEdges() const;
-  size_t getNumRoutes() const;
+  size_t getNumLines() const;
   size_t getMaxCardinality() const;
 
   double getMaxCrossPen() const;
@@ -137,20 +137,20 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   void untangle();
   void partnerLines();
 
-  std::vector<PartnerPath> getPartnerRoutes() const;
+  std::vector<PartnerPath> getPartnerLines() const;
   PartnerPath pathFromComp(const std::set<OptNode*>& comp) const;
 
   static shared::linegraph::LineEdge* getAdjEdg(const OptEdge* e,
                                                 const OptNode* n);
   static EtgPart getAdjEtgp(const OptEdge* e, const OptNode* n);
-  static bool hasCtdRoutesIn(const shared::linegraph::Route* r,
-                             const shared::linegraph::LineNode* dir,
-                             const OptEdge* fromEdge, const OptEdge* toEdge);
-  static std::vector<OptRO> getCtdRoutesIn(
-      const shared::linegraph::Route* r, const shared::linegraph::LineNode* dir,
+  static bool hasCtdLinesIn(const shared::linegraph::Line* r,
+                            const shared::linegraph::LineNode* dir,
+                            const OptEdge* fromEdge, const OptEdge* toEdge);
+  static std::vector<OptLO> getCtdLinesIn(
+      const shared::linegraph::Line* r, const shared::linegraph::LineNode* dir,
       const OptEdge* fromEdge, const OptEdge* toEdge);
-  static std::vector<OptRO> getSameDirRoutesIn(
-      const shared::linegraph::Route* r, const shared::linegraph::LineNode* dir,
+  static std::vector<OptLO> getSameDirLinesIn(
+      const shared::linegraph::Line* r, const shared::linegraph::LineNode* dir,
       const OptEdge* fromEdge, const OptEdge* toEdge);
   static EtgPart getFirstEdg(const OptEdge*);
   static EtgPart getLastEdg(const OptEdge*);
@@ -193,7 +193,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   OptEdge* isStump(OptEdge* e) const;
   OptEdge* isStumpAt(OptEdge* e, OptNode* n) const;
 
-  std::set<const shared::linegraph::Route*> getRoutes() const;
+  std::set<const shared::linegraph::Line*> getLines() const;
 
   bool isDogBone(OptEdge* e) const;
   OptNode* isPartialDogBone(OptEdge* e) const;
@@ -206,25 +206,25 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   std::vector<size_t> mapPositions(std::vector<OptEdge*> a, OptEdge* leg,
                                    std::vector<OptEdge*> b) const;
 
-  static bool dirRouteEndsIn(const OptEdge* a, const OptEdge* b);
-  static bool dirRouteContains(const OptEdge* a, const OptEdge* b);
+  static bool dirLineEndsIn(const OptEdge* a, const OptEdge* b);
+  static bool dirLineContains(const OptEdge* a, const OptEdge* b);
 
-  static bool dirRouteEqualIn(const OptEdge* a, const OptEdge* b);
+  static bool dirLineEqualIn(const OptEdge* a, const OptEdge* b);
   static bool dirContinuedOver(const OptEdge* a, const OptEdge* b,
                                const OptEdge* c);
   static bool dirPartialContinuedOver(const OptEdge* a, const OptEdge* b);
-  static bool dirContinuedOver(const OptRO& ro, const OptEdge* a,
+  static bool dirContinuedOver(const OptLO& ro, const OptEdge* a,
                                const OptEdge* b);
-  static bool dirContinuedOver(const OptRO& ro, const OptEdge* a,
+  static bool dirContinuedOver(const OptLO& ro, const OptEdge* a,
                                const OptNode* n);
 
-  static std::vector<OptRO> getCtdRoutesIn(const OptEdge* fromEdge,
-                                           const OptEdge* toEdge);
+  static std::vector<OptLO> getCtdLinesIn(const OptEdge* fromEdge,
+                                          const OptEdge* toEdge);
 
   static OptNode* sharedNode(const OptEdge* a, const OptEdge* b);
 
-  static util::Nullable<const OptRO> getRO(const OptEdge* a,
-                                     const shared::linegraph::Route*);
+  static util::Nullable<const OptLO> getLO(const OptEdge* a,
+                                           const shared::linegraph::Line*);
 
   static std::vector<OptEdge*> clockwEdges(OptEdge* noon, OptNode* n);
   static std::vector<OptEdge*> partialClockwEdges(OptEdge* noon, OptNode* n);
@@ -244,15 +244,15 @@ inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
 
   auto tgEdgeA = OptGraph::getAdjEdg(a, n);
   assert(tgEdgeA);
-  assert(n->pl().node->pl().getNodeFrontFor(tgEdgeA));
+  assert(n->pl().node->pl().frontFor(tgEdgeA));
 
-  angA = n->pl().node->pl().getNodeFrontFor(tgEdgeA)->getOutAngle();
+  angA = n->pl().node->pl().frontFor(tgEdgeA)->getOutAngle();
 
   auto tgEdgeB = OptGraph::getAdjEdg(b, n);
   assert(tgEdgeB);
-  assert(n->pl().node->pl().getNodeFrontFor(tgEdgeB));
+  assert(n->pl().node->pl().frontFor(tgEdgeB));
 
-  angB = n->pl().node->pl().getNodeFrontFor(tgEdgeB)->getOutAngle();
+  angB = n->pl().node->pl().frontFor(tgEdgeB)->getOutAngle();
 
   if (tgEdgeA == tgEdgeB) {
     // if these edges originally came from the same node front, use their

@@ -18,7 +18,7 @@
 using namespace transitmapper;
 using namespace optim;
 using namespace transitmapper::graph;
-using shared::linegraph::Route;
+using shared::linegraph::Line;
 
 // _____________________________________________________________________________
 int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
@@ -101,8 +101,7 @@ double ILPOptimizer::getConstraintCoeff(glp_prob* lp, int constraint,
 
 // _____________________________________________________________________________
 void ILPOptimizer::getConfigurationFromSolution(
-    glp_prob* lp, HierarOrderCfg* hc,
-    const std::set<OptNode*>& g) const {
+    glp_prob* lp, HierarOrderCfg* hc, const std::set<OptNode*>& g) const {
   // build name index for faster lookup
   glp_create_index(lp);
 
@@ -113,17 +112,17 @@ void ILPOptimizer::getConfigurationFromSolution(
         if (etgp.wasCut) continue;
         for (size_t tp = 0; tp < e->pl().getCardinality(); tp++) {
           bool found = false;
-          for (auto ro : e->pl().getRoutes()) {
-            std::string varName = getILPVarName(e, ro.route, tp);
+          for (auto lo : e->pl().getLines()) {
+            std::string varName = getILPVarName(e, lo.line, tp);
 
             size_t i = glp_find_col(lp, varName.c_str());
             assert(i > 0);
             double val = glp_mip_col_val(lp, i);
 
             if (val > 0.5) {
-              for (auto rel : ro.relatives) {
+              for (auto rel : lo.relatives) {
                 // retrieve the original route pos
-                size_t p = etgp.etg->pl().getRoutePos(rel);
+                size_t p = etgp.etg->pl().linePos(rel);
 
                 if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
                   (*hc)[etgp.etg][etgp.order].insert(
@@ -173,16 +172,16 @@ glp_prob* ILPOptimizer::createProblem(OptGraph* og,
         glp_set_row_bnds(lp, rowA + p, GLP_FX, 1, 1);
       }
 
-      for (auto r : e->pl().getRoutes()) {
+      for (auto l : e->pl().getLines()) {
         // constraint: the sum of all x_slp over p must be 1 for equal sl
         size_t row = glp_add_rows(lp, 1);
         std::stringstream varName;
-        varName << "sum(" << e->pl().getStrRepr() << ",l=" << r.route << ")";
+        varName << "sum(" << e->pl().getStrRepr() << ",l=" << l.line << ")";
         glp_set_row_name(lp, row, varName.str().c_str());
         glp_set_row_bnds(lp, row, GLP_FX, 1, 1);
 
         for (size_t p = 0; p < e->pl().getCardinality(); p++) {
-          std::string varName = getILPVarName(e, r.route, p);
+          std::string varName = getILPVarName(e, l.line, p);
           size_t curCol = cols + i;
           glp_set_col_name(lp, curCol, varName.c_str());
 
@@ -241,10 +240,9 @@ void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
           // introduce dec var
           std::stringstream ss;
           ss << "x_dec(" << segmentA->pl().getStrRepr() << ","
-             << segmentB->pl().getStrRepr() << "," << linepair.first.route
-             << "(" << linepair.first.route->getId() << "),"
-             << linepair.second.route << "(" << linepair.second.route->getId()
-             << ")," << node << ")";
+             << segmentB->pl().getStrRepr() << "," << linepair.first.line << "("
+             << linepair.first.line->id() << ")," << linepair.second.line << "("
+             << linepair.second.line->id() << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(
@@ -258,21 +256,21 @@ void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
                getPositionCombinations(segmentA, segmentB)) {
             if (crosses(og, node, segmentA, segmentB, poscomb)) {
               size_t lineAinAatP =
-                  glp_find_col(lp, getILPVarName(segmentA, linepair.first.route,
+                  glp_find_col(lp, getILPVarName(segmentA, linepair.first.line,
                                                  poscomb.first.first)
                                        .c_str());
-              size_t lineBinAatP = glp_find_col(
-                  lp, getILPVarName(segmentA, linepair.second.route,
-                                    poscomb.second.first)
-                          .c_str());
+              size_t lineBinAatP =
+                  glp_find_col(lp, getILPVarName(segmentA, linepair.second.line,
+                                                 poscomb.second.first)
+                                       .c_str());
               size_t lineAinBatP =
-                  glp_find_col(lp, getILPVarName(segmentB, linepair.first.route,
+                  glp_find_col(lp, getILPVarName(segmentB, linepair.first.line,
                                                  poscomb.first.second)
                                        .c_str());
-              size_t lineBinBatP = glp_find_col(
-                  lp, getILPVarName(segmentB, linepair.second.route,
-                                    poscomb.second.second)
-                          .c_str());
+              size_t lineBinBatP =
+                  glp_find_col(lp, getILPVarName(segmentB, linepair.second.line,
+                                                 poscomb.second.second)
+                                       .c_str());
 
               assert(lineAinAatP > 0);
               assert(lineAinBatP > 0);
@@ -282,8 +280,8 @@ void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
               size_t row = glp_add_rows(lp, 1);
               std::stringstream ss;
               ss << "dec_sum(" << segmentA->pl().getStrRepr() << ","
-                 << segmentB->pl().getStrRepr() << "," << linepair.first.route
-                 << "," << linepair.second.route << "pa=" << poscomb.first.first
+                 << segmentB->pl().getStrRepr() << "," << linepair.first.line
+                 << "," << linepair.second.line << "pa=" << poscomb.first.first
                  << ",pb=" << poscomb.second.first
                  << ",pa'=" << poscomb.first.second
                  << ",pb'=" << poscomb.second.second << ",n=" << node << ")";
@@ -324,10 +322,9 @@ void ILPOptimizer::writeDiffSegConstraints(OptGraph* og,
           std::stringstream ss;
           ss << "x_dec(" << segmentA->pl().getStrRepr() << ","
              << segments.first->pl().getStrRepr()
-             << segments.second->pl().getStrRepr() << ","
-             << linepair.first.route << "(" << linepair.first.route->getId()
-             << ")," << linepair.second.route << "("
-             << linepair.second.route->getId() << ")," << node << ")";
+             << segments.second->pl().getStrRepr() << "," << linepair.first.line
+             << "(" << linepair.first.line->id() << ")," << linepair.second.line
+             << "(" << linepair.second.line->id() << ")," << node << ")";
           glp_set_col_name(lp, decisionVar, ss.str().c_str());
           glp_set_col_kind(lp, decisionVar, GLP_BV);
           glp_set_obj_coef(
@@ -341,11 +338,11 @@ void ILPOptimizer::writeDiffSegConstraints(OptGraph* og,
             if (crosses(og, node, segmentA, segments, poscomb)) {
               size_t lineAinAatP = glp_find_col(
                   lp,
-                  getILPVarName(segmentA, linepair.first.route, poscomb.first)
+                  getILPVarName(segmentA, linepair.first.line, poscomb.first)
                       .c_str());
               size_t lineBinAatP = glp_find_col(
                   lp,
-                  getILPVarName(segmentA, linepair.second.route, poscomb.second)
+                  getILPVarName(segmentA, linepair.second.line, poscomb.second)
                       .c_str());
 
               assert(lineAinAatP > 0);
@@ -356,7 +353,7 @@ void ILPOptimizer::writeDiffSegConstraints(OptGraph* og,
               ss << "dec_sum(" << segmentA->pl().getStrRepr() << ","
                  << segments.first->pl().getStrRepr()
                  << segments.second->pl().getStrRepr() << ","
-                 << linepair.first.route << "," << linepair.second.route
+                 << linepair.first.line << "," << linepair.second.line
                  << "pa=" << poscomb.first << ",pb=" << poscomb.second
                  << ",n=" << node << ")";
               glp_set_row_name(lp, row, ss.str().c_str());
@@ -413,7 +410,7 @@ std::vector<PosCom> ILPOptimizer::getPositionCombinations(OptEdge* a) const {
 }
 
 // _____________________________________________________________________________
-std::string ILPOptimizer::getILPVarName(OptEdge* seg, const Route* r,
+std::string ILPOptimizer::getILPVarName(OptEdge* seg, const Line* r,
                                         size_t p) const {
   std::stringstream varName;
   varName << "x_(" << seg->pl().getStrRepr() << ",l=" << r << ",p=" << p << ")";
