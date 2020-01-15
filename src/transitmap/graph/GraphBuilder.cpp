@@ -132,6 +132,8 @@ void GraphBuilder::createMetaNodes(RenderGraph* g) {
     // first node has new ref node id
     LineNode* ref = g->addNd(*cands[0].n->pl().getGeom());
 
+    std::set<LineNode*> toDel;
+
     for (auto nf : cands) {
       for (auto onf : getOpenNodeFronts(g, nf.n)) {
         LineEdge* e;
@@ -167,8 +169,7 @@ void GraphBuilder::createMetaNodes(RenderGraph* g) {
           e->pl().addRoute(ro.route, ref);
         }
 
-        // delete the old node
-        g->delNd(onf.n);
+        toDel.insert(onf.n);
 
         // update the node front node
         onf.n = ref;
@@ -177,6 +178,9 @@ void GraphBuilder::createMetaNodes(RenderGraph* g) {
         ref->pl().addMainDir(onf);
       }
     }
+
+    // delete the nodes marked for deletion
+    for (auto delNd : toDel) g->delNd(delNd);
   }
 }
 
