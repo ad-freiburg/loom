@@ -64,7 +64,9 @@ void GurobiSolver::addColToRow(const std::string& colName,
                                const std::string& rowName, double coef) {}
 
 // _____________________________________________________________________________
-void GurobiSolver::addColToRow(size_t colId, size_t rowId, double coef) {}
+void GurobiSolver::addColToRow(size_t colId, size_t rowId, double coef) {
+  // GRBchgcoef does the right thing here
+}
 
 // _____________________________________________________________________________
 void GurobiSolver::solve() {}
