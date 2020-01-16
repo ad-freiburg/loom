@@ -3,4 +3,5 @@ include_directories(
 )
 
 add_executable(sharedTest TestMain.cpp)
+
 target_link_libraries(sharedTest shared_dep util ${Boost_LIBRARIES} ${GUROBI_LIBRARY} -lproj)

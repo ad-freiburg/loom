@@ -26,6 +26,11 @@ else()
 	message(WARNING "Configuring without OpenMP!")
 	set(CMAKE_CXX_FLAGS            "-Ofast -fno-signed-zeros -fno-trapping-math -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wformat-security -Wformat=2")
 endif()
+
+if(GUROBI_FOUND)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGUROBI_FOUND=1")
+endif()
+
 set(CMAKE_CXX_FLAGS_DEBUG          "-Og -g -DLOGLEVEL=3")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2")
 set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2")

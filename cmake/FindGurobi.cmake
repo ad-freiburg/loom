@@ -43,10 +43,7 @@ string(REGEX REPLACE
     "${GUROBI_LIBRARY_LIST}")
 list(LENGTH GUROBI_LIBRARY_VERSIONS GUROBI_NUMVER)
 
-#message("GUROBI LIB VERSIONS: ${GUROBI_LIBRARY_VERSIONS}")
-
 if (GUROBI_NUMVER EQUAL 0)
-message(STATUS "Found no Gurobi library version in ${GUROBI_LIB_DIR}.")
 elseif (GUROBI_NUMVER EQUAL 1)
     list(GET GUROBI_LIBRARY_VERSIONS 0 GUROBI_LIBRARY_VERSION)
 else()
@@ -56,9 +53,14 @@ else()
     set(GUROBI_LIBRARY_VERSION "")
 endif()
 
-
 find_library(GUROBI_LIBRARY
     NAMES "gurobi${GUROBI_LIBRARY_VERSION}"
     PATHS
     ${GUROBI_LIB_DIR}
 )
+
+if (NOT GUROBI_FOUND)
+	message(STATUS "Found no Gurobi library. If you have Gurobi installed, make sure GUROBI_HOME is set properly.")
+	set(GUROBI_LIBRARY "")
+	set(GUROBI_INCLUDE_DIR "")
+endif()

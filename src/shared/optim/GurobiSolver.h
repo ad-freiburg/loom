@@ -5,6 +5,8 @@
 #ifndef SHARED_OPTIM_GUROBISOLVER_H_
 #define SHARED_OPTIM_GUROBISOLVER_H_
 
+#ifdef GUROBI_FOUND
+
 #include "gurobi_c.h"
 #include "shared/optim/ILPSolver.h"
 
@@ -38,3 +40,5 @@ class GurobiSolver : ILPSolver {
 }  // namespace shared
 
 #endif  // SHARED_OPTIM_ILPSOLVER_H_
+
+#endif

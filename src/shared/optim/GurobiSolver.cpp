@@ -2,6 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#ifdef GUROBI_FOUND
+
 #include "gurobi_c.h"
 #include "shared/optim/GurobiSolver.h"
 #include "util/log/Log.h"
@@ -69,3 +71,5 @@ void GurobiSolver::solve() {}
 
 // _____________________________________________________________________________
 void GurobiSolver::update() {}
+
+#endif
