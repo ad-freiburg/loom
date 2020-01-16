@@ -2,13 +2,7 @@
 
 # Once done this will define
 #  GUROBI_FOUND - System has Gurobi
-#  Targets:
-#       Gurobi::GurobiC   - only the C interface
-#       Gurobi::GurobiCXX - C and C++ interface
-#       Gurobi::Gurobi    - same as GurobiCXX
-
-find_path(GUROBI_HOME
-          NAMES include/gurobi_c++.h
+find_path(GUROBI_HOME NAMES include/gurobi_c++.h
           PATHS
           $ENV{GUROBI_HOME}
           "/opt/gurobi/linux64/"
@@ -59,8 +53,11 @@ find_library(GUROBI_LIBRARY
     ${GUROBI_LIB_DIR}
 )
 
-if (NOT GUROBI_FOUND)
+set(GUROBI_FOUND TRUE)
+
+if (NOT GUROBI_LIBRARY OR NOT GUROBI_INCLUDE_DIR)
 	message(STATUS "Found no Gurobi library. If you have Gurobi installed, make sure GUROBI_HOME is set properly.")
 	set(GUROBI_LIBRARY "")
 	set(GUROBI_INCLUDE_DIR "")
+	set(GUROBI_FOUND "")
 endif()
