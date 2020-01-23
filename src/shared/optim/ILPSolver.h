@@ -12,18 +12,22 @@ namespace optim {
 
 enum ColType { INT, BIN, CONT };
 enum RowType { FIX, UP, LO };
+enum DirType { MAX, MIN };
 
 class ILPSolver {
  public:
   ILPSolver(){};
 
-  virtual size_t addCol(const std::string& name, ColType colType,
+  virtual int addCol(const std::string& name, ColType colType,
                         double objCoef) = 0;
-  virtual size_t addRow(const std::string& name, RowType rowType) = 0;
+  virtual int addRow(const std::string& name, double bnd, RowType rowType) = 0;
 
   virtual void addColToRow(const std::string& colName,
                            const std::string& rowName, double coef) = 0;
-  virtual void addColToRow(size_t colId, size_t rowId, double coef) = 0;
+  virtual void addColToRow(int colId, int rowId, double coef) = 0;
+
+  virtual int getVarByName(const std::string& name) const = 0;
+  virtual int getConstrByName(const std::string& name) const = 0;
 
   virtual void solve() = 0;
   virtual void update() = 0;

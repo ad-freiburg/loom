@@ -15,16 +15,18 @@ namespace optim {
 
 class GurobiSolver : ILPSolver {
  public:
-  GurobiSolver();
+  GurobiSolver(DirType dir);
   ~GurobiSolver();
 
-  size_t addCol(const std::string& name, ColType colType,
-                        double objCoef);
-  size_t addRow(const std::string& name, RowType rowType);
+  int addCol(const std::string& name, ColType colType, double objCoef);
+  int addRow(const std::string& name, double bnd, RowType rowType);
 
-  void addColToRow(const std::string& colName,
-                           const std::string& rowName, double coef);
-  void addColToRow(size_t colId, size_t rowId, double coef);
+  void addColToRow(const std::string& colName, const std::string& rowName,
+                   double coef);
+  void addColToRow(int colId, int rowId, double coef);
+
+  int getVarByName(const std::string& name) const;
+  int getConstrByName(const std::string& name) const;
 
   void solve();
   void update();
@@ -33,7 +35,7 @@ class GurobiSolver : ILPSolver {
   GRBenv* _env;
   GRBmodel* _model;
 
-  size_t _numVars;
+  size_t _numVars, _numRows;
 };
 
 }  // namespace optim
