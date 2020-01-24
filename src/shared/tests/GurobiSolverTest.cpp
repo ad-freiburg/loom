@@ -11,6 +11,7 @@
 #include "shared/optim/GurobiSolver.h"
 
 using shared::optim::GurobiSolver;
+using  util::approx;
 
 #endif
 
@@ -43,7 +44,15 @@ void GurobiSolverTest::run() {
   TEST(s.getConstrByName("constr1"), ==, 0);
   TEST(s.getConstrByName("constr2"), ==, 1);
 
-  s.solve();
+  auto ret = s.solve();
+
+  TEST(ret, ==, shared::optim::OPTIM);
+
+  TEST(s.getVarVal("x"), ==, approx(1));
+  TEST(s.getVarVal("y"), ==, approx(0));
+  TEST(s.getVarVal("x"), ==, approx(1));
+
+  TEST(s.getObjVal(), ==, approx(3));
 
 #endif
 }

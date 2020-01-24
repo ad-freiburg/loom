@@ -9,6 +9,7 @@
 #include "util/log/Log.h"
 
 using shared::optim::GurobiSolver;
+using shared::optim::SolveType;
 
 // _____________________________________________________________________________
 GurobiSolver::GurobiSolver(DirType dir) : _numVars(0), _numRows(0) {
@@ -21,7 +22,7 @@ GurobiSolver::GurobiSolver(DirType dir) : _numVars(0), _numRows(0) {
   }
 
   // create emtpy model
-  error = GRBnewmodel(_env, &_model, "mip1", 0, 0, 0, 0, 0, 0);
+  error = GRBnewmodel(_env, &_model, "loom_mip", 0, 0, 0, 0, 0, 0);
   if (error) {
     LOG(ERROR) << "Could not create gurobi model";
     exit(1);
@@ -35,13 +36,13 @@ GurobiSolver::GurobiSolver(DirType dir) : _numVars(0), _numRows(0) {
 
 // _____________________________________________________________________________
 GurobiSolver::~GurobiSolver() {
-  LOG(DEBUG) << "Destroying gurobi solver...";
   GRBfreeenv(_env);
+  GRBfreemodel(_model);
 }
 
 // _____________________________________________________________________________
 int GurobiSolver::addCol(const std::string& name, ColType colType,
-                            double objCoef) {
+                         double objCoef) {
   char vtype;
   switch (colType) {
     case INT:
@@ -65,8 +66,7 @@ int GurobiSolver::addCol(const std::string& name, ColType colType,
 }
 
 // _____________________________________________________________________________
-int GurobiSolver::addRow(const std::string& name, double bnd,
-                            RowType rowType) {
+int GurobiSolver::addRow(const std::string& name, double bnd, RowType rowType) {
   char rtype;
   switch (rowType) {
     case FIX:
@@ -91,7 +91,18 @@ int GurobiSolver::addRow(const std::string& name, double bnd,
 
 // _____________________________________________________________________________
 void GurobiSolver::addColToRow(const std::string& colName,
-                               const std::string& rowName, double coef) {}
+                               const std::string& rowName, double coef) {
+  int col = getVarByName(colName);
+  if (col < 0) {
+    LOG(ERROR) << "Could not find variable " << colName;
+  }
+  int row = getConstrByName(rowName);
+  if (row < 0) {
+    LOG(ERROR) << "Could not find constraint " << rowName;
+  }
+
+  addColToRow(col, row, coef);
+}
 
 // _____________________________________________________________________________
 int GurobiSolver::getVarByName(const std::string& name) const {
@@ -122,7 +133,20 @@ void GurobiSolver::addColToRow(int colId, int rowId, double coef) {
 }
 
 // _____________________________________________________________________________
-void GurobiSolver::solve() {
+double GurobiSolver::getObjVal() const {
+  double objVal;
+
+  int error = GRBgetdblattr(_model, GRB_DBL_ATTR_OBJVAL, &objVal);
+  if (error) {
+    LOG(ERROR) << "Could not retrieve optimal target function value.";
+    exit(1);
+  }
+
+  return objVal;
+}
+
+// _____________________________________________________________________________
+SolveType GurobiSolver::solve() {
   update();
   GRBwrite(_model, "mip1.lp");
   int error = GRBoptimize(_model);
@@ -137,6 +161,46 @@ void GurobiSolver::solve() {
     LOG(ERROR) << "Could not retrieve optim status";
     exit(1);
   }
+
+  int optimStat;
+  double objVal;
+
+  error = GRBgetintattr(_model, GRB_INT_ATTR_STATUS, &optimStat);
+  if (error) {
+    LOG(ERROR) << "Could not read optimization status.";
+    exit(1);
+  }
+
+  error = GRBgetdblattr(_model, GRB_DBL_ATTR_OBJVAL, &objVal);
+  if (error) {
+    LOG(ERROR) << "Could not retrieve optimal target function value.";
+    exit(1);
+  }
+
+  if (optimStat == GRB_OPTIMAL) return OPTIM;
+  if (optimStat == GRB_INF_OR_UNBD) return INF;
+  return NON_OPTIM;
+}
+
+// _____________________________________________________________________________
+double GurobiSolver::getVarVal(int colId) const {
+  double val;
+  int error = GRBgetdblattrelement(_model, GRB_DBL_ATTR_X, colId, &val);
+  if (error) {
+    LOG(ERROR) << "Could not retrieve value for field " << colId;
+    exit(1);
+  }
+  return val;
+}
+
+// _____________________________________________________________________________
+double GurobiSolver::getVarVal(const std::string& colName) const {
+  int col = getVarByName(colName);
+  if (col < 0) {
+    LOG(ERROR) << "Could not find variable " << colName;
+  }
+
+  return getVarVal(col);
 }
 
 // _____________________________________________________________________________

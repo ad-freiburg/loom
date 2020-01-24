@@ -13,6 +13,7 @@ namespace optim {
 enum ColType { INT, BIN, CONT };
 enum RowType { FIX, UP, LO };
 enum DirType { MAX, MIN };
+enum SolveType { OPTIM, INF, NON_OPTIM };
 
 class ILPSolver {
  public:
@@ -29,8 +30,13 @@ class ILPSolver {
   virtual int getVarByName(const std::string& name) const = 0;
   virtual int getConstrByName(const std::string& name) const = 0;
 
-  virtual void solve() = 0;
+  virtual double getVarVal(int colId) const = 0;
+  virtual double getVarVal(const std::string& name) const = 0;
+
+  virtual SolveType solve() = 0;
   virtual void update() = 0;
+
+  virtual double getObjVal() const = 0;
 };
 
 }  // namespace optim

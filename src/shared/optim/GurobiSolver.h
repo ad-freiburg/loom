@@ -28,8 +28,13 @@ class GurobiSolver : ILPSolver {
   int getVarByName(const std::string& name) const;
   int getConstrByName(const std::string& name) const;
 
-  void solve();
+  double getVarVal(int colId) const;
+  double getVarVal(const std::string& name) const;
+
+  SolveType solve();
   void update();
+
+  double getObjVal() const;
 
  private:
   GRBenv* _env;
