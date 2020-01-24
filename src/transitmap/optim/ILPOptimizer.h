@@ -5,8 +5,8 @@
 #ifndef TRANSITMAP_OPTIM_ILPOPTIMIZER_H_
 #define TRANSITMAP_OPTIM_ILPOPTIMIZER_H_
 
-#include <glpk.h>
 #include "shared/linegraph/Line.h"
+#include "shared/optim/ILPSolver.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderCfg.h"
 #include "transitmap/optim/OptGraph.h"
@@ -21,16 +21,6 @@ namespace optim {
 
 using namespace graph;
 
-struct VariableMatrix {
-  std::vector<int> rowNum;
-  std::vector<int> colNum;
-  std::vector<double> vals;
-
-  void addVar(int row, int col, double val);
-  void getGLPKArrs(int** ia, int** ja, double** r) const;
-  size_t getNumVars() const { return vals.size(); }
-};
-
 class ILPOptimizer : public Optimizer {
  public:
   ILPOptimizer(const config::Config* cfg, const Scorer* scorer)
@@ -40,25 +30,21 @@ class ILPOptimizer : public Optimizer {
                    size_t depth) const;
 
  protected:
-  virtual glp_prob* createProblem(OptGraph* og,
-                                  const std::set<OptNode*>& g) const;
+  virtual shared::optim::ILPSolver* createProblem(
+      OptGraph* og, const std::set<OptNode*>& g) const;
 
-  void solveProblem(glp_prob* lp) const;
-  void preSolveCoinCbc(glp_prob* lp) const;
-
-  virtual void getConfigurationFromSolution(glp_prob* lp, HierarOrderCfg* c,
+  virtual void getConfigurationFromSolution(shared::optim::ILPSolver* lp,
+                                            HierarOrderCfg* c,
                                             const std::set<OptNode*>& g) const;
 
   std::string getILPVarName(OptEdge* e, const shared::linegraph::Line* r,
                             size_t p) const;
 
   void writeSameSegConstraints(OptGraph* og, const std::set<OptNode*>& g,
-                               VariableMatrix* vm, glp_prob* lp) const;
+                               shared::optim::ILPSolver* lp) const;
 
   void writeDiffSegConstraints(OptGraph* og, const std::set<OptNode*>& g,
-                               VariableMatrix* vm, glp_prob* lp) const;
-
-  double getConstraintCoeff(glp_prob* lp, int constraint, int col) const;
+                               shared::optim::ILPSolver* lp) const;
 
   std::vector<PosComPair> getPositionCombinations(OptEdge* a, OptEdge* b) const;
   std::vector<PosCom> getPositionCombinations(OptEdge* a) const;

@@ -4,6 +4,8 @@
 
 #ifdef GUROBI_FOUND
 
+#include <sstream>
+#include <stdexcept>
 #include "gurobi_c.h"
 #include "shared/optim/GurobiSolver.h"
 #include "util/log/Log.h"
@@ -17,15 +19,13 @@ GurobiSolver::GurobiSolver(DirType dir) : _numVars(0), _numRows(0) {
 
   int error = GRBloadenv(&_env, "gurobi.log");
   if (error || _env == 0) {
-    LOG(ERROR) << "Could not create gurobi environment";
-    exit(1);
+    throw std::runtime_error("Could not create gurobi environment");
   }
 
   // create emtpy model
   error = GRBnewmodel(_env, &_model, "loom_mip", 0, 0, 0, 0, 0, 0);
   if (error) {
-    LOG(ERROR) << "Could not create gurobi model";
-    exit(1);
+    throw std::runtime_error("Could not create gurobi model");
   }
 
   if (dir == MAX)
@@ -36,14 +36,14 @@ GurobiSolver::GurobiSolver(DirType dir) : _numVars(0), _numRows(0) {
 
 // _____________________________________________________________________________
 GurobiSolver::~GurobiSolver() {
-  GRBfreeenv(_env);
   GRBfreemodel(_model);
+  GRBfreeenv(_env);
 }
 
 // _____________________________________________________________________________
 int GurobiSolver::addCol(const std::string& name, ColType colType,
                          double objCoef) {
-  char vtype;
+  char vtype = 0;
   switch (colType) {
     case INT:
       vtype = GRB_INTEGER;
@@ -58,8 +58,7 @@ int GurobiSolver::addCol(const std::string& name, ColType colType,
   int error = GRBaddvar(_model, 0, 0, 0, objCoef, -GRB_INFINITY, GRB_INFINITY,
                         vtype, name.c_str());
   if (error) {
-    LOG(ERROR) << "Could not add variable " << name;
-    exit(1);
+    throw std::runtime_error("Could not add variable " + name);
   }
   _numVars++;
   return _numVars - 1;
@@ -67,7 +66,7 @@ int GurobiSolver::addCol(const std::string& name, ColType colType,
 
 // _____________________________________________________________________________
 int GurobiSolver::addRow(const std::string& name, double bnd, RowType rowType) {
-  char rtype;
+  char rtype = 0;
   switch (rowType) {
     case FIX:
       rtype = GRB_EQUAL;
@@ -81,8 +80,7 @@ int GurobiSolver::addRow(const std::string& name, double bnd, RowType rowType) {
   }
   int error = GRBaddconstr(_model, 0, 0, 0, rtype, bnd, name.c_str());
   if (error) {
-    LOG(ERROR) << "Could not add row " << name;
-    exit(1);
+    throw std::runtime_error("Could not add row " + name);
   }
 
   _numRows++;
@@ -90,8 +88,8 @@ int GurobiSolver::addRow(const std::string& name, double bnd, RowType rowType) {
 }
 
 // _____________________________________________________________________________
-void GurobiSolver::addColToRow(const std::string& colName,
-                               const std::string& rowName, double coef) {
+void GurobiSolver::addColToRow(const std::string& rowName,
+                               const std::string& colName, double coef) {
   int col = getVarByName(colName);
   if (col < 0) {
     LOG(ERROR) << "Could not find variable " << colName;
@@ -121,14 +119,16 @@ int GurobiSolver::getConstrByName(const std::string& name) const {
 }
 
 // _____________________________________________________________________________
-void GurobiSolver::addColToRow(int colId, int rowId, double coef) {
+void GurobiSolver::addColToRow(int rowId, int colId, double coef) {
   int col = colId;
   int row = rowId;
 
   int error = GRBchgcoeffs(_model, 1, &row, &col, &coef);
   if (error) {
-    LOG(ERROR) << "Could not add col " << colId << " to row " << rowId;
-    exit(1);
+    std::stringstream ss;
+    ss << "Could not add col " << colId << " to row " << rowId << " (" << error
+       << ")";
+    throw std::runtime_error(ss.str());
   }
 }
 
@@ -138,8 +138,8 @@ double GurobiSolver::getObjVal() const {
 
   int error = GRBgetdblattr(_model, GRB_DBL_ATTR_OBJVAL, &objVal);
   if (error) {
-    LOG(ERROR) << "Could not retrieve optimal target function value.";
-    exit(1);
+    throw std::runtime_error(
+        "Could not retrieve optimal target function value.");
   }
 
   return objVal;
@@ -151,15 +151,13 @@ SolveType GurobiSolver::solve() {
   GRBwrite(_model, "mip1.lp");
   int error = GRBoptimize(_model);
   if (error) {
-    LOG(ERROR) << "Could not optimize model";
-    exit(1);
+    throw std::runtime_error("Could not optimize model");
   }
 
   int status;
   error = GRBgetintattr(_model, GRB_INT_ATTR_STATUS, &status);
   if (error) {
-    LOG(ERROR) << "Could not retrieve optim status";
-    exit(1);
+    throw std::runtime_error("Could not retrieve optim status");
   }
 
   int optimStat;
@@ -167,14 +165,13 @@ SolveType GurobiSolver::solve() {
 
   error = GRBgetintattr(_model, GRB_INT_ATTR_STATUS, &optimStat);
   if (error) {
-    LOG(ERROR) << "Could not read optimization status.";
-    exit(1);
+    throw std::runtime_error("Could not read optimization status.");
   }
 
   error = GRBgetdblattr(_model, GRB_DBL_ATTR_OBJVAL, &objVal);
   if (error) {
-    LOG(ERROR) << "Could not retrieve optimal target function value.";
-    exit(1);
+    throw std::runtime_error(
+        "Could not retrieve optimal target function value.");
   }
 
   if (optimStat == GRB_OPTIMAL) return OPTIM;
@@ -187,8 +184,9 @@ double GurobiSolver::getVarVal(int colId) const {
   double val;
   int error = GRBgetdblattrelement(_model, GRB_DBL_ATTR_X, colId, &val);
   if (error) {
-    LOG(ERROR) << "Could not retrieve value for field " << colId;
-    exit(1);
+    std::stringstream ss;
+    ss << "Could not retrieve value for field " << colId;
+    throw std::runtime_error(ss.str());
   }
   return val;
 }
@@ -204,6 +202,32 @@ double GurobiSolver::getVarVal(const std::string& colName) const {
 }
 
 // _____________________________________________________________________________
+void GurobiSolver::setObjCoef(const std::string& colName, double coef) const {
+  int col = getVarByName(colName);
+  if (col < 0) {
+    LOG(ERROR) << "Could not find variable " << colName;
+  }
+
+  setObjCoef(col, coef);
+}
+
+// _____________________________________________________________________________
+void GurobiSolver::setObjCoef(int colId, double coef) const {
+  int error = GRBsetdblattrelement(_model, GRB_DBL_ATTR_OBJ, colId, coef);
+  if (error) {
+    std::stringstream ss;
+    ss << "Could not change objective value for col " << colId;
+    throw std::runtime_error(ss.str());
+  }
+}
+
+// _____________________________________________________________________________
 void GurobiSolver::update() { GRBupdatemodel(_model); }
+
+// _____________________________________________________________________________
+size_t GurobiSolver::getNumConstrs() const { return _numRows; }
+
+// _____________________________________________________________________________
+size_t GurobiSolver::getNumVars() const { return _numVars; }
 
 #endif

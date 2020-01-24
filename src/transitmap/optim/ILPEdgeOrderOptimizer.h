@@ -5,7 +5,6 @@
 #ifndef TRANSITMAP_OPTIM_ILPEDGEORDEROPTIMIZER_H_
 #define TRANSITMAP_OPTIM_ILPEDGEORDEROPTIMIZER_H_
 
-#include <glpk.h>
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/OrderCfg.h"
 #include "transitmap/optim/ILPOptimizer.h"
@@ -31,17 +30,18 @@ class ILPEdgeOrderOptimizer : public ILPOptimizer {
       : ILPOptimizer(cfg, scorer){};
 
  private:
-  virtual glp_prob* createProblem(OptGraph* og, const std::set<OptNode*>& g) const;
+  virtual shared::optim::ILPSolver* createProblem(
+      OptGraph* og, const std::set<OptNode*>& g) const;
 
-  virtual void getConfigurationFromSolution(glp_prob* lp,
+  virtual void getConfigurationFromSolution(shared::optim::ILPSolver* lp,
                                             graph::HierarOrderCfg* c,
                                             const std::set<OptNode*>& g) const;
 
-  void writeCrossingOracle(const std::set<OptNode*>& g, VariableMatrix* vm,
-                           glp_prob* lp) const;
+  void writeCrossingOracle(const std::set<OptNode*>& g,
+                           shared::optim::ILPSolver* lp) const;
 
   void writeDiffSegConstraintsImpr(OptGraph* og, const std::set<OptNode*>& g,
-                                   VariableMatrix* vm, glp_prob* lp) const;
+                                   shared::optim::ILPSolver* lp) const;
 };
 }  // namespace optim
 }  // namespace transitmapper

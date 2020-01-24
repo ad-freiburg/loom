@@ -20,15 +20,18 @@ class ILPSolver {
   ILPSolver(){};
 
   virtual int addCol(const std::string& name, ColType colType,
-                        double objCoef) = 0;
+                     double objCoef) = 0;
   virtual int addRow(const std::string& name, double bnd, RowType rowType) = 0;
 
-  virtual void addColToRow(const std::string& colName,
-                           const std::string& rowName, double coef) = 0;
-  virtual void addColToRow(int colId, int rowId, double coef) = 0;
+  virtual void addColToRow(const std::string& rowName,
+                           const std::string& colName, double coef) = 0;
+  virtual void addColToRow(int rowId, int colId, double coef) = 0;
 
   virtual int getVarByName(const std::string& name) const = 0;
   virtual int getConstrByName(const std::string& name) const = 0;
+
+  virtual void setObjCoef(const std::string& name, double coef) const = 0;
+  virtual void setObjCoef(int colId, double coef) const = 0;
 
   virtual double getVarVal(int colId) const = 0;
   virtual double getVarVal(const std::string& name) const = 0;
@@ -37,6 +40,9 @@ class ILPSolver {
   virtual void update() = 0;
 
   virtual double getObjVal() const = 0;
+
+  virtual size_t getNumConstrs() const = 0;
+  virtual size_t getNumVars() const = 0;
 };
 
 }  // namespace optim

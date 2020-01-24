@@ -13,7 +13,7 @@
 namespace shared {
 namespace optim {
 
-class GurobiSolver : ILPSolver {
+class GurobiSolver : public ILPSolver {
  public:
   GurobiSolver(DirType dir);
   ~GurobiSolver();
@@ -21,9 +21,9 @@ class GurobiSolver : ILPSolver {
   int addCol(const std::string& name, ColType colType, double objCoef);
   int addRow(const std::string& name, double bnd, RowType rowType);
 
-  void addColToRow(const std::string& colName, const std::string& rowName,
+  void addColToRow(const std::string& rowName, const std::string& colName,
                    double coef);
-  void addColToRow(int colId, int rowId, double coef);
+  void addColToRow(int rowId, int colId, double coef);
 
   int getVarByName(const std::string& name) const;
   int getConstrByName(const std::string& name) const;
@@ -31,10 +31,16 @@ class GurobiSolver : ILPSolver {
   double getVarVal(int colId) const;
   double getVarVal(const std::string& name) const;
 
+  void setObjCoef(const std::string& name, double coef) const;
+  void setObjCoef(int colId, double coef) const;
+
   SolveType solve();
   void update();
 
   double getObjVal() const;
+
+  size_t getNumConstrs() const;
+  size_t getNumVars() const;
 
  private:
   GRBenv* _env;
@@ -46,6 +52,6 @@ class GurobiSolver : ILPSolver {
 }  // namespace optim
 }  // namespace shared
 
-#endif  // SHARED_OPTIM_ILPSOLVER_H_
+#endif
 
 #endif
