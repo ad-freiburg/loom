@@ -13,8 +13,11 @@
 using namespace transitmapper;
 using namespace optim;
 using namespace transitmapper::graph;
-using shared::optim::GurobiSolver;
 using shared::optim::ILPSolver;
+
+#ifdef GUROBI_FOUND
+using shared::optim::GurobiSolver;
+#endif
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
@@ -79,7 +82,11 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
 // _____________________________________________________________________________
 ILPSolver* ILPEdgeOrderOptimizer::createProblem(
     OptGraph* og, const std::set<OptNode*>& g) const {
-  auto lp = new GurobiSolver(shared::optim::MIN);
+  ILPSolver* lp;
+
+#ifdef GUROBI_FOUND
+  lp = new GurobiSolver(shared::optim::MIN);
+#endif
 
   std::set<OptEdge*> processed;
 

@@ -20,7 +20,10 @@ using namespace optim;
 using namespace transitmapper::graph;
 using shared::linegraph::Line;
 using shared::optim::ILPSolver;
+
+#ifdef GUROBI_FOUND
 using shared::optim::GurobiSolver;
+#endif
 
 // _____________________________________________________________________________
 int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
@@ -142,7 +145,11 @@ ILPSolver* ILPOptimizer::createProblem(OptGraph* og,
 
   // VariableMatrix vm;
 
-  auto lp = new GurobiSolver(shared::optim::MIN);
+  ILPSolver* lp;
+
+#ifdef GUROBI_FOUND
+  lp = new GurobiSolver(shared::optim::MIN);
+#endif
 
   // for every segment s, we define |L(s)|^2 decision variables x_slp
   for (OptNode* n : g) {

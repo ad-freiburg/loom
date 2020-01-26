@@ -36,12 +36,13 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   // read input graph
-  tg.readFromJson(&(std::cin), -1);
+  tg.readFromJson(&(std::cin), 0);
 
   size_t statFr = mc.freeze();
   si.init();
 
   mc.averageNodePositions();
+
   mc.cleanUpGeoms();
 
   mc.removeNodeArtifacts();
