@@ -41,6 +41,11 @@ void RestrInferrer::init() {
         }
       }
     }
+
+    // copy turn restrictions from original graph
+    for (auto ex : nd->pl().getConnExc()) {
+      _nMap[nd]->pl().restrs[ex.first] = {_eMap[ex.second. 
+    }
   }
 }
 
