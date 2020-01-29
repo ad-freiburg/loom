@@ -50,7 +50,10 @@ struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
     double c = 0;
 
     if (n) {
-      c += 0;  // TODO: turn restrictions
+      auto lRestrs = n->pl().restrs.find(_line);
+      if (lRestrs != n->pl().restrs.end() && lRestrs->second.count(from)) {
+        if (lRestrs->second.find(from)->second.count(to))  return inf();
+      }
 
       // dont allow going back the same edge
       if (from->getOtherNd(n) == to->getOtherNd(n)) return inf();
@@ -88,11 +91,11 @@ class RestrInferrer {
 
   // mapping from the edges in the original graph to our internal
   // graph representation
-  std::unordered_map<LineEdge*, std::vector<RestrEdge*>> _eMap;
+  std::unordered_map<const LineEdge*, std::vector<RestrEdge*>> _eMap;
 
   // mapping from the nodes in the original graph to our internal
   // graph representation
-  std::unordered_map<LineNode*, RestrNode*> _nMap;
+  std::unordered_map<const LineNode*, RestrNode*> _nMap;
 
   // check whether a connection ocurred in the original graph
   bool check(const Line* r, const LineEdge* edg1, const LineEdge* edg2) const;
@@ -100,6 +103,9 @@ class RestrInferrer {
   void addHndls(const OrigEdgs& origEdgs);
   void addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
                 std::map<RestrEdge*, HndlLst>* handles);
+
+  void edgeRpl(RestrNode* n, const RestrEdge* oldE,
+                             const RestrEdge* newE);
 
   std::map<const LineEdge *, std::set<RestrNode *>> _handlesA, _handlesB;
 };

@@ -64,6 +64,7 @@ int main(int argc, char** argv) {
       mc.removeNodeArtifacts();
       mc.removeEdgeArtifacts();
     };
+    break;
   }
 
   mc.removeNodeArtifacts();

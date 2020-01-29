@@ -42,9 +42,24 @@ void RestrInferrer::init() {
       }
     }
 
-    // copy turn restrictions from original graph
+  }
+
+  // copy turn restrictions from original graph
+  for (auto nd : *_tg->getNds()) {
     for (auto ex : nd->pl().getConnExc()) {
-      _nMap[nd]->pl().restrs[ex.first] = {_eMap[ex.second. 
+      auto line = ex.first;
+      for (auto exPair : ex.second) {
+        const LineEdge* edgeFr = exPair.first;
+
+        for (RestrEdge* rEdgeFr : _eMap[edgeFr]) {
+          for (auto edgeTo : exPair.second) {
+            for (RestrEdge* rEdgeTo : _eMap[edgeTo]) {
+              _nMap[nd]->pl().restrs[line][rEdgeFr].insert(rEdgeTo);
+              _nMap[nd]->pl().restrs[line][rEdgeTo].insert(rEdgeFr);
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -52,6 +67,12 @@ void RestrInferrer::init() {
 // _____________________________________________________________________________
 void RestrInferrer::infer(const OrigEdgs& origEdgs) {
   addHndls(origEdgs);
+
+  // output
+  // util::geo::output::GeoGraphJsonOutput out;
+  // out.print(_rg, std::cout);
+
+  // exit(0);
 
   for (auto nd : *_tg->getNds()) {
     for (auto edg1 : nd->getAdjList()) {
@@ -97,10 +118,12 @@ void RestrInferrer::addHndls(const OrigEdgs& origEdgs) {
 
   // add them to the edge
   for (auto edgHndl : handles) {
+    // sort the handles by their occurance on the line edge
     std::sort(edgHndl.second.begin(), edgHndl.second.end(), HndlCmp());
 
     auto lastNd = edgHndl.first->getFrom();
     double lastPos = 0;
+
     for (auto hndl : edgHndl.second) {
       auto e =
           _rg.addEdg(lastNd, hndl.first,
@@ -109,12 +132,56 @@ void RestrInferrer::addHndls(const OrigEdgs& origEdgs) {
 
       lastNd = hndl.first;
       lastPos = hndl.second;
+
+      // replace any existing exception occurances of the old edge with the new
+      edgeRpl(e->getFrom(), edgHndl.first, e);
+      edgeRpl(e->getTo(), edgHndl.first, e);
     }
+
+    // last edge
     auto e = _rg.addEdg(lastNd, edgHndl.first->getTo(),
                         edgHndl.first->pl().geom.getSegment(lastPos, 1));
     e->pl().lines = edgHndl.first->pl().lines;
 
+    // replace any existing exception occurances of the old edge with the new
+    edgeRpl(e->getFrom(), edgHndl.first, e);
+    edgeRpl(e->getTo(), edgHndl.first, e);
+
+    // delete original edge
     _rg.delEdg(edgHndl.first->getFrom(), edgHndl.first->getTo());
+  }
+}
+
+// _____________________________________________________________________________
+void RestrInferrer::edgeRpl(RestrNode* n, const RestrEdge* oldE,
+                             const RestrEdge* newE) {
+  if (oldE == newE) return;
+  // replace in from
+  for (auto& r : n->pl().restrs) {
+    auto exFr = r.second.begin();
+    while (exFr != r.second.end()) {
+      if (exFr->first == oldE) {
+        std::swap(r.second[newE], exFr->second);
+        exFr = r.second.erase(exFr);
+      } else {
+        exFr++;
+      }
+    }
+  }
+
+  // replace in to
+  for (auto& r : n->pl().restrs) {
+    for (auto& exFr : r.second) {
+      auto exTo = exFr.second.begin();
+      while (exTo != exFr.second.end()) {
+        if (*exTo == oldE) {
+          exFr.second.insert(newE);
+          exTo = exFr.second.erase(exTo);
+        } else {
+          exTo++;
+        }
+      }
+    }
   }
 }
 
