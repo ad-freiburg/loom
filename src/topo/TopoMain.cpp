@@ -45,6 +45,9 @@ int main(int argc, char** argv) {
 
   mc.cleanUpGeoms();
 
+  // does preserve existing turn restrictions
+  mc.removeNodeArtifacts();
+
   // init restriction inferrer
   ri.init();
   size_t restrFr = mc.freeze();
@@ -52,9 +55,7 @@ int main(int argc, char** argv) {
   // only remove the artifacts after the restriction inferrer has bin
   // initialized, as these operations do not guarantee that the restrictions
   // are preserved!
-  mc.removeNodeArtifacts();
   mc.removeEdgeArtifacts();
-
 
   // first run, with 0 perc of line width, and offset of 5
   mc.collapseShrdSegs(5.0);
