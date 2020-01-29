@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include "shared/linegraph/LineGraph.h"
 #include "topo/config/TopoConfig.h"
+#include "topo/mapconstructor/MapConstructor.h"
 #include "topo/restr/RestrGraph.h"
 #include "topo/restr/RestrInferrer.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -20,7 +21,7 @@ RestrInferrer::RestrInferrer(const TopoConfig* cfg, LineGraph* g)
 // _____________________________________________________________________________
 void RestrInferrer::init() {
   for (auto nd : *_tg->getNds()) {
-    _nMap[nd] = _rg.addNd();
+    _nMap[nd] = _rg.addNd(*nd->pl().getGeom());
   }
 
   for (auto nd : *_tg->getNds()) {
@@ -41,7 +42,6 @@ void RestrInferrer::init() {
         }
       }
     }
-
   }
 
   // copy turn restrictions from original graph
@@ -69,10 +69,10 @@ void RestrInferrer::infer(const OrigEdgs& origEdgs) {
   addHndls(origEdgs);
 
   // output
-  // util::geo::output::GeoGraphJsonOutput out;
-  // out.print(_rg, std::cout);
-
-  // exit(0);
+  util::geo::output::GeoGraphJsonOutput out;
+  std::ofstream outs;
+  outs.open("restr_graph.json");
+  out.print(_rg, outs);
 
   for (auto nd : *_tg->getNds()) {
     for (auto edg1 : nd->getAdjList()) {
@@ -154,7 +154,7 @@ void RestrInferrer::addHndls(const OrigEdgs& origEdgs) {
 
 // _____________________________________________________________________________
 void RestrInferrer::edgeRpl(RestrNode* n, const RestrEdge* oldE,
-                             const RestrEdge* newE) {
+                            const RestrEdge* newE) {
   if (oldE == newE) return;
   // replace in from
   for (auto& r : n->pl().restrs) {
@@ -188,22 +188,12 @@ void RestrInferrer::edgeRpl(RestrNode* n, const RestrEdge* oldE,
 // _____________________________________________________________________________
 void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
                              std::map<RestrEdge*, HndlLst>* handles) {
-  double MAX_DIST = _cfg->maxAggrDistance;
+  // double MAX_DIST = _cfg->maxAggrDistance;
+  AggrDistFunc aggrD(_cfg->maxAggrDistance);
 
   auto hndlPA = e->pl().getPolyline().getPointAt(1.0 / 3.0).p;
   auto hndlPB = e->pl().getPolyline().getPointAt(2.0 / 3.0).p;
 
-  auto hndlLA =
-      e->pl()
-          .getPolyline()
-          .getOrthoLineAtDist(MAX_DIST, e->pl().getLines().size() * MAX_DIST)
-          .getLine();
-  auto hndlLB =
-      e->pl()
-          .getPolyline()
-          .getOrthoLineAtDist(e->pl().getPolyline().getLength() - MAX_DIST,
-                              e->pl().getLines().size() * MAX_DIST)
-          .getLine();
 
   for (auto edg : origEdgs.find(e)->second) {
     auto origFr = const_cast<LineEdge*>(edg);
@@ -211,9 +201,26 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
     const auto& edgs = _eMap.find(origFr)->second;
 
     for (auto restrE : edgs) {
+
+      // we add a small buffer to account for the skip heuristic in the
+      // shared segments collapsing
+      double MAX_DIST = aggrD(e) + 2;
+      double checkPos = _cfg->maxAggrDistance;
+      auto hndlLA =
+          e->pl()
+              .getPolyline()
+              .getOrthoLineAtDist(checkPos, MAX_DIST)
+              .getLine();
+      auto hndlLB =
+          e->pl()
+              .getPolyline()
+              .getOrthoLineAtDist(e->pl().getPolyline().getLength() - checkPos,
+                                  MAX_DIST)
+              .getLine();
+
       if (util::geo::intersects(hndlLA, restrE->pl().geom.getLine())) {
         auto projA = restrE->pl().geom.projectOn(hndlPA);
-        auto handleNdA = _rg.addNd();
+        auto handleNdA = _rg.addNd(projA.p);
 
         _handlesA[e].insert(handleNdA);
         (*handles)[restrE].push_back({handleNdA, projA.totalPos});
@@ -221,7 +228,7 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
 
       if (util::geo::intersects(hndlLB, restrE->pl().geom.getLine())) {
         auto projB = restrE->pl().geom.projectOn(hndlPB);
-        auto handleNdB = _rg.addNd();
+        auto handleNdB = _rg.addNd(projB.p);
 
         _handlesB[e].insert(handleNdB);
         (*handles)[restrE].push_back({handleNdB, projB.totalPos});

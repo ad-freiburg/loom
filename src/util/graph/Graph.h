@@ -32,6 +32,8 @@ class Graph {
   const std::set<Node<N, E>*>& getNds() const;
   std::set<Node<N, E>*>* getNds();
 
+  static Node<N, E>* sharedNode(const Edge<N, E>* a, const Edge<N, E>* b);
+
   typename std::set<Node<N, E>*>::iterator delNd(Node<N, E>* n);
   typename std::set<Node<N, E>*>::iterator delNd(
       typename std::set<Node<N, E>*>::iterator i);

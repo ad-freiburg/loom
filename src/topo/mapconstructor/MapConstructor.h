@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include "shared/linegraph/LineGraph.h"
+#include "topo/restr/RestrGraph.h"
 #include "topo/config/TopoConfig.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
@@ -42,6 +43,21 @@ typedef Grid<LineEdge*, Line, double> EdgeGrid;
 typedef std::map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
 
 namespace topo {
+
+struct AggrDistFunc {
+  AggrDistFunc(double maxDist) : _maxDist(maxDist){};
+
+  double operator()(const LineEdge* a, const LineEdge* b) const {
+    return fmax(_maxDist, a->pl().getLines().size() * (_maxDist / 2) +
+                              b->pl().getLines().size() * (_maxDist / 2));
+  };
+
+  double operator()(const LineEdge* a) const {
+    return operator()(a, a);
+  };
+
+  double _maxDist;
+};
 
 struct ShrdSegWrap {
   ShrdSegWrap() : e(0), f(0){};

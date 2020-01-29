@@ -50,7 +50,6 @@ class LineGraph
   size_t getNumNds(bool topo) const;
   size_t getNumLines() const;
 
-  static LineNode* sharedNode(const LineEdge* a, const LineEdge* b);
   static std::vector<LineOcc> getCtdLinesIn(const Line* r,
                                               const LineNode* dir,
                                               const LineEdge* fromEdge,

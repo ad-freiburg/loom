@@ -454,15 +454,6 @@ const Line* LineGraph::getLine(const std::string& id) const {
 }
 
 // _____________________________________________________________________________
-LineNode* LineGraph::sharedNode(const LineEdge* a, const LineEdge* b) {
-  LineNode* r = 0;
-  if (a->getFrom() == b->getFrom() || a->getFrom() == b->getTo())
-    r = a->getFrom();
-  if (a->getTo() == b->getFrom() || a->getTo() == b->getTo()) r = a->getTo();
-  return r;
-}
-
-// _____________________________________________________________________________
 std::vector<LineOcc> LineGraph::getCtdLinesIn(const Line* r,
                                               const LineNode* dir,
                                               const LineEdge* fromEdge,

@@ -25,11 +25,14 @@ typedef std::map<const shared::linegraph::Line*,
     ConnEx;
 
 struct RestrNodePL {
-  RestrNodePL(){};
+  RestrNodePL() {};
+  RestrNodePL(const util::geo::DPoint& geom) : _geom(geom) {};
   ConnEx restrs;
 
-  const util::geo::Point<double>* getGeom() const { return 0; }
-  util::json::Dict getAttrs() const { return util::json::Dict(); }
+  const util::geo::Point<double>* getGeom() const { return &_geom; }
+  util::json::Dict getAttrs() const;
+
+  util::geo::DPoint _geom;
 };
 
 struct RestrEdgePL {
@@ -65,6 +68,31 @@ struct RestrEdgePL {
 };
 
 typedef util::graph::DirGraph<RestrNodePL, RestrEdgePL> RestrGraph;
+
+// _____________________________________________________________________________
+inline util::json::Dict RestrNodePL::getAttrs() const {
+  util::json::Dict obj;
+  auto arr = util::json::Array();
+
+  for (const auto& ro : restrs) {
+    for (const auto& exFr : ro.second) {
+      for (const auto* exTo : exFr.second) {
+        util::json::Dict ex;
+        ex["route"] = util::toString(ro.first->id());
+        if (exFr.first == exTo) continue;
+        auto shrd = RestrGraph::sharedNode(exFr.first, exTo);
+        auto nd1 = exFr.first->getOtherNd(shrd);
+        auto nd2 = exTo->getOtherNd(shrd);
+        ex["edge1_node"] = util::toString(nd1);
+        ex["edge2_node"] = util::toString(nd2);
+        arr.push_back(ex);
+      }
+    }
+  }
+
+  if (arr.size()) obj["excluded_line_conns"] = arr;
+  return obj;
+}
 }
 }
 

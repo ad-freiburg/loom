@@ -67,6 +67,17 @@ Edge<N, E>* Graph<N, E>::getEdg(Node<N, E>* from, Node<N, E>* to) {
 
 // _____________________________________________________________________________
 template <typename N, typename E>
+Node<N, E>* Graph<N, E>::sharedNode(const Edge<N, E>* a, const Edge<N, E>* b) {
+  Node<N, E>* r = 0;
+  if (a->getFrom() == b->getFrom() || a->getFrom() == b->getTo())
+    r = a->getFrom();
+  if (a->getTo() == b->getFrom() || a->getTo() == b->getTo()) r = a->getTo();
+  return r;
+}
+
+
+// _____________________________________________________________________________
+template <typename N, typename E>
 const Edge<N, E>* Graph<N, E>::getEdg(Node<N, E>* from, Node<N, E>* to) const {
   for (auto e : from->getAdjList()) {
     if (e->getOtherNd(from) == to) return e;

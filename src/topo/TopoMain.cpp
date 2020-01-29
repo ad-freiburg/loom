@@ -45,12 +45,16 @@ int main(int argc, char** argv) {
 
   mc.cleanUpGeoms();
 
-  mc.removeNodeArtifacts();
-  mc.removeEdgeArtifacts();
-
   // init restriction inferrer
   ri.init();
   size_t restrFr = mc.freeze();
+
+  // only remove the artifacts after the restriction inferrer has bin
+  // initialized, as these operations do not guarantee that the restrictions
+  // are preserved!
+  mc.removeNodeArtifacts();
+  mc.removeEdgeArtifacts();
+
 
   // first run, with 0 perc of line width, and offset of 5
   mc.collapseShrdSegs(5.0);
@@ -64,7 +68,6 @@ int main(int argc, char** argv) {
       mc.removeNodeArtifacts();
       mc.removeEdgeArtifacts();
     };
-    break;
   }
 
   mc.removeNodeArtifacts();
@@ -74,7 +77,7 @@ int main(int argc, char** argv) {
   ri.infer(mc.freezeTrack(restrFr));
 
   // insert stations
-  si.insertStations(mc.freezeTrack(statFr));
+  // si.insertStations(mc.freezeTrack(statFr));
 
   // output
   util::geo::output::GeoGraphJsonOutput out;

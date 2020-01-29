@@ -43,7 +43,7 @@ bool MapConstructor::collapseShrdSegs() { return collapseShrdSegs(DBL_MAX); }
 
 // _____________________________________________________________________________
 ShrdSegWrap MapConstructor::nextShrdSeg(double dCut, EdgeGrid* grid) {
-  double dmin = _cfg->maxAggrDistance;
+  AggrDistFunc aggrD(_cfg->maxAggrDistance);
 
   for (auto n : *_g->getNds()) {
     for (auto e : n->getAdjList()) {
@@ -51,7 +51,9 @@ ShrdSegWrap MapConstructor::nextShrdSeg(double dCut, EdgeGrid* grid) {
       if (_indEdges.find(e) != _indEdges.end()) continue;
 
       std::set<LineEdge*> neighbors;
-      grid->getNeighbors(e, fmax(5, dmin * 20), &neighbors);
+
+      // TODO: why is the * 20 needed here, this does not make sense!
+      grid->getNeighbors(e, _cfg->maxAggrDistance * 20, &neighbors);
 
       for (auto toTest : neighbors) {
         if (_indEdgesPairs.find({e, toTest}) != _indEdgesPairs.end() ||
@@ -60,9 +62,7 @@ ShrdSegWrap MapConstructor::nextShrdSeg(double dCut, EdgeGrid* grid) {
         }
 
         if (e != toTest) {
-          double dmax =
-              fmax(dmin, e->pl().getLines().size() * (dmin / 2) +
-                             toTest->pl().getLines().size() * (dmin / 2));
+          double dmax = aggrD(e, toTest);
           dmax = fmin(dmax, dCut);
 
           const auto& s = e->pl().getPolyline().getSharedSegments(
@@ -512,6 +512,11 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n) {
   combContEdgs(newEdge, a);
   combContEdgs(newEdge, b);
 
+  edgeRpl(a->getFrom(), a, newEdge);
+  edgeRpl(a->getTo(), a, newEdge);
+  edgeRpl(b->getFrom(), b, newEdge);
+  edgeRpl(b->getTo(), b, newEdge);
+
   _g->delEdg(a->getFrom(), a->getTo());
   _g->delEdg(b->getFrom(), b->getTo());
   _g->delNd(n);
@@ -793,6 +798,8 @@ bool MapConstructor::cleanUpGeoms() {
               .totalPos));
     }
   }
+
+  // TODO: edges with continue to each other should be re-connected here
 
   return true;
 }
