@@ -36,7 +36,6 @@ class GraphBuilder {
   void writeMainDirs(RenderGraph* g);
   void expandOverlappinFronts(RenderGraph* g);
   void writeInitialConfig(RenderGraph* g);
-  void createMetaNodes(RenderGraph* g);
 
  private:
   const config::Config* _cfg;
@@ -46,15 +45,6 @@ class GraphBuilder {
       const RenderGraph* g, const shared::linegraph::LineNode* n) const;
   void freeNodeFront(const shared::linegraph::LineNode* n,
                      shared::linegraph::NodeFront* f);
-
-  std::vector<shared::linegraph::NodeFront> getNextMetaNodeCand(
-      RenderGraph* g) const;
-  std::vector<shared::linegraph::NodeFront> getOpenNodeFronts(
-      const graph::RenderGraph* g, const shared::linegraph::LineNode* n) const;
-  std::vector<shared::linegraph::NodeFront> getClosedNodeFronts(
-      const graph::RenderGraph* g, const shared::linegraph::LineNode* n) const;
-  bool isClique(const graph::RenderGraph* g,
-                std::set<const shared::linegraph::LineNode*> potClique) const;
 
   bool nodeFrontsOverlap(const RenderGraph* g,
                          const shared::linegraph::NodeFront& a,

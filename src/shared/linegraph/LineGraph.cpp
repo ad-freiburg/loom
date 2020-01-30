@@ -21,6 +21,8 @@ using shared::linegraph::Line;
 using shared::linegraph::Partner;
 using shared::linegraph::LineOcc;
 using shared::linegraph::ISect;
+using shared::linegraph::NodeGrid;
+using shared::linegraph::EdgeGrid;
 using util::geo::Point;
 using util::geo::DPoint;
 
@@ -408,6 +410,15 @@ void LineGraph::topologizeIsects() {
 }
 
 // _____________________________________________________________________________
+std::set<LineEdge*> LineGraph::getNeighborEdges(const util::geo::DLine& line,
+                                                double d) const {
+  std::set<LineEdge*> neighbors;
+  _edgeGrid.get(line, d, &neighbors);
+
+  return neighbors;
+}
+
+// _____________________________________________________________________________
 ISect LineGraph::getNextIntersection() {
   for (auto n1 : *getNds()) {
     for (auto e1 : n1->getAdjList()) {
@@ -505,9 +516,9 @@ size_t LineGraph::getMaxLineNum(const LineNode* nd) {
 }
 
 // _____________________________________________________________________________
-size_t LineGraph::getMaxLineNum() {
+size_t LineGraph::getMaxLineNum() const {
   size_t ret = 0;
-  for (auto nd : *getNds()) {
+  for (auto nd : getNds()) {
     size_t lineNum = getMaxLineNum(nd);
     if (lineNum > ret) ret = lineNum;
   }
@@ -564,3 +575,23 @@ size_t LineGraph::getNumNds() const { return getNds().size(); }
 
 // _____________________________________________________________________________
 size_t LineGraph::getNumNds(bool topo) const { return 0; }
+
+// _____________________________________________________________________________
+NodeGrid* LineGraph::getNdGrid() {
+  return &_nodeGrid;
+}
+
+// _____________________________________________________________________________
+const NodeGrid& LineGraph::getNdGrid() const {
+  return _nodeGrid;
+}
+
+// _____________________________________________________________________________
+EdgeGrid* LineGraph::getEdgGrid() {
+  return &_edgeGrid;
+}
+
+// _____________________________________________________________________________
+const EdgeGrid& LineGraph::getEdgGrid() const {
+  return &_edgeGrid;
+}

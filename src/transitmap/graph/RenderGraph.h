@@ -12,8 +12,8 @@
 #include <set>
 #include <string>
 
-#include "shared/linegraph/LineGraph.h"
 #include "shared/linegraph/Line.h"
+#include "shared/linegraph/LineGraph.h"
 #include "transitmap/graph/OrderCfg.h"
 #include "transitmap/graph/Penalties.h"
 #include "util/geo/Geo.h"
@@ -57,6 +57,8 @@ class RenderGraph : public shared::linegraph::LineGraph {
                               const shared::linegraph::LineEdge* e, size_t pos,
                               bool inv, bool origG) const;
 
+  void createMetaNodes();
+
  private:
   double _defWidth, _defSpacing;
 
@@ -83,6 +85,15 @@ class RenderGraph : public shared::linegraph::LineGraph {
   util::geo::Polygon<double> getConvexFrontHull(
       const shared::linegraph::LineNode* n, double d, bool rectangulize,
       bool simpleRenderForTwoEdgeNodes) const;
+
+  std::vector<shared::linegraph::NodeFront> getNextMetaNodeCand() const;
+  bool isClique(std::set<const shared::linegraph::LineNode*> potClique) const;
+
+  std::vector<shared::linegraph::NodeFront> getOpenNodeFronts(
+      const shared::linegraph::LineNode* n) const;
+
+  std::vector<shared::linegraph::NodeFront> getClosedNodeFronts(
+      const shared::linegraph::LineNode* n) const;
 };
 }
 }

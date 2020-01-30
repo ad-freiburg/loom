@@ -77,6 +77,15 @@ struct OutlinePrintPair {
   PrintDelegate back;
 };
 
+struct LineLabelPosCand {
+  util::geo::PolyLine<double> geom;
+  double centerDist;
+};
+
+inline bool operator<(const LineLabelPosCand& a, const LineLabelPosCand& b) {
+  return a.centerDist < b.centerDist;
+}
+
 class SvgRenderer : public Renderer {
  public:
   SvgRenderer(std::ostream* o, const config::Config* cfg,
@@ -141,6 +150,9 @@ class SvgRenderer : public Renderer {
                        const RenderParams& params);
 
   void renderNodeFronts(const graph::RenderGraph& outG,
+                        const RenderParams& params);
+
+  void renderLineLabels(const graph::RenderGraph& outG,
                         const RenderParams& params);
 
   std::multiset<InnerClique> getInnerCliques(

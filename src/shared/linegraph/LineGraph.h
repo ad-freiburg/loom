@@ -27,8 +27,7 @@ struct ISect {
   util::geo::LinePoint<double> bp;
 };
 
-class LineGraph
-    : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
+class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
  public:
   LineGraph();
 
@@ -50,23 +49,32 @@ class LineGraph
   size_t getNumNds(bool topo) const;
   size_t getNumLines() const;
 
-  static std::vector<LineOcc> getCtdLinesIn(const Line* r,
-                                              const LineNode* dir,
-                                              const LineEdge* fromEdge,
-                                              const LineEdge* toEdge);
+  static std::vector<LineOcc> getCtdLinesIn(const Line* r, const LineNode* dir,
+                                            const LineEdge* fromEdge,
+                                            const LineEdge* toEdge);
 
   static std::vector<LineOcc> getCtdLinesIn(const LineEdge* fromEdge,
-                                              const LineEdge* toEdge);
+                                            const LineEdge* toEdge);
 
   static std::vector<const Line*> getSharedLines(const LineEdge* a,
-                                              const LineEdge* b);
+                                                 const LineEdge* b);
 
   static size_t getLDeg(const LineNode* nd);
   static size_t getMaxLineNum(const LineNode* nd);
-  size_t getMaxLineNum();
+  size_t getMaxLineNum() const;
 
   static std::vector<Partner> getPartners(const LineNode* n, const NodeFront* f,
-                                   const LineOcc& ro);
+                                          const LineOcc& ro);
+
+  std::set<LineEdge*> getNeighborEdges(const util::geo::DLine& line,
+                                       double d) const;
+
+  NodeGrid* getNdGrid();
+  const NodeGrid& getNdGrid() const;
+
+  EdgeGrid* getEdgGrid();
+  const EdgeGrid& getEdgGrid() const;
+
 
  private:
   util::geo::Box<double> _bbox;
@@ -75,6 +83,7 @@ class LineGraph
 
   void buildGrids();
 
+  // TODO: remove this
   std::set<LineEdge*> proced;
   std::map<std::string, const Line*> _lines;
 

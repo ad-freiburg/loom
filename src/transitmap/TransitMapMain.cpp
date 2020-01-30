@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     b.expandOverlappinFronts(&g);
   }
 
-  b.createMetaNodes(&g);
+  g.createMetaNodes();
 
   LOG(INFO) << "Optimizing...";
 
