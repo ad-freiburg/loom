@@ -13,6 +13,7 @@
 #include "shared/linegraph/Line.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/RenderGraph.h"
+#include "transitmap/label/Labeller.h"
 #include "transitmap/optim/Scorer.h"
 #include "util/geo/Geo.h"
 #include "util/geo/PolyLine.h"
@@ -76,15 +77,6 @@ struct OutlinePrintPair {
   PrintDelegate front;
   PrintDelegate back;
 };
-
-struct LineLabelPosCand {
-  util::geo::PolyLine<double> geom;
-  double centerDist;
-};
-
-inline bool operator<(const LineLabelPosCand& a, const LineLabelPosCand& b) {
-  return a.centerDist < b.centerDist;
-}
 
 class SvgRenderer : public Renderer {
  public:
@@ -152,7 +144,10 @@ class SvgRenderer : public Renderer {
   void renderNodeFronts(const graph::RenderGraph& outG,
                         const RenderParams& params);
 
-  void renderLineLabels(const graph::RenderGraph& outG,
+  void renderLineLabels(const label::Labeller& lbler,
+                        const RenderParams& params);
+
+  void renderStationLabels(const label::Labeller& lbler,
                         const RenderParams& params);
 
   std::multiset<InnerClique> getInnerCliques(

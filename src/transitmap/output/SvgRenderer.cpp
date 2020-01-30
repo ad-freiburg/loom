@@ -7,6 +7,7 @@
 #include "shared/linegraph/Line.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/RenderGraph.h"
+#include "transitmap/label/Labeller.h"
 #include "transitmap/output/SvgRenderer.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
@@ -22,6 +23,8 @@ using util::geo::LinePoint;
 using util::geo::LinePointCmp;
 using output::SvgRenderer;
 using output::InnerClique;
+using label::Labeller;
+using label::LineLabel;
 
 using util::toString;
 
@@ -34,6 +37,9 @@ SvgRenderer::SvgRenderer(std::ostream* o, const config::Config* cfg,
 void SvgRenderer::print(const graph::RenderGraph& outG) {
   std::map<std::string, std::string> params;
   RenderParams rparams;
+
+  Labeller labeller(_cfg);
+  labeller.label(outG);
 
   double p = _cfg->outputPadding;
 
@@ -120,7 +126,8 @@ void SvgRenderer::print(const graph::RenderGraph& outG) {
     renderNodeFronts(outG, rparams);
   }
 
-  renderLineLabels(outG, rparams);
+  renderLineLabels(labeller, rparams);
+  renderStationLabels(labeller, rparams);
 
   _w.closeTags();
 }
@@ -684,78 +691,99 @@ size_t InnerClique::getNumBranchesIn(
 }
 
 // _____________________________________________________________________________
-void SvgRenderer::renderLineLabels(const graph::RenderGraph& outG,
+void SvgRenderer::renderStationLabels(const Labeller& labeller,
                                    const RenderParams& rparams) {
   _w.openTag("g");
   size_t id = 0;
-  for (auto n : outG.getNds()) {
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-      double geomLen = util::geo::len(*e->pl().getGeom());
+  for (auto label : labeller.getStationLabels()) {
+      std::string shift = "0em";
+      auto textPath = label.geom;
+      double ang = util::geo::angBetween(textPath.front(), textPath.back());
 
-      // estimate label width
-      double fontSize = 1 / _cfg->outputResolution;
-      double labelW = ((fontSize / 3) * (e->pl().getLines().size() - 1)) /
-                      _cfg->outputResolution;
-
-      for (auto lo : e->pl().getLines()) {
-        labelW += lo.line->label().size() * (fontSize / _cfg->outputResolution);
+      if ((fabs(ang) < (3 * M_PI / 2)) && (fabs(ang) > (M_PI / 2))) {
+        shift = ".75em";
+        textPath.reverse();
       }
 
       std::stringstream points;
       std::map<std::string, std::string> pathPars;
 
-      // try out positions
-      double step = geomLen / 4;
+      points << "M"
+             << (textPath.front().getX() - rparams.xOff) *
+                    _cfg->outputResolution
+             << " "
+             << rparams.height -
+                    (textPath.front().getY() - rparams.yOff) *
+                        _cfg->outputResolution;
 
-      std::vector<LineLabelPosCand> cands;
-
-      for (int dir = -1; dir < 2; dir += 2) {
-        double start = 0;
-        while (start + labelW <= geomLen) {
-          PolyLine<double> cand = util::geo::segment(
-              *e->pl().getGeom(), start / geomLen, (start + labelW) / geomLen);
-          cand.offsetPerp(dir * (outG.getTotalWidth(e) / 2 +
-                                 (_cfg->lineSpacing + _cfg->lineWidth)));
-
-          bool block = false;
-
-          for (auto neigh : outG.getNeighborEdges(
-                   cand.getLine(), outG.getMaxLineNum() * (_cfg->lineWidth +
-                                                           _cfg->lineSpacing) +
-                                       fontSize * 4)) {
-            if (neigh == e) continue;
-            if (util::geo::dist(cand.getLine(), *neigh->pl().getGeom()) <
-                (outG.getTotalWidth(neigh) / 2) + (fontSize)) {
-              block = true;
-              break;
-            }
-          }
-
-          if (dir < 0) cand.reverse();
-
-          if (!block)
-            cands.push_back(
-                {cand, fabs((geomLen / 2) - (start + (labelW / 2)))});
-          start += step;
-        }
+      for (auto& p : textPath.getLine()) {
+        points << " L" << (p.getX() - rparams.xOff) * _cfg->outputResolution
+               << " "
+               << rparams.height -
+                      (p.getY() - rparams.yOff) * _cfg->outputResolution;
       }
 
-      std::sort(cands.begin(), cands.end());
+      std::stringstream style;
+      style << "fill:none;stroke:black"
+            << ";stroke-linejoin: "
+               "miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1";
+      std::map<std::string, std::string> ps;
+      ps["style"] = style.str();
+      printLine(textPath, ps, rparams);
 
-      /////
+      std::string idStr = "stlblp" + util::toString(id);
 
-      if (cands.size() == 0) continue;
+      pathPars["d"] = points.str();
+      pathPars["id"] = idStr;
+      id++;
 
-      auto textPath = cands.front().geom;
+      _w.openTag("defs");
+      _w.openTag("path", pathPars);
+      _w.closeTag();
+      _w.closeTag();
 
-      std::string baseLine = "baseline";
+      std::map<std::string, std::string> params;
+      // params["stroke"] = "black";
+      // params["stroke-width"] =
+      // util::toString((_cfg->lineWidth / 20) * _cfg->outputResolution);
+      // params["stroke-linejoin"] = "miter";
+      // params["stroke-linecap"] = "butt";
+      params["font-weight"] = "bold";
+      params["font-family"] = "Ubuntu";
+      params["dy"] = shift;
+      params["font-size"] = util::toString(label.fontSize * _cfg->outputResolution);
+      // params["textLength"] = "100";
+      // params["lengthAdjust"] = "spacingAndGlyphs";
+
+      _w.openTag("text", params);
+      _w.openTag("textPath", {{"dy", shift},
+                              {"xlink:href", "#" + idStr},
+                              {"text-anchor", "left"}});
+
+      _w.writeText(label.s.name);
+      _w.closeTag();
+      _w.closeTag();
+    }
+  _w.closeTag();
+}
+
+// _____________________________________________________________________________
+void SvgRenderer::renderLineLabels(const Labeller& labeller,
+                                   const RenderParams& rparams) {
+  _w.openTag("g");
+  size_t id = 0;
+  for (auto label : labeller.getLineLabels()) {
+      std::string shift = "0em";
+      auto textPath = label.geom;
       double ang = util::geo::angBetween(textPath.front(), textPath.back());
 
       if ((fabs(ang) < (3 * M_PI / 2)) && (fabs(ang) > (M_PI / 2))) {
-        baseLine = "hanging";
+        shift = ".75em";
         textPath.reverse();
       }
+
+      std::stringstream points;
+      std::map<std::string, std::string> pathPars;
 
       points << "M"
              << (textPath.front().getX() - rparams.xOff) *
@@ -791,27 +819,28 @@ void SvgRenderer::renderLineLabels(const graph::RenderGraph& outG,
       // params["stroke-linecap"] = "butt";
       params["font-weight"] = "bold";
       params["font-family"] = "Ubuntu";
-      ;
-      params["font-size"] = util::toString(fontSize);
+      params["dy"] = shift;
+      params["font-size"] = util::toString(label.fontSize * _cfg->outputResolution);
       // params["textLength"] = "100";
       // params["lengthAdjust"] = "spacingAndGlyphs";
 
       _w.openTag("text", params);
-      _w.openTag("textPath", {{"dominant-baseline", baseLine},
+      _w.openTag("textPath", {{"dy", shift},
                               {"xlink:href", "#" + idStr},
                               {"text-anchor", "middle"},
                               {"startOffset", "50%"}});
 
-      for (auto lo : e->pl().getLines()) {
-        _w.openTag("tspan", {{"fill", "#" + lo.line->color()},
-                             {"dx", util::toString(fontSize / 3)}});
-        _w.writeText(lo.line->label());
+      double dy = 0;
+      for (auto line : label.lines) {
+        _w.openTag("tspan", {{"fill", "#" + line->color()},
+                             {"dx", util::toString(dy)}});
+        dy = (label.fontSize * _cfg->outputResolution)/ 3;
+        _w.writeText(line->label());
         _w.closeTag();
       }
       _w.closeTag();
       _w.closeTag();
     }
-  }
   _w.closeTag();
 }
 
