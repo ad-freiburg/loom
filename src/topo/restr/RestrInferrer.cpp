@@ -66,6 +66,13 @@ void RestrInferrer::init() {
 
 // _____________________________________________________________________________
 void RestrInferrer::infer(const OrigEdgs& origEdgs) {
+  // delete all existing restrictions
+
+  for (auto nd : *_tg->getNds()) {
+    nd->pl().clearConnExc();
+  }
+
+
   addHndls(origEdgs);
 
   // output

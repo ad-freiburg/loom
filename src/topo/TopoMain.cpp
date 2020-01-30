@@ -60,9 +60,9 @@ int main(int argc, char** argv) {
   // first run, with 0 perc of line width, and offset of 5
   mc.collapseShrdSegs(5.0);
 
-  double step = cfg.maxAggrDistance;
+  double step = 30;
 
-  for (double d = cfg.maxAggrDistance; d <= (cfg.maxAggrDistance * 15);
+  for (double d = cfg.maxAggrDistance; d <= (cfg.maxAggrDistance * tg.getMaxLineNum());
        d += step) {
     std::cerr << d << std::endl;
     while (mc.collapseShrdSegs(d)) {
@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
   ri.infer(mc.freezeTrack(restrFr));
 
   // insert stations
-  // si.insertStations(mc.freezeTrack(statFr));
+  si.insertStations(mc.freezeTrack(statFr));
 
   // output
   util::geo::output::GeoGraphJsonOutput out;

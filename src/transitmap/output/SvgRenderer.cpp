@@ -274,7 +274,7 @@ size_t SvgRenderer::getNextPartner(
 bool SvgRenderer::isNextTo(const shared::linegraph::InnerGeom& a,
                            const shared::linegraph::InnerGeom b) const {
   // TODO!!!!!
-  return false;
+  // return false;
 
   double THRESHOLD = 0.5 * M_PI + 0.1;
   if (a.from.front == b.from.front && a.to.front == b.to.front) {

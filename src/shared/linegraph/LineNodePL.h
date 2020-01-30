@@ -106,6 +106,8 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   bool connOccurs(const Line* r, const LineEdge* edgeA,
                   const LineEdge* edgeB) const;
 
+  void clearConnExc();
+
   ConnEx& getConnExc() { return _connEx; }
   const ConnEx& getConnExc() const { return _connEx; }
 

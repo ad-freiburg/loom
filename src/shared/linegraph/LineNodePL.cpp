@@ -19,6 +19,11 @@ LineNodePL::LineNodePL(Point<double> pos) : _pos(pos) {}
 const Point<double>* LineNodePL::getGeom() const { return &_pos; }
 
 // _____________________________________________________________________________
+void LineNodePL::clearConnExc() {
+  _connEx.clear();
+}
+
+// _____________________________________________________________________________
 void LineNodePL::setGeom(const Point<double>& p) { _pos = p; }
 
 // _____________________________________________________________________________
