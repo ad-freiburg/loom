@@ -73,7 +73,7 @@ maps/%: %/network.json
 
 
 	# z14
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=100 --line-width=34 --line-spacing=17 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.125
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=102 --line-width=34 --line-spacing=17 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.125
 	cp $@/z14/network_e.pngw $@/z14/network_s.pngw
 	cp $@/z14/network_e.pngw $@/z14/network_n.pngw
 	cp $@/z14/network_e.pngw $@/z14/network_l.pngw
@@ -84,11 +84,11 @@ maps/%: %/network.json
 	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z14/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z14/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z14/network_n.png $@/nodes
-	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z15/network_l.png $@/labels
+	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z14/network_l.png $@/labels
 
 
 	# z13
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=240 --line-width=60 --line-spacing=30 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.075
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=180 --line-width=60 --line-spacing=30 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.075
 	cp $@/z13/network_e.pngw $@/z13/network_s.pngw
 	cp $@/z13/network_e.pngw $@/z13/network_n.pngw
 	cp $@/z13/network_e.pngw $@/z13/network_l.pngw
@@ -99,7 +99,7 @@ maps/%: %/network.json
 	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z13/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z13/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z13/network_n.png $@/nodes
-	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z15/network_l.png $@/labels
+	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z13/network_l.png $@/labels
 
 
 	# z12
@@ -114,7 +114,7 @@ maps/%: %/network.json
 	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z12/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z12/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z12/network_n.png $@/nodes
-	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z15/network_l.png $@/labels
+	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z12/network_l.png $@/labels
 
 
 	# z11
