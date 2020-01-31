@@ -137,6 +137,7 @@ int main(int argc, char** argv) {
       std::string path = cfg.outputPath + "/edges.svg";
       cfg.renderEdges = 1;
       cfg.renderStations = 0;
+      cfg.renderLabels = 0;
       cfg.renderNodeConnections = 0;
       LOG(INFO) << "Outputting edge SVG to " << path << " ..." << std::endl;
       std::ofstream o;
@@ -149,6 +150,7 @@ int main(int argc, char** argv) {
       std::string path = cfg.outputPath + "/nodes.svg";
       cfg.renderEdges = 0;
       cfg.renderStations = 0;
+      cfg.renderLabels = 0;
       cfg.renderNodeConnections = 1;
       LOG(INFO) << "Outputting node SVG to " << path << " ..." << std::endl;
       std::ofstream o;
@@ -161,6 +163,7 @@ int main(int argc, char** argv) {
       std::string path = cfg.outputPath + "/stations.svg";
       cfg.renderEdges = 0;
       cfg.renderStations = 1;
+      cfg.renderLabels = 0;
       cfg.renderNodeConnections = 0;
       LOG(INFO) << "Outputting station SVG to " << path << " ..." << std::endl;
       std::ofstream o;
@@ -168,26 +171,20 @@ int main(int argc, char** argv) {
       output::SvgRenderer svgOut(&o, &cfg, &scorer);
       svgOut.print(g);
     }
-  }
 
-  if (!cfg.worldFilePath.empty()) {
-    LOG(INFO) << "Writing world file for this map to " << cfg.worldFilePath;
-
-    std::ofstream file;
-    file.open(cfg.worldFilePath);
-    auto box = util::geo::pad(g.getBBox(), cfg.outputPadding);
-    if (file) {
-      file << 1 / cfg.outputResolution << std::endl
-           << 0 << std::endl
-           << 0 << std::endl
-           << -1 / cfg.outputResolution << std::endl
-           << std::fixed
-           << box.getLowerLeft().getX()
-           << std::endl
-           << box.getUpperRight().getY()
-           << std::endl;
-      file.close();
+    {
+      std::string path = cfg.outputPath + "/labels.svg";
+      cfg.renderEdges = 0;
+      cfg.renderStations = 0;
+      cfg.renderLabels = 1;
+      cfg.renderNodeConnections = 0;
+      LOG(INFO) << "Outputting label SVG to " << path << " ..." << std::endl;
+      std::ofstream o;
+      o.open(path);
+      output::SvgRenderer svgOut(&o, &cfg, &scorer);
+      svgOut.print(g);
     }
   }
+
   return (0);
 }

@@ -14,6 +14,9 @@ struct Config {
   double lineWidth;
   double lineSpacing;
 
+  double lineLabelSize;
+  double stationLabelSize;
+
   std::string name;
   std::string outputPath;
   std::string dbgPath;
@@ -44,6 +47,7 @@ struct Config {
   bool renderNodePolygons;
   bool renderStationNames;
   bool renderEdges;
+  bool renderLabels;
 
   bool outputStats;
   bool renderStats;

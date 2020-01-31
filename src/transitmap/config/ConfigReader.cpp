@@ -56,10 +56,22 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->outlineWidth))
       ->default_value(2),
       "default width of line outline")
+    ("line-label-textsize",
+      opts::value<double>(&(cfg->lineLabelSize))
+      ->default_value(40),
+      "text size for line labels")
+    ("station-label-textsize",
+      opts::value<double>(&(cfg->stationLabelSize))
+      ->default_value(60),
+      "text size for station labels")
     ("render-stations",
      opts::value<bool>(&(cfg->renderStations))
       ->default_value(true),
       "render station geometries")
+    ("render-labels",
+     opts::value<bool>(&(cfg->renderLabels))
+      ->default_value(false),
+      "render labels")
     ("tight-stations",
      opts::value<bool>(&(cfg->tightStations))
       ->default_value(false),

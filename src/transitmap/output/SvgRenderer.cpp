@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <ostream>
+#include <fstream>
 #include "shared/linegraph/Line.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/RenderGraph.h"
@@ -43,7 +44,28 @@ void SvgRenderer::print(const graph::RenderGraph& outG) {
 
   double p = _cfg->outputPadding;
 
-  auto box = util::geo::pad(outG.getBBox(), p);
+  auto box = outG.getBBox();
+  box = util::geo::extendBox(labeller.getBBox(), box);
+
+  box = util::geo::pad(box, p);
+
+  if (!_cfg->worldFilePath.empty()) {
+
+    std::ofstream file;
+    file.open(_cfg->worldFilePath);
+    if (file) {
+      file << 1 / _cfg->outputResolution << std::endl
+           << 0 << std::endl
+           << 0 << std::endl
+           << -1 / _cfg->outputResolution << std::endl
+           << std::fixed
+           << box.getLowerLeft().getX()
+           << std::endl
+           << box.getUpperRight().getY()
+           << std::endl;
+      file.close();
+    }
+  }
 
   rparams.xOff = box.getLowerLeft().getX();
   rparams.yOff = box.getLowerLeft().getY();
@@ -126,8 +148,10 @@ void SvgRenderer::print(const graph::RenderGraph& outG) {
     renderNodeFronts(outG, rparams);
   }
 
-  renderLineLabels(labeller, rparams);
-  renderStationLabels(labeller, rparams);
+  if (_cfg->renderLabels) {
+    renderLineLabels(labeller, rparams);
+    renderStationLabels(labeller, rparams);
+  }
 
   _w.closeTags();
 }
@@ -697,11 +721,15 @@ void SvgRenderer::renderStationLabels(const Labeller& labeller,
   size_t id = 0;
   for (auto label : labeller.getStationLabels()) {
       std::string shift = "0em";
+      std::string textAnchor = "start";
+      std::string startOffset = "0";
       auto textPath = label.geom;
       double ang = util::geo::angBetween(textPath.front(), textPath.back());
 
       if ((fabs(ang) < (3 * M_PI / 2)) && (fabs(ang) > (M_PI / 2))) {
         shift = ".75em";
+        textAnchor = "end";
+        startOffset = "100%";
         textPath.reverse();
       }
 
@@ -729,7 +757,8 @@ void SvgRenderer::renderStationLabels(const Labeller& labeller,
                "miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1";
       std::map<std::string, std::string> ps;
       ps["style"] = style.str();
-      printLine(textPath, ps, rparams);
+
+      for (auto path : label.band) printLine(path, ps, rparams);
 
       std::string idStr = "stlblp" + util::toString(id);
 
@@ -748,8 +777,8 @@ void SvgRenderer::renderStationLabels(const Labeller& labeller,
       // util::toString((_cfg->lineWidth / 20) * _cfg->outputResolution);
       // params["stroke-linejoin"] = "miter";
       // params["stroke-linecap"] = "butt";
-      params["font-weight"] = "bold";
-      params["font-family"] = "Ubuntu";
+      params["font-weight"] = label.bold ? "bold" : "normal";
+      params["font-family"] = "Ubuntu Condensed";
       params["dy"] = shift;
       params["font-size"] = util::toString(label.fontSize * _cfg->outputResolution);
       // params["textLength"] = "100";
@@ -758,7 +787,8 @@ void SvgRenderer::renderStationLabels(const Labeller& labeller,
       _w.openTag("text", params);
       _w.openTag("textPath", {{"dy", shift},
                               {"xlink:href", "#" + idStr},
-                              {"text-anchor", "left"}});
+                              {"startOffset", startOffset},
+                              {"text-anchor", textAnchor}});
 
       _w.writeText(label.s.name);
       _w.closeTag();

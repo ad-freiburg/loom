@@ -43,6 +43,7 @@ var networks = [
 var stations = [];
 var edges = [];
 var nodes = [];
+var labels = [];
 
 var attr = '';
 
@@ -77,6 +78,15 @@ for (var n in networks) {
   });
   edges.push(net['layerE']);
 
+  net['layerL'] = new ol.layer.Tile({
+    source: new ol.source.XYZ({
+      url: net['id'] + '/labels/{z}/{x}/{y}.png'
+    }),
+    extent: net['extent'],
+    attributions: attr
+  });
+  labels.push(net['layerL']);
+
   $("#layerlist")
     .append('<li class="" id="layer-' + net['id'] + '">' +
       '<div class="flink">' +
@@ -94,6 +104,7 @@ for (var n in networks) {
 var stationsLayer = new ol.layer.Group({layers : stations});
 var edgesLayer = new ol.layer.Group({layers : edges});
 var nodesLayer = new ol.layer.Group({layers : nodes});
+var labelsLayer = new ol.layer.Group({layers : labels});
 
 window.map = new ol.Map({
   target: 'map',
@@ -118,7 +129,7 @@ window.map = new ol.Map({
             attributions: ['&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>', '&copy; <a href="https://carto.com/attribution">CARTO</a>']
           })
         }),
-        edgesLayer, nodesLayer, stationsLayer
+        edgesLayer, nodesLayer, stationsLayer, labelsLayer
       ]
     })
   ],
@@ -183,7 +194,11 @@ document.getElementById("con-cb").onchange = function() {
   nodesLayer.setVisible(this.checked);
 };
 
-$(window).on('hashchange',function(){ 
+document.getElementById("lbl-cb").onchange = function() {
+  labelsLayer.setVisible(this.checked);
+};
+
+$(window).on('hashchange',function(){
   setVisibleNetwork(location.hash.slice(1));
 });
 

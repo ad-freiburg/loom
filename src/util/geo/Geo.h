@@ -630,6 +630,34 @@ inline bool intersects(const Box<T>& b, const Point<T>& p) {
 }
 
 // _____________________________________________________________________________
+template <template <typename> class GeometryA,
+          template <typename> class GeometryB, typename T>
+inline bool intersects(const std::vector<GeometryA<T>>& multigeom,
+                       const GeometryB<T>& b) {
+  for (const auto& geom : multigeom)
+    if (intersects(geom, b)) return true;
+  return false;
+}
+
+// _____________________________________________________________________________
+template <template <typename> class GeometryA,
+          template <typename> class GeometryB, typename T>
+inline bool intersects(const GeometryB<T>& b,
+                       const std::vector<GeometryA<T>>& multigeom) {
+  return intersects(multigeom, b);
+}
+
+// _____________________________________________________________________________
+template <template <typename> class GeometryA,
+          template <typename> class GeometryB, typename T>
+inline bool intersects(const std::vector<GeometryA<T>>& multigeomA,
+                       const std::vector<GeometryA<T>>& multigeomB) {
+  for (const auto& geom : multigeomA)
+    if (intersects(geom, multigeomB)) return true;
+  return false;
+}
+
+// _____________________________________________________________________________
 template <typename T>
 inline Point<T> intersection(T p1x, T p1y, T q1x, T q1y, T p2x, T p2y, T q2x,
                              T q2y) {
@@ -776,6 +804,36 @@ inline double dist(const Line<T>& la, const Line<T>& lb) {
     if (dTmp < EPSILON) return 0;
     if (dTmp < d) d = dTmp;
   }
+  return d;
+}
+
+// _____________________________________________________________________________
+template <template <typename> class GeometryA,
+          template <typename> class GeometryB, typename T>
+inline double dist(const std::vector<GeometryA<T>>& multigeom,
+                   const GeometryB<T>& b) {
+  double d = std::numeric_limits<double>::infinity();
+  for (const auto& geom : multigeom)
+    if (dist(geom, b) < d) d = dist(geom, b);
+  return d;
+}
+
+// _____________________________________________________________________________
+template <template <typename> class GeometryA,
+          template <typename> class GeometryB, typename T>
+inline double dist(const GeometryB<T>& b,
+                   const std::vector<GeometryA<T>>& multigeom) {
+  return dist(multigeom, b);
+}
+
+// _____________________________________________________________________________
+template <template <typename> class GeometryA,
+          template <typename> class GeometryB, typename T>
+inline double dist(const std::vector<GeometryA<T>>& multigeomA,
+                   const std::vector<GeometryB<T>>& multigeomB) {
+  double d = std::numeric_limits<double>::infinity();
+  for (const auto& geom : multigeomB)
+    if (dist(geom, multigeomA) < d) d = dist(geom, multigeomA);
   return d;
 }
 
@@ -1244,6 +1302,30 @@ inline Box<T> getBoundingBox(const std::vector<Geometry<T>>& multigeo) {
 
 // _____________________________________________________________________________
 template <typename T>
+inline double getEnclosingRadius(const Point<T>& p, const Point<T>& pp) {
+  return dist(p, pp);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline double getEnclosingRadius(const Point<T>& p, const Line<T>& l) {
+  double ret = 0;
+  for (const auto& pp : l)
+    if (getEnclosingRadius(pp, p) > ret) ret = getEnclosingRadius(pp, p);
+  return ret;
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline double getEnclosingRadius(const Point<T>& p, const Polygon<T>& pg) {
+  double ret = 0;
+  for (const auto& pp : pg.getOuter())
+    if (getEnclosingRadius(pp, p) > ret) ret = getEnclosingRadius(pp, p);
+  return ret;
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline Polygon<T> convexHull(const Point<T>& p) {
   return Polygon<T>({p});
 }
@@ -1480,11 +1562,12 @@ Line<T> average(const std::vector<const Line<T>*>& lines) {
 // _____________________________________________________________________________
 template <typename T>
 Line<T> average(const std::vector<const Line<T>*>& lines,
-                                 const std::vector<double>& weights) {
+                const std::vector<double>& weights) {
   bool weighted = lines.size() == weights.size();
   double stepSize;
 
-  double longestLength = std::numeric_limits<double>::min();  // avoid recalc of length on each comparision
+  double longestLength = std::numeric_limits<
+      double>::min();  // avoid recalc of length on each comparision
   for (auto p : lines) {
     if (len(*p) > longestLength) {
       longestLength = len(*p);

@@ -11,7 +11,7 @@
       "properties": {
         "id": "0x12f5230",
         "station_id": "555921",
-        "station_label": "Bad Cannstatt Wilhelmsplatz, Stuttgart"
+        "station_label": "Bad Cannstatt Wilhelmsplatz"
       },
       "type": "Feature"
     },
@@ -26,7 +26,7 @@
       "properties": {
         "id": "0x12f53f0",
         "station_id": "556020",
-        "station_label": "NeckarPark (Stadion), Stuttgart"
+        "station_label": "NeckarPark (Stadion)"
       },
       "type": "Feature"
     },
@@ -41,7 +41,7 @@
       "properties": {
         "id": "0x12f5620",
         "station_id": "561217",
-        "station_label": "Stelle, Stuttgart"
+        "station_label": "Stelle"
       },
       "type": "Feature"
     },
@@ -56,7 +56,7 @@
       "properties": {
         "id": "0x12f5ff0",
         "station_id": "562645",
-        "station_label": "Geroksruhe, Stuttgart"
+        "station_label": "Geroksruhe"
       },
       "type": "Feature"
     },
@@ -71,7 +71,7 @@
       "properties": {
         "id": "0x12f6250",
         "station_id": "559506",
-        "station_label": "Payerstraße, Stuttgart"
+        "station_label": "Payerstraße"
       },
       "type": "Feature"
     },
@@ -86,7 +86,7 @@
       "properties": {
         "id": "0x12f64c0",
         "station_id": "559269",
-        "station_label": "Fasanenhof, Stuttgart"
+        "station_label": "Fasanenhof"
       },
       "type": "Feature"
     },
@@ -101,7 +101,7 @@
       "properties": {
         "id": "0x12f66b0",
         "station_id": "559220",
-        "station_label": "Bubenbad, Stuttgart"
+        "station_label": "Bubenbad"
       },
       "type": "Feature"
     },
@@ -116,7 +116,7 @@
       "properties": {
         "id": "0x12f6a80",
         "station_id": "559593",
-        "station_label": "Stafflenbergstraße, Stuttgart"
+        "station_label": "Stafflenbergstraße"
       },
       "type": "Feature"
     },
@@ -131,7 +131,7 @@
       "properties": {
         "id": "0x12f6dc0",
         "station_id": "561216",
-        "station_label": "Heidehofstraße, Stuttgart"
+        "station_label": "Heidehofstraße"
       },
       "type": "Feature"
     },
@@ -146,7 +146,7 @@
       "properties": {
         "id": "0x22d6ca0",
         "station_id": "559264",
-        "station_label": "Eugensplatz, Stuttgart"
+        "station_label": "Eugensplatz"
       },
       "type": "Feature"
     },
@@ -161,7 +161,7 @@
       "properties": {
         "id": "0x22d6ef0",
         "station_id": "561215",
-        "station_label": "Olgaeck, Stuttgart"
+        "station_label": "Olgaeck"
       },
       "type": "Feature"
     },
@@ -176,7 +176,7 @@
       "properties": {
         "id": "0x22d71a0",
         "station_id": "561375",
-        "station_label": "Charlottenplatz, Stuttgart"
+        "station_label": "Charlottenplatz"
       },
       "type": "Feature"
     },
@@ -191,7 +191,7 @@
       "properties": {
         "id": "0x22d75a0",
         "station_id": "561197",
-        "station_label": "Schlossplatz, Stuttgart"
+        "station_label": "Schlossplatz"
       },
       "type": "Feature"
     },
@@ -206,7 +206,7 @@
       "properties": {
         "id": "0x22d7870",
         "station_id": "561211",
-        "station_label": "Hauptbf (Arnulf-Klett-Platz), Stuttgart"
+        "station_label": "Hauptbf (Arnulf-Klett-Platz)"
       },
       "type": "Feature"
     },
@@ -221,7 +221,7 @@
       "properties": {
         "id": "0x22d7b60",
         "station_id": "559621",
-        "station_label": "Stadtbibliothek, Stuttgart"
+        "station_label": "Stadtbibliothek"
       },
       "type": "Feature"
     },
@@ -236,7 +236,7 @@
       "properties": {
         "id": "0x22d7e30",
         "station_id": "560941",
-        "station_label": "Eckartshaldenweg, Stuttgart"
+        "station_label": "Eckartshaldenweg"
       },
       "type": "Feature"
     },
@@ -251,7 +251,7 @@
       "properties": {
         "id": "0x22d8240",
         "station_id": "561213",
-        "station_label": "Löwentorbrücke, Stuttgart"
+        "station_label": "Löwentorbrücke"
       },
       "type": "Feature"
     },
@@ -266,7 +266,7 @@
       "properties": {
         "id": "0x22d8580",
         "station_id": "561379",
-        "station_label": "Pragsattel, Stuttgart"
+        "station_label": "Pragsattel"
       },
       "type": "Feature"
     },
@@ -281,7 +281,7 @@
       "properties": {
         "id": "0x22d87e0",
         "station_id": "559579",
-        "station_label": "Sieglestraße, Stuttgart"
+        "station_label": "Sieglestraße"
       },
       "type": "Feature"
     },
@@ -296,7 +296,7 @@
       "properties": {
         "id": "0x22d8af0",
         "station_id": "559213",
-        "station_label": "Borsigstraße, Stuttgart"
+        "station_label": "Borsigstraße"
       },
       "type": "Feature"
     },
@@ -311,7 +311,7 @@
       "properties": {
         "id": "0x22d8ee0",
         "station_id": "559297",
-        "station_label": "Friedrichswahl, Stuttgart"
+        "station_label": "Friedrichswahl"
       },
       "type": "Feature"
     },
@@ -326,7 +326,7 @@
       "properties": {
         "id": "0x22d91f0",
         "station_id": "561377",
-        "station_label": "Hohensteinstraße, Stuttgart"
+        "station_label": "Hohensteinstraße"
       },
       "type": "Feature"
     },
@@ -341,7 +341,7 @@
       "properties": {
         "id": "0x22d9500",
         "station_id": "561239",
-        "station_label": "Zuffenhausen Kelterplatz, Stuttgart"
+        "station_label": "Zuffenhausen Kelterplatz"
       },
       "type": "Feature"
     },
@@ -356,7 +356,7 @@
       "properties": {
         "id": "0x22d9810",
         "station_id": "559393",
-        "station_label": "Kirchtalstraße, Stuttgart"
+        "station_label": "Kirchtalstraße"
       },
       "type": "Feature"
     },
@@ -371,7 +371,7 @@
       "properties": {
         "id": "0x22d9b90",
         "station_id": "559552",
-        "station_label": "Salzwiesenstraße, Stuttgart"
+        "station_label": "Salzwiesenstraße"
       },
       "type": "Feature"
     },
@@ -386,7 +386,7 @@
       "properties": {
         "id": "0x22ddd60",
         "station_id": "559669",
-        "station_label": "Wimpfener Straße, Stuttgart"
+        "station_label": "Wimpfener Straße"
       },
       "type": "Feature"
     },
@@ -401,7 +401,7 @@
       "properties": {
         "id": "0x22de060",
         "station_id": "559350",
-        "station_label": "Heutingsheimer Straße, Stuttgart"
+        "station_label": "Heutingsheimer Straße"
       },
       "type": "Feature"
     },
@@ -416,7 +416,7 @@
       "properties": {
         "id": "0x22de380",
         "station_id": "561303",
-        "station_label": "Korntaler Straße, Stuttgart"
+        "station_label": "Korntaler Straße"
       },
       "type": "Feature"
     },
@@ -431,7 +431,7 @@
       "properties": {
         "id": "0x22de6d0",
         "station_id": "562157",
-        "station_label": "Stammheim, Stuttgart"
+        "station_label": "Stammheim"
       },
       "type": "Feature"
     },
@@ -446,7 +446,7 @@
       "properties": {
         "id": "0x22df390",
         "station_id": "561390",
-        "station_label": "Möhringen Bf, Stuttgart"
+        "station_label": "Möhringen Bf"
       },
       "type": "Feature"
     },
@@ -461,7 +461,7 @@
       "properties": {
         "id": "0x22df8b0",
         "station_id": "559505",
-        "station_label": "Riedsee, Stuttgart"
+        "station_label": "Riedsee"
       },
       "type": "Feature"
     },
@@ -476,7 +476,7 @@
       "properties": {
         "id": "0x22dfcc0",
         "station_id": "560946",
-        "station_label": "Weinsteige, Stuttgart"
+        "station_label": "Weinsteige"
       },
       "type": "Feature"
     },
@@ -491,7 +491,7 @@
       "properties": {
         "id": "0x22e0370",
         "station_id": "560942",
-        "station_label": "Heumaden, Stuttgart"
+        "station_label": "Heumaden"
       },
       "type": "Feature"
     },
@@ -506,7 +506,7 @@
       "properties": {
         "id": "0x22e05f0",
         "station_id": "559456",
-        "station_label": "Mittnachtstraße, Stuttgart"
+        "station_label": "Mittnachtstraße"
       },
       "type": "Feature"
     },
@@ -521,7 +521,7 @@
       "properties": {
         "id": "0x22e0860",
         "station_id": "561403",
-        "station_label": "Nordbahnhof, Stuttgart"
+        "station_label": "Nordbahnhof"
       },
       "type": "Feature"
     },
@@ -536,7 +536,7 @@
       "properties": {
         "id": "0x22e0b40",
         "station_id": "561912",
-        "station_label": "Bopser, Stuttgart"
+        "station_label": "Bopser"
       },
       "type": "Feature"
     },
@@ -551,7 +551,7 @@
       "properties": {
         "id": "0x22e0ef0",
         "station_id": "559241",
-        "station_label": "Dobelstraße, Stuttgart"
+        "station_label": "Dobelstraße"
       },
       "type": "Feature"
     },
@@ -566,7 +566,7 @@
       "properties": {
         "id": "0x22e1370",
         "station_id": "561683",
-        "station_label": "Bockelstraße, Stuttgart-Heumaden"
+        "station_label": "Bockelstraße-Heumaden"
       },
       "type": "Feature"
     },
@@ -581,7 +581,7 @@
       "properties": {
         "id": "0x22e1450",
         "station_id": "561219",
-        "station_label": "Schemppstraße, Stuttgart"
+        "station_label": "Schemppstraße"
       },
       "type": "Feature"
     },
@@ -596,7 +596,7 @@
       "properties": {
         "id": "0x22e1630",
         "station_id": "561221",
-        "station_label": "Sillenbuch, Stuttgart"
+        "station_label": "Sillenbuch"
       },
       "type": "Feature"
     },
@@ -611,7 +611,7 @@
       "properties": {
         "id": "0x22e1850",
         "station_id": "559582",
-        "station_label": "Silberwald, Stuttgart"
+        "station_label": "Silberwald"
       },
       "type": "Feature"
     },
@@ -626,7 +626,7 @@
       "properties": {
         "id": "0x22e3780",
         "station_id": "559585",
-        "station_label": "Sonnenberg, Stuttgart"
+        "station_label": "Sonnenberg"
       },
       "type": "Feature"
     },
@@ -641,7 +641,7 @@
       "properties": {
         "id": "0x22e3e70",
         "station_id": "555920",
-        "station_label": "Europaplatz, Stuttgart"
+        "station_label": "Europaplatz"
       },
       "type": "Feature"
     },
@@ -656,7 +656,7 @@
       "properties": {
         "id": "0x22e5260",
         "station_id": "559566",
-        "station_label": "Schozacher Straße, Stuttgart"
+        "station_label": "Schozacher Straße"
       },
       "type": "Feature"
     },
@@ -671,7 +671,7 @@
       "properties": {
         "id": "0x22e5980",
         "station_id": "559507",
-        "station_label": "Peregrinastraße, Stuttgart"
+        "station_label": "Peregrinastraße"
       },
       "type": "Feature"
     },
@@ -686,7 +686,7 @@
       "properties": {
         "id": "0x22e9b80",
         "station_id": "559453",
-        "station_label": "Milchhof, Stuttgart"
+        "station_label": "Milchhof"
       },
       "type": "Feature"
     },
@@ -701,7 +701,7 @@
       "properties": {
         "id": "0x22ea310",
         "station_id": "562703",
-        "station_label": "Fasanenhof Schelmenwasen, Stuttgart"
+        "station_label": "Fasanenhof Schelmenwasen"
       },
       "type": "Feature"
     },
@@ -716,7 +716,7 @@
       "properties": {
         "id": "0x22ea880",
         "station_id": "561309",
-        "station_label": "Vaihinger Straße, Stuttgart"
+        "station_label": "Vaihinger Straße"
       },
       "type": "Feature"
     },
@@ -731,7 +731,7 @@
       "properties": {
         "id": "0x22ead60",
         "station_id": "555944",
-        "station_label": "EnBW City, Stuttgart"
+        "station_label": "EnBW City"
       },
       "type": "Feature"
     },
@@ -746,7 +746,7 @@
       "properties": {
         "id": "0x22eff40",
         "station_id": "561487",
-        "station_label": "Feuerbach, Stuttgart"
+        "station_label": "Feuerbach"
       },
       "type": "Feature"
     },
@@ -761,7 +761,7 @@
       "properties": {
         "id": "0x22f01e0",
         "station_id": "559666",
-        "station_label": "Wilhelm-Geiger-Platz, Stuttgart"
+        "station_label": "Wilhelm-Geiger-Platz"
       },
       "type": "Feature"
     },
@@ -776,7 +776,7 @@
       "properties": {
         "id": "0x22f04f0",
         "station_id": "562155",
-        "station_label": "Föhrich, Stuttgart"
+        "station_label": "Föhrich"
       },
       "type": "Feature"
     },
@@ -791,7 +791,7 @@
       "properties": {
         "id": "0x22f48d0",
         "station_id": "562520",
-        "station_label": "Degerloch Albstraße, Stuttgart"
+        "station_label": "Degerloch Albstraße"
       },
       "type": "Feature"
     },
@@ -806,7 +806,7 @@
       "properties": {
         "id": "0x22f4b80",
         "station_id": "561225",
-        "station_label": "Degerloch, Stuttgart"
+        "station_label": "Degerloch"
       },
       "type": "Feature"
     },
@@ -821,7 +821,7 @@
       "properties": {
         "id": "0x22f51f0",
         "station_id": "559449",
-        "station_label": "Maybachstraße, Stuttgart"
+        "station_label": "Maybachstraße"
       },
       "type": "Feature"
     },
@@ -836,7 +836,7 @@
       "properties": {
         "id": "0x22f5530",
         "station_id": "559461",
-        "station_label": "Möhringen Freibad, Stuttgart"
+        "station_label": "Möhringen Freibad"
       },
       "type": "Feature"
     },
@@ -851,7 +851,7 @@
       "properties": {
         "id": "0x22f6590",
         "station_id": "559536",
-        "station_label": "Rohrer Weg, Stuttgart"
+        "station_label": "Rohrer Weg"
       },
       "type": "Feature"
     },
@@ -866,7 +866,7 @@
       "properties": {
         "id": "0x2300060",
         "station_id": "559589",
-        "station_label": "Sportpark Feuerbach, Stuttgart"
+        "station_label": "Sportpark Feuerbach"
       },
       "type": "Feature"
     },
@@ -881,7 +881,7 @@
       "properties": {
         "id": "0x2300410",
         "station_id": "560945",
-        "station_label": "Pfostenwäldle, Stuttgart-Feuerbach"
+        "station_label": "Pfostenwäldle-Feuerbach"
       },
       "type": "Feature"
     },
@@ -896,7 +896,7 @@
       "properties": {
         "id": "0x23007e0",
         "station_id": "559412",
-        "station_label": "Landauer Straße, Stuttgart"
+        "station_label": "Landauer Straße"
       },
       "type": "Feature"
     },
@@ -911,7 +911,7 @@
       "properties": {
         "id": "0x2300ab0",
         "station_id": "561222",
-        "station_label": "Weilimdorf Löwen-Markt, Stuttgart"
+        "station_label": "Weilimdorf Löwen-Markt"
       },
       "type": "Feature"
     },
@@ -926,7 +926,7 @@
       "properties": {
         "id": "0x2300df0",
         "station_id": "559526",
-        "station_label": "Rastatter Straße, Stuttgart"
+        "station_label": "Rastatter Straße"
       },
       "type": "Feature"
     },
@@ -941,7 +941,7 @@
       "properties": {
         "id": "0x2301170",
         "station_id": "559670",
-        "station_label": "Wolfbusch, Stuttgart"
+        "station_label": "Wolfbusch"
       },
       "type": "Feature"
     },
@@ -956,7 +956,7 @@
       "properties": {
         "id": "0x2301430",
         "station_id": "559195",
-        "station_label": "Bergheimer Hof, Stuttgart"
+        "station_label": "Bergheimer Hof"
       },
       "type": "Feature"
     },
@@ -971,7 +971,7 @@
       "properties": {
         "id": "0x2301740",
         "station_id": "560944",
-        "station_label": "Salamanderweg, Stuttgart"
+        "station_label": "Salamanderweg"
       },
       "type": "Feature"
     },
@@ -986,7 +986,7 @@
       "properties": {
         "id": "0x2301a50",
         "station_id": "561307",
-        "station_label": "Giebel, Stuttgart"
+        "station_label": "Giebel"
       },
       "type": "Feature"
     },
@@ -1046,7 +1046,7 @@
       "properties": {
         "id": "0x23026c0",
         "station_id": "561358",
-        "station_label": "Vaihingen, Stuttgart"
+        "station_label": "Vaihingen"
       },
       "type": "Feature"
     },
@@ -1061,7 +1061,7 @@
       "properties": {
         "id": "0x23027d0",
         "station_id": "560957",
-        "station_label": "Jurastraße, Stuttgart"
+        "station_label": "Jurastraße"
       },
       "type": "Feature"
     },
@@ -1076,7 +1076,7 @@
       "properties": {
         "id": "0x2302b00",
         "station_id": "559651",
-        "station_label": "Wallgraben, Stuttgart"
+        "station_label": "Wallgraben"
       },
       "type": "Feature"
     },
@@ -1091,7 +1091,7 @@
       "properties": {
         "id": "0x2302d70",
         "station_id": "559549",
-        "station_label": "SSB-Zentrum, Stuttgart"
+        "station_label": "SSB-Zentrum"
       },
       "type": "Feature"
     },
@@ -1106,7 +1106,7 @@
       "properties": {
         "id": "0x2307a60",
         "station_id": "560743",
-        "station_label": "Waldau, Stuttgart"
+        "station_label": "Waldau"
       },
       "type": "Feature"
     },
@@ -1121,7 +1121,7 @@
       "properties": {
         "id": "0x2307d10",
         "station_id": "559250",
-        "station_label": "Glockenstraße, Stuttgart"
+        "station_label": "Glockenstraße"
       },
       "type": "Feature"
     },
@@ -1136,7 +1136,7 @@
       "properties": {
         "id": "0x2307e30",
         "station_id": "561296",
-        "station_label": "Uff-Kirchhof, Stuttgart"
+        "station_label": "Uff-Kirchhof"
       },
       "type": "Feature"
     },
@@ -1166,7 +1166,7 @@
       "properties": {
         "id": "0x2308b60",
         "station_id": "559287",
-        "station_label": "Rosensteinpark, Stuttgart"
+        "station_label": "Rosensteinpark"
       },
       "type": "Feature"
     },
@@ -1196,7 +1196,7 @@
       "properties": {
         "id": "0x230b440",
         "station_id": "559380",
-        "station_label": "Karl-Olga-Krankenhaus, Stuttgart"
+        "station_label": "Karl-Olga-Krankenhaus"
       },
       "type": "Feature"
     },
@@ -1211,7 +1211,7 @@
       "properties": {
         "id": "0x230bd70",
         "station_id": "559391",
-        "station_label": "Killesberg, Stuttgart"
+        "station_label": "Killesberg"
       },
       "type": "Feature"
     },
@@ -1239,7 +1239,7 @@
       "properties": {
         "id": "0x230d020",
         "station_id": "559521",
-        "station_label": "Pragfriedhof, Stuttgart"
+        "station_label": "Pragfriedhof"
       },
       "type": "Feature"
     },
@@ -1254,7 +1254,7 @@
       "properties": {
         "id": "0x230d190",
         "station_id": "561234",
-        "station_label": "Löwentor, Stuttgart"
+        "station_label": "Löwentor"
       },
       "type": "Feature"
     },
@@ -1269,7 +1269,7 @@
       "properties": {
         "id": "0x230d430",
         "station_id": "556256",
-        "station_label": "Züricher Straße, Stuttgart"
+        "station_label": "Züricher Straße"
       },
       "type": "Feature"
     },
@@ -1284,7 +1284,7 @@
       "properties": {
         "id": "0x230d7b0",
         "station_id": "556247",
-        "station_label": "Riethmüllerhaus, Stuttgart"
+        "station_label": "Riethmüllerhaus"
       },
       "type": "Feature"
     },
@@ -1299,7 +1299,7 @@
       "properties": {
         "id": "0x230db80",
         "station_id": "556244",
-        "station_label": "Hallschlag, Stuttgart"
+        "station_label": "Hallschlag"
       },
       "type": "Feature"
     },
@@ -1372,7 +1372,7 @@
       "properties": {
         "id": "0x2314a10",
         "station_id": "559455",
-        "station_label": "Mineralbäder, Stuttgart"
+        "station_label": "Mineralbäder"
       },
       "type": "Feature"
     },
@@ -1387,7 +1387,7 @@
       "properties": {
         "id": "0x2314d10",
         "station_id": "559452",
-        "station_label": "Metzstraße, Stuttgart"
+        "station_label": "Metzstraße"
       },
       "type": "Feature"
     },
@@ -1402,7 +1402,7 @@
       "properties": {
         "id": "0x2315120",
         "station_id": "561295",
-        "station_label": "Stöckach, Stuttgart"
+        "station_label": "Stöckach"
       },
       "type": "Feature"
     },
@@ -1417,7 +1417,7 @@
       "properties": {
         "id": "0x2315460",
         "station_id": "559478",
-        "station_label": "Neckartor, Stuttgart"
+        "station_label": "Neckartor"
       },
       "type": "Feature"
     },
@@ -1432,7 +1432,7 @@
       "properties": {
         "id": "0x2315710",
         "station_id": "561199",
-        "station_label": "Staatsgalerie, Stuttgart"
+        "station_label": "Staatsgalerie"
       },
       "type": "Feature"
     },
@@ -1447,7 +1447,7 @@
       "properties": {
         "id": "0x2315c50",
         "station_id": "562649",
-        "station_label": "Friedrichsbau, Stuttgart"
+        "station_label": "Friedrichsbau"
       },
       "type": "Feature"
     },
@@ -1462,7 +1462,7 @@
       "properties": {
         "id": "0x2315f70",
         "station_id": "561299",
-        "station_label": "Berliner Platz (Hohe Straße), Stuttgart"
+        "station_label": "Berliner Platz (Hohe Straße)"
       },
       "type": "Feature"
     },
@@ -1477,7 +1477,7 @@
       "properties": {
         "id": "0x2316380",
         "station_id": "561468",
-        "station_label": "Stadtmitte, Stuttgart"
+        "station_label": "Stadtmitte"
       },
       "type": "Feature"
     },
@@ -1492,7 +1492,7 @@
       "properties": {
         "id": "0x23166b0",
         "station_id": "561196",
-        "station_label": "Österreichischer Platz, Stuttgart"
+        "station_label": "Österreichischer Platz"
       },
       "type": "Feature"
     },
@@ -1507,7 +1507,7 @@
       "properties": {
         "id": "0x23169b0",
         "station_id": "561363",
-        "station_label": "Marienplatz, Stuttgart"
+        "station_label": "Marienplatz"
       },
       "type": "Feature"
     },
@@ -1522,7 +1522,7 @@
       "properties": {
         "id": "0x2316d70",
         "station_id": "561194",
-        "station_label": "Erwin-Schoettle-Platz, Stuttgart"
+        "station_label": "Erwin-Schoettle-Platz"
       },
       "type": "Feature"
     },
@@ -1567,7 +1567,7 @@
       "properties": {
         "id": "0x231bff0",
         "station_id": "561402",
-        "station_label": "Tapachstraße, Stuttgart"
+        "station_label": "Tapachstraße"
       },
       "type": "Feature"
     },
@@ -1687,7 +1687,7 @@
       "properties": {
         "id": "0x2322680",
         "station_id": "561235",
-        "station_label": "Mühlhausen, Stuttgart"
+        "station_label": "Mühlhausen"
       },
       "type": "Feature"
     },
@@ -1702,7 +1702,7 @@
       "properties": {
         "id": "0x2322b80",
         "station_id": "561313",
-        "station_label": "Auwiesen, Stuttgart"
+        "station_label": "Auwiesen"
       },
       "type": "Feature"
     },
@@ -1717,7 +1717,7 @@
       "properties": {
         "id": "0x2326ef0",
         "station_id": "559352",
-        "station_label": "Hofen, Stuttgart"
+        "station_label": "Hofen"
       },
       "type": "Feature"
     },
@@ -1732,7 +1732,7 @@
       "properties": {
         "id": "0x2327200",
         "station_id": "561236",
-        "station_label": "Max-Eyth-See, Stuttgart"
+        "station_label": "Max-Eyth-See"
       },
       "type": "Feature"
     },
@@ -1747,7 +1747,7 @@
       "properties": {
         "id": "0x2327580",
         "station_id": "560954",
-        "station_label": "Wagrainäcker, Stuttgart"
+        "station_label": "Wagrainäcker"
       },
       "type": "Feature"
     },
@@ -1762,7 +1762,7 @@
       "properties": {
         "id": "0x2327880",
         "station_id": "559256",
-        "station_label": "Elbestraße, Stuttgart"
+        "station_label": "Elbestraße"
       },
       "type": "Feature"
     },
@@ -1777,7 +1777,7 @@
       "properties": {
         "id": "0x2327a40",
         "station_id": "559293",
-        "station_label": "Freibergstraße, Stuttgart"
+        "station_label": "Freibergstraße"
       },
       "type": "Feature"
     },
@@ -1792,7 +1792,7 @@
       "properties": {
         "id": "0x2327d10",
         "station_id": "560955",
-        "station_label": "Münster Rathaus, Stuttgart"
+        "station_label": "Münster Rathaus"
       },
       "type": "Feature"
     },
@@ -1807,7 +1807,7 @@
       "properties": {
         "id": "0x2327fe0",
         "station_id": "559474",
-        "station_label": "Münster Viadukt, Stuttgart"
+        "station_label": "Münster Viadukt"
       },
       "type": "Feature"
     },
@@ -1822,7 +1822,7 @@
       "properties": {
         "id": "0x2328340",
         "station_id": "559401",
-        "station_label": "Kraftwerk Münster, Stuttgart"
+        "station_label": "Kraftwerk Münster"
       },
       "type": "Feature"
     },
@@ -1837,7 +1837,7 @@
       "properties": {
         "id": "0x2328730",
         "station_id": "559470",
-        "station_label": "Mühlsteg, Stuttgart"
+        "station_label": "Mühlsteg"
       },
       "type": "Feature"
     },
@@ -1852,7 +1852,7 @@
       "properties": {
         "id": "0x2328a00",
         "station_id": "561555",
-        "station_label": "Rosensteinbrücke, Stuttgart"
+        "station_label": "Rosensteinbrücke"
       },
       "type": "Feature"
     },
@@ -1867,7 +1867,7 @@
       "properties": {
         "id": "0x2328d20",
         "station_id": "560952",
-        "station_label": "Wilhelma, Stuttgart"
+        "station_label": "Wilhelma"
       },
       "type": "Feature"
     },
@@ -1882,7 +1882,7 @@
       "properties": {
         "id": "0x232d100",
         "station_id": "559202",
-        "station_label": "Bihlplatz, Stuttgart"
+        "station_label": "Bihlplatz"
       },
       "type": "Feature"
     },
@@ -1897,7 +1897,7 @@
       "properties": {
         "id": "0x232d480",
         "station_id": "561294",
-        "station_label": "Südheimer Platz, Stuttgart"
+        "station_label": "Südheimer Platz"
       },
       "type": "Feature"
     },
@@ -1912,7 +1912,7 @@
       "properties": {
         "id": "0x232d750",
         "station_id": "559345",
-        "station_label": "Heslach Vogelrain, Stuttgart"
+        "station_label": "Heslach Vogelrain"
       },
       "type": "Feature"
     },
@@ -1927,7 +1927,7 @@
       "properties": {
         "id": "0x232dca0",
         "station_id": "561407",
-        "station_label": "Landhaus, Stuttgart"
+        "station_label": "Landhaus"
       },
       "type": "Feature"
     },
@@ -1970,7 +1970,7 @@
       "properties": {
         "id": "0x23318e0",
         "station_id": "559301",
-        "station_label": "Gaisburg, Stuttgart"
+        "station_label": "Gaisburg"
       },
       "type": "Feature"
     },
@@ -2011,7 +2011,7 @@
       "properties": {
         "id": "0x233af30",
         "station_id": "555922",
-        "station_label": "Ebitzweg, Stuttgart"
+        "station_label": "Ebitzweg"
       },
       "type": "Feature"
     },
@@ -2026,7 +2026,7 @@
       "properties": {
         "id": "0x2341340",
         "station_id": "559390",
-        "station_label": "Kienbachstraße, Stuttgart"
+        "station_label": "Kienbachstraße"
       },
       "type": "Feature"
     },
@@ -2041,7 +2041,7 @@
       "properties": {
         "id": "0x2341640",
         "station_id": "559210",
-        "station_label": "Blick, Stuttgart"
+        "station_label": "Blick"
       },
       "type": "Feature"
     },
@@ -2056,7 +2056,7 @@
       "properties": {
         "id": "0x2341860",
         "station_id": "559263",
-        "station_label": "Eszet, Stuttgart"
+        "station_label": "Eszet"
       },
       "type": "Feature"
     },
@@ -2071,7 +2071,7 @@
       "properties": {
         "id": "0x2341b60",
         "station_id": "559560",
-        "station_label": "Schlotterbeckstraße, Stuttgart"
+        "station_label": "Schlotterbeckstraße"
       },
       "type": "Feature"
     },
@@ -2086,7 +2086,7 @@
       "properties": {
         "id": "0x2341ea0",
         "station_id": "561474",
-        "station_label": "Untertürkheim Bahnhof, Stuttgart"
+        "station_label": "Untertürkheim Bahnhof"
       },
       "type": "Feature"
     },
@@ -2103,7 +2103,7 @@
         ],
         "id": "0x23421e0",
         "station_id": "561302",
-        "station_label": "Wasenstraße, Stuttgart"
+        "station_label": "Wasenstraße"
       },
       "type": "Feature"
     },
@@ -2118,7 +2118,7 @@
       "properties": {
         "id": "0x23425c0",
         "station_id": "559652",
-        "station_label": "Wangen Marktplatz, Stuttgart"
+        "station_label": "Wangen Marktplatz"
       },
       "type": "Feature"
     },
@@ -2133,7 +2133,7 @@
       "properties": {
         "id": "0x2342790",
         "station_id": "559397",
-        "station_label": "Hedelfinger Straße, Stuttgart"
+        "station_label": "Hedelfinger Straße"
       },
       "type": "Feature"
     },
@@ -2148,7 +2148,7 @@
       "properties": {
         "id": "0x2342aa0",
         "station_id": "560951",
-        "station_label": "Hedelfingen, Stuttgart"
+        "station_label": "Hedelfingen"
       },
       "type": "Feature"
     },
@@ -2176,7 +2176,7 @@
       "properties": {
         "id": "0x234a550",
         "station_id": "559299",
-        "station_label": "Fürfelder Straße, Stuttgart"
+        "station_label": "Fürfelder Straße"
       },
       "type": "Feature"
     },
@@ -2191,7 +2191,7 @@
       "properties": {
         "id": "0x234a8b0",
         "station_id": "560956",
-        "station_label": "Himmelsleiter, Stuttgart"
+        "station_label": "Himmelsleiter"
       },
       "type": "Feature"
     },
@@ -2206,7 +2206,7 @@
       "properties": {
         "id": "0x234abd0",
         "station_id": "559604",
-        "station_label": "Suttnerstraße, Stuttgart"
+        "station_label": "Suttnerstraße"
       },
       "type": "Feature"
     },
@@ -2221,7 +2221,7 @@
       "properties": {
         "id": "0x234aef0",
         "station_id": "561237",
-        "station_label": "Freiberg, Stuttgart"
+        "station_label": "Freiberg"
       },
       "type": "Feature"
     },
@@ -2236,7 +2236,7 @@
       "properties": {
         "id": "0x234f120",
         "station_id": "555435",
-        "station_label": "Mönchfeld, Stuttgart"
+        "station_label": "Mönchfeld"
       },
       "type": "Feature"
     },
@@ -2251,7 +2251,7 @@
       "properties": {
         "id": "0x2356ee0",
         "station_id": "561431",
-        "station_label": "Nürnberger Straße, Stuttgart"
+        "station_label": "Nürnberger Straße"
       },
       "type": "Feature"
     },
@@ -2266,7 +2266,7 @@
       "properties": {
         "id": "0x2357df0",
         "station_id": "561252",
-        "station_label": "Plieningen, Stuttgart"
+        "station_label": "Plieningen"
       },
       "type": "Feature"
     },
@@ -2281,7 +2281,7 @@
       "properties": {
         "id": "0x2358fa0",
         "station_id": "562651",
-        "station_label": "Salzäcker, Stuttgart"
+        "station_label": "Salzäcker"
       },
       "type": "Feature"
     },
@@ -2296,7 +2296,7 @@
       "properties": {
         "id": "0x235f120",
         "station_id": "559518",
-        "station_label": "Plieninger Straße, Stuttgart"
+        "station_label": "Plieninger Straße"
       },
       "type": "Feature"
     },
@@ -2311,7 +2311,7 @@
       "properties": {
         "id": "0x235f3e0",
         "station_id": "559580",
-        "station_label": "Sigmaringer Straße, Stuttgart"
+        "station_label": "Sigmaringer Straße"
       },
       "type": "Feature"
     },
@@ -2326,7 +2326,7 @@
       "properties": {
         "id": "0x235fb20",
         "station_id": "560950",
-        "station_label": "Vogelsang, Stuttgart"
+        "station_label": "Vogelsang"
       },
       "type": "Feature"
     },
@@ -2341,7 +2341,7 @@
       "properties": {
         "id": "0x235fc30",
         "station_id": "559177",
-        "station_label": "Arndt-/Spittastraße, Stuttgart"
+        "station_label": "Arndt-/Spittastraße"
       },
       "type": "Feature"
     },
@@ -2356,7 +2356,7 @@
       "properties": {
         "id": "0x235fe30",
         "station_id": "561228",
-        "station_label": "Schwab-/Bebelstraße, Stuttgart"
+        "station_label": "Schwab-/Bebelstraße"
       },
       "type": "Feature"
     },
@@ -2371,7 +2371,7 @@
       "properties": {
         "id": "0x2360060",
         "station_id": "561230",
-        "station_label": "Schloss-/Johannesstraße, Stuttgart"
+        "station_label": "Schloss-/Johannesstraße"
       },
       "type": "Feature"
     },
@@ -2386,7 +2386,7 @@
       "properties": {
         "id": "0x2360890",
         "station_id": "559193",
-        "station_label": "Bergfriedhof, Stuttgart"
+        "station_label": "Bergfriedhof"
       },
       "type": "Feature"
     },
@@ -2414,7 +2414,7 @@
       "properties": {
         "id": "0x2360e50",
         "station_id": "559524",
-        "station_label": "Raitelsberg, Stuttgart"
+        "station_label": "Raitelsberg"
       },
       "type": "Feature"
     },
@@ -2429,7 +2429,7 @@
       "properties": {
         "id": "0x2363170",
         "station_id": "561231",
-        "station_label": "Schlachthof, Stuttgart"
+        "station_label": "Schlachthof"
       },
       "type": "Feature"
     },
@@ -2444,7 +2444,7 @@
       "properties": {
         "id": "0x2363530",
         "station_id": "560934",
-        "station_label": "Wangener-/Landhausstraße, Stuttgart"
+        "station_label": "Wangener-/Landhausstraße"
       },
       "type": "Feature"
     },
@@ -2459,7 +2459,7 @@
       "properties": {
         "id": "0x23639c0",
         "station_id": "561301",
-        "station_label": "Brendle (Großmarkt), Stuttgart"
+        "station_label": "Brendle (Großmarkt)"
       },
       "type": "Feature"
     },
@@ -2474,7 +2474,7 @@
       "properties": {
         "id": "0x2363d90",
         "station_id": "559366",
-        "station_label": "Im Degen, Stuttgart"
+        "station_label": "Im Degen"
       },
       "type": "Feature"
     },
@@ -2489,7 +2489,7 @@
       "properties": {
         "id": "0x23640d0",
         "station_id": "559373",
-        "station_label": "Inselstraße, Stuttgart"
+        "station_label": "Inselstraße"
       },
       "type": "Feature"
     },
@@ -2504,7 +2504,7 @@
       "properties": {
         "id": "0x2364720",
         "station_id": "559450",
-        "station_label": "Mercedesstraße, Stuttgart"
+        "station_label": "Mercedesstraße"
       },
       "type": "Feature"
     },
@@ -2519,7 +2519,7 @@
       "properties": {
         "id": "0x2364a30",
         "station_id": "559233",
-        "station_label": "Daimlerplatz, Stuttgart"
+        "station_label": "Daimlerplatz"
       },
       "type": "Feature"
     },
@@ -2534,7 +2534,7 @@
       "properties": {
         "id": "0x2364e60",
         "station_id": "559407",
-        "station_label": "Kursaal, Stuttgart"
+        "station_label": "Kursaal"
       },
       "type": "Feature"
     },
@@ -2549,7 +2549,7 @@
       "properties": {
         "id": "0x2365230",
         "station_id": "559316",
-        "station_label": "Gnesener Straße, Stuttgart"
+        "station_label": "Gnesener Straße"
       },
       "type": "Feature"
     },
@@ -2564,7 +2564,7 @@
       "properties": {
         "id": "0x2365420",
         "station_id": "561189",
-        "station_label": "Schillerplatz, Stuttgart-Vaihingen"
+        "station_label": "Schillerplatz-Vaihingen"
       },
       "type": "Feature"
     },
@@ -2579,7 +2579,7 @@
       "properties": {
         "id": "0x2365780",
         "station_id": "559639",
-        "station_label": "Vaihingen Viadukt, Stuttgart"
+        "station_label": "Vaihingen Viadukt"
       },
       "type": "Feature"
     },
@@ -2594,7 +2594,7 @@
       "properties": {
         "id": "0x2365b00",
         "station_id": "559259",
-        "station_label": "Engelboldstraße, Stuttgart"
+        "station_label": "Engelboldstraße"
       },
       "type": "Feature"
     },
@@ -2609,7 +2609,7 @@
       "properties": {
         "id": "0x2365e60",
         "station_id": "559377",
-        "station_label": "Kaltental, Stuttgart"
+        "station_label": "Kaltental"
       },
       "type": "Feature"
     },
@@ -2624,7 +2624,7 @@
       "properties": {
         "id": "0x23661e0",
         "station_id": "561191",
-        "station_label": "Waldeck, Stuttgart"
+        "station_label": "Waldeck"
       },
       "type": "Feature"
     },
@@ -2639,7 +2639,7 @@
       "properties": {
         "id": "0x236a950",
         "station_id": "561240",
-        "station_label": "Obere Ziegelei, Stuttgart"
+        "station_label": "Obere Ziegelei"
       },
       "type": "Feature"
     },
@@ -2654,7 +2654,7 @@
       "properties": {
         "id": "0x236ac70",
         "station_id": "555066",
-        "station_label": "Hauptfriedhof, Stuttgart"
+        "station_label": "Hauptfriedhof"
       },
       "type": "Feature"
     },
@@ -2669,7 +2669,7 @@
       "properties": {
         "id": "0x236b010",
         "station_id": "559598",
-        "station_label": "Steinhaldenfeld, Stuttgart"
+        "station_label": "Steinhaldenfeld"
       },
       "type": "Feature"
     },
@@ -2684,7 +2684,7 @@
       "properties": {
         "id": "0x236b200",
         "station_id": "559271",
-        "station_label": "Fauststraße, Stuttgart"
+        "station_label": "Fauststraße"
       },
       "type": "Feature"
     },
@@ -2699,7 +2699,7 @@
       "properties": {
         "id": "0x236b4e0",
         "station_id": "555341",
-        "station_label": "Neugereut, Stuttgart"
+        "station_label": "Neugereut"
       },
       "type": "Feature"
     },
@@ -2714,7 +2714,7 @@
       "properties": {
         "id": "0x236ed30",
         "station_id": "559296",
-        "station_label": "Antwerpener Straße, Stuttgart"
+        "station_label": "Antwerpener Straße"
       },
       "type": "Feature"
     },
@@ -2729,7 +2729,7 @@
       "properties": {
         "id": "0x236f040",
         "station_id": "559201",
-        "station_label": "Beskidenstraße, Stuttgart"
+        "station_label": "Beskidenstraße"
       },
       "type": "Feature"
     },
@@ -2744,7 +2744,7 @@
       "properties": {
         "id": "0x236f710",
         "station_id": "560931",
-        "station_label": "Augsburger Platz, Stuttgart"
+        "station_label": "Augsburger Platz"
       },
       "type": "Feature"
     },
@@ -2819,7 +2819,7 @@
       "properties": {
         "id": "0x23706c0",
         "station_id": "559214",
-        "station_label": "Botnang, Stuttgart"
+        "station_label": "Botnang"
       },
       "type": "Feature"
     },
@@ -2834,7 +2834,7 @@
       "properties": {
         "id": "0x2374800",
         "station_id": "559258",
-        "station_label": "Eltinger Straße, Stuttgart"
+        "station_label": "Eltinger Straße"
       },
       "type": "Feature"
     },
@@ -2849,7 +2849,7 @@
       "properties": {
         "id": "0x2374a40",
         "station_id": "559454",
-        "station_label": "Millöckerstraße, Stuttgart"
+        "station_label": "Millöckerstraße"
       },
       "type": "Feature"
     },
@@ -2864,7 +2864,7 @@
       "properties": {
         "id": "0x2374cf0",
         "station_id": "559192",
-        "station_label": "Beethovenstraße, Stuttgart"
+        "station_label": "Beethovenstraße"
       },
       "type": "Feature"
     },
@@ -2879,7 +2879,7 @@
       "properties": {
         "id": "0x2375050",
         "station_id": "561229",
-        "station_label": "Lindpaintnerstraße, Stuttgart"
+        "station_label": "Lindpaintnerstraße"
       },
       "type": "Feature"
     },
@@ -2894,7 +2894,7 @@
       "properties": {
         "id": "0x2375350",
         "station_id": "560949",
-        "station_label": "Herderplatz, Stuttgart"
+        "station_label": "Herderplatz"
       },
       "type": "Feature"
     },
@@ -2934,7 +2934,7 @@
       "properties": {
         "id": "0x2375ac0",
         "station_id": "555735",
-        "station_label": "Ostheim Leo-Vetter-Bad, Stuttgart"
+        "station_label": "Ostheim Leo-Vetter-Bad"
       },
       "type": "Feature"
     },
@@ -2988,7 +2988,7 @@
       "properties": {
         "id": "0x238ae30",
         "station_id": "561202",
-        "station_label": "Ostendplatz, Stuttgart"
+        "station_label": "Ostendplatz"
       },
       "type": "Feature"
     },
@@ -3003,7 +3003,7 @@
       "properties": {
         "id": "0x238b530",
         "station_id": "561204",
-        "station_label": "Rosenberg-/Seidenstraße, Stuttgart"
+        "station_label": "Rosenberg-/Seidenstraße"
       },
       "type": "Feature"
     },
@@ -3018,7 +3018,7 @@
       "properties": {
         "id": "0x238bb80",
         "station_id": "559548",
-        "station_label": "Russische Kirche, Stuttgart"
+        "station_label": "Russische Kirche"
       },
       "type": "Feature"
     },
@@ -3033,7 +3033,7 @@
       "properties": {
         "id": "0x238bdd0",
         "station_id": "561203",
-        "station_label": "Hölderlinplatz, Stuttgart"
+        "station_label": "Hölderlinplatz"
       },
       "type": "Feature"
     },

@@ -3,21 +3,10 @@ OPTIM := ilp_impr
 CORE_GRAPH := 1
 SPLITTING_OPTIM := 1
 
-EXTBINARY :=
-METHOD := gu
-
-ifeq ($(METHOD),gu)
-	EXTBINARY = --external-solver='/home/patrick/gurobi/gurobi751/linux64/bin/gurobi_cl ResultFile={OUTPUT} {INPUT}'
-endif
-
-ifeq ($(METHOD),cbc)
-	EXTBINARY = --external-solver='/home/patrick/repos/Cbc-2.9/build/bin/cbc {INPUT} -randomCbcSeed 0 -threads {THREADS} -printingOptions rows -solve -solution {OUTPUT}'
-endif
-
 MAPS := maps/freiburg maps/chicago maps/stuttgart maps/turin maps/nyc_subway maps/busses_manhattan maps/dallas maps/boston
 
-PARAMS := --render-stations=1  $(EXTBINARY) --render-station-names=0 --glpk-time-limit=100000000 --output-stats=1  --render-node-fronts=0
-RPARAMS := --outline-width=1 $(EXTBINARY) --render-edges=0 --render-station-names=0 --glpk-time-limit=100000000 --output-stats=0  --render-node-fronts=0 --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
+PARAMS := --render-stations=1 --render-station-names=0 --glpk-time-limit=100000000 --output-stats=1  --render-node-fronts=0
+RPARAMS := --outline-width=1 --render-edges=0 --render-station-names=0 --glpk-time-limit=100000000 --output-stats=0  --render-node-fronts=0 --splitting-optim=${SPLITTING_OPTIM} --optim-method=${OPTIM} --create-core-optim-graph=${CORE_GRAPH}
 
 
 %/network.svg: %/network.json
@@ -69,90 +58,112 @@ maps/%: %/network.json
 	# python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_n.png $@/nodes
 
 	# z15
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=20 --line-spacing=10 -o $@/z15/ --world-file-path=$@/z15/network_e.pngw  --resolution=0.25
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=60 --line-width=20 --line-spacing=10 -o $@/z15/ --world-file-path=$@/z15/network_e.pngw  --resolution=0.25
 	cp $@/z15/network_e.pngw $@/z15/network_s.pngw
 	cp $@/z15/network_e.pngw $@/z15/network_n.pngw
+	cp $@/z15/network_e.pngw $@/z15/network_l.pngw
 	inkscape $@/z15/edges.svg --export-png=$@/z15/network_e.png
 	inkscape $@/z15/nodes.svg --export-png=$@/z15/network_n.png
 	inkscape $@/z15/stations.svg --export-png=$@/z15/network_s.png
+	inkscape $@/z15/labels.svg --export-png=$@/z15/network_l.png
 	python scripts/gdal2tilesp.py -w none -z 15 -s EPSG:4326 $@/z15/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 15 -s EPSG:4326 $@/z15/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 15 -s EPSG:4326 $@/z15/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 15 -s EPSG:4326 $@/z15/network_l.png $@/labels
 
 
 	# z14
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=34 --line-spacing=17 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.125
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=100 --line-width=34 --line-spacing=17 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.125
 	cp $@/z14/network_e.pngw $@/z14/network_s.pngw
 	cp $@/z14/network_e.pngw $@/z14/network_n.pngw
+	cp $@/z14/network_e.pngw $@/z14/network_l.pngw
 	inkscape $@/z14/edges.svg --export-png=$@/z14/network_e.png
 	inkscape $@/z14/nodes.svg --export-png=$@/z14/network_n.png
 	inkscape $@/z14/stations.svg --export-png=$@/z14/network_s.png
+	inkscape $@/z14/labels.svg --export-png=$@/z14/network_l.png
 	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z14/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z14/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z14/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 14 -s EPSG:4326 $@/z15/network_l.png $@/labels
 
 
 	# z13
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=60 --line-spacing=30 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.075
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=240 --line-width=60 --line-spacing=30 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.075
 	cp $@/z13/network_e.pngw $@/z13/network_s.pngw
 	cp $@/z13/network_e.pngw $@/z13/network_n.pngw
+	cp $@/z13/network_e.pngw $@/z13/network_l.pngw
 	inkscape $@/z13/edges.svg --export-png=$@/z13/network_e.png
 	inkscape $@/z13/nodes.svg --export-png=$@/z13/network_n.png
 	inkscape $@/z13/stations.svg --export-png=$@/z13/network_s.png
+	inkscape $@/z13/labels.svg --export-png=$@/z13/network_l.png
 	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z13/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z13/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z13/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 13 -s EPSG:4326 $@/z15/network_l.png $@/labels
 
 
 	# z12
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=100 --line-spacing=50 -o $@/z12/ --world-file-path=$@/z12/network_e.pngw  --resolution=0.03
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=300 --line-width=100 --line-spacing=50 -o $@/z12/ --world-file-path=$@/z12/network_e.pngw  --resolution=0.03
 	cp $@/z12/network_e.pngw $@/z12/network_s.pngw
 	cp $@/z12/network_e.pngw $@/z12/network_n.pngw
+	cp $@/z12/network_e.pngw $@/z12/network_l.pngw
 	inkscape $@/z12/edges.svg --export-png=$@/z12/network_e.png
 	inkscape $@/z12/nodes.svg --export-png=$@/z12/network_n.png
 	inkscape $@/z12/stations.svg --export-png=$@/z12/network_s.png
+	inkscape $@/z12/labels.svg --export-png=$@/z12/network_l.png
 	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z12/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z12/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z12/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 12 -s EPSG:4326 $@/z15/network_l.png $@/labels
 
 
 	# z11
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --line-width=140 --line-spacing=60 -o $@/z11/ --world-file-path=$@/z11/network_e.pngw  --resolution=0.015
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=420 --line-width=140 --line-spacing=60 -o $@/z11/ --world-file-path=$@/z11/network_e.pngw  --resolution=0.015
 	cp $@/z11/network_e.pngw $@/z11/network_s.pngw
 	cp $@/z11/network_e.pngw $@/z11/network_n.pngw
+	cp $@/z11/network_e.pngw $@/z11/network_l.pngw
 	inkscape $@/z11/edges.svg --export-png=$@/z11/network_e.png
 	inkscape $@/z11/nodes.svg --export-png=$@/z11/network_n.png
 	inkscape $@/z11/stations.svg --export-png=$@/z11/network_s.png
+	inkscape $@/z11/labels.svg --export-png=$@/z11/network_l.png
 
 	# something is not right with multi-zoomlevel tile generationin parallel version, create them separately
 	python scripts/gdal2tilesp.py -w none -z 11 -s EPSG:4326 $@/z11/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 11 -s EPSG:4326 $@/z11/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 11 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 11 -s EPSG:4326 $@/z11/network_l.png $@/labels
 
 	python scripts/gdal2tilesp.py -w none -z 10 -s EPSG:4326 $@/z11/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 10 -s EPSG:4326 $@/z11/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 10 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 10 -s EPSG:4326 $@/z11/network_l.png $@/labels
 
 	python scripts/gdal2tilesp.py -w none -z 9 -s EPSG:4326 $@/z11/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 9 -s EPSG:4326 $@/z11/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 9 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 9 -s EPSG:4326 $@/z11/network_l.png $@/labels
 
 	python scripts/gdal2tilesp.py -w none -z 8 -s EPSG:4326 $@/z11/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 8 -s EPSG:4326 $@/z11/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 8 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 8 -s EPSG:4326 $@/z11/network_l.png $@/labels
 
 	python scripts/gdal2tilesp.py -w none -z 7 -s EPSG:4326 $@/z11/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 7 -s EPSG:4326 $@/z11/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 7 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 7 -s EPSG:4326 $@/z11/network_l.png $@/labels
 
 	python scripts/gdal2tilesp.py -w none -z 6 -s EPSG:4326 $@/z11/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 6 -s EPSG:4326 $@/z11/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 6 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 6 -s EPSG:4326 $@/z11/network_l.png $@/labels
 
 	python scripts/gdal2tilesp.py -w none -z 5 -s EPSG:4326 $@/z11/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 5 -s EPSG:4326 $@/z11/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 5 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 5 -s EPSG:4326 $@/z11/network_l.png $@/labels
 
 	python scripts/gdal2tilesp.py -w none -z 4 -s EPSG:4326 $@/z11/network_e.png $@/edges
 	python scripts/gdal2tilesp.py -w none -z 4 -s EPSG:4326 $@/z11/network_s.png $@/stations
 	python scripts/gdal2tilesp.py -w none -z 4 -s EPSG:4326 $@/z11/network_n.png $@/nodes
+	python scripts/gdal2tilesp.py -w none -z 4 -s EPSG:4326 $@/z11/network_l.png $@/labels
