@@ -33,6 +33,17 @@ struct Overlaps {
   size_t statLabelOverlaps;
 };
 
+inline bool statNdCmp (const shared::linegraph::LineNode* a, const shared::linegraph::LineNode* b) {
+  // first degree 1 nodes
+  size_t ad = a->getDeg();
+  size_t bd = b->getDeg();
+  if (ad == 1) ad = std::numeric_limits<size_t>::max();
+  if (bd == 1) bd = std::numeric_limits<size_t>::max();
+  return (ad > bd || (ad == bd && shared::linegraph::LineGraph::getLDeg(a) > shared::linegraph::LineGraph::getLDeg(b)));
+
+}
+
+
 struct StationLabel {
   util::geo::PolyLine<double> geom;
   util::geo::MultiLine<double> band;

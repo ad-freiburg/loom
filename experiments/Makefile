@@ -58,7 +58,7 @@ maps/%: %/network.json
 	# python scripts/gdal2tilesp.py -w none -z 16 -s EPSG:4326 $@/z16/network_n.png $@/nodes
 
 	# z15
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=60 --line-width=20 --line-spacing=10 -o $@/z15/ --world-file-path=$@/z15/network_e.pngw  --resolution=0.25
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=60 --line-label-textsize=40 --line-width=20 --line-spacing=10 -o $@/z15/ --world-file-path=$@/z15/network_e.pngw  --resolution=0.25
 	cp $@/z15/network_e.pngw $@/z15/network_s.pngw
 	cp $@/z15/network_e.pngw $@/z15/network_n.pngw
 	cp $@/z15/network_e.pngw $@/z15/network_l.pngw
@@ -73,7 +73,7 @@ maps/%: %/network.json
 
 
 	# z14
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=102 --line-width=34 --line-spacing=17 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.125
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=102 --line-label-textsize=65 --line-width=34 --line-spacing=17 -o $@/z14/ --world-file-path=$@/z14/network_e.pngw  --resolution=0.125
 	cp $@/z14/network_e.pngw $@/z14/network_s.pngw
 	cp $@/z14/network_e.pngw $@/z14/network_n.pngw
 	cp $@/z14/network_e.pngw $@/z14/network_l.pngw
@@ -88,7 +88,7 @@ maps/%: %/network.json
 
 
 	# z13
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=180 --line-width=60 --line-spacing=30 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.075
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=180 --line-label-textsize=120 --line-width=60 --line-spacing=30 -o $@/z13/ --world-file-path=$@/z13/network_e.pngw  --resolution=0.075
 	cp $@/z13/network_e.pngw $@/z13/network_s.pngw
 	cp $@/z13/network_e.pngw $@/z13/network_n.pngw
 	cp $@/z13/network_e.pngw $@/z13/network_l.pngw
@@ -103,7 +103,7 @@ maps/%: %/network.json
 
 
 	# z12
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=300 --line-width=100 --line-spacing=50 -o $@/z12/ --world-file-path=$@/z12/network_e.pngw  --resolution=0.03
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=300 --line-label-textsize=200 --line-width=100 --line-spacing=50 -o $@/z12/ --world-file-path=$@/z12/network_e.pngw  --resolution=0.03
 	cp $@/z12/network_e.pngw $@/z12/network_s.pngw
 	cp $@/z12/network_e.pngw $@/z12/network_n.pngw
 	cp $@/z12/network_e.pngw $@/z12/network_l.pngw
@@ -118,7 +118,7 @@ maps/%: %/network.json
 
 
 	# z11
-	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=420 --line-width=140 --line-spacing=60 -o $@/z11/ --world-file-path=$@/z11/network_e.pngw  --resolution=0.015
+	cat $< | $(TRANSITMAP_BIN) $(RPARAMS) --render-engine=svg_sep --station-label-textsize=420 --line-label-textsize=280 --line-width=140 --line-spacing=60 -o $@/z11/ --world-file-path=$@/z11/network_e.pngw  --resolution=0.015
 	cp $@/z11/network_e.pngw $@/z11/network_s.pngw
 	cp $@/z11/network_e.pngw $@/z11/network_n.pngw
 	cp $@/z11/network_e.pngw $@/z11/network_l.pngw

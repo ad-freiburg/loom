@@ -96,36 +96,19 @@ void SvgRenderer::print(const graph::RenderGraph& outG) {
     params.clear();
     params["id"] = m.name;
     params["orient"] = "auto";
-    params["markerWidth"] = "2";
-    params["markerHeight"] = "1";
+    params["markerWidth"] = "1";
+    params["markerHeight"] = "0.5";
     params["refY"] = "0.5";
     params["refX"] = "0";
+    params["stroke"] = "black";
+    params["stroke-width"] = util::toString((_cfg->lineSpacing / 8) * _cfg->outputResolution);
 
     _w.openTag("marker", params);
 
     params.clear();
     params["d"] = m.path;
     params["fill"] = m.color;
-    params["stroke"] = "";
-
-    _w.openTag("path", params);
-
-    _w.closeTag();
-    _w.closeTag();
-
-    params.clear();
-    params["id"] = m.name + "_black";
-    params["orient"] = "auto";
-    params["markerWidth"] = "2";
-    params["markerHeight"] = "1";
-    params["refY"] = "0.5";
-    params["refX"] = "0";
-
-    _w.openTag("marker", params);
-
-    params.clear();
-    params["d"] = m.path;
-    params["fill"] = "#000000";
+;
 
     _w.openTag("path", params);
 
@@ -442,10 +425,6 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
   std::stringstream styleOutline;
   styleOutline << "fill:none;stroke:#000000";
 
-  if (!endMarker.empty()) {
-    styleOutline << ";marker-end:url(#" << endMarker << "_black)";
-  }
-
   styleOutline << ";stroke-linecap:round;stroke-width:"
                << (width + _cfg->outlineWidth) * _cfg->outputResolution;
   Params paramsOutline;
@@ -523,26 +502,21 @@ void SvgRenderer::renderEdgeTripGeom(const graph::RenderGraph& outG,
       markerName << e << ":" << line << ":" << i;
 
       std::string markerPathMale = getMarkerPathMale(lineW);
-      std::string markerPathFemale = getMarkerPathFemale(lineW);
-      EndMarker emm(markerName.str() + "_m", "#" + line->color(),
+      EndMarker emm(markerName.str() + "_m", "white",
                     markerPathMale, lineW, lineW);
-      EndMarker emf(markerName.str() + "_f", "#" + line->color(),
-                    markerPathFemale, lineW, lineW);
 
       _markers.push_back(emm);
-      _markers.push_back(emf);
 
       PolyLine<double> firstPart =
-          p.getSegmentAtDist(0, p.getLength() / 2 - arrowLength / 2);
+          p.getSegmentAtDist(0, p.getLength() / 2);
       PolyLine<double> secondPart = p.getSegmentAtDist(
-          p.getLength() / 2 + arrowLength / 2, p.getLength());
+          p.getLength() / 2, p.getLength());
 
       if (lo.direction == e->getTo()) {
         renderLinePart(firstPart, lineW, *line, e, markerName.str() + "_m");
-        renderLinePart(secondPart.reversed(), lineW, *line, e,
-                       markerName.str() + "_f");
+        renderLinePart(secondPart.reversed(), lineW, *line, e);
       } else {
-        renderLinePart(firstPart, lineW, *line, e, markerName.str() + "_f");
+        renderLinePart(firstPart, lineW, *line, e);
         renderLinePart(secondPart.reversed(), lineW, *line, e,
                        markerName.str() + "_m");
       }
@@ -560,14 +534,6 @@ void SvgRenderer::renderEdgeTripGeom(const graph::RenderGraph& outG,
 std::string SvgRenderer::getMarkerPathMale(double w) const {
   std::stringstream path;
   path << "M0,0 V1 H.5 L1.3,.5 L.5,0 Z";
-
-  return path.str();
-}
-
-// _____________________________________________________________________________
-std::string SvgRenderer::getMarkerPathFemale(double w) const {
-  std::stringstream path;
-  path << "M1.3,1 L.5,.5 L1.3,0 L0,0 L0,1";
 
   return path.str();
 }

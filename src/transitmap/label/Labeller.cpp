@@ -80,8 +80,15 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
 
 // _____________________________________________________________________________
 void Labeller::labelStations(const graph::RenderGraph& g) {
+  std::vector<const shared::linegraph::LineNode*> orderedNds;
   for (auto n : g.getNds()) {
     if (n->pl().stops().size() == 0) continue;
+    orderedNds.push_back(n);
+  }
+
+  std::sort(orderedNds.begin(), orderedNds.end(), statNdCmp);
+
+  for (auto n : orderedNds) {
 
     double fontSize = _cfg->stationLabelSize;
 
@@ -93,6 +100,8 @@ void Labeller::labelStations(const graph::RenderGraph& g) {
         band = util::geo::rotate(band, 45 * deg, *n->pl().getGeom());
 
         auto overlaps = getOverlaps(band, g);
+
+        if (overlaps.lineOverlaps + overlaps.statLabelOverlaps > 0) continue;
         cands.push_back({band[0], band, fontSize, n->getDeg() == 1, deg, offset,
                          overlaps, n->pl().stops().front()});
       }
@@ -168,6 +177,7 @@ void Labeller::labelLines(const graph::RenderGraph& g) {
         while (start + labelW <= geomLen) {
           PolyLine<double> cand = util::geo::segment(
               *e->pl().getGeom(), start / geomLen, (start + labelW) / geomLen);
+          if (cand.getLength() < 5) break;
           cand.offsetPerp(dir * (g.getTotalWidth(e) / 2 +
                                  (_cfg->lineSpacing + _cfg->lineWidth)));
 
