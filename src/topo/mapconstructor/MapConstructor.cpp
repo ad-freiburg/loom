@@ -61,6 +61,21 @@ ShrdSegWrap MapConstructor::nextShrdSeg(double dCut, EdgeGrid* grid) {
           continue;
         }
 
+        bool shared = false;
+
+        for (auto lo1 : e->pl().getLines()) {
+          for (auto lo2 : toTest->pl().getLines()) {
+            bool train1 = lo1.line->label().front() == 'R' || lo1.line->label().front() == 'L';
+            bool train2 = lo2.line->label().front() == 'R' || lo2.line->label().front() == 'L';
+            if ((!train1 && !train2) || (train1 && train2)) {
+              shared = true;
+              break;
+            }
+          }
+        }
+
+        if (!shared) continue;
+
         if (e != toTest) {
           double dmax = aggrD(e, toTest);
           dmax = fmin(dmax, dCut);

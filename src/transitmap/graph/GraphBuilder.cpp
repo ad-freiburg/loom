@@ -109,15 +109,17 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
 
+      double fac = 1;
+
       if (nodeFrontsOverlap(g, fa, fb)) {
         if (util::geo::len(*fa.edge->pl().getGeom()) > minLength &&
             fa.geom.distTo(*n->pl().getGeom()) <
-                2.5 * g->getMaxNdFrontWidth(n)) {
+                fac * g->getMaxNdFrontWidth(n)) {
           ret.insert(const_cast<NodeFront*>(&fa));
         }
         if (util::geo::len(*fb.edge->pl().getGeom()) > minLength &&
             fb.geom.distTo(*n->pl().getGeom()) <
-                2.5 * g->getMaxNdFrontWidth(n)) {
+                fac * g->getMaxNdFrontWidth(n)) {
           ret.insert(const_cast<NodeFront*>(&fb));
         }
       }

@@ -22,6 +22,12 @@ GurobiSolver::GurobiSolver(DirType dir) : _numVars(0), _numRows(0) {
     throw std::runtime_error("Could not create gurobi environment");
   }
 
+  // set time limit
+  // TODO: make this configurable
+  std::cerr << " *** WARNING: TIME LIME STILL ACTIVATED! *** " << std::endl;
+  GRBsetdblparam(_env, "TimeLimit", 60.0 * 10);
+  // GRBsetdblparam(_env, "TuneTimeLimit", 60.0 * 1);
+
   // create emtpy model
   error = GRBnewmodel(_env, &_model, "loom_mip", 0, 0, 0, 0, 0, 0);
   if (error) {
@@ -148,8 +154,19 @@ double GurobiSolver::getObjVal() const {
 // _____________________________________________________________________________
 SolveType GurobiSolver::solve() {
   update();
-  GRBwrite(_model, "mip1.lp");
-  int error = GRBoptimize(_model);
+  // GRBwrite(_model, "mip1.lp");
+
+  int error;
+
+  // error = GRBtunemodel(_model);
+  // int nresults;
+
+  // error = GRBgetintattr(_model, "TuneResultCount", &nresults);
+  // if (nresults > 0) {
+    // error = GRBgettuneresult(_model, 0);
+  // }
+
+  error = GRBoptimize(_model);
   if (error) {
     throw std::runtime_error("Could not optimize model");
   }

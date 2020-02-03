@@ -96,12 +96,12 @@ void SvgRenderer::print(const graph::RenderGraph& outG) {
     params.clear();
     params["id"] = m.name;
     params["orient"] = "auto";
-    params["markerWidth"] = "1";
-    params["markerHeight"] = "0.5";
+    params["markerWidth"] = "20";
+    params["markerHeight"] = "4";
     params["refY"] = "0.5";
     params["refX"] = "0";
-    params["stroke"] = "black";
-    params["stroke-width"] = util::toString((_cfg->lineSpacing / 8) * _cfg->outputResolution);
+    // params["stroke"] = "white";
+    // params["stroke-width"] = util::toString((_cfg->lineSpacing / 8) * _cfg->outputResolution);
 
     _w.openTag("marker", params);
 
@@ -292,7 +292,7 @@ size_t SvgRenderer::getNextPartner(
 bool SvgRenderer::isNextTo(const shared::linegraph::InnerGeom& a,
                            const shared::linegraph::InnerGeom b) const {
   // TODO!!!!!
-  // return false;
+  return false;
 
   double THRESHOLD = 0.5 * M_PI + 0.1;
   if (a.from.front == b.from.front && a.to.front == b.to.front) {
@@ -497,7 +497,7 @@ void SvgRenderer::renderEdgeTripGeom(const graph::RenderGraph& outG,
     double arrowLength = (_cfg->lineWidth * 2.5);
 
     if (_cfg->renderDirMarkers && lo.direction != 0 &&
-        center.getLength() > arrowLength * 4) {
+        center.getLength() > arrowLength * 3) {
       std::stringstream markerName;
       markerName << e << ":" << line << ":" << i;
 

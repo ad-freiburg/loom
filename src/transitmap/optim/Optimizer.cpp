@@ -276,12 +276,11 @@ bool Optimizer::crosses(OptGraph* g, OptNode* node, OptEdge* segmentA,
                     std::find(node->pl().orderedEdges.begin(),
                               node->pl().orderedEdges.end(), segments.second));
 
-  bool retB = false;
+  // bool retB = false;
 
-  if (posAinA > posBinA && posEdgeA < posEdgeB) retB = true;
+  // if (posAinA > posBinA && posEdgeA < posEdgeB) retB = true;
 
-  // TODO(patrick): remove this
-  retB = false;
+  // return retB;
 
   DPoint aInA = getPos(g, node, segmentA, posAinA);
   DPoint bInA = getPos(g, node, segmentA, posBinA);

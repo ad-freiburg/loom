@@ -37,6 +37,13 @@ var networks = [
     'name' : "Turin (Tram)",
     'center' : ol.proj.transform([7.678555, 45.060714], 'EPSG:4326', 'EPSG:3857'),
     'zoom' : 16
+  },
+  {
+    'id' : 'kreisgr_bus',
+    'extent' : [1527760.466410 - 200, 6656270.395517 - (145 * 256 * 8) - 200, 1527760.466410 + (145 * 256 * 8) + 200, 6656270.395517 + 200],
+    'name' : "Kreis Gr (Bus ohne Schul)",
+    'center' : ol.proj.transform([14.7854208, 50.958611], 'EPSG:4326', 'EPSG:3857'),
+    'zoom' : 14
   }
 ];
 
