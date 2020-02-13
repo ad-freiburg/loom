@@ -153,13 +153,11 @@ void SvgRenderer::outputNodes(const graph::RenderGraph& outG,
           util::toString((_cfg->lineWidth / 2) * _cfg->outputResolution);
       params["fill"] = "white";
 
-      printPolygon(
-          outG.getStationHull(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                              _cfg->simpleRenderForTwoEdgeNodes),
-          params, rparams);
-    } else if (false) {
-      params["r"] = "5";
-      params["fill"] = "#FF00FF";
+      for (const auto& geom : outG.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
+                              _cfg->simpleRenderForTwoEdgeNodes)) {
+
+        printPolygon(geom, params, rparams);
+      }
     }
   }
   _w.closeTag();

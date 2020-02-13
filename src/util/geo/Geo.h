@@ -1311,7 +1311,7 @@ template <typename T>
 inline double getEnclosingRadius(const Point<T>& p, const Line<T>& l) {
   double ret = 0;
   for (const auto& pp : l)
-    if (getEnclosingRadius(pp, p) > ret) ret = getEnclosingRadius(pp, p);
+    if (getEnclosingRadius(p, pp) > ret) ret = getEnclosingRadius(p, pp);
   return ret;
 }
 
@@ -1320,7 +1320,17 @@ template <typename T>
 inline double getEnclosingRadius(const Point<T>& p, const Polygon<T>& pg) {
   double ret = 0;
   for (const auto& pp : pg.getOuter())
-    if (getEnclosingRadius(pp, p) > ret) ret = getEnclosingRadius(pp, p);
+    if (getEnclosingRadius(p, pp) > ret) ret = getEnclosingRadius(p, pp);
+  return ret;
+}
+
+// _____________________________________________________________________________
+template <template <typename> class Geometry, typename T>
+inline double getEnclosingRadius(const Point<T>& p,
+                                 const std::vector<Geometry<T>>& multigeom) {
+  double ret = 0;
+  for (const auto& pp : multigeom)
+    if (getEnclosingRadius(p, pp) > ret) ret = getEnclosingRadius(p, pp);
   return ret;
 }
 
@@ -1566,8 +1576,9 @@ Line<T> average(const std::vector<const Line<T>*>& lines,
   bool weighted = lines.size() == weights.size();
   double stepSize;
 
-  double longestLength = std::numeric_limits<
-      double>::min();  // avoid recalc of length on each comparision
+  double longestLength =
+      std::numeric_limits<double>::min();  // avoid recalc of length on each
+                                           // comparision
   for (auto p : lines) {
     if (len(*p) > longestLength) {
       longestLength = len(*p);
@@ -1882,7 +1893,7 @@ inline double webMercDistFactor(const G& a) {
   double lat = 2 * atan(exp(a.getY() / 6378137.0)) - 1.5707965;
   return cos(lat);
 }
-}
-}
+}  // namespace geo
+}  // namespace util
 
 #endif  // UTIL_GEO_GEO_H_

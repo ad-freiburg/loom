@@ -66,6 +66,9 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   static std::vector<Partner> getPartners(const LineNode* n, const NodeFront* f,
                                           const LineOcc& ro);
 
+  static std::set<const shared::linegraph::Line*> servedLines(
+      const shared::linegraph::LineNode* n);
+
   std::set<LineEdge*> getNeighborEdges(const util::geo::DLine& line,
                                        double d) const;
 
@@ -74,7 +77,6 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
 
   EdgeGrid* getEdgGrid();
   const EdgeGrid& getEdgGrid() const;
-
 
  private:
   util::geo::Box<double> _bbox;
@@ -91,7 +93,7 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   EdgeGrid _edgeGrid;
 };
 
-}  // linegraph
-}  // shared
+}  // namespace linegraph
+}  // namespace shared
 
 #endif  // SHARED_LINEGRAPH_LINEGRAPH_H_

@@ -20,6 +20,8 @@ typedef std::map<const Line*,
                  std::map<const LineEdge*, std::set<const LineEdge*>>>
     ConnEx;
 
+typedef std::set<const Line*> NotServedLines;
+
 struct NodeFront {
   NodeFront(LineNode* n, LineEdge* e) : n(n), edge(e) {}
 
@@ -106,6 +108,9 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   bool connOccurs(const Line* r, const LineEdge* edgeA,
                   const LineEdge* edgeB) const;
 
+  void addLineNotServed(const Line* r);
+  bool lineServed(const Line* r) const;
+
   void clearConnExc();
 
   ConnEx& getConnExc() { return _connEx; }
@@ -118,6 +123,7 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   std::vector<NodeFront> _mainDirs;
 
   ConnEx _connEx;
+  NotServedLines _notServed;
 };
 }
 }

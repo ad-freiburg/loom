@@ -53,6 +53,15 @@ util::json::Dict LineNodePL::getAttrs() const {
   }
 
   if (arr.size()) obj["excluded_line_conns"] = arr;
+
+  auto nonServedArr = util::json::Array();
+
+  for (const auto& no : _notServed) {
+    nonServedArr.push_back(util::toString(no->id()));
+  }
+
+  if (nonServedArr.size()) obj["not_serving"] = nonServedArr;
+
   return obj;
 }
 
@@ -149,3 +158,13 @@ double NodeFront::getOutAngle() const {
 // _____________________________________________________________________________
 void LineNodePL::addMainDir(const NodeFront& f) { _mainDirs.push_back(f); }
 
+
+// _____________________________________________________________________________
+void LineNodePL::addLineNotServed(const Line* r) {
+  _notServed.insert(r);
+}
+
+// _____________________________________________________________________________
+bool LineNodePL::lineServed(const Line* r) const {
+  return !_notServed.count(r);
+}

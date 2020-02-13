@@ -43,7 +43,27 @@ start:
           LineNode* n = 0;
 
           if (e1->getTo()->pl().stops().size() > 0) {
+            auto servedLines = g->servedLines(e1->getTo());
             n = g->mergeNds(e1->getFrom(), e1->getTo());
+
+            for (auto l : g->servedLines(n)) {
+              if (!servedLines.count(l)) {
+                std::cerr << "AT " << n->pl().stops().front().name << " " << l->label() << std::endl;
+                n->pl().addLineNotServed(l);
+              }
+            }
+
+          } else if (e1->getFrom()->pl().stops().size() > 0) {
+            auto servedLines = g->servedLines(e1->getFrom());
+            n = g->mergeNds(e1->getTo(), e1->getFrom());
+
+            for (auto l : g->servedLines(n)) {
+              if (!servedLines.count(l)) {
+                std::cerr << "AT " << n->pl().stops().front().name << " " << l->label() << std::endl;
+                n->pl().addLineNotServed(l);
+              }
+            }
+
           } else {
             n = g->mergeNds(e1->getTo(), e1->getFrom());
           }

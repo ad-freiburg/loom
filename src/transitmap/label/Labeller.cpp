@@ -32,7 +32,7 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
     const graph::RenderGraph& g) {
   // TODO: the hull padding should be the same as in the renderer
   auto statHull =
-      g.getStationHull(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
+      g.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
                        _cfg->simpleRenderForTwoEdgeNodes);
 
   double rad = util::geo::getEnclosingRadius(*n->pl().getGeom(), statHull);

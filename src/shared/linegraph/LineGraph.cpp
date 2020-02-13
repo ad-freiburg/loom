@@ -14,17 +14,17 @@
 
 #include "shared/style/LineStyle.h"
 
+using shared::linegraph::EdgeGrid;
+using shared::linegraph::ISect;
+using shared::linegraph::Line;
+using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
-using shared::linegraph::LineEdge;
-using shared::linegraph::Line;
-using shared::linegraph::Partner;
 using shared::linegraph::LineOcc;
-using shared::linegraph::ISect;
 using shared::linegraph::NodeGrid;
-using shared::linegraph::EdgeGrid;
-using util::geo::Point;
+using shared::linegraph::Partner;
 using util::geo::DPoint;
+using util::geo::Point;
 
 // _____________________________________________________________________________
 LineGraph::LineGraph() {}
@@ -274,6 +274,22 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
 
         if (!idMap.count(id)) continue;
         LineNode* n = idMap[id];
+
+        if (!props["not_serving"].is_null()) {
+          for (auto excl : props["not_serving"]) {
+            std::string lid = util::toString(excl);
+
+            const Line* r = getLine(lid);
+
+            if (!r) {
+              LOG(WARN) << "line " << lid << " marked as not served in in node "
+                        << id << ", but no such line exists.";
+              continue;
+            }
+
+            n->pl().addLineNotServed(r);
+          }
+        }
 
         if (!props["excluded_line_conns"].is_null()) {
           for (auto excl : props["excluded_line_conns"]) {
@@ -577,21 +593,29 @@ size_t LineGraph::getNumNds() const { return getNds().size(); }
 size_t LineGraph::getNumNds(bool topo) const { return 0; }
 
 // _____________________________________________________________________________
-NodeGrid* LineGraph::getNdGrid() {
-  return &_nodeGrid;
-}
+NodeGrid* LineGraph::getNdGrid() { return &_nodeGrid; }
 
 // _____________________________________________________________________________
-const NodeGrid& LineGraph::getNdGrid() const {
-  return _nodeGrid;
-}
+const NodeGrid& LineGraph::getNdGrid() const { return _nodeGrid; }
 
 // _____________________________________________________________________________
-EdgeGrid* LineGraph::getEdgGrid() {
-  return &_edgeGrid;
-}
+EdgeGrid* LineGraph::getEdgGrid() { return &_edgeGrid; }
 
 // _____________________________________________________________________________
-const EdgeGrid& LineGraph::getEdgGrid() const {
-  return &_edgeGrid;
+const EdgeGrid& LineGraph::getEdgGrid() const { return &_edgeGrid; }
+
+// _____________________________________________________________________________
+std::set<const shared::linegraph::Line*> LineGraph::servedLines(
+    const shared::linegraph::LineNode* n) {
+  std::set<const shared::linegraph::Line*> ret;
+
+  for (auto e : n->getAdjList()) {
+    for (auto l : e->pl().getLines()) {
+      if (n->pl().lineServed(l.line)) {
+        ret.insert(l.line);
+      }
+    }
+  }
+  return ret;
 }
+

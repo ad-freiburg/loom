@@ -35,7 +35,7 @@ class RenderGraph : public shared::linegraph::LineGraph {
       const shared::linegraph::LineNode* n, const OrderCfg& c,
       double prec) const;
 
-  util::geo::Polygon<double> getStationHull(
+std::vector<util::geo::Polygon<double>> getStopGeoms(
       const shared::linegraph::LineNode* n, double d, bool simple) const;
 
   // TODO: maybe move this to LineGraph?
@@ -56,6 +56,10 @@ class RenderGraph : public shared::linegraph::LineGraph {
   util::geo::DPoint linePosOn(const shared::linegraph::NodeFront& nf,
                               const shared::linegraph::LineEdge* e, size_t pos,
                               bool inv, bool origG) const;
+
+  static bool notCompletelyServed(const shared::linegraph::LineNode* n);
+
+  std::vector<util::geo::Polygon<double>> getIndStopPolys(const std::set<const shared::linegraph::Line*> served, const shared::linegraph::LineNode* n) const;
 
   void createMetaNodes();
 

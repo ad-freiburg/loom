@@ -19,11 +19,7 @@
 
 namespace bgeo = boost::geometry;
 
-using util::geo::Point;
-using util::geo::DPoint;
-using util::geo::Box;
-using util::geo::dist;
-using transitmapper::graph::RenderGraph;
+using shared::linegraph::InnerGeom;
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
@@ -31,11 +27,15 @@ using shared::linegraph::LineOcc;
 using shared::linegraph::NodeFront;
 using shared::linegraph::Partner;
 using transitmapper::graph::OrderCfg;
-using shared::linegraph::InnerGeom;
+using transitmapper::graph::RenderGraph;
 using util::geo::BezierCurve;
-using util::geo::PolyLine;
-using util::geo::Polygon;
+using util::geo::Box;
+using util::geo::dist;
+using util::geo::DPoint;
 using util::geo::MultiLine;
+using util::geo::Point;
+using util::geo::Polygon;
+using util::geo::PolyLine;
 
 // _____________________________________________________________________________
 const OrderCfg& RenderGraph::getConfig() const { return _config; }
@@ -86,7 +86,7 @@ std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
       }
 
       // handle lines where this node is the terminus
-      if (partners.size() == 0) {
+      if (partners.size() == 0 && !notCompletelyServed(n)) {
         auto is = getTerminusStraightLine(n, c, o);
         if (is.geom.getLength() > 0) {
           if (prec > 0) {
@@ -356,6 +356,8 @@ Polygon<double> RenderGraph::getConvexFrontHull(
 
     auto avg = PolyLine<double>::average(pols).getLine();
 
+    typedef bgeo::model::linestring<BoostPoint> BoostLine;
+
     BoostLine lineBgeo;
     for (const auto& p : avg) {
       lineBgeo.push_back({p.getX(), p.getY()});
@@ -376,10 +378,78 @@ Polygon<double> RenderGraph::getConvexFrontHull(
 }
 
 // _____________________________________________________________________________
-Polygon<double> RenderGraph::getStationHull(const LineNode* n, double d,
-                                            bool simple) const {
-  if (n->pl().fronts().size() == 0) return Polygon<double>();
-  return getConvexFrontHull(n, d, true, simple);
+std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
+    const std::set<const shared::linegraph::Line*> served,
+    const shared::linegraph::LineNode* n) const {
+  double d = _defWidth;
+
+  typedef bgeo::model::point<double, 2, bgeo::cs::cartesian> BoostPoint;
+  typedef bgeo::model::linestring<BoostPoint> BoostLine;
+  typedef bgeo::model::polygon<BoostPoint> BoostPoly;
+  typedef bgeo::model::multi_polygon<BoostPoly> BoostMultiPoly;
+
+  BoostMultiPoly ret;
+  double pointsPerCircle = 36;
+  bgeo::strategy::buffer::distance_symmetric<double> distanceStrat(d);
+  bgeo::strategy::buffer::join_round joinStrat(pointsPerCircle);
+  bgeo::strategy::buffer::end_round endStrat(pointsPerCircle);
+  bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
+  bgeo::strategy::buffer::side_straight sideStrat;
+
+  std::vector<util::geo::Polygon<double>> retPolys;
+
+  for (auto l : served) {
+    for (auto e : n->getAdjList()) {
+      if (e->pl().hasLine(l)) {
+        auto pos = linePosOn(*n->pl().frontFor(e), l, _config, false);
+
+        typedef bgeo::model::linestring<BoostPoint> BoostLine;
+
+        BoostLine lineBgeo;
+        lineBgeo.push_back({pos.getX(), pos.getY()});
+
+        bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat,
+                     endStrat, circleStrat);
+
+        Polygon<double> retPoly;
+        for (const auto& p : ret[0].outer()) {
+          retPoly.getOuter().push_back({p.get<0>(), p.get<1>()});
+        }
+        retPolys.push_back(retPoly);
+
+        break;
+      }
+    }
+  }
+
+  return retPolys;
+}
+
+// _____________________________________________________________________________
+bool RenderGraph::notCompletelyServed(const shared::linegraph::LineNode* n) {
+  for (auto e : n->getAdjList()) {
+    for (auto l : e->pl().getLines()) {
+      if (!n->pl().lineServed(l.line)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+// _____________________________________________________________________________
+std::vector<Polygon<double>> RenderGraph::getStopGeoms(const LineNode* n,
+                                                       double d,
+                                                       bool simple) const {
+  if (notCompletelyServed(n)) {
+    // render each stop individually
+    auto served = servedLines(n);
+    return getIndStopPolys(served, n);
+  }
+
+  if (n->pl().fronts().size() == 0) return {};
+  return {getConvexFrontHull(n, d, true, simple)};
 }
 
 // _____________________________________________________________________________
@@ -626,8 +696,7 @@ std::vector<NodeFront> RenderGraph::getNextMetaNodeCand() const {
 }
 
 // _____________________________________________________________________________
-bool RenderGraph::isClique(
-                            std::set<const LineNode*> potClique) const {
+bool RenderGraph::isClique(std::set<const LineNode*> potClique) const {
   if (potClique.size() < 2) return false;
 
   for (const LineNode* a : potClique) {
@@ -683,8 +752,7 @@ bool RenderGraph::isClique(
 }
 
 // _____________________________________________________________________________
-std::vector<NodeFront> RenderGraph::getOpenNodeFronts(
-    const LineNode* n) const {
+std::vector<NodeFront> RenderGraph::getOpenNodeFronts(const LineNode* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->pl().fronts()) {
     if (util::geo::len(*nf.edge->pl().getGeom()) >
