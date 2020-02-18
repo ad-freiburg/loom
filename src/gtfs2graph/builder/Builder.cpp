@@ -47,7 +47,7 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
   DBox graphBox(getProjectedPoint(f.getMinLat(), f.getMinLon(), _graphProj),
                 getProjectedPoint(f.getMaxLat(), f.getMaxLon(), _graphProj));
 
-  NodeGrid ngrid(200, 200, graphBox);
+  NodeGrid ngrid(2000, 2000, graphBox);
 
   bool SANITY_CHECK = true;
 

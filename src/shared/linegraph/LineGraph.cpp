@@ -216,6 +216,10 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
 
         LineEdge* e = addEdg(fromN, toN, pl);
 
+        if (props["dontcontract"].is_number() &&
+            props["dontcontract"].get<int>())
+          e->pl().setDontContract(true);
+
         for (auto line : props["lines"]) {
           std::string id;
           if (!line["id"].is_null()) {
@@ -618,4 +622,3 @@ std::set<const shared::linegraph::Line*> LineGraph::servedLines(
   }
   return ret;
 }
-

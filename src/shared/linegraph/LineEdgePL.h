@@ -16,9 +16,9 @@
 namespace shared {
 namespace linegraph {
 
+using util::Nullable;
 using util::geo::PolyLine;
 using util::graph::Node;
-using util::Nullable;
 
 class LineEdgePL;
 class LineNodePL;
@@ -45,7 +45,7 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   LineEdgePL(const PolyLine<double>& p);
 
   void addLine(const Line* r, const Node<LineNodePL, LineEdgePL>* dir,
-                util::Nullable<shared::style::LineStyle> ls);
+               util::Nullable<shared::style::LineStyle> ls);
   void addLine(const Line* r, const Node<LineNodePL, LineEdgePL>* dir);
 
   std::set<LineOcc>& getLines();
@@ -57,8 +57,7 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   const LineOcc& lineOcc(const Line* r) const;
   const LineOcc& lineOccAtPos(size_t i) const;
 
-  size_t linePosUnder(const Line* r,
-                         const std::vector<size_t> ordering) const;
+  size_t linePosUnder(const Line* r, const std::vector<size_t> ordering) const;
 
   size_t linePos(const Line* r) const;
 
@@ -69,12 +68,16 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   const PolyLine<double>& getPolyline() const;
   void setPolyline(const PolyLine<double>& p);
 
+  void setDontContract(bool dontContract) { _dontContract = dontContract; }
+  bool dontContract() { return _dontContract; }
+
  private:
   std::set<LineOcc> _lines;
+  bool _dontContract;
 
   PolyLine<double> _p;
 };
-}
-}
+}  // namespace linegraph
+}  // namespace shared
 
 #endif  // SHARED_LINEGRAPH_LINEEDGEPL_H_

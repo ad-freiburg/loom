@@ -15,15 +15,15 @@
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
 
-using transitmapper::graph::GraphBuilder;
-using shared::linegraph::NodeFront;
-using shared::linegraph::LineNode;
-using shared::linegraph::LineEdge;
 using shared::linegraph::Line;
-using util::geo::PolyLine;
+using shared::linegraph::LineEdge;
+using shared::linegraph::LineNode;
+using shared::linegraph::NodeFront;
+using transitmapper::graph::GraphBuilder;
 using util::geo::DPoint;
 using util::geo::LinePoint;
 using util::geo::LinePointCmp;
+using util::geo::PolyLine;
 
 const static char* WGS84_PROJ =
     "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
@@ -71,7 +71,9 @@ void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
   while (true) {
     bool stillFree = false;
     for (auto n : *g->getNds()) {
-      if (n->pl().stops().size() && _cfg->tightStations) continue;
+      if (n->pl().stops().size() && !g->notCompletelyServed(n) &&
+          _cfg->tightStations)
+        continue;
       std::set<NodeFront*> overlaps = nodeGetOverlappingFronts(g, n);
       for (auto f : overlaps) {
         stillFree = true;

@@ -16,10 +16,10 @@ using shared::linegraph::LineEdgePL;
 using shared::linegraph::LineOcc;
 
 // _____________________________________________________________________________
-LineEdgePL::LineEdgePL() {}
+LineEdgePL::LineEdgePL() : _dontContract(false) {}
 
 // _____________________________________________________________________________
-LineEdgePL::LineEdgePL(const PolyLine<double>& p) : _p(p) {}
+LineEdgePL::LineEdgePL(const PolyLine<double>& p) : _p(p), _dontContract(false) {}
 
 // _____________________________________________________________________________
 const util::geo::Line<double>* LineEdgePL::getGeom() const {

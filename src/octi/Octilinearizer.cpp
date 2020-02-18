@@ -31,12 +31,12 @@ void Octilinearizer::removeEdgesShorterThan(LineGraph* g, double d) {
 start:
   for (auto n1 : *g->getNds()) {
     for (auto e1 : n1->getAdjList()) {
-      if (e1->pl().getPolyline().getLength() < d) {
+      if (!e1->pl().dontContract() && e1->pl().getPolyline().getLength() < d) {
         if (e1->getOtherNd(n1)->getAdjList().size() > 1 &&
             n1->getAdjList().size() > 1 &&
             (n1->pl().stops().size() == 0 ||
              e1->getOtherNd(n1)->pl().stops().size() == 0)) {
-          auto otherP = e1->getFrom()->pl().getGeom();
+          auto otherP = e1->getOtherNd(n1)->pl().getGeom();
           auto newGeom =
               DPoint((n1->pl().getGeom()->getX() + otherP->getX()) / 2,
                      (n1->pl().getGeom()->getY() + otherP->getY()) / 2);
@@ -48,7 +48,6 @@ start:
 
             for (auto l : g->servedLines(n)) {
               if (!servedLines.count(l)) {
-                std::cerr << "AT " << n->pl().stops().front().name << " " << l->label() << std::endl;
                 n->pl().addLineNotServed(l);
               }
             }
@@ -59,7 +58,6 @@ start:
 
             for (auto l : g->servedLines(n)) {
               if (!servedLines.count(l)) {
-                std::cerr << "AT " << n->pl().stops().front().name << " " << l->label() << std::endl;
                 n->pl().addLineNotServed(l);
               }
             }
@@ -84,6 +82,8 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
                                const std::string& path) {
   GridGraph* gg;
   removeEdgesShorterThan(tg, gridSize / 2);
+
+
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
@@ -116,7 +116,14 @@ double Octilinearizer::draw(LineGraph* tg, LineGraph* outTg, GridGraph** retGg,
                             double borderRad, bool deg2heur, double maxGrDist,
                             bool restrLocSearch, double enfGeoPen) {
   removeEdgesShorterThan(tg, gridSize / 2);
+
+  // util::geo::output::GeoGraphJsonOutput a;
+  // a.print(*tg, std::cout);
+  // exit(0);
+
   CombGraph cg(tg, deg2heur);
+
+
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
 

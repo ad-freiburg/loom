@@ -29,6 +29,7 @@ Grid<V, G, T>::Grid(double w, double h, const Box<T>& bbox, bool bValIdx)
       _cellHeight(fabs(h)),
       _bb(bbox),
       _hasValIdx(bValIdx) {
+
   _width =
       bbox.getUpperRight().getX() - bbox.getLowerLeft().getX();
   _height =
