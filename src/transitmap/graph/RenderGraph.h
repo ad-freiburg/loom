@@ -76,10 +76,12 @@ class RenderGraph : public shared::linegraph::LineGraph {
   static bool notCompletelyServed(const shared::linegraph::LineNode* n);
 
   std::vector<util::geo::Polygon<double>> getIndStopPolys(
-      const std::set<const shared::linegraph::Line*> served,
-      const shared::linegraph::LineNode* n) const;
+      const std::set<const shared::linegraph::Line*>& served,
+      const shared::linegraph::LineNode* n, double d) const;
 
   void createMetaNodes();
+
+  static bool isTerminus(const shared::linegraph::LineNode* n);
 
  private:
   double _defWidth, _defSpacing;

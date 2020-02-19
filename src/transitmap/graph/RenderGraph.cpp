@@ -47,6 +47,22 @@ void RenderGraph::setConfig(const OrderCfg& c) { _config = c; }
 size_t RenderGraph::numEdgs() const { return 0; }
 
 // _____________________________________________________________________________
+bool RenderGraph::isTerminus(const LineNode* n) {
+
+  if (n->getDeg() ==1 ) return true;
+  for (size_t i = 0; i < n->pl().fronts().size(); ++i) {
+    const shared::linegraph::NodeFront& nf = n->pl().fronts()[i];
+
+    for (size_t p = 0; p < nf.edge->pl().getLines().size(); p++) {
+      const LineOcc& lineOcc = nf.edge->pl().lineOccAtPos(p);
+      std::vector<Partner> partners = getPartners(n, &nf, lineOcc);
+      if (partners.size() == 0) return true;
+    }
+  }
+  return false;
+}
+
+// _____________________________________________________________________________
 std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
                                                const OrderCfg& c,
                                                double prec) const {
@@ -379,9 +395,8 @@ Polygon<double> RenderGraph::getConvexFrontHull(
 
 // _____________________________________________________________________________
 std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
-    const std::set<const shared::linegraph::Line*> served,
-    const shared::linegraph::LineNode* n) const {
-  double d = _defWidth;
+    const std::set<const shared::linegraph::Line*>& served,
+    const shared::linegraph::LineNode* n, double d) const {
 
   typedef bgeo::model::point<double, 2, bgeo::cs::cartesian> BoostPoint;
   typedef bgeo::model::linestring<BoostPoint> BoostLine;
@@ -396,42 +411,55 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
   bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
   bgeo::strategy::buffer::side_straight sideStrat;
 
+  typedef bgeo::model::linestring<BoostPoint> BoostLine;
   std::vector<util::geo::Polygon<double>> retPolys;
 
   // order edges by number of lines not served
   std::vector<const LineEdge*> orderedEdgs;
-  orderedEdgs.insert(orderedEdgs.begin(), n->getAdjList().begin(), n->getAdjList().end());
+  orderedEdgs.insert(orderedEdgs.begin(), n->getAdjList().begin(),
+                     n->getAdjList().end());
   EdgOrder cmp(served);
 
-  std::cout << "BEF ";
-  for (auto a : orderedEdgs) std::cout << a << " ";
-  std::cout << std::endl;
-  std::sort(orderedEdgs.begin(), orderedEdgs.end(), cmp);
-  std::cout << "AFT ";
-  for (auto a : orderedEdgs) std::cout << a << " (" << cmp.notServed(a) << ") ";
-  std::cout << std::endl;
+  std::set<const Line*> proced;
 
-  for (auto l : served) {
-    for (auto e : orderedEdgs) {
-      if (e->pl().hasLine(l)) {
+  for (auto e : orderedEdgs) {
+    BoostLine lineBgeo;
+
+    for (size_t p = 0; p < e->pl().getLines().size(); p++) {
+      auto lineAtPos = e->pl().lineOccAtPos(_config.find(e)->second[p]).line;
+      for (auto l : served) {
+        if (proced.count(l)) continue;
+        if (l != lineAtPos) {
+          if (lineBgeo.size()) {
+            bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat,
+                         endStrat, circleStrat);
+
+            Polygon<double> retPoly;
+            for (const auto& p : ret[0].outer()) {
+              retPoly.getOuter().push_back({p.get<0>(), p.get<1>()});
+            }
+            retPolys.push_back(retPoly);
+          }
+          continue;
+        }
+        proced.insert(l);
+
         auto pos = linePosOn(*n->pl().frontFor(e), l, _config, false);
 
-        typedef bgeo::model::linestring<BoostPoint> BoostLine;
-
-        BoostLine lineBgeo;
         lineBgeo.push_back({pos.getX(), pos.getY()});
-
-        bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat,
-                     endStrat, circleStrat);
-
-        Polygon<double> retPoly;
-        for (const auto& p : ret[0].outer()) {
-          retPoly.getOuter().push_back({p.get<0>(), p.get<1>()});
-        }
-        retPolys.push_back(retPoly);
-
-        break;
       }
+    }
+
+    // last entry
+    if (lineBgeo.size()) {
+      bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat,
+                   endStrat, circleStrat);
+
+      Polygon<double> retPoly;
+      for (const auto& p : ret[0].outer()) {
+        retPoly.getOuter().push_back({p.get<0>(), p.get<1>()});
+      }
+      retPolys.push_back(retPoly);
     }
   }
 
@@ -458,7 +486,7 @@ std::vector<Polygon<double>> RenderGraph::getStopGeoms(const LineNode* n,
   if (notCompletelyServed(n)) {
     // render each stop individually
     auto served = servedLines(n);
-    return getIndStopPolys(served, n);
+    return getIndStopPolys(served, n, d);
   }
 
   if (n->pl().fronts().size() == 0) return {};

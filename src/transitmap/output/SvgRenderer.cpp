@@ -715,14 +715,14 @@ void SvgRenderer::renderStationLabels(const Labeller& labeller,
                       (p.getY() - rparams.yOff) * _cfg->outputResolution;
       }
 
-      std::stringstream style;
-      style << "fill:none;stroke:black"
-            << ";stroke-linejoin: "
-               "miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1";
-      std::map<std::string, std::string> ps;
-      ps["style"] = style.str();
+      // std::stringstream style;
+      // style << "fill:none;stroke:black"
+            // << ";stroke-linejoin: "
+               // "miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1";
+      // std::map<std::string, std::string> ps;
+      // ps["style"] = style.str();
 
-      for (auto path : label.band) printLine(path, ps, rparams);
+      // for (auto path : label.band) printLine(path, ps, rparams);
 
       std::string idStr = "stlblp" + util::toString(id);
 

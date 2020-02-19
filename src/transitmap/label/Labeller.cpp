@@ -102,7 +102,7 @@ void Labeller::labelStations(const graph::RenderGraph& g) {
         auto overlaps = getOverlaps(band, g);
 
         if (overlaps.lineOverlaps + overlaps.statLabelOverlaps > 0) continue;
-        cands.push_back({band[0], band, fontSize, n->getDeg() == 1, deg, offset,
+        cands.push_back({band[0], band, fontSize, g.isTerminus(n), deg, offset,
                          overlaps, n->pl().stops().front()});
       }
     }
