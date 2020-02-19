@@ -21,6 +21,22 @@
 namespace transitmapper {
 namespace graph {
 
+struct EdgOrder {
+  EdgOrder(const std::set<const shared::linegraph::Line*>& served)
+      : _served(served) {}
+  bool operator()(const shared::linegraph::LineEdge* e1,
+                  const shared::linegraph::LineEdge* e2) {
+    return notServed(e1) < notServed(e2);
+  }
+
+  size_t notServed(const shared::linegraph::LineEdge* e) {
+    size_t ret = 0;
+    for (auto l : _served) if (e->pl().hasLine(l)) ret++;
+    return e->pl().getLines().size() - ret;
+  }
+  std::set<const shared::linegraph::Line*> _served;
+};
+
 class RenderGraph : public shared::linegraph::LineGraph {
  public:
   RenderGraph(double defLineWidth, double defLineSpace)
@@ -35,7 +51,7 @@ class RenderGraph : public shared::linegraph::LineGraph {
       const shared::linegraph::LineNode* n, const OrderCfg& c,
       double prec) const;
 
-std::vector<util::geo::Polygon<double>> getStopGeoms(
+  std::vector<util::geo::Polygon<double>> getStopGeoms(
       const shared::linegraph::LineNode* n, double d, bool simple) const;
 
   // TODO: maybe move this to LineGraph?
@@ -59,7 +75,9 @@ std::vector<util::geo::Polygon<double>> getStopGeoms(
 
   static bool notCompletelyServed(const shared::linegraph::LineNode* n);
 
-  std::vector<util::geo::Polygon<double>> getIndStopPolys(const std::set<const shared::linegraph::Line*> served, const shared::linegraph::LineNode* n) const;
+  std::vector<util::geo::Polygon<double>> getIndStopPolys(
+      const std::set<const shared::linegraph::Line*> served,
+      const shared::linegraph::LineNode* n) const;
 
   void createMetaNodes();
 
@@ -99,7 +117,7 @@ std::vector<util::geo::Polygon<double>> getStopGeoms(
   std::vector<shared::linegraph::NodeFront> getClosedNodeFronts(
       const shared::linegraph::LineNode* n) const;
 };
-}
-}
+}  // namespace graph
+}  // namespace transitmapper
 
 #endif  // TRANSITMAP_GRAPH_RENDERGRAPH_H_

@@ -37,7 +37,7 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
 
   double rad = util::geo::getEnclosingRadius(*n->pl().getGeom(), statHull);
 
-  double labelW = n->pl().stops().front().name.size() * fontSize / 1.5;
+  double labelW = n->pl().stops().front().name.size() * fontSize / 1.6;
 
   util::geo::MultiLine<double> band;
 
@@ -47,19 +47,19 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
   geomBaseLine.push_back({n->pl().getGeom()->getX() + rad +
                               (_cfg->lineSpacing + _cfg->lineWidth),
                           n->pl().getGeom()->getY() - (offset * h / 2)});
-  geomBaseLine.push_back({n->pl().getGeom()->getX() + labelW,
+  geomBaseLine.push_back({n->pl().getGeom()->getX() + rad + labelW,
                           n->pl().getGeom()->getY() - (offset * h / 2)});
 
   geomMiddle.push_back({n->pl().getGeom()->getX() + rad +
                             (_cfg->lineSpacing + _cfg->lineWidth),
                         n->pl().getGeom()->getY() + h / 2 - (offset * h / 2)});
-  geomMiddle.push_back({n->pl().getGeom()->getX() + labelW,
+  geomMiddle.push_back({n->pl().getGeom()->getX() + rad + labelW,
                         n->pl().getGeom()->getY() + h / 2 - (offset * h / 2)});
 
   geomTop.push_back({n->pl().getGeom()->getX() + rad +
                          (_cfg->lineSpacing + _cfg->lineWidth),
                      n->pl().getGeom()->getY() + h - (offset * h / 2)});
-  geomTop.push_back({n->pl().getGeom()->getX() + labelW,
+  geomTop.push_back({n->pl().getGeom()->getX() + rad + labelW,
                      n->pl().getGeom()->getY() + h - (offset * h / 2)});
 
   capLeft = util::geo::PolyLine<double>(geomMiddle)

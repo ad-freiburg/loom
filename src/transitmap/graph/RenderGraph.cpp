@@ -398,8 +398,21 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
 
   std::vector<util::geo::Polygon<double>> retPolys;
 
+  // order edges by number of lines not served
+  std::vector<const LineEdge*> orderedEdgs;
+  orderedEdgs.insert(orderedEdgs.begin(), n->getAdjList().begin(), n->getAdjList().end());
+  EdgOrder cmp(served);
+
+  std::cout << "BEF ";
+  for (auto a : orderedEdgs) std::cout << a << " ";
+  std::cout << std::endl;
+  std::sort(orderedEdgs.begin(), orderedEdgs.end(), cmp);
+  std::cout << "AFT ";
+  for (auto a : orderedEdgs) std::cout << a << " (" << cmp.notServed(a) << ") ";
+  std::cout << std::endl;
+
   for (auto l : served) {
-    for (auto e : n->getAdjList()) {
+    for (auto e : orderedEdgs) {
       if (e->pl().hasLine(l)) {
         auto pos = linePosOn(*n->pl().frontFor(e), l, _config, false);
 

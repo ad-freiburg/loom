@@ -4085,7 +4085,7 @@
       }, 
       "properties": {
         "dbg_lines": "T8", 
-        "from": "0x55c8665e0ca0", 
+        "from": "0x55c8674ca670", 
         "id": "0x55c86742cf60", 
         "lines": [
           {
@@ -4095,37 +4095,7 @@
           }], 
         "to": "0x55c86742cfd0"
       }
-    }, 
-    {
-      "type": "Feature", 
-      "geometry": {
-        "type": "LineString", 
-        "coordinates": [[16798215.1860162914, -4024168.6316182432], [16797317.9801389314, -4025099.8792853234]]
-      }, 
-      "properties": {
-        "dbg_lines": "T2$T8$T3$T5", 
-        "from": "0x55c8665e0ca0", 
-        "id": "0x55c8674ca7b0", 
-        "lines": [
-          {
-            "color": "0098cd", 
-            "id": "\"0x561971baaa70\"", 
-            "label": "T2"
-          }, 
-          {
-            "color": "00954c", 
-            "id": "\"0x561971c3bda0\"", 
-            "label": "T8"
-          },
-          {
-            "color": "c4258f", 
-            "id": "\"0x561971baa1f0\"", 
-            "label": "T5"
-          }], 
-        "to": "0x55c8674ca670"
-      }
-    }, 
-    {
+    },    {
       "type": "Feature", 
       "geometry": {
         "type": "LineString", 
@@ -4133,7 +4103,7 @@
       }, 
       "properties": {
         "dbg_lines": "T2$T3$T5", 
-        "from": "0x55c8665e0ca0", 
+        "from": "0x55c8674ca670", 
         "id": "0x55c86660d6b0", 
         "lines": [
           {
@@ -6518,6 +6488,11 @@
         "id": "0x55c867479e00", 
         "lines": [
           {
+            "color": "d11f2f", 
+            "id": "\"0x561971c3be60\"", 
+            "label": "T9"
+          },
+		  {
             "color": "f99d1c", 
             "id": "\"0x561971baac60\"", 
             "label": "T1"
