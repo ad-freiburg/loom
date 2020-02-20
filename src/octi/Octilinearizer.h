@@ -15,25 +15,25 @@
 
 namespace octi {
 
+using octi::gridgraph::GeoPens;
+using octi::gridgraph::GeoPensMap;
+using octi::gridgraph::GridEdge;
+using octi::gridgraph::GridEdgePL;
 using octi::gridgraph::GridGraph;
 using octi::gridgraph::GridNode;
-using octi::gridgraph::GridEdge;
 using octi::gridgraph::GridNodePL;
-using octi::gridgraph::GridEdgePL;
-using octi::gridgraph::Penalties;
 using octi::gridgraph::NodeCost;
-using octi::gridgraph::GeoPensMap;
-using octi::gridgraph::GeoPens;
+using octi::gridgraph::Penalties;
 
+using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
-using shared::linegraph::LineEdge;
 
-using octi::combgraph::EdgeOrdering;
+using octi::combgraph::CombEdge;
 using octi::combgraph::CombGraph;
 using octi::combgraph::CombNode;
-using octi::combgraph::CombEdge;
 using octi::combgraph::Drawing;
+using octi::combgraph::EdgeOrdering;
 
 using util::graph::Dijkstra;
 
@@ -75,8 +75,10 @@ struct GridCost : public Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
   virtual float inf() const { return _inf; }
 };
 
-struct GridCostGeoPen : public Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
-  GridCostGeoPen(float inf, const GeoPens* geoPens) : _inf(inf), _geoPens(geoPens) {}
+struct GridCostGeoPen
+    : public Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
+  GridCostGeoPen(float inf, const GeoPens* geoPens)
+      : _inf(inf), _geoPens(geoPens) {}
   virtual float operator()(const GridNode* from, const GridEdge* e,
                            const GridNode* to) const {
     UNUSED(from);
@@ -143,12 +145,14 @@ class Octilinearizer {
   double draw(LineGraph* in, LineGraph* out, GridGraph** gg,
               const Penalties& pens, double gridSize, double borderRad,
               bool deg2heur, double maxGrDist, bool restrLocSearch,
-              double enfGeoCourse);
+              double enfGeoCourse,
+              const std::vector<util::geo::Polygon<double>>& obstacles);
 
-  double draw(const CombGraph& cg, const util::geo::DBox& box,
-              LineGraph* out, GridGraph** gg, const Penalties& pens,
-              double gridSize, double borderRad, bool deg2heur,
-              double maxGrDist, bool restrLocSearch, double enfGeoCourse);
+  double draw(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
+              GridGraph** gg, const Penalties& pens, double gridSize,
+              double borderRad, bool deg2heur, double maxGrDist,
+              bool restrLocSearch, double enfGeoCourse,
+              const std::vector<util::geo::Polygon<double>>& obstacles);
 
   double drawILP(LineGraph* in, LineGraph* out, GridGraph** gg,
                  const Penalties& pens, double gridSize, double borderRad,

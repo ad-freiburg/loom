@@ -108,6 +108,8 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target, double pen);
 
+  void addObstacle(const util::geo::Polygon<double>& obst);
+
  private:
   util::geo::DBox _bbox;
   Penalties _c;
@@ -124,9 +126,13 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   // edge id counter
   size_t _edgeCount;
 
+  std::vector<util::geo::Polygon<double>> _obstacles;
+
   std::unordered_map<GridEdge*, CombEdge*> _resEdgs;
 
   void writeInitialCosts();
+  void writeObstacleCost(const util::geo::Polygon<double>& obst);
+  void reWriteObstCosts();
 
   GridNode* writeNd(size_t x, size_t y);
 

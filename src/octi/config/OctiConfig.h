@@ -7,6 +7,7 @@
 
 #include <string>
 #include "octi/gridgraph/GridGraph.h"
+#include "util/geo/Geo.h"
 
 namespace octi {
 namespace config {
@@ -25,6 +26,9 @@ struct Config {
   bool ilpNoSolve;
 
   double maxGrDist;
+
+  std::string obstaclePath;
+  std::vector<util::geo::DPolygon> obstacles;
 
   octi::gridgraph::Penalties pens;
 };

@@ -18,13 +18,12 @@
 using namespace octi;
 using namespace gridgraph;
 
-using octi::combgraph::Drawing;
 using combgraph::EdgeOrdering;
-using util::graph::Dijkstra;
-using util::graph::Dijkstra;
-using util::geo::len;
+using octi::combgraph::Drawing;
 using util::geo::dist;
 using util::geo::DPoint;
+using util::geo::len;
+using util::graph::Dijkstra;
 
 // _____________________________________________________________________________
 void Octilinearizer::removeEdgesShorterThan(LineGraph* g, double d) {
@@ -83,7 +82,6 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
   GridGraph* gg;
   removeEdgesShorterThan(tg, gridSize / 2);
 
-
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
@@ -92,7 +90,7 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
     std::cerr << "Presolving..." << std::endl;
     // important: always use restrLocSearch here!
     draw(cg, box, outTg, &gg, pens, gridSize, borderRad, deg2heur, maxGrDist,
-         true, false);
+         true, false, {});
     std::cerr << "Presolving finished." << std::endl;
   } else {
     gg = new GridGraph(box, gridSize, borderRad, pens);
@@ -111,31 +109,27 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
 }
 
 // _____________________________________________________________________________
-double Octilinearizer::draw(LineGraph* tg, LineGraph* outTg, GridGraph** retGg,
-                            const Penalties& pens, double gridSize,
-                            double borderRad, bool deg2heur, double maxGrDist,
-                            bool restrLocSearch, double enfGeoPen) {
+double Octilinearizer::draw(
+    LineGraph* tg, LineGraph* outTg, GridGraph** retGg, const Penalties& pens,
+    double gridSize, double borderRad, bool deg2heur, double maxGrDist,
+    bool restrLocSearch, double enfGeoPen,
+    const std::vector<util::geo::Polygon<double>>& obstacles) {
   removeEdgesShorterThan(tg, gridSize / 2);
 
-  // util::geo::output::GeoGraphJsonOutput a;
-  // a.print(*tg, std::cout);
-  // exit(0);
-
   CombGraph cg(tg, deg2heur);
-
 
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
 
   return draw(cg, box, outTg, retGg, pens, gridSize, borderRad, deg2heur,
-              maxGrDist, restrLocSearch, enfGeoPen);
+              maxGrDist, restrLocSearch, enfGeoPen, obstacles);
 }
 // _____________________________________________________________________________
-double Octilinearizer::draw(const CombGraph& cg, const util::geo::DBox& box,
-                            LineGraph* outTg, GridGraph** retGg,
-                            const Penalties& pens, double gridSize,
-                            double borderRad, bool deg2heur, double maxGrDist,
-                            bool restrLocSearch, double enfGeoPen) {
+double Octilinearizer::draw(
+    const CombGraph& cg, const util::geo::DBox& box, LineGraph* outTg,
+    GridGraph** retGg, const Penalties& pens, double gridSize, double borderRad,
+    bool deg2heur, double maxGrDist, bool restrLocSearch, double enfGeoPen,
+    const std::vector<util::geo::Polygon<double>>& obstacles) {
   size_t jobs = 4;
   std::vector<GridGraph*> ggs(jobs);
 
@@ -165,6 +159,13 @@ double Octilinearizer::draw(const CombGraph& cg, const util::geo::DBox& box,
     }
     std::cerr << " done (" << T_STOP(geopens) << "ms)" << std::endl;
     geoPens = &enfGeoPens;
+  }
+
+  if (obstacles.size()) {
+    std::cerr << "Writing obstacles... ";
+    T_START(obstacles);
+    for (auto gg : ggs) for (const auto& obst : obstacles) gg->addObstacle(obst);
+    std::cerr << " done (" << T_STOP(obstacles) << "ms)" << std::endl;
   }
 
   Drawing drawing(ggs[0]);
@@ -382,7 +383,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     auto frCmbNd = cmbEdg->getFrom();
     auto toCmbNd = cmbEdg->getTo();
 
-    std::set<GridNode *> frGrNds, toGrNds;
+    std::set<GridNode*> frGrNds, toGrNds;
     std::tie(frGrNds, toGrNds) =
         getRtPair(frCmbNd, toCmbNd, settled, gg, maxGrDist);
 

@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <set>
+#include "json/json.hpp"
 #include "octi/Octilinearizer.h"
 #include "octi/combgraph/CombGraph.h"
 #include "octi/config/ConfigReader.h"
@@ -22,6 +23,7 @@ using namespace octi;
 
 using octi::Octilinearizer;
 using util::geo::dist;
+using util::geo::DPolygon;
 
 // _____________________________________________________________________________
 double avgStatDist(const LineGraph& g) {
@@ -41,6 +43,31 @@ double avgStatDist(const LineGraph& g) {
 }
 
 // _____________________________________________________________________________
+std::vector<DPolygon> readObstacleFile(const std::string& p) {
+  std::vector<DPolygon> ret;
+  std::ifstream s;
+  s.open(p);
+  nlohmann::json j;
+  s >> j;
+
+  if (j["type"] == "FeatureCollection") {
+    for (auto feature : j["features"]) {
+      auto geom = feature["geometry"];
+      if (geom["type"] == "Polygon") {
+        std::vector<std::vector<double>> coords = geom["coordinates"][0];
+        util::geo::Line<double> l;
+        for (auto coord : coords) {
+          l.push_back({coord[0], coord[1]});
+        }
+        ret.push_back(l);
+      }
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
 int main(int argc, char** argv) {
   // disable output buffering for standard output
   setbuf(stdout, NULL);
@@ -54,6 +81,12 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   util::geo::output::GeoGraphJsonOutput out;
+
+  if (cfg.obstaclePath.size()) {
+    std::cerr << "Reading obstacle file... ";
+    cfg.obstacles = readObstacleFile(cfg.obstaclePath);
+    std::cerr << "Done (" << cfg.obstacles.size() << " obstacles)" << std::endl;
+  }
 
   std::cerr << "Reading graph file... ";
   T_START(read);
@@ -89,16 +122,16 @@ int main(int argc, char** argv) {
 
   if (cfg.optMode == "ilp") {
     T_START(octi);
-    double sc =
-        oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                    cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve, cfg.ilpPath);
+    double sc = oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+                            cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve,
+                            cfg.ilpPath);
     std::cerr << "Octilinearized using ILP in " << T_STOP(octi) << " ms, score "
               << sc << std::endl;
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
     double sc = oct.draw(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
                          cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch,
-                         cfg.enfGeoPen);
+                         cfg.enfGeoPen, cfg.obstacles);
     std::cerr << "Octilinearized using heur approach in " << T_STOP(octi)
               << " ms, score " << sc << std::endl;
   }

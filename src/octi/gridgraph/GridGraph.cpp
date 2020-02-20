@@ -13,11 +13,11 @@
 #include "util/graph/Node.h"
 
 using namespace octi::gridgraph;
-using octi::gridgraph::NodeCost;
 using octi::gridgraph::GridGraph;
+using octi::gridgraph::NodeCost;
 using util::geo::DBox;
-using util::geo::DPoint;
 using util::geo::dist;
+using util::geo::DPoint;
 
 double INF = std::numeric_limits<float>::infinity();
 
@@ -157,7 +157,46 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target, double pen) {
+void GridGraph::addObstacle(const util::geo::Polygon<double>& obst) {
+  _obstacles.push_back(obst);
+  writeObstacleCost(obst);
+}
+
+// _____________________________________________________________________________
+void GridGraph::writeObstacleCost(const util::geo::Polygon<double>& obst) {
+  for (size_t x = 0; x < _grid.getXWidth(); x++) {
+    for (size_t y = 0; y < _grid.getYHeight(); y++) {
+      auto grNdA = getNode(x, y);
+
+      for (size_t i = 0; i < 8; i++) {
+        auto neigh = getNeighbor(x, y, i);
+        if (!neigh) continue;
+        auto ge = getNEdg(grNdA, neigh);
+
+        if (util::geo::intersects(
+                util::geo::LineSegment<double>(*ge->getFrom()->pl().getGeom(),
+                                               *ge->getTo()->pl().getGeom()),
+                obst) || util::geo::contains(
+                util::geo::LineSegment<double>(*ge->getFrom()->pl().getGeom(),
+                                               *ge->getTo()->pl().getGeom()),
+                obst)) {
+          ge->pl().setCost(std::numeric_limits<double>::infinity());
+        }
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void GridGraph::reWriteObstCosts() {
+  for (const auto& obst : _obstacles) {
+    writeObstacleCost(obst);
+  }
+}
+
+// _____________________________________________________________________________
+void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
+                                   double pen) {
   (*target)[ce].resize(_edgeCount);
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
@@ -701,6 +740,7 @@ void GridGraph::reset() {
   }
 
   writeInitialCosts();
+  reWriteObstCosts();
 }
 
 // _____________________________________________________________________________

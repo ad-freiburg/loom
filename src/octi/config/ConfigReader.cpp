@@ -45,6 +45,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "path to output the ILP to, a first feasible solution will be written "
       "to <basename>.mst.")
     (
+      "obstacles",
+      opts::value<std::string>(&(cfg->obstaclePath))->default_value(""),
+      "GeoJSON file containing obstacle polygons")
+    (
       "from-dot,D",
       opts::bool_switch(&(cfg->fromDot))->default_value(false),
       "input is in dot format")
