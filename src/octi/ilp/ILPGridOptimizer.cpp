@@ -34,6 +34,9 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
     gg->closeNodeSinkTo(nd);
   }
 
+  // clear drawing
+  d->crumble();
+
   glp_prob* lp = createProblem(gg, cg, maxGrDist);
 
   if (noSolve) {

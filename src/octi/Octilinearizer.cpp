@@ -86,10 +86,11 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
   if (true) {
+    LineGraph tmpOutTg;
     // presolve using heuristical approach to get a first feasible solution
     std::cerr << "Presolving..." << std::endl;
     // important: always use restrLocSearch here!
-    draw(cg, box, outTg, &gg, pens, gridSize, borderRad, deg2heur, maxGrDist,
+    draw(cg, box, &tmpOutTg, &gg, pens, gridSize, borderRad, deg2heur, maxGrDist,
          true, false, {});
     std::cerr << "Presolving finished." << std::endl;
   } else {

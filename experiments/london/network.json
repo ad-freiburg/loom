@@ -1963,9 +1963,7 @@
         "deg": "3", 
         "deg_in": "3", 
         "deg_out": "3", 
-        "id": "0x2f34d60", 
-        "station_id": "\"940GZZLUPAH\"", 
-        "station_label": "Paddington"
+        "id": "0x2f34d60"
       }
     }, 
     {
@@ -8199,30 +8197,16 @@
         "id": "0x2eee410", 
         "lines": [
           {
+            "color": "f386a0", 
+            "id": "\"Hammersmith & City\"", 
+            "label": ""
+          }, 
+          {
             "color": "b05f0f", 
             "id": "\"Bakerloo\"", 
             "label": ""
           }], 
         "to": "0x11fbf60"
-      }
-    }, 
-    {
-      "type": "Feature", 
-      "geometry": {
-        "type": "LineString", 
-        "coordinates": [[-19616.1077833718, 6713316.5740584210], [-19602.3162594654, 6713311.8080281336], [-19552.2931147858, 6713315.9511577934], [-19431.6871930032, 6713339.3780042352], [-19118.5624985132, 6713451.9539805073]]
-      }, 
-      "properties": {
-        "dbg_lines": "", 
-        "from": "0x2f34d60", 
-        "id": "0x2f300b0", 
-        "lines": [
-          {
-            "color": "f386a0", 
-            "id": "\"Hammersmith & City\"", 
-            "label": ""
-          }], 
-        "to": "0x2f35880"
       }
     }, 
     {
