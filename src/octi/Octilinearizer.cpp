@@ -116,6 +116,10 @@ double Octilinearizer::draw(
     const std::vector<util::geo::Polygon<double>>& obstacles) {
   removeEdgesShorterThan(tg, gridSize / 2);
 
+  // util::geo::output::GeoGraphJsonOutput out;
+  // out.print(*tg, std::cout);
+  // exit(1);
+
   CombGraph cg(tg, deg2heur);
 
   auto box = tg->getBBox();
