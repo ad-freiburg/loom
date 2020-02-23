@@ -205,11 +205,9 @@ double Octilinearizer::draw(
       drawing.crumble();
   }
 
-  std::cerr << "Done.." << std::endl;
+  if (!found) throw NoEmbeddingFoundExc();
 
-  if (!found) {
-    throw NoEmbeddingFoundExc();
-  }
+  std::cerr << "Done.." << std::endl;
 
   for (size_t i = 0; i < jobs; i++) drawing.applyToGrid(ggs[i]);
 
