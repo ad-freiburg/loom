@@ -85,15 +85,17 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
   CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
-  if (true) {
-    LineGraph tmpOutTg;
+
+  std::cerr << "Presolving..." << std::endl;
+  try {
     // presolve using heuristical approach to get a first feasible solution
-    std::cerr << "Presolving..." << std::endl;
+    LineGraph tmpOutTg;
     // important: always use restrLocSearch here!
     draw(cg, box, &tmpOutTg, &gg, pens, gridSize, borderRad, deg2heur, maxGrDist,
          true, false, {});
     std::cerr << "Presolving finished." << std::endl;
-  } else {
+  } catch (const NoEmbeddingFoundExc& exc) {
+    std::cerr << "Presolve was not sucessful." << std::endl;
     gg = new GridGraph(box, gridSize, borderRad, pens);
   }
   Drawing drawing(gg);
@@ -206,8 +208,7 @@ double Octilinearizer::draw(
   std::cerr << "Done.." << std::endl;
 
   if (!found) {
-    LOG(ERROR) << "Could not find planar embedding for input graph.";
-    exit(1);
+    throw NoEmbeddingFoundExc();
   }
 
   for (size_t i = 0; i < jobs; i++) drawing.applyToGrid(ggs[i]);

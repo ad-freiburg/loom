@@ -42,6 +42,13 @@ typedef Dijkstra::NList<GridNodePL, GridEdgePL> GrNdList;
 typedef std::pair<std::set<GridNode*>, std::set<GridNode*>> RtPair;
 typedef std::map<CombNode*, std::pair<size_t, size_t>> SettledPos;
 
+// exception thrown when no planar embedding could be found
+struct NoEmbeddingFoundExc : public std::exception {
+  const char* what() const throw() {
+    return "Could not find planar embedding for input graph.";
+  }
+};
+
 // comparator for nodes, based on degree
 struct NodeCmp {
   bool operator()(CombNode* a, CombNode* b) {

@@ -122,16 +122,22 @@ int main(int argc, char** argv) {
 
   if (cfg.optMode == "ilp") {
     T_START(octi);
-    double sc = oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                            cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve,
-                            cfg.ilpPath);
+    double sc =
+        oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+                    cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve, cfg.ilpPath);
     std::cerr << "Octilinearized using ILP in " << T_STOP(octi) << " ms, score "
               << sc << std::endl;
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
-    double sc = oct.draw(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                         cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch,
-                         cfg.enfGeoPen, cfg.obstacles);
+    double sc;
+    try {
+      sc = oct.draw(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+                    cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch,
+                    cfg.enfGeoPen, cfg.obstacles);
+    } catch (const NoEmbeddingFoundExc& exc) {
+      LOG(ERROR) << exc.what();
+      exit(1);
+    }
     std::cerr << "Octilinearized using heur approach in " << T_STOP(octi)
               << " ms, score " << sc << std::endl;
   }
