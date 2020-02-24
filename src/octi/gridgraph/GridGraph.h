@@ -19,13 +19,13 @@
 #include "octi/combgraph/CombEdgePL.h"
 #include "octi/combgraph/CombNodePL.h"
 
-using util::graph::DirGraph;
-using util::graph::Node;
 using util::geo::Grid;
 using util::geo::Point;
+using util::graph::DirGraph;
+using util::graph::Node;
 
-using octi::combgraph::CombNode;
 using octi::combgraph::CombEdge;
+using octi::combgraph::CombNode;
 
 namespace octi {
 namespace gridgraph {
@@ -133,12 +133,13 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   void writeInitialCosts();
   void writeObstacleCost(const util::geo::Polygon<double>& obst);
   void reWriteObstCosts();
+  void reWriteGeoPens();
 
   GridNode* writeNd(size_t x, size_t y);
 
   void getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]);
 };
-}
-}
+}  // namespace gridgraph
+}  // namespace octi
 
 #endif  // OCTI_GRIDGRAPH_GRIDGRAPH_H_

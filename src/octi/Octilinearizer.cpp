@@ -77,7 +77,7 @@ start:
 double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
                                GridGraph** retGg, const Penalties& pens,
                                double gridSize, double borderRad, bool deg2heur,
-                               double maxGrDist, bool noSolve,
+                               double maxGrDist, bool noSolve, double enfGeoPen,
                                const std::string& path) {
   GridGraph* gg;
   removeEdgesShorterThan(tg, gridSize / 2);
@@ -92,17 +92,38 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
     LineGraph tmpOutTg;
     // important: always use restrLocSearch here!
     draw(cg, box, &tmpOutTg, &gg, pens, gridSize, borderRad, deg2heur, maxGrDist,
-         true, false, {});
+         true, enfGeoPen, {});
     std::cerr << "Presolving finished." << std::endl;
   } catch (const NoEmbeddingFoundExc& exc) {
     std::cerr << "Presolve was not sucessful." << std::endl;
     gg = new GridGraph(box, gridSize, borderRad, pens);
   }
   Drawing drawing(gg);
+  GeoPensMap enfGeoPens;
+  const GeoPensMap* geoPens = 0;
+
+  if (enfGeoPen) {
+    std::cerr << "Writing geopens... ";
+    auto initOrder = getOrdering(cg, false);
+    T_START(geopens);
+    for (auto cmbEdg : initOrder) {
+      gg->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
+    }
+    std::cerr << " done (" << T_STOP(geopens) << "ms)" << std::endl;
+    geoPens = &enfGeoPens;
+  }
+
+  // TODO
+  // if (obstacles.size()) {
+    // std::cerr << "Writing obstacles... ";
+    // T_START(obstacles);
+    // for (auto gg : ggs) for (const auto& obst : obstacles) gg->addObstacle(obst);
+    // std::cerr << " done (" << T_STOP(obstacles) << "ms)" << std::endl;
+  // }
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, path);
+  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens, path);
 
   drawing.getLineGraph(outTg);
 
@@ -308,6 +329,7 @@ double Octilinearizer::draw(
         bestCore = i;
       }
     }
+
     double imp = (drawing.score() - bestFrIters[bestCore].score());
     std::cerr << " ++ Iter " << iters << ", prev " << drawing.score()
               << ", next " << bestFrIters[bestCore].score() << " ("

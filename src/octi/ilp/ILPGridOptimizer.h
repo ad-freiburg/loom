@@ -37,10 +37,10 @@ class ILPGridOptimizer {
   ILPGridOptimizer() {}
 
   double optimize(GridGraph* gg, const CombGraph& cg, combgraph::Drawing* d,
-                  double maxGrDist, bool noSolve, const std::string& path) const;
+                  double maxGrDist, bool noSolve, const gridgraph::GeoPensMap* geoPensMap, const std::string& path) const;
 
  protected:
-  virtual glp_prob* createProblem(GridGraph* gg, const CombGraph& cg,
+  virtual glp_prob* createProblem(GridGraph* gg, const CombGraph& cg, const gridgraph::GeoPensMap* geoPensMap,
                                   double maxGrDist) const;
 
   void preSolve(glp_prob* lp, const std::string& f) const;

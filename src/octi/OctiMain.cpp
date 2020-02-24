@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
     T_START(octi);
     double sc =
         oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                    cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve, cfg.ilpPath);
+                    cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen, cfg.ilpPath);
     std::cerr << "Octilinearized using ILP in " << T_STOP(octi) << " ms, score "
               << sc << std::endl;
   } else if ((cfg.optMode == "heur")) {

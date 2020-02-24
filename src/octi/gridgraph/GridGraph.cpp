@@ -188,13 +188,6 @@ void GridGraph::writeObstacleCost(const util::geo::Polygon<double>& obst) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::reWriteObstCosts() {
-  for (const auto& obst : _obstacles) {
-    writeObstacleCost(obst);
-  }
-}
-
-// _____________________________________________________________________________
 void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
                                    double pen) {
   (*target)[ce].resize(_edgeCount);
@@ -741,6 +734,13 @@ void GridGraph::reset() {
 
   writeInitialCosts();
   reWriteObstCosts();
+}
+
+// _____________________________________________________________________________
+void GridGraph::reWriteObstCosts() {
+  for (const auto& obst : _obstacles) {
+    writeObstacleCost(obst);
+  }
 }
 
 // _____________________________________________________________________________

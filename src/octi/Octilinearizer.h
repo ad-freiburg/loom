@@ -163,7 +163,7 @@ class Octilinearizer {
 
   double drawILP(LineGraph* in, LineGraph* out, GridGraph** gg,
                  const Penalties& pens, double gridSize, double borderRad,
-                 bool deg2heur, double maxGrDist, bool noSolve,
+                 bool deg2heur, double maxGrDist, bool noSolve, double enfGeoPens,
                  const std::string& path);
 
  private:

@@ -8,16 +8,18 @@
 #include "octi/ilp/ILPGridOptimizer.h"
 #include "util/log/Log.h"
 
+using octi::gridgraph::GeoPensMap;
+using octi::gridgraph::GridEdge;
 using octi::gridgraph::GridGraph;
 using octi::gridgraph::GridNode;
-using octi::gridgraph::GridEdge;
 using octi::ilp::ILPGridOptimizer;
 using octi::ilp::VariableMatrix;
 
 // _____________________________________________________________________________
 double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
                                   combgraph::Drawing* d, double maxGrDist,
-                                  bool noSolve, const std::string& path) const {
+                                  bool noSolve, const GeoPensMap* geoPensMap,
+                                  const std::string& path) const {
   // extract first feasible solution from gridgraph
   extractFeasibleSol(gg, cg, maxGrDist, path);
   gg->reset();
@@ -37,7 +39,7 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
   // clear drawing
   d->crumble();
 
-  glp_prob* lp = createProblem(gg, cg, maxGrDist);
+  glp_prob* lp = createProblem(gg, cg, geoPensMap, maxGrDist);
 
   if (noSolve) {
     glp_write_mps(lp, GLP_MPS_FILE, 0, path.c_str());
@@ -62,6 +64,7 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
 
 // _____________________________________________________________________________
 glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
+                                          const GeoPensMap* geoPensMap,
                                           double maxGrDist) const {
   glp_prob* lp = glp_create_prob();
 
@@ -146,7 +149,13 @@ glp_prob* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
           glp_set_col_name(lp, col, edgeVarName.c_str());
           // binary variable € {0,1}, edge is either used, or not
           glp_set_col_kind(lp, col, GLP_BV);
-          glp_set_obj_coef(lp, col, e->pl().cost());
+          if (geoPensMap && !e->pl().isSecondary()) {
+            // add geo pen
+            glp_set_obj_coef(lp, col,
+                             e->pl().cost() + (*geoPensMap).find(edg)->second[e->pl().getId()]);
+          } else {
+            glp_set_obj_coef(lp, col, e->pl().cost());
+          }
         }
       }
     }
