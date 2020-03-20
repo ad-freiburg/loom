@@ -1,7 +1,7 @@
 // Copyright 2016
 // Author: Patrick Brosi
 
-#include "shared/tests/GurobiSolverTest.h"
+#include "shared/tests/ILPSolverTest.h"
 
 #include "util/Misc.h"
 
@@ -9,7 +9,7 @@
 int main(int argc, char** argv) {
   UNUSED(argc);
   UNUSED(argv);
-  GurobiSolverTest gs;
+  ILPSolverTest gs;
 
   gs.run();
 }
