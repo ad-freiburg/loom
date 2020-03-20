@@ -128,6 +128,7 @@ size_t LineEdgePL::linePosUnder(const Line* r,
   size_t i = 0;
   for (const LineOcc& lo : _lines) {
     if (lo.line == r) {
+      assert(std::find(ordering.begin(), ordering.end(), i) != ordering.end());
       size_t pos =
           std::find(ordering.begin(), ordering.end(), i) - ordering.begin();
       return pos;

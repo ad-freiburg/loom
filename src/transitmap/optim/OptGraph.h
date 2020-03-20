@@ -218,6 +218,8 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   static bool dirContinuedOver(const OptLO& ro, const OptEdge* a,
                                const OptNode* n);
 
+  static bool lineDisjunct(const std::vector<const OptEdge*>& edges);
+
   static std::vector<OptLO> getCtdLinesIn(const OptEdge* fromEdge,
                                           const OptEdge* toEdge);
 

@@ -16,7 +16,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-find_package(GLPK REQUIRED)
+find_package(GLPK)
 find_package(Gurobi)
 
 # set compiler flags, see http://stackoverflow.com/questions/7724569/debug-vs-release-in-cmake
@@ -29,6 +29,10 @@ endif()
 
 if(GUROBI_FOUND)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGUROBI_FOUND=1")
+endif()
+
+if(GLPK_FOUND)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGLPK_FOUND=1")
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG          "-Og -g -DLOGLEVEL=3")

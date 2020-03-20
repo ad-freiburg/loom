@@ -41,7 +41,9 @@ using util::geo::PolyLine;
 const OrderCfg& RenderGraph::getConfig() const { return _config; }
 
 // _____________________________________________________________________________
-void RenderGraph::setConfig(const OrderCfg& c) { _config = c; }
+void RenderGraph::setConfig(const OrderCfg& c) {
+  _config = c;
+}
 
 // _____________________________________________________________________________
 size_t RenderGraph::numEdgs() const { return 0; }

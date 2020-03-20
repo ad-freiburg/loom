@@ -194,8 +194,8 @@ void OptGraph::partnerLines() {
 
   for (const auto& p : partners) {
     if (p.partners.size() == 1) continue;
-    std::cout << "Combining " << p.partners.begin()->line->id() << " and "
-              << p.partners.size() - 1 << " lines." << std::endl;
+    // std::cout << "Combining " << p.partners.begin()->line->id() << " and "
+              // << p.partners.size() - 1 << " lines." << std::endl;
     for (size_t i = 0; i < p.path.size(); i++) {
       // TODO: why isnt there a getLine function f or OptEdgePL?
       auto e = p.path[i];
@@ -1382,15 +1382,20 @@ std::vector<OptEdge*> OptGraph::branchesAt(OptEdge* e, OptNode* n) const {
   if (e->pl().getCardinality() < 2) return ret;
 
   size_t c = 0;
+  std::vector<const OptEdge*> branchEdgs;
 
   for (OptEdge* ea : n->getAdjList()) {
     if (ea == e) continue;
-    if (!dirLineContains(e, ea)) return std::vector<OptEdge*>();
+    branchEdgs.push_back(ea);
+    if (!dirLineContains(e, ea)) return {};
+
     c += ea->pl().getCardinality();
     ret.push_back(ea);
   }
 
-  if (c != e->pl().getCardinality()) return std::vector<OptEdge*>();
+  if (!lineDisjunct(branchEdgs)) return {};
+
+  if (c != e->pl().getCardinality()) return {};
 
   return ret;
 }
@@ -1596,6 +1601,20 @@ std::vector<OptLO> OptGraph::getCtdLinesIn(const Line* r, const LineNode* dir,
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+bool OptGraph::lineDisjunct(const std::vector<const OptEdge*>& edges) {
+  std::set<const Line*> lines;
+
+  for (const auto edg : edges) {
+    for (const OptLO& to : edg->pl().getLines()) {
+      if (lines.count(to.line)) return false;
+      lines.insert(to.line);
+    }
+  }
+
+  return true;
 }
 
 // _____________________________________________________________________________
