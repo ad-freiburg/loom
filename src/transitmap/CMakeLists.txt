@@ -7,7 +7,6 @@ list(REMOVE_ITEM transitmap_SRC TestMain.cpp)
 
 include_directories(
 	${TRANSITMAP_INCLUDE_DIR}
-	${GDAL_INCLUDE_DIR}
 	${GUROBI_INCLUDE_DIR}
 )
 
@@ -21,4 +20,4 @@ configure_file (
 add_executable(transitmap ${transitmap_main})
 add_library(transitmap_dep ${transitmap_SRC})
 
-target_link_libraries(transitmap transitmap_dep shared_dep dot_dep util ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GDAL_LIBRARY} ${GUROBI_LIBRARY} -lproj -lpthread)
+target_link_libraries(transitmap transitmap_dep shared_dep dot_dep util ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GUROBI_LIBRARY} -lproj -lpthread)

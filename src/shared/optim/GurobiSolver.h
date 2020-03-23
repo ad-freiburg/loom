@@ -19,6 +19,8 @@ class GurobiSolver : public ILPSolver {
   ~GurobiSolver();
 
   int addCol(const std::string& name, ColType colType, double objCoef);
+  int addCol(const std::string& name, ColType colType, double objCoef,
+             double lowBnd, double upBnd);
   int addRow(const std::string& name, double bnd, RowType rowType);
 
   void addColToRow(const std::string& rowName, const std::string& colName,
@@ -35,6 +37,7 @@ class GurobiSolver : public ILPSolver {
   void setObjCoef(int colId, double coef) const;
 
   SolveType solve();
+  SolveType getStatus() { return _status; }
   void update();
 
   double getObjVal() const;
@@ -42,11 +45,21 @@ class GurobiSolver : public ILPSolver {
   int getNumConstrs() const;
   int getNumVars() const;
 
+  void setTimeLim(int ms);
+  int getTimeLim() const;
+
+  void writeMps(const std::string& path) const;
+
   void setStarter(const StarterSol& starterSol);
 
  private:
   GRBenv* _env;
   GRBmodel* _model;
+
+  double* _starterArr;
+  StarterSol murr;
+
+  SolveType _status;
 
   int _numVars, _numRows;
 };

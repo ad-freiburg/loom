@@ -13,9 +13,6 @@
 #include "transitmap/optim/Optimizer.h"
 #include "transitmap/optim/Scorer.h"
 
-using std::exception;
-using std::string;
-
 namespace transitmapper {
 namespace optim {
 

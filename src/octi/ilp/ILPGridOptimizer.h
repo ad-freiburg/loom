@@ -5,19 +5,19 @@
 #ifndef OCTI_ILP_ILPGRIDOPTIMIZER_H_
 #define OCTI_ILP_ILPGRIDOPTIMIZER_H_
 
-#include <glpk.h>
 #include <vector>
 #include "octi/combgraph/CombGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "octi/gridgraph/GridGraph.h"
+#include "shared/optim/ILPSolver.h"
 
+using octi::gridgraph::GridEdge;
 using octi::gridgraph::GridGraph;
 using octi::gridgraph::GridNode;
-using octi::gridgraph::GridEdge;
 
+using octi::combgraph::CombEdge;
 using octi::combgraph::CombGraph;
 using octi::combgraph::CombNode;
-using octi::combgraph::CombEdge;
 
 namespace octi {
 namespace ilp {
@@ -37,27 +37,28 @@ class ILPGridOptimizer {
   ILPGridOptimizer() {}
 
   double optimize(GridGraph* gg, const CombGraph& cg, combgraph::Drawing* d,
-                  double maxGrDist, bool noSolve, const gridgraph::GeoPensMap* geoPensMap, const std::string& path) const;
+                  double maxGrDist, bool noSolve,
+                  const gridgraph::GeoPensMap* geoPensMap,
+                  const std::string& path) const;
 
  protected:
-  virtual glp_prob* createProblem(GridGraph* gg, const CombGraph& cg, const gridgraph::GeoPensMap* geoPensMap,
-                                  double maxGrDist) const;
-
-  void preSolve(glp_prob* lp, const std::string& f) const;
+  shared::optim::ILPSolver* createProblem(
+      GridGraph* gg, const CombGraph& cg,
+      const gridgraph::GeoPensMap* geoPensMap, double maxGrDist) const;
 
   std::string getEdgeUseVar(const GridEdge* e, const CombEdge* cg) const;
   std::string getStatPosVar(const GridNode* e, const CombNode* cg) const;
 
-  void solveProblem(glp_prob* lp) const;
-  void extractSolution(glp_prob* lp, GridGraph* gg, const CombGraph& cg,
-                       combgraph::Drawing* d) const;
+  void extractSolution(shared::optim::ILPSolver* lp, GridGraph* gg,
+                       const CombGraph& cg, combgraph::Drawing* d) const;
 
-  void extractFeasibleSol(GridGraph* gg, const CombGraph& cg,
-                          double maxGrDist, const std::string& f) const;
+  shared::optim::StarterSol extractFeasibleSol(GridGraph* gg,
+                                               const CombGraph& cg,
+                                               double maxGrDist) const;
 
   size_t nonInfDeg(const GridNode* g) const;
 };
-}  // namespace optim
-}  // namespace transitmapper
+}  // namespace ilp
+}  // namespace octi
 
 #endif  // OCTI_ILP_ILPGRIDOPTIMIZER_H_

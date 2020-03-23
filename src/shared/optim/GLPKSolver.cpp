@@ -14,16 +14,19 @@
 #include "util/log/Log.h"
 
 using shared::optim::GLPKSolver;
-using shared::optim::VariableMatrix;
 using shared::optim::SolveType;
+using shared::optim::VariableMatrix;
 
 // _____________________________________________________________________________
-GLPKSolver::GLPKSolver(DirType dir) : _starterArr(0) {
+GLPKSolver::GLPKSolver(DirType dir)
+    : _starterArr(0),
+      _status(INF),
+      _timeLimit(std::numeric_limits<int>::max()) {
   LOG(DEBUG) << "Creating GLPK solver instance...";
 
   _prob = glp_create_prob();
 
-  glp_set_prob_name(_prob, "transitmap");
+  glp_set_prob_name(_prob, "loom_mip");
 
   if (dir == MAX)
     glp_set_obj_dir(_prob, GLP_MAX);
@@ -65,6 +68,29 @@ int GLPKSolver::addCol(const std::string& name, ColType colType,
 }
 
 // _____________________________________________________________________________
+int GLPKSolver::addCol(const std::string& name, ColType colType, double objCoef,
+                       double lowBnd, double upBnd) {
+  int rtype = 0;
+  if (lowBnd <= -std::numeric_limits<double>::max() &&
+      upBnd >= std::numeric_limits<double>::max()) {
+    rtype = GLP_FR;
+  } else if (lowBnd <= -std::numeric_limits<double>::max()) {
+    rtype = GLP_UP;
+  } else if (upBnd >= std::numeric_limits<double>::max()) {
+    rtype = GLP_LO;
+  } else if (lowBnd == upBnd) {
+    rtype = GLP_FX;
+  } else {
+    rtype = GLP_DB;
+  }
+
+  int col = addCol(name, colType, objCoef);
+  glp_set_col_bnds(_prob, col + 1, rtype, lowBnd, upBnd);
+
+  return col;
+}
+
+// _____________________________________________________________________________
 int GLPKSolver::addRow(const std::string& name, double bnd, RowType rowType) {
   int rtype = 0;
   switch (rowType) {
@@ -99,9 +125,6 @@ void GLPKSolver::addColToRow(const std::string& rowName,
     LOG(ERROR) << "Could not find constraint " << rowName;
   }
 
-  assert(col);
-  assert(row);
-
   addColToRow(col, row, coef);
 }
 
@@ -130,7 +153,6 @@ double GLPKSolver::getObjVal() const { return glp_get_obj_val(_prob); }
 // _____________________________________________________________________________
 SolveType GLPKSolver::solve() {
   update();
-  glp_term_hook(termHook, 0);
 
   int* ia = 0;
   int* ja = 0;
@@ -142,6 +164,9 @@ SolveType GLPKSolver::solve() {
   delete[](ia);
   delete[](ja);
   delete[](res);
+
+  std::string buf;
+  glp_term_hook(termHook, &buf);
 
   glp_iocp params;
   glp_smcp sparams;
@@ -156,7 +181,7 @@ SolveType GLPKSolver::solve() {
   // params.presolve = GLP_ON;
   // params.binarize = GLP_OFF;
   // params.ps_tm_lim = 10000;
-  // params.tm_lim = 30000;
+  params.tm_lim = _timeLimit * 1000;
   // params.fp_heur = GLP_ON;
   // params.ps_heur = GLP_ON;
 
@@ -165,12 +190,20 @@ SolveType GLPKSolver::solve() {
 
   int optimStat = glp_get_status(_prob);
 
-  if (optimStat == GLP_OPT) return OPTIM;
+  if (optimStat == GLP_OPT) _status = OPTIM;
   if (optimStat == GLP_NOFEAS || optimStat == GLP_INFEAS ||
       optimStat == GLP_UNBND || optimStat == GLP_UNDEF)
-    return INF;
-  return NON_OPTIM;
+    _status = INF;
+  _status = NON_OPTIM;
+
+  return getStatus();
 }
+
+// _____________________________________________________________________________
+void GLPKSolver::setTimeLim(int ms) { _timeLimit = ms; }
+
+// _____________________________________________________________________________
+int GLPKSolver::getTimeLim() const { return _timeLimit; }
 
 // _____________________________________________________________________________
 double* GLPKSolver::getStarterArr() const { return _starterArr; }
@@ -180,7 +213,6 @@ void GLPKSolver::optCb(glp_tree* tree, void* solver) {
   auto _this = reinterpret_cast<GLPKSolver*>(solver);
   switch (glp_ios_reason(tree)) {
     case GLP_IHEUR:
-      std::cout << "IHEUR" << std::endl;
       if (_this->getStarterArr()) {
         glp_ios_heur_sol(tree, _this->getStarterArr());
       }
@@ -192,10 +224,17 @@ void GLPKSolver::optCb(glp_tree* tree, void* solver) {
 
 // _____________________________________________________________________________
 int GLPKSolver::termHook(void* info, const char* str) {
-  UNUSED(info);
+  std::string* buff = reinterpret_cast<std::string*>(info);
   std::string s = str;
-  s = util::rtrim(s);
-  if (s.size()) LOG(INFO) << s;
+  for (auto ch : s) {
+    if (ch == '\n') {
+      std::string trimmed = util::ltrim(*buff);
+      if (trimmed.size()) LOG(INFO) << trimmed;
+      buff->clear();
+    } else {
+      buff->push_back(ch);
+    }
+  }
   return 1;
 }
 
@@ -243,10 +282,13 @@ int GLPKSolver::getNumVars() const { return glp_get_num_cols(_prob); }
 void GLPKSolver::setStarter(const StarterSol& starterSol) {
   _starterArr = new double[getNumVars() + 1];
 
+  size_t a = 0;
+
   for (const auto& varVal : starterSol) {
     int colId = getVarByName(varVal.first);
-    assert(colId < getNumVars());
+    if (colId < 0) continue;
     _starterArr[colId + 1] = varVal.second;
+    a++;
   }
 }
 
@@ -272,6 +314,12 @@ void VariableMatrix::getGLPKArrs(int** ia, int** ja, double** r) const {
     (*ja)[i] = colNum[i - 1];
     (*r)[i] = vals[i - 1];
   }
+}
+
+// _____________________________________________________________________________
+void GLPKSolver::writeMps(const std::string& path) const {
+  // TODO: exception if could not be written
+  glp_write_mps(_prob, GLP_MPS_FILE, 0, path.c_str());
 }
 
 #endif

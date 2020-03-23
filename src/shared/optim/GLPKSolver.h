@@ -30,6 +30,8 @@ class GLPKSolver : public ILPSolver {
   ~GLPKSolver();
 
   int addCol(const std::string& name, ColType colType, double objCoef);
+  int addCol(const std::string& name, ColType colType, double objCoef,
+             double lowBnd, double upBnd);
   int addRow(const std::string& name, double bnd, RowType rowType);
 
   void addColToRow(const std::string& rowName, const std::string& colName,
@@ -46,6 +48,7 @@ class GLPKSolver : public ILPSolver {
   void setObjCoef(int colId, double coef) const;
 
   SolveType solve();
+  SolveType getStatus() { return _status; }
   void update();
 
   double getObjVal() const;
@@ -53,7 +56,11 @@ class GLPKSolver : public ILPSolver {
   int getNumConstrs() const;
   int getNumVars() const;
 
+  void setTimeLim(int s);
+  int getTimeLim() const;
+
   void setStarter(const StarterSol& starterSol);
+  void writeMps(const std::string& path) const;
 
   double* getStarterArr() const;
 
@@ -62,6 +69,10 @@ class GLPKSolver : public ILPSolver {
   VariableMatrix _vm;
 
   double* _starterArr;
+
+  SolveType _status;
+
+  int _timeLimit;
 
   static void optCb(glp_tree* tree, void* solver);
   static int termHook(void* info, const char* str);

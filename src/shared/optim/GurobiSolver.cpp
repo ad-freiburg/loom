@@ -14,7 +14,8 @@ using shared::optim::GurobiSolver;
 using shared::optim::SolveType;
 
 // _____________________________________________________________________________
-GurobiSolver::GurobiSolver(DirType dir) : _numVars(0), _numRows(0) {
+GurobiSolver::GurobiSolver(DirType dir)
+    : _status(INF), _numVars(0), _numRows(0) {
   LOG(DEBUG) << "Creating gurobi solver instance...";
 
   int error = GRBloadenv(&_env, "gurobi.log");
@@ -22,11 +23,6 @@ GurobiSolver::GurobiSolver(DirType dir) : _numVars(0), _numRows(0) {
     throw std::runtime_error("Could not create gurobi environment");
   }
 
-  // set time limit
-  // TODO: make this configurable
-  std::cerr << " *** WARNING: TIME LIME STILL ACTIVATED! *** " << std::endl;
-  GRBsetdblparam(_env, "TimeLimit", 60.0 * 10);
-  // GRBsetdblparam(_env, "TuneTimeLimit", 60.0 * 1);
 
   // create emtpy model
   error = GRBnewmodel(_env, &_model, "loom_mip", 0, 0, 0, 0, 0, 0);
@@ -44,11 +40,18 @@ GurobiSolver::GurobiSolver(DirType dir) : _numVars(0), _numRows(0) {
 GurobiSolver::~GurobiSolver() {
   GRBfreemodel(_model);
   GRBfreeenv(_env);
+  if (_starterArr) delete[] _starterArr;
 }
 
 // _____________________________________________________________________________
 int GurobiSolver::addCol(const std::string& name, ColType colType,
                          double objCoef) {
+  return addCol(name, colType, objCoef, -GRB_INFINITY, GRB_INFINITY);
+}
+
+// _____________________________________________________________________________
+int GurobiSolver::addCol(const std::string& name, ColType colType,
+                         double objCoef, double lowBnd, double upBnd) {
   char vtype = 0;
   switch (colType) {
     case INT:
@@ -61,8 +64,8 @@ int GurobiSolver::addCol(const std::string& name, ColType colType,
       vtype = GRB_CONTINUOUS;
       break;
   }
-  int error = GRBaddvar(_model, 0, 0, 0, objCoef, -GRB_INFINITY, GRB_INFINITY,
-                        vtype, name.c_str());
+  int error =
+      GRBaddvar(_model, 0, 0, 0, objCoef, lowBnd, upBnd, vtype, name.c_str());
   if (error) {
     throw std::runtime_error("Could not add variable " + name);
   }
@@ -152,19 +155,39 @@ double GurobiSolver::getObjVal() const {
 }
 
 // _____________________________________________________________________________
+void GurobiSolver::setStarter(const StarterSol& starterSol) {
+  _starterArr = new double[getNumVars()];
+  std::fill_n(_starterArr, getNumVars(), GRB_UNDEFINED);
+
+  for (const auto& varVal : starterSol) {
+    int colId = getVarByName(varVal.first);
+    if (colId < 0) continue;
+    _starterArr[colId] = varVal.second;
+  }
+}
+
+// _____________________________________________________________________________
 SolveType GurobiSolver::solve() {
   update();
-  // GRBwrite(_model, "mip1.lp");
 
   int error;
 
   // error = GRBtunemodel(_model);
   // int nresults;
 
+  // GRBsetdblparam(_env, "TuneTimeLimit", 60.0 * 1);
+
   // error = GRBgetintattr(_model, "TuneResultCount", &nresults);
   // if (nresults > 0) {
-    // error = GRBgettuneresult(_model, 0);
+  // error = GRBgettuneresult(_model, 0);
   // }
+
+  if (_starterArr) {
+    error = GRBsetdblattrarray(_model, "Start", 0, getNumVars(), _starterArr);
+    if (error) {
+      throw std::runtime_error("Could not set start solution");
+    }
+  }
 
   error = GRBoptimize(_model);
   if (error) {
@@ -191,9 +214,29 @@ SolveType GurobiSolver::solve() {
         "Could not retrieve optimal target function value.");
   }
 
-  if (optimStat == GRB_OPTIMAL) return OPTIM;
-  if (optimStat == GRB_INF_OR_UNBD) return INF;
-  return NON_OPTIM;
+  if (optimStat == GRB_OPTIMAL) _status = OPTIM;
+  if (optimStat == GRB_INF_OR_UNBD) _status = INF;
+  _status = NON_OPTIM;
+
+  return getStatus();
+}
+
+// _____________________________________________________________________________
+void GurobiSolver::setTimeLim(int s) {
+  // set time limit
+  GRBsetdblparam(_env, "TimeLimit", s);
+}
+
+// _____________________________________________________________________________
+int GurobiSolver::getTimeLim() const {
+  double ret;
+  int error = GRBgetdblparam(_env, "TimeLimit", &ret);
+  if (error) {
+    std::stringstream ss;
+    ss << "Could not retrieve time limit value";
+    throw std::runtime_error(ss.str());
+  }
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -246,5 +289,11 @@ int GurobiSolver::getNumConstrs() const { return _numRows; }
 
 // _____________________________________________________________________________
 int GurobiSolver::getNumVars() const { return _numVars; }
+
+// _____________________________________________________________________________
+void GurobiSolver::writeMps(const std::string& path) const {
+  // TODO: exception if could not be written
+  GRBwrite(_model, path.c_str());
+}
 
 #endif

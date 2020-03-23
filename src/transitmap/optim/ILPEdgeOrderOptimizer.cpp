@@ -4,8 +4,7 @@
 
 #include <fstream>
 #include "transitmap/graph/OrderCfg.h"
-#include "shared/optim/GurobiSolver.h"
-#include "shared/optim/GLPKSolver.h"
+#include "shared/optim/ILPSolvProv.h"
 #include "transitmap/optim/ILPEdgeOrderOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
 #include "util/geo/Geo.h"
@@ -15,14 +14,6 @@ using namespace transitmapper;
 using namespace optim;
 using namespace transitmapper::graph;
 using shared::optim::ILPSolver;
-
-#ifdef GUROBI_FOUND
-using shared::optim::GurobiSolver;
-#endif
-
-#ifdef GLPK_FOUND
-using shared::optim::GLPKSolver;
-#endif
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
@@ -87,13 +78,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
 // _____________________________________________________________________________
 ILPSolver* ILPEdgeOrderOptimizer::createProblem(
     OptGraph* og, const std::set<OptNode*>& g) const {
-  ILPSolver* lp;
-
-#ifdef GUROBI_FOUND
-  lp = new GurobiSolver(shared::optim::MIN);
-#elif GLPK_FOUND
-  lp = new GLPKSolver(shared::optim::MIN);
-#endif
+  ILPSolver* lp = shared::optim::getSolver("", shared::optim::MIN);
 
   std::set<OptEdge*> processed;
 

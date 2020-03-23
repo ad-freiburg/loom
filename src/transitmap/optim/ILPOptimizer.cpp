@@ -6,8 +6,7 @@
 #include <cstdio>
 #include <fstream>
 #include <thread>
-#include "shared/optim/GurobiSolver.h"
-#include "shared/optim/GLPKSolver.h"
+#include "shared/optim/ILPSolvProv.h"
 #include "transitmap/graph/OrderCfg.h"
 #include "transitmap/optim/ILPOptimizer.h"
 #include "transitmap/optim/OptGraph.h"
@@ -21,14 +20,6 @@ using namespace optim;
 using namespace transitmapper::graph;
 using shared::linegraph::Line;
 using shared::optim::ILPSolver;
-
-#ifdef GUROBI_FOUND
-using shared::optim::GurobiSolver;
-#endif
-
-#ifdef GLPK_FOUND
-using shared::optim::GLPKSolver;
-#endif
 
 // _____________________________________________________________________________
 int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
@@ -49,10 +40,7 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-  if (_cfg->externalSolver.empty()) {
-    LOG(INFO) << " === Solve done in " << duration << " ms ===";
-  }
-
+  LOG(INFO) << " === Solve done in " << duration << " ms ===";
   LOG(INFO) << "(stats) ILP obj = " << lp->getObjVal();
 
   getConfigurationFromSolution(lp, hc, g);
@@ -120,13 +108,7 @@ void ILPOptimizer::getConfigurationFromSolution(
 // _____________________________________________________________________________
 ILPSolver* ILPOptimizer::createProblem(OptGraph* og,
                                        const std::set<OptNode*>& g) const {
-  ILPSolver* lp;
-
-#ifdef GUROBI_FOUND
-  lp = new GurobiSolver(shared::optim::MIN);
-#elif GLPK_FOUND
-  lp = new GLPKSolver(shared::optim::MIN);
-#endif
+  ILPSolver* lp = shared::optim::getSolver("", shared::optim::MIN);
 
   // for every segment s, we define |L(s)|^2 decision variables x_slp
   for (OptNode* n : g) {
