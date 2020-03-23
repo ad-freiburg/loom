@@ -50,12 +50,21 @@ class GLPKSolver : public ILPSolver {
 
   double getObjVal() const;
 
-  size_t getNumConstrs() const;
-  size_t getNumVars() const;
+  int getNumConstrs() const;
+  int getNumVars() const;
+
+  void setStarter(const StarterSol& starterSol);
+
+  double* getStarterArr() const;
 
  private:
   glp_prob* _prob;
   VariableMatrix _vm;
+
+  double* _starterArr;
+
+  static void optCb(glp_tree* tree, void* solver);
+  static int termHook(void* info, const char* str);
 };
 
 }  // namespace optim

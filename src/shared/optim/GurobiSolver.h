@@ -39,14 +39,16 @@ class GurobiSolver : public ILPSolver {
 
   double getObjVal() const;
 
-  size_t getNumConstrs() const;
-  size_t getNumVars() const;
+  int getNumConstrs() const;
+  int getNumVars() const;
+
+  void setStarter(const StarterSol& starterSol);
 
  private:
   GRBenv* _env;
   GRBmodel* _model;
 
-  size_t _numVars, _numRows;
+  int _numVars, _numRows;
 };
 
 }  // namespace optim

@@ -6,6 +6,7 @@
 #define SHARED_OPTIM_ILPSOLVER_H_
 
 #include <string>
+#include <map>
 
 namespace shared {
 namespace optim {
@@ -14,6 +15,8 @@ enum ColType { INT, BIN, CONT };
 enum RowType { FIX, UP, LO };
 enum DirType { MAX, MIN };
 enum SolveType { OPTIM, INF, NON_OPTIM };
+
+typedef std::map<std::string, double> StarterSol;
 
 class ILPSolver {
  public:
@@ -41,8 +44,10 @@ class ILPSolver {
 
   virtual double getObjVal() const = 0;
 
-  virtual size_t getNumConstrs() const = 0;
-  virtual size_t getNumVars() const = 0;
+  virtual void setStarter(const StarterSol& starterSol) = 0;
+
+  virtual int getNumConstrs() const = 0;
+  virtual int getNumVars() const = 0;
 };
 
 }  // namespace optim

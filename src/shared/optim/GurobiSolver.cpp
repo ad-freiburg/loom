@@ -242,9 +242,9 @@ void GurobiSolver::setObjCoef(int colId, double coef) const {
 void GurobiSolver::update() { GRBupdatemodel(_model); }
 
 // _____________________________________________________________________________
-size_t GurobiSolver::getNumConstrs() const { return _numRows; }
+int GurobiSolver::getNumConstrs() const { return _numRows; }
 
 // _____________________________________________________________________________
-size_t GurobiSolver::getNumVars() const { return _numVars; }
+int GurobiSolver::getNumVars() const { return _numVars; }
 
 #endif

@@ -5,10 +5,12 @@
 #ifdef GLPK_FOUND
 
 #include <glpk.h>
-#include <sstream>
 #include <cassert>
+#include <sstream>
 #include <stdexcept>
 #include "shared/optim/GLPKSolver.h"
+#include "util/Misc.h"
+#include "util/String.h"
 #include "util/log/Log.h"
 
 using shared::optim::GLPKSolver;
@@ -16,7 +18,7 @@ using shared::optim::VariableMatrix;
 using shared::optim::SolveType;
 
 // _____________________________________________________________________________
-GLPKSolver::GLPKSolver(DirType dir) {
+GLPKSolver::GLPKSolver(DirType dir) : _starterArr(0) {
   LOG(DEBUG) << "Creating GLPK solver instance...";
 
   _prob = glp_create_prob();
@@ -35,6 +37,7 @@ GLPKSolver::GLPKSolver(DirType dir) {
 GLPKSolver::~GLPKSolver() {
   glp_delete_prob(_prob);
   glp_free_env();
+  if (_starterArr) delete[] _starterArr;
 }
 
 // _____________________________________________________________________________
@@ -127,6 +130,7 @@ double GLPKSolver::getObjVal() const { return glp_get_obj_val(_prob); }
 // _____________________________________________________________________________
 SolveType GLPKSolver::solve() {
   update();
+  glp_term_hook(termHook, 0);
 
   int* ia = 0;
   int* ja = 0;
@@ -141,9 +145,13 @@ SolveType GLPKSolver::solve() {
 
   glp_iocp params;
   glp_smcp sparams;
+
   // default initialization
   glp_init_iocp(&params);
   glp_init_smcp(&sparams);
+
+  params.cb_func = optCb;
+  params.cb_info = this;
 
   // params.presolve = GLP_ON;
   // params.binarize = GLP_OFF;
@@ -152,7 +160,6 @@ SolveType GLPKSolver::solve() {
   // params.fp_heur = GLP_ON;
   // params.ps_heur = GLP_ON;
 
-  // glp_term_out(GLP_OFF);
   glp_simplex(_prob, &sparams);
   glp_intopt(_prob, &params);
 
@@ -163,6 +170,33 @@ SolveType GLPKSolver::solve() {
       optimStat == GLP_UNBND || optimStat == GLP_UNDEF)
     return INF;
   return NON_OPTIM;
+}
+
+// _____________________________________________________________________________
+double* GLPKSolver::getStarterArr() const { return _starterArr; }
+
+// _____________________________________________________________________________
+void GLPKSolver::optCb(glp_tree* tree, void* solver) {
+  auto _this = reinterpret_cast<GLPKSolver*>(solver);
+  switch (glp_ios_reason(tree)) {
+    case GLP_IHEUR:
+      std::cout << "IHEUR" << std::endl;
+      if (_this->getStarterArr()) {
+        glp_ios_heur_sol(tree, _this->getStarterArr());
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+// _____________________________________________________________________________
+int GLPKSolver::termHook(void* info, const char* str) {
+  UNUSED(info);
+  std::string s = str;
+  s = util::rtrim(s);
+  if (s.size()) LOG(INFO) << s;
+  return 1;
 }
 
 // _____________________________________________________________________________
@@ -200,11 +234,20 @@ void GLPKSolver::setObjCoef(int colId, double coef) const {
 void GLPKSolver::update() { glp_create_index(_prob); }
 
 // _____________________________________________________________________________
-size_t GLPKSolver::getNumConstrs() const { return glp_get_num_rows(_prob); }
+int GLPKSolver::getNumConstrs() const { return glp_get_num_rows(_prob); }
 
 // _____________________________________________________________________________
-size_t GLPKSolver::getNumVars() const {
-  return glp_get_num_cols(_prob);
+int GLPKSolver::getNumVars() const { return glp_get_num_cols(_prob); }
+
+// _____________________________________________________________________________
+void GLPKSolver::setStarter(const StarterSol& starterSol) {
+  _starterArr = new double[getNumVars() + 1];
+
+  for (const auto& varVal : starterSol) {
+    int colId = getVarByName(varVal.first);
+    assert(colId < getNumVars());
+    _starterArr[colId + 1] = varVal.second;
+  }
 }
 
 // _____________________________________________________________________________
@@ -218,8 +261,6 @@ void VariableMatrix::addVar(int row, int col, double val) {
 void VariableMatrix::getGLPKArrs(int** ia, int** ja, double** r) const {
   assert(rowNum.size() == colNum.size());
   assert(colNum.size() == vals.size());
-
-  std::cout << rowNum.size() << " " << colNum.size() << std::endl;
 
   *ia = new int[rowNum.size() + 1];
   *ja = new int[rowNum.size() + 1];
