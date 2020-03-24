@@ -8,6 +8,7 @@
 #include "octi/Octilinearizer.h"
 #include "octi/gridgraph/BaseGraph.h"
 #include "octi/gridgraph/GridGraph.h"
+#include "octi/gridgraph/OctiGridGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "octi/gridgraph/NodeCost.h"
 #include "util/Misc.h"
@@ -632,7 +633,7 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, double cellSize,
                                         const Penalties& pens) const {
   switch (_baseGraphType) {
     case OCTIGRID:
-      return new GridGraph(bbox, cellSize, spacer, pens);
+      return new OctiGridGraph(bbox, cellSize, spacer, pens);
     case GRID:
       return new GridGraph(bbox, cellSize, spacer, pens);
     default:
