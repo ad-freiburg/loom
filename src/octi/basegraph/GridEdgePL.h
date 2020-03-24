@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRIDGRAPH_GRIDEDGEPL_H_
-#define OCTI_GRIDGRAPH_GRIDEDGEPL_H_
+#ifndef OCTI_BASEGRAPH_GRIDEDGEPL_H_
+#define OCTI_BASEGRAPH_GRIDEDGEPL_H_
 
 #include <set>
 #include "octi/combgraph/CombEdgePL.h"
@@ -15,7 +15,7 @@
 using util::geo::PolyLine;
 
 namespace octi {
-namespace gridgraph {
+namespace basegraph {
 
 class GridEdgePL : util::geograph::GeoEdgePL<double> {
  public:
@@ -61,4 +61,4 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
 }
 }
 
-#endif  // OCTI_GRIDGRAPH_GRIDEDGEPL_H_
+#endif  // OCTI_BASEGRAPH_GRIDEDGEPL_H_

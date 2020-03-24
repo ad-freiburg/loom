@@ -2,13 +2,13 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRIDGRAPH_OCTIGRIDGRAPH_H_
-#define OCTI_GRIDGRAPH_OCTIGRIDGRAPH_H_
+#ifndef OCTI_BASEGRAPH_OCTIGRIDGRAPH_H_
+#define OCTI_BASEGRAPH_OCTIGRIDGRAPH_H_
 
-#include "octi/gridgraph/GridGraph.h"
+#include "octi/basegraph/GridGraph.h"
 
 namespace octi {
-namespace gridgraph {
+namespace basegraph {
 
 class OctiGridGraph : public GridGraph {
  public:
@@ -16,7 +16,7 @@ class OctiGridGraph : public GridGraph {
                 const Penalties& pens)
       : GridGraph(bbox, cellSize, spacer, pens) {}
 };
-}  // namespace gridgraph
+}  // namespace basegraph
 }  // namespace octi
 
-#endif  // OCTI_GRIDGRAPH_OCTIGRIDGRAPH_H_
+#endif  // OCTI_BASEGRAPH_OCTIGRIDGRAPH_H_

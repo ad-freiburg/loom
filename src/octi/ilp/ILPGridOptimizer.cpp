@@ -4,15 +4,15 @@
 
 #include <glpk.h>
 #include <fstream>
-#include "octi/gridgraph/BaseGraph.h"
+#include "octi/basegraph/BaseGraph.h"
 #include "octi/ilp/ILPGridOptimizer.h"
 #include "shared/optim/ILPSolvProv.h"
 #include "util/log/Log.h"
 
-using octi::gridgraph::GeoPensMap;
-using octi::gridgraph::GridEdge;
-using octi::gridgraph::BaseGraph;
-using octi::gridgraph::GridNode;
+using octi::basegraph::GeoPensMap;
+using octi::basegraph::GridEdge;
+using octi::basegraph::BaseGraph;
+using octi::basegraph::GridNode;
 using octi::ilp::ILPGridOptimizer;
 using octi::ilp::VariableMatrix;
 using shared::optim::ILPSolver;

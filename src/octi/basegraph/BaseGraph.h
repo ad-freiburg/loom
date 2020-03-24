@@ -2,16 +2,16 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRIDGRAPH_BASEGRAPH_H_
-#define OCTI_GRIDGRAPH_BASEGRAPH_H_
+#ifndef OCTI_BASEGRAPH_BASEGRAPH_H_
+#define OCTI_BASEGRAPH_BASEGRAPH_H_
 
 #include <queue>
 #include <set>
 #include <unordered_map>
 #include "octi/combgraph/CombGraph.h"
-#include "octi/gridgraph/GridEdgePL.h"
-#include "octi/gridgraph/GridNodePL.h"
-#include "octi/gridgraph/NodeCost.h"
+#include "octi/basegraph/GridEdgePL.h"
+#include "octi/basegraph/GridNodePL.h"
+#include "octi/basegraph/NodeCost.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/DirGraph.h"
@@ -28,7 +28,7 @@ using octi::combgraph::CombEdge;
 using octi::combgraph::CombNode;
 
 namespace octi {
-namespace gridgraph {
+namespace basegraph {
 
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
 typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
@@ -111,7 +111,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   virtual void addObstacle(const util::geo::Polygon<double>& obst) = 0;
 };
-}  // namespace gridgraph
+}  // namespace basegraph
 }  // namespace octi
 
-#endif  // OCTI_GRIDGRAPH_BASEGRAPH_H_
+#endif  // OCTI_BASEGRAPH_BASEGRAPH_H_

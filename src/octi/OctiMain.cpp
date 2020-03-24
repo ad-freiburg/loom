@@ -11,7 +11,7 @@
 #include "octi/Octilinearizer.h"
 #include "octi/combgraph/CombGraph.h"
 #include "octi/config/ConfigReader.h"
-#include "octi/gridgraph/BaseGraph.h"
+#include "octi/basegraph/BaseGraph.h"
 #include "shared/linegraph/LineGraph.h"
 #include "util/Misc.h"
 #include "util/geo/Geo.h"
@@ -24,7 +24,7 @@ using namespace octi;
 using octi::Octilinearizer;
 using util::geo::dist;
 using util::geo::DPolygon;
-using octi::gridgraph::BaseGraph;
+using octi::basegraph::BaseGraph;
 
 // _____________________________________________________________________________
 double avgStatDist(const LineGraph& g) {

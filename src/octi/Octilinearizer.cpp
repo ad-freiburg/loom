@@ -6,11 +6,11 @@
 #include <fstream>
 #include <thread>
 #include "octi/Octilinearizer.h"
-#include "octi/gridgraph/BaseGraph.h"
-#include "octi/gridgraph/GridGraph.h"
-#include "octi/gridgraph/OctiGridGraph.h"
+#include "octi/basegraph/BaseGraph.h"
+#include "octi/basegraph/GridGraph.h"
+#include "octi/basegraph/OctiGridGraph.h"
 #include "octi/combgraph/Drawing.h"
-#include "octi/gridgraph/NodeCost.h"
+#include "octi/basegraph/NodeCost.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Dijkstra.h"
@@ -19,7 +19,7 @@
 #include "ilp/ILPGridOptimizer.h"
 
 using namespace octi;
-using namespace gridgraph;
+using namespace basegraph;
 
 using combgraph::EdgeOrdering;
 using octi::combgraph::Drawing;
@@ -28,7 +28,7 @@ using util::geo::DPoint;
 using util::geo::DBox;
 using util::geo::len;
 using util::graph::Dijkstra;
-using octi::gridgraph::BaseGraph;
+using octi::basegraph::BaseGraph;
 
 // _____________________________________________________________________________
 void Octilinearizer::removeEdgesShorterThan(LineGraph* g, double d) {
@@ -258,7 +258,7 @@ double Octilinearizer::draw(
         Drawing drawingCp = drawing;
 
         // use the batches grid graph
-        drawingCp.setGridGraph(ggs[btch]);
+        drawingCp.setBaseGraph(ggs[btch]);
 
         size_t origX = drawing.getGrNd(a)->pl().getX();
         size_t origY = drawingCp.getGrNd(a)->pl().getY();

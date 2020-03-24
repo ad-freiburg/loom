@@ -7,24 +7,24 @@
 
 #include <unordered_set>
 #include <vector>
+#include "octi/basegraph/BaseGraph.h"
+#include "octi/basegraph/GridGraph.h"
 #include "octi/combgraph/CombGraph.h"
 #include "octi/combgraph/Drawing.h"
-#include "octi/gridgraph/BaseGraph.h"
-#include "octi/gridgraph/GridGraph.h"
 #include "shared/linegraph/LineGraph.h"
 #include "util/graph/Dijkstra.h"
 
 namespace octi {
 
-using octi::gridgraph::GeoPens;
-using octi::gridgraph::GeoPensMap;
-using octi::gridgraph::GridEdge;
-using octi::gridgraph::GridEdgePL;
-using octi::gridgraph::GridGraph;
-using octi::gridgraph::GridNode;
-using octi::gridgraph::GridNodePL;
-using octi::gridgraph::NodeCost;
-using octi::gridgraph::Penalties;
+using octi::basegraph::GeoPens;
+using octi::basegraph::GeoPensMap;
+using octi::basegraph::GridEdge;
+using octi::basegraph::GridEdgePL;
+using octi::basegraph::GridGraph;
+using octi::basegraph::GridNode;
+using octi::basegraph::GridNodePL;
+using octi::basegraph::NodeCost;
+using octi::basegraph::Penalties;
 
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
@@ -102,8 +102,10 @@ struct GridCostGeoPen
   virtual float inf() const { return _inf; }
 };
 
-struct BaseGraphHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
-  BaseGraphHeur(gridgraph::BaseGraph* g, const std::set<GridNode*>& to) : g(g), to(0) {
+struct BaseGraphHeur
+    : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
+  BaseGraphHeur(basegraph::BaseGraph* g, const std::set<GridNode*>& to)
+      : g(g), to(0) {
     if (to.size() == 1) this->to = *to.begin();
 
     cheapestSink = std::numeric_limits<float>::infinity();
@@ -143,7 +145,7 @@ struct BaseGraphHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> 
     return ret + cheapestSink;
   }
 
-  octi::gridgraph::BaseGraph* g;
+  octi::basegraph::BaseGraph* g;
   GridNode* to;
   std::vector<size_t> hull;
   float cheapestSink;
@@ -152,19 +154,19 @@ struct BaseGraphHeur : public Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> 
 class Octilinearizer {
  public:
   Octilinearizer(BaseGraphType baseGraphType) : _baseGraphType(baseGraphType) {}
-  double draw(LineGraph* in, LineGraph* out, gridgraph::BaseGraph** gg,
+  double draw(LineGraph* in, LineGraph* out, basegraph::BaseGraph** gg,
               const Penalties& pens, double gridSize, double borderRad,
               bool deg2heur, double maxGrDist, bool restrLocSearch,
               double enfGeoCourse,
               const std::vector<util::geo::Polygon<double>>& obstacles);
 
   double draw(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
-              gridgraph::BaseGraph** gg, const Penalties& pens, double gridSize,
+              basegraph::BaseGraph** gg, const Penalties& pens, double gridSize,
               double borderRad, double maxGrDist, bool restrLocSearch,
               double enfGeoCourse,
               const std::vector<util::geo::Polygon<double>>& obstacles);
 
-  double drawILP(LineGraph* in, LineGraph* out, gridgraph::BaseGraph** gg,
+  double drawILP(LineGraph* in, LineGraph* out, basegraph::BaseGraph** gg,
                  const Penalties& pens, double gridSize, double borderRad,
                  bool deg2heur, double maxGrDist, bool noSolve,
                  double enfGeoPens, const std::string& path);
@@ -172,37 +174,37 @@ class Octilinearizer {
  private:
   BaseGraphType _baseGraphType;
 
-  gridgraph::BaseGraph* newBaseGraph(const util::geo::DBox& bbox,
+  basegraph::BaseGraph* newBaseGraph(const util::geo::DBox& bbox,
                                      double cellSize, double spacer,
                                      const Penalties& pens) const;
 
   void removeEdgesShorterThan(LineGraph* g, double d);
 
   void writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
-                    gridgraph::BaseGraph* g);
+                    basegraph::BaseGraph* g);
 
   void settleRes(GridNode* startGridNd, GridNode* toGridNd,
-                 gridgraph::BaseGraph* gg, CombNode* from, CombNode* to,
+                 basegraph::BaseGraph* gg, CombNode* from, CombNode* to,
                  const GrEdgList& res, CombEdge* e);
 
   std::vector<CombEdge*> getOrdering(const CombGraph& cg, bool randr) const;
 
-  bool draw(const std::vector<CombEdge*>& order, gridgraph::BaseGraph* gg,
+  bool draw(const std::vector<CombEdge*>& order, basegraph::BaseGraph* gg,
             Drawing* drawing, double cutoff, double maxGrDist,
             const GeoPensMap* geoPensMap);
   bool draw(const std::vector<CombEdge*>& order, const SettledPos& settled,
-            gridgraph::BaseGraph* gg, Drawing* drawing, double cutoff,
+            basegraph::BaseGraph* gg, Drawing* drawing, double cutoff,
             double maxGrDist, const GeoPensMap* geoPensMap);
 
   SettledPos getNeighbor(const SettledPos& pos, const std::vector<CombNode*>&,
                          size_t i) const;
 
   RtPair getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
-                   const SettledPos& settled, gridgraph::BaseGraph* gg,
+                   const SettledPos& settled, basegraph::BaseGraph* gg,
                    double maxGrDist);
 
   std::set<GridNode*> getCands(CombNode* cmBnd, const SettledPos& settled,
-                               gridgraph::BaseGraph* gg, double maxDis);
+                               basegraph::BaseGraph* gg, double maxDis);
 };
 
 }  // namespace octi

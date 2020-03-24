@@ -3,7 +3,7 @@
 
 #include <map>
 #include "octi/combgraph/CombGraph.h"
-#include "octi/gridgraph/BaseGraph.h"
+#include "octi/basegraph/BaseGraph.h"
 #include "util/graph/Dijkstra.h"
 
 namespace octi {
@@ -13,11 +13,11 @@ using octi::combgraph::CombGraph;
 using octi::combgraph::CombNode;
 using octi::combgraph::CombEdge;
 using util::graph::Dijkstra;
-using octi::gridgraph::BaseGraph;
-using octi::gridgraph::GridNode;
-using octi::gridgraph::GridEdge;
-using octi::gridgraph::GridNodePL;
-using octi::gridgraph::GridEdgePL;
+using octi::basegraph::BaseGraph;
+using octi::basegraph::GridNode;
+using octi::basegraph::GridEdge;
+using octi::basegraph::GridNodePL;
+using octi::basegraph::GridEdgePL;
 
 typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
 
@@ -60,7 +60,7 @@ class Drawing {
   double getNdBndCost(const CombNode* e) const;
   double getNdReachCost(const CombNode* e) const;
 
-  void setGridGraph(const BaseGraph* gg);
+  void setBaseGraph(const BaseGraph* gg);
 
  private:
   std::map<const CombNode*, size_t> _nds;

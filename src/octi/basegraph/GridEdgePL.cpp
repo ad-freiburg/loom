@@ -2,12 +2,12 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/gridgraph/GridEdgePL.h"
+#include "octi/basegraph/GridEdgePL.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
 
 using util::geo::PolyLine;
-using namespace octi::gridgraph;
+using namespace octi::basegraph;
 
 // _____________________________________________________________________________
 GridEdgePL::GridEdgePL(double c, bool secondary)

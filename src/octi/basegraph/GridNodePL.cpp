@@ -2,10 +2,10 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/gridgraph/GridNodePL.h"
+#include "octi/basegraph/GridNodePL.h"
 
 using util::geo::Point;
-using namespace octi::gridgraph;
+using namespace octi::basegraph;
 
 // _____________________________________________________________________________
 GridNodePL::GridNodePL(Point<double> pos)

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "octi/combgraph/CombGraph.h"
 #include "octi/combgraph/Drawing.h"
-#include "octi/gridgraph/BaseGraph.h"
+#include "octi/basegraph/BaseGraph.h"
 #include "util/geo/BezierCurve.h"
 #include "util/graph/Dijkstra.h"
 using shared::linegraph::LineGraph;
@@ -14,17 +14,17 @@ using octi::combgraph::CombNode;
 using octi::combgraph::CombEdge;
 using util::graph::Dijkstra;
 using util::geo::BezierCurve;
-using octi::gridgraph::BaseGraph;
-using octi::gridgraph::GridNode;
-using octi::gridgraph::GridEdge;
-using octi::gridgraph::GridNodePL;
-using octi::gridgraph::GridEdgePL;
+using octi::basegraph::BaseGraph;
+using octi::basegraph::GridNode;
+using octi::basegraph::GridEdge;
+using octi::basegraph::GridNodePL;
+using octi::basegraph::GridEdgePL;
 
 // _____________________________________________________________________________
 double Drawing::score() const { return _c; }
 
 // _____________________________________________________________________________
-void Drawing::setGridGraph(const BaseGraph* gg) {
+void Drawing::setBaseGraph(const BaseGraph* gg) {
   _gg = gg;
 }
 

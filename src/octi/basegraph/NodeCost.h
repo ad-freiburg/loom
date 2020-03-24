@@ -2,15 +2,15 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef OCTI_GRIDGRAPH_NODECOST_H_
-#define OCTI_GRIDGRAPH_NODECOST_H_
+#ifndef OCTI_BASEGRAPH_NODECOST_H_
+#define OCTI_BASEGRAPH_NODECOST_H_
 
 
 #include <sstream>
 
 
 namespace octi {
-namespace gridgraph {
+namespace basegraph {
 
 struct NodeCost {
   double _cost[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -47,9 +47,9 @@ struct NodeCost {
   }
 };
 
-}  // gridgraph
+}  // basegraph
 }  // octi
 
 
 
-#endif  // OCTI_GRIDGRAPH_NODECOST_H_
+#endif  // OCTI_BASEGRAPH_NODECOST_H_

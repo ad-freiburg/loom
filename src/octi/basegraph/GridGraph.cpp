@@ -6,15 +6,15 @@
 #include <fstream>
 #include <unordered_map>
 #include <unordered_set>
-#include "octi/gridgraph/GridGraph.h"
-#include "octi/gridgraph/NodeCost.h"
+#include "octi/basegraph/GridGraph.h"
+#include "octi/basegraph/NodeCost.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Node.h"
 
-using namespace octi::gridgraph;
-using octi::gridgraph::GridGraph;
-using octi::gridgraph::NodeCost;
+using namespace octi::basegraph;
+using octi::basegraph::GridGraph;
+using octi::basegraph::NodeCost;
 using util::geo::DBox;
 using util::geo::dist;
 using util::geo::DPoint;

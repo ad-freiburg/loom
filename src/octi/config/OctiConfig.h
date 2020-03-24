@@ -6,7 +6,7 @@
 #define OCTI_CONFIG_OCTICONFIG_H_
 
 #include <string>
-#include "octi/gridgraph/GridGraph.h"
+#include "octi/basegraph/GridGraph.h"
 #include "util/geo/Geo.h"
 
 namespace octi {
@@ -30,7 +30,7 @@ struct Config {
   std::string obstaclePath;
   std::vector<util::geo::DPolygon> obstacles;
 
-  octi::gridgraph::Penalties pens;
+  octi::basegraph::Penalties pens;
 };
 
 }  // namespace config
