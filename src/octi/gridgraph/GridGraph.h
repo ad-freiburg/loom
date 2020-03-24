@@ -12,6 +12,7 @@
 #include "octi/gridgraph/GridEdgePL.h"
 #include "octi/gridgraph/GridNodePL.h"
 #include "octi/gridgraph/NodeCost.h"
+#include "octi/gridgraph/BaseGraph.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/DirGraph.h"
@@ -30,85 +31,62 @@ using octi::combgraph::CombNode;
 namespace octi {
 namespace gridgraph {
 
-typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
-typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
-
-typedef std::vector<double> GeoPens;
-typedef std::map<const CombEdge*, GeoPens> GeoPensMap;
-
-struct Candidate {
-  Candidate(GridNode* n, double d) : n(n), d(d){};
-
-  bool operator<(const Candidate& c) const { return d > c.d; }
-
-  GridNode* n;
-  double d;
-};
-
-struct Penalties {
-  double p_0, p_45, p_90, p_135;
-  double verticalPen, horizontalPen, diagonalPen;
-  double densityPen;
-};
-
-class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
+class GridGraph : public BaseGraph {
  public:
   GridGraph(const util::geo::DBox& bbox, double cellSize, double spacer,
             const Penalties& pens);
 
-  double getCellSize() const;
+  virtual double getCellSize() const;
 
-  GridNode* getNode(size_t x, size_t y) const;
+  virtual GridNode* getNode(size_t x, size_t y) const;
 
-  const Grid<GridNode*, Point, double>& getGrid() const;
+  virtual NodeCost nodeBendPen(GridNode* n, CombEdge* e);
+  virtual NodeCost topoBlockPen(GridNode* n, CombNode* origNode, CombEdge* e);
+  virtual NodeCost spacingPen(GridNode* n, CombNode* origNode, CombEdge* e);
 
-  NodeCost nodeBendPenalty(GridNode* n, CombEdge* e);
-  NodeCost topoBlockPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
-  NodeCost spacingPenalty(GridNode* n, CombNode* origNode, CombEdge* e);
+  virtual double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
-  double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
-
-  std::priority_queue<Candidate> getGridNdCands(const util::geo::DPoint& p,
+  virtual std::priority_queue<Candidate> getGridNdCands(const util::geo::DPoint& p,
                                                 double maxD) const;
 
-  void addCostVector(GridNode* n, const NodeCost& addC);
+  virtual void addCostVec(GridNode* n, const NodeCost& addC);
 
-  void openNodeSinkTo(GridNode* n, double cost);
-  void closeNodeSinkTo(GridNode* n);
-  void openNodeSinkFr(GridNode* n, double cost);
-  void closeNodeSinkFr(GridNode* n);
-  void openNodeTurns(GridNode* n);
-  void closeNodeTurns(GridNode* n);
+  virtual void openSinkTo(GridNode* n, double cost);
+  virtual void closeSinkTo(GridNode* n);
+  virtual void openSinkFr(GridNode* n, double cost);
+  virtual void closeSinkFr(GridNode* n);
+  virtual void openTurns(GridNode* n);
+  virtual void closeTurns(GridNode* n);
 
-  GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
+  virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
-  std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis);
+  virtual std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis);
 
-  void settleNd(GridNode* n, CombNode* cn);
-  void settleEdg(GridNode* a, GridNode* b, CombEdge* e);
+  virtual void settleNd(GridNode* n, CombNode* cn);
+  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e);
 
-  const Penalties& getPenalties() const;
+  virtual const Penalties& getPens() const;
 
-  void unSettleEdg(GridNode* a, GridNode* b);
-  void unSettleNd(CombNode* a);
+  virtual void unSettleEdg(GridNode* a, GridNode* b);
+  virtual void unSettleNd(CombNode* a);
 
-  bool isSettled(const CombNode* cn);
+  virtual bool isSettled(const CombNode* cn);
 
-  GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;
-  void reset();
+  virtual GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;
+  virtual void reset();
 
-  GridNode* getSettled(const CombNode* cnd) const;
+  virtual GridNode* getSettled(const CombNode* cnd) const;
 
-  double ndMovePen(const CombNode* cbNd, const GridNode* grNd) const;
+  virtual double ndMovePen(const CombNode* cbNd, const GridNode* grNd) const;
 
-  GridNode* getGrNdById(size_t id) const;
-  const GridEdge* getGrEdgById(std::pair<size_t, size_t> id) const;
-  void addResEdg(GridEdge* ge, CombEdge* cg);
-  CombEdge* getResEdg(GridEdge* ge);
+  virtual GridNode* getGrNdById(size_t id) const;
+  virtual const GridEdge* getGrEdgById(std::pair<size_t, size_t> id) const;
+  virtual void addResEdg(GridEdge* ge, CombEdge* cg);
+  virtual CombEdge* getResEdg(GridEdge* ge);
 
-  void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target, double pen);
+  virtual void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target, double pen);
 
-  void addObstacle(const util::geo::Polygon<double>& obst);
+  virtual void addObstacle(const util::geo::Polygon<double>& obst);
 
  private:
   util::geo::DBox _bbox;
@@ -129,6 +107,8 @@ class GridGraph : public DirGraph<GridNodePL, GridEdgePL> {
   std::vector<util::geo::Polygon<double>> _obstacles;
 
   std::unordered_map<GridEdge*, CombEdge*> _resEdgs;
+
+  const Grid<GridNode*, Point, double>& getGrid() const;
 
   void writeInitialCosts();
   void writeObstacleCost(const util::geo::Polygon<double>& obst);

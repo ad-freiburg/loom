@@ -181,7 +181,7 @@ SolveType GLPKSolver::solve() {
   // params.presolve = GLP_ON;
   // params.binarize = GLP_OFF;
   // params.ps_tm_lim = 10000;
-  params.tm_lim = _timeLimit * 1000;
+  params.tm_lim = _timeLimit;
   // params.fp_heur = GLP_ON;
   // params.ps_heur = GLP_ON;
 
@@ -191,19 +191,19 @@ SolveType GLPKSolver::solve() {
   int optimStat = glp_get_status(_prob);
 
   if (optimStat == GLP_OPT) _status = OPTIM;
-  if (optimStat == GLP_NOFEAS || optimStat == GLP_INFEAS ||
+  else if (optimStat == GLP_NOFEAS || optimStat == GLP_INFEAS ||
       optimStat == GLP_UNBND || optimStat == GLP_UNDEF)
     _status = INF;
-  _status = NON_OPTIM;
+  else _status = NON_OPTIM;
 
   return getStatus();
 }
 
 // _____________________________________________________________________________
-void GLPKSolver::setTimeLim(int ms) { _timeLimit = ms; }
+void GLPKSolver::setTimeLim(int s) { _timeLimit = s * 1000; }
 
 // _____________________________________________________________________________
-int GLPKSolver::getTimeLim() const { return _timeLimit; }
+int GLPKSolver::getTimeLim() const { return _timeLimit / 1000; }
 
 // _____________________________________________________________________________
 double* GLPKSolver::getStarterArr() const { return _starterArr; }

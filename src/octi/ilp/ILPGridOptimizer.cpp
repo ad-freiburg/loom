@@ -4,14 +4,14 @@
 
 #include <glpk.h>
 #include <fstream>
-#include "octi/gridgraph/GridGraph.h"
+#include "octi/gridgraph/BaseGraph.h"
 #include "octi/ilp/ILPGridOptimizer.h"
 #include "shared/optim/ILPSolvProv.h"
 #include "util/log/Log.h"
 
 using octi::gridgraph::GeoPensMap;
 using octi::gridgraph::GridEdge;
-using octi::gridgraph::GridGraph;
+using octi::gridgraph::BaseGraph;
 using octi::gridgraph::GridNode;
 using octi::ilp::ILPGridOptimizer;
 using octi::ilp::VariableMatrix;
@@ -19,7 +19,7 @@ using shared::optim::ILPSolver;
 using shared::optim::StarterSol;
 
 // _____________________________________________________________________________
-double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
+double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
                                   combgraph::Drawing* d, double maxGrDist,
                                   bool noSolve, const GeoPensMap* geoPensMap,
                                   const std::string& path) const {
@@ -34,9 +34,9 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
       e->pl().unblock();
     }
     if (!nd->pl().isSink()) continue;
-    gg->openNodeTurns(nd);
-    gg->closeNodeSinkFr(nd);
-    gg->closeNodeSinkTo(nd);
+    gg->openTurns(nd);
+    gg->closeSinkFr(nd);
+    gg->closeSinkTo(nd);
   }
 
   // clear drawing
@@ -70,7 +70,7 @@ double ILPGridOptimizer::optimize(GridGraph* gg, const CombGraph& cg,
 }
 
 // _____________________________________________________________________________
-ILPSolver* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
+ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
                                            const GeoPensMap* geoPensMap,
                                            double maxGrDist) const {
   ILPSolver* lp = shared::optim::getSolver("", shared::optim::MIN);
@@ -102,8 +102,8 @@ ILPSolver* ILPGridOptimizer::createProblem(GridGraph* gg, const CombGraph& cg,
 
       cands[nd].insert(n);
 
-      gg->openNodeSinkFr(const_cast<GridNode*>(n), 0);
-      gg->openNodeSinkTo(const_cast<GridNode*>(n), 0);
+      gg->openSinkFr(const_cast<GridNode*>(n), 0);
+      gg->openSinkTo(const_cast<GridNode*>(n), 0);
 
       auto varName = getStatPosVar(n, nd);
 
@@ -766,7 +766,7 @@ std::string ILPGridOptimizer::getStatPosVar(const GridNode* n,
 }
 
 // _____________________________________________________________________________
-void ILPGridOptimizer::extractSolution(ILPSolver* lp, GridGraph* gg,
+void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
                                        const CombGraph& cg,
                                        combgraph::Drawing* d) const {
   std::map<const CombNode*, const GridNode*> gridNds;
@@ -861,7 +861,7 @@ size_t ILPGridOptimizer::nonInfDeg(const GridNode* g) const {
 }
 
 // _____________________________________________________________________________
-StarterSol ILPGridOptimizer::extractFeasibleSol(GridGraph* gg,
+StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
                                                 const CombGraph& cg,
                                                 double maxGrDist
                                                 ) const {

@@ -34,10 +34,10 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
   assert(_c.p_135 <= _c.p_90);
   assert(_c.p_90 <= _c.p_45);
 
-  double c_0 = _c.p_45 - _c.p_135;
-  double c_135 = _c.p_45;
-  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
-  double c_45 = c_0 + c_135;
+  // double c_0 = _c.p_45 - _c.p_135;
+  // double c_135 = _c.p_45;
+  // double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
+  // double c_45 = c_0 + c_135;
 
   _heurECost =
       (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
@@ -101,7 +101,7 @@ GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
 
 // _____________________________________________________________________________
 void GridGraph::unSettleNd(CombNode* a) {
-  openNodeTurns(_settled[a]);
+  openTurns(_settled[a]);
   _settled[a]->pl().setSettled(false);
   _settled.erase(a);
 }
@@ -136,10 +136,10 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   _resEdgs[gf] = 0;
 
   if (!a->pl().isSettled()) {
-    openNodeTurns(a);
+    openTurns(a);
   }
   if (!b->pl().isSettled()) {
-    openNodeTurns(b);
+    openTurns(b);
   }
 
   if (dir != 0) {
@@ -239,15 +239,13 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
 
   // this closes the grid edge
   auto ge = getNEdg(a, b);
-  // auto gf = getNEdg(b, a);
 
   addResEdg(ge, e);
-  // addResEdg(gf, e);
 
   // this closes both nodes
   // a close means that all major edges reaching this node are closed
-  closeNodeTurns(a);
-  closeNodeTurns(b);
+  closeTurns(a);
+  closeTurns(b);
 
   if (dir != 0) {
     auto na = getNeighbor(x, y, (dir + 7) % 8);
@@ -279,8 +277,7 @@ CombEdge* GridGraph::getResEdg(GridEdge* ge) {
 
 // _____________________________________________________________________________
 GridEdge* GridGraph::getNEdg(const GridNode* a, const GridNode* b) const {
-  if (!a) return 0;
-  if (!b) return 0;
+  if (!a || !b) return 0;
 
   int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
   int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
@@ -328,10 +325,10 @@ void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
 }
 
 // _____________________________________________________________________________
-const Penalties& GridGraph::getPenalties() const { return _c; }
+const Penalties& GridGraph::getPens() const { return _c; }
 
 // _____________________________________________________________________________
-NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
+NodeCost GridGraph::nodeBendPen(GridNode* n, CombEdge* e) {
   NodeCost addC;
 
   // TODO: same code as in write nd
@@ -375,7 +372,7 @@ NodeCost GridGraph::nodeBendPenalty(GridNode* n, CombEdge* e) {
 }
 
 // _____________________________________________________________________________
-NodeCost GridGraph::spacingPenalty(GridNode* nd, CombNode* origNd,
+NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd,
                                    CombEdge* edg) {
   NodeCost addC;
 
@@ -403,7 +400,7 @@ NodeCost GridGraph::spacingPenalty(GridNode* nd, CombNode* origNd,
 }
 
 // _____________________________________________________________________________
-NodeCost GridGraph::topoBlockPenalty(GridNode* nd, CombNode* origNd,
+NodeCost GridGraph::topoBlockPen(GridNode* nd, CombNode* origNd,
                                      CombEdge* edg) {
   CombEdge* outgoing[8];
   NodeCost addC;
@@ -432,7 +429,7 @@ NodeCost GridGraph::topoBlockPenalty(GridNode* nd, CombNode* origNd,
 }
 
 // _____________________________________________________________________________
-void GridGraph::addCostVector(GridNode* n, const NodeCost& addC) {
+void GridGraph::addCostVec(GridNode* n, const NodeCost& addC) {
   for (size_t i = 0; i < 8; i++) {
     auto p = n->pl().getPort(i);
 
@@ -503,7 +500,7 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 }
 
 // _____________________________________________________________________________
-void GridGraph::openNodeTurns(GridNode* n) {
+void GridGraph::openTurns(GridNode* n) {
   if (!n->pl().isClosed()) return;
 
   // open all non-sink inner edges
@@ -525,7 +522,7 @@ void GridGraph::openNodeTurns(GridNode* n) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::closeNodeTurns(GridNode* n) {
+void GridGraph::closeTurns(GridNode* n) {
   if (n->pl().isClosed()) return;
 
   // close all non-sink inner edges
@@ -545,7 +542,7 @@ void GridGraph::closeNodeTurns(GridNode* n) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::openNodeSinkTo(GridNode* n, double cost) {
+void GridGraph::openSinkTo(GridNode* n, double cost) {
   for (size_t i = 0; i < 8; i++) {
     getEdg(n->pl().getPort(i), n)->pl().open();
     getEdg(n->pl().getPort(i), n)->pl().setCost(cost);
@@ -553,7 +550,7 @@ void GridGraph::openNodeSinkTo(GridNode* n, double cost) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::closeNodeSinkTo(GridNode* n) {
+void GridGraph::closeSinkTo(GridNode* n) {
   for (size_t i = 0; i < 8; i++) {
     getEdg(n->pl().getPort(i), n)->pl().close();
     getEdg(n->pl().getPort(i), n)->pl().setCost(INF);
@@ -561,7 +558,7 @@ void GridGraph::closeNodeSinkTo(GridNode* n) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::openNodeSinkFr(GridNode* n, double cost) {
+void GridGraph::openSinkFr(GridNode* n, double cost) {
   for (size_t i = 0; i < 8; i++) {
     getEdg(n, n->pl().getPort(i))->pl().open();
     getEdg(n, n->pl().getPort(i))->pl().setCost(cost);
@@ -569,7 +566,7 @@ void GridGraph::openNodeSinkFr(GridNode* n, double cost) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::closeNodeSinkFr(GridNode* n) {
+void GridGraph::closeSinkFr(GridNode* n) {
   for (size_t i = 0; i < 8; i++) {
     getEdg(n, n->pl().getPort(i))->pl().close();
     getEdg(n, n->pl().getPort(i))->pl().setCost(INF);
@@ -727,9 +724,9 @@ void GridGraph::reset() {
   for (auto n : *getNds()) {
     for (auto e : n->getAdjListOut()) e->pl().reset();
     if (!n->pl().isSink()) continue;
-    openNodeTurns(n);
-    closeNodeSinkFr(n);
-    closeNodeSinkTo(n);
+    openTurns(n);
+    closeSinkFr(n);
+    closeSinkTo(n);
   }
 
   writeInitialCosts();

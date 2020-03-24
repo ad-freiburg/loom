@@ -215,8 +215,8 @@ SolveType GurobiSolver::solve() {
   }
 
   if (optimStat == GRB_OPTIMAL) _status = OPTIM;
-  if (optimStat == GRB_INF_OR_UNBD) _status = INF;
-  _status = NON_OPTIM;
+  else if (optimStat == GRB_INF_OR_UNBD) _status = INF;
+  else _status = NON_OPTIM;
 
   return getStatus();
 }

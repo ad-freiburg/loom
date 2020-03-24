@@ -1,7 +1,7 @@
 #include <iostream>
 #include "octi/combgraph/CombGraph.h"
 #include "octi/combgraph/Drawing.h"
-#include "octi/gridgraph/GridGraph.h"
+#include "octi/gridgraph/BaseGraph.h"
 #include "util/geo/BezierCurve.h"
 #include "util/graph/Dijkstra.h"
 using shared::linegraph::LineGraph;
@@ -14,7 +14,7 @@ using octi::combgraph::CombNode;
 using octi::combgraph::CombEdge;
 using util::graph::Dijkstra;
 using util::geo::BezierCurve;
-using octi::gridgraph::GridGraph;
+using octi::gridgraph::BaseGraph;
 using octi::gridgraph::GridNode;
 using octi::gridgraph::GridEdge;
 using octi::gridgraph::GridNodePL;
@@ -24,7 +24,7 @@ using octi::gridgraph::GridEdgePL;
 double Drawing::score() const { return _c; }
 
 // _____________________________________________________________________________
-void Drawing::setGridGraph(const GridGraph* gg) {
+void Drawing::setGridGraph(const BaseGraph* gg) {
   _gg = gg;
 }
 
@@ -117,7 +117,7 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
   // variables named as in the paper
   int k = ce->pl().getChilds().size() - 1;
 
-  double c = _gg->getPenalties().densityPen / (k);
+  double c = _gg->getPens().densityPen / (k);
 
   double F = c * (k + 1 - l);
   double E = 0.5 * c * (k + 1 - l) * (k + 1 - l);
@@ -239,10 +239,10 @@ void Drawing::crumble() {
 
 // _____________________________________________________________________________
 double Drawing::recalcBends(const CombNode* nd) {
-  double c_0 = _gg->getPenalties().p_45 - _gg->getPenalties().p_135;
-  double c_135 = _gg->getPenalties().p_45;
-  double c_90 = _gg->getPenalties().p_45 - _gg->getPenalties().p_135 +
-                _gg->getPenalties().p_90;
+  double c_0 = _gg->getPens().p_45 - _gg->getPens().p_135;
+  double c_135 = _gg->getPens().p_45;
+  double c_90 = _gg->getPens().p_45 - _gg->getPens().p_135 +
+                _gg->getPens().p_90;
   double c_45 = c_0 + c_135;
 
   double c = 0;
@@ -347,7 +347,7 @@ void Drawing::erase(CombNode* cn) {
 }
 
 // _____________________________________________________________________________
-void Drawing::eraseFromGrid(const CombEdge* ce, GridGraph* gg) {
+void Drawing::eraseFromGrid(const CombEdge* ce, BaseGraph* gg) {
   auto it = _edgs.find(ce);
   if (it == _edgs.end()) return;
   const auto& es = it->second;
@@ -359,7 +359,7 @@ void Drawing::eraseFromGrid(const CombEdge* ce, GridGraph* gg) {
 }
 
 // _____________________________________________________________________________
-void Drawing::applyToGrid(const CombEdge* ce, GridGraph* gg) {
+void Drawing::applyToGrid(const CombEdge* ce, BaseGraph* gg) {
   auto it = _edgs.find(ce);
   if (it == _edgs.end()) return;
   const auto& es = it->second;
@@ -372,24 +372,24 @@ void Drawing::applyToGrid(const CombEdge* ce, GridGraph* gg) {
 }
 
 // _____________________________________________________________________________
-void Drawing::eraseFromGrid(const CombNode* nd, GridGraph* gg) {
+void Drawing::eraseFromGrid(const CombNode* nd, BaseGraph* gg) {
   gg->unSettleNd(const_cast<CombNode*>(nd));
 }
 
 // _____________________________________________________________________________
-void Drawing::applyToGrid(const CombNode* nd, GridGraph* gg) {
+void Drawing::applyToGrid(const CombNode* nd, BaseGraph* gg) {
   gg->settleNd(const_cast<GridNode*>(gg->getGrNdById(_nds[nd])),
                const_cast<CombNode*>(nd));
 }
 
 // _____________________________________________________________________________
-void Drawing::eraseFromGrid(GridGraph* gg) {
+void Drawing::eraseFromGrid(BaseGraph* gg) {
   for (auto e : _edgs) eraseFromGrid(e.first, gg);
   for (auto nd : _nds) eraseFromGrid(nd.first, gg);
 }
 
 // _____________________________________________________________________________
-void Drawing::applyToGrid(GridGraph* gg) {
+void Drawing::applyToGrid(BaseGraph* gg) {
   for (auto nd : _nds) applyToGrid(nd.first, gg);
   for (auto e : _edgs) applyToGrid(e.first, gg);
 }

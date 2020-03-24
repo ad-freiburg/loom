@@ -3,7 +3,7 @@
 
 #include <map>
 #include "octi/combgraph/CombGraph.h"
-#include "octi/gridgraph/GridGraph.h"
+#include "octi/gridgraph/BaseGraph.h"
 #include "util/graph/Dijkstra.h"
 
 namespace octi {
@@ -13,7 +13,7 @@ using octi::combgraph::CombGraph;
 using octi::combgraph::CombNode;
 using octi::combgraph::CombEdge;
 using util::graph::Dijkstra;
-using octi::gridgraph::GridGraph;
+using octi::gridgraph::BaseGraph;
 using octi::gridgraph::GridNode;
 using octi::gridgraph::GridEdge;
 using octi::gridgraph::GridNodePL;
@@ -30,7 +30,7 @@ struct Costs {
 
 class Drawing {
  public:
-  Drawing(const GridGraph* gg)
+  Drawing(const BaseGraph* gg)
       : _c(std::numeric_limits<double>::infinity()), _gg(gg){};
   Drawing() : _c(std::numeric_limits<double>::infinity()), _gg(0){};
 
@@ -48,19 +48,19 @@ class Drawing {
 
   bool drawn(const CombEdge* ce) const;
 
-  void eraseFromGrid(const CombEdge* ce, GridGraph* gg);
-  void eraseFromGrid(const CombNode* ce, GridGraph* gg);
-  void applyToGrid(const CombEdge* ce, GridGraph* gg);
-  void applyToGrid(const CombNode* ce, GridGraph* gg);
+  void eraseFromGrid(const CombEdge* ce, BaseGraph* gg);
+  void eraseFromGrid(const CombNode* ce, BaseGraph* gg);
+  void applyToGrid(const CombEdge* ce, BaseGraph* gg);
+  void applyToGrid(const CombNode* ce, BaseGraph* gg);
 
-  void eraseFromGrid(GridGraph* gg);
-  void applyToGrid(GridGraph* gg);
+  void eraseFromGrid(BaseGraph* gg);
+  void applyToGrid(BaseGraph* gg);
 
   double getEdgCost(const CombEdge* e) const;
   double getNdBndCost(const CombNode* e) const;
   double getNdReachCost(const CombNode* e) const;
 
-  void setGridGraph(const GridGraph* gg);
+  void setGridGraph(const BaseGraph* gg);
 
  private:
   std::map<const CombNode*, size_t> _nds;
@@ -71,7 +71,7 @@ class Drawing {
   std::map<const CombEdge*, double> _edgCosts;
   std::map<const CombEdge*, double> _springCosts;
   double _c;
-  const GridGraph* _gg;
+  const BaseGraph* _gg;
 
   double recalcBends(const CombNode* nd);
 

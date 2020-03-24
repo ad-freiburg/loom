@@ -6,6 +6,8 @@
 #include <fstream>
 #include <thread>
 #include "octi/Octilinearizer.h"
+#include "octi/gridgraph/BaseGraph.h"
+#include "octi/gridgraph/GridGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "octi/gridgraph/NodeCost.h"
 #include "util/Misc.h"
@@ -22,8 +24,10 @@ using combgraph::EdgeOrdering;
 using octi::combgraph::Drawing;
 using util::geo::dist;
 using util::geo::DPoint;
+using util::geo::DBox;
 using util::geo::len;
 using util::graph::Dijkstra;
+using octi::gridgraph::BaseGraph;
 
 // _____________________________________________________________________________
 void Octilinearizer::removeEdgesShorterThan(LineGraph* g, double d) {
@@ -75,11 +79,11 @@ start:
 
 // _____________________________________________________________________________
 double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
-                               GridGraph** retGg, const Penalties& pens,
+                               BaseGraph** retGg, const Penalties& pens,
                                double gridSize, double borderRad, bool deg2heur,
                                double maxGrDist, bool noSolve, double enfGeoPen,
                                const std::string& path) {
-  GridGraph* gg;
+  BaseGraph* gg;
   removeEdgesShorterThan(tg, gridSize / 2);
 
   CombGraph cg(tg, deg2heur);
@@ -91,12 +95,12 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
     // presolve using heuristical approach to get a first feasible solution
     LineGraph tmpOutTg;
     // important: always use restrLocSearch here!
-    draw(cg, box, &tmpOutTg, &gg, pens, gridSize, borderRad, deg2heur, maxGrDist,
-         true, enfGeoPen, {});
+    draw(cg, box, &tmpOutTg, &gg, pens, gridSize, borderRad, maxGrDist, true,
+         enfGeoPen, {});
     std::cerr << "Presolving finished." << std::endl;
   } catch (const NoEmbeddingFoundExc& exc) {
     std::cerr << "Presolve was not sucessful." << std::endl;
-    gg = new GridGraph(box, gridSize, borderRad, pens);
+    gg = newBaseGraph(box, gridSize, borderRad, pens);
   }
   Drawing drawing(gg);
   GeoPensMap enfGeoPens;
@@ -115,15 +119,17 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
 
   // TODO
   // if (obstacles.size()) {
-    // std::cerr << "Writing obstacles... ";
-    // T_START(obstacles);
-    // for (auto gg : ggs) for (const auto& obst : obstacles) gg->addObstacle(obst);
-    // std::cerr << " done (" << T_STOP(obstacles) << "ms)" << std::endl;
+  // std::cerr << "Writing obstacles... ";
+  // T_START(obstacles);
+  // for (auto gg : ggs) for (const auto& obst : obstacles)
+  // gg->addObstacle(obst);
+  // std::cerr << " done (" << T_STOP(obstacles) << "ms)" << std::endl;
   // }
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens, path);
+  double score =
+      ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens, path);
 
   drawing.getLineGraph(outTg);
 
@@ -134,38 +140,34 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
 
 // _____________________________________________________________________________
 double Octilinearizer::draw(
-    LineGraph* tg, LineGraph* outTg, GridGraph** retGg, const Penalties& pens,
+    LineGraph* tg, LineGraph* outTg, BaseGraph** retGg, const Penalties& pens,
     double gridSize, double borderRad, bool deg2heur, double maxGrDist,
     bool restrLocSearch, double enfGeoPen,
     const std::vector<util::geo::Polygon<double>>& obstacles) {
   removeEdgesShorterThan(tg, gridSize / 2);
-
-  // util::geo::output::GeoGraphJsonOutput out;
-  // out.print(*tg, std::cout);
-  // exit(1);
 
   CombGraph cg(tg, deg2heur);
 
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
 
-  return draw(cg, box, outTg, retGg, pens, gridSize, borderRad, deg2heur,
-              maxGrDist, restrLocSearch, enfGeoPen, obstacles);
+  return draw(cg, box, outTg, retGg, pens, gridSize, borderRad, maxGrDist,
+              restrLocSearch, enfGeoPen, obstacles);
 }
 // _____________________________________________________________________________
 double Octilinearizer::draw(
     const CombGraph& cg, const util::geo::DBox& box, LineGraph* outTg,
-    GridGraph** retGg, const Penalties& pens, double gridSize, double borderRad,
-    bool deg2heur, double maxGrDist, bool restrLocSearch, double enfGeoPen,
+    BaseGraph** retGg, const Penalties& pens, double gridSize, double borderRad,
+    double maxGrDist, bool restrLocSearch, double enfGeoPen,
     const std::vector<util::geo::Polygon<double>>& obstacles) {
   size_t jobs = 4;
-  std::vector<GridGraph*> ggs(jobs);
+  std::vector<BaseGraph*> ggs(jobs);
 
   std::cerr << "Creating grid graphs... ";
   T_START(ggraph);
 #pragma omp parallel for
   for (size_t i = 0; i < jobs; i++) {
-    ggs[i] = new GridGraph(box, gridSize, borderRad, pens);
+    ggs[i] = newBaseGraph(box, gridSize, borderRad, pens);
   }
   std::cerr << " done (" << T_STOP(ggraph) << "ms)" << std::endl;
 
@@ -192,7 +194,8 @@ double Octilinearizer::draw(
   if (obstacles.size()) {
     std::cerr << "Writing obstacles... ";
     T_START(obstacles);
-    for (auto gg : ggs) for (const auto& obst : obstacles) gg->addObstacle(obst);
+    for (auto gg : ggs)
+      for (const auto& obst : obstacles) gg->addObstacle(obst);
     std::cerr << " done (" << T_STOP(obstacles) << "ms)" << std::endl;
   }
 
@@ -358,7 +361,7 @@ double Octilinearizer::draw(
 
 // _____________________________________________________________________________
 void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
-                               GridGraph* gg, CombNode* from, CombNode* to,
+                               BaseGraph* gg, CombNode* from, CombNode* to,
                                const GrEdgList& res, CombEdge* e) {
   gg->settleNd(toGrNd, to);
   gg->settleNd(frGrNd, from);
@@ -373,17 +376,17 @@ void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
 
 // _____________________________________________________________________________
 void Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
-                                  GridGraph* g) {
+                                  BaseGraph* g) {
   NodeCost c;
-  c += g->topoBlockPenalty(n, origNode, e);
-  c += g->spacingPenalty(n, origNode, e);
-  c += g->nodeBendPenalty(n, e);
+  c += g->topoBlockPen(n, origNode, e);
+  c += g->spacingPen(n, origNode, e);
+  c += g->nodeBendPen(n, e);
 
-  g->addCostVector(n, c);
+  g->addCostVec(n, c);
 }
 
 // _____________________________________________________________________________
-bool Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg,
+bool Octilinearizer::draw(const std::vector<CombEdge*>& order, BaseGraph* gg,
                           Drawing* drawing, double cutoff, double maxGrDist,
                           const GeoPensMap* geoPensMap) {
   SettledPos emptyPos;
@@ -392,7 +395,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& order, GridGraph* gg,
 
 // _____________________________________________________________________________
 bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
-                          const SettledPos& settled, GridGraph* gg,
+                          const SettledPos& settled, BaseGraph* gg,
                           Drawing* drawing, double globCutoff, double maxGrDist,
                           const GeoPensMap* geoPensMap) {
   SettledPos retPos;
@@ -409,7 +412,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     auto frCmbNd = cmbEdg->getFrom();
     auto toCmbNd = cmbEdg->getTo();
 
-    std::set<GridNode*> frGrNds, toGrNds;
+    std::set<GridNode *> frGrNds, toGrNds;
     std::tie(frGrNds, toGrNds) =
         getRtPair(frCmbNd, toCmbNd, settled, gg, maxGrDist);
 
@@ -436,10 +439,10 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     for (auto n : frGrNds) {
       if (gg->isSettled(frCmbNd)) {
         // only count displacement penalty ONCE
-        gg->openNodeSinkFr(n, 0);
+        gg->openSinkFr(n, 0);
       } else {
-        costOffsetFrom = (gg->getPenalties().p_45 - gg->getPenalties().p_135);
-        gg->openNodeSinkFr(n, costOffsetFrom + gg->ndMovePen(frCmbNd, n));
+        costOffsetFrom = (gg->getPens().p_45 - gg->getPens().p_135);
+        gg->openSinkFr(n, costOffsetFrom + gg->ndMovePen(frCmbNd, n));
       }
     }
 
@@ -447,10 +450,10 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     for (auto n : toGrNds) {
       if (gg->isSettled(toCmbNd)) {
         // only count displacement penalty ONCE
-        gg->openNodeSinkTo(n, 0);
+        gg->openSinkTo(n, 0);
       } else {
-        costOffsetTo = (gg->getPenalties().p_45 - gg->getPenalties().p_135);
-        gg->openNodeSinkTo(n, costOffsetTo + gg->ndMovePen(toCmbNd, n));
+        costOffsetTo = (gg->getPens().p_45 - gg->getPens().p_135);
+        gg->openSinkTo(n, costOffsetTo + gg->ndMovePen(toCmbNd, n));
       }
     }
 
@@ -478,7 +481,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     GridNode* toGrNd = 0;
     GridNode* frGrNd = 0;
 
-    auto heur = GridHeur(gg, toGrNds);
+    auto heur = BaseGraphHeur(gg, toGrNds);
 
     if (geoPensMap) {
       // init cost function with geo distance penalties
@@ -492,8 +495,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     if (!nL.size()) {
       // cleanup
-      for (auto n : toGrNds) gg->closeNodeSinkTo(n);
-      for (auto n : frGrNds) gg->closeNodeSinkFr(n);
+      for (auto n : toGrNds) gg->closeSinkTo(n);
+      for (auto n : frGrNds) gg->closeSinkFr(n);
 
       return false;
     }
@@ -509,8 +512,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     drawing->draw(cmbEdg, eL, rev);
 
     // close the source and target node
-    for (auto n : toGrNds) gg->closeNodeSinkTo(n);
-    for (auto n : frGrNds) gg->closeNodeSinkFr(n);
+    for (auto n : toGrNds) gg->closeSinkTo(n);
+    for (auto n : frGrNds) gg->closeSinkFr(n);
 
     settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg);
   }
@@ -559,7 +562,7 @@ std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg,
 
 // _____________________________________________________________________________
 RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
-                                 const SettledPos& preSettled, GridGraph* gg,
+                                 const SettledPos& preSettled, BaseGraph* gg,
                                  double maxGrDist) {
   // shortcut
   if (gg->getSettled(frCmbNd) && gg->getSettled(toCmbNd)) {
@@ -607,7 +610,7 @@ RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
 // _____________________________________________________________________________
 std::set<GridNode*> Octilinearizer::getCands(CombNode* cmbNd,
                                              const SettledPos& preSettled,
-                                             GridGraph* gg, double maxDis) {
+                                             BaseGraph* gg, double maxDis) {
   std::set<GridNode*> ret;
 
   if (gg->getSettled(cmbNd)) {
@@ -621,4 +624,18 @@ std::set<GridNode*> Octilinearizer::getCands(CombNode* cmbNd,
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, double cellSize,
+                                        double spacer,
+                                        const Penalties& pens) const {
+  switch (_baseGraphType) {
+    case OCTIGRID:
+      return new GridGraph(bbox, cellSize, spacer, pens);
+    case GRID:
+      return new GridGraph(bbox, cellSize, spacer, pens);
+    default:
+      return 0;
+  }
 }

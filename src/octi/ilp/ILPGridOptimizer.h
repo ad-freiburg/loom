@@ -8,11 +8,11 @@
 #include <vector>
 #include "octi/combgraph/CombGraph.h"
 #include "octi/combgraph/Drawing.h"
-#include "octi/gridgraph/GridGraph.h"
+#include "octi/gridgraph/BaseGraph.h"
 #include "shared/optim/ILPSolver.h"
 
 using octi::gridgraph::GridEdge;
-using octi::gridgraph::GridGraph;
+using octi::gridgraph::BaseGraph;
 using octi::gridgraph::GridNode;
 
 using octi::combgraph::CombEdge;
@@ -36,23 +36,23 @@ class ILPGridOptimizer {
  public:
   ILPGridOptimizer() {}
 
-  double optimize(GridGraph* gg, const CombGraph& cg, combgraph::Drawing* d,
+  double optimize(BaseGraph* gg, const CombGraph& cg, combgraph::Drawing* d,
                   double maxGrDist, bool noSolve,
                   const gridgraph::GeoPensMap* geoPensMap,
                   const std::string& path) const;
 
  protected:
   shared::optim::ILPSolver* createProblem(
-      GridGraph* gg, const CombGraph& cg,
+      BaseGraph* gg, const CombGraph& cg,
       const gridgraph::GeoPensMap* geoPensMap, double maxGrDist) const;
 
   std::string getEdgeUseVar(const GridEdge* e, const CombEdge* cg) const;
   std::string getStatPosVar(const GridNode* e, const CombNode* cg) const;
 
-  void extractSolution(shared::optim::ILPSolver* lp, GridGraph* gg,
+  void extractSolution(shared::optim::ILPSolver* lp, BaseGraph* gg,
                        const CombGraph& cg, combgraph::Drawing* d) const;
 
-  shared::optim::StarterSol extractFeasibleSol(GridGraph* gg,
+  shared::optim::StarterSol extractFeasibleSol(BaseGraph* gg,
                                                const CombGraph& cg,
                                                double maxGrDist) const;
 
