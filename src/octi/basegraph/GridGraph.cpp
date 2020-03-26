@@ -34,19 +34,9 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
   assert(_c.p_135 <= _c.p_90);
   assert(_c.p_90 <= _c.p_45);
 
-  // double c_0 = _c.p_45 - _c.p_135;
-  // double c_135 = _c.p_45;
-  // double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
-  // double c_45 = c_0 + c_135;
-
   _heurECost =
       (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
   _heurHopCost = _c.p_45 - _c.p_135;
-
-  // std::cerr << "C0: " << c_0 << std::endl;
-  // std::cerr << "C135: " << c_135 << std::endl;
-  // std::cerr << "C90: " << c_90 << std::endl;
-  // std::cerr << "C45: " << c_45 << std::endl;
 
   // cut off illegal spacer values
   if (spacer > cellSize / 2) spacer = cellSize / 2;
@@ -58,6 +48,7 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
     }
   }
 
+  // write grid edges
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       GridNode* center = getNode(x, y);
