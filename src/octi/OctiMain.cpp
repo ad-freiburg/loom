@@ -9,9 +9,9 @@
 #include <set>
 #include "json/json.hpp"
 #include "octi/Octilinearizer.h"
+#include "octi/basegraph/BaseGraph.h"
 #include "octi/combgraph/CombGraph.h"
 #include "octi/config/ConfigReader.h"
-#include "octi/basegraph/BaseGraph.h"
 #include "shared/linegraph/LineGraph.h"
 #include "util/Misc.h"
 #include "util/geo/Geo.h"
@@ -22,9 +22,9 @@ using std::string;
 using namespace octi;
 
 using octi::Octilinearizer;
+using octi::basegraph::BaseGraph;
 using util::geo::dist;
 using util::geo::DPolygon;
-using octi::basegraph::BaseGraph;
 
 // _____________________________________________________________________________
 double avgStatDist(const LineGraph& g) {
@@ -84,12 +84,12 @@ int main(int argc, char** argv) {
   util::geo::output::GeoGraphJsonOutput out;
 
   if (cfg.obstaclePath.size()) {
-    std::cerr << "Reading obstacle file... ";
+    LOG(INFO, std::cerr) << "Reading obstacle file... ";
     cfg.obstacles = readObstacleFile(cfg.obstaclePath);
-    std::cerr << "Done (" << cfg.obstacles.size() << " obstacles)" << std::endl;
+    LOG(INFO, std::cerr) << "Done (" << cfg.obstacles.size() << " obstacles)";
   }
 
-  std::cerr << "Reading graph file... ";
+  LOG(INFO, std::cerr) << "Reading graph file... ";
   T_START(read);
   LineGraph tg;
   BaseGraph* gg;
@@ -97,15 +97,15 @@ int main(int argc, char** argv) {
     tg.readFromDot(&(std::cin), 0);
   else
     tg.readFromJson(&(std::cin), 0);
-  std::cerr << " done (" << T_STOP(read) << "ms)" << std::endl;
+  LOG(INFO, std::cerr) << " done (" << T_STOP(read) << "ms)";
 
-  std::cerr << "Planarize graph... ";
+  LOG(INFO, std::cerr) << "Planarize graph... ";
   T_START(planarize);
   tg.topologizeIsects();
-  std::cerr << " done (" << T_STOP(planarize) << "ms)" << std::endl;
+  LOG(INFO, std::cerr) << " done (" << T_STOP(planarize) << "ms)";
 
   double avgDist = avgStatDist(tg);
-  std::cerr << "Average adj. node distance is " << avgDist << std::endl;
+  LOG(INFO, std::cerr) << "Average adj. node distance is " << avgDist;
 
   BaseGraphType graphType = BaseGraphType::OCTIGRID;
 
@@ -117,19 +117,20 @@ int main(int argc, char** argv) {
   if (util::trim(cfg.gridSize).back() == '%') {
     double perc = atof(cfg.gridSize.c_str()) / 100;
     gridSize = avgDist * perc;
-    std::cerr << "Grid size " << gridSize << " (" << perc * 100 << "%)\n";
+    LOG(INFO, std::cerr) << "Grid size " << gridSize << " (" << perc * 100
+                         << "%)";
   } else {
     gridSize = atof(cfg.gridSize.c_str());
-    std::cerr << "Grid size " << gridSize << "\n";
+    LOG(INFO, std::cerr) << "Grid size " << gridSize;
   }
 
   if (cfg.optMode == "ilp") {
     T_START(octi);
-    double sc =
-        oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                    cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen, cfg.ilpPath);
-    std::cerr << "Octilinearized using ILP in " << T_STOP(octi) << " ms, score "
-              << sc << std::endl;
+    double sc = oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+                            cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve,
+                            cfg.enfGeoPen, cfg.ilpPath);
+    LOG(INFO, std::cerr) << "Octilinearized using ILP in " << T_STOP(octi)
+                         << " ms, score " << sc;
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
     double sc;
@@ -141,8 +142,8 @@ int main(int argc, char** argv) {
       LOG(ERROR) << exc.what();
       exit(1);
     }
-    std::cerr << "Octilinearized using heur approach in " << T_STOP(octi)
-              << " ms, score " << sc << std::endl;
+    LOG(INFO, std::cerr) << "Octilinearized using heur approach in "
+                         << T_STOP(octi) << " ms, score " << sc;
   }
 
   if (cfg.printMode == "gridgraph") {

@@ -62,6 +62,9 @@ class GurobiSolver : public ILPSolver {
   SolveType _status;
 
   int _numVars, _numRows;
+  std::string _logBuffer;
+
+  static int termHook(GRBmodel* mod, void* cbdata, int where, void* solver);
 };
 
 }  // namespace optim

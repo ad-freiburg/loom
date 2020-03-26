@@ -19,8 +19,12 @@
 #define LOGLEVEL 2
 #endif
 
+#define GET_MACRO(_1,_2,NAME,...) NAME
+#define LOG(...) GET_MACRO(__VA_ARGS__, LOGSTR, LOGAUTO)(__VA_ARGS__)
+
 // compiler will optimize statement away if x > LOGLEVEL
-#define LOG(x) if (x <= LOGLEVEL) util::Log<x>().log()
+#define LOGAUTO(x) if (x <= LOGLEVEL) util::Log<x>().log()
+#define LOGSTR(x, os) if (x <= LOGLEVEL) util::Log<x>(&os).log()
 
 using std::setfill;
 using std::setw;
@@ -34,6 +38,7 @@ template <char LVL>
 class Log {
  public:
   Log() { if (LVL < INFO) os = &std::cerr; else os = &std::cout; }
+  Log(std::ostream* s) { os = s; }
   ~Log() { (*os) << std::endl; }
   std::ostream& log() { return ts() << LOGS[(size_t)LVL] << ": "; }
 

@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include "gurobi_c.h"
 #include "shared/optim/GurobiSolver.h"
+#include "util/String.h"
 #include "util/log/Log.h"
 
 using shared::optim::GurobiSolver;
@@ -16,19 +17,38 @@ using shared::optim::SolveType;
 // _____________________________________________________________________________
 GurobiSolver::GurobiSolver(DirType dir)
     : _status(INF), _numVars(0), _numRows(0) {
-  LOG(DEBUG) << "Creating gurobi solver instance...";
+  int verMaj, verMin, verTech;
+  GRBversion(&verMaj, &verMin, &verTech);
+  LOG(INFO, std::cerr) << "Creating gurobi v" << verMaj << "." << verMin << "."
+                        << verTech << " solver instance...";
 
-  int error = GRBloadenv(&_env, "gurobi.log");
+  int error = GRBemptyenv(&_env);
   if (error || _env == 0) {
     throw std::runtime_error("Could not create gurobi environment");
   }
 
+  error = GRBsetintparam(_env, "LogToConsole", 0);
+  if (error) {
+    throw std::runtime_error("Could not set logging of gurobi environment");
+  }
+
+  error = GRBsetstrparam(_env, "LogFile", "gurobi.log");
+  if (error) {
+    throw std::runtime_error("Could not set logging of gurobi environment");
+  }
+
+  error = GRBstartenv(_env);
+  if (error) {
+    throw std::runtime_error("Could not start gurobi environment");
+  }
 
   // create emtpy model
   error = GRBnewmodel(_env, &_model, "loom_mip", 0, 0, 0, 0, 0, 0);
   if (error) {
     throw std::runtime_error("Could not create gurobi model");
   }
+
+  error = GRBsetcallbackfunc(_model, termHook, &_logBuffer);
 
   if (dir == MAX)
     GRBsetintattr(_model, GRB_INT_ATTR_MODELSENSE, GRB_MAXIMIZE);
@@ -101,11 +121,11 @@ void GurobiSolver::addColToRow(const std::string& rowName,
                                const std::string& colName, double coef) {
   int col = getVarByName(colName);
   if (col < 0) {
-    LOG(ERROR) << "Could not find variable " << colName;
+    LOG(ERROR, std::cerr) << "Could not find variable " << colName;
   }
   int row = getConstrByName(rowName);
   if (row < 0) {
-    LOG(ERROR) << "Could not find constraint " << rowName;
+    LOG(ERROR, std::cerr) << "Could not find constraint " << rowName;
   }
 
   addColToRow(col, row, coef);
@@ -214,9 +234,12 @@ SolveType GurobiSolver::solve() {
         "Could not retrieve optimal target function value.");
   }
 
-  if (optimStat == GRB_OPTIMAL) _status = OPTIM;
-  else if (optimStat == GRB_INF_OR_UNBD) _status = INF;
-  else _status = NON_OPTIM;
+  if (optimStat == GRB_OPTIMAL)
+    _status = OPTIM;
+  else if (optimStat == GRB_INF_OR_UNBD)
+    _status = INF;
+  else
+    _status = NON_OPTIM;
 
   return getStatus();
 }
@@ -255,7 +278,7 @@ double GurobiSolver::getVarVal(int colId) const {
 double GurobiSolver::getVarVal(const std::string& colName) const {
   int col = getVarByName(colName);
   if (col < 0) {
-    LOG(ERROR) << "Could not find variable " << colName;
+    LOG(ERROR, std::cerr) << "Could not find variable " << colName;
   }
 
   return getVarVal(col);
@@ -265,7 +288,7 @@ double GurobiSolver::getVarVal(const std::string& colName) const {
 void GurobiSolver::setObjCoef(const std::string& colName, double coef) const {
   int col = getVarByName(colName);
   if (col < 0) {
-    LOG(ERROR) << "Could not find variable " << colName;
+    LOG(ERROR, std::cerr) << "Could not find variable " << colName;
   }
 
   setObjCoef(col, coef);
@@ -294,6 +317,29 @@ int GurobiSolver::getNumVars() const { return _numVars; }
 void GurobiSolver::writeMps(const std::string& path) const {
   // TODO: exception if could not be written
   GRBwrite(_model, path.c_str());
+}
+
+// _____________________________________________________________________________
+int GurobiSolver::termHook(GRBmodel* mod, void* cbdata, int where,
+                           void* buffPtr) {
+  if (where == GRB_CB_MESSAGE) {
+    const char* msg;
+    int error = GRBcbget(cbdata, where, GRB_CB_MSG_STRING, &msg);
+    if (error) return 0;
+
+    std::string* buff = reinterpret_cast<std::string*>(buffPtr);
+    std::string s = msg;
+    for (auto ch : s) {
+      if (ch == '\n') {
+        std::string trimmed = util::ltrim(*buff);
+        if (trimmed.size()) LOG(INFO, std::cerr) << trimmed;
+        buff->clear();
+      } else {
+        buff->push_back(ch);
+      }
+    }
+  }
+  return 0;
 }
 
 #endif

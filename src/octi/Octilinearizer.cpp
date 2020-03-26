@@ -91,16 +91,16 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
   auto box = tg->getBBox();
   box = util::geo::pad(box, gridSize + 1);
 
-  std::cerr << "Presolving..." << std::endl;
+  LOG(INFO, std::cerr) << "Presolving...";
   try {
     // presolve using heuristical approach to get a first feasible solution
     LineGraph tmpOutTg;
     // important: always use restrLocSearch here!
     draw(cg, box, &tmpOutTg, &gg, pens, gridSize, borderRad, maxGrDist, true,
          enfGeoPen, {});
-    std::cerr << "Presolving finished." << std::endl;
+    LOG(INFO, std::cerr) << "Presolving finished.";
   } catch (const NoEmbeddingFoundExc& exc) {
-    std::cerr << "Presolve was not sucessful." << std::endl;
+    LOG(INFO, std::cerr) << "Presolve was not sucessful.";
     gg = newBaseGraph(box, gridSize, borderRad, pens);
   }
   Drawing drawing(gg);
@@ -108,13 +108,13 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
   const GeoPensMap* geoPens = 0;
 
   if (enfGeoPen) {
-    std::cerr << "Writing geopens... ";
+    LOG(INFO, std::cerr) << "Writing geopens... ";
     auto initOrder = getOrdering(cg, false);
     T_START(geopens);
     for (auto cmbEdg : initOrder) {
       gg->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
     }
-    std::cerr << " done (" << T_STOP(geopens) << "ms)" << std::endl;
+    LOG(INFO) << " done (" << T_STOP(geopens) << "ms)";
     geoPens = &enfGeoPens;
   }
 
@@ -164,13 +164,13 @@ double Octilinearizer::draw(
   size_t jobs = 4;
   std::vector<BaseGraph*> ggs(jobs);
 
-  std::cerr << "Creating grid graphs... ";
+  LOG(INFO, std::cerr) << "Creating grid graphs... ";
   T_START(ggraph);
 #pragma omp parallel for
   for (size_t i = 0; i < jobs; i++) {
     ggs[i] = newBaseGraph(box, gridSize, borderRad, pens);
   }
-  std::cerr << " done (" << T_STOP(ggraph) << "ms)" << std::endl;
+  LOG(INFO, std::cerr) << " done (" << T_STOP(ggraph) << "ms)";
 
   bool found = false;
 
@@ -183,21 +183,21 @@ double Octilinearizer::draw(
   auto initOrder = getOrdering(cg, false);
 
   if (enfGeoPen > 0) {
-    std::cerr << "Writing geopens... ";
+    LOG(INFO, std::cerr) << "Writing geopens... ";
     T_START(geopens);
     for (auto cmbEdg : initOrder) {
       ggs[0]->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
     }
-    std::cerr << " done (" << T_STOP(geopens) << "ms)" << std::endl;
+    LOG(INFO, std::cerr) << " done (" << T_STOP(geopens) << "ms)";
     geoPens = &enfGeoPens;
   }
 
   if (obstacles.size()) {
-    std::cerr << "Writing obstacles... ";
+    LOG(INFO, std::cerr) << "Writing obstacles... ";
     T_START(obstacles);
     for (auto gg : ggs)
       for (const auto& obst : obstacles) gg->addObstacle(obst);
-    std::cerr << " done (" << T_STOP(obstacles) << "ms)" << std::endl;
+    LOG(INFO, std::cerr) << " done (" << T_STOP(obstacles) << "ms)";
   }
 
   Drawing drawing(ggs[0]);
@@ -214,13 +214,13 @@ double Octilinearizer::draw(
         draw(iterOrder, ggs[0], &drawing, drawing.score(), maxGrDist, geoPens);
 
     if (locFound) {
-      std::cerr << " ++ Try " << i << ", score " << drawing.score()
-                << ", (took " << T_STOP(draw) << " ms)" << std::endl;
+      LOG(INFO, std::cerr) << " ++ Try " << i << ", score " << drawing.score()
+                << ", (took " << T_STOP(draw) << " ms)";
       found = true;
     } else {
-      std::cerr << " ++ Try " << i << ", score <inf>"
+      LOG(INFO, std::cerr) << " ++ Try " << i << ", score <inf>"
                 << ", next <not found>"
-                << " (took " << T_STOP(draw) << " ms)" << std::endl;
+                << " (took " << T_STOP(draw) << " ms)";
     }
 
     drawing.eraseFromGrid(ggs[0]);
@@ -232,13 +232,13 @@ double Octilinearizer::draw(
 
   if (!found) throw NoEmbeddingFoundExc();
 
-  std::cerr << "Done.." << std::endl;
+  LOG(INFO, std::cerr) << "Done.";
 
   for (size_t i = 0; i < jobs; i++) drawing.applyToGrid(ggs[i]);
 
   size_t iters = 0;
 
-  std::cerr << "Iterating..." << std::endl;
+  LOG(INFO, std::cerr) << "Iterating...";
 
   std::vector<std::vector<CombNode*>> batches(jobs);
   size_t c = 0;
@@ -335,10 +335,10 @@ double Octilinearizer::draw(
     }
 
     double imp = (drawing.score() - bestFrIters[bestCore].score());
-    std::cerr << " ++ Iter " << iters << ", prev " << drawing.score()
+    LOG(INFO, std::cerr) << " ++ Iter " << iters << ", prev " << drawing.score()
               << ", next " << bestFrIters[bestCore].score() << " ("
               << (imp >= 0 ? "+" : "") << imp << ", took " << T_STOP(iter)
-              << " ms)" << std::endl;
+              << " ms)";
 
     for (size_t i = 0; i < jobs; i++) {
       drawing.eraseFromGrid(ggs[i]);
@@ -351,10 +351,10 @@ double Octilinearizer::draw(
 
   drawing.getLineGraph(outTg);
   auto fullScore = drawing.fullScore();
-  std::cerr << "Hop costs: " << fullScore.hop
+  LOG(INFO, std::cerr) << "Hop costs: " << fullScore.hop
             << ", bend costs: " << fullScore.bend
             << ", mv costs: " << fullScore.move
-            << ", dense costs: " << fullScore.dense << std::endl;
+            << ", dense costs: " << fullScore.dense;
 
   *retGg = ggs[0];
   return drawing.score();
