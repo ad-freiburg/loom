@@ -79,7 +79,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   virtual void openTurns(GridNode* n) = 0;
   virtual void closeTurns(GridNode* n) = 0;
 
-  virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const = 0;
+  virtual GridNode* getNeighbor(const GridNode* n, size_t i) const = 0;
 
   virtual std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis) = 0;
 

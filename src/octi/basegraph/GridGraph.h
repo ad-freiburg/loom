@@ -58,7 +58,7 @@ class GridGraph : public BaseGraph {
   virtual void openTurns(GridNode* n);
   virtual void closeTurns(GridNode* n);
 
-  virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
+  virtual GridNode* getNeighbor(const GridNode* n, size_t i) const;
 
   virtual std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis);
 
@@ -116,6 +116,8 @@ class GridGraph : public BaseGraph {
   void reWriteGeoPens();
 
   GridNode* writeNd(size_t x, size_t y);
+
+  GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
   void getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]);
 };

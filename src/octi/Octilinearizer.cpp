@@ -290,6 +290,10 @@ double Octilinearizer::draw(
           if (pos == 8) p[a] = {origX, origY};
           if (pos == 4) p[a] = {origX, origY - 1};
 
+          auto n = ggs[btch]->getNeighbor(drawing.getGrNd(a), pos);
+          auto nn = ggs[btch]->getNode(p[a].first, p[a].second);
+          assert(n == nn);
+
           if (restrLocSearch && ggs[btch]->getNode(p[a].first, p[a].second)) {
             // dont try positions outside the move radius for consistency with
             // ILP approach

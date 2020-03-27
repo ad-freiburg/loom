@@ -399,8 +399,6 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
   // dont allow crossing edges
   for (const GridNode* n : *gg->getNds()) {
     if (!n->pl().isSink()) continue;
-    size_t x = n->pl().getX();
-    size_t y = n->pl().getY();
 
     std::stringstream constName;
     // size_t row = glp_add_rows(lp, 1);
@@ -410,13 +408,13 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
     int row = lp->addRow(constName.str(), 1, shared::optim::UP);
 
-    auto eOr = gg->getNEdg(n, gg->getNeighbor(x, y, 3));
-    auto fOr = gg->getNEdg(gg->getNeighbor(x, y, 3), n);
+    auto eOr = gg->getNEdg(n, gg->getNeighbor(n, 3));
+    auto fOr = gg->getNEdg(gg->getNeighbor(n, 3), n);
 
     if (!eOr || !fOr) continue;
 
-    auto na = gg->getNeighbor(x, y, (3 + 7) % 8);
-    auto nb = gg->getNeighbor(x, y, (3 + 1) % 8);
+    auto na = gg->getNeighbor(n, (3 + 7) % 8);
+    auto nb = gg->getNeighbor(n, (3 + 1) % 8);
 
     if (!na || !nb) continue;
 

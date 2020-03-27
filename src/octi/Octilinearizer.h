@@ -115,7 +115,7 @@ struct BaseGraphHeur
       for (; i < 8; i++) {
         float sinkCost = g->getEdg(n->pl().getPort(i), n)->pl().cost();
         if (sinkCost < cheapestSink) cheapestSink = sinkCost;
-        auto neigh = g->getNeighbor(n->pl().getX(), n->pl().getY(), i);
+        auto neigh = g->getNeighbor(n, i);
         if (neigh && to.find(neigh) == to.end()) {
           hull.push_back(n->pl().getX());
           hull.push_back(n->pl().getY());

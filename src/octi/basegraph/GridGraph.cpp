@@ -53,6 +53,19 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       GridNode* center = getNode(x, y);
 
+      // for (size_t p = 0; p < 8; p++) {
+        // GridNode* from = center->pl().getPort(p);
+        // GridNode* toN = getNeighbor(x, y, p);
+        // if (from != 0 && toN != 0) {
+          // GridNode* to = toN->pl().getPort((p + 4) % 8);
+          // auto e = new GridEdge(from, to, GridEdgePL(9, false));
+          // e->pl().setId(_edgeCount);
+          // _edgeCount++;
+          // from->addEdge(e);
+          // to->addEdge(e);
+        // }
+      // }
+
       for (size_t p = 0; p < 8; p++) {
         GridNode* from = center->pl().getPort(p);
         GridNode* toN = getNeighbor(x, y, p);
@@ -79,6 +92,7 @@ GridNode* GridGraph::getNode(size_t x, size_t y) const {
 
 // _____________________________________________________________________________
 GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
+  if (i == 8) return getNode(cx, cy);
   int8_t x = 1;
   if (i % 4 == 0) x = 0;
   if (i > 4) x = -1;
@@ -88,6 +102,11 @@ GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
   if (i == 3 || i == 4 || i == 5) y = -1;
 
   return getNode(cx + x, cy + y);
+}
+
+// _____________________________________________________________________________
+GridNode* GridGraph::getNeighbor(const GridNode* n, size_t i) const {
+  return getNeighbor(n->pl().getX(), n->pl().getY(), i);
 }
 
 // _____________________________________________________________________________
