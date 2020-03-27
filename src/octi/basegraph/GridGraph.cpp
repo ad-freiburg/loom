@@ -53,24 +53,12 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       GridNode* center = getNode(x, y);
 
-      // for (size_t p = 0; p < 8; p++) {
-        // GridNode* from = center->pl().getPort(p);
-        // GridNode* toN = getNeighbor(x, y, p);
-        // if (from != 0 && toN != 0) {
-          // GridNode* to = toN->pl().getPort((p + 4) % 8);
-          // auto e = new GridEdge(from, to, GridEdgePL(9, false));
-          // e->pl().setId(_edgeCount);
-          // _edgeCount++;
-          // from->addEdge(e);
-          // to->addEdge(e);
-        // }
-      // }
-
-      for (size_t p = 0; p < 8; p++) {
+      for (size_t p = 0; p < getNumNeighbors(); p++) {
         GridNode* from = center->pl().getPort(p);
         GridNode* toN = getNeighbor(x, y, p);
         if (from != 0 && toN != 0) {
-          GridNode* to = toN->pl().getPort((p + 4) % 8);
+          GridNode* to = toN->pl().getPort((p + getNumNeighbors() / 2) %
+                                           getNumNeighbors());
           auto e = new GridEdge(from, to, GridEdgePL(9, false));
           e->pl().setId(_edgeCount);
           _edgeCount++;
@@ -85,6 +73,9 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
 }
 
 // _____________________________________________________________________________
+size_t GridGraph::getNumNeighbors() const { return 8; }
+
+// _____________________________________________________________________________
 GridNode* GridGraph::getNode(size_t x, size_t y) const {
   if (x >= _grid.getXWidth() || y >= _grid.getYHeight()) return 0;
   return _nds[_grid.getYHeight() * 9 * x + y * 9];
@@ -92,7 +83,7 @@ GridNode* GridGraph::getNode(size_t x, size_t y) const {
 
 // _____________________________________________________________________________
 GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
-  if (i == 8) return getNode(cx, cy);
+  if (i > 7) return getNode(cx, cy);
   int8_t x = 1;
   if (i % 4 == 0) x = 0;
   if (i > 4) x = -1;
@@ -152,6 +143,7 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
     openTurns(b);
   }
 
+  // unblock blocked diagonal edges crossing this edge
   if (dir != 0) {
     auto na = getNeighbor(x, y, (dir + 7) % 8);
     auto nb = getNeighbor(x, y, (dir + 1) % 8);
@@ -164,6 +156,30 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
       f->pl().unblock();
     }
   }
+}
+
+// _____________________________________________________________________________
+CrossEdgPairs GridGraph::getCrossEdgPairs() const {
+  CrossEdgPairs ret;
+  for (const GridNode* n : getNds()) {
+    if (!n->pl().isSink()) continue;
+
+    auto eOr = getNEdg(n, getNeighbor(n, 3));
+    auto fOr = getNEdg(getNeighbor(n, 3), n);
+
+    if (!eOr || !fOr) continue;
+
+    auto na = getNeighbor(n, (3 + 7) % 8);
+    auto nb = getNeighbor(n, (3 + 1) % 8);
+
+    if (!na || !nb) continue;
+
+    auto e = getNEdg(na, nb);
+    auto f = getNEdg(nb, na);
+    ret.push_back({{eOr, fOr}, {e, f}});
+  }
+
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -186,7 +202,8 @@ void GridGraph::writeObstacleCost(const util::geo::Polygon<double>& obst) {
         if (util::geo::intersects(
                 util::geo::LineSegment<double>(*ge->getFrom()->pl().getGeom(),
                                                *ge->getTo()->pl().getGeom()),
-                obst) || util::geo::contains(
+                obst) ||
+            util::geo::contains(
                 util::geo::LineSegment<double>(*ge->getFrom()->pl().getGeom(),
                                                *ge->getTo()->pl().getGeom()),
                 obst)) {
@@ -257,6 +274,7 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   closeTurns(a);
   closeTurns(b);
 
+  // block diagonal edges crossing this edge
   if (dir != 0) {
     auto na = getNeighbor(x, y, (dir + 7) % 8);
     auto nb = getNeighbor(x, y, (dir + 1) % 8);
@@ -382,8 +400,7 @@ NodeCost GridGraph::nodeBendPen(GridNode* n, CombEdge* e) {
 }
 
 // _____________________________________________________________________________
-NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd,
-                                   CombEdge* edg) {
+NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd, CombEdge* edg) {
   NodeCost addC;
 
   CombEdge* out[8];
@@ -411,7 +428,7 @@ NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd,
 
 // _____________________________________________________________________________
 NodeCost GridGraph::topoBlockPen(GridNode* nd, CombNode* origNd,
-                                     CombEdge* edg) {
+                                 CombEdge* edg) {
   CombEdge* outgoing[8];
   NodeCost addC;
   getSettledAdjEdgs(nd, outgoing);

@@ -22,16 +22,6 @@ using octi::combgraph::CombNode;
 namespace octi {
 namespace ilp {
 
-struct VariableMatrix {
-  std::vector<int> rowNum;
-  std::vector<int> colNum;
-  std::vector<double> vals;
-
-  void addVar(int row, int col, double val);
-  void getGLPKArrs(int** ia, int** ja, double** r) const;
-  size_t getNumVars() const { return vals.size(); }
-};
-
 class ILPGridOptimizer {
  public:
   ILPGridOptimizer() {}

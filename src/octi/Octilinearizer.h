@@ -41,7 +41,7 @@ using util::graph::Dijkstra;
 typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
 typedef Dijkstra::NList<GridNodePL, GridEdgePL> GrNdList;
 typedef std::pair<std::set<GridNode*>, std::set<GridNode*>> RtPair;
-typedef std::map<CombNode*, std::pair<size_t, size_t>> SettledPos;
+typedef std::map<CombNode*, const GridNode*> SettledPos;
 
 enum BaseGraphType { OCTIGRID, GRID };
 

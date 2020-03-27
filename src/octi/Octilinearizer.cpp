@@ -8,9 +8,9 @@
 #include "octi/Octilinearizer.h"
 #include "octi/basegraph/BaseGraph.h"
 #include "octi/basegraph/GridGraph.h"
+#include "octi/basegraph/NodeCost.h"
 #include "octi/basegraph/OctiGridGraph.h"
 #include "octi/combgraph/Drawing.h"
-#include "octi/basegraph/NodeCost.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Dijkstra.h"
@@ -22,13 +22,13 @@ using namespace octi;
 using namespace basegraph;
 
 using combgraph::EdgeOrdering;
+using octi::basegraph::BaseGraph;
 using octi::combgraph::Drawing;
+using util::geo::DBox;
 using util::geo::dist;
 using util::geo::DPoint;
-using util::geo::DBox;
 using util::geo::len;
 using util::graph::Dijkstra;
-using octi::basegraph::BaseGraph;
 
 // _____________________________________________________________________________
 void Octilinearizer::removeEdgesShorterThan(LineGraph* g, double d) {
@@ -215,12 +215,12 @@ double Octilinearizer::draw(
 
     if (locFound) {
       LOG(INFO, std::cerr) << " ++ Try " << i << ", score " << drawing.score()
-                << ", (took " << T_STOP(draw) << " ms)";
+                           << ", (took " << T_STOP(draw) << " ms)";
       found = true;
     } else {
       LOG(INFO, std::cerr) << " ++ Try " << i << ", score <inf>"
-                << ", next <not found>"
-                << " (took " << T_STOP(draw) << " ms)";
+                           << ", next <not found>"
+                           << " (took " << T_STOP(draw) << " ms)";
     }
 
     drawing.eraseFromGrid(ggs[0]);
@@ -260,9 +260,6 @@ double Octilinearizer::draw(
         // use the batches grid graph
         drawingCp.setBaseGraph(ggs[btch]);
 
-        size_t origX = drawing.getGrNd(a)->pl().getX();
-        size_t origY = drawingCp.getGrNd(a)->pl().getY();
-
         // reverting a
         std::vector<CombEdge*> test;
         for (auto ce : a->getAdjList()) {
@@ -275,31 +272,16 @@ double Octilinearizer::draw(
         drawingCp.erase(a);
         ggs[btch]->unSettleNd(a);
 
-        for (size_t pos = 0; pos < 9; pos++) {
+        for (size_t pos = 0; pos < ggs[btch]->getNumNeighbors() + 1; pos++) {
           SettledPos p;
 
-          if (pos == 1) p[a] = {origX + 1, origY + 1};
-          if (pos == 2) p[a] = {origX + 1, origY};
-          if (pos == 3) p[a] = {origX + 1, origY - 1};
-
-          if (pos == 7) p[a] = {origX - 1, origY + 1};
-          if (pos == 6) p[a] = {origX - 1, origY};
-          if (pos == 5) p[a] = {origX - 1, origY - 1};
-
-          if (pos == 0) p[a] = {origX, origY + 1};
-          if (pos == 8) p[a] = {origX, origY};
-          if (pos == 4) p[a] = {origX, origY - 1};
-
           auto n = ggs[btch]->getNeighbor(drawing.getGrNd(a), pos);
-          auto nn = ggs[btch]->getNode(p[a].first, p[a].second);
-          assert(n == nn);
+          if (n) p[a] = n;
 
-          if (restrLocSearch && ggs[btch]->getNode(p[a].first, p[a].second)) {
+          if (restrLocSearch && n) {
             // dont try positions outside the move radius for consistency with
             // ILP approach
-            double gridD = dist(
-                *a->pl().getGeom(),
-                *ggs[btch]->getNode(p[a].first, p[a].second)->pl().getGeom());
+            double gridD = dist(*a->pl().getGeom(), *n->pl().getGeom());
             double maxDis = ggs[btch]->getCellSize() * maxGrDist;
             if (gridD >= maxDis) continue;
           }
@@ -340,9 +322,9 @@ double Octilinearizer::draw(
 
     double imp = (drawing.score() - bestFrIters[bestCore].score());
     LOG(INFO, std::cerr) << " ++ Iter " << iters << ", prev " << drawing.score()
-              << ", next " << bestFrIters[bestCore].score() << " ("
-              << (imp >= 0 ? "+" : "") << imp << ", took " << T_STOP(iter)
-              << " ms)";
+                         << ", next " << bestFrIters[bestCore].score() << " ("
+                         << (imp >= 0 ? "+" : "") << imp << ", took "
+                         << T_STOP(iter) << " ms)";
 
     for (size_t i = 0; i < jobs; i++) {
       drawing.eraseFromGrid(ggs[i]);
@@ -356,9 +338,9 @@ double Octilinearizer::draw(
   drawing.getLineGraph(outTg);
   auto fullScore = drawing.fullScore();
   LOG(INFO, std::cerr) << "Hop costs: " << fullScore.hop
-            << ", bend costs: " << fullScore.bend
-            << ", mv costs: " << fullScore.move
-            << ", dense costs: " << fullScore.dense;
+                       << ", bend costs: " << fullScore.bend
+                       << ", mv costs: " << fullScore.move
+                       << ", dense costs: " << fullScore.dense;
 
   *retGg = ggs[0];
   return drawing.score();
@@ -417,7 +399,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     auto frCmbNd = cmbEdg->getFrom();
     auto toCmbNd = cmbEdg->getTo();
 
-    std::set<GridNode *> frGrNds, toGrNds;
+    std::set<GridNode*> frGrNds, toGrNds;
     std::tie(frGrNds, toGrNds) =
         getRtPair(frCmbNd, toCmbNd, settled, gg, maxGrDist);
 
@@ -621,8 +603,7 @@ std::set<GridNode*> Octilinearizer::getCands(CombNode* cmbNd,
   if (gg->getSettled(cmbNd)) {
     ret.insert(gg->getSettled(cmbNd));
   } else if (preSettled.count(cmbNd)) {
-    auto nd = gg->getNode(preSettled.find(cmbNd)->second.first,
-                          preSettled.find(cmbNd)->second.second);
+    auto nd = preSettled.find(cmbNd)->second->pl().getParent();
     if (nd && !nd->pl().isClosed()) ret.insert(nd);
   } else {
     ret = gg->getGrNdCands(cmbNd, maxDis);

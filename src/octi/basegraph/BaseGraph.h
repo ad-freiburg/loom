@@ -33,6 +33,9 @@ namespace basegraph {
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
 typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
 
+typedef std::pair<const GridEdge*, const GridEdge*> EdgPair;
+typedef std::vector<std::pair<EdgPair, EdgPair>> CrossEdgPairs;
+
 typedef std::vector<double> GeoPens;
 typedef std::map<const CombEdge*, GeoPens> GeoPensMap;
 
@@ -57,8 +60,6 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   virtual double getCellSize() const = 0;
 
-  virtual GridNode* getNode(size_t x, size_t y) const = 0;
-
   virtual NodeCost nodeBendPen(GridNode* n, CombEdge* e) = 0;
   virtual NodeCost topoBlockPen(GridNode* n, CombNode* origNode,
                                 CombEdge* e) = 0;
@@ -80,6 +81,8 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   virtual void closeTurns(GridNode* n) = 0;
 
   virtual GridNode* getNeighbor(const GridNode* n, size_t i) const = 0;
+
+  virtual size_t getNumNeighbors() const = 0;
 
   virtual std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis) = 0;
 
@@ -108,6 +111,8 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   virtual void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
                                   double pen) = 0;
+
+  virtual CrossEdgPairs getCrossEdgPairs() const = 0;
 
   virtual void addObstacle(const util::geo::Polygon<double>& obst) = 0;
 };

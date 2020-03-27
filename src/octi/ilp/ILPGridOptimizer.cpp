@@ -14,7 +14,6 @@ using octi::basegraph::GridEdge;
 using octi::basegraph::BaseGraph;
 using octi::basegraph::GridNode;
 using octi::ilp::ILPGridOptimizer;
-using octi::ilp::VariableMatrix;
 using shared::optim::ILPSolver;
 using shared::optim::StarterSol;
 
@@ -83,10 +82,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     if (nd->getDeg() == 0) continue;
     std::stringstream oneAssignment;
     // must sum up to 1
-    // size_t rowStat = glp_add_rows(lp, 1);
     oneAssignment << "oneass(" << nd << ")";
-    // glp_set_row_name(lp, rowStat, oneAssignment.str().c_str());
-    // glp_set_row_bnds(lp, rowStat, GLP_FX, 1, 1);
     int rowStat = lp->addRow(oneAssignment.str(), 1, shared::optim::FIX);
 
     size_t i = 0;
@@ -107,18 +103,10 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
       auto varName = getStatPosVar(n, nd);
 
-      // size_t col = glp_add_cols(lp, 1);
-      // glp_set_col_name(lp, col, varName.c_str());
-      // // binary variable € {0,1}, node is either this station, or not
-      // glp_set_col_kind(lp, col, GLP_BV);
-
-      // glp_set_obj_coef(lp, col, gg->ndMovePen(nd, n));
-
       int col = lp->addCol(varName, shared::optim::BIN, gg->ndMovePen(nd, n));
 
       lp->addColToRow(rowStat, col, 1);
 
-      // vm.addVar(rowStat, col, 1);
       i++;
     }
   }
@@ -150,10 +138,6 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
           auto edgeVarName = getEdgeUseVar(e, edg);
 
-          // size_t col = glp_add_cols(lp, 1);
-          // glp_set_col_name(lp, col, edgeVarName.c_str());
-          // // binary variable € {0,1}, edge is either used, or not
-          // glp_set_col_kind(lp, col, GLP_BV);
           double coef;
           if (geoPensMap && !e->pl().isSecondary()) {
             // add geo pen
@@ -170,8 +154,6 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
   lp->update();
 
-  // glp_create_index(lp);
-
   // an edge can only be used a single time
   std::set<const GridEdge*> proced;
   for (const GridNode* n : *gg->getNds()) {
@@ -183,11 +165,8 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
       proced.insert(f);
 
       std::stringstream constName;
-      // size_t row = glp_add_rows(lp, 1);
-      constName << "uniqedge(" << e->getFrom()->pl().getId() << ","
+      constName << "ue(" << e->getFrom()->pl().getId() << ","
                 << e->getTo()->pl().getId() << ")";
-      // glp_set_row_name(lp, row, constName.str().c_str());
-      // glp_set_row_bnds(lp, row, GLP_UP, 1, 1);
       int row = lp->addRow(constName.str(), 1, shared::optim::UP);
 
       for (auto nd : cg.getNds()) {
@@ -219,13 +198,9 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
       for (auto edg : nd->getAdjList()) {
         if (edg->getFrom() != nd) continue;
         std::stringstream constName;
-        // size_t row = glp_add_rows(lp, 1);
-        constName << "adjsum(" << n->pl().getId() << "," << edg << ")";
-        // glp_set_row_name(lp, row, constName.str().c_str());
+        constName << "as(" << n->pl().getId() << "," << edg << ")";
 
-        // // an upper bound is enough here
-        // glp_set_row_bnds(lp, row, GLP_UP, 0, 0);
-
+        // an upper bound is enough here
         int row = lp->addRow(constName.str(), 0, shared::optim::UP);
 
         // normally, we count an incoming edge as 1 and an outgoing edge as -1
@@ -251,41 +226,33 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
           // subtract the variable for this start node and edge, if used
           // as a candidate
           int ndColFrom = lp->getVarByName(getStatPosVar(n, edg->getFrom()));
-          // glp_find_col(lp, getStatPosVar(n, edg->getFrom()).c_str());
           if (ndColFrom > -1)
-            lp->addColToRow(row, ndColFrom,
-                            -2);  // vm.addVar(row, ndColFrom, -2);
+            lp->addColToRow(row, ndColFrom, -2);
 
           // add the variable for this end node and edge, if used
           // as a candidate
           int ndColTo = lp->getVarByName(getStatPosVar(n, edg->getTo()));
-          // glp_find_col(lp, getStatPosVar(n, edg->getTo()).c_str());
           if (ndColTo > -1)
-            lp->addColToRow(row, ndColTo, 1);  // vm.addVar(row, ndColTo, 1);
+            lp->addColToRow(row, ndColTo, 1);
 
           outCost = 2;
         }
 
         for (auto e : n->getAdjListIn()) {
           int edgCol = lp->getVarByName(getEdgeUseVar(e, edg));
-          // glp_find_col(lp, getEdgeUseVar(e, edg).c_str());
           if (edgCol < 0) continue;
           lp->addColToRow(row, edgCol, inCost);
-          // vm.addVar(row, edgCol, inCost);
         }
 
         for (auto e : n->getAdjListOut()) {
           int edgCol = lp->getVarByName(getEdgeUseVar(e, edg));
-          // size_t edgCol = glp_find_col(lp, getEdgeUseVar(e, edg).c_str());
           if (edgCol < 0) continue;
           lp->addColToRow(row, edgCol, outCost);
-          // vm.addVar(row, edgCol, outCost);
         }
       }
     }
   }
 
-  // glp_create_index(lp);
   lp->update();
 
   // only a single sink edge can be activated per input edge and settled grid
@@ -300,10 +267,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
         if (e->getFrom() != nd) continue;
 
         std::stringstream constName;
-        // size_t row = glp_add_rows(lp, 1);
-        constName << "singlesink(" << n->pl().getId() << "," << e << ")";
-        // glp_set_row_name(lp, row, constName.str().c_str());
-        // glp_set_row_bnds(lp, row, GLP_FX, 0, 0);
+        constName << "ss(" << n->pl().getId() << "," << e << ")";
 
         int row = lp->addRow(constName.str(), 0, shared::optim::FIX);
 
@@ -314,34 +278,27 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
         } else {
           if (cands[e->getTo()].count(n)) {
             int ndColTo = lp->getVarByName(getStatPosVar(n, e->getTo()));
-            // glp_find_col(lp, getStatPosVar(n, e->getTo()).c_str());
             if (ndColTo > -1)
-              lp->addColToRow(row, ndColTo,
-                              -1);  // vm.addVar(row, ndColTo, -1);
+              lp->addColToRow(row, ndColTo, -1);
           }
 
           if (cands[e->getFrom()].count(n)) {
             int ndColFr = lp->getVarByName(getStatPosVar(n, e->getFrom()));
-            // glp_find_col(lp, getStatPosVar(n, e->getFrom()).c_str());
             if (ndColFr > -1)
-              lp->addColToRow(row, ndColFr,
-                              -1);  // vm.addVar(row, ndColFr, -1);
+              lp->addColToRow(row, ndColFr, -1);
           }
         };
 
-        for (size_t p = 0; p < 8; p++) {
+        for (size_t p = 0; p < gg->getNumNeighbors(); p++) {
           auto varSinkTo = getEdgeUseVar(gg->getEdg(n->pl().getPort(p), n), e);
           auto varSinkFr = getEdgeUseVar(gg->getEdg(n, n->pl().getPort(p)), e);
 
-          // size_t ndColTo = glp_find_col(lp, varSinkTo.c_str());
           int ndColTo = lp->getVarByName(varSinkTo);
-          if (ndColTo > -1)
-            lp->addColToRow(row, ndColTo, 1);  // vm.addVar(row, ndColTo, 1);
+          if (ndColTo > -1)            lp->addColToRow(row, ndColTo, 1);
 
-          // size_t ndColFr = glp_find_col(lp, varSinkFr.c_str());
           int ndColFr = lp->getVarByName(varSinkFr);
           if (ndColFr > -1)
-            lp->addColToRow(row, ndColFr, 1);  // vm.addVar(row, ndColFr, 1);
+            lp->addColToRow(row, ndColFr, 1);
         }
       }
     }
@@ -353,10 +310,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     if (!n->pl().isSink()) continue;
 
     std::stringstream constName;
-    // size_t row = glp_add_rows(lp, 1);
-    constName << "inneruse(" << n->pl().getId() << ")";
-    // glp_set_row_name(lp, row, constName.str().c_str());
-    // glp_set_row_bnds(lp, row, GLP_UP, 0, 1);
+    constName << "iu(" << n->pl().getId() << ")";
 
     int row = lp->addRow(constName.str(), 1, shared::optim::UP);
 
@@ -364,16 +318,14 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     // a pass-through
 
     for (auto nd : cg.getNds()) {
-      // size_t ndcolto = glp_find_col(lp, getStatPosVar(n, nd).c_str());
       int ndcolto = lp->getVarByName(getStatPosVar(n, nd).c_str());
-      // if (ndcolto > 0) vm.addVar(row, ndcolto, 1);
       if (ndcolto > -1) lp->addColToRow(row, ndcolto, 1);
     }
 
     // go over all ports
-    for (size_t pf = 0; pf < 8; pf++) {
+    for (size_t pf = 0; pf < gg->getNumNeighbors(); pf++) {
       auto from = n->pl().getPort(pf);
-      for (size_t pt = 0; pt < 8; pt++) {
+      for (size_t pt = 0; pt < gg->getNumNeighbors(); pt++) {
         auto to = n->pl().getPort(pt);
         if (from == to) continue;
 
@@ -381,77 +333,46 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
         for (auto nd : cg.getNds()) {
           for (auto edg : nd->getAdjList()) {
             if (edg->getFrom() != nd) continue;
-            // size_t edgCol =
-            // glp_find_col(lp, getEdgeUseVar(innerE, edg).c_str());
+
             int edgCol = lp->getVarByName(getEdgeUseVar(innerE, edg));
             if (edgCol < 0) continue;
             lp->addColToRow(row, edgCol, 1);
-            // vm.addVar(row, edgCol, 1);
           }
         }
       }
     }
   }
 
-  // glp_create_index(lp);
   lp->update();
 
   // dont allow crossing edges
-  for (const GridNode* n : *gg->getNds()) {
-    if (!n->pl().isSink()) continue;
-
+  size_t rowId = 0;
+  for (auto edgPair : gg->getCrossEdgPairs()) {
     std::stringstream constName;
-    // size_t row = glp_add_rows(lp, 1);
-    constName << "nocross(" << n->pl().getId() << ")";
-    // glp_set_row_name(lp, row, constName.str().c_str());
-    // glp_set_row_bnds(lp, row, GLP_UP, 0, 1);
+    constName << "nc(" << rowId << ")";
+    rowId++;
 
     int row = lp->addRow(constName.str(), 1, shared::optim::UP);
-
-    auto eOr = gg->getNEdg(n, gg->getNeighbor(n, 3));
-    auto fOr = gg->getNEdg(gg->getNeighbor(n, 3), n);
-
-    if (!eOr || !fOr) continue;
-
-    auto na = gg->getNeighbor(n, (3 + 7) % 8);
-    auto nb = gg->getNeighbor(n, (3 + 1) % 8);
-
-    if (!na || !nb) continue;
-
-    auto e = gg->getNEdg(na, nb);
-    auto f = gg->getNEdg(nb, na);
 
     for (auto nd : cg.getNds()) {
       for (auto edg : nd->getAdjList()) {
         if (edg->getFrom() != nd) continue;
-        // size_t col = glp_find_col(lp, getEdgeUseVar(eOr, edg).c_str());
-        // if (col) vm.addVar(row, col, 1);
 
-        int col = lp->getVarByName(getEdgeUseVar(eOr, edg));
+        int col = lp->getVarByName(getEdgeUseVar(edgPair.first.first, edg));
         if (col > -1) lp->addColToRow(row, col, 1);
 
-        // col = glp_find_col(lp, getEdgeUseVar(fOr, edg).c_str());
-        // if (col) vm.addVar(row, col, 1);
-
-        col = lp->getVarByName(getEdgeUseVar(fOr, edg));
+        col = lp->getVarByName(getEdgeUseVar(edgPair.first.second, edg));
         if (col > -1) lp->addColToRow(row, col, 1);
 
-        // col = glp_find_col(lp, getEdgeUseVar(e, edg).c_str());
-        // if (col) vm.addVar(row, col, 1);
-
-        col = lp->getVarByName(getEdgeUseVar(e, edg));
+        col = lp->getVarByName(getEdgeUseVar(edgPair.second.first, edg));
         if (col > -1) lp->addColToRow(row, col, 1);
 
-        // col = glp_find_col(lp, getEdgeUseVar(f, edg).c_str());
-        // if (col) vm.addVar(row, col, 1);
-
-        col = lp->getVarByName(getEdgeUseVar(f, edg));
+        col = lp->getVarByName(getEdgeUseVar(edgPair.second.second, edg));
         if (col > -1) lp->addColToRow(row, col, 1);
       }
     }
   }
 
-  // glp_create_index(lp);
   lp->update();
 
   // for each input node N, define a var x_dirNE which tells the direction of
@@ -460,24 +381,14 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     if (nd->getDeg() < 2) continue;  // we don't need this for deg 1 nodes
     for (auto edg : nd->getAdjList()) {
       std::stringstream dirName;
-      dirName << "dir(" << nd << "," << edg << ")";
-      // size_t col = glp_add_cols(lp, 1);
-      // assert(col);
-      // glp_set_col_name(lp, col, dirName.str().c_str());
-      // glp_set_col_kind(lp, col, GLP_IV);
-      // glp_set_col_bnds(lp, col, GLP_UP, 0, 7);
+      dirName << "d(" << nd << "," << edg << ")";
       int col = lp->addCol(dirName.str(), shared::optim::INT, 0, 0, 7);
 
       std::stringstream constName;
-      constName << "dirconst(" << nd << "," << edg << ")";
-      // size_t row = glp_add_rows(lp, 1);
-      // assert(row);
-      // glp_set_row_name(lp, row, constName.str().c_str());
-      // glp_set_row_bnds(lp, row, GLP_FX, 0, 0);
+      constName << "dc(" << nd << "," << edg << ")";
 
       int row = lp->addRow(constName.str(), 0, shared::optim::FIX);
 
-      // vm.addVar(row, col, -1);
       lp->addColToRow(row, col, -1);
 
       for (GridNode* n : *gg->getNds()) {
@@ -485,19 +396,15 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
         if (edg->getFrom() == nd) {
           // the 0 can be skipped here
-          for (size_t i = 1; i < 8; i++) {
+          for (size_t i = 1; i < gg->getNumNeighbors(); i++) {
             auto e = gg->getEdg(n, n->pl().getPort(i));
-            // size_t col = glp_find_col(lp, getEdgeUseVar(e, edg).c_str());
-            // if (col) vm.addVar(row, col, i);
             int col = lp->getVarByName(getEdgeUseVar(e, edg));
             if (col > -1) lp->addColToRow(row, col, i);
           }
         } else {
           // the 0 can be skipped here
-          for (size_t i = 1; i < 8; i++) {
+          for (size_t i = 1; i < gg->getNumNeighbors(); i++) {
             auto e = gg->getEdg(n->pl().getPort(i), n);
-            // size_t col = glp_find_col(lp, getEdgeUseVar(e, edg).c_str());
-            // if (col) vm.addVar(row, col, i);
             int col = lp->getVarByName(getEdgeUseVar(e, edg));
             if (col > -1) lp->addColToRow(row, col, i);
           }
@@ -506,38 +413,26 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     }
   }
 
-  // glp_create_index(lp);
   lp->update();
 
   // for each input node N, make sure that the circular ordering of the final
   // drawing matches the input ordering
-  int M = 8;
+  int M = gg->getNumNeighbors();
   for (auto nd : cg.getNds()) {
     // for degree < 3, the circular ordering cannot be violated
     if (nd->getDeg() < 3) continue;
 
     std::stringstream vulnConstName;
-    vulnConstName << "vulnconst(" << nd << ")";
-    // size_t vulnRow = glp_add_rows(lp, 1);
-    // glp_set_row_name(lp, vulnRow, vulnConstName.str().c_str());
-    // // an upper bound would also work here, at most one
-    // // of the vuln vars may be 1
-    // glp_set_row_bnds(lp, vulnRow, GLP_FX, 1, 1);
+    vulnConstName << "vc(" << nd << ")";
+    // an upper bound would also work here, at most one
+    // of the vuln vars may be 1
 
     int vulnRow = lp->addRow(vulnConstName.str(), 1, shared::optim::FIX);
 
     for (size_t i = 0; i < nd->getDeg(); i++) {
       std::stringstream n;
       n << "vuln(" << nd << "," << i << ")";
-      // size_t col = glp_add_cols(lp, 1);
-      // glp_set_col_name(lp, col, n.str().c_str());
-      // glp_set_col_kind(lp, col, GLP_BV);
-
-      // vm.addVar(vulnRow, col, 1);
-
       int col = lp->addCol(n.str(), shared::optim::BIN, 0);
-
-      // vm.addVar(vulnRow, col, 1);
       lp->addColToRow(vulnRow, col, 1);
     }
 
@@ -557,34 +452,23 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
       assert(edgA != edgB);
 
       std::stringstream colNameA;
-      colNameA << "dir(" << nd << "," << edgA << ")";
-      // size_t colA = glp_find_col(lp, colNameA.str().c_str());
+      colNameA << "d(" << nd << "," << edgA << ")";
       int colA = lp->getVarByName(colNameA.str());
       assert(colA > -1);
 
       std::stringstream colNameB;
-      colNameB << "dir(" << nd << "," << edgB << ")";
-      // size_t colB = glp_find_col(lp, colNameB.str().c_str());
+      colNameB << "d(" << nd << "," << edgB << ")";
       int colB = lp->getVarByName(colNameB.str());
       assert(colB > -1);
 
       std::stringstream constName;
-      constName << "orderconst(" << nd << "," << i << ")";
-      // size_t row = glp_add_rows(lp, 1);
-      // glp_set_row_name(lp, row, constName.str().c_str());
-      // glp_set_row_bnds(lp, row, GLP_LO, 1, 1);
+      constName << "oc(" << nd << "," << i << ")";
       int row = lp->addRow(constName.str(), 1, shared::optim::LO);
 
       std::stringstream vulnColName;
       vulnColName << "vuln(" << nd << "," << i << ")";
-      // size_t vulnCol = glp_find_col(lp, vulnColName.str().c_str());
-      // assert(vulnCol);
       int vulnCol = lp->getVarByName(vulnColName.str());
       assert(vulnCol > -1);
-
-      // vm.addVar(row, colB, 1);
-      // vm.addVar(row, colA, -1);
-      // vm.addVar(row, vulnCol, M);
 
       lp->addColToRow(row, colB, 1);
       lp->addColToRow(row, colA, -1);
@@ -592,7 +476,6 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     }
   }
 
-  // glp_create_index(lp);
   lp->update();
 
   // for each adjacent edge pair, add variables telling the accuteness of the
@@ -620,71 +503,43 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
         std::stringstream negVar;
         negVar << "negdist(" << edgA << "," << edgB << ")";
-        // size_t colNeg = glp_add_cols(lp, 1);
-        // assert(colNeg);
-        // glp_set_col_name(lp, colNeg, negVar.str().c_str());
-        // glp_set_col_kind(lp, colNeg, GLP_BV);
 
         int colNeg = lp->addCol(negVar.str(), shared::optim::BIN, 0);
 
         std::stringstream constName;
-        constName << "negconst(" << edgA << "," << edgB << ")";
-        // size_t row = glp_add_rows(lp, 1);
-        // assert(row);
-        // glp_set_row_name(lp, row, constName.str().c_str());
-        // glp_set_row_bnds(lp, row, GLP_DB, 0, 7);
+        constName << "nc(" << edgA << "," << edgB << ")";
+
         int row1 = lp->addRow(constName.str() + "lo", 0, shared::optim::LO);
         int row2 = lp->addRow(constName.str() + "up", 7, shared::optim::UP);
 
         std::stringstream dirNameA;
-        dirNameA << "dir(" << nd << "," << edgA << ")";
+        dirNameA << "d(" << nd << "," << edgA << ")";
         std::stringstream dirNameB;
-        dirNameB << "dir(" << nd << "," << edgB << ")";
-
-        // size_t colA = glp_find_col(lp, dirNameA.str().c_str());
-        // assert(colA);
-        // vm.addVar(row, colA, 1);
+        dirNameB << "d(" << nd << "," << edgB << ")";
 
         int colA = lp->getVarByName(dirNameA.str());
         assert(colA > -1);
         lp->addColToRow(row1, colA, 1);
         lp->addColToRow(row2, colA, 1);
 
-        // size_t colB = glp_find_col(lp, dirNameB.str().c_str());
-        // assert(colB);
-        // vm.addVar(row, colB, -1);
-
         int colB = lp->getVarByName(dirNameB.str());
         assert(colB > -1);
         lp->addColToRow(row1, colB, -1);
         lp->addColToRow(row2, colB, -1);
 
-        // vm.addVar(row, colNeg, 8);
         lp->addColToRow(row1, colNeg, 8);
         lp->addColToRow(row2, colNeg, 8);
 
         std::stringstream angConst;
-        angConst << "angconst(" << edgA << "," << edgB << ")";
-        // size_t rowAng = glp_add_rows(lp, 1);
-        // assert(rowAng);
-        // glp_set_row_name(lp, rowAng, angConst.str().c_str());
-        // glp_set_row_bnds(lp, rowAng, GLP_FX, 0, 0);
+        angConst << "ac(" << edgA << "," << edgB << ")";
         int rowAng = lp->addRow(angConst.str(), 0, shared::optim::FIX);
-
-        // vm.addVar(rowAng, colA, 1);
-        // vm.addVar(rowAng, colB, -1);
-        // vm.addVar(rowAng, colNeg, 8);
 
         lp->addColToRow(rowAng, colA, 1);
         lp->addColToRow(rowAng, colB, -1);
         lp->addColToRow(rowAng, colNeg, 8);
 
         std::stringstream sumConst;
-        sumConst << "angsumconst(" << edgA << "," << edgB << ")";
-        // size_t rowSum = glp_add_rows(lp, 1);
-        // assert(rowSum);
-        // glp_set_row_name(lp, rowSum, sumConst.str().c_str());
-        // glp_set_row_bnds(lp, rowSum, GLP_UP, 0, 1);
+        sumConst << "asc(" << edgA << "," << edgB << ")";
 
         int rowSum = lp->addRow(sumConst.str(), 1, shared::optim::UP);
 
@@ -697,9 +552,6 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
         for (int k = 0; k < 7; k++) {
           std::stringstream var;
           var << names[k] << "(" << edgA << "," << edgB << ")";
-          // size_t col = glp_add_cols(lp, 1);
-          // glp_set_col_name(lp, col, var.str().c_str());
-          // glp_set_col_kind(lp, col, GLP_BV);
 
           // TODO: maybe multiply per shared lines - but this actually
           // makes the drawings look worse.
@@ -707,41 +559,14 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
           lp->addColToRow(rowAng, col, -(k + 1));
           lp->addColToRow(rowSum, col, 1);
-
-          // glp_set_obj_coef(lp, col, pens[k]);
         }
       }
     }
   }
 
-  // glp_create_index(lp);
   lp->update();
 
   return lp;
-}
-
-// _____________________________________________________________________________
-void VariableMatrix::addVar(int row, int col, double val) {
-  rowNum.push_back(row);
-  colNum.push_back(col);
-  vals.push_back(val);
-}
-
-// _____________________________________________________________________________
-void VariableMatrix::getGLPKArrs(int** ia, int** ja, double** r) const {
-  assert(rowNum.size() == colNum.size());
-  assert(colNum.size() == vals.size());
-
-  *ia = new int[rowNum.size() + 1];
-  *ja = new int[rowNum.size() + 1];
-  *r = new double[rowNum.size() + 1];
-
-  // glpk arrays always start at 1 for some reason
-  for (size_t i = 1; i <= rowNum.size(); ++i) {
-    (*ia)[i] = rowNum[i - 1];
-    (*ja)[i] = colNum[i - 1];
-    (*r)[i] = vals[i - 1];
-  }
 }
 
 // _____________________________________________________________________________
@@ -758,7 +583,7 @@ std::string ILPGridOptimizer::getEdgeUseVar(const GridEdge* e,
 std::string ILPGridOptimizer::getStatPosVar(const GridNode* n,
                                             const CombNode* nd) const {
   std::stringstream varName;
-  varName << "statpos(" << n->pl().getId() << "," << nd << ")";
+  varName << "sp(" << n->pl().getId() << "," << nd << ")";
 
   return varName.str();
 }
@@ -780,10 +605,8 @@ void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
           if (edg->getFrom() != nd) continue;
           auto varName = getEdgeUseVar(e, edg);
 
-          // size_t i = glp_find_col(lp, varName.c_str());
           int i = lp->getVarByName(varName);
           if (i > -1) {
-            // double val = glp_mip_col_val(lp, i);
             double val = lp->getVarVal(i);
             if (val > 0.5) {
               gg->addResEdg(e, edg);
@@ -800,10 +623,8 @@ void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
     for (auto nd : cg.getNds()) {
       auto varName = getStatPosVar(n, nd);
 
-      // size_t i = glp_find_col(lp, varName.c_str());
       int i = lp->getVarByName(varName);
       if (i > -1) {
-        // double val = glp_mip_col_val(lp, i);
         double val = lp->getVarVal(i);
         if (val > 0.5) {
           n->pl().setStation();
@@ -879,25 +700,21 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
 
       auto varName = getStatPosVar(gnd, nd);
       if (gnd == settled) {
-        // fo << varName << "\t" << 1 << "\n";
         sol[varName] = 1;
 
         // if settled, all bend edges are unused
-        for (size_t p = 0; p < 8; p++) {
+        for (size_t p = 0; p < gg->getNumNeighbors(); p++) {
           auto portNd = gnd->pl().getPort(p);
           for (auto bendEdg : portNd->getAdjList()) {
             if (!bendEdg->pl().isSecondary()) continue;
             for (auto cEdg : nd->getAdjList()) {
               if (cEdg->getFrom() != nd) continue;
               auto varName = getEdgeUseVar(bendEdg, cEdg);
-              // fo << varName << "\t" << 0;
-              // fo << "\n";
               sol[varName] = 0;
             }
           }
         }
       } else {
-        // fo << varName << "\t" << 0 << "\n";
         sol[varName] = 0;
 
         // if not settled, all sink edges are unused
@@ -907,8 +724,6 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
           for (auto cEdg : nd->getAdjList()) {
             if (cEdg->getFrom() != nd) continue;
             auto varName = getEdgeUseVar(sinkEdg, cEdg);
-            // fo << varName << "\t" << 0;
-            // fo << "\n";
             sol[varName] = 0;
           }
         }
@@ -923,16 +738,12 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
 
       if (resEdg) {
         auto varName = getEdgeUseVar(grEdg, resEdg);
-        // fo << varName << "\t" << 1;
-        // fo << "\n";
         sol[varName] = 1;
       } else {
         for (auto cNd : cg.getNds()) {
           for (auto cEdg : cNd->getAdjList()) {
             if (cEdg->getFrom() != cNd) continue;
             auto varName = getEdgeUseVar(grEdg, cEdg);
-            // fo << varName << "\t" << 0;
-            // fo << "\n";
             sol[varName] = 0;
           }
         }

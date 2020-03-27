@@ -38,8 +38,6 @@ class GridGraph : public BaseGraph {
 
   virtual double getCellSize() const;
 
-  virtual GridNode* getNode(size_t x, size_t y) const;
-
   virtual NodeCost nodeBendPen(GridNode* n, CombEdge* e);
   virtual NodeCost topoBlockPen(GridNode* n, CombNode* origNode, CombEdge* e);
   virtual NodeCost spacingPen(GridNode* n, CombNode* origNode, CombEdge* e);
@@ -59,6 +57,7 @@ class GridGraph : public BaseGraph {
   virtual void closeTurns(GridNode* n);
 
   virtual GridNode* getNeighbor(const GridNode* n, size_t i) const;
+  virtual size_t getNumNeighbors() const;
 
   virtual std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis);
 
@@ -84,11 +83,13 @@ class GridGraph : public BaseGraph {
   virtual void addResEdg(GridEdge* ge, CombEdge* cg);
   virtual CombEdge* getResEdg(GridEdge* ge);
 
+  virtual CrossEdgPairs getCrossEdgPairs() const;
+
   virtual void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target, double pen);
 
   virtual void addObstacle(const util::geo::Polygon<double>& obst);
 
- private:
+ protected:
   util::geo::DBox _bbox;
   Penalties _c;
 
@@ -114,6 +115,8 @@ class GridGraph : public BaseGraph {
   void writeObstacleCost(const util::geo::Polygon<double>& obst);
   void reWriteObstCosts();
   void reWriteGeoPens();
+
+  GridNode* getNode(size_t x, size_t y) const;
 
   GridNode* writeNd(size_t x, size_t y);
 
