@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
   double avgDist = avgStatDist(tg);
   LOG(INFO, std::cerr) << "Average adj. node distance is " << avgDist;
 
-  BaseGraphType graphType = BaseGraphType::OCTIGRID;
+  BaseGraphType graphType = BaseGraphType::GRID;
 
   Octilinearizer oct(graphType);
   LineGraph res;

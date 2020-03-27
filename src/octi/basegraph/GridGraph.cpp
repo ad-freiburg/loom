@@ -19,8 +19,6 @@ using util::geo::DBox;
 using util::geo::dist;
 using util::geo::DPoint;
 
-double INF = std::numeric_limits<float>::infinity();
-
 // _____________________________________________________________________________
 GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
                      const Penalties& pens)
@@ -34,13 +32,18 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
   assert(_c.p_135 <= _c.p_90);
   assert(_c.p_90 <= _c.p_45);
 
+  // cut off illegal spacer values
+  if (spacer > cellSize / 2) _spacer = cellSize / 2;
+
   _heurECost =
       (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
   _heurHopCost = _c.p_45 - _c.p_135;
+}
 
-  // cut off illegal spacer values
-  if (spacer > cellSize / 2) spacer = cellSize / 2;
 
+
+// _____________________________________________________________________________
+void GridGraph::init(){
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
@@ -73,24 +76,32 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
 }
 
 // _____________________________________________________________________________
-size_t GridGraph::getNumNeighbors() const { return 8; }
+size_t GridGraph::getNumNeighbors() const { return 4; }
 
 // _____________________________________________________________________________
 GridNode* GridGraph::getNode(size_t x, size_t y) const {
   if (x >= _grid.getXWidth() || y >= _grid.getYHeight()) return 0;
-  return _nds[_grid.getYHeight() * 9 * x + y * 9];
+  return _nds[_grid.getYHeight() * 5 * x + y * 5];
 }
 
 // _____________________________________________________________________________
 GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
-  if (i > 7) return getNode(cx, cy);
-  int8_t x = 1;
-  if (i % 4 == 0) x = 0;
-  if (i > 4) x = -1;
-
-  int8_t y = 1;
-  if (i == 2 || i == 6) y = 0;
-  if (i == 3 || i == 4 || i == 5) y = -1;
+  if (i > 3) return getNode(cx, cy);
+  int x = 0;
+  int y = 0;
+  if (i == 0) {
+    y = 1;
+  }
+  if (i == 1) {
+    y = 0;
+    x = 1;
+  }
+  if (i == 2) {
+    y = -1;
+  }
+  if (i == 3) {
+    x = -1;
+  }
 
   return getNode(cx + x, cy + y);
 }
@@ -110,19 +121,6 @@ void GridGraph::unSettleNd(CombNode* a) {
 // _____________________________________________________________________________
 void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   if (a == b) return;
-  int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
-  int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
-
-  size_t dir = 0;
-  size_t d = aa * 3 + bb;
-
-  if (d == 0) dir = 1;
-  if (d == 2) dir = 3;
-  if (d == 8) dir = 5;
-  if (d == 6) dir = 7;
-
-  size_t x = a->pl().getX();
-  size_t y = a->pl().getY();
 
   auto ge = getNEdg(a, b);
   auto gf = getNEdg(b, a);
@@ -142,44 +140,11 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   if (!b->pl().isSettled()) {
     openTurns(b);
   }
-
-  // unblock blocked diagonal edges crossing this edge
-  if (dir != 0) {
-    auto na = getNeighbor(x, y, (dir + 7) % 8);
-    auto nb = getNeighbor(x, y, (dir + 1) % 8);
-
-    if (na && nb) {
-      auto e = getNEdg(na, nb);
-      auto f = getNEdg(nb, na);
-
-      e->pl().unblock();
-      f->pl().unblock();
-    }
-  }
 }
 
 // _____________________________________________________________________________
 CrossEdgPairs GridGraph::getCrossEdgPairs() const {
-  CrossEdgPairs ret;
-  for (const GridNode* n : getNds()) {
-    if (!n->pl().isSink()) continue;
-
-    auto eOr = getNEdg(n, getNeighbor(n, 3));
-    auto fOr = getNEdg(getNeighbor(n, 3), n);
-
-    if (!eOr || !fOr) continue;
-
-    auto na = getNeighbor(n, (3 + 7) % 8);
-    auto nb = getNeighbor(n, (3 + 1) % 8);
-
-    if (!na || !nb) continue;
-
-    auto e = getNEdg(na, nb);
-    auto f = getNEdg(nb, na);
-    ret.push_back({{eOr, fOr}, {e, f}});
-  }
-
-  return ret;
+  return {};
 }
 
 // _____________________________________________________________________________
@@ -194,7 +159,7 @@ void GridGraph::writeObstacleCost(const util::geo::Polygon<double>& obst) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       auto grNdA = getNode(x, y);
 
-      for (size_t i = 0; i < 8; i++) {
+      for (size_t i = 0; i < getNumNeighbors(); i++) {
         auto neigh = getNeighbor(x, y, i);
         if (!neigh) continue;
         auto ge = getNEdg(grNdA, neigh);
@@ -250,20 +215,6 @@ void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
 void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   if (a == b) return;
 
-  int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
-  int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
-
-  size_t dir = 0;
-  size_t d = aa * 3 + bb;
-
-  if (d == 0) dir = 1;
-  if (d == 2) dir = 3;
-  if (d == 8) dir = 5;
-  if (d == 6) dir = 7;
-
-  size_t x = a->pl().getX();
-  size_t y = a->pl().getY();
-
   // this closes the grid edge
   auto ge = getNEdg(a, b);
 
@@ -273,20 +224,6 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   // a close means that all major edges reaching this node are closed
   closeTurns(a);
   closeTurns(b);
-
-  // block diagonal edges crossing this edge
-  if (dir != 0) {
-    auto na = getNeighbor(x, y, (dir + 7) % 8);
-    auto nb = getNeighbor(x, y, (dir + 1) % 8);
-
-    if (na && nb) {
-      auto e = getNEdg(na, nb);
-      auto f = getNEdg(nb, na);
-
-      e->pl().block();
-      f->pl().block();
-    }
-  }
 }
 
 // _____________________________________________________________________________
@@ -313,18 +250,15 @@ GridEdge* GridGraph::getNEdg(const GridNode* a, const GridNode* b) const {
   size_t dir = 0;
   size_t d = aa * 3 + bb;
 
-  if (d == 0) dir = 1;
-  if (d == 1) dir = 2;
-  if (d == 2) dir = 3;
-  if (d == 3) dir = 0;
-  if (d == 5) dir = 4;
-  if (d == 8) dir = 5;
-  if (d == 7) dir = 6;
-  if (d == 6) dir = 7;
+  if (d == 1) dir = 1;
+  else if (d == 3) dir = 0;
+  else if (d == 5) dir = 2;
+  else if (d == 7) dir = 3;
+  else return 0;
 
-  if (a->pl().getPort(dir) && b->pl().getPort((dir + 4) % 8)) {
+  if (a->pl().getPort(dir) && b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())) {
     return const_cast<GridEdge*>(
-        getEdg(a->pl().getPort(dir), b->pl().getPort((dir + 4) % 8)));
+        getEdg(a->pl().getPort(dir), b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())));
   }
 
   return 0;
@@ -335,14 +269,14 @@ void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
   size_t x = n->pl().getX();
   size_t y = n->pl().getY();
 
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
     outgoing[i] = 0;
     auto p = n->pl().getPort(i);
     auto neigh = getNeighbor(x, y, i);
 
     if (!neigh) continue;
 
-    auto neighP = neigh->pl().getPort((i + 4) % 8);
+    auto neighP = neigh->pl().getPort((i + getNumNeighbors() / 2) % getNumNeighbors());
     auto e = getEdg(p, neighP);
     auto f = getEdg(neighP, p);
     auto resEdg = getResEdg(e);
@@ -365,16 +299,16 @@ NodeCost GridGraph::nodeBendPen(GridNode* n, CombEdge* e) {
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
   double c_45 = c_0 + c_135;
 
-  CombEdge* out[8];
+  CombEdge* out[getNumNeighbors()];
   getSettledAdjEdgs(n, out);
 
-  for (int i = 0; i < 8; i++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
     if (!out[i]) continue;
     for (auto lo : e->pl().getChilds().front()->pl().getLines()) {
       // TODO: turn restrictions, if there is actually no connection
       // between the lines on the edges, dont penalize!!
       if (out[i]->pl().getChilds().front()->pl().hasLine(lo.line)) {
-        for (int j = 0; j < 8; j++) {
+        for (size_t j = 0; j < getNumNeighbors(); j++) {
           // determine angle between port i and j
 
           int ang = (8 + (i - j)) % 8;
@@ -457,7 +391,7 @@ NodeCost GridGraph::topoBlockPen(GridNode* nd, CombNode* origNd,
 
 // _____________________________________________________________________________
 void GridGraph::addCostVec(GridNode* n, const NodeCost& addC) {
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
     auto p = n->pl().getPort(i);
 
     if (addC[i] < -1) {
@@ -475,21 +409,19 @@ void GridGraph::writeInitialCosts() {
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       auto n = getNode(x, y);
-      for (size_t i = 0; i < 8; i++) {
+      for (size_t i = 0; i < getNumNeighbors(); i++) {
         auto port = n->pl().getPort(i);
         auto neigh = getNeighbor(x, y, i);
 
         if (!neigh || !port) continue;
 
-        auto oPort = neigh->pl().getPort((i + 4) % 8);
+        auto oPort = neigh->pl().getPort((i + getNumNeighbors() / 2) % getNumNeighbors());
         auto e = getEdg(port, oPort);
 
-        if (i % 4 == 0) {
+        if (i % 2 == 0) {
           e->pl().setCost(_c.verticalPen);
-        } else if ((i + 2) % 4 == 0) {
+        } else {
           e->pl().setCost(_c.horizontalPen);
-        } else if (i % 2) {
-          e->pl().setCost(_c.diagonalPen);
         }
       }
     }
@@ -527,16 +459,22 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 }
 
 // _____________________________________________________________________________
+const util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float>*
+  GridGraph::getHeur(const std::set<GridNode*>& to) const {
+  return new GridGraphHeur(this, to);
+}
+
+// _____________________________________________________________________________
 void GridGraph::openTurns(GridNode* n) {
   if (!n->pl().isClosed()) return;
 
   // open all non-sink inner edges
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
     auto portA = n->pl().getPort(i);
-    if (portA->getDeg() == 8) continue;
-    for (size_t j = i + 1; j < 8; j++) {
+    if (portA->getDeg() == getNumNeighbors()) continue;
+    for (size_t j = i + 1; j < getNumNeighbors(); j++) {
       auto portB = n->pl().getPort(j);
-      if (portB->getDeg() == 8) continue;
+      if (portB->getDeg() == getNumNeighbors()) continue;
       auto e = getEdg(portA, portB);
       auto f = getEdg(portB, portA);
 
@@ -553,9 +491,9 @@ void GridGraph::closeTurns(GridNode* n) {
   if (n->pl().isClosed()) return;
 
   // close all non-sink inner edges
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
     auto portA = n->pl().getPort(i);
-    for (size_t j = i + 1; j < 8; j++) {
+    for (size_t j = i + 1; j < getNumNeighbors(); j++) {
       auto portB = n->pl().getPort(j);
       auto e = getEdg(portA, portB);
       auto f = getEdg(portB, portA);
@@ -570,7 +508,7 @@ void GridGraph::closeTurns(GridNode* n) {
 
 // _____________________________________________________________________________
 void GridGraph::openSinkTo(GridNode* n, double cost) {
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
     getEdg(n->pl().getPort(i), n)->pl().open();
     getEdg(n->pl().getPort(i), n)->pl().setCost(cost);
   }
@@ -578,7 +516,7 @@ void GridGraph::openSinkTo(GridNode* n, double cost) {
 
 // _____________________________________________________________________________
 void GridGraph::closeSinkTo(GridNode* n) {
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
     getEdg(n->pl().getPort(i), n)->pl().close();
     getEdg(n->pl().getPort(i), n)->pl().setCost(INF);
   }
@@ -586,7 +524,7 @@ void GridGraph::closeSinkTo(GridNode* n) {
 
 // _____________________________________________________________________________
 void GridGraph::openSinkFr(GridNode* n, double cost) {
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
     getEdg(n, n->pl().getPort(i))->pl().open();
     getEdg(n, n->pl().getPort(i))->pl().setCost(cost);
   }
@@ -594,7 +532,7 @@ void GridGraph::openSinkFr(GridNode* n, double cost) {
 
 // _____________________________________________________________________________
 void GridGraph::closeSinkFr(GridNode* n) {
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
     getEdg(n, n->pl().getPort(i))->pl().close();
     getEdg(n, n->pl().getPort(i))->pl().setCost(INF);
   }
@@ -660,11 +598,23 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   n->pl().setXY(x, y);
   n->pl().setParent(n);
 
-  for (int i = 0; i < 8; i++) {
-    int xi = (4 - (i % 8)) % 4;
-    xi /= abs(abs(xi) - 1) + 1;
-    int yi = (4 - ((i + 2) % 8)) % 4;
-    yi /= abs(abs(yi) - 1) + 1;
+  for (int i = 0; i < 4; i++) {
+    int xi = 0;
+    int yi = 0;
+
+    if (i == 0) {
+      yi = 1;
+    }
+    if (i == 1) {
+      xi = 1;
+    }
+    if (i == 2) {
+      yi = -1;
+    }
+    if (i == 3) {
+      xi = -1;
+    }
+
     GridNode* nn = addNd(DPoint(xPos + xi * _spacer, yPos + yi * _spacer));
     nn->pl().setId(_nds.size());
     _nds.push_back(nn);
@@ -685,22 +635,19 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   }
 
   // in-node connections
-  for (size_t i = 0; i < 8; i++) {
-    for (size_t j = i + 1; j < 8; j++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
+    for (size_t j = i + 1; j < getNumNeighbors(); j++) {
       int d = (int)(i) - (int)(j);
-      size_t deg = abs((((d + 4) % 8) + 8) % 8 - 4);
+      size_t deg = abs((((d + 2) % 4) + 4) % 4 - 2);
       double pen = c_0;
 
       if (deg == 0) pen = c_0;
-      if (deg == 1) pen = c_45;
-      if (deg == 2) pen = c_90;
-      if (deg == 3) pen = c_135;
+      if (deg == 1) pen = c_90;
 
-      if (x == 0 && (i == 5 || i == 6 || i == 7)) pen = INF;
-      if (y == 0 && (i == 0 || i == 7 || i == 1)) pen = INF;
-      if (x == _grid.getXWidth() - 1 && (i == 1 || i == 2 || i == 3)) pen = INF;
-      if (y == _grid.getYHeight() - 1 && (i == 3 || i == 4 || i == 5))
-        pen = INF;
+      if (x == 0 && i == 3) pen = INF;
+      if (y == 0 && i == 0) pen = INF;
+      if (x == _grid.getXWidth() - 1 && i == 1) pen = INF;
+      if (y == _grid.getYHeight() - 1 && i == 2) pen = INF;
 
       auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
                             GridEdgePL(pen, true));

@@ -8,13 +8,14 @@
 #include <queue>
 #include <set>
 #include <unordered_map>
-#include "octi/combgraph/CombGraph.h"
 #include "octi/basegraph/GridEdgePL.h"
 #include "octi/basegraph/GridNodePL.h"
 #include "octi/basegraph/NodeCost.h"
+#include "octi/combgraph/CombGraph.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/DirGraph.h"
+#include "util/graph/Dijkstra.h"
 
 #include "octi/combgraph/CombEdgePL.h"
 #include "octi/combgraph/CombNodePL.h"
@@ -58,6 +59,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
  public:
   BaseGraph(){};
 
+  virtual void init() = 0;
   virtual double getCellSize() const = 0;
 
   virtual NodeCost nodeBendPen(GridNode* n, CombEdge* e) = 0;
@@ -67,6 +69,9 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   virtual double heurCost(int64_t xa, int64_t ya, int64_t xb,
                           int64_t yb) const = 0;
+
+  virtual const util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float>*
+  getHeur(const std::set<GridNode*>& to) const = 0;
 
   virtual std::priority_queue<Candidate> getGridNdCands(
       const util::geo::DPoint& p, double maxD) const = 0;

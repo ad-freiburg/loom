@@ -16,6 +16,7 @@
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/DirGraph.h"
+#include "util/graph/Dijkstra.h"
 
 #include "octi/combgraph/CombEdgePL.h"
 #include "octi/combgraph/CombNodePL.h"
@@ -30,6 +31,8 @@ using octi::combgraph::CombNode;
 
 namespace octi {
 namespace basegraph {
+
+const static double INF = std::numeric_limits<float>::infinity();
 
 class GridGraph : public BaseGraph {
  public:
@@ -72,6 +75,7 @@ class GridGraph : public BaseGraph {
   virtual bool isSettled(const CombNode* cn);
 
   virtual GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;
+  virtual void init();
   virtual void reset();
 
   virtual GridNode* getSettled(const CombNode* cnd) const;
@@ -88,6 +92,9 @@ class GridGraph : public BaseGraph {
   virtual void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target, double pen);
 
   virtual void addObstacle(const util::geo::Polygon<double>& obst);
+
+  virtual const util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float>*
+  getHeur(const std::set<GridNode*>& to) const;
 
  protected:
   util::geo::DBox _bbox;
@@ -111,19 +118,68 @@ class GridGraph : public BaseGraph {
 
   const Grid<GridNode*, Point, double>& getGrid() const;
 
-  void writeInitialCosts();
-  void writeObstacleCost(const util::geo::Polygon<double>& obst);
-  void reWriteObstCosts();
-  void reWriteGeoPens();
+  virtual void writeInitialCosts();
+  virtual void writeObstacleCost(const util::geo::Polygon<double>& obst);
+  virtual void reWriteObstCosts();
 
-  GridNode* getNode(size_t x, size_t y) const;
+  virtual GridNode* getNode(size_t x, size_t y) const;
 
-  GridNode* writeNd(size_t x, size_t y);
+  virtual GridNode* writeNd(size_t x, size_t y);
 
-  GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
+  virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
-  void getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]);
+  virtual void getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]);
 };
+
+struct GridGraphHeur
+    : public util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
+  GridGraphHeur(const basegraph::GridGraph* g, const std::set<GridNode*>& to)
+      : g(g), to(0) {
+    if (to.size() == 1) this->to = *to.begin();
+
+    cheapestSink = std::numeric_limits<float>::infinity();
+
+    for (auto n : to) {
+      size_t i = 0;
+      for (; i < 4; i++) {
+        float sinkCost = g->getEdg(n->pl().getPort(i), n)->pl().cost();
+        if (sinkCost < cheapestSink) cheapestSink = sinkCost;
+        auto neigh = g->getNeighbor(n, i);
+        if (neigh && to.find(neigh) == to.end()) {
+          hull.push_back(n->pl().getX());
+          hull.push_back(n->pl().getY());
+          break;
+        }
+      }
+      for (size_t j = i; j < 4; j++) {
+        float sinkCost = g->getEdg(n->pl().getPort(j), n)->pl().cost();
+        if (sinkCost < cheapestSink) cheapestSink = sinkCost;
+      }
+    }
+  }
+
+  float operator()(const GridNode* from, const std::set<GridNode*>& to) const {
+    const_cast<GridNode*>(from)->pl().visited = true;
+    if (to.find(from->pl().getParent()) != to.end()) return 0;
+
+    float ret = std::numeric_limits<float>::infinity();
+
+    for (size_t i = 0; i < hull.size(); i += 2) {
+      float tmp = g->heurCost(from->pl().getParent()->pl().getX(),
+                              from->pl().getParent()->pl().getY(), hull[i],
+                              hull[i + 1]);
+      if (tmp < ret) ret = tmp;
+    }
+
+    return ret + cheapestSink;
+  }
+
+  const octi::basegraph::BaseGraph* g;
+  GridNode* to;
+  std::vector<size_t> hull;
+  float cheapestSink;
+};
+
 }  // namespace basegraph
 }  // namespace octi
 

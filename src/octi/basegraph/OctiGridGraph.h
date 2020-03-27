@@ -12,9 +12,22 @@ namespace basegraph {
 
 class OctiGridGraph : public GridGraph {
  public:
+  using GridGraph::getNeighbor;
   OctiGridGraph(const util::geo::DBox& bbox, double cellSize, double spacer,
                 const Penalties& pens)
       : GridGraph(bbox, cellSize, spacer, pens) {}
+
+  virtual void unSettleEdg(GridNode* a, GridNode* b);
+  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e);
+  virtual CrossEdgPairs getCrossEdgPairs() const;
+  virtual GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;
+  virtual size_t getNumNeighbors() const;
+
+ protected:
+  virtual void writeInitialCosts();
+  virtual GridNode* writeNd(size_t x, size_t y);
+  virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
+  virtual GridNode* getNode(size_t x, size_t y) const;
 };
 }  // namespace basegraph
 }  // namespace octi

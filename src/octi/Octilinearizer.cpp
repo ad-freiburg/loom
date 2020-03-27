@@ -102,6 +102,7 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
   } catch (const NoEmbeddingFoundExc& exc) {
     LOG(INFO, std::cerr) << "Presolve was not sucessful.";
     gg = newBaseGraph(box, gridSize, borderRad, pens);
+    gg->init();
   }
   Drawing drawing(gg);
   GeoPensMap enfGeoPens;
@@ -164,11 +165,19 @@ double Octilinearizer::draw(
   size_t jobs = 4;
   std::vector<BaseGraph*> ggs(jobs);
 
+  auto gg = newBaseGraph(box, gridSize, borderRad, pens);
+  gg->init();
+
+  // util::geo::output::GeoGraphJsonOutput out;
+  // out.print(*gg, std::cout);
+  // exit(0);
+
   LOG(INFO, std::cerr) << "Creating grid graphs... ";
   T_START(ggraph);
 #pragma omp parallel for
   for (size_t i = 0; i < jobs; i++) {
     ggs[i] = newBaseGraph(box, gridSize, borderRad, pens);
+    ggs[i]->init();
   }
   LOG(INFO, std::cerr) << " done (" << T_STOP(ggraph) << "ms)";
 
@@ -468,17 +477,19 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     GridNode* toGrNd = 0;
     GridNode* frGrNd = 0;
 
-    auto heur = BaseGraphHeur(gg, toGrNds);
+    auto heur = gg->getHeur(toGrNds);
 
     if (geoPensMap) {
       // init cost function with geo distance penalties
       auto cost = GridCostGeoPen(cutoff + costOffsetTo + costOffsetFrom,
                                  &geoPensMap->find(cmbEdg)->second);
-      Dijkstra::shortestPath(frGrNds, toGrNds, cost, heur, &eL, &nL);
+      Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
     } else {
       auto cost = GridCost(cutoff + costOffsetTo + costOffsetFrom);
-      Dijkstra::shortestPath(frGrNds, toGrNds, cost, heur, &eL, &nL);
+      Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
     }
+
+    delete heur;
 
     if (!nL.size()) {
       // cleanup
