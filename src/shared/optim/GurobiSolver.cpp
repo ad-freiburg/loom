@@ -193,21 +193,23 @@ SolveType GurobiSolver::solve() {
 
   int error;
 
-  // error = GRBtunemodel(_model);
-  // int nresults;
-
-  // GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_TUNETIMELIMIT, 60.0 * 1);
-
-  // error = GRBgetintattr(_model, "TuneResultCount", &nresults);
-  // if (nresults > 0) {
-  // error = GRBgettuneresult(_model, 0);
-  // }
-
   if (_starterArr) {
     error = GRBsetdblattrarray(_model, "Start", 0, getNumVars(), _starterArr);
     if (error) {
       throw std::runtime_error("Could not set start solution");
     }
+  }
+
+  // 5 minute tuning
+  // GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_TUNETIMELIMIT, 60.0 * 5);
+
+  error = GRBtunemodel(_model);
+  int nresults;
+
+  // TODO: disable tuning and make configurable
+  error = GRBgetintattr(_model, "TuneResultCount", &nresults);
+  if (nresults > 0) {
+    error = GRBgettuneresult(_model, 0);
   }
 
   error = GRBoptimize(_model);
