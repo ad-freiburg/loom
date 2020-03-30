@@ -74,8 +74,11 @@ class GLPKSolver : public ILPSolver {
 
   int _timeLimit;
 
+  std::string _termBuf;
+
   static void optCb(glp_tree* tree, void* solver);
   static int termHook(void* info, const char* str);
+  static void errorHook(void* info);
 };
 
 }  // namespace optim

@@ -187,7 +187,7 @@ void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       auto grNdA = getNode(x, y);
 
-      for (size_t i = 0; i < 8; i++) {
+      for (size_t i = 0; i < getNumNeighbors(); i++) {
         auto neigh = getNeighbor(x, y, i);
         if (!neigh) continue;
         auto ge = getNEdg(grNdA, neigh);

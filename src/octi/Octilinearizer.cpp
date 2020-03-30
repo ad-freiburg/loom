@@ -83,6 +83,7 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
                                BaseGraph** retGg, const Penalties& pens,
                                double gridSize, double borderRad, bool deg2heur,
                                double maxGrDist, bool noSolve, double enfGeoPen,
+                               int timeLim, const std::string& solverStr,
                                const std::string& path) {
   BaseGraph* gg;
   removeEdgesShorterThan(tg, gridSize / 2);
@@ -130,8 +131,8 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  double score =
-      ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens, path);
+  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve,
+                                   geoPens, timeLim, solverStr, path);
 
   drawing.getLineGraph(outTg);
 

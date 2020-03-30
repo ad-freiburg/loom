@@ -120,7 +120,8 @@ class Octilinearizer {
   double drawILP(LineGraph* in, LineGraph* out, basegraph::BaseGraph** gg,
                  const Penalties& pens, double gridSize, double borderRad,
                  bool deg2heur, double maxGrDist, bool noSolve,
-                 double enfGeoPens, const std::string& path);
+                 double enfGeoPens, int timeLim, const std::string& solverStr,
+                 const std::string& path);
 
  private:
   BaseGraphType _baseGraphType;

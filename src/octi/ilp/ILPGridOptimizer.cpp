@@ -9,9 +9,9 @@
 #include "shared/optim/ILPSolvProv.h"
 #include "util/log/Log.h"
 
+using octi::basegraph::BaseGraph;
 using octi::basegraph::GeoPensMap;
 using octi::basegraph::GridEdge;
-using octi::basegraph::BaseGraph;
 using octi::basegraph::GridNode;
 using octi::ilp::ILPGridOptimizer;
 using shared::optim::ILPSolver;
@@ -21,6 +21,7 @@ using shared::optim::StarterSol;
 double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
                                   combgraph::Drawing* d, double maxGrDist,
                                   bool noSolve, const GeoPensMap* geoPensMap,
+                                  int timeLim, const std::string& solverStr,
                                   const std::string& path) const {
   // extract first feasible solution from gridgraph
   StarterSol sol = extractFeasibleSol(gg, cg, maxGrDist);
@@ -41,7 +42,7 @@ double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
   // clear drawing
   d->crumble();
 
-  auto lp = createProblem(gg, cg, geoPensMap, maxGrDist);
+  auto lp = createProblem(gg, cg, geoPensMap, maxGrDist, solverStr);
   lp->setStarter(sol);
 
   if (path.size()) {
@@ -58,7 +59,14 @@ double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
   if (noSolve) {
     return std::numeric_limits<double>::infinity();
   } else {
-    lp->solve();
+    if (timeLim >= 0) lp->setTimeLim(timeLim);
+    auto status = lp->solve();
+
+    if (status == shared::optim::SolveType::INF) {
+      throw std::runtime_error(
+          "No solution found for ILP problem (most likely because of a time "
+          "limit)!");
+    }
 
     extractSolution(lp, gg, cg, d);
 
@@ -71,8 +79,9 @@ double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
 // _____________________________________________________________________________
 ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
                                            const GeoPensMap* geoPensMap,
-                                           double maxGrDist) const {
-  ILPSolver* lp = shared::optim::getSolver("", shared::optim::MIN);
+                                           double maxGrDist,
+                                           const std::string& solverStr) const {
+  ILPSolver* lp = shared::optim::getSolver(solverStr, shared::optim::MIN);
 
   // grid nodes that may potentially be a position for an
   // input station
@@ -226,14 +235,12 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
           // subtract the variable for this start node and edge, if used
           // as a candidate
           int ndColFrom = lp->getVarByName(getStatPosVar(n, edg->getFrom()));
-          if (ndColFrom > -1)
-            lp->addColToRow(row, ndColFrom, -2);
+          if (ndColFrom > -1) lp->addColToRow(row, ndColFrom, -2);
 
           // add the variable for this end node and edge, if used
           // as a candidate
           int ndColTo = lp->getVarByName(getStatPosVar(n, edg->getTo()));
-          if (ndColTo > -1)
-            lp->addColToRow(row, ndColTo, 1);
+          if (ndColTo > -1) lp->addColToRow(row, ndColTo, 1);
 
           outCost = 2;
         }
@@ -278,14 +285,12 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
         } else {
           if (cands[e->getTo()].count(n)) {
             int ndColTo = lp->getVarByName(getStatPosVar(n, e->getTo()));
-            if (ndColTo > -1)
-              lp->addColToRow(row, ndColTo, -1);
+            if (ndColTo > -1) lp->addColToRow(row, ndColTo, -1);
           }
 
           if (cands[e->getFrom()].count(n)) {
             int ndColFr = lp->getVarByName(getStatPosVar(n, e->getFrom()));
-            if (ndColFr > -1)
-              lp->addColToRow(row, ndColFr, -1);
+            if (ndColFr > -1) lp->addColToRow(row, ndColFr, -1);
           }
         };
 
@@ -294,11 +299,10 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
           auto varSinkFr = getEdgeUseVar(gg->getEdg(n, n->pl().getPort(p)), e);
 
           int ndColTo = lp->getVarByName(varSinkTo);
-          if (ndColTo > -1)            lp->addColToRow(row, ndColTo, 1);
+          if (ndColTo > -1) lp->addColToRow(row, ndColTo, 1);
 
           int ndColFr = lp->getVarByName(varSinkFr);
-          if (ndColFr > -1)
-            lp->addColToRow(row, ndColFr, 1);
+          if (ndColFr > -1) lp->addColToRow(row, ndColFr, 1);
         }
       }
     }
@@ -682,8 +686,7 @@ size_t ILPGridOptimizer::nonInfDeg(const GridNode* g) const {
 // _____________________________________________________________________________
 StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
                                                 const CombGraph& cg,
-                                                double maxGrDist
-                                                ) const {
+                                                double maxGrDist) const {
   StarterSol sol;
 
   for (auto nd : cg.getNds()) {

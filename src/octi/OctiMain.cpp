@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
   double avgDist = avgStatDist(tg);
   LOG(INFO, std::cerr) << "Average adj. node distance is " << avgDist;
 
-  BaseGraphType graphType = BaseGraphType::GRID;
+  BaseGraphType graphType = BaseGraphType::OCTIGRID;
 
   Octilinearizer oct(graphType);
   LineGraph res;
@@ -126,9 +126,10 @@ int main(int argc, char** argv) {
 
   if (cfg.optMode == "ilp") {
     T_START(octi);
-    double sc = oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                            cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve,
-                            cfg.enfGeoPen, cfg.ilpPath);
+    double sc =
+        oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+                    cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen,
+                    cfg.ilpTimeLimit, cfg.ilpSolver, cfg.ilpPath);
     LOG(INFO, std::cerr) << "Octilinearized using ILP in " << T_STOP(octi)
                          << " ms, score " << sc;
   } else if ((cfg.optMode == "heur")) {

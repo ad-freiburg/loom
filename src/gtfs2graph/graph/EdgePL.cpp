@@ -196,7 +196,7 @@ util::json::Dict EdgePL::getAttrs() const {
   util::json::Dict obj;
   util::json::Array lines;
 
-  assert(getRefETG());
+  if (!getRefETG()) return obj;
 
   for (auto r : getRefETG()->getTripsUnordered()) {
     util::json::Dict route;

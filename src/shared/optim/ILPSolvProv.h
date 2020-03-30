@@ -16,12 +16,24 @@ inline ILPSolver* getSolver(const std::string& wish,
                             shared::optim::DirType dir) {
   ILPSolver* lp = 0;
 
+  // first try to consider wish
+
 #ifdef GUROBI_FOUND
-  if (wish == "gurobi" || !lp) lp = new shared::optim::GurobiSolver(dir);
+  if (wish == "gurobi") lp = new shared::optim::GurobiSolver(dir);
 #endif
 
 #if GLPK_FOUND
-  if (wish == "glpk" || !lp) lp = new shared::optim::GLPKSolver(dir);
+  if (wish == "glpk") lp = new shared::optim::GLPKSolver(dir);
+#endif
+
+  // fallbacks
+
+#ifdef GUROBI_FOUND
+  if (!lp) lp = new shared::optim::GurobiSolver(dir);
+#endif
+
+#if GLPK_FOUND
+  if (!lp) lp = new shared::optim::GLPKSolver(dir);
 #endif
 
   return lp;

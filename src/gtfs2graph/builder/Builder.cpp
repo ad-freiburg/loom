@@ -177,15 +177,15 @@ std::pair<bool, PolyLine<double>> Builder::getSubPolyLine(const Stop* a,
     pl->second.fixTopology(50);
   }
 
-  if ((pl->second.distTo(ap) > 200) || (pl->second.distTo(bp) > 200)) {
+  // if ((pl->second.distTo(ap) > 200) || (pl->second.distTo(bp) > 200)) {
     /**
      * something is not right, the distance from the station to its geometry
      * is excessive. fall back to straight line connection
      */
-    PolyLine<double> p = PolyLine<double>(ap, bp);
-    p.smoothenOutliers(50);
-    return std::pair<bool, PolyLine<double>>(false, p);
-  }
+    // PolyLine<double> p = PolyLine<double>(ap, bp);
+    // p.smoothenOutliers(50);
+    // return std::pair<bool, PolyLine<double>>(false, p);
+  // }
 
   PolyLine<double> p;
 

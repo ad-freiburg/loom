@@ -24,6 +24,8 @@ struct Config {
   bool restrLocSearch;
   double enfGeoPen;
   bool ilpNoSolve;
+  int ilpTimeLimit;
+  std::string ilpSolver;
 
   double maxGrDist;
 

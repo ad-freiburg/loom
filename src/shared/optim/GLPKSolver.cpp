@@ -22,7 +22,11 @@ GLPKSolver::GLPKSolver(DirType dir)
     : _starterArr(0),
       _status(INF),
       _timeLimit(std::numeric_limits<int>::max()) {
-  LOG(INFO, std::cerr) << "Creating GLPK solver instance...";
+  const char* ver = glp_version();
+  LOG(INFO, std::cerr) << "Creating GLPK solver v" << ver << " instance...";
+
+  glp_term_hook(termHook, &_termBuf);
+  glp_error_hook(errorHook, this);
 
   _prob = glp_create_prob();
 
@@ -165,9 +169,6 @@ SolveType GLPKSolver::solve() {
   delete[](ja);
   delete[](res);
 
-  std::string buf;
-  glp_term_hook(termHook, &buf);
-
   glp_iocp params;
   glp_smcp sparams;
 
@@ -188,13 +189,14 @@ SolveType GLPKSolver::solve() {
   glp_simplex(_prob, &sparams);
   glp_intopt(_prob, &params);
 
-  int optimStat = glp_get_status(_prob);
+  int optimStat = glp_mip_status(_prob);
 
-  if (optimStat == GLP_OPT) _status = OPTIM;
-  else if (optimStat == GLP_NOFEAS || optimStat == GLP_INFEAS ||
-      optimStat == GLP_UNBND || optimStat == GLP_UNDEF)
+  if (optimStat == GLP_OPT)
+    _status = OPTIM;
+  else if (optimStat == GLP_UNDEF || optimStat == GLP_NOFEAS)
     _status = INF;
-  else _status = NON_OPTIM;
+  else
+    _status = NON_OPTIM;
 
   return getStatus();
 }
@@ -220,6 +222,12 @@ void GLPKSolver::optCb(glp_tree* tree, void* solver) {
     default:
       break;
   }
+}
+
+// _____________________________________________________________________________
+void GLPKSolver::errorHook(void* info) {
+  UNUSED(info);
+  throw std::runtime_error("Abnormal GLPK termination.");
 }
 
 // _____________________________________________________________________________
@@ -319,8 +327,6 @@ void VariableMatrix::getGLPKArrs(int** ia, int** ja, double** r) const {
 // _____________________________________________________________________________
 void GLPKSolver::writeMps(const std::string& path) const {
   // TODO: exception if could not be written
-  std::string buf;
-  glp_term_hook(termHook, &buf);
   glp_write_mps(_prob, GLP_MPS_FILE, 0, path.c_str());
 }
 

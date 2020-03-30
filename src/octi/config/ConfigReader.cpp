@@ -39,6 +39,14 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "ilp-no-solve",
       opts::bool_switch(&(cfg->ilpNoSolve))->default_value(false),
       "if set, the ILP is not solved, only written to file")
+    ("ilp-time-limit",
+      opts::value<int>(&(cfg->ilpTimeLimit))
+      ->default_value(60),
+      "ILP solver time limit (in seconds), negative value means infinity")
+    ("ilp-solver",
+      opts::value<std::string>(&(cfg->ilpSolver))
+      ->default_value("gurobi"),
+      "The preferred solver library to use, will fall back if library is not available.")
     (
       "ilp-out",
       opts::value<std::string>(&(cfg->ilpPath))->default_value("prob.mps"),

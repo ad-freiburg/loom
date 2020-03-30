@@ -33,7 +33,18 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   std::chrono::high_resolution_clock::time_point t1 =
       std::chrono::high_resolution_clock::now();
 
-  lp->solve();
+  if (_cfg->MPSOutputPath.size()) {
+    lp->writeMps(_cfg->MPSOutputPath);
+  }
+
+  if (_cfg->ilpTimeLimit >= 0) lp->setTimeLim(_cfg->ilpTimeLimit);
+
+  auto status = lp->solve();
+  if (status == shared::optim::SolveType::INF) {
+    throw std::runtime_error(
+        "No solution found for ILP problem (most likely because of a time "
+        "limit)!");
+  }
 
   std::chrono::high_resolution_clock::time_point t2 =
       std::chrono::high_resolution_clock::now();
@@ -42,6 +53,8 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
   LOG(INFO) << " === Solve done in " << duration << " ms ===";
   LOG(INFO) << "(stats) ILP obj = " << lp->getObjVal();
+  if (status == shared::optim::SolveType::OPTIM)
+    LOG(INFO) << "(stats) (which is optimal)";
 
   getConfigurationFromSolution(lp, hc, g);
 
@@ -108,7 +121,7 @@ void ILPOptimizer::getConfigurationFromSolution(
 // _____________________________________________________________________________
 ILPSolver* ILPOptimizer::createProblem(OptGraph* og,
                                        const std::set<OptNode*>& g) const {
-  ILPSolver* lp = shared::optim::getSolver("", shared::optim::MIN);
+  ILPSolver* lp = shared::optim::getSolver(_cfg->ilpSolver, shared::optim::MIN);
 
   // for every segment s, we define |L(s)|^2 decision variables x_slp
   for (OptNode* n : g) {
@@ -135,7 +148,6 @@ ILPSolver* ILPOptimizer::createProblem(OptGraph* og,
 
         for (size_t p = 0; p < e->pl().getCardinality(); p++) {
           std::string varName = getILPVarName(e, l.line, p);
-          // size_t curCol = cols + i;
           int curCol = lp->addCol(varName, shared::optim::BIN, 0);
 
           lp->addColToRow(row, curCol, 1);
@@ -251,7 +263,8 @@ void ILPOptimizer::writeDiffSegConstraints(OptGraph* og,
              << "(" << linepair.first.line->id() << ")," << linepair.second.line
              << "(" << linepair.second.line->id() << ")," << node << ")";
 
-          int decisionVar = lp->addCol(ss.str(), shared::optim::BIN,
+          int decisionVar = lp->addCol(
+              ss.str(), shared::optim::BIN,
               getCrossingPenaltyDiffSeg(node)
                   // multiply the penalty with the number of collapsed lines!
                   * (linepair.first.relatives.size()) *
@@ -260,11 +273,9 @@ void ILPOptimizer::writeDiffSegConstraints(OptGraph* og,
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
             if (crosses(og, node, segmentA, segments, poscomb)) {
               int lineAinAatP = lp->getVarByName(
-                  getILPVarName(segmentA, linepair.first.line, poscomb.first)
-                      );
-              int lineBinAatP = lp->getVarByName(
-                  getILPVarName(segmentA, linepair.second.line, poscomb.second)
-                      );
+                  getILPVarName(segmentA, linepair.first.line, poscomb.first));
+              int lineBinAatP = lp->getVarByName(getILPVarName(
+                  segmentA, linepair.second.line, poscomb.second));
 
               assert(lineAinAatP > -1);
               assert(lineBinAatP > -1);

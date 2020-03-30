@@ -11,8 +11,8 @@
 #include "octi/combgraph/Drawing.h"
 #include "shared/optim/ILPSolver.h"
 
-using octi::basegraph::GridEdge;
 using octi::basegraph::BaseGraph;
+using octi::basegraph::GridEdge;
 using octi::basegraph::GridNode;
 
 using octi::combgraph::CombEdge;
@@ -28,13 +28,14 @@ class ILPGridOptimizer {
 
   double optimize(BaseGraph* gg, const CombGraph& cg, combgraph::Drawing* d,
                   double maxGrDist, bool noSolve,
-                  const basegraph::GeoPensMap* geoPensMap,
-                  const std::string& path) const;
+                  const basegraph::GeoPensMap* geoPensMap, int timeLim,
+                  const std::string& solverStr, const std::string& path) const;
 
  protected:
   shared::optim::ILPSolver* createProblem(
       BaseGraph* gg, const CombGraph& cg,
-      const basegraph::GeoPensMap* geoPensMap, double maxGrDist) const;
+      const basegraph::GeoPensMap* geoPensMap, double maxGrDist,
+      const std::string& solverStr) const;
 
   std::string getEdgeUseVar(const GridEdge* e, const CombEdge* cg) const;
   std::string getStatPosVar(const GridNode* e, const CombNode* cg) const;

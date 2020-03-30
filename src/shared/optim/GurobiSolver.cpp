@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include "gurobi_c.h"
 #include "shared/optim/GurobiSolver.h"
+#include "util/Misc.h"
 #include "util/String.h"
 #include "util/log/Log.h"
 
@@ -16,11 +17,11 @@ using shared::optim::SolveType;
 
 // _____________________________________________________________________________
 GurobiSolver::GurobiSolver(DirType dir)
-    : _status(INF), _numVars(0), _numRows(0) {
+    : _starterArr(0), _status(INF), _numVars(0), _numRows(0) {
   int verMaj, verMin, verTech;
   GRBversion(&verMaj, &verMin, &verTech);
   LOG(INFO, std::cerr) << "Creating gurobi v" << verMaj << "." << verMin << "."
-                        << verTech << " solver instance...";
+                       << verTech << " solver instance...";
 
   int error = GRBemptyenv(&_env);
   if (error || _env == 0) {
@@ -195,7 +196,7 @@ SolveType GurobiSolver::solve() {
   // error = GRBtunemodel(_model);
   // int nresults;
 
-  // GRBsetdblparam(_env, "TuneTimeLimit", 60.0 * 1);
+  // GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_TUNETIMELIMIT, 60.0 * 1);
 
   // error = GRBgetintattr(_model, "TuneResultCount", &nresults);
   // if (nresults > 0) {
@@ -234,9 +235,16 @@ SolveType GurobiSolver::solve() {
         "Could not retrieve optimal target function value.");
   }
 
+  int solCount;
+  error = GRBgetintattr(_model, GRB_INT_ATTR_SOLCOUNT, &solCount);
+  if (error) {
+    throw std::runtime_error("Could not retrieve number of solutions.");
+  }
+
   if (optimStat == GRB_OPTIMAL)
     _status = OPTIM;
-  else if (optimStat == GRB_INF_OR_UNBD)
+  else if (solCount == 0 || optimStat == GRB_INF_OR_UNBD ||
+           optimStat == GRB_INFEASIBLE || optimStat == GRB_UNBOUNDED)
     _status = INF;
   else
     _status = NON_OPTIM;
@@ -247,13 +255,17 @@ SolveType GurobiSolver::solve() {
 // _____________________________________________________________________________
 void GurobiSolver::setTimeLim(int s) {
   // set time limit
-  GRBsetdblparam(_env, "TimeLimit", s);
+  LOG(INFO, std::cerr) << "Setting solver time limit to " << s << " seconds.";
+  int error = GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_TIMELIMIT, s);
+  if (error) {
+    throw std::runtime_error("Could not set timelimit");
+  }
 }
 
 // _____________________________________________________________________________
 int GurobiSolver::getTimeLim() const {
   double ret;
-  int error = GRBgetdblparam(_env, "TimeLimit", &ret);
+  int error = GRBgetdblparam(GRBgetenv(_model), "TimeLimit", &ret);
   if (error) {
     std::stringstream ss;
     ss << "Could not retrieve time limit value";
@@ -315,13 +327,18 @@ int GurobiSolver::getNumVars() const { return _numVars; }
 
 // _____________________________________________________________________________
 void GurobiSolver::writeMps(const std::string& path) const {
-  // TODO: exception if could not be written
-  GRBwrite(_model, path.c_str());
+  int error = GRBwrite(_model, path.c_str());
+  if (error) {
+    std::stringstream ss;
+    ss << "Could not write to " << path;
+    throw std::runtime_error(ss.str());
+  }
 }
 
 // _____________________________________________________________________________
 int GurobiSolver::termHook(GRBmodel* mod, void* cbdata, int where,
                            void* buffPtr) {
+  UNUSED(mod);
   if (where == GRB_CB_MESSAGE) {
     const char* msg;
     int error = GRBcbget(cbdata, where, GRB_CB_MSG_STRING, &msg);

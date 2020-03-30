@@ -180,38 +180,18 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->crossPenMultiDiffSeg))
       ->default_value(1),
       "penalty factor during optimization for crossings that occur between two lines that travel through 3 segments")
-    ("glpk-time-limit",
-      opts::value<int>(&(cfg->glpkTimeLimit))
-      ->default_value(60000 * 60 * 12),
-      "GLPK: overall time limit for search, in ms")
-    ("glpk-proximity-search-time-limit",
-      opts::value<int>(&(cfg->glpkPSTimeLimit))
-      ->default_value(60000),
-      "GLPK: time limit for proximit search heuristig")
-    ("glpk-use-proximity-search",
-      opts::value<bool>(&(cfg->useGlpkProximSearch))
-      ->default_value(true),
-      "GLPK: use proximity search heuristic")
-    ("glpk-use-feasibility-pump",
-      opts::value<bool>(&(cfg->useGlpkProximSearch))
-      ->default_value(true),
-      "GLPK: use feasibility pump heuristic")
-    ("glpk-mps-output-path",
-      opts::value<std::string>(&(cfg->glpkMPSOutputPath))
+    ("ilp-time-limit",
+      opts::value<int>(&(cfg->ilpTimeLimit))
+      ->default_value(-1),
+      "ILP solver time limit (in seconds), negative value means infinity")
+    ("ilp-solver",
+      opts::value<std::string>(&(cfg->ilpSolver))
+      ->default_value("gurobi"),
+      "The preferred solver library to use, will fall back if library is not available.")
+    ("mps-output-path",
+      opts::value<std::string>(&(cfg->MPSOutputPath))
       ->default_value(""),
       "output path for ILP, printed in MPS format. If empty, no output will be generated.")
-    ("glpk-h-output-path",
-      opts::value<std::string>(&(cfg->glpkHOutputPath))
-      ->default_value(""),
-      "output path for ILP, printed in \"human readable\" format. If empty, no output will be generated.")
-    ("glpk-solution-output-path",
-      opts::value<std::string>(&(cfg->glpkSolutionOutputPath))
-      ->default_value(""),
-      "output path for ILP solution. If empty, no output will be generated.")
-    ("external-solver",
-      opts::value<std::string>(&(cfg->externalSolver))
-     ->default_value(""),
-      "command for an external solver. {INPUT} will be replaced by an MPS file, {THREADS} by the number of threads (optional), {OUTPUT} will be replaced with the path a solution should be written to")
     ("world-file-path",
       opts::value<std::string>(&(cfg->worldFilePath))
       ->default_value(""),

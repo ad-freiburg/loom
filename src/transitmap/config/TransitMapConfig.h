@@ -23,9 +23,7 @@ struct Config {
 
   std::string renderMethod;
   std::string optimMethod;
-  std::string glpkMPSOutputPath;
-  std::string glpkHOutputPath;
-  std::string glpkSolutionOutputPath;
+  std::string MPSOutputPath;
 
   size_t optimRuns;
 
@@ -62,10 +60,7 @@ struct Config {
   bool untangleGraph;
   bool simpleRenderForTwoEdgeNodes;
 
-  bool useGlpkFeasibilityPump;
-  bool useGlpkProximSearch;
-  int glpkPSTimeLimit;
-  int glpkTimeLimit;
+  int ilpTimeLimit;
   std::string externalSolver;
 
   double crossPenMultiSameSeg;
@@ -76,6 +71,8 @@ struct Config {
   double stationSplitWeight;
 
   std::string worldFilePath;
+
+  std::string ilpSolver;
 };
 
 }  // namespace config
