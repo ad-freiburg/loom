@@ -200,6 +200,9 @@ SolveType GurobiSolver::solve() {
     }
   }
 
+  GRBsetintparam(GRBgetenv(_model), GRB_INT_PAR_PRESOLVE, 2);
+
+
   // 10 sec tuning
   // GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_TUNETIMELIMIT, 10);
 
