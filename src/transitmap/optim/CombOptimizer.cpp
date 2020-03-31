@@ -27,8 +27,8 @@ int CombOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   size_t maxC = maxCard(g);
   double solSp = solutionSpaceSize(g);
 
-  LOG(DEBUG) << prefix(depth) << "(CombOptimizer) Optimizing comp with " << g.size()
-             << " nodes, max card " << maxC << ", sol space size "
+  LOG(DEBUG) << prefix(depth) << "(CombOptimizer) Optimizing comp with "
+             << g.size() << " nodes, max card " << maxC << ", sol space size "
              << solSp;
 
   if (maxC == 1) {
