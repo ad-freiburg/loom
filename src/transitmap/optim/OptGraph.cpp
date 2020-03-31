@@ -1393,9 +1393,9 @@ std::vector<OptEdge*> OptGraph::branchesAt(OptEdge* e, OptNode* n) const {
     ret.push_back(ea);
   }
 
-  if (!lineDisjunct(branchEdgs)) return {};
-
   if (c != e->pl().getCardinality()) return {};
+
+  if (!lineDisjunct(branchEdgs)) return {};
 
   return ret;
 }

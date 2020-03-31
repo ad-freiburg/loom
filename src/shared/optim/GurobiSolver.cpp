@@ -200,17 +200,17 @@ SolveType GurobiSolver::solve() {
     }
   }
 
-  // 5 minute tuning
-  // GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_TUNETIMELIMIT, 60.0 * 5);
+  // 10 sec tuning
+  // GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_TUNETIMELIMIT, 10);
 
-  error = GRBtunemodel(_model);
-  int nresults;
+  // error = GRBtunemodel(_model);
+  // int nresults;
 
-  // TODO: disable tuning and make configurable
-  error = GRBgetintattr(_model, "TuneResultCount", &nresults);
-  if (nresults > 0) {
-    error = GRBgettuneresult(_model, 0);
-  }
+  // // TODO: disable tuning and make configurable
+  // error = GRBgetintattr(_model, "TuneResultCount", &nresults);
+  // if (nresults > 0) {
+    // error = GRBgettuneresult(_model, 0);
+  // }
 
   error = GRBoptimize(_model);
   if (error) {
