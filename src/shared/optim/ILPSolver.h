@@ -22,6 +22,7 @@ typedef std::map<std::string, int> StarterSol;
 class ILPSolver {
  public:
   ILPSolver(){};
+  virtual ~ILPSolver() = default;
 
   virtual int addCol(const std::string& name, ColType colType,
                      double objCoef) = 0;

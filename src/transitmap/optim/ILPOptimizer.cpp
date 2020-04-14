@@ -58,6 +58,8 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
   getConfigurationFromSolution(lp, hc, g);
 
+  delete lp;
+
   return 0;
 }
 

@@ -70,7 +70,11 @@ double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
 
     extractSolution(lp, gg, cg, d);
 
-    return lp->getObjVal();
+    double obj = lp->getObjVal();
+
+    delete lp;
+
+    return  obj;
   }
 
   return std::numeric_limits<double>::infinity();

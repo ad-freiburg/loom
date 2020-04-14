@@ -8,8 +8,8 @@
 #include "shared/tests/ILPSolverTest.h"
 #include "util/Misc.h"
 
-using util::approx;
 using shared::optim::ILPSolver;
+using util::approx;
 
 #ifdef GUROBI_FOUND
 
@@ -27,9 +27,26 @@ using shared::optim::GLPKSolver;
 
 #endif
 
+#ifdef COIN_FOUND
+
+#include "shared/optim/COINSolver.h"
+
+using shared::optim::COINSolver;
+
+#endif
+
 // _____________________________________________________________________________
 void ILPSolverTest::run() {
   {
+    // just for test
+#ifdef COIN_FOUND
+    auto solv = new COINSolver(shared::optim::MAX);
+
+    exit(0);
+#endif
+
+    //
+
     std::vector<ILPSolver*> solvers;
 #ifdef GUROBI_FOUND
     solvers.push_back(new GurobiSolver(shared::optim::MAX));

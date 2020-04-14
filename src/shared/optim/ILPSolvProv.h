@@ -6,6 +6,7 @@
 #define SHARED_OPTIM_ILPSOLVPROV_H_
 
 #include "shared/optim/GLPKSolver.h"
+#include "shared/optim/COINSolver.h"
 #include "shared/optim/GurobiSolver.h"
 #include "shared/optim/ILPSolver.h"
 
@@ -22,6 +23,10 @@ inline ILPSolver* getSolver(const std::string& wish,
   if (wish == "gurobi") lp = new shared::optim::GurobiSolver(dir);
 #endif
 
+#if COIN_FOUND
+  if (wish == "coin") lp = new shared::optim::COINSolver(dir);
+#endif
+
 #if GLPK_FOUND
   if (wish == "glpk") lp = new shared::optim::GLPKSolver(dir);
 #endif
@@ -30,6 +35,10 @@ inline ILPSolver* getSolver(const std::string& wish,
 
 #ifdef GUROBI_FOUND
   if (!lp) lp = new shared::optim::GurobiSolver(dir);
+#endif
+
+#ifdef COIN_FOUND
+  if (!lp) lp = new shared::optim::COINSolver(dir);
 #endif
 
 #if GLPK_FOUND
