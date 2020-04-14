@@ -409,6 +409,9 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     auto frCmbNd = cmbEdg->getFrom();
     auto toCmbNd = cmbEdg->getTo();
 
+    // assert(frCmbNd->getDeg() <= 4);
+    // assert(toCmbNd->getDeg() <= 4);
+
     std::set<GridNode*> frGrNds, toGrNds;
     std::tie(frGrNds, toGrNds) =
         getRtPair(frCmbNd, toCmbNd, settled, gg, maxGrDist);

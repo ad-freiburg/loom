@@ -85,6 +85,30 @@ void OctiGridGraph::unSettleEdg(GridNode* a, GridNode* b) {
 }
 
 // _____________________________________________________________________________
+double OctiGridGraph::getBendPen(size_t origI, size_t targetI) const {
+  // TODO: same code as in write nd
+  double c_0 = _c.p_45 - _c.p_135;
+  double c_135 = _c.p_45;
+  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
+  double c_45 = c_0 + c_135;
+
+  // determine angle between port i and j
+  int ang = (8 + (origI - targetI)) % 8;
+  if (ang > 4) ang = 8 - ang;
+  ang = ang % 4;
+
+  double mult = 1;
+
+  // write corresponding cost to addC[j]
+  if (ang == 0) return mult * c_0;
+  if (ang == 1) return mult * c_45;
+  if (ang == 2) return mult * c_90;
+  if (ang == 3) return mult * c_135;
+
+  return 0;
+}
+
+// _____________________________________________________________________________
 void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   if (a == b) return;
 

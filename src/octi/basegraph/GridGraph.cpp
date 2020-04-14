@@ -40,10 +40,8 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
   _heurHopCost = _c.p_45 - _c.p_135;
 }
 
-
-
 // _____________________________________________________________________________
-void GridGraph::init(){
+void GridGraph::init() {
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
@@ -143,9 +141,7 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
 }
 
 // _____________________________________________________________________________
-CrossEdgPairs GridGraph::getCrossEdgPairs() const {
-  return {};
-}
+CrossEdgPairs GridGraph::getCrossEdgPairs() const { return {}; }
 
 // _____________________________________________________________________________
 void GridGraph::addObstacle(const util::geo::Polygon<double>& obst) {
@@ -250,15 +246,22 @@ GridEdge* GridGraph::getNEdg(const GridNode* a, const GridNode* b) const {
   size_t dir = 0;
   size_t d = aa * 3 + bb;
 
-  if (d == 1) dir = 1;
-  else if (d == 3) dir = 0;
-  else if (d == 5) dir = 2;
-  else if (d == 7) dir = 3;
-  else return 0;
+  if (d == 1)
+    dir = 1;
+  else if (d == 3)
+    dir = 0;
+  else if (d == 5)
+    dir = 2;
+  else if (d == 7)
+    dir = 3;
+  else
+    return 0;
 
-  if (a->pl().getPort(dir) && b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())) {
-    return const_cast<GridEdge*>(
-        getEdg(a->pl().getPort(dir), b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())));
+  if (a->pl().getPort(dir) &&
+      b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())) {
+    return const_cast<GridEdge*>(getEdg(
+        a->pl().getPort(dir),
+        b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())));
   }
 
   return 0;
@@ -276,7 +279,8 @@ void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
 
     if (!neigh) continue;
 
-    auto neighP = neigh->pl().getPort((i + getNumNeighbors() / 2) % getNumNeighbors());
+    auto neighP =
+        neigh->pl().getPort((i + getNumNeighbors() / 2) % getNumNeighbors());
     auto e = getEdg(p, neighP);
     auto f = getEdg(neighP, p);
     auto resEdg = getResEdg(e);
@@ -293,12 +297,6 @@ const Penalties& GridGraph::getPens() const { return _c; }
 NodeCost GridGraph::nodeBendPen(GridNode* n, CombEdge* e) {
   NodeCost addC;
 
-  // TODO: same code as in write nd
-  double c_0 = _c.p_45 - _c.p_135;
-  double c_135 = _c.p_45;
-  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
-  double c_45 = c_0 + c_135;
-
   CombEdge* out[getNumNeighbors()];
   getSettledAdjEdgs(n, out);
 
@@ -309,19 +307,7 @@ NodeCost GridGraph::nodeBendPen(GridNode* n, CombEdge* e) {
       // between the lines on the edges, dont penalize!!
       if (out[i]->pl().getChilds().front()->pl().hasLine(lo.line)) {
         for (size_t j = 0; j < getNumNeighbors(); j++) {
-          // determine angle between port i and j
-
-          int ang = (8 + (i - j)) % 8;
-          if (ang > 4) ang = 8 - ang;
-          ang = ang % 4;
-
-          double mult = 1;
-
-          // write corresponding cost to addC[j]
-          if (ang == 0) addC[j] += mult * c_0;
-          if (ang == 1) addC[j] += mult * c_45;
-          if (ang == 2) addC[j] += mult * c_90;
-          if (ang == 3) addC[j] += mult * c_135;
+          addC[j] += getBendPen(i, j);
         }
 
         // only count a single matching line
@@ -334,13 +320,33 @@ NodeCost GridGraph::nodeBendPen(GridNode* n, CombEdge* e) {
 }
 
 // _____________________________________________________________________________
+double GridGraph::getBendPen(size_t origI, size_t targetI) const {
+  // TODO: same code as in write nd
+  double c_0 = _c.p_45 - _c.p_135;
+  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
+
+  // determine angle between port i and j
+  int ang = (4 + (origI - targetI)) % 4;
+  if (ang > 2) ang = 4 - ang;
+  ang = ang % 2;
+
+  double mult = 1;
+
+  // write corresponding cost to addC[j]
+  if (ang == 0) return mult * c_0;
+  if (ang == 1) return mult * c_90;
+
+  return 0;
+}
+
+// _____________________________________________________________________________
 NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd, CombEdge* edg) {
   NodeCost addC;
 
-  CombEdge* out[8];
+  CombEdge* out[getNumNeighbors()];
   getSettledAdjEdgs(nd, out);
 
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
     if (!out[i]) continue;
 
     // this is the number of edges that will occur between the currently checked
@@ -349,11 +355,13 @@ NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd, CombEdge* edg) {
     int32_t dCCw = origNd->pl().getEdgeOrdering().dist(edg, out[i]);
 
     for (int j = 1; j < dCw; j++) {
-      addC[(i + j) % 8] = -1.0 * std::numeric_limits<double>::max();
+      addC[(i + j) % getNumNeighbors()] =
+          -1.0 * std::numeric_limits<double>::max();
     }
 
     for (int j = 1; j < dCCw; j++) {
-      addC[(i + (8 - j)) % 8] = -1.0 * std::numeric_limits<double>::max();
+      addC[(i + (getNumNeighbors() - j)) % getNumNeighbors()] =
+          -1.0 * std::numeric_limits<double>::max();
     }
   }
 
@@ -363,25 +371,27 @@ NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd, CombEdge* edg) {
 // _____________________________________________________________________________
 NodeCost GridGraph::topoBlockPen(GridNode* nd, CombNode* origNd,
                                  CombEdge* edg) {
-  CombEdge* outgoing[8];
+  CombEdge* outgoing[getNumNeighbors()];
   NodeCost addC;
   getSettledAdjEdgs(nd, outgoing);
 
   // topological blocking
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0; i < getNumNeighbors(); i++) {
     if (!outgoing[i]) continue;
 
-    for (size_t j = i + 1; j < i + 8; j++) {
-      if (!outgoing[j % 8]) continue;
-      if (outgoing[j % 8] == outgoing[i]) break;
+    for (size_t j = i + 1; j < i + getNumNeighbors(); j++) {
+      if (!outgoing[j % getNumNeighbors()]) continue;
+      if (outgoing[j % getNumNeighbors()] == outgoing[i]) break;
 
       int da = origNd->pl().getEdgeOrdering().dist(outgoing[i], edg);
-      int db = origNd->pl().getEdgeOrdering().dist(outgoing[j % 8], edg);
+      int db = origNd->pl().getEdgeOrdering().dist(
+          outgoing[j % getNumNeighbors()], edg);
 
       if (db < da) {
         // edge does not lie in this segment, block it!
         for (size_t x = i + 1; x < j; x++) {
-          addC[x % 8] = -1.0 * std::numeric_limits<double>::max();
+          addC[x % getNumNeighbors()] =
+              -1.0 * std::numeric_limits<double>::max();
         }
       }
     }
@@ -415,7 +425,8 @@ void GridGraph::writeInitialCosts() {
 
         if (!neigh || !port) continue;
 
-        auto oPort = neigh->pl().getPort((i + getNumNeighbors() / 2) % getNumNeighbors());
+        auto oPort = neigh->pl().getPort((i + getNumNeighbors() / 2) %
+                                         getNumNeighbors());
         auto e = getEdg(port, oPort);
 
         if (i % 2 == 0) {
@@ -460,7 +471,7 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 
 // _____________________________________________________________________________
 const util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float>*
-  GridGraph::getHeur(const std::set<GridNode*>& to) const {
+GridGraph::getHeur(const std::set<GridNode*>& to) const {
   return new GridGraphHeur(this, to);
 }
 

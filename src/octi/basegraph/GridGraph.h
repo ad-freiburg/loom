@@ -122,6 +122,8 @@ class GridGraph : public BaseGraph {
   virtual void writeObstacleCost(const util::geo::Polygon<double>& obst);
   virtual void reWriteObstCosts();
 
+  virtual double getBendPen(size_t origI, size_t targetI) const;
+
   virtual GridNode* getNode(size_t x, size_t y) const;
 
   virtual GridNode* writeNd(size_t x, size_t y);

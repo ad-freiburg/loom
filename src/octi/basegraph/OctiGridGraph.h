@@ -28,6 +28,7 @@ class OctiGridGraph : public GridGraph {
   virtual GridNode* writeNd(size_t x, size_t y);
   virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
   virtual GridNode* getNode(size_t x, size_t y) const;
+  virtual double getBendPen(size_t origI, size_t targetI) const;
 };
 }  // namespace basegraph
 }  // namespace octi
