@@ -165,18 +165,35 @@ We consider the following as our main contributions:
 \subsection{Related Work}
 \label{SEC:related}
 
-As metro map layouts and octilinear drawings are of high practical relevance, they both have been studied extensively in the past. 
+\begin{figure}
+    \centering
+	\hfill
+	\includegraphics[width=0.18\textwidth]{figures2/nodesplit.pdf}
+	\hfill
+	\includegraphics[width=0.18\textwidth,page=2]{figures2/nodesplit.pdf}
+	\hfill
+	\caption{Left: Node $v$ in an input line graph has a degree of 10, making it impossible to render the graph in an octilinear fashion. Right: We keep the first (in clockwise order) 7 adjacent edges of $v$, combine the lines of the remaining edges $e_7$, $e_8$ and $e_9$ into a single new edge $e'_0$ and connect it to a new non-station node $v'$. In reality, $v'$ is given the exact same location as $v$ to not distort node move penalties later on.}
+	\label{FIG:orthoradgrid}
+\end{figure}
 
-For metro maps, it was observed early that multiple criteria are important to produce visually pleasing and informative layouts. In \cite{stott2004metro}, a fitness score was introduced which incorporates the number of edge crossings, edge lengths, node distribution, angular resolution, direction changes, and other layout aspects to judge its quality. A hill climbing heuristic was applied to find a layout with a high fitness score. Similar heuristic approaches were described in \cite{hong2004metro}, \cite{hong2006automatic} and  \cite{stott2010automatic}. While such approaches might result in useful layouts, they come without any quality guarantees; and expressing all layout aspects with a single fitness score might obfuscate better trade-offs. In \cite{nollenburg2005mixed} and \cite{noll11}, the metro map layout aspects were subdivided in hard and soft constraints, and a mixed-integer program was used to ensure that all hard constraints (among them octilinearity of all edges) are fulfilled. This method comes with some restrictions on the input graph (planarity, maximum degree of 8, the latter being also a restriction of our approach) and only allows edges without bends. The observed running times were high already for small networks. In \cite{benkert2006minimizing, bekos2007line}, the metro-line crossing minimization problem (MCLM) was introduced. Here, the  goal is to draw a set of simple paths (representing metro lines) along the edges of an embedded underlying graph with a minimum number of pairwise crossings. In \cite{bast2019efficient}, a pipeline was presented in which a problem similar to MCLM was solved efficiently to obtain transit maps with few line crossings and few line separations. However, the goal there was to come up with transit maps in which the abstraction from the real-world course of the lines was negligible. Hence map schematization and in particular octilinearity were not considered in this context.
+\section{Node Splitting}
 
-Octilinear drawings, in which every edge of a given graph is drawn as an alternating sequence of horizontal, vertical and diagonal line segments, have been studied in different contexts before. In \cite{bekos2014planar}, it was proven that for planar input graphs with low degree there always exists an octilinear drawing with at most one direction change (or bend) per edge when using an integer grid where the number of grid nodes is polynomial in the number of input points. The general problem of finding planar octilinear drawings with a minimum number of bends is NP-hard. In \cite{nollenburg2005automated}, an NP-hardness proof for the problem of deciding whether a given embedded graph can be drawn using only straight octilinear edges was given. Our goal is to find an optimal octilinear drawing, i.e., edges are allowed to be represented by octilinear paths rather than just by a single segment but planarity is not a necessary prerequisite. In this configuration, our problem has resemblance to the $k$-node disjoint path problem. There, given a graph and $k$ node pairs, the goal is to find a set of  node-disjoint paths connecting each pair. The problem was proven to be NP-hard even on grid graphs \cite{chuzhoy2015approximating}. As our model allows to assign arbitrary costs to the edges in the octilinear grid graph, the $k$-node disjoint path problem on grids can be seen as a special case of our problem with diagonal costs set to infinity. Our problem therefore is NP-hard, too.
 
-A recent vision paper on passenger navigation in metro networks \cite{craig2019vision} emphasizes the importance of (dynamically adaptable) octilinear drawings of metro maps for guiding passenger flows. But current methods which are fast enough to produce schematic metro maps on demand (as e.g. described in \cite{claudio2014octilinear}, \cite{van2018realtime}, \cite{wang2011} and \cite{wang2016}) either compromise octilinearity or topology preservation, and do not allow for adapting the visualization to different application scenarios. Our pipeline will be shown to be very flexible, and to  produce nearly optimal octilinear drawings quickly.
+\section{Octilinear Hanan Grid}
 
-The metro map layout problem is often considered in conjunction with station labeling. In \cite{noll11}, an extension of the mixed-integer linear program for drawing the metro lines allows to guarantee enough space around station markers for labels. In \cite{WuTLY12} and \cite{WuTHALY13}, this was extended to work with large annotation labels like photographs. In \cite{wang2011} and \cite{wang2016}, labels are placed after the metro map layout was obtained by minimizing an energy function which captures labeling aspect as their directions, spaces between labels and coherence among labels of the same line. While labeling is not the main focus of this paper, we sketch how labels can be included in our model towards the end of the paper.
+\section{Quad-Tree Grid}
 
-Finally it should be noted that metro map layout algorithms are not only relevant for visualizing the tracks of real trains, but also for visualizing 'trains of thought'. In fact, the term \emph{metro map metaphor} was coined specifically to capture non-spatial information visualization problems with similar visualization demands as metro maps \cite{sandvad2001metro,nesbitt2004getting,stott2005automatic}. While our evaluation in this paper sticks to actual metro maps, our pipeline works for any graph with given node coordinates and optional edge shapes.
-%
+\section{Ortho-Radial Grid}
+
+\begin{figure}
+    \centering
+	\includegraphics[width=0.23\textwidth]{figures2/ortho.pdf}
+	\hfill
+	\includegraphics[width=0.23\textwidth,page=2]{figures2/ortho.pdf}
+	\caption{Two kinds of ortho-radial grid graphs. Left: Ortho-radial grid graph with $b = 8$ and a central node. Right: Ortho-radial grid graph where $b$ is doubled each time the radius doubles.}
+	\label{FIG:orthoradgrid}
+	\vspace{-.65cm}
+\end{figure}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{pfaedle}
