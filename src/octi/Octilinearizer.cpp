@@ -163,9 +163,9 @@ double Octilinearizer::draw(
 
   CombGraph cg(tg, deg2heur);
 
-  util::geo::output::GeoGraphJsonOutput out;
-  out.print(cg, std::cout);
-  exit(0);
+  // util::geo::output::GeoGraphJsonOutput out;
+  // out.print(cg, std::cout);
+  // exit(0);
 
   box = util::geo::pad(box, gridSize + 1);
 
@@ -490,10 +490,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     if (toGrNds.size() == 1 && gg->isSettled(toCmbNd)) {
       writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
     }
-
-    std::cerr << "Routing from " << frCmbNd->pl().getParent()->pl().stops().front().name
-    << " to " << toCmbNd->pl().getParent()->pl().stops().front().name << std::endl;
-
 
     GrEdgList eL;
     GrNdList nL;

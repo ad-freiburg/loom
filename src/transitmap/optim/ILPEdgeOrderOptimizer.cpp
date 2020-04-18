@@ -78,7 +78,7 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
 // _____________________________________________________________________________
 ILPSolver* ILPEdgeOrderOptimizer::createProblem(
     OptGraph* og, const std::set<OptNode*>& g) const {
-  ILPSolver* lp = shared::optim::getSolver("", shared::optim::MIN);
+  ILPSolver* lp = shared::optim::getSolver(_cfg->ilpSolver, shared::optim::MIN);
 
   std::set<OptEdge*> processed;
 

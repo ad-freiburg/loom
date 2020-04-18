@@ -666,22 +666,52 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
     combine.insert(combine.begin(), orig.begin() + maxDeg - 1, orig.end());
 
     // add a new node
-    // TODO: store the allocated LineNodes and delete them in destructor
     auto geom = *n->pl().getGeom();
-    geom.setX(geom.getX() - 500);
+    auto cn = addNd(geom);
 
-    LineNode* cn = addNd(geom);
+    // add the new trunk edge
+    auto ce = addEdg(n, cn, LineEdgePL({*n->pl().getGeom(), *cn->pl().getGeom()}));
 
     for (auto eo : combine) {
-      auto newEdg = addEdg(cn, eo.first->getOtherNd(n), eo.first->pl());
-      edgeRpl(cn, eo.first, newEdg);
+      LineEdge* newEdg = 0;
+      if (eo.first->getFrom() == n) {
+        newEdg = addEdg(cn, eo.first->getOtherNd(n), eo.first->pl());
+      } else {
+        newEdg = addEdg(eo.first->getOtherNd(n), cn, eo.first->pl());
+      }
+      nodeRpl(newEdg, n, cn);
+
+      for (auto lo : eo.first->pl().getLines()) {
+        ce->pl().addLine(lo.line, 0);
+      }
+
+      delEdg(eo.first->getFrom(), eo.first->getTo());
     }
+
+    // no continuation lines across the new node, only to the trunk edge
+    for (auto lo : ce->pl().getLines()) {
+      for (auto ea : cn->getAdjList()) {
+        if (ea == ce) continue;
+        for (auto eb : cn->getAdjList()) {
+          if (ea == ce) continue;
+          if (ea == eb) continue;
+          cn->pl().addConnExc(lo.line, ea, eb);
+        }
+      }
+    }
+
+    // recursively split until max deg is satisfied
+    if (cn->getDeg() > maxDeg) splitNode(cn, maxDeg);
   }
 }
 
 // _____________________________________________________________________________
 void LineGraph::splitNodes(size_t maxDeg) {
-  for (auto n : *getNds()) splitNode(n, maxDeg);
+  std::vector<LineNode*> toSplit;
+  for (auto n : *getNds()) {
+    if (n->getDeg() > maxDeg) toSplit.push_back(n);
+  }
+  for (auto n : toSplit) splitNode(n, maxDeg);
 }
 
 // _____________________________________________________________________________
@@ -718,7 +748,8 @@ void LineGraph::edgeRpl(LineNode* n, const LineEdge* oldE,
 }
 
 // _____________________________________________________________________________
-void LineGraph::nodeRpl(LineEdge* e, const LineNode* oldN, const LineNode* newN) {
+void LineGraph::nodeRpl(LineEdge* e, const LineNode* oldN,
+                        const LineNode* newN) {
   auto ro = e->pl().getLines().begin();
   while (ro != e->pl().getLines().end()) {
     if (ro->direction == oldN) {
