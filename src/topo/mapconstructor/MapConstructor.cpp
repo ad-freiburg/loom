@@ -478,7 +478,7 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n) {
     newPl = util::geo::PolyLine<double>(lineA);
 
     newEdge = _g->addEdg(a->getFrom(), b->getTo(), a->pl());
-    lineDirRepl(n, newEdge->getTo(), newEdge);
+    LineGraph::nodeRpl(newEdge, n, newEdge->getTo());
   }
 
   if (a->getTo() != n && b->getTo() == n) {
@@ -490,7 +490,7 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n) {
     newPl = util::geo::PolyLine<double>(lineB);
 
     newEdge = _g->addEdg(b->getFrom(), a->getTo(), b->pl());
-    lineDirRepl(n, newEdge->getTo(), newEdge);
+    LineGraph::nodeRpl(newEdge, n, newEdge->getTo());
   }
 
   if (a->getFrom() == n && b->getFrom() == n) {
@@ -503,7 +503,7 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n) {
     newPl = util::geo::PolyLine<double>(lineA);
 
     newEdge = _g->addEdg(a->getTo(), b->getTo(), b->pl());
-    lineDirRepl(n, newEdge->getFrom(), newEdge);
+    LineGraph::nodeRpl(newEdge, n, newEdge->getFrom());
   }
 
   if (a->getTo() == n && b->getTo() == n) {
@@ -515,7 +515,7 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n) {
     newPl = util::geo::PolyLine<double>(lineA);
 
     newEdge = _g->addEdg(a->getFrom(), b->getFrom(), a->pl());
-    lineDirRepl(n, newEdge->getTo(), newEdge);
+    LineGraph::nodeRpl(newEdge, n, newEdge->getTo());
   }
 
   // set new polyline and smoothen a bit
@@ -527,10 +527,10 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n) {
   combContEdgs(newEdge, a);
   combContEdgs(newEdge, b);
 
-  edgeRpl(a->getFrom(), a, newEdge);
-  edgeRpl(a->getTo(), a, newEdge);
-  edgeRpl(b->getFrom(), b, newEdge);
-  edgeRpl(b->getTo(), b, newEdge);
+  LineGraph::edgeRpl(a->getFrom(), a, newEdge);
+  LineGraph::edgeRpl(a->getTo(), a, newEdge);
+  LineGraph::edgeRpl(b->getFrom(), b, newEdge);
+  LineGraph::edgeRpl(b->getTo(), b, newEdge);
 
   _g->delEdg(a->getFrom(), a->getTo());
   _g->delEdg(b->getFrom(), b->getTo());
@@ -587,13 +587,13 @@ bool MapConstructor::combineNodes(LineNode* a, LineNode* b) {
       newE = _g->addEdg(b, oldE->getTo(), oldE->pl());
 
       // update route dirs
-      lineDirRepl(a, b, newE);
+      LineGraph::nodeRpl(newE, a, b);
     } else {
       // edge is already existing
       foldEdges(oldE, newE);
 
       // update route dirs
-      lineDirRepl(a, b, newE);
+      LineGraph::nodeRpl(newE, a, b);
     }
 
     combContEdgs(newE, oldE);
@@ -610,13 +610,13 @@ bool MapConstructor::combineNodes(LineNode* a, LineNode* b) {
       newE = _g->addEdg(oldE->getFrom(), b, oldE->pl());
 
       // update route dirs
-      lineDirRepl(a, b, newE);
+      LineGraph::nodeRpl(newE, a, b);
     } else {
       // edge is already existing
       foldEdges(oldE, newE);
 
       // update route dirs
-      lineDirRepl(a, b, newE);
+      LineGraph::nodeRpl(newE, a, b);
     }
 
     combContEdgs(newE, oldE);
@@ -684,25 +684,6 @@ DBox MapConstructor::bbox() const {
   }
 
   return b;
-}
-
-// _____________________________________________________________________________
-void MapConstructor::lineDirRepl(LineNode* oldN, LineNode* newN, LineEdge* e) {
-  auto ro = e->pl().getLines().begin();
-  while (ro != e->pl().getLines().end()) {
-    if (ro->direction == oldN) {
-      shared::linegraph::LineOcc newRo = *ro;
-      newRo.direction = newN;
-
-      // delete old
-      ro = e->pl().getLines().erase(ro);
-
-      // add new
-      e->pl().getLines().insert(newRo);
-    } else {
-      ro++;
-    }
-  }
 }
 
 // _____________________________________________________________________________
@@ -817,37 +798,4 @@ bool MapConstructor::cleanUpGeoms() {
   // TODO: edges with continue to each other should be re-connected here
 
   return true;
-}
-
-// _____________________________________________________________________________
-void MapConstructor::edgeRpl(LineNode* n, const LineEdge* oldE,
-                             const LineEdge* newE) {
-  if (oldE == newE) return;
-  // replace in from
-  for (auto& r : n->pl().getConnExc()) {
-    auto exFr = r.second.begin();
-    while (exFr != r.second.end()) {
-      if (exFr->first == oldE) {
-        std::swap(r.second[newE], exFr->second);
-        exFr = r.second.erase(exFr);
-      } else {
-        exFr++;
-      }
-    }
-  }
-
-  // replace in to
-  for (auto& r : n->pl().getConnExc()) {
-    for (auto& exFr : r.second) {
-      auto exTo = exFr.second.begin();
-      while (exTo != exFr.second.end()) {
-        if (*exTo == oldE) {
-          exFr.second.insert(newE);
-          exTo = exFr.second.erase(exTo);
-        } else {
-          exTo++;
-        }
-      }
-    }
-  }
 }

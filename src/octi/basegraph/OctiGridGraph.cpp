@@ -6,15 +6,15 @@
 #include <fstream>
 #include <unordered_map>
 #include <unordered_set>
-#include "octi/basegraph/OctiGridGraph.h"
 #include "octi/basegraph/NodeCost.h"
+#include "octi/basegraph/OctiGridGraph.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Node.h"
 
 using namespace octi::basegraph;
-using octi::basegraph::OctiGridGraph;
 using octi::basegraph::NodeCost;
+using octi::basegraph::OctiGridGraph;
 using util::geo::DBox;
 using util::geo::dist;
 using util::geo::DPoint;
@@ -186,7 +186,8 @@ void OctiGridGraph::writeInitialCosts() {
 
         if (!neigh || !port) continue;
 
-        auto oPort = neigh->pl().getPort((i + getNumNeighbors() / 2) % getNumNeighbors());
+        auto oPort = neigh->pl().getPort((i + getNumNeighbors() / 2) %
+                                         getNumNeighbors());
         auto e = getEdg(port, oPort);
 
         if (i % 4 == 0) {
@@ -220,9 +221,11 @@ GridEdge* OctiGridGraph::getNEdg(const GridNode* a, const GridNode* b) const {
   if (d == 7) dir = 6;
   if (d == 6) dir = 7;
 
-  if (a->pl().getPort(dir) && b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())) {
-    return const_cast<GridEdge*>(
-        getEdg(a->pl().getPort(dir), b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())));
+  if (a->pl().getPort(dir) &&
+      b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())) {
+    return const_cast<GridEdge*>(getEdg(
+        a->pl().getPort(dir),
+        b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())));
   }
 
   return 0;

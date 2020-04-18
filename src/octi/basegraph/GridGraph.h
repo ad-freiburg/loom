@@ -137,13 +137,15 @@ struct GridGraphHeur
     : public util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
   GridGraphHeur(const basegraph::GridGraph* g, const std::set<GridNode*>& to)
       : g(g), to(0) {
+    // TODO: for the normal orthogonal grid, a better heuristic can be used
+    // here!
     if (to.size() == 1) this->to = *to.begin();
 
     cheapestSink = std::numeric_limits<float>::infinity();
 
     for (auto n : to) {
       size_t i = 0;
-      for (; i < 4; i++) {
+      for (; i < g->getNumNeighbors(); i++) {
         float sinkCost = g->getEdg(n->pl().getPort(i), n)->pl().cost();
         if (sinkCost < cheapestSink) cheapestSink = sinkCost;
         auto neigh = g->getNeighbor(n, i);
@@ -153,7 +155,7 @@ struct GridGraphHeur
           break;
         }
       }
-      for (size_t j = i; j < 4; j++) {
+      for (size_t j = i; j < g->getNumNeighbors(); j++) {
         float sinkCost = g->getEdg(n->pl().getPort(j), n)->pl().cost();
         if (sinkCost < cheapestSink) cheapestSink = sinkCost;
       }

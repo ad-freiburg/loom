@@ -93,8 +93,6 @@ class MapConstructor {
   const config::TopoConfig* _cfg;
   LineGraph* _g;
 
-  void lineDirRepl(LineNode* oldN, LineNode* newN, LineEdge* e);
-
   ShrdSegWrap nextShrdSeg(double dCut, EdgeGrid* grid);
   bool combineNodes(LineNode* a, LineNode* b);
   bool combineEdges(LineEdge* a, LineEdge* b, LineNode* n);
@@ -112,8 +110,6 @@ class MapConstructor {
 
   DBox bbox() const;
   EdgeGrid geoIndex();
-
-  void edgeRpl(LineNode* n, const LineEdge* oldE, const LineEdge* newE);
 
   LineEdgePair split(LineEdgePL& a, LineNode* fr, LineNode* to, double p);
 

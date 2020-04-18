@@ -25,6 +25,7 @@ util::json::Dict GridNodePL::getAttrs() const {
   util::json::Dict obj;
 
   obj["visited"] = visited ? "1" : "0";
+  obj["grid"] = util::toString(_id);
 
   return obj;
 }

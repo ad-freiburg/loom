@@ -25,9 +25,7 @@ class CombGraph : public util::graph::UndirGraph<CombNodePL, CombEdgePL> {
   CombGraph(const LineGraph* g, bool collapse);
 
   EdgeOrdering getEdgeOrderingForNode(CombNode* n) const;
-  EdgeOrdering getEdgeOrderingForNode(
-      CombNode* n, bool useOrigNextNode,
-      const std::map<CombNode*, util::geo::DPoint>& newPos) const;
+  EdgeOrdering getEdgeOrderingForNode(CombNode* n, bool useOrigNextNode) const;
 
  private:
   void build(const LineGraph* source);

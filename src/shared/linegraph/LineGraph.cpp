@@ -15,6 +15,7 @@
 #include "shared/style/LineStyle.h"
 
 using shared::linegraph::EdgeGrid;
+using shared::linegraph::EdgeOrdering;
 using shared::linegraph::ISect;
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
@@ -376,6 +377,7 @@ const util::geo::DBox& LineGraph::getBBox() const { return _bbox; }
 
 // _____________________________________________________________________________
 void LineGraph::topologizeIsects() {
+  // TODO: prevent lines from continuing at the new intersection node!
   proced.clear();
   while (getNextIntersection().a) {
     auto i = getNextIntersection();
@@ -621,4 +623,115 @@ std::set<const shared::linegraph::Line*> LineGraph::servedLines(
     }
   }
   return ret;
+}
+
+// _____________________________________________________________________________
+EdgeOrdering LineGraph::edgeOrdering(LineNode* n, bool useOrigNextNode) {
+  EdgeOrdering order;
+  for (auto e : n->getAdjList()) {
+    util::geo::DPoint a = *n->pl().getGeom();
+
+    util::geo::DPoint b;
+    if (useOrigNextNode) {
+      b = *e->getOtherNd(n)->pl().getGeom();
+    } else {
+      auto other = e->getOtherNd(n);
+      if (e->pl().getGeom()->size() > 2) {
+        if (e->getTo() == n) {
+          b = e->pl().getGeom()->at(e->pl().getGeom()->size() - 2);
+        } else {
+          b = e->pl().getGeom()->at(1);
+        }
+      } else {
+        b = *other->pl().getGeom();
+      }
+    }
+
+    // get the angles
+    double deg = util::geo::angBetween(a, b) - M_PI / 2;
+    if (deg <= 0) deg += M_PI * 2;
+
+    order.add(e, deg);
+  }
+
+  return order;
+}
+
+// _____________________________________________________________________________
+void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
+  if (n->getAdjList().size() > maxDeg) {
+    std::vector<std::pair<LineEdge*, double>> combine;
+
+    const auto& orig = edgeOrdering(n, true).getOrderedSet();
+    combine.insert(combine.begin(), orig.begin() + maxDeg - 1, orig.end());
+
+    // add a new node
+    // TODO: store the allocated LineNodes and delete them in destructor
+    auto geom = *n->pl().getGeom();
+    geom.setX(geom.getX() - 500);
+
+    LineNode* cn = addNd(geom);
+
+    for (auto eo : combine) {
+      auto newEdg = addEdg(cn, eo.first->getOtherNd(n), eo.first->pl());
+      edgeRpl(cn, eo.first, newEdg);
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void LineGraph::splitNodes(size_t maxDeg) {
+  for (auto n : *getNds()) splitNode(n, maxDeg);
+}
+
+// _____________________________________________________________________________
+void LineGraph::edgeRpl(LineNode* n, const LineEdge* oldE,
+                        const LineEdge* newE) {
+  if (oldE == newE) return;
+  // replace in from
+  for (auto& r : n->pl().getConnExc()) {
+    auto exFr = r.second.begin();
+    while (exFr != r.second.end()) {
+      if (exFr->first == oldE) {
+        std::swap(r.second[newE], exFr->second);
+        exFr = r.second.erase(exFr);
+      } else {
+        exFr++;
+      }
+    }
+  }
+
+  // replace in to
+  for (auto& r : n->pl().getConnExc()) {
+    for (auto& exFr : r.second) {
+      auto exTo = exFr.second.begin();
+      while (exTo != exFr.second.end()) {
+        if (*exTo == oldE) {
+          exFr.second.insert(newE);
+          exTo = exFr.second.erase(exTo);
+        } else {
+          exTo++;
+        }
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void LineGraph::nodeRpl(LineEdge* e, const LineNode* oldN, const LineNode* newN) {
+  auto ro = e->pl().getLines().begin();
+  while (ro != e->pl().getLines().end()) {
+    if (ro->direction == oldN) {
+      shared::linegraph::LineOcc newRo = *ro;
+      newRo.direction = newN;
+
+      // delete old
+      ro = e->pl().getLines().erase(ro);
+
+      // add new
+      e->pl().getLines().insert(newRo);
+    } else {
+      ro++;
+    }
+  }
 }

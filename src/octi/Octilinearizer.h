@@ -43,7 +43,7 @@ typedef Dijkstra::NList<GridNodePL, GridEdgePL> GrNdList;
 typedef std::pair<std::set<GridNode*>, std::set<GridNode*>> RtPair;
 typedef std::map<CombNode*, const GridNode*> SettledPos;
 
-enum BaseGraphType { OCTIGRID, GRID };
+enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL };
 
 // exception thrown when no planar embedding could be found
 struct NoEmbeddingFoundExc : public std::exception {

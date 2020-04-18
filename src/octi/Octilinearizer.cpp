@@ -10,6 +10,7 @@
 #include "octi/basegraph/GridGraph.h"
 #include "octi/basegraph/NodeCost.h"
 #include "octi/basegraph/OctiGridGraph.h"
+#include "octi/basegraph/OrthoRadialGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -88,8 +89,11 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
   BaseGraph* gg;
   removeEdgesShorterThan(tg, gridSize / 2);
 
-  CombGraph cg(tg, deg2heur);
   auto box = tg->getBBox();
+
+  auto tester = newBaseGraph(box, gridSize, borderRad, pens);
+  tg->splitNodes(tester->getNumNeighbors());
+  CombGraph cg(tg, deg2heur);
   box = util::geo::pad(box, gridSize + 1);
 
   LOG(INFO, std::cerr) << "Presolving...";
@@ -105,6 +109,7 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
     gg = newBaseGraph(box, gridSize, borderRad, pens);
     gg->init();
   }
+
   Drawing drawing(gg);
   GeoPensMap enfGeoPens;
   const GeoPensMap* geoPens = 0;
@@ -149,9 +154,19 @@ double Octilinearizer::draw(
     const std::vector<util::geo::Polygon<double>>& obstacles) {
   removeEdgesShorterThan(tg, gridSize / 2);
 
+  auto box = tg->getBBox();
+
+  // TODO: this is just to get the max degree, solve this in some nicer way
+  auto gg = newBaseGraph(box, gridSize, borderRad, pens);
+
+  tg->splitNodes(gg->getNumNeighbors());
+
   CombGraph cg(tg, deg2heur);
 
-  auto box = tg->getBBox();
+  util::geo::output::GeoGraphJsonOutput out;
+  out.print(cg, std::cout);
+  exit(0);
+
   box = util::geo::pad(box, gridSize + 1);
 
   return draw(cg, box, outTg, retGg, pens, gridSize, borderRad, maxGrDist,
@@ -476,6 +491,10 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       writeNdCosts(*toGrNds.begin(), toCmbNd, cmbEdg, gg);
     }
 
+    std::cerr << "Routing from " << frCmbNd->pl().getParent()->pl().stops().front().name
+    << " to " << toCmbNd->pl().getParent()->pl().stops().front().name << std::endl;
+
+
     GrEdgList eL;
     GrNdList nL;
     GridNode* toGrNd = 0;
@@ -636,6 +655,8 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, double cellSize,
       return new OctiGridGraph(bbox, cellSize, spacer, pens);
     case GRID:
       return new GridGraph(bbox, cellSize, spacer, pens);
+    case ORTHORADIAL:
+      return new OrthoRadialGraph(20, bbox, cellSize, spacer, pens);
     default:
       return 0;
   }

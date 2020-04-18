@@ -15,7 +15,8 @@
 namespace shared {
 namespace linegraph {
 
-typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge; typedef util::graph::Node<LineNodePL, LineEdgePL> LineNode;
+typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge;
+typedef util::graph::Node<LineNodePL, LineEdgePL> LineNode;
 typedef std::map<const Line*,
                  std::map<const LineEdge*, std::set<const LineEdge*>>>
     ConnEx;

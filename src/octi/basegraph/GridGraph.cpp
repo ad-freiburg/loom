@@ -214,6 +214,8 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   // this closes the grid edge
   auto ge = getNEdg(a, b);
 
+  assert(ge);
+
   addResEdg(ge, e);
 
   // this closes both nodes

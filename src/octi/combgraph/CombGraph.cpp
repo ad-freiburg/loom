@@ -5,12 +5,14 @@
 #include "octi/combgraph/CombGraph.h"
 
 using octi::combgraph::CombGraph;
+using octi::combgraph::EdgeOrdering;
+using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
-using octi::combgraph::EdgeOrdering;
 
 // _____________________________________________________________________________
-CombGraph::CombGraph(const LineGraph* g) : CombGraph(g, false) {}
+CombGraph::CombGraph(const LineGraph* g)
+    : CombGraph(g, false) {}
 
 // _____________________________________________________________________________
 CombGraph::CombGraph(const LineGraph* g, bool collapse) {
@@ -48,8 +50,7 @@ void CombGraph::build(const LineGraph* source) {
 
 // _____________________________________________________________________________
 void CombGraph::combineDeg2() {
-  std::set<CombNode*> nodes = *getNds();
-  for (auto n : nodes) {
+  for (auto n : *getNds()) {
     if (n->getAdjList().size() == 2) {
       CombEdge* a = n->getAdjList().front();
       CombEdge* b = n->getAdjList().back();
@@ -105,18 +106,16 @@ void CombGraph::writeEdgeOrdering() {
 
 // _____________________________________________________________________________
 EdgeOrdering CombGraph::getEdgeOrderingForNode(CombNode* n) const {
-  return getEdgeOrderingForNode(n, true, std::map<CombNode*, util::geo::DPoint>());
+  return getEdgeOrderingForNode(n, true);
 }
 
 // _____________________________________________________________________________
-EdgeOrdering CombGraph::getEdgeOrderingForNode(
-    CombNode* n, bool useOrigNextNode,
-    const std::map<CombNode*, util::geo::DPoint>& newPos) const {
+EdgeOrdering CombGraph::getEdgeOrderingForNode(CombNode* n,
+    bool useOrigNextNode) const {
   EdgeOrdering order;
   for (auto e : n->getAdjList()) {
     auto r = e->pl().getChilds().front();
     util::geo::DPoint a = *n->pl().getGeom();
-    if (newPos.find(n) != newPos.end()) a = newPos.find(n)->second;
 
     util::geo::DPoint b;
     if (useOrigNextNode) {
@@ -131,12 +130,12 @@ EdgeOrdering CombGraph::getEdgeOrderingForNode(
         }
       } else {
         b = *other->pl().getGeom();
-        if (newPos.find(other) != newPos.end()) b = newPos.find(other)->second;
       }
     }
 
     // get the angles
-    double deg = util::geo::angBetween(a, b);
+    double deg = util::geo::angBetween(a, b) - M_PI / 2;
+    if (deg <= 0) deg += M_PI * 2;
 
     order.add(e, deg);
   }

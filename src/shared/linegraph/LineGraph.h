@@ -5,6 +5,7 @@
 #ifndef SHARED_LINEGRAPH_LINEGRAPH_H_
 #define SHARED_LINEGRAPH_LINEGRAPH_H_
 
+#include "shared/linegraph/EdgeOrdering.h"
 #include "shared/linegraph/LineEdgePL.h"
 #include "shared/linegraph/LineNodePL.h"
 #include "util/geo/Geo.h"
@@ -69,6 +70,11 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   static std::set<const shared::linegraph::Line*> servedLines(
       const shared::linegraph::LineNode* n);
 
+  static EdgeOrdering edgeOrdering(LineNode* n, bool useOrigNextNode);
+
+  static void edgeRpl(LineNode* n, const LineEdge* oldE, const LineEdge* newE);
+  static void nodeRpl(LineEdge* e, const LineNode* oldN, const LineNode* newN);
+
   std::set<LineEdge*> getNeighborEdges(const util::geo::DLine& line,
                                        double d) const;
 
@@ -77,6 +83,9 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
 
   EdgeGrid* getEdgGrid();
   const EdgeGrid& getEdgGrid() const;
+
+  void splitNode(LineNode* n, size_t maxDeg);
+  void splitNodes(size_t maxDeg);
 
  private:
   util::geo::Box<double> _bbox;
