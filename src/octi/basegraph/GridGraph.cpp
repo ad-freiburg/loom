@@ -473,7 +473,7 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
   // cost without using diagonals
   // we can take at most min(dx, dy) diagonal edges. Edge diagonal edge saves us
   // one horizontal and one vertical edge, but costs a diagonal edge
-  double edgCost = (_c.verticalPen * dx + _c.horizontalPen * dy);
+  double edgCost = (_c.horizontalPen * dx + _c.verticalPen * dy);
 
   // Alternative: use chebyshev distance heuristic
   // double heurECost =

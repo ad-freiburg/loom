@@ -332,7 +332,7 @@ double OctiGridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
   // we can take at most min(dx, dy) diagonal edges. Edge diagonal edge saves us
   // one horizontal and one vertical edge, but costs a diagonal edge
   double edgeCost =
-      (_c.verticalPen * dx + _c.horizontalPen * dy) +
+      (_c.horizontalPen * dx + _c.verticalPen * dy) +
       _diagSave * std::min(dx, dy);
 
   // Worse alternative: use a chebyshev distance heuristic
