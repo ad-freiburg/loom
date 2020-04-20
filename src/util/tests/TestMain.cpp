@@ -10,6 +10,7 @@
 #include "util/geo/Grid.h"
 #include "util/graph/Algorithm.h"
 #include "util/graph/Dijkstra.h"
+#include "util/graph/BiDijkstra.h"
 #include "util/graph/DirGraph.h"
 #include "util/graph/EDijkstra.h"
 #include "util/graph/UndirGraph.h"
@@ -856,6 +857,102 @@ int main(int argc, char** argv) {
     cost = EDijkstra::shortestPath(a, d, cFunc, &res);
 
     TEST(cost, ==, 2);
+  }
+
+  // ___________________________________________________________________________
+  {
+    DirGraph<int, int> g;
+
+    auto source = g.addNd();
+    auto target = g.addNd();
+    auto a = g.addNd();
+    auto b = g.addNd();
+
+    g.addEdg(source, a, 4);
+    g.addEdg(source, b, 5);
+    g.addEdg(a, target, 3);
+    g.addEdg(b, target, 1);
+
+    struct CostFunc : public BiDijkstra::CostFunc<int, int, int> {
+      int operator()(const Node<int, int>* fr, const Edge<int, int>* e,
+                     const Node<int, int>* to) const {
+        UNUSED(fr);
+        UNUSED(to);
+        return e->pl();
+      };
+      int inf() const { return 999; };
+    };
+
+    CostFunc cFunc;
+
+    BiDijkstra::NList<int, int> res;
+    int cost = BiDijkstra::shortestPath(source, target, cFunc, &res);
+
+    TEST(cost, ==, 6);
+  }
+
+  // ___________________________________________________________________________
+  {
+    DirGraph<int, int> g;
+
+    DirNode<int, int>* a = new DirNode<int, int>(1);
+    DirNode<int, int>* b = new DirNode<int, int>(0);
+    g.addNd(a);
+    g.addNd(b);
+
+    auto c = g.addNd();
+    auto d = g.addNd(4);
+    auto x = g.addNd();
+
+    g.addEdg(a, d, 4);
+    g.addEdg(a, c, 1);
+    g.addEdg(c, b, 1);
+    g.addEdg(b, d, 1);
+
+    struct CostFunc : public BiDijkstra::CostFunc<int, int, int> {
+      int operator()(const Node<int, int>* fr, const Edge<int, int>* e,
+                     const Node<int, int>* to) const {
+        UNUSED(fr);
+        UNUSED(to);
+        return e->pl();
+      };
+      int inf() const { return 999; };
+    };
+
+    CostFunc cFunc;
+
+    BiDijkstra::NList<int, int> res;
+    int cost = BiDijkstra::shortestPath(a, d, cFunc, &res);
+
+    TEST(cost, ==, 3);
+    TEST(res.size(), ==, (size_t)4);
+
+    g.addEdg(c, d, 3);
+    cost = BiDijkstra::shortestPath(a, d, cFunc, &res);
+
+    TEST(cost, ==, 3);
+
+    g.addEdg(a, b, 1);
+    g.addEdg(x, a, 1);
+    cost = BiDijkstra::shortestPath(a, d, cFunc, &res);
+
+    TEST(cost, ==, 2);
+
+    // const std::set<Node<int, int>*> to{b, c, d, x};
+    // std::unordered_map<Node<int, int>*, BiDijkstra::EList<int, int>*> resEdges;
+    // std::unordered_map<Node<int, int>*, BiDijkstra::NList<int, int>*> resNodes;
+
+    // for (auto n : to) {
+      // resEdges[n] = new BiDijkstra::EList<int, int>();
+      // resNodes[n] = new BiDijkstra::NList<int, int>();
+    // }
+
+    // auto costs = BiDijkstra::shortestPath(a, to, cFunc, resEdges, resNodes);
+
+    // TEST(costs[b], ==, 1);
+    // TEST(costs[c], ==, 1);
+    // TEST(costs[d], ==, 2);
+    // TEST(costs[x], ==, 999);
   }
 
   // ___________________________________________________________________________

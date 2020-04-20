@@ -19,9 +19,15 @@
 namespace util {
 namespace graph {
 
+using util::graph::Edge;
 using util::graph::Graph;
 using util::graph::Node;
-using util::graph::Edge;
+
+template <typename N, typename E>
+using EList = std::vector<Edge<N, E>*>;
+
+template <typename N, typename E>
+using NList = std::vector<Node<N, E>*>;
 
 // shortest path base class
 template <class D>
@@ -81,6 +87,15 @@ class ShortestPath {
                         EList<N, E>* resEdges, NList<N, E>* resNodes) {
     return D::shortestPathImpl(from, to, costFunc, heurFunc, resEdges,
                                resNodes);
+  }
+
+  template <typename N, typename E, typename C>
+  static C shortestPath(const std::set<Node<N, E>*> from,
+                        const std::set<Node<N, E>*>& to,
+                        const CostFunc<N, E, C>& costFunc,
+                        EList<N, E>* resEdges, NList<N, E>* resNodes) {
+    return D::shortestPathImpl(from, to, costFunc, ZeroHeurFunc<N, E, C>(),
+                               resEdges, resNodes);
   }
 
   template <typename N, typename E, typename C>
@@ -401,7 +416,7 @@ class ShortestPath {
     return D::shortestPathImpl(froms, costFunc, true);
   }
 };
-}
-}
+}  // namespace graph
+}  // namespace util
 
 #endif  // UTIL_GRAPH_SHORTESTPATH_H_

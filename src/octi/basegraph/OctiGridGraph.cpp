@@ -319,3 +319,28 @@ GridNode* OctiGridGraph::getNode(size_t x, size_t y) const {
   if (x >= _grid.getXWidth() || y >= _grid.getYHeight()) return 0;
   return _nds[_grid.getYHeight() * 9 * x + y * 9];
 }
+
+// _____________________________________________________________________________
+double OctiGridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
+                           int64_t yb) const {
+  int dx = labs(xb - xa);
+  int dy = labs(yb - ya);
+
+  double minHops = std::max(dx, dy);
+
+  // cost without using diagonals
+  // we can take at most min(dx, dy) diagonal edges. Edge diagonal edge saves us
+  // one horizontal and one vertical edge, but costs a diagonal edge
+  double edgeCost =
+      (_c.verticalPen * dx + _c.horizontalPen * dy) +
+      _diagSave * std::min(dx, dy);
+
+  // Alternative: use chebyshev distance heuristic
+  // double heurECost =
+      // (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
+
+  // return minHops * (heurECost + _heurHopCost) - _heurHopCost;
+
+  // we always count one heurHopCost too much, subtract it at the end!
+  return edgeCost + minHops * (_heurHopCost)-_heurHopCost;
+}

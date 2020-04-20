@@ -15,6 +15,7 @@
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Dijkstra.h"
+#include "util/graph/BiDijkstra.h"
 #include "util/log/Log.h"
 
 #include "ilp/ILPGridOptimizer.h"
@@ -30,6 +31,7 @@ using util::geo::dist;
 using util::geo::DPoint;
 using util::geo::len;
 using util::graph::Dijkstra;
+using util::graph::BiDijkstra;
 
 // _____________________________________________________________________________
 void Octilinearizer::removeEdgesShorterThan(LineGraph* g, double d) {
@@ -506,6 +508,8 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     } else {
       auto cost = GridCost(cutoff + costOffsetTo + costOffsetFrom);
       Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
+
+      // BiDijkstra::shortestPath(frGrNds, toGrNds, cost, &eL, &nL);
     }
 
     delete heur;

@@ -15,7 +15,10 @@ class OctiGridGraph : public GridGraph {
   using GridGraph::getNeighbor;
   OctiGridGraph(const util::geo::DBox& bbox, double cellSize, double spacer,
                 const Penalties& pens)
-      : GridGraph(bbox, cellSize, spacer, pens) {}
+      : GridGraph(bbox, cellSize, spacer, pens) {
+    // to prevent the calculation later on
+    _diagSave = (_c.diagonalPen - (_c.horizontalPen + _c.verticalPen));
+  }
 
   virtual void unSettleEdg(GridNode* a, GridNode* b);
   virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e);
@@ -29,6 +32,9 @@ class OctiGridGraph : public GridGraph {
   virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
   virtual GridNode* getNode(size_t x, size_t y) const;
   virtual double getBendPen(size_t origI, size_t targetI) const;
+  double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
+
+  double _diagSave;
 };
 }  // namespace basegraph
 }  // namespace octi

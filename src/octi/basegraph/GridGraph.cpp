@@ -35,8 +35,6 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
   // cut off illegal spacer values
   if (spacer > cellSize / 2) _spacer = cellSize / 2;
 
-  _heurECost =
-      (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
   _heurHopCost = _c.p_45 - _c.p_135;
 }
 
@@ -467,8 +465,24 @@ const Grid<GridNode*, Point, double>& GridGraph::getGrid() const {
 // _____________________________________________________________________________
 double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
                            int64_t yb) const {
-  double minHops = std::max(labs(xb - xa), labs(yb - ya));
-  return minHops * (_heurECost + _heurHopCost) - _heurHopCost;
+  int dx = labs(xb - xa);
+  int dy = labs(yb - ya);
+
+  double minHops = std::max(dx, dy);
+
+  // cost without using diagonals
+  // we can take at most min(dx, dy) diagonal edges. Edge diagonal edge saves us
+  // one horizontal and one vertical edge, but costs a diagonal edge
+  double edgCost = (_c.verticalPen * dx + _c.horizontalPen * dy);
+
+  // Alternative: use chebyshev distance heuristic
+  // double heurECost =
+      // (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
+
+  // return minHops * (heurECost + _heurHopCost) - _heurHopCost;
+
+  // we always count one heurHopCost too much, subtract it at the end!
+  return edgCost + minHops * (_heurHopCost)-_heurHopCost;
 }
 
 // _____________________________________________________________________________

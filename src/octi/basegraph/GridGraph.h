@@ -104,7 +104,7 @@ class GridGraph : public BaseGraph {
   double _cellSize, _spacer;
   std::unordered_map<const CombNode*, GridNode*> _settled;
 
-  double _heurECost, _heurHopCost;
+  double _heurHopCost;
 
   // encoding portable IDs for each node
   std::vector<GridNode*> _nds;

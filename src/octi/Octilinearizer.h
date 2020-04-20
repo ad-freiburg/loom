@@ -13,6 +13,7 @@
 #include "octi/combgraph/Drawing.h"
 #include "shared/linegraph/LineGraph.h"
 #include "util/graph/Dijkstra.h"
+#include "util/graph/BiDijkstra.h"
 
 namespace octi {
 
@@ -38,8 +39,8 @@ using octi::combgraph::EdgeOrdering;
 
 using util::graph::Dijkstra;
 
-typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
-typedef Dijkstra::NList<GridNodePL, GridEdgePL> GrNdList;
+typedef util::graph::EList<GridNodePL, GridEdgePL> GrEdgList;
+typedef util::graph::NList<GridNodePL, GridEdgePL> GrNdList;
 typedef std::pair<std::set<GridNode*>, std::set<GridNode*>> RtPair;
 typedef std::map<CombNode*, const GridNode*> SettledPos;
 
@@ -71,7 +72,7 @@ struct GraphMeasures {
   size_t maxDeg;
 };
 
-struct GridCost : public Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
+struct GridCost : public util::graph::Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
   GridCost(float inf) : _inf(inf) {}
   virtual float operator()(const GridNode* from, const GridEdge* e,
                            const GridNode* to) const {
