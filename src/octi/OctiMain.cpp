@@ -15,6 +15,7 @@
 #include "shared/linegraph/LineGraph.h"
 #include "util/Misc.h"
 #include "util/geo/Geo.h"
+#include "util/graph/BiDijkstra.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
@@ -148,7 +149,8 @@ int main(int argc, char** argv) {
     LOG(INFO, std::cerr) << "Octilinearized using heur approach in "
                          << T_STOP(octi) << " ms, score " << sc;
 
-    std::cerr << "Iters: " << Dijkstra::ITERS << std::endl;
+    std::cerr << "Iters   : " << util::graph::Dijkstra::ITERS << std::endl;
+    std::cerr << "Iters Bi: " << util::graph::BiDijkstra::ITERS << std::endl;
   }
 
   if (cfg.printMode == "gridgraph") {

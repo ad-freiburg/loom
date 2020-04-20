@@ -51,7 +51,7 @@ class EDijkstra : public ShortestPath<EDijkstra> {
   };
 
   template <typename N, typename E, typename C>
-  struct CostFunc : public ShortestPath::CostFunc<N, E, C> {
+  struct CostFunc : public util::graph::CostFunc<N, E, C> {
     C operator()(const Node<N, E>* from, const Edge<N, E>* e,
                  const Node<N, E>* to) const {
       UNUSED(from);
@@ -62,7 +62,7 @@ class EDijkstra : public ShortestPath<EDijkstra> {
   };
 
   template <typename N, typename E, typename C>
-  struct HeurFunc : public ShortestPath::HeurFunc<N, E, C> {
+  struct HeurFunc : public util::graph::HeurFunc<N, E, C> {
     C operator()(const Node<N, E>* from,
                  const std::set<Node<N, E>*>& to) const {
       UNUSED(from);
@@ -80,39 +80,39 @@ class EDijkstra : public ShortestPath<EDijkstra> {
   template <typename N, typename E, typename C>
   static C shortestPathImpl(const std::set<Edge<N, E>*> from,
                             const std::set<Edge<N, E>*>& to,
-                            const ShortestPath::CostFunc<N, E, C>& costFunc,
-                            const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                            const util::graph::CostFunc<N, E, C>& costFunc,
+                            const util::graph::HeurFunc<N, E, C>& heurFunc,
                             EList<N, E>* resEdges, NList<N, E>* resNodes);
 
   template <typename N, typename E, typename C>
   static C shortestPathImpl(Node<N, E>* from, const std::set<Node<N, E>*>& to,
-                            const ShortestPath::CostFunc<N, E, C>& costFunc,
-                            const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                            const util::graph::CostFunc<N, E, C>& costFunc,
+                            const util::graph::HeurFunc<N, E, C>& heurFunc,
                             EList<N, E>* resEdges, NList<N, E>* resNodes);
 
   template <typename N, typename E, typename C>
   static C shortestPathImpl(Edge<N, E>* from, const std::set<Node<N, E>*>& to,
-                            const ShortestPath::CostFunc<N, E, C>& costFunc,
-                            const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                            const util::graph::CostFunc<N, E, C>& costFunc,
+                            const util::graph::HeurFunc<N, E, C>& heurFunc,
                             EList<N, E>* resEdges, NList<N, E>* resNodes);
 
   template <typename N, typename E, typename C>
   static C shortestPathImpl(const std::set<Edge<N, E>*>& from,
                             const std::set<Node<N, E>*>& to,
-                            const ShortestPath::CostFunc<N, E, C>& costFunc,
-                            const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                            const util::graph::CostFunc<N, E, C>& costFunc,
+                            const util::graph::HeurFunc<N, E, C>& heurFunc,
                             EList<N, E>* resEdges, NList<N, E>* resNodes);
 
   template <typename N, typename E, typename C>
   static std::unordered_map<Edge<N, E>*, C> shortestPathImpl(
       const std::set<Edge<N, E>*>& from,
-      const ShortestPath::CostFunc<N, E, C>& costFunc, bool rev);
+      const util::graph::CostFunc<N, E, C>& costFunc, bool rev);
 
   template <typename N, typename E, typename C>
   static std::unordered_map<Edge<N, E>*, C> shortestPathImpl(
       Edge<N, E>* from, const std::set<Edge<N, E>*>& to,
-      const ShortestPath::CostFunc<N, E, C>& costFunc,
-      const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+      const util::graph::CostFunc<N, E, C>& costFunc,
+      const util::graph::HeurFunc<N, E, C>& heurFunc,
       std::unordered_map<Edge<N, E>*, EList<N, E>*> resEdges,
       std::unordered_map<Edge<N, E>*, NList<N, E>*> resNodes);
 
@@ -123,13 +123,13 @@ class EDijkstra : public ShortestPath<EDijkstra> {
   template <typename N, typename E, typename C>
   static inline void relax(RouteEdge<N, E, C>& cur,
                            const std::set<Edge<N, E>*>& to,
-                           const ShortestPath::CostFunc<N, E, C>& costFunc,
-                           const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                           const util::graph::CostFunc<N, E, C>& costFunc,
+                           const util::graph::HeurFunc<N, E, C>& heurFunc,
                            PQ<N, E, C>& pq);
 
   template <typename N, typename E, typename C>
   static void relaxInv(RouteEdge<N, E, C>& cur,
-                      const ShortestPath::CostFunc<N, E, C>& costFunc,
+                      const util::graph::CostFunc<N, E, C>& costFunc,
                       PQ<N, E, C>& pq);
 
   static size_t ITERS;

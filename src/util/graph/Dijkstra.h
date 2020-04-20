@@ -9,7 +9,6 @@
 #include <list>
 #include <queue>
 #include <set>
-#include <set>
 #include <unordered_map>
 #include "util/graph/Edge.h"
 #include "util/graph/Graph.h"
@@ -19,9 +18,9 @@
 namespace util {
 namespace graph {
 
+using util::graph::Edge;
 using util::graph::Graph;
 using util::graph::Node;
-using util::graph::Edge;
 
 // dijkstras algorithm for util graph
 class Dijkstra : public ShortestPath<Dijkstra> {
@@ -44,9 +43,7 @@ class Dijkstra : public ShortestPath<Dijkstra> {
     // the heuristical remaining cost + the cost so far
     C h;
 
-    bool operator<(const RouteNode<N, E, C>& p) const {
-      return h > p.h;
-    }
+    bool operator<(const RouteNode<N, E, C>& p) const { return h > p.h; }
   };
 
   template <typename N, typename E, typename C>
@@ -56,7 +53,7 @@ class Dijkstra : public ShortestPath<Dijkstra> {
   using PQ = std::priority_queue<RouteNode<N, E, C> >;
 
   template <typename N, typename E, typename C>
-  struct CostFunc : public ShortestPath::CostFunc<N, E, C> {
+  struct CostFunc : public util::graph::CostFunc<N, E, C> {
     virtual ~CostFunc() = default;
     C operator()(const Edge<N, E>* from, const Node<N, E>* n,
                  const Edge<N, E>* to) const {
@@ -68,7 +65,7 @@ class Dijkstra : public ShortestPath<Dijkstra> {
   };
 
   template <typename N, typename E, typename C>
-  struct HeurFunc : public ShortestPath::HeurFunc<N, E, C> {
+  struct HeurFunc : public util::graph::HeurFunc<N, E, C> {
     virtual ~HeurFunc() = default;
     C operator()(const Edge<N, E>* from,
                  const std::set<Edge<N, E>*>& to) const {
@@ -81,26 +78,29 @@ class Dijkstra : public ShortestPath<Dijkstra> {
   template <typename N, typename E, typename C>
   static std::unordered_map<Node<N, E>*, C> shortestPathImpl(
       Node<N, E>* from, const std::set<Node<N, E>*>& to,
-      const ShortestPath::CostFunc<N, E, C>& costFunc, const ShortestPath::HeurFunc<N, E, C>&,
+      const util::graph::CostFunc<N, E, C>& costFunc,
+      const util::graph::HeurFunc<N, E, C>&,
       std::unordered_map<Node<N, E>*, EList<N, E>*> resEdges,
       std::unordered_map<Node<N, E>*, NList<N, E>*> resNode);
 
   template <typename N, typename E, typename C>
-  static C shortestPathImpl(const std::set<Node<N, E>*> from, const std::set<Node<N, E>*>& to,
-                            const ShortestPath::CostFunc<N, E, C>& costFunc,
-                            const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+  static C shortestPathImpl(const std::set<Node<N, E>*> from,
+                            const std::set<Node<N, E>*>& to,
+                            const util::graph::CostFunc<N, E, C>& costFunc,
+                            const util::graph::HeurFunc<N, E, C>& heurFunc,
                             EList<N, E>* resEdges, NList<N, E>* resNodes);
 
   template <typename N, typename E, typename C>
   static C shortestPathImpl(Node<N, E>* from, const std::set<Node<N, E>*>& to,
-                            const ShortestPath::CostFunc<N, E, C>& costFunc,
-                            const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                            const util::graph::CostFunc<N, E, C>& costFunc,
+                            const util::graph::HeurFunc<N, E, C>& heurFunc,
                             EList<N, E>* resEdges, NList<N, E>* resNodes);
 
   template <typename N, typename E, typename C>
   static void relax(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
-                    const ShortestPath::CostFunc<N, E, C>& costFunc,
-                    const ShortestPath::HeurFunc<N, E, C>& heurFunc, PQ<N, E, C>& pq);
+                    const util::graph::CostFunc<N, E, C>& costFunc,
+                    const util::graph::HeurFunc<N, E, C>& heurFunc,
+                    PQ<N, E, C>& pq);
 
   template <typename N, typename E, typename C>
   static void buildPath(Node<N, E>* curN, Settled<N, E, C>& settled,
@@ -110,7 +110,7 @@ class Dijkstra : public ShortestPath<Dijkstra> {
 };
 
 #include "util/graph/Dijkstra.tpp"
-}
-}
+}  // namespace graph
+}  // namespace util
 
 #endif  // UTIL_GRAPH_DIJKSTRA_H_

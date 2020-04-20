@@ -508,8 +508,6 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     } else {
       auto cost = GridCost(cutoff + costOffsetTo + costOffsetFrom);
       Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
-
-      // BiDijkstra::shortestPath(frGrNds, toGrNds, cost, &eL, &nL);
     }
 
     delete heur;

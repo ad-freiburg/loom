@@ -5,8 +5,8 @@
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
 C Dijkstra::shortestPathImpl(Node<N, E>* from, const std::set<Node<N, E>*>& to,
-                             const ShortestPath::CostFunc<N, E, C>& costFunc,
-                             const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                             const util::graph::CostFunc<N, E, C>& costFunc,
+                             const util::graph::HeurFunc<N, E, C>& heurFunc,
                              EList<N, E>* resEdges, NList<N, E>* resNodes) {
   if (from->getOutDeg() == 0) return costFunc.inf();
 
@@ -49,8 +49,8 @@ C Dijkstra::shortestPathImpl(Node<N, E>* from, const std::set<Node<N, E>*>& to,
 template <typename N, typename E, typename C>
 C Dijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
                              const std::set<Node<N, E>*>& to,
-                             const ShortestPath::CostFunc<N, E, C>& costFunc,
-                             const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                             const util::graph::CostFunc<N, E, C>& costFunc,
+                             const util::graph::HeurFunc<N, E, C>& heurFunc,
                              EList<N, E>* resEdges, NList<N, E>* resNodes) {
   Settled<N, E, C> settled;
   PQ<N, E, C> pq;
@@ -92,8 +92,8 @@ C Dijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
 template <typename N, typename E, typename C>
 std::unordered_map<Node<N, E>*, C> Dijkstra::shortestPathImpl(
     Node<N, E>* from, const std::set<Node<N, E>*>& to,
-    const ShortestPath::CostFunc<N, E, C>& costFunc,
-    const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+    const util::graph::CostFunc<N, E, C>& costFunc,
+    const util::graph::HeurFunc<N, E, C>& heurFunc,
     std::unordered_map<Node<N, E>*, EList<N, E>*> resEdges,
     std::unordered_map<Node<N, E>*, NList<N, E>*> resNodes) {
   std::unordered_map<Node<N, E>*, C> costs;
@@ -147,8 +147,9 @@ std::unordered_map<Node<N, E>*, C> Dijkstra::shortestPathImpl(
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
 void Dijkstra::relax(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
-                     const ShortestPath::CostFunc<N, E, C>& costFunc,
-                     const ShortestPath::HeurFunc<N, E, C>& heurFunc, PQ<N, E, C>& pq) {
+                     const util::graph::CostFunc<N, E, C>& costFunc,
+                     const util::graph::HeurFunc<N, E, C>& heurFunc,
+                     PQ<N, E, C>& pq) {
   for (auto edge : cur.n->getAdjListOut()) {
     C newC = costFunc(cur.n, edge, edge->getOtherNd(cur.n));
     newC = cur.d + newC;
@@ -163,9 +164,8 @@ void Dijkstra::relax(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
 
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
-void Dijkstra::buildPath(Node<N, E>* curN,
-                         Settled<N, E, C>& settled, NList<N, E>* resNodes,
-                         EList<N, E>* resEdges) {
+void Dijkstra::buildPath(Node<N, E>* curN, Settled<N, E, C>& settled,
+                         NList<N, E>* resNodes, EList<N, E>* resEdges) {
   while (resNodes || resEdges) {
     const RouteNode<N, E, C>& curNode = settled[curN];
     if (resNodes) resNodes->push_back(curNode.n);

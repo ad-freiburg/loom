@@ -136,11 +136,7 @@ class GridGraph : public BaseGraph {
 struct GridGraphHeur
     : public util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
   GridGraphHeur(const basegraph::GridGraph* g, const std::set<GridNode*>& to)
-      : g(g), to(0) {
-    // TODO: for the normal orthogonal grid, a better heuristic can be used
-    // here!
-    if (to.size() == 1) this->to = *to.begin();
-
+      : g(g) {
     cheapestSink = std::numeric_limits<float>::infinity();
 
     for (auto n : to) {
@@ -163,8 +159,8 @@ struct GridGraphHeur
   }
 
   float operator()(const GridNode* from, const std::set<GridNode*>& to) const {
-    const_cast<GridNode*>(from)->pl().visited = true;
-    if (to.find(from->pl().getParent()) != to.end()) return 0;
+    // const_cast<GridNode*>(from)->pl().visited = true;
+    if (to.count(from->pl().getParent())) return 0;
 
     float ret = std::numeric_limits<float>::infinity();
 
@@ -179,7 +175,6 @@ struct GridGraphHeur
   }
 
   const octi::basegraph::BaseGraph* g;
-  GridNode* to;
   std::vector<size_t> hull;
   float cheapestSink;
 };

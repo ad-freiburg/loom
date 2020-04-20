@@ -78,6 +78,7 @@ struct GridCost : public util::graph::Dijkstra::CostFunc<GridNodePL, GridEdgePL,
                            const GridNode* to) const {
     UNUSED(from);
     UNUSED(to);
+    // const_cast<GridNode*>(from)->pl().visited = true;
     return e->pl().cost();
   }
 

@@ -5,8 +5,8 @@
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
 C EDijkstra::shortestPathImpl(Node<N, E>* from, const std::set<Node<N, E>*>& to,
-                              const ShortestPath::CostFunc<N, E, C>& costFunc,
-                              const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                              const util::graph::CostFunc<N, E, C>& costFunc,
+                              const util::graph::HeurFunc<N, E, C>& heurFunc,
                               EList<N, E>* resEdges, NList<N, E>* resNodes) {
   std::set<Edge<N, E>*> frEs;
   std::set<Edge<N, E>*> toEs;
@@ -28,8 +28,8 @@ C EDijkstra::shortestPathImpl(Node<N, E>* from, const std::set<Node<N, E>*>& to,
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
 C EDijkstra::shortestPathImpl(Edge<N, E>* from, const std::set<Node<N, E>*>& to,
-                              const ShortestPath::CostFunc<N, E, C>& costFunc,
-                              const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                              const util::graph::CostFunc<N, E, C>& costFunc,
+                              const util::graph::HeurFunc<N, E, C>& heurFunc,
                               EList<N, E>* resEdges, NList<N, E>* resNodes) {
   std::set<Edge<N, E>*> frEs;
   std::set<Edge<N, E>*> toEs;
@@ -49,8 +49,8 @@ C EDijkstra::shortestPathImpl(Edge<N, E>* from, const std::set<Node<N, E>*>& to,
 template <typename N, typename E, typename C>
 C EDijkstra::shortestPathImpl(const std::set<Edge<N, E>*> from,
                               const std::set<Edge<N, E>*>& to,
-                              const ShortestPath::CostFunc<N, E, C>& costFunc,
-                              const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                              const util::graph::CostFunc<N, E, C>& costFunc,
+                              const util::graph::HeurFunc<N, E, C>& heurFunc,
                               EList<N, E>* resEdges, NList<N, E>* resNodes) {
   if (from.size() == 0 || to.size() == 0) return costFunc.inf();
 
@@ -100,7 +100,7 @@ C EDijkstra::shortestPathImpl(const std::set<Edge<N, E>*> from,
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
 std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
-    const std::set<Edge<N, E>*>& from, const ShortestPath::CostFunc<N, E, C>& costFunc,
+    const std::set<Edge<N, E>*>& from, const util::graph::CostFunc<N, E, C>& costFunc,
     bool rev) {
   std::unordered_map<Edge<N, E>*, C> costs;
 
@@ -144,8 +144,8 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
 template <typename N, typename E, typename C>
 std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
     Edge<N, E>* from, const std::set<Edge<N, E>*>& to,
-    const ShortestPath::CostFunc<N, E, C>& costFunc,
-    const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+    const util::graph::CostFunc<N, E, C>& costFunc,
+    const util::graph::HeurFunc<N, E, C>& heurFunc,
     std::unordered_map<Edge<N, E>*, EList<N, E>*> resEdges,
     std::unordered_map<Edge<N, E>*, NList<N, E>*> resNodes) {
   std::unordered_map<Edge<N, E>*, C> costs;
@@ -196,7 +196,7 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
 void EDijkstra::relaxInv(RouteEdge<N, E, C>& cur,
-                         const ShortestPath::CostFunc<N, E, C>& costFunc,
+                         const util::graph::CostFunc<N, E, C>& costFunc,
                          PQ<N, E, C>& pq) {
 
   // handling undirected graph makes no sense here
@@ -214,8 +214,8 @@ void EDijkstra::relaxInv(RouteEdge<N, E, C>& cur,
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
 void EDijkstra::relax(RouteEdge<N, E, C>& cur, const std::set<Edge<N, E>*>& to,
-                      const ShortestPath::CostFunc<N, E, C>& costFunc,
-                      const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                      const util::graph::CostFunc<N, E, C>& costFunc,
+                      const util::graph::HeurFunc<N, E, C>& heurFunc,
                       PQ<N, E, C>& pq) {
   if (cur.e->getFrom()->hasEdgeIn(cur.e)) {
     // for undirected graphs

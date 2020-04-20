@@ -725,7 +725,7 @@ int main(int argc, char** argv) {
         res;
     res[eDC] = new EDijkstra::NList<std::string, int>();
     res[eED] = new EDijkstra::NList<std::string, int>();
-    auto hFunc = EDijkstra::ZeroHeurFunc<std::string, int, int>();
+    auto hFunc = ZeroHeurFunc<std::string, int, int>();
     std::unordered_map<Edge<std::string, int>*, int> cost =
         EDijkstra::shortestPath(eAB, tos, cFunc, hFunc, resE, res);
 

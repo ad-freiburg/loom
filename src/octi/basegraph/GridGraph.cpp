@@ -482,7 +482,7 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
   // return minHops * (heurECost + _heurHopCost) - _heurHopCost;
 
   // we always count one heurHopCost too much, subtract it at the end!
-  return edgCost + minHops * (_heurHopCost)-_heurHopCost;
+  return edgCost + minHops * (_heurHopCost) - _heurHopCost;
 }
 
 // _____________________________________________________________________________

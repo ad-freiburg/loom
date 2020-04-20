@@ -6,8 +6,8 @@
 template <typename N, typename E, typename C>
 C BiDijkstra::shortestPathImpl(Node<N, E>* from,
                                const std::set<Node<N, E>*>& to,
-                               const ShortestPath::CostFunc<N, E, C>& costFunc,
-                               const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                               const util::graph::CostFunc<N, E, C>& costFunc,
+                               const util::graph::HeurFunc<N, E, C>& heurFunc,
                                EList<N, E>* resEdges, NList<N, E>* resNodes) {
   if (from->getOutDeg() == 0) return costFunc.inf();
 
@@ -21,8 +21,8 @@ C BiDijkstra::shortestPathImpl(Node<N, E>* from,
 template <typename N, typename E, typename C>
 C BiDijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
                                const std::set<Node<N, E>*>& to,
-                               const ShortestPath::CostFunc<N, E, C>& costFunc,
-                               const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                               const util::graph::CostFunc<N, E, C>& costFunc,
+                               const util::graph::HeurFunc<N, E, C>& heurFunc,
                                EList<N, E>* resEdges, NList<N, E>* resNodes) {
   Settled<N, E, C> settledFwd, settledBwd;
   PQ<N, E, C> pqFwd, pqBwd;
@@ -38,12 +38,11 @@ C BiDijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
 
   RouteNode<N, E, C> cur;
 
-  while (!pqFwd.empty() || !pqBwd.empty()) {
-    if ((pqFwd.empty() || costFunc.inf() <= pqFwd.top().h) &&
-        (pqBwd.empty() || costFunc.inf() <= pqBwd.top().h))
+  while (!pqFwd.empty() && !pqBwd.empty()) {
+    if (costFunc.inf() <= pqFwd.top().h && costFunc.inf() <= pqBwd.top().h)
       return costFunc.inf();
 
-    if (pqFwd.empty() || pqFwd.top() < pqBwd.top()) {
+    if (pqFwd.top() < pqBwd.top()) {
       if (settledBwd.find(pqBwd.top().n) != settledBwd.end()) {
         pqBwd.pop();
         continue;
@@ -57,12 +56,12 @@ C BiDijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
 
     BiDijkstra::ITERS++;
 
-    if (pqFwd.empty() || pqFwd.top() < pqBwd.top()) {
+    if (pqFwd.top() < pqBwd.top()) {
       cur = pqBwd.top();
       pqBwd.pop();
       settledBwd[cur.n] = cur;
       if (settledFwd.find(cur.n) != settledFwd.end()) {
-        auto newL = cur.h + settledFwd.find(cur.n)->second.d;
+        auto newL = cur.d + settledFwd.find(cur.n)->second.d;
 
         if (!(newL > l)) {
           l = newL;
@@ -77,7 +76,7 @@ C BiDijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
       pqFwd.pop();
       settledFwd[cur.n] = cur;
       if (settledBwd.find(cur.n) != settledBwd.end()) {
-        auto newL = cur.h + settledBwd.find(cur.n)->second.d;
+        auto newL = cur.d + settledBwd.find(cur.n)->second.d;
 
         if (!(newL > l)) {
           l = newL;
@@ -101,8 +100,8 @@ C BiDijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
 template <typename N, typename E, typename C>
 std::unordered_map<Node<N, E>*, C> BiDijkstra::shortestPathImpl(
     Node<N, E>* from, const std::set<Node<N, E>*>& to,
-    const ShortestPath::CostFunc<N, E, C>& costFunc,
-    const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+    const util::graph::CostFunc<N, E, C>& costFunc,
+    const util::graph::HeurFunc<N, E, C>& heurFunc,
     std::unordered_map<Node<N, E>*, EList<N, E>*> resEdges,
     std::unordered_map<Node<N, E>*, NList<N, E>*> resNodes) {
   assert(false);
@@ -112,7 +111,6 @@ std::unordered_map<Node<N, E>*, C> BiDijkstra::shortestPathImpl(
   // for (auto n : to) costs[n] = costFunc.inf();
 
   // if (from->getOutDeg() == 0) return costs;
-
   // Settled<N, E, C> settled;
   // PQ<N, E, C> pq;
 
@@ -122,33 +120,33 @@ std::unordered_map<Node<N, E>*, C> BiDijkstra::shortestPathImpl(
   // RouteNode<N, E, C> cur;
 
   // while (!pq.empty()) {
-    // if (costFunc.inf() <= pq.top().h) return costs;
-    // if (settled.find(pq.top().n) != settled.end()) {
-      // pq.pop();
-      // continue;
-    // }
-    // BiDijkstra::ITERS++;
+  // if (costFunc.inf() <= pq.top().h) return costs;
+  // if (settled.find(pq.top().n) != settled.end()) {
+  // pq.pop();
+  // continue;
+  // }
+  // BiDijkstra::ITERS++;
 
-    // cur = pq.top();
-    // pq.pop();
+  // cur = pq.top();
+  // pq.pop();
 
-    // settled[cur.n] = cur;
+  // settled[cur.n] = cur;
 
-    // if (to.find(cur.n) != to.end()) {
-      // found++;
-    // }
+  // if (to.find(cur.n) != to.end()) {
+  // found++;
+  // }
 
-    // if (found == to.size()) break;
+  // if (found == to.size()) break;
 
-    // relax(cur, to, costFunc, heurFunc, pq);
+  // relax(cur, to, costFunc, heurFunc, pq);
   // }
 
   // for (auto nto : to) {
-    // if (!settled.count(nto)) continue;
-    // Node<N, E>* curN = nto;
-    // costs[nto] = settled[curN].d;
+  // if (!settled.count(nto)) continue;
+  // Node<N, E>* curN = nto;
+  // costs[nto] = settled[curN].d;
 
-    // buildPath(nto, settled, resNodes[nto], resEdges[nto]);
+  // buildPath(nto, settled, resNodes[nto], resEdges[nto]);
   // }
 
   // return costs;
@@ -157,8 +155,8 @@ std::unordered_map<Node<N, E>*, C> BiDijkstra::shortestPathImpl(
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
 void BiDijkstra::relax(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
-                       const ShortestPath::CostFunc<N, E, C>& costFunc,
-                       const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                       const util::graph::CostFunc<N, E, C>& costFunc,
+                       const util::graph::HeurFunc<N, E, C>& heurFunc,
                        PQ<N, E, C>& pq) {
   for (auto edge : cur.n->getAdjListOut()) {
     C newC = costFunc(cur.n, edge, edge->getOtherNd(cur.n));
@@ -175,8 +173,8 @@ void BiDijkstra::relax(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
 C BiDijkstra::relaxFwd(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
-                       const ShortestPath::CostFunc<N, E, C>& costFunc,
-                       const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                       const util::graph::CostFunc<N, E, C>& costFunc,
+                       const util::graph::HeurFunc<N, E, C>& heurFunc,
                        PQ<N, E, C>& pq, const Settled<N, E, C>& settledBwd) {
   C ret = costFunc.inf();
   for (auto edge : cur.n->getAdjListOut()) {
@@ -185,7 +183,9 @@ C BiDijkstra::relaxFwd(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
     if (costFunc.inf() <= newC) continue;
 
     // addition done here to avoid it in the PQ
-    // const C& newH = newC + heurFunc(edge->getOtherNd(cur.n), to);
+    // const C& newH = newC + heurFunc(froms, edge->getOtherNd(cur.n));
+
+    // TODO:
     const C& newH = newC + 0;
 
     // update new best found cost
@@ -204,8 +204,8 @@ C BiDijkstra::relaxFwd(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
 template <typename N, typename E, typename C>
 C BiDijkstra::relaxBwd(const std::set<Node<N, E>*>& froms,
                        RouteNode<N, E, C>& cur,
-                       const ShortestPath::CostFunc<N, E, C>& costFunc,
-                       const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                       const util::graph::CostFunc<N, E, C>& costFunc,
+                       const util::graph::HeurFunc<N, E, C>& heurFunc,
                        PQ<N, E, C>& pq, const Settled<N, E, C>& settledFwd) {
   C ret = costFunc.inf();
   for (auto edge : cur.n->getAdjListIn()) {
@@ -216,7 +216,7 @@ C BiDijkstra::relaxBwd(const std::set<Node<N, E>*>& froms,
     // addition done here to avoid it in the PQ
     // const C& newH = newC + heurFunc(froms, edge->getOtherNd(cur.n));
 
-    // TODO: add heur function allowing for definition of from set
+    // TODO:
     const C& newH = newC + 0;
 
     // update new best found cost
@@ -234,9 +234,8 @@ C BiDijkstra::relaxBwd(const std::set<Node<N, E>*>& froms,
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
 void BiDijkstra::buildPath(Node<N, E>* curN, Settled<N, E, C>& settledFwd,
-Settled<N, E, C>& settledBwd,
-                           NList<N, E>* resNodes, EList<N, E>* resEdges) {
-
+                           Settled<N, E, C>& settledBwd, NList<N, E>* resNodes,
+                           EList<N, E>* resEdges) {
   Node<N, E>* curNFwd = curN;
   Node<N, E>* curNBwd = curN;
 

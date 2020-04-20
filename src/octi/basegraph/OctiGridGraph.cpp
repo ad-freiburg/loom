@@ -335,7 +335,7 @@ double OctiGridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
       (_c.verticalPen * dx + _c.horizontalPen * dy) +
       _diagSave * std::min(dx, dy);
 
-  // Alternative: use chebyshev distance heuristic
+  // Worse alternative: use a chebyshev distance heuristic
   // double heurECost =
       // (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
 

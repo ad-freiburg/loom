@@ -54,9 +54,8 @@ class BiDijkstra : public ShortestPath<BiDijkstra> {
   using PQ = std::priority_queue<RouteNode<N, E, C> >;
 
   template <typename N, typename E, typename C>
-  struct CostFunc : public ShortestPath::CostFunc<N, E, C> {
-    virtual ~CostFunc() = default;
-    C operator()(const Edge<N, E>* from, const Node<N, E>* n,
+  struct CostFunc : public util::graph::CostFunc<N, E, C> {
+    virtual ~CostFunc() = default; C operator()(const Edge<N, E>* from, const Node<N, E>* n,
                  const Edge<N, E>* to) const {
       UNUSED(from);
       UNUSED(n);
@@ -66,7 +65,7 @@ class BiDijkstra : public ShortestPath<BiDijkstra> {
   };
 
   template <typename N, typename E, typename C>
-  struct HeurFunc : public ShortestPath::HeurFunc<N, E, C> {
+  struct HeurFunc : public util::graph::HeurFunc<N, E, C> {
     virtual ~HeurFunc() = default;
     C operator()(const Edge<N, E>* from,
                  const std::set<Edge<N, E>*>& to) const {
@@ -79,40 +78,40 @@ class BiDijkstra : public ShortestPath<BiDijkstra> {
   template <typename N, typename E, typename C>
   static std::unordered_map<Node<N, E>*, C> shortestPathImpl(
       Node<N, E>* from, const std::set<Node<N, E>*>& to,
-      const ShortestPath::CostFunc<N, E, C>& costFunc,
-      const ShortestPath::HeurFunc<N, E, C>&,
+      const util::graph::CostFunc<N, E, C>& costFunc,
+      const util::graph::HeurFunc<N, E, C>&,
       std::unordered_map<Node<N, E>*, EList<N, E>*> resEdges,
       std::unordered_map<Node<N, E>*, NList<N, E>*> resNode);
 
   template <typename N, typename E, typename C>
   static C shortestPathImpl(const std::set<Node<N, E>*> from,
                             const std::set<Node<N, E>*>& to,
-                            const ShortestPath::CostFunc<N, E, C>& costFunc,
-                            const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                            const util::graph::CostFunc<N, E, C>& costFunc,
+                            const util::graph::HeurFunc<N, E, C>& heurFunc,
                             EList<N, E>* resEdges, NList<N, E>* resNodes);
 
   template <typename N, typename E, typename C>
   static C shortestPathImpl(Node<N, E>* from, const std::set<Node<N, E>*>& to,
-                            const ShortestPath::CostFunc<N, E, C>& costFunc,
-                            const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                            const util::graph::CostFunc<N, E, C>& costFunc,
+                            const util::graph::HeurFunc<N, E, C>& heurFunc,
                             EList<N, E>* resEdges, NList<N, E>* resNodes);
 
   template <typename N, typename E, typename C>
   static void relax(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
-                    const ShortestPath::CostFunc<N, E, C>& costFunc,
-                    const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                    const util::graph::CostFunc<N, E, C>& costFunc,
+                    const util::graph::HeurFunc<N, E, C>& heurFunc,
                     PQ<N, E, C>& pq);
 
   template <typename N, typename E, typename C>
   static C relaxFwd(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
-                    const ShortestPath::CostFunc<N, E, C>& costFunc,
-                    const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                    const util::graph::CostFunc<N, E, C>& costFunc,
+                    const util::graph::HeurFunc<N, E, C>& heurFunc,
                     PQ<N, E, C>& pq, const Settled<N, E, C>& settledBwd);
 
   template <typename N, typename E, typename C>
   static C relaxBwd(const std::set<Node<N, E>*>& froms, RouteNode<N, E, C>& cur,
-                    const ShortestPath::CostFunc<N, E, C>& costFunc,
-                    const ShortestPath::HeurFunc<N, E, C>& heurFunc,
+                    const util::graph::CostFunc<N, E, C>& costFunc,
+                    const util::graph::HeurFunc<N, E, C>& heurFunc,
                     PQ<N, E, C>& pq, const Settled<N, E, C>& settledFwd);
 
   template <typename N, typename E, typename C>
