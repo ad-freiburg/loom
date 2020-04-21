@@ -107,6 +107,7 @@ class Dijkstra : public ShortestPath<Dijkstra> {
                         NList<N, E>* resNodes, EList<N, E>* resEdges);
 
   static size_t ITERS;
+  static size_t DBL_VISITS;
 };
 
 #include "util/graph/Dijkstra.tpp"

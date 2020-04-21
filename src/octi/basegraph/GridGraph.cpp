@@ -468,21 +468,22 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
   int dx = labs(xb - xa);
   int dy = labs(yb - ya);
 
-  double minHops = std::max(dx, dy);
-
-  // cost without using diagonals
-  // we can take at most min(dx, dy) diagonal edges. Edge diagonal edge saves us
-  // one horizontal and one vertical edge, but costs a diagonal edge
-  double edgCost = (_c.horizontalPen * dx + _c.verticalPen * dy);
-
   // Alternative: use chebyshev distance heuristic
+  // double minHops = std::max(dx, dy);
+
   // double heurECost =
-      // (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
+  // (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
 
   // return minHops * (heurECost + _heurHopCost) - _heurHopCost;
 
+  double edgCost = ((_c.horizontalPen + _heurHopCost) * dx +
+                    (_c.verticalPen + _heurHopCost) * dy);
+
+  // we have to do at least one turn, which can only be a 90 degree turn
+  if (dx != 0 && dy != 0) edgCost += _c.p_90;
+
   // we always count one heurHopCost too much, subtract it at the end!
-  return edgCost + minHops * (_heurHopCost) - _heurHopCost;
+  return edgCost - _heurHopCost;
 }
 
 // _____________________________________________________________________________

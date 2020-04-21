@@ -70,9 +70,13 @@ C EDijkstra::shortestPathImpl(const std::set<Edge<N, E>*> from,
 
   while (!pq.empty()) {
     if (costFunc.inf() <= pq.top().h) return costFunc.inf();
-    if (settled.find(pq.top().e) != settled.end()) {
-      pq.pop();
-      continue;
+    auto se = settled.find(pq.top().e);
+    if (se != settled.end()) {
+      // to allow non-consistent heuristics
+      if (se->second.d <= pq.top().d) {
+        pq.pop();
+        continue;
+      }
     }
 
     EDijkstra::ITERS++;
@@ -116,9 +120,13 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
   RouteEdge<N, E, C> cur;
 
   while (!pq.empty()) {
-    if (settled.find(pq.top().e) != settled.end()) {
-      pq.pop();
-      continue;
+    auto se = settled.find(pq.top().e);
+    if (se != settled.end()) {
+      // to allow non-consistent heuristics
+      if (se->second.d <= pq.top().d) {
+        pq.pop();
+        continue;
+      }
     }
 
     EDijkstra::ITERS++;
@@ -167,9 +175,13 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
 
   while (!pq.empty()) {
     if (costFunc.inf() <= pq.top().h) return costs;
-    if (settled.find(pq.top().e) != settled.end()) {
-      pq.pop();
-      continue;
+    auto se = settled.find(pq.top().e);
+    if (se != settled.end()) {
+      // to allow non-consistent heuristics
+      if (se->second.d <= pq.top().d) {
+        pq.pop();
+        continue;
+      }
     }
 
     EDijkstra::ITERS++;

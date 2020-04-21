@@ -43,14 +43,22 @@ C BiDijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
       return costFunc.inf();
 
     if (pqFwd.top() < pqBwd.top()) {
-      if (settledBwd.find(pqBwd.top().n) != settledBwd.end()) {
-        pqBwd.pop();
-        continue;
+      auto se = settledBwd.find(pqBwd.top().n);
+      if (se != settledBwd.end()) {
+        // to allow non-consistent heuristics
+        if (se->second.d <= pqBwd.top().d) {
+          pqBwd.pop();
+          continue;
+        }
       }
     } else {
-      if (settledFwd.find(pqFwd.top().n) != settledFwd.end()) {
-        pqFwd.pop();
-        continue;
+      auto se = settledFwd.find(pqFwd.top().n);
+      if (se != settledFwd.end()) {
+        // to allow non-consistent heuristics
+        if (se->second.d <= pqFwd.top().d) {
+          pqFwd.pop();
+          continue;
+        }
       }
     }
 

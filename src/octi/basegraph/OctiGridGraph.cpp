@@ -322,25 +322,28 @@ GridNode* OctiGridGraph::getNode(size_t x, size_t y) const {
 
 // _____________________________________________________________________________
 double OctiGridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
-                           int64_t yb) const {
+                               int64_t yb) const {
   int dx = labs(xb - xa);
   int dy = labs(yb - ya);
-
-  double minHops = std::max(dx, dy);
 
   // cost without using diagonals
   // we can take at most min(dx, dy) diagonal edges. Edge diagonal edge saves us
   // one horizontal and one vertical edge, but costs a diagonal edge
   double edgeCost =
-      (_c.horizontalPen * dx + _c.verticalPen * dy) +
-      _diagSave * std::min(dx, dy);
+      _heurXCost * dx + _heurYCost * dy + _heurDiagSave * std::min(dx, dy);
 
-  // Worse alternative: use a chebyshev distance heuristic
+  // we have to do at least one turn!
+  if (dx != dy && dx != 0 && dy != 0) edgeCost += _c.p_135;
+
+  // // Worse alternative: use a chebyshev distance heuristic
+  // double minHops = std::max(dx, dy);
   // double heurECost =
-      // (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
+  // (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
 
-  // return minHops * (heurECost + _heurHopCost) - _heurHopCost;
+  // double cc = minHops * (heurECost + _heurHopCost) - _heurHopCost;
+
+  // return cc;
 
   // we always count one heurHopCost too much, subtract it at the end!
-  return edgeCost + minHops * (_heurHopCost)-_heurHopCost;
+  return edgeCost - _heurHopCost;
 }

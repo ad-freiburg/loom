@@ -5,3 +5,4 @@
 #include "util/graph/Dijkstra.h"
 
 size_t util::graph::Dijkstra::ITERS = 0;
+size_t util::graph::Dijkstra::DBL_VISITS = 0;

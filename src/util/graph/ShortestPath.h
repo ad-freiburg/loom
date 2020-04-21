@@ -178,6 +178,14 @@ class ShortestPath {
   }
 
   template <typename N, typename E, typename C>
+  static C shortestPath(Node<N, E>* from, const std::set<Node<N, E>*>& tos,
+                        const CostFunc<N, E, C>& costFunc) {
+    EList<N, E>* el = 0;
+    NList<N, E>* nl = 0;
+    return shortestPath(from, tos, costFunc, el, nl);
+  }
+
+  template <typename N, typename E, typename C>
   static C shortestPath(Node<N, E>* from, Node<N, E>* to,
                         const CostFunc<N, E, C>& costFunc) {
     if (to->getInDeg() == 0) return costFunc.inf();

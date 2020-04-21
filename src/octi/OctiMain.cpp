@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
   if (cfg.obstaclePath.size()) {
     LOG(INFO, std::cerr) << "Reading obstacle file... ";
     cfg.obstacles = readObstacleFile(cfg.obstaclePath);
-    LOG(INFO, std::cerr) << "Done (" << cfg.obstacles.size() << " obstacles)";
+    LOG(INFO, std::cerr) << "Done. (" << cfg.obstacles.size() << " obstacles)";
   }
 
   LOG(INFO, std::cerr) << "Reading graph file... ";
@@ -98,12 +98,12 @@ int main(int argc, char** argv) {
     tg.readFromDot(&(std::cin), 0);
   else
     tg.readFromJson(&(std::cin), 0);
-  LOG(INFO, std::cerr) << " done (" << T_STOP(read) << "ms)";
+  LOG(INFO, std::cerr) << "Done. (" << T_STOP(read) << "ms)";
 
   LOG(INFO, std::cerr) << "Planarize graph... ";
   T_START(planarize);
   tg.topologizeIsects();
-  LOG(INFO, std::cerr) << " done (" << T_STOP(planarize) << "ms)";
+  LOG(INFO, std::cerr) << "Done. (" << T_STOP(planarize) << "ms)";
 
   double avgDist = avgStatDist(tg);
   LOG(INFO, std::cerr) << "Average adj. node distance is " << avgDist;
@@ -148,9 +148,6 @@ int main(int argc, char** argv) {
     }
     LOG(INFO, std::cerr) << "Octilinearized using heur approach in "
                          << T_STOP(octi) << " ms, score " << sc;
-
-    std::cerr << "Iters   : " << util::graph::Dijkstra::ITERS << std::endl;
-    std::cerr << "Iters Bi: " << util::graph::BiDijkstra::ITERS << std::endl;
   }
 
   if (cfg.printMode == "gridgraph") {

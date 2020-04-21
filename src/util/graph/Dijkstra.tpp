@@ -62,9 +62,14 @@ C Dijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
 
   while (!pq.empty()) {
     if (costFunc.inf() <= pq.top().h) return costFunc.inf();
-    if (settled.find(pq.top().n) != settled.end()) {
-      pq.pop();
-      continue;
+    auto se = settled.find(pq.top().n);
+    if (se != settled.end()) {
+      // to allow non-consistent heuristics
+      if (se->second.d <= pq.top().d) {
+        pq.pop();
+        continue;
+      }
+      Dijkstra::DBL_VISITS++;
     }
     Dijkstra::ITERS++;
 
@@ -113,9 +118,13 @@ std::unordered_map<Node<N, E>*, C> Dijkstra::shortestPathImpl(
 
   while (!pq.empty()) {
     if (costFunc.inf() <= pq.top().h) return costs;
-    if (settled.find(pq.top().n) != settled.end()) {
-      pq.pop();
-      continue;
+    auto se = settled.find(pq.top().n);
+    if (se != settled.end()) {
+      // to allow non-consistent heuristics
+      if (se->second.d <= pq.top().d) {
+        pq.pop();
+        continue;
+      }
     }
     Dijkstra::ITERS++;
 

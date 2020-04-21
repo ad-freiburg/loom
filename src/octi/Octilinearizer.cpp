@@ -123,7 +123,7 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
     for (auto cmbEdg : initOrder) {
       gg->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
     }
-    LOG(INFO) << " done (" << T_STOP(geopens) << "ms)";
+    LOG(INFO) << "Done. (" << T_STOP(geopens) << "ms)";
     geoPens = &enfGeoPens;
   }
 
@@ -197,7 +197,7 @@ double Octilinearizer::draw(
     ggs[i] = newBaseGraph(box, gridSize, borderRad, pens);
     ggs[i]->init();
   }
-  LOG(INFO, std::cerr) << " done (" << T_STOP(ggraph) << "ms)";
+  LOG(INFO, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
 
   bool found = false;
 
@@ -215,7 +215,7 @@ double Octilinearizer::draw(
     for (auto cmbEdg : initOrder) {
       ggs[0]->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
     }
-    LOG(INFO, std::cerr) << " done (" << T_STOP(geopens) << "ms)";
+    LOG(INFO, std::cerr) << "Done. (" << T_STOP(geopens) << "ms)";
     geoPens = &enfGeoPens;
   }
 
@@ -224,7 +224,7 @@ double Octilinearizer::draw(
     T_START(obstacles);
     for (auto gg : ggs)
       for (const auto& obst : obstacles) gg->addObstacle(obst);
-    LOG(INFO, std::cerr) << " done (" << T_STOP(obstacles) << "ms)";
+    LOG(INFO, std::cerr) << "Done. (" << T_STOP(obstacles) << "ms)";
   }
 
   Drawing drawing(ggs[0]);
@@ -242,12 +242,12 @@ double Octilinearizer::draw(
 
     if (locFound) {
       LOG(INFO, std::cerr) << " ++ Try " << i << ", score " << drawing.score()
-                           << ", (took " << T_STOP(draw) << " ms)";
+                           << ", (" << T_STOP(draw) << " ms)";
       found = true;
     } else {
       LOG(INFO, std::cerr) << " ++ Try " << i << ", score <inf>"
                            << ", next <not found>"
-                           << " (took " << T_STOP(draw) << " ms)";
+                           << " (" << T_STOP(draw) << " ms)";
     }
 
     drawing.eraseFromGrid(ggs[0]);
@@ -265,7 +265,7 @@ double Octilinearizer::draw(
 
   size_t iters = 0;
 
-  LOG(INFO, std::cerr) << "Iterating...";
+  LOG(INFO, std::cerr) << "Starting local search...";
 
   std::vector<std::vector<CombNode*>> batches(jobs);
   size_t c = 0;
@@ -350,7 +350,7 @@ double Octilinearizer::draw(
     double imp = (drawing.score() - bestFrIters[bestCore].score());
     LOG(INFO, std::cerr) << " ++ Iter " << iters << ", prev " << drawing.score()
                          << ", next " << bestFrIters[bestCore].score() << " ("
-                         << (imp >= 0 ? "+" : "") << imp << ", took "
+                         << (imp >= 0 ? "+" : "") << imp << ", "
                          << T_STOP(iter) << " ms)";
 
     for (size_t i = 0; i < jobs; i++) {
@@ -507,7 +507,19 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
     } else {
       auto cost = GridCost(cutoff + costOffsetTo + costOffsetFrom);
-      Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
+
+      // auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
+      auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
+
+      // for (auto e : eL) std::cerr << "E " << e << " " << e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> " << e->getTo()->pl().getX() << "," << e->getTo()->pl().getY() << " " << e->pl().cost() << std::endl;
+      // eL.clear();
+      // nL.clear();
+
+      // auto c2 = Dijkstra::shortestPath(frGrNds, toGrNds, cost, &eL, &nL);
+      // std::cerr << c << " vs " << c2 << " " << fabs(c - c2) << std::endl;
+      // for (auto e : eL) std::cerr << "E " << e << " " << e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> " << e->getTo()->pl().getX() << "," << e->getTo()->pl().getY() << " " << e->pl().cost() << std::endl;
+      // assert((isinf(c) && isinf(c2)) || (fabs(c - c2) < 0.0001));
+      // exit(0);
     }
 
     delete heur;

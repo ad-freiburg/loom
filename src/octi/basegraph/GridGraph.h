@@ -133,6 +133,21 @@ class GridGraph : public BaseGraph {
   virtual void getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]);
 };
 
+struct GridCost : public util::graph::Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
+  GridCost(float inf) : _inf(inf) {}
+  virtual float operator()(const GridNode* from, const GridEdge* e,
+                           const GridNode* to) const {
+    UNUSED(from);
+    UNUSED(to);
+    // const_cast<GridNode*>(from)->pl().visited = true;
+    return e->pl().cost();
+  }
+
+  float _inf;
+
+  virtual float inf() const { return _inf; }
+};
+
 struct GridGraphHeur
     : public util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
   GridGraphHeur(const basegraph::GridGraph* g, const std::set<GridNode*>& to)
@@ -140,6 +155,7 @@ struct GridGraphHeur
     cheapestSink = std::numeric_limits<float>::infinity();
 
     for (auto n : to) {
+      assert(n->pl().getParent() == n);
       size_t i = 0;
       for (; i < g->getNumNeighbors(); i++) {
         float sinkCost = g->getEdg(n->pl().getPort(i), n)->pl().cost();
@@ -170,6 +186,13 @@ struct GridGraphHeur
                               hull[i + 1]);
       if (tmp < ret) ret = tmp;
     }
+
+    // auto cost = GridCost(500);
+    // auto c = util::graph::Dijkstra::shortestPath(const_cast<GridNode*>(from), to, cost);
+
+    // // std::cerr << c << " VSS " << ret + cheapestSink << std::endl;
+
+    // assert(c >= ret + cheapestSink);
 
     return ret + cheapestSink;
   }

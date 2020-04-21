@@ -17,7 +17,32 @@ class OctiGridGraph : public GridGraph {
                 const Penalties& pens)
       : GridGraph(bbox, cellSize, spacer, pens) {
     // to prevent the calculation later on
-    _diagSave = (_c.diagonalPen - (_c.horizontalPen + _c.verticalPen));
+
+    _heurXCost = _c.horizontalPen + _heurHopCost;
+    _heurYCost = _c.verticalPen + _heurHopCost;
+    _heurDiagCost = _c.diagonalPen + _heurHopCost;
+
+    if (_heurDiagCost < _heurXCost) {
+      // 1) two horizontal hops may be substituted by two diagonal hops
+      // 2) a horizontal hop may be subsituted by a diagonal + a vertical hop
+      // in both cases, the minimum x hops required is _heurDiagCost
+      _heurXCost = _heurDiagCost;
+    }
+
+    if (_heurDiagCost < _heurYCost) {
+      // 1) two vertical hops may be substituted by two diagonal hops
+      // 2) a vertical hop may be subsituted by a diagonal + a horizontal hop
+      // in both cases, the minimum y hops required is _heurDiagCost
+      _heurYCost = _heurDiagCost;
+    }
+
+    if (_heurDiagCost > _heurXCost + _heurYCost) {
+      // if the diagonal cost is greater than the horizontal plus the
+      // vertical, we can never save something by going diagonal
+      _heurDiagSave = 0;
+    } else {
+      _heurDiagSave = _heurDiagCost - _heurXCost - _heurYCost;
+    }
   }
 
   virtual void unSettleEdg(GridNode* a, GridNode* b);
@@ -34,7 +59,10 @@ class OctiGridGraph : public GridGraph {
   virtual double getBendPen(size_t origI, size_t targetI) const;
   double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
-  double _diagSave;
+  double _heurDiagSave;
+  double _heurXCost;
+  double _heurYCost;
+  double _heurDiagCost;
 };
 }  // namespace basegraph
 }  // namespace octi
