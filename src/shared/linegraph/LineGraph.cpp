@@ -685,6 +685,7 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
         ce->pl().addLine(lo.line, 0);
       }
 
+      edgeRpl(n, eo.first, ce);
       delEdg(eo.first->getFrom(), eo.first->getTo());
     }
 
@@ -693,7 +694,7 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
       for (auto ea : cn->getAdjList()) {
         if (ea == ce) continue;
         for (auto eb : cn->getAdjList()) {
-          if (ea == ce) continue;
+          if (eb == ce) continue;
           if (ea == eb) continue;
           cn->pl().addConnExc(lo.line, ea, eb);
         }

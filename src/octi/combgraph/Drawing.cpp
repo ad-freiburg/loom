@@ -219,7 +219,13 @@ void Drawing::getLineGraph(LineGraph* target) const {
 
         shared::linegraph::LineEdgePL payload = e->pl();
         payload.setPolyline(pl);
-        target->addEdg(m[from], m[to], payload);
+
+        // this is the new edge
+        auto newE = target->addEdg(m[from], m[to], payload);
+        LineGraph::edgeRpl(m[from], e, newE);
+        LineGraph::edgeRpl(m[to], e, newE);
+        LineGraph::nodeRpl(newE, from, m[from]);
+        LineGraph::nodeRpl(newE, to, m[to]);
 
         i++;
       }
@@ -259,7 +265,7 @@ double Drawing::recalcBends(const CombNode* nd) {
     auto ge = _edgs.find(e)->second;
 
     size_t dirA = 0;
-    for (; dirA < 8; dirA++) {
+    for (; dirA < _gg->getNumNeighbors(); dirA++) {
       if (gnd->pl().getPort(dirA) == _gg->getGrEdgById(ge.front())->getFrom() ||
           gnd->pl().getPort(dirA) == _gg->getGrEdgById(ge.front())->getTo() ||
           gnd->pl().getPort(dirA) == _gg->getGrEdgById(ge.back())->getFrom() ||
@@ -268,7 +274,7 @@ double Drawing::recalcBends(const CombNode* nd) {
       }
     }
 
-    assert(dirA < 8);
+    assert(dirA < _gg->getNumNeighbors());
 
     for (auto lo : e->pl().getChilds().front()->pl().getLines()) {
       for (auto f : nd->getAdjList()) {
@@ -280,7 +286,7 @@ double Drawing::recalcBends(const CombNode* nd) {
 
         if (f->pl().getChilds().front()->pl().hasLine(lo.line)) {
           size_t dirB = 0;
-          for (; dirB < 8; dirB++) {
+          for (; dirB < _gg->getNumNeighbors(); dirB++) {
             if (gnd->pl().getPort(dirB) ==
                     _gg->getGrEdgById(gf.front())->getFrom() ||
                 gnd->pl().getPort(dirB) ==
@@ -293,8 +299,9 @@ double Drawing::recalcBends(const CombNode* nd) {
             }
           }
 
-          assert(dirB < 8);
+          assert(dirB < _gg->getNumNeighbors());
 
+          TODO(this does not work with orthogonal layout!!)
           int ang = (8 + (dirA - dirB)) % 8;
           if (ang > 4) ang = 8 - ang;
           ang = ang % 4;

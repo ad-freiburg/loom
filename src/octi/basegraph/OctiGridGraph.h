@@ -16,8 +16,8 @@ class OctiGridGraph : public GridGraph {
   OctiGridGraph(const util::geo::DBox& bbox, double cellSize, double spacer,
                 const Penalties& pens)
       : GridGraph(bbox, cellSize, spacer, pens) {
-    // to prevent the calculation later on
 
+    // prepare the octigrid A* heuristic
     _heurXCost = _c.horizontalPen + _heurHopCost;
     _heurYCost = _c.verticalPen + _heurHopCost;
     _heurDiagCost = _c.diagonalPen + _heurHopCost;
@@ -41,6 +41,8 @@ class OctiGridGraph : public GridGraph {
       // vertical, we can never save something by going diagonal
       _heurDiagSave = 0;
     } else {
+      // else, we save one x hop and one y hop at the cost of one
+      // diagonal hop
       _heurDiagSave = _heurDiagCost - _heurXCost - _heurYCost;
     }
   }

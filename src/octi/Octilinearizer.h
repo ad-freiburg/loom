@@ -12,8 +12,8 @@
 #include "octi/combgraph/CombGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "shared/linegraph/LineGraph.h"
-#include "util/graph/Dijkstra.h"
 #include "util/graph/BiDijkstra.h"
+#include "util/graph/Dijkstra.h"
 
 namespace octi {
 
@@ -72,13 +72,13 @@ struct GraphMeasures {
   size_t maxDeg;
 };
 
-struct GridCost : public util::graph::Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
+struct GridCost
+    : public util::graph::Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
   GridCost(float inf) : _inf(inf) {}
   virtual float operator()(const GridNode* from, const GridEdge* e,
                            const GridNode* to) const {
     UNUSED(from);
     UNUSED(to);
-    // const_cast<GridNode*>(from)->pl().visited = true;
     return e->pl().cost();
   }
 

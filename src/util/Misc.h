@@ -27,6 +27,8 @@
 #define _GET_TEST_MACRO(_1,_2,_3,NAME,...) NAME
 #define TEST(...) _GET_TEST_MACRO(__VA_ARGS__, _TEST3, _TEST2, _TEST1)(__VA_ARGS__)
 
+#define TODO(msg) std::cerr << "\n" __FILE__ << ":" << __LINE__ << ": TODO: " << #msg << std::endl;
+
 namespace util {
 
 // cached first 10 powers of 10

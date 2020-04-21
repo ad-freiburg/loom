@@ -14,8 +14,8 @@
 #include "octi/combgraph/Drawing.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
-#include "util/graph/Dijkstra.h"
 #include "util/graph/BiDijkstra.h"
+#include "util/graph/Dijkstra.h"
 #include "util/log/Log.h"
 
 #include "ilp/ILPGridOptimizer.h"
@@ -30,8 +30,8 @@ using util::geo::DBox;
 using util::geo::dist;
 using util::geo::DPoint;
 using util::geo::len;
-using util::graph::Dijkstra;
 using util::graph::BiDijkstra;
+using util::graph::Dijkstra;
 
 // _____________________________________________________________________________
 void Octilinearizer::removeEdgesShorterThan(LineGraph* g, double d) {
@@ -165,10 +165,6 @@ double Octilinearizer::draw(
 
   CombGraph cg(tg, deg2heur);
 
-  // util::geo::output::GeoGraphJsonOutput out;
-  // out.print(cg, std::cout);
-  // exit(0);
-
   box = util::geo::pad(box, gridSize + 1);
 
   return draw(cg, box, outTg, retGg, pens, gridSize, borderRad, maxGrDist,
@@ -201,8 +197,9 @@ double Octilinearizer::draw(
 
   bool found = false;
 
-  size_t tries = 100;
-  size_t ITERS = 100;
+  size_t INITIAL_TRIES = 100;
+  size_t LOCAL_SEARCH_ITERS = 100;
+  double CONVERGENCE_THRESHOLD = 0.05;
 
   GeoPensMap enfGeoPens;
   const GeoPensMap* geoPens = 0;
@@ -229,7 +226,7 @@ double Octilinearizer::draw(
 
   Drawing drawing(ggs[0]);
 
-  for (size_t i = 0; i < tries; i++) {
+  for (size_t i = 0; i < INITIAL_TRIES; i++) {
     T_START(draw);
     std::vector<CombEdge*> iterOrder;
     if (i != 0)
@@ -275,7 +272,7 @@ double Octilinearizer::draw(
     c++;
   }
 
-  for (; iters < ITERS; iters++) {
+  for (; iters < LOCAL_SEARCH_ITERS; iters++) {
     T_START(iter);
     std::vector<Drawing> bestFrIters(jobs);
 
@@ -350,8 +347,8 @@ double Octilinearizer::draw(
     double imp = (drawing.score() - bestFrIters[bestCore].score());
     LOG(INFO, std::cerr) << " ++ Iter " << iters << ", prev " << drawing.score()
                          << ", next " << bestFrIters[bestCore].score() << " ("
-                         << (imp >= 0 ? "+" : "") << imp << ", "
-                         << T_STOP(iter) << " ms)";
+                         << (imp >= 0 ? "+" : "") << imp << ", " << T_STOP(iter)
+                         << " ms)";
 
     for (size_t i = 0; i < jobs; i++) {
       drawing.eraseFromGrid(ggs[i]);
@@ -359,7 +356,7 @@ double Octilinearizer::draw(
     }
     drawing = bestFrIters[bestCore];
 
-    if (imp < 0.05) break;
+    if (imp < CONVERGENCE_THRESHOLD) break;
   }
 
   drawing.getLineGraph(outTg);
@@ -508,18 +505,22 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     } else {
       auto cost = GridCost(cutoff + costOffsetTo + costOffsetFrom);
 
-      // auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
+      // auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL,
+      // &nL);
       auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
 
-      // for (auto e : eL) std::cerr << "E " << e << " " << e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> " << e->getTo()->pl().getX() << "," << e->getTo()->pl().getY() << " " << e->pl().cost() << std::endl;
-      // eL.clear();
-      // nL.clear();
+      // for (auto e : eL) std::cerr << "E " << e << " " <<
+      // e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> "
+      // << e->getTo()->pl().getX() << "," << e->getTo()->pl().getY() << " " <<
+      // e->pl().cost() << std::endl; eL.clear(); nL.clear();
 
       // auto c2 = Dijkstra::shortestPath(frGrNds, toGrNds, cost, &eL, &nL);
       // std::cerr << c << " vs " << c2 << " " << fabs(c - c2) << std::endl;
-      // for (auto e : eL) std::cerr << "E " << e << " " << e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> " << e->getTo()->pl().getX() << "," << e->getTo()->pl().getY() << " " << e->pl().cost() << std::endl;
-      // assert((isinf(c) && isinf(c2)) || (fabs(c - c2) < 0.0001));
-      // exit(0);
+      // for (auto e : eL) std::cerr << "E " << e << " " <<
+      // e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> "
+      // << e->getTo()->pl().getX() << "," << e->getTo()->pl().getY() << " " <<
+      // e->pl().cost() << std::endl; assert((isinf(c) && isinf(c2)) || (fabs(c
+      // - c2) < 0.0001)); exit(0);
     }
 
     delete heur;
