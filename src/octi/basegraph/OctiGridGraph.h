@@ -56,7 +56,7 @@ class OctiGridGraph : public GridGraph {
   virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e);
   virtual CrossEdgPairs getCrossEdgPairs() const;
   virtual GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;
-  virtual size_t getNumNeighbors() const;
+  virtual size_t maxDeg() const;
 
  protected:
   virtual void writeInitialCosts();

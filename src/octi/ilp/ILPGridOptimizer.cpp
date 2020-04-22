@@ -298,7 +298,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
           }
         };
 
-        for (size_t p = 0; p < gg->getNumNeighbors(); p++) {
+        for (size_t p = 0; p < gg->maxDeg(); p++) {
           auto varSinkTo = getEdgeUseVar(gg->getEdg(n->pl().getPort(p), n), e);
           auto varSinkFr = getEdgeUseVar(gg->getEdg(n, n->pl().getPort(p)), e);
 
@@ -331,9 +331,9 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     }
 
     // go over all ports
-    for (size_t pf = 0; pf < gg->getNumNeighbors(); pf++) {
+    for (size_t pf = 0; pf < gg->maxDeg(); pf++) {
       auto from = n->pl().getPort(pf);
-      for (size_t pt = 0; pt < gg->getNumNeighbors(); pt++) {
+      for (size_t pt = 0; pt < gg->maxDeg(); pt++) {
         auto to = n->pl().getPort(pt);
         if (from == to) continue;
 
@@ -404,14 +404,14 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
         if (edg->getFrom() == nd) {
           // the 0 can be skipped here
-          for (size_t i = 1; i < gg->getNumNeighbors(); i++) {
+          for (size_t i = 1; i < gg->maxDeg(); i++) {
             auto e = gg->getEdg(n, n->pl().getPort(i));
             int col = lp->getVarByName(getEdgeUseVar(e, edg));
             if (col > -1) lp->addColToRow(row, col, i);
           }
         } else {
           // the 0 can be skipped here
-          for (size_t i = 1; i < gg->getNumNeighbors(); i++) {
+          for (size_t i = 1; i < gg->maxDeg(); i++) {
             auto e = gg->getEdg(n->pl().getPort(i), n);
             int col = lp->getVarByName(getEdgeUseVar(e, edg));
             if (col > -1) lp->addColToRow(row, col, i);
@@ -425,7 +425,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
   // for each input node N, make sure that the circular ordering of the final
   // drawing matches the input ordering
-  int M = gg->getNumNeighbors();
+  int M = gg->maxDeg();
   for (auto nd : cg.getNds()) {
     // for degree < 3, the circular ordering cannot be violated
     if (nd->getDeg() < 3) continue;
@@ -710,7 +710,7 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
         sol[varName] = 1;
 
         // if settled, all bend edges are unused
-        for (size_t p = 0; p < gg->getNumNeighbors(); p++) {
+        for (size_t p = 0; p < gg->maxDeg(); p++) {
           auto portNd = gnd->pl().getPort(p);
           for (auto bendEdg : portNd->getAdjList()) {
             if (!bendEdg->pl().isSecondary()) continue;

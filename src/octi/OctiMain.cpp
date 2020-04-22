@@ -15,8 +15,8 @@
 #include "shared/linegraph/LineGraph.h"
 #include "util/Misc.h"
 #include "util/geo/Geo.h"
-#include "util/graph/BiDijkstra.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
+#include "util/graph/BiDijkstra.h"
 #include "util/log/Log.h"
 
 using std::string;

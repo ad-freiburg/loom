@@ -60,7 +60,7 @@ class GridGraph : public BaseGraph {
   virtual void closeTurns(GridNode* n);
 
   virtual GridNode* getNeighbor(const GridNode* n, size_t i) const;
-  virtual size_t getNumNeighbors() const;
+  virtual size_t maxDeg() const;
 
   virtual std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis);
 
@@ -161,7 +161,7 @@ struct GridGraphHeur
     for (auto n : to) {
       assert(n->pl().getParent() == n);
       size_t i = 0;
-      for (; i < g->getNumNeighbors(); i++) {
+      for (; i < g->maxDeg(); i++) {
         float sinkCost = g->getEdg(n->pl().getPort(i), n)->pl().cost();
         if (sinkCost < cheapestSink) cheapestSink = sinkCost;
         auto neigh = g->getNeighbor(n, i);
@@ -171,7 +171,7 @@ struct GridGraphHeur
           break;
         }
       }
-      for (size_t j = i; j < g->getNumNeighbors(); j++) {
+      for (size_t j = i; j < g->maxDeg(); j++) {
         float sinkCost = g->getEdg(n->pl().getPort(j), n)->pl().cost();
         if (sinkCost < cheapestSink) cheapestSink = sinkCost;
       }

@@ -46,7 +46,7 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
   auto box = tg->getBBox();
 
   auto tester = newBaseGraph(box, gridSize, borderRad, pens);
-  tg->splitNodes(tester->getNumNeighbors());
+  tg->splitNodes(tester->maxDeg());
   CombGraph cg(tg, deg2heur);
   box = util::geo::pad(box, gridSize + 1);
 
@@ -113,7 +113,7 @@ double Octilinearizer::draw(
   // TODO: this is just to get the max degree, solve this in some nicer way
   auto gg = newBaseGraph(box, gridSize, borderRad, pens);
 
-  tg->splitNodes(gg->getNumNeighbors());
+  tg->splitNodes(gg->maxDeg());
 
   CombGraph cg(tg, deg2heur);
 
@@ -248,7 +248,7 @@ double Octilinearizer::draw(
         drawingCp.erase(a);
         ggs[btch]->unSettleNd(a);
 
-        for (size_t pos = 0; pos < ggs[btch]->getNumNeighbors() + 1; pos++) {
+        for (size_t pos = 0; pos < ggs[btch]->maxDeg() + 1; pos++) {
           SettledPos p;
 
           auto n = ggs[btch]->getNeighbor(drawing.getGrNd(a), pos);

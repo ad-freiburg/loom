@@ -33,12 +33,12 @@ void OrthoRadialGraph::init() {
     for (size_t y = 0; y < _grid.getYHeight() / 2; y++) {
       GridNode* center = getNode(x, y);
 
-      for (size_t p = 0; p < getNumNeighbors(); p++) {
+      for (size_t p = 0; p < maxDeg(); p++) {
         GridNode* from = center->pl().getPort(p);
         GridNode* toN = getNeighbor(x, y, p);
         if (from != 0 && toN != 0) {
-          GridNode* to = toN->pl().getPort((p + getNumNeighbors() / 2) %
-                                           getNumNeighbors());
+          GridNode* to = toN->pl().getPort((p + maxDeg() / 2) %
+                                           maxDeg());
           if (!to) continue;
           auto e = new GridEdge(from, to, GridEdgePL(9, false));
           e->pl().setId(_edgeCount);
@@ -87,10 +87,10 @@ GridEdge* OrthoRadialGraph::getNEdg(const GridNode* a, const GridNode* b) const 
   // std::cerr << "(" << a->pl().getX() << "," <<  a->pl().getY()  << ")" << ", " << "(" << b->pl().getX() << "," <<  b->pl().getY()  << ")" <<  " dir: " << dir << std::endl;
 
   if (a->pl().getPort(dir) &&
-      b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())) {
+      b->pl().getPort((dir + maxDeg() / 2) % maxDeg())) {
     return const_cast<GridEdge*>(getEdg(
         a->pl().getPort(dir),
-        b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())));
+        b->pl().getPort((dir + maxDeg() / 2) % maxDeg())));
   }
 
   return 0;
@@ -101,14 +101,14 @@ void OrthoRadialGraph::writeInitialCosts() {
   for (size_t x = 0; x < _numBeams; x++) {
     for (size_t y = 0; y < _grid.getYHeight() / 2; y++) {
       auto n = getNode(x, y);
-      for (size_t i = 0; i < getNumNeighbors(); i++) {
+      for (size_t i = 0; i < maxDeg(); i++) {
         auto port = n->pl().getPort(i);
         auto neigh = getNeighbor(x, y, i);
 
         if (!neigh || !port) continue;
 
-        auto oPort = neigh->pl().getPort((i + getNumNeighbors() / 2) %
-                                         getNumNeighbors());
+        auto oPort = neigh->pl().getPort((i + maxDeg() / 2) %
+                                         maxDeg());
         auto e = getEdg(port, oPort);
 
         if (i % 2 == 0) {
@@ -189,8 +189,8 @@ GridNode* OrthoRadialGraph::writeNd(size_t x, size_t y) {
   }
 
   // in-node connections
-  for (size_t i = 0; i < getNumNeighbors(); i++) {
-    for (size_t j = i + 1; j < getNumNeighbors(); j++) {
+  for (size_t i = 0; i < maxDeg(); i++) {
+    for (size_t j = i + 1; j < maxDeg(); j++) {
       int d = (int)(i) - (int)(j);
       size_t deg = abs((((d + 2) % 4) + 4) % 4 - 2);
       double pen = c_0;

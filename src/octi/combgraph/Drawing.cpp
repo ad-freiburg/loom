@@ -259,7 +259,7 @@ double Drawing::recalcBends(const CombNode* nd) {
     auto ge = _edgs.find(e)->second;
 
     size_t dirA = 0;
-    for (; dirA < _gg->getNumNeighbors(); dirA++) {
+    for (; dirA < _gg->maxDeg(); dirA++) {
       if (gnd->pl().getPort(dirA) == _gg->getGrEdgById(ge.front())->getFrom() ||
           gnd->pl().getPort(dirA) == _gg->getGrEdgById(ge.front())->getTo() ||
           gnd->pl().getPort(dirA) == _gg->getGrEdgById(ge.back())->getFrom() ||
@@ -268,7 +268,7 @@ double Drawing::recalcBends(const CombNode* nd) {
       }
     }
 
-    assert(dirA < _gg->getNumNeighbors());
+    assert(dirA < _gg->maxDeg());
 
     for (auto lo : e->pl().getChilds().front()->pl().getLines()) {
       for (auto f : nd->getAdjList()) {
@@ -280,7 +280,7 @@ double Drawing::recalcBends(const CombNode* nd) {
 
         if (f->pl().getChilds().front()->pl().hasLine(lo.line)) {
           size_t dirB = 0;
-          for (; dirB < _gg->getNumNeighbors(); dirB++) {
+          for (; dirB < _gg->maxDeg(); dirB++) {
             if (gnd->pl().getPort(dirB) ==
                     _gg->getGrEdgById(gf.front())->getFrom() ||
                 gnd->pl().getPort(dirB) ==
@@ -293,7 +293,7 @@ double Drawing::recalcBends(const CombNode* nd) {
             }
           }
 
-          assert(dirB < _gg->getNumNeighbors());
+          assert(dirB < _gg->maxDeg());
 
           c += _gg->getBendPen(dirA, dirB);
         }

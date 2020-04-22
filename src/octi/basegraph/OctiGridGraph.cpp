@@ -175,14 +175,13 @@ void OctiGridGraph::writeInitialCosts() {
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       auto n = getNode(x, y);
-      for (size_t i = 0; i < getNumNeighbors(); i++) {
+      for (size_t i = 0; i < maxDeg(); i++) {
         auto port = n->pl().getPort(i);
         auto neigh = getNeighbor(x, y, i);
 
         if (!neigh || !port) continue;
 
-        auto oPort = neigh->pl().getPort((i + getNumNeighbors() / 2) %
-                                         getNumNeighbors());
+        auto oPort = neigh->pl().getPort((i + maxDeg() / 2) % maxDeg());
         auto e = getEdg(port, oPort);
 
         if (i % 4 == 0) {
@@ -217,10 +216,10 @@ GridEdge* OctiGridGraph::getNEdg(const GridNode* a, const GridNode* b) const {
   if (d == 6) dir = 7;
 
   if (a->pl().getPort(dir) &&
-      b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())) {
-    return const_cast<GridEdge*>(getEdg(
-        a->pl().getPort(dir),
-        b->pl().getPort((dir + getNumNeighbors() / 2) % getNumNeighbors())));
+      b->pl().getPort((dir + maxDeg() / 2) % maxDeg())) {
+    return const_cast<GridEdge*>(
+        getEdg(a->pl().getPort(dir),
+               b->pl().getPort((dir + maxDeg() / 2) % maxDeg())));
   }
 
   return 0;
@@ -230,11 +229,6 @@ GridEdge* OctiGridGraph::getNEdg(const GridNode* a, const GridNode* b) const {
 GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
   double xPos = _bbox.getLowerLeft().getX() + x * _cellSize;
   double yPos = _bbox.getLowerLeft().getY() + y * _cellSize;
-
-  double c_0 = _c.p_45 - _c.p_135;
-  double c_135 = _c.p_45;
-  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
-  double c_45 = c_0 + c_135;
 
   GridNode* n = addNd(DPoint(xPos, yPos));
   n->pl().setId(_nds.size());
@@ -270,8 +264,8 @@ GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
   }
 
   // in-node connections
-  for (size_t i = 0; i < getNumNeighbors(); i++) {
-    for (size_t j = i + 1; j < getNumNeighbors(); j++) {
+  for (size_t i = 0; i < maxDeg(); i++) {
+    for (size_t j = i + 1; j < maxDeg(); j++) {
       double pen = getBendPen(i, j);
 
       if (x == 0 && (i == 5 || i == 6 || i == 7)) pen = INF;
@@ -300,7 +294,7 @@ GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
 }
 
 // _____________________________________________________________________________
-size_t OctiGridGraph::getNumNeighbors() const { return 8; }
+size_t OctiGridGraph::maxDeg() const { return 8; }
 
 // _____________________________________________________________________________
 GridNode* OctiGridGraph::getNode(size_t x, size_t y) const {

@@ -87,7 +87,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   virtual GridNode* getNeighbor(const GridNode* n, size_t i) const = 0;
 
-  virtual size_t getNumNeighbors() const = 0;
+  virtual size_t maxDeg() const = 0;
 
   virtual std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis) = 0;
 
