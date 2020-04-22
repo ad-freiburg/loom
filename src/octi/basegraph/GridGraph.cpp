@@ -32,6 +32,9 @@ GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
   assert(_c.p_135 <= _c.p_90);
   assert(_c.p_90 <= _c.p_45);
 
+  _bendCosts[0] = _c.p_45 - _c.p_135;
+  _bendCosts[1] = _c.p_45 - _c.p_135 + _c.p_90;
+
   // cut off illegal spacer values
   if (spacer > cellSize / 2) _spacer = cellSize / 2;
 
@@ -321,22 +324,12 @@ NodeCost GridGraph::nodeBendPen(GridNode* n, CombEdge* e) {
 
 // _____________________________________________________________________________
 double GridGraph::getBendPen(size_t origI, size_t targetI) const {
-  // TODO: same code as in write nd
-  double c_0 = _c.p_45 - _c.p_135;
-  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
-
   // determine angle between port i and j
   int ang = (4 + (origI - targetI)) % 4;
   if (ang > 2) ang = 4 - ang;
   ang = ang % 2;
 
-  double mult = 1;
-
-  // write corresponding cost to addC[j]
-  if (ang == 0) return mult * c_0;
-  if (ang == 1) return mult * c_90;
-
-  return 0;
+  return _bendCosts[ang];
 }
 
 // _____________________________________________________________________________
@@ -613,11 +606,6 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   double xPos = _bbox.getLowerLeft().getX() + x * _cellSize;
   double yPos = _bbox.getLowerLeft().getY() + y * _cellSize;
 
-  double c_0 = _c.p_45 - _c.p_135;
-  double c_135 = _c.p_45;
-  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
-  double c_45 = c_0 + c_135;
-
   GridNode* n = addNd(DPoint(xPos, yPos));
   n->pl().setId(_nds.size());
   _nds.push_back(n);
@@ -667,10 +655,7 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
     for (size_t j = i + 1; j < getNumNeighbors(); j++) {
       int d = (int)(i) - (int)(j);
       size_t deg = abs((((d + 2) % 4) + 4) % 4 - 2);
-      double pen = c_0;
-
-      if (deg == 0) pen = c_0;
-      if (deg == 1) pen = c_90;
+      double pen = _bendCosts[deg];
 
       if (x == 0 && i == 3) pen = INF;
       if (y == 0 && i == 0) pen = INF;

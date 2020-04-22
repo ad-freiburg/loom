@@ -87,6 +87,9 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   void splitNode(LineNode* n, size_t maxDeg);
   void splitNodes(size_t maxDeg);
 
+  void contractEdges(double d);
+  void contractEdge(LineEdge* e);
+
  private:
   util::geo::Box<double> _bbox;
 

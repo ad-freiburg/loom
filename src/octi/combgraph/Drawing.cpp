@@ -114,7 +114,7 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
     }
   }
 
-  // variables named as in the paper
+  // variables named as in the EuroVis paper
   int k = ce->pl().getChilds().size() - 1;
 
   double c = _gg->getPens().densityPen / (k);
@@ -245,12 +245,6 @@ void Drawing::crumble() {
 
 // _____________________________________________________________________________
 double Drawing::recalcBends(const CombNode* nd) {
-  double c_0 = _gg->getPens().p_45 - _gg->getPens().p_135;
-  double c_135 = _gg->getPens().p_45;
-  double c_90 = _gg->getPens().p_45 - _gg->getPens().p_135 +
-                _gg->getPens().p_90;
-  double c_45 = c_0 + c_135;
-
   double c = 0;
 
   if (_nds.count(nd) == 0) return 0;
@@ -301,18 +295,7 @@ double Drawing::recalcBends(const CombNode* nd) {
 
           assert(dirB < _gg->getNumNeighbors());
 
-          TODO(this does not work with orthogonal layout!!)
-          int ang = (8 + (dirA - dirB)) % 8;
-          if (ang > 4) ang = 8 - ang;
-          ang = ang % 4;
-
-          double mult = 1;
-
-          // write corresponding cost to addC[j]
-          if (ang == 0) c += mult * c_0;
-          if (ang == 1) c += mult * c_45;
-          if (ang == 2) c += mult * c_90;
-          if (ang == 3) c += mult * c_135;
+          c += _gg->getBendPen(dirA, dirB);
         }
       }
     }

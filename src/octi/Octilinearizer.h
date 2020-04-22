@@ -132,8 +132,6 @@ class Octilinearizer {
                                      double cellSize, double spacer,
                                      const Penalties& pens) const;
 
-  void removeEdgesShorterThan(LineGraph* g, double d);
-
   void writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
                     basegraph::BaseGraph* g);
 

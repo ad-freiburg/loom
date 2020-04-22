@@ -131,6 +131,9 @@ class GridGraph : public BaseGraph {
   virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
 
   virtual void getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]);
+
+ private:
+  double _bendCosts[2];
 };
 
 struct GridCost : public util::graph::Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {

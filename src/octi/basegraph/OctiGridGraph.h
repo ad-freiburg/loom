@@ -17,6 +17,11 @@ class OctiGridGraph : public GridGraph {
                 const Penalties& pens)
       : GridGraph(bbox, cellSize, spacer, pens) {
 
+    _bendCosts[0] = _c.p_45 - _c.p_135;
+    _bendCosts[1] = _c.p_45;
+    _bendCosts[2] = _c.p_45 - _c.p_135 + _c.p_90;
+    _bendCosts[3] = _bendCosts[0] + _bendCosts[1];
+
     // prepare the octigrid A* heuristic
     _heurXCost = _c.horizontalPen + _heurHopCost;
     _heurYCost = _c.verticalPen + _heurHopCost;
@@ -59,12 +64,15 @@ class OctiGridGraph : public GridGraph {
   virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
   virtual GridNode* getNode(size_t x, size_t y) const;
   virtual double getBendPen(size_t origI, size_t targetI) const;
-  double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
+  virtual double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
+ private:
   double _heurDiagSave;
   double _heurXCost;
   double _heurYCost;
   double _heurDiagCost;
+
+  double _bendCosts[4];
 };
 }  // namespace basegraph
 }  // namespace octi

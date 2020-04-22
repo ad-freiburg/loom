@@ -670,7 +670,8 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
     auto cn = addNd(geom);
 
     // add the new trunk edge
-    auto ce = addEdg(n, cn, LineEdgePL({*n->pl().getGeom(), *cn->pl().getGeom()}));
+    auto ce =
+        addEdg(n, cn, LineEdgePL({*n->pl().getGeom(), *cn->pl().getGeom()}));
 
     for (auto eo : combine) {
       LineEdge* newEdg = 0;
@@ -764,6 +765,60 @@ void LineGraph::nodeRpl(LineEdge* e, const LineNode* oldN,
       e->pl().getLines().insert(newRo);
     } else {
       ro++;
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void LineGraph::contractEdge(LineEdge* e) {
+  auto n1 = e->getFrom();
+  auto n2 = e->getTo();
+  auto otherP = n2->pl().getGeom();
+  auto newGeom = DPoint((n1->pl().getGeom()->getX() + otherP->getX()) / 2,
+                        (n1->pl().getGeom()->getY() + otherP->getY()) / 2);
+  LineNode* n = 0;
+
+  if (e->getTo()->pl().stops().size() > 0) {
+    auto servedLines = LineGraph::servedLines(e->getTo());
+    n = mergeNds(e->getFrom(), e->getTo());
+
+    for (auto l : LineGraph::servedLines(n)) {
+      if (!servedLines.count(l)) n->pl().addLineNotServed(l);
+    }
+  } else if (e->getFrom()->pl().stops().size() > 0) {
+    auto servedLines = LineGraph::servedLines(e->getFrom());
+    n = mergeNds(e->getTo(), e->getFrom());
+
+    for (auto l : LineGraph::servedLines(n)) {
+      if (!servedLines.count(l)) n->pl().addLineNotServed(l);
+    }
+  } else {
+    n = mergeNds(e->getTo(), e->getFrom());
+  }
+
+  n->pl().setGeom(newGeom);
+}
+
+// _____________________________________________________________________________
+void LineGraph::contractEdges(double d) {
+  // TODO: the problem here is that contractEdge(e) may delete and replace edges
+  // in the graph, which is why we cannot just build a list of edges eligible
+  // for contraction and iterate over it - we would have to record the changes
+  // made in contractEdge(e) and propagate it back.
+
+breakfor:
+  for (auto n1 : *getNds()) {
+    for (auto e : n1->getAdjList()) {
+      if (e->getFrom() != n1) continue;
+      if (!e->pl().dontContract() && e->pl().getPolyline().getLength() < d) {
+        if (e->getOtherNd(n1)->getAdjList().size() > 1 &&
+            n1->getAdjList().size() > 1 &&
+            (n1->pl().stops().size() == 0 ||
+             e->getOtherNd(n1)->pl().stops().size() == 0)) {
+          contractEdge(e);
+          goto breakfor;
+        }
+      }
     }
   }
 }

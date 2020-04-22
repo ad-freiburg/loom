@@ -86,26 +86,12 @@ void OctiGridGraph::unSettleEdg(GridNode* a, GridNode* b) {
 
 // _____________________________________________________________________________
 double OctiGridGraph::getBendPen(size_t origI, size_t targetI) const {
-  // TODO: same code as in write nd
-  double c_0 = _c.p_45 - _c.p_135;
-  double c_135 = _c.p_45;
-  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
-  double c_45 = c_0 + c_135;
-
   // determine angle between port i and j
   int ang = (8 + (origI - targetI)) % 8;
   if (ang > 4) ang = 8 - ang;
   ang = ang % 4;
 
-  double mult = 1;
-
-  // write corresponding cost to addC[j]
-  if (ang == 0) return mult * c_0;
-  if (ang == 1) return mult * c_45;
-  if (ang == 2) return mult * c_90;
-  if (ang == 3) return mult * c_135;
-
-  return 0;
+  return _bendCosts[ang];
 }
 
 // _____________________________________________________________________________
@@ -236,11 +222,6 @@ GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
   double xPos = _bbox.getLowerLeft().getX() + x * _cellSize;
   double yPos = _bbox.getLowerLeft().getY() + y * _cellSize;
 
-  double c_0 = _c.p_45 - _c.p_135;
-  double c_135 = _c.p_45;
-  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
-  double c_45 = c_0 + c_135;
-
   GridNode* n = addNd(DPoint(xPos, yPos));
   n->pl().setId(_nds.size());
   _nds.push_back(n);
@@ -279,12 +260,8 @@ GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
     for (size_t j = i + 1; j < getNumNeighbors(); j++) {
       int d = (int)(i) - (int)(j);
       size_t deg = abs((((d + 4) % 8) + 8) % 8 - 4);
-      double pen = c_0;
 
-      if (deg == 0) pen = c_0;
-      if (deg == 1) pen = c_45;
-      if (deg == 2) pen = c_90;
-      if (deg == 3) pen = c_135;
+      double pen = _bendCosts[deg];
 
       if (x == 0 && (i == 5 || i == 6 || i == 7)) pen = INF;
       if (y == 0 && (i == 0 || i == 7 || i == 1)) pen = INF;

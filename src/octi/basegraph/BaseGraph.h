@@ -109,6 +109,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   virtual double ndMovePen(const CombNode* cbNd,
                            const GridNode* grNd) const = 0;
 
+  virtual double getBendPen(size_t origI, size_t targetI) const = 0;
   virtual GridNode* getGrNdById(size_t id) const = 0;
   virtual const GridEdge* getGrEdgById(std::pair<size_t, size_t> id) const = 0;
   virtual void addResEdg(GridEdge* ge, CombEdge* cg) = 0;

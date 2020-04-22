@@ -34,54 +34,6 @@ using util::graph::BiDijkstra;
 using util::graph::Dijkstra;
 
 // _____________________________________________________________________________
-void Octilinearizer::removeEdgesShorterThan(LineGraph* g, double d) {
-start:
-  for (auto n1 : *g->getNds()) {
-    for (auto e1 : n1->getAdjList()) {
-      if (!e1->pl().dontContract() && e1->pl().getPolyline().getLength() < d) {
-        if (e1->getOtherNd(n1)->getAdjList().size() > 1 &&
-            n1->getAdjList().size() > 1 &&
-            (n1->pl().stops().size() == 0 ||
-             e1->getOtherNd(n1)->pl().stops().size() == 0)) {
-          auto otherP = e1->getOtherNd(n1)->pl().getGeom();
-          auto newGeom =
-              DPoint((n1->pl().getGeom()->getX() + otherP->getX()) / 2,
-                     (n1->pl().getGeom()->getY() + otherP->getY()) / 2);
-          LineNode* n = 0;
-
-          if (e1->getTo()->pl().stops().size() > 0) {
-            auto servedLines = g->servedLines(e1->getTo());
-            n = g->mergeNds(e1->getFrom(), e1->getTo());
-
-            for (auto l : g->servedLines(n)) {
-              if (!servedLines.count(l)) {
-                n->pl().addLineNotServed(l);
-              }
-            }
-
-          } else if (e1->getFrom()->pl().stops().size() > 0) {
-            auto servedLines = g->servedLines(e1->getFrom());
-            n = g->mergeNds(e1->getTo(), e1->getFrom());
-
-            for (auto l : g->servedLines(n)) {
-              if (!servedLines.count(l)) {
-                n->pl().addLineNotServed(l);
-              }
-            }
-
-          } else {
-            n = g->mergeNds(e1->getTo(), e1->getFrom());
-          }
-
-          n->pl().setGeom(newGeom);
-          goto start;
-        }
-      }
-    }
-  }
-}
-
-// _____________________________________________________________________________
 double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
                                BaseGraph** retGg, const Penalties& pens,
                                double gridSize, double borderRad, bool deg2heur,
@@ -89,7 +41,7 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
                                int timeLim, const std::string& solverStr,
                                const std::string& path) {
   BaseGraph* gg;
-  removeEdgesShorterThan(tg, gridSize / 2);
+  tg->contractEdges(gridSize / 2);
 
   auto box = tg->getBBox();
 
@@ -154,7 +106,7 @@ double Octilinearizer::draw(
     double gridSize, double borderRad, bool deg2heur, double maxGrDist,
     bool restrLocSearch, double enfGeoPen,
     const std::vector<util::geo::Polygon<double>>& obstacles) {
-  removeEdgesShorterThan(tg, gridSize / 2);
+  tg->contractEdges(gridSize / 2);
 
   auto box = tg->getBBox();
 
