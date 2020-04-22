@@ -20,7 +20,7 @@ using util::geo::dist;
 using util::geo::DPoint;
 
 // _____________________________________________________________________________
-GridNode* OctiGridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
+GridNode* OctiGridGraph::neigh(size_t cx, size_t cy, size_t i) const {
   if (i > 7) return getNode(cx, cy);
   int8_t x = 1;
   if (i % 4 == 0) x = 0;
@@ -71,8 +71,8 @@ void OctiGridGraph::unSettleEdg(GridNode* a, GridNode* b) {
 
   // unblock blocked diagonal edges crossing this edge
   if (dir != 0) {
-    auto na = getNeighbor(x, y, (dir + 7) % 8);
-    auto nb = getNeighbor(x, y, (dir + 1) % 8);
+    auto na = neigh(x, y, (dir + 7) % 8);
+    auto nb = neigh(x, y, (dir + 1) % 8);
 
     if (na && nb) {
       auto e = getNEdg(na, nb);
@@ -133,8 +133,8 @@ void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
 
   // block diagonal edges crossing this edge
   if (dir != 0) {
-    auto na = getNeighbor(x, y, (dir + 7) % 8);
-    auto nb = getNeighbor(x, y, (dir + 1) % 8);
+    auto na = neigh(x, y, (dir + 7) % 8);
+    auto nb = neigh(x, y, (dir + 1) % 8);
 
     if (na && nb) {
       auto e = getNEdg(na, nb);
@@ -152,13 +152,13 @@ CrossEdgPairs OctiGridGraph::getCrossEdgPairs() const {
   for (const GridNode* n : getNds()) {
     if (!n->pl().isSink()) continue;
 
-    auto eOr = getNEdg(n, getNeighbor(n, 3));
-    auto fOr = getNEdg(getNeighbor(n, 3), n);
+    auto eOr = getNEdg(n, neigh(n, 3));
+    auto fOr = getNEdg(neigh(n, 3), n);
 
     if (!eOr || !fOr) continue;
 
-    auto na = getNeighbor(n, (3 + 7) % 8);
-    auto nb = getNeighbor(n, (3 + 1) % 8);
+    auto na = neigh(n, (3 + 7) % 8);
+    auto nb = neigh(n, (3 + 1) % 8);
 
     if (!na || !nb) continue;
 
@@ -177,11 +177,11 @@ void OctiGridGraph::writeInitialCosts() {
       auto n = getNode(x, y);
       for (size_t i = 0; i < maxDeg(); i++) {
         auto port = n->pl().getPort(i);
-        auto neigh = getNeighbor(x, y, i);
+        auto neighbor = neigh(x, y, i);
 
-        if (!neigh || !port) continue;
+        if (!neighbor || !port) continue;
 
-        auto oPort = neigh->pl().getPort((i + maxDeg() / 2) % maxDeg());
+        auto oPort = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
         auto e = getEdg(port, oPort);
 
         if (i % 4 == 0) {

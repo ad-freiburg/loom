@@ -12,7 +12,7 @@ namespace basegraph {
 
 class OctiGridGraph : public GridGraph {
  public:
-  using GridGraph::getNeighbor;
+  using GridGraph::neigh;
   OctiGridGraph(const util::geo::DBox& bbox, double cellSize, double spacer,
                 const Penalties& pens)
       : GridGraph(bbox, cellSize, spacer, pens) {
@@ -61,7 +61,7 @@ class OctiGridGraph : public GridGraph {
  protected:
   virtual void writeInitialCosts();
   virtual GridNode* writeNd(size_t x, size_t y);
-  virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
+  virtual GridNode* neigh(size_t cx, size_t cy, size_t i) const;
   virtual GridNode* getNode(size_t x, size_t y) const;
   virtual double getBendPen(size_t i, size_t j) const;
   virtual size_t ang(size_t i, size_t j) const;

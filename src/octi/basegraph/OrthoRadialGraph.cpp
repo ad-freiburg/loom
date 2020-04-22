@@ -35,7 +35,7 @@ void OrthoRadialGraph::init() {
 
       for (size_t p = 0; p < maxDeg(); p++) {
         GridNode* from = center->pl().getPort(p);
-        GridNode* toN = getNeighbor(x, y, p);
+        GridNode* toN = neigh(x, y, p);
         if (from != 0 && toN != 0) {
           GridNode* to = toN->pl().getPort((p + maxDeg() / 2) %
                                            maxDeg());
@@ -54,7 +54,7 @@ void OrthoRadialGraph::init() {
 }
 
 // _____________________________________________________________________________
-GridNode* OrthoRadialGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
+GridNode* OrthoRadialGraph::neigh(size_t cx, size_t cy, size_t i) const {
   if (i == 0) return getNode(cx, cy + 1);
   if (i == 1) return getNode((cx + 1) % _numBeams, cy);
   if (i == 2) return getNode(cx, cy - 1);
@@ -103,11 +103,11 @@ void OrthoRadialGraph::writeInitialCosts() {
       auto n = getNode(x, y);
       for (size_t i = 0; i < maxDeg(); i++) {
         auto port = n->pl().getPort(i);
-        auto neigh = getNeighbor(x, y, i);
+        auto neighbor = neigh(x, y, i);
 
-        if (!neigh || !port) continue;
+        if (!neighbor || !port) continue;
 
-        auto oPort = neigh->pl().getPort((i + maxDeg() / 2) %
+        auto oPort = neighbor->pl().getPort((i + maxDeg() / 2) %
                                          maxDeg());
         auto e = getEdg(port, oPort);
 

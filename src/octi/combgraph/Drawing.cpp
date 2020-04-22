@@ -193,8 +193,7 @@ void Drawing::getLineGraph(LineGraph* target) const {
         auto from = e->getFrom();
         auto to = e->getTo();
 
-        PolyLine<double> pl =
-            poly.getSegment((step * i) / d, (step * (i + 1)) / d);
+        auto pl = poly.getSegment((step * i) / d, (step * (i + 1)) / d);
 
         if (from == pre) {
           pre = to;
@@ -204,14 +203,14 @@ void Drawing::getLineGraph(LineGraph* target) const {
         }
 
         if (m.find(from) == m.end()) {
-          shared::linegraph::LineNodePL payload = from->pl();
+          auto payload = from->pl();
           payload.setGeom(pl.getLine().front());
           auto tfrom = target->addNd(payload);
           m[from] = tfrom;
         }
 
         if (m.find(to) == m.end()) {
-          shared::linegraph::LineNodePL payload = to->pl();
+          auto payload = to->pl();
           payload.setGeom(pl.getLine().back());
           auto tto = target->addNd(payload);
           m[to] = tto;

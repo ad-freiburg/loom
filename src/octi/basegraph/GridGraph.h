@@ -59,7 +59,7 @@ class GridGraph : public BaseGraph {
   virtual void openTurns(GridNode* n);
   virtual void closeTurns(GridNode* n);
 
-  virtual GridNode* getNeighbor(const GridNode* n, size_t i) const;
+  virtual GridNode* neigh(const GridNode* n, size_t i) const;
   virtual size_t maxDeg() const;
 
   virtual std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis);
@@ -129,7 +129,7 @@ class GridGraph : public BaseGraph {
 
   virtual GridNode* writeNd(size_t x, size_t y);
 
-  virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
+  virtual GridNode* neigh(size_t cx, size_t cy, size_t i) const;
 
   virtual void getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]);
 
@@ -164,7 +164,7 @@ struct GridGraphHeur
       for (; i < g->maxDeg(); i++) {
         float sinkCost = g->getEdg(n->pl().getPort(i), n)->pl().cost();
         if (sinkCost < cheapestSink) cheapestSink = sinkCost;
-        auto neigh = g->getNeighbor(n, i);
+        auto neigh = g->neigh(n, i);
         if (neigh && to.find(neigh) == to.end()) {
           hull.push_back(n->pl().getX());
           hull.push_back(n->pl().getY());

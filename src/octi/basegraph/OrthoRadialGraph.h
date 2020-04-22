@@ -12,7 +12,7 @@ namespace basegraph {
 
 class OrthoRadialGraph : public GridGraph {
  public:
-  using GridGraph::getNeighbor;
+  using GridGraph::neigh;
   OrthoRadialGraph(size_t numBeams, const util::geo::DBox& bbox,
                    double cellSize, double spacer, const Penalties& pens)
       : GridGraph(bbox, cellSize, spacer, pens), _numBeams(numBeams) {}
@@ -25,7 +25,7 @@ class OrthoRadialGraph : public GridGraph {
  protected:
   virtual void writeInitialCosts();
   virtual GridNode* writeNd(size_t x, size_t y);
-  virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
+  virtual GridNode* neigh(size_t cx, size_t cy, size_t i) const;
   virtual GridNode* getNode(size_t x, size_t y) const;
 
  private:

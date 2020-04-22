@@ -251,7 +251,7 @@ double Octilinearizer::draw(
         for (size_t pos = 0; pos < ggs[btch]->maxDeg() + 1; pos++) {
           SettledPos p;
 
-          auto n = ggs[btch]->getNeighbor(drawing.getGrNd(a), pos);
+          auto n = ggs[btch]->neigh(drawing.getGrNd(a), pos);
           if (n) p[a] = n;
 
           if (restrLocSearch && n) {

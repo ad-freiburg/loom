@@ -59,14 +59,14 @@ void GridGraph::init() {
       GridNode* center = getNode(x, y);
 
       for (size_t p = 0; p < maxDeg(); p++) {
-        GridNode* from = center->pl().getPort(p);
-        GridNode* toN = getNeighbor(x, y, p);
-        if (from != 0 && toN != 0) {
+        GridNode* frN = center->pl().getPort(p);
+        GridNode* toN = neigh(x, y, p);
+        if (frN != 0 && toN != 0) {
           GridNode* to = toN->pl().getPort((p + maxDeg() / 2) % maxDeg());
-          auto e = new GridEdge(from, to, GridEdgePL(9, false));
+          auto e = new GridEdge(frN, to, GridEdgePL(9, false));
           e->pl().setId(_edgeCount);
           _edgeCount++;
-          from->addEdge(e);
+          frN->addEdge(e);
           to->addEdge(e);
         }
       }
@@ -86,7 +86,7 @@ GridNode* GridGraph::getNode(size_t x, size_t y) const {
 }
 
 // _____________________________________________________________________________
-GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
+GridNode* GridGraph::neigh(size_t cx, size_t cy, size_t i) const {
   if (i > 3) return getNode(cx, cy);
   int x = 0;
   int y = 0;
@@ -108,8 +108,8 @@ GridNode* GridGraph::getNeighbor(size_t cx, size_t cy, size_t i) const {
 }
 
 // _____________________________________________________________________________
-GridNode* GridGraph::getNeighbor(const GridNode* n, size_t i) const {
-  return getNeighbor(n->pl().getX(), n->pl().getY(), i);
+GridNode* GridGraph::neigh(const GridNode* n, size_t i) const {
+  return neigh(n->pl().getX(), n->pl().getY(), i);
 }
 
 // _____________________________________________________________________________
@@ -155,9 +155,9 @@ void GridGraph::writeObstacleCost(const util::geo::Polygon<double>& obst) {
       auto grNdA = getNode(x, y);
 
       for (size_t i = 0; i < maxDeg(); i++) {
-        auto neigh = getNeighbor(x, y, i);
-        if (!neigh) continue;
-        auto ge = getNEdg(grNdA, neigh);
+        auto grNeigh = neigh(x, y, i);
+        if (!grNeigh) continue;
+        auto ge = getNEdg(grNdA, grNeigh);
 
         if (intersects(LineSegment<double>(*ge->getFrom()->pl().getGeom(),
                                            *ge->getTo()->pl().getGeom()),
@@ -181,9 +181,9 @@ void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
       auto grNdA = getNode(x, y);
 
       for (size_t i = 0; i < maxDeg(); i++) {
-        auto neigh = getNeighbor(x, y, i);
-        if (!neigh) continue;
-        auto ge = getNEdg(grNdA, neigh);
+        auto grNeigh = neigh(x, y, i);
+        if (!grNeigh) continue;
+        auto ge = getNEdg(grNdA, grNeigh);
 
         double d = std::numeric_limits<double>::infinity();
 
@@ -274,11 +274,11 @@ void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
   for (size_t i = 0; i < maxDeg(); i++) {
     outgoing[i] = 0;
     auto p = n->pl().getPort(i);
-    auto neigh = getNeighbor(x, y, i);
+    auto neighbor = neigh(x, y, i);
 
-    if (!neigh) continue;
+    if (!neighbor) continue;
 
-    auto neighP = neigh->pl().getPort((i + maxDeg() / 2) % maxDeg());
+    auto neighP = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
     auto e = getEdg(p, neighP);
     auto f = getEdg(neighP, p);
     auto resEdg = getResEdg(e);
@@ -416,11 +416,11 @@ void GridGraph::writeInitialCosts() {
       auto n = getNode(x, y);
       for (size_t i = 0; i < maxDeg(); i++) {
         auto port = n->pl().getPort(i);
-        auto neigh = getNeighbor(x, y, i);
+        auto neighbor = neigh(x, y, i);
 
-        if (!neigh || !port) continue;
+        if (!neighbor || !port) continue;
 
-        auto oPort = neigh->pl().getPort((i + maxDeg() / 2) % maxDeg());
+        auto oPort = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
         auto e = getEdg(port, oPort);
 
         if (i % 2 == 0) {

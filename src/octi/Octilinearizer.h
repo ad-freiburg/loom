@@ -148,7 +148,7 @@ class Octilinearizer {
             basegraph::BaseGraph* gg, Drawing* drawing, double cutoff,
             double maxGrDist, const GeoPensMap* geoPensMap);
 
-  SettledPos getNeighbor(const SettledPos& pos, const std::vector<CombNode*>&,
+  SettledPos neigh(const SettledPos& pos, const std::vector<CombNode*>&,
                          size_t i) const;
 
   RtPair getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
