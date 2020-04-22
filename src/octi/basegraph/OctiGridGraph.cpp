@@ -85,13 +85,22 @@ void OctiGridGraph::unSettleEdg(GridNode* a, GridNode* b) {
 }
 
 // _____________________________________________________________________________
-double OctiGridGraph::getBendPen(size_t origI, size_t targetI) const {
-  // determine angle between port i and j
-  int ang = (8 + (origI - targetI)) % 8;
+size_t OctiGridGraph::ang(size_t i, size_t j) const {
+  int d = (int)(i) - (int)(j);
+  int deg = abs((((d + 4) % 8) + 8) % 8 - 4) % 4;
+
+  int ang = (8 + (i - j)) % 8;
   if (ang > 4) ang = 8 - ang;
   ang = ang % 4;
 
-  return _bendCosts[ang];
+  assert(deg == ang);
+
+  return ang;
+}
+
+// _____________________________________________________________________________
+double OctiGridGraph::getBendPen(size_t i, size_t j) const {
+  return _bendCosts[ang(i, j)];
 }
 
 // _____________________________________________________________________________
@@ -263,19 +272,7 @@ GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
   // in-node connections
   for (size_t i = 0; i < getNumNeighbors(); i++) {
     for (size_t j = i + 1; j < getNumNeighbors(); j++) {
-      int d = (int)(i) - (int)(j);
-      size_t deg = abs((((d + 4) % 8) + 8) % 8 - 4) % 4;
-      double pen = c_0;
-
-      if (deg == 0) pen = c_0;
-      if (deg == 1) pen = c_45;
-      if (deg == 2) pen = c_90;
-      if (deg == 3) pen = c_135;
-
-      std::cerr << deg << " " << pen << " VS " << _bendCosts[deg] << std::endl;
-      assert(pen == _bendCosts[deg]);
-
-      // pen = _bendCosts[deg];
+      double pen = getBendPen(i, j);
 
       if (x == 0 && (i == 5 || i == 6 || i == 7)) pen = INF;
       if (y == 0 && (i == 0 || i == 7 || i == 1)) pen = INF;

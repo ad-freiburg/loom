@@ -63,7 +63,8 @@ class OctiGridGraph : public GridGraph {
   virtual GridNode* writeNd(size_t x, size_t y);
   virtual GridNode* getNeighbor(size_t cx, size_t cy, size_t i) const;
   virtual GridNode* getNode(size_t x, size_t y) const;
-  virtual double getBendPen(size_t origI, size_t targetI) const;
+  virtual double getBendPen(size_t i, size_t j) const;
+  virtual size_t ang(size_t i, size_t j) const;
   virtual double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
  private:

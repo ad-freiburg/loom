@@ -15,9 +15,12 @@
 using namespace octi::basegraph;
 using octi::basegraph::GridGraph;
 using octi::basegraph::NodeCost;
+using util::geo::contains;
 using util::geo::DBox;
 using util::geo::dist;
 using util::geo::DPoint;
+using util::geo::intersects;
+using util::geo::LineSegment;
 
 // _____________________________________________________________________________
 GridGraph::GridGraph(const DBox& bbox, double cellSize, double spacer,
@@ -133,12 +136,8 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   _resEdgs[ge] = 0;
   _resEdgs[gf] = 0;
 
-  if (!a->pl().isSettled()) {
-    openTurns(a);
-  }
-  if (!b->pl().isSettled()) {
-    openTurns(b);
-  }
+  if (!a->pl().isSettled()) openTurns(a);
+  if (!b->pl().isSettled()) openTurns(b);
 }
 
 // _____________________________________________________________________________
@@ -161,14 +160,12 @@ void GridGraph::writeObstacleCost(const util::geo::Polygon<double>& obst) {
         if (!neigh) continue;
         auto ge = getNEdg(grNdA, neigh);
 
-        if (util::geo::intersects(
-                util::geo::LineSegment<double>(*ge->getFrom()->pl().getGeom(),
-                                               *ge->getTo()->pl().getGeom()),
-                obst) ||
-            util::geo::contains(
-                util::geo::LineSegment<double>(*ge->getFrom()->pl().getGeom(),
-                                               *ge->getTo()->pl().getGeom()),
-                obst)) {
+        if (intersects(LineSegment<double>(*ge->getFrom()->pl().getGeom(),
+                                           *ge->getTo()->pl().getGeom()),
+                       obst) ||
+            contains(LineSegment<double>(*ge->getFrom()->pl().getGeom(),
+                                         *ge->getTo()->pl().getGeom()),
+                     obst)) {
           ge->pl().setCost(std::numeric_limits<double>::infinity());
         }
       }
@@ -192,11 +189,11 @@ void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
         double d = std::numeric_limits<double>::infinity();
 
         for (auto orE : ce->pl().getChilds()) {
-          double dLoc = util::geo::dist(*orE->pl().getGeom(),
-                                        util::geo::LineSegment<double>(
-                                            *ge->getFrom()->pl().getGeom(),
-                                            *ge->getTo()->pl().getGeom())) /
-                        getCellSize();
+          double dLoc =
+              dist(*orE->pl().getGeom(),
+                   LineSegment<double>(*ge->getFrom()->pl().getGeom(),
+                                       *ge->getTo()->pl().getGeom())) /
+              getCellSize();
           if (dLoc < d) d = dLoc;
         }
 
@@ -323,13 +320,23 @@ NodeCost GridGraph::nodeBendPen(GridNode* n, CombEdge* e) {
 }
 
 // _____________________________________________________________________________
-double GridGraph::getBendPen(size_t origI, size_t targetI) const {
+double GridGraph::getBendPen(size_t i, size_t j) const {
+  return _bendCosts[ang(i, j)];
+}
+
+// _____________________________________________________________________________
+size_t GridGraph::ang(size_t i, size_t j) const {
   // determine angle between port i and j
-  int ang = (4 + (origI - targetI)) % 4;
+  int ang = (4 + (i - j)) % 4;
   if (ang > 2) ang = 4 - ang;
   ang = ang % 2;
 
-  return _bendCosts[ang];
+  int d = (int)(i) - (int)(j);
+  int deg = abs((((d + 2) % 4) + 4) % 4 - 2) % 2;
+
+  assert(ang == deg);
+
+  return ang;
 }
 
 // _____________________________________________________________________________
@@ -653,10 +660,7 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   // in-node connections
   for (size_t i = 0; i < getNumNeighbors(); i++) {
     for (size_t j = i + 1; j < getNumNeighbors(); j++) {
-      int d = (int)(i) - (int)(j);
-      size_t deg = abs((((d + 2) % 4) + 4) % 4 - 2) % 2;
-
-      double pen = _bendCosts[deg];
+      double pen = getBendPen(i, j);
 
       if (x == 0 && i == 3) pen = INF;
       if (y == 0 && i == 0) pen = INF;

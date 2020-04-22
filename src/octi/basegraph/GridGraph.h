@@ -123,6 +123,7 @@ class GridGraph : public BaseGraph {
   virtual void reWriteObstCosts();
 
   virtual double getBendPen(size_t origI, size_t targetI) const;
+  virtual size_t ang(size_t i, size_t j) const;
 
   virtual GridNode* getNode(size_t x, size_t y) const;
 
