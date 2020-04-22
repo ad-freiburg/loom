@@ -222,6 +222,11 @@ GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
   double xPos = _bbox.getLowerLeft().getX() + x * _cellSize;
   double yPos = _bbox.getLowerLeft().getY() + y * _cellSize;
 
+  double c_0 = _c.p_45 - _c.p_135;
+  double c_135 = _c.p_45;
+  double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
+  double c_45 = c_0 + c_135;
+
   GridNode* n = addNd(DPoint(xPos, yPos));
   n->pl().setId(_nds.size());
   _nds.push_back(n);
@@ -259,9 +264,18 @@ GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
   for (size_t i = 0; i < getNumNeighbors(); i++) {
     for (size_t j = i + 1; j < getNumNeighbors(); j++) {
       int d = (int)(i) - (int)(j);
-      size_t deg = abs((((d + 4) % 8) + 8) % 8 - 4);
+      size_t deg = abs((((d + 4) % 8) + 8) % 8 - 4) % 4;
+      double pen = c_0;
 
-      double pen = _bendCosts[deg];
+      if (deg == 0) pen = c_0;
+      if (deg == 1) pen = c_45;
+      if (deg == 2) pen = c_90;
+      if (deg == 3) pen = c_135;
+
+      std::cerr << deg << " " << pen << " VS " << _bendCosts[deg] << std::endl;
+      assert(pen == _bendCosts[deg]);
+
+      // pen = _bendCosts[deg];
 
       if (x == 0 && (i == 5 || i == 6 || i == 7)) pen = INF;
       if (y == 0 && (i == 0 || i == 7 || i == 1)) pen = INF;

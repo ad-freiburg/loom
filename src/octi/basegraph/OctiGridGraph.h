@@ -18,9 +18,9 @@ class OctiGridGraph : public GridGraph {
       : GridGraph(bbox, cellSize, spacer, pens) {
 
     _bendCosts[0] = _c.p_45 - _c.p_135;
-    _bendCosts[1] = _c.p_45;
+    _bendCosts[3] = _c.p_45;
     _bendCosts[2] = _c.p_45 - _c.p_135 + _c.p_90;
-    _bendCosts[3] = _bendCosts[0] + _bendCosts[1];
+    _bendCosts[1] = _bendCosts[0] + _bendCosts[3];
 
     // prepare the octigrid A* heuristic
     _heurXCost = _c.horizontalPen + _heurHopCost;

@@ -654,7 +654,8 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
   for (size_t i = 0; i < getNumNeighbors(); i++) {
     for (size_t j = i + 1; j < getNumNeighbors(); j++) {
       int d = (int)(i) - (int)(j);
-      size_t deg = abs((((d + 2) % 4) + 4) % 4 - 2);
+      size_t deg = abs((((d + 2) % 4) + 4) % 4 - 2) % 2;
+
       double pen = _bendCosts[deg];
 
       if (x == 0 && i == 3) pen = INF;
