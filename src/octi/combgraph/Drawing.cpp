@@ -135,44 +135,6 @@ const GridNode* Drawing::getGrNd(const CombNode* cn) {
 }
 
 // _____________________________________________________________________________
-PolyLine<double> Drawing::buildPolylineFromRes(
-    const std::vector<std::pair<size_t, size_t>>& res) const {
-  PolyLine<double> pl;
-  for (auto revIt = res.rbegin(); revIt != res.rend(); revIt++) {
-    auto f = _gg->getEdg(_gg->getGrNdById(revIt->first),
-                         _gg->getGrNdById(revIt->second));
-    // TODO check for isSecondary should not be needed, filtered out by draw()
-    if (!f->pl().isSecondary()) {
-      if (pl.getLine().size() > 0 &&
-          dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) > 0) {
-        BezierCurve<double> bc(pl.getLine().back(),
-                               *f->getFrom()->pl().getParent()->pl().getGeom(),
-                               *f->getFrom()->pl().getParent()->pl().getGeom(),
-                               *f->getFrom()->pl().getGeom());
-
-        for (auto p : bc.render(10).getLine()) pl << p;
-      } else {
-        pl << *f->getFrom()->pl().getParent()->pl().getGeom();
-      }
-
-      pl << *f->getFrom()->pl().getGeom();
-      pl << *f->getTo()->pl().getGeom();
-    }
-  }
-
-  if (res.size())
-    pl << *_gg->getEdg(_gg->getGrNdById(res.front().first),
-                       _gg->getGrNdById(res.front().second))
-               ->getTo()
-               ->pl()
-               .getParent()
-               ->pl()
-               .getGeom();
-
-  return pl;
-}
-
-// _____________________________________________________________________________
 void Drawing::getLineGraph(LineGraph* target) const {
   std::map<LineNode*, LineNode*> m;
 
@@ -180,7 +142,7 @@ void Drawing::getLineGraph(LineGraph* target) const {
     auto n = ndpair.first;
     for (auto f : n->getAdjListOut()) {
       if (f->getFrom() != n) continue;
-      auto poly = buildPolylineFromRes(_edgs.find(f)->second);
+      auto poly = _gg->geomFromPath(_edgs.find(f)->second);
       double tot = f->pl().getChilds().size();
       double d = poly.getLength();
       double step = d / tot;

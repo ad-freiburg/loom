@@ -1,4 +1,3 @@
-// Copyright 2017, University of Freiburg,
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
@@ -121,6 +120,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   virtual CrossEdgPairs getCrossEdgPairs() const = 0;
 
   virtual void addObstacle(const util::geo::Polygon<double>& obst) = 0;
+  virtual PolyLine<double> geomFromPath(const std::vector<std::pair<size_t, size_t>>& res) const = 0;
 };
 }  // namespace basegraph
 }  // namespace octi

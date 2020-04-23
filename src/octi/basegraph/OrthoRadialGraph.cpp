@@ -9,12 +9,14 @@
 #include "octi/basegraph/NodeCost.h"
 #include "octi/basegraph/OrthoRadialGraph.h"
 #include "util/Misc.h"
+#include "util/geo/CircularSegment.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Node.h"
 
 using namespace octi::basegraph;
 using octi::basegraph::NodeCost;
 using octi::basegraph::OrthoRadialGraph;
+using util::geo::CircularSegment;
 using util::geo::DBox;
 using util::geo::dist;
 using util::geo::DPoint;
@@ -22,7 +24,8 @@ using util::geo::DPoint;
 // _____________________________________________________________________________
 void OrthoRadialGraph::init() {
   // write nodes
-  for (size_t y = 0; y < _grid.getYHeight() / 2; y++) {
+  // TODO: we are only going from 1 because we have no center node
+  for (size_t y = 1; y < _grid.getYHeight() / 2; y++) {
     for (size_t x = 0; x < _numBeams; x++) {
       writeNd(x, y);
     }
@@ -32,13 +35,13 @@ void OrthoRadialGraph::init() {
   for (size_t x = 0; x < _numBeams; x++) {
     for (size_t y = 0; y < _grid.getYHeight() / 2; y++) {
       GridNode* center = getNode(x, y);
+      if (!center) continue;
 
       for (size_t p = 0; p < maxDeg(); p++) {
         GridNode* from = center->pl().getPort(p);
         GridNode* toN = neigh(x, y, p);
         if (from != 0 && toN != 0) {
-          GridNode* to = toN->pl().getPort((p + maxDeg() / 2) %
-                                           maxDeg());
+          GridNode* to = toN->pl().getPort((p + maxDeg() / 2) % maxDeg());
           if (!to) continue;
           auto e = new GridEdge(from, to, GridEdgePL(9, false));
           e->pl().setId(_edgeCount);
@@ -70,7 +73,8 @@ OrthoRadialGraph::getHeur(const std::set<GridNode*>& to) const {
 }
 
 // _____________________________________________________________________________
-GridEdge* OrthoRadialGraph::getNEdg(const GridNode* a, const GridNode* b) const {
+GridEdge* OrthoRadialGraph::getNEdg(const GridNode* a,
+                                    const GridNode* b) const {
   if (!a || !b) return 0;
 
   int dy = (int)a->pl().getY() - (int)b->pl().getY();
@@ -78,19 +82,26 @@ GridEdge* OrthoRadialGraph::getNEdg(const GridNode* a, const GridNode* b) const 
 
   size_t dir = 0;
 
-  if (dy == 1 && dx == 0) dir = 2;
-  else if (dy == -1 && dx == 0) dir = 0;
-  else if (dy == 0 && (dx == -((int)_numBeams - 1) || dx == 1)) dir = 3;
-  else if (dy == 0 && (dx == ((int)_numBeams - 1) || dx == -1)) dir = 1;
-  else return 0;
+  if (dy == 1 && dx == 0)
+    dir = 2;
+  else if (dy == -1 && dx == 0)
+    dir = 0;
+  else if (dy == 0 && (dx == -((int)_numBeams - 1) || dx == 1))
+    dir = 3;
+  else if (dy == 0 && (dx == ((int)_numBeams - 1) || dx == -1))
+    dir = 1;
+  else
+    return 0;
 
-  // std::cerr << "(" << a->pl().getX() << "," <<  a->pl().getY()  << ")" << ", " << "(" << b->pl().getX() << "," <<  b->pl().getY()  << ")" <<  " dir: " << dir << std::endl;
+  // std::cerr << "(" << a->pl().getX() << "," <<  a->pl().getY()  << ")" << ",
+  // " << "(" << b->pl().getX() << "," <<  b->pl().getY()  << ")" <<  " dir: "
+  // << dir << std::endl;
 
   if (a->pl().getPort(dir) &&
       b->pl().getPort((dir + maxDeg() / 2) % maxDeg())) {
-    return const_cast<GridEdge*>(getEdg(
-        a->pl().getPort(dir),
-        b->pl().getPort((dir + maxDeg() / 2) % maxDeg())));
+    return const_cast<GridEdge*>(
+        getEdg(a->pl().getPort(dir),
+               b->pl().getPort((dir + maxDeg() / 2) % maxDeg())));
   }
 
   return 0;
@@ -101,14 +112,14 @@ void OrthoRadialGraph::writeInitialCosts() {
   for (size_t x = 0; x < _numBeams; x++) {
     for (size_t y = 0; y < _grid.getYHeight() / 2; y++) {
       auto n = getNode(x, y);
+      if (!n) continue;
       for (size_t i = 0; i < maxDeg(); i++) {
         auto port = n->pl().getPort(i);
         auto neighbor = neigh(x, y, i);
 
         if (!neighbor || !port) continue;
 
-        auto oPort = neighbor->pl().getPort((i + maxDeg() / 2) %
-                                         maxDeg());
+        auto oPort = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
         auto e = getEdg(port, oPort);
 
         if (i % 2 == 0) {
@@ -123,7 +134,6 @@ void OrthoRadialGraph::writeInitialCosts() {
 
 // _____________________________________________________________________________
 GridNode* OrthoRadialGraph::writeNd(size_t x, size_t y) {
-  y += 1;
   double origX =
       _bbox.getLowerLeft().getX() +
       (_bbox.getUpperRight().getX() - _bbox.getLowerLeft().getX()) * 0.5;
@@ -138,17 +148,16 @@ GridNode* OrthoRadialGraph::writeNd(size_t x, size_t y) {
 
   double xPos = origX + y * cos(curAngle) * _cellSize;
   double yPos = origY + y * sin(curAngle) * _cellSize;
+  auto pos = DPoint(xPos, yPos);
 
   double c_0 = _c.p_45 - _c.p_135;
-  double c_135 = _c.p_45;
   double c_90 = _c.p_45 - _c.p_135 + _c.p_90;
-  double c_45 = c_0 + c_135;
 
-  GridNode* n = addNd(DPoint(xPos, yPos));
+  GridNode* n = addNd(pos);
   n->pl().setId(_nds.size());
   _nds.push_back(n);
   n->pl().setSink();
-  _grid.add(x, y, n);
+  _grid.add(pos, n);
   n->pl().setXY(x, y);
   n->pl().setParent(n);
 
@@ -198,10 +207,9 @@ GridNode* OrthoRadialGraph::writeNd(size_t x, size_t y) {
       if (deg == 0) pen = c_0;
       if (deg == 1) pen = c_90;
 
-      if (x == 0 && i == 3) pen = INF;
-      if (y == 0 && i == 0) pen = INF;
-      if (x == _grid.getXWidth() - 1 && i == 1) pen = INF;
-      if (y == _grid.getYHeight() - 1 && i == 2) pen = INF;
+      if (y == 1 && i == 2) pen = INF;
+      if (y == 1 && j == 2) pen = INF;
+      if (y == _grid.getYHeight() / 2 && i == 0) pen = INF;
 
       auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
                             GridEdgePL(pen, true));
@@ -224,6 +232,71 @@ GridNode* OrthoRadialGraph::writeNd(size_t x, size_t y) {
 
 // _____________________________________________________________________________
 GridNode* OrthoRadialGraph::getNode(size_t x, size_t y) const {
-  if ((y * _numBeams + x) * 5 >= _nds.size()) return 0;
-  return _nds[(y * _numBeams + x) * 5];
+  if (y == 0) return 0;
+  if (((y - 1) * _numBeams + x) * 5 >= _nds.size()) return 0;
+  return _nds[((y - 1) * _numBeams + x) * 5];
+}
+
+// _____________________________________________________________________________
+PolyLine<double> OrthoRadialGraph::geomFromPath(
+    const std::vector<std::pair<size_t, size_t>>& res) const {
+  double origX =
+      _bbox.getLowerLeft().getX() +
+      (_bbox.getUpperRight().getX() - _bbox.getLowerLeft().getX()) * 0.5;
+
+  double origY =
+      _bbox.getLowerLeft().getY() +
+      (_bbox.getUpperRight().getY() - _bbox.getLowerLeft().getY()) * 0.5;
+
+  PolyLine<double> pl;
+  for (auto revIt = res.rbegin(); revIt != res.rend(); revIt++) {
+    auto f = getEdg(getGrNdById(revIt->first), getGrNdById(revIt->second));
+    auto frPar = f->getFrom()->pl().getParent();
+    auto toPar = f->getTo()->pl().getParent();
+
+    if (!f->pl().isSecondary()) {
+      pl << *frPar->pl().getGeom();
+
+      if (frPar->pl().getY() == toPar->pl().getY()) {
+        double angStep = 2.0 * M_PI / _numBeams;
+        if (((frPar->pl().getX() - toPar->pl().getX()) == 1) ||
+            ((toPar->pl().getX() - frPar->pl().getX()) == _numBeams - 1)) {
+          angStep = -angStep;
+        }
+
+        CircularSegment<double> seg(*frPar->pl().getGeom(), -angStep,
+                                    {origX, origY});
+        for (auto p : seg.render(10).getLine()) pl << p;
+      }
+
+      pl << *toPar->pl().getGeom();
+
+      // if (pl.getLine().size() > 0 &&
+      // dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) > 0) {
+      // BezierCurve<double> bc(pl.getLine().back(),
+      // *f->getFrom()->pl().getParent()->pl().getGeom(),
+      // *f->getFrom()->pl().getParent()->pl().getGeom(),
+      // *f->getFrom()->pl().getGeom());
+
+      // for (auto p : bc.render(10).getLine()) pl << p;
+      // } else {
+      // pl << *f->getFrom()->pl().getParent()->pl().getGeom();
+      // }
+
+      // pl << *f->getFrom()->pl().getGeom();
+      // pl << *f->getTo()->pl().getGeom();
+      pl.simplify(1);
+    }
+  }
+
+  // if (res.size())
+  // pl << *getEdg(getGrNdById(res.front().first),
+  // getGrNdById(res.front().second))
+  // ->getTo()
+  // ->pl()
+  // .getParent()
+  // ->pl()
+  // .getGeom();
+
+  return pl;
 }

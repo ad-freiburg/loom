@@ -74,9 +74,6 @@ class Drawing {
   const BaseGraph* _gg;
 
   double recalcBends(const CombNode* nd);
-
-  PolyLine<double> buildPolylineFromRes(
-      const std::vector<std::pair<size_t, size_t>>& res) const;
 };
 }
 }

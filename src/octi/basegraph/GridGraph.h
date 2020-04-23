@@ -8,15 +8,15 @@
 #include <queue>
 #include <set>
 #include <unordered_map>
-#include "octi/combgraph/CombGraph.h"
+#include "octi/basegraph/BaseGraph.h"
 #include "octi/basegraph/GridEdgePL.h"
 #include "octi/basegraph/GridNodePL.h"
 #include "octi/basegraph/NodeCost.h"
-#include "octi/basegraph/BaseGraph.h"
+#include "octi/combgraph/CombGraph.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
-#include "util/graph/DirGraph.h"
 #include "util/graph/Dijkstra.h"
+#include "util/graph/DirGraph.h"
 
 #include "octi/combgraph/CombEdgePL.h"
 #include "octi/combgraph/CombNodePL.h"
@@ -47,8 +47,8 @@ class GridGraph : public BaseGraph {
 
   virtual double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
-  virtual std::priority_queue<Candidate> getGridNdCands(const util::geo::DPoint& p,
-                                                double maxD) const;
+  virtual std::priority_queue<Candidate> getGridNdCands(
+      const util::geo::DPoint& p, double maxD) const;
 
   virtual void addCostVec(GridNode* n, const NodeCost& addC);
 
@@ -89,12 +89,16 @@ class GridGraph : public BaseGraph {
 
   virtual CrossEdgPairs getCrossEdgPairs() const;
 
-  virtual void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target, double pen);
+  virtual void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
+                                  double pen);
 
   virtual void addObstacle(const util::geo::Polygon<double>& obst);
 
   virtual const util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float>*
   getHeur(const std::set<GridNode*>& to) const;
+
+  virtual PolyLine<double> geomFromPath(
+      const std::vector<std::pair<size_t, size_t>>& res) const;
 
  protected:
   util::geo::DBox _bbox;
@@ -137,7 +141,8 @@ class GridGraph : public BaseGraph {
   double _bendCosts[2];
 };
 
-struct GridCost : public util::graph::Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
+struct GridCost
+    : public util::graph::Dijkstra::CostFunc<GridNodePL, GridEdgePL, float> {
   GridCost(float inf) : _inf(inf) {}
   virtual float operator()(const GridNode* from, const GridEdge* e,
                            const GridNode* to) const {
@@ -192,7 +197,8 @@ struct GridGraphHeur
     }
 
     // auto cost = GridCost(500);
-    // auto c = util::graph::Dijkstra::shortestPath(const_cast<GridNode*>(from), to, cost);
+    // auto c = util::graph::Dijkstra::shortestPath(const_cast<GridNode*>(from),
+    // to, cost);
 
     // // std::cerr << c << " VSS " << ret + cheapestSink << std::endl;
 

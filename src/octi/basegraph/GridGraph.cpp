@@ -9,12 +9,14 @@
 #include "octi/basegraph/GridGraph.h"
 #include "octi/basegraph/NodeCost.h"
 #include "util/Misc.h"
+#include "util/geo/BezierCurve.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Node.h"
 
 using namespace octi::basegraph;
 using octi::basegraph::GridGraph;
 using octi::basegraph::NodeCost;
+using util::geo::BezierCurve;
 using util::geo::contains;
 using util::geo::DBox;
 using util::geo::dist;
@@ -724,6 +726,43 @@ void GridGraph::reWriteObstCosts() {
   for (const auto& obst : _obstacles) {
     writeObstacleCost(obst);
   }
+}
+
+// _____________________________________________________________________________
+PolyLine<double> GridGraph::geomFromPath(
+    const std::vector<std::pair<size_t, size_t>>& res) const {
+  PolyLine<double> pl;
+  for (auto revIt = res.rbegin(); revIt != res.rend(); revIt++) {
+    auto f = getEdg(getGrNdById(revIt->first), getGrNdById(revIt->second));
+    // TODO check for isSecondary should not be needed, filtered out by draw()
+    if (!f->pl().isSecondary()) {
+      if (pl.getLine().size() > 0 &&
+          dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) > 0) {
+        BezierCurve<double> bc(pl.getLine().back(),
+                               *f->getFrom()->pl().getParent()->pl().getGeom(),
+                               *f->getFrom()->pl().getParent()->pl().getGeom(),
+                               *f->getFrom()->pl().getGeom());
+
+        for (auto p : bc.render(10).getLine()) pl << p;
+      } else {
+        pl << *f->getFrom()->pl().getParent()->pl().getGeom();
+      }
+
+      pl << *f->getFrom()->pl().getGeom();
+      pl << *f->getTo()->pl().getGeom();
+    }
+  }
+
+  if (res.size())
+    pl << *getEdg(getGrNdById(res.front().first),
+                  getGrNdById(res.front().second))
+               ->getTo()
+               ->pl()
+               .getParent()
+               ->pl()
+               .getGeom();
+
+  return pl;
 }
 
 // _____________________________________________________________________________

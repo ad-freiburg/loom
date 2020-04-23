@@ -22,6 +22,9 @@ class OrthoRadialGraph : public GridGraph {
   virtual const util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float>*
   getHeur(const std::set<GridNode*>& to) const;
 
+  virtual PolyLine<double> geomFromPath(
+      const std::vector<std::pair<size_t, size_t>>& res) const;
+
  protected:
   virtual void writeInitialCosts();
   virtual GridNode* writeNd(size_t x, size_t y);
@@ -36,8 +39,7 @@ struct OrthoRadialGraphHeur
     : public util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
   OrthoRadialGraphHeur(const basegraph::GridGraph* g,
                        const std::set<GridNode*>& to)
-      : g(g), to(0) {
-  }
+      : g(g), to(0) {}
 
   float operator()(const GridNode* from, const std::set<GridNode*>& to) const {
     return 0;
