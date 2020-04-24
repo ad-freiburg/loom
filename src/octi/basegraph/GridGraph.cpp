@@ -727,9 +727,8 @@ double GridGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) const {
   // TODO: make configurable
   double PEN = 0.5;
 
-  double c_0 = _c.p_45 - _c.p_135;
   double penPerGrid =
-      PEN + c_0 + fmax(_c.horizontalPen, _c.verticalPen);
+      PEN + _bendCosts[0] + fmax(_c.horizontalPen, _c.verticalPen);
 
   // real distance between grid node and input node
   double d = dist(*cbNd->pl().getGeom(), *grNd->pl().getGeom());

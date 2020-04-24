@@ -524,17 +524,17 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     // }
 
     if (!nL.size()) {
-      std::cerr << "FAILED TO FIND A ROUTE FROM " << std::endl;
-      for (auto fr : frGrNds)
-      std::cerr << fr->pl().getX() << "," << fr->pl().getY() << std::endl;
-      std::cerr << " TO" << std::endl;
-      for (auto to : toGrNds)
-      std::cerr << to->pl().getX() << "," << to->pl().getY() << std::endl;
-      std::cerr << "DEG FROM CMB NODE " << frCmbNd->getDeg() << std::endl;
-      std::cerr << "DEG TO CMB NODE " << toCmbNd->getDeg() << std::endl;
-      util::geo::output::GeoGraphJsonOutput out;
-      out.print(*gg, std::cout);
-      exit(0);
+      // std::cerr << "FAILED TO FIND A ROUTE FROM " << std::endl;
+      // for (auto fr : frGrNds)
+      // std::cerr << fr->pl().getX() << "," << fr->pl().getY() << std::endl;
+      // std::cerr << " TO" << std::endl;
+      // for (auto to : toGrNds)
+      // std::cerr << to->pl().getX() << "," << to->pl().getY() << std::endl;
+      // std::cerr << "DEG FROM CMB NODE " << frCmbNd->getDeg() << std::endl;
+      // std::cerr << "DEG TO CMB NODE " << toCmbNd->getDeg() << std::endl;
+      // util::geo::output::GeoGraphJsonOutput out;
+      // out.print(*gg, std::cout);
+      // exit(0);
 
       // cleanup
       for (auto n : toGrNds) gg->closeSinkTo(n);

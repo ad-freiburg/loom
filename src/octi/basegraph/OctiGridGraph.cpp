@@ -347,7 +347,8 @@ size_t OctiGridGraph::getGrNdDeg(const CombNode* nd, size_t x, size_t y) const {
 }
 
 // _____________________________________________________________________________
-double OctiGridGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) const {
+double OctiGridGraph::ndMovePen(const CombNode* cbNd,
+                                const GridNode* grNd) const {
   // the move penalty has to be at least the max cost of saving a single
   // grid hop - otherwise we could move the node closer and closer to the
   // other node without ever increasing the total cost.
@@ -356,9 +357,21 @@ double OctiGridGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) cons
   // TODO: make configurable
   double PEN = 0.5;
 
-  double c_0 = _c.p_45 - _c.p_135;
-  double penPerGrid =
-      PEN + c_0 + fmax(_c.diagonalPen, fmax(_c.horizontalPen, _c.verticalPen));
+  // we may substitute a diagonal edge be a horizontal + 90 deg bend + vertical
+  // edge
+  double diagCost =
+      _bendCosts[0] +
+      fmin(_c.diagonalPen, _c.horizontalPen + _c.verticalPen + _bendCosts[2]);
+
+  double vertCost =
+      _bendCosts[0] +
+      fmin(_c.verticalPen, _c.horizontalPen + _c.diagonalPen + _bendCosts[3]);
+
+  double horiCost =
+      _bendCosts[0] +
+      fmin(_c.horizontalPen, _c.verticalPen + _c.diagonalPen + _bendCosts[3]);
+
+  double penPerGrid = PEN + fmax(diagCost, fmax(vertCost, horiCost));
 
   // real distance between grid node and input node
   double d = dist(*cbNd->pl().getGeom(), *grNd->pl().getGeom());
