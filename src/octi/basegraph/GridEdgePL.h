@@ -45,6 +45,8 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   void setId(size_t id);
   size_t getId() const;
 
+  void setRndrOrder(size_t order);
+
  private:
   double _c;
 
@@ -56,6 +58,7 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   bool _blocked;
 
   uint8_t _resEdgs;
+  size_t _rndrOrder;
   size_t _id;
 };
 }

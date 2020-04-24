@@ -27,6 +27,26 @@ void LineNodePL::clearConnExc() {
 void LineNodePL::setGeom(const Point<double>& p) { _pos = p; }
 
 // _____________________________________________________________________________
+std::string LineNodePL::toString() const {
+  std::stringstream ret;
+
+  ret << "<nd " << this;
+
+  ret << " @ " << _pos.getX() << "," << _pos.getY();
+
+  char sep = ' ';
+  for (auto st : _is) {
+    ret << sep;
+    ret << "\"" << st.name << "\" (" << st.id << ")";
+    sep = ',';
+  }
+
+  ret << ">";
+
+  return ret.str();
+}
+
+// _____________________________________________________________________________
 util::json::Dict LineNodePL::getAttrs() const {
   util::json::Dict obj;
   if (_is.size() > 0) {

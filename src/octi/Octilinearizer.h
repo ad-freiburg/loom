@@ -46,6 +46,8 @@ typedef std::map<CombNode*, const GridNode*> SettledPos;
 
 enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL };
 
+enum Undrawable { DRAWN = 0, NO_PATH = 1, NO_CANDS = 2 };
+
 // exception thrown when no planar embedding could be found
 struct NoEmbeddingFoundExc : public std::exception {
   const char* what() const throw() {
@@ -137,14 +139,16 @@ class Octilinearizer {
 
   void settleRes(GridNode* startGridNd, GridNode* toGridNd,
                  basegraph::BaseGraph* gg, CombNode* from, CombNode* to,
-                 const GrEdgList& res, CombEdge* e);
+                 const GrEdgList& res, CombEdge* e, size_t rndrOrder);
+
+  static const CombNode* getCenterNd(const CombGraph* cg);
 
   std::vector<CombEdge*> getOrdering(const CombGraph& cg, bool randr) const;
 
-  bool draw(const std::vector<CombEdge*>& order, basegraph::BaseGraph* gg,
+  Undrawable draw(const std::vector<CombEdge*>& order, basegraph::BaseGraph* gg,
             Drawing* drawing, double cutoff, double maxGrDist,
             const GeoPensMap* geoPensMap);
-  bool draw(const std::vector<CombEdge*>& order, const SettledPos& settled,
+  Undrawable draw(const std::vector<CombEdge*>& order, const SettledPos& settled,
             basegraph::BaseGraph* gg, Drawing* drawing, double cutoff,
             double maxGrDist, const GeoPensMap* geoPensMap);
 

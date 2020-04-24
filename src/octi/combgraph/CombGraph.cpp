@@ -50,7 +50,12 @@ void CombGraph::build(const LineGraph* source) {
 
 // _____________________________________________________________________________
 void CombGraph::combineDeg2() {
+  std::vector<CombNode*> toDel;
   for (auto n : *getNds()) {
+    if (n->getAdjList().size() == 2)  toDel.push_back(n);
+  }
+
+  for (auto n : toDel) {
     if (n->getAdjList().size() == 2) {
       CombEdge* a = n->getAdjList().front();
       CombEdge* b = n->getAdjList().back();

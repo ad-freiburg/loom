@@ -205,6 +205,14 @@ inline Polygon<T> move(Polygon<T> geo, double x, double y) {
 }
 
 // _____________________________________________________________________________
+template <typename T>
+inline Box<T> move(Box<T> geo, double x, double y) {
+  geo.setLowerLeft(move(geo.getLowerLeft(), x, y));
+  geo.setUpperRight(move(geo.getUpperRight(), x, y));
+  return geo;
+}
+
+// _____________________________________________________________________________
 template <template <typename> class Geometry, typename T>
 inline std::vector<Geometry<T>> move(std::vector<Geometry<T>> multigeo,
                                      double x, double y) {

@@ -117,6 +117,8 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   ConnEx& getConnExc() { return _connEx; }
   const ConnEx& getConnExc() const { return _connEx; }
 
+  std::string toString() const;
+
  private:
   util::geo::Point<double> _pos;
   std::vector<Station> _is;

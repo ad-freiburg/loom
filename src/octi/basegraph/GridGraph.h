@@ -65,7 +65,7 @@ class GridGraph : public BaseGraph {
   virtual std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis);
 
   virtual void settleNd(GridNode* n, CombNode* cn);
-  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e);
+  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrOr);
 
   virtual const Penalties& getPens() const;
 
@@ -136,6 +136,8 @@ class GridGraph : public BaseGraph {
   virtual GridNode* neigh(size_t cx, size_t cy, size_t i) const;
 
   virtual void getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]);
+
+  virtual size_t getGrNdDeg(const CombNode* nd, size_t x, size_t y) const;
 
  private:
   double _bendCosts[2];

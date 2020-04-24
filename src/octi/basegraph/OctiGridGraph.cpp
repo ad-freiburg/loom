@@ -104,7 +104,8 @@ double OctiGridGraph::getBendPen(size_t i, size_t j) const {
 }
 
 // _____________________________________________________________________________
-void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
+void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
+                              size_t rndrOrd) {
   if (a == b) return;
 
   int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
@@ -125,6 +126,8 @@ void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   auto ge = getNEdg(a, b);
 
   addResEdg(ge, e);
+
+  ge->pl().setRndrOrder(rndrOrd);
 
   // this closes both nodes
   // a close means that all major edges reaching this node are closed
@@ -328,4 +331,41 @@ double OctiGridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 
   // we always count one heurHopCost too much, subtract it at the end!
   return edgeCost - _heurHopCost;
+}
+
+// _____________________________________________________________________________
+size_t OctiGridGraph::getGrNdDeg(const CombNode* nd, size_t x, size_t y) const {
+  if ((x == 0 || x == _grid.getXWidth() - 1) &&
+      (y == 0 || y == _grid.getYHeight() - 1))
+    return 3;
+
+  if ((x == 0 || x == _grid.getXWidth() - 1) ||
+      (y == 0 || y == _grid.getYHeight() - 1))
+    return 5;
+
+  return 8;
+}
+
+// _____________________________________________________________________________
+double OctiGridGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) const {
+  // the move penalty has to be at least the max cost of saving a single
+  // grid hop - otherwise we could move the node closer and closer to the
+  // other node without ever increasing the total cost.
+
+  // additional penalty per grid move
+  // TODO: make configurable
+  double PEN = 0.5;
+
+  double c_0 = _c.p_45 - _c.p_135;
+  double penPerGrid =
+      PEN + c_0 + fmax(_c.diagonalPen, fmax(_c.horizontalPen, _c.verticalPen));
+
+  // real distance between grid node and input node
+  double d = dist(*cbNd->pl().getGeom(), *grNd->pl().getGeom());
+
+  // distance normalized to grid length
+  double gridD = d / getCellSize();
+
+  // and multiplied per grid hop penalty
+  return gridD * penPerGrid;
 }

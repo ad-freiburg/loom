@@ -50,6 +50,20 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
   CombGraph cg(tg, deg2heur);
   box = util::geo::pad(box, gridSize + 1);
 
+  if (_baseGraphType == ORTHORADIAL) {
+    auto centerNd = getCenterNd(&cg);
+
+    std::cerr << "Center node is "
+              << centerNd->pl().getParent()->pl().toString() << std::endl;
+
+    auto cgCtr = *centerNd->pl().getGeom();
+    auto newBox = DBox();
+
+    newBox = extendBox(box, newBox);
+    newBox = extendBox(rotate(convexHull(box), 180, cgCtr), newBox);
+    box = newBox;
+  }
+
   LOG(INFO, std::cerr) << "Presolving...";
   try {
     // presolve using heuristical approach to get a first feasible solution
@@ -119,9 +133,24 @@ double Octilinearizer::draw(
 
   box = util::geo::pad(box, gridSize + 1);
 
+  if (_baseGraphType == ORTHORADIAL) {
+    auto centerNd = getCenterNd(&cg);
+
+    std::cerr << "Center node is "
+              << centerNd->pl().getParent()->pl().toString() << std::endl;
+
+    auto cgCtr = *centerNd->pl().getGeom();
+    auto newBox = DBox();
+
+    newBox = extendBox(box, newBox);
+    newBox = extendBox(rotate(convexHull(box), 180, cgCtr), newBox);
+    box = newBox;
+  }
+
   return draw(cg, box, outTg, retGg, pens, gridSize, borderRad, maxGrDist,
               restrLocSearch, enfGeoPen, obstacles);
 }
+
 // _____________________________________________________________________________
 double Octilinearizer::draw(
     const CombGraph& cg, const util::geo::DBox& box, LineGraph* outTg,
@@ -134,7 +163,7 @@ double Octilinearizer::draw(
   auto gg = newBaseGraph(box, gridSize, borderRad, pens);
   gg->init();
 
-  // util::geo::output::GeoGraphJsonOutput out;
+  // util::geo::output::geographjsonoutput out;
   // out.print(*gg, std::cout);
   // exit(0);
 
@@ -186,17 +215,25 @@ double Octilinearizer::draw(
     else
       iterOrder = initOrder;
 
-    bool locFound =
+    auto error =
         draw(iterOrder, ggs[0], &drawing, drawing.score(), maxGrDist, geoPens);
 
-    if (locFound) {
-      LOG(INFO, std::cerr) << " ++ Try " << i << ", score " << drawing.score()
-                           << ", (" << T_STOP(draw) << " ms)";
-      found = true;
-    } else {
-      LOG(INFO, std::cerr) << " ++ Try " << i << ", score <inf>"
-                           << ", next <not found>"
-                           << " (" << T_STOP(draw) << " ms)";
+    switch (error) {
+      case DRAWN:
+        LOG(INFO, std::cerr) << " ++ Try " << i << ", score " << drawing.score()
+                             << ", (" << T_STOP(draw) << " ms)";
+        found = true;
+        break;
+      case NO_PATH:
+        LOG(INFO, std::cerr) << " ++ Try " << i << ", score <inf>"
+                             << ", next <no path found>"
+                             << " (" << T_STOP(draw) << " ms)";
+        break;
+      case NO_CANDS:
+        LOG(INFO, std::cerr) << " ++ Try " << i << ", score <inf>"
+                             << ", next <no cands found>"
+                             << " (" << T_STOP(draw) << " ms)";
+        break;
     }
 
     drawing.eraseFromGrid(ggs[0]);
@@ -266,10 +303,10 @@ double Octilinearizer::draw(
 
           // we can use bestFromIter.score() as the limit for the shortest
           // path computation, as we can already do at least as good.
-          bool found = draw(test, p, ggs[btch], &run, bestFrIters[btch].score(),
+          auto error = draw(test, p, ggs[btch], &run, bestFrIters[btch].score(),
                             maxGrDist, geoPens);
 
-          if (found && bestFrIters[btch].score() > run.score()) {
+          if (!error && bestFrIters[btch].score() > run.score()) {
             bestFrIters[btch] = run;
           }
 
@@ -325,7 +362,8 @@ double Octilinearizer::draw(
 // _____________________________________________________________________________
 void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
                                BaseGraph* gg, CombNode* from, CombNode* to,
-                               const GrEdgList& res, CombEdge* e) {
+                               const GrEdgList& res, CombEdge* e,
+                               size_t rndrOrder) {
   gg->settleNd(toGrNd, to);
   gg->settleNd(frGrNd, from);
 
@@ -333,7 +371,7 @@ void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
   for (auto f : res) {
     if (f->pl().isSecondary()) continue;
     gg->settleEdg(f->getFrom()->pl().getParent(), f->getTo()->pl().getParent(),
-                  e);
+                  e, rndrOrder);
   }
 }
 
@@ -349,18 +387,20 @@ void Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
 }
 
 // _____________________________________________________________________________
-bool Octilinearizer::draw(const std::vector<CombEdge*>& order, BaseGraph* gg,
-                          Drawing* drawing, double cutoff, double maxGrDist,
-                          const GeoPensMap* geoPensMap) {
+Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& order,
+                                BaseGraph* gg, Drawing* drawing, double cutoff,
+                                double maxGrDist,
+                                const GeoPensMap* geoPensMap) {
   SettledPos emptyPos;
   return draw(order, emptyPos, gg, drawing, cutoff, maxGrDist, geoPensMap);
 }
 
 // _____________________________________________________________________________
-bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
-                          const SettledPos& settled, BaseGraph* gg,
-                          Drawing* drawing, double globCutoff, double maxGrDist,
-                          const GeoPensMap* geoPensMap) {
+Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
+                                const SettledPos& settled, BaseGraph* gg,
+                                Drawing* drawing, double globCutoff,
+                                double maxGrDist,
+                                const GeoPensMap* geoPensMap) {
   SettledPos retPos;
 
   size_t i = 0;
@@ -383,7 +423,7 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
         getRtPair(frCmbNd, toCmbNd, settled, gg, maxGrDist);
 
     if (frGrNds.size() == 0 || toGrNds.size() == 0) {
-      return false;
+      return NO_CANDS;
     }
 
     if (toGrNds.size() > frGrNds.size()) {
@@ -477,12 +517,30 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     delete heur;
 
+    // if (i == 4) {
+    // util::geo::output::GeoGraphJsonOutput out;
+    // out.print(*gg, std::cout);
+    // exit(0);
+    // }
+
     if (!nL.size()) {
+      std::cerr << "FAILED TO FIND A ROUTE FROM " << std::endl;
+      for (auto fr : frGrNds)
+      std::cerr << fr->pl().getX() << "," << fr->pl().getY() << std::endl;
+      std::cerr << " TO" << std::endl;
+      for (auto to : toGrNds)
+      std::cerr << to->pl().getX() << "," << to->pl().getY() << std::endl;
+      std::cerr << "DEG FROM CMB NODE " << frCmbNd->getDeg() << std::endl;
+      std::cerr << "DEG TO CMB NODE " << toCmbNd->getDeg() << std::endl;
+      util::geo::output::GeoGraphJsonOutput out;
+      out.print(*gg, std::cout);
+      exit(0);
+
       // cleanup
       for (auto n : toGrNds) gg->closeSinkTo(n);
       for (auto n : frGrNds) gg->closeSinkFr(n);
 
-      return false;
+      return NO_PATH;
     }
 
     toGrNd = nL.front();
@@ -499,10 +557,10 @@ bool Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     for (auto n : toGrNds) gg->closeSinkTo(n);
     for (auto n : frGrNds) gg->closeSinkFr(n);
 
-    settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg);
+    settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg, i);
   }
 
-  return true;
+  return DRAWN;
 }
 
 // _____________________________________________________________________________
@@ -623,4 +681,17 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, double cellSize,
     default:
       return 0;
   }
+}
+
+// _____________________________________________________________________________
+const CombNode* Octilinearizer::getCenterNd(const CombGraph* cg) {
+  const CombNode* ret = 0;
+  for (auto nd : cg->getNds()) {
+    if (!ret || LineGraph::getLDeg(nd->pl().getParent()) >
+                    LineGraph::getLDeg(ret->pl().getParent())) {
+      ret = nd;
+    }
+  }
+
+  return ret;
 }

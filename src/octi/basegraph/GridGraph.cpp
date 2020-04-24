@@ -207,7 +207,7 @@ void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
 }
 
 // _____________________________________________________________________________
-void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
+void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrO) {
   if (a == b) return;
 
   // this closes the grid edge
@@ -216,6 +216,8 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   assert(ge);
 
   addResEdg(ge, e);
+
+  ge->pl().setRndrOrder(rndrO);
 
   // this closes both nodes
   // a close means that all major edges reaching this node are closed
@@ -354,13 +356,36 @@ NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd, CombEdge* edg) {
     int32_t dCw = origNd->pl().getEdgeOrdering().dist(out[i], edg);
     int32_t dCCw = origNd->pl().getEdgeOrdering().dist(edg, out[i]);
 
-    for (int j = 1; j < dCw; j++) {
-      addC[(i + j) % maxDeg()] = -1.0 * std::numeric_limits<double>::max();
+    int addSpace = 0;
+    for (int j = 1; j < dCw + addSpace; j++) {
+      size_t cur = (i + j) % maxDeg();
+      auto neighbor = neigh(nd, cur);
+      if (!neighbor) {
+        addSpace++;
+      }
+      if (neighbor && !out[cur] && neighbor->pl().isClosed() &&
+          !neighbor->pl().isSettled()) {
+        // std::cerr << "For node " << nd->pl().getX() << "," << nd->pl().getY()
+        // << " neighbor at " << cur << " is closed!" << std::endl;
+        addSpace++;
+      }
+      addC[cur] = -1.0 * std::numeric_limits<double>::max();
     }
 
-    for (int j = 1; j < dCCw; j++) {
-      addC[(i + (maxDeg() - j)) % maxDeg()] =
-          -1.0 * std::numeric_limits<double>::max();
+    addSpace = 0;
+    for (int j = 1; j < dCCw + addSpace; j++) {
+      size_t cur = (i + (maxDeg() - j)) % maxDeg();
+      auto neighbor = neigh(nd, cur);
+      if (!neighbor) {
+        addSpace++;
+      }
+      if (neighbor && !out[cur] && neighbor->pl().isClosed() &&
+          !neighbor->pl().isSettled()) {
+        // std::cerr << "For node " << nd->pl().getX() << "," << nd->pl().getY()
+        // << " neighbor at " << cur << " is closed!" << std::endl;
+        addSpace++;
+      }
+      addC[cur] = -1.0 * std::numeric_limits<double>::max();
     }
   }
 
@@ -575,7 +600,17 @@ std::set<GridNode*> GridGraph::getGrNdCands(CombNode* n, double maxDis) {
     auto cands = getGridNdCands(*n->pl().getGeom(), maxDis);
 
     while (!cands.empty()) {
-      if (!cands.top().n->pl().isClosed()) tos.insert(cands.top().n);
+      size_t x = cands.top().n->pl().getParent()->pl().getX();
+      size_t y = cands.top().n->pl().getParent()->pl().getY();
+
+      // getGrNdDeg returns the maximum node degree of the grid node at this
+      // position to prevent choosing nodes which cannot hold the CombNode
+      //
+      // If such nodes are chosen, the greedy heuristic algorithm will fall into
+      // a local optimum which is a death valley - there is now way out
+
+      if (!cands.top().n->pl().isClosed() && getGrNdDeg(n, x, y) >= n->getDeg())
+        tos.insert(cands.top().n);
       cands.pop();
     }
   } else {
@@ -693,7 +728,8 @@ double GridGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) const {
   double PEN = 0.5;
 
   double c_0 = _c.p_45 - _c.p_135;
-  double penPerGrid = PEN + c_0 + fmax(_c.diagonalPen, _c.horizontalPen);
+  double penPerGrid =
+      PEN + c_0 + fmax(_c.horizontalPen, _c.verticalPen);
 
   // real distance between grid node and input node
   double d = dist(*cbNd->pl().getGeom(), *grNd->pl().getGeom());
@@ -767,3 +803,16 @@ PolyLine<double> GridGraph::geomFromPath(
 
 // _____________________________________________________________________________
 double GridGraph::getCellSize() const { return _cellSize; }
+
+// _____________________________________________________________________________
+size_t GridGraph::getGrNdDeg(const CombNode* nd, size_t x, size_t y) const {
+  if ((x == 0 || x == _grid.getXWidth() - 1) &&
+      (y == 0 || y == _grid.getYHeight() - 1))
+    return 2;
+
+  if ((x == 0 || x == _grid.getXWidth() - 1) ||
+      (y == 0 || y == _grid.getYHeight() - 1))
+    return 3;
+
+  return 4;
+}

@@ -15,7 +15,11 @@ class OrthoRadialGraph : public GridGraph {
   using GridGraph::neigh;
   OrthoRadialGraph(size_t numBeams, const util::geo::DBox& bbox,
                    double cellSize, double spacer, const Penalties& pens)
-      : GridGraph(bbox, cellSize, spacer, pens), _numBeams(numBeams) {}
+      : GridGraph(util::geo::extendBox(
+                      bbox, util::geo::getBoundingBox(util::geo::rotate(
+                                convexHull(bbox), 90, centroid(bbox)))),
+                  cellSize, spacer, pens),
+        _numBeams(numBeams) {}
 
   virtual void init();
   virtual GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;
@@ -24,12 +28,14 @@ class OrthoRadialGraph : public GridGraph {
 
   virtual PolyLine<double> geomFromPath(
       const std::vector<std::pair<size_t, size_t>>& res) const;
+  virtual double ndMovePen(const CombNode* cbNd, const GridNode* grNd) const;
 
  protected:
   virtual void writeInitialCosts();
   virtual GridNode* writeNd(size_t x, size_t y);
   virtual GridNode* neigh(size_t cx, size_t cy, size_t i) const;
   virtual GridNode* getNode(size_t x, size_t y) const;
+  virtual size_t getGrNdDeg(const CombNode* nd, size_t x, size_t y) const;
 
  private:
   size_t _numBeams;

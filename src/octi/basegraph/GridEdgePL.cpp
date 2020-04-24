@@ -15,7 +15,7 @@ GridEdgePL::GridEdgePL(double c, bool secondary)
       _isSecondary(secondary),
       _closed(false),
       _blocked(false),
-      _resEdgs(0) {}
+      _resEdgs(0), _rndrOrder(0) {}
 
 // _____________________________________________________________________________
 GridEdgePL::GridEdgePL(double c, bool secondary, bool closed)
@@ -23,7 +23,7 @@ GridEdgePL::GridEdgePL(double c, bool secondary, bool closed)
       _isSecondary(secondary),
       _closed(closed),
       _blocked(false),
-      _resEdgs(0) {}
+      _resEdgs(0), _rndrOrder(0) {}
 
 // _____________________________________________________________________________
 const util::geo::Line<double>* GridEdgePL::getGeom() const { return 0; }
@@ -41,6 +41,7 @@ util::json::Dict GridEdgePL::getAttrs() const {
                     ? "inf"
                     : util::toString(cost());
   obj["res_edges"] = util::toString((int)_resEdgs);
+  obj["rndr_order"] = util::toString((int)_rndrOrder);
   return obj;
 }
 // _____________________________________________________________________________
@@ -84,3 +85,8 @@ void GridEdgePL::setId(size_t id) { _id = id; }
 
 // _____________________________________________________________________________
 size_t GridEdgePL::getId() const { return _id; }
+
+// _____________________________________________________________________________
+void GridEdgePL::setRndrOrder(size_t order) {
+  _rndrOrder = order;
+}
