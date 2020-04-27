@@ -55,6 +55,9 @@ class Grid {
   size_t getXWidth() const;
   size_t getYHeight() const;
 
+  size_t getCellXFromX(double lon) const;
+  size_t getCellYFromY(double lat) const;
+
  private:
   double _width;
   double _height;
@@ -76,9 +79,6 @@ class Grid {
   std::set<V> _removed;
 
   Box<T> getBox(size_t x, size_t y) const;
-
-  size_t getCellXFromX(double lon) const;
-  size_t getCellYFromY(double lat) const;
 };
 
 #include "util/geo/Grid.tpp"

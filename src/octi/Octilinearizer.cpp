@@ -10,6 +10,7 @@
 #include "octi/basegraph/GridGraph.h"
 #include "octi/basegraph/NodeCost.h"
 #include "octi/basegraph/OctiGridGraph.h"
+#include "octi/basegraph/OctiHananGraph.h"
 #include "octi/basegraph/OrthoRadialGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "util/Misc.h"
@@ -45,8 +46,7 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
 
   auto box = tg->getBBox();
 
-  auto tester = newBaseGraph(box, gridSize, borderRad, pens);
-  tg->splitNodes(tester->maxDeg());
+  tg->splitNodes(baseMaxDeg());
   CombGraph cg(tg, deg2heur);
   box = util::geo::pad(box, gridSize + 1);
 
@@ -74,7 +74,7 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
     LOG(INFO, std::cerr) << "Presolving finished.";
   } catch (const NoEmbeddingFoundExc& exc) {
     LOG(INFO, std::cerr) << "Presolve was not sucessful.";
-    gg = newBaseGraph(box, gridSize, borderRad, pens);
+    gg = newBaseGraph(box, cg, gridSize, borderRad, pens);
     gg->init();
   }
 
@@ -124,10 +124,7 @@ double Octilinearizer::draw(
 
   auto box = tg->getBBox();
 
-  // TODO: this is just to get the max degree, solve this in some nicer way
-  auto gg = newBaseGraph(box, gridSize, borderRad, pens);
-
-  tg->splitNodes(gg->maxDeg());
+  tg->splitNodes(baseMaxDeg());
 
   CombGraph cg(tg, deg2heur);
 
@@ -160,18 +157,18 @@ double Octilinearizer::draw(
   size_t jobs = 4;
   std::vector<BaseGraph*> ggs(jobs);
 
-  auto gg = newBaseGraph(box, gridSize, borderRad, pens);
+  auto gg = newBaseGraph(box, cg, gridSize, borderRad, pens);
   gg->init();
 
-  // util::geo::output::geographjsonoutput out;
-  // out.print(*gg, std::cout);
-  // exit(0);
+  util::geo::output::GeoGraphJsonOutput out;
+  out.print(*gg, std::cout);
+  exit(0);
 
   LOG(INFO, std::cerr) << "Creating grid graphs... ";
   T_START(ggraph);
 #pragma omp parallel for
   for (size_t i = 0; i < jobs; i++) {
-    ggs[i] = newBaseGraph(box, gridSize, borderRad, pens);
+    ggs[i] = newBaseGraph(box, cg, gridSize, borderRad, pens);
     ggs[i]->init();
   }
   LOG(INFO, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
@@ -668,8 +665,8 @@ std::set<GridNode*> Octilinearizer::getCands(CombNode* cmbNd,
 }
 
 // _____________________________________________________________________________
-BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, double cellSize,
-                                        double spacer,
+BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, const CombGraph& cg,
+                                        double cellSize, double spacer,
                                         const Penalties& pens) const {
   switch (_baseGraphType) {
     case OCTIGRID:
@@ -677,7 +674,25 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, double cellSize,
     case GRID:
       return new GridGraph(bbox, cellSize, spacer, pens);
     case ORTHORADIAL:
-      return new OrthoRadialGraph(20, bbox, cellSize, spacer, pens);
+      return new OrthoRadialGraph(40, bbox, cellSize, spacer, pens);
+    case OCTIHANANGRID:
+      return new OctiHananGraph(bbox, cg, cellSize, spacer, pens);
+    default:
+      return 0;
+  }
+}
+
+// _____________________________________________________________________________
+size_t Octilinearizer::baseMaxDeg() const {
+  switch (_baseGraphType) {
+    case OCTIGRID:
+      return 8;
+    case GRID:
+      return 4;
+    case ORTHORADIAL:
+      return 4;
+    case OCTIHANANGRID:
+      return 8;
     default:
       return 0;
   }

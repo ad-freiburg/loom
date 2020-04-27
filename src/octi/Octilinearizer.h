@@ -44,7 +44,7 @@ typedef util::graph::NList<GridNodePL, GridEdgePL> GrNdList;
 typedef std::pair<std::set<GridNode*>, std::set<GridNode*>> RtPair;
 typedef std::map<CombNode*, const GridNode*> SettledPos;
 
-enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL };
+enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL, OCTIHANANGRID };
 
 enum Undrawable { DRAWN = 0, NO_PATH = 1, NO_CANDS = 2 };
 
@@ -131,8 +131,11 @@ class Octilinearizer {
   BaseGraphType _baseGraphType;
 
   basegraph::BaseGraph* newBaseGraph(const util::geo::DBox& bbox,
-                                     double cellSize, double spacer,
+                                     const CombGraph& cg, double cellSize,
+                                     double spacer,
                                      const Penalties& pens) const;
+
+  size_t baseMaxDeg() const;
 
   void writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
                     basegraph::BaseGraph* g);
@@ -146,14 +149,15 @@ class Octilinearizer {
   std::vector<CombEdge*> getOrdering(const CombGraph& cg, bool randr) const;
 
   Undrawable draw(const std::vector<CombEdge*>& order, basegraph::BaseGraph* gg,
-            Drawing* drawing, double cutoff, double maxGrDist,
-            const GeoPensMap* geoPensMap);
-  Undrawable draw(const std::vector<CombEdge*>& order, const SettledPos& settled,
-            basegraph::BaseGraph* gg, Drawing* drawing, double cutoff,
-            double maxGrDist, const GeoPensMap* geoPensMap);
+                  Drawing* drawing, double cutoff, double maxGrDist,
+                  const GeoPensMap* geoPensMap);
+  Undrawable draw(const std::vector<CombEdge*>& order,
+                  const SettledPos& settled, basegraph::BaseGraph* gg,
+                  Drawing* drawing, double cutoff, double maxGrDist,
+                  const GeoPensMap* geoPensMap);
 
   SettledPos neigh(const SettledPos& pos, const std::vector<CombNode*>&,
-                         size_t i) const;
+                   size_t i) const;
 
   RtPair getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
                    const SettledPos& settled, basegraph::BaseGraph* gg,

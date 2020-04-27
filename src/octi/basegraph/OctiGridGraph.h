@@ -68,7 +68,6 @@ class OctiGridGraph : public GridGraph {
   virtual double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
   virtual size_t getGrNdDeg(const CombNode* nd, size_t x, size_t y) const;
 
- private:
   double _heurDiagSave;
   double _heurXCost;
   double _heurYCost;
