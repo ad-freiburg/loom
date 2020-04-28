@@ -26,7 +26,6 @@ class OctiHananGraph : public OctiGridGraph {
   virtual void init();
 
  protected:
-  virtual void writeInitialCosts();
   virtual GridNode* writeNd(size_t x, size_t y);
   virtual GridNode* neigh(size_t cx, size_t cy, size_t i) const;
   virtual GridNode* getNode(size_t x, size_t y) const;
@@ -36,8 +35,10 @@ class OctiHananGraph : public OctiGridGraph {
   virtual size_t getGrNdDeg(const CombNode* nd, size_t x, size_t y) const;
 
  private:
+  void connectNodes(GridNode* grNdA, GridNode* grNdB, size_t dir);
+
   const combgraph::CombGraph& _cg;
-  std::map<std::pair<size_t, size_t>, GridNode*> _nds;
+  std::map<std::pair<size_t, size_t>, size_t> _ndIdx;
 };
 }  // namespace basegraph
 }  // namespace octi

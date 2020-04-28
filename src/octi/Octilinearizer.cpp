@@ -160,9 +160,9 @@ double Octilinearizer::draw(
   auto gg = newBaseGraph(box, cg, gridSize, borderRad, pens);
   gg->init();
 
-  util::geo::output::GeoGraphJsonOutput out;
-  out.print(*gg, std::cout);
-  exit(0);
+  // util::geo::output::GeoGraphJsonOutput out;
+  // out.print(*gg, std::cout);
+  // exit(0);
 
   LOG(INFO, std::cerr) << "Creating grid graphs... ";
   T_START(ggraph);
@@ -496,7 +496,8 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
       // auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL,
       // &nL);
-      auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
+      // auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
+      auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, &eL, &nL);
 
       // for (auto e : eL) std::cerr << "E " << e << " " <<
       // e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> "

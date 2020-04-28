@@ -21,16 +21,17 @@ using util::geo::DPoint;
 
 // _____________________________________________________________________________
 GridNode* OctiHananGraph::neigh(size_t cx, size_t cy, size_t i) const {
-  if (i > 7) return getNode(cx, cy);
-  int8_t x = 1;
-  if (i % 4 == 0) x = 0;
-  if (i > 4) x = -1;
+  auto nd = getNode(cx, cy);
+  if (i > 7) return nd;
 
-  int8_t y = 1;
-  if (i == 2 || i == 6) y = 0;
-  if (i == 3 || i == 4 || i == 5) y = -1;
-
-  return getNode(cx + x, cy + y);
+  // TODO: not very efficient
+  for (auto edg : nd->pl().getPort(i)->getAdjList()) {
+    auto check = edg->getOtherNd(nd->pl().getPort(i))->pl().getParent();
+    if (check != nd) {
+      return check;
+    }
+  }
+  return 0;
 }
 
 // _____________________________________________________________________________
@@ -70,18 +71,19 @@ void OctiHananGraph::unSettleEdg(GridNode* a, GridNode* b) {
   }
 
   // unblock blocked diagonal edges crossing this edge
-  if (dir != 0) {
-    auto na = neigh(x, y, (dir + 7) % 8);
-    auto nb = neigh(x, y, (dir + 1) % 8);
+  // TODO!!!
+  // if (dir != 0) {
+    // auto na = neigh(x, y, (dir + 7) % 8);
+    // auto nb = neigh(x, y, (dir + 1) % 8);
 
-    if (na && nb) {
-      auto e = getNEdg(na, nb);
-      auto f = getNEdg(nb, na);
+    // if (na && nb) {
+      // auto e = getNEdg(na, nb);
+      // auto f = getNEdg(nb, na);
 
-      e->pl().unblock();
-      f->pl().unblock();
-    }
-  }
+      // e->pl().unblock();
+      // f->pl().unblock();
+    // }
+  // }
 }
 
 // _____________________________________________________________________________
@@ -105,7 +107,7 @@ double OctiHananGraph::getBendPen(size_t i, size_t j) const {
 
 // _____________________________________________________________________________
 void OctiHananGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
-                              size_t rndrOrd) {
+                               size_t rndrOrd) {
   if (a == b) return;
 
   int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
@@ -135,18 +137,19 @@ void OctiHananGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
   closeTurns(b);
 
   // block diagonal edges crossing this edge
-  if (dir != 0) {
-    auto na = neigh(x, y, (dir + 7) % 8);
-    auto nb = neigh(x, y, (dir + 1) % 8);
+  // TODO!!!!!!
+  // if (dir != 0) {
+    // auto na = neigh(x, y, (dir + 7) % 8);
+    // auto nb = neigh(x, y, (dir + 1) % 8);
 
-    if (na && nb) {
-      auto e = getNEdg(na, nb);
-      auto f = getNEdg(nb, na);
+    // if (na && nb) {
+      // auto e = getNEdg(na, nb);
+      // auto f = getNEdg(nb, na);
 
-      e->pl().block();
-      f->pl().block();
-    }
-  }
+      // e->pl().block();
+      // f->pl().block();
+    // }
+  // }
 }
 
 // _____________________________________________________________________________
@@ -174,37 +177,19 @@ CrossEdgPairs OctiHananGraph::getCrossEdgPairs() const {
 }
 
 // _____________________________________________________________________________
-void OctiHananGraph::writeInitialCosts() {
-  for (size_t x = 0; x < _grid.getXWidth(); x++) {
-    for (size_t y = 0; y < _grid.getYHeight(); y++) {
-      auto n = getNode(x, y);
-      for (size_t i = 0; i < maxDeg(); i++) {
-        auto port = n->pl().getPort(i);
-        auto neighbor = neigh(x, y, i);
-
-        if (!neighbor || !port) continue;
-
-        auto oPort = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
-        auto e = getEdg(port, oPort);
-
-        if (i % 4 == 0) {
-          e->pl().setCost(_c.verticalPen);
-        } else if ((i + 2) % 4 == 0) {
-          e->pl().setCost(_c.horizontalPen);
-        } else if (i % 2) {
-          e->pl().setCost(_c.diagonalPen);
-        }
-      }
-    }
-  }
-}
-
-// _____________________________________________________________________________
 GridEdge* OctiHananGraph::getNEdg(const GridNode* a, const GridNode* b) const {
   if (!a || !b) return 0;
 
-  int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
-  int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
+  int i = (int)a->pl().getX() - (int)b->pl().getX();
+  if (i < -1) i = -1;
+  if (i > 1) i = 1;
+
+  int j = (int)a->pl().getY() - (int)b->pl().getY();
+  if (j < -1) j = -1;
+  if (j > 1) j = 1;
+
+  int aa = 1 + i;
+  int bb = 1 + j;
 
   size_t dir = 0;
   size_t d = aa * 3 + bb;
@@ -230,7 +215,6 @@ GridEdge* OctiHananGraph::getNEdg(const GridNode* a, const GridNode* b) const {
 
 // _____________________________________________________________________________
 void OctiHananGraph::init() {
-
   std::vector<GridNode*> xSorted;
   std::vector<GridNode*> ySorted;
 
@@ -251,13 +235,13 @@ void OctiHananGraph::init() {
   }
 
   struct {
-    bool operator() (const GridNode* a, const GridNode* b) {
+    bool operator()(const GridNode* a, const GridNode* b) {
       return a->pl().getX() < b->pl().getX();
     }
   } sortByX;
 
   struct {
-    bool operator() (const GridNode* a, const GridNode* b) {
+    bool operator()(const GridNode* a, const GridNode* b) {
       return a->pl().getY() < b->pl().getY();
     }
   } sortByY;
@@ -267,8 +251,10 @@ void OctiHananGraph::init() {
   std::vector<std::vector<GridNode*>> yAct(_grid.getYHeight());
   std::vector<std::vector<GridNode*>> xAct(_grid.getXWidth());
 
-  std::vector<std::vector<GridNode*>> xyAct(_grid.getXWidth() + _grid.getYHeight());
-  std::vector<std::vector<GridNode*>> yxAct(_grid.getXWidth() + _grid.getYHeight());
+  std::vector<std::vector<GridNode*>> xyAct(_grid.getXWidth() +
+                                            _grid.getYHeight());
+  std::vector<std::vector<GridNode*>> yxAct(_grid.getXWidth() +
+                                            _grid.getYHeight());
 
   for (auto nd : xSorted) {
     yAct[nd->pl().getY()].push_back(nd);
@@ -279,7 +265,8 @@ void OctiHananGraph::init() {
   }
 
   for (auto nd : xSorted) {
-    xyAct[nd->pl().getX() + (_grid.getYHeight() - 1 - nd->pl().getY())].push_back(nd);
+    xyAct[nd->pl().getX() + (_grid.getYHeight() - 1 - nd->pl().getY())]
+        .push_back(nd);
   }
 
   for (auto nd : xSorted) {
@@ -302,9 +289,10 @@ void OctiHananGraph::init() {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       size_t xi = x + (_grid.getYHeight() - 1 - y);
       size_t yi = y + x;
-      if ((xyAct[xi].size() && (yxAct[yi].size() || yAct[y].size() || xAct[x].size())) ||
-       (yxAct[yi].size() && (xyAct[xi].size() || yAct[y].size() || xAct[x].size()))) {
-
+      if ((xyAct[xi].size() &&
+           (yxAct[yi].size() || yAct[y].size() || xAct[x].size())) ||
+          (yxAct[yi].size() &&
+           (xyAct[xi].size() || yAct[y].size() || xAct[x].size()))) {
         bool have = false;
 
         auto newNd = getNode(x, y);
@@ -332,12 +320,11 @@ void OctiHananGraph::init() {
         if (xAct[x].size()) {
           xAct[x].push_back(newNd);
         }
-
       }
     }
   }
 
-  for (size_t x = 0; x < _grid.getYHeight(); x++) {
+  for (size_t x = 0; x < _grid.getXWidth(); x++) {
     std::sort(xAct[x].begin(), xAct[x].end(), sortByY);
   }
 
@@ -350,94 +337,60 @@ void OctiHananGraph::init() {
     std::sort(yxAct[i].begin(), yxAct[i].end(), sortByX);
   }
 
-
-  for (size_t y = 0; y < _grid.getYHeight();y++) {
+  for (size_t y = 0; y < _grid.getYHeight(); y++) {
     for (size_t i = 1; i < yAct[y].size(); i++) {
-      auto e = new GridEdge(yAct[y][i-1], yAct[y][i], GridEdgePL(9, false));
-      e->pl().setId(_edgeCount);
-      _edgeCount++;
-      yAct[y][i-1]->addEdge(e);
-      yAct[y][i]->addEdge(e);
-
-      auto f = new GridEdge(yAct[y][i], yAct[y][i-1], GridEdgePL(9, false));
-      f->pl().setId(_edgeCount);
-      _edgeCount++;
-      yAct[y][i-1]->addEdge(f);
-      yAct[y][i]->addEdge(f);
+      connectNodes(yAct[y][i-1], yAct[y][i], 2);
     }
   }
 
-  for (size_t x = 0; x < _grid.getXWidth();x++) {
+  for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t i = 1; i < xAct[x].size(); i++) {
-      auto e = new GridEdge(xAct[x][i-1], xAct[x][i], GridEdgePL(9, false));
-      e->pl().setId(_edgeCount);
-      _edgeCount++;
-      xAct[x][i-1]->addEdge(e);
-      xAct[x][i]->addEdge(e);
-
-      auto f = new GridEdge(xAct[x][i], xAct[x][i-1], GridEdgePL(9, false));
-      f->pl().setId(_edgeCount);
-      _edgeCount++;
-      xAct[x][i-1]->addEdge(f);
-      xAct[x][i]->addEdge(f);
+      connectNodes(xAct[x][i-1], xAct[x][i], 0);
     }
   }
 
-  for (size_t xi = 0; xi < _grid.getXWidth() + _grid.getYHeight() ;xi++) {
+  for (size_t xi = 0; xi < _grid.getXWidth() + _grid.getYHeight(); xi++) {
     for (size_t i = 1; i < xyAct[xi].size(); i++) {
-      auto e = new GridEdge(xyAct[xi][i-1], xyAct[xi][i], GridEdgePL(9, false));
-      e->pl().setId(_edgeCount);
-      _edgeCount++;
-      xyAct[xi][i-1]->addEdge(e);
-      xyAct[xi][i]->addEdge(e);
-
-      auto f = new GridEdge(xyAct[xi][i], xyAct[xi][i-1], GridEdgePL(9, false));
-      f->pl().setId(_edgeCount);
-      _edgeCount++;
-      xyAct[xi][i-1]->addEdge(f);
-      xyAct[xi][i]->addEdge(f);
+      connectNodes(xyAct[xi][i-1], xyAct[xi][i], 1);
     }
   }
 
-  for (size_t yi = 0; yi < _grid.getXWidth() + _grid.getYHeight() ;yi++) {
+  for (size_t yi = 0; yi < _grid.getXWidth() + _grid.getYHeight(); yi++) {
     for (size_t i = 1; i < yxAct[yi].size(); i++) {
-      auto e = new GridEdge(yxAct[yi][i-1], yxAct[yi][i], GridEdgePL(9, false));
-      e->pl().setId(_edgeCount);
-      _edgeCount++;
-      yxAct[yi][i-1]->addEdge(e);
-      yxAct[yi][i]->addEdge(e);
-
-      auto f = new GridEdge(yxAct[yi][i], yxAct[yi][i-1], GridEdgePL(9, false));
-      f->pl().setId(_edgeCount);
-      _edgeCount++;
-      yxAct[yi][i-1]->addEdge(f);
-      yxAct[yi][i]->addEdge(f);
+      connectNodes(yxAct[yi][i-1], yxAct[yi][i], 3);
     }
   }
+}
 
+// _____________________________________________________________________________
+void OctiHananGraph::connectNodes(GridNode* grNdFr, GridNode* grNdTo,
+                                  size_t p) {
+  if (grNdFr == 0 || grNdTo == 0) return;
+  if (grNdFr == grNdTo) return;
+  GridNode* fr = grNdFr->pl().getPort(p);
+  GridNode* to = grNdTo->pl().getPort((p + maxDeg() / 2) % maxDeg());
 
+  int xDist = labs((int)grNdFr->pl().getX() - (int)grNdTo->pl().getX());
+  int yDist = labs((int)grNdFr->pl().getY() - (int)grNdTo->pl().getY());
 
-  // write grid edges
-  // for (size_t x = 0; x < _grid.getXWidth(); x++) {
-    // for (size_t y = 0; y < _grid.getYHeight(); y++) {
-      // GridNode* center = getNode(x, y);
+  double cost = 0;
+  if (p % 4 == 0) cost = (_c.verticalPen + _heurHopCost) * yDist - _heurHopCost;
+  else if ((p + 2) % 4 == 0) cost = (_c.horizontalPen + _heurHopCost) * xDist - _heurHopCost;
+  else if (p % 2) cost = (_c.diagonalPen + _heurHopCost) * yDist - _heurHopCost;
 
-      // for (size_t p = 0; p < maxDeg(); p++) {
-        // GridNode* frN = center->pl().getPort(p);
-        // GridNode* toN = neigh(x, y, p);
-        // if (frN != 0 && toN != 0) {
-          // GridNode* to = toN->pl().getPort((p + maxDeg() / 2) % maxDeg());
-          // auto e = new GridEdge(frN, to, GridEdgePL(9, false));
-          // e->pl().setId(_edgeCount);
-          // _edgeCount++;
-          // frN->addEdge(e);
-          // to->addEdge(e);
-        // }
-      // }
-    // }
-  // }
+  auto e = new GridEdge(fr, to, GridEdgePL(9, false));
+  e->pl().setId(_edgeCount);
+  e->pl().setCost(cost);
+  _edgeCount++;
+  fr->addEdge(e);
+  to->addEdge(e);
 
-  // writeInitialCosts();
+  auto f = new GridEdge(to, fr, GridEdgePL(9, false));
+  f->pl().setId(_edgeCount);
+  f->pl().setCost(cost);
+  _edgeCount++;
+  fr->addEdge(f);
+  to->addEdge(f);
 }
 
 // _____________________________________________________________________________
@@ -447,7 +400,8 @@ GridNode* OctiHananGraph::writeNd(size_t x, size_t y) {
 
   GridNode* n = addNd(DPoint(xPos, yPos));
   n->pl().setId(_nds.size());
-  _nds[{x, y}] = n;
+  _ndIdx[{x, y}] = _nds.size();
+  _nds.push_back(n);
   n->pl().setSink();
   _grid.add(x, y, n);
   n->pl().setXY(x, y);
@@ -461,6 +415,7 @@ GridNode* OctiHananGraph::writeNd(size_t x, size_t y) {
 
     GridNode* nn = addNd(DPoint(xPos + xi * _spacer, yPos + yi * _spacer));
     nn->pl().setId(_nds.size());
+    _nds.push_back(nn);
     nn->pl().setParent(n);
     n->pl().setPort(i, nn);
 
@@ -512,14 +467,14 @@ size_t OctiHananGraph::maxDeg() const { return 8; }
 
 // _____________________________________________________________________________
 GridNode* OctiHananGraph::getNode(size_t x, size_t y) const {
-  auto f = _nds.find({x, y});
-  if (f == _nds.end()) return 0;
-  return f->second;
+  auto i = _ndIdx.find({x, y});
+  if (i == _ndIdx.end()) return 0;
+  return _nds[i->second];
 }
 
 // _____________________________________________________________________________
 double OctiHananGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
-                               int64_t yb) const {
+                                int64_t yb) const {
   int dx = labs(xb - xa);
   int dy = labs(yb - ya);
 
@@ -546,7 +501,8 @@ double OctiHananGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 }
 
 // _____________________________________________________________________________
-size_t OctiHananGraph::getGrNdDeg(const CombNode* nd, size_t x, size_t y) const {
+size_t OctiHananGraph::getGrNdDeg(const CombNode* nd, size_t x,
+                                  size_t y) const {
   if ((x == 0 || x == _grid.getXWidth() - 1) &&
       (y == 0 || y == _grid.getYHeight() - 1))
     return 3;
@@ -560,7 +516,7 @@ size_t OctiHananGraph::getGrNdDeg(const CombNode* nd, size_t x, size_t y) const 
 
 // _____________________________________________________________________________
 double OctiHananGraph::ndMovePen(const CombNode* cbNd,
-                                const GridNode* grNd) const {
+                                 const GridNode* grNd) const {
   // the move penalty has to be at least the max cost of saving a single
   // grid hop - otherwise we could move the node closer and closer to the
   // other node without ever increasing the total cost.
