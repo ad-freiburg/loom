@@ -6,6 +6,7 @@
 #include "util/Misc.h"
 #include "util/Nullable.h"
 #include "util/String.h"
+#include "util/tests/QuadTreeTest.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/graph/Algorithm.h"
@@ -26,6 +27,9 @@ using util::approx;
 int main(int argc, char** argv) {
 	UNUSED(argc);
 	UNUSED(argv);
+
+  QuadTreeTest quadTreeTest;
+  quadTreeTest.run();
 
   // ___________________________________________________________________________
   {

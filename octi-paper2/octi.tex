@@ -67,7 +67,7 @@
 \DeclareMathOperator*{\lev}{lev}
 
 \begin{document}
-\title{Adaptable Metro Maps}
+\title{Metro Maps on Various Base Grids}
 
 \author{Hannah Bast}
 \affiliation{%
@@ -94,7 +94,7 @@
 \email{sabine.storandt@uni-konstanz.de}
 
 \begin{abstract}
-We investigate the problem of finding the most likely geographic path a public transit vehicle (road-, rail- or water-bound) will take between a sorted list of given station coordinates. This sparse map-matching task frequently arises when real-world schedule data (where the geographic information often only consists of imprecise station locations) should be prepared for visualization, for example in route-planners or in transit-map drawing. It can also be a valuable pre-processing step for the closely related problem of on-line matching live passenger GPS data (e.g. from a smartphone) to a specific public transit vehicle. Our approach is implemented in a publicly-available tool called \emph{pfaedle} which matches arbitrary transit schedules (given as GTFS files) against geographic data from OpenStreetMap with high precision. We test our approach by comparing vehicle paths published by the transit agencies of several cities against the paths found by our tool. Previous work either primarily considered non-sparse private transport scenarios, did not handle inter-hop turn-restrictions, did not find a globally optimal path and/or lacked an extensive evaluation against real-world schedule data.
+Our interest is threefold. First, we would like to speed up the solution times of both the Linear Program and the approximation algorithm by using more sparse base grids. Second, we are interested in the capability of the original approach to render maps which are not octilinear, but for example orthoradial. Last, we want to investigate how a different base grid can be used to enlarge areas of high station density. 
 \end{abstract}
 
 %
@@ -125,18 +125,6 @@ We investigate the problem of finding the most likely geographic path a public t
 \maketitle
 
 \section{Introduction}
-
-Maps of public transit networks usually depict the lines in a schematized way to ensure readability.
-In 1931, Harry Beck presented his idea to draw the London subway lines as alternating sequences of horizontal, vertical and diagonal line segments \cite{garl94}.
-This octilinear design has since become the de facto standard and its usage goes beyond the cartographic representation of public transit networks.
-
-The high practical relevance of these maps has lead to numerous approaches to render them automatically.
-We give an overview of existing work in Section~\ref{SEC:related}.
-However, existing methods usually do not guarantee octilinear results, require impractically long solution times and/or only allow a small fixed number of bends (or none at all) along edges in the final drawing.
-This leads to several restrictions in their practical applicability.
-In particular, previous work which guaranteed octilinear results often did not have solution times fast enough to be used interactively in a map editor.
-Additionally, we are not aware of any previous work which allows octilinear drawings to approximate the real geographical courses of a line between stations, which is a requirement if the final maps should be combined with either existing maps or satellite imagery.
-In this work, our goal is to overcome these restrictions.
 
 \begin{figure}
     \centering

@@ -44,7 +44,7 @@ typedef util::graph::NList<GridNodePL, GridEdgePL> GrNdList;
 typedef std::pair<std::set<GridNode*>, std::set<GridNode*>> RtPair;
 typedef std::map<CombNode*, const GridNode*> SettledPos;
 
-enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL, OCTIHANANGRID };
+enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL, OCTIHANANGRID, OCTIQUADTREE };
 
 enum Undrawable { DRAWN = 0, NO_PATH = 1, NO_CANDS = 2 };
 
