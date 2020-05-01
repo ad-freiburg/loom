@@ -23,6 +23,7 @@ using util::geo::DPoint;
 GridNode* OctiHananGraph::neigh(size_t cx, size_t cy, size_t i) const {
   auto nd = getNode(cx, cy);
   if (i > 7) return nd;
+  if (!nd->pl().getPort(i)) return 0;
 
   // TODO: not very efficient
   for (auto edg : nd->pl().getPort(i)->getAdjList()) {
@@ -37,19 +38,6 @@ GridNode* OctiHananGraph::neigh(size_t cx, size_t cy, size_t i) const {
 // _____________________________________________________________________________
 void OctiHananGraph::unSettleEdg(GridNode* a, GridNode* b) {
   if (a == b) return;
-  int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
-  int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
-
-  size_t dir = 0;
-  size_t d = aa * 3 + bb;
-
-  if (d == 0) dir = 1;
-  if (d == 2) dir = 3;
-  if (d == 8) dir = 5;
-  if (d == 6) dir = 7;
-
-  size_t x = a->pl().getX();
-  size_t y = a->pl().getY();
 
   auto ge = getNEdg(a, b);
   auto gf = getNEdg(b, a);
@@ -71,19 +59,14 @@ void OctiHananGraph::unSettleEdg(GridNode* a, GridNode* b) {
   }
 
   // unblock blocked diagonal edges crossing this edge
-  // TODO!!!
-  // if (dir != 0) {
-    // auto na = neigh(x, y, (dir + 7) % 8);
-    // auto nb = neigh(x, y, (dir + 1) % 8);
-
-    // if (na && nb) {
-      // auto e = getNEdg(na, nb);
-      // auto f = getNEdg(nb, na);
-
-      // e->pl().unblock();
-      // f->pl().unblock();
-    // }
-  // }
+  if (getDir(a, b) % 2 != 0) {
+    auto pairs = _edgePairs.find(ge);
+    if (pairs == _edgePairs.end()) return;
+    for (auto p : pairs->second) {
+      p.first->pl().unblock();
+      p.second->pl().unblock();
+    }
+  }
 }
 
 // _____________________________________________________________________________
@@ -110,20 +93,6 @@ void OctiHananGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
                                size_t rndrOrd) {
   if (a == b) return;
 
-  int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
-  int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
-
-  size_t dir = 0;
-  size_t d = aa * 3 + bb;
-
-  if (d == 0) dir = 1;
-  if (d == 2) dir = 3;
-  if (d == 8) dir = 5;
-  if (d == 6) dir = 7;
-
-  size_t x = a->pl().getX();
-  size_t y = a->pl().getY();
-
   // this closes the grid edge
   auto ge = getNEdg(a, b);
 
@@ -137,19 +106,14 @@ void OctiHananGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
   closeTurns(b);
 
   // block diagonal edges crossing this edge
-  // TODO!!!!!!
-  // if (dir != 0) {
-    // auto na = neigh(x, y, (dir + 7) % 8);
-    // auto nb = neigh(x, y, (dir + 1) % 8);
-
-    // if (na && nb) {
-      // auto e = getNEdg(na, nb);
-      // auto f = getNEdg(nb, na);
-
-      // e->pl().block();
-      // f->pl().block();
-    // }
-  // }
+  if (getDir(a, b) % 2 != 0) {
+    auto pairs = _edgePairs.find(ge);
+    if (pairs == _edgePairs.end()) return;
+    for (auto p : pairs->second) {
+      p.first->pl().block();
+      p.second->pl().block();
+    }
+  }
 }
 
 // _____________________________________________________________________________
@@ -180,28 +144,7 @@ CrossEdgPairs OctiHananGraph::getCrossEdgPairs() const {
 GridEdge* OctiHananGraph::getNEdg(const GridNode* a, const GridNode* b) const {
   if (!a || !b) return 0;
 
-  int i = (int)a->pl().getX() - (int)b->pl().getX();
-  if (i < -1) i = -1;
-  if (i > 1) i = 1;
-
-  int j = (int)a->pl().getY() - (int)b->pl().getY();
-  if (j < -1) j = -1;
-  if (j > 1) j = 1;
-
-  int aa = 1 + i;
-  int bb = 1 + j;
-
-  size_t dir = 0;
-  size_t d = aa * 3 + bb;
-
-  if (d == 0) dir = 1;
-  if (d == 1) dir = 2;
-  if (d == 2) dir = 3;
-  if (d == 3) dir = 0;
-  if (d == 5) dir = 4;
-  if (d == 8) dir = 5;
-  if (d == 7) dir = 6;
-  if (d == 6) dir = 7;
+  size_t dir = getDir(a, b);
 
   if (a->pl().getPort(dir) &&
       b->pl().getPort((dir + maxDeg() / 2) % maxDeg())) {
@@ -360,6 +303,44 @@ void OctiHananGraph::init() {
       connectNodes(yxAct[yi][i-1], yxAct[yi][i], 3);
     }
   }
+
+  // diagonal intersections
+  for (size_t i = 0; i < _grid.getXWidth() + _grid.getYHeight(); i++) {
+    for (size_t j = 1; j < xyAct[i].size(); j++) {
+      auto ndA = xyAct[i][j -1];
+      auto ndB = xyAct[i][j];
+      if (ndA == ndB) continue; // there may be duplicates
+
+      auto ea = getNEdg(ndA, ndB);
+      auto eb = getNEdg(ndB, ndA);
+
+      size_t yi = ndA->pl().getX() + ndA->pl().getY() + 1;
+      if (yi < yxAct.size() && yxAct[yi].size()) {
+
+        auto it = std::upper_bound(yxAct[yi].begin(), yxAct[yi].end(), ndA, sortByX);
+
+        if (it != yxAct[yi].end() && it != yxAct[yi].begin()) {
+          // it is the first element with an x greater than ndA, which means
+          // that the preceeding element at it-1 has a different x, so we are
+          // filtering out duplicates here automatically
+          auto oNdA = *(it-1);
+          auto oNdB = *(it);
+          assert(oNdA != oNdB);
+
+          auto fa = getNEdg(oNdA, oNdB);
+          auto fb = getNEdg(oNdB, oNdA);
+
+          _edgePairs[ea].push_back({fa, fb});
+          _edgePairs[eb].push_back({fa, fb});
+
+          _edgePairs[fa].push_back({ea, eb});
+          _edgePairs[fb].push_back({ea, eb});
+        }
+      }
+    }
+  }
+
+  prunePorts();
 }
 
 // _____________________________________________________________________________
@@ -470,48 +451,6 @@ GridNode* OctiHananGraph::getNode(size_t x, size_t y) const {
   auto i = _ndIdx.find({x, y});
   if (i == _ndIdx.end()) return 0;
   return _nds[i->second];
-}
-
-// _____________________________________________________________________________
-double OctiHananGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
-                                int64_t yb) const {
-  int dx = labs(xb - xa);
-  int dy = labs(yb - ya);
-
-  // cost without using diagonals
-  // we can take at most min(dx, dy) diagonal edges. Edge diagonal edge saves us
-  // one horizontal and one vertical edge, but costs a diagonal edge
-  double edgeCost =
-      _heurXCost * dx + _heurYCost * dy + _heurDiagSave * std::min(dx, dy);
-
-  // we have to do at least one turn!
-  if (dx != dy && dx != 0 && dy != 0) edgeCost += _c.p_135;
-
-  // // Worse alternative: use a chebyshev distance heuristic
-  // double minHops = std::max(dx, dy);
-  // double heurECost =
-  // (std::min(_c.verticalPen, std::min(_c.horizontalPen, _c.diagonalPen)));
-
-  // double cc = minHops * (heurECost + _heurHopCost) - _heurHopCost;
-
-  // return cc;
-
-  // we always count one heurHopCost too much, subtract it at the end!
-  return edgeCost - _heurHopCost;
-}
-
-// _____________________________________________________________________________
-size_t OctiHananGraph::getGrNdDeg(const CombNode* nd, size_t x,
-                                  size_t y) const {
-  if ((x == 0 || x == _grid.getXWidth() - 1) &&
-      (y == 0 || y == _grid.getYHeight() - 1))
-    return 3;
-
-  if ((x == 0 || x == _grid.getXWidth() - 1) ||
-      (y == 0 || y == _grid.getYHeight() - 1))
-    return 5;
-
-  return 8;
 }
 
 // _____________________________________________________________________________

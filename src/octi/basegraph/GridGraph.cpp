@@ -63,7 +63,7 @@ void GridGraph::init() {
       for (size_t p = 0; p < maxDeg(); p++) {
         GridNode* frN = center->pl().getPort(p);
         GridNode* toN = neigh(x, y, p);
-        if (frN != 0 && toN != 0) {
+        if (frN && toN) {
           GridNode* to = toN->pl().getPort((p + maxDeg() / 2) % maxDeg());
           auto e = new GridEdge(frN, to, GridEdgePL(9, false));
           e->pl().setId(_edgeCount);
@@ -76,6 +76,7 @@ void GridGraph::init() {
   }
 
   writeInitialCosts();
+  prunePorts();
 }
 
 // _____________________________________________________________________________
@@ -280,7 +281,7 @@ void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
     auto p = n->pl().getPort(i);
     auto neighbor = neigh(x, y, i);
 
-    if (!neighbor) continue;
+    if (!neighbor || !p) continue;
 
     auto neighP = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
     auto e = getEdg(p, neighP);
@@ -426,6 +427,8 @@ void GridGraph::addCostVec(GridNode* n, const NodeCost& addC) {
   for (size_t i = 0; i < maxDeg(); i++) {
     auto p = n->pl().getPort(i);
 
+    if (!p) continue;
+
     if (addC[i] < -1) {
       getEdg(p, n)->pl().close();
       getEdg(n, p)->pl().close();
@@ -520,9 +523,11 @@ void GridGraph::openTurns(GridNode* n) {
   // open all non-sink inner edges
   for (size_t i = 0; i < maxDeg(); i++) {
     auto portA = n->pl().getPort(i);
+    if (!portA) continue;
     if (portA->getDeg() == maxDeg()) continue;
     for (size_t j = i + 1; j < maxDeg(); j++) {
       auto portB = n->pl().getPort(j);
+      if (!portB) continue;
       if (portB->getDeg() == maxDeg()) continue;
       auto e = getEdg(portA, portB);
       auto f = getEdg(portB, portA);
@@ -542,8 +547,10 @@ void GridGraph::closeTurns(GridNode* n) {
   // close all non-sink inner edges
   for (size_t i = 0; i < maxDeg(); i++) {
     auto portA = n->pl().getPort(i);
+    if (!portA) continue;
     for (size_t j = i + 1; j < maxDeg(); j++) {
       auto portB = n->pl().getPort(j);
+      if (!portB) continue;
       auto e = getEdg(portA, portB);
       auto f = getEdg(portB, portA);
 
@@ -558,6 +565,7 @@ void GridGraph::closeTurns(GridNode* n) {
 // _____________________________________________________________________________
 void GridGraph::openSinkTo(GridNode* n, double cost) {
   for (size_t i = 0; i < maxDeg(); i++) {
+    if (!n->pl().getPort(i)) continue;
     getEdg(n->pl().getPort(i), n)->pl().open();
     getEdg(n->pl().getPort(i), n)->pl().setCost(cost);
   }
@@ -566,6 +574,7 @@ void GridGraph::openSinkTo(GridNode* n, double cost) {
 // _____________________________________________________________________________
 void GridGraph::closeSinkTo(GridNode* n) {
   for (size_t i = 0; i < maxDeg(); i++) {
+    if (!n->pl().getPort(i)) continue;
     getEdg(n->pl().getPort(i), n)->pl().close();
     getEdg(n->pl().getPort(i), n)->pl().setCost(INF);
   }
@@ -574,6 +583,7 @@ void GridGraph::closeSinkTo(GridNode* n) {
 // _____________________________________________________________________________
 void GridGraph::openSinkFr(GridNode* n, double cost) {
   for (size_t i = 0; i < maxDeg(); i++) {
+    if (!n->pl().getPort(i)) continue;
     getEdg(n, n->pl().getPort(i))->pl().open();
     getEdg(n, n->pl().getPort(i))->pl().setCost(cost);
   }
@@ -582,6 +592,7 @@ void GridGraph::openSinkFr(GridNode* n, double cost) {
 // _____________________________________________________________________________
 void GridGraph::closeSinkFr(GridNode* n) {
   for (size_t i = 0; i < maxDeg(); i++) {
+    if (!n->pl().getPort(i)) continue;
     getEdg(n, n->pl().getPort(i))->pl().close();
     getEdg(n, n->pl().getPort(i))->pl().setCost(INF);
   }
@@ -805,13 +816,54 @@ double GridGraph::getCellSize() const { return _cellSize; }
 
 // _____________________________________________________________________________
 size_t GridGraph::getGrNdDeg(const CombNode* nd, size_t x, size_t y) const {
-  if ((x == 0 || x == _grid.getXWidth() - 1) &&
-      (y == 0 || y == _grid.getYHeight() - 1))
-    return 2;
+  auto grNd =  getNode(x, y);
+  if (!grNd) return 0;
 
-  if ((x == 0 || x == _grid.getXWidth() - 1) ||
-      (y == 0 || y == _grid.getYHeight() - 1))
-    return 3;
+  size_t closed = 0;
+  size_t notPresent = 0;
 
-  return 4;
+  std::set<const GridNode*> settledNeighs;
+  for (size_t i = 0; i < maxDeg(); i++) {
+    auto n = neigh(x, y, i);
+    if (!n) {
+      notPresent++;
+      continue;
+    }
+
+    if (n->pl().isSettled()) {
+      settledNeighs.insert(n);
+    } else if (n->pl().isClosed()) {
+      closed++;
+    }
+  }
+
+  // subtract the settled nodes which are grid nodes for adjacent comb nodes
+  for (auto e : nd->getAdjList()) {
+    auto ond = e->getOtherNd(nd);
+    settledNeighs.erase(getSettled(ond));
+  }
+
+  UNUSED(x);
+
+  return maxDeg() - settledNeighs.size() - closed - notPresent;
+}
+
+// _____________________________________________________________________________
+void GridGraph::prunePorts() {
+  std::vector<GridNode*> toDel;
+
+  for (auto grNd : *getNds()) {
+    if (grNd->pl().getParent() != grNd) continue;
+    for (size_t p = 0; p < maxDeg(); p++) {
+      auto port = grNd->pl().getPort(p);
+      if (port && port->getDeg() == maxDeg()) {
+        toDel.push_back(port);
+        grNd->pl().setPort(p, 0);
+      }
+    }
+  }
+
+  for (auto grNd : toDel) {
+    delNd(grNd);
+  }
 }

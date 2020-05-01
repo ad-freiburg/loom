@@ -497,16 +497,20 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
       // auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL,
       // &nL);
-      // auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
-      auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, &eL, &nL);
+      auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
 
       // for (auto e : eL) std::cerr << "E " << e << " " <<
       // e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> "
       // << e->getTo()->pl().getX() << "," << e->getTo()->pl().getY() << " " <<
       // e->pl().cost() << std::endl; eL.clear(); nL.clear();
 
+      // eL.clear();
+      // nL.clear();
+
       // auto c2 = Dijkstra::shortestPath(frGrNds, toGrNds, cost, &eL, &nL);
       // std::cerr << c << " vs " << c2 << " " << fabs(c - c2) << std::endl;
+      // assert((std::isinf(c) && std::isinf(c2)) || (std::isnan(c) && std::isnan(c2)) || fabs(c - c2) < 0.001);
+
       // for (auto e : eL) std::cerr << "E " << e << " " <<
       // e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> "
       // << e->getTo()->pl().getX() << "," << e->getTo()->pl().getY() << " " <<
@@ -523,17 +527,17 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     // }
 
     if (!nL.size()) {
-      std::cerr << "FAILED TO FIND A ROUTE FROM " << std::endl;
-      for (auto fr : frGrNds)
-      std::cerr << fr->pl().getX() << "," << fr->pl().getY() << std::endl;
-      std::cerr << " TO" << std::endl;
-      for (auto to : toGrNds)
-      std::cerr << to->pl().getX() << "," << to->pl().getY() << std::endl;
-      std::cerr << "DEG FROM CMB NODE " << frCmbNd->getDeg() << std::endl;
-      std::cerr << "DEG TO CMB NODE " << toCmbNd->getDeg() << std::endl;
-      util::geo::output::GeoGraphJsonOutput out;
-      out.print(*gg, std::cout);
-      exit(0);
+      // std::cerr << "FAILED TO FIND A ROUTE FROM " << std::endl;
+      // for (auto fr : frGrNds)
+      // std::cerr << fr->pl().getX() << "," << fr->pl().getY() << std::endl;
+      // std::cerr << " TO" << std::endl;
+      // for (auto to : toGrNds)
+      // std::cerr << to->pl().getX() << "," << to->pl().getY() << std::endl;
+      // std::cerr << "DEG FROM CMB NODE " << frCmbNd->getDeg() << std::endl;
+      // std::cerr << "DEG TO CMB NODE " << toCmbNd->getDeg() << std::endl;
+      // util::geo::output::GeoGraphJsonOutput out;
+      // out.print(*gg, std::cout);
+      // exit(0);
 
       // cleanup
       for (auto n : toGrNds) gg->closeSinkTo(n);

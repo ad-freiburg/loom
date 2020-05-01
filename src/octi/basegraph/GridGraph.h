@@ -100,6 +100,8 @@ class GridGraph : public BaseGraph {
   virtual PolyLine<double> geomFromPath(
       const std::vector<std::pair<size_t, size_t>>& res) const;
 
+  virtual void prunePorts();
+
  protected:
   util::geo::DBox _bbox;
   Penalties _c;
@@ -169,6 +171,7 @@ struct GridGraphHeur
       assert(n->pl().getParent() == n);
       size_t i = 0;
       for (; i < g->maxDeg(); i++) {
+        if (!n->pl().getPort(i)) continue;
         float sinkCost = g->getEdg(n->pl().getPort(i), n)->pl().cost();
         if (sinkCost < cheapestSink) cheapestSink = sinkCost;
         auto neigh = g->neigh(n, i);
@@ -179,6 +182,7 @@ struct GridGraphHeur
         }
       }
       for (size_t j = i; j < g->maxDeg(); j++) {
+        if (!n->pl().getPort(j)) continue;
         float sinkCost = g->getEdg(n->pl().getPort(j), n)->pl().cost();
         if (sinkCost < cheapestSink) cheapestSink = sinkCost;
       }
@@ -197,14 +201,6 @@ struct GridGraphHeur
                               hull[i + 1]);
       if (tmp < ret) ret = tmp;
     }
-
-    // auto cost = GridCost(500);
-    // auto c = util::graph::Dijkstra::shortestPath(const_cast<GridNode*>(from),
-    // to, cost);
-
-    // // std::cerr << c << " VSS " << ret + cheapestSink << std::endl;
-
-    // assert(c >= ret + cheapestSink);
 
     return ret + cheapestSink;
   }

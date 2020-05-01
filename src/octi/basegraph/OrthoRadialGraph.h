@@ -35,7 +35,6 @@ class OrthoRadialGraph : public GridGraph {
   virtual GridNode* writeNd(size_t x, size_t y);
   virtual GridNode* neigh(size_t cx, size_t cy, size_t i) const;
   virtual GridNode* getNode(size_t x, size_t y) const;
-  virtual size_t getGrNdDeg(const CombNode* nd, size_t x, size_t y) const;
 
  private:
   size_t _numBeams;

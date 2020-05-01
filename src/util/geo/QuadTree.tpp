@@ -1,6 +1,15 @@
 // _____________________________________________________________________________
 template <typename V, typename T>
-QuadTree<V, T>::QuadTree(size_t d, const Box<T>& bbox) : _maxDepth(d) {
+QuadTree<V, T>::QuadTree(size_t d, size_t c, const Box<T>& bbox)
+    : _maxDepth(d), _capaFunc(c), _splFunc(_capaFunc) {
+  _nds.push_back(QuadNode<T>{0, 0, bbox});
+}
+
+// _____________________________________________________________________________
+template <typename V, typename T>
+QuadTree<V, T>::QuadTree(size_t d, const SplitFunc<V, T>& splitF,
+                         const Box<T>& bbox)
+    : _maxDepth(d), _capaFunc(0), _splFunc(splitF) {
   _nds.push_back(QuadNode<T>{0, 0, bbox});
 }
 
@@ -11,21 +20,22 @@ void QuadTree<V, T>::insert(const V& val, const Point<T>& pos) {
   int64_t valId = _vals.size();
   _vals.push_back(QuadValue<V, T>{val, pos, -1});
   _vals[valId].nextValue = -1;
-  insert(valId, 0);
+  insert(valId, 0, 0);
 }
 
 // _____________________________________________________________________________
 template <typename V, typename T>
-void QuadTree<V, T>::insert(int64_t vid, int64_t nid) {
+void QuadTree<V, T>::insert(int64_t vid, int64_t nid, size_t d) {
   if (!intersects(_vals[vid].point, _nds[nid].bbox)) return;
 
-  if (shouldSplit(_nds[nid], _vals[vid])) {
-    split(nid);
+  if (d < _maxDepth && _nds[nid].numEls > -1 &&
+      _splFunc(_nds[nid], _vals[vid])) {
+    split(nid, d);
   }
 
   if (_nds[nid].numEls == -1) {
     // insert into fitting subtree
-    for (size_t i = 0; i < 4; i++) insert(vid, _nds[nid].childs + i);
+    for (size_t i = 0; i < 4; i++) insert(vid, _nds[nid].childs + i, d + 1);
   } else {
     if (_nds[nid].numEls == 0) {
       _nds[nid].childs = vid;
@@ -39,11 +49,11 @@ void QuadTree<V, T>::insert(int64_t vid, int64_t nid) {
 
 // _____________________________________________________________________________
 template <typename V, typename T>
-void QuadTree<V, T>::split(size_t nid) {
+void QuadTree<V, T>::split(size_t nid, size_t d) {
   const auto& box = _nds[nid].bbox;
   T w = (box.getUpperRight().getX() - box.getLowerLeft().getX()) / T(2);
 
-  int64_t curEl = _nds[nid].childs;
+  int64_t curEl = _nds[nid].numEls > 0 ? _nds[nid].childs : -1;
 
   _nds[nid].numEls = -1;           // the node is now a leaf node
   _nds[nid].childs = _nds.size();  // the nodes quadrant block starts here
@@ -73,18 +83,9 @@ void QuadTree<V, T>::split(size_t nid) {
 
   while (curEl > -1) {
     _vals[curEl].nextValue = -1;
-    insert(curEl, nid);
+    insert(curEl, nid, d + 1);
     curEl = _vals[curEl].nextValue;
   }
-}
-
-// _____________________________________________________________________________
-template <typename V, typename T>
-bool QuadTree<V, T>::shouldSplit(const QuadNode<T>& nd,
-                                 const QuadValue<V, T>& newVal) const {
-  // if (nd.numEls + 1 > 4) return true;
-  if (nd.numEls + 1 > 1) return true;
-  return false;
 }
 
 // _____________________________________________________________________________

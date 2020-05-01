@@ -57,6 +57,7 @@ class OctiGridGraph : public GridGraph {
   virtual GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;
   virtual size_t maxDeg() const;
   virtual double ndMovePen(const CombNode* cbNd, const GridNode* grNd) const;
+  virtual size_t getDir(const GridNode* a, const GridNode* b) const;
 
  protected:
   virtual void writeInitialCosts();
@@ -66,7 +67,6 @@ class OctiGridGraph : public GridGraph {
   virtual double getBendPen(size_t i, size_t j) const;
   virtual size_t ang(size_t i, size_t j) const;
   virtual double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
-  virtual size_t getGrNdDeg(const CombNode* nd, size_t x, size_t y) const;
 
   double _heurDiagSave;
   double _heurXCost;

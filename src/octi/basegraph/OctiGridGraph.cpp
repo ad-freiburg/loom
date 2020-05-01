@@ -36,19 +36,6 @@ GridNode* OctiGridGraph::neigh(size_t cx, size_t cy, size_t i) const {
 // _____________________________________________________________________________
 void OctiGridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   if (a == b) return;
-  int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
-  int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
-
-  size_t dir = 0;
-  size_t d = aa * 3 + bb;
-
-  if (d == 0) dir = 1;
-  if (d == 2) dir = 3;
-  if (d == 8) dir = 5;
-  if (d == 6) dir = 7;
-
-  size_t x = a->pl().getX();
-  size_t y = a->pl().getY();
 
   auto ge = getNEdg(a, b);
   auto gf = getNEdg(b, a);
@@ -62,15 +49,15 @@ void OctiGridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   _resEdgs[ge] = 0;
   _resEdgs[gf] = 0;
 
-  if (!a->pl().isSettled()) {
-    openTurns(a);
-  }
-  if (!b->pl().isSettled()) {
-    openTurns(b);
-  }
+  if (!a->pl().isSettled()) openTurns(a);
+  if (!b->pl().isSettled()) openTurns(b);
 
   // unblock blocked diagonal edges crossing this edge
-  if (dir != 0) {
+  size_t dir = getDir(a, b);
+  if (dir % 2 != 0) {
+    size_t x = a->pl().getX();
+    size_t y = a->pl().getY();
+
     auto na = neigh(x, y, (dir + 7) % 8);
     auto nb = neigh(x, y, (dir + 1) % 8);
 
@@ -108,20 +95,6 @@ void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
                               size_t rndrOrd) {
   if (a == b) return;
 
-  int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
-  int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
-
-  size_t dir = 0;
-  size_t d = aa * 3 + bb;
-
-  if (d == 0) dir = 1;
-  if (d == 2) dir = 3;
-  if (d == 8) dir = 5;
-  if (d == 6) dir = 7;
-
-  size_t x = a->pl().getX();
-  size_t y = a->pl().getY();
-
   // this closes the grid edge
   auto ge = getNEdg(a, b);
 
@@ -135,7 +108,11 @@ void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
   closeTurns(b);
 
   // block diagonal edges crossing this edge
-  if (dir != 0) {
+  size_t dir = getDir(a, b);
+  if (dir % 2 != 0) {
+    size_t x = a->pl().getX();
+    size_t y = a->pl().getY();
+
     auto na = neigh(x, y, (dir + 7) % 8);
     auto nb = neigh(x, y, (dir + 1) % 8);
 
@@ -147,6 +124,36 @@ void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
       f->pl().block();
     }
   }
+}
+
+// _____________________________________________________________________________
+size_t OctiGridGraph::getDir(const GridNode* a, const GridNode* b) const {
+  if (!a || !b || a == b) return 0;
+
+  int i = (int)a->pl().getX() - (int)b->pl().getX();
+  if (i < -1) i = -1;
+  if (i > 1) i = 1;
+
+  int j = (int)a->pl().getY() - (int)b->pl().getY();
+  if (j < -1) j = -1;
+  if (j > 1) j = 1;
+
+  int aa = 1 + i;
+  int bb = 1 + j;
+
+  size_t dir = 0;
+  size_t d = aa * 3 + bb;
+
+  if (d == 0) dir = 1;
+  if (d == 1) dir = 2;
+  if (d == 2) dir = 3;
+  if (d == 3) dir = 0;
+  if (d == 5) dir = 4;
+  if (d == 8) dir = 5;
+  if (d == 7) dir = 6;
+  if (d == 6) dir = 7;
+
+  return dir;
 }
 
 // _____________________________________________________________________________
@@ -203,20 +210,7 @@ void OctiGridGraph::writeInitialCosts() {
 GridEdge* OctiGridGraph::getNEdg(const GridNode* a, const GridNode* b) const {
   if (!a || !b) return 0;
 
-  int aa = 1 + (int)a->pl().getX() - (int)b->pl().getX();
-  int bb = 1 + (int)a->pl().getY() - (int)b->pl().getY();
-
-  size_t dir = 0;
-  size_t d = aa * 3 + bb;
-
-  if (d == 0) dir = 1;
-  if (d == 1) dir = 2;
-  if (d == 2) dir = 3;
-  if (d == 3) dir = 0;
-  if (d == 5) dir = 4;
-  if (d == 8) dir = 5;
-  if (d == 7) dir = 6;
-  if (d == 6) dir = 7;
+  size_t dir = getDir(a, b);
 
   if (a->pl().getPort(dir) &&
       b->pl().getPort((dir + maxDeg() / 2) % maxDeg())) {
@@ -331,19 +325,6 @@ double OctiGridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 
   // we always count one heurHopCost too much, subtract it at the end!
   return edgeCost - _heurHopCost;
-}
-
-// _____________________________________________________________________________
-size_t OctiGridGraph::getGrNdDeg(const CombNode* nd, size_t x, size_t y) const {
-  if ((x == 0 || x == _grid.getXWidth() - 1) &&
-      (y == 0 || y == _grid.getYHeight() - 1))
-    return 3;
-
-  if ((x == 0 || x == _grid.getXWidth() - 1) ||
-      (y == 0 || y == _grid.getYHeight() - 1))
-    return 5;
-
-  return 8;
 }
 
 // _____________________________________________________________________________

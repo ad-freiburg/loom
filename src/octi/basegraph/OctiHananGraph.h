@@ -31,14 +31,12 @@ class OctiHananGraph : public OctiGridGraph {
   virtual GridNode* getNode(size_t x, size_t y) const;
   virtual double getBendPen(size_t i, size_t j) const;
   virtual size_t ang(size_t i, size_t j) const;
-  virtual double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
-  virtual size_t getGrNdDeg(const CombNode* nd, size_t x, size_t y) const;
-
- private:
-  void connectNodes(GridNode* grNdA, GridNode* grNdB, size_t dir);
+  virtual void connectNodes(GridNode* grNdA, GridNode* grNdB, size_t dir);
 
   const combgraph::CombGraph& _cg;
   std::map<std::pair<size_t, size_t>, size_t> _ndIdx;
+
+  std::map<GridEdge*, std::vector<std::pair<GridEdge*, GridEdge*>>> _edgePairs;
 };
 }  // namespace basegraph
 }  // namespace octi

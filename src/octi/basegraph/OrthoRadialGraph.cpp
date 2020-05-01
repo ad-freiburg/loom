@@ -93,10 +93,6 @@ GridEdge* OrthoRadialGraph::getNEdg(const GridNode* a,
   else
     return 0;
 
-  // std::cerr << "(" << a->pl().getX() << "," <<  a->pl().getY()  << ")" << ",
-  // " << "(" << b->pl().getX() << "," <<  b->pl().getY()  << ")" <<  " dir: "
-  // << dir << std::endl;
-
   if (a->pl().getPort(dir) &&
       b->pl().getPort((dir + maxDeg() / 2) % maxDeg())) {
     return const_cast<GridEdge*>(
@@ -341,36 +337,4 @@ PolyLine<double> OrthoRadialGraph::geomFromPath(
   // .getGeom();
 
   return pl;
-}
-
-// _____________________________________________________________________________
-size_t OrthoRadialGraph::getGrNdDeg(const CombNode* nd, size_t x,
-                                    size_t y) const {
-  auto grNd =  getNode(x, y);
-  if (!grNd) return 0;
-
-  size_t closed = 0;
-
-  std::set<const GridNode*> settledNeighs;
-  for (size_t i = 0; i < maxDeg(); i++) {
-    auto n = neigh(x, y, i);
-    if (!n) continue;
-
-    if (n->pl().isSettled()) {
-      settledNeighs.insert(n);
-    } else if (n->pl().isClosed()) {
-      closed++;
-    }
-  }
-
-  for (auto e : nd->getAdjList()) {
-    auto ond = e->getOtherNd(nd);
-    settledNeighs.erase(getSettled(ond));
-  }
-
-  UNUSED(x);
-  if (y == 1) return 3 - settledNeighs.size() - closed;
-  if (y == (_grid.getYHeight() / 2) - 1) return 3 - settledNeighs.size() - closed;
-
-  return 4 - settledNeighs.size() - closed;
 }

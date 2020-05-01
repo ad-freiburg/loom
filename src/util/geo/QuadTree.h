@@ -30,20 +30,37 @@ struct QuadNode {
   Box<T> bbox;
 };
 
+template <typename V, typename T>
+struct SplitFunc {
+  virtual ~SplitFunc() = default;
+  virtual bool operator()(const QuadNode<T>& nd,
+                       const QuadValue<V, T>& newVal) const = 0;
+};
+
+template <typename V, typename T>
+struct CapaSplitFunc : SplitFunc<V, T> {
+  CapaSplitFunc(size_t c) : _c(c) {}
+  virtual bool operator()(const QuadNode<T>& nd,
+                       const QuadValue<V, T>& newVal) const {
+    return static_cast<size_t>(nd.numEls) + 1 > _c;
+  }
+  size_t _c;
+};
+
 // QuadTree for point data (and only point data)
 template <typename V, typename T>
 class QuadTree {
  public:
-  // initialization of a quad tree with maximum depth d
-  QuadTree(size_t d, const Box<T>& bbox);
+  // initialization of a quad tree with maximum depth d and maximum node // capacity c
+  QuadTree(size_t d, size_t c, const Box<T>& bbox);
+
+  QuadTree(size_t d, const SplitFunc<V, T>& splitF, const Box<T>& bbox);
 
   // insert into the tree
   void insert(const V& val, const Point<T>& point);
 
   // insert into a specific node
-  void insert(int64_t vid, int64_t nid);
-
-  bool shouldSplit(const QuadNode<T>& nd, const QuadValue<V, T>& newVal) const;
+  void insert(int64_t vid, int64_t nid, size_t d);
 
   size_t size() const;
 
@@ -55,9 +72,13 @@ class QuadTree {
   std::vector<QuadValue<V, T>> _vals;
   std::vector<QuadNode<T>> _nds;
 
-  // split a node
-  void split(size_t nid);
+  CapaSplitFunc<V, T> _capaFunc;
 
+  const SplitFunc<V, T>& _splFunc;
+
+
+  // split a node
+  void split(size_t nid, size_t d);
 };
 
 #include "util/geo/QuadTree.tpp"

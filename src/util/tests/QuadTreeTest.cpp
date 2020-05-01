@@ -14,7 +14,7 @@ using util::geo::DBox;
 void QuadTreeTest::run() {
   // ___________________________________________________________________________
   {
-    QuadTree<int, double> qt(4, DBox(DPoint(0, 0), DPoint(10, 10)));
+    QuadTree<int, double> qt(4, 4, DBox(DPoint(0, 0), DPoint(10, 10)));
 
     qt.insert(0, {2, 2});
     TEST(qt.size(), ==, 1);
