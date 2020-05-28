@@ -71,7 +71,7 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
     LineGraph tmpOutTg;
     // important: always use restrLocSearch here!
     draw(cg, box, &tmpOutTg, &gg, pens, gridSize, borderRad, maxGrDist, true,
-         enfGeoPen, {});
+         enfGeoPen, {}, std::numeric_limits<size_t>::max());
     LOG(INFO, std::cerr) << "Presolving finished.";
   } catch (const NoEmbeddingFoundExc& exc) {
     LOG(INFO, std::cerr) << "Presolve was not sucessful.";
@@ -120,7 +120,8 @@ double Octilinearizer::draw(
     LineGraph* tg, LineGraph* outTg, BaseGraph** retGg, const Penalties& pens,
     double gridSize, double borderRad, bool deg2heur, double maxGrDist,
     bool restrLocSearch, double enfGeoPen,
-    const std::vector<util::geo::Polygon<double>>& obstacles) {
+    const std::vector<util::geo::Polygon<double>>& obstacles,
+    size_t abortAfter) {
   tg->contractEdges(gridSize / 2);
 
   auto box = tg->getBBox();
@@ -146,7 +147,7 @@ double Octilinearizer::draw(
   }
 
   return draw(cg, box, outTg, retGg, pens, gridSize, borderRad, maxGrDist,
-              restrLocSearch, enfGeoPen, obstacles);
+              restrLocSearch, enfGeoPen, obstacles, abortAfter);
 }
 
 // _____________________________________________________________________________
@@ -154,7 +155,8 @@ double Octilinearizer::draw(
     const CombGraph& cg, const util::geo::DBox& box, LineGraph* outTg,
     BaseGraph** retGg, const Penalties& pens, double gridSize, double borderRad,
     double maxGrDist, bool restrLocSearch, double enfGeoPen,
-    const std::vector<util::geo::Polygon<double>>& obstacles) {
+    const std::vector<util::geo::Polygon<double>>& obstacles,
+    size_t abortAfter) {
   size_t jobs = 4;
   std::vector<BaseGraph*> ggs(jobs);
 
@@ -213,8 +215,8 @@ double Octilinearizer::draw(
     else
       iterOrder = initOrder;
 
-    auto error =
-        draw(iterOrder, ggs[0], &drawing, drawing.score(), maxGrDist, geoPens);
+    auto error = draw(iterOrder, ggs[0], &drawing, drawing.score(), maxGrDist,
+                      geoPens, abortAfter);
 
     switch (error) {
       case DRAWN:
@@ -250,6 +252,9 @@ double Octilinearizer::draw(
   size_t iters = 0;
 
   LOG(INFO, std::cerr) << "Starting local search...";
+
+  // dont use local search if abortAfter is set
+  if (abortAfter != std::numeric_limits<size_t>::max()) LOCAL_SEARCH_ITERS = 0;
 
   std::vector<std::vector<CombNode*>> batches(jobs);
   size_t c = 0;
@@ -301,8 +306,9 @@ double Octilinearizer::draw(
 
           // we can use bestFromIter.score() as the limit for the shortest
           // path computation, as we can already do at least as good.
-          auto error = draw(test, p, ggs[btch], &run, bestFrIters[btch].score(),
-                            maxGrDist, geoPens);
+          auto error =
+              draw(test, p, ggs[btch], &run, bestFrIters[btch].score(),
+                   maxGrDist, geoPens, std::numeric_limits<size_t>::max());
 
           if (!error && bestFrIters[btch].score() > run.score()) {
             bestFrIters[btch] = run;
@@ -387,18 +393,19 @@ void Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
 // _____________________________________________________________________________
 Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& order,
                                 BaseGraph* gg, Drawing* drawing, double cutoff,
-                                double maxGrDist,
-                                const GeoPensMap* geoPensMap) {
+                                double maxGrDist, const GeoPensMap* geoPensMap,
+                                size_t abortAfter) {
   SettledPos emptyPos;
-  return draw(order, emptyPos, gg, drawing, cutoff, maxGrDist, geoPensMap);
+  return draw(order, emptyPos, gg, drawing, cutoff, maxGrDist, geoPensMap,
+              abortAfter);
 }
 
 // _____________________________________________________________________________
 Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
                                 const SettledPos& settled, BaseGraph* gg,
                                 Drawing* drawing, double globCutoff,
-                                double maxGrDist,
-                                const GeoPensMap* geoPensMap) {
+                                double maxGrDist, const GeoPensMap* geoPensMap,
+                                size_t abortAfter) {
   SettledPos retPos;
 
   size_t i = 0;
@@ -412,9 +419,6 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     bool rev = false;
     auto frCmbNd = cmbEdg->getFrom();
     auto toCmbNd = cmbEdg->getTo();
-
-    // assert(frCmbNd->getDeg() <= 4);
-    // assert(toCmbNd->getDeg() <= 4);
 
     std::set<GridNode*> frGrNds, toGrNds;
     std::tie(frGrNds, toGrNds) =
@@ -509,7 +513,8 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
       // auto c2 = Dijkstra::shortestPath(frGrNds, toGrNds, cost, &eL, &nL);
       // std::cerr << c << " vs " << c2 << " " << fabs(c - c2) << std::endl;
-      // assert((std::isinf(c) && std::isinf(c2)) || (std::isnan(c) && std::isnan(c2)) || fabs(c - c2) < 0.001);
+      // assert((std::isinf(c) && std::isinf(c2)) || (std::isnan(c) &&
+      // std::isnan(c2)) || fabs(c - c2) < 0.001);
 
       // for (auto e : eL) std::cerr << "E " << e << " " <<
       // e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> "
@@ -555,6 +560,11 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     // draw
     drawing->draw(cmbEdg, eL, rev);
+
+    if (i > abortAfter) {
+      settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg, i);
+      return DRAWN;
+    }
 
     // close the source and target node
     for (auto n : toGrNds) gg->closeSinkTo(n);

@@ -359,14 +359,14 @@ void OctiHananGraph::connectNodes(GridNode* grNdFr, GridNode* grNdTo,
   else if ((p + 2) % 4 == 0) cost = (_c.horizontalPen + _heurHopCost) * xDist - _heurHopCost;
   else if (p % 2) cost = (_c.diagonalPen + _heurHopCost) * yDist - _heurHopCost;
 
-  auto e = new GridEdge(fr, to, GridEdgePL(9, false));
+  auto e = new GridEdge(fr, to, GridEdgePL(9, false, false));
   e->pl().setId(_edgeCount);
   e->pl().setCost(cost);
   _edgeCount++;
   fr->addEdge(e);
   to->addEdge(e);
 
-  auto f = new GridEdge(to, fr, GridEdgePL(9, false));
+  auto f = new GridEdge(to, fr, GridEdgePL(9, false, false));
   f->pl().setId(_edgeCount);
   f->pl().setCost(cost);
   _edgeCount++;
@@ -400,13 +400,13 @@ GridNode* OctiHananGraph::writeNd(size_t x, size_t y) {
     nn->pl().setParent(n);
     n->pl().setPort(i, nn);
 
-    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, false));
+    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, true, false));
     e->pl().setId(_edgeCount);
     _edgeCount++;
     n->addEdge(e);
     nn->addEdge(e);
 
-    e = new GridEdge(nn, n, GridEdgePL(INF, true, false));
+    e = new GridEdge(nn, n, GridEdgePL(INF, true, true, false));
     e->pl().setId(_edgeCount);
     _edgeCount++;
     n->addEdge(e);
@@ -425,14 +425,14 @@ GridNode* OctiHananGraph::writeNd(size_t x, size_t y) {
         pen = INF;
 
       auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
-                            GridEdgePL(pen, true));
+                            GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
       e->getFrom()->addEdge(e);
       e->getTo()->addEdge(e);
 
       e = new GridEdge(n->pl().getPort(j), n->pl().getPort(i),
-                       GridEdgePL(pen, true));
+                       GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
       e->getFrom()->addEdge(e);

@@ -6,6 +6,7 @@
 #define UTIL_STRING_H_
 
 #include <algorithm>
+#include <cassert>
 #include <cstring>
 #include <iomanip>
 #include <sstream>
@@ -169,7 +170,8 @@ inline size_t editDist(const std::string& s1, const std::string& s2) {
 }
 
 // _____________________________________________________________________________
-inline size_t prefixEditDist(const std::string& prefix, const std::string& s,
+template <class String>
+inline size_t prefixEditDist(const String& prefix, const String& s,
                              size_t deltaMax) {
   // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C++
   size_t len1 = prefix.size();
@@ -200,8 +202,43 @@ inline size_t prefixEditDist(const std::string& prefix, const std::string& s,
 }
 
 // _____________________________________________________________________________
-inline size_t prefixEditDist(const std::string& prefix, const std::string& s) {
+template <class String>
+inline size_t prefixEditDist(const String& prefix, const String& s) {
   return prefixEditDist(prefix, s, s.size());
+}
+
+// _____________________________________________________________________________
+inline size_t prefixEditDist(const char* prefix, const char* s) {
+  return prefixEditDist<std::string>(std::string(prefix), std::string(s));
+}
+
+// _____________________________________________________________________________
+inline size_t prefixEditDist(const char* prefix, const char* s,
+                             size_t deltaMax) {
+  return prefixEditDist<std::string>(std::string(prefix), std::string(s),
+                                     deltaMax);
+}
+
+// _____________________________________________________________________________
+inline size_t prefixEditDist(const char* prefix, const std::string& s) {
+  return prefixEditDist<std::string>(std::string(prefix), s);
+}
+
+// _____________________________________________________________________________
+inline size_t prefixEditDist(const char* prefix, const std::string& s,
+                             size_t deltaMax) {
+  return prefixEditDist<std::string>(std::string(prefix), s, deltaMax);
+}
+
+// _____________________________________________________________________________
+inline size_t prefixEditDist(const std::string& prefix, const char* s) {
+  return prefixEditDist<std::string>(prefix, std::string(s));
+}
+
+// _____________________________________________________________________________
+inline size_t prefixEditDist(const std::string& prefix, const char* s,
+                             size_t deltaMax) {
+  return prefixEditDist<std::string>(prefix, std::string(s), deltaMax);
 }
 
 // _____________________________________________________________________________
@@ -255,6 +292,6 @@ template <typename T>
 inline std::string implode(const std::vector<T>& vec, const char* del) {
   return implode(vec.begin(), vec.end(), del);
 }
-}
+}  // namespace util
 
 #endif  // UTIL_STRING_H_

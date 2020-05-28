@@ -109,9 +109,9 @@ int main(int argc, char** argv) {
   LOG(INFO, std::cerr) << "Average adj. node distance is " << avgDist;
 
   // BaseGraphType graphType = BaseGraphType::ORTHORADIAL;
-  BaseGraphType graphType = BaseGraphType::OCTIHANANGRID;
+  // BaseGraphType graphType = BaseGraphType::OCTIHANANGRID;
   // BaseGraphType graphType = BaseGraphType::OCTIQUADTREE;
-  // BaseGraphType graphType = BaseGraphType::OCTIGRID;
+  BaseGraphType graphType = BaseGraphType::OCTIGRID;
   // BaseGraphType graphType = BaseGraphType::GRID;
 
   Octilinearizer oct(graphType);
@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
     try {
       sc = oct.draw(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
                     cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch,
-                    cfg.enfGeoPen, cfg.obstacles);
+                    cfg.enfGeoPen, cfg.obstacles, cfg.abortAfter);
     } catch (const NoEmbeddingFoundExc& exc) {
       LOG(ERROR) << exc.what();
       exit(1);

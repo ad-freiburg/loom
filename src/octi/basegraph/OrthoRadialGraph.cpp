@@ -43,7 +43,7 @@ void OrthoRadialGraph::init() {
         if (from != 0 && toN != 0) {
           GridNode* to = toN->pl().getPort((p + maxDeg() / 2) % maxDeg());
           if (!to) continue;
-          auto e = new GridEdge(from, to, GridEdgePL(9, false));
+          auto e = new GridEdge(from, to, GridEdgePL(9, false, false));
           e->pl().setId(_edgeCount);
           _edgeCount++;
           from->addEdge(e);
@@ -250,14 +250,14 @@ GridNode* OrthoRadialGraph::writeNd(size_t x, size_t y) {
       if (y == _grid.getYHeight() / 2 && i == 0) pen = INF;
 
       auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
-                            GridEdgePL(pen, true));
+                            GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
       e->getFrom()->addEdge(e);
       e->getTo()->addEdge(e);
 
       e = new GridEdge(n->pl().getPort(j), n->pl().getPort(i),
-                       GridEdgePL(pen, true));
+                       GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
       e->getFrom()->addEdge(e);

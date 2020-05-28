@@ -10,17 +10,19 @@ using util::geo::PolyLine;
 using namespace octi::basegraph;
 
 // _____________________________________________________________________________
-GridEdgePL::GridEdgePL(double c, bool secondary)
+GridEdgePL::GridEdgePL(double c, bool secondary, bool sink)
     : _c(c),
       _isSecondary(secondary),
+      _isSink(sink),
       _closed(false),
       _blocked(false),
       _resEdgs(0), _rndrOrder(0) {}
 
 // _____________________________________________________________________________
-GridEdgePL::GridEdgePL(double c, bool secondary, bool closed)
+GridEdgePL::GridEdgePL(double c, bool secondary, bool sink, bool closed)
     : _c(c),
       _isSecondary(secondary),
+      _isSink(sink),
       _closed(closed),
       _blocked(false),
       _resEdgs(0), _rndrOrder(0) {}
@@ -42,6 +44,8 @@ util::json::Dict GridEdgePL::getAttrs() const {
                     : util::toString(cost());
   obj["res_edges"] = util::toString((int)_resEdgs);
   obj["rndr_order"] = util::toString((int)_rndrOrder);
+  obj["secondary"] = util::toString((int)_isSecondary);
+  obj["sink"] = util::toString((int)_isSink);
   return obj;
 }
 // _____________________________________________________________________________

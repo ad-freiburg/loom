@@ -247,13 +247,13 @@ GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
     nn->pl().setParent(n);
     n->pl().setPort(i, nn);
 
-    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, false));
+    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, true, false));
     e->pl().setId(_edgeCount);
     _edgeCount++;
     n->addEdge(e);
     nn->addEdge(e);
 
-    e = new GridEdge(nn, n, GridEdgePL(INF, true, false));
+    e = new GridEdge(nn, n, GridEdgePL(INF, true, true, false));
     e->pl().setId(_edgeCount);
     _edgeCount++;
     n->addEdge(e);
@@ -272,14 +272,14 @@ GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
         pen = INF;
 
       auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
-                            GridEdgePL(pen, true));
+                            GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
       e->getFrom()->addEdge(e);
       e->getTo()->addEdge(e);
 
       e = new GridEdge(n->pl().getPort(j), n->pl().getPort(i),
-                       GridEdgePL(pen, true));
+                       GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
       e->getFrom()->addEdge(e);

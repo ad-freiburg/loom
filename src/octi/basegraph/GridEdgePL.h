@@ -1,6 +1,5 @@
 // Copyright 2016, University of Freiburg,
-// Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
+// Chair of Algorithms and Data Structures.  // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #ifndef OCTI_BASEGRAPH_GRIDEDGEPL_H_
 #define OCTI_BASEGRAPH_GRIDEDGEPL_H_
@@ -19,8 +18,8 @@ namespace basegraph {
 
 class GridEdgePL : util::geograph::GeoEdgePL<double> {
  public:
-  GridEdgePL(double c, bool secondar);
-  GridEdgePL(double c, bool secondar, bool closed);
+  GridEdgePL(double c, bool secondar, bool sink);
+  GridEdgePL(double c, bool secondar, bool sink, bool closed);
 
   const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;
@@ -51,6 +50,7 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   double _c;
 
   bool _isSecondary;
+  bool _isSink;
 
   bool _closed;
 

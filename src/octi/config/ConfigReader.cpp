@@ -14,8 +14,8 @@
 using octi::config::ConfigReader;
 namespace opts = boost::program_options;
 
-using std::string;
 using std::exception;
+using std::string;
 using std::vector;
 
 // _____________________________________________________________________________
@@ -30,97 +30,72 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "help,?", "show this message")("verbose,v", "verbosity level");
 
   opts::options_description config("Output");
-  config.add_options()
-    (
+  config.add_options()(
       "optim-mode,o",
       opts::value<std::string>(&(cfg->optMode))->default_value("heur"),
-      "optimization mode, either 'heur' (fast) or 'ilp' (very slow)")
-    (
+      "optimization mode, either 'heur' (fast) or 'ilp' (very slow)")(
       "ilp-no-solve",
       opts::bool_switch(&(cfg->ilpNoSolve))->default_value(false),
-      "if set, the ILP is not solved, only written to file")
-    ("ilp-time-limit",
-      opts::value<int>(&(cfg->ilpTimeLimit))
-      ->default_value(60),
-      "ILP solver time limit (in seconds), negative value means infinity")
-    ("ilp-solver",
-      opts::value<std::string>(&(cfg->ilpSolver))
-      ->default_value("gurobi"),
-      "The preferred solver library to use, will fall back if library is not available.")
-    (
+      "if set, the ILP is not solved, only written to file")(
+      "ilp-time-limit",
+      opts::value<int>(&(cfg->ilpTimeLimit))->default_value(60),
+      "ILP solver time limit (in seconds), negative value means infinity")(
+      "ilp-solver",
+      opts::value<std::string>(&(cfg->ilpSolver))->default_value("gurobi"),
+      "The preferred solver library to use, will fall back if library is not "
+      "available.")(
       "ilp-out",
       opts::value<std::string>(&(cfg->ilpPath))->default_value("prob.mps"),
       "path to output the ILP to, a first feasible solution will be written "
-      "to <basename>.mst.")
-    (
+      "to <basename>.mst.")(
       "obstacles",
       opts::value<std::string>(&(cfg->obstaclePath))->default_value(""),
-      "GeoJSON file containing obstacle polygons")
-    (
-      "from-dot,D",
-      opts::bool_switch(&(cfg->fromDot))->default_value(false),
-      "input is in dot format")
-    (
-      "deg2-heur",
-      opts::bool_switch(&(cfg->deg2Heur))->default_value(false),
-      "contract degree 2 nodes and re-insert them equidistantly")
-    (
-      "enf-geo-pen",
-      opts::value<double>(&(cfg->enfGeoPen))->default_value(0),
-      "enforce lines to roughly follow original geographical course")
-    (
-      "max-grid-dist",
-      opts::value<double>(&(cfg->maxGrDist))->default_value(3),
-      "max grid distance radius for station candidates")
-    (
+      "GeoJSON file containing obstacle polygons")(
+      "from-dot,D", opts::bool_switch(&(cfg->fromDot))->default_value(false),
+      "input is in dot format")(
+      "deg2-heur", opts::bool_switch(&(cfg->deg2Heur))->default_value(false),
+      "contract degree 2 nodes and re-insert them equidistantly")(
+      "enf-geo-pen", opts::value<double>(&(cfg->enfGeoPen))->default_value(0),
+      "enforce lines to roughly follow original geographical course")(
+      "max-grid-dist", opts::value<double>(&(cfg->maxGrDist))->default_value(3),
+      "max grid distance radius for station candidates")(
       "restr-loc-search",
       opts::bool_switch(&(cfg->restrLocSearch))->default_value(false),
-      "restrict local search to max grid distance")
-    (
+      "restrict local search to max grid distance")(
       "density-pen",
       opts::value<double>(&(cfg->pens.densityPen))->default_value(0),
-      "penalty factor for re-inserted contracted stations that are too near, a reasonable value is e.g. 5. Only works with optim mode 'heur'!")
-    (
+      "penalty factor for re-inserted contracted stations that are too near, a "
+      "reasonable value is e.g. 5. Only works with optim mode 'heur'!")(
       "grid-size,g",
       opts::value<std::string>(&(cfg->gridSize))->default_value("100%"),
-      "grid cell length, either as exact value (like '500') or as percentage of average adj. station distance (like '75%')")
-    (
-      "border-rad",
-      opts::value<double>(&(cfg->borderRad))->default_value(45),
-      "border rad")
-    (
-      "print-mode",
-      opts::value<std::string>(&(cfg->printMode))->default_value("transitgraph"),
-      "print mode: transitgraph, gridgraph")
-    (
+      "grid cell length, either as exact value (like '500') or as percentage "
+      "of average adj. station distance (like '75%')")(
+      "border-rad", opts::value<double>(&(cfg->borderRad))->default_value(45),
+      "border rad")("print-mode",
+                    opts::value<std::string>(&(cfg->printMode))
+                        ->default_value("transitgraph"),
+                    "print mode: transitgraph, gridgraph")(
       "vert-pen",
       opts::value<double>(&(cfg->pens.verticalPen))->default_value(0),
-      "penalty for vertical edges")
-    (
+      "penalty for vertical edges")(
       "hori-pen",
       opts::value<double>(&(cfg->pens.horizontalPen))->default_value(0),
-      "penalty for horicontal edges")
-    (
+      "penalty for horicontal edges")(
       "diag-pen",
       opts::value<double>(&(cfg->pens.diagonalPen))->default_value(.5),
-      "penalty for diagonal edges")
-    (
-      "pen-180",
-      opts::value<double>(&(cfg->pens.p_0))->default_value(0),
-      "penalty for 180 deg traversal")
-    (
-      "pen-135",
-      opts::value<double>(&(cfg->pens.p_135))->default_value(1),
-      "penalty for 135 deg traversal")
-    (
-      "pen-90",
-      opts::value<double>(&(cfg->pens.p_90))->default_value(1.5),
-      "penalty for 90 deg traversal")
-    (
-      "pen-45",
-      opts::value<double>(&(cfg->pens.p_45))->default_value(2),
-      "penalty for 45 deg traversal")
-    ;
+      "penalty for diagonal edges")(
+      "pen-180", opts::value<double>(&(cfg->pens.p_0))->default_value(0),
+      "penalty for 180 deg traversal")(
+      "pen-135", opts::value<double>(&(cfg->pens.p_135))->default_value(1),
+      "penalty for 135 deg traversal")(
+      "pen-90", opts::value<double>(&(cfg->pens.p_90))->default_value(1.5),
+      "penalty for 90 deg traversal")(
+      "pen-45", opts::value<double>(&(cfg->pens.p_45))->default_value(2),
+      "penalty for 45 deg traversal")(
+      "abort-after,a",
+      opts::value<size_t>(&(cfg->abortAfter))
+          ->default_value(std::numeric_limits<size_t>::max()),
+      "abort approximate rendering after <n> rounds");
 
   opts::options_description cmdlineOptions;
   cmdlineOptions.add(config).add(generic);

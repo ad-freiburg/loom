@@ -4,6 +4,7 @@
 #include "octi/basegraph/BaseGraph.h"
 #include "util/geo/BezierCurve.h"
 #include "util/graph/Dijkstra.h"
+#include "util/log/Log.h"
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
 
@@ -142,6 +143,10 @@ void Drawing::getLineGraph(LineGraph* target) const {
     auto n = ndpair.first;
     for (auto f : n->getAdjListOut()) {
       if (f->getFrom() != n) continue;
+      if (_edgs.find(f) == _edgs.end()) {
+        LOG(WARN, std::cerr) << "Edge " << f << " was not drawn, skipping...";
+        continue;
+      }
       auto poly = _gg->geomFromPath(_edgs.find(f)->second);
       double tot = f->pl().getChilds().size();
       double d = poly.getLength();

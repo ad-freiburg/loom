@@ -11,6 +11,7 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <algorithm>
+#include <csignal>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -24,12 +25,12 @@
 #include "util/String.h"
 #include "util/log/Log.h"
 
-using util::http::Socket;
-using util::http::Queue;
-using util::http::Req;
+using util::http::HeaderState;
 using util::http::HttpErr;
 using util::http::HttpServer;
-using util::http::HeaderState;
+using util::http::Queue;
+using util::http::Req;
+using util::http::Socket;
 
 // _____________________________________________________________________________
 Socket::Socket(int port) {
@@ -71,6 +72,9 @@ int Socket::wait() {
 
 // _____________________________________________________________________________
 void HttpServer::send(int sock, Answer* aw) {
+  // ignore SIGPIPE
+  signal(SIGPIPE, SIG_IGN);
+
   std::string enc = "identity";
   if (aw->gzip) aw->pl = compress(aw->pl, &enc);
 

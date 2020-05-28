@@ -29,6 +29,8 @@ struct Config {
 
   double maxGrDist;
 
+  size_t abortAfter;
+
   std::string obstaclePath;
   std::vector<util::geo::DPolygon> obstacles;
 

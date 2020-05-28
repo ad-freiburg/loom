@@ -113,13 +113,15 @@ class Octilinearizer {
               const Penalties& pens, double gridSize, double borderRad,
               bool deg2heur, double maxGrDist, bool restrLocSearch,
               double enfGeoCourse,
-              const std::vector<util::geo::Polygon<double>>& obstacles);
+              const std::vector<util::geo::Polygon<double>>& obstacles,
+              size_t abortAfter);
 
   double draw(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
               basegraph::BaseGraph** gg, const Penalties& pens, double gridSize,
               double borderRad, double maxGrDist, bool restrLocSearch,
               double enfGeoCourse,
-              const std::vector<util::geo::Polygon<double>>& obstacles);
+              const std::vector<util::geo::Polygon<double>>& obstacles,
+              size_t abortAfter);
 
   double drawILP(LineGraph* in, LineGraph* out, basegraph::BaseGraph** gg,
                  const Penalties& pens, double gridSize, double borderRad,
@@ -150,11 +152,11 @@ class Octilinearizer {
 
   Undrawable draw(const std::vector<CombEdge*>& order, basegraph::BaseGraph* gg,
                   Drawing* drawing, double cutoff, double maxGrDist,
-                  const GeoPensMap* geoPensMap);
+                  const GeoPensMap* geoPensMap, size_t abortAfter);
   Undrawable draw(const std::vector<CombEdge*>& order,
                   const SettledPos& settled, basegraph::BaseGraph* gg,
                   Drawing* drawing, double cutoff, double maxGrDist,
-                  const GeoPensMap* geoPensMap);
+                  const GeoPensMap* geoPensMap, size_t abortAfter);
 
   SettledPos neigh(const SettledPos& pos, const std::vector<CombNode*>&,
                    size_t i) const;
