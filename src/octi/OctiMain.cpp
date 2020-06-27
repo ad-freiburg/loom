@@ -85,12 +85,12 @@ int main(int argc, char** argv) {
   util::geo::output::GeoGraphJsonOutput out;
 
   if (cfg.obstaclePath.size()) {
-    LOG(INFO, std::cerr) << "Reading obstacle file... ";
+    LOGTO(INFO, std::cerr) << "Reading obstacle file... ";
     cfg.obstacles = readObstacleFile(cfg.obstaclePath);
-    LOG(INFO, std::cerr) << "Done. (" << cfg.obstacles.size() << " obstacles)";
+    LOGTO(INFO, std::cerr) << "Done. (" << cfg.obstacles.size() << " obstacles)";
   }
 
-  LOG(INFO, std::cerr) << "Reading graph file... ";
+  LOGTO(INFO, std::cerr) << "Reading graph file... ";
   T_START(read);
   LineGraph tg;
   BaseGraph* gg;
@@ -98,15 +98,15 @@ int main(int argc, char** argv) {
     tg.readFromDot(&(std::cin), 0);
   else
     tg.readFromJson(&(std::cin), 0);
-  LOG(INFO, std::cerr) << "Done. (" << T_STOP(read) << "ms)";
+  LOGTO(INFO, std::cerr) << "Done. (" << T_STOP(read) << "ms)";
 
-  LOG(INFO, std::cerr) << "Planarize graph... ";
+  LOGTO(INFO, std::cerr) << "Planarize graph... ";
   T_START(planarize);
   tg.topologizeIsects();
-  LOG(INFO, std::cerr) << "Done. (" << T_STOP(planarize) << "ms)";
+  LOGTO(INFO, std::cerr) << "Done. (" << T_STOP(planarize) << "ms)";
 
   double avgDist = avgStatDist(tg);
-  LOG(INFO, std::cerr) << "Average adj. node distance is " << avgDist;
+  LOGTO(INFO, std::cerr) << "Average adj. node distance is " << avgDist;
 
   // BaseGraphType graphType = BaseGraphType::ORTHORADIAL;
   // BaseGraphType graphType = BaseGraphType::OCTIHANANGRID;
@@ -122,11 +122,11 @@ int main(int argc, char** argv) {
   if (util::trim(cfg.gridSize).back() == '%') {
     double perc = atof(cfg.gridSize.c_str()) / 100;
     gridSize = avgDist * perc;
-    LOG(INFO, std::cerr) << "Grid size " << gridSize << " (" << perc * 100
+    LOGTO(INFO, std::cerr) << "Grid size " << gridSize << " (" << perc * 100
                          << "%)";
   } else {
     gridSize = atof(cfg.gridSize.c_str());
-    LOG(INFO, std::cerr) << "Grid size " << gridSize;
+    LOGTO(INFO, std::cerr) << "Grid size " << gridSize;
   }
 
   if (cfg.optMode == "ilp") {
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
         oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
                     cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen,
                     cfg.ilpTimeLimit, cfg.ilpSolver, cfg.ilpPath);
-    LOG(INFO, std::cerr) << "Octilinearized using ILP in " << T_STOP(octi)
+    LOGTO(INFO, std::cerr) << "Octilinearized using ILP in " << T_STOP(octi)
                          << " ms, score " << sc;
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
       LOG(ERROR) << exc.what();
       exit(1);
     }
-    LOG(INFO, std::cerr) << "Octilinearized using heur approach in "
+    LOGTO(INFO, std::cerr) << "Octilinearized using heur approach in "
                          << T_STOP(octi) << " ms, score " << sc;
   }
 

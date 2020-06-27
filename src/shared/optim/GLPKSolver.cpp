@@ -23,7 +23,7 @@ GLPKSolver::GLPKSolver(DirType dir)
       _status(INF),
       _timeLimit(std::numeric_limits<int>::max()) {
   const char* ver = glp_version();
-  LOG(INFO, std::cerr) << "Creating GLPK solver v" << ver << " instance...";
+  LOGTO(INFO, std::cerr) << "Creating GLPK solver v" << ver << " instance...";
 
   glp_term_hook(termHook, &_termBuf);
   glp_error_hook(errorHook, this);
@@ -122,11 +122,11 @@ void GLPKSolver::addColToRow(const std::string& rowName,
                              const std::string& colName, double coef) {
   int col = getVarByName(colName);
   if (col < 0) {
-    LOG(ERROR, std::cerr) << "Could not find variable " << colName;
+    LOGTO(ERROR, std::cerr) << "Could not find variable " << colName;
   }
   int row = getConstrByName(rowName);
   if (row < 0) {
-    LOG(ERROR, std::cerr) << "Could not find constraint " << rowName;
+    LOGTO(ERROR, std::cerr) << "Could not find constraint " << rowName;
   }
 
   addColToRow(col, row, coef);
@@ -237,7 +237,7 @@ int GLPKSolver::termHook(void* info, const char* str) {
   for (auto ch : s) {
     if (ch == '\n') {
       std::string trimmed = util::ltrim(*buff);
-      if (trimmed.size()) LOG(INFO, std::cerr) << trimmed;
+      if (trimmed.size()) LOGTO(INFO, std::cerr) << trimmed;
       buff->clear();
     } else {
       buff->push_back(ch);
@@ -256,7 +256,7 @@ double GLPKSolver::getVarVal(int colId) const {
 double GLPKSolver::getVarVal(const std::string& colName) const {
   int col = getVarByName(colName);
   if (col < 0) {
-    LOG(ERROR, std::cerr) << "Could not find variable " << colName;
+    LOGTO(ERROR, std::cerr) << "Could not find variable " << colName;
   }
 
   return getVarVal(col);
@@ -266,7 +266,7 @@ double GLPKSolver::getVarVal(const std::string& colName) const {
 void GLPKSolver::setObjCoef(const std::string& colName, double coef) const {
   int col = getVarByName(colName);
   if (col < 0) {
-    LOG(ERROR, std::cerr) << "Could not find variable " << colName;
+    LOGTO(ERROR, std::cerr) << "Could not find variable " << colName;
   }
 
   setObjCoef(col, coef);

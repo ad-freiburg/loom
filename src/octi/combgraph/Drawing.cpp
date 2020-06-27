@@ -144,7 +144,7 @@ void Drawing::getLineGraph(LineGraph* target) const {
     for (auto f : n->getAdjListOut()) {
       if (f->getFrom() != n) continue;
       if (_edgs.find(f) == _edgs.end()) {
-        LOG(WARN, std::cerr) << "Edge " << f << " was not drawn, skipping...";
+        LOGTO(WARN, std::cerr) << "Edge " << f << " was not drawn, skipping...";
         continue;
       }
       auto poly = _gg->geomFromPath(_edgs.find(f)->second);

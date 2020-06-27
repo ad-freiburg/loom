@@ -19,12 +19,9 @@
 #define LOGLEVEL 2
 #endif
 
-#define GET_MACRO(_1,_2,NAME,...) NAME
-#define LOG(...) GET_MACRO(__VA_ARGS__, LOGSTR, LOGAUTO)(__VA_ARGS__)
-
 // compiler will optimize statement away if x > LOGLEVEL
-#define LOGAUTO(x) if (x <= LOGLEVEL) util::Log<x>().log()
-#define LOGSTR(x, os) if (x <= LOGLEVEL) util::Log<x>(&os).log()
+#define LOG(x) if (x <= LOGLEVEL) util::Log<x>().log()
+#define LOGTO(x, os) if (x <= LOGLEVEL) util::Log<x>(&os).log()
 
 using std::setfill;
 using std::setw;
