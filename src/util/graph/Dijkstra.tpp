@@ -69,7 +69,6 @@ C Dijkstra::shortestPathImpl(const std::set<Node<N, E>*> from,
         pq.pop();
         continue;
       }
-      Dijkstra::DBL_VISITS++;
     }
     Dijkstra::ITERS++;
 
