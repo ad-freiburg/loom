@@ -215,6 +215,7 @@ C BiDijkstra::relaxBwd(const std::set<Node<N, E>*>& froms,
                        const util::graph::CostFunc<N, E, C>& costFunc,
                        const util::graph::HeurFunc<N, E, C>& heurFunc,
                        PQ<N, E, C>& pq, const Settled<N, E, C>& settledFwd) {
+  UNUSED(heurFunc);
   C ret = costFunc.inf();
   for (auto edge : cur.n->getAdjListIn()) {
     C newC = costFunc(edge->getOtherNd(cur.n), edge, cur.n);

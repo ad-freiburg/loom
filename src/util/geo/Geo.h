@@ -1873,13 +1873,28 @@ inline Point<T> webMercToLatLng(double x, double y) {
 }
 
 // _____________________________________________________________________________
-template <typename G1, typename G2>
-inline double webMercMeterDist(const G1& a, const G2& b) {
+template <typename T>
+inline double webMercMeterDist(const Point<T>& a, const Point<T>& b) {
   // euclidean distance on web mercator is in meters on equator,
   // and proportional to cos(lat) in both y directions
 
   double latA = 2 * atan(exp(a.getY() / 6378137.0)) - 1.5707965;
   double latB = 2 * atan(exp(b.getY() / 6378137.0)) - 1.5707965;
+
+  return util::geo::dist(a, b) * cos((latA + latB) / 2.0);
+}
+
+// _____________________________________________________________________________
+template <typename G1, typename G2>
+inline double webMercMeterDist(const G1& a, const G2& b) {
+  // euclidean distance on web mercator is in meters on equator,
+  // and proportional to cos(lat) in both y directions
+
+  auto pa = centroid(a);
+  auto pb = centroid(b);
+
+  double latA = 2 * atan(exp(pa.getY() / 6378137.0)) - 1.5707965;
+  double latB = 2 * atan(exp(pb.getY() / 6378137.0)) - 1.5707965;
 
   return util::geo::dist(a, b) * cos((latA + latB) / 2.0);
 }

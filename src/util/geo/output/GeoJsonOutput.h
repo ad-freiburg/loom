@@ -29,10 +29,16 @@ class GeoJsonOutput {
   void print(const Line<T>& l, json::Val attrs);
 
   template <typename T>
+  void print(const MultiLine<T>& l, json::Val attrs);
+
+  template <typename T>
   void printLatLng(const Point<T>& p, json::Val attrs);
 
   template <typename T>
   void printLatLng(const Line<T>& l, json::Val attrs);
+
+  template <typename T>
+  void printLatLng(const MultiLine<T>& l, json::Val attrs);
 
   void flush();
 
@@ -41,8 +47,8 @@ class GeoJsonOutput {
 };
 
 #include "util/geo/output/GeoJsonOutput.tpp"
-}
-}
-}
+}  // namespace output
+}  // namespace geo
+}  // namespace util
 
 #endif  // UTIL_GEO_OUTPUT_GEOJSONOUTPUT_H_
