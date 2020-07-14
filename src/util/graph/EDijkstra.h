@@ -117,6 +117,15 @@ class EDijkstra : public ShortestPath<EDijkstra> {
       std::unordered_map<Edge<N, E>*, NList<N, E>*> resNodes);
 
   template <typename N, typename E, typename C>
+  static std::unordered_map<Edge<N, E>*, C> shortestPathImpl(
+      const std::set<Edge<N, E>*>& from, const std::set<Edge<N, E>*>& to,
+      const std::unordered_map<Edge<N, E>*, C>& initCosts,
+      const util::graph::CostFunc<N, E, C>& costFunc,
+      const util::graph::HeurFunc<N, E, C>& heurFunc,
+      std::unordered_map<Edge<N, E>*, EList<N, E>*> resEdges,
+      std::unordered_map<Edge<N, E>*, NList<N, E>*> resNodes);
+
+  template <typename N, typename E, typename C>
   static void buildPath(Edge<N, E>* curE, const Settled<N, E, C>& settled,
                         NList<N, E>* resNodes, EList<N, E>* resEdges);
 

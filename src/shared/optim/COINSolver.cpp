@@ -27,7 +27,7 @@ COINSolver::COINSolver(DirType dir)
       _starterArr(0),
       _status(INF),
       _timeLimit(std::numeric_limits<int>::max()) {
-  LOG(INFO, std::cerr) << "Creating COIN solver instance...";
+  LOGTO(INFO, std::cerr) << "Creating COIN solver instance...";
 
   // basically following
   // https://github.com/coin-or/Cbc/blob/master/examples/sample5.cpp

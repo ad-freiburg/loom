@@ -207,6 +207,73 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
 
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
+std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
+    const std::set<Edge<N, E>*>& from, const std::set<Edge<N, E>*>& to,
+    const std::unordered_map<Edge<N, E>*, C>& initCosts,
+    const util::graph::CostFunc<N, E, C>& costFunc,
+    const util::graph::HeurFunc<N, E, C>& heurFunc,
+    std::unordered_map<Edge<N, E>*, EList<N, E>*> resEdges,
+    std::unordered_map<Edge<N, E>*, NList<N, E>*> resNodes) {
+  /**
+   * Shortest paths from the set <from> to ALL nodes in <TO>, but
+   * init <from> nodes with costs (this is equivalent to adding an auxiliary
+   * node S, connecting it with directed edges to all <from>, setting the
+   * costs of these edges to the initial costs and run a 1->N Dijkstra from S
+   **/
+
+  std::unordered_map<Edge<N, E>*, C> costs;
+  if (to.size() == 0) return costs;
+
+  // init costs with inf
+  for (auto e : to) costs[e] = costFunc.inf();
+
+  Settled<N, E, C> settled;
+  PQ<N, E, C> pq;
+
+  size_t found = 0;
+
+  // put all nodes in from onto the PQ with their initial costs, also set
+  // the initial cost as a heuristic starting point!
+  for (auto e : from) {
+    C iCost = initCosts.find(e)->second;
+    pq.emplace(e, (Edge<N, E>*)0, (Node<N, E>*)0, iCost, iCost + heurFunc(e, to));
+  }
+
+  RouteEdge<N, E, C> cur;
+
+  while (!pq.empty()) {
+    EDijkstra::ITERS++;
+
+    auto se = settled.find(pq.top().e);
+    if (se != settled.end()) {
+      // to allow non-consistent heuristics
+      if (se->second.d <= pq.top().d) {
+        pq.pop();
+        continue;
+      }
+    }
+
+    cur = pq.top();
+    pq.pop();
+
+    settled[cur.e] = cur;
+
+    if (to.find(cur.e) != to.end()) {
+      found++;
+      costs[cur.e] = cur.d;
+      buildPath(cur.e, settled, resNodes[cur.e], resEdges[cur.e]);
+    }
+
+    if (found == to.size()) return costs;
+
+    relax(cur, to, costFunc, heurFunc, pq);
+  }
+
+  return costs;
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E, typename C>
 void EDijkstra::relaxInv(RouteEdge<N, E, C>& cur,
                          const util::graph::CostFunc<N, E, C>& costFunc,
                          PQ<N, E, C>& pq) {
