@@ -20,32 +20,37 @@ GurobiSolver::GurobiSolver(DirType dir)
     : _starterArr(0), _status(INF), _numVars(0), _numRows(0) {
   int verMaj, verMin, verTech;
   GRBversion(&verMaj, &verMin, &verTech);
-  LOG(INFO, std::cerr) << "Creating gurobi v" << verMaj << "." << verMin << "."
+  LOGTO(INFO, std::cerr) << "Creating gurobi v" << verMaj << "." << verMin << "."
                        << verTech << " solver instance...";
 
   int error = GRBemptyenv(&_env);
   if (error || _env == 0) {
+    if (_env != 0 && error) LOG(ERROR) << GRBgeterrormsg(_env);
     throw std::runtime_error("Could not create gurobi environment");
   }
 
   error = GRBsetintparam(_env, "LogToConsole", 0);
   if (error) {
+    LOG(ERROR) << GRBgeterrormsg(_env);
     throw std::runtime_error("Could not set logging of gurobi environment");
   }
 
   error = GRBsetstrparam(_env, "LogFile", "gurobi.log");
   if (error) {
+    LOG(ERROR) << GRBgeterrormsg(_env);
     throw std::runtime_error("Could not set logging of gurobi environment");
   }
 
   error = GRBstartenv(_env);
   if (error) {
+    LOG(ERROR) << GRBgeterrormsg(_env);
     throw std::runtime_error("Could not start gurobi environment");
   }
 
   // create emtpy model
   error = GRBnewmodel(_env, &_model, "loom_mip", 0, 0, 0, 0, 0, 0);
   if (error) {
+    LOG(ERROR) << GRBgeterrormsg(_env);
     throw std::runtime_error("Could not create gurobi model");
   }
 
@@ -122,11 +127,11 @@ void GurobiSolver::addColToRow(const std::string& rowName,
                                const std::string& colName, double coef) {
   int col = getVarByName(colName);
   if (col < 0) {
-    LOG(ERROR, std::cerr) << "Could not find variable " << colName;
+    LOGTO(ERROR, std::cerr) << "Could not find variable " << colName;
   }
   int row = getConstrByName(rowName);
   if (row < 0) {
-    LOG(ERROR, std::cerr) << "Could not find constraint " << rowName;
+    LOGTO(ERROR, std::cerr) << "Could not find constraint " << rowName;
   }
 
   addColToRow(col, row, coef);
@@ -259,7 +264,7 @@ SolveType GurobiSolver::solve() {
 // _____________________________________________________________________________
 void GurobiSolver::setTimeLim(int s) {
   // set time limit
-  LOG(INFO, std::cerr) << "Setting solver time limit to " << s << " seconds.";
+  LOGTO(INFO, std::cerr) << "Setting solver time limit to " << s << " seconds.";
   int error = GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_TIMELIMIT, s);
   if (error) {
     throw std::runtime_error("Could not set timelimit");
@@ -294,7 +299,7 @@ double GurobiSolver::getVarVal(int colId) const {
 double GurobiSolver::getVarVal(const std::string& colName) const {
   int col = getVarByName(colName);
   if (col < 0) {
-    LOG(ERROR, std::cerr) << "Could not find variable " << colName;
+    LOGTO(ERROR, std::cerr) << "Could not find variable " << colName;
   }
 
   return getVarVal(col);
@@ -304,7 +309,7 @@ double GurobiSolver::getVarVal(const std::string& colName) const {
 void GurobiSolver::setObjCoef(const std::string& colName, double coef) const {
   int col = getVarByName(colName);
   if (col < 0) {
-    LOG(ERROR, std::cerr) << "Could not find variable " << colName;
+    LOGTO(ERROR, std::cerr) << "Could not find variable " << colName;
   }
 
   setObjCoef(col, coef);
@@ -353,7 +358,7 @@ int GurobiSolver::termHook(GRBmodel* mod, void* cbdata, int where,
     for (auto ch : s) {
       if (ch == '\n') {
         std::string trimmed = util::ltrim(*buff);
-        if (trimmed.size()) LOG(INFO, std::cerr) << trimmed;
+        if (trimmed.size()) LOGTO(INFO, std::cerr) << trimmed;
         buff->clear();
       } else {
         buff->push_back(ch);

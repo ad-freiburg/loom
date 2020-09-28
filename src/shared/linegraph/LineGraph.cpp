@@ -356,8 +356,10 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
 
 // _____________________________________________________________________________
 void LineGraph::buildGrids() {
-  _nodeGrid = NodeGrid(200, 200, _bbox);
-  _edgeGrid = EdgeGrid(200, 200, _bbox);
+  size_t gridSize = 20000; // TODO: make configurable
+
+  _nodeGrid = NodeGrid(gridSize, gridSize, _bbox);
+  _edgeGrid = EdgeGrid(gridSize, gridSize, _bbox);
 
   for (auto n : *getNds()) {
     _nodeGrid.add(*n->pl().getGeom(), n);
