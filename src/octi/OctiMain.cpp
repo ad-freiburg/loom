@@ -1,6 +1,6 @@
 // Copyright 2017
 // University of Freiburg - Chair of Algorithms and Datastructures
-// Author: Patrick Brosi
+// Author: Patrick Brosi <brosi@cs.uni-freiburg.de>
 
 #include <stdio.h>
 #include <unistd.h>
