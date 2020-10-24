@@ -24,6 +24,7 @@
 
 using namespace octi;
 using namespace basegraph;
+using namespace util;
 
 using combgraph::EdgeOrdering;
 using octi::basegraph::BaseGraph;
@@ -31,12 +32,13 @@ using octi::combgraph::Drawing;
 using util::geo::DBox;
 using util::geo::dist;
 using util::geo::DPoint;
+using util::geo::Polygon;
 using util::geo::len;
 using util::graph::BiDijkstra;
 using util::graph::Dijkstra;
 
 // _____________________________________________________________________________
-double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
+Score Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
                                BaseGraph** retGg, const Penalties& pens,
                                double gridSize, double borderRad, bool deg2heur,
                                double maxGrDist, bool noSolve, double enfGeoPen,
@@ -49,7 +51,7 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
 
   tg->splitNodes(baseMaxDeg());
   CombGraph cg(tg, deg2heur);
-  box = util::geo::pad(box, gridSize + 1);
+  box = geo::pad(box, gridSize + 1);
 
   if (_baseGraphType == ORTHORADIAL) {
     auto centerNd = getCenterNd(&cg);
@@ -65,16 +67,16 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
     box = newBox;
   }
 
-  LOGTO(INFO, std::cerr) << "Presolving...";
+  LOGTO(DEBUG, std::cerr) << "Presolving...";
   try {
     // presolve using heuristical approach to get a first feasible solution
     LineGraph tmpOutTg;
     // important: always use restrLocSearch here!
     draw(cg, box, &tmpOutTg, &gg, pens, gridSize, borderRad, maxGrDist, true,
          enfGeoPen, {}, std::numeric_limits<size_t>::max());
-    LOGTO(INFO, std::cerr) << "Presolving finished.";
+    LOGTO(DEBUG, std::cerr) << "Presolving finished.";
   } catch (const NoEmbeddingFoundExc& exc) {
-    LOGTO(INFO, std::cerr) << "Presolve was not sucessful.";
+    LOGTO(DEBUG, std::cerr) << "Presolve was not sucessful.";
     gg = newBaseGraph(box, cg, gridSize, borderRad, pens);
     gg->init();
   }
@@ -84,13 +86,13 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
   const GeoPensMap* geoPens = 0;
 
   if (enfGeoPen) {
-    LOGTO(INFO, std::cerr) << "Writing geopens... ";
+    LOGTO(DEBUG, std::cerr) << "Writing geopens... ";
     auto initOrder = getOrdering(cg, false);
     T_START(geopens);
     for (auto cmbEdg : initOrder) {
       gg->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
     }
-    LOGTO(INFO, std::cerr) << "Done. (" << T_STOP(geopens) << "ms)";
+    LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(geopens) << "ms)";
     geoPens = &enfGeoPens;
   }
 
@@ -105,22 +107,22 @@ double Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve,
+  ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve,
                                    geoPens, timeLim, solverStr, path);
 
   drawing.getLineGraph(outTg);
 
   *retGg = gg;
 
-  return score;
+  return drawing.fullScore();
 }
 
 // _____________________________________________________________________________
-double Octilinearizer::draw(
+Score Octilinearizer::draw(
     LineGraph* tg, LineGraph* outTg, BaseGraph** retGg, const Penalties& pens,
     double gridSize, double borderRad, bool deg2heur, double maxGrDist,
     bool restrLocSearch, double enfGeoPen,
-    const std::vector<util::geo::Polygon<double>>& obstacles,
+    const std::vector<Polygon<double>>& obstacles,
     size_t abortAfter) {
   tg->contractEdges(gridSize / 2);
 
@@ -130,7 +132,7 @@ double Octilinearizer::draw(
 
   CombGraph cg(tg, deg2heur);
 
-  box = util::geo::pad(box, gridSize + 1);
+  box = geo::pad(box, gridSize + 1);
 
   if (_baseGraphType == ORTHORADIAL) {
     auto centerNd = getCenterNd(&cg);
@@ -151,11 +153,11 @@ double Octilinearizer::draw(
 }
 
 // _____________________________________________________________________________
-double Octilinearizer::draw(
-    const CombGraph& cg, const util::geo::DBox& box, LineGraph* outTg,
+Score Octilinearizer::draw(
+    const CombGraph& cg, const DBox& box, LineGraph* outTg,
     BaseGraph** retGg, const Penalties& pens, double gridSize, double borderRad,
     double maxGrDist, bool restrLocSearch, double enfGeoPen,
-    const std::vector<util::geo::Polygon<double>>& obstacles,
+    const std::vector<Polygon<double>>& obstacles,
     size_t abortAfter) {
   size_t jobs = 4;
   std::vector<BaseGraph*> ggs(jobs);
@@ -167,14 +169,14 @@ double Octilinearizer::draw(
   // out.print(*gg, std::cout);
   // exit(0);
 
-  LOGTO(INFO, std::cerr) << "Creating grid graphs... ";
+  LOGTO(DEBUG, std::cerr) << "Creating grid graphs... ";
   T_START(ggraph);
 #pragma omp parallel for
   for (size_t i = 0; i < jobs; i++) {
     ggs[i] = newBaseGraph(box, cg, gridSize, borderRad, pens);
     ggs[i]->init();
   }
-  LOGTO(INFO, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
+  LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
 
   bool found = false;
 
@@ -188,21 +190,21 @@ double Octilinearizer::draw(
   auto initOrder = getOrdering(cg, false);
 
   if (enfGeoPen > 0) {
-    LOGTO(INFO, std::cerr) << "Writing geopens... ";
+    LOGTO(DEBUG, std::cerr) << "Writing geopens... ";
     T_START(geopens);
     for (auto cmbEdg : initOrder) {
       ggs[0]->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
     }
-    LOGTO(INFO, std::cerr) << "Done. (" << T_STOP(geopens) << "ms)";
+    LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(geopens) << "ms)";
     geoPens = &enfGeoPens;
   }
 
   if (obstacles.size()) {
-    LOGTO(INFO, std::cerr) << "Writing obstacles... ";
+    LOGTO(DEBUG, std::cerr) << "Writing obstacles... ";
     T_START(obstacles);
     for (auto gg : ggs)
       for (const auto& obst : obstacles) gg->addObstacle(obst);
-    LOGTO(INFO, std::cerr) << "Done. (" << T_STOP(obstacles) << "ms)";
+    LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(obstacles) << "ms)";
   }
 
   Drawing drawing(ggs[0]);
@@ -220,18 +222,18 @@ double Octilinearizer::draw(
 
     switch (error) {
       case DRAWN:
-        LOGTO(INFO, std::cerr) << " ++ Try " << i << ", score "
+        LOGTO(DEBUG, std::cerr) << " ++ Try " << i << ", score "
                                << drawing.score() << ", (" << T_STOP(draw)
                                << " ms)";
         found = true;
         break;
       case NO_PATH:
-        LOGTO(INFO, std::cerr) << " ++ Try " << i << ", score <inf>"
+        LOGTO(DEBUG, std::cerr) << " ++ Try " << i << ", score <inf>"
                                << ", next <no path found>"
                                << " (" << T_STOP(draw) << " ms)";
         break;
       case NO_CANDS:
-        LOGTO(INFO, std::cerr) << " ++ Try " << i << ", score <inf>"
+        LOGTO(DEBUG, std::cerr) << " ++ Try " << i << ", score <inf>"
                                << ", next <no cands found>"
                                << " (" << T_STOP(draw) << " ms)";
         break;
@@ -246,13 +248,13 @@ double Octilinearizer::draw(
 
   if (!found) throw NoEmbeddingFoundExc();
 
-  LOGTO(INFO, std::cerr) << "Done.";
+  LOGTO(DEBUG, std::cerr) << "Done.";
 
   for (size_t i = 0; i < jobs; i++) drawing.applyToGrid(ggs[i]);
 
   size_t iters = 0;
 
-  LOGTO(INFO, std::cerr) << "Starting local search...";
+  LOGTO(DEBUG, std::cerr) << "Starting local search...";
 
   // dont use local search if abortAfter is set
   if (abortAfter != std::numeric_limits<size_t>::max()) LOCAL_SEARCH_ITERS = 0;
@@ -339,7 +341,7 @@ double Octilinearizer::draw(
     }
 
     double imp = (drawing.score() - bestFrIters[bestCore].score());
-    LOGTO(INFO, std::cerr) << " ++ Iter " << iters << ", prev "
+    LOGTO(DEBUG, std::cerr) << " ++ Iter " << iters << ", prev "
                            << drawing.score() << ", next "
                            << bestFrIters[bestCore].score() << " ("
                            << (imp >= 0 ? "+" : "") << imp << ", "
@@ -356,13 +358,13 @@ double Octilinearizer::draw(
 
   drawing.getLineGraph(outTg);
   auto fullScore = drawing.fullScore();
-  LOGTO(INFO, std::cerr) << "Hop costs: " << fullScore.hop
+  LOGTO(DEBUG, std::cerr) << "Hop costs: " << fullScore.hop
                          << ", bend costs: " << fullScore.bend
                          << ", mv costs: " << fullScore.move
                          << ", dense costs: " << fullScore.dense;
 
   *retGg = ggs[0];
-  return drawing.score();
+  return fullScore;
 }
 
 // _____________________________________________________________________________
@@ -629,14 +631,13 @@ RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
 
   double maxDis = gg->getCellSize() * maxGrDist;
 
-  std::set<GridNode*> frGrNds;
-  std::set<GridNode*> toGrNds;
+  std::set<GridNode*> frGrNds, toGrNds;
 
   size_t i = 0;
 
   while ((!frGrNds.size() || !toGrNds.size()) && i < 10) {
-    std::set<GridNode*> frCands = getCands(frCmbNd, preSettled, gg, maxDis);
-    std::set<GridNode*> toCands = getCands(toCmbNd, preSettled, gg, maxDis);
+    auto frCands = getCands(frCmbNd, preSettled, gg, maxDis);
+    auto toCands = getCands(toCmbNd, preSettled, gg, maxDis);
 
     std::set<GridNode*> isect;
     std::set_intersection(frCands.begin(), frCands.end(), toCands.begin(),

@@ -37,6 +37,8 @@ using octi::combgraph::CombNode;
 using octi::combgraph::Drawing;
 using octi::combgraph::EdgeOrdering;
 
+using octi::combgraph::Score;
+
 using util::graph::Dijkstra;
 
 typedef util::graph::EList<GridNodePL, GridEdgePL> GrEdgList;
@@ -109,21 +111,21 @@ struct GridCostGeoPen
 class Octilinearizer {
  public:
   Octilinearizer(BaseGraphType baseGraphType) : _baseGraphType(baseGraphType) {}
-  double draw(LineGraph* in, LineGraph* out, basegraph::BaseGraph** gg,
+  Score draw(LineGraph* in, LineGraph* out, basegraph::BaseGraph** gg,
               const Penalties& pens, double gridSize, double borderRad,
               bool deg2heur, double maxGrDist, bool restrLocSearch,
               double enfGeoCourse,
               const std::vector<util::geo::Polygon<double>>& obstacles,
               size_t abortAfter);
 
-  double draw(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
+  Score draw(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
               basegraph::BaseGraph** gg, const Penalties& pens, double gridSize,
               double borderRad, double maxGrDist, bool restrLocSearch,
               double enfGeoCourse,
               const std::vector<util::geo::Polygon<double>>& obstacles,
               size_t abortAfter);
 
-  double drawILP(LineGraph* in, LineGraph* out, basegraph::BaseGraph** gg,
+  Score drawILP(LineGraph* in, LineGraph* out, basegraph::BaseGraph** gg,
                  const Penalties& pens, double gridSize, double borderRad,
                  bool deg2heur, double maxGrDist, bool noSolve,
                  double enfGeoPens, int timeLim, const std::string& solverStr,

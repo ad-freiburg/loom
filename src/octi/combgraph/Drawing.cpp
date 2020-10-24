@@ -9,7 +9,7 @@ using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
 
 using octi::combgraph::Drawing;
-using octi::combgraph::Costs;
+using octi::combgraph::Score;
 using octi::combgraph::CombGraph;
 using octi::combgraph::CombNode;
 using octi::combgraph::CombEdge;
@@ -30,13 +30,14 @@ void Drawing::setBaseGraph(const BaseGraph* gg) {
 }
 
 // _____________________________________________________________________________
-Costs Drawing::fullScore() const {
-  Costs ret{0, 0, 0, 0};
+Score Drawing::fullScore() const {
+  Score ret{0, 0, 0, 0, 0};
 
   for (auto c : _ndReachCosts) ret.move += c.second;
   for (auto c : _ndBndCosts) ret.bend += c.second;
   for (auto c : _edgCosts) ret.hop += c.second;
   for (auto c : _springCosts) ret.dense += c.second;
+  ret.full = _c;
 
   return ret;
 }

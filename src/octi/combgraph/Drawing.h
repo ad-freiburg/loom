@@ -21,11 +21,12 @@ using octi::basegraph::GridEdgePL;
 
 typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
 
-struct Costs {
+struct Score {
   double bend;
   double move;
   double hop;
   double dense;
+  double full;
 };
 
 class Drawing {
@@ -35,7 +36,7 @@ class Drawing {
   Drawing() : _c(std::numeric_limits<double>::infinity()), _gg(0){};
 
   double score() const;
-  Costs fullScore() const;
+  Score fullScore() const;
   void crumble();
 
   void draw(CombEdge* ce, const GrEdgList& ge, bool rev);
