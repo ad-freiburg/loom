@@ -69,7 +69,7 @@ void DirNode<N, E>::removeEdge(Edge<N, E>* e) {
     if (p != _adjListIn.end()) _adjListIn.erase(p);
   }
 }
-//
+
 // _____________________________________________________________________________
 template <typename N, typename E>
 bool DirNode<N, E>::hasEdgeIn(const Edge<N, E>* e) const {
@@ -139,6 +139,8 @@ const N& DirNode<N, E>::pl() const {
 // _____________________________________________________________________________
 template <typename N, typename E>
 bool DirNode<N, E>::adjInContains(const Edge<N, E>* e) const {
+  // this is faster than a binary search as the adjacency lists are typically
+  // very small for our use cases
   for (size_t i = 0; i < _adjListIn.size(); i++)
     if (_adjListIn[i] == e) return true;
   return false;
@@ -147,6 +149,8 @@ bool DirNode<N, E>::adjInContains(const Edge<N, E>* e) const {
 // _____________________________________________________________________________
 template <typename N, typename E>
 bool DirNode<N, E>::adjOutContains(const Edge<N, E>* e) const {
+  // this is faster than a binary search as the adjacency lists are typically
+  // very small for our use cases
   for (size_t i = 0; i < _adjListOut.size(); i++)
     if (_adjListOut[i] == e) return true;
   return false;

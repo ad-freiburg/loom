@@ -51,6 +51,7 @@ typedef Polygon<int> IPolygon;
 
 const static double EPSILON = 0.00001;
 const static double RAD = 0.017453292519943295;  // PI/180
+const static double IRAD = 180.0 / M_PI;         // 180 / PI
 const static double AVERAGING_STEP = 20;
 
 // _____________________________________________________________________________
@@ -856,7 +857,7 @@ inline double innerProd(double x1, double y1, double x2, double y2, double x3,
   double m13 = sqrt(dx31 * dx31 + dy31 * dy31);
   double theta = acos(std::min((dx21 * dx31 + dy21 * dy31) / (m12 * m13), 1.0));
 
-  return theta * (180 / M_PI);
+  return theta * IRAD;
 }
 
 // _____________________________________________________________________________
@@ -1787,28 +1788,30 @@ inline Line<T> densify(const Line<T>& l, double d) {
 // _____________________________________________________________________________
 template <typename T>
 inline double frechetDistC(size_t i, size_t j, const Line<T>& p,
-                           const Line<T>& q,
-                           std::vector<std::vector<double>>& ca) {
+                           const Line<T>& q, std::vector<float>& ca) {
   // based on Eiter / Mannila
   // http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf
 
-  if (ca[i][j] > -1)
-    return ca[i][j];
+  if (ca[i * q.size() + j] > -1)
+    return ca[i * q.size() + j];
   else if (i == 0 && j == 0)
-    ca[i][j] = dist(p[0], q[0]);
+    ca[i * q.size() + j] = dist(p[0], q[0]);
   else if (i > 0 && j == 0)
-    ca[i][j] = std::max(frechetDistC(i - 1, 0, p, q, ca), dist(p[i], q[0]));
+    ca[i * q.size() + j] =
+        std::max(frechetDistC(i - 1, 0, p, q, ca), dist(p[i], q[0]));
   else if (i == 0 && j > 0)
-    ca[i][j] = std::max(frechetDistC(0, j - 1, p, q, ca), dist(p[0], q[j]));
+    ca[i * q.size() + j] =
+        std::max(frechetDistC(0, j - 1, p, q, ca), dist(p[0], q[j]));
   else if (i > 0 && j > 0)
-    ca[i][j] = std::max(std::min(std::min(frechetDistC(i - 1, j, p, q, ca),
-                                          frechetDistC(i - 1, j - 1, p, q, ca)),
-                                 frechetDistC(i, j - 1, p, q, ca)),
-                        dist(p[i], q[j]));
+    ca[i * q.size() + j] =
+        std::max(std::min(std::min(frechetDistC(i - 1, j, p, q, ca),
+                                   frechetDistC(i - 1, j - 1, p, q, ca)),
+                          frechetDistC(i, j - 1, p, q, ca)),
+                 dist(p[i], q[j]));
   else
-    ca[i][j] = std::numeric_limits<double>::infinity();
+    ca[i * q.size() + j] = std::numeric_limits<float>::infinity();
 
-  return ca[i][j];
+  return ca[i * q.size() + j];
 }
 
 // _____________________________________________________________________________
@@ -1820,8 +1823,7 @@ inline double frechetDist(const Line<T>& a, const Line<T>& b, double d) {
   auto p = densify(a, d);
   auto q = densify(b, d);
 
-  std::vector<std::vector<double>> ca(p.size(),
-                                      std::vector<double>(q.size(), -1.0));
+  std::vector<float> ca(p.size() * q.size(), -1.0);
   double fd = frechetDistC(p.size() - 1, q.size() - 1, p, q, ca);
 
   return fd;
@@ -1833,24 +1835,28 @@ inline double accFrechetDistC(const Line<T>& a, const Line<T>& b, double d) {
   auto p = densify(a, d);
   auto q = densify(b, d);
 
-  std::vector<std::vector<double>> ca(p.size(),
-                                      std::vector<double>(q.size(), 0));
+  assert(p.size());
+  assert(q.size());
+
+  std::vector<float> ca(p.size() * q.size(), 0);
 
   for (size_t i = 0; i < p.size(); i++)
-    ca[i][0] = std::numeric_limits<double>::infinity();
+    ca[i * q.size() + 0] = std::numeric_limits<float>::infinity();
   for (size_t j = 0; j < q.size(); j++)
-    ca[0][j] = std::numeric_limits<double>::infinity();
-  ca[0][0] = 0;
+    ca[j] = std::numeric_limits<float>::infinity();
+  ca[0] = 0;
 
   for (size_t i = 1; i < p.size(); i++) {
     for (size_t j = 1; j < q.size(); j++) {
-      double d = util::geo::dist(p[i], q[j]) * util::geo::dist(p[i], p[i - 1]);
-      ca[i][j] =
-          d + std::min(ca[i - 1][j], std::min(ca[i][j - 1], ca[i - 1][j - 1]));
+      float d = util::geo::dist(p[i], q[j]) * util::geo::dist(p[i], p[i - 1]);
+      ca[i * q.size() + j] =
+          d + std::min(ca[(i - 1) * q.size() + j],
+                       std::min(ca[i * q.size() + (j - 1)],
+                                ca[(i - 1) * q.size() + (j - 1)]));
     }
   }
 
-  return ca[p.size() - 1][q.size() - 1];
+  return ca[p.size() * q.size() - 1];
 }
 
 // _____________________________________________________________________________
@@ -1916,6 +1922,20 @@ inline double webMercDistFactor(const G& a) {
   double lat = 2 * atan(exp(a.getY() / 6378137.0)) - 1.5707965;
   return cos(lat);
 }
+
+// _____________________________________________________________________________
+inline double haversine(double lat1, double lon1, double lat2, double lon2) {
+  double dLat = (lat2 - lat1) * RAD;
+  double dLon = (lon2 - lon1) * RAD;
+
+  lat1 *= RAD;
+  lat2 *= RAD;
+
+  double a = (sin(dLat / 2) * sin(dLat / 2)) +
+             (sin(dLon / 2) * sin(dLon / 2)) * cos(lat1) * cos(lat2);
+  return 6371000 * 2 * asin(sqrt(a));
+}
+
 }  // namespace geo
 }  // namespace util
 

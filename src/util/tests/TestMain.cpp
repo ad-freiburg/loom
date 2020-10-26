@@ -28,8 +28,44 @@ int main(int argc, char** argv) {
 	UNUSED(argc);
 	UNUSED(argv);
 
+  std::setlocale(LC_ALL, "en_US.utf8");
+
   QuadTreeTest quadTreeTest;
   quadTreeTest.run();
+
+  // ___________________________________________________________________________
+  {
+    TEST(geo::frechetDist(Line<double>{{0, 0}, {10, 10}}, Line<double>{{0, 0},
+                                  {10, 10}}, 1) == approx(0));
+
+    TEST(geo::frechetDist(Line<double>{{0, 0}, {10, 10}}, Line<double>{{0, 0},
+                                  {10, 10}}, 0.1) == approx(0));
+
+    TEST(geo::frechetDist(Line<double>{{0, 10}, {10, 10}}, Line<double>{{0, 0},
+                                  {10, 0}}, 0.1) == approx(10));
+
+    TEST(geo::frechetDist(Line<double>{{0, 10}, {10, 10}}, Line<double>{{0, 0},
+                                  {0, 0}}, 0.1)
+        == approx(util::geo::dist(Point<double>{0, 0}, Point<double>{10, 10})));
+
+    TEST(geo::frechetDist(Line<double>{{0, 10}, {0, 10}}, Line<double>{{0, 0},
+                                  {0, 5}}, 0.1) == approx(10));
+
+    TEST(geo::frechetDist(Line<double>{{0, 10}, {0, 10}}, Line<double>{{0, 5},
+                                  {0, 5}}, 0.1) == approx(5));
+  }
+
+  // ___________________________________________________________________________
+  {
+    std::string test = u8"Zürich, Hauptbahnhof (Nord)";
+    auto tokens = util::tokenize(test);
+
+    TEST(tokens.size(), ==, 3);
+
+    TEST(util::jaccardSimi("Zürich Hauptbahnhof Nord", "Zürich, Hauptbahnhof (Nord)"), ==, approx(1));
+    TEST(util::jaccardSimi("Zürich Hauptbahnhof", "Zürich, Hauptbahnhof ()"), ==, approx(1));
+    TEST(util::jaccardSimi("Zürich Hauptbahnhof", "Zürich, Hauptbahnhof (Nord)"), ==, approx(2./3.));
+  }
 
   // ___________________________________________________________________________
   {

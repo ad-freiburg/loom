@@ -16,21 +16,36 @@ Line<T> GeoGraphJsonOutput::createLine(const util::geo::Point<T>& a,
 template <typename N, typename E>
 void GeoGraphJsonOutput::print(const util::graph::Graph<N, E>& outG,
                                std::ostream& str) {
-  printImpl(outG, str, false);
+  printImpl(outG, str, false, {});
 }
 
 // _____________________________________________________________________________
 template <typename N, typename E>
 void GeoGraphJsonOutput::printLatLng(const util::graph::Graph<N, E>& outG,
                                std::ostream& str) {
-  printImpl(outG, str, true);
+  printImpl(outG, str, true, {});
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
+void GeoGraphJsonOutput::print(const util::graph::Graph<N, E>& outG,
+                               std::ostream& str, json::Val attrs) {
+  printImpl(outG, str, false, attrs);
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
+void GeoGraphJsonOutput::printLatLng(const util::graph::Graph<N, E>& outG,
+                               std::ostream& str, json::Val attrs) {
+  printImpl(outG, str, true, attrs);
 }
 
 // _____________________________________________________________________________
 template <typename N, typename E>
 void GeoGraphJsonOutput::printImpl(const util::graph::Graph<N, E>& outG,
-                               std::ostream& str, bool proj) {
-  GeoJsonOutput _out(str);
+                               std::ostream& str, bool proj, json::Val attrs) {
+
+  GeoJsonOutput _out(str, attrs);
 
   // first pass, nodes
   for (util::graph::Node<N, E>* n : outG.getNds()) {

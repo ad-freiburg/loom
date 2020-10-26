@@ -90,8 +90,8 @@ void Grid<V, G, T>::get(const Box<T>& box, std::set<V>* s) const {
   size_t neX = getCellXFromX(box.getUpperRight().getX());
   size_t neY = getCellYFromY(box.getUpperRight().getY());
 
-  for (size_t x = swX; x <= neX && x >= 0 && x < _xWidth; x++)
-    for (size_t y = swY; y <= neY && y >= 0 && y < _yHeight; y++) get(x, y, s);
+  for (size_t x = swX; x <= neX && x < _xWidth; x++)
+    for (size_t y = swY; y <= neY && y < _yHeight; y++) get(x, y, s);
 }
 
 // _____________________________________________________________________________

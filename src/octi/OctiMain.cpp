@@ -17,7 +17,14 @@
 #include "util/geo/Geo.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/BiDijkstra.h"
+#include "util/json/Writer.h"
 #include "util/log/Log.h"
+#include "util/Misc.h"
+#ifdef _OPENMP
+#include <omp.h>
+#else
+#define omp_get_num_procs() 1
+#endif
 
 using std::string;
 using namespace octi;
@@ -87,7 +94,8 @@ int main(int argc, char** argv) {
   if (cfg.obstaclePath.size()) {
     LOGTO(DEBUG, std::cerr) << "Reading obstacle file... ";
     cfg.obstacles = readObstacleFile(cfg.obstaclePath);
-    LOGTO(DEBUG, std::cerr) << "Done. (" << cfg.obstacles.size() << " obstacles)";
+    LOGTO(DEBUG, std::cerr)
+        << "Done. (" << cfg.obstacles.size() << " obstacles)";
   }
 
   LOGTO(DEBUG, std::cerr) << "Reading graph file... ";
@@ -122,40 +130,72 @@ int main(int argc, char** argv) {
   if (util::trim(cfg.gridSize).back() == '%') {
     double perc = atof(cfg.gridSize.c_str()) / 100;
     gridSize = avgDist * perc;
-    LOGTO(DEBUG, std::cerr) << "Grid size " << gridSize << " (" << perc * 100
-                         << "%)";
+    LOGTO(DEBUG, std::cerr)
+        << "Grid size " << gridSize << " (" << perc * 100 << "%)";
   } else {
     gridSize = atof(cfg.gridSize.c_str());
     LOGTO(DEBUG, std::cerr) << "Grid size " << gridSize;
   }
 
+  Score sc;
+  double time = 0;
+
   if (cfg.optMode == "ilp") {
     T_START(octi);
-    Score sc =
-        oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                    cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen,
-                    cfg.ilpTimeLimit, cfg.ilpSolver, cfg.ilpPath);
-    LOGTO(DEBUG, std::cerr) << "Octilinearized using ILP in " << T_STOP(octi)
-                         << " ms, score " << sc.full;
+    sc = oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+                     cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen,
+                     cfg.ilpTimeLimit, cfg.ilpSolver, cfg.ilpPath);
+    time = T_STOP(octi);
+    LOGTO(DEBUG, std::cerr)
+        << "Octilinearized using ILP in " << time << " ms, score " << sc.full;
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
-    Score sc;
     try {
       sc = oct.draw(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
                     cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch,
                     cfg.enfGeoPen, cfg.obstacles, cfg.abortAfter);
+      time = T_STOP(octi);
     } catch (const NoEmbeddingFoundExc& exc) {
       LOG(ERROR) << exc.what();
       exit(1);
     }
-    LOGTO(DEBUG, std::cerr) << "Octilinearized using heur approach in "
-                         << T_STOP(octi) << " ms, score " << sc.full;
+    LOGTO(DEBUG, std::cerr) << "Octilinearized using heur approach in " << time
+                            << " ms, score " << sc.full;
   }
 
+  size_t maxRss= util::getPeakRSS();
+
+  // translate score to JSON
+  util::json::Dict jsonScore{
+      {"scores", util::json::Dict{{"total_score", sc.full},
+                                  {"density-score", sc.dense},
+                                  {"bend-score", sc.bend},
+                                  {"hop-score", sc.hop},
+                                  {"move-score", sc.move}}},
+      {"pens",
+       util::json::Dict{
+           {"density-pen", cfg.pens.densityPen},
+           {"diag-pen", cfg.pens.diagonalPen},
+           {"hori-pen", cfg.pens.horizontalPen},
+           {"vert-pen", cfg.pens.verticalPen},
+           {"180-turn-pen", cfg.pens.p_0},
+           {"135-turn-pen", cfg.pens.p_135},
+           {"90-turn-pen", cfg.pens.p_90},
+           {"45-turn-pen", cfg.pens.p_45},
+       }},
+      {"misc", util::json::Dict{{"method", cfg.optMode},
+                                {"deg2heur", cfg.deg2Heur},
+                                {"max-grid-dist", cfg.maxGrDist}}},
+      {"time_ms", time},
+      {"procs", omp_get_num_procs()},
+      {"peak_memory", util::readableSize(maxRss)},
+      {"peak_memory_bytes", util::json::Int(maxRss)},
+      {"timestamp", util::json::Int(std::time(0))}};
+
   if (cfg.printMode == "gridgraph") {
-    out.print(*gg, std::cout);
+    out.print(*gg, std::cout, jsonScore);
   } else {
-    out.print(res, std::cout);
+    out.print(res, std::cout, jsonScore);
   }
 
   return (0);

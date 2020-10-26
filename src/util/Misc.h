@@ -9,10 +9,15 @@
 #include <cstring>
 #include <chrono>
 #include <sstream>
+#include <immintrin.h>
 #include <iostream>
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <map>
+#include <shared_mutex>
+#include <thread>
+#include "3rdparty/dtoa_milo.h"
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 #define TIME() std::chrono::high_resolution_clock::now()
@@ -25,11 +30,59 @@
 #define _TEST1(s) _TEST3(static_cast<bool>(s), ==, true)
 
 #define _GET_TEST_MACRO(_1,_2,_3,NAME,...) NAME
-#define TEST(...) _GET_TEST_MACRO(__VA_ARGS__, _TEST3, _TEST2, _TEST1)(__VA_ARGS__)
+#define TEST(...) _GET_TEST_MACRO(__VA_ARGS__, _TEST3, _TEST2, _TEST1, UNUSED)(__VA_ARGS__)
 
 #define TODO(msg) std::cerr << "\n" __FILE__ << ":" << __LINE__ << ": TODO: " << #msg << std::endl;
 
+#if defined(_WIN32)
+#include <windows.h>
+#include <psapi.h>
+#elif defined(__unix__) || defined(__unix) || defined(unix) || (defined(__APPLE__) && defined(__MACH__))
+#include <unistd.h>
+#include <sys/resource.h>
+#if defined(__APPLE__) && defined(__MACH__)
+#include <mach/mach.h>
+#elif (defined(_AIX) || defined(__TOS__AIX__)) || (defined(__sun__) || defined(__sun) || defined(sun) && (defined(__SVR4) || defined(__svr4__)))
+#include <fcntl.h>
+#include <procfs.h>
+#elif defined(__linux__) || defined(__linux) || defined(linux) || defined(__gnu_linux__)
+#include <stdio.h>
+#endif
+#else
+#error "Cannot define getPeakRSS( ) or getCurrentRSS( ) for an unknown OS."
+#endif
+
 namespace util {
+
+struct hashPair {
+  template <class T1, class T2>
+  size_t operator()(const std::pair<T1, T2>& p) const {
+    auto h1 = std::hash<T1>{}(p.first);
+    auto h2 = std::hash<T2>{}(p.second);
+    return h1 ^  h2;
+  }
+};
+
+template<typename Key, typename Val, Val Def>
+class SparseMatrix {
+ public:
+  Val get(const Key& x, const Key& y) const {
+    auto a = _m.find(std::pair<Key, Key>(x, y));
+    if (a == _m.end()) return Def;
+    return a->second;
+  }
+
+  void set(Key x, Key y, Val v) {
+    _m[std::pair<Key, Key>(x, y)] = v;
+  }
+
+	const std::map<std::pair<Key, Key>, Val>& vals() const {
+    return _m;
+  }
+
+ private:
+	std::map<std::pair<Key, Key>, Val> _m;
+};
 
 // cached first 10 powers of 10
 static int pow10[10] = {
@@ -126,6 +179,29 @@ inline std::string getHomeDir() {
 }
 
 // _____________________________________________________________________________
+inline char* readableSize(double size, char* buf) {
+  int i = 0;
+  const char* units[] = {"B", "kB", "MB", "GB", "TB", "PB"};
+  while (size > 1024 && i < 5) {
+    size /= 1024;
+    i++;
+  }
+  sprintf(buf, "%.*f %s", i, size, units[i]);
+  return buf;
+}
+
+// _____________________________________________________________________________
+inline std::string readableSize(double size) {
+  char buffer[30];
+  return readableSize(size, buffer);
+}
+
+// _____________________________________________________________________________
+inline float f_rsqrt(float x) {
+  return _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(x)));
+}
+
+// _____________________________________________________________________________
 inline std::string getTmpDir() {
   // first, check if an env variable is set
   const char* tmpdir = getenv("TMPDIR");
@@ -189,6 +265,101 @@ class approx {
   double _epsilon;
   double _magnitude;
 };
+
+/*
+ * Author:  David Robert Nadeau
+ * Site:    http://NadeauSoftware.com/
+ * License: Creative Commons Attribution 3.0 Unported License
+ *          http://creativecommons.org/licenses/by/3.0/deed.en_US
+ */
+
+/**
+ * Returns the peak (maximum so far) resident set size (physical
+ * memory use) measured in bytes, or zero if the value cannot be
+ * determined on this OS.
+ */
+
+// _____________________________________________________________________________
+inline size_t getPeakRSS() {
+#if defined(_WIN32)
+  /* Windows -------------------------------------------------- */
+  PROCESS_MEMORY_COUNTERS info;
+  GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
+  return (size_t)info.PeakWorkingSetSize;
+
+#elif (defined(_AIX) || defined(__TOS__AIX__)) || \
+    (defined(__sun__) || defined(__sun) ||        \
+     defined(sun) && (defined(__SVR4) || defined(__svr4__)))
+  /* AIX and Solaris ------------------------------------------ */
+  struct psinfo psinfo;
+  int fd = -1;
+  if ((fd = open("/proc/self/psinfo", O_RDONLY)) == -1)
+    return (size_t)0L; /* Can't open? */
+  if (read(fd, &psinfo, sizeof(psinfo)) != sizeof(psinfo)) {
+    close(fd);
+    return (size_t)0L; /* Can't read? */
+  }
+  close(fd);
+  return (size_t)(psinfo.pr_rssize * 1024L);
+
+#elif defined(__unix__) || defined(__unix) || defined(unix) || \
+    (defined(__APPLE__) && defined(__MACH__))
+  /* BSD, Linux, and OSX -------------------------------------- */
+  struct rusage rusage;
+  getrusage(RUSAGE_SELF, &rusage);
+#if defined(__APPLE__) && defined(__MACH__)
+  return (size_t)rusage.ru_maxrss;
+#else
+  return (size_t)(rusage.ru_maxrss * 1024L);
+#endif
+
+#else
+  /* Unknown OS ----------------------------------------------- */
+  return (size_t)0L; /* Unsupported. */
+#endif
+}
+
+/*
+ * Returns the current resident set size (physical memory use) measured
+ * in bytes, or zero if the value cannot be determined on this OS.
+ */
+
+// _____________________________________________________________________________
+inline size_t getCurrentRSS() {
+#if defined(_WIN32)
+  /* Windows -------------------------------------------------- */
+  PROCESS_MEMORY_COUNTERS info;
+  GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
+  return (size_t)info.WorkingSetSize;
+
+#elif defined(__APPLE__) && defined(__MACH__)
+  /* OSX ------------------------------------------------------ */
+  struct mach_task_basic_info info;
+  mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
+  if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info,
+                &infoCount) != KERN_SUCCESS)
+    return (size_t)0L; /* Can't access? */
+  return (size_t)info.resident_size;
+
+#elif defined(__linux__) || defined(__linux) || defined(linux) || \
+    defined(__gnu_linux__)
+  /* Linux ---------------------------------------------------- */
+  long rss = 0L;
+  FILE* fp = NULL;
+  if ((fp = fopen("/proc/self/statm", "r")) == NULL)
+    return (size_t)0L; /* Can't open? */
+  if (fscanf(fp, "%*s%ld", &rss) != 1) {
+    fclose(fp);
+    return (size_t)0L; /* Can't read? */
+  }
+  fclose(fp);
+  return (size_t)rss * (size_t)sysconf(_SC_PAGESIZE);
+
+#else
+  /* AIX, BSD, Solaris, and Unknown OS ------------------------ */
+  return (size_t)0L; /* Unsupported. */
+#endif
+}
 
 }  // namespace util
 

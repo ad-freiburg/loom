@@ -19,13 +19,22 @@ class GeoGraphJsonOutput {
  public:
   inline GeoGraphJsonOutput(){};
 
-  // print a graph to the provided path
+  // print a graph to the provided path, with optional JSON attributes
+  // written on the graph-level
   template <typename N, typename E>
   void print(const util::graph::Graph<N, E>& outG, std::ostream& str);
+  template <typename N, typename E>
+  void print(const util::graph::Graph<N, E>& outG, std::ostream& str,
+             json::Val attrs);
 
-  // print a graph to the provided path, but treat coordinates as Web Mercator coordinates and reproject to WGS84
+  // print a graph to the provided path, but treat coordinates as Web Mercator
+  // coordinates and reproject to WGS84, with optional JSON attributes
+  // written on the graph-level
   template <typename N, typename E>
   void printLatLng(const util::graph::Graph<N, E>& outG, std::ostream& str);
+  template <typename N, typename E>
+  void printLatLng(const util::graph::Graph<N, E>& outG, std::ostream& str,
+                   json::Val attrs);
 
  private:
   template <typename T>
@@ -34,12 +43,13 @@ class GeoGraphJsonOutput {
 
   // print a graph to the provided path
   template <typename N, typename E>
-  void printImpl(const util::graph::Graph<N, E>& outG, std::ostream& str, bool proj);
+  void printImpl(const util::graph::Graph<N, E>& outG, std::ostream& str,
+                 bool proj, json::Val attrs);
 };
 
 #include "util/geo/output/GeoGraphJsonOutput.tpp"
-}
-}
-}
+}  // namespace output
+}  // namespace geo
+}  // namespace util
 
 #endif  // UTIL_GEO_OUTPUT_GEOGRAPHJSONOUTPUT_H_

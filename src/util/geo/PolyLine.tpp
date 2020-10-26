@@ -379,11 +379,12 @@ LinePoint<T> PolyLine<T>::projectOnAfter(const Point<T>& p, size_t a) const {
   assert(a < _line.size());
   std::pair<size_t, double> bc = nearestSegmentAfter(p, a);
 
-  Point<T> ret = geo::projectOn(_line[bc.first], p, _line[bc.first + 1]);
+  size_t next = bc.first + 1;
+  if (next >= _line.size()) next = bc.first;
 
-  if (getLength() > 0) {
-    bc.second += dist(_line[bc.first], ret) / getLength();
-  }
+  Point<T> ret = geo::projectOn(_line[bc.first], p, _line[next]);
+
+  if (getLength() > 0) bc.second += dist(_line[bc.first], ret) / getLength();
 
   return LinePoint<T>(bc.first, bc.second, ret);
 }

@@ -63,25 +63,24 @@ C EDijkstra::shortestPathImpl(const std::set<Edge<N, E>*> from,
   for (auto e : from) {
     C c = costFunc(0, 0, e);
     C h = heurFunc(e, to);
-    pq.emplace(e, (Edge<N, E>*)0, (Node<N, E>*)0, c, c + h);
+    pq.push(c + h, {e, (Edge<N, E>*)0, (Node<N, E>*)0, c});
   }
 
   RouteEdge<N, E, C> cur;
 
   while (!pq.empty()) {
-    if (costFunc.inf() <= pq.top().h) return costFunc.inf();
-    auto se = settled.find(pq.top().e);
+
+    if (costFunc.inf() <= pq.topKey()) return costFunc.inf();
+    auto se = settled.find(pq.topVal().e);
     if (se != settled.end()) {
       // to allow non-consistent heuristics
-      if (se->second.d <= pq.top().d) {
+      if (se->second.d <= pq.topVal().d) {
         pq.pop();
         continue;
       }
     }
 
-    EDijkstra::ITERS++;
-
-    cur = pq.top();
+    cur = pq.topVal();
     pq.pop();
 
     settled[cur.e] = cur;
@@ -114,24 +113,23 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
   std::set<Edge<N, E>*> to;
 
   for (auto e : from) {
-    pq.emplace(e, (Edge<N, E>*)0, (Node<N, E>*)0, costFunc(0, 0, e), C());
+    pq.push(C(), {e, (Edge<N, E>*)0, (Node<N, E>*)0, costFunc(0, 0, e)});
   }
 
   RouteEdge<N, E, C> cur;
 
   while (!pq.empty()) {
-    auto se = settled.find(pq.top().e);
+    auto se = settled.find(pq.topVal().e);
     if (se != settled.end()) {
       // to allow non-consistent heuristics
-      if (se->second.d <= pq.top().d) {
+      if (se->second.d <= pq.topVal().d) {
         pq.pop();
         continue;
       }
     }
 
-    EDijkstra::ITERS++;
 
-    cur = pq.top();
+    cur = pq.topVal();
     pq.pop();
 
     settled[cur.e] = cur;
@@ -169,24 +167,23 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
 
   C c = costFunc(0, 0, from);
   C h = heurFunc(from, to);
-  pq.emplace(from, (Edge<N, E>*)0, (Node<N, E>*)0, c, c + h);
+  pq.push(c + h, {from, (Edge<N, E>*)0, (Node<N, E>*)0, c});
 
   RouteEdge<N, E, C> cur;
 
   while (!pq.empty()) {
-    if (costFunc.inf() <= pq.top().h) return costs;
-    auto se = settled.find(pq.top().e);
+    if (costFunc.inf() <= pq.topKey()) return costs;
+    auto se = settled.find(pq.topVal().e);
     if (se != settled.end()) {
       // to allow non-consistent heuristics
-      if (se->second.d <= pq.top().d) {
+      if (se->second.d <= pq.topVal().d) {
         pq.pop();
         continue;
       }
     }
 
-    EDijkstra::ITERS++;
 
-    cur = pq.top();
+    cur = pq.topVal();
     pq.pop();
 
     settled[cur.e] = cur;
@@ -209,11 +206,12 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
 template <typename N, typename E, typename C>
 std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
     const std::set<Edge<N, E>*>& from, const std::set<Edge<N, E>*>& to,
-    const std::unordered_map<Edge<N, E>*, C>& initCosts,
+    const std::unordered_map<Edge<N, E>*, C>& initCosts, C stall,
     const util::graph::CostFunc<N, E, C>& costFunc,
     const util::graph::HeurFunc<N, E, C>& heurFunc,
     std::unordered_map<Edge<N, E>*, EList<N, E>*> resEdges,
-    std::unordered_map<Edge<N, E>*, NList<N, E>*> resNodes) {
+    std::unordered_map<Edge<N, E>*, NList<N, E>*> resNodes
+    ) {
   /**
    * Shortest paths from the set <from> to ALL nodes in <TO>, but
    * init <from> nodes with costs (this is equivalent to adding an auxiliary
@@ -227,8 +225,8 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
   // init costs with inf
   for (auto e : to) costs[e] = costFunc.inf();
 
-  Settled<N, E, C> settled;
-  PQ<N, E, C> pq;
+  SettledInit<N, E, C> settled;
+  PQInit<N, E, C> pq;
 
   size_t found = 0;
 
@@ -236,24 +234,25 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
   // the initial cost as a heuristic starting point!
   for (auto e : from) {
     C iCost = initCosts.find(e)->second;
-    pq.emplace(e, (Edge<N, E>*)0, (Node<N, E>*)0, iCost, iCost + heurFunc(e, to));
+    assert(iCost + heurFunc(e, to) >= iCost);
+    pq.push(iCost + heurFunc(e, to), {e, (Edge<N, E>*)0, (Node<N, E>*)0, iCost});
   }
 
-  RouteEdge<N, E, C> cur;
+  RouteEdgeInit<N, E, C> cur;
 
   while (!pq.empty()) {
-    EDijkstra::ITERS++;
-
-    auto se = settled.find(pq.top().e);
+    if (costFunc.inf() <= pq.topKey()) return costs;
+    if (stall <= pq.topVal().dwi) return costs;
+    auto se = settled.find(pq.topVal().e);
     if (se != settled.end()) {
       // to allow non-consistent heuristics
-      if (se->second.d <= pq.top().d) {
+      if (se->second.d <= pq.topVal().d) {
         pq.pop();
         continue;
       }
     }
 
-    cur = pq.top();
+    cur = pq.topVal();
     pq.pop();
 
     settled[cur.e] = cur;
@@ -261,12 +260,12 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
     if (to.find(cur.e) != to.end()) {
       found++;
       costs[cur.e] = cur.d;
-      buildPath(cur.e, settled, resNodes[cur.e], resEdges[cur.e]);
+      buildPathInit(cur.e, settled, resNodes[cur.e], resEdges[cur.e]);
+
+      if (found == to.size()) return costs;
     }
 
-    if (found == to.size()) return costs;
-
-    relax(cur, to, costFunc, heurFunc, pq);
+    relaxInit(cur, to, stall, costFunc, heurFunc, pq);
   }
 
   return costs;
@@ -286,7 +285,57 @@ void EDijkstra::relaxInv(RouteEdge<N, E, C>& cur,
     newC = cur.d + newC;
     if (costFunc.inf() <= newC) continue;
 
-    pq.emplace(edge, cur.e, cur.e->getFrom(), newC, C());
+    pq.push(C(), {edge, cur.e, cur.e->getFrom(), newC});
+  }
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E, typename C>
+void EDijkstra::relaxInit(RouteEdgeInit<N, E, C>& cur, const std::set<Edge<N, E>*>& to, C stall,
+                      const util::graph::CostFunc<N, E, C>& costFunc,
+                      const util::graph::HeurFunc<N, E, C>& heurFunc,
+                      PQInit<N, E, C>& pq) {
+  if (cur.e->getFrom()->hasEdgeIn(cur.e) && cur.e->getFrom() != cur.e->getTo()) {
+    // for undirected graphs
+    for (const auto edge : cur.e->getFrom()->getAdjListOut()) {
+      if (edge == cur.e) continue;
+      C newC = costFunc(cur.e, cur.e->getFrom(), edge);
+      C newDwi = cur.dwi + newC;
+
+      if (stall <= newDwi) continue;
+
+      if (costFunc.inf() <= newC) continue;
+      newC = cur.d + newC;
+      // must be monotonous!
+      assert(newC >= cur.d);
+      if (costFunc.inf() <= newC) continue;
+
+      const C& h = heurFunc(edge, to);
+      const C& newH = newC + h;
+      assert(newC <= newH);
+
+      pq.push(newH, {edge, cur.e, cur.e->getFrom(), newC, newDwi});
+    }
+  }
+
+  for (const auto edge : cur.e->getTo()->getAdjListOut()) {
+    if (edge == cur.e) continue;
+    C newC = costFunc(cur.e, cur.e->getTo(), edge);
+    C newDwi = cur.dwi + newC;
+
+    if (stall <= newDwi) continue;
+
+    if (costFunc.inf() <= newC) continue;
+    newC = cur.d + newC;
+    // must be monotonous!
+    assert(newC >= cur.d);
+    if (costFunc.inf() <= newC) continue;
+
+    const C& h = heurFunc(edge, to);
+    const C& newH = newC + h;
+    assert(newC <= newH);
+
+    pq.push(newH, {edge, cur.e, cur.e->getTo(), newC, newDwi});
   }
 }
 
@@ -296,33 +345,39 @@ void EDijkstra::relax(RouteEdge<N, E, C>& cur, const std::set<Edge<N, E>*>& to,
                       const util::graph::CostFunc<N, E, C>& costFunc,
                       const util::graph::HeurFunc<N, E, C>& heurFunc,
                       PQ<N, E, C>& pq) {
-  if (cur.e->getFrom()->hasEdgeIn(cur.e)) {
+  if (cur.e->getFrom()->hasEdgeIn(cur.e) && cur.e->getFrom() != cur.e->getTo()) {
     // for undirected graphs
     for (const auto edge : cur.e->getFrom()->getAdjListOut()) {
       if (edge == cur.e) continue;
       C newC = costFunc(cur.e, cur.e->getFrom(), edge);
+      if (costFunc.inf() <= newC) continue;
       newC = cur.d + newC;
+      // must be monotonous!
+      assert(newC >= cur.d);
       if (costFunc.inf() <= newC) continue;
 
       const C& h = heurFunc(edge, to);
-      // addition done here to avoid it in the PQ
       const C& newH = newC + h;
+      assert(newC <= newH);
 
-      pq.emplace(edge, cur.e, cur.e->getFrom(), newC, newH);
+      pq.push(newH, {edge, cur.e, cur.e->getFrom(), newC});
     }
   }
 
   for (const auto edge : cur.e->getTo()->getAdjListOut()) {
     if (edge == cur.e) continue;
     C newC = costFunc(cur.e, cur.e->getTo(), edge);
+    if (costFunc.inf() <= newC) continue;
     newC = cur.d + newC;
+    // must be monotonous!
+    assert(newC >= cur.d);
     if (costFunc.inf() <= newC) continue;
 
     const C& h = heurFunc(edge, to);
-    // addition done here to avoid it in the PQ
     const C& newH = newC + h;
+    assert(newC <= newH);
 
-    pq.emplace(edge, cur.e, cur.e->getTo(), newC, newH);
+    pq.push(newH, {edge, cur.e, cur.e->getTo(), newC});
   }
 }
 
@@ -331,6 +386,20 @@ template <typename N, typename E, typename C>
 void EDijkstra::buildPath(Edge<N, E>* curE, const Settled<N, E, C>& settled,
                           NList<N, E>* resNodes, EList<N, E>* resEdges) {
   const RouteEdge<N, E, C>* curEdge = &settled.find(curE)->second;
+  if (resNodes) resNodes->push_back(curEdge->e->getOtherNd(curEdge->n));
+  while (resNodes || resEdges) {
+    if (resNodes && curEdge->n) resNodes->push_back(curEdge->n);
+    if (resEdges) resEdges->push_back(curEdge->e);
+    if (!curEdge->parent) break;
+    curEdge = &settled.find(curEdge->parent)->second;
+  }
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E, typename C>
+void EDijkstra::buildPathInit(Edge<N, E>* curE, const SettledInit<N, E, C>& settled,
+                          NList<N, E>* resNodes, EList<N, E>* resEdges) {
+  const RouteEdgeInit<N, E, C>* curEdge = &settled.find(curE)->second;
   if (resNodes) resNodes->push_back(curEdge->e->getOtherNd(curEdge->n));
   while (resNodes || resEdges) {
     if (resNodes && curEdge->n) resNodes->push_back(curEdge->n);
