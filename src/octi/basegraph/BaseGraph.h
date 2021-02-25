@@ -30,6 +30,9 @@ using octi::combgraph::CombNode;
 namespace octi {
 namespace basegraph {
 
+enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL, OCTIHANANGRID, OCTIQUADTREE };
+
+
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
 typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
 

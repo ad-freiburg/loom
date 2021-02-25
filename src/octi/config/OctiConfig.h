@@ -7,6 +7,7 @@
 
 #include <string>
 #include "octi/basegraph/GridGraph.h"
+#include "octi/basegraph/BaseGraph.h"
 #include "util/geo/Geo.h"
 
 namespace octi {
@@ -33,6 +34,8 @@ struct Config {
 
   std::string obstaclePath;
   std::vector<util::geo::DPolygon> obstacles;
+
+  octi::basegraph::BaseGraphType baseGraphType;
 
   octi::basegraph::Penalties pens;
 };

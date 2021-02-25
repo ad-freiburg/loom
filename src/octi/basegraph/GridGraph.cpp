@@ -475,6 +475,7 @@ std::priority_queue<Candidate> GridGraph::getGridNdCands(const DPoint& p,
   for (auto n : neigh) {
     if (n->pl().isClosed() || n->pl().isSettled()) continue;
     double d = dist(*n->pl().getGeom(), p);
+
     if (d < maxD) ret.push(Candidate(n, d));
   }
 

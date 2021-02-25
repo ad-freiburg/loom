@@ -46,8 +46,6 @@ typedef util::graph::NList<GridNodePL, GridEdgePL> GrNdList;
 typedef std::pair<std::set<GridNode*>, std::set<GridNode*>> RtPair;
 typedef std::map<CombNode*, const GridNode*> SettledPos;
 
-enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL, OCTIHANANGRID, OCTIQUADTREE };
-
 enum Undrawable { DRAWN = 0, NO_PATH = 1, NO_CANDS = 2 };
 
 // exception thrown when no planar embedding could be found
@@ -110,23 +108,24 @@ struct GridCostGeoPen
 
 class Octilinearizer {
  public:
-  Octilinearizer(BaseGraphType baseGraphType) : _baseGraphType(baseGraphType) {}
+  Octilinearizer(basegraph::BaseGraphType baseGraphType)
+      : _baseGraphType(baseGraphType) {}
 
   Score draw(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
-              basegraph::BaseGraph** gg, const Penalties& pens, double gridSize,
-              double borderRad, double maxGrDist, bool restrLocSearch,
-              double enfGeoCourse,
-              const std::vector<util::geo::Polygon<double>>& obstacles,
-              size_t abortAfter);
+             basegraph::BaseGraph** gg, const Penalties& pens, double gridSize,
+             double borderRad, double maxGrDist, bool restrLocSearch,
+             double enfGeoCourse,
+             const std::vector<util::geo::Polygon<double>>& obstacles,
+             size_t abortAfter);
 
-  Score drawILP(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out, basegraph::BaseGraph** gg,
-                 const Penalties& pens, double gridSize, double borderRad,
-                  double maxGrDist, bool noSolve,
-                 double enfGeoPens, int timeLim, const std::string& solverStr,
-                 const std::string& path);
+  Score drawILP(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
+                basegraph::BaseGraph** gg, const Penalties& pens,
+                double gridSize, double borderRad, double maxGrDist,
+                bool noSolve, double enfGeoPens, int timeLim,
+                const std::string& solverStr, const std::string& path);
 
  private:
-  BaseGraphType _baseGraphType;
+  basegraph::BaseGraphType _baseGraphType;
 
   basegraph::BaseGraph* newBaseGraph(const util::geo::DBox& bbox,
                                      const CombGraph& cg, double cellSize,

@@ -109,18 +109,19 @@ int main(int argc, char** argv) {
   if (cfg.obstaclePath.size()) {
     LOGTO(DEBUG, std::cerr) << "Reading obstacle file... ";
     cfg.obstacles = readObstacleFile(cfg.obstaclePath);
-    LOGTO(DEBUG, std::cerr)
-        << "Done. (" << cfg.obstacles.size() << " obstacles)";
+    LOGTO(DEBUG, std::cerr) << "Done. (" << cfg.obstacles.size() << " obst.)";
   }
 
   LOGTO(DEBUG, std::cerr) << "Reading graph file... ";
   T_START(read);
   LineGraph tg;
   BaseGraph* gg;
+
   if (cfg.fromDot)
     tg.readFromDot(&(std::cin), 0);
   else
     tg.readFromJson(&(std::cin), 0);
+
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(read) << "ms)";
 
   LOGTO(DEBUG, std::cerr) << "Planarizing graph... ";
@@ -131,13 +132,7 @@ int main(int argc, char** argv) {
   double avgDist = avgStatDist(tg);
   LOGTO(DEBUG, std::cerr) << "Average adj. node distance is " << avgDist;
 
-  // BaseGraphType graphType = BaseGraphType::ORTHORADIAL;
-  // BaseGraphType graphType = BaseGraphType::OCTIHANANGRID;
-  // BaseGraphType graphType = BaseGraphType::OCTIQUADTREE;
-  BaseGraphType graphType = BaseGraphType::OCTIGRID;
-  // BaseGraphType graphType = BaseGraphType::GRID;
-
-  Octilinearizer oct(graphType);
+  Octilinearizer oct(cfg.baseGraphType);
   LineGraph res;
 
   double gridSize;
@@ -162,16 +157,16 @@ int main(int argc, char** argv) {
   CombGraph cg(&tg, cfg.deg2Heur);
 
   // local enlargement
-  LOGTO(DEBUG, std::cerr) << "Locally enlarging graph... ";
-  Enlarger e;
-  e.enlarge(cg, 100);
-  avgDist = avgStatDist(tg);
-  LOGTO(DEBUG, std::cerr)
-      << "Average adj. node distance after local enlargement is " << avgDist;
+  // LOGTO(DEBUG, std::cerr) << "Locally enlarging graph... ";
+  // Enlarger e;
+  // e.enlarge(cg, 100);
+  // avgDist = avgStatDist(tg);
+  // LOGTO(DEBUG, std::cerr)
+      // << "Average adj. node distance after local enlargement is " << avgDist;
 
   box = util::geo::pad(box, gridSize + 1);
 
-  if (graphType == ORTHORADIAL) {
+  if (cfg.baseGraphType == octi::basegraph::BaseGraphType::ORTHORADIAL) {
     auto centerNd = getCenterNd(&cg);
 
     std::cerr << "Center node is "

@@ -373,9 +373,7 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     std::tie(frGrNds, toGrNds) =
         getRtPair(frCmbNd, toCmbNd, settled, gg, maxGrDist);
 
-    if (frGrNds.size() == 0 || toGrNds.size() == 0) {
-      return NO_CANDS;
-    }
+    if (frGrNds.size() == 0 || toGrNds.size() == 0) return NO_CANDS;
 
     if (toGrNds.size() > frGrNds.size()) {
       auto tmp = frCmbNd;
@@ -574,7 +572,7 @@ RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
             getCands(toCmbNd, preSettled, gg, 0)};
   }
 
-  double maxDis = gg->getCellSize() * maxGrDist;
+  double maxDis = 100000;//gg->getCellSize() * maxGrDist;
 
   std::set<GridNode*> frGrNds, toGrNds;
 

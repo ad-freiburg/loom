@@ -14,6 +14,7 @@
 using octi::config::ConfigReader;
 namespace opts = boost::program_options;
 
+using octi::basegraph::BaseGraphType;
 using std::exception;
 using std::string;
 using std::vector;
@@ -23,7 +24,8 @@ ConfigReader::ConfigReader() {}
 
 // _____________________________________________________________________________
 void ConfigReader::read(Config* cfg, int argc, char** argv) const {
-  string VERSION_STR = " - unversioned - ";
+  std::string VERSION_STR = " - unversioned - ";
+  std::string baseGraphStr;
 
   opts::options_description generic("General");
   generic.add_options()("version", "output version")(
@@ -71,10 +73,14 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "grid cell length, either as exact value (like '500') or as percentage "
       "of average adj. station distance (like '75%')")(
       "border-rad", opts::value<double>(&(cfg->borderRad))->default_value(45),
-      "border rad")("print-mode",
-                    opts::value<std::string>(&(cfg->printMode))
-                        ->default_value("transitgraph"),
-                    "print mode: transitgraph, gridgraph")(
+      "border rad")(
+      "base-graph",
+      opts::value<std::string>(&baseGraphStr)->default_value("octilinear"),
+      "base graph type, either: ortholinear, octilinear, orthoradial, "
+      "quadtree, octihanan")("print-mode",
+                             opts::value<std::string>(&(cfg->printMode))
+                                 ->default_value("transitgraph"),
+                             "print mode: transitgraph, gridgraph")(
       "vert-pen",
       opts::value<double>(&(cfg->pens.verticalPen))->default_value(0),
       "penalty for vertical edges")(
@@ -125,5 +131,17 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   if (vm.count("version")) {
     std::cout << "\n" << VERSION_STR << "\n";
     exit(0);
+  }
+
+  if (baseGraphStr == "ortholinear") {
+    cfg->baseGraphType = BaseGraphType::GRID;
+  } else if (baseGraphStr == "octilinear") {
+    cfg->baseGraphType = BaseGraphType::OCTIGRID;
+  } else if (baseGraphStr == "orthoradial") {
+    cfg->baseGraphType = BaseGraphType::ORTHORADIAL;
+  } else if (baseGraphStr == "quadtree") {
+    cfg->baseGraphType = BaseGraphType::OCTIQUADTREE;
+  } else if (baseGraphStr == "octihanan") {
+    cfg->baseGraphType = BaseGraphType::OCTIHANANGRID;
   }
 }
