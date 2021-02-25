@@ -32,6 +32,12 @@ class GeoJsonOutput {
   void print(const MultiLine<T>& l, json::Val attrs);
 
   template <typename T>
+  void print(const Polygon<T>& l, json::Val attrs);
+
+  template <typename T>
+  void print(const MultiPolygon<T>& l, json::Val attrs);
+
+  template <typename T>
   void printLatLng(const Point<T>& p, json::Val attrs);
 
   template <typename T>
@@ -39,6 +45,12 @@ class GeoJsonOutput {
 
   template <typename T>
   void printLatLng(const MultiLine<T>& l, json::Val attrs);
+
+  template <typename T>
+  void printLatLng(const Polygon<T>& l, json::Val attrs);
+
+  template <typename T>
+  void printLatLng(const MultiPolygon<T>& l, json::Val attrs);
 
   void flush();
 

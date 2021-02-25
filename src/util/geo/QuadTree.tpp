@@ -105,3 +105,13 @@ template <typename V, typename T>
 const std::vector<QuadNode<T>>& QuadTree<V, T>::getNds() const {
   return _nds;
 }
+
+// _____________________________________________________________________________
+template <typename V, typename T>
+void QuadTree<V, T>::print(std::ostream& o) const {
+  util::geo::output::GeoJsonOutput out(o);
+  for (const auto& nd : _nds) {
+    if (nd.numEls == -1) continue; // don't print non-leaf nodes
+    out.print(util::geo::convexHull(nd.bbox), json::Dict{{"elements", json::Int(nd.numEls)}});
+  }
+}

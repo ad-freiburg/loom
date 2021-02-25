@@ -111,12 +111,6 @@ struct GridCostGeoPen
 class Octilinearizer {
  public:
   Octilinearizer(BaseGraphType baseGraphType) : _baseGraphType(baseGraphType) {}
-  Score draw(LineGraph* in, LineGraph* out, basegraph::BaseGraph** gg,
-              const Penalties& pens, double gridSize, double borderRad,
-              bool deg2heur, double maxGrDist, bool restrLocSearch,
-              double enfGeoCourse,
-              const std::vector<util::geo::Polygon<double>>& obstacles,
-              size_t abortAfter);
 
   Score draw(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
               basegraph::BaseGraph** gg, const Penalties& pens, double gridSize,
@@ -125,9 +119,9 @@ class Octilinearizer {
               const std::vector<util::geo::Polygon<double>>& obstacles,
               size_t abortAfter);
 
-  Score drawILP(LineGraph* in, LineGraph* out, basegraph::BaseGraph** gg,
+  Score drawILP(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out, basegraph::BaseGraph** gg,
                  const Penalties& pens, double gridSize, double borderRad,
-                 bool deg2heur, double maxGrDist, bool noSolve,
+                  double maxGrDist, bool noSolve,
                  double enfGeoPens, int timeLim, const std::string& solverStr,
                  const std::string& path);
 
@@ -138,8 +132,6 @@ class Octilinearizer {
                                      const CombGraph& cg, double cellSize,
                                      double spacer,
                                      const Penalties& pens) const;
-
-  size_t baseMaxDeg() const;
 
   void writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
                     basegraph::BaseGraph* g);

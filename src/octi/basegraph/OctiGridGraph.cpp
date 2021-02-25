@@ -306,7 +306,7 @@ double OctiGridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
   int dy = labs(yb - ya);
 
   // cost without using diagonals
-  // we can take at most min(dx, dy) diagonal edges. Edge diagonal edge saves us
+  // we can take at most min(dx, dy) diagonal edges. Each diagonal edge saves us
   // one horizontal and one vertical edge, but costs a diagonal edge
   double edgeCost =
       _heurXCost * dx + _heurYCost * dy + _heurDiagSave * std::min(dx, dy);

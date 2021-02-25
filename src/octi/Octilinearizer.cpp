@@ -32,40 +32,20 @@ using octi::combgraph::Drawing;
 using util::geo::DBox;
 using util::geo::dist;
 using util::geo::DPoint;
-using util::geo::Polygon;
 using util::geo::len;
+using util::geo::Polygon;
 using util::graph::BiDijkstra;
 using util::graph::Dijkstra;
 
 // _____________________________________________________________________________
-Score Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
-                               BaseGraph** retGg, const Penalties& pens,
-                               double gridSize, double borderRad, bool deg2heur,
-                               double maxGrDist, bool noSolve, double enfGeoPen,
-                               int timeLim, const std::string& solverStr,
-                               const std::string& path) {
+Score Octilinearizer::drawILP(const CombGraph& cg, const util::geo::DBox& box,
+                              LineGraph* outTg, BaseGraph** retGg,
+                              const Penalties& pens, double gridSize,
+                              double borderRad, double maxGrDist, bool noSolve,
+                              double enfGeoPen, int timeLim,
+                              const std::string& solverStr,
+                              const std::string& path) {
   BaseGraph* gg;
-  tg->contractEdges(gridSize / 2);
-
-  auto box = tg->getBBox();
-
-  tg->splitNodes(baseMaxDeg());
-  CombGraph cg(tg, deg2heur);
-  box = geo::pad(box, gridSize + 1);
-
-  if (_baseGraphType == ORTHORADIAL) {
-    auto centerNd = getCenterNd(&cg);
-
-    std::cerr << "Center node is "
-              << centerNd->pl().getParent()->pl().toString() << std::endl;
-
-    auto cgCtr = *centerNd->pl().getGeom();
-    auto newBox = DBox();
-
-    newBox = extendBox(box, newBox);
-    newBox = extendBox(rotate(convexHull(box), 180, cgCtr), newBox);
-    box = newBox;
-  }
 
   LOGTO(DEBUG, std::cerr) << "Presolving...";
   try {
@@ -107,8 +87,8 @@ Score Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve,
-                                   geoPens, timeLim, solverStr, path);
+  ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens, timeLim,
+                    solverStr, path);
 
   drawing.getLineGraph(outTg);
 
@@ -118,47 +98,13 @@ Score Octilinearizer::drawILP(LineGraph* tg, LineGraph* outTg,
 }
 
 // _____________________________________________________________________________
-Score Octilinearizer::draw(
-    LineGraph* tg, LineGraph* outTg, BaseGraph** retGg, const Penalties& pens,
-    double gridSize, double borderRad, bool deg2heur, double maxGrDist,
-    bool restrLocSearch, double enfGeoPen,
-    const std::vector<Polygon<double>>& obstacles,
-    size_t abortAfter) {
-  tg->contractEdges(gridSize / 2);
-
-  auto box = tg->getBBox();
-
-  tg->splitNodes(baseMaxDeg());
-
-  CombGraph cg(tg, deg2heur);
-
-  box = geo::pad(box, gridSize + 1);
-
-  if (_baseGraphType == ORTHORADIAL) {
-    auto centerNd = getCenterNd(&cg);
-
-    std::cerr << "Center node is "
-              << centerNd->pl().getParent()->pl().toString() << std::endl;
-
-    auto cgCtr = *centerNd->pl().getGeom();
-    auto newBox = DBox();
-
-    newBox = extendBox(box, newBox);
-    newBox = extendBox(rotate(convexHull(box), 180, cgCtr), newBox);
-    box = newBox;
-  }
-
-  return draw(cg, box, outTg, retGg, pens, gridSize, borderRad, maxGrDist,
-              restrLocSearch, enfGeoPen, obstacles, abortAfter);
-}
-
-// _____________________________________________________________________________
-Score Octilinearizer::draw(
-    const CombGraph& cg, const DBox& box, LineGraph* outTg,
-    BaseGraph** retGg, const Penalties& pens, double gridSize, double borderRad,
-    double maxGrDist, bool restrLocSearch, double enfGeoPen,
-    const std::vector<Polygon<double>>& obstacles,
-    size_t abortAfter) {
+Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
+                           LineGraph* outTg, BaseGraph** retGg,
+                           const Penalties& pens, double gridSize,
+                           double borderRad, double maxGrDist,
+                           bool restrLocSearch, double enfGeoPen,
+                           const std::vector<Polygon<double>>& obstacles,
+                           size_t abortAfter) {
   size_t jobs = 4;
   std::vector<BaseGraph*> ggs(jobs);
 
@@ -222,20 +168,20 @@ Score Octilinearizer::draw(
 
     switch (error) {
       case DRAWN:
-        LOGTO(DEBUG, std::cerr) << " ++ Try " << i << ", score "
-                               << drawing.score() << ", (" << T_STOP(draw)
-                               << " ms)";
+        LOGTO(DEBUG, std::cerr)
+            << " ++ Try " << i << ", score " << drawing.score() << ", ("
+            << T_STOP(draw) << " ms)";
         found = true;
         break;
       case NO_PATH:
         LOGTO(DEBUG, std::cerr) << " ++ Try " << i << ", score <inf>"
-                               << ", next <no path found>"
-                               << " (" << T_STOP(draw) << " ms)";
+                                << ", next <no path found>"
+                                << " (" << T_STOP(draw) << " ms)";
         break;
       case NO_CANDS:
         LOGTO(DEBUG, std::cerr) << " ++ Try " << i << ", score <inf>"
-                               << ", next <no cands found>"
-                               << " (" << T_STOP(draw) << " ms)";
+                                << ", next <no cands found>"
+                                << " (" << T_STOP(draw) << " ms)";
         break;
     }
 
@@ -341,11 +287,10 @@ Score Octilinearizer::draw(
     }
 
     double imp = (drawing.score() - bestFrIters[bestCore].score());
-    LOGTO(DEBUG, std::cerr) << " ++ Iter " << iters << ", prev "
-                           << drawing.score() << ", next "
-                           << bestFrIters[bestCore].score() << " ("
-                           << (imp >= 0 ? "+" : "") << imp << ", "
-                           << T_STOP(iter) << " ms)";
+    LOGTO(DEBUG, std::cerr)
+        << " ++ Iter " << iters << ", prev " << drawing.score() << ", next "
+        << bestFrIters[bestCore].score() << " (" << (imp >= 0 ? "+" : "") << imp
+        << ", " << T_STOP(iter) << " ms)";
 
     for (size_t i = 0; i < jobs; i++) {
       drawing.eraseFromGrid(ggs[i]);
@@ -359,9 +304,9 @@ Score Octilinearizer::draw(
   drawing.getLineGraph(outTg);
   auto fullScore = drawing.fullScore();
   LOGTO(DEBUG, std::cerr) << "Hop costs: " << fullScore.hop
-                         << ", bend costs: " << fullScore.bend
-                         << ", mv costs: " << fullScore.move
-                         << ", dense costs: " << fullScore.dense;
+                          << ", bend costs: " << fullScore.bend
+                          << ", mv costs: " << fullScore.move
+                          << ", dense costs: " << fullScore.dense;
 
   *retGg = ggs[0];
   return fullScore;
@@ -424,7 +369,7 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     auto frCmbNd = cmbEdg->getFrom();
     auto toCmbNd = cmbEdg->getTo();
 
-    std::set<GridNode *> frGrNds, toGrNds;
+    std::set<GridNode*> frGrNds, toGrNds;
     std::tie(frGrNds, toGrNds) =
         getRtPair(frCmbNd, toCmbNd, settled, gg, maxGrDist);
 
@@ -701,33 +646,4 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, const CombGraph& cg,
     default:
       return 0;
   }
-}
-
-// _____________________________________________________________________________
-size_t Octilinearizer::baseMaxDeg() const {
-  switch (_baseGraphType) {
-    case GRID:
-    case ORTHORADIAL:
-      return 4;
-    case OCTIHANANGRID:
-    case OCTIGRID:
-    case OCTIQUADTREE:
-      return 8;
-    default:
-      return 0;
-  }
-}
-
-// _____________________________________________________________________________
-const CombNode* Octilinearizer::getCenterNd(const CombGraph* cg) {
-  const CombNode* ret = 0;
-  for (auto nd : cg->getNds()) {
-    if (!ret ||
-        LineGraph::getLDeg(nd->pl().getParent()) >
-            LineGraph::getLDeg(ret->pl().getParent())) {
-      ret = nd;
-    }
-  }
-
-  return ret;
 }

@@ -11,15 +11,17 @@ using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
 
 // _____________________________________________________________________________
-CombGraph::CombGraph(const LineGraph* g)
-    : CombGraph(g, false) {}
+CombGraph::CombGraph(const LineGraph* g) : CombGraph(g, false) {}
 
 // _____________________________________________________________________________
-CombGraph::CombGraph(const LineGraph* g, bool collapse) {
+CombGraph::CombGraph(const LineGraph* g, bool collapse) : _bbox(g->getBBox()) {
   build(g);
   if (collapse) combineDeg2();
   writeEdgeOrdering();
 }
+
+// _____________________________________________________________________________
+const util::geo::DBox& CombGraph::getBBox() const { return _bbox; }
 
 // _____________________________________________________________________________
 void CombGraph::build(const LineGraph* source) {
@@ -52,7 +54,7 @@ void CombGraph::build(const LineGraph* source) {
 void CombGraph::combineDeg2() {
   std::vector<CombNode*> toDel;
   for (auto n : *getNds()) {
-    if (n->getAdjList().size() == 2)  toDel.push_back(n);
+    if (n->getAdjList().size() == 2) toDel.push_back(n);
   }
 
   for (auto n : toDel) {
@@ -116,7 +118,7 @@ EdgeOrdering CombGraph::getEdgeOrderingForNode(CombNode* n) const {
 
 // _____________________________________________________________________________
 EdgeOrdering CombGraph::getEdgeOrderingForNode(CombNode* n,
-    bool useOrigNextNode) const {
+                                               bool useOrigNextNode) const {
   EdgeOrdering order;
   for (auto e : n->getAdjList()) {
     auto r = e->pl().getChilds().front();

@@ -1311,6 +1311,22 @@ inline Box<T> getBoundingBox(const std::vector<Geometry<T>>& multigeo) {
 
 // _____________________________________________________________________________
 template <typename T>
+inline Box<T> getBoundingRect(const Box<T>& b) {
+  auto box = Box<T>();
+  auto centroid = util::geo::centroid(b);
+  box = extendBox(b, box);
+  box = extendBox(rotate(convexHull(b), 180, centroid), box);
+  return box;
+}
+
+// _____________________________________________________________________________
+template <template <typename> class Geometry, typename T>
+inline Box<T> getBoundingRect(const Geometry<T> geom) {
+  return getBoundingRect<T>(getBoundingBox<T>(geom));
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline double getEnclosingRadius(const Point<T>& p, const Point<T>& pp) {
   return dist(p, pp);
 }

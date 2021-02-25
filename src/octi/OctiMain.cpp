@@ -9,6 +9,7 @@
 #include <set>
 #include "json/json.hpp"
 #include "octi/Octilinearizer.h"
+#include "octi/Enlarger.h"
 #include "octi/basegraph/BaseGraph.h"
 #include "octi/combgraph/CombGraph.h"
 #include "octi/config/ConfigReader.h"
@@ -19,7 +20,6 @@
 #include "util/graph/BiDijkstra.h"
 #include "util/json/Writer.h"
 #include "util/log/Log.h"
-#include "util/Misc.h"
 #ifdef _OPENMP
 #include <omp.h>
 #else
@@ -30,6 +30,7 @@ using std::string;
 using namespace octi;
 
 using octi::Octilinearizer;
+using octi::Enlarger;
 using octi::basegraph::BaseGraph;
 using util::geo::dist;
 using util::geo::DPolygon;
@@ -49,6 +50,20 @@ double avgStatDist(const LineGraph& g) {
   }
   avg /= i++;
   return avg;
+}
+
+// _____________________________________________________________________________
+const CombNode* getCenterNd(const CombGraph* cg) {
+  const CombNode* ret = 0;
+  for (auto nd : cg->getNds()) {
+    if (!ret ||
+        LineGraph::getLDeg(nd->pl().getParent()) >
+            LineGraph::getLDeg(ret->pl().getParent())) {
+      ret = nd;
+    }
+  }
+
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -137,13 +152,46 @@ int main(int argc, char** argv) {
     LOGTO(DEBUG, std::cerr) << "Grid size " << gridSize;
   }
 
+  tg.contractEdges(gridSize / 2);
+
+  auto box = tg.getBBox();
+
+  // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+  // change according to graphtype
+  tg.splitNodes(4);
+  CombGraph cg(&tg, cfg.deg2Heur);
+
+  // local enlargement
+  LOGTO(DEBUG, std::cerr) << "Locally enlarging graph... ";
+  Enlarger e;
+  e.enlarge(cg, 100);
+  avgDist = avgStatDist(tg);
+  LOGTO(DEBUG, std::cerr)
+      << "Average adj. node distance after local enlargement is " << avgDist;
+
+  box = util::geo::pad(box, gridSize + 1);
+
+  if (graphType == ORTHORADIAL) {
+    auto centerNd = getCenterNd(&cg);
+
+    std::cerr << "Center node is "
+              << centerNd->pl().getParent()->pl().toString() << std::endl;
+
+    auto cgCtr = *centerNd->pl().getGeom();
+    auto newBox = util::geo::DBox();
+
+    newBox = extendBox(box, newBox);
+    newBox = extendBox(rotate(convexHull(box), 180, cgCtr), newBox);
+    box = newBox;
+  }
+
   Score sc;
   double time = 0;
 
   if (cfg.optMode == "ilp") {
     T_START(octi);
-    sc = oct.drawILP(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                     cfg.deg2Heur, cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen,
+    sc = oct.drawILP(cg, box, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+                     cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen,
                      cfg.ilpTimeLimit, cfg.ilpSolver, cfg.ilpPath);
     time = T_STOP(octi);
     LOGTO(DEBUG, std::cerr)
@@ -151,8 +199,8 @@ int main(int argc, char** argv) {
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
     try {
-      sc = oct.draw(&tg, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                    cfg.deg2Heur, cfg.maxGrDist, cfg.restrLocSearch,
+      sc = oct.draw(cg, box, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+                    cfg.maxGrDist, cfg.restrLocSearch,
                     cfg.enfGeoPen, cfg.obstacles, cfg.abortAfter);
       time = T_STOP(octi);
     } catch (const NoEmbeddingFoundExc& exc) {
@@ -163,7 +211,7 @@ int main(int argc, char** argv) {
                             << " ms, score " << sc.full;
   }
 
-  size_t maxRss= util::getPeakRSS();
+  size_t maxRss = util::getPeakRSS();
 
   // translate score to JSON
   util::json::Dict jsonScore{

@@ -16,8 +16,8 @@ namespace combgraph {
 typedef util::graph::Node<CombNodePL, CombEdgePL> CombNode;
 typedef util::graph::Edge<CombNodePL, CombEdgePL> CombEdge;
 
-using shared::linegraph::LineGraph;
 using octi::combgraph::EdgeOrdering;
+using shared::linegraph::LineGraph;
 
 class CombGraph : public util::graph::UndirGraph<CombNodePL, CombEdgePL> {
  public:
@@ -27,13 +27,16 @@ class CombGraph : public util::graph::UndirGraph<CombNodePL, CombEdgePL> {
   EdgeOrdering getEdgeOrderingForNode(CombNode* n) const;
   EdgeOrdering getEdgeOrderingForNode(CombNode* n, bool useOrigNextNode) const;
 
+  const util::geo::DBox& getBBox() const;
+
  private:
+  util::geo::Box<double> _bbox;
   void build(const LineGraph* source);
   void combineDeg2();
   void writeEdgeOrdering();
 };
 
-}  // combgraph
-}  // octi
+}  // namespace combgraph
+}  // namespace octi
 
 #endif  // OCTI_COMBGRAPH_GRAPH_H_

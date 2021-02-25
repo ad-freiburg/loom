@@ -29,14 +29,14 @@ class OctiGridGraph : public GridGraph {
     if (_heurDiagCost < _heurXCost) {
       // 1) two horizontal hops may be substituted by two diagonal hops
       // 2) a horizontal hop may be subsituted by a diagonal + a vertical hop
-      // in both cases, the minimum x hops required is _heurDiagCost
+      // in both cases, _heurDiagCost is admissable
       _heurXCost = _heurDiagCost;
     }
 
     if (_heurDiagCost < _heurYCost) {
       // 1) two vertical hops may be substituted by two diagonal hops
       // 2) a vertical hop may be subsituted by a diagonal + a horizontal hop
-      // in both cases, the minimum y hops required is _heurDiagCost
+      // in both cases, _heurDiagCost is admissable
       _heurYCost = _heurDiagCost;
     }
 

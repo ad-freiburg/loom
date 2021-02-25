@@ -9,6 +9,7 @@
 #include <set>
 #include <vector>
 #include "util/geo/Geo.h"
+#include "util/geo/output/GeoJsonOutput.h"
 
 namespace util {
 namespace geo {
@@ -67,6 +68,9 @@ class QuadTree {
 
   const std::vector<QuadNode<T>>& getNds() const;
   const QuadNode<T>& getNd(size_t nid) const;
+
+  // GeoJSON output
+  void print(std::ostream& o) const;
 
  private:
   size_t _maxDepth;

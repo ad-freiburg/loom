@@ -21,9 +21,10 @@ class Polygon {
   Polygon(const Line<T>& l) : _outer(l) {}
   Polygon(const Box<T>& b)
       : _outer({b.getLowerLeft(),
-                Point<T>(b.getUpperRight().getX(), b.getLowerLeft().getY()),
+                Point<T>(b.getLowerLeft().getX(), b.getUpperRight().getY()),
                 b.getUpperRight(),
-                Point<T>(b.getLowerLeft().getX(), b.getUpperRight().getY())}) {}
+                Point<T>(b.getUpperRight().getX(), b.getLowerLeft().getY()),
+                b.getLowerLeft()}) {}
 
   const Line<T>& getOuter() const { return _outer; }
   Line<T>& getOuter() { return _outer; }
