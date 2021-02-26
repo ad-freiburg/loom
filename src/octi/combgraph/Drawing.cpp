@@ -85,7 +85,7 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
       } else {
         // otherwise it is the reach cost belonging to the edge
         _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] += ge->pl().cost();
-        assert(!ges[i + 1]->pl().isSecondary());
+        // assert(!ges[i + 1]->pl().isSecondary());
       }
     } else if (i == ges.size() - 1) {
       if (!_ndReachCosts.count(rev ? ce->getTo() : ce->getFrom())) {
@@ -95,7 +95,7 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
       } else {
         // otherwise it is the reach cost belonging to the edge
         _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] += ge->pl().cost();
-        assert(!ges[i - 1]->pl().isSecondary());
+        // assert(!ges[i - 1]->pl().isSecondary());
       }
     } else {
       if (!ge->pl().isSecondary()) l++;
@@ -310,7 +310,8 @@ void Drawing::eraseFromGrid(const CombEdge* ce, BaseGraph* gg) {
   const auto& es = it->second;
   for (auto eid : es) {
     auto e = gg->getGrEdgById(eid);
-    gg->unSettleEdg(e->getFrom()->pl().getParent(),
+    // TODO: remove const cast
+    gg->unSettleEdg(const_cast<CombEdge*>(ce), e->getFrom()->pl().getParent(),
                     e->getTo()->pl().getParent());
   }
 }

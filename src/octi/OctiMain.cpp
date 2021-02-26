@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
 
   // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
   // change according to graphtype
-  tg.splitNodes(4);
+  // tg.splitNodes(4);
 
   CombGraph cg(&tg, cfg.deg2Heur);
 

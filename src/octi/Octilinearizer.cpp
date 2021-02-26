@@ -334,7 +334,7 @@ void Octilinearizer::writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
   NodeCost c;
   c += g->topoBlockPen(n, origNode, e);
   c += g->spacingPen(n, origNode, e);
-  c += g->nodeBendPen(n, e);
+  c += g->nodeBendPen(n, origNode, e);
 
   g->addCostVec(n, c);
 }

@@ -24,7 +24,7 @@ using util::geo::QuadValue;
 using util::geo::QuadTree;
 
 // _____________________________________________________________________________
-void OctiQuadTree::unSettleEdg(GridNode* a, GridNode* b) {
+void OctiQuadTree::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
   if (a == b) return;
 
   auto ge = getNEdg(a, b);
@@ -36,14 +36,13 @@ void OctiQuadTree::unSettleEdg(GridNode* a, GridNode* b) {
   ge->pl().clearResEdges();
   gf->pl().clearResEdges();
 
-  _resEdgs[ge] = 0;
-  _resEdgs[gf] = 0;
+  _resEdgs[ge].erase(ce);
+  _resEdgs[gf].erase(ce);
 
-  if (!a->pl().isSettled()) {
-    openTurns(a);
-  }
-  if (!b->pl().isSettled()) {
-    openTurns(b);
+
+  if (_resEdgs[ge].size() == 0) {
+    if (!a->pl().isSettled()) openTurns(a);
+    if (!b->pl().isSettled()) openTurns(b);
   }
 
   // unblock diagonal edges crossing this edge

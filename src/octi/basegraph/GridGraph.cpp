@@ -123,7 +123,7 @@ void GridGraph::unSettleNd(CombNode* a) {
 }
 
 // _____________________________________________________________________________
-void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
+void GridGraph::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
   if (a == b) return;
 
   auto ge = getNEdg(a, b);
@@ -135,11 +135,13 @@ void GridGraph::unSettleEdg(GridNode* a, GridNode* b) {
   ge->pl().clearResEdges();
   gf->pl().clearResEdges();
 
-  _resEdgs[ge] = 0;
-  _resEdgs[gf] = 0;
+  _resEdgs[ge].erase(ce);
+  _resEdgs[gf].erase(ce);
 
-  if (!a->pl().isSettled()) openTurns(a);
-  if (!b->pl().isSettled()) openTurns(b);
+  if (_resEdgs[ge].size() == 0) {
+    if (!a->pl().isSettled()) openTurns(a);
+    if (!b->pl().isSettled()) openTurns(b);
+  }
 }
 
 // _____________________________________________________________________________
@@ -211,7 +213,6 @@ void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
 void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrO) {
   if (a == b) return;
 
-  // this closes the grid edge
   auto ge = getNEdg(a, b);
 
   assert(ge);
@@ -228,16 +229,16 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrO) {
 
 // _____________________________________________________________________________
 void GridGraph::addResEdg(GridEdge* ge, CombEdge* ce) {
-  assert(_resEdgs.count(ge) == 0 || _resEdgs.find(ge)->second == 0);
+  // assert(_resEdgs.count(ge) == 0 || _resEdgs.find(ge)->second.size() == 0);
   ge->pl().addResEdge();
-  _resEdgs[ge] = ce;
+  _resEdgs[ge].insert(ce);
 }
 
 // _____________________________________________________________________________
-CombEdge* GridGraph::getResEdg(GridEdge* ge) {
-  if (!ge) return 0;
+std::set<CombEdge*> GridGraph::getResEdgs(GridEdge* ge) {
+  if (!ge) return {};
   if (_resEdgs.count(ge)) return _resEdgs.find(ge)->second;
-  return 0;
+  return {};
 }
 
 // _____________________________________________________________________________
@@ -272,7 +273,7 @@ GridEdge* GridGraph::getNEdg(const GridNode* a, const GridNode* b) const {
 }
 
 // _____________________________________________________________________________
-void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
+void GridGraph::getSettledAdjEdgs(GridNode* n, CombNode* origNd, CombEdge* outgoing[8]) {
   size_t x = n->pl().getX();
   size_t y = n->pl().getY();
 
@@ -286,10 +287,18 @@ void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
     auto neighP = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
     auto e = getEdg(p, neighP);
     auto f = getEdg(neighP, p);
-    auto resEdg = getResEdg(e);
-    if (!resEdg) resEdg = getResEdg(f);
+    auto resEdgs = getResEdgs(e);
+    if (!resEdgs.size()) resEdgs = getResEdgs(f);
 
-    if (resEdg) outgoing[i] = resEdg;
+    if (resEdgs.size()) {
+      for (auto e : resEdgs) {
+        // they may be incorrect resident edges because of relaxed constraints
+        if (e->getFrom() == origNd || e->getTo() == origNd) {
+          outgoing[i] = e;
+          break;
+        }
+      }
+    }
   }
 }
 
@@ -297,11 +306,11 @@ void GridGraph::getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]) {
 const Penalties& GridGraph::getPens() const { return _c; }
 
 // _____________________________________________________________________________
-NodeCost GridGraph::nodeBendPen(GridNode* n, CombEdge* e) {
+NodeCost GridGraph::nodeBendPen(GridNode* n, CombNode* origNd, CombEdge* e) {
   NodeCost addC;
 
   CombEdge* out[maxDeg()];
-  getSettledAdjEdgs(n, out);
+  getSettledAdjEdgs(n, origNd, out);
 
   for (size_t i = 0; i < maxDeg(); i++) {
     if (!out[i]) continue;
@@ -347,7 +356,7 @@ NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd, CombEdge* edg) {
   NodeCost addC;
 
   CombEdge* out[maxDeg()];
-  getSettledAdjEdgs(nd, out);
+  getSettledAdjEdgs(nd, origNd, out);
 
   for (size_t i = 0; i < maxDeg(); i++) {
     if (!out[i]) continue;
@@ -396,7 +405,7 @@ NodeCost GridGraph::topoBlockPen(GridNode* nd, CombNode* origNd,
                                  CombEdge* edg) {
   CombEdge* outgoing[maxDeg()];
   NodeCost addC;
-  getSettledAdjEdgs(nd, outgoing);
+  getSettledAdjEdgs(nd, origNd, outgoing);
 
   // topological blocking
   for (size_t i = 0; i < maxDeg(); i++) {
@@ -428,8 +437,8 @@ void GridGraph::addCostVec(GridNode* n, const NodeCost& addC) {
     if (!p) continue;
 
     if (addC[i] < -1) {
-      getEdg(p, n)->pl().close();
-      getEdg(n, p)->pl().close();
+      getEdg(p, n)->pl().softClose();
+      getEdg(n, p)->pl().softClose();
     } else {
       getEdg(p, n)->pl().setCost(getEdg(p, n)->pl().rawCost() + addC[i]);
       getEdg(n, p)->pl().setCost(getEdg(n, p)->pl().rawCost() + addC[i]);
@@ -556,8 +565,8 @@ void GridGraph::closeTurns(GridNode* n) {
       auto e = getEdg(portA, portB);
       auto f = getEdg(portB, portA);
 
-      e->pl().close();
-      f->pl().close();
+      e->pl().softClose();
+      f->pl().softClose();
     }
   }
 
@@ -688,13 +697,13 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
     nn->pl().setParent(n);
     n->pl().setPort(i, nn);
 
-    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, true, false));
+    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, true));
     e->pl().setId(_edgeCount);
     _edgeCount++;
     n->addEdge(e);
     nn->addEdge(e);
 
-    e = new GridEdge(nn, n, GridEdgePL(INF, true, true, false));
+    e = new GridEdge(nn, n, GridEdgePL(INF, true, true));
     e->pl().setId(_edgeCount);
     _edgeCount++;
     n->addEdge(e);

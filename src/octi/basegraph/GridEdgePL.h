@@ -19,7 +19,6 @@ namespace basegraph {
 class GridEdgePL : util::geograph::GeoEdgePL<double> {
  public:
   GridEdgePL(double c, bool secondar, bool sink);
-  GridEdgePL(double c, bool secondar, bool sink, bool closed);
 
   const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;
@@ -30,6 +29,7 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   bool isSecondary() const;
 
   void close();
+  void softClose();
   void open();
   bool closed() const;
 
@@ -53,6 +53,7 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   bool _isSink;
 
   bool _closed;
+  bool _softClosed;
 
   // edges are blocked if they would cross a settled edge
   bool _blocked;

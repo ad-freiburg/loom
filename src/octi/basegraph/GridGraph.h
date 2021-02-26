@@ -32,9 +32,6 @@ using octi::combgraph::CombNode;
 namespace octi {
 namespace basegraph {
 
-const static double INF = std::numeric_limits<float>::infinity();
-// const static double INF = 5000;
-
 class GridGraph : public BaseGraph {
  public:
   GridGraph(const util::geo::DBox& bbox, double cellSize, double spacer,
@@ -42,7 +39,7 @@ class GridGraph : public BaseGraph {
 
   virtual double getCellSize() const;
 
-  virtual NodeCost nodeBendPen(GridNode* n, CombEdge* e);
+  virtual NodeCost nodeBendPen(GridNode* n, CombNode* origNd, CombEdge* e);
   virtual NodeCost topoBlockPen(GridNode* n, CombNode* origNode, CombEdge* e);
   virtual NodeCost spacingPen(GridNode* n, CombNode* origNode, CombEdge* e);
 
@@ -70,7 +67,7 @@ class GridGraph : public BaseGraph {
 
   virtual const Penalties& getPens() const;
 
-  virtual void unSettleEdg(GridNode* a, GridNode* b);
+  virtual void unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b);
   virtual void unSettleNd(CombNode* a);
 
   virtual bool isSettled(const CombNode* cn);
@@ -86,7 +83,7 @@ class GridGraph : public BaseGraph {
   virtual GridNode* getGrNdById(size_t id) const;
   virtual const GridEdge* getGrEdgById(std::pair<size_t, size_t> id) const;
   virtual void addResEdg(GridEdge* ge, CombEdge* cg);
-  virtual CombEdge* getResEdg(GridEdge* ge);
+  virtual std::set<CombEdge*> getResEdgs(GridEdge* ge);
 
   virtual CrossEdgPairs getCrossEdgPairs() const;
 
@@ -121,7 +118,8 @@ class GridGraph : public BaseGraph {
 
   std::vector<util::geo::Polygon<double>> _obstacles;
 
-  std::unordered_map<GridEdge*, CombEdge*> _resEdgs;
+  // may be multiple resident edges if hard constraints are relaxed
+  std::unordered_map<GridEdge*, std::set<CombEdge*>> _resEdgs;
 
   const Grid<GridNode*, Point, double>& getGrid() const;
 
@@ -138,7 +136,8 @@ class GridGraph : public BaseGraph {
 
   virtual GridNode* neigh(size_t cx, size_t cy, size_t i) const;
 
-  virtual void getSettledAdjEdgs(GridNode* n, CombEdge* outgoing[8]);
+  virtual void getSettledAdjEdgs(GridNode* n, CombNode* origNd,
+                                 CombEdge* outgoing[8]);
 
   virtual size_t getGrNdDeg(const CombNode* nd, size_t x, size_t y) const;
 

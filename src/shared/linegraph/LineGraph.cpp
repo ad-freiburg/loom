@@ -463,6 +463,12 @@ ISect LineGraph::getNextIntersection() {
             ret.a = e1;
             ret.b = e2;
             ret.bp = *is.begin();
+            // if the intersection is near a shared node, ignore
+            auto shrdNd = sharedNode(e1, e2);
+            if (shrdNd && util::geo::dist(*shrdNd->pl().getGeom(), ret.bp.p) < 100) {
+              continue;
+            }
+
             if (ret.bp.totalPos > 0.001 && 1 - ret.bp.totalPos > 0.001) {
               return ret;
             }
@@ -830,6 +836,8 @@ breakfor:
             n1->getAdjList().size() > 1 &&
             (n1->pl().stops().size() == 0 ||
              e->getOtherNd(n1)->pl().stops().size() == 0)) {
+
+          std::cerr << "Contracting " << e << std::endl;
           contractEdge(e);
           goto breakfor;
         }

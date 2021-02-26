@@ -36,7 +36,7 @@ GridNode* OctiHananGraph::neigh(size_t cx, size_t cy, size_t i) const {
 }
 
 // _____________________________________________________________________________
-void OctiHananGraph::unSettleEdg(GridNode* a, GridNode* b) {
+void OctiHananGraph::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
   if (a == b) return;
 
   auto ge = getNEdg(a, b);
@@ -48,14 +48,12 @@ void OctiHananGraph::unSettleEdg(GridNode* a, GridNode* b) {
   ge->pl().clearResEdges();
   gf->pl().clearResEdges();
 
-  _resEdgs[ge] = 0;
-  _resEdgs[gf] = 0;
+  _resEdgs[ge].erase(ce);
+  _resEdgs[gf].erase(ce);
 
-  if (!a->pl().isSettled()) {
-    openTurns(a);
-  }
-  if (!b->pl().isSettled()) {
-    openTurns(b);
+  if (_resEdgs[ge].size() == 0) {
+    if (!a->pl().isSettled()) openTurns(a);
+    if (!b->pl().isSettled()) openTurns(b);
   }
 
   // unblock blocked diagonal edges crossing this edge
@@ -400,13 +398,13 @@ GridNode* OctiHananGraph::writeNd(size_t x, size_t y) {
     nn->pl().setParent(n);
     n->pl().setPort(i, nn);
 
-    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, true, false));
+    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, true));
     e->pl().setId(_edgeCount);
     _edgeCount++;
     n->addEdge(e);
     nn->addEdge(e);
 
-    e = new GridEdge(nn, n, GridEdgePL(INF, true, true, false));
+    e = new GridEdge(nn, n, GridEdgePL(INF, true, true));
     e->pl().setId(_edgeCount);
     _edgeCount++;
     n->addEdge(e);

@@ -30,6 +30,12 @@ using octi::combgraph::CombNode;
 namespace octi {
 namespace basegraph {
 
+const static double INF = std::numeric_limits<float>::infinity();
+const static double SOFT_INF = 5000;
+
+// const static double SOFT_INF = INF;
+
+
 enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL, OCTIHANANGRID, OCTIQUADTREE };
 
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
@@ -63,7 +69,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   virtual void init() = 0;
   virtual double getCellSize() const = 0;
 
-  virtual NodeCost nodeBendPen(GridNode* n, CombEdge* e) = 0;
+  virtual NodeCost nodeBendPen(GridNode* n, CombNode* origNode, CombEdge* e) = 0;
   virtual NodeCost topoBlockPen(GridNode* n, CombNode* origNode,
                                 CombEdge* e) = 0;
   virtual NodeCost spacingPen(GridNode* n, CombNode* origNode, CombEdge* e) = 0;
@@ -98,7 +104,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   virtual const Penalties& getPens() const = 0;
 
-  virtual void unSettleEdg(GridNode* a, GridNode* b) = 0;
+  virtual void unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) = 0;
   virtual void unSettleNd(CombNode* a) = 0;
 
   virtual bool isSettled(const CombNode* cn) = 0;
@@ -115,7 +121,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   virtual GridNode* getGrNdById(size_t id) const = 0;
   virtual const GridEdge* getGrEdgById(std::pair<size_t, size_t> id) const = 0;
   virtual void addResEdg(GridEdge* ge, CombEdge* cg) = 0;
-  virtual CombEdge* getResEdg(GridEdge* ge) = 0;
+  virtual std::set<CombEdge*> getResEdgs(GridEdge* ge) = 0;
 
   virtual void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
                                   double pen) = 0;

@@ -17,7 +17,7 @@ class OctiHananGraph : public OctiGridGraph {
                  double cellSize, double spacer, const Penalties& pens)
       : OctiGridGraph(bbox, cellSize, spacer, pens), _cg(cg) {}
 
-  virtual void unSettleEdg(GridNode* a, GridNode* b);
+  virtual void unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b);
   virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t order);
   virtual CrossEdgPairs getCrossEdgPairs() const;
   virtual GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;

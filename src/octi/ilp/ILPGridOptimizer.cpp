@@ -741,7 +741,8 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
   for (auto grNd : *gg->getNds()) {
     for (auto grEdg : grNd->getAdjListOut()) {
       if (grEdg->pl().isSecondary()) continue;
-      auto resEdg = gg->getResEdg(grEdg);
+      // we assume here that the heuristic solution is feasible!
+      auto resEdg = *gg->getResEdgs(grEdg).begin();
 
       if (resEdg) {
         auto varName = getEdgeUseVar(grEdg, resEdg);
