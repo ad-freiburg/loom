@@ -13,13 +13,17 @@ namespace basegraph {
 class OrthoRadialGraph : public GridGraph {
  public:
   using GridGraph::neigh;
-  OrthoRadialGraph(size_t numBeams, const util::geo::DBox& bbox,
+  OrthoRadialGraph(const util::geo::DBox& bbox,
                    double cellSize, double spacer, const Penalties& pens)
       : GridGraph(util::geo::extendBox(
                       bbox, util::geo::getBoundingBox(util::geo::rotate(
                                 convexHull(bbox), 90, centroid(bbox)))),
-                  cellSize, spacer, pens),
-        _numBeams(numBeams) {}
+                  cellSize, spacer, pens) {
+    // we want the cell size at roughly 1/4 of the radius to match the given
+    // parameter
+    double circum = (_grid.getYHeight() / 8) * cellSize * 2 * M_PI;
+    _numBeams = circum / cellSize;
+  }
 
   virtual void init();
   virtual GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;

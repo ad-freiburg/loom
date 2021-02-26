@@ -33,6 +33,7 @@ namespace octi {
 namespace basegraph {
 
 const static double INF = std::numeric_limits<float>::infinity();
+// const static double INF = 5000;
 
 class GridGraph : public BaseGraph {
  public:
@@ -48,7 +49,7 @@ class GridGraph : public BaseGraph {
   virtual double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
   virtual std::priority_queue<Candidate> getGridNdCands(
-      const util::geo::DPoint& p, double maxD) const;
+      const util::geo::DPoint& p, size_t maxGrD) const;
 
   virtual void addCostVec(GridNode* n, const NodeCost& addC);
 
@@ -62,7 +63,7 @@ class GridGraph : public BaseGraph {
   virtual GridNode* neigh(const GridNode* n, size_t i) const;
   virtual size_t maxDeg() const;
 
-  virtual std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis);
+  virtual std::set<GridNode*> getGrNdCands(CombNode* n, size_t maxGrDist);
 
   virtual void settleNd(GridNode* n, CombNode* cn);
   virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrOr);

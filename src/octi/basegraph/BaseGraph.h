@@ -13,8 +13,8 @@
 #include "octi/combgraph/CombGraph.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
-#include "util/graph/DirGraph.h"
 #include "util/graph/Dijkstra.h"
+#include "util/graph/DirGraph.h"
 
 #include "octi/combgraph/CombEdgePL.h"
 #include "octi/combgraph/CombNodePL.h"
@@ -31,7 +31,6 @@ namespace octi {
 namespace basegraph {
 
 enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL, OCTIHANANGRID, OCTIQUADTREE };
-
 
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
 typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
@@ -76,7 +75,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   getHeur(const std::set<GridNode*>& to) const = 0;
 
   virtual std::priority_queue<Candidate> getGridNdCands(
-      const util::geo::DPoint& p, double maxD) const = 0;
+      const util::geo::DPoint& p, size_t maxGrD) const = 0;
 
   virtual void addCostVec(GridNode* n, const NodeCost& addC) = 0;
 
@@ -91,10 +90,11 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
 
   virtual size_t maxDeg() const = 0;
 
-  virtual std::set<GridNode*> getGrNdCands(CombNode* n, double maxDis) = 0;
+  virtual std::set<GridNode*> getGrNdCands(CombNode* n, size_t maxDis) = 0;
 
   virtual void settleNd(GridNode* n, CombNode* cn) = 0;
-  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrOrder) = 0;
+  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e,
+                         size_t rndrOrder) = 0;
 
   virtual const Penalties& getPens() const = 0;
 
@@ -123,7 +123,8 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   virtual CrossEdgPairs getCrossEdgPairs() const = 0;
 
   virtual void addObstacle(const util::geo::Polygon<double>& obst) = 0;
-  virtual PolyLine<double> geomFromPath(const std::vector<std::pair<size_t, size_t>>& res) const = 0;
+  virtual PolyLine<double> geomFromPath(
+      const std::vector<std::pair<size_t, size_t>>& res) const = 0;
 };
 }  // namespace basegraph
 }  // namespace octi

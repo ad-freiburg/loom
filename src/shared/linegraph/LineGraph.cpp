@@ -356,7 +356,7 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
 
 // _____________________________________________________________________________
 void LineGraph::buildGrids() {
-  size_t gridSize = 20000; // TODO: make configurable
+  size_t gridSize = 20000;  // TODO: make configurable
 
   _nodeGrid = NodeGrid(gridSize, gridSize, _bbox);
   _edgeGrid = EdgeGrid(gridSize, gridSize, _bbox);
@@ -630,9 +630,9 @@ std::set<const shared::linegraph::Line*> LineGraph::servedLines(
 // _____________________________________________________________________________
 EdgeOrdering LineGraph::edgeOrdering(LineNode* n, bool useOrigNextNode) {
   EdgeOrdering order;
-  for (auto e : n->getAdjList()) {
-    util::geo::DPoint a = *n->pl().getGeom();
+  util::geo::DPoint a = *n->pl().getGeom();
 
+  for (auto e : n->getAdjList()) {
     util::geo::DPoint b;
     if (useOrigNextNode) {
       b = *e->getOtherNd(n)->pl().getGeom();
@@ -651,6 +651,7 @@ EdgeOrdering LineGraph::edgeOrdering(LineNode* n, bool useOrigNextNode) {
 
     // get the angles
     double deg = util::geo::angBetween(a, b) - M_PI / 2;
+    // make sure the ordering start at 12 o'clock
     if (deg <= 0) deg += M_PI * 2;
 
     order.add(e, deg);
@@ -667,8 +668,20 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
     const auto& orig = edgeOrdering(n, true).getOrderedSet();
     combine.insert(combine.begin(), orig.begin() + maxDeg - 1, orig.end());
 
-    // add a new node
+    // for the new geometry, take the average angle
+    double refAngle = 0;
+
+    for (auto eo : combine) {
+      refAngle += util::geo::angBetween(
+          *n->pl().getGeom(), *eo.first->getOtherNd(n)->pl().getGeom());
+    }
+
+    refAngle /= combine.size();
+    std::cerr << "Ref angle is: " << refAngle << std::endl;
     auto geom = *n->pl().getGeom();
+    geom.setX(geom.getX() + 10 * cos(refAngle));
+    geom.setY(geom.getY() + 10 * sin(refAngle));
+    // add a new node
     auto cn = addNd(geom);
 
     // add the new trunk edge

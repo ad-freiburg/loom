@@ -159,7 +159,7 @@ class Octilinearizer {
                    double maxGrDist);
 
   std::set<GridNode*> getCands(CombNode* cmBnd, const SettledPos& settled,
-                               basegraph::BaseGraph* gg, double maxDis);
+                               basegraph::BaseGraph* gg, size_t maxGridDis);
 };
 
 }  // namespace octi

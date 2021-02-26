@@ -154,6 +154,7 @@ int main(int argc, char** argv) {
   // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
   // change according to graphtype
   tg.splitNodes(4);
+
   CombGraph cg(&tg, cfg.deg2Heur);
 
   // local enlargement
@@ -190,7 +191,7 @@ int main(int argc, char** argv) {
                      cfg.ilpTimeLimit, cfg.ilpSolver, cfg.ilpPath);
     time = T_STOP(octi);
     LOGTO(DEBUG, std::cerr)
-        << "Octilinearized using ILP in " << time << " ms, score " << sc.full;
+        << "Schematized using ILP in " << time << " ms, score " << sc.full;
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
     try {
@@ -202,7 +203,7 @@ int main(int argc, char** argv) {
       LOG(ERROR) << exc.what();
       exit(1);
     }
-    LOGTO(DEBUG, std::cerr) << "Octilinearized using heur approach in " << time
+    LOGTO(DEBUG, std::cerr) << "Schematized using heur approach in " << time
                             << " ms, score " << sc.full;
   }
 

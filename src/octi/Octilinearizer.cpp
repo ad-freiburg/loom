@@ -572,15 +572,13 @@ RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
             getCands(toCmbNd, preSettled, gg, 0)};
   }
 
-  double maxDis = 100000;//gg->getCellSize() * maxGrDist;
-
   std::set<GridNode*> frGrNds, toGrNds;
 
   size_t i = 0;
 
   while ((!frGrNds.size() || !toGrNds.size()) && i < 10) {
-    auto frCands = getCands(frCmbNd, preSettled, gg, maxDis);
-    auto toCands = getCands(toCmbNd, preSettled, gg, maxDis);
+    auto frCands = getCands(frCmbNd, preSettled, gg, maxGrDist);
+    auto toCands = getCands(toCmbNd, preSettled, gg, maxGrDist);
 
     std::set<GridNode*> isect;
     std::set_intersection(frCands.begin(), frCands.end(), toCands.begin(),
@@ -601,7 +599,7 @@ RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
       }
     }
 
-    maxDis += i * 2.0;
+    maxGrDist += i * 2;
     i++;
   }
 
@@ -611,7 +609,7 @@ RtPair Octilinearizer::getRtPair(CombNode* frCmbNd, CombNode* toCmbNd,
 // _____________________________________________________________________________
 std::set<GridNode*> Octilinearizer::getCands(CombNode* cmbNd,
                                              const SettledPos& preSettled,
-                                             BaseGraph* gg, double maxDis) {
+                                             BaseGraph* gg, size_t maxGrDist) {
   std::set<GridNode*> ret;
 
   if (gg->getSettled(cmbNd)) {
@@ -620,7 +618,7 @@ std::set<GridNode*> Octilinearizer::getCands(CombNode* cmbNd,
     auto nd = preSettled.find(cmbNd)->second->pl().getParent();
     if (nd && !nd->pl().isClosed()) ret.insert(nd);
   } else {
-    ret = gg->getGrNdCands(cmbNd, maxDis);
+    ret = gg->getGrNdCands(cmbNd, maxGrDist);
   }
 
   return ret;
@@ -636,7 +634,7 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, const CombGraph& cg,
     case GRID:
       return new GridGraph(bbox, cellSize, spacer, pens);
     case ORTHORADIAL:
-      return new OrthoRadialGraph(40, bbox, cellSize, spacer, pens);
+      return new OrthoRadialGraph(bbox, cellSize, spacer, pens);
     case OCTIHANANGRID:
       return new OctiHananGraph(bbox, cg, cellSize, spacer, pens);
     case OCTIQUADTREE:

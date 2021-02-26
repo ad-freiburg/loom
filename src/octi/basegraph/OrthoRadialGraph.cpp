@@ -134,7 +134,6 @@ void OrthoRadialGraph::writeInitialCosts() {
           e->pl().setCost((_c.verticalPen + c_0) * sY - c_0);
         } else {
           // horizontal hops get bigger with higher y (= higher radius)
-
           e->pl().setCost((_c.horizontalPen + c_0) * sX - c_0);
         }
       }
@@ -203,18 +202,10 @@ GridNode* OrthoRadialGraph::writeNd(size_t x, size_t y) {
     int xi = 0;
     int yi = 0;
 
-    if (i == 0) {
-      yi = 1;
-    }
-    if (i == 1) {
-      xi = 1;
-    }
-    if (i == 2) {
-      yi = -1;
-    }
-    if (i == 3) {
-      xi = -1;
-    }
+    if (i == 0) yi = 1;
+    if (i == 1) xi = 1;
+    if (i == 2) yi = -1;
+    if (i == 3) xi = -1;
 
     GridNode* nn = addNd(DPoint(xPos + xi * _spacer, yPos + yi * _spacer));
     nn->pl().setId(_nds.size());

@@ -366,8 +366,6 @@ NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd, CombEdge* edg) {
       }
       if (neighbor && !out[cur] && neighbor->pl().isClosed() &&
           !neighbor->pl().isSettled()) {
-        // std::cerr << "For node " << nd->pl().getX() << "," << nd->pl().getY()
-        // << " neighbor at " << cur << " is closed!" << std::endl;
         addSpace++;
       }
       addC[cur] = -1.0 * std::numeric_limits<double>::max();
@@ -465,9 +463,12 @@ void GridGraph::writeInitialCosts() {
 
 // _____________________________________________________________________________
 std::priority_queue<Candidate> GridGraph::getGridNdCands(const DPoint& p,
-                                                         double maxD) const {
+                                                         size_t maxGrD) const {
   std::priority_queue<Candidate> ret;
   std::set<GridNode*> neigh;
+
+  double maxD = getCellSize() * maxGrD;
+
   DBox b(DPoint(p.getX() - maxD, p.getY() - maxD),
          DPoint(p.getX() + maxD, p.getY() + maxD));
   _grid.get(b, &neigh);
@@ -606,7 +607,7 @@ GridNode* GridGraph::getSettled(const CombNode* cnd) const {
 }
 
 // _____________________________________________________________________________
-std::set<GridNode*> GridGraph::getGrNdCands(CombNode* n, double maxDis) {
+std::set<GridNode*> GridGraph::getGrNdCands(CombNode* n, size_t maxDis) {
   std::set<GridNode*> tos;
   if (!isSettled(n)) {
     auto cands = getGridNdCands(*n->pl().getGeom(), maxDis);
@@ -617,7 +618,7 @@ std::set<GridNode*> GridGraph::getGrNdCands(CombNode* n, double maxDis) {
 
       // getGrNdDeg returns the maximum node degree of the grid node at this
       // position to prevent choosing nodes which cannot hold the CombNode
-      //
+
       // If such nodes are chosen, the greedy heuristic algorithm will fall into
       // a local optimum which is a death valley - there is now way out
 
@@ -770,9 +771,7 @@ void GridGraph::reset() {
 
 // _____________________________________________________________________________
 void GridGraph::reWriteObstCosts() {
-  for (const auto& obst : _obstacles) {
-    writeObstacleCost(obst);
-  }
+  for (const auto& obst : _obstacles) writeObstacleCost(obst);
 }
 
 // _____________________________________________________________________________
@@ -864,7 +863,5 @@ void GridGraph::prunePorts() {
     }
   }
 
-  for (auto grNd : toDel) {
-    delNd(grNd);
-  }
+  for (auto grNd : toDel) delNd(grNd);
 }
