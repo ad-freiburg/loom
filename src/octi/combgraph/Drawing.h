@@ -31,11 +31,11 @@ struct Score {
 
 struct NodeOnSeg {
   shared::linegraph::LineNode* n;
-  double progression;
+  double progr;
 };
 
 inline bool operator<(const NodeOnSeg& lh, const NodeOnSeg& rh) {
-  return lh.progression < rh.progression;
+  return lh.progr < rh.progr;
 }
 
 struct LineEdgeOnSeg {
@@ -49,7 +49,7 @@ struct Segment {
   GridNode* end;
   std::vector<std::pair<size_t, size_t>> path;
   PolyLine<double> geom;
-  std::vector<NodeOnSeg> nodesOnSeg;
+  std::vector<NodeOnSeg> nodes;
   std::set<CombEdge*> combEdges;
 };
 

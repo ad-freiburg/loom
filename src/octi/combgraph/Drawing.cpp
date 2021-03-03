@@ -140,8 +140,8 @@ void Drawing::getLineGraph(LineGraph* target) const {
   std::map<LineNode*, LineNode*> m;
   std::map<GridNode*, LineNode*> mm;
 
-  std::vector<Segment> pathSegments;
-  std::map<const CombEdge*, std::vector<std::pair<size_t, bool>>> combEdgSegs;
+  std::vector<Segment> pathSegs;
+  std::map<const CombEdge*, std::vector<std::pair<size_t, bool>>> cEdgSeg;
 
   std::map<const GridEdge*, size_t> grEdgToPathSeg;
 
@@ -155,22 +155,21 @@ void Drawing::getLineGraph(LineGraph* target) const {
         continue;
       }
 
-      auto path = _edgs.find(f)->second;
-      GridNode* from =
-          _gg->getGrEdgById(path.back())->getFrom()->pl().getParent();
-      GridNode* to = _gg->getGrEdgById(path.front())->getTo()->pl().getParent();
+      auto p = _edgs.find(f)->second;
+      GridNode* fr = _gg->getGrEdgById(p.back())->getFrom()->pl().getParent();
+      GridNode* to = _gg->getGrEdgById(p.front())->getTo()->pl().getParent();
 
-      if (mm.find(from) == mm.end()) {
-        auto payload = n->pl().getParent()->pl();
-        payload.setGeom(*from->pl().getGeom());
-        mm[from] = target->addNd(payload);
-        m[n->pl().getParent()] = mm[from];
+      if (mm.find(fr) == mm.end()) {
+        auto pl = n->pl().getParent()->pl();
+        pl.setGeom(*fr->pl().getGeom());
+        mm[fr] = target->addNd(pl);
+        m[n->pl().getParent()] = mm[fr];
       }
 
       if (mm.find(to) == mm.end()) {
-        auto payload = f->getTo()->pl().getParent()->pl();
-        payload.setGeom(*to->pl().getGeom());
-        mm[to] = target->addNd(payload);
+        auto pl = f->getTo()->pl().getParent()->pl();
+        pl.setGeom(*to->pl().getGeom());
+        mm[to] = target->addNd(pl);
         m[f->getTo()->pl().getParent()] = mm[to];
       }
     }
@@ -181,34 +180,29 @@ void Drawing::getLineGraph(LineGraph* target) const {
     auto n = ndpair.first;
     for (auto f : n->getAdjListOut()) {
       if (f->getFrom() != n) continue;
-      if (_edgs.find(f) == _edgs.end()) {
-        LOGTO(WARN, std::cerr) << "Edge " << f << " was not drawn, skipping...";
-        continue;
-      }
+      if (_edgs.find(f) == _edgs.end()) continue;
 
       auto path = _edgs.find(f)->second;
 
       std::set<CombEdge*> curResEdgs;
 
       for (size_t i = 0; i < path.size(); i++) {
-        auto pathEdge = path[i];
-        const GridEdge* grEdg = _gg->getGrEdgById(pathEdge);
+        auto pathEdg = path[i];
+        const GridEdge* grEdg = _gg->getGrEdgById(pathEdg);
 
         const GridEdge* grCounterEdg =
-            _gg->getGrEdgById({pathEdge.second, pathEdge.first});
+            _gg->getGrEdgById({pathEdg.second, pathEdg.first});
 
         if (grEdgToPathSeg.count(grEdg)) {
-          size_t existSegment = grEdgToPathSeg[grEdg];
-          if (combEdgSegs[f].size() == 0 ||
-              combEdgSegs[f].back().first != existSegment) {
-            combEdgSegs[f].push_back({existSegment, false});
+          size_t exiSeg = grEdgToPathSeg[grEdg];
+          if (cEdgSeg[f].size() == 0 || cEdgSeg[f].back().first != exiSeg) {
+            cEdgSeg[f].push_back({exiSeg, false});
             continue;
           }
         } else if (grEdgToPathSeg.count(grCounterEdg)) {
-          size_t existSegment = grEdgToPathSeg[grCounterEdg];
-          if (combEdgSegs[f].size() == 0 ||
-              combEdgSegs[f].back().first != existSegment) {
-            combEdgSegs[f].push_back({existSegment, true});
+          size_t exiSeg = grEdgToPathSeg[grCounterEdg];
+          if (cEdgSeg[f].size() == 0 || cEdgSeg[f].back().first != exiSeg) {
+            cEdgSeg[f].push_back({exiSeg, true});
             continue;
           }
         }
@@ -216,54 +210,49 @@ void Drawing::getLineGraph(LineGraph* target) const {
         auto newResEdgs = _gg->getResEdgsDirInd(grEdg);
 
         if (newResEdgs == curResEdgs) {
-          pathSegments[combEdgSegs[f].back().first].start =
+          pathSegs[cEdgSeg[f].back().first].start =
               grEdg->getFrom()->pl().getParent();
-          pathSegments[combEdgSegs[f].back().first].path.push_back(pathEdge);
-          assert(pathSegments.back().end != pathSegments.back().start);
+          pathSegs[cEdgSeg[f].back().first].path.push_back(pathEdg);
+          assert(pathSegs.back().end != pathSegs.back().start);
         } else {
-          pathSegments.push_back({grEdg->getFrom()->pl().getParent(),
-                                  grEdg->getTo()->pl().getParent(),
-                                  {pathEdge},
-                                  {},
-                                  {},
-                                  newResEdgs});
-          assert(pathSegments.back().end != pathSegments.back().start);
-          combEdgSegs[f].push_back({pathSegments.size() - 1, false});
+          pathSegs.push_back({grEdg->getFrom()->pl().getParent(),
+                              grEdg->getTo()->pl().getParent(),
+                              {pathEdg},
+                              {},
+                              {},
+                              newResEdgs});
+          assert(pathSegs.back().end != pathSegs.back().start);
+          cEdgSeg[f].push_back({pathSegs.size() - 1, false});
           curResEdgs = newResEdgs;
         }
-        grEdgToPathSeg[grEdg] = combEdgSegs[f].back().first;
+        grEdgToPathSeg[grEdg] = cEdgSeg[f].back().first;
       }
     }
   }
 
   // write geometries of segments
-  for (auto& segment : pathSegments)
-    segment.geom = _gg->geomFromPath(segment.path);
+  for (auto& segment : pathSegs) segment.geom = _gg->geomFromPath(segment.path);
 
   // add nodes to segments
   for (auto ndpair : _nds) {
     auto n = ndpair.first;
     for (auto f : n->getAdjListOut()) {
       if (f->getFrom() != n) continue;
-      if (_edgs.find(f) == _edgs.end()) {
-        LOGTO(WARN, std::cerr) << "Edge " << f << " was not drawn, skipping...";
-        continue;
-      }
+      if (_edgs.find(f) == _edgs.end()) continue;
 
       double dTot = 0;
-      for (const auto& seg : combEdgSegs[f])
-        dTot += pathSegments[seg.first].geom.getLength();
+      for (const auto& seg : cEdgSeg[f])
+        dTot += pathSegs[seg.first].geom.getLength();
       double tot = f->pl().getChilds().size();
       double step = dTot / tot;
 
       auto curSegIdx = 0;
-      double curSegLen =
-          pathSegments[combEdgSegs[f][curSegIdx].first].geom.getLength();
+      double curSegLen = pathSegs[cEdgSeg[f][curSegIdx].first].geom.getLength();
       double offset = 0;
 
       int i = 1;
 
-      std::vector<LineNode*> nds{};
+      std::vector<LineNode*> nds;
       auto prev = n->pl().getParent();
       for (auto e : f->pl().getChilds()) {
         if (e->getFrom() == prev)
@@ -281,19 +270,18 @@ void Drawing::getLineGraph(LineGraph* target) const {
         while (progr > offset + curSegLen) {
           curSegIdx++;
           offset += curSegLen;
-          curSegLen =
-              pathSegments[combEdgSegs[f][curSegIdx].first].geom.getLength();
+          curSegLen = pathSegs[cEdgSeg[f][curSegIdx].first].geom.getLength();
         }
 
         double onSegProgr = progr - offset;
         assert(onSegProgr <= curSegLen);
 
-        if (combEdgSegs[f][curSegIdx].second) {
+        if (cEdgSeg[f][curSegIdx].second) {
           // using this segment in reverse direction
-          pathSegments[combEdgSegs[f][curSegIdx].first].nodesOnSeg.push_back(
+          pathSegs[cEdgSeg[f][curSegIdx].first].nodes.push_back(
               {nd, 1 - onSegProgr});
         } else {
-          pathSegments[combEdgSegs[f][curSegIdx].first].nodesOnSeg.push_back(
+          pathSegs[cEdgSeg[f][curSegIdx].first].nodes.push_back(
               {nd, onSegProgr});
         }
 
@@ -302,11 +290,11 @@ void Drawing::getLineGraph(LineGraph* target) const {
     }
   }
 
-  std::vector<std::vector<LineEdge*>> segmentEdges(pathSegments.size());
+  std::vector<std::vector<LineEdge*>> segmentEdges(pathSegs.size());
 
-  for (size_t segId = 0; segId < pathSegments.size(); segId++) {
-    auto seg = pathSegments[segId];
-    std::sort(seg.nodesOnSeg.begin(), seg.nodesOnSeg.end());
+  for (size_t segId = 0; segId < pathSegs.size(); segId++) {
+    auto seg = pathSegs[segId];
+    std::sort(seg.nodes.begin(), seg.nodes.end());
 
     std::set<shared::linegraph::LineEdge*> activeLineEdges;
 
@@ -317,10 +305,10 @@ void Drawing::getLineGraph(LineGraph* target) const {
     auto from = mm[seg.start];
     double lastProgr = 0;
 
-    for (size_t i = 0; i < seg.nodesOnSeg.size(); i++) {
-      auto geom = seg.geom.getSegment(lastProgr, seg.nodesOnSeg[i].progression);
+    for (size_t i = 0; i < seg.nodes.size(); i++) {
+      auto geom = seg.geom.getSegment(lastProgr, seg.nodes[i].progr);
 
-      auto to = seg.nodesOnSeg[i].n;
+      auto to = seg.nodes[i].n;
 
       if (m.find(to) == m.end()) {
         auto payload = to->pl();
@@ -330,7 +318,7 @@ void Drawing::getLineGraph(LineGraph* target) const {
 
       segmentEdges[segId].push_back(target->addEdg(from, m[to], geom));
       from = m[to];
-      lastProgr = seg.nodesOnSeg[i].progression;
+      lastProgr = seg.nodes[i].progr;
     }
 
     // add new topological node at end of segment
@@ -341,17 +329,20 @@ void Drawing::getLineGraph(LineGraph* target) const {
     segmentEdges[segId].push_back(target->addEdg(from, mm[seg.end], geom));
   }
 
-  for (auto a : combEdgSegs) {
+  // now go over all original comb edge segments and add line informations
+  // to the new line graph edges
+  for (const auto& a : cEdgSeg) {
     auto combEdg = a.first;
 
-    size_t childPointer = 0;
+    size_t childPtr = 0;
     auto prev = a.first->getFrom()->pl().getParent();
 
-    for (auto segPairIt = a.second.rbegin(); segPairIt != a.second.rend();
-         segPairIt++) {
-      auto segPair = *segPairIt;
+    // reverse iterator because paths are always give in reverse order
+    for (auto it = a.second.rbegin(); it != a.second.rend(); it++) {
+      auto segPair = *it;
       size_t segId = segPair.first;
       bool reverse = segPair.second;
+      auto child = combEdg->pl().getChilds()[childPtr];
 
       auto sCopy = segmentEdges[segId];
       if (reverse) std::reverse(sCopy.begin(), sCopy.end());
@@ -360,25 +351,42 @@ void Drawing::getLineGraph(LineGraph* target) const {
         auto from = reverse ? edge->getTo() : edge->getFrom();
         auto to = edge->getOtherNd(from);
 
-        for (auto lo :
-             combEdg->pl().getChilds()[childPointer]->pl().getLines()) {
-          // TODO: direction
+        for (auto lo : child->pl().getLines()) {
+          // directions will be handled below by nodeRpl
           edge->pl().addLine(lo.line, lo.direction);
         }
 
-        auto curChldTo = combEdg->pl().getChilds()[childPointer]->getTo();
-        if (curChldTo == prev)
-          curChldTo = combEdg->pl().getChilds()[childPointer]->getFrom();
+        auto curChldTo = child->getTo();
+        if (curChldTo == prev) curChldTo = child->getFrom();
+        auto curChldFr = child->getOtherNd(curChldTo);
+
+        if (from == m[curChldFr]) {
+          // if this edge is the beginning of an original child edge, replace
+          // it in the node. All other node will not be touched (except for
+          // line not served info) by this original comb edge
+          LineGraph::edgeRpl(m[curChldFr], child, edge);
+        }
 
         if (to == m[curChldTo]) {
+          // if this edge is the end of an original child edge, replace
+          // it in the node. All other node will not be touched (except for
+          // line not served info) by this original comb edge
+          LineGraph::edgeRpl(m[curChldTo], child, edge);
           prev = curChldTo;
-          childPointer++;
+
+          // consider the next child in the original comb edge
+          childPtr++;
         } else {
-          for (auto lo :
-               combEdg->pl().getChilds()[childPointer]->pl().getLines()) {
+          for (auto lo : child->pl().getLines()) {
             to->pl().addLineNotServed(lo.line);
           }
         }
+
+        // node replacement in the altered edge, where directions are now given
+        // w.r.t. to the original end node of the child edge. These are replaced
+        // by the respective nodes of the new edge
+        LineGraph::nodeRpl(edge, curChldFr, from);
+        LineGraph::nodeRpl(edge, curChldTo, to);
       }
     }
   }
