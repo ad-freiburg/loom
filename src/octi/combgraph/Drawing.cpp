@@ -325,15 +325,21 @@ void Drawing::getLineGraph(LineGraph* target) const {
     segmentEdges[segId].push_back(target->addEdg(from, mm[seg.end], geom));
   }
 
+  std::cerr << "Going through path segments..." << std::endl;
   for (auto a : combEdgePathSegments) {
     auto combEdg = a.first;
+
+    std::cerr << "=== Path for edge " << combEdg << std::endl;
 
     size_t childPointer = 0;
     auto prev = a.first->getFrom()->pl().getParent();
 
-    for (auto segPair : a.second) {
+    for (auto segPairIt = a.second.rbegin(); segPairIt != a.second.rend(); segPairIt++) {
+      auto segPair = *segPairIt;
       size_t segId = segPair.first;
       bool reverse = segPair.second;
+
+      std::cerr << "  === On segment " << segId << " (reverse=" << reverse << ", start=" << pathSegments[segId].start << ", end=" << pathSegments[segId].end << ")"<< std::endl;
 
       auto sCopy = segmentEdges[segId];
       if (reverse) std::reverse(sCopy.begin(), sCopy.end());
@@ -342,27 +348,29 @@ void Drawing::getLineGraph(LineGraph* target) const {
         auto from = reverse ? edge->getTo() : edge->getFrom();
         auto to = edge->getOtherNd(from);
 
-        // if (childPointer >= combEdg->pl().getChilds().size()) continue;
+        std::cerr << "    Edge from " << from << " to " << to  << std::endl;
+        std::cerr << "    (cur edge child: from " << m[combEdg->pl().getChilds()[childPointer]->getFrom()] << "(" << m[combEdg->pl().getChilds()[childPointer]->getFrom()]->pl().toString() << ") to " << m[combEdg->pl().getChilds()[childPointer]->getTo()]  << "(" << m[combEdg->pl().getChilds()[childPointer]->getTo()]->pl().toString() << ")" << std::endl;
 
         for (auto lo : combEdg->pl().getChilds()[childPointer]->pl().getLines()) {
           // TODO: direction
           edge->pl().addLine(lo.line, lo.direction);
         }
 
-        auto curNode = m[combEdg->pl().getChilds()[childPointer]->getTo()];
+        auto curChldTo = combEdg->pl().getChilds()[childPointer]->getTo();
 
-        if (combEdg->pl().getChilds()[childPointer]->getTo() == prev) {
-          curNode = m[combEdg->pl().getChilds()[childPointer]->getFrom()];
+        if (curChldTo == prev) {
+          curChldTo = combEdg->pl().getChilds()[childPointer]->getFrom();
         }
 
-        if (to == curNode) {
+        if (to == m[curChldTo]) {
+          prev = curChldTo;
           childPointer++;
         } else {
+          std::cerr << " ** SKIPPING @ " << m[curChldTo]->pl().toString() << std::endl;
           for (auto lo : combEdg->pl().getChilds()[childPointer]->pl().getLines()) {
-            curNode->pl().addLineNotServed(lo.line);
+            to->pl().addLineNotServed(lo.line);
           }
         }
-        prev = curNode;
       }
     }
   }
