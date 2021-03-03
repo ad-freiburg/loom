@@ -342,12 +342,12 @@ void Drawing::getLineGraph(LineGraph* target) const {
       auto segPair = *it;
       size_t segId = segPair.first;
       bool reverse = segPair.second;
-      auto child = combEdg->pl().getChilds()[childPtr];
 
       auto sCopy = segmentEdges[segId];
       if (reverse) std::reverse(sCopy.begin(), sCopy.end());
 
       for (auto edge : sCopy) {
+        auto child = combEdg->pl().getChilds()[childPtr];
         auto from = reverse ? edge->getTo() : edge->getFrom();
         auto to = edge->getOtherNd(from);
 
