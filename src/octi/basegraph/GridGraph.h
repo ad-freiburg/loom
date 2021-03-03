@@ -83,7 +83,8 @@ class GridGraph : public BaseGraph {
   virtual GridNode* getGrNdById(size_t id) const;
   virtual const GridEdge* getGrEdgById(std::pair<size_t, size_t> id) const;
   virtual void addResEdg(GridEdge* ge, CombEdge* cg);
-  virtual std::set<CombEdge*> getResEdgs(GridEdge* ge);
+  virtual std::set<CombEdge*> getResEdgs(const GridEdge* ge) const;
+  virtual std::set<CombEdge*> getResEdgsDirInd(const GridEdge* ge) const;
 
   virtual CrossEdgPairs getCrossEdgPairs() const;
 

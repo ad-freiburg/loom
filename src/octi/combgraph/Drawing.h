@@ -2,22 +2,22 @@
 #define OCTI_COMBGRAPH_DRAWING_H_
 
 #include <map>
-#include "octi/combgraph/CombGraph.h"
 #include "octi/basegraph/BaseGraph.h"
+#include "octi/combgraph/CombGraph.h"
 #include "util/graph/Dijkstra.h"
 
 namespace octi {
 namespace combgraph {
 
+using octi::basegraph::BaseGraph;
+using octi::basegraph::GridEdge;
+using octi::basegraph::GridEdgePL;
+using octi::basegraph::GridNode;
+using octi::basegraph::GridNodePL;
+using octi::combgraph::CombEdge;
 using octi::combgraph::CombGraph;
 using octi::combgraph::CombNode;
-using octi::combgraph::CombEdge;
 using util::graph::Dijkstra;
-using octi::basegraph::BaseGraph;
-using octi::basegraph::GridNode;
-using octi::basegraph::GridEdge;
-using octi::basegraph::GridNodePL;
-using octi::basegraph::GridEdgePL;
 
 typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
 
@@ -27,6 +27,30 @@ struct Score {
   double hop;
   double dense;
   double full;
+};
+
+struct NodeOnSeg {
+  shared::linegraph::LineNode* n;
+  double progression;
+};
+
+inline bool operator<(const NodeOnSeg& lh, const NodeOnSeg& rh) {
+  return lh.progression < rh.progression;
+}
+
+struct LineEdgeOnSeg {
+  shared::linegraph::LineEdge* n;
+  shared::linegraph::LineNode* start;
+  shared::linegraph::LineNode* end;
+};
+
+struct Segment {
+  GridNode* start;
+  GridNode* end;
+  std::vector<std::pair<size_t, size_t>> path;
+  PolyLine<double> geom;
+  std::vector<NodeOnSeg> nodesOnSeg;
+  std::set<CombEdge*> combEdges;
 };
 
 class Drawing {
@@ -76,7 +100,7 @@ class Drawing {
 
   double recalcBends(const CombNode* nd);
 };
-}
-}
+}  // namespace combgraph
+}  // namespace octi
 
 #endif  // OCTI_COMBGRAPH_DRAWING_H_

@@ -121,7 +121,8 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   virtual GridNode* getGrNdById(size_t id) const = 0;
   virtual const GridEdge* getGrEdgById(std::pair<size_t, size_t> id) const = 0;
   virtual void addResEdg(GridEdge* ge, CombEdge* cg) = 0;
-  virtual std::set<CombEdge*> getResEdgs(GridEdge* ge) = 0;
+  virtual std::set<CombEdge*> getResEdgs(const GridEdge* ge) const = 0;
+  virtual std::set<CombEdge*> getResEdgsDirInd(const GridEdge* ge) const = 0;
 
   virtual void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
                                   double pen) = 0;

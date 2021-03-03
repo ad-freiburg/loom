@@ -235,10 +235,27 @@ void GridGraph::addResEdg(GridEdge* ge, CombEdge* ce) {
 }
 
 // _____________________________________________________________________________
-std::set<CombEdge*> GridGraph::getResEdgs(GridEdge* ge) {
+std::set<CombEdge*> GridGraph::getResEdgs(const GridEdge* ge) const {
   if (!ge) return {};
-  if (_resEdgs.count(ge)) return _resEdgs.find(ge)->second;
+  if (_resEdgs.count(const_cast<GridEdge*>(ge)))
+    return _resEdgs.find(const_cast<GridEdge*>(ge))->second;
   return {};
+}
+
+// _____________________________________________________________________________
+std::set<CombEdge*> GridGraph::getResEdgsDirInd(const GridEdge* ge) const {
+  std::set<CombEdge*> ret;
+  if (!ge) return {};
+  auto otherEdge = getEdg(ge->getTo(), ge->getFrom());
+  if (_resEdgs.count(const_cast<GridEdge*>(ge))) {
+    const auto& tmp = _resEdgs.find(const_cast<GridEdge*>(ge))->second;
+    ret.insert(tmp.begin(), tmp.end());
+  }
+  if (otherEdge && _resEdgs.count(const_cast<GridEdge*>(otherEdge))) {
+    const auto& tmp = _resEdgs.find(const_cast<GridEdge*>(otherEdge))->second;
+    ret.insert(tmp.begin(), tmp.end());
+  }
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -273,7 +290,8 @@ GridEdge* GridGraph::getNEdg(const GridNode* a, const GridNode* b) const {
 }
 
 // _____________________________________________________________________________
-void GridGraph::getSettledAdjEdgs(GridNode* n, CombNode* origNd, CombEdge* outgoing[8]) {
+void GridGraph::getSettledAdjEdgs(GridNode* n, CombNode* origNd,
+                                  CombEdge* outgoing[8]) {
   size_t x = n->pl().getX();
   size_t y = n->pl().getY();
 
@@ -825,7 +843,7 @@ double GridGraph::getCellSize() const { return _cellSize; }
 
 // _____________________________________________________________________________
 size_t GridGraph::getGrNdDeg(const CombNode* nd, size_t x, size_t y) const {
-  auto grNd =  getNode(x, y);
+  auto grNd = getNode(x, y);
   if (!grNd) return 0;
 
   size_t closed = 0;
