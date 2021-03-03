@@ -429,27 +429,26 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
 
     for (size_t p = 0; p < e->pl().getLines().size(); p++) {
       auto lineAtPos = e->pl().lineOccAtPos(_config.find(e)->second[p]).line;
-      for (auto l : served) {
-        if (proced.count(l)) continue;
-        if (l != lineAtPos) {
-          if (lineBgeo.size()) {
-            bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat,
-                         endStrat, circleStrat);
+      if (proced.count(lineAtPos)) continue;
+      if (!served.count(lineAtPos)) {
+        if (lineBgeo.size()) {
+          bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat,
+                       endStrat, circleStrat);
 
-            Polygon<double> retPoly;
-            for (const auto& p : ret[0].outer()) {
-              retPoly.getOuter().push_back({p.get<0>(), p.get<1>()});
-            }
-            retPolys.push_back(retPoly);
+          Polygon<double> retPoly;
+          for (const auto& p : ret[0].outer()) {
+            retPoly.getOuter().push_back({p.get<0>(), p.get<1>()});
           }
-          continue;
+          retPolys.push_back(retPoly);
+          lineBgeo.clear();
         }
-        proced.insert(l);
-
-        auto pos = linePosOn(*n->pl().frontFor(e), l, _config, false);
-
-        lineBgeo.push_back({pos.getX(), pos.getY()});
+        continue;
       }
+      proced.insert(lineAtPos);
+
+      auto pos = linePosOn(*n->pl().frontFor(e), lineAtPos, _config, false);
+
+      lineBgeo.push_back({pos.getX(), pos.getY()});
     }
 
     // last entry
