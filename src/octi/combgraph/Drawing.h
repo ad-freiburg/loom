@@ -27,6 +27,7 @@ struct Score {
   double hop;
   double dense;
   double full;
+  uint64_t violations;
 };
 
 struct NodeOnSeg {
@@ -60,6 +61,7 @@ class Drawing {
   Drawing() : _c(std::numeric_limits<double>::infinity()), _gg(0){};
 
   double score() const;
+  uint64_t violations() const;
   Score fullScore() const;
   void crumble();
 

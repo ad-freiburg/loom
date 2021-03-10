@@ -30,10 +30,10 @@ using octi::combgraph::CombNode;
 namespace octi {
 namespace basegraph {
 
-const static double INF = std::numeric_limits<float>::infinity();
-const static double SOFT_INF = 5000;
+const static double INF = std::numeric_limits<double>::infinity();
 
-// const static double SOFT_INF = INF;
+// this allows for 10000 topology violations
+const static double SOFT_INF = std::numeric_limits<float>::max() / 10000;
 
 
 enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL, OCTIHANANGRID, OCTIQUADTREE };

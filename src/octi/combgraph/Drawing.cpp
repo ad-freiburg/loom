@@ -26,17 +26,21 @@ using util::graph::Dijkstra;
 double Drawing::score() const { return _c; }
 
 // _____________________________________________________________________________
+uint64_t Drawing::violations() const { return _c / basegraph::SOFT_INF; }
+
+// _____________________________________________________________________________
 void Drawing::setBaseGraph(const BaseGraph* gg) { _gg = gg; }
 
 // _____________________________________________________________________________
 Score Drawing::fullScore() const {
-  Score ret{0, 0, 0, 0, 0};
+  Score ret{0, 0, 0, 0, 0, 0};
 
   for (auto c : _ndReachCosts) ret.move += c.second;
   for (auto c : _ndBndCosts) ret.bend += c.second;
   for (auto c : _edgCosts) ret.hop += c.second;
   for (auto c : _springCosts) ret.dense += c.second;
   ret.full = _c;
+  ret.violations = violations();
 
   return ret;
 }

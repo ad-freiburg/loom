@@ -124,8 +124,6 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
   }
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
 
-  bool found = false;
-
   size_t INITIAL_TRIES = 100;
   size_t LOCAL_SEARCH_ITERS = 100;
   double CONVERGENCE_THRESHOLD = 0.05;
@@ -133,6 +131,7 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
   GeoPensMap enfGeoPens;
   const GeoPensMap* geoPens = 0;
 
+  // get a non-randomized initial ordering
   auto initOrder = getOrdering(cg, false);
 
   if (enfGeoPen > 0) {
@@ -153,46 +152,60 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
     LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(obstacles) << "ms)";
   }
 
+  // this is the best drawing
   Drawing drawing(ggs[0]);
 
-  for (size_t i = 0; i < INITIAL_TRIES; i++) {
-    T_START(draw);
-    std::vector<CombEdge*> iterOrder;
-    if (i != 0)
-      iterOrder = getOrdering(cg, true);
-    else
-      iterOrder = initOrder;
+  // try our default edge ordering first, without any randomization
+  T_START(draw);
+  auto status = draw(initOrder, ggs[0], &drawing, drawing.score(), maxGrDist,
+                     geoPens, abortAfter);
 
-    auto error = draw(iterOrder, ggs[0], &drawing, drawing.score(), maxGrDist,
-                      geoPens, abortAfter);
+  statLine(status, "Try <init>", drawing, T_STOP(draw), "");
+  if (status != DRAWN) drawing.crumble();
 
-    switch (error) {
-      case DRAWN:
-        LOGTO(DEBUG, std::cerr)
-            << " ++ Try " << i << ", score " << drawing.score() << ", ("
-            << T_STOP(draw) << " ms)";
-        found = true;
-        break;
-      case NO_PATH:
-        LOGTO(DEBUG, std::cerr) << " ++ Try " << i << ", score <inf>"
-                                << ", next <no path found>"
-                                << " (" << T_STOP(draw) << " ms)";
-        break;
-      case NO_CANDS:
-        LOGTO(DEBUG, std::cerr) << " ++ Try " << i << ", score <inf>"
-                                << ", next <no cands found>"
-                                << " (" << T_STOP(draw) << " ms)";
-        break;
+  // TODO: better check topology violations
+  if (drawing.score() == INF || drawing.violations()) {
+    bool abort = false;
+
+#pragma omp parallel for
+    for (size_t btch = 0; btch < jobs; btch++) {
+      for (size_t i = 0; i < INITIAL_TRIES / jobs; i++) {
+        size_t tryNr = INITIAL_TRIES / jobs * btch + i;
+        if (abort) continue;
+        T_START(draw);
+        Drawing drawingCp(ggs[btch]);
+
+        // get a randomized ordering
+        std::vector<CombEdge*> iterOrder = getOrdering(cg, true);
+
+        auto status = draw(iterOrder, ggs[btch], &drawingCp, drawingCp.score(),
+                           maxGrDist, geoPens, abortAfter);
+
+        drawingCp.eraseFromGrid(ggs[btch]);
+
+#pragma omp critical
+        {
+          if (status == DRAWN && drawingCp.violations() == 0) {
+            // found solution without topology violations, immediately abort
+            abort = true;
+            statLine(status, std::string("Try ") + std::to_string(tryNr),
+                     drawingCp, T_STOP(draw), "**");
+          }
+          if (status == DRAWN && drawingCp.score() < drawing.score()) {
+            drawing = drawingCp;
+            statLine(status, std::string("Try ") + std::to_string(tryNr),
+                     drawingCp, T_STOP(draw), "*");
+          } else {
+            drawingCp.crumble();
+            statLine(status, std::string("Try ") + std::to_string(tryNr),
+                     drawingCp, T_STOP(draw), "");
+          }
+        }
+      }
     }
-
-    drawing.eraseFromGrid(ggs[0]);
-    if (found)
-      break;
-    else
-      drawing.crumble();
   }
 
-  if (!found) throw NoEmbeddingFoundExc();
+  if (drawing.score() == INF) throw NoEmbeddingFoundExc();
 
   LOGTO(DEBUG, std::cerr) << "Done.";
 
@@ -200,6 +213,8 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
 
   size_t iters = 0;
 
+  LOGTO(DEBUG, std::cerr) << "Initial score: " << drawing.score() << " ("
+                          << drawing.violations() << " topology violations).";
   LOGTO(DEBUG, std::cerr) << "Starting local search...";
 
   // dont use local search if abortAfter is set
@@ -303,7 +318,8 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
 
   drawing.getLineGraph(outTg);
   auto fullScore = drawing.fullScore();
-  LOGTO(DEBUG, std::cerr) << "Hop costs: " << fullScore.hop
+  LOGTO(DEBUG, std::cerr) << "Topo violations: " << drawing.violations()
+                          << ", hop costs: " << fullScore.hop
                           << ", bend costs: " << fullScore.bend
                           << ", mv costs: " << fullScore.move
                           << ", dense costs: " << fullScore.dense;
@@ -641,5 +657,27 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, const CombGraph& cg,
       return new OctiQuadTree(bbox, cg, cellSize, spacer, pens);
     default:
       return 0;
+  }
+}
+
+// _____________________________________________________________________________
+void Octilinearizer::statLine(Undrawable status, const std::string& msg,
+                              const Drawing& drawing, double ms,
+                              const std::string& mark) const {
+  switch (status) {
+    case DRAWN:
+      LOGTO(DEBUG, std::cerr) << " ++ " << msg << ", score " << drawing.score()
+                              << ", (" << ms << " ms) " << mark;
+      break;
+    case NO_PATH:
+      LOGTO(DEBUG, std::cerr) << " ++ " << msg << " score <inf>"
+                              << " <no path>"
+                              << " (" << ms << " ms)" << mark;
+      break;
+    case NO_CANDS:
+      LOGTO(DEBUG, std::cerr) << " ++ " << msg << ", score <inf>"
+                              << " <no cands>"
+                              << " (" << ms << " ms)" << mark;
+      break;
   }
 }

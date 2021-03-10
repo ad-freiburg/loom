@@ -8,8 +8,8 @@
 #include <iostream>
 #include <set>
 #include "json/json.hpp"
-#include "octi/Octilinearizer.h"
 #include "octi/Enlarger.h"
+#include "octi/Octilinearizer.h"
 #include "octi/basegraph/BaseGraph.h"
 #include "octi/combgraph/CombGraph.h"
 #include "octi/config/ConfigReader.h"
@@ -29,8 +29,8 @@
 using std::string;
 using namespace octi;
 
-using octi::Octilinearizer;
 using octi::Enlarger;
+using octi::Octilinearizer;
 using octi::basegraph::BaseGraph;
 using util::geo::dist;
 using util::geo::DPolygon;
@@ -56,9 +56,8 @@ double avgStatDist(const LineGraph& g) {
 const CombNode* getCenterNd(const CombGraph* cg) {
   const CombNode* ret = 0;
   for (auto nd : cg->getNds()) {
-    if (!ret ||
-        LineGraph::getLDeg(nd->pl().getParent()) >
-            LineGraph::getLDeg(ret->pl().getParent())) {
+    if (!ret || LineGraph::getLDeg(nd->pl().getParent()) >
+                    LineGraph::getLDeg(ret->pl().getParent())) {
       ret = nd;
     }
   }
@@ -163,7 +162,7 @@ int main(int argc, char** argv) {
   // e.enlarge(cg, 100);
   // avgDist = avgStatDist(tg);
   // LOGTO(DEBUG, std::cerr)
-      // << "Average adj. node distance after local enlargement is " << avgDist;
+  // << "Average adj. node distance after local enlargement is " << avgDist;
 
   box = util::geo::pad(box, gridSize + 1);
 
@@ -196,8 +195,8 @@ int main(int argc, char** argv) {
     T_START(octi);
     try {
       sc = oct.draw(cg, box, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
-                    cfg.maxGrDist, cfg.restrLocSearch,
-                    cfg.enfGeoPen, cfg.obstacles, cfg.abortAfter);
+                    cfg.maxGrDist, cfg.restrLocSearch, cfg.enfGeoPen,
+                    cfg.obstacles, cfg.abortAfter);
       time = T_STOP(octi);
     } catch (const NoEmbeddingFoundExc& exc) {
       LOG(ERROR) << exc.what();
@@ -211,11 +210,13 @@ int main(int argc, char** argv) {
 
   // translate score to JSON
   util::json::Dict jsonScore{
-      {"scores", util::json::Dict{{"total_score", sc.full},
-                                  {"density-score", sc.dense},
-                                  {"bend-score", sc.bend},
-                                  {"hop-score", sc.hop},
-                                  {"move-score", sc.move}}},
+      {"scores",
+       util::json::Dict{{"total_score", sc.full},
+                        {"topology_violations", util::json::Int(sc.violations)},
+                        {"density-score", sc.dense},
+                        {"bend-score", sc.bend},
+                        {"hop-score", sc.hop},
+                        {"move-score", sc.move}}},
       {"pens",
        util::json::Dict{
            {"density-pen", cfg.pens.densityPen},

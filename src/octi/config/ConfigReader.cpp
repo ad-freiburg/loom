@@ -143,5 +143,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     cfg->baseGraphType = BaseGraphType::OCTIQUADTREE;
   } else if (baseGraphStr == "octihanan") {
     cfg->baseGraphType = BaseGraphType::OCTIHANANGRID;
+  } else {
+    LOG(ERROR) << "Unknown base graph type " << baseGraphStr << std::endl;
+    exit(0);
   }
 }

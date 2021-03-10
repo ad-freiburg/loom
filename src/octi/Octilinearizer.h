@@ -160,6 +160,10 @@ class Octilinearizer {
 
   std::set<GridNode*> getCands(CombNode* cmBnd, const SettledPos& settled,
                                basegraph::BaseGraph* gg, size_t maxGridDis);
+
+  void statLine(Undrawable status, const std::string& msg,
+                const Drawing& drawing, double ms,
+                const std::string& mark) const;
 };
 
 }  // namespace octi

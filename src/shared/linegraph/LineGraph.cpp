@@ -837,7 +837,6 @@ breakfor:
             (n1->pl().stops().size() == 0 ||
              e->getOtherNd(n1)->pl().stops().size() == 0)) {
 
-          std::cerr << "Contracting " << e << std::endl;
           contractEdge(e);
           goto breakfor;
         }
