@@ -107,8 +107,6 @@ GridEdge* OrthoRadialGraph::getNEdg(const GridNode* a,
 void OrthoRadialGraph::writeInitialCosts() {
   double angStep = 2.0 * M_PI / _numBeams;
 
-  double sY = 1 / angStep;
-
   double c_0 = _c.p_45 - _c.p_135;
 
   for (size_t x = 0; x < _numBeams; x++) {
@@ -124,14 +122,15 @@ void OrthoRadialGraph::writeInitialCosts() {
         auto oPort = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
         auto e = getEdg(port, oPort);
 
-        // this is percentage the hop length is longer than the smallest cell size
+        // this is percentage the hop length is longer than the smallest cell
+        // size
         double sX = angStep / angStep * y;
 
         // here, the costs are normalized to always
         // represent the map lengths exactly
         if (i % 2 == 0) {
           // vertical hops always have the same length
-          e->pl().setCost((_c.verticalPen + c_0) * sY - c_0);
+          e->pl().setCost((_c.verticalPen + c_0) - c_0);
         } else {
           // horizontal hops get bigger with higher y (= higher radius)
           e->pl().setCost((_c.horizontalPen + c_0) * sX - c_0);
@@ -142,7 +141,8 @@ void OrthoRadialGraph::writeInitialCosts() {
 }
 
 // _____________________________________________________________________________
-double OrthoRadialGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) const {
+double OrthoRadialGraph::ndMovePen(const CombNode* cbNd,
+                                   const GridNode* grNd) const {
   // the move penalty has to be at least the max cost of saving a single
   // grid hop - otherwise we could move the node closer and closer to the
   // other node without ever increasing the total cost.
@@ -156,8 +156,7 @@ double OrthoRadialGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) c
   double rat = 1 / angStep;
 
   double c_0 = _c.p_45 - _c.p_135;
-  double penPerGrid =
-      PEN + c_0 + rat * fmax(_c.verticalPen, _c.horizontalPen);
+  double penPerGrid = PEN + c_0 + rat * fmax(_c.verticalPen, _c.horizontalPen);
 
   // real distance between grid node and input node
   double d = dist(*cbNd->pl().getGeom(), *grNd->pl().getGeom());
@@ -300,32 +299,9 @@ PolyLine<double> OrthoRadialGraph::geomFromPath(
 
       pl << *toPar->pl().getGeom();
 
-      // if (pl.getLine().size() > 0 &&
-      // dist(pl.getLine().back(), *f->getFrom()->pl().getGeom()) > 0) {
-      // BezierCurve<double> bc(pl.getLine().back(),
-      // *f->getFrom()->pl().getParent()->pl().getGeom(),
-      // *f->getFrom()->pl().getParent()->pl().getGeom(),
-      // *f->getFrom()->pl().getGeom());
-
-      // for (auto p : bc.render(10).getLine()) pl << p;
-      // } else {
-      // pl << *f->getFrom()->pl().getParent()->pl().getGeom();
-      // }
-
-      // pl << *f->getFrom()->pl().getGeom();
-      // pl << *f->getTo()->pl().getGeom();
       pl.simplify(1);
     }
   }
-
-  // if (res.size())
-  // pl << *getEdg(getGrNdById(res.front().first),
-  // getGrNdById(res.front().second))
-  // ->getTo()
-  // ->pl()
-  // .getParent()
-  // ->pl()
-  // .getGeom();
 
   return pl;
 }

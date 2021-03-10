@@ -13,6 +13,7 @@
 #include "octi/basegraph/OctiHananGraph.h"
 #include "octi/basegraph/OctiQuadTree.h"
 #include "octi/basegraph/OrthoRadialGraph.h"
+#include "octi/basegraph/PseudoOrthoRadialGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -111,9 +112,9 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
   auto gg = newBaseGraph(box, cg, gridSize, borderRad, pens);
   gg->init();
 
-  // util::geo::output::GeoGraphJsonOutput out;
-  // out.print(*gg, std::cout);
-  // exit(0);
+  util::geo::output::GeoGraphJsonOutput out;
+  out.print(*gg, std::cout);
+  exit(0);
 
   LOGTO(DEBUG, std::cerr) << "Creating grid graphs... ";
   T_START(ggraph);
@@ -651,6 +652,8 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, const CombGraph& cg,
       return new GridGraph(bbox, cellSize, spacer, pens);
     case ORTHORADIAL:
       return new OrthoRadialGraph(bbox, cellSize, spacer, pens);
+    case PSEUDOORTHORADIAL:
+      return new PseudoOrthoRadialGraph(bbox, cellSize, spacer, pens);
     case OCTIHANANGRID:
       return new OctiHananGraph(bbox, cg, cellSize, spacer, pens);
     case OCTIQUADTREE:

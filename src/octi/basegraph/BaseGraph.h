@@ -35,8 +35,14 @@ const static double INF = std::numeric_limits<double>::infinity();
 // this allows for 10000 topology violations
 const static double SOFT_INF = std::numeric_limits<float>::max() / 10000;
 
-
-enum BaseGraphType { OCTIGRID, GRID, ORTHORADIAL, OCTIHANANGRID, OCTIQUADTREE };
+enum BaseGraphType {
+  OCTIGRID,
+  GRID,
+  ORTHORADIAL,
+  PSEUDOORTHORADIAL,
+  OCTIHANANGRID,
+  OCTIQUADTREE
+};
 
 typedef util::graph::Node<GridNodePL, GridEdgePL> GridNode;
 typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
@@ -69,7 +75,8 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   virtual void init() = 0;
   virtual double getCellSize() const = 0;
 
-  virtual NodeCost nodeBendPen(GridNode* n, CombNode* origNode, CombEdge* e) = 0;
+  virtual NodeCost nodeBendPen(GridNode* n, CombNode* origNode,
+                               CombEdge* e) = 0;
   virtual NodeCost topoBlockPen(GridNode* n, CombNode* origNode,
                                 CombEdge* e) = 0;
   virtual NodeCost spacingPen(GridNode* n, CombNode* origNode, CombEdge* e) = 0;
