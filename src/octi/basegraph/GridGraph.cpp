@@ -498,6 +498,7 @@ std::priority_queue<Candidate> GridGraph::getGridNdCands(const DPoint& p,
 
   DBox b(DPoint(p.getX() - maxD, p.getY() - maxD),
          DPoint(p.getX() + maxD, p.getY() + maxD));
+
   _grid.get(b, &neigh);
 
   for (auto n : neigh) {
@@ -629,7 +630,8 @@ void GridGraph::closeSinkFr(GridNode* n) {
 
 // _____________________________________________________________________________
 GridNode* GridGraph::getSettled(const CombNode* cnd) const {
-  if (_settled.count(cnd)) return _settled.find(cnd)->second;
+  auto i = _settled.find(cnd);
+  if (i != _settled.end()) return i->second;
   return 0;
 }
 

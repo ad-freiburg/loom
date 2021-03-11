@@ -159,6 +159,8 @@ void OctiHananGraph::init() {
   std::vector<GridNode*> xSorted;
   std::vector<GridNode*> ySorted;
 
+  _ndIdx.resize(_grid.getXWidth() * _grid.getYHeight());
+
   std::map<const CombNode*, std::pair<size_t, size_t>> coords;
 
   // write nodes
@@ -280,48 +282,48 @@ void OctiHananGraph::init() {
 
   for (size_t y = 0; y < _grid.getYHeight(); y++) {
     for (size_t i = 1; i < yAct[y].size(); i++) {
-      connectNodes(yAct[y][i-1], yAct[y][i], 2);
+      connectNodes(yAct[y][i - 1], yAct[y][i], 2);
     }
   }
 
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t i = 1; i < xAct[x].size(); i++) {
-      connectNodes(xAct[x][i-1], xAct[x][i], 0);
+      connectNodes(xAct[x][i - 1], xAct[x][i], 0);
     }
   }
 
   for (size_t xi = 0; xi < _grid.getXWidth() + _grid.getYHeight(); xi++) {
     for (size_t i = 1; i < xyAct[xi].size(); i++) {
-      connectNodes(xyAct[xi][i-1], xyAct[xi][i], 1);
+      connectNodes(xyAct[xi][i - 1], xyAct[xi][i], 1);
     }
   }
 
   for (size_t yi = 0; yi < _grid.getXWidth() + _grid.getYHeight(); yi++) {
     for (size_t i = 1; i < yxAct[yi].size(); i++) {
-      connectNodes(yxAct[yi][i-1], yxAct[yi][i], 3);
+      connectNodes(yxAct[yi][i - 1], yxAct[yi][i], 3);
     }
   }
 
   // diagonal intersections
   for (size_t i = 0; i < _grid.getXWidth() + _grid.getYHeight(); i++) {
     for (size_t j = 1; j < xyAct[i].size(); j++) {
-      auto ndA = xyAct[i][j -1];
+      auto ndA = xyAct[i][j - 1];
       auto ndB = xyAct[i][j];
-      if (ndA == ndB) continue; // there may be duplicates
+      if (ndA == ndB) continue;  // there may be duplicates
 
       auto ea = getNEdg(ndA, ndB);
       auto eb = getNEdg(ndB, ndA);
 
       size_t yi = ndA->pl().getX() + ndA->pl().getY() + 1;
       if (yi < yxAct.size() && yxAct[yi].size()) {
-
-        auto it = std::upper_bound(yxAct[yi].begin(), yxAct[yi].end(), ndA, sortByX);
+        auto it =
+            std::upper_bound(yxAct[yi].begin(), yxAct[yi].end(), ndA, sortByX);
 
         if (it != yxAct[yi].end() && it != yxAct[yi].begin()) {
           // it is the first element with an x greater than ndA, which means
           // that the preceeding element at it-1 has a different x, so we are
           // filtering out duplicates here automatically
-          auto oNdA = *(it-1);
+          auto oNdA = *(it - 1);
           auto oNdB = *(it);
           assert(oNdA != oNdB);
 
@@ -353,9 +355,12 @@ void OctiHananGraph::connectNodes(GridNode* grNdFr, GridNode* grNdTo,
   int yDist = labs((int)grNdFr->pl().getY() - (int)grNdTo->pl().getY());
 
   double cost = 0;
-  if (p % 4 == 0) cost = (_c.verticalPen + _heurHopCost) * yDist - _heurHopCost;
-  else if ((p + 2) % 4 == 0) cost = (_c.horizontalPen + _heurHopCost) * xDist - _heurHopCost;
-  else if (p % 2) cost = (_c.diagonalPen + _heurHopCost) * yDist - _heurHopCost;
+  if (p % 4 == 0)
+    cost = (_c.verticalPen + _heurHopCost) * yDist - _heurHopCost;
+  else if ((p + 2) % 4 == 0)
+    cost = (_c.horizontalPen + _heurHopCost) * xDist - _heurHopCost;
+  else if (p % 2)
+    cost = (_c.diagonalPen + _heurHopCost) * yDist - _heurHopCost;
 
   auto e = new GridEdge(fr, to, GridEdgePL(9, false, false));
   e->pl().setId(_edgeCount);
@@ -379,8 +384,8 @@ GridNode* OctiHananGraph::writeNd(size_t x, size_t y) {
 
   GridNode* n = addNd(DPoint(xPos, yPos));
   n->pl().setId(_nds.size());
-  _ndIdx[{x, y}] = _nds.size();
   _nds.push_back(n);
+  _ndIdx[x * _grid.getYHeight() + y] = _nds.size();
   n->pl().setSink();
   _grid.add(x, y, n);
   n->pl().setXY(x, y);
@@ -446,9 +451,9 @@ size_t OctiHananGraph::maxDeg() const { return 8; }
 
 // _____________________________________________________________________________
 GridNode* OctiHananGraph::getNode(size_t x, size_t y) const {
-  auto i = _ndIdx.find({x, y});
-  if (i == _ndIdx.end()) return 0;
-  return _nds[i->second];
+  auto a = _ndIdx[x * _grid.getYHeight() + y];
+  if (a == 0) return 0;
+  return _nds[a - 1];
 }
 
 // _____________________________________________________________________________
