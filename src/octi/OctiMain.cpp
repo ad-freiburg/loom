@@ -166,7 +166,8 @@ int main(int argc, char** argv) {
 
   box = util::geo::pad(box, gridSize + 1);
 
-  if (cfg.baseGraphType == octi::basegraph::BaseGraphType::ORTHORADIAL) {
+  if (cfg.baseGraphType == octi::basegraph::BaseGraphType::ORTHORADIAL ||
+      cfg.baseGraphType == octi::basegraph::BaseGraphType::PSEUDOORTHORADIAL) {
     auto centerNd = getCenterNd(&cg);
 
     std::cerr << "Center node is "

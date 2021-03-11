@@ -124,13 +124,13 @@ void OrthoRadialGraph::writeInitialCosts() {
 
         // this is percentage the hop length is longer than the smallest cell
         // size
-        double sX = angStep / angStep * y;
+        double sX = (angStep * y) / angStep;
 
         // here, the costs are normalized to always
         // represent the map lengths exactly
         if (i % 2 == 0) {
           // vertical hops always have the same length
-          e->pl().setCost((_c.verticalPen + c_0) - c_0);
+          e->pl().setCost((_c.verticalPen));
         } else {
           // horizontal hops get bigger with higher y (= higher radius)
           e->pl().setCost((_c.horizontalPen + c_0) * sX - c_0);

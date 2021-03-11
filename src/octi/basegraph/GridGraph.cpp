@@ -407,8 +407,6 @@ NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd, CombEdge* edg) {
       }
       if (neighbor && !out[cur] && neighbor->pl().isClosed() &&
           !neighbor->pl().isSettled()) {
-        // std::cerr << "For node " << nd->pl().getX() << "," << nd->pl().getY()
-        // << " neighbor at " << cur << " is closed!" << std::endl;
         addSpace++;
       }
       addC[cur] = -1.0 * std::numeric_limits<double>::max();

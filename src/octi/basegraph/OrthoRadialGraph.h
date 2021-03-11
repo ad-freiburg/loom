@@ -19,9 +19,7 @@ class OrthoRadialGraph : public GridGraph {
                       bbox, util::geo::getBoundingBox(util::geo::rotate(
                                 convexHull(bbox), 90, centroid(bbox)))),
                   cellSize, spacer, pens) {
-    // we want the cell size at roughly 1/4 of the radius to match the given
-    // parameter
-    double circum = (_grid.getYHeight() / 8) * cellSize * 2 * M_PI;
+    double circum = cellSize * 2 * M_PI;
     _numBeams = circum / cellSize;
   }
 
