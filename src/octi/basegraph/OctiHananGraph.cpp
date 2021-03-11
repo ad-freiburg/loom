@@ -21,18 +21,11 @@ using util::geo::DPoint;
 
 // _____________________________________________________________________________
 GridNode* OctiHananGraph::neigh(size_t cx, size_t cy, size_t i) const {
-  auto nd = getNode(cx, cy);
-  if (i > 7) return nd;
-  if (!nd->pl().getPort(i)) return 0;
+  auto a = _ndIdx[cx * _grid.getYHeight() + cy];
+  if (!a) return 0;
 
-  // TODO: not very efficient
-  for (auto edg : nd->pl().getPort(i)->getAdjList()) {
-    auto check = edg->getOtherNd(nd->pl().getPort(i))->pl().getParent();
-    if (check != nd) {
-      return check;
-    }
-  }
-  return 0;
+  if (i > 7) return _nds[a - 1];
+  return _neighs[a - 1 + i];
 }
 
 // _____________________________________________________________________________
@@ -280,6 +273,10 @@ void OctiHananGraph::init() {
     std::sort(yxAct[i].begin(), yxAct[i].end(), sortByX);
   }
 
+
+  // init the _neighs size
+  _neighs.resize(_nds.size() * 8);
+
   for (size_t y = 0; y < _grid.getYHeight(); y++) {
     for (size_t i = 1; i < yAct[y].size(); i++) {
       connectNodes(yAct[y][i - 1], yAct[y][i], 2);
@@ -368,6 +365,9 @@ void OctiHananGraph::connectNodes(GridNode* grNdFr, GridNode* grNdTo,
   _edgeCount++;
   fr->addEdge(e);
   to->addEdge(e);
+
+  _neighs[grNdFr->pl().getId() + p] = grNdTo;
+  _neighs[grNdTo->pl().getId() + (p + maxDeg() / 2) % maxDeg()] = grNdFr;
 
   auto f = new GridEdge(to, fr, GridEdgePL(9, false, false));
   f->pl().setId(_edgeCount);

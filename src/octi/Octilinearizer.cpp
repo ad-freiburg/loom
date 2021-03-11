@@ -126,7 +126,7 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
 
   size_t INITIAL_TRIES = 100;
-  size_t LOCAL_SEARCH_ITERS = 0;
+  size_t LOCAL_SEARCH_ITERS = 100;
   double CONVERGENCE_THRESHOLD = 0.05;
 
   GeoPensMap enfGeoPens;
@@ -378,12 +378,6 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
   size_t i = 0;
 
-  double t =0;
-
-  double rtPairT = 0;
-  double spT = 0;
-  double oSinkT = 0;
-
   for (auto cmbEdg : ord) {
     double cutoff = globCutoff - drawing->score();
     i++;
@@ -396,10 +390,8 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     std::set<GridNode*> frGrNds, toGrNds;
 
-    T_START(A);
     std::tie(frGrNds, toGrNds) =
         getRtPair(frCmbNd, toCmbNd, settled, gg, maxGrDist);
-    rtPairT += T_STOP(A);
 
     if (frGrNds.size() == 0 || toGrNds.size() == 0) return NO_CANDS;
 
@@ -418,7 +410,6 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     double costOffsetFrom = 0;
     double costOffsetTo = 0;
 
-    T_START(B);
     // open the source nodes
     for (auto n : frGrNds) {
       if (gg->isSettled(frCmbNd)) {
@@ -440,7 +431,6 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
         gg->openSinkTo(n, costOffsetTo + gg->ndMovePen(toCmbNd, n));
       }
     }
-    oSinkT += T_STOP(B);
 
     // IMPORTANT: node costs are only written to sinks if they are already
     // settled. There is no need to add node costs before, as they handle
@@ -478,9 +468,7 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
       // auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL,
       // &nL);
-      T_START(SP);
-      auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
-      t += T_STOP(SP);
+      Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
 
       // for (auto e : eL) std::cerr << "E " << e << " " <<
       // e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> "
@@ -551,10 +539,6 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
     settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg, i);
   }
-
-  std::cerr << "RT PAIR T " << rtPairT << std::endl;
-  std::cerr << "SP T " << spT << std::endl;
-  std::cerr << "OSINK T " << oSinkT << std::endl;
 
   return DRAWN;
 }

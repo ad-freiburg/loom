@@ -35,6 +35,7 @@ class OctiHananGraph : public OctiGridGraph {
 
   const combgraph::CombGraph& _cg;
   std::vector<size_t> _ndIdx;
+  std::vector<GridNode*> _neighs;
 
   std::map<GridEdge*, std::vector<std::pair<GridEdge*, GridEdge*>>> _edgePairs;
 };
