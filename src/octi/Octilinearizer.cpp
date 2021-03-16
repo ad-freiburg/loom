@@ -14,6 +14,7 @@
 #include "octi/basegraph/OctiQuadTree.h"
 #include "octi/basegraph/OrthoRadialGraph.h"
 #include "octi/basegraph/PseudoOrthoRadialGraph.h"
+#include "octi/basegraph/ConvexHullOctiGridGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -164,9 +165,15 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
   statLine(status, "Try <init>", drawing, T_STOP(draw), "");
   if (status != DRAWN) drawing.crumble();
 
+  size_t a = 1;
+
   // TODO: better check topology violations
   if (drawing.score() == INF || drawing.violations()) {
     bool abort = false;
+    // clear the initial grid
+    drawing.eraseFromGrid(ggs[0]);
+    // set a to 0 to re-add the best solution later to grid 0
+    a = 0;
 
 #pragma omp parallel for
     for (size_t btch = 0; btch < jobs; btch++) {
@@ -210,7 +217,8 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
 
   LOGTO(DEBUG, std::cerr) << "Done.";
 
-  for (size_t i = 0; i < jobs; i++) drawing.applyToGrid(ggs[i]);
+  // skipping grid 0 here if a remains set to 1
+  for (size_t i = a; i < jobs; i++) drawing.applyToGrid(ggs[i]);
 
   size_t iters = 0;
 
@@ -653,6 +661,8 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, const CombGraph& cg,
   switch (_baseGraphType) {
     case OCTIGRID:
       return new OctiGridGraph(bbox, cellSize, spacer, pens);
+    case CONVEXHULLOCTIGRID:
+      return new ConvexHullOctiGridGraph(bbox, cellSize, spacer, pens);
     case GRID:
       return new GridGraph(bbox, cellSize, spacer, pens);
     case ORTHORADIAL:

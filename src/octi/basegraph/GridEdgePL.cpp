@@ -26,7 +26,7 @@ const util::geo::Line<double>* GridEdgePL::getGeom() const { return 0; }
 // _____________________________________________________________________________
 void GridEdgePL::reset() {
   _closed = false;
-  clearResEdges();
+  _resEdgs = 0;
 }
 
 // _____________________________________________________________________________
@@ -81,7 +81,7 @@ void GridEdgePL::setCost(double c) { _c = c; }
 bool GridEdgePL::isSecondary() const { return _isSecondary; }
 
 // _____________________________________________________________________________
-void GridEdgePL::clearResEdges() { if (_resEdgs > 0) _resEdgs--; }
+void GridEdgePL::delResEdg() { if (_resEdgs > 0) _resEdgs--; }
 
 // _____________________________________________________________________________
 void GridEdgePL::setId(size_t id) { _id = id; }

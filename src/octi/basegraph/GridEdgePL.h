@@ -38,7 +38,7 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
 
   void reset();
 
-  void clearResEdges();
+  void delResEdg();
   void addResEdge();
 
   void setId(size_t id);

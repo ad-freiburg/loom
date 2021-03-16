@@ -139,6 +139,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     cfg->baseGraphType = BaseGraphType::OCTIGRID;
   } else if (baseGraphStr == "orthoradial") {
     cfg->baseGraphType = BaseGraphType::ORTHORADIAL;
+  } else if (baseGraphStr == "chulloctilinear") {
+    cfg->baseGraphType = BaseGraphType::CONVEXHULLOCTIGRID;
   } else if (baseGraphStr == "porthoradial") {
     cfg->baseGraphType = BaseGraphType::PSEUDOORTHORADIAL;
   } else if (baseGraphStr == "pseudoorthoradial") {

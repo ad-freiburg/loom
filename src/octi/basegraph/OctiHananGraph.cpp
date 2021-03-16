@@ -38,8 +38,8 @@ void OctiHananGraph::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
   assert(ge);
   assert(gf);
 
-  ge->pl().clearResEdges();
-  gf->pl().clearResEdges();
+  ge->pl().delResEdg();
+  gf->pl().delResEdg();
 
   _resEdgs[ge].erase(ce);
   _resEdgs[gf].erase(ce);

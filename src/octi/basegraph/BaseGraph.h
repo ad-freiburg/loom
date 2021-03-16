@@ -37,6 +37,7 @@ const static double SOFT_INF = std::numeric_limits<float>::max() / 10000;
 
 enum BaseGraphType {
   OCTIGRID,
+  CONVEXHULLOCTIGRID,
   GRID,
   ORTHORADIAL,
   PSEUDOORTHORADIAL,
