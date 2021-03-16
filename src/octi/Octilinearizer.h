@@ -132,6 +132,8 @@ class Octilinearizer {
                                      double spacer,
                                      const Penalties& pens) const;
 
+  util::geo::Polygon<double> hull(const CombGraph& cg) const;
+
   void writeNdCosts(GridNode* n, CombNode* origNode, CombEdge* e,
                     basegraph::BaseGraph* g);
 

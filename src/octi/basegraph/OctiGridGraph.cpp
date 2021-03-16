@@ -187,6 +187,7 @@ void OctiGridGraph::writeInitialCosts() {
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       auto n = getNode(x, y);
+      if (!n) continue;
       for (size_t i = 0; i < maxDeg(); i++) {
         auto port = n->pl().getPort(i);
         auto neighbor = neigh(x, y, i);

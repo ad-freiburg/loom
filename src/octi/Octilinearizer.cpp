@@ -7,6 +7,7 @@
 #include <thread>
 #include "octi/Octilinearizer.h"
 #include "octi/basegraph/BaseGraph.h"
+#include "octi/basegraph/ConvexHullOctiGridGraph.h"
 #include "octi/basegraph/GridGraph.h"
 #include "octi/basegraph/NodeCost.h"
 #include "octi/basegraph/OctiGridGraph.h"
@@ -14,7 +15,6 @@
 #include "octi/basegraph/OctiQuadTree.h"
 #include "octi/basegraph/OrthoRadialGraph.h"
 #include "octi/basegraph/PseudoOrthoRadialGraph.h"
-#include "octi/basegraph/ConvexHullOctiGridGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -34,7 +34,9 @@ using octi::combgraph::Drawing;
 using util::geo::DBox;
 using util::geo::dist;
 using util::geo::DPoint;
+using util::geo::DPolygon;
 using util::geo::len;
+using util::geo::MultiPoint;
 using util::geo::Polygon;
 using util::graph::BiDijkstra;
 using util::graph::Dijkstra;
@@ -662,7 +664,8 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, const CombGraph& cg,
     case OCTIGRID:
       return new OctiGridGraph(bbox, cellSize, spacer, pens);
     case CONVEXHULLOCTIGRID:
-      return new ConvexHullOctiGridGraph(bbox, cellSize, spacer, pens);
+      return new ConvexHullOctiGridGraph(hull(cg), bbox, cellSize, spacer,
+                                         pens);
     case GRID:
       return new GridGraph(bbox, cellSize, spacer, pens);
     case ORTHORADIAL:
@@ -676,6 +679,15 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, const CombGraph& cg,
     default:
       return 0;
   }
+}
+
+// _____________________________________________________________________________
+DPolygon Octilinearizer::hull(const CombGraph& cg) const {
+  MultiPoint<double> points;
+  for (auto nd : cg.getNds()) {
+    points.push_back(*nd->pl().getGeom());
+  }
+  return util::geo::convexHull(points);
 }
 
 // _____________________________________________________________________________

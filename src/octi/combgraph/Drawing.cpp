@@ -88,7 +88,6 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
       } else {
         // otherwise it is the reach cost belonging to the edge
         _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] += ge->pl().cost();
-        // assert(!ges[i + 1]->pl().isSecondary());
       }
     } else if (i == ges.size() - 1) {
       if (!_ndReachCosts.count(rev ? ce->getTo() : ce->getFrom())) {
@@ -98,7 +97,6 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
       } else {
         // otherwise it is the reach cost belonging to the edge
         _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] += ge->pl().cost();
-        // assert(!ges[i - 1]->pl().isSecondary());
       }
     } else {
       if (!ge->pl().isSecondary()) l++;
@@ -217,7 +215,6 @@ void Drawing::getLineGraph(LineGraph* target) const {
           pathSegs[cEdgSeg[f].back().first].start =
               grEdg->getFrom()->pl().getParent();
           pathSegs[cEdgSeg[f].back().first].path.push_back(pathEdg);
-          assert(pathSegs.back().end != pathSegs.back().start);
         } else {
           pathSegs.push_back({grEdg->getFrom()->pl().getParent(),
                               grEdg->getTo()->pl().getParent(),
@@ -225,7 +222,6 @@ void Drawing::getLineGraph(LineGraph* target) const {
                               {},
                               {},
                               newResEdgs});
-          assert(pathSegs.back().end != pathSegs.back().start);
           cEdgSeg[f].push_back({pathSegs.size() - 1, false});
           curResEdgs = newResEdgs;
         }
