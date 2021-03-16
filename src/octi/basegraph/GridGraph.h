@@ -124,6 +124,8 @@ class GridGraph : public BaseGraph {
 
   const Grid<GridNode*, Point, double>& getGrid() const;
 
+  virtual bool skip(size_t x, size_t y) const;
+
   virtual void writeInitialCosts();
   virtual void writeObstacleCost(const util::geo::Polygon<double>& obst);
   virtual void reWriteObstCosts();

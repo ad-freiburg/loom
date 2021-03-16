@@ -51,6 +51,7 @@ void GridGraph::init() {
   // write nodes
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
+      if (skip(x, y)) continue;
       writeNd(x, y);
     }
   }
@@ -59,6 +60,9 @@ void GridGraph::init() {
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {
       GridNode* center = getNode(x, y);
+
+      // for convex hull grid
+      if (!center) continue;
 
       for (size_t p = 0; p < maxDeg(); p++) {
         GridNode* frN = center->pl().getPort(p);
@@ -77,6 +81,13 @@ void GridGraph::init() {
 
   writeInitialCosts();
   prunePorts();
+}
+
+// _____________________________________________________________________________
+bool GridGraph::skip(size_t x, size_t y) const {
+  UNUSED(x);
+  UNUSED(y);
+  return false;
 }
 
 // _____________________________________________________________________________
