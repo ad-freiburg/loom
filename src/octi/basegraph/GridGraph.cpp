@@ -215,6 +215,8 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrO) {
 
   auto ge = getNEdg(a, b);
 
+  if (!ge) std::cerr << a->pl().getX() << " " <<  a->pl().getY() << std::endl;
+  if (!ge) std::cerr << b->pl().getX() << " " <<  b->pl().getY() << std::endl;
   assert(ge);
 
   addResEdg(ge, e);
@@ -360,11 +362,6 @@ size_t GridGraph::ang(size_t i, size_t j) const {
   int ang = (4 + (i - j)) % 4;
   if (ang > 2) ang = 4 - ang;
   ang = ang % 2;
-
-  int d = (int)(i) - (int)(j);
-  int deg = abs((((d + 2) % 4) + 4) % 4 - 2) % 2;
-
-  assert(ang == deg);
 
   return ang;
 }

@@ -36,6 +36,7 @@ const static double INF = std::numeric_limits<double>::infinity();
 const static double SOFT_INF = std::numeric_limits<float>::max() / 10000;
 
 enum BaseGraphType {
+  HEXGRID,
   OCTIGRID,
   CONVEXHULLOCTIGRID,
   GRID,

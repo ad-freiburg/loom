@@ -15,6 +15,7 @@
 #include "octi/basegraph/OctiQuadTree.h"
 #include "octi/basegraph/OrthoRadialGraph.h"
 #include "octi/basegraph/PseudoOrthoRadialGraph.h"
+#include "octi/basegraph/HexGridGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -676,6 +677,8 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, const CombGraph& cg,
       return new OctiHananGraph(bbox, cg, cellSize, spacer, pens);
     case OCTIQUADTREE:
       return new OctiQuadTree(bbox, cg, cellSize, spacer, pens);
+    case HEXGRID:
+      return new HexGridGraph(bbox, cellSize, spacer, pens);
     default:
       return 0;
   }

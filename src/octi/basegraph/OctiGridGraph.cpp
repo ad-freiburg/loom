@@ -75,14 +75,9 @@ void OctiGridGraph::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
 
 // _____________________________________________________________________________
 size_t OctiGridGraph::ang(size_t i, size_t j) const {
-  int d = (int)(i) - (int)(j);
-  int deg = abs((((d + 4) % 8) + 8) % 8 - 4) % 4;
-
   int ang = (8 + (i - j)) % 8;
   if (ang > 4) ang = 8 - ang;
   ang = ang % 4;
-
-  assert(deg == ang);
 
   return ang;
 }
