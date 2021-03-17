@@ -112,8 +112,6 @@ CrossEdgPairs OctiHananGraph::getCrossEdgPairs() const {
   CrossEdgPairs ret;
   std::unordered_map<const GridEdge*, std::set<const GridEdge*>> have;
 
-  size_t dbl = 0;
-  size_t a = 0;
   for (const GridNode* n : getNds()) {
     if (!n->pl().isSink()) continue;
 
@@ -130,28 +128,8 @@ CrossEdgPairs OctiHananGraph::getCrossEdgPairs() const {
       auto e = p.first;
       auto f = p.second;
       ret.push_back({{eOr, fOr}, p});
-
-      a++;
-
-      if (have[eOr].find(e) != have[eOr].end()) dbl++;
-      if (have[eOr].find(f) != have[eOr].end()) dbl++;
-      if (have[fOr].find(e) != have[fOr].end()) dbl++;
-      if (have[fOr].find(f) != have[fOr].end()) dbl++;
-      if (have[e].find(eOr) != have[e].end()) dbl++;
-      have[eOr].insert(e);
-      have[eOr].insert(f);
-      have[fOr].insert(e);
-      have[fOr].insert(f);
-
-      have[e].insert(eOr);
-      have[e].insert(eOr);
-      have[f].insert(fOr);
-      have[f].insert(fOr);
     }
   }
-
-  std::cerr << dbl << std::endl;
-  std::cerr << a << std::endl;
 
   return ret;
 }

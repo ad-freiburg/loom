@@ -140,7 +140,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
       for (const GridNode* n : *gg->getNds()) {
         for (const GridEdge* e : n->getAdjList()) {
           if (e->getFrom() != n) continue;
-          if (e->pl().cost() == std::numeric_limits<float>::infinity()) {
+          if (e->pl().cost() >= basegraph::SOFT_INF) {
             // skip infinite edges, we cannot use them.
             // this also skips sink edges of nodes not used as
             // candidates
@@ -193,7 +193,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
       for (auto nd : cg.getNds()) {
         for (auto edg : nd->getAdjList()) {
           if (edg->getFrom() != nd) continue;
-          if (e->pl().cost() == std::numeric_limits<float>::infinity())
+          if (e->pl().cost() >= basegraph::SOFT_INF)
             continue;
 
           auto eVarName = getEdgeUseVar(e, edg);
@@ -701,7 +701,7 @@ void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
 size_t ILPGridOptimizer::nonInfDeg(const GridNode* g) const {
   size_t ret = 0;
   for (auto e : g->getAdjList()) {
-    if (e->pl().cost() != std::numeric_limits<float>::infinity()) ret++;
+    if (e->pl().cost() < basegraph::SOFT_INF) ret++;
   }
 
   return ret;
