@@ -23,10 +23,10 @@ using util::geo::BezierCurve;
 using util::graph::Dijkstra;
 
 // _____________________________________________________________________________
-double Drawing::score() const { return _c; }
+double Drawing::score() const { return _c + violations() * basegraph::SOFT_INF; }
 
 // _____________________________________________________________________________
-uint64_t Drawing::violations() const { return _c / basegraph::SOFT_INF; }
+uint64_t Drawing::violations() const { return _violations; }
 
 // _____________________________________________________________________________
 void Drawing::setBaseGraph(const BaseGraph* gg) { _gg = gg; }
@@ -39,7 +39,7 @@ Score Drawing::fullScore() const {
   for (auto c : _ndBndCosts) ret.bend += c.second;
   for (auto c : _edgCosts) ret.hop += c.second;
   for (auto c : _springCosts) ret.dense += c.second;
-  ret.full = _c;
+  ret.full = _c + basegraph::SOFT_INF * violations();
   ret.violations = violations();
 
   return ret;
@@ -78,29 +78,37 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
     //  d) edge costs, which can also be safely removed if a settled edge is
     //     unsettled
 
-    _c += ge->pl().cost();
+    double edgeCost = ge->pl().cost();
+    if (edgeCost >= basegraph::SOFT_INF) {
+      int vios = edgeCost / basegraph::SOFT_INF;
+      edgeCost -= vios * basegraph::SOFT_INF;
+      _vios[ce]++;
+      _violations++;
+    }
+
+    _c += edgeCost;
 
     if (i == 0) {
       if (!_ndReachCosts.count(rev ? ce->getFrom() : ce->getTo())) {
         // if the node was not settled before, this is the node move cost
-        _ndReachCosts[rev ? ce->getFrom() : ce->getTo()] = ge->pl().cost();
+        _ndReachCosts[rev ? ce->getFrom() : ce->getTo()] = edgeCost;
         _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] = 0;
       } else {
         // otherwise it is the reach cost belonging to the edge
-        _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] += ge->pl().cost();
+        _ndBndCosts[rev ? ce->getFrom() : ce->getTo()] += edgeCost;
       }
     } else if (i == ges.size() - 1) {
       if (!_ndReachCosts.count(rev ? ce->getTo() : ce->getFrom())) {
         // if the node was not settled before, this is the node move cost
-        _ndReachCosts[rev ? ce->getTo() : ce->getFrom()] = ge->pl().cost();
+        _ndReachCosts[rev ? ce->getTo() : ce->getFrom()] = edgeCost;
         _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] = 0;
       } else {
         // otherwise it is the reach cost belonging to the edge
-        _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] += ge->pl().cost();
+        _ndBndCosts[rev ? ce->getTo() : ce->getFrom()] += edgeCost;
       }
     } else {
       if (!ge->pl().isSecondary()) l++;
-      _edgCosts[ce] += ge->pl().cost();
+      _edgCosts[ce] += edgeCost;
     }
 
     if (rev) {
@@ -394,11 +402,13 @@ void Drawing::getLineGraph(LineGraph* target) const {
 // _____________________________________________________________________________
 void Drawing::crumble() {
   _c = std::numeric_limits<double>::infinity();
+  _violations = 0;
   _nds.clear();
   _edgs.clear();
   _ndReachCosts.clear();
   _ndBndCosts.clear();
   _edgCosts.clear();
+  _vios.clear();
   _springCosts.clear();
 }
 
@@ -484,6 +494,9 @@ void Drawing::erase(CombEdge* ce) {
 
   _c += _ndBndCosts[ce->getTo()];
   _c += _ndBndCosts[ce->getFrom()];
+
+  _violations -= _vios[ce];
+  _vios.erase(ce);
 }
 
 // _____________________________________________________________________________

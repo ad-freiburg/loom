@@ -103,11 +103,19 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     for (const GridNode* n : *gg->getNds()) {
       if (!n->pl().isSink()) continue;
 
+      // don't use nodes as candidates which cannot hold the comb node due to
+      // their degree
+      if (n->getDeg() < nd->getDeg()) {
+        continue;
+      }
+
       double gridD = dist(*n->pl().getGeom(), *nd->pl().getGeom());
 
       // threshold for speedup
       double maxDis = gg->getCellSize() * maxGrDist;
-      if (gridD >= maxDis) continue;
+      if (gridD >= maxDis) {
+        continue;
+      }
 
       cands[nd].insert(n);
 
@@ -193,10 +201,10 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
           int eCol = lp->getVarByName(eVarName);
           if (eCol > -1)
-            lp->addColToRow(row, eCol, 1);  // vm.addVar(row, eCol, 1);
+            lp->addColToRow(row, eCol, 1);
           int fCol = lp->getVarByName(fVarName);
           if (fCol > -1)
-            lp->addColToRow(row, fCol, 1);  // vm.addVar(row, fCol, 1);
+            lp->addColToRow(row, fCol, 1);
         }
       }
     }
@@ -299,8 +307,10 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
         };
 
         for (size_t p = 0; p < gg->maxDeg(); p++) {
-          auto varSinkTo = getEdgeUseVar(gg->getEdg(n->pl().getPort(p), n), e);
-          auto varSinkFr = getEdgeUseVar(gg->getEdg(n, n->pl().getPort(p)), e);
+          auto portNd = n->pl().getPort(p);
+          if (!portNd) continue;
+          auto varSinkTo = getEdgeUseVar(gg->getEdg(portNd, n), e);
+          auto varSinkFr = getEdgeUseVar(gg->getEdg(n, portNd), e);
 
           int ndColTo = lp->getVarByName(varSinkTo);
           if (ndColTo > -1) lp->addColToRow(row, ndColTo, 1);
@@ -312,7 +322,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     }
   }
 
-  // a meta node can either be an activated sink, or a single pass through
+  // a grid node can either be an activated sink, or a single pass through
   // edge is used
   for (GridNode* n : *gg->getNds()) {
     if (!n->pl().isSink()) continue;
@@ -333,9 +343,10 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     // go over all ports
     for (size_t pf = 0; pf < gg->maxDeg(); pf++) {
       auto from = n->pl().getPort(pf);
+      if (!from) continue;
       for (size_t pt = 0; pt < gg->maxDeg(); pt++) {
         auto to = n->pl().getPort(pt);
-        if (from == to) continue;
+        if (!to || from == to) continue;
 
         auto innerE = gg->getEdg(from, to);
         for (auto nd : cg.getNds()) {
@@ -402,17 +413,26 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
       for (GridNode* n : *gg->getNds()) {
         if (!n->pl().isSink()) continue;
 
+        // check if this grid node is used as a candidate for comb node
+        // if not, we don't have to add the constraints
+        int ndColFrom = lp->getVarByName(getStatPosVar(n, nd));
+        if (ndColFrom == -1) continue;
+
         if (edg->getFrom() == nd) {
           // the 0 can be skipped here
           for (size_t i = 1; i < gg->maxDeg(); i++) {
-            auto e = gg->getEdg(n, n->pl().getPort(i));
+            auto portNd = n->pl().getPort(i);
+            if (!portNd) continue;
+            auto e = gg->getEdg(n, portNd);
             int col = lp->getVarByName(getEdgeUseVar(e, edg));
             if (col > -1) lp->addColToRow(row, col, i);
           }
         } else {
           // the 0 can be skipped here
           for (size_t i = 1; i < gg->maxDeg(); i++) {
-            auto e = gg->getEdg(n->pl().getPort(i), n);
+            auto portNd = n->pl().getPort(i);
+            if (!portNd) continue;
+            auto e = gg->getEdg(portNd, n);
             int col = lp->getVarByName(getEdgeUseVar(e, edg));
             if (col > -1) lp->addColToRow(row, col, i);
           }
@@ -712,6 +732,7 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
         // if settled, all bend edges are unused
         for (size_t p = 0; p < gg->maxDeg(); p++) {
           auto portNd = gnd->pl().getPort(p);
+          if (!portNd) continue;  // may be pruned
           for (auto bendEdg : portNd->getAdjList()) {
             if (!bendEdg->pl().isSecondary()) continue;
             for (auto cEdg : nd->getAdjList()) {

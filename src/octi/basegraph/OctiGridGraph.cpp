@@ -156,6 +156,11 @@ size_t OctiGridGraph::getDir(const GridNode* a, const GridNode* b) const {
 // _____________________________________________________________________________
 CrossEdgPairs OctiGridGraph::getCrossEdgPairs() const {
   CrossEdgPairs ret;
+
+  std::unordered_map<const GridEdge*, std::set<const GridEdge*>> have;
+
+  size_t dbl = 0;
+
   for (const GridNode* n : getNds()) {
     if (!n->pl().isSink()) continue;
 
@@ -172,7 +177,23 @@ CrossEdgPairs OctiGridGraph::getCrossEdgPairs() const {
     auto e = getNEdg(na, nb);
     auto f = getNEdg(nb, na);
     ret.push_back({{eOr, fOr}, {e, f}});
+    if (have[eOr].find(e) != have[eOr].end()) dbl++;
+    if (have[eOr].find(f) != have[eOr].end()) dbl++;
+    if (have[fOr].find(e) != have[fOr].end()) dbl++;
+    if (have[fOr].find(f) != have[fOr].end()) dbl++;
+    if (have[e].find(eOr) != have[e].end()) dbl++;
+    have[eOr].insert(e);
+    have[eOr].insert(f);
+    have[fOr].insert(e);
+    have[fOr].insert(f);
+
+    have[e].insert(eOr);
+    have[e].insert(eOr);
+    have[f].insert(fOr);
+    have[f].insert(fOr);
   }
+
+  std::cerr << dbl << std::endl;
 
   return ret;
 }

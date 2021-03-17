@@ -96,6 +96,12 @@ Score Octilinearizer::drawILP(const CombGraph& cg, const util::geo::DBox& box,
                     solverStr, path);
 
   drawing.getLineGraph(outTg);
+  auto fullScore = drawing.fullScore();
+  LOGTO(DEBUG, std::cerr) << "Topo violations: " << drawing.violations()
+                          << ", hop costs: " << fullScore.hop
+                          << ", bend costs: " << fullScore.bend
+                          << ", mv costs: " << fullScore.move
+                          << ", dense costs: " << fullScore.dense;
 
   *retGg = gg;
 
@@ -128,6 +134,8 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
     ggs[i]->init();
   }
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
+
+  LOGTO(DEBUG, std::cerr) << "Grid graph has " << gg->getNds()->size() << " nodes";
 
   size_t INITIAL_TRIES = 100;
   size_t LOCAL_SEARCH_ITERS = 100;

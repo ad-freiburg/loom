@@ -96,9 +96,12 @@ class Drawing {
   std::map<const CombNode*, double> _ndReachCosts;
   std::map<const CombNode*, double> _ndBndCosts;
   std::map<const CombEdge*, double> _edgCosts;
+  std::map<const CombEdge*, int> _vios;
   std::map<const CombEdge*, double> _springCosts;
-  double _c;
+  double _c, _cTopo;
   const BaseGraph* _gg;
+
+  size_t _violations;
 
   double recalcBends(const CombNode* nd);
 };

@@ -110,23 +110,48 @@ void OctiHananGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
 // _____________________________________________________________________________
 CrossEdgPairs OctiHananGraph::getCrossEdgPairs() const {
   CrossEdgPairs ret;
+  std::unordered_map<const GridEdge*, std::set<const GridEdge*>> have;
+
+  size_t dbl = 0;
+  size_t a = 0;
   for (const GridNode* n : getNds()) {
     if (!n->pl().isSink()) continue;
 
     auto eOr = getNEdg(n, neigh(n, 3));
     auto fOr = getNEdg(neigh(n, 3), n);
 
-    if (!eOr || !fOr) continue;
+    if (!eOr) continue;
 
-    auto na = neigh(n, (3 + 7) % 8);
-    auto nb = neigh(n, (3 + 1) % 8);
+    auto pairs = _edgePairs.find(eOr);
+    if (pairs == _edgePairs.end()) continue;
 
-    if (!na || !nb) continue;
 
-    auto e = getNEdg(na, nb);
-    auto f = getNEdg(nb, na);
-    ret.push_back({{eOr, fOr}, {e, f}});
+    for (const auto& p : pairs->second) {
+      auto e = p.first;
+      auto f = p.second;
+      ret.push_back({{eOr, fOr}, p});
+
+      a++;
+
+      if (have[eOr].find(e) != have[eOr].end()) dbl++;
+      if (have[eOr].find(f) != have[eOr].end()) dbl++;
+      if (have[fOr].find(e) != have[fOr].end()) dbl++;
+      if (have[fOr].find(f) != have[fOr].end()) dbl++;
+      if (have[e].find(eOr) != have[e].end()) dbl++;
+      have[eOr].insert(e);
+      have[eOr].insert(f);
+      have[fOr].insert(e);
+      have[fOr].insert(f);
+
+      have[e].insert(eOr);
+      have[e].insert(eOr);
+      have[f].insert(fOr);
+      have[f].insert(fOr);
+    }
   }
+
+  std::cerr << dbl << std::endl;
+  std::cerr << a << std::endl;
 
   return ret;
 }
