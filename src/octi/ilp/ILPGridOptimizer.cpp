@@ -71,10 +71,9 @@ double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
     extractSolution(lp, gg, cg, d);
 
     double obj = lp->getObjVal();
-
     delete lp;
 
-    return  obj;
+    return obj;
   }
 
   return std::numeric_limits<double>::infinity();
@@ -193,18 +192,15 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
       for (auto nd : cg.getNds()) {
         for (auto edg : nd->getAdjList()) {
           if (edg->getFrom() != nd) continue;
-          if (e->pl().cost() >= basegraph::SOFT_INF)
-            continue;
+          if (e->pl().cost() >= basegraph::SOFT_INF) continue;
 
           auto eVarName = getEdgeUseVar(e, edg);
           auto fVarName = getEdgeUseVar(f, edg);
 
           int eCol = lp->getVarByName(eVarName);
-          if (eCol > -1)
-            lp->addColToRow(row, eCol, 1);
+          if (eCol > -1) lp->addColToRow(row, eCol, 1);
           int fCol = lp->getVarByName(fVarName);
-          if (fCol > -1)
-            lp->addColToRow(row, fCol, 1);
+          if (fCol > -1) lp->addColToRow(row, fCol, 1);
         }
       }
     }
@@ -401,7 +397,8 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     for (auto edg : nd->getAdjList()) {
       std::stringstream dirName;
       dirName << "d(" << nd << "," << edg << ")";
-      int col = lp->addCol(dirName.str(), shared::optim::INT, 0, 0, 7);
+      int col =
+          lp->addCol(dirName.str(), shared::optim::INT, 0, 0, gg->maxDeg() - 1);
 
       std::stringstream constName;
       constName << "dc(" << nd << "," << edg << ")";
@@ -506,6 +503,8 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
   lp->update();
 
+  std::vector<double> pens = gg->getCosts();
+
   // for each adjacent edge pair, add variables telling the accuteness of the
   // angle between them
   for (auto nd : cg.getNds()) {
@@ -538,7 +537,8 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
         constName << "nc(" << edgA << "," << edgB << ")";
 
         int row1 = lp->addRow(constName.str() + "lo", 0, shared::optim::LO);
-        int row2 = lp->addRow(constName.str() + "up", 7, shared::optim::UP);
+        int row2 = lp->addRow(constName.str() + "up", gg->maxDeg() - 1,
+                              shared::optim::UP);
 
         std::stringstream dirNameA;
         dirNameA << "d(" << nd << "," << edgA << ")";
@@ -555,8 +555,8 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
         lp->addColToRow(row1, colB, -1);
         lp->addColToRow(row2, colB, -1);
 
-        lp->addColToRow(row1, colNeg, 8);
-        lp->addColToRow(row2, colNeg, 8);
+        lp->addColToRow(row1, colNeg, gg->maxDeg());
+        lp->addColToRow(row2, colNeg, gg->maxDeg());
 
         std::stringstream angConst;
         angConst << "ac(" << edgA << "," << edgB << ")";
@@ -564,26 +564,28 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
         lp->addColToRow(rowAng, colA, 1);
         lp->addColToRow(rowAng, colB, -1);
-        lp->addColToRow(rowAng, colNeg, 8);
+        lp->addColToRow(rowAng, colNeg, gg->maxDeg());
 
         std::stringstream sumConst;
         sumConst << "asc(" << edgA << "," << edgB << ")";
 
         int rowSum = lp->addRow(sumConst.str(), 1, shared::optim::UP);
 
-        std::vector<std::string> names = {"d45",   "d90",  "d135", "d180",
-                                          "d135'", "d90'", "d45'"};
+        int N = gg->maxDeg() - 1;
 
-        // TODO: derive from configuration!!!
-        std::vector<double> pens = {3, 2.5, 2, 1, 2, 2.5, 3};
-
-        for (int k = 0; k < 7; k++) {
+        for (int k = 0; k < N; k++) {
           std::stringstream var;
-          var << names[k] << "(" << edgA << "," << edgB << ")";
+          size_t pp = pens.size() - 1 - k;
+          if (k >= pens.size()) {
+            pp = k + 1 - pens.size();
+            var << "d" << pp << "'(" << edgA << "," << edgB << ")";
+          } else {
+            var << "d" << pp << "(" << edgA << "," << edgB << ")";
+          }
 
           // TODO: maybe multiply per shared lines - but this actually
           // makes the drawings look worse.
-          int col = lp->addCol(var.str(), shared::optim::BIN, pens[k]);
+          int col = lp->addCol(var.str(), shared::optim::BIN, pens[pp]);
 
           lp->addColToRow(rowAng, col, -(k + 1));
           lp->addColToRow(rowSum, col, 1);

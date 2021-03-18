@@ -179,6 +179,16 @@ CrossEdgPairs OctiGridGraph::getCrossEdgPairs() const {
 }
 
 // _____________________________________________________________________________
+std::vector<double> OctiGridGraph::getCosts() const {
+  std::vector<double> ret(4);
+  ret[0] = _bendCosts[0];
+  ret[1] = _bendCosts[3];
+  ret[2] = _bendCosts[2];
+  ret[3] = _bendCosts[1];
+  return ret;
+ }
+
+// _____________________________________________________________________________
 void OctiGridGraph::writeInitialCosts() {
   for (size_t x = 0; x < _grid.getXWidth(); x++) {
     for (size_t y = 0; y < _grid.getYHeight(); y++) {

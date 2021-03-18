@@ -112,6 +112,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
                          size_t rndrOrder) = 0;
 
   virtual const Penalties& getPens() const = 0;
+  virtual std::vector<double> getCosts() const = 0;
 
   virtual void unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) = 0;
   virtual void unSettleNd(CombNode* a) = 0;

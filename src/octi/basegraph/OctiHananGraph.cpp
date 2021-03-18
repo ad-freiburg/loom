@@ -341,6 +341,7 @@ void OctiHananGraph::init() {
   }
 
   prunePorts();
+  writeInitialCosts();
 }
 
 // _____________________________________________________________________________
@@ -351,20 +352,8 @@ void OctiHananGraph::connectNodes(GridNode* grNdFr, GridNode* grNdTo,
   GridNode* fr = grNdFr->pl().getPort(p);
   GridNode* to = grNdTo->pl().getPort((p + maxDeg() / 2) % maxDeg());
 
-  int xDist = labs((int)grNdFr->pl().getX() - (int)grNdTo->pl().getX());
-  int yDist = labs((int)grNdFr->pl().getY() - (int)grNdTo->pl().getY());
-
-  double cost = 0;
-  if (p % 4 == 0)
-    cost = (_c.verticalPen + _heurHopCost) * yDist - _heurHopCost;
-  else if ((p + 2) % 4 == 0)
-    cost = (_c.horizontalPen + _heurHopCost) * xDist - _heurHopCost;
-  else if (p % 2)
-    cost = (_c.diagonalPen + _heurHopCost) * yDist - _heurHopCost;
-
   auto e = new GridEdge(fr, to, GridEdgePL(9, false, false));
   e->pl().setId(_edgeCount);
-  e->pl().setCost(cost);
   _edgeCount++;
   fr->addEdge(e);
   to->addEdge(e);
@@ -374,10 +363,39 @@ void OctiHananGraph::connectNodes(GridNode* grNdFr, GridNode* grNdTo,
 
   auto f = new GridEdge(to, fr, GridEdgePL(9, false, false));
   f->pl().setId(_edgeCount);
-  f->pl().setCost(cost);
   _edgeCount++;
   fr->addEdge(f);
   to->addEdge(f);
+}
+
+// _____________________________________________________________________________
+void OctiHananGraph::writeInitialCosts() {
+  for (auto n : *getNds()) {
+      if (!n->pl().isSink()) continue;
+      for (size_t p = 0; p < maxDeg(); p++) {
+        auto port = n->pl().getPort(p);
+        auto neighbor = neigh(n->pl().getX(), n->pl().getY(), p);
+
+        if (!neighbor || !port) continue;
+
+        auto oPort = neighbor->pl().getPort((p + maxDeg() / 2) % maxDeg());
+
+        int xDist = labs((int)n->pl().getX() - (int)neighbor->pl().getX());
+        int yDist = labs((int)n->pl().getY() - (int)neighbor->pl().getY());
+
+        auto e = getEdg(port, oPort);
+
+        double cost = 0;
+        if (p % 4 == 0)
+          cost = (_c.verticalPen + _heurHopCost) * yDist - _heurHopCost;
+        else if ((p + 2) % 4 == 0)
+          cost = (_c.horizontalPen + _heurHopCost) * xDist - _heurHopCost;
+        else if (p % 2)
+          cost = (_c.diagonalPen + _heurHopCost) * yDist - _heurHopCost;
+
+        e->pl().setCost(cost);
+      }
+    }
 }
 
 // _____________________________________________________________________________

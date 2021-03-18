@@ -270,6 +270,15 @@ GridNode* HexGridGraph::writeNd(size_t x, size_t y) {
 }
 
 // _____________________________________________________________________________
+std::vector<double> HexGridGraph::getCosts() const {
+  std::vector<double> ret(3);
+  ret[0] = _bendCosts[0];
+  ret[1] = _bendCosts[2];
+  ret[2] = _bendCosts[1];
+  return ret;
+ }
+
+// _____________________________________________________________________________
 double HexGridGraph::getBendPen(size_t i, size_t j) const {
   return _bendCosts[ang(i, j)];
 }

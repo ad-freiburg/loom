@@ -215,8 +215,8 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrO) {
 
   auto ge = getNEdg(a, b);
 
-  if (!ge) std::cerr << a->pl().getX() << " " <<  a->pl().getY() << std::endl;
-  if (!ge) std::cerr << b->pl().getX() << " " <<  b->pl().getY() << std::endl;
+  if (!ge) std::cerr << a->pl().getX() << " " << a->pl().getY() << std::endl;
+  if (!ge) std::cerr << b->pl().getX() << " " << b->pl().getY() << std::endl;
   assert(ge);
 
   addResEdg(ge, e);
@@ -324,6 +324,14 @@ void GridGraph::getSettledAdjEdgs(GridNode* n, CombNode* origNd,
 
 // _____________________________________________________________________________
 const Penalties& GridGraph::getPens() const { return _c; }
+
+// _____________________________________________________________________________
+std::vector<double> GridGraph::getCosts() const {
+  std::vector<double> ret(2);
+  ret[0] = _bendCosts[0];
+  ret[1] = _bendCosts[1];
+  return ret;
+}
 
 // _____________________________________________________________________________
 NodeCost GridGraph::nodeBendPen(GridNode* n, CombNode* origNd, CombEdge* e) {

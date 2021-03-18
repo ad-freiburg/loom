@@ -66,6 +66,7 @@ class GridGraph : public BaseGraph {
   virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrOr);
 
   virtual const Penalties& getPens() const;
+  virtual std::vector<double> getCosts() const;
 
   virtual void unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b);
   virtual void unSettleNd(CombNode* a);

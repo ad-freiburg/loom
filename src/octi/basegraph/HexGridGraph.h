@@ -30,6 +30,7 @@ class HexGridGraph : public GridGraph {
   virtual const util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float>*
   getHeur(const std::set<GridNode*>& to) const;
   virtual size_t maxDeg() const;
+  virtual std::vector<double> getCosts() const;
 
  protected:
   virtual void writeInitialCosts();

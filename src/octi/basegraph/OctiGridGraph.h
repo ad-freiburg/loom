@@ -58,6 +58,7 @@ class OctiGridGraph : public GridGraph {
   virtual size_t maxDeg() const;
   virtual double ndMovePen(const CombNode* cbNd, const GridNode* grNd) const;
   virtual size_t getDir(const GridNode* a, const GridNode* b) const;
+  virtual std::vector<double> getCosts() const;
 
  protected:
   virtual void writeInitialCosts();

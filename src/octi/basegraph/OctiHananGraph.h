@@ -32,6 +32,7 @@ class OctiHananGraph : public OctiGridGraph {
   virtual double getBendPen(size_t i, size_t j) const;
   virtual size_t ang(size_t i, size_t j) const;
   virtual void connectNodes(GridNode* grNdA, GridNode* grNdB, size_t dir);
+  virtual void writeInitialCosts();
 
   const combgraph::CombGraph& _cg;
   std::vector<size_t> _ndIdx;

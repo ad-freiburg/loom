@@ -92,20 +92,16 @@ Score Octilinearizer::drawILP(const CombGraph& cg, const util::geo::DBox& box,
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens, timeLim,
+  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens, timeLim,
                     solverStr, path);
 
   drawing.getLineGraph(outTg);
-  auto fullScore = drawing.fullScore();
-  LOGTO(DEBUG, std::cerr) << "Topo violations: " << drawing.violations()
-                          << ", hop costs: " << fullScore.hop
-                          << ", bend costs: " << fullScore.bend
-                          << ", mv costs: " << fullScore.move
-                          << ", dense costs: " << fullScore.dense;
-
   *retGg = gg;
 
-  return drawing.fullScore();
+  Score a;
+  a.full = score;
+
+  return a;
 }
 
 // _____________________________________________________________________________
