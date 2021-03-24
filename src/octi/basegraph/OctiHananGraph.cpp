@@ -45,12 +45,12 @@ void OctiHananGraph::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
   _resEdgs[gf].erase(ce);
 
   if (_resEdgs[ge].size() == 0) {
-    if (!a->pl().isSettled()) openTurns(a);
-    if (!b->pl().isSettled()) openTurns(b);
+    if (!a->pl().isSettled() && unused(a)) openTurns(a);
+    if (!b->pl().isSettled() && unused(b)) openTurns(b);
   }
 
   // unblock blocked diagonal edges crossing this edge
-  if (getDir(a, b) % 2 != 0) {
+  if (getDir(a, b) % 2 != 0 && _resEdgs[ge].size() == 0) {
     auto pairs = _edgePairs.find(ge);
     if (pairs == _edgePairs.end()) return;
     for (auto p : pairs->second) {
@@ -86,8 +86,10 @@ void OctiHananGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
 
   // this closes the grid edge
   auto ge = getNEdg(a, b);
+  auto gf = getNEdg(b, a);
 
   addResEdg(ge, e);
+  addResEdg(gf, e);
 
   ge->pl().setRndrOrder(rndrOrd);
 
@@ -125,8 +127,6 @@ CrossEdgPairs OctiHananGraph::getCrossEdgPairs() const {
 
 
     for (const auto& p : pairs->second) {
-      auto e = p.first;
-      auto f = p.second;
       ret.push_back({{eOr, fOr}, p});
     }
   }

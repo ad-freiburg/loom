@@ -24,6 +24,11 @@ GridEdgePL::GridEdgePL(double c, bool secondary, bool sink)
 const util::geo::Line<double>* GridEdgePL::getGeom() const { return 0; }
 
 // _____________________________________________________________________________
+size_t GridEdgePL::resEdgs() const {
+  return _resEdgs;
+}
+
+// _____________________________________________________________________________
 void GridEdgePL::reset() {
   _closed = false;
   _resEdgs = 0;

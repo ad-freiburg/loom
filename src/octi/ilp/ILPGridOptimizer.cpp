@@ -13,6 +13,7 @@ using octi::basegraph::BaseGraph;
 using octi::basegraph::GeoPensMap;
 using octi::basegraph::GridEdge;
 using octi::basegraph::GridNode;
+using octi::combgraph::Drawing;
 using octi::ilp::ILPGridOptimizer;
 using shared::optim::ILPSolver;
 using shared::optim::StarterSol;
@@ -24,7 +25,7 @@ double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
                                   int timeLim, const std::string& solverStr,
                                   const std::string& path) const {
   // extract first feasible solution from gridgraph
-  StarterSol sol = extractFeasibleSol(gg, cg, maxGrDist);
+  StarterSol sol = extractFeasibleSol(d, gg, cg, maxGrDist);
   gg->reset();
 
   for (auto nd : *gg->getNds()) {
@@ -156,7 +157,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
             continue;
           }
 
-          auto edgeVarName = getEdgeUseVar(e, edg);
+          auto edgeVarName = getEdgUseVar(e, edg);
 
           double coef;
           if (geoPensMap && !e->pl().isSecondary()) {
@@ -194,8 +195,8 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
           if (edg->getFrom() != nd) continue;
           if (e->pl().cost() >= basegraph::SOFT_INF) continue;
 
-          auto eVarName = getEdgeUseVar(e, edg);
-          auto fVarName = getEdgeUseVar(f, edg);
+          auto eVarName = getEdgUseVar(e, edg);
+          auto fVarName = getEdgUseVar(f, edg);
 
           int eCol = lp->getVarByName(eVarName);
           if (eCol > -1) lp->addColToRow(row, eCol, 1);
@@ -254,13 +255,13 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
         }
 
         for (auto e : n->getAdjListIn()) {
-          int edgCol = lp->getVarByName(getEdgeUseVar(e, edg));
+          int edgCol = lp->getVarByName(getEdgUseVar(e, edg));
           if (edgCol < 0) continue;
           lp->addColToRow(row, edgCol, inCost);
         }
 
         for (auto e : n->getAdjListOut()) {
-          int edgCol = lp->getVarByName(getEdgeUseVar(e, edg));
+          int edgCol = lp->getVarByName(getEdgUseVar(e, edg));
           if (edgCol < 0) continue;
           lp->addColToRow(row, edgCol, outCost);
         }
@@ -305,8 +306,8 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
         for (size_t p = 0; p < gg->maxDeg(); p++) {
           auto portNd = n->pl().getPort(p);
           if (!portNd) continue;
-          auto varSinkTo = getEdgeUseVar(gg->getEdg(portNd, n), e);
-          auto varSinkFr = getEdgeUseVar(gg->getEdg(n, portNd), e);
+          auto varSinkTo = getEdgUseVar(gg->getEdg(portNd, n), e);
+          auto varSinkFr = getEdgUseVar(gg->getEdg(n, portNd), e);
 
           int ndColTo = lp->getVarByName(varSinkTo);
           if (ndColTo > -1) lp->addColToRow(row, ndColTo, 1);
@@ -349,7 +350,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
           for (auto edg : nd->getAdjList()) {
             if (edg->getFrom() != nd) continue;
 
-            int edgCol = lp->getVarByName(getEdgeUseVar(innerE, edg));
+            int edgCol = lp->getVarByName(getEdgUseVar(innerE, edg));
             if (edgCol < 0) continue;
             lp->addColToRow(row, edgCol, 1);
           }
@@ -373,16 +374,16 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
       for (auto edg : nd->getAdjList()) {
         if (edg->getFrom() != nd) continue;
 
-        int col = lp->getVarByName(getEdgeUseVar(edgPair.first.first, edg));
+        int col = lp->getVarByName(getEdgUseVar(edgPair.first.first, edg));
         if (col > -1) lp->addColToRow(row, col, 1);
 
-        col = lp->getVarByName(getEdgeUseVar(edgPair.first.second, edg));
+        col = lp->getVarByName(getEdgUseVar(edgPair.first.second, edg));
         if (col > -1) lp->addColToRow(row, col, 1);
 
-        col = lp->getVarByName(getEdgeUseVar(edgPair.second.first, edg));
+        col = lp->getVarByName(getEdgUseVar(edgPair.second.first, edg));
         if (col > -1) lp->addColToRow(row, col, 1);
 
-        col = lp->getVarByName(getEdgeUseVar(edgPair.second.second, edg));
+        col = lp->getVarByName(getEdgUseVar(edgPair.second.second, edg));
         if (col > -1) lp->addColToRow(row, col, 1);
       }
     }
@@ -421,7 +422,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
             auto portNd = n->pl().getPort(i);
             if (!portNd) continue;
             auto e = gg->getEdg(n, portNd);
-            int col = lp->getVarByName(getEdgeUseVar(e, edg));
+            int col = lp->getVarByName(getEdgUseVar(e, edg));
             if (col > -1) lp->addColToRow(row, col, i);
           }
         } else {
@@ -430,7 +431,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
             auto portNd = n->pl().getPort(i);
             if (!portNd) continue;
             auto e = gg->getEdg(portNd, n);
-            int col = lp->getVarByName(getEdgeUseVar(e, edg));
+            int col = lp->getVarByName(getEdgUseVar(e, edg));
             if (col > -1) lp->addColToRow(row, col, i);
           }
         }
@@ -572,11 +573,12 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
         int rowSum = lp->addRow(sumConst.str(), 1, shared::optim::UP);
 
         int N = gg->maxDeg() - 1;
+        int M = pens.size();
 
         for (int k = 0; k < N; k++) {
           std::stringstream var;
           size_t pp = pens.size() - 1 - k;
-          if (k >= pens.size()) {
+          if (k >= M) {
             pp = k + 1 - pens.size();
             var << "d" << pp << "'(" << edgA << "," << edgB << ")";
           } else {
@@ -600,8 +602,8 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 }
 
 // _____________________________________________________________________________
-std::string ILPGridOptimizer::getEdgeUseVar(const GridEdge* e,
-                                            const CombEdge* cg) const {
+std::string ILPGridOptimizer::getEdgUseVar(const GridEdge* e,
+                                           const CombEdge* cg) const {
   std::stringstream varName;
   varName << "edg(" << e->getFrom()->pl().getId() << ","
           << e->getTo()->pl().getId() << "," << cg << ")";
@@ -633,7 +635,7 @@ void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
       for (auto nd : cg.getNds()) {
         for (auto edg : nd->getAdjList()) {
           if (edg->getFrom() != nd) continue;
-          auto varName = getEdgeUseVar(e, edg);
+          auto varName = getEdgUseVar(e, edg);
 
           int i = lp->getVarByName(varName);
           if (i > -1) {
@@ -710,7 +712,7 @@ size_t ILPGridOptimizer::nonInfDeg(const GridNode* g) const {
 }
 
 // _____________________________________________________________________________
-StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
+StarterSol ILPGridOptimizer::extractFeasibleSol(Drawing* d, BaseGraph* gg,
                                                 const CombGraph& cg,
                                                 double maxGrDist) const {
   StarterSol sol;
@@ -739,7 +741,7 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
             if (!bendEdg->pl().isSecondary()) continue;
             for (auto cEdg : nd->getAdjList()) {
               if (cEdg->getFrom() != nd) continue;
-              auto varName = getEdgeUseVar(bendEdg, cEdg);
+              auto varName = getEdgUseVar(bendEdg, cEdg);
               sol[varName] = 0;
             }
           }
@@ -753,7 +755,7 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
           assert(sinkEdg->pl().isSecondary());
           for (auto cEdg : nd->getAdjList()) {
             if (cEdg->getFrom() != nd) continue;
-            auto varName = getEdgeUseVar(sinkEdg, cEdg);
+            auto varName = getEdgUseVar(sinkEdg, cEdg);
             sol[varName] = 0;
           }
         }
@@ -761,26 +763,34 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(BaseGraph* gg,
     }
   }
 
+  // init edge use vars to 0
   for (auto grNd : *gg->getNds()) {
     for (auto grEdg : grNd->getAdjListOut()) {
       if (grEdg->pl().isSecondary()) continue;
-      // we assume here that the heuristic solution is feasible!
-      auto resEdg = *gg->getResEdgs(grEdg).begin();
 
-      if (resEdg) {
-        auto varName = getEdgeUseVar(grEdg, resEdg);
-        sol[varName] = 1;
-      } else {
-        for (auto cNd : cg.getNds()) {
-          for (auto cEdg : cNd->getAdjList()) {
-            if (cEdg->getFrom() != cNd) continue;
-            auto varName = getEdgeUseVar(grEdg, cEdg);
-            sol[varName] = 0;
-          }
+      for (auto cNd : cg.getNds()) {
+        for (auto cEdg : cNd->getAdjList()) {
+          if (cEdg->getFrom() != cNd) continue;
+          auto varName = getEdgUseVar(grEdg, cEdg);
+          sol[varName] = 0;
         }
       }
     }
   }
+
+  // write edge use vars from heuristic solution
+  for (const auto& a : d->getEdgPaths()) {
+    auto cEdg = a.first;
+    const auto& grEdgList = a.second;
+    for (auto xy : grEdgList) {
+      auto grEdg = gg->getGrEdgById(xy);
+      auto varName = getEdgUseVar(grEdg, cEdg);
+      sol[varName] = 1;
+    }
+  }
+
+  // TODO: we don't write the bend edge variables here, these can
+  // typically be filled by the solver using the information given above
 
   return sol;
 }

@@ -139,8 +139,8 @@ void GridGraph::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
   _resEdgs[gf].erase(ce);
 
   if (_resEdgs[ge].size() == 0) {
-    if (!a->pl().isSettled()) openTurns(a);
-    if (!b->pl().isSettled()) openTurns(b);
+    if (!a->pl().isSettled() && unused(a)) openTurns(a);
+    if (!b->pl().isSettled() && unused(b)) openTurns(b);
   }
 }
 
@@ -213,13 +213,12 @@ void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
 void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrO) {
   if (a == b) return;
 
+  // this closes the grid edge
   auto ge = getNEdg(a, b);
-
-  if (!ge) std::cerr << a->pl().getX() << " " << a->pl().getY() << std::endl;
-  if (!ge) std::cerr << b->pl().getX() << " " << b->pl().getY() << std::endl;
-  assert(ge);
+  auto gf = getNEdg(b, a);
 
   addResEdg(ge, e);
+  addResEdg(gf, e);
 
   ge->pl().setRndrOrder(rndrO);
 
@@ -228,12 +227,33 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrO) {
   closeTurns(a);
   closeTurns(b);
 }
+// _____________________________________________________________________________
+bool GridGraph::unused(const GridNode* gnd) const {
+  if (!gnd->pl().isSink()) return false;
+  for (size_t i = 0; i < maxDeg(); i++) {
+    auto neighbor = neigh(gnd, i);
+    if (!neighbor) continue;
+    auto e = getNEdg(gnd, neighbor);
+    auto f = getNEdg(neighbor, gnd);
+    auto a = _resEdgs.find(const_cast<GridEdge*>(e));
+
+
+    if (a != _resEdgs.end()) {
+      assert(a->second.size() == e->pl().resEdgs());
+    }
+    if (a != _resEdgs.end() && a->second.size() != 0) return false;
+    a = _resEdgs.find(const_cast<GridEdge*>(f));
+    if (a != _resEdgs.end()) assert(a->second.size() == f->pl().resEdgs());
+    if (a != _resEdgs.end() && a->second.size() != 0) return false;
+  }
+  return true;
+}
 
 // _____________________________________________________________________________
 void GridGraph::addResEdg(GridEdge* ge, CombEdge* ce) {
-  // assert(_resEdgs.count(ge) == 0 || _resEdgs.find(ge)->second.size() == 0);
   ge->pl().addResEdge();
   _resEdgs[ge].insert(ce);
+  assert(_resEdgs[ge].size() == ge->pl().resEdgs());
 }
 
 // _____________________________________________________________________________

@@ -30,7 +30,7 @@ int PseudoOrthoRadialGraph::multi(size_t y) const {
 // _____________________________________________________________________________
 void PseudoOrthoRadialGraph::init() {
   // write nodes
-  // TODO: we are only going from 1 because we have no center node
+
   for (size_t y = 1; y < _grid.getYHeight() / 2; y++) {
     for (size_t x = 0; x < _numBeams * multi(y); x++) {
       writeNd(x, y);
@@ -145,7 +145,7 @@ void PseudoOrthoRadialGraph::writeInitialCosts() {
         auto oPort = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
         auto e = getEdg(port, oPort);
 
-        // this is percentage the hop length is longer than the smallest cell
+        // this is the percentage the hop length is longer than the smallest cell
         // size
         double sX = (angStepLoc * y) / angStep;
 

@@ -7,6 +7,8 @@
 
 #include "octi/basegraph/GridGraph.h"
 
+#define A 0.86602540378443865
+
 namespace octi {
 namespace basegraph {
 
@@ -17,7 +19,7 @@ class HexGridGraph : public GridGraph {
                const Penalties& pens)
       : GridGraph(bbox, cellSize, spacer, pens) {
     _a = _cellSize;
-    _h = _a * 0.86602540378443865;
+    _h = _a * A;
     _grid = Grid<GridNode*, Point, double>(_a, _h, bbox, false);
 
     _bendCosts[0] = _c.p_45 - _c.p_135;

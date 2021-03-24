@@ -20,6 +20,7 @@ using octi::combgraph::CombNode;
 using util::graph::Dijkstra;
 
 typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
+typedef std::vector<std::pair<size_t, size_t>>  GrPath;
 
 struct Score {
   double bend;
@@ -61,6 +62,7 @@ class Drawing {
   Drawing() : _c(std::numeric_limits<double>::infinity()), _gg(0){};
 
   double score() const;
+  double rawScore() const;
   uint64_t violations() const;
   Score fullScore() const;
   void crumble();
@@ -89,9 +91,11 @@ class Drawing {
 
   void setBaseGraph(const BaseGraph* gg);
 
+  const std::map<const CombEdge*, GrPath>& getEdgPaths() const;
+
  private:
   std::map<const CombNode*, size_t> _nds;
-  std::map<const CombEdge*, std::vector<std::pair<size_t, size_t>>> _edgs;
+  std::map<const CombEdge*, GrPath> _edgs;
 
   std::map<const CombNode*, double> _ndReachCosts;
   std::map<const CombNode*, double> _ndBndCosts;

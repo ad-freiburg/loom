@@ -115,6 +115,7 @@ int main(int argc, char** argv) {
   T_START(read);
   LineGraph tg;
   BaseGraph* gg;
+  Drawing d;
 
   if (cfg.fromDot)
     tg.readFromDot(&(std::cin), 0);
@@ -150,9 +151,8 @@ int main(int argc, char** argv) {
 
   auto box = tg.getBBox();
 
-  // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-  // change according to graphtype
-  // tg.splitNodes(4);
+  // split nodes that have a larger degree than the max degree of the grid graph
+  tg.splitNodes(oct.maxNodeDeg());
 
   CombGraph cg(&tg, cfg.deg2Heur);
 
@@ -186,7 +186,7 @@ int main(int argc, char** argv) {
 
   if (cfg.optMode == "ilp") {
     T_START(octi);
-    sc = oct.drawILP(cg, box, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+    sc = oct.drawILP(cg, box, &res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
                      cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen,
                      cfg.ilpTimeLimit, cfg.ilpSolver, cfg.ilpPath);
     time = T_STOP(octi);
@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
   } else if ((cfg.optMode == "heur")) {
     T_START(octi);
     try {
-      sc = oct.draw(cg, box, &res, &gg, cfg.pens, gridSize, cfg.borderRad,
+      sc = oct.draw(cg, box, &res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
                     cfg.maxGrDist, cfg.restrLocSearch, cfg.enfGeoPen,
                     cfg.obstacles, cfg.abortAfter);
       time = T_STOP(octi);
@@ -207,36 +207,50 @@ int main(int argc, char** argv) {
                             << " ms, score " << sc.full;
   }
 
-  size_t maxRss = util::getPeakRSS();
+  util::json::Dict jsonScore;
 
-  // translate score to JSON
-  util::json::Dict jsonScore{
-      {"scores",
-       util::json::Dict{{"total_score", sc.full},
-                        {"topology_violations", util::json::Int(sc.violations)},
-                        {"density-score", sc.dense},
-                        {"bend-score", sc.bend},
-                        {"hop-score", sc.hop},
-                        {"move-score", sc.move}}},
-      {"pens",
-       util::json::Dict{
-           {"density-pen", cfg.pens.densityPen},
-           {"diag-pen", cfg.pens.diagonalPen},
-           {"hori-pen", cfg.pens.horizontalPen},
-           {"vert-pen", cfg.pens.verticalPen},
-           {"180-turn-pen", cfg.pens.p_0},
-           {"135-turn-pen", cfg.pens.p_135},
-           {"90-turn-pen", cfg.pens.p_90},
-           {"45-turn-pen", cfg.pens.p_45},
-       }},
-      {"misc", util::json::Dict{{"method", cfg.optMode},
-                                {"deg2heur", cfg.deg2Heur},
-                                {"max-grid-dist", cfg.maxGrDist}}},
-      {"time_ms", time},
-      {"procs", omp_get_num_procs()},
-      {"peak_memory", util::readableSize(maxRss)},
-      {"peak_memory_bytes", util::json::Int(maxRss)},
-      {"timestamp", util::json::Int(std::time(0))}};
+  if (true) {
+    size_t maxRss = util::getPeakRSS();
+    size_t numEdgs = 0;  // double because we are modelling an undirected graph
+    for (auto nd : *gg->getNds()) {
+      numEdgs += nd->getDeg();
+    }
+
+    // translate score to JSON
+    jsonScore = util::json::Dict{
+        {"scores", util::json::Dict{{"total_score", sc.full},
+                                    {"topology_violations",
+                                     util::json::Int(sc.violations)},
+                                    {"density-score", sc.dense},
+                                    {"bend-score", sc.bend},
+                                    {"hop-score", sc.hop},
+                                    {"move-score", sc.move}}},
+        {"pens",
+         util::json::Dict{
+             {"density-pen", cfg.pens.densityPen},
+             {"diag-pen", cfg.pens.diagonalPen},
+             {"hori-pen", cfg.pens.horizontalPen},
+             {"vert-pen", cfg.pens.verticalPen},
+             {"180-turn-pen", cfg.pens.p_0},
+             {"135-turn-pen", cfg.pens.p_135},
+             {"90-turn-pen", cfg.pens.p_90},
+             {"45-turn-pen", cfg.pens.p_45},
+         }},
+        {"gridgraph-size",
+         util::json::Dict{{"nodes", gg->getNds()->size()},
+                          {"edges", numEdgs / 2}}},
+        {"ilp", util::json::Dict{{"size", util::json::Dict{{"rows", "TODO"},
+                                                           {"cols", "TODO"}}},
+                                 {"solve-time", "TODO"}}},
+        {"misc", util::json::Dict{{"method", cfg.optMode},
+                                  {"deg2heur", cfg.deg2Heur},
+                                  {"max-grid-dist", cfg.maxGrDist}}},
+        {"time_ms", time},
+        {"procs", omp_get_num_procs()},
+        {"peak_memory", util::readableSize(maxRss)},
+        {"peak_memory_bytes", maxRss},
+        {"timestamp", util::json::Int(std::time(0))}};
+  }
 
   if (cfg.printMode == "gridgraph") {
     out.print(*gg, std::cout, jsonScore);

@@ -39,10 +39,9 @@ void OctiQuadTree::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
   _resEdgs[ge].erase(ce);
   _resEdgs[gf].erase(ce);
 
-
   if (_resEdgs[ge].size() == 0) {
-    if (!a->pl().isSettled()) openTurns(a);
-    if (!b->pl().isSettled()) openTurns(b);
+    if (!a->pl().isSettled() && unused(a)) openTurns(a);
+    if (!b->pl().isSettled() && unused(b)) openTurns(b);
   }
 
   // unblock diagonal edges crossing this edge
@@ -69,7 +68,7 @@ void OctiQuadTree::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
     bb = getNode(a->pl().getX(), a->pl().getY() + len);
   }
 
-  if (aa && bb) {
+  if (aa && bb && _resEdgs[ge].size() == 0) {
     auto e = getNEdg(aa, bb);
     auto f = getNEdg(bb, aa);
     if (e && f) {
@@ -86,8 +85,10 @@ void OctiQuadTree::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
 
   // this closes the grid edge
   auto ge = getNEdg(a, b);
+  auto gf = getNEdg(b, a);
 
   addResEdg(ge, e);
+  addResEdg(gf, e);
 
   ge->pl().setRndrOrder(rndrOrd);
 
@@ -132,23 +133,31 @@ void OctiQuadTree::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
 
 // _____________________________________________________________________________
 CrossEdgPairs OctiQuadTree::getCrossEdgPairs() const {
-  assert(false);
   CrossEdgPairs ret;
   for (const GridNode* n : getNds()) {
     if (!n->pl().isSink()) continue;
 
-    auto eOr = getNEdg(n, neigh(n, 3));
-    auto fOr = getNEdg(neigh(n, 3), n);
+    auto nn = neigh(n, 3);
+
+    if (!nn) continue;
+
+    size_t d = nn->pl().getX() - n->pl().getX();
+
+    auto eOr = getNEdg(n, nn);
+    auto fOr = getNEdg(nn, n);
 
     if (!eOr || !fOr) continue;
 
-    auto na = neigh(n, (3 + 7) % 8);
-    auto nb = neigh(n, (3 + 1) % 8);
+    auto na = getNode(n->pl().getX(), n->pl().getY() - d);
+    auto nb = getNode(n->pl().getX() + d, n->pl().getY());
 
     if (!na || !nb) continue;
 
     auto e = getNEdg(na, nb);
     auto f = getNEdg(nb, na);
+
+    assert(e);
+    assert(f);
     ret.push_back({{eOr, fOr}, {e, f}});
   }
 
@@ -169,14 +178,14 @@ void OctiQuadTree::init() {
       _cellSize;
   size_t n = pow(2, ceil(log2(numCells)));
 
-  std::cerr << "num cells: " << n << std::endl;
+  // std::cerr << "num cells: " << n << std::endl;
   newBox = extendBox(DPoint(newBox.getLowerLeft().getX() + n * _cellSize,
                             newBox.getLowerLeft().getY() + n * _cellSize),
                      newBox);
 
   size_t maxDepth = log2(n);
 
-  std::cerr << "Max depth: " << maxDepth << std::endl;
+  // std::cerr << "Max depth: " << maxDepth << std::endl;
 
   _bbox = newBox;
 
@@ -196,6 +205,8 @@ struct SplitFunc : util::geo::SplitFunc<const CombNode*, double> {
 
   _grid = Grid<GridNode*, Point, double>(
       _cellSize, _cellSize, util::geo::pad(_bbox, _cellSize), false);
+
+  _ndIdx.resize(_grid.getXWidth() * _grid.getYHeight());
 
   // write nodes to quadtree
   for (auto cNd : _cg.getNds()) {
@@ -246,6 +257,29 @@ struct SplitFunc : util::geo::SplitFunc<const CombNode*, double> {
 
     auto ur = getNode(xb, yb);
     if (!ur) ur = writeNd(xb, yb);
+  }
+
+  _neighs.resize(_nds.size() * 8);
+
+  for (auto nid : sortedQdNds) {
+    const auto& qNd = qt.getNd(nid);
+    size_t xa = std::round(
+        (qNd.bbox.getLowerLeft().getX() - _bbox.getLowerLeft().getX()) /
+        _cellSize);
+    size_t ya = std::round(
+        (qNd.bbox.getLowerLeft().getY() - _bbox.getLowerLeft().getY()) /
+        _cellSize);
+    size_t xb = std::round(
+        (qNd.bbox.getUpperRight().getX() - _bbox.getLowerLeft().getX()) /
+        _cellSize);
+    size_t yb = std::round(
+        (qNd.bbox.getUpperRight().getY() - _bbox.getLowerLeft().getY()) /
+        _cellSize);
+
+    auto ll = getNode(xa, ya);
+    auto lr = getNode(xb, ya);
+    auto ul = getNode(xa, yb);
+    auto ur = getNode(xb, yb);
 
     connectNodes(ll, ur, 1);
     connectNodes(ul, lr, 3);
@@ -257,6 +291,7 @@ struct SplitFunc : util::geo::SplitFunc<const CombNode*, double> {
   }
 
   prunePorts();
+  writeInitialCosts();
 }
 
 // _____________________________________________________________________________

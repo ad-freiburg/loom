@@ -141,6 +141,8 @@ class GridGraph : public BaseGraph {
   virtual void getSettledAdjEdgs(GridNode* n, CombNode* origNd,
                                  CombEdge* outgoing[8]);
 
+  virtual bool unused(const GridNode* gnd) const;
+
   virtual size_t getGrNdDeg(const CombNode* nd, size_t x, size_t y) const;
 
  private:

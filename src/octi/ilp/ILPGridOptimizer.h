@@ -37,13 +37,13 @@ class ILPGridOptimizer {
       const basegraph::GeoPensMap* geoPensMap, double maxGrDist,
       const std::string& solverStr) const;
 
-  std::string getEdgeUseVar(const GridEdge* e, const CombEdge* cg) const;
+  std::string getEdgUseVar(const GridEdge* e, const CombEdge* cg) const;
   std::string getStatPosVar(const GridNode* e, const CombNode* cg) const;
 
   void extractSolution(shared::optim::ILPSolver* lp, BaseGraph* gg,
                        const CombGraph& cg, combgraph::Drawing* d) const;
 
-  shared::optim::StarterSol extractFeasibleSol(BaseGraph* gg,
+  shared::optim::StarterSol extractFeasibleSol(combgraph::Drawing* d, BaseGraph* gg,
                                                const CombGraph& cg,
                                                double maxGrDist) const;
 

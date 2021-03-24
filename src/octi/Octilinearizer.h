@@ -112,17 +112,19 @@ class Octilinearizer {
       : _baseGraphType(baseGraphType) {}
 
   Score draw(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
-             basegraph::BaseGraph** gg, const Penalties& pens, double gridSize,
+             basegraph::BaseGraph** gg, Drawing* d, const Penalties& pens, double gridSize,
              double borderRad, double maxGrDist, bool restrLocSearch,
              double enfGeoCourse,
              const std::vector<util::geo::Polygon<double>>& obstacles,
              size_t abortAfter);
 
   Score drawILP(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
-                basegraph::BaseGraph** gg, const Penalties& pens,
+                basegraph::BaseGraph** gg, Drawing* d, const Penalties& pens,
                 double gridSize, double borderRad, double maxGrDist,
                 bool noSolve, double enfGeoPens, int timeLim,
                 const std::string& solverStr, const std::string& path);
+
+  size_t maxNodeDeg() const;
 
  private:
   basegraph::BaseGraphType _baseGraphType;

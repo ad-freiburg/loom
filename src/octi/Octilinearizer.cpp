@@ -9,13 +9,13 @@
 #include "octi/basegraph/BaseGraph.h"
 #include "octi/basegraph/ConvexHullOctiGridGraph.h"
 #include "octi/basegraph/GridGraph.h"
+#include "octi/basegraph/HexGridGraph.h"
 #include "octi/basegraph/NodeCost.h"
 #include "octi/basegraph/OctiGridGraph.h"
 #include "octi/basegraph/OctiHananGraph.h"
 #include "octi/basegraph/OctiQuadTree.h"
 #include "octi/basegraph/OrthoRadialGraph.h"
 #include "octi/basegraph/PseudoOrthoRadialGraph.h"
-#include "octi/basegraph/HexGridGraph.h"
 #include "octi/combgraph/Drawing.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -45,28 +45,31 @@ using util::graph::Dijkstra;
 // _____________________________________________________________________________
 Score Octilinearizer::drawILP(const CombGraph& cg, const util::geo::DBox& box,
                               LineGraph* outTg, BaseGraph** retGg,
-                              const Penalties& pens, double gridSize,
-                              double borderRad, double maxGrDist, bool noSolve,
-                              double enfGeoPen, int timeLim,
-                              const std::string& solverStr,
+                              Drawing* dOut, const Penalties& pens,
+                              double gridSize, double borderRad,
+                              double maxGrDist, bool noSolve, double enfGeoPen,
+                              int timeLim, const std::string& solverStr,
                               const std::string& path) {
   BaseGraph* gg;
+  Drawing drawing;
 
   LOGTO(DEBUG, std::cerr) << "Presolving...";
   try {
     // presolve using heuristical approach to get a first feasible solution
     LineGraph tmpOutTg;
     // important: always use restrLocSearch here!
-    draw(cg, box, &tmpOutTg, &gg, pens, gridSize, borderRad, maxGrDist, true,
-         enfGeoPen, {}, std::numeric_limits<size_t>::max());
+    auto score = draw(cg, box, &tmpOutTg, &gg, &drawing, pens, gridSize,
+                      borderRad, maxGrDist, true, enfGeoPen, {},
+                      std::numeric_limits<size_t>::max());
+    if (score.violations) throw NoEmbeddingFoundExc();
     LOGTO(DEBUG, std::cerr) << "Presolving finished.";
   } catch (const NoEmbeddingFoundExc& exc) {
-    LOGTO(DEBUG, std::cerr) << "Presolve was not sucessful.";
+    LOGTO(DEBUG, std::cerr) << "Presolve was not successful.";
     gg = newBaseGraph(box, cg, gridSize, borderRad, pens);
     gg->init();
+    drawing = Drawing(gg);
   }
 
-  Drawing drawing(gg);
   GeoPensMap enfGeoPens;
   const GeoPensMap* geoPens = 0;
 
@@ -92,11 +95,12 @@ Score Octilinearizer::drawILP(const CombGraph& cg, const util::geo::DBox& box,
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens, timeLim,
-                    solverStr, path);
+  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve,
+                                   geoPens, timeLim, solverStr, path);
 
   drawing.getLineGraph(outTg);
   *retGg = gg;
+  *dOut = drawing;
 
   Score a;
   a.full = score;
@@ -106,7 +110,7 @@ Score Octilinearizer::drawILP(const CombGraph& cg, const util::geo::DBox& box,
 
 // _____________________________________________________________________________
 Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
-                           LineGraph* outTg, BaseGraph** retGg,
+                           LineGraph* outTg, BaseGraph** retGg, Drawing* dOut,
                            const Penalties& pens, double gridSize,
                            double borderRad, double maxGrDist,
                            bool restrLocSearch, double enfGeoPen,
@@ -131,7 +135,8 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
   }
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
 
-  LOGTO(DEBUG, std::cerr) << "Grid graph has " << gg->getNds()->size() << " nodes";
+  LOGTO(DEBUG, std::cerr) << "Grid graph has " << gg->getNds()->size()
+                          << " nodes";
 
   size_t INITIAL_TRIES = 100;
   size_t LOCAL_SEARCH_ITERS = 100;
@@ -343,6 +348,7 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
                           << ", dense costs: " << fullScore.dense;
 
   *retGg = ggs[0];
+  *dOut = drawing;
   return fullScore;
 }
 
@@ -716,5 +722,31 @@ void Octilinearizer::statLine(Undrawable status, const std::string& msg,
                               << " <no cands>"
                               << " (" << ms << " ms)" << mark;
       break;
+  }
+}
+
+// _____________________________________________________________________________
+size_t Octilinearizer::maxNodeDeg() const {
+  // TODO: this is currently at two locations, in the base graph class and here,
+  // fix this
+  switch (_baseGraphType) {
+    case OCTIGRID:
+      return 8;
+    case CONVEXHULLOCTIGRID:
+      return 8;
+    case GRID:
+      return 4;
+    case ORTHORADIAL:
+      return 4;
+    case PSEUDOORTHORADIAL:
+      return 4;
+    case OCTIHANANGRID:
+      return 8;
+    case OCTIQUADTREE:
+      return 8;
+    case HEXGRID:
+      return 6;
+    default:
+      return 8;
   }
 }

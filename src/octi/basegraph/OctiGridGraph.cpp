@@ -56,7 +56,7 @@ void OctiGridGraph::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
 
   // unblock blocked diagonal edges crossing this edge
   size_t dir = getDir(a, b);
-  if (dir % 2 != 0) {
+  if (dir % 2 != 0 && _resEdgs[ge].size() == 0) {
     size_t x = a->pl().getX();
     size_t y = a->pl().getY();
 
@@ -94,8 +94,10 @@ void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
 
   // this closes the grid edge
   auto ge = getNEdg(a, b);
+  auto gf = getNEdg(b, a);
 
   addResEdg(ge, e);
+  addResEdg(gf, e);
 
   ge->pl().setRndrOrder(rndrOrd);
 

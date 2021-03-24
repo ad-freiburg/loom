@@ -15,6 +15,7 @@ using octi::combgraph::CombEdge;
 using octi::combgraph::CombGraph;
 using octi::combgraph::CombNode;
 using octi::combgraph::Drawing;
+using octi::combgraph::GrPath;
 using octi::combgraph::Score;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
@@ -24,6 +25,9 @@ using util::graph::Dijkstra;
 
 // _____________________________________________________________________________
 double Drawing::score() const { return _c + violations() * basegraph::SOFT_INF; }
+
+// _____________________________________________________________________________
+double Drawing::rawScore() const { return _c + violations() * basegraph::SOFT_INF; }
 
 // _____________________________________________________________________________
 uint64_t Drawing::violations() const { return _violations; }
@@ -475,6 +479,11 @@ double Drawing::recalcBends(const CombNode* nd) {
 
 // _____________________________________________________________________________
 bool Drawing::drawn(const CombEdge* ce) const { return _edgs.count(ce); }
+
+// _____________________________________________________________________________
+const std::map<const CombEdge*, GrPath>& Drawing::getEdgPaths() const {
+  return _edgs;
+}
 
 // _____________________________________________________________________________
 void Drawing::erase(CombEdge* ce) {

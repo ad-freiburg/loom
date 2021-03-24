@@ -199,26 +199,26 @@ GridNode* HexGridGraph::writeNd(size_t x, size_t y) {
     double yi = 0;
 
     if (i == 0) {
-      xi = 1;
-      yi = 1;
+      xi = .5;
+      yi = A;
     }
     if (i == 1) {
-      xi = 1;
+      xi = A;
     }
     if (i == 2) {
-      xi = 1;
-      yi = -1;
+      xi = .5;
+      yi = -A;
     }
     if (i == 3) {
-      xi = -1;
-      yi = -1;
+      xi = -.5;
+      yi = -A;
     }
     if (i == 4) {
       xi = -1;
     }
     if (i == 5) {
-      xi = -1;
-      yi = 1;
+      xi = -.5;
+      yi = A;
     }
 
     GridNode* nn = addNd(DPoint(xPos + xi * _spacer, yPos + yi * _spacer));

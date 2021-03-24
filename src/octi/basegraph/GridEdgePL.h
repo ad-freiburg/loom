@@ -33,6 +33,8 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   void open();
   bool closed() const;
 
+  size_t resEdgs() const;
+
   void block();
   void unblock();
 

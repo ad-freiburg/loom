@@ -32,8 +32,7 @@ namespace basegraph {
 
 const static double INF = std::numeric_limits<double>::infinity();
 
-// this allows for 10000 topology violations
-const static double SOFT_INF = std::numeric_limits<float>::max() / 10000;
+const static double SOFT_INF = 100000;
 
 enum BaseGraphType {
   HEXGRID,
@@ -123,6 +122,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   virtual void reset() = 0;
 
   virtual GridNode* getSettled(const CombNode* cnd) const = 0;
+  virtual bool unused(const GridNode* gnd) const = 0;
 
   virtual double ndMovePen(const CombNode* cbNd,
                            const GridNode* grNd) const = 0;
