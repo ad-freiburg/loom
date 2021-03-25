@@ -14,8 +14,9 @@ class OctiHananGraph : public OctiGridGraph {
  public:
   using OctiGridGraph::neigh;
   OctiHananGraph(const util::geo::DBox& bbox, const combgraph::CombGraph& cg,
-                 double cellSize, double spacer, const Penalties& pens)
-      : OctiGridGraph(bbox, cellSize, spacer, pens), _cg(cg) {}
+                 double cellSize, double spacer, size_t iters,
+                 const Penalties& pens)
+      : OctiGridGraph(bbox, cellSize, spacer, pens), _cg(cg), _iters(iters) {}
 
   virtual void unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b);
   virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t order);
@@ -33,8 +34,10 @@ class OctiHananGraph : public OctiGridGraph {
   virtual size_t ang(size_t i, size_t j) const;
   virtual void connectNodes(GridNode* grNdA, GridNode* grNdB, size_t dir);
   virtual void writeInitialCosts();
+  std::set<std::pair<size_t, size_t>> getIterCoords(const std::set<std::pair<size_t, size_t>>& inCoords) const;
 
   const combgraph::CombGraph& _cg;
+  size_t _iters;
   std::vector<size_t> _ndIdx;
   std::vector<GridNode*> _neighs;
 

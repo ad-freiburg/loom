@@ -32,6 +32,9 @@ struct Config {
 
   size_t abortAfter;
 
+  size_t hananIters;
+  bool writeStats;
+
   std::string obstaclePath;
   std::vector<util::geo::DPolygon> obstacles;
 

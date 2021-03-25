@@ -39,6 +39,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "ilp-no-solve",
       opts::bool_switch(&(cfg->ilpNoSolve))->default_value(false),
       "if set, the ILP is not solved, only written to file")(
+      "hanan-iters", opts::value<size_t>(&(cfg->hananIters))->default_value(1),
+      "hanan iterations")(
       "ilp-time-limit",
       opts::value<int>(&(cfg->ilpTimeLimit))->default_value(60),
       "ILP solver time limit (in seconds), negative value means infinity")(
@@ -64,6 +66,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "restr-loc-search",
       opts::bool_switch(&(cfg->restrLocSearch))->default_value(false),
       "restrict local search to max grid distance")(
+      "stats", opts::bool_switch(&(cfg->writeStats))->default_value(false),
+      "write stats to output graph")(
       "density-pen",
       opts::value<double>(&(cfg->pens.densityPen))->default_value(0),
       "penalty factor for re-inserted contracted stations that are too near, a "

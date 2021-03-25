@@ -22,11 +22,18 @@ using octi::combgraph::CombNode;
 namespace octi {
 namespace ilp {
 
+struct ILPStats {
+  double score;
+  double time;
+  size_t rows;
+  size_t cols;
+};
+
 class ILPGridOptimizer {
  public:
   ILPGridOptimizer() {}
 
-  double optimize(BaseGraph* gg, const CombGraph& cg, combgraph::Drawing* d,
+  ILPStats optimize(BaseGraph* gg, const CombGraph& cg, combgraph::Drawing* d,
                   double maxGrDist, bool noSolve,
                   const basegraph::GeoPensMap* geoPensMap, int timeLim,
                   const std::string& solverStr, const std::string& path) const;

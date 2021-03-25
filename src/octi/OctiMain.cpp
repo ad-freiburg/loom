@@ -182,13 +182,15 @@ int main(int argc, char** argv) {
   }
 
   Score sc;
+  octi::ilp::ILPStats ilpstats;
   double time = 0;
 
   if (cfg.optMode == "ilp") {
     T_START(octi);
     sc = oct.drawILP(cg, box, &res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
                      cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen,
-                     cfg.ilpTimeLimit, cfg.ilpSolver, cfg.ilpPath);
+                     cfg.hananIters, cfg.ilpTimeLimit, &ilpstats, cfg.ilpSolver,
+                     cfg.ilpPath);
     time = T_STOP(octi);
     LOGTO(DEBUG, std::cerr)
         << "Schematized using ILP in " << time << " ms, score " << sc.full;
@@ -197,7 +199,7 @@ int main(int argc, char** argv) {
     try {
       sc = oct.draw(cg, box, &res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
                     cfg.maxGrDist, cfg.restrLocSearch, cfg.enfGeoPen,
-                    cfg.obstacles, cfg.abortAfter);
+                    cfg.hananIters, cfg.obstacles, cfg.abortAfter);
       time = T_STOP(octi);
     } catch (const NoEmbeddingFoundExc& exc) {
       LOG(ERROR) << exc.what();
@@ -209,7 +211,7 @@ int main(int argc, char** argv) {
 
   util::json::Dict jsonScore;
 
-  if (true) {
+  if (cfg.writeStats) {
     size_t maxRss = util::getPeakRSS();
     size_t numEdgs = 0;  // double because we are modelling an undirected graph
     for (auto nd : *gg->getNds()) {
@@ -236,12 +238,8 @@ int main(int argc, char** argv) {
              {"90-turn-pen", cfg.pens.p_90},
              {"45-turn-pen", cfg.pens.p_45},
          }},
-        {"gridgraph-size",
-         util::json::Dict{{"nodes", gg->getNds()->size()},
-                          {"edges", numEdgs / 2}}},
-        {"ilp", util::json::Dict{{"size", util::json::Dict{{"rows", "TODO"},
-                                                           {"cols", "TODO"}}},
-                                 {"solve-time", "TODO"}}},
+        {"gridgraph-size", util::json::Dict{{"nodes", gg->getNds()->size()},
+                                            {"edges", numEdgs / 2}}},
         {"misc", util::json::Dict{{"method", cfg.optMode},
                                   {"deg2heur", cfg.deg2Heur},
                                   {"max-grid-dist", cfg.maxGrDist}}},
@@ -250,6 +248,13 @@ int main(int argc, char** argv) {
         {"peak_memory", util::readableSize(maxRss)},
         {"peak_memory_bytes", maxRss},
         {"timestamp", util::json::Int(std::time(0))}};
+
+    if (cfg.optMode == "ilp") {
+      jsonScore["ilp"] = util::json::Dict{
+          {"size",
+           util::json::Dict{{"rows", ilpstats.rows}, {"cols", ilpstats.cols}}},
+          {"solve-time", ilpstats.time}};
+    }
   }
 
   if (cfg.printMode == "gridgraph") {

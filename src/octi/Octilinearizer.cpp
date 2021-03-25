@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <fstream>
 #include <thread>
+#include "ilp/ILPGridOptimizer.h"
 #include "octi/Octilinearizer.h"
 #include "octi/basegraph/BaseGraph.h"
 #include "octi/basegraph/ConvexHullOctiGridGraph.h"
@@ -23,8 +24,6 @@
 #include "util/graph/Dijkstra.h"
 #include "util/log/Log.h"
 
-#include "ilp/ILPGridOptimizer.h"
-
 using namespace octi;
 using namespace basegraph;
 using namespace util;
@@ -32,6 +31,7 @@ using namespace util;
 using combgraph::EdgeOrdering;
 using octi::basegraph::BaseGraph;
 using octi::combgraph::Drawing;
+using octi::ilp::ILPStats;
 using util::geo::DBox;
 using util::geo::dist;
 using util::geo::DPoint;
@@ -43,13 +43,12 @@ using util::graph::BiDijkstra;
 using util::graph::Dijkstra;
 
 // _____________________________________________________________________________
-Score Octilinearizer::drawILP(const CombGraph& cg, const util::geo::DBox& box,
-                              LineGraph* outTg, BaseGraph** retGg,
-                              Drawing* dOut, const Penalties& pens,
-                              double gridSize, double borderRad,
-                              double maxGrDist, bool noSolve, double enfGeoPen,
-                              int timeLim, const std::string& solverStr,
-                              const std::string& path) {
+Score Octilinearizer::drawILP(
+    const CombGraph& cg, const util::geo::DBox& box, LineGraph* outTg,
+    BaseGraph** retGg, Drawing* dOut, const Penalties& pens, double gridSize,
+    double borderRad, double maxGrDist, bool noSolve, double enfGeoPen,
+    size_t hananIters, int timeLim, octi::ilp::ILPStats* stats,
+    const std::string& solverStr, const std::string& path) {
   BaseGraph* gg;
   Drawing drawing;
 
@@ -59,13 +58,13 @@ Score Octilinearizer::drawILP(const CombGraph& cg, const util::geo::DBox& box,
     LineGraph tmpOutTg;
     // important: always use restrLocSearch here!
     auto score = draw(cg, box, &tmpOutTg, &gg, &drawing, pens, gridSize,
-                      borderRad, maxGrDist, true, enfGeoPen, {},
+                      borderRad, maxGrDist, true, enfGeoPen, hananIters, {},
                       std::numeric_limits<size_t>::max());
     if (score.violations) throw NoEmbeddingFoundExc();
     LOGTO(DEBUG, std::cerr) << "Presolving finished.";
   } catch (const NoEmbeddingFoundExc& exc) {
     LOGTO(DEBUG, std::cerr) << "Presolve was not successful.";
-    gg = newBaseGraph(box, cg, gridSize, borderRad, pens);
+    gg = newBaseGraph(box, cg, gridSize, borderRad, hananIters, pens);
     gg->init();
     drawing = Drawing(gg);
   }
@@ -95,31 +94,29 @@ Score Octilinearizer::drawILP(const CombGraph& cg, const util::geo::DBox& box,
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  double score = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve,
-                                   geoPens, timeLim, solverStr, path);
+  *stats = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens,
+                             timeLim, solverStr, path);
 
   drawing.getLineGraph(outTg);
   *retGg = gg;
   *dOut = drawing;
 
   Score a;
-  a.full = score;
+  a.full = stats->score;
 
   return a;
 }
 
 // _____________________________________________________________________________
-Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
-                           LineGraph* outTg, BaseGraph** retGg, Drawing* dOut,
-                           const Penalties& pens, double gridSize,
-                           double borderRad, double maxGrDist,
-                           bool restrLocSearch, double enfGeoPen,
-                           const std::vector<Polygon<double>>& obstacles,
-                           size_t abortAfter) {
+Score Octilinearizer::draw(
+    const CombGraph& cg, const DBox& box, LineGraph* outTg, BaseGraph** retGg,
+    Drawing* dOut, const Penalties& pens, double gridSize, double borderRad,
+    double maxGrDist, bool restrLocSearch, double enfGeoPen, size_t hananIters,
+    const std::vector<Polygon<double>>& obstacles, size_t abortAfter) {
   size_t jobs = 4;
   std::vector<BaseGraph*> ggs(jobs);
 
-  auto gg = newBaseGraph(box, cg, gridSize, borderRad, pens);
+  auto gg = newBaseGraph(box, cg, gridSize, borderRad, hananIters, pens);
   gg->init();
 
   // util::geo::output::GeoGraphJsonOutput out;
@@ -130,7 +127,7 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
   T_START(ggraph);
 #pragma omp parallel for
   for (size_t i = 0; i < jobs; i++) {
-    ggs[i] = newBaseGraph(box, cg, gridSize, borderRad, pens);
+    ggs[i] = newBaseGraph(box, cg, gridSize, borderRad, hananIters, pens);
     ggs[i]->init();
   }
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
@@ -670,6 +667,7 @@ std::set<GridNode*> Octilinearizer::getCands(CombNode* cmbNd,
 // _____________________________________________________________________________
 BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, const CombGraph& cg,
                                         double cellSize, double spacer,
+                                        size_t hananIters,
                                         const Penalties& pens) const {
   switch (_baseGraphType) {
     case OCTIGRID:
@@ -684,7 +682,7 @@ BaseGraph* Octilinearizer::newBaseGraph(const DBox& bbox, const CombGraph& cg,
     case PSEUDOORTHORADIAL:
       return new PseudoOrthoRadialGraph(bbox, cellSize, spacer, pens);
     case OCTIHANANGRID:
-      return new OctiHananGraph(bbox, cg, cellSize, spacer, pens);
+      return new OctiHananGraph(bbox, cg, cellSize, spacer, hananIters, pens);
     case OCTIQUADTREE:
       return new OctiQuadTree(bbox, cg, cellSize, spacer, pens);
     case HEXGRID:

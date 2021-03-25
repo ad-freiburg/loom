@@ -15,7 +15,7 @@ class OctiQuadTree : public OctiHananGraph {
   using OctiGridGraph::neigh;
   OctiQuadTree(const util::geo::DBox& bbox, const combgraph::CombGraph& cg,
                double cellSize, double spacer, const Penalties& pens)
-      : OctiHananGraph(bbox, cg, cellSize, spacer, pens) {}
+      : OctiHananGraph(bbox, cg, cellSize, spacer, 1, pens) {}
 
   virtual void unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b);
   virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t order);

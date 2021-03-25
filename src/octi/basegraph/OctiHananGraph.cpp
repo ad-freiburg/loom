@@ -157,20 +157,28 @@ void OctiHananGraph::init() {
 
   _ndIdx.resize(_grid.getXWidth() * _grid.getYHeight());
 
-  std::map<const CombNode*, std::pair<size_t, size_t>> coords;
+  std::set<std::pair<size_t, size_t>> coords;
 
-  // write nodes
+  // get coords
   for (auto cNd : _cg.getNds()) {
     int x = _grid.getCellXFromX(cNd->pl().getGeom()->getX());
     int y = _grid.getCellYFromY(cNd->pl().getGeom()->getY());
+    coords.insert({x, y});
+  }
 
-    if (!getNode(x, y)) {
-      auto nd = writeNd(x, y);
-      coords[cNd] = {x, y};
+  // hanan iterations
+  for (size_t i = 1; i < _iters; i++)
+    coords = getIterCoords(coords);
 
-      xSorted.push_back(nd);
-      ySorted.push_back(nd);
-    }
+  // write nodes
+  for (auto coord : coords) {
+    int x = coord.first;
+    int y = coord.second;
+
+    auto nd = writeNd(x, y);
+
+    xSorted.push_back(nd);
+    ySorted.push_back(nd);
   }
 
   struct {
@@ -512,4 +520,71 @@ double OctiHananGraph::ndMovePen(const CombNode* cbNd,
 
   // and multiplied per grid hop penalty
   return gridD * penPerGrid;
+}
+
+// _____________________________________________________________________________
+std::set<std::pair<size_t, size_t>> OctiHananGraph::getIterCoords(const std::set<std::pair<size_t, size_t>>& inCoords) const {
+
+  std::set<std::pair<size_t, size_t>> ret;
+
+  std::vector<std::pair<size_t, size_t>> xSorted;
+  std::vector<std::pair<size_t, size_t>> ySorted;
+
+  // write nodes
+  for (auto coord : inCoords) {
+    xSorted.push_back(coord);
+    ySorted.push_back(coord);
+  }
+
+  std::vector<std::vector<std::pair<size_t, size_t>>> yAct(_grid.getYHeight());
+  std::vector<std::vector<std::pair<size_t, size_t>>> xAct(_grid.getXWidth());
+
+  std::vector<std::vector<std::pair<size_t, size_t>>> xyAct(_grid.getXWidth() +
+                                            _grid.getYHeight());
+  std::vector<std::vector<std::pair<size_t, size_t>>> yxAct(_grid.getXWidth() +
+                                            _grid.getYHeight());
+
+  for (auto c : xSorted) {
+    yAct[c.second].push_back(c);
+  }
+
+  for (auto c : xSorted) {
+    xAct[c.first].push_back(c);
+  }
+
+  for (auto c : xSorted) {
+    xyAct[c.first + (_grid.getYHeight() - 1 - c.second)]
+        .push_back(c);
+  }
+
+  for (auto c : xSorted) {
+    yxAct[c.second + c.first].push_back(c);
+  }
+
+  for (size_t x = 0; x < _grid.getXWidth(); x++) {
+    if (!xAct[x].size()) continue;
+
+    for (size_t y = 0; y < _grid.getYHeight(); y++) {
+      if (!yAct[y].size()) continue;
+      if (ret.count({x, y})) continue;
+      ret.insert({x, y});
+      yAct[y].push_back({x, y});
+      xAct[x].push_back({x, y});
+    }
+  }
+
+  for (size_t x = 0; x < _grid.getXWidth(); x++) {
+    for (size_t y = 0; y < _grid.getYHeight(); y++) {
+      size_t xi = x + (_grid.getYHeight() - 1 - y);
+      size_t yi = y + x;
+      if ((xyAct[xi].size() &&
+           (yxAct[yi].size() || yAct[y].size() || xAct[x].size())) ||
+          (yxAct[yi].size() &&
+           (xyAct[xi].size() || yAct[y].size() || xAct[x].size()))) {
+        if (!ret.count({x, y})) ret.insert({x, y});
+      }
+    }
+  }
+
+  return ret;
 }

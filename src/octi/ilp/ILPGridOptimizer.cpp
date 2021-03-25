@@ -15,16 +15,18 @@ using octi::basegraph::GridEdge;
 using octi::basegraph::GridNode;
 using octi::combgraph::Drawing;
 using octi::ilp::ILPGridOptimizer;
+using octi::ilp::ILPStats;
 using shared::optim::ILPSolver;
 using shared::optim::StarterSol;
 
 // _____________________________________________________________________________
-double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
+ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
                                   combgraph::Drawing* d, double maxGrDist,
                                   bool noSolve, const GeoPensMap* geoPensMap,
                                   int timeLim, const std::string& solverStr,
                                   const std::string& path) const {
   // extract first feasible solution from gridgraph
+  ILPStats s{std::numeric_limits<double>::infinity(), 0, 0, 0};
   StarterSol sol = extractFeasibleSol(d, gg, cg, maxGrDist);
   gg->reset();
 
@@ -44,6 +46,10 @@ double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
   d->crumble();
 
   auto lp = createProblem(gg, cg, geoPensMap, maxGrDist, solverStr);
+
+  s.cols = lp->getNumVars();
+  s.rows = lp->getNumConstrs();
+
   lp->setStarter(sol);
 
   if (path.size()) {
@@ -57,11 +63,13 @@ double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
     lp->writeMps(path);
   }
 
-  if (noSolve) {
-    return std::numeric_limits<double>::infinity();
-  } else {
+  double time;
+
+  if (!noSolve) {
     if (timeLim >= 0) lp->setTimeLim(timeLim);
+    T_START(ilp);
     auto status = lp->solve();
+    time = T_STOP(ilp);
 
     if (status == shared::optim::SolveType::INF) {
       throw std::runtime_error(
@@ -71,13 +79,14 @@ double ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
 
     extractSolution(lp, gg, cg, d);
 
-    double obj = lp->getObjVal();
+    s.score = lp->getObjVal();
+    s.time = time;
+
     delete lp;
 
-    return obj;
   }
 
-  return std::numeric_limits<double>::infinity();
+  return s;
 }
 
 // _____________________________________________________________________________

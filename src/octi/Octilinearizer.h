@@ -7,6 +7,7 @@
 
 #include <unordered_set>
 #include <vector>
+#include "ilp/ILPGridOptimizer.h"
 #include "octi/basegraph/BaseGraph.h"
 #include "octi/basegraph/GridGraph.h"
 #include "octi/combgraph/CombGraph.h"
@@ -112,17 +113,18 @@ class Octilinearizer {
       : _baseGraphType(baseGraphType) {}
 
   Score draw(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
-             basegraph::BaseGraph** gg, Drawing* d, const Penalties& pens, double gridSize,
-             double borderRad, double maxGrDist, bool restrLocSearch,
-             double enfGeoCourse,
+             basegraph::BaseGraph** gg, Drawing* d, const Penalties& pens,
+             double gridSize, double borderRad, double maxGrDist,
+             bool restrLocSearch, double enfGeoCourse, size_t hananIters,
              const std::vector<util::geo::Polygon<double>>& obstacles,
              size_t abortAfter);
 
   Score drawILP(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
                 basegraph::BaseGraph** gg, Drawing* d, const Penalties& pens,
                 double gridSize, double borderRad, double maxGrDist,
-                bool noSolve, double enfGeoPens, int timeLim,
-                const std::string& solverStr, const std::string& path);
+                bool noSolve, double enfGeoPens, size_t hananIters, int timeLim,
+                octi::ilp::ILPStats* stats, const std::string& solverStr,
+                const std::string& path);
 
   size_t maxNodeDeg() const;
 
@@ -131,7 +133,7 @@ class Octilinearizer {
 
   basegraph::BaseGraph* newBaseGraph(const util::geo::DBox& bbox,
                                      const CombGraph& cg, double cellSize,
-                                     double spacer,
+                                     double spacer, size_t hananIters,
                                      const Penalties& pens) const;
 
   util::geo::Polygon<double> hull(const CombGraph& cg) const;
