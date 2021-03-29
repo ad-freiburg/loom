@@ -44,6 +44,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "ilp-time-limit",
       opts::value<int>(&(cfg->ilpTimeLimit))->default_value(60),
       "ILP solver time limit (in seconds), negative value means infinity")(
+      "ilp-cache-dir",
+      opts::value<std::string>(&(cfg->ilpCacheDir))->default_value("."),
+      "ILP cache dir (solver-dependend)")(
       "ilp-solver",
       opts::value<std::string>(&(cfg->ilpSolver))->default_value("gurobi"),
       "The preferred solver library to use, will fall back if library is not "

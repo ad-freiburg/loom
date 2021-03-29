@@ -208,6 +208,15 @@ void GLPKSolver::setTimeLim(int s) { _timeLimit = s * 1000; }
 int GLPKSolver::getTimeLim() const { return _timeLimit / 1000; }
 
 // _____________________________________________________________________________
+void GLPKSolver::setCacheDir(const std::string& dir) {
+  LOGTO(INFO, std::cerr) << "Setting cache dir to " << dir
+                         << " (TODO: not implemented for GLPK)";
+}
+
+// _____________________________________________________________________________
+std::string GLPKSolver::getCacheDir() const { return ""; }
+
+// _____________________________________________________________________________
 double* GLPKSolver::getStarterArr() const { return _starterArr; }
 
 // _____________________________________________________________________________

@@ -47,8 +47,9 @@ Score Octilinearizer::drawILP(
     const CombGraph& cg, const util::geo::DBox& box, LineGraph* outTg,
     BaseGraph** retGg, Drawing* dOut, const Penalties& pens, double gridSize,
     double borderRad, double maxGrDist, bool noSolve, double enfGeoPen,
-    size_t hananIters, int timeLim, octi::ilp::ILPStats* stats,
-    const std::string& solverStr, const std::string& path) {
+    size_t hananIters, int timeLim, const std::string& cacheDir,
+    octi::ilp::ILPStats* stats, const std::string& solverStr,
+    const std::string& path) {
   BaseGraph* gg;
   Drawing drawing;
 
@@ -95,7 +96,7 @@ Score Octilinearizer::drawILP(
   ilp::ILPGridOptimizer ilpoptim;
 
   *stats = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens,
-                             timeLim, solverStr, path);
+                             timeLim, cacheDir, solverStr, path);
 
   drawing.getLineGraph(outTg);
   *retGg = gg;
@@ -113,7 +114,7 @@ Score Octilinearizer::draw(
     Drawing* dOut, const Penalties& pens, double gridSize, double borderRad,
     double maxGrDist, bool restrLocSearch, double enfGeoPen, size_t hananIters,
     const std::vector<Polygon<double>>& obstacles, size_t abortAfter) {
-  size_t jobs = 4;
+  size_t jobs = std::thread::hardware_concurrency();
   std::vector<BaseGraph*> ggs(jobs);
 
   auto gg = newBaseGraph(box, cg, gridSize, borderRad, hananIters, pens);
@@ -135,6 +136,7 @@ Score Octilinearizer::draw(
   LOGTO(DEBUG, std::cerr) << "Grid graph has " << gg->getNds()->size()
                           << " nodes";
 
+  // size_t INITIAL_TRIES = 100;
   size_t INITIAL_TRIES = 100;
   size_t LOCAL_SEARCH_ITERS = 100;
   double CONVERGENCE_THRESHOLD = 0.05;
@@ -172,15 +174,15 @@ Score Octilinearizer::draw(
                      geoPens, abortAfter);
 
   statLine(status, "Try <init>", drawing, T_STOP(draw), "");
-  if (status != DRAWN) drawing.crumble();
 
   size_t a = 1;
 
   // TODO: better check topology violations
-  if (drawing.score() == INF || drawing.violations()) {
+  if (status != DRAWN || drawing.score() == INF || drawing.violations()) {
     bool abort = false;
     // clear the initial grid
     drawing.eraseFromGrid(ggs[0]);
+    drawing.crumble();
     // set a to 0 to re-add the best solution later to grid 0
     a = 0;
 
@@ -708,7 +710,7 @@ void Octilinearizer::statLine(Undrawable status, const std::string& msg,
   switch (status) {
     case DRAWN:
       LOGTO(DEBUG, std::cerr) << " ++ " << msg << ", score " << drawing.score()
-                              << ", (" << ms << " ms) " << mark;
+                              << ", (" << ms << " ms)" << mark;
       break;
     case NO_PATH:
       LOGTO(DEBUG, std::cerr) << " ++ " << msg << " score <inf>"

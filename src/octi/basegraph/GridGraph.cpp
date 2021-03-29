@@ -128,6 +128,7 @@ void GridGraph::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
 
   auto ge = getNEdg(a, b);
   auto gf = getNEdg(b, a);
+  assert(ge != gf);
 
   assert(ge);
   assert(gf);
@@ -216,6 +217,9 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrO) {
   // this closes the grid edge
   auto ge = getNEdg(a, b);
   auto gf = getNEdg(b, a);
+  assert(ge != gf);
+  assert(ge->getFrom() == gf->getTo());
+  assert(ge->getTo() == gf->getFrom());
 
   addResEdg(ge, e);
   addResEdg(gf, e);

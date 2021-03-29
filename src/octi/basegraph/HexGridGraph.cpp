@@ -186,11 +186,15 @@ GridNode* HexGridGraph::writeNd(size_t x, size_t y) {
 
   if (y % 2) xPos += _a / 2;
 
-  GridNode* n = addNd(DPoint(xPos, yPos));
+  auto pos = DPoint(xPos, yPos);
+  GridNode* n = addNd(pos);
   n->pl().setId(_nds.size());
   _nds.push_back(n);
   n->pl().setSink();
-  _grid.add(x, y, n);
+
+  // we are using the raw position here, as grid cells do not reflect the
+  // positions in the grid graph as in the octilinear case
+  _grid.add(pos, n);
   n->pl().setXY(x, y);
   n->pl().setParent(n);
 

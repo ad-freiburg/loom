@@ -106,12 +106,12 @@ int main(int argc, char** argv) {
   util::geo::output::GeoGraphJsonOutput out;
 
   if (cfg.obstaclePath.size()) {
-    LOGTO(DEBUG, std::cerr) << "Reading obstacle file... ";
+    LOGTO(DEBUG, std::cerr) << "Reading obstacle file...";
     cfg.obstacles = readObstacleFile(cfg.obstaclePath);
     LOGTO(DEBUG, std::cerr) << "Done. (" << cfg.obstacles.size() << " obst.)";
   }
 
-  LOGTO(DEBUG, std::cerr) << "Reading graph file... ";
+  LOGTO(DEBUG, std::cerr) << "Reading graph file...";
   T_START(read);
   LineGraph tg;
   BaseGraph* gg;
@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
 
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(read) << "ms)";
 
-  LOGTO(DEBUG, std::cerr) << "Planarizing graph... ";
+  LOGTO(DEBUG, std::cerr) << "Planarizing graph...";
   T_START(planarize);
   tg.topologizeIsects();
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(planarize) << "ms)";
@@ -152,12 +152,12 @@ int main(int argc, char** argv) {
   auto box = tg.getBBox();
 
   // split nodes that have a larger degree than the max degree of the grid graph
-  tg.splitNodes(oct.maxNodeDeg());
+  tg.splitNodes(oct.maxNodeDeg() - 2);
 
   CombGraph cg(&tg, cfg.deg2Heur);
 
   // local enlargement
-  // LOGTO(DEBUG, std::cerr) << "Locally enlarging graph... ";
+  // LOGTO(DEBUG, std::cerr) << "Locally enlarging graph...";
   // Enlarger e;
   // e.enlarge(cg, 100);
   // avgDist = avgStatDist(tg);
@@ -189,8 +189,8 @@ int main(int argc, char** argv) {
     T_START(octi);
     sc = oct.drawILP(cg, box, &res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
                      cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen,
-                     cfg.hananIters, cfg.ilpTimeLimit, &ilpstats, cfg.ilpSolver,
-                     cfg.ilpPath);
+                     cfg.hananIters, cfg.ilpTimeLimit, cfg.ilpCacheDir,
+                     &ilpstats, cfg.ilpSolver, cfg.ilpPath);
     time = T_STOP(octi);
     LOGTO(DEBUG, std::cerr)
         << "Schematized using ILP in " << time << " ms, score " << sc.full;
@@ -221,7 +221,7 @@ int main(int argc, char** argv) {
     // translate score to JSON
     jsonScore = util::json::Dict{
         {"scores", util::json::Dict{{"total_score", sc.full},
-                                    {"topology_violations",
+                                    {"topo-violations",
                                      util::json::Int(sc.violations)},
                                     {"density-score", sc.dense},
                                     {"bend-score", sc.bend},

@@ -34,9 +34,10 @@ class ILPGridOptimizer {
   ILPGridOptimizer() {}
 
   ILPStats optimize(BaseGraph* gg, const CombGraph& cg, combgraph::Drawing* d,
-                  double maxGrDist, bool noSolve,
-                  const basegraph::GeoPensMap* geoPensMap, int timeLim,
-                  const std::string& solverStr, const std::string& path) const;
+                    double maxGrDist, bool noSolve,
+                    const basegraph::GeoPensMap* geoPensMap, int timeLim,
+                    const std::string& cacheDir, const std::string& solverStr,
+                    const std::string& path) const;
 
  protected:
   shared::optim::ILPSolver* createProblem(
@@ -50,7 +51,8 @@ class ILPGridOptimizer {
   void extractSolution(shared::optim::ILPSolver* lp, BaseGraph* gg,
                        const CombGraph& cg, combgraph::Drawing* d) const;
 
-  shared::optim::StarterSol extractFeasibleSol(combgraph::Drawing* d, BaseGraph* gg,
+  shared::optim::StarterSol extractFeasibleSol(combgraph::Drawing* d,
+                                               BaseGraph* gg,
                                                const CombGraph& cg,
                                                double maxGrDist) const;
 

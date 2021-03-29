@@ -123,6 +123,7 @@ class Octilinearizer {
                 basegraph::BaseGraph** gg, Drawing* d, const Penalties& pens,
                 double gridSize, double borderRad, double maxGrDist,
                 bool noSolve, double enfGeoPens, size_t hananIters, int timeLim,
+                const std::string& cacheDir,
                 octi::ilp::ILPStats* stats, const std::string& solverStr,
                 const std::string& path);
 

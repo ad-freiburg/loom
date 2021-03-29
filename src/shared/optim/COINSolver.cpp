@@ -140,4 +140,13 @@ void COINSolver::setStarter(const StarterSol& starterSol) {
 void COINSolver::writeMps(const std::string& path) const {
 }
 
+// _____________________________________________________________________________
+void COINSolver::setCacheDir(const std::string& dir) {
+  LOGTO(INFO, std::cerr) << "Setting cache dir to " << dir
+                         << " (TODO: not implemented for COIN)";
+}
+
+// _____________________________________________________________________________
+std::string COINSolver::getCacheDir() const { return ""; }
+
 #endif

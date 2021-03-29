@@ -54,6 +54,9 @@ class COINSolver : public ILPSolver {
   void setTimeLim(int s);
   int getTimeLim() const;
 
+  void setCacheDir(const std::string& dir);
+  std::string getCacheDir() const;
+
   void setStarter(const StarterSol& starterSol);
   void writeMps(const std::string& path) const;
 

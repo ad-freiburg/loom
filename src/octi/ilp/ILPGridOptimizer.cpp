@@ -21,10 +21,11 @@ using shared::optim::StarterSol;
 
 // _____________________________________________________________________________
 ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
-                                  combgraph::Drawing* d, double maxGrDist,
-                                  bool noSolve, const GeoPensMap* geoPensMap,
-                                  int timeLim, const std::string& solverStr,
-                                  const std::string& path) const {
+                                    combgraph::Drawing* d, double maxGrDist,
+                                    bool noSolve, const GeoPensMap* geoPensMap,
+                                    int timeLim, const std::string& cacheDir,
+                                    const std::string& solverStr,
+                                    const std::string& path) const {
   // extract first feasible solution from gridgraph
   ILPStats s{std::numeric_limits<double>::infinity(), 0, 0, 0};
   StarterSol sol = extractFeasibleSol(d, gg, cg, maxGrDist);
@@ -67,6 +68,7 @@ ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
 
   if (!noSolve) {
     if (timeLim >= 0) lp->setTimeLim(timeLim);
+    if (cacheDir.size()) lp->setCacheDir(cacheDir);
     T_START(ilp);
     auto status = lp->solve();
     time = T_STOP(ilp);
@@ -83,7 +85,6 @@ ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
     s.time = time;
 
     delete lp;
-
   }
 
   return s;

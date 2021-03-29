@@ -741,6 +741,19 @@ inline double angBetween(const Point<T>& p1, const Point<T>& q1) {
 }
 
 // _____________________________________________________________________________
+template <typename T>
+inline double angBetween(const Point<T>& p1, const MultiPoint<T>& points) {
+  double sinSum = 0;
+  double cosSum = 0;
+  for (auto q1 : points) {
+    double a = angBetween(p1.getX(), p1.getY(), q1.getX(), q1.getY());
+    sinSum += sin(a);
+    cosSum += cos(a);
+  }
+  return atan2(sinSum / points.size(),cosSum / points.size());
+}
+
+// _____________________________________________________________________________
 inline double dist(double x1, double y1, double x2, double y2) {
   return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }

@@ -262,6 +262,27 @@ SolveType GurobiSolver::solve() {
 }
 
 // _____________________________________________________________________________
+void GurobiSolver::setCacheDir(const std::string& dir) {
+  LOGTO(INFO, std::cerr) << "Setting cache dir to " << dir;
+  int error = GRBsetstrparam(GRBgetenv(_model), "NodefileDir", dir.c_str());
+  if (error) {
+    throw std::runtime_error("Could not set cache dir");
+  }
+}
+
+// _____________________________________________________________________________
+std::string GurobiSolver::getCacheDir() const {
+  char ret[100];
+  int error = GRBgetstrparam(GRBgetenv(_model), "NodefileDir", ret);
+  if (error) {
+    std::stringstream ss;
+    ss << "Could not retrieve time limit value";
+    throw std::runtime_error(ss.str());
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
 void GurobiSolver::setTimeLim(int s) {
   // set time limit
   LOGTO(INFO, std::cerr) << "Setting solver time limit to " << s << " seconds.";

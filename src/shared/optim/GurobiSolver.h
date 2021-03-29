@@ -48,6 +48,9 @@ class GurobiSolver : public ILPSolver {
   void setTimeLim(int ms);
   int getTimeLim() const;
 
+  void setCacheDir(const std::string& dir);
+  std::string getCacheDir() const;
+
   void writeMps(const std::string& path) const;
 
   void setStarter(const StarterSol& starterSol);

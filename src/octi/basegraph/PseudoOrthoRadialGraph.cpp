@@ -37,9 +37,14 @@ void PseudoOrthoRadialGraph::init() {
     }
   }
 
+  // write center node
+  writeNd(0, 0);
+
   // write grid edges
   for (size_t y = 0; y < _grid.getYHeight() / 2; y++) {
-    for (size_t x = 0; x < _numBeams * multi(y); x++) {
+    size_t n = _numBeams * multi(y);
+    if (y == 0) n = 1;
+    for (size_t x = 0; x < n; x++) {
       GridNode* grNd = getNode(x, y);
       if (!grNd) continue;
 
@@ -48,6 +53,8 @@ void PseudoOrthoRadialGraph::init() {
         GridNode* toN = neigh(x, y, p);
         if (from != 0 && toN != 0) {
           GridNode* to = toN->pl().getPort((p + maxDeg() / 2) % maxDeg());
+          if (y == 0) to = toN->pl().getPort(2);
+          if (toN->pl().getY() == 0) to = toN->pl().getPort(x / 2);
           if (!to) continue;
           auto e = new GridEdge(from, to, GridEdgePL(9, false, false));
           e->pl().setId(_edgeCount);
@@ -64,6 +71,7 @@ void PseudoOrthoRadialGraph::init() {
 
 // _____________________________________________________________________________
 GridNode* PseudoOrthoRadialGraph::neigh(size_t cx, size_t cy, size_t i) const {
+  if (cx == 0 && cy == 0) return getNode(i * 2, 1);
   if (i == 0) {
     if (multi(cy) != multi(cy + 1)) {
       return getNode(cx * 2, cy + 1);
@@ -72,6 +80,10 @@ GridNode* PseudoOrthoRadialGraph::neigh(size_t cx, size_t cy, size_t i) const {
   }
   if (i == 1) return getNode((cx + 1) % (_numBeams * multi(cy)), cy);
   if (i == 2) {
+    if (cy == 1) {
+      if (cx % 2) return 0;
+      else return getNode(0, 0);
+    }
     if (multi(cy) != multi(cy - 1)) {
       if (cx % 2) return 0;
       return getNode(cx / 2, cy - 1);
@@ -98,6 +110,22 @@ GridEdge* PseudoOrthoRadialGraph::getNEdg(const GridNode* a,
 
   int dy = (int)a->pl().getY() - (int)b->pl().getY();
   int dx = (int)a->pl().getX() - (int)b->pl().getX();
+
+  if (a->pl().getY() == 0 && a->pl().getX() == 0) {
+    assert(b->pl().getY() == 1);
+    assert(b->pl().getX() % 2 == 0);
+    return const_cast<GridEdge*>(
+        getEdg(a->pl().getPort(b->pl().getX() / 2),
+               b->pl().getPort(2)));
+  }
+
+  if (b->pl().getY() == 0 && b->pl().getX() == 0) {
+    assert(a->pl().getY() == 1);
+    assert(a->pl().getX() % 2 == 0);
+    return const_cast<GridEdge*>(
+        getEdg(a->pl().getPort(2),
+               b->pl().getPort(a->pl().getX() / 2)));
+  }
 
   size_t dir = 0;
 
@@ -132,22 +160,27 @@ void PseudoOrthoRadialGraph::writeInitialCosts() {
   double c_0 = _c.p_45 - _c.p_135;
 
   for (size_t y = 0; y < _grid.getYHeight() / 2; y++) {
-    double angStepLoc = 2.0 * M_PI / (_numBeams * multi(y));
-    for (size_t x = 0; x < _numBeams * multi(y); x++) {
+    size_t n = _numBeams * multi(y);
+    if (y == 0) n = 1;
+    double angStepLoc = 2.0 * M_PI / n;
+    for (size_t x = 0; x < n; x++) {
       auto n = getNode(x, y);
       if (!n) continue;
       for (size_t i = 0; i < maxDeg(); i++) {
         auto port = n->pl().getPort(i);
+        if (!port) continue;
         auto neighbor = neigh(x, y, i);
-
-        if (!neighbor || !port) continue;
+        if (!neighbor) continue;
 
         auto oPort = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
+        if (y == 0) oPort = neighbor->pl().getPort(2);
+        if (neighbor->pl().getY() == 0) oPort = neighbor->pl().getPort(x / 2);
         auto e = getEdg(port, oPort);
 
         // this is the percentage the hop length is longer than the smallest cell
         // size
         double sX = (angStepLoc * y) / angStep;
+        if (y == 0) sX = 1;
 
         // here, the costs are normalized to always
         // represent the map lengths exactly
@@ -218,6 +251,9 @@ GridNode* PseudoOrthoRadialGraph::writeNd(size_t x, size_t y) {
   n->pl().setId(_nds.size());
   _nds.push_back(n);
   n->pl().setSink();
+
+  // we are using the raw position here, as grid cells do not reflect the
+  // positions in the grid graph as in the octilinear case
   _grid.add(pos, n);
   n->pl().setXY(x, y);
   n->pl().setParent(n);
@@ -285,12 +321,13 @@ GridNode* PseudoOrthoRadialGraph::writeNd(size_t x, size_t y) {
 
 // _____________________________________________________________________________
 GridNode* PseudoOrthoRadialGraph::getNode(size_t x, size_t y) const {
+  if (x == 0 && y == 0) return _nds[_nds.size() - 5];
   int a = 0;
 
   for (size_t i = 1; i < y; i++) a += _numBeams * multi(i);
 
   if (y == 0) return 0;
-  if ((a + x) * 5 >= _nds.size()) return 0;
+  if ((a + x) * 5 >= _nds.size() - 5) return 0;
   return _nds[(a + x) * 5];
 }
 

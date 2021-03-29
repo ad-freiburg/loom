@@ -27,6 +27,7 @@ struct Config {
   bool ilpNoSolve;
   int ilpTimeLimit;
   std::string ilpSolver;
+  std::string ilpCacheDir;
 
   double maxGrDist;
 

@@ -19,7 +19,7 @@ class PseudoOrthoRadialGraph : public GridGraph {
                       bbox, util::geo::getBoundingBox(util::geo::rotate(
                                 convexHull(bbox), 90, centroid(bbox)))),
                   cellSize, spacer, pens) {
-    double circum = cellSize * 2 * M_PI;
+    double circum = cellSize * 1.3 * 2 * M_PI;
     _numBeams = circum / cellSize;
   }
 

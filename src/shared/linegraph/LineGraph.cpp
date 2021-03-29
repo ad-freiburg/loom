@@ -670,20 +670,22 @@ EdgeOrdering LineGraph::edgeOrdering(LineNode* n, bool useOrigNextNode) {
 void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
   if (n->getAdjList().size() > maxDeg) {
     std::vector<std::pair<LineEdge*, double>> combine;
+    std::cerr << "Splitting " << n << std::endl;
 
     const auto& orig = edgeOrdering(n, true).getOrderedSet();
     combine.insert(combine.begin(), orig.begin() + maxDeg - 1, orig.end());
 
+    std::cerr << "max deg: " << maxDeg<< " comb size: " << combine.size() << std::endl;
+
     // for the new geometry, take the average angle
     double refAngle = 0;
+    util::geo::MultiPoint<double> mp;
 
     for (auto eo : combine) {
-      refAngle += util::geo::angBetween(
-          *n->pl().getGeom(), *eo.first->getOtherNd(n)->pl().getGeom());
+      mp.push_back(*eo.first->getOtherNd(n)->pl().getGeom());
     }
+    refAngle = util::geo::angBetween(*n->pl().getGeom(), mp);
 
-    refAngle /= combine.size();
-    std::cerr << "Ref angle is: " << refAngle << std::endl;
     auto geom = *n->pl().getGeom();
     geom.setX(geom.getX() + 10 * cos(refAngle));
     geom.setY(geom.getY() + 10 * sin(refAngle));
@@ -722,6 +724,8 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
         }
       }
     }
+
+    assert(n->getDeg() <= maxDeg);
 
     // recursively split until max deg is satisfied
     if (cn->getDeg() > maxDeg) splitNode(cn, maxDeg);
