@@ -67,7 +67,7 @@ void PseudoOrthoRadialGraph::init() {
   }
 
   writeInitialCosts();
-  // prunePorts();
+  // prunePorts();  // TODO: there is a bug somewhere when ports are pruned
 }
 
 // _____________________________________________________________________________
