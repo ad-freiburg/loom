@@ -44,6 +44,9 @@ util::json::Dict GridEdgePL::getAttrs() const {
   obj["rndr_order"] = util::toString((int)_rndrOrder);
   obj["secondary"] = util::toString((int)_isSecondary);
   obj["sink"] = util::toString((int)_isSink);
+  obj["closed"] = util::toString(_closed);
+  obj["blocked"] = util::toString(_blocked);
+  obj["softclosed"] = util::toString(_softClosed);
   return obj;
 }
 // _____________________________________________________________________________

@@ -141,7 +141,6 @@ Score Octilinearizer::draw(
   LOGTO(DEBUG, std::cerr) << "Grid graph has " << gg->getNds()->size()
                           << " nodes";
 
-  // size_t INITIAL_TRIES = 100;
   size_t INITIAL_TRIES = 100;
   size_t LOCAL_SEARCH_ITERS = 100;
   double CONVERGENCE_THRESHOLD = 0.05;

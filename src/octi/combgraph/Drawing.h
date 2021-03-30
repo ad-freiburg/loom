@@ -58,8 +58,8 @@ struct Segment {
 class Drawing {
  public:
   Drawing(const BaseGraph* gg)
-      : _c(std::numeric_limits<double>::infinity()), _gg(gg){};
-  Drawing() : _c(std::numeric_limits<double>::infinity()), _gg(0){};
+      : _c(std::numeric_limits<double>::infinity()), _gg(gg), _violations(0){};
+  Drawing() : _c(std::numeric_limits<double>::infinity()), _gg(0), _violations(0){};
 
   double score() const;
   double rawScore() const;
@@ -102,7 +102,7 @@ class Drawing {
   std::map<const CombEdge*, double> _edgCosts;
   std::map<const CombEdge*, int> _vios;
   std::map<const CombEdge*, double> _springCosts;
-  double _c, _cTopo;
+  double _c;
   const BaseGraph* _gg;
 
   size_t _violations;

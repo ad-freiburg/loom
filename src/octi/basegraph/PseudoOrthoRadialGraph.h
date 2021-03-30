@@ -37,6 +37,8 @@ class PseudoOrthoRadialGraph : public GridGraph {
   virtual GridNode* writeNd(size_t x, size_t y);
   virtual GridNode* neigh(size_t cx, size_t cy, size_t i) const;
   virtual GridNode* getNode(size_t x, size_t y) const;
+  virtual void getSettledAdjEdgs(GridNode* n, CombNode* origNd,
+                                 CombEdge* outgoing[8]);
 
  private:
   virtual int multi(size_t y) const;

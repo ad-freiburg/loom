@@ -919,5 +919,17 @@ void GridGraph::prunePorts() {
     }
   }
 
-  for (auto grNd : toDel) delNd(grNd);
+  // for (auto grNd : toDel) delNd(grNd);
+  std::set<GridEdge*> toDelEdg;
+  for (auto grNd : toDel) {
+    // delNd(grNd);
+    for (auto e : grNd->getAdjList()) {
+      toDelEdg.insert(e);
+      toDelEdg.insert(getEdg(e->getTo(), e->getFrom()));
+    }
+  }
+  for (auto e : toDelEdg) {
+    // e->pl().setCost(INF);
+    delEdg(e->getFrom(), e->getTo());
+  }
 }

@@ -7,6 +7,7 @@
 #include "octi/basegraph/BaseGraph.h"
 #include "octi/ilp/ILPGridOptimizer.h"
 #include "shared/optim/ILPSolvProv.h"
+#include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
 using octi::basegraph::BaseGraph;

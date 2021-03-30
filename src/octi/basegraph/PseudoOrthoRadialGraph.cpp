@@ -67,6 +67,43 @@ void PseudoOrthoRadialGraph::init() {
   }
 
   writeInitialCosts();
+  // prunePorts();
+}
+
+// _____________________________________________________________________________
+void PseudoOrthoRadialGraph::getSettledAdjEdgs(GridNode* n, CombNode* origNd,
+                                  CombEdge* outgoing[8]) {
+  size_t x = n->pl().getX();
+  size_t y = n->pl().getY();
+
+  for (size_t i = 0; i < maxDeg(); i++) {
+    outgoing[i] = 0;
+    auto p = n->pl().getPort(i);
+    if (!p) continue;
+    auto neighbor = neigh(x, y, i);
+    if (!neighbor) continue;
+
+    auto neighP = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
+    if (y == 0) neighP = neighbor->pl().getPort(2);
+    if (neighbor->pl().getY() == 0) neighP = neighbor->pl().getPort(x / 2);
+
+    auto e = getEdg(p, neighP);
+    auto f = getEdg(neighP, p);
+    assert(e);
+    assert(f);
+    auto resEdgs = getResEdgs(e);
+    if (!resEdgs.size()) resEdgs = getResEdgs(f);
+
+    if (resEdgs.size()) {
+      for (auto e : resEdgs) {
+        // they may be incorrect resident edges because of relaxed constraints
+        if (e->getFrom() == origNd || e->getTo() == origNd) {
+          outgoing[i] = e;
+          break;
+        }
+      }
+    }
+  }
 }
 
 // _____________________________________________________________________________
@@ -111,7 +148,7 @@ GridEdge* PseudoOrthoRadialGraph::getNEdg(const GridNode* a,
   int dy = (int)a->pl().getY() - (int)b->pl().getY();
   int dx = (int)a->pl().getX() - (int)b->pl().getX();
 
-  if (a->pl().getY() == 0 && a->pl().getX() == 0) {
+  if (a->pl().getX() == 0 && a->pl().getY() == 0) {
     assert(b->pl().getY() == 1);
     assert(b->pl().getX() % 2 == 0);
     return const_cast<GridEdge*>(
@@ -119,7 +156,7 @@ GridEdge* PseudoOrthoRadialGraph::getNEdg(const GridNode* a,
                b->pl().getPort(2)));
   }
 
-  if (b->pl().getY() == 0 && b->pl().getX() == 0) {
+  if (b->pl().getX() == 0 && b->pl().getY() == 0) {
     assert(a->pl().getY() == 1);
     assert(a->pl().getX() % 2 == 0);
     return const_cast<GridEdge*>(
@@ -296,8 +333,8 @@ GridNode* PseudoOrthoRadialGraph::writeNd(size_t x, size_t y) {
       if (deg == 0) pen = c_0;
       if (deg == 1) pen = c_90;
 
-      if (y == 1 && i == 2) pen = INF;
-      if (y == 1 && j == 2) pen = INF;
+      if (y == 1 && x % 2 && i == 2) pen = INF;
+      if (y == 1 && x % 2 && j == 2) pen = INF;
       if (y == _grid.getYHeight() / 2 && i == 0) pen = INF;
 
       auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
