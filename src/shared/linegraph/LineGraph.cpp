@@ -170,8 +170,13 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
         Station i("", "", *n->pl().getGeom());
         if (!props["station_id"].is_null() ||
             !props["station_label"].is_null()) {
-          if (!props["station_id"].is_null())
-            i.id = util::toString(props["station_id"]);
+          if (!props["station_id"].is_null()) {
+            if (props["station_id"].type() == nlohmann::json::value_t::string) {
+              i.id = props["station_id"].get<std::string>();
+            } else {
+              i.id = util::toString(props["station_id"]);
+            }
+          }
           if (!props["station_label"].is_null())
             i.name = props["station_label"];
           n->pl().addStop(i);
@@ -668,11 +673,12 @@ EdgeOrdering LineGraph::edgeOrdering(LineNode* n, bool useOrigNextNode) {
 
 // _____________________________________________________________________________
 void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
+  assert(maxDeg > 2);
   if (n->getAdjList().size() > maxDeg) {
     std::vector<std::pair<LineEdge*, double>> combine;
-    std::cerr << "Splitting " << n << std::endl;
 
     const auto& orig = edgeOrdering(n, true).getOrderedSet();
+    std::cerr << "Splitting " << n << " with " << orig.size() << " adj edges " << std::endl;
     combine.insert(combine.begin(), orig.begin() + maxDeg - 1, orig.end());
 
     std::cerr << "max deg: " << maxDeg<< " comb size: " << combine.size() << std::endl;
@@ -728,7 +734,10 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
     assert(n->getDeg() <= maxDeg);
 
     // recursively split until max deg is satisfied
-    if (cn->getDeg() > maxDeg) splitNode(cn, maxDeg);
+    if (cn->getDeg() > maxDeg) {
+      std::cerr << "rec " << cn->getDeg() << std::endl;
+      splitNode(cn, maxDeg);
+    }
   }
 }
 

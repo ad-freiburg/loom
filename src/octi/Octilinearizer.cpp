@@ -53,19 +53,24 @@ Score Octilinearizer::drawILP(
   BaseGraph* gg;
   Drawing drawing;
 
+  // always set density penality to 0, cannot by used in ILP and prevents proper
+  // presolve by our approximate approach
+  Penalties pensCpy = pens;
+  pensCpy.densityPen = 0;
+
   LOGTO(DEBUG, std::cerr) << "Presolving...";
   try {
     // presolve using heuristical approach to get a first feasible solution
     LineGraph tmpOutTg;
     // important: always use restrLocSearch here!
-    auto score = draw(cg, box, &tmpOutTg, &gg, &drawing, pens, gridSize,
+    auto score = draw(cg, box, &tmpOutTg, &gg, &drawing, pensCpy, gridSize,
                       borderRad, maxGrDist, true, enfGeoPen, hananIters, {},
                       std::numeric_limits<size_t>::max());
     if (score.violations) throw NoEmbeddingFoundExc();
     LOGTO(DEBUG, std::cerr) << "Presolving finished.";
   } catch (const NoEmbeddingFoundExc& exc) {
     LOGTO(DEBUG, std::cerr) << "Presolve was not successful.";
-    gg = newBaseGraph(box, cg, gridSize, borderRad, hananIters, pens);
+    gg = newBaseGraph(box, cg, gridSize, borderRad, hananIters, pensCpy);
     gg->init();
     drawing = Drawing(gg);
   }

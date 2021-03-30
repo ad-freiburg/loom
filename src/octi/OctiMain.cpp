@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
   auto box = tg.getBBox();
 
   // split nodes that have a larger degree than the max degree of the grid graph
-  tg.splitNodes(oct.maxNodeDeg() - 2);
+  tg.splitNodes(oct.maxNodeDeg());
 
   CombGraph cg(&tg, cfg.deg2Heur);
 
