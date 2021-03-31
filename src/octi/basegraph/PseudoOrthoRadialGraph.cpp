@@ -416,3 +416,16 @@ PolyLine<double> PseudoOrthoRadialGraph::geomFromPath(
 
   return pl;
 }
+
+// _____________________________________________________________________________
+double PseudoOrthoRadialGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
+                           int64_t yb) const {
+  UNUSED(xa);
+  UNUSED(xb);
+  int dy = labs(yb - ya);
+
+  double edgCost = (_c.verticalPen + _heurHopCost) * dy;
+
+  // we always count one heurHopCost too much, subtract it at the end!
+  return edgCost - _heurHopCost;
+}

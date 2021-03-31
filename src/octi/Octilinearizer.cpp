@@ -119,15 +119,10 @@ Score Octilinearizer::draw(
     Drawing* dOut, const Penalties& pens, double gridSize, double borderRad,
     double maxGrDist, bool restrLocSearch, double enfGeoPen, size_t hananIters,
     const std::vector<Polygon<double>>& obstacles, size_t abortAfter) {
-  size_t jobs = std::thread::hardware_concurrency();
+  size_t jobs = 8;
+  if (jobs > std::thread::hardware_concurrency())
+    jobs = std::thread::hardware_concurrency();
   std::vector<BaseGraph*> ggs(jobs);
-
-  auto gg = newBaseGraph(box, cg, gridSize, borderRad, hananIters, pens);
-  gg->init();
-
-  // util::geo::output::GeoGraphJsonOutput out;
-  // out.print(*gg, std::cout);
-  // exit(0);
 
   LOGTO(DEBUG, std::cerr) << "Creating grid graphs... ";
   T_START(ggraph);
@@ -136,9 +131,14 @@ Score Octilinearizer::draw(
     ggs[i] = newBaseGraph(box, cg, gridSize, borderRad, hananIters, pens);
     ggs[i]->init();
   }
+
+  // util::geo::output::GeoGraphJsonOutput out;
+  // out.print(*ggs[0], std::cout);
+  // exit(0);
+
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
 
-  LOGTO(DEBUG, std::cerr) << "Grid graph has " << gg->getNds()->size()
+  LOGTO(DEBUG, std::cerr) << "Grid graph has " << ggs[0]->getNds()->size()
                           << " nodes";
 
   size_t INITIAL_TRIES = 100;

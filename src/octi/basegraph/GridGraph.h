@@ -194,7 +194,6 @@ struct GridGraphHeur
   }
 
   float operator()(const GridNode* from, const std::set<GridNode*>& to) const {
-    // const_cast<GridNode*>(from)->pl().visited = true;
     if (to.count(from->pl().getParent())) return 0;
 
     float ret = std::numeric_limits<float>::infinity();

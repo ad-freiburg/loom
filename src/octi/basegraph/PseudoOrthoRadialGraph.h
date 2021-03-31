@@ -21,12 +21,14 @@ class PseudoOrthoRadialGraph : public GridGraph {
                   cellSize, spacer, pens) {
     double circum = cellSize * 1.3 * 2 * M_PI;
     _numBeams = circum / cellSize;
+    _heurHopCost = _c.p_45 - _c.p_135;
   }
 
   virtual void init();
   virtual GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;
   virtual const util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float>*
   getHeur(const std::set<GridNode*>& to) const;
+  virtual double heurCost(int64_t xa, int64_t ya, int64_t xb, int64_t yb) const;
 
   virtual PolyLine<double> geomFromPath(
       const std::vector<std::pair<size_t, size_t>>& res) const;
@@ -50,10 +52,44 @@ struct PseudoOrthoRadialGraphHeur
     : public util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
   PseudoOrthoRadialGraphHeur(const basegraph::GridGraph* g,
                              const std::set<GridNode*>& to)
-      : g(g), to(0) {}
+      : g(g), to(0) {
+    cheapestSink = std::numeric_limits<float>::infinity();
+
+    for (auto n : to) {
+      assert(n->pl().getParent() == n);
+      size_t i = 0;
+      for (; i < g->maxDeg(); i++) {
+        if (!n->pl().getPort(i)) continue;
+        float sinkCost = g->getEdg(n->pl().getPort(i), n)->pl().cost();
+        if (sinkCost < cheapestSink) cheapestSink = sinkCost;
+        auto neigh = g->neigh(n, i);
+        if (neigh && to.find(neigh) == to.end()) {
+          hull.push_back(n->pl().getX());
+          hull.push_back(n->pl().getY());
+          break;
+        }
+      }
+      for (size_t j = i; j < g->maxDeg(); j++) {
+        if (!n->pl().getPort(j)) continue;
+        float sinkCost = g->getEdg(n->pl().getPort(j), n)->pl().cost();
+        if (sinkCost < cheapestSink) cheapestSink = sinkCost;
+      }
+    }
+  }
 
   float operator()(const GridNode* from, const std::set<GridNode*>& to) const {
-    return 0;
+    if (to.count(from->pl().getParent())) return 0;
+
+    float ret = std::numeric_limits<float>::infinity();
+
+    for (size_t i = 0; i < hull.size(); i += 2) {
+      float tmp = g->heurCost(from->pl().getParent()->pl().getX(),
+                              from->pl().getParent()->pl().getY(), hull[i],
+                              hull[i + 1]);
+      if (tmp < ret) ret = tmp;
+    }
+
+    return ret + cheapestSink;
   }
 
   const octi::basegraph::BaseGraph* g;
