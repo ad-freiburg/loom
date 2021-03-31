@@ -581,11 +581,9 @@ void GridGraph::openTurns(GridNode* n) {
   for (size_t i = 0; i < maxDeg(); i++) {
     auto portA = n->pl().getPort(i);
     if (!portA) continue;
-    if (portA->getDeg() == maxDeg()) continue;
     for (size_t j = i + 1; j < maxDeg(); j++) {
       auto portB = n->pl().getPort(j);
       if (!portB) continue;
-      if (portB->getDeg() == maxDeg()) continue;
       auto e = getEdg(portA, portB);
       auto f = getEdg(portB, portA);
 
@@ -919,17 +917,5 @@ void GridGraph::prunePorts() {
     }
   }
 
-  // for (auto grNd : toDel) delNd(grNd);
-  std::set<GridEdge*> toDelEdg;
-  for (auto grNd : toDel) {
-    // delNd(grNd);
-    for (auto e : grNd->getAdjList()) {
-      toDelEdg.insert(e);
-      toDelEdg.insert(getEdg(e->getTo(), e->getFrom()));
-    }
-  }
-  for (auto e : toDelEdg) {
-    // e->pl().setCost(INF);
-    delEdg(e->getFrom(), e->getTo());
-  }
+  for (auto grNd : toDel) delNd(grNd);
 }

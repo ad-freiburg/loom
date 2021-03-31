@@ -30,7 +30,6 @@ int PseudoOrthoRadialGraph::multi(size_t y) const {
 // _____________________________________________________________________________
 void PseudoOrthoRadialGraph::init() {
   // write nodes
-
   for (size_t y = 1; y < _grid.getYHeight() / 2; y++) {
     for (size_t x = 0; x < _numBeams * multi(y); x++) {
       writeNd(x, y);
@@ -67,7 +66,7 @@ void PseudoOrthoRadialGraph::init() {
   }
 
   writeInitialCosts();
-  // prunePorts();  // TODO: there is a bug somewhere when ports are pruned
+  prunePorts();
 }
 
 // _____________________________________________________________________________
@@ -84,8 +83,12 @@ void PseudoOrthoRadialGraph::getSettledAdjEdgs(GridNode* n, CombNode* origNd,
     if (!neighbor) continue;
 
     auto neighP = neighbor->pl().getPort((i + maxDeg() / 2) % maxDeg());
+
+    // special handling for center node
     if (y == 0) neighP = neighbor->pl().getPort(2);
     if (neighbor->pl().getY() == 0) neighP = neighbor->pl().getPort(x / 2);
+
+    assert(neighP);
 
     auto e = getEdg(p, neighP);
     auto f = getEdg(neighP, p);
@@ -151,6 +154,8 @@ GridEdge* PseudoOrthoRadialGraph::getNEdg(const GridNode* a,
   if (a->pl().getX() == 0 && a->pl().getY() == 0) {
     assert(b->pl().getY() == 1);
     assert(b->pl().getX() % 2 == 0);
+    assert(getEdg(a->pl().getPort(b->pl().getX() / 2),
+               b->pl().getPort(2)));
     return const_cast<GridEdge*>(
         getEdg(a->pl().getPort(b->pl().getX() / 2),
                b->pl().getPort(2)));
@@ -159,6 +164,8 @@ GridEdge* PseudoOrthoRadialGraph::getNEdg(const GridNode* a,
   if (b->pl().getX() == 0 && b->pl().getY() == 0) {
     assert(a->pl().getY() == 1);
     assert(a->pl().getX() % 2 == 0);
+    assert(        getEdg(a->pl().getPort(2),
+               b->pl().getPort(a->pl().getX() / 2)));
     return const_cast<GridEdge*>(
         getEdg(a->pl().getPort(2),
                b->pl().getPort(a->pl().getX() / 2)));
