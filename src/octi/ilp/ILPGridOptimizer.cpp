@@ -75,6 +75,7 @@ ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
     time = T_STOP(ilp);
 
     if (status == shared::optim::SolveType::INF) {
+      delete lp;
       throw std::runtime_error(
           "No solution found for ILP problem (most likely because of a time "
           "limit)!");
@@ -84,9 +85,9 @@ ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
 
     s.score = lp->getObjVal();
     s.time = time;
-
-    delete lp;
   }
+
+  delete lp;
 
   return s;
 }
@@ -802,6 +803,5 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(Drawing* d, BaseGraph* gg,
 
   // TODO: we don't write the bend edge variables here, these can
   // typically be filled by the solver using the information given above
-
   return sol;
 }

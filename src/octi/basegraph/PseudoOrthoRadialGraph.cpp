@@ -55,11 +55,9 @@ void PseudoOrthoRadialGraph::init() {
           if (y == 0) to = toN->pl().getPort(2);
           if (toN->pl().getY() == 0) to = toN->pl().getPort(x / 2);
           if (!to) continue;
-          auto e = new GridEdge(from, to, GridEdgePL(9, false, false));
+          auto e = addEdg(from, to, GridEdgePL(9, false, false));
           e->pl().setId(_edgeCount);
           _edgeCount++;
-          from->addEdge(e);
-          to->addEdge(e);
         }
       }
     }
@@ -317,17 +315,13 @@ GridNode* PseudoOrthoRadialGraph::writeNd(size_t x, size_t y) {
     nn->pl().setParent(n);
     n->pl().setPort(i, nn);
 
-    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, false));
+    auto e = addEdg(n, nn, GridEdgePL(INF, true, false));
     e->pl().setId(_edgeCount);
     _edgeCount++;
-    n->addEdge(e);
-    nn->addEdge(e);
 
-    e = new GridEdge(nn, n, GridEdgePL(INF, true, false));
+    e = addEdg(nn, n, GridEdgePL(INF, true, false));
     e->pl().setId(_edgeCount);
     _edgeCount++;
-    n->addEdge(e);
-    nn->addEdge(e);
   }
 
   // in-node connections
@@ -344,19 +338,15 @@ GridNode* PseudoOrthoRadialGraph::writeNd(size_t x, size_t y) {
       if (y == 1 && x % 2 && j == 2) pen = INF;
       if (y == _grid.getYHeight() / 2 && i == 0) pen = INF;
 
-      auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
+      auto e = addEdg(n->pl().getPort(i), n->pl().getPort(j),
                             GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
-      e->getFrom()->addEdge(e);
-      e->getTo()->addEdge(e);
 
-      e = new GridEdge(n->pl().getPort(j), n->pl().getPort(i),
+      e = addEdg(n->pl().getPort(j), n->pl().getPort(i),
                        GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
-      e->getFrom()->addEdge(e);
-      e->getTo()->addEdge(e);
     }
   }
 

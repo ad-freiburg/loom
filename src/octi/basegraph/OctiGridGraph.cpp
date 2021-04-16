@@ -258,17 +258,13 @@ GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
     nn->pl().setParent(n);
     n->pl().setPort(i, nn);
 
-    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, true));
+    auto e = addEdg(n, nn, GridEdgePL(INF, true, true));
     e->pl().setId(_edgeCount);
     _edgeCount++;
-    n->addEdge(e);
-    nn->addEdge(e);
 
-    e = new GridEdge(nn, n, GridEdgePL(INF, true, true));
+    e = addEdg(nn, n, GridEdgePL(INF, true, true));
     e->pl().setId(_edgeCount);
     _edgeCount++;
-    n->addEdge(e);
-    nn->addEdge(e);
   }
 
   // in-node connections
@@ -282,19 +278,15 @@ GridNode* OctiGridGraph::writeNd(size_t x, size_t y) {
       if (y == _grid.getYHeight() - 1 && (i == 3 || i == 4 || i == 5))
         pen = INF;
 
-      auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
+      auto e = addEdg(n->pl().getPort(i), n->pl().getPort(j),
                             GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
-      e->getFrom()->addEdge(e);
-      e->getTo()->addEdge(e);
 
-      e = new GridEdge(n->pl().getPort(j), n->pl().getPort(i),
+      e = addEdg(n->pl().getPort(j), n->pl().getPort(i),
                        GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
-      e->getFrom()->addEdge(e);
-      e->getTo()->addEdge(e);
     }
   }
 
