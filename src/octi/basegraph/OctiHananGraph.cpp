@@ -360,20 +360,16 @@ void OctiHananGraph::connectNodes(GridNode* grNdFr, GridNode* grNdTo,
   GridNode* fr = grNdFr->pl().getPort(p);
   GridNode* to = grNdTo->pl().getPort((p + maxDeg() / 2) % maxDeg());
 
-  auto e = new GridEdge(fr, to, GridEdgePL(9, false, false));
+  auto e = addEdg(fr, to, GridEdgePL(9, false, false));
   e->pl().setId(_edgeCount);
   _edgeCount++;
-  fr->addEdge(e);
-  to->addEdge(e);
 
   _neighs[grNdFr->pl().getId() + p] = grNdTo;
   _neighs[grNdTo->pl().getId() + (p + maxDeg() / 2) % maxDeg()] = grNdFr;
 
-  auto f = new GridEdge(to, fr, GridEdgePL(9, false, false));
+  auto f = addEdg(to, fr, GridEdgePL(9, false, false));
   f->pl().setId(_edgeCount);
   _edgeCount++;
-  fr->addEdge(f);
-  to->addEdge(f);
 }
 
 // _____________________________________________________________________________
@@ -432,17 +428,13 @@ GridNode* OctiHananGraph::writeNd(size_t x, size_t y) {
     nn->pl().setParent(n);
     n->pl().setPort(i, nn);
 
-    auto e = new GridEdge(n, nn, GridEdgePL(INF, true, true));
+    auto e = addEdg(n, nn, GridEdgePL(INF, true, true));
     e->pl().setId(_edgeCount);
     _edgeCount++;
-    n->addEdge(e);
-    nn->addEdge(e);
 
-    e = new GridEdge(nn, n, GridEdgePL(INF, true, true));
+    e = addEdg(nn, n, GridEdgePL(INF, true, true));
     e->pl().setId(_edgeCount);
     _edgeCount++;
-    n->addEdge(e);
-    nn->addEdge(e);
   }
 
   // in-node connections
@@ -456,19 +448,15 @@ GridNode* OctiHananGraph::writeNd(size_t x, size_t y) {
       if (y == _grid.getYHeight() - 1 && (i == 3 || i == 4 || i == 5))
         pen = INF;
 
-      auto e = new GridEdge(n->pl().getPort(i), n->pl().getPort(j),
+      auto e = addEdg(n->pl().getPort(i), n->pl().getPort(j),
                             GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
-      e->getFrom()->addEdge(e);
-      e->getTo()->addEdge(e);
 
-      e = new GridEdge(n->pl().getPort(j), n->pl().getPort(i),
+      e = addEdg(n->pl().getPort(j), n->pl().getPort(i),
                        GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
-      e->getFrom()->addEdge(e);
-      e->getTo()->addEdge(e);
     }
   }
 
