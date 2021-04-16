@@ -684,9 +684,16 @@ void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
 
       std::vector<GridEdge*> edges(gridEdgs[edg].size());
 
+      assert(gridNds.count(edg->getFrom()));
+      assert(gridNds.count(edg->getTo()));
+
       // get the start and end grid nodes
       auto grStart = gridNds[edg->getFrom()];
       auto grEnd = gridNds[edg->getTo()];
+
+
+      assert(grStart);
+      assert(grEnd);
 
       auto curNode = grStart;
       GridEdge* last = 0;
@@ -698,6 +705,7 @@ void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
           if (adj != last && gridEdgs[edg].count(adj)) {
             last = adj;
             i++;
+            assert(edges.size() >= i);
             edges[edges.size() - i] = adj;
             curNode = adj->getOtherNd(curNode);
             break;
