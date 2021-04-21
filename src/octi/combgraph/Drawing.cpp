@@ -119,13 +119,24 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
       auto e = _gg->getEdg(ges[ges.size() - 1 - i]->getTo(),
                            ges[ges.size() - 1 - i]->getFrom());
 
-      if (!e->pl().isSecondary())
+      if (!e->pl().isSecondary()) {
         _edgs[ce].push_back(
             {e->getFrom()->pl().getId(), e->getTo()->pl().getId()});
+      }
     } else {
-      if (!ges[i]->pl().isSecondary())
+      if (!ges[i]->pl().isSecondary()) {
         _edgs[ce].push_back(
             {ges[i]->getFrom()->pl().getId(), ges[i]->getTo()->pl().getId()});
+
+        assert(_gg->getEdg(ges[i]->getFrom(), ges[i]->getTo()) == ges[i]);
+
+        assert(_gg->getGrNdById(ges[i]->getFrom()->pl().getId())->pl().getId() == ges[i]->getFrom()->pl().getId());
+
+        assert(_gg->getGrNdById(ges[i]->getFrom()->pl().getId()) == ges[i]->getFrom());
+
+
+        assert(_gg->getGrEdgById({ges[i]->getFrom()->pl().getId(), ges[i]->getTo()->pl().getId()}) == ges[i]);
+      }
     }
   }
 
@@ -170,6 +181,8 @@ void Drawing::getLineGraph(LineGraph* target) const {
       }
 
       auto p = _edgs.find(f)->second;
+      assert(_gg->getGrEdgById(p.back()));
+      assert(_gg->getGrEdgById(p.front()));
       GridNode* fr = _gg->getGrEdgById(p.back())->getFrom()->pl().getParent();
       GridNode* to = _gg->getGrEdgById(p.front())->getTo()->pl().getParent();
 
@@ -203,6 +216,8 @@ void Drawing::getLineGraph(LineGraph* target) const {
       for (size_t i = 0; i < path.size(); i++) {
         auto pathEdg = path[i];
         const GridEdge* grEdg = _gg->getGrEdgById(pathEdg);
+        assert(grEdg);
+        assert(_gg->getResEdgsDirInd(grEdg).size());
 
         const GridEdge* grCounterEdg =
             _gg->getGrEdgById({pathEdg.second, pathEdg.first});
@@ -222,6 +237,7 @@ void Drawing::getLineGraph(LineGraph* target) const {
         }
 
         auto newResEdgs = _gg->getResEdgsDirInd(grEdg);
+        assert(newResEdgs.size());
 
         if (newResEdgs == curResEdgs) {
           pathSegs[cEdgSeg[f].back().first].start =

@@ -82,6 +82,8 @@ ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
     }
 
     extractSolution(lp, gg, cg, d);
+    shared::linegraph::LineGraph tg;
+    d->getLineGraph(&tg);
 
     s.score = lp->getObjVal();
     s.time = time;
@@ -715,6 +717,13 @@ void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
       }
 
       assert(i == edges.size());
+
+      for (size_t i = 0; i < edges.size(); i++) {
+        // TODO: delete
+        if (!edges[i]->pl().isSecondary()) {
+          assert(gg->getResEdgsDirInd(edges[i]).size());
+        }
+      }
 
       d->draw(edg, edges, false);
     }

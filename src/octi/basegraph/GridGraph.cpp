@@ -701,6 +701,8 @@ GridNode* GridGraph::getGrNdById(size_t id) const { return _nds[id]; }
 
 // _____________________________________________________________________________
 const GridEdge* GridGraph::getGrEdgById(std::pair<size_t, size_t> id) const {
+  assert(_nds.size() > id.first);
+  assert(_nds.size() > id.second);
   return getEdg(_nds[id.first], _nds[id.second]);
 }
 

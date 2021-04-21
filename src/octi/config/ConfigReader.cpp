@@ -52,7 +52,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "The preferred solver library to use, will fall back if library is not "
       "available.")(
       "ilp-out",
-      opts::value<std::string>(&(cfg->ilpPath))->default_value("prob.mps"),
+      opts::value<std::string>(&(cfg->ilpPath))->default_value(""),
       "path to output the ILP to, a first feasible solution will be written "
       "to <basename>.mst.")(
       "obstacles",

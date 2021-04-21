@@ -119,7 +119,7 @@ Score Octilinearizer::draw(
     Drawing* dOut, const Penalties& pens, double gridSize, double borderRad,
     double maxGrDist, bool restrLocSearch, double enfGeoPen, size_t hananIters,
     const std::vector<Polygon<double>>& obstacles, size_t abortAfter) {
-  size_t jobs = 4;
+  size_t jobs = 100;
   std::vector<BaseGraph*> ggs(jobs);
 
   LOGTO(DEBUG, std::cerr) << "Creating grid graphs... ";
@@ -350,6 +350,10 @@ Score Octilinearizer::draw(
 
   *retGg = ggs[0];
   *dOut = drawing;
+
+  // the drawing might still have another internal grid graph, make sure they
+  // match (this is important for drawILP)
+  dOut->setBaseGraph(ggs[0]);
   return fullScore;
 }
 

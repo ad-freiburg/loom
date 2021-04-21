@@ -23,6 +23,8 @@ typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
 typedef std::vector<std::pair<size_t, size_t>>  GrPath;
 
 struct Score {
+  Score(double bend, double move, double hop, double dense, double full, uint64_t violations) : bend(bend), move(move), hop(hop), dense(dense), full(full), violations(violations) {}
+  Score() : bend(0), move(0), hop(0), dense(0), full(0), violations(0) {}
   double bend;
   double move;
   double hop;

@@ -66,6 +66,7 @@ void GeoJsonOutput::print(const Polygon<T>& poly, json::Val attrs) {
   _wr.key("coordinates");
   _wr.arr();
   _wr.arr();
+
   for (auto p : poly.getOuter()) {
     _wr.arr();
     _wr.val(p.getX());
