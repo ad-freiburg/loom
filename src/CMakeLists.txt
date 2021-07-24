@@ -8,6 +8,7 @@ include_directories(
 add_subdirectory(shared)
 add_subdirectory(util)
 add_subdirectory(transitmap)
+add_subdirectory(loom)
 add_subdirectory(cppgtfs)
 add_subdirectory(gtfs2graph)
 add_subdirectory(topo)

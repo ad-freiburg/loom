@@ -5,13 +5,13 @@
 #include <algorithm>
 #include <unordered_map>
 #include "shared/linegraph/Line.h"
-#include "transitmap/optim/ExhaustiveOptimizer.h"
+#include "loom/optim/ExhaustiveOptimizer.h"
 #include "util/log/Log.h"
 
-using namespace transitmapper;
+using namespace loom;
 using namespace optim;
-using namespace transitmapper::graph;
-using transitmapper::optim::ExhaustiveOptimizer;
+using namespace loom::graph;
+using loom::optim::ExhaustiveOptimizer;
 using shared::linegraph::Line;
 
 // _____________________________________________________________________________

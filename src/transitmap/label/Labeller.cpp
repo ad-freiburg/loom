@@ -7,11 +7,11 @@
 
 using transitmapper::label::Labeller;
 using transitmapper::label::LineLabel;
-using transitmapper::label::StationLabel;
 using transitmapper::label::Overlaps;
+using transitmapper::label::StationLabel;
 
-using util::geo::PolyLine;
 using util::geo::MultiLine;
+using util::geo::PolyLine;
 
 // _____________________________________________________________________________
 Labeller::Labeller(const config::Config* cfg) : _cfg(cfg) {}
@@ -31,9 +31,8 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
     const shared::linegraph::LineNode* n, double fontSize, uint8_t offset,
     const graph::RenderGraph& g) {
   // TODO: the hull padding should be the same as in the renderer
-  auto statHull =
-      g.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                       _cfg->simpleRenderForTwoEdgeNodes);
+  auto statHull = g.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
+                                 _cfg->simpleRenderForTwoEdgeNodes);
 
   double rad = util::geo::getEnclosingRadius(*n->pl().getGeom(), statHull);
 
@@ -44,21 +43,21 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
   double h = fontSize * 0.75;
 
   util::geo::Line<double> geomBaseLine, geomMiddle, geomTop, capLeft, capRight;
-  geomBaseLine.push_back({n->pl().getGeom()->getX() + rad +
-                              (_cfg->lineSpacing + _cfg->lineWidth),
-                          n->pl().getGeom()->getY() - (offset * h / 2)});
+  geomBaseLine.push_back(
+      {n->pl().getGeom()->getX() + rad + (_cfg->lineSpacing + _cfg->lineWidth),
+       n->pl().getGeom()->getY() - (offset * h / 2)});
   geomBaseLine.push_back({n->pl().getGeom()->getX() + rad + labelW,
                           n->pl().getGeom()->getY() - (offset * h / 2)});
 
-  geomMiddle.push_back({n->pl().getGeom()->getX() + rad +
-                            (_cfg->lineSpacing + _cfg->lineWidth),
-                        n->pl().getGeom()->getY() + h / 2 - (offset * h / 2)});
+  geomMiddle.push_back(
+      {n->pl().getGeom()->getX() + rad + (_cfg->lineSpacing + _cfg->lineWidth),
+       n->pl().getGeom()->getY() + h / 2 - (offset * h / 2)});
   geomMiddle.push_back({n->pl().getGeom()->getX() + rad + labelW,
                         n->pl().getGeom()->getY() + h / 2 - (offset * h / 2)});
 
-  geomTop.push_back({n->pl().getGeom()->getX() + rad +
-                         (_cfg->lineSpacing + _cfg->lineWidth),
-                     n->pl().getGeom()->getY() + h - (offset * h / 2)});
+  geomTop.push_back(
+      {n->pl().getGeom()->getX() + rad + (_cfg->lineSpacing + _cfg->lineWidth),
+       n->pl().getGeom()->getY() + h - (offset * h / 2)});
   geomTop.push_back({n->pl().getGeom()->getX() + rad + labelW,
                      n->pl().getGeom()->getY() + h - (offset * h / 2)});
 
@@ -89,7 +88,6 @@ void Labeller::labelStations(const graph::RenderGraph& g) {
   std::sort(orderedNds.begin(), orderedNds.end(), statNdCmp);
 
   for (auto n : orderedNds) {
-
     double fontSize = _cfg->stationLabelSize;
 
     std::vector<StationLabel> cands;
@@ -124,8 +122,9 @@ Overlaps Labeller::getOverlaps(const util::geo::MultiLine<double>& band,
   Overlaps ret{0, 0, 0};
 
   for (auto line : band) {
-    for (auto neigh : g.getNeighborEdges(
-             line, g.getMaxLineNum() * (_cfg->lineWidth + _cfg->lineSpacing))) {
+    auto neighs = g.getNeighborEdges(
+        line, g.getMaxLineNum() * (_cfg->lineWidth + _cfg->lineSpacing));
+    for (auto neigh : neighs) {
       if (proced.count(neigh)) continue;
 
       if (util::geo::dist(*neigh->pl().getGeom(), band) <

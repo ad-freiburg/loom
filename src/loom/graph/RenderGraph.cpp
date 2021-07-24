@@ -6,8 +6,8 @@
 #include <string>
 #include "json/json.hpp"
 #include "shared/linegraph/Line.h"
-#include "transitmap/graph/OrderCfg.h"
-#include "transitmap/graph/RenderGraph.h"
+#include "loom/graph/OrderCfg.h"
+#include "loom/graph/RenderGraph.h"
 #include "util/Misc.h"
 #include "util/geo/BezierCurve.h"
 #include "util/geo/Geo.h"
@@ -36,31 +36,6 @@ using util::geo::MultiLine;
 using util::geo::Point;
 using util::geo::Polygon;
 using util::geo::PolyLine;
-
-// _____________________________________________________________________________
-void RenderGraph::readFromDot(std::istream* s, double smooth) {
-  LineGraph::readFromDot(s, smooth);
-  writeInitOrder();
-}
-
-// _____________________________________________________________________________
-void RenderGraph::readFromJson(std::istream* s, double smooth) {
-  LineGraph::readFromJson(s, smooth);
-  writeInitOrder();
-}
-
-// _____________________________________________________________________________
-void RenderGraph::writeInitOrder() {
-  OrderCfg cfg;
-  for (auto nd : *getNds()) {
-    for (auto e : nd->getAdjList()) {
-      if (e->getFrom() != nd) continue;
-      cfg[e] = Ordering(e->pl().getLines().size());
-      std::iota(std::begin(cfg[e]), std::end(cfg[e]), 0);
-    }
-  }
-  setConfig(cfg);
-}
 
 // _____________________________________________________________________________
 const OrderCfg& RenderGraph::getConfig() const { return _config; }
@@ -101,7 +76,6 @@ std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
     const shared::linegraph::NodeFront& nf = n->pl().fronts()[i];
 
     if (!c.count(nf.edge)) {
-      // TODO: throw exception here!
       std::cout << "No ordering for edge " << nf.edge << " found!" << std::endl;
       assert(false);
     }
@@ -446,6 +420,7 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
   std::vector<const LineEdge*> orderedEdgs;
   orderedEdgs.insert(orderedEdgs.begin(), n->getAdjList().begin(),
                      n->getAdjList().end());
+  EdgOrder cmp(served);
 
   std::set<const Line*> proced;
 

@@ -2,22 +2,22 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_OPTIM_SIMULATEDANNEALINGOPTIMIZER_H_
-#define TRANSITMAP_OPTIM_SIMULATEDANNEALINGOPTIMIZER_H_
+#ifndef LOOM_OPTIM_SIMULATEDANNEALINGOPTIMIZER_H_
+#define LOOM_OPTIM_SIMULATEDANNEALINGOPTIMIZER_H_
 
-#include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/OrderCfg.h"
-#include "transitmap/optim/HillClimbOptimizer.h"
-#include "transitmap/optim/ILPEdgeOrderOptimizer.h"
-#include "transitmap/optim/NullOptimizer.h"
-#include "transitmap/optim/OptGraph.h"
-#include "transitmap/optim/OptGraphScorer.h"
-#include "transitmap/optim/Optimizer.h"
+#include "loom/config/TransitMapConfig.h"
+#include "loom/graph/OrderCfg.h"
+#include "loom/optim/HillClimbOptimizer.h"
+#include "loom/optim/ILPEdgeOrderOptimizer.h"
+#include "loom/optim/NullOptimizer.h"
+#include "loom/optim/OptGraph.h"
+#include "loom/optim/OptGraphScorer.h"
+#include "loom/optim/Optimizer.h"
 
 using std::exception;
 using std::string;
 
-namespace transitmapper {
+namespace loom {
 namespace optim {
 
 class SimulatedAnnealingOptimizer : public HillClimbOptimizer {
@@ -32,6 +32,6 @@ class SimulatedAnnealingOptimizer : public HillClimbOptimizer {
   double getScore(OptGraph* og, OptEdge* e, OptOrderCfg& cur) const;
 };
 }  // namespace optim
-}  // namespace transitmapper
+}  // namespace loom
 
-#endif  // TRANSITMAP_OPTIM_SIMULATEDANNEALINGOPTIMIZER_H_
+#endif  // LOOM_OPTIM_SIMULATEDANNEALINGOPTIMIZER_H_

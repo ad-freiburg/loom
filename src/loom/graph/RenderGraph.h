@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_GRAPH_RENDERGRAPH_H_
-#define TRANSITMAP_GRAPH_RENDERGRAPH_H_
+#ifndef LOOM_GRAPH_RENDERGRAPH_H_
+#define LOOM_GRAPH_RENDERGRAPH_H_
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/box.hpp>
@@ -14,20 +14,33 @@
 
 #include "shared/linegraph/Line.h"
 #include "shared/linegraph/LineGraph.h"
-#include "transitmap/graph/OrderCfg.h"
-#include "transitmap/graph/Penalties.h"
+#include "loom/graph/OrderCfg.h"
+#include "loom/graph/Penalties.h"
 #include "util/geo/Geo.h"
 
-namespace transitmapper {
+namespace loom {
 namespace graph {
+
+struct EdgOrder {
+  EdgOrder(const std::set<const shared::linegraph::Line*>& served)
+      : _served(served) {}
+  bool operator()(const shared::linegraph::LineEdge* e1,
+                  const shared::linegraph::LineEdge* e2) {
+    return notServed(e1) < notServed(e2);
+  }
+
+  size_t notServed(const shared::linegraph::LineEdge* e) {
+    size_t ret = 0;
+    for (auto l : _served) if (e->pl().hasLine(l)) ret++;
+    return e->pl().getLines().size() - ret;
+  }
+  std::set<const shared::linegraph::Line*> _served;
+};
 
 class RenderGraph : public shared::linegraph::LineGraph {
  public:
   RenderGraph(double defLineWidth, double defLineSpace)
       : _defWidth(defLineWidth), _defSpacing(defLineSpace){};
-
-  virtual void readFromJson(std::istream* s, double smooth);
-  virtual void readFromDot(std::istream* s, double smooth);
 
   const OrderCfg& getConfig() const;
   void setConfig(const OrderCfg&);
@@ -75,8 +88,6 @@ class RenderGraph : public shared::linegraph::LineGraph {
 
   OrderCfg _config;
 
-  void writeInitOrder();
-
   shared::linegraph::InnerGeom getInnerBezier(
       const shared::linegraph::LineNode* n, const OrderCfg& cf,
       const shared::linegraph::Partner& partnerFrom,
@@ -109,6 +120,6 @@ class RenderGraph : public shared::linegraph::LineGraph {
       const shared::linegraph::LineNode* n) const;
 };
 }  // namespace graph
-}  // namespace transitmapper
+}  // namespace loom
 
-#endif  // TRANSITMAP_GRAPH_RENDERGRAPH_H_
+#endif  // LOOM_GRAPH_RENDERGRAPH_H_

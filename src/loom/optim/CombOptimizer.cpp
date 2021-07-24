@@ -7,19 +7,19 @@
 #include <cstdio>
 #include <fstream>
 #include <thread>
-#include "transitmap/graph/OrderCfg.h"
-#include "transitmap/optim/CombOptimizer.h"
-#include "transitmap/optim/OptGraph.h"
+#include "loom/graph/OrderCfg.h"
+#include "loom/optim/CombOptimizer.h"
+#include "loom/optim/OptGraph.h"
 #include "util/String.h"
 #include "util/geo/Geo.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Algorithm.h"
 #include "util/log/Log.h"
 
-using namespace transitmapper;
+using namespace loom;
 using namespace optim;
-using namespace transitmapper::graph;
-using transitmapper::optim::CombOptimizer;
+using namespace loom::graph;
+using loom::optim::CombOptimizer;
 
 // _____________________________________________________________________________
 int CombOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,

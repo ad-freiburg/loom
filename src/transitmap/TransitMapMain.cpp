@@ -13,16 +13,12 @@
 #include "transitmap/graph/GraphBuilder.h"
 #include "transitmap/graph/Penalties.h"
 #include "transitmap/graph/RenderGraph.h"
-#include "transitmap/optim/CombOptimizer.h"
-#include "transitmap/optim/ILPEdgeOrderOptimizer.h"
-#include "transitmap/optim/Scorer.h"
 #include "transitmap/output/SvgRenderer.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
 
 using namespace transitmapper;
 using namespace util::geo;
-using std::string;
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
@@ -37,98 +33,25 @@ int main(int argc, char** argv) {
   config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
-  LOG(INFO) << "Reading graph...";
+  LOG(DEBUG) << "Reading graph...";
   transitmapper::graph::RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
   transitmapper::graph::GraphBuilder b(&cfg);
 
   g.readFromJson(&std::cin, cfg.inputSmoothing);
 
-  LOG(INFO) << "Creating node fronts...";
+  LOG(DEBUG) << "Creating node fronts...";
   b.writeMainDirs(&g);
 
-  if (cfg.expandFronts) {
-    b.expandOverlappinFronts(&g);
-  }
+  if (cfg.expandFronts) b.expandOverlappinFronts(&g);
 
   g.createMetaNodes();
 
-  LOG(INFO) << "Optimizing...";
-
-  double maxCrossPen =
-      g.maxDeg() * (cfg.crossPenMultiSameSeg > cfg.crossPenMultiDiffSeg
-                              ? cfg.crossPenMultiSameSeg
-                              : cfg.crossPenMultiDiffSeg);
-  double maxSplitPen = g.maxDeg() * cfg.splitPenWeight;
-
-  // TODO move this into configuration, at least partially
-  transitmapper::graph::Penalties pens{maxCrossPen,
-                                       maxSplitPen,
-                                       cfg.crossPenMultiSameSeg,
-                                       cfg.crossPenMultiDiffSeg,
-                                       cfg.splitPenWeight,
-                                       cfg.stationCrossWeightSameSeg,
-                                       cfg.stationCrossWeightDiffSeg,
-                                       cfg.stationSplitWeight,
-                                       true,
-                                       true};
-
-  optim::Scorer scorer(&g, pens);
-
-  if (cfg.outputStats) {
-    LOG(INFO) << "(stats) Stats for graph";
-    LOG(INFO) << "(stats)   Total node count: " << g.getNds()->size() << " ("
-              << g.getNumNds(true) << " topo, " << g.getNumNds(false)
-              << " non-topo)";
-    LOG(INFO) << "(stats)   Total edge count: " << g.numEdgs();
-    LOG(INFO) << "(stats)   Total unique line count: " << g.getNumLines();
-    LOG(INFO) << "(stats)   Max edge line cardinality: "
-              << g.getMaxLineNum();
-    LOG(INFO) << "(stats)   Number of poss. solutions: "
-              << scorer.getNumPossSolutions();
-    LOG(INFO) << "(stats)   Highest node degree: " << g.maxDeg();
-  }
-
-  LOG(INFO) << "(stats) Max crossing pen: " << maxCrossPen;
-  LOG(INFO) << "(stats) Max splitting pen: " << maxSplitPen;
-
-  if (cfg.optimMethod == "ilp_impr") {
-    optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, &scorer);
-    ilpEoOptim.optimize(&g);
-  } else if (cfg.optimMethod == "ilp") {
-    optim::ILPOptimizer ilpOptim(&cfg, &scorer);
-    ilpOptim.optimize(&g);
-  } else if (cfg.optimMethod == "comb") {
-    optim::CombOptimizer ilpCombiOptim(&cfg, &scorer);
-    ilpCombiOptim.optimize(&g);
-  } else if (cfg.optimMethod == "exhaust") {
-    optim::ExhaustiveOptimizer exhausOptim(&cfg, &scorer);
-    exhausOptim.optimize(&g);
-  } else if (cfg.optimMethod == "hillc") {
-    optim::HillClimbOptimizer hillcOptim(&cfg, &scorer);
-    hillcOptim.optimize(&g);
-  } else if (cfg.optimMethod == "anneal") {
-    optim::SimulatedAnnealingOptimizer annealOptim(&cfg, &scorer);
-    annealOptim.optimize(&g);
-  } else if (cfg.optimMethod == "null") {
-    optim::NullOptimizer nullOptim(&cfg, &scorer);
-    nullOptim.optimize(&g);
-  }
-
-  LOG(INFO) << "(stats) Total graph score AFTER optim is -- "
-            << scorer.getScore() << " -- (excl. unavoidable crossings!)";
-  LOG(INFO) << "(stats)   Per node graph score: "
-            << scorer.getScore() / g.getNds()->size();
-  LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings()
-            << " (score: " << scorer.getCrossScore() << ")";
-  LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
-            << " (score: " << scorer.getSeparationScore() << ")";
-
   if (cfg.renderMethod == "svg") {
     std::string path = cfg.outputPath;
-    LOG(INFO) << "Outputting to SVG " << path << " ..." << std::endl;
+    LOG(DEBUG) << "Outputting to SVG " << path << " ...";
     std::ofstream o;
     o.open(path);
-    output::SvgRenderer svgOut(&o, &cfg, &scorer);
+    output::SvgRenderer svgOut(&o, &cfg);
     svgOut.print(g);
   }
 
@@ -139,10 +62,10 @@ int main(int argc, char** argv) {
       cfg.renderStations = 0;
       cfg.renderLabels = 0;
       cfg.renderNodeConnections = 0;
-      LOG(INFO) << "Outputting edge SVG to " << path << " ..." << std::endl;
+      LOG(DEBUG) << "Outputting edge SVG to " << path << " ...";
       std::ofstream o;
       o.open(path);
-      output::SvgRenderer svgOut(&o, &cfg, &scorer);
+      output::SvgRenderer svgOut(&o, &cfg);
       svgOut.print(g);
     }
 
@@ -152,10 +75,10 @@ int main(int argc, char** argv) {
       cfg.renderStations = 0;
       cfg.renderLabels = 0;
       cfg.renderNodeConnections = 1;
-      LOG(INFO) << "Outputting node SVG to " << path << " ..." << std::endl;
+      LOG(DEBUG) << "Outputting node SVG to " << path << " ...";
       std::ofstream o;
       o.open(path);
-      output::SvgRenderer svgOut(&o, &cfg, &scorer);
+      output::SvgRenderer svgOut(&o, &cfg);
       svgOut.print(g);
     }
 
@@ -165,10 +88,10 @@ int main(int argc, char** argv) {
       cfg.renderStations = 1;
       cfg.renderLabels = 0;
       cfg.renderNodeConnections = 0;
-      LOG(INFO) << "Outputting station SVG to " << path << " ..." << std::endl;
+      LOG(DEBUG) << "Outputting station SVG to " << path << " ...";
       std::ofstream o;
       o.open(path);
-      output::SvgRenderer svgOut(&o, &cfg, &scorer);
+      output::SvgRenderer svgOut(&o, &cfg);
       svgOut.print(g);
     }
 
@@ -178,10 +101,10 @@ int main(int argc, char** argv) {
       cfg.renderStations = 0;
       cfg.renderLabels = 1;
       cfg.renderNodeConnections = 0;
-      LOG(INFO) << "Outputting label SVG to " << path << " ..." << std::endl;
+      LOG(DEBUG) << "Outputting label SVG to " << path << " ...";
       std::ofstream o;
       o.open(path);
-      output::SvgRenderer svgOut(&o, &cfg, &scorer);
+      output::SvgRenderer svgOut(&o, &cfg);
       svgOut.print(g);
     }
   }
