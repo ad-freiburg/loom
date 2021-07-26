@@ -9,7 +9,7 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
-#include "transitmap/graph/RenderGraph.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "util/geo/PolyLine.h"
 
@@ -32,19 +32,20 @@ class GraphBuilder {
  public:
   GraphBuilder(const config::Config* cfg);
 
-  void writeMainDirs(RenderGraph* g);
-  void expandOverlappinFronts(RenderGraph* g);
-  void writeInitialConfig(RenderGraph* g);
+  void writeMainDirs(shared::rendergraph::RenderGraph* g);
+  void expandOverlappinFronts(shared::rendergraph::RenderGraph* g);
+  void writeInitialConfig(shared::rendergraph::RenderGraph* g);
 
  private:
   const config::Config* _cfg;
 
   std::set<shared::linegraph::NodeFront*> nodeGetOverlappingFronts(
-      const RenderGraph* g, const shared::linegraph::LineNode* n) const;
+      const shared::rendergraph::RenderGraph* g,
+      const shared::linegraph::LineNode* n) const;
   void freeNodeFront(const shared::linegraph::LineNode* n,
                      shared::linegraph::NodeFront* f);
 
-  bool nodeFrontsOverlap(const RenderGraph* g,
+  bool nodeFrontsOverlap(const shared::rendergraph::RenderGraph* g,
                          const shared::linegraph::NodeFront& a,
                          const shared::linegraph::NodeFront& b) const;
   mutable std::set<const shared::linegraph::LineEdge*> _indEdges;

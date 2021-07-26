@@ -6,8 +6,8 @@
 #include <string>
 #include "json/json.hpp"
 #include "shared/linegraph/Line.h"
-#include "transitmap/graph/OrderCfg.h"
-#include "transitmap/graph/RenderGraph.h"
+#include "shared/rendergraph/OrderCfg.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "util/Misc.h"
 #include "util/geo/BezierCurve.h"
 #include "util/geo/Geo.h"
@@ -26,8 +26,8 @@ using shared::linegraph::LineNode;
 using shared::linegraph::LineOcc;
 using shared::linegraph::NodeFront;
 using shared::linegraph::Partner;
-using transitmapper::graph::OrderCfg;
-using transitmapper::graph::RenderGraph;
+using shared::rendergraph::OrderCfg;
+using shared::rendergraph::RenderGraph;
 using util::geo::BezierCurve;
 using util::geo::Box;
 using util::geo::dist;

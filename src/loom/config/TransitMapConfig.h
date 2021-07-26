@@ -11,17 +11,10 @@ namespace loom {
 namespace config {
 
 struct Config {
-  double lineWidth;
-  double lineSpacing;
-
-  double lineLabelSize;
-  double stationLabelSize;
-
   std::string name;
   std::string outputPath;
   std::string dbgPath;
 
-  std::string renderMethod;
   std::string optimMethod;
   std::string MPSOutputPath;
 
@@ -30,38 +23,15 @@ struct Config {
   bool splittingOpt;
   bool outOptGraph;
 
-  double outputResolution;
-  double inputSmoothing;
-  double innerGeometryPrecision;
-
-  double outputPadding;
-
-  double outlineWidth;
-  std::string outlineColor;
-
-  bool renderStations;
-  bool renderNodeFronts;
-  bool renderNodeCircles;
-  bool renderNodePolygons;
-  bool renderStationNames;
-  bool renderEdges;
-  bool renderLabels;
-
   bool outputStats;
   bool renderStats;
   bool collapseLinePartners;
-  bool renderNodeConnections;
-  bool expandFronts;
-  bool tightStations;
-
-  bool renderDirMarkers;
 
   bool createCoreOptimGraph;
   bool untangleGraph;
   bool simpleRenderForTwoEdgeNodes;
 
   int ilpTimeLimit;
-  std::string externalSolver;
 
   double crossPenMultiSameSeg;
   double crossPenMultiDiffSeg;

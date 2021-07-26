@@ -5,9 +5,9 @@
 #include <set>
 #include <string>
 #include "json/json.hpp"
-#include "shared/linegraph/Line.h"
 #include "loom/graph/OrderCfg.h"
 #include "loom/graph/RenderGraph.h"
+#include "shared/linegraph/Line.h"
 #include "util/Misc.h"
 #include "util/geo/BezierCurve.h"
 #include "util/geo/Geo.h"
@@ -19,6 +19,8 @@
 
 namespace bgeo = boost::geometry;
 
+using loom::graph::OrderCfg;
+using loom::graph::RenderGraph;
 using shared::linegraph::InnerGeom;
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
@@ -26,8 +28,6 @@ using shared::linegraph::LineNode;
 using shared::linegraph::LineOcc;
 using shared::linegraph::NodeFront;
 using shared::linegraph::Partner;
-using loom::graph::OrderCfg;
-using loom::graph::RenderGraph;
 using util::geo::BezierCurve;
 using util::geo::Box;
 using util::geo::dist;
@@ -41,17 +41,14 @@ using util::geo::PolyLine;
 const OrderCfg& RenderGraph::getConfig() const { return _config; }
 
 // _____________________________________________________________________________
-void RenderGraph::setConfig(const OrderCfg& c) {
-  _config = c;
-}
+void RenderGraph::setConfig(const OrderCfg& c) { _config = c; }
 
 // _____________________________________________________________________________
 size_t RenderGraph::numEdgs() const { return 0; }
 
 // _____________________________________________________________________________
 bool RenderGraph::isTerminus(const LineNode* n) {
-
-  if (n->getDeg() ==1 ) return true;
+  if (n->getDeg() == 1) return true;
   for (size_t i = 0; i < n->pl().fronts().size(); ++i) {
     const shared::linegraph::NodeFront& nf = n->pl().fronts()[i];
 
@@ -399,7 +396,6 @@ Polygon<double> RenderGraph::getConvexFrontHull(
 std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
     const std::set<const shared::linegraph::Line*>& served,
     const shared::linegraph::LineNode* n, double d) const {
-
   typedef bgeo::model::point<double, 2, bgeo::cs::cartesian> BoostPoint;
   typedef bgeo::model::linestring<BoostPoint> BoostLine;
   typedef bgeo::model::polygon<BoostPoint> BoostPoly;
@@ -453,8 +449,8 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
 
     // last entry
     if (lineBgeo.size()) {
-      bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat,
-                   endStrat, circleStrat);
+      bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat, endStrat,
+                   circleStrat);
 
       Polygon<double> retPoly;
       for (const auto& p : ret[0].outer()) {

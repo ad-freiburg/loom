@@ -37,10 +37,10 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   LOG(INFO) << "Reading graph...";
-  loom::graph::RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
+  loom::graph::RenderGraph g(5, 5);
   loom::graph::GraphBuilder b(&cfg);
 
-  g.readFromJson(&std::cin, cfg.inputSmoothing);
+  g.readFromJson(&std::cin, 3);
 
   LOG(INFO) << "Creating node fronts...";
   b.writeMainDirs(&g);

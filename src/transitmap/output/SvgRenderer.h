@@ -11,8 +11,8 @@
 #include <vector>
 #include "Renderer.h"
 #include "shared/linegraph/Line.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/RenderGraph.h"
 #include "transitmap/label/Labeller.h"
 #include "util/geo/Geo.h"
 #include "util/geo/PolyLine.h"
@@ -82,7 +82,7 @@ class SvgRenderer : public Renderer {
   SvgRenderer(std::ostream* o, const config::Config* cfg);
   virtual ~SvgRenderer(){};
 
-  virtual void print(const graph::RenderGraph& outputGraph);
+  virtual void print(const shared::rendergraph::RenderGraph& outputGraph);
 
   void printLine(const util::geo::PolyLine<double>& l,
                  const std::map<std::string, std::string>& ps,
@@ -113,16 +113,16 @@ class SvgRenderer : public Renderer {
       _innerDelegates;
   std::vector<EndMarker> _markers;
 
-  void outputNodes(const graph::RenderGraph& outputGraph,
+  void outputNodes(const shared::rendergraph::RenderGraph& outputGraph,
                    const RenderParams& params);
-  void outputEdges(const graph::RenderGraph& outputGraph,
+  void outputEdges(const shared::rendergraph::RenderGraph& outputGraph,
                    const RenderParams& params);
 
-  void renderEdgeTripGeom(const graph::RenderGraph& outG,
+  void renderEdgeTripGeom(const shared::rendergraph::RenderGraph& outG,
                           const shared::linegraph::LineEdge* e,
                           const RenderParams& params);
 
-  void renderNodeConnections(const graph::RenderGraph& outG,
+  void renderNodeConnections(const shared::rendergraph::RenderGraph& outG,
                              const shared::linegraph::LineNode* n,
                              const RenderParams& params);
 
@@ -135,17 +135,17 @@ class SvgRenderer : public Renderer {
                       const shared::linegraph::LineEdge* edge,
                       const std::string& endMarker);
 
-  void renderDelegates(const graph::RenderGraph& outG,
+  void renderDelegates(const shared::rendergraph::RenderGraph& outG,
                        const RenderParams& params);
 
-  void renderNodeFronts(const graph::RenderGraph& outG,
+  void renderNodeFronts(const shared::rendergraph::RenderGraph& outG,
                         const RenderParams& params);
 
   void renderLineLabels(const label::Labeller& lbler,
                         const RenderParams& params);
 
   void renderStationLabels(const label::Labeller& lbler,
-                        const RenderParams& params);
+                           const RenderParams& params);
 
   std::multiset<InnerClique> getInnerCliques(
       const shared::linegraph::LineNode* n,
@@ -166,7 +166,7 @@ class SvgRenderer : public Renderer {
   std::string getMarkerPathMale(double w) const;
   std::string getMarkerPathFemale(double w) const;
 };
-}
-}
+}  // namespace output
+}  // namespace transitmapper
 
 #endif  // TRANSITMAP_OUTPUT_SVGRENDERER_H_

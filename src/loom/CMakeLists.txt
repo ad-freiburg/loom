@@ -1,6 +1,6 @@
 file(GLOB_RECURSE loom_SRC *.cpp)
 
-set(loom_main TransitMapMain.cpp)
+set(loom_main LoomMain.cpp)
 
 list(REMOVE_ITEM loom_SRC ${loom_main})
 list(REMOVE_ITEM loom_SRC TestMain.cpp)

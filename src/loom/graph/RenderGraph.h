@@ -12,10 +12,10 @@
 #include <set>
 #include <string>
 
-#include "shared/linegraph/Line.h"
-#include "shared/linegraph/LineGraph.h"
 #include "loom/graph/OrderCfg.h"
 #include "loom/graph/Penalties.h"
+#include "shared/linegraph/Line.h"
+#include "shared/linegraph/LineGraph.h"
 #include "util/geo/Geo.h"
 
 namespace loom {
@@ -31,7 +31,8 @@ struct EdgOrder {
 
   size_t notServed(const shared::linegraph::LineEdge* e) {
     size_t ret = 0;
-    for (auto l : _served) if (e->pl().hasLine(l)) ret++;
+    for (auto l : _served)
+      if (e->pl().hasLine(l)) ret++;
     return e->pl().getLines().size() - ret;
   }
   std::set<const shared::linegraph::Line*> _served;

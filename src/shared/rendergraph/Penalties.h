@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_GRAPH_PENALTIES_H_
-#define TRANSITMAP_GRAPH_PENALTIES_H_
+#ifndef SHARED_RENDERGRAPH_PENALTIES_H_
+#define SHARED_RENDERGRAPH_PENALTIES_H_
 
 namespace transitmapper {
 namespace graph {
@@ -23,7 +23,7 @@ struct Penalties {
 
 const Penalties IDENTITY_PENALTIES = Penalties {1, 1, 1, 1, 1, 1, 1, 1, 0, 0};
 
-}  // namespace graph
-}  // namespace transitmapper
+}  // namespace rendergraph
+}  // namespace shared
 
-#endif  // TRANSITMAP_GRAPH_PENALTIES_H_
+#endif  // SHARED_RENDERGRAPH_PENALTIES_H_

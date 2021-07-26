@@ -2,9 +2,11 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include "shared/rendergraph/RenderGraph.h"
 #include "transitmap/label/Labeller.h"
 #include "util/geo/Geo.h"
 
+using shared::rendergraph::RenderGraph;
 using transitmapper::label::Labeller;
 using transitmapper::label::LineLabel;
 using transitmapper::label::Overlaps;
@@ -17,7 +19,7 @@ using util::geo::PolyLine;
 Labeller::Labeller(const config::Config* cfg) : _cfg(cfg) {}
 
 // _____________________________________________________________________________
-void Labeller::label(const graph::RenderGraph& g) {
+void Labeller::label(const RenderGraph& g) {
   // leave enough room for labels
   auto bbox = util::geo::pad(g.getBBox(), 500);
   _statLblGrid = StatLblGrid(200, 200, bbox);
@@ -29,7 +31,7 @@ void Labeller::label(const graph::RenderGraph& g) {
 // _____________________________________________________________________________
 util::geo::MultiLine<double> Labeller::getStationLblBand(
     const shared::linegraph::LineNode* n, double fontSize, uint8_t offset,
-    const graph::RenderGraph& g) {
+    const RenderGraph& g) {
   // TODO: the hull padding should be the same as in the renderer
   auto statHull = g.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
                                  _cfg->simpleRenderForTwoEdgeNodes);
@@ -78,7 +80,7 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
 }
 
 // _____________________________________________________________________________
-void Labeller::labelStations(const graph::RenderGraph& g) {
+void Labeller::labelStations(const RenderGraph& g) {
   std::vector<const shared::linegraph::LineNode*> orderedNds;
   for (auto n : g.getNds()) {
     if (n->pl().stops().size() == 0) continue;
@@ -116,7 +118,7 @@ void Labeller::labelStations(const graph::RenderGraph& g) {
 
 // _____________________________________________________________________________
 Overlaps Labeller::getOverlaps(const util::geo::MultiLine<double>& band,
-                               const graph::RenderGraph& g) const {
+                               const RenderGraph& g) const {
   std::set<const shared::linegraph::LineEdge*> proced;
 
   Overlaps ret{0, 0, 0};
@@ -151,7 +153,7 @@ Overlaps Labeller::getOverlaps(const util::geo::MultiLine<double>& band,
 }
 
 // _____________________________________________________________________________
-void Labeller::labelLines(const graph::RenderGraph& g) {
+void Labeller::labelLines(const RenderGraph& g) {
   for (auto n : g.getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;

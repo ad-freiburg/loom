@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_GRAPH_ORDERCFG_H_
-#define TRANSITMAP_GRAPH_ORDERCFG_H_
+#ifndef SHARED_RENDERGRAPH_ORDERCFG_H_
+#define SHARED_RENDERGRAPH_ORDERCFG_H_
 
 #include <map>
 #include <vector>
@@ -20,8 +20,8 @@ typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge;
 }
 }
 
-namespace transitmapper {
-namespace graph {
+namespace shared {
+namespace rendergraph {
 
 typedef std::vector<size_t> Ordering;
 typedef std::map<const shared::linegraph::LineEdge*, Ordering> OrderCfg;
@@ -41,4 +41,4 @@ class HierarOrderCfg : public std::map<const shared::linegraph::LineEdge*,
 }
 }
 
-#endif  // TRANSITMAP_GRAPH_ORDERCFG_H_
+#endif  // SHARED_RENDERGRAPH_ORDERCFG_H_

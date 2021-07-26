@@ -6,8 +6,8 @@
 #define TRANSITMAP_LABEL_LABELLER_H_
 
 #include "shared/linegraph/Line.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/RenderGraph.h"
 #include "util/geo/Grid.h"
 
 namespace transitmapper {
@@ -33,16 +33,17 @@ struct Overlaps {
   size_t statLabelOverlaps;
 };
 
-inline bool statNdCmp (const shared::linegraph::LineNode* a, const shared::linegraph::LineNode* b) {
+inline bool statNdCmp(const shared::linegraph::LineNode* a,
+                      const shared::linegraph::LineNode* b) {
   // first degree 1 nodes
   size_t ad = a->getDeg();
   size_t bd = b->getDeg();
   if (ad == 1) ad = std::numeric_limits<size_t>::max();
   if (bd == 1) bd = std::numeric_limits<size_t>::max();
-  return (ad > bd || (ad == bd && shared::linegraph::LineGraph::getLDeg(a) > shared::linegraph::LineGraph::getLDeg(b)));
-
+  return (ad > bd ||
+          (ad == bd && shared::linegraph::LineGraph::getLDeg(a) >
+                           shared::linegraph::LineGraph::getLDeg(b)));
 }
-
 
 struct StationLabel {
   util::geo::PolyLine<double> geom;
@@ -78,7 +79,7 @@ class Labeller {
  public:
   Labeller(const config::Config* cfg);
 
-  void label(const graph::RenderGraph& g);
+  void label(const shared::rendergraph::RenderGraph& g);
 
   const std::vector<LineLabel>& getLineLabels() const;
   const std::vector<StationLabel>& getStationLabels() const;
@@ -93,16 +94,17 @@ class Labeller {
 
   const config::Config* _cfg;
 
-  void labelStations(const graph::RenderGraph& g);
-  void labelLines(const graph::RenderGraph& g);
+  void labelStations(const shared::rendergraph::RenderGraph& g);
+  void labelLines(const shared::rendergraph::RenderGraph& g);
 
   Overlaps getOverlaps(const util::geo::MultiLine<double>& band,
-                       const graph::RenderGraph& g) const;
+                       const shared::rendergraph::RenderGraph& g) const;
 
   util::geo::MultiLine<double> getStationLblBand(
-    const shared::linegraph::LineNode* n, double fontSize, uint8_t offset, const graph::RenderGraph& g);
+      const shared::linegraph::LineNode* n, double fontSize, uint8_t offset,
+      const shared::rendergraph::RenderGraph& g);
 };
-}
-}
+}  // namespace label
+}  // namespace transitmapper
 
 #endif  // TRANSITMAP_OUTPUT_SVGRENDERER_H_

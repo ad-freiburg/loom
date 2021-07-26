@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_GRAPH_RENDERGRAPH_H_
-#define TRANSITMAP_GRAPH_RENDERGRAPH_H_
+#ifndef SHARED_RENDERGRAPH_RENDERGRAPH_H_
+#define SHARED_RENDERGRAPH_RENDERGRAPH_H_
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/box.hpp>
@@ -14,15 +14,17 @@
 
 #include "shared/linegraph/Line.h"
 #include "shared/linegraph/LineGraph.h"
-#include "transitmap/graph/OrderCfg.h"
-#include "transitmap/graph/Penalties.h"
+#include "shared/rendergraph/OrderCfg.h"
+#include "shared/rendergraph/Penalties.h"
 #include "util/geo/Geo.h"
 
-namespace transitmapper {
-namespace graph {
+namespace shared {
+namespace rendergraph {
 
 class RenderGraph : public shared::linegraph::LineGraph {
  public:
+  RenderGraph()
+      : _defWidth(5), _defSpacing(5){};
   RenderGraph(double defLineWidth, double defLineSpace)
       : _defWidth(defLineWidth), _defSpacing(defLineSpace){};
 
@@ -108,7 +110,7 @@ class RenderGraph : public shared::linegraph::LineGraph {
   std::vector<shared::linegraph::NodeFront> getClosedNodeFronts(
       const shared::linegraph::LineNode* n) const;
 };
-}  // namespace graph
-}  // namespace transitmapper
+}  // namespace rendergraph
+}  // namespaceshared
 
-#endif  // TRANSITMAP_GRAPH_RENDERGRAPH_H_
+#endif  // SHARED_RENDERGRAPH_RENDERGRAPH_H_

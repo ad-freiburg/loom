@@ -8,25 +8,24 @@
 #include <vector>
 #include "GraphBuilder.h"
 #include "json/json.hpp"
-#include "shared/linegraph/Line.h"
 #include "loom/config/TransitMapConfig.h"
 #include "loom/graph/RenderGraph.h"
+#include "shared/linegraph/Line.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
 
+using loom::graph::GraphBuilder;
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
 using shared::linegraph::NodeFront;
-using loom::graph::GraphBuilder;
 using util::geo::DPoint;
 using util::geo::LinePoint;
 using util::geo::LinePointCmp;
 using util::geo::PolyLine;
 
 // _____________________________________________________________________________
-GraphBuilder::GraphBuilder(const config::Config* cfg) : _cfg(cfg) {
-}
+GraphBuilder::GraphBuilder(const config::Config* cfg) : _cfg(cfg) {}
 
 // _____________________________________________________________________________
 void GraphBuilder::writeMainDirs(RenderGraph* graph) {

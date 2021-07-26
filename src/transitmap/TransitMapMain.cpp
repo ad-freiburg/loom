@@ -8,11 +8,11 @@
 #include <iostream>
 #include <set>
 #include <string>
+#include "shared/rendergraph/Penalties.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "transitmap/config/ConfigReader.cpp"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/GraphBuilder.h"
-#include "transitmap/graph/Penalties.h"
-#include "transitmap/graph/RenderGraph.h"
 #include "transitmap/output/SvgRenderer.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   LOG(DEBUG) << "Reading graph...";
-  transitmapper::graph::RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
+  shared::rendergraph::RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
   transitmapper::graph::GraphBuilder b(&cfg);
 
   g.readFromJson(&std::cin, cfg.inputSmoothing);
