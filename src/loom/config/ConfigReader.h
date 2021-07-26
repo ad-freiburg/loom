@@ -9,7 +9,7 @@
 #include <vector>
 #include "loom/config/TransitMapConfig.h"
 
-namespace transitmapper {
+namespace loom {
 namespace config {
 
 class ConfigReader {

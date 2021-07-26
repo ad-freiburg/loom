@@ -10,7 +10,7 @@
 #include "util/log/Log.h"
 #include "loom/config/ConfigReader.h"
 
-using transitmapper::config::ConfigReader;
+using loom::config::ConfigReader;
 namespace opts = boost::program_options;
 using std::string;
 using std::exception;

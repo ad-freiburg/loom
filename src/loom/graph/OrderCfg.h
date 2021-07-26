@@ -20,7 +20,7 @@ typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge;
 }
 }
 
-namespace transitmapper {
+namespace loom {
 namespace graph {
 
 typedef std::vector<size_t> Ordering;

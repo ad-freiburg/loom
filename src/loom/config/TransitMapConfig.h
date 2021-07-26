@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace transitmapper {
+namespace loom {
 namespace config {
 
 struct Config {
@@ -76,6 +76,6 @@ struct Config {
 };
 
 }  // namespace config
-}  // namespace transitmapper
+}  // namespace loom
 
 #endif  // LOOM_CONFIG_TRANSITMAPCONFIG_H_

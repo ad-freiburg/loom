@@ -18,7 +18,7 @@ using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
 using shared::linegraph::NodeFront;
-using transitmapper::graph::GraphBuilder;
+using loom::graph::GraphBuilder;
 using util::geo::DPoint;
 using util::geo::LinePoint;
 using util::geo::LinePointCmp;
