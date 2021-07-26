@@ -11,22 +11,22 @@
 #include "util/graph/Algorithm.h"
 #include "util/log/Log.h"
 
-using transitmapper::optim::OptGraph;
-using transitmapper::optim::OptEdge;
-using transitmapper::optim::OptNode;
-using transitmapper::optim::EtgPart;
-using transitmapper::optim::OptEdgePL;
-using transitmapper::optim::OptNodePL;
-using transitmapper::optim::OptLO;
-using transitmapper::optim::PartnerPath;
-using transitmapper::graph::RenderGraph;
-using shared::linegraph::LineOcc;
 using shared::linegraph::Line;
+using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
-using shared::linegraph::LineEdge;
-using util::graph::Algorithm;
+using shared::linegraph::LineOcc;
+using transitmapper::graph::RenderGraph;
+using transitmapper::optim::EtgPart;
+using transitmapper::optim::OptEdge;
+using transitmapper::optim::OptEdgePL;
+using transitmapper::optim::OptGraph;
+using transitmapper::optim::OptLO;
+using transitmapper::optim::OptNode;
+using transitmapper::optim::OptNodePL;
+using transitmapper::optim::PartnerPath;
 using util::Nullable;
+using util::graph::Algorithm;
 
 // _____________________________________________________________________________
 void OptGraph::upFirstLastEdg(OptEdge* optEdg) {
@@ -195,7 +195,7 @@ void OptGraph::partnerLines() {
   for (const auto& p : partners) {
     if (p.partners.size() == 1) continue;
     // std::cout << "Combining " << p.partners.begin()->line->id() << " and "
-              // << p.partners.size() - 1 << " lines." << std::endl;
+    // << p.partners.size() - 1 << " lines." << std::endl;
     for (size_t i = 0; i < p.path.size(); i++) {
       // TODO: why isnt there a getLine function f or OptEdgePL?
       auto e = p.path[i];
@@ -1524,11 +1524,10 @@ bool OptGraph::dirContinuedOver(const OptLO& ro, const OptEdge* a,
 
 // _____________________________________________________________________________
 OptNode* OptGraph::sharedNode(const OptEdge* a, const OptEdge* b) {
-  OptNode* r = 0;
   if (a->getFrom() == b->getFrom() || a->getFrom() == b->getTo())
-    r = a->getFrom();
-  if (a->getTo() == b->getFrom() || a->getTo() == b->getTo()) r = a->getTo();
-  return r;
+    return a->getFrom();
+  if (a->getTo() == b->getFrom() || a->getTo() == b->getTo()) return a->getTo();
+  return 0;
 }
 
 // _____________________________________________________________________________
