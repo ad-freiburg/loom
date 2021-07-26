@@ -3,16 +3,16 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <fstream>
-#include "transitmap/graph/OrderCfg.h"
+#include "loom/graph/OrderCfg.h"
 #include "shared/optim/ILPSolvProv.h"
-#include "transitmap/optim/ILPEdgeOrderOptimizer.h"
-#include "transitmap/optim/OptGraph.h"
+#include "loom/optim/ILPEdgeOrderOptimizer.h"
+#include "loom/optim/OptGraph.h"
 #include "util/geo/Geo.h"
 #include "util/log/Log.h"
 
-using namespace transitmapper;
+using namespace loom;
 using namespace optim;
-using namespace transitmapper::graph;
+using namespace loom::graph;
 using shared::optim::ILPSolver;
 
 // _____________________________________________________________________________

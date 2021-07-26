@@ -6,6 +6,7 @@
 #define SHARED_LINEGRAPH_LINEEDGEPL_H_
 
 #include <set>
+
 #include "shared/linegraph/Line.h"
 #include "shared/style/LineStyle.h"
 #include "util/Nullable.h"
@@ -24,6 +25,7 @@ class LineEdgePL;
 class LineNodePL;
 
 struct LineOcc {
+  LineOcc() {}
   LineOcc(const Line* r, const Node<LineNodePL, LineEdgePL>* dir)
       : line(r), direction(dir) {}
   LineOcc(const Line* r, const Node<LineNodePL, LineEdgePL>* dir,
@@ -48,8 +50,8 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
                util::Nullable<shared::style::LineStyle> ls);
   void addLine(const Line* r, const Node<LineNodePL, LineEdgePL>* dir);
 
-  std::set<LineOcc>& getLines();
-  const std::set<LineOcc>& getLines() const;
+  std::vector<LineOcc>& getLines();
+  const std::vector<LineOcc>& getLines() const;
 
   bool hasLine(const Line* r) const;
   void delLine(const Line* r);
@@ -57,8 +59,9 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   const LineOcc& lineOcc(const Line* r) const;
   const LineOcc& lineOccAtPos(size_t i) const;
 
-  size_t linePosUnder(const Line* r, const std::vector<size_t> ordering) const;
+  void updateLineOcc(const LineOcc& occ);
 
+  size_t linePosUnder(const Line* r, const std::vector<size_t> ordering) const;
   size_t linePos(const Line* r) const;
 
   const util::geo::Line<double>* getGeom() const;
@@ -72,7 +75,8 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   bool dontContract() { return _dontContract; }
 
  private:
-  std::set<LineOcc> _lines;
+  std::map<const Line*, size_t> _lineToIdx;
+  std::vector<LineOcc> _lines;
   bool _dontContract;
 
   PolyLine<double> _p;

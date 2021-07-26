@@ -4,14 +4,14 @@
 
 #include <algorithm>
 #include <unordered_map>
-#include "transitmap/optim/HillClimbOptimizer.h"
+#include "loom/optim/HillClimbOptimizer.h"
 #include "shared/linegraph/Line.h"
 #include "util/log/Log.h"
 
-using namespace transitmapper;
+using namespace loom;
 using namespace optim;
-using namespace transitmapper::graph;
-using transitmapper::optim::HillClimbOptimizer;
+using namespace loom::graph;
+using loom::optim::HillClimbOptimizer;
 using shared::linegraph::Line;
 
 // _____________________________________________________________________________

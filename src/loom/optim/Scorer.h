@@ -2,16 +2,16 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_OPTIM_SCORER_H_
-#define TRANSITMAP_OPTIM_SCORER_H_
+#ifndef LOOM_OPTIM_SCORER_H_
+#define LOOM_OPTIM_SCORER_H_
 
 #include <string>
 #include <vector>
-#include "transitmap/graph/OrderCfg.h"
-#include "transitmap/graph/Penalties.h"
-#include "transitmap/graph/RenderGraph.h"
+#include "loom/graph/OrderCfg.h"
+#include "loom/graph/Penalties.h"
+#include "loom/graph/RenderGraph.h"
 
-namespace transitmapper {
+namespace loom {
 namespace optim {
 
 class Scorer {
@@ -76,4 +76,4 @@ class Scorer {
 }
 }
 
-#endif  // TRANSITMAP_GRAPH_ROUTE_H_
+#endif  // LOOM_GRAPH_ROUTE_H_

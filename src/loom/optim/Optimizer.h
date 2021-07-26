@@ -2,15 +2,15 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/OrderCfg.h"
-#include "transitmap/graph/RenderGraph.h"
-#include "transitmap/optim/OptGraph.h"
+#include "loom/config/TransitMapConfig.h"
+#include "loom/graph/OrderCfg.h"
+#include "loom/graph/RenderGraph.h"
+#include "loom/optim/OptGraph.h"
 
-#ifndef TRANSITMAP_OPTIM_OPTIMIZER_H_
-#define TRANSITMAP_OPTIM_OPTIMIZER_H_
+#ifndef LOOM_OPTIM_OPTIMIZER_H_
+#define LOOM_OPTIM_OPTIMIZER_H_
 
-namespace transitmapper {
+namespace loom {
 namespace optim {
 
 typedef std::pair<const OptLO, const OptLO> LinePair;
@@ -57,6 +57,6 @@ class Optimizer {
   static std::string prefix(size_t depth);
 };
 }  // namespace optim
-}  // namespace transitmapper
+}  // namespace loom
 
-#endif  // TRANSITMAP_OPTIM_OPTIMIZER_H_
+#endif  // LOOM_OPTIM_OPTIMIZER_H_

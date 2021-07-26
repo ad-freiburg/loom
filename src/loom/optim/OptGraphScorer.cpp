@@ -3,18 +3,18 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "shared/linegraph/Line.h"
-#include "transitmap/graph/Penalties.h"
-#include "transitmap/optim/OptGraph.h"
-#include "transitmap/optim/OptGraphScorer.h"
-#include "transitmap/optim/Optimizer.h"
+#include "loom/graph/Penalties.h"
+#include "loom/optim/OptGraph.h"
+#include "loom/optim/OptGraphScorer.h"
+#include "loom/optim/Optimizer.h"
 
-using namespace transitmapper;
+using namespace loom;
 using namespace optim;
 using shared::linegraph::Line;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineEdge;
 using shared::linegraph::InnerGeom;
-using transitmapper::graph::IDENTITY_PENALTIES;
+using loom::graph::IDENTITY_PENALTIES;
 
 // _____________________________________________________________________________
 double OptGraphScorer::getSplittingScore(OptGraph* og,

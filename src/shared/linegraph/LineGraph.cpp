@@ -7,12 +7,11 @@
 #include "shared/linegraph/LineEdgePL.h"
 #include "shared/linegraph/LineGraph.h"
 #include "shared/linegraph/LineNodePL.h"
+#include "shared/style/LineStyle.h"
 #include "util/String.h"
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
 #include "util/log/Log.h"
-
-#include "shared/style/LineStyle.h"
 
 using shared::linegraph::EdgeGrid;
 using shared::linegraph::EdgeOrdering;
@@ -361,7 +360,10 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
 
 // _____________________________________________________________________________
 void LineGraph::buildGrids() {
-  size_t gridSize = 20000;  // TODO: make configurable
+  size_t gridSize =
+      std::max(_bbox.getUpperRight().getX() - _bbox.getLowerLeft().getX(),
+               _bbox.getUpperRight().getY() - _bbox.getLowerLeft().getY()) /
+      10;
 
   _nodeGrid = NodeGrid(gridSize, gridSize, _bbox);
   _edgeGrid = EdgeGrid(gridSize, gridSize, _bbox);
@@ -470,7 +472,8 @@ ISect LineGraph::getNextIntersection() {
             ret.bp = *is.begin();
             // if the intersection is near a shared node, ignore
             auto shrdNd = sharedNode(e1, e2);
-            if (shrdNd && util::geo::dist(*shrdNd->pl().getGeom(), ret.bp.p) < 100) {
+            if (shrdNd &&
+                util::geo::dist(*shrdNd->pl().getGeom(), ret.bp.p) < 100) {
               continue;
             }
 
@@ -678,10 +681,12 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
     std::vector<std::pair<LineEdge*, double>> combine;
 
     const auto& orig = edgeOrdering(n, true).getOrderedSet();
-    std::cerr << "Splitting " << n << " with " << orig.size() << " adj edges " << std::endl;
+    std::cerr << "Splitting " << n << " with " << orig.size() << " adj edges "
+              << std::endl;
     combine.insert(combine.begin(), orig.begin() + maxDeg - 1, orig.end());
 
-    std::cerr << "max deg: " << maxDeg<< " comb size: " << combine.size() << std::endl;
+    std::cerr << "max deg: " << maxDeg << " comb size: " << combine.size()
+              << std::endl;
 
     // for the new geometry, take the average angle
     double refAngle = 0;
@@ -792,11 +797,7 @@ void LineGraph::nodeRpl(LineEdge* e, const LineNode* oldN,
       shared::linegraph::LineOcc newRo = *ro;
       newRo.direction = newN;
 
-      // delete old
-      ro = e->pl().getLines().erase(ro);
-
-      // add new
-      e->pl().getLines().insert(newRo);
+      e->pl().updateLineOcc(newRo);
     } else {
       ro++;
     }
@@ -849,7 +850,6 @@ breakfor:
             n1->getAdjList().size() > 1 &&
             (n1->pl().stops().size() == 0 ||
              e->getOtherNd(n1)->pl().stops().size() == 0)) {
-
           contractEdge(e);
           goto breakfor;
         }

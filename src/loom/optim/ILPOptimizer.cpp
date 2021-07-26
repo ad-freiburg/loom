@@ -7,17 +7,17 @@
 #include <fstream>
 #include <thread>
 #include "shared/optim/ILPSolvProv.h"
-#include "transitmap/graph/OrderCfg.h"
-#include "transitmap/optim/ILPOptimizer.h"
-#include "transitmap/optim/OptGraph.h"
+#include "loom/graph/OrderCfg.h"
+#include "loom/optim/ILPOptimizer.h"
+#include "loom/optim/OptGraph.h"
 #include "util/String.h"
 #include "util/geo/Geo.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
-using namespace transitmapper;
+using namespace loom;
 using namespace optim;
-using namespace transitmapper::graph;
+using namespace loom::graph;
 using shared::linegraph::Line;
 using shared::optim::ILPSolver;
 

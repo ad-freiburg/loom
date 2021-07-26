@@ -32,8 +32,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
  public:
   LineGraph();
 
-  void readFromJson(std::istream* s, double smooth);
-  void readFromDot(std::istream* s, double smooth);
+  virtual void readFromJson(std::istream* s, double smooth);
+  virtual void readFromDot(std::istream* s, double smooth);
 
   const util::geo::Box<double>& getBBox() const;
   void topologizeIsects();

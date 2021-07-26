@@ -2,14 +2,14 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "transitmap/optim/NullOptimizer.h"
+#include "loom/optim/NullOptimizer.h"
 #include "util/Misc.h"
 #include "util/log/Log.h"
 
-using namespace transitmapper;
+using namespace loom;
 using namespace optim;
-using namespace transitmapper::graph;
-using transitmapper::optim::NullOptimizer;
+using namespace loom::graph;
+using loom::optim::NullOptimizer;
 
 // _____________________________________________________________________________
 int NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,

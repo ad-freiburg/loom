@@ -3,18 +3,18 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "shared/linegraph/Line.h"
-#include "transitmap/graph/Penalties.h"
-#include "transitmap/graph/RenderGraph.h"
-#include "transitmap/optim/Scorer.h"
+#include "loom/graph/Penalties.h"
+#include "loom/graph/RenderGraph.h"
+#include "loom/optim/Scorer.h"
 #include "util/Misc.h"
 
-using transitmapper::graph::RenderGraph;
-using transitmapper::graph::OrderCfg;
-using transitmapper::graph::Penalties;
+using loom::graph::RenderGraph;
+using loom::graph::OrderCfg;
+using loom::graph::Penalties;
 using shared::linegraph::Line;
 using shared::linegraph::InnerGeom;
-using transitmapper::graph::IDENTITY_PENALTIES;
-using transitmapper::optim::Scorer;
+using loom::graph::IDENTITY_PENALTIES;
+using loom::optim::Scorer;
 
 // _____________________________________________________________________________
 double Scorer::getScore() const { return getScore(_g->getConfig()); }

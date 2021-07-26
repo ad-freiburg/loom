@@ -3,22 +3,22 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <fstream>
-#include "transitmap/optim/OptGraph.h"
-#include "transitmap/optim/Optimizer.h"
+#include "loom/optim/OptGraph.h"
+#include "loom/optim/Optimizer.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Algorithm.h"
 #include "util/log/Log.h"
 
-using transitmapper::optim::Optimizer;
-using transitmapper::optim::LinePair;
-using transitmapper::optim::PosComPair;
-using transitmapper::optim::EdgePair;
-using transitmapper::optim::OptGraph;
-using transitmapper::optim::OptNode;
-using transitmapper::optim::OptEdge;
-using transitmapper::graph::RenderGraph;
-using transitmapper::graph::HierarOrderCfg;
+using loom::optim::Optimizer;
+using loom::optim::LinePair;
+using loom::optim::PosComPair;
+using loom::optim::EdgePair;
+using loom::optim::OptGraph;
+using loom::optim::OptNode;
+using loom::optim::OptEdge;
+using loom::graph::RenderGraph;
+using loom::graph::HierarOrderCfg;
 using shared::linegraph::NodeFront;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineEdge;

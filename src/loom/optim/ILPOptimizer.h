@@ -2,18 +2,18 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_OPTIM_ILPOPTIMIZER_H_
-#define TRANSITMAP_OPTIM_ILPOPTIMIZER_H_
+#ifndef LOOM_OPTIM_ILPOPTIMIZER_H_
+#define LOOM_OPTIM_ILPOPTIMIZER_H_
 
 #include "shared/linegraph/Line.h"
 #include "shared/optim/ILPSolver.h"
-#include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/OrderCfg.h"
-#include "transitmap/optim/OptGraph.h"
-#include "transitmap/optim/Optimizer.h"
-#include "transitmap/optim/Scorer.h"
+#include "loom/config/TransitMapConfig.h"
+#include "loom/graph/OrderCfg.h"
+#include "loom/optim/OptGraph.h"
+#include "loom/optim/Optimizer.h"
+#include "loom/optim/Scorer.h"
 
-namespace transitmapper {
+namespace loom {
 namespace optim {
 
 using namespace graph;
@@ -51,6 +51,6 @@ class ILPOptimizer : public Optimizer {
   int getSplittingPenalty(const OptNode* n) const;
 };
 }  // namespace optim
-}  // namespace transitmapper
+}  // namespace loom
 
-#endif  // TRANSITMAP_OPTIM_ILPOPTIMIZER_H_
+#endif  // LOOM_OPTIM_ILPOPTIMIZER_H_

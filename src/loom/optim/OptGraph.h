@@ -2,20 +2,20 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_GRAPH_OPTIM_OPTGRAPH_H_
-#define TRANSITMAP_GRAPH_OPTIM_OPTGRAPH_H_
+#ifndef LOOM_GRAPH_OPTIM_OPTGRAPH_H_
+#define LOOM_GRAPH_OPTIM_OPTGRAPH_H_
 
 #include <set>
 #include <string>
 
 #include "shared/linegraph/LineGraph.h"
-#include "transitmap/graph/RenderGraph.h"
-#include "transitmap/optim/Scorer.h"
+#include "loom/graph/RenderGraph.h"
+#include "loom/optim/Scorer.h"
 #include "util/Misc.h"
 #include "util/graph/UndirGraph.h"
 #include "util/json/Writer.h"
 
-namespace transitmapper {
+namespace loom {
 namespace optim {
 
 struct OptNodePL;
@@ -24,7 +24,7 @@ struct OptEdgePL;
 typedef util::graph::Node<OptNodePL, OptEdgePL> OptNode;
 typedef util::graph::Edge<OptNodePL, OptEdgePL> OptEdge;
 
-typedef std::map<const transitmapper::optim::OptEdge*,
+typedef std::map<const loom::optim::OptEdge*,
                  std::vector<const shared::linegraph::Line*>>
     OptOrderCfg;
 
@@ -285,4 +285,4 @@ inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
 }
 }
 
-#endif  // TRANSITMAP_GRAPH_OPTIM_OPTGRAPH_H_
+#endif  // LOOM_GRAPH_OPTIM_OPTGRAPH_H_

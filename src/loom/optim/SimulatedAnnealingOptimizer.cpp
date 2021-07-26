@@ -4,13 +4,13 @@
 
 #include <algorithm>
 #include <unordered_map>
-#include "transitmap/optim/SimulatedAnnealingOptimizer.h"
+#include "loom/optim/SimulatedAnnealingOptimizer.h"
 #include "util/log/Log.h"
 
-using namespace transitmapper;
+using namespace loom;
 using namespace optim;
-using namespace transitmapper::graph;
-using transitmapper::optim::SimulatedAnnealingOptimizer;
+using namespace loom::graph;
+using loom::optim::SimulatedAnnealingOptimizer;
 
 // _____________________________________________________________________________
 int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,

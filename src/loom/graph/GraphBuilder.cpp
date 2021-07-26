@@ -9,8 +9,8 @@
 #include "GraphBuilder.h"
 #include "json/json.hpp"
 #include "shared/linegraph/Line.h"
-#include "transitmap/config/TransitMapConfig.h"
-#include "transitmap/graph/RenderGraph.h"
+#include "loom/config/TransitMapConfig.h"
+#include "loom/graph/RenderGraph.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
 

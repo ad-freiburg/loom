@@ -2,18 +2,18 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef TRANSITMAP_GRAPH_GRAPHBUILDER_H_
-#define TRANSITMAP_GRAPH_GRAPHBUILDER_H_
+#ifndef LOOM_GRAPH_GRAPHBUILDER_H_
+#define LOOMP_GRAPH_GRAPHBUILDER_H_
 
 #include <algorithm>
 #include <set>
 #include <unordered_map>
 #include <vector>
-#include "transitmap/graph/RenderGraph.h"
-#include "transitmap/config/TransitMapConfig.h"
+#include "loom/graph/RenderGraph.h"
+#include "loom/config/TransitMapConfig.h"
 #include "util/geo/PolyLine.h"
 
-namespace transitmapper {
+namespace loom {
 namespace graph {
 
 using util::geo::SharedSegment;
@@ -52,6 +52,6 @@ class GraphBuilder {
 };
 
 }  // namespace graph
-}  // namespace transitmapper
+}  // namespace loom
 
-#endif  // TRANSITMAP_GRAPH_GRAPHBUILDER_H_
+#endif  // LOOM_GRAPH_GRAPHBUILDER_H_

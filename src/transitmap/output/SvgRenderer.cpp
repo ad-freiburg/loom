@@ -3,8 +3,10 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <stdint.h>
-#include <ostream>
+
 #include <fstream>
+#include <ostream>
+
 #include "shared/linegraph/Line.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/RenderGraph.h"
@@ -12,45 +14,46 @@
 #include "transitmap/output/SvgRenderer.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
+#include "util/log/Log.h"
 
 using namespace transitmapper;
+using label::Labeller;
+using output::InnerClique;
+using output::SvgRenderer;
 using shared::linegraph::Line;
 using shared::linegraph::LineNode;
 using util::geo::DPoint;
-using util::geo::PolyLine;
 using util::geo::DPolygon;
-using util::geo::Polygon;
 using util::geo::LinePoint;
 using util::geo::LinePointCmp;
-using output::SvgRenderer;
-using output::InnerClique;
-using label::Labeller;
-using label::LineLabel;
+using util::geo::Polygon;
+using util::geo::PolyLine;
 
 using util::toString;
 
 // _____________________________________________________________________________
-SvgRenderer::SvgRenderer(std::ostream* o, const config::Config* cfg,
-                         const optim::Scorer* scorer)
-    : _o(o), _w(o, true), _cfg(cfg), _scorer(scorer) {}
+SvgRenderer::SvgRenderer(std::ostream* o, const config::Config* cfg)
+    : _o(o), _w(o, true), _cfg(cfg) {}
 
 // _____________________________________________________________________________
 void SvgRenderer::print(const graph::RenderGraph& outG) {
   std::map<std::string, std::string> params;
   RenderParams rparams;
 
+  auto box = outG.getBBox();
+
   Labeller labeller(_cfg);
-  labeller.label(outG);
+  if (_cfg->renderLabels) {
+    LOG(DEBUG) << "Rendering labels...";
+    labeller.label(outG);
+    box = util::geo::extendBox(labeller.getBBox(), box);
+  }
 
   double p = _cfg->outputPadding;
-
-  auto box = outG.getBBox();
-  box = util::geo::extendBox(labeller.getBBox(), box);
 
   box = util::geo::pad(box, p);
 
   if (!_cfg->worldFilePath.empty()) {
-
     std::ofstream file;
     file.open(_cfg->worldFilePath);
     if (file) {
@@ -58,11 +61,8 @@ void SvgRenderer::print(const graph::RenderGraph& outG) {
            << 0 << std::endl
            << 0 << std::endl
            << -1 / _cfg->outputResolution << std::endl
-           << std::fixed
-           << box.getLowerLeft().getX()
-           << std::endl
-           << box.getUpperRight().getY()
-           << std::endl;
+           << std::fixed << box.getLowerLeft().getX() << std::endl
+           << box.getUpperRight().getY() << std::endl;
       file.close();
     }
   }
@@ -85,6 +85,7 @@ void SvgRenderer::print(const graph::RenderGraph& outG) {
   *_o << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
          "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">";
 
+  LOG(DEBUG) << "Rendering edges...";
   if (_cfg->renderEdges) {
     outputEdges(outG, rparams);
   }
@@ -92,6 +93,7 @@ void SvgRenderer::print(const graph::RenderGraph& outG) {
 
   _w.openTag("defs");
 
+  LOG(DEBUG) << "Rendering markers...";
   for (auto const& m : _markers) {
     params.clear();
     params["id"] = m.name;
@@ -100,15 +102,13 @@ void SvgRenderer::print(const graph::RenderGraph& outG) {
     params["markerHeight"] = "4";
     params["refY"] = "0.5";
     params["refX"] = "0";
-    // params["stroke"] = "white";
-    // params["stroke-width"] = util::toString((_cfg->lineSpacing / 8) * _cfg->outputResolution);
 
     _w.openTag("marker", params);
 
     params.clear();
     params["d"] = m.path;
     params["fill"] = m.color;
-;
+    ;
 
     _w.openTag("path", params);
 
@@ -118,19 +118,23 @@ void SvgRenderer::print(const graph::RenderGraph& outG) {
 
   _w.closeTag();
 
+  LOG(DEBUG) << "Rendering nodes...";
   for (auto n : outG.getNds()) {
     if (_cfg->renderNodeConnections) {
       renderNodeConnections(outG, n, rparams);
     }
   }
 
+  LOG(DEBUG) << "Writing edges...";
   renderDelegates(outG, rparams);
 
+  LOG(DEBUG) << "Writing nodes...";
   outputNodes(outG, rparams);
   if (_cfg->renderNodeFronts) {
     renderNodeFronts(outG, rparams);
   }
 
+  LOG(DEBUG) << "Writing labels...";
   if (_cfg->renderLabels) {
     renderLineLabels(labeller, rparams);
     renderStationLabels(labeller, rparams);
@@ -153,9 +157,9 @@ void SvgRenderer::outputNodes(const graph::RenderGraph& outG,
           util::toString((_cfg->lineWidth / 2) * _cfg->outputResolution);
       params["fill"] = "white";
 
-      for (const auto& geom : outG.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                              _cfg->simpleRenderForTwoEdgeNodes)) {
-
+      for (const auto& geom :
+           outG.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
+                             _cfg->simpleRenderForTwoEdgeNodes)) {
         printPolygon(geom, params, rparams);
       }
     }
@@ -500,15 +504,14 @@ void SvgRenderer::renderEdgeTripGeom(const graph::RenderGraph& outG,
       markerName << e << ":" << line << ":" << i;
 
       std::string markerPathMale = getMarkerPathMale(lineW);
-      EndMarker emm(markerName.str() + "_m", "white",
-                    markerPathMale, lineW, lineW);
+      EndMarker emm(markerName.str() + "_m", "white", markerPathMale, lineW,
+                    lineW);
 
       _markers.push_back(emm);
 
-      PolyLine<double> firstPart =
-          p.getSegmentAtDist(0, p.getLength() / 2);
-      PolyLine<double> secondPart = p.getSegmentAtDist(
-          p.getLength() / 2, p.getLength());
+      PolyLine<double> firstPart = p.getSegmentAtDist(0, p.getLength() / 2);
+      PolyLine<double> secondPart =
+          p.getSegmentAtDist(p.getLength() / 2, p.getLength());
 
       if (lo.direction == e->getTo()) {
         renderLinePart(firstPart, lineW, *line, e, markerName.str() + "_m");
@@ -557,11 +560,6 @@ void SvgRenderer::renderDelegates(const graph::RenderGraph& outG,
         if (_cfg->outlineWidth > 0) {
           printLine(pd.back.second, pd.back.first, rparams);
         }
-        // printLine(
-        //    pd.back.second.getSegmentAtDist(
-        //        rparams.width * _cfg->outputResolution,
-        //        pd.back.second.getLength() - rparams.width),
-        //    pd.back.first, rparams);
       }
       for (auto& pd : b.second) {
         printLine(pd.front.second, pd.front.first, rparams);
@@ -577,8 +575,8 @@ void SvgRenderer::printPoint(const DPoint& p, const std::string& style,
   std::map<std::string, std::string> params;
   params["cx"] =
       std::to_string((p.getX() - rparams.xOff) * _cfg->outputResolution);
-  params["cy"] = std::to_string(
-      rparams.height - (p.getY() - rparams.yOff) * _cfg->outputResolution);
+  params["cy"] = std::to_string(rparams.height - (p.getY() - rparams.yOff) *
+                                                     _cfg->outputResolution);
   params["r"] = "2";
   params["style"] = style;
   _w.openTag("circle", params);
@@ -680,84 +678,83 @@ size_t InnerClique::getNumBranchesIn(
 
 // _____________________________________________________________________________
 void SvgRenderer::renderStationLabels(const Labeller& labeller,
-                                   const RenderParams& rparams) {
+                                      const RenderParams& rparams) {
   _w.openTag("g");
   size_t id = 0;
   for (auto label : labeller.getStationLabels()) {
-      std::string shift = "0em";
-      std::string textAnchor = "start";
-      std::string startOffset = "0";
-      auto textPath = label.geom;
-      double ang = util::geo::angBetween(textPath.front(), textPath.back());
+    std::string shift = "0em";
+    std::string textAnchor = "start";
+    std::string startOffset = "0";
+    auto textPath = label.geom;
+    double ang = util::geo::angBetween(textPath.front(), textPath.back());
 
-      if ((fabs(ang) < (3 * M_PI / 2)) && (fabs(ang) > (M_PI / 2))) {
-        shift = ".75em";
-        textAnchor = "end";
-        startOffset = "100%";
-        textPath.reverse();
-      }
+    if ((fabs(ang) < (3 * M_PI / 2)) && (fabs(ang) > (M_PI / 2))) {
+      shift = ".75em";
+      textAnchor = "end";
+      startOffset = "100%";
+      textPath.reverse();
+    }
 
-      std::stringstream points;
-      std::map<std::string, std::string> pathPars;
+    std::stringstream points;
+    std::map<std::string, std::string> pathPars;
 
-      points << "M"
-             << (textPath.front().getX() - rparams.xOff) *
-                    _cfg->outputResolution
+    points << "M"
+           << (textPath.front().getX() - rparams.xOff) * _cfg->outputResolution
+           << " "
+           << rparams.height - (textPath.front().getY() - rparams.yOff) *
+                                   _cfg->outputResolution;
+
+    for (auto& p : textPath.getLine()) {
+      points << " L" << (p.getX() - rparams.xOff) * _cfg->outputResolution
              << " "
              << rparams.height -
-                    (textPath.front().getY() - rparams.yOff) *
-                        _cfg->outputResolution;
-
-      for (auto& p : textPath.getLine()) {
-        points << " L" << (p.getX() - rparams.xOff) * _cfg->outputResolution
-               << " "
-               << rparams.height -
-                      (p.getY() - rparams.yOff) * _cfg->outputResolution;
-      }
-
-      // std::stringstream style;
-      // style << "fill:none;stroke:black"
-            // << ";stroke-linejoin: "
-               // "miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1";
-      // std::map<std::string, std::string> ps;
-      // ps["style"] = style.str();
-
-      // for (auto path : label.band) printLine(path, ps, rparams);
-
-      std::string idStr = "stlblp" + util::toString(id);
-
-      pathPars["d"] = points.str();
-      pathPars["id"] = idStr;
-      id++;
-
-      _w.openTag("defs");
-      _w.openTag("path", pathPars);
-      _w.closeTag();
-      _w.closeTag();
-
-      std::map<std::string, std::string> params;
-      // params["stroke"] = "black";
-      // params["stroke-width"] =
-      // util::toString((_cfg->lineWidth / 20) * _cfg->outputResolution);
-      // params["stroke-linejoin"] = "miter";
-      // params["stroke-linecap"] = "butt";
-      params["font-weight"] = label.bold ? "bold" : "normal";
-      params["font-family"] = "Ubuntu Condensed";
-      params["dy"] = shift;
-      params["font-size"] = util::toString(label.fontSize * _cfg->outputResolution);
-      // params["textLength"] = "100";
-      // params["lengthAdjust"] = "spacingAndGlyphs";
-
-      _w.openTag("text", params);
-      _w.openTag("textPath", {{"dy", shift},
-                              {"xlink:href", "#" + idStr},
-                              {"startOffset", startOffset},
-                              {"text-anchor", textAnchor}});
-
-      _w.writeText(label.s.name);
-      _w.closeTag();
-      _w.closeTag();
+                    (p.getY() - rparams.yOff) * _cfg->outputResolution;
     }
+
+    // std::stringstream style;
+    // style << "fill:none;stroke:black"
+    // << ";stroke-linejoin: "
+    // "miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1";
+    // std::map<std::string, std::string> ps;
+    // ps["style"] = style.str();
+
+    // for (auto path : label.band) printLine(path, ps, rparams);
+
+    std::string idStr = "stlblp" + util::toString(id);
+
+    pathPars["d"] = points.str();
+    pathPars["id"] = idStr;
+    id++;
+
+    _w.openTag("defs");
+    _w.openTag("path", pathPars);
+    _w.closeTag();
+    _w.closeTag();
+
+    std::map<std::string, std::string> params;
+    // params["stroke"] = "black";
+    // params["stroke-width"] =
+    // util::toString((_cfg->lineWidth / 20) * _cfg->outputResolution);
+    // params["stroke-linejoin"] = "miter";
+    // params["stroke-linecap"] = "butt";
+    params["font-weight"] = label.bold ? "bold" : "normal";
+    params["font-family"] = "Ubuntu Condensed";
+    params["dy"] = shift;
+    params["font-size"] =
+        util::toString(label.fontSize * _cfg->outputResolution);
+    // params["textLength"] = "100";
+    // params["lengthAdjust"] = "spacingAndGlyphs";
+
+    _w.openTag("text", params);
+    _w.openTag("textPath", {{"dy", shift},
+                            {"xlink:href", "#" + idStr},
+                            {"startOffset", startOffset},
+                            {"text-anchor", textAnchor}});
+
+    _w.writeText(label.s.name);
+    _w.closeTag();
+    _w.closeTag();
+  }
   _w.closeTag();
 }
 
@@ -767,74 +764,73 @@ void SvgRenderer::renderLineLabels(const Labeller& labeller,
   _w.openTag("g");
   size_t id = 0;
   for (auto label : labeller.getLineLabels()) {
-      std::string shift = "0em";
-      auto textPath = label.geom;
-      double ang = util::geo::angBetween(textPath.front(), textPath.back());
+    std::string shift = "0em";
+    auto textPath = label.geom;
+    double ang = util::geo::angBetween(textPath.front(), textPath.back());
 
-      if ((fabs(ang) < (3 * M_PI / 2)) && (fabs(ang) > (M_PI / 2))) {
-        shift = ".75em";
-        textPath.reverse();
-      }
+    if ((fabs(ang) < (3 * M_PI / 2)) && (fabs(ang) > (M_PI / 2))) {
+      shift = ".75em";
+      textPath.reverse();
+    }
 
-      std::stringstream points;
-      std::map<std::string, std::string> pathPars;
+    std::stringstream points;
+    std::map<std::string, std::string> pathPars;
 
-      points << "M"
-             << (textPath.front().getX() - rparams.xOff) *
-                    _cfg->outputResolution
+    points << "M"
+           << (textPath.front().getX() - rparams.xOff) * _cfg->outputResolution
+           << " "
+           << rparams.height - (textPath.front().getY() - rparams.yOff) *
+                                   _cfg->outputResolution;
+
+    for (auto& p : textPath.getLine()) {
+      points << " L" << (p.getX() - rparams.xOff) * _cfg->outputResolution
              << " "
              << rparams.height -
-                    (textPath.front().getY() - rparams.yOff) *
-                        _cfg->outputResolution;
+                    (p.getY() - rparams.yOff) * _cfg->outputResolution;
+    }
 
-      for (auto& p : textPath.getLine()) {
-        points << " L" << (p.getX() - rparams.xOff) * _cfg->outputResolution
-               << " "
-               << rparams.height -
-                      (p.getY() - rparams.yOff) * _cfg->outputResolution;
-      }
+    std::string idStr = "textp" + util::toString(id);
 
-      std::string idStr = "textp" + util::toString(id);
+    pathPars["d"] = points.str();
+    pathPars["id"] = idStr;
+    id++;
 
-      pathPars["d"] = points.str();
-      pathPars["id"] = idStr;
-      id++;
+    _w.openTag("defs");
+    _w.openTag("path", pathPars);
+    _w.closeTag();
+    _w.closeTag();
 
-      _w.openTag("defs");
-      _w.openTag("path", pathPars);
-      _w.closeTag();
-      _w.closeTag();
+    std::map<std::string, std::string> params;
+    // params["stroke"] = "black";
+    // params["stroke-width"] =
+    // util::toString((_cfg->lineWidth / 20) * _cfg->outputResolution);
+    // params["stroke-linejoin"] = "miter";
+    // params["stroke-linecap"] = "butt";
+    params["font-weight"] = "bold";
+    params["font-family"] = "Ubuntu";
+    params["dy"] = shift;
+    params["font-size"] =
+        util::toString(label.fontSize * _cfg->outputResolution);
+    // params["textLength"] = "100";
+    // params["lengthAdjust"] = "spacingAndGlyphs";
 
-      std::map<std::string, std::string> params;
-      // params["stroke"] = "black";
-      // params["stroke-width"] =
-      // util::toString((_cfg->lineWidth / 20) * _cfg->outputResolution);
-      // params["stroke-linejoin"] = "miter";
-      // params["stroke-linecap"] = "butt";
-      params["font-weight"] = "bold";
-      params["font-family"] = "Ubuntu";
-      params["dy"] = shift;
-      params["font-size"] = util::toString(label.fontSize * _cfg->outputResolution);
-      // params["textLength"] = "100";
-      // params["lengthAdjust"] = "spacingAndGlyphs";
+    _w.openTag("text", params);
+    _w.openTag("textPath", {{"dy", shift},
+                            {"xlink:href", "#" + idStr},
+                            {"text-anchor", "middle"},
+                            {"startOffset", "50%"}});
 
-      _w.openTag("text", params);
-      _w.openTag("textPath", {{"dy", shift},
-                              {"xlink:href", "#" + idStr},
-                              {"text-anchor", "middle"},
-                              {"startOffset", "50%"}});
-
-      double dy = 0;
-      for (auto line : label.lines) {
-        _w.openTag("tspan", {{"fill", "#" + line->color()},
-                             {"dx", util::toString(dy)}});
-        dy = (label.fontSize * _cfg->outputResolution)/ 3;
-        _w.writeText(line->label());
-        _w.closeTag();
-      }
-      _w.closeTag();
+    double dy = 0;
+    for (auto line : label.lines) {
+      _w.openTag("tspan",
+                 {{"fill", "#" + line->color()}, {"dx", util::toString(dy)}});
+      dy = (label.fontSize * _cfg->outputResolution) / 3;
+      _w.writeText(line->label());
       _w.closeTag();
     }
+    _w.closeTag();
+    _w.closeTag();
+  }
   _w.closeTag();
 }
 

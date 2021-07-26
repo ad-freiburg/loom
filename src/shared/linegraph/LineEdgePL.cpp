@@ -10,16 +10,17 @@
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
 
-using util::geo::PolyLine;
-using shared::linegraph::LineNode;
 using shared::linegraph::LineEdgePL;
+using shared::linegraph::LineNode;
 using shared::linegraph::LineOcc;
+using util::geo::PolyLine;
 
 // _____________________________________________________________________________
 LineEdgePL::LineEdgePL() : _dontContract(false) {}
 
 // _____________________________________________________________________________
-LineEdgePL::LineEdgePL(const PolyLine<double>& p) : _p(p), _dontContract(false) {}
+LineEdgePL::LineEdgePL(const PolyLine<double>& p)
+    : _dontContract(false), _p(p) {}
 
 // _____________________________________________________________________________
 const util::geo::Line<double>* LineEdgePL::getGeom() const {
@@ -37,11 +38,11 @@ void LineEdgePL::setPolyline(const PolyLine<double>& p) { _p = p; }
 
 // _____________________________________________________________________________
 void LineEdgePL::addLine(const Line* r, const LineNode* dir,
-                          util::Nullable<shared::style::LineStyle> ls) {
-  LineOcc occ(r, dir, ls);
-  auto f = _lines.find(occ);
-  if (f != _lines.end()) {
-    const auto& prev = *f;
+                         util::Nullable<shared::style::LineStyle> ls) {
+  auto f = _lineToIdx.find(r);
+  if (f != _lineToIdx.end()) {
+    size_t prevIdx = f->second;
+    const auto& prev = _lines[prevIdx];
     // the route is already present in both directions, ignore newly inserted
     if (prev.direction == 0) return;
 
@@ -50,11 +51,12 @@ void LineEdgePL::addLine(const Line* r, const LineNode* dir,
 
     // the route is already present in the other direction, make two-way
     if (prev.direction != dir) {
-      occ.direction = 0;
-      _lines.erase(f);
+      _lines[prevIdx].direction = 0;
     }
   }
-  _lines.insert(occ);
+  _lineToIdx[r] = _lines.size();
+  LineOcc occ(r, dir, ls);
+  _lines.push_back(occ);
 }
 
 // _____________________________________________________________________________
@@ -64,23 +66,23 @@ void LineEdgePL::addLine(const Line* r, const LineNode* dir) {
 
 // _____________________________________________________________________________
 void LineEdgePL::delLine(const Line* r) {
-  LineOcc occ(r, 0);
-  _lines.erase(occ);
+  _lineToIdx[_lines.back().line] = _lineToIdx.find(r)->second;
+  _lines[_lineToIdx.find(r)->second] = _lines.back();
+  _lines.resize(_lines.size() - 1);
+  _lineToIdx.erase(r);
 }
 
 // _____________________________________________________________________________
-const std::set<LineOcc>& LineEdgePL::getLines() const { return _lines; }
+const std::vector<LineOcc>& LineEdgePL::getLines() const { return _lines; }
 
 // _____________________________________________________________________________
-std::set<LineOcc>& LineEdgePL::getLines() { return _lines; }
+std::vector<LineOcc>& LineEdgePL::getLines() { return _lines; }
 
 // _____________________________________________________________________________
 util::json::Dict LineEdgePL::getAttrs() const {
   util::json::Dict obj;
   auto arr = util::json::Array();
-
   std::string dbg_lines = "";
-  bool first = true;
 
   for (auto r : getLines()) {
     auto route = util::json::Dict();
@@ -90,13 +92,12 @@ util::json::Dict LineEdgePL::getAttrs() const {
 
     if (r.direction != 0) {
       route["direction"] = util::toString(r.direction);
-      dbg_lines += (first ? "" : "$") + r.line->label() + ">";
+      dbg_lines += (!arr.size() ? "" : "$") + r.line->label() + ">";
     } else {
-      dbg_lines += (first ? "" : "$") + r.line->label();
+      dbg_lines += (!arr.size() ? "" : "$") + r.line->label();
     }
 
     arr.push_back(route);
-    first = false;
   }
 
   obj["lines"] = arr;
@@ -106,45 +107,32 @@ util::json::Dict LineEdgePL::getAttrs() const {
 }
 
 // _____________________________________________________________________________
-bool LineEdgePL::hasLine(const Line* r) const {
-  return _lines.count(LineOcc(r, 0)) > 0;
+bool LineEdgePL::hasLine(const Line* l) const { return _lineToIdx.count(l); }
+
+// _____________________________________________________________________________
+const LineOcc& LineEdgePL::lineOcc(const Line* l) const {
+  return _lines[_lineToIdx.find(l)->second];
 }
 
 // _____________________________________________________________________________
-const LineOcc& LineEdgePL::lineOcc(const Line* r) const {
-  return *_lines.find(LineOcc(r, 0));
+const LineOcc& LineEdgePL::lineOccAtPos(size_t i) const { return _lines[i]; }
+
+// _____________________________________________________________________________
+void LineEdgePL::updateLineOcc(const LineOcc& occ) {
+  _lines[_lineToIdx.find(occ.line)->second] = occ;
 }
 
 // _____________________________________________________________________________
-const LineOcc& LineEdgePL::lineOccAtPos(size_t i) const {
-  auto it = _lines.begin();
-  for (size_t j = 0; j < i; j++) it++;
-  return *it;
-}
-
-// _____________________________________________________________________________
-size_t LineEdgePL::linePosUnder(const Line* r,
-                                const std::vector<size_t> ordering) const {
-  size_t i = 0;
-  for (const LineOcc& lo : _lines) {
-    if (lo.line == r) {
-      assert(std::find(ordering.begin(), ordering.end(), i) != ordering.end());
-      size_t pos =
-          std::find(ordering.begin(), ordering.end(), i) - ordering.begin();
-      return pos;
-    }
-    i++;
-  }
-  assert(false);
-  return -1;
+size_t LineEdgePL::linePosUnder(const Line* l,
+                                const std::vector<size_t> order) const {
+  size_t i = _lineToIdx.find(l)->second;
+  size_t pos = std::find(order.begin(), order.end(), i) - order.begin();
+  return pos;
 }
 
 // _____________________________________________________________________________
 size_t LineEdgePL::linePos(const Line* r) const {
-  size_t i = 0;
-  for (const LineOcc& ro : _lines) {
-    if (ro.line == r) return i;
-    i++;
-  }
-  return -1;
+  auto it = _lineToIdx.find(r);
+  if (it == _lineToIdx.end()) return -1;
+  return it->second;
 }
