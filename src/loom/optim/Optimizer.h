@@ -23,7 +23,7 @@ class Optimizer {
   Optimizer(const config::Config* cfg, const Scorer* scorer)
       : _cfg(cfg), _scorer(scorer){};
 
-  virtual int optimize(shared::rendergraph::RenderGraph* tg) const;
+  virtual int optimize(shared::rendergraph::RenderGraph* rg) const;
   int optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
                    shared::rendergraph::HierarOrderCfg* c) const;
   virtual int optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
@@ -33,11 +33,11 @@ class Optimizer {
   static std::vector<LinePair> getLinePairs(OptEdge* segment);
   static std::vector<LinePair> getLinePairs(OptEdge* segment, bool unique);
 
-  static bool crosses(OptGraph* g, OptNode* node, OptEdge* segmentA,
-                      OptEdge* segmentB, PosComPair postcomb);
+  static bool crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
+                      PosComPair postcomb);
 
-  static bool crosses(OptGraph* g, OptNode* node, OptEdge* segmentA,
-                      EdgePair segments, PosCom postcomb);
+  static bool crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
+                      PosCom postcomb);
   static util::geo::DPoint getPos(OptGraph* g, OptNode* n, OptEdge* segment,
                                   size_t p);
 

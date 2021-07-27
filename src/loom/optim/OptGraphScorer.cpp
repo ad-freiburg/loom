@@ -134,7 +134,7 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
 
         PosComPair poses(posA, posB);
 
-        if (Optimizer::crosses(og, n, ea, eb, poses)) sameSegCrossings++;
+        if (Optimizer::crosses(n, ea, eb, poses)) sameSegCrossings++;
       }
 
       for (auto ebc : Optimizer::getEdgePartnerPairs(n, ea, lp)) {
@@ -145,7 +145,7 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
                                   std::find(c.at(ea).begin(), c.at(ea).end(),
                                             lp.second.line)));
 
-        if (Optimizer::crosses(og, n, ea, ebc, posA)) diffSegCrossings++;
+        if (Optimizer::crosses(n, ea, ebc, posA)) diffSegCrossings++;
       }
     }
   }

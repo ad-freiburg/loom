@@ -123,7 +123,7 @@ ILPSolver* ILPEdgeOrderOptimizer::createProblem(
   lp->update();
 
   writeCrossingOracle(g, lp);
-  writeDiffSegConstraintsImpr(og, g, lp);
+  writeDiffSegConstraintsImpr(g, lp);
 
   return lp;
 }
@@ -505,7 +505,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(
-    OptGraph* og, const std::set<OptNode*>& g, ILPSolver* lp) const {
+    const std::set<OptNode*>& g, ILPSolver* lp) const {
   // go into nodes and build crossing constraints for adjacent
   for (OptNode* node : g) {
     std::set<OptEdge*> processed;
@@ -533,7 +533,7 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(
                   (linepair.second.relatives.size()));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
-            if (crosses(og, node, segmentA, segments, poscomb)) {
+            if (crosses(node, segmentA, segments, poscomb)) {
               int testVar = 0;
 
               if (poscomb.first > poscomb.second) {

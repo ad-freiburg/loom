@@ -204,7 +204,7 @@ void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
 
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
-            if (crosses(og, node, segmentA, segmentB, poscomb)) {
+            if (crosses(node, segmentA, segmentB, poscomb)) {
               int lineAinAatP = lp->getVarByName(getILPVarName(
                   segmentA, linepair.first.line, poscomb.first.first));
               int lineBinAatP = lp->getVarByName(getILPVarName(
@@ -273,7 +273,7 @@ void ILPOptimizer::writeDiffSegConstraints(OptGraph* og,
                   (linepair.second.relatives.size()));
 
           for (PosCom poscomb : getPositionCombinations(segmentA)) {
-            if (crosses(og, node, segmentA, segments, poscomb)) {
+            if (crosses(node, segmentA, segments, poscomb)) {
               int lineAinAatP = lp->getVarByName(
                   getILPVarName(segmentA, linepair.first.line, poscomb.first));
               int lineBinAatP = lp->getVarByName(getILPVarName(

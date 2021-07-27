@@ -35,7 +35,7 @@ class ILPEdgeOrderOptimizer : public ILPOptimizer {
   void writeCrossingOracle(const std::set<OptNode*>& g,
                            shared::optim::ILPSolver* lp) const;
 
-  void writeDiffSegConstraintsImpr(OptGraph* og, const std::set<OptNode*>& g,
+  void writeDiffSegConstraintsImpr(const std::set<OptNode*>& g,
                                    shared::optim::ILPSolver* lp) const;
 };
 }  // namespace optim
