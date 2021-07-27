@@ -8,7 +8,7 @@
 #include <vector>
 #include "GraphBuilder.h"
 #include "json/json.hpp"
-#include "loom/config/TransitMapConfig.h"
+#include "loom/config/LoomConfig.h"
 #include "shared/rendergraph/RenderGraph.h"
 #include "shared/linegraph/Line.h"
 #include "util/geo/PolyLine.h"
@@ -57,20 +57,4 @@ void GraphBuilder::writeMainDirs(RenderGraph* graph) {
       n->pl().addMainDir(f);
     }
   }
-}
-
-
-// _____________________________________________________________________________
-void GraphBuilder::writeInitialConfig(RenderGraph* g) {
-  OrderCfg c;
-  for (auto n : *g->getNds()) {
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-      Ordering order(e->pl().getLines().size());
-      for (size_t i = 0; i < e->pl().getLines().size(); i++) order[i] = i;
-      c[e] = order;
-    }
-  }
-
-  g->setConfig(c);
 }

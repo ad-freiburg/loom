@@ -17,7 +17,7 @@ using shared::rendergraph::HierarOrderCfg;
 // _____________________________________________________________________________
 int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                       HierarOrderCfg* hc, size_t depth) const {
-  LOG(DEBUG) << prefix(depth)
+  LOGTO(DEBUG,std::cerr) << prefix(depth)
              << "(ExhaustiveOptimizer) Optimizing component with " << g.size()
              << " nodes.";
 
@@ -47,7 +47,7 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
   while (true) {
     if (bestScore == 0) {
-      LOG(DEBUG) << prefix(depth) << "Found optimal score 0 prematurely after "
+      LOGTO(DEBUG,std::cerr) << prefix(depth) << "Found optimal score 0 prematurely after "
                  << iters << " iterations!";
       writeHierarch(&best, hc);
       return 0;
@@ -56,7 +56,7 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
     iters++;
 
     if (iters - last == 10000) {
-      LOG(DEBUG) << prefix(depth) << "@ " << iters;
+      LOGTO(DEBUG,std::cerr) << prefix(depth) << "@ " << iters;
       last = iters;
     }
 
@@ -83,7 +83,7 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
     }
   }
 
-  LOG(DEBUG) << prefix(depth) << "Found optimal score " << bestScore
+  LOGTO(DEBUG,std::cerr) << prefix(depth) << "Found optimal score " << bestScore
              << " after " << iters << " iterations!";
 
   writeHierarch(&best, hc);

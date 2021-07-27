@@ -23,22 +23,23 @@ namespace rendergraph {
 
 class RenderGraph : public shared::linegraph::LineGraph {
  public:
-  RenderGraph()
-      : _defWidth(5), _defSpacing(5){};
+  RenderGraph() : _defWidth(5), _defSpacing(5){};
   RenderGraph(double defLineWidth, double defLineSpace)
       : _defWidth(defLineWidth), _defSpacing(defLineSpace){};
 
   virtual void readFromJson(std::istream* s, double smooth);
   virtual void readFromDot(std::istream* s, double smooth);
 
-  const OrderCfg& getConfig() const;
-  void setConfig(const OrderCfg&);
+  void writePermutation(const OrderCfg&);
 
   size_t numEdgs() const;
 
   std::vector<shared::linegraph::InnerGeom> innerGeoms(
       const shared::linegraph::LineNode* n, const OrderCfg& c,
       double prec) const;
+
+  std::vector<shared::linegraph::InnerGeom> innerGeoms(
+      const shared::linegraph::LineNode* n, double prec) const;
 
   std::vector<util::geo::Polygon<double>> getStopGeoms(
       const shared::linegraph::LineNode* n, double d, bool simple) const;
@@ -59,6 +60,10 @@ class RenderGraph : public shared::linegraph::LineGraph {
                               const OrderCfg& c, bool origGeom) const;
 
   util::geo::DPoint linePosOn(const shared::linegraph::NodeFront& nf,
+                              const shared::linegraph::Line* r,
+                              bool origGeom) const;
+
+  util::geo::DPoint linePosOn(const shared::linegraph::NodeFront& nf,
                               const shared::linegraph::LineEdge* e, size_t pos,
                               bool inv, bool origG) const;
 
@@ -74,10 +79,6 @@ class RenderGraph : public shared::linegraph::LineGraph {
 
  private:
   double _defWidth, _defSpacing;
-
-  OrderCfg _config;
-
-  void writeInitOrder();
 
   shared::linegraph::InnerGeom getInnerBezier(
       const shared::linegraph::LineNode* n, const OrderCfg& cf,
@@ -111,6 +112,6 @@ class RenderGraph : public shared::linegraph::LineGraph {
       const shared::linegraph::LineNode* n) const;
 };
 }  // namespace rendergraph
-}  // namespaceshared
+}  // namespace shared
 
 #endif  // SHARED_RENDERGRAPH_RENDERGRAPH_H_

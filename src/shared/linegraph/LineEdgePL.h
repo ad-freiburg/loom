@@ -71,6 +71,8 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   const PolyLine<double>& getPolyline() const;
   void setPolyline(const PolyLine<double>& p);
 
+  void writePermutation(const std::vector<size_t> order);
+
   void setDontContract(bool dontContract) { _dontContract = dontContract; }
   bool dontContract() { return _dontContract; }
 

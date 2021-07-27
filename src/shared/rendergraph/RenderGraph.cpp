@@ -40,34 +40,21 @@ using util::geo::PolyLine;
 // _____________________________________________________________________________
 void RenderGraph::readFromDot(std::istream* s, double smooth) {
   LineGraph::readFromDot(s, smooth);
-  writeInitOrder();
 }
 
 // _____________________________________________________________________________
 void RenderGraph::readFromJson(std::istream* s, double smooth) {
   LineGraph::readFromJson(s, smooth);
-  writeInitOrder();
 }
 
 // _____________________________________________________________________________
-void RenderGraph::writeInitOrder() {
-  OrderCfg cfg;
-  for (auto nd : *getNds()) {
-    for (auto e : nd->getAdjList()) {
-      if (e->getFrom() != nd) continue;
-      cfg[e] = Ordering(e->pl().getLines().size());
-      std::iota(std::begin(cfg[e]), std::end(cfg[e]), 0);
+void RenderGraph::writePermutation(const OrderCfg& c) {
+  for (auto n : *getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      e->pl().writePermutation(c.find(e)->second);
     }
   }
-  setConfig(cfg);
-}
-
-// _____________________________________________________________________________
-const OrderCfg& RenderGraph::getConfig() const { return _config; }
-
-// _____________________________________________________________________________
-void RenderGraph::setConfig(const OrderCfg& c) {
-  _config = c;
 }
 
 // _____________________________________________________________________________
@@ -75,8 +62,7 @@ size_t RenderGraph::numEdgs() const { return 0; }
 
 // _____________________________________________________________________________
 bool RenderGraph::isTerminus(const LineNode* n) {
-
-  if (n->getDeg() ==1 ) return true;
+  if (n->getDeg() == 1) return true;
   for (size_t i = 0; i < n->pl().fronts().size(); ++i) {
     const shared::linegraph::NodeFront& nf = n->pl().fronts()[i];
 
@@ -91,8 +77,26 @@ bool RenderGraph::isTerminus(const LineNode* n) {
 
 // _____________________________________________________________________________
 std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
+                                               double prec) const {
+  OrderCfg c;
+  for (auto n : getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      std::vector<size_t> o(e->pl().getLines().size());
+      std::iota(o.begin(), o.end(), 0);
+      c[e] = o;
+    }
+  }
+
+  return innerGeoms(n, c, prec);
+}
+
+// _____________________________________________________________________________
+std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
                                                const OrderCfg& c,
                                                double prec) const {
+  // TODO: this is only needed for the scorer working on geoms,
+  // replace this as soon as the scorer uses circular edge orderings
   std::vector<InnerGeom> ret;
   std::map<const Line*, std::set<const shared::linegraph::NodeFront*>>
       processed;
@@ -100,11 +104,6 @@ std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
   for (size_t i = 0; i < n->pl().fronts().size(); ++i) {
     const shared::linegraph::NodeFront& nf = n->pl().fronts()[i];
 
-    if (!c.count(nf.edge)) {
-      // TODO: throw exception here!
-      std::cout << "No ordering for edge " << nf.edge << " found!" << std::endl;
-      assert(false);
-    }
     const std::vector<size_t>* ordering = &c.find(nf.edge)->second;
 
     for (size_t j : *ordering) {
@@ -425,7 +424,6 @@ Polygon<double> RenderGraph::getConvexFrontHull(
 std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
     const std::set<const shared::linegraph::Line*>& served,
     const shared::linegraph::LineNode* n, double d) const {
-
   typedef bgeo::model::point<double, 2, bgeo::cs::cartesian> BoostPoint;
   typedef bgeo::model::linestring<BoostPoint> BoostLine;
   typedef bgeo::model::polygon<BoostPoint> BoostPoly;
@@ -453,7 +451,7 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
     BoostLine lineBgeo;
 
     for (size_t p = 0; p < e->pl().getLines().size(); p++) {
-      auto lineAtPos = e->pl().lineOccAtPos(_config.find(e)->second[p]).line;
+      auto lineAtPos = e->pl().lineOccAtPos(p).line;
       if (proced.count(lineAtPos)) continue;
       if (!served.count(lineAtPos)) {
         if (lineBgeo.size()) {
@@ -471,15 +469,15 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
       }
       proced.insert(lineAtPos);
 
-      auto pos = linePosOn(*n->pl().frontFor(e), lineAtPos, _config, false);
+      auto pos = linePosOn(*n->pl().frontFor(e), lineAtPos, false);
 
       lineBgeo.push_back({pos.getX(), pos.getY()});
     }
 
     // last entry
     if (lineBgeo.size()) {
-      bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat,
-                   endStrat, circleStrat);
+      bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat, endStrat,
+                   circleStrat);
 
       Polygon<double> retPoly;
       for (const auto& p : ret[0].outer()) {
@@ -589,6 +587,13 @@ DPoint RenderGraph::linePosOn(const NodeFront& nf, const Line* r,
   assert(c.find(nf.edge) != c.end());
 
   size_t p = nf.edge->pl().linePosUnder(r, c.find(nf.edge)->second);
+  return linePosOn(nf, nf.edge, p, nf.n == nf.edge->getTo(), origGeom);
+}
+
+// _____________________________________________________________________________
+DPoint RenderGraph::linePosOn(const NodeFront& nf, const Line* r,
+                               bool origGeom) const {
+  size_t p = nf.edge->pl().linePos(r);
   return linePosOn(nf, nf.edge, p, nf.n == nf.edge->getTo(), origGeom);
 }
 

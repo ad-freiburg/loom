@@ -35,7 +35,7 @@ int Optimizer::optimize(RenderGraph* tg) const {
 
   size_t maxC = maxCard(*g.getNds());
   double solSp = solutionSpaceSize(*g.getNds());
-  LOG(DEBUG) << "Optimizing line graph of size " << tg->getNds()->size()
+  LOGTO(DEBUG,std::cerr) << "Optimizing line graph of size " << tg->getNds()->size()
              << " with max cardinality = " << maxC
              << " and solution space size = " << solSp;
 
@@ -43,24 +43,24 @@ int Optimizer::optimize(RenderGraph* tg) const {
 
   if (_cfg->untangleGraph) {
     // do full untangling
-    LOG(DEBUG) << "Untangling graph...";
+    LOGTO(DEBUG,std::cerr) << "Untangling graph...";
     T_START(1);
     for (size_t i = 0; i < 2 * maxC; i++) {
       g.untangle();
       g.simplify();
       g.split();
     }
-    LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
+    LOGTO(DEBUG,std::cerr) << "Done (" << T_STOP(1) << " ms)";
   } else if (_cfg->createCoreOptimGraph) {
     // only apply core graph rules
     T_START(1);
-    LOG(DEBUG) << "Creating core optimization graph...";
+    LOGTO(DEBUG,std::cerr) << "Creating core optimization graph...";
     g.simplify();
-    LOG(DEBUG) << "Done (" << T_STOP(1) << " ms)";
+    LOGTO(DEBUG,std::cerr) << "Done (" << T_STOP(1) << " ms)";
   }
 
   if (_cfg->outOptGraph) {
-    LOG(INFO) << "Outputting optimization graph to " << _cfg->dbgPath
+    LOGTO(INFO,std::cerr) << "Outputting optimization graph to " << _cfg->dbgPath
               << "/optgraph.json";
     util::geo::output::GeoGraphJsonOutput out;
     std::ofstream fstr(_cfg->dbgPath + "/optgraph.json");
@@ -68,13 +68,13 @@ int Optimizer::optimize(RenderGraph* tg) const {
   }
 
   if (_cfg->outputStats) {
-    LOG(INFO) << "(stats) Stats for <optim> graph of '" << tg << "'";
-    LOG(INFO) << "(stats)   Total node count: " << g.getNumNodes();
-    LOG(INFO) << "(stats)   Total edge count: " << g.getNumEdges();
-    // LOG(INFO) << "(stats)   Total unique line count: " << g.getNumLines();
-    LOG(INFO) << "(stats)   Max edge line cardinality: "
+    LOGTO(INFO,std::cerr) << "(stats) Stats for <optim> graph of '" << tg << "'";
+    LOGTO(INFO,std::cerr) << "(stats)   Total node count: " << g.getNumNodes();
+    LOGTO(INFO,std::cerr) << "(stats)   Total edge count: " << g.getNumEdges();
+    // LOGTO(INFO,std::cerr) << "(stats)   Total unique line count: " << g.getNumLines();
+    LOGTO(INFO,std::cerr) << "(stats)   Max edge line cardinality: "
               << maxCard(*g.getNds());
-    LOG(INFO) << "(stats)   Solution space: " << solutionSpaceSize(*g.getNds());
+    LOGTO(INFO,std::cerr) << "(stats)   Solution space: " << solutionSpaceSize(*g.getNds());
   }
 
   // iterate over components and optimize all of them separately
@@ -87,7 +87,7 @@ int Optimizer::optimize(RenderGraph* tg) const {
   double crossSum = 0;
   double sepSum = 0;
 
-  LOG(INFO) << "Optimization graph has " << comps.size() << " components.";
+  LOGTO(INFO,std::cerr) << "Optimization graph has " << comps.size() << " components.";
 
   for (size_t run = 0; run < runs; run++) {
     OrderCfg c;
@@ -111,7 +111,7 @@ int Optimizer::optimize(RenderGraph* tg) const {
         if (nds.size() > maxNumNodes) maxNumNodes = nds.size();
         if (numEdges(nds) > maxNumEdges) maxNumEdges = numEdges(nds);
 
-        LOG(INFO) << " (stats) Optimizing subgraph of size " << nds.size()
+        LOGTO(INFO,std::cerr) << " (stats) Optimizing subgraph of size " << nds.size()
                   << " with max cardinality = " << maxC
                   << " and solution space size = " << solSp;
       }
@@ -120,17 +120,17 @@ int Optimizer::optimize(RenderGraph* tg) const {
 
     double t = T_STOP(1);
 
-    LOG(INFO) << " -- Optimization took " << t << " ms -- ";
+    LOGTO(INFO,std::cerr) << " -- Optimization took " << t << " ms -- ";
 
     if (_cfg->outputStats) {
-      LOG(INFO) << " (stats) Number of components: " << comps.size();
-      LOG(INFO) << " (stats) Number of components with M=1: " << numM1Comps;
-      LOG(INFO) << " (stats) Max number of nodes of all components: "
+      LOGTO(INFO,std::cerr) << " (stats) Number of components: " << comps.size();
+      LOGTO(INFO,std::cerr) << " (stats) Number of components with M=1: " << numM1Comps;
+      LOGTO(INFO,std::cerr) << " (stats) Max number of nodes of all components: "
                 << maxNumNodes;
-      LOG(INFO) << " (stats) Max number of edges of all components: "
+      LOGTO(INFO,std::cerr) << " (stats) Max number of edges of all components: "
                 << maxNumEdges;
-      LOG(INFO) << " (stats) Max cardinality of all components: " << maxCompC;
-      LOG(INFO) << " (stats) Max solution space size of all components: "
+      LOGTO(INFO,std::cerr) << " (stats) Max cardinality of all components: " << maxCompC;
+      LOGTO(INFO,std::cerr) << " (stats) Max solution space size of all components: "
                 << maxCompSolSpace;
     }
 
@@ -139,31 +139,31 @@ int Optimizer::optimize(RenderGraph* tg) const {
 
     hc.writeFlatCfg(&c);
 
-    tg->setConfig(c);
+    tg->writePermutation(c);
 
     if (runs > 1) {
       if (_cfg->splittingOpt)
-        scoreSum += _scorer->getScore();
+        scoreSum += _scorer->getScore(c);
       else
-        scoreSum += _scorer->getCrossScore();
-      crossSum += _scorer->getNumCrossings();
-      sepSum += _scorer->getNumSeparations();
+        scoreSum += _scorer->getCrossScore(c);
+      crossSum += _scorer->getNumCrossings(c);
+      sepSum += _scorer->getNumSeparations(c);
     }
   }
 
   if (runs > 1 && _cfg->outputStats) {
-    LOG(INFO) << "";
-    LOG(INFO) << "(multiple opt runs stats) avg time: " << tSum / (1.0 * runs)
+    LOGTO(INFO,std::cerr) << "";
+    LOGTO(INFO,std::cerr) << "(multiple opt runs stats) avg time: " << tSum / (1.0 * runs)
               << " ms";
-    LOG(INFO) << "(multiple opt runs stats) avg iters: "
+    LOGTO(INFO,std::cerr) << "(multiple opt runs stats) avg iters: "
               << iterSum / (1.0 * runs);
-    LOG(INFO) << "(multiple opt runs stats) avg score: -- "
+    LOGTO(INFO,std::cerr) << "(multiple opt runs stats) avg score: -- "
               << scoreSum / (1.0 * runs) << " --";
-    LOG(INFO) << "(multiple opt runs stats) avg num crossings: -- "
+    LOGTO(INFO,std::cerr) << "(multiple opt runs stats) avg num crossings: -- "
               << crossSum / (1.0 * runs) << " --";
-    LOG(INFO) << "(multiple opt runs stats) avg num separations: -- "
+    LOGTO(INFO,std::cerr) << "(multiple opt runs stats) avg num separations: -- "
               << sepSum / (1.0 * runs) << " --";
-    LOG(INFO) << "";
+    LOGTO(INFO,std::cerr) << "";
   }
 
   return 0;

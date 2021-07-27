@@ -24,11 +24,11 @@ using shared::rendergraph::HierarOrderCfg;
 // _____________________________________________________________________________
 int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                HierarOrderCfg* hc, size_t depth) const {
-  LOG(DEBUG) << "Creating ILP problem... ";
+  LOGTO(DEBUG,std::cerr) << "Creating ILP problem... ";
   auto lp = createProblem(og, g);
-  LOG(DEBUG) << " .. done";
+  LOGTO(DEBUG,std::cerr) << " .. done";
 
-  LOG(DEBUG) << "Solving problem...";
+  LOGTO(DEBUG,std::cerr) << "Solving problem...";
 
   std::chrono::high_resolution_clock::time_point t1 =
       std::chrono::high_resolution_clock::now();
@@ -51,10 +51,10 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-  LOG(INFO) << " === Solve done in " << duration << " ms ===";
-  LOG(INFO) << "(stats) ILP obj = " << lp->getObjVal();
+  LOGTO(INFO,std::cerr) << " === Solve done in " << duration << " ms ===";
+  LOGTO(INFO,std::cerr) << "(stats) ILP obj = " << lp->getObjVal();
   if (status == shared::optim::SolveType::OPTIM)
-    LOG(INFO) << "(stats) (which is optimal)";
+    LOGTO(INFO,std::cerr) << "(stats) (which is optimal)";
 
   getConfigurationFromSolution(lp, hc, g);
 

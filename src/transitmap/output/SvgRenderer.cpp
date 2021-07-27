@@ -245,7 +245,7 @@ void SvgRenderer::renderNodeConnections(const RenderGraph& outG,
                                         const LineNode* n,
                                         const RenderParams& rparams) {
   auto geoms =
-      outG.innerGeoms(n, outG.getConfig(), _cfg->innerGeometryPrecision);
+      outG.innerGeoms(n, _cfg->innerGeometryPrecision);
 
   for (auto& clique : getInnerCliques(n, geoms, 99)) {
     renderClique(clique, n);
@@ -466,10 +466,8 @@ void SvgRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 
   double o = oo;
 
-  assert(outG.getConfig().find(e) != outG.getConfig().end());
-
   size_t a = 0;
-  for (size_t i : outG.getConfig().find(e)->second) {
+  for (size_t i = 0 ; i < e->pl().getLines().size(); i++) {
     const auto& lo = e->pl().lineOccAtPos(i);
 
     const Line* line = lo.line;

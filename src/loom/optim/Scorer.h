@@ -22,19 +22,14 @@ class Scorer {
 
   const shared::rendergraph::RenderGraph* getGraph() const { return _g; }
 
-  double getScore() const;
   double getScore(const shared::rendergraph::OrderCfg& c) const;
 
-  double getCrossScore() const;
   double getCrossScore(const shared::rendergraph::OrderCfg& c) const;
 
-  double getSeparationScore() const;
   double getSeparationScore(const shared::rendergraph::OrderCfg& c) const;
 
-  size_t getNumCrossings() const;
   size_t getNumCrossings(const shared::rendergraph::OrderCfg& c) const;
 
-  size_t getNumSeparations() const;
   size_t getNumSeparations(const shared::rendergraph::OrderCfg& c) const;
 
   double getNumPossSolutions() const;

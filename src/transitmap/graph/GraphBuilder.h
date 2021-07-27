@@ -34,7 +34,6 @@ class GraphBuilder {
 
   void writeMainDirs(shared::rendergraph::RenderGraph* g);
   void expandOverlappinFronts(shared::rendergraph::RenderGraph* g);
-  void writeInitialConfig(shared::rendergraph::RenderGraph* g);
 
  private:
   const config::Config* _cfg;

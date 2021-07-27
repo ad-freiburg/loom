@@ -9,6 +9,7 @@
 #include <exception>
 #include "util/log/Log.h"
 #include "loom/config/ConfigReader.h"
+#include "loom/config/LoomConfig.h"
 
 using loom::config::ConfigReader;
 namespace opts = boost::program_options;
@@ -48,9 +49,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->untangleGraph))
       ->default_value(true),
       "untangle line graph")
-    ("splitting-optim",
+    ("separation-optim",
       opts::value<bool>(&(cfg->splittingOpt))
-      ->default_value(false),
+      ->default_value(true),
       "enable splitting optimization")
     ("output-stats",
       opts::value<bool>(&(cfg->outputStats))

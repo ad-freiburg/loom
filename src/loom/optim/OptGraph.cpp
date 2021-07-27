@@ -666,7 +666,7 @@ bool OptGraph::untangleFullCross() {
   for (OptNode* n : *getNds()) {
     std::pair<OptEdge*, OptEdge*> cross;
     if ((cross = isFullCross(n)).first) {
-      LOG(DEBUG) << "Found full cross at node " << n << " between "
+      LOGTO(DEBUG,std::cerr) << "Found full cross at node " << n << " between "
                  << cross.first << "(" << cross.first->pl().toStr() << ") and "
                  << cross.second << " (" << cross.second->pl().toStr() << ")";
 
@@ -734,7 +734,7 @@ bool OptGraph::untanglePartialYStep() {
       assert(nb->pl().node);
       assert(na->pl().node);
 
-      LOG(DEBUG) << "Found partial Y at node " << nb << " with main leg " << ea
+      LOGTO(DEBUG,std::cerr) << "Found partial Y at node " << nb << " with main leg " << ea
                  << " (" << ea->pl().toStr() << ")";
 
       // the geometry of the main leg
@@ -825,7 +825,7 @@ bool OptGraph::untangleStumpStep() {
         stumpN = sharedNode(mainLeg, stumpEdg);
         OptNode* notStumpN = mainLeg->getOtherNd(stumpN);
 
-        LOG(DEBUG) << "Found stump with main leg " << mainLeg << " ("
+        LOGTO(DEBUG,std::cerr) << "Found stump with main leg " << mainLeg << " ("
                    << mainLeg->pl().toStr() << ") at node " << stumpN
                    << " with main stump branch " << stumpEdg << " ("
                    << stumpEdg->pl().toStr() << ")";
@@ -902,7 +902,7 @@ bool OptGraph::untangleYStep() {
       assert(nb->pl().node);
       assert(na->pl().node);
 
-      LOG(DEBUG) << "Found full Y at node " << nb << " with main leg " << ea
+      LOGTO(DEBUG,std::cerr) << "Found full Y at node " << nb << " with main leg " << ea
                  << " (" << ea->pl().toStr() << ")";
 
       // the geometry of the main leg
@@ -1024,7 +1024,7 @@ bool OptGraph::untanglePartialDogBoneStep() {
       if (mainLeg->getFrom() != na) continue;
       OptNode* notPartN = 0;
       if ((notPartN = isPartialDogBone(mainLeg))) {
-        LOG(DEBUG) << "Found partial dog bone with main leg " << mainLeg << " ("
+        LOGTO(DEBUG,std::cerr) << "Found partial dog bone with main leg " << mainLeg << " ("
                    << mainLeg->pl().toStr() << ") at node " << notPartN;
 
         OptNode* partN = mainLeg->getOtherNd(notPartN);
@@ -1112,7 +1112,7 @@ bool OptGraph::untangleDogBoneStep() {
     for (OptEdge* mainLeg : na->getAdjList()) {
       if (mainLeg->getFrom() != na) continue;
       if (isDogBone(mainLeg)) {
-        LOG(DEBUG) << "Found full dog bone with main leg " << mainLeg << " ("
+        LOGTO(DEBUG,std::cerr) << "Found full dog bone with main leg " << mainLeg << " ("
                    << mainLeg->pl().toStr() << ")";
 
         OptNode* nb = mainLeg->getOtherNd(na);

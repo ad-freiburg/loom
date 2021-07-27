@@ -5,7 +5,7 @@
 #ifndef LOOM_OPTIM_ILPOPTIMIZER_H_
 #define LOOM_OPTIM_ILPOPTIMIZER_H_
 
-#include "loom/config/TransitMapConfig.h"
+#include "loom/config/LoomConfig.h"
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/Optimizer.h"
 #include "loom/optim/Scorer.h"

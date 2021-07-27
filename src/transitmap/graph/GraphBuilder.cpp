@@ -179,18 +179,3 @@ void GraphBuilder::freeNodeFront(const LineNode* n, NodeFront* f) {
     }
   }
 }
-
-// _____________________________________________________________________________
-void GraphBuilder::writeInitialConfig(RenderGraph* g) {
-  OrderCfg c;
-  for (auto n : *g->getNds()) {
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-      Ordering order(e->pl().getLines().size());
-      for (size_t i = 0; i < e->pl().getLines().size(); i++) order[i] = i;
-      c[e] = order;
-    }
-  }
-
-  g->setConfig(c);
-}

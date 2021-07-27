@@ -5,7 +5,7 @@
 #ifndef LOOM_OPTIM_COMBOPTIMIZER_H_
 #define LOOM_OPTIM_COMBOPTIMIZER_H_
 
-#include "loom/config/TransitMapConfig.h"
+#include "loom/config/LoomConfig.h"
 #include "loom/optim/ExhaustiveOptimizer.h"
 #include "loom/optim/HillClimbOptimizer.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"

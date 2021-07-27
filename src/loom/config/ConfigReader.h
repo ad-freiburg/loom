@@ -7,7 +7,7 @@
 
 #include <boost/program_options.hpp>
 #include <vector>
-#include "loom/config/TransitMapConfig.h"
+#include "loom/config/LoomConfig.h"
 
 namespace loom {
 namespace config {

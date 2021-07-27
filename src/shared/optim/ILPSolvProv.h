@@ -5,10 +5,11 @@
 #ifndef SHARED_OPTIM_ILPSOLVPROV_H_
 #define SHARED_OPTIM_ILPSOLVPROV_H_
 
-#include "shared/optim/GLPKSolver.h"
 #include "shared/optim/COINSolver.h"
+#include "shared/optim/GLPKSolver.h"
 #include "shared/optim/GurobiSolver.h"
 #include "shared/optim/ILPSolver.h"
+#include "util/log/Log.h"
 
 namespace shared {
 namespace optim {
@@ -19,30 +20,46 @@ inline ILPSolver* getSolver(const std::string& wish,
 
   // first try to consider wish
 
+  try {
 #ifdef GUROBI_FOUND
-  if (wish == "gurobi") lp = new shared::optim::GurobiSolver(dir);
+    if (wish == "gurobi") lp = new shared::optim::GurobiSolver(dir);
 #endif
 
 #if COIN_FOUND
-  if (wish == "coin") lp = new shared::optim::COINSolver(dir);
+    if (wish == "coin") lp = new shared::optim::COINSolver(dir);
 #endif
 
 #if GLPK_FOUND
-  if (wish == "glpk") lp = new shared::optim::GLPKSolver(dir);
+    if (wish == "glpk") lp = new shared::optim::GLPKSolver(dir);
 #endif
+  } catch (std::exception& e) {
+    LOG(ERROR) << e.what();
+  }
 
   // fallbacks
 
 #ifdef GUROBI_FOUND
-  if (!lp) lp = new shared::optim::GurobiSolver(dir);
+  try {
+    if (!lp && wish != "gurobi") lp = new shared::optim::GurobiSolver(dir);
+  } catch (std::exception& e) {
+    LOG(ERROR) << e.what();
+  }
 #endif
 
 #ifdef COIN_FOUND
-  if (!lp) lp = new shared::optim::COINSolver(dir);
+  try {
+    if (!lp && wish != "coin") lp = new shared::optim::COINSolver(dir);
+  } catch (std::exception& e) {
+    LOG(ERROR) << e.what();
+  }
 #endif
 
 #if GLPK_FOUND
-  if (!lp) lp = new shared::optim::GLPKSolver(dir);
+  try {
+    if (!lp && wish != "glpk") lp = new shared::optim::GLPKSolver(dir);
+  } catch (std::exception& e) {
+    LOG(ERROR) << e.what();
+  }
 #endif
 
   return lp;

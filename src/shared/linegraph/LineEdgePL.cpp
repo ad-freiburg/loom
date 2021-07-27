@@ -85,19 +85,19 @@ util::json::Dict LineEdgePL::getAttrs() const {
   std::string dbg_lines = "";
 
   for (auto r : getLines()) {
-    auto route = util::json::Dict();
-    route["id"] = r.line->id();
-    route["label"] = r.line->label();
-    route["color"] = r.line->color();
+    auto line = util::json::Dict();
+    line["id"] = r.line->id();
+    line["label"] = r.line->label();
+    line["color"] = r.line->color();
 
     if (r.direction != 0) {
-      route["direction"] = util::toString(r.direction);
+      line["direction"] = util::toString(r.direction);
       dbg_lines += (!arr.size() ? "" : "$") + r.line->label() + ">";
     } else {
       dbg_lines += (!arr.size() ? "" : "$") + r.line->label();
     }
 
-    arr.push_back(route);
+    arr.push_back(line);
   }
 
   obj["lines"] = arr;
@@ -120,6 +120,16 @@ const LineOcc& LineEdgePL::lineOccAtPos(size_t i) const { return _lines[i]; }
 // _____________________________________________________________________________
 void LineEdgePL::updateLineOcc(const LineOcc& occ) {
   _lines[_lineToIdx.find(occ.line)->second] = occ;
+}
+
+// _____________________________________________________________________________
+void LineEdgePL::writePermutation(const std::vector<size_t> order) {
+  std::vector<LineOcc> linesNew(_lines.size());
+  for (size_t i = 0; i < order.size(); i++) {
+    linesNew[i] = _lines[order[i]];
+    _lineToIdx[_lines[order[i]].line] = i;
+  }
+  _lines = linesNew;
 }
 
 // _____________________________________________________________________________

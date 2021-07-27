@@ -9,11 +9,12 @@
 #include <set>
 #include <string>
 #include "loom/config/ConfigReader.cpp"
-#include "loom/config/TransitMapConfig.h"
+#include "loom/config/LoomConfig.h"
 #include "loom/graph/GraphBuilder.h"
 #include "shared/rendergraph/Penalties.h"
 #include "shared/rendergraph/RenderGraph.h"
 #include "loom/optim/CombOptimizer.h"
+#include "util/geo/output/GeoGraphJsonOutput.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
 #include "loom/optim/Scorer.h"
 #include "util/geo/PolyLine.h"
@@ -35,16 +36,16 @@ int main(int argc, char** argv) {
   config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
-  LOG(INFO) << "Reading graph...";
+  LOGTO(DEBUG, std::cerr) << "Reading graph...";
   shared::rendergraph::RenderGraph g(5, 5);
   loom::graph::GraphBuilder b(&cfg);
 
   g.readFromJson(&std::cin, 3);
 
-  LOG(INFO) << "Creating node fronts...";
+  LOGTO(DEBUG, std::cerr) << "Creating node fronts...";
   b.writeMainDirs(&g);
 
-  LOG(INFO) << "Optimizing...";
+  LOGTO(DEBUG, std::cerr) << "Optimizing...";
 
   double maxCrossPen =
       g.maxDeg() * (cfg.crossPenMultiSameSeg > cfg.crossPenMultiDiffSeg
@@ -67,21 +68,18 @@ int main(int argc, char** argv) {
   optim::Scorer scorer(&g, pens);
 
   if (cfg.outputStats) {
-    LOG(INFO) << "(stats) Stats for graph";
-    LOG(INFO) << "(stats)   Total node count: " << g.getNds()->size() << " ("
+    LOGTO(INFO, std::cerr) << "(stats) Stats for graph";
+    LOGTO(INFO, std::cerr) << "(stats)   Total node count: " << g.getNds()->size() << " ("
               << g.getNumNds(true) << " topo, " << g.getNumNds(false)
               << " non-topo)";
-    LOG(INFO) << "(stats)   Total edge count: " << g.numEdgs();
-    LOG(INFO) << "(stats)   Total unique line count: " << g.getNumLines();
-    LOG(INFO) << "(stats)   Max edge line cardinality: "
+    LOGTO(INFO, std::cerr) << "(stats)   Total edge count: " << g.numEdgs();
+    LOGTO(INFO, std::cerr) << "(stats)   Total unique line count: " << g.getNumLines();
+    LOGTO(INFO, std::cerr) << "(stats)   Max edge line cardinality: "
               << g.getMaxLineNum();
-    LOG(INFO) << "(stats)   Number of poss. solutions: "
+    LOGTO(INFO, std::cerr) << "(stats)   Number of poss. solutions: "
               << scorer.getNumPossSolutions();
-    LOG(INFO) << "(stats)   Highest node degree: " << g.maxDeg();
+    LOGTO(INFO, std::cerr) << "(stats)   Highest node degree: " << g.maxDeg();
   }
-
-  LOG(INFO) << "(stats) Max crossing pen: " << maxCrossPen;
-  LOG(INFO) << "(stats) Max splitting pen: " << maxSplitPen;
 
   if (cfg.optimMethod == "ilp_impr") {
     optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, &scorer);
@@ -106,14 +104,16 @@ int main(int argc, char** argv) {
     nullOptim.optimize(&g);
   }
 
-  LOG(INFO) << "(stats) Total graph score AFTER optim is -- "
-            << scorer.getScore() << " -- (excl. unavoidable crossings!)";
-  LOG(INFO) << "(stats)   Per node graph score: "
-            << scorer.getScore() / g.getNds()->size();
-  LOG(INFO) << "(stats)   Crossings: " << scorer.getNumCrossings()
-            << " (score: " << scorer.getCrossScore() << ")";
-  LOG(INFO) << "(stats)   Separations: " << scorer.getNumSeparations()
-            << " (score: " << scorer.getSeparationScore() << ")";
+  // LOGTO(INFO,std::cerr) << "(stats) Total graph score AFTER optim is -- "
+            // << scorer.getScore() << " -- (excl. unavoidable crossings!)";
+  // LOGTO(INFO,std::cerr) << "(stats)   Per node graph score: "
+            // << scorer.getScore() / g.getNds()->size();
+  // LOGTO(INFO,std::cerr) << "(stats)   Crossings: " << scorer.getNumCrossings()
+            // << " (score: " << scorer.getCrossScore() << ")";
+  // LOGTO(INFO,std::cerr) << "(stats)   Separations: " << scorer.getNumSeparations()
+            // << " (score: " << scorer.getSeparationScore() << ")";
+  util::geo::output::GeoGraphJsonOutput out;
+  out.print(g, std::cout);
 
   return (0);
 }

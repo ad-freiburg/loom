@@ -29,7 +29,7 @@ COINSolver::COINSolver(DirType dir)
       _timeLimit(std::numeric_limits<int>::max()) {
   LOGTO(INFO, std::cerr) << "Creating COIN solver instance...";
 
-  assert("COIN SOLVER NOT YET IMPLEMENTED" == 0);
+  throw std::runtime_error("COIN Solver not yet implemented.");
 
   // basically following
   // https://github.com/coin-or/Cbc/blob/master/examples/sample5.cpp

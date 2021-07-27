@@ -2,7 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "loom/config/TransitMapConfig.h"
+#include "loom/config/LoomConfig.h"
 #include "loom/optim/OptGraph.h"
 #include "shared/rendergraph/OrderCfg.h"
 #include "shared/rendergraph/RenderGraph.h"

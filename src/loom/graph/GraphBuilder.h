@@ -9,7 +9,7 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
-#include "loom/config/TransitMapConfig.h"
+#include "loom/config/LoomConfig.h"
 #include "shared/rendergraph/RenderGraph.h"
 #include "util/geo/PolyLine.h"
 

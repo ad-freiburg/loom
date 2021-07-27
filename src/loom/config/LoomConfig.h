@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifndef LOOM_CONFIG_TRANSITMAPCONFIG_H_
-#define LOOM_CONFIG_TRANSITMAPCONFIG_H_
+#ifndef LOOM_CONFIG_LOOMCONFIG_H_
+#define LOOM_CONFIG_LOOMCONFIG_H_
 
 #include <string>
 
@@ -48,4 +48,4 @@ struct Config {
 }  // namespace config
 }  // namespace loom
 
-#endif  // LOOM_CONFIG_TRANSITMAPCONFIG_H_
+#endif  // LOOM_CONFIG_LOOMCONFIG_H_

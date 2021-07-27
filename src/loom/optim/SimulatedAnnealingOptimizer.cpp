@@ -47,7 +47,7 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
     double temp = 1000.0 / iters;
 
     if (iters - last == 10000) {
-      LOG(DEBUG) << "@ " << iters << ", temp = " << temp
+      LOGTO(DEBUG,std::cerr) << "@ " << iters << ", temp = " << temp
                  << ", last change was at " << k << " iters.";
       last = iters;
     }
@@ -85,7 +85,7 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
   double curScore = _optScorer.getCrossingScore(og, g, cur);
   if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, g, cur);
 
-  LOG(DEBUG) << "Stopped after " << iters
+  LOGTO(DEBUG,std::cerr) << "Stopped after " << iters
              << " iterations. Final target = " << curScore;
 
   writeHierarch(&cur, hc);

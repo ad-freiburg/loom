@@ -17,9 +17,6 @@ using shared::rendergraph::Penalties;
 using shared::rendergraph::RenderGraph;
 
 // _____________________________________________________________________________
-double Scorer::getScore() const { return getScore(_g->getConfig()); }
-
-// _____________________________________________________________________________
 double Scorer::getScore(const OrderCfg& c) const {
   double ret = 0;
 
@@ -29,9 +26,6 @@ double Scorer::getScore(const OrderCfg& c) const {
 
   return ret;
 }
-//
-// _____________________________________________________________________________
-double Scorer::getCrossScore() const { return getCrossScore(_g->getConfig()); }
 
 // _____________________________________________________________________________
 double Scorer::getCrossScore(const OrderCfg& c) const {
@@ -42,11 +36,6 @@ double Scorer::getCrossScore(const OrderCfg& c) const {
   }
 
   return ret;
-}
-
-// _____________________________________________________________________________
-double Scorer::getSeparationScore() const {
-  return getSeparationScore(_g->getConfig());
 }
 
 // _____________________________________________________________________________
@@ -61,11 +50,6 @@ double Scorer::getSeparationScore(const OrderCfg& c) const {
 }
 
 // _____________________________________________________________________________
-size_t Scorer::getNumCrossings() const {
-  return getNumCrossings(_g->getConfig());
-}
-
-// _____________________________________________________________________________
 size_t Scorer::getNumCrossings(const OrderCfg& c) const {
   double ret = 0;
 
@@ -74,11 +58,6 @@ size_t Scorer::getNumCrossings(const OrderCfg& c) const {
   }
 
   return ret;
-}
-
-// _____________________________________________________________________________
-size_t Scorer::getNumSeparations() const {
-  return getNumSeparations(_g->getConfig());
 }
 
 // _____________________________________________________________________________
