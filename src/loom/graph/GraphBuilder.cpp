@@ -9,19 +9,19 @@
 #include "GraphBuilder.h"
 #include "json/json.hpp"
 #include "loom/config/LoomConfig.h"
-#include "shared/rendergraph/RenderGraph.h"
 #include "shared/linegraph/Line.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
 
 using loom::graph::GraphBuilder;
-using shared::rendergraph::RenderGraph;
-using shared::rendergraph::OrderCfg;
-using shared::rendergraph::Ordering;
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
 using shared::linegraph::NodeFront;
+using shared::rendergraph::OrderCfg;
+using shared::rendergraph::Ordering;
+using shared::rendergraph::RenderGraph;
 using util::geo::DPoint;
 using util::geo::LinePoint;
 using util::geo::LinePointCmp;

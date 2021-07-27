@@ -11,23 +11,19 @@
 #include "loom/config/ConfigReader.cpp"
 #include "loom/config/LoomConfig.h"
 #include "loom/graph/GraphBuilder.h"
-#include "shared/rendergraph/Penalties.h"
-#include "shared/rendergraph/RenderGraph.h"
 #include "loom/optim/CombOptimizer.h"
-#include "util/geo/output/GeoGraphJsonOutput.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
 #include "loom/optim/Scorer.h"
+#include "shared/rendergraph/Penalties.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "util/geo/PolyLine.h"
+#include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
 using namespace loom;
-using namespace util::geo;
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
-  // disable output buffering for standard output
-  setbuf(stdout, NULL);
-
   // initialize randomness
   srand(time(NULL) + rand());
 
@@ -49,35 +45,36 @@ int main(int argc, char** argv) {
 
   double maxCrossPen =
       g.maxDeg() * (cfg.crossPenMultiSameSeg > cfg.crossPenMultiDiffSeg
-                              ? cfg.crossPenMultiSameSeg
-                              : cfg.crossPenMultiDiffSeg);
+                        ? cfg.crossPenMultiSameSeg
+                        : cfg.crossPenMultiDiffSeg);
   double maxSplitPen = g.maxDeg() * cfg.splitPenWeight;
 
   // TODO move this into configuration, at least partially
   shared::rendergraph::Penalties pens{maxCrossPen,
-                                       maxSplitPen,
-                                       cfg.crossPenMultiSameSeg,
-                                       cfg.crossPenMultiDiffSeg,
-                                       cfg.splitPenWeight,
-                                       cfg.stationCrossWeightSameSeg,
-                                       cfg.stationCrossWeightDiffSeg,
-                                       cfg.stationSplitWeight,
-                                       true,
-                                       true};
+                                      maxSplitPen,
+                                      cfg.crossPenMultiSameSeg,
+                                      cfg.crossPenMultiDiffSeg,
+                                      cfg.splitPenWeight,
+                                      cfg.stationCrossWeightSameSeg,
+                                      cfg.stationCrossWeightDiffSeg,
+                                      cfg.stationSplitWeight,
+                                      true,
+                                      true};
 
   optim::Scorer scorer(&g, pens);
 
   if (cfg.outputStats) {
     LOGTO(INFO, std::cerr) << "(stats) Stats for graph";
-    LOGTO(INFO, std::cerr) << "(stats)   Total node count: " << g.getNds()->size() << " ("
-              << g.getNumNds(true) << " topo, " << g.getNumNds(false)
-              << " non-topo)";
+    LOGTO(INFO, std::cerr) << "(stats)   Total node count: "
+                           << g.getNds()->size() << " (" << g.getNumNds(true)
+                           << " topo, " << g.getNumNds(false) << " non-topo)";
     LOGTO(INFO, std::cerr) << "(stats)   Total edge count: " << g.numEdgs();
-    LOGTO(INFO, std::cerr) << "(stats)   Total unique line count: " << g.getNumLines();
+    LOGTO(INFO, std::cerr) << "(stats)   Total unique line count: "
+                           << g.getNumLines();
     LOGTO(INFO, std::cerr) << "(stats)   Max edge line cardinality: "
-              << g.getMaxLineNum();
+                           << g.getMaxLineNum();
     LOGTO(INFO, std::cerr) << "(stats)   Number of poss. solutions: "
-              << scorer.getNumPossSolutions();
+                           << scorer.getNumPossSolutions();
     LOGTO(INFO, std::cerr) << "(stats)   Highest node degree: " << g.maxDeg();
   }
 
@@ -105,13 +102,15 @@ int main(int argc, char** argv) {
   }
 
   // LOGTO(INFO,std::cerr) << "(stats) Total graph score AFTER optim is -- "
-            // << scorer.getScore() << " -- (excl. unavoidable crossings!)";
+  // << scorer.getScore() << " -- (excl. unavoidable crossings!)";
   // LOGTO(INFO,std::cerr) << "(stats)   Per node graph score: "
-            // << scorer.getScore() / g.getNds()->size();
-  // LOGTO(INFO,std::cerr) << "(stats)   Crossings: " << scorer.getNumCrossings()
-            // << " (score: " << scorer.getCrossScore() << ")";
-  // LOGTO(INFO,std::cerr) << "(stats)   Separations: " << scorer.getNumSeparations()
-            // << " (score: " << scorer.getSeparationScore() << ")";
+  // << scorer.getScore() / g.getNds()->size();
+  // LOGTO(INFO,std::cerr) << "(stats)   Crossings: " <<
+  // scorer.getNumCrossings()
+  // << " (score: " << scorer.getCrossScore() << ")";
+  // LOGTO(INFO,std::cerr) << "(stats)   Separations: " <<
+  // scorer.getNumSeparations()
+  // << " (score: " << scorer.getSeparationScore() << ")";
   util::geo::output::GeoGraphJsonOutput out;
   out.print(g, std::cout);
 

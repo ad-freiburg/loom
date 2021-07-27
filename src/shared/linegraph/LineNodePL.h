@@ -128,7 +128,7 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   ConnEx _connEx;
   NotServedLines _notServed;
 };
-}
-}
+}  // namespace linegraph
+}  // namespace shared
 
 #endif  // SHARED_LINEGRAPH_LINENODEPL_H_

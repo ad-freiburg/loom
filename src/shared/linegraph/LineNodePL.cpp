@@ -6,11 +6,11 @@
 #include "shared/linegraph/LineNodePL.h"
 #include "shared/linegraph/NodeFront.h"
 
-using util::geo::Point;
-using util::geo::DPoint;
 using shared::linegraph::LineNodePL;
 using shared::linegraph::NodeFront;
 using shared::linegraph::Station;
+using util::geo::DPoint;
+using util::geo::Point;
 
 // _____________________________________________________________________________
 LineNodePL::LineNodePL(Point<double> pos) : _pos(pos) {}
@@ -19,9 +19,7 @@ LineNodePL::LineNodePL(Point<double> pos) : _pos(pos) {}
 const Point<double>* LineNodePL::getGeom() const { return &_pos; }
 
 // _____________________________________________________________________________
-void LineNodePL::clearConnExc() {
-  _connEx.clear();
-}
+void LineNodePL::clearConnExc() { _connEx.clear(); }
 
 // _____________________________________________________________________________
 void LineNodePL::setGeom(const Point<double>& p) { _pos = p; }
@@ -141,9 +139,7 @@ NodeFront* LineNodePL::frontFor(const LineEdge* e) {
 }
 
 // _____________________________________________________________________________
-const std::vector<NodeFront>& LineNodePL::fronts() const {
-  return _mainDirs;
-}
+const std::vector<NodeFront>& LineNodePL::fronts() const { return _mainDirs; }
 
 // _____________________________________________________________________________
 void LineNodePL::delMainDir(const LineEdge* e) {
@@ -178,11 +174,8 @@ double NodeFront::getOutAngle() const {
 // _____________________________________________________________________________
 void LineNodePL::addMainDir(const NodeFront& f) { _mainDirs.push_back(f); }
 
-
 // _____________________________________________________________________________
-void LineNodePL::addLineNotServed(const Line* r) {
-  _notServed.insert(r);
-}
+void LineNodePL::addLineNotServed(const Line* r) { _notServed.insert(r); }
 
 // _____________________________________________________________________________
 bool LineNodePL::lineServed(const Line* r) const {

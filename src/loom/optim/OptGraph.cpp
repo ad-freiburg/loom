@@ -87,6 +87,7 @@ EtgPart OptGraph::getAdjEtgp(const OptEdge* e, const OptNode* n) {
     return getLastEdg(e);
   }
 
+  // TODO: throw exception
   assert(false);
 }
 
@@ -109,38 +110,43 @@ OptGraph::OptGraph(RenderGraph* toOptim, const Scorer* scorer)
 
 // _____________________________________________________________________________
 void OptGraph::build() {
+  std::map<const LineNode*, OptNode*> lnNdToOptNd;
   if (_g) {
     for (auto n : *_g->getNds()) {
       for (auto e : n->getAdjList()) {
         if (e->getFrom() != n) continue;
-        auto fromTn = e->getFrom();
-        auto toTn = e->getTo();
 
-        OptNode* from = getNodeForTransitNode(fromTn);
-        OptNode* to = getNodeForTransitNode(toTn);
+        auto frLnNd = e->getFrom();
+        auto toLnNd = e->getTo();
 
-        if (!from) from = addNd(fromTn);
-        if (!to) to = addNd(toTn);
+        OptNode* from;
+        OptNode* to;
+
+        auto fromI = lnNdToOptNd.find(frLnNd);
+        auto toI = lnNdToOptNd.find(toLnNd);
+
+        if (fromI == lnNdToOptNd.end()) {
+          fromI = lnNdToOptNd.insert({frLnNd, addNd(frLnNd)}).first;
+        }
+
+        if (toI == lnNdToOptNd.end()) {
+          toI = lnNdToOptNd.insert({toLnNd, addNd(toLnNd)}).first;
+        }
+
+        from = fromI->second;
+        to = toI->second;
 
         OptEdge* edge = addEdg(from, to);
 
-        edge->pl().etgs.push_back(EtgPart(e, e->getTo() == toTn));
+        edge->pl().etgs.push_back(EtgPart(e, e->getTo() == toLnNd));
         for (auto roOld : e->pl().getLines()) {
           edge->pl().lines.push_back(OptLO(roOld.line, roOld.direction));
         }
       }
     }
   }
+
   writeEdgeOrder();
-}
-
-// _____________________________________________________________________________
-OptNode* OptGraph::getNodeForTransitNode(const LineNode* tn) const {
-  for (auto n : getNds()) {
-    if (n->pl().node == tn) return n;
-  }
-
-  return 0;
 }
 
 // _____________________________________________________________________________
@@ -666,9 +672,10 @@ bool OptGraph::untangleFullCross() {
   for (OptNode* n : *getNds()) {
     std::pair<OptEdge*, OptEdge*> cross;
     if ((cross = isFullCross(n)).first) {
-      LOGTO(DEBUG,std::cerr) << "Found full cross at node " << n << " between "
-                 << cross.first << "(" << cross.first->pl().toStr() << ") and "
-                 << cross.second << " (" << cross.second->pl().toStr() << ")";
+      LOGTO(DEBUG, std::cerr)
+          << "Found full cross at node " << n << " between " << cross.first
+          << "(" << cross.first->pl().toStr() << ") and " << cross.second
+          << " (" << cross.second->pl().toStr() << ")";
 
       auto newN = addNd(util::geo::DPoint(n->pl().getGeom()->getX() + DO,
                                           n->pl().getGeom()->getY() + DO));
@@ -734,8 +741,9 @@ bool OptGraph::untanglePartialYStep() {
       assert(nb->pl().node);
       assert(na->pl().node);
 
-      LOGTO(DEBUG,std::cerr) << "Found partial Y at node " << nb << " with main leg " << ea
-                 << " (" << ea->pl().toStr() << ")";
+      LOGTO(DEBUG, std::cerr)
+          << "Found partial Y at node " << nb << " with main leg " << ea << " ("
+          << ea->pl().toStr() << ")";
 
       // the geometry of the main leg
       util::geo::PolyLine<double> pl(*nb->pl().getGeom(), *na->pl().getGeom());
@@ -825,10 +833,11 @@ bool OptGraph::untangleStumpStep() {
         stumpN = sharedNode(mainLeg, stumpEdg);
         OptNode* notStumpN = mainLeg->getOtherNd(stumpN);
 
-        LOGTO(DEBUG,std::cerr) << "Found stump with main leg " << mainLeg << " ("
-                   << mainLeg->pl().toStr() << ") at node " << stumpN
-                   << " with main stump branch " << stumpEdg << " ("
-                   << stumpEdg->pl().toStr() << ")";
+        LOGTO(DEBUG, std::cerr)
+            << "Found stump with main leg " << mainLeg << " ("
+            << mainLeg->pl().toStr() << ") at node " << stumpN
+            << " with main stump branch " << stumpEdg << " ("
+            << stumpEdg->pl().toStr() << ")";
 
         // the geometry of the main leg
         util::geo::PolyLine<double> pl(*notStumpN->pl().getGeom(),
@@ -902,8 +911,9 @@ bool OptGraph::untangleYStep() {
       assert(nb->pl().node);
       assert(na->pl().node);
 
-      LOGTO(DEBUG,std::cerr) << "Found full Y at node " << nb << " with main leg " << ea
-                 << " (" << ea->pl().toStr() << ")";
+      LOGTO(DEBUG, std::cerr)
+          << "Found full Y at node " << nb << " with main leg " << ea << " ("
+          << ea->pl().toStr() << ")";
 
       // the geometry of the main leg
       util::geo::PolyLine<double> pl(*nb->pl().getGeom(), *na->pl().getGeom());
@@ -1024,8 +1034,9 @@ bool OptGraph::untanglePartialDogBoneStep() {
       if (mainLeg->getFrom() != na) continue;
       OptNode* notPartN = 0;
       if ((notPartN = isPartialDogBone(mainLeg))) {
-        LOGTO(DEBUG,std::cerr) << "Found partial dog bone with main leg " << mainLeg << " ("
-                   << mainLeg->pl().toStr() << ") at node " << notPartN;
+        LOGTO(DEBUG, std::cerr)
+            << "Found partial dog bone with main leg " << mainLeg << " ("
+            << mainLeg->pl().toStr() << ") at node " << notPartN;
 
         OptNode* partN = mainLeg->getOtherNd(notPartN);
 
@@ -1112,8 +1123,9 @@ bool OptGraph::untangleDogBoneStep() {
     for (OptEdge* mainLeg : na->getAdjList()) {
       if (mainLeg->getFrom() != na) continue;
       if (isDogBone(mainLeg)) {
-        LOGTO(DEBUG,std::cerr) << "Found full dog bone with main leg " << mainLeg << " ("
-                   << mainLeg->pl().toStr() << ")";
+        LOGTO(DEBUG, std::cerr)
+            << "Found full dog bone with main leg " << mainLeg << " ("
+            << mainLeg->pl().toStr() << ")";
 
         OptNode* nb = mainLeg->getOtherNd(na);
         // the geometry of the main leg

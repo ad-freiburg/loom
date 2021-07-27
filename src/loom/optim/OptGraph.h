@@ -162,8 +162,6 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   shared::rendergraph::RenderGraph* _g;
   const Scorer* _scorer;
 
-  OptNode* getNodeForTransitNode(const shared::linegraph::LineNode* tn) const;
-
   void build();
   void writeEdgeOrder();
   void updateEdgeOrder(OptNode* n);
