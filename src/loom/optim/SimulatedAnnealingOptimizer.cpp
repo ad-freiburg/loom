@@ -9,8 +9,10 @@
 
 using namespace loom;
 using namespace optim;
-using namespace loom::graph;
 using loom::optim::SimulatedAnnealingOptimizer;
+using shared::rendergraph::HierarOrderCfg;
+using shared::rendergraph::OrderCfg;
+using shared::rendergraph::RenderGraph;
 
 // _____________________________________________________________________________
 int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,

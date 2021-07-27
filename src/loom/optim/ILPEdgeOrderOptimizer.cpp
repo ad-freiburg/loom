@@ -3,17 +3,17 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <fstream>
-#include "loom/graph/OrderCfg.h"
-#include "shared/optim/ILPSolvProv.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
 #include "loom/optim/OptGraph.h"
+#include "shared/optim/ILPSolvProv.h"
+#include "shared/rendergraph/OrderCfg.h"
 #include "util/geo/Geo.h"
 #include "util/log/Log.h"
 
 using namespace loom;
 using namespace optim;
-using namespace loom::graph;
 using shared::optim::ILPSolver;
+using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
@@ -155,7 +155,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
         assert(max % 2 == 0);
         max = max / 2;
 
-        rowDistanceRangeKeeper = lp->addRow(rowName.str(), max, shared::optim::UP);
+        rowDistanceRangeKeeper =
+            lp->addRow(rowName.str(), max, shared::optim::UP);
       }
 
       // iterate over all possible line pairs in this segment
@@ -291,8 +292,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
           int decVarDistance = lp->getVarByName(sss.str());
           assert(decVarDistance > -1);
 
-          lp->addColToRow(rowDistance1, decVarDistance,  -static_cast<int>(m));
-          lp->addColToRow(rowDistance2, decVarDistance,  -static_cast<int>(m));
+          lp->addColToRow(rowDistance1, decVarDistance, -static_cast<int>(m));
+          lp->addColToRow(rowDistance2, decVarDistance, -static_cast<int>(m));
 
           for (size_t p = 0; p < segment->pl().getCardinality(); ++p) {
             std::stringstream ss;
@@ -343,7 +344,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
              << ")," << linepair.second.line << "("
              << linepair.second.line->id() << ")," << node << ")";
 
-          int decisionVar = lp->addCol(ss.str(), shared::optim::BIN,
+          int decisionVar = lp->addCol(
+              ss.str(), shared::optim::BIN,
               getCrossingPenaltySameSeg(node)
                   // multiply the penalty with the number of collapsed lines!
                   * (linepair.first.relatives.size()) *
@@ -404,9 +406,9 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
           lp->addColToRow(row, aSmallerBinL2, 1);
           lp->addColToRow(row, decisionVar, 1);
 
-          lp->addColToRow(row2, aSmallerBinL1 , 1);
-          lp->addColToRow(row2, aSmallerBinL2 , -1);
-          lp->addColToRow(row2, decisionVar , 1);
+          lp->addColToRow(row2, aSmallerBinL1, 1);
+          lp->addColToRow(row2, aSmallerBinL2, -1);
+          lp->addColToRow(row2, decisionVar, 1);
         }
       }
 
@@ -435,7 +437,8 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
                   << linepair.first.line->id() << ")," << linepair.second.line
                   << "(" << linepair.second.line->id() << ")," << node << ")";
 
-              int decisionVarDist1Change = lp->addCol(sss.str(), shared::optim::BIN, getSplittingPenalty(node));
+              int decisionVarDist1Change = lp->addCol(
+                  sss.str(), shared::optim::BIN, getSplittingPenalty(node));
 
               int aNearBinL1 = 0;
               int aNearBinL2 = 0;
@@ -502,8 +505,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(
-    OptGraph* og, const std::set<OptNode*>& g,
-    ILPSolver* lp) const {
+    OptGraph* og, const std::set<OptNode*>& g, ILPSolver* lp) const {
   // go into nodes and build crossing constraints for adjacent
   for (OptNode* node : g) {
     std::set<OptEdge*> processed;
@@ -523,7 +525,8 @@ void ILPEdgeOrderOptimizer::writeDiffSegConstraintsImpr(
              << "(" << linepair.first.line->id() << ")," << linepair.second.line
              << "(" << linepair.second.line->id() << ")," << node << ")";
 
-          int decisionVar = lp->addCol(ss.str(), shared::optim::BIN,
+          int decisionVar = lp->addCol(
+              ss.str(), shared::optim::BIN,
               getCrossingPenaltyDiffSeg(node)
                   // multiply the penalty with the number of collapsed lines!
                   * (linepair.first.relatives.size()) *

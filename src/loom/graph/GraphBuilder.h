@@ -9,8 +9,8 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
-#include "loom/graph/RenderGraph.h"
 #include "loom/config/TransitMapConfig.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "util/geo/PolyLine.h"
 
 namespace loom {
@@ -32,19 +32,19 @@ class GraphBuilder {
  public:
   GraphBuilder(const config::Config* cfg);
 
-  void writeMainDirs(RenderGraph* g);
-  void expandOverlappinFronts(RenderGraph* g);
-  void writeInitialConfig(RenderGraph* g);
+  void writeMainDirs(shared::rendergraph::RenderGraph* g);
+  void writeInitialConfig(shared::rendergraph::RenderGraph* g);
 
  private:
   const config::Config* _cfg;
 
   std::set<shared::linegraph::NodeFront*> nodeGetOverlappingFronts(
-      const RenderGraph* g, const shared::linegraph::LineNode* n) const;
+      const shared::rendergraph::RenderGraph* g,
+      const shared::linegraph::LineNode* n) const;
   void freeNodeFront(const shared::linegraph::LineNode* n,
                      shared::linegraph::NodeFront* f);
 
-  bool nodeFrontsOverlap(const RenderGraph* g,
+  bool nodeFrontsOverlap(const shared::rendergraph::RenderGraph* g,
                          const shared::linegraph::NodeFront& a,
                          const shared::linegraph::NodeFront& b) const;
   mutable std::set<const shared::linegraph::LineEdge*> _indEdges;

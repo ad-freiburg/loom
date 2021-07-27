@@ -6,19 +6,14 @@
 #define LOOM_OPTIM_ILPEDGEORDEROPTIMIZER_H_
 
 #include "loom/config/TransitMapConfig.h"
-#include "loom/graph/OrderCfg.h"
 #include "loom/optim/ILPOptimizer.h"
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/Optimizer.h"
 #include "loom/optim/Scorer.h"
-
-using std::exception;
-using std::string;
+#include "shared/rendergraph/OrderCfg.h"
 
 namespace loom {
 namespace optim {
-
-using namespace graph;
 
 typedef std::pair<size_t, size_t> PosCom;
 typedef std::pair<PosCom, PosCom> PosComPair;
@@ -33,9 +28,9 @@ class ILPEdgeOrderOptimizer : public ILPOptimizer {
   virtual shared::optim::ILPSolver* createProblem(
       OptGraph* og, const std::set<OptNode*>& g) const;
 
-  virtual void getConfigurationFromSolution(shared::optim::ILPSolver* lp,
-                                            graph::HierarOrderCfg* c,
-                                            const std::set<OptNode*>& g) const;
+  virtual void getConfigurationFromSolution(
+      shared::optim::ILPSolver* lp, shared::rendergraph::HierarOrderCfg* c,
+      const std::set<OptNode*>& g) const;
 
   void writeCrossingOracle(const std::set<OptNode*>& g,
                            shared::optim::ILPSolver* lp) const;

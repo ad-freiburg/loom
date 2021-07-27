@@ -11,8 +11,8 @@
 #include "loom/config/ConfigReader.cpp"
 #include "loom/config/TransitMapConfig.h"
 #include "loom/graph/GraphBuilder.h"
-#include "loom/graph/Penalties.h"
-#include "loom/graph/RenderGraph.h"
+#include "shared/rendergraph/Penalties.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "loom/optim/CombOptimizer.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
 #include "loom/optim/Scorer.h"
@@ -21,7 +21,6 @@
 
 using namespace loom;
 using namespace util::geo;
-using std::string;
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
@@ -37,7 +36,7 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   LOG(INFO) << "Reading graph...";
-  loom::graph::RenderGraph g(5, 5);
+  shared::rendergraph::RenderGraph g(5, 5);
   loom::graph::GraphBuilder b(&cfg);
 
   g.readFromJson(&std::cin, 3);
@@ -54,7 +53,7 @@ int main(int argc, char** argv) {
   double maxSplitPen = g.maxDeg() * cfg.splitPenWeight;
 
   // TODO move this into configuration, at least partially
-  loom::graph::Penalties pens{maxCrossPen,
+  shared::rendergraph::Penalties pens{maxCrossPen,
                                        maxSplitPen,
                                        cfg.crossPenMultiSameSeg,
                                        cfg.crossPenMultiDiffSeg,

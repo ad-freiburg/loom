@@ -6,16 +6,13 @@
 #define LOOM_OPTIM_SIMULATEDANNEALINGOPTIMIZER_H_
 
 #include "loom/config/TransitMapConfig.h"
-#include "loom/graph/OrderCfg.h"
 #include "loom/optim/HillClimbOptimizer.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
 #include "loom/optim/NullOptimizer.h"
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/OptGraphScorer.h"
 #include "loom/optim/Optimizer.h"
-
-using std::exception;
-using std::string;
+#include "shared/rendergraph/OrderCfg.h"
 
 namespace loom {
 namespace optim {
@@ -26,7 +23,8 @@ class SimulatedAnnealingOptimizer : public HillClimbOptimizer {
       : HillClimbOptimizer(cfg, scorer){};
 
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                           graph::HierarOrderCfg* c, size_t depth) const;
+                           shared::rendergraph::HierarOrderCfg* c,
+                           size_t depth) const;
 
  private:
   double getScore(OptGraph* og, OptEdge* e, OptOrderCfg& cur) const;

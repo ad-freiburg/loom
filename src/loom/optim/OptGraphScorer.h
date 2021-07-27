@@ -7,8 +7,6 @@
 
 #include <string>
 #include <vector>
-#include "loom/graph/OrderCfg.h"
-#include "loom/graph/Penalties.h"
 #include "loom/optim/OptGraph.h"
 
 namespace loom {
@@ -39,7 +37,7 @@ class OptGraphScorer {
   size_t getNumSeparations(OptGraph* og, OptNode* n,
                            const OptOrderCfg& c) const;
 };
-}
-}
+}  // namespace optim
+}  // namespace loom
 
 #endif  // LOOM_OPTIM_OPTGRAPHSCORER_H_

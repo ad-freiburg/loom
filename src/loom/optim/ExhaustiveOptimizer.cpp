@@ -4,15 +4,15 @@
 
 #include <algorithm>
 #include <unordered_map>
-#include "shared/linegraph/Line.h"
 #include "loom/optim/ExhaustiveOptimizer.h"
+#include "shared/linegraph/Line.h"
 #include "util/log/Log.h"
 
 using namespace loom;
 using namespace optim;
-using namespace loom::graph;
 using loom::optim::ExhaustiveOptimizer;
 using shared::linegraph::Line;
+using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
 int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,

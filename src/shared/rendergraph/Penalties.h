@@ -5,8 +5,8 @@
 #ifndef SHARED_RENDERGRAPH_PENALTIES_H_
 #define SHARED_RENDERGRAPH_PENALTIES_H_
 
-namespace transitmapper {
-namespace graph {
+namespace shared {
+namespace rendergraph {
 
 struct Penalties {
   double inStatCrossPenDegTwo;

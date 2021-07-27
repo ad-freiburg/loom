@@ -2,19 +2,18 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "shared/linegraph/Line.h"
-#include "loom/graph/Penalties.h"
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/OptGraphScorer.h"
 #include "loom/optim/Optimizer.h"
+#include "shared/linegraph/Line.h"
+#include "shared/rendergraph/Penalties.h"
 
 using namespace loom;
 using namespace optim;
-using shared::linegraph::Line;
-using shared::linegraph::LineNode;
-using shared::linegraph::LineEdge;
 using shared::linegraph::InnerGeom;
-using loom::graph::IDENTITY_PENALTIES;
+using shared::linegraph::Line;
+using shared::linegraph::LineEdge;
+using shared::linegraph::LineNode;
 
 // _____________________________________________________________________________
 double OptGraphScorer::getSplittingScore(OptGraph* og,

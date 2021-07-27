@@ -10,13 +10,14 @@
 
 using namespace loom;
 using namespace optim;
-using namespace loom::graph;
 using loom::optim::HillClimbOptimizer;
 using shared::linegraph::Line;
+using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
 int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                      HierarOrderCfg* hc, size_t depth) const {
+  UNUSED(depth);
   OptOrderCfg cur, null;
 
   // fixed order list of optim graph edges

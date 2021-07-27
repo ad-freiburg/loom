@@ -2,19 +2,19 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "shared/linegraph/Line.h"
-#include "loom/graph/Penalties.h"
-#include "loom/graph/RenderGraph.h"
 #include "loom/optim/Scorer.h"
+#include "shared/linegraph/Line.h"
+#include "shared/rendergraph/Penalties.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "util/Misc.h"
 
-using loom::graph::RenderGraph;
-using loom::graph::OrderCfg;
-using loom::graph::Penalties;
-using shared::linegraph::Line;
-using shared::linegraph::InnerGeom;
-using loom::graph::IDENTITY_PENALTIES;
 using loom::optim::Scorer;
+using shared::linegraph::InnerGeom;
+using shared::linegraph::Line;
+using shared::rendergraph::IDENTITY_PENALTIES;
+using shared::rendergraph::OrderCfg;
+using shared::rendergraph::Penalties;
+using shared::rendergraph::RenderGraph;
 
 // _____________________________________________________________________________
 double Scorer::getScore() const { return getScore(_g->getConfig()); }
@@ -108,7 +108,7 @@ double Scorer::getNumPossSolutions() const {
 
 // _____________________________________________________________________________
 double Scorer::getScore(const shared::linegraph::LineNode* n,
-                        const graph::OrderCfg& cfg) const {
+                        const OrderCfg& cfg) const {
   return getCrossingScore(n, cfg, _pens) + getSeparationScore(n, cfg, _pens);
 }
 
@@ -199,8 +199,7 @@ double Scorer::getSeparationScore(const shared::linegraph::LineNode* n,
             n->pl().connOccurs(p.first, e, f) &&
             n->pl().connOccurs(p.second, e, f)) {
           if (abs(int(f->pl().linePosUnder(p.first, c.find(f)->second)) -
-                  int(f->pl().linePosUnder(p.second, c.find(f)->second))) >
-              1) {
+                  int(f->pl().linePosUnder(p.second, c.find(f)->second))) > 1) {
             ret += getSplittingPenalty(n, pens);
           }
         }
@@ -215,12 +214,10 @@ double Scorer::getSeparationScore(const shared::linegraph::LineNode* n,
 int Scorer::getCrossingPenaltySameSeg(const shared::linegraph::LineNode* n,
                                       const Penalties& pens) const {
   double ret = 1;
-  if (pens.crossAdjPen)
-    ret *= n->getDeg();
+  if (pens.crossAdjPen) ret *= n->getDeg();
 
   if (n->pl().stops().size() > 0) {
-    if (n->getDeg() == 2)
-      return pens.inStatCrossPenDegTwo;
+    if (n->getDeg() == 2) return pens.inStatCrossPenDegTwo;
     return pens.inStatCrossPenSameSeg * ret;
   }
 
@@ -231,12 +228,10 @@ int Scorer::getCrossingPenaltySameSeg(const shared::linegraph::LineNode* n,
 int Scorer::getCrossingPenaltyDiffSeg(const shared::linegraph::LineNode* n,
                                       const Penalties& pens) const {
   double ret = 1;
-  if (pens.crossAdjPen)
-    ret *= n->getDeg();
+  if (pens.crossAdjPen) ret *= n->getDeg();
 
   if (n->pl().stops().size() > 0) {
-    if (n->getDeg() == 2)
-      return pens.inStatCrossPenDegTwo;
+    if (n->getDeg() == 2) return pens.inStatCrossPenDegTwo;
     return pens.inStatCrossPenDiffSeg * ret;
   }
 
@@ -247,12 +242,10 @@ int Scorer::getCrossingPenaltyDiffSeg(const shared::linegraph::LineNode* n,
 int Scorer::getSplittingPenalty(const shared::linegraph::LineNode* n,
                                 const Penalties& pens) const {
   double ret = 1;
-  if (pens.splitAdjPen)
-    ret *= n->getDeg();
+  if (pens.splitAdjPen) ret *= n->getDeg();
 
   if (n->pl().stops().size() > 0) {
-    if (n->getDeg() == 2)
-      return pens.inStatSplitPenDegTwo;
+    if (n->getDeg() == 2) return pens.inStatSplitPenDegTwo;
     return pens.inStatSplitPen * ret;
   }
 

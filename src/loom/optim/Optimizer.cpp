@@ -10,22 +10,23 @@
 #include "util/graph/Algorithm.h"
 #include "util/log/Log.h"
 
-using loom::optim::Optimizer;
-using loom::optim::LinePair;
-using loom::optim::PosComPair;
 using loom::optim::EdgePair;
-using loom::optim::OptGraph;
-using loom::optim::OptNode;
+using loom::optim::LinePair;
 using loom::optim::OptEdge;
-using loom::graph::RenderGraph;
-using loom::graph::HierarOrderCfg;
-using shared::linegraph::NodeFront;
-using shared::linegraph::LineNode;
-using shared::linegraph::LineEdge;
+using loom::optim::OptGraph;
+using loom::optim::Optimizer;
+using loom::optim::OptNode;
+using loom::optim::PosComPair;
 using shared::linegraph::Line;
-using util::geo::DPoint;
-using util::geo::DLine;
+using shared::linegraph::LineEdge;
+using shared::linegraph::LineNode;
+using shared::linegraph::NodeFront;
+using shared::rendergraph::HierarOrderCfg;
+using shared::rendergraph::OrderCfg;
+using shared::rendergraph::RenderGraph;
 using util::factorial;
+using util::geo::DLine;
+using util::geo::DPoint;
 
 // _____________________________________________________________________________
 int Optimizer::optimize(RenderGraph* tg) const {
@@ -89,8 +90,8 @@ int Optimizer::optimize(RenderGraph* tg) const {
   LOG(INFO) << "Optimization graph has " << comps.size() << " components.";
 
   for (size_t run = 0; run < runs; run++) {
-    graph::OrderCfg c;
-    graph::HierarOrderCfg hc;
+    OrderCfg c;
+    HierarOrderCfg hc;
 
     T_START(1);
     size_t iters = 0;

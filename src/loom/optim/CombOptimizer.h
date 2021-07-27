@@ -6,7 +6,6 @@
 #define LOOM_OPTIM_COMBOPTIMIZER_H_
 
 #include "loom/config/TransitMapConfig.h"
-#include "loom/graph/OrderCfg.h"
 #include "loom/optim/ExhaustiveOptimizer.h"
 #include "loom/optim/HillClimbOptimizer.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
@@ -15,9 +14,7 @@
 #include "loom/optim/Optimizer.h"
 #include "loom/optim/Scorer.h"
 #include "loom/optim/SimulatedAnnealingOptimizer.h"
-
-using std::exception;
-using std::string;
+#include "shared/rendergraph/OrderCfg.h"
 
 namespace loom {
 namespace optim {
@@ -32,8 +29,8 @@ class CombOptimizer : public Optimizer {
         _hillcOpt(cfg, scorer),
         _annealOpt(cfg, scorer){};
 
-  int optimizeComp(OptGraph* og, const std::set<OptNode*>& g, HierarOrderCfg* c,
-                   size_t depth) const;
+  int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+                   shared::rendergraph::HierarOrderCfg* c, size_t depth) const;
 
  private:
   const ILPEdgeOrderOptimizer _ilpOpt;

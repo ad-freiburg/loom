@@ -7,73 +7,76 @@
 
 #include <string>
 #include <vector>
-#include "loom/graph/OrderCfg.h"
-#include "loom/graph/Penalties.h"
-#include "loom/graph/RenderGraph.h"
+#include "shared/rendergraph/OrderCfg.h"
+#include "shared/rendergraph/Penalties.h"
+#include "shared/rendergraph/RenderGraph.h"
 
 namespace loom {
 namespace optim {
 
 class Scorer {
  public:
-  Scorer(const graph::RenderGraph* g, const graph::Penalties& pens)
+  Scorer(const shared::rendergraph::RenderGraph* g,
+         const shared::rendergraph::Penalties& pens)
       : _g(g), _pens(pens) {}
 
-  const graph::RenderGraph* getGraph() const { return _g; }
+  const shared::rendergraph::RenderGraph* getGraph() const { return _g; }
 
   double getScore() const;
-  double getScore(const graph::OrderCfg& c) const;
+  double getScore(const shared::rendergraph::OrderCfg& c) const;
 
   double getCrossScore() const;
-  double getCrossScore(const graph::OrderCfg& c) const;
+  double getCrossScore(const shared::rendergraph::OrderCfg& c) const;
 
   double getSeparationScore() const;
-  double getSeparationScore(const graph::OrderCfg& c) const;
+  double getSeparationScore(const shared::rendergraph::OrderCfg& c) const;
 
   size_t getNumCrossings() const;
-  size_t getNumCrossings(const graph::OrderCfg& c) const;
+  size_t getNumCrossings(const shared::rendergraph::OrderCfg& c) const;
 
   size_t getNumSeparations() const;
-  size_t getNumSeparations(const graph::OrderCfg& c) const;
+  size_t getNumSeparations(const shared::rendergraph::OrderCfg& c) const;
 
   double getNumPossSolutions() const;
   size_t getMaxCrossPenalty() const;
   size_t getMaxSplitPenalty() const;
 
   double getScore(const shared::linegraph::LineNode* n,
-                  const graph::OrderCfg& cfg) const;
+                  const shared::rendergraph::OrderCfg& cfg) const;
   size_t getNumCrossings(const shared::linegraph::LineNode* n,
-                         const graph::OrderCfg& c) const;
+                         const shared::rendergraph::OrderCfg& c) const;
   size_t getNumSeparations(const shared::linegraph::LineNode* n,
-                           const graph::OrderCfg& c) const;
+                           const shared::rendergraph::OrderCfg& c) const;
   double getSeparationScore(const shared::linegraph::LineNode* n,
-                            const graph::OrderCfg& c,
-                            const graph::Penalties& pens) const;
+                            const shared::rendergraph::OrderCfg& c,
+                            const shared::rendergraph::Penalties& pens) const;
   double getCrossingScore(const shared::linegraph::LineNode* n,
-                          const graph::OrderCfg& c,
-                          const graph::Penalties& pens) const;
+                          const shared::rendergraph::OrderCfg& c,
+                          const shared::rendergraph::Penalties& pens) const;
 
   double getSeparationScore(const shared::linegraph::LineNode* n,
-                            const graph::OrderCfg& c) const;
+                            const shared::rendergraph::OrderCfg& c) const;
   double getCrossingScore(const shared::linegraph::LineNode* n,
-                          const graph::OrderCfg& c) const;
+                          const shared::rendergraph::OrderCfg& c) const;
 
-  int getCrossingPenaltySameSeg(const shared::linegraph::LineNode* n,
-                                const graph::Penalties& pens) const;
-  int getCrossingPenaltyDiffSeg(const shared::linegraph::LineNode* n,
-                                const graph::Penalties& pens) const;
+  int getCrossingPenaltySameSeg(
+      const shared::linegraph::LineNode* n,
+      const shared::rendergraph::Penalties& pens) const;
+  int getCrossingPenaltyDiffSeg(
+      const shared::linegraph::LineNode* n,
+      const shared::rendergraph::Penalties& pens) const;
   int getSplittingPenalty(const shared::linegraph::LineNode* n,
-                          const graph::Penalties& pens) const;
+                          const shared::rendergraph::Penalties& pens) const;
 
   int getCrossingPenaltySameSeg(const shared::linegraph::LineNode* n) const;
   int getCrossingPenaltyDiffSeg(const shared::linegraph::LineNode* n) const;
   int getSplittingPenalty(const shared::linegraph::LineNode* n) const;
 
  private:
-  const graph::RenderGraph* _g;
-  graph::Penalties _pens;
+  const shared::rendergraph::RenderGraph* _g;
+  shared::rendergraph::Penalties _pens;
 };
-}
-}
+}  // namespace optim
+}  // namespace loom
 
 #endif  // LOOM_GRAPH_ROUTE_H_

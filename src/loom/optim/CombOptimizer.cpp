@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <fstream>
 #include <thread>
-#include "loom/graph/OrderCfg.h"
+#include "shared/rendergraph/OrderCfg.h"
 #include "loom/optim/CombOptimizer.h"
 #include "loom/optim/OptGraph.h"
 #include "util/String.h"
@@ -18,7 +18,7 @@
 
 using namespace loom;
 using namespace optim;
-using namespace loom::graph;
+using shared::rendergraph::HierarOrderCfg;
 using loom::optim::CombOptimizer;
 
 // _____________________________________________________________________________

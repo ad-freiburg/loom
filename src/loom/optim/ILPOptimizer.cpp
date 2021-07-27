@@ -6,10 +6,10 @@
 #include <cstdio>
 #include <fstream>
 #include <thread>
-#include "shared/optim/ILPSolvProv.h"
-#include "loom/graph/OrderCfg.h"
+#include "shared/rendergraph/OrderCfg.h"
 #include "loom/optim/ILPOptimizer.h"
 #include "loom/optim/OptGraph.h"
+#include "shared/optim/ILPSolvProv.h"
 #include "util/String.h"
 #include "util/geo/Geo.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -17,9 +17,9 @@
 
 using namespace loom;
 using namespace optim;
-using namespace loom::graph;
 using shared::linegraph::Line;
 using shared::optim::ILPSolver;
+using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
 int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,

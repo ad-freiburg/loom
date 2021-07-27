@@ -3,9 +3,9 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "loom/config/TransitMapConfig.h"
-#include "loom/graph/OrderCfg.h"
-#include "loom/graph/RenderGraph.h"
 #include "loom/optim/OptGraph.h"
+#include "shared/rendergraph/OrderCfg.h"
+#include "shared/rendergraph/RenderGraph.h"
 
 #ifndef LOOM_OPTIM_OPTIMIZER_H_
 #define LOOM_OPTIM_OPTIMIZER_H_
@@ -23,11 +23,12 @@ class Optimizer {
   Optimizer(const config::Config* cfg, const Scorer* scorer)
       : _cfg(cfg), _scorer(scorer){};
 
-  virtual int optimize(graph::RenderGraph* tg) const;
+  virtual int optimize(shared::rendergraph::RenderGraph* tg) const;
   int optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
-                   graph::HierarOrderCfg* c) const;
+                   shared::rendergraph::HierarOrderCfg* c) const;
   virtual int optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
-                           graph::HierarOrderCfg* c, size_t depth) const = 0;
+                           shared::rendergraph::HierarOrderCfg* c,
+                           size_t depth) const = 0;
 
   static std::vector<LinePair> getLinePairs(OptEdge* segment);
   static std::vector<LinePair> getLinePairs(OptEdge* segment, bool unique);

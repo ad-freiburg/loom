@@ -8,9 +8,9 @@
 #include <set>
 #include <string>
 
-#include "shared/linegraph/LineGraph.h"
-#include "loom/graph/RenderGraph.h"
 #include "loom/optim/Scorer.h"
+#include "shared/linegraph/LineGraph.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "util/Misc.h"
 #include "util/graph/UndirGraph.h"
 #include "util/json/Writer.h"
@@ -120,9 +120,9 @@ struct OptNodePL {
 
 class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
  public:
-  OptGraph(graph::RenderGraph* toOptim, const Scorer* scorer);
+  OptGraph(shared::rendergraph::RenderGraph* toOptim, const Scorer* scorer);
 
-  graph::RenderGraph* getGraph() const;
+  shared::rendergraph::RenderGraph* getGraph() const;
 
   size_t getNumNodes() const;
   size_t getNumNodes(bool topo) const;
@@ -159,7 +159,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   void split();
 
  private:
-  graph::RenderGraph* _g;
+  shared::rendergraph::RenderGraph* _g;
   const Scorer* _scorer;
 
   OptNode* getNodeForTransitNode(const shared::linegraph::LineNode* tn) const;
@@ -282,7 +282,7 @@ inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
   }
   return fmod(angA + M_PI * 1.5, 2 * M_PI) > fmod(angB + M_PI * 1.5, 2 * M_PI);
 }
-}
-}
+}  // namespace optim
+}  // namespace loom
 
 #endif  // LOOM_GRAPH_OPTIM_OPTGRAPH_H_

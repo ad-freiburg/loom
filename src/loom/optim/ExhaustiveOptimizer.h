@@ -6,16 +6,13 @@
 #define LOOM_OPTIM_EXHAUSTIVEOPTIMIZER_H_
 
 #include "loom/config/TransitMapConfig.h"
-#include "loom/graph/OrderCfg.h"
-#include "loom/graph/RenderGraph.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
 #include "loom/optim/NullOptimizer.h"
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/OptGraphScorer.h"
 #include "loom/optim/Optimizer.h"
-
-using std::exception;
-using std::string;
+#include "shared/rendergraph/OrderCfg.h"
+#include "shared/rendergraph/RenderGraph.h"
 
 namespace loom {
 namespace optim {
@@ -26,14 +23,16 @@ class ExhaustiveOptimizer : public Optimizer {
       : Optimizer(cfg, scorer), _optScorer(scorer){};
 
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                           HierarOrderCfg* c, size_t depth) const;
+                           shared::rendergraph::HierarOrderCfg* c,
+                           size_t depth) const;
 
  protected:
   OptGraphScorer _optScorer;
   void initialConfig(const std::set<OptNode*>& g, OptOrderCfg* cfg) const;
   void initialConfig(const std::set<OptNode*>& g, OptOrderCfg* cfg,
                      bool sorted) const;
-  void writeHierarch(OptOrderCfg* cfg, HierarOrderCfg* c) const;
+  void writeHierarch(OptOrderCfg* cfg,
+                     shared::rendergraph::HierarOrderCfg* c) const;
 };
 }  // namespace optim
 }  // namespace loom

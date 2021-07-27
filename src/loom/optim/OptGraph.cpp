@@ -3,28 +3,28 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <set>
+#include "loom/optim/OptGraph.h"
 #include "shared/linegraph/Line.h"
 #include "shared/linegraph/LineGraph.h"
-#include "loom/graph/RenderGraph.h"
-#include "loom/optim/OptGraph.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "util/String.h"
 #include "util/graph/Algorithm.h"
 #include "util/log/Log.h"
 
-using loom::optim::OptGraph;
-using loom::optim::OptEdge;
-using loom::optim::OptNode;
 using loom::optim::EtgPart;
+using loom::optim::OptEdge;
 using loom::optim::OptEdgePL;
-using loom::optim::OptNodePL;
+using loom::optim::OptGraph;
 using loom::optim::OptLO;
+using loom::optim::OptNode;
+using loom::optim::OptNodePL;
 using loom::optim::PartnerPath;
-using loom::graph::RenderGraph;
-using shared::linegraph::LineOcc;
 using shared::linegraph::Line;
+using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
-using shared::linegraph::LineEdge;
+using shared::linegraph::LineOcc;
+using shared::rendergraph::RenderGraph;
 using util::Nullable;
 using util::graph::Algorithm;
 

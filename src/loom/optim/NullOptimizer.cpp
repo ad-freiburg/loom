@@ -6,10 +6,8 @@
 #include "util/Misc.h"
 #include "util/log/Log.h"
 
-using namespace loom;
-using namespace optim;
-using namespace loom::graph;
 using loom::optim::NullOptimizer;
+using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
 int NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
