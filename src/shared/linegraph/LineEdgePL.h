@@ -61,7 +61,6 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
 
   void updateLineOcc(const LineOcc& occ);
 
-  size_t linePosUnder(const Line* r, const std::vector<size_t> ordering) const;
   size_t linePos(const Line* r) const;
 
   const util::geo::Line<double>* getGeom() const;

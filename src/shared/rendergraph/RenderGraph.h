@@ -21,6 +21,26 @@
 namespace shared {
 namespace rendergraph {
 
+struct Partner {
+  Partner() : front(0), edge(0), line(0){};
+  Partner(const shared::linegraph::NodeFront* f,
+          const shared::linegraph::LineEdge* e,
+          const shared::linegraph::Line* r)
+      : front(f), edge(e), line(r){};
+  const shared::linegraph::NodeFront* front;
+  const shared::linegraph::LineEdge* edge;
+  const shared::linegraph::Line* line;
+};
+
+struct InnerGeom {
+  InnerGeom(util::geo::PolyLine<double> g, Partner a, Partner b, size_t slotF,
+            size_t slotT)
+      : geom(g), from(a), to(b), slotFrom(slotF), slotTo(slotT){};
+  util::geo::PolyLine<double> geom;
+  Partner from, to;
+  size_t slotFrom, slotTo;
+};
+
 class RenderGraph : public shared::linegraph::LineGraph {
  public:
   RenderGraph() : _defWidth(5), _defSpacing(5){};
@@ -34,11 +54,7 @@ class RenderGraph : public shared::linegraph::LineGraph {
 
   size_t numEdgs() const;
 
-  std::vector<shared::linegraph::InnerGeom> innerGeoms(
-      const shared::linegraph::LineNode* n, const OrderCfg& c,
-      double prec) const;
-
-  std::vector<shared::linegraph::InnerGeom> innerGeoms(
+  std::vector<shared::rendergraph::InnerGeom> innerGeoms(
       const shared::linegraph::LineNode* n, double prec) const;
 
   std::vector<util::geo::Polygon<double>> getStopGeoms(
@@ -57,10 +73,6 @@ class RenderGraph : public shared::linegraph::LineGraph {
 
   util::geo::DPoint linePosOn(const shared::linegraph::NodeFront& nf,
                               const shared::linegraph::Line* r,
-                              const OrderCfg& c, bool origGeom) const;
-
-  util::geo::DPoint linePosOn(const shared::linegraph::NodeFront& nf,
-                              const shared::linegraph::Line* r,
                               bool origGeom) const;
 
   util::geo::DPoint linePosOn(const shared::linegraph::NodeFront& nf,
@@ -73,6 +85,9 @@ class RenderGraph : public shared::linegraph::LineGraph {
       const std::set<const shared::linegraph::Line*>& served,
       const shared::linegraph::LineNode* n, double d) const;
 
+  static std::vector<Partner> getPartners(const shared::linegraph::NodeFront* f,
+                                          const shared::linegraph::LineOcc& ro);
+
   void createMetaNodes();
 
   static bool isTerminus(const shared::linegraph::LineNode* n);
@@ -80,23 +95,19 @@ class RenderGraph : public shared::linegraph::LineGraph {
  private:
   double _defWidth, _defSpacing;
 
-  shared::linegraph::InnerGeom getInnerBezier(
-      const shared::linegraph::LineNode* n, const OrderCfg& cf,
-      const shared::linegraph::Partner& partnerFrom,
-      const shared::linegraph::Partner& partnerTo, double prec) const;
+  shared::rendergraph::InnerGeom getInnerBezier(
+      const shared::linegraph::LineNode* n, const Partner& partnerFrom,
+      const Partner& partnerTo, double prec) const;
 
-  shared::linegraph::InnerGeom getInnerStraightLine(
-      const shared::linegraph::LineNode* n, const OrderCfg& c,
-      const shared::linegraph::Partner& partnerFrom,
-      const shared::linegraph::Partner& partnerTo) const;
+  shared::rendergraph::InnerGeom getInnerStraightLine(
+      const Partner& partnerFrom, const Partner& partnerTo) const;
 
-  shared::linegraph::InnerGeom getTerminusStraightLine(
-      const shared::linegraph::LineNode* n, const OrderCfg& c,
-      const shared::linegraph::Partner& partnerFrom) const;
+  shared::rendergraph::InnerGeom getTerminusStraightLine(
+      const Partner& partnerFrom) const;
 
-  shared::linegraph::InnerGeom getTerminusBezier(
-      const shared::linegraph::LineNode* n, const OrderCfg& c,
-      const shared::linegraph::Partner& partnerFrom, double prec) const;
+  shared::rendergraph::InnerGeom getTerminusBezier(
+      const shared::linegraph::LineNode* n, const Partner& partnerFrom,
+      double prec) const;
 
   util::geo::Polygon<double> getConvexFrontHull(
       const shared::linegraph::LineNode* n, double d, bool rectangulize,

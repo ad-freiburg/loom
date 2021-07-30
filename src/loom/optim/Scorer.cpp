@@ -9,63 +9,65 @@
 #include "util/Misc.h"
 
 using loom::optim::Scorer;
-using shared::linegraph::InnerGeom;
+using shared::rendergraph::InnerGeom;
 using shared::linegraph::Line;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
 using shared::rendergraph::IDENTITY_PENALTIES;
 using shared::rendergraph::OrderCfg;
 using shared::rendergraph::Penalties;
 using shared::rendergraph::RenderGraph;
 
 // _____________________________________________________________________________
-double Scorer::getScore(const OrderCfg& c) const {
+double Scorer::getScore() const {
   double ret = 0;
 
   for (auto n : _g->getNds()) {
-    ret += getScore(n, c);
+    ret += getScore(n);
   }
 
   return ret;
 }
 
 // _____________________________________________________________________________
-double Scorer::getCrossScore(const OrderCfg& c) const {
+double Scorer::getCrossScore() const {
   double ret = 0;
 
   for (auto n : _g->getNds()) {
-    ret += getCrossingScore(n, c, _pens);
+    ret += getCrossingScore(n, _pens);
   }
 
   return ret;
 }
 
 // _____________________________________________________________________________
-double Scorer::getSeparationScore(const OrderCfg& c) const {
+double Scorer::getSeparationScore() const {
   double ret = 0;
 
   for (auto n : _g->getNds()) {
-    ret += getSeparationScore(n, c, _pens);
+    ret += getSeparationScore(n, _pens);
   }
 
   return ret;
 }
 
 // _____________________________________________________________________________
-size_t Scorer::getNumCrossings(const OrderCfg& c) const {
+size_t Scorer::getNumCrossings() const {
   double ret = 0;
 
   for (auto n : _g->getNds()) {
-    ret += getNumCrossings(n, c);
+    ret += getNumCrossings(n);
   }
 
   return ret;
 }
 
 // _____________________________________________________________________________
-size_t Scorer::getNumSeparations(const OrderCfg& c) const {
+size_t Scorer::getNumSeparations() const {
   double ret = 0;
 
   for (auto n : _g->getNds()) {
-    ret += getNumSeparations(n, c);
+    ret += getNumSeparations(n);
   }
 
   return ret;
@@ -86,22 +88,19 @@ double Scorer::getNumPossSolutions() const {
 }
 
 // _____________________________________________________________________________
-double Scorer::getScore(const shared::linegraph::LineNode* n,
-                        const OrderCfg& cfg) const {
-  return getCrossingScore(n, cfg, _pens) + getSeparationScore(n, cfg, _pens);
+double Scorer::getScore(const LineNode* n) const {
+  return getCrossingScore(n, _pens) + getSeparationScore(n, _pens);
 }
 
 // _____________________________________________________________________________
-size_t Scorer::getNumCrossings(const shared::linegraph::LineNode* n,
-                               const OrderCfg& c) const {
-  return getCrossingScore(n, c, IDENTITY_PENALTIES);
+size_t Scorer::getNumCrossings(const LineNode* n) const {
+  return getCrossingScore(n, IDENTITY_PENALTIES);
 }
 
 // _____________________________________________________________________________
-double Scorer::getCrossingScore(const shared::linegraph::LineNode* n,
-                                const OrderCfg& c,
+double Scorer::getCrossingScore(const LineNode* n,
                                 const Penalties& pens) const {
-  std::vector<InnerGeom> igs = _g->innerGeoms(n, c, -1);
+  std::vector<InnerGeom> igs = _g->innerGeoms(n, -1);
   size_t ret = 0;
 
   for (size_t i = 0; i < igs.size(); ++i) {
@@ -145,40 +144,33 @@ double Scorer::getCrossingScore(const shared::linegraph::LineNode* n,
     }
   }
 
+
+  size_t ret2 = 0;
+
   return ret;
 }
 
 // _____________________________________________________________________________
-size_t Scorer::getNumSeparations(const shared::linegraph::LineNode* n,
-                                 const OrderCfg& c) const {
-  return getSeparationScore(n, c, IDENTITY_PENALTIES);
+size_t Scorer::getNumSeparations(const LineNode* n) const {
+  return getSeparationScore(n, IDENTITY_PENALTIES);
 }
 
 // _____________________________________________________________________________
-double Scorer::getSeparationScore(const shared::linegraph::LineNode* n,
-                                  const OrderCfg& c,
+double Scorer::getSeparationScore(const LineNode* n,
                                   const Penalties& pens) const {
   size_t ret = 0;
-  for (auto nf : n->pl().fronts()) {
-    const auto* e = nf.edge;
-    std::vector<std::pair<const Line*, const Line*> > curPairs;
-    for (size_t i = 0; i < c.find(e)->second.size() - 1; i++) {
-      size_t p = c.find(e)->second[i];
-      curPairs.push_back(std::pair<const Line*, const Line*>(
-          e->pl().lineOccAtPos(p).line,
-          e->pl().lineOccAtPos(c.find(e)->second[i + 1]).line));
-    }
+  for (auto e : n->getAdjList()) {
+    std::vector<std::pair<size_t, size_t> > curPairs;
 
-    for (auto p : curPairs) {
-      for (auto nf : n->pl().fronts()) {
-        const auto* f = nf.edge;
+    for (size_t p = 0; p < e->pl().getLines().size() - 1; p++) {
+      for (auto f : n->getAdjList()) {
         if (e == f) continue;
 
-        if (f->pl().hasLine(p.first) && f->pl().hasLine(p.second) &&
-            n->pl().connOccurs(p.first, e, f) &&
-            n->pl().connOccurs(p.second, e, f)) {
-          if (abs(int(f->pl().linePosUnder(p.first, c.find(f)->second)) -
-                  int(f->pl().linePosUnder(p.second, c.find(f)->second))) > 1) {
+        auto lnA = e->pl().lineOccAtPos(p).line;
+        auto lnB = e->pl().lineOccAtPos(p + 1).line;
+
+        if (LineGraph::lineCtd(e, f, lnA) && LineGraph::lineCtd(e, f, lnB)) {
+          if (abs(int(f->pl().linePos(lnA)) - int(f->pl().linePos(lnB))) > 1) {
             ret += getSplittingPenalty(n, pens);
           }
         }
@@ -190,7 +182,7 @@ double Scorer::getSeparationScore(const shared::linegraph::LineNode* n,
 }
 
 // _____________________________________________________________________________
-int Scorer::getCrossingPenaltySameSeg(const shared::linegraph::LineNode* n,
+int Scorer::getCrossingPenaltySameSeg(const LineNode* n,
                                       const Penalties& pens) const {
   double ret = 1;
   if (pens.crossAdjPen) ret *= n->getDeg();
@@ -204,7 +196,7 @@ int Scorer::getCrossingPenaltySameSeg(const shared::linegraph::LineNode* n,
 }
 
 // _____________________________________________________________________________
-int Scorer::getCrossingPenaltyDiffSeg(const shared::linegraph::LineNode* n,
+int Scorer::getCrossingPenaltyDiffSeg(const LineNode* n,
                                       const Penalties& pens) const {
   double ret = 1;
   if (pens.crossAdjPen) ret *= n->getDeg();
@@ -218,7 +210,7 @@ int Scorer::getCrossingPenaltyDiffSeg(const shared::linegraph::LineNode* n,
 }
 
 // _____________________________________________________________________________
-int Scorer::getSplittingPenalty(const shared::linegraph::LineNode* n,
+int Scorer::getSplittingPenalty(const LineNode* n,
                                 const Penalties& pens) const {
   double ret = 1;
   if (pens.splitAdjPen) ret *= n->getDeg();
@@ -232,30 +224,26 @@ int Scorer::getSplittingPenalty(const shared::linegraph::LineNode* n,
 }
 
 // _____________________________________________________________________________
-double Scorer::getSeparationScore(const shared::linegraph::LineNode* n,
-                                  const OrderCfg& c) const {
-  return getSeparationScore(n, c, _pens);
+double Scorer::getSeparationScore(const LineNode* n) const {
+  return getSeparationScore(n, _pens);
 }
 
 // _____________________________________________________________________________
-double Scorer::getCrossingScore(const shared::linegraph::LineNode* n,
-                                const OrderCfg& c) const {
-  return getCrossingScore(n, c, _pens);
+double Scorer::getCrossingScore(const LineNode* n) const {
+  return getCrossingScore(n, _pens);
 }
 
 // _____________________________________________________________________________
-int Scorer::getCrossingPenaltySameSeg(
-    const shared::linegraph::LineNode* n) const {
+int Scorer::getCrossingPenaltySameSeg(const LineNode* n) const {
   return getCrossingPenaltySameSeg(n, _pens);
 }
 
 // _____________________________________________________________________________
-int Scorer::getCrossingPenaltyDiffSeg(
-    const shared::linegraph::LineNode* n) const {
+int Scorer::getCrossingPenaltyDiffSeg(const LineNode* n) const {
   return getCrossingPenaltyDiffSeg(n, _pens);
 }
 
 // _____________________________________________________________________________
-int Scorer::getSplittingPenalty(const shared::linegraph::LineNode* n) const {
+int Scorer::getSplittingPenalty(const LineNode* n) const {
   return getSplittingPenalty(n, _pens);
 }

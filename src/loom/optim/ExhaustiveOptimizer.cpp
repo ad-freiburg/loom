@@ -17,9 +17,9 @@ using shared::rendergraph::HierarOrderCfg;
 // _____________________________________________________________________________
 int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                       HierarOrderCfg* hc, size_t depth) const {
-  LOGTO(DEBUG,std::cerr) << prefix(depth)
-             << "(ExhaustiveOptimizer) Optimizing component with " << g.size()
-             << " nodes.";
+  LOGTO(DEBUG, std::cerr) << prefix(depth)
+                          << "(ExhaustiveOptimizer) Optimizing component with "
+                          << g.size() << " nodes.";
 
   OptOrderCfg best, cur, null;
   double bestScore = DBL_MAX;
@@ -39,16 +39,17 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   size_t last = 0;
   bool running = true;
 
-  double curScore = _optScorer.getCrossingScore(og, g, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, g, cur);
+  double curScore = _optScorer.getCrossingScore(g, cur);
+  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
 
   bestScore = curScore;
   best = cur;
 
   while (true) {
     if (bestScore == 0) {
-      LOGTO(DEBUG,std::cerr) << prefix(depth) << "Found optimal score 0 prematurely after "
-                 << iters << " iterations!";
+      LOGTO(DEBUG, std::cerr)
+          << prefix(depth) << "Found optimal score 0 prematurely after "
+          << iters << " iterations!";
       writeHierarch(&best, hc);
       return 0;
     }
@@ -56,7 +57,7 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
     iters++;
 
     if (iters - last == 10000) {
-      LOGTO(DEBUG,std::cerr) << prefix(depth) << "@ " << iters;
+      LOGTO(DEBUG, std::cerr) << prefix(depth) << "@ " << iters;
       last = iters;
     }
 
@@ -73,9 +74,8 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
     if (!running) break;
 
-    double curScore = _optScorer.getCrossingScore(og, g, cur);
-    if (_cfg->splittingOpt)
-      curScore += _optScorer.getSplittingScore(og, g, cur);
+    double curScore = _optScorer.getCrossingScore(g, cur);
+    if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
 
     if (curScore < bestScore) {
       bestScore = curScore;
@@ -83,8 +83,8 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
     }
   }
 
-  LOGTO(DEBUG,std::cerr) << prefix(depth) << "Found optimal score " << bestScore
-             << " after " << iters << " iterations!";
+  LOGTO(DEBUG, std::cerr) << prefix(depth) << "Found optimal score "
+                          << bestScore << " after " << iters << " iterations!";
 
   writeHierarch(&best, hc);
 

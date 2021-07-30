@@ -46,24 +46,6 @@ struct NodeFront {
   double refEtgLengthBefExp;
 };
 
-struct Partner {
-  Partner() : front(0), edge(0), line(0){};
-  Partner(const NodeFront* f, const LineEdge* e, const Line* r)
-      : front(f), edge(e), line(r){};
-  const NodeFront* front;
-  const LineEdge* edge;
-  const Line* line;
-};
-
-struct InnerGeom {
-  InnerGeom(PolyLine<double> g, Partner a, Partner b, size_t slotF,
-            size_t slotT)
-      : geom(g), from(a), to(b), slotFrom(slotF), slotTo(slotT){};
-  PolyLine<double> geom;
-  Partner from, to;
-  size_t slotFrom, slotTo;
-};
-
 struct Station {
   Station(const std::string& id, const std::string& name,
           const util::geo::DPoint& pos)
@@ -93,7 +75,7 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
 
   size_t lineGed() const;
 
-  // TODO refactor
+  // TODO refactor, all front related stuff should go into rendergraph
   const std::vector<NodeFront>& fronts() const;
   std::vector<NodeFront>& fronts();
   void delMainDir(const LineEdge* e);

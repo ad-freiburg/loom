@@ -21,6 +21,7 @@ using label::Labeller;
 using output::InnerClique;
 using output::SvgRenderer;
 using shared::rendergraph::RenderGraph;
+using shared::rendergraph::InnerGeom;
 using shared::linegraph::Line;
 using shared::linegraph::LineNode;
 using util::geo::DPoint;
@@ -255,7 +256,7 @@ void SvgRenderer::renderNodeConnections(const RenderGraph& outG,
 // _____________________________________________________________________________
 std::multiset<InnerClique> SvgRenderer::getInnerCliques(
     const shared::linegraph::LineNode* n,
-    std::vector<shared::linegraph::InnerGeom> pool, size_t level) const {
+    std::vector<InnerGeom> pool, size_t level) const {
   std::multiset<InnerClique> ret;
 
   // start with the first geom in pool
@@ -278,7 +279,7 @@ std::multiset<InnerClique> SvgRenderer::getInnerCliques(
 // _____________________________________________________________________________
 size_t SvgRenderer::getNextPartner(
     const InnerClique& forClique,
-    const std::vector<shared::linegraph::InnerGeom>& pool, size_t level) const {
+    const std::vector<InnerGeom>& pool, size_t level) const {
   for (size_t i = 0; i < pool.size(); i++) {
     const auto& ic = pool[i];
     for (auto& ciq : forClique.geoms) {
@@ -292,8 +293,8 @@ size_t SvgRenderer::getNextPartner(
 }
 
 // _____________________________________________________________________________
-bool SvgRenderer::isNextTo(const shared::linegraph::InnerGeom& a,
-                           const shared::linegraph::InnerGeom b) const {
+bool SvgRenderer::isNextTo(const InnerGeom& a,
+                           const InnerGeom& b) const {
   // TODO!!!!!
   return false;
 
@@ -322,8 +323,8 @@ bool SvgRenderer::isNextTo(const shared::linegraph::InnerGeom& a,
 }
 
 // _____________________________________________________________________________
-bool SvgRenderer::hasSameOrigin(const shared::linegraph::InnerGeom& a,
-                                const shared::linegraph::InnerGeom b) const {
+bool SvgRenderer::hasSameOrigin(const InnerGeom& a,
+                                const InnerGeom& b) const {
   if (a.from.front == b.from.front) {
     return a.slotFrom == b.slotFrom;
   }
@@ -347,7 +348,7 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
   std::multiset<InnerClique> renderCliques = getInnerCliques(n, cc.geoms, 0);
   for (const auto& c : renderCliques) {
     // the longest geom will be the ref geom
-    shared::linegraph::InnerGeom ref = c.geoms[0];
+    InnerGeom ref = c.geoms[0];
     for (size_t i = 1; i < c.geoms.size(); i++) {
       if (c.geoms[i].geom.getLength() > ref.geom.getLength()) ref = c.geoms[i];
     }

@@ -133,14 +133,6 @@ void LineEdgePL::writePermutation(const std::vector<size_t> order) {
 }
 
 // _____________________________________________________________________________
-size_t LineEdgePL::linePosUnder(const Line* l,
-                                const std::vector<size_t> order) const {
-  size_t i = _lineToIdx.find(l)->second;
-  size_t pos = std::find(order.begin(), order.end(), i) - order.begin();
-  return pos;
-}
-
-// _____________________________________________________________________________
 size_t LineEdgePL::linePos(const Line* r) const {
   auto it = _lineToIdx.find(r);
   if (it == _lineToIdx.end()) return -1;

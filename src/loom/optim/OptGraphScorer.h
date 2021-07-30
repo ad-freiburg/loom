@@ -16,26 +16,23 @@ class OptGraphScorer {
  public:
   OptGraphScorer(const Scorer* scorer) : _scorer(scorer) {}
 
-  double getCrossingScore(OptGraph* og, const std::set<OptNode*>& g,
+  double getCrossingScore(const std::set<OptNode*>& g,
                           const OptOrderCfg& c) const;
-  double getCrossingScore(OptGraph* og, OptNode* n, const OptOrderCfg& c) const;
+  double getCrossingScore(OptNode* n, const OptOrderCfg& c) const;
 
-  double getCrossingScore(OptGraph* og, OptEdge* e, const OptOrderCfg& c) const;
-  double getSplittingScore(OptGraph* og, OptEdge* e,
-                           const OptOrderCfg& c) const;
+  double getCrossingScore(OptEdge* e, const OptOrderCfg& c) const;
+  double getSplittingScore(OptEdge* e, const OptOrderCfg& c) const;
 
-  double getSplittingScore(OptGraph* og, const std::set<OptNode*>& g,
+  double getSplittingScore(const std::set<OptNode*>& g,
                            const OptOrderCfg& c) const;
-  double getSplittingScore(OptGraph* og, OptNode* n,
-                           const OptOrderCfg& c) const;
+  double getSplittingScore(OptNode* n, const OptOrderCfg& c) const;
 
  private:
   const Scorer* _scorer;
 
-  std::pair<size_t, size_t> getNumCrossings(OptGraph* og, OptNode* n,
+  std::pair<size_t, size_t> getNumCrossings(OptNode* n,
                                             const OptOrderCfg& c) const;
-  size_t getNumSeparations(OptGraph* og, OptNode* n,
-                           const OptOrderCfg& c) const;
+  size_t getNumSeparations(OptNode* n, const OptOrderCfg& c) const;
 };
 }  // namespace optim
 }  // namespace loom

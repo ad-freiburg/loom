@@ -40,7 +40,7 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
     iters++;
 
     if (iters - last == 10000) {
-      LOGTO(INFO,std::cerr) << "@ " << iters;
+      LOGTO(INFO, std::cerr) << "@ " << iters;
       last = iters;
     }
 
@@ -89,19 +89,18 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
       cur[edges[i]] = old;
     }
 
-    double curScore = _optScorer.getCrossingScore(og, g, cur);
-    if (_cfg->splittingOpt)
-      curScore += _optScorer.getSplittingScore(og, g, cur);
+    double curScore = _optScorer.getCrossingScore(g, cur);
+    if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
 
     if (!found) {
-      LOGTO(INFO,std::cerr) << "Local optimum found after " << iters
-                << ", target=" << curScore;
+      LOGTO(INFO, std::cerr)
+          << "Local optimum found after " << iters << ", target=" << curScore;
       break;
     }
 
     cur[bestEdge] = bestOrder;
 
-    LOGTO(DEBUG,std::cerr) << "At round " << iters << ", target=" << curScore;
+    LOGTO(DEBUG, std::cerr) << "At round " << iters << ", target=" << curScore;
   }
 
   writeHierarch(&cur, hc);
@@ -111,7 +110,7 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 // _____________________________________________________________________________
 double HillClimbOptimizer::getScore(OptGraph* og, OptEdge* e,
                                     OptOrderCfg& cur) const {
-  double curScore = _optScorer.getCrossingScore(og, e, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, e, cur);
+  double curScore = _optScorer.getCrossingScore(e, cur);
+  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(e, cur);
   return curScore;
 }

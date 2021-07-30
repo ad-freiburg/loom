@@ -36,11 +36,11 @@ class SvgRendererException : public std::exception {
 
 struct InnerClique {
   InnerClique(const shared::linegraph::LineNode* n,
-              shared::linegraph::InnerGeom geom)
+              shared::rendergraph::InnerGeom geom)
       : n(n) {
     geoms.push_back(geom);
   };
-  std::vector<shared::linegraph::InnerGeom> geoms;
+  std::vector<shared::rendergraph::InnerGeom> geoms;
 
   double getZWeight() const;
   size_t getNumBranchesIn(const shared::linegraph::NodeFront* front) const;
@@ -149,18 +149,18 @@ class SvgRenderer : public Renderer {
 
   std::multiset<InnerClique> getInnerCliques(
       const shared::linegraph::LineNode* n,
-      std::vector<shared::linegraph::InnerGeom> geoms, size_t level) const;
+      std::vector<shared::rendergraph::InnerGeom> geoms, size_t level) const;
 
   void renderClique(const InnerClique& c,
                     const shared::linegraph::LineNode* node);
 
-  bool isNextTo(const shared::linegraph::InnerGeom& a,
-                const shared::linegraph::InnerGeom b) const;
-  bool hasSameOrigin(const shared::linegraph::InnerGeom& a,
-                     const shared::linegraph::InnerGeom b) const;
+  bool isNextTo(const shared::rendergraph::InnerGeom& a,
+                const shared::rendergraph::InnerGeom& b) const;
+  bool hasSameOrigin(const shared::rendergraph::InnerGeom& a,
+                     const shared::rendergraph::InnerGeom& b) const;
 
   size_t getNextPartner(const InnerClique& forGeom,
-                        const std::vector<shared::linegraph::InnerGeom>& pool,
+                        const std::vector<shared::rendergraph::InnerGeom>& pool,
                         size_t level) const;
 
   std::string getMarkerPathMale(double w) const;

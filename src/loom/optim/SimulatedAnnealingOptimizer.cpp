@@ -47,8 +47,8 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
     double temp = 1000.0 / iters;
 
     if (iters - last == 10000) {
-      LOGTO(DEBUG,std::cerr) << "@ " << iters << ", temp = " << temp
-                 << ", last change was at " << k << " iters.";
+      LOGTO(DEBUG, std::cerr) << "@ " << iters << ", temp = " << temp
+                              << ", last change was at " << k << " iters.";
       last = iters;
     }
 
@@ -82,11 +82,11 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
     if (iters - k > ABORT_AFTER_UNCH) break;
   }
 
-  double curScore = _optScorer.getCrossingScore(og, g, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, g, cur);
+  double curScore = _optScorer.getCrossingScore(g, cur);
+  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
 
-  LOGTO(DEBUG,std::cerr) << "Stopped after " << iters
-             << " iterations. Final target = " << curScore;
+  LOGTO(DEBUG, std::cerr) << "Stopped after " << iters
+                          << " iterations. Final target = " << curScore;
 
   writeHierarch(&cur, hc);
   return iters;
@@ -95,7 +95,7 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
 // _____________________________________________________________________________
 double SimulatedAnnealingOptimizer::getScore(OptGraph* og, OptEdge* e,
                                              OptOrderCfg& cur) const {
-  double curScore = _optScorer.getCrossingScore(og, e, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(og, e, cur);
+  double curScore = _optScorer.getCrossingScore(e, cur);
+  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(e, cur);
   return curScore;
 }

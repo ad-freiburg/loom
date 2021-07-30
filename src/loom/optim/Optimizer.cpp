@@ -18,9 +18,6 @@ using loom::optim::Optimizer;
 using loom::optim::OptNode;
 using loom::optim::PosComPair;
 using shared::linegraph::Line;
-using shared::linegraph::LineEdge;
-using shared::linegraph::LineNode;
-using shared::linegraph::NodeFront;
 using shared::rendergraph::HierarOrderCfg;
 using shared::rendergraph::OrderCfg;
 using shared::rendergraph::RenderGraph;
@@ -153,11 +150,11 @@ int Optimizer::optimize(RenderGraph* rg) const {
 
     if (runs > 1) {
       if (_cfg->splittingOpt)
-        scoreSum += _scorer->getScore(c);
+        scoreSum += _scorer->getScore();
       else
-        scoreSum += _scorer->getCrossScore(c);
-      crossSum += _scorer->getNumCrossings(c);
-      sepSum += _scorer->getNumSeparations(c);
+        scoreSum += _scorer->getCrossScore();
+      crossSum += _scorer->getNumCrossings();
+      sepSum += _scorer->getNumSeparations();
     }
   }
 
@@ -189,6 +186,7 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment) {
 std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
   std::set<const Line*> processed;
   std::vector<LinePair> ret;
+
   for (auto& toA : segment->pl().getLines()) {
     processed.insert(toA.line);
     for (auto& toB : segment->pl().getLines()) {

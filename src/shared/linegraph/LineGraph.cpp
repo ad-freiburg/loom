@@ -22,7 +22,6 @@ using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineOcc;
 using shared::linegraph::NodeGrid;
-using shared::linegraph::Partner;
 using util::geo::DPoint;
 using util::geo::Point;
 
@@ -273,8 +272,7 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
     }
 
     // third pass, exceptions (TODO: do this in the first part, store in some
-    // data strcuture,
-    //  add here!)
+    // data structure, add here!)
     for (auto feature : j["features"]) {
       auto props = feature["properties"];
       auto geom = feature["geometry"];
@@ -503,21 +501,36 @@ const Line* LineGraph::getLine(const std::string& id) const {
 }
 
 // _____________________________________________________________________________
-std::vector<LineOcc> LineGraph::getCtdLinesIn(const Line* r,
-                                              const LineNode* dir,
-                                              const LineEdge* fromEdge,
+bool LineGraph::lineCtd(const LineEdge* frEdg, const LineEdge* toEdg,
+                        const Line* line) {
+  if (!frEdg->pl().hasLine(line) || !toEdg->pl().hasLine(line)) return false;
+  auto frLn = frEdg->pl().lineOcc(line);
+  auto toLn = toEdg->pl().lineOcc(line);
+  return lineCtd(frEdg, frLn, toEdg, toLn);
+}
+
+// _____________________________________________________________________________
+bool LineGraph::lineCtd(const LineEdge* frEdg, const LineOcc& frLn,
+                        const LineEdge* toEdg, const LineOcc& toLn) {
+  if (frLn.line != toLn.line) return false;
+  const auto* n = sharedNode(frEdg, toEdg);
+  if (!n || n->getDeg() == 1) return false;
+  return (frLn.direction == 0 || toLn.direction == 0 ||
+          (frLn.direction == n && toLn.direction != n) ||
+          (frLn.direction != n && toLn.direction == n)) &&
+         n->pl().connOccurs(frLn.line, frEdg, toEdg);
+}
+
+// _____________________________________________________________________________
+std::vector<LineOcc> LineGraph::getCtdLinesIn(const LineOcc& frLn,
+                                              const LineEdge* frEdge,
                                               const LineEdge* toEdge) {
   std::vector<LineOcc> ret;
-  const auto* n = sharedNode(fromEdge, toEdge);
+  const auto* n = sharedNode(frEdge, toEdge);
   if (!n || n->getDeg() == 1) return ret;
 
-  for (const auto& to : toEdge->pl().getLines()) {
-    if (to.line == r) {
-      if (to.direction == 0 || dir == 0 || (to.direction == n && dir != n) ||
-          (to.direction != n && dir == n)) {
-        if (n->pl().connOccurs(r, fromEdge, toEdge)) ret.push_back(to);
-      }
-    }
+  for (const auto& toLn : toEdge->pl().getLines()) {
+    if (lineCtd(frEdge, frLn, toEdge, toLn)) ret.push_back(toLn);
   }
 
   return ret;
@@ -531,7 +544,7 @@ std::vector<LineOcc> LineGraph::getCtdLinesIn(const LineEdge* fromEdge,
   if (!n) return ret;
 
   for (const auto& to : fromEdge->pl().getLines()) {
-    auto r = getCtdLinesIn(to.line, to.direction, fromEdge, toEdge);
+    auto r = getCtdLinesIn(to, fromEdge, toEdge);
     ret.insert(ret.end(), r.begin(), r.end());
   }
 
@@ -579,29 +592,6 @@ std::vector<const Line*> LineGraph::getSharedLines(const LineEdge* a,
     if (b->pl().hasLine(to.line)) ret.push_back(to.line);
   }
 
-  return ret;
-}
-
-// _____________________________________________________________________________
-std::vector<Partner> LineGraph::getPartners(const LineNode* n,
-                                            const NodeFront* f,
-                                            const LineOcc& ro) {
-  std::vector<Partner> ret;
-  for (const auto& nf : n->pl().fronts()) {
-    if (&nf == f) continue;
-
-    // TODO: if that is so, then why do we have the parameter n?
-    assert(f->n == n);
-
-    for (const LineOcc& to :
-         getCtdLinesIn(ro.line, ro.direction, f->edge, nf.edge)) {
-      Partner p(f, nf.edge, to.line);
-      p.front = &nf;
-      p.edge = nf.edge;
-      p.line = to.line;
-      ret.push_back(p);
-    }
-  }
   return ret;
 }
 

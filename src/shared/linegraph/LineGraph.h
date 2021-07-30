@@ -44,18 +44,23 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   void addLine(const Line* r);
   const Line* getLine(const std::string& id) const;
   void expandBBox(const util::geo::Point<double>& p);
-  //
 
   size_t getNumNds() const;
   size_t getNumNds(bool topo) const;
   size_t getNumLines() const;
 
-  static std::vector<LineOcc> getCtdLinesIn(const Line* r, const LineNode* dir,
+  static std::vector<LineOcc> getCtdLinesIn(const LineOcc& line,
                                             const LineEdge* fromEdge,
                                             const LineEdge* toEdge);
 
   static std::vector<LineOcc> getCtdLinesIn(const LineEdge* fromEdge,
                                             const LineEdge* toEdge);
+
+  static bool lineCtd(const LineEdge* fromEdge, const LineOcc& fromLine,
+                            const LineEdge* toEdge, const LineOcc& toLine);
+
+  static bool lineCtd(const LineEdge* fromEdge,
+                            const LineEdge* toEdge, const Line* line);
 
   static std::vector<const Line*> getSharedLines(const LineEdge* a,
                                                  const LineEdge* b);
@@ -63,9 +68,6 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   static size_t getLDeg(const LineNode* nd);
   static size_t getMaxLineNum(const LineNode* nd);
   size_t getMaxLineNum() const;
-
-  static std::vector<Partner> getPartners(const LineNode* n, const NodeFront* f,
-                                          const LineOcc& ro);
 
   static std::set<const shared::linegraph::Line*> servedLines(
       const shared::linegraph::LineNode* n);

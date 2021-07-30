@@ -101,16 +101,17 @@ int main(int argc, char** argv) {
     nullOptim.optimize(&g);
   }
 
-  // LOGTO(INFO,std::cerr) << "(stats) Total graph score AFTER optim is -- "
-  // << scorer.getScore() << " -- (excl. unavoidable crossings!)";
-  // LOGTO(INFO,std::cerr) << "(stats)   Per node graph score: "
-  // << scorer.getScore() / g.getNds()->size();
-  // LOGTO(INFO,std::cerr) << "(stats)   Crossings: " <<
-  // scorer.getNumCrossings()
-  // << " (score: " << scorer.getCrossScore() << ")";
-  // LOGTO(INFO,std::cerr) << "(stats)   Separations: " <<
-  // scorer.getNumSeparations()
-  // << " (score: " << scorer.getSeparationScore() << ")";
+  LOGTO(DEBUG,std::cerr) << "(stats) Total graph score AFTER optim is -- "
+  << scorer.getScore() << " -- (excl. unavoidable crossings!)";
+  LOGTO(DEBUG,std::cerr) << "(stats)   Per node graph score: "
+  << scorer.getScore() / g.getNds()->size();
+  LOGTO(DEBUG,std::cerr) << "(stats)   Crossings: " <<
+  scorer.getNumCrossings()
+  << " (score: " << scorer.getCrossScore() << ")";
+  LOGTO(DEBUG,std::cerr) << "(stats)   Separations: " <<
+  scorer.getNumSeparations()
+  << " (score: " << scorer.getSeparationScore() << ")";
+
   util::geo::output::GeoGraphJsonOutput out;
   out.print(g, std::cout);
 

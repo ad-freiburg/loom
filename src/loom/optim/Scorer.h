@@ -22,37 +22,30 @@ class Scorer {
 
   const shared::rendergraph::RenderGraph* getGraph() const { return _g; }
 
-  double getScore(const shared::rendergraph::OrderCfg& c) const;
+  double getScore() const;
 
-  double getCrossScore(const shared::rendergraph::OrderCfg& c) const;
+  double getCrossScore() const;
 
-  double getSeparationScore(const shared::rendergraph::OrderCfg& c) const;
+  double getSeparationScore() const;
 
-  size_t getNumCrossings(const shared::rendergraph::OrderCfg& c) const;
+  size_t getNumCrossings() const;
 
-  size_t getNumSeparations(const shared::rendergraph::OrderCfg& c) const;
+  size_t getNumSeparations() const;
 
   double getNumPossSolutions() const;
   size_t getMaxCrossPenalty() const;
   size_t getMaxSplitPenalty() const;
 
-  double getScore(const shared::linegraph::LineNode* n,
-                  const shared::rendergraph::OrderCfg& cfg) const;
-  size_t getNumCrossings(const shared::linegraph::LineNode* n,
-                         const shared::rendergraph::OrderCfg& c) const;
-  size_t getNumSeparations(const shared::linegraph::LineNode* n,
-                           const shared::rendergraph::OrderCfg& c) const;
+  double getScore(const shared::linegraph::LineNode* n) const;
+  size_t getNumCrossings(const shared::linegraph::LineNode* n) const;
+  size_t getNumSeparations(const shared::linegraph::LineNode* n) const;
   double getSeparationScore(const shared::linegraph::LineNode* n,
-                            const shared::rendergraph::OrderCfg& c,
                             const shared::rendergraph::Penalties& pens) const;
   double getCrossingScore(const shared::linegraph::LineNode* n,
-                          const shared::rendergraph::OrderCfg& c,
                           const shared::rendergraph::Penalties& pens) const;
 
-  double getSeparationScore(const shared::linegraph::LineNode* n,
-                            const shared::rendergraph::OrderCfg& c) const;
-  double getCrossingScore(const shared::linegraph::LineNode* n,
-                          const shared::rendergraph::OrderCfg& c) const;
+  double getSeparationScore(const shared::linegraph::LineNode* n) const;
+  double getCrossingScore(const shared::linegraph::LineNode* n) const;
 
   int getCrossingPenaltySameSeg(
       const shared::linegraph::LineNode* n,
