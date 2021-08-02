@@ -6,10 +6,10 @@
 #include <cstdio>
 #include <fstream>
 #include <thread>
-#include "shared/rendergraph/OrderCfg.h"
 #include "loom/optim/ILPOptimizer.h"
 #include "loom/optim/OptGraph.h"
 #include "shared/optim/ILPSolvProv.h"
+#include "shared/rendergraph/OrderCfg.h"
 #include "util/String.h"
 #include "util/geo/Geo.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -24,11 +24,11 @@ using shared::rendergraph::HierarOrderCfg;
 // _____________________________________________________________________________
 int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                HierarOrderCfg* hc, size_t depth) const {
-  LOGTO(DEBUG,std::cerr) << "Creating ILP problem... ";
+  LOGTO(DEBUG, std::cerr) << "Creating ILP problem... ";
   auto lp = createProblem(og, g);
-  LOGTO(DEBUG,std::cerr) << " .. done";
+  LOGTO(DEBUG, std::cerr) << " .. done";
 
-  LOGTO(DEBUG,std::cerr) << "Solving problem...";
+  LOGTO(DEBUG, std::cerr) << "Solving problem...";
 
   std::chrono::high_resolution_clock::time_point t1 =
       std::chrono::high_resolution_clock::now();
@@ -51,10 +51,10 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-  LOGTO(INFO,std::cerr) << " === Solve done in " << duration << " ms ===";
-  LOGTO(INFO,std::cerr) << "(stats) ILP obj = " << lp->getObjVal();
+  LOGTO(INFO, std::cerr) << " === Solve done in " << duration << " ms ===";
+  LOGTO(INFO, std::cerr) << "(stats) ILP obj = " << lp->getObjVal();
   if (status == shared::optim::SolveType::OPTIM)
-    LOGTO(INFO,std::cerr) << "(stats) (which is optimal)";
+    LOGTO(INFO, std::cerr) << "(stats) (which is optimal)";
 
   getConfigurationFromSolution(lp, hc, g);
 
@@ -65,18 +65,18 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 int ILPOptimizer::getCrossingPenaltySameSeg(const OptNode* n) const {
-  return _scorer->getCrossingPenaltySameSeg(n->pl().node);
+  return _scorer.getCrossingPenSameSeg(n);
 }
 
 // _____________________________________________________________________________
 int ILPOptimizer::getCrossingPenaltyDiffSeg(const OptNode* n) const {
-  return _scorer->getCrossingPenaltyDiffSeg(n->pl().node);
+  return _scorer.getCrossingPenDiffSeg(n);
 }
 
 // _____________________________________________________________________________
 int ILPOptimizer::getSplittingPenalty(const OptNode* n) const {
   // double the value because we only count a splitting once for each pair!
-  return _scorer->getSplittingPenalty(n->pl().node) * 1;
+  return _scorer.getSplittingPen(n) * 1;
 }
 
 // _____________________________________________________________________________

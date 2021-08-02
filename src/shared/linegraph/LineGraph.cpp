@@ -863,3 +863,17 @@ breakfor:
     }
   }
 }
+
+// _____________________________________________________________________________
+double LineGraph::searchSpaceSize() const {
+  double ret = 1;
+
+  for (auto n :getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      ret *= util::factorial(e->pl().getLines().size());
+    }
+  }
+
+  return ret;
+}

@@ -823,3 +823,20 @@ std::vector<NodeFront> RenderGraph::getClosedNodeFronts(
 
   return res;
 }
+
+// _____________________________________________________________________________
+double RenderGraph::getOutAngle(const LineNode* n, const LineEdge* e) {
+  double checkDist = 10;
+  assert(e->getFrom() == n || e->getTo() == n);
+  if (e->getFrom() == n) {
+    return angBetween(
+        *n->pl().getGeom(),
+        PolyLine<double>(*e->pl().getGeom()).getPointAtDist(checkDist).p);
+  } else {
+    return angBetween(
+        *n->pl().getGeom(),
+        PolyLine<double>(*e->pl().getGeom())
+            .getPointAtDist(util::geo::len(*e->pl().getGeom()) - checkDist)
+            .p);
+  }
+}

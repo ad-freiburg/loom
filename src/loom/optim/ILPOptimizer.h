@@ -8,7 +8,6 @@
 #include "loom/config/LoomConfig.h"
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/Optimizer.h"
-#include "loom/optim/Scorer.h"
 #include "shared/linegraph/Line.h"
 #include "shared/optim/ILPSolver.h"
 #include "shared/rendergraph/OrderCfg.h"
@@ -18,8 +17,9 @@ namespace optim {
 
 class ILPOptimizer : public Optimizer {
  public:
-  ILPOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : Optimizer(cfg, scorer){};
+  ILPOptimizer(const config::Config* cfg,
+               const shared::rendergraph::Penalties& pens)
+      : Optimizer(cfg, pens){};
 
   int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                    shared::rendergraph::HierarOrderCfg* c, size_t depth) const;

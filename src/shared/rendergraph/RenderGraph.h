@@ -77,6 +77,8 @@ class RenderGraph : public shared::linegraph::LineGraph {
   void createMetaNodes();
 
   static bool isTerminus(const shared::linegraph::LineNode* n);
+  static double getOutAngle(const shared::linegraph::LineNode* n,
+                            const shared::linegraph::LineEdge* e);
 
  private:
   double _defWidth, _defSpacing;

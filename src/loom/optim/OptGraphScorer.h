@@ -14,7 +14,7 @@ namespace optim {
 
 class OptGraphScorer {
  public:
-  OptGraphScorer(const Scorer* scorer) : _scorer(scorer) {}
+  OptGraphScorer(const shared::rendergraph::Penalties& pens) : _pens(pens) {}
 
   double getCrossingScore(const OptGraph* g, const OptOrderCfg& c) const;
   double getCrossingScore(const std::set<OptNode*>& g,
@@ -41,9 +41,12 @@ class OptGraphScorer {
 
   size_t getNumSeparations(const OptGraph* g, const OptOrderCfg& c) const;
 
- private:
-  const Scorer* _scorer;
+  double getSplittingPen(const OptNode* n) const;
+  double getCrossingPenSameSeg(const OptNode* n) const;
+  double getCrossingPenDiffSeg(const OptNode* n) const;
 
+ private:
+  shared::rendergraph::Penalties _pens;
 };
 }  // namespace optim
 }  // namespace loom

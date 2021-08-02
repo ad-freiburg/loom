@@ -33,7 +33,13 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
 // _____________________________________________________________________________
 size_t OptGraphScorer::getNumSeparations(const OptGraph* g,
                                          const OptOrderCfg& c) const {
-  return 0;
+  double ret = 0;
+
+  for (auto n : g->getNds()) {
+    ret += getNumSeparations(n, c);
+  }
+
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -90,15 +96,15 @@ double OptGraphScorer::getCrossingScore(OptNode* n,
   if (!n->pl().node) return 0;
   auto numCrossings = getNumCrossings(n, c);
 
-  return numCrossings.first * _scorer->getCrossingPenaltySameSeg(n->pl().node) +
-         numCrossings.second * _scorer->getCrossingPenaltyDiffSeg(n->pl().node);
+  return numCrossings.first * getCrossingPenSameSeg(n) +
+         numCrossings.second * getCrossingPenDiffSeg(n);
 }
 
 // _____________________________________________________________________________
 double OptGraphScorer::getSplittingScore(OptNode* n,
                                          const OptOrderCfg& c) const {
   if (!n->pl().node) return 0;
-  return getNumSeparations(n, c) * _scorer->getSplittingPenalty(n->pl().node);
+  return getNumSeparations(n, c) * getSplittingPen(n);
 }
 
 // _____________________________________________________________________________
@@ -206,4 +212,43 @@ double OptGraphScorer::getCrossingScore(OptEdge* e,
 double OptGraphScorer::getSplittingScore(OptEdge* e,
                                          const OptOrderCfg& c) const {
   return getSplittingScore(e->getFrom(), c) + getSplittingScore(e->getTo(), c);
+}
+
+// _____________________________________________________________________________
+double OptGraphScorer::getCrossingPenSameSeg(const OptNode* n) const {
+  double ret = 1;
+  if (_pens.crossAdjPen) ret *= n->getDeg();
+
+  if (n->pl().node->pl().stops().size() > 0) {
+    if (n->getDeg() == 2) return _pens.inStatCrossPenDegTwo;
+    return _pens.inStatCrossPenSameSeg * ret;
+  }
+
+  return ret * _pens.sameSegCrossPen;
+}
+
+// _____________________________________________________________________________
+double OptGraphScorer::getCrossingPenDiffSeg(const OptNode* n) const {
+  double ret = 1;
+  if (_pens.crossAdjPen) ret *= n->getDeg();
+
+  if (n->pl().node->pl().stops().size() > 0) {
+    if (n->getDeg() == 2) return _pens.inStatCrossPenDegTwo;
+    return _pens.inStatCrossPenDiffSeg * ret;
+  }
+
+  return ret * _pens.diffSegCrossPen;
+}
+
+// _____________________________________________________________________________
+double OptGraphScorer::getSplittingPen(const OptNode* n) const {
+  double ret = 1;
+  if (_pens.splitAdjPen) ret *= n->getDeg();
+
+  if (n->pl().node->pl().stops().size() > 0) {
+    if (n->getDeg() == 2) return _pens.inStatSplitPenDegTwo;
+    return _pens.inStatSplitPen * ret;
+  }
+
+  return ret * _pens.splitPen;
 }

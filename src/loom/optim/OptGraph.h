@@ -8,7 +8,6 @@
 #include <set>
 #include <string>
 
-#include "loom/optim/Scorer.h"
 #include "shared/linegraph/LineGraph.h"
 #include "shared/rendergraph/RenderGraph.h"
 #include "util/Misc.h"
@@ -20,6 +19,8 @@ namespace optim {
 
 struct OptNodePL;
 struct OptEdgePL;
+
+class OptGraphScorer;
 
 typedef util::graph::Node<OptNodePL, OptEdgePL> OptNode;
 typedef util::graph::Edge<OptNodePL, OptEdgePL> OptEdge;
@@ -120,7 +121,7 @@ struct OptNodePL {
 
 class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
  public:
-  OptGraph(const Scorer* scorer);
+  OptGraph(const OptGraphScorer* scorer) : _scorer(scorer) {};
 
   std::map<const shared::linegraph::LineNode*, OptNode*> build(
       shared::rendergraph::RenderGraph* rg);
@@ -160,7 +161,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   void split();
 
  private:
-  const Scorer* _scorer;
+  const OptGraphScorer* _scorer;
   void writeEdgeOrder();
   void updateEdgeOrder(OptNode* n);
   bool simplifyStep();
@@ -242,15 +243,13 @@ inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
 
   auto tgEdgeA = OptGraph::getAdjEdg(a, n);
   assert(tgEdgeA);
-  assert(n->pl().node->pl().frontFor(tgEdgeA));
 
-  angA = n->pl().node->pl().frontFor(tgEdgeA)->getOutAngle();
+  angA = shared::rendergraph::RenderGraph::getOutAngle(n->pl().node, tgEdgeA);
 
   auto tgEdgeB = OptGraph::getAdjEdg(b, n);
   assert(tgEdgeB);
-  assert(n->pl().node->pl().frontFor(tgEdgeB));
 
-  angB = n->pl().node->pl().frontFor(tgEdgeB)->getOutAngle();
+  angB = shared::rendergraph::RenderGraph::getOutAngle(n->pl().node, tgEdgeB);
 
   if (tgEdgeA == tgEdgeB) {
     // if these edges originally came from the same node front, use their

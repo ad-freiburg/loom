@@ -12,7 +12,6 @@
 #include "loom/optim/NullOptimizer.h"
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/Optimizer.h"
-#include "loom/optim/Scorer.h"
 #include "loom/optim/SimulatedAnnealingOptimizer.h"
 #include "shared/rendergraph/OrderCfg.h"
 
@@ -21,13 +20,14 @@ namespace optim {
 
 class CombOptimizer : public Optimizer {
  public:
-  CombOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : Optimizer(cfg, scorer),
-        _ilpOpt(cfg, scorer),
-        _nullOpt(cfg, scorer),
-        _exhausOpt(cfg, scorer),
-        _hillcOpt(cfg, scorer),
-        _annealOpt(cfg, scorer){};
+  CombOptimizer(const config::Config* cfg,
+                const shared::rendergraph::Penalties& pens)
+      : Optimizer(cfg, pens),
+        _ilpOpt(cfg, pens),
+        _nullOpt(cfg, pens),
+        _exhausOpt(cfg, pens),
+        _hillcOpt(cfg, pens),
+        _annealOpt(cfg, pens){};
 
   int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                    shared::rendergraph::HierarOrderCfg* c, size_t depth) const;

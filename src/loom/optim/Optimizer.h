@@ -4,6 +4,7 @@
 
 #include "loom/config/LoomConfig.h"
 #include "loom/optim/OptGraph.h"
+#include "loom/optim/OptGraphScorer.h"
 #include "shared/rendergraph/OrderCfg.h"
 #include "shared/rendergraph/RenderGraph.h"
 
@@ -20,8 +21,9 @@ typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
 class Optimizer {
  public:
-  Optimizer(const config::Config* cfg, const Scorer* scorer)
-      : _cfg(cfg), _scorer(scorer){};
+  Optimizer(const config::Config* cfg,
+            const shared::rendergraph::Penalties& pens)
+      : _cfg(cfg), _scorer(pens){};
 
   virtual int optimize(shared::rendergraph::RenderGraph* rg) const;
   int optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
@@ -53,12 +55,15 @@ class Optimizer {
 
  protected:
   const config::Config* _cfg;
-  const Scorer* _scorer;
+  const OptGraphScorer _scorer;
 
   static std::string prefix(size_t depth);
 
  private:
-   static OptOrderCfg getOptOrderCfg(const shared::rendergraph::OrderCfg&, const std::map<const shared::linegraph::LineNode*, OptNode*>& ndMap, const OptGraph* g);
+  static OptOrderCfg getOptOrderCfg(
+      const shared::rendergraph::OrderCfg&,
+      const std::map<const shared::linegraph::LineNode*, OptNode*>& ndMap,
+      const OptGraph* g);
 };
 }  // namespace optim
 }  // namespace loom

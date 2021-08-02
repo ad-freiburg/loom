@@ -10,7 +10,6 @@
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
 #include "loom/optim/NullOptimizer.h"
 #include "loom/optim/OptGraph.h"
-#include "loom/optim/OptGraphScorer.h"
 #include "loom/optim/Optimizer.h"
 #include "shared/rendergraph/OrderCfg.h"
 
@@ -19,8 +18,9 @@ namespace optim {
 
 class HillClimbOptimizer : public ExhaustiveOptimizer {
  public:
-  HillClimbOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : ExhaustiveOptimizer(cfg, scorer){};
+  HillClimbOptimizer(const config::Config* cfg,
+                     const shared::rendergraph::Penalties& pens)
+      : ExhaustiveOptimizer(cfg, pens){};
 
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                            shared::rendergraph::HierarOrderCfg* c,

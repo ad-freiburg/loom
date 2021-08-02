@@ -32,7 +32,7 @@ using util::geo::DPoint;
 // _____________________________________________________________________________
 int Optimizer::optimize(RenderGraph* rg) const {
   // create optim graph
-  OptGraph g(_scorer);
+  OptGraph g(&_scorer);
   g.build(rg);
 
   size_t maxC = maxCard(*g.getNds());
@@ -97,8 +97,6 @@ int Optimizer::optimize(RenderGraph* rg) const {
   LOGTO(INFO, std::cerr) << "Optimization graph has " << comps.size()
                          << " components.";
 
-  OptGraphScorer optScorer(_scorer);
-
   for (size_t run = 0; run < runs; run++) {
     OrderCfg c;
     HierarOrderCfg hc;
@@ -154,20 +152,20 @@ int Optimizer::optimize(RenderGraph* rg) const {
     tSum += t;
     iterSum += iters;
 
-    OptGraph gg(_scorer);
+    OptGraph gg(&_scorer);
     auto ndMap = gg.build(rg);
 
     auto optCfg = getOptOrderCfg(c, ndMap, &gg);
 
-    scoreSum += optScorer.getCrossingScore(&gg, optCfg);
+    scoreSum += _scorer.getCrossingScore(&gg, optCfg);
 
     if (_cfg->splittingOpt)
-      scoreSum += optScorer.getSplittingScore(&gg, optCfg);
+      scoreSum += _scorer.getSplittingScore(&gg, optCfg);
 
-    auto crossings = optScorer.getNumCrossings(&gg, optCfg);
+    auto crossings = _scorer.getNumCrossings(&gg, optCfg);
     crossSumSame += crossings.first;
     crossSumDiff += crossings.second;
-    sepSum += optScorer.getNumSeparations(&gg, optCfg);
+    sepSum += _scorer.getNumSeparations(&gg, optCfg);
 
     // todo: dont write this here, write the best one after all runs!!!!!
     rg->writePermutation(c);

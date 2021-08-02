@@ -155,22 +155,6 @@ void LineNodePL::delFrontFor(const LineEdge* e) {
 std::vector<NodeFront>& LineNodePL::fronts() { return _nodeFronts; }
 
 // _____________________________________________________________________________
-double NodeFront::getOutAngle() const {
-  double checkDist = 10;
-  if (edge->getFrom() == n) {
-    return angBetween(
-        *n->pl().getGeom(),
-        PolyLine<double>(*edge->pl().getGeom()).getPointAtDist(checkDist).p);
-  } else {
-    return angBetween(
-        *n->pl().getGeom(),
-        PolyLine<double>(*edge->pl().getGeom())
-            .getPointAtDist(util::geo::len(*edge->pl().getGeom()) - checkDist)
-            .p);
-  }
-}
-
-// _____________________________________________________________________________
 void LineNodePL::addFront(const NodeFront& f) {
   _edgToNf[f.edge] = _nodeFronts.size();
   _nodeFronts.push_back(f);

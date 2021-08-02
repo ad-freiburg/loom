@@ -10,10 +10,8 @@
 #include <string>
 #include "loom/config/ConfigReader.cpp"
 #include "loom/config/LoomConfig.h"
-#include "loom/graph/GraphBuilder.h"
 #include "loom/optim/CombOptimizer.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
-#include "loom/optim/Scorer.h"
 #include "shared/rendergraph/Penalties.h"
 #include "shared/rendergraph/RenderGraph.h"
 #include "util/geo/PolyLine.h"
@@ -34,12 +32,8 @@ int main(int argc, char** argv) {
 
   LOGTO(DEBUG, std::cerr) << "Reading graph...";
   shared::rendergraph::RenderGraph g(5, 5);
-  loom::graph::GraphBuilder b(&cfg);
 
   g.readFromJson(&std::cin, 3);
-
-  LOGTO(DEBUG, std::cerr) << "Creating node fronts...";
-  b.writeMainDirs(&g);
 
   LOGTO(DEBUG, std::cerr) << "Optimizing...";
 
@@ -61,8 +55,6 @@ int main(int argc, char** argv) {
                                       true,
                                       true};
 
-  optim::Scorer scorer(&g, pens);
-
   if (cfg.outputStats) {
     LOGTO(INFO, std::cerr) << "(stats) Stats for graph";
     LOGTO(INFO, std::cerr) << "(stats)   Total node count: "
@@ -74,30 +66,30 @@ int main(int argc, char** argv) {
     LOGTO(INFO, std::cerr) << "(stats)   Max edge line cardinality: "
                            << g.getMaxLineNum();
     LOGTO(INFO, std::cerr) << "(stats)   Number of poss. solutions: "
-                           << scorer.getNumPossSolutions();
+                           << g.searchSpaceSize();
     LOGTO(INFO, std::cerr) << "(stats)   Highest node degree: " << g.maxDeg();
   }
 
   if (cfg.optimMethod == "ilp_impr") {
-    optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, &scorer);
+    optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, pens);
     ilpEoOptim.optimize(&g);
   } else if (cfg.optimMethod == "ilp") {
-    optim::ILPOptimizer ilpOptim(&cfg, &scorer);
+    optim::ILPOptimizer ilpOptim(&cfg, pens);
     ilpOptim.optimize(&g);
   } else if (cfg.optimMethod == "comb") {
-    optim::CombOptimizer ilpCombiOptim(&cfg, &scorer);
+    optim::CombOptimizer ilpCombiOptim(&cfg, pens);
     ilpCombiOptim.optimize(&g);
   } else if (cfg.optimMethod == "exhaust") {
-    optim::ExhaustiveOptimizer exhausOptim(&cfg, &scorer);
+    optim::ExhaustiveOptimizer exhausOptim(&cfg, pens);
     exhausOptim.optimize(&g);
   } else if (cfg.optimMethod == "hillc") {
-    optim::HillClimbOptimizer hillcOptim(&cfg, &scorer);
+    optim::HillClimbOptimizer hillcOptim(&cfg, pens);
     hillcOptim.optimize(&g);
   } else if (cfg.optimMethod == "anneal") {
-    optim::SimulatedAnnealingOptimizer annealOptim(&cfg, &scorer);
+    optim::SimulatedAnnealingOptimizer annealOptim(&cfg, pens);
     annealOptim.optimize(&g);
   } else if (cfg.optimMethod == "null") {
-    optim::NullOptimizer nullOptim(&cfg, &scorer);
+    optim::NullOptimizer nullOptim(&cfg, pens);
     nullOptim.optimize(&g);
   }
 

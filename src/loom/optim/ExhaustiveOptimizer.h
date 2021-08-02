@@ -19,8 +19,9 @@ namespace optim {
 
 class ExhaustiveOptimizer : public Optimizer {
  public:
-  ExhaustiveOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : Optimizer(cfg, scorer), _optScorer(scorer){};
+  ExhaustiveOptimizer(const config::Config* cfg,
+                      const shared::rendergraph::Penalties& pens)
+      : Optimizer(cfg, pens), _optScorer(pens){};
 
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                            shared::rendergraph::HierarOrderCfg* c,

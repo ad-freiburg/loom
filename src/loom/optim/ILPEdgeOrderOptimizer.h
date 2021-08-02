@@ -9,7 +9,6 @@
 #include "loom/optim/ILPOptimizer.h"
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/Optimizer.h"
-#include "loom/optim/Scorer.h"
 #include "shared/rendergraph/OrderCfg.h"
 
 namespace loom {
@@ -21,8 +20,9 @@ typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
 class ILPEdgeOrderOptimizer : public ILPOptimizer {
  public:
-  ILPEdgeOrderOptimizer(const config::Config* cfg, const Scorer* scorer)
-      : ILPOptimizer(cfg, scorer){};
+  ILPEdgeOrderOptimizer(const config::Config* cfg,
+                        const shared::rendergraph::Penalties& pens)
+      : ILPOptimizer(cfg, pens){};
 
  private:
   virtual shared::optim::ILPSolver* createProblem(

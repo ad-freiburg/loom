@@ -29,7 +29,6 @@ struct NodeFront {
   LineNode* n;
   LineEdge* edge;
 
-  double getOutAngle() const;
   // geometry after expansion
   PolyLine<double> geom;
 

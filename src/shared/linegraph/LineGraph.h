@@ -102,6 +102,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   void contractEdges(double d);
   void contractEdge(LineEdge* e);
 
+  double searchSpaceSize() const;
+
  private:
   util::geo::Box<double> _bbox;
 

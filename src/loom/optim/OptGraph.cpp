@@ -4,6 +4,7 @@
 
 #include <set>
 #include "loom/optim/OptGraph.h"
+#include "loom/optim/OptGraphScorer.h"
 #include "shared/linegraph/Line.h"
 #include "shared/linegraph/LineGraph.h"
 #include "shared/rendergraph/RenderGraph.h"
@@ -19,6 +20,7 @@ using loom::optim::OptLO;
 using loom::optim::OptNode;
 using loom::optim::OptNodePL;
 using loom::optim::PartnerPath;
+using loom::optim::OptGraphScorer;
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
@@ -100,11 +102,6 @@ LineEdge* OptGraph::getAdjEdg(const OptEdge* e, const OptNode* n) {
   }
 
   return 0;
-}
-
-// _____________________________________________________________________________
-OptGraph::OptGraph(const Scorer* scorer)
-    : _scorer(scorer) {
 }
 
 // _____________________________________________________________________________
@@ -409,29 +406,23 @@ bool OptGraph::simplifyStep() {
           n->pl().node->getAdjList().size() != 2) {
         bool cheaper = false;
         if (first->getOtherNd(n)->pl().node) {
-          if (_scorer->getSplittingPenalty(n->pl().node) >=
-                  _scorer->getSplittingPenalty(
-                      first->getOtherNd(n)->pl().node) &&
-              _scorer->getCrossingPenaltySameSeg(n->pl().node) >=
-                  _scorer->getCrossingPenaltySameSeg(
-                      first->getOtherNd(n)->pl().node) &&
-              _scorer->getCrossingPenaltyDiffSeg(n->pl().node) >=
-                  _scorer->getCrossingPenaltyDiffSeg(
-                      first->getOtherNd(n)->pl().node)) {
+          if (_scorer->getSplittingPen(n) >=
+                  _scorer->getSplittingPen(first->getOtherNd(n)) &&
+              _scorer->getCrossingPenSameSeg(n) >=
+                  _scorer->getCrossingPenSameSeg(first->getOtherNd(n)) &&
+              _scorer->getCrossingPenDiffSeg(n) >=
+                  _scorer->getCrossingPenDiffSeg(first->getOtherNd(n))) {
             cheaper = true;
           }
         }
         if (!cheaper) {
           if (second->getOtherNd(n)->pl().node) {
-            if (_scorer->getSplittingPenalty(n->pl().node) >=
-                    _scorer->getSplittingPenalty(
-                        second->getOtherNd(n)->pl().node) &&
-                _scorer->getCrossingPenaltySameSeg(n->pl().node) >=
-                    _scorer->getCrossingPenaltySameSeg(
-                        second->getOtherNd(n)->pl().node) &&
-                _scorer->getCrossingPenaltyDiffSeg(n->pl().node) >=
-                    _scorer->getCrossingPenaltyDiffSeg(
-                        second->getOtherNd(n)->pl().node)) {
+            if (_scorer->getSplittingPen(n) >=
+                    _scorer->getSplittingPen(second->getOtherNd(n)) &&
+                _scorer->getCrossingPenSameSeg(n) >=
+                    _scorer->getCrossingPenSameSeg(second->getOtherNd(n)) &&
+                _scorer->getCrossingPenDiffSeg(n) >=
+                    _scorer->getCrossingPenDiffSeg(second->getOtherNd(n))) {
               cheaper = true;
             }
           }
@@ -1070,8 +1061,8 @@ bool OptGraph::untanglePartialDogBoneStep() {
 
         std::vector<OptEdge*>& refLegs = minLgs;
         std::vector<size_t>& toB = iden;
-        if (_scorer->getCrossingPenaltyDiffSeg(partN->pl().node) <
-            _scorer->getCrossingPenaltyDiffSeg(notPartN->pl().node)) {
+        if (_scorer->getCrossingPenDiffSeg(partN) <
+            _scorer->getCrossingPenDiffSeg(notPartN)) {
           refLegs = minLgsNotPart;
           toB = aToB;
         }
@@ -1178,8 +1169,8 @@ bool OptGraph::untangleDogBoneStep() {
         std::vector<OptEdge*>& refLegs = minLgsA;
         std::vector<size_t>& toA = bToA;
         std::vector<size_t>& toB = iden;
-        if (_scorer->getCrossingPenaltyDiffSeg(na->pl().node) <
-            _scorer->getCrossingPenaltyDiffSeg(nb->pl().node)) {
+        if (_scorer->getCrossingPenDiffSeg(na) <
+            _scorer->getCrossingPenDiffSeg(nb)) {
           refLegs = minLgsB;
           toA = iden;
           toB = aToB;
