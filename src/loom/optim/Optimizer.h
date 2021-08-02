@@ -56,6 +56,9 @@ class Optimizer {
   const Scorer* _scorer;
 
   static std::string prefix(size_t depth);
+
+ private:
+   static OptOrderCfg getOptOrderCfg(const shared::rendergraph::OrderCfg&, const std::map<const shared::linegraph::LineNode*, OptNode*>& ndMap, const OptGraph* g);
 };
 }  // namespace optim
 }  // namespace loom

@@ -103,50 +103,49 @@ LineEdge* OptGraph::getAdjEdg(const OptEdge* e, const OptNode* n) {
 }
 
 // _____________________________________________________________________________
-OptGraph::OptGraph(RenderGraph* toOptim, const Scorer* scorer)
-    : _g(toOptim), _scorer(scorer) {
-  build();
+OptGraph::OptGraph(const Scorer* scorer)
+    : _scorer(scorer) {
 }
 
 // _____________________________________________________________________________
-void OptGraph::build() {
+std::map<const LineNode*, OptNode*> OptGraph::build(RenderGraph* rg) {
   std::map<const LineNode*, OptNode*> lnNdToOptNd;
-  if (_g) {
-    for (auto n : *_g->getNds()) {
-      for (auto e : n->getAdjList()) {
-        if (e->getFrom() != n) continue;
+  for (auto n : *rg->getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
 
-        auto frLnNd = e->getFrom();
-        auto toLnNd = e->getTo();
+      auto frLnNd = e->getFrom();
+      auto toLnNd = e->getTo();
 
-        OptNode* from;
-        OptNode* to;
+      OptNode* from;
+      OptNode* to;
 
-        auto fromI = lnNdToOptNd.find(frLnNd);
-        auto toI = lnNdToOptNd.find(toLnNd);
+      auto fromI = lnNdToOptNd.find(frLnNd);
+      auto toI = lnNdToOptNd.find(toLnNd);
 
-        if (fromI == lnNdToOptNd.end()) {
-          fromI = lnNdToOptNd.insert({frLnNd, addNd(frLnNd)}).first;
-        }
+      if (fromI == lnNdToOptNd.end()) {
+        fromI = lnNdToOptNd.insert({frLnNd, addNd(frLnNd)}).first;
+      }
 
-        if (toI == lnNdToOptNd.end()) {
-          toI = lnNdToOptNd.insert({toLnNd, addNd(toLnNd)}).first;
-        }
+      if (toI == lnNdToOptNd.end()) {
+        toI = lnNdToOptNd.insert({toLnNd, addNd(toLnNd)}).first;
+      }
 
-        from = fromI->second;
-        to = toI->second;
+      from = fromI->second;
+      to = toI->second;
 
-        OptEdge* edge = addEdg(from, to);
+      OptEdge* edge = addEdg(from, to);
 
-        edge->pl().etgs.push_back(EtgPart(e, e->getTo() == toLnNd));
-        for (auto roOld : e->pl().getLines()) {
-          edge->pl().lines.push_back(OptLO(roOld.line, roOld.direction));
-        }
+      edge->pl().etgs.push_back(EtgPart(e, true));
+      for (auto roOld : e->pl().getLines()) {
+        edge->pl().lines.push_back(OptLO(roOld.line, roOld.direction));
       }
     }
   }
 
   writeEdgeOrder();
+
+  return lnNdToOptNd;
 }
 
 // _____________________________________________________________________________
@@ -507,9 +506,6 @@ bool OptGraph::simplifyStep() {
 
   return false;
 }
-
-// _____________________________________________________________________________
-RenderGraph* OptGraph::getGraph() const { return _g; }
 
 // _____________________________________________________________________________
 size_t OptGraph::getNumNodes() const { return getNds().size(); }

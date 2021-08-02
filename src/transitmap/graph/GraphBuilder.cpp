@@ -54,7 +54,7 @@ void GraphBuilder::writeMainDirs(RenderGraph* graph) {
 
       f.setInitialGeom(pl);
 
-      n->pl().addMainDir(f);
+      n->pl().addFront(f);
     }
   }
 }

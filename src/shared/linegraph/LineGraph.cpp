@@ -15,6 +15,7 @@
 
 using shared::linegraph::EdgeGrid;
 using shared::linegraph::EdgeOrdering;
+using shared::linegraph::Partner;
 using shared::linegraph::ISect;
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
@@ -822,6 +823,21 @@ void LineGraph::contractEdge(LineEdge* e) {
   }
 
   n->pl().setGeom(newGeom);
+}
+
+// _____________________________________________________________________________
+std::vector<Partner> LineGraph::getPartners(const LineNode* nd, const LineEdge* e,
+                                              const LineOcc& lo) {
+  std::vector<Partner> ret;
+  for (auto toEdg : nd->getAdjList()) {
+    if (toEdg == e) continue;
+
+    for (const LineOcc& to : getCtdLinesIn(lo, e, toEdg)) {
+      Partner p(toEdg, to.line);
+      ret.push_back(p);
+    }
+  }
+  return ret;
 }
 
 // _____________________________________________________________________________

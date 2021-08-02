@@ -63,6 +63,9 @@ class Scorer {
  private:
   const shared::rendergraph::RenderGraph* _g;
   shared::rendergraph::Penalties _pens;
+
+  std::vector<std::pair<shared::linegraph::LineOcc, shared::linegraph::LineOcc>>
+  getLinePairs(const shared::linegraph::LineEdge* e) const;
 };
 }  // namespace optim
 }  // namespace loom

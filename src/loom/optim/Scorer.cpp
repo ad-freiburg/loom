@@ -9,11 +9,14 @@
 #include "util/Misc.h"
 
 using loom::optim::Scorer;
-using shared::rendergraph::InnerGeom;
 using shared::linegraph::Line;
+using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
+using shared::linegraph::LineOcc;
+using shared::linegraph::Partner;
 using shared::rendergraph::IDENTITY_PENALTIES;
+using shared::rendergraph::InnerGeom;
 using shared::rendergraph::OrderCfg;
 using shared::rendergraph::Penalties;
 using shared::rendergraph::RenderGraph;
@@ -108,25 +111,23 @@ double Scorer::getCrossingScore(const LineNode* n,
       const InnerGeom& iga = igs[i];
       const InnerGeom& igb = igs[j];
 
-      if (iga.from.front == 0 || iga.to.front == 0 || igb.from.front == 0 ||
-          igb.to.front == 0)
+      if (iga.from.edge == 0 || iga.to.edge == 0 || igb.from.edge == 0 ||
+          igb.to.edge == 0)
         continue;
 
-      if (iga.from.front == igb.from.front && iga.slotFrom == igb.slotFrom)
+      if (iga.from.edge == igb.from.edge && iga.slotFrom == igb.slotFrom)
         continue;
-      if (iga.from.front == igb.to.front && iga.slotFrom == igb.slotTo)
-        continue;
-      if (iga.to.front == igb.to.front && iga.slotTo == igb.slotTo) continue;
-      if (iga.to.front == igb.from.front && iga.slotTo == igb.slotFrom)
-        continue;
+      if (iga.from.edge == igb.to.edge && iga.slotFrom == igb.slotTo) continue;
+      if (iga.to.edge == igb.to.edge && iga.slotTo == igb.slotTo) continue;
+      if (iga.to.edge == igb.from.edge && iga.slotTo == igb.slotFrom) continue;
 
       bool sameSeg =
-          (iga.from.front == igb.from.front && iga.to.front == igb.to.front) ||
-          (iga.to.front == igb.from.front && iga.from.front == igb.to.front);
+          (iga.from.edge == igb.from.edge && iga.to.edge == igb.to.edge) ||
+          (iga.to.edge == igb.from.edge && iga.from.edge == igb.to.edge);
 
       bool unavoidable =
-          iga.from.front != igb.from.front && iga.from.front != igb.to.front &&
-          iga.to.front != igb.from.front && iga.to.front != igb.to.front;
+          iga.from.edge != igb.from.edge && iga.from.edge != igb.to.edge &&
+          iga.to.edge != igb.from.edge && iga.to.edge != igb.to.edge;
 
       bool iSectGeo =
           util::geo::intersects(
@@ -144,9 +145,6 @@ double Scorer::getCrossingScore(const LineNode* n,
     }
   }
 
-
-  size_t ret2 = 0;
-
   return ret;
 }
 
@@ -160,7 +158,7 @@ double Scorer::getSeparationScore(const LineNode* n,
                                   const Penalties& pens) const {
   size_t ret = 0;
   for (auto e : n->getAdjList()) {
-    std::vector<std::pair<size_t, size_t> > curPairs;
+    std::vector<std::pair<size_t, size_t>> curPairs;
 
     for (size_t p = 0; p < e->pl().getLines().size() - 1; p++) {
       for (auto f : n->getAdjList()) {

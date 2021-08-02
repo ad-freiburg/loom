@@ -8,8 +8,8 @@
 #include <ostream>
 
 #include "shared/linegraph/Line.h"
-#include "transitmap/config/TransitMapConfig.h"
 #include "shared/rendergraph/RenderGraph.h"
+#include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/label/Labeller.h"
 #include "transitmap/output/SvgRenderer.h"
 #include "util/String.h"
@@ -20,10 +20,10 @@ using namespace transitmapper;
 using label::Labeller;
 using output::InnerClique;
 using output::SvgRenderer;
-using shared::rendergraph::RenderGraph;
-using shared::rendergraph::InnerGeom;
 using shared::linegraph::Line;
 using shared::linegraph::LineNode;
+using shared::rendergraph::InnerGeom;
+using shared::rendergraph::RenderGraph;
 using util::geo::DPoint;
 using util::geo::DPolygon;
 using util::geo::LinePoint;
@@ -245,8 +245,7 @@ void SvgRenderer::outputEdges(const RenderGraph& outG,
 void SvgRenderer::renderNodeConnections(const RenderGraph& outG,
                                         const LineNode* n,
                                         const RenderParams& rparams) {
-  auto geoms =
-      outG.innerGeoms(n, _cfg->innerGeometryPrecision);
+  auto geoms = outG.innerGeoms(n, _cfg->innerGeometryPrecision);
 
   for (auto& clique : getInnerCliques(n, geoms, 99)) {
     renderClique(clique, n);
@@ -255,8 +254,8 @@ void SvgRenderer::renderNodeConnections(const RenderGraph& outG,
 
 // _____________________________________________________________________________
 std::multiset<InnerClique> SvgRenderer::getInnerCliques(
-    const shared::linegraph::LineNode* n,
-    std::vector<InnerGeom> pool, size_t level) const {
+    const shared::linegraph::LineNode* n, std::vector<InnerGeom> pool,
+    size_t level) const {
   std::multiset<InnerClique> ret;
 
   // start with the first geom in pool
@@ -277,9 +276,9 @@ std::multiset<InnerClique> SvgRenderer::getInnerCliques(
 }
 
 // _____________________________________________________________________________
-size_t SvgRenderer::getNextPartner(
-    const InnerClique& forClique,
-    const std::vector<InnerGeom>& pool, size_t level) const {
+size_t SvgRenderer::getNextPartner(const InnerClique& forClique,
+                                   const std::vector<InnerGeom>& pool,
+                                   size_t level) const {
   for (size_t i = 0; i < pool.size(); i++) {
     const auto& ic = pool[i];
     for (auto& ciq : forClique.geoms) {
@@ -293,13 +292,12 @@ size_t SvgRenderer::getNextPartner(
 }
 
 // _____________________________________________________________________________
-bool SvgRenderer::isNextTo(const InnerGeom& a,
-                           const InnerGeom& b) const {
+bool SvgRenderer::isNextTo(const InnerGeom& a, const InnerGeom& b) const {
   // TODO!!!!!
   return false;
 
   double THRESHOLD = 0.5 * M_PI + 0.1;
-  if (a.from.front == b.from.front && a.to.front == b.to.front) {
+  if (a.from.edge == b.from.edge && a.to.edge == b.to.edge) {
     if ((a.slotFrom - b.slotFrom == 1 || b.slotFrom - a.slotFrom == 1) &&
         (a.slotTo - b.slotTo == 1 || b.slotTo - a.slotTo == 1)) {
       double ang1 = fabs(util::geo::angBetween(a.geom.front(), a.geom.back()));
@@ -309,7 +307,7 @@ bool SvgRenderer::isNextTo(const InnerGeom& a,
     }
   }
 
-  if (a.to.front == b.from.front && a.from.front == b.to.front) {
+  if (a.to.edge == b.from.edge && a.from.edge == b.to.edge) {
     if ((a.slotTo - b.slotFrom == 1 || b.slotFrom - a.slotTo == 1) &&
         (a.slotFrom - b.slotTo == 1 || b.slotTo - a.slotFrom == 1)) {
       double ang1 = fabs(util::geo::angBetween(a.geom.front(), a.geom.back()));
@@ -323,18 +321,17 @@ bool SvgRenderer::isNextTo(const InnerGeom& a,
 }
 
 // _____________________________________________________________________________
-bool SvgRenderer::hasSameOrigin(const InnerGeom& a,
-                                const InnerGeom& b) const {
-  if (a.from.front == b.from.front) {
+bool SvgRenderer::hasSameOrigin(const InnerGeom& a, const InnerGeom& b) const {
+  if (a.from.edge == b.from.edge) {
     return a.slotFrom == b.slotFrom;
   }
-  if (a.to.front == b.from.front) {
+  if (a.to.edge == b.from.edge) {
     return a.slotTo == b.slotFrom;
   }
-  if (a.to.front == b.to.front) {
+  if (a.to.edge == b.to.edge) {
     return a.slotTo == b.slotTo;
   }
-  if (a.from.front == b.to.front) {
+  if (a.from.edge == b.to.edge) {
     return a.slotFrom == b.slotTo;
   }
 
@@ -377,8 +374,10 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
         std::set<LinePoint<double>, LinePointCmp<double>> a;
         std::set<LinePoint<double>, LinePointCmp<double>> b;
 
-        if (ref.from.front) a = ref.from.front->geom.getIntersections(pl);
-        if (ref.to.front) b = ref.to.front->geom.getIntersections(pl);
+        if (ref.from.edge)
+          a = n->pl().frontFor(ref.from.edge)->geom.getIntersections(pl);
+        if (ref.to.edge)
+          b = n->pl().frontFor(ref.to.edge)->geom.getIntersections(pl);
 
         if (a.size() == 1 && b.size() == 1) {
           pl = pl.getSegment(a.begin()->totalPos, b.begin()->totalPos);
@@ -468,7 +467,7 @@ void SvgRenderer::renderEdgeTripGeom(const RenderGraph& outG,
   double o = oo;
 
   size_t a = 0;
-  for (size_t i = 0 ; i < e->pl().getLines().size(); i++) {
+  for (size_t i = 0; i < e->pl().getLines().size(); i++) {
     const auto& lo = e->pl().lineOccAtPos(i);
 
     const Line* line = lo.line;
@@ -665,12 +664,12 @@ void SvgRenderer::printPolygon(const DPolygon& g, const std::string& style,
 
 // _____________________________________________________________________________
 size_t InnerClique::getNumBranchesIn(
-    const shared::linegraph::NodeFront* front) const {
+    const shared::linegraph::LineEdge* edg) const {
   std::set<size_t> slots;
   size_t ret = 0;
   for (const auto& ig : geoms) {
-    if (ig.from.front == front && !slots.insert(ig.slotFrom).second) ret++;
-    if (ig.to.front == front && !slots.insert(ig.slotTo).second) ret++;
+    if (ig.from.edge == edg && !slots.insert(ig.slotFrom).second) ret++;
+    if (ig.to.edge == edg && !slots.insert(ig.slotTo).second) ret++;
   }
 
   return ret;
@@ -846,7 +845,7 @@ double InnerClique::getZWeight() const {
                        // because they are easier to follow
 
   for (const auto& nf : n->pl().fronts()) {
-    ret -= getNumBranchesIn(&nf) * BRANCH_WEIGHT;
+    ret -= getNumBranchesIn(nf.edge) * BRANCH_WEIGHT;
   }
 
   return ret;

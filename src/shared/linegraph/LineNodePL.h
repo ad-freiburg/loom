@@ -78,11 +78,11 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   // TODO refactor, all front related stuff should go into rendergraph
   const std::vector<NodeFront>& fronts() const;
   std::vector<NodeFront>& fronts();
-  void delMainDir(const LineEdge* e);
+  void delFrontFor(const LineEdge* e);
   const NodeFront* frontFor(const LineEdge* e) const;
   NodeFront* frontFor(const LineEdge* e);
 
-  void addMainDir(const NodeFront& f);
+  void addFront(const NodeFront& f);
 
   void addConnExc(const Line* r, const LineEdge* edgeA, const LineEdge* edgeB);
 
@@ -105,7 +105,8 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   util::geo::Point<double> _pos;
   std::vector<Station> _is;
 
-  std::vector<NodeFront> _mainDirs;
+  std::map<const LineEdge*, size_t> _edgToNf;
+  std::vector<NodeFront> _nodeFronts;
 
   ConnEx _connEx;
   NotServedLines _notServed;

@@ -330,6 +330,7 @@ std::vector<PosComPair> ILPOptimizer::getPositionCombinations(
 
 // _____________________________________________________________________________
 std::vector<PosCom> ILPOptimizer::getPositionCombinations(OptEdge* a) const {
+  // TODO: this is already implemented in Optimizer!!
   std::vector<PosCom> ret;
   for (size_t posLineAinA = 0; posLineAinA < a->pl().getCardinality();
        posLineAinA++) {

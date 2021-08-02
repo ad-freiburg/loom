@@ -131,29 +131,28 @@ const NodeFront* LineNodePL::frontFor(const LineEdge* e) const {
 
 // _____________________________________________________________________________
 NodeFront* LineNodePL::frontFor(const LineEdge* e) {
-  for (auto& nf : fronts()) {
-    if (nf.edge == e) return &nf;
-  }
-
-  return 0;
+  auto i = _edgToNf.find(e);
+  if (i == _edgToNf.end()) return 0;
+  return &_nodeFronts[i->second];
 }
 
 // _____________________________________________________________________________
-const std::vector<NodeFront>& LineNodePL::fronts() const { return _mainDirs; }
+const std::vector<NodeFront>& LineNodePL::fronts() const { return _nodeFronts; }
 
 // _____________________________________________________________________________
-void LineNodePL::delMainDir(const LineEdge* e) {
-  for (size_t i = 0; i < fronts().size(); i++) {
-    if (_mainDirs[i].edge == e) {
-      _mainDirs[i] = _mainDirs.back();
-      _mainDirs.pop_back();
-      return;
-    }
-  }
+void LineNodePL::delFrontFor(const LineEdge* e) {
+  auto i = _edgToNf.find(e);
+  if (i == _edgToNf.end()) return;
+  size_t idx = i->second;
+  _edgToNf.erase(e);
+
+  _edgToNf[_nodeFronts.back().edge] = idx;
+  _nodeFronts[idx] = _nodeFronts.back();
+  _nodeFronts.pop_back();
 }
 
 // _____________________________________________________________________________
-std::vector<NodeFront>& LineNodePL::fronts() { return _mainDirs; }
+std::vector<NodeFront>& LineNodePL::fronts() { return _nodeFronts; }
 
 // _____________________________________________________________________________
 double NodeFront::getOutAngle() const {
@@ -172,7 +171,10 @@ double NodeFront::getOutAngle() const {
 }
 
 // _____________________________________________________________________________
-void LineNodePL::addMainDir(const NodeFront& f) { _mainDirs.push_back(f); }
+void LineNodePL::addFront(const NodeFront& f) {
+  _edgToNf[f.edge] = _nodeFronts.size();
+  _nodeFronts.push_back(f);
+}
 
 // _____________________________________________________________________________
 void LineNodePL::addLineNotServed(const Line* r) { _notServed.insert(r); }

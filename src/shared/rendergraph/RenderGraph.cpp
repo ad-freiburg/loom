@@ -24,9 +24,9 @@ using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineOcc;
 using shared::linegraph::NodeFront;
+using shared::linegraph::Partner;
 using shared::rendergraph::InnerGeom;
 using shared::rendergraph::OrderCfg;
-using shared::rendergraph::Partner;
 using shared::rendergraph::RenderGraph;
 using util::geo::BezierCurve;
 using util::geo::Box;
@@ -68,7 +68,7 @@ bool RenderGraph::isTerminus(const LineNode* n) {
 
     for (size_t p = 0; p < nf.edge->pl().getLines().size(); p++) {
       const LineOcc& lineOcc = nf.edge->pl().lineOccAtPos(p);
-      std::vector<Partner> partners = getPartners(&nf, lineOcc);
+      std::vector<Partner> partners = getPartners(n, nf.edge, lineOcc);
       if (partners.size() == 0) return true;
     }
   }
@@ -79,24 +79,24 @@ bool RenderGraph::isTerminus(const LineNode* n) {
 std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
                                                double prec) const {
   std::vector<InnerGeom> ret;
-  std::map<const Line*, std::set<const NodeFront*>> processed;
+  std::map<const Line*, std::set<const LineEdge*>> processed;
 
   for (size_t i = 0; i < n->pl().fronts().size(); ++i) {
     const NodeFront& nf = n->pl().fronts()[i];
 
     for (size_t j = 0; j < nf.edge->pl().getLines().size(); j++) {
       const LineOcc& lineOcc = nf.edge->pl().lineOccAtPos(j);
-      Partner o(&nf, nf.edge, lineOcc.line);
+      Partner o(nf.edge, lineOcc.line);
 
-      std::vector<Partner> partners = getPartners(&nf, lineOcc);
+      std::vector<Partner> partners = getPartners(n, nf.edge, lineOcc);
 
       for (const Partner& p : partners) {
-        if (processed[lineOcc.line].find(p.front) !=
+        if (processed[lineOcc.line].find(p.edge) !=
             processed[lineOcc.line].end()) {
           continue;
         }
 
-        auto is = getInnerStraightLine(o, p);
+        auto is = getInnerStraightLine(n, o, p);
         if (is.geom.getLength() == 0) continue;
 
         if (prec > 0) {
@@ -108,7 +108,7 @@ std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
 
       // handle lines where this node is the terminus
       if (partners.size() == 0 && !notCompletelyServed(n)) {
-        auto is = getTerminusStraightLine(o);
+        auto is = getTerminusStraightLine(n, o);
         if (is.geom.getLength() > 0) {
           if (prec > 0) {
             ret.push_back(getTerminusBezier(n, o, prec));
@@ -118,7 +118,7 @@ std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
         }
       }
 
-      processed[lineOcc.line].insert(&nf);
+      processed[lineOcc.line].insert(nf.edge);
     }
   }
 
@@ -131,7 +131,7 @@ InnerGeom RenderGraph::getInnerBezier(const LineNode* n,
                                       const Partner& partnerTo,
                                       double prec) const {
   double EPSI = 0.001;
-  InnerGeom ret = getInnerStraightLine(partnerFrom, partnerTo);
+  InnerGeom ret = getInnerStraightLine(n, partnerFrom, partnerTo);
   DPoint p = ret.geom.getLine().front();
   DPoint pp = ret.geom.getLine().back();
   double d = util::geo::dist(p, pp);
@@ -140,29 +140,28 @@ InnerGeom RenderGraph::getInnerBezier(const LineNode* n,
   DPoint c = pp;
   std::pair<double, double> slopeA, slopeB;
 
-  if (util::geo::len(*partnerFrom.front->edge->pl().getGeom()) <= 5) return ret;
-  if (util::geo::len(*partnerTo.front->edge->pl().getGeom()) <= 5) return ret;
+  if (util::geo::len(*partnerFrom.edge->pl().getGeom()) <= 5) return ret;
+  if (util::geo::len(*partnerTo.edge->pl().getGeom()) <= 5) return ret;
 
   if (d <= 5) return ret;
 
-  if (partnerFrom.front->edge->getTo() == n) {
-    slopeA =
-        PolyLine<double>(*partnerFrom.front->edge->pl().getGeom())
-            .getSlopeBetweenDists(
-                util::geo::len(*partnerFrom.front->edge->pl().getGeom()) - 5,
-                util::geo::len(*partnerFrom.front->edge->pl().getGeom()));
+  if (partnerFrom.edge->getTo() == n) {
+    slopeA = PolyLine<double>(*partnerFrom.edge->pl().getGeom())
+                 .getSlopeBetweenDists(
+                     util::geo::len(*partnerFrom.edge->pl().getGeom()) - 5,
+                     util::geo::len(*partnerFrom.edge->pl().getGeom()));
   } else {
-    slopeA = PolyLine<double>(*partnerFrom.front->edge->pl().getGeom())
+    slopeA = PolyLine<double>(*partnerFrom.edge->pl().getGeom())
                  .getSlopeBetweenDists(5, 0);
   }
 
-  if (partnerTo.front->edge->getTo() == n) {
-    slopeB = PolyLine<double>(*partnerTo.front->edge->pl().getGeom())
+  if (partnerTo.edge->getTo() == n) {
+    slopeB = PolyLine<double>(*partnerTo.edge->pl().getGeom())
                  .getSlopeBetweenDists(
-                     util::geo::len(*partnerTo.front->edge->pl().getGeom()) - 5,
-                     util::geo::len(*partnerTo.front->edge->pl().getGeom()));
+                     util::geo::len(*partnerTo.edge->pl().getGeom()) - 5,
+                     util::geo::len(*partnerTo.edge->pl().getGeom()));
   } else {
-    slopeB = PolyLine<double>(*partnerTo.front->edge->pl().getGeom())
+    slopeB = PolyLine<double>(*partnerTo.edge->pl().getGeom())
                  .getSlopeBetweenDists(5, 0);
   }
 
@@ -230,9 +229,10 @@ InnerGeom RenderGraph::getInnerBezier(const LineNode* n,
 
 // _____________________________________________________________________________
 InnerGeom RenderGraph::getTerminusStraightLine(
-    const Partner& partnerFrom) const {
-  DPoint p = linePosOn(*partnerFrom.front, partnerFrom.line, false);
-  DPoint pp = linePosOn(*partnerFrom.front, partnerFrom.line, true);
+    const LineNode* n, const Partner& partnerFrom) const {
+  auto nf = n->pl().frontFor(partnerFrom.edge);
+  DPoint p = linePosOn(*nf, partnerFrom.line, false);
+  DPoint pp = linePosOn(*nf, partnerFrom.line, true);
 
   size_t s = partnerFrom.edge->pl().linePos(partnerFrom.line);
   size_t ss = partnerFrom.edge->pl().linePos(partnerFrom.line);
@@ -241,10 +241,13 @@ InnerGeom RenderGraph::getTerminusStraightLine(
 }
 
 // _____________________________________________________________________________
-InnerGeom RenderGraph::getInnerStraightLine(const Partner& partnerFrom,
+InnerGeom RenderGraph::getInnerStraightLine(const LineNode* n,
+                                            const Partner& partnerFrom,
                                             const Partner& partnerTo) const {
-  DPoint p = linePosOn(*partnerFrom.front, partnerFrom.line, false);
-  DPoint pp = linePosOn(*partnerTo.front, partnerTo.line, false);
+  auto nfFr = n->pl().frontFor(partnerFrom.edge);
+  auto nfTo = n->pl().frontFor(partnerTo.edge);
+  DPoint p = linePosOn(*nfFr, partnerFrom.line, false);
+  DPoint pp = linePosOn(*nfTo, partnerTo.line, false);
 
   size_t s = partnerFrom.edge->pl().linePos(partnerFrom.line);
   size_t ss = partnerTo.edge->pl().linePos(partnerTo.line);
@@ -256,7 +259,7 @@ InnerGeom RenderGraph::getInnerStraightLine(const Partner& partnerFrom,
 InnerGeom RenderGraph::getTerminusBezier(const LineNode* n,
                                          const Partner& partnerFrom,
                                          double prec) const {
-  InnerGeom ret = getTerminusStraightLine(partnerFrom);
+  InnerGeom ret = getTerminusStraightLine(n, partnerFrom);
   DPoint p = ret.geom.getLine().front();
   DPoint pp = ret.geom.getLine().back();
   double d = util::geo::dist(p, pp) / 2;
@@ -265,16 +268,15 @@ InnerGeom RenderGraph::getTerminusBezier(const LineNode* n,
   DPoint c = pp;
   std::pair<double, double> slopeA;
 
-  assert(util::geo::len(*partnerFrom.front->edge->pl().getGeom()) > 5);
+  assert(util::geo::len(*partnerFrom.edge->pl().getGeom()) > 5);
 
-  if (partnerFrom.front->edge->getTo() == n) {
-    slopeA =
-        PolyLine<double>(*partnerFrom.front->edge->pl().getGeom())
-            .getSlopeBetweenDists(
-                util::geo::len(*partnerFrom.front->edge->pl().getGeom()) - 5,
-                util::geo::len(*partnerFrom.front->edge->pl().getGeom()));
+  if (partnerFrom.edge->getTo() == n) {
+    slopeA = PolyLine<double>(*partnerFrom.edge->pl().getGeom())
+                 .getSlopeBetweenDists(
+                     util::geo::len(*partnerFrom.edge->pl().getGeom()) - 5,
+                     util::geo::len(*partnerFrom.edge->pl().getGeom()));
   } else {
-    slopeA = PolyLine<double>(*partnerFrom.front->edge->pl().getGeom())
+    slopeA = PolyLine<double>(*partnerFrom.edge->pl().getGeom())
                  .getSlopeBetweenDists(5, 0);
   }
 
@@ -345,7 +347,7 @@ Polygon<double> RenderGraph::getConvexFrontHull(
                  circleStrat);
 
   } else {
-    // for two main dirs, take average
+    // for two node fronts, take average
     std::vector<const PolyLine<double>*> pols;
 
     PolyLine<double> a = n->pl().fronts()[0].origGeom.getSegment(
@@ -498,23 +500,23 @@ double RenderGraph::getTotalWidth(const LineEdge* e) const {
 // _____________________________________________________________________________
 size_t RenderGraph::getConnCardinality(const LineNode* n) {
   size_t ret = 0;
-  std::map<const Line*, std::set<const NodeFront*>> processed;
+  std::map<const Line*, std::set<const LineEdge*>> processed;
 
   for (const auto& nf : n->pl().fronts()) {
     for (size_t j = 0; j < nf.edge->pl().getLines().size(); j++) {
       const auto& lineOcc = nf.edge->pl().lineOccAtPos(j);
 
-      std::vector<Partner> partners = getPartners(&nf, lineOcc);
+      std::vector<Partner> partners = getPartners(n, nf.edge, lineOcc);
 
       for (const Partner& p : partners) {
-        if (processed[lineOcc.line].find(p.front) !=
+        if (processed[lineOcc.line].find(p.edge) !=
             processed[lineOcc.line].end()) {
           continue;
         }
         ret++;
       }
 
-      processed[lineOcc.line].insert(&nf);
+      processed[lineOcc.line].insert(nf.edge);
     }
   }
 
@@ -610,8 +612,8 @@ void RenderGraph::createMetaNodes() {
 
         if (!found) continue;
 
-        e->getTo()->pl().delMainDir(e);
-        e->getFrom()->pl().delMainDir(e);
+        e->getTo()->pl().delFrontFor(e);
+        e->getFrom()->pl().delFrontFor(e);
         delEdg(e->getTo(), e->getFrom());
         getEdgGrid()->remove(e);
       }
@@ -664,7 +666,7 @@ void RenderGraph::createMetaNodes() {
         onf.n = ref;
 
         // add the new node front to the new node
-        ref->pl().addMainDir(onf);
+        ref->pl().addFront(onf);
       }
     }
 
@@ -801,24 +803,6 @@ std::vector<NodeFront> RenderGraph::getOpenNodeFronts(const LineNode* n) const {
   }
 
   return res;
-}
-
-// _____________________________________________________________________________
-std::vector<Partner> RenderGraph::getPartners(const NodeFront* f,
-                                              const LineOcc& lo) {
-  std::vector<Partner> ret;
-  for (const auto& nf : f->n->pl().fronts()) {
-    if (&nf == f) continue;
-
-    for (const LineOcc& to : getCtdLinesIn(lo, f->edge, nf.edge)) {
-      Partner p(f, nf.edge, to.line);
-      p.front = &nf;
-      p.edge = nf.edge;
-      p.line = to.line;
-      ret.push_back(p);
-    }
-  }
-  return ret;
 }
 
 // _____________________________________________________________________________

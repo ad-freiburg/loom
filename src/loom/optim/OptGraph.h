@@ -120,9 +120,10 @@ struct OptNodePL {
 
 class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
  public:
-  OptGraph(shared::rendergraph::RenderGraph* toOptim, const Scorer* scorer);
+  OptGraph(const Scorer* scorer);
 
-  shared::rendergraph::RenderGraph* getGraph() const;
+  std::map<const shared::linegraph::LineNode*, OptNode*> build(
+      shared::rendergraph::RenderGraph* rg);
 
   size_t getNumNodes() const;
   size_t getNumNodes(bool topo) const;
@@ -159,10 +160,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   void split();
 
  private:
-  shared::rendergraph::RenderGraph* _g;
   const Scorer* _scorer;
-
-  void build();
   void writeEdgeOrder();
   void updateEdgeOrder(OptNode* n);
   bool simplifyStep();

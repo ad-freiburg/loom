@@ -43,7 +43,7 @@ struct InnerClique {
   std::vector<shared::rendergraph::InnerGeom> geoms;
 
   double getZWeight() const;
-  size_t getNumBranchesIn(const shared::linegraph::NodeFront* front) const;
+  size_t getNumBranchesIn(const shared::linegraph::LineEdge* front) const;
   bool operator<(const InnerClique& rhs) const;
 
   const shared::linegraph::LineNode* n;

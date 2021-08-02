@@ -28,6 +28,13 @@ struct ISect {
   util::geo::LinePoint<double> bp;
 };
 
+struct Partner {
+  Partner() : edge(0), line(0){};
+  Partner(const LineEdge* e, const Line* r) : edge(e), line(r){};
+  const LineEdge* edge;
+  const Line* line;
+};
+
 class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
  public:
   LineGraph();
@@ -57,10 +64,10 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
                                             const LineEdge* toEdge);
 
   static bool lineCtd(const LineEdge* fromEdge, const LineOcc& fromLine,
-                            const LineEdge* toEdge, const LineOcc& toLine);
+                      const LineEdge* toEdge, const LineOcc& toLine);
 
-  static bool lineCtd(const LineEdge* fromEdge,
-                            const LineEdge* toEdge, const Line* line);
+  static bool lineCtd(const LineEdge* fromEdge, const LineEdge* toEdge,
+                      const Line* line);
 
   static std::vector<const Line*> getSharedLines(const LineEdge* a,
                                                  const LineEdge* b);
@@ -79,6 +86,9 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
 
   std::set<LineEdge*> getNeighborEdges(const util::geo::DLine& line,
                                        double d) const;
+
+  static std::vector<Partner> getPartners(const LineNode* nd, const LineEdge* e,
+                                          const LineOcc& lo);
 
   NodeGrid* getNdGrid();
   const NodeGrid& getNdGrid() const;

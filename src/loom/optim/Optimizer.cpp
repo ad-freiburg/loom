@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include "loom/optim/OptGraph.h"
+#include "loom/optim/OptGraphScorer.h"
 #include "loom/optim/Optimizer.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -14,10 +15,13 @@ using loom::optim::EdgePair;
 using loom::optim::LinePair;
 using loom::optim::OptEdge;
 using loom::optim::OptGraph;
+using loom::optim::OptGraphScorer;
 using loom::optim::Optimizer;
 using loom::optim::OptNode;
+using loom::optim::OptOrderCfg;
 using loom::optim::PosComPair;
 using shared::linegraph::Line;
+using shared::linegraph::LineNode;
 using shared::rendergraph::HierarOrderCfg;
 using shared::rendergraph::OrderCfg;
 using shared::rendergraph::RenderGraph;
@@ -28,7 +32,8 @@ using util::geo::DPoint;
 // _____________________________________________________________________________
 int Optimizer::optimize(RenderGraph* rg) const {
   // create optim graph
-  OptGraph g(rg, _scorer);
+  OptGraph g(_scorer);
+  g.build(rg);
 
   size_t maxC = maxCard(*g.getNds());
   double solSp = solutionSpaceSize(*g.getNds());
@@ -85,11 +90,14 @@ int Optimizer::optimize(RenderGraph* rg) const {
   double tSum = 0;
   double iterSum = 0;
   double scoreSum = 0;
-  double crossSum = 0;
+  double crossSumSame = 0;
+  double crossSumDiff = 0;
   double sepSum = 0;
 
   LOGTO(INFO, std::cerr) << "Optimization graph has " << comps.size()
                          << " components.";
+
+  OptGraphScorer optScorer(_scorer);
 
   for (size_t run = 0; run < runs; run++) {
     OrderCfg c;
@@ -141,24 +149,31 @@ int Optimizer::optimize(RenderGraph* rg) const {
           << maxCompSolSpace;
     }
 
+    hc.writeFlatCfg(&c);
+
     tSum += t;
     iterSum += iters;
 
-    hc.writeFlatCfg(&c);
+    OptGraph gg(_scorer);
+    auto ndMap = gg.build(rg);
 
+    auto optCfg = getOptOrderCfg(c, ndMap, &gg);
+
+    scoreSum += optScorer.getCrossingScore(&gg, optCfg);
+
+    if (_cfg->splittingOpt)
+      scoreSum += optScorer.getSplittingScore(&gg, optCfg);
+
+    auto crossings = optScorer.getNumCrossings(&gg, optCfg);
+    crossSumSame += crossings.first;
+    crossSumDiff += crossings.second;
+    sepSum += optScorer.getNumSeparations(&gg, optCfg);
+
+    // todo: dont write this here, write the best one after all runs!!!!!
     rg->writePermutation(c);
-
-    if (runs > 1) {
-      if (_cfg->splittingOpt)
-        scoreSum += _scorer->getScore();
-      else
-        scoreSum += _scorer->getCrossScore();
-      crossSum += _scorer->getNumCrossings();
-      sepSum += _scorer->getNumSeparations();
-    }
   }
 
-  if (runs > 1 && _cfg->outputStats) {
+  if (true || _cfg->outputStats) {
     LOGTO(INFO, std::cerr) << "";
     LOGTO(INFO, std::cerr) << "(multiple opt runs stats) avg time: "
                            << tSum / (1.0 * runs) << " ms";
@@ -167,7 +182,10 @@ int Optimizer::optimize(RenderGraph* rg) const {
     LOGTO(INFO, std::cerr) << "(multiple opt runs stats) avg score: -- "
                            << scoreSum / (1.0 * runs) << " --";
     LOGTO(INFO, std::cerr) << "(multiple opt runs stats) avg num crossings: -- "
-                           << crossSum / (1.0 * runs) << " --";
+                           << (crossSumDiff + crossSumSame) / (1.0 * runs)
+                           << " -- (" << (crossSumSame / (1.0 * runs))
+                           << " same, " << crossSumDiff / (1.0 * runs)
+                           << " diff)";
     LOGTO(INFO, std::cerr)
         << "(multiple opt runs stats) avg num separations: -- "
         << sepSum / (1.0 * runs) << " --";
@@ -184,23 +202,26 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment) {
 
 // _____________________________________________________________________________
 std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
-  std::set<const Line*> processed;
   std::vector<LinePair> ret;
+  for (size_t a = 0; a < segment->pl().getLines().size(); a++) {
+    for (size_t b = a + 1; b < segment->pl().getLines().size(); b++) {
+      auto loA = segment->pl().getLines()[a];
+      auto loB = segment->pl().getLines()[b];
 
-  for (auto& toA : segment->pl().getLines()) {
-    processed.insert(toA.line);
-    for (auto& toB : segment->pl().getLines()) {
-      if (unique && processed.count(toB.line)) continue;
-      if (toA.line == toB.line) continue;
+      if (!unique) {
+        ret.push_back(LinePair(loA, loB));
+        ret.push_back(LinePair(loB, loA));
+        continue;
+      }
 
-      // this is to make sure that we always get the same line pairs in unique
-      // mode -> take the smaller pointer first
-      if (!unique || toA.line < toB.line)
-        ret.push_back(LinePair(toA, toB));
-      else
-        ret.push_back(LinePair(toB, toA));
+      if (loA.line < loB.line) {
+        ret.push_back(LinePair(loA, loB));
+      } else {
+        ret.push_back(LinePair(loB, loA));
+      }
     }
   }
+
   return ret;
 }
 
@@ -218,7 +239,7 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
   size_t pBinA = revA ? carA - 1 - poscom.second.first : poscom.second.first;
   size_t pBinB = revB ? carB - 1 - poscom.second.second : poscom.second.second;
 
-  return pAinA < pBinA && pAinB < pBinB;
+  return !((pAinA < pBinA) ^ (pAinB < pBinB));
 }
 
 // _____________________________________________________________________________
@@ -254,7 +275,7 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
   else
     pEdgeB = (node->getDeg() - pSegmentA) + pEdgeB;
 
-  return pAinA > pBinA && pEdgeA < pEdgeB;
+  return !((pAinA > pBinA) ^ (pEdgeA < pEdgeB));
 }
 
 // _____________________________________________________________________________
@@ -352,6 +373,31 @@ double Optimizer::solutionSpaceSize(const std::set<OptNode*>& g) {
 int Optimizer::optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
                             HierarOrderCfg* c) const {
   return optimizeComp(g, cmp, c, 0);
+}
+
+// _____________________________________________________________________________
+OptOrderCfg Optimizer::getOptOrderCfg(
+    const shared::rendergraph::OrderCfg& cfg,
+    const std::map<const LineNode*, OptNode*>& ndMap, const OptGraph* g) {
+  OptOrderCfg ret;
+  for (auto i : cfg) {
+    auto e = i.first;
+    auto order = i.second;
+
+    auto opNdFr = ndMap.find(e->getFrom())->second;
+    auto opNdTo = ndMap.find(e->getTo())->second;
+    auto opEdg = g->getEdg(opNdFr, opNdTo);
+
+    for (size_t pos : order) {
+      auto lo = e->pl().lineOccAtPos(pos);
+      ret[opEdg].push_back(lo.line);
+    }
+
+    // TODO(patrick): i don't quite understand why we need to reverse here
+    std::reverse(ret[opEdg].begin(), ret[opEdg].end());
+  }
+
+  return ret;
 }
 
 // _____________________________________________________________________________

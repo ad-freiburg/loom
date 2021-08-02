@@ -15,6 +15,52 @@ using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
 
 // _____________________________________________________________________________
+std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
+    const OptGraph* g, const OptOrderCfg& c) const {
+
+  size_t sameSegCrossings = 0;
+  size_t diffSegCrossings = 0;
+
+  for (auto n : g->getNds()) {
+    auto crossings =  getNumCrossings(n, c);
+    sameSegCrossings +=crossings.first;
+    diffSegCrossings +=crossings.second;
+  }
+
+  return {sameSegCrossings, diffSegCrossings};
+}
+
+// _____________________________________________________________________________
+size_t OptGraphScorer::getNumSeparations(const OptGraph* g,
+                                         const OptOrderCfg& c) const {
+  return 0;
+}
+
+// _____________________________________________________________________________
+double OptGraphScorer::getSplittingScore(const OptGraph* g,
+                                         const OptOrderCfg& c) const {
+  double ret = 0;
+
+  for (auto n : g->getNds()) {
+    ret += getSplittingScore(n, c);
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+double OptGraphScorer::getCrossingScore(const OptGraph* g,
+                                        const OptOrderCfg& c) const {
+  double ret = 0;
+
+  for (auto n : g->getNds()) {
+    ret += getCrossingScore(n, c);
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
 double OptGraphScorer::getSplittingScore(const std::set<OptNode*>& g,
                                          const OptOrderCfg& c) const {
   double ret = 0;
@@ -127,7 +173,9 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
 
         PosComPair poses(posA, posB);
 
-        if (Optimizer::crosses(n, ea, eb, poses)) sameSegCrossings++;
+        if (Optimizer::crosses(n, ea, eb, poses)) {
+          sameSegCrossings++;
+        }
       }
 
       for (auto ebc : Optimizer::getEdgePartnerPairs(n, ea, lp)) {
@@ -137,7 +185,10 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
             std::find(c.at(ea).begin(), c.at(ea).end(), lp.second.line) -
                 c.at(ea).begin());
 
-        if (Optimizer::crosses(n, ea, ebc, posA)) diffSegCrossings++;
+        if (Optimizer::crosses(n, ea, ebc, posA)) {
+          diffSegCrossings++;
+          // std::cerr << "Crossing at " << n->pl().node->pl().stops().front().name << " between " << lp.first.line->label() << " and " << lp.second.line->label()<< std::endl;
+        }
       }
     }
   }
@@ -148,13 +199,11 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
 // _____________________________________________________________________________
 double OptGraphScorer::getCrossingScore(OptEdge* e,
                                         const OptOrderCfg& c) const {
-  return getCrossingScore(e->getFrom(), c) +
-         getCrossingScore(e->getTo(), c);
+  return getCrossingScore(e->getFrom(), c) + getCrossingScore(e->getTo(), c);
 }
 
 // _____________________________________________________________________________
 double OptGraphScorer::getSplittingScore(OptEdge* e,
                                          const OptOrderCfg& c) const {
-  return getSplittingScore(e->getFrom(), c) +
-         getSplittingScore(e->getTo(), c);
+  return getSplittingScore(e->getFrom(), c) + getSplittingScore(e->getTo(), c);
 }
