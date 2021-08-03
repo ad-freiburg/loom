@@ -29,8 +29,6 @@ COINSolver::COINSolver(DirType dir)
       _timeLimit(std::numeric_limits<int>::max()) {
   LOGTO(INFO, std::cerr) << "Creating COIN solver instance...";
 
-  throw std::runtime_error("COIN Solver not yet implemented.");
-
   // basically following
   // https://github.com/coin-or/Cbc/blob/master/examples/sample5.cpp
 
@@ -51,19 +49,21 @@ int COINSolver::addCol(const std::string& name, ColType colType,
 // _____________________________________________________________________________
 int COINSolver::addCol(const std::string& name, ColType colType, double objCoef,
                        double lowBnd, double upBnd) {
-  _solver->addCol(0, NULL, NULL, lowBnd, upBnd, objCoef);
+  _model.addCol(0, NULL, NULL, lowBnd, upBnd, objCoef);
   _numCols++;
   int colId = _numCols - 1;
 
+  _model.setColName(colId, name.c_str());
+
   switch (colType) {
     case INT:
-      _solver->setInteger(colId);
+      _model.setInteger(colId);
       break;
     case BIN:
-      _solver->setInteger(colId);
+      _model.setInteger(colId);
       break;
     case CONT:
-      _solver->setContinuous(colId);
+      _model.setContinuous(colId);
       break;
   }
 
@@ -81,6 +81,7 @@ void COINSolver::addColToRow(const std::string& rowName,
 
 // _____________________________________________________________________________
 int COINSolver::getVarByName(const std::string& name) const {
+  return _model.column(name.c_str());
 }
 
 // _____________________________________________________________________________
