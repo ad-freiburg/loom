@@ -22,8 +22,8 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
 
-      for (auto etgp : e->pl().etgs) {
-        if (etgp.wasCut) continue;
+      for (auto lnEdgPart : e->pl().lnEdgParts) {
+        if (lnEdgPart.wasCut) continue;
         for (size_t tp = 0; tp < e->pl().getCardinality(); tp++) {
           bool found = false;
 
@@ -48,18 +48,18 @@ void ILPEdgeOrderOptimizer::getConfigurationFromSolution(
             if (valPrev < 0.5 && val > 0.5) {
               // first time p is eq/greater, so it is this p
               // TODO: the latter dir is checking the 'main' direction here,
-              // put this into a method in the pl()! (there, the [0] etg is
+              // put this into a method in the pl()! (there, the [0] lnEdgeP is
               // already taken as a ref). THIS IS A POTENTIAL BUG HERE
 
               for (auto rel : ro.relatives) {
                 // retrieve the original route pos
-                size_t p = etgp.etg->pl().linePos(rel);
+                size_t p = lnEdgPart.lnEdg->pl().linePos(rel);
 
-                if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
-                  (*hc)[etgp.etg][etgp.order].insert(
-                      (*hc)[etgp.etg][etgp.order].begin(), p);
+                if (!(lnEdgPart.dir ^ e->pl().lnEdgParts.front().dir)) {
+                  (*hc)[lnEdgPart.lnEdg][lnEdgPart.order].insert(
+                      (*hc)[lnEdgPart.lnEdg][lnEdgPart.order].begin(), p);
                 } else {
-                  (*hc)[etgp.etg][etgp.order].push_back(p);
+                  (*hc)[lnEdgPart.lnEdg][lnEdgPart.order].push_back(p);
                 }
               }
 
@@ -393,9 +393,9 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
           int row2 = lp->addRow(rowName2.str(), 0, shared::optim::LO);
 
           bool otherWayA =
-              (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
+              (segmentA->getFrom() != node) ^ segmentA->pl().lnEdgParts.front().dir;
           bool otherWayB =
-              (segmentB->getFrom() != node) ^ segmentB->pl().etgs.front().dir;
+              (segmentB->getFrom() != node) ^ segmentB->pl().lnEdgParts.front().dir;
 
           if (otherWayA ^ otherWayB) {
           } else {

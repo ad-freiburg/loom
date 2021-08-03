@@ -57,8 +57,8 @@ struct PartnerPath {
   std::vector<bool> inv;
 };
 
-struct EtgPart {
-  shared::linegraph::LineEdge* etg;
+struct LnEdgPart {
+  shared::linegraph::LineEdge* lnEdg;
   bool dir;
   size_t order;
 
@@ -67,23 +67,24 @@ struct EtgPart {
   // writing of ordering later on
   bool wasCut;
 
-  EtgPart(shared::linegraph::LineEdge* etg, bool dir)
-      : etg(etg), dir(dir), order(0), wasCut(false){};
-  EtgPart(shared::linegraph::LineEdge* etg, bool dir, size_t order, bool wasCut)
-      : etg(etg), dir(dir), order(order), wasCut(wasCut){};
+  LnEdgPart(shared::linegraph::LineEdge* lnEdg, bool dir)
+      : lnEdg(lnEdg), dir(dir), order(0), wasCut(false){};
+  LnEdgPart(shared::linegraph::LineEdge* lnEdg, bool dir, size_t order,
+            bool wasCut)
+      : lnEdg(lnEdg), dir(dir), order(order), wasCut(wasCut){};
 };
 
 struct OptEdgePL {
-  OptEdgePL() : depth(0), firstEtg(0), lastEtg(0){};
+  OptEdgePL() : depth(0), firstLnEdg(0), lastLnEdg(0){};
 
-  // all original ETGs from the transit graph contained in this edge
+  // all original line edges from the transit graph contained in this edge
   // Guarantee: they are all equal in terms of (directed) routes
-  std::vector<EtgPart> etgs;
+  std::vector<LnEdgPart> lnEdgParts;
 
   size_t depth;
 
-  size_t firstEtg;
-  size_t lastEtg;
+  size_t firstLnEdg;
+  size_t lastLnEdg;
 
   size_t getCardinality() const;
   std::string toStr() const;
@@ -91,9 +92,9 @@ struct OptEdgePL {
   const std::vector<OptLO>& getLines() const;
 
   // partial routes
-  // For the ETGs contained in .etgs, only these route occurances are
-  // actually contained in this edge. Their relative ordering is defined by
-  // .order
+  // For the line edge parts contained in lnEdgParts, only these route
+  // occurances are actually contained in this edge. Their relative ordering is
+  // defined by .order
   std::vector<OptLO> lines;
 
   std::string getStrRepr() const;
@@ -103,25 +104,28 @@ struct OptEdgePL {
 };
 
 struct OptNodePL {
-  const shared::linegraph::LineNode* node;
-  util::geo::Point<double> p;
-
-  // the edges arriving at this node, in clockwise fashion, based
-  // on the geometry in the original graph
-  std::vector<OptEdge*> orderedEdges;
-
   OptNodePL(util::geo::Point<double> p) : node(0), p(p){};
   OptNodePL(const shared::linegraph::LineNode* node)
       : node(node), p(*node->pl().getGeom()){};
   OptNodePL() : node(0){};
 
+  size_t circOrder(OptEdge*) const;
+
   const util::geo::Point<double>* getGeom();
   util::json::Dict getAttrs();
+
+  const shared::linegraph::LineNode* node;
+  util::geo::Point<double> p;
+
+  // the edges adjacent to this node, in clockwise fashion, based
+  // on the geometry in the original graph
+  std::vector<OptEdge*> circOrdering;
+  std::map<OptEdge*, size_t> circOrderMap;
 };
 
 class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
  public:
-  OptGraph(const OptGraphScorer* scorer) : _scorer(scorer) {};
+  OptGraph(const OptGraphScorer* scorer) : _scorer(scorer){};
 
   std::map<const shared::linegraph::LineNode*, OptNode*> build(
       shared::rendergraph::RenderGraph* rg);
@@ -144,7 +148,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
 
   static shared::linegraph::LineEdge* getAdjEdg(const OptEdge* e,
                                                 const OptNode* n);
-  static EtgPart getAdjEtgp(const OptEdge* e, const OptNode* n);
+  static LnEdgPart getAdjLnEdgPart(const OptEdge* e, const OptNode* n);
   static bool hasCtdLinesIn(const shared::linegraph::Line* r,
                             const shared::linegraph::LineNode* dir,
                             const OptEdge* fromEdge, const OptEdge* toEdge);
@@ -154,8 +158,8 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   static std::vector<OptLO> getSameDirLinesIn(
       const shared::linegraph::Line* r, const shared::linegraph::LineNode* dir,
       const OptEdge* fromEdge, const OptEdge* toEdge);
-  static EtgPart getFirstEdg(const OptEdge*);
-  static EtgPart getLastEdg(const OptEdge*);
+  static LnEdgPart getFirstLnEdgPart(const OptEdge*);
+  static LnEdgPart getLastLnEdgPart(const OptEdge*);
 
   // apply splitting rules
   void split();
@@ -256,22 +260,22 @@ inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
     // internal ordering
     // TODO: what if the edge is reversed?
     if ((a->getFrom() == n && b->getFrom() == n)) {
-      if (OptGraph::getAdjEtgp(a, n).dir) {
-        assert(OptGraph::getAdjEtgp(b, n).dir);
-        return OptGraph::getAdjEtgp(a, n).order <
-               OptGraph::getAdjEtgp(b, n).order;
+      if (OptGraph::getAdjLnEdgPart(a, n).dir) {
+        assert(OptGraph::getAdjLnEdgPart(b, n).dir);
+        return OptGraph::getAdjLnEdgPart(a, n).order <
+               OptGraph::getAdjLnEdgPart(b, n).order;
       } else {
-        return OptGraph::getAdjEtgp(a, n).order >
-               OptGraph::getAdjEtgp(b, n).order;
+        return OptGraph::getAdjLnEdgPart(a, n).order >
+               OptGraph::getAdjLnEdgPart(b, n).order;
       }
     } else if ((a->getTo() == n && b->getTo() == n)) {
-      if (OptGraph::getAdjEtgp(a, n).dir) {
-        assert(OptGraph::getAdjEtgp(b, n).dir);
-        return OptGraph::getAdjEtgp(a, n).order >
-               OptGraph::getAdjEtgp(b, n).order;
+      if (OptGraph::getAdjLnEdgPart(a, n).dir) {
+        assert(OptGraph::getAdjLnEdgPart(b, n).dir);
+        return OptGraph::getAdjLnEdgPart(a, n).order >
+               OptGraph::getAdjLnEdgPart(b, n).order;
       } else {
-        return OptGraph::getAdjEtgp(a, n).order <
-               OptGraph::getAdjEtgp(b, n).order;
+        return OptGraph::getAdjLnEdgPart(a, n).order <
+               OptGraph::getAdjLnEdgPart(b, n).order;
       }
     }
   }

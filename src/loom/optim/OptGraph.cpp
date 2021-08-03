@@ -12,15 +12,15 @@
 #include "util/graph/Algorithm.h"
 #include "util/log/Log.h"
 
-using loom::optim::EtgPart;
+using loom::optim::LnEdgPart;
 using loom::optim::OptEdge;
 using loom::optim::OptEdgePL;
 using loom::optim::OptGraph;
+using loom::optim::OptGraphScorer;
 using loom::optim::OptLO;
 using loom::optim::OptNode;
 using loom::optim::OptNodePL;
 using loom::optim::PartnerPath;
-using loom::optim::OptGraphScorer;
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
@@ -33,34 +33,34 @@ using util::graph::Algorithm;
 // _____________________________________________________________________________
 void OptGraph::upFirstLastEdg(OptEdge* optEdg) {
   size_t i = 0;
-  for (const auto e : optEdg->pl().etgs) {
-    if (e.etg->getFrom() == optEdg->getFrom()->pl().node ||
-        e.etg->getTo() == optEdg->getFrom()->pl().node) {
+  for (const auto e : optEdg->pl().lnEdgParts) {
+    if (e.lnEdg->getFrom() == optEdg->getFrom()->pl().node ||
+        e.lnEdg->getTo() == optEdg->getFrom()->pl().node) {
       break;
     }
     i++;
   }
 
   size_t j = 0;
-  for (const auto e : optEdg->pl().etgs) {
-    if (e.etg->getFrom() == optEdg->getTo()->pl().node ||
-        e.etg->getTo() == optEdg->getTo()->pl().node) {
+  for (const auto e : optEdg->pl().lnEdgParts) {
+    if (e.lnEdg->getFrom() == optEdg->getTo()->pl().node ||
+        e.lnEdg->getTo() == optEdg->getTo()->pl().node) {
       break;
     }
     j++;
   }
-  optEdg->pl().firstEtg = i;
-  optEdg->pl().lastEtg = j;
+  optEdg->pl().firstLnEdg = i;
+  optEdg->pl().lastLnEdg = j;
 }
 
 // _____________________________________________________________________________
-EtgPart OptGraph::getFirstEdg(const OptEdge* optEdg) {
-  return optEdg->pl().etgs[optEdg->pl().firstEtg];
+LnEdgPart OptGraph::getFirstLnEdgPart(const OptEdge* optEdg) {
+  return optEdg->pl().lnEdgParts[optEdg->pl().firstLnEdg];
 }
 
 // _____________________________________________________________________________
-EtgPart OptGraph::getLastEdg(const OptEdge* optEdg) {
-  return optEdg->pl().etgs[optEdg->pl().lastEtg];
+LnEdgPart OptGraph::getLastLnEdgPart(const OptEdge* optEdg) {
+  return optEdg->pl().lnEdgParts[optEdg->pl().lastLnEdg];
 }
 
 // _____________________________________________________________________________
@@ -82,11 +82,11 @@ std::string OptEdgePL::getStrRepr() const {
 }
 
 // _____________________________________________________________________________
-EtgPart OptGraph::getAdjEtgp(const OptEdge* e, const OptNode* n) {
+LnEdgPart OptGraph::getAdjLnEdgPart(const OptEdge* e, const OptNode* n) {
   if (e->getFrom() == n) {
-    return getFirstEdg(e);
+    return getFirstLnEdgPart(e);
   } else if (e->getTo() == n) {
-    return getLastEdg(e);
+    return getLastLnEdgPart(e);
   }
 
   // TODO: throw exception
@@ -96,9 +96,9 @@ EtgPart OptGraph::getAdjEtgp(const OptEdge* e, const OptNode* n) {
 // _____________________________________________________________________________
 LineEdge* OptGraph::getAdjEdg(const OptEdge* e, const OptNode* n) {
   if (e->getFrom() == n) {
-    return getFirstEdg(e).etg;
+    return getFirstLnEdgPart(e).lnEdg;
   } else if (e->getTo() == n) {
-    return getLastEdg(e).etg;
+    return getLastLnEdgPart(e).lnEdg;
   }
 
   return 0;
@@ -133,7 +133,7 @@ std::map<const LineNode*, OptNode*> OptGraph::build(RenderGraph* rg) {
 
       OptEdge* edge = addEdg(from, to);
 
-      edge->pl().etgs.push_back(EtgPart(e, true));
+      edge->pl().lnEdgParts.push_back(LnEdgPart(e, true));
       for (auto roOld : e->pl().getLines()) {
         edge->pl().lines.push_back(OptLO(roOld.line, roOld.direction));
       }
@@ -178,7 +178,7 @@ void OptGraph::split() {
 
     addEdg(eFrom, leftN, e->pl());
     auto newE = addEdg(rightN, eTo, e->pl());
-    for (auto& etg : newE->pl().etgs) etg.wasCut = true;
+    for (auto& lnEdgPart : newE->pl().lnEdgParts) lnEdgPart.wasCut = true;
 
     delEdg(eFrom, eTo);
 
@@ -460,15 +460,17 @@ bool OptGraph::simplifyStep() {
 
         OptEdge* newEdge = addEdg(newFrom, newTo);
 
-        // add etgs...
-        for (EtgPart& etgp : first->pl().etgs) {
-          newEdge->pl().etgs.push_back(EtgPart(
-              etgp.etg, (etgp.dir ^ firstReverted), etgp.order, etgp.wasCut));
+        // add lnEdgParts...
+        for (LnEdgPart& lnEdgPart : first->pl().lnEdgParts) {
+          newEdge->pl().lnEdgParts.push_back(
+              LnEdgPart(lnEdgPart.lnEdg, (lnEdgPart.dir ^ firstReverted),
+                        lnEdgPart.order, lnEdgPart.wasCut));
         }
 
-        for (EtgPart& etgp : second->pl().etgs) {
-          newEdge->pl().etgs.push_back(EtgPart(
-              etgp.etg, (etgp.dir ^ secondReverted), etgp.order, etgp.wasCut));
+        for (LnEdgPart& lnEdgPart : second->pl().lnEdgParts) {
+          newEdge->pl().lnEdgParts.push_back(
+              LnEdgPart(lnEdgPart.lnEdg, (lnEdgPart.dir ^ secondReverted),
+                        lnEdgPart.order, lnEdgPart.wasCut));
         }
 
         upFirstLastEdg(newEdge);
@@ -532,7 +534,7 @@ size_t OptGraph::getNumLines() const {
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      for (const auto& to : getFirstEdg(e).etg->pl().getLines()) {
+      for (const auto& to : getFirstLnEdgPart(e).lnEdg->pl().getLines()) {
         lines.insert(to.line);
       }
     }
@@ -547,8 +549,8 @@ size_t OptGraph::getMaxCardinality() const {
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      if (getFirstEdg(e).etg->pl().getLines().size() > ret) {
-        ret = getFirstEdg(e).etg->pl().getLines().size();
+      if (getFirstLnEdgPart(e).lnEdg->pl().getLines().size() > ret) {
+        ret = getFirstLnEdgPart(e).lnEdg->pl().getLines().size();
       }
     }
   }
@@ -575,7 +577,7 @@ util::json::Dict OptEdgePL::getAttrs() {
   }
 
   ret["lines"] = lines;
-  ret["num_etgs"] = util::toString(etgs.size());
+  ret["num_line_edge_parts"] = util::toString(lnEdgParts.size());
   ret["depth"] = util::toString(depth);
 
   return ret;
@@ -614,7 +616,7 @@ util::json::Dict OptNodePL::getAttrs() {
     }
   }
   std::string edges;
-  for (auto e : orderedEdges) {
+  for (auto e : circOrdering) {
     edges += util::toString(e) + ",";
   }
 
@@ -751,11 +753,11 @@ bool OptGraph::untanglePartialYStep() {
         size_t j = i;
         OptEdgePL pl;
         if (ea->getFrom() == nb) {
-          if (ea->pl().etgs[0].dir) j = minLgs.size() - 1 - i;
+          if (ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
           pl = getPartialView(ea, minLgs[j], offset);
           addEdg(nb, origNds[j], pl);
         } else {
-          if (!ea->pl().etgs[0].dir) j = minLgs.size() - 1 - i;
+          if (!ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
           pl = getPartialView(ea, minLgs[j], offset);
           addEdg(origNds[j], nb, pl);
         }
@@ -849,11 +851,11 @@ bool OptGraph::untangleStumpStep() {
           size_t j = i;
           OptEdgePL pl;
           if (mainLeg->getFrom() == stumpN) {
-            if (mainLeg->pl().etgs[0].dir) j = stumpNds.size() - 1 - i;
+            if (mainLeg->pl().lnEdgParts[0].dir) j = stumpNds.size() - 1 - i;
             pl = getPartialView(mainLeg, stumpLegs[j], offset);
             addEdg(stumpNds[j], notStumpN, pl);
           } else {
-            if (!mainLeg->pl().etgs[0].dir) j = stumpLegs.size() - 1 - i;
+            if (!mainLeg->pl().lnEdgParts[0].dir) j = stumpLegs.size() - 1 - i;
             pl = getPartialView(mainLeg, stumpLegs[j], offset);
             addEdg(notStumpN, stumpNds[j], pl);
           }
@@ -917,7 +919,7 @@ bool OptGraph::untangleYStep() {
       // each leg, in clockwise fashion
       auto minLgs = clockwEdges(ea, nb);
       std::vector<OptEdge*> minLgsN(minLgs.size());
-      assert(minLgs.size() == nb->pl().orderedEdges.size() - 1);
+      assert(minLgs.size() == nb->pl().circOrdering.size() - 1);
 
       for (size_t i = 0; i < minLgs.size(); i++) {
         if (minLgs[i]->getFrom() == nb)
@@ -933,11 +935,11 @@ bool OptGraph::untangleYStep() {
         size_t j = i;
         OptEdgePL pl;
         if (ea->getFrom() == nb) {
-          if (ea->pl().etgs[0].dir) j = minLgs.size() - 1 - i;
+          if (ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
           pl = getView(ea, minLgs[j], offset);
           addEdg(centerNds[j], origNds[j], pl);
         } else {
-          if (!ea->pl().etgs[0].dir) j = minLgs.size() - 1 - i;
+          if (!ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
           pl = getView(ea, minLgs[j], offset);
           addEdg(origNds[j], centerNds[j], pl);
         }
@@ -966,12 +968,12 @@ OptEdgePL OptGraph::getView(OptEdge* parent, OptEdge* leg, size_t offset) {
   OptEdgePL ret(parent->pl());
   ret.depth++;
 
-  for (auto& etg : ret.etgs) {
-    if (parent->pl().etgs[0].dir ^ etg.dir)
-      etg.order +=
+  for (auto& lnEdgPart : ret.lnEdgParts) {
+    if (parent->pl().lnEdgParts[0].dir ^ lnEdgPart.dir)
+      lnEdgPart.order +=
           parent->pl().getLines().size() - leg->pl().getLines().size() - offset;
     else
-      etg.order += offset;
+      lnEdgPart.order += offset;
   }
 
   ret.lines.clear();
@@ -994,11 +996,11 @@ OptEdgePL OptGraph::getPartialView(OptEdge* parent, OptEdge* leg,
   auto ctdR = getCtdLinesIn(parent, leg);
   size_t shared = ctdR.size();
 
-  for (auto& etg : ret.etgs) {
-    if (parent->pl().etgs[0].dir ^ etg.dir)
-      etg.order += parent->pl().getLines().size() - shared - offset;
+  for (auto& lnEdgPart : ret.lnEdgParts) {
+    if (parent->pl().lnEdgParts[0].dir ^ lnEdgPart.dir)
+      lnEdgPart.order += parent->pl().getLines().size() - shared - offset;
     else
-      etg.order += offset;
+      lnEdgPart.order += offset;
   }
 
   ret.lines.clear();
@@ -1072,11 +1074,11 @@ bool OptGraph::untanglePartialDogBoneStep() {
           size_t j = i;
           OptEdgePL pl;
           if (mainLeg->getFrom() == partN) {
-            if (mainLeg->pl().etgs[0].dir) j = minLgs.size() - 1 - i;
+            if (mainLeg->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
             pl = getPartialView(mainLeg, refLegs[j], offset);
             addEdg(partNds[toB[j]], notPartN, pl);
           } else {
-            if (!mainLeg->pl().etgs[0].dir) j = minLgs.size() - 1 - i;
+            if (!mainLeg->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
             pl = getPartialView(mainLeg, refLegs[j], offset);
             addEdg(notPartN, partNds[toB[j]], pl);
           }
@@ -1129,7 +1131,7 @@ bool OptGraph::untangleDogBoneStep() {
         // each leg in a, in clockwise fashion
         auto minLgsA = clockwEdges(mainLeg, na);
         std::vector<OptEdge*> minLgsANew(minLgsA.size());
-        assert(minLgsA.size() == na->pl().orderedEdges.size() - 1);
+        assert(minLgsA.size() == na->pl().circOrdering.size() - 1);
 
         std::vector<OptNode*> bNds =
             explodeNodeAlong(nb, orthoPlB, nb->getDeg() - 1);
@@ -1137,7 +1139,7 @@ bool OptGraph::untangleDogBoneStep() {
         // each leg in b, in counter-clockwise fashion
         auto minLgsB = clockwEdges(mainLeg, nb);
         std::vector<OptEdge*> minLgsBNew(minLgsB.size());
-        assert(minLgsB.size() == nb->pl().orderedEdges.size() - 1);
+        assert(minLgsB.size() == nb->pl().circOrdering.size() - 1);
 
         std::reverse(minLgsB.begin(), minLgsB.end());
 
@@ -1181,11 +1183,11 @@ bool OptGraph::untangleDogBoneStep() {
           size_t j = i;
           OptEdgePL pl;
           if (mainLeg->getFrom() == na) {
-            if (mainLeg->pl().etgs[0].dir) j = minLgsA.size() - 1 - i;
+            if (mainLeg->pl().lnEdgParts[0].dir) j = minLgsA.size() - 1 - i;
             pl = getView(mainLeg, refLegs[j], offset);
             addEdg(aNds[toB[j]], bNds[toA[j]], pl);
           } else {
-            if (!mainLeg->pl().etgs[0].dir) j = minLgsA.size() - 1 - i;
+            if (!mainLeg->pl().lnEdgParts[0].dir) j = minLgsA.size() - 1 - i;
             pl = getView(mainLeg, refLegs[j], offset);
             addEdg(bNds[toA[j]], aNds[toB[j]], pl);
           }
@@ -1222,18 +1224,36 @@ void OptGraph::writeEdgeOrder() {
 }
 
 // _____________________________________________________________________________
+size_t OptNodePL::circOrder(OptEdge* e) const {
+  if (circOrdering.size() == 1) return 0;
+  if (circOrdering.size() < 4) {
+    return std::find(circOrdering.begin(), circOrdering.end(), e) -
+           circOrdering.begin();
+  } else {
+    return circOrderMap.find(e)->second;
+  }
+
+  // TODO: throw exception
+  assert(false);
+}
+
+// _____________________________________________________________________________
 void OptGraph::updateEdgeOrder(OptNode* n) {
-  n->pl().orderedEdges.clear();
+  n->pl().circOrdering.clear();
 
   if (n->getDeg() == 1) {
-    n->pl().orderedEdges.push_back(n->getAdjList().front());
+    n->pl().circOrdering.push_back(n->getAdjList().front());
     return;
   }
 
   for (auto e : n->getAdjList()) {
-    n->pl().orderedEdges.push_back(e);
+    n->pl().circOrdering.push_back(e);
   }
-  std::sort(n->pl().orderedEdges.begin(), n->pl().orderedEdges.end(), cmpEdge);
+  std::sort(n->pl().circOrdering.begin(), n->pl().circOrdering.end(), cmpEdge);
+
+  for (size_t i = 0; i < n->pl().circOrdering.size(); i++) {
+    n->pl().circOrderMap[n->pl().circOrdering[i]] = i;
+  }
 }
 
 // _____________________________________________________________________________
@@ -1444,8 +1464,8 @@ std::vector<OptEdge*> OptGraph::clockwEdges(OptEdge* noon, OptNode* n) {
   std::vector<OptEdge*> clockwise;
 
   size_t passed = n->getDeg();
-  for (size_t i = 0; i < n->pl().orderedEdges.size(); i++) {
-    auto e = n->pl().orderedEdges[i];
+  for (size_t i = 0; i < n->pl().circOrdering.size(); i++) {
+    auto e = n->pl().circOrdering[i];
     if (e == noon) {
       passed = i;
       continue;

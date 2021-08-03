@@ -110,7 +110,6 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 // _____________________________________________________________________________
 double HillClimbOptimizer::getScore(OptGraph* og, OptEdge* e,
                                     OptOrderCfg& cur) const {
-  double curScore = _optScorer.getCrossingScore(e, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(e, cur);
-  return curScore;
+  if (_cfg->splittingOpt) return _optScorer.getTotalScore(e, cur);
+  return _optScorer.getCrossingScore(e, cur);
 }

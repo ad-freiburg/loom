@@ -17,14 +17,19 @@ using shared::linegraph::LineNode;
 // _____________________________________________________________________________
 std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
     const OptGraph* g, const OptOrderCfg& c) const {
+  return getNumCrossings(g->getNds(), c);
+}
 
+// _____________________________________________________________________________
+std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
+    const std::set<OptNode*>& g, const OptOrderCfg& c) const {
   size_t sameSegCrossings = 0;
   size_t diffSegCrossings = 0;
 
-  for (auto n : g->getNds()) {
-    auto crossings =  getNumCrossings(n, c);
-    sameSegCrossings +=crossings.first;
-    diffSegCrossings +=crossings.second;
+  for (auto n : g) {
+    auto crossings = getNumCrossings(n, c);
+    sameSegCrossings += crossings.first;
+    diffSegCrossings += crossings.second;
   }
 
   return {sameSegCrossings, diffSegCrossings};
@@ -33,9 +38,15 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
 // _____________________________________________________________________________
 size_t OptGraphScorer::getNumSeparations(const OptGraph* g,
                                          const OptOrderCfg& c) const {
+  return getNumSeparations(g->getNds(), c);
+}
+
+// _____________________________________________________________________________
+size_t OptGraphScorer::getNumSeparations(const std::set<OptNode*>& g,
+                                         const OptOrderCfg& c) const {
   double ret = 0;
 
-  for (auto n : g->getNds()) {
+  for (auto n : g) {
     ret += getNumSeparations(n, c);
   }
 
@@ -45,25 +56,46 @@ size_t OptGraphScorer::getNumSeparations(const OptGraph* g,
 // _____________________________________________________________________________
 double OptGraphScorer::getSplittingScore(const OptGraph* g,
                                          const OptOrderCfg& c) const {
+  return getSplittingScore(g->getNds(), c);
+}
+
+// _____________________________________________________________________________
+double OptGraphScorer::getCrossingScore(const OptGraph* g,
+                                        const OptOrderCfg& c) const {
+  return getCrossingScore(g->getNds(), c);
+}
+
+// _____________________________________________________________________________
+double OptGraphScorer::getTotalScore(const OptGraph* g,
+                                     const OptOrderCfg& c) const {
+  return getTotalScore(g->getNds(), c);
+}
+
+// _____________________________________________________________________________
+double OptGraphScorer::getTotalScore(const std::set<OptNode*>& g,
+                                     const OptOrderCfg& c) const {
   double ret = 0;
 
-  for (auto n : g->getNds()) {
-    ret += getSplittingScore(n, c);
+  for (auto n : g) {
+    ret += getTotalScore(n, c);
   }
 
   return ret;
 }
 
 // _____________________________________________________________________________
-double OptGraphScorer::getCrossingScore(const OptGraph* g,
-                                        const OptOrderCfg& c) const {
-  double ret = 0;
+double OptGraphScorer::getTotalScore(OptEdge* e, const OptOrderCfg& c) const {
+  return getTotalScore(e->getFrom(), c) + getTotalScore(e->getTo(), c);
+}
 
-  for (auto n : g->getNds()) {
-    ret += getCrossingScore(n, c);
-  }
+// _____________________________________________________________________________
+double OptGraphScorer::getTotalScore(OptNode* n, const OptOrderCfg& c) const {
+  if (!n->pl().node) return 0;
+  auto num = getNumCrossSeps(n, c);
 
-  return ret;
+  return num.first.first * getCrossingPenSameSeg(n) +
+         num.first.second * getCrossingPenDiffSeg(n) +
+         num.second * getSplittingPen(n);
 }
 
 // _____________________________________________________________________________
@@ -110,96 +142,64 @@ double OptGraphScorer::getSplittingScore(OptNode* n,
 // _____________________________________________________________________________
 size_t OptGraphScorer::getNumSeparations(OptNode* n,
                                          const OptOrderCfg& c) const {
-  size_t seps = 0;
-
-  for (auto ea : n->getAdjList()) {
-    auto linePairs = Optimizer::getLinePairs(ea, true);
-
-    for (auto lp : linePairs) {
-      for (auto eb : Optimizer::getEdgePartners(n, ea, lp)) {
-        int ainA = std::distance(
-            c.at(ea).begin(),
-            std::find(c.at(ea).begin(), c.at(ea).end(), lp.first.line));
-        int ainB = std::distance(
-            c.at(eb).begin(),
-            std::find(c.at(eb).begin(), c.at(eb).end(), lp.first.line));
-
-        int binA = std::distance(
-            c.at(ea).begin(),
-            std::find(c.at(ea).begin(), c.at(ea).end(), lp.second.line));
-        int binB = std::distance(
-            c.at(eb).begin(),
-            std::find(c.at(eb).begin(), c.at(eb).end(), lp.second.line));
-
-        if (abs(ainA - binA) == 1 && abs(ainB - binB) != 1) {
-          seps++;
-        }
-      }
-    }
-  }
-
-  return seps;
+  return getNumCrossSeps(n, c).second;
 }
 
 // _____________________________________________________________________________
 std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
     OptNode* n, const OptOrderCfg& c) const {
+  return getNumCrossSeps(n, c).first;
+}
+
+// _____________________________________________________________________________
+std::pair<std::pair<size_t, size_t>, size_t> OptGraphScorer::getNumCrossSeps(
+    OptNode* n, const OptOrderCfg& c) const {
+  if (n->getDeg() == 1) return {{0, 0}, {0}};
   size_t sameSegCrossings = 0;
   size_t diffSegCrossings = 0;
-
-  std::map<LinePair, std::set<OptEdge*>> proced;
+  size_t seps = 0;
 
   for (auto ea : n->getAdjList()) {
     // line pairs are unique because of the second parameter
     // they are always sorted by their pointer value
-    auto linePairs = Optimizer::getLinePairs(ea, true);
+    const auto& linePairs = Optimizer::getLinePairs(ea, true);
+    const auto& cea = c.at(ea);
 
-    for (auto lp : linePairs) {
+    for (const auto& lp : linePairs) {
       // check if pairs continue in same segments
 
-      // mark this line pair as processed on ea - we have checked it
-      // into each adjacent edge
-      proced[lp].insert(ea);
+      size_t peaA =
+          std::find(cea.begin(), cea.end(), lp.first.line) - cea.begin();
+      size_t peaB =
+          std::find(cea.begin(), cea.end(), lp.second.line) - cea.begin();
 
-      for (auto eb : Optimizer::getEdgePartners(n, ea, lp)) {
+      for (const auto& eb : Optimizer::getEdgePartners(n, ea, lp)) {
         // if we have already fully checked the line pairs on this edge,
         // don't count the crossing again - skip.
-        if (proced[lp].count(eb)) continue;
 
-        PosCom posA(std::find(c.at(ea).begin(), c.at(ea).end(), lp.first.line) -
-                        c.at(ea).begin(),
-                    std::find(c.at(eb).begin(), c.at(eb).end(), lp.first.line) -
-                        c.at(eb).begin());
+        const auto& ceb = c.at(eb);
 
-        PosCom posB(
-            std::find(c.at(ea).begin(), c.at(ea).end(), lp.second.line) -
-                c.at(ea).begin(),
-            std::find(c.at(eb).begin(), c.at(eb).end(), lp.second.line) -
-                c.at(eb).begin());
+        PosCom posA(peaA, std::find(ceb.begin(), ceb.end(), lp.first.line) -
+                              ceb.begin());
+
+        PosCom posB(peaB, std::find(ceb.begin(), ceb.end(), lp.second.line) -
+                              ceb.begin());
 
         PosComPair poses(posA, posB);
 
-        if (Optimizer::crosses(n, ea, eb, poses)) {
-          sameSegCrossings++;
-        }
+        if (Optimizer::crosses(n, ea, eb, poses)) sameSegCrossings++;
+        if (Optimizer::separates(poses)) seps++;
       }
 
-      for (auto ebc : Optimizer::getEdgePartnerPairs(n, ea, lp)) {
-        PosCom posA(
-            std::find(c.at(ea).begin(), c.at(ea).end(), lp.first.line) -
-                c.at(ea).begin(),
-            std::find(c.at(ea).begin(), c.at(ea).end(), lp.second.line) -
-                c.at(ea).begin());
+      PosCom posA(peaA, peaB);
 
-        if (Optimizer::crosses(n, ea, ebc, posA)) {
-          diffSegCrossings++;
-          // std::cerr << "Crossing at " << n->pl().node->pl().stops().front().name << " between " << lp.first.line->label() << " and " << lp.second.line->label()<< std::endl;
-        }
+      for (const auto& ebc : Optimizer::getEdgePartnerPairs(n, ea, lp)) {
+        if (Optimizer::crosses(n, ea, ebc, posA)) diffSegCrossings++;
       }
     }
   }
 
-  return std::pair<size_t, size_t>(sameSegCrossings, diffSegCrossings);
+  return {{sameSegCrossings / 2, diffSegCrossings}, seps / 2};
 }
 
 // _____________________________________________________________________________

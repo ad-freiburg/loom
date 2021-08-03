@@ -38,16 +38,6 @@ using util::geo::Polygon;
 using util::geo::PolyLine;
 
 // _____________________________________________________________________________
-void RenderGraph::readFromDot(std::istream* s, double smooth) {
-  LineGraph::readFromDot(s, smooth);
-}
-
-// _____________________________________________________________________________
-void RenderGraph::readFromJson(std::istream* s, double smooth) {
-  LineGraph::readFromJson(s, smooth);
-}
-
-// _____________________________________________________________________________
 void RenderGraph::writePermutation(const OrderCfg& c) {
   for (auto n : *getNds()) {
     for (auto e : n->getAdjList()) {
@@ -96,7 +86,7 @@ std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
           continue;
         }
 
-        auto is = getInnerStraightLine(n, o, p);
+        auto is = getInnerLine(n, o, p);
         if (is.geom.getLength() == 0) continue;
 
         if (prec > 0) {
@@ -108,7 +98,7 @@ std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
 
       // handle lines where this node is the terminus
       if (partners.size() == 0 && !notCompletelyServed(n)) {
-        auto is = getTerminusStraightLine(n, o);
+        auto is = getTerminusLine(n, o);
         if (is.geom.getLength() > 0) {
           if (prec > 0) {
             ret.push_back(getTerminusBezier(n, o, prec));
@@ -131,7 +121,7 @@ InnerGeom RenderGraph::getInnerBezier(const LineNode* n,
                                       const Partner& partnerTo,
                                       double prec) const {
   double EPSI = 0.001;
-  InnerGeom ret = getInnerStraightLine(n, partnerFrom, partnerTo);
+  InnerGeom ret = getInnerLine(n, partnerFrom, partnerTo);
   DPoint p = ret.geom.getLine().front();
   DPoint pp = ret.geom.getLine().back();
   double d = util::geo::dist(p, pp);
@@ -228,8 +218,8 @@ InnerGeom RenderGraph::getInnerBezier(const LineNode* n,
 }
 
 // _____________________________________________________________________________
-InnerGeom RenderGraph::getTerminusStraightLine(
-    const LineNode* n, const Partner& partnerFrom) const {
+InnerGeom RenderGraph::getTerminusLine(const LineNode* n,
+                                       const Partner& partnerFrom) const {
   auto nf = n->pl().frontFor(partnerFrom.edge);
   DPoint p = linePosOn(*nf, partnerFrom.line, false);
   DPoint pp = linePosOn(*nf, partnerFrom.line, true);
@@ -241,9 +231,9 @@ InnerGeom RenderGraph::getTerminusStraightLine(
 }
 
 // _____________________________________________________________________________
-InnerGeom RenderGraph::getInnerStraightLine(const LineNode* n,
-                                            const Partner& partnerFrom,
-                                            const Partner& partnerTo) const {
+InnerGeom RenderGraph::getInnerLine(const LineNode* n,
+                                    const Partner& partnerFrom,
+                                    const Partner& partnerTo) const {
   auto nfFr = n->pl().frontFor(partnerFrom.edge);
   auto nfTo = n->pl().frontFor(partnerTo.edge);
   DPoint p = linePosOn(*nfFr, partnerFrom.line, false);
@@ -259,7 +249,7 @@ InnerGeom RenderGraph::getInnerStraightLine(const LineNode* n,
 InnerGeom RenderGraph::getTerminusBezier(const LineNode* n,
                                          const Partner& partnerFrom,
                                          double prec) const {
-  InnerGeom ret = getTerminusStraightLine(n, partnerFrom);
+  InnerGeom ret = getTerminusLine(n, partnerFrom);
   DPoint p = ret.geom.getLine().front();
   DPoint pp = ret.geom.getLine().back();
   double d = util::geo::dist(p, pp) / 2;
@@ -540,16 +530,6 @@ double RenderGraph::getMaxNdFrontWidth(const LineNode* n) const {
   double ret = 0;
   for (const auto& g : n->pl().fronts()) {
     if (getTotalWidth(g.edge) > ret) ret = getTotalWidth(g.edge);
-  }
-  return ret;
-}
-
-// _____________________________________________________________________________
-size_t RenderGraph::getMaxNdFrontCard(const LineNode* n) const {
-  size_t ret = 0;
-  for (const auto& g : n->pl().fronts()) {
-    if (g.edge->pl().getLines().size() > ret)
-      ret = g.edge->pl().getLines().size();
   }
   return ret;
 }

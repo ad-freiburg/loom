@@ -16,6 +16,11 @@ class OptGraphScorer {
  public:
   OptGraphScorer(const shared::rendergraph::Penalties& pens) : _pens(pens) {}
 
+  double getTotalScore(const OptGraph* g, const OptOrderCfg& c) const;
+  double getTotalScore(const std::set<OptNode*>& g, const OptOrderCfg& c) const;
+  double getTotalScore(OptNode* n, const OptOrderCfg& c) const;
+  double getTotalScore(OptEdge* n, const OptOrderCfg& c) const;
+
   double getCrossingScore(const OptGraph* g, const OptOrderCfg& c) const;
   double getCrossingScore(const std::set<OptNode*>& g,
                           const OptOrderCfg& c) const;
@@ -31,6 +36,9 @@ class OptGraphScorer {
                            const OptOrderCfg& c) const;
   double getSplittingScore(OptNode* n, const OptOrderCfg& c) const;
 
+  std::pair<std::pair<size_t, size_t>, size_t> getNumCrossSeps(
+      OptNode* n, const OptOrderCfg& c) const;
+
   std::pair<size_t, size_t> getNumCrossings(OptNode* n,
                                             const OptOrderCfg& c) const;
 
@@ -39,7 +47,12 @@ class OptGraphScorer {
   std::pair<size_t, size_t> getNumCrossings(const OptGraph* g,
                                             const OptOrderCfg& c) const;
 
+  std::pair<size_t, size_t> getNumCrossings(const std::set<OptNode*>& g,
+                                            const OptOrderCfg& c) const;
+
   size_t getNumSeparations(const OptGraph* g, const OptOrderCfg& c) const;
+  size_t getNumSeparations(const std::set<OptNode*>& g,
+                           const OptOrderCfg& c) const;
 
   double getSplittingPen(const OptNode* n) const;
   double getCrossingPenSameSeg(const OptNode* n) const;

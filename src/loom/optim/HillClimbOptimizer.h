@@ -26,7 +26,7 @@ class HillClimbOptimizer : public ExhaustiveOptimizer {
                            shared::rendergraph::HierarOrderCfg* c,
                            size_t depth) const;
 
- private:
+ protected:
   double getScore(OptGraph* og, OptEdge* e, OptOrderCfg& cur) const;
 };
 }  // namespace optim

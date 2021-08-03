@@ -159,8 +159,7 @@ int Optimizer::optimize(RenderGraph* rg) const {
 
     scoreSum += _scorer.getCrossingScore(&gg, optCfg);
 
-    if (_cfg->splittingOpt)
-      scoreSum += _scorer.getSplittingScore(&gg, optCfg);
+    if (_cfg->splittingOpt) scoreSum += _scorer.getSplittingScore(&gg, optCfg);
 
     auto crossings = _scorer.getNumCrossings(&gg, optCfg);
     crossSumSame += crossings.first;
@@ -171,7 +170,7 @@ int Optimizer::optimize(RenderGraph* rg) const {
     rg->writePermutation(c);
   }
 
-  if (true || _cfg->outputStats) {
+  if (_cfg->outputStats) {
     LOGTO(INFO, std::cerr) << "";
     LOGTO(INFO, std::cerr) << "(multiple opt runs stats) avg time: "
                            << tSum / (1.0 * runs) << " ms";
@@ -203,8 +202,8 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
   std::vector<LinePair> ret;
   for (size_t a = 0; a < segment->pl().getLines().size(); a++) {
     for (size_t b = a + 1; b < segment->pl().getLines().size(); b++) {
-      auto loA = segment->pl().getLines()[a];
-      auto loB = segment->pl().getLines()[b];
+      const auto& loA = segment->pl().getLines()[a];
+      const auto& loB = segment->pl().getLines()[b];
 
       if (!unique) {
         ret.push_back(LinePair(loA, loB));
@@ -224,13 +223,13 @@ std::vector<LinePair> Optimizer::getLinePairs(OptEdge* segment, bool unique) {
 }
 
 // _____________________________________________________________________________
-bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
+bool Optimizer::crosses(OptNode* node, OptEdge* segA, OptEdge* segB,
                         PosComPair poscom) {
-  bool revA = (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
-  bool revB = (segmentB->getFrom() != node) ^ segmentB->pl().etgs.front().dir;
+  bool revA = (segA->getFrom() != node) ^ segA->pl().lnEdgParts.front().dir;
+  bool revB = (segB->getFrom() != node) ^ segB->pl().lnEdgParts.front().dir;
 
-  size_t carA = segmentA->pl().getCardinality();
-  size_t carB = segmentB->pl().getCardinality();
+  size_t carA = segA->pl().getCardinality();
+  size_t carB = segB->pl().getCardinality();
 
   size_t pAinA = revA ? carA - 1 - poscom.first.first : poscom.first.first;
   size_t pAinB = revB ? carB - 1 - poscom.first.second : poscom.first.second;
@@ -241,59 +240,61 @@ bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, OptEdge* segmentB,
 }
 
 // _____________________________________________________________________________
-bool Optimizer::crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
+bool Optimizer::crosses(OptNode* node, OptEdge* segA, EdgePair segments,
                         PosCom poscomb) {
-  bool revA = (segmentA->getFrom() != node) ^ segmentA->pl().etgs.front().dir;
+  bool revA = (segA->getFrom() != node) ^ segA->pl().lnEdgParts.front().dir;
 
-  size_t carA = segmentA->pl().getCardinality();
+  size_t carA = segA->pl().getCardinality();
 
   size_t pAinA = revA ? carA - 1 - poscomb.first : poscomb.first;
   size_t pBinA = revA ? carA - 1 - poscomb.second : poscomb.second;
 
-  size_t pSegmentA = std::find(node->pl().orderedEdges.begin(),
-                               node->pl().orderedEdges.end(), segmentA) -
-                     node->pl().orderedEdges.begin();
-
-  size_t pEdgeA = std::find(node->pl().orderedEdges.begin(),
-                            node->pl().orderedEdges.end(), segments.first) -
-                  node->pl().orderedEdges.begin();
-
-  size_t pEdgeB = std::find(node->pl().orderedEdges.begin(),
-                            node->pl().orderedEdges.end(), segments.second) -
-                  node->pl().orderedEdges.begin();
+  size_t pSegA = node->pl().circOrder(segA);
+  size_t pEdgeA = node->pl().circOrder(segments.first);
+  size_t pEdgeB = node->pl().circOrder(segments.second);
 
   // make position relative to segment A
-  if (pEdgeA > pSegmentA)
-    pEdgeA = pEdgeA - pSegmentA;
+  if (pEdgeA > pSegA)
+    pEdgeA = pEdgeA - pSegA;
   else
-    pEdgeA = (node->getDeg() - pSegmentA) + pEdgeA;
+    pEdgeA = (node->getDeg() - pSegA) + pEdgeA;
 
-  if (pEdgeB > pSegmentA)
-    pEdgeB = pEdgeB - pSegmentA;
+  if (pEdgeB > pSegA)
+    pEdgeB = pEdgeB - pSegA;
   else
-    pEdgeB = (node->getDeg() - pSegmentA) + pEdgeB;
+    pEdgeB = (node->getDeg() - pSegA) + pEdgeB;
 
   return !((pAinA > pBinA) ^ (pEdgeA < pEdgeB));
 }
 
 // _____________________________________________________________________________
-std::vector<OptEdge*> Optimizer::getEdgePartners(OptNode* node,
-                                                 OptEdge* segmentA,
+bool Optimizer::separates(PosComPair poscom) {
+  size_t pAinA = poscom.first.first;
+  size_t pAinB = poscom.first.second;
+  size_t pBinA = poscom.second.first;
+  size_t pBinB = poscom.second.second;
+
+  return ((pAinA > pBinA ? pAinA - pBinA : pBinA - pAinA) == 1 &&
+          (pAinB > pBinB ? pAinB - pBinB : pBinB - pAinB) != 1) ||
+         ((pAinA > pBinA ? pAinA - pBinA : pBinA - pAinA) != 1 &&
+          (pAinB > pBinB ? pAinB - pBinB : pBinB - pAinB) == 1);
+}
+
+// _____________________________________________________________________________
+std::vector<OptEdge*> Optimizer::getEdgePartners(OptNode* node, OptEdge* segA,
                                                  const LinePair& linepair) {
   std::vector<OptEdge*> ret;
 
-  auto* fromEtg = OptGraph::getAdjEdg(segmentA, node);
-  auto* dirA = fromEtg->pl().lineOcc(linepair.first.line).direction;
-  auto* dirB = fromEtg->pl().lineOcc(linepair.second.line).direction;
+  auto* fromLnEdg = OptGraph::getAdjEdg(segA, node);
+  auto* dirA = fromLnEdg->pl().lineOcc(linepair.first.line).direction;
+  auto* dirB = fromLnEdg->pl().lineOcc(linepair.second.line).direction;
 
-  for (OptEdge* segmentB : node->getAdjList()) {
-    if (segmentB == segmentA) continue;
+  for (OptEdge* segB : node->getAdjList()) {
+    if (segB == segA) continue;
 
-    if (OptGraph::hasCtdLinesIn(linepair.first.line, dirA, segmentA,
-                                segmentB) &&
-        OptGraph::hasCtdLinesIn(linepair.second.line, dirB, segmentA,
-                                segmentB)) {
-      ret.push_back(segmentB);
+    if (OptGraph::hasCtdLinesIn(linepair.first.line, dirA, segA, segB) &&
+        OptGraph::hasCtdLinesIn(linepair.second.line, dirB, segA, segB)) {
+      ret.push_back(segB);
     }
   }
   return ret;
@@ -301,25 +302,25 @@ std::vector<OptEdge*> Optimizer::getEdgePartners(OptNode* node,
 
 // _____________________________________________________________________________
 std::vector<EdgePair> Optimizer::getEdgePartnerPairs(OptNode* node,
-                                                     OptEdge* segmentA,
+                                                     OptEdge* segA,
                                                      const LinePair& linepair) {
   std::vector<EdgePair> ret;
+  if (node->getDeg() < 3) return ret;
 
-  auto fromEtg = OptGraph::getAdjEdg(segmentA, node);
-  auto dirA = fromEtg->pl().lineOcc(linepair.first.line).direction;
-  auto dirB = fromEtg->pl().lineOcc(linepair.second.line).direction;
+  auto fromLnEdg = OptGraph::getAdjEdg(segA, node);
+  auto dirA = fromLnEdg->pl().lineOcc(linepair.first.line).direction;
+  auto dirB = fromLnEdg->pl().lineOcc(linepair.second.line).direction;
 
-  for (OptEdge* segmentB : node->getAdjList()) {
-    if (segmentB == segmentA) continue;
+  for (OptEdge* segB : node->getAdjList()) {
+    if (segB == segA) continue;
 
-    if (OptGraph::hasCtdLinesIn(linepair.first.line, dirA, segmentA,
-                                segmentB)) {
+    if (OptGraph::hasCtdLinesIn(linepair.first.line, dirA, segA, segB)) {
       EdgePair curPair;
-      curPair.first = segmentB;
+      curPair.first = segB;
       for (OptEdge* segmentC : node->getAdjList()) {
-        if (segmentC == segmentA || segmentC == segmentB) continue;
+        if (segmentC == segA || segmentC == segB) continue;
 
-        if (OptGraph::hasCtdLinesIn(linepair.second.line, dirB, segmentA,
+        if (OptGraph::hasCtdLinesIn(linepair.second.line, dirB, segA,
                                     segmentC)) {
           curPair.second = segmentC;
           ret.push_back(curPair);
@@ -386,13 +387,10 @@ OptOrderCfg Optimizer::getOptOrderCfg(
     auto opNdTo = ndMap.find(e->getTo())->second;
     auto opEdg = g->getEdg(opNdFr, opNdTo);
 
-    for (size_t pos : order) {
-      auto lo = e->pl().lineOccAtPos(pos);
+    for (auto pos = order.rbegin(); pos != order.rend(); pos++) {
+      auto lo = e->pl().lineOccAtPos(*pos);
       ret[opEdg].push_back(lo.line);
     }
-
-    // TODO(patrick): i don't quite understand why we need to reverse here
-    std::reverse(ret[opEdg].begin(), ret[opEdg].end());
   }
 
   return ret;

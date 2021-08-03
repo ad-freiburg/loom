@@ -82,20 +82,15 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
     if (iters - k > ABORT_AFTER_UNCH) break;
   }
 
-  double curScore = _optScorer.getCrossingScore(g, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
+  double curScore = 0;
+  if (_cfg->splittingOpt)
+    curScore += _optScorer.getTotalScore(g, cur);
+  else
+    curScore = _optScorer.getCrossingScore(g, cur);
 
   LOGTO(DEBUG, std::cerr) << "Stopped after " << iters
                           << " iterations. Final target = " << curScore;
 
   writeHierarch(&cur, hc);
   return iters;
-}
-
-// _____________________________________________________________________________
-double SimulatedAnnealingOptimizer::getScore(OptGraph* og, OptEdge* e,
-                                             OptOrderCfg& cur) const {
-  double curScore = _optScorer.getCrossingScore(e, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(e, cur);
-  return curScore;
 }

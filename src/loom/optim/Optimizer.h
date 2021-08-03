@@ -40,6 +40,9 @@ class Optimizer {
 
   static bool crosses(OptNode* node, OptEdge* segmentA, EdgePair segments,
                       PosCom postcomb);
+
+  static bool separates(PosComPair postcomb);
+
   static util::geo::DPoint getPos(OptGraph* g, OptNode* n, OptEdge* segment,
                                   size_t p);
 

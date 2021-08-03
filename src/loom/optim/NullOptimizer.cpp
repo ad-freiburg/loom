@@ -12,23 +12,24 @@ using shared::rendergraph::HierarOrderCfg;
 // _____________________________________________________________________________
 int NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                 HierarOrderCfg* hc, size_t depth) const {
-  LOGTO(DEBUG,std::cerr) << prefix(depth) << "(NullOptimizer) Optimizing component with "
-             << g.size() << " nodes.";
+  LOGTO(DEBUG, std::cerr) << prefix(depth)
+                          << "(NullOptimizer) Optimizing component with "
+                          << g.size() << " nodes.";
 
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      for (auto etgp : e->pl().etgs) {
-        if (etgp.wasCut) continue;
+      for (auto lnEdgPart : e->pl().lnEdgParts) {
+        if (lnEdgPart.wasCut) continue;
         for (auto ro : e->pl().getLines()) {
           for (auto rel : ro.relatives) {
             // retrieve the original line pos
-            size_t p = etgp.etg->pl().linePos(rel);
-            if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
-              (*hc)[etgp.etg][etgp.order].insert(
-                  (*hc)[etgp.etg][etgp.order].begin(), p);
+            size_t p = lnEdgPart.lnEdg->pl().linePos(rel);
+            if (!(lnEdgPart.dir ^ e->pl().lnEdgParts.front().dir)) {
+              (*hc)[lnEdgPart.lnEdg][lnEdgPart.order].insert(
+                  (*hc)[lnEdgPart.lnEdg][lnEdgPart.order].begin(), p);
             } else {
-              (*hc)[etgp.etg][etgp.order].push_back(p);
+              (*hc)[lnEdgPart.lnEdg][lnEdgPart.order].push_back(p);
             }
           }
         }

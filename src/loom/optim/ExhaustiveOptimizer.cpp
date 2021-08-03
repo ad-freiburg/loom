@@ -31,12 +31,13 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
     for (auto e : n->getAdjList())
       if (n == e->getFrom()) edges.push_back(e);
 
-  // this guarantees that all the orderings are sorted!
+  // this guarantees that all the orderings are sorted, which we need for
+  // std::next_permutation below!
   initialConfig(g, &null, true);
   cur = null;
 
-  size_t iters = 0;
-  size_t last = 0;
+  double iters = 0;
+  double last = 0;
   bool running = true;
 
   double curScore = _optScorer.getCrossingScore(g, cur);
@@ -45,7 +46,12 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   bestScore = curScore;
   best = cur;
 
+  double solSp = solutionSpaceSize(g);
+
+  double itTime = 0;
+
   while (true) {
+    T_START(iter);
     if (bestScore == 0) {
       LOGTO(DEBUG, std::cerr)
           << prefix(depth) << "Found optimal score 0 prematurely after "
@@ -56,9 +62,13 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
     iters++;
 
-    if (iters - last == 10000) {
-      LOGTO(DEBUG, std::cerr) << prefix(depth) << "@ " << iters;
+    if (fabs((iters - last) - 10000) < 1) {
+      LOGTO(DEBUG, std::cerr)
+          << prefix(depth) << "@ " << iters << "/" << solSp << " ("
+          << int(((1.0 * iters) / (1.0 * solSp)) * 100) << "%, "
+          << (10000 / (itTime / 1000)) << " its/s)";
       last = iters;
+      itTime = 0;
     }
 
     for (size_t i = 0; i < edges.size(); i++) {
@@ -66,21 +76,19 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
         break;
       } else if (i == edges.size() - 1) {
         running = false;
-      } else {
-        // reset
-        cur[edges[i]] = null[edges[i]];
       }
     }
 
     if (!running) break;
 
-    double curScore = _optScorer.getCrossingScore(g, cur);
-    if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
+    if (_cfg->splittingOpt) curScore = _optScorer.getTotalScore(g, cur);
+    else curScore = _optScorer.getCrossingScore(g, cur);
 
     if (curScore < bestScore) {
       bestScore = curScore;
       best = cur;
     }
+    itTime += T_STOP(iter);
   }
 
   LOGTO(DEBUG, std::cerr) << prefix(depth) << "Found optimal score "
@@ -125,8 +133,8 @@ void ExhaustiveOptimizer::writeHierarch(OptOrderCfg* cfg,
   for (auto ep : *cfg) {
     auto e = ep.first;
 
-    for (auto etgp : e->pl().etgs) {
-      if (etgp.wasCut) continue;
+    for (auto lnEdgPart : e->pl().lnEdgParts) {
+      if (lnEdgPart.wasCut) continue;
       for (auto r : ep.second) {
         // get the corresponding route occurance in the opt graph edge
         // TODO: replace this as soon as a lookup function is present in OptLO
@@ -137,12 +145,12 @@ void ExhaustiveOptimizer::writeHierarch(OptOrderCfg* cfg,
 
         for (auto rel : optRO.relatives) {
           // retrieve the original line pos
-          size_t p = etgp.etg->pl().linePos(rel);
-          if (!(etgp.dir ^ e->pl().etgs.front().dir)) {
-            (*hc)[etgp.etg][etgp.order].insert(
-                (*hc)[etgp.etg][etgp.order].begin(), p);
+          size_t p = lnEdgPart.lnEdg->pl().linePos(rel);
+          if (!(lnEdgPart.dir ^ e->pl().lnEdgParts.front().dir)) {
+            (*hc)[lnEdgPart.lnEdg][lnEdgPart.order].insert(
+                (*hc)[lnEdgPart.lnEdg][lnEdgPart.order].begin(), p);
           } else {
-            (*hc)[etgp.etg][etgp.order].push_back(p);
+            (*hc)[lnEdgPart.lnEdg][lnEdgPart.order].push_back(p);
           }
         }
       }

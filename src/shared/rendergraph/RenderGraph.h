@@ -36,9 +36,6 @@ class RenderGraph : public shared::linegraph::LineGraph {
   RenderGraph(double defLineWidth, double defLineSpace)
       : _defWidth(defLineWidth), _defSpacing(defLineSpace){};
 
-  virtual void readFromJson(std::istream* s, double smooth);
-  virtual void readFromDot(std::istream* s, double smooth);
-
   void writePermutation(const OrderCfg&);
 
   size_t numEdgs() const;
@@ -58,7 +55,6 @@ class RenderGraph : public shared::linegraph::LineGraph {
   double getSpacing(const shared::linegraph::LineEdge* e) const;
 
   double getMaxNdFrontWidth(const shared::linegraph::LineNode* n) const;
-  size_t getMaxNdFrontCard(const shared::linegraph::LineNode* n) const;
 
   util::geo::DPoint linePosOn(const shared::linegraph::NodeFront& nf,
                               const shared::linegraph::Line* r,
@@ -88,12 +84,12 @@ class RenderGraph : public shared::linegraph::LineGraph {
       const shared::linegraph::Partner& partnerFrom,
       const shared::linegraph::Partner& partnerTo, double prec) const;
 
-  shared::rendergraph::InnerGeom getInnerStraightLine(
+  shared::rendergraph::InnerGeom getInnerLine(
       const shared::linegraph::LineNode* n,
       const shared::linegraph::Partner& partnerFrom,
       const shared::linegraph::Partner& partnerTo) const;
 
-  shared::rendergraph::InnerGeom getTerminusStraightLine(
+  shared::rendergraph::InnerGeom getTerminusLine(
       const shared::linegraph::LineNode* n,
       const shared::linegraph::Partner& partnerFrom) const;
 
