@@ -8,8 +8,7 @@
 #include "shared/linegraph/Line.h"
 #include "shared/rendergraph/Penalties.h"
 
-using namespace loom;
-using namespace optim;
+using loom::optim::OptGraphScorer;
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
@@ -155,6 +154,7 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
 std::pair<std::pair<size_t, size_t>, size_t> OptGraphScorer::getNumCrossSeps(
     OptNode* n, const OptOrderCfg& c) const {
   if (n->getDeg() == 1) return {{0, 0}, {0}};
+
   size_t sameSegCrossings = 0;
   size_t diffSegCrossings = 0;
   size_t seps = 0;

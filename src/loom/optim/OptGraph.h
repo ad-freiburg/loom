@@ -91,6 +91,8 @@ struct OptEdgePL {
   std::vector<OptLO>& getLines();
   const std::vector<OptLO>& getLines() const;
 
+  const OptLO* getLineOcc(const shared::linegraph::Line* l) const;
+
   // partial routes
   // For the line edge parts contained in lnEdgParts, only these route
   // occurances are actually contained in this edge. Their relative ordering is
@@ -149,15 +151,21 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   static shared::linegraph::LineEdge* getAdjEdg(const OptEdge* e,
                                                 const OptNode* n);
   static LnEdgPart getAdjLnEdgPart(const OptEdge* e, const OptNode* n);
-  static bool hasCtdLinesIn(const shared::linegraph::Line* r,
-                            const shared::linegraph::LineNode* dir,
-                            const OptEdge* fromEdge, const OptEdge* toEdge);
-  static std::vector<OptLO> getCtdLinesIn(
-      const shared::linegraph::Line* r, const shared::linegraph::LineNode* dir,
-      const OptEdge* fromEdge, const OptEdge* toEdge);
-  static std::vector<OptLO> getSameDirLinesIn(
-      const shared::linegraph::Line* r, const shared::linegraph::LineNode* dir,
-      const OptEdge* fromEdge, const OptEdge* toEdge);
+
+  static bool hasCtdLineIn(const shared::linegraph::Line* r,
+                           const shared::linegraph::LineNode* dir,
+                           const OptEdge* fromEdge, const OptEdge* toEdge);
+
+  static const OptLO* getCtdLineIn(const shared::linegraph::Line* r,
+                                   const shared::linegraph::LineNode* dir,
+                                   const OptEdge* fromEdge,
+                                   const OptEdge* toEdge);
+
+  static const OptLO* getSameDirLineIn(const shared::linegraph::Line* r,
+                                       const shared::linegraph::LineNode* dir,
+                                       const OptEdge* fromEdge,
+                                       const OptEdge* toEdge);
+
   static LnEdgPart getFirstLnEdgPart(const OptEdge*);
   static LnEdgPart getLastLnEdgPart(const OptEdge*);
 

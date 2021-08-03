@@ -292,8 +292,8 @@ std::vector<OptEdge*> Optimizer::getEdgePartners(OptNode* node, OptEdge* segA,
   for (OptEdge* segB : node->getAdjList()) {
     if (segB == segA) continue;
 
-    if (OptGraph::hasCtdLinesIn(linepair.first.line, dirA, segA, segB) &&
-        OptGraph::hasCtdLinesIn(linepair.second.line, dirB, segA, segB)) {
+    if (OptGraph::hasCtdLineIn(linepair.first.line, dirA, segA, segB) &&
+        OptGraph::hasCtdLineIn(linepair.second.line, dirB, segA, segB)) {
       ret.push_back(segB);
     }
   }
@@ -314,14 +314,14 @@ std::vector<EdgePair> Optimizer::getEdgePartnerPairs(OptNode* node,
   for (OptEdge* segB : node->getAdjList()) {
     if (segB == segA) continue;
 
-    if (OptGraph::hasCtdLinesIn(linepair.first.line, dirA, segA, segB)) {
+    if (OptGraph::hasCtdLineIn(linepair.first.line, dirA, segA, segB)) {
       EdgePair curPair;
       curPair.first = segB;
       for (OptEdge* segmentC : node->getAdjList()) {
         if (segmentC == segA || segmentC == segB) continue;
 
-        if (OptGraph::hasCtdLinesIn(linepair.second.line, dirB, segA,
-                                    segmentC)) {
+        if (OptGraph::hasCtdLineIn(linepair.second.line, dirB, segA,
+                                   segmentC)) {
           curPair.second = segmentC;
           ret.push_back(curPair);
         }
