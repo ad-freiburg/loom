@@ -75,10 +75,18 @@ size_t OptEdgePL::getCardinality() const { return getLines().size(); }
 
 // _____________________________________________________________________________
 const OptLO* OptEdgePL::getLineOcc(const Line* l) const {
-  for (const OptLO& to : getLines()) {
-    if (to.line == l) return &to;
-  }
-  return 0;
+  if (lines.back().line > l) return 0;
+  if (lines.size() > 0 && lines[0].line == l) return &lines[0];
+  if (lines.size() > 1 && lines[1].line == l) return &lines[1];
+  if (lines.size() > 2 && lines[2].line == l) return &lines[2];
+
+  if (lines.size() < 4) return 0;
+
+  auto it = std::lower_bound(lines.begin(), lines.end(), l);
+
+  if (it->line != l) return 0;
+
+  return &*it;
 }
 
 // _____________________________________________________________________________
@@ -146,6 +154,8 @@ std::map<const LineNode*, OptNode*> OptGraph::build(RenderGraph* rg) {
       for (auto roOld : e->pl().getLines()) {
         edge->pl().lines.push_back(OptLO(roOld.line, roOld.direction));
       }
+
+      std::sort(edge->pl().lines.begin(), edge->pl().lines.end());
     }
   }
 
@@ -490,7 +500,7 @@ bool OptGraph::simplifyStep() {
 
         // update direction markers
         for (auto& ro : newEdge->pl().lines) {
-          if (ro.direction == n->pl().node) ro.direction = newTo->pl().node;
+          if (ro.dir == n->pl().node) ro.dir = newTo->pl().node;
         }
 
         assert(newFrom != n);
@@ -578,11 +588,11 @@ util::json::Dict OptEdgePL::getAttrs() {
   for (const auto& r : getLines()) {
     if (r.relatives.size() > 1)
       lines += r.line->label() + "(x" + util::toString(r.relatives.size()) +
-               ")" + "[" + r.line->color() + ", -> " +
-               util::toString(r.direction) + "], ";
+               ")" + "[" + r.line->color() + ", -> " + util::toString(r.dir) +
+               "], ";
     else
       lines += r.line->label() + "[" + r.line->color() + ", -> " +
-               util::toString(r.direction) + "], ";
+               util::toString(r.dir) + "], ";
   }
 
   ret["lines"] = lines;
@@ -598,11 +608,11 @@ std::string OptEdgePL::toStr() const {
   for (const auto& r : getLines()) {
     if (r.relatives.size() > 1)
       lines += r.line->label() + "(x" + util::toString(r.relatives.size()) +
-               ")" + "[" + r.line->color() + ", -> " +
-               util::toString(r.direction) + "], ";
+               ")" + "[" + r.line->color() + ", -> " + util::toString(r.dir) +
+               "], ";
     else
       lines += r.line->label() + "[" + r.line->color() + ", -> " +
-               util::toString(r.direction) + "], ";
+               util::toString(r.dir) + "], ";
   }
 
   return "[" + lines + "]";
@@ -988,10 +998,12 @@ OptEdgePL OptGraph::getView(OptEdge* parent, OptEdge* leg, size_t offset) {
   ret.lines.clear();
 
   for (auto ro : leg->pl().getLines()) {
-    auto lo = getCtdLineIn(ro.line, ro.direction, leg, parent);
+    auto lo = getCtdLineIn(ro.line, ro.dir, leg, parent);
     assert(sharedNode(leg, parent));
-    if (lo) ret.lines.insert(ret.lines.begin(), *lo);
+    if (lo) ret.lines.push_back(*lo);
   }
+
+  std::sort(ret.lines.begin(), ret.lines.end());
 
   return ret;
 }
@@ -1015,9 +1027,11 @@ OptEdgePL OptGraph::getPartialView(OptEdge* parent, OptEdge* leg,
   ret.lines.clear();
 
   for (auto ro : leg->pl().getLines()) {
-    auto lo = getCtdLineIn(ro.line, ro.direction, leg, parent);
-    if (lo) ret.lines.insert(ret.lines.begin(), *lo);
+    auto lo = getCtdLineIn(ro.line, ro.dir, leg, parent);
+    if (lo) ret.lines.push_back(*lo);
   }
+
+  std::sort(ret.lines.begin(), ret.lines.end());
 
   return ret;
 }
@@ -1285,7 +1299,7 @@ bool OptGraph::dirLineEndsIn(const OptEdge* a, const OptEdge* b) {
 // _____________________________________________________________________________
 bool OptGraph::dirLineContains(const OptEdge* a, const OptEdge* b) {
   for (auto& to : b->pl().getLines()) {
-    if (!getCtdLineIn(to.line, to.direction, b, a)) {
+    if (!getCtdLineIn(to.line, to.dir, b, a)) {
       return false;
     }
   }
@@ -1299,11 +1313,11 @@ bool OptGraph::dirLineEqualIn(const OptEdge* a, const OptEdge* b) {
   }
 
   for (auto& to : a->pl().getLines()) {
-    if (!getSameDirLineIn(to.line, to.direction, a, b)) return false;
+    if (!getSameDirLineIn(to.line, to.dir, a, b)) return false;
   }
 
   for (auto& to : b->pl().getLines()) {
-    if (!getSameDirLineIn(to.line, to.direction, b, a)) return false;
+    if (!getSameDirLineIn(to.line, to.dir, b, a)) return false;
   }
 
   return true;
@@ -1509,8 +1523,8 @@ bool OptGraph::dirContinuedOver(const OptEdge* a, const OptEdge* b,
   if (!ab || !bc) return false;
 
   for (auto& to : a->pl().getLines()) {
-    auto too = getCtdLineIn(to.line, to.direction, a, b);
-    if (too && !getCtdLineIn(too->line, too->direction, b, c)) return false;
+    auto too = getCtdLineIn(to.line, to.dir, a, b);
+    if (too && !getCtdLineIn(too->line, too->dir, b, c)) return false;
   }
   return true;
 }
@@ -1521,7 +1535,7 @@ bool OptGraph::dirPartialContinuedOver(const OptEdge* a, const OptEdge* b) {
   if (!ab) return false;
 
   for (auto& to : a->pl().getLines()) {
-    if (getCtdLineIn(to.line, to.direction, a, b)) return true;
+    if (getCtdLineIn(to.line, to.dir, a, b)) return true;
   }
 
   return false;
@@ -1533,7 +1547,7 @@ bool OptGraph::dirContinuedOver(const OptLO& ro, const OptEdge* a,
   OptNode* ab = sharedNode(a, b);
   if (!ab) return false;
 
-  return getCtdLineIn(ro.line, ro.direction, a, b);
+  return getCtdLineIn(ro.line, ro.dir, a, b);
 }
 
 // _____________________________________________________________________________
@@ -1563,10 +1577,9 @@ const OptLO* OptGraph::getSameDirLineIn(const Line* r, const LineNode* dir,
 
   auto to = toEdge->pl().getLineOcc(r);
   if (!to) return 0;
-  if ((to->direction == 0 && dir == 0) ||
-      (to->direction == n->pl().node && dir != 0 && dir != n->pl().node) ||
-      (to->direction != n->pl().node && to->direction != 0 &&
-       dir == n->pl().node)) {
+  if ((to->dir == 0 && dir == 0) ||
+      (to->dir == n->pl().node && dir != 0 && dir != n->pl().node) ||
+      (to->dir != n->pl().node && to->dir != 0 && dir == n->pl().node)) {
     if (n->pl().node->pl().connOccurs(r, getAdjEdg(fromEdge, n),
                                       getAdjEdg(toEdge, n))) {
       return to;
@@ -1591,9 +1604,9 @@ const OptLO* OptGraph::getCtdLineIn(const Line* r, const LineNode* dir,
 
   auto to = toEdge->pl().getLineOcc(r);
   if (!to) return 0;
-  if (to->direction == 0 || dir == 0 ||
-      (to->direction == n->pl().node && dir != n->pl().node) ||
-      (to->direction != n->pl().node && dir == n->pl().node)) {
+  if (to->dir == 0 || dir == 0 ||
+      (to->dir == n->pl().node && dir != n->pl().node) ||
+      (to->dir != n->pl().node && dir == n->pl().node)) {
     if (n->pl().node->pl().connOccurs(r, getAdjEdg(fromEdge, n),
                                       getAdjEdg(toEdge, n))) {
       return to;
@@ -1625,7 +1638,7 @@ std::vector<OptLO> OptGraph::getCtdLinesIn(const OptEdge* fromEdge,
   if (!n || !n->pl().node) return ret;
 
   for (const OptLO& to : fromEdge->pl().getLines()) {
-    auto r = getCtdLineIn(to.line, to.direction, fromEdge, toEdge);
+    auto r = getCtdLineIn(to.line, to.dir, fromEdge, toEdge);
     if (r) ret.push_back(*r);
   }
 

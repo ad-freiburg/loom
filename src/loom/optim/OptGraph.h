@@ -30,20 +30,25 @@ typedef std::map<const loom::optim::OptEdge*,
     OptOrderCfg;
 
 struct OptLO {
-  OptLO() : line(0), direction(0) {}
+  OptLO() : line(0), dir(0) {}
   OptLO(const shared::linegraph::Line* r,
         const shared::linegraph::LineNode* dir)
-      : line(r), direction(dir) {
+      : line(r), dir(dir) {
     relatives.push_back(r);
   }
   const shared::linegraph::Line* line;
-  const shared::linegraph::LineNode* direction;  // 0 if in both directions
+  const shared::linegraph::LineNode* dir;  // 0 if in both directions
 
   std::vector<const shared::linegraph::Line*> relatives;
+
+  bool operator==(const shared::linegraph::Line* b) const { return b == line; }
+  bool operator<(const shared::linegraph::Line* b) const { return b < line; }
+  bool operator>(const shared::linegraph::Line* b) const { return b > line; }
 
   bool operator==(const OptLO& b) const { return b.line == line; }
   bool operator<(const OptLO& b) const { return b.line < line; }
   bool operator>(const OptLO& b) const { return b.line > line; }
+
   bool operator==(const shared::linegraph::LineOcc& b) const {
     return b.line == line;
   }
