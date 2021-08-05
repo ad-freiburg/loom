@@ -202,6 +202,17 @@ void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
                   * (linepair.first.relatives.size()) *
                   (linepair.second.relatives.size()));
 
+          // introduce dec var for sep
+          std::stringstream sss;
+          sss << "x||_dec(" << segmentA->pl().getStrRepr() << ","
+             << segmentB->pl().getStrRepr() << "," << linepair.first.line << "("
+             << linepair.first.line->id() << ")," << linepair.second.line << "("
+             << linepair.second.line->id() << ")," << node << ")";
+
+          int decisionVarSep = lp->addCol(
+              sss.str(), shared::optim::BIN,
+              getSplittingPenalty(node));
+
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
             if (crosses(node, segmentA, segmentB, poscomb)) {
@@ -234,6 +245,38 @@ void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
               lp->addColToRow(row, lineAinBatP, 1);
               lp->addColToRow(row, lineBinBatP, 1);
               lp->addColToRow(row, decisionVar, -1);
+            }
+
+            if (_cfg->splittingOpt && separates(poscomb)) {
+              int lineAinAatP = lp->getVarByName(getILPVarName(
+                  segmentA, linepair.first.line, poscomb.first.first));
+              int lineBinAatP = lp->getVarByName(getILPVarName(
+                  segmentA, linepair.second.line, poscomb.second.first));
+              int lineAinBatP = lp->getVarByName(getILPVarName(
+                  segmentB, linepair.first.line, poscomb.first.second));
+              int lineBinBatP = lp->getVarByName(getILPVarName(
+                  segmentB, linepair.second.line, poscomb.second.second));
+
+              assert(lineAinAatP > -1);
+              assert(lineAinBatP > -1);
+              assert(lineBinAatP > -1);
+              assert(lineBinBatP > -1);
+
+              std::stringstream ss;
+              ss << "dec_sum_sep(" << segmentA->pl().getStrRepr() << ","
+                 << segmentB->pl().getStrRepr() << "," << linepair.first.line
+                 << "," << linepair.second.line << "pa=" << poscomb.first.first
+                 << ",pb=" << poscomb.second.first
+                 << ",pa'=" << poscomb.first.second
+                 << ",pb'=" << poscomb.second.second << ",n=" << node << ")";
+
+              int row = lp->addRow(ss.str(), 3, shared::optim::UP);
+
+              lp->addColToRow(row, lineAinAatP, 1);
+              lp->addColToRow(row, lineBinAatP, 1);
+              lp->addColToRow(row, lineAinBatP, 1);
+              lp->addColToRow(row, lineBinBatP, 1);
+              lp->addColToRow(row, decisionVarSep, -1);
             }
           }
         }

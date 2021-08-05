@@ -12,6 +12,7 @@
 // COIN includes
 #include "CbcSolver.hpp"
 #include "CoinPragma.hpp"
+#include "CoinWarmStart.hpp"
 #include "OsiCbcSolverInterface.hpp"
 #include "OsiSolverInterface.hpp"
 
@@ -21,47 +22,41 @@
 #include "util/log/Log.h"
 
 using shared::optim::COINSolver;
+using shared::optim::DirType;
 using shared::optim::SolveType;
 
-/* Return non-zero to return quickly */
-int callBack(CbcModel* model, int whereFrom) {
-  int returnCode = 0;
-  switch (whereFrom) {
+// _____________________________________________________________________________
+int callBack(CbcModel* model, int from) {
+  int ret = 0;
+  switch (from) {
     case 1:
     case 2:
-      if (!model->status() && model->secondaryStatus()) returnCode = 1;
+      if (!model->status() && model->secondaryStatus()) ret = 1;
       break;
-    case 3: {
-      // set up signal trapping
-      // saveSignal = signal(SIGINT, signal_handler);
-      // currentBranchModel = model;
-    } break;
-    case 4: {
-      // restore
-      // signal(SIGINT, saveSignal);
-      // currentBranchModel = NULL;
-    }
-    // If not good enough could skip postprocessing
-    break;
+    case 3:
+      break;
+    case 4:
+      break;
     case 5:
       break;
     default:
       abort();
   }
-  return returnCode;
+  return ret;
 }
 
 // _____________________________________________________________________________
 COINSolver::COINSolver(DirType dir)
     : _starterArr(0),
       _status(INF),
-      _timeLimit(std::numeric_limits<int>::max()) {
-  // basically following
-  // https://github.com/coin-or/Cbc/blob/master/examples/sample5.cpp
-  //
-  // throw std::runtime_error("A");
-
+      _timeLimit(std::numeric_limits<int>::max()),
+      _msgHandler(stderr) {
   _solver = &_solver1;
+
+  // use or own msghandler which outputs to stderr, set loglevel of CBC (=0) to
+  // normal (=1)
+  _msgHandler.setLogLevel(0, 1);
+  _solver->passInMessageHandler(&_msgHandler);
 
   if (dir == MAX) {
     _model.setOptimizationDirection(-1);
@@ -170,8 +165,12 @@ double COINSolver::getObjVal() const { return _solver->getObjValue(); }
 // _____________________________________________________________________________
 SolveType COINSolver::solve() {
   _solver->loadFromCoinModel(_model);
+
   _solver1.getModelPtr()->setMoreSpecialOptions(3);
   _cbcModel = CbcModel(_solver1);
+
+  _cbcModel.setMaximumSeconds(_timeLimit);
+  _cbcModel.setUseElapsedTime(true);
 
   // this basically follows the examle given at
   // https://github.com/coin-or/Cbc/blob/879602724a65987c5cfb0b9fbacfa192c93df42c/examples/driver6.cpp
@@ -196,18 +195,23 @@ SolveType COINSolver::solve() {
   CbcMain1(3, argv2, _cbcModel, callBack, solverData);
   _solver = _cbcModel.solver();
 
-	if (_cbcModel.isProvenOptimal()) _status = OPTIM;
-	else if (_cbcModel.isProvenInfeasible()) _status = INF;
-	else if (_cbcModel.bestSolution()) _status = NON_OPTIM;
+  if (_cbcModel.isProvenOptimal())
+    _status = OPTIM;
+  else if (_cbcModel.isProvenInfeasible())
+    _status = INF;
+  else if (_cbcModel.bestSolution())
+    _status = NON_OPTIM;
+  else
+    _status = INF;
 
   return getStatus();
 }
 
 // _____________________________________________________________________________
-void COINSolver::setTimeLim(int s) { _timeLimit = s * 1000; }
+void COINSolver::setTimeLim(int s) { _timeLimit = s; }
 
 // _____________________________________________________________________________
-int COINSolver::getTimeLim() const { return _timeLimit / 1000; }
+int COINSolver::getTimeLim() const { return _timeLimit; }
 
 // _____________________________________________________________________________
 double* COINSolver::getStarterArr() const { return _starterArr; }
@@ -242,10 +246,14 @@ int COINSolver::getNumConstrs() const { return _model.numberRows(); }
 int COINSolver::getNumVars() const { return _model.numberColumns(); }
 
 // _____________________________________________________________________________
-void COINSolver::setStarter(const StarterSol& starterSol) {}
+void COINSolver::setStarter(const StarterSol& starterSol) {
+  // TODO: not yet implemented
+}
 
 // _____________________________________________________________________________
-void COINSolver::writeMps(const std::string& path) const {}
+void COINSolver::writeMps(const std::string& path) const {
+  _model.writeMps(path.c_str());
+}
 
 // _____________________________________________________________________________
 void COINSolver::setCacheDir(const std::string& dir) {

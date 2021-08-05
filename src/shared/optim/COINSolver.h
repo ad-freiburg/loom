@@ -12,10 +12,11 @@
 
 // COIN includes
 #include "CbcSolver.hpp"
-#include "OsiSolverInterface.hpp"
-#include "OsiCbcSolverInterface.hpp"
 #include "CoinBuild.hpp"
+#include "CoinMessageHandler.hpp"
 #include "CoinModel.hpp"
+#include "OsiCbcSolverInterface.hpp"
+#include "OsiSolverInterface.hpp"
 
 namespace shared {
 namespace optim {
@@ -74,6 +75,7 @@ class COINSolver : public ILPSolver {
   OsiSolverInterface* _solver;
   mutable CoinModel _model;
   CbcModel _cbcModel;
+CoinMessageHandler _msgHandler;
 };
 
 }  // namespace optim
