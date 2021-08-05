@@ -157,7 +157,7 @@ double GLPKSolver::getObjVal() const { return glp_mip_obj_val(_prob); }
 // _____________________________________________________________________________
 SolveType GLPKSolver::solve() {
   update();
-
+  writeMps("/home/patrick/test2.mps");
   int* ia = 0;
   int* ja = 0;
   double* res = 0;
@@ -335,8 +335,17 @@ void VariableMatrix::getGLPKArrs(int** ia, int** ja, double** r) const {
 
 // _____________________________________________________________________________
 void GLPKSolver::writeMps(const std::string& path) const {
-  // TODO: exception if could not be written
+  int* ia = 0;
+  int* ja = 0;
+  double* res = 0;
+  _vm.getGLPKArrs(&ia, &ja, &res);
+
+  glp_load_matrix(_prob, _vm.getNumVars(), ia, ja, res);
   glp_write_mps(_prob, GLP_MPS_FILE, 0, path.c_str());
+
+  delete[](ia);
+  delete[](ja);
+  delete[](res);
 }
 
 #endif

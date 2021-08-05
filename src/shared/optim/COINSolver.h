@@ -11,6 +11,7 @@
 #include "shared/optim/ILPSolver.h"
 
 // COIN includes
+#include "CbcSolver.hpp"
 #include "OsiSolverInterface.hpp"
 #include "OsiCbcSolverInterface.hpp"
 #include "CoinBuild.hpp"
@@ -63,16 +64,16 @@ class COINSolver : public ILPSolver {
   double* getStarterArr() const;
 
  private:
-  int _numCols;
   double* _starterArr;
 
   SolveType _status;
 
   int _timeLimit;
 
-  OsiCbcSolverInterface _solver1;
+  OsiClpSolverInterface _solver1;
   OsiSolverInterface* _solver;
-  CoinModel _model;
+  mutable CoinModel _model;
+  CbcModel _cbcModel;
 };
 
 }  // namespace optim

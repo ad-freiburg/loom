@@ -259,6 +259,7 @@ SolveType GurobiSolver::solve() {
     _status = NON_OPTIM;
 
   return getStatus();
+
 }
 
 // _____________________________________________________________________________

@@ -38,47 +38,24 @@ using shared::optim::COINSolver;
 // _____________________________________________________________________________
 void ILPSolverTest::run() {
   {
-    // just for test
-#ifdef COIN_FOUND
-    auto s = new COINSolver(shared::optim::MAX);
-
-    size_t col1 = s->addCol("x", shared::optim::BIN, 1);
-    size_t col2 = s->addCol("y", shared::optim::BIN, 1);
-    size_t col3 = s->addCol("z", shared::optim::BIN, 2);
-
-    s->update();
-
-    TEST(s->getVarByName("x"), ==, 0);
-    TEST(s->getVarByName("y"), ==, 1);
-    TEST(s->getVarByName("z"), ==, 2);
-
-    size_t row1 = s->addRow("constr1", 4, shared::optim::UP);
-    s->addColToRow(row1, col1, 1);
-    s->addColToRow(row1, col2, 2);
-    s->addColToRow(row1, col3, 3);
-
-    size_t row2 = s->addRow("constr2", 1, shared::optim::LO);
-    s->addColToRow(row2, col1, 1);
-    s->addColToRow(row2, col2, 1);
-
-    s->update();
-
-    TEST(s->getConstrByName("constr1"), ==, 0);
-    TEST(s->getConstrByName("constr2"), ==, 1);
-
-    exit(0);
-#endif
-
-    //
-
     std::vector<ILPSolver*> solvers;
+
 #ifdef GUROBI_FOUND
-    solvers.push_back(new GurobiSolver(shared::optim::MAX));
+    try {
+      solvers.push_back(new GurobiSolver(shared::optim::MAX));
+    } catch (std::exception e) {
+    }
 #endif
 
 #ifdef GLPK_FOUND
     solvers.push_back(new GLPKSolver(shared::optim::MAX));
 #endif
+
+#ifdef COIN_FOUND
+    auto s = new COINSolver(shared::optim::MAX);
+    solvers.push_back(s);
+#endif
+
 
     for (auto s : solvers) {
       size_t col1 = s->addCol("x", shared::optim::BIN, 1);
@@ -111,7 +88,7 @@ void ILPSolverTest::run() {
 
       TEST(s->getVarVal("x"), ==, approx(1));
       TEST(s->getVarVal("y"), ==, approx(0));
-      TEST(s->getVarVal("x"), ==, approx(1));
+      TEST(s->getVarVal("z"), ==, approx(1));
 
       TEST(s->getObjVal(), ==, approx(3));
     }
@@ -119,7 +96,10 @@ void ILPSolverTest::run() {
   {
     std::vector<ILPSolver*> solvers;
 #ifdef GUROBI_FOUND
-    solvers.push_back(new GurobiSolver(shared::optim::MAX));
+    try {
+      solvers.push_back(new GurobiSolver(shared::optim::MAX));
+    } catch (std::exception e) {
+    }
 #endif
 
 #ifdef GLPK_FOUND
@@ -163,7 +143,7 @@ void ILPSolverTest::run() {
 
       TEST(s->getVarVal("x"), ==, approx(1));
       TEST(s->getVarVal("y"), ==, approx(0));
-      TEST(s->getVarVal("x"), ==, approx(1));
+      TEST(s->getVarVal("z"), ==, approx(1));
 
       TEST(s->getObjVal(), ==, approx(3));
     }
