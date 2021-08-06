@@ -53,9 +53,9 @@ size_t OptGraphScorer::getNumSeparations(const std::set<OptNode*>& g,
 }
 
 // _____________________________________________________________________________
-double OptGraphScorer::getSplittingScore(const OptGraph* g,
+double OptGraphScorer::getSeparationScore(const OptGraph* g,
                                          const OptOrderCfg& c) const {
-  return getSplittingScore(g->getNds(), c);
+  return getSeparationScore(g->getNds(), c);
 }
 
 // _____________________________________________________________________________
@@ -94,16 +94,16 @@ double OptGraphScorer::getTotalScore(OptNode* n, const OptOrderCfg& c) const {
 
   return num.first.first * getCrossingPenSameSeg(n) +
          num.first.second * getCrossingPenDiffSeg(n) +
-         num.second * getSplittingPen(n);
+         num.second * getSeparationPen(n);
 }
 
 // _____________________________________________________________________________
-double OptGraphScorer::getSplittingScore(const std::set<OptNode*>& g,
+double OptGraphScorer::getSeparationScore(const std::set<OptNode*>& g,
                                          const OptOrderCfg& c) const {
   double ret = 0;
 
   for (auto n : g) {
-    ret += getSplittingScore(n, c);
+    ret += getSeparationScore(n, c);
   }
 
   return ret;
@@ -132,10 +132,10 @@ double OptGraphScorer::getCrossingScore(OptNode* n,
 }
 
 // _____________________________________________________________________________
-double OptGraphScorer::getSplittingScore(OptNode* n,
+double OptGraphScorer::getSeparationScore(OptNode* n,
                                          const OptOrderCfg& c) const {
   if (!n->pl().node) return 0;
-  return getNumSeparations(n, c) * getSplittingPen(n);
+  return getNumSeparations(n, c) * getSeparationPen(n);
 }
 
 // _____________________________________________________________________________
@@ -209,9 +209,9 @@ double OptGraphScorer::getCrossingScore(OptEdge* e,
 }
 
 // _____________________________________________________________________________
-double OptGraphScorer::getSplittingScore(OptEdge* e,
+double OptGraphScorer::getSeparationScore(OptEdge* e,
                                          const OptOrderCfg& c) const {
-  return getSplittingScore(e->getFrom(), c) + getSplittingScore(e->getTo(), c);
+  return getSeparationScore(e->getFrom(), c) + getSeparationScore(e->getTo(), c);
 }
 
 // _____________________________________________________________________________
@@ -241,7 +241,7 @@ double OptGraphScorer::getCrossingPenDiffSeg(const OptNode* n) const {
 }
 
 // _____________________________________________________________________________
-double OptGraphScorer::getSplittingPen(const OptNode* n) const {
+double OptGraphScorer::getSeparationPen(const OptNode* n) const {
   double ret = 1;
   if (_pens.splitAdjPen) ret *= n->getDeg();
 

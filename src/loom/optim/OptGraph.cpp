@@ -425,8 +425,8 @@ bool OptGraph::simplifyStep() {
           n->pl().node->getAdjList().size() != 2) {
         bool cheaper = false;
         if (first->getOtherNd(n)->pl().node) {
-          if (_scorer->getSplittingPen(n) >=
-                  _scorer->getSplittingPen(first->getOtherNd(n)) &&
+          if (_scorer->getSeparationPen(n) >=
+                  _scorer->getSeparationPen(first->getOtherNd(n)) &&
               _scorer->getCrossingPenSameSeg(n) >=
                   _scorer->getCrossingPenSameSeg(first->getOtherNd(n)) &&
               _scorer->getCrossingPenDiffSeg(n) >=
@@ -436,8 +436,8 @@ bool OptGraph::simplifyStep() {
         }
         if (!cheaper) {
           if (second->getOtherNd(n)->pl().node) {
-            if (_scorer->getSplittingPen(n) >=
-                    _scorer->getSplittingPen(second->getOtherNd(n)) &&
+            if (_scorer->getSeparationPen(n) >=
+                    _scorer->getSeparationPen(second->getOtherNd(n)) &&
                 _scorer->getCrossingPenSameSeg(n) >=
                     _scorer->getCrossingPenSameSeg(second->getOtherNd(n)) &&
                 _scorer->getCrossingPenDiffSeg(n) >=

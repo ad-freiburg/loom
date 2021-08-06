@@ -20,7 +20,7 @@ struct Config {
 
   size_t optimRuns;
 
-  bool splittingOpt;
+  bool separationOpt;
   bool outOptGraph;
 
   bool outputStats;
@@ -35,10 +35,10 @@ struct Config {
 
   double crossPenMultiSameSeg;
   double crossPenMultiDiffSeg;
-  double splitPenWeight;
+  double separationPenWeight;
   double stationCrossWeightSameSeg;
   double stationCrossWeightDiffSeg;
-  double stationSplitWeight;
+  double stationSeparationWeight;
 
   std::string worldFilePath;
 

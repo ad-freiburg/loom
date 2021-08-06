@@ -19,13 +19,18 @@ typedef std::pair<size_t, size_t> PosCom;
 typedef std::pair<PosCom, PosCom> PosComPair;
 typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
+struct OptResStats {
+  size_t sameSegCrossings, diffSegCrossings, separations;
+  double score;
+};
+
 class Optimizer {
  public:
   Optimizer(const config::Config* cfg,
             const shared::rendergraph::Penalties& pens)
       : _cfg(cfg), _scorer(pens){};
 
-  virtual int optimize(shared::rendergraph::RenderGraph* rg) const;
+  virtual OptResStats optimize(shared::rendergraph::RenderGraph* rg) const;
   int optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
                    shared::rendergraph::HierarOrderCfg* c) const;
   virtual int optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,

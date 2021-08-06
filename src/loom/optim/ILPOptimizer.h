@@ -46,7 +46,7 @@ class ILPOptimizer : public Optimizer {
 
   int getCrossingPenaltySameSeg(const OptNode* n) const;
   int getCrossingPenaltyDiffSeg(const OptNode* n) const;
-  int getSplittingPenalty(const OptNode* n) const;
+  int getSeparationPenalty(const OptNode* n) const;
 };
 }  // namespace optim
 }  // namespace loom

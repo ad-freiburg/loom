@@ -18,6 +18,7 @@ using loom::optim::OptGraph;
 using loom::optim::OptGraphScorer;
 using loom::optim::Optimizer;
 using loom::optim::OptNode;
+using loom::optim::OptResStats;
 using loom::optim::OptOrderCfg;
 using loom::optim::PosComPair;
 using shared::linegraph::Line;
@@ -30,7 +31,7 @@ using util::geo::DLine;
 using util::geo::DPoint;
 
 // _____________________________________________________________________________
-int Optimizer::optimize(RenderGraph* rg) const {
+OptResStats Optimizer::optimize(RenderGraph* rg) const {
   // create optim graph
   OptGraph g(&_scorer);
   g.build(rg);
@@ -93,6 +94,7 @@ int Optimizer::optimize(RenderGraph* rg) const {
   double crossSumSame = 0;
   double crossSumDiff = 0;
   double sepSum = 0;
+  OptResStats optResStats;
 
   LOGTO(INFO, std::cerr) << "Optimization graph has " << comps.size()
                          << " components.";
@@ -159,12 +161,18 @@ int Optimizer::optimize(RenderGraph* rg) const {
 
     scoreSum += _scorer.getCrossingScore(&gg, optCfg);
 
-    if (_cfg->splittingOpt) scoreSum += _scorer.getSplittingScore(&gg, optCfg);
+    if (_cfg->separationOpt) scoreSum += _scorer.getSeparationScore(&gg, optCfg);
 
     auto crossings = _scorer.getNumCrossings(&gg, optCfg);
     crossSumSame += crossings.first;
     crossSumDiff += crossings.second;
-    sepSum += _scorer.getNumSeparations(&gg, optCfg);
+
+    optResStats.sameSegCrossings = crossings.first;
+    optResStats.diffSegCrossings = crossings.second;
+    optResStats.separations = _scorer.getNumSeparations(&gg, optCfg);
+
+    sepSum += optResStats.separations;
+
 
     // todo: dont write this here, write the best one after all runs!!!!!
     rg->writePermutation(c);
@@ -189,7 +197,7 @@ int Optimizer::optimize(RenderGraph* rg) const {
     LOGTO(INFO, std::cerr) << "";
   }
 
-  return 0;
+  return optResStats;
 }
 
 // _____________________________________________________________________________

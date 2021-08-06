@@ -41,7 +41,7 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   bool running = true;
 
   double curScore = _optScorer.getCrossingScore(g, cur);
-  if (_cfg->splittingOpt) curScore += _optScorer.getSplittingScore(g, cur);
+  if (_cfg->separationOpt) curScore += _optScorer.getSeparationScore(g, cur);
 
   bestScore = curScore;
   best = cur;
@@ -81,7 +81,7 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
     if (!running) break;
 
-    if (_cfg->splittingOpt) curScore = _optScorer.getTotalScore(g, cur);
+    if (_cfg->separationOpt) curScore = _optScorer.getTotalScore(g, cur);
     else curScore = _optScorer.getCrossingScore(g, cur);
 
     if (curScore < bestScore) {

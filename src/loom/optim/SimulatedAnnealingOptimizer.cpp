@@ -83,7 +83,7 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
   }
 
   double curScore = 0;
-  if (_cfg->splittingOpt)
+  if (_cfg->separationOpt)
     curScore += _optScorer.getTotalScore(g, cur);
   else
     curScore = _optScorer.getCrossingScore(g, cur);

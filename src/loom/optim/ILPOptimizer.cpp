@@ -74,9 +74,9 @@ int ILPOptimizer::getCrossingPenaltyDiffSeg(const OptNode* n) const {
 }
 
 // _____________________________________________________________________________
-int ILPOptimizer::getSplittingPenalty(const OptNode* n) const {
-  // double the value because we only count a splitting once for each pair!
-  return _scorer.getSplittingPen(n) * 1;
+int ILPOptimizer::getSeparationPenalty(const OptNode* n) const {
+  // double the value because we only count a separation once for each pair!
+  return _scorer.getSeparationPen(n) * 1;
 }
 
 // _____________________________________________________________________________
@@ -211,7 +211,7 @@ void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
 
           int decisionVarSep = lp->addCol(
               sss.str(), shared::optim::BIN,
-              getSplittingPenalty(node));
+              getSeparationPenalty(node));
 
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
@@ -247,7 +247,7 @@ void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
               lp->addColToRow(row, decisionVar, -1);
             }
 
-            if (_cfg->splittingOpt && separates(poscomb)) {
+            if (_cfg->separationOpt && separates(poscomb)) {
               int lineAinAatP = lp->getVarByName(getILPVarName(
                   segmentA, linepair.first.line, poscomb.first.first));
               int lineBinAatP = lp->getVarByName(getILPVarName(

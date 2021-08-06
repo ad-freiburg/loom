@@ -28,13 +28,13 @@ class OptGraphScorer {
 
   double getCrossingScore(OptEdge* e, const OptOrderCfg& c) const;
 
-  double getSplittingScore(const OptGraph* g, const OptOrderCfg& c) const;
+  double getSeparationScore(const OptGraph* g, const OptOrderCfg& c) const;
 
-  double getSplittingScore(OptEdge* e, const OptOrderCfg& c) const;
+  double getSeparationScore(OptEdge* e, const OptOrderCfg& c) const;
 
-  double getSplittingScore(const std::set<OptNode*>& g,
+  double getSeparationScore(const std::set<OptNode*>& g,
                            const OptOrderCfg& c) const;
-  double getSplittingScore(OptNode* n, const OptOrderCfg& c) const;
+  double getSeparationScore(OptNode* n, const OptOrderCfg& c) const;
 
   std::pair<std::pair<size_t, size_t>, size_t> getNumCrossSeps(
       OptNode* n, const OptOrderCfg& c) const;
@@ -54,7 +54,7 @@ class OptGraphScorer {
   size_t getNumSeparations(const std::set<OptNode*>& g,
                            const OptOrderCfg& c) const;
 
-  double getSplittingPen(const OptNode* n) const;
+  double getSeparationPen(const OptNode* n) const;
   double getCrossingPenSameSeg(const OptNode* n) const;
   double getCrossingPenDiffSeg(const OptNode* n) const;
 

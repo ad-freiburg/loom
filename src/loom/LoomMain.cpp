@@ -41,17 +41,17 @@ int main(int argc, char** argv) {
       g.maxDeg() * (cfg.crossPenMultiSameSeg > cfg.crossPenMultiDiffSeg
                         ? cfg.crossPenMultiSameSeg
                         : cfg.crossPenMultiDiffSeg);
-  double maxSplitPen = g.maxDeg() * cfg.splitPenWeight;
+  double maxSepPen = g.maxDeg() * cfg.separationPenWeight;
 
   // TODO move this into configuration, at least partially
   shared::rendergraph::Penalties pens{maxCrossPen,
-                                      maxSplitPen,
+                                      maxSepPen,
                                       cfg.crossPenMultiSameSeg,
                                       cfg.crossPenMultiDiffSeg,
-                                      cfg.splitPenWeight,
+                                      cfg.separationPenWeight,
                                       cfg.stationCrossWeightSameSeg,
                                       cfg.stationCrossWeightDiffSeg,
-                                      cfg.stationSplitWeight,
+                                      cfg.stationSeparationWeight,
                                       true,
                                       true};
 
