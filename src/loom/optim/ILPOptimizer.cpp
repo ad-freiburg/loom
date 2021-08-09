@@ -65,6 +65,7 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 int ILPOptimizer::getCrossingPenaltySameSeg(const OptNode* n) const {
+  std::cerr << _scorer.getCrossingPenSameSeg(n) << std::endl;
   return _scorer.getCrossingPenSameSeg(n);
 }
 

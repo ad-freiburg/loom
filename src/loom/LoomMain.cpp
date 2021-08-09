@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
   double maxSepPen = g.maxDeg() * cfg.separationPenWeight;
 
   // TODO move this into configuration, at least partially
-  shared::rendergraph::Penalties pens{maxCrossPen,
+  shared::rendergraph::Penalties pens{1, //maxCrossPen,
                                       maxSepPen,
                                       cfg.crossPenMultiSameSeg,
                                       cfg.crossPenMultiDiffSeg,

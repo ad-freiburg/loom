@@ -176,17 +176,17 @@ static const std::vector<FileTest> fileTests(
          15,  // number nodes
          0,   // number topological nodes
          12   // number edges
-     }
-     ,{
-     "/home/patrick/repos/loom/src/loom/tests/datasets/y-splitting-rec-4.json",
-     0,  // number same segment crossings
-     0,  // number diff segment crossings
-     0,  // number separations
-     16, // number nodes
-     0,  // number topological nodes
-     13  // number edges
-     }
-     ,
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "y-splitting-rec-4.json",
+         0,   // number same segment crossings
+         0,   // number diff segment crossings
+         0,   // number separations
+         16,  // number nodes
+         0,   // number topological nodes
+         13   // number edges
+     },
      {
          "/home/patrick/repos/loom/src/loom/tests/datasets/"
          "dog-bone-splitting.json",
@@ -365,7 +365,121 @@ int main(int argc, char** argv) {
 
         TEST(res.sameSegCrossings, ==, test.sameSegCrossings);
         TEST(res.diffSegCrossings, ==, test.diffSegCrossings);
-        // TEST(res.separations, ==, test.separations);
+      }
+    }
+  }
+
+  // miscellaneous
+  for (const auto& cfg : configs) {
+    loom::optim::ExhaustiveOptimizer exhausOptim(&cfg, pens);
+    loom::optim::ILPOptimizer ilpOptim(&cfg, pens);
+    loom::optim::ILPEdgeOrderOptimizer ilpImprOptim(&cfg, pens);
+    loom::optim::CombOptimizer combOptim(&cfg, pens);
+
+    std::vector<loom::optim::Optimizer*> optimizers;
+    optimizers.push_back(&exhausOptim);
+    optimizers.push_back(&ilpOptim);
+    optimizers.push_back(&ilpImprOptim);
+    optimizers.push_back(&combOptim);
+
+    for (auto optim : optimizers) {
+      shared::rendergraph::RenderGraph g(5, 5);
+
+      std::ifstream input;
+      input.open(
+          "/home/patrick/repos/loom/src/loom/tests/datasets/"
+          "freiburg-tram.json");
+      g.readFromJson(&input, 3);
+
+      TEST(g.numEdgs(), ==, 78);
+      TEST(g.numNds(), ==, 77);
+      TEST(g.numNds(true), ==, 5);
+
+      if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
+      if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
+
+      auto res = optim->optimize(&g);
+
+      TEST(res.sameSegCrossings + res.diffSegCrossings, ==, 4);
+    }
+  }
+
+  {
+    shared::rendergraph::Penalties pensLoc = pens;
+    pensLoc.diffSegCrossPen = 100;
+    pensLoc.inStatCrossPenDiffSeg = 200;
+    for (const auto& cfg : configs) {
+      loom::optim::ExhaustiveOptimizer exhausOptim(&cfg, pensLoc);
+      loom::optim::ILPOptimizer ilpOptim(&cfg, pensLoc);
+      loom::optim::ILPEdgeOrderOptimizer ilpImprOptim(&cfg, pensLoc);
+      loom::optim::CombOptimizer combOptim(&cfg, pensLoc);
+
+      std::vector<loom::optim::Optimizer*> optimizers;
+      optimizers.push_back(&exhausOptim);
+      optimizers.push_back(&ilpOptim);
+      optimizers.push_back(&ilpImprOptim);
+      optimizers.push_back(&combOptim);
+
+      for (auto optim : optimizers) {
+        shared::rendergraph::RenderGraph g(5, 5);
+
+        std::ifstream input;
+        input.open(
+            "/home/patrick/repos/loom/src/loom/tests/datasets/"
+            "freiburg-tram.json");
+        g.readFromJson(&input, 3);
+
+        TEST(g.numEdgs(), ==, 78);
+        TEST(g.numNds(), ==, 77);
+        TEST(g.numNds(true), ==, 5);
+
+        if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
+        if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
+
+        auto res = optim->optimize(&g);
+
+        TEST(res.sameSegCrossings + res.diffSegCrossings, ==, 4);
+        TEST(res.diffSegCrossings, ==, 0);
+      }
+    }
+  }
+
+  // with separation penalty
+
+  for (auto& cfg : configs) cfg.separationOpt = true;
+
+  for (const auto& cfg : configs) {
+    loom::optim::ExhaustiveOptimizer exhausOptim(&cfg, pens);
+    loom::optim::ILPOptimizer ilpOptim(&cfg, pens);
+    loom::optim::ILPEdgeOrderOptimizer ilpImprOptim(&cfg, pens);
+    loom::optim::CombOptimizer combOptim(&cfg, pens);
+
+    std::vector<loom::optim::Optimizer*> optimizers;
+    optimizers.push_back(&exhausOptim);
+    optimizers.push_back(&ilpOptim);
+    optimizers.push_back(&ilpImprOptim);
+    optimizers.push_back(&combOptim);
+
+    for (auto optim : optimizers) {
+      for (const auto& test : fileTests) {
+        shared::rendergraph::RenderGraph g(5, 5);
+
+        std::ifstream input;
+        input.open(test.fname);
+        g.readFromJson(&input, 3);
+
+        TEST(g.numEdgs(), ==, test.numEdgs);
+        TEST(g.numNds(), ==, test.numNds);
+        TEST(g.numNds(true), ==, test.numTopoNds);
+
+        if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
+        if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
+
+        auto res = optim->optimize(&g);
+
+        TEST(res.sameSegCrossings, ==, test.sameSegCrossings);
+        TEST(res.diffSegCrossings, ==, test.diffSegCrossings);
+        TEST(res.separations, ==, test.separations);
       }
     }
   }

@@ -421,8 +421,7 @@ bool OptGraph::simplifyStep() {
       assert(n->pl().node);
 
       if (first->pl().getCardinality() > 1 &&
-          first->pl().getCardinality() > 1 &&
-          n->pl().node->getAdjList().size() != 2) {
+          second->pl().getCardinality() > 1) {
         bool cheaper = false;
         if (first->getOtherNd(n)->pl().node) {
           if (_scorer->getSeparationPen(n) >=
