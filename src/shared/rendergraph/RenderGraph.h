@@ -38,8 +38,6 @@ class RenderGraph : public shared::linegraph::LineGraph {
 
   void writePermutation(const OrderCfg&);
 
-  size_t numEdgs() const;
-
   std::vector<shared::rendergraph::InnerGeom> innerGeoms(
       const shared::linegraph::LineNode* n, double prec) const;
 

@@ -597,13 +597,31 @@ std::vector<const Line*> LineGraph::getSharedLines(const LineEdge* a,
 }
 
 // _____________________________________________________________________________
-size_t LineGraph::getNumLines() const { return _lines.size(); }
+size_t LineGraph::numLines() const { return _lines.size(); }
 
 // _____________________________________________________________________________
-size_t LineGraph::getNumNds() const { return getNds().size(); }
+size_t LineGraph::numNds() const { return getNds().size(); }
 
 // _____________________________________________________________________________
-size_t LineGraph::getNumNds(bool topo) const { return 0; }
+size_t LineGraph::numNds(bool topo) const {
+  size_t ret = 0;
+  for (auto nd : getNds()) {
+    if ((nd->pl().stops().size() == 0) ^ !topo) ret++;
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
+size_t LineGraph::numEdgs() const {
+  size_t ret = 0;
+  for (auto nd : getNds()) {
+    for (auto e : nd->getAdjList()) {
+      if (e->getFrom() != nd) continue;
+      ret++;
+    }
+  }
+  return ret;
+}
 
 // _____________________________________________________________________________
 NodeGrid* LineGraph::getNdGrid() { return &_nodeGrid; }

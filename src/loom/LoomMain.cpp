@@ -58,11 +58,11 @@ int main(int argc, char** argv) {
   if (cfg.outputStats) {
     LOGTO(INFO, std::cerr) << "(stats) Stats for graph";
     LOGTO(INFO, std::cerr) << "(stats)   Total node count: "
-                           << g.getNds()->size() << " (" << g.getNumNds(true)
-                           << " topo, " << g.getNumNds(false) << " non-topo)";
+                           << g.getNds()->size() << " (" << g.numNds(true)
+                           << " topo, " << g.numNds(false) << " non-topo)";
     LOGTO(INFO, std::cerr) << "(stats)   Total edge count: " << g.numEdgs();
     LOGTO(INFO, std::cerr) << "(stats)   Total unique line count: "
-                           << g.getNumLines();
+                           << g.numLines();
     LOGTO(INFO, std::cerr) << "(stats)   Max edge line cardinality: "
                            << g.getMaxLineNum();
     LOGTO(INFO, std::cerr) << "(stats)   Number of poss. solutions: "

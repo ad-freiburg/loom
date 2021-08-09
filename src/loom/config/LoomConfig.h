@@ -18,27 +18,25 @@ struct Config {
   std::string optimMethod;
   std::string MPSOutputPath;
 
-  size_t optimRuns;
+  size_t optimRuns = 1;
 
-  bool separationOpt;
-  bool outOptGraph;
+  bool separationOpt = true;
+  bool outOptGraph = false;
 
-  bool outputStats;
-  bool renderStats;
-  bool collapseLinePartners;
+  bool outputStats = false;
+  bool collapseLinePartners = true;
 
-  bool createCoreOptimGraph;
-  bool untangleGraph;
-  bool simpleRenderForTwoEdgeNodes;
+  bool createCoreOptimGraph = true;
+  bool untangleGraph = true;
 
-  int ilpTimeLimit;
+  int ilpTimeLimit = -1;
 
-  double crossPenMultiSameSeg;
-  double crossPenMultiDiffSeg;
-  double separationPenWeight;
-  double stationCrossWeightSameSeg;
-  double stationCrossWeightDiffSeg;
-  double stationSeparationWeight;
+  double crossPenMultiSameSeg = 1;
+  double crossPenMultiDiffSeg = 1;
+  double separationPenWeight = 1;
+  double stationCrossWeightSameSeg = 1;
+  double stationCrossWeightDiffSeg = 1;
+  double stationSeparationWeight = 1;
 
   std::string worldFilePath;
 

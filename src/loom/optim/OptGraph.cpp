@@ -797,47 +797,55 @@ bool OptGraph::untanglePartialYStep() {
 }
 
 // _____________________________________________________________________________
-OptEdge* OptGraph::isStump(OptEdge* e) const {
-  OptEdge* ret;
-  if ((ret = isStumpAt(e, e->getFrom()))) return ret;
-  if ((ret = isStumpAt(e, e->getTo()))) return ret;
+std::pair<OptEdge*, OptEdge*> OptGraph::isStump(OptEdge* e) const {
+  std::pair<OptEdge*, OptEdge*> ret;
+  if ((ret = isStumpAt(e, e->getFrom())).first) return ret;
+  if ((ret = isStumpAt(e, e->getTo())).first) return ret;
 
-  return 0;
+  return {0, 0};
 }
 
 // _____________________________________________________________________________
-OptEdge* OptGraph::isStumpAt(OptEdge* e, OptNode* n) const {
-  if (n->getDeg() != 2) return 0;
+std::pair<OptEdge*, OptEdge*> OptGraph::isStumpAt(OptEdge* e,
+                                                  OptNode* n) const {
+  if (n->getDeg() != 2) return {0, 0};
 
   auto branches = branchesAt(e, e->getOtherNd(n));
   if (!branches.size()) branches = partiallyBranchesAt(e, e->getOtherNd(n));
 
   OptEdge* mainBranch = 0;
+  OptEdge* mainOtherBranch = 0;
 
   for (auto branch : branches) {
     for (auto otherBranch : n->getAdjList()) {
       if (otherBranch == e) continue;
       if (dirContinuedOver(otherBranch, e, branch)) {
-        if (mainBranch) return 0;
+        if (mainBranch) return {0, 0};
         mainBranch = otherBranch;
+        mainOtherBranch = branch;
       }
     }
   }
 
-  return mainBranch;
+  return {mainBranch, mainOtherBranch};
 }
 
 // _____________________________________________________________________________
 bool OptGraph::untangleStumpStep() {
   double DO = 100;  // only relevant for debug output
+
   for (OptNode* n : *getNds()) {
     for (OptEdge* mainLeg : n->getAdjList()) {
       if (mainLeg->getFrom() != n) continue;
 
+      std::pair<OptEdge*, OptEdge*> stumpEdgs = {0, 0};
       OptEdge* stumpEdg = 0;
+      OptEdge* stumpEdgBranch = 0;
       OptNode* stumpN = 0;
 
-      if ((stumpEdg = isStump(mainLeg))) {
+      if ((stumpEdgs = isStump(mainLeg)).first) {
+        stumpEdg = stumpEdgs.first;
+        stumpEdgBranch = stumpEdgs.second;
         stumpN = sharedNode(mainLeg, stumpEdg);
         OptNode* notStumpN = mainLeg->getOtherNd(stumpN);
 
@@ -863,8 +871,6 @@ bool OptGraph::untangleStumpStep() {
         std::vector<OptNode*> stumpNds =
             explodeNodeAlong(stumpN, ortho, stumpLegs.size());
 
-        size_t mainLegNode = 0;
-
         size_t offset = 0;
         for (size_t i = 0; i < stumpLegs.size(); i++) {
           size_t j = i;
@@ -878,9 +884,15 @@ bool OptGraph::untangleStumpStep() {
             pl = getPartialView(mainLeg, stumpLegs[j], offset);
             addEdg(notStumpN, stumpNds[j], pl);
           }
-          if (dirContinuedOver(stumpLegs[j], mainLeg, stumpEdg))
-            mainLegNode = j;
           offset += pl.getLines().size();
+        }
+
+        size_t mainLegNode = 0;
+        for (size_t i = 0; i < stumpNds.size(); i++) {
+          if (dirPartialContinuedOver(stumpEdgBranch,
+                                      getEdg(stumpNds[i], notStumpN))) {
+            mainLegNode = i;
+          }
         }
 
         if (stumpEdg->getFrom() == stumpN)

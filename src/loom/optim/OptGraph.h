@@ -204,8 +204,8 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   std::pair<OptEdge*, OptEdge*> isFullCross(OptNode* n) const;
   bool isYAt(OptEdge* e, OptNode* n) const;
   bool isPartialYAt(OptEdge* e, OptNode* n) const;
-  OptEdge* isStump(OptEdge* e) const;
-  OptEdge* isStumpAt(OptEdge* e, OptNode* n) const;
+  std::pair<OptEdge*, OptEdge*> isStump(OptEdge* e) const;
+  std::pair<OptEdge*, OptEdge*> isStumpAt(OptEdge* e, OptNode* n) const;
 
   std::set<const shared::linegraph::Line*> getLines() const;
 

@@ -48,9 +48,6 @@ void RenderGraph::writePermutation(const OrderCfg& c) {
 }
 
 // _____________________________________________________________________________
-size_t RenderGraph::numEdgs() const { return 0; }
-
-// _____________________________________________________________________________
 bool RenderGraph::isTerminus(const LineNode* n) {
   if (n->getDeg() == 1) return true;
   for (size_t i = 0; i < n->pl().fronts().size(); ++i) {

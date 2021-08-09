@@ -52,9 +52,10 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   const Line* getLine(const std::string& id) const;
   void expandBBox(const util::geo::Point<double>& p);
 
-  size_t getNumNds() const;
-  size_t getNumNds(bool topo) const;
-  size_t getNumLines() const;
+  size_t numNds() const;
+  size_t numNds(bool topo) const;
+  size_t numEdgs() const;
+  size_t numLines() const;
 
   static std::vector<LineOcc> getCtdLinesIn(const LineOcc& line,
                                             const LineEdge* fromEdge,
