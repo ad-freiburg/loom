@@ -161,12 +161,13 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
 
     scoreSum += _scorer.getCrossingScore(&gg, optCfg);
 
-    if (_cfg->separationOpt) scoreSum += _scorer.getSeparationScore(&gg, optCfg);
+    if (_scorer.optimizeSep()) scoreSum += _scorer.getSeparationScore(&gg, optCfg);
 
     auto crossings = _scorer.getNumCrossings(&gg, optCfg);
     crossSumSame += crossings.first;
     crossSumDiff += crossings.second;
 
+    optResStats.score = scoreSum;
     optResStats.sameSegCrossings = crossings.first;
     optResStats.diffSegCrossings = crossings.second;
     optResStats.separations = _scorer.getNumSeparations(&gg, optCfg);

@@ -620,9 +620,10 @@ void RenderGraph::createMetaNodes() {
         }
 
         // also update the edge of the other node front
-        NodeFront* otherFr = other->pl().frontFor(onf.edge);
-        assert(otherFr);
-        otherFr->edge = e;
+        NodeFront otherFr = *other->pl().frontFor(onf.edge);
+        other->pl().delFrontFor(onf.edge);
+        otherFr.edge = e;
+        other->pl().addFront(otherFr);
 
         // remove the original edge
         delEdg(onf.edge->getFrom(), onf.edge->getTo());

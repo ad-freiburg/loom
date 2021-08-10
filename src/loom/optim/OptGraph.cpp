@@ -412,6 +412,51 @@ void OptGraph::untangle() {
 }
 
 // _____________________________________________________________________________
+bool OptGraph::contractCheaper(const OptNode* cont, const OptNode* cheaper,
+                               const std::vector<OptLO>& lines) const {
+  if (cheaper->getDeg() == 2) {
+    return cheaper->pl().node &&
+           _scorer->getSeparationPen(cont) >=
+               _scorer->getSeparationPen(cheaper) &&
+           _scorer->getCrossingPenSameSeg(cont) >=
+               _scorer->getCrossingPenSameSeg(cheaper);
+  } else if (cheaper->getDeg() == 1) {
+    return true;
+  } else {
+    // for degree 3, check if true for each line pair - it might be that they
+    // cross into different segments there
+
+    for (const auto& loA : lines) {
+      for (const auto& loB : lines) {
+        if (loA == loB) continue;
+        auto edg = getEdg(cont, cheaper);
+        if (linesCtnOver(loA, loB, edg, cheaper)) {
+          // we have to consider same segment crossings and separations
+          if (_scorer->getSeparationPen(cont) <
+                  _scorer->getSeparationPen(cheaper) ||
+              _scorer->getCrossingPenSameSeg(cont) <
+                  _scorer->getCrossingPenSameSeg(cheaper)) {
+            return false;
+          }
+        }
+
+        if (linesBranchAt(loA, loB, edg, cheaper)) {
+          // we have to consider diff segment crossings in the cheaper node,
+          // but same segment crossings in the cont node (no diff crossings are
+          // possible there)
+          if (_scorer->getCrossingPenSameSeg(cont) <
+              _scorer->getCrossingPenDiffSeg(cheaper)) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+}
+
+// _____________________________________________________________________________
 bool OptGraph::simplifyStep() {
   for (OptNode* n : *getNds()) {
     if (n->getDeg() == 2) {
@@ -420,36 +465,18 @@ bool OptGraph::simplifyStep() {
 
       assert(n->pl().node);
 
-      if (first->pl().getCardinality() > 1 &&
-          second->pl().getCardinality() > 1) {
-        bool cheaper = false;
-        if (first->getOtherNd(n)->pl().node) {
-          if (_scorer->getSeparationPen(n) >=
-                  _scorer->getSeparationPen(first->getOtherNd(n)) &&
-              _scorer->getCrossingPenSameSeg(n) >=
-                  _scorer->getCrossingPenSameSeg(first->getOtherNd(n)) &&
-              _scorer->getCrossingPenDiffSeg(n) >=
-                  _scorer->getCrossingPenDiffSeg(first->getOtherNd(n))) {
-            cheaper = true;
-          }
-        }
-        if (!cheaper) {
-          if (second->getOtherNd(n)->pl().node) {
-            if (_scorer->getSeparationPen(n) >=
-                    _scorer->getSeparationPen(second->getOtherNd(n)) &&
-                _scorer->getCrossingPenSameSeg(n) >=
-                    _scorer->getCrossingPenSameSeg(second->getOtherNd(n)) &&
-                _scorer->getCrossingPenDiffSeg(n) >=
-                    _scorer->getCrossingPenDiffSeg(second->getOtherNd(n))) {
-              cheaper = true;
-            }
-          }
-        }
-
-        if (!cheaper) continue;
-      }
-
       if (dirLineEqualIn(first, second)) {
+        // if both edges have more than 2 lines, only contract if we can move
+        // potential crossings to a cheaper location
+        if (first->pl().getCardinality() > 1 &&
+            second->pl().getCardinality() > 1) {
+          if (!contractCheaper(n, first->getOtherNd(n),
+                               first->pl().getLines()) &&
+              !contractCheaper(n, second->getOtherNd(n),
+                               first->pl().getLines()))
+            continue;
+        }
+
         OptNode* newFrom = 0;
         OptNode* newTo = 0;
 
@@ -1567,6 +1594,37 @@ bool OptGraph::dirContinuedOver(const OptLO& ro, const OptEdge* a,
   for (auto e : n->getAdjList()) {
     if (e == a) continue;
     if (dirContinuedOver(ro, a, e)) return true;
+  }
+  return false;
+}
+
+// _____________________________________________________________________________
+bool OptGraph::linesBranchAt(const OptLO& roA, const OptLO& roB,
+                             const OptEdge* a, const OptNode* n) {
+  const OptEdge* roATo = 0;
+  const OptEdge* roBTo = 0;
+  for (auto e : n->getAdjList()) {
+    if (e == a) continue;
+    if (dirContinuedOver(roA, a, e)) {
+      roATo = e;
+      continue;
+    }
+    if (dirContinuedOver(roB, a, e)) {
+      roBTo = e;
+      continue;
+    }
+  }
+  return roATo != 0 && roBTo != 0 && roATo != roBTo;
+}
+
+// _____________________________________________________________________________
+bool OptGraph::linesCtnOver(const OptLO& roA, const OptLO& roB,
+                            const OptEdge* a, const OptNode* n) {
+  for (auto e : n->getAdjList()) {
+    if (e == a) continue;
+    if (dirContinuedOver(roA, a, e) && dirContinuedOver(roB, a, e)) {
+      return true;
+    }
   }
   return false;
 }

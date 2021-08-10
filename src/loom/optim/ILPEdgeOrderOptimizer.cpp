@@ -146,7 +146,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
       size_t rowDistanceRangeKeeper = 0;
       size_t c = segment->pl().getCardinality();
       // constraint is only needed for segments with more than 2 lines
-      if (_cfg->separationOpt && c > 2) {
+      if (separationOpt() && c > 2) {
         std::stringstream rowName;
         rowName << "sum_distancorRangeKeeper(e=" << segment->pl().getStrRepr()
                 << ")";
@@ -172,7 +172,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
 
       // iterate over all possible line pairs in this segment
       for (LinePair linepair : getLinePairs(segment, true)) {
-        if (_cfg->separationOpt && c > 2) {
+        if (separationOpt() && c > 2) {
           std::stringstream ss;
           // variable to check if distance between position of A and position
           // of B is > 1
@@ -270,7 +270,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
 
         int rowDistance1 = 0;
         int rowDistance2 = 0;
-        if (_cfg->separationOpt && segment->pl().getCardinality() > 2) {
+        if (separationOpt() && segment->pl().getCardinality() > 2) {
           rowName.str("");
           rowName << "sum_distancor1(e=" << segment->pl().getStrRepr()
                   << ",A=" << linepair.first.line
@@ -422,7 +422,7 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
           if (processed.find(segmentB) != processed.end()) continue;
 
           // introduce dec var for distance 1 between lines changes
-          if (_cfg->separationOpt) {
+          if (separationOpt()) {
             if (segmentA->pl().getCardinality() > 2 &&
                 segmentB->pl().getCardinality() > 2) {
               // the interesting case where the line continue together from

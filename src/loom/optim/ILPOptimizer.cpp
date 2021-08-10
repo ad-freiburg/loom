@@ -65,7 +65,6 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 int ILPOptimizer::getCrossingPenaltySameSeg(const OptNode* n) const {
-  std::cerr << _scorer.getCrossingPenSameSeg(n) << std::endl;
   return _scorer.getCrossingPenSameSeg(n);
 }
 
@@ -206,13 +205,16 @@ void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
           // introduce dec var for sep
           std::stringstream sss;
           sss << "x||_dec(" << segmentA->pl().getStrRepr() << ","
-             << segmentB->pl().getStrRepr() << "," << linepair.first.line << "("
-             << linepair.first.line->id() << ")," << linepair.second.line << "("
-             << linepair.second.line->id() << ")," << node << ")";
+              << segmentB->pl().getStrRepr() << "," << linepair.first.line
+              << "(" << linepair.first.line->id() << "),"
+              << linepair.second.line << "(" << linepair.second.line->id()
+              << ")," << node << ")";
 
-          int decisionVarSep = lp->addCol(
-              sss.str(), shared::optim::BIN,
-              getSeparationPenalty(node));
+          int decisionVarSep = 0;
+          if (separationOpt()) {
+            decisionVarSep = lp->addCol(sss.str(), shared::optim::BIN,
+                                        getSeparationPenalty(node));
+          }
 
           for (PosComPair poscomb :
                getPositionCombinations(segmentA, segmentB)) {
@@ -248,7 +250,7 @@ void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
               lp->addColToRow(row, decisionVar, -1);
             }
 
-            if (_cfg->separationOpt && separates(poscomb)) {
+            if (separationOpt() && separates(poscomb)) {
               int lineAinAatP = lp->getVarByName(getILPVarName(
                   segmentA, linepair.first.line, poscomb.first.first));
               int lineBinAatP = lp->getVarByName(getILPVarName(
@@ -394,3 +396,6 @@ std::string ILPOptimizer::getILPVarName(OptEdge* seg, const Line* r,
   varName << "x_(" << seg->pl().getStrRepr() << ",l=" << r << ",p=" << p << ")";
   return varName.str();
 }
+
+// _____________________________________________________________________________
+bool ILPOptimizer::separationOpt() const { return _scorer.optimizeSep(); }

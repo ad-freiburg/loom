@@ -457,6 +457,9 @@ void SvgRenderer::renderEdgeTripGeom(const RenderGraph& outG,
   const shared::linegraph::NodeFront* nfTo = e->getTo()->pl().frontFor(e);
   const shared::linegraph::NodeFront* nfFrom = e->getFrom()->pl().frontFor(e);
 
+  assert(nfTo);
+  assert(nfFrom);
+
   PolyLine<double> center = *e->pl().getGeom();
 
   double lineW = _cfg->lineWidth;

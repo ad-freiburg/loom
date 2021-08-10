@@ -38,13 +38,16 @@ int main(int argc, char** argv) {
   LOGTO(DEBUG, std::cerr) << "Optimizing...";
 
   double maxCrossPen =
-      g.maxDeg() * (cfg.crossPenMultiSameSeg > cfg.crossPenMultiDiffSeg
-                        ? cfg.crossPenMultiSameSeg
-                        : cfg.crossPenMultiDiffSeg);
-  double maxSepPen = g.maxDeg() * cfg.separationPenWeight;
+      g.maxDeg() * std::max(cfg.crossPenMultiSameSeg,
+                            std::max(cfg.crossPenMultiDiffSeg,
+                                     std::max(cfg.stationCrossWeightSameSeg,
+                                              cfg.stationCrossWeightDiffSeg)));
+  double maxSepPen =
+      g.maxDeg() *
+      std::max(cfg.separationPenWeight, cfg.stationSeparationWeight);
 
   // TODO move this into configuration, at least partially
-  shared::rendergraph::Penalties pens{1, //maxCrossPen,
+  shared::rendergraph::Penalties pens{maxCrossPen,
                                       maxSepPen,
                                       cfg.crossPenMultiSameSeg,
                                       cfg.crossPenMultiDiffSeg,

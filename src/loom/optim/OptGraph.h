@@ -232,6 +232,15 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   static bool dirContinuedOver(const OptLO& ro, const OptEdge* a,
                                const OptNode* n);
 
+  static bool linesBranchAt(const OptLO& roA, const OptLO& roB, const OptEdge* a,
+                                const OptNode* n);
+
+  static bool linesCtnOver(const OptLO& roA, const OptLO& roB, const OptEdge* a,
+                                const OptNode* n);
+
+  bool contractCheaper(const OptNode* cont, const OptNode* cheaper,
+                       const std::vector<OptLO>& lines) const;
+
   static bool lineDisjunct(const std::vector<const OptEdge*>& edges);
 
   static std::vector<OptLO> getCtdLinesIn(const OptEdge* fromEdge,

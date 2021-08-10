@@ -54,7 +54,7 @@ size_t OptGraphScorer::getNumSeparations(const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 double OptGraphScorer::getSeparationScore(const OptGraph* g,
-                                         const OptOrderCfg& c) const {
+                                          const OptOrderCfg& c) const {
   return getSeparationScore(g->getNds(), c);
 }
 
@@ -99,7 +99,7 @@ double OptGraphScorer::getTotalScore(OptNode* n, const OptOrderCfg& c) const {
 
 // _____________________________________________________________________________
 double OptGraphScorer::getSeparationScore(const std::set<OptNode*>& g,
-                                         const OptOrderCfg& c) const {
+                                          const OptOrderCfg& c) const {
   double ret = 0;
 
   for (auto n : g) {
@@ -133,7 +133,7 @@ double OptGraphScorer::getCrossingScore(OptNode* n,
 
 // _____________________________________________________________________________
 double OptGraphScorer::getSeparationScore(OptNode* n,
-                                         const OptOrderCfg& c) const {
+                                          const OptOrderCfg& c) const {
   if (!n->pl().node) return 0;
   return getNumSeparations(n, c) * getSeparationPen(n);
 }
@@ -210,17 +210,19 @@ double OptGraphScorer::getCrossingScore(OptEdge* e,
 
 // _____________________________________________________________________________
 double OptGraphScorer::getSeparationScore(OptEdge* e,
-                                         const OptOrderCfg& c) const {
-  return getSeparationScore(e->getFrom(), c) + getSeparationScore(e->getTo(), c);
+                                          const OptOrderCfg& c) const {
+  return getSeparationScore(e->getFrom(), c) +
+         getSeparationScore(e->getTo(), c);
 }
 
 // _____________________________________________________________________________
 double OptGraphScorer::getCrossingPenSameSeg(const OptNode* n) const {
+  if (n->getDeg() == 1) return 0;
   double ret = 1;
-  if (_pens.crossAdjPen) ret *= n->getDeg();
+  if (_pens.crossAdjPen) ret *= n->pl().node->getDeg();
 
   if (n->pl().node->pl().stops().size() > 0) {
-    if (n->getDeg() == 2) return _pens.inStatCrossPenDegTwo;
+    if (n->pl().node->getDeg() == 2) return _pens.inStatCrossPenDegTwo;
     return _pens.inStatCrossPenSameSeg * ret;
   }
 
@@ -229,11 +231,12 @@ double OptGraphScorer::getCrossingPenSameSeg(const OptNode* n) const {
 
 // _____________________________________________________________________________
 double OptGraphScorer::getCrossingPenDiffSeg(const OptNode* n) const {
+  if (n->getDeg() == 1) return 0;
   double ret = 1;
-  if (_pens.crossAdjPen) ret *= n->getDeg();
+  if (_pens.crossAdjPen) ret *= n->pl().node->getDeg();
 
   if (n->pl().node->pl().stops().size() > 0) {
-    if (n->getDeg() == 2) return _pens.inStatCrossPenDegTwo;
+    if (n->pl().node->getDeg() == 2) return _pens.inStatCrossPenDegTwo;
     return _pens.inStatCrossPenDiffSeg * ret;
   }
 
@@ -242,13 +245,20 @@ double OptGraphScorer::getCrossingPenDiffSeg(const OptNode* n) const {
 
 // _____________________________________________________________________________
 double OptGraphScorer::getSeparationPen(const OptNode* n) const {
+  if (n->getDeg() == 1) return 0;
   double ret = 1;
-  if (_pens.splitAdjPen) ret *= n->getDeg();
+  if (_pens.splitAdjPen) ret *= n->pl().node->getDeg();
 
   if (n->pl().node->pl().stops().size() > 0) {
-    if (n->getDeg() == 2) return _pens.inStatSplitPenDegTwo;
+    if (n->pl().node->getDeg() == 2) return _pens.inStatSplitPenDegTwo;
     return _pens.inStatSplitPen * ret;
   }
 
   return ret * _pens.splitPen;
+}
+
+// _____________________________________________________________________________
+bool OptGraphScorer::optimizeSep() const {
+  return _pens.inStatSplitPenDegTwo > 0 || _pens.inStatSplitPen > 0 ||
+         _pens.splitPen > 0;
 }

@@ -20,7 +20,6 @@ struct Config {
 
   size_t optimRuns = 1;
 
-  bool separationOpt = true;
   bool outOptGraph = false;
 
   bool outputStats = false;

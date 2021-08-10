@@ -90,7 +90,7 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
     }
 
     double curScore = _optScorer.getCrossingScore(g, cur);
-    if (_cfg->separationOpt) curScore += _optScorer.getSeparationScore(g, cur);
+    if (_optScorer.optimizeSep()) curScore += _optScorer.getSeparationScore(g, cur);
 
     if (!found) {
       LOGTO(INFO, std::cerr)
@@ -110,6 +110,6 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 // _____________________________________________________________________________
 double HillClimbOptimizer::getScore(OptGraph* og, OptEdge* e,
                                     OptOrderCfg& cur) const {
-  if (_cfg->separationOpt) return _optScorer.getTotalScore(e, cur);
+  if (_optScorer.optimizeSep()) return _optScorer.getTotalScore(e, cur);
   return _optScorer.getCrossingScore(e, cur);
 }

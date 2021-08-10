@@ -79,7 +79,6 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   std::vector<NodeFront>& fronts();
   void delFrontFor(const LineEdge* e);
   const NodeFront* frontFor(const LineEdge* e) const;
-  NodeFront* frontFor(const LineEdge* e);
 
   void addFront(const NodeFront& f);
 

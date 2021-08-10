@@ -49,10 +49,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->untangleGraph))
       ->default_value(true),
       "untangle line graph")
-    ("separation-optim",
-      opts::value<bool>(&(cfg->separationOpt))
-      ->default_value(true),
-      "enable line separation optimization")
     ("output-stats",
       opts::value<bool>(&(cfg->outputStats))
       ->default_value(false),

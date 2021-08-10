@@ -122,15 +122,6 @@ bool LineNodePL::connOccurs(const Line* r, const LineEdge* edgeA,
 
 // _____________________________________________________________________________
 const NodeFront* LineNodePL::frontFor(const LineEdge* e) const {
-  for (auto& nf : fronts()) {
-    if (nf.edge == e) return &nf;
-  }
-
-  return 0;
-}
-
-// _____________________________________________________________________________
-NodeFront* LineNodePL::frontFor(const LineEdge* e) {
   auto i = _edgToNf.find(e);
   if (i == _edgToNf.end()) return 0;
   return &_nodeFronts[i->second];
@@ -156,6 +147,7 @@ std::vector<NodeFront>& LineNodePL::fronts() { return _nodeFronts; }
 
 // _____________________________________________________________________________
 void LineNodePL::addFront(const NodeFront& f) {
+  assert(!frontFor(f.edge));
   _edgToNf[f.edge] = _nodeFronts.size();
   _nodeFronts.push_back(f);
 }
