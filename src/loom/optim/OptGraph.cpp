@@ -412,8 +412,29 @@ void OptGraph::untangle() {
 }
 
 // _____________________________________________________________________________
+bool OptGraph::uniquelyExtendsOver(const OptLO& lo, const OptEdge* eA,
+                                   const OptNode* nd) {
+  size_t c = 0;
+  for (const auto eB : nd->getAdjList()) {
+    if (eB == eA) continue;
+    if (dirContinuedOver(lo, eA, eB)) c++;
+    if (c > 1) return false;
+  }
+
+  return c == 1;
+}
+
+// _____________________________________________________________________________
 bool OptGraph::contractCheaper(const OptNode* cont, const OptNode* cheaper,
                                const std::vector<OptLO>& lines) const {
+  // check if the lines *uniquely* extend over cheaper, otherwise don't contract
+  for (const auto& lo : lines) {
+    if (!terminatesAt(lo, getEdg(cont, cheaper), cheaper) &&
+        !uniquelyExtendsOver(lo, getEdg(cont, cheaper), cheaper)) {
+      return false;
+    }
+  }
+
   if (cheaper->getDeg() == 2) {
     return cheaper->pl().node &&
            _scorer->getSeparationPen(cont) >=
@@ -468,8 +489,7 @@ bool OptGraph::simplifyStep() {
       if (dirLineEqualIn(first, second)) {
         // if both edges have more than 2 lines, only contract if we can move
         // potential crossings to a cheaper location
-        if (first->pl().getCardinality() > 1 &&
-            second->pl().getCardinality() > 1) {
+        if (first->pl().getCardinality() > 1) {
           if (!contractCheaper(n, first->getOtherNd(n),
                                first->pl().getLines()) &&
               !contractCheaper(n, second->getOtherNd(n),
@@ -1589,11 +1609,11 @@ bool OptGraph::dirContinuedOver(const OptLO& ro, const OptEdge* a,
 }
 
 // _____________________________________________________________________________
-bool OptGraph::dirContinuedOver(const OptLO& ro, const OptEdge* a,
+bool OptGraph::dirContinuedOver(const OptLO& ro, const OptEdge* eA,
                                 const OptNode* n) {
-  for (auto e : n->getAdjList()) {
-    if (e == a) continue;
-    if (dirContinuedOver(ro, a, e)) return true;
+  for (auto eB : n->getAdjList()) {
+    if (eA == eB) continue;
+    if (dirContinuedOver(ro, eA, eB)) return true;
   }
   return false;
 }
@@ -1734,4 +1754,14 @@ std::vector<size_t> OptGraph::mapPositions(std::vector<OptEdge*> a,
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+bool OptGraph::terminatesAt(const OptLO& lo, const OptEdge* eA,
+                                   const OptNode* nd) {
+  for (auto eB : nd->getAdjList()) {
+    if (eA == eB) continue;
+    if (dirContinuedOver(lo, eA, eB)) return false;
+  }
+  return true;
 }

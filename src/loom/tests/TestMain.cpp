@@ -349,6 +349,8 @@ int main(int argc, char** argv) {
       for (const auto& test : fileTests) {
         shared::rendergraph::RenderGraph g(5, 5);
 
+        std::cerr << " ====== Testing " << test.fname << " ======" << std::endl;
+
         std::ifstream input;
         input.open(test.fname);
         g.readFromJson(&input, 3);

@@ -232,11 +232,13 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   static bool dirContinuedOver(const OptLO& ro, const OptEdge* a,
                                const OptNode* n);
 
-  static bool linesBranchAt(const OptLO& roA, const OptLO& roB, const OptEdge* a,
-                                const OptNode* n);
+  static bool linesBranchAt(const OptLO& roA, const OptLO& roB,
+                            const OptEdge* a, const OptNode* n);
 
   static bool linesCtnOver(const OptLO& roA, const OptLO& roB, const OptEdge* a,
-                                const OptNode* n);
+                           const OptNode* n);
+
+  static bool uniquelyExtendsOver(const OptLO& a, const OptEdge* e, const OptNode* n);
 
   bool contractCheaper(const OptNode* cont, const OptNode* cheaper,
                        const std::vector<OptLO>& lines) const;
@@ -253,6 +255,8 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
 
   static std::vector<OptEdge*> clockwEdges(OptEdge* noon, OptNode* n);
   static std::vector<OptEdge*> partialClockwEdges(OptEdge* noon, OptNode* n);
+
+  static bool terminatesAt(const OptLO& lo, const OptEdge* e, const OptNode* nd);
 };
 
 // compare the orientation of two edges adjacent to some shared node

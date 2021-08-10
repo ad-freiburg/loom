@@ -31,7 +31,7 @@ using util::geo::PolyLine;
 GraphBuilder::GraphBuilder(const config::Config* cfg) : _cfg(cfg) {}
 
 // _____________________________________________________________________________
-void GraphBuilder::writeMainDirs(RenderGraph* graph) {
+void GraphBuilder::writeNodeFronts(RenderGraph* graph) {
   for (auto n : *graph->getNds()) {
     std::set<LineEdge*> eSet;
     eSet.insert(n->getAdjList().begin(), n->getAdjList().end());

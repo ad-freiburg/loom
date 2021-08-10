@@ -1,7 +1,6 @@
 // Copyright 2017, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
-
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de> 
 #ifndef LOOM_OPTIM_OPTGRAPHSCORER_H_
 #define LOOM_OPTIM_OPTGRAPHSCORER_H_
 
@@ -24,7 +23,7 @@ class OptGraphScorer {
   double getCrossingScore(const OptGraph* g, const OptOrderCfg& c) const;
   double getCrossingScore(const std::set<OptNode*>& g,
                           const OptOrderCfg& c) const;
-  double getCrossingScore(OptNode* n, const OptOrderCfg& c) const; 
+  double getCrossingScore(OptNode* n, const OptOrderCfg& c) const;
   double getCrossingScore(OptEdge* e, const OptOrderCfg& c) const;
 
   double getSeparationScore(const OptGraph* g, const OptOrderCfg& c) const;
@@ -53,7 +52,8 @@ class OptGraphScorer {
   size_t getNumSeparations(const std::set<OptNode*>& g,
                            const OptOrderCfg& c) const;
 
-  bool  optimizeSep() const;
+  bool optimizeSep() const;
+
   double getSeparationPen(const OptNode* n) const;
   double getCrossingPenSameSeg(const OptNode* n) const;
   double getCrossingPenDiffSeg(const OptNode* n) const;

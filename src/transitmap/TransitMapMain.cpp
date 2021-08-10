@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   g.readFromJson(&std::cin, cfg.inputSmoothing);
 
   LOG(DEBUG) << "Creating node fronts...";
-  b.writeMainDirs(&g);
+  b.writeNodeFronts(&g);
 
   if (cfg.expandFronts) b.expandOverlappinFronts(&g);
 

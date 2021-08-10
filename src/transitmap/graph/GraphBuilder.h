@@ -32,7 +32,7 @@ class GraphBuilder {
  public:
   GraphBuilder(const config::Config* cfg);
 
-  void writeMainDirs(shared::rendergraph::RenderGraph* g);
+  void writeNodeFronts(shared::rendergraph::RenderGraph* g);
   void expandOverlappinFronts(shared::rendergraph::RenderGraph* g);
 
  private:

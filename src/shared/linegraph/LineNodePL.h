@@ -72,8 +72,6 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   const std::vector<Station>& stops() const;
   void clearStops();
 
-  size_t lineGed() const;
-
   // TODO refactor, all front related stuff should go into rendergraph
   const std::vector<NodeFront>& fronts() const;
   std::vector<NodeFront>& fronts();
