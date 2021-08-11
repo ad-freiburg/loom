@@ -42,7 +42,7 @@ void RenderGraph::writePermutation(const OrderCfg& c) {
   for (auto n : *getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      e->pl().writePermutation(c.find(e)->second);
+      e->pl().writePermutation(c.at(e));
     }
   }
 }

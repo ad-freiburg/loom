@@ -146,7 +146,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   double getMaxCrossPen() const;
   double getMaxSplitPen() const;
 
-  void simplify();
+  void contractDeg2Nds();
   void untangle();
   void partnerLines();
 
@@ -175,13 +175,15 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   static LnEdgPart getLastLnEdgPart(const OptEdge*);
 
   // apply splitting rules
-  void split();
+  void splitSingleLineEdgs();
+  void terminusDetach();
+  void deleteSingleEdgeComponents();
 
  private:
   const OptGraphScorer* _scorer;
   void writeEdgeOrder();
   void updateEdgeOrder(OptNode* n);
-  bool simplifyStep();
+  bool contractDeg2Step();
 
   bool untangleFullCross();
   bool untangleYStep();
@@ -220,7 +222,6 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   std::vector<size_t> mapPositions(std::vector<OptEdge*> a, OptEdge* leg,
                                    std::vector<OptEdge*> b) const;
 
-  static bool dirLineEndsIn(const OptEdge* a, const OptEdge* b);
   static bool dirLineContains(const OptEdge* a, const OptEdge* b);
 
   static bool dirLineEqualIn(const OptEdge* a, const OptEdge* b);
@@ -257,6 +258,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   static std::vector<OptEdge*> partialClockwEdges(OptEdge* noon, OptNode* n);
 
   static bool terminatesAt(const OptLO& lo, const OptEdge* e, const OptNode* nd);
+  static bool terminatesAt(const OptEdge* e, const OptNode* nd);
 };
 
 // compare the orientation of two edges adjacent to some shared node

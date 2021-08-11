@@ -50,6 +50,15 @@ static const std::vector<FileTest> fileTests(
          0,  // number topological nodes
          5   // number edges
      },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/terminus-detach.json",
+         0,  // number same segment crossings
+         0,  // number diff segment crossings
+         0,  // number separations
+         31,  // number nodes
+         0,  // number topological nodes
+         25   // number edges
+     },
      // Y splitting
      {
          "/home/patrick/repos/loom/src/loom/tests/datasets/y-splitting.json",
@@ -304,7 +313,17 @@ static const std::vector<FileTest> fileTests(
          19,  // number nodes
          0,   // number topological nodes
          16   // number edges
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/non-unique-extension-contract.json",
+         1,   // number same segment crossings
+         0,   // number diff segment crossings
+         0,   // number separations
+         9,  // number nodes
+         7,   // number topological nodes
+         8   // number edges
      }
+
 
     });
 

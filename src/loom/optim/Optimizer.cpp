@@ -3,9 +3,11 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <fstream>
+#include <numeric>
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/OptGraphScorer.h"
 #include "loom/optim/Optimizer.h"
+#include "loom/optim/NullOptimizer.h"
 #include "util/Misc.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Algorithm.h"
@@ -17,14 +19,16 @@ using loom::optim::OptEdge;
 using loom::optim::OptGraph;
 using loom::optim::OptGraphScorer;
 using loom::optim::Optimizer;
+using loom::optim::NullOptimizer;
 using loom::optim::OptNode;
-using loom::optim::OptResStats;
 using loom::optim::OptOrderCfg;
+using loom::optim::OptResStats;
 using loom::optim::PosComPair;
 using shared::linegraph::Line;
 using shared::linegraph::LineNode;
 using shared::rendergraph::HierarOrderCfg;
 using shared::rendergraph::OrderCfg;
+using shared::rendergraph::Ordering;
 using shared::rendergraph::RenderGraph;
 using util::factorial;
 using util::geo::DLine;
@@ -49,17 +53,20 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     // do full untangling
     LOGTO(DEBUG, std::cerr) << "Untangling graph...";
     T_START(1);
-    for (size_t i = 0; i < 2 * maxC; i++) {
+
+    for (size_t i = 0; i <= maxC; i++) {
       g.untangle();
-      g.simplify();
-      g.split();
+      g.contractDeg2Nds();
+      g.splitSingleLineEdgs();
+      g.terminusDetach();
     }
+
     LOGTO(DEBUG, std::cerr) << "Done (" << T_STOP(1) << " ms)";
   } else if (_cfg->createCoreOptimGraph) {
     // only apply core graph rules
     T_START(1);
     LOGTO(DEBUG, std::cerr) << "Creating core optimization graph...";
-    g.simplify();
+    g.contractDeg2Nds();
     LOGTO(DEBUG, std::cerr) << "Done (" << T_STOP(1) << " ms)";
   }
 
@@ -87,6 +94,14 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
   // iterate over components and optimize all of them separately
   const auto& comps = util::graph::Algorithm::connectedComponents(g);
 
+  size_t nonTrivialComponents = 0;
+
+  for (const auto& nds : comps) {
+    // skip trivial components
+    if (nds.size() < 3) continue;
+    nonTrivialComponents++;
+  }
+
   size_t runs = _cfg->optimRuns;
   double tSum = 0;
   double iterSum = 0;
@@ -96,8 +111,11 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
   double sepSum = 0;
   OptResStats optResStats;
 
-  LOGTO(INFO, std::cerr) << "Optimization graph has " << comps.size()
-                         << " components.";
+  LOGTO(INFO, std::cerr) << "Optimization graph has " << nonTrivialComponents
+                         << " nontrivial components.";
+
+  // for trivial cases
+  const NullOptimizer nullOpt(_cfg, _scorer.getPens());
 
   for (size_t run = 0; run < runs; run++) {
     OrderCfg c;
@@ -115,18 +133,29 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
       if (_cfg->outputStats) {
         size_t maxC = maxCard(nds);
         double solSp = solutionSpaceSize(nds);
-        if (maxC > maxCompC) maxCompC = maxC;
-        if (solSp > maxCompSolSpace) maxCompSolSpace = solSp;
-        if (solSp == 1) numM1Comps++;
-        if (nds.size() > maxNumNodes) maxNumNodes = nds.size();
-        if (numEdges(nds) > maxNumEdges) maxNumEdges = numEdges(nds);
 
-        LOGTO(INFO, std::cerr)
-            << " (stats) Optimizing subgraph of size " << nds.size()
-            << " with max cardinality = " << maxC
-            << " and solution space size = " << solSp;
+        // skip trivial components
+        if (nds.size() > 2) {
+          if (maxC > maxCompC) maxCompC = maxC;
+          if (solSp > maxCompSolSpace) maxCompSolSpace = solSp;
+          if (solSp == 1) numM1Comps++;
+          if (nds.size() > maxNumNodes) maxNumNodes = nds.size();
+          if (numEdges(nds) > maxNumEdges) maxNumEdges = numEdges(nds);
+
+          LOGTO(INFO, std::cerr)
+              << " (stats) Optimizing subgraph of size " << nds.size()
+              << " with max cardinality = " << maxC
+              << " and solution space size = " << solSp;
+        }
       }
-      iters += optimizeComp(&g, nds, &hc);
+
+      // this is the implementation of the single edge pruning described in the
+      // publication - simple skip such components
+      if (nds.size() > 2) {
+        iters += optimizeComp(&g, nds, &hc);
+      } else {
+        nullOpt.optimizeComp(&g, nds, &hc, 0);
+      }
     }
 
     double t = T_STOP(1);
@@ -134,22 +163,39 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     LOGTO(INFO, std::cerr) << " -- Optimization took " << t << " ms -- ";
 
     if (_cfg->outputStats) {
+      LOGTO(INFO, std::cerr) << " (stats) Number of nontrivial components: "
+                             << nonTrivialComponents;
       LOGTO(INFO, std::cerr)
-          << " (stats) Number of components: " << comps.size();
+          << " (stats) Number of nontrivial components with M=1: "
+          << numM1Comps;
       LOGTO(INFO, std::cerr)
-          << " (stats) Number of components with M=1: " << numM1Comps;
+          << " (stats) Max number of nodes of all nontrivial components: "
+          << maxNumNodes;
       LOGTO(INFO, std::cerr)
-          << " (stats) Max number of nodes of all components: " << maxNumNodes;
+          << " (stats) Max number of edges of all nontrivial components: "
+          << maxNumEdges;
       LOGTO(INFO, std::cerr)
-          << " (stats) Max number of edges of all components: " << maxNumEdges;
+          << " (stats) Max cardinality of all nontrivial components: "
+          << maxCompC;
       LOGTO(INFO, std::cerr)
-          << " (stats) Max cardinality of all components: " << maxCompC;
-      LOGTO(INFO, std::cerr)
-          << " (stats) Max solution space size of all components: "
+          << " (stats) Max solution space size of all nontrivial components: "
           << maxCompSolSpace;
     }
 
     hc.writeFlatCfg(&c);
+
+    // fill in missing edges (which may have been pruned in the optim graph)
+    // use the input ordering for these edges
+    for (auto n : *rg->getNds()) {
+      for (auto e : n->getAdjList()) {
+        if (e->getFrom() != n) continue;
+        if (c.find(e) == c.end()) {
+          Ordering o(e->pl().getLines().size());
+          std::iota(o.begin(), o.end(), 0);
+          c[e] = o;
+        }
+      }
+    }
 
     tSum += t;
     iterSum += iters;
@@ -161,7 +207,8 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
 
     scoreSum += _scorer.getCrossingScore(&gg, optCfg);
 
-    if (_scorer.optimizeSep()) scoreSum += _scorer.getSeparationScore(&gg, optCfg);
+    if (_scorer.optimizeSep())
+      scoreSum += _scorer.getSeparationScore(&gg, optCfg);
 
     auto crossings = _scorer.getNumCrossings(&gg, optCfg);
     crossSumSame += crossings.first;
@@ -173,7 +220,6 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     optResStats.separations = _scorer.getNumSeparations(&gg, optCfg);
 
     sepSum += optResStats.separations;
-
 
     // todo: dont write this here, write the best one after all runs!!!!!
     rg->writePermutation(c);

@@ -58,6 +58,8 @@ class OptGraphScorer {
   double getCrossingPenSameSeg(const OptNode* n) const;
   double getCrossingPenDiffSeg(const OptNode* n) const;
 
+  const shared::rendergraph::Penalties& getPens() const { return _pens;}
+
  private:
   shared::rendergraph::Penalties _pens;
 };

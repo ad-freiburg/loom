@@ -165,7 +165,59 @@ std::map<const LineNode*, OptNode*> OptGraph::build(RenderGraph* rg) {
 }
 
 // _____________________________________________________________________________
-void OptGraph::split() {
+void OptGraph::terminusDetach() {
+  std::vector<std::pair<OptEdge*, OptNode*>> toDetach;
+
+  // collect edges to cut
+  for (OptNode* n : *getNds()) {
+    for (OptEdge* e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+
+      // we only cut if the terminating node has a degree greater than 1
+      if (e->getFrom()->getDeg() > 1 && terminatesAt(e, e->getFrom())) {
+        toDetach.push_back({e, e->getFrom()});
+        continue;
+      }
+
+      if (e->getTo()->getDeg() > 1 && terminatesAt(e, e->getTo())) {
+        toDetach.push_back({e, e->getTo()});
+        continue;
+      }
+    }
+  }
+
+  for (auto ePair : toDetach) {
+    OptEdge* e = ePair.first;
+    OptNode* n = ePair.second;
+
+    if (n->getDeg() < 2) continue;  // may happen if we have detached an edge
+                                    // from the other side
+
+    OptNode* eFrom = e->getFrom();
+    OptNode* eTo = e->getTo();
+
+    if (n == eFrom) {
+      OptNode* newFrom = addNd(e->getFrom()->pl().node);
+      addEdg(newFrom, eTo, e->pl());
+
+      delEdg(eFrom, eTo);
+      updateEdgeOrder(newFrom);
+      updateEdgeOrder(eFrom);
+      updateEdgeOrder(eTo);
+    } else {
+      OptNode* newTo = addNd(e->getTo()->pl().node);
+      addEdg(eFrom, newTo, e->pl());
+
+      delEdg(eFrom, eTo);
+      updateEdgeOrder(newTo);
+      updateEdgeOrder(eFrom);
+      updateEdgeOrder(eTo);
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void OptGraph::splitSingleLineEdgs() {
   std::vector<OptEdge*> toCut;
 
   // collect edges to cut
@@ -385,8 +437,8 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
 }
 
 // _____________________________________________________________________________
-void OptGraph::simplify() {
-  while (simplifyStep()) {
+void OptGraph::contractDeg2Nds() {
+  while (contractDeg2Step()) {
   }
 }
 
@@ -444,7 +496,7 @@ bool OptGraph::contractCheaper(const OptNode* cont, const OptNode* cheaper,
   } else if (cheaper->getDeg() == 1) {
     return true;
   } else {
-    // for degree 3, check if true for each line pair - it might be that they
+    // for degree > 3, check if true for each line pair - it might be that they
     // cross into different segments there
 
     for (const auto& loA : lines) {
@@ -478,7 +530,7 @@ bool OptGraph::contractCheaper(const OptNode* cont, const OptNode* cheaper,
 }
 
 // _____________________________________________________________________________
-bool OptGraph::simplifyStep() {
+bool OptGraph::contractDeg2Step() {
   for (OptNode* n : *getNds()) {
     if (n->getDeg() == 2) {
       OptEdge* first = n->getAdjList().front();
@@ -1338,23 +1390,6 @@ void OptGraph::updateEdgeOrder(OptNode* n) {
 }
 
 // _____________________________________________________________________________
-bool OptGraph::dirLineEndsIn(const OptEdge* a, const OptEdge* b) {
-  OptNode* na = sharedNode(a, b);
-  if (!na) return false;
-  OptNode* nb = b->getOtherNd(na);
-
-  for (auto& to : b->pl().getLines()) {
-    if (!dirContinuedOver(to, b, a)) continue;
-
-    for (auto c : nb->getAdjList()) {
-      if (b == c) continue;
-      if (dirContinuedOver(to, b, c)) return false;
-    }
-  }
-  return true;
-}
-
-// _____________________________________________________________________________
 bool OptGraph::dirLineContains(const OptEdge* a, const OptEdge* b) {
   for (auto& to : b->pl().getLines()) {
     if (!getCtdLineIn(to.line, to.dir, b, a)) {
@@ -1762,6 +1797,18 @@ bool OptGraph::terminatesAt(const OptLO& lo, const OptEdge* eA,
   for (auto eB : nd->getAdjList()) {
     if (eA == eB) continue;
     if (dirContinuedOver(lo, eA, eB)) return false;
+  }
+  return true;
+}
+
+// _____________________________________________________________________________
+bool OptGraph::terminatesAt(const OptEdge* eA,
+                                   const OptNode* nd) {
+  for (const auto& lo : eA->pl().getLines()) {
+    for (auto eB : nd->getAdjList()) {
+      if (eA == eB) continue;
+      if (dirContinuedOver(lo, eA, eB)) return false;
+    }
   }
   return true;
 }
