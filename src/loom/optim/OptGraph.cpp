@@ -444,6 +444,8 @@ void OptGraph::contractDeg2Nds() {
 
 // _____________________________________________________________________________
 void OptGraph::untangle() {
+  while (untangleOuterStumpStep()) {
+  }
   while (untangleStumpStep()) {
   }
 
@@ -895,6 +897,54 @@ bool OptGraph::untanglePartialYStep() {
 }
 
 // _____________________________________________________________________________
+std::pair<OptEdge*, bool> OptGraph::isOuterStump(OptEdge* e) const {
+  std::pair<OptEdge*, bool> ret = {0, 0};
+  if ((ret = isOuterStumpAt(e, e->getFrom())).first) return ret;
+  if ((ret = isOuterStumpAt(e, e->getTo())).first) return ret;
+
+  return {0, 0};
+}
+
+// _____________________________________________________________________________
+std::pair<OptEdge*, bool> OptGraph::isOuterStumpAt(OptEdge* mainLeg, OptNode* n) const {
+  if (n->getDeg() < 3 || mainLeg->getOtherNd(n)->getDeg() < 2) return {0, 0};
+
+  auto clockwEdgs = clockwEdges(mainLeg, n);
+
+  size_t i = 0;
+  size_t extends = 0;
+
+
+  // check that at least two edges have lines that extend over n into e
+  for (auto branch : n->getAdjList()) {
+    if (branch == mainLeg) continue;
+    if (getCtdLinesIn(branch, mainLeg).size() > 0) extends++;
+    if (extends > 1) break;
+  }
+
+  if (extends < 2) return {0, 0};
+  extends = 0;
+
+
+  // check that at least one edge has lines that extend over other(n) into e
+  for (auto branch : mainLeg->getOtherNd(n)->getAdjList()) {
+    if (branch == mainLeg) continue;
+    if (getCtdLinesIn(branch, mainLeg).size() > 0) {
+      extends++;
+      break;
+    }
+  }
+
+  if (extends == 0) return {0, 0};
+
+
+  if (dirLineContains(mainLeg, clockwEdgs.front() ) && terminatesAt(clockwEdgs.front(), mainLeg, mainLeg->getOtherNd(n))) return {clockwEdgs.front(), 0};
+  if (dirLineContains(mainLeg, clockwEdgs.back()) && terminatesAt(clockwEdgs.back(), mainLeg, mainLeg->getOtherNd(n))) return {clockwEdgs.back(), 1};
+
+  return {0, 0};
+}
+
+// _____________________________________________________________________________
 std::pair<OptEdge*, OptEdge*> OptGraph::isStump(OptEdge* e) const {
   std::pair<OptEdge*, OptEdge*> ret;
   if ((ret = isStumpAt(e, e->getFrom())).first) return ret;
@@ -926,6 +976,126 @@ std::pair<OptEdge*, OptEdge*> OptGraph::isStumpAt(OptEdge* e,
   }
 
   return {mainBranch, mainOtherBranch};
+}
+
+// _____________________________________________________________________________
+bool OptGraph::untangleOuterStumpStep() {
+  double DO = 100;  // only relevant for debug output
+
+  for (OptNode* n : *getNds()) {
+    for (OptEdge* mainLeg : n->getAdjList()) {
+      if (mainLeg->getFrom() != n) continue;
+
+      std::pair<OptEdge*, bool> stumpEdgPair = {0, 0};
+      OptEdge* stumpEdg = 0;
+      OptEdge* stumpEdgBranch = 0;
+      OptNode* stumpN = 0;
+
+      if ((stumpEdgPair = isOuterStump(mainLeg)).first) {
+        stumpEdg = stumpEdgPair.first;
+        bool clockw = stumpEdgPair.second;
+        stumpN = sharedNode(mainLeg, stumpEdg);
+        OptNode* notStumpN = mainLeg->getOtherNd(stumpN);
+
+        LOGTO(DEBUG, std::cerr)
+            << "Found outer stump with main leg " << mainLeg << " ("
+            << mainLeg->pl().toStr() << ") at node " << stumpN
+            << " with stump " << stumpEdg << " ("
+            << stumpEdg->pl().toStr() << ")";
+
+        // the geometry of the main leg
+        util::geo::PolyLine<double> poly(*notStumpN->pl().getGeom(),
+                                       *stumpN->pl().getGeom());
+        double bandW = (DO / (mainLeg->pl().depth + 1));
+        auto ortho = poly.getOrthoLineAtDist(poly.getLength(), bandW);
+
+        // create two new nodes at the stump node
+        std::vector<OptNode*> stumpNds =
+            explodeNodeAlong(stumpN, ortho, 2);
+
+        auto ortho2 = poly.getOrthoLineAtDist(0, bandW);
+
+        // create two new nodes at the non-stump node
+        std::vector<OptNode*> notStumpNds =
+            explodeNodeAlong(notStumpN, ortho2, 2);
+
+        size_t mainLegNode, stumpNode;
+
+        // we assume that the stump edge is on the right
+
+        if ((mainLeg->getFrom() != stumpN) ^ !clockw) {
+          size_t j;
+
+          if (mainLeg->pl().lnEdgParts[0].dir) j = 1;
+          else j = 0;
+
+          mainLegNode = j;
+          stumpNode = 1 - j;
+
+          OptEdgePL pl = getPartialViewExcl(mainLeg, stumpEdg, 0);
+          addEdg(stumpNds[mainLegNode], notStumpNds[mainLegNode], pl);
+
+          pl = getPartialView(mainLeg, stumpEdg, pl.getLines().size());
+          addEdg(stumpNds[stumpNode], notStumpNds[stumpNode], pl);
+        } else {
+          size_t j;
+
+          if (mainLeg->pl().lnEdgParts[0].dir) j = 1;
+          else j = 0;
+
+          mainLegNode = j;
+          stumpNode = 1 - j;
+
+          OptEdgePL pl = getPartialView(mainLeg, stumpEdg, 0);
+          addEdg(notStumpNds[stumpNode], stumpNds[stumpNode], pl);
+
+          pl = getPartialViewExcl(mainLeg, stumpEdg, pl.getLines().size());
+          addEdg(notStumpNds[mainLegNode], stumpNds[mainLegNode], pl);
+        }
+
+        if (stumpEdg->getFrom() == stumpN)
+          addEdg(stumpNds[stumpNode], stumpEdg->getTo(), stumpEdg->pl());
+        else
+          addEdg(stumpEdg->getFrom(), stumpNds[stumpNode], stumpEdg->pl());
+
+        for (auto e : stumpN->getAdjList()) {
+          if (e == stumpEdg || e == mainLeg) continue;
+
+          if (e->getFrom() == stumpN)
+            addEdg(stumpNds[mainLegNode], e->getTo(), e->pl());
+          else
+            addEdg(e->getFrom(), stumpNds[mainLegNode], e->pl());
+        }
+
+        for (auto e : notStumpN->getAdjList()) {
+          if (e == mainLeg) continue;
+
+          if (e->getFrom() == notStumpN)
+            addEdg(notStumpNds[mainLegNode], e->getTo(), e->pl());
+          else
+            addEdg(e->getFrom(), notStumpNds[mainLegNode], e->pl());
+        }
+
+        delNd(stumpN);
+        delNd(notStumpN);
+
+        // update orderings
+        for (auto n : stumpNds) {
+          updateEdgeOrder(n);
+          for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
+        }
+        for (auto n : notStumpNds) {
+          updateEdgeOrder(n);
+          for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
+        }
+
+
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 // _____________________________________________________________________________
@@ -1017,6 +1187,9 @@ bool OptGraph::untangleStumpStep() {
 
 // _____________________________________________________________________________
 bool OptGraph::untangleYStep() {
+
+
+
   double DO = 100;  // only relevant for debug output
   for (OptNode* na : *getNds()) {
     if (na->getDeg() != 1) continue;  // only look at terminus nodes
@@ -1119,13 +1292,39 @@ OptEdgePL OptGraph::getView(OptEdge* parent, OptEdge* leg, size_t offset) {
 }
 
 // _____________________________________________________________________________
+OptEdgePL OptGraph::getPartialViewExcl(OptEdge* parent, OptEdge* leg,
+                                   size_t offset) {
+  OptEdgePL ret(parent->pl());
+  ret.depth++;
+
+  size_t shared = getCtdLinesIn(parent, leg).size();
+
+  for (auto& lnEdgPart : ret.lnEdgParts) {
+    if (parent->pl().lnEdgParts[0].dir ^ lnEdgPart.dir)
+      lnEdgPart.order += shared - offset;
+    else
+      lnEdgPart.order += offset;
+  }
+
+  ret.lines.clear();
+
+  for (auto ro : parent->pl().getLines()) {
+    auto lo = getCtdLineIn(ro.line, ro.dir, parent, leg);
+    if (!lo) ret.lines.push_back(ro);
+  }
+
+  std::sort(ret.lines.begin(), ret.lines.end());
+
+  return ret;
+}
+
+// _____________________________________________________________________________
 OptEdgePL OptGraph::getPartialView(OptEdge* parent, OptEdge* leg,
                                    size_t offset) {
   OptEdgePL ret(parent->pl());
   ret.depth++;
 
-  auto ctdR = getCtdLinesIn(parent, leg);
-  size_t shared = ctdR.size();
+  size_t shared = getCtdLinesIn(parent, leg).size();
 
   for (auto& lnEdgPart : ret.lnEdgParts) {
     if (parent->pl().lnEdgParts[0].dir ^ lnEdgPart.dir)
@@ -1789,6 +1988,16 @@ std::vector<size_t> OptGraph::mapPositions(std::vector<OptEdge*> a,
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+bool OptGraph::terminatesAt(const OptEdge* from, const OptEdge* over, const OptNode* nd) {
+  for (const auto& lo : from->pl().getLines()) {
+    auto ro = getLO(over, lo.line);
+    if (ro.isNull()) return false;
+    if (!terminatesAt(ro, over, nd)) return false;
+  }
+  return true;
 }
 
 // _____________________________________________________________________________

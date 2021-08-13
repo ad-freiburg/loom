@@ -177,7 +177,6 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   // apply splitting rules
   void splitSingleLineEdgs();
   void terminusDetach();
-  void deleteSingleEdgeComponents();
 
  private:
   const OptGraphScorer* _scorer;
@@ -191,6 +190,8 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   bool untangleDogBoneStep();
   bool untanglePartialDogBoneStep();
   bool untangleStumpStep();
+
+  bool untangleOuterStumpStep();
 
   std::vector<OptNode*> explodeNodeAlong(OptNode* nd,
                                          const util::geo::PolyLine<double>& pl,
@@ -209,6 +210,9 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   std::pair<OptEdge*, OptEdge*> isStump(OptEdge* e) const;
   std::pair<OptEdge*, OptEdge*> isStumpAt(OptEdge* e, OptNode* n) const;
 
+  std::pair<OptEdge*, bool> isOuterStump(OptEdge* e) const;
+  std::pair<OptEdge*, bool> isOuterStumpAt(OptEdge* e, OptNode* n) const;
+
   std::set<const shared::linegraph::Line*> getLines() const;
 
   bool isDogBone(OptEdge* e) const;
@@ -218,6 +222,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
 
   static OptEdgePL getView(OptEdge* parent, OptEdge* leg, size_t offset);
   static OptEdgePL getPartialView(OptEdge* parent, OptEdge* leg, size_t offset);
+  static OptEdgePL getPartialViewExcl(OptEdge* parent, OptEdge* leg, size_t offset);
 
   std::vector<size_t> mapPositions(std::vector<OptEdge*> a, OptEdge* leg,
                                    std::vector<OptEdge*> b) const;
@@ -259,6 +264,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
 
   static bool terminatesAt(const OptLO& lo, const OptEdge* e, const OptNode* nd);
   static bool terminatesAt(const OptEdge* e, const OptNode* nd);
+  static bool terminatesAt(const OptEdge* from, const OptEdge* over, const OptNode* nd);
 };
 
 // compare the orientation of two edges adjacent to some shared node
@@ -312,4 +318,4 @@ inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
 }  // namespace optim
 }  // namespace loom
 
-#endif  // LOOM_GRAPH_OPTIM_OPTGRAPH_H_
+#endif // LOOM_GRAPH_OPTIM_OPTGRAPH_H_
