@@ -184,12 +184,11 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   void updateEdgeOrder(OptNode* n);
   bool contractDeg2Step();
 
-  bool untangleFullCross();
+  bool untangleFullX();
   bool untangleYStep();
   bool untanglePartialYStep();
   bool untangleDogBoneStep();
   bool untanglePartialDogBoneStep();
-  bool untangleStumpStep();
 
   bool untangleOuterStumpStep();
 
@@ -207,8 +206,6 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   std::pair<OptEdge*, OptEdge*> isFullCross(OptNode* n) const;
   bool isYAt(OptEdge* e, OptNode* n) const;
   bool isPartialYAt(OptEdge* e, OptNode* n) const;
-  std::pair<OptEdge*, OptEdge*> isStump(OptEdge* e) const;
-  std::pair<OptEdge*, OptEdge*> isStumpAt(OptEdge* e, OptNode* n) const;
 
   std::pair<OptEdge*, bool> isOuterStump(OptEdge* e) const;
   std::pair<OptEdge*, bool> isOuterStumpAt(OptEdge* e, OptNode* n) const;
