@@ -1610,9 +1610,7 @@
         "coordinates": [12000, 3000]
       }, 
       "properties": {
-        "id": "CCCCC", 
-        "station_id": "CCCCC", 
-        "station_label": "CCCCC"
+        "id": "CCCCC"
       }
     },
     {

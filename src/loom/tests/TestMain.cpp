@@ -233,7 +233,7 @@ static const std::vector<FileTest> fileTests(
          18,  // number diff segment crossings
          0,   // number separations
          66,  // number nodes
-         5,   // number topological nodes
+         6,   // number topological nodes
          59   // number edges
      },
      {
@@ -273,7 +273,7 @@ static const std::vector<FileTest> fileTests(
          21,  // number diff segment crossings
          0,   // number separations
          86,  // number nodes
-         7,   // number topological nodes
+         8,   // number topological nodes
          77   // number edges
      },
      {

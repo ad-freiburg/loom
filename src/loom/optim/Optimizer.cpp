@@ -54,7 +54,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     LOGTO(DEBUG, std::cerr) << "Untangling graph...";
     T_START(1);
 
-    for (size_t i = 0; i <= maxC; i++) {
+    for (size_t i = 0; i <= maxC + 10; i++) {
       g.untangle();
       g.contractDeg2Nds();
       g.splitSingleLineEdgs();

@@ -203,7 +203,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
                                std::vector<OptEdge*> branchesA) const;
   std::vector<OptEdge*> partiallyBranchesAt(OptEdge* e, OptNode* n) const;
 
-  std::pair<OptEdge*, OptEdge*> isFullCross(OptNode* n) const;
+  std::pair<OptEdge*, OptEdge*> isFullX(OptNode* n) const;
   bool isYAt(OptEdge* e, OptNode* n) const;
   bool isPartialYAt(OptEdge* e, OptNode* n) const;
 
@@ -219,7 +219,8 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
 
   static OptEdgePL getView(OptEdge* parent, OptEdge* leg, size_t offset);
   static OptEdgePL getPartialView(OptEdge* parent, OptEdge* leg, size_t offset);
-  static OptEdgePL getPartialViewExcl(OptEdge* parent, OptEdge* leg, size_t offset);
+  static OptEdgePL getPartialViewExcl(OptEdge* parent, OptEdge* leg,
+                                      size_t offset);
 
   std::vector<size_t> mapPositions(std::vector<OptEdge*> a, OptEdge* leg,
                                    std::vector<OptEdge*> b) const;
@@ -241,10 +242,15 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   static bool linesCtnOver(const OptLO& roA, const OptLO& roB, const OptEdge* a,
                            const OptNode* n);
 
-  static bool uniquelyExtendsOver(const OptLO& a, const OptEdge* e, const OptNode* n);
+  static bool uniquelyExtendsOver(const OptLO& a, const OptEdge* e,
+                                  const OptNode* n);
+
+  bool contractCheaper(const OptNode* cont, const OptNode* cheaperA,
+                       const OptNode* cheaperB,
+                       const std::vector<OptLO>& lines) const;
 
   bool contractCheaper(const OptNode* cont, const OptNode* cheaper,
-                       const std::vector<OptLO>& lines) const;
+                       const OptLO& loA, const OptLO& loB) const;
 
   static bool lineDisjunct(const std::vector<const OptEdge*>& edges);
 
@@ -259,9 +265,11 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   static std::vector<OptEdge*> clockwEdges(OptEdge* noon, OptNode* n);
   static std::vector<OptEdge*> partialClockwEdges(OptEdge* noon, OptNode* n);
 
-  static bool terminatesAt(const OptLO& lo, const OptEdge* e, const OptNode* nd);
+  static bool terminatesAt(const OptLO& lo, const OptEdge* e,
+                           const OptNode* nd);
   static bool terminatesAt(const OptEdge* e, const OptNode* nd);
-  static bool terminatesAt(const OptEdge* from, const OptEdge* over, const OptNode* nd);
+  static bool terminatesAt(const OptEdge* from, const OptEdge* over,
+                           const OptNode* nd);
 };
 
 // compare the orientation of two edges adjacent to some shared node
@@ -315,4 +323,4 @@ inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
 }  // namespace optim
 }  // namespace loom
 
-#endif // LOOM_GRAPH_OPTIM_OPTGRAPH_H_
+#endif  // LOOM_GRAPH_OPTIM_OPTGRAPH_H_
