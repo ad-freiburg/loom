@@ -322,8 +322,97 @@ static const std::vector<FileTest> fileTests(
          9,  // number nodes
          7,   // number topological nodes
          8   // number edges
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/outer-stump.json",
+         0,   // number same segment crossings
+         0,   // number diff segment crossings
+         0,   // number separations
+         12,  // number nodes
+         0,   // number topological nodes
+         8   // number edges
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/outer-stump-2.json",
+         0,   // number same segment crossings
+         2,   // number diff segment crossings
+         0,   // number separations
+         14,  // number nodes
+         0,   // number topological nodes
+         12   // number edges
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/outer-stump-3.json",
+         0,   // number same segment crossings
+         2,   // number diff segment crossings
+         0,   // number separations
+         14,  // number nodes
+         0,   // number topological nodes
+         12   // number edges
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/outer-stump-4.json",
+         0,   // number same segment crossings
+         4,   // number diff segment crossings
+         0,   // number separations
+         15,  // number nodes
+         0,   // number topological nodes
+         13   // number edges
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/inner-stump.json",
+         0,   // number same segment crossings
+         1,   // number diff segment crossings
+         0,   // number separations
+         14,  // number nodes
+         0,   // number topological nodes
+         12   // number edges
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/inner-stump-2.json",
+         0,   // number same segment crossings
+         0,   // number diff segment crossings
+         0,   // number separations
+         18,  // number nodes
+         0,   // number topological nodes
+         16   // number edges
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/inner-stump-3.json",
+         0,   // number same segment crossings
+         0,   // number diff segment crossings
+         0,   // number separations
+         18,  // number nodes
+         0,   // number topological nodes
+         16   // number edges
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/inner-stump-4.json",
+         0,   // number same segment crossings
+         0,   // number diff segment crossings
+         0,   // number separations
+         18,  // number nodes
+         0,   // number topological nodes
+         14   // number edges
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/inner-stump-5.json",
+         0,   // number same segment crossings
+         0,   // number diff segment crossings
+         0,   // number separations
+         18,  // number nodes
+         0,   // number topological nodes
+         14   // number edges
+     },
+     {
+         "/home/patrick/repos/loom/src/loom/tests/datasets/double-stump.json",
+         0,   // number same segment crossings
+         0,   // number diff segment crossings
+         0,   // number separations
+         16,  // number nodes
+         0,   // number topological nodes
+         12   // number edges
      }
-
 
     });
 

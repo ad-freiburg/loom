@@ -185,19 +185,23 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   bool contractDeg2Step();
 
   bool untangleFullX();
-  bool untangleYStep();
-  bool untanglePartialYStep();
-  bool untangleDogBoneStep();
-  bool untanglePartialDogBoneStep();
+  bool untangleY();
+  bool untanglePartialY();
+  bool untangleDogBone();
+  bool untanglePartialDogBone();
 
-  bool untangleOuterStumpStep();
+  bool untangleOuterStump();
+  bool untangleInnerStump();
 
   std::vector<OptNode*> explodeNodeAlong(OptNode* nd,
                                          const util::geo::PolyLine<double>& pl,
                                          size_t n);
 
   std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n) const;
+  std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n, bool allowStumps) const;
   bool branchesAtInto(OptEdge* e, OptNode* n,
+                      std::vector<OptEdge*> branchesA) const;
+  bool branchesAtIntoStump(OptEdge* e, OptNode* n,
                       std::vector<OptEdge*> branchesA) const;
   bool partiallyBranchesAtInto(OptEdge* e, OptNode* n,
                                std::vector<OptEdge*> branchesA) const;
@@ -207,10 +211,17 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   bool isYAt(OptEdge* e, OptNode* n) const;
   bool isPartialYAt(OptEdge* e, OptNode* n) const;
 
+  bool isInnerStump(OptEdge* e) const;
+
+  const OptLO* isDoubleStump(OptEdge* e) const;
+
   std::pair<OptEdge*, bool> isOuterStump(OptEdge* e) const;
   std::pair<OptEdge*, bool> isOuterStumpAt(OptEdge* e, OptNode* n) const;
 
   std::set<const shared::linegraph::Line*> getLines() const;
+
+  bool dogBoneCheaper(const OptNode* a, const OptNode* b,
+                      const std::vector<OptLO>& lines) const;
 
   bool isDogBone(OptEdge* e) const;
   OptNode* isPartialDogBone(OptEdge* e) const;
@@ -219,11 +230,16 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
 
   static OptEdgePL getView(OptEdge* parent, OptEdge* leg, size_t offset);
   static OptEdgePL getPartialView(OptEdge* parent, OptEdge* leg, size_t offset);
+  static OptEdgePL getPartialView(OptEdge* parent, const OptLO* leg, size_t offset);
   static OptEdgePL getPartialViewExcl(OptEdge* parent, OptEdge* leg,
+                                      size_t offset);
+  static OptEdgePL getPartialViewExcl(OptEdge* parent, const OptLO* leg,
                                       size_t offset);
 
   std::vector<size_t> mapPositions(std::vector<OptEdge*> a, OptEdge* leg,
                                    std::vector<OptEdge*> b) const;
+
+  bool untangleDoubleStump();
 
   static bool dirLineContains(const OptEdge* a, const OptEdge* b);
 

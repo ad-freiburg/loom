@@ -1,0 +1,251 @@
+Ok, hello everyone, thank you very much for giving us the oportunity to present
+our work here today.
+
+Our work is about drawing metro maps on flexible base grids and we will start right away with an example. 
+
+Here is a map of the Berlin subway network, drawn by hand in an octilinear fashion.
+
+Octilinearity just means that all segments have an oriention which is a multiple of 45 degrees.
+
+This has been the prevailing standard for public transit network maps for the past century.
+
+Drawing maps in this style is an active area of research.
+
+The maps are then called "Metro Maps", and one area of research is to actually find the schematic, octilinear layouts.
+
+Recently, other types of metro maps have found some interest, both in the map drawing community, but also in research.
+
+Here is the same map (with some additional local trains), drawn in an orthoradial fashion.
+
+And here is a map of the London subway drawn in a hexalinear style, meaning that all segment shave an oriention which is a multiple of 60 degrees.
+
+The goal of this work was to produce maps following these layouts fully automatically and fast.
+
+As input we get a so-called line graph, in which nodes are stations (or topological nodes at intersection or branch points), and edges are segments between these nodes, labelled with the lines travelling on them.
+
+Here is such an input graph in which edges additionally follow their original geographical path.
+
+And from this, we now want to generate metro map drawings following a predefined layout.
+
+We additionally want to allow and arbitrary number of edge bends, for example to approximate geographical courses or to circumvent obstacles (other work searches for embeddings, where segments are always straight lines).
+
+The topology should of course be preserved, and a minimum distance between nodes should be kept to ensure readability.
+
+Our target function penalizes the number and accutness of segment bends, the node displacements, and the overall segment length.
+
+-----
+
+In previous work, an approach to produce such maps was described which searched for a minimum-weight image of the input line graph G in an octiliner grid graph.
+
+So how does this work?
+
+Here is an example input graph G. 
+We first build an octilinear grid graph Gamma covering the padded bounding box of G like this.
+
+The goal is then to find image grid nodes for each input node, and image grid paths for each input edge, in such a way that the assigment satisfies the hard constraints, and optimizes the target function described on the previous slide.
+
+For the example graph, an optimal image would for example look like this.
+
+-----
+
+To find the image with minimum cost, an integer linear program was described to find the optimal result.
+
+Alternatively, a fast approximate approach  can be used which routes the edges through the grid graph following a predefined ordering.
+
+The drawings are done polished using a local search approach.
+
+So, for the approximate approach, if we want to find a path for an edge geoing from input node s to input node to, we first determine a set of candidate nodes in the grid (up to a reasonable displacement cost) and then find the shortest path from the set S to the set T.
+
+Note that the displacement costs are added the edge weighte beforehand.
+
+If one or both of the image nodes have already been settled in a previous round, we search for a node-to-set path, or even a node-to-node.
+
+The approximate approach typically finds an octilinear drawing in under 1 second.
+
+-----
+
+Here is an example map rendered using the approximate approach, before the local search was applied.
+
+Note that the minimum distance is not kept everywhere.
+
+This is because we are contract nodes of degree 2 prior to rendering an re-insert them equidistantly afterwards.
+
+During the subsequent local search, these edges will be made longer, allowing for more space.
+
+We call this the station-density penalty.
+
+-----------------------------------------
+
+This original approach had several limitations.
+
+In particular, only input line graphs where node degrees where smaller than 9 were supported.
+
+Only octilinear layouts were supported.
+
+Very often, die grid graph density was also inadequate - either too high, or too low locally.
+
+Additionally, the approximate approach sometimes stalled and had to be restarted using a different edge ordering.
+
+Our current work adresses all of these issues.
+
+We will discuss the two most interesting aspects, namely the grid graph density and different layout types, in this presentation.
+
+For the other points, we refer to the paper.
+
+
+-------------
+
+Regrading the grid graph density problems, consider the following example: the input line graph is depicted in red, and a corresponding grid graph in black.
+
+An optimal octilinear drawing of G is obvious, and the grid graph is way too dense. It would be enough if we had a node here, a node here, and a line connecting them.
+
+Another extreme case is depicted here: the line graph is again given in red, but the grid graph is now not dense enough the render the input graph without extreme node displacement.
+
+What we are interested in are adaptive sparse grids, both to smaller the problem instances, and to be able to acknowledge high local input node densities.
+
+A simple baseline idea is to just crop the grid graph to the padded convex hull of the input graph.
+
+So again given a line graph G like shown here, take the convex hull, and crop the grid graph to this hull.
+
+Obviously, the grid graph density inside the hull boundaries is still not adaptive.
+
+So a second idea is to build a quadtree from the input nodes, and transform this into an octilinear grid graph.
+
+Here is a line graph $G$, and here is a corresponding quadtree, which can be easily transformed into an octilinear grid by adding nodes to the intersection points, and diagonal edges to each cell.
+
+A more sophisticated idea, which will also turn out to work the best, is to build an octilinear Hanan grid.
+
+As a reminder, a Hanan grid is constracted from a set of points by drawing vertical and horizontal lines though each point, and then adding nodes at the intersection points.
+
+For an octilinera Hanan grid, we additionally draw diagonal lines through the input points.
+
+So, for example, given an input graph G, we draw 4 lines through each input node, and the resulting grid graph will look like this.
+
+To ensure a minimum distance between nodes, we first snap the input nodes to a grid.
+
+This will then translate to an octilinear Hanan grid in which this original grid size is also kept as a minimum distance between adjacent nodes.
+
+An image on the corresponding grid graph will then look like this.
+
+We can create a more fine grained octilinear Hanan grid by simply taking the nodes of the octilinear Hanan grid again as input points for the construction of another octilinear Hanan grid.
+
+We call this a Hanan iteration.
+
+----
+
+Here is an example how an octilinear Hanan grid grows aver several such iterations.
+
+----
+
+So how do these sparse grid graphs perform?
+
+In terms of the problem size reduction, the convex hull approach was already able to reduce the problem size by nearly 50% (measured in number nodes), the quadtree dramatically reduces the problem size by 80% on average.
+
+The octilinear Hanan grid with one iteration was able to reduce the problem size by nearly 70% on average.
+
+Interestingly, nearly all octilinear Hanan grid were already a full grid after the second iteration, so the problem size reduction was 0.
+
+From this, one would think that quadtree were the method of choice.
+
+However, if you look at the quality loss introduced by the sparse grids, it is obvious that the quadtree performs worst, in particular, if we punish re-inserted stations under the minimum distance threshold during the local search in our approximate approach.
+
+So, despite having reduced the problem instance by nearly 70%, the octilinear hanan grids only resulted in a quality loss of on average 8\% for the A+D method.
+
+For the integer linear program and the approximate approach without the punishing of stations that were too close, the quality loss was negligible.
+
+This directly translates to a visual inspection: here we have a drawing using the approximate approach without punishing re-inserted stations that were too close on the full grid.
+
+Here is the same map, rendered on the convex hull grid, with nearly equivalent results.
+
+Here are the results on a quadtree grid, which clearly look inferior.
+
+And here are the results on an octilinear Hanan grid, which are again very close to the optimal map.
+
+So does this reduction of the problem instance also lead to faster map rendering times?
+
+Unfortunately, not always.
+
+---
+
+If you look at these number, on average, we even measured a strong increase to find solutions using the ILP, and also for the approximate approaches.
+It was faster for some approaches, but in general, this was far below our expectations.
+
+In hindsight, it can of course be explained by the altered search space for the optimization problem:
+
+because of the irregularity of sparse grids, the search space will now have many spikes with local optima, but arriving there or leaving is now much harder.
+
+However, it also depends on the problem instance.
+Here is the maximum time reduction measured over all our test datasets, so speedups of up to 84\% are possible.
+
+So in terms of speed-up, the results where a bit underwhelming.
+
+Nevertheless, the significant reduction of the grid graph sizes directly translates into the space consumption of the approach.
+
+The integer linear programs benifited from this in particular: to solve the Sydney map to optimality, we needed nearly 30 gigabytes of RAM using the gurobi ILP solver on a full octilinear grid, but only 8 GB on an octilinear Hanan grid.
+
+-----
+
+Now, regarding alternative layouts, the ortholinear case is trivial: we can just use our original octilinear grid, without the diagonal edges.
+
+For hexalinear layouts, we experimented with a triagnular grid.
+
+For orthoradial layouts, it is tempting to simply use a radial grid.
+
+However, the resulting maps will not look good, because the grid node density dramatically decreases with the distance to the center node, resulting in very distorted maps.
+
+So, what we used instead was a so-called pseudo-orthoradial grid: we simply double the number of beams each time the radius doubles.
+
+The resulting grid is then centered on the input node of highest *line* degree.
+
+Here is an example of such a pseudo-orthoradial grid.
+
+------
+
+So I mentioned previously that the original approach usually found an octilinear drawing in under 1 seconds for all test datasets.
+
+How did the method perform on alternative layouts?
+
+Using the ILP, solution times randing from several minutes to several hours, which was comparable to the octilinear case.
+
+Using the approximate approach, the solution time was around 1 second on average, for both approximate methods, while the aprpoximate approach with added station density penalty took a bit longer overall.
+
+But for both approximate approaches, we could find a map for all instances in under 2.5 seconds.
+
+In our oppinion, the resulting maps also look great on visual inspection.
+
+Here are a few examples:
+
+-----
+
+This is Vienna drawn in a hexalinear layout, and here in an orthoradial fashion.
+
+This is Sydney, hexalinear, and orthoradial
+
+This is Berlin, hexalinear, and here is the orthoradial version, which is at least comparable to the manually created orthoradial map shown in the beginning.
+
+Here is a very dense network, Stuttgart, both hexalinear, and orthoradial.
+
+Again, all these maps were drawn in under 3 seconds.
+
+Here is the Stuttgart map with labels, added after the layout was found.
+
+So what is there to do?
+
+As you have seen in the previous slide, the labling still needs improvment.
+
+In particular, we have to consider the spacing needed for the labels during the schematization process.
+
+Additionally, it would be interesting to investigate how our sparse grids may be translated to the alternative layouts, and how they perform in these settings.
+
+Another thing which we are currently experimenting with is to use the quadtree to idenfity and enlarge high-density areas into empty areas of the map.
+
+One thing that is actually a big open question in metro map drawing is how the esthetic quality of the maps can be measured, in particular: which weights for target function look "best" to a human eye?
+
+-----
+
+Ok, thank you very much for your attention, if you are itnerested, our maps are available online here.
+
+Bye bye!
+
+
+
