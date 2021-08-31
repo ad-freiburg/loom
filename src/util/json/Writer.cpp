@@ -43,7 +43,7 @@ void Writer::obj() {
 void Writer::key(const std::string& k) {
   if (_stack.empty() || _stack.top().type != OBJ)
     throw WriterException("Keys only allowed in objects.");
-  if (!_stack.top().empty) (*_out) << "," << (_pretty ? " " : "");
+  if (!_stack.top().empty) (*_out) << ",";
   _stack.top().empty = 0;
   prettor();
   *_out << "\"" << k << "\""

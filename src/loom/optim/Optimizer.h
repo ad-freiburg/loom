@@ -20,7 +20,14 @@ typedef std::pair<PosCom, PosCom> PosComPair;
 typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
 struct OptResStats {
-  size_t sameSegCrossings, diffSegCrossings, separations;
+  size_t numNodes, numEdges, maxLineCard, solutionSpaceSize, nonTrivialComponents, numCompsSolSpaceOne, maxNumNodesPerComp, maxNumEdgesPerComp, maxCardPerComp, maxCompSolSpace;
+  size_t runs;
+  double avgSolveTime, avgIterations, avgScore, avgSameSegCross, avgDiffSegCross, avgSeps;
+
+  // best score for multiple runs
+  size_t sameSegCrossings;
+  size_t diffSegCrossings;
+  size_t separations;
   double score;
 };
 

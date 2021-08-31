@@ -57,7 +57,7 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
       int c = util::factorial(edges[i]->pl().getCardinality());
 
       if (c > 300000) {
-        // heuristic: is the neighboordhood is too large, simply take
+        // heuristic: if the neighboorhood is too large, simply take
         // 1000 random choices
         for (size_t k = 0; k < 1000; k++) {
           int steps = rand() % c;

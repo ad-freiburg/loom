@@ -185,24 +185,26 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   bool contractDeg2Step();
 
   bool untangleFullX();
-  bool untangleY();
-  bool untanglePartialY();
-  bool untangleDogBone();
-  bool untanglePartialDogBone();
+  void untangleY();
+  void untanglePartialY();
+  void untangleDogBone();
+  void untanglePartialDogBone();
 
-  bool untangleOuterStump();
-  bool untangleInnerStump();
+  void untangleOuterStump();
+  void untangleInnerStump();
+  void untangleDoubleStump();
 
   std::vector<OptNode*> explodeNodeAlong(OptNode* nd,
                                          const util::geo::PolyLine<double>& pl,
                                          size_t n);
 
   std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n) const;
-  std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n, bool allowStumps) const;
+  std::vector<OptEdge*> branchesAt(OptEdge* e, OptNode* n,
+                                   bool allowStumps) const;
   bool branchesAtInto(OptEdge* e, OptNode* n,
                       std::vector<OptEdge*> branchesA) const;
   bool branchesAtIntoStump(OptEdge* e, OptNode* n,
-                      std::vector<OptEdge*> branchesA) const;
+                           std::vector<OptEdge*> branchesA) const;
   bool partiallyBranchesAtInto(OptEdge* e, OptNode* n,
                                std::vector<OptEdge*> branchesA) const;
   std::vector<OptEdge*> partiallyBranchesAt(OptEdge* e, OptNode* n) const;
@@ -230,7 +232,8 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
 
   static OptEdgePL getView(OptEdge* parent, OptEdge* leg, size_t offset);
   static OptEdgePL getPartialView(OptEdge* parent, OptEdge* leg, size_t offset);
-  static OptEdgePL getPartialView(OptEdge* parent, const OptLO* leg, size_t offset);
+  static OptEdgePL getPartialView(OptEdge* parent, const OptLO* leg,
+                                  size_t offset);
   static OptEdgePL getPartialViewExcl(OptEdge* parent, OptEdge* leg,
                                       size_t offset);
   static OptEdgePL getPartialViewExcl(OptEdge* parent, const OptLO* leg,
@@ -238,8 +241,6 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
 
   std::vector<size_t> mapPositions(std::vector<OptEdge*> a, OptEdge* leg,
                                    std::vector<OptEdge*> b) const;
-
-  bool untangleDoubleStump();
 
   static bool dirLineContains(const OptEdge* a, const OptEdge* b);
 

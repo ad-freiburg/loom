@@ -42,9 +42,8 @@ int main(int argc, char** argv) {
                             std::max(cfg.crossPenMultiDiffSeg,
                                      std::max(cfg.stationCrossWeightSameSeg,
                                               cfg.stationCrossWeightDiffSeg)));
-  double maxSepPen =
-      g.maxDeg() *
-      std::max(cfg.separationPenWeight, cfg.stationSeparationWeight);
+  double maxSepPen = g.maxDeg() * std::max(cfg.separationPenWeight,
+                                           cfg.stationSeparationWeight);
 
   // TODO move this into configuration, at least partially
   shared::rendergraph::Penalties pens{maxCrossPen,
@@ -58,45 +57,62 @@ int main(int argc, char** argv) {
                                       true,
                                       true};
 
-  if (cfg.outputStats) {
-    LOGTO(INFO, std::cerr) << "(stats) Stats for graph";
-    LOGTO(INFO, std::cerr) << "(stats)   Total node count: "
-                           << g.getNds()->size() << " (" << g.numNds(true)
-                           << " topo, " << g.numNds(false) << " non-topo)";
-    LOGTO(INFO, std::cerr) << "(stats)   Total edge count: " << g.numEdgs();
-    LOGTO(INFO, std::cerr) << "(stats)   Total unique line count: "
-                           << g.numLines();
-    LOGTO(INFO, std::cerr) << "(stats)   Max edge line cardinality: "
-                           << g.getMaxLineNum();
-    LOGTO(INFO, std::cerr) << "(stats)   Number of poss. solutions: "
-                           << g.searchSpaceSize();
-    LOGTO(INFO, std::cerr) << "(stats)   Highest node degree: " << g.maxDeg();
-  }
+  loom::optim::OptResStats stats;
 
   if (cfg.optimMethod == "ilp_impr") {
     optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, pens);
-    ilpEoOptim.optimize(&g);
+    stats = ilpEoOptim.optimize(&g);
   } else if (cfg.optimMethod == "ilp") {
     optim::ILPOptimizer ilpOptim(&cfg, pens);
-    ilpOptim.optimize(&g);
+    stats = ilpOptim.optimize(&g);
   } else if (cfg.optimMethod == "comb") {
     optim::CombOptimizer ilpCombiOptim(&cfg, pens);
-    ilpCombiOptim.optimize(&g);
+    stats = ilpCombiOptim.optimize(&g);
   } else if (cfg.optimMethod == "exhaust") {
     optim::ExhaustiveOptimizer exhausOptim(&cfg, pens);
-    exhausOptim.optimize(&g);
+    stats = exhausOptim.optimize(&g);
   } else if (cfg.optimMethod == "hillc") {
     optim::HillClimbOptimizer hillcOptim(&cfg, pens);
-    hillcOptim.optimize(&g);
+    stats = hillcOptim.optimize(&g);
   } else if (cfg.optimMethod == "anneal") {
     optim::SimulatedAnnealingOptimizer annealOptim(&cfg, pens);
-    annealOptim.optimize(&g);
+    stats = annealOptim.optimize(&g);
   } else if (cfg.optimMethod == "null") {
     optim::NullOptimizer nullOptim(&cfg, pens);
-    nullOptim.optimize(&g);
+    stats = nullOptim.optimize(&g);
   }
 
   util::geo::output::GeoGraphJsonOutput out;
+
+  if (cfg.outputStats) {
+    util::json::Dict jsonStats = {
+        {"statistics",
+         util::json::Dict{
+             {"input_num_nodes", stats.numNodes},
+             {"input_num_edges", stats.numEdges},
+             {"input_max_number_lines", stats.maxLineCard},
+             {"input_solution_space_size", stats.solutionSpaceSize},
+             {"input_nontrivial_comps", stats.nonTrivialComponents},
+             {"input_nontrivial_comps_searchspace_one",
+              stats.numCompsSolSpaceOne},
+             {"input_max_num_nodes_in_comps", stats.maxNumNodesPerComp},
+             {"input_max_num_edges_in_comps", stats.maxNumEdgesPerComp},
+             {"input_max_number_lines_in_comps", stats.maxCardPerComp},
+             {"input_max_solution_space_size_in_comps", stats.maxCompSolSpace},
+             {"runs", stats.runs},
+             {"avg_solve_time", stats.avgSolveTime},
+             {"avg_iterations", stats.avgIterations},
+             {"avg_score", stats.avgScore},
+             {"avg_num_same_seg_crossings", stats.avgSameSegCross},
+             {"avg_num_diff_seg_crossings", stats.avgDiffSegCross},
+             {"avg_num_separations", stats.avgSeps},
+             {"best_num_same_seg_crossings", stats.sameSegCrossings},
+             {"best_num_diff_seg_crossings", stats.diffSegCrossings},
+             {"best_num_separations", stats.separations},
+             {"best_score", stats.score}}}};
+  out.print(g, std::cout, jsonStats);
+  }
+
   out.print(g, std::cout);
 
   return (0);

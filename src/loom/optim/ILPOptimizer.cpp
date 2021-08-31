@@ -25,13 +25,11 @@ using shared::rendergraph::HierarOrderCfg;
 int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                HierarOrderCfg* hc, size_t depth) const {
   LOGTO(DEBUG, std::cerr) << "Creating ILP problem... ";
+  T_START(build);
   auto lp = createProblem(og, g);
+  double buildT = T_STOP(build);
   LOGTO(DEBUG, std::cerr) << " .. done";
 
-  LOGTO(DEBUG, std::cerr) << "Solving problem...";
-
-  std::chrono::high_resolution_clock::time_point t1 =
-      std::chrono::high_resolution_clock::now();
 
   if (_cfg->MPSOutputPath.size()) {
     lp->writeMps(_cfg->MPSOutputPath);
@@ -39,20 +37,23 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
   if (_cfg->ilpTimeLimit >= 0) lp->setTimeLim(_cfg->ilpTimeLimit);
 
+  LOGTO(DEBUG, std::cerr) << "Solving problem...";
+
+  T_START(solve);
+
   auto status = lp->solve();
+
+  double solveT = T_STOP(solve);
+
   if (status == shared::optim::SolveType::INF) {
     throw std::runtime_error(
         "No solution found for ILP problem (most likely because of a time "
         "limit)!");
   }
 
-  std::chrono::high_resolution_clock::time_point t2 =
-      std::chrono::high_resolution_clock::now();
-  auto duration =
-      std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-
-  LOGTO(INFO, std::cerr) << " === Solve done in " << duration << " ms ===";
   LOGTO(INFO, std::cerr) << "(stats) ILP obj = " << lp->getObjVal();
+  LOGTO(INFO, std::cerr) << "(stats) ILP build time = " << buildT << " ms";
+  LOGTO(INFO, std::cerr) << "(stats) ILP solve time = " << solveT << " ms";
   if (status == shared::optim::SolveType::OPTIM)
     LOGTO(INFO, std::cerr) << "(stats) (which is optimal)";
 

@@ -858,7 +858,7 @@ std::vector<OptNode*> OptGraph::explodeNodeAlong(
 }
 
 // _____________________________________________________________________________
-bool OptGraph::untanglePartialY() {
+void OptGraph::untanglePartialY() {
   std::vector<OptEdge*> toUntangle;
 
   for (OptNode* na : *getNds()) {
@@ -934,7 +934,6 @@ bool OptGraph::untanglePartialY() {
       assert(false);
     }
   }
-  return false;
 }
 
 // _____________________________________________________________________________
@@ -1010,7 +1009,7 @@ std::pair<OptEdge*, bool> OptGraph::isOuterStumpAt(OptEdge* mainLeg,
 }
 
 // _____________________________________________________________________________
-bool OptGraph::untangleDoubleStump() {
+void OptGraph::untangleDoubleStump() {
   std::vector<OptEdge*> toUntangle;
 
   for (OptNode* n : *getNds()) {
@@ -1039,18 +1038,14 @@ bool OptGraph::untangleDoubleStump() {
       auto stNdA = addNd(mainLeg->getFrom()->pl());
       auto stNdB = addNd(mainLeg->getTo()->pl());
       addEdg(stNdA, stNdB, plStump);
-
-      return true;
     } else {
       assert(false);
     }
   }
-
-  return false;
 }
 
 // _____________________________________________________________________________
-bool OptGraph::untangleOuterStump() {
+void OptGraph::untangleOuterStump() {
   std::vector<OptEdge*> toUntangle;
 
   for (OptNode* n : *getNds()) {
@@ -1181,18 +1176,14 @@ bool OptGraph::untangleOuterStump() {
         updateEdgeOrder(n);
         for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
       }
-
-      return true;
     } else {
       assert(false);
     }
   }
-
-  return false;
 }
 
 // _____________________________________________________________________________
-bool OptGraph::untangleY() {
+void OptGraph::untangleY() {
   std::vector<OptEdge*> toUntangle;
 
   for (OptNode* na : *getNds()) {
@@ -1280,7 +1271,6 @@ bool OptGraph::untangleY() {
       assert(false);
     }
   }
-  return false;
 }
 
 // _____________________________________________________________________________
@@ -1413,7 +1403,7 @@ OptEdgePL OptGraph::getPartialView(OptEdge* parent, OptEdge* leg,
 }
 
 // _____________________________________________________________________________
-bool OptGraph::untanglePartialDogBone() {
+void OptGraph::untanglePartialDogBone() {
   std::vector<OptEdge*> toUntangle;
 
   for (OptNode* na : *getNds()) {
@@ -1509,12 +1499,10 @@ bool OptGraph::untanglePartialDogBone() {
       assert(false);
     }
   }
-
-  return false;
 }
 
 // _____________________________________________________________________________
-bool OptGraph::untangleInnerStump() {
+void OptGraph::untangleInnerStump() {
   std::vector<OptEdge*> toUntangle;
 
   for (OptNode* na : *getNds()) {
@@ -1559,6 +1547,7 @@ bool OptGraph::untangleInnerStump() {
         }
 
         i++;
+        // only necessary on this side, not the other side
         while (i < nb->pl().circOrdering.size() &&
                terminatesAt(nb->pl().circOrdering[i], mainLeg, na)) {
           i++;
@@ -1673,19 +1662,16 @@ bool OptGraph::untangleInnerStump() {
         updateEdgeOrder(n);
         for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
       }
-
     } else {
       // this cannot happen - it would mean that main leg was a minor leg of
       // one of its minor legs, but this is impossible
       assert(false);
     }
   }
-
-  return false;
 }
 
 // _____________________________________________________________________________
-bool OptGraph::untangleDogBone() {
+void OptGraph::untangleDogBone() {
   std::vector<OptEdge*> toUntangle;
 
   for (OptNode* na : *getNds()) {
@@ -1801,8 +1787,6 @@ bool OptGraph::untangleDogBone() {
       assert(false);
     }
   }
-
-  return false;
 }
 
 // _____________________________________________________________________________
@@ -1848,9 +1832,8 @@ void OptGraph::updateEdgeOrder(OptNode* n) {
 // _____________________________________________________________________________
 bool OptGraph::dirLineContains(const OptEdge* a, const OptEdge* b) {
   for (auto& to : b->pl().getLines()) {
-    if (!getCtdLineIn(to.line, to.dir, b, a)) {
+    if (!getCtdLineIn(to.line, to.dir, b, a))
       return false;
-    }
   }
   return true;
 }
