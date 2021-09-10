@@ -12,6 +12,7 @@
 #include "loom/config/LoomConfig.h"
 #include "loom/optim/CombOptimizer.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
+#include "loom/optim/OracleOptimizer.h"
 #include "shared/rendergraph/Penalties.h"
 #include "shared/rendergraph/RenderGraph.h"
 #include "util/geo/PolyLine.h"
@@ -77,6 +78,9 @@ int main(int argc, char** argv) {
   } else if (cfg.optimMethod == "anneal") {
     optim::SimulatedAnnealingOptimizer annealOptim(&cfg, pens);
     stats = annealOptim.optimize(&g);
+  } else if (cfg.optimMethod == "oracle") {
+    optim::OracleOptimizer oracleOptim(&cfg, pens);
+    stats = oracleOptim.optimize(&g);
   } else if (cfg.optimMethod == "null") {
     optim::NullOptimizer nullOptim(&cfg, pens);
     stats = nullOptim.optimize(&g);
@@ -110,10 +114,10 @@ int main(int argc, char** argv) {
              {"best_num_diff_seg_crossings", stats.diffSegCrossings},
              {"best_num_separations", stats.separations},
              {"best_score", stats.score}}}};
-  out.print(g, std::cout, jsonStats);
+    out.print(g, std::cout, jsonStats);
+  } else {
+    out.print(g, std::cout);
   }
-
-  out.print(g, std::cout);
 
   return (0);
 }
