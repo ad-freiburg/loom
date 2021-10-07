@@ -26,8 +26,8 @@ struct LineCmp {
 
   bool operator()(const shared::linegraph::Line* a,
                   const shared::linegraph::Line* b) {
-    auto leftPair = smallerThanAt(a, b, _e->getFrom());
-    auto rightPair = smallerThanAt(a, b, _e->getTo());
+    auto leftPair = smallerThanAt(a, b, _e, _e->getFrom(), 0);
+    auto rightPair = smallerThanAt(a, b, _e, _e->getTo(), 0);
 
     int left = leftPair.first;
     int right = rightPair.first;
@@ -67,10 +67,16 @@ struct LineCmp {
 
   std::pair<int, double> smallerThanAt(const shared::linegraph::Line* a,
                                        const shared::linegraph::Line* b,
-                                       const OptNode* nd) const;
+                                       const OptEdge* e,
+                                       const OptNode* nd,
+                                       const OptEdge* ignore) const;
 
   bool oracle(const shared::linegraph::Line* a,
               const shared::linegraph::Line* b) const;
+
+  const OptEdge* eligibleNextEdge(const OptEdge* start, const OptNode* nd,
+                                  const shared::linegraph::Line* a,
+                                  const shared::linegraph::Line* b) const;
 
   const OptEdge* _e;
   const OptOrderCfg& _cfg;
