@@ -174,6 +174,10 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   static LnEdgPart getFirstLnEdgPart(const OptEdge*);
   static LnEdgPart getLastLnEdgPart(const OptEdge*);
 
+  static std::vector<OptEdge*> clockwEdges(const OptEdge* noon, const OptNode* n);
+  static std::vector<OptEdge*> partialClockwEdges(const OptEdge* noon, const OptNode* n);
+
+
   // apply splitting rules
   void splitSingleLineEdgs();
   void terminusDetach();
@@ -278,9 +282,6 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
 
   static util::Nullable<const OptLO> getLO(const OptEdge* a,
                                            const shared::linegraph::Line*);
-
-  static std::vector<OptEdge*> clockwEdges(OptEdge* noon, OptNode* n);
-  static std::vector<OptEdge*> partialClockwEdges(OptEdge* noon, OptNode* n);
 
   static bool terminatesAt(const OptLO& lo, const OptEdge* e,
                            const OptNode* nd);

@@ -174,9 +174,6 @@ std::pair<std::pair<size_t, size_t>, size_t> OptGraphScorer::getNumCrossSeps(
           std::find(cea.begin(), cea.end(), lp.second.line) - cea.begin();
 
       for (const auto& eb : Optimizer::getEdgePartners(n, ea, lp)) {
-        // if we have already fully checked the line pairs on this edge,
-        // don't count the crossing again - skip.
-
         const auto& ceb = c.at(eb);
 
         PosCom posA(peaA, std::find(ceb.begin(), ceb.end(), lp.first.line) -

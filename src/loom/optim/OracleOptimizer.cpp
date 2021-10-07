@@ -11,6 +11,7 @@
 using namespace loom;
 using namespace optim;
 using loom::optim::OracleOptimizer;
+using loom::optim::SettledEdgs;
 using shared::linegraph::Line;
 using shared::rendergraph::HierarOrderCfg;
 
@@ -20,16 +21,139 @@ int OracleOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   UNUSED(depth);
   OptOrderCfg cur, null;
 
-  // fixed order list of optim graph edges
-  std::vector<OptEdge*> edges;
+  const OptEdge* e = 0;
+  SettledEdgs settled;
 
-  for (auto n : g)
-    for (auto e : n->getAdjList())
-      if (n == e->getFrom() && e->pl().getCardinality() > 1) edges.push_back(e);
+  while ((e = getNextEdge(g, &settled))) {
+    std::cerr << "Optimizing " << e << " with " << e->pl().getCardinality()
+              << " lines" << std::endl;
 
-  // this guarantees that all the orderings are sorted!
-  initialConfig(g, &null, true);
+    // fill lines into empty config
+    for (const auto& lo : e->pl().getLines()) {
+      cur[e].push_back(lo.line);
+    }
+
+    auto cmp = LineCmp(e, cur, _optScorer);
+
+    auto order = cur[e];
+    std::sort(order.begin(), order.end(), cmp);
+    cur[e] = order;
+
+    settled.insert(e);
+  }
 
   writeHierarch(&cur, hc);
   return 0;
+}
+
+// _____________________________________________________________________________
+const OptEdge* OracleOptimizer::getNextEdge(const std::set<OptNode*>& g,
+                                            SettledEdgs* settled) const {
+  if (settled->size() == 0) return getInitialEdge(g);
+
+  // else, use some unsettled edge adjacent to the settled set
+  for (auto eid : *settled) {
+    for (auto adj : eid->getFrom()->getAdjList()) {
+      if (adj->pl().getCardinality() < 2) continue;
+      if (!settled->count(adj)) return adj;
+    }
+    for (auto adj : eid->getTo()->getAdjList()) {
+      if (adj->pl().getCardinality() < 2) continue;
+      if (!settled->count(adj)) return adj;
+    }
+  }
+
+  return 0;
+}
+
+// _____________________________________________________________________________
+const OptEdge* OracleOptimizer::getInitialEdge(
+    const std::set<OptNode*>& g) const {
+  const OptEdge* ret = 0;
+
+  for (auto n : g) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n || e->pl().getCardinality() < 2) continue;
+      if (!ret || e->pl().getCardinality() > ret->pl().getCardinality() || (e->pl().getCardinality() == ret->pl().getCardinality() && e->getTo()->getDeg() + e->getFrom()->getDeg() > ret->getTo()->getDeg() + ret->getFrom()->getDeg())) {
+        ret = e;
+      }
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::pair<int, double> LineCmp::smallerThanAt(const shared::linegraph::Line* a,
+                           const shared::linegraph::Line* b,
+                           const OptNode* nd) const {
+  // return -1 for false, 0 for undecided, 1 for true
+
+  std::vector<size_t> positionsA;
+  std::vector<size_t> positionsB;
+
+  double cost = 0;
+
+  size_t offset = 0;
+
+  for (auto e : OptGraph::clockwEdges(_e, nd)) {
+    auto loA = e->pl().getLineOcc(a);
+    auto loB = e->pl().getLineOcc(b);
+
+    if (loA && loB) {
+      auto eCfg = _cfg.find(e);
+      if (eCfg != _cfg.end()) {
+        // TODO!
+        bool rev = (e->getFrom() != nd) ^ e->pl().lnEdgParts.front().dir;
+        size_t peaA =
+            std::find(eCfg->second.begin(), eCfg->second.end(), a) - eCfg->second.begin();
+        size_t peaB =
+            std::find(eCfg->second.begin(), eCfg->second.end(), b) - eCfg->second.begin();
+        if (rev) {
+          positionsA.push_back(offset + peaA);
+          positionsB.push_back(offset + peaB);
+        } else {
+          positionsA.push_back(offset + (e->pl().getCardinality() - 1 - peaA));
+          positionsB.push_back(offset + (e->pl().getCardinality() - 1 - peaB));
+        }
+        cost += _scorer.getCrossingPenSameSeg(nd);
+      }
+    } else if (loA) {
+      positionsA.push_back(offset);
+      cost += _scorer.getCrossingPenDiffSeg(nd);
+    } else if (loB) {
+      positionsB.push_back(offset);
+      cost += _scorer.getCrossingPenDiffSeg(nd);
+    }
+
+    offset += e->pl().getCardinality();
+  }
+
+  if (positionsA.size() == 0 || positionsB.size() == 0) return {0, 0};
+
+  if (positionsA.back() < positionsB.front()) return {1, cost};
+  if (positionsA.front() > positionsB.back()) return {-1, cost};
+  return {0, 0};
+}
+
+// _____________________________________________________________________________
+bool LineCmp::oracle(const shared::linegraph::Line* a,
+              const shared::linegraph::Line* b) const {
+
+  auto e = _e;
+
+  int left = 0;
+  int right = 0;
+
+  double leftCost = 0;
+  double rightCost = 0;
+
+  // go to the left
+  // auto curNd = e->getFrom();
+  // while (curNd) {
+    // auto i = smallerThanAt(a, b, e->     
+  // }
+
+
+  return a < b;
 }

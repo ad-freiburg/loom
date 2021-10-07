@@ -1029,9 +1029,9 @@ void OptGraph::untangleDoubleStump() {
   for (auto mainLeg : toUntangle) {
     const OptLO* stump;
     if ((stump = isDoubleStump(mainLeg))) {
-
       OptEdgePL plMain = getPartialViewExcl(mainLeg, stump, 0);
-      OptEdgePL plStump = getPartialView(mainLeg, stump, plMain.getLines().size());
+      OptEdgePL plStump =
+          getPartialView(mainLeg, stump, plMain.getLines().size());
 
       mainLeg->pl() = plMain;
 
@@ -1832,8 +1832,7 @@ void OptGraph::updateEdgeOrder(OptNode* n) {
 // _____________________________________________________________________________
 bool OptGraph::dirLineContains(const OptEdge* a, const OptEdge* b) {
   for (auto& to : b->pl().getLines()) {
-    if (!getCtdLineIn(to.line, to.dir, b, a))
-      return false;
+    if (!getCtdLineIn(to.line, to.dir, b, a)) return false;
   }
   return true;
 }
@@ -2144,7 +2143,8 @@ std::vector<OptEdge*> OptGraph::partiallyBranchesAt(OptEdge* eMain,
 }
 
 // _____________________________________________________________________________
-std::vector<OptEdge*> OptGraph::clockwEdges(OptEdge* noon, OptNode* n) {
+std::vector<OptEdge*> OptGraph::clockwEdges(const OptEdge* noon,
+                                            const OptNode* n) {
   std::vector<OptEdge*> clockwise;
 
   size_t passed = n->getDeg();
@@ -2165,7 +2165,8 @@ std::vector<OptEdge*> OptGraph::clockwEdges(OptEdge* noon, OptNode* n) {
 }
 
 // _____________________________________________________________________________
-std::vector<OptEdge*> OptGraph::partialClockwEdges(OptEdge* noon, OptNode* n) {
+std::vector<OptEdge*> OptGraph::partialClockwEdges(const OptEdge* noon,
+                                                   const OptNode* n) {
   std::vector<OptEdge*> clockwise = clockwEdges(noon, n);
 
   for (auto i = clockwise.begin(); i != clockwise.end(); i++) {

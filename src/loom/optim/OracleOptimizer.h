@@ -17,6 +17,66 @@
 namespace loom {
 namespace optim {
 
+typedef std::set<const OptEdge*> SettledEdgs;
+
+struct LineCmp {
+  LineCmp(const OptEdge* e, const OptOrderCfg& cfg,
+          const OptGraphScorer& scorer)
+      : _e(e), _cfg(cfg), _scorer(scorer){};
+
+  bool operator()(const shared::linegraph::Line* a,
+                  const shared::linegraph::Line* b) {
+    auto leftPair = smallerThanAt(a, b, _e->getFrom());
+    auto rightPair = smallerThanAt(a, b, _e->getTo());
+
+    int left = leftPair.first;
+    int right = rightPair.first;
+
+    double leftCost = leftPair.second;
+    double rightCost = rightPair.second;
+
+    bool rev = !_e->pl().lnEdgParts.front().dir;
+
+    if (left != 0 && right != 0) {
+      if (left == -right) {
+        // both sides induce the same, and are not undecided
+        if (left == 1) return false ^ rev;
+        return true ^ rev;
+      } else {
+        // both sides induce different orderings, take the order of the side
+        // where a crossing is more expensive
+        if (leftCost > rightCost) {
+          if (left == 1) return false ^ rev;
+          return true ^ rev;
+        } else {
+          if (right == 1) return true ^ rev;
+          return false ^ rev;
+        }
+      }
+    } else if (left != 0 && right == 0) {
+      // left side induces
+      if (left == 1) return false ^ rev;
+      return true ^ rev;
+    } else if (left == 0 && right != 0) {
+      // right side induces
+      if (right == 1) return true ^ rev;
+      return false ^ rev;
+    } else
+      return oracle(a, b);
+  }
+
+  std::pair<int, double> smallerThanAt(const shared::linegraph::Line* a,
+                                       const shared::linegraph::Line* b,
+                                       const OptNode* nd) const;
+
+  bool oracle(const shared::linegraph::Line* a,
+              const shared::linegraph::Line* b) const;
+
+  const OptEdge* _e;
+  const OptOrderCfg& _cfg;
+  const OptGraphScorer& _scorer;
+};
+
 class OracleOptimizer : public ExhaustiveOptimizer {
  public:
   OracleOptimizer(const config::Config* cfg,
@@ -26,6 +86,11 @@ class OracleOptimizer : public ExhaustiveOptimizer {
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                            shared::rendergraph::HierarOrderCfg* c,
                            size_t depth) const;
+
+ private:
+  const OptEdge* getNextEdge(const std::set<OptNode*>& g,
+                             SettledEdgs* settled) const;
+  const OptEdge* getInitialEdge(const std::set<OptNode*>& g) const;
 };
 }  // namespace optim
 }  // namespace loom
