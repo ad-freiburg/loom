@@ -20,8 +20,9 @@ namespace optim {
 class SimulatedAnnealingOptimizer : public HillClimbOptimizer {
  public:
   SimulatedAnnealingOptimizer(const config::Config* cfg,
-                              const shared::rendergraph::Penalties& pens)
-      : HillClimbOptimizer(cfg, pens){};
+                              const shared::rendergraph::Penalties& pens,
+                              bool randomStart)
+      : HillClimbOptimizer(cfg, pens, randomStart){};
 
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                            shared::rendergraph::HierarOrderCfg* c,

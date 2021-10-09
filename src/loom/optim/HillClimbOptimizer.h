@@ -19,8 +19,9 @@ namespace optim {
 class HillClimbOptimizer : public ExhaustiveOptimizer {
  public:
   HillClimbOptimizer(const config::Config* cfg,
-                     const shared::rendergraph::Penalties& pens)
-      : ExhaustiveOptimizer(cfg, pens){};
+                     const shared::rendergraph::Penalties& pens,
+                     bool randomStart)
+      : ExhaustiveOptimizer(cfg, pens), _randomStart(randomStart) {};
 
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                            shared::rendergraph::HierarOrderCfg* c,
@@ -28,6 +29,9 @@ class HillClimbOptimizer : public ExhaustiveOptimizer {
 
  protected:
   double getScore(OptGraph* og, OptEdge* e, OptOrderCfg& cur) const;
+
+  bool _randomStart;
+
 };
 }  // namespace optim
 }  // namespace loom

@@ -26,8 +26,8 @@ class CombOptimizer : public Optimizer {
         _ilpOpt(cfg, pens),
         _nullOpt(cfg, pens),
         _exhausOpt(cfg, pens),
-        _hillcOpt(cfg, pens),
-        _annealOpt(cfg, pens){};
+        _hillcOpt(cfg, pens, false),
+        _annealOpt(cfg, pens, false){};
 
   int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                    shared::rendergraph::HierarOrderCfg* c, size_t depth) const;

@@ -11,8 +11,8 @@
 #include "loom/config/ConfigReader.cpp"
 #include "loom/config/LoomConfig.h"
 #include "loom/optim/CombOptimizer.h"
+#include "loom/optim/GreedyOptimizer.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
-#include "loom/optim/OracleOptimizer.h"
 #include "shared/rendergraph/Penalties.h"
 #include "shared/rendergraph/RenderGraph.h"
 #include "util/geo/PolyLine.h"
@@ -73,17 +73,30 @@ int main(int argc, char** argv) {
     optim::ExhaustiveOptimizer exhausOptim(&cfg, pens);
     stats = exhausOptim.optimize(&g);
   } else if (cfg.optimMethod == "hillc") {
-    optim::HillClimbOptimizer hillcOptim(&cfg, pens);
+    optim::HillClimbOptimizer hillcOptim(&cfg, pens, false);
+    stats = hillcOptim.optimize(&g);
+  } else if (cfg.optimMethod == "hillc-random") {
+    optim::HillClimbOptimizer hillcOptim(&cfg, pens, true);
     stats = hillcOptim.optimize(&g);
   } else if (cfg.optimMethod == "anneal") {
-    optim::SimulatedAnnealingOptimizer annealOptim(&cfg, pens);
+    optim::SimulatedAnnealingOptimizer annealOptim(&cfg, pens, false);
     stats = annealOptim.optimize(&g);
-  } else if (cfg.optimMethod == "oracle") {
-    optim::OracleOptimizer oracleOptim(&cfg, pens);
-    stats = oracleOptim.optimize(&g);
+  } else if (cfg.optimMethod == "anneal-random") {
+    optim::SimulatedAnnealingOptimizer annealOptim(&cfg, pens, true);
+    stats = annealOptim.optimize(&g);
+  } else if (cfg.optimMethod == "greedy") {
+    optim::GreedyOptimizer greedyOptim(&cfg, pens, false);
+    stats = greedyOptim.optimize(&g);
+  } else if (cfg.optimMethod == "greedy-lookahead") {
+    optim::GreedyOptimizer greedyOptim(&cfg, pens, true);
+    stats = greedyOptim.optimize(&g);
   } else if (cfg.optimMethod == "null") {
     optim::NullOptimizer nullOptim(&cfg, pens);
     stats = nullOptim.optimize(&g);
+  } else {
+    LOG(ERROR) << "Unknown optimization method " << cfg.optimMethod
+               << std::endl;
+    exit(1);
   }
 
   util::geo::output::GeoGraphJsonOutput out;

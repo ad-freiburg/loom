@@ -4,65 +4,95 @@
 
 #include <algorithm>
 #include <unordered_map>
-#include "loom/optim/OracleOptimizer.h"
+#include "loom/optim/GreedyOptimizer.h"
 #include "shared/linegraph/Line.h"
 #include "util/log/Log.h"
 
 using namespace loom;
 using namespace optim;
-using loom::optim::OracleOptimizer;
+using loom::optim::GreedyOptimizer;
 using loom::optim::SettledEdgs;
 using shared::linegraph::Line;
 using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
-int OracleOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+int GreedyOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                   HierarOrderCfg* hc, size_t depth) const {
   UNUSED(depth);
-  OptOrderCfg cur, null;
+  OptOrderCfg cfg;
 
-  const OptEdge* e = 0;
-  SettledEdgs settled;
+  getFlatConfig(g, &cfg);
 
-  while ((e = getNextEdge(g, &settled))) {
-    std::cerr << "Optimizing " << e << " with " << e->pl().getCardinality()
-              << " lines" << std::endl;
-    for (auto lo : e->pl().getLines()) {
-      std::cerr << lo.line->label() << ", ";
-    }
-    std::cerr << std::endl;
-
-    // fill lines into empty config
-    for (const auto& lo : e->pl().getLines()) {
-      cur[e].push_back(lo.line);
-    }
-
-    auto cmp = LineCmp(e, cur, _optScorer);
-
-    auto order = cur[e];
-    std::sort(order.begin(), order.end(), cmp);
-    cur[e] = order;
-
-    settled.insert(e);
-  }
-
-  writeHierarch(&cur, hc);
+  writeHierarch(&cfg, hc);
   return 0;
 }
 
 // _____________________________________________________________________________
-const OptEdge* OracleOptimizer::getNextEdge(const std::set<OptNode*>& g,
+void GreedyOptimizer::getFlatConfig(const std::set<OptNode*>& g,
+                                   OptOrderCfg* cfg) const {
+  const OptEdge* e = 0;
+  SettledEdgs settled;
+
+  while ((e = getNextEdge(g, &settled))) {
+    Cmp left, right;
+
+    // build cmp function for left
+    for (const auto& lo1 : e->pl().getLines()) {
+      for (const auto& lo2 : e->pl().getLines()) {
+        if (lo1.line == lo2.line) continue;
+        left[{lo1.line, lo2.line}] =
+            guess(lo1.line, lo2.line, e, e->getFrom(), *cfg);
+        right[{lo1.line, lo2.line}] =
+            guess(lo1.line, lo2.line, e, e->getTo(), *cfg);
+      }
+    }
+
+    double costLeft = 0;
+    double costRight = 0;
+
+    // which one is cheaper?
+    for (const auto& lo1 : e->pl().getLines()) {
+      for (const auto& lo2 : e->pl().getLines()) {
+        if (lo1.line == lo2.line) continue;
+        if (left[{lo1.line, lo2.line}].first ==
+            right[{lo1.line, lo2.line}].first) {
+          costLeft += right[{lo1.line, lo2.line}].second;
+          costRight += left[{lo1.line, lo2.line}].second;
+        }
+      }
+    }
+
+    // build cmp function for right
+
+    LineCmp cmp({}, false);
+    if (costLeft < costRight) {
+      cmp = LineCmp(left, false);
+    } else {
+      cmp = LineCmp(right, true);
+    }
+
+    // fill lines into empty config
+    for (const auto& lo : e->pl().getLines()) {
+      (*cfg)[e].push_back(lo.line);
+    }
+
+    std::sort((*cfg)[e].begin(), (*cfg)[e].end(), cmp);
+
+    settled.insert(e);
+  }
+}
+
+// _____________________________________________________________________________
+const OptEdge* GreedyOptimizer::getNextEdge(const std::set<OptNode*>& g,
                                             SettledEdgs* settled) const {
   if (settled->size() == 0) return getInitialEdge(g);
 
   // else, use some unsettled edge adjacent to the settled set
   for (auto eid : *settled) {
     for (auto adj : eid->getFrom()->getAdjList()) {
-      // if (adj->pl().getCardinality() < 2) continue;
       if (!settled->count(adj)) return adj;
     }
     for (auto adj : eid->getTo()->getAdjList()) {
-      // if (adj->pl().getCardinality() < 2) continue;
       if (!settled->count(adj)) return adj;
     }
   }
@@ -71,13 +101,13 @@ const OptEdge* OracleOptimizer::getNextEdge(const std::set<OptNode*>& g,
 }
 
 // _____________________________________________________________________________
-const OptEdge* OracleOptimizer::getInitialEdge(
+const OptEdge* GreedyOptimizer::getInitialEdge(
     const std::set<OptNode*>& g) const {
   const OptEdge* ret = 0;
 
   for (auto n : g) {
     for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n || e->pl().getCardinality() < 2) continue;
+      if (e->getFrom() != n) continue;
       if (!ret || e->pl().getCardinality() > ret->pl().getCardinality() ||
           (e->pl().getCardinality() == ret->pl().getCardinality() &&
            e->getTo()->getDeg() + e->getFrom()->getDeg() >
@@ -91,13 +121,11 @@ const OptEdge* OracleOptimizer::getInitialEdge(
 }
 
 // _____________________________________________________________________________
-std::pair<int, double> LineCmp::smallerThanAt(const shared::linegraph::Line* a,
-                                              const shared::linegraph::Line* b,
-                                              const OptEdge* e,
-                                              const OptNode* nd,
-                                              const OptEdge* ign) const {
+std::pair<int, double> GreedyOptimizer::smallerThanAt(
+    const shared::linegraph::Line* a, const shared::linegraph::Line* b,
+    const OptEdge* start, const OptNode* nd, const OptEdge* ign,
+    const OptOrderCfg& cfg) const {
   // return -1 for false, 0 for undecided, 1 for true
-
   std::vector<size_t> positionsA;
   std::vector<size_t> positionsB;
 
@@ -105,14 +133,14 @@ std::pair<int, double> LineCmp::smallerThanAt(const shared::linegraph::Line* a,
 
   size_t offset = 0;
 
-  for (auto e : OptGraph::clockwEdges(e, nd)) {
+  for (auto e : OptGraph::clockwEdges(start, nd)) {
     if (e == ign) continue;
     auto loA = e->pl().getLineOcc(a);
     auto loB = e->pl().getLineOcc(b);
 
     if (loA && loB) {
-      auto eCfg = _cfg.find(e);
-      if (eCfg != _cfg.end()) {
+      auto eCfg = cfg.find(e);
+      if (eCfg != cfg.end()) {
         bool rev = (e->getFrom() != nd) ^ e->pl().lnEdgParts.front().dir;
         size_t peaA = std::find(eCfg->second.begin(), eCfg->second.end(), a) -
                       eCfg->second.begin();
@@ -146,91 +174,63 @@ std::pair<int, double> LineCmp::smallerThanAt(const shared::linegraph::Line* a,
 }
 
 // _____________________________________________________________________________
-bool LineCmp::oracle(const shared::linegraph::Line* a,
-                     const shared::linegraph::Line* b) const {
-  // return a < b;
-  int left = 0;
-  int right = 0;
+std::pair<bool, double> GreedyOptimizer::guess(const shared::linegraph::Line* a,
+                                               const shared::linegraph::Line* b,
+                                               const OptEdge* start,
+                                               const OptNode* refNd,
+                                               const OptOrderCfg& cfg) const {
+  int dec = 0;
+  bool notRef = false;
 
-  double leftCost = 0;
-  double rightCost = 0;
+  double cost = 0;
 
-  std::cerr << "oracleing... " << a->label() << " vs " << b->label() << std::endl;
-
-  // go to the left
-  auto e = _e;
-  auto curNd = e->getFrom();
-  while (curNd) {
-    std::cerr << "A" << std::endl;
-    auto newECand = eligibleNextEdge(e, curNd, a, b);
-    std::cerr << newECand << std::endl;
-    if (!newECand) break;
-    curNd = newECand->getOtherNd(curNd);
-    auto i = smallerThanAt(a, b, newECand, curNd, e);
+  // on ref node
+  auto e = start;
+  auto curNd = refNd;
+  while (true) {
+    auto i = smallerThanAt(a, b, e, curNd, e, cfg);
     if (i.first != 0) {
-      left = i.first;
-      leftCost = i.second;
+      dec = i.first;
+      cost = i.second;
       break;
     }
-    e = newECand;
+    e = eligibleNextEdge(e, curNd, a, b);
+    if (!e || e == start) break;
+    curNd = e->getOtherNd(curNd);
   }
 
-  // go to the right
-  e = _e;
-  curNd = e->getTo();
-  while (curNd) {
-    std::cerr << "B" << std::endl;
-    auto newECand = eligibleNextEdge(e, curNd, a, b);
-    if (!newECand) break;
-    curNd = newECand->getOtherNd(curNd);
-    auto i = smallerThanAt(a, b, newECand, curNd, e);
-    if (i.first != 0) {
-      right = i.first;
-      rightCost = i.second;
-      break;
+  if (!dec) {
+    e = start;
+    curNd = start->getOtherNd(refNd);
+    while (true) {
+      auto i = smallerThanAt(a, b, e, curNd, e, cfg);
+      if (i.first != 0) {
+        dec = i.first;
+        cost = i.second;
+        notRef = true;
+        break;
+      }
+      e = eligibleNextEdge(e, curNd, a, b);
+      if (!e || e == start) break;
+      curNd = e->getOtherNd(curNd);
     }
-    e = newECand;
   }
 
   // build return value
+  bool rev = !start->pl().lnEdgParts.front().dir;
 
-  bool rev = !_e->pl().lnEdgParts.front().dir;
+  if (dec == 1) return {notRef ^ rev, cost};
+  if (dec == -1) return {!notRef ^ rev, cost};
 
-  if (left != 0 && right != 0) {
-    if (left == -right) {
-      // both sides induce the same, and are not undecided
-      if (left == 1) return false ^ rev;
-      return true ^ rev;
-    } else {
-      // both sides induce different orderings, take the order of the side
-      // where a crossing is more expensive
-      if (leftCost > rightCost) {
-        if (left == 1) return false ^ rev;
-        return true ^ rev;
-      } else {
-        if (right == 1) return true ^ rev;
-        return false ^ rev;
-      }
-    }
-  } else if (left != 0 && right == 0) {
-    // left side induces
-    if (left == 1) return false ^ rev;
-    return true ^ rev;
-  } else if (left == 0 && right != 0) {
-    // right side induces
-    if (right == 1) return true ^ rev;
-    return false ^ rev;
-  }
-
-  std::cerr << "(failure)" << std::endl;
-
-  return a < b;
+  // undecided
+  return {a < b, 0};
 }
 
 // _____________________________________________________________________________
-const OptEdge* LineCmp::eligibleNextEdge(
+const OptEdge* GreedyOptimizer::eligibleNextEdge(
     const OptEdge* start, const OptNode* nd, const shared::linegraph::Line* a,
     const shared::linegraph::Line* b) const {
+  if (!_lookAhead) return 0;
   const OptEdge* newECand = 0;
   for (auto newE : nd->getAdjList()) {
     if (newE == start) continue;

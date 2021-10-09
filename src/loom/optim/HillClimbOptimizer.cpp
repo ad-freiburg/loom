@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include "loom/optim/GreedyOptimizer.h"
 #include "loom/optim/HillClimbOptimizer.h"
 #include "shared/linegraph/Line.h"
 #include "util/log/Log.h"
@@ -18,7 +19,7 @@ using shared::rendergraph::HierarOrderCfg;
 int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                      HierarOrderCfg* hc, size_t depth) const {
   UNUSED(depth);
-  OptOrderCfg cur, null;
+  OptOrderCfg cur ;
 
   // fixed order list of optim graph edges
   std::vector<OptEdge*> edges;
@@ -27,11 +28,14 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
     for (auto e : n->getAdjList())
       if (n == e->getFrom() && e->pl().getCardinality() > 1) edges.push_back(e);
 
-  // this guarantees that all the orderings are sorted!
-  initialConfig(g, &null, true);
-
-  // this is the starting ordering, which is random
-  initialConfig(g, &cur, false);
+  if (_randomStart) {
+    // this is the starting ordering, which is random
+    initialConfig(g, &cur, false);
+  } else {
+    // take the greedy optimized ordering as a starting point
+    GreedyOptimizer greedy(_cfg, _scorer.getPens(), true);
+    greedy.getFlatConfig(g, &cur);
+  }
 
   size_t iters = 0;
   size_t last = 0;
@@ -51,18 +55,13 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
     for (size_t i = 0; i < edges.size(); i++) {
       double oldScore = getScore(og, edges[i], cur);
-      auto old = cur[edges[i]];
-      cur[edges[i]] = null[edges[i]];
 
-      int c = util::factorial(edges[i]->pl().getCardinality());
-
-      if (c > 300000) {
-        // heuristic: if the neighboorhood is too large, simply take
-        // 1000 random choices
-        for (size_t k = 0; k < 1000; k++) {
-          int steps = rand() % c;
-          for (int j = 0; j < steps; j++)
-            std::next_permutation(cur[edges[i]].begin(), cur[edges[i]].end());
+      for (size_t p1 = 0; p1 < cur[edges[i]].size(); p1++) {
+        for (size_t p2 = p1; p2 < cur[edges[i]].size(); p2++) {
+          // switch p1 and p2
+          auto tmp = cur[edges[i]][p1];
+          cur[edges[i]][p1] = cur[edges[i]][p2];
+          cur[edges[i]][p2] = tmp;
 
           double s = getScore(og, edges[i], cur);
           if (s < oldScore && oldScore - s > bestChange) {
@@ -71,26 +70,18 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
             bestEdge = edges[i];
             bestOrder = cur[edges[i]];
           }
+
+          // switch back
+          tmp = cur[edges[i]][p1];
+          cur[edges[i]][p1] = cur[edges[i]][p2];
+          cur[edges[i]][p2] = tmp;
         }
-      } else {
-        do {
-          double s = getScore(og, edges[i], cur);
-          if (s < oldScore && oldScore - s > bestChange) {
-            found = true;
-            bestChange = oldScore - s;
-            bestEdge = edges[i];
-            bestOrder = cur[edges[i]];
-          }
-        } while (
-            std::next_permutation(cur[edges[i]].begin(), cur[edges[i]].end()));
       }
-
-      // reverting
-      cur[edges[i]] = old;
     }
 
     double curScore = _optScorer.getCrossingScore(g, cur);
-    if (_optScorer.optimizeSep()) curScore += _optScorer.getSeparationScore(g, cur);
+    if (_optScorer.optimizeSep())
+      curScore += _optScorer.getSeparationScore(g, cur);
 
     if (!found) {
       LOGTO(INFO, std::cerr)
