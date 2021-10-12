@@ -23,9 +23,8 @@ struct Config {
   bool outOptGraph = false;
 
   bool outputStats = false;
-  bool collapseLinePartners = true;
+  bool pruneGraph = true;
 
-  bool createCoreOptimGraph = true;
   bool untangleGraph = true;
 
   int ilpTimeLimit = -1;

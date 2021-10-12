@@ -41,11 +41,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<std::string>(&(cfg->name))
       ->default_value("shinygraph"),
       "name of transit graph")
-    ("create-core-optim-graph",
-     opts::value<bool>(&(cfg->createCoreOptimGraph))
-      ->default_value(true),
-      "simplify optimization graph prior to optimization")
-    ("untangle-optim-graph",
+    ("untangle",
      opts::value<bool>(&(cfg->untangleGraph))
       ->default_value(true),
       "untangle line graph")
@@ -53,10 +49,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<bool>(&(cfg->outputStats))
       ->default_value(false),
       "print some more graph stats to stdout")
-    ("collapse-line-partners",
-      opts::value<bool>(&(cfg->collapseLinePartners))
+    ("prune",
+      opts::value<bool>(&(cfg->pruneGraph))
       ->default_value(true),
-      "collapse line partners")
+      "prune and cut the input graph prior to optimization")
     ("optim-method",
       opts::value<std::string>(&(cfg->optimMethod))
       ->default_value("comb"),

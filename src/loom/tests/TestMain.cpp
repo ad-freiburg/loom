@@ -423,8 +423,7 @@ int main(int argc, char** argv) {
 
   loom::config::Config baseCfg;
   baseCfg.untangleGraph = false;
-  baseCfg.collapseLinePartners = false;
-  baseCfg.createCoreOptimGraph = false;
+  baseCfg.pruneGraph = false;
   baseCfg.optimRuns = 1;
 
   shared::rendergraph::Penalties pens{1, 0, 1, 1, 0, 1, 1, 0, false, false};
@@ -434,8 +433,7 @@ int main(int argc, char** argv) {
   std::vector<loom::config::Config> configs;
   configs.push_back(baseCfg);
 
-  baseCfg.collapseLinePartners = true;
-  baseCfg.createCoreOptimGraph = true;
+  baseCfg.pruneGraph = true;
   configs.push_back(baseCfg);
 
   baseCfg.untangleGraph = true;

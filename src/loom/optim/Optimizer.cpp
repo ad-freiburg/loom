@@ -64,7 +64,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     }
 
     LOGTO(DEBUG, std::cerr) << "Done (" << T_STOP(1) << " ms)";
-  } else if (_cfg->createCoreOptimGraph) {
+  } else if (_cfg->pruneGraph) {
     // only apply core graph rules
     T_START(1);
     LOGTO(DEBUG, std::cerr) << "Creating core optimization graph...";

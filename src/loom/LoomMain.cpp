@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 
   loom::optim::OptResStats stats;
 
-  if (cfg.optimMethod == "ilp_impr") {
+  if (cfg.optimMethod == "ilp-naive") {
     optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, pens);
     stats = ilpEoOptim.optimize(&g);
   } else if (cfg.optimMethod == "ilp") {
