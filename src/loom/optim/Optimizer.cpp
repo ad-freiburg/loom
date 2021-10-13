@@ -42,6 +42,12 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
 
   OptResStats optResStats;
 
+  optResStats.numNodesOrig = rg->numNds();
+  optResStats.numStationsOrig = rg->numNds(false);
+  optResStats.numEdgesOrig = rg->numEdgs();
+  optResStats.numLinesOrig = rg->numLines();
+  optResStats.maxDegOrig = rg->maxDeg();
+
   size_t maxC = maxCard(*g.getNds());
   double solSp = solutionSpaceSize(*g.getNds());
   LOGTO(DEBUG, std::cerr) << "Optimizing line graph of size "
@@ -49,14 +55,17 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
                           << " with max cardinality = " << maxC
                           << " and solution space size = " << solSp;
 
-  g.partnerLines();
+  optResStats.solutionSpaceSizeOrig = solSp;
+  optResStats.maxLineCardOrig = maxC;
 
   if (_cfg->untangleGraph) {
     // do full untangling
     LOGTO(DEBUG, std::cerr) << "Untangling graph...";
+    g.partnerLines();
+
     T_START(1);
 
-    for (size_t i = 0; i <= maxC + 10; i++) {
+    for (size_t i = 0; i <= maxC + 1; i++) {
       g.untangle();
       g.contractDeg2Nds();
       g.splitSingleLineEdgs();
@@ -68,7 +77,10 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     // only apply core graph rules
     T_START(1);
     LOGTO(DEBUG, std::cerr) << "Creating core optimization graph...";
+    g.partnerLines();
     g.contractDeg2Nds();
+    g.splitSingleLineEdgs();
+    g.terminusDetach();
     LOGTO(DEBUG, std::cerr) << "Done (" << T_STOP(1) << " ms)";
   }
 
