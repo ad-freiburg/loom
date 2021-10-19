@@ -61,11 +61,11 @@ int main(int argc, char** argv) {
   loom::optim::OptResStats stats;
 
   if (cfg.optimMethod == "ilp-naive") {
-    optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, pens);
-    stats = ilpEoOptim.optimize(&g);
-  } else if (cfg.optimMethod == "ilp") {
     optim::ILPOptimizer ilpOptim(&cfg, pens);
     stats = ilpOptim.optimize(&g);
+  } else if (cfg.optimMethod == "ilp") {
+    optim::ILPEdgeOrderOptimizer ilpEoOptim(&cfg, pens);
+    stats = ilpEoOptim.optimize(&g);
   } else if (cfg.optimMethod == "comb") {
     optim::CombOptimizer ilpCombiOptim(&cfg, pens);
     stats = ilpCombiOptim.optimize(&g);
