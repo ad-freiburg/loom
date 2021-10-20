@@ -21,7 +21,8 @@ class NullOptimizer : public Optimizer {
                 const shared::rendergraph::Penalties& pens)
       : Optimizer(cfg, pens){};
   int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                   shared::rendergraph::HierarOrderCfg* c, size_t depth) const;
+                   shared::rendergraph::HierarOrderCfg* c, size_t depth,
+                   OptResStats& stats) const;
 };
 }  // namespace optim
 }  // namespace loom

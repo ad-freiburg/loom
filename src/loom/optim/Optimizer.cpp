@@ -49,10 +49,17 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
   optResStats.maxDegOrig = rg->maxDeg();
 
   size_t maxC = maxCard(*g.getNds());
-  double solSp = solutionSpaceSize(*g.getNds());
+
+  double solSp = 0;
+  const auto& origComps = util::graph::Algorithm::connectedComponents(g);
+  for (const auto& nds : origComps) {
+    solSp +=  solutionSpaceSize(nds);
+  }
+  optResStats.numCompsOrig = origComps.size();
   LOGTO(DEBUG, std::cerr) << "Optimizing line graph of size "
                           << rg->getNds()->size()
-                          << " with max cardinality = " << maxC
+                          << " with " << origComps.size() << " components"
+                          << " and max cardinality = " << maxC
                           << " and solution space size = " << solSp;
 
   optResStats.solutionSpaceSizeOrig = solSp;
@@ -91,10 +98,23 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     out.print(g, fstr);
   }
 
+  // iterate over components and optimize all of them separately
+  const auto& comps = util::graph::Algorithm::connectedComponents(g);
+
   optResStats.numNodes = g.getNumNodes();
   optResStats.numEdges = g.getNumEdges();
   optResStats.maxLineCard = maxCard(*g.getNds());
-  optResStats.solutionSpaceSize = solutionSpaceSize(*g.getNds());
+  optResStats.solutionSpaceSize = 0;
+
+  size_t nonTrivialComponents = 0;
+
+  for (const auto& nds : comps) {
+    optResStats.solutionSpaceSize +=  solutionSpaceSize(nds);
+    // skip trivial components
+    if (nds.size() < 3) continue;
+    nonTrivialComponents++;
+  }
+
 
   if (_cfg->outputStats) {
     LOGTO(INFO, std::cerr) << "(stats) Stats for <optim> graph of '" << rg
@@ -109,21 +129,11 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
                            << optResStats.solutionSpaceSize;
   }
 
-  // iterate over components and optimize all of them separately
-  const auto& comps = util::graph::Algorithm::connectedComponents(g);
-
-  size_t nonTrivialComponents = 0;
-
-  for (const auto& nds : comps) {
-    // skip trivial components
-    if (nds.size() < 3) continue;
-    nonTrivialComponents++;
-  }
-
   size_t runs = _cfg->optimRuns;
   double tSum = 0;
   double iterSum = 0;
   double scoreSum = 0;
+  double crossSum = 0;
   double crossSumSame = 0;
   double crossSumDiff = 0;
   double sepSum = 0;
@@ -149,6 +159,9 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     size_t maxNumEdges = 0;
     size_t numM1Comps = 0;
 
+    optResStats.maxNumRowsPerComp = 0;
+    optResStats.maxNumColsPerComp = 0;
+
     for (const auto nds : comps) {
       if (_cfg->outputStats) {
         size_t maxC = maxCard(nds);
@@ -172,9 +185,9 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
       // this is the implementation of the single edge pruning described in the
       // publication - simple skip such components
       if (nds.size() > 2) {
-        iters += optimizeComp(&g, nds, &hc);
+        iters += optimizeComp(&g, nds, &hc, optResStats);
       } else {
-        nullOpt.optimizeComp(&g, nds, &hc, 0);
+        nullOpt.optimizeComp(&g, nds, &hc, 0, optResStats);
       }
     }
 
@@ -240,6 +253,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     auto crossings = _scorer.getNumCrossings(&gg, optCfg);
     crossSumSame += crossings.first;
     crossSumDiff += crossings.second;
+    crossSum += crossings.first + crossings.second;
 
     size_t separations = _scorer.getNumSeparations(&gg, optCfg);
 
@@ -264,6 +278,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
   optResStats.avgScore = scoreSum / (1.0 * runs);
   optResStats.avgSameSegCross = crossSumSame / (1.0 * runs);
   optResStats.avgDiffSegCross = crossSumDiff / (1.0 * runs);
+  optResStats.avgCross = crossSum / (1.0 * runs);
   optResStats.avgSeps = sepSum / (1.0 * runs);
 
   if (_cfg->outputStats) {
@@ -468,8 +483,8 @@ double Optimizer::solutionSpaceSize(const std::set<OptNode*>& g) {
 
 // _____________________________________________________________________________
 int Optimizer::optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
-                            HierarOrderCfg* c) const {
-  return optimizeComp(g, cmp, c, 0);
+                            HierarOrderCfg* c, OptResStats& stats) const {
+  return optimizeComp(g, cmp, c, 0, stats);
 }
 
 // _____________________________________________________________________________

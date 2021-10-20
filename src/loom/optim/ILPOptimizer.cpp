@@ -23,13 +23,18 @@ using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
 int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                               HierarOrderCfg* hc, size_t depth) const {
+                               HierarOrderCfg* hc, size_t depth,
+                               OptResStats& stats) const {
   LOGTO(DEBUG, std::cerr) << "Creating ILP problem... ";
   T_START(build);
   auto lp = createProblem(og, g);
   double buildT = T_STOP(build);
   LOGTO(DEBUG, std::cerr) << " .. done";
 
+  if (lp->getNumVars() > stats.maxNumColsPerComp)
+    stats.maxNumColsPerComp = lp->getNumVars();
+  if (lp->getNumConstrs() > stats.maxNumRowsPerComp)
+    stats.maxNumRowsPerComp = lp->getNumConstrs();
 
   if (_cfg->MPSOutputPath.size()) {
     lp->writeMps(_cfg->MPSOutputPath);

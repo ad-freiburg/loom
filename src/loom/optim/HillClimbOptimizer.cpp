@@ -17,9 +17,10 @@ using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
 int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                     HierarOrderCfg* hc, size_t depth) const {
+                                     HierarOrderCfg* hc, size_t depth,
+                                     OptResStats& stats) const {
   UNUSED(depth);
-  OptOrderCfg cur ;
+  OptOrderCfg cur;
 
   // fixed order list of optim graph edges
   std::vector<OptEdge*> edges;

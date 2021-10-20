@@ -19,8 +19,8 @@ using shared::rendergraph::RenderGraph;
 // _____________________________________________________________________________
 int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
                                               const std::set<OptNode*>& g,
-                                              HierarOrderCfg* hc,
-                                              size_t depth) const {
+                                              HierarOrderCfg* hc, size_t depth,
+                                              OptResStats& stats) const {
   OptOrderCfg cur;
 
   // fixed order list of optim graph edges

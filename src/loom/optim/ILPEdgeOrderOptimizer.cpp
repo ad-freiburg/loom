@@ -392,10 +392,10 @@ void ILPEdgeOrderOptimizer::writeCrossingOracle(const std::set<OptNode*>& g,
 
           int row2 = lp->addRow(rowName2.str(), 0, shared::optim::LO);
 
-          bool otherWayA =
-              (segmentA->getFrom() != node) ^ segmentA->pl().lnEdgParts.front().dir;
-          bool otherWayB =
-              (segmentB->getFrom() != node) ^ segmentB->pl().lnEdgParts.front().dir;
+          bool otherWayA = (segmentA->getFrom() != node) ^
+                           segmentA->pl().lnEdgParts.front().dir;
+          bool otherWayB = (segmentB->getFrom() != node) ^
+                           segmentB->pl().lnEdgParts.front().dir;
 
           if (otherWayA ^ otherWayB) {
           } else {

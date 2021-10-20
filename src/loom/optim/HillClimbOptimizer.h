@@ -21,17 +21,16 @@ class HillClimbOptimizer : public ExhaustiveOptimizer {
   HillClimbOptimizer(const config::Config* cfg,
                      const shared::rendergraph::Penalties& pens,
                      bool randomStart)
-      : ExhaustiveOptimizer(cfg, pens), _randomStart(randomStart) {};
+      : ExhaustiveOptimizer(cfg, pens), _randomStart(randomStart){};
 
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                           shared::rendergraph::HierarOrderCfg* c,
-                           size_t depth) const;
+                           shared::rendergraph::HierarOrderCfg* c, size_t depth,
+                           OptResStats& stats) const;
 
  protected:
   double getScore(OptGraph* og, OptEdge* e, OptOrderCfg& cur) const;
 
   bool _randomStart;
-
 };
 }  // namespace optim
 }  // namespace loom

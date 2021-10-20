@@ -16,7 +16,8 @@ using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
 int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                      HierarOrderCfg* hc, size_t depth) const {
+                                      HierarOrderCfg* hc, size_t depth,
+                                      OptResStats& stats) const {
   LOGTO(DEBUG, std::cerr) << prefix(depth)
                           << "(ExhaustiveOptimizer) Optimizing component with "
                           << g.size() << " nodes.";
@@ -41,7 +42,8 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   bool running = true;
 
   double curScore = _optScorer.getCrossingScore(g, cur);
-  if (_optScorer.optimizeSep()) curScore += _optScorer.getSeparationScore(g, cur);
+  if (_optScorer.optimizeSep())
+    curScore += _optScorer.getSeparationScore(g, cur);
 
   bestScore = curScore;
   best = cur;
@@ -81,8 +83,10 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
     if (!running) break;
 
-    if (_optScorer.optimizeSep()) curScore = _optScorer.getTotalScore(g, cur);
-    else curScore = _optScorer.getCrossingScore(g, cur);
+    if (_optScorer.optimizeSep())
+      curScore = _optScorer.getTotalScore(g, cur);
+    else
+      curScore = _optScorer.getCrossingScore(g, cur);
 
     if (curScore < bestScore) {
       bestScore = curScore;

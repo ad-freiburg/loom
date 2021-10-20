@@ -11,7 +11,8 @@ using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
 int NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                HierarOrderCfg* hc, size_t depth) const {
+                                HierarOrderCfg* hc, size_t depth,
+                                OptResStats& stats) const {
   LOGTO(DEBUG, std::cerr) << prefix(depth)
                           << "(NullOptimizer) Optimizing component with "
                           << g.size() << " nodes.";

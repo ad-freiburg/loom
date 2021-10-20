@@ -30,7 +30,8 @@ class CombOptimizer : public Optimizer {
         _annealOpt(cfg, pens, false){};
 
   int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                   shared::rendergraph::HierarOrderCfg* c, size_t depth) const;
+                   shared::rendergraph::HierarOrderCfg* c, size_t depth,
+                   OptResStats& stats) const;
 
  private:
   const ILPEdgeOrderOptimizer _ilpOpt;

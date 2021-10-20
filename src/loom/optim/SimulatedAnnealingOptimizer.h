@@ -26,7 +26,7 @@ class SimulatedAnnealingOptimizer : public HillClimbOptimizer {
 
   virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                            shared::rendergraph::HierarOrderCfg* c,
-                           size_t depth) const;
+                           size_t depth, OptResStats& stats) const;
 };
 }  // namespace optim
 }  // namespace loom

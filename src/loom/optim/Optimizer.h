@@ -21,9 +21,9 @@ typedef std::pair<OptEdge*, OptEdge*> EdgePair;
 
 struct OptResStats {
   size_t numNodesOrig, numStationsOrig, numEdgesOrig, maxLineCardOrig, numLinesOrig, maxDegOrig;
-  size_t numStations, numNodes, numEdges, maxLineCard, nonTrivialComponents, numCompsSolSpaceOne, maxNumNodesPerComp, maxNumEdgesPerComp, maxCardPerComp;
+  size_t numStations, numNodes, numEdges, maxLineCard, nonTrivialComponents, numCompsSolSpaceOne, maxNumNodesPerComp, maxNumEdgesPerComp, maxCardPerComp, numCompsOrig, maxNumRowsPerComp, maxNumColsPerComp;
   size_t runs;
-  double avgSolveTime, avgIterations, avgScore, avgSameSegCross, avgDiffSegCross, avgSeps, solutionSpaceSize, solutionSpaceSizeOrig, maxCompSolSpace;
+  double avgSolveTime, avgIterations, avgScore, avgCross, avgSameSegCross, avgDiffSegCross, avgSeps, solutionSpaceSize, solutionSpaceSizeOrig, maxCompSolSpace;
 
   // best score for multiple runs
   size_t sameSegCrossings;
@@ -40,10 +40,11 @@ class Optimizer {
 
   virtual OptResStats optimize(shared::rendergraph::RenderGraph* rg) const;
   int optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
-                   shared::rendergraph::HierarOrderCfg* c) const;
+                   shared::rendergraph::HierarOrderCfg* c,
+                   OptResStats& stats) const;
   virtual int optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
                            shared::rendergraph::HierarOrderCfg* c,
-                           size_t depth) const = 0;
+                           size_t depth, OptResStats& stats) const = 0;
 
   static std::vector<LinePair> getLinePairs(OptEdge* segment);
   static std::vector<LinePair> getLinePairs(OptEdge* segment, bool unique);
