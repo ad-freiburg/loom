@@ -84,9 +84,11 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     T_START(1);
     LOGTO(DEBUG, std::cerr) << "Creating core optimization graph...";
     g.partnerLines();
+    // not necessary here, but avoids an excessive number of single edges...
     g.contractDeg2Nds();
     g.splitSingleLineEdgs();
     g.terminusDetach();
+    g.contractDeg2Nds();
     LOGTO(DEBUG, std::cerr) << "Done (" << T_STOP(1) << " ms)";
   }
 
