@@ -1820,4 +1820,42 @@ int main(int argc, char** argv) {
   TEST(geo::getWKT(geo::segment(DLine{{0, 0}, {0, 1}, {0, 2}}, 0, 0.5)), ==, "LINESTRING (0 0, 0 1)");
   TEST(geo::getWKT(geo::segment(DLine{{0, 0}, {0, 1}, {0, 2}}, 0.5, 1)), ==, "LINESTRING (0 1, 0 2)");
 }
+
+
+  // inversion count
+  std::vector<int> test = {2, 1};
+  TEST(inversions(test), ==, 1);
+
+  test = {};
+  TEST(inversions(test), ==, 0);
+
+  test = {2};
+  TEST(inversions(test), ==, 0);
+
+  test = {2, 1};
+  TEST(inversions(test), ==, 1);
+
+  test = {1, 2};
+  TEST(inversions(test), ==, 0);
+
+  test = {2, 1, 3};
+  TEST(inversions(test), ==, 1);
+
+  test = {2, 3, 1};
+  TEST(inversions(test), ==, 2);
+
+  test = {3, 2, 1};
+  TEST(inversions(test), ==, 3);
+
+  test = {1, 2, 3};
+  TEST(inversions(test), ==, 0);
+
+  test = {1, 3, 2, 6, 5, 4, 8, 7, 9};
+  TEST(inversions(test), ==, 5);
+
+  test = {1, 2, 3, 4, 5, 6};
+  TEST(inversions(test), ==, 0);
+
+  test = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+  TEST(inversions(test), ==, 8 + 7 + 6 + 5 + 4 + 3 + 2 + 1);
 }

@@ -11,6 +11,7 @@
 #include <sstream>
 #include <immintrin.h>
 #include <iostream>
+#include <vector>
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
@@ -151,6 +152,79 @@ inline double atof(const char* p, uint8_t mn) {
 
 // _____________________________________________________________________________
 inline double atof(const char* p) { return atof(p, 38); }
+
+// _____________________________________________________________________________
+template <typename V>
+int merge(V* lst, V* tmpLst, size_t l, size_t m, size_t r) {
+  size_t ret = 0;
+
+  size_t lp = l;
+  size_t rp = m;
+  size_t outp = l;
+
+  while (lp < m && rp < r + 1) {
+    if (lst[lp] <= lst[rp]) {
+      // if left element is smaller or equal, add it to return list,
+      // increase left pointer
+      tmpLst[outp] = lst[lp];
+      lp++;
+    } else {
+      // if left element is bigger, add the right element, add it to ret,
+      // increase right pointer
+      tmpLst[outp] = lst[rp];
+      rp++;
+
+      // if the left element was bigger, everything to the right in the
+      // left list is also bigger, and all these m - i elements were
+      // initially in the wrong order! Count these inversions.
+      ret += m - lp;
+    }
+
+    outp++;
+  }
+
+  // fill in remaining values
+  if (lp < m) std::memcpy(tmpLst + outp, lst + lp, (m - lp) * sizeof(V));
+  if (rp <= r) std::memcpy(tmpLst + outp, lst + rp, ((r + 1) - rp) * sizeof(V));
+
+  // copy to output
+  std::memcpy(lst + l, tmpLst + l, ((r + 1) - l) * sizeof(V));
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+template <typename V>
+size_t mergeInvCount(V* lst, V* tmpLst, size_t l, size_t r) {
+  size_t ret = 0;
+  if (l < r) {
+    size_t m = (r + l) / 2;
+
+    ret += mergeInvCount(lst, tmpLst, l, m);
+    ret += mergeInvCount(lst, tmpLst, m + 1, r);
+
+    ret += merge(lst, tmpLst, l, m + 1, r);
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
+template <typename V>
+size_t inversions(const std::vector<V>& v) {
+  if (v.size() < 2) return 0;  // no inversions possible
+
+  // unroll some simple cases
+  if (v.size() == 2) return v[1] < v[0];
+  if (v.size() == 3) return (v[0] > v[1]) + (v[0] > v[2]) + (v[1] > v[2]);
+
+  V tmpLst[v.size()];
+  V lst[v.size()];
+
+  for (size_t i = 0; i < v.size(); i++) lst[i] = v[i];
+
+  return mergeInvCount<V>(lst, tmpLst, 0, v.size() - 1);
+}
+
 
 // _____________________________________________________________________________
 inline std::string getHomeDir() {

@@ -2,6 +2,7 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#include <map>
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/OptGraphScorer.h"
 #include "loom/optim/Optimizer.h"
@@ -90,6 +91,7 @@ double OptGraphScorer::getTotalScore(OptEdge* e, const OptOrderCfg& c) const {
 // _____________________________________________________________________________
 double OptGraphScorer::getTotalScore(OptNode* n, const OptOrderCfg& c) const {
   if (!n->pl().node) return 0;
+
   auto num = getNumCrossSeps(n, c);
 
   return num.first.first * getCrossingPenSameSeg(n) +
@@ -153,50 +155,160 @@ std::pair<size_t, size_t> OptGraphScorer::getNumCrossings(
 // _____________________________________________________________________________
 std::pair<std::pair<size_t, size_t>, size_t> OptGraphScorer::getNumCrossSeps(
     OptNode* n, const OptOrderCfg& c) const {
-  if (n->getDeg() == 1) return {{0, 0}, {0}};
-
-  size_t sameSegCrossings = 0;
-  size_t diffSegCrossings = 0;
-  size_t seps = 0;
-
+  std::pair<std::pair<size_t, size_t>, size_t> ret = {{0, 0}, 0};
   for (auto ea : n->getAdjList()) {
-    // line pairs are unique because of the second parameter
-    // they are always sorted by their pointer value
-    const auto& linePairs = Optimizer::getLinePairs(ea, true);
-    const auto& cea = c.at(ea);
+    auto cur = getNumCrossSeps(n, ea, c);
+    ret.first.first += cur.first.first;
+    ret.second += cur.second;
+  }
 
-    for (const auto& lp : linePairs) {
-      // check if pairs continue in same segments
+  if (n->getDeg() > 2) {
+    // diff seg crossings
+    for (auto ea : n->getAdjList()) {
+      size_t cur = getNumCrossDiffSeg(n, ea, c);
+      ret.first.second += cur;
+    }
 
-      size_t peaA =
-          std::find(cea.begin(), cea.end(), lp.first.line) - cea.begin();
-      size_t peaB =
-          std::find(cea.begin(), cea.end(), lp.second.line) - cea.begin();
+    ret.first.second -= ret.first.first;
+  }
 
-      for (const auto& eb : Optimizer::getEdgePartners(n, ea, lp)) {
-        const auto& ceb = c.at(eb);
+  // same seg crossings are counted twice!
+  ret.first.first /= 2;
 
-        PosCom posA(peaA, std::find(ceb.begin(), ceb.end(), lp.first.line) -
-                              ceb.begin());
+  return ret;
+}
 
-        PosCom posB(peaB, std::find(ceb.begin(), ceb.end(), lp.second.line) -
-                              ceb.begin());
+// _____________________________________________________________________________
+size_t OptGraphScorer::getNumCrossDiffSeg(OptNode* n, OptEdge* ea,
+                                          const OptOrderCfg& c) const {
+  std::map<const Line*, size_t> ordering;
 
-        PosComPair poses(posA, posB);
+  bool revA = (ea->getFrom() != n) ^ ea->pl().lnEdgParts.front().dir;
 
-        if (Optimizer::crosses(n, ea, eb, poses)) sameSegCrossings++;
-        if (Optimizer::separates(poses)) seps++;
-      }
+  const auto& cea = c.at(ea);
 
-      PosCom posA(peaA, peaB);
+  for (size_t i = 0; i < cea.size(); i++) {
+    const auto& l = cea[i];
+    ordering[l] = revA ? cea.size() - 1 - i : i;
+  }
 
-      for (const auto& ebc : Optimizer::getEdgePartnerPairs(n, ea, lp)) {
-        if (Optimizer::crosses(n, ea, ebc, posA)) diffSegCrossings++;
+  std::vector<size_t> relOrderCross;
+
+  for (const auto& eb : OptGraph::clockwEdges(ea, n)) {
+    const auto& ceb = c.at(eb);
+    bool revB = (eb->getFrom() != n) ^ eb->pl().lnEdgParts.front().dir;
+
+    for (size_t i = 0; i < ceb.size(); i++) {
+      const auto& thisLine = ceb[!revB ? ceb.size() - 1 - i : i];
+
+      auto otherIt = ordering.find(thisLine);
+      if (otherIt == ordering.end()) continue;
+
+      const auto* eaLo = ea->pl().getLineOcc(otherIt->first);
+      const auto* ebLo = eb->pl().getLineOcc(thisLine);
+
+      assert(eaLo);
+      assert(ebLo);
+
+      if ((eaLo->dir == 0 || ebLo->dir == 0 ||
+           (eaLo->dir == n->pl().node && ebLo->dir != n->pl().node) ||
+           (eaLo->dir != n->pl().node && ebLo->dir == n->pl().node)) &&
+          (n->pl().node->pl().connOccurs(eaLo->line, OptGraph::getAdjEdg(ea, n),
+                                         OptGraph::getAdjEdg(eb, n)))) {
+        // connection occurs, consider for crossings
+        relOrderCross.push_back(otherIt->second);
       }
     }
   }
 
-  return {{sameSegCrossings / 2, diffSegCrossings}, seps / 2};
+  return util::inversions(relOrderCross);
+}
+
+// _____________________________________________________________________________
+std::pair<std::pair<size_t, size_t>, size_t> OptGraphScorer::getNumCrossSeps(
+    OptNode* n, OptEdge* ea, OptEdge* eb, const OptOrderCfg& c) const {
+  std::pair<std::pair<size_t, size_t>, size_t> ret{{0, 0}, 0};
+
+  std::map<const Line*, size_t> ordering;
+
+  bool revA = (ea->getFrom() != n) ^ ea->pl().lnEdgParts.front().dir;
+  bool revB = (eb->getFrom() != n) ^ eb->pl().lnEdgParts.front().dir;
+
+  bool rev = !(revA ^ revB);
+
+  const auto& cea = c.at(ea);
+  const auto& ceb = c.at(eb);
+
+  for (size_t i = 0; i < cea.size(); i++) {
+    ordering[cea[i]] = rev ? cea.size() - 1 - i : i;
+  }
+
+  std::vector<size_t> relOrderCross, relOrderSep;
+
+  for (size_t i = 0; i < ceb.size(); i++) {
+    const auto& thisLine = ceb[i];
+
+    auto otherIt = ordering.find(thisLine);
+    if (otherIt == ordering.end()) {
+      // insert a placeholder for separations, otherwise ignore
+      relOrderSep.push_back(std::numeric_limits<size_t>::max());
+      continue;
+    }
+
+    const auto* eaLo = ea->pl().getLineOcc(otherIt->first);
+    const auto* ebLo = eb->pl().getLineOcc(thisLine);
+
+    assert(eaLo);
+    assert(ebLo);
+
+    if ((eaLo->dir == 0 || ebLo->dir == 0 ||
+         (eaLo->dir == n->pl().node && ebLo->dir != n->pl().node) ||
+         (eaLo->dir != n->pl().node && ebLo->dir == n->pl().node)) &&
+        (n->pl().node->pl().connOccurs(eaLo->line, OptGraph::getAdjEdg(ea, n),
+                                       OptGraph::getAdjEdg(eb, n)))) {
+      // connection occurs, consider for crossings
+      relOrderCross.push_back(otherIt->second);
+      relOrderSep.push_back(otherIt->second);
+    } else {
+      // otherwise insert a placeholder
+      relOrderSep.push_back(std::numeric_limits<size_t>::max());
+    }
+  }
+
+  size_t seps = 0;
+
+  // count separations
+  for (size_t i = 1; i < relOrderSep.size(); i++) {
+    if (relOrderSep[i - 1] < std::numeric_limits<size_t>::max() &&
+        relOrderSep[i] < std::numeric_limits<size_t>::max()) {
+      if (relOrderSep[i] > relOrderSep[i - 1] &&
+          relOrderSep[i] - relOrderSep[i - 1] > 1)
+        seps++;
+      if (relOrderSep[i] < relOrderSep[i - 1] &&
+          relOrderSep[i - 1] - relOrderSep[i] > 1)
+        seps++;
+    }
+  }
+
+  ret.first.first = util::inversions(relOrderCross);
+  ret.second = seps;
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+std::pair<std::pair<size_t, size_t>, size_t> OptGraphScorer::getNumCrossSeps(
+    OptNode* n, OptEdge* ea, const OptOrderCfg& c) const {
+  std::pair<std::pair<size_t, size_t>, size_t> ret = {{0, 0}, 0};
+  for (auto eb : n->getAdjList()) {
+    if (eb == ea) continue;
+    auto cur = getNumCrossSeps(n, ea, eb, c);
+    ret.first.first += cur.first.first;
+    ret.first.second += cur.first.second;
+    ret.second += cur.second;
+  }
+
+  return ret;
 }
 
 // _____________________________________________________________________________

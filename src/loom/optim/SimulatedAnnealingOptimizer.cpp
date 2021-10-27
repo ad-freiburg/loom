@@ -21,6 +21,8 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
                                               const std::set<OptNode*>& g,
                                               HierarOrderCfg* hc, size_t depth,
                                               OptResStats& stats) const {
+  UNUSED(depth);
+  UNUSED(stats);
   OptOrderCfg cur;
 
   // fixed order list of optim graph edges
@@ -40,22 +42,15 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
   }
 
   size_t iters = 0;
-  size_t last = 0;
 
   size_t k = 0;
 
-  size_t ABORT_AFTER_UNCH = 50;
+  size_t ABORT_AFTER_UNCH = 5;
 
   while (true) {
     iters++;
 
     double temp = 1000.0 / iters;
-
-    if (iters - last == 10000) {
-      LOGTO(DEBUG, std::cerr) << "@ " << iters << ", temp = " << temp
-                              << ", last change was at " << k << " iters.";
-      last = iters;
-    }
 
     for (size_t i = 0; i < edges.size(); i++) {
       double oldScore = getScore(og, edges[i], cur);
@@ -92,15 +87,6 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
 
     if (iters - k > ABORT_AFTER_UNCH) break;
   }
-
-  double curScore = 0;
-  if (_optScorer.optimizeSep())
-    curScore += _optScorer.getTotalScore(g, cur);
-  else
-    curScore = _optScorer.getCrossingScore(g, cur);
-
-  LOGTO(INFO, std::cerr) << "Stopped after " << iters
-                         << " iterations. Final target = " << curScore;
 
   writeHierarch(&cur, hc);
   return iters;

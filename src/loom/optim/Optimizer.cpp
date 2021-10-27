@@ -58,7 +58,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
   optResStats.numCompsOrig = origComps.size();
   LOGTO(DEBUG, std::cerr) << "Optimizing line graph of size "
                           << rg->getNds()->size()
-                          << " with " << origComps.size() << " components"
+                          << " with " << origComps.size() << " component(s)"
                           << " and max cardinality = " << maxC
                           << " and solution space size = " << solSp;
 

@@ -1,6 +1,6 @@
 // Copyright 2017, University of Freiburg,
 // Chair of Algorithms and Data Structures.
-// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de> 
+// Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 #ifndef LOOM_OPTIM_OPTGRAPHSCORER_H_
 #define LOOM_OPTIM_OPTGRAPHSCORER_H_
 
@@ -31,11 +31,19 @@ class OptGraphScorer {
   double getSeparationScore(OptEdge* e, const OptOrderCfg& c) const;
 
   double getSeparationScore(const std::set<OptNode*>& g,
-                           const OptOrderCfg& c) const;
+                            const OptOrderCfg& c) const;
   double getSeparationScore(OptNode* n, const OptOrderCfg& c) const;
 
   std::pair<std::pair<size_t, size_t>, size_t> getNumCrossSeps(
       OptNode* n, const OptOrderCfg& c) const;
+
+  std::pair<std::pair<size_t, size_t>, size_t> getNumCrossSeps(
+      OptNode* n, OptEdge* e, const OptOrderCfg& c) const;
+
+  std::pair<std::pair<size_t, size_t>, size_t> getNumCrossSeps(
+      OptNode* n, OptEdge* ea, OptEdge* eb, const OptOrderCfg& c) const;
+  size_t getNumCrossDiffSeg(OptNode* n, OptEdge* ea,
+                            const OptOrderCfg& c) const;
 
   std::pair<size_t, size_t> getNumCrossings(OptNode* n,
                                             const OptOrderCfg& c) const;
@@ -58,7 +66,7 @@ class OptGraphScorer {
   double getCrossingPenSameSeg(const OptNode* n) const;
   double getCrossingPenDiffSeg(const OptNode* n) const;
 
-  const shared::rendergraph::Penalties& getPens() const { return _pens;}
+  const shared::rendergraph::Penalties& getPens() const { return _pens; }
 
  private:
   shared::rendergraph::Penalties _pens;

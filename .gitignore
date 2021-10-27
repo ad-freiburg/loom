@@ -1,3 +1,4 @@
+transitmap.svg
 Makefile
 CMakeCache.txt
 *.o
@@ -18,3 +19,4 @@ compile_commands.json
 [._]s[a-w][a-z]
 *.cppr
 *.hr
+*.log

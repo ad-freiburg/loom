@@ -84,6 +84,7 @@ const OptLO* OptEdgePL::getLineOcc(const Line* l) const {
 
   if (lines.size() < 4) return 0;
 
+  // we make use of the fact here that the lines are always sorted
   auto it = std::lower_bound(lines.begin(), lines.end(), l);
 
   if (it->line != l) return 0;
