@@ -50,6 +50,14 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
   double solSp = solutionSpaceSize(g);
 
+  // don't try if it is pointless, assuming we can make 100.000
+  // iterations per second
+  if ((solSp / 100000) > (60 * 60 * 6)) {
+    std::stringstream ss;
+    ss << "Exhaustive search would take too long (over " << ((solSp / 100000) / (60 * 60)) << " hours even assuming we can check 100.000 configurations per second";
+    throw std::runtime_error(ss.str());
+  }
+
   double itTime = 0;
 
   while (true) {
@@ -65,7 +73,7 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
     iters++;
 
     if (fabs((iters - last) - 10000) < 1) {
-      LOGTO(DEBUG, std::cerr)
+      LOGTO(INFO, std::cerr)
           << prefix(depth) << "@ " << iters << "/" << solSp << " ("
           << int(((1.0 * iters) / (1.0 * solSp)) * 100) << "%, "
           << (10000 / (itTime / 1000)) << " its/s)";
