@@ -24,6 +24,9 @@ inline ILPSolver* getSolver(std::string wish,
 
   // first try to consider wish
 
+  // aliases
+  if (wish == "cbc") wish = "coin";
+
   try {
 #ifdef GUROBI_FOUND
     if (wish == "gurobi") lp = new shared::optim::GurobiSolver(dir);
