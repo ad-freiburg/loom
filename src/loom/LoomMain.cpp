@@ -129,7 +129,6 @@ int main(int argc, char** argv) {
              {"max_num_cols_in_comp", stats.maxNumColsPerComp},
              {"max_num_rows_in_comp", stats.maxNumRowsPerComp},
              {"avg_solve_time", stats.avgSolveTime},
-             {"avg_iterations", stats.avgIterations},
              {"avg_score", stats.avgScore},
              {"avg_num_same_seg_crossings", stats.avgSameSegCross},
              {"avg_num_diff_seg_crossings", stats.avgDiffSegCross},
@@ -138,6 +137,7 @@ int main(int argc, char** argv) {
              {"best_num_same_seg_crossings", stats.sameSegCrossings},
              {"best_num_diff_seg_crossings", stats.diffSegCrossings},
              {"best_num_separations", stats.separations},
+             {"line_graph_simplification_time", stats.simplificationTime},
              {"best_score", stats.score}}}};
     out.print(g, std::cout, jsonStats);
   } else {

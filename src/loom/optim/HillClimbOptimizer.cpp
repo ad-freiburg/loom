@@ -16,9 +16,10 @@ using shared::linegraph::Line;
 using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
-int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+double HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                      HierarOrderCfg* hc, size_t depth,
                                      OptResStats& stats) const {
+  T_START(1);
   UNUSED(depth);
   OptOrderCfg cur;
 
@@ -42,6 +43,7 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   size_t last = 0;
 
   while (true) {
+    break;
     iters++;
 
     bool found = false;
@@ -81,7 +83,7 @@ int HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   }
 
   writeHierarch(&cur, hc);
-  return iters;
+  return T_STOP(1);
 }
 
 // _____________________________________________________________________________

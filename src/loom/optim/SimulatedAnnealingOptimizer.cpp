@@ -17,10 +17,11 @@ using shared::rendergraph::OrderCfg;
 using shared::rendergraph::RenderGraph;
 
 // _____________________________________________________________________________
-int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
+double SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
                                               const std::set<OptNode*>& g,
                                               HierarOrderCfg* hc, size_t depth,
                                               OptResStats& stats) const {
+  T_START(1);
   UNUSED(depth);
   UNUSED(stats);
   OptOrderCfg cur;
@@ -89,5 +90,5 @@ int SimulatedAnnealingOptimizer::optimizeComp(OptGraph* og,
   }
 
   writeHierarch(&cur, hc);
-  return iters;
+  return T_STOP(1);
 }

@@ -23,7 +23,7 @@ class ExhaustiveOptimizer : public Optimizer {
                       const shared::rendergraph::Penalties& pens)
       : Optimizer(cfg, pens), _optScorer(pens){};
 
-  virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+  virtual double optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                            shared::rendergraph::HierarOrderCfg* c,
                            size_t depth, OptResStats& stats) const;
 

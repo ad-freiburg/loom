@@ -21,9 +21,9 @@ class ILPOptimizer : public Optimizer {
                const shared::rendergraph::Penalties& pens)
       : Optimizer(cfg, pens){};
 
-  int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                   shared::rendergraph::HierarOrderCfg* c, size_t depth,
-                   OptResStats& stats) const;
+  virtual double optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+                              shared::rendergraph::HierarOrderCfg* c,
+                              size_t depth, OptResStats& stats) const;
 
  protected:
   virtual shared::optim::ILPSolver* createProblem(

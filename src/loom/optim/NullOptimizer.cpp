@@ -10,12 +10,13 @@ using loom::optim::NullOptimizer;
 using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
-int NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+double NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                 HierarOrderCfg* hc, size_t depth,
                                 OptResStats& stats) const {
   LOGTO(DEBUG, std::cerr) << prefix(depth)
                           << "(NullOptimizer) Optimizing component with "
                           << g.size() << " nodes.";
+  T_START(1);
 
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
@@ -37,5 +38,5 @@ int NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
       }
     }
   }
-  return 0;
+  return T_STOP(1);
 }

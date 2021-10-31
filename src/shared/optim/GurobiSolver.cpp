@@ -47,7 +47,7 @@ GurobiSolver::GurobiSolver(DirType dir)
     throw std::runtime_error("Could not start gurobi environment");
   }
 
-  // create emtpy model
+  // create empty model
   error = GRBnewmodel(_env, &_model, "loom_mip", 0, 0, 0, 0, 0, 0);
   if (error) {
     LOG(ERROR) << GRBgeterrormsg(_env);

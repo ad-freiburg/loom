@@ -23,7 +23,7 @@ class HillClimbOptimizer : public ExhaustiveOptimizer {
                      bool randomStart)
       : ExhaustiveOptimizer(cfg, pens), _randomStart(randomStart){};
 
-  virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+  virtual double optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                            shared::rendergraph::HierarOrderCfg* c, size_t depth,
                            OptResStats& stats) const;
 

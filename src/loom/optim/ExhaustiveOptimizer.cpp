@@ -15,12 +15,14 @@ using shared::linegraph::Line;
 using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
-int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+double ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                       HierarOrderCfg* hc, size_t depth,
                                       OptResStats& stats) const {
   LOGTO(DEBUG, std::cerr) << prefix(depth)
                           << "(ExhaustiveOptimizer) Optimizing component with "
                           << g.size() << " nodes.";
+
+  T_START(1);
 
   OptOrderCfg best, cur, null;
   double bestScore = DBL_MAX;
@@ -108,7 +110,7 @@ int ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
   writeHierarch(&best, hc);
 
-  return iters;
+  return T_STOP(1);
 }
 
 // _____________________________________________________________________________

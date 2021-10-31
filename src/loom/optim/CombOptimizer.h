@@ -29,7 +29,7 @@ class CombOptimizer : public Optimizer {
         _hillcOpt(cfg, pens, false),
         _annealOpt(cfg, pens, false){};
 
-  int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+  double optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                    shared::rendergraph::HierarOrderCfg* c, size_t depth,
                    OptResStats& stats) const;
 

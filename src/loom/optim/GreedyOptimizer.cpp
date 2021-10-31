@@ -16,19 +16,20 @@ using shared::linegraph::Line;
 using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
-int GreedyOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+double GreedyOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                   HierarOrderCfg* hc, size_t depth,
                                   OptResStats& stats) const {
   LOGTO(DEBUG, std::cerr) << prefix(depth)
                           << "(GreedyOptimizer) Optimizing component with "
                           << g.size() << " nodes.";
+  T_START(1);
   UNUSED(depth);
   OptOrderCfg cfg;
 
   getFlatConfig(g, &cfg);
 
   writeHierarch(&cfg, hc);
-  return 0;
+  return T_STOP(1);
 }
 
 // _____________________________________________________________________________

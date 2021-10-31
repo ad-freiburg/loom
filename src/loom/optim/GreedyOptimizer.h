@@ -42,7 +42,7 @@ class GreedyOptimizer : public ExhaustiveOptimizer {
                   const shared::rendergraph::Penalties& pens, bool lookAhead)
       : ExhaustiveOptimizer(cfg, pens), _lookAhead(lookAhead){};
 
-  virtual int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+  virtual double optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                            shared::rendergraph::HierarOrderCfg* c,
                            size_t depth, OptResStats& stats) const;
 

@@ -22,7 +22,7 @@ using shared::optim::ILPSolver;
 using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
-int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+double ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                HierarOrderCfg* hc, size_t depth,
                                OptResStats& stats) const {
   LOGTO(DEBUG, std::cerr) << "Creating ILP problem... ";
@@ -42,7 +42,7 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
   if (_cfg->ilpTimeLimit >= 0) lp->setTimeLim(_cfg->ilpTimeLimit);
 
-  LOGTO(DEBUG, std::cerr) << "Solving problem...";
+  LOGTO(DEBUG, std::cerr) << "Solving ILP problem...";
 
   T_START(solve);
 
@@ -66,7 +66,7 @@ int ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
   delete lp;
 
-  return 0;
+  return solveT;
 }
 
 // _____________________________________________________________________________

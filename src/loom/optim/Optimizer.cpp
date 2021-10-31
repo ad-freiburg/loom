@@ -53,12 +53,12 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
   double solSp = 0;
   const auto& origComps = util::graph::Algorithm::connectedComponents(g);
   for (const auto& nds : origComps) {
-    solSp +=  solutionSpaceSize(nds);
+    solSp += solutionSpaceSize(nds);
   }
   optResStats.numCompsOrig = origComps.size();
   LOGTO(DEBUG, std::cerr) << "Optimizing line graph of size "
-                          << rg->getNds()->size()
-                          << " with " << origComps.size() << " component(s)"
+                          << rg->getNds()->size() << " with "
+                          << origComps.size() << " component(s)"
                           << " and max cardinality = " << maxC
                           << " and solution space size = " << solSp;
 
@@ -78,7 +78,10 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
       g.terminusDetach();
     }
 
-    LOGTO(DEBUG, std::cerr) << "Done (" << T_STOP(1) << " ms)";
+    optResStats.simplificationTime = T_STOP(1);
+
+    LOGTO(DEBUG, std::cerr)
+        << "Done (" << optResStats.simplificationTime << " ms)";
   } else if (_cfg->pruneGraph) {
     // only apply core graph rules
     T_START(1);
@@ -89,7 +92,11 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     g.splitSingleLineEdgs();
     g.terminusDetach();
     g.contractDeg2Nds();
-    LOGTO(DEBUG, std::cerr) << "Done (" << T_STOP(1) << " ms)";
+
+    optResStats.simplificationTime = T_STOP(1);
+
+    LOGTO(DEBUG, std::cerr)
+        << "Done (" << optResStats.simplificationTime << " ms)";
   }
 
   if (_cfg->outOptGraph) {
@@ -111,12 +118,11 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
   size_t nonTrivialComponents = 0;
 
   for (const auto& nds : comps) {
-    optResStats.solutionSpaceSize +=  solutionSpaceSize(nds);
+    optResStats.solutionSpaceSize += solutionSpaceSize(nds);
     // skip trivial components
     if (nds.size() < 3) continue;
     nonTrivialComponents++;
   }
-
 
   if (_cfg->outputStats) {
     LOGTO(INFO, std::cerr) << "(stats) Stats for <optim> graph of '" << rg
@@ -133,7 +139,6 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
 
   size_t runs = _cfg->optimRuns;
   double tSum = 0;
-  double iterSum = 0;
   double scoreSum = 0;
   double crossSum = 0;
   double crossSumSame = 0;
@@ -153,8 +158,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     OrderCfg c;
     HierarOrderCfg hc;
 
-    T_START(1);
-    size_t iters = 0;
+    double t = 0;
     double maxCompSolSpace = 0;
     size_t maxCompC = 0;
     size_t maxNumNodes = 0;
@@ -187,13 +191,11 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
       // this is the implementation of the single edge pruning described in the
       // publication - simple skip such components
       if (nds.size() > 2) {
-        iters += optimizeComp(&g, nds, &hc, optResStats);
+        t += optimizeComp(&g, nds, &hc, optResStats);
       } else {
-        nullOpt.optimizeComp(&g, nds, &hc, 0, optResStats);
+        t += nullOpt.optimizeComp(&g, nds, &hc, 0, optResStats);
       }
     }
-
-    double t = T_STOP(1);
 
     optResStats.nonTrivialComponents = nonTrivialComponents;
     optResStats.numCompsSolSpaceOne = numM1Comps;
@@ -238,7 +240,6 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     }
 
     tSum += t;
-    iterSum += iters;
 
     OptGraph gg(&_scorer);
     auto ndMap = gg.build(rg);
@@ -247,8 +248,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
 
     double score = _scorer.getCrossingScore(&gg, optCfg);
 
-    if (_scorer.optimizeSep())
-      score += _scorer.getSeparationScore(&gg, optCfg);
+    if (_scorer.optimizeSep()) score += _scorer.getSeparationScore(&gg, optCfg);
 
     scoreSum += score;
 
@@ -276,7 +276,6 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
 
   optResStats.runs = runs;
   optResStats.avgSolveTime = tSum / (1.0 * runs);
-  optResStats.avgIterations = iterSum / (1.0 * runs);
   optResStats.avgScore = scoreSum / (1.0 * runs);
   optResStats.avgSameSegCross = crossSumSame / (1.0 * runs);
   optResStats.avgDiffSegCross = crossSumDiff / (1.0 * runs);
@@ -289,8 +288,6 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
                            << " run(s):";
     LOGTO(INFO, std::cerr) << "(stats) avg solve time: "
                            << optResStats.avgSolveTime << " ms";
-    LOGTO(INFO, std::cerr) << "(stats) avg iters: "
-                           << optResStats.avgIterations;
     LOGTO(INFO, std::cerr) << "(stats) avg score: -- " << optResStats.avgScore
                            << " --";
     LOGTO(INFO, std::cerr) << "(stats) avg num crossings: -- "
@@ -484,8 +481,8 @@ double Optimizer::solutionSpaceSize(const std::set<OptNode*>& g) {
 }
 
 // _____________________________________________________________________________
-int Optimizer::optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
-                            HierarOrderCfg* c, OptResStats& stats) const {
+double Optimizer::optimizeComp(OptGraph* g, const std::set<OptNode*>& cmp,
+                               HierarOrderCfg* c, OptResStats& stats) const {
   return optimizeComp(g, cmp, c, 0, stats);
 }
 

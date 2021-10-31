@@ -20,7 +20,7 @@ class NullOptimizer : public Optimizer {
   NullOptimizer(const config::Config* cfg,
                 const shared::rendergraph::Penalties& pens)
       : Optimizer(cfg, pens){};
-  int optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+  double optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                    shared::rendergraph::HierarOrderCfg* c, size_t depth,
                    OptResStats& stats) const;
 };

@@ -20,7 +20,7 @@ using loom::optim::CombOptimizer;
 using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
-int CombOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
+double CombOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                 HierarOrderCfg* hc, size_t depth,
                                 OptResStats& stats) const {
   size_t maxC = maxCard(g);
@@ -32,12 +32,10 @@ int CombOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                           << solSp;
 
   if (maxC == 1) {
-    _nullOpt.optimizeComp(og, g, hc, depth + 1, stats);
+    return _nullOpt.optimizeComp(og, g, hc, depth + 1, stats);
   } else if (solSp < 500) {
-    _exhausOpt.optimizeComp(og, g, hc, depth + 1, stats);
+    return _exhausOpt.optimizeComp(og, g, hc, depth + 1, stats);
   } else {
-    _ilpOpt.optimizeComp(og, g, hc, depth + 1, stats);
+    return _ilpOpt.optimizeComp(og, g, hc, depth + 1, stats);
   }
-
-  return 0;
 }

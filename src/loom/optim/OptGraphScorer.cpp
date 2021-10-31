@@ -345,7 +345,6 @@ double OptGraphScorer::getCrossingPenDiffSeg(const OptNode* n) const {
   if (_pens.crossAdjPen) ret *= n->pl().node->getDeg();
 
   if (n->pl().node->pl().stops().size() > 0) {
-    if (n->pl().node->getDeg() == 2) return _pens.inStatCrossPenDegTwo;
     return _pens.inStatCrossPenDiffSeg * ret;
   }
 

@@ -267,16 +267,16 @@ void OptGraph::splitSingleLineEdgs() {
 
 // _____________________________________________________________________________
 void OptGraph::partnerLines() {
-  auto partners = getPartnerLines();
+  const auto& partners = getPartnerLines();
 
   for (const auto& p : partners) {
     if (p.partners.size() == 1) continue;
-    // std::cout << "Combining " << p.partners.begin()->line->id() << " and "
-    // << p.partners.size() - 1 << " lines." << std::endl;
+
     for (size_t i = 0; i < p.path.size(); i++) {
       // TODO: why isnt there a getLine function f or OptEdgePL?
       auto e = p.path[i];
       auto it = e->pl().getLines().begin();
+
       while (it != e->pl().getLines().end()) {
         auto& ro = *it;
         if (ro == *p.partners.begin()) {
@@ -310,8 +310,8 @@ std::set<const Line*> OptGraph::getLines() const {
 
 // _____________________________________________________________________________
 Nullable<const OptLO> OptGraph::getLO(const OptEdge* a, const Line* r) {
-  for (auto rt : a->pl().getLines())
-    if (rt.line == r) return rt;
+  auto lo = a->pl().getLineOcc(r);
+  if (lo) return *lo;
   return Nullable<const OptLO>();
 }
 
@@ -326,20 +326,21 @@ std::vector<PartnerPath> OptGraph::getPartnerLines() const {
     struct Check : public Algorithm::EdgeCheckFunc<OptNodePL, OptEdgePL> {
       Check(const Line* l) : rt(l){};
       const Line* rt;
-      virtual bool operator()(const OptNode* frNd, const OptEdge* edge) const {
+      virtual bool operator()(const OptNode* frNd, const OptEdge* edg) const {
         UNUSED(frNd);
         // TODO: this will put lines not continueing over a particular edge
         // in one component, as only the lines' presence on the edge is checked.
         // Later on, we then cannot follow the edge through the entire path,
         // which may lead to collapsing opportunities being missed.
-        auto ro = getLO(edge, rt);
+        auto ro = getLO(edg, rt);
         return !ro.isNull();
       };
     };
 
-    auto comps = Algorithm::connectedComponents(*this, Check(rt));
+    const auto& comps = Algorithm::connectedComponents(*this, Check(rt));
+
     size_t nonNullComps = 0;
-    for (auto comp : comps) {
+    for (const auto& comp : comps) {
       if (comp.size() < 2) continue;
       nonNullComps++;
       auto p = pathFromComp(comp);
@@ -399,12 +400,12 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
       if (e == cntE) continue;
 
       if (pp.path.size()) {
-        auto ctdLines = getCtdLinesIn(pp.path.back(), e);
+        const auto& ctdLines = getCtdLinesIn(pp.path.back(), e);
         notPartner.insert(ctdLines.begin(), ctdLines.end());
       }
 
       if (cntE) {
-        auto ctdLines = getCtdLinesIn(e, cntE);
+        const auto& ctdLines = getCtdLinesIn(e, cntE);
         notPartner.insert(ctdLines.begin(), ctdLines.end());
       }
     }
@@ -413,14 +414,14 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
     if (!cntE) break;
 
     if (pp.path.size()) {
-      auto ctd = getCtdLinesIn(pp.path.back(), cntE);
+      const auto& ctd = getCtdLinesIn(pp.path.back(), cntE);
       std::set<OptLO> newPartners;
       for (auto ctdRt : ctd) {
         if (pp.partners.count(ctdRt)) newPartners.insert(ctdRt);
       }
       pp.partners = newPartners;
     } else {
-      auto ctd = cntE->pl().getLines();
+      const auto& ctd = cntE->pl().getLines();
       pp.partners.insert(ctd.begin(), ctd.end());
     }
 
@@ -435,7 +436,7 @@ PartnerPath OptGraph::pathFromComp(const std::set<OptNode*>& comp) const {
   }
 
   // remove routes continuing outside the component from the partners set
-  for (auto r : notPartner) pp.partners.erase(r);
+  for (const auto& r : notPartner) pp.partners.erase(r);
 
   return pp;
 }
