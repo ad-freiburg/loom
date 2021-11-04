@@ -48,7 +48,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     ("output-stats",
       opts::value<bool>(&(cfg->outputStats))
       ->default_value(false),
-      "print some more graph stats to stdout")
+      "print some more stats")
     ("prune",
       opts::value<bool>(&(cfg->pruneGraph))
       ->default_value(true),

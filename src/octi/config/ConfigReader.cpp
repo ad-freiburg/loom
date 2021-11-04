@@ -51,11 +51,12 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<std::string>(&(cfg->ilpSolver))->default_value("gurobi"),
       "The preferred solver library to use, will fall back if library is not "
       "available.")(
-      "ilp-out",
-      opts::value<std::string>(&(cfg->ilpPath))->default_value(""),
+      "ilp-out", opts::value<std::string>(&(cfg->ilpPath))->default_value(""),
       "path to output the ILP to, a first feasible solution will be written "
-      "to <basename>.mst.")(
-      "obstacles",
+      "to <basename>.mst.")
+      ("stats", opts::bool_switch(&(cfg->writeStats))->default_value(false),
+       "write stats to output graph")
+      ( "obstacles",
       opts::value<std::string>(&(cfg->obstaclePath))->default_value(""),
       "GeoJSON file containing obstacle polygons")(
       "from-dot,D", opts::bool_switch(&(cfg->fromDot))->default_value(false),
@@ -69,8 +70,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "restr-loc-search",
       opts::bool_switch(&(cfg->restrLocSearch))->default_value(false),
       "restrict local search to max grid distance")(
-      "stats", opts::bool_switch(&(cfg->writeStats))->default_value(false),
-      "write stats to output graph")(
       "density-pen",
       opts::value<double>(&(cfg->pens.densityPen))->default_value(0),
       "penalty factor for re-inserted contracted stations that are too near, a "

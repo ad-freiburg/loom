@@ -220,13 +220,13 @@ int main(int argc, char** argv) {
 
     // translate score to JSON
     jsonScore = util::json::Dict{
-        {"scores", util::json::Dict{{"total_score", sc.full},
-                                    {"topo-violations",
-                                     util::json::Int(sc.violations)},
-                                    {"density-score", sc.dense},
-                                    {"bend-score", sc.bend},
-                                    {"hop-score", sc.hop},
-                                    {"move-score", sc.move}}},
+        {"scores",
+         util::json::Dict{{"total_score", sc.full},
+                          {"topo-violations", util::json::Int(sc.violations)},
+                          {"density-score", sc.dense},
+                          {"bend-score", sc.bend},
+                          {"hop-score", sc.hop},
+                          {"move-score", sc.move}}},
         {"pens",
          util::json::Dict{
              {"density-pen", cfg.pens.densityPen},
@@ -258,9 +258,17 @@ int main(int argc, char** argv) {
   }
 
   if (cfg.printMode == "gridgraph") {
-    out.print(*gg, std::cout, jsonScore);
+    if (cfg.writeStats) {
+      out.print(*gg, std::cout, util::json::Dict{{"statistics", jsonScore}});
+    } else {
+      out.print(*gg, std::cout);
+    }
   } else {
-    out.print(res, std::cout, jsonScore);
+    if (cfg.writeStats) {
+      out.print(res, std::cout, util::json::Dict{{"statistics", jsonScore}});
+    } else {
+      out.print(res, std::cout);
+    }
   }
 
   return (0);
