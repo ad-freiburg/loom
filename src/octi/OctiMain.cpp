@@ -188,9 +188,9 @@ int main(int argc, char** argv) {
   if (cfg.optMode == "ilp") {
     T_START(octi);
     sc = oct.drawILP(cg, box, &res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
-                     cfg.maxGrDist, cfg.ilpNoSolve, cfg.enfGeoPen,
-                     cfg.hananIters, cfg.ilpTimeLimit, cfg.ilpCacheDir,
-                     &ilpstats, cfg.ilpSolver, cfg.ilpPath);
+                     cfg.maxGrDist, cfg.orderMethod, cfg.ilpNoSolve,
+                     cfg.enfGeoPen, cfg.hananIters, cfg.ilpTimeLimit,
+                     cfg.ilpCacheDir, &ilpstats, cfg.ilpSolver, cfg.ilpPath);
     time = T_STOP(octi);
     LOGTO(DEBUG, std::cerr)
         << "Schematized using ILP in " << time << " ms, score " << sc.full;
@@ -198,8 +198,11 @@ int main(int argc, char** argv) {
     T_START(octi);
     try {
       sc = oct.draw(cg, box, &res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
-                    cfg.maxGrDist, cfg.restrLocSearch, cfg.enfGeoPen,
-                    cfg.hananIters, cfg.obstacles, cfg.abortAfter);
+                    cfg.maxGrDist, cfg.orderMethod, cfg.restrLocSearch,
+                    cfg.enfGeoPen, cfg.hananIters, cfg.obstacles,
+                    cfg.heurInitialTries,
+                    cfg.heurLocSearchIters,
+                    cfg.abortAfter);
       time = T_STOP(octi);
     } catch (const NoEmbeddingFoundExc& exc) {
       LOG(ERROR) << exc.what();
@@ -213,15 +216,23 @@ int main(int argc, char** argv) {
 
   if (cfg.writeStats) {
     size_t maxRss = util::getPeakRSS();
-    size_t numEdgs = 0;  // double because we are modelling an undirected graph
+    size_t numEdgs = 0;
+    size_t numEdgsComb = 0;
+    size_t numEdgsTg = 0;
     for (auto nd : *gg->getNds()) {
       numEdgs += nd->getDeg();
+    }
+    for (auto nd : *cg.getNds()) {
+      numEdgsComb += nd->getDeg();
+    }
+    for (auto nd : *tg.getNds()) {
+      numEdgsTg += nd->getDeg();
     }
 
     // translate score to JSON
     jsonScore = util::json::Dict{
         {"scores",
-         util::json::Dict{{"total_score", sc.full},
+         util::json::Dict{{"total-score", sc.full},
                           {"topo-violations", util::json::Int(sc.violations)},
                           {"density-score", sc.dense},
                           {"bend-score", sc.bend},
@@ -240,20 +251,33 @@ int main(int argc, char** argv) {
          }},
         {"gridgraph-size", util::json::Dict{{"nodes", gg->getNds()->size()},
                                             {"edges", numEdgs / 2}}},
+        {"combgraph-size", util::json::Dict{{"nodes", cg.getNds()->size()},
+                                            {"edges", numEdgsComb / 2}}},
+        {"input-graph-size", util::json::Dict{{"nodes", tg.getNds()->size()},
+                                              {"edges", numEdgsTg / 2},
+                                              {"max-deg", tg.maxDeg()}}},
+        {"input-graph-avg-node-dist",
+         avgDist * webMercDistFactor(box.getLowerLeft())},
+        {"area", dist(box.getLowerRight(), box.getLowerLeft()) *
+                     webMercDistFactor(box.getLowerRight()) *
+                     dist(box.getLowerRight(), box.getUpperRight()) *
+                     webMercDistFactor(box.getLowerRight())},
         {"misc", util::json::Dict{{"method", cfg.optMode},
                                   {"deg2heur", cfg.deg2Heur},
                                   {"max-grid-dist", cfg.maxGrDist}}},
-        {"time_ms", time},
+        {"time-ms", time},
+        {"iterations", sc.iters},
         {"procs", omp_get_num_procs()},
-        {"peak_memory", util::readableSize(maxRss)},
-        {"peak_memory_bytes", maxRss},
+        {"peak-memory", util::readableSize(maxRss)},
+        {"peak-memory-bytes", maxRss},
         {"timestamp", util::json::Int(std::time(0))}};
 
     if (cfg.optMode == "ilp") {
       jsonScore["ilp"] = util::json::Dict{
           {"size",
            util::json::Dict{{"rows", ilpstats.rows}, {"cols", ilpstats.cols}}},
-          {"solve-time", ilpstats.time}};
+          {"solve-time", ilpstats.time},
+          {"optimal", util::json::Bool{ilpstats.optimal}}};
     }
   }
 

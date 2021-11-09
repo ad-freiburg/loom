@@ -27,8 +27,13 @@ class CombEdgePL : util::geograph::GeoEdgePL<double> {
   const PolyLine<double>& getPolyLine() const;
   void setPolyLine(const PolyLine<double>& p);
 
+  size_t getNumLines() const { return _maxLineNum; }
+  void setNumLines(size_t numLines) { _maxLineNum = numLines; }
+
  private:
   std::vector<shared::linegraph::LineEdge*> _childs;
+
+  size_t _maxLineNum;
 
   PolyLine<double> _geom;
 };

@@ -24,6 +24,9 @@ class Box {
   Point<T>& getLowerLeft() { return _ll; }
   Point<T>& getUpperRight() { return _ur; }
 
+  Point<T> getUpperLeft() { return {_ll.getX(), _ur.getY()}; }
+  Point<T> getLowerRight() { return {_ur.getX(), _ll.getY()}; }
+
   void setLowerLeft(const Point<T>& ll) { _ll = ll; }
   void setUpperRight(const Point<T>& ur) { _ur = ur; }
 

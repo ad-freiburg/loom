@@ -20,17 +20,27 @@ using octi::combgraph::CombNode;
 using util::graph::Dijkstra;
 
 typedef Dijkstra::EList<GridNodePL, GridEdgePL> GrEdgList;
-typedef std::vector<std::pair<size_t, size_t>>  GrPath;
+typedef std::vector<std::pair<size_t, size_t>> GrPath;
 
 struct Score {
-  Score(double bend, double move, double hop, double dense, double full, uint64_t violations) : bend(bend), move(move), hop(hop), dense(dense), full(full), violations(violations) {}
-  Score() : bend(0), move(0), hop(0), dense(0), full(0), violations(0) {}
+  Score(double bend, double move, double hop, double dense, double full,
+        uint64_t violations)
+      : bend(bend),
+        move(move),
+        hop(hop),
+        dense(dense),
+        full(full),
+        violations(violations),
+        iters(0) {}
+  Score()
+      : bend(0), move(0), hop(0), dense(0), full(0), violations(0), iters(0) {}
   double bend;
   double move;
   double hop;
   double dense;
   double full;
   uint64_t violations;
+  size_t iters;
 };
 
 struct NodeOnSeg {
@@ -61,7 +71,8 @@ class Drawing {
  public:
   Drawing(const BaseGraph* gg)
       : _c(std::numeric_limits<double>::infinity()), _gg(gg), _violations(0){};
-  Drawing() : _c(std::numeric_limits<double>::infinity()), _gg(0), _violations(0){};
+  Drawing()
+      : _c(std::numeric_limits<double>::infinity()), _gg(0), _violations(0){};
 
   double score() const;
   double rawScore() const;

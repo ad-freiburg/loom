@@ -31,6 +31,7 @@ using namespace util;
 using combgraph::EdgeOrdering;
 using octi::basegraph::BaseGraph;
 using octi::combgraph::Drawing;
+using octi::config::OrderMethod;
 using octi::ilp::ILPStats;
 using util::geo::DBox;
 using util::geo::dist;
@@ -46,10 +47,10 @@ using util::graph::Dijkstra;
 Score Octilinearizer::drawILP(
     const CombGraph& cg, const util::geo::DBox& box, LineGraph* outTg,
     BaseGraph** retGg, Drawing* dOut, const Penalties& pens, double gridSize,
-    double borderRad, double maxGrDist, bool noSolve, double enfGeoPen,
-    size_t hananIters, int timeLim, const std::string& cacheDir,
-    octi::ilp::ILPStats* stats, const std::string& solverStr,
-    const std::string& path) {
+    double borderRad, double maxGrDist, OrderMethod orderMethod, bool noSolve,
+    double enfGeoPen, size_t hananIters, int timeLim,
+    const std::string& cacheDir, octi::ilp::ILPStats* stats,
+    const std::string& solverStr, const std::string& path) {
   BaseGraph* gg;
   Drawing drawing;
 
@@ -63,9 +64,10 @@ Score Octilinearizer::drawILP(
     // presolve using heuristical approach to get a first feasible solution
     LineGraph tmpOutTg;
     // important: always use restrLocSearch here!
-    auto score = draw(cg, box, &tmpOutTg, &gg, &drawing, pensCpy, gridSize,
-                      borderRad, maxGrDist, true, enfGeoPen, hananIters, {},
-                      std::numeric_limits<size_t>::max());
+    auto score =
+        draw(cg, box, &tmpOutTg, &gg, &drawing, pensCpy, gridSize, borderRad,
+             maxGrDist, orderMethod, true, enfGeoPen, hananIters, {}, 100, 100,
+             std::numeric_limits<size_t>::max());
     if (score.violations) throw NoEmbeddingFoundExc();
     LOGTO(DEBUG, std::cerr) << "Presolving finished.";
   } catch (const NoEmbeddingFoundExc& exc) {
@@ -80,7 +82,7 @@ Score Octilinearizer::drawILP(
 
   if (enfGeoPen) {
     LOGTO(DEBUG, std::cerr) << "Writing geopens... ";
-    auto initOrder = getOrdering(cg, false);
+    auto initOrder = getOrdering(cg, orderMethod, false);
     T_START(geopens);
     for (auto cmbEdg : initOrder) {
       gg->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
@@ -114,12 +116,16 @@ Score Octilinearizer::drawILP(
 }
 
 // _____________________________________________________________________________
-Score Octilinearizer::draw(
-    const CombGraph& cg, const DBox& box, LineGraph* outTg, BaseGraph** retGg,
-    Drawing* dOut, const Penalties& pens, double gridSize, double borderRad,
-    double maxGrDist, bool restrLocSearch, double enfGeoPen, size_t hananIters,
-    const std::vector<Polygon<double>>& obstacles, size_t abortAfter) {
-  size_t jobs = 100;
+Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
+                           LineGraph* outTg, BaseGraph** retGg, Drawing* dOut,
+                           const Penalties& pens, double gridSize,
+                           double borderRad, double maxGrDist,
+                           OrderMethod orderMethod, bool restrLocSearch,
+                           double enfGeoPen, size_t hananIters,
+                           const std::vector<Polygon<double>>& obstacles,
+                           size_t initialTries, size_t locSearchIters,
+                           size_t abortAfter) {
+  size_t jobs = 4;
   std::vector<BaseGraph*> ggs(jobs);
 
   LOGTO(DEBUG, std::cerr) << "Creating grid graphs... ";
@@ -139,15 +145,15 @@ Score Octilinearizer::draw(
   LOGTO(DEBUG, std::cerr) << "Grid graph has " << ggs[0]->getNds()->size()
                           << " nodes";
 
-  size_t INITIAL_TRIES = 100;
-  size_t LOCAL_SEARCH_ITERS = 100;
+  size_t INITIAL_TRIES = initialTries;
+  size_t LOCAL_SEARCH_ITERS = locSearchIters;
   double CONVERGENCE_THRESHOLD = 0.05;
 
   GeoPensMap enfGeoPens;
   const GeoPensMap* geoPens = 0;
 
   // get a non-randomized initial ordering
-  auto initOrder = getOrdering(cg, false);
+  auto initOrder = getOrdering(cg, orderMethod, false);
 
   if (enfGeoPen > 0) {
     LOGTO(DEBUG, std::cerr) << "Writing geopens... ";
@@ -179,25 +185,28 @@ Score Octilinearizer::draw(
 
   size_t a = 1;
 
-  // TODO: better check topology violations
-  if (status != DRAWN || drawing.score() == INF || drawing.violations()) {
+  if (INITIAL_TRIES > 0 && (status != DRAWN || drawing.score() == INF || drawing.violations())) {
     bool abort = false;
     // clear the initial grid
     drawing.eraseFromGrid(ggs[0]);
-    drawing.crumble();
     // set a to 0 to re-add the best solution later to grid 0
     a = 0;
 
+    std::vector<std::vector<size_t>> batches(jobs);
+    for (size_t i = 0; i < INITIAL_TRIES; i++) {
+      batches[i % jobs].push_back(i);
+    }
+
 #pragma omp parallel for
     for (size_t btch = 0; btch < jobs; btch++) {
-      for (size_t i = 0; i < INITIAL_TRIES / jobs; i++) {
-        size_t tryNr = INITIAL_TRIES / jobs * btch + i;
+      for (size_t tryNr : batches[btch]) {
         if (abort) continue;
         T_START(draw);
         Drawing drawingCp(ggs[btch]);
 
         // get a randomized ordering
-        std::vector<CombEdge*> iterOrder = getOrdering(cg, true);
+        std::vector<CombEdge*> iterOrder =
+            getOrdering(cg, OrderMethod::GROWTH_LDEG, true);
 
         auto status = draw(iterOrder, ggs[btch], &drawingCp, drawingCp.score(),
                            maxGrDist, geoPens, abortAfter);
@@ -209,6 +218,7 @@ Score Octilinearizer::draw(
           if (status == DRAWN && drawingCp.violations() == 0) {
             // found solution without topology violations, immediately abort
             abort = true;
+            drawing = drawingCp;
             statLine(status, std::string("Try ") + std::to_string(tryNr),
                      drawingCp, T_STOP(draw), "**");
           }
@@ -354,6 +364,7 @@ Score Octilinearizer::draw(
   // the drawing might still have another internal grid graph, make sure they
   // match (this is important for drawILP)
   dOut->setBaseGraph(ggs[0]);
+  fullScore.iters = iters + 1;
   return fullScore;
 }
 
@@ -571,41 +582,37 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 
 // _____________________________________________________________________________
 std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg,
+                                                   config::OrderMethod method,
                                                    bool randr) const {
-  NodePQ globalPq, dangling;
+  if (method == OrderMethod::GROWTH_DEG)
+    return getGrowthOrder<EdgeCmpDeg, NodeCmpDeg>(cg, randr);
+  else if (method == OrderMethod::GROWTH_LDEG)
+    return getGrowthOrder<EdgeCmpLdeg, NodeCmpLdeg>(cg, randr);
 
-  std::set<CombNode*> settled;
-  std::vector<CombEdge*> order;
+  std::vector<CombEdge*> retOrder;
 
-  for (auto n : cg.getNds()) globalPq.push(n);
-  std::set<CombEdge*> done;
-
-  while (!globalPq.empty()) {
-    auto n = globalPq.top();
-    globalPq.pop();
-    dangling.push(n);
-
-    while (!dangling.empty()) {
-      auto n = dangling.top();
-      dangling.pop();
-
-      if (settled.find(n) != settled.end()) continue;
-
-      auto odSet = n->pl().getEdgeOrdering().getOrderedSet();
-      if (randr) std::random_shuffle(odSet.begin(), odSet.end());
-
-      for (auto ee : odSet) {
-        if (done.find(ee.first) != done.end()) continue;
-        done.insert(ee.first);
-        dangling.push(ee.first->getOtherNd(n));
-
-        order.push_back(ee.first);
-      }
-      settled.insert(n);
+  for (auto n : cg.getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      retOrder.push_back(e);
     }
   }
 
-  return order;
+  if (method == OrderMethod::ADJ_ND_DEGREE) {
+    EdgeCmpDeg cmp;
+    std::sort(retOrder.begin(), retOrder.end(), cmp);
+  } else if (method == OrderMethod::ADJ_ND_LDEGREE) {
+    EdgeCmpLdeg cmp;
+    std::sort(retOrder.begin(), retOrder.end(), cmp);
+  } else if (method == OrderMethod::NUM_LINES) {
+    EdgeCmpNumLines cmp;
+    std::sort(retOrder.begin(), retOrder.end(), cmp);
+  } else if (method == OrderMethod::LENGTH) {
+    EdgeCmpLength cmp;
+    std::sort(retOrder.begin(), retOrder.end(), cmp);
+  }
+
+  return retOrder;
 }
 
 // _____________________________________________________________________________

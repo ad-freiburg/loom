@@ -15,6 +15,7 @@ using octi::config::ConfigReader;
 namespace opts = boost::program_options;
 
 using octi::basegraph::BaseGraphType;
+using octi::config::OrderMethod;
 using std::exception;
 using std::string;
 using std::vector;
@@ -26,6 +27,7 @@ ConfigReader::ConfigReader() {}
 void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   std::string VERSION_STR = " - unversioned - ";
   std::string baseGraphStr;
+  std::string edgeOrderMethod;
 
   opts::options_description generic("General");
   generic.add_options()("version", "output version")(
@@ -41,6 +43,13 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "if set, the ILP is not solved, only written to file")(
       "hanan-iters", opts::value<size_t>(&(cfg->hananIters))->default_value(1),
       "hanan iterations")(
+      "initial-search-tries",
+      opts::value<int>(&(cfg->heurInitialTries))->default_value(100),
+      "maximum number of tries with randomized orderings if the initial "
+      "ordering did not yield a result")(
+      "loc-search-max-iters",
+      opts::value<int>(&(cfg->heurLocSearchIters))->default_value(100),
+      "maximum number of iterations for the local search")(
       "ilp-time-limit",
       opts::value<int>(&(cfg->ilpTimeLimit))->default_value(60),
       "ILP solver time limit (in seconds), negative value means infinity")(
@@ -53,10 +62,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "available.")(
       "ilp-out", opts::value<std::string>(&(cfg->ilpPath))->default_value(""),
       "path to output the ILP to, a first feasible solution will be written "
-      "to <basename>.mst.")
-      ("stats", opts::bool_switch(&(cfg->writeStats))->default_value(false),
-       "write stats to output graph")
-      ( "obstacles",
+      "to <basename>.mst.")(
+      "stats", opts::bool_switch(&(cfg->writeStats))->default_value(false),
+      "write stats to output graph")(
+      "obstacles",
       opts::value<std::string>(&(cfg->obstaclePath))->default_value(""),
       "GeoJSON file containing obstacle polygons")(
       "from-dot,D", opts::bool_switch(&(cfg->fromDot))->default_value(false),
@@ -70,6 +79,11 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "restr-loc-search",
       opts::bool_switch(&(cfg->restrLocSearch))->default_value(false),
       "restrict local search to max grid distance")(
+      "edge-order",
+      opts::value<std::string>(&(edgeOrderMethod))
+          ->default_value("growth-ldeg"),
+      "method used for initial edge ordering for heuristic method. One of "
+      "{num-lines, length, adj-nd-deg, adj-nd-ldeg, growth-deg, growth-ldef}")(
       "density-pen",
       opts::value<double>(&(cfg->pens.densityPen))->default_value(0),
       "penalty factor for re-inserted contracted stations that are too near, a "
@@ -107,7 +121,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "abort-after,a",
       opts::value<size_t>(&(cfg->abortAfter))
           ->default_value(std::numeric_limits<size_t>::max()),
-      "abort approximate rendering after <n> rounds");
+      "abort approximate rendering after <n> edges");
 
   opts::options_description cmdlineOptions;
   cmdlineOptions.add(config).add(generic);
@@ -136,6 +150,25 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
 
   if (vm.count("version")) {
     std::cout << "\n" << VERSION_STR << "\n";
+    exit(0);
+  }
+
+  if (edgeOrderMethod == "num-lines") {
+    cfg->orderMethod = OrderMethod::NUM_LINES;
+  } else if (edgeOrderMethod == "length") {
+    cfg->orderMethod = OrderMethod::LENGTH;
+  } else if (edgeOrderMethod == "adj-nd-deg") {
+    cfg->orderMethod = OrderMethod::ADJ_ND_DEGREE;
+  } else if (edgeOrderMethod == "adj-nd-ldeg") {
+    cfg->orderMethod = OrderMethod::ADJ_ND_LDEGREE;
+  } else if (edgeOrderMethod == "growth-deg") {
+    cfg->orderMethod = OrderMethod::GROWTH_DEG;
+  } else if (edgeOrderMethod == "growth-ldeg") {
+    cfg->orderMethod = OrderMethod::GROWTH_LDEG;
+  } else {
+    LOG(ERROR) << "Unknown order method " << edgeOrderMethod
+               << ", must be one of {num-lines, length, adj-nd-deg, "
+                  "adj-nd-ldeg, growth-deg, growth-ldef}";
     exit(0);
   }
 

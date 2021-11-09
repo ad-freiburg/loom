@@ -87,6 +87,7 @@ ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
 
     s.score = lp->getObjVal();
     s.time = time;
+    s.optimal = (status == shared::optim::SolveType::OPTIM);
   }
 
   delete lp;

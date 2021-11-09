@@ -27,6 +27,7 @@ struct ILPStats {
   double time;
   size_t rows;
   size_t cols;
+  bool optimal;
 };
 
 class ILPGridOptimizer {

@@ -34,6 +34,7 @@ class CombGraph : public util::graph::UndirGraph<CombNodePL, CombEdgePL> {
   void build(const LineGraph* source);
   void combineDeg2();
   void writeEdgeOrdering();
+  void writeMaxLineNum();
 };
 
 }  // namespace combgraph

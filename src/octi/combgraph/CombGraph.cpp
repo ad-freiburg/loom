@@ -18,6 +18,7 @@ CombGraph::CombGraph(const LineGraph* g, bool collapse) : _bbox(g->getBBox()) {
   build(g);
   if (collapse) combineDeg2();
   writeEdgeOrdering();
+  writeMaxLineNum();
 }
 
 // _____________________________________________________________________________
@@ -108,6 +109,21 @@ void CombGraph::combineDeg2() {
 void CombGraph::writeEdgeOrdering() {
   for (auto n : *getNds()) {
     n->pl().setEdgeOrdering(getEdgeOrderingForNode(n));
+  }
+}
+
+// _____________________________________________________________________________
+void CombGraph::writeMaxLineNum() {
+  for (auto n : *getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+
+      size_t max = 0;
+      for (auto ee : e->pl().getChilds()) {
+        if (ee->pl().getLines().size() > max) max = ee->pl().getLines().size();
+      }
+      e->pl().setNumLines(max);
+    }
   }
 }
 

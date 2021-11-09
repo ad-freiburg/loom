@@ -9,7 +9,7 @@ using util::geo::PolyLine;
 using octi::combgraph::CombEdgePL;
 
 // _____________________________________________________________________________
-CombEdgePL::CombEdgePL(shared::linegraph::LineEdge* child) {
+CombEdgePL::CombEdgePL(shared::linegraph::LineEdge* child) : _maxLineNum(0) {
   _childs.push_back(child);
   _geom = PolyLine<double>(*child->getFrom()->pl().getGeom(),
                            *child->getTo()->pl().getGeom());

@@ -6,12 +6,21 @@
 #define OCTI_CONFIG_OCTICONFIG_H_
 
 #include <string>
-#include "octi/basegraph/GridGraph.h"
 #include "octi/basegraph/BaseGraph.h"
+#include "octi/basegraph/GridGraph.h"
 #include "util/geo/Geo.h"
 
 namespace octi {
 namespace config {
+
+enum OrderMethod {
+  NUM_LINES = 0,
+  LENGTH = 1,
+  ADJ_ND_DEGREE = 2,
+  ADJ_ND_LDEGREE = 3,
+  GROWTH_DEG = 4,
+  GROWTH_LDEG = 5
+};
 
 struct Config {
   std::string gridSize;
@@ -31,10 +40,15 @@ struct Config {
 
   double maxGrDist;
 
+  int heurInitialTries;
+  int heurLocSearchIters;
+
   size_t abortAfter;
 
   size_t hananIters;
   bool writeStats;
+
+  OrderMethod orderMethod;
 
   std::string obstaclePath;
   std::vector<util::geo::DPolygon> obstacles;
