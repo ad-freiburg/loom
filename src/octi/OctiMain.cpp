@@ -200,9 +200,7 @@ int main(int argc, char** argv) {
       sc = oct.draw(cg, box, &res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
                     cfg.maxGrDist, cfg.orderMethod, cfg.restrLocSearch,
                     cfg.enfGeoPen, cfg.hananIters, cfg.obstacles,
-                    cfg.heurInitialTries,
-                    cfg.heurLocSearchIters,
-                    cfg.abortAfter);
+                    cfg.heurLocSearchIters, cfg.abortAfter);
       time = T_STOP(octi);
     } catch (const NoEmbeddingFoundExc& exc) {
       LOG(ERROR) << exc.what();

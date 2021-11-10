@@ -28,7 +28,7 @@ class CombNodePL : util::geograph::GeoNodePL<double> {
 
   const combgraph::EdgeOrdering& getEdgeOrdering();
   void setEdgeOrdering(const combgraph::EdgeOrdering& e);
-  size_t getRouteNumber() const;
+  size_t getLDeg() const;
   void setRouteNumber(size_t n);
   std::string toString() const;
 

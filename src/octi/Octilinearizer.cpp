@@ -66,7 +66,7 @@ Score Octilinearizer::drawILP(
     // important: always use restrLocSearch here!
     auto score =
         draw(cg, box, &tmpOutTg, &gg, &drawing, pensCpy, gridSize, borderRad,
-             maxGrDist, orderMethod, true, enfGeoPen, hananIters, {}, 100, 100,
+             maxGrDist, orderMethod, true, enfGeoPen, hananIters, {}, 100,
              std::numeric_limits<size_t>::max());
     if (score.violations) throw NoEmbeddingFoundExc();
     LOGTO(DEBUG, std::cerr) << "Presolving finished.";
@@ -82,9 +82,9 @@ Score Octilinearizer::drawILP(
 
   if (enfGeoPen) {
     LOGTO(DEBUG, std::cerr) << "Writing geopens... ";
-    auto initOrder = getOrdering(cg, orderMethod, false);
+    auto edges = getOrdering(cg, OrderMethod::NUM_LINES);
     T_START(geopens);
-    for (auto cmbEdg : initOrder) {
+    for (auto cmbEdg : edges) {
       gg->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
     }
     LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(geopens) << "ms)";
@@ -123,8 +123,7 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
                            OrderMethod orderMethod, bool restrLocSearch,
                            double enfGeoPen, size_t hananIters,
                            const std::vector<Polygon<double>>& obstacles,
-                           size_t initialTries, size_t locSearchIters,
-                           size_t abortAfter) {
+                           size_t locSearchIters, size_t abortAfter) {
   size_t jobs = 4;
   std::vector<BaseGraph*> ggs(jobs);
 
@@ -136,29 +135,24 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
     ggs[i]->init();
   }
 
-  // util::geo::output::GeoGraphJsonOutput out;
-  // out.print(*ggs[0], std::cout);
-  // exit(0);
-
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
 
   LOGTO(DEBUG, std::cerr) << "Grid graph has " << ggs[0]->getNds()->size()
                           << " nodes";
 
-  size_t INITIAL_TRIES = initialTries;
   size_t LOCAL_SEARCH_ITERS = locSearchIters;
   double CONVERGENCE_THRESHOLD = 0.05;
 
   GeoPensMap enfGeoPens;
   const GeoPensMap* geoPens = 0;
 
-  // get a non-randomized initial ordering
-  auto initOrder = getOrdering(cg, orderMethod, false);
+  // ordering is irrelevant, this is a just a shortcut to get all edges
+  auto edges = getOrdering(cg, OrderMethod::NUM_LINES);
 
   if (enfGeoPen > 0) {
     LOGTO(DEBUG, std::cerr) << "Writing geopens... ";
     T_START(geopens);
-    for (auto cmbEdg : initOrder) {
+    for (auto cmbEdg : edges) {
       ggs[0]->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
     }
     LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(geopens) << "ms)";
@@ -177,60 +171,51 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
   Drawing drawing(ggs[0]);
 
   // try our default edge ordering first, without any randomization
-  T_START(draw);
-  auto status = draw(initOrder, ggs[0], &drawing, drawing.score(), maxGrDist,
-                     geoPens, abortAfter);
 
-  statLine(status, "Try <init>", drawing, T_STOP(draw), "");
+  std::vector<OrderMethod> methods = {
+      OrderMethod::NUM_LINES,     OrderMethod::LENGTH,
+      OrderMethod::ADJ_ND_DEGREE, OrderMethod::ADJ_ND_LDEGREE,
+      OrderMethod::GROWTH_DEG,    OrderMethod::GROWTH_LDEG};
 
-  size_t a = 1;
+  if (orderMethod != OrderMethod::ALL) {
+    methods = {orderMethod};
+  }
 
-  if (INITIAL_TRIES > 0 && (status != DRAWN || drawing.score() == INF || drawing.violations())) {
-    bool abort = false;
-    // clear the initial grid
-    drawing.eraseFromGrid(ggs[0]);
-    // set a to 0 to re-add the best solution later to grid 0
-    a = 0;
+  std::vector<std::vector<OrderMethod>> batches(jobs);
+  for (size_t i = 0; i < methods.size(); i++) {
+    batches[i % jobs].push_back(methods[i]);
+  }
 
-    std::vector<std::vector<size_t>> batches(jobs);
-    for (size_t i = 0; i < INITIAL_TRIES; i++) {
-      batches[i % jobs].push_back(i);
-    }
+  LOGTO(DEBUG, std::cerr) << "Searching initial drawing... ";
 
 #pragma omp parallel for
-    for (size_t btch = 0; btch < jobs; btch++) {
-      for (size_t tryNr : batches[btch]) {
-        if (abort) continue;
-        T_START(draw);
-        Drawing drawingCp(ggs[btch]);
+  for (size_t btch = 0; btch < jobs; btch++) {
+    for (OrderMethod meth : batches[btch]) {
+      T_START(draw);
+      Drawing drawingCp(ggs[btch]);
 
-        // get a randomized ordering
-        std::vector<CombEdge*> iterOrder =
-            getOrdering(cg, OrderMethod::GROWTH_LDEG, true);
+      // get a randomized ordering
+      std::vector<CombEdge*> iterOrder = getOrdering(cg, meth);
 
-        auto status = draw(iterOrder, ggs[btch], &drawingCp, drawingCp.score(),
-                           maxGrDist, geoPens, abortAfter);
-
-        drawingCp.eraseFromGrid(ggs[btch]);
+      double bestScoreSoFar = 0;
 
 #pragma omp critical
-        {
-          if (status == DRAWN && drawingCp.violations() == 0) {
-            // found solution without topology violations, immediately abort
-            abort = true;
-            drawing = drawingCp;
-            statLine(status, std::string("Try ") + std::to_string(tryNr),
-                     drawingCp, T_STOP(draw), "**");
-          }
-          if (status == DRAWN && drawingCp.score() < drawing.score()) {
-            drawing = drawingCp;
-            statLine(status, std::string("Try ") + std::to_string(tryNr),
-                     drawingCp, T_STOP(draw), "*");
-          } else {
-            drawingCp.crumble();
-            statLine(status, std::string("Try ") + std::to_string(tryNr),
-                     drawingCp, T_STOP(draw), "");
-          }
+      { bestScoreSoFar = drawing.score(); }
+
+      auto status = draw(iterOrder, ggs[btch], &drawingCp, bestScoreSoFar,
+                         maxGrDist, geoPens, abortAfter);
+
+      drawingCp.eraseFromGrid(ggs[btch]);
+
+      statLine(status, std::string("Try ") + std::to_string(meth), drawingCp,
+               T_STOP(draw), "*");
+
+#pragma omp critical
+      {
+        if (status == DRAWN && drawingCp.score() < drawing.score()) {
+          drawing = drawingCp;
+        } else {
+          drawingCp.crumble();
         }
       }
     }
@@ -240,8 +225,7 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
 
   LOGTO(DEBUG, std::cerr) << "Done.";
 
-  // skipping grid 0 here if a remains set to 1
-  for (size_t i = a; i < jobs; i++) drawing.applyToGrid(ggs[i]);
+  for (size_t i = 0; i < jobs; i++) drawing.applyToGrid(ggs[i]);
 
   size_t iters = 0;
 
@@ -252,11 +236,11 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
   // dont use local search if abortAfter is set
   if (abortAfter != std::numeric_limits<size_t>::max()) LOCAL_SEARCH_ITERS = 0;
 
-  std::vector<std::vector<CombNode*>> batches(jobs);
+  std::vector<std::vector<CombNode*>> batchesLoc(jobs);
   size_t c = 0;
   for (auto nd : cg.getNds()) {
     if (nd->getDeg() == 0) continue;
-    batches[c % jobs].push_back(nd);
+    batchesLoc[c % jobs].push_back(nd);
     c++;
   }
 
@@ -266,7 +250,7 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
 
 #pragma omp parallel for
     for (size_t btch = 0; btch < jobs; btch++) {
-      for (auto a : batches[btch]) {
+      for (auto a : batchesLoc[btch]) {
         Drawing drawingCp = drawing;
 
         // use the batches grid graph
@@ -364,7 +348,7 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
   // the drawing might still have another internal grid graph, make sure they
   // match (this is important for drawILP)
   dOut->setBaseGraph(ggs[0]);
-  fullScore.iters = iters + 1;
+  fullScore.iters = iters;
   return fullScore;
 }
 
@@ -503,51 +487,12 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     } else {
       auto cost = GridCost(cutoff + costOffsetTo + costOffsetFrom);
 
-      // auto c = Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL,
-      // &nL);
       Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
-
-      // for (auto e : eL) std::cerr << "E " << e << " " <<
-      // e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> "
-      // << e->getTo()->pl().getX() << "," << e->getTo()->pl().getY() << " " <<
-      // e->pl().cost() << std::endl; eL.clear(); nL.clear();
-
-      // eL.clear();
-      // nL.clear();
-
-      // auto c2 = Dijkstra::shortestPath(frGrNds, toGrNds, cost, &eL, &nL);
-      // std::cerr << c << " vs " << c2 << " " << fabs(c - c2) << std::endl;
-      // assert((std::isinf(c) && std::isinf(c2)) || (std::isnan(c) &&
-      // std::isnan(c2)) || fabs(c - c2) < 0.001);
-
-      // for (auto e : eL) std::cerr << "E " << e << " " <<
-      // e->getFrom()->pl().getX() << "," << e->getFrom()->pl().getY() << " -> "
-      // << e->getTo()->pl().getX() << "," << e->getTo()->pl().getY() << " " <<
-      // e->pl().cost() << std::endl; assert((isinf(c) && isinf(c2)) || (fabs(c
-      // - c2) < 0.0001)); exit(0);
     }
 
     delete heur;
 
-    // if (i == 4) {
-    // util::geo::output::GeoGraphJsonOutput out;
-    // out.print(*gg, std::cout);
-    // exit(0);
-    // }
-
     if (!nL.size()) {
-      // std::cerr << "FAILED TO FIND A ROUTE FROM " << std::endl;
-      // for (auto fr : frGrNds)
-      // std::cerr << fr->pl().getX() << "," << fr->pl().getY() << std::endl;
-      // std::cerr << " TO" << std::endl;
-      // for (auto to : toGrNds)
-      // std::cerr << to->pl().getX() << "," << to->pl().getY() << std::endl;
-      // std::cerr << "DEG FROM CMB NODE " << frCmbNd->getDeg() << std::endl;
-      // std::cerr << "DEG TO CMB NODE " << toCmbNd->getDeg() << std::endl;
-      // util::geo::output::GeoGraphJsonOutput out;
-      // out.print(*gg, std::cout);
-      // exit(0);
-
       // cleanup
       for (auto n : toGrNds) gg->closeSinkTo(n);
       for (auto n : frGrNds) gg->closeSinkFr(n);
@@ -581,13 +526,12 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
 }
 
 // _____________________________________________________________________________
-std::vector<CombEdge*> Octilinearizer::getOrdering(const CombGraph& cg,
-                                                   config::OrderMethod method,
-                                                   bool randr) const {
+std::vector<CombEdge*> Octilinearizer::getOrdering(
+    const CombGraph& cg, config::OrderMethod method) const {
   if (method == OrderMethod::GROWTH_DEG)
-    return getGrowthOrder<EdgeCmpDeg, NodeCmpDeg>(cg, randr);
+    return getGrowthOrder<EdgeCmpDeg, NodeCmpDeg>(cg);
   else if (method == OrderMethod::GROWTH_LDEG)
-    return getGrowthOrder<EdgeCmpLdeg, NodeCmpLdeg>(cg, randr);
+    return getGrowthOrder<EdgeCmpLdeg, NodeCmpLdeg>(cg);
 
   std::vector<CombEdge*> retOrder;
 

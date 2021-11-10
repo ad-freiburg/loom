@@ -43,10 +43,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "if set, the ILP is not solved, only written to file")(
       "hanan-iters", opts::value<size_t>(&(cfg->hananIters))->default_value(1),
       "hanan iterations")(
-      "initial-search-tries",
-      opts::value<int>(&(cfg->heurInitialTries))->default_value(100),
-      "maximum number of tries with randomized orderings if the initial "
-      "ordering did not yield a result")(
       "loc-search-max-iters",
       opts::value<int>(&(cfg->heurLocSearchIters))->default_value(100),
       "maximum number of iterations for the local search")(
@@ -81,9 +77,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "restrict local search to max grid distance")(
       "edge-order",
       opts::value<std::string>(&(edgeOrderMethod))
-          ->default_value("growth-ldeg"),
+          ->default_value("all"),
       "method used for initial edge ordering for heuristic method. One of "
-      "{num-lines, length, adj-nd-deg, adj-nd-ldeg, growth-deg, growth-ldef}")(
+      "{num-lines, length, adj-nd-deg, adj-nd-ldeg, growth-deg, growth-ldef, all}")(
       "density-pen",
       opts::value<double>(&(cfg->pens.densityPen))->default_value(0),
       "penalty factor for re-inserted contracted stations that are too near, a "
@@ -96,7 +92,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "border rad")(
       "base-graph",
       opts::value<std::string>(&baseGraphStr)->default_value("octilinear"),
-      "base graph type, either: ortholinear, octilinear, orthoradial, "
+      "base graph type, either: ortholinear, octilinear, porthoradial, "
       "quadtree, octihanan")("print-mode",
                              opts::value<std::string>(&(cfg->printMode))
                                  ->default_value("transitgraph"),
@@ -165,10 +161,12 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     cfg->orderMethod = OrderMethod::GROWTH_DEG;
   } else if (edgeOrderMethod == "growth-ldeg") {
     cfg->orderMethod = OrderMethod::GROWTH_LDEG;
+  } else if (edgeOrderMethod == "all") {
+    cfg->orderMethod = OrderMethod::ALL;
   } else {
     LOG(ERROR) << "Unknown order method " << edgeOrderMethod
                << ", must be one of {num-lines, length, adj-nd-deg, "
-                  "adj-nd-ldeg, growth-deg, growth-ldef}";
+                  "adj-nd-ldeg, growth-deg, growth-ldef, all}";
     exit(0);
   }
 
@@ -178,8 +176,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     cfg->baseGraphType = BaseGraphType::OCTIGRID;
   } else if (baseGraphStr == "hexalinear") {
     cfg->baseGraphType = BaseGraphType::HEXGRID;
-  } else if (baseGraphStr == "orthoradial") {
-    cfg->baseGraphType = BaseGraphType::ORTHORADIAL;
+  // } else if (baseGraphStr == "orthoradial") {
+    // cfg->baseGraphType = BaseGraphType::ORTHORADIAL;
   } else if (baseGraphStr == "chulloctilinear") {
     cfg->baseGraphType = BaseGraphType::CONVEXHULLOCTIGRID;
   } else if (baseGraphStr == "porthoradial") {
@@ -188,6 +186,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     cfg->baseGraphType = BaseGraphType::PSEUDOORTHORADIAL;
   } else if (baseGraphStr == "quadtree") {
     cfg->baseGraphType = BaseGraphType::OCTIQUADTREE;
+  } else if (baseGraphStr == "octihanan") {
+    cfg->baseGraphType = BaseGraphType::OCTIHANANGRID;
   } else if (baseGraphStr == "octihanan") {
     cfg->baseGraphType = BaseGraphType::OCTIHANANGRID;
   } else {

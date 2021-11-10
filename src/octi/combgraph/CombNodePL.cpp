@@ -30,7 +30,7 @@ util::json::Dict CombNodePL::getAttrs() const {
 void CombNodePL::setRouteNumber(size_t n) { _routeNumber = n; }
 
 // _____________________________________________________________________________
-size_t CombNodePL::getRouteNumber() const { return _routeNumber; }
+size_t CombNodePL::getLDeg() const { return _routeNumber; }
 
 // _____________________________________________________________________________
 const octi::combgraph::EdgeOrdering& CombNodePL::getEdgeOrdering() {

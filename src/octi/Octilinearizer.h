@@ -69,7 +69,7 @@ struct NodeCmpDeg {
 struct NodeCmpLdeg {
   bool operator()(const CombNode* a, const CombNode* b) {
     // smallest first, as the PQ returns the biggest
-    return a->pl().getRouteNumber() < b->pl().getRouteNumber();
+    return a->pl().getLDeg() < b->pl().getLDeg();
   }
 };
 
@@ -85,22 +85,20 @@ struct EdgeCmpLength {
                                 *a->getTo()->pl().getGeom());
     double db = util::geo::dist(*b->getFrom()->pl().getGeom(),
                                 *b->getTo()->pl().getGeom());
-    return da > db;
+
+    // smallest first, as we are sorting a vector with this
+    return da < db;
   }
 };
 
 struct EdgeCmpLdeg {
   bool operator()(const CombEdge* a, const CombEdge* b) {
     std::pair<size_t, size_t> oa = {
-        std::max(a->getFrom()->pl().getRouteNumber(),
-                 a->getTo()->pl().getRouteNumber()),
-        std::min(a->getFrom()->pl().getRouteNumber(),
-                 a->getTo()->pl().getRouteNumber())};
+        std::max(a->getFrom()->pl().getLDeg(), a->getTo()->pl().getLDeg()),
+        std::min(a->getFrom()->pl().getLDeg(), a->getTo()->pl().getLDeg())};
     std::pair<size_t, size_t> ob = {
-        std::max(b->getFrom()->pl().getRouteNumber(),
-                 b->getTo()->pl().getRouteNumber()),
-        std::min(b->getFrom()->pl().getRouteNumber(),
-                 b->getTo()->pl().getRouteNumber())};
+        std::max(b->getFrom()->pl().getLDeg(), b->getTo()->pl().getLDeg()),
+        std::min(b->getFrom()->pl().getLDeg(), b->getTo()->pl().getLDeg())};
 
     // biggest first, as we are sorting a vector with this
     return oa > ob;
@@ -174,7 +172,7 @@ class Octilinearizer {
              config::OrderMethod orderMethod, bool restrLocSearch,
              double enfGeoCourse, size_t hananIters,
              const std::vector<util::geo::Polygon<double>>& obstacles,
-             size_t initialTries, size_t locsearchIters, size_t abortAfter);
+             size_t locsearchIters, size_t abortAfter);
 
   Score drawILP(const CombGraph& cg, const util::geo::DBox& box, LineGraph* out,
                 basegraph::BaseGraph** gg, Drawing* d, const Penalties& pens,
@@ -206,8 +204,7 @@ class Octilinearizer {
   static const CombNode* getCenterNd(const CombGraph* cg);
 
   std::vector<CombEdge*> getOrdering(const CombGraph& cg,
-                                     octi::config::OrderMethod method,
-                                     bool randr) const;
+                                     octi::config::OrderMethod method) const;
 
   Undrawable draw(const std::vector<CombEdge*>& order, basegraph::BaseGraph* gg,
                   Drawing* drawing, double cutoff, double maxGrDist,
@@ -232,7 +229,7 @@ class Octilinearizer {
                 const std::string& mark) const;
 
   template <class ECmp, class NCmp>
-  std::vector<CombEdge*> getGrowthOrder(const CombGraph& cg, bool randr) const {
+  std::vector<CombEdge*> getGrowthOrder(const CombGraph& cg) const {
     ECmp eCmp;
 
     std::priority_queue<CombNode*, std::vector<CombNode*>, NCmp> globalPq,
@@ -256,12 +253,7 @@ class Octilinearizer {
         if (settled.find(n) != settled.end()) continue;
 
         auto ordered = n->getAdjList();
-
-        if (randr) {
-          std::random_shuffle(ordered.begin(), ordered.end());
-        } else {
-          std::sort(ordered.begin(), ordered.end(), eCmp);
-        }
+        std::sort(ordered.begin(), ordered.end(), eCmp);
 
         for (auto ee : ordered) {
           if (settled.find(ee->getOtherNd(n)) != settled.end()) continue;

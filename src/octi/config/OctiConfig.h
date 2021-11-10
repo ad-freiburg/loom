@@ -19,7 +19,8 @@ enum OrderMethod {
   ADJ_ND_DEGREE = 2,
   ADJ_ND_LDEGREE = 3,
   GROWTH_DEG = 4,
-  GROWTH_LDEG = 5
+  GROWTH_LDEG = 5,
+  ALL = 99
 };
 
 struct Config {
@@ -40,7 +41,6 @@ struct Config {
 
   double maxGrDist;
 
-  int heurInitialTries;
   int heurLocSearchIters;
 
   size_t abortAfter;
