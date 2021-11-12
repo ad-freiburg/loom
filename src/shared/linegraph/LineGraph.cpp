@@ -689,13 +689,10 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
   if (n->getAdjList().size() > maxDeg) {
     std::vector<std::pair<LineEdge*, double>> combine;
 
-    const auto& orig = edgeOrdering(n, true).getOrderedSet();
-    std::cerr << "Splitting " << n << " with " << orig.size() << " adj edges "
-              << std::endl;
-    combine.insert(combine.begin(), orig.begin() + maxDeg - 1, orig.end());
+    const auto& eo = edgeOrdering(n, true);
+    const auto& orig = eo.getOrderedSet();
 
-    std::cerr << "max deg: " << maxDeg << " comb size: " << combine.size()
-              << std::endl;
+    combine.insert(combine.begin(), orig.begin() + (maxDeg - 1), orig.end());
 
     // for the new geometry, take the average angle
     double refAngle = 0;
@@ -748,10 +745,7 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
     assert(n->getDeg() <= maxDeg);
 
     // recursively split until max deg is satisfied
-    if (cn->getDeg() > maxDeg) {
-      std::cerr << "rec " << cn->getDeg() << std::endl;
-      splitNode(cn, maxDeg);
-    }
+    if (cn->getDeg() > maxDeg) splitNode(cn, maxDeg);
   }
 }
 

@@ -365,7 +365,7 @@ void Drawing::getLineGraph(LineGraph* target) const {
     size_t childPtr = 0;
     auto prev = a.first->getFrom()->pl().getParent();
 
-    // reverse iterator because paths are always give in reverse order
+    // reverse iterator because paths are always given in reverse order
     for (auto it = a.second.rbegin(); it != a.second.rend(); it++) {
       auto segPair = *it;
       size_t segId = segPair.first;
@@ -375,6 +375,7 @@ void Drawing::getLineGraph(LineGraph* target) const {
       if (reverse) std::reverse(sCopy.begin(), sCopy.end());
 
       for (auto edge : sCopy) {
+        assert(childPtr < combEdg->pl().getChilds().size());
         auto child = combEdg->pl().getChilds()[childPtr];
         auto from = reverse ? edge->getTo() : edge->getFrom();
         auto to = edge->getOtherNd(from);
@@ -390,7 +391,7 @@ void Drawing::getLineGraph(LineGraph* target) const {
 
         if (from == m[curChldFr]) {
           // if this edge is the beginning of an original child edge, replace
-          // it in the node. All other node will not be touched (except for
+          // it in the node. All other nodes will not be touched (except for
           // line not served info) by this original comb edge
           LineGraph::edgeRpl(m[curChldFr], child, edge);
         }

@@ -170,8 +170,8 @@ int main(int argc, char** argv) {
       cfg.baseGraphType == octi::basegraph::BaseGraphType::PSEUDOORTHORADIAL) {
     auto centerNd = getCenterNd(&cg);
 
-    std::cerr << "Center node is "
-              << centerNd->pl().getParent()->pl().toString() << std::endl;
+    // std::cerr << "Center node is "
+              // << centerNd->pl().getParent()->pl().toString() << std::endl;
 
     auto cgCtr = *centerNd->pl().getGeom();
     auto newBox = util::geo::DBox();
