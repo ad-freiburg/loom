@@ -393,50 +393,56 @@ void LineGraph::topologizeIsects() {
 
     double pa = i.a->pl().getPolyline().projectOn(i.bp.p).totalPos;
 
-    auto ba = addEdg(i.b->getFrom(), x,
-                     i.b->pl().getPolyline().getSegment(0, i.bp.totalPos));
-    auto bb = addEdg(x, i.b->getTo(),
-                     i.b->pl().getPolyline().getSegment(i.bp.totalPos, 1));
+    auto ba = addEdg(i.b->getFrom(), x, i.b->pl());
+    ba->pl().setPolyline(i.b->pl().getPolyline().getSegment(0, i.bp.totalPos));
+
+    auto bb = addEdg(x, i.b->getTo(), i.b->pl());
+    bb->pl().setPolyline(i.b->pl().getPolyline().getSegment(i.bp.totalPos, 1));
 
     edgeRpl(i.b->getFrom(), i.b, ba);
     edgeRpl(i.b->getTo(), i.b, bb);
 
+    nodeRpl(ba, i.b->getTo(), x);
+    nodeRpl(bb, i.b->getFrom(), x);
+
     _edgeGrid.add(*ba->pl().getGeom(), ba);
     _edgeGrid.add(*bb->pl().getGeom(), bb);
 
-    // TODO: replace this with the new nodeRpl() method, which does
-    // exactly the same thing
+    // this was replaced by nodeRpl above
+    // for (auto l : i.b->pl().getLines()) {
+      // if (l.direction == i.b->getFrom()) {
+        // ba->pl().addLine(l.line, i.b->getFrom());
+        // bb->pl().addLine(l.line, x);
+      // } else {
+        // ba->pl().addLine(l.line, x);
+        // bb->pl().addLine(l.line, i.b->getTo());
+      // }
+    // }
 
-    for (auto l : i.b->pl().getLines()) {
-      if (l.direction == i.b->getFrom()) {
-        ba->pl().addLine(l.line, i.b->getFrom());
-        bb->pl().addLine(l.line, x);
-      } else {
-        ba->pl().addLine(l.line, x);
-        bb->pl().addLine(l.line, i.b->getTo());
-      }
-    }
-
-    auto aa =
-        addEdg(i.a->getFrom(), x, i.a->pl().getPolyline().getSegment(0, pa));
-    auto ab =
-        addEdg(x, i.a->getTo(), i.a->pl().getPolyline().getSegment(pa, 1));
+    auto aa = addEdg(i.a->getFrom(), x, i.a->pl());
+    aa->pl().setPolyline(i.a->pl().getPolyline().getSegment(0, pa));
+    auto ab = addEdg(x, i.a->getTo(), i.a->pl());
+    ab->pl().setPolyline(i.a->pl().getPolyline().getSegment(pa, 1));
 
     edgeRpl(i.a->getFrom(), i.a, aa);
     edgeRpl(i.a->getTo(), i.a, ab);
 
+    nodeRpl(aa, i.b->getTo(), x);
+    nodeRpl(ab, i.b->getFrom(), x);
+
     _edgeGrid.add(*aa->pl().getGeom(), aa);
     _edgeGrid.add(*ab->pl().getGeom(), ab);
 
-    for (auto l : i.a->pl().getLines()) {
-      if (l.direction == i.b->getFrom()) {
-        aa->pl().addLine(l.line, i.a->getFrom());
-        ab->pl().addLine(l.line, x);
-      } else {
-        aa->pl().addLine(l.line, x);
-        ab->pl().addLine(l.line, i.a->getTo());
-      }
-    }
+    // this was replaced by nodeRpl above
+    // for (auto l : i.a->pl().getLines()) {
+      // if (l.direction == i.b->getFrom()) {
+        // aa->pl().addLine(l.line, i.a->getFrom());
+        // ab->pl().addLine(l.line, x);
+      // } else {
+        // aa->pl().addLine(l.line, x);
+        // ab->pl().addLine(l.line, i.a->getTo());
+      // }
+    // }
 
     _edgeGrid.remove(i.a);
     _edgeGrid.remove(i.b);
