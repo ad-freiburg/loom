@@ -61,6 +61,7 @@ util::json::Dict LineNodePL::getAttrs() const {
         ex["route"] = util::toString(ro.first->id());
         if (exFr.first == exTo) continue;
         auto shrd = LineGraph::sharedNode(exFr.first, exTo);
+        if (!shrd) continue;
         auto nd1 = exFr.first->getOtherNd(shrd);
         auto nd2 = exTo->getOtherNd(shrd);
         ex["edge1_node"] = util::toString(nd1);

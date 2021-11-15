@@ -24,10 +24,14 @@ using util::geo::BezierCurve;
 using util::graph::Dijkstra;
 
 // _____________________________________________________________________________
-double Drawing::score() const { return _c + violations() * basegraph::SOFT_INF; }
+double Drawing::score() const {
+  return _c + violations() * basegraph::SOFT_INF;
+}
 
 // _____________________________________________________________________________
-double Drawing::rawScore() const { return _c + violations() * basegraph::SOFT_INF; }
+double Drawing::rawScore() const {
+  return _c + violations() * basegraph::SOFT_INF;
+}
 
 // _____________________________________________________________________________
 uint64_t Drawing::violations() const { return _violations; }
@@ -130,12 +134,15 @@ void Drawing::draw(CombEdge* ce, const GrEdgList& ges, bool rev) {
 
         assert(_gg->getEdg(ges[i]->getFrom(), ges[i]->getTo()) == ges[i]);
 
-        assert(_gg->getGrNdById(ges[i]->getFrom()->pl().getId())->pl().getId() == ges[i]->getFrom()->pl().getId());
+        assert(
+            _gg->getGrNdById(ges[i]->getFrom()->pl().getId())->pl().getId() ==
+            ges[i]->getFrom()->pl().getId());
 
-        assert(_gg->getGrNdById(ges[i]->getFrom()->pl().getId()) == ges[i]->getFrom());
+        assert(_gg->getGrNdById(ges[i]->getFrom()->pl().getId()) ==
+               ges[i]->getFrom());
 
-
-        assert(_gg->getGrEdgById({ges[i]->getFrom()->pl().getId(), ges[i]->getTo()->pl().getId()}) == ges[i]);
+        assert(_gg->getGrEdgById({ges[i]->getFrom()->pl().getId(),
+                                  ges[i]->getTo()->pl().getId()}) == ges[i]);
       }
     }
   }
@@ -162,6 +169,12 @@ const GridNode* Drawing::getGrNd(const CombNode* cn) {
 
 // _____________________________________________________________________________
 void Drawing::getLineGraph(LineGraph* target) const {
+  // This method extracts a line graph from the drawing, written to "target"
+  // The challenge here is that because of the constraint relaxation, it may be
+  // that image paths overlap. In this case, we have to merge overlapping
+  // segments into a new segment in the target linegraph that wasn't originally
+  // present in the input linegraph
+
   std::map<LineNode*, LineNode*> m;
   std::map<GridNode*, LineNode*> mm;
 
@@ -170,29 +183,42 @@ void Drawing::getLineGraph(LineGraph* target) const {
 
   std::map<const GridEdge*, size_t> grEdgToPathSeg;
 
-  // settle grid nodes
+  // settle grid nodes, _nds contains a mapping of input comb edges to
+  // grid node ids
   for (auto ndpair : _nds) {
-    auto n = ndpair.first;
-    for (auto f : n->getAdjListOut()) {
-      if (f->getFrom() != n) continue;
+    auto combNd = ndpair.first;
+    for (auto f : combNd->getAdjListOut()) {
+      // go over each adjacent edge's image path and add nodes to the target
+      // graph for the image's end and start node
+
+      if (f->getFrom() != combNd) continue;
       if (_edgs.find(f) == _edgs.end()) {
         LOGTO(WARN, std::cerr) << "Edge " << f << " was not drawn, skipping...";
         continue;
       }
 
-      auto p = _edgs.find(f)->second;
-      assert(_gg->getGrEdgById(p.back()));
-      assert(_gg->getGrEdgById(p.front()));
-      GridNode* fr = _gg->getGrEdgById(p.back())->getFrom()->pl().getParent();
-      GridNode* to = _gg->getGrEdgById(p.front())->getTo()->pl().getParent();
+      // the image path...
+      auto pth = _edgs.find(f)->second;
+      assert(_gg->getGrEdgById(pth.back()));
+      assert(_gg->getGrEdgById(pth.front()));
+      // ... and it's from and to grid nodes. We can be sure that that
+      // the path indeed goes in the direction of the comb edge, as the path is
+      // explicitely reverted during the drawing if that was not the case
+      GridNode* fr = _gg->getGrEdgById(pth.back())->getFrom()->pl().getParent();
+      GridNode* to = _gg->getGrEdgById(pth.front())->getTo()->pl().getParent();
 
+      // if we haven't seen the grid nodes...
       if (mm.find(fr) == mm.end()) {
-        auto pl = n->pl().getParent()->pl();
+        // ... retrieve a copy the corresponding PL of the comb node ...
+        auto pl = combNd->pl().getParent()->pl();
+        // ... update the geometry to the grid node geometry ...
         pl.setGeom(*fr->pl().getGeom());
+        // ... and update the lookup maps
         mm[fr] = target->addNd(pl);
-        m[n->pl().getParent()] = mm[fr];
+        m[combNd->pl().getParent()] = mm[fr];
       }
 
+      // (as above)
       if (mm.find(to) == mm.end()) {
         auto pl = f->getTo()->pl().getParent()->pl();
         pl.setGeom(*to->pl().getGeom());
@@ -207,46 +233,58 @@ void Drawing::getLineGraph(LineGraph* target) const {
     auto n = ndpair.first;
     for (auto f : n->getAdjListOut()) {
       if (f->getFrom() != n) continue;
-      if (_edgs.find(f) == _edgs.end()) continue;
+      if (_edgs.find(f) == _edgs.end()) continue; // edge was not drawn
 
       auto path = _edgs.find(f)->second;
 
       std::set<CombEdge*> curResEdgs;
 
       for (size_t i = 0; i < path.size(); i++) {
-        auto pathEdg = path[i];
-        const GridEdge* grEdg = _gg->getGrEdgById(pathEdg);
+        // the current edge id of the path
+        auto pathEdgId = path[i];
+        const GridEdge* grEdg = _gg->getGrEdgById(pathEdgId);
         assert(grEdg);
         assert(_gg->getResEdgsDirInd(grEdg).size());
 
+        // the same grid edge in the other direction
         const GridEdge* grCounterEdg =
-            _gg->getGrEdgById({pathEdg.second, pathEdg.first});
+            _gg->getGrEdgById({pathEdgId.second, pathEdgId.first});
 
+        // if we have already encountered this grid edge before, it hosts
+        // multiple comb edges
         if (grEdgToPathSeg.count(grEdg)) {
           size_t exiSeg = grEdgToPathSeg[grEdg];
           if (cEdgSeg[f].size() == 0 || cEdgSeg[f].back().first != exiSeg) {
+            // add this segment to the path
             cEdgSeg[f].push_back({exiSeg, false});
+            curResEdgs = _gg->getResEdgsDirInd(grEdg);
             continue;
           }
         } else if (grEdgToPathSeg.count(grCounterEdg)) {
+          // as above
           size_t exiSeg = grEdgToPathSeg[grCounterEdg];
           if (cEdgSeg[f].size() == 0 || cEdgSeg[f].back().first != exiSeg) {
             cEdgSeg[f].push_back({exiSeg, true});
+            curResEdgs = _gg->getResEdgsDirInd(grCounterEdg);
             continue;
           }
         }
 
+        // if we have not encountered it yet, check the resident edges on this
+        // segment
         auto newResEdgs = _gg->getResEdgsDirInd(grEdg);
         assert(newResEdgs.size());
 
         if (newResEdgs == curResEdgs) {
+          // if it is the same as before, extend the current segment
           pathSegs[cEdgSeg[f].back().first].start =
               grEdg->getFrom()->pl().getParent();
-          pathSegs[cEdgSeg[f].back().first].path.push_back(pathEdg);
+          pathSegs[cEdgSeg[f].back().first].path.push_back(pathEdgId);
         } else {
+          // if not, start a new segment
           pathSegs.push_back({grEdg->getFrom()->pl().getParent(),
                               grEdg->getTo()->pl().getParent(),
-                              {pathEdg},
+                              {pathEdgId},
                               {},
                               {},
                               newResEdgs});
@@ -375,15 +413,18 @@ void Drawing::getLineGraph(LineGraph* target) const {
       if (reverse) std::reverse(sCopy.begin(), sCopy.end());
 
       for (auto edge : sCopy) {
-        assert(childPtr < combEdg->pl().getChilds().size());
-        auto child = combEdg->pl().getChilds()[childPtr];
         auto from = reverse ? edge->getTo() : edge->getFrom();
         auto to = edge->getOtherNd(from);
+
+        assert(childPtr < combEdg->pl().getChilds().size());
+        auto child = combEdg->pl().getChilds()[childPtr];
 
         for (auto lo : child->pl().getLines()) {
           // directions will be handled below by nodeRpl
           edge->pl().addLine(lo.line, lo.direction);
         }
+
+        assert(child->getTo() == prev || child->getFrom() == prev);
 
         auto curChldTo = child->getTo();
         if (curChldTo == prev) curChldTo = child->getFrom();
@@ -398,8 +439,8 @@ void Drawing::getLineGraph(LineGraph* target) const {
 
         if (to == m[curChldTo]) {
           // if this edge is the end of an original child edge, replace
-          // it in the node. All other node will not be touched (except for
-          // line not served info) by this original comb edge
+          // it in the node. All other nodes will not be touched (except for
+          // lines not served info) by this original comb edge
           LineGraph::edgeRpl(m[curChldTo], child, edge);
           prev = curChldTo;
 

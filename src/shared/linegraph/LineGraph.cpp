@@ -15,7 +15,6 @@
 
 using shared::linegraph::EdgeGrid;
 using shared::linegraph::EdgeOrdering;
-using shared::linegraph::Partner;
 using shared::linegraph::ISect;
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
@@ -23,6 +22,7 @@ using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineOcc;
 using shared::linegraph::NodeGrid;
+using shared::linegraph::Partner;
 using util::geo::DPoint;
 using util::geo::Point;
 
@@ -31,6 +31,7 @@ LineGraph::LineGraph() {}
 
 // _____________________________________________________________________________
 void LineGraph::readFromDot(std::istream* s, double smooth) {
+  UNUSED(smooth);
   _bbox = util::geo::Box<double>();
 
   dot::parser::Parser dp(s);
@@ -385,7 +386,6 @@ const util::geo::DBox& LineGraph::getBBox() const { return _bbox; }
 
 // _____________________________________________________________________________
 void LineGraph::topologizeIsects() {
-  // TODO: prevent lines from continuing at the new intersection node!
   proced.clear();
   while (getNextIntersection().a) {
     auto i = getNextIntersection();
@@ -398,8 +398,14 @@ void LineGraph::topologizeIsects() {
     auto bb = addEdg(x, i.b->getTo(),
                      i.b->pl().getPolyline().getSegment(i.bp.totalPos, 1));
 
+    edgeRpl(i.b->getFrom(), i.b, ba);
+    edgeRpl(i.b->getTo(), i.b, bb);
+
     _edgeGrid.add(*ba->pl().getGeom(), ba);
     _edgeGrid.add(*bb->pl().getGeom(), bb);
+
+    // TODO: replace this with the new nodeRpl() method, which does
+    // exactly the same thing
 
     for (auto l : i.b->pl().getLines()) {
       if (l.direction == i.b->getFrom()) {
@@ -415,6 +421,9 @@ void LineGraph::topologizeIsects() {
         addEdg(i.a->getFrom(), x, i.a->pl().getPolyline().getSegment(0, pa));
     auto ab =
         addEdg(x, i.a->getTo(), i.a->pl().getPolyline().getSegment(pa, 1));
+
+    edgeRpl(i.a->getFrom(), i.a, aa);
+    edgeRpl(i.a->getTo(), i.a, ab);
 
     _edgeGrid.add(*aa->pl().getGeom(), aa);
     _edgeGrid.add(*ab->pl().getGeom(), ab);
@@ -633,7 +642,7 @@ const NodeGrid& LineGraph::getNdGrid() const { return _nodeGrid; }
 EdgeGrid* LineGraph::getEdgGrid() { return &_edgeGrid; }
 
 // _____________________________________________________________________________
-const EdgeGrid& LineGraph::getEdgGrid() const { return &_edgeGrid; }
+const EdgeGrid& LineGraph::getEdgGrid() const { return _edgeGrid; }
 
 // _____________________________________________________________________________
 std::set<const shared::linegraph::Line*> LineGraph::servedLines(
@@ -686,6 +695,7 @@ EdgeOrdering LineGraph::edgeOrdering(LineNode* n, bool useOrigNextNode) {
 // _____________________________________________________________________________
 void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
   assert(maxDeg > 2);
+
   if (n->getAdjList().size() > maxDeg) {
     std::vector<std::pair<LineEdge*, double>> combine;
 
@@ -720,12 +730,19 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
       } else {
         newEdg = addEdg(eo.first->getOtherNd(n), cn, eo.first->pl());
       }
+
+      // replace direction markers in the new edge
       nodeRpl(newEdg, n, cn);
+
+      // replace exception containing the old edge in the remaining target node
+      edgeRpl(eo.first->getOtherNd(n), eo.first, newEdg);
 
       for (auto lo : eo.first->pl().getLines()) {
         ce->pl().addLine(lo.line, 0);
       }
 
+      // in the old node, replace any exception occurence of this node with
+      // the new trunk edge
       edgeRpl(n, eo.first, ce);
       delEdg(eo.first->getFrom(), eo.first->getTo());
     }
@@ -756,6 +773,35 @@ void LineGraph::splitNodes(size_t maxDeg) {
     if (n->getDeg() > maxDeg) toSplit.push_back(n);
   }
   for (auto n : toSplit) splitNode(n, maxDeg);
+}
+
+// _____________________________________________________________________________
+void LineGraph::edgeDel(LineNode* n, const LineEdge* oldE) {
+  // remove from from
+  for (auto& r : n->pl().getConnExc()) {
+    auto exFr = r.second.begin();
+    while (exFr != r.second.end()) {
+      if (exFr->first == oldE) {
+        exFr = r.second.erase(exFr);
+      } else {
+        exFr++;
+      }
+    }
+  }
+
+  // remove from to
+  for (auto& r : n->pl().getConnExc()) {
+    for (auto& exFr : r.second) {
+      auto exTo = exFr.second.begin();
+      while (exTo != exFr.second.end()) {
+        if (*exTo == oldE) {
+          exTo = exFr.second.erase(exTo);
+        } else {
+          exTo++;
+        }
+      }
+    }
+  }
 }
 
 // _____________________________________________________________________________
@@ -816,6 +862,9 @@ void LineGraph::contractEdge(LineEdge* e) {
                         (n1->pl().getGeom()->getY() + otherP->getY()) / 2);
   LineNode* n = 0;
 
+  // n2 is always the target node
+  auto n1Pl = n1->pl();
+
   if (e->getTo()->pl().stops().size() > 0) {
     auto servedLines = LineGraph::servedLines(e->getTo());
     n = mergeNds(e->getFrom(), e->getTo());
@@ -838,8 +887,62 @@ void LineGraph::contractEdge(LineEdge* e) {
 }
 
 // _____________________________________________________________________________
-std::vector<Partner> LineGraph::getPartners(const LineNode* nd, const LineEdge* e,
-                                              const LineOcc& lo) {
+LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
+  auto eConn = getEdg(a, b);
+
+  std::vector<std::pair<const Line*, std::pair<LineNode*, LineNode*>>> ex;
+
+  if (eConn) {
+    for (auto fr : a->getAdjList()) {
+      if (fr == eConn) continue;
+      for (auto lo : fr->pl().getLines()) {
+        for (auto to : b->getAdjList()) {
+          if (to == eConn) continue;
+          if (fr->pl().hasLine(lo.line) && to->pl().hasLine(lo.line) &&
+              (!lineCtd(fr, eConn, lo.line) || !lineCtd(to, eConn, lo.line))) {
+            ex.push_back({lo.line, {fr->getOtherNd(a), to->getOtherNd(b)}});
+          }
+        }
+      }
+    }
+
+    edgeDel(a, eConn);
+    edgeDel(b, eConn);
+    delEdg(a, b);
+  }
+
+  for (auto e : a->getAdjList()) {
+    if (e->getFrom() != a) continue;
+    if (e->getTo() == b) continue;
+    auto newE = addEdg(b, e->getTo(), e->pl());
+    edgeRpl(b, e, newE);
+    edgeRpl(e->getTo(), e, newE);
+    nodeRpl(newE, a, b);
+  }
+
+  for (auto e : a->getAdjList()) {
+    if (e->getTo() != a) continue;
+    if (e->getFrom() == b) continue;
+    auto newE = addEdg(e->getFrom(), b, e->pl());
+    edgeRpl(b, e, newE);
+    edgeRpl(e->getFrom(), e, newE);
+    nodeRpl(newE, a, b);
+  }
+
+  delNd(a);
+
+  for (const auto& newEx : ex) {
+    b->pl().addConnExc(newEx.first, getEdg(b, newEx.second.first),
+                       getEdg(b, newEx.second.second));
+  }
+
+  return b;
+}
+
+// _____________________________________________________________________________
+std::vector<Partner> LineGraph::getPartners(const LineNode* nd,
+                                            const LineEdge* e,
+                                            const LineOcc& lo) {
   std::vector<Partner> ret;
   for (auto toEdg : nd->getAdjList()) {
     if (toEdg == e) continue;
@@ -880,7 +983,7 @@ breakfor:
 double LineGraph::searchSpaceSize() const {
   double ret = 1;
 
-  for (auto n :getNds()) {
+  for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       ret *= util::factorial(e->pl().getLines().size());

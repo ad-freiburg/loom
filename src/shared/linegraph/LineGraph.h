@@ -82,6 +82,7 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
 
   static EdgeOrdering edgeOrdering(LineNode* n, bool useOrigNextNode);
 
+  static void edgeDel(LineNode* n, const LineEdge* oldE);
   static void edgeRpl(LineNode* n, const LineEdge* oldE, const LineEdge* newE);
   static void nodeRpl(LineEdge* e, const LineNode* oldN, const LineNode* newN);
 
@@ -104,6 +105,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   void contractEdge(LineEdge* e);
 
   double searchSpaceSize() const;
+
+  virtual LineNode* mergeNds(LineNode* a, LineNode* b);
 
  private:
   util::geo::Box<double> _bbox;
