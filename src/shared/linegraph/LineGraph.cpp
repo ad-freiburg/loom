@@ -410,13 +410,13 @@ void LineGraph::topologizeIsects() {
 
     // this was replaced by nodeRpl above
     // for (auto l : i.b->pl().getLines()) {
-      // if (l.direction == i.b->getFrom()) {
-        // ba->pl().addLine(l.line, i.b->getFrom());
-        // bb->pl().addLine(l.line, x);
-      // } else {
-        // ba->pl().addLine(l.line, x);
-        // bb->pl().addLine(l.line, i.b->getTo());
-      // }
+    // if (l.direction == i.b->getFrom()) {
+    // ba->pl().addLine(l.line, i.b->getFrom());
+    // bb->pl().addLine(l.line, x);
+    // } else {
+    // ba->pl().addLine(l.line, x);
+    // bb->pl().addLine(l.line, i.b->getTo());
+    // }
     // }
 
     auto aa = addEdg(i.a->getFrom(), x, i.a->pl());
@@ -435,13 +435,13 @@ void LineGraph::topologizeIsects() {
 
     // this was replaced by nodeRpl above
     // for (auto l : i.a->pl().getLines()) {
-      // if (l.direction == i.b->getFrom()) {
-        // aa->pl().addLine(l.line, i.a->getFrom());
-        // ab->pl().addLine(l.line, x);
-      // } else {
-        // aa->pl().addLine(l.line, x);
-        // ab->pl().addLine(l.line, i.a->getTo());
-      // }
+    // if (l.direction == i.b->getFrom()) {
+    // aa->pl().addLine(l.line, i.a->getFrom());
+    // ab->pl().addLine(l.line, x);
+    // } else {
+    // aa->pl().addLine(l.line, x);
+    // ab->pl().addLine(l.line, i.a->getTo());
+    // }
     // }
 
     _edgeGrid.remove(i.a);
@@ -860,6 +860,74 @@ void LineGraph::nodeRpl(LineEdge* e, const LineNode* oldN,
 }
 
 // _____________________________________________________________________________
+void LineGraph::contractStrayNds() {
+  std::vector<LineNode*> toDel;
+  for (auto n : *getNds()) {
+    if (n->pl().stops().size()) continue;
+    if (n->getAdjList().size() != 2) continue;
+
+    auto eA = n->getAdjList().front();
+    auto eB = n->getAdjList().back();
+
+    // check if all lines continue over this node
+    bool lineEqual = true;
+
+    for (const auto& lo : eA->pl().getLines()) {
+      if (!lineCtd(eA, eB, lo.line)) {
+        lineEqual = false;
+        break;
+      }
+    }
+
+    if (!lineEqual) continue;
+
+    for (const auto& lo : eB->pl().getLines()) {
+      if (!lineCtd(eB, eA, lo.line)) {
+        lineEqual = false;
+        break;
+      }
+    }
+
+    if (!lineEqual) continue;
+
+    toDel.push_back(n);
+  }
+
+  for (auto n : toDel) {
+    if (n->getAdjList().size() == 2) {
+      auto a = n->getAdjList().front();
+      auto b = n->getAdjList().back();
+
+      // if this combination would turn our graph into a multigraph,
+      // dont do it!
+      if (getEdg(a->getOtherNd(n), b->getOtherNd(n))) continue;
+
+      auto pl = a->pl();
+
+      if (a->getTo() == n) {
+        pl.setPolyline(PolyLine<double>(*a->getFrom()->pl().getGeom(),
+                                        *b->getOtherNd(n)->pl().getGeom()));
+        auto newE = addEdg(a->getFrom(), b->getOtherNd(n), pl);
+        edgeRpl(a->getFrom(), b, newE);
+        edgeRpl(b->getOtherNd(n), b, newE);
+        edgeRpl(a->getFrom(), a, newE);
+        edgeRpl(b->getOtherNd(n), a, newE);
+      } else {
+        pl.setPolyline(PolyLine<double>(*b->getOtherNd(n)->pl().getGeom(),
+                                        *a->getTo()->pl().getGeom()));
+        auto newE = addEdg(b->getOtherNd(n), a->getTo(), pl);
+        edgeRpl(a->getTo(), b, newE);
+        edgeRpl(b->getOtherNd(n), b, newE);
+        edgeRpl(a->getTo(), a, newE);
+        edgeRpl(b->getOtherNd(n), a, newE);
+      }
+
+      delNd(n);
+    }
+  }
+}
+
+// _____________________________________________________________________________
 void LineGraph::contractEdge(LineEdge* e) {
   auto n1 = e->getFrom();
   auto n2 = e->getTo();
@@ -917,10 +985,25 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
     delEdg(a, b);
   }
 
+  for (const auto& ex : a->pl().getConnExc()) {
+    for (const auto& from : ex.second) {
+      for (const auto& to : from.second) {
+        b->pl().addConnExc(ex.first, from.first, to);
+      }
+    }
+  }
+
   for (auto e : a->getAdjList()) {
     if (e->getFrom() != a) continue;
     if (e->getTo() == b) continue;
+    auto ex = getEdg(b, e->getTo());  // check if edge already exists
     auto newE = addEdg(b, e->getTo(), e->pl());
+    if (ex) {
+      for (auto lo : e->pl().getLines()) {
+        if (lo.direction == a) lo.direction = b;
+        newE->pl().addLine(lo.line, lo.direction);
+      }
+    }
     edgeRpl(b, e, newE);
     edgeRpl(e->getTo(), e, newE);
     nodeRpl(newE, a, b);
@@ -929,7 +1012,14 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
   for (auto e : a->getAdjList()) {
     if (e->getTo() != a) continue;
     if (e->getFrom() == b) continue;
+    auto ex = getEdg(e->getFrom(), b);  // check if edge already exists
     auto newE = addEdg(e->getFrom(), b, e->pl());
+    if (ex) {
+      for (auto lo : e->pl().getLines()) {
+        if (lo.direction == a) lo.direction = b;
+        newE->pl().addLine(lo.line, lo.direction);
+      }
+    }
     edgeRpl(b, e, newE);
     edgeRpl(e->getFrom(), e, newE);
     nodeRpl(newE, a, b);

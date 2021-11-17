@@ -147,11 +147,17 @@ int main(int argc, char** argv) {
     LOGTO(DEBUG, std::cerr) << "Grid size " << gridSize;
   }
 
+  // contract degree 2 nodes without any significance (no station, no exception,
+  // no change in lines
+  tg.contractStrayNds();
+
+  // heuristic: contract all edges shorter than half the grid size
   tg.contractEdges(gridSize / 2);
 
   auto box = tg.getBBox();
 
   // split nodes that have a larger degree than the max degree of the grid graph
+  // to allow drawing
   tg.splitNodes(oct.maxNodeDeg());
 
   CombGraph cg(&tg, cfg.deg2Heur);
@@ -170,8 +176,8 @@ int main(int argc, char** argv) {
       cfg.baseGraphType == octi::basegraph::BaseGraphType::PSEUDOORTHORADIAL) {
     auto centerNd = getCenterNd(&cg);
 
-    // std::cerr << "Center node is "
-              // << centerNd->pl().getParent()->pl().toString() << std::endl;
+    LOGTO(DEBUG, std::cerr) << "Orthoradial center node is "
+                            << centerNd->pl().getParent()->pl().toString();
 
     auto cgCtr = *centerNd->pl().getGeom();
     auto newBox = util::geo::DBox();
