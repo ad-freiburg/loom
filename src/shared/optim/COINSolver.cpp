@@ -257,6 +257,7 @@ void COINSolver::setStarter(const StarterSol& starterSol) {
 
 // _____________________________________________________________________________
 void COINSolver::setNumThreads(int n) {
+  LOGTO(INFO, std::cerr) << "Setting number of threads to " << n;
   _numThreads = n;
 }
 

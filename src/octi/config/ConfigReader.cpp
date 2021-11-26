@@ -29,6 +29,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   std::string baseGraphStr;
   std::string edgeOrderMethod;
 
+  bool noDeg2Heur = false;
+
   opts::options_description generic("General");
   generic.add_options()("version", "output version")(
       "help,?", "show this message")("verbose,v", "verbosity level");
@@ -70,8 +72,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "GeoJSON file containing obstacle polygons")(
       "from-dot,D", opts::bool_switch(&(cfg->fromDot))->default_value(false),
       "input is in dot format")(
-      "deg2-heur", opts::bool_switch(&(cfg->deg2Heur))->default_value(false),
-      "contract degree 2 nodes and re-insert them equidistantly")(
+      "no-deg2-heur", opts::bool_switch(&noDeg2Heur)->default_value(false),
+      "don't contract degree 2 nodes")(
       "enf-geo-pen", opts::value<double>(&(cfg->enfGeoPen))->default_value(0),
       "enforce lines to roughly follow original geographical course")(
       "max-grid-dist", opts::value<double>(&(cfg->maxGrDist))->default_value(3),
@@ -152,6 +154,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     std::cout << "\n" << VERSION_STR << "\n";
     exit(0);
   }
+
+  cfg->deg2Heur = !noDeg2Heur;
 
   if (edgeOrderMethod == "num-lines") {
     cfg->orderMethod = OrderMethod::NUM_LINES;
