@@ -49,7 +49,7 @@ Score Octilinearizer::drawILP(
     BaseGraph** retGg, Drawing* dOut, const Penalties& pens, double gridSize,
     double borderRad, double maxGrDist, OrderMethod orderMethod, bool noSolve,
     double enfGeoPen, size_t hananIters, int timeLim,
-    const std::string& cacheDir, octi::ilp::ILPStats* stats,
+    const std::string& cacheDir, int numThreads, octi::ilp::ILPStats* stats,
     const std::string& solverStr, const std::string& path) {
   BaseGraph* gg;
   Drawing drawing;
@@ -103,7 +103,7 @@ Score Octilinearizer::drawILP(
   ilp::ILPGridOptimizer ilpoptim;
 
   *stats = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens,
-                             timeLim, cacheDir, solverStr, path);
+                             timeLim, cacheDir, numThreads, solverStr, path);
 
   drawing.getLineGraph(outTg);
   *retGg = gg;

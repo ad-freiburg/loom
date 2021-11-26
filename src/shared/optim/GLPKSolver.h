@@ -56,6 +56,9 @@ class GLPKSolver : public ILPSolver {
   int getNumConstrs() const;
   int getNumVars() const;
 
+  void setNumThreads(int n) {};
+  int getNumThreads() const {};
+
   void setTimeLim(int s);
   int getTimeLim() const;
 

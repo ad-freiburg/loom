@@ -59,6 +59,9 @@ class COINSolver : public ILPSolver {
   void setCacheDir(const std::string& dir);
   std::string getCacheDir() const;
 
+  void setNumThreads(int n);
+  int getNumThreads() const;
+
   void setStarter(const StarterSol& starterSol);
   void writeMps(const std::string& path) const;
 
@@ -70,6 +73,8 @@ class COINSolver : public ILPSolver {
   SolveType _status;
 
   int _timeLimit;
+
+  int _numThreads;
 
   OsiClpSolverInterface _solver1;
   OsiSolverInterface* _solver;

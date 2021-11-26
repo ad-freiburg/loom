@@ -38,9 +38,13 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "optim-mode,o",
       opts::value<std::string>(&(cfg->optMode))->default_value("heur"),
       "optimization mode, either 'heur' (fast) or 'ilp' (very slow)")(
-      "ilp-no-solve",
-      opts::bool_switch(&(cfg->ilpNoSolve))->default_value(false),
-      "if set, the ILP is not solved, only written to file")(
+      "ilp-num-threads",
+      opts::value<int>(&(cfg->ilpNumThreads))->default_value(0),
+      "Number of threads to use by the ILP solver (how this number is "
+      "internally used depends on the solver). If 0, the solver default will "
+      "be used.")("ilp-no-solve",
+                  opts::bool_switch(&(cfg->ilpNoSolve))->default_value(false),
+                  "if set, the ILP is not solved, only written to file")(
       "hanan-iters", opts::value<size_t>(&(cfg->hananIters))->default_value(1),
       "hanan iterations")(
       "loc-search-max-iters",
@@ -76,10 +80,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::bool_switch(&(cfg->restrLocSearch))->default_value(false),
       "restrict local search to max grid distance")(
       "edge-order",
-      opts::value<std::string>(&(edgeOrderMethod))
-          ->default_value("all"),
+      opts::value<std::string>(&(edgeOrderMethod))->default_value("all"),
       "method used for initial edge ordering for heuristic method. One of "
-      "{num-lines, length, adj-nd-deg, adj-nd-ldeg, growth-deg, growth-ldef, all}")(
+      "{num-lines, length, adj-nd-deg, adj-nd-ldeg, growth-deg, growth-ldef, "
+      "all}")(
       "density-pen",
       opts::value<double>(&(cfg->pens.densityPen))->default_value(0),
       "penalty factor for re-inserted contracted stations that are too near, a "
@@ -176,7 +180,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     cfg->baseGraphType = BaseGraphType::OCTIGRID;
   } else if (baseGraphStr == "hexalinear") {
     cfg->baseGraphType = BaseGraphType::HEXGRID;
-  // } else if (baseGraphStr == "orthoradial") {
+    // } else if (baseGraphStr == "orthoradial") {
     // cfg->baseGraphType = BaseGraphType::ORTHORADIAL;
   } else if (baseGraphStr == "chulloctilinear") {
     cfg->baseGraphType = BaseGraphType::CONVEXHULLOCTIGRID;

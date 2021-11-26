@@ -36,6 +36,7 @@ struct Config {
   double enfGeoPen;
   bool ilpNoSolve;
   int ilpTimeLimit;
+  int ilpNumThreads;
   std::string ilpSolver;
   std::string ilpCacheDir;
 

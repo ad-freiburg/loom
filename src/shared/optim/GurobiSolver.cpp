@@ -277,7 +277,28 @@ std::string GurobiSolver::getCacheDir() const {
   int error = GRBgetstrparam(GRBgetenv(_model), "NodefileDir", ret);
   if (error) {
     std::stringstream ss;
-    ss << "Could not retrieve time limit value";
+    ss << "Could not retrieve cache dir";
+    throw std::runtime_error(ss.str());
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
+void GurobiSolver::setNumThreads(int n) {
+  LOGTO(INFO, std::cerr) << "Setting number of threads to " << n;
+  int error = GRBsetintparam(GRBgetenv(_model), "Threads", n);
+  if (error) {
+    throw std::runtime_error("Could not set number of threads");
+  }
+}
+
+// _____________________________________________________________________________
+int GurobiSolver::getNumThreads() const {
+  int ret;
+  int error = GRBgetintparam(GRBgetenv(_model), "Threads", &ret);
+  if (error) {
+    std::stringstream ss;
+    ss << "Could not retrieve thread number";
     throw std::runtime_error(ss.str());
   }
   return ret;

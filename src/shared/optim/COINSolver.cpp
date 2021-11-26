@@ -50,6 +50,7 @@ COINSolver::COINSolver(DirType dir)
     : _starterArr(0),
       _status(INF),
       _timeLimit(std::numeric_limits<int>::max()),
+      _numThreads(0),
       _msgHandler(stderr) {
   _solver = &_solver1;
 
@@ -191,7 +192,11 @@ SolveType COINSolver::solve() {
 
   CbcSolverUsefulData solverData;
   CbcMain0(_cbcModel, solverData);
-  const char* argv2[] = {"-solve", "-threads", "4"};
+  std::string numThreads = "4";
+
+  if (_numThreads > 0) numThreads = std::to_string(_numThreads);
+
+  const char* argv2[] = {"-solve", "-threads", numThreads.c_str()};
   CbcMain1(3, argv2, _cbcModel, callBack, solverData);
   _solver = _cbcModel.solver();
 
@@ -248,6 +253,16 @@ int COINSolver::getNumVars() const { return _model.numberColumns(); }
 // _____________________________________________________________________________
 void COINSolver::setStarter(const StarterSol& starterSol) {
   // TODO: not yet implemented
+}
+
+// _____________________________________________________________________________
+void COINSolver::setNumThreads(int n) {
+  _numThreads = n;
+}
+
+// _____________________________________________________________________________
+int COINSolver::getNumThreads() const {
+  return _numThreads;
 }
 
 // _____________________________________________________________________________

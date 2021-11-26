@@ -49,6 +49,9 @@ class ILPSolver {
   virtual void setCacheDir(const std::string& dir) = 0;
   virtual std::string getCacheDir() const = 0;
 
+  virtual void setNumThreads(int n) = 0;
+  virtual int getNumThreads() const = 0;
+
   virtual SolveType solve() = 0;
   virtual SolveType getStatus() = 0;
   virtual void update() = 0;
