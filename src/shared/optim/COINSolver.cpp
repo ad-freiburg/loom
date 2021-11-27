@@ -262,9 +262,7 @@ void COINSolver::setNumThreads(int n) {
 }
 
 // _____________________________________________________________________________
-int COINSolver::getNumThreads() const {
-  return _numThreads;
-}
+int COINSolver::getNumThreads() const { return _numThreads; }
 
 // _____________________________________________________________________________
 void COINSolver::writeMps(const std::string& path) const {
@@ -276,6 +274,15 @@ void COINSolver::setCacheDir(const std::string& dir) {
   LOGTO(INFO, std::cerr) << "Setting cache dir to " << dir
                          << " (TODO: not implemented for COIN)";
 }
+
+// _____________________________________________________________________________
+void COINSolver::setCacheThreshold(double gb) {
+  LOGTO(INFO, std::cerr) << "Setting cache threshhold to " << gb
+                         << " GB (TODO: not implemented for COIN)";
+}
+
+// _____________________________________________________________________________
+double COINSolver::getCacheThreshold() const { return 0; }
 
 // _____________________________________________________________________________
 std::string COINSolver::getCacheDir() const { return ""; }

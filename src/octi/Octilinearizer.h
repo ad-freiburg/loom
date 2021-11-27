@@ -179,9 +179,9 @@ class Octilinearizer {
                 double gridSize, double borderRad, double maxGrDist,
                 config::OrderMethod orderMethod, bool noSolve,
                 double enfGeoPens, size_t hananIters, int timeLim,
-                const std::string& cacheDir, int numThredas,
-                octi::ilp::ILPStats* stats, const std::string& solverStr,
-                const std::string& path);
+                const std::string& cacheDir, double cacheThreshold,
+                int numThreads, octi::ilp::ILPStats* stats,
+                const std::string& solverStr, const std::string& path);
 
   size_t maxNodeDeg() const;
 

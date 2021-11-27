@@ -59,6 +59,9 @@ class COINSolver : public ILPSolver {
   void setCacheDir(const std::string& dir);
   std::string getCacheDir() const;
 
+  void setCacheThreshold(double gb);
+  double getCacheThreshold() const;
+
   void setNumThreads(int n);
   int getNumThreads() const;
 

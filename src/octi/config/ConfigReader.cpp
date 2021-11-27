@@ -52,6 +52,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "loc-search-max-iters",
       opts::value<int>(&(cfg->heurLocSearchIters))->default_value(100),
       "maximum number of iterations for the local search")(
+      "ilp-cache-threshold",
+      opts::value<double>(&(cfg->ilpCacheThreshold))
+          ->default_value(std::numeric_limits<double>::infinity()),
+      "ILP solver time limit (in seconds), negative value means infinity")(
       "ilp-time-limit",
       opts::value<int>(&(cfg->ilpTimeLimit))->default_value(60),
       "ILP solver time limit (in seconds), negative value means infinity")(

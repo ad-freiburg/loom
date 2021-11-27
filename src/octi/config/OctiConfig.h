@@ -37,6 +37,7 @@ struct Config {
   bool ilpNoSolve;
   int ilpTimeLimit;
   int ilpNumThreads;
+  double ilpCacheThreshold;
   std::string ilpSolver;
   std::string ilpCacheDir;
 

@@ -37,8 +37,8 @@ class ILPGridOptimizer {
   ILPStats optimize(BaseGraph* gg, const CombGraph& cg, combgraph::Drawing* d,
                     double maxGrDist, bool noSolve,
                     const basegraph::GeoPensMap* geoPensMap, int timeLim,
-                    const std::string& cacheDir, int numThreads,
-                    const std::string& solverStr,
+                    const std::string& cacheDir, double cacheThreshold,
+                    int numThreads, const std::string& solverStr,
                     const std::string& path) const;
 
  protected:

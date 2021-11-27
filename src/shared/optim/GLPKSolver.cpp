@@ -217,6 +217,17 @@ void GLPKSolver::setCacheDir(const std::string& dir) {
 std::string GLPKSolver::getCacheDir() const { return ""; }
 
 // _____________________________________________________________________________
+void GLPKSolver::setCacheThreshold(double gb) {
+  LOGTO(INFO, std::cerr) << "Setting cache threshold to " << gb
+                         << " (TODO: not implemented for GLPK)";
+}
+
+// _____________________________________________________________________________
+double GLPKSolver::getCacheThreshold() const {
+  return std::numeric_limits<double>::infinity();
+}
+
+// _____________________________________________________________________________
 double* GLPKSolver::getStarterArr() const { return _starterArr; }
 
 // _____________________________________________________________________________

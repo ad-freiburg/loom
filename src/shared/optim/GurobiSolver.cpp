@@ -284,6 +284,27 @@ std::string GurobiSolver::getCacheDir() const {
 }
 
 // _____________________________________________________________________________
+void GurobiSolver::setCacheThreshold(double gb) {
+  LOGTO(INFO, std::cerr) << "Setting cache threshhold to " << gb << " GB";
+  int error = GRBsetdblparam(GRBgetenv(_model), "NodefileStart", gb);
+  if (error) {
+    throw std::runtime_error("Could not set cache threshold");
+  }
+}
+
+// _____________________________________________________________________________
+double GurobiSolver::getCacheThreshold() const {
+  double ret;
+  int error = GRBgetdblparam(GRBgetenv(_model), "NodefileStart", &ret);
+  if (error) {
+    std::stringstream ss;
+    ss << "Could not retrieve cache threshold";
+    throw std::runtime_error(ss.str());
+  }
+  return ret;
+}
+
+// _____________________________________________________________________________
 void GurobiSolver::setNumThreads(int n) {
   LOGTO(INFO, std::cerr) << "Setting number of threads to " << n;
   int error = GRBsetintparam(GRBgetenv(_model), "Threads", n);

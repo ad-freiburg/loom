@@ -25,6 +25,7 @@ ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
                                     combgraph::Drawing* d, double maxGrDist,
                                     bool noSolve, const GeoPensMap* geoPensMap,
                                     int timeLim, const std::string& cacheDir,
+                                    double cacheThreshold,
                                     int numThreads,
                                     const std::string& solverStr,
                                     const std::string& path) const {
@@ -71,6 +72,7 @@ ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
   if (!noSolve) {
     if (timeLim >= 0) lp->setTimeLim(timeLim);
     if (cacheDir.size()) lp->setCacheDir(cacheDir);
+    lp->setCacheThreshold(cacheThreshold);
     if (numThreads != 0) lp->setNumThreads(numThreads);
     T_START(ilp);
     auto status = lp->solve();

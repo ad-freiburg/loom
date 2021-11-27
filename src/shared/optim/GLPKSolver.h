@@ -56,7 +56,7 @@ class GLPKSolver : public ILPSolver {
   int getNumConstrs() const;
   int getNumVars() const;
 
-  void setNumThreads(int n) {};
+  void setNumThreads(int n){};
   int getNumThreads() const {};
 
   void setTimeLim(int s);
@@ -64,6 +64,9 @@ class GLPKSolver : public ILPSolver {
 
   void setCacheDir(const std::string& dir);
   std::string getCacheDir() const;
+
+  void setCacheThreshold(double gb);
+  double getCacheThreshold() const;
 
   void setStarter(const StarterSol& starterSol);
   void writeMps(const std::string& path) const;

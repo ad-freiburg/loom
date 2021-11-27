@@ -196,8 +196,8 @@ int main(int argc, char** argv) {
     sc = oct.drawILP(cg, box, &res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
                      cfg.maxGrDist, cfg.orderMethod, cfg.ilpNoSolve,
                      cfg.enfGeoPen, cfg.hananIters, cfg.ilpTimeLimit,
-                     cfg.ilpCacheDir, cfg.ilpNumThreads, &ilpstats,
-                     cfg.ilpSolver, cfg.ilpPath);
+                     cfg.ilpCacheDir, cfg.ilpCacheThreshold, cfg.ilpNumThreads,
+                     &ilpstats, cfg.ilpSolver, cfg.ilpPath);
     time = T_STOP(octi);
     LOGTO(DEBUG, std::cerr)
         << "Schematized using ILP in " << time << " ms, score " << sc.full;

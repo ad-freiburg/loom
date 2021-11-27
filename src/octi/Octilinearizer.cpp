@@ -49,8 +49,9 @@ Score Octilinearizer::drawILP(
     BaseGraph** retGg, Drawing* dOut, const Penalties& pens, double gridSize,
     double borderRad, double maxGrDist, OrderMethod orderMethod, bool noSolve,
     double enfGeoPen, size_t hananIters, int timeLim,
-    const std::string& cacheDir, int numThreads, octi::ilp::ILPStats* stats,
-    const std::string& solverStr, const std::string& path) {
+    const std::string& cacheDir, double cacheThreshold, int numThreads,
+    octi::ilp::ILPStats* stats, const std::string& solverStr,
+    const std::string& path) {
   BaseGraph* gg;
   Drawing drawing;
 
@@ -64,10 +65,9 @@ Score Octilinearizer::drawILP(
     // presolve using heuristical approach to get a first feasible solution
     LineGraph tmpOutTg;
     // important: always use restrLocSearch here!
-    auto score =
-        draw(cg, box, &tmpOutTg, &gg, &drawing, pensCpy, gridSize, borderRad,
-             maxGrDist, orderMethod, true, enfGeoPen, hananIters, {}, 100,
-             std::numeric_limits<size_t>::max());
+    auto score = draw(cg, box, &tmpOutTg, &gg, &drawing, pensCpy, gridSize,
+                      borderRad, maxGrDist, orderMethod, true, enfGeoPen,
+                      hananIters, {}, 100, std::numeric_limits<size_t>::max());
     if (score.violations) throw NoEmbeddingFoundExc();
     LOGTO(DEBUG, std::cerr) << "Presolving finished.";
   } catch (const NoEmbeddingFoundExc& exc) {
@@ -102,8 +102,9 @@ Score Octilinearizer::drawILP(
 
   ilp::ILPGridOptimizer ilpoptim;
 
-  *stats = ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens,
-                             timeLim, cacheDir, numThreads, solverStr, path);
+  *stats =
+      ilpoptim.optimize(gg, cg, &drawing, maxGrDist, noSolve, geoPens, timeLim,
+                        cacheDir, cacheThreshold, numThreads, solverStr, path);
 
   drawing.getLineGraph(outTg);
   *retGg = gg;
