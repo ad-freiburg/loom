@@ -41,6 +41,7 @@ double ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   }
 
   if (_cfg->ilpTimeLimit >= 0) lp->setTimeLim(_cfg->ilpTimeLimit);
+  if (_cfg->ilpNumThreads != 0) lp->setNumThreads(_cfg->ilpNumThreads);
 
   LOGTO(DEBUG, std::cerr) << "Solving ILP problem...";
 

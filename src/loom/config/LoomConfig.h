@@ -28,6 +28,7 @@ struct Config {
   bool untangleGraph = true;
 
   int ilpTimeLimit = -1;
+  int ilpNumThreads = 0;
 
   double crossPenMultiSameSeg = 1;
   double crossPenMultiDiffSeg = 1;

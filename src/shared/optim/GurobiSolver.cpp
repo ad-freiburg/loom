@@ -20,8 +20,8 @@ GurobiSolver::GurobiSolver(DirType dir)
     : _starterArr(0), _status(INF), _numVars(0), _numRows(0) {
   int verMaj, verMin, verTech;
   GRBversion(&verMaj, &verMin, &verTech);
-  LOGTO(INFO, std::cerr) << "Creating gurobi v" << verMaj << "." << verMin << "."
-                       << verTech << " solver instance...";
+  LOGTO(INFO, std::cerr) << "Creating gurobi v" << verMaj << "." << verMin
+                         << "." << verTech << " solver instance...";
 
   int error = GRBemptyenv(&_env);
   if (error || _env == 0) {
@@ -35,10 +35,11 @@ GurobiSolver::GurobiSolver(DirType dir)
     throw std::runtime_error("Could not set logging of gurobi environment");
   }
 
-  error = GRBsetstrparam(_env, "LogFile", "gurobi.log");
+  error = GRBsetstrparam(_env, "LogFile", "");
   if (error) {
     LOG(ERROR) << GRBgeterrormsg(_env);
-    throw std::runtime_error("Could not set logging of gurobi environment");
+    throw std::runtime_error(
+        "Could not disable file logging of gurobi environment");
   }
 
   error = GRBstartenv(_env);
@@ -47,12 +48,16 @@ GurobiSolver::GurobiSolver(DirType dir)
     throw std::runtime_error("Could not start gurobi environment");
   }
 
+  error = GRBsetdblparam(_env, GRB_DBL_PAR_NODEFILESTART, 0.00001);
+
   // create empty model
   error = GRBnewmodel(_env, &_model, "loom_mip", 0, 0, 0, 0, 0, 0);
   if (error) {
     LOG(ERROR) << GRBgeterrormsg(_env);
     throw std::runtime_error("Could not create gurobi model");
   }
+
+  error = GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_NODEFILESTART, 0.00001);
 
   error = GRBsetcallbackfunc(_model, termHook, &_logBuffer);
 
@@ -216,7 +221,7 @@ SolveType GurobiSolver::solve() {
   // // TODO: disable tuning and make configurable
   // error = GRBgetintattr(_model, "TuneResultCount", &nresults);
   // if (nresults > 0) {
-    // error = GRBgettuneresult(_model, 0);
+  // error = GRBgettuneresult(_model, 0);
   // }
 
   error = GRBoptimize(_model);
@@ -259,13 +264,13 @@ SolveType GurobiSolver::solve() {
     _status = NON_OPTIM;
 
   return getStatus();
-
 }
 
 // _____________________________________________________________________________
 void GurobiSolver::setCacheDir(const std::string& dir) {
   LOGTO(INFO, std::cerr) << "Setting cache dir to " << dir;
-  int error = GRBsetstrparam(GRBgetenv(_model), "NodefileDir", dir.c_str());
+  int error =
+      GRBsetstrparam(GRBgetenv(_model), GRB_STR_PAR_NODEFILEDIR, dir.c_str());
   if (error) {
     throw std::runtime_error("Could not set cache dir");
   }
@@ -274,7 +279,7 @@ void GurobiSolver::setCacheDir(const std::string& dir) {
 // _____________________________________________________________________________
 std::string GurobiSolver::getCacheDir() const {
   char ret[100];
-  int error = GRBgetstrparam(GRBgetenv(_model), "NodefileDir", ret);
+  int error = GRBgetstrparam(GRBgetenv(_model), GRB_STR_PAR_NODEFILEDIR, ret);
   if (error) {
     std::stringstream ss;
     ss << "Could not retrieve cache dir";
@@ -286,7 +291,7 @@ std::string GurobiSolver::getCacheDir() const {
 // _____________________________________________________________________________
 void GurobiSolver::setCacheThreshold(double gb) {
   LOGTO(INFO, std::cerr) << "Setting cache threshhold to " << gb << " GB";
-  int error = GRBsetdblparam(GRBgetenv(_model), "NodefileStart", gb);
+  int error = GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_NODEFILESTART, gb);
   if (error) {
     throw std::runtime_error("Could not set cache threshold");
   }
@@ -295,7 +300,8 @@ void GurobiSolver::setCacheThreshold(double gb) {
 // _____________________________________________________________________________
 double GurobiSolver::getCacheThreshold() const {
   double ret;
-  int error = GRBgetdblparam(GRBgetenv(_model), "NodefileStart", &ret);
+  int error =
+      GRBgetdblparam(GRBgetenv(_model), GRB_DBL_PAR_NODEFILESTART, &ret);
   if (error) {
     std::stringstream ss;
     ss << "Could not retrieve cache threshold";
@@ -307,7 +313,7 @@ double GurobiSolver::getCacheThreshold() const {
 // _____________________________________________________________________________
 void GurobiSolver::setNumThreads(int n) {
   LOGTO(INFO, std::cerr) << "Setting number of threads to " << n;
-  int error = GRBsetintparam(GRBgetenv(_model), "Threads", n);
+  int error = GRBsetintparam(GRBgetenv(_model), GRB_INT_PAR_THREADS, n);
   if (error) {
     throw std::runtime_error("Could not set number of threads");
   }
@@ -316,7 +322,7 @@ void GurobiSolver::setNumThreads(int n) {
 // _____________________________________________________________________________
 int GurobiSolver::getNumThreads() const {
   int ret;
-  int error = GRBgetintparam(GRBgetenv(_model), "Threads", &ret);
+  int error = GRBgetintparam(GRBgetenv(_model), GRB_INT_PAR_THREADS, &ret);
   if (error) {
     std::stringstream ss;
     ss << "Could not retrieve thread number";
@@ -338,7 +344,7 @@ void GurobiSolver::setTimeLim(int s) {
 // _____________________________________________________________________________
 int GurobiSolver::getTimeLim() const {
   double ret;
-  int error = GRBgetdblparam(GRBgetenv(_model), "TimeLimit", &ret);
+  int error = GRBgetdblparam(GRBgetenv(_model), GRB_DBL_PAR_TIMELIMIT, &ret);
   if (error) {
     std::stringstream ss;
     ss << "Could not retrieve time limit value";

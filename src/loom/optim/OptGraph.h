@@ -266,8 +266,7 @@ class OptGraph : public util::graph::UndirGraph<OptNodePL, OptEdgePL> {
   static bool uniquelyExtendsOver(const OptLO& a, const OptEdge* e,
                                   const OptNode* n);
 
-  bool contractCheaper(const OptNode* cont, const OptNode* cheaperA,
-                       const OptNode* cheaperB,
+  bool contractCheaper(const OptNode* cont, const OptNode* cheaper,
                        const std::vector<OptLO>& lines) const;
 
   bool contractCheaper(const OptNode* cont, const OptNode* cheaper,

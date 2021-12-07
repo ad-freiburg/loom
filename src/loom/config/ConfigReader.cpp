@@ -81,6 +81,11 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->crossPenMultiDiffSeg))
       ->default_value(1),
       "penalty factor during optimization for crossings that occur between two lines that travel through 3 segments")
+    ("ilp-num-threads",
+      opts::value<int>(&(cfg->ilpNumThreads))->default_value(0),
+      "Number of threads to use by the ILP solver (how this number is "
+      "internally used depends on the solver). If 0, the solver default will "
+      "be used.")
     ("ilp-time-limit",
       opts::value<int>(&(cfg->ilpTimeLimit))
       ->default_value(-1),

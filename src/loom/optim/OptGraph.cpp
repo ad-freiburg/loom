@@ -500,20 +500,17 @@ bool OptGraph::dogBoneCheaper(const OptNode* a, const OptNode* b,
 }
 
 // _____________________________________________________________________________
-bool OptGraph::contractCheaper(const OptNode* cont, const OptNode* cheaperA,
-                               const OptNode* cheaperB,
+bool OptGraph::contractCheaper(const OptNode* cont, const OptNode* cheaper,
                                const std::vector<OptLO>& lines) const {
+  if (cheaper->getDeg() == 1) return true; // trivially a terminus node
+
   // check if the lines *uniquely* extend over cheaper, otherwise don't contract
   for (const auto& lo : lines) {
-    if ((!terminatesAt(lo, getEdg(cont, cheaperA), cheaperA) &&
-         !uniquelyExtendsOver(lo, getEdg(cont, cheaperA), cheaperA)) &&
-        (!terminatesAt(lo, getEdg(cont, cheaperB), cheaperB) &&
-         !uniquelyExtendsOver(lo, getEdg(cont, cheaperB), cheaperB))) {
+    if ((!terminatesAt(lo, getEdg(cont, cheaper), cheaper) &&
+         !uniquelyExtendsOver(lo, getEdg(cont, cheaper), cheaper))) {
       return false;
     }
   }
-
-  if (cheaperA->getDeg() == 1 || cheaperB->getDeg() == 1) return true;
 
   // for degree > 2, check if true for each line pair - it might be that they
   // cross into different segments there
@@ -522,8 +519,7 @@ bool OptGraph::contractCheaper(const OptNode* cont, const OptNode* cheaperA,
     for (const auto& loB : lines) {
       if (loA == loB) continue;
 
-      if (!contractCheaper(cont, cheaperA, loA, loB) &&
-          !contractCheaper(cont, cheaperB, loA, loB)) {
+      if (!contractCheaper(cont, cheaper, loA, loB)) {
         return false;
       }
     }
@@ -571,7 +567,9 @@ bool OptGraph::contractDeg2Step() {
         // if both edges have more than 2 lines, only contract if we can move
         // potential crossings to a cheaper location
         if (first->pl().getCardinality() > 1) {
-          if (!contractCheaper(n, first->getOtherNd(n), second->getOtherNd(n),
+          if (!contractCheaper(n, first->getOtherNd(n),
+                               first->pl().getLines()) &&
+              !contractCheaper(n, second->getOtherNd(n),
                                first->pl().getLines()))
             continue;
         }
