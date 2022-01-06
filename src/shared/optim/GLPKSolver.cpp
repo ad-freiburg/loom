@@ -157,7 +157,6 @@ double GLPKSolver::getObjVal() const { return glp_mip_obj_val(_prob); }
 // _____________________________________________________________________________
 SolveType GLPKSolver::solve() {
   update();
-  writeMps("/home/patrick/test2.mps");
   int* ia = 0;
   int* ja = 0;
   double* res = 0;
