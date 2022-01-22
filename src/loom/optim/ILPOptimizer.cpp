@@ -25,6 +25,12 @@ using shared::rendergraph::HierarOrderCfg;
 double ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                   HierarOrderCfg* hc, size_t depth,
                                   OptResStats& stats) const {
+
+  // avoid building the entire ILP for small search sizes
+  if (solutionSpaceSize(g) < 500) {
+    return _exhausOpt.optimizeComp(og, g, hc, depth + 1, stats);
+  }
+
   LOGTO(DEBUG, std::cerr) << "Creating ILP problem... ";
   T_START(build);
   auto lp = createProblem(og, g);

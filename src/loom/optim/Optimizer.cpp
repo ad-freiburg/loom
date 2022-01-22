@@ -190,7 +190,8 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
 
       // this is the implementation of the single edge pruning described in the
       // publication - simple skip such components
-      if (nds.size() > 2) {
+      // we also skip components with only single edges
+      if (maxC > 1 && nds.size() > 2) {
         t += optimizeComp(&g, nds, &hc, optResStats);
       } else {
         t += nullOpt.optimizeComp(&g, nds, &hc, 0, optResStats);

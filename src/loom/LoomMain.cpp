@@ -57,7 +57,6 @@ int main(int argc, char** argv) {
                                       cfg.stationSeparationWeight,
                                       true,
                                       true};
-
   loom::optim::OptResStats stats;
 
   if (cfg.optimMethod == "ilp-naive") {

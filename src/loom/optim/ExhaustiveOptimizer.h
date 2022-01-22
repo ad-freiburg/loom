@@ -6,8 +6,6 @@
 #define LOOM_OPTIM_EXHAUSTIVEOPTIMIZER_H_
 
 #include "loom/config/LoomConfig.h"
-#include "loom/optim/ILPEdgeOrderOptimizer.h"
-#include "loom/optim/NullOptimizer.h"
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/OptGraphScorer.h"
 #include "loom/optim/Optimizer.h"
