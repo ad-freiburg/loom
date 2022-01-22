@@ -48,16 +48,12 @@ GurobiSolver::GurobiSolver(DirType dir)
     throw std::runtime_error("Could not start gurobi environment");
   }
 
-  error = GRBsetdblparam(_env, GRB_DBL_PAR_NODEFILESTART, 0.00001);
-
   // create empty model
   error = GRBnewmodel(_env, &_model, "loom_mip", 0, 0, 0, 0, 0, 0);
   if (error) {
     LOG(ERROR) << GRBgeterrormsg(_env);
     throw std::runtime_error("Could not create gurobi model");
   }
-
-  error = GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_NODEFILESTART, 0.00001);
 
   error = GRBsetcallbackfunc(_model, termHook, &_logBuffer);
 

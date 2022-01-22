@@ -180,7 +180,7 @@ SolveType GLPKSolver::solve() {
 
   // params.presolve = GLP_ON;
   // params.binarize = GLP_OFF;
-  // params.ps_tm_lim = 10000;
+  params.ps_tm_lim = 60000;
   params.tm_lim = _timeLimit;
   // params.fp_heur = GLP_ON;
   // params.ps_heur = GLP_ON;
