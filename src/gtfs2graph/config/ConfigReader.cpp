@@ -54,9 +54,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<double>(&(cfg->maxAggrDistance))->default_value(30),
       "maximum aggregation distance between shared segments")(
       "use-mots,m", opts::value<string>(&motStr)->default_value("all"),
-      "used mots, as a bitmap (see GTFS reference, 0000001 = 1 means 'only "
-      "tram', 0000010 = 2 means 'only subway', 0000100 = 4 means 'only rail', "
-      "0001000 = 8 means 'only bus', 0001001 = 3 means 'tram and bus' etc");
+      "used mots");
 
   opts::options_description positional("Positional arguments");
   positional.add_options()("input-feed",

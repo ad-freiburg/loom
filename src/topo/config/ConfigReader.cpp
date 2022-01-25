@@ -31,7 +31,7 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
   opts::options_description config("Output");
   config.add_options()
     ("max-aggr-distance,d",
-      opts::value<double>(&(cfg->maxAggrDistance))->default_value(30),
+      opts::value<double>(&(cfg->maxAggrDistance))->default_value(35),
       "maximum aggregation distance between shared segments")
     ("min-seg-length",
       opts::value<double>(&(cfg->minSegLength))->default_value(35),

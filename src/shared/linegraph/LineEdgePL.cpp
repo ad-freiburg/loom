@@ -52,11 +52,13 @@ void LineEdgePL::addLine(const Line* r, const LineNode* dir,
     // the route is already present in the other direction, make two-way
     if (prev.direction != dir) {
       _lines[prevIdx].direction = 0;
+      return;
     }
   }
   _lineToIdx[r] = _lines.size();
   LineOcc occ(r, dir, ls);
   _lines.push_back(occ);
+
 }
 
 // _____________________________________________________________________________
@@ -76,9 +78,6 @@ void LineEdgePL::delLine(const Line* r) {
 const std::vector<LineOcc>& LineEdgePL::getLines() const { return _lines; }
 
 // _____________________________________________________________________________
-std::vector<LineOcc>& LineEdgePL::getLines() { return _lines; }
-
-// _____________________________________________________________________________
 util::json::Dict LineEdgePL::getAttrs() const {
   util::json::Dict obj;
   auto arr = util::json::Array();
@@ -92,9 +91,9 @@ util::json::Dict LineEdgePL::getAttrs() const {
 
     if (r.direction != 0) {
       line["direction"] = util::toString(r.direction);
-      dbg_lines += (!arr.size() ? "" : "$") + r.line->label() + ">";
+      dbg_lines += (!arr.size() ? "" : ",") + r.line->label() + ">";
     } else {
-      dbg_lines += (!arr.size() ? "" : "$") + r.line->label();
+      dbg_lines += (!arr.size() ? "" : ",") + r.line->label();
     }
 
     arr.push_back(line);

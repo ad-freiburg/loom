@@ -19,6 +19,8 @@ namespace graph {
 template <typename N, typename E>
 class Graph {
  public:
+  Graph() = default;
+  Graph(const Graph&) = delete;
   virtual ~Graph();
   virtual Node<N, E>* addNd() = 0;
   virtual Node<N, E>* addNd(const N& pl) = 0;
@@ -39,7 +41,7 @@ class Graph {
       typename std::set<Node<N, E>*>::iterator i);
   void delEdg(Node<N, E>* from, Node<N, E>* to);
 
- private:
+ protected:
   std::set<Node<N, E>*> _nodes;
 };
 

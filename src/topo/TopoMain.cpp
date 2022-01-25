@@ -52,27 +52,14 @@ int main(int argc, char** argv) {
   ri.init();
   size_t restrFr = mc.freeze();
 
-  // only remove the artifacts after the restriction inferrer has bin
+  // only remove the artifacts after the restriction inferrer has been
   // initialized, as these operations do not guarantee that the restrictions
   // are preserved!
   mc.removeEdgeArtifacts();
 
   // first run, with 0 perc of line width, and offset of 5
-  mc.collapseShrdSegs(5.0);
-
-  double step = 30;
-
-  for (double d = cfg.maxAggrDistance; d <= (cfg.maxAggrDistance * tg.getMaxLineNum());
-       d += step) {
-    std::cerr << d << std::endl;
-    while (mc.collapseShrdSegs(d)) {
-      mc.removeNodeArtifacts();
-      mc.removeEdgeArtifacts();
-    };
-  }
-
-  mc.removeNodeArtifacts();
-  mc.averageNodePositions();
+  // mc.collapseShrdSegs(5.0);
+  mc.collapseShrdSegs(35.0);
 
   // infer restrictions
   ri.infer(mc.freezeTrack(restrFr));

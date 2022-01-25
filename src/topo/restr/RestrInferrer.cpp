@@ -72,7 +72,6 @@ void RestrInferrer::infer(const OrigEdgs& origEdgs) {
     nd->pl().clearConnExc();
   }
 
-
   addHndls(origEdgs);
 
   // output
@@ -201,30 +200,31 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
   auto hndlPA = e->pl().getPolyline().getPointAt(1.0 / 3.0).p;
   auto hndlPB = e->pl().getPolyline().getPointAt(2.0 / 3.0).p;
 
+  // we add a small buffer to account for the skip heuristic in the
+  // shared segments collapsing
+  // double MAX_DIST = aggrD(e) + 2;
+  double MAX_DIST = 35 + 2;  // TODO!!!!!!!!!!!
+  // double checkPos = _cfg->maxAggrDistance;
+  double checkPos =
+      std::min(e->pl().getPolyline().getLength() / 2, _cfg->maxAggrDistance);
+  auto hndlLA =
+      e->pl().getPolyline().getOrthoLineAtDist(checkPos, MAX_DIST).getLine();
+  auto hndlLB = e->pl()
+                    .getPolyline()
+                    .getOrthoLineAtDist(
+                        e->pl().getPolyline().getLength() - checkPos, MAX_DIST)
+                    .getLine();
 
+  std::cerr << "Edge " << e
+            << " contained orig: " << origEdgs.find(e)->second.size()
+            << std::endl;
   for (auto edg : origEdgs.find(e)->second) {
     auto origFr = const_cast<LineEdge*>(edg);
-
     const auto& edgs = _eMap.find(origFr)->second;
 
+    assert(edgs.size());
+
     for (auto restrE : edgs) {
-
-      // we add a small buffer to account for the skip heuristic in the
-      // shared segments collapsing
-      double MAX_DIST = aggrD(e) + 2;
-      double checkPos = _cfg->maxAggrDistance;
-      auto hndlLA =
-          e->pl()
-              .getPolyline()
-              .getOrthoLineAtDist(checkPos, MAX_DIST)
-              .getLine();
-      auto hndlLB =
-          e->pl()
-              .getPolyline()
-              .getOrthoLineAtDist(e->pl().getPolyline().getLength() - checkPos,
-                                  MAX_DIST)
-              .getLine();
-
       if (util::geo::intersects(hndlLA, restrE->pl().geom.getLine())) {
         auto projA = restrE->pl().geom.projectOn(hndlPA);
         auto handleNdA = _rg.addNd(projA.p);
@@ -247,7 +247,7 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
 // _____________________________________________________________________________
 bool RestrInferrer::check(const Line* r, const LineEdge* edg1,
                           const LineEdge* edg2) const {
-  std::set<RestrEdge *> from, to;
+  std::set<RestrEdge*> from, to;
   auto shrdNd = shared::linegraph::LineGraph::sharedNode(edg1, edg2);
 
   double curD = edg1->pl().getPolyline().getLength() * 0.33 +
@@ -281,8 +281,8 @@ bool RestrInferrer::check(const Line* r, const LineEdge* edg1,
     }
   }
 
-  // curdist + 500 is the inf. We do not have to check any further as we
-  // only return true below if cost - curD < 500 <=> cost < curD + 500
+  // curdist + maxL is the inf. We do not have to check any further as we
+  // only return true below if cost - curD < maxL <=> cost < curD + maxL
   CostFunc cFunc(r, curD + _cfg->maxLengthDev);
   return EDijkstra::shortestPath(from, to, cFunc) - curD < _cfg->maxLengthDev;
 }

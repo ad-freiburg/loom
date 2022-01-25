@@ -27,9 +27,6 @@ using util::geo::DPoint;
 using util::geo::Point;
 
 // _____________________________________________________________________________
-LineGraph::LineGraph() {}
-
-// _____________________________________________________________________________
 void LineGraph::readFromDot(std::istream* s, double smooth) {
   UNUSED(smooth);
   _bbox = util::geo::Box<double>();

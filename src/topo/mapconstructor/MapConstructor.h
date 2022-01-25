@@ -75,6 +75,7 @@ class MapConstructor {
   bool collapseShrdSegs();
   bool collapseShrdSegs(double dCut);
   bool collapseShrdSegs(double dCut, size_t steps);
+  bool collapseShrdSegsOld(double dCut, size_t steps);
 
   void averageNodePositions();
   void removeEdgeArtifacts();
@@ -93,11 +94,22 @@ class MapConstructor {
   const config::TopoConfig* _cfg;
   LineGraph* _g;
 
+  LineNode* ndCollapseCand(std::set<LineNode*> notFrom, double maxD,
+                                       const util::geo::Point<double>& point,
+                                         const LineNode* spanA,
+                                         const LineNode* spanB,
+                                       NodeGrid& grid, LineGraph* g) const;
+
   ShrdSegWrap nextShrdSeg(double dCut, EdgeGrid* grid);
+  bool combineNodes(LineNode* a, LineNode* b, LineGraph* g);
+  bool combineEdges(LineEdge* a, LineEdge* b, LineNode* n, LineGraph* g);
+
   bool combineNodes(LineNode* a, LineNode* b);
   bool combineEdges(LineEdge* a, LineEdge* b, LineNode* n);
 
   void combContEdgs(const LineEdge* a, const LineEdge* b);
+  void delOrigEdgsFor(const LineEdge* a);
+  void delOrigEdgsFor(const LineNode* a);
 
   bool lineEq(const LineEdge* a, const LineEdge* b);
 

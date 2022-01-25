@@ -50,7 +50,6 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
                util::Nullable<shared::style::LineStyle> ls);
   void addLine(const Line* r, const Node<LineNodePL, LineEdgePL>* dir);
 
-  std::vector<LineOcc>& getLines();
   const std::vector<LineOcc>& getLines() const;
 
   bool hasLine(const Line* r) const;

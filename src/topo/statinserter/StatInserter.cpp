@@ -66,11 +66,23 @@ DBox StatInserter::bbox() const {
 
 // _____________________________________________________________________________
 void StatInserter::init() {
+  std::map<std::string, size_t> existing;
+
   for (auto nd : *_g->getNds()) {
     if (nd->pl().stops().size()) {
-      StationOcc occ{nd->pl().stops().front(),
-                     {nd->getAdjList().begin(), nd->getAdjList().end()}};
-      _statClusters.push_back({occ});
+      auto stop =nd->pl().stops().front();
+
+      auto exI = existing.find(stop.name);
+      if (exI != existing.end()) {
+        auto& ex = _statClusters[exI->second];
+        ex.front().edges.insert(nd->getAdjList().begin(), nd->getAdjList().end());
+      } else {
+        StationOcc occ{stop,
+                       {nd->getAdjList().begin(), nd->getAdjList().end()}};
+        _statClusters.push_back({occ});
+        existing[stop.name] = _statClusters.size() - 1;
+      }
+
       nd->pl().clearStops();
     }
   }
@@ -229,21 +241,20 @@ LineEdgePair StatInserter::split(LineEdgePL& a, LineNode* fr,
   auto right = a.getPolyline().getSegment(p, 1);
   a.setPolyline(a.getPolyline().getSegment(0, p));
   auto helper = _g->addNd(a.getPolyline().back());
-  auto ro = a.getLines().begin();
   auto helperEdg = _g->addEdg(helper, to, right);
 
-  while (ro != a.getLines().end()) {
-    if (ro->direction == to) {
-      auto* route = ro->line;  // store because of deletion below
-      ro = a.getLines().erase(ro);
+  for (size_t i = 0; i < a.getLines().size(); i++) {
+    auto ro = a.getLines()[i];
+    if (ro.direction == to) {
+      auto* route = ro.line;  // store because of deletion below
+      a.delLine(ro.line);
       a.addLine(route, helper);
       helperEdg->pl().addLine(route, to);
-    } else if (ro->direction == fr) {
-      helperEdg->pl().addLine(ro->line, helper);
-      ro++;
+      i--;
+    } else if (ro.direction == fr) {
+      helperEdg->pl().addLine(ro.line, helper);
     } else {
-      helperEdg->pl().addLine(ro->line, 0);
-      ro++;
+      helperEdg->pl().addLine(ro.line, 0);
     }
   }
 

@@ -37,7 +37,32 @@ struct Partner {
 
 class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
  public:
-  LineGraph();
+  LineGraph() = default;
+  LineGraph(const LineGraph& other) = delete;
+  void operator=(const LineGraph& other) = delete;
+
+  LineGraph(LineGraph&& other) {
+    _bbox = other._bbox;
+    proced = other.proced;
+    _lines = other._lines;
+    _nodeGrid = other._nodeGrid;
+    _edgeGrid = other._edgeGrid;
+
+    _nodes = other._nodes;
+    other._nodes.clear();
+  }
+
+  LineGraph& operator=(LineGraph&& other) {
+    _bbox = other._bbox;
+    proced = other.proced;
+    _lines = other._lines;
+    _nodeGrid = other._nodeGrid;
+    _edgeGrid = other._edgeGrid;
+
+    _nodes = other._nodes;
+    other._nodes.clear();
+    return *this;
+  }
 
   virtual void readFromJson(std::istream* s, double smooth);
   virtual void readFromDot(std::istream* s, double smooth);
