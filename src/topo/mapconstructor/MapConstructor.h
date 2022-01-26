@@ -104,6 +104,8 @@ double maxD(const LineNode* ndA, const LineNode* ndB, double d) const;
   bool combineNodes(LineNode* a, LineNode* b);
   bool combineEdges(LineEdge* a, LineEdge* b, LineNode* n);
 
+  void densifyEdg(LineEdge* e, LineGraph* g, double SEGL);
+
   void combContEdgs(const LineEdge* a, const LineEdge* b);
   void delOrigEdgsFor(const LineEdge* a);
   void delOrigEdgsFor(const LineNode* a);

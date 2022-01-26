@@ -215,6 +215,10 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
                         e->pl().getPolyline().getLength() - checkPos, MAX_DIST)
                     .getLine();
 
+  auto a =_rg.addNd(hndlLA.front());
+  auto b = _rg.addNd(hndlLA.back());
+  _rg.addEdg(a, b, RestrEdgePL(hndlLA));
+
   for (auto edg : origEdgs.find(e)->second) {
     auto origFr = const_cast<LineEdge*>(edg);
     const auto& edgs = _eMap.find(origFr)->second;
@@ -278,10 +282,19 @@ bool RestrInferrer::check(const Line* r, const LineEdge* edg1,
     }
   }
 
+  if (r->label() == "J") {
+    std::cerr << "Checking from " << edg1 << " to " << edg2 << std::endl;
+    std::cerr << from.size() << " === " << to.size() << std::endl;
+  }
+
   // curdist + maxL is the inf. We do not have to check any further as we
   // only return true below if cost - curD < maxL <=> cost < curD + maxL
   // + epsilon to avoid integer rounding issues in the < comparison below
   double eps = 0.1;
   CostFunc cFunc(r, curD + _cfg->maxLengthDev + eps);
+
+  if (r->label() == "J") 
+  std::cerr << EDijkstra::shortestPath(from, to, cFunc) << " vs " << curD + _cfg->maxLengthDev << std::endl;
+
   return EDijkstra::shortestPath(from, to, cFunc) - curD < _cfg->maxLengthDev;
 }

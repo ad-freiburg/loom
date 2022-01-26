@@ -156,6 +156,38 @@ double MapConstructor::maxD(const LineNode* ndA, const LineNode* ndB, double d) 
 }
 
 // _____________________________________________________________________________
+void MapConstructor::densifyEdg(LineEdge* e, LineGraph* g, double SEGL) {
+  return;
+  double segd = util::geo::dist(*e->getFrom()->pl().getGeom(), *e->getTo()->pl().getGeom());
+  if (segd <= SEGL) return;
+
+  auto a = *e->getFrom()->pl().getGeom();
+  auto b = *e->getTo()->pl().getGeom();
+
+  double dx = (a.getX() - b.getX()) / segd;
+  double dy = (a.getY() - b.getY()) / segd;
+  double curd = SEGL;
+  auto last = e->getFrom();
+  while (curd < segd) {
+    auto p = Point<double>(b.getX() + dx * curd, b.getY() + dy * curd);
+    auto nd = g->addNd(p);
+    auto newE = g->addEdg(last, nd, e->pl());
+    combContEdgs(newE, e);
+    LineGraph::nodeRpl(newE, e->getTo(), nd);
+    LineGraph::nodeRpl(newE, e->getFrom(), last);
+    curd += SEGL;
+    last = nd;
+  }
+
+  auto newE = g->addEdg(last, e->getTo(), e->pl());
+  combContEdgs(newE, e);
+  LineGraph::nodeRpl(newE, e->getFrom(), last);
+
+  g->delEdg(e->getFrom(), e->getTo());
+  delOrigEdgsFor(e);
+}
+
+// _____________________________________________________________________________
 bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
   // densify
 
@@ -169,7 +201,7 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
     std::unordered_map<LineNode*, LineNode*> imageNds;
     std::set<LineNode*> imageNdsSet;
 
-    double SEGL = 10;
+    double SEGL = 5;
 
     std::vector<std::pair<double, LineEdge*>> sortedEdges;
     for (auto n : *_g->getNds()) {
@@ -199,10 +231,10 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
       bool imgToCovered = false;
 
       auto pl = *e->pl().getGeom();
-      // pl.insert(pl.begin(), *e->getFrom()->pl().getGeom());
-      // pl.insert(pl.end(), *e->getTo()->pl().getGeom());
+      pl.insert(pl.begin(), *e->getFrom()->pl().getGeom());
+      pl.insert(pl.end(), *e->getTo()->pl().getGeom());
 
-      const auto& plDense = util::geo::densify(util::geo::simplify(*e->pl().getGeom(), 0.5), 10);
+      const auto& plDense = util::geo::densify(util::geo::simplify(*e->pl().getGeom(), 0.5), SEGL);
 
       for (const auto& point : plDense) {
         LineNode* cur =  ndCollapseCand(myNds, e->pl().getLines().size(), dCut, point, front, e->getTo(), grid, &tgNew);
@@ -244,11 +276,18 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
 
           combContEdgs(newE, e);
           mergeLines(newE, e, last, cur);
+
+          densifyEdg(newE, &tgNew, SEGL);
         }
 
         affectedNodes.push_back(cur);
         if (!front) front = cur;
         last = cur;
+
+
+        if (imageNds.count(e->getTo()) && last == imageNds.find(e->getTo())->second) {
+          break;
+        }
       }
 
       assert(imageNds[e->getFrom()]);
@@ -260,6 +299,8 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
 
         combContEdgs(newE, e);
         mergeLines(newE, e, imageNds[e->getFrom()], front);
+
+          densifyEdg(newE, &tgNew, SEGL);
       }
 
       if (!imgToCovered) {
@@ -268,6 +309,8 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
 
         combContEdgs(newE, e);
         mergeLines(newE, e, last, imageNds[e->getTo()]);
+
+          densifyEdg(newE, &tgNew, SEGL);
       }
 
       // now check all affected nodes for artifact edges (= edges connecting
@@ -341,6 +384,12 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
       }
     }
 
+  // // output
+  // util::geo::output::GeoGraphJsonOutput out;
+  // out.print(tgNew, std::cout);
+  // exit(0);
+
+
     // remove edge artifacts
     nds.clear();
     nds.insert(nds.begin(), tgNew.getNds()->begin(), tgNew.getNds()->end());
@@ -395,6 +444,20 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
         if (!lineEq(n->getAdjList().front(), n->getAdjList().back())) continue;
         combineEdges(n->getAdjList().front(), n->getAdjList().back(), n,
                      &tgNew);
+      }
+    }
+
+    // smoothen a bit
+    for (auto n : *tgNew.getNds()) {
+      for (auto e : n->getAdjList()) {
+        if (e->getFrom() != n) continue;
+        auto pl = e->pl().getPolyline();
+        pl.smoothenOutliers(50);
+        pl.simplify(1);
+        pl = util::geo::densify(pl.getLine(), 50);
+        pl.applyChaikinSmooth(1);
+        pl.simplify(1);
+        e->pl().setPolyline(pl);
       }
     }
 

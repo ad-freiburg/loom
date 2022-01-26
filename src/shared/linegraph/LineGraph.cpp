@@ -850,9 +850,8 @@ void LineGraph::nodeRpl(LineEdge* e, const LineNode* oldN,
       newRo.direction = newN;
 
       e->pl().updateLineOcc(newRo);
-    } else {
-      ro++;
     }
+    ro++;
   }
 }
 

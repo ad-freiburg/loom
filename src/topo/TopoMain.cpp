@@ -57,6 +57,11 @@ int main(int argc, char** argv) {
   // are preserved!
   mc.removeEdgeArtifacts();
 
+  // two times the segment length
+  mc.collapseShrdSegs(10);
+
+  // mc.collapseShrdSegs(50);
+
   mc.collapseShrdSegs(cfg.maxAggrDistance);
 
   mc.removeNodeArtifacts();
