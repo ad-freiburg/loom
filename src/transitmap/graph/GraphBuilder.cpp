@@ -63,7 +63,7 @@ void GraphBuilder::writeNodeFronts(RenderGraph* graph) {
 void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
   // now, look at the nodes entire front geometries and expand them
   // until nothing overlaps
-  double step = 1;
+  double step = 5;
 
   while (true) {
     bool stillFree = false;
@@ -97,7 +97,7 @@ void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
 std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
     const RenderGraph* g, const LineNode* n) const {
   std::set<NodeFront*> ret;
-  double minLength = 6;
+  double minLength = 10;
 
   // TODO: why are nodefronts accessed via index?
   for (size_t i = 0; i < n->pl().fronts().size(); ++i) {

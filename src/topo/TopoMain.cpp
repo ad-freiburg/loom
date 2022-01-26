@@ -57,9 +57,9 @@ int main(int argc, char** argv) {
   // are preserved!
   mc.removeEdgeArtifacts();
 
-  // first run, with 0 perc of line width, and offset of 5
-  // mc.collapseShrdSegs(5.0);
-  mc.collapseShrdSegs(35.0);
+  mc.collapseShrdSegs(cfg.maxAggrDistance);
+
+  mc.removeNodeArtifacts();
 
   // infer restrictions
   ri.infer(mc.freezeTrack(restrFr));

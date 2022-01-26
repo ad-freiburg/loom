@@ -9,36 +9,34 @@
 #include <algorithm>
 #include <unordered_map>
 #include "shared/linegraph/LineGraph.h"
-#include "topo/restr/RestrGraph.h"
 #include "topo/config/TopoConfig.h"
+#include "topo/restr/RestrGraph.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
 #include "util/geo/PolyLine.h"
 #include "util/graph/Graph.h"
 
-using util::geo::Grid;
 using util::geo::Box;
-using util::geo::Line;
-using util::geo::PolyLine;
-using util::geo::Point;
-using util::geo::Line;
-using util::geo::DPoint;
-using util::geo::DLine;
 using util::geo::DBox;
+using util::geo::DLine;
+using util::geo::DPoint;
+using util::geo::Grid;
+using util::geo::Line;
+using util::geo::Point;
+using util::geo::PolyLine;
 using util::geo::SharedSegment;
 
 using topo::config::TopoConfig;
 
-using shared::linegraph::LineGraph;
-using shared::linegraph::LineNode;
-using shared::linegraph::Station;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineEdgePair;
-using shared::linegraph::LineNodePL;
 using shared::linegraph::LineEdgePL;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
+using shared::linegraph::LineNodePL;
+using shared::linegraph::Station;
 
 typedef Grid<LineNode*, Point, double> NodeGrid;
-typedef Grid<LineEdge*, Line, double> EdgeGrid;
 
 typedef std::map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
 
@@ -52,9 +50,7 @@ struct AggrDistFunc {
                               b->pl().getLines().size() * (_maxDist / 2));
   };
 
-  double operator()(const LineEdge* a) const {
-    return operator()(a, a);
-  };
+  double operator()(const LineEdge* a) const { return operator()(a, a); };
 
   double _maxDist;
 };
@@ -75,7 +71,6 @@ class MapConstructor {
   bool collapseShrdSegs();
   bool collapseShrdSegs(double dCut);
   bool collapseShrdSegs(double dCut, size_t steps);
-  bool collapseShrdSegsOld(double dCut, size_t steps);
 
   void averageNodePositions();
   void removeEdgeArtifacts();
@@ -94,13 +89,15 @@ class MapConstructor {
   const config::TopoConfig* _cfg;
   LineGraph* _g;
 
-  LineNode* ndCollapseCand(std::set<LineNode*> notFrom, double maxD,
-                                       const util::geo::Point<double>& point,
-                                         const LineNode* spanA,
-                                         const LineNode* spanB,
-                                       NodeGrid& grid, LineGraph* g) const;
+  LineNode* ndCollapseCand(const std::set<LineNode*>& notFrom, const size_t numLines, const double maxD,
+                           const util::geo::Point<double>& point,
+                           const LineNode* spanA, const LineNode* spanB,
+                           NodeGrid& grid, LineGraph* g) const;
 
-  ShrdSegWrap nextShrdSeg(double dCut, EdgeGrid* grid);
+double maxD(size_t lines, const LineNode* nd, double d) const;
+double maxD(size_t lines, double d) const;
+double maxD(const LineNode* ndA, const LineNode* ndB, double d) const;
+
   bool combineNodes(LineNode* a, LineNode* b, LineGraph* g);
   bool combineEdges(LineEdge* a, LineEdge* b, LineNode* n, LineGraph* g);
 
@@ -117,11 +114,13 @@ class MapConstructor {
 
   bool foldEdges(LineEdge* a, LineEdge* b);
 
+  void mergeLines(LineEdge* newE, LineEdge* oldE, LineNode* newFrom,
+                  LineNode* newTo);
+
   PolyLine<double> geomAvg(const LineEdgePL& geomA, double startA, double endA,
                            const LineEdgePL& geomB, double startB, double endB);
 
   DBox bbox() const;
-  EdgeGrid geoIndex();
 
   LineEdgePair split(LineEdgePL& a, LineNode* fr, LineNode* to, double p);
 

@@ -31,9 +31,7 @@ using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
 using shared::linegraph::LineNodePL;
 using shared::linegraph::Station;
-
-double MIN_SEG_LENGTH = 35;
-double MAX_SNAP_DIST = 1;
+using shared::linegraph::LineOcc;
 
 // _____________________________________________________________________________
 MapConstructor::MapConstructor(const TopoConfig* cfg, LineGraph* g)
@@ -41,55 +39,6 @@ MapConstructor::MapConstructor(const TopoConfig* cfg, LineGraph* g)
 
 // _____________________________________________________________________________
 bool MapConstructor::collapseShrdSegs() { return collapseShrdSegs(DBL_MAX); }
-
-// _____________________________________________________________________________
-ShrdSegWrap MapConstructor::nextShrdSeg(double dCut, EdgeGrid* grid) {
-  AggrDistFunc aggrD(_cfg->maxAggrDistance);
-
-  for (auto n : *_g->getNds()) {
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-      if (_indEdges.find(e) != _indEdges.end()) continue;
-
-      std::set<LineEdge*> neighbors;
-
-      // TODO: why is the * 20 needed here, this does not make sense!
-      grid->getNeighbors(e, _cfg->maxAggrDistance * 20, &neighbors);
-
-      for (auto toTest : neighbors) {
-        if (_indEdgesPairs.find({e, toTest}) != _indEdgesPairs.end() ||
-            _indEdges.find(toTest) != _indEdges.end()) {
-          continue;
-        }
-
-        if (e != toTest) {
-          double dmax = aggrD(e, toTest);
-          dmax = fmin(dmax, dCut);
-
-          const auto& s = e->pl().getPolyline().getSharedSegments(
-              toTest->pl().getPolyline(), dmax);
-
-          if (s.segments.size() > 0) {
-            _pEdges[{e, toTest}]++;
-            _pEdges[{toTest, e}]++;
-
-            if (_pEdges[{e, toTest}] > 20) {
-              _indEdgesPairs.insert({e, toTest});
-              _indEdgesPairs.insert({toTest, e});
-            }
-
-            return ShrdSegWrap(e, toTest, s.segments.front());
-          }
-        }
-      }
-
-      // nothing overlapping found for this edge anymore, mark as processed
-      _indEdges.insert(e);
-    }
-  }
-
-  return ShrdSegWrap();
-}
 
 // _____________________________________________________________________________
 bool MapConstructor::lineEq(const LineEdge* a, const LineEdge* b) {
@@ -104,6 +53,8 @@ bool MapConstructor::lineEq(const LineEdge* a, const LineEdge* b) {
     for (const auto& rb : b->pl().getLines()) {
       if (ra.line == rb.line && ra.style == rb.style) {
         if (!shrNd->pl().connOccurs(ra.line, a, b)) return false;
+
+        found = true;
 
         if (ra.direction == 0 && rb.direction == 0) {
           found = true;
@@ -131,19 +82,21 @@ bool MapConstructor::collapseShrdSegs(double dCut) {
 }
 
 // _____________________________________________________________________________
-LineNode* MapConstructor::ndCollapseCand(std::set<LineNode*> notFrom,
-                                         double maxD,
+LineNode* MapConstructor::ndCollapseCand(const std::set<LineNode*>& notFrom,
+    const size_t numLines,
+                                         const double dCut,
                                          const util::geo::Point<double>& point,
                                          const LineNode* spanA,
-                                         const LineNode* spanB, NodeGrid& grid,
+                                         const LineNode* spanB,
+                                         NodeGrid& grid,
                                          LineGraph* g) const {
+  LineNode* ndMin = 0;
+
   std::set<LineNode*> neighbors;
 
-  grid.get(point, _cfg->maxAggrDistance * 20, &neighbors);
+  grid.get(point, dCut * 2, &neighbors);
 
   double dMin = std::numeric_limits<double>::infinity();
-  LineNode* ndMin = 0;
-  LineNode* ret = 0;
 
   double dSpanA = std::numeric_limits<double>::infinity();
   double dSpanB = std::numeric_limits<double>::infinity();
@@ -155,11 +108,16 @@ LineNode* MapConstructor::ndCollapseCand(std::set<LineNode*> notFrom,
     if (ndTest->getDeg() == 0) continue;
     if (notFrom.count(ndTest)) continue;
     double d = util::geo::dist(point, *ndTest->pl().getGeom());
-    if (d < dSpanA && d < dSpanB && d < maxD && d < dMin) {
+
+    double dMax = maxD(numLines, ndTest, dCut);
+
+    if (d < dSpanA && d < dSpanB && d < dMax && d < dMin) {
       dMin = d;
       ndMin = ndTest;
     }
   }
+
+  LineNode* ret = 0;
 
   if (ndMin) {
     ndMin->pl().setGeom(util::geo::centroid(
@@ -175,12 +133,37 @@ LineNode* MapConstructor::ndCollapseCand(std::set<LineNode*> notFrom,
 }
 
 // _____________________________________________________________________________
+double MapConstructor::maxD(size_t lines, const LineNode* nd, double d) const {
+    return d;
+    size_t numLinesOther = LineGraph::getMaxLineNum(nd);
+
+    return  (d * lines) / 2.0 + (d * numLinesOther) / 2.0;
+}
+
+// _____________________________________________________________________________
+double MapConstructor::maxD(size_t lines, double d) const {
+    return d;
+    return  (d * lines);
+}
+
+// _____________________________________________________________________________
+double MapConstructor::maxD(const LineNode* ndA, const LineNode* ndB, double d) const {
+    return d;
+    size_t lines = LineGraph::getMaxLineNum(ndA);
+    size_t numLinesOther = LineGraph::getMaxLineNum(ndB);
+
+    return (d * lines) / 2.0 + (d * numLinesOther) / 2.0;
+}
+
+// _____________________________________________________________________________
 bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
   // densify
 
   for (size_t ITER = 0; ITER < 40; ITER++) {
     std::cerr << "ITER " << ITER << std::endl;
     shared::linegraph::LineGraph tgNew;
+
+    // new grid per iteration
     NodeGrid grid(120, 120, bbox());
 
     std::unordered_map<LineNode*, LineNode*> imageNds;
@@ -198,49 +181,33 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
 
     std::sort(sortedEdges.rbegin(), sortedEdges.rend());
 
-    size_t i = 0;
-    for (auto ep : sortedEdges) {
-      // if (ITER == 11 && i == 36) {
-      // // output
-      // util::geo::output::GeoGraphJsonOutput out;
-      // out.print(*tgNew, std::cout);
-
-      // exit(0);
-      // }
-      i++;
+    size_t j = 0;
+    for (const auto& ep : sortedEdges) {
+      j++;
 
       auto e = ep.second;
-      auto edgePl = e->pl();
-      edgePl.setGeom({});
-
-      // TODO change this, making all lines bidirectional here
-      for (auto& l : edgePl.getLines()) {
-        edgePl.addLine(l.line, 0);
-      }
 
       LineNode* last = 0;
 
       std::set<LineNode*> myNds;
 
-      auto pl = *e->pl().getGeom();
-      pl.insert(pl.begin(), *e->getFrom()->pl().getGeom());
-      pl.insert(pl.end(), *e->getTo()->pl().getGeom());
-
-      pl = util::geo::densify(util::geo::simplify(pl, 0.5), 10);
-      // pl = util::geo::densify(pl, 10);
       size_t i = 0;
       std::vector<LineNode*> affectedNodes;
       LineNode* front = 0;
 
       bool imgFromCovered = false;
       bool imgToCovered = false;
-      for (const auto& point : pl) {
-        LineNode* cur = 0;
-        cur =
-            ndCollapseCand(myNds, dCut, point, front, e->getTo(), grid, &tgNew);
+
+      auto pl = *e->pl().getGeom();
+      // pl.insert(pl.begin(), *e->getFrom()->pl().getGeom());
+      // pl.insert(pl.end(), *e->getTo()->pl().getGeom());
+
+      const auto& plDense = util::geo::densify(util::geo::simplify(*e->pl().getGeom(), 0.5), 10);
+
+      for (const auto& point : plDense) {
+        LineNode* cur =  ndCollapseCand(myNds, e->pl().getLines().size(), dCut, point, front, e->getTo(), grid, &tgNew);
         if (i == 0) {
           // this is the "FROM" node
-
           if (!imageNds.count(e->getFrom())) {
             imageNds[e->getFrom()] = cur;
             imageNdsSet.insert(cur);
@@ -248,7 +215,7 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
           }
         }
 
-        if (i == pl.size() - 1) {
+        if (i == plDense.size() - 1) {
           // this is the "TO" node
           if (!imageNds.count(e->getTo())) {
             imageNds[e->getTo()] = cur;
@@ -272,17 +239,11 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
         }
 
         if (last) {
-          auto exE = tgNew.getEdg(last, cur);
-          if (exE) {
-            for (auto l : edgePl.getLines()) {
-              exE->pl().addLine(l.line, l.direction);
-            }
-            combContEdgs(exE, e);
-          } else {
-            auto newE = tgNew.addEdg(last, cur, edgePl);
-            assert(_origEdgs.back().count(newE) == 0);
-            combContEdgs(newE, e);
-          }
+          auto newE = tgNew.getEdg(last, cur);
+          if (!newE)  newE = tgNew.addEdg(last, cur);
+
+          combContEdgs(newE, e);
+          mergeLines(newE, e, last, cur);
         }
 
         affectedNodes.push_back(cur);
@@ -294,29 +255,19 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
       assert(imageNds[e->getTo()]);
 
       if (!imgFromCovered) {
-        auto exE = tgNew.getEdg(imageNds[e->getFrom()], front);
-        if (exE) {
-          for (auto l : edgePl.getLines()) {
-            exE->pl().addLine(l.line, l.direction);
-          }
-          combContEdgs(exE, e);
-        } else {
-          auto newE = tgNew.addEdg(imageNds[e->getFrom()], front, edgePl);
-          combContEdgs(newE, e);
-        }
+        auto newE = tgNew.getEdg(imageNds[e->getFrom()], front);
+        if (!newE) newE = tgNew.addEdg(imageNds[e->getFrom()], front);
+
+        combContEdgs(newE, e);
+        mergeLines(newE, e, imageNds[e->getFrom()], front);
       }
 
       if (!imgToCovered) {
-        auto exE = tgNew.getEdg(last, imageNds[e->getTo()]);
-        if (exE) {
-          for (auto l : edgePl.getLines()) {
-            exE->pl().addLine(l.line, l.direction);
-          }
-          combContEdgs(exE, e);
-        } else {
-          auto newE = tgNew.addEdg(last, imageNds[e->getTo()], edgePl);
-          combContEdgs(newE, e);
-        }
+        auto newE = tgNew.getEdg(last, imageNds[e->getTo()]);
+        if (!newE) newE = tgNew.addEdg(last, imageNds[e->getTo()]);
+
+        combContEdgs(newE, e);
+        mergeLines(newE, e, last, imageNds[e->getTo()]);
       }
 
       // now check all affected nodes for artifact edges (= edges connecting
@@ -357,9 +308,10 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
         if (e->getFrom() != from) continue;
         auto to = e->getTo();
         if ((from->getDeg() == 2 || to->getDeg() == 2)) continue;
+        if (combineNodes(from, to, &tgNew)) break;
         double dCur =
             util::geo::dist(*from->pl().getGeom(), *to->pl().getGeom());
-        if (dCur < dCut) {
+        if (dCur < maxD(from, to, dCut)) {
           if (combineNodes(from, to, &tgNew)) break;
         }
       }
@@ -389,33 +341,88 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
       }
     }
 
-    // output
-    // if (ITER == 4) {
-    // util::geo::output::GeoGraphJsonOutput out;
-    // out.print(*tgNew, std::cout);
-
-    // exit(0);
-    // }
-
     // remove edge artifacts
     nds.clear();
     nds.insert(nds.begin(), tgNew.getNds()->begin(), tgNew.getNds()->end());
     for (auto from : nds) {
       for (auto e : from->getAdjList()) {
         if (e->getFrom() != from) continue;
-        if (e->pl().getPolyline().getLength() < dCut) {
-          auto to = e->getTo();
+        auto to = e->getTo();
+        if (e->pl().getPolyline().getLength() < 2 * maxD(from, to, dCut)) {
+          for (auto* oldE : from->getAdjList()) {
+            if (e == oldE) continue;
+
+            auto ex = tgNew.getEdg(oldE->getOtherNd(from), to);
+
+            if (ex && ex->pl().getPolyline().getLength() > 2 * maxD(ex->pl().getLines().size(), dCut)) {
+                // if long enough, cut the blocking edge in half and add a support node here
+
+                auto plA = ex->pl().getPolyline().getSegment(0, 0.5).getLine();
+                auto plB = ex->pl().getPolyline().getSegment(0.5, 1).getLine();
+                auto supNd = tgNew.addNd(plA.back());
+
+                auto eA = tgNew.addEdg(ex->getFrom(), supNd, ex->pl());
+                auto eB = tgNew.addEdg(supNd, ex->getTo(), ex->pl());
+
+                LineGraph::nodeRpl(eA, ex->getTo(), supNd);
+                LineGraph::nodeRpl(eB, ex->getFrom(), supNd);
+
+                eA->pl().setGeom(plA);
+                eB->pl().setGeom(plB);
+
+                combContEdgs(eA, ex);
+                combContEdgs(eB, ex);
+
+                tgNew.delEdg(ex->getFrom(), ex->getTo());
+                delOrigEdgsFor(ex);
+            }
+          }
+
+
           if (combineNodes(from, to, &tgNew)) break;
         }
       }
     }
 
-    std::cerr << "edges before " << _g->numEdgs() << std::endl;
-    std::cerr << "edges after " << tgNew.numEdgs() << std::endl;
+    // re-collapse again because we might have introduce deg 2 nodes above
+    nds.clear();
+    nds.insert(nds.begin(), tgNew.getNds()->begin(), tgNew.getNds()->end());
 
-    size_t THRESHOLD = 2;
+    for (auto n : nds) {
+      if (n->getDeg() == 2 &&
+          !tgNew.getEdg(n->getAdjList().front()->getOtherNd(n),
+                        n->getAdjList().back()->getOtherNd(n))) {
+        if (!lineEq(n->getAdjList().front(), n->getAdjList().back())) continue;
+        combineEdges(n->getAdjList().front(), n->getAdjList().back(), n,
+                     &tgNew);
+      }
+    }
 
-    if (fabs(_g->numEdgs() - tgNew.numEdgs()) < THRESHOLD) {
+    // convergence criteria
+    double THRESHOLD = 0.001;
+
+    double LEN_OLD = 0;
+    double LEN_NEW = 0;
+    for (const auto& nd : *_g->getNds()) {
+      for (const auto& e : nd->getAdjList()) {
+        if (e->getFrom() != nd) continue;
+        LEN_OLD += e->pl().getPolyline().getLength();
+      }
+    }
+
+    for (const auto& nd : *tgNew.getNds()) {
+      for (const auto& e : nd->getAdjList()) {
+        if (e->getFrom() != nd) continue;
+        LEN_NEW += e->pl().getPolyline().getLength();
+      }
+    }
+
+    std::cerr << "len before " << LEN_OLD << std::endl;
+    std::cerr << "len after " << LEN_NEW << std::endl;
+    std::cerr << "gap " << (1 - LEN_NEW / LEN_OLD) << std::endl;
+
+
+    if (fabs(1 - LEN_NEW / LEN_OLD) < THRESHOLD) {
       *_g = std::move(tgNew);
       break;
     }
@@ -433,249 +440,6 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t steps) {
 
   // copy to target graph
   return true;
-}
-
-// _____________________________________________________________________________
-bool MapConstructor::collapseShrdSegsOld(double dCut, size_t steps) {
-  ShrdSegWrap w;
-  _indEdges.clear();
-  _indEdgesPairs.clear();
-  _pEdges.clear();
-  bool found = false;
-
-  EdgeGrid grid = geoIndex();
-
-  while (steps > 0 && (w = nextShrdSeg(dCut, &grid)).e) {
-    steps--;
-    const auto curEdgeGeom = w.e;
-    const auto cmpEdgeGeom = w.f;
-
-    const auto& eap = w.s.first.first;
-    const auto& ebp = w.s.second.first;
-    const auto& fap = w.s.first.second;
-    const auto& fbp = w.s.second.second;
-
-    auto ea = curEdgeGeom->pl().getPolyline().getSegment(0, eap.totalPos);
-    auto ec = curEdgeGeom->pl().getPolyline().getSegment(ebp.totalPos, 1);
-
-    PolyLine<double> fa, fc;
-
-    if (fap.totalPos > fbp.totalPos) {
-      fa = cmpEdgeGeom->pl().getPolyline().getSegment(fap.totalPos, 1);
-      fc = cmpEdgeGeom->pl().getPolyline().getSegment(0, fbp.totalPos);
-    } else {
-      fa = cmpEdgeGeom->pl().getPolyline().getSegment(0, fap.totalPos);
-      fc = cmpEdgeGeom->pl().getPolyline().getSegment(fbp.totalPos, 1);
-    }
-
-    auto ab = geomAvg(w.e->pl(), w.s.first.first.totalPos,
-                      w.s.second.first.totalPos, w.f->pl(),
-                      w.s.first.second.totalPos, w.s.second.second.totalPos);
-
-    // new nodes at the start and end of the shared segment
-    LineNode *a = 0, *b = 0;
-
-    if (ea.getLength() < MAX_SNAP_DIST) {
-      a = w.e->getFrom();
-    }
-
-    if (ec.getLength() < MAX_SNAP_DIST) {
-      b = w.e->getTo();
-    }
-
-    if (fap.totalPos <= fbp.totalPos) {
-      if (fa.getLength() < MAX_SNAP_DIST && b != w.f->getFrom()) {
-        a = w.f->getFrom();
-      }
-
-      if (fc.getLength() < MAX_SNAP_DIST && a != w.f->getTo()) {
-        b = w.f->getTo();
-      }
-    } else {
-      if (fa.getLength() < MAX_SNAP_DIST && b != w.f->getTo()) {
-        a = w.f->getTo();
-      }
-
-      if (fc.getLength() < MAX_SNAP_DIST && a != w.f->getFrom()) {
-        b = w.f->getFrom();
-      }
-    }
-
-    if (!a) {
-      a = _g->addNd({w.s.first.first.p});
-    }
-
-    if (!b) {
-      b = _g->addNd({w.s.second.first.p});
-    }
-
-    if (a == b) continue;
-
-    LineEdgePL eaEdgeGeom(ea);
-    LineEdgePL abEdgeGeom(ab);
-    LineEdgePL ecEdgeGeom(ec);
-    LineEdgePL faEdgeGeom(fa);
-    LineEdgePL fcEdgeGeom(fc);
-
-    auto wefrom = w.e->getFrom();
-    auto weto = w.e->getTo();
-    auto wffrom = w.f->getFrom();
-    auto wfto = w.f->getTo();
-
-    for (const auto& r : curEdgeGeom->pl().getLines()) {
-      if (!r.direction) {
-        eaEdgeGeom.addLine(r.line, 0, r.style);
-        abEdgeGeom.addLine(r.line, 0, r.style);
-        ecEdgeGeom.addLine(r.line, 0, r.style);
-      } else if (r.direction == weto) {
-        eaEdgeGeom.addLine(r.line, a, r.style);
-        abEdgeGeom.addLine(r.line, b, r.style);
-        ecEdgeGeom.addLine(r.line, weto, r.style);
-      } else {
-        eaEdgeGeom.addLine(r.line, wefrom, r.style);
-        abEdgeGeom.addLine(r.line, a, r.style);
-        ecEdgeGeom.addLine(r.line, b, r.style);
-      }
-    }
-
-    for (const auto& r : cmpEdgeGeom->pl().getLines()) {
-      if (!r.direction) {
-        faEdgeGeom.addLine(r.line, 0, r.style);
-        abEdgeGeom.addLine(r.line, 0, r.style);
-        fcEdgeGeom.addLine(r.line, 0, r.style);
-      } else if ((r.direction == wfto)) {
-        if (fap.totalPos > fbp.totalPos) {
-          faEdgeGeom.addLine(r.line, wfto, r.style);
-          abEdgeGeom.addLine(r.line, a, r.style);
-          fcEdgeGeom.addLine(r.line, b, r.style);
-        } else {
-          faEdgeGeom.addLine(r.line, a, r.style);
-          abEdgeGeom.addLine(r.line, b, r.style);
-          fcEdgeGeom.addLine(r.line, wfto, r.style);
-        }
-      } else {
-        if (fap.totalPos > fbp.totalPos) {
-          faEdgeGeom.addLine(r.line, a, r.style);
-          abEdgeGeom.addLine(r.line, b, r.style);
-          fcEdgeGeom.addLine(r.line, wffrom, r.style);
-        } else {
-          faEdgeGeom.addLine(r.line, wffrom, r.style);
-          abEdgeGeom.addLine(r.line, a, r.style);
-          fcEdgeGeom.addLine(r.line, b, r.style);
-        }
-      }
-    }
-
-    // delete old edges
-    grid.remove(_g->getEdg(w.e->getFrom(), w.e->getTo()));
-    grid.remove(_g->getEdg(w.f->getFrom(), w.f->getTo()));
-    _indEdges.erase(_g->getEdg(w.e->getFrom(), w.e->getTo()));
-    _indEdges.erase(_g->getEdg(w.f->getFrom(), w.f->getTo()));
-    _g->delEdg(w.e->getFrom(), w.e->getTo());
-    _g->delEdg(w.f->getFrom(), w.f->getTo());
-
-
-    LineEdge *eaE = 0, *abE = 0, *ebE = 0, *faE = 0, *fbE = 0, *helper = 0;
-
-    // add new edges
-    if (_g->getEdg(a, b)) {
-      std::tie(helper, abE) = split(abEdgeGeom, a, b, .5);
-      grid.add(*helper->pl().getGeom(), helper);
-      combContEdgs(helper, w.e);
-      combContEdgs(helper, w.f);
-    } else {
-      abE = _g->addEdg(a, b, abEdgeGeom);
-    }
-
-    if (a != wefrom) {
-      if (_g->getEdg(wefrom, a)) {
-        std::tie(helper, eaE) = split(eaEdgeGeom, wefrom, a, .5);
-        grid.add(*helper->pl().getGeom(), helper);
-        combContEdgs(helper, w.e);
-      } else {
-        eaE = _g->addEdg(wefrom, a, eaEdgeGeom);
-      }
-    }
-
-    if (b != weto) {
-      if (_g->getEdg(b, weto)) {
-        std::tie(ebE, helper) = split(ecEdgeGeom, b, weto, .5);
-        grid.add(*helper->pl().getGeom(), helper);
-        combContEdgs(helper, w.e);
-      } else {
-        ebE = _g->addEdg(b, weto, ecEdgeGeom);
-      }
-    }
-
-    if (fap.totalPos > fbp.totalPos) {
-      if (a != wfto) {
-        if (_g->getEdg(a, wfto)) {
-          std::tie(faE, helper) = split(faEdgeGeom, a, wfto, .5);
-          grid.add(*helper->pl().getGeom(), helper);
-          combContEdgs(helper, w.f);
-        } else {
-          faE = _g->addEdg(a, wfto, faEdgeGeom);
-          assert(faE != abE);
-        }
-      }
-
-      if (b != wffrom) {
-        if (_g->getEdg(wffrom, b)) {
-          std::tie(helper, fbE) = split(fcEdgeGeom, wffrom, b, .5);
-          grid.add(*helper->pl().getGeom(), helper);
-          combContEdgs(helper, w.f);
-        } else {
-          fbE = _g->addEdg(wffrom, b, fcEdgeGeom);
-        }
-      }
-    } else {
-      if (a != wffrom) {
-        if (_g->getEdg(wffrom, a)) {
-          std::tie(helper, faE) = split(faEdgeGeom, wffrom, a, .5);
-          grid.add(*helper->pl().getGeom(), helper);
-          combContEdgs(helper, w.f);
-        } else {
-          faE = _g->addEdg(wffrom, a, faEdgeGeom);
-        }
-      }
-
-      if (b != wfto) {
-        if (_g->getEdg(b, wfto)) {
-          std::tie(fbE, helper) = split(fcEdgeGeom, b, wfto, .5);
-          grid.add(*helper->pl().getGeom(), helper);
-          combContEdgs(helper, w.f);
-        } else {
-          fbE = _g->addEdg(b, wfto, fcEdgeGeom);
-        }
-      }
-    }
-
-    if (abE) {
-      grid.add(*abE->pl().getGeom(), abE);
-      combContEdgs(abE, w.e);
-      combContEdgs(abE, w.f);
-    }
-    if (eaE) {
-      grid.add(*eaE->pl().getGeom(), eaE);
-      combContEdgs(eaE, w.e);
-    }
-    if (ebE) {
-      grid.add(*ebE->pl().getGeom(), ebE);
-      combContEdgs(ebE, w.e);
-    }
-    if (faE) {
-      grid.add(*faE->pl().getGeom(), faE);
-      combContEdgs(faE, w.f);
-    }
-    if (fbE) {
-      grid.add(*fbE->pl().getGeom(), fbE);
-      combContEdgs(fbE, w.f);
-    }
-
-    found = true;
-  }
-
-  return found;
 }
 
 // _____________________________________________________________________________
@@ -814,9 +578,7 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n,
     LineGraph::nodeRpl(newEdge, n, newEdge->getTo());
   }
 
-  // set new polyline and smoothen a bit
-  // newPl.smoothenOutliers(50);
-  // newPl.applyChaikinSmooth(1);
+  // set new polyline and simplify a bit
   newPl.simplify(0.5);
   newEdge->pl().setPolyline(newPl);
 
@@ -981,20 +743,6 @@ PolyLine<double> MapConstructor::geomAvg(const LineEdgePL& geomA, double startA,
 }
 
 // _____________________________________________________________________________
-EdgeGrid MapConstructor::geoIndex() {
-  EdgeGrid grid(120, 120, bbox());
-
-  for (auto n : *_g->getNds()) {
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-      grid.add(e->pl().getPolyline().getLine(), e);
-    }
-  }
-
-  return grid;
-}
-
-// _____________________________________________________________________________
 DBox MapConstructor::bbox() const {
   DBox b;
 
@@ -1104,6 +852,20 @@ LineEdgePair MapConstructor::split(LineEdgePL& a, LineNode* fr, LineNode* to,
   ret = _g->addEdg(fr, helper, a);
 
   return {ret, helperEdg};
+}
+
+// _____________________________________________________________________________
+void MapConstructor::mergeLines(LineEdge* newE, LineEdge* oldE, LineNode* newFrom, LineNode* newTo) {
+  // add the lines, update the line directions accordingly
+  for (auto l : oldE->pl().getLines()) {
+    if (!l.direction) {
+      newE->pl().addLine(l.line, 0, l.style);
+    } else if (l.direction == oldE->getTo()) {
+      newE->pl().addLine(l.line, newTo, l.style);
+    } else {
+      newE->pl().addLine(l.line, newFrom, l.style);
+    }
+  }
 }
 
 // _____________________________________________________________________________

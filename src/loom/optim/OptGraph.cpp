@@ -77,7 +77,7 @@ size_t OptEdgePL::getCardinality() const { return getLines().size(); }
 
 // _____________________________________________________________________________
 const OptLO* OptEdgePL::getLineOcc(const Line* l) const {
-  if (lines.back().line > l) return 0;
+  if (lines.size() && lines.back().line > l) return 0;
   if (lines.size() > 0 && lines[0].line == l) return &lines[0];
   if (lines.size() > 1 && lines[1].line == l) return &lines[1];
   if (lines.size() > 2 && lines[2].line == l) return &lines[2];
@@ -1065,6 +1065,7 @@ void OptGraph::untangleOuterStump() {
   }
 
   for (auto mainLeg : toUntangle) {
+    std::cerr << mainLeg << std::endl;
     std::pair<OptEdge*, bool> stumpEdgPair;
     if ((stumpEdgPair = isOuterStump(mainLeg)).first) {
       OptEdge* stumpEdg = stumpEdgPair.first;

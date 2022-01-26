@@ -33,7 +33,6 @@ int main(int argc, char** argv) {
 
   LOGTO(DEBUG, std::cerr) << "Reading graph...";
   shared::rendergraph::RenderGraph g(5, 5);
-
   g.readFromJson(&std::cin, 3);
 
   LOGTO(DEBUG, std::cerr) << "Optimizing...";

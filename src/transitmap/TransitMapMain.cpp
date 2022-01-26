@@ -38,13 +38,12 @@ int main(int argc, char** argv) {
   transitmapper::graph::GraphBuilder b(&cfg);
 
   g.readFromJson(&std::cin, cfg.inputSmoothing);
+  g.smoothen();
 
   LOG(DEBUG) << "Creating node fronts...";
   b.writeNodeFronts(&g);
 
   if (cfg.expandFronts) b.expandOverlappinFronts(&g);
-
-  g.createMetaNodes();
 
   if (cfg.renderMethod == "svg") {
     std::string path = cfg.outputPath;

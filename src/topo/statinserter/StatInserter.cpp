@@ -14,22 +14,22 @@ using namespace topo;
 
 using topo::config::TopoConfig;
 
-using util::geo::Point;
-using util::geo::DPoint;
-using util::geo::Grid;
 using util::geo::Box;
 using util::geo::DBox;
+using util::geo::DPoint;
 using util::geo::extendBox;
+using util::geo::Grid;
+using util::geo::Point;
 using util::geo::PolyLine;
 using util::geo::SharedSegments;
 
-using shared::linegraph::LineGraph;
-using shared::linegraph::LineNode;
-using shared::linegraph::Station;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineEdgePair;
-using shared::linegraph::LineNodePL;
 using shared::linegraph::LineEdgePL;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
+using shared::linegraph::LineNodePL;
+using shared::linegraph::Station;
 
 // _____________________________________________________________________________
 StatInserter::StatInserter(const TopoConfig* cfg, LineGraph* g)
@@ -70,12 +70,13 @@ void StatInserter::init() {
 
   for (auto nd : *_g->getNds()) {
     if (nd->pl().stops().size()) {
-      auto stop =nd->pl().stops().front();
+      auto stop = nd->pl().stops().front();
 
       auto exI = existing.find(stop.name);
       if (exI != existing.end()) {
         auto& ex = _statClusters[exI->second];
-        ex.front().edges.insert(nd->getAdjList().begin(), nd->getAdjList().end());
+        ex.front().edges.insert(nd->getAdjList().begin(),
+                                nd->getAdjList().end());
       } else {
         StationOcc occ{stop,
                        {nd->getAdjList().begin(), nd->getAdjList().end()}};
@@ -86,14 +87,14 @@ void StatInserter::init() {
       nd->pl().clearStops();
     }
   }
-  std::cerr << "Collected " << _statClusters.size() << " station clusters..."
-            << std::endl;
+  LOGTO(DEBUG, std::cerr) << "Collected " << _statClusters.size()
+                          << " station clusters...";
 }
 
 // _____________________________________________________________________________
 std::pair<size_t, size_t> StatInserter::served(
-    const std::vector<LineEdge*>& adj,
-    const std::set<const LineEdge*>& toServe, const OrigEdgs& origEdgs) {
+    const std::vector<LineEdge*>& adj, const std::set<const LineEdge*>& toServe,
+    const OrigEdgs& origEdgs) {
   std::set<const LineEdge*> contained;
 
   for (auto e : adj)
@@ -134,7 +135,7 @@ std::vector<StationCand> StatInserter::candidates(const StationOcc& occ,
   idx.get(util::geo::pad(util::geo::getBoundingBox(occ.station.pos), 250),
           &neighbors);
 
-  std::cerr << "Got " << neighbors.size() << " candidates..." << std::endl;
+  LOGTO(VDEBUG, std::cerr) << "Got " << neighbors.size() << " candidates...";
 
   for (auto edg : neighbors) {
     auto pos = edg->pl().getPolyline().projectOn(occ.station.pos);
@@ -168,19 +169,19 @@ std::vector<StationCand> StatInserter::candidates(const StationOcc& occ,
 
   std::sort(ret.begin(), ret.end(), cmp);
 
-  std::cerr << "  Cands: " << std::endl;
+  LOGTO(VDEBUG, std::cerr) << "  Cands: ";
   for (auto cand : ret) {
     if (cand.edg) {
-      std::cerr << "    Edg " << cand.edg << " at position " << cand.pos
-                << " with dist = " << cand.dist << " truely serving "
-                << cand.truelyServ << "/" << occ.edges.size()
-                << " edges, falsely serving " << cand.falselyServ << " edges."
-                << std::endl;
+      LOGTO(VDEBUG, std::cerr)
+          << "    Edg " << cand.edg << " at position " << cand.pos
+          << " with dist = " << cand.dist << " truely serving "
+          << cand.truelyServ << "/" << occ.edges.size()
+          << " edges, falsely serving " << cand.falselyServ << " edges.";
     } else {
-      std::cerr << "    Nd " << cand.nd << " with dist = " << cand.dist
-                << " truely serving " << cand.truelyServ << "/"
-                << occ.edges.size() << " edges, falsely serving "
-                << cand.falselyServ << " edges." << std::endl;
+      LOGTO(VDEBUG, std::cerr)
+          << "    Nd " << cand.nd << " with dist = " << cand.dist
+          << " truely serving " << cand.truelyServ << "/" << occ.edges.size()
+          << " edges, falsely serving " << cand.falselyServ << " edges.";
     }
   }
 
@@ -196,12 +197,12 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
     if (st.size() == 0) continue;
 
     auto repr = st.front();
-    std::cerr << "Inserting " << repr.station.name << std::endl;
+    LOGTO(VDEBUG, std::cerr) << "Inserting " << repr.station.name;
 
     auto cands = candidates(repr, idx, modOrigEdgs);
 
     if (cands.size() == 0) {
-      std::cerr << "  (No insertion candidate found.)" << std::endl;
+      LOGTO(VDEBUG, std::cerr) << "  (No insertion candidate found.)";
       continue;
     }
 
@@ -235,8 +236,8 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
 }
 
 // _____________________________________________________________________________
-LineEdgePair StatInserter::split(LineEdgePL& a, LineNode* fr,
-                                    LineNode* to, double p) {
+LineEdgePair StatInserter::split(LineEdgePL& a, LineNode* fr, LineNode* to,
+                                 double p) {
   LineEdge* ret;
   auto right = a.getPolyline().getSegment(p, 1);
   a.setPolyline(a.getPolyline().getSegment(0, p));

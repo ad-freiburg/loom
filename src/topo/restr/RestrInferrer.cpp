@@ -203,10 +203,10 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
   // we add a small buffer to account for the skip heuristic in the
   // shared segments collapsing
   // double MAX_DIST = aggrD(e) + 2;
-  double MAX_DIST = 35 + 2;  // TODO!!!!!!!!!!!
+  double MAX_DIST = _cfg->maxAggrDistance + 2;
   // double checkPos = _cfg->maxAggrDistance;
   double checkPos =
-      std::min(e->pl().getPolyline().getLength() / 2, _cfg->maxAggrDistance);
+      std::min(e->pl().getPolyline().getLength() / 2, 2 * _cfg->maxAggrDistance);
   auto hndlLA =
       e->pl().getPolyline().getOrthoLineAtDist(checkPos, MAX_DIST).getLine();
   auto hndlLB = e->pl()
@@ -215,9 +215,6 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
                         e->pl().getPolyline().getLength() - checkPos, MAX_DIST)
                     .getLine();
 
-  std::cerr << "Edge " << e
-            << " contained orig: " << origEdgs.find(e)->second.size()
-            << std::endl;
   for (auto edg : origEdgs.find(e)->second) {
     auto origFr = const_cast<LineEdge*>(edg);
     const auto& edgs = _eMap.find(origFr)->second;
@@ -283,6 +280,8 @@ bool RestrInferrer::check(const Line* r, const LineEdge* edg1,
 
   // curdist + maxL is the inf. We do not have to check any further as we
   // only return true below if cost - curD < maxL <=> cost < curD + maxL
-  CostFunc cFunc(r, curD + _cfg->maxLengthDev);
+  // + epsilon to avoid integer rounding issues in the < comparison below
+  double eps = 0.1;
+  CostFunc cFunc(r, curD + _cfg->maxLengthDev + eps);
   return EDijkstra::shortestPath(from, to, cFunc) - curD < _cfg->maxLengthDev;
 }

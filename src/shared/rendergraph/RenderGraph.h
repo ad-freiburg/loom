@@ -62,13 +62,13 @@ class RenderGraph : public shared::linegraph::LineGraph {
                               const shared::linegraph::LineEdge* e, size_t pos,
                               bool inv, bool origG) const;
 
+  void smoothen();
+
   static bool notCompletelyServed(const shared::linegraph::LineNode* n);
 
   std::vector<util::geo::Polygon<double>> getIndStopPolys(
       const std::set<const shared::linegraph::Line*>& served,
       const shared::linegraph::LineNode* n, double d) const;
-
-  void createMetaNodes();
 
   static bool isTerminus(const shared::linegraph::LineNode* n);
   static double getOutAngle(const shared::linegraph::LineNode* n,
@@ -98,15 +98,6 @@ class RenderGraph : public shared::linegraph::LineGraph {
   util::geo::Polygon<double> getConvexFrontHull(
       const shared::linegraph::LineNode* n, double d, bool rectangulize,
       bool simpleRenderForTwoEdgeNodes) const;
-
-  std::vector<shared::linegraph::NodeFront> getNextMetaNodeCand() const;
-  bool isClique(std::set<const shared::linegraph::LineNode*> potClique) const;
-
-  std::vector<shared::linegraph::NodeFront> getOpenNodeFronts(
-      const shared::linegraph::LineNode* n) const;
-
-  std::vector<shared::linegraph::NodeFront> getClosedNodeFronts(
-      const shared::linegraph::LineNode* n) const;
 };
 }  // namespace rendergraph
 }  // namespace shared
