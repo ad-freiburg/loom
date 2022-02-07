@@ -27,35 +27,17 @@ EdgePL::EdgePL() : _e(0) {}
 void EdgePL::setEdge(const Edge* e) { _e = e; }
 
 // _____________________________________________________________________________
-bool EdgePL::addTrip(gtfs::Trip* t, Node* toNode) {
-  assert(toNode == _e->getFrom() || toNode == _e->getTo());
-  for (auto& e : _tripsContained) {
-    if (e.containsRoute(t->getRoute())) {
-      for (auto& tr : e.getTripsForRoute(t->getRoute())->trips) {
-        // shortcut: if a trip is contained here with the same shape id,
-        // don't require recalc of polyline
-        if (tr->getShape() == t->getShape()) {
-          e.addTrip(t, toNode);
-          return true;
-        }
-      }
-    }
-  }
-
-  return false;
-}
-
-// _____________________________________________________________________________
 bool EdgePL::addTrip(gtfs::Trip* t, PolyLine<double> pl, Node* toNode) {
   assert(toNode == _e->getFrom() || toNode == _e->getTo());
   bool inserted = false;
   for (auto& e : _tripsContained) {
-    if (e.getGeom() == pl) {
+    if (e.getGeom().equals(pl, 10)) {
       e.addTrip(t, toNode, pl);
       inserted = true;
       break;
     }
   }
+
   if (!inserted) {
     EdgeTripGeom etg(pl, toNode);
     etg.addTrip(t, toNode);
@@ -105,23 +87,6 @@ void EdgePL::addEdgeTripGeom(const EdgeTripGeom& e) {
 
 // _____________________________________________________________________________
 void EdgePL::simplify() {
-  // calculate average cardinalty of geometries on this edge
-  double avg = 0;
-  for (auto& e : _tripsContained) {
-    avg += e.getTripCardinality();
-  }
-
-  avg /= _tripsContained.size();
-
-  std::cerr << avg << " (" << _tripsContained.size() << ")" << std::endl;
-
-  for (auto it = _tripsContained.begin(); it < _tripsContained.end(); ++it) {
-    if (it->getTripCardinality() < avg * 0.1) {
-      std::cerr << "Erasing..." << std::endl;
-      it = _tripsContained.erase(it);
-    }
-  }
-
   combineIncludedGeoms();
   averageCombineGeom();
 }

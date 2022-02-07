@@ -31,11 +31,8 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
   opts::options_description config("Output");
   config.add_options()
     ("max-aggr-distance,d",
-      opts::value<double>(&(cfg->maxAggrDistance))->default_value(35),
+      opts::value<double>(&(cfg->maxAggrDistance))->default_value(40),
       "maximum aggregation distance between shared segments")
-    ("min-seg-length",
-      opts::value<double>(&(cfg->minSegLength))->default_value(35),
-      "minimum segment length for topologize")
     ("max-length-dev",
       opts::value<double>(&(cfg->maxLengthDev))->default_value(500),
       "maximal distance deviation for turn restriction infer");

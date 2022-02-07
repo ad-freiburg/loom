@@ -202,9 +202,7 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
 
   // we add a small buffer to account for the skip heuristic in the
   // shared segments collapsing
-  // double MAX_DIST = aggrD(e) + 2;
-  double MAX_DIST = _cfg->maxAggrDistance + 2;
-  // double checkPos = _cfg->maxAggrDistance;
+  double MAX_DIST = _cfg->maxAggrDistance * 2;
   double checkPos =
       std::min(e->pl().getPolyline().getLength() / 2, 2 * _cfg->maxAggrDistance);
   auto hndlLA =
@@ -226,7 +224,14 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
     assert(edgs.size());
 
     for (auto restrE : edgs) {
-      if (util::geo::intersects(hndlLA, restrE->pl().geom.getLine())) {
+      // the geometry of the original line
+      auto geom = restrE->pl().geom.getLine();
+
+      // make sure this geometry is connected to the nodes
+      geom.insert(geom.begin(), *restrE->getFrom()->pl().getGeom());
+      geom.insert(geom.end(), *restrE->getTo()->pl().getGeom());
+
+      if (util::geo::intersects(hndlLA, geom)) {
         auto projA = restrE->pl().geom.projectOn(hndlPA);
         auto handleNdA = _rg.addNd(projA.p);
 
@@ -234,7 +239,7 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
         (*handles)[restrE].push_back({handleNdA, projA.totalPos});
       }
 
-      if (util::geo::intersects(hndlLB, restrE->pl().geom.getLine())) {
+      if (util::geo::intersects(hndlLB, geom)) {
         auto projB = restrE->pl().geom.projectOn(hndlPB);
         auto handleNdB = _rg.addNd(projB.p);
 
@@ -282,19 +287,11 @@ bool RestrInferrer::check(const Line* r, const LineEdge* edg1,
     }
   }
 
-  if (r->label() == "J") {
-    std::cerr << "Checking from " << edg1 << " to " << edg2 << std::endl;
-    std::cerr << from.size() << " === " << to.size() << std::endl;
-  }
-
   // curdist + maxL is the inf. We do not have to check any further as we
   // only return true below if cost - curD < maxL <=> cost < curD + maxL
   // + epsilon to avoid integer rounding issues in the < comparison below
   double eps = 0.1;
   CostFunc cFunc(r, curD + _cfg->maxLengthDev + eps);
-
-  if (r->label() == "J") 
-  std::cerr << EDijkstra::shortestPath(from, to, cFunc) << " vs " << curD + _cfg->maxLengthDev << std::endl;
 
   return EDijkstra::shortestPath(from, to, cFunc) - curD < _cfg->maxLengthDev;
 }

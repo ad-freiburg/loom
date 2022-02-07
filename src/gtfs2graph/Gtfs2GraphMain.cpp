@@ -45,11 +45,12 @@ int main(int argc, char** argv) {
     Builder b(&cfg);
 
     b.consume(feed, &g);
+
     b.simplify(&g);
 
     util::geo::output::GeoGraphJsonOutput out;
     out.print(g, std::cout);
   }
 
-  return (0);
+  return 0;
 }

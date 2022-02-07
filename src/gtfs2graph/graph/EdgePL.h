@@ -6,13 +6,13 @@
 #define GTFS2GRAPH_GRAPH_EDGEPL_H_
 
 #include <vector>
-#include "gtfs2graph/graph/EdgeTripGeom.h"
-#include "util/geo/PolyLine.h"
-#include "util/Nullable.h"
 #include "ad/cppgtfs/gtfs/Trip.h"
-#include "util/geo/GeoGraph.h"
-#include "util/json/Writer.h"
 #include "gtfs2graph/graph/BuildGraph.h"
+#include "gtfs2graph/graph/EdgeTripGeom.h"
+#include "util/Nullable.h"
+#include "util/geo/GeoGraph.h"
+#include "util/geo/PolyLine.h"
+#include "util/json/Writer.h"
 
 using namespace ad::cppgtfs;
 using util::Nullable;
@@ -25,8 +25,7 @@ class EdgePL : public util::geograph::GeoEdgePL<double> {
   EdgePL(const Edge* e);
   EdgePL();
 
-  bool addTrip(gtfs::Trip* t, Node* toNode);
-  bool addTrip(gtfs::Trip* t, PolyLine<double> pl, Node* toNode);
+  bool addTrip(gtfs::Trip* t, util::geo::PolyLine<double> pl, Node* toNode);
 
   void setEdge(const Edge* e);
 
@@ -43,11 +42,8 @@ class EdgePL : public util::geograph::GeoEdgePL<double> {
 
   const util::geo::Line<double>* getGeom() const;
   util::json::Dict getAttrs() const;
+
  private:
-  // Map of EdgeTripGeometries in this graph edge.
-  // An EdgeTripGeometry is a geometry holding N trips.
-  // This is meant as a multi-stage structure, where in the first
-  // (trivial) stage, each EdgeTripGeometry holds exactly 1 trip.
   std::vector<EdgeTripGeom> _tripsContained;
 
   void combineIncludedGeoms();
@@ -56,6 +52,7 @@ class EdgePL : public util::geograph::GeoEdgePL<double> {
   const Edge* _e;
 };
 
-}}
+}  // namespace graph
+}  // namespace gtfs2graph
 
 #endif  // GTFS2GRAPH_GRAPH_EDGEPL_H_

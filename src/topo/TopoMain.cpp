@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
   mc.cleanUpGeoms();
 
   // does preserve existing turn restrictions
-  mc.removeNodeArtifacts();
+  mc.removeNodeArtifacts(false);
 
   // init restriction inferrer
   ri.init();
@@ -57,20 +57,26 @@ int main(int argc, char** argv) {
   // are preserved!
   mc.removeEdgeArtifacts();
 
-  // two times the segment length
+  // segment length
   mc.collapseShrdSegs(10);
-
-  // mc.collapseShrdSegs(50);
 
   mc.collapseShrdSegs(cfg.maxAggrDistance);
 
-  mc.removeNodeArtifacts();
+  mc.removeNodeArtifacts(false);
 
   // infer restrictions
   ri.infer(mc.freezeTrack(restrFr));
 
   // insert stations
   si.insertStations(mc.freezeTrack(statFr));
+
+  // remove orphan lines, which may be introduced by another station
+  // placement
+  mc.removeOrphanLines();
+
+  mc.removeNodeArtifacts(true);
+
+  mc.reconstructIntersections();
 
   // output
   util::geo::output::GeoGraphJsonOutput out;

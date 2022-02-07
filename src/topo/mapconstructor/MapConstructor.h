@@ -70,11 +70,13 @@ class MapConstructor {
 
   bool collapseShrdSegs();
   bool collapseShrdSegs(double dCut);
-  bool collapseShrdSegs(double dCut, size_t steps);
+  bool collapseShrdSegs(double dCut, size_t MAX_ITERS);
 
   void averageNodePositions();
   void removeEdgeArtifacts();
-  void removeNodeArtifacts();
+  void removeNodeArtifacts(bool keepStations);
+
+  void reconstructIntersections();
 
   // TODO: make private
   bool contractNodes();
@@ -84,19 +86,21 @@ class MapConstructor {
   bool cleanUpGeoms();
 
   const OrigEdgs& freezeTrack(size_t i) const { return _origEdgs[i]; }
+  void removeOrphanLines();
 
  private:
   const config::TopoConfig* _cfg;
   LineGraph* _g;
 
-  LineNode* ndCollapseCand(const std::set<LineNode*>& notFrom, const size_t numLines, const double maxD,
+  LineNode* ndCollapseCand(const std::set<LineNode*>& notFrom,
+                           const size_t numLines, const double maxD,
                            const util::geo::Point<double>& point,
                            const LineNode* spanA, const LineNode* spanB,
                            NodeGrid& grid, LineGraph* g) const;
 
-double maxD(size_t lines, const LineNode* nd, double d) const;
-double maxD(size_t lines, double d) const;
-double maxD(const LineNode* ndA, const LineNode* ndB, double d) const;
+  double maxD(size_t lines, const LineNode* nd, double d) const;
+  double maxD(size_t lines, double d) const;
+  double maxD(const LineNode* ndA, const LineNode* ndB, double d) const;
 
   bool combineNodes(LineNode* a, LineNode* b, LineGraph* g);
   bool combineEdges(LineEdge* a, LineEdge* b, LineNode* n, LineGraph* g);
@@ -112,7 +116,7 @@ double maxD(const LineNode* ndA, const LineNode* ndB, double d) const;
 
   bool lineEq(const LineEdge* a, const LineEdge* b);
 
-  bool contractEdges();
+  bool contractEdges(bool keepStations);
 
   bool foldEdges(LineEdge* a, LineEdge* b);
 

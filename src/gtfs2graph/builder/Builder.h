@@ -16,17 +16,17 @@
 #include "util/geo/PolyLine.h"
 #include "util/graph/Graph.h"
 
-using namespace gtfs2graph::graph;
-using namespace ad::cppgtfs;
-using util::geo::Grid;
+using gtfs2graph::graph::BuildGraph;
+using gtfs2graph::graph::Edge;
+using gtfs2graph::graph::Node;
 using util::geo::Box;
-using util::geo::Line;
-using util::geo::PolyLine;
-using util::geo::Point;
-using util::geo::Line;
-using util::geo::DPoint;
-using util::geo::DLine;
 using util::geo::DBox;
+using util::geo::DLine;
+using util::geo::DPoint;
+using util::geo::Grid;
+using util::geo::Line;
+using util::geo::Point;
+using util::geo::PolyLine;
 using util::geo::SharedSegment;
 
 typedef Grid<Node*, Point, double> NodeGrid;
@@ -39,9 +39,9 @@ class Builder {
   Builder(const config::Config* cfg);
 
   // build a BuildGraph from a gtfs feed
-  void consume(const gtfs::Feed& f, BuildGraph* g);
+  void consume(const ad::cppgtfs::gtfs::Feed& f, BuildGraph* g);
 
-  // simpliyfy the BuildGraph
+  // simplify the BuildGraph
   void simplify(BuildGraph* g);
 
  private:
@@ -49,33 +49,22 @@ class Builder {
   projPJ _mercProj;
   projPJ _graphProj;
 
-  std::map<const gtfs::Stop*, Node*> _stopNodes;
+  std::map<const ad::cppgtfs::gtfs::Stop*, Node*> _stopNodes;
 
   // map of compiled polylines, to avoid calculating them each time
-  std::unordered_map<gtfs::Shape*, PolyLine<double>> _polyLines;
+  std::unordered_map<ad::cppgtfs::gtfs::Shape*, PolyLine<double>> _polyLines;
 
   DPoint getProjectedPoint(double lat, double lng, projPJ p) const;
 
-  std::pair<bool, PolyLine<double>> getSubPolyLine(const gtfs::Stop* a,
-                                                   const gtfs::Stop* b,
-                                                   gtfs::Trip* t, double distA,
-                                                   double distB);
+  std::pair<bool, PolyLine<double>> getSubPolyLine(
+      const ad::cppgtfs::gtfs::Stop* a, const ad::cppgtfs::gtfs::Stop* b,
+      ad::cppgtfs::gtfs::Trip* t, double distA, double distB);
 
-  Node* addStop(const gtfs::Stop* curStop, uint8_t aggrLevel, BuildGraph* g,
+  Node* addStop(const ad::cppgtfs::gtfs::Stop* curStop, BuildGraph* g,
                 NodeGrid* grid);
 
-  bool checkTripSanity(gtfs::Trip* t) const;
-  bool checkShapeSanity(gtfs::Shape* t) const;
-
-  Node* getNodeByStop(const BuildGraph* g, const gtfs::Stop* s,
-                      bool getParent) const;
-  Node* getNodeByStop(const BuildGraph* g, const gtfs::Stop* s) const;
-  Node* getNearestStop(const DPoint& p, double maxD,
-                       const NodeGrid* grid) const;
-
-  mutable std::set<const Edge*> _indEdges;
-  mutable std::set<std::pair<const Edge*, const Edge*>> _indEdgesPairs;
-  mutable std::map<std::pair<const Edge*, const Edge*>, size_t> _pEdges;
+  Node* getNodeByStop(const BuildGraph* g,
+                      const ad::cppgtfs::gtfs::Stop* s) const;
 };
 
 }  // namespace gtfs2graph

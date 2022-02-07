@@ -104,9 +104,9 @@ void LineNodePL::addConnExc(const Line* r, const LineEdge* edgeA,
 // _____________________________________________________________________________
 void LineNodePL::delConnExc(const Line* r, const LineEdge* edgeA,
                             const LineEdge* edgeB) {
-  _connEx[r][edgeA].erase(edgeB);
-  // index the other direction also, will lead to faster lookups later on
-  _connEx[r][edgeB].erase(edgeA);
+  if (!_connEx.count(r)) return;
+  if (_connEx[r].count(edgeA)) _connEx[r][edgeA].erase(edgeB);
+  if (_connEx[r].count(edgeB)) _connEx[r][edgeB].erase(edgeA);
 }
 
 // _____________________________________________________________________________

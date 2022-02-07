@@ -111,9 +111,7 @@ class PolyLine {
 
   // equality operator, will hold frechet-distance equality check in
   // the dmax
-  bool operator==(const PolyLine& rhs) const;
   bool contains(const PolyLine& rhs, double dmax) const;
-  bool equals(const PolyLine& rhs) const;
   bool equals(const PolyLine& rhs, double dmax) const;
 
   std::string getWKT() const;

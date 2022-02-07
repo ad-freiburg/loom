@@ -91,7 +91,8 @@ util::json::Dict LineEdgePL::getAttrs() const {
 
     if (r.direction != 0) {
       line["direction"] = util::toString(r.direction);
-      dbg_lines += (!arr.size() ? "" : ",") + r.line->label() + ">";
+      // dbg_lines += (!arr.size() ? "" : ",") + r.line->label() + ">";
+      dbg_lines += (!arr.size() ? "" : ",") + r.line->label();
     } else {
       dbg_lines += (!arr.size() ? "" : ",") + r.line->label();
     }

@@ -40,26 +40,13 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                           "+lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m "
                           "+nadgrids=@null +wktext  +no_defs"),
       "map projection as proj4 string")(
-      "ignore-gtfs-distances",
-      opts::bool_switch(&(cfg->ignoreGtfsDistances))->default_value(false),
-      "ignore the distance values in GTFS feed, useful for buggy feeds")(
-      "station-aggregation-level",
-      opts::value<size_t>(&(cfg->stationAggrLevel))->default_value(2),
-      "2 = aggregate based on distance, 1 = aggregate based on feed, 0 = no "
-      "aggr")(
-      "max-station-aggr-distance",
-      opts::value<double>(&(cfg->stationAggrDistance))->default_value(100),
-      "maximum aggregation distance between stops (if aggr level > 1)")(
-      "max-aggr-distance,d",
-      opts::value<double>(&(cfg->maxAggrDistance))->default_value(30),
-      "maximum aggregation distance between shared segments")(
       "use-mots,m", opts::value<string>(&motStr)->default_value("all"),
       "used mots");
 
   opts::options_description positional("Positional arguments");
   positional.add_options()("input-feed",
                            opts::value<std::string>(&(cfg->inputFeedPath)),
-                           "path to an (unzipped) GTFS feed");
+                           "path to an (unzipped!) GTFS feed");
 
   opts::positional_options_description positionalOptions;
   positionalOptions.add("input-feed", 1);

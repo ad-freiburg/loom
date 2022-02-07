@@ -412,22 +412,6 @@ void PolyLine<T>::smoothenOutliers(double d) {
 
 // _____________________________________________________________________________
 template <typename T>
-bool PolyLine<T>::equals(const PolyLine<T>& rhs) const {
-  // TODO: why 100? make global static or configurable or determine in some
-  //       way!
-  return equals(rhs, 100);
-}
-
-// _____________________________________________________________________________
-template <typename T>
-bool PolyLine<T>::operator==(const PolyLine<T>& rhs) const {
-  // TODO: why 100? make global static or configurable or determine in some
-  //       way!
-  return equals(rhs, 100);
-}
-
-// _____________________________________________________________________________
-template <typename T>
 bool PolyLine<T>::equals(const PolyLine<T>& rhs, double dmax) const {
   // check if two lines are equal, THE DIRECTION DOES NOT MATTER HERE!!!!!
 

@@ -12,8 +12,6 @@ namespace config {
 
 struct TopoConfig {
   double maxAggrDistance;
-  double stationAggrDistance;
-  double minSegLength;
   double maxLengthDev;
 };
 

@@ -3,30 +3,27 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <cassert>
-#include "gtfs2graph/graph/BuildGraph.h"
-#include "util/geo/Geo.h"
 #include "ad/cppgtfs/gtfs/Stop.h"
+#include "gtfs2graph/graph/BuildGraph.h"
+#include "gtfs2graph/graph/EdgePL.h"
 #include "gtfs2graph/graph/EdgeTripGeom.h"
 #include "gtfs2graph/graph/NodePL.h"
-#include "gtfs2graph/graph/EdgePL.h"
 #include "util/String.h"
+#include "util/geo/Geo.h"
 #include "util/json/Writer.h"
 
 using namespace gtfs2graph;
 using namespace graph;
 using namespace ad::cppgtfs;
 
-using util::geo::DPoint;
 using util::geo::DLine;
-
-
-// _____________________________________________________________________________
-NodePL::NodePL(DPoint pos) : _pos(pos) {
-}
+using util::geo::DPoint;
 
 // _____________________________________________________________________________
-NodePL::NodePL(double x, double y) : _pos(x, y) {
-}
+NodePL::NodePL(DPoint pos) : _pos(pos) {}
+
+// _____________________________________________________________________________
+NodePL::NodePL(double x, double y) : _pos(x, y) {}
 
 // _____________________________________________________________________________
 NodePL::NodePL(DPoint pos, const gtfs::Stop* s) : _pos(pos) {
@@ -39,34 +36,26 @@ NodePL::NodePL(double x, double y, const gtfs::Stop* s) : _pos(x, y) {
 }
 
 // _____________________________________________________________________________
-void NodePL::addStop(const gtfs::Stop* s) {
-  _stops.insert(s);
-}
+void NodePL::addStop(const gtfs::Stop* s) { _stops.insert(s); }
 
 // _____________________________________________________________________________
-const std::set<const gtfs::Stop*>& NodePL::getStops() const {
-  return _stops;
-}
+const std::set<const gtfs::Stop*>& NodePL::getStops() const { return _stops; }
 
 // _____________________________________________________________________________
-const DPoint& NodePL::getPos() const {
-  return _pos;
-}
+const DPoint& NodePL::getPos() const { return _pos; }
 
 // _____________________________________________________________________________
-void NodePL::setPos(const DPoint& p) {
-  _pos = p;
-}
+void NodePL::setPos(const DPoint& p) { _pos = p; }
 
 // _____________________________________________________________________________
-bool NodePL::isConnOccuring(const gtfs::Route* r, const Edge* from, const Edge* to)
-const {
+bool NodePL::isConnOccuring(const gtfs::Route* r, const Edge* from,
+                            const Edge* to) const {
   auto it = _occConns.find(r);
   if (it == _occConns.end()) return false;
 
   for (auto occ : it->second) {
-    if ((occ.from == from && occ.to == to) || (occ.from == to && occ.to == from))
-    {
+    if ((occ.from == from && occ.to == to) ||
+        (occ.from == to && occ.to == from)) {
       return true;
     }
   }
@@ -75,21 +64,22 @@ const {
 }
 
 // _____________________________________________________________________________
-void NodePL::connOccurs(const gtfs::Route* r, const Edge* from, const Edge* to) {
+void NodePL::connOccurs(const gtfs::Route* r, const Edge* from,
+                        const Edge* to) {
   if (isConnOccuring(r, from, to)) return;
 
   _occConns[r].push_back(OccuringConnection(from, to));
 }
 
 // _____________________________________________________________________________
-const std::map<const gtfs::Route*, std::vector<OccuringConnection> >& NodePL::getOccuringConnections()
-const {
+const std::map<const gtfs::Route*, std::vector<OccuringConnection> >&
+NodePL::getOccuringConnections() const {
   return _occConns;
 }
 
 // _____________________________________________________________________________
-std::vector<const Edge*> NodePL::getConnectingEdgesFor(const gtfs::Route* to, Edge* a)
-const {
+std::vector<const Edge*> NodePL::getConnectingEdgesFor(const gtfs::Route* to,
+                                                       Edge* a) const {
   std::vector<const Edge*> ret;
 
   auto it = _occConns.find(to);
@@ -105,14 +95,10 @@ const {
 }
 
 // _____________________________________________________________________________
-const util::geo::DPoint* NodePL::getGeom() const {
-  return &getPos();
-}
+const util::geo::DPoint* NodePL::getGeom() const { return &getPos(); }
 
 // _____________________________________________________________________________
-void NodePL::setNode(const Node* n) {
-  _n = n;
-}
+void NodePL::setNode(const Node* n) { _n = n; }
 
 // _____________________________________________________________________________
 util::json::Dict NodePL::getAttrs() const {

@@ -95,6 +95,9 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   static bool lineCtd(const LineEdge* fromEdge, const LineEdge* toEdge,
                       const Line* line);
 
+  static bool terminatesAt(const LineEdge* fromEdge, const LineNode* terminus,
+                      const Line* line);
+
   static std::vector<const Line*> getSharedLines(const LineEdge* a,
                                                  const LineEdge* b);
 

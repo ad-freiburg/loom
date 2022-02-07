@@ -1790,6 +1790,34 @@ inline RotatedBox<T> getOrientedEnvelopeAvg(MultiLine<T> ml) {
 
 // _____________________________________________________________________________
 template <typename T>
+inline Line<T> sample(const Line<T>& l, double d) {
+  if (!l.size()) return l;
+
+  Line<T> ret;
+  ret.reserve(l.size());
+  ret.push_back(l.front());
+
+  double curd = d;
+
+  for (size_t i = 1; i < l.size(); i++) {
+    double segd = dist(l[i - 1], l[i]);
+    double dx = (l[i].getX() - l[i - 1].getX()) / segd;
+    double dy = (l[i].getY() - l[i - 1].getY()) / segd;
+    while (curd < segd) {
+      ret.push_back(
+          Point<T>(l[i - 1].getX() + dx * curd, l[i - 1].getY() + dy * curd));
+      curd += d;
+    }
+    curd = curd - segd;
+  }
+
+  ret.push_back(l.back());
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline Line<T> densify(const Line<T>& l, double d) {
   if (!l.size()) return l;
 

@@ -1072,6 +1072,20 @@ breakfor:
 }
 
 // _____________________________________________________________________________
+bool LineGraph::terminatesAt(const LineEdge* fromEdge, const LineNode* terminus,
+                             const Line* line) {
+  for (const auto& toEdg : terminus->getAdjList()) {
+    if (toEdg == fromEdge) continue;
+
+    if (lineCtd(fromEdge, toEdg, line)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// _____________________________________________________________________________
 double LineGraph::searchSpaceSize() const {
   double ret = 1;
 

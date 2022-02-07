@@ -6,55 +6,51 @@
 #define GTFS2GRAPH_GRAPH_EDGETRIPGEOM_H_
 
 #include <vector>
-#include "ad/cppgtfs/gtfs/Trip.h"
 #include "ad/cppgtfs/gtfs/Route.h"
-#include "util/geo/PolyLine.h"
+#include "ad/cppgtfs/gtfs/Trip.h"
 #include "gtfs2graph/graph/BuildGraph.h"
+#include "util/geo/PolyLine.h"
 
 namespace gtfs2graph {
 namespace graph {
 
-using namespace ad::cppgtfs;
-using namespace util::geo;
-
-struct TripOccurance {
-  TripOccurance(gtfs::Route* r) : route(r), direction(0) {}
-  void addTrip(gtfs::Trip* t, const Node* dirNode) {
+struct RouteOccurance {
+  RouteOccurance(ad::cppgtfs::gtfs::Route* r) : route(r), direction(0) {}
+  void addTrip(ad::cppgtfs::gtfs::Trip* t, const Node* dirNode) {
     if (trips.size() == 0) {
       direction = dirNode;
     } else {
-      if (direction && direction != dirNode) {
-        direction = 0;
-      }
+      if (direction && direction != dirNode) direction = 0;
     }
     trips.push_back(t);
   }
-  gtfs::Route* route;
-  std::vector<gtfs::Trip*> trips;
-  const Node* direction;  // 0 if in both directions (should be 0 in most cases!)
+  ad::cppgtfs::gtfs::Route* route;
+  std::vector<ad::cppgtfs::gtfs::Trip*> trips;
+  const Node* direction;  // 0 if in both directions
 };
 
-typedef std::pair<TripOccurance*, size_t> TripOccWithPos;
+typedef std::pair<RouteOccurance*, size_t> TripOccWithPos;
 
 class EdgeTripGeom {
  public:
-  EdgeTripGeom(PolyLine<double> pl, const Node* geomDir);
+  EdgeTripGeom(util::geo::PolyLine<double> pl, const Node* geomDir);
 
-  void addTrip(gtfs::Trip* t, const Node* dirNode, PolyLine<double>& pl);
-  void addTrip(gtfs::Trip* t, const Node* dirNode);
+  void addTrip(ad::cppgtfs::gtfs::Trip* t, const Node* dirNode,
+               util::geo::PolyLine<double>& pl);
+  void addTrip(ad::cppgtfs::gtfs::Trip* t, const Node* dirNode);
 
-  const std::vector<TripOccurance>& getTripsUnordered() const;
-  std::vector<TripOccurance>* getTripsUnordered();
+  const std::vector<RouteOccurance>& getTripsUnordered() const;
+  std::vector<RouteOccurance>* getTripsUnordered();
 
-  std::vector<TripOccurance>::iterator removeTripOccurance(
-      std::vector<TripOccurance>::const_iterator pos);
+  std::vector<RouteOccurance>::iterator removeRouteOcc(
+      std::vector<RouteOccurance>::const_iterator pos);
 
-  TripOccurance* getTripsForRoute(const gtfs::Route* r) const;
+  RouteOccurance* getRouteOcc(const ad::cppgtfs::gtfs::Route* r) const;
 
-  const PolyLine<double>& getGeom() const;
-  void setGeom(const PolyLine<double>& p);
+  const util::geo::PolyLine<double>& getGeom() const;
+  void setGeom(const util::geo::PolyLine<double>& p);
 
-  bool containsRoute(gtfs::Route* r) const;
+  bool containsRoute(ad::cppgtfs::gtfs::Route* r) const;
   size_t getTripCardinality() const;
   size_t getCardinality() const;
   const Node* getGeomDir() const;
@@ -62,13 +58,13 @@ class EdgeTripGeom {
   void setGeomDir(const Node* newDir);
 
  private:
-  std::vector<TripOccurance> _trips;
+  std::vector<RouteOccurance> _routeOccs;
 
-  PolyLine<double> _geom;
-  const Node* _geomDir; // the direction of the geometry, may be reversed
+  util::geo::PolyLine<double> _geom;
+  const Node* _geomDir;  // the direction of the geometry, may be reversed
 };
 
-}}
+}  // namespace graph
+}  // namespace gtfs2graph
 
 #endif  // GTFS2GRAPH_GRAPH_EDGETRIPGEOM_H_
-

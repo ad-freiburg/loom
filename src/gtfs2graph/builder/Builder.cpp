@@ -15,23 +15,23 @@
 using namespace gtfs2graph;
 using namespace graph;
 
-using util::geo::Point;
-using util::geo::DPoint;
-using util::geo::Grid;
 using util::geo::Box;
 using util::geo::DBox;
+using util::geo::DPoint;
 using util::geo::extendBox;
+using util::geo::Grid;
+using util::geo::Point;
 using util::geo::PolyLine;
 using util::geo::SharedSegments;
 
-using graph::Node;
 using graph::Edge;
+using graph::Node;
 
+using ad::cppgtfs::gtfs::Feed;
+using ad::cppgtfs::gtfs::Shape;
 using ad::cppgtfs::gtfs::Stop;
 using ad::cppgtfs::gtfs::StopTime;
 using ad::cppgtfs::gtfs::Trip;
-using ad::cppgtfs::gtfs::Shape;
-using ad::cppgtfs::gtfs::Feed;
 
 const static char* WGS84_PROJ =
     "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
@@ -49,26 +49,23 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
 
   NodeGrid ngrid(2000, 2000, graphBox);
 
-  bool SANITY_CHECK = true;
-
   for (auto t = f.getTrips().begin(); t != f.getTrips().end(); ++t) {
+    // ignore trips with only one stop
     if (t->second->getStopTimes().size() < 2) continue;
     if (!_cfg->useMots.count(t->second->getRoute()->getType())) continue;
-
-    if (SANITY_CHECK && !checkTripSanity(t->second)) continue;
 
     auto st = t->second->getStopTimes().begin();
 
     auto prev = *st;
     const Edge* prevEdge = 0;
-    addStop(prev.getStop(), _cfg->stationAggrLevel, g, &ngrid);
+    addStop(prev.getStop(), g, &ngrid);
     ++st;
 
     for (; st != t->second->getStopTimes().end(); ++st) {
       const auto& cur = *st;
 
-      Node* fromNode = getNodeByStop(g, prev.getStop(), _cfg->stationAggrLevel);
-      Node* toNode = addStop(cur.getStop(), _cfg->stationAggrLevel, g, &ngrid);
+      Node* fromNode = getNodeByStop(g, prev.getStop());
+      Node* toNode = addStop(cur.getStop(), g, &ngrid);
 
       // TODO: we should also allow this, for round-trips
       if (fromNode == toNode) continue;
@@ -82,34 +79,17 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
 
       Node* directionNode = toNode;
 
-      if (!exE->pl().addTrip(t->second, directionNode)) {
-        std::pair<bool, PolyLine<double>> edgeGeom;
-        if (_cfg->stationAggrLevel) {
-          const Stop* frs = prev.getStop()->getParentStation()
-                                ? prev.getStop()->getParentStation()
-                                : prev.getStop();
-          const Stop* tos = cur.getStop()->getParentStation()
-                                ? cur.getStop()->getParentStation()
-                                : cur.getStop();
-          edgeGeom = getSubPolyLine(frs, tos, t->second,
-                                    prev.getShapeDistanceTravelled(),
-                                    cur.getShapeDistanceTravelled());
-        } else {
-          edgeGeom = getSubPolyLine(prev.getStop(), cur.getStop(), t->second,
-                                    prev.getShapeDistanceTravelled(),
-                                    cur.getShapeDistanceTravelled());
-        }
+      std::pair<bool, PolyLine<double>> edgeGeom;
+      edgeGeom = getSubPolyLine(prev.getStop(), cur.getStop(), t->second,
+                                prev.getShapeDistanceTravelled(),
+                                cur.getShapeDistanceTravelled());
 
-        // only take geometries that could be found using the
-        // shape geometry, not some fallback
-        if (!SANITY_CHECK || edgeGeom.first) {
-          if (prevEdge) {
-            fromNode->pl().connOccurs(t->second->getRoute(), prevEdge, exE);
-          }
-
-          exE->pl().addTrip(t->second, edgeGeom.second, directionNode);
-        }
+      if (prevEdge) {
+        fromNode->pl().connOccurs(t->second->getRoute(), prevEdge, exE);
       }
+
+      exE->pl().addTrip(t->second, edgeGeom.second, directionNode);
+
       prev = cur;
       prevEdge = exE;
     }
@@ -157,9 +137,6 @@ std::pair<bool, PolyLine<double>> Builder::getSubPolyLine(const Stop* a,
     return std::pair<bool, PolyLine<double>>(false, PolyLine<double>(ap, bp));
   }
 
-  double totalTripDist = t->getShape()->getPoints().rbegin()->travelDist -
-                         t->getShape()->getPoints().begin()->travelDist;
-
   auto pl = _polyLines.find(t->getShape());
   if (pl == _polyLines.end()) {
     // generate polyline for this shape
@@ -172,55 +149,26 @@ std::pair<bool, PolyLine<double>> Builder::getSubPolyLine(const Stop* a,
       pl->second << getProjectedPoint(sp.lat, sp.lng, _graphProj);
     }
 
+    // some smoothing
     pl->second.simplify(20);
     pl->second.smoothenOutliers(50);
     pl->second.fixTopology(50);
   }
 
-  // if ((pl->second.distTo(ap) > 200) || (pl->second.distTo(bp) > 200)) {
-    /**
-     * something is not right, the distance from the station to its geometry
-     * is excessive. fall back to straight line connection
-     */
-    // PolyLine<double> p = PolyLine<double>(ap, bp);
-    // p.smoothenOutliers(50);
-    // return std::pair<bool, PolyLine<double>>(false, p);
-  // }
-
   PolyLine<double> p;
 
-  if (!_cfg->ignoreGtfsDistances && distA > -1 && distA > -1 &&
-      totalTripDist > 0) {
-    p = pl->second.getSegment(
-        (distA - t->getShape()->getPoints().begin()->travelDist) /
-            totalTripDist,
-        (distB - t->getShape()->getPoints().begin()->travelDist) /
-            totalTripDist);
-  } else {
-    p = pl->second.getSegment(ap, bp);
-  }
+  p = pl->second.getSegment(ap, bp);
 
   return std::pair<bool, PolyLine<double>>(true, p);
 }
 
 // _____________________________________________________________________________
-Node* Builder::addStop(const Stop* curStop, uint8_t aggrLevel, BuildGraph* g,
-                       NodeGrid* grid) {
-  if (aggrLevel && curStop->getParentStation() != 0) {
-    Node* n = addStop(curStop->getParentStation(), aggrLevel, g, grid);
-    _stopNodes[curStop] = n;
-    return n;
-  }
-
-  Node* n = getNodeByStop(g, curStop, aggrLevel);
+Node* Builder::addStop(const Stop* curStop, BuildGraph* g, NodeGrid* grid) {
+  Node* n = getNodeByStop(g, curStop);
   if (n) return n;
 
   DPoint p =
       getProjectedPoint(curStop->getLat(), curStop->getLng(), _graphProj);
-
-  if (aggrLevel > 1) {
-    n = getNearestStop(p, _cfg->stationAggrDistance, grid);
-  }
 
   if (n) {
     n->pl().addStop(curStop);
@@ -236,26 +184,6 @@ Node* Builder::addStop(const Stop* curStop, uint8_t aggrLevel, BuildGraph* g,
 }
 
 // _____________________________________________________________________________
-bool Builder::checkTripSanity(Trip* t) const {
-  return checkShapeSanity(t->getShape());
-}
-
-// _____________________________________________________________________________
-bool Builder::checkShapeSanity(Shape* s) const {
-  if (!s || s->getPoints().size() < 2) return false;
-  return true;
-}
-
-// _____________________________________________________________________________
-Node* Builder::getNodeByStop(const BuildGraph* g, const gtfs::Stop* s,
-                             bool getParent) const {
-  if (getParent && s->getParentStation())
-    return getNodeByStop(g, s->getParentStation());
-
-  return getNodeByStop(g, s);
-}
-
-// _____________________________________________________________________________
 Node* Builder::getNodeByStop(const BuildGraph* g, const gtfs::Stop* s) const {
   if (_stopNodes.find(s) != _stopNodes.end()) return _stopNodes.find(s)->second;
 
@@ -266,24 +194,4 @@ Node* Builder::getNodeByStop(const BuildGraph* g, const gtfs::Stop* s) const {
     }
   }
   return 0;
-}
-
-// _____________________________________________________________________________
-Node* Builder::getNearestStop(const DPoint& p, double maxD,
-                              const NodeGrid* grid) const {
-  double curD = DBL_MAX;
-
-  Node* curN = 0;
-  std::set<Node*> neighbors;
-  grid->get(p, maxD, &neighbors);
-
-  for (auto n : neighbors) {
-    double d = util::geo::dist(n->pl().getPos(), p);
-    if (d < maxD && d < curD) {
-      curN = n;
-      curD = d;
-    }
-  }
-
-  return curN;
 }

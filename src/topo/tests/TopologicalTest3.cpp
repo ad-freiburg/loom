@@ -57,7 +57,6 @@ void TopologicalTest3::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
-    cfg.minSegLength = 20;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
@@ -109,12 +108,11 @@ void TopologicalTest3::run() {
 
     topo::config::TopoConfig cfg;
     cfg.maxAggrDistance = 50;
-    cfg.minSegLength = 50;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
     mc.removeEdgeArtifacts();
-    mc.removeNodeArtifacts();
+    mc.removeNodeArtifacts(false);
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
