@@ -1098,3 +1098,10 @@ double LineGraph::searchSpaceSize() const {
 
   return ret;
 }
+
+// _____________________________________________________________________________
+size_t LineGraph::numConnExcs() const {
+  size_t ret = 0;
+  for (auto n : getNds()) ret += n->pl().numConnExcs();
+  return ret;
+}

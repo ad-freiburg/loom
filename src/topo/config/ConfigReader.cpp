@@ -33,6 +33,10 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
     ("max-aggr-distance,d",
       opts::value<double>(&(cfg->maxAggrDistance))->default_value(40),
       "maximum aggregation distance between shared segments")
+    ("write-stats",
+      opts::bool_switch(&(cfg->outputStats))
+      ->default_value(false),
+      "write stats to output file")
     ("max-length-dev",
       opts::value<double>(&(cfg->maxLengthDev))->default_value(500),
       "maximal distance deviation for turn restriction infer");

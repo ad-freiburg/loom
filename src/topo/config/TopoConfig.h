@@ -13,6 +13,7 @@ namespace config {
 struct TopoConfig {
   double maxAggrDistance;
   double maxLengthDev;
+  bool outputStats;
 };
 
 }  // namespace config

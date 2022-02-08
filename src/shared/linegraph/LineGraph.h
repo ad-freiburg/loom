@@ -81,6 +81,7 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   size_t numNds(bool topo) const;
   size_t numEdgs() const;
   size_t numLines() const;
+  size_t numConnExcs() const;
 
   static std::vector<LineOcc> getCtdLinesIn(const LineOcc& line,
                                             const LineEdge* fromEdge,

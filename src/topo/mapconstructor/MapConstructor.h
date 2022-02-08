@@ -68,18 +68,15 @@ class MapConstructor {
  public:
   MapConstructor(const TopoConfig* cfg, LineGraph* g);
 
-  bool collapseShrdSegs();
-  bool collapseShrdSegs(double dCut);
-  bool collapseShrdSegs(double dCut, size_t MAX_ITERS);
+  int collapseShrdSegs();
+  int collapseShrdSegs(double dCut);
+  int collapseShrdSegs(double dCut, size_t MAX_ITERS);
 
   void averageNodePositions();
   void removeEdgeArtifacts();
   void removeNodeArtifacts(bool keepStations);
 
   void reconstructIntersections();
-
-  // TODO: make private
-  bool contractNodes();
 
   size_t freeze();
 
@@ -109,6 +106,8 @@ class MapConstructor {
   bool combineEdges(LineEdge* a, LineEdge* b, LineNode* n);
 
   void densifyEdg(LineEdge* e, LineGraph* g, double SEGL);
+
+  bool contractNodes();
 
   void combContEdgs(const LineEdge* a, const LineEdge* b);
   void delOrigEdgsFor(const LineEdge* a);

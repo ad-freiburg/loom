@@ -92,6 +92,8 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
 
   void clearConnExc();
 
+  size_t numConnExcs() const;
+
   ConnEx& getConnExc() { return _connEx; }
   const ConnEx& getConnExc() const { return _connEx; }
 

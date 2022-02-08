@@ -102,7 +102,8 @@ LineNode* MapConstructor::ndCollapseCand(const std::set<LineNode*>& notFrom,
 
     double dMax = maxD(numLines, ndTest, dCut);
 
-    if (d < dSpanA / sqrt(2.0) && d < dSpanB / sqrt(2.0) && d < dMax && d < dBest) {
+    if (d < dSpanA / sqrt(2.0) && d < dSpanB / sqrt(2.0) && d < dMax &&
+        d < dBest) {
       dBest = d;
       ndMin = ndTest;
     }
@@ -181,19 +182,19 @@ void MapConstructor::densifyEdg(LineEdge* e, LineGraph* g, double SEGL) {
 }
 
 // _____________________________________________________________________________
-bool MapConstructor::collapseShrdSegs() {
+int MapConstructor::collapseShrdSegs() {
   return collapseShrdSegs(_cfg->maxAggrDistance);
 }
 
 // _____________________________________________________________________________
-bool MapConstructor::collapseShrdSegs(double dCut) {
+int MapConstructor::collapseShrdSegs(double dCut) {
   return collapseShrdSegs(dCut, 50);
 }
 
 // _____________________________________________________________________________
-bool MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
-
-  for (size_t ITER = 0; ITER < MAX_ITERS; ITER++) {
+int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
+  size_t ITER = 0;
+  for (; ITER < MAX_ITERS; ITER++) {
     shared::linegraph::LineGraph tgNew;
 
     // new grid per iteration
@@ -235,7 +236,8 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
       pl.insert(pl.begin(), *e->getFrom()->pl().getGeom());
       pl.insert(pl.end(), *e->getTo()->pl().getGeom());
 
-      const auto& plDense = util::geo::densify(util::geo::simplify(pl, 0.5), SEGL);
+      const auto& plDense =
+          util::geo::densify(util::geo::simplify(pl, 0.5), SEGL);
 
       for (const auto& point : plDense) {
         // TODO: e->getTo() is never null  here, so if a point equals
@@ -322,14 +324,6 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
       // now check all affected nodes for artifact edges (= edges connecting
       // two deg != 1 nodes under the segment length, they would otherwise
       // never be collapsed because they have to collapse into themself)
-      //
-      // if (ITER == 1 && j == 3) {
-        // util::geo::output::GeoGraphJsonOutput out;
-        // out.print(tgNew, std::cout);
-        // exit(0);
-      // }
-
-
 
       for (const auto& a : affectedNodes) {
         if (imageNdsSet.count(a)) continue;
@@ -356,7 +350,6 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
           if (a != comb) grid.remove(a);
         }
       }
-
     }
 
     // soft cleanup
@@ -390,47 +383,45 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
     std::vector<LineNode*> nds;
     nds.insert(nds.begin(), tgNew.getNds()->begin(), tgNew.getNds()->end());
 
-
     for (auto n : nds) {
       if (n->getDeg() == 2) {
         if (!lineEq(n->getAdjList().front(), n->getAdjList().back())) continue;
 
-          auto ex = tgNew.getEdg(n->getAdjList().front()->getOtherNd(n),
-                        n->getAdjList().back()->getOtherNd(n));
+        auto ex = tgNew.getEdg(n->getAdjList().front()->getOtherNd(n),
+                               n->getAdjList().back()->getOtherNd(n));
 
-          if (ex && ex->pl().getPolyline().getLength() >
-                        2 * maxD(ex->pl().getLines().size(), dCut)) {
-            // if long enough, cut the blocking edge in half and add a support
-            // node here
+        if (ex && ex->pl().getPolyline().getLength() >
+                      2 * maxD(ex->pl().getLines().size(), dCut)) {
+          // if long enough, cut the blocking edge in half and add a support
+          // node here
 
-            auto plA = ex->pl().getPolyline().getSegment(0, 0.5).getLine();
-            auto plB = ex->pl().getPolyline().getSegment(0.5, 1).getLine();
-            auto supNd = tgNew.addNd(plA.back());
+          auto plA = ex->pl().getPolyline().getSegment(0, 0.5).getLine();
+          auto plB = ex->pl().getPolyline().getSegment(0.5, 1).getLine();
+          auto supNd = tgNew.addNd(plA.back());
 
-            auto eA = tgNew.addEdg(ex->getFrom(), supNd, ex->pl());
-            auto eB = tgNew.addEdg(supNd, ex->getTo(), ex->pl());
+          auto eA = tgNew.addEdg(ex->getFrom(), supNd, ex->pl());
+          auto eB = tgNew.addEdg(supNd, ex->getTo(), ex->pl());
 
-            combContEdgs(eA, ex);
-            combContEdgs(eB, ex);
+          combContEdgs(eA, ex);
+          combContEdgs(eB, ex);
 
-            LineGraph::nodeRpl(eA, ex->getTo(), supNd);
-            LineGraph::nodeRpl(eB, ex->getFrom(), supNd);
+          LineGraph::nodeRpl(eA, ex->getTo(), supNd);
+          LineGraph::nodeRpl(eB, ex->getFrom(), supNd);
 
-            eA->pl().setGeom(plA);
-            eB->pl().setGeom(plB);
+          eA->pl().setGeom(plA);
+          eB->pl().setGeom(plB);
 
-            tgNew.delEdg(ex->getFrom(), ex->getTo());
-            delOrigEdgsFor(ex);
-          } else if (ex) {
-            // else dont contract
-            continue;
-          }
+          tgNew.delEdg(ex->getFrom(), ex->getTo());
+          delOrigEdgsFor(ex);
+        } else if (ex) {
+          // else dont contract
+          continue;
+        }
 
         combineEdges(n->getAdjList().front(), n->getAdjList().back(), n,
                      &tgNew);
       }
     }
-
 
     // remove edge artifacts
     nds.clear();
@@ -476,8 +467,6 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
       }
     }
 
-
-
     // re-collapse again because we might have introduce deg 2 nodes above
     nds.clear();
     nds.insert(nds.begin(), tgNew.getNds()->begin(), tgNew.getNds()->end());
@@ -491,7 +480,6 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
                      &tgNew);
       }
     }
-
 
     // smoothen a bit
     for (auto n : *tgNew.getNds()) {
@@ -507,15 +495,8 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
       }
     }
 
-    // if (ITER == 0) {
-      // util::geo::output::GeoGraphJsonOutput out;
-      // out.print(tgNew, std::cout);
-      // exit(0);
-    // }
-
-
     // convergence criteria
-    double THRESHOLD = 0.001;
+    double THRESHOLD = 0.002;
 
     double LEN_OLD = 0;
     double LEN_NEW = 0;
@@ -535,10 +516,13 @@ bool MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
     *_g = std::move(tgNew);
 
+    LOGTO(DEBUG, std::cerr)
+        << "iter " << ITER << ", distance gap: " << (1 - LEN_NEW / LEN_OLD);
+
     if (fabs(1 - LEN_NEW / LEN_OLD) < THRESHOLD) break;
   }
 
-  return true;
+  return ITER + 1;
 }
 
 // _____________________________________________________________________________
@@ -1013,16 +997,16 @@ void MapConstructor::removeOrphanLines() {
       }
 
       for (const auto& del : toDel) {
-        e->pl().delLine(del);
         // clear restrictions
         for (auto other : e->getFrom()->getAdjList())
-          n->pl().delConnExc(del, e, other);
+          e->getFrom()->pl().delConnExc(del, e, other);
         for (auto other : e->getTo()->getAdjList())
-          n->pl().delConnExc(del, e, other);
+          e->getTo()->pl().delConnExc(del, e, other);
+        e->pl().delLine(del);
       }
 
       // if the edge runs empty, delete it
-      if (e->pl().getLines().size() == 0 ) toDelEdgs.push_back(e);
+      if (e->pl().getLines().size() == 0) toDelEdgs.push_back(e);
     }
   }
 
@@ -1042,7 +1026,8 @@ void MapConstructor::reconstructIntersections() {
   for (auto n : *_g->getNds()) {
     for (auto e : n->getAdjList()) {
       auto pl = e->pl().getPolyline();
-      pl = pl.getSegmentAtDist(_cfg->maxAggrDistance, pl.getLength() - _cfg->maxAggrDistance);
+      pl = pl.getSegmentAtDist(_cfg->maxAggrDistance,
+                               pl.getLength() - _cfg->maxAggrDistance);
       auto l = pl.getLine();
       l.insert(l.begin(), *e->getFrom()->pl().getGeom());
       l.insert(l.end(), *e->getTo()->pl().getGeom());

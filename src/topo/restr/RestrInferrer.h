@@ -78,7 +78,7 @@ class RestrInferrer {
   RestrInferrer(const TopoConfig* cfg, LineGraph* g);
 
   void init();
-  void infer(const OrigEdgs& origEdgs);
+  size_t infer(const OrigEdgs& origEdgs);
 
  private:
   const TopoConfig* _cfg;

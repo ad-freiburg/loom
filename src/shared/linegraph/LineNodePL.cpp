@@ -22,6 +22,15 @@ const Point<double>* LineNodePL::getGeom() const { return &_pos; }
 void LineNodePL::clearConnExc() { _connEx.clear(); }
 
 // _____________________________________________________________________________
+size_t LineNodePL::numConnExcs() const {
+  size_t ret = 0;
+
+  for (const auto& conn : _connEx) ret += conn.second.size();
+
+  return ret/2; // exceptions are always stored in both directions
+}
+
+// _____________________________________________________________________________
 void LineNodePL::setGeom(const Point<double>& p) { _pos = p; }
 
 // _____________________________________________________________________________

@@ -65,7 +65,7 @@ void RestrInferrer::init() {
 }
 
 // _____________________________________________________________________________
-void RestrInferrer::infer(const OrigEdgs& origEdgs) {
+size_t RestrInferrer::infer(const OrigEdgs& origEdgs) {
   // delete all existing restrictions
 
   for (auto nd : *_tg->getNds()) {
@@ -74,11 +74,13 @@ void RestrInferrer::infer(const OrigEdgs& origEdgs) {
 
   addHndls(origEdgs);
 
-  // output
-  util::geo::output::GeoGraphJsonOutput out;
-  std::ofstream outs;
-  outs.open("restr_graph.json");
-  out.print(_rg, outs);
+  size_t ret = 0;
+
+  // debug output
+  // util::geo::output::GeoGraphJsonOutput out;
+  // std::ofstream outs;
+  // outs.open("restr_graph.json");
+  // out.print(_rg, outs);
 
   for (auto nd : *_tg->getNds()) {
     for (auto edg1 : nd->getAdjList()) {
@@ -103,11 +105,14 @@ void RestrInferrer::infer(const OrigEdgs& origEdgs) {
 
           if (!check(ro1.line, edg1, edg2) && !check(ro1.line, edg2, edg1)) {
             nd->pl().addConnExc(ro1.line, edg1, edg2);
+            ret++;
           }
         }
       }
     }
   }
+
+  return ret;
 }
 
 // _____________________________________________________________________________

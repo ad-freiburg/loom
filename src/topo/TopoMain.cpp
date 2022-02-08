@@ -38,6 +38,17 @@ int main(int argc, char** argv) {
   // read input graph
   tg.readFromJson(&(std::cin), 0);
 
+  double lenBef = 0, lenAfter = 0;
+
+  if (cfg.outputStats) {
+    for (const auto& nd : *tg.getNds()) {
+      for (const auto& e : nd->getAdjList()) {
+        if (e->getFrom() != nd) continue;
+        lenBef += e->pl().getPolyline().getLength();
+      }
+    }
+  }
+
   size_t statFr = mc.freeze();
   si.init();
 
@@ -57,18 +68,23 @@ int main(int argc, char** argv) {
   // are preserved!
   mc.removeEdgeArtifacts();
 
-  // segment length
-  mc.collapseShrdSegs(10);
-
-  mc.collapseShrdSegs(cfg.maxAggrDistance);
+  T_START(construction);
+  size_t iters = 0;
+  iters += mc.collapseShrdSegs(10);
+  iters += mc.collapseShrdSegs(cfg.maxAggrDistance);
+  double constrT = T_STOP(construction);
 
   mc.removeNodeArtifacts(false);
 
   // infer restrictions
+  T_START(restrInf);
   ri.infer(mc.freezeTrack(restrFr));
+  double restrT = T_STOP(restrInf);
 
   // insert stations
+  T_START(stationIns);
   si.insertStations(mc.freezeTrack(statFr));
+  double stationT = T_STOP(stationIns);
 
   // remove orphan lines, which may be introduced by another station
   // placement
@@ -78,9 +94,33 @@ int main(int argc, char** argv) {
 
   mc.reconstructIntersections();
 
+  if (cfg.outputStats) {
+    for (const auto& nd : *tg.getNds()) {
+      for (const auto& e : nd->getAdjList()) {
+        if (e->getFrom() != nd) continue;
+        lenAfter += e->pl().getPolyline().getLength();
+      }
+    }
+  }
+
   // output
   util::geo::output::GeoGraphJsonOutput out;
-  out.print(tg, std::cout);
+  if (cfg.outputStats) {
+    util::json::Dict jsonStats = {
+        {"statistics",
+         util::json::Dict{
+             {"iters", iters},
+             {"time_const", constrT},
+             {"time_restr_inf", restrT},
+             {"time_station_insert", stationT},
+             {"len_before", lenBef},
+             {"num_restrs", tg.numConnExcs()},
+             {"len_after", lenAfter},
+         }}};
+    out.print(tg, std::cout, jsonStats);
+  } else {
+    out.print(tg, std::cout);
+  }
 
   return (0);
 }
