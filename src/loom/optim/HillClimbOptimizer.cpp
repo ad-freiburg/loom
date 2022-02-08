@@ -43,7 +43,6 @@ double HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& 
   size_t last = 0;
 
   while (true) {
-    break;
     iters++;
 
     bool found = false;
