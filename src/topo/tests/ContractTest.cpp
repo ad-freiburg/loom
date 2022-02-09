@@ -1286,19 +1286,13 @@ void ContractTest::run() {
     // std::cout << std::flush;
 
     TEST(tg.getNds()->size(), ==, 4);
-    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
-                   d->getAdjList().front()->getOtherNd(d))
-             ->pl()
+    auto test = tg.getEdg(a->getAdjList().front()->getOtherNd(a),
+                   d->getAdjList().front()->getOtherNd(d));
+    TEST(test->pl()
              .getLines()
              .size(),
          ==, 2);
-    TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
-                   d->getAdjList().front()->getOtherNd(d))
-             ->pl()
-             .getLines()
-             .begin()
-             ->line,
-         ==, &l1);
+    TEST(test->pl().hasLine(&l1));
   }
   // ___________________________________________________________________________
   {

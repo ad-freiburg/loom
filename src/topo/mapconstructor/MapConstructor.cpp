@@ -51,7 +51,7 @@ bool MapConstructor::lineEq(const LineEdge* a, const LineEdge* b) {
       if (ra.line == rb.line && ra.style == rb.style) {
         if (!shrNd->pl().connOccurs(ra.line, a, b)) return false;
 
-        found = true;
+        found = false;
 
         if (ra.direction == 0 && rb.direction == 0) {
           found = true;
@@ -200,8 +200,8 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
     // new grid per iteration
     NodeGrid grid(120, 120, bbox());
 
-    std::unordered_map<LineNode*, LineNode*> imageNds;
-    std::set<LineNode*> imageNdsSet;
+    std::unordered_map<LineNode*, LineNode*> imgNds;
+    std::set<LineNode*> imgNdsSet;
 
     double SEGL = 5;
 
@@ -228,6 +228,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
       size_t i = 0;
       std::vector<LineNode*> affectedNodes;
       LineNode* front = 0;
+      LineNode* back = e->getTo();
 
       bool imgFromCovered = false;
       bool imgToCovered = false;
@@ -240,26 +241,25 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
           util::geo::densify(util::geo::simplify(pl, 0.5), SEGL);
 
       for (const auto& point : plDense) {
-        // TODO: e->getTo() is never null  here, so if a point equals
-        // e->getTo(), it will never receive a merge candidate here? (doesn't
-        // matter though because it will be connected nevertheless)
-        LineNode* cur = ndCollapseCand(myNds, e->pl().getLines().size(), dCut,
-                                       point, front, e->getTo(), grid, &tgNew);
+        if (i == plDense.size() - 1) back = 0;
+        LineNode* cur = ndCollapseCand(myNds, e->pl().getLines().size(), dCut, point,
+                               front, back, grid, &tgNew);
 
         if (i == 0) {
           // this is the "FROM" node
-          if (!imageNds.count(e->getFrom())) {
-            imageNds[e->getFrom()] = cur;
-            imageNdsSet.insert(cur);
+          if (!imgNds.count(e->getFrom())) {
+            imgNds[e->getFrom()] = cur;
+            imgNdsSet.insert(cur);
             imgFromCovered = true;
           }
+
         }
 
         if (i == plDense.size() - 1) {
           // this is the "TO" node
-          if (!imageNds.count(e->getTo())) {
-            imageNds[e->getTo()] = cur;
-            imageNdsSet.insert(cur);
+          if (!imgNds.count(e->getTo())) {
+            imgNds[e->getTo()] = cur;
+            imgNdsSet.insert(cur);
             imgToCovered = true;
           }
         }
@@ -271,10 +271,10 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
         if (last == cur) continue;  // skip self-edges
 
-        if (cur == imageNds[e->getFrom()]) {
+        if (cur == imgNds[e->getFrom()]) {
           imgFromCovered = true;
         }
-        if (imageNds.count(e->getTo()) && cur == imageNds[e->getTo()]) {
+        if (imgNds.count(e->getTo()) && cur == imgNds[e->getTo()]) {
           imgToCovered = true;
         }
 
@@ -292,31 +292,29 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
         if (!front) front = cur;
         last = cur;
 
-        if (imageNds.count(e->getTo()) &&
-            last == imageNds.find(e->getTo())->second) {
+        if (imgNds.count(e->getTo()) && last == imgNds.find(e->getTo())->second)
           break;
-        }
       }
 
-      assert(imageNds[e->getFrom()]);
-      assert(imageNds[e->getTo()]);
+      assert(imgNds[e->getFrom()]);
+      assert(imgNds[e->getTo()]);
 
       if (!imgFromCovered) {
-        auto newE = tgNew.getEdg(imageNds[e->getFrom()], front);
-        if (!newE) newE = tgNew.addEdg(imageNds[e->getFrom()], front);
+        auto newE = tgNew.getEdg(imgNds[e->getFrom()], front);
+        if (!newE) newE = tgNew.addEdg(imgNds[e->getFrom()], front);
 
         combContEdgs(newE, e);
-        mergeLines(newE, e, imageNds[e->getFrom()], front);
+        mergeLines(newE, e, imgNds[e->getFrom()], front);
 
         densifyEdg(newE, &tgNew, SEGL);
       }
 
       if (!imgToCovered) {
-        auto newE = tgNew.getEdg(last, imageNds[e->getTo()]);
-        if (!newE) newE = tgNew.addEdg(last, imageNds[e->getTo()]);
+        auto newE = tgNew.getEdg(last, imgNds[e->getTo()]);
+        if (!newE) newE = tgNew.addEdg(last, imgNds[e->getTo()]);
 
         combContEdgs(newE, e);
-        mergeLines(newE, e, last, imageNds[e->getTo()]);
+        mergeLines(newE, e, last, imgNds[e->getTo()]);
 
         densifyEdg(newE, &tgNew, SEGL);
       }
@@ -326,7 +324,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
       // never be collapsed because they have to collapse into themself)
 
       for (const auto& a : affectedNodes) {
-        if (imageNdsSet.count(a)) continue;
+        if (imgNdsSet.count(a)) continue;
 
         double dMin = SEGL;
         LineNode* comb = 0;
@@ -346,9 +344,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
         // this will delete "a" and keep "comb"
         // crucially, "to" has not yet appeared in the list, and we will
         // see the combined node later on
-        if (comb && combineNodes(a, comb, &tgNew)) {
-          if (a != comb) grid.remove(a);
-        }
+        if (comb && combineNodes(a, comb, &tgNew) && a != comb) grid.remove(a);
       }
     }
 
@@ -395,24 +391,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
           // if long enough, cut the blocking edge in half and add a support
           // node here
 
-          auto plA = ex->pl().getPolyline().getSegment(0, 0.5).getLine();
-          auto plB = ex->pl().getPolyline().getSegment(0.5, 1).getLine();
-          auto supNd = tgNew.addNd(plA.back());
-
-          auto eA = tgNew.addEdg(ex->getFrom(), supNd, ex->pl());
-          auto eB = tgNew.addEdg(supNd, ex->getTo(), ex->pl());
-
-          combContEdgs(eA, ex);
-          combContEdgs(eB, ex);
-
-          LineGraph::nodeRpl(eA, ex->getTo(), supNd);
-          LineGraph::nodeRpl(eB, ex->getFrom(), supNd);
-
-          eA->pl().setGeom(plA);
-          eB->pl().setGeom(plB);
-
-          tgNew.delEdg(ex->getFrom(), ex->getTo());
-          delOrigEdgsFor(ex);
+          supportEdge(ex, &tgNew);
         } else if (ex) {
           // else dont contract
           continue;
@@ -433,35 +412,15 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
         if (e->pl().getPolyline().getLength() < maxD(from, to, dCut)) {
           for (auto* oldE : from->getAdjList()) {
             if (e == oldE) continue;
-
             auto ex = tgNew.getEdg(oldE->getOtherNd(from), to);
 
             if (ex && ex->pl().getPolyline().getLength() >
                           2 * maxD(ex->pl().getLines().size(), dCut)) {
               // if long enough, cut the blocking edge in half and add a support
               // node here
-
-              auto plA = ex->pl().getPolyline().getSegment(0, 0.5).getLine();
-              auto plB = ex->pl().getPolyline().getSegment(0.5, 1).getLine();
-              auto supNd = tgNew.addNd(plA.back());
-
-              auto eA = tgNew.addEdg(ex->getFrom(), supNd, ex->pl());
-              auto eB = tgNew.addEdg(supNd, ex->getTo(), ex->pl());
-
-              combContEdgs(eA, ex);
-              combContEdgs(eB, ex);
-
-              LineGraph::nodeRpl(eA, ex->getTo(), supNd);
-              LineGraph::nodeRpl(eB, ex->getFrom(), supNd);
-
-              eA->pl().setGeom(plA);
-              eB->pl().setGeom(plB);
-
-              tgNew.delEdg(ex->getFrom(), ex->getTo());
-              delOrigEdgsFor(ex);
+              supportEdge(ex, &tgNew);
             }
           }
-
           if (combineNodes(from, to, &tgNew)) break;
         }
       }
@@ -516,9 +475,8 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
     *_g = std::move(tgNew);
 
-    LOGTO(DEBUG, std::cerr)
-        << "iter " << ITER << ", distance gap: " << (1 - LEN_NEW / LEN_OLD);
-
+    LOGTO(DEBUG, std::cerr) << "iter " << ITER
+                           << ", distance gap: " << (1 - LEN_NEW / LEN_OLD);
     if (fabs(1 - LEN_NEW / LEN_OLD) < THRESHOLD) break;
   }
 
@@ -1034,4 +992,29 @@ void MapConstructor::reconstructIntersections() {
       e->pl().setGeom(l);
     }
   }
+}
+
+// _____________________________________________________________________________
+void MapConstructor::supportEdge(LineEdge* ex, LineGraph* g) {
+  // if long enough, cut the blocking edge in half and add a support
+  // node here
+
+  auto plA = ex->pl().getPolyline().getSegment(0, 0.5).getLine();
+  auto plB = ex->pl().getPolyline().getSegment(0.5, 1).getLine();
+  auto supNd = g->addNd(plA.back());
+
+  auto eA = g->addEdg(ex->getFrom(), supNd, ex->pl());
+  auto eB = g->addEdg(supNd, ex->getTo(), ex->pl());
+
+  combContEdgs(eA, ex);
+  combContEdgs(eB, ex);
+
+  LineGraph::nodeRpl(eA, ex->getTo(), supNd);
+  LineGraph::nodeRpl(eB, ex->getFrom(), supNd);
+
+  eA->pl().setGeom(plA);
+  eB->pl().setGeom(plB);
+
+  g->delEdg(ex->getFrom(), ex->getTo());
+  delOrigEdgsFor(ex);
 }

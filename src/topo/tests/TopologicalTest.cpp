@@ -21,6 +21,50 @@ using util::approx;
 void TopologicalTest::run() {
   // ___________________________________________________________________________
   {
+    //     1
+    // a ------> b
+    // c ------> d
+    //     2
+    shared::linegraph::LineGraph tg;
+    auto a = tg.addNd({{0.0, 5.0}});
+    auto b = tg.addNd({{50.0, 5.0}});
+    auto c = tg.addNd({{0.0, 0.0}});
+    auto d = tg.addNd({{50.0, 0.0}});
+
+    auto ab = tg.addEdg(a, b, {{{0.0, 5.0}, {50.0, 5.0}}});
+    auto cd = tg.addEdg(c, d, {{{0.0, 0.0}, {50.0, 0.0}}});
+
+    shared::linegraph::Line l1("1", "1", "red");
+    shared::linegraph::Line l2("2", "2", "blue");
+
+    ab->pl().addLine(&l1, 0);
+    cd->pl().addLine(&l2, 0);
+
+    topo::config::TopoConfig cfg;
+    cfg.maxAggrDistance = 10;
+
+    topo::MapConstructor mc(&cfg, &tg);
+    mc.collapseShrdSegs();
+
+    //     1, 2
+    // a ------> b
+
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cout << std::flush;
+
+    TEST(tg.getNds()->size(), ==, 2);
+    TEST((*tg.getNds()->begin())->getAdjList().front()->pl().getLines().size(),
+         ==, 2);
+
+    for (auto r :
+         (*tg.getNds()->begin())->getAdjList().front()->pl().getLines()) {
+      if (r.line == &l1) TEST(r.direction, ==, 0);
+      if (r.line == &l2) TEST(r.direction, ==, 0);
+    }
+  }
+  // ___________________________________________________________________________
+  {
     //      2->     1
     //     a--> b <---|
     // c -----> d <---e
@@ -46,15 +90,24 @@ void TopologicalTest::run() {
     ed->pl().addLine(&l2, d);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
+    cfg.maxAggrDistance = 15;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
+
+    // reconstruct the old nodes for testing
+    c = 0;
+    e = 0;
+    for (auto nd : *tg.getNds()) {
+      if (nd->getDeg() == 1) {
+        if (nd->getAdjList().front()->pl().hasLine(&l1)) e = nd;
+        else c = nd;
+      }
+    }
 
     TEST(c->getAdjList().size(), !=, 0);
     a = c->getAdjList().front()->getOtherNd(c);
@@ -106,15 +159,24 @@ void TopologicalTest::run() {
     ed->pl().addLine(&l2, d);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
+    cfg.maxAggrDistance = 15;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
 
     // util::geo::output::GeoGraphJsonOutput gout;
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
+
+    // reconstruct the old nodes for testing
+    c = 0;
+    e = 0;
+    for (auto nd : *tg.getNds()) {
+      if (nd->getDeg() == 1) {
+        if (nd->getAdjList().front()->pl().hasLine(&l1)) e = nd;
+        else c = nd;
+      }
+    }
 
     a = c->getAdjList().front()->getOtherNd(c);
     for (auto edg : a->getAdjList()) {
@@ -165,11 +227,19 @@ void TopologicalTest::run() {
     de->pl().addLine(&l2, d);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
+    cfg.maxAggrDistance = 15;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
+
+    c = 0;
+    e = 0;
+    for (auto nd : *tg.getNds()) {
+      if (nd->getDeg() == 1) {
+        if (nd->getAdjList().front()->pl().hasLine(&l1)) e = nd;
+        else c = nd;
+      }
+    }
 
     a = c->getAdjList().front()->getOtherNd(c);
     for (auto edg : a->getAdjList()) {
@@ -221,7 +291,16 @@ void TopologicalTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
+
+    // reconstruct the old nodes for testing
+    c = 0;
+    e = 0;
+    for (auto nd : *tg.getNds()) {
+      if (nd->getDeg() == 1) {
+        if (nd->getAdjList().front()->pl().hasLine(&l1)) e = nd;
+        else c = nd;
+      }
+    }
 
     cd = c->getAdjList().front();
     for (auto* nd : *tg.getNds()) {
@@ -262,15 +341,23 @@ void TopologicalTest::run() {
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
 
     //    <-2          1,<-2
     // c ---------> d < --- e
 
-    for (auto* nd : *tg.getNds()) {
-      if (nd->getDeg() == 1 && nd != c) e = nd;
-      if (nd->getDeg() == 2) d = nd;
+    // reconstruct the old nodes for testing
+    c = 0;
+    e = 0;
+    d = 0;
+    for (auto nd : *tg.getNds()) {
+      if (nd->getDeg() == 1) {
+        if (nd->getAdjList().front()->pl().hasLine(&l1)) e = nd;
+        else c = nd;
+      } else {
+        d = nd;
+      }
     }
+
 
     TEST(tg.getNds()->size(), ==, 3);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
@@ -279,8 +366,7 @@ void TopologicalTest::run() {
 
     for (auto ro : e->getAdjList().front()->pl().getLines()) {
       if (ro.line == &l1) TEST(ro.direction, ==, 0);
-      if (ro.line == &l2)
-        TEST(ro.direction->pl().getGeom()->getX(), ==, approx(100));
+      if (ro.line == &l2) TEST(ro.direction, ==, d);
     }
   }
   // ___________________________________________________________________________
@@ -316,9 +402,17 @@ void TopologicalTest::run() {
     //    <-2          1,<-2
     // c ---------> d < --- e
 
-    for (auto* nd : *tg.getNds()) {
-      if (nd->getDeg() == 1 && nd != c) e = nd;
-      if (nd->getDeg() == 2) d = nd;
+    // reconstruct the old nodes for testing
+    c = 0;
+    e = 0;
+    d = 0;
+    for (auto nd : *tg.getNds()) {
+      if (nd->getDeg() == 1) {
+        if (nd->getAdjList().front()->pl().hasLine(&l1)) e = nd;
+        else c = nd;
+      } else {
+        d = nd;
+      }
     }
 
     TEST(tg.getNds()->size(), ==, 3);
@@ -328,8 +422,7 @@ void TopologicalTest::run() {
 
     for (auto ro : e->getAdjList().front()->pl().getLines()) {
       if (ro.line == &l1) TEST(ro.direction, ==, 0);
-      if (ro.line == &l2)
-        TEST(ro.direction->pl().getGeom()->getX(), ==, approx(100));
+      if (ro.line == &l2) TEST(ro.direction, ==, d);
     }
   }
 
@@ -360,24 +453,27 @@ void TopologicalTest::run() {
     de->pl().addLine(&l2, d);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
+    cfg.maxAggrDistance = 20;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
-    mc.removeNodeArtifacts(false);
-
-    // util::geo::output::GeoGraphJsonOutput gout;
-    // gout.print(tg, std::cout);
-    // std::cout << std::flush;
 
     //    <-2   2        1,<-2
     // c ----a-----> d < --- e
 
-    for (auto* nd : *tg.getNds()) {
-      if (nd->getDeg() == 1 && nd != c) e = nd;
-      if (nd->getDeg() == 2) d = nd;
+    // reconstruct the old nodes for testing
+    c = 0;
+    e = 0;
+    for (auto nd : *tg.getNds()) {
+      if (nd->getDeg() == 1) {
+        if (nd->getAdjList().front()->pl().hasLine(&l1)) e = nd;
+        else c = nd;
+      }
     }
+
+    assert(c && e);
+    a = c->getAdjList().front()->getOtherNd(c);
+    d = e->getAdjList().front()->getOtherNd(e);
 
     TEST(tg.getNds()->size(), ==, 4);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
@@ -386,60 +482,13 @@ void TopologicalTest::run() {
 
     for (auto edg : a->getAdjList()) {
       if (edg->getOtherNd(a) == c) continue;
-
       TEST(edg->pl().getLines().size(), ==, 1);
       TEST(edg->pl().getLines().begin()->direction, ==, 0);
     }
 
     for (auto ro : e->getAdjList().front()->pl().getLines()) {
       if (ro.line == &l1) TEST(ro.direction, ==, 0);
-
-      if (ro.line == &l2) {
-        TEST(ro.direction->pl().getGeom()->getX(), <, 130);
-        TEST(ro.direction->pl().getGeom()->getX(), >, 70);
-      }
-    }
-  }
-
-  // ___________________________________________________________________________
-  {
-    //     1
-    // a ------> b
-    // c ------> d
-    //     2
-    shared::linegraph::LineGraph tg;
-    auto a = tg.addNd({{0.0, 10.0}});
-    auto b = tg.addNd({{50.0, 10.0}});
-    auto c = tg.addNd({{0.0, 0.0}});
-    auto d = tg.addNd({{50.0, 0.0}});
-
-    auto ab = tg.addEdg(a, b, {{{0.0, 10.0}, {50.0, 10.0}}});
-    auto cd = tg.addEdg(c, d, {{{0.0, 0.0}, {50.0, 0.0}}});
-
-    shared::linegraph::Line l1("1", "1", "red");
-    shared::linegraph::Line l2("2", "2", "blue");
-
-    ab->pl().addLine(&l1, 0);
-    cd->pl().addLine(&l2, 0);
-
-    topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
-
-    topo::MapConstructor mc(&cfg, &tg);
-    mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
-
-    //     1, 2
-    // a ------> b
-
-    TEST(tg.getNds()->size(), ==, 2);
-    TEST((*tg.getNds()->begin())->getAdjList().front()->pl().getLines().size(),
-         ==, 2);
-
-    for (auto r :
-         (*tg.getNds()->begin())->getAdjList().front()->pl().getLines()) {
-      if (r.line == &l1) TEST(r.direction, ==, 0);
-      if (r.line == &l2) TEST(r.direction, ==, 0);
+      if (ro.line == &l2) TEST(ro.direction, ==, d);
     }
   }
 
@@ -465,7 +514,7 @@ void TopologicalTest::run() {
     cd->pl().addLine(&l2, 0);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
+    cfg.maxAggrDistance = 15;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
@@ -490,7 +539,7 @@ void TopologicalTest::run() {
     //     1
     // a ------> b
     // c <------ d
-    //     2
+    //     2->
     shared::linegraph::LineGraph tg;
     auto a = tg.addNd({{0.0, 10.0}});
     auto b = tg.addNd({{50.0, 10.0}});
@@ -507,11 +556,10 @@ void TopologicalTest::run() {
     cd->pl().addLine(&l2, d);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
+    cfg.maxAggrDistance = 15;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
 
     //     1, 2
     // a ------> b
@@ -525,7 +573,7 @@ void TopologicalTest::run() {
       if (r.line == &l1) TEST(r.direction, ==, 0);
       if (r.line == &l2) {
         TEST(r.direction, !=, 0);
-        TEST(r.direction->pl().getGeom()->getX(), ==, approx(50));
+        TEST(r.direction->pl().getGeom()->getX(), >, 25);
       }
     }
   }
@@ -541,21 +589,21 @@ void TopologicalTest::run() {
     // g <---------- h
     //      3
     shared::linegraph::LineGraph tg;
-    auto a = tg.addNd({{0.0, 10.0}});
-    auto b = tg.addNd({{50.0, 10.0}});
+    auto a = tg.addNd({{0.0, 5.0}});
+    auto b = tg.addNd({{50.0, 5.0}});
     auto c = tg.addNd({{0.0, 0.0}});
     auto d = tg.addNd({{50.0, 0.0}});
 
-    auto e = tg.addNd({{0.0, 20.0}});
-    auto f = tg.addNd({{50.0, 20.0}});
-    auto g = tg.addNd({{0.0, 30.0}});
-    auto h = tg.addNd({{50.0, 30.0}});
+    auto e = tg.addNd({{0.0, 10.0}});
+    auto f = tg.addNd({{50.0, 10.0}});
+    auto g = tg.addNd({{0.0, 15.0}});
+    auto h = tg.addNd({{50.0, 15.0}});
 
-    auto ab = tg.addEdg(a, b, {{{0.0, 10.0}, {50.0, 10.0}}});
+    auto ab = tg.addEdg(a, b, {{{0.0, 5.0}, {50.0, 5.0}}});
     auto cd = tg.addEdg(d, c, {{{50.0, 0.0}, {0.0, 0.0}}});
 
-    auto fe = tg.addEdg(f, e, {{{50.0, 20.0}, {0.0, 20.0}}});
-    auto hg = tg.addEdg(h, g, {{{50.0, 30.0}, {0.0, 30.0}}});
+    auto fe = tg.addEdg(f, e, {{{50.0, 10.0}, {0.0, 10.0}}});
+    auto hg = tg.addEdg(h, g, {{{50.0, 15.0}, {0.0, 15.0}}});
 
     shared::linegraph::Line l1("1", "1", "red");
     shared::linegraph::Line l2("2", "2", "blue");
@@ -569,11 +617,14 @@ void TopologicalTest::run() {
     hg->pl().addLine(&l3, 0);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
+    cfg.maxAggrDistance = 20;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
+
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cout << std::flush;
 
     //  1, 2->, 3
     // a ------> b
@@ -587,12 +638,9 @@ void TopologicalTest::run() {
       if (r.line == &l1) TEST(r.direction, ==, 0);
       if (r.line == &l2) {
         TEST(r.direction, !=, 0);
-        TEST(r.direction->pl().getGeom()->getX(), >, 49);
-        TEST(r.direction->pl().getGeom()->getX(), <, 51);
+        TEST(r.direction->pl().getGeom()->getX(), >, 25);
       }
-      if (r.line == &l3) {
-        TEST(r.direction, ==, 0);
-      }
+      if (r.line == &l3) TEST(r.direction, ==, 0);
     }
   }
 
@@ -603,12 +651,12 @@ void TopologicalTest::run() {
     // c ------> d
     //     2
     shared::linegraph::LineGraph tg;
-    auto a = tg.addNd({{30.0, 10.0}});
-    auto b = tg.addNd({{70.0, 10.0}});
+    auto a = tg.addNd({{30.0, 5.0}});
+    auto b = tg.addNd({{70.0, 5.0}});
     auto c = tg.addNd({{0.0, 0.0}});
     auto d = tg.addNd({{100.0, 0.0}});
 
-    auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {70.0, 10.0}}});
+    auto ab = tg.addEdg(a, b, {{{30.0, 5.0}, {70.0, 5.0}}});
     auto cd = tg.addEdg(c, d, {{{0.0, 0.0}, {100.0, 0.0}}});
 
     shared::linegraph::Line l1("1", "1", "red");
@@ -618,14 +666,21 @@ void TopologicalTest::run() {
     cd->pl().addLine(&l2, 0);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
+    cfg.maxAggrDistance = 10;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
 
     //    2   1,2    2
     // c ----a--->b----> d
+    c = 0;
+    d = 0;
+    for (auto nd : *tg.getNds()) {
+      if (nd->getDeg() == 1) {
+        if (!c) c = nd;
+        else d = nd;
+      }
+    }
 
     a = c->getAdjList().front()->getOtherNd(c);
     b = d->getAdjList().front()->getOtherNd(d);
@@ -649,12 +704,12 @@ void TopologicalTest::run() {
     // c <----- d
     //     2
     shared::linegraph::LineGraph tg;
-    auto a = tg.addNd({{30.0, 10.0}});
-    auto b = tg.addNd({{70.0, 10.0}});
+    auto a = tg.addNd({{30.0, 5.0}});
+    auto b = tg.addNd({{70.0, 5.0}});
     auto c = tg.addNd({{0.0, 0.0}});
     auto d = tg.addNd({{100.0, 0.0}});
 
-    auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {70.0, 10.0}}});
+    auto ab = tg.addEdg(a, b, {{{30.0, 5.0}, {70.0, 5.0}}});
     auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
 
     shared::linegraph::Line l1("1", "1", "red");
@@ -664,17 +719,25 @@ void TopologicalTest::run() {
     dc->pl().addLine(&l2, 0);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
+    cfg.maxAggrDistance = 10;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
-
-    a = c->getAdjList().front()->getOtherNd(c);
-    b = d->getAdjList().front()->getOtherNd(d);
 
     //    2   1,2    2
     // c ----a--->b----> d
+
+    c = 0;
+    d = 0;
+    for (auto nd : *tg.getNds()) {
+      if (nd->getDeg() == 1) {
+        if (!c) c = nd;
+        else d = nd;
+      }
+     }
+
+    a = c->getAdjList().front()->getOtherNd(c);
+    b = d->getAdjList().front()->getOtherNd(d);
 
     TEST(tg.getNds()->size(), ==, 4);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
@@ -695,12 +758,12 @@ void TopologicalTest::run() {
     // c <----- d
     //     2
     shared::linegraph::LineGraph tg;
-    auto a = tg.addNd({{30.0, 10.0}});
-    auto b = tg.addNd({{100.0, 10.0}});
+    auto a = tg.addNd({{30.0, 5.0}});
+    auto b = tg.addNd({{100.0, 5.0}});
     auto c = tg.addNd({{0.0, 0.0}});
     auto d = tg.addNd({{100.0, 0.0}});
 
-    auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
+    auto ab = tg.addEdg(a, b, {{{30.0, 5.0}, {100.0, 5.0}}});
     auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
 
     shared::linegraph::Line l1("1", "1", "red");
@@ -710,7 +773,7 @@ void TopologicalTest::run() {
     dc->pl().addLine(&l2, 0);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
+    cfg.maxAggrDistance = 10;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
@@ -722,6 +785,15 @@ void TopologicalTest::run() {
 
     //    2     1,2
     // c ----a-----> d
+    //
+    c = 0;
+    d = 0;
+    for (auto nd : *tg.getNds()) {
+      if (nd->getDeg() == 1) {
+        if (nd->getAdjList().front()->pl().hasLine(&l1)) d = nd;
+        else c = nd;
+      }
+    }
 
     a = c->getAdjList().front()->getOtherNd(c);
 
@@ -746,12 +818,12 @@ void TopologicalTest::run() {
     // c <----- d
     //     <-2
     shared::linegraph::LineGraph tg;
-    auto a = tg.addNd({{30.0, 10.0}});
-    auto b = tg.addNd({{100.0, 10.0}});
+    auto a = tg.addNd({{30.0, 5.0}});
+    auto b = tg.addNd({{100.0, 5.0}});
     auto c = tg.addNd({{0.0, 0.0}});
     auto d = tg.addNd({{100.0, 0.0}});
 
-    auto ab = tg.addEdg(a, b, {{{30.0, 10.0}, {100.0, 10.0}}});
+    auto ab = tg.addEdg(a, b, {{{30.0, 5.0}, {100.0, 5.0}}});
     auto dc = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
 
     shared::linegraph::Line l2("2", "2", "blue");
@@ -760,14 +832,20 @@ void TopologicalTest::run() {
     dc->pl().addLine(&l2, c);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 50;
+    cfg.maxAggrDistance = 10;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
-    mc.removeEdgeArtifacts();
 
     //    <-2   2
     // c ----a-----> d
+    //
+    c = 0;
+    for (auto nd : *tg.getNds()) {
+      if (nd->getDeg() == 1 && nd->pl().getGeom()->getX() < 50) {
+        c = nd;
+      }
+    }
 
     a = c->getAdjList().front()->getOtherNd(c);
 

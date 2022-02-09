@@ -76,6 +76,24 @@ int main(int argc, char** argv) {
 
   mc.removeNodeArtifacts(false);
 
+
+  double avgMergedEdgs = 0;
+  size_t maxMergedEdgs = 0;
+  if (cfg.outputStats) {
+    size_t c = 0;
+    const auto& origEdgs = mc.freezeTrack(restrFr);
+    for (const auto& nd : *tg.getNds()) {
+      for (const auto& e : nd->getAdjList()) {
+        if (e->getFrom() != nd) continue;
+        size_t cur = origEdgs.at(e).size();
+        if (cur > maxMergedEdgs) maxMergedEdgs = cur;
+        avgMergedEdgs += cur;
+        c++;
+      }
+    }
+    avgMergedEdgs /= c;
+  }
+
   // infer restrictions
   T_START(restrInf);
   ri.infer(mc.freezeTrack(restrFr));
@@ -115,6 +133,8 @@ int main(int argc, char** argv) {
              {"time_station_insert", stationT},
              {"len_before", lenBef},
              {"num_restrs", tg.numConnExcs()},
+             {"avg_merged_edgs", avgMergedEdgs},
+             {"max_merged_edgs", maxMergedEdgs},
              {"len_after", lenAfter},
          }}};
     out.print(tg, std::cout, jsonStats);

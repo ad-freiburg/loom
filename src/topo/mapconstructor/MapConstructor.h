@@ -121,6 +121,7 @@ class MapConstructor {
 
   void mergeLines(LineEdge* newE, LineEdge* oldE, LineNode* newFrom,
                   LineNode* newTo);
+  void supportEdge(LineEdge* ex, LineGraph* g);
 
   PolyLine<double> geomAvg(const LineEdgePL& geomA, double startA, double endA,
                            const LineEdgePL& geomB, double startB, double endB);
