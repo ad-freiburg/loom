@@ -186,23 +186,6 @@ InnerGeom RenderGraph::getInnerBezier(const LineNode* n,
       double degAng = util::geo::innerProd(isect, pa, ppb);
       double ang = cos(degAng / (180 / M_PI));
 
-      ang = ang * ang;
-
-      if (std::isnan(ang)) ang = 1;
-
-      if (std::max(partnerFrom.edge->pl().getLines().size(),
-                   partnerTo.edge->pl().getLines().size()) > 1) {
-        double fac =
-            fabs((double)((int)partnerFrom.edge->pl().getLines().size() -
-                          (int)partnerTo.edge->pl().getLines().size())) /
-            (double)(std::max(partnerFrom.edge->pl().getLines().size(),
-                              partnerTo.edge->pl().getLines().size()) -
-                     1);
-
-        fac = pow(fac, 2);
-        ang = pow(ang, fac);
-      }
-
       double dar = util::geo::dist(isect, p);
       double dbr = util::geo::dist(isect, pp);
 
