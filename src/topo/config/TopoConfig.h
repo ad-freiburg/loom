@@ -14,6 +14,7 @@ struct TopoConfig {
   double maxAggrDistance;
   double maxLengthDev;
   bool outputStats;
+  bool noInferRestrs;
 };
 
 }  // namespace config

@@ -5,12 +5,7 @@
 // _____________________________________________________________________________
 template <typename K, typename V>
 void PriorityQueue<K, V>::push(K key, const V& val) {
-  // if (_last - key > 0) key = _last; 
-  if (key < _last) {
-    std::cout << std::setprecision(10) << _last << " vs " << key << std::endl;
-    key = _last;
-  }
-  // assert(key >= _last);
+  if (key < _last) key = _last;
   _pq.emplace(std::pair<K, V>(key, val));
 }
 

@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
 
   // infer restrictions
   T_START(restrInf);
-  ri.infer(mc.freezeTrack(restrFr));
+  if (!cfg.noInferRestrs) ri.infer(mc.freezeTrack(restrFr));
   double restrT = T_STOP(restrInf);
 
   // insert stations

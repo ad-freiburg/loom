@@ -122,7 +122,7 @@ void LineNodePL::delConnExc(const Line* r, const LineEdge* edgeA,
 bool LineNodePL::connOccurs(const Line* r, const LineEdge* edgeA,
                             const LineEdge* edgeB) const {
   const auto& i = _connEx.find(r);
-  if (_connEx.find(r) == _connEx.end()) return true;
+  if (i == _connEx.end()) return true;
 
   const auto& ii = i->second.find(edgeA);
   if (ii == i->second.end()) return true;

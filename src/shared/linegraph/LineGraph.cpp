@@ -157,7 +157,7 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
       auto props = feature["properties"];
       auto geom = feature["geometry"];
       if (geom["type"] == "Point") {
-        std::string id = util::toString(props["id"]);
+        std::string id = props["id"].get<std::string>();
 
         std::vector<double> coords = geom["coordinates"];
 
@@ -171,7 +171,7 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
             if (props["station_id"].type() == nlohmann::json::value_t::string) {
               i.id = props["station_id"].get<std::string>();
             } else {
-              i.id = util::toString(props["station_id"]);
+              i.id = props["station_id"].get<std::string>();
             }
           }
           if (!props["station_label"].is_null())
@@ -189,8 +189,8 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
       auto geom = feature["geometry"];
       if (geom["type"] == "LineString") {
         if (props["lines"].is_null() || props["lines"].size() == 0) continue;
-        std::string from = util::toString(props["from"]);
-        std::string to = util::toString(props["to"]);
+        std::string from = props["from"].get<std::string>();
+        std::string to = props["to"].get<std::string>();
 
         std::vector<std::vector<double>> coords = geom["coordinates"];
 
@@ -226,11 +226,11 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
         for (auto line : props["lines"]) {
           std::string id;
           if (!line["id"].is_null()) {
-            id = util::toString(line["id"]);
+            id = line["id"].get<std::string>();
           } else if (!line["label"].is_null()) {
-            id = util::toString(line["label"]);
+            id = line["label"].get<std::string>();
           } else if (!line["color"].is_null()) {
-            id = line["color"];
+            id = line["color"].get<std::string>();
           } else
             continue;
 
@@ -245,7 +245,7 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
           LineNode* dir = 0;
 
           if (!line["direction"].is_null()) {
-            dir = idMap[util::toString(line["direction"])];
+            dir = idMap[line["direction"].get<std::string>()];
           }
 
           if (!line["style"].is_null()) {
@@ -276,14 +276,14 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
       auto props = feature["properties"];
       auto geom = feature["geometry"];
       if (geom["type"] == "Point") {
-        std::string id = util::toString(props["id"]);
+        std::string id = props["id"].get<std::string>();
 
         if (!idMap.count(id)) continue;
         LineNode* n = idMap[id];
 
         if (!props["not_serving"].is_null()) {
           for (auto excl : props["not_serving"]) {
-            std::string lid = util::toString(excl);
+            std::string lid = excl.get<std::string>();
 
             const Line* r = getLine(lid);
 
@@ -299,15 +299,15 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
 
         if (!props["excluded_line_conns"].is_null()) {
           for (auto excl : props["excluded_line_conns"]) {
-            std::string rid = util::toString(excl["route"]);
-            std::string nid1 = util::toString(excl["edge1_node"]);
-            std::string nid2 = util::toString(excl["edge2_node"]);
+            std::string lid = excl["route"].get<std::string>();
+            std::string nid1 = excl["edge1_node"].get<std::string>();
+            std::string nid2 = excl["edge2_node"].get<std::string>();
 
-            const Line* r = getLine(rid);
+            const Line* r = getLine(lid);
 
             if (!r) {
               LOG(WARN) << "line connection exclude defined in node " << id
-                        << " for line " << rid << ", but no such line exists.";
+                        << " for line " << lid << ", but no such line exists.";
               continue;
             }
 

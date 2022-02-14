@@ -80,6 +80,16 @@ class ShortestPath {
   }
 
   template <typename N, typename E, typename C>
+  static C shortestPath(const std::set<Node<N, E>*>& from,
+                        const std::set<Node<N, E>*>& to,
+                        const CostFunc<N, E, C>& costFunc) {
+    EList<N, E>* el = 0;
+    NList<N, E>* nl = 0;
+    return D::shortestPathImpl(from, to, costFunc, ZeroHeurFunc<N, E, C>(),
+                               el, nl);
+  }
+
+  template <typename N, typename E, typename C>
   static C shortestPath(const std::set<Node<N, E>*> from,
                         const std::set<Node<N, E>*>& to,
                         const CostFunc<N, E, C>& costFunc,

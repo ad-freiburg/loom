@@ -242,8 +242,8 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
       for (const auto& point : plDense) {
         if (i == plDense.size() - 1) back = 0;
-        LineNode* cur = ndCollapseCand(myNds, e->pl().getLines().size(), dCut, point,
-                               front, back, grid, &tgNew);
+        LineNode* cur = ndCollapseCand(myNds, e->pl().getLines().size(), dCut,
+                                       point, front, back, grid, &tgNew);
 
         if (i == 0) {
           // this is the "FROM" node
@@ -252,7 +252,6 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
             imgNdsSet.insert(cur);
             imgFromCovered = true;
           }
-
         }
 
         if (i == plDense.size() - 1) {
@@ -475,8 +474,8 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
     *_g = std::move(tgNew);
 
-    LOGTO(DEBUG, std::cerr) << "iter " << ITER
-                           << ", distance gap: " << (1 - LEN_NEW / LEN_OLD);
+    LOGTO(DEBUG, std::cerr)
+        << "iter " << ITER << ", distance gap: " << (1 - LEN_NEW / LEN_OLD);
     if (fabs(1 - LEN_NEW / LEN_OLD) < THRESHOLD) break;
   }
 

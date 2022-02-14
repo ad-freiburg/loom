@@ -37,6 +37,10 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
       opts::bool_switch(&(cfg->outputStats))
       ->default_value(false),
       "write stats to output file")
+    ("no-infer-restrs",
+      opts::bool_switch(&(cfg->noInferRestrs))
+      ->default_value(false),
+      "don't infer turn restrictions")
     ("max-length-dev",
       opts::value<double>(&(cfg->maxLengthDev))->default_value(500),
       "maximal distance deviation for turn restriction infer");

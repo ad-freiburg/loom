@@ -9,20 +9,20 @@
 #include <list>
 #include <set>
 #include <unordered_map>
-#include "util/graph/robin/robin_map.h"
+#include "util/PriorityQueue.h"
 #include "util/graph/Edge.h"
 #include "util/graph/Graph.h"
 #include "util/graph/Node.h"
 #include "util/graph/ShortestPath.h"
-#include "util/PriorityQueue.h"
 #include "util/graph/radix_heap.h"
+#include "util/graph/robin/robin_map.h"
 
 namespace util {
 namespace graph {
 
+using util::graph::Edge;
 using util::graph::Graph;
 using util::graph::Node;
-using util::graph::Edge;
 
 // edge-based dijkstra - settles edges instead of nodes
 class EDijkstra : public ShortestPath<EDijkstra> {
@@ -98,7 +98,7 @@ class EDijkstra : public ShortestPath<EDijkstra> {
   using PQInit = radix_heap::pair_radix_heap<C, RouteEdgeInit<N, E, C> >;
 
   template <typename N, typename E, typename C>
-  static C shortestPathImpl(const std::set<Edge<N, E>*> from,
+  static C shortestPathImpl(const std::set<Edge<N, E>*>& from,
                             const std::set<Edge<N, E>*>& to,
                             const util::graph::CostFunc<N, E, C>& costFunc,
                             const util::graph::HeurFunc<N, E, C>& heurFunc,
@@ -146,12 +146,20 @@ class EDijkstra : public ShortestPath<EDijkstra> {
       std::unordered_map<Edge<N, E>*, NList<N, E>*> resNodes);
 
   template <typename N, typename E, typename C>
-  static void buildPath(Edge<N, E>* curE, const Settled<N, E, C>& settled,
-                        NList<N, E>* resNodes, EList<N, E>* resEdges);
+  static C shortestPathImpl(const std::set<Node<N, E>*>& from,
+                     const std::set<Node<N, E>*>& to,
+                     const util::graph::CostFunc<N, E, C>& costFunc,
+                     const util::graph::HeurFunc<N, E, C>& heurFunc,
+                     EList<N, E>* resEdges, NList<N, E>* resNodes);
 
   template <typename N, typename E, typename C>
-  static void buildPathInit(Edge<N, E>* curE, const SettledInit<N, E, C>& settled,
-                        NList<N, E>* resNodes, EList<N, E>* resEdges);
+  static void buildPath(Edge<N, E>* curE, const Settled<N, E, C>& settled,
+                 NList<N, E>* resNodes, EList<N, E>* resEdges);
+
+  template <typename N, typename E, typename C>
+  static void buildPathInit(Edge<N, E>* curE,
+                            const SettledInit<N, E, C>& settled,
+                            NList<N, E>* resNodes, EList<N, E>* resEdges);
 
   template <typename N, typename E, typename C>
   static inline void relax(RouteEdge<N, E, C>& cur,
@@ -162,22 +170,21 @@ class EDijkstra : public ShortestPath<EDijkstra> {
 
   template <typename N, typename E, typename C>
   static inline void relaxInit(RouteEdgeInit<N, E, C>& cur,
-                           const std::set<Edge<N, E>*>& to,
-                           C stall,
-                           const util::graph::CostFunc<N, E, C>& costFunc,
-                           const util::graph::HeurFunc<N, E, C>& heurFunc,
-                           PQInit<N, E, C>& pq);
+                               const std::set<Edge<N, E>*>& to, C stall,
+                               const util::graph::CostFunc<N, E, C>& costFunc,
+                               const util::graph::HeurFunc<N, E, C>& heurFunc,
+                               PQInit<N, E, C>& pq);
 
   template <typename N, typename E, typename C>
   static void relaxInv(RouteEdge<N, E, C>& cur,
-                      const util::graph::CostFunc<N, E, C>& costFunc,
-                      PQ<N, E, C>& pq);
+                       const util::graph::CostFunc<N, E, C>& costFunc,
+                       PQ<N, E, C>& pq);
 
   static size_t ITERS;
 };
 
 #include "util/graph/EDijkstra.tpp"
-}
-}
+}  // namespace graph
+}  // namespace util
 
 #endif  // UTIL_GRAPH_DIJKSTRA_H_

@@ -49,7 +49,10 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
 
   NodeGrid ngrid(2000, 2000, graphBox);
 
+  size_t i = 0;
+
   for (auto t = f.getTrips().begin(); t != f.getTrips().end(); ++t) {
+    i++;
     // ignore trips with only one stop
     if (t->second->getStopTimes().size() < 2) continue;
     if (!_cfg->useMots.count(t->second->getRoute()->getType())) continue;
@@ -60,6 +63,9 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
     const Edge* prevEdge = 0;
     addStop(prev.getStop(), g, &ngrid);
     ++st;
+
+    if (i % 100 == 0)
+      LOGTO(INFO, std::cerr) << "@ trip " << i << "/" << f.getTrips().size();
 
     for (; st != t->second->getStopTimes().end(); ++st) {
       const auto& cur = *st;
@@ -148,11 +154,6 @@ std::pair<bool, PolyLine<double>> Builder::getSubPolyLine(const Stop* a,
     for (const auto& sp : t->getShape()->getPoints()) {
       pl->second << getProjectedPoint(sp.lat, sp.lng, _graphProj);
     }
-
-    // some smoothing
-    pl->second.simplify(20);
-    pl->second.smoothenOutliers(50);
-    pl->second.fixTopology(50);
   }
 
   PolyLine<double> p;

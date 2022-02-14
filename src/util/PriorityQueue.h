@@ -6,6 +6,7 @@
 #define UTIL_PRIORITYQUEUE_H_
 
 #include<iomanip>
+#include<queue>
 
 namespace util {
 template <typename K, typename V>
