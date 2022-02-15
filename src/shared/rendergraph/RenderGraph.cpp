@@ -135,12 +135,10 @@ InnerGeom RenderGraph::getInnerBezier(const LineNode* n,
   double EPSI = 0.001;
   InnerGeom ret = getInnerLine(n, partnerFrom, partnerTo);
   DPoint p = ret.geom.getLine().front();
-  DPoint pp = ret.geom.getLine().back();
-  double d = util::geo::dist(p, pp);
+  DPoint q = ret.geom.getLine().back();
+  double d = util::geo::dist(p, q);
 
-  DPoint b = p;
-  DPoint c = pp;
-  std::pair<double, double> slopeA, slopeB;
+  std::pair<double, double> slpA, slpB;
 
   if (util::geo::len(*partnerFrom.edge->pl().getGeom()) <= 5) return ret;
   if (util::geo::len(*partnerTo.edge->pl().getGeom()) <= 5) return ret;
@@ -148,65 +146,53 @@ InnerGeom RenderGraph::getInnerBezier(const LineNode* n,
   if (d <= 5) return ret;
 
   if (partnerFrom.edge->getTo() == n) {
-    slopeA = PolyLine<double>(*partnerFrom.edge->pl().getGeom())
-                 .getSlopeBetweenDists(
-                     util::geo::len(*partnerFrom.edge->pl().getGeom()) - 5,
-                     util::geo::len(*partnerFrom.edge->pl().getGeom()));
+    slpA = PolyLine<double>(*partnerFrom.edge->pl().getGeom())
+               .getSlopeBetweenDists(
+                   util::geo::len(*partnerFrom.edge->pl().getGeom()) - 5,
+                   util::geo::len(*partnerFrom.edge->pl().getGeom()));
   } else {
-    slopeA = PolyLine<double>(*partnerFrom.edge->pl().getGeom())
-                 .getSlopeBetweenDists(5, 0);
+    slpA = PolyLine<double>(*partnerFrom.edge->pl().getGeom())
+               .getSlopeBetweenDists(5, 0);
   }
 
   if (partnerTo.edge->getTo() == n) {
-    slopeB = PolyLine<double>(*partnerTo.edge->pl().getGeom())
-                 .getSlopeBetweenDists(
-                     util::geo::len(*partnerTo.edge->pl().getGeom()) - 5,
-                     util::geo::len(*partnerTo.edge->pl().getGeom()));
+    slpB = PolyLine<double>(*partnerTo.edge->pl().getGeom())
+               .getSlopeBetweenDists(
+                   util::geo::len(*partnerTo.edge->pl().getGeom()) - 5,
+                   util::geo::len(*partnerTo.edge->pl().getGeom()));
   } else {
-    slopeB = PolyLine<double>(*partnerTo.edge->pl().getGeom())
-                 .getSlopeBetweenDists(5, 0);
+    slpB = PolyLine<double>(*partnerTo.edge->pl().getGeom())
+               .getSlopeBetweenDists(5, 0);
   }
 
-  double da = 1;
-  double db = 1;
+  double da = d * 0.55;
 
   DPoint pa =
-      DPoint(p.getX() - slopeA.first * d * 2, p.getY() - slopeA.second * d * 2);
-  DPoint pb = DPoint(pp.getX() - slopeB.first * d * 2,
-                     pp.getY() - slopeB.second * d * 2);
+      DPoint(p.getX() + slpA.first * d * 2, p.getY() + slpA.second * d * 2);
   DPoint ppa =
-      DPoint(p.getX() + slopeA.first * d * 2, p.getY() + slopeA.second * d * 2);
-  DPoint ppb = DPoint(pp.getX() + slopeB.first * d * 2,
-                      pp.getY() + slopeB.second * d * 2);
+      DPoint(q.getX() + slpB.first * d * 2, q.getY() + slpB.second * d * 2);
 
-  if (d > EPSI && util::geo::intersects(pa, ppa, pb, ppb)) {
-    DPoint isect = util::geo::intersection(pa, ppa, pb, ppb);
+  if (d > EPSI && util::geo::intersects(p, pa, q, ppa)) {
+    DPoint isect = util::geo::intersection(p, pa, q, ppa);
 
     if (!std::isnan(isect.getX()) && !std::isnan(isect.getY())) {
-      double degAng = util::geo::innerProd(isect, pa, ppb);
-      double ang = cos(degAng / (180 / M_PI));
-
       double dar = util::geo::dist(isect, p);
-      double dbr = util::geo::dist(isect, pp);
+      double dbr = util::geo::dist(isect, q);
 
       double avg = (dar + dbr) / 2;
 
-      da = (dar * 2 * (1 - ang) + avg * 2 * ang) / 2;
-      db = (dbr * 2 * (1 - ang) + avg * 2 * ang) / 2;
+      da = avg * 0.55;
     }
   }
 
-  if ((da + db) < EPSI || (da + db) > d * 2) {
-    da = 1;
-    db = 1;
+  if ((2 * da) < EPSI || (2 * da) > d * 2) {
+    da = d * 0.55;
   }
 
-  b = DPoint(p.getX() + slopeA.first * d * (da / (da + db)),
-             p.getY() + slopeA.second * d * (da / (da + db)));
-  c = DPoint(pp.getX() + slopeB.first * d * (db / (da + db)),
-             pp.getY() + slopeB.second * d * (db / (da + db)));
+  auto pp = DPoint(p.getX() + slpA.first * (da), p.getY() + slpA.second * (da));
+  auto qq = DPoint(q.getX() + slpB.first * (da), q.getY() + slpB.second * (da));
 
-  BezierCurve<double> bc(p, b, c, pp);
+  BezierCurve<double> bc(p, pp, qq, q);
   ret.geom = bc.render(prec);
 
   return ret;
@@ -555,7 +541,6 @@ DPoint RenderGraph::linePosOn(const NodeFront& nf, const LineEdge* e,
                                nf.geom.getLine().back(), p);
   }
 }
-
 
 // _____________________________________________________________________________
 double RenderGraph::getOutAngle(const LineNode* n, const LineEdge* e) {
