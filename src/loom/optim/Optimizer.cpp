@@ -135,6 +135,8 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
                            << optResStats.maxLineCard;
     LOGTO(INFO, std::cerr) << "(stats)   Solution space: "
                            << optResStats.solutionSpaceSize;
+    LOGTO(INFO, std::cerr) << "(stats)   Nontrivial components: "
+                           << nonTrivialComponents;
   }
 
   size_t runs = _cfg->optimRuns;
@@ -144,9 +146,6 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
   double crossSumSame = 0;
   double crossSumDiff = 0;
   double sepSum = 0;
-
-  LOGTO(INFO, std::cerr) << "Optimization graph has " << nonTrivialComponents
-                         << " nontrivial components.";
 
   // for trivial cases
   const NullOptimizer nullOpt(_cfg, _scorer.getPens());

@@ -92,8 +92,6 @@ class SvgRenderer : public Renderer {
   void printPoint(const util::geo::DPoint& p, const std::string& style,
                   const RenderParams& params);
   void printPolygon(const util::geo::Polygon<double>& g,
-                    const std::string& style, const RenderParams& params);
-  void printPolygon(const util::geo::Polygon<double>& g,
                     const std::map<std::string, std::string>& ps,
                     const RenderParams& params);
   void printCircle(const util::geo::DPoint& center, double rad,

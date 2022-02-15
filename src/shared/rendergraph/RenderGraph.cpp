@@ -282,10 +282,10 @@ Polygon<double> RenderGraph::getConvexFrontHull(
   if (!simpleRenderForTwoEdgeNodes || n->pl().fronts().size() != 2) {
     MultiLine<double> l;
     for (auto& nf : n->pl().fronts()) {
-      l.push_back(nf.origGeom
-                      .getSegment((cd / 2) / nf.origGeom.getLength(),
-                                  (nf.origGeom.getLength() - cd / 2) /
-                                      nf.origGeom.getLength())
+      l.push_back(nf.geom
+                      .getSegment((cd / 2) / nf.geom.getLength(),
+                                  (nf.geom.getLength() - cd / 2) /
+                                      nf.geom.getLength())
                       .getLine());
     }
 
@@ -294,7 +294,7 @@ Polygon<double> RenderGraph::getConvexFrontHull(
     if (rectangulize && getMaxLineNum(n) > 1) {
       MultiLine<double> ll;
       for (auto& nf : n->pl().fronts()) {
-        ll.push_back(nf.origGeom.getLine());
+        ll.push_back(nf.geom.getLine());
       }
       Polygon<double> env = util::geo::convexHull(
           util::geo::shrink(util::geo::getOrientedEnvelopeAvg(ll), cd / 2));

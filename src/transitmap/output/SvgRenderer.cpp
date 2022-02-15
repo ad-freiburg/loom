@@ -180,7 +180,7 @@ void SvgRenderer::renderNodeFronts(const RenderGraph& outG,
       std::stringstream style;
       style << "fill:none;stroke:" << color
             << ";stroke-linejoin: "
-               "miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1";
+               "miter;stroke-linecap:round;stroke-opacity:0.9;stroke-width:1";
       std::map<std::string, std::string> params;
       params["style"] = style.str();
       printLine(p, params, rparams);
@@ -293,9 +293,6 @@ size_t SvgRenderer::getNextPartner(const InnerClique& forClique,
 
 // _____________________________________________________________________________
 bool SvgRenderer::isNextTo(const InnerGeom& a, const InnerGeom& b) const {
-  // TODO!!!!!
-  return false;
-
   double THRESHOLD = 0.5 * M_PI + 0.1;
   if (a.from.edge == b.from.edge && a.to.edge == b.to.edge) {
     if ((a.slotFrom - b.slotFrom == 1 || b.slotFrom - a.slotFrom == 1) &&
@@ -445,9 +442,11 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
   Params params;
   params["style"] = styleStr.str();
 
+  auto pOutline = p.getSegmentAtDist(_cfg->outlineWidth, p.getLength() - _cfg->outlineWidth);
+
   _delegates[0].insert(_delegates[0].begin(),
                        OutlinePrintPair(PrintDelegate(params, p),
-                                        PrintDelegate(paramsOutline, p)));
+                                        PrintDelegate(paramsOutline, pOutline)));
 }
 
 // _____________________________________________________________________________
@@ -626,6 +625,7 @@ void SvgRenderer::printPolygon(const Polygon<double>& g,
   }
 
   params["points"] = points.str();
+  // params["style"] = "fill-opacity:0.5";
 
   _w.openTag("polygon", params);
   _w.closeTag();
@@ -655,14 +655,6 @@ void SvgRenderer::printCircle(const DPoint& center, double rad,
 
   _w.openTag("circle", params);
   _w.closeTag();
-}
-
-// _____________________________________________________________________________
-void SvgRenderer::printPolygon(const DPolygon& g, const std::string& style,
-                               const RenderParams& rparams) {
-  std::map<std::string, std::string> params;
-  params["style"] = style;
-  printPolygon(g, params, rparams);
 }
 
 // _____________________________________________________________________________

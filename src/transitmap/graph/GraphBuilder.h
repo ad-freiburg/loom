@@ -46,7 +46,8 @@ class GraphBuilder {
 
   bool nodeFrontsOverlap(const shared::rendergraph::RenderGraph* g,
                          const shared::linegraph::NodeFront& a,
-                         const shared::linegraph::NodeFront& b) const;
+                         const shared::linegraph::NodeFront& b,
+                         double d) const;
   mutable std::set<const shared::linegraph::LineEdge*> _indEdges;
   mutable std::map<const shared::linegraph::LineEdge*, size_t> _pEdges;
 };

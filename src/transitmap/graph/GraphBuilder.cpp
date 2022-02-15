@@ -108,17 +108,30 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
 
-      double fac = 1;
+      bool overlap = false;
 
-      if (nodeFrontsOverlap(g, fa, fb)) {
+      if (n->pl().stops().size()) {
+        size_t numShr = g->getSharedLines(fa.edge, fb.edge).size();
+        double fac = 1;
+        if (!numShr) fac = 0;
+        overlap = nodeFrontsOverlap(g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
+      } else {
+        size_t numShr = g->getSharedLines(fa.edge, fb.edge).size();
+        double fac = 3;
+        if (!numShr) fac = 1;
+
+        overlap = nodeFrontsOverlap(g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
+      }
+
+      if (overlap) {
         if (util::geo::len(*fa.edge->pl().getGeom()) > minLength &&
             fa.geom.distTo(*n->pl().getGeom()) <
-                fac * g->getMaxNdFrontWidth(n)) {
+                g->getMaxNdFrontWidth(n)) {
           ret.insert(const_cast<NodeFront*>(&fa));
         }
         if (util::geo::len(*fb.edge->pl().getGeom()) > minLength &&
             fb.geom.distTo(*n->pl().getGeom()) <
-                fac * g->getMaxNdFrontWidth(n)) {
+                g->getMaxNdFrontWidth(n)) {
           ret.insert(const_cast<NodeFront*>(&fb));
         }
       }
@@ -130,26 +143,8 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 
 // _____________________________________________________________________________
 bool GraphBuilder::nodeFrontsOverlap(const RenderGraph* g, const NodeFront& a,
-                                     const NodeFront& b) const {
-  size_t numShr = g->getSharedLines(a.edge, b.edge).size();
-
-  DPoint aa = a.geom.front();
-  DPoint ab = a.geom.back();
-  DPoint ba = b.geom.front();
-  DPoint bb = b.geom.back();
-
-  bool intersects = lineIntersects(aa, ab, ba, bb);
-  if (!intersects) return false;
-
-  DPoint i = intersection(aa, ab, ba, bb);
-
-  if (numShr &&
-      a.geom.distTo(i) < (g->getWidth(a.edge) + g->getSpacing(a.edge)))
-    return true;
-  if (b.geom.distTo(a.geom) <
-      fmax((g->getWidth(b.edge) + g->getSpacing(b.edge)) * 3,
-           (g->getTotalWidth(b.edge) + g->getTotalWidth(a.edge)) / 4))
-    return true;
+                                     const NodeFront& b, double d) const {
+  return b.geom.distTo(a.geom) <= d;
 
   return false;
 }
