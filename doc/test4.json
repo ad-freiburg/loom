@@ -8,6 +8,7 @@
       },
       "properties": {
         "id": "1",
+        "station_label": "Main St",
         "station_id": "1"
       }
     },
@@ -18,6 +19,7 @@
       },
       "properties": {
         "id": "2",
+        "station_label": "East St",
         "station_id": "2"
       },
       "type": "Feature"
@@ -39,6 +41,7 @@
       },
       "properties": {
         "id": "3",
+        "station_label": "South St",
         "station_id" : "3"
       },
       "type": "Feature"
@@ -50,6 +53,7 @@
       },
       "properties": {
         "id": "4",
+        "station_label": "West St",
         "station_id" : "4"
       },
       "type": "Feature"
@@ -65,8 +69,12 @@
         "from": "a",
         "to": "2",
         "lines": [
-          {"color": "990000", "direction": "a"},
-          {"color": "33FF66"}
+          {"color": "990000", 
+			  
+			  "style": "stroke-dasharray: 23",
+			  "outline-style": "stroke-dasharray: 23",
+			  "direction": "a", "label" : "C"},
+          {"color": "33FF66", "label" : "E"}
         ]
       }
     },
@@ -81,9 +89,9 @@
         "from": "1",
         "to": "a",
         "lines": [
-          {"color": "666600"},
-          {"color": "990000", "direction": "1"},
-          {"color": "00a1de", "direction": "a"}
+          {"color": "666600", "label" : "A"},
+          {"color": "990000", "direction": "1", "label" : "C"},
+          {"color": "00a1de", "direction": "a", "label" :"B"}
         ]
       }
     },
@@ -98,8 +106,8 @@
         "from": "a",
         "to": "3",
         "lines": [
-          {"color": "33FF66"},
-          {"color": "00a1de", "direction": "3"}
+          {"color": "33FF66", "label" : "E"},
+          {"color": "00a1de", "direction": "3", "label" :"B"}
         ]
       }
     },
@@ -114,8 +122,8 @@
         "from": "a",
         "to": "4",
         "lines": [
-          {"color": "666600"},
-          {"color": "00a1de", "direction": "a"}
+          {"color": "666600", "label" : "A"},
+          {"color": "00a1de", "direction": "a", "label" :"B"}
         ]
       }
     }

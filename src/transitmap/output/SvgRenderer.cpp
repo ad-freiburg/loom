@@ -44,6 +44,9 @@ void SvgRenderer::print(const RenderGraph& outG) {
 
   auto box = outG.getBBox();
 
+  box = util::geo::pad(
+      box, outG.getMaxLineNum() * (_cfg->lineWidth + _cfg->lineSpacing));
+
   Labeller labeller(_cfg);
   if (_cfg->renderLabels) {
     LOG(DEBUG) << "Rendering labels...";
@@ -247,7 +250,7 @@ void SvgRenderer::renderNodeConnections(const RenderGraph& outG,
                                         const RenderParams& rparams) {
   auto geoms = outG.innerGeoms(n, _cfg->innerGeometryPrecision);
 
-  for (auto& clique : getInnerCliques(n, geoms, 99)) {
+  for (auto& clique : getInnerCliques(n, geoms, 9999)) {
     renderClique(clique, n);
   }
 }
@@ -359,31 +362,31 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
     for (size_t i = 0; i < c.geoms.size(); i++) {
       PolyLine<double> pl = c.geoms[i].geom;
 
-      if (!raw) {
-        double off = -(_cfg->lineWidth + _cfg->lineSpacing) *
-                     (static_cast<int>(c.geoms[i].slotFrom) -
-                      static_cast<int>(ref.slotFrom));
+      // if (!raw) {
+      // double off = -(_cfg->lineWidth + _cfg->lineSpacing) *
+      // (static_cast<int>(c.geoms[i].slotFrom) -
+      // static_cast<int>(ref.slotFrom));
 
-        if (ref.from.edge->getTo() == n) off = -off;
+      // if (ref.from.edge->getTo() == n) off = -off;
 
-        pl = ref.geom.offsetted(off);
+      // pl = ref.geom.offsetted(off);
 
-        std::set<LinePoint<double>, LinePointCmp<double>> a;
-        std::set<LinePoint<double>, LinePointCmp<double>> b;
+      // std::set<LinePoint<double>, LinePointCmp<double>> a;
+      // std::set<LinePoint<double>, LinePointCmp<double>> b;
 
-        if (ref.from.edge)
-          a = n->pl().frontFor(ref.from.edge)->geom.getIntersections(pl);
-        if (ref.to.edge)
-          b = n->pl().frontFor(ref.to.edge)->geom.getIntersections(pl);
+      // if (ref.from.edge)
+      // a = n->pl().frontFor(ref.from.edge)->geom.getIntersections(pl);
+      // if (ref.to.edge)
+      // b = n->pl().frontFor(ref.to.edge)->geom.getIntersections(pl);
 
-        if (a.size() == 1 && b.size() == 1) {
-          pl = pl.getSegment(a.begin()->totalPos, b.begin()->totalPos);
-        } else if (a.size() == 1) {
-          pl = pl.getSegment(a.begin()->totalPos, 1);
-        } else if (b.size() == 1) {
-          pl = pl.getSegment(0, b.begin()->totalPos);
-        }
-      }
+      // if (a.size() == 1 && b.size() == 1) {
+      // pl = pl.getSegment(a.begin()->totalPos, b.begin()->totalPos);
+      // } else if (a.size() == 1) {
+      // pl = pl.getSegment(a.begin()->totalPos, 1);
+      // } else if (b.size() == 1) {
+      // pl = pl.getSegment(0, b.begin()->totalPos);
+      // }
+      // }
 
       std::stringstream styleOutlineCropped;
       styleOutlineCropped << "fill:none;stroke:#000000";
@@ -412,14 +415,18 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
 // _____________________________________________________________________________
 void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
                                  const Line& line,
-                                 const shared::linegraph::LineEdge* edge) {
-  renderLinePart(p, width, line, edge, "");
+                                 const shared::linegraph::LineEdge* edge,
+                                 const std::string& css,
+                                 const std::string& oCss) {
+  renderLinePart(p, width, line, edge, css, oCss, "");
 }
 
 // _____________________________________________________________________________
 void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
                                  const Line& line,
                                  const shared::linegraph::LineEdge* edge,
+                                 const std::string& css,
+                                 const std::string& oCss,
                                  const std::string& endMarker) {
   if (p.getLength() < width / 2) return;
   std::stringstream styleOutline;
@@ -427,11 +434,13 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
 
   styleOutline << ";stroke-linecap:round;stroke-width:"
                << (width + _cfg->outlineWidth) * _cfg->outputResolution;
+  styleOutline << ";" << oCss;
   Params paramsOutline;
   paramsOutline["style"] = styleOutline.str();
 
   std::stringstream styleStr;
   styleStr << "fill:none;stroke:#" << line.color();
+  styleStr << ";" << css;
 
   if (!endMarker.empty()) {
     styleStr << ";marker-end:url(#" << endMarker << ")";
@@ -442,11 +451,13 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
   Params params;
   params["style"] = styleStr.str();
 
-  auto pOutline = p.getSegmentAtDist(_cfg->outlineWidth, p.getLength() - _cfg->outlineWidth);
+  auto pOutline = p.getSegmentAtDist(_cfg->outlineWidth,
+                                     p.getLength() - _cfg->outlineWidth);
 
-  _delegates[0].insert(_delegates[0].begin(),
-                       OutlinePrintPair(PrintDelegate(params, p),
-                                        PrintDelegate(paramsOutline, pOutline)));
+  _delegates[0].insert(
+      _delegates[0].begin(),
+      OutlinePrintPair(PrintDelegate(params, pOutline),
+                       PrintDelegate(paramsOutline, pOutline)));
 }
 
 // _____________________________________________________________________________
@@ -481,16 +492,14 @@ void SvgRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 
     p.offsetPerp(offset);
 
-    std::set<LinePoint<double>, LinePointCmp<double>> iSects =
-        nfTo->geom.getIntersections(p);
+    auto iSects = nfTo->geom.getIntersections(p);
     if (iSects.size() > 0) {
       p = p.getSegment(0, iSects.begin()->totalPos);
     } else {
       p << nfTo->geom.projectOn(p.back()).p;
     }
 
-    std::set<LinePoint<double>, LinePointCmp<double>> iSects2 =
-        nfFrom->geom.getIntersections(p);
+    auto iSects2 = nfFrom->geom.getIntersections(p);
     if (iSects2.size() > 0) {
       p = p.getSegment(iSects2.begin()->totalPos, 1);
     } else {
@@ -498,6 +507,13 @@ void SvgRenderer::renderEdgeTripGeom(const RenderGraph& outG,
     }
 
     double arrowLength = (_cfg->lineWidth * 2.5);
+
+    std::string css, oCss;
+
+    if (!lo.style.isNull()) {
+      css = lo.style.get().getCss();
+      oCss = lo.style.get().getOutlineCss();
+    }
 
     if (_cfg->renderDirMarkers && lo.direction != 0 &&
         center.getLength() > arrowLength * 3) {
@@ -515,15 +531,16 @@ void SvgRenderer::renderEdgeTripGeom(const RenderGraph& outG,
           p.getSegmentAtDist(p.getLength() / 2, p.getLength());
 
       if (lo.direction == e->getTo()) {
-        renderLinePart(firstPart, lineW, *line, e, markerName.str() + "_m");
-        renderLinePart(secondPart.reversed(), lineW, *line, e);
-      } else {
-        renderLinePart(firstPart, lineW, *line, e);
-        renderLinePart(secondPart.reversed(), lineW, *line, e,
+        renderLinePart(firstPart, lineW, *line, e, css, oCss,
                        markerName.str() + "_m");
+        renderLinePart(secondPart.reversed(), lineW, *line, e, css, oCss);
+      } else {
+        renderLinePart(secondPart.reversed(), lineW, *line, e, css, oCss,
+                       markerName.str() + "_m");
+        renderLinePart(firstPart, lineW, *line, e, css, oCss);
       }
     } else {
-      renderLinePart(p, lineW, *line, e);
+      renderLinePart(p, lineW, *line, e, css, oCss);
     }
 
     a++;
@@ -625,7 +642,6 @@ void SvgRenderer::printPolygon(const Polygon<double>& g,
   }
 
   params["points"] = points.str();
-  // params["style"] = "fill-opacity:0.5";
 
   _w.openTag("polygon", params);
   _w.closeTag();
@@ -705,15 +721,6 @@ void SvgRenderer::renderStationLabels(const Labeller& labeller,
                     (p.getY() - rparams.yOff) * _cfg->outputResolution;
     }
 
-    // std::stringstream style;
-    // style << "fill:none;stroke:black"
-    // << ";stroke-linejoin: "
-    // "miter;stroke-linecap:round;stroke-opacity:0.7;stroke-width:1";
-    // std::map<std::string, std::string> ps;
-    // ps["style"] = style.str();
-
-    // for (auto path : label.band) printLine(path, ps, rparams);
-
     std::string idStr = "stlblp" + util::toString(id);
 
     pathPars["d"] = points.str();
@@ -726,18 +733,11 @@ void SvgRenderer::renderStationLabels(const Labeller& labeller,
     _w.closeTag();
 
     std::map<std::string, std::string> params;
-    // params["stroke"] = "black";
-    // params["stroke-width"] =
-    // util::toString((_cfg->lineWidth / 20) * _cfg->outputResolution);
-    // params["stroke-linejoin"] = "miter";
-    // params["stroke-linecap"] = "butt";
     params["font-weight"] = label.bold ? "bold" : "normal";
     params["font-family"] = "Ubuntu Condensed";
     params["dy"] = shift;
     params["font-size"] =
         util::toString(label.fontSize * _cfg->outputResolution);
-    // params["textLength"] = "100";
-    // params["lengthAdjust"] = "spacingAndGlyphs";
 
     _w.openTag("text", params);
     _w.openTag("textPath", {{"dy", shift},
@@ -795,18 +795,11 @@ void SvgRenderer::renderLineLabels(const Labeller& labeller,
     _w.closeTag();
 
     std::map<std::string, std::string> params;
-    // params["stroke"] = "black";
-    // params["stroke-width"] =
-    // util::toString((_cfg->lineWidth / 20) * _cfg->outputResolution);
-    // params["stroke-linejoin"] = "miter";
-    // params["stroke-linecap"] = "butt";
     params["font-weight"] = "bold";
     params["font-family"] = "Ubuntu";
     params["dy"] = shift;
     params["font-size"] =
         util::toString(label.fontSize * _cfg->outputResolution);
-    // params["textLength"] = "100";
-    // params["lengthAdjust"] = "spacingAndGlyphs";
 
     _w.openTag("text", params);
     _w.openTag("textPath", {{"dy", shift},

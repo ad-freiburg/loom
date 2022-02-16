@@ -1235,7 +1235,7 @@ inline double parallelity(const Box<T>& box, const MultiLine<T>& multiline) {
 
 // _____________________________________________________________________________
 template <template <typename> class Geometry, typename T>
-inline RotatedBox<T> getOrientedEnvelope(Geometry<T> pol) {
+inline RotatedBox<T> getOrientedEnvelope(std::vector<Geometry<T>> pol) {
   // TODO: implement this nicer, works for now, but inefficient
   // see
   // https://geidav.wordpress.com/tag/gift-wrapping/#fn-1057-FreemanShapira1975
@@ -1256,6 +1256,13 @@ inline RotatedBox<T> getOrientedEnvelope(Geometry<T> pol) {
   }
 
   return RotatedBox<T>(tmpBox, -rotateDeg, center);
+}
+
+// _____________________________________________________________________________
+template <template <typename> class Geometry, typename T>
+inline RotatedBox<T> getOrientedEnvelope(Geometry<T> pol) {
+  std::vector<Geometry<T>> mult{pol};
+  return getOrientedEnvelope(mult);
 }
 
 // _____________________________________________________________________________
@@ -1725,7 +1732,7 @@ inline RotatedBox<T> getFullEnvelope(std::vector<Geometry<T>> pol) {
 
   std::vector<Polygon<T>> ml;
 
-  // rotate in 5 deg steps
+  // rotate in 1 deg steps
   for (int i = 1; i < 360; i += 1) {
     pol = rotate(pol, 1, center);
     Polygon<T> hull = convexHull(pol);
@@ -1748,44 +1755,6 @@ inline RotatedBox<T> getFullEnvelope(const Geometry<T> pol) {
   std::vector<Geometry<T>> mult;
   mult.push_back(pol);
   return getFullEnvelope(mult);
-}
-
-// _____________________________________________________________________________
-template <typename T>
-inline RotatedBox<T> getOrientedEnvelopeAvg(MultiLine<T> ml) {
-  MultiLine<T> orig = ml;
-  // get oriented envelope for hull
-  RotatedBox<T> rbox = getFullEnvelope(ml);
-  Point<T> center = centroid(rbox.getBox());
-
-  ml = rotate(ml, -rbox.getDegree() - 45, center);
-
-  double bestDeg = -45;
-  double score = parallelity(rbox.getBox(), ml);
-
-  for (double i = -45; i <= 45; i += .5) {
-    ml = rotate(ml, -.5, center);
-    double p = parallelity(rbox.getBox(), ml);
-    if (parallelity(rbox.getBox(), ml) > score) {
-      bestDeg = i;
-      score = p;
-    }
-  }
-
-  rbox.setDegree(rbox.getDegree() + bestDeg);
-
-  // move the box along 45deg angles from its origin until it fits the ml
-  // = until the intersection of its hull and the box is largest
-  Polygon<T> p = convexHull(rbox);
-  p = rotate(p, -rbox.getDegree(), rbox.getCenter());
-
-  Polygon<T> hull = convexHull(orig);
-  hull = rotate(hull, -rbox.getDegree(), rbox.getCenter());
-
-  Box<T> box = getBoundingBox(hull);
-  rbox = RotatedBox<T>(box, rbox.getDegree(), rbox.getCenter());
-
-  return rbox;
 }
 
 // _____________________________________________________________________________

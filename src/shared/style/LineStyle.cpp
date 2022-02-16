@@ -1,39 +1,27 @@
-// Copyright 2016, University of Freiburg,
+// Copyright 2017, University of Freiburg,
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include <sstream>
 #include "shared/style/LineStyle.h"
 
 using shared::style::LineStyle;
 
-// ____________________________________________________________________________
-const std::vector<double>& LineStyle::getDashArray() const {
-  return _dashArray;
+// _____________________________________________________________________________
+void LineStyle::setOutlineCss(const std::string& css) {
+  _oCss = css;
 }
 
-// ____________________________________________________________________________
-std::string LineStyle::getDashArrayString() const {
-  std::stringstream ss;
-  for (auto d : _dashArray) ss << d << " ";
-
-  return ss.str();
+// _____________________________________________________________________________
+const std::string& LineStyle::getOutlineCss() const {
+  return _oCss;
 }
 
-// ____________________________________________________________________________
-void LineStyle::setCss(const std::string& css) { _css = css; }
-
-// ____________________________________________________________________________
-const std::string& LineStyle::getCss() const { return _css; }
-
-// ____________________________________________________________________________
-void LineStyle::setDashArray(const std::vector<double>& arr) {
-  _dashArray = arr;
+// _____________________________________________________________________________
+void LineStyle::setCss(const std::string& css) {
+  _css = css;
 }
 
-// ____________________________________________________________________________
-void LineStyle::setDashArray(const std::string& doubleArrayString) {
-  _dashArray.clear();
-  std::stringstream ss(doubleArrayString);
-  for (double a; ss >> a;) _dashArray.push_back(a);
+// _____________________________________________________________________________
+const std::string& LineStyle::getCss() const {
+  return _css;
 }

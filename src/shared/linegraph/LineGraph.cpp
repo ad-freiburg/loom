@@ -248,19 +248,11 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
             dir = idMap[line["direction"].get<std::string>()];
           }
 
-          if (!line["style"].is_null()) {
+          if (!line["style"].is_null() || !line["outline-style"].is_null()) {
             shared::style::LineStyle ls;
-            auto style = line["style"];
-            std::string dashArray;
-            if (!style["dash-array"].is_null()) {
-              dashArray = style["dash-array"];
-            }
 
-            if (!style["css"].is_null()) {
-              ls.setCss(style["css"]);
-            }
-
-            ls.setDashArray(dashArray);
+            if (!line["style"].is_null()) ls.setCss(line["style"]);
+            if (!line["outline-style"].is_null()) ls.setOutlineCss(line["outline-style"]);
 
             e->pl().addLine(l, dir, ls);
           } else {

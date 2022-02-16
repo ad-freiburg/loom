@@ -15,21 +15,14 @@ class LineStyle {
  public:
   LineStyle(){};
 
-  const std::vector<double>& getDashArray() const;
-  std::string getDashArrayString() const;
-  void setDashArray(const std::vector<double>& arr);
-  void setDashArray(const std::string& doubleArrayString);
+  void setOutlineCss(const std::string& css);
+  const std::string& getOutlineCss() const;
 
   void setCss(const std::string& css);
   const std::string& getCss() const;
 
-  bool operator==(const LineStyle& other) const {
-    return _dashArray == other.getDashArray() && _css == other.getCss();
-  }
-
  private:
-  std::vector<double> _dashArray;
-  std::string _css;
+  std::string _css, _oCss;
 };
 }
 }

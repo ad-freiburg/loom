@@ -38,7 +38,7 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
 
   double rad = util::geo::getEnclosingRadius(*n->pl().getGeom(), statHull);
 
-  double labelW = n->pl().stops().front().name.size() * fontSize / 1.6;
+  double labelW = (n->pl().stops().front().name.size() + 1) * fontSize / 1.6;
 
   util::geo::MultiLine<double> band;
 

@@ -66,8 +66,9 @@
         "to": "2",
         "lines": [
           {"color": "990000",
-			"style": {
-			  "css": "stroke-dasharray: 5,5"}},
+			  "style": "stroke-dasharray: 5,5",
+			  "outline-style": "stroke-dasharray: 5,5"
+		  },
           {"color": "33FF66"}
         ]
       }

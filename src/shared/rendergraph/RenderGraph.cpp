@@ -99,9 +99,8 @@ std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
         }
 
         auto is = getInnerLine(n, o, p);
-        if (is.geom.getLength() == 0) continue;
 
-        if (prec > 0) {
+        if (prec > 0 && is.geom.getLength() > 0) {
           ret.push_back(getInnerBezier(n, o, p, prec));
         } else {
           ret.push_back(is);
@@ -297,7 +296,7 @@ Polygon<double> RenderGraph::getConvexFrontHull(
         ll.push_back(nf.geom.getLine());
       }
       Polygon<double> env = util::geo::convexHull(
-          util::geo::shrink(util::geo::getOrientedEnvelopeAvg(ll), cd / 2));
+          util::geo::shrink(util::geo::getOrientedEnvelope(ll), cd / 2));
 
       double incr = (util::geo::area(env) / util::geo::area(hull)) - 1;
       if (ll.size() < 5 || incr < 0.5) {
@@ -385,7 +384,7 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
   typedef bgeo::model::linestring<BoostPoint> BoostLine;
   std::vector<util::geo::Polygon<double>> retPolys;
 
-  // order edges by number of lines not served
+  // TODO: order edges by number of lines not served
   std::vector<const LineEdge*> orderedEdgs;
   orderedEdgs.insert(orderedEdgs.begin(), n->getAdjList().begin(),
                      n->getAdjList().end());
