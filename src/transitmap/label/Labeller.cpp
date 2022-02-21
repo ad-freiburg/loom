@@ -38,10 +38,14 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
 
   double rad = util::geo::getEnclosingRadius(*n->pl().getGeom(), statHull);
 
-  double labelW = (n->pl().stops().front().name.size() + 1) * fontSize / 1.6;
+  // TODO: determine the label width based on the real font width. This is
+  // nontrivial, as it requires the fonts to be rendered for non-monospaced
+  // fonts
+  double labelW = (n->pl().stops().front().name.size() + 1) * fontSize / 2.2;
 
   util::geo::MultiLine<double> band;
 
+  // TODO: should also be determined based on the font
   double h = fontSize * 0.75;
 
   util::geo::Line<double> geomBaseLine, geomMiddle, geomTop, capLeft, capRight;

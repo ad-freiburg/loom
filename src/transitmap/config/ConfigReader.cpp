@@ -76,14 +76,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
      opts::value<bool>(&(cfg->tightStations))
       ->default_value(false),
       "dont expand station nodes at all")
-    ("render-station-names",
-     opts::value<bool>(&(cfg->renderStationNames))
-      ->default_value(false),
-      "render station name")
     ("render-dir-markers",
      opts::value<bool>(&(cfg->renderDirMarkers))
       ->default_value(false),
-      "render direction markers (experimental!)")
+      "render direction markers")
     ("render-node-connections",
      opts::value<bool>(&(cfg->renderNodeConnections))
       ->default_value(true),

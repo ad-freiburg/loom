@@ -38,7 +38,7 @@ using util::geo::Polygon;
 using util::geo::PolyLine;
 
 // _____________________________________________________________________________
-void RenderGraph::smoothen() {
+void RenderGraph::smooth() {
   for (auto n : *getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
@@ -100,7 +100,11 @@ std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
 
         auto is = getInnerLine(n, o, p);
 
-        if (prec > 0 && is.geom.getLength() > 0) {
+        auto nfo = n->pl().frontFor(p.edge);
+
+        double dmax = std::max(util::geo::dist(nfo->geom.getLine(), nf.geom.getLine().front()), util::geo::dist(nfo->geom.getLine(), nf.geom.getLine().back()));
+
+        if (prec > 0 && is.geom.getLength() > 0 && dmax > 5) {
           ret.push_back(getInnerBezier(n, o, p, prec));
         } else {
           ret.push_back(is);

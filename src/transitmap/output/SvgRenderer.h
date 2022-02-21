@@ -126,13 +126,11 @@ class SvgRenderer : public Renderer {
 
   void renderLinePart(const util::geo::PolyLine<double> p, double width,
                       const shared::linegraph::Line& line,
-                      const shared::linegraph::LineEdge* e,
                       const std::string& css,
                       const std::string& oCss);
 
   void renderLinePart(const util::geo::PolyLine<double> p, double width,
                       const shared::linegraph::Line& line,
-                      const shared::linegraph::LineEdge* edge,
                       const std::string& css,
                       const std::string& oCss,
                       const std::string& endMarker);

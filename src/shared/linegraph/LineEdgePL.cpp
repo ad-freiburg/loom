@@ -88,10 +88,15 @@ util::json::Dict LineEdgePL::getAttrs() const {
     line["id"] = r.line->id();
     line["label"] = r.line->label();
     line["color"] = r.line->color();
+    if (!r.style.isNull()) {
+      if (r.style.get().getCss().size())
+        line["style"] = r.style.get().getCss();
+      if (r.style.get().getOutlineCss().size())
+        line["outline-style"] = r.style.get().getOutlineCss();
+    }
 
     if (r.direction != 0) {
       line["direction"] = util::toString(r.direction);
-      // dbg_lines += (!arr.size() ? "" : ",") + r.line->label() + ">";
       dbg_lines += (!arr.size() ? "" : ",") + r.line->label();
     } else {
       dbg_lines += (!arr.size() ? "" : ",") + r.line->label();

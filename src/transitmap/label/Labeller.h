@@ -13,7 +13,9 @@
 namespace transitmapper {
 namespace label {
 
-const static std::vector<double> DEG_PENS = {0, 2.5, 10, 3, 1, 3, 10, 2};
+//const static std::vector<double> DEG_PENS = {0, 2.5, 10, 3, 0, 3, 10, 2};
+// starting 90 deg
+const static std::vector<double> DEG_PENS = {0, 2, 6, 3, 1, 3, 6, 2};
 
 struct LineLabel {
   util::geo::PolyLine<double> geom;

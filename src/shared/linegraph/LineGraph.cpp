@@ -94,23 +94,26 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
           e = addEdg(idMap[curId], idMap[prevId], pl);
         }
 
+
         std::string id;
         if (ent.attrs.find("id") != ent.attrs.end()) {
           id = ent.attrs["id"];
         } else if (ent.attrs.find("label") != ent.attrs.end()) {
           id = ent.attrs["label"];
+        } else if (ent.attrs.find("color") != ent.attrs.end()) {
+          id = ent.attrs["color"];
         } else {
           id = util::toString(eid);
         }
 
         const Line* r = getLine(id);
         if (!r) {
-          std::string label = ent.attrs.find("label") != ent.attrs.end()
+          std::string label = ent.attrs.find("label") == ent.attrs.end()
                                   ? ""
                                   : ent.attrs["label"];
-          std::string color = ent.attrs.find("label") != ent.attrs.end()
+          std::string color = ent.attrs.find("color") == ent.attrs.end()
                                   ? ""
-                                  : ent.attrs["label"];
+                                  : ent.attrs["color"];
           r = new Line(id, label, color);
           addLine(r);
         }
