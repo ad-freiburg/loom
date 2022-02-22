@@ -14,7 +14,6 @@ using transitmapper::config::ConfigReader;
 namespace opts = boost::program_options;
 using std::string;
 using std::exception;
-using std::vector;
 
 // _____________________________________________________________________________
 ConfigReader::ConfigReader() {
@@ -29,10 +28,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     ("version", "output version")
     ("help,?", "show this message")
     ("verbose,v", "verbosity level")
-    ("output,o",
-      opts::value<std::string>(&(cfg->outputPath))
-      ->default_value("./transitmap.svg"),
-      "output path")
     ("render-engine",
       opts::value<std::string>(&(cfg->renderMethod))
       ->default_value("svg"),
@@ -108,10 +103,6 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       opts::value<bool>(&(cfg->renderStats))
       ->default_value(false),
       "render stats to output")
-    ("simple-station-render-heur",
-      opts::value<bool>(&(cfg->simpleRenderForTwoEdgeNodes))
-      ->default_value(true),
-      "if a station only has 2 incident edges, dont calculate hull")
     ("resolution",
       opts::value<double>(&(cfg->outputResolution))
       ->default_value(0.1),
@@ -149,7 +140,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     if (cfg->outputPadding < 0) {
       cfg->outputPadding = (cfg->lineWidth + cfg->lineSpacing);
     }
-  } catch (exception e) {
+  } catch (const exception& e) {
     LOG(ERROR) << e.what() << std::endl;
     std::cout << visibleDesc << "\n";
     exit(1);

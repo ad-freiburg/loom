@@ -42,8 +42,7 @@ int main(int argc, char** argv) {
   if (cfg.expandFronts) b.expandOverlappinFronts(&g);
 
   if (cfg.renderMethod == "svg") {
-    std::string path = cfg.outputPath;
-    LOGTO(DEBUG, std::cerr) << "Outputting to SVG " << path << " ...";
+    LOGTO(DEBUG, std::cerr) << "Outputting to SVG ...";
     transitmapper::output::SvgRenderer svgOut(&std::cout, &cfg);
     svgOut.print(g);
   } else {

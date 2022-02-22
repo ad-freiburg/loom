@@ -13,9 +13,8 @@
 namespace transitmapper {
 namespace label {
 
-//const static std::vector<double> DEG_PENS = {0, 2.5, 10, 3, 0, 3, 10, 2};
 // starting 90 deg
-const static std::vector<double> DEG_PENS = {0, 2, 6, 3, 1, 3, 6, 2};
+const static std::vector<double> DEG_PENS = {0, 3, 6, 4, 1, 5, 6, 2};
 
 struct LineLabel {
   util::geo::PolyLine<double> geom;
@@ -33,6 +32,7 @@ struct Overlaps {
   size_t lineOverlaps;
   size_t lineLabelOverlaps;
   size_t statLabelOverlaps;
+  size_t statOverlaps;
 };
 
 inline bool statNdCmp(const shared::linegraph::LineNode* a,
@@ -60,12 +60,12 @@ struct StationLabel {
   shared::linegraph::Station s;
 
   double getPen() const {
-    double score = overlaps.lineOverlaps * 15 +
+    double score = overlaps.lineOverlaps * 15 + overlaps.statOverlaps * 20 +
                    overlaps.statLabelOverlaps * 20 +
                    overlaps.lineLabelOverlaps * 15;
     score += DEG_PENS[deg];
 
-    if (pos == 1) score += 0.5;
+    if (pos == 0) score += 0.5;
     if (pos == 2) score += 0.1;
     return score;
   }
@@ -76,6 +76,7 @@ inline bool operator<(const StationLabel& a, const StationLabel& b) {
 }
 
 typedef util::geo::Grid<size_t, util::geo::MultiLine, double> StatLblGrid;
+typedef util::geo::Grid<size_t, util::geo::Line, double> LineLblGrid;
 
 class Labeller {
  public:
@@ -100,6 +101,7 @@ class Labeller {
   void labelLines(const shared::rendergraph::RenderGraph& g);
 
   Overlaps getOverlaps(const util::geo::MultiLine<double>& band,
+                       const shared::linegraph::LineNode* forNd,
                        const shared::rendergraph::RenderGraph& g) const;
 
   util::geo::MultiLine<double> getStationLblBand(

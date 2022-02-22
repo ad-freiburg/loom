@@ -46,7 +46,7 @@ void SvgRenderer::print(const RenderGraph& outG) {
 
   Labeller labeller(_cfg);
   if (_cfg->renderLabels) {
-    LOG(DEBUG) << "Rendering labels...";
+    LOGTO(DEBUG, std::cerr) << "Rendering labels...";
     labeller.label(outG);
     box = util::geo::extendBox(labeller.getBBox(), box);
   }
@@ -87,7 +87,7 @@ void SvgRenderer::print(const RenderGraph& outG) {
   *_o << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
          "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">";
 
-  LOG(DEBUG) << "Rendering edges...";
+  LOGTO(DEBUG, std::cerr) << "Rendering edges...";
   if (_cfg->renderEdges) {
     outputEdges(outG, rparams);
   }
@@ -95,7 +95,7 @@ void SvgRenderer::print(const RenderGraph& outG) {
 
   _w.openTag("defs");
 
-  LOG(DEBUG) << "Rendering markers...";
+  LOGTO(DEBUG, std::cerr) << "Rendering markers...";
   for (auto const& m : _markers) {
     params.clear();
     params["id"] = m.name;
@@ -120,23 +120,23 @@ void SvgRenderer::print(const RenderGraph& outG) {
 
   _w.closeTag();
 
-  LOG(DEBUG) << "Rendering nodes...";
+  LOGTO(DEBUG, std::cerr) << "Rendering nodes...";
   for (auto n : outG.getNds()) {
     if (_cfg->renderNodeConnections) {
       renderNodeConnections(outG, n, rparams);
     }
   }
 
-  LOG(DEBUG) << "Writing edges...";
+  LOGTO(DEBUG, std::cerr) << "Writing edges...";
   renderDelegates(outG, rparams);
 
-  LOG(DEBUG) << "Writing nodes...";
+  LOGTO(DEBUG, std::cerr) << "Writing nodes...";
   outputNodes(outG, rparams);
   if (_cfg->renderNodeFronts) {
     renderNodeFronts(outG, rparams);
   }
 
-  LOG(DEBUG) << "Writing labels...";
+  LOGTO(DEBUG, std::cerr) << "Writing labels...";
   if (_cfg->renderLabels) {
     renderLineLabels(labeller, rparams);
     renderStationLabels(labeller, rparams);
@@ -161,7 +161,7 @@ void SvgRenderer::outputNodes(const RenderGraph& outG,
 
       for (const auto& geom :
            outG.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                             _cfg->simpleRenderForTwoEdgeNodes)) {
+                             _cfg->tightStations)) {
         printPolygon(geom, params, rparams);
       }
     }

@@ -68,9 +68,9 @@ void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
   while (true) {
     bool stillFree = false;
     for (auto n : *g->getNds()) {
-      if (n->pl().stops().size() && !g->notCompletelyServed(n) &&
-          _cfg->tightStations)
-        continue;
+      // if (n->pl().stops().size() && !g->notCompletelyServed(n) &&
+          // _cfg->tightStations)
+        // continue;
       std::set<NodeFront*> overlaps = nodeGetOverlappingFronts(g, n);
       for (auto f : overlaps) {
         stillFree = true;
@@ -110,10 +110,10 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 
       bool overlap = false;
 
-      if (n->pl().stops().size()) {
+      if (n->pl().stops().size() && !g->notCompletelyServed(n)) {
         size_t numShr = g->getSharedLines(fa.edge, fb.edge).size();
         double fac = 1;
-        if (!numShr) fac = 0;
+        if (!numShr || _cfg->tightStations) fac = 0;
         overlap = nodeFrontsOverlap(g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
       } else {
         size_t numShr = g->getSharedLines(fa.edge, fb.edge).size();

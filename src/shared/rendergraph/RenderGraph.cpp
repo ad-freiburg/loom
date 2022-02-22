@@ -29,11 +29,9 @@ using shared::rendergraph::InnerGeom;
 using shared::rendergraph::OrderCfg;
 using shared::rendergraph::RenderGraph;
 using util::geo::BezierCurve;
-using util::geo::Box;
 using util::geo::dist;
 using util::geo::DPoint;
 using util::geo::MultiLine;
-using util::geo::Point;
 using util::geo::Polygon;
 using util::geo::PolyLine;
 
@@ -266,11 +264,10 @@ InnerGeom RenderGraph::getTerminusBezier(const LineNode* n,
 // _____________________________________________________________________________
 Polygon<double> RenderGraph::getConvexFrontHull(
     const LineNode* n, double d, bool rectangulize,
-    bool simpleRenderForTwoEdgeNodes) const {
+    bool tight) const {
   double cd = d;
 
   typedef bgeo::model::point<double, 2, bgeo::cs::cartesian> BoostPoint;
-  typedef bgeo::model::linestring<BoostPoint> BoostLine;
   typedef bgeo::model::polygon<BoostPoint> BoostPoly;
   typedef bgeo::model::multi_polygon<BoostPoly> BoostMultiPoly;
 
@@ -282,7 +279,7 @@ Polygon<double> RenderGraph::getConvexFrontHull(
   bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
   bgeo::strategy::buffer::side_straight sideStrat;
 
-  if (!simpleRenderForTwoEdgeNodes || n->pl().fronts().size() != 2) {
+  if (n->pl().fronts().size() != 2) {
     MultiLine<double> l;
     for (auto& nf : n->pl().fronts()) {
       l.push_back(nf.geom
@@ -294,13 +291,12 @@ Polygon<double> RenderGraph::getConvexFrontHull(
 
     Polygon<double> hull = util::geo::convexHull(l);
 
-    if (rectangulize && getMaxLineNum(n) > 1) {
+    if (rectangulize) {
+      double step = tight ? 45 : 1;
       MultiLine<double> ll;
-      for (auto& nf : n->pl().fronts()) {
-        ll.push_back(nf.geom.getLine());
-      }
+      for (auto& nf : n->pl().fronts()) ll.push_back(nf.geom.getLine());
       Polygon<double> env = util::geo::convexHull(
-          util::geo::shrink(util::geo::getOrientedEnvelope(ll), cd / 2));
+          util::geo::shrink(util::geo::getOrientedEnvelope(ll, step), cd / 2));
 
       double incr = (util::geo::area(env) / util::geo::area(hull)) - 1;
       if (ll.size() < 5 || incr < 0.5) {
@@ -389,13 +385,19 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
   std::vector<util::geo::Polygon<double>> retPolys;
 
   // TODO: order edges by number of lines not served
-  std::vector<const LineEdge*> orderedEdgs;
-  orderedEdgs.insert(orderedEdgs.begin(), n->getAdjList().begin(),
-                     n->getAdjList().end());
+  std::vector<std::pair<size_t, const LineEdge*>> orderedEdgs;
+  for (auto e : n->getAdjList()) {
+    size_t unserved = 0;
+    for (auto lo : e->pl().getLines()) if (!served.count(lo.line)) unserved++;
+    orderedEdgs.push_back({unserved, e});
+  }
+
+  std::sort(orderedEdgs.begin(), orderedEdgs.end());
 
   std::set<const Line*> proced;
 
-  for (auto e : orderedEdgs) {
+  for (auto ep : orderedEdgs) {
+    auto e = ep.second;
     BoostLine lineBgeo;
 
     for (size_t p = 0; p < e->pl().getLines().size(); p++) {
@@ -454,7 +456,7 @@ bool RenderGraph::notCompletelyServed(const LineNode* n) {
 // _____________________________________________________________________________
 std::vector<Polygon<double>> RenderGraph::getStopGeoms(const LineNode* n,
                                                        double d,
-                                                       bool simple) const {
+                                                       bool tight) const {
   if (notCompletelyServed(n)) {
     // render each stop individually
     auto served = servedLines(n);
@@ -462,7 +464,7 @@ std::vector<Polygon<double>> RenderGraph::getStopGeoms(const LineNode* n,
   }
 
   if (n->pl().fronts().size() == 0) return {};
-  return {getConvexFrontHull(n, d, true, simple)};
+  return {getConvexFrontHull(n, d, true, tight)};
 }
 
 // _____________________________________________________________________________

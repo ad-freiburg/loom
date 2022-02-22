@@ -8,11 +8,13 @@
 #define _USE_MATH_DEFINES
 
 #include <math.h>
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+
 #include "util/Misc.h"
 #include "util/String.h"
 #include "util/geo/Box.h"
@@ -750,7 +752,7 @@ inline double angBetween(const Point<T>& p1, const MultiPoint<T>& points) {
     sinSum += sin(a);
     cosSum += cos(a);
   }
-  return atan2(sinSum / points.size(),cosSum / points.size());
+  return atan2(sinSum / points.size(), cosSum / points.size());
 }
 
 // _____________________________________________________________________________
@@ -1235,7 +1237,8 @@ inline double parallelity(const Box<T>& box, const MultiLine<T>& multiline) {
 
 // _____________________________________________________________________________
 template <template <typename> class Geometry, typename T>
-inline RotatedBox<T> getOrientedEnvelope(std::vector<Geometry<T>> pol) {
+inline RotatedBox<T> getOrientedEnvelope(std::vector<Geometry<T>> pol,
+                                         double step) {
   // TODO: implement this nicer, works for now, but inefficient
   // see
   // https://geidav.wordpress.com/tag/gift-wrapping/#fn-1057-FreemanShapira1975
@@ -1246,8 +1249,8 @@ inline RotatedBox<T> getOrientedEnvelope(std::vector<Geometry<T>> pol) {
   double rotateDeg = 0;
 
   // rotate in 1 deg steps
-  for (int i = 1; i < 360; i += 1) {
-    pol = rotate(pol, 1, center);
+  for (double i = step; i < 360; i += step) {
+    pol = rotate(pol, step, center);
     Box<T> e = getBoundingBox(pol);
     if (area(tmpBox) > area(e)) {
       tmpBox = e;
@@ -1260,9 +1263,22 @@ inline RotatedBox<T> getOrientedEnvelope(std::vector<Geometry<T>> pol) {
 
 // _____________________________________________________________________________
 template <template <typename> class Geometry, typename T>
+inline RotatedBox<T> getOrientedEnvelope(std::vector<Geometry<T>> pol) {
+  return getOrientedEnvelope(pol, 1);
+}
+
+// _____________________________________________________________________________
+template <template <typename> class Geometry, typename T>
+inline RotatedBox<T> getOrientedEnvelope(Geometry<T> pol, double step) {
+  std::vector<Geometry<T>> mult{pol};
+  return getOrientedEnvelope(mult, step);
+}
+
+// _____________________________________________________________________________
+template <template <typename> class Geometry, typename T>
 inline RotatedBox<T> getOrientedEnvelope(Geometry<T> pol) {
   std::vector<Geometry<T>> mult{pol};
-  return getOrientedEnvelope(mult);
+  return getOrientedEnvelope(mult, 1);
 }
 
 // _____________________________________________________________________________

@@ -312,10 +312,6 @@ void Drawing::getLineGraph(LineGraph* target) const {
       double tot = f->pl().getChilds().size();
       double step = dTot / tot;
 
-      auto curSegIdx = 0;
-      double curSegLen = pathSegs[cEdgSeg[f][curSegIdx].first].geom.getLength();
-      double offset = 0;
-
       int i = 1;
 
       std::vector<LineNode*> nds;
@@ -330,17 +326,20 @@ void Drawing::getLineGraph(LineGraph* target) const {
 
       nds.pop_back();
 
+      auto curSegIdx = cEdgSeg[f].size() - 1;
+      double curSegLen = pathSegs[cEdgSeg[f][curSegIdx].first].geom.getLength();
+      double offset = 0;
+
       for (auto nd : nds) {
-        double progr = (step * i) / dTot;
+        double progr = step * i;
 
         while (progr > offset + curSegLen) {
-          curSegIdx++;
+          curSegIdx--;
           offset += curSegLen;
           curSegLen = pathSegs[cEdgSeg[f][curSegIdx].first].geom.getLength();
         }
 
-        double onSegProgr = progr - offset;
-        assert(onSegProgr <= curSegLen);
+        double onSegProgr = (progr - offset) / curSegLen;
 
         if (cEdgSeg[f][curSegIdx].second) {
           // using this segment in reverse direction

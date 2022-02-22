@@ -18,7 +18,6 @@ struct Config {
   double stationLabelSize;
 
   std::string name;
-  std::string outputPath;
   std::string dbgPath;
 
   std::string renderMethod;
@@ -47,8 +46,6 @@ struct Config {
   bool tightStations;
 
   bool renderDirMarkers;
-
-  bool simpleRenderForTwoEdgeNodes;
 
   std::string worldFilePath;
 };
