@@ -90,6 +90,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       "method used for initial edge ordering for heuristic method. One of "
       "{num-lines, length, adj-nd-deg, adj-nd-ldeg, growth-deg, growth-ldef, "
       "all}")(
+      "nd-move-pen",
+      opts::value<double>(&(cfg->pens.ndMovePen))->default_value(0.5),
+      "penalty factor moving input nodes")(
       "density-pen",
       opts::value<double>(&(cfg->pens.densityPen))->default_value(0),
       "penalty factor for re-inserted contracted stations that are too near, a "

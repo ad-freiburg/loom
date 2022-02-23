@@ -68,9 +68,6 @@ void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
   while (true) {
     bool stillFree = false;
     for (auto n : *g->getNds()) {
-      // if (n->pl().stops().size() && !g->notCompletelyServed(n) &&
-          // _cfg->tightStations)
-        // continue;
       std::set<NodeFront*> overlaps = nodeGetOverlappingFronts(g, n);
       for (auto f : overlaps) {
         stillFree = true;
@@ -110,10 +107,13 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 
       bool overlap = false;
 
+      double maxNfDist = 2 * g->getMaxNdFrontWidth(n);
+
       if (n->pl().stops().size() && !g->notCompletelyServed(n)) {
-        size_t numShr = g->getSharedLines(fa.edge, fb.edge).size();
-        double fac = 1;
-        if (!numShr || _cfg->tightStations) fac = 0;
+        maxNfDist = .5 * g->getMaxNdFrontWidth(n);
+        double fac = 0;
+        // if (!numShr || _cfg->tightStations) fac = 0;
+        if (_cfg->tightStations) maxNfDist = _cfg->lineWidth + _cfg->lineSpacing;
         overlap = nodeFrontsOverlap(g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
       } else {
         size_t numShr = g->getSharedLines(fa.edge, fb.edge).size();
@@ -125,13 +125,11 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 
       if (overlap) {
         if (util::geo::len(*fa.edge->pl().getGeom()) > minLength &&
-            fa.geom.distTo(*n->pl().getGeom()) <
-                g->getMaxNdFrontWidth(n)) {
+            fa.geom.distTo(*n->pl().getGeom()) < maxNfDist) {
           ret.insert(const_cast<NodeFront*>(&fa));
         }
         if (util::geo::len(*fb.edge->pl().getGeom()) > minLength &&
-            fb.geom.distTo(*n->pl().getGeom()) <
-                g->getMaxNdFrontWidth(n)) {
+            fb.geom.distTo(*n->pl().getGeom()) < maxNfDist) {
           ret.insert(const_cast<NodeFront*>(&fb));
         }
       }
@@ -145,8 +143,6 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 bool GraphBuilder::nodeFrontsOverlap(const RenderGraph* g, const NodeFront& a,
                                      const NodeFront& b, double d) const {
   return b.geom.distTo(a.geom) <= d;
-
-  return false;
 }
 
 // _____________________________________________________________________________

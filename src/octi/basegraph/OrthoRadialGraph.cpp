@@ -147,7 +147,7 @@ double OrthoRadialGraph::ndMovePen(const CombNode* cbNd,
 
   // additional penalty per grid move
   // TODO: make configurable
-  double PEN = 0.5;
+  double PEN = _c.ndMovePen;
 
   double angStep = 2.0 * M_PI / _numBeams;
 

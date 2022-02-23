@@ -10,6 +10,7 @@
 #include "octi/basegraph/NodeCost.h"
 #include "util/Misc.h"
 #include "util/geo/BezierCurve.h"
+#include "util/geo/Point.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Node.h"
 
@@ -192,11 +193,14 @@ void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
         double d = std::numeric_limits<double>::infinity();
 
         for (auto orE : ce->pl().getChilds()) {
-          double dLoc =
-              dist(*orE->pl().getGeom(),
-                   LineSegment<double>(*ge->getFrom()->pl().getGeom(),
-                                       *ge->getTo()->pl().getGeom())) /
-              getCellSize();
+          double dLoc = fmax(fmax(
+              dist(*orE->pl().getGeom(), *ge->getFrom()->pl().getGeom()) /
+              getCellSize(),
+              dist(*orE->pl().getGeom(), util::geo::centroid(util::geo::MultiPoint<double>{*ge->getFrom()->pl().getGeom(), *ge->getFrom()->pl().getGeom()})) /
+              getCellSize()),
+              dist(*orE->pl().getGeom(), *ge->getTo()->pl().getGeom()) /
+              getCellSize());
+
           if (dLoc < d) d = dLoc;
         }
 
@@ -784,7 +788,7 @@ double GridGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) const {
 
   // additional penalty per grid move
   // TODO: make configurable
-  double PEN = 0.5;
+  double PEN = _c.ndMovePen;
 
   double penPerGrid =
       PEN + _bendCosts[0] + fmax(_c.horizontalPen, _c.verticalPen);

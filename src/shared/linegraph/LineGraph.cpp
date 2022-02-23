@@ -142,6 +142,7 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
     }
   }
 
+  _bbox = util::geo::pad(_bbox, 100);
   buildGrids();
 }
 
@@ -347,6 +348,8 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
     }
   }
 
+  _bbox = util::geo::pad(_bbox, 100);
+
   buildGrids();
 }
 
@@ -400,17 +403,6 @@ void LineGraph::topologizeIsects() {
     _edgeGrid.add(*ba->pl().getGeom(), ba);
     _edgeGrid.add(*bb->pl().getGeom(), bb);
 
-    // this was replaced by nodeRpl above
-    // for (auto l : i.b->pl().getLines()) {
-    // if (l.direction == i.b->getFrom()) {
-    // ba->pl().addLine(l.line, i.b->getFrom());
-    // bb->pl().addLine(l.line, x);
-    // } else {
-    // ba->pl().addLine(l.line, x);
-    // bb->pl().addLine(l.line, i.b->getTo());
-    // }
-    // }
-
     auto aa = addEdg(i.a->getFrom(), x, i.a->pl());
     aa->pl().setPolyline(i.a->pl().getPolyline().getSegment(0, pa));
     auto ab = addEdg(x, i.a->getTo(), i.a->pl());
@@ -424,17 +416,6 @@ void LineGraph::topologizeIsects() {
 
     _edgeGrid.add(*aa->pl().getGeom(), aa);
     _edgeGrid.add(*ab->pl().getGeom(), ab);
-
-    // this was replaced by nodeRpl above
-    // for (auto l : i.a->pl().getLines()) {
-    // if (l.direction == i.b->getFrom()) {
-    // aa->pl().addLine(l.line, i.a->getFrom());
-    // ab->pl().addLine(l.line, x);
-    // } else {
-    // aa->pl().addLine(l.line, x);
-    // ab->pl().addLine(l.line, i.a->getTo());
-    // }
-    // }
 
     _edgeGrid.remove(i.a);
     _edgeGrid.remove(i.b);
@@ -742,6 +723,7 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
       // in the old node, replace any exception occurence of this node with
       // the new trunk edge
       edgeRpl(n, eo.first, ce);
+      _edgeGrid.remove(eo.first);
       delEdg(eo.first->getFrom(), eo.first->getTo());
     }
 
@@ -973,6 +955,7 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
 
     edgeDel(a, eConn);
     edgeDel(b, eConn);
+    _edgeGrid.remove(eConn);
     delEdg(a, b);
   }
 
@@ -989,6 +972,7 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
     if (e->getTo() == b) continue;
     auto ex = getEdg(b, e->getTo());  // check if edge already exists
     auto newE = addEdg(b, e->getTo(), e->pl());
+    _edgeGrid.add(*newE->pl().getGeom(), newE);
     if (ex) {
       for (auto lo : e->pl().getLines()) {
         if (lo.direction == a) lo.direction = b;
@@ -1005,6 +989,7 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
     if (e->getFrom() == b) continue;
     auto ex = getEdg(e->getFrom(), b);  // check if edge already exists
     auto newE = addEdg(e->getFrom(), b, e->pl());
+    _edgeGrid.add(*newE->pl().getGeom(), newE);
     if (ex) {
       for (auto lo : e->pl().getLines()) {
         if (lo.direction == a) lo.direction = b;
@@ -1016,6 +1001,7 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
     nodeRpl(newE, a, b);
   }
 
+  for (auto e : a->getAdjList()) _edgeGrid.remove(e);
   delNd(a);
 
   for (const auto& newEx : ex) {
@@ -1044,6 +1030,11 @@ std::vector<Partner> LineGraph::getPartners(const LineNode* nd,
 
 // _____________________________________________________________________________
 void LineGraph::contractEdges(double d) {
+  contractEdges(d, false);
+}
+
+// _____________________________________________________________________________
+void LineGraph::contractEdges(double d, bool onlyNonStatConns) {
   // TODO: the problem here is that contractEdge(e) may delete and replace edges
   // in the graph, which is why we cannot just build a list of edges eligible
   // for contraction and iterate over it - we would have to record the changes
@@ -1053,6 +1044,7 @@ breakfor:
   for (auto n1 : *getNds()) {
     for (auto e : n1->getAdjList()) {
       if (e->getFrom() != n1) continue;
+      if (onlyNonStatConns && (e->getFrom()->pl().stops().size() || e->getTo()->pl().stops().size())) continue;
       if (!e->pl().dontContract() && e->pl().getPolyline().getLength() < d) {
         if (e->getOtherNd(n1)->getAdjList().size() > 1 &&
             n1->getAdjList().size() > 1 &&

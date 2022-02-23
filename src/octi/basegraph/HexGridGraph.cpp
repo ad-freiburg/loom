@@ -13,10 +13,8 @@
 #include "util/graph/Node.h"
 
 using namespace octi::basegraph;
-using octi::basegraph::NodeCost;
 using octi::basegraph::HexGridGraph;
 using util::geo::DBox;
-using util::geo::dist;
 using util::geo::DPoint;
 
 // _____________________________________________________________________________

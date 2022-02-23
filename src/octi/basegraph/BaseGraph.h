@@ -19,8 +19,6 @@
 #include "octi/combgraph/CombEdgePL.h"
 #include "octi/combgraph/CombNodePL.h"
 
-using util::geo::Grid;
-using util::geo::Point;
 using util::graph::DirGraph;
 using util::graph::Node;
 
@@ -67,6 +65,7 @@ struct Penalties {
   double p_0, p_45, p_90, p_135;
   double verticalPen, horizontalPen, diagonalPen;
   double densityPen;
+  double ndMovePen;
 };
 
 class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {

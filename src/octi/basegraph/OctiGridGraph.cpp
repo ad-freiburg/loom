@@ -339,7 +339,7 @@ double OctiGridGraph::ndMovePen(const CombNode* cbNd,
 
   // additional penalty per grid move
   // TODO: make configurable
-  double PEN = 0.5;
+  double PEN = _c.ndMovePen;
 
   // we may substitute a diagonal edge be a horizontal + 90 deg bend + vertical
   // edge

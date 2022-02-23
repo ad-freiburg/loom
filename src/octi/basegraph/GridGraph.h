@@ -23,8 +23,6 @@
 
 using util::geo::Grid;
 using util::geo::Point;
-using util::graph::DirGraph;
-using util::graph::Node;
 
 using octi::combgraph::CombEdge;
 using octi::combgraph::CombNode;

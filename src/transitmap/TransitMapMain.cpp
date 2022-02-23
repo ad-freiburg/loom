@@ -33,8 +33,13 @@ int main(int argc, char** argv) {
   shared::rendergraph::RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
   transitmapper::graph::GraphBuilder b(&cfg);
 
+  // TODO: implement from-dot option
   g.readFromJson(&std::cin, cfg.inputSmoothing);
   // g.readFromDot(&std::cin, cfg.inputSmoothing);
+
+  // heuristic: contract all edges shorter than which are between non-station nodes
+  g.contractEdges(cfg.lineWidth * 5, true);
+
   g.smooth();
 
   b.writeNodeFronts(&g);

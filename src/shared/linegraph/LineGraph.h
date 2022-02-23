@@ -133,6 +133,7 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   void contractStrayNds();
 
   void contractEdges(double d);
+  void contractEdges(double d, bool onlyNonStatConns);
   void contractEdge(LineEdge* e);
 
   double searchSpaceSize() const;
