@@ -1,3 +1,0 @@
-[submodule "src/cppgtfs"]
-	path = src/cppgtfs
-	url = https://github.com/ad-freiburg/cppgtfs.git
