@@ -5,6 +5,7 @@ LOOM
 ====
 
 Software suite for the automated generation of geographically correct or schematic transit maps.
+Still alpha status with minimal documentation, so beware.
 
 
 Requirements
