@@ -16,4 +16,4 @@ add_executable(gtfs2graph ${gtfs2graph_main})
 add_library(gtfs2graph_dep ${gtfs2graph_SRC})
 
 target_include_directories(gtfs2graph_dep PUBLIC ${PROJECT_SOURCE_DIR}/src/cppgtfs/src)
-target_link_libraries(gtfs2graph gtfs2graph_dep util ad_cppgtfs ${Boost_LIBRARIES} -lproj -lpthread)
+target_link_libraries(gtfs2graph gtfs2graph_dep util ad_cppgtfs ${Boost_LIBRARIES} -lpthread)

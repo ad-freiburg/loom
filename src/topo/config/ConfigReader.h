@@ -16,7 +16,10 @@ class ConfigReader {
  public:
   ConfigReader();
   void read(TopoConfig* targetConfig, int argc, char** argv) const;
+
+ public:
+  void help(const char* bin) const;
 };
-}
-}
+}  // namespace config
+}  // namespace topo
 #endif  // TOPO_CONFIG_CONFIGREADER_H_

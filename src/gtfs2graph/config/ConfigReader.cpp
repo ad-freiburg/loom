@@ -3,89 +3,104 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <float.h>
-#include <boost/program_options.hpp>
+#include <getopt.h>
 #include <exception>
 #include <iostream>
 #include <string>
-#include "gtfs2graph/config/ConfigReader.h"
-#include "util/log/Log.h"
-#include "util/String.h"
 #include "ad/cppgtfs/gtfs/flat/Route.h"
+#include "gtfs2graph/_config.h"
+#include "gtfs2graph/config/ConfigReader.h"
+#include "util/String.h"
+#include "util/log/Log.h"
 
 using gtfs2graph::config::ConfigReader;
-namespace opts = boost::program_options;
 
-using std::string;
 using std::exception;
+using std::string;
 using std::vector;
+
+static const char* YEAR = &__DATE__[7];
+static const char* COPY =
+    "University of Freiburg - Chair of Algorithms and Data Structures";
+static const char* AUTHORS = "Patrick Brosi <brosi@informatik.uni-freiburg.de>";
 
 // _____________________________________________________________________________
 ConfigReader::ConfigReader() {}
 
 // _____________________________________________________________________________
+void ConfigReader::help(const char* bin) const {
+  std::cout << std::setfill(' ') << std::left << "gtfs2graph (part of LOOM) "
+            << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
+            << "\n\n(C) " << YEAR << " " << COPY << "\n"
+            << "Authors: " << AUTHORS << "\n\n"
+            << "Usage: " << bin << " <GTFS FEED>\n\n"
+            << "Allowed options:\n\n"
+            << "General:\n"
+            << std::setw(35) << "  -v [ --version ]"
+            << "print version\n"
+            << std::setw(35) << "  -h [ --help ]"
+            << "show this help message\n"
+            << std::setw(35) << "  -m [ --mots ] arg (=all)"
+            << "MOTs to calculate shapes for, comma sep.,\n"
+            << std::setw(35) << " "
+            << "  either as string "
+               "{all, tram | streetcar,\n"
+            << std::setw(35) << " "
+            << "  subway | metro, rail | train, bus,\n"
+            << std::setw(35) << " "
+            << "  ferry | boat | ship, cablecar, gondola,\n"
+            << std::setw(35) << " "
+            << "  funicular, coach} or as GTFS mot codes\n";
+}
+
+// _____________________________________________________________________________
 void ConfigReader::read(Config* cfg, int argc, char** argv) const {
-  string VERSION_STR = " - unversioned - ";
+  std::string motStr = "all";
 
-  opts::options_description generic("General");
-  generic.add_options()("version", "output version")(
-      "help,?", "show this message")("verbose,v", "verbosity level");
+  struct option ops[] = {{"version", no_argument, 0, 'v'},
+                         {"help", no_argument, 0, 'h'},
+                         {"mots", required_argument, 0, 'm'},
+                         {0, 0, 0, 0}};
 
-  std::string motStr;
-
-  opts::options_description config("Output");
-  config.add_options()(
-      "projection",
-      opts::value<std::string>(&(cfg->projectionString))
-          ->default_value("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 "
-                          "+lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m "
-                          "+nadgrids=@null +wktext  +no_defs"),
-      "map projection as proj4 string")(
-      "use-mots,m", opts::value<string>(&motStr)->default_value("all"),
-      "used mots");
-
-  opts::options_description positional("Positional arguments");
-  positional.add_options()("input-feed",
-                           opts::value<std::string>(&(cfg->inputFeedPath)),
-                           "path to an (unzipped!) GTFS feed");
-
-  opts::positional_options_description positionalOptions;
-  positionalOptions.add("input-feed", 1);
-
-  opts::options_description cmdlineOptions;
-  cmdlineOptions.add(config).add(generic).add(positional);
-
-  opts::options_description visibleDesc("Allowed options");
-  visibleDesc.add(generic).add(config);
-  opts::variables_map vm;
-
-  try {
-    opts::store(opts::command_line_parser(argc, argv)
-                    .options(cmdlineOptions)
-                    .positional(positionalOptions)
-                    .run(),
-                vm);
-    opts::notify(vm);
-  } catch (exception e) {
-    LOG(ERROR) << e.what() << std::endl;
-    std::cout << visibleDesc << "\n";
-    exit(1);
-  }
-
-  for (auto sMotStr : util::split(motStr, ',')) {
-    for (auto mot : ad::cppgtfs::gtfs::flat::Route::getTypesFromString(sMotStr)) {
-      cfg->useMots.insert(mot);
+  char c;
+  while ((c = getopt_long(argc, argv, ":hvim:", ops, 0)) != -1) {
+    switch (c) {
+      case 'h':
+        help(argv[0]);
+        exit(0);
+      case 'v':
+        std::cout << "gtfs2graph - (LOOM " << VERSION_FULL << ")" << std::endl;
+        exit(0);
+      case 'm':
+        motStr = optarg;
+        break;
+      case ':':
+        std::cerr << argv[optind - 1];
+        std::cerr << " requires an argument" << std::endl;
+        exit(1);
+      case '?':
+        std::cerr << argv[optind - 1];
+        std::cerr << " option unknown" << std::endl;
+        exit(1);
+        break;
+      default:
+        std::cerr << "Error while parsing arguments" << std::endl;
+        exit(1);
+        break;
     }
   }
 
-  if (vm.count("help")) {
-    std::cout << argv[0] << " [options] <input-feed>\n"
-              << VERSION_STR << "\n\n"
-              << visibleDesc << "\n";
-    exit(0);
+  if (optind == argc) {
+      std::cerr << "No input GTFS feed specified." << std::endl;
+      exit(1);
   }
 
-  if (vm.count("version")) {
-    std::cout << "\n" << VERSION_STR << "\n";
-    exit(0);
+  cfg->inputFeedPath = argv[optind];
+
+  for (auto sMotStr : util::split(motStr, ',')) {
+    for (auto mot :
+         ad::cppgtfs::gtfs::flat::Route::getTypesFromString(sMotStr)) {
+      cfg->useMots.insert(mot);
+    }
   }
 }

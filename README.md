@@ -1,4 +1,15 @@
 LOOM
 ====
 
-For COIN-OR, you need coinor-libcbc-dev
+Software suite for the automated generation of geographically correct or schematic transit maps.
+
+Requirements
+------------
+
+
+Building and Installation
+-------------------------
+
+
+Usage
+=====

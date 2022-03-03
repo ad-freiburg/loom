@@ -4,20 +4,13 @@
 
 #include <set>
 #include <string>
-#include "json/json.hpp"
+#include "3rdparty/json.hpp"
 #include "shared/linegraph/Line.h"
 #include "shared/rendergraph/OrderCfg.h"
 #include "shared/rendergraph/RenderGraph.h"
 #include "util/Misc.h"
 #include "util/geo/BezierCurve.h"
 #include "util/geo/Geo.h"
-
-// we still need boost geometry for the polygon buffering, which is no
-// yet implemented in util/Geo.h
-#include <boost/geometry.hpp>
-#include <boost/geometry/strategies/transform/matrix_transformers.hpp>
-
-namespace bgeo = boost::geometry;
 
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
@@ -100,7 +93,9 @@ std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
 
         auto nfo = n->pl().frontFor(p.edge);
 
-        double dmax = std::max(util::geo::dist(nfo->geom.getLine(), nf.geom.getLine().front()), util::geo::dist(nfo->geom.getLine(), nf.geom.getLine().back()));
+        double dmax = std::max(
+            util::geo::dist(nfo->geom.getLine(), nf.geom.getLine().front()),
+            util::geo::dist(nfo->geom.getLine(), nf.geom.getLine().back()));
 
         if (prec > 0 && is.geom.getLength() > 0 && dmax > 5) {
           ret.push_back(getInnerBezier(n, o, p, prec));
@@ -267,26 +262,16 @@ Polygon<double> RenderGraph::getConvexFrontHull(
     bool tight) const {
   double cd = d;
 
-  typedef bgeo::model::point<double, 2, bgeo::cs::cartesian> BoostPoint;
-  typedef bgeo::model::polygon<BoostPoint> BoostPoly;
-  typedef bgeo::model::multi_polygon<BoostPoly> BoostMultiPoly;
-
-  BoostMultiPoly ret;
-  double pointsPerCircle = 36;
-  bgeo::strategy::buffer::distance_symmetric<double> distanceStrat(d);
-  bgeo::strategy::buffer::join_round joinStrat(pointsPerCircle);
-  bgeo::strategy::buffer::end_round endStrat(pointsPerCircle);
-  bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
-  bgeo::strategy::buffer::side_straight sideStrat;
+  size_t pointsPerCircle = 32;
 
   if (n->pl().fronts().size() != 2) {
     MultiLine<double> l;
     for (auto& nf : n->pl().fronts()) {
-      l.push_back(nf.geom
-                      .getSegment((cd / 2) / nf.geom.getLength(),
-                                  (nf.geom.getLength() - cd / 2) /
-                                      nf.geom.getLength())
-                      .getLine());
+      l.push_back(
+          nf.geom
+              .getSegment((cd / 2) / nf.geom.getLength(),
+                          (nf.geom.getLength() - cd / 2) / nf.geom.getLength())
+              .getLine());
     }
 
     Polygon<double> hull = util::geo::convexHull(l);
@@ -304,17 +289,7 @@ Polygon<double> RenderGraph::getConvexFrontHull(
       }
     }
 
-    BoostPoly hullBgeo;
-    for (const auto& p : hull.getOuter())
-      hullBgeo.outer().push_back({p.getX(), p.getY()});
-    hullBgeo.outer().push_back(
-        {hull.getOuter().front().getX(), hull.getOuter().front().getY()});
-
-    // boost geometry expects polygons in clockwise fashion
-    bgeo::correct(hullBgeo);
-
-    bgeo::buffer(hullBgeo, ret, distanceStrat, sideStrat, joinStrat, endStrat,
-                 circleStrat);
+    return util::geo::buffer(hull, d, pointsPerCircle);
 
   } else {
     // for two node fronts, take average
@@ -343,48 +318,17 @@ Polygon<double> RenderGraph::getConvexFrontHull(
 
     auto avg = PolyLine<double>::average(pols).getLine();
 
-    typedef bgeo::model::linestring<BoostPoint> BoostLine;
-
-    BoostLine lineBgeo;
-    for (const auto& p : avg) {
-      lineBgeo.push_back({p.getX(), p.getY()});
-    }
-
-    bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat, endStrat,
-                 circleStrat);
+    return util::geo::buffer(avg, d, pointsPerCircle);
   }
-
-  assert(ret.size() > 0);
-
-  Polygon<double> retPoly;
-  for (const auto& p : ret[0].outer()) {
-    retPoly.getOuter().push_back({p.get<0>(), p.get<1>()});
-  }
-
-  return retPoly;
 }
 
 // _____________________________________________________________________________
 std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
     const std::set<const shared::linegraph::Line*>& served, const LineNode* n,
     double d) const {
-  typedef bgeo::model::point<double, 2, bgeo::cs::cartesian> BoostPoint;
-  typedef bgeo::model::linestring<BoostPoint> BoostLine;
-  typedef bgeo::model::polygon<BoostPoint> BoostPoly;
-  typedef bgeo::model::multi_polygon<BoostPoly> BoostMultiPoly;
-
-  BoostMultiPoly ret;
-  double pointsPerCircle = 36;
-  bgeo::strategy::buffer::distance_symmetric<double> distanceStrat(d);
-  bgeo::strategy::buffer::join_round joinStrat(pointsPerCircle);
-  bgeo::strategy::buffer::end_round endStrat(pointsPerCircle);
-  bgeo::strategy::buffer::point_circle circleStrat(pointsPerCircle);
-  bgeo::strategy::buffer::side_straight sideStrat;
-
-  typedef bgeo::model::linestring<BoostPoint> BoostLine;
+  double pointsPerCircle = 32;
   std::vector<util::geo::Polygon<double>> retPolys;
 
-  // TODO: order edges by number of lines not served
   std::vector<std::pair<size_t, const LineEdge*>> orderedEdgs;
   for (auto e : n->getAdjList()) {
     size_t unserved = 0;
@@ -397,22 +341,15 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
   std::set<const Line*> proced;
 
   for (auto ep : orderedEdgs) {
+    util::geo::Line<double> lineBgeo;
     auto e = ep.second;
-    BoostLine lineBgeo;
 
     for (size_t p = 0; p < e->pl().getLines().size(); p++) {
       auto lineAtPos = e->pl().lineOccAtPos(p).line;
       if (proced.count(lineAtPos)) continue;
       if (!served.count(lineAtPos)) {
         if (lineBgeo.size()) {
-          bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat,
-                       endStrat, circleStrat);
-
-          Polygon<double> retPoly;
-          for (const auto& p : ret[0].outer()) {
-            retPoly.getOuter().push_back({p.get<0>(), p.get<1>()});
-          }
-          retPolys.push_back(retPoly);
+          retPolys.push_back(util::geo::buffer(lineBgeo, d, pointsPerCircle));
           lineBgeo.clear();
         }
         continue;
@@ -426,14 +363,7 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
 
     // last entry
     if (lineBgeo.size()) {
-      bgeo::buffer(lineBgeo, ret, distanceStrat, sideStrat, joinStrat, endStrat,
-                   circleStrat);
-
-      Polygon<double> retPoly;
-      for (const auto& p : ret[0].outer()) {
-        retPoly.getOuter().push_back({p.get<0>(), p.get<1>()});
-      }
-      retPolys.push_back(retPoly);
+      retPolys.push_back(util::geo::buffer(lineBgeo, d, pointsPerCircle));
     }
   }
 

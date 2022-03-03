@@ -24,31 +24,31 @@ enum OrderMethod {
 };
 
 struct Config {
-  std::string gridSize;
-  double borderRad;
+  std::string gridSize = "100%";
+  double borderRad = 45;
 
-  std::string printMode;
-  std::string optMode;
+  std::string printMode = "linegraph";
+  std::string optMode = "heur";
   std::string ilpPath;
-  bool fromDot;
-  bool deg2Heur;
-  bool restrLocSearch;
-  double enfGeoPen;
-  bool ilpNoSolve;
-  int ilpTimeLimit;
-  int ilpNumThreads;
-  double ilpCacheThreshold;
-  std::string ilpSolver;
-  std::string ilpCacheDir;
+  bool fromDot = false;
+  bool deg2Heur = true;
+  bool restrLocSearch = false;
+  double enfGeoPen = 0;
+  bool ilpNoSolve = false;
+  int ilpTimeLimit = 60;
+  int ilpNumThreads = 0;
+  double ilpCacheThreshold = DBL_MAX;
+  std::string ilpSolver = "gurobi";
+  std::string ilpCacheDir = ".";
 
-  double maxGrDist;
+  double maxGrDist = 3;
 
-  int heurLocSearchIters;
+  int heurLocSearchIters = 100;
 
-  size_t abortAfter;
+  size_t abortAfter = -1;
 
-  size_t hananIters;
-  bool writeStats;
+  size_t hananIters = 1;
+  bool writeStats = false;
 
   OrderMethod orderMethod;
 

@@ -5,10 +5,6 @@
 #ifndef SHARED_RENDERGRAPH_RENDERGRAPH_H_
 #define SHARED_RENDERGRAPH_RENDERGRAPH_H_
 
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/box.hpp>
-#include <boost/geometry/geometries/point.hpp>
-#include <boost/geometry/index/rtree.hpp>
 #include <set>
 #include <string>
 

@@ -4,15 +4,15 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <float.h>
-#include <boost/program_options.hpp>
+#include <getopt.h>
 #include <exception>
 #include <iostream>
 #include <string>
+#include "octi/_config.h"
 #include "octi/config/ConfigReader.h"
 #include "util/log/Log.h"
 
 using octi::config::ConfigReader;
-namespace opts = boost::program_options;
 
 using octi::basegraph::BaseGraphType;
 using octi::config::OrderMethod;
@@ -20,149 +20,241 @@ using std::exception;
 using std::string;
 using std::vector;
 
+static const char* YEAR = &__DATE__[7];
+static const char* COPY =
+    "University of Freiburg - Chair of Algorithms and Data Structures";
+static const char* AUTHORS = "Patrick Brosi <brosi@informatik.uni-freiburg.de>";
+
 // _____________________________________________________________________________
 ConfigReader::ConfigReader() {}
 
 // _____________________________________________________________________________
+void ConfigReader::help(const char* bin) const {
+  std::cout << std::setfill(' ') << std::left << "octi (part of LOOM) "
+            << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
+            << "\n\n(C) " << YEAR << " " << COPY << "\n"
+            << "Authors: " << AUTHORS << "\n\n"
+            << "Usage: " << bin << " < graph.json\n\n"
+            << "Allowed options:\n\n"
+            << "General:\n"
+            << std::setw(36) << "  -v [ --version ]"
+            << "print version\n"
+            << std::setw(36) << "  -h [ --help ]"
+            << "show this help message\n"
+            << std::setw(36) << "  -o [ --optim-mode ] arg (=heur)"
+            << "optimization mode, 'heur' or 'ilp'\n"
+            << std::setw(36) << "  --obstacles arg"
+            << "GeoJSON file containing obstacle polygons\n"
+            << std::setw(36) << "  -g [ --grid-size ] arg (=100%)"
+            << "grid cell length, either exact or a\n"
+            << std::setw(36) << " " << " percentage of input adjacent station distance\n"
+            << std::setw(36) << "  --base-graph arg (=octilinear)"
+            << "base graph, either ortholinear, octilinear,\n"
+            << std::setw(36) << " " << " porthoradial, quadtree, octihanan\n\n"
+            << "Misc:\n"
+            << std::setw(36) << "  --ilp-num-threads arg (=0)"
+            << "number of threads to use by ILP solver,\n"
+            << std::setw(36) << " "
+            << " 0 means solver default\n"
+            << std::setw(36) << "  --hanan-iters arg (=1)"
+            << "number of Hanan grid iterations\n"
+            << std::setw(36) << "  --loc-search-max-iters arg (=100)"
+            << "max local search iterations\n"
+            << std::setw(36) << "  --ilp-cache-threshold arg (=inf)"
+            << "ILP cache treshhold\n"
+            << std::setw(36) << "  --ilp-time-limit arg (=60)"
+            << "ILP time limit (seconds)\n"
+            << std::setw(36) << "  --ilp-cache-dir arg (=.)"
+            << "ILP cache dir\n"
+            << std::setw(36) << "  --ilp-solver arg (=gurobi)"
+            << "Preferred ILP solver, either glpk, cbc, or gurobi.\n"
+            << std::setw(36) << " "
+            << "Will fall back if not available.\n"
+            << std::setw(36) << "  --stats"
+            << "write stats to output graph\n"
+            << std::setw(36) << "  -D [ --from-dot ]"
+            << "input is in dot format\n"
+            << std::setw(36) << "  --no-deg2-heur"
+            << "don't contract degree 2 nodes\n"
+            << std::setw(36) << "  --geo-pen arg (=0)"
+            << "enforces lines to follow input geo course\n"
+            << std::setw(36) << "  --max-grid-dist arg (=3)"
+            << "max grid distance for station candidates\n"
+            << std::setw(36) << "  --restr-loc-search"
+            << "restrict local search to max grid distance\n"
+            << std::setw(36) << "  --edge-order arg (=all)"
+            << "method used for initial edge ordering for heur,\n"
+            << std::setw(36) << " " << " one of num-lines, length, adj-nd-deg,\n"
+            << std::setw(36) << " " << " adj-nd-ldeg, growth-deg, growth-ldef, all\n"
+            << std::setw(36) << "  --density-pen arg (=10)"
+            << "restrict local search to max grid distance\n"
+            << std::setw(36) << "  --vert-pen arg (=0)"
+            << "penalty for vertical edges\n"
+            << std::setw(36) << "  --hori-pen arg (=0)"
+            << "penalty for horizontal edges\n"
+            << std::setw(36) << "  --diag-pen arg (=.5)"
+            << "penalty for diagonal edges\n"
+            << std::setw(36) << "  --pen-180 arg (=0)"
+            << "penalty for 180 deg bends\n"
+            << std::setw(36) << "  --pen-135 arg (=1)"
+            << "penalty for 135 deg bends\n"
+            << std::setw(36) << "  --pen-90 arg (=1.5)"
+            << "penalty for 90 deg bends\n"
+            << std::setw(36) << "  --pen-45 arg (=2)"
+            << "penalty for 45 deg bends\n"
+            << std::setw(36) << "  --no-mode-pen arg (=.5)"
+            << "penalty for node movement\n";
+}
+
+// _____________________________________________________________________________
 void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   std::string VERSION_STR = " - unversioned - ";
-  std::string baseGraphStr;
-  std::string edgeOrderMethod;
+  std::string baseGraphStr = "octilinear";
+  std::string edgeOrderMethod = "all";
 
-  bool noDeg2Heur = false;
+  struct option ops[] = {
+                         {"version", no_argument, 0, 'v'},
+                         {"help", no_argument, 0, 'h'},
+                         {"optim-mode", required_argument, 0, 'm'},
+                         {"ilp-num-threads", required_argument, 0, 1},
+                         {"hanan-iters", required_argument, 0, 2},
+                         {"loc-search-max-iters", required_argument, 0, 3},
+                         {"ilp-cache-threshold", required_argument, 0, 4},
+                         {"ilp-time-limit", required_argument, 0, 5},
+                         {"ilp-cache-dir", required_argument, 0, 6},
+                         {"ilp-solver", required_argument, 0, 7},
+                         {"stats", no_argument, 0, 8},
+                         {"obstacles", required_argument, 0, 9},
+                         {"from-dot", required_argument, 0, 'D'},
+                         {"no-deg2-heur", no_argument, 0, 10},
+                         {"geo-pen", required_argument, 0, 11},
+                         {"max-grid-dist", required_argument, 0, 12},
+                         {"restr-loc-search", no_argument, 0, 13},
+                         {"edge-order", required_argument, 0, 14},
+                         {"density-pen", required_argument, 0, 15},
+                         {"grid-size", required_argument, 0, 'g'},
+                         {"base-graph", required_argument, 0, 16},
+                         {"vert-pen", required_argument, 0, 17},
+                         {"hori-pen", required_argument, 0, 18},
+                         {"diag-pen", required_argument, 0, 19},
+                         {"pen-180", required_argument, 0, 20},
+                         {"pen-135", required_argument, 0, 21},
+                         {"pen-90", required_argument, 0, 22},
+                         {"pen-45", required_argument, 0, 23},
+                         {"nd-move-pen", required_argument, 0, 24},
+                         {"abort-after", required_argument, 0, 'a'},
+                         {0, 0, 0, 0}};
 
-  opts::options_description generic("General");
-  generic.add_options()("version", "output version")(
-      "help,?", "show this message")("verbose,v", "verbosity level");
+  char c;
 
-  opts::options_description config("Output");
-  config.add_options()(
-      "optim-mode,o",
-      opts::value<std::string>(&(cfg->optMode))->default_value("heur"),
-      "optimization mode, either 'heur' (fast) or 'ilp' (very slow)")(
-      "ilp-num-threads",
-      opts::value<int>(&(cfg->ilpNumThreads))->default_value(0),
-      "Number of threads to use by the ILP solver (how this number is "
-      "internally used depends on the solver). If 0, the solver default will "
-      "be used.")("ilp-no-solve",
-                  opts::bool_switch(&(cfg->ilpNoSolve))->default_value(false),
-                  "if set, the ILP is not solved, only written to file")(
-      "hanan-iters", opts::value<size_t>(&(cfg->hananIters))->default_value(1),
-      "hanan iterations")(
-      "loc-search-max-iters",
-      opts::value<int>(&(cfg->heurLocSearchIters))->default_value(100),
-      "maximum number of iterations for the local search")(
-      "ilp-cache-threshold",
-      opts::value<double>(&(cfg->ilpCacheThreshold))
-          ->default_value(std::numeric_limits<double>::infinity()),
-      "ILP solver time limit (in seconds), negative value means infinity")(
-      "ilp-time-limit",
-      opts::value<int>(&(cfg->ilpTimeLimit))->default_value(60),
-      "ILP solver time limit (in seconds), negative value means infinity")(
-      "ilp-cache-dir",
-      opts::value<std::string>(&(cfg->ilpCacheDir))->default_value("."),
-      "ILP cache dir (solver-dependend)")(
-      "ilp-solver",
-      opts::value<std::string>(&(cfg->ilpSolver))->default_value("gurobi"),
-      "The preferred solver library to use, will fall back if library is not "
-      "available.")(
-      "ilp-out", opts::value<std::string>(&(cfg->ilpPath))->default_value(""),
-      "path to output the ILP to, a first feasible solution will be written "
-      "to <basename>.mst.")(
-      "stats", opts::bool_switch(&(cfg->writeStats))->default_value(false),
-      "write stats to output graph")(
-      "obstacles",
-      opts::value<std::string>(&(cfg->obstaclePath))->default_value(""),
-      "GeoJSON file containing obstacle polygons")(
-      "from-dot,D", opts::bool_switch(&(cfg->fromDot))->default_value(false),
-      "input is in dot format")(
-      "no-deg2-heur", opts::bool_switch(&noDeg2Heur)->default_value(false),
-      "don't contract degree 2 nodes")(
-      "enf-geo-pen", opts::value<double>(&(cfg->enfGeoPen))->default_value(0),
-      "enforce lines to roughly follow original geographical course")(
-      "max-grid-dist", opts::value<double>(&(cfg->maxGrDist))->default_value(3),
-      "max grid distance radius for station candidates")(
-      "restr-loc-search",
-      opts::bool_switch(&(cfg->restrLocSearch))->default_value(false),
-      "restrict local search to max grid distance")(
-      "edge-order",
-      opts::value<std::string>(&(edgeOrderMethod))->default_value("all"),
-      "method used for initial edge ordering for heuristic method. One of "
-      "{num-lines, length, adj-nd-deg, adj-nd-ldeg, growth-deg, growth-ldef, "
-      "all}")(
-      "nd-move-pen",
-      opts::value<double>(&(cfg->pens.ndMovePen))->default_value(0.5),
-      "penalty factor moving input nodes")(
-      "density-pen",
-      opts::value<double>(&(cfg->pens.densityPen))->default_value(0),
-      "penalty factor for re-inserted contracted stations that are too near, a "
-      "reasonable value is e.g. 5. Only works with optim mode 'heur'!")(
-      "grid-size,g",
-      opts::value<std::string>(&(cfg->gridSize))->default_value("100%"),
-      "grid cell length, either as exact value (like '500') or as percentage "
-      "of average adj. station distance (like '75%')")(
-      "border-rad", opts::value<double>(&(cfg->borderRad))->default_value(45),
-      "border rad")(
-      "base-graph",
-      opts::value<std::string>(&baseGraphStr)->default_value("octilinear"),
-      "base graph type, either: ortholinear, octilinear, porthoradial, "
-      "quadtree, octihanan")("print-mode",
-                             opts::value<std::string>(&(cfg->printMode))
-                                 ->default_value("transitgraph"),
-                             "print mode: transitgraph, gridgraph")(
-      "vert-pen",
-      opts::value<double>(&(cfg->pens.verticalPen))->default_value(0),
-      "penalty for vertical edges")(
-      "hori-pen",
-      opts::value<double>(&(cfg->pens.horizontalPen))->default_value(0),
-      "penalty for horicontal edges")(
-      "diag-pen",
-      opts::value<double>(&(cfg->pens.diagonalPen))->default_value(.5),
-      "penalty for diagonal edges")(
-      "pen-180", opts::value<double>(&(cfg->pens.p_0))->default_value(0),
-      "penalty for 180 deg traversal")(
-      "pen-135", opts::value<double>(&(cfg->pens.p_135))->default_value(1),
-      "penalty for 135 deg traversal")(
-      "pen-90", opts::value<double>(&(cfg->pens.p_90))->default_value(1.5),
-      "penalty for 90 deg traversal")(
-      "pen-45", opts::value<double>(&(cfg->pens.p_45))->default_value(2),
-      "penalty for 45 deg traversal")(
-      "abort-after,a",
-      opts::value<size_t>(&(cfg->abortAfter))
-          ->default_value(std::numeric_limits<size_t>::max()),
-      "abort approximate rendering after <n> edges");
-
-  opts::options_description cmdlineOptions;
-  cmdlineOptions.add(config).add(generic);
-
-  opts::options_description visibleDesc("Allowed options");
-  visibleDesc.add(generic).add(config);
-  opts::variables_map vm;
-
-  try {
-    opts::store(
-        opts::command_line_parser(argc, argv).options(cmdlineOptions).run(),
-        vm);
-    opts::notify(vm);
-  } catch (exception e) {
-    LOG(ERROR) << e.what() << std::endl;
-    std::cout << visibleDesc << "\n";
-    exit(1);
+  while ((c = getopt_long(argc, argv, ":hvm:Dg:", ops, 0)) !=
+         -1) {
+    switch (c) {
+      case 'a':
+        cfg->abortAfter = atoi(optarg);
+        break;
+      case 'D':
+        cfg->fromDot = true;
+        break;
+      case 'm':
+        cfg->optMode = optarg;
+        break;
+      case 1:
+        cfg->ilpNumThreads = atoi(optarg);
+        break;
+      case 2:
+        cfg->hananIters = atoi(optarg);
+        break;
+      case 3:
+        cfg->heurLocSearchIters = atoi(optarg);
+        break;
+      case 4:
+        cfg->ilpCacheThreshold = atof(optarg);
+        break;
+      case 5:
+        cfg->ilpTimeLimit = atoi(optarg);
+        break;
+      case 6:
+        cfg->ilpCacheDir = optarg;
+        break;
+      case 7:
+        cfg->ilpSolver = optarg;
+        break;
+      case 8:
+        cfg->writeStats = true;
+        break;
+      case 9:
+        cfg->obstaclePath = optarg;
+        break;
+      case 10:
+        cfg->deg2Heur = false;
+        break;
+      case 11:
+        cfg->enfGeoPen = atof(optarg);
+        break;
+      case 12:
+        cfg->maxGrDist = atof(optarg);
+        break;
+      case 13:
+        cfg->restrLocSearch = true;
+        break;
+      case 14:
+        edgeOrderMethod = optarg;
+        break;
+      case 15:
+        cfg->pens.densityPen = atof(optarg);
+        break;
+      case 16:
+        baseGraphStr = optarg;
+        break;
+      case 17:
+        cfg->pens.verticalPen = atof(optarg);
+        break;
+      case 18:
+        cfg->pens.horizontalPen = atof(optarg);
+        break;
+      case 19:
+        cfg->pens.diagonalPen = atof(optarg);
+        break;
+      case 20:
+        cfg->pens.p_0 = atof(optarg);
+        break;
+      case 21:
+        cfg->pens.p_135 = atof(optarg);
+        break;
+      case 22:
+        cfg->pens.p_90 = atof(optarg);
+        break;
+      case 23:
+        cfg->pens.p_45 = atof(optarg);
+        break;
+      case 24:
+        cfg->pens.ndMovePen= atof(optarg);
+        break;
+      case 'g':
+        cfg->gridSize = optarg;
+        break;
+      case 'v':
+        std::cout << "pfaedle " << VERSION_FULL << std::endl;
+        exit(0);
+      case 'h':
+        help(argv[0]);
+        exit(0);
+      case ':':
+        std::cerr << argv[optind - 1];
+        std::cerr << " requires an argument" << std::endl;
+        exit(1);
+      case '?':
+        std::cerr << argv[optind - 1];
+        std::cerr << " option unknown" << std::endl;
+        exit(1);
+        break;
+      default:
+        std::cerr << "Error while parsing arguments" << std::endl;
+        exit(1);
+        break;
+    }
   }
-
-  if (vm.count("help")) {
-    std::cout << argv[0] << " [options] <input-feed>\n"
-              << VERSION_STR << "\n\n"
-              << visibleDesc << "\n";
-    exit(0);
-  }
-
-  if (vm.count("version")) {
-    std::cout << "\n" << VERSION_STR << "\n";
-    exit(0);
-  }
-
-  cfg->deg2Heur = !noDeg2Heur;
 
   if (edgeOrderMethod == "num-lines") {
     cfg->orderMethod = OrderMethod::NUM_LINES;

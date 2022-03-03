@@ -2,160 +2,164 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include <boost/program_options.hpp>
-#include <iostream>
 #include <float.h>
-#include <string>
+#include <getopt.h>
 #include <exception>
-#include "util/log/Log.h"
+#include <iostream>
+#include <string>
+#include "transitmap/_config.h"
 #include "transitmap/config/ConfigReader.h"
+#include "util/log/Log.h"
 
 using transitmapper::config::ConfigReader;
 namespace opts = boost::program_options;
-using std::string;
 using std::exception;
 
+static const char* YEAR = &__DATE__[7];
+static const char* COPY =
+    "University of Freiburg - Chair of Algorithms and Data Structures";
+static const char* AUTHORS = "Patrick Brosi <brosi@informatik.uni-freiburg.de>";
+
 // _____________________________________________________________________________
-ConfigReader::ConfigReader() {
+ConfigReader::ConfigReader() {}
+
+// _____________________________________________________________________________
+void ConfigReader::help(const char* bin) const {
+  std::cout << std::setfill(' ') << std::left << "transitmap (part of LOOM) "
+            << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
+            << "\n\n(C) " << YEAR << " " << COPY << "\n"
+            << "Authors: " << AUTHORS << "\n\n"
+            << "Usage: " << bin << " <GTFS FEED>\n\n"
+            << "Allowed options:\n\n"
+            << "General:\n"
+            << std::setw(37) << "  -v [ --version ]"
+            << "print version\n"
+            << std::setw(37) << "  -h [ --help ]"
+            << "show this help message\n"
+            << std::setw(37) << "  --render-engine arg (=svg)"
+            << "Render engine, only SVG support atm\n"
+            << std::setw(37) << "  --line-width arg (=20)"
+            << "width of a single transit line\n"
+            << std::setw(37) << "  --line-spacing arg (=10)"
+            << "spacing between transit lines\n"
+            << std::setw(37) << "  --outline-width arg (=2)"
+            << "width of line outlines\n"
+            << std::setw(37) << "  --render-dir-markers"
+            << "render line direction markers\n"
+            << std::setw(37) << "  --render-labels"
+            << "render labels\n"
+            << std::setw(37) << "  --line-label-textsize arg (=40)"
+            << "textsize for line labels\n"
+            << std::setw(37) << "  --station-label-textsize arg (=60)"
+            << "textsize for station labels\n\n"
+            << "Misc:\n"
+            << std::setw(37) << "  --padding arg (=-1)"
+            << "padding, -1 for auto\n"
+            << std::setw(37) << "  --smoothing arg (=3)"
+            << "input line smoothing\n"
+            << std::setw(37) << "  --no-render-stations"
+            << "don't render stations\n"
+            << std::setw(37) << "  --tight-stations"
+            << "don't expand node fronts for stations\n"
+            << std::setw(37) << "  --no-render-stations"
+            << "don't render stations\n"
+            << std::setw(37) << "  --no-render-node-connections"
+            << "don't render inner node connections\n"
+            << std::setw(37) << "  --render-node-fronts"
+            << "render node fronts\n";
 }
 
 // _____________________________________________________________________________
 void ConfigReader::read(Config* cfg, int argc, char** argv) const {
-  string VERSION_STR = " - unversioned - ";
+  struct option ops[] = {{"version", no_argument, 0, 'v'},
+                         {"help", no_argument, 0, 'h'},
+                         {"render-engine", required_argument, 0, 1},
+                         {"line-width", required_argument, 0, 2},
+                         {"line-spacing", required_argument, 0, 3},
+                         {"outline-width", required_argument, 0, 4},
+                         {"line-label-textsize", required_argument, 0, 5},
+                         {"station-label-textsize", required_argument, 0, 6},
+                         {"no-render-stations", no_argument, 0, 7},
+                         {"render-labels", no_argument, 0, 8},
+                         {"tight-stations", no_argument, 0, 9},
+                         {"render-dir-markers", no_argument, 0, 10},
+                         {"no-render-node-connections", no_argument, 0, 11},
+                         {"resolution", required_argument, 0, 12},
+                         {"padding", required_argument, 0, 13},
+                         {"smoothing", required_argument, 0, 14},
+                         {"render-node-fronts", no_argument, 0, 15},
+                         {0, 0, 0, 0}};
 
-  opts::options_description generic("General");
-  generic.add_options()
-    ("version", "output version")
-    ("help,?", "show this message")
-    ("verbose,v", "verbosity level")
-    ("render-engine",
-      opts::value<std::string>(&(cfg->renderMethod))
-      ->default_value("svg"),
-      "output method, atm only \"svg\" is supported");
-
-  opts::options_description config("Output");
-  config.add_options()
-    ("name",
-      opts::value<std::string>(&(cfg->name))
-      ->default_value("shinygraph"),
-      "name of transit graph")
-    ("line-width",
-      opts::value<double>(&(cfg->lineWidth))
-      ->default_value(20),
-      "width of a single rendered line")
-    ("line-spacing",
-      opts::value<double>(&(cfg->lineSpacing))
-      ->default_value(10),
-      "spacing between two rendered lines")
-    ("outline-width",
-      opts::value<double>(&(cfg->outlineWidth))
-      ->default_value(2),
-      "default width of line outline")
-    ("line-label-textsize",
-      opts::value<double>(&(cfg->lineLabelSize))
-      ->default_value(40),
-      "text size for line labels")
-    ("station-label-textsize",
-      opts::value<double>(&(cfg->stationLabelSize))
-      ->default_value(60),
-      "text size for station labels")
-    ("render-stations",
-     opts::value<bool>(&(cfg->renderStations))
-      ->default_value(true),
-      "render station geometries")
-    ("render-labels",
-     opts::value<bool>(&(cfg->renderLabels))
-      ->default_value(false),
-      "render labels")
-    ("tight-stations",
-     opts::value<bool>(&(cfg->tightStations))
-      ->default_value(false),
-      "dont expand station nodes at all")
-    ("render-dir-markers",
-     opts::value<bool>(&(cfg->renderDirMarkers))
-      ->default_value(false),
-      "render direction markers")
-    ("render-node-connections",
-     opts::value<bool>(&(cfg->renderNodeConnections))
-      ->default_value(true),
-      "render inner node connections")
-    ("render-edges",
-     opts::value<bool>(&(cfg->renderEdges))
-      ->default_value(true),
-      "render edges")
-    ("expand-fronts",
-     opts::value<bool>(&(cfg->expandFronts))
-      ->default_value(true),
-      "expand fronts to make room for inner geometries")
-    ("render-node-fronts",
-     opts::value<bool>(&(cfg->renderNodeFronts))
-      ->default_value(false),
-      "render node fronts as red lines")
-    ("render-node-circles",
-     opts::value<bool>(&(cfg->renderNodeCircles))
-      ->default_value(false),
-      "mark node areas with background grey")
-    ("render-node-polygons",
-     opts::value<bool>(&(cfg->renderNodePolygons))
-      ->default_value(false),
-      "render node polygons")
-    ("render-stats",
-      opts::value<bool>(&(cfg->renderStats))
-      ->default_value(false),
-      "render stats to output")
-    ("resolution",
-      opts::value<double>(&(cfg->outputResolution))
-      ->default_value(0.1),
-      "output resolution (output pixel size / projection pixel size)")
-    ("padding",
-      opts::value<double>(&(cfg->outputPadding))
-      ->default_value(-1),
-      "padding of output. If < 0, automatic.")
-    ("input-smoothing",
-      opts::value<double>(&(cfg->inputSmoothing))
-      ->default_value(3),
-      "level of input-data smoothing")
-    ("bezier-prec",
-      opts::value<double>(&(cfg->innerGeometryPrecision))
-      ->default_value(3),
-      "rendering precision of inner node geometries")
-    ("world-file-path",
-      opts::value<std::string>(&(cfg->worldFilePath))
-      ->default_value(""),
-      "if set, output world file of rendered map to this location")
-  ;
-
-  opts::options_description cmdlineOptions;
-  cmdlineOptions.add(config).add(generic);
-
-  opts::options_description visibleDesc("Allowed options");
-  visibleDesc.add(generic).add(config);
-  opts::variables_map vm;
-
-  try {
-    opts::store(opts::command_line_parser(argc, argv).options(cmdlineOptions)
-        .run(), vm);
-    opts::notify(vm);
-
-    if (cfg->outputPadding < 0) {
-      cfg->outputPadding = (cfg->lineWidth + cfg->lineSpacing);
+  char c;
+  while ((c = getopt_long(argc, argv, ":hvim:", ops, 0)) != -1) {
+    switch (c) {
+      case 'h':
+        help(argv[0]);
+        exit(0);
+      case 'v':
+        std::cout << "gtfs2graph - (LOOM " << VERSION_FULL << ")" << std::endl;
+        exit(0);
+      case 1:
+        cfg->renderMethod = optarg;
+        break;
+      case 2:
+        cfg->lineWidth = atof(optarg);
+        break;
+      case 3:
+        cfg->lineSpacing = atof(optarg);
+        break;
+      case 4:
+        cfg->outlineWidth = atof(optarg);
+        break;
+      case 5:
+        cfg->lineLabelSize = atof(optarg);
+        break;
+      case 6:
+        cfg->stationLabelSize = atof(optarg);
+        break;
+      case 7:
+        cfg->renderStations = false;
+        break;
+      case 8:
+        cfg->renderLabels = true;
+        break;
+      case 9:
+        cfg->tightStations = true;
+        break;
+      case 10:
+        cfg->renderDirMarkers = true;
+        break;
+      case 11:
+        cfg->renderNodeConnections = false;
+        break;
+      case 12:
+        cfg->outputResolution = atof(optarg);
+        break;
+      case 13:
+        cfg->outputPadding = atof(optarg);
+        break;
+      case 14:
+        cfg->inputSmoothing = atof(optarg);
+        break;
+      case 15:
+        cfg->renderNodeFronts = true;
+        break;
+      case ':':
+        std::cerr << argv[optind - 1];
+        std::cerr << " requires an argument" << std::endl;
+        exit(1);
+      case '?':
+        std::cerr << argv[optind - 1];
+        std::cerr << " option unknown" << std::endl;
+        exit(1);
+        break;
+      default:
+        std::cerr << "Error while parsing arguments" << std::endl;
+        exit(1);
+        break;
     }
-  } catch (const exception& e) {
-    LOG(ERROR) << e.what() << std::endl;
-    std::cout << visibleDesc << "\n";
-    exit(1);
   }
-
-  if (vm.count("help")) {
-    std::cout << argv[0] << " [options]\n"
-      << VERSION_STR << "\n\n"
-      << visibleDesc << "\n";
-    exit(0);
-  }
-
-  if (vm.count("version")) {
-    std::cout << "\n" << VERSION_STR << "\n";
-    exit(0);
+  if (cfg->outputPadding < 0) {
+    cfg->outputPadding = (cfg->lineWidth + cfg->lineSpacing);
   }
 }
-

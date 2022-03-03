@@ -11,42 +11,33 @@ namespace transitmapper {
 namespace config {
 
 struct Config {
-  double lineWidth;
-  double lineSpacing;
+  double lineWidth = 20;
+  double lineSpacing = 10;
 
-  double lineLabelSize;
-  double stationLabelSize;
+  double lineLabelSize = 40;
+  double stationLabelSize = 60;
 
-  std::string name;
-  std::string dbgPath;
+  std::string renderMethod = "svg";
 
-  std::string renderMethod;
+  double outputResolution = 0.1;
+  double inputSmoothing = 3;
+  double innerGeometryPrecision = 3;
 
-  double outputResolution;
-  double inputSmoothing;
-  double innerGeometryPrecision;
+  double outputPadding = -1;
 
-  double outputPadding;
-
-  double outlineWidth;
+  double outlineWidth = 2;
   std::string outlineColor;
 
-  bool renderStations;
-  bool renderNodeFronts;
-  bool renderNodeCircles;
-  bool renderNodePolygons;
-  bool renderStationNames;
-  bool renderEdges;
-  bool renderLabels;
+  bool renderStations = true;
+  bool renderNodeFronts = false;
+  bool renderNodeCircles = false;
+  bool renderEdges = true;
+  bool renderLabels = false;
 
-  bool outputStats;
-  bool renderStats;
-  bool renderNodeConnections;
-  bool expandFronts;
-  bool tightStations;
+  bool renderNodeConnections = true;
+  bool tightStations = false;
 
-  bool renderDirMarkers;
-
+  bool renderDirMarkers = false;
   std::string worldFilePath;
 };
 

@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 
   b.writeNodeFronts(&g);
 
-  if (cfg.expandFronts) b.expandOverlappinFronts(&g);
+  b.expandOverlappinFronts(&g);
 
   if (cfg.renderMethod == "svg") {
     LOGTO(DEBUG, std::cerr) << "Outputting to SVG ...";

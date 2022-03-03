@@ -5,7 +5,6 @@
 #ifndef OCTI_CONFIG_CONFIGREADER_H_
 #define OCTI_CONFIG_CONFIGREADER_H_
 
-#include <boost/program_options.hpp>
 #include <vector>
 #include "octi/config/OctiConfig.h"
 
@@ -16,6 +15,8 @@ class ConfigReader {
  public:
   ConfigReader();
   void read(Config* targetConfig, int argc, char** argv) const;
+ private:
+  void help(const char* bin) const;
 };
 }
 }

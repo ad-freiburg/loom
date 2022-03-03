@@ -3,7 +3,7 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include "dot/Parser.h"
-#include "json/json.hpp"
+#include "3rdparty/json.hpp"
 #include "shared/linegraph/LineEdgePL.h"
 #include "shared/linegraph/LineGraph.h"
 #include "shared/linegraph/LineNodePL.h"

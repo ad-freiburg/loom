@@ -3,76 +3,103 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <float.h>
-#include <boost/program_options.hpp>
+#include <getopt.h>
 #include <exception>
 #include <iostream>
 #include <string>
+#include "topo/_config.h"
 #include "topo/config/ConfigReader.h"
 #include "util/log/Log.h"
 
 using topo::config::ConfigReader;
 namespace opts = boost::program_options;
 
-using std::string;
 using std::exception;
+using std::string;
 using std::vector;
+
+static const char* YEAR = &__DATE__[7];
+static const char* COPY =
+    "University of Freiburg - Chair of Algorithms and Data Structures";
+static const char* AUTHORS = "Patrick Brosi <brosi@informatik.uni-freiburg.de>";
 
 // _____________________________________________________________________________
 ConfigReader::ConfigReader() {}
 
 // _____________________________________________________________________________
+void ConfigReader::help(const char* bin) const {
+  std::cout << std::setfill(' ') << std::left << "topo (part of LOOM) "
+            << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
+            << "\n\n(C) " << YEAR << " " << COPY << "\n"
+            << "Authors: " << AUTHORS << "\n\n"
+            << "Usage: " << bin << " <GTFS FEED>\n\n"
+            << "Allowed options:\n\n"
+            << "General:\n"
+            << std::setw(35) << "  -v [ --version ]"
+            << "print version\n"
+            << std::setw(35) << "  -h [ --help ]"
+            << "show this help message\n"
+            << std::setw(35) << "  -d [ --max-aggr-dist ] arg (=40)"
+            << "maximum distance between segments\n"
+            << std::setw(35) << "  --write-stats"
+            << "write statistics to output file\n"
+            << std::setw(35) << "  --no-infer-restrs"
+            << "don't infer turn restrictions\n"
+            << std::setw(35) << "  --max-length-dev arg (=500)"
+            << "maxumum distance deviation for turn restrictions infer\n";
+}
+
+// _____________________________________________________________________________
 void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
-  string VERSION_STR = " - unversioned - ";
+  std::string motStr = "all";
 
-  opts::options_description generic("General");
-  generic.add_options()("version", "output version")(
-      "help,?", "show this message")("verbose,v", "verbosity level");
+  struct option ops[] = {{"version", no_argument, 0, 'v'},
+                         {"help", no_argument, 0, 'h'},
+                         {"max-aggr-dist", required_argument, 0, 'd'},
+                         {"no-infer-restrs", required_argument, 0, 1},
+                         {"write-stats", required_argument, 0, 2},
+                         {"max-length-dev", required_argument, 0, 3},
+                         {0, 0, 0, 0}};
 
-  opts::options_description config("Output");
-  config.add_options()
-    ("max-aggr-distance,d",
-      opts::value<double>(&(cfg->maxAggrDistance))->default_value(40),
-      "maximum aggregation distance between shared segments")
-    ("write-stats",
-      opts::bool_switch(&(cfg->outputStats))
-      ->default_value(false),
-      "write stats to output file")
-    ("no-infer-restrs",
-      opts::bool_switch(&(cfg->noInferRestrs))
-      ->default_value(false),
-      "don't infer turn restrictions")
-    ("max-length-dev",
-      opts::value<double>(&(cfg->maxLengthDev))->default_value(500),
-      "maximal distance deviation for turn restriction infer");
+  char c;
+  while ((c = getopt_long(argc, argv, ":hvim:", ops, 0)) != -1) {
+    switch (c) {
+      case 'h':
+        help(argv[0]);
+        exit(0);
+      case 'v':
+        std::cout << "topo - (LOOM " << VERSION_FULL << ")" << std::endl;
+        exit(0);
+      case 'd':
+        cfg->maxAggrDistance = atof(optarg);
+        break;
+      case 1:
+        cfg->noInferRestrs = true;
+        break;
+      case 2:
+        cfg->outputStats = true;
+        break;
+      case 3:
+        cfg->maxAggrDistance = atof(optarg);
+        break;
+      case ':':
+        std::cerr << argv[optind - 1];
+        std::cerr << " requires an argument" << std::endl;
+        exit(1);
+      case '?':
+        std::cerr << argv[optind - 1];
+        std::cerr << " option unknown" << std::endl;
+        exit(1);
+        break;
+      default:
+        std::cerr << "Error while parsing arguments" << std::endl;
+        exit(1);
+        break;
+    }
+  }
 
-  opts::options_description cmdlineOptions;
-  cmdlineOptions.add(config).add(generic);
-
-  opts::options_description visibleDesc("Allowed options");
-  visibleDesc.add(generic).add(config);
-  opts::variables_map vm;
-
-  try {
-    opts::store(opts::command_line_parser(argc, argv)
-                    .options(cmdlineOptions)
-                    .run(),
-                vm);
-    opts::notify(vm);
-  } catch (exception e) {
-    LOG(ERROR) << e.what() << std::endl;
-    std::cout << visibleDesc << "\n";
+  if (optind == argc) {
+    std::cerr << "No input GTFS feed specified." << std::endl;
     exit(1);
-  }
-
-  if (vm.count("help")) {
-    std::cout << argv[0] << " [options] <input-feed>\n"
-              << VERSION_STR << "\n\n"
-              << visibleDesc << "\n";
-    exit(0);
-  }
-
-  if (vm.count("version")) {
-    std::cout << "\n" << VERSION_STR << "\n";
-    exit(0);
   }
 }

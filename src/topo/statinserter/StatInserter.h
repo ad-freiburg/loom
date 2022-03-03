@@ -5,7 +5,6 @@
 #ifndef TOPO_STATINSERTER_STATINSERTER_H_
 #define TOPO_STATINSERTER_STATINSERTER_H_
 
-#include <proj_api.h>
 #include <algorithm>
 #include <unordered_map>
 #include "shared/linegraph/LineGraph.h"

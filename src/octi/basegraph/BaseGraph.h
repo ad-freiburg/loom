@@ -62,10 +62,15 @@ struct Candidate {
 };
 
 struct Penalties {
-  double p_0, p_45, p_90, p_135;
-  double verticalPen, horizontalPen, diagonalPen;
-  double densityPen;
-  double ndMovePen;
+  double p_0 = 0;
+  double p_45 = 2;
+  double p_90 = 1.5;
+  double p_135 = 1;
+  double verticalPen = 0;
+  double horizontalPen = 0;
+  double diagonalPen = 0.5;
+  double densityPen = 10.0;
+  double ndMovePen = 0.5;
 };
 
 class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {

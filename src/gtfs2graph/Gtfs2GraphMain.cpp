@@ -40,7 +40,13 @@ int main(int argc, char** argv) {
   ad::cppgtfs::gtfs::Feed feed;
 
   if (!cfg.inputFeedPath.empty()) {
-    parser.parse(&feed, cfg.inputFeedPath);
+    try {
+      parser.parse(&feed, cfg.inputFeedPath);
+    } catch (const ad::cppgtfs::ParserException& ex) {
+      LOG(ERROR) << "Could not parse input GTFS feed, reason was:";
+      std::cerr << ex.what() << std::endl;
+      exit(1);
+    }
     gtfs2graph::graph::BuildGraph g;
     Builder b(&cfg);
 

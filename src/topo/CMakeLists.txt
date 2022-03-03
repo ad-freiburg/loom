@@ -7,7 +7,6 @@ list(REMOVE_ITEM topo_SRC TestMain.cpp)
 
 include_directories(
 	${TRANSITMAP_INCLUDE_DIR}
-	${GDAL_INCLUDE_DIR}
 )
 
 add_subdirectory(tests)
@@ -20,4 +19,4 @@ configure_file (
 add_executable(topo ${topo_main})
 add_library(topo_dep ${topo_SRC})
 
-target_link_libraries(topo topo_dep shared_dep dot_dep transitmap_dep util ${Boost_LIBRARIES} -lproj -lpthread)
+target_link_libraries(topo topo_dep shared_dep dot_dep transitmap_dep util ${Boost_LIBRARIES} -lpthread)

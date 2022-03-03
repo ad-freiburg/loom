@@ -2,7 +2,6 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include <proj_api.h>
 #include "ad/cppgtfs/gtfs/Feed.h"
 #include "gtfs2graph/builder/Builder.h"
 #include "gtfs2graph/graph/BuildGraph.h"
@@ -33,19 +32,13 @@ using ad::cppgtfs::gtfs::Stop;
 using ad::cppgtfs::gtfs::StopTime;
 using ad::cppgtfs::gtfs::Trip;
 
-const static char* WGS84_PROJ =
-    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
-
 // _____________________________________________________________________________
-Builder::Builder(const config::Config* cfg) : _cfg(cfg) {
-  _mercProj = pj_init_plus(WGS84_PROJ);
-  _graphProj = pj_init_plus(cfg->projectionString.c_str());
-}
+Builder::Builder(const config::Config* cfg) : _cfg(cfg) {}
 
 // _____________________________________________________________________________
 void Builder::consume(const Feed& f, BuildGraph* g) {
-  DBox graphBox(getProjectedPoint(f.getMinLat(), f.getMinLon(), _graphProj),
-                getProjectedPoint(f.getMaxLat(), f.getMaxLon(), _graphProj));
+  DBox graphBox(getProjP(f.getMinLat(), f.getMinLon()),
+                getProjP(f.getMaxLat(), f.getMaxLon()));
 
   NodeGrid ngrid(2000, 2000, graphBox);
 
@@ -65,7 +58,7 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
     ++st;
 
     if (i % 100 == 0)
-      LOGTO(INFO, std::cerr) << "@ trip " << i << "/" << f.getTrips().size();
+      LOGTO(DEBUG, std::cerr) << "@ trip " << i << "/" << f.getTrips().size();
 
     for (; st != t->second->getStopTimes().end(); ++st) {
       const auto& cur = *st;
@@ -103,10 +96,8 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
 }
 
 // _____________________________________________________________________________
-DPoint Builder::getProjectedPoint(double lat, double lng, projPJ p) const {
-  double x = lng * DEG_TO_RAD, y = lat * DEG_TO_RAD;
-  pj_transform(_mercProj, p, 1, 1, &x, &y, 0);
-  return DPoint(x, y);
+DPoint Builder::getProjP(double lat, double lng) const {
+  return util::geo::latLngToWebMerc<double>(lat, lng);
 }
 
 // _____________________________________________________________________________
@@ -136,8 +127,8 @@ std::pair<bool, PolyLine<double>> Builder::getSubPolyLine(const Stop* a,
                                                           const Stop* b,
                                                           Trip* t, double distA,
                                                           double distB) {
-  DPoint ap = getProjectedPoint(a->getLat(), a->getLng(), _graphProj);
-  DPoint bp = getProjectedPoint(b->getLat(), b->getLng(), _graphProj);
+  DPoint ap = getProjP(a->getLat(), a->getLng());
+  DPoint bp = getProjP(b->getLat(), b->getLng());
 
   if (!t->getShape()) {
     return std::pair<bool, PolyLine<double>>(false, PolyLine<double>(ap, bp));
@@ -152,7 +143,7 @@ std::pair<bool, PolyLine<double>> Builder::getSubPolyLine(const Stop* a,
              .first;
 
     for (const auto& sp : t->getShape()->getPoints()) {
-      pl->second << getProjectedPoint(sp.lat, sp.lng, _graphProj);
+      pl->second << getProjP(sp.lat, sp.lng);
     }
   }
 
@@ -168,8 +159,7 @@ Node* Builder::addStop(const Stop* curStop, BuildGraph* g, NodeGrid* grid) {
   Node* n = getNodeByStop(g, curStop);
   if (n) return n;
 
-  DPoint p =
-      getProjectedPoint(curStop->getLat(), curStop->getLng(), _graphProj);
+  DPoint p = getProjP(curStop->getLat(), curStop->getLng());
 
   if (n) {
     n->pl().addStop(curStop);

@@ -145,23 +145,25 @@ Overlaps Labeller::getOverlaps(const util::geo::MultiLine<double>& band,
       }
       proced.insert(neigh);
 
-      std::vector<const shared::linegraph::LineNode*> nds = {neigh->getTo(), neigh->getFrom()};
+      std::vector<const shared::linegraph::LineNode*> nds = {neigh->getTo(),
+                                                             neigh->getFrom()};
 
       for (auto nd : nds) {
-      if (nd->pl().stops().size() && !procedNds.count(nd)) {
-        procedNds.insert(nd);
+        if (nd->pl().stops().size() && !procedNds.count(nd)) {
+          procedNds.insert(nd);
 
-        auto statHull =
-            g.getStopGeoms(nd, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                           _cfg->tightStations);
+          auto statHull =
+              g.getStopGeoms(nd, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
+                             _cfg->tightStations);
 
-        double rad =
-            util::geo::getEnclosingRadius(*nd->pl().getGeom(), statHull);
+          double rad =
+              util::geo::getEnclosingRadius(*nd->pl().getGeom(), statHull);
 
-        if (util::geo::dist(*nd->pl().getGeom(), band) < rad + (_cfg->lineWidth + _cfg->lineSpacing) / 2) {
-          ret.statOverlaps++;
+          if (util::geo::dist(*nd->pl().getGeom(), band) <
+              rad + (_cfg->lineWidth + _cfg->lineSpacing) / 2) {
+            ret.statOverlaps++;
+          }
         }
-      }
       }
     }
   }
@@ -242,10 +244,9 @@ void Labeller::labelLines(const RenderGraph& g) {
           if (dir < 0) cand.reverse();
 
           std::set<size_t> lineLabelNeighs;
-          labelGrid.get(
-              cand.getLine(),
-              20 * (_cfg->lineWidth + _cfg->lineSpacing),
-              &lineLabelNeighs);
+          labelGrid.get(cand.getLine(),
+                        20 * (_cfg->lineWidth + _cfg->lineSpacing),
+                        &lineLabelNeighs);
 
           std::vector<const shared::linegraph::Line*> lines;
           for (auto lo : e->pl().getLines()) {
@@ -254,7 +255,9 @@ void Labeller::labelLines(const RenderGraph& g) {
 
           for (auto neighLabelId : lineLabelNeighs) {
             auto neighLabel = _lineLabels[neighLabelId];
-            if (neighLabel.lines == lines && util::geo::dist(cand.getLine(), neighLabel.geom.getLine()) < 20 * (_cfg->lineWidth + _cfg->lineSpacing)) {
+            if (neighLabel.lines == lines &&
+                util::geo::dist(cand.getLine(), neighLabel.geom.getLine()) <
+                    20 * (_cfg->lineWidth + _cfg->lineSpacing)) {
               block = true;
               break;
             }

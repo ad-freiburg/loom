@@ -48,7 +48,7 @@ bool MapConstructor::lineEq(const LineEdge* a, const LineEdge* b) {
   for (const auto& ra : a->pl().getLines()) {
     bool found = false;
     for (const auto& rb : b->pl().getLines()) {
-      if (ra.line == rb.line && ra.style == rb.style) {
+      if (ra.line == rb.line) {
         if (!shrNd->pl().connOccurs(ra.line, a, b)) return false;
 
         found = false;

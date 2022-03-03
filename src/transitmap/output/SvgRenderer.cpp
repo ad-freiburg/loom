@@ -400,10 +400,9 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
   Params params;
   params["style"] = styleStr.str();
 
-  _delegates[0].insert(
-      _delegates[0].begin(),
-      OutlinePrintPair(PrintDelegate(params, p),
-                       PrintDelegate(paramsOutline, p)));
+  _delegates[0].insert(_delegates[0].begin(),
+                       OutlinePrintPair(PrintDelegate(params, p),
+                                        PrintDelegate(paramsOutline, p)));
 }
 
 // _____________________________________________________________________________

@@ -5,8 +5,6 @@
 #ifndef gtfs2graph_CONFIG_CONFIGREADER_H_
 #define gtfs2graph_CONFIG_CONFIGREADER_H_
 
-#include <boost/program_options.hpp>
-#include <vector>
 #include "gtfs2graph/config/GraphBuilderConfig.h"
 
 namespace gtfs2graph {
@@ -16,6 +14,8 @@ class ConfigReader {
  public:
   ConfigReader();
   void read(Config* targetConfig, int argc, char** argv) const;
+ private:
+  void help(const char* bin) const;
 };
 }
 }

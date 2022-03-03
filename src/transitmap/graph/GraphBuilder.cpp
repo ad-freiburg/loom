@@ -7,7 +7,6 @@
 #include <stack>
 #include <vector>
 #include "GraphBuilder.h"
-#include "json/json.hpp"
 #include "shared/rendergraph/RenderGraph.h"
 #include "shared/linegraph/Line.h"
 #include "transitmap/config/TransitMapConfig.h"

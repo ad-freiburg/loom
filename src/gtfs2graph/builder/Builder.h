@@ -5,7 +5,6 @@
 #ifndef GTFS2GRAPH_BUILDER_BUILDER_H_
 #define GTFS2GRAPH_BUILDER_BUILDER_H_
 
-#include <proj_api.h>
 #include <algorithm>
 #include <unordered_map>
 #include "ad/cppgtfs/gtfs/Feed.h"
@@ -46,15 +45,13 @@ class Builder {
 
  private:
   const config::Config* _cfg;
-  projPJ _mercProj;
-  projPJ _graphProj;
 
   std::map<const ad::cppgtfs::gtfs::Stop*, Node*> _stopNodes;
 
   // map of compiled polylines, to avoid calculating them each time
   std::unordered_map<ad::cppgtfs::gtfs::Shape*, PolyLine<double>> _polyLines;
 
-  DPoint getProjectedPoint(double lat, double lng, projPJ p) const;
+  DPoint getProjP(double lat, double lng) const;
 
   std::pair<bool, PolyLine<double>> getSubPolyLine(
       const ad::cppgtfs::gtfs::Stop* a, const ad::cppgtfs::gtfs::Stop* b,

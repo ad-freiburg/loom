@@ -7,7 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <set>
-#include "json/json.hpp"
+#include "3rdparty/json.hpp"
 #include "octi/Enlarger.h"
 #include "octi/Octilinearizer.h"
 #include "octi/basegraph/BaseGraph.h"

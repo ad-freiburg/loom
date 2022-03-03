@@ -1775,6 +1775,30 @@ inline RotatedBox<T> getFullEnvelope(const Geometry<T> pol) {
 
 // _____________________________________________________________________________
 template <typename T>
+inline Polygon<T> buffer(const Line<T>& line, double d, size_t points) {
+  // so far only works correctly if the input polygon is convex
+  MultiPoint<T> pSet;
+  for (const auto& p : line) {
+    Point<T> anchor{p.getX() + d, p.getY()};
+    double deg = 0;
+    pSet.push_back(p);
+    for (size_t i = 0; i < points; i++) {
+      pSet.push_back(rotate(anchor, deg, p));
+      deg += 360 / (1.0 * points);
+    }
+  }
+
+  return convexHull(pSet);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline Polygon<T> buffer(const Polygon<T>& pol, double d, size_t points) {
+  return buffer(pol.getOuter(), d, points);
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline Line<T> sample(const Line<T>& l, double d) {
   if (!l.size()) return l;
 

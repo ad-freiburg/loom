@@ -16,7 +16,10 @@ class ConfigReader {
  public:
   ConfigReader();
   void read(Config* targetConfig, int argc, char** argv) const;
+
+ private:
+  void help(const char* bin) const;
 };
-}
-}
+}  // namespace config
+}  // namespace transitmapper
 #endif  // TRANSITMAP_CONFIG_CONFIGREADER_H_

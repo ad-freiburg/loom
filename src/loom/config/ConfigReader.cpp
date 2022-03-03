@@ -2,143 +2,177 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include <boost/program_options.hpp>
-#include <iostream>
 #include <float.h>
-#include <string>
+#include <getopt.h>
 #include <exception>
-#include "util/log/Log.h"
+#include <iostream>
+#include <string>
+#include "loom/_config.h"
 #include "loom/config/ConfigReader.h"
 #include "loom/config/LoomConfig.h"
+#include "util/log/Log.h"
 
 using loom::config::ConfigReader;
-namespace opts = boost::program_options;
-using std::string;
+
 using std::exception;
+using std::string;
 using std::vector;
 
+static const char* YEAR = &__DATE__[7];
+static const char* COPY =
+    "University of Freiburg - Chair of Algorithms and Data Structures";
+static const char* AUTHORS = "Patrick Brosi <brosi@informatik.uni-freiburg.de>";
+
 // _____________________________________________________________________________
-ConfigReader::ConfigReader() {
+ConfigReader::ConfigReader() {}
+
+// _____________________________________________________________________________
+void ConfigReader::help(const char* bin) const {
+  std::cout << std::setfill(' ') << std::left << "loom (part of LOOM) "
+            << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
+            << "\n\n(C) " << YEAR << " " << COPY << "\n"
+            << "Authors: " << AUTHORS << "\n\n"
+            << "Usage: " << bin << " < graph.json\n\n"
+            << "Allowed options:\n\n"
+            << "General:\n"
+            << std::setw(41) << "  -v [ --version ]"
+            << "print version\n"
+            << std::setw(41) << "  -h [ --help ]"
+            << "show this help message\n"
+            << std::setw(41) << "  --no-untangle"
+            << "Don't apply untangling rules\n"
+            << std::setw(41) << "  --no-prune"
+            << "Don't apply pruning rules\n"
+            << std::setw(41) << "  --optim method arg (=comb)"
+            << "Optimization method, one of ilp-naive, ilp,\n"
+            << std::setw(41) << " "
+            << " comb, exhaust, hillc, hillc-random, anneal,\n"
+            << std::setw(41) << " "
+            << " anneal-random, greedy, greedy-lookahead, null\n"
+            << std::setw(41) << "  --same-seg-cross-pen arg (=4)"
+            << "Penalty for same-segment crossings\n"
+            << std::setw(41) << "  --diff-seg-cross-pen arg (=1)"
+            << "Penalty for diff-segment crossings\n"
+            << std::setw(41) << "  --in-stat-cross-pen-same-seg arg (=12)"
+            << "Penalty for same-segment crossings at stations\n"
+            << std::setw(41) << "  --in-stat-cross-pen-diff-seg arg (=3)"
+            << "Penalty for diff-segment crossings at stations\n"
+            << std::setw(41) << "  --sep-pen arg (=3)"
+            << "Penalty for separations\n"
+            << std::setw(41) << "  --in-stat-sep-pen arg (=9)"
+            << "Penalty for separations at stations\n\n"
+            << "Misc:\n"
+            << std::setw(41) << "  --output-stats"
+            << "Print stats to output\n"
+            << std::setw(41) << "  --ilp-solver arg (=gurobi)"
+            << "Preferred ILP solver, either glpk, cbc, or gurobi.\n"
+            << std::setw(41) << " "
+            << "Will fall back if not available.\n"
+            << std::setw(41) << "  --ilp-num-threads method arg (=0)"
+            << "Number of threads to use by ILP solver,\n"
+            << std::setw(41) << " "
+            << " 0 means solver default\n"
+            << std::setw(41) << "  --ilp-time-limit method arg (=-1)"
+            << "ILP solve time limit, -1 for infinite\n"
+            << std::setw(41) << "  --dbg-output-path arg (=.)"
+            << "Path used for debug output\n"
+            << std::setw(41) << "  --output-optgraph"
+            << "Output optimization graph to debug path\n";
 }
 
 // _____________________________________________________________________________
 void ConfigReader::read(Config* cfg, int argc, char** argv) const {
-  string VERSION_STR = " - unversioned - ";
+  struct option ops[] = {
+      {"version", no_argument, 0, 'v'},
+      {"help", no_argument, 0, 'h'},
+      {"no-untangle", no_argument, 0, 1},
+      {"output-stats", no_argument, 0, 2},
+      {"no-prune", no_argument, 0, 3},
+      {"same-seg-cross-pen", required_argument, 0, 4},
+      {"diff-seg-cross-pen", required_argument, 0, 9},
+      {"sep-pen", required_argument, 0, 5},
+      {"in-stat-sep-pen", required_argument, 0, 8},
+      {"in-stat-cross-pen-same-seg", required_argument, 0, 6},
+      {"in-stat-cross-pen-diff-seg", required_argument, 0, 7},
+      {"ilp-num-threads", required_argument, 0, 10},
+      {"ilp-time-limit", required_argument, 0, 11},
+      {"ilp-solver", required_argument, 0, 12},
+      {"optim-method", required_argument, 0, 'm'},
+      {"optim-runs", required_argument, 0, 13},
+      {"dbg-output-path", required_argument, 0, 14},
+      {"output-optgraph", required_argument, 0, 15},
+      {0, 0, 0, 0}};
 
-  opts::options_description generic("General");
-  generic.add_options()
-    ("version", "output version")
-    ("help,?", "show this message")
-    ("verbose,v", "verbosity level")
-    ("output,o",
-      opts::value<std::string>(&(cfg->outputPath))
-      ->default_value("./transitmap.svg"),
-      "output path");
-
-  opts::options_description config("Output");
-  config.add_options()
-    ("name",
-      opts::value<std::string>(&(cfg->name))
-      ->default_value("shinygraph"),
-      "name of transit graph")
-    ("untangle",
-     opts::value<bool>(&(cfg->untangleGraph))
-      ->default_value(true),
-      "untangle line graph")
-    ("output-stats",
-      opts::value<bool>(&(cfg->outputStats))
-      ->default_value(false),
-      "print some more stats")
-    ("prune",
-      opts::value<bool>(&(cfg->pruneGraph))
-      ->default_value(true),
-      "prune and cut the input graph prior to optimization")
-    ("optim-method",
-      opts::value<std::string>(&(cfg->optimMethod))
-      ->default_value("comb"),
-      "optimization method to use, possible values: ilp_impr, ilp, hillc, comb")
-    ("same-seg-cross-penalty-factor",
-      opts::value<double>(&(cfg->crossPenMultiSameSeg))
-      ->default_value(4),
-      "penalty factor during optimization for crossings that occur between two lines that travel 2 same segments")
-    ("separation-penalty-factor",
-      opts::value<double>(&(cfg->separationPenWeight))
-      ->default_value(3),
-      "penalty factor during optimization for separations")
-    ("in-station-crossing-penalty-factor-same-seg",
-      opts::value<double>(&(cfg->stationCrossWeightSameSeg))
-      ->default_value(12),
-      "penalty factor during optimization for crossings in station with degree > 2 that occur between two lines that travel 2 same segments, only applies if degree-based penalty is enabled")
-   ("in-station-crossing-penalty-factor-diff-seg",
-      opts::value<double>(&(cfg->stationCrossWeightDiffSeg))
-      ->default_value(3),
-      "penalty factor during optimization for crossings in station with degree > 2 that occur between two lines that travel 2 same segments, only applies if degree-based penalty is enabled")
-    ("in-station-separation-penalty-factor",
-      opts::value<double>(&(cfg->stationSeparationWeight))
-      ->default_value(9),
-      "penalty factor during optimization for separations in station with degree > 2, only applies if degree-based penalty is enabled")
-    ("diff-seg-cross-penalty-factor",
-      opts::value<double>(&(cfg->crossPenMultiDiffSeg))
-      ->default_value(1),
-      "penalty factor during optimization for crossings that occur between two lines that travel through 3 segments")
-    ("ilp-num-threads",
-      opts::value<int>(&(cfg->ilpNumThreads))->default_value(0),
-      "Number of threads to use by the ILP solver (how this number is "
-      "internally used depends on the solver). If 0, the solver default will "
-      "be used.")
-    ("ilp-time-limit",
-      opts::value<int>(&(cfg->ilpTimeLimit))
-      ->default_value(-1),
-      "ILP solver time limit (in seconds), negative value means infinity")
-    ("ilp-solver",
-      opts::value<std::string>(&(cfg->ilpSolver))
-      ->default_value("gurobi"),
-      "The preferred solver library to use, will fall back if library is not available.")
-    ("mps-output-path",
-      opts::value<std::string>(&(cfg->MPSOutputPath))
-      ->default_value(""),
-      "output path for ILP, printed in MPS format. If empty, no output will be generated.")
-    ("optim-runs",
-      opts::value<size_t>(&(cfg->optimRuns))
-      ->default_value(1),
-      "number of optimization runs (use for evaluation, avg stats will be printed if > 1)")
-    ("dbg-output-path",
-      opts::value<std::string>(&(cfg->dbgPath))
-      ->default_value("."),
-      "folder the debug information will be written to")
-    ("output-optgraph",
-      opts::value<bool>(&(cfg->outOptGraph))
-      ->default_value(false),
-      "write optimization graph to debug path (--dbg-output-path)")
-  ;
-
-  opts::options_description cmdlineOptions;
-  cmdlineOptions.add(config).add(generic);
-
-  opts::options_description visibleDesc("Allowed options");
-  visibleDesc.add(generic).add(config);
-  opts::variables_map vm;
-
-  try {
-    opts::store(opts::command_line_parser(argc, argv).options(cmdlineOptions)
-        .run(), vm);
-    opts::notify(vm);
-  } catch (exception e) {
-    LOG(ERROR) << e.what() << std::endl;
-    std::cout << visibleDesc << "\n";
-    exit(1);
-  }
-
-  if (vm.count("help")) {
-    std::cout << argv[0] << " [options]\n"
-      << VERSION_STR << "\n\n"
-      << visibleDesc << "\n";
-    exit(0);
-  }
-
-  if (vm.count("version")) {
-    std::cout << "\n" << VERSION_STR << "\n";
-    exit(0);
+  char c;
+  while ((c = getopt_long(argc, argv, ":hvm:", ops, 0)) != -1) {
+    switch (c) {
+      case 'h':
+        help(argv[0]);
+        exit(0);
+      case 'v':
+        std::cout << "loom - (LOOM " << VERSION_FULL << ")" << std::endl;
+        exit(0);
+      case 1:
+        cfg->untangleGraph = false;
+        break;
+      case 2:
+        cfg->outputStats = true;
+        break;
+      case 3:
+        cfg->pruneGraph = false;
+        break;
+      case 'm':
+        cfg->optimMethod = optarg;
+        break;
+      case 4:
+        cfg->crossPenMultiSameSeg = atof(optarg);
+        break;
+      case 5:
+        cfg->separationPenWeight = atof(optarg);
+        break;
+      case 6:
+        cfg->stationCrossWeightSameSeg = atof(optarg);
+        break;
+      case 7:
+        cfg->stationCrossWeightDiffSeg = atof(optarg);
+        break;
+      case 8:
+        cfg->stationSeparationWeight = atof(optarg);
+        break;
+      case 9:
+        cfg->crossPenMultiDiffSeg = atof(optarg);
+        break;
+      case 10:
+        cfg->ilpNumThreads = atoi(optarg);
+        break;
+      case 11:
+        cfg->ilpTimeLimit = atof(optarg);
+        break;
+      case 12:
+        cfg->ilpSolver = atof(optarg);
+        break;
+      case 13:
+        cfg->optimRuns = atoi(optarg);
+        break;
+      case 14:
+        cfg->dbgPath = optarg;
+        break;
+      case 15:
+        cfg->outOptGraph = true;
+        break;
+      case ':':
+        std::cerr << argv[optind - 1];
+        std::cerr << " requires an argument" << std::endl;
+        exit(1);
+      case '?':
+        std::cerr << argv[optind - 1];
+        std::cerr << " option unknown" << std::endl;
+        exit(1);
+        break;
+      default:
+        std::cerr << "Error while parsing arguments" << std::endl;
+        exit(1);
+        break;
+    }
   }
 }
-
