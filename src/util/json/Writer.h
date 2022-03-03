@@ -30,9 +30,9 @@ struct Null {};
 struct Val {
   enum VAL_T { UINT, INT, FLOAT, STRING, ARRAY, DICT, BOOL, JSNULL };
   VAL_T type;
-  int i;
-  uint64_t ui;
-  double f;
+  int i = 0;
+  uint64_t ui = 0;
+  double f = 0;
   std::string str;
   std::vector<Val> arr;
   std::map<std::string, Val> dict;

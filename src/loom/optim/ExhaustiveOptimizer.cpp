@@ -15,9 +15,12 @@ using shared::linegraph::Line;
 using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
-double ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                      HierarOrderCfg* hc, size_t depth,
-                                      OptResStats& stats) const {
+double ExhaustiveOptimizer::optimizeComp(OptGraph* og,
+                                         const std::set<OptNode*>& g,
+                                         HierarOrderCfg* hc, size_t depth,
+                                         OptResStats& stats) const {
+  UNUSED(og);
+  UNUSED(stats);
   LOGTO(DEBUG, std::cerr) << prefix(depth)
                           << "(ExhaustiveOptimizer) Optimizing component with "
                           << g.size() << " nodes.";
@@ -56,7 +59,9 @@ double ExhaustiveOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>&
   // iterations per second
   if ((solSp / 50000) > (60 * 60 * 6)) {
     std::stringstream ss;
-    ss << "Exhaustive search would take too long (over " << ((solSp / 50000) / (60 * 60)) << " hours even assuming we can check 50.000 configurations per second";
+    ss << "Exhaustive search would take too long (over "
+       << ((solSp / 50000) / (60 * 60))
+       << " hours even assuming we can check 50.000 configurations per second";
     throw std::runtime_error(ss.str());
   }
 

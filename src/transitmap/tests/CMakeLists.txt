@@ -3,4 +3,4 @@ include_directories(
 )
 
 add_executable(transitmapTest TestMain.cpp)
-target_link_libraries(transitmapTest transitmap_dep ${Boost_LIBRARIES})
+target_link_libraries(transitmapTest transitmap_dep)

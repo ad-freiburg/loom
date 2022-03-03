@@ -253,6 +253,7 @@ int COINSolver::getNumVars() const { return _model.numberColumns(); }
 // _____________________________________________________________________________
 void COINSolver::setStarter(const StarterSol& starterSol) {
   // TODO: not yet implemented
+  UNUSED(starterSol);
 }
 
 // _____________________________________________________________________________

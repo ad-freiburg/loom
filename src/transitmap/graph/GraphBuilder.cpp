@@ -141,6 +141,7 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
 // _____________________________________________________________________________
 bool GraphBuilder::nodeFrontsOverlap(const RenderGraph* g, const NodeFront& a,
                                      const NodeFront& b, double d) const {
+  UNUSED(g);
   return b.geom.distTo(a.geom) <= d;
 }
 

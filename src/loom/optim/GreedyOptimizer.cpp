@@ -19,6 +19,8 @@ using shared::rendergraph::HierarOrderCfg;
 double GreedyOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                   HierarOrderCfg* hc, size_t depth,
                                   OptResStats& stats) const {
+  UNUSED(og);
+  UNUSED(stats);
   LOGTO(DEBUG, std::cerr) << prefix(depth)
                           << "(GreedyOptimizer) Optimizing component with "
                           << g.size() << " nodes.";

@@ -2,10 +2,12 @@
 // University of Freiburg - Chair of Algorithms and Datastructures
 // Author: Patrick Brosi
 
+#include "util/Misc.h"
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
-  // TODO
+  UNUSED(argc);
+  UNUSED(argv);
 
-  return (0);
+  return 0;
 }

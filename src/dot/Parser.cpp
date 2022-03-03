@@ -31,7 +31,6 @@ const Entity& Parser::get() {
   _level = _level == std::numeric_limits<size_t>::max() ? 0 : _level;
 
   while (_is->get(_c)) {
-    // std::cout << "state: " << _s << " level: " << _level << " char: " << _c << std::endl;
     _ret.level = _level;
     switch (_s) {
       case NONE:
@@ -129,6 +128,8 @@ const Entity& Parser::get() {
           _s = KW_DIRGRAPH;
           continue;
         }
+        std::cerr << "Expected keyword 'digraph'" << std::endl;
+        exit(1);
       case AW_GRAPH_ID:
         if (std::isspace(_c)) continue;
         if (isIDChar(_c)) {
@@ -253,8 +254,7 @@ const Entity& Parser::get() {
 
         if (tmp == "graph") {
           if (_ret.type != EMPTY) {
-            std::cerr << "'graph' is a reserved keyword"
-                      << std::endl;
+            std::cerr << "'graph' is a reserved keyword" << std::endl;
             exit(1);
           }
           _ret.type = ATTR_GRAPH;
@@ -262,8 +262,7 @@ const Entity& Parser::get() {
 
         if (tmp == "node") {
           if (_ret.type != EMPTY) {
-            std::cerr << "'node' is a reserved keyword"
-                      << std::endl;
+            std::cerr << "'node' is a reserved keyword" << std::endl;
             exit(1);
           }
           _ret.type = ATTR_NODE;
@@ -271,8 +270,7 @@ const Entity& Parser::get() {
 
         if (tmp == "edge") {
           if (_ret.type != EMPTY) {
-            std::cerr << "'edge' is a reserved keyword"
-                      << std::endl;
+            std::cerr << "'edge' is a reserved keyword" << std::endl;
             exit(1);
           }
           _ret.type = ATTR_EDGE;
@@ -282,9 +280,7 @@ const Entity& Parser::get() {
         tmp.clear();
 
         _s = AW_STMT_DEC;
-        // slip down
-
-
+        // fall through
       case AW_STMT_DEC:
         if (std::isspace(_c)) continue;
         if (_c == '=') {
@@ -401,8 +397,7 @@ const Entity& Parser::get() {
         tmp.clear();
         tmp2.clear();
         _s = AW_CONT_ATTR_KEY;
-        // slip through
-
+        // fall through
       case AW_CONT_ATTR_KEY:
         if (std::isspace(_c)) continue;
         if (_c == ';' || _c == ',') {

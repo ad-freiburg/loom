@@ -502,7 +502,7 @@ bool OptGraph::dogBoneCheaper(const OptNode* a, const OptNode* b,
 // _____________________________________________________________________________
 bool OptGraph::contractCheaper(const OptNode* cont, const OptNode* cheaper,
                                const std::vector<OptLO>& lines) const {
-  if (cheaper->getDeg() == 1) return true; // trivially a terminus node
+  if (cheaper->getDeg() == 1) return true;  // trivially a terminus node
 
   // check if the lines *uniquely* extend over cheaper, otherwise don't contract
   for (const auto& lo : lines) {
@@ -887,52 +887,44 @@ void OptGraph::untanglePartialY() {
     assert(na->getDeg() == 1);
     OptNode* nb = ea->getOtherNd(na);
 
-    if (isPartialYAt(ea, nb)) {
-      assert(nb->pl().node);
-      assert(na->pl().node);
+    assert(nb->pl().node);
+    assert(na->pl().node);
 
-      // the geometry of the main leg
-      util::geo::PolyLine<double> pl(*nb->pl().getGeom(), *na->pl().getGeom());
-      double bandW = (nb->getDeg() - 1) * (DO / (ea->pl().depth + 1));
-      auto ortho = pl.getOrthoLineAtDist(pl.getLength(), bandW);
+    // the geometry of the main leg
+    util::geo::PolyLine<double> pl(*nb->pl().getGeom(), *na->pl().getGeom());
+    double bandW = (nb->getDeg() - 1) * (DO / (ea->pl().depth + 1));
+    auto ortho = pl.getOrthoLineAtDist(pl.getLength(), bandW);
 
-      // each leg, in clockwise fashion
-      auto minLgs = partialClockwEdges(ea, nb);
+    // each leg, in clockwise fashion
+    auto minLgs = partialClockwEdges(ea, nb);
 
-      assert(minLgs.size() <= ea->pl().getCardinality());
+    assert(minLgs.size() <= ea->pl().getCardinality());
 
-      // for each minor leg of the Y, create a new node at the origin
-      std::vector<OptNode*> origNds =
-          explodeNodeAlong(na, ortho, minLgs.size());
+    // for each minor leg of the Y, create a new node at the origin
+    std::vector<OptNode*> origNds = explodeNodeAlong(na, ortho, minLgs.size());
 
-      size_t offset = 0;
-      for (size_t i = 0; i < minLgs.size(); i++) {
-        size_t j = i;
-        OptEdgePL pl;
-        if (ea->getFrom() == nb) {
-          if (ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
-          pl = getPartialView(ea, minLgs[j], offset);
-          addEdg(nb, origNds[j], pl);
-        } else {
-          if (!ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
-          pl = getPartialView(ea, minLgs[j], offset);
-          addEdg(origNds[j], nb, pl);
-        }
-        offset += pl.getLines().size();
+    size_t offset = 0;
+    for (size_t i = 0; i < minLgs.size(); i++) {
+      size_t j = i;
+      OptEdgePL pl;
+      if (ea->getFrom() == nb) {
+        if (ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
+        pl = getPartialView(ea, minLgs[j], offset);
+        addEdg(nb, origNds[j], pl);
+      } else {
+        if (!ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
+        pl = getPartialView(ea, minLgs[j], offset);
+        addEdg(origNds[j], nb, pl);
       }
-
-      // delete remaining stuff
-      delNd(na);
-
-      // update orderings
-      for (auto n : origNds) updateEdgeOrder(n);
-      updateEdgeOrder(nb);
-
-    } else {
-      // this cannot happen - it would mean that main leg was a minor leg of
-      // one of its minor legs, but this is impossible
-      assert(false);
+      offset += pl.getLines().size();
     }
+
+    // delete remaining stuff
+    delNd(na);
+
+    // update orderings
+    for (auto n : origNds) updateEdgeOrder(n);
+    updateEdgeOrder(nb);
   }
 }
 
@@ -1027,20 +1019,16 @@ void OptGraph::untangleDoubleStump() {
   }
 
   for (auto mainLeg : toUntangle) {
-    const OptLO* stump;
-    if ((stump = isDoubleStump(mainLeg))) {
-      OptEdgePL plMain = getPartialViewExcl(mainLeg, stump, 0);
-      OptEdgePL plStump =
-          getPartialView(mainLeg, stump, plMain.getLines().size());
+    const OptLO* stump = isDoubleStump(mainLeg);
+    OptEdgePL plMain = getPartialViewExcl(mainLeg, stump, 0);
+    OptEdgePL plStump =
+        getPartialView(mainLeg, stump, plMain.getLines().size());
 
-      mainLeg->pl() = plMain;
+    mainLeg->pl() = plMain;
 
-      auto stNdA = addNd(mainLeg->getFrom()->pl());
-      auto stNdB = addNd(mainLeg->getTo()->pl());
-      addEdg(stNdA, stNdB, plStump);
-    } else {
-      assert(false);
-    }
+    auto stNdA = addNd(mainLeg->getFrom()->pl());
+    auto stNdB = addNd(mainLeg->getTo()->pl());
+    addEdg(stNdA, stNdB, plStump);
   }
 }
 
@@ -1065,120 +1053,114 @@ void OptGraph::untangleOuterStump() {
   }
 
   for (auto mainLeg : toUntangle) {
-    std::cerr << mainLeg << std::endl;
-    std::pair<OptEdge*, bool> stumpEdgPair;
-    if ((stumpEdgPair = isOuterStump(mainLeg)).first) {
-      OptEdge* stumpEdg = stumpEdgPair.first;
-      bool clockw = stumpEdgPair.second;
-      OptNode* stumpN = sharedNode(mainLeg, stumpEdg);
-      OptNode* notStumpN = mainLeg->getOtherNd(stumpN);
+    auto stumpEdgPair = isOuterStump(mainLeg);
+    OptEdge* stumpEdg = stumpEdgPair.first;
+    bool clockw = stumpEdgPair.second;
+    OptNode* stumpN = sharedNode(mainLeg, stumpEdg);
+    OptNode* notStumpN = mainLeg->getOtherNd(stumpN);
 
-      // the geometry of the main leg
-      util::geo::PolyLine<double> poly(*notStumpN->pl().getGeom(),
-                                       *stumpN->pl().getGeom());
-      double bandW = (DO / (mainLeg->pl().depth + 1));
-      auto ortho = poly.getOrthoLineAtDist(poly.getLength(), bandW);
+    // the geometry of the main leg
+    util::geo::PolyLine<double> poly(*notStumpN->pl().getGeom(),
+                                     *stumpN->pl().getGeom());
+    double bandW = (DO / (mainLeg->pl().depth + 1));
+    auto ortho = poly.getOrthoLineAtDist(poly.getLength(), bandW);
 
-      // create two new nodes at the stump node
-      std::vector<OptNode*> stumpNds = explodeNodeAlong(stumpN, ortho, 2);
+    // create two new nodes at the stump node
+    std::vector<OptNode*> stumpNds = explodeNodeAlong(stumpN, ortho, 2);
 
-      auto ortho2 = poly.getOrthoLineAtDist(0, bandW);
+    auto ortho2 = poly.getOrthoLineAtDist(0, bandW);
 
-      // create two new nodes at the non-stump node
-      std::vector<OptNode*> notStumpNds =
-          explodeNodeAlong(notStumpN, ortho2, 2);
+    // create two new nodes at the non-stump node
+    std::vector<OptNode*> notStumpNds = explodeNodeAlong(notStumpN, ortho2, 2);
 
-      size_t mainLegNode, stumpNode;
+    size_t mainLegNode, stumpNode;
 
-      // we assume that the stump edge is on the right
+    // we assume that the stump edge is on the right
 
-      if (mainLeg->getFrom() == stumpN) {
-        size_t j;
+    if (mainLeg->getFrom() == stumpN) {
+      size_t j;
 
-        if (mainLeg->pl().lnEdgParts[0].dir)
-          j = 1;
-        else
-          j = 0;
-
-        mainLegNode = j;
-        stumpNode = 1 - j;
-
-        if (clockw ^ !mainLeg->pl().lnEdgParts[0].dir) {
-          OptEdgePL pl = getPartialViewExcl(mainLeg, stumpEdg, 0);
-          addEdg(stumpNds[mainLegNode], notStumpNds[mainLegNode], pl);
-
-          pl = getPartialView(mainLeg, stumpEdg, pl.getLines().size());
-          addEdg(stumpNds[stumpNode], notStumpNds[stumpNode], pl);
-        } else {
-          OptEdgePL pl = getPartialView(mainLeg, stumpEdg, 0);
-          addEdg(stumpNds[stumpNode], notStumpNds[stumpNode], pl);
-
-          pl = getPartialViewExcl(mainLeg, stumpEdg, pl.getLines().size());
-          addEdg(stumpNds[mainLegNode], notStumpNds[mainLegNode], pl);
-        }
-      } else {
-        size_t j;
-
-        if (mainLeg->pl().lnEdgParts[0].dir)
-          j = 1;
-        else
-          j = 0;
-
-        mainLegNode = j;
-        stumpNode = 1 - j;
-
-        if (clockw ^ !mainLeg->pl().lnEdgParts[0].dir) {
-          OptEdgePL pl = getPartialView(mainLeg, stumpEdg, 0);
-          addEdg(notStumpNds[stumpNode], stumpNds[stumpNode], pl);
-
-          pl = getPartialViewExcl(mainLeg, stumpEdg, pl.getLines().size());
-          addEdg(notStumpNds[mainLegNode], stumpNds[mainLegNode], pl);
-        } else {
-          OptEdgePL pl = getPartialViewExcl(mainLeg, stumpEdg, 0);
-          addEdg(notStumpNds[mainLegNode], stumpNds[mainLegNode], pl);
-
-          pl = getPartialView(mainLeg, stumpEdg, pl.getLines().size());
-          addEdg(notStumpNds[stumpNode], stumpNds[stumpNode], pl);
-        }
-      }
-
-      if (stumpEdg->getFrom() == stumpN)
-        addEdg(stumpNds[stumpNode], stumpEdg->getTo(), stumpEdg->pl());
+      if (mainLeg->pl().lnEdgParts[0].dir)
+        j = 1;
       else
-        addEdg(stumpEdg->getFrom(), stumpNds[stumpNode], stumpEdg->pl());
+        j = 0;
 
-      for (auto e : stumpN->getAdjList()) {
-        if (e == stumpEdg || e == mainLeg) continue;
+      mainLegNode = j;
+      stumpNode = 1 - j;
 
-        if (e->getFrom() == stumpN)
-          addEdg(stumpNds[mainLegNode], e->getTo(), e->pl());
-        else
-          addEdg(e->getFrom(), stumpNds[mainLegNode], e->pl());
-      }
+      if (clockw ^ !mainLeg->pl().lnEdgParts[0].dir) {
+        OptEdgePL pl = getPartialViewExcl(mainLeg, stumpEdg, 0);
+        addEdg(stumpNds[mainLegNode], notStumpNds[mainLegNode], pl);
 
-      for (auto e : notStumpN->getAdjList()) {
-        if (e == mainLeg) continue;
+        pl = getPartialView(mainLeg, stumpEdg, pl.getLines().size());
+        addEdg(stumpNds[stumpNode], notStumpNds[stumpNode], pl);
+      } else {
+        OptEdgePL pl = getPartialView(mainLeg, stumpEdg, 0);
+        addEdg(stumpNds[stumpNode], notStumpNds[stumpNode], pl);
 
-        if (e->getFrom() == notStumpN)
-          addEdg(notStumpNds[mainLegNode], e->getTo(), e->pl());
-        else
-          addEdg(e->getFrom(), notStumpNds[mainLegNode], e->pl());
-      }
-
-      delNd(stumpN);
-      delNd(notStumpN);
-
-      // update orderings
-      for (auto n : stumpNds) {
-        updateEdgeOrder(n);
-        for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
-      }
-      for (auto n : notStumpNds) {
-        updateEdgeOrder(n);
-        for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
+        pl = getPartialViewExcl(mainLeg, stumpEdg, pl.getLines().size());
+        addEdg(stumpNds[mainLegNode], notStumpNds[mainLegNode], pl);
       }
     } else {
-      assert(false);
+      size_t j;
+
+      if (mainLeg->pl().lnEdgParts[0].dir)
+        j = 1;
+      else
+        j = 0;
+
+      mainLegNode = j;
+      stumpNode = 1 - j;
+
+      if (clockw ^ !mainLeg->pl().lnEdgParts[0].dir) {
+        OptEdgePL pl = getPartialView(mainLeg, stumpEdg, 0);
+        addEdg(notStumpNds[stumpNode], stumpNds[stumpNode], pl);
+
+        pl = getPartialViewExcl(mainLeg, stumpEdg, pl.getLines().size());
+        addEdg(notStumpNds[mainLegNode], stumpNds[mainLegNode], pl);
+      } else {
+        OptEdgePL pl = getPartialViewExcl(mainLeg, stumpEdg, 0);
+        addEdg(notStumpNds[mainLegNode], stumpNds[mainLegNode], pl);
+
+        pl = getPartialView(mainLeg, stumpEdg, pl.getLines().size());
+        addEdg(notStumpNds[stumpNode], stumpNds[stumpNode], pl);
+      }
+    }
+
+    if (stumpEdg->getFrom() == stumpN)
+      addEdg(stumpNds[stumpNode], stumpEdg->getTo(), stumpEdg->pl());
+    else
+      addEdg(stumpEdg->getFrom(), stumpNds[stumpNode], stumpEdg->pl());
+
+    for (auto e : stumpN->getAdjList()) {
+      if (e == stumpEdg || e == mainLeg) continue;
+
+      if (e->getFrom() == stumpN)
+        addEdg(stumpNds[mainLegNode], e->getTo(), e->pl());
+      else
+        addEdg(e->getFrom(), stumpNds[mainLegNode], e->pl());
+    }
+
+    for (auto e : notStumpN->getAdjList()) {
+      if (e == mainLeg) continue;
+
+      if (e->getFrom() == notStumpN)
+        addEdg(notStumpNds[mainLegNode], e->getTo(), e->pl());
+      else
+        addEdg(e->getFrom(), notStumpNds[mainLegNode], e->pl());
+    }
+
+    delNd(stumpN);
+    delNd(notStumpN);
+
+    // update orderings
+    for (auto n : stumpNds) {
+      updateEdgeOrder(n);
+      for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
+    }
+    for (auto n : notStumpNds) {
+      updateEdgeOrder(n);
+      for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
     }
   }
 }
@@ -1212,64 +1194,56 @@ void OptGraph::untangleY() {
     assert(na->getDeg() == 1);
     OptNode* nb = ea->getOtherNd(na);
 
-    if (isYAt(ea, nb)) {
-      // the geometry of the main leg
-      util::geo::PolyLine<double> pl(*nb->pl().getGeom(), *na->pl().getGeom());
-      double bandW = (nb->getDeg() - 1) * (DO / (ea->pl().depth + 1));
-      auto orthoPl = pl.getOrthoLineAtDist(0, bandW);
-      auto orthoPlOrig = pl.getOrthoLineAtDist(pl.getLength(), bandW);
+    // the geometry of the main leg
+    util::geo::PolyLine<double> pl(*nb->pl().getGeom(), *na->pl().getGeom());
+    double bandW = (nb->getDeg() - 1) * (DO / (ea->pl().depth + 1));
+    auto orthoPl = pl.getOrthoLineAtDist(0, bandW);
+    auto orthoPlOrig = pl.getOrthoLineAtDist(pl.getLength(), bandW);
 
-      // for each minor leg of the stump, create a new node at the origin
-      std::vector<OptNode*> centerNds =
-          explodeNodeAlong(nb, orthoPl, nb->getDeg() - 1);
-      std::vector<OptNode*> origNds =
-          explodeNodeAlong(na, orthoPlOrig, nb->getDeg() - 1);
+    // for each minor leg of the stump, create a new node at the origin
+    std::vector<OptNode*> centerNds =
+        explodeNodeAlong(nb, orthoPl, nb->getDeg() - 1);
+    std::vector<OptNode*> origNds =
+        explodeNodeAlong(na, orthoPlOrig, nb->getDeg() - 1);
 
-      // each leg, in clockwise fashion
-      auto minLgs = clockwEdges(ea, nb);
-      std::vector<OptEdge*> minLgsN(minLgs.size());
-      assert(minLgs.size() == nb->pl().circOrdering.size() - 1);
+    // each leg, in clockwise fashion
+    auto minLgs = clockwEdges(ea, nb);
+    std::vector<OptEdge*> minLgsN(minLgs.size());
+    assert(minLgs.size() == nb->pl().circOrdering.size() - 1);
 
-      for (size_t i = 0; i < minLgs.size(); i++) {
-        if (minLgs[i]->getFrom() == nb)
-          minLgsN[i] =
-              addEdg(centerNds[i], minLgs[i]->getTo(), minLgs[i]->pl());
-        else
-          minLgsN[i] =
-              addEdg(minLgs[i]->getFrom(), centerNds[i], minLgs[i]->pl());
+    for (size_t i = 0; i < minLgs.size(); i++) {
+      if (minLgs[i]->getFrom() == nb)
+        minLgsN[i] = addEdg(centerNds[i], minLgs[i]->getTo(), minLgs[i]->pl());
+      else
+        minLgsN[i] =
+            addEdg(minLgs[i]->getFrom(), centerNds[i], minLgs[i]->pl());
+    }
+
+    size_t offset = 0;
+    for (size_t i = 0; i < minLgs.size(); i++) {
+      size_t j = i;
+      OptEdgePL pl;
+      if (ea->getFrom() == nb) {
+        if (ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
+        pl = getView(ea, minLgs[j], offset);
+        addEdg(centerNds[j], origNds[j], pl);
+      } else {
+        if (!ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
+        pl = getView(ea, minLgs[j], offset);
+        addEdg(origNds[j], centerNds[j], pl);
       }
+      offset += pl.getLines().size();
+    }
 
-      size_t offset = 0;
-      for (size_t i = 0; i < minLgs.size(); i++) {
-        size_t j = i;
-        OptEdgePL pl;
-        if (ea->getFrom() == nb) {
-          if (ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
-          pl = getView(ea, minLgs[j], offset);
-          addEdg(centerNds[j], origNds[j], pl);
-        } else {
-          if (!ea->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
-          pl = getView(ea, minLgs[j], offset);
-          addEdg(origNds[j], centerNds[j], pl);
-        }
-        offset += pl.getLines().size();
-      }
+    // delete remaining stuff
+    delNd(nb);
+    delNd(na);
 
-      // delete remaining stuff
-      delNd(nb);
-      delNd(na);
-
-      // update orderings
-      for (auto n : origNds) updateEdgeOrder(n);  // TODO: is this redundant?
-      for (auto n : centerNds) {
-        updateEdgeOrder(n);
-        for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
-      }
-
-    } else {
-      // this cannot happen - it would mean that main leg was a minor leg of
-      // one of its minor legs, but this is impossible
-      assert(false);
+    // update orderings
+    for (auto n : origNds) updateEdgeOrder(n);  // TODO: is this redundant?
+    for (auto n : centerNds) {
+      updateEdgeOrder(n);
+      for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
     }
   }
 }
@@ -1424,81 +1398,73 @@ void OptGraph::untanglePartialDogBone() {
   }
 
   for (auto mainLeg : toUntangle) {
-    OptNode* notPartN = 0;
-    if ((notPartN = isPartialDogBone(mainLeg))) {
-      OptNode* partN = mainLeg->getOtherNd(notPartN);
+    OptNode* notPartN = isPartialDogBone(mainLeg);
+    OptNode* partN = mainLeg->getOtherNd(notPartN);
 
-      // the geometry of the main leg
-      util::geo::PolyLine<double> pl(*notPartN->pl().getGeom(),
-                                     *partN->pl().getGeom());
-      double bandW = (partN->getDeg() - 1) * (DO / (mainLeg->pl().depth + 1));
-      auto orthoPlOrig = pl.getOrthoLineAtDist(pl.getLength(), bandW);
-      orthoPlOrig.reverse();
+    // the geometry of the main leg
+    util::geo::PolyLine<double> pl(*notPartN->pl().getGeom(),
+                                   *partN->pl().getGeom());
+    double bandW = (partN->getDeg() - 1) * (DO / (mainLeg->pl().depth + 1));
+    auto orthoPlOrig = pl.getOrthoLineAtDist(pl.getLength(), bandW);
+    orthoPlOrig.reverse();
 
-      // each leg, in clockwise fashion
-      auto minLgs = clockwEdges(mainLeg, partN);
-      auto minLgsNotPart = partialClockwEdges(mainLeg, notPartN);
-      std::reverse(minLgsNotPart.begin(), minLgsNotPart.end());
-      std::vector<OptEdge*> minLgsNew(minLgs.size());
+    // each leg, in clockwise fashion
+    auto minLgs = clockwEdges(mainLeg, partN);
+    auto minLgsNotPart = partialClockwEdges(mainLeg, notPartN);
+    std::reverse(minLgsNotPart.begin(), minLgsNotPart.end());
+    std::vector<OptEdge*> minLgsNew(minLgs.size());
 
-      assert(minLgs.size() <= mainLeg->pl().getCardinality());
-      // map positions in b to positions in a
-      std::vector<size_t> aToB = mapPositions(minLgsNotPart, mainLeg, minLgs);
-      std::vector<size_t> iden(aToB.size());
-      for (size_t i = 0; i < iden.size(); i++) iden[i] = i;
+    assert(minLgs.size() <= mainLeg->pl().getCardinality());
+    // map positions in b to positions in a
+    std::vector<size_t> aToB = mapPositions(minLgsNotPart, mainLeg, minLgs);
+    std::vector<size_t> iden(aToB.size());
+    for (size_t i = 0; i < iden.size(); i++) iden[i] = i;
 
-      // for each minor leg of the Y, create a new node at the origin
-      std::vector<OptNode*> partNds =
-          explodeNodeAlong(partN, orthoPlOrig, minLgs.size());
+    // for each minor leg of the Y, create a new node at the origin
+    std::vector<OptNode*> partNds =
+        explodeNodeAlong(partN, orthoPlOrig, minLgs.size());
 
-      for (size_t i = 0; i < minLgs.size(); i++) {
-        if (minLgs[i]->getFrom() == partN)
-          minLgsNew[i] =
-              addEdg(partNds[i], minLgs[i]->getTo(), minLgs[i]->pl());
-        else
-          minLgsNew[i] =
-              addEdg(minLgs[i]->getFrom(), partNds[i], minLgs[i]->pl());
-      }
-
-      std::vector<OptEdge*>& refLegs = minLgs;
-      std::vector<size_t>& toB = iden;
-      if (_scorer->getCrossingPenDiffSeg(partN) <
-          _scorer->getCrossingPenDiffSeg(notPartN)) {
-        refLegs = minLgsNotPart;
-        toB = aToB;
-      }
-
-      size_t offset = 0;
-      for (size_t i = 0; i < minLgs.size(); i++) {
-        size_t j = i;
-        OptEdgePL pl;
-        if (mainLeg->getFrom() == partN) {
-          if (mainLeg->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
-          pl = getPartialView(mainLeg, refLegs[j], offset);
-          addEdg(partNds[toB[j]], notPartN, pl);
-        } else {
-          if (!mainLeg->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
-          pl = getPartialView(mainLeg, refLegs[j], offset);
-          addEdg(notPartN, partNds[toB[j]], pl);
-        }
-        offset += pl.getLines().size();
-      }
-
-      // delete remaining stuff
-      delNd(partN);
-
-      // update orderings
-      for (auto n : partNds) {
-        updateEdgeOrder(n);
-        for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
-      }
-      updateEdgeOrder(notPartN);
-
-    } else {
-      // this cannot happen - it would mean that main leg was a minor leg of
-      // one of its minor legs, but this is impossible
-      assert(false);
+    for (size_t i = 0; i < minLgs.size(); i++) {
+      if (minLgs[i]->getFrom() == partN)
+        minLgsNew[i] = addEdg(partNds[i], minLgs[i]->getTo(), minLgs[i]->pl());
+      else
+        minLgsNew[i] =
+            addEdg(minLgs[i]->getFrom(), partNds[i], minLgs[i]->pl());
     }
+
+    std::vector<OptEdge*>& refLegs = minLgs;
+    std::vector<size_t>& toB = iden;
+    if (_scorer->getCrossingPenDiffSeg(partN) <
+        _scorer->getCrossingPenDiffSeg(notPartN)) {
+      refLegs = minLgsNotPart;
+      toB = aToB;
+    }
+
+    size_t offset = 0;
+    for (size_t i = 0; i < minLgs.size(); i++) {
+      size_t j = i;
+      OptEdgePL pl;
+      if (mainLeg->getFrom() == partN) {
+        if (mainLeg->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
+        pl = getPartialView(mainLeg, refLegs[j], offset);
+        addEdg(partNds[toB[j]], notPartN, pl);
+      } else {
+        if (!mainLeg->pl().lnEdgParts[0].dir) j = minLgs.size() - 1 - i;
+        pl = getPartialView(mainLeg, refLegs[j], offset);
+        addEdg(notPartN, partNds[toB[j]], pl);
+      }
+      offset += pl.getLines().size();
+    }
+
+    // delete remaining stuff
+    delNd(partN);
+
+    // update orderings
+    for (auto n : partNds) {
+      updateEdgeOrder(n);
+      for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
+    }
+    updateEdgeOrder(notPartN);
   }
 }
 
@@ -1519,154 +1485,146 @@ void OptGraph::untangleInnerStump() {
   }
 
   for (auto mainLeg : toUntangle) {
-    if (isInnerStump(mainLeg)) {
-      auto na = mainLeg->getFrom();
-      OptNode* nb = mainLeg->getOtherNd(na);
+    auto na = mainLeg->getFrom();
+    OptNode* nb = mainLeg->getOtherNd(na);
 
-      std::vector<OptNode*> dummies;
+    std::vector<OptNode*> dummies;
 
-      // make relative to main leg
-      na->pl().circOrdering = clockwEdges(mainLeg, na);
-      na->pl().circOrdering.insert(na->pl().circOrdering.begin(), mainLeg);
-      nb->pl().circOrdering = clockwEdges(mainLeg, nb);
-      nb->pl().circOrdering.insert(nb->pl().circOrdering.begin(), mainLeg);
+    // make relative to main leg
+    na->pl().circOrdering = clockwEdges(mainLeg, na);
+    na->pl().circOrdering.insert(na->pl().circOrdering.begin(), mainLeg);
+    nb->pl().circOrdering = clockwEdges(mainLeg, nb);
+    nb->pl().circOrdering.insert(nb->pl().circOrdering.begin(), mainLeg);
 
-      // add dummy edges
-      size_t i = 0;
-      for (auto a : clockwEdges(mainLeg, na)) {
-        if (terminatesAt(a, mainLeg, nb)) {
-          auto dummyNode = addNd(nb->pl());
-          dummies.push_back(dummyNode);
-          auto dummyEdge = addEdg(nb, dummyNode);
-          for (auto roOld : a->pl().getLines()) {
-            dummyEdge->pl().lines.push_back(OptLO(roOld.line, 0));
-          }
-          dummyEdge->pl().lnEdgParts.push_back({0, 0, 0, 0});
-
-          nb->pl().circOrdering.insert(nb->pl().circOrdering.end() - i,
-                                       dummyEdge);
+    // add dummy edges
+    size_t i = 0;
+    for (auto a : clockwEdges(mainLeg, na)) {
+      if (terminatesAt(a, mainLeg, nb)) {
+        auto dummyNode = addNd(nb->pl());
+        dummies.push_back(dummyNode);
+        auto dummyEdge = addEdg(nb, dummyNode);
+        for (auto roOld : a->pl().getLines()) {
+          dummyEdge->pl().lines.push_back(OptLO(roOld.line, 0));
         }
+        dummyEdge->pl().lnEdgParts.push_back({0, 0, 0, 0});
 
-        i++;
-        // only necessary on this side, not the other side
-        while (i < nb->pl().circOrdering.size() &&
-               terminatesAt(nb->pl().circOrdering[i], mainLeg, na)) {
-          i++;
-        }
+        nb->pl().circOrdering.insert(nb->pl().circOrdering.end() - i,
+                                     dummyEdge);
       }
 
-      i = 0;
-      for (auto a : clockwEdges(mainLeg, nb)) {
-        if (terminatesAt(a, mainLeg, na)) {
-          auto dummyNode = addNd(na->pl());
-          dummies.push_back(dummyNode);
-          auto dummyEdge = addEdg(na, dummyNode);
-          for (auto roOld : a->pl().getLines()) {
-            dummyEdge->pl().lines.push_back(OptLO(roOld.line, 0));
-          }
-          dummyEdge->pl().lnEdgParts.push_back({0, 0, 0, 0});
-          na->pl().circOrdering.insert(na->pl().circOrdering.end() - i,
-                                       dummyEdge);
-        }
+      i++;
+      // only necessary on this side, not the other side
+      while (i < nb->pl().circOrdering.size() &&
+             terminatesAt(nb->pl().circOrdering[i], mainLeg, na)) {
         i++;
       }
+    }
 
-      // the geometry of the main leg
-      util::geo::PolyLine<double> pl(*na->pl().getGeom(), *nb->pl().getGeom());
-      double bandW = (nb->getDeg() - 1) * (DO / (mainLeg->pl().depth + 1));
-      auto orthoPlA = pl.getOrthoLineAtDist(0, bandW);
-      auto orthoPlB = pl.getOrthoLineAtDist(pl.getLength(), bandW);
-
-      // for each minor leg at node a, create a new node
-      std::vector<OptNode*> aNds =
-          explodeNodeAlong(na, orthoPlA, na->getDeg() - 1);
-
-      // each leg in a, in clockwise fashion
-      auto minLgsA = clockwEdges(mainLeg, na);
-      std::vector<OptEdge*> minLgsANew(minLgsA.size());
-      assert(minLgsA.size() == na->pl().circOrdering.size() - 1);
-
-      std::vector<OptNode*> bNds =
-          explodeNodeAlong(nb, orthoPlB, nb->getDeg() - 1);
-
-      // each leg in b, in counter-clockwise fashion
-      auto minLgsB = clockwEdges(mainLeg, nb);
-      std::vector<OptEdge*> minLgsBNew(minLgsB.size());
-      assert(minLgsB.size() == nb->pl().circOrdering.size() - 1);
-
-      std::reverse(minLgsB.begin(), minLgsB.end());
-
-      // map positions in b to positions in a
-      std::vector<size_t> bToA = mapPositions(minLgsA, mainLeg, minLgsB);
-      std::vector<size_t> aToB = mapPositions(minLgsB, mainLeg, minLgsA);
-      std::vector<size_t> iden(bToA.size());
-      for (size_t i = 0; i < iden.size(); i++) iden[i] = i;
-
-      for (size_t i = 0; i < minLgsA.size(); i++) {
-        if (minLgsA[i]->getFrom() == na) {
-          minLgsANew[i] =
-              addEdg(aNds[i], minLgsA[i]->getTo(), minLgsA[i]->pl());
-        } else {
-          minLgsANew[i] =
-              addEdg(minLgsA[i]->getFrom(), aNds[i], minLgsA[i]->pl());
+    i = 0;
+    for (auto a : clockwEdges(mainLeg, nb)) {
+      if (terminatesAt(a, mainLeg, na)) {
+        auto dummyNode = addNd(na->pl());
+        dummies.push_back(dummyNode);
+        auto dummyEdge = addEdg(na, dummyNode);
+        for (auto roOld : a->pl().getLines()) {
+          dummyEdge->pl().lines.push_back(OptLO(roOld.line, 0));
         }
+        dummyEdge->pl().lnEdgParts.push_back({0, 0, 0, 0});
+        na->pl().circOrdering.insert(na->pl().circOrdering.end() - i,
+                                     dummyEdge);
       }
+      i++;
+    }
 
-      for (size_t i = 0; i < minLgsB.size(); i++) {
-        if (minLgsB[i]->getFrom() == nb)
-          minLgsBNew[i] =
-              addEdg(bNds[i], minLgsB[i]->getTo(), minLgsB[i]->pl());
-        else
-          minLgsBNew[i] =
-              addEdg(minLgsB[i]->getFrom(), bNds[i], minLgsB[i]->pl());
+    // the geometry of the main leg
+    util::geo::PolyLine<double> pl(*na->pl().getGeom(), *nb->pl().getGeom());
+    double bandW = (nb->getDeg() - 1) * (DO / (mainLeg->pl().depth + 1));
+    auto orthoPlA = pl.getOrthoLineAtDist(0, bandW);
+    auto orthoPlB = pl.getOrthoLineAtDist(pl.getLength(), bandW);
+
+    // for each minor leg at node a, create a new node
+    std::vector<OptNode*> aNds =
+        explodeNodeAlong(na, orthoPlA, na->getDeg() - 1);
+
+    // each leg in a, in clockwise fashion
+    auto minLgsA = clockwEdges(mainLeg, na);
+    std::vector<OptEdge*> minLgsANew(minLgsA.size());
+    assert(minLgsA.size() == na->pl().circOrdering.size() - 1);
+
+    std::vector<OptNode*> bNds =
+        explodeNodeAlong(nb, orthoPlB, nb->getDeg() - 1);
+
+    // each leg in b, in counter-clockwise fashion
+    auto minLgsB = clockwEdges(mainLeg, nb);
+    std::vector<OptEdge*> minLgsBNew(minLgsB.size());
+    assert(minLgsB.size() == nb->pl().circOrdering.size() - 1);
+
+    std::reverse(minLgsB.begin(), minLgsB.end());
+
+    // map positions in b to positions in a
+    std::vector<size_t> bToA = mapPositions(minLgsA, mainLeg, minLgsB);
+    std::vector<size_t> aToB = mapPositions(minLgsB, mainLeg, minLgsA);
+    std::vector<size_t> iden(bToA.size());
+    for (size_t i = 0; i < iden.size(); i++) iden[i] = i;
+
+    for (size_t i = 0; i < minLgsA.size(); i++) {
+      if (minLgsA[i]->getFrom() == na) {
+        minLgsANew[i] = addEdg(aNds[i], minLgsA[i]->getTo(), minLgsA[i]->pl());
+      } else {
+        minLgsANew[i] =
+            addEdg(minLgsA[i]->getFrom(), aNds[i], minLgsA[i]->pl());
       }
+    }
 
-      std::vector<OptEdge*>& refLegs = minLgsA;
-      std::vector<size_t>& toA = bToA;
-      std::vector<size_t>& toB = iden;
+    for (size_t i = 0; i < minLgsB.size(); i++) {
+      if (minLgsB[i]->getFrom() == nb)
+        minLgsBNew[i] = addEdg(bNds[i], minLgsB[i]->getTo(), minLgsB[i]->pl());
+      else
+        minLgsBNew[i] =
+            addEdg(minLgsB[i]->getFrom(), bNds[i], minLgsB[i]->pl());
+    }
 
-      if (dogBoneCheaper(na, nb, mainLeg->pl().getLines())) {
-        refLegs = minLgsB;
-        toA = iden;
-        toB = aToB;
+    std::vector<OptEdge*>& refLegs = minLgsA;
+    std::vector<size_t>& toA = bToA;
+    std::vector<size_t>& toB = iden;
+
+    if (dogBoneCheaper(na, nb, mainLeg->pl().getLines())) {
+      refLegs = minLgsB;
+      toA = iden;
+      toB = aToB;
+    }
+
+    size_t offset = 0;
+    for (size_t i = 0; i < minLgsA.size(); i++) {
+      size_t j = i;
+      OptEdgePL pl;
+      if (mainLeg->getFrom() == na) {
+        if (mainLeg->pl().lnEdgParts[0].dir) j = minLgsA.size() - 1 - i;
+        pl = getView(mainLeg, refLegs[j], offset);
+        addEdg(aNds[toB[j]], bNds[toA[j]], pl);
+      } else {
+        if (!mainLeg->pl().lnEdgParts[0].dir) j = minLgsA.size() - 1 - i;
+        pl = getView(mainLeg, refLegs[j], offset);
+        addEdg(bNds[toA[j]], aNds[toB[j]], pl);
       }
+      offset += pl.getLines().size();
+    }
 
-      size_t offset = 0;
-      for (size_t i = 0; i < minLgsA.size(); i++) {
-        size_t j = i;
-        OptEdgePL pl;
-        if (mainLeg->getFrom() == na) {
-          if (mainLeg->pl().lnEdgParts[0].dir) j = minLgsA.size() - 1 - i;
-          pl = getView(mainLeg, refLegs[j], offset);
-          addEdg(aNds[toB[j]], bNds[toA[j]], pl);
-        } else {
-          if (!mainLeg->pl().lnEdgParts[0].dir) j = minLgsA.size() - 1 - i;
-          pl = getView(mainLeg, refLegs[j], offset);
-          addEdg(bNds[toA[j]], aNds[toB[j]], pl);
-        }
-        offset += pl.getLines().size();
-      }
+    // delete remaining stuff
+    delNd(nb);
+    delNd(na);
 
-      // delete remaining stuff
-      delNd(nb);
-      delNd(na);
+    // delete dummy nodes
+    for (auto nd : dummies) delNd(nd);
 
-      // delete dummy nodes
-      for (auto nd : dummies) delNd(nd);
-
-      // update orderings
-      for (auto n : aNds) {
-        updateEdgeOrder(n);
-        for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
-      }
-      for (auto n : bNds) {
-        updateEdgeOrder(n);
-        for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
-      }
-    } else {
-      // this cannot happen - it would mean that main leg was a minor leg of
-      // one of its minor legs, but this is impossible
-      assert(false);
+    // update orderings
+    for (auto n : aNds) {
+      updateEdgeOrder(n);
+      for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
+    }
+    for (auto n : bNds) {
+      updateEdgeOrder(n);
+      for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
     }
   }
 }
@@ -1689,103 +1647,94 @@ void OptGraph::untangleDogBone() {
   }
 
   for (auto mainLeg : toUntangle) {
-    if (isDogBone(mainLeg)) {
-      auto na = mainLeg->getFrom();
-      OptNode* nb = mainLeg->getOtherNd(na);
-      // the geometry of the main leg
-      util::geo::PolyLine<double> pl(*na->pl().getGeom(), *nb->pl().getGeom());
-      double bandW = (nb->getDeg() - 1) * (DO / (mainLeg->pl().depth + 1));
-      auto orthoPlA = pl.getOrthoLineAtDist(0, bandW);
-      auto orthoPlB = pl.getOrthoLineAtDist(pl.getLength(), bandW);
+    auto na = mainLeg->getFrom();
+    OptNode* nb = mainLeg->getOtherNd(na);
+    // the geometry of the main leg
+    util::geo::PolyLine<double> pl(*na->pl().getGeom(), *nb->pl().getGeom());
+    double bandW = (nb->getDeg() - 1) * (DO / (mainLeg->pl().depth + 1));
+    auto orthoPlA = pl.getOrthoLineAtDist(0, bandW);
+    auto orthoPlB = pl.getOrthoLineAtDist(pl.getLength(), bandW);
 
-      // for each minor leg at node a, create a new node
-      std::vector<OptNode*> aNds =
-          explodeNodeAlong(na, orthoPlA, na->getDeg() - 1);
+    // for each minor leg at node a, create a new node
+    std::vector<OptNode*> aNds =
+        explodeNodeAlong(na, orthoPlA, na->getDeg() - 1);
 
-      // each leg in a, in clockwise fashion
-      auto minLgsA = clockwEdges(mainLeg, na);
-      std::vector<OptEdge*> minLgsANew(minLgsA.size());
-      assert(minLgsA.size() == na->pl().circOrdering.size() - 1);
+    // each leg in a, in clockwise fashion
+    auto minLgsA = clockwEdges(mainLeg, na);
+    std::vector<OptEdge*> minLgsANew(minLgsA.size());
+    assert(minLgsA.size() == na->pl().circOrdering.size() - 1);
 
-      std::vector<OptNode*> bNds =
-          explodeNodeAlong(nb, orthoPlB, nb->getDeg() - 1);
+    std::vector<OptNode*> bNds =
+        explodeNodeAlong(nb, orthoPlB, nb->getDeg() - 1);
 
-      // each leg in b, in counter-clockwise fashion
-      auto minLgsB = clockwEdges(mainLeg, nb);
-      std::vector<OptEdge*> minLgsBNew(minLgsB.size());
-      assert(minLgsB.size() == nb->pl().circOrdering.size() - 1);
+    // each leg in b, in counter-clockwise fashion
+    auto minLgsB = clockwEdges(mainLeg, nb);
+    std::vector<OptEdge*> minLgsBNew(minLgsB.size());
+    assert(minLgsB.size() == nb->pl().circOrdering.size() - 1);
 
-      std::reverse(minLgsB.begin(), minLgsB.end());
+    std::reverse(minLgsB.begin(), minLgsB.end());
 
-      // map positions in b to positions in a
-      std::vector<size_t> bToA = mapPositions(minLgsA, mainLeg, minLgsB);
-      std::vector<size_t> aToB = mapPositions(minLgsB, mainLeg, minLgsA);
-      std::vector<size_t> iden(bToA.size());
-      for (size_t i = 0; i < iden.size(); i++) iden[i] = i;
+    // map positions in b to positions in a
+    std::vector<size_t> bToA = mapPositions(minLgsA, mainLeg, minLgsB);
+    std::vector<size_t> aToB = mapPositions(minLgsB, mainLeg, minLgsA);
+    std::vector<size_t> iden(bToA.size());
+    for (size_t i = 0; i < iden.size(); i++) iden[i] = i;
 
-      for (size_t i = 0; i < minLgsA.size(); i++) {
-        if (minLgsA[i]->getFrom() == na) {
-          minLgsANew[i] =
-              addEdg(aNds[i], minLgsA[i]->getTo(), minLgsA[i]->pl());
-        } else {
-          minLgsANew[i] =
-              addEdg(minLgsA[i]->getFrom(), aNds[i], minLgsA[i]->pl());
-        }
+    for (size_t i = 0; i < minLgsA.size(); i++) {
+      if (minLgsA[i]->getFrom() == na) {
+        minLgsANew[i] = addEdg(aNds[i], minLgsA[i]->getTo(), minLgsA[i]->pl());
+      } else {
+        minLgsANew[i] =
+            addEdg(minLgsA[i]->getFrom(), aNds[i], minLgsA[i]->pl());
       }
+    }
 
-      for (size_t i = 0; i < minLgsB.size(); i++) {
-        if (minLgsB[i]->getFrom() == nb)
-          minLgsBNew[i] =
-              addEdg(bNds[i], minLgsB[i]->getTo(), minLgsB[i]->pl());
-        else
-          minLgsBNew[i] =
-              addEdg(minLgsB[i]->getFrom(), bNds[i], minLgsB[i]->pl());
+    for (size_t i = 0; i < minLgsB.size(); i++) {
+      if (minLgsB[i]->getFrom() == nb)
+        minLgsBNew[i] = addEdg(bNds[i], minLgsB[i]->getTo(), minLgsB[i]->pl());
+      else
+        minLgsBNew[i] =
+            addEdg(minLgsB[i]->getFrom(), bNds[i], minLgsB[i]->pl());
+    }
+
+    std::vector<OptEdge*>& refLegs = minLgsA;
+    std::vector<size_t>& toA = bToA;
+    std::vector<size_t>& toB = iden;
+
+    if (dogBoneCheaper(na, nb, mainLeg->pl().getLines())) {
+      refLegs = minLgsB;
+      toA = iden;
+      toB = aToB;
+    }
+
+    size_t offset = 0;
+    for (size_t i = 0; i < minLgsA.size(); i++) {
+      size_t j = i;
+      OptEdgePL pl;
+      if (mainLeg->getFrom() == na) {
+        if (mainLeg->pl().lnEdgParts[0].dir) j = minLgsA.size() - 1 - i;
+        pl = getView(mainLeg, refLegs[j], offset);
+        addEdg(aNds[toB[j]], bNds[toA[j]], pl);
+      } else {
+        if (!mainLeg->pl().lnEdgParts[0].dir) j = minLgsA.size() - 1 - i;
+        pl = getView(mainLeg, refLegs[j], offset);
+        addEdg(bNds[toA[j]], aNds[toB[j]], pl);
       }
+      offset += pl.getLines().size();
+    }
 
-      std::vector<OptEdge*>& refLegs = minLgsA;
-      std::vector<size_t>& toA = bToA;
-      std::vector<size_t>& toB = iden;
+    // delete remaining stuff
+    delNd(nb);
+    delNd(na);
 
-      if (dogBoneCheaper(na, nb, mainLeg->pl().getLines())) {
-        refLegs = minLgsB;
-        toA = iden;
-        toB = aToB;
-      }
-
-      size_t offset = 0;
-      for (size_t i = 0; i < minLgsA.size(); i++) {
-        size_t j = i;
-        OptEdgePL pl;
-        if (mainLeg->getFrom() == na) {
-          if (mainLeg->pl().lnEdgParts[0].dir) j = minLgsA.size() - 1 - i;
-          pl = getView(mainLeg, refLegs[j], offset);
-          addEdg(aNds[toB[j]], bNds[toA[j]], pl);
-        } else {
-          if (!mainLeg->pl().lnEdgParts[0].dir) j = minLgsA.size() - 1 - i;
-          pl = getView(mainLeg, refLegs[j], offset);
-          addEdg(bNds[toA[j]], aNds[toB[j]], pl);
-        }
-        offset += pl.getLines().size();
-      }
-
-      // delete remaining stuff
-      delNd(nb);
-      delNd(na);
-
-      // update orderings
-      for (auto n : aNds) {
-        updateEdgeOrder(n);
-        for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
-      }
-      for (auto n : bNds) {
-        updateEdgeOrder(n);
-        for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
-      }
-
-    } else {
-      // this cannot happen - it would mean that main leg was a minor leg of
-      // one of its minor legs, but this is impossible
-      assert(false);
+    // update orderings
+    for (auto n : aNds) {
+      updateEdgeOrder(n);
+      for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
+    }
+    for (auto n : bNds) {
+      updateEdgeOrder(n);
+      for (auto e : n->getAdjList()) updateEdgeOrder(e->getOtherNd(n));
     }
   }
 }

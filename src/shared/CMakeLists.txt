@@ -2,9 +2,9 @@ file(GLOB_RECURSE shared_SRC *.cpp)
 
 include_directories(
 	${TRANSITMAP_INCLUDE_DIR}
-	${GUROBI_INCLUDE_DIR}
-	${GLPK_INCLUDE_DIR}
-	${COIN_INCLUDE_DIR}
+	SYSTEM ${GUROBI_INCLUDE_DIR}
+	SYSTEM ${GLPK_INCLUDE_DIR}
+	SYSTEM ${COIN_INCLUDE_DIR}
 )
 
 add_subdirectory(tests)

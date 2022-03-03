@@ -127,6 +127,8 @@ std::pair<bool, PolyLine<double>> Builder::getSubPolyLine(const Stop* a,
                                                           const Stop* b,
                                                           Trip* t, double distA,
                                                           double distB) {
+  UNUSED(distA);
+  UNUSED(distB);
   DPoint ap = getProjP(a->getLat(), a->getLng());
   DPoint bp = getProjP(b->getLat(), b->getLng());
 

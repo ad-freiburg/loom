@@ -46,9 +46,11 @@ struct OrthoRadialGraphHeur
     : public util::graph::Dijkstra::HeurFunc<GridNodePL, GridEdgePL, float> {
   OrthoRadialGraphHeur(const basegraph::GridGraph* g,
                        const std::set<GridNode*>& to)
-      : g(g), to(0) {}
+      : g(g), to(0) {UNUSED(to);}
 
   float operator()(const GridNode* from, const std::set<GridNode*>& to) const {
+    UNUSED(from);
+    UNUSED(to);
     return 0;
   }
 

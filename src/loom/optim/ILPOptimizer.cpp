@@ -37,9 +37,9 @@ double ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   double buildT = T_STOP(build);
   LOGTO(DEBUG, std::cerr) << " .. done";
 
-  if (lp->getNumVars() > stats.maxNumColsPerComp)
+  if (lp->getNumVars() > static_cast<int>(stats.maxNumColsPerComp))
     stats.maxNumColsPerComp = lp->getNumVars();
-  if (lp->getNumConstrs() > stats.maxNumRowsPerComp)
+  if (lp->getNumConstrs() > static_cast<int>(stats.maxNumRowsPerComp))
     stats.maxNumRowsPerComp = lp->getNumConstrs();
 
   if (_cfg->MPSOutputPath.size()) {
@@ -186,6 +186,7 @@ ILPSolver* ILPOptimizer::createProblem(OptGraph* og,
 void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
                                            const std::set<OptNode*>& g,
                                            ILPSolver* lp) const {
+  UNUSED(og);
   // go into nodes and build crossing constraints for adjacent
   for (OptNode* node : g) {
     std::set<OptEdge*> processed;
@@ -305,6 +306,7 @@ void ILPOptimizer::writeSameSegConstraints(OptGraph* og,
 void ILPOptimizer::writeDiffSegConstraints(OptGraph* og,
                                            const std::set<OptNode*>& g,
                                            ILPSolver* lp) const {
+  UNUSED(og);
   // go into nodes and build crossing constraints for adjacent
   for (OptNode* node : g) {
     std::set<OptEdge*> processed;

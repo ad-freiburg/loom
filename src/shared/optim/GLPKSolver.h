@@ -10,6 +10,7 @@
 #include <glpk.h>
 #include <vector>
 #include "shared/optim/ILPSolver.h"
+#include "util/Misc.h"
 
 namespace shared {
 namespace optim {
@@ -56,8 +57,8 @@ class GLPKSolver : public ILPSolver {
   int getNumConstrs() const;
   int getNumVars() const;
 
-  void setNumThreads(int n){};
-  int getNumThreads() const {};
+  void setNumThreads(int n){UNUSED(n);};
+  int getNumThreads() const {return 0;};
 
   void setTimeLim(int s);
   int getTimeLim() const;

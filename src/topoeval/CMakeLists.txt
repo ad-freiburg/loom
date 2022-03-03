@@ -16,4 +16,4 @@ configure_file (
 add_executable(topoeval ${topoeval_main})
 add_library(topoeval_dep ${topoeval_SRC})
 
-target_link_libraries(topoeval topoeval_dep shared_dep dot_dep transitmap_dep util ${Boost_LIBRARIES} -lpthread)
+target_link_libraries(topoeval topoeval_dep shared_dep dot_dep util)

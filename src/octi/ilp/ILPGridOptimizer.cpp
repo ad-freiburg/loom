@@ -30,7 +30,7 @@ ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
                                     const std::string& solverStr,
                                     const std::string& path) const {
   // extract first feasible solution from gridgraph
-  ILPStats s{std::numeric_limits<double>::infinity(), 0, 0, 0};
+  ILPStats s{std::numeric_limits<double>::infinity(), 0, 0, 0, 0};
   StarterSol sol = extractFeasibleSol(d, gg, cg, maxGrDist);
   gg->reset();
 

@@ -3,4 +3,4 @@ include_directories(
 )
 
 add_executable(octiTest TestMain.cpp)
-target_link_libraries(octiTest octi_dep util ad_cppgtfs ${Boost_LIBRARIES})
+target_link_libraries(octiTest octi_dep util ad_cppgtfs)

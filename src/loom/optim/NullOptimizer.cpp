@@ -13,6 +13,8 @@ using shared::rendergraph::HierarOrderCfg;
 double NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                 HierarOrderCfg* hc, size_t depth,
                                 OptResStats& stats) const {
+  UNUSED(og);
+  UNUSED(stats);
   LOGTO(DEBUG, std::cerr) << prefix(depth)
                           << "(NullOptimizer) Optimizing component with "
                           << g.size() << " nodes.";

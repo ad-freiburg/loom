@@ -19,8 +19,9 @@ using shared::rendergraph::HierarOrderCfg;
 double HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                      HierarOrderCfg* hc, size_t depth,
                                      OptResStats& stats) const {
-  T_START(1);
+  UNUSED(stats);
   UNUSED(depth);
+  T_START(1);
   OptOrderCfg cur;
 
   // fixed order list of optim graph edges
@@ -40,7 +41,6 @@ double HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& 
   }
 
   size_t iters = 0;
-  size_t last = 0;
 
   while (true) {
     iters++;
@@ -88,6 +88,7 @@ double HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& 
 // _____________________________________________________________________________
 double HillClimbOptimizer::getScore(OptGraph* og, OptEdge* e,
                                     OptOrderCfg& cur) const {
+  UNUSED(og);
   if (_optScorer.optimizeSep()) return _optScorer.getTotalScore(e, cur);
   return _optScorer.getCrossingScore(e, cur);
 }

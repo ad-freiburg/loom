@@ -7,9 +7,9 @@ list(REMOVE_ITEM loom_SRC TestMain.cpp)
 
 include_directories(
 	${TRANSITMAP_INCLUDE_DIR}
-	${GUROBI_INCLUDE_DIR}
-	${GLPK_INCLUDE_DIR}
-	${COIN_INCLUDE_DIR}
+	SYSTEM ${GUROBI_INCLUDE_DIR}
+	SYSTEM ${GLPK_INCLUDE_DIR}
+	SYSTEM ${COIN_INCLUDE_DIR}
 )
 
 add_subdirectory(tests)
@@ -22,4 +22,4 @@ configure_file (
 add_executable(loom ${loom_main})
 add_library(loom_dep ${loom_SRC})
 
-target_link_libraries(loom loom_dep shared_dep dot_dep util ${Boost_LIBRARIES} ${GLPK_LIBRARY} ${GUROBI_LIBRARY} ${COIN_LIBRARIES} -lpthread)
+target_link_libraries(loom loom_dep shared_dep dot_dep util ${GLPK_LIBRARY} ${GUROBI_LIBRARY} ${COIN_LIBRARIES} -lpthread)
