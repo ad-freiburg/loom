@@ -257,12 +257,10 @@ InnerGeom RenderGraph::getTerminusBezier(const LineNode* n,
 }
 
 // _____________________________________________________________________________
-Polygon<double> RenderGraph::getConvexFrontHull(
-    const LineNode* n, double d, bool rectangulize,
-    bool tight) const {
+Polygon<double> RenderGraph::getConvexFrontHull(const LineNode* n, double d,
+                                                bool rectangulize, bool tight,
+                                                size_t pointsPerCircle) const {
   double cd = d;
-
-  size_t pointsPerCircle = 32;
 
   if (n->pl().fronts().size() != 2) {
     MultiLine<double> l;
@@ -332,7 +330,8 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
   std::vector<std::pair<size_t, const LineEdge*>> orderedEdgs;
   for (auto e : n->getAdjList()) {
     size_t unserved = 0;
-    for (auto lo : e->pl().getLines()) if (!served.count(lo.line)) unserved++;
+    for (auto lo : e->pl().getLines())
+      if (!served.count(lo.line)) unserved++;
     orderedEdgs.push_back({unserved, e});
   }
 
@@ -384,9 +383,8 @@ bool RenderGraph::notCompletelyServed(const LineNode* n) {
 }
 
 // _____________________________________________________________________________
-std::vector<Polygon<double>> RenderGraph::getStopGeoms(const LineNode* n,
-                                                       double d,
-                                                       bool tight) const {
+std::vector<Polygon<double>> RenderGraph::getStopGeoms(
+    const LineNode* n, double d, bool tight, size_t pointsPerCircle) const {
   if (notCompletelyServed(n)) {
     // render each stop individually
     auto served = servedLines(n);
@@ -394,7 +392,7 @@ std::vector<Polygon<double>> RenderGraph::getStopGeoms(const LineNode* n,
   }
 
   if (n->pl().fronts().size() == 0) return {};
-  return {getConvexFrontHull(n, d, true, tight)};
+  return {getConvexFrontHull(n, d, true, tight, pointsPerCircle)};
 }
 
 // _____________________________________________________________________________

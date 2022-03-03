@@ -34,7 +34,7 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
     const RenderGraph& g) {
   // TODO: the hull padding should be the same as in the renderer
   auto statHull = g.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                                 _cfg->tightStations);
+                                 _cfg->tightStations, 4);
 
   double rad = util::geo::getEnclosingRadius(*n->pl().getGeom(), statHull);
 
@@ -90,6 +90,7 @@ void Labeller::labelStations(const RenderGraph& g) {
     if (n->pl().stops().size() == 0) continue;
     orderedNds.push_back(n);
   }
+
 
   std::sort(orderedNds.begin(), orderedNds.end(), statNdCmp);
 
@@ -154,7 +155,7 @@ Overlaps Labeller::getOverlaps(const util::geo::MultiLine<double>& band,
 
           auto statHull =
               g.getStopGeoms(nd, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                             _cfg->tightStations);
+                             _cfg->tightStations, 4);
 
           double rad =
               util::geo::getEnclosingRadius(*nd->pl().getGeom(), statHull);

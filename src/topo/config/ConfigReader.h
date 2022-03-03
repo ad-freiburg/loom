@@ -5,7 +5,6 @@
 #ifndef TOPO_CONFIG_CONFIGREADER_H_
 #define TOPO_CONFIG_CONFIGREADER_H_
 
-#include <boost/program_options.hpp>
 #include <vector>
 #include "topo/config/TopoConfig.h"
 

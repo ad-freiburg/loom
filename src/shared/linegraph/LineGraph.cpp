@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "dot/Parser.h"
 #include "3rdparty/json.hpp"
+#include "dot/Parser.h"
 #include "shared/linegraph/LineEdgePL.h"
 #include "shared/linegraph/LineGraph.h"
 #include "shared/linegraph/LineNodePL.h"
@@ -94,7 +94,6 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
           e = addEdg(idMap[curId], idMap[prevId], pl);
         }
 
-
         std::string id;
         if (ent.attrs.find("id") != ent.attrs.end()) {
           id = ent.attrs["id"];
@@ -147,202 +146,214 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
 }
 
 // _____________________________________________________________________________
-void LineGraph::readFromJson(std::istream* s, double smooth) {
-  _bbox = util::geo::Box<double>();
+void LineGraph::readFromTopoJson(nlohmann::json::array_t objects,
+                                 nlohmann::json::array_t arcs, double smooth) {
+  UNUSED(objects);
+  UNUSED(arcs);
+  UNUSED(smooth);
+  throw(std::runtime_error("TopoJSON input not yet implemented."));
+}
 
-  nlohmann::json j;
-  (*s) >> j;
+// _____________________________________________________________________________
+void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
+                                double smooth) {
+  _bbox = util::geo::Box<double>();
 
   std::map<std::string, LineNode*> idMap;
 
-  if (j["type"] == "FeatureCollection") {
-    // first pass, nodes
-    for (auto feature : j["features"]) {
-      auto props = feature["properties"];
-      auto geom = feature["geometry"];
-      if (geom["type"] == "Point") {
-        std::string id = props["id"].get<std::string>();
+  for (auto feature : features) {
+    auto props = feature["properties"];
+    auto geom = feature["geometry"];
+    if (geom["type"] == "Point") {
+      std::string id = props["id"].get<std::string>();
 
-        std::vector<double> coords = geom["coordinates"];
+      std::vector<double> coords = geom["coordinates"];
 
-        LineNode* n = addNd(util::geo::DPoint(coords[0], coords[1]));
-        expandBBox(*n->pl().getGeom());
+      LineNode* n = addNd(util::geo::DPoint(coords[0], coords[1]));
+      expandBBox(*n->pl().getGeom());
 
-        Station i("", "", *n->pl().getGeom());
-        if (!props["station_id"].is_null() ||
-            !props["station_label"].is_null()) {
-          if (!props["station_id"].is_null()) {
-            if (props["station_id"].type() == nlohmann::json::value_t::string) {
-              i.id = props["station_id"].get<std::string>();
-            } else {
-              i.id = props["station_id"].get<std::string>();
-            }
+      Station i("", "", *n->pl().getGeom());
+      if (!props["station_id"].is_null() || !props["station_label"].is_null()) {
+        if (!props["station_id"].is_null()) {
+          if (props["station_id"].type() == nlohmann::json::value_t::string) {
+            i.id = props["station_id"].get<std::string>();
+          } else {
+            i.id = props["station_id"].get<std::string>();
           }
-          if (!props["station_label"].is_null())
-            i.name = props["station_label"];
-          n->pl().addStop(i);
         }
-
-        idMap[id] = n;
+        if (!props["station_label"].is_null()) i.name = props["station_label"];
+        n->pl().addStop(i);
       }
+
+      idMap[id] = n;
     }
+  }
 
-    // second pass, edges
-    for (auto feature : j["features"]) {
-      auto props = feature["properties"];
-      auto geom = feature["geometry"];
-      if (geom["type"] == "LineString") {
-        if (props["lines"].is_null() || props["lines"].size() == 0) continue;
-        std::string from = props["from"].get<std::string>();
-        std::string to = props["to"].get<std::string>();
+  // second pass, edges
+  for (auto feature : features) {
+    auto props = feature["properties"];
+    auto geom = feature["geometry"];
+    if (geom["type"] == "LineString") {
+      if (props["lines"].is_null() || props["lines"].size() == 0) continue;
+      std::string from = props["from"].get<std::string>();
+      std::string to = props["to"].get<std::string>();
 
-        std::vector<std::vector<double>> coords = geom["coordinates"];
+      std::vector<std::vector<double>> coords = geom["coordinates"];
 
-        PolyLine<double> pl;
-        for (auto coord : coords) {
-          double x = coord[0], y = coord[1];
-          Point<double> p(x, y);
-          pl << p;
-          expandBBox(p);
-        }
+      PolyLine<double> pl;
+      for (auto coord : coords) {
+        double x = coord[0], y = coord[1];
+        Point<double> p(x, y);
+        pl << p;
+        expandBBox(p);
+      }
 
-        pl.applyChaikinSmooth(smooth);
+      pl.applyChaikinSmooth(smooth);
 
-        LineNode* fromN = idMap[from];
-        LineNode* toN = idMap[to];
+      LineNode* fromN = 0;
+      LineNode* toN = 0;
 
+      if (from.size()) {
+        fromN = idMap[from];
         if (!fromN) {
           LOG(ERROR) << "Node \"" << from << "\" not found." << std::endl;
           continue;
         }
+      } else {
+        fromN = addNd(pl.getLine().front());
+      }
 
-        if (!toN) {
+      if (to.size()) {
+        toN = idMap[to];
+        if (!fromN) {
           LOG(ERROR) << "Node \"" << to << "\" not found." << std::endl;
           continue;
         }
+      } else {
+        fromN = addNd(pl.getLine().back());
+      }
 
-        LineEdge* e = addEdg(fromN, toN, pl);
+      LineEdge* e = addEdg(fromN, toN, pl);
 
-        if (props["dontcontract"].is_number() &&
-            props["dontcontract"].get<int>())
-          e->pl().setDontContract(true);
+      if (props["dontcontract"].is_number() && props["dontcontract"].get<int>())
+        e->pl().setDontContract(true);
 
-        for (auto line : props["lines"]) {
-          std::string id;
-          if (!line["id"].is_null()) {
-            id = line["id"].get<std::string>();
-          } else if (!line["label"].is_null()) {
-            id = line["label"].get<std::string>();
-          } else if (!line["color"].is_null()) {
-            id = line["color"].get<std::string>();
-          } else
-            continue;
+      for (auto line : props["lines"]) {
+        std::string id;
+        if (!line["id"].is_null()) {
+          id = line["id"].get<std::string>();
+        } else if (!line["label"].is_null()) {
+          id = line["label"].get<std::string>();
+        } else if (!line["color"].is_null()) {
+          id = line["color"].get<std::string>();
+        } else
+          continue;
 
-          const Line* l = getLine(id);
-          if (!l) {
-            std::string label = line["label"].is_null() ? "" : line["label"];
-            std::string color = line["color"];
-            l = new Line(id, label, color);
-            addLine(l);
-          }
+        const Line* l = getLine(id);
+        if (!l) {
+          std::string label = line["label"].is_null() ? "" : line["label"];
+          std::string color = line["color"];
+          l = new Line(id, label, color);
+          addLine(l);
+        }
 
-          LineNode* dir = 0;
+        LineNode* dir = 0;
 
-          if (!line["direction"].is_null()) {
-            dir = idMap[line["direction"].get<std::string>()];
-          }
+        if (!line["direction"].is_null()) {
+          dir = idMap[line["direction"].get<std::string>()];
+        }
 
-          if (!line["style"].is_null() || !line["outline-style"].is_null()) {
-            shared::style::LineStyle ls;
+        if (!line["style"].is_null() || !line["outline-style"].is_null()) {
+          shared::style::LineStyle ls;
 
-            if (!line["style"].is_null()) ls.setCss(line["style"]);
-            if (!line["outline-style"].is_null()) ls.setOutlineCss(line["outline-style"]);
+          if (!line["style"].is_null()) ls.setCss(line["style"]);
+          if (!line["outline-style"].is_null())
+            ls.setOutlineCss(line["outline-style"]);
 
-            e->pl().addLine(l, dir, ls);
-          } else {
-            e->pl().addLine(l, dir);
-          }
+          e->pl().addLine(l, dir, ls);
+        } else {
+          e->pl().addLine(l, dir);
         }
       }
     }
+  }
 
-    // third pass, exceptions (TODO: do this in the first part, store in some
-    // data structure, add here!)
-    for (auto feature : j["features"]) {
-      auto props = feature["properties"];
-      auto geom = feature["geometry"];
-      if (geom["type"] == "Point") {
-        std::string id = props["id"].get<std::string>();
+  // third pass, exceptions (TODO: do this in the first part, store in some
+  // data structure, add here!)
+  for (auto feature : features) {
+    auto props = feature["properties"];
+    auto geom = feature["geometry"];
+    if (geom["type"] == "Point") {
+      std::string id = props["id"].get<std::string>();
 
-        if (!idMap.count(id)) continue;
-        LineNode* n = idMap[id];
+      if (!idMap.count(id)) continue;
+      LineNode* n = idMap[id];
 
-        if (!props["not_serving"].is_null()) {
-          for (auto excl : props["not_serving"]) {
-            std::string lid = excl.get<std::string>();
+      if (!props["not_serving"].is_null()) {
+        for (auto excl : props["not_serving"]) {
+          std::string lid = excl.get<std::string>();
 
-            const Line* r = getLine(lid);
+          const Line* r = getLine(lid);
 
-            if (!r) {
-              LOG(WARN) << "line " << lid << " marked as not served in in node "
-                        << id << ", but no such line exists.";
-              continue;
-            }
-
-            n->pl().addLineNotServed(r);
+          if (!r) {
+            LOG(WARN) << "line " << lid << " marked as not served in in node "
+                      << id << ", but no such line exists.";
+            continue;
           }
+
+          n->pl().addLineNotServed(r);
         }
+      }
 
-        if (!props["excluded_line_conns"].is_null()) {
-          for (auto excl : props["excluded_line_conns"]) {
-            std::string lid = excl["route"].get<std::string>();
-            std::string nid1 = excl["edge1_node"].get<std::string>();
-            std::string nid2 = excl["edge2_node"].get<std::string>();
+      if (!props["excluded_line_conns"].is_null()) {
+        for (auto excl : props["excluded_line_conns"]) {
+          std::string lid = excl["route"].get<std::string>();
+          std::string nid1 = excl["edge1_node"].get<std::string>();
+          std::string nid2 = excl["edge2_node"].get<std::string>();
 
-            const Line* r = getLine(lid);
+          const Line* r = getLine(lid);
 
-            if (!r) {
-              LOG(WARN) << "line connection exclude defined in node " << id
-                        << " for line " << lid << ", but no such line exists.";
-              continue;
-            }
-
-            if (!idMap.count(nid1)) {
-              LOG(WARN) << "line connection exclude defined in node " << id
-                        << " for edge from " << nid1
-                        << ", but no such node exists.";
-              continue;
-            }
-
-            if (!idMap.count(nid2)) {
-              LOG(WARN) << "line connection exclude defined in node " << id
-                        << " for edge from " << nid2
-                        << ", but no such node exists.";
-              continue;
-            }
-
-            LineNode* n1 = idMap[nid1];
-            LineNode* n2 = idMap[nid2];
-
-            LineEdge* a = getEdg(n, n1);
-            LineEdge* b = getEdg(n, n2);
-
-            if (!a) {
-              LOG(WARN) << "line connection exclude defined in node " << id
-                        << " for edge from " << nid1
-                        << ", but no such edge exists.";
-              continue;
-            }
-
-            if (!b) {
-              LOG(WARN) << "line connection exclude defined in node " << id
-                        << " for edge from " << nid2
-                        << ", but no such edge exists.";
-              continue;
-            }
-
-            n->pl().addConnExc(r, a, b);
+          if (!r) {
+            LOG(WARN) << "line connection exclude defined in node " << id
+                      << " for line " << lid << ", but no such line exists.";
+            continue;
           }
+
+          if (!idMap.count(nid1)) {
+            LOG(WARN) << "line connection exclude defined in node " << id
+                      << " for edge from " << nid1
+                      << ", but no such node exists.";
+            continue;
+          }
+
+          if (!idMap.count(nid2)) {
+            LOG(WARN) << "line connection exclude defined in node " << id
+                      << " for edge from " << nid2
+                      << ", but no such node exists.";
+            continue;
+          }
+
+          LineNode* n1 = idMap[nid1];
+          LineNode* n2 = idMap[nid2];
+
+          LineEdge* a = getEdg(n, n1);
+          LineEdge* b = getEdg(n, n2);
+
+          if (!a) {
+            LOG(WARN) << "line connection exclude defined in node " << id
+                      << " for edge from " << nid1
+                      << ", but no such edge exists.";
+            continue;
+          }
+
+          if (!b) {
+            LOG(WARN) << "line connection exclude defined in node " << id
+                      << " for edge from " << nid2
+                      << ", but no such edge exists.";
+            continue;
+          }
+
+          n->pl().addConnExc(r, a, b);
         }
       }
     }
@@ -351,6 +362,16 @@ void LineGraph::readFromJson(std::istream* s, double smooth) {
   _bbox = util::geo::pad(_bbox, 100);
 
   buildGrids();
+}
+
+// _____________________________________________________________________________
+void LineGraph::readFromJson(std::istream* s, double smooth) {
+  nlohmann::json j;
+  (*s) >> j;
+
+  if (j["type"] == "FeatureCollection") readFromGeoJson(j["features"], smooth);
+  if (j["type"] == "Topology")
+    readFromTopoJson(j["objects"], j["arcs"], smooth);
 }
 
 // _____________________________________________________________________________
@@ -1029,9 +1050,7 @@ std::vector<Partner> LineGraph::getPartners(const LineNode* nd,
 }
 
 // _____________________________________________________________________________
-void LineGraph::contractEdges(double d) {
-  contractEdges(d, false);
-}
+void LineGraph::contractEdges(double d) { contractEdges(d, false); }
 
 // _____________________________________________________________________________
 void LineGraph::contractEdges(double d, bool onlyNonStatConns) {
@@ -1044,7 +1063,9 @@ breakfor:
   for (auto n1 : *getNds()) {
     for (auto e : n1->getAdjList()) {
       if (e->getFrom() != n1) continue;
-      if (onlyNonStatConns && (e->getFrom()->pl().stops().size() || e->getTo()->pl().stops().size())) continue;
+      if (onlyNonStatConns && (e->getFrom()->pl().stops().size() ||
+                               e->getTo()->pl().stops().size()))
+        continue;
       if (!e->pl().dontContract() && e->pl().getPolyline().getLength() < d) {
         if (e->getOtherNd(n1)->getAdjList().size() > 1 &&
             n1->getAdjList().size() > 1 &&

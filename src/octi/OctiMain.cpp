@@ -161,15 +161,6 @@ int main(int argc, char** argv) {
   tg.splitNodes(oct.maxNodeDeg());
 
   CombGraph cg(&tg, cfg.deg2Heur);
-
-  // local enlargement
-  // LOGTO(DEBUG, std::cerr) << "Locally enlarging graph...";
-  // Enlarger e;
-  // e.enlarge(cg, 100);
-  // avgDist = avgStatDist(tg);
-  // LOGTO(DEBUG, std::cerr)
-  // << "Average adj. node distance after local enlargement is " << avgDist;
-
   box = util::geo::pad(box, gridSize + 1);
 
   if (cfg.baseGraphType == octi::basegraph::BaseGraphType::ORTHORADIAL ||

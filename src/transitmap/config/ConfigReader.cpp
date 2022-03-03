@@ -12,7 +12,6 @@
 #include "util/log/Log.h"
 
 using transitmapper::config::ConfigReader;
-namespace opts = boost::program_options;
 using std::exception;
 
 static const char* YEAR = &__DATE__[7];
@@ -46,7 +45,7 @@ void ConfigReader::help(const char* bin) const {
             << "width of line outlines\n"
             << std::setw(37) << "  --render-dir-markers"
             << "render line direction markers\n"
-            << std::setw(37) << "  --render-labels"
+            << std::setw(37) << "  -l [ --labels ]"
             << "render labels\n"
             << std::setw(37) << "  --line-label-textsize arg (=40)"
             << "textsize for line labels\n"
@@ -80,7 +79,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"line-label-textsize", required_argument, 0, 5},
                          {"station-label-textsize", required_argument, 0, 6},
                          {"no-render-stations", no_argument, 0, 7},
-                         {"render-labels", no_argument, 0, 8},
+                         {"labels", no_argument, 0, 'l'},
                          {"tight-stations", no_argument, 0, 9},
                          {"render-dir-markers", no_argument, 0, 10},
                          {"no-render-node-connections", no_argument, 0, 11},
@@ -91,7 +90,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {0, 0, 0, 0}};
 
   char c;
-  while ((c = getopt_long(argc, argv, ":hvim:", ops, 0)) != -1) {
+  while ((c = getopt_long(argc, argv, ":hvl", ops, 0)) != -1) {
     switch (c) {
       case 'h':
         help(argv[0]);
@@ -120,7 +119,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       case 7:
         cfg->renderStations = false;
         break;
-      case 8:
+      case 'l':
         cfg->renderLabels = true;
         break;
       case 9:

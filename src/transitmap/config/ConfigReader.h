@@ -5,7 +5,6 @@
 #ifndef TRANSITMAP_CONFIG_CONFIGREADER_H_
 #define TRANSITMAP_CONFIG_CONFIGREADER_H_
 
-#include <boost/program_options.hpp>
 #include <vector>
 #include "transitmap/config/TransitMapConfig.h"
 

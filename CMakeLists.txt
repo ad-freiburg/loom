@@ -7,9 +7,6 @@ enable_testing()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/build")
 
-find_package(Boost COMPONENTS system program_options thread filesystem REQUIRED)
-include_directories("build" ${Boost_INCLUDE_DIRS})
-
 find_package(OpenMP)
 if(OPENMP_FOUND)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -79,13 +76,29 @@ endif()
 
 add_subdirectory(src)
 
-add_test(ctest_build_graphbuilder_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target graphbuilderTest)
-add_test(graphbuilder_test ${EXECUTABLE_OUTPUT_PATH}/graphbuilderTest)
-set_tests_properties (graphbuilder_test PROPERTIES DEPENDS ctest_build_graphbuilder_test)
+add_test(ctest_build_topo_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target topoTest)
+add_test(topo_test ${EXECUTABLE_OUTPUT_PATH}/topoTest)
+set_tests_properties (topo_test PROPERTIES DEPENDS ctest_build_topo_test)
 
-add_test(ctest_build_transitmapper_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target transitmapperTest)
-add_test(transitmapper_test ${EXECUTABLE_OUTPUT_PATH}/transitmapperTest)
-set_tests_properties (transitmapper_test PROPERTIES DEPENDS ctest_build_transitmapper_test)
+add_test(ctest_build_util_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target utilTest)
+add_test(util_test ${EXECUTABLE_OUTPUT_PATH}/utilTest)
+set_tests_properties (util_test PROPERTIES DEPENDS ctest_build_util_test)
+
+add_test(ctest_build_shared_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target sharedTest)
+add_test(shared_test ${EXECUTABLE_OUTPUT_PATH}/sharedTest)
+set_tests_properties (shared_test PROPERTIES DEPENDS ctest_build_shared_test)
+
+add_test(ctest_build_loom_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target loomTest)
+add_test(loom_test ${EXECUTABLE_OUTPUT_PATH}/loomTest)
+set_tests_properties (loom_test PROPERTIES DEPENDS ctest_build_loom_test)
+
+add_test(ctest_build_octi_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target octiTest)
+add_test(octi_test ${EXECUTABLE_OUTPUT_PATH}/octiTest)
+set_tests_properties (octi_test PROPERTIES DEPENDS ctest_build_octi_test)
+
+add_test(ctest_build_transitmap_test "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target transitmapTest)
+add_test(transitmap_test ${EXECUTABLE_OUTPUT_PATH}/transitmapTest)
+set_tests_properties (transitmap_test PROPERTIES DEPENDS ctest_build_transitmap_test)
 
 # handles install target
 
@@ -94,7 +107,7 @@ install(
 )
 
 install(
-  FILES build/transitmap DESTINATION bin
+  FILES build/transitmap build/topo build/topoeval build/gtfs2graph build/loom build/octi DESTINATION bin
   PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
 )
 

@@ -38,7 +38,8 @@ class RenderGraph : public shared::linegraph::LineGraph {
       const shared::linegraph::LineNode* n, double prec) const;
 
   std::vector<util::geo::Polygon<double>> getStopGeoms(
-      const shared::linegraph::LineNode* n, double d, bool simple) const;
+      const shared::linegraph::LineNode* n, double d, bool simple,
+      size_t pointsPerCircle) const;
 
   // TODO: maybe move this to LineGraph?
   static size_t getConnCardinality(const shared::linegraph::LineNode* n);
@@ -93,7 +94,7 @@ class RenderGraph : public shared::linegraph::LineGraph {
 
   util::geo::Polygon<double> getConvexFrontHull(
       const shared::linegraph::LineNode* n, double d, bool rectangulize,
-      bool simpleRenderForTwoEdgeNodes) const;
+      bool simpleRenderForTwoEdgeNodes, size_t points) const;
 };
 }  // namespace rendergraph
 }  // namespace shared

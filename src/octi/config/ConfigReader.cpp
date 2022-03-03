@@ -48,9 +48,9 @@ void ConfigReader::help(const char* bin) const {
             << std::setw(36) << "  -g [ --grid-size ] arg (=100%)"
             << "grid cell length, either exact or a\n"
             << std::setw(36) << " " << " percentage of input adjacent station distance\n"
-            << std::setw(36) << "  --base-graph arg (=octilinear)"
+            << std::setw(36) << "  -b [ -base-graph ] arg (=octilinear)"
             << "base graph, either ortholinear, octilinear,\n"
-            << std::setw(36) << " " << " porthoradial, quadtree, octihanan\n\n"
+            << std::setw(36) << " " << " orthoradial, quadtree, octihanan\n\n"
             << "Misc:\n"
             << std::setw(36) << "  --ilp-num-threads arg (=0)"
             << "number of threads to use by ILP solver,\n"
@@ -133,7 +133,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"edge-order", required_argument, 0, 14},
                          {"density-pen", required_argument, 0, 15},
                          {"grid-size", required_argument, 0, 'g'},
-                         {"base-graph", required_argument, 0, 16},
+                         {"base-graph", required_argument, 0, 'b'},
                          {"vert-pen", required_argument, 0, 17},
                          {"hori-pen", required_argument, 0, 18},
                          {"diag-pen", required_argument, 0, 19},
@@ -147,7 +147,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
 
   char c;
 
-  while ((c = getopt_long(argc, argv, ":hvm:Dg:", ops, 0)) !=
+  while ((c = getopt_long(argc, argv, ":hvm:Dg:b:", ops, 0)) !=
          -1) {
     switch (c) {
       case 'a':
@@ -204,7 +204,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       case 15:
         cfg->pens.densityPen = atof(optarg);
         break;
-      case 16:
+      case 'b':
         baseGraphStr = optarg;
         break;
       case 17:
@@ -283,11 +283,11 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
     cfg->baseGraphType = BaseGraphType::OCTIGRID;
   } else if (baseGraphStr == "hexalinear") {
     cfg->baseGraphType = BaseGraphType::HEXGRID;
-    // } else if (baseGraphStr == "orthoradial") {
-    // cfg->baseGraphType = BaseGraphType::ORTHORADIAL;
   } else if (baseGraphStr == "chulloctilinear") {
     cfg->baseGraphType = BaseGraphType::CONVEXHULLOCTIGRID;
   } else if (baseGraphStr == "porthoradial") {
+    cfg->baseGraphType = BaseGraphType::PSEUDOORTHORADIAL;
+  } else if (baseGraphStr == "orthoradial") {
     cfg->baseGraphType = BaseGraphType::PSEUDOORTHORADIAL;
   } else if (baseGraphStr == "pseudoorthoradial") {
     cfg->baseGraphType = BaseGraphType::PSEUDOORTHORADIAL;

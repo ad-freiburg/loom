@@ -161,7 +161,7 @@ void SvgRenderer::outputNodes(const RenderGraph& outG,
 
       for (const auto& geom :
            outG.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                             _cfg->tightStations)) {
+                             _cfg->tightStations, 32)) {
         printPolygon(geom, params, rparams);
       }
     }

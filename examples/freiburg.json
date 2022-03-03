@@ -1,0 +1,5141 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          870895.7425411046,
+          6107430.847861859
+        ]
+      },
+      "properties": {
+        "deg": "3",
+        "deg_in": "3",
+        "deg_out": "3",
+        "id": "0xeea7b0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          868707.4790341319,
+          6105938.248122439
+        ]
+      },
+      "properties": {
+        "deg": "3",
+        "deg_in": "3",
+        "deg_out": "3",
+        "id": "0xeeadc0",
+        "station_id": "Parent30601",
+        "station_label": "Am Lindenwäldle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          869305.4013636946,
+          6111597.194882979
+        ]
+      },
+      "properties": {
+        "deg": "1",
+        "deg_in": "1",
+        "deg_out": "1",
+        "id": "0xef5e20",
+        "station_id": "Parent30800",
+        "station_label": "Moosweiher"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          870514.923059423,
+          6105265.289586787
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0xef63b0",
+        "station_id": "Parent30604",
+        "station_label": "Scherrerplatz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874421.1812958359,
+          6108061.793093174
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0xf19570",
+        "station_id": "Parent30204",
+        "station_label": "Hauptstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874368.791489028,
+          6109017.646927123
+        ]
+      },
+      "properties": {
+        "deg": "3",
+        "deg_in": "3",
+        "deg_out": "3",
+        "id": "0xf19ce0",
+        "station_id": "Parent30208",
+        "station_label": "Komturplatz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          869478.2080429678,
+          6108704.393491576
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0xf22bc0",
+        "station_id": "Parent30503",
+        "station_label": "Betzenhauser Torplatz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          872396.147751921,
+          6107498.172968443
+        ]
+      },
+      "properties": {
+        "deg": "3",
+        "deg_in": "3",
+        "deg_out": "3",
+        "id": "0xf480c0",
+        "station_id": "Parent30810",
+        "station_label": "Robert-Koch-Straße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          872234.1299100403,
+          6108864.307758795
+        ]
+      },
+      "properties": {
+        "deg": "1",
+        "deg_in": "1",
+        "deg_out": "1",
+        "id": "0xf48250",
+        "station_id": "Parent30813",
+        "station_label": "Technische Fakultät"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873405.9717554587,
+          6106092.599301003
+        ]
+      },
+      "properties": {
+        "deg": "4",
+        "deg_in": "4",
+        "deg_out": "4",
+        "id": "0xf483e0",
+        "station_id": "Parent30106",
+        "station_label": "Stadttheater"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          872325.7653737431,
+          6104544.710689413
+        ]
+      },
+      "properties": {
+        "deg": "3",
+        "deg_in": "3",
+        "deg_out": "3",
+        "id": "0xf49330",
+        "station_id": "Parent30411",
+        "station_label": "H.-von-Stephan-Straße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          878787.1755945929,
+          6104287.40952052
+        ]
+      },
+      "properties": {
+        "deg": "1",
+        "deg_in": "1",
+        "deg_out": "1",
+        "id": "0xf495a0",
+        "station_id": "Parent30300",
+        "station_label": "Laßbergstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          875503.8337669587,
+          6104921.959865082
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0xf498e0",
+        "station_id": "Parent30306",
+        "station_label": "Maria-Hilf-Kirche"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          866948.9481539902,
+          6106958.339658059
+        ]
+      },
+      "properties": {
+        "deg": "1",
+        "deg_in": "1",
+        "deg_out": "1",
+        "id": "0xf4a360",
+        "station_id": "Parent30727",
+        "station_label": "Bollerstaudenstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874171.3576337277,
+          6106508.078905344
+        ]
+      },
+      "properties": {
+        "deg": "3",
+        "deg_in": "3",
+        "deg_out": "3",
+        "id": "0xf4aad0",
+        "station_id": "Parent30101",
+        "station_label": "Europaplatz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873845.3256795934,
+          6105998.892817168
+        ]
+      },
+      "properties": {
+        "deg": "4",
+        "deg_in": "4",
+        "deg_out": "4",
+        "id": "0xf4aeb0",
+        "station_id": "Parent30100",
+        "station_label": "Bertoldsbrunnen"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          872674.6371274581,
+          6104746.072941343
+        ]
+      },
+      "properties": {
+        "deg": "3",
+        "deg_in": "3",
+        "deg_out": "3",
+        "id": "0xf4b150",
+        "station_id": "Parent30408",
+        "station_label": "Reiterstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          867856.930433803,
+          6104921.323396489
+        ]
+      },
+      "properties": {
+        "deg": "1",
+        "deg_in": "1",
+        "deg_out": "1",
+        "id": "0xf4b230",
+        "station_id": "Parent30716",
+        "station_label": "Munzinger Straße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          871903.4284504568,
+          6106828.949048755
+        ]
+      },
+      "properties": {
+        "deg": "3",
+        "deg_in": "3",
+        "deg_out": "3",
+        "id": "0xf4b860",
+        "station_id": "Parent30500",
+        "station_label": "Rathaus im Stühlinger"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          875329.1767019787,
+          6112646.146067768
+        ]
+      },
+      "properties": {
+        "deg": "1",
+        "deg_in": "1",
+        "deg_out": "1",
+        "id": "0xf4c0f0",
+        "station_id": "Parent30430",
+        "station_label": "Gundelfinger Str."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          870274.2164114933,
+          6102948.3807571735
+        ]
+      },
+      "properties": {
+        "deg": "1",
+        "deg_in": "1",
+        "deg_out": "1",
+        "id": "0xf4c1d0",
+        "station_id": "Parent30424",
+        "station_label": "Innsbrucker Straße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874697.2325639899,
+          6101006.8448838685
+        ]
+      },
+      "properties": {
+        "deg": "1",
+        "deg_in": "1",
+        "deg_out": "1",
+        "id": "0xf4c630",
+        "station_id": "Parent30400",
+        "station_label": "Dorfstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          878243.9304351048,
+          6104517.559885941
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0xf4c930",
+        "station_id": "Parent30301",
+        "station_label": "Römerhof"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874249.5195484454,
+          6105800.590610224
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0xf58400",
+        "station_id": "Parent30118",
+        "station_label": "Oberlinden"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          870316.3649319753,
+          6108007.41133463
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0xf591c0",
+        "station_id": "Parent30502",
+        "station_label": "Am Bischofskreuz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873591.282186812,
+          6104294.869708492
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0xfd0ae0",
+        "station_id": "Parent30405",
+        "station_label": "Lorettostraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          868371.0302260793,
+          6106024.855390921
+        ]
+      },
+      "properties": {
+        "deg": "3",
+        "deg_in": "3",
+        "deg_out": "3",
+        "id": "0xfd4b30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874805.5557317059,
+          6105096.93868999
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0xfd4d10",
+        "station_id": "Parent30120",
+        "station_label": "Brauerei Ganter"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873627.6554554392,
+          6105009.452839714
+        ]
+      },
+      "properties": {
+        "deg": "3",
+        "deg_in": "3",
+        "deg_out": "3",
+        "id": "0xfd5fc0",
+        "station_id": "Parent30104",
+        "station_label": "Johanneskirche"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873646.1482506145,
+          6108336.027705901
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1006c70",
+        "station_id": "Parent30206",
+        "station_label": "Rennweg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          869356.6341118687,
+          6105681.419029643
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x10071b0",
+        "station_id": "Parent30602",
+        "station_label": "Krozinger Straße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873623.503707192,
+          6103467.159026505
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1008aa0",
+        "station_id": "Parent30404",
+        "station_label": "Holbeinstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          877701.0027002936,
+          6104629.614104933
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x100a510",
+        "station_id": "Parent30302",
+        "station_label": "Hasemannstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          869651.6305236303,
+          6110778.558363916
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x100ef60",
+        "station_id": "Parent30801",
+        "station_label": "Diakoniekrankenhaus"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          872864.0469246696,
+          6107435.117492458
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x10116c0",
+        "station_id": "Parent30811",
+        "station_label": "Friedrich-Ebert-Platz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          869579.7920619419,
+          6109865.421847866
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1011a80",
+        "station_id": "Parent30802",
+        "station_label": "Moosgrund"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          871402.2274797835,
+          6102558.429809818
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1011e00",
+        "station_id": "Parent30651",
+        "station_label": "Paula-Modersohn-Platz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873104.9565633015,
+          6105126.115126809
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x10132c0",
+        "station_id": "Parent30123",
+        "station_label": "Mattenstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873899.2090406315,
+          6108569.277105635
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x10156c0",
+        "station_id": "Parent30207",
+        "station_label": "Eichstetter Straße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874506.1947591684,
+          6101166.688880448
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1017150",
+        "station_id": "Parent30401",
+        "station_label": "Klosterplatz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873338.2237295412,
+          6105614.855348373
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x10172a0",
+        "station_id": "Parent30114",
+        "station_label": "Erbprinzenstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          869158.8369559166,
+          6109124.921259073
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1017330",
+        "station_id": "Parent30504",
+        "station_label": "Paduaallee"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874197.041227959,
+          6101340.105922524
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1018c00",
+        "station_id": "Parent30402",
+        "station_label": "Wiesenweg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873390.9469132139,
+          6108109.372813286
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101a820",
+        "station_id": "Parent30205",
+        "station_label": "Hauptfriedhof"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          871741.2568561774,
+          6103326.406299801
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101ae50",
+        "station_id": "Parent30131",
+        "station_label": "Peter-Thumb-Straße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          871555.9979469596,
+          6104580.429329348
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101b5f0",
+        "station_id": "Parent30616",
+        "station_label": "Pressehaus"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          872793.1294302876,
+          6106290.658544485
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101c470",
+        "station_id": "Parent30107",
+        "station_label": "Hauptbahnhof"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          870535.9928071701,
+          6107248.1729601
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101caf0",
+        "station_id": "Parent30505",
+        "station_label": "Bissierstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          872373.5564745428,
+          6104240.833951203
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101cb80",
+        "station_id": "Parent30415",
+        "station_label": "Weddigenstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          868023.7979536955,
+          6105495.936699058
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101ce40",
+        "station_id": "Parent30715",
+        "station_label": "VAG-Zentrum"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          867723.7664096544,
+          6106431.490177252
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101dfb0",
+        "station_id": "Parent30733",
+        "station_label": "Geschwister-Scholl-Platz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          870062.6363691376,
+          6105409.863697146
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101e270",
+        "station_id": "Parent30603",
+        "station_label": "Dorfbrunnen"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873689.9624549947,
+          6106588.697042053
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101f1d0",
+        "station_id": "Parent30105",
+        "station_label": "Fahnenbergplatz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874368.0178619499,
+          6105331.032157305
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101f750",
+        "station_id": "Parent30119",
+        "station_label": "Schwabentorbrücke"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          875992.2908933498,
+          6104933.088025831
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x101fff0",
+        "station_id": "Parent30305",
+        "station_label": "Alter Messplatz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          871659.5622910113,
+          6108053.532290891
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x10200b0",
+        "station_id": "Parent30808",
+        "station_label": "Berliner Allee"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          867340.9321905655,
+          6106713.41215995
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1020760",
+        "station_id": "Parent30734",
+        "station_label": "Maria-von-Rudloff-Platz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          877101.3950703307,
+          6104696.428775427
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1020b20",
+        "station_id": "Parent30303",
+        "station_label": "Emil-Gött-Straße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          870905.0100308711,
+          6105099.290564468
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1021f40",
+        "station_id": "Parent30605",
+        "station_label": "Haslach Bad"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          876466.6212734992,
+          6104856.342415757
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1022640",
+        "station_id": "Parent30304",
+        "station_label": "Musikhochschule"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873585.1509724542,
+          6102688.62289184
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1023070",
+        "station_id": "Parent30403",
+        "station_label": "Wonnhalde"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          871793.4298280807,
+          6108450.832668153
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1024320",
+        "station_id": "Parent30814",
+        "station_label": "Elsässer Straße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          871149.376852825,
+          6107195.366712924
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x10245f0",
+        "station_id": "Parent30501",
+        "station_label": "Runzmattenweg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          873696.5718885412,
+          6105503.034224884
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x10252a0",
+        "station_id": "Parent30103",
+        "station_label": "Holzmarkt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          872025.648920647,
+          6107841.46338718
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1025e50",
+        "station_id": "Parent30809",
+        "station_label": "Freiburg Killianstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          872307.702013358,
+          6106564.558742686
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1026070",
+        "station_id": "Parent30108",
+        "station_label": "Eschholzstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          875003.2073250349,
+          6111231.905822824
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1027260",
+        "station_id": "Parent30431",
+        "station_label": "Berggasse"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          869393.1123580398,
+          6106741.923944836
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1028c00",
+        "station_id": "Parent30607",
+        "station_label": "Rohrgraben"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          870792.8733651668,
+          6102750.131418524
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x10293b0",
+        "station_id": "Parent30423",
+        "station_label": "Vauban-Mitte"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874630.0492611707,
+          6110045.784548041
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x1029b30",
+        "station_id": "Parent30201",
+        "station_label": "Tullastraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874443.2498296768,
+          6109419.3899331195
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x102b240",
+        "station_id": "Parent30200",
+        "station_label": "Hornusstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874365.9647906219,
+          6107370.179267192
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x102bee0",
+        "station_id": "Parent30102",
+        "station_label": "Tennenbacher Straße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          875189.2972055714,
+          6111909.375064874
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x102c630",
+        "station_id": "Parent30432",
+        "station_label": "Glottertalstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874781.4099618907,
+          6110544.966694358
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x102dc20",
+        "station_id": "Parent30202",
+        "station_label": "Reutebachgasse"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          874374.0099460027,
+          6108692.837338154
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x102e8d0",
+        "station_id": "Parent30203",
+        "station_label": "Okenstraße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          869087.6789471197,
+          6106441.984543043
+        ]
+      },
+      "properties": {
+        "deg": "2",
+        "deg_in": "2",
+        "deg_out": "2",
+        "id": "0x102efc0",
+        "station_id": "Parent30600",
+        "station_label": "Bugginger Straße"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            870883.6956334044,
+            6107423.9346372895
+          ],
+          [
+            870880.9308745626,
+            6107426.309525091
+          ],
+          [
+            870854.2397406519,
+            6107447.306158965
+          ],
+          [
+            870846.5583927851,
+            6107447.729890021
+          ],
+          [
+            870808.2225381612,
+            6107428.8040837925
+          ],
+          [
+            870542.0176772726,
+            6107251.459465941
+          ],
+          [
+            870535.9928071701,
+            6107248.1729601
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0xeea7b0",
+        "id": "0x1014f50",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0x101caf0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            870895.7425411046,
+            6107430.847861858
+          ],
+          [
+            870986.4110952587,
+            6107339.518997045
+          ],
+          [
+            871148.7559269221,
+            6107195.643239645
+          ],
+          [
+            871149.376852825,
+            6107195.366712924
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1$3",
+        "from": "0xeea7b0",
+        "id": "0x1024680",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          },
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0x10245f0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            868707.4790341319,
+            6105938.248122439
+          ],
+          [
+            868477.8450320326,
+            6106001.102179365
+          ],
+          [
+            868371.0302260793,
+            6106024.855390921
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3$5",
+        "from": "0xeeadc0",
+        "id": "0xefe9a0",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          },
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0xfd4b30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            869305.4013636946,
+            6111597.194882979
+          ],
+          [
+            869433.5952112733,
+            6111347.449228497
+          ],
+          [
+            869535.2039472389,
+            6111100.804009337
+          ],
+          [
+            869651.6305236303,
+            6110778.558363916
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0xef5e20",
+        "id": "0x100ee60",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0x100ef60"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            870514.923059423,
+            6105265.289586787
+          ],
+          [
+            870227.1838314536,
+            6105353.035677904
+          ],
+          [
+            870077.9117297684,
+            6105403.723708851
+          ],
+          [
+            870062.6363691376,
+            6105409.863697146
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0xef63b0",
+        "id": "0x101f5c0",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0x101e270"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874421.1812958359,
+            6108061.793093174
+          ],
+          [
+            874425.4446256311,
+            6108034.153803359
+          ],
+          [
+            874434.2763914882,
+            6107922.809995198
+          ],
+          [
+            874432.7509088393,
+            6107850.219864298
+          ],
+          [
+            874388.5670296418,
+            6107504.194646974
+          ],
+          [
+            874365.9647906219,
+            6107370.179267192
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "4",
+        "from": "0xf19570",
+        "id": "0xefeab0",
+        "lines": [
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x102bee0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874368.791489028,
+            6109017.646927124
+          ],
+          [
+            874394.8715591679,
+            6109140.1195996795
+          ],
+          [
+            874420.5164293714,
+            6109311.582849698
+          ],
+          [
+            874440.5910685796,
+            6109410.474308375
+          ],
+          [
+            874443.2498296768,
+            6109419.3899331195
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2$4",
+        "from": "0xf19ce0",
+        "id": "0x1008140",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x102b240"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874370.1303419129,
+            6109016.336657129
+          ],
+          [
+            874346.333566217,
+            6108879.246173599
+          ],
+          [
+            874374.781512147,
+            6108798.381252411
+          ],
+          [
+            874374.0099460027,
+            6108692.837338154
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "4",
+        "from": "0xf19ce0",
+        "id": "0x102ea40",
+        "lines": [
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x102e8d0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            869478.2080429678,
+            6108704.393491576
+          ],
+          [
+            870042.2133196797,
+            6108218.555813651
+          ],
+          [
+            870222.6224349657,
+            6108074.226997657
+          ],
+          [
+            870316.3649319753,
+            6108007.41133463
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0xf22bc0",
+        "id": "0xfdc7f0",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0xf591c0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            872399.2486040081,
+            6107492.200365338
+          ],
+          [
+            872392.2138450515,
+            6107492.6592458775
+          ],
+          [
+            872377.436892064,
+            6107479.715102067
+          ],
+          [
+            872364.2430573765,
+            6107464.960263763
+          ],
+          [
+            872351.0492650233,
+            6107450.205388283
+          ],
+          [
+            872337.85547348,
+            6107435.450512093
+          ],
+          [
+            872324.6616819429,
+            6107420.695635897
+          ],
+          [
+            872311.4678904053,
+            6107405.940759702
+          ],
+          [
+            872298.2740988682,
+            6107391.185883506
+          ],
+          [
+            872258.6927242565,
+            6107346.92125492
+          ],
+          [
+            872245.4989327192,
+            6107332.166378723
+          ],
+          [
+            872232.3051411822,
+            6107317.411502529
+          ],
+          [
+            872219.1113501088,
+            6107302.656625926
+          ],
+          [
+            872205.9175845527,
+            6107287.901726916
+          ],
+          [
+            872192.7241991479,
+            6107273.146494124
+          ],
+          [
+            872179.5329759589,
+            6107258.389363654
+          ],
+          [
+            872166.348673109,
+            6107243.626168115
+          ],
+          [
+            872153.2054227188,
+            6107228.827291798
+          ],
+          [
+            872141.7209745232,
+            6107212.755278425
+          ],
+          [
+            872131.0970137143,
+            6107196.069626243
+          ],
+          [
+            872120.7623626273,
+            6107179.187972533
+          ],
+          [
+            872110.4302559983,
+            6107162.30478507
+          ],
+          [
+            872100.0983279096,
+            6107145.421490077
+          ],
+          [
+            872089.7664114533,
+            6107128.5381880775
+          ],
+          [
+            872079.4344954131,
+            6107111.6548858285
+          ],
+          [
+            872069.1025793802,
+            6107094.771583574
+          ],
+          [
+            872048.438747315,
+            6107061.004979067
+          ],
+          [
+            872027.7749152501,
+            6107027.238374557
+          ],
+          [
+            872007.1110831852,
+            6106993.47177005
+          ],
+          [
+            871996.7791671529,
+            6106976.588467795
+          ],
+          [
+            871986.4472511283,
+            6106959.705165537
+          ],
+          [
+            871976.1153352237,
+            6106942.821863205
+          ],
+          [
+            871965.7834207569,
+            6106925.938560008
+          ],
+          [
+            871955.4515201047,
+            6106909.0552484915
+          ],
+          [
+            871945.1197109981,
+            6106892.171881845
+          ],
+          [
+            871934.7848406613,
+            6106875.290361296
+          ],
+          [
+            871924.399829756,
+            6106858.4396284055
+          ],
+          [
+            871910.4947309894,
+            6106846.317724873
+          ],
+          [
+            871903.7011850548,
+            6106840.881829366
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2$4",
+        "from": "0xf480c0",
+        "id": "0xf50e80",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0xf4b860"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            872409.59502543,
+            6107491.663324597
+          ],
+          [
+            872448.3547581108,
+            6107469.142043939
+          ],
+          [
+            872633.302909001,
+            6107330.073507162
+          ],
+          [
+            872646.5109223977,
+            6107325.877120357
+          ],
+          [
+            872664.2522022488,
+            6107327.720059622
+          ],
+          [
+            872731.5655410518,
+            6107357.049143356
+          ],
+          [
+            872847.7122743588,
+            6107420.465600264
+          ],
+          [
+            872864.0469246696,
+            6107435.117492458
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2",
+        "from": "0xf480c0",
+        "id": "0x1014de0",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          }
+        ],
+        "to": "0x10116c0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            872234.1299100403,
+            6108864.307758795
+          ],
+          [
+            871793.4298280807,
+            6108450.832668153
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "4",
+        "from": "0xf48250",
+        "id": "0x10244a0",
+        "lines": [
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x1024320"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873405.8912123207,
+            6106093.602229143
+          ],
+          [
+            873423.3089582231,
+            6106088.008399352
+          ],
+          [
+            873442.2940246253,
+            6106081.91219278
+          ],
+          [
+            873461.3210541507,
+            6106075.951094104
+          ],
+          [
+            873480.4758195563,
+            6106070.567130087
+          ],
+          [
+            873500.4058585018,
+            6106069.9879358
+          ],
+          [
+            873520.3376628524,
+            6106069.454243216
+          ],
+          [
+            873540.2694978274,
+            6106068.921391267
+          ],
+          [
+            873560.2013332983,
+            6106068.388552951
+          ],
+          [
+            873580.1331687749,
+            6106067.855714781
+          ],
+          [
+            873619.9968397277,
+            6106066.790038446
+          ],
+          [
+            873639.9286752042,
+            6106066.257200275
+          ],
+          [
+            873659.8605105804,
+            6106065.72435935
+          ],
+          [
+            873679.7923275064,
+            6106065.191018336
+          ],
+          [
+            873699.7220073815,
+            6106064.621773649
+          ],
+          [
+            873718.5445269772,
+            6106059.071371306
+          ],
+          [
+            873736.5890350905,
+            6106050.605076514
+          ],
+          [
+            873754.170158443,
+            6106041.217370907
+          ],
+          [
+            873771.728924992,
+            6106031.7909149965
+          ],
+          [
+            873789.2867052727,
+            6106022.362759434
+          ],
+          [
+            873806.8436038656,
+            6106012.933087582
+          ],
+          [
+            873824.317339359,
+            6106003.382403752
+          ],
+          [
+            873831.2083337193,
+            6105995.701742763
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1$2$3$4",
+        "from": "0xf483e0",
+        "id": "0xf55310",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          },
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          },
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0xf4aeb0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873406.6778524499,
+            6106090.6582349595
+          ],
+          [
+            873338.4425229375,
+            6105797.602453943
+          ],
+          [
+            873338.2237295412,
+            6105614.855348373
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0xf483e0",
+        "id": "0x1018770",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0x10172a0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            872323.1832221157,
+            6104548.029011072
+          ],
+          [
+            872065.7419490146,
+            6104439.507913923
+          ],
+          [
+            871992.0556281595,
+            6104422.387612464
+          ],
+          [
+            871937.429291317,
+            6104417.26045238
+          ],
+          [
+            871895.0205349831,
+            6104418.9526806455
+          ],
+          [
+            871727.1009606958,
+            6104439.292537734
+          ],
+          [
+            871643.4542660469,
+            6104454.626721908
+          ],
+          [
+            871635.1208078729,
+            6104459.195612844
+          ],
+          [
+            871621.3388348485,
+            6104478.476611838
+          ],
+          [
+            871555.9979469596,
+            6104580.429329348
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0xf49330",
+        "id": "0xfcbf60",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0x101b5f0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            875503.8337669587,
+            6104921.959865082
+          ],
+          [
+            875752.7913228157,
+            6104937.8146911515
+          ],
+          [
+            875863.9976723607,
+            6104940.001637946
+          ],
+          [
+            875992.2908933498,
+            6104933.088025831
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0xf498e0",
+        "id": "0x1020bf0",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0x101fff0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874169.8976513623,
+            6106508.334062463
+          ],
+          [
+            873723.46199986,
+            6106592.152481804
+          ],
+          [
+            873689.9624549947,
+            6106588.697042053
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0xf4aad0",
+        "id": "0x101f260",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0x101f1d0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873859.5858720121,
+            6106033.730821075
+          ],
+          [
+            873870.6355838478,
+            6106049.295094258
+          ],
+          [
+            873881.4666600956,
+            6106065.019524372
+          ],
+          [
+            873892.2910901508,
+            6106080.748679316
+          ],
+          [
+            873903.1154903813,
+            6106096.477855444
+          ],
+          [
+            873913.9398906117,
+            6106112.207031571
+          ],
+          [
+            873924.7642908419,
+            6106127.936207699
+          ],
+          [
+            873935.5886910721,
+            6106143.665383827
+          ],
+          [
+            873957.2374915327,
+            6106175.123736082
+          ],
+          [
+            873968.061891763,
+            6106190.85291221
+          ],
+          [
+            873978.8862919933,
+            6106206.582088337
+          ],
+          [
+            873989.7106922235,
+            6106222.311264465
+          ],
+          [
+            874000.5350924539,
+            6106238.040440593
+          ],
+          [
+            874022.1838929146,
+            6106269.498792848
+          ],
+          [
+            874033.0082931448,
+            6106285.227968976
+          ],
+          [
+            874043.832693375,
+            6106300.957145103
+          ],
+          [
+            874054.6570936055,
+            6106316.686321231
+          ],
+          [
+            874065.4814938357,
+            6106332.415497359
+          ],
+          [
+            874087.1302942962,
+            6106363.873849614
+          ],
+          [
+            874097.9546945266,
+            6106379.603025742
+          ],
+          [
+            874119.6034949871,
+            6106411.061377997
+          ],
+          [
+            874130.4278914891,
+            6106426.790556773
+          ],
+          [
+            874141.2522227813,
+            6106442.519781863
+          ],
+          [
+            874152.0760611452,
+            6106458.2493570205
+          ],
+          [
+            874162.8720911341,
+            6106473.9985532
+          ],
+          [
+            874168.8383014072,
+            6106490.594787095
+          ],
+          [
+            874169.2393549919,
+            6106504.203474231
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "4",
+        "from": "0xf4aeb0",
+        "id": "0xf590f0",
+        "lines": [
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0xf4aad0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873860.2625416871,
+            6105970.884603128
+          ],
+          [
+            874202.1366489585,
+            6105841.969013127
+          ],
+          [
+            874226.0063041188,
+            6105826.175858783
+          ],
+          [
+            874249.5195484454,
+            6105800.590610224
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0xf4aeb0",
+        "id": "0xfe35f0",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0xf58400"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            872682.7453455116,
+            6104735.975841995
+          ],
+          [
+            872702.6498175086,
+            6104737.521555173
+          ],
+          [
+            872722.5542895058,
+            6104739.067268353
+          ],
+          [
+            872762.3632334999,
+            6104742.158694711
+          ],
+          [
+            872782.2677054883,
+            6104743.704407987
+          ],
+          [
+            872802.1721756742,
+            6104745.250141284
+          ],
+          [
+            872822.0764558103,
+            6104746.797983207
+          ],
+          [
+            872841.6306561204,
+            6104750.776586582
+          ],
+          [
+            872861.1361451001,
+            6104755.038905579
+          ],
+          [
+            872880.6414743802,
+            6104759.301973331
+          ],
+          [
+            872900.1468008652,
+            6104763.565054103
+          ],
+          [
+            872919.652127303,
+            6104767.828135096
+          ],
+          [
+            872958.6627801773,
+            6104776.354297087
+          ],
+          [
+            872978.1681066141,
+            6104780.617378084
+          ],
+          [
+            872997.6734330512,
+            6104784.880459079
+          ],
+          [
+            873017.1787594883,
+            6104789.143540074
+          ],
+          [
+            873036.6840859252,
+            6104793.406621071
+          ],
+          [
+            873056.1894123624,
+            6104797.669702066
+          ],
+          [
+            873095.2000652364,
+            6104806.195864059
+          ],
+          [
+            873114.7053916735,
+            6104810.458945055
+          ],
+          [
+            873134.2107181104,
+            6104814.722026051
+          ],
+          [
+            873153.7160445475,
+            6104818.985107047
+          ],
+          [
+            873173.2213709846,
+            6104823.248188041
+          ],
+          [
+            873192.7266974216,
+            6104827.511269039
+          ],
+          [
+            873231.7373502958,
+            6104836.03743103
+          ],
+          [
+            873251.2426767326,
+            6104840.300512026
+          ],
+          [
+            873270.7480031699,
+            6104844.563593022
+          ],
+          [
+            873290.253329607,
+            6104848.826674018
+          ],
+          [
+            873329.2639824809,
+            6104857.352836009
+          ],
+          [
+            873348.7693089179,
+            6104861.615917006
+          ],
+          [
+            873368.2746353007,
+            6104865.8789982535
+          ],
+          [
+            873387.7799518516,
+            6104870.142125303
+          ],
+          [
+            873407.2850392412,
+            6104874.406319567
+          ],
+          [
+            873426.7718204914,
+            6104878.753974164
+          ],
+          [
+            873446.1175576422,
+            6104883.620399164
+          ],
+          [
+            873463.907685351,
+            6104892.676591478
+          ],
+          [
+            873481.659524208,
+            6104901.814805025
+          ],
+          [
+            873499.4084422991,
+            6104910.958727517
+          ],
+          [
+            873517.1570724901,
+            6104920.1032117
+          ],
+          [
+            873534.9056825715,
+            6104929.247735111
+          ],
+          [
+            873552.6542735335,
+            6104938.392295816
+          ],
+          [
+            873570.4011303992,
+            6104947.540237484
+          ],
+          [
+            873588.1303350474,
+            6104956.722413903
+          ],
+          [
+            873604.8818441723,
+            6104967.031485333
+          ],
+          [
+            873608.7734824801,
+            6104986.591617251
+          ],
+          [
+            873612.0106134783,
+            6105006.293214147
+          ],
+          [
+            873612.904385483,
+            6105011.832812505
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0xf4b150",
+        "id": "0xf5a390",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0xfd5fc0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            872674.5929997431,
+            6104746.373536246
+          ],
+          [
+            872500.5777184742,
+            6104635.085447332
+          ],
+          [
+            872326.1377425005,
+            6104546.037149077
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3$5",
+        "from": "0xf4b150",
+        "id": "0xfda630",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          },
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0xf49330"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            867856.930433803,
+            6104921.323396489
+          ],
+          [
+            867908.6888610737,
+            6104991.273248639
+          ],
+          [
+            868023.7979536955,
+            6105495.936699058
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0xf4b230",
+        "id": "0x101cc80",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0x101ce40"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            871904.6866802878,
+            6106821.907408431
+          ],
+          [
+            872079.7850101086,
+            6106715.177138286
+          ],
+          [
+            872307.702013358,
+            6106564.558742686
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1$2$3$4",
+        "from": "0xf4b860",
+        "id": "0x10201b0",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          },
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          },
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x1026070"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            870274.2164114933,
+            6102948.3807571735
+          ],
+          [
+            870792.8733651668,
+            6102750.131418524
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0xf4c1d0",
+        "id": "0x1029440",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0x10293b0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874697.2325639899,
+            6101006.8448838685
+          ],
+          [
+            874658.2120527255,
+            6101061.699254818
+          ],
+          [
+            874618.9111780524,
+            6101095.0308383815
+          ],
+          [
+            874506.1947591684,
+            6101166.688880448
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2",
+        "from": "0xf4c630",
+        "id": "0xeeb200",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          }
+        ],
+        "to": "0x1017150"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            878243.9304351048,
+            6104517.559885941
+          ],
+          [
+            878367.9582540283,
+            6104476.278511396
+          ],
+          [
+            878679.0827261404,
+            6104348.840291676
+          ],
+          [
+            878750.5321804218,
+            6104314.064190379
+          ],
+          [
+            878787.1755945929,
+            6104287.40952052
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0xf4c930",
+        "id": "0xf3f140",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0xf495a0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874249.5195484454,
+            6105800.590610224
+          ],
+          [
+            874259.7583635524,
+            6105789.449543266
+          ],
+          [
+            874292.8772981013,
+            6105739.3020793665
+          ],
+          [
+            874309.2841690407,
+            6105694.646838365
+          ],
+          [
+            874314.8666641968,
+            6105492.488940037
+          ],
+          [
+            874327.4742322969,
+            6105412.13837662
+          ],
+          [
+            874347.8661117915,
+            6105356.315957804
+          ],
+          [
+            874368.0178619499,
+            6105331.032157305
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0xf58400",
+        "id": "0x101f7e0",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0x101f750"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            870316.3649319753,
+            6108007.41133463
+          ],
+          [
+            870571.6076063889,
+            6107825.485217153
+          ],
+          [
+            870692.9410320446,
+            6107727.998646954
+          ],
+          [
+            870748.308981167,
+            6107673.819866142
+          ],
+          [
+            870805.7199801019,
+            6107602.043843945
+          ],
+          [
+            870855.1149083398,
+            6107529.551150658
+          ],
+          [
+            870907.7894488047,
+            6107437.761086426
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0xf591c0",
+        "id": "0x1016f60",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0xeea7b0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873591.282186812,
+            6104294.869708492
+          ],
+          [
+            873588.8957597167,
+            6104387.439181963
+          ],
+          [
+            873603.568922045,
+            6104642.339198866
+          ],
+          [
+            873642.4065253955,
+            6105007.072866922
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2",
+        "from": "0xfd0ae0",
+        "id": "0xf40940",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          }
+        ],
+        "to": "0xfd5fc0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            868374.3012462937,
+            6106035.078335712
+          ],
+          [
+            868369.3751866862,
+            6106036.654519569
+          ],
+          [
+            868303.5187547179,
+            6106062.725292446
+          ],
+          [
+            868234.180536069,
+            6106094.908917092
+          ],
+          [
+            868085.0587387276,
+            6106177.614721689
+          ],
+          [
+            867922.0097946622,
+            6106284.771933368
+          ],
+          [
+            867835.2626426083,
+            6106347.519816862
+          ],
+          [
+            867723.7664096544,
+            6106431.490177252
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0xfd4b30",
+        "id": "0x101de20",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0x101dfb0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874805.5557317059,
+            6105096.93868999
+          ],
+          [
+            874811.8522882008,
+            6105093.921471411
+          ],
+          [
+            874936.7977018429,
+            6105039.946720634
+          ],
+          [
+            875212.0148861073,
+            6104963.026729789
+          ],
+          [
+            875406.62751712,
+            6104922.183641609
+          ],
+          [
+            875476.7322200355,
+            6104920.233906971
+          ],
+          [
+            875503.8337669587,
+            6104921.959865082
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0xfd4d10",
+        "id": "0xf48d20",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0xf498e0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873627.6554554392,
+            6105009.452839714
+          ],
+          [
+            873656.2926921183,
+            6105239.152988989
+          ],
+          [
+            873696.5718885412,
+            6105503.034224884
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2$3",
+        "from": "0xfd5fc0",
+        "id": "0xfcebd0",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0x10252a0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873646.1482506145,
+            6108336.027705901
+          ],
+          [
+            873666.3033935642,
+            6108348.416814206
+          ],
+          [
+            873719.2981848092,
+            6108389.15794732
+          ],
+          [
+            873899.2090406315,
+            6108569.277105635
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2",
+        "from": "0x1006c70",
+        "id": "0x1006c00",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          }
+        ],
+        "to": "0x10156c0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            869356.6341118687,
+            6105681.419029643
+          ],
+          [
+            868960.1151293877,
+            6105820.126629798
+          ],
+          [
+            868706.1279194251,
+            6105924.557621818
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0x10071b0",
+        "id": "0xee6ee0",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0xeeadc0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873623.503707192,
+            6103467.159026505
+          ],
+          [
+            873629.8987730739,
+            6103659.545347825
+          ],
+          [
+            873593.4398536184,
+            6104211.173843415
+          ],
+          [
+            873591.282186812,
+            6104294.869708492
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2",
+        "from": "0x1008aa0",
+        "id": "0x1008b40",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          }
+        ],
+        "to": "0xfd0ae0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            877701.0027002936,
+            6104629.614104933
+          ],
+          [
+            878013.1175621031,
+            6104577.769888731
+          ],
+          [
+            878186.808071858,
+            6104536.572472735
+          ],
+          [
+            878243.9304351048,
+            6104517.559885941
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0x100a510",
+        "id": "0xf50fc0",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0xf4c930"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            869651.6305236303,
+            6110778.558363916
+          ],
+          [
+            869780.1131517745,
+            6110422.943961132
+          ],
+          [
+            869795.4506042519,
+            6110365.285712781
+          ],
+          [
+            869797.8415205235,
+            6110310.926410226
+          ],
+          [
+            869783.2799665933,
+            6110207.121296035
+          ],
+          [
+            869763.9427491704,
+            6110148.88591118
+          ],
+          [
+            869579.7920619419,
+            6109865.421847866
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0x100ef60",
+        "id": "0x100ecf0",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0x1011a80"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            872864.0469246696,
+            6107435.117492458
+          ],
+          [
+            873148.7569939523,
+            6107690.49738503
+          ],
+          [
+            873182.2767032329,
+            6107726.462403549
+          ],
+          [
+            873208.4679543098,
+            6107843.853459926
+          ],
+          [
+            873226.9941080572,
+            6107887.402298865
+          ],
+          [
+            873254.7955436256,
+            6107934.966152654
+          ],
+          [
+            873390.9469132139,
+            6108109.372813286
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2",
+        "from": "0x10116c0",
+        "id": "0x1022f80",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          }
+        ],
+        "to": "0x101a820"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            869579.7920619419,
+            6109865.421847866
+          ],
+          [
+            869442.4213619245,
+            6109653.966450152
+          ],
+          [
+            869321.217394982,
+            6109443.716764173
+          ],
+          [
+            869197.3061008861,
+            6109213.056087533
+          ],
+          [
+            869158.8369559166,
+            6109124.921259073
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0x1011a80",
+        "id": "0x10170e0",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0x1017330"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            871402.2274797835,
+            6102558.429809818
+          ],
+          [
+            871406.2301332253,
+            6102558.1291017
+          ],
+          [
+            871447.7483864971,
+            6102563.187321646
+          ],
+          [
+            871455.4427478507,
+            6102573.075281
+          ],
+          [
+            871461.0857021456,
+            6102595.1332582105
+          ],
+          [
+            871507.774832237,
+            6102973.694963586
+          ],
+          [
+            871519.3900461544,
+            6103016.607191715
+          ],
+          [
+            871536.1146099466,
+            6103055.477916905
+          ],
+          [
+            871568.731447153,
+            6103103.9360556705
+          ],
+          [
+            871735.2730617712,
+            6103316.535275622
+          ],
+          [
+            871741.2568561774,
+            6103326.406299801
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0x1011e00",
+        "id": "0x1018ca0",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0x101ae50"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873104.9565633015,
+            6105126.115126809
+          ],
+          [
+            872666.57303712,
+            6104755.869445785
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0x10132c0",
+        "id": "0x1011a10",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0xf4b150"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873899.2090406315,
+            6108569.277105635
+          ],
+          [
+            874202.5905595865,
+            6108873.009882586
+          ],
+          [
+            874340.4699071745,
+            6108991.385853307
+          ],
+          [
+            874367.4526361432,
+            6109018.9571971195
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2",
+        "from": "0x10156c0",
+        "id": "0x1011890",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          }
+        ],
+        "to": "0xf19ce0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874506.1947591684,
+            6101166.688880448
+          ],
+          [
+            874505.0638029882,
+            6101167.40787158
+          ],
+          [
+            874264.2705894925,
+            6101300.303609954
+          ],
+          [
+            874197.041227959,
+            6101340.105922524
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2",
+        "from": "0x1017150",
+        "id": "0x101a5b0",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          }
+        ],
+        "to": "0x1018c00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873338.2237295412,
+            6105614.855348373
+          ],
+          [
+            873337.9673974791,
+            6105400.754085885
+          ],
+          [
+            873328.472795843,
+            6105359.790837678
+          ],
+          [
+            873306.2906729744,
+            6105317.490915472
+          ],
+          [
+            873269.2745536097,
+            6105273.025117108
+          ],
+          [
+            873204.3381689304,
+            6105210.049873577
+          ],
+          [
+            873104.9565633015,
+            6105126.115126809
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0x10172a0",
+        "id": "0x1008880",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0x10132c0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            869158.8369559166,
+            6109124.921259073
+          ],
+          [
+            869143.8778880625,
+            6109090.64925016
+          ],
+          [
+            869139.6371376407,
+            6109065.045472918
+          ],
+          [
+            869151.411064571,
+            6109021.871412526
+          ],
+          [
+            869221.2698776757,
+            6108945.917768039
+          ],
+          [
+            869444.5550770286,
+            6108733.382367217
+          ],
+          [
+            869478.2080429678,
+            6108704.393491576
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0x1017330",
+        "id": "0x1009d00",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0xf22bc0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874197.041227959,
+            6101340.105922524
+          ],
+          [
+            874117.9976765155,
+            6101386.902680211
+          ],
+          [
+            874027.1329265141,
+            6101451.916334959
+          ],
+          [
+            873944.2719186066,
+            6101537.71377964
+          ],
+          [
+            873890.6112220995,
+            6101608.917002587
+          ],
+          [
+            873832.8861035057,
+            6101702.308209034
+          ],
+          [
+            873700.228610135,
+            6102042.003181081
+          ],
+          [
+            873655.3145616516,
+            6102172.029460835
+          ],
+          [
+            873622.4644804841,
+            6102288.1073422795
+          ],
+          [
+            873595.809297451,
+            6102436.070917615
+          ],
+          [
+            873583.3879418412,
+            6102653.799959138
+          ],
+          [
+            873585.1509724542,
+            6102688.62289184
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2",
+        "from": "0x1018c00",
+        "id": "0xf40aa0",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          }
+        ],
+        "to": "0x1023070"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873390.9469132139,
+            6108109.372813286
+          ],
+          [
+            873479.4257401419,
+            6108212.247376531
+          ],
+          [
+            873542.956105602,
+            6108272.5968156345
+          ],
+          [
+            873646.1482506145,
+            6108336.027705901
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2",
+        "from": "0x101a820",
+        "id": "0xfd6ea0",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          }
+        ],
+        "to": "0x1006c70"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            871741.2568561774,
+            6103326.406299801
+          ],
+          [
+            871892.7405582297,
+            6103576.297787394
+          ],
+          [
+            871983.9147547386,
+            6103712.859816823
+          ],
+          [
+            872316.8126358499,
+            6104131.398090655
+          ],
+          [
+            872371.0997140824,
+            6104225.988037534
+          ],
+          [
+            872373.5564745428,
+            6104240.833951203
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0x101ae50",
+        "id": "0xeeac70",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0x101cb80"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            871555.9979469596,
+            6104580.429329348
+          ],
+          [
+            871507.6902601869,
+            6104655.804796413
+          ],
+          [
+            871476.5686110255,
+            6104697.207568999
+          ],
+          [
+            871440.7982684367,
+            6104738.0120430365
+          ],
+          [
+            871355.3115029769,
+            6104817.826095462
+          ],
+          [
+            871251.2299638075,
+            6104895.246953689
+          ],
+          [
+            871192.2161540817,
+            6104933.0599349765
+          ],
+          [
+            870905.0100308711,
+            6105099.290564468
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0x101b5f0",
+        "id": "0x10220a0",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0x1021f40"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            872793.1294302876,
+            6106290.658544485
+          ],
+          [
+            873404.3177999719,
+            6106094.107174367
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1$2$3$4",
+        "from": "0x101c470",
+        "id": "0x1015b40",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          },
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          },
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0xf483e0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            870535.9928071701,
+            6107248.1729601
+          ],
+          [
+            870463.4108255067,
+            6107208.5802215515
+          ],
+          [
+            869884.8666752093,
+            6107025.269770743
+          ],
+          [
+            869764.400990112,
+            6106980.697775729
+          ],
+          [
+            869649.6848102057,
+            6106930.177490212
+          ],
+          [
+            869541.64521796,
+            6106868.018642294
+          ],
+          [
+            869393.1123580398,
+            6106741.923944836
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0x101caf0",
+        "id": "0xf517f0",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0x1028c00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            872373.5564745428,
+            6104240.833951203
+          ],
+          [
+            872380.7408815204,
+            6104284.248475114
+          ],
+          [
+            872377.4683167692,
+            6104326.950299577
+          ],
+          [
+            872327.9751566134,
+            6104540.065908087
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0x101cb80",
+        "id": "0xf5cba0",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0xf49330"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            868023.7979536955,
+            6105495.936699058
+          ],
+          [
+            868040.6616587077,
+            6105569.870871975
+          ],
+          [
+            868122.5010479103,
+            6105665.367550827
+          ],
+          [
+            868186.7497364134,
+            6105864.120172385
+          ],
+          [
+            868233.0682236445,
+            6105937.226849217
+          ],
+          [
+            868256.5117770481,
+            6105962.720332019
+          ],
+          [
+            868276.6772891817,
+            6105976.42105764
+          ],
+          [
+            868367.7592058647,
+            6106014.63244613
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0x101ce40",
+        "id": "0xf5a320",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0xfd4b30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            867723.7664096544,
+            6106431.490177252
+          ],
+          [
+            867390.816013538,
+            6106682.242727481
+          ],
+          [
+            867340.9321905655,
+            6106713.41215995
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0x101dfb0",
+        "id": "0xf5c2d0",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0x1020760"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            870062.6363691376,
+            6105409.863697146
+          ],
+          [
+            869591.0952316953,
+            6105599.401419648
+          ],
+          [
+            869356.6341118687,
+            6105681.419029643
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0x101e270",
+        "id": "0x101e4d0",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0x10071b0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873689.9624549947,
+            6106588.697042053
+          ],
+          [
+            873497.388242011,
+            6106310.472232922
+          ],
+          [
+            873425.771763151,
+            6106151.088866787
+          ],
+          [
+            873407.0001570926,
+            6106092.029565543
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0x101f1d0",
+        "id": "0x101b720",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0xf483e0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874368.0178619499,
+            6105331.032157305
+          ],
+          [
+            874385.3841808878,
+            6105309.243154365
+          ],
+          [
+            874437.509074171,
+            6105276.396283605
+          ],
+          [
+            874573.1350648089,
+            6105208.311303701
+          ],
+          [
+            874805.5557317059,
+            6105096.93868999
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0x101f750",
+        "id": "0x101e380",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0xfd4d10"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            875992.2908933498,
+            6104933.088025831
+          ],
+          [
+            875997.0696109759,
+            6104932.830504819
+          ],
+          [
+            876145.6649856614,
+            6104914.465224234
+          ],
+          [
+            876466.6212734992,
+            6104856.342415757
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0x101fff0",
+        "id": "0x1009c40",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0x1022640"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            871659.5622910113,
+            6108053.532290891
+          ],
+          [
+            871890.4674742327,
+            6107932.612297373
+          ],
+          [
+            871982.7871956562,
+            6107878.432490325
+          ],
+          [
+            872025.648920647,
+            6107841.46338718
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "4",
+        "from": "0x10200b0",
+        "id": "0x1025ee0",
+        "lines": [
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x1025e50"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            867340.9321905655,
+            6106713.41215995
+          ],
+          [
+            866948.9481539902,
+            6106958.339658059
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0x1020760",
+        "id": "0x10206c0",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0xf4a360"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            877101.3950703307,
+            6104696.428775427
+          ],
+          [
+            877206.3497128024,
+            6104694.7599938195
+          ],
+          [
+            877314.9749972882,
+            6104685.568337703
+          ],
+          [
+            877625.498107384,
+            6104642.155886559
+          ],
+          [
+            877701.0027002936,
+            6104629.614104933
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0x1020b20",
+        "id": "0xfd4ac0",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0x100a510"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            870905.0100308711,
+            6105099.290564468
+          ],
+          [
+            870826.3036464902,
+            6105144.844648324
+          ],
+          [
+            870706.8015785789,
+            6105200.168345904
+          ],
+          [
+            870620.7932980583,
+            6105233.00445253
+          ],
+          [
+            870514.923059423,
+            6105265.289586787
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "5",
+        "from": "0x1021f40",
+        "id": "0x1022030",
+        "lines": [
+          {
+            "color": "0000ff",
+            "id": "0x26b5690",
+            "label": "5"
+          }
+        ],
+        "to": "0xef63b0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            876466.6212734992,
+            6104856.342415757
+          ],
+          [
+            876619.7016705768,
+            6104828.620688723
+          ],
+          [
+            876747.8192736787,
+            6104748.762138224
+          ],
+          [
+            876812.254705793,
+            6104721.808805838
+          ],
+          [
+            876865.4024610913,
+            6104708.477128876
+          ],
+          [
+            876954.7446494768,
+            6104698.760521019
+          ],
+          [
+            877101.3950703307,
+            6104696.428775427
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1",
+        "from": "0x1022640",
+        "id": "0x10229a0",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          }
+        ],
+        "to": "0x1020b20"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873585.1509724542,
+            6102688.62289184
+          ],
+          [
+            873621.470891706,
+            6103406.004708393
+          ],
+          [
+            873623.503707192,
+            6103467.159026505
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2",
+        "from": "0x1023070",
+        "id": "0x1020ab0",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          }
+        ],
+        "to": "0x1008aa0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            871793.4298280807,
+            6108450.832668153
+          ],
+          [
+            871557.8085577905,
+            6108229.767299484
+          ],
+          [
+            871512.4909453623,
+            6108185.293008574
+          ],
+          [
+            871499.8308114742,
+            6108160.487835817
+          ],
+          [
+            871520.7618179918,
+            6108129.007221792
+          ],
+          [
+            871545.5138064956,
+            6108113.256987479
+          ],
+          [
+            871659.5622910113,
+            6108053.532290891
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "4",
+        "from": "0x1024320",
+        "id": "0x1007010",
+        "lines": [
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x10200b0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            871149.376852825,
+            6107195.366712924
+          ],
+          [
+            871586.608628799,
+            6107000.647392907
+          ],
+          [
+            871901.897486028,
+            6106824.057908468
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1$3",
+        "from": "0x10245f0",
+        "id": "0xfcc700",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          },
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0xf4b860"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            873696.5718885412,
+            6105503.034224884
+          ],
+          [
+            873742.8752334778,
+            6105806.381485332
+          ],
+          [
+            873830.2459709551,
+            6105995.254101703
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2$3",
+        "from": "0x10252a0",
+        "id": "0xf54920",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0xf4aeb0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            872025.648920647,
+            6107841.46338718
+          ],
+          [
+            872363.6666646729,
+            6107549.916258679
+          ],
+          [
+            872379.6189784807,
+            6107530.361986888
+          ],
+          [
+            872379.5996263248,
+            6107510.65521539
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "4",
+        "from": "0x1025e50",
+        "id": "0xf5a420",
+        "lines": [
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0xf480c0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            872307.702013358,
+            6106564.558742686
+          ],
+          [
+            872643.5620068924,
+            6106342.606485281
+          ],
+          [
+            872723.2049126297,
+            6106313.145490298
+          ],
+          [
+            872793.1294302876,
+            6106290.658544485
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "1$2$3$4",
+        "from": "0x1026070",
+        "id": "0x101ca80",
+        "lines": [
+          {
+            "color": "e8001b",
+            "id": "0x26648a0",
+            "label": "1"
+          },
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          },
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x101c470"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            875003.2073250349,
+            6111231.905822824
+          ],
+          [
+            875049.9450050818,
+            6111506.200135112
+          ],
+          [
+            875082.9149371067,
+            6111612.009752113
+          ],
+          [
+            875189.2972055714,
+            6111909.375064874
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2$4",
+        "from": "0x1027260",
+        "id": "0x102c1b0",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x102c630"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            869393.1123580398,
+            6106741.923944836
+          ],
+          [
+            869329.3444411908,
+            6106687.789148084
+          ],
+          [
+            869191.3808731419,
+            6106563.15821364
+          ],
+          [
+            869134.0736218707,
+            6106503.200139789
+          ],
+          [
+            869087.6831090486,
+            6106441.990280718
+          ],
+          [
+            869087.6789471197,
+            6106441.984543043
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0x1028c00",
+        "id": "0x102f1d0",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0x102efc0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            870792.8733651668,
+            6102750.131418524
+          ],
+          [
+            870977.0758935141,
+            6102679.722588249
+          ],
+          [
+            871203.8731964604,
+            6102598.100160133
+          ],
+          [
+            871285.5652224619,
+            6102574.635322735
+          ],
+          [
+            871349.5506346626,
+            6102562.387273336
+          ],
+          [
+            871402.2274797835,
+            6102558.429809818
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0x10293b0",
+        "id": "0x10294b0",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0x1011e00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874630.0492611707,
+            6110045.784548041
+          ],
+          [
+            874701.0389318619,
+            6110283.834241664
+          ],
+          [
+            874781.4099618907,
+            6110544.966694358
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2$4",
+        "from": "0x1029b30",
+        "id": "0x10272f0",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x102dc20"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874443.2498296768,
+            6109419.3899331195
+          ],
+          [
+            874630.0492611707,
+            6110045.784548041
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2$4",
+        "from": "0x102b240",
+        "id": "0x1027080",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x1029b30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874365.9647906219,
+            6107370.179267192
+          ],
+          [
+            874339.9451684712,
+            6107215.90120911
+          ],
+          [
+            874289.2435481467,
+            6106979.8803721955
+          ],
+          [
+            874174.935894829,
+            6106511.699179336
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "4",
+        "from": "0x102bee0",
+        "id": "0x102c0e0",
+        "lines": [
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0xf4aad0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            875189.2972055714,
+            6111909.375064874
+          ],
+          [
+            875206.9691513416,
+            6111958.772617275
+          ],
+          [
+            875255.2627129841,
+            6112125.93259364
+          ],
+          [
+            875329.1767019787,
+            6112646.146067768
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2$4",
+        "from": "0x102c630",
+        "id": "0x1012880",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0xf4c0f0"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874781.4099618907,
+            6110544.966694358
+          ],
+          [
+            874799.9609493753,
+            6110605.240462904
+          ],
+          [
+            874933.5198397448,
+            6110897.3782041045
+          ],
+          [
+            874958.2796617985,
+            6110968.2341455445
+          ],
+          [
+            875003.2073250349,
+            6111231.905822824
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "2$4",
+        "from": "0x102dc20",
+        "id": "0xf42230",
+        "lines": [
+          {
+            "color": "13a538",
+            "id": "0x26489d0",
+            "label": "2"
+          },
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0x1027260"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            874374.0099460027,
+            6108692.837338154
+          ],
+          [
+            874372.647905218,
+            6108506.521340654
+          ],
+          [
+            874376.279616563,
+            6108389.917006696
+          ],
+          [
+            874386.8043576444,
+            6108284.659773273
+          ],
+          [
+            874421.1812958359,
+            6108061.793093174
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "4",
+        "from": "0x102e8d0",
+        "id": "0x102e040",
+        "lines": [
+          {
+            "color": "ea5297",
+            "id": "0x26b5810",
+            "label": "4"
+          }
+        ],
+        "to": "0xf19570"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            869087.6789471197,
+            6106441.984543043
+          ],
+          [
+            868740.4176036713,
+            6105963.246779138
+          ],
+          [
+            868716.5387317521,
+            6105951.177863462
+          ],
+          [
+            868708.8301488386,
+            6105951.93862306
+          ]
+        ]
+      },
+      "properties": {
+        "dbg_lines": "3",
+        "from": "0x102efc0",
+        "id": "0x102f160",
+        "lines": [
+          {
+            "color": "f59e00",
+            "id": "0x26b5750",
+            "label": "3"
+          }
+        ],
+        "to": "0xeeadc0"
+      }
+    }
+  ]
+}

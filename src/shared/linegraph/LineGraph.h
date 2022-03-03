@@ -5,6 +5,7 @@
 #ifndef SHARED_LINEGRAPH_LINEGRAPH_H_
 #define SHARED_LINEGRAPH_LINEGRAPH_H_
 
+#include "3rdparty/json.hpp"
 #include "shared/linegraph/EdgeOrdering.h"
 #include "shared/linegraph/LineEdgePL.h"
 #include "shared/linegraph/LineNodePL.h"
@@ -65,6 +66,9 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   }
 
   virtual void readFromJson(std::istream* s, double smooth);
+  virtual void readFromGeoJson(nlohmann::json::array_t, double smooth);
+  virtual void readFromTopoJson(nlohmann::json::array_t objects,
+                                nlohmann::json::array_t arc, double smooth);
   virtual void readFromDot(std::istream* s, double smooth);
 
   const util::geo::Box<double>& getBBox() const;
@@ -97,7 +101,7 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
                       const Line* line);
 
   static bool terminatesAt(const LineEdge* fromEdge, const LineNode* terminus,
-                      const Line* line);
+                           const Line* line);
 
   static std::vector<const Line*> getSharedLines(const LineEdge* a,
                                                  const LineEdge* b);

@@ -12,7 +12,6 @@
 #include "util/log/Log.h"
 
 using topo::config::ConfigReader;
-namespace opts = boost::program_options;
 
 using std::exception;
 using std::string;
@@ -32,7 +31,7 @@ void ConfigReader::help(const char* bin) const {
             << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
             << "\n\n(C) " << YEAR << " " << COPY << "\n"
             << "Authors: " << AUTHORS << "\n\n"
-            << "Usage: " << bin << " <GTFS FEED>\n\n"
+            << "Usage: " << bin << " < linegraph.json\n\n"
             << "Allowed options:\n\n"
             << "General:\n"
             << std::setw(35) << "  -v [ --version ]"
@@ -96,10 +95,5 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
         exit(1);
         break;
     }
-  }
-
-  if (optind == argc) {
-    std::cerr << "No input GTFS feed specified." << std::endl;
-    exit(1);
   }
 }

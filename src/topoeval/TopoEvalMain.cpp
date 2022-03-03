@@ -4,11 +4,11 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <set>
 #include <string>
-#include <cstdlib>
 #include "shared/linegraph/LineGraph.h"
 #include "topoeval/DirLineGraph.h"
 #include "util/geo/Geo.h"
@@ -462,11 +462,13 @@ int main(int argc, char** argv) {
     for (auto nd : resNodesGt) lineGt.push_back(*nd->pl().getGeom());
     for (auto nd : resNodesTest) lineTest.push_back(*nd->pl().getGeom());
 
-    if (cGt > std::numeric_limits<double>::max() && cTest > std::numeric_limits<double>::max()) {
+    if (cGt > std::numeric_limits<double>::max() &&
+        cTest > std::numeric_limits<double>::max()) {
       continue;
     }
 
-    if ((cGt > std::numeric_limits<double>::max()) ^ (cTest > std::numeric_limits<double>::max())) {
+    if ((cGt > std::numeric_limits<double>::max()) ^
+        (cTest > std::numeric_limits<double>::max())) {
       unmatch += 1;
       continue;
     }
@@ -483,25 +485,12 @@ int main(int argc, char** argv) {
     if (frechetDist < d)
       match += 1;
     else {
-      // std::ofstream pstr("path.json");
-      // util::geo::output::GeoJsonOutput o(pstr);
-      // o.print(lineTest, {});
-      // o.print(lineGt, {});
-      // o.flush();
-      // pstr.close();
-
-      // // // util::geo::output::GeoGraphJsonOutput out;
-      // // // out.print(testGraph, std::cout);
-      // exit(0);
-
       unmatch += 1;
     }
   }
 
-  std::cout << match / (match + unmatch) << "\t" << minFrech << "\t" << maxFrech << "\t" << frechAvg / (match + unmatch) << std::endl;
-
-  // util::geo::output::GeoGraphJsonOutput out;
-  // out.print(testGraph, std::cout);
+  std::cout << match / (match + unmatch) << "\t" << minFrech << "\t" << maxFrech
+            << "\t" << frechAvg / (match + unmatch) << std::endl;
 
   return (0);
 }
