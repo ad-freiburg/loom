@@ -61,7 +61,7 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
                          {0, 0, 0, 0}};
 
   char c;
-  while ((c = getopt_long(argc, argv, ":hvim:", ops, 0)) != -1) {
+  while ((c = getopt_long(argc, argv, ":hvd:", ops, 0)) != -1) {
     switch (c) {
       case 'h':
         help(argv[0]);
