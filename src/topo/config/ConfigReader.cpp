@@ -55,8 +55,8 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
   struct option ops[] = {{"version", no_argument, 0, 'v'},
                          {"help", no_argument, 0, 'h'},
                          {"max-aggr-dist", required_argument, 0, 'd'},
-                         {"no-infer-restrs", required_argument, 0, 1},
-                         {"write-stats", required_argument, 0, 2},
+                         {"no-infer-restrs", no_argument, 0, 1},
+                         {"write-stats", no_argument, 0, 2},
                          {"max-length-dev", required_argument, 0, 3},
                          {0, 0, 0, 0}};
 
