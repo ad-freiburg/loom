@@ -62,7 +62,7 @@ void GraphBuilder::writeNodeFronts(RenderGraph* graph) {
 void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
   // now, look at the nodes entire front geometries and expand them
   // until nothing overlaps
-  double step = 5;
+  double step = 4;
 
   while (true) {
     bool stillFree = false;
@@ -99,7 +99,7 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
   for (size_t i = 0; i < n->pl().fronts().size(); ++i) {
     const NodeFront& fa = n->pl().fronts()[i];
 
-    for (size_t j = 0; j < n->pl().fronts().size(); ++j) {
+    for (size_t j = i + 1; j < n->pl().fronts().size(); ++j) {
       const NodeFront& fb = n->pl().fronts()[j];
 
       if (fa.geom.equals(fb.geom, 5) || j == i) continue;
@@ -111,12 +111,11 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
       if (n->pl().stops().size() && !g->notCompletelyServed(n)) {
         maxNfDist = .5 * g->getMaxNdFrontWidth(n);
         double fac = 0;
-        // if (!numShr || _cfg->tightStations) fac = 0;
         if (_cfg->tightStations) maxNfDist = _cfg->lineWidth + _cfg->lineSpacing;
         overlap = nodeFrontsOverlap(g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
       } else {
         size_t numShr = g->getSharedLines(fa.edge, fb.edge).size();
-        double fac = 3;
+        double fac = 5;
         if (!numShr) fac = 1;
 
         overlap = nodeFrontsOverlap(g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
@@ -157,16 +156,11 @@ void GraphBuilder::freeNodeFront(const LineNode* n, NodeFront* f) {
       f->edge->pl().setGeom(PolyLine<double>(*f->edge->pl().getGeom())
                                 .getSegment(iSects.begin()->totalPos, 1)
                                 .getLine());
-
-      assert(cutLine.distTo(f->edge->pl().getGeom()->front()) < 0.1);
-
     } else {
       // cut at end
       f->edge->pl().setGeom(PolyLine<double>(*f->edge->pl().getGeom())
                                 .getSegment(0, (--iSects.end())->totalPos)
                                 .getLine());
-
-      assert(cutLine.distTo(f->edge->pl().getGeom()->back()) < 0.1);
     }
   }
 }

@@ -235,7 +235,7 @@ InnerGeom RenderGraph::getTerminusBezier(const LineNode* n,
   DPoint c = pp;
   std::pair<double, double> slopeA;
 
-  assert(util::geo::len(*partnerFrom.edge->pl().getGeom()) > 5);
+  if (util::geo::len(*partnerFrom.edge->pl().getGeom()) <= 5) return ret;
 
   if (partnerFrom.edge->getTo() == n) {
     slopeA = PolyLine<double>(*partnerFrom.edge->pl().getGeom())
@@ -392,7 +392,18 @@ std::vector<Polygon<double>> RenderGraph::getStopGeoms(
   }
 
   if (n->pl().fronts().size() == 0) return {};
-  return {getConvexFrontHull(n, d, true, tight, pointsPerCircle)};
+  auto h = getConvexFrontHull(n, d, true, tight, pointsPerCircle);
+
+  auto nfWidth = getMaxNdFrontWidth(n);
+
+  // prevent too large stations
+  if (util::geo::area(h) > 1.25 * (nfWidth * nfWidth)) {
+    // render each stop individually
+    auto served = servedLines(n);
+    return getIndStopPolys(served, n, d);
+  }
+
+  return {h};
 }
 
 // _____________________________________________________________________________
@@ -437,6 +448,17 @@ double RenderGraph::getWidth(const shared::linegraph::LineEdge* e) const {
 double RenderGraph::getSpacing(const shared::linegraph::LineEdge* e) const {
   UNUSED(e);
   return _defSpacing;
+}
+
+// _____________________________________________________________________________
+double RenderGraph::getMaxNdFrontWidth() const {
+  double ret = 0;
+  for (auto n : getNds()) {
+    for (const auto& g : n->pl().fronts()) {
+      if (getTotalWidth(g.edge) > ret) ret = getTotalWidth(g.edge);
+    }
+  }
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -490,4 +512,248 @@ double RenderGraph::getOutAngle(const LineNode* n, const LineEdge* e) {
             .getPointAtDist(util::geo::len(*e->pl().getGeom()) - checkDist)
             .p);
   }
+}
+
+// _____________________________________________________________________________
+void RenderGraph::createMetaNodes() {
+  std::vector<NodeFront> cands;
+  while ((cands = getNextMetaNodeCand()).size() > 0) {
+    // remove all edges completely contained
+    for (auto nf : cands) {
+      auto onfs = getClosedNodeFronts(nf.n);
+
+      for (auto onf : onfs) {
+        LineEdge* e = onf.edge;
+
+        bool found = false;
+
+        for (auto nf : cands) {
+          if (nf.n == e->getFrom()) {
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) continue;
+
+        for (auto nf : cands) {
+          if (nf.n == e->getTo()) {
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) continue;
+
+        e->getTo()->pl().delFrontFor(e);
+        e->getFrom()->pl().delFrontFor(e);
+        delEdg(e->getTo(), e->getFrom());
+        getEdgGrid()->remove(e);
+      }
+    }
+
+    // first node has new ref node id
+    LineNode* ref = addNd(*cands[0].n->pl().getGeom());
+
+    std::set<LineNode*> toDel;
+
+    for (auto nf : cands) {
+      for (auto onf : getOpenNodeFronts(nf.n)) {
+        LineEdge* e;
+        LineNode* other;
+        if (onf.edge->getTo() == nf.n) {
+          e = addEdg(onf.edge->getFrom(), ref, onf.edge->pl());
+          other = onf.edge->getFrom();
+        } else {
+          e = addEdg(ref, onf.edge->getTo(), onf.edge->pl());
+          other = onf.edge->getTo();
+        }
+
+        // update the directions, if necessary
+        std::set<shared::linegraph::LineOcc> del;
+        for (auto& to : e->pl().getLines()) {
+          if (to.direction == nf.n) del.insert(to);
+        }
+
+        // also update the edge of the other node front
+        NodeFront otherFr = *other->pl().frontFor(onf.edge);
+        other->pl().delFrontFor(onf.edge);
+        otherFr.edge = e;
+        other->pl().addFront(otherFr);
+
+        // remove the original edge
+        delEdg(onf.edge->getFrom(), onf.edge->getTo());
+        getEdgGrid()->remove(onf.edge);
+
+        // update the original edge in the checked node front
+        onf.edge = e;
+
+        // update the lines
+        for (auto ro : del) {
+          e->pl().delLine(ro.line);
+          e->pl().addLine(ro.line, ref);
+        }
+
+        toDel.insert(onf.n);
+
+        // update the node front node
+        onf.n = ref;
+
+        // add the new node front to the new node
+        ref->pl().addFront(onf);
+      }
+    }
+
+    // delete the nodes marked for deletion
+    for (auto toDelNd : toDel) {
+      getNdGrid()->remove(toDelNd);
+      delNd(toDelNd);
+    }
+  }
+}
+
+// _____________________________________________________________________________
+std::vector<NodeFront> RenderGraph::getNextMetaNodeCand() const {
+  for (auto n : getNds()) {
+    if (n->pl().stops().size()) continue;
+    if (getOpenNodeFronts(n).size() != 1) continue;
+
+    std::set<const LineNode*> potClique;
+
+    std::stack<const LineNode*> nodeStack;
+    nodeStack.push(n);
+
+    while (!nodeStack.empty()) {
+      const LineNode* n = nodeStack.top();
+      nodeStack.pop();
+
+      if (n->pl().stops().size() == 0) {
+        potClique.insert(n);
+        for (auto nff : getClosedNodeFronts(n)) {
+          const LineNode* m;
+
+          if (nff.edge->getTo() == n) {
+            m = nff.edge->getFrom();
+          } else {
+            m = nff.edge->getTo();
+          }
+
+          if (potClique.find(m) == potClique.end()) {
+            nodeStack.push(m);
+          }
+        }
+      }
+    }
+
+    if (isClique(potClique)) {
+      std::vector<NodeFront> ret;
+
+      for (auto n : potClique) {
+        if (getOpenNodeFronts(n).size() > 0) {
+          ret.push_back(getOpenNodeFronts(n)[0]);
+        } else {
+          for (auto nf : getClosedNodeFronts(n)) {
+            ret.push_back(nf);
+          }
+        }
+      }
+
+      return ret;
+    }
+  }
+
+  return std::vector<NodeFront>();
+}
+
+// _____________________________________________________________________________
+bool RenderGraph::isClique(std::set<const LineNode*> potClique) const {
+  if (potClique.size() < 2) return false;
+
+  for (const LineNode* a : potClique) {
+    for (const LineNode* b : potClique) {
+      if (util::geo::dist(*a->pl().getGeom(), *b->pl().getGeom()) >
+          (_defWidth + _defSpacing) * 10) {
+        return false;
+      }
+    }
+  }
+
+  std::set<const LineNode*> periphery;
+
+  for (const LineNode* n : potClique) {
+    for (auto nf : getClosedNodeFronts(n)) {
+      if (nf.edge->getTo() == n) {
+        if (potClique.find(nf.edge->getFrom()) == potClique.end()) {
+          return false;
+        }
+      } else {
+        if (potClique.find(nf.edge->getTo()) == potClique.end()) {
+          return false;
+        }
+      }
+    }
+
+    // catch cases where two clique nodes share the same node at their
+    // open front
+    for (auto nf : getOpenNodeFronts(n)) {
+      if (nf.edge->getTo() == n) {
+        if (periphery.count(nf.edge->getFrom())) return false;
+        periphery.insert(nf.edge->getFrom());
+      } else {
+        if (periphery.count(nf.edge->getTo())) return false;
+        periphery.insert(nf.edge->getTo());
+      }
+    }
+
+    for (auto nf : getOpenNodeFronts(n)) {
+      if (nf.edge->getTo() == n) {
+        if (potClique.find(nf.edge->getFrom()) != potClique.end()) {
+          return false;
+        }
+      } else {
+        if (potClique.find(nf.edge->getTo()) != potClique.end()) {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+// _____________________________________________________________________________
+std::vector<NodeFront> RenderGraph::getOpenNodeFronts(const LineNode* n) const {
+  std::vector<NodeFront> res;
+  for (auto nf : n->pl().fronts()) {
+    if (util::geo::len(*nf.edge->pl().getGeom()) >
+            (getWidth(nf.edge) + getSpacing(nf.edge)) ||
+        (nf.edge->getOtherNd(n)->pl().frontFor(nf.edge)->geom.distTo(
+             *nf.edge->getOtherNd(n)->pl().getGeom()) >
+         6 * (getWidth(nf.edge) + getSpacing(nf.edge))) ||
+        (nf.edge->getTo()->pl().stops().size() > 0) ||
+        (nf.edge->getFrom()->pl().stops().size() > 0)) {
+      res.push_back(nf);
+    }
+  }
+
+  return res;
+}
+
+// _____________________________________________________________________________
+std::vector<NodeFront> RenderGraph::getClosedNodeFronts(
+    const LineNode* n) const {
+  std::vector<NodeFront> res;
+  for (auto nf : n->pl().fronts()) {
+    if (!(util::geo::len(*nf.edge->pl().getGeom()) >
+          (getWidth(nf.edge) + getSpacing(nf.edge))) &&
+        !(nf.edge->getOtherNd(n)->pl().frontFor(nf.edge)->geom.distTo(
+              *nf.edge->getOtherNd(n)->pl().getGeom()) >
+          6 * (getWidth(nf.edge) + getSpacing(nf.edge))) &&
+        (nf.edge->getTo()->pl().stops().size() == 0) &&
+        (nf.edge->getFrom()->pl().stops().size() == 0)) {
+      res.push_back(nf);
+    }
+  }
+
+  return res;
 }

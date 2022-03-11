@@ -50,6 +50,7 @@ class RenderGraph : public shared::linegraph::LineGraph {
   double getSpacing(const shared::linegraph::LineEdge* e) const;
 
   double getMaxNdFrontWidth(const shared::linegraph::LineNode* n) const;
+  double getMaxNdFrontWidth() const;
 
   util::geo::DPoint linePosOn(const shared::linegraph::NodeFront& nf,
                               const shared::linegraph::Line* r,
@@ -60,6 +61,8 @@ class RenderGraph : public shared::linegraph::LineGraph {
                               bool inv, bool origG) const;
 
   void smooth();
+
+  void createMetaNodes();
 
   static bool notCompletelyServed(const shared::linegraph::LineNode* n);
 
@@ -95,6 +98,16 @@ class RenderGraph : public shared::linegraph::LineGraph {
   util::geo::Polygon<double> getConvexFrontHull(
       const shared::linegraph::LineNode* n, double d, bool rectangulize,
       bool simpleRenderForTwoEdgeNodes, size_t points) const;
+
+  std::vector<shared::linegraph::NodeFront> getClosedNodeFronts(
+      const shared::linegraph::LineNode* n) const;
+
+  std::vector<shared::linegraph::NodeFront> getOpenNodeFronts(
+      const shared::linegraph::LineNode* n) const;
+
+  bool isClique(std::set<const shared::linegraph::LineNode*> potClique) const;
+
+  std::vector<shared::linegraph::NodeFront> getNextMetaNodeCand() const;
 };
 }  // namespace rendergraph
 }  // namespace shared

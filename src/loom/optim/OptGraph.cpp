@@ -1054,6 +1054,10 @@ void OptGraph::untangleOuterStump() {
 
   for (auto mainLeg : toUntangle) {
     auto stumpEdgPair = isOuterStump(mainLeg);
+    // check here again because the main leg may break up if there were
+    // only 2 lines on it in a previous outer stump untangle, this should be
+    // explicitely checked above
+    if (!stumpEdgPair.first) continue;
     OptEdge* stumpEdg = stumpEdgPair.first;
     bool clockw = stumpEdgPair.second;
     OptNode* stumpN = sharedNode(mainLeg, stumpEdg);

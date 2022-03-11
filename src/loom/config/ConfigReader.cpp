@@ -1,4 +1,4 @@
-// Copyright 2016, University of Freiburg,
+
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
@@ -62,6 +62,8 @@ void ConfigReader::help(const char* bin) const {
             << std::setw(41) << "  --in-stat-sep-pen arg (=9)"
             << "Penalty for separations at stations\n\n"
             << "Misc:\n"
+            << std::setw(41) << "  -D [ --from-dot ]"
+            << "input is in dot format\n"
             << std::setw(41) << "  --output-stats"
             << "Print stats to output\n"
             << std::setw(41) << "  --ilp-solver arg (=gurobi)"
@@ -91,6 +93,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       {"same-seg-cross-pen", required_argument, 0, 4},
       {"diff-seg-cross-pen", required_argument, 0, 9},
       {"sep-pen", required_argument, 0, 5},
+      {"from-dot", required_argument, 0, 'D'},
       {"in-stat-sep-pen", required_argument, 0, 8},
       {"in-stat-cross-pen-same-seg", required_argument, 0, 6},
       {"in-stat-cross-pen-diff-seg", required_argument, 0, 7},
@@ -104,7 +107,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       {0, 0, 0, 0}};
 
   char c;
-  while ((c = getopt_long(argc, argv, ":hvm:", ops, 0)) != -1) {
+  while ((c = getopt_long(argc, argv, ":hvm:D", ops, 0)) != -1) {
     switch (c) {
       case 'h':
         help(argv[0]);
@@ -159,6 +162,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         break;
       case 15:
         cfg->outOptGraph = true;
+        break;
+      case 'D':
+        cfg->fromDot = true;
         break;
       case ':':
         std::cerr << argv[optind - 1];

@@ -33,18 +33,21 @@ int main(int argc, char** argv) {
   shared::rendergraph::RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
   transitmapper::graph::GraphBuilder b(&cfg);
 
-  // TODO: implement from-dot option
-  g.readFromJson(&std::cin, cfg.inputSmoothing);
-  // g.readFromDot(&std::cin, cfg.inputSmoothing);
-
-  // heuristic: contract all edges shorter than which are between non-station nodes
-  g.contractEdges(cfg.lineWidth * 5, true);
+  if (cfg.fromDot) {
+    g.readFromDot(&std::cin, cfg.inputSmoothing);
+  } else {
+    g.readFromJson(&std::cin, cfg.inputSmoothing);
+  }
 
   g.smooth();
 
   b.writeNodeFronts(&g);
 
   b.expandOverlappinFronts(&g);
+
+  // find expanded node fronts that form a node and replace them with a
+  // single node
+  g.createMetaNodes();
 
   if (cfg.renderMethod == "svg") {
     LOGTO(DEBUG, std::cerr) << "Outputting to SVG ...";

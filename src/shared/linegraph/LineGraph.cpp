@@ -967,7 +967,7 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
         for (auto to : b->getAdjList()) {
           if (to == eConn) continue;
           if (fr->pl().hasLine(lo.line) && to->pl().hasLine(lo.line) &&
-              (!lineCtd(fr, eConn, lo.line) || !lineCtd(to, eConn, lo.line))) {
+              (!lineCtd(fr, eConn, lo.line) || !lineCtd(eConn, to, lo.line))) {
             ex.push_back({lo.line, {fr->getOtherNd(a), to->getOtherNd(b)}});
           }
         }
@@ -1063,6 +1063,9 @@ breakfor:
   for (auto n1 : *getNds()) {
     for (auto e : n1->getAdjList()) {
       if (e->getFrom() != n1) continue;
+      if (onlyNonStatConns && (e->getFrom()->pl().stops().size() ||
+                               e->getTo()->pl().stops().size()))
+        continue;
       if (onlyNonStatConns && (e->getFrom()->pl().stops().size() ||
                                e->getTo()->pl().stops().size()))
         continue;

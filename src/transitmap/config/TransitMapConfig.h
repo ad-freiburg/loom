@@ -33,6 +33,8 @@ struct Config {
   bool renderNodeCircles = false;
   bool renderEdges = true;
   bool renderLabels = false;
+  bool dontLabelDeg2 = false;
+  bool fromDot = false;
 
   bool renderNodeConnections = true;
   bool tightStations = false;

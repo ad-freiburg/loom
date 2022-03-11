@@ -26,6 +26,7 @@ struct Config {
   bool pruneGraph = true;
 
   bool untangleGraph = true;
+  bool fromDot = false;
 
   int ilpTimeLimit = -1;
   int ilpNumThreads = 0;

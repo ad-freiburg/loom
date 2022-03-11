@@ -19,12 +19,12 @@ using util::geo::PolyLine;
 Labeller::Labeller(const config::Config* cfg) : _cfg(cfg) {}
 
 // _____________________________________________________________________________
-void Labeller::label(const RenderGraph& g) {
+void Labeller::label(const RenderGraph& g, bool notDeg2) {
   // leave enough room for labels
   auto bbox = util::geo::pad(g.getBBox(), 500);
   _statLblGrid = StatLblGrid(200, 200, bbox);
 
-  labelStations(g);
+  labelStations(g, notDeg2);
   labelLines(g);
 }
 
@@ -84,10 +84,10 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
 }
 
 // _____________________________________________________________________________
-void Labeller::labelStations(const RenderGraph& g) {
+void Labeller::labelStations(const RenderGraph& g, bool notdeg2) {
   std::vector<const shared::linegraph::LineNode*> orderedNds;
   for (auto n : g.getNds()) {
-    if (n->pl().stops().size() == 0) continue;
+    if (n->pl().stops().size() == 0 || (notdeg2 && n->getDeg() == 2)) continue;
     orderedNds.push_back(n);
   }
 

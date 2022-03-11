@@ -47,7 +47,7 @@ void SvgRenderer::print(const RenderGraph& outG) {
   Labeller labeller(_cfg);
   if (_cfg->renderLabels) {
     LOGTO(DEBUG, std::cerr) << "Rendering labels...";
-    labeller.label(outG);
+    labeller.label(outG, _cfg->dontLabelDeg2);
     box = util::geo::extendBox(labeller.getBBox(), box);
   }
 
@@ -78,8 +78,20 @@ void SvgRenderer::print(const RenderGraph& outG) {
   rparams.width *= _cfg->outputResolution;
   rparams.height *= _cfg->outputResolution;
 
-  params["width"] = std::to_string(rparams.width) + "px";
-  params["height"] = std::to_string(rparams.height) + "px";
+  auto latLngLL = util::geo::webMercToLatLng<double>(box.getLowerLeft().getX(),
+                                                     box.getLowerLeft().getY());
+  auto latLngUR = util::geo::webMercToLatLng<double>(
+      box.getUpperRight().getX(), box.getUpperRight().getY());
+
+  params["latlng-box"] = std::to_string(latLngLL.getX()) + "," +
+                         std::to_string(latLngLL.getY()) + "," +
+                         std::to_string(latLngUR.getX()) + "," +
+                         std::to_string(latLngUR.getY());
+
+  params["width"] = std::to_string(rparams.width);
+  params["height"] = std::to_string(rparams.height);
+  params["viewBox"] = "0 0 " + std::to_string(rparams.width) + " " +
+                      std::to_string(rparams.height);
   params["xmlns"] = "http://www.w3.org/2000/svg";
   params["xmlns:xlink"] = "http://www.w3.org/1999/xlink";
 
@@ -289,9 +301,33 @@ size_t SvgRenderer::getNextPartner(const InnerClique& forClique,
 // _____________________________________________________________________________
 bool SvgRenderer::isNextTo(const InnerGeom& a, const InnerGeom& b) const {
   double THRESHOLD = 0.5 * M_PI + 0.1;
+
+  if (!a.from.edge) return false;
+  if (!b.from.edge) return false;
+  if (!a.to.edge) return false;
+  if (!b.to.edge) return false;
+
+  auto nd = RenderGraph::sharedNode(a.from.edge, a.to.edge);
+
+  assert(a.from.edge);
+  assert(b.from.edge);
+  assert(a.to.edge);
+  assert(b.to.edge);
+
+  bool aFromInv = a.from.edge->getTo() == nd;
+  bool bFromInv = b.from.edge->getTo() == nd;
+  bool aToInv = a.to.edge->getTo() == nd;
+  bool bToInv = b.to.edge->getTo() == nd;
+
+  int aSlotFrom = !aFromInv ? a.slotFrom : (a.from.edge->pl().getLines().size() -1 - a.slotFrom);
+  int aSlotTo = !aToInv ? a.slotTo : (a.to.edge->pl().getLines().size() -1 - a.slotTo);
+  int bSlotFrom = !bFromInv ? b.slotFrom : (b.from.edge->pl().getLines().size() -1 - b.slotFrom);
+  int bSlotTo = !bToInv ? b.slotTo : (b.to.edge->pl().getLines().size() -1 - b.slotTo);
+
   if (a.from.edge == b.from.edge && a.to.edge == b.to.edge) {
-    if ((a.slotFrom - b.slotFrom == 1 || b.slotFrom - a.slotFrom == 1) &&
-        (a.slotTo - b.slotTo == 1 || b.slotTo - a.slotTo == 1)) {
+    if ((aSlotFrom - bSlotFrom == 1 && bSlotTo - aSlotTo == 1) ||
+        (bSlotFrom - aSlotFrom == 1 && aSlotTo - bSlotTo == 1)) {
+      return true;
       double ang1 = fabs(util::geo::angBetween(a.geom.front(), a.geom.back()));
       double ang2 = fabs(util::geo::angBetween(b.geom.front(), b.geom.back()));
 
@@ -300,8 +336,9 @@ bool SvgRenderer::isNextTo(const InnerGeom& a, const InnerGeom& b) const {
   }
 
   if (a.to.edge == b.from.edge && a.from.edge == b.to.edge) {
-    if ((a.slotTo - b.slotFrom == 1 || b.slotFrom - a.slotTo == 1) &&
-        (a.slotFrom - b.slotTo == 1 || b.slotTo - a.slotFrom == 1)) {
+    if ((aSlotFrom - bSlotTo == 1 && bSlotFrom - aSlotTo == 1) ||
+        (bSlotTo - aSlotFrom == 1 && aSlotTo - bSlotFrom == 1)) {
+      return true;
       double ang1 = fabs(util::geo::angBetween(a.geom.front(), a.geom.back()));
       double ang2 = fabs(util::geo::angBetween(b.geom.front(), b.geom.back()));
 
@@ -345,6 +382,32 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
     for (size_t i = 0; i < c.geoms.size(); i++) {
       PolyLine<double> pl = c.geoms[i].geom;
 
+      if (ref.geom.getLength() > (_cfg->lineWidth + _cfg->lineSpacing) * 4) {
+        double off = -(_cfg->lineWidth + _cfg->lineSpacing) *
+                     (static_cast<int>(c.geoms[i].slotFrom) -
+                      static_cast<int>(ref.slotFrom));
+
+        if (ref.from.edge->getTo() == n) off = -off;
+
+        pl = ref.geom.offsetted(off);
+
+        std::set<LinePoint<double>, LinePointCmp<double>> a;
+        std::set<LinePoint<double>, LinePointCmp<double>> b;
+
+        if (ref.from.edge)
+          a = n->pl().frontFor(ref.from.edge)->geom.getIntersections(pl);
+        if (ref.to.edge)
+          b = n->pl().frontFor(ref.to.edge)->geom.getIntersections(pl);
+
+        if (a.size() == 1 && b.size() == 1) {
+          pl = pl.getSegment(a.begin()->totalPos, b.begin()->totalPos);
+        } else if (a.size() == 1) {
+          pl = pl.getSegment(a.begin()->totalPos, 1);
+        } else if (b.size() == 1) {
+          pl = pl.getSegment(0, b.begin()->totalPos);
+        }
+      }
+
       std::stringstream styleOutlineCropped;
       styleOutlineCropped << "fill:none;stroke:#000000";
 
@@ -353,6 +416,8 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
                                  _cfg->outputResolution;
       Params paramsOutlineCropped;
       paramsOutlineCropped["style"] = styleOutlineCropped.str();
+      paramsOutlineCropped["class"] += " inner-geom-outline";
+      paramsOutlineCropped["class"] += " " + getLineClass(c.geoms[i].from.line->id());
 
       std::stringstream styleStr;
       styleStr << "fill:none;stroke:#" << c.geoms[i].from.line->color();
@@ -361,6 +426,8 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
                << _cfg->lineWidth * _cfg->outputResolution;
       Params params;
       params["style"] = styleStr.str();
+      params["class"] += " inner-geom ";
+      params["class"] += " " + getLineClass(c.geoms[i].from.line->id());
 
       _innerDelegates.back()[(uintptr_t)c.geoms[i].from.line].push_back(
           OutlinePrintPair(PrintDelegate(params, pl),
@@ -387,6 +454,7 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
                << oCss;
   Params paramsOutline;
   paramsOutline["style"] = styleOutline.str();
+  paramsOutline["class"] = "transit-edge-outline " + getLineClass(line.id());
 
   std::stringstream styleStr;
   styleStr << "fill:none;stroke:#" << line.color() << ";" << css;
@@ -399,6 +467,7 @@ void SvgRenderer::renderLinePart(const PolyLine<double> p, double width,
            << width * _cfg->outputResolution;
   Params params;
   params["style"] = styleStr.str();
+  params["class"] = "transit-edge " + getLineClass(line.id());
 
   _delegates[0].insert(_delegates[0].begin(),
                        OutlinePrintPair(PrintDelegate(params, p),
@@ -587,6 +656,7 @@ void SvgRenderer::printPolygon(const Polygon<double>& g,
   }
 
   params["points"] = points.str();
+  params["class"] = "station-poly";
 
   _w.openTag("polygon", params);
   _w.closeTag();
@@ -678,6 +748,7 @@ void SvgRenderer::renderStationLabels(const Labeller& labeller,
     _w.closeTag();
 
     std::map<std::string, std::string> params;
+    params["class"] = "station-label";
     params["font-weight"] = label.bold ? "bold" : "normal";
     params["font-family"] = "Ubuntu Condensed";
     params["dy"] = shift;
@@ -740,6 +811,7 @@ void SvgRenderer::renderLineLabels(const Labeller& labeller,
     _w.closeTag();
 
     std::map<std::string, std::string> params;
+    params["class"] = "line-label";
     params["font-weight"] = "bold";
     params["font-family"] = "Ubuntu";
     params["dy"] = shift;
@@ -782,6 +854,15 @@ double InnerClique::getZWeight() const {
   }
 
   return ret;
+}
+
+// _____________________________________________________________________________
+std::string SvgRenderer::getLineClass(const std::string& id) const {
+  auto i = lineClassIds.find(id);
+  if (i != lineClassIds.end()) return "line-" + std::to_string(i->second);
+
+  lineClassIds[id] = ++lineClassId;
+  return "line-" + std::to_string(lineClassId);
 }
 
 // _____________________________________________________________________________

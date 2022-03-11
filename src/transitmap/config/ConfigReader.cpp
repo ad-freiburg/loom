@@ -50,8 +50,12 @@ void ConfigReader::help(const char* bin) const {
             << std::setw(37) << "  --line-label-textsize arg (=40)"
             << "textsize for line labels\n"
             << std::setw(37) << "  --station-label-textsize arg (=60)"
-            << "textsize for station labels\n\n"
+            << "textsize for station labels\n"
+            << std::setw(37) << "  --no-deg2-labels"
+            << "no labels for deg-2 stations\n\n"
             << "Misc:\n"
+            << std::setw(37) << "  -D [ --from-dot ]"
+            << "input is in dot format\n"
             << std::setw(37) << "  --padding arg (=-1)"
             << "padding, -1 for auto\n"
             << std::setw(37) << "  --smoothing arg (=3)"
@@ -76,6 +80,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"line-width", required_argument, 0, 2},
                          {"line-spacing", required_argument, 0, 3},
                          {"outline-width", required_argument, 0, 4},
+                         {"from-dot", required_argument, 0, 'D'},
+                         {"no-deg2-labels", no_argument, 0, 16},
                          {"line-label-textsize", required_argument, 0, 5},
                          {"station-label-textsize", required_argument, 0, 6},
                          {"no-render-stations", no_argument, 0, 7},
@@ -90,7 +96,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {0, 0, 0, 0}};
 
   char c;
-  while ((c = getopt_long(argc, argv, ":hvl", ops, 0)) != -1) {
+  while ((c = getopt_long(argc, argv, ":hvlD", ops, 0)) != -1) {
     switch (c) {
       case 'h':
         help(argv[0]);
@@ -142,6 +148,12 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         break;
       case 15:
         cfg->renderNodeFronts = true;
+        break;
+      case 16:
+        cfg->dontLabelDeg2 = true;
+        break;
+      case 'D':
+        cfg->fromDot = true;
         break;
       case ':':
         std::cerr << argv[optind - 1];

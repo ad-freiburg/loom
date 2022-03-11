@@ -110,6 +110,8 @@ class SvgRenderer : public Renderer {
   std::vector<std::map<uintptr_t, std::vector<OutlinePrintPair>>>
       _innerDelegates;
   std::vector<EndMarker> _markers;
+  mutable std::map<std::string, int> lineClassIds;
+  mutable int lineClassId = 0;
 
   void outputNodes(const shared::rendergraph::RenderGraph& outputGraph,
                    const RenderParams& params);
@@ -162,6 +164,8 @@ class SvgRenderer : public Renderer {
   size_t getNextPartner(const InnerClique& forGeom,
                         const std::vector<shared::rendergraph::InnerGeom>& pool,
                         size_t level) const;
+
+  std::string getLineClass(const std::string& id) const;
 
   std::string getMarkerPathMale(double w) const;
   std::string getMarkerPathFemale(double w) const;
