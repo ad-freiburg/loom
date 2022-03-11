@@ -236,7 +236,7 @@ void SvgRenderer::outputEdges(const RenderGraph& outG,
 
   std::set<const LineNode*, cmp> nodesOrdered;
   std::set<const shared::linegraph::LineEdge*, cmpEdge> edgesOrdered;
-  nodesOrdered.insert(outG.getNds().begin(), outG.getNds().end());
+  for (auto nd : outG.getNds()) nodesOrdered.insert(nd);
 
   std::set<const shared::linegraph::LineEdge*> rendered;
 

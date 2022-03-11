@@ -1810,11 +1810,13 @@ bool OptGraph::dirLineEqualIn(const OptEdge* a, const OptEdge* b) {
 
 // _____________________________________________________________________________
 bool OptGraph::isYAt(OptEdge* eLeg, OptNode* n) const {
+  if (eLeg->getFrom() == eLeg->getTo()) return 0;
   if (eLeg->getOtherNd(n)->getDeg() != 1) return false;
   return branchesAt(eLeg, n).size();
 }
 // _____________________________________________________________________________
 bool OptGraph::isPartialYAt(OptEdge* eLeg, OptNode* n) const {
+  if (eLeg->getFrom() == eLeg->getTo()) return 0;
   if (eLeg->getOtherNd(n)->getDeg() != 1) return false;
 
   return partiallyBranchesAt(eLeg, n).size();
@@ -1822,6 +1824,7 @@ bool OptGraph::isPartialYAt(OptEdge* eLeg, OptNode* n) const {
 
 // _____________________________________________________________________________
 bool OptGraph::isInnerStump(OptEdge* leg) const {
+  if (leg->getFrom() == leg->getTo()) return 0;
   auto branches = branchesAt(leg, leg->getFrom(), true);
   if (!branches.size()) return false;
 
@@ -1890,6 +1893,7 @@ bool OptGraph::isInnerStump(OptEdge* leg) const {
 
 // _____________________________________________________________________________
 bool OptGraph::isDogBone(OptEdge* leg) const {
+  if (leg->getFrom() == leg->getTo()) return false;
   if (leg->getFrom()->getDeg() != leg->getTo()->getDeg()) return false;
 
   auto branches = branchesAt(leg, leg->getFrom());
@@ -1905,6 +1909,7 @@ bool OptGraph::isDogBone(OptEdge* leg) const {
 
 // _____________________________________________________________________________
 OptNode* OptGraph::isPartialDogBone(OptEdge* leg) const {
+  if (leg->getFrom() == leg->getTo()) return 0;
   auto branchesA = branchesAt(leg, leg->getFrom());
 
   // check whether all leg lines may cross cheaper or equal at one of the nodes
