@@ -958,7 +958,8 @@ std::pair<OptEdge*, bool> OptGraph::isOuterStumpAt(OptEdge* mainLeg,
 
   size_t extends = 0;
 
-  // check that at least two edges have lines that extend over n into e
+  // check that at least two edges have lines that extend over n into the mainl
+  // (one edge is the stump edge)
   for (auto branch : n->getAdjList()) {
     if (branch == mainLeg) continue;
     if (getCtdLinesIn(branch, mainLeg).size() > 0) extends++;
@@ -968,7 +969,7 @@ std::pair<OptEdge*, bool> OptGraph::isOuterStumpAt(OptEdge* mainLeg,
   if (extends < 2) return {0, 0};
   extends = 0;
 
-  // check that at least one edge has lines that extend over other(n) into e
+  // check that at least one edge has lines that extend over other(n) into mainl
   for (auto branch : mainLeg->getOtherNd(n)->getAdjList()) {
     if (branch == mainLeg) continue;
     if (getCtdLinesIn(branch, mainLeg).size() > 0) {
@@ -1034,7 +1035,7 @@ void OptGraph::untangleDoubleStump() {
 
 // _____________________________________________________________________________
 void OptGraph::untangleOuterStump() {
-  std::vector<OptEdge*> toUntangle;
+  std::set<OptEdge*> toUntangle;
 
   for (OptNode* n : *getNds()) {
     for (OptEdge* mainLeg : n->getAdjList()) {
@@ -1047,7 +1048,9 @@ void OptGraph::untangleOuterStump() {
             << mainLeg->pl().toStr() << ") at node " << stumpEdgPair.second
             << " with stump " << stumpEdgPair.first << " ("
             << stumpEdgPair.first->pl().toStr() << ")";
-        toUntangle.push_back(mainLeg);
+        assert(mainLeg->getFrom());
+        assert(mainLeg->getTo());
+        toUntangle.insert(mainLeg);
       }
     }
   }
@@ -1139,19 +1142,41 @@ void OptGraph::untangleOuterStump() {
     for (auto e : stumpN->getAdjList()) {
       if (e == stumpEdg || e == mainLeg) continue;
 
+      assert(!toUntangle.count(e));
+
+      OptEdge* newE = 0;
+
       if (e->getFrom() == stumpN)
-        addEdg(stumpNds[mainLegNode], e->getTo(), e->pl());
+        newE = addEdg(stumpNds[mainLegNode], e->getTo(), e->pl());
       else
-        addEdg(e->getFrom(), stumpNds[mainLegNode], e->pl());
+        newE = addEdg(e->getFrom(), stumpNds[mainLegNode], e->pl());
+
+      // Important: the untangling rule assumes that if the node of the main
+      // leg are split, the original node is kept. This is not the case in this
+      // implementation - the original node is deleted, and a new split node
+      // is inserted. But the original node may have *another* dangling outer
+      // stump split in the toUntangle list, which we must replace here
+      if (toUntangle.count(e)) {
+        toUntangle.erase(e);
+        toUntangle.insert(newE);
+      }
     }
 
     for (auto e : notStumpN->getAdjList()) {
       if (e == mainLeg) continue;
 
+      OptEdge* newE = 0;
+
       if (e->getFrom() == notStumpN)
-        addEdg(notStumpNds[mainLegNode], e->getTo(), e->pl());
+        newE = addEdg(notStumpNds[mainLegNode], e->getTo(), e->pl());
       else
-        addEdg(e->getFrom(), notStumpNds[mainLegNode], e->pl());
+        newE = addEdg(e->getFrom(), notStumpNds[mainLegNode], e->pl());
+
+      // see above
+      if (toUntangle.count(e)) {
+        toUntangle.erase(e);
+        toUntangle.insert(newE);
+      }
     }
 
     delNd(stumpN);
