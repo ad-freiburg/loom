@@ -120,5 +120,5 @@ cat examples/freiburg.json | sudo docker run -i loom octi
 *Note*: if you want to use gurobi for ILP optimization, you *must* mount a folder container a valid gurobi license file `gurobi.lic` to `/gurobi/` in the container. For example, if your `gurobi.lic` is in `/home/user/gurobi`:
 
 ```
-docker run -v /home/user/gurobi:/gurobi loom <TOOL>:
+docker run -v /home/user/gurobi:/gurobi loom <TOOL>
 ```
