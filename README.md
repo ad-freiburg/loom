@@ -93,3 +93,32 @@ A full pipeline for creating an octilinear map of the Freiburg tram network woul
 ```
 gtfs2graph -m tram freiburg.zip | topo | loom | octi | transitmap > freiburg-tram.svg
 ```
+
+Usage via Docker
+================
+
+You can also use any tool in a Docker container via the provided Dockerfile.
+
+To build the container:
+
+```
+docker build -t loom
+```
+
+To run a tool from the suite, use
+
+```
+docker run -i loom <TOOL>
+```
+
+For example, to octilinearize the Freiburg example, use
+
+```
+cat examples/freiburg.json | sudo docker run -i loom octi
+```
+
+*Note*: if you want to use gurobi for ILP optimization, you *must* mount a folder container a valid gurobi license file `gurobi.lic` to `/gurobi/` in the container. For example, if your `gurobi.lic` is in `/home/user/gurobi`:
+
+```
+docker run -v /home/user/gurobi:/gurobi loom <TOOL>:
+```

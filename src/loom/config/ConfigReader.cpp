@@ -43,7 +43,7 @@ void ConfigReader::help(const char* bin) const {
             << "Don't apply untangling rules\n"
             << std::setw(41) << "  --no-prune"
             << "Don't apply pruning rules\n"
-            << std::setw(41) << "  --optim method arg (=comb)"
+            << std::setw(41) << "  -m [ --optim-method ] arg (=comb)"
             << "Optimization method, one of ilp-naive, ilp,\n"
             << std::setw(41) << " "
             << " comb, exhaust, hillc, hillc-random, anneal,\n"

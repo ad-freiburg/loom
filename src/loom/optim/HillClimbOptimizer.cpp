@@ -45,9 +45,8 @@ double HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& 
   while (true) {
     iters++;
 
-    bool found = false;
     double bestChange = 0;
-    OptEdge* bestEdge;
+    OptEdge* bestEdge = 0;
     std::vector<const Line*> bestOrder;
 
     for (size_t i = 0; i < edges.size(); i++) {
@@ -62,7 +61,6 @@ double HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& 
 
           double s = getScore(og, edges[i], cur);
           if (s < oldScore && oldScore - s > bestChange) {
-            found = true;
             bestChange = oldScore - s;
             bestEdge = edges[i];
             bestOrder = cur[edges[i]];
@@ -76,7 +74,7 @@ double HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& 
       }
     }
 
-    if (!found) break;
+    if (bestEdge == 0) break;
 
     cur[bestEdge] = bestOrder;
   }
