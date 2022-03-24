@@ -22,7 +22,7 @@ Building and Installation
 Fetch this repository and init submodules:
 
 ```
-git clone --recurse-submodules https://github.com/ad-freiburg/pfaedle
+git clone --recurse-submodules https://github.com/ad-freiburg/loom.git
 ```
 
 ```
