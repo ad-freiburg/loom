@@ -363,7 +363,7 @@ std::vector<double> GridGraph::getCosts() const {
 NodeCost GridGraph::nodeBendPen(GridNode* n, CombNode* origNd, CombEdge* e) {
   NodeCost addC;
 
-  CombEdge* out[maxDeg()];
+  CombEdge* out[8];
   getSettledAdjEdgs(n, origNd, out);
 
   for (size_t i = 0; i < maxDeg(); i++) {
@@ -404,7 +404,7 @@ size_t GridGraph::ang(size_t i, size_t j) const {
 NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd, CombEdge* edg) {
   NodeCost addC;
 
-  CombEdge* out[maxDeg()];
+  CombEdge* out[8];
   getSettledAdjEdgs(nd, origNd, out);
 
   for (size_t i = 0; i < maxDeg(); i++) {
@@ -450,7 +450,7 @@ NodeCost GridGraph::spacingPen(GridNode* nd, CombNode* origNd, CombEdge* edg) {
 // _____________________________________________________________________________
 NodeCost GridGraph::topoBlockPen(GridNode* nd, CombNode* origNd,
                                  CombEdge* edg) {
-  CombEdge* outgoing[maxDeg()];
+  CombEdge* outgoing[8];
   NodeCost addC;
   getSettledAdjEdgs(nd, origNd, outgoing);
 

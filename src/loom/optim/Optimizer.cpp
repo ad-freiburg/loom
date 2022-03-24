@@ -167,7 +167,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
     optResStats.maxNumRowsPerComp = 0;
     optResStats.maxNumColsPerComp = 0;
 
-    for (const auto nds : comps) {
+    for (const auto& nds : comps) {
       if (_cfg->outputStats) {
         size_t maxC = maxCard(nds);
         double solSp = solutionSpaceSize(nds);

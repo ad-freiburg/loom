@@ -2,7 +2,6 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include <glpk.h>
 #include <chrono>
 #include <cstdio>
 #include <fstream>
@@ -36,6 +35,10 @@ double CombOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   } else if (solSp < 500) {
     return _exhausOpt.optimizeComp(og, g, hc, depth + 1, stats);
   } else {
+#if defined GUROBI_FOUND || defined GLPK_FOUND || defined CBC_FOUND
     return _ilpOpt.optimizeComp(og, g, hc, depth + 1, stats);
+#else
+    return _hillcOpt.optimizeComp(og, g, hc, depth + 1, stats);
+#endif
   }
 }

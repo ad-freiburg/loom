@@ -39,7 +39,7 @@ struct LineOcc {
 
 inline bool operator<(const LineOcc& x, const LineOcc& y) {
   return x.line < y.line;
-};
+}
 
 class LineEdgePL : util::geograph::GeoEdgePL<double> {
  public:

@@ -217,12 +217,17 @@ size_t inversions(const std::vector<V>& v) {
   if (v.size() == 2) return v[1] < v[0];
   if (v.size() == 3) return (v[0] > v[1]) + (v[0] > v[2]) + (v[1] > v[2]);
 
-  V tmpLst[v.size()];
-  V lst[v.size()];
+  V* tmpLst = new V[v.size()];
+  V* lst = new V[v.size()];
 
   for (size_t i = 0; i < v.size(); i++) lst[i] = v[i];
 
-  return mergeInvCount<V>(lst, tmpLst, 0, v.size() - 1);
+  size_t ret = mergeInvCount<V>(lst, tmpLst, 0, v.size() - 1);
+
+  delete[] tmpLst;
+  delete[] lst;
+
+  return ret;
 }
 
 

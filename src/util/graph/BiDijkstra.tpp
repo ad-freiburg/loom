@@ -112,6 +112,12 @@ std::unordered_map<Node<N, E>*, C> BiDijkstra::shortestPathImpl(
     const util::graph::HeurFunc<N, E, C>& heurFunc,
     std::unordered_map<Node<N, E>*, EList<N, E>*> resEdges,
     std::unordered_map<Node<N, E>*, NList<N, E>*> resNodes) {
+  UNUSED(from);
+  UNUSED(to);
+  UNUSED(costFunc);
+  UNUSED(heurFunc);
+  UNUSED(resEdges);
+  UNUSED(resNodes);
   assert(false);
   // std::unordered_map<Node<N, E>*, C> costs;
   // if (to.size() == 0) return costs;

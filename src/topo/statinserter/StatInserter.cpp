@@ -33,7 +33,9 @@ using shared::linegraph::Station;
 
 // _____________________________________________________________________________
 StatInserter::StatInserter(const TopoConfig* cfg, LineGraph* g)
-    : _cfg(cfg), _g(g) {}
+    : _cfg(cfg), _g(g) {
+  UNUSED(_cfg);
+}
 
 // _____________________________________________________________________________
 EdgeGrid StatInserter::geoIndex() {

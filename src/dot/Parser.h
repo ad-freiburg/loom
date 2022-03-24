@@ -79,7 +79,6 @@ class Parser {
   Entity _ret;
   char _c;
   size_t _level;
-  bool _has;
   std::string tmp;
   std::string tmp2;
 

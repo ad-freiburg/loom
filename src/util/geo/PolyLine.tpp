@@ -469,13 +469,11 @@ SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
   if (distTo(pl) > dmax) return ret;
 
   bool in = false, single = true;
-  double curDist = 0;
-  double curTotalSegDist = 0;
   size_t skips;
 
   LinePoint<T> curStartCand, curEndCand, curStartCandCmp, curEndCandCmp;
 
-  double comp = 0, curSegDist = 0;
+  double curSegDist = 0;
   double length = getLength(), plLength = pl.getLength();
 
   for (size_t i = 1; i < _line.size(); ++i) {
@@ -512,7 +510,6 @@ SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
         if (in) {
           skips++;
           if (skips > MAX_SKIPS) {  // TODO: make configurable
-            // if (comp > 0.8 && comp < 1.2 && !single &&
             if (!single &&
                 (fabs(curStartCand.totalPos * length -
                       curEndCand.totalPos * length) > MIN_SEG_LENGTH &&
@@ -538,15 +535,12 @@ SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
         lastRound = true;
         double finalStep = totalDist - curSegDist - 0.0005;
         curSegDist += finalStep;
-        curDist += finalStep;
       } else {
         curSegDist += STEP_SIZE;
-        curDist += STEP_SIZE;
       }
     }
 
     curSegDist = curSegDist - totalDist;
-    curTotalSegDist += totalDist;
   }
 
   if (in && !single &&

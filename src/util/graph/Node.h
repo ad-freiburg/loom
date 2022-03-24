@@ -6,6 +6,7 @@
 #define UTIL_GRAPH_NODE_H_
 
 #include <vector>
+#include <stddef.h>
 
 namespace util {
 namespace graph {

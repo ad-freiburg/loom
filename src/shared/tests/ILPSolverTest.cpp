@@ -43,7 +43,7 @@ void ILPSolverTest::run() {
 #ifdef GUROBI_FOUND
     try {
       solvers.push_back(new GurobiSolver(shared::optim::MAX));
-    } catch (std::exception e) {
+    } catch (const std::exception& e) {
     }
 #endif
 
@@ -98,7 +98,7 @@ void ILPSolverTest::run() {
 #ifdef GUROBI_FOUND
     try {
       solvers.push_back(new GurobiSolver(shared::optim::MAX));
-    } catch (std::exception e) {
+    } catch (const std::exception& e) {
     }
 #endif
 
