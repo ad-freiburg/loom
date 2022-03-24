@@ -4,7 +4,6 @@
 
 #ifdef COIN_FOUND
 
-#include <glpk.h>
 #include <cassert>
 #include <sstream>
 #include <stdexcept>

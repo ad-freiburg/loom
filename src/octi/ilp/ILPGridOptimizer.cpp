@@ -2,7 +2,6 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include <glpk.h>
 #include <fstream>
 #include "octi/basegraph/BaseGraph.h"
 #include "octi/ilp/ILPGridOptimizer.h"
