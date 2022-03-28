@@ -12,7 +12,7 @@ Requirements
 ------------
 
  * `cmake`
- * `gcc >= 4.9` (or `clang >= 3.9`)
+ * `gcc >= 5.0` (or `clang >= 3.9`)
  * Optional: `libglpk-dev`, `coinor-libcbc-dev`, `gurobi`
 
 
