@@ -322,6 +322,19 @@ class ShortestPath {
   template <typename N, typename E, typename C>
   static std::unordered_map<Edge<N, E>*, C> shortestPath(
       Edge<N, E>* from, const std::set<Edge<N, E>*>& to,
+      const CostFunc<N, E, C>& costFunc,
+      std::unordered_map<Edge<N, E>*, EList<N, E>*> resEdges,
+      std::unordered_map<Edge<N, E>*, NList<N, E>*> resNodes) {
+    return D::shortestPathImpl(from, to, costFunc, ZeroHeurFunc<N, E, C>()
+, resEdges,
+                               resNodes);
+  }
+
+
+
+  template <typename N, typename E, typename C>
+  static std::unordered_map<Edge<N, E>*, C> shortestPath(
+      Edge<N, E>* from, const std::set<Edge<N, E>*>& to,
       const CostFunc<N, E, C>& costFunc, const HeurFunc<N, E, C>& heurFunc,
       std::unordered_map<Edge<N, E>*, EList<N, E>*> resEdges) {
     std::unordered_map<Edge<N, E>*, NList<N, E>*> dummyRet;
@@ -337,6 +350,18 @@ class ShortestPath {
     std::unordered_map<Edge<N, E>*, EList<N, E>*> dummyRetE;
     return D::shortestPathImpl(from, to, costFunc, heurFunc, dummyRetE,
                                dummyRet);
+  }
+
+  template <typename N, typename E, typename C>
+  static C shortestPath(Edge<N, E>* from,
+                        const std::set<Edge<N, E>*>& to,
+                        const CostFunc<N, E, C>& costFunc) {
+    NList<N, E>* nl = 0;
+    EList<N, E>* el = 0;
+    std::set<Edge<N, E>*> fromS;
+    fromS.insert(from);
+    return D::shortestPathImpl(fromS, to, costFunc, ZeroHeurFunc<N, E, C>(), el,
+                               nl);
   }
 
   template <typename N, typename E, typename C>
@@ -424,14 +449,11 @@ class ShortestPath {
   }
 
   template <typename N, typename E, typename C>
-  static std::unordered_map<Edge<N, E>*, C> shortestPath(
+  static std::unordered_map<Edge<N, E>*, std::pair<Edge<N, E>*, C>> shortestPath(
       const std::set<Edge<N, E>*>& from, const std::set<Edge<N, E>*>& to,
       const std::unordered_map<Edge<N, E>*, C>& initCosts, C stall,
       const CostFunc<N, E, C>& costFunc, const HeurFunc<N, E, C>& heurFunc) {
-    std::unordered_map<Edge<N, E>*, NList<N, E>*> dummyRet;
-    std::unordered_map<Edge<N, E>*, EList<N, E>*> dummyRetE;
-    return D::shortestPathImpl(from, to, initCosts, stall, costFunc, heurFunc,
-                               dummyRetE, dummyRet);
+    return D::shortestPathImpl(from, to, initCosts, stall, costFunc, heurFunc);
   }
 
   template <typename N, typename E, typename C>

@@ -319,6 +319,7 @@ std::string HttpServer::compress(const std::string& str, std::string* enc) {
   *enc = "gzip";
   return ret;
 #else
+  UNUSED(enc);
   return str;
 #endif
 }

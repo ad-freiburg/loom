@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
   double lenBef = 0, lenAfter = 0;
 
   if (cfg.outputStats) {
-    for (const auto& nd : *tg.getNds()) {
+    for (const auto& nd : tg.getNds()) {
       for (const auto& e : nd->getAdjList()) {
         if (e->getFrom() != nd) continue;
         lenBef += e->pl().getPolyline().getLength();
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
   if (cfg.outputStats) {
     size_t c = 0;
     const auto& origEdgs = mc.freezeTrack(restrFr);
-    for (const auto& nd : *tg.getNds()) {
+    for (const auto& nd : tg.getNds()) {
       for (const auto& e : nd->getAdjList()) {
         if (e->getFrom() != nd) continue;
         size_t cur = origEdgs.at(e).size();
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
   mc.reconstructIntersections();
 
   if (cfg.outputStats) {
-    for (const auto& nd : *tg.getNds()) {
+    for (const auto& nd : tg.getNds()) {
       for (const auto& e : nd->getAdjList()) {
         if (e->getFrom() != nd) continue;
         lenAfter += e->pl().getPolyline().getLength();

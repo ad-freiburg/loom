@@ -30,7 +30,7 @@ using util::geo::PolyLine;
 
 // _____________________________________________________________________________
 void RenderGraph::smooth() {
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       auto pl = e->pl().getPolyline();
@@ -45,7 +45,7 @@ void RenderGraph::smooth() {
 
 // _____________________________________________________________________________
 void RenderGraph::writePermutation(const OrderCfg& c) {
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       e->pl().writePermutation(c.at(e));
@@ -394,14 +394,14 @@ std::vector<Polygon<double>> RenderGraph::getStopGeoms(
   if (n->pl().fronts().size() == 0) return {};
   auto h = getConvexFrontHull(n, d, true, tight, pointsPerCircle);
 
-  auto nfWidth = getMaxNdFrontWidth(n);
+  // auto nfWidth = getMaxNdFrontWidth(n);
 
   // prevent too large stations
-  if (util::geo::area(h) > 1.25 * (nfWidth * nfWidth)) {
-    // render each stop individually
-    auto served = servedLines(n);
-    return getIndStopPolys(served, n, d);
-  }
+  // if (util::geo::area(h) > 1.25 * (nfWidth * nfWidth)) {
+    // // render each stop individually
+    // auto served = servedLines(n);
+    // return getIndStopPolys(served, n, d);
+  // }
 
   return {h};
 }

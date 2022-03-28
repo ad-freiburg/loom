@@ -5,10 +5,10 @@
 #ifndef UTIL_GRAPH_GRAPH_H_
 #define UTIL_GRAPH_GRAPH_H_
 
+#include <cassert>
+#include <iostream>
 #include <set>
 #include <string>
-#include <iostream>
-#include <cassert>
 
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
@@ -19,8 +19,6 @@ namespace graph {
 template <typename N, typename E>
 class Graph {
  public:
-  Graph() = default;
-  Graph(const Graph&) = delete;
   virtual ~Graph();
   virtual Node<N, E>* addNd() = 0;
   virtual Node<N, E>* addNd(const N& pl) = 0;
@@ -32,7 +30,6 @@ class Graph {
   virtual Node<N, E>* mergeNds(Node<N, E>* a, Node<N, E>* b) = 0;
 
   const std::set<Node<N, E>*>& getNds() const;
-  std::set<Node<N, E>*>* getNds();
 
   static Node<N, E>* sharedNode(const Edge<N, E>* a, const Edge<N, E>* b);
 
@@ -46,7 +43,7 @@ class Graph {
 };
 
 #include "util/graph/Graph.tpp"
-}
-}
+}  // namespace graph
+}  // namespace util
 
 #endif  // UTIL_GRAPH_GRAPH_H_

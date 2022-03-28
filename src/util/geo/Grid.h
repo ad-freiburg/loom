@@ -5,9 +5,9 @@
 #ifndef UTIL_GEO_GRID_H_
 #define UTIL_GEO_GRID_H_
 
+#include <map>
 #include <set>
 #include <vector>
-#include <map>
 #include "util/geo/Geo.h"
 
 namespace util {
@@ -21,6 +21,39 @@ class GridException : public std::runtime_error {
 template <typename V, template <typename> class G, typename T>
 class Grid {
  public:
+  Grid(const Grid<V, G, T>&) = delete;
+  Grid(Grid<V, G, T>&& o)
+      : _width(o._width),
+        _height(o._height),
+        _cellWidth(o._cellWidth),
+        _cellHeight(o._cellHeight),
+        _bb(o._bb),
+        _xWidth(o._xWidth),
+        _yHeight(o._yHeight),
+        _hasValIdx(o._hasValIdx),
+        _grid(o._grid),
+        _index(o._index),
+        _removed(o._removed) {
+    o._grid = 0;
+  }
+
+  Grid<V, G, T>& operator=(Grid<V, G, T>&& o) {
+    _width = o._width;
+    _height = o._height;
+    _cellWidth = o._cellWidth;
+    _cellHeight = o._cellHeight;
+    _bb = o._bb;
+    _xWidth = o._xWidth;
+    _yHeight = o._yHeight;
+    _hasValIdx = o._hasValIdx;
+    _grid = o._grid;
+    _index = std::move(o._index);
+    _removed = std::move(o._removed);
+    o._grid = 0;
+
+    return *this;
+  };
+
   // initialization of a point grid with cell width w and cell height h
   // that covers the area of bounding box bbox
   Grid(double w, double h, const Box<T>& bbox);
@@ -35,6 +68,14 @@ class Grid {
   Grid();
   // the empty grid
   Grid(bool buildValIdx);
+
+  ~Grid() {
+    if (!_grid) return;
+    for (size_t i = 0; i < _xWidth; i++) {
+      delete[] _grid[i];
+    }
+    delete[] _grid;
+  }
 
   // add object t to this grid
   void add(G<T> geom, V val);
@@ -67,14 +108,13 @@ class Grid {
 
   Box<T> _bb;
 
-  size_t _counter;
-
   size_t _xWidth;
   size_t _yHeight;
 
   bool _hasValIdx;
 
-  std::vector<std::vector<std::set<V> > > _grid;
+  // raw 2d array, less memory overhead
+  std::set<V>** _grid;
   std::map<V, std::set<std::pair<size_t, size_t> > > _index;
   std::set<V> _removed;
 

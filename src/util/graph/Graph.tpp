@@ -22,12 +22,6 @@ const std::set<Node<N, E>*>& Graph<N, E>::getNds() const {
 
 // _____________________________________________________________________________
 template <typename N, typename E>
-std::set<Node<N, E>*>* Graph<N, E>::getNds() {
-  return &_nodes;
-}
-
-// _____________________________________________________________________________
-template <typename N, typename E>
 typename std::set<Node<N, E>*>::iterator Graph<N, E>::delNd(Node<N, E>* n) {
   return delNd(_nodes.find(n));
 }

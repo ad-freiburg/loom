@@ -5,8 +5,8 @@
 #ifndef UTIL_GRAPH_NODE_H_
 #define UTIL_GRAPH_NODE_H_
 
+#include <cstddef>
 #include <vector>
-#include <stddef.h>
 
 namespace util {
 namespace graph {
@@ -43,6 +43,7 @@ class Node {
 template <typename N, typename E>
 inline Node<N, E>::~Node() {}
 
-}}
+}  // namespace graph
+}  // namespace util
 
 #endif  // UTIL_GRAPH_NODE_H_

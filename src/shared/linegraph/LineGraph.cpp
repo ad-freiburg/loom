@@ -129,7 +129,7 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
     }
   }
 
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
     for (auto e : n->getAdjListOut()) {
       PolyLine<double> pl;
       pl << *e->getFrom()->pl().getGeom();
@@ -384,7 +384,7 @@ void LineGraph::buildGrids() {
   _nodeGrid = NodeGrid(gridSize, gridSize, _bbox);
   _edgeGrid = EdgeGrid(gridSize, gridSize, _bbox);
 
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
     _nodeGrid.add(*n->pl().getGeom(), n);
     for (auto e : n->getAdjListOut()) {
       _edgeGrid.add(*e->pl().getGeom(), e);
@@ -459,7 +459,7 @@ std::set<LineEdge*> LineGraph::getNeighborEdges(const util::geo::DLine& line,
 
 // _____________________________________________________________________________
 ISect LineGraph::getNextIntersection() {
-  for (auto n1 : *getNds()) {
+  for (auto n1 : getNds()) {
     for (auto e1 : n1->getAdjList()) {
       if (e1->getFrom() != n1) continue;
       if (proced.find(e1) != proced.end()) continue;
@@ -770,7 +770,7 @@ void LineGraph::splitNode(LineNode* n, size_t maxDeg) {
 // _____________________________________________________________________________
 void LineGraph::splitNodes(size_t maxDeg) {
   std::vector<LineNode*> toSplit;
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
     if (n->getDeg() > maxDeg) toSplit.push_back(n);
   }
   for (auto n : toSplit) splitNode(n, maxDeg);
@@ -856,7 +856,7 @@ void LineGraph::nodeRpl(LineEdge* e, const LineNode* oldN,
 // _____________________________________________________________________________
 void LineGraph::contractStrayNds() {
   std::vector<LineNode*> toDel;
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
     if (n->pl().stops().size()) continue;
     if (n->getAdjList().size() != 2) continue;
 
@@ -1060,7 +1060,7 @@ void LineGraph::contractEdges(double d, bool onlyNonStatConns) {
   // made in contractEdge(e) and propagate it back.
 
 breakfor:
-  for (auto n1 : *getNds()) {
+  for (auto n1 : getNds()) {
     for (auto e : n1->getAdjList()) {
       if (e->getFrom() != n1) continue;
       if (onlyNonStatConns && (e->getFrom()->pl().stops().size() ||

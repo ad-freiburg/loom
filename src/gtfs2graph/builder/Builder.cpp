@@ -104,7 +104,7 @@ DPoint Builder::getProjP(double lat, double lng) const {
 void Builder::simplify(BuildGraph* g) {
   // delete edges without a reference ETG
   std::vector<Edge*> toDel;
-  for (auto n : *g->getNds()) {
+  for (auto n : g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       if (!e->pl().getRefETG()) toDel.push_back(e);
@@ -114,7 +114,7 @@ void Builder::simplify(BuildGraph* g) {
   for (auto e : toDel) g->delEdg(e->getFrom(), e->getTo());
 
   // try to merge both-direction edges into a single one
-  for (auto n : *g->getNds()) {
+  for (auto n : g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       e->pl().simplify();

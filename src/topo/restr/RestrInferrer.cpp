@@ -20,11 +20,11 @@ RestrInferrer::RestrInferrer(const TopoConfig* cfg, LineGraph* g)
 
 // _____________________________________________________________________________
 void RestrInferrer::init() {
-  for (auto nd : *_tg->getNds()) {
+  for (auto nd : _tg->getNds()) {
     _nMap[nd] = _rg.addNd(*nd->pl().getGeom());
   }
 
-  for (auto nd : *_tg->getNds()) {
+  for (auto nd : _tg->getNds()) {
     for (auto edg : nd->getAdjList()) {
       if (edg->getFrom() != nd) continue;
       const auto& pl = edg->pl().getPolyline();
@@ -45,7 +45,7 @@ void RestrInferrer::init() {
   }
 
   // copy turn restrictions from original graph
-  for (auto nd : *_tg->getNds()) {
+  for (auto nd : _tg->getNds()) {
     for (auto ex : nd->pl().getConnExc()) {
       auto line = ex.first;
       for (auto exPair : ex.second) {
@@ -68,7 +68,7 @@ void RestrInferrer::init() {
 size_t RestrInferrer::infer(const OrigEdgs& origEdgs) {
   // delete all existing restrictions
 
-  for (auto nd : *_tg->getNds()) {
+  for (auto nd : _tg->getNds()) {
     nd->pl().clearConnExc();
   }
 
@@ -82,7 +82,7 @@ size_t RestrInferrer::infer(const OrigEdgs& origEdgs) {
   // outs.open("restr_graph.json");
   // out.print(_rg, outs);
 
-  for (auto nd : *_tg->getNds()) {
+  for (auto nd : _tg->getNds()) {
     for (auto edg1 : nd->getAdjList()) {
       // check every other edge
       for (auto edg2 : nd->getAdjList()) {
@@ -120,7 +120,7 @@ void RestrInferrer::addHndls(const OrigEdgs& origEdgs) {
   std::map<RestrEdge*, HndlLst> handles;
 
   // collect the handles
-  for (auto nd : *_tg->getNds()) {
+  for (auto nd : _tg->getNds()) {
     for (auto edg : nd->getAdjList()) {
       if (edg->getFrom() != nd) continue;
       addHndls(edg, origEdgs, &handles);

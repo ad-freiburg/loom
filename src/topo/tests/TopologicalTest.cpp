@@ -54,12 +54,12 @@ void TopologicalTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    TEST(tg.getNds()->size(), ==, 2);
-    TEST((*tg.getNds()->begin())->getAdjList().front()->pl().getLines().size(),
+    TEST(tg.getNds().size(), ==, 2);
+    TEST((*tg.getNds().begin())->getAdjList().front()->pl().getLines().size(),
          ==, 2);
 
     for (auto r :
-         (*tg.getNds()->begin())->getAdjList().front()->pl().getLines()) {
+         (*tg.getNds().begin())->getAdjList().front()->pl().getLines()) {
       if (r.line == &l1) TEST(r.direction, ==, 0);
       if (r.line == &l2) TEST(r.direction, ==, 0);
     }
@@ -103,7 +103,7 @@ void TopologicalTest::run() {
     // reconstruct the old nodes for testing
     c = 0;
     e = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l1))
           e = nd;
@@ -121,7 +121,7 @@ void TopologicalTest::run() {
       if (edg->getOtherNd(d) != a) e = edg->getOtherNd(d);
     }
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(c->getAdjList().front()->pl().lineOcc(&l2).direction, ==, c);
 
@@ -174,7 +174,7 @@ void TopologicalTest::run() {
     // reconstruct the old nodes for testing
     c = 0;
     e = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l1))
           e = nd;
@@ -191,7 +191,7 @@ void TopologicalTest::run() {
       if (edg->getOtherNd(d) != a) e = edg->getOtherNd(d);
     }
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(c->getAdjList().front()->pl().lineOcc(&l2).direction, ==, c);
 
@@ -239,7 +239,7 @@ void TopologicalTest::run() {
 
     c = 0;
     e = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l1))
           e = nd;
@@ -256,7 +256,7 @@ void TopologicalTest::run() {
       if (edg->getOtherNd(d) != a) e = edg->getOtherNd(d);
     }
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(c->getAdjList().front()->pl().lineOcc(&l2).direction, ==, c);
 
@@ -302,7 +302,7 @@ void TopologicalTest::run() {
     // reconstruct the old nodes for testing
     c = 0;
     e = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l1))
           e = nd;
@@ -312,7 +312,7 @@ void TopologicalTest::run() {
     }
 
     cd = c->getAdjList().front();
-    for (auto* nd : *tg.getNds()) {
+    for (auto* nd : tg.getNds()) {
       if (nd->getDeg() == 1 && nd != c) e = nd;
       if (nd->getDeg() == 2) d = nd;
     }
@@ -358,7 +358,7 @@ void TopologicalTest::run() {
     c = 0;
     e = 0;
     d = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l1))
           e = nd;
@@ -369,7 +369,7 @@ void TopologicalTest::run() {
       }
     }
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(c->getAdjList().front()->pl().getLines().begin()->direction, ==, c);
     TEST(e->getAdjList().front()->pl().getLines().size(), ==, 2);
@@ -416,7 +416,7 @@ void TopologicalTest::run() {
     c = 0;
     e = 0;
     d = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l1))
           e = nd;
@@ -427,7 +427,7 @@ void TopologicalTest::run() {
       }
     }
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(c->getAdjList().front()->pl().getLines().begin()->direction, ==, c);
     TEST(e->getAdjList().front()->pl().getLines().size(), ==, 2);
@@ -476,7 +476,7 @@ void TopologicalTest::run() {
     // reconstruct the old nodes for testing
     c = 0;
     e = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l1))
           e = nd;
@@ -489,7 +489,7 @@ void TopologicalTest::run() {
     a = c->getAdjList().front()->getOtherNd(c);
     d = e->getAdjList().front()->getOtherNd(e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(c->getAdjList().front()->pl().getLines().begin()->direction, ==, c);
     TEST(e->getAdjList().front()->pl().getLines().size(), ==, 2);
@@ -537,12 +537,12 @@ void TopologicalTest::run() {
     //     1, 2
     // a ------> b
 
-    TEST(tg.getNds()->size(), ==, 2);
-    TEST((*tg.getNds()->begin())->getAdjList().front()->pl().getLines().size(),
+    TEST(tg.getNds().size(), ==, 2);
+    TEST((*tg.getNds().begin())->getAdjList().front()->pl().getLines().size(),
          ==, 2);
 
     for (auto r :
-         (*tg.getNds()->begin())->getAdjList().front()->pl().getLines()) {
+         (*tg.getNds().begin())->getAdjList().front()->pl().getLines()) {
       if (r.line == &l1) TEST(r.direction, ==, 0);
       if (r.line == &l2) TEST(r.direction, ==, 0);
     }
@@ -578,12 +578,12 @@ void TopologicalTest::run() {
     //     1, 2
     // a ------> b
 
-    TEST(tg.getNds()->size(), ==, 2);
-    TEST((*tg.getNds()->begin())->getAdjList().front()->pl().getLines().size(),
+    TEST(tg.getNds().size(), ==, 2);
+    TEST((*tg.getNds().begin())->getAdjList().front()->pl().getLines().size(),
          ==, 2);
 
     for (auto r :
-         (*tg.getNds()->begin())->getAdjList().front()->pl().getLines()) {
+         (*tg.getNds().begin())->getAdjList().front()->pl().getLines()) {
       if (r.line == &l1) TEST(r.direction, ==, 0);
       if (r.line == &l2) {
         TEST(r.direction, !=, 0);
@@ -643,12 +643,12 @@ void TopologicalTest::run() {
     //  1, 2->, 3
     // a ------> b
 
-    TEST(tg.getNds()->size(), ==, 2);
-    TEST((*tg.getNds()->begin())->getAdjList().front()->pl().getLines().size(),
+    TEST(tg.getNds().size(), ==, 2);
+    TEST((*tg.getNds().begin())->getAdjList().front()->pl().getLines().size(),
          ==, 3);
 
     for (auto r :
-         (*tg.getNds()->begin())->getAdjList().front()->pl().getLines()) {
+         (*tg.getNds().begin())->getAdjList().front()->pl().getLines()) {
       if (r.line == &l1) TEST(r.direction, ==, 0);
       if (r.line == &l2) {
         TEST(r.direction, !=, 0);
@@ -689,7 +689,7 @@ void TopologicalTest::run() {
     // c ----a--->b----> d
     c = 0;
     d = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (!c)
           c = nd;
@@ -701,7 +701,7 @@ void TopologicalTest::run() {
     a = c->getAdjList().front()->getOtherNd(c);
     b = d->getAdjList().front()->getOtherNd(d);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(d->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(tg.getEdg(a, b), !=, 0);
@@ -745,7 +745,7 @@ void TopologicalTest::run() {
 
     c = 0;
     d = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (!c)
           c = nd;
@@ -757,7 +757,7 @@ void TopologicalTest::run() {
     a = c->getAdjList().front()->getOtherNd(c);
     b = d->getAdjList().front()->getOtherNd(d);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(d->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(tg.getEdg(a, b), !=, 0);
@@ -806,7 +806,7 @@ void TopologicalTest::run() {
     //
     c = 0;
     d = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l1))
           d = nd;
@@ -817,7 +817,7 @@ void TopologicalTest::run() {
 
     a = c->getAdjList().front()->getOtherNd(c);
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
 
     for (auto e : a->getAdjList()) {
@@ -861,7 +861,7 @@ void TopologicalTest::run() {
     // c ----a-----> d
     //
     c = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1 && nd->pl().getGeom()->getX() < 50) {
         c = nd;
       }
@@ -869,7 +869,7 @@ void TopologicalTest::run() {
 
     a = c->getAdjList().front()->getOtherNd(c);
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(c->getAdjList().front()->pl().getLines().begin()->direction, ==, c);
 
@@ -918,7 +918,7 @@ void TopologicalTest::run() {
 
     c = 0;
     e = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l1))
           e = nd;
@@ -929,7 +929,7 @@ void TopologicalTest::run() {
 
     a = c->getAdjList().front()->getOtherNd(c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(c->getAdjList().front()->pl().getLines().begin()->direction, ==, c);
     TEST(e->getAdjList().front()->pl().getLines().size(), ==, 2);
@@ -983,7 +983,7 @@ void TopologicalTest::run() {
 
     c = 0;
     e = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l2)) {
           if (nd->getAdjList().front()->pl().lineOcc(&l2).direction != nd)
@@ -999,7 +999,7 @@ void TopologicalTest::run() {
     a = c->getAdjList().front()->getOtherNd(c);
     d = e->getAdjList().front()->getOtherNd(e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(c->getAdjList().front()->pl().getLines().begin()->direction, ==, c);
     TEST(e->getAdjList().front()->pl().getLines().size(), ==, 1);
@@ -1048,7 +1048,7 @@ void TopologicalTest::run() {
 
     c = 0;
     e = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l2)) {
           if (nd->getAdjList().front()->pl().lineOcc(&l2).direction != nd)
@@ -1064,7 +1064,7 @@ void TopologicalTest::run() {
     a = c->getAdjList().front()->getOtherNd(c);
     d = e->getAdjList().front()->getOtherNd(e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(c->getAdjList().front()->pl().getLines().begin()->direction, ==, c);
     TEST(e->getAdjList().front()->pl().getLines().size(), ==, 1);
@@ -1111,7 +1111,7 @@ void TopologicalTest::run() {
 
     c = 0;
     d = 0;
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       if (nd->getDeg() == 1) {
         if (nd->getAdjList().front()->pl().hasLine(&l2)) {
           if (nd->getAdjList().front()->pl().lineOcc(&l2).direction == nd)
@@ -1126,7 +1126,7 @@ void TopologicalTest::run() {
 
     a = c->getAdjList().front()->getOtherNd(c);
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
     TEST(c->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(c->getAdjList().front()->pl().getLines().begin()->direction, ==, c);
 

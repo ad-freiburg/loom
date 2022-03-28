@@ -48,7 +48,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
   optResStats.numLinesOrig = rg->numLines();
   optResStats.maxDegOrig = rg->maxDeg();
 
-  size_t maxC = maxCard(*g.getNds());
+  size_t maxC = maxCard(g.getNds());
 
   double solSp = 0;
   const auto& origComps = util::graph::Algorithm::connectedComponents(g);
@@ -57,7 +57,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
   }
   optResStats.numCompsOrig = origComps.size();
   LOGTO(DEBUG, std::cerr) << "Optimizing line graph of size "
-                          << rg->getNds()->size() << " with "
+                          << rg->getNds().size() << " with "
                           << origComps.size() << " component(s)"
                           << " and max cardinality = " << maxC
                           << " and solution space size = " << solSp;
@@ -112,7 +112,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
 
   optResStats.numNodes = g.getNumNodes();
   optResStats.numEdges = g.getNumEdges();
-  optResStats.maxLineCard = maxCard(*g.getNds());
+  optResStats.maxLineCard = maxCard(g.getNds());
   optResStats.solutionSpaceSize = 0;
 
   size_t nonTrivialComponents = 0;
@@ -228,7 +228,7 @@ OptResStats Optimizer::optimize(RenderGraph* rg) const {
 
     // fill in missing edges (which may have been pruned in the optim graph)
     // use the input ordering for these edges
-    for (auto n : *rg->getNds()) {
+    for (auto n : rg->getNds()) {
       for (auto e : n->getAdjList()) {
         if (e->getFrom() != n) continue;
         if (c.find(e) == c.end()) {

@@ -117,7 +117,7 @@ void getDirLineGraph(const shared::linegraph::LineGraph* g,
 // _____________________________________________________________________________
 void denseSample(shared::linegraph::LineGraph* g, double d) {
   std::vector<shared::linegraph::LineEdge*> edgs;
-  for (auto n : *g->getNds()) {
+  for (auto n : g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       edgs.push_back(e);
@@ -321,8 +321,8 @@ int main(int argc, char** argv) {
   testGraph.readFromJson(&ifs, false);
   ifs.close();
 
-  LOG(DEBUG) << "Ground truth graph: " << gtGraph.getNds()->size() << " nodes";
-  LOG(DEBUG) << "Test graph: " << testGraph.getNds()->size() << " nodes";
+  LOG(DEBUG) << "Ground truth graph: " << gtGraph.getNds().size() << " nodes";
+  LOG(DEBUG) << "Test graph: " << testGraph.getNds().size() << " nodes";
 
   denseSample(&gtGraph, 10);
   denseSample(&testGraph, 10);
@@ -334,14 +334,14 @@ int main(int argc, char** argv) {
   getDirLineGraph(&testGraph, &testDirGraph);
 
   // collect stations
-  for (auto nd : *gtDirGraph.getNds()) {
+  for (auto nd : gtDirGraph.getNds()) {
     if (nd->pl().getStatLabel().size()) {
       if (!stationsGt.count(nd->pl().getStatLabel()))
         gtStations.push_back(nd->pl().getStatLabel());
       stationsGt[nd->pl().getStatLabel()].insert(nd);
     }
   }
-  for (auto nd : *testDirGraph.getNds()) {
+  for (auto nd : testDirGraph.getNds()) {
     if (nd->pl().getStatLabel().size()) {
       stationsTest[nd->pl().getStatLabel()].insert(nd);
     }
@@ -349,23 +349,23 @@ int main(int argc, char** argv) {
 
   testGrid = util::geo::Grid<topoeval::DirLineNode*, Point, double>(
       120, 120, testGraph.getBBox());
-  for (auto nd : *testDirGraph.getNds()) {
+  for (auto nd : testDirGraph.getNds()) {
     testGrid.add(*nd->pl().getGeom(), nd);
   }
 
   gtGrid = util::geo::Grid<topoeval::DirLineNode*, Point, double>(
       120, 120, gtGraph.getBBox());
-  for (auto nd : *gtDirGraph.getNds()) {
+  for (auto nd : gtDirGraph.getNds()) {
     gtGrid.add(*nd->pl().getGeom(), nd);
   }
 
-  gtNds = std::vector<shared::linegraph::LineNode*>(gtGraph.getNds()->begin(),
-                                                    gtGraph.getNds()->end());
+  gtNds = std::vector<shared::linegraph::LineNode*>(gtGraph.getNds().begin(),
+                                                    gtGraph.getNds().end());
 
   std::map<const shared::linegraph::Line*, const shared::linegraph::Line*>
       lineMap;
 
-  for (auto nd : *gtGraph.getNds()) {
+  for (auto nd : gtGraph.getNds()) {
     for (auto e : nd->getAdjList()) {
       for (auto l : e->pl().getLines()) {
         lineMap[l.line] = 0;
@@ -374,7 +374,7 @@ int main(int argc, char** argv) {
   }
 
   for (auto i : lineMap) {
-    for (auto nd : *testGraph.getNds()) {
+    for (auto nd : testGraph.getNds()) {
       for (auto e : nd->getAdjList()) {
         for (auto l : e->pl().getLines()) {
           if (l.line->id() == i.first->id()) {

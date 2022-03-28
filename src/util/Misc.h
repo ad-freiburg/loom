@@ -9,14 +9,15 @@
 #include <cstring>
 #include <chrono>
 #include <sstream>
+#include <iomanip>
 #include <immintrin.h>
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
 #include <map>
-#include <shared_mutex>
 #include <thread>
 #include "3rdparty/dtoa_milo.h"
 
@@ -113,6 +114,21 @@ inline bool isFloatingPoint(const std::string& str) {
   double f;
   ss >> std::noskipws >> f;
   return ss.eof() && ! ss.fail();
+}
+
+// _____________________________________________________________________________
+inline std::string formatFloat(double f, size_t digits) {
+  std::stringstream ss;
+  ss << std::fixed << std::setprecision(digits) << f;
+	std::string ret = ss.str();
+
+  if (ret.find('.') != std::string::npos) {
+		auto p = ret.find_last_not_of('0');
+    if (ret[p] == '.') return ret.substr(0, p);
+    return ret.substr(0, p + 1);
+  }
+
+  return ret;
 }
 
 // _____________________________________________________________________________
@@ -217,16 +233,14 @@ size_t inversions(const std::vector<V>& v) {
   if (v.size() == 2) return v[1] < v[0];
   if (v.size() == 3) return (v[0] > v[1]) + (v[0] > v[2]) + (v[1] > v[2]);
 
-  V* tmpLst = new V[v.size()];
-  V* lst = new V[v.size()];
+  auto tmpLst = new V[v.size()];
+  auto lst = new V[v.size()];
 
   for (size_t i = 0; i < v.size(); i++) lst[i] = v[i];
 
   size_t ret = mergeInvCount<V>(lst, tmpLst, 0, v.size() - 1);
-
   delete[] tmpLst;
   delete[] lst;
-
   return ret;
 }
 

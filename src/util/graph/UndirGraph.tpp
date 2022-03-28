@@ -21,7 +21,7 @@ Node<N, E>* UndirGraph<N, E>::addNd() {
 // _____________________________________________________________________________
 template <typename N, typename E>
 Node<N, E>* UndirGraph<N, E>::addNd(UndirNode<N, E>* n) {
-  auto ins = Graph<N, E>::getNds()->insert(n);
+  auto ins = Graph<N, E>::_nodes.insert(n);
   return *ins.first;
 }
 

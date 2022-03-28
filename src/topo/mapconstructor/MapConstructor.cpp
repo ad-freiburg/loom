@@ -206,7 +206,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
     double SEGL = 5;
 
     std::vector<std::pair<double, LineEdge*>> sortedEdges;
-    for (auto n : *_g->getNds()) {
+    for (auto n : _g->getNds()) {
       for (auto e : n->getAdjList()) {
         if (e->getFrom() != n) continue;
         sortedEdges.push_back({e->pl().getPolyline().getLength(), e});
@@ -349,7 +349,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
     // soft cleanup
     std::vector<LineNode*> ndsA;
-    ndsA.insert(ndsA.begin(), tgNew.getNds()->begin(), tgNew.getNds()->end());
+    ndsA.insert(ndsA.begin(), tgNew.getNds().begin(), tgNew.getNds().end());
     for (auto from : ndsA) {
       for (auto e : from->getAdjList()) {
         if (e->getFrom() != from) continue;
@@ -365,7 +365,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
     }
 
     // write edge geoms
-    for (auto n : *tgNew.getNds()) {
+    for (auto n : tgNew.getNds()) {
       for (auto e : n->getAdjList()) {
         if (e->getFrom() != n) continue;
 
@@ -376,7 +376,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
     // re-collapse
     std::vector<LineNode*> nds;
-    nds.insert(nds.begin(), tgNew.getNds()->begin(), tgNew.getNds()->end());
+    nds.insert(nds.begin(), tgNew.getNds().begin(), tgNew.getNds().end());
 
     for (auto n : nds) {
       if (n->getDeg() == 2) {
@@ -403,7 +403,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
     // remove edge artifacts
     nds.clear();
-    nds.insert(nds.begin(), tgNew.getNds()->begin(), tgNew.getNds()->end());
+    nds.insert(nds.begin(), tgNew.getNds().begin(), tgNew.getNds().end());
     for (auto from : nds) {
       for (auto e : from->getAdjList()) {
         if (e->getFrom() != from) continue;
@@ -427,7 +427,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
     // re-collapse again because we might have introduce deg 2 nodes above
     nds.clear();
-    nds.insert(nds.begin(), tgNew.getNds()->begin(), tgNew.getNds()->end());
+    nds.insert(nds.begin(), tgNew.getNds().begin(), tgNew.getNds().end());
 
     for (auto n : nds) {
       if (n->getDeg() == 2 &&
@@ -440,7 +440,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
     }
 
     // smoothen a bit
-    for (auto n : *tgNew.getNds()) {
+    for (auto n : tgNew.getNds()) {
       for (auto e : n->getAdjList()) {
         if (e->getFrom() != n) continue;
         auto pl = e->pl().getPolyline();
@@ -458,14 +458,14 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
     double LEN_OLD = 0;
     double LEN_NEW = 0;
-    for (const auto& nd : *_g->getNds()) {
+    for (const auto& nd : _g->getNds()) {
       for (const auto& e : nd->getAdjList()) {
         if (e->getFrom() != nd) continue;
         LEN_OLD += e->pl().getPolyline().getLength();
       }
     }
 
-    for (const auto& nd : *tgNew.getNds()) {
+    for (const auto& nd : tgNew.getNds()) {
       for (const auto& e : nd->getAdjList()) {
         if (e->getFrom() != nd) continue;
         LEN_NEW += e->pl().getPolyline().getLength();
@@ -484,7 +484,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
 // _____________________________________________________________________________
 void MapConstructor::averageNodePositions() {
-  for (auto n : *_g->getNds()) {
+  for (auto n : _g->getNds()) {
     double x = 0, y = 0;
     size_t c = 0;
 
@@ -519,7 +519,7 @@ void MapConstructor::removeNodeArtifacts(bool keepStations) {
 
 // _____________________________________________________________________________
 bool MapConstructor::contractNodes() {
-  for (auto n : *_g->getNds()) {
+  for (auto n : _g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       // contract edges below minimum length, and dead end edges ending in a
@@ -536,7 +536,7 @@ bool MapConstructor::contractNodes() {
 
 // _____________________________________________________________________________
 bool MapConstructor::contractEdges(bool keepStations) {
-  for (auto n : *_g->getNds()) {
+  for (auto n : _g->getNds()) {
     if (keepStations && n->pl().stops().size()) continue;
     std::vector<LineEdge*> edges;
     edges.insert(edges.end(), n->getAdjList().begin(), n->getAdjList().end());
@@ -646,7 +646,7 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n,
 size_t MapConstructor::freeze() {
   size_t i = 0;
   _origEdgs.push_back(OrigEdgs());
-  for (auto nd : *_g->getNds()) {
+  for (auto nd : _g->getNds()) {
     for (auto* edg : nd->getAdjList()) {
       if (edg->getFrom() != nd) continue;
       _origEdgs.back()[edg].insert(edg);
@@ -789,7 +789,7 @@ PolyLine<double> MapConstructor::geomAvg(const LineEdgePL& geomA, double startA,
 DBox MapConstructor::bbox() const {
   DBox b;
 
-  for (auto n : *_g->getNds()) {
+  for (auto n : _g->getNds()) {
     b = extendBox(*n->pl().getGeom(), b);
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
@@ -914,7 +914,7 @@ void MapConstructor::mergeLines(LineEdge* newE, LineEdge* oldE,
 
 // _____________________________________________________________________________
 bool MapConstructor::cleanUpGeoms() {
-  for (auto n : *_g->getNds()) {
+  for (auto n : _g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       e->pl().setPolyline(e->pl().getPolyline().getSegment(
@@ -938,7 +938,7 @@ bool MapConstructor::cleanUpGeoms() {
 void MapConstructor::removeOrphanLines() {
   std::vector<LineEdge*> toDelEdgs;
 
-  for (auto n : *_g->getNds()) {
+  for (auto n : _g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
 
@@ -970,7 +970,7 @@ void MapConstructor::removeOrphanLines() {
   for (auto e : toDelEdgs) _g->delEdg(e->getFrom(), e->getTo());
 
   std::vector<LineNode*> toDelNds;
-  for (auto nd : *_g->getNds()) {
+  for (auto nd : _g->getNds()) {
     if (nd->getDeg() == 0) toDelNds.push_back(nd);
   }
 
@@ -980,7 +980,7 @@ void MapConstructor::removeOrphanLines() {
 // _____________________________________________________________________________
 void MapConstructor::reconstructIntersections() {
   averageNodePositions();
-  for (auto n : *_g->getNds()) {
+  for (auto n : _g->getNds()) {
     for (auto e : n->getAdjList()) {
       auto pl = e->pl().getPolyline();
       pl = pl.getSegmentAtDist(_cfg->maxAggrDistance,

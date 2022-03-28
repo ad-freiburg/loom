@@ -70,8 +70,6 @@ void PolyLine<T>::offsetPerp(double units) {
 
   if (fabs(units) < 0.001) return;
 
-  assert(getLength() > 0);
-
   if (_line.size() < 2) return;
 
   Line<T> ret;
@@ -180,6 +178,7 @@ template <typename T>
 PolyLine<T> PolyLine<T>::getSegment(const LinePoint<T>& start,
                                     const LinePoint<T>& end) const {
   PolyLine ret;
+
   ret << start.p;
 
   if (start.lastIndex + 1 <= end.lastIndex) {
@@ -199,8 +198,18 @@ PolyLine<T> PolyLine<T>::getSegment(const LinePoint<T>& start,
 // _____________________________________________________________________________
 template <typename T>
 LinePoint<T> PolyLine<T>::getPointAtDist(double atDist) const {
-  if (atDist > getLength()) atDist = getLength();
+  double l = getLength();
+  if (atDist > l) atDist = l;
   if (atDist < 0) atDist = 0;
+
+  // shortcuts
+  if (atDist == 0) {
+    return LinePoint<T>(0, 0, _line.front());
+  }
+
+  if (atDist == l) {
+    return LinePoint<T>(_line.size() - 1, 1, _line.back());
+  }
 
   double dist = 0;
 
@@ -215,8 +224,7 @@ LinePoint<T> PolyLine<T>::getPointAtDist(double atDist) const {
 
     if (dist > atDist) {
       double p = (d - (dist - atDist));
-      return LinePoint<T>(i - 1, atDist / getLength(),
-                          interpolate(*last, cur, p));
+      return LinePoint<T>(i - 1, atDist / l, interpolate(*last, cur, p));
     }
 
     last = &_line[i];
@@ -272,8 +280,9 @@ PolyLine<T> PolyLine<T>::average(const std::vector<const PolyLine<T>*>& lines,
 
   double longestLength = DBL_MIN;  // avoid recalc of length on each comparision
   for (const PolyLine* p : lines) {
-    if (p->getLength() > longestLength) {
-      longestLength = p->getLength();
+    double l = p->getLength();
+    if (l > longestLength) {
+      longestLength = l;
     }
   }
 
@@ -384,7 +393,8 @@ LinePoint<T> PolyLine<T>::projectOnAfter(const Point<T>& p, size_t a) const {
 
   Point<T> ret = geo::projectOn(_line[bc.first], p, _line[next]);
 
-  if (getLength() > 0) bc.second += dist(_line[bc.first], ret) / getLength();
+  double l = getLength();
+  if (l > 0) bc.second += dist(_line[bc.first], ret) / l;
 
   return LinePoint<T>(bc.first, bc.second, ret);
 }
@@ -408,6 +418,22 @@ void PolyLine<T>::smoothenOutliers(double d) {
       }
     }
   }
+}
+
+// _____________________________________________________________________________
+template <typename T>
+bool PolyLine<T>::equals(const PolyLine<T>& rhs) const {
+  // TODO: why 100? make global static or configurable or determine in some
+  //       way!
+  return equals(rhs, 100);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+bool PolyLine<T>::operator==(const PolyLine<T>& rhs) const {
+  // TODO: why 100? make global static or configurable or determine in some
+  //       way!
+  return equals(rhs, 100);
 }
 
 // _____________________________________________________________________________
@@ -450,110 +476,6 @@ void PolyLine<T>::move(double vx, double vy) {
     _line[i].setX(_line[i].getX() + vx);
     _line[i].setY(_line[i].getY() + vy);
   }
-}
-
-// _____________________________________________________________________________
-template <typename T>
-SharedSegments<T> PolyLine<T>::getSharedSegments(const PolyLine<T>& pl,
-                                                 double dmax) const {
-  /**
-   * Returns the segments this polyline share with pl
-   * atm, this is a very simple distance-based algorithm
-   */
-  double STEP_SIZE = 2;
-  double MAX_SKIPS = 4;
-  double MIN_SEG_LENGTH = 0.1;  // dmax / 2;  // make this configurable!
-
-  SharedSegments<T> ret;
-
-  if (distTo(pl) > dmax) return ret;
-
-  bool in = false, single = true;
-  size_t skips;
-
-  LinePoint<T> curStartCand, curEndCand, curStartCandCmp, curEndCandCmp;
-
-  double curSegDist = 0;
-  double length = getLength(), plLength = pl.getLength();
-
-  for (size_t i = 1; i < _line.size(); ++i) {
-    const Point<T>& s = _line[i - 1];
-    const Point<T>& e = _line[i];
-
-    bool lastRound = false;
-
-    double totalDist = dist(s, e);
-    while (curSegDist <= totalDist) {
-      const auto& curPointer = interpolate(s, e, curSegDist);
-
-      if (pl.distTo(curPointer) <= dmax) {
-        LinePoint<T> curCmpPointer = pl.projectOn(curPointer);
-        LinePoint<T> curBackProjectedPointer = projectOn(curCmpPointer.p);
-
-        skips = 0;
-
-        if (in) {
-          curEndCand = curBackProjectedPointer;
-          curEndCandCmp = curCmpPointer;
-
-          if (curEndCand.totalPos < curStartCand.totalPos) {
-            curEndCand = curStartCand;
-          }
-
-          single = false;
-        } else {
-          in = true;
-          curStartCand = curBackProjectedPointer;
-          curStartCandCmp = curCmpPointer;
-        }
-      } else {
-        if (in) {
-          skips++;
-          if (skips > MAX_SKIPS) {  // TODO: make configurable
-            if (!single &&
-                (fabs(curStartCand.totalPos * length -
-                      curEndCand.totalPos * length) > MIN_SEG_LENGTH &&
-                 fabs(curStartCandCmp.totalPos * plLength -
-                      curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
-              ret.segments.push_back(
-                  SharedSegment<T>(std::pair<LinePoint<T>, LinePoint<T>>(
-                                       curStartCand, curStartCandCmp),
-                                   std::pair<LinePoint<T>, LinePoint<T>>(
-                                       curEndCand, curEndCandCmp)));
-
-              // TODO: only return the FIRST one, make this configuralbe
-              return ret;
-            }
-
-            in = false;
-            single = true;
-          }
-        }
-      }
-
-      if (curSegDist + STEP_SIZE > totalDist && !lastRound) {
-        lastRound = true;
-        double finalStep = totalDist - curSegDist - 0.0005;
-        curSegDist += finalStep;
-      } else {
-        curSegDist += STEP_SIZE;
-      }
-    }
-
-    curSegDist = curSegDist - totalDist;
-  }
-
-  if (in && !single &&
-      (fabs(curStartCand.totalPos * length - curEndCand.totalPos * length) >
-           MIN_SEG_LENGTH &&
-       fabs(curStartCandCmp.totalPos * plLength -
-            curEndCandCmp.totalPos * plLength) > MIN_SEG_LENGTH)) {
-    ret.segments.push_back(SharedSegment<T>(
-        std::pair<LinePoint<T>, LinePoint<T>>(curStartCand, curStartCandCmp),
-        std::pair<LinePoint<T>, LinePoint<T>>(curEndCand, curEndCandCmp)));
-  }
-
-  return ret;
 }
 
 // _____________________________________________________________________________
@@ -635,7 +557,8 @@ std::pair<double, double> PolyLine<T>::getSlopeBetween(double ad,
 template <typename T>
 std::pair<double, double> PolyLine<T>::getSlopeBetweenDists(double ad,
                                                             double bd) const {
-  return getSlopeBetween(ad / getLength(), bd / getLength());
+  double l = getLength();
+  return getSlopeBetween(ad / l, bd / l);
 }
 
 // _____________________________________________________________________________

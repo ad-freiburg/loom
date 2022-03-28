@@ -65,6 +65,25 @@ class EDijkstra : public ShortestPath<EDijkstra> {
   };
 
   template <typename N, typename E, typename C>
+  struct RouteEdgeInitNoRes {
+    RouteEdgeInitNoRes() : e(0), parent(0), d(), dwi() {}
+    RouteEdgeInitNoRes(Edge<N, E>* e) : e(e), parent(0), d(), dwi() {}
+    RouteEdgeInitNoRes(Edge<N, E>* e, Edge<N, E>* parent, C d)
+        : e(e), parent(parent), d(d), dwi() {}
+    RouteEdgeInitNoRes(Edge<N, E>* e, Edge<N, E>* parent, C d, C dwi)
+        : e(e), parent(parent), d(d), dwi(dwi) {}
+
+    Edge<N, E>* e;
+    Edge<N, E>* parent;
+
+    // the cost so far
+    C d;
+
+    // the cost without the initial costs
+    C dwi;
+  };
+
+  template <typename N, typename E, typename C>
   struct CostFunc : public util::graph::CostFunc<N, E, C> {
     C operator()(const Node<N, E>* from, const Edge<N, E>* e,
                  const Node<N, E>* to) const {
@@ -86,16 +105,24 @@ class EDijkstra : public ShortestPath<EDijkstra> {
   };
 
   template <typename N, typename E, typename C>
-  using Settled = tsl::robin_map<Edge<N, E>*, RouteEdge<N, E, C> >;
+  using Settled = tsl::robin_map<Edge<N, E>*, RouteEdge<N, E, C>>;
 
   template <typename N, typename E, typename C>
-  using PQ = radix_heap::pair_radix_heap<C, RouteEdge<N, E, C> >;
+  using PQ = radix_heap::pair_radix_heap<C, RouteEdge<N, E, C>>;
 
   template <typename N, typename E, typename C>
-  using SettledInit = tsl::robin_map<Edge<N, E>*, RouteEdgeInit<N, E, C> >;
+  using SettledInit = tsl::robin_map<Edge<N, E>*, RouteEdgeInit<N, E, C>>;
 
   template <typename N, typename E, typename C>
-  using PQInit = radix_heap::pair_radix_heap<C, RouteEdgeInit<N, E, C> >;
+  using SettledInitNoRes =
+      tsl::robin_map<Edge<N, E>*, RouteEdgeInitNoRes<N, E, C>>;
+
+  template <typename N, typename E, typename C>
+  using PQInit = radix_heap::pair_radix_heap<C, RouteEdgeInit<N, E, C>>;
+
+  template <typename N, typename E, typename C>
+  using PQInitNoRes =
+      radix_heap::pair_radix_heap<C, RouteEdgeInitNoRes<N, E, C>>;
 
   template <typename N, typename E, typename C>
   static C shortestPathImpl(const std::set<Edge<N, E>*>& from,
@@ -124,6 +151,13 @@ class EDijkstra : public ShortestPath<EDijkstra> {
                             EList<N, E>* resEdges, NList<N, E>* resNodes);
 
   template <typename N, typename E, typename C>
+  static C shortestPathImpl(const std::set<Node<N, E>*>& from,
+                            const std::set<Node<N, E>*>& to,
+                            const util::graph::CostFunc<N, E, C>& costFunc,
+                            const util::graph::HeurFunc<N, E, C>& heurFunc,
+                            EList<N, E>* resEdges, NList<N, E>* resNodes);
+
+  template <typename N, typename E, typename C>
   static std::unordered_map<Edge<N, E>*, C> shortestPathImpl(
       const std::set<Edge<N, E>*>& from,
       const util::graph::CostFunc<N, E, C>& costFunc, bool rev);
@@ -139,6 +173,15 @@ class EDijkstra : public ShortestPath<EDijkstra> {
   template <typename N, typename E, typename C>
   static std::unordered_map<Edge<N, E>*, C> shortestPathImpl(
       const std::set<Edge<N, E>*>& from, const std::set<Edge<N, E>*>& to,
+      const std::unordered_map<Edge<N, E>*, C>& initCosts,
+      const util::graph::CostFunc<N, E, C>& costFunc,
+      const util::graph::HeurFunc<N, E, C>& heurFunc,
+      std::unordered_map<Edge<N, E>*, EList<N, E>*> resEdges,
+      std::unordered_map<Edge<N, E>*, NList<N, E>*> resNodes);
+
+  template <typename N, typename E, typename C>
+  static std::unordered_map<Edge<N, E>*, C> shortestPathImpl(
+      const std::set<Edge<N, E>*>& from, const std::set<Edge<N, E>*>& to,
       const std::unordered_map<Edge<N, E>*, C>& initCosts, C stall,
       const util::graph::CostFunc<N, E, C>& costFunc,
       const util::graph::HeurFunc<N, E, C>& heurFunc,
@@ -146,15 +189,16 @@ class EDijkstra : public ShortestPath<EDijkstra> {
       std::unordered_map<Edge<N, E>*, NList<N, E>*> resNodes);
 
   template <typename N, typename E, typename C>
-  static C shortestPathImpl(const std::set<Node<N, E>*>& from,
-                     const std::set<Node<N, E>*>& to,
-                     const util::graph::CostFunc<N, E, C>& costFunc,
-                     const util::graph::HeurFunc<N, E, C>& heurFunc,
-                     EList<N, E>* resEdges, NList<N, E>* resNodes);
+  static std::unordered_map<Edge<N, E>*, std::pair<Edge<N, E>*, C>>
+  shortestPathImpl(const std::set<Edge<N, E>*>& from,
+                   const std::set<Edge<N, E>*>& to,
+                   const std::unordered_map<Edge<N, E>*, C>& initCosts, C stall,
+                   const util::graph::CostFunc<N, E, C>& costFunc,
+                   const util::graph::HeurFunc<N, E, C>& heurFunc);
 
   template <typename N, typename E, typename C>
   static void buildPath(Edge<N, E>* curE, const Settled<N, E, C>& settled,
-                 NList<N, E>* resNodes, EList<N, E>* resEdges);
+                        NList<N, E>* resNodes, EList<N, E>* resEdges);
 
   template <typename N, typename E, typename C>
   static void buildPathInit(Edge<N, E>* curE,
@@ -174,6 +218,12 @@ class EDijkstra : public ShortestPath<EDijkstra> {
                                const util::graph::CostFunc<N, E, C>& costFunc,
                                const util::graph::HeurFunc<N, E, C>& heurFunc,
                                PQInit<N, E, C>& pq);
+
+  template <typename N, typename E, typename C>
+  static inline void relaxInitNoResEdgs(
+      RouteEdgeInitNoRes<N, E, C>& cur, const std::set<Edge<N, E>*>& to,
+      C stall, const util::graph::CostFunc<N, E, C>& costFunc,
+      const util::graph::HeurFunc<N, E, C>& heurFunc, PQInitNoRes<N, E, C>& pq);
 
   template <typename N, typename E, typename C>
   static void relaxInv(RouteEdge<N, E, C>& cur,

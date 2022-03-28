@@ -126,8 +126,11 @@ class pair_radix_heap {
   }
 
   void push(key_type key, const value_type &value) {
-    const unsigned_key_type x = encoder_type::encode(key);
-    assert(last_ <= x);
+    unsigned_key_type x = encoder_type::encode(key);
+    if (last_ > x) {
+      std::cerr << "PQ: not monotone: " << last_ << " vs " << x << std::endl;
+      x = last_;
+    }
     ++size_;
     const size_t k = internal::find_bucket(x, last_);
     buckets_[k].emplace_back(x, value);
@@ -135,8 +138,11 @@ class pair_radix_heap {
   }
 
   void push(key_type key, value_type &&value) {
-    const unsigned_key_type x = encoder_type::encode(key);
-    assert(last_ <= x);
+    unsigned_key_type x = encoder_type::encode(key);
+    if (last_ > x) {
+      std::cerr << "PQ: not monotone: " << last_ << " vs " << x << std::endl;
+      x = last_;
+    }
     ++size_;
     const size_t k = internal::find_bucket(x, last_);
     buckets_[k].emplace_back(x, std::move(value));
@@ -145,8 +151,8 @@ class pair_radix_heap {
 
   template <class... Args>
   void emplace(key_type key, Args &&... args) {
-    const unsigned_key_type x = encoder_type::encode(key);
-    assert(last_ <= x);
+    unsigned_key_type x = encoder_type::encode(key);
+    if (last_ > x) x = last_;
     ++size_;
     const size_t k = internal::find_bucket(x, last_);
     buckets_[k].emplace_back(std::piecewise_construct, std::forward_as_tuple(x),

@@ -127,7 +127,7 @@ LineEdge* OptGraph::getAdjEdg(const OptEdge* e, const OptNode* n) {
 // _____________________________________________________________________________
 std::map<const LineNode*, OptNode*> OptGraph::build(RenderGraph* rg) {
   std::map<const LineNode*, OptNode*> lnNdToOptNd;
-  for (auto n : *rg->getNds()) {
+  for (auto n : rg->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
 
@@ -172,7 +172,7 @@ void OptGraph::terminusDetach() {
   std::vector<std::pair<OptEdge*, OptNode*>> toDetach;
 
   // collect edges to cut
-  for (OptNode* n : *getNds()) {
+  for (OptNode* n : getNds()) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
 
@@ -225,7 +225,7 @@ void OptGraph::splitSingleLineEdgs() {
   std::vector<OptEdge*> toCut;
 
   // collect edges to cut
-  for (OptNode* n : *getNds()) {
+  for (OptNode* n : getNds()) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
 
@@ -556,7 +556,7 @@ bool OptGraph::contractCheaper(const OptNode* cont, const OptNode* cheaper,
 
 // _____________________________________________________________________________
 bool OptGraph::contractDeg2Step() {
-  for (OptNode* n : *getNds()) {
+  for (OptNode* n : getNds()) {
     if (n->getDeg() == 2) {
       OptEdge* first = n->getAdjList().front();
       OptEdge* second = n->getAdjList().back();
@@ -799,7 +799,7 @@ std::pair<OptEdge*, OptEdge*> OptGraph::isFullX(OptNode* n) const {
 
 // _____________________________________________________________________________
 bool OptGraph::untangleFullX() {
-  for (OptNode* n : *getNds()) {
+  for (OptNode* n : getNds()) {
     std::pair<OptEdge*, OptEdge*> cross;
     if ((cross = isFullX(n)).first) {
       LOGTO(DEBUG, std::cerr)
@@ -861,7 +861,7 @@ std::vector<OptNode*> OptGraph::explodeNodeAlong(
 void OptGraph::untanglePartialY() {
   std::vector<OptEdge*> toUntangle;
 
-  for (OptNode* na : *getNds()) {
+  for (OptNode* na : getNds()) {
     if (na->getDeg() != 1) continue;  // only look at terminus nodes
 
     // the only outgoing edge
@@ -1005,7 +1005,7 @@ std::pair<OptEdge*, bool> OptGraph::isOuterStumpAt(OptEdge* mainLeg,
 void OptGraph::untangleDoubleStump() {
   std::vector<OptEdge*> toUntangle;
 
-  for (OptNode* n : *getNds()) {
+  for (OptNode* n : getNds()) {
     for (OptEdge* mainLeg : n->getAdjList()) {
       if (mainLeg->getFrom() != n) continue;
 
@@ -1037,7 +1037,7 @@ void OptGraph::untangleDoubleStump() {
 void OptGraph::untangleOuterStump() {
   std::set<OptEdge*> toUntangle;
 
-  for (OptNode* n : *getNds()) {
+  for (OptNode* n : getNds()) {
     for (OptEdge* mainLeg : n->getAdjList()) {
       if (mainLeg->getFrom() != n) continue;
 
@@ -1198,7 +1198,7 @@ void OptGraph::untangleOuterStump() {
 void OptGraph::untangleY() {
   std::vector<OptEdge*> toUntangle;
 
-  for (OptNode* na : *getNds()) {
+  for (OptNode* na : getNds()) {
     if (na->getDeg() != 1) continue;  // only look at terminus nodes
 
     // the only outgoing edge
@@ -1410,7 +1410,7 @@ OptEdgePL OptGraph::getPartialView(OptEdge* parent, OptEdge* leg,
 void OptGraph::untanglePartialDogBone() {
   std::vector<OptEdge*> toUntangle;
 
-  for (OptNode* na : *getNds()) {
+  for (OptNode* na : getNds()) {
     if (na->getDeg() < 3) continue;  // only look at nodes with deg > 2
 
     for (OptEdge* mainLeg : na->getAdjList()) {
@@ -1501,7 +1501,7 @@ void OptGraph::untanglePartialDogBone() {
 void OptGraph::untangleInnerStump() {
   std::vector<OptEdge*> toUntangle;
 
-  for (OptNode* na : *getNds()) {
+  for (OptNode* na : getNds()) {
     for (OptEdge* mainLeg : na->getAdjList()) {
       if (mainLeg->getFrom() != na) continue;
       if (isInnerStump(mainLeg)) {
@@ -1662,7 +1662,7 @@ void OptGraph::untangleInnerStump() {
 void OptGraph::untangleDogBone() {
   std::vector<OptEdge*> toUntangle;
 
-  for (OptNode* na : *getNds()) {
+  for (OptNode* na : getNds()) {
     for (OptEdge* mainLeg : na->getAdjList()) {
       if (mainLeg->getFrom() != na) continue;
       if (isDogBone(mainLeg)) {
@@ -1770,7 +1770,7 @@ void OptGraph::untangleDogBone() {
 
 // _____________________________________________________________________________
 void OptGraph::writeEdgeOrder() {
-  for (auto nd : *getNds()) {
+  for (auto nd : getNds()) {
     updateEdgeOrder(nd);
   }
 }

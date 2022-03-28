@@ -71,8 +71,6 @@ class PolyLine {
   double distTo(const PolyLine<T>& g) const;
   double distTo(const Point<T>& p) const;
 
-  SharedSegments<T> getSharedSegments(const PolyLine<T>& pl, double dmax) const;
-
   double getLength() const;
 
   // return point at dist
@@ -111,7 +109,9 @@ class PolyLine {
 
   // equality operator, will hold frechet-distance equality check in
   // the dmax
+  bool operator==(const PolyLine& rhs) const;
   bool contains(const PolyLine& rhs, double dmax) const;
+  bool equals(const PolyLine& rhs) const;
   bool equals(const PolyLine& rhs, double dmax) const;
 
   std::string getWKT() const;

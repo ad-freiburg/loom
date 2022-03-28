@@ -42,7 +42,7 @@ void CombGraph::build(const LineGraph* source) {
     }
   }
 
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
     size_t numLines = 0;
     for (auto e : n->getAdjList()) {
       numLines += e->pl().getChilds().front()->pl().getLines().size();
@@ -54,7 +54,7 @@ void CombGraph::build(const LineGraph* source) {
 // _____________________________________________________________________________
 void CombGraph::combineDeg2() {
   std::vector<CombNode*> toDel;
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
     if (n->getAdjList().size() == 2) toDel.push_back(n);
   }
 
@@ -107,14 +107,14 @@ void CombGraph::combineDeg2() {
 
 // _____________________________________________________________________________
 void CombGraph::writeEdgeOrdering() {
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
     n->pl().setEdgeOrdering(getEdgeOrderingForNode(n));
   }
 }
 
 // _____________________________________________________________________________
 void CombGraph::writeMaxLineNum() {
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
 

@@ -6,17 +6,19 @@
 #define UTIL_STRING_H_
 
 #include <algorithm>
+#include <bitset>
 #include <cassert>
+#include <cmath>
 #include <codecvt>
 #include <cstring>
 #include <exception>
 #include <iomanip>
 #include <iostream>
 #include <locale>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <set>
 
 namespace util {
 
@@ -274,6 +276,12 @@ inline std::string implode(Iter begin, const Iter& end, const char* del) {
 }
 
 // _____________________________________________________________________________
+template <class T>
+inline std::string implode(const std::vector<T>& vec, const char* del) {
+  return implode(vec.begin(), vec.end(), del);
+}
+
+// _____________________________________________________________________________
 inline std::string normalizeWhiteSpace(const std::string& input) {
   std::string ret;
   bool ws = false;
@@ -324,8 +332,9 @@ inline std::vector<std::string> tokenize(const std::string& str) {
 }
 
 // _____________________________________________________________________________
-inline double jaccardSimi(const std::string& a,
-                                            const std::string& b) {
+inline double jaccardSimi(const std::string& a, const std::string& b) {
+  if (a == b) return 1;
+
   std::set<std::string> sa, sb;
 
   auto toksA = tokenize(a);
@@ -349,9 +358,83 @@ inline double jaccardSimi(const std::string& a,
 }
 
 // _____________________________________________________________________________
-template <class T>
-inline std::string implode(const std::vector<T>& vec, const char* del) {
-  return implode(vec.begin(), vec.end(), del);
+inline double btsSimiInner(const std::vector<std::string>& toks,
+                           const std::string& b, double best) {
+  std::set<std::string> toksSet;
+  toksSet.insert(toks.begin(), toks.end());
+  std::vector<std::string> toksUniqSorted;
+  toksUniqSorted.insert(toksUniqSorted.begin(), toksSet.begin(), toksSet.end());
+
+  assert(toksUniqSorted.size() <= 8);
+
+  for (uint8_t v = 1; v <= pow(2, toksUniqSorted.size()); v++) {
+    std::bitset<8> bs(v);
+    std::vector<std::string> cur(bs.count());
+
+    size_t i = 0;
+    for (size_t j = 0; j < toksUniqSorted.size(); j++) {
+      if (bs[j]) {
+        cur[i] = toksUniqSorted[j];
+        i++;
+      }
+    }
+
+    double tmp = util::implode(cur, " ").size();
+
+    // ed between the two string will always be at least their length
+    // difference - if this is already too big, skip it right now
+    double dt = 1 - (fabs(tmp - b.size()) * 1.0) / (fmax(tmp, b.size()) * 1.0);
+
+    if (dt <= best) continue;
+
+    // cur is guaranteed to be sorted now
+    do {
+      const auto& comb = util::implode(cur, " ");
+
+      double d =
+          1 - ((editDist(comb, b) * 1.0) / (fmax(comb.size(), b.size()) * 1.0));
+
+      if (fabs(d - 1) < 0.0001) return 1;
+
+      if (d > best) best = d;
+    } while (std::next_permutation(cur.begin(), cur.end()));
+  }
+
+  return best;
+}
+
+// _____________________________________________________________________________
+inline double btsSimi(std::string a, std::string b) {
+  // this follows the implementation for the station similarity paper in
+  // https://github.com/ad-freiburg/statsimi/
+  if (a == b) return 1;
+
+  std::set<std::string> sa, sb;
+
+  auto toksA = tokenize(a);
+  auto toksB = tokenize(b);
+
+  // fallback to jaccard if the token set is too large
+  if (toksA.size() > 6 || toksB.size() > 6) {
+    return jaccardSimi(a, b);
+  }
+
+  if (toksA.size() > toksB.size()) {
+    std::swap(a, b);
+    std::swap(toksA, toksB);
+  }
+
+  // this is already our best known value - simply the edit
+  // distance similarity between the strings
+  double best = 1 - (editDist(a, b) * 1.0) / std::fmax(a.size(), b.size());
+
+  if (fabs(best) < 0.0001) return 0;
+
+  best = btsSimiInner(toksA, b, best);
+
+  if (fabs(best - 1) < 0.0001) return 1;
+
+  return btsSimiInner(toksB, a, best);
 }
 }  // namespace util
 

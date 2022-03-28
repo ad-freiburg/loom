@@ -101,6 +101,7 @@ C EDijkstra::shortestPathImpl(const std::set<Edge<N, E>*>& from,
         continue;
       }
     }
+    EDijkstra::ITERS++;
 
     cur = pq.topVal();
     pq.pop();
@@ -149,6 +150,7 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
         continue;
       }
     }
+    EDijkstra::ITERS++;
 
     cur = pq.topVal();
     pq.pop();
@@ -202,6 +204,7 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
         continue;
       }
     }
+    EDijkstra::ITERS++;
 
     cur = pq.topVal();
     pq.pop();
@@ -271,6 +274,7 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
         continue;
       }
     }
+    EDijkstra::ITERS++;
 
     cur = pq.topVal();
     pq.pop();
@@ -293,6 +297,75 @@ std::unordered_map<Edge<N, E>*, C> EDijkstra::shortestPathImpl(
 
 // _____________________________________________________________________________
 template <typename N, typename E, typename C>
+std::unordered_map<Edge<N, E>*, std::pair<Edge<N, E>*, C>>
+EDijkstra::shortestPathImpl(const std::set<Edge<N, E>*>& from,
+                            const std::set<Edge<N, E>*>& to,
+                            const std::unordered_map<Edge<N, E>*, C>& initCosts,
+                            C stall,
+                            const util::graph::CostFunc<N, E, C>& costFunc,
+                            const util::graph::HeurFunc<N, E, C>& heurFunc) {
+  /**
+   * Shortest paths from the set <from> to ALL nodes in <TO>, but
+   * init <from> nodes with costs (this is equivalent to adding an auxiliary
+   * node S, connecting it with directed edges to all <from>, setting the
+   * costs of these edges to the initial costs and run a 1->N Dijkstra from S
+   **/
+
+  std::unordered_map<Edge<N, E>*, std::pair<Edge<N, E>*, C>> costs;
+  if (to.size() == 0) return costs;
+
+  // init costs with inf
+  for (auto e : to) costs[e] = {0, costFunc.inf()};
+
+  SettledInitNoRes<N, E, C> settled;
+  PQInitNoRes<N, E, C> pq;
+
+  size_t found = 0;
+
+  // put all nodes in from onto the PQ with their initial costs, also set
+  // the initial cost as a heuristic starting point!
+  // set the parent to the edge itself - in this version, the parent is ALWAYS
+  // the start edge, as we don't need the exact paths later on
+  for (auto e : from) {
+    C iCost = initCosts.find(e)->second;
+    assert(iCost + heurFunc(e, to) >= iCost);
+    pq.push(iCost + heurFunc(e, to), {e, e, iCost});
+  }
+
+  RouteEdgeInitNoRes<N, E, C> cur;
+
+  while (!pq.empty()) {
+    if (costFunc.inf() <= pq.topKey()) return costs;
+    if (stall <= pq.topVal().dwi) return costs;
+    auto se = settled.find(pq.topVal().e);
+    if (se != settled.end()) {
+      // to allow non-consistent heuristics
+      if (se->second.d <= pq.topVal().d) {
+        pq.pop();
+        continue;
+      }
+    }
+    EDijkstra::ITERS++;
+
+    cur = pq.topVal();
+    pq.pop();
+
+    settled[cur.e] = cur;
+
+    if (to.find(cur.e) != to.end()) {
+      found++;
+      costs[cur.e] = {cur.parent, cur.d};
+      if (found == to.size()) return costs;
+    }
+
+    relaxInitNoResEdgs(cur, to, stall, costFunc, heurFunc, pq);
+  }
+
+  return costs;
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E, typename C>
 void EDijkstra::relaxInv(RouteEdge<N, E, C>& cur,
                          const util::graph::CostFunc<N, E, C>& costFunc,
                          PQ<N, E, C>& pq) {
@@ -303,8 +376,63 @@ void EDijkstra::relaxInv(RouteEdge<N, E, C>& cur,
     C newC = costFunc(edge, cur.e->getFrom(), cur.e);
     newC = cur.d + newC;
     if (costFunc.inf() <= newC) continue;
+    if (newC < cur.d) continue;  // cost overflow!
 
     pq.push(C(), {edge, cur.e, cur.e->getFrom(), newC});
+  }
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E, typename C>
+void EDijkstra::relaxInitNoResEdgs(
+    RouteEdgeInitNoRes<N, E, C>& cur, const std::set<Edge<N, E>*>& to, C stall,
+    const util::graph::CostFunc<N, E, C>& costFunc,
+    const util::graph::HeurFunc<N, E, C>& heurFunc, PQInitNoRes<N, E, C>& pq) {
+  if (cur.e->getFrom()->hasEdgeIn(cur.e) &&
+      cur.e->getFrom() != cur.e->getTo()) {
+    // for undirected graphs
+    for (const auto edge : cur.e->getFrom()->getAdjListOut()) {
+      if (edge == cur.e) continue;
+      C newC = costFunc(cur.e, cur.e->getFrom(), edge);
+      C newDwi = cur.dwi + newC;
+
+      if (stall <= newDwi) continue;
+
+      if (costFunc.inf() <= newC) continue;
+      newC = cur.d + newC;
+      if (newC < cur.d) continue;  // cost overflow!
+
+      if (costFunc.inf() <= newC) continue;
+
+      const C& h = heurFunc(edge, to);
+      if (costFunc.inf() <= h) continue;
+      newC = cur.d + newC;
+      const C& newH = newC + h;
+      if (newH < newC) continue;  // cost overflow!
+
+      pq.push(newH, {edge, cur.parent, newC, newDwi});
+    }
+  }
+
+  for (const auto edge : cur.e->getTo()->getAdjListOut()) {
+    if (edge == cur.e) continue;
+    C newC = costFunc(cur.e, cur.e->getTo(), edge);
+    C newDwi = cur.dwi + newC;
+
+    if (stall <= newDwi) continue;
+
+    if (costFunc.inf() <= newC) continue;
+    newC = cur.d + newC;
+    if (newC < cur.d) continue;  // cost overflow!
+
+    if (costFunc.inf() <= newC) continue;
+
+    const C& h = heurFunc(edge, to);
+    if (costFunc.inf() <= h) continue;
+    const C& newH = newC + h;
+    if (newH < newC) continue;  // cost overflow!
+
+    pq.push(newH, {edge, cur.parent, newC, newDwi});
   }
 }
 
@@ -327,13 +455,15 @@ void EDijkstra::relaxInit(RouteEdgeInit<N, E, C>& cur,
 
       if (costFunc.inf() <= newC) continue;
       newC = cur.d + newC;
-      // must be monotonous!
-      assert(newC >= cur.d);
+      if (newC < cur.d) continue;  // cost overflow!
+
       if (costFunc.inf() <= newC) continue;
 
       const C& h = heurFunc(edge, to);
+      if (costFunc.inf() <= h) continue;
+      newC = cur.d + newC;
       const C& newH = newC + h;
-      assert(newC <= newH);
+      if (newH < newC) continue;  // cost overflow!
 
       pq.push(newH, {edge, cur.e, cur.e->getFrom(), newC, newDwi});
     }
@@ -348,13 +478,14 @@ void EDijkstra::relaxInit(RouteEdgeInit<N, E, C>& cur,
 
     if (costFunc.inf() <= newC) continue;
     newC = cur.d + newC;
-    // must be monotonous!
-    assert(newC >= cur.d);
+    if (newC < cur.d) continue;  // cost overflow!
+
     if (costFunc.inf() <= newC) continue;
 
     const C& h = heurFunc(edge, to);
+    if (costFunc.inf() <= h) continue;
     const C& newH = newC + h;
-    assert(newC <= newH);
+    if (newH < newC) continue;  // cost overflow!
 
     pq.push(newH, {edge, cur.e, cur.e->getTo(), newC, newDwi});
   }
@@ -374,13 +505,13 @@ void EDijkstra::relax(RouteEdge<N, E, C>& cur, const std::set<Edge<N, E>*>& to,
       C newC = costFunc(cur.e, cur.e->getFrom(), edge);
       if (costFunc.inf() <= newC) continue;
       newC = cur.d + newC;
-      // must be monotonous!
-      assert(newC >= cur.d);
+      if (newC < cur.d) continue;  // cost overflow!
       if (costFunc.inf() <= newC) continue;
 
       const C& h = heurFunc(edge, to);
+      if (costFunc.inf() <= h) continue;
       const C& newH = newC + h;
-      assert(newC <= newH);
+      if (newH < newC) continue;  // cost overflow!
 
       pq.push(newH, {edge, cur.e, cur.e->getFrom(), newC});
     }
@@ -391,13 +522,13 @@ void EDijkstra::relax(RouteEdge<N, E, C>& cur, const std::set<Edge<N, E>*>& to,
     C newC = costFunc(cur.e, cur.e->getTo(), edge);
     if (costFunc.inf() <= newC) continue;
     newC = cur.d + newC;
-    // must be monotonous!
-    assert(newC >= cur.d);
+    if (newC < cur.d) continue;  // cost overflow!
     if (costFunc.inf() <= newC) continue;
 
     const C& h = heurFunc(edge, to);
+    if (costFunc.inf() <= h) continue;
     const C& newH = newC + h;
-    assert(newC <= newH);
+    if (newH < newC) continue;  // cost overflow!
 
     pq.push(newH, {edge, cur.e, cur.e->getTo(), newC});
   }

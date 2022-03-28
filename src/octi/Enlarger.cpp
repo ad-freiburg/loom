@@ -33,7 +33,7 @@ struct SplitFunc : util::geo::SplitFunc<const CombNode*, double> {
   QuadTree<const CombNode*, double> qt(1024, sFunc, bbox);
 
   // write nodes to quadtree
-  for (auto cNd : *cg.getNds()) {
+  for (auto cNd : cg.getNds()) {
     qt.insert(cNd, *cNd->pl().getGeom());
   }
 

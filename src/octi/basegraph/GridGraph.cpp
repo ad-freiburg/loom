@@ -807,7 +807,7 @@ double GridGraph::ndMovePen(const CombNode* cbNd, const GridNode* grNd) const {
 void GridGraph::reset() {
   _settled.clear();
   _resEdgs.clear();
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
     for (auto e : n->getAdjListOut()) e->pl().reset();
     if (!n->pl().isSink()) continue;
     openTurns(n);
@@ -902,7 +902,7 @@ size_t GridGraph::getGrNdDeg(const CombNode* nd, size_t x, size_t y) const {
 void GridGraph::prunePorts() {
   std::vector<GridNode*> toDel;
 
-  for (auto grNd : *getNds()) {
+  for (auto grNd : getNds()) {
     if (grNd->pl().getParent() != grNd) continue;
     for (size_t p = 0; p < maxDeg(); p++) {
       auto port = grNd->pl().getPort(p);

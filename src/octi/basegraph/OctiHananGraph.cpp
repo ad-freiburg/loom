@@ -374,7 +374,7 @@ void OctiHananGraph::connectNodes(GridNode* grNdFr, GridNode* grNdTo,
 
 // _____________________________________________________________________________
 void OctiHananGraph::writeInitialCosts() {
-  for (auto n : *getNds()) {
+  for (auto n : getNds()) {
       if (!n->pl().isSink()) continue;
       for (size_t p = 0; p < maxDeg(); p++) {
         auto port = n->pl().getPort(p);

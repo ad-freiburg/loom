@@ -33,7 +33,7 @@ ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
   StarterSol sol = extractFeasibleSol(d, gg, cg, maxGrDist);
   gg->reset();
 
-  for (auto nd : *gg->getNds()) {
+  for (auto nd : gg->getNds()) {
     // if we presolve, some edges may be blocked
     for (auto e : nd->getAdjList()) {
       e->pl().open();
@@ -118,7 +118,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
     size_t i = 0;
 
-    for (const GridNode* n : *gg->getNds()) {
+    for (const GridNode* n : gg->getNds()) {
       if (!n->pl().isSink()) continue;
 
       // don't use nodes as candidates which cannot hold the comb node due to
@@ -155,7 +155,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
   for (auto nd : cg.getNds()) {
     for (auto edg : nd->getAdjList()) {
       if (edg->getFrom() != nd) continue;
-      for (const GridNode* n : *gg->getNds()) {
+      for (const GridNode* n : gg->getNds()) {
         for (const GridEdge* e : n->getAdjList()) {
           if (e->getFrom() != n) continue;
           if (e->pl().cost() >= basegraph::SOFT_INF) {
@@ -195,7 +195,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
   // an edge can only be used a single time
   std::set<const GridEdge*> proced;
-  for (const GridNode* n : *gg->getNds()) {
+  for (const GridNode* n : gg->getNds()) {
     for (const GridEdge* e : n->getAdjList()) {
       if (e->pl().isSecondary()) continue;
       if (proced.count(e)) continue;
@@ -227,7 +227,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
   // for every node, the number of outgoing and incoming used edges must be
   // the same, except for the start and end node
-  for (const GridNode* n : *gg->getNds()) {
+  for (const GridNode* n : gg->getNds()) {
     if (nonInfDeg(n) == 0) continue;
 
     for (auto nd : cg.getNds()) {
@@ -293,7 +293,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
   // node
   // THIS RULE IS REDUNDANT AND IMPLICITELY ENFORCED BY OTHER RULES,
   // BUT SEEMS TO LEAD TO FASTER SOLUTION TIMES
-  for (GridNode* n : *gg->getNds()) {
+  for (GridNode* n : gg->getNds()) {
     if (!n->pl().isSink()) continue;
 
     for (auto nd : cg.getNds()) {
@@ -339,7 +339,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
   // a grid node can either be an activated sink, or a single pass through
   // edge is used
-  for (GridNode* n : *gg->getNds()) {
+  for (GridNode* n : gg->getNds()) {
     if (!n->pl().isSink()) continue;
 
     std::stringstream constName;
@@ -426,7 +426,7 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
 
       lp->addColToRow(row, col, -1);
 
-      for (GridNode* n : *gg->getNds()) {
+      for (GridNode* n : gg->getNds()) {
         if (!n->pl().isSink()) continue;
 
         // check if this grid node is used as a candidate for comb node
@@ -646,7 +646,7 @@ void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
   std::map<const CombEdge*, std::set<const GridEdge*>> gridEdgs;
 
   // write solution to grid graph
-  for (GridNode* n : *gg->getNds()) {
+  for (GridNode* n : gg->getNds()) {
     for (GridEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
 
@@ -668,7 +668,7 @@ void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
     }
   }
 
-  for (GridNode* n : *gg->getNds()) {
+  for (GridNode* n : gg->getNds()) {
     if (!n->pl().isSink()) continue;
     for (auto nd : cg.getNds()) {
       auto varName = getStatPosVar(n, nd);
@@ -754,7 +754,7 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(Drawing* d, BaseGraph* gg,
     if (nd->getDeg() == 0) continue;
     auto settled = gg->getSettled(nd);
 
-    for (auto gnd : *gg->getNds()) {
+    for (auto gnd : gg->getNds()) {
       if (!gnd->pl().isSink()) continue;
       double gridD = dist(*nd->pl().getGeom(), *gnd->pl().getGeom());
 
@@ -797,7 +797,7 @@ StarterSol ILPGridOptimizer::extractFeasibleSol(Drawing* d, BaseGraph* gg,
   }
 
   // init edge use vars to 0
-  for (auto grNd : *gg->getNds()) {
+  for (auto grNd : gg->getNds()) {
     for (auto grEdg : grNd->getAdjListOut()) {
       if (grEdg->pl().isSecondary()) continue;
 

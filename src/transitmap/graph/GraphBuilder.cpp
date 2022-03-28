@@ -31,7 +31,7 @@ GraphBuilder::GraphBuilder(const config::Config* cfg) : _cfg(cfg) {}
 
 // _____________________________________________________________________________
 void GraphBuilder::writeNodeFronts(RenderGraph* graph) {
-  for (auto n : *graph->getNds()) {
+  for (auto n : graph->getNds()) {
     std::set<LineEdge*> eSet;
     eSet.insert(n->getAdjList().begin(), n->getAdjList().end());
 
@@ -66,7 +66,7 @@ void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
 
   while (true) {
     bool stillFree = false;
-    for (auto n : *g->getNds()) {
+    for (auto n : g->getNds()) {
       std::set<NodeFront*> overlaps = nodeGetOverlappingFronts(g, n);
       for (auto f : overlaps) {
         stillFree = true;

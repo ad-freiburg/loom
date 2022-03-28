@@ -161,12 +161,16 @@ void Dijkstra::relax(RouteNode<N, E, C>& cur, const std::set<Node<N, E>*>& to,
   for (auto edge : cur.n->getAdjListOut()) {
     C newC = costFunc(cur.n, edge, edge->getOtherNd(cur.n));
     newC = cur.d + newC;
-    // must be monotonous!
-    assert(cur.d <= newC);
+    if (newC < cur.d) continue; // cost overflow!
     if (costFunc.inf() <= newC) continue;
 
     // addition done here to avoid it in the PQ
-    const C& newH = newC + heurFunc(edge->getOtherNd(cur.n), to);
+    auto h = heurFunc(edge->getOtherNd(cur.n), to);
+    if (costFunc.inf() <= h) continue;
+
+    const C& newH = newC + h;
+
+    if (newH < newC) continue;  // cost overflow!
 
     pq.emplace(edge->getOtherNd(cur.n), cur.n, newC, newH);
   }

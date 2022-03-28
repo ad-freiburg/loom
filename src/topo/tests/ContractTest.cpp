@@ -866,7 +866,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, c);
 
-    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getNds().size(), ==, 5);
     TEST(tg.getEdg(a, c)->pl().getLines().size(), ==, 2);
     TEST(tg.getEdg(c, d)->pl().getLines().size(), ==, 2);
     TEST(tg.getEdg(c, e)->pl().getLines().size(), ==, 1);
@@ -926,7 +926,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, b);
 
-    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getNds().size(), ==, 5);
     TEST(tg.getEdg(a, b)->pl().getLines().size(), ==, 2);
     TEST(tg.getEdg(b, d)->pl().getLines().size(), ==, 2);
     TEST(tg.getEdg(b, e)->pl().getLines().size(), ==, 1);
@@ -986,7 +986,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getNds().size(), ==, 5);
     TEST(tg.getEdg(a, b)->pl().getLines().size(), ==, 2);
     TEST(tg.getEdg(b, e)->pl().getLines().size(), ==, 2);
   }
@@ -1043,7 +1043,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getNds().size(), ==, 5);
     TEST(tg.getEdg(a, b)->pl().getLines().size(), ==, 2);
     TEST(tg.getEdg(b, c)->pl().getLines().size(), ==, 2);
   }
@@ -1100,7 +1100,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, b);
 
-    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getNds().size(), ==, 5);
     TEST(tg.getEdg(a, b)->pl().getLines().size(), ==, 2);
     TEST(tg.getEdg(f, b)->pl().getLines().size(), ==, 1);
     TEST(tg.getEdg(f, b)->pl().getLines().begin()->line, ==, &l2);
@@ -1161,7 +1161,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getNds().size(), ==, 5);
     TEST(tg.getEdg(a, e)->pl().getLines().size(), ==, 2);
     TEST(tg.getEdg(f, e)->pl().getLines().size(), ==, 1);
     TEST(tg.getEdg(f, e)->pl().getLines().begin()->line, ==, &l2);
@@ -1216,7 +1216,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -1285,7 +1285,7 @@ void ContractTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     auto test = tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d));
     TEST(test->pl()
@@ -1343,7 +1343,7 @@ void ContractTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -1415,7 +1415,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -1472,9 +1472,9 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -1533,7 +1533,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -1603,7 +1603,7 @@ void ContractTest::run() {
       }
     }
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     TEST(tg.getEdg(a, c));
     TEST(tg.getEdg(a, c)->pl().getLines().size(), ==, 2);
@@ -1668,7 +1668,7 @@ void ContractTest::run() {
       }
     }
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     TEST(tg.getEdg(a, c));
     TEST(tg.getEdg(a, c)->pl().getLines().size(), ==, 2);
@@ -1736,7 +1736,7 @@ void ContractTest::run() {
       }
     }
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // all 3 lines in the triangle are lost
     TEST(tg.getEdg(c, e)->pl().getLines().size(), ==, 2);
   }
@@ -1794,7 +1794,7 @@ void ContractTest::run() {
       }
     }
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // all 3 lines in the triangle are lost
     TEST(tg.getEdg(c, e)->pl().getLines().size(), ==, 2);
   }
@@ -1858,7 +1858,7 @@ void ContractTest::run() {
     // neither 1 nor 2 can continue from ab to cd because 1 cannot continue
     // through the triangle, and 2 is restricted by the exception from cd to bc
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     TEST(tg.getEdg(a, c));
     TEST(tg.getEdg(a, c)->pl().getLines().size(), ==, 2);
@@ -1926,7 +1926,7 @@ void ContractTest::run() {
       }
     }
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     TEST(tg.getEdg(a, c));
     TEST(tg.getEdg(a, c)->pl().getLines().size(), ==, 2);
@@ -1984,7 +1984,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // line 1 on bc is deleted because it cannot leave bc
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -2049,7 +2049,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // line 2 is deleted because it is lost
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -2111,7 +2111,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -2163,7 +2163,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -2216,7 +2216,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -2275,7 +2275,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // 1 on ec was deleted, 2 on be was deleted
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -2334,7 +2334,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // line 1 on bc is deleted because it cannot leave bc
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -2399,7 +2399,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // line 2 is deleted because it is lost
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -2461,7 +2461,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     // line 3 and line 2-> on bc are dead ends (because ec is contracted), line
     // 2 on ec is also a dead end
@@ -2516,7 +2516,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // all 3 lines in the triangle are lost
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -2570,7 +2570,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
@@ -2630,7 +2630,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -2692,7 +2692,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -2757,7 +2757,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // line 2 is deleted because it is lost
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -2819,7 +2819,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     // line 3 and line 2-> on bc are dead ends (because ec is contracted), line
     // 2 on ec is also a dead end
@@ -2874,7 +2874,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // all 3 lines in the triangle are lost
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -2932,7 +2932,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
@@ -2992,7 +2992,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // 1 on ec was deleted, 2 on be was deleted
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -3053,7 +3053,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -3113,7 +3113,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // line 2 is deleted because it is lost
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -3175,7 +3175,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     // line 3 and line 2-> on bc are dead ends (because ec is contracted), line
     // 2 on ec is also a dead end
@@ -3230,7 +3230,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     // all 3 lines in the triangle are lost
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
@@ -3284,7 +3284,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     // 3 on be and 2 on bc are lost, 2 on ce is contracted but continues outside
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
@@ -3344,7 +3344,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(e, c);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -3406,7 +3406,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -3473,7 +3473,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     // 2 on be and 2 on ce are dead ends
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
@@ -3543,7 +3543,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -3617,7 +3617,7 @@ void ContractTest::run() {
     // gout.print(tg, std::cout);
     // std::cout << std::flush;
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -3670,7 +3670,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -3737,7 +3737,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -3808,7 +3808,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, e);
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(tg.getEdg(a->getAdjList().front()->getOtherNd(a),
                    d->getAdjList().front()->getOtherNd(d))
              ->pl()
@@ -3858,7 +3858,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(b, c);
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
     TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(d->getAdjList().front()->pl().getLines().size(), ==, 1);
 
@@ -3896,7 +3896,7 @@ void ContractTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.combineNodes(c, b);
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
     TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
     TEST(d->getAdjList().front()->pl().getLines().size(), ==, 1);
 
@@ -3916,7 +3916,7 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
 
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
@@ -3945,7 +3945,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ca, ab, a);
 
-    TEST(tg.getNds()->size(), ==, 2);
+    TEST(tg.getNds().size(), ==, 2);
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -3972,7 +3972,7 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
 
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
@@ -4001,7 +4001,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ab, ac, a);
 
-    TEST(tg.getNds()->size(), ==, 2);
+    TEST(tg.getNds().size(), ==, 2);
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -4028,7 +4028,7 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
 
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
@@ -4057,7 +4057,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ac, ba, a);
 
-    TEST(tg.getNds()->size(), ==, 2);
+    TEST(tg.getNds().size(), ==, 2);
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -4084,7 +4084,7 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
 
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
@@ -4113,7 +4113,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ca, ba, a);
 
-    TEST(tg.getNds()->size(), ==, 2);
+    TEST(tg.getNds().size(), ==, 2);
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -4140,7 +4140,7 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
 
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
@@ -4169,7 +4169,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ca, ab, a);
 
-    TEST(tg.getNds()->size(), ==, 2);
+    TEST(tg.getNds().size(), ==, 2);
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -4198,7 +4198,7 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
 
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
@@ -4227,7 +4227,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ab, ac, a);
 
-    TEST(tg.getNds()->size(), ==, 2);
+    TEST(tg.getNds().size(), ==, 2);
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -4256,7 +4256,7 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
 
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
@@ -4285,7 +4285,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ac, ba, a);
 
-    TEST(tg.getNds()->size(), ==, 2);
+    TEST(tg.getNds().size(), ==, 2);
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -4314,7 +4314,7 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
 
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
@@ -4343,7 +4343,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ca, ba, a);
 
-    TEST(tg.getNds()->size(), ==, 2);
+    TEST(tg.getNds().size(), ==, 2);
     TEST(b->getAdjList().size(), ==, 1);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -4372,7 +4372,7 @@ void ContractTest::run() {
     auto b = tg.addNd({{100.0, 50.0}});
     auto c = tg.addNd({{20.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
 
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
@@ -4412,7 +4412,7 @@ void ContractTest::run() {
     auto c = tg.addNd({{20.0, 50.0}});
     auto d = tg.addNd({{200.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
@@ -4449,7 +4449,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ca, ab, a);
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
     TEST(b->getAdjList().size(), ==, 2);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -4477,7 +4477,7 @@ void ContractTest::run() {
     auto c = tg.addNd({{20.0, 50.0}});
     auto d = tg.addNd({{200.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
     auto ab = tg.addEdg(a, b, {{{50.0, 50.0}, {100.0, 50.0}}});
@@ -4514,7 +4514,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ac, ab, a);
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
     TEST(b->getAdjList().size(), ==, 2);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -4542,7 +4542,7 @@ void ContractTest::run() {
     auto c = tg.addNd({{20.0, 50.0}});
     auto d = tg.addNd({{200.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     auto ca = tg.addEdg(c, a, {{{20.0, 50.0}, {50.0, 50.0}}});
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
@@ -4579,7 +4579,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ca, ba, a);
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
     TEST(b->getAdjList().size(), ==, 2);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -4607,7 +4607,7 @@ void ContractTest::run() {
     auto c = tg.addNd({{20.0, 50.0}});
     auto d = tg.addNd({{200.0, 50.0}});
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
 
     auto ac = tg.addEdg(a, c, {{{50.0, 50.0}, {20.0, 50.0}}});
     auto ba = tg.addEdg(b, a, {{{100.0, 50.0}, {50.0, 50.0}}});
@@ -4644,7 +4644,7 @@ void ContractTest::run() {
 
     mc.combineEdges(ac, ba, a);
 
-    TEST(tg.getNds()->size(), ==, 3);
+    TEST(tg.getNds().size(), ==, 3);
     TEST(b->getAdjList().size(), ==, 2);
     TEST(c->getAdjList().size(), ==, 1);
 
@@ -4677,7 +4677,7 @@ void ContractTest::run() {
     auto d = tg.addNd({{100.0, 0.0}});
     auto e = tg.addNd({{150.0, 0.0}});
 
-    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getNds().size(), ==, 5);
 
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {50.0, 50.0}}});
@@ -4720,7 +4720,7 @@ void ContractTest::run() {
     //    1   |  1,2,3
     // a ---> d ---> e
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().size(), ==, 1);
     TEST(a->getAdjList().size(), ==, 1);
     TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
@@ -4743,7 +4743,7 @@ void ContractTest::run() {
     auto d = tg.addNd({{100.0, 0.0}});
     auto e = tg.addNd({{150.0, 0.0}});
 
-    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getNds().size(), ==, 5);
 
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {50.0, 50.0}}});
@@ -4786,7 +4786,7 @@ void ContractTest::run() {
     //    1   |  1,2,3
     // a ---> d ---> e
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().size(), ==, 1);
     TEST(a->getAdjList().size(), ==, 1);
     TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
@@ -4824,7 +4824,7 @@ void ContractTest::run() {
     auto d = tg.addNd({{100.0, 0.0}});
     auto e = tg.addNd({{150.0, 0.0}});
 
-    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getNds().size(), ==, 5);
 
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {50.0, 50.0}}});
@@ -4870,7 +4870,7 @@ void ContractTest::run() {
     //    1   |  1,2,3
     // a ---> d ---> e
 
-    TEST(tg.getNds()->size(), ==, 4);
+    TEST(tg.getNds().size(), ==, 4);
     TEST(c->getAdjList().size(), ==, 1);
     TEST(a->getAdjList().size(), ==, 1);
     TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
@@ -4911,7 +4911,7 @@ void ContractTest::run() {
     auto e = tg.addNd({{150.0, 0.0}});
     auto f = tg.addNd({{150.0, -50.0}});
 
-    TEST(tg.getNds()->size(), ==, 6);
+    TEST(tg.getNds().size(), ==, 6);
 
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {50.0, 50.0}}});
@@ -4962,7 +4962,7 @@ void ContractTest::run() {
     //        |  2
     //        -----> f
 
-    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getNds().size(), ==, 5);
     TEST(c->getAdjList().size(), ==, 1);
     TEST(a->getAdjList().size(), ==, 1);
     TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);
@@ -5007,7 +5007,7 @@ void ContractTest::run() {
     auto e = tg.addNd({{150.0, 0.0}});
     auto f = tg.addNd({{150.0, -50.0}});
 
-    TEST(tg.getNds()->size(), ==, 6);
+    TEST(tg.getNds().size(), ==, 6);
 
     auto ab = tg.addEdg(a, b, {{{0.0, 0.0}, {50.0, 0.0}}});
     auto bc = tg.addEdg(b, c, {{{50.0, 0.0}, {50.0, 50.0}}});
@@ -5058,7 +5058,7 @@ void ContractTest::run() {
     //        |  2
     //        -----> f
 
-    TEST(tg.getNds()->size(), ==, 5);
+    TEST(tg.getNds().size(), ==, 5);
     TEST(c->getAdjList().size(), ==, 1);
     TEST(a->getAdjList().size(), ==, 1);
     TEST(a->getAdjList().front()->pl().getLines().size(), ==, 1);

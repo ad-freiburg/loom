@@ -138,7 +138,7 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
 
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(ggraph) << "ms)";
 
-  LOGTO(DEBUG, std::cerr) << "Grid graph has " << ggs[0]->getNds()->size()
+  LOGTO(DEBUG, std::cerr) << "Grid graph has " << ggs[0]->getNds().size()
                           << " nodes";
 
   size_t LOCAL_SEARCH_ITERS = locSearchIters;

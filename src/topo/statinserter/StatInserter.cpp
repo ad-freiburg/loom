@@ -41,7 +41,7 @@ StatInserter::StatInserter(const TopoConfig* cfg, LineGraph* g)
 EdgeGrid StatInserter::geoIndex() {
   EdgeGrid grid(120, 120, bbox());
 
-  for (auto n : *_g->getNds()) {
+  for (auto n : _g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
       grid.add(e->pl().getPolyline().getLine(), e);
@@ -55,7 +55,7 @@ EdgeGrid StatInserter::geoIndex() {
 DBox StatInserter::bbox() const {
   DBox b;
 
-  for (auto n : *_g->getNds()) {
+  for (auto n : _g->getNds()) {
     b = extendBox(*n->pl().getGeom(), b);
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
@@ -70,7 +70,7 @@ DBox StatInserter::bbox() const {
 void StatInserter::init() {
   std::map<std::string, size_t> existing;
 
-  for (auto nd : *_g->getNds()) {
+  for (auto nd : _g->getNds()) {
     if (nd->pl().stops().size()) {
       auto stop = nd->pl().stops().front();
 

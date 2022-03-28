@@ -215,13 +215,13 @@ int main(int argc, char** argv) {
     size_t numEdgs = 0;
     size_t numEdgsComb = 0;
     size_t numEdgsTg = 0;
-    for (auto nd : *gg->getNds()) {
+    for (auto nd : gg->getNds()) {
       numEdgs += nd->getDeg();
     }
-    for (auto nd : *cg.getNds()) {
+    for (auto nd : cg.getNds()) {
       numEdgsComb += nd->getDeg();
     }
-    for (auto nd : *tg.getNds()) {
+    for (auto nd : tg.getNds()) {
       numEdgsTg += nd->getDeg();
     }
 
@@ -245,11 +245,11 @@ int main(int argc, char** argv) {
              {"90-turn-pen", cfg.pens.p_90},
              {"45-turn-pen", cfg.pens.p_45},
          }},
-        {"gridgraph-size", util::json::Dict{{"nodes", gg->getNds()->size()},
+        {"gridgraph-size", util::json::Dict{{"nodes", gg->getNds().size()},
                                             {"edges", numEdgs / 2}}},
-        {"combgraph-size", util::json::Dict{{"nodes", cg.getNds()->size()},
+        {"combgraph-size", util::json::Dict{{"nodes", cg.getNds().size()},
                                             {"edges", numEdgsComb / 2}}},
-        {"input-graph-size", util::json::Dict{{"nodes", tg.getNds()->size()},
+        {"input-graph-size", util::json::Dict{{"nodes", tg.getNds().size()},
                                               {"edges", numEdgsTg / 2},
                                               {"max-deg", tg.maxDeg()}}},
         {"input-graph-avg-node-dist",

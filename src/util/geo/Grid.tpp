@@ -11,7 +11,8 @@ Grid<V, G, T>::Grid(bool bldIdx)
       _cellHeight(0),
       _xWidth(0),
       _yHeight(0),
-      _hasValIdx(bldIdx) {}
+      _hasValIdx(bldIdx),
+      _grid(0) {}
 
 // _____________________________________________________________________________
 template <typename V, template <typename> class G, typename T>
@@ -28,12 +29,10 @@ Grid<V, G, T>::Grid(double w, double h, const Box<T>& bbox, bool bValIdx)
     : _cellWidth(fabs(w)),
       _cellHeight(fabs(h)),
       _bb(bbox),
-      _hasValIdx(bValIdx) {
-
-  _width =
-      bbox.getUpperRight().getX() - bbox.getLowerLeft().getX();
-  _height =
-      bbox.getUpperRight().getY() - bbox.getLowerLeft().getY();
+      _hasValIdx(bValIdx),
+      _grid(0) {
+  _width = bbox.getUpperRight().getX() - bbox.getLowerLeft().getX();
+  _height = bbox.getUpperRight().getY() - bbox.getLowerLeft().getY();
 
   if (_width < 0 || _height < 0) {
     _width = 0;
@@ -47,11 +46,11 @@ Grid<V, G, T>::Grid(double w, double h, const Box<T>& bbox, bool bValIdx)
   _yHeight = ceil(_height / _cellHeight);
 
   // resize rows
-  _grid.resize(_xWidth);
+  _grid = new std::set<V>*[_xWidth];
 
   // resize columns
-  for (size_t i = 0; i < _xWidth; i++) {
-    _grid[i].resize(_yHeight);
+  for (size_t x = 0; x < _xWidth; x++) {
+    _grid[x] = new std::set<V>[_yHeight];
   }
 }
 
@@ -65,8 +64,8 @@ void Grid<V, G, T>::add(G<T> geom, V val) {
   size_t neX = getCellXFromX(box.getUpperRight().getX());
   size_t neY = getCellYFromY(box.getUpperRight().getY());
 
-  for (size_t x = swX; x <= neX && x < _grid.size(); x++) {
-    for (size_t y = swY; y <= neY && y < _grid[x].size(); y++) {
+  for (size_t x = swX; x <= neX && x < _xWidth; x++) {
+    for (size_t y = swY; y <= neY && y < _yHeight; y++) {
       if (intersects(geom, getBox(x, y))) {
         add(x, y, val);
       }
@@ -98,10 +97,9 @@ void Grid<V, G, T>::get(const Box<T>& box, std::set<V>* s) const {
 template <typename V, template <typename> class G, typename T>
 void Grid<V, G, T>::get(const G<T>& geom, double d, std::set<V>* s) const {
   Box<T> a = getBoundingBox(geom);
-  Box<T> b(Point<T>(a.getLowerLeft().getX() - d,
-                    a.getLowerLeft().getY() - d),
-           Point<T>(a.getUpperRight().getX() + d,
-                    a.getUpperRight().getY() + d));
+  Box<T> b(
+      Point<T>(a.getLowerLeft().getX() - d, a.getLowerLeft().getY() - d),
+      Point<T>(a.getUpperRight().getX() + d, a.getUpperRight().getY() + d));
   return get(b, s);
 }
 
@@ -113,9 +111,9 @@ void Grid<V, G, T>::get(size_t x, size_t y, std::set<V>* s) const {
   } else {
     // if we dont have a value index, we have a set of deleted nodes.
     // in this case, only insert if not deleted
-    std::copy_if(_grid[x][y].begin(), _grid[x][y].end(),
-                 std::inserter(*s, s->end()),
-                 [&](const V& v) { return Grid<V, G, T>::_removed.count(v) == 0; });
+    std::copy_if(
+        _grid[x][y].begin(), _grid[x][y].end(), std::inserter(*s, s->end()),
+        [&](const V& v) { return Grid<V, G, T>::_removed.count(v) == 0; });
   }
 }
 

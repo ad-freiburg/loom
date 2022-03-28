@@ -46,8 +46,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
     _bbox = other._bbox;
     proced = other.proced;
     _lines = other._lines;
-    _nodeGrid = other._nodeGrid;
-    _edgeGrid = other._edgeGrid;
+    _nodeGrid = std::move(other._nodeGrid);
+    _edgeGrid = std::move(other._edgeGrid);
 
     _nodes = other._nodes;
     other._nodes.clear();
@@ -57,8 +57,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
     _bbox = other._bbox;
     proced = other.proced;
     _lines = other._lines;
-    _nodeGrid = other._nodeGrid;
-    _edgeGrid = other._edgeGrid;
+    _nodeGrid = std::move(other._nodeGrid);
+    _edgeGrid = std::move(other._edgeGrid);
 
     _nodes = other._nodes;
     other._nodes.clear();
