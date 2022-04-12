@@ -87,18 +87,18 @@ Line graph extraction from GTFS
 To extract for example a line graph for streetcars from GTFS data, use `gtfs2graph` as follows:
 
 ```
-gtfs2graph -m tram freiburg.zip > freiburg.json
+gtfs2graph -m tram freiburg > freiburg.json
 ```
 
 This line graph will have many overlapping edges and stations. To create an overlapping-free line graph ready for rendering, add `topo`:
 
 ```
-gtfs2graph -m tram freiburg.zip | topo > freiburg.json
+gtfs2graph -m tram freiburg | topo > freiburg.json
 ```
 
 A full pipeline for creating an octilinear map of the Freiburg tram network would look like this:
 ```
-gtfs2graph -m tram freiburg.zip | topo | loom | octi | transitmap > freiburg-tram.svg
+gtfs2graph -m tram freiburg | topo | loom | octi | transitmap > freiburg-tram.svg
 ```
 
 Usage via Docker
