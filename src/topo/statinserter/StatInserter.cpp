@@ -94,6 +94,27 @@ void StatInserter::init() {
 }
 
 // _____________________________________________________________________________
+StationOcc StatInserter::unserved(const std::vector<LineEdge*>& adj,
+                                  const StationOcc& stationOcc,
+                                  const OrigEdgs& origEdgs) {
+  StationOcc ret{stationOcc.station, {}};
+  std::set<const LineEdge*> contained;
+
+  for (auto e : adj)
+    contained.insert(origEdgs.find(e)->second.begin(),
+                     origEdgs.find(e)->second.end());
+
+  std::set<const LineEdge*> diff;
+  set_difference(stationOcc.edges.begin(), stationOcc.edges.end(),
+                 contained.begin(), contained.end(),
+                 std::inserter(diff, diff.begin()));
+
+  ret.edges.insert(diff.begin(), diff.end());
+
+  return ret;
+}
+
+// _____________________________________________________________________________
 std::pair<size_t, size_t> StatInserter::served(
     const std::vector<LineEdge*>& adj, const std::set<const LineEdge*>& toServe,
     const OrigEdgs& origEdgs) {
@@ -145,22 +166,25 @@ std::vector<StationCand> StatInserter::candidates(const StationOcc& occ,
 
     size_t truelyServed, falselyServed;
     std::tie(truelyServed, falselyServed) = served({edg}, occ.edges, origEdgs);
+    StationOcc remaining = unserved({edg}, occ, origEdgs);
 
     ret.push_back(StationCand{edg, pos.totalPos, 0, d, occ.edges.size(),
-                              truelyServed, falselyServed});
+                              truelyServed, falselyServed, remaining});
 
     std::tie(truelyServed, falselyServed) =
         served(edg->getFrom()->getAdjList(), occ.edges, origEdgs);
+    remaining = unserved(edg->getFrom()->getAdjList(), occ, origEdgs);
     ret.push_back(StationCand{
         0, 0, edg->getFrom(),
         util::geo::dist(*edg->getFrom()->pl().getGeom(), occ.station.pos),
-        occ.edges.size(), truelyServed, falselyServed});
+        occ.edges.size(), truelyServed, falselyServed, remaining});
     std::tie(truelyServed, falselyServed) =
         served(edg->getTo()->getAdjList(), occ.edges, origEdgs);
+    remaining = unserved(edg->getTo()->getAdjList(), occ, origEdgs);
     ret.push_back(StationCand{
         0, 0, edg->getTo(),
         util::geo::dist(*edg->getTo()->pl().getGeom(), occ.station.pos),
-        occ.edges.size(), truelyServed, falselyServed});
+        occ.edges.size(), truelyServed, falselyServed, remaining});
   }
 
   struct {
@@ -198,39 +222,49 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
   for (auto st : _statClusters) {
     if (st.size() == 0) continue;
 
-    auto repr = st.front();
-    LOGTO(VDEBUG, std::cerr) << "Inserting " << repr.station.name;
+    auto curOcc = st.front();
+    LOGTO(VDEBUG, std::cerr) << "Inserting " << curOcc.station.name;
 
-    auto cands = candidates(repr, idx, modOrigEdgs);
+    while (true) {
+      auto cands = candidates(curOcc, idx, modOrigEdgs);
 
-    if (cands.size() == 0) {
-      LOGTO(VDEBUG, std::cerr) << "  (No insertion candidate found.)";
-      continue;
-    }
+      if (cands.size() == 0) {
+        LOGTO(VDEBUG, std::cerr) << "  (No insertion candidate found.)";
+        continue;
+      }
 
-    if (cands.front().edg) {
-      auto e = cands.front().edg;
+      auto curCan = cands.front();
 
-      auto spl = split(e->pl(), e->getFrom(), e->getTo(), cands.front().pos);
+      if (curCan.edg) {
+        auto e = curCan.edg;
 
-      shared::linegraph::LineGraph::sharedNode(spl.first, spl.second)
-          ->pl()
-          .addStop(repr.station);
+        auto spl = split(e->pl(), e->getFrom(), e->getTo(), curCan.pos);
 
-      idx.add(*spl.first->pl().getGeom(), spl.first);
-      idx.add(*spl.second->pl().getGeom(), spl.second);
+        shared::linegraph::LineGraph::sharedNode(spl.first, spl.second)
+            ->pl()
+            .addStop(curOcc.station);
 
-      // UPDATE ORIGEDGES
-      modOrigEdgs[spl.first] = modOrigEdgs[e];
-      modOrigEdgs[spl.second] = modOrigEdgs[e];
+        idx.add(*spl.first->pl().getGeom(), spl.first);
+        idx.add(*spl.second->pl().getGeom(), spl.second);
 
-      edgeRpl(e->getFrom(), e, spl.first);
-      edgeRpl(e->getTo(), e, spl.second);
+        // UPDATE ORIGEDGES
+        modOrigEdgs[spl.first] = modOrigEdgs[e];
+        modOrigEdgs[spl.second] = modOrigEdgs[e];
 
-      _g->delEdg(e->getFrom(), e->getTo());
-      idx.remove(e);
-    } else {
-      cands.front().nd->pl().addStop(repr.station);
+        edgeRpl(e->getFrom(), e, spl.first);
+        edgeRpl(e->getTo(), e, spl.second);
+
+        _g->delEdg(e->getFrom(), e->getTo());
+        idx.remove(e);
+      } else {
+        curCan.nd->pl().addStop(curOcc.station);
+      }
+
+      break;
+
+      if (curCan.unserved.edges.size() == 0) break;
+
+      curOcc = curCan.unserved;
     }
   }
 

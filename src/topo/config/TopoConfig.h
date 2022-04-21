@@ -11,7 +11,7 @@ namespace topo {
 namespace config {
 
 struct TopoConfig {
-  double maxAggrDistance = 40;
+  double maxAggrDistance = 50;
   double maxLengthDev = 500;
   bool outputStats = false;
   bool noInferRestrs = false;

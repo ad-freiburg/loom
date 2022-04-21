@@ -37,7 +37,7 @@ class EdgePL : public util::geograph::GeoEdgePL<double> {
 
   void addEdgeTripGeom(const EdgeTripGeom& e);
 
-  void simplify();
+  void simplify(double pruneThreshold);
   void setTo(Node* to);
 
   const util::geo::Line<double>* getGeom() const;

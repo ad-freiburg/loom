@@ -102,6 +102,32 @@ DPoint Builder::getProjP(double lat, double lng) const {
 
 // _____________________________________________________________________________
 void Builder::simplify(BuildGraph* g) {
+  // calculate average number of trip occurences per line
+  double avg = 0;
+  int c = 0;
+  for (auto n : g->getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      for (auto& etg : *e->pl().getEdgeTripGeoms()) {
+        for (auto& r : *etg.getTripsUnordered()) {
+          avg += r.trips.size();
+          c++;
+        }
+      }
+    }
+  }
+
+  avg /= c;
+
+  // try to merge both-direction edges into a single one
+  // also prune edges with few trips
+  for (auto n : g->getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      e->pl().simplify(avg * _cfg->pruneThreshold);
+    }
+  }
+
   // delete edges without a reference ETG
   std::vector<Edge*> toDel;
   for (auto n : g->getNds()) {
@@ -112,14 +138,6 @@ void Builder::simplify(BuildGraph* g) {
   }
 
   for (auto e : toDel) g->delEdg(e->getFrom(), e->getTo());
-
-  // try to merge both-direction edges into a single one
-  for (auto n : g->getNds()) {
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-      e->pl().simplify();
-    }
-  }
 }
 
 // _____________________________________________________________________________

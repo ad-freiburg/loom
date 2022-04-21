@@ -86,7 +86,28 @@ void EdgePL::addEdgeTripGeom(const EdgeTripGeom& e) {
 }
 
 // _____________________________________________________________________________
-void EdgePL::simplify() {
+void EdgePL::simplify(double pruneThreshold) {
+  auto eit = _tripsContained.begin();
+  while (eit != _tripsContained.end()) {
+    auto etg = *eit;
+    auto it = etg.getTripsUnordered()->begin();
+    while (it != etg.getTripsUnordered()->end()) {
+      if (it->trips.size() < pruneThreshold) {
+        it = etg.getTripsUnordered()->erase(it);
+      } else {
+        it++;
+      }
+    }
+
+    // delete if it runs empty
+    if (etg.getTripsUnordered()->size() == 0) {
+      eit = _tripsContained.erase(eit);
+    } else {
+      eit++;
+    }
+  }
+
+
   combineIncludedGeoms();
   averageCombineGeom();
 }

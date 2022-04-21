@@ -38,7 +38,7 @@ void ConfigReader::help(const char* bin) const {
             << "print version\n"
             << std::setw(35) << "  -h [ --help ]"
             << "show this help message\n"
-            << std::setw(35) << "  -d [ --max-aggr-dist ] arg (=40)"
+            << std::setw(35) << "  -d [ --max-aggr-dist ] arg (=50)"
             << "maximum distance between segments\n"
             << std::setw(35) << "  --write-stats"
             << "write statistics to output file\n"

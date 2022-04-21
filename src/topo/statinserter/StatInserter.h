@@ -14,26 +14,25 @@
 #include "util/geo/PolyLine.h"
 #include "util/graph/Graph.h"
 
-using util::geo::Grid;
 using util::geo::Box;
-using util::geo::Line;
-using util::geo::PolyLine;
-using util::geo::Point;
-using util::geo::Line;
-using util::geo::DPoint;
-using util::geo::DLine;
 using util::geo::DBox;
+using util::geo::DLine;
+using util::geo::DPoint;
+using util::geo::Grid;
+using util::geo::Line;
+using util::geo::Point;
+using util::geo::PolyLine;
 using util::geo::SharedSegment;
 
 using topo::config::TopoConfig;
 
-using shared::linegraph::LineGraph;
-using shared::linegraph::LineNode;
-using shared::linegraph::Station;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineEdgePair;
-using shared::linegraph::LineNodePL;
 using shared::linegraph::LineEdgePL;
+using shared::linegraph::LineGraph;
+using shared::linegraph::LineNode;
+using shared::linegraph::LineNodePL;
+using shared::linegraph::Station;
 
 typedef Grid<LineNode*, Point, double> NodeGrid;
 typedef Grid<LineEdge*, Line, double> EdgeGrid;
@@ -61,6 +60,8 @@ struct StationCand {
 
   size_t truelyServ;
   size_t falselyServ;
+
+  StationOcc unserved;
 };
 
 class StatInserter {
@@ -86,6 +87,9 @@ class StatInserter {
   std::pair<size_t, size_t> served(const std::vector<LineEdge*>& adj,
                                    const std::set<const LineEdge*>& toServe,
                                    const OrigEdgs& origEdgs);
+
+  StationOcc unserved(const std::vector<LineEdge*>& adj,
+                      const StationOcc& stationOcc, const OrigEdgs& origEdgs);
 
   LineEdgePair split(LineEdgePL& a, LineNode* fr, LineNode* to, double p);
 

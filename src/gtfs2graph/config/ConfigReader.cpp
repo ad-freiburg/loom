@@ -50,20 +50,25 @@ void ConfigReader::help(const char* bin) const {
             << std::setw(35) << " "
             << "  ferry | boat | ship, cablecar, gondola,\n"
             << std::setw(35) << " "
-            << "  funicular, coach} or as GTFS mot codes\n";
+            << "  funicular, coach} or as GTFS mot codes\n"
+            << std::setw(35) << "  -p [ --prune-threshold ] arg (=0.0)"
+            << "Threshold for pruning of seldomly occuring lines, between 0 and 1"
+;
 }
 
 // _____________________________________________________________________________
 void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   std::string motStr = "all";
+  double pruneThreshold = 0;
 
   struct option ops[] = {{"version", no_argument, 0, 'v'},
                          {"help", no_argument, 0, 'h'},
                          {"mots", required_argument, 0, 'm'},
+                         {"prune-threshold", required_argument, 0, 'p'},
                          {0, 0, 0, 0}};
 
   char c;
-  while ((c = getopt_long(argc, argv, ":hvim:", ops, 0)) != -1) {
+  while ((c = getopt_long(argc, argv, ":hvim:p:", ops, 0)) != -1) {
     switch (c) {
       case 'h':
         help(argv[0]);
@@ -73,6 +78,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         exit(0);
       case 'm':
         motStr = optarg;
+        break;
+      case 'p':
+        pruneThreshold = atof(optarg);
         break;
       case ':':
         std::cerr << argv[optind - 1];
@@ -96,6 +104,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   }
 
   cfg->inputFeedPath = argv[optind];
+  cfg->pruneThreshold = pruneThreshold;
 
   for (auto sMotStr : util::split(motStr, ',')) {
     for (auto mot :

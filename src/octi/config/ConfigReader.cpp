@@ -102,7 +102,7 @@ void ConfigReader::help(const char* bin) const {
             << "penalty for 90 deg bends\n"
             << std::setw(36) << "  --pen-45 arg (=2)"
             << "penalty for 45 deg bends\n"
-            << std::setw(36) << "  --no-mode-pen arg (=.5)"
+            << std::setw(36) << "  --nd-move-pen arg (=.5)"
             << "penalty for node movement\n";
 }
 
