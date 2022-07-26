@@ -152,7 +152,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         cfg->ilpTimeLimit = atof(optarg);
         break;
       case 12:
-        cfg->ilpSolver = atof(optarg);
+        cfg->ilpSolver = optarg;
         break;
       case 13:
         cfg->optimRuns = atoi(optarg);

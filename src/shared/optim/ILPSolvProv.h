@@ -17,6 +17,7 @@ namespace optim {
 inline ILPSolver* getSolver(std::string wish,
                             shared::optim::DirType dir) {
   bool force = (wish.back() == '!');
+
   if (force) {
     wish.pop_back();
   }
