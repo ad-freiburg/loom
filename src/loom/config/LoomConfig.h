@@ -31,12 +31,12 @@ struct Config {
   int ilpTimeLimit = -1;
   int ilpNumThreads = 0;
 
-  double crossPenMultiSameSeg = 1;
+  double crossPenMultiSameSeg = 4;
   double crossPenMultiDiffSeg = 1;
-  double separationPenWeight = 1;
-  double stationCrossWeightSameSeg = 1;
-  double stationCrossWeightDiffSeg = 1;
-  double stationSeparationWeight = 1;
+  double separationPenWeight = 3;
+  double stationCrossWeightSameSeg = 12;
+  double stationCrossWeightDiffSeg = 3;
+  double stationSeparationWeight = 9;
 
   std::string worldFilePath;
 
