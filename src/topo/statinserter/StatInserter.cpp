@@ -230,7 +230,7 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
 
       if (cands.size() == 0) {
         LOGTO(VDEBUG, std::cerr) << "  (No insertion candidate found.)";
-        continue;
+        break;
       }
 
       auto curCan = cands.front();
@@ -260,6 +260,7 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
         curCan.nd->pl().addStop(curOcc.station);
       }
 
+      // TODO
       break;
 
       if (curCan.unserved.edges.size() == 0) break;
