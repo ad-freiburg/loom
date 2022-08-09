@@ -401,26 +401,29 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
       }
     }
 
-    // remove edge artifacts
-    nds.clear();
-    nds.insert(nds.begin(), tgNew.getNds().begin(), tgNew.getNds().end());
-    for (auto from : nds) {
-      for (auto e : from->getAdjList()) {
-        if (e->getFrom() != from) continue;
-        auto to = e->getTo();
-        if (e->pl().getPolyline().getLength() < maxD(from, to, dCut)) {
-          for (auto* oldE : from->getAdjList()) {
-            if (e == oldE) continue;
-            auto ex = tgNew.getEdg(oldE->getOtherNd(from), to);
+    // remove edge artifacts 2 times, because an artifact removal
+    // might introduce another artifact if we fold edges
+    for (size_t a = 0; a  < 2; a++) {
+      nds.clear();
+      nds.insert(nds.begin(), tgNew.getNds().begin(), tgNew.getNds().end());
+      for (auto from : nds) {
+        for (auto e : from->getAdjList()) {
+          if (e->getFrom() != from) continue;
+          auto to = e->getTo();
+          if (e->pl().getPolyline().getLength() < maxD(from, to, dCut)) {
+            for (auto* oldE : from->getAdjList()) {
+              if (e == oldE) continue;
+              auto ex = tgNew.getEdg(oldE->getOtherNd(from), to);
 
-            if (ex && ex->pl().getPolyline().getLength() >
-                          2 * maxD(ex->pl().getLines().size(), dCut)) {
-              // if long enough, cut the blocking edge in half and add a support
-              // node here
-              supportEdge(ex, &tgNew);
+              if (ex && ex->pl().getPolyline().getLength() >
+                            2 * maxD(ex->pl().getLines().size(), dCut)) {
+                // if long enough, cut the blocking edge in half and add a support
+                // node here
+                supportEdge(ex, &tgNew);
+              }
             }
+            if (combineNodes(from, to, &tgNew)) break;
           }
-          if (combineNodes(from, to, &tgNew)) break;
         }
       }
     }
@@ -849,15 +852,11 @@ bool MapConstructor::foldEdges(LineEdge* a, LineEdge* b) {
         // now goes in both directions
         b->pl().delLine(ro.line);
         b->pl().addLine(ro.line, 0);
-      }
-
-      if (ro.direction == shrNd && old.direction != shrNd) {
+      } else if (ro.direction == shrNd && old.direction != shrNd) {
         // now goes in both directions
         b->pl().delLine(ro.line);
         b->pl().addLine(ro.line, 0);
-      }
-
-      if (ro.direction != shrNd && old.direction == shrNd) {
+      } else if (ro.direction != shrNd && old.direction == shrNd) {
         // now goes in both directions
         b->pl().delLine(ro.line);
         b->pl().addLine(ro.line, 0);
