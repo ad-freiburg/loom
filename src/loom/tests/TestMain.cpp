@@ -15,7 +15,7 @@ struct FileTest {
 
 static const std::vector<FileTest> fileTests(
     {{
-         "/home/patrick/repos/loom/src/loom/tests/datasets/single.json",
+         "../src/loom/tests/datasets/single.json",
          0,  // number same segment crossings
          0,  // number diff segment crossings
          0,  // number separations
@@ -24,7 +24,7 @@ static const std::vector<FileTest> fileTests(
          1   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/simplify.json",
+         "../src/loom/tests/datasets/simplify.json",
          0,  // number same segment crossings
          0,  // number diff segment crossings
          0,  // number separations
@@ -33,7 +33,7 @@ static const std::vector<FileTest> fileTests(
          3   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/simplify-2.json",
+         "../src/loom/tests/datasets/simplify-2.json",
          0,  // number same segment crossings
          0,  // number diff segment crossings
          0,  // number separations
@@ -42,7 +42,7 @@ static const std::vector<FileTest> fileTests(
          5   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/simplify-3.json",
+         "../src/loom/tests/datasets/simplify-3.json",
          0,  // number same segment crossings
          0,  // number diff segment crossings
          0,  // number separations
@@ -51,7 +51,7 @@ static const std::vector<FileTest> fileTests(
          5   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/terminus-detach.json",
+         "../src/loom/tests/datasets/terminus-detach.json",
          0,  // number same segment crossings
          0,  // number diff segment crossings
          0,  // number separations
@@ -61,7 +61,7 @@ static const std::vector<FileTest> fileTests(
      },
      // Y splitting
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/y-splitting.json",
+         "../src/loom/tests/datasets/y-splitting.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -70,7 +70,7 @@ static const std::vector<FileTest> fileTests(
          22   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/y-splitting-2.json",
+         "../src/loom/tests/datasets/y-splitting-2.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -79,7 +79,7 @@ static const std::vector<FileTest> fileTests(
          18   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/y-splitting-3.json",
+         "../src/loom/tests/datasets/y-splitting-3.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -88,7 +88,7 @@ static const std::vector<FileTest> fileTests(
          30   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/y-splitting-4.json",
+         "../src/loom/tests/datasets/y-splitting-4.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -97,7 +97,7 @@ static const std::vector<FileTest> fileTests(
          37   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/y-splitting-5.json",
+         "../src/loom/tests/datasets/y-splitting-5.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -106,7 +106,7 @@ static const std::vector<FileTest> fileTests(
          20   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/y-splitting-6.json",
+         "../src/loom/tests/datasets/y-splitting-6.json",
          0,  // number same segment crossings
          0,  // number diff segment crossings
          0,  // number separations
@@ -117,7 +117,7 @@ static const std::vector<FileTest> fileTests(
 
      // partial Y splitting
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "y-splitting-partial.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -127,7 +127,7 @@ static const std::vector<FileTest> fileTests(
          22   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "y-splitting-partial-2.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -137,7 +137,7 @@ static const std::vector<FileTest> fileTests(
          18   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "y-splitting-partial-3.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -147,7 +147,7 @@ static const std::vector<FileTest> fileTests(
          30   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "y-splitting-partial-4.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -157,7 +157,7 @@ static const std::vector<FileTest> fileTests(
          39   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "y-splitting-rec.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -167,7 +167,7 @@ static const std::vector<FileTest> fileTests(
          20   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "y-splitting-rec-2.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -177,7 +177,7 @@ static const std::vector<FileTest> fileTests(
          20   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "y-splitting-rec-3.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -187,7 +187,7 @@ static const std::vector<FileTest> fileTests(
          12   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "y-splitting-rec-4.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -197,7 +197,7 @@ static const std::vector<FileTest> fileTests(
          13   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "dog-bone-splitting.json",
          0,   // number same segment crossings
          2,   // number diff segment crossings
@@ -207,7 +207,7 @@ static const std::vector<FileTest> fileTests(
          10   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "dog-bone-splitting-2.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -217,7 +217,7 @@ static const std::vector<FileTest> fileTests(
          28   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "dog-bone-splitting-3.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -227,7 +227,7 @@ static const std::vector<FileTest> fileTests(
          59   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "dog-bone-splitting-4.json",
          0,   // number same segment crossings
          18,  // number diff segment crossings
@@ -237,7 +237,7 @@ static const std::vector<FileTest> fileTests(
          59   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "dog-bone-splitting-partial.json",
          0,   // number same segment crossings
          2,   // number diff segment crossings
@@ -247,7 +247,7 @@ static const std::vector<FileTest> fileTests(
          10   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "dog-bone-splitting-partial-2.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -257,7 +257,7 @@ static const std::vector<FileTest> fileTests(
          28   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "dog-bone-splitting-partial-3.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
@@ -267,7 +267,7 @@ static const std::vector<FileTest> fileTests(
          59   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "dog-bone-splitting-partial-4.json",
          0,   // number same segment crossings
          21,  // number diff segment crossings
@@ -277,7 +277,7 @@ static const std::vector<FileTest> fileTests(
          77   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "dog-bone-splitting-partial-5.json",
          0,  // number same segment crossings
          0,  // number diff segment crossings
@@ -287,7 +287,7 @@ static const std::vector<FileTest> fileTests(
          6   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/"
+         "../src/loom/tests/datasets/"
          "dog-bone-splitting-partial-6.json",
          0,   // number same segment crossings
          2,   // number diff segment crossings
@@ -297,7 +297,7 @@ static const std::vector<FileTest> fileTests(
          10   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/full-cross.json",
+         "../src/loom/tests/datasets/full-cross.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -306,7 +306,7 @@ static const std::vector<FileTest> fileTests(
          14   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/full-cross-2.json",
+         "../src/loom/tests/datasets/full-cross-2.json",
          1,   // number same segment crossings
          3,   // number diff segment crossings
          0,   // number separations
@@ -315,7 +315,7 @@ static const std::vector<FileTest> fileTests(
          16   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/non-unique-extension-contract.json",
+         "../src/loom/tests/datasets/non-unique-extension-contract.json",
          1,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -324,7 +324,7 @@ static const std::vector<FileTest> fileTests(
          8   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/outer-stump.json",
+         "../src/loom/tests/datasets/outer-stump.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -333,7 +333,7 @@ static const std::vector<FileTest> fileTests(
          8   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/outer-stump-2.json",
+         "../src/loom/tests/datasets/outer-stump-2.json",
          0,   // number same segment crossings
          2,   // number diff segment crossings
          0,   // number separations
@@ -342,7 +342,7 @@ static const std::vector<FileTest> fileTests(
          12   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/outer-stump-3.json",
+         "../src/loom/tests/datasets/outer-stump-3.json",
          0,   // number same segment crossings
          2,   // number diff segment crossings
          0,   // number separations
@@ -351,7 +351,7 @@ static const std::vector<FileTest> fileTests(
          12   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/outer-stump-4.json",
+         "../src/loom/tests/datasets/outer-stump-4.json",
          0,   // number same segment crossings
          4,   // number diff segment crossings
          0,   // number separations
@@ -360,7 +360,7 @@ static const std::vector<FileTest> fileTests(
          13   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/inner-stump.json",
+         "../src/loom/tests/datasets/inner-stump.json",
          0,   // number same segment crossings
          1,   // number diff segment crossings
          0,   // number separations
@@ -369,7 +369,7 @@ static const std::vector<FileTest> fileTests(
          12   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/inner-stump-2.json",
+         "../src/loom/tests/datasets/inner-stump-2.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -378,7 +378,7 @@ static const std::vector<FileTest> fileTests(
          16   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/inner-stump-3.json",
+         "../src/loom/tests/datasets/inner-stump-3.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -387,7 +387,7 @@ static const std::vector<FileTest> fileTests(
          16   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/inner-stump-4.json",
+         "../src/loom/tests/datasets/inner-stump-4.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -396,7 +396,7 @@ static const std::vector<FileTest> fileTests(
          14   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/inner-stump-5.json",
+         "../src/loom/tests/datasets/inner-stump-5.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -405,7 +405,7 @@ static const std::vector<FileTest> fileTests(
          14   // number edges
      },
      {
-         "/home/patrick/repos/loom/src/loom/tests/datasets/double-stump.json",
+         "../src/loom/tests/datasets/double-stump.json",
          0,   // number same segment crossings
          0,   // number diff segment crossings
          0,   // number separations
@@ -494,7 +494,7 @@ int main(int argc, char** argv) {
 
       std::ifstream input;
       input.open(
-          "/home/patrick/repos/loom/src/loom/tests/datasets/"
+          "../src/loom/tests/datasets/"
           "freiburg-tram.json");
       g.readFromJson(&input, 3);
 
@@ -534,7 +534,7 @@ int main(int argc, char** argv) {
 
         std::ifstream input;
         input.open(
-            "/home/patrick/repos/loom/src/loom/tests/datasets/"
+            "../src/loom/tests/datasets/"
             "freiburg-tram.json");
         g.readFromJson(&input, 3);
 
@@ -579,7 +579,7 @@ int main(int argc, char** argv) {
 
         std::ifstream input;
         input.open(
-            "/home/patrick/repos/loom/src/loom/tests/datasets/"
+            "../src/loom/tests/datasets/"
             "freiburg-tram.json");
         g.readFromJson(&input, 3);
 
@@ -670,7 +670,7 @@ int main(int argc, char** argv) {
 
         std::ifstream input;
         input.open(
-            "/home/patrick/repos/loom/src/loom/tests/datasets/"
+            "../src/loom/tests/datasets/"
             "freiburg-tram.json");
         g.readFromJson(&input, 3);
 
