@@ -32,6 +32,8 @@ class PseudoOrthoRadialGraph : public GridGraph {
   virtual PolyLine<double> geomFromPath(
       const std::vector<std::pair<size_t, size_t>>& res) const;
   virtual double ndMovePen(const CombNode* cbNd, const GridNode* grNd) const;
+  virtual void writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
+                                  double pen);
 
  protected:
   virtual void writeInitialCosts();
@@ -40,6 +42,7 @@ class PseudoOrthoRadialGraph : public GridGraph {
   virtual GridNode* getNode(size_t x, size_t y) const;
   virtual void getSettledAdjEdgs(GridNode* n, CombNode* origNd,
                                  CombEdge* outgoing[8]);
+  virtual void writeObstacleCost(const util::geo::Polygon<double>& obst);
 
  private:
   virtual int multi(size_t y) const;

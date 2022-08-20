@@ -164,6 +164,8 @@ void GridGraph::writeObstacleCost(const util::geo::Polygon<double>& obst) {
         if (!grNeigh) continue;
         auto ge = getNEdg(grNdA, grNeigh);
 
+        if (!ge) continue;
+
         if (intersects(LineSegment<double>(*ge->getFrom()->pl().getGeom(),
                                            *ge->getTo()->pl().getGeom()),
                        obst) ||

@@ -6,6 +6,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <unordered_set>
+
 #include "octi/basegraph/NodeCost.h"
 #include "octi/basegraph/PseudoOrthoRadialGraph.h"
 #include "util/Misc.h"
@@ -25,6 +26,72 @@ using util::geo::DPoint;
 int PseudoOrthoRadialGraph::multi(size_t y) const {
   int lg = log2(y);
   return 1 << lg;
+}
+
+// _____________________________________________________________________________
+void PseudoOrthoRadialGraph::writeObstacleCost(
+    const util::geo::Polygon<double>& obst) {
+  for (size_t y = 1; y < _grid.getYHeight() / 2; y++) {
+    for (size_t x = 0; x < _numBeams * multi(y); x++) {
+      auto grNdA = getNode(x, y);
+
+      for (size_t i = 0; i < maxDeg(); i++) {
+        auto grNeigh = neigh(x, y, i);
+        if (!grNeigh) continue;
+        auto ge = getNEdg(grNdA, grNeigh);
+
+        if (intersects(
+                util::geo::LineSegment<double>(*ge->getFrom()->pl().getGeom(),
+                                               *ge->getTo()->pl().getGeom()),
+                obst) ||
+            contains(
+                util::geo::LineSegment<double>(*ge->getFrom()->pl().getGeom(),
+                                               *ge->getTo()->pl().getGeom()),
+                obst)) {
+          ge->pl().setCost(std::numeric_limits<double>::infinity());
+        }
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void PseudoOrthoRadialGraph::writeGeoCoursePens(const CombEdge* ce,
+                                                GeoPensMap* target,
+                                                double pen) {
+  (*target)[ce].resize(_edgeCount);
+  for (size_t y = 1; y < _grid.getYHeight() / 2; y++) {
+    for (size_t x = 0; x < _numBeams * multi(y); x++) {
+      auto grNdA = getNode(x, y);
+
+      for (size_t i = 0; i < maxDeg(); i++) {
+        auto grNeigh = neigh(x, y, i);
+        if (!grNeigh) continue;
+        auto ge = getNEdg(grNdA, grNeigh);
+
+        double d = std::numeric_limits<double>::infinity();
+
+        for (auto orE : ce->pl().getChilds()) {
+          double dLoc = fmax(
+              fmax(dist(*orE->pl().getGeom(), *ge->getFrom()->pl().getGeom()) /
+                       getCellSize(),
+                   dist(*orE->pl().getGeom(),
+                        util::geo::centroid(util::geo::MultiPoint<double>{
+                            *ge->getFrom()->pl().getGeom(),
+                            *ge->getFrom()->pl().getGeom()})) /
+                       getCellSize()),
+              dist(*orE->pl().getGeom(), *ge->getTo()->pl().getGeom()) /
+                  getCellSize());
+
+          if (dLoc < d) d = dLoc;
+        }
+
+        d *= pen * d;
+
+        (*target)[ce][ge->pl().getId()] = d;
+      }
+    }
+  }
 }
 
 // _____________________________________________________________________________
@@ -69,7 +136,7 @@ void PseudoOrthoRadialGraph::init() {
 
 // _____________________________________________________________________________
 void PseudoOrthoRadialGraph::getSettledAdjEdgs(GridNode* n, CombNode* origNd,
-                                  CombEdge* outgoing[8]) {
+                                               CombEdge* outgoing[8]) {
   size_t x = n->pl().getX();
   size_t y = n->pl().getY();
 
@@ -119,8 +186,10 @@ GridNode* PseudoOrthoRadialGraph::neigh(size_t cx, size_t cy, size_t i) const {
   if (i == 1) return getNode((cx + 1) % (_numBeams * multi(cy)), cy);
   if (i == 2) {
     if (cy == 1) {
-      if (cx % 2) return 0;
-      else return getNode(0, 0);
+      if (cx % 2)
+        return 0;
+      else
+        return getNode(0, 0);
     }
     if (multi(cy) != multi(cy - 1)) {
       if (cx % 2) return 0;
@@ -152,21 +221,17 @@ GridEdge* PseudoOrthoRadialGraph::getNEdg(const GridNode* a,
   if (a->pl().getX() == 0 && a->pl().getY() == 0) {
     assert(b->pl().getY() == 1);
     assert(b->pl().getX() % 2 == 0);
-    assert(getEdg(a->pl().getPort(b->pl().getX() / 2),
-               b->pl().getPort(2)));
+    assert(getEdg(a->pl().getPort(b->pl().getX() / 2), b->pl().getPort(2)));
     return const_cast<GridEdge*>(
-        getEdg(a->pl().getPort(b->pl().getX() / 2),
-               b->pl().getPort(2)));
+        getEdg(a->pl().getPort(b->pl().getX() / 2), b->pl().getPort(2)));
   }
 
   if (b->pl().getX() == 0 && b->pl().getY() == 0) {
     assert(a->pl().getY() == 1);
     assert(a->pl().getX() % 2 == 0);
-    assert(        getEdg(a->pl().getPort(2),
-               b->pl().getPort(a->pl().getX() / 2)));
+    assert(getEdg(a->pl().getPort(2), b->pl().getPort(a->pl().getX() / 2)));
     return const_cast<GridEdge*>(
-        getEdg(a->pl().getPort(2),
-               b->pl().getPort(a->pl().getX() / 2)));
+        getEdg(a->pl().getPort(2), b->pl().getPort(a->pl().getX() / 2)));
   }
 
   size_t dir = 0;
@@ -219,8 +284,8 @@ void PseudoOrthoRadialGraph::writeInitialCosts() {
         if (neighbor->pl().getY() == 0) oPort = neighbor->pl().getPort(x / 2);
         auto e = getEdg(port, oPort);
 
-        // this is the percentage the hop length is longer than the smallest cell
-        // size
+        // this is the percentage the hop length is longer than the smallest
+        // cell size
         double sX = (angStepLoc * y) / angStep;
         if (y == 0) sX = 1;
 
@@ -339,12 +404,12 @@ GridNode* PseudoOrthoRadialGraph::writeNd(size_t x, size_t y) {
       if (y == _grid.getYHeight() / 2 && i == 0) pen = INF;
 
       auto e = addEdg(n->pl().getPort(i), n->pl().getPort(j),
-                            GridEdgePL(pen, true, false));
+                      GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
 
       e = addEdg(n->pl().getPort(j), n->pl().getPort(i),
-                       GridEdgePL(pen, true, false));
+                 GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
     }
@@ -409,7 +474,7 @@ PolyLine<double> PseudoOrthoRadialGraph::geomFromPath(
 
 // _____________________________________________________________________________
 double PseudoOrthoRadialGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
-                           int64_t yb) const {
+                                        int64_t yb) const {
   UNUSED(xa);
   UNUSED(xb);
   int dy = labs(yb - ya);
