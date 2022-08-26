@@ -32,7 +32,10 @@ Fetch this repository and init submodules:
 git clone --recurse-submodules https://github.com/ad-freiburg/loom.git
 ```
 
+Build and install:
+
 ```
+cd loom
 mkdir build && cd build
 cmake ..
 make -j
@@ -42,6 +45,8 @@ To (optionally) install, type
 ```
 make install
 ```
+
+You can also use the binaries in `./build` directly.
 
 Usage
 =====
