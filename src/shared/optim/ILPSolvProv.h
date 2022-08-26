@@ -14,8 +14,17 @@
 namespace shared {
 namespace optim {
 
-inline ILPSolver* getSolver(std::string wish,
-                            shared::optim::DirType dir) {
+class ILPProviderErr : public std::exception {
+ public:
+  ILPProviderErr(const std::string& msg) : _msg(msg) {}
+  const char* what() { return _msg.c_str(); }
+
+ private:
+  std::string _msg;
+};
+
+inline ILPSolver* getSolver(std::string wish, shared::optim::DirType dir) {
+  UNUSED(dir);  // prevent warning if no ILP solver is present
   bool force = (wish.back() == '!');
 
   if (force) {
@@ -45,7 +54,8 @@ inline ILPSolver* getSolver(std::string wish,
   }
 
   if (!lp && force) {
-    throw std::runtime_error("The configured ILP solver could not be provided");
+    throw ILPProviderErr(
+        "The configured ILP solver could not be provided");
   }
 
   // fallbacks
@@ -75,7 +85,7 @@ inline ILPSolver* getSolver(std::string wish,
 #endif
 
   if (!lp) {
-    throw std::runtime_error("No ILP solver found.");
+    throw ILPProviderErr("No ILP solver found.");
   }
 
   return lp;

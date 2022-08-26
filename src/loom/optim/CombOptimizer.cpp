@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <fstream>
 #include <thread>
+
 #include "loom/optim/CombOptimizer.h"
 #include "loom/optim/OptGraph.h"
 #include "shared/rendergraph/OrderCfg.h"
@@ -20,8 +21,8 @@ using shared::rendergraph::HierarOrderCfg;
 
 // _____________________________________________________________________________
 double CombOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                HierarOrderCfg* hc, size_t depth,
-                                OptResStats& stats) const {
+                                   HierarOrderCfg* hc, size_t depth,
+                                   OptResStats& stats) const {
   size_t maxC = maxCard(g);
   double solSp = solutionSpaceSize(g);
 
@@ -35,6 +36,7 @@ double CombOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
   } else if (solSp < 500) {
     return _exhausOpt.optimizeComp(og, g, hc, depth + 1, stats);
   } else {
+    if (_forceILP) return _ilpOpt.optimizeComp(og, g, hc, depth + 1, stats);
 #if defined GUROBI_FOUND || defined GLPK_FOUND || defined COIN_FOUND
     return _ilpOpt.optimizeComp(og, g, hc, depth + 1, stats);
 #else

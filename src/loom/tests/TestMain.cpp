@@ -3,8 +3,10 @@
 //
 
 #include <vector>
+
 #include "loom/config/LoomConfig.h"
 #include "loom/optim/CombOptimizer.h"
+#include "shared/optim/ILPSolvProv.h"
 #include "shared/rendergraph/RenderGraph.h"
 
 struct FileTest {
@@ -52,11 +54,11 @@ static const std::vector<FileTest> fileTests(
      },
      {
          "../src/loom/tests/datasets/terminus-detach.json",
-         0,  // number same segment crossings
-         0,  // number diff segment crossings
-         0,  // number separations
+         0,   // number same segment crossings
+         0,   // number diff segment crossings
+         0,   // number separations
          31,  // number nodes
-         0,  // number topological nodes
+         0,   // number topological nodes
          25   // number edges
      },
      // Y splitting
@@ -316,11 +318,11 @@ static const std::vector<FileTest> fileTests(
      },
      {
          "../src/loom/tests/datasets/non-unique-extension-contract.json",
-         1,   // number same segment crossings
-         0,   // number diff segment crossings
-         0,   // number separations
+         1,  // number same segment crossings
+         0,  // number diff segment crossings
+         0,  // number separations
          9,  // number nodes
-         7,   // number topological nodes
+         7,  // number topological nodes
          8   // number edges
      },
      {
@@ -330,7 +332,7 @@ static const std::vector<FileTest> fileTests(
          0,   // number separations
          12,  // number nodes
          0,   // number topological nodes
-         8   // number edges
+         8    // number edges
      },
      {
          "../src/loom/tests/datasets/outer-stump-2.json",
@@ -443,7 +445,7 @@ int main(int argc, char** argv) {
     loom::optim::ExhaustiveOptimizer exhausOptim(&cfg, pens);
     loom::optim::ILPOptimizer ilpOptim(&cfg, pens);
     loom::optim::ILPEdgeOrderOptimizer ilpImprOptim(&cfg, pens);
-    loom::optim::CombOptimizer combOptim(&cfg, pens);
+    loom::optim::CombOptimizer combOptim(&cfg, pens, true);
 
     std::vector<loom::optim::Optimizer*> optimizers;
     optimizers.push_back(&exhausOptim);
@@ -451,11 +453,11 @@ int main(int argc, char** argv) {
     optimizers.push_back(&ilpImprOptim);
     optimizers.push_back(&combOptim);
 
+    size_t i = 0;
+
     for (auto optim : optimizers) {
       for (const auto& test : fileTests) {
         shared::rendergraph::RenderGraph g(5, 5);
-
-        std::cerr << " ====== Testing " << test.fname << " ======" << std::endl;
 
         std::ifstream input;
         input.open(test.fname);
@@ -468,11 +470,17 @@ int main(int argc, char** argv) {
         if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
         if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
 
-        auto res = optim->optimize(&g);
-
-        TEST(res.sameSegCrossings, ==, test.sameSegCrossings);
-        TEST(res.diffSegCrossings, ==, test.diffSegCrossings);
+        try {
+          auto res = optim->optimize(&g);
+          TEST(res.sameSegCrossings, ==, test.sameSegCrossings);
+          TEST(res.diffSegCrossings, ==, test.diffSegCrossings);
+        } catch (const shared::optim::ILPProviderErr& err) {
+          LOG(WARN) << "Could not test all solvers for " << test.fname
+                    << " because no ILP solver was found";
+          continue;
+        }
       }
+      i++;
     }
   }
 
@@ -481,7 +489,7 @@ int main(int argc, char** argv) {
     loom::optim::ExhaustiveOptimizer exhausOptim(&cfg, pens);
     loom::optim::ILPOptimizer ilpOptim(&cfg, pens);
     loom::optim::ILPEdgeOrderOptimizer ilpImprOptim(&cfg, pens);
-    loom::optim::CombOptimizer combOptim(&cfg, pens);
+    loom::optim::CombOptimizer combOptim(&cfg, pens, true);
 
     std::vector<loom::optim::Optimizer*> optimizers;
     optimizers.push_back(&exhausOptim);
@@ -505,10 +513,17 @@ int main(int argc, char** argv) {
       if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
       if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
 
-      auto res = optim->optimize(&g);
+      try {
+        auto res = optim->optimize(&g);
 
-      TEST(res.sameSegCrossings + res.diffSegCrossings, ==, 4);
-      TEST(res.score, ==, 4);
+        TEST(res.sameSegCrossings + res.diffSegCrossings, ==, 4);
+        TEST(res.score, ==, 4);
+      } catch (const shared::optim::ILPProviderErr& err) {
+        LOG(WARN) << "Could not test all solvers for "
+                     "../src/oom/tests/datasets/freiburg-tram.json because no "
+                     "ILP solver was found";
+        continue;
+      }
     }
   }
 
@@ -521,7 +536,7 @@ int main(int argc, char** argv) {
       loom::optim::ExhaustiveOptimizer exhausOptim(&cfg, pensLoc);
       loom::optim::ILPOptimizer ilpOptim(&cfg, pensLoc);
       loom::optim::ILPEdgeOrderOptimizer ilpImprOptim(&cfg, pensLoc);
-      loom::optim::CombOptimizer combOptim(&cfg, pensLoc);
+      loom::optim::CombOptimizer combOptim(&cfg, pensLoc, true);
 
       std::vector<loom::optim::Optimizer*> optimizers;
       optimizers.push_back(&exhausOptim);
@@ -545,11 +560,17 @@ int main(int argc, char** argv) {
         if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
         if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
 
-        auto res = optim->optimize(&g);
+        try {
+          auto res = optim->optimize(&g);
 
-        TEST(res.sameSegCrossings + res.diffSegCrossings, ==, 4);
-        TEST(res.diffSegCrossings, ==, 0);
-        TEST(res.score, ==, 4);
+          TEST(res.sameSegCrossings + res.diffSegCrossings, ==, 4);
+          TEST(res.diffSegCrossings, ==, 0);
+          TEST(res.score, ==, 4);
+        } catch (const shared::optim::ILPProviderErr& err) {
+          LOG(WARN) << "Could not test all solvers for dataset because no ILP "
+                       "solver was found";
+          continue;
+        }
       }
     }
   }
@@ -566,7 +587,7 @@ int main(int argc, char** argv) {
       loom::optim::ExhaustiveOptimizer exhausOptim(&cfg, pensLoc);
       loom::optim::ILPOptimizer ilpOptim(&cfg, pensLoc);
       loom::optim::ILPEdgeOrderOptimizer ilpImprOptim(&cfg, pensLoc);
-      loom::optim::CombOptimizer combOptim(&cfg, pensLoc);
+      loom::optim::CombOptimizer combOptim(&cfg, pensLoc, true);
 
       std::vector<loom::optim::Optimizer*> optimizers;
       optimizers.push_back(&exhausOptim);
@@ -590,11 +611,17 @@ int main(int argc, char** argv) {
         if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
         if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
 
-        auto res = optim->optimize(&g);
+        try {
+          auto res = optim->optimize(&g);
 
-        TEST(res.sameSegCrossings + res.diffSegCrossings, ==, 4);
-        TEST(res.diffSegCrossings, ==, 0);
-        TEST(res.score, ==, 18);
+          TEST(res.sameSegCrossings + res.diffSegCrossings, ==, 4);
+          TEST(res.diffSegCrossings, ==, 0);
+          TEST(res.score, ==, 18);
+        } catch (const shared::optim::ILPProviderErr& err) {
+          LOG(WARN) << "Could not test all solvers for dataset because no ILP "
+                       "solver was found";
+          continue;
+        }
       }
     }
   }
@@ -609,7 +636,7 @@ int main(int argc, char** argv) {
     loom::optim::ExhaustiveOptimizer exhausOptim(&cfg, pens);
     loom::optim::ILPOptimizer ilpOptim(&cfg, pens);
     loom::optim::ILPEdgeOrderOptimizer ilpImprOptim(&cfg, pens);
-    loom::optim::CombOptimizer combOptim(&cfg, pens);
+    loom::optim::CombOptimizer combOptim(&cfg, pens, true);
 
     std::vector<loom::optim::Optimizer*> optimizers;
     optimizers.push_back(&exhausOptim);
@@ -632,11 +659,17 @@ int main(int argc, char** argv) {
         if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
         if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
 
-        auto res = optim->optimize(&g);
+        try {
+          auto res = optim->optimize(&g);
 
-        TEST(res.sameSegCrossings, ==, test.sameSegCrossings);
-        TEST(res.diffSegCrossings, ==, test.diffSegCrossings);
-        TEST(res.separations, ==, test.separations);
+          TEST(res.sameSegCrossings, ==, test.sameSegCrossings);
+          TEST(res.diffSegCrossings, ==, test.diffSegCrossings);
+          TEST(res.separations, ==, test.separations);
+        } catch (const shared::optim::ILPProviderErr& err) {
+          LOG(WARN) << "Could not test all solvers for " << test.fname
+                    << " because no ILP solver was found";
+          continue;
+        }
       }
     }
   }
@@ -657,7 +690,7 @@ int main(int argc, char** argv) {
       loom::optim::ExhaustiveOptimizer exhausOptim(&cfg, pensLoc);
       loom::optim::ILPOptimizer ilpOptim(&cfg, pensLoc);
       loom::optim::ILPEdgeOrderOptimizer ilpImprOptim(&cfg, pensLoc);
-      loom::optim::CombOptimizer combOptim(&cfg, pensLoc);
+      loom::optim::CombOptimizer combOptim(&cfg, pensLoc, true);
 
       std::vector<loom::optim::Optimizer*> optimizers;
       optimizers.push_back(&exhausOptim);
@@ -681,12 +714,16 @@ int main(int argc, char** argv) {
         if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
         if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
 
-        auto res = optim->optimize(&g);
+        try {
+          auto res = optim->optimize(&g);
 
-        TEST(res.sameSegCrossings + res.diffSegCrossings, ==, 4);
-        TEST(res.diffSegCrossings, ==, 0);
-        TEST(res.separations, ==, 2);
-        TEST(res.score, ==, 620);
+          TEST(res.sameSegCrossings + res.diffSegCrossings, ==, 4);
+          TEST(res.diffSegCrossings, ==, 0);
+          TEST(res.separations, ==, 2);
+          TEST(res.score, ==, 620);
+        } catch (const shared::optim::ILPProviderErr& err) {
+          continue;
+        }
       }
     }
   }

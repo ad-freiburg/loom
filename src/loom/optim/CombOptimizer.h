@@ -27,11 +27,22 @@ class CombOptimizer : public Optimizer {
         _nullOpt(cfg, pens),
         _exhausOpt(cfg, pens),
         _hillcOpt(cfg, pens, false),
-        _annealOpt(cfg, pens, false){};
+        _annealOpt(cfg, pens, false),
+        _forceILP(false){};
+
+  CombOptimizer(const config::Config* cfg,
+                const shared::rendergraph::Penalties& pens, bool forceILP)
+      : Optimizer(cfg, pens),
+        _ilpOpt(cfg, pens),
+        _nullOpt(cfg, pens),
+        _exhausOpt(cfg, pens),
+        _hillcOpt(cfg, pens, false),
+        _annealOpt(cfg, pens, false),
+        _forceILP(forceILP){};
 
   double optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                   shared::rendergraph::HierarOrderCfg* c, size_t depth,
-                   OptResStats& stats) const;
+                      shared::rendergraph::HierarOrderCfg* c, size_t depth,
+                      OptResStats& stats) const;
 
  private:
   const ILPEdgeOrderOptimizer _ilpOpt;
@@ -39,6 +50,8 @@ class CombOptimizer : public Optimizer {
   const ExhaustiveOptimizer _exhausOpt;
   const HillClimbOptimizer _hillcOpt;
   const SimulatedAnnealingOptimizer _annealOpt;
+
+  const bool _forceILP;
 };
 }  // namespace optim
 }  // namespace loom
