@@ -72,8 +72,8 @@ class Writer {
   void val(const std::string& v);
   void val(const char* v);
   void val(double v);
-  void val(size_t v);
   void val(int v);
+  void val(uint64_t v);
   void val(bool v);
   void val(Null);
   void val(const Val& v);
