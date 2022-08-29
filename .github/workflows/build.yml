@@ -17,4 +17,18 @@ jobs:
         run: cd build && make
       - name: tests
         run: cd build && make test
-
+  macos-build:
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: install dependencies
+        run: brew install cmake && brew install glpk
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && make test
