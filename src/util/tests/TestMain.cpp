@@ -3,6 +3,7 @@
 //
 
 #include <string>
+#include <clocale>
 #include "util/Misc.h"
 #include "util/Nullable.h"
 #include "util/String.h"
