@@ -14,5 +14,5 @@ jobs:
       - name: cmake
         run: mkdir build && cd build && cmake ..
       - name: make
-        run: make
+        run: cd build && make
 
