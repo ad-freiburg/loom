@@ -5,8 +5,9 @@ jobs:
   ubuntu-build:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository code
+      - name: Checkout repository code
         uses: actions/checkout@v2
+      - name: Checkout submodules
         run: git submodule update --init --recursive
       - name: install dependencies
         run: sudo apt install -y cmake gcc libglpk-dev
