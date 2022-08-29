@@ -3,7 +3,7 @@ name: Build
   - push
 jobs:
   ubuntu-build-gcc-5:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
@@ -37,7 +37,7 @@ jobs:
       - name: tests
         run: cd build && make test
   ubuntu-build-clang-3_9:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
