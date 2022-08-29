@@ -2,7 +2,7 @@ name: Build
 'on':
   - push
 jobs:
-  ubuntu-build:
+  ubuntu-build-gcc-5:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
@@ -10,9 +10,66 @@ jobs:
       - name: Checkout submodules
         run: git submodule update --init --recursive
       - name: install dependencies
-        run: sudo apt install -y cmake gcc libglpk-dev
+        run: sudo apt install -y cmake g++-5 gcc-5 libglpk-dev
       - name: cmake
         run: mkdir build && cd build && cmake ..
+          shell: bash
+          env:
+            CC: gcc-5
+            CXX: g++-5
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && make test
+  ubuntu-build-gcc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: install dependencies
+        run: sudo apt install -y cmake gcc g++ libglpk-dev
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && make test
+  ubuntu-build-clang-3.9:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: install dependencies
+        run: sudo apt install -y cmake clang-3.9 libglpk-dev
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+          shell: bash
+          env:
+            CC: clang-3.9
+            CXX: clang++-3.9
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && make test
+  ubuntu-build-clang:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: install dependencies
+        run: sudo apt install -y cmake clang libglpk-dev
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+          shell: bash
+          env:
+            CC: clang
+            CXX: clang++
       - name: make
         run: cd build && make
       - name: tests

@@ -17,7 +17,7 @@ namespace optim {
 class ILPProviderErr : public std::exception {
  public:
   ILPProviderErr(const std::string& msg) : _msg(msg) {}
-  const char* what() { return _msg.c_str(); }
+  const char* what() const noexcept { return _msg.c_str(); }
 
  private:
   std::string _msg;
