@@ -29,8 +29,6 @@ int main(int argc, char** argv) {
 	UNUSED(argc);
 	UNUSED(argv);
 
-  std::setlocale(LC_ALL, "en_US.utf8");
-
   QuadTreeTest quadTreeTest;
   quadTreeTest.run();
 
@@ -65,9 +63,9 @@ int main(int argc, char** argv) {
     TEST(util::btsSimi("Milner Road / Wandlee Road", "Wandlee Road"), ==, approx(1));
     TEST(util::btsSimi("bla blubb blob", "blubb blib"), ==, approx(0.9));
     TEST(util::btsSimi("St Pancras International", "London St Pancras"), ==, approx(0.588235));
-    TEST(util::btsSimi("Reiterstraße", "Reiterstraße Freiburg im Breisgau"), ==, approx(1));
-    TEST(util::btsSimi("Reiterstraße", "Reiter Freiburg im Breisgau"), ==, approx(.466666666));
-    TEST(util::btsSimi("AA", "Reiterstraße, Freiburg im Breisgau"), ==, approx(0));
+    TEST(util::btsSimi("Reiterstrasse", "Reiterstrasse Freiburg im Breisgau"), ==, approx(1));
+    TEST(util::btsSimi("Reiterstrasse", "Reiter Freiburg im Breisgau"), ==, approx(.53333333));
+    TEST(util::btsSimi("AA", "Reiterstrasse, Freiburg im Breisgau"), ==, approx(0));
     TEST(util::btsSimi("blibb blabbel bla blubb blob", "blubb blib blabb"), ==, approx(0.875));
     TEST(util::btsSimi("blibb blabbel bla blubb blobo", "blubb blib blabb blabo"), ==, approx(0.84));
     TEST(util::btsSimi("blubb blib blabb", "blibb blabbel bla blubb blob"), ==, approx(0.875));
@@ -80,14 +78,14 @@ int main(int argc, char** argv) {
 
   // ___________________________________________________________________________
   {
-    std::string test = u8"Zürich, Hauptbahnhof (Nord)";
+    std::string test = u8"Zuerich, Hauptbahnhof (Nord)";
     auto tokens = util::tokenize(test);
 
     TEST(tokens.size(), ==, 3);
 
-    TEST(util::jaccardSimi("Zürich Hauptbahnhof Nord", "Zürich, Hauptbahnhof (Nord)"), ==, approx(1));
-    TEST(util::jaccardSimi("Zürich Hauptbahnhof", "Zürich, Hauptbahnhof ()"), ==, approx(1));
-    TEST(util::jaccardSimi("Zürich Hauptbahnhof", "Zürich, Hauptbahnhof (Nord)"), ==, approx(2./3.));
+    TEST(util::jaccardSimi("Zuerich Hauptbahnhof Nord", "Zuerich, Hauptbahnhof (Nord)"), ==, approx(1));
+    TEST(util::jaccardSimi("Zuerich Hauptbahnhof", "Zuerich, Hauptbahnhof ()"), ==, approx(1));
+    TEST(util::jaccardSimi("Zuerich Hauptbahnhof", "Zuerich, Hauptbahnhof (Nord)"), ==, approx(2./3.));
   }
 
   // ___________________________________________________________________________
