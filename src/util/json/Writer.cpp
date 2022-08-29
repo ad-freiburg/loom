@@ -87,7 +87,7 @@ void Writer::val(int v) {
 }
 
 // _____________________________________________________________________________
-void Writer::val(size_t v) {
+void Writer::val(uint64_t v) {
   valCheck();
   *_out << v;
 }
