@@ -13,10 +13,10 @@ jobs:
         run: sudo apt install -y cmake g++-5 gcc-5 libglpk-dev
       - name: cmake
         run: mkdir build && cd build && cmake ..
-          shell: bash
-          env:
-            CC: gcc-5
-            CXX: g++-5
+        shell: bash
+        env:
+          CC: gcc-5
+          CXX: g++-5
       - name: make
         run: cd build && make
       - name: tests
@@ -47,10 +47,10 @@ jobs:
         run: sudo apt install -y cmake clang-3.9 libglpk-dev
       - name: cmake
         run: mkdir build && cd build && cmake ..
-          shell: bash
-          env:
-            CC: clang-3.9
-            CXX: clang++-3.9
+        shell: bash
+        env:
+          CC: clang-3.9
+          CXX: clang++-3.9
       - name: make
         run: cd build && make
       - name: tests
@@ -66,10 +66,10 @@ jobs:
         run: sudo apt install -y cmake clang libglpk-dev
       - name: cmake
         run: mkdir build && cd build && cmake ..
-          shell: bash
-          env:
-            CC: clang
-            CXX: clang++
+        shell: bash
+        env:
+          CC: clang
+          CXX: clang++
       - name: make
         run: cd build && make
       - name: tests
