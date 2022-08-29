@@ -10,7 +10,7 @@ jobs:
       - name: install dependencies
         run: sudo apt install -y cmake gcc libglpk-dev
       - name: cmake
-        run: mkdir build && cmake ..
+        run: mkdir build && cd build && cmake ..
       - name: make
         run: make
 
