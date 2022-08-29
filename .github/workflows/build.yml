@@ -36,7 +36,7 @@ jobs:
         run: cd build && make
       - name: tests
         run: cd build && make test
-  ubuntu-build-clang-3.9:
+  ubuntu-build-clang-3_9:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
