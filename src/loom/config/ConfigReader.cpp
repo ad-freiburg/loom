@@ -75,7 +75,7 @@ void ConfigReader::help(const char* bin) const {
             << std::setw(41) << " "
             << " 0 means solver default\n"
             << std::setw(41) << "  --ilp-time-limit arg (=-1)"
-            << "ILP solve time limit, -1 for infinite\n"
+            << "ILP solve time limit (seconds), -1 for infinite\n"
             << std::setw(41) << "  --dbg-output-path arg (=.)"
             << "Path used for debug output\n"
             << std::setw(41) << "  --output-optgraph"
