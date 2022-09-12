@@ -10,7 +10,6 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
-#include <immintrin.h>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -287,11 +286,6 @@ inline char* readableSize(double size, char* buf) {
 inline std::string readableSize(double size) {
   char buffer[30];
   return readableSize(size, buffer);
-}
-
-// _____________________________________________________________________________
-inline float f_rsqrt(float x) {
-  return _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(x)));
 }
 
 // _____________________________________________________________________________
