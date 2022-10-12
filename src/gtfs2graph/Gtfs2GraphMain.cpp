@@ -36,12 +36,12 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   // parse an example feed
-  ad::cppgtfs::Parser parser;
   ad::cppgtfs::gtfs::Feed feed;
 
   if (!cfg.inputFeedPath.empty()) {
     try {
-      parser.parse(&feed, cfg.inputFeedPath);
+      ad::cppgtfs::Parser parser(cfg.inputFeedPath);
+      parser.parse(&feed);
     } catch (const ad::cppgtfs::ParserException& ex) {
       LOG(ERROR) << "Could not parse input GTFS feed, reason was:";
       std::cerr << ex.what() << std::endl;
