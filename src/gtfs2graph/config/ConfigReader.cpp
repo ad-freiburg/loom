@@ -4,9 +4,11 @@
 
 #include <float.h>
 #include <getopt.h>
+
 #include <exception>
 #include <iostream>
 #include <string>
+
 #include "ad/cppgtfs/gtfs/flat/Route.h"
 #include "gtfs2graph/_config.h"
 #include "gtfs2graph/config/ConfigReader.h"
@@ -29,31 +31,38 @@ ConfigReader::ConfigReader() {}
 
 // _____________________________________________________________________________
 void ConfigReader::help(const char* bin) const {
-  std::cout << std::setfill(' ') << std::left << "gtfs2graph (part of LOOM) "
-            << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
-            << "\n\n(C) " << YEAR << " " << COPY << "\n"
-            << "Authors: " << AUTHORS << "\n\n"
-            << "Usage: " << bin << " <GTFS FEED>\n\n"
-            << "Allowed options:\n\n"
-            << "General:\n"
-            << std::setw(35) << "  -v [ --version ]"
-            << "print version\n"
-            << std::setw(35) << "  -h [ --help ]"
-            << "show this help message\n"
-            << std::setw(35) << "  -m [ --mots ] arg (=all)"
-            << "MOTs to calculate shapes for, comma sep.,\n"
-            << std::setw(35) << " "
-            << "  either as string "
-               "{all, tram | streetcar,\n"
-            << std::setw(35) << " "
-            << "  subway | metro, rail | train, bus,\n"
-            << std::setw(35) << " "
-            << "  ferry | boat | ship, cablecar, gondola,\n"
-            << std::setw(35) << " "
-            << "  funicular, coach} or as GTFS mot codes\n"
-            << std::setw(35) << "  -p [ --prune-threshold ] arg (=0.0)"
-            << "Threshold for pruning of seldomly occuring lines, between 0 and 1"
-;
+  std::cout
+      << std::setfill(' ') << std::left << "gtfs2graph (part of LOOM) "
+      << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
+      << "\n\n(C) " << YEAR << " " << COPY << "\n"
+      << "Authors: " << AUTHORS << "\n\n"
+      << "Usage: " << bin << " <GTFS FEED>\n\n"
+      << "Allowed options:\n\n"
+      << "General:\n"
+      << std::setw(36) << "  -v [ --version ]"
+      << "print version\n"
+      << std::setw(36) << "  -h [ --help ]"
+      << "show this help message\n"
+      << std::setw(36) << "  -m [ --mots ] arg (=all)"
+      << "MOTs to calculate shapes for, comma sep.,\n"
+      << std::setw(36) << " "
+      << "  either as string "
+         "{all, tram | streetcar,\n"
+      << std::setw(36) << " "
+      << "  subway | metro, rail | train, bus,\n"
+      << std::setw(36) << " "
+      << "  ferry | boat | ship, cablecar, gondola,\n"
+      << std::setw(36) << " "
+      << "  funicular, coach, mono-rail | monorail,\n"
+      << std::setw(36) << " "
+      << "  trolley | trolleybus | trolley-bus} or\n"
+      << std::setw(36) << " "
+      << "  as GTFS mot codes\n"
+      << std::setw(36) << " "
+      << "  funicular, coach} or as GTFS mot codes\n"
+      << std::setw(36) << "  -p [ --prune-threshold ] arg (=0)"
+      << "Threshold for pruning of seldomly occuring\n"
+      << std::setw(36) << " " << "  lines, between 0 and 1\n";
 }
 
 // _____________________________________________________________________________
@@ -99,8 +108,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   }
 
   if (optind == argc) {
-      std::cerr << "No input GTFS feed specified." << std::endl;
-      exit(1);
+    std::cerr << "No input GTFS feed specified." << std::endl;
+    exit(1);
   }
 
   cfg->inputFeedPath = argv[optind];
