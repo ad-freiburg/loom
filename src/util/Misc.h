@@ -27,7 +27,7 @@
 #define T_STOP(n) (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - _tstart_##n).count() / 1000.0)
 
 #define _TEST3(s, o, e) if (!(s o e)) {  std::cerr << "\n" << __FILE__ << ":" << __LINE__ << ": Test failed!\n  Expected " << #s << " " << #o " " << (e) << ", got " << (s) << std::endl;  exit(1);}
-#define _TEST2(s, e) _TEST3(s, ==, o)
+#define _TEST2(s, e) _TEST3(s, ==, e)
 #define _TEST1(s) _TEST3(static_cast<bool>(s), ==, true)
 
 #define _GET_TEST_MACRO(_1,_2,_3,NAME,...) NAME
