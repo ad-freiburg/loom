@@ -298,8 +298,6 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
         util::geo::DPoint point(coords[0], coords[1]);
         if (!webMercCoords) point = util::geo::latLngToWebMerc(point);
 
-        std::cout << "A" << std::endl;
-
         id = std::to_string(static_cast<int>(point.getX())) + "|" +
              std::to_string(static_cast<int>(point.getY()));
       }
@@ -1207,7 +1205,7 @@ std::string LineGraph::getLineColor(const nlohmann::json::object_t& line) {
     color = line.at("\"?col\"").get<std::string>();
   }
 
-  return util::trim(color, "\"");
+  return util::trim(util::trim(color, "\""), "#");
 }
 
 // _____________________________________________________________________________
