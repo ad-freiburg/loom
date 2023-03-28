@@ -525,8 +525,7 @@ bool MapConstructor::contractNodes() {
   for (auto n : _g->getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      // contract edges below minimum length, and dead end edges ending in a
-      // non-station node
+      // contract edges below minimum length
       if (e->pl().getPolyline().getLength() < _cfg->maxAggrDistance) {
         auto from = e->getFrom();
         auto to = e->getTo();
