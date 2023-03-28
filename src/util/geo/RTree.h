@@ -21,8 +21,8 @@ class RTreeException : public std::runtime_error {
 template <typename V, template <typename> class G, typename T>
 class RTree {
  public:
-  RTree(const RTree<V, G, T>&) = delete;
-  RTree(RTree<V, G, T>&& o) = delete;
+  // RTree(const RTree<V, G, T>&) = delete;
+  // RTree(RTree<V, G, T>&& o) = delete;
 
   // the empty RTree
   RTree() {};

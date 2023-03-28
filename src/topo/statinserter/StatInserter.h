@@ -11,6 +11,7 @@
 #include "topo/config/TopoConfig.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
+#include "util/geo/RTree.h"
 #include "util/geo/PolyLine.h"
 #include "util/graph/Graph.h"
 
@@ -19,6 +20,7 @@ using util::geo::DBox;
 using util::geo::DLine;
 using util::geo::DPoint;
 using util::geo::Grid;
+using util::geo::RTree;
 using util::geo::Line;
 using util::geo::Point;
 using util::geo::PolyLine;
@@ -34,8 +36,7 @@ using shared::linegraph::LineNode;
 using shared::linegraph::LineNodePL;
 using shared::linegraph::Station;
 
-typedef Grid<LineNode*, Point, double> NodeGrid;
-typedef Grid<LineEdge*, Line, double> EdgeGrid;
+typedef RTree<LineEdge*, Line, double> EdgeGeoIdx;
 
 typedef std::map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
 
@@ -76,11 +77,11 @@ class StatInserter {
   LineGraph* _g;
 
   std::vector<StationCand> candidates(const StationOcc& occ,
-                                      const EdgeGrid& idx,
+                                      const EdgeGeoIdx& idx,
                                       const OrigEdgs& origEdgs);
 
   DBox bbox() const;
-  EdgeGrid geoIndex();
+  EdgeGeoIdx geoIndex();
 
   static double candScore(const StationCand& c);
 

@@ -79,7 +79,7 @@ LineNode* MapConstructor::ndCollapseCand(const std::set<LineNode*>& notFrom,
                                          const double dCut,
                                          const util::geo::Point<double>& point,
                                          const LineNode* spanA,
-                                         const LineNode* spanB, NodeGrid& grid,
+                                         const LineNode* spanB, NodeGeoIdx& grid,
                                          LineGraph* g) const {
   LineNode* ndMin = 0;
 
@@ -198,7 +198,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
     shared::linegraph::LineGraph tgNew;
 
     // new grid per iteration
-    NodeGrid grid(120, 120, bbox());
+    NodeGeoIdx grid;
 
     std::unordered_map<LineNode*, LineNode*> imgNds;
     std::set<LineNode*> imgNdsSet;

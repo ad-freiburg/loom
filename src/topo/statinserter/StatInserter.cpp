@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <climits>
+
 #include "shared/linegraph/LineGraph.h"
 #include "topo/statinserter/StatInserter.h"
 #include "util/geo/Geo.h"
@@ -38,8 +39,8 @@ StatInserter::StatInserter(const TopoConfig* cfg, LineGraph* g)
 }
 
 // _____________________________________________________________________________
-EdgeGrid StatInserter::geoIndex() {
-  EdgeGrid grid(120, 120, bbox());
+EdgeGeoIdx StatInserter::geoIndex() {
+  EdgeGeoIdx grid;
 
   for (auto n : _g->getNds()) {
     for (auto e : n->getAdjList()) {
@@ -151,7 +152,7 @@ double StatInserter::candScore(const StationCand& c) {
 
 // _____________________________________________________________________________
 std::vector<StationCand> StatInserter::candidates(const StationOcc& occ,
-                                                  const EdgeGrid& idx,
+                                                  const EdgeGeoIdx& idx,
                                                   const OrigEdgs& origEdgs) {
   std::vector<StationCand> ret;
   std::set<LineEdge*> neighbors;

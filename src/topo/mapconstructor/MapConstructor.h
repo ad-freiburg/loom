@@ -12,6 +12,7 @@
 #include "topo/restr/RestrGraph.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
+#include "util/geo/RTree.h"
 #include "util/geo/PolyLine.h"
 #include "util/graph/Graph.h"
 
@@ -20,6 +21,7 @@ using util::geo::DBox;
 using util::geo::DLine;
 using util::geo::DPoint;
 using util::geo::Grid;
+using util::geo::RTree;
 using util::geo::Line;
 using util::geo::Point;
 using util::geo::PolyLine;
@@ -35,7 +37,8 @@ using shared::linegraph::LineNode;
 using shared::linegraph::LineNodePL;
 using shared::linegraph::Station;
 
-typedef Grid<LineNode*, Point, double> NodeGrid;
+// typedef Grid<LineNode*, Point, double> NodeGeoIdx;
+typedef RTree<LineNode*, Point, double> NodeGeoIdx;
 
 typedef std::map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
 
@@ -92,7 +95,7 @@ class MapConstructor {
                            const size_t numLines, const double maxD,
                            const util::geo::Point<double>& point,
                            const LineNode* spanA, const LineNode* spanB,
-                           NodeGrid& grid, LineGraph* g) const;
+                           NodeGeoIdx& grid, LineGraph* g) const;
 
   double maxD(size_t lines, const LineNode* nd, double d) const;
   double maxD(size_t lines, double d) const;
