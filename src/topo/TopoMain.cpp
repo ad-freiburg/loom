@@ -38,6 +38,10 @@ int main(int argc, char** argv) {
   // read input graph
   tg.readFromJson(&(std::cin), 0);
 
+  // util::geo::output::GeoGraphJsonOutput out2;
+  // out2.printLatLng(tg, std::cout);
+  // exit(0);
+
   double lenBef = 0, lenAfter = 0;
 
   if (cfg.outputStats) {
@@ -68,11 +72,13 @@ int main(int argc, char** argv) {
   // are preserved!
   mc.removeEdgeArtifacts();
 
+
   T_START(construction);
   size_t iters = 0;
   iters += mc.collapseShrdSegs(10);
   iters += mc.collapseShrdSegs(cfg.maxAggrDistance);
   double constrT = T_STOP(construction);
+
 
   mc.removeNodeArtifacts(false);
 
@@ -106,7 +112,8 @@ int main(int argc, char** argv) {
 
   // remove orphan lines, which may be introduced by another station
   // placement
-  mc.removeOrphanLines();
+  std::cerr << "TODO!!!!" << std::endl;
+  // mc.removeOrphanLines();
 
   mc.removeNodeArtifacts(true);
 
@@ -137,9 +144,9 @@ int main(int argc, char** argv) {
              {"max_merged_edgs", maxMergedEdgs},
              {"len_after", lenAfter},
          }}};
-    out.print(tg, std::cout, jsonStats);
+    out.printLatLng(tg, std::cout, jsonStats);
   } else {
-    out.print(tg, std::cout);
+    out.printLatLng(tg, std::cout);
   }
 
   return (0);

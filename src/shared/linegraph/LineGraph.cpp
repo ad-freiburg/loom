@@ -165,23 +165,32 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
     auto props = feature["properties"];
     auto geom = feature["geometry"];
     if (geom["type"] == "Point") {
-      std::string id = props["id"].get<std::string>();
+      std::string id;
+      if (props.count("id")) id = props["id"].get<std::string>();
 
       std::vector<double> coords = geom["coordinates"];
 
-      LineNode* n = addNd(util::geo::DPoint(coords[0], coords[1]));
+      util::geo::DPoint point(coords[0], coords[1]);
+      point = util::geo::latLngToWebMerc(point);
+
+      if (id.empty()) {
+        id = std::to_string(static_cast<int>(point.getX())) + "|" +
+               std::to_string(static_cast<int>(point.getY()));
+      }
+
+      if (idMap.count(id)) continue;
+
+      LineNode* n = addNd(point);
       expandBBox(*n->pl().getGeom());
 
       Station i("", "", *n->pl().getGeom());
-      if (!props["station_id"].is_null() || !props["station_label"].is_null()) {
-        if (!props["station_id"].is_null()) {
-          if (props["station_id"].type() == nlohmann::json::value_t::string) {
-            i.id = props["station_id"].get<std::string>();
-          } else {
-            i.id = props["station_id"].get<std::string>();
-          }
-        }
-        if (!props["station_label"].is_null()) i.name = props["station_label"];
+
+      std::string sid = getStationId(props);
+      std::string label = getStationLabel(props);
+      if (!sid.empty() || !label.empty()) {
+        i.id = sid;
+        i.name = label;
+
         n->pl().addStop(i);
       }
 
@@ -194,9 +203,12 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
     auto props = feature["properties"];
     auto geom = feature["geometry"];
     if (geom["type"] == "LineString") {
-      if (props["lines"].is_null() || props["lines"].size() == 0) continue;
-      std::string from = props["from"].get<std::string>();
-      std::string to = props["to"].get<std::string>();
+      std::string from =
+          props["from"].is_null() ? "" : props["from"].get<std::string>();
+      std::string to =
+          props["to"].is_null() ? "" : props["to"].get<std::string>();
+
+      if (geom["coordinates"].is_null()) continue;
 
       std::vector<std::vector<double>> coords = geom["coordinates"];
 
@@ -204,8 +216,21 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
       for (auto coord : coords) {
         double x = coord[0], y = coord[1];
         Point<double> p(x, y);
+        p = util::geo::latLngToWebMerc(p);
         pl << p;
         expandBBox(p);
+      }
+
+      if (from.empty()) {
+        from = std::to_string(static_cast<int>(pl.front().getX())) + "|" +
+               std::to_string(static_cast<int>(pl.front().getY()));
+        if (!idMap.count(from)) idMap[from] = addNd(pl.getLine().front());
+      }
+
+      if (to.empty()) {
+        to = std::to_string(static_cast<int>(pl.back().getX())) + "|" +
+             std::to_string(static_cast<int>(pl.back().getY()));
+        if (!idMap.count(to)) idMap[to] = addNd(pl.getLine().back());
       }
 
       pl.applyChaikinSmooth(smooth);
@@ -216,7 +241,7 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
       if (from.size()) {
         fromN = idMap[from];
         if (!fromN) {
-          LOG(ERROR) << "Node \"" << from << "\" not found." << std::endl;
+          LOG(ERROR) << "Node \"" << from << "\" not found.";
           continue;
         }
       } else {
@@ -225,12 +250,12 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
 
       if (to.size()) {
         toN = idMap[to];
-        if (!fromN) {
-          LOG(ERROR) << "Node \"" << to << "\" not found." << std::endl;
+        if (!toN) {
+          LOG(ERROR) << "Node \"" << to << "\" not found.";
           continue;
         }
       } else {
-        fromN = addNd(pl.getLine().back());
+        toN = addNd(pl.getLine().back());
       }
 
       LineEdge* e = addEdg(fromN, toN, pl);
@@ -238,43 +263,10 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
       if (props["dontcontract"].is_number() && props["dontcontract"].get<int>())
         e->pl().setDontContract(true);
 
-      for (auto line : props["lines"]) {
-        std::string id;
-        if (!line["id"].is_null()) {
-          id = line["id"].get<std::string>();
-        } else if (!line["label"].is_null()) {
-          id = line["label"].get<std::string>();
-        } else if (!line["color"].is_null()) {
-          id = line["color"].get<std::string>();
-        } else
-          continue;
+      extractLines(props, e, idMap);
 
-        const Line* l = getLine(id);
-        if (!l) {
-          std::string label = line["label"].is_null() ? "" : line["label"];
-          std::string color = line["color"];
-          l = new Line(id, label, color);
-          addLine(l);
-        }
-
-        LineNode* dir = 0;
-
-        if (!line["direction"].is_null()) {
-          dir = idMap[line["direction"].get<std::string>()];
-        }
-
-        if (!line["style"].is_null() || !line["outline-style"].is_null()) {
-          shared::style::LineStyle ls;
-
-          if (!line["style"].is_null()) ls.setCss(line["style"]);
-          if (!line["outline-style"].is_null())
-            ls.setOutlineCss(line["outline-style"]);
-
-          e->pl().addLine(l, dir, ls);
-        } else {
-          e->pl().addLine(l, dir);
-        }
-      }
+      // if no lines were extracted, completely delete edge
+      if (e->pl().getLines().empty()) delEdg(e->getFrom(), e->getTo());
     }
   }
 
@@ -284,7 +276,18 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
     auto props = feature["properties"];
     auto geom = feature["geometry"];
     if (geom["type"] == "Point") {
-      std::string id = props["id"].get<std::string>();
+      std::string id;
+      if (props.count("id")) id = props["id"].get<std::string>();
+
+      if (id.empty()) {
+        std::vector<double> coords = geom["coordinates"];
+
+        util::geo::DPoint point(coords[0], coords[1]);
+        point = util::geo::latLngToWebMerc(point);
+
+        id = std::to_string(static_cast<int>(point.getX())) + "|" +
+               std::to_string(static_cast<int>(point.getY()));
+      }
 
       if (!idMap.count(id)) continue;
       LineNode* n = idMap[id];
@@ -1115,4 +1118,170 @@ size_t LineGraph::numConnExcs() const {
   size_t ret = 0;
   for (auto n : getNds()) ret += n->pl().numConnExcs();
   return ret;
+}
+
+// _____________________________________________________________________________
+void LineGraph::extractLines(const nlohmann::json::object_t& props, LineEdge* e,
+                             const std::map<std::string, LineNode*>& idMap) {
+  auto i = props.find("lines");
+
+  if (i == props.end()) {
+    extractLine(props, e, idMap);
+  } else {
+    for (auto line : i->second) {
+      extractLine(line, e, idMap);
+    }
+  }
+}
+
+// _____________________________________________________________________________
+std::string LineGraph::getLineId(const nlohmann::json::object_t& line) {
+  std::string id;
+
+  if (line.count("id")) {
+    id = line.at("id").get<std::string>();
+  } else if (line.count("\"id\"")) {
+    id = line.at("\"id\"").get<std::string>();
+  } else if (line.count("?id")) {
+    id = line.at("?id").get<std::string>();
+  } else if (line.count("\"?id\"")) {
+    id = line.at("\"?id\"").get<std::string>();
+  } else if (!getLineLabel(line).empty()) {
+    id = getLineLabel(line);
+  } else if (!getLineColor(line).empty()) {
+    id = getLineColor(line);
+  }
+
+  return util::trim(id, "\"");
+}
+
+// _____________________________________________________________________________
+std::string LineGraph::getLineColor(const nlohmann::json::object_t& line) {
+  std::string color;
+
+  if (line.count("color")) {
+    color = line.at("color").get<std::string>();
+  } else if (line.count("\"color\"")) {
+    color = line.at("\"color\"").get<std::string>();
+  } else if (line.count("?color")) {
+    color = line.at("?color").get<std::string>();
+  } else if (line.count("\"?color\"")) {
+    color = line.at("\"?color\"").get<std::string>();
+  } else if (line.count("?colour")) {
+    color = line.at("?colour").get<std::string>();
+  } else if (line.count("\"?colour\"")) {
+    color = line.at("\"?colour\"").get<std::string>();
+  } else if (line.count("colour")) {
+    color = line.at("colour").get<std::string>();
+  } else if (line.count("\"colour\"")) {
+    color = line.at("\"colour\"").get<std::string>();
+  } else if (line.count("col")) {
+    color = line.at("col").get<std::string>();
+  } else if (line.count("\"col\"")) {
+    color = line.at("\"col\"").get<std::string>();
+  } else if (line.count("?col")) {
+    color = line.at("?col").get<std::string>();
+  } else if (line.count("\"?col\"")) {
+    color = line.at("\"?col\"").get<std::string>();
+  }
+
+  return util::trim(color, "\"");
+}
+
+// _____________________________________________________________________________
+std::string LineGraph::getLineLabel(const nlohmann::json::object_t& line) {
+  std::string label;
+
+  if (line.count("label")) {
+    label = line.at("label").get<std::string>();
+  } else if (line.count("\"label\"")) {
+    label = line.at("\"label\"").get<std::string>();
+  } else if (line.count("?label")) {
+    label = line.at("?label").get<std::string>();
+  } else if (line.count("\"?label\"")) {
+    label = line.at("\"?label\"").get<std::string>();
+  } else if (line.count("lbl")) {
+    label = line.at("lbl").get<std::string>();
+  } else if (line.count("\"lbl\"")) {
+    label = line.at("\"lbl\"").get<std::string>();
+  } else if (line.count("?lbl")) {
+    label = line.at("?lbl").get<std::string>();
+  } else if (line.count("\"?lbl\"")) {
+    label = line.at("\"?lbl\"").get<std::string>();
+  }
+
+  return util::trim(label, "\"");
+}
+
+// _____________________________________________________________________________
+std::string LineGraph::getStationId(const nlohmann::json::object_t& props) {
+  std::string id;
+
+  if (props.count("station_id")) {
+    id = props.at("station_id").get<std::string>();
+  } else if (props.count("\"station_id\"")) {
+    id = props.at("\"station_id\"").get<std::string>();
+  } else if (props.count("?station_id")) {
+    id = props.at("?station_id").get<std::string>();
+  } else if (props.count("\"?station_id\"")) {
+    id = props.at("\"?station_id\"").get<std::string>();
+  }
+
+  return util::trim(id, "\"");
+}
+
+// _____________________________________________________________________________
+std::string LineGraph::getStationLabel(const nlohmann::json::object_t& line) {
+  std::string label;
+
+  if (line.count("station_label")) {
+    label = line.at("station_label").get<std::string>();
+  } else if (line.count("\"station_label\"")) {
+    label = line.at("\"station_label\"").get<std::string>();
+  } else if (line.count("?station_label")) {
+    label = line.at("?station_label").get<std::string>();
+  } else if (line.count("\"?station_label\"")) {
+    label = line.at("\"?station_label\"").get<std::string>();
+  } else if (line.count("station_lbl")) {
+    label = line.at("station_lbl").get<std::string>();
+  } else if (line.count("\"station_lbl\"")) {
+    label = line.at("\"station_lbl\"").get<std::string>();
+  } else if (line.count("?station_lbl")) {
+    label = line.at("?station_lbl").get<std::string>();
+  } else if (line.count("\"?station_lbl\"")) {
+    label = line.at("\"?station_lbl\"").get<std::string>();
+  }
+
+  return util::trim(label, "\"");
+}
+
+// _____________________________________________________________________________
+void LineGraph::extractLine(const nlohmann::json::object_t& line, LineEdge* e,
+                            const std::map<std::string, LineNode*>& idMap) {
+  std::string id = getLineId(line);
+  std::string color = getLineColor(line);
+  std::string label = getLineLabel(line);
+
+  const Line* l = getLine(id);
+  if (!l) {
+    l = new Line(id, label, color);
+    addLine(l);
+  }
+
+  LineNode* dir = 0;
+
+  if (line.count("direction") && idMap.count(line.at("direction"))) {
+    dir = idMap.at(line.at("direction").get<std::string>());
+  }
+
+  if (line.count("style") || line.count("outline-style")) {
+    shared::style::LineStyle ls;
+
+    if (line.count("style")) ls.setCss(line.at("style"));
+    if (line.count("outline-style")) ls.setOutlineCss(line.at("outline-style"));
+
+    e->pl().addLine(l, dir, ls);
+  } else {
+    e->pl().addLine(l, dir);
+  }
 }

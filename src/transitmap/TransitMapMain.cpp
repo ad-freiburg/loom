@@ -14,7 +14,11 @@
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/GraphBuilder.h"
 #include "transitmap/output/SvgRenderer.h"
+#include "transitmap/output/MvtRenderer.h"
 #include "util/log/Log.h"
+
+using shared::rendergraph::RenderGraph;
+using transitmapper::graph::GraphBuilder;
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
@@ -29,30 +33,27 @@ int main(int argc, char** argv) {
   transitmapper::config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
-  LOGTO(DEBUG, std::cerr) << "Reading graph...";
-  shared::rendergraph::RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
-  transitmapper::graph::GraphBuilder b(&cfg);
+  GraphBuilder b(&cfg);
 
-  if (cfg.fromDot) {
-    g.readFromDot(&std::cin, cfg.inputSmoothing);
-  } else {
-    g.readFromJson(&std::cin, cfg.inputSmoothing);
-  }
+  LOGTO(DEBUG, std::cerr) << "Reading graph...";
+  RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
+
+  if (cfg.fromDot) g.readFromDot(&std::cin, cfg.inputSmoothing);
+  else g.readFromJson(&std::cin, cfg.inputSmoothing);
 
   g.smooth();
-
   b.writeNodeFronts(&g);
-
   b.expandOverlappinFronts(&g);
-
-  // find expanded node fronts that form a node and replace them with a
-  // single node
   g.createMetaNodes();
 
   if (cfg.renderMethod == "svg") {
     LOGTO(DEBUG, std::cerr) << "Outputting to SVG ...";
     transitmapper::output::SvgRenderer svgOut(&std::cout, &cfg);
     svgOut.print(g);
+  } else if (cfg.renderMethod == "mvt") {
+    LOGTO(DEBUG, std::cerr) << "Outputting to MVT ...";
+    transitmapper::output::MvtRenderer mvtOut(&cfg, cfg.mvtZoom);
+    mvtOut.print(g);
   } else {
     LOG(ERROR) << "Unknown render method " << cfg.renderMethod;
     exit(1);

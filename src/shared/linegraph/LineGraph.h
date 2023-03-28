@@ -150,6 +150,17 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   ISect getNextIntersection();
 
   void buildGrids();
+  void extractLines(const nlohmann::json::object_t& pars, LineEdge* e,
+                    const std::map<std::string, LineNode*>& idMap);
+  void extractLine(const nlohmann::json::object_t& pars, LineEdge* e,
+                   const std::map<std::string, LineNode*>& idMap);
+
+  std::string getLineColor(const nlohmann::json::object_t& line);
+  std::string getLineLabel(const nlohmann::json::object_t& line);
+  std::string getLineId(const nlohmann::json::object_t& line);
+
+  std::string getStationLabel(const nlohmann::json::object_t& props);
+  std::string getStationId(const nlohmann::json::object_t& props);
 
   // TODO: remove this
   std::set<LineEdge*> proced;

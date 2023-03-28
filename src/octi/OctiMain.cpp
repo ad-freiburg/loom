@@ -279,15 +279,15 @@ int main(int argc, char** argv) {
 
   if (cfg.printMode == "gridgraph") {
     if (cfg.writeStats) {
-      out.print(*gg, std::cout, util::json::Dict{{"statistics", jsonScore}});
+      out.printLatLng(*gg, std::cout, util::json::Dict{{"statistics", jsonScore}});
     } else {
-      out.print(*gg, std::cout);
+      out.printLatLng(*gg, std::cout);
     }
   } else {
     if (cfg.writeStats) {
-      out.print(res, std::cout, util::json::Dict{{"statistics", jsonScore}});
+      out.printLatLng(res, std::cout, util::json::Dict{{"statistics", jsonScore}});
     } else {
-      out.print(res, std::cout);
+      out.printLatLng(res, std::cout);
     }
   }
 

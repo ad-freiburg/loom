@@ -142,9 +142,9 @@ int main(int argc, char** argv) {
              {"best_num_separations", stats.separations},
              {"line_graph_simplification_time", stats.simplificationTime},
              {"best_score", stats.score}}}};
-    out.print(g, std::cout, jsonStats);
+    out.printLatLng(g, std::cout, jsonStats);
   } else {
-    out.print(g, std::cout);
+    out.printLatLng(g, std::cout);
   }
 
   return (0);
