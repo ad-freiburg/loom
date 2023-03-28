@@ -50,10 +50,12 @@ int main(int argc, char** argv) {
     LOGTO(DEBUG, std::cerr) << "Outputting to SVG ...";
     transitmapper::output::SvgRenderer svgOut(&std::cout, &cfg);
     svgOut.print(g);
+#ifdef PROTOBUF_FOUND
   } else if (cfg.renderMethod == "mvt") {
     LOGTO(DEBUG, std::cerr) << "Outputting to MVT ...";
     transitmapper::output::MvtRenderer mvtOut(&cfg, cfg.mvtZoom);
     mvtOut.print(g);
+#endif
   } else {
     LOG(ERROR) << "Unknown render method " << cfg.renderMethod;
     exit(1);

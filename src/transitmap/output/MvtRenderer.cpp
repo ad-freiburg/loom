@@ -2,6 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
+#ifdef PROTOBUF_FOUND
+
 #include <stdint.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -812,3 +814,5 @@ void MvtRenderer::writeTiles(size_t z) {
     }
   }
 }
+
+#endif

@@ -16,6 +16,7 @@ endif()
 find_package(GLPK)
 find_package(Gurobi)
 find_package(COIN)
+find_package(Protobuf)
 
 # set compiler flags, see http://stackoverflow.com/questions/7724569/debug-vs-release-in-cmake
 if(OPENMP_FOUND)
@@ -28,6 +29,10 @@ endif()
 
 if(GUROBI_FOUND)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGUROBI_FOUND=1")
+endif()
+
+if(Protobuf_FOUND)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DPROTOBUF_FOUND=1")
 endif()
 
 if(GLPK_FOUND)

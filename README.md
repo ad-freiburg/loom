@@ -22,7 +22,7 @@ Requirements
 
  * `cmake`
  * `gcc >= 5.0` (or `clang >= 3.9`)
- * Optional: `libglpk-dev`, `coinor-libcbc-dev`, `gurobi`, `libzip`
+ * Optional: `libglpk-dev`, `coinor-libcbc-dev`, `gurobi`, `libzip`, `libprotobuf-dev`
 
 
 Building and Installation

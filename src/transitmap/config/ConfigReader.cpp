@@ -36,7 +36,11 @@ void ConfigReader::help(const char* bin) const {
             << std::setw(37) << "  -h [ --help ]"
             << "show this help message\n"
             << std::setw(37) << "  --render-engine arg (=svg)"
-            << "Render engine, only SVG support atm\n"
+#ifdef PROTOBUF_FOUND
+            << "Render engine, either 'svg' or 'mvt'\n"
+#else
+            << "Render engine, only 'svg' supported\n"
+#endif
             << std::setw(37) << "  --line-width arg (=20)"
             << "width of a single transit line\n"
             << std::setw(37) << "  --line-spacing arg (=10)"
@@ -53,8 +57,10 @@ void ConfigReader::help(const char* bin) const {
             << "textsize for station labels\n"
             << std::setw(37) << "  --no-deg2-labels"
             << "no labels for deg-2 stations\n"
+#ifdef PROTOBUF_FOUND
             << std::setw(37) << "  -z [ --zoom ] (=14)"
             << "zoom level to write for MVT tiles\n\n"
+#endif
             << "Misc:\n"
             << std::setw(37) << "  -D [ --from-dot ]"
             << "input is in dot format\n"

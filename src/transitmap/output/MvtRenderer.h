@@ -5,6 +5,8 @@
 #ifndef TRANSITMAP_OUTPUT_MVTRENDERER_H_
 #define TRANSITMAP_OUTPUT_MVTRENDERER_H_
 
+#ifdef PROTOBUF_FOUND
+
 #include <ostream>
 #include <set>
 #include <string>
@@ -113,5 +115,7 @@ class MvtRenderer : public Renderer {
 };
 }  // namespace output
 }  // namespace transitmapper
+
+#endif
 
 #endif  // TRANSITMAP_OUTPUT_MVTRENDERER_H_
