@@ -39,6 +39,8 @@ struct Config {
   bool renderNodeConnections = true;
   bool tightStations = false;
 
+  size_t mvtZoom = 14;
+
   bool renderDirMarkers = false;
   std::string worldFilePath;
 };

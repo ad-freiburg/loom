@@ -52,7 +52,9 @@ void ConfigReader::help(const char* bin) const {
             << std::setw(37) << "  --station-label-textsize arg (=60)"
             << "textsize for station labels\n"
             << std::setw(37) << "  --no-deg2-labels"
-            << "no labels for deg-2 stations\n\n"
+            << "no labels for deg-2 stations\n"
+            << std::setw(37) << "  -z [ --zoom ] (=14)"
+            << "zoom level to write for MVT tiles\n\n"
             << "Misc:\n"
             << std::setw(37) << "  -D [ --from-dot ]"
             << "input is in dot format\n"
@@ -93,10 +95,11 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"padding", required_argument, 0, 13},
                          {"smoothing", required_argument, 0, 14},
                          {"render-node-fronts", no_argument, 0, 15},
+                         {"zoom", required_argument, 0, 'z'},
                          {0, 0, 0, 0}};
 
   char c;
-  while ((c = getopt_long(argc, argv, ":hvlD", ops, 0)) != -1) {
+  while ((c = getopt_long(argc, argv, ":hvlDz", ops, 0)) != -1) {
     switch (c) {
       case 'h':
         help(argv[0]);
@@ -154,6 +157,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         break;
       case 'D':
         cfg->fromDot = true;
+        break;
+      case 'z':
+        cfg->mvtZoom = atoi(optarg);
         break;
       case ':':
         std::cerr << argv[optind - 1];

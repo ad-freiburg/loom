@@ -9,6 +9,7 @@ include_directories(
 	${TRANSITMAP_INCLUDE_DIR}
 )
 
+add_subdirectory(output/protobuf)
 add_subdirectory(tests)
 
 configure_file (
@@ -19,4 +20,6 @@ configure_file (
 add_executable(transitmap ${transitmap_main})
 add_library(transitmap_dep ${transitmap_SRC})
 
-target_link_libraries(transitmap transitmap_dep shared_dep dot_dep util)
+add_dependencies(transitmap_dep proto)
+
+target_link_libraries(transitmap transitmap_dep shared_dep dot_dep util ${Protobuf_LIBRARIES} proto)

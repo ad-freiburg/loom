@@ -139,19 +139,30 @@ inline std::vector<std::string> split(std::string in, char sep) {
 }
 
 // _____________________________________________________________________________
-inline std::string ltrim(std::string str) {
-  str.erase(0, str.find_first_not_of(" \t\n\v\f\r"));
+inline std::string ltrim(std::string str, std::string c) {
+  str.erase(0, str.find_first_not_of(c));
   return str;
 }
 
 // _____________________________________________________________________________
-inline std::string rtrim(std::string str) {
-  str.erase(str.find_last_not_of(" \t\n\v\f\r") + 1);
+inline std::string rtrim(std::string str, std::string c) {
+  str.erase(str.find_last_not_of(c) + 1);
   return str;
 }
 
 // _____________________________________________________________________________
-inline std::string trim(std::string str) { return ltrim(rtrim(str)); }
+inline std::string trim(std::string str, std::string c) {
+  return ltrim(rtrim(str, c), c);
+}
+
+// _____________________________________________________________________________
+inline std::string ltrim(std::string str) { return ltrim(str, " \t\n\v\f\r"); }
+
+// _____________________________________________________________________________
+inline std::string rtrim(std::string str) { return rtrim(str, " \t\n\v\f\r"); }
+
+// _____________________________________________________________________________
+inline std::string trim(std::string str) { return trim(str, " \t\n\v\f\r"); }
 
 // _____________________________________________________________________________
 inline size_t editDist(const std::string& s1, const std::string& s2) {

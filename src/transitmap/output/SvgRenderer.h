@@ -23,39 +23,6 @@ using util::Nullable;
 namespace transitmapper {
 namespace output {
 
-class SvgRendererException : public std::exception {
- public:
-  SvgRendererException(std::string msg) : _msg(msg) {}
-  ~SvgRendererException() throw() {}
-
-  virtual const char* what() const throw() { return _msg.c_str(); };
-
- private:
-  std::string _msg;
-};
-
-struct InnerClique {
-  InnerClique(const shared::linegraph::LineNode* n,
-              shared::rendergraph::InnerGeom geom)
-      : n(n) {
-    geoms.push_back(geom);
-  };
-  std::vector<shared::rendergraph::InnerGeom> geoms;
-
-  double getZWeight() const;
-  size_t getNumBranchesIn(const shared::linegraph::LineEdge* front) const;
-  bool operator<(const InnerClique& rhs) const;
-
-  const shared::linegraph::LineNode* n;
-};
-
-struct RenderParams {
-  double width;
-  double height;
-  int64_t xOff;
-  int64_t yOff;
-};
-
 struct EndMarker {
   EndMarker(const std::string& name, const std::string& color,
             const std::string& path, double width, double height)
@@ -64,17 +31,6 @@ struct EndMarker {
   std::string color;
   std::string path;
   double width, height;
-};
-
-typedef std::map<std::string, std::string> Params;
-typedef std::pair<Params, util::geo::PolyLine<double>> PrintDelegate;
-
-struct OutlinePrintPair {
-  OutlinePrintPair(PrintDelegate front, PrintDelegate back)
-      : front(front), back(back) {}
-
-  PrintDelegate front;
-  PrintDelegate back;
 };
 
 class SvgRenderer : public Renderer {
