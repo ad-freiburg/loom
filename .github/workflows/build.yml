@@ -2,25 +2,6 @@ name: Build
 'on':
   - push
 jobs:
-  ubuntu-18-04-build-gcc-5:
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: install dependencies
-        run: sudo apt install -y cmake g++-5 gcc-5 libglpk-dev coinor-cbc coinor-libcbc-dev
-      - name: cmake
-        run: mkdir build && cd build && cmake ..
-        shell: bash
-        env:
-          CC: gcc-5
-          CXX: g++-5
-      - name: make
-        run: cd build && make
-      - name: tests
-        run: cd build && ctest --output-on-failure
   ubuntu-20-04-build-gcc:
     runs-on: ubuntu-20.04
     steps:
@@ -47,25 +28,6 @@ jobs:
         run: sudo apt install -y cmake gcc g++ libglpk-dev coinor-cbc coinor-libcbc-dev
       - name: cmake
         run: mkdir build && cd build && cmake ..
-      - name: make
-        run: cd build && make
-      - name: tests
-        run: cd build && ctest --output-on-failure
-  ubuntu-18-04-build-clang-3_9:
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: install dependencies
-        run: sudo apt install -y cmake clang-3.9 libglpk-dev coinor-cbc coinor-libcbc-dev
-      - name: cmake
-        run: mkdir build && cd build && cmake ..
-        shell: bash
-        env:
-          CC: clang-3.9
-          CXX: clang++-3.9
       - name: make
         run: cd build && make
       - name: tests
