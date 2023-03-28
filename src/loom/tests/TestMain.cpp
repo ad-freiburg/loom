@@ -461,7 +461,7 @@ int main(int argc, char** argv) {
 
         std::ifstream input;
         input.open(test.fname);
-        g.readFromJson(&input, 3);
+        g.readFromJson(&input, 3, true);
 
         TEST(g.numEdgs(), ==, test.numEdgs);
         TEST(g.numNds(), ==, test.numNds);
@@ -469,6 +469,8 @@ int main(int argc, char** argv) {
 
         if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
         if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
+
+        std::cout << cfg.optimMethod << " " << test.fname << std::endl;
 
         try {
           auto res = optim->optimize(&g);
@@ -504,7 +506,7 @@ int main(int argc, char** argv) {
       input.open(
           "../src/loom/tests/datasets/"
           "freiburg-tram.json");
-      g.readFromJson(&input, 3);
+      g.readFromJson(&input, 3, true);
 
       TEST(g.numEdgs(), ==, 78);
       TEST(g.numNds(), ==, 77);
@@ -551,7 +553,7 @@ int main(int argc, char** argv) {
         input.open(
             "../src/loom/tests/datasets/"
             "freiburg-tram.json");
-        g.readFromJson(&input, 3);
+        g.readFromJson(&input, 3, true);
 
         TEST(g.numEdgs(), ==, 78);
         TEST(g.numNds(), ==, 77);
@@ -602,7 +604,7 @@ int main(int argc, char** argv) {
         input.open(
             "../src/loom/tests/datasets/"
             "freiburg-tram.json");
-        g.readFromJson(&input, 3);
+        g.readFromJson(&input, 3, true);
 
         TEST(g.numEdgs(), ==, 78);
         TEST(g.numNds(), ==, 77);
@@ -650,7 +652,7 @@ int main(int argc, char** argv) {
 
         std::ifstream input;
         input.open(test.fname);
-        g.readFromJson(&input, 3);
+        g.readFromJson(&input, 3, true);
 
         TEST(g.numEdgs(), ==, test.numEdgs);
         TEST(g.numNds(), ==, test.numNds);
@@ -705,7 +707,7 @@ int main(int argc, char** argv) {
         input.open(
             "../src/loom/tests/datasets/"
             "freiburg-tram.json");
-        g.readFromJson(&input, 3);
+        g.readFromJson(&input, 3, true);
 
         TEST(g.numEdgs(), ==, 78);
         TEST(g.numNds(), ==, 77);

@@ -144,19 +144,32 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
   _bbox = util::geo::pad(_bbox, 100);
   buildGrids();
 }
+// _____________________________________________________________________________
+void LineGraph::readFromTopoJson(nlohmann::json::array_t objects,
+                                 nlohmann::json::array_t arcs, double smooth,
+                                 bool webMercCoords) {
+  UNUSED(objects);
+  UNUSED(arcs);
+  UNUSED(smooth);
+  UNUSED(webMercCoords);
+  throw(std::runtime_error("TopoJSON input not yet implemented."));
+}
 
 // _____________________________________________________________________________
 void LineGraph::readFromTopoJson(nlohmann::json::array_t objects,
                                  nlohmann::json::array_t arcs, double smooth) {
-  UNUSED(objects);
-  UNUSED(arcs);
-  UNUSED(smooth);
-  throw(std::runtime_error("TopoJSON input not yet implemented."));
+  return readFromTopoJson(objects, arcs, smooth, false);
 }
 
 // _____________________________________________________________________________
 void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
                                 double smooth) {
+  return readFromGeoJson(features, smooth, false);
+}
+
+// _____________________________________________________________________________
+void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
+                                bool webMercCoords) {
   _bbox = util::geo::Box<double>();
 
   std::map<std::string, LineNode*> idMap;
@@ -171,11 +184,11 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
       std::vector<double> coords = geom["coordinates"];
 
       util::geo::DPoint point(coords[0], coords[1]);
-      point = util::geo::latLngToWebMerc(point);
+      if (!webMercCoords) point = util::geo::latLngToWebMerc(point);
 
       if (id.empty()) {
         id = std::to_string(static_cast<int>(point.getX())) + "|" +
-               std::to_string(static_cast<int>(point.getY()));
+             std::to_string(static_cast<int>(point.getY()));
       }
 
       if (idMap.count(id)) continue;
@@ -216,7 +229,7 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
       for (auto coord : coords) {
         double x = coord[0], y = coord[1];
         Point<double> p(x, y);
-        p = util::geo::latLngToWebMerc(p);
+        if (!webMercCoords) p = util::geo::latLngToWebMerc(p);
         pl << p;
         expandBBox(p);
       }
@@ -283,10 +296,12 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
         std::vector<double> coords = geom["coordinates"];
 
         util::geo::DPoint point(coords[0], coords[1]);
-        point = util::geo::latLngToWebMerc(point);
+        if (!webMercCoords) point = util::geo::latLngToWebMerc(point);
+
+        std::cout << "A" << std::endl;
 
         id = std::to_string(static_cast<int>(point.getX())) + "|" +
-               std::to_string(static_cast<int>(point.getY()));
+             std::to_string(static_cast<int>(point.getY()));
       }
 
       if (!idMap.count(id)) continue;
@@ -369,12 +384,19 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
 
 // _____________________________________________________________________________
 void LineGraph::readFromJson(std::istream* s, double smooth) {
+  return readFromJson(s, smooth, false);
+}
+
+// _____________________________________________________________________________
+void LineGraph::readFromJson(std::istream* s, double smooth,
+                             bool useWebMercCoords) {
   nlohmann::json j;
   (*s) >> j;
 
-  if (j["type"] == "FeatureCollection") readFromGeoJson(j["features"], smooth);
+  if (j["type"] == "FeatureCollection")
+    readFromGeoJson(j["features"], smooth, useWebMercCoords);
   if (j["type"] == "Topology")
-    readFromTopoJson(j["objects"], j["arcs"], smooth);
+    readFromTopoJson(j["objects"], j["arcs"], smooth, useWebMercCoords);
 }
 
 // _____________________________________________________________________________

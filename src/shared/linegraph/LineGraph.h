@@ -69,6 +69,11 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   virtual void readFromGeoJson(nlohmann::json::array_t, double smooth);
   virtual void readFromTopoJson(nlohmann::json::array_t objects,
                                 nlohmann::json::array_t arc, double smooth);
+
+  virtual void readFromJson(std::istream* s, double smooth, bool useWebMerc);
+  virtual void readFromGeoJson(nlohmann::json::array_t, double smooth, bool useWebMerc);
+  virtual void readFromTopoJson(nlohmann::json::array_t objects,
+                                nlohmann::json::array_t arc, double smooth, bool useWebMerc);
   virtual void readFromDot(std::istream* s, double smooth);
 
   const util::geo::Box<double>& getBBox() const;
