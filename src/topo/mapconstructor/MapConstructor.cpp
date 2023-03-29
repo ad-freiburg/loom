@@ -127,25 +127,25 @@ LineNode* MapConstructor::ndCollapseCand(const std::set<LineNode*>& notFrom,
 // _____________________________________________________________________________
 double MapConstructor::maxD(size_t lines, const LineNode* nd, double d) const {
   return d;
-  size_t numLinesOther = LineGraph::getMaxLineNum(nd);
+  // size_t numLinesOther = LineGraph::getMaxLineNum(nd);
 
-  return (d * lines) / 2.0 + (d * numLinesOther) / 2.0;
+  // return (d * lines) / 2.0 + (d * numLinesOther) / 2.0;
 }
 
 // _____________________________________________________________________________
 double MapConstructor::maxD(size_t lines, double d) const {
   return d;
-  return (d * lines);
+  // return (d * lines);
 }
 
 // _____________________________________________________________________________
 double MapConstructor::maxD(const LineNode* ndA, const LineNode* ndB,
                             double d) const {
   return d;
-  size_t lines = LineGraph::getMaxLineNum(ndA);
-  size_t numLinesOther = LineGraph::getMaxLineNum(ndB);
+  // size_t lines = LineGraph::getMaxLineNum(ndA);
+  // size_t numLinesOther = LineGraph::getMaxLineNum(ndB);
 
-  return (d * lines) / 2.0 + (d * numLinesOther) / 2.0;
+  // return (d * lines) / 2.0 + (d * numLinesOther) / 2.0;
 }
 
 // _____________________________________________________________________________

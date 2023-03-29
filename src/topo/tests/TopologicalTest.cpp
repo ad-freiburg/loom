@@ -631,14 +631,14 @@ void TopologicalTest::run() {
     hg->pl().addLine(&l3, 0);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 20;
+    cfg.maxAggrDistance = 15;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cerr << std::flush;
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cerr << std::flush;
 
     //  1, 2->, 3
     // a ------> b
