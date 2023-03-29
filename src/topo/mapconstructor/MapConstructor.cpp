@@ -126,6 +126,8 @@ LineNode* MapConstructor::ndCollapseCand(const std::set<LineNode*>& notFrom,
 
 // _____________________________________________________________________________
 double MapConstructor::maxD(size_t lines, const LineNode* nd, double d) const {
+  UNUSED(lines);
+  UNUSED(nd);
   return d;
   // size_t numLinesOther = LineGraph::getMaxLineNum(nd);
 
@@ -134,6 +136,7 @@ double MapConstructor::maxD(size_t lines, const LineNode* nd, double d) const {
 
 // _____________________________________________________________________________
 double MapConstructor::maxD(size_t lines, double d) const {
+  UNUSED(lines);
   return d;
   // return (d * lines);
 }
@@ -141,6 +144,8 @@ double MapConstructor::maxD(size_t lines, double d) const {
 // _____________________________________________________________________________
 double MapConstructor::maxD(const LineNode* ndA, const LineNode* ndB,
                             double d) const {
+  UNUSED(ndA);
+  UNUSED(ndB);
   return d;
   // size_t lines = LineGraph::getMaxLineNum(ndA);
   // size_t numLinesOther = LineGraph::getMaxLineNum(ndB);
@@ -215,9 +220,9 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
     std::sort(sortedEdges.rbegin(), sortedEdges.rend());
 
-    size_t j = 0;
+    // size_t j = 0;
     for (const auto& ep : sortedEdges) {
-      j++;
+      // j++;
 
       auto e = ep.second;
 
@@ -646,13 +651,11 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n,
 
 // _____________________________________________________________________________
 size_t MapConstructor::freeze() {
-  size_t i = 0;
   _origEdgs.push_back(OrigEdgs());
   for (auto nd : _g->getNds()) {
     for (auto* edg : nd->getAdjList()) {
       if (edg->getFrom() != nd) continue;
       _origEdgs.back()[edg].insert(edg);
-      i++;
     }
   }
 

@@ -914,7 +914,7 @@ bool RTREE_QUAL::InsertRectRec(Rect* a_rect, const DATATYPE& a_id, Node* a_node,
   else if(a_node->m_level == a_level) // Have reached level for insertion. Add rect, split if necessary
   {
     branch.m_rect = *a_rect;
-    branch.m_child = (Node*) a_id;
+    branch.m_child = (Node*) (size_t) a_id;
     // Child field of leaves contains id of data record
     return AddBranch(&branch, a_node, a_newNode);
   }
@@ -1501,7 +1501,7 @@ bool RTREE_QUAL::RemoveRectRec(Rect* a_rect, const DATATYPE& a_id, Node* a_node,
   {
     for(int index = 0; index < a_node->m_count; ++index)
     {
-      if(a_node->m_branch[index].m_child == (Node*)a_id)
+      if(a_node->m_branch[index].m_child == (Node*)(size_t)a_id)
       {
         DisconnectBranch(a_node, index); // Must return after this call as count has changed
         return false;
@@ -1572,15 +1572,10 @@ bool RTREE_QUAL::Search(Node* a_node, Rect* a_rect, int& a_foundCount, bool a_re
       if(Overlap(a_rect, &a_node->m_branch[index].m_rect))
       {
         DATATYPE& id = a_node->m_branch[index].m_data;
-        
-        // NOTE: There are different ways to return results.  Here's where to modify
-        if(&a_resultCallback)
+        ++a_foundCount;
+        if(!a_resultCallback(id, a_context))
         {
-          ++a_foundCount;
-          if(!a_resultCallback(id, a_context))
-          {
-            return false; // Don't continue searching
-          }
+          return false; // Don't continue searching
         }
       }
     }
