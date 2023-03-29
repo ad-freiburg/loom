@@ -83,7 +83,8 @@ public:
   /// \param a_min Min of bounding rect
   /// \param a_max Max of bounding rect
   /// \param a_dataId Positive Id of data.  Maybe zero, but negative numbers not allowed.
-  void Remove(const ELEMTYPE a_min[NUMDIMS], const ELEMTYPE a_max[NUMDIMS], const DATATYPE& a_dataId);
+  /// \return Returns true if data element was not found, false if success
+  bool Remove(const ELEMTYPE a_min[NUMDIMS], const ELEMTYPE a_max[NUMDIMS], const DATATYPE& a_dataId);
   
   /// Find all within search rectangle
   /// \param a_min Min of search bounding rect
@@ -505,7 +506,7 @@ void RTREE_QUAL::Insert(const ELEMTYPE a_min[NUMDIMS], const ELEMTYPE a_max[NUMD
 
 
 RTREE_TEMPLATE
-void RTREE_QUAL::Remove(const ELEMTYPE a_min[NUMDIMS], const ELEMTYPE a_max[NUMDIMS], const DATATYPE& a_dataId)
+bool RTREE_QUAL::Remove(const ELEMTYPE a_min[NUMDIMS], const ELEMTYPE a_max[NUMDIMS], const DATATYPE& a_dataId)
 {
 #ifdef _DEBUG
   for(int index=0; index<NUMDIMS; ++index)
@@ -522,7 +523,7 @@ void RTREE_QUAL::Remove(const ELEMTYPE a_min[NUMDIMS], const ELEMTYPE a_max[NUMD
     rect.m_max[axis] = a_max[axis];
   }
 
-  RemoveRect(&rect, a_dataId, &m_root);
+  return RemoveRect(&rect, a_dataId, &m_root);
 }
 
 

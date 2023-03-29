@@ -40,7 +40,7 @@ void RTree<V, G, T>::get(const Box<T>& box, std::set<V>* s) const {
   maxCoords[0] = box.getUpperRight().getX();
   maxCoords[1] = box.getUpperRight().getY();
 
-  int res = _rtree.Search(minCoords, maxCoords, RTree<V, G, T>::searchCb, s);
+  _rtree.Search(minCoords, maxCoords, RTree<V, G, T>::searchCb, s);
 }
 
 // _____________________________________________________________________________
@@ -60,7 +60,8 @@ void RTree<V, G, T>::remove(V val) {
   maxCoords[0] = box.getUpperRight().getX();
   maxCoords[1] = box.getUpperRight().getY();
 
-  return _rtree.Remove(minCoords, maxCoords, val);
+  bool notFound = _rtree.Remove(minCoords, maxCoords, val);
+  assert(!notFound);
 }
 
 // _____________________________________________________________________________

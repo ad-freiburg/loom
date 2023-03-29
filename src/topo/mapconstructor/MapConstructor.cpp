@@ -79,13 +79,13 @@ LineNode* MapConstructor::ndCollapseCand(const std::set<LineNode*>& notFrom,
                                          const double dCut,
                                          const util::geo::Point<double>& point,
                                          const LineNode* spanA,
-                                         const LineNode* spanB, NodeGeoIdx& grid,
+                                         const LineNode* spanB, NodeGeoIdx& geoIdx,
                                          LineGraph* g) const {
   LineNode* ndMin = 0;
 
   std::set<LineNode*> neighbors;
 
-  grid.get(point, dCut * 2, &neighbors);
+  geoIdx.get(point, dCut * 2, &neighbors);
 
   double dBest = std::numeric_limits<double>::infinity();
 
@@ -114,13 +114,13 @@ LineNode* MapConstructor::ndCollapseCand(const std::set<LineNode*>& notFrom,
   if (ndMin) {
     ndMin->pl().setGeom(util::geo::centroid(
         util::geo::LineSegment<double>(*ndMin->pl().getGeom(), point)));
-    grid.remove(ndMin);
+    geoIdx.remove(ndMin);
     ret = ndMin;
   } else {
     ret = g->addNd(point);
   }
 
-  grid.add(*ret->pl().getGeom(), ret);
+  geoIdx.add(*ret->pl().getGeom(), ret);
   return ret;
 }
 
@@ -198,7 +198,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
     shared::linegraph::LineGraph tgNew;
 
     // new grid per iteration
-    NodeGeoIdx grid;
+    NodeGeoIdx geoIdx;
 
     std::unordered_map<LineNode*, LineNode*> imgNds;
     std::set<LineNode*> imgNdsSet;
@@ -243,7 +243,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
       for (const auto& point : plDense) {
         if (i == plDense.size() - 1) back = 0;
         LineNode* cur = ndCollapseCand(myNds, e->pl().getLines().size(), dCut,
-                                       point, front, back, grid, &tgNew);
+                                       point, front, back, geoIdx, &tgNew);
 
         if (i == 0) {
           // this is the "FROM" node
@@ -343,7 +343,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
         // this will delete "a" and keep "comb"
         // crucially, "to" has not yet appeared in the list, and we will
         // see the combined node later on
-        if (comb && combineNodes(a, comb, &tgNew) && a != comb) grid.remove(a);
+        if (comb && combineNodes(a, comb, &tgNew) && a != comb) geoIdx.remove(a);
       }
     }
 
