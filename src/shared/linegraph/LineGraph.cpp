@@ -15,8 +15,7 @@
 
 using shared::linegraph::EdgeGrid;
 using shared::linegraph::EdgeOrdering;
-using shared::linegraph::ISect;
-using shared::linegraph::Line;
+using shared::linegraph::ISect; using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
@@ -271,6 +270,11 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
         toN = addNd(pl.getLine().back());
       }
 
+      if (fromN == toN) {
+        LOG(DEBUG) << "Self edges are not supported, dropping...";
+        continue;
+      }
+
       LineEdge* e = addEdg(fromN, toN, pl);
 
       if (props["dontcontract"].is_number() && props["dontcontract"].get<int>())
@@ -399,17 +403,13 @@ void LineGraph::readFromJson(std::istream* s, double smooth,
 
 // _____________________________________________________________________________
 void LineGraph::buildGrids() {
-  size_t gridSize =
-      std::max(_bbox.getUpperRight().getX() - _bbox.getLowerLeft().getX(),
-               _bbox.getUpperRight().getY() - _bbox.getLowerLeft().getY()) /
-      10;
-
-  _nodeGrid = NodeGrid(gridSize, gridSize, _bbox);
-  _edgeGrid = EdgeGrid(gridSize, gridSize, _bbox);
+  _nodeGrid = NodeGrid();
+  _edgeGrid = EdgeGrid();
 
   for (auto n : getNds()) {
     _nodeGrid.add(*n->pl().getGeom(), n);
     for (auto e : n->getAdjListOut()) {
+      if (e->getFrom() != n) continue;
       _edgeGrid.add(*e->pl().getGeom(), e);
     }
   }
@@ -1303,5 +1303,50 @@ void LineGraph::extractLine(const nlohmann::json::object_t& line, LineEdge* e,
     e->pl().addLine(l, dir, ls);
   } else {
     e->pl().addLine(l, dir);
+  }
+}
+
+// _____________________________________________________________________________
+void LineGraph::snapOrphanStations() {
+  double MAXD = 1;
+
+  for (auto nd : getNds()) {
+    if (nd->getDeg() != 0 || nd->pl().stops().size() == 0) continue;
+
+    std::set<LineEdge*> cands;
+
+    _edgeGrid.get(*nd->pl().getGeom(), MAXD, &cands);
+
+    for (auto e : cands) {
+      if (util::geo::dist(*nd->pl().getGeom(), *e->pl().getGeom()) < MAXD) {
+        double pa = e->pl().getPolyline().projectOn(*nd->pl().getGeom()).totalPos;
+        if (getEdg(e->getFrom(), nd) || getEdg(nd, e->getTo())) continue;
+
+        assert(e->getFrom() != nd);
+        assert(e->getTo() != nd);
+
+        auto ba = addEdg(e->getFrom(), nd, e->pl());
+        ba->pl().setPolyline(e->pl().getPolyline().getSegment(0, pa));
+
+        auto bb = addEdg(nd, e->getTo(), e->pl());
+        bb->pl().setPolyline(e->pl().getPolyline().getSegment(pa, 1));
+
+        edgeRpl(e->getFrom(), e, ba);
+        edgeRpl(e->getTo(), e, bb);
+
+        nodeRpl(ba, e->getTo(), nd);
+        nodeRpl(bb, e->getFrom(), nd);
+
+        assert(ba != bb);
+
+        _edgeGrid.add(*ba->pl().getGeom(), ba);
+        _edgeGrid.add(*bb->pl().getGeom(), bb);
+
+        _edgeGrid.remove(e);
+
+        assert(getEdg(e->getFrom(), e->getTo()));
+        delEdg(e->getFrom(), e->getTo());
+      }
+    }
   }
 }

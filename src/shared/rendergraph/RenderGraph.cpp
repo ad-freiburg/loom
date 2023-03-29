@@ -562,9 +562,11 @@ void RenderGraph::createMetaNodes() {
         LineEdge* e;
         LineNode* other;
         if (onf.edge->getTo() == nf.n) {
+          assert(!getEdg(onf.edge->getFrom(), ref));
           e = addEdg(onf.edge->getFrom(), ref, onf.edge->pl());
           other = onf.edge->getFrom();
         } else {
+          assert(!getEdg(ref, onf.edge->getTo()));
           e = addEdg(ref, onf.edge->getTo(), onf.edge->pl());
           other = onf.edge->getTo();
         }
@@ -575,6 +577,8 @@ void RenderGraph::createMetaNodes() {
           if (to.direction == nf.n) del.insert(to);
         }
 
+        assert(onf.edge != e);
+
         // also update the edge of the other node front
         NodeFront otherFr = *other->pl().frontFor(onf.edge);
         other->pl().delFrontFor(onf.edge);
@@ -582,6 +586,7 @@ void RenderGraph::createMetaNodes() {
         other->pl().addFront(otherFr);
 
         // remove the original edge
+        onf.edge->getOtherNd(other)->pl().delFrontFor(onf.edge);
         delEdg(onf.edge->getFrom(), onf.edge->getTo());
         getEdgGrid()->remove(onf.edge);
 

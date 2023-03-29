@@ -11,6 +11,7 @@
 #include "shared/linegraph/LineNodePL.h"
 #include "util/geo/Geo.h"
 #include "util/geo/Grid.h"
+#include "util/geo/RTree.h"
 #include "util/graph/UndirGraph.h"
 
 namespace shared {
@@ -21,8 +22,11 @@ typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge;
 
 typedef std::pair<LineEdge*, LineEdge*> LineEdgePair;
 
-typedef util::geo::Grid<LineNode*, util::geo::Point, double> NodeGrid;
-typedef util::geo::Grid<LineEdge*, util::geo::Line, double> EdgeGrid;
+// typedef util::geo::Grid<LineNode*, util::geo::Point, double> NodeGrid;
+// typedef util::geo::Grid<LineEdge*, util::geo::Line, double> EdgeGrid;
+
+typedef util::geo::RTree<LineNode*, util::geo::Point, double> NodeGrid;
+typedef util::geo::RTree<LineEdge*, util::geo::Line, double> EdgeGrid;
 
 struct ISect {
   LineEdge *a, *b;
@@ -148,6 +152,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   double searchSpaceSize() const;
 
   virtual LineNode* mergeNds(LineNode* a, LineNode* b);
+
+  void snapOrphanStations();
 
  private:
   util::geo::Box<double> _bbox;

@@ -88,7 +88,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"line-width", required_argument, 0, 2},
                          {"line-spacing", required_argument, 0, 3},
                          {"outline-width", required_argument, 0, 4},
-                         {"from-dot", required_argument, 0, 'D'},
+                         {"from-dot", no_argument, 0, 'D'},
                          {"no-deg2-labels", no_argument, 0, 16},
                          {"line-label-textsize", required_argument, 0, 5},
                          {"station-label-textsize", required_argument, 0, 6},
@@ -105,7 +105,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {0, 0, 0, 0}};
 
   char c;
-  while ((c = getopt_long(argc, argv, ":hvlDz", ops, 0)) != -1) {
+  while ((c = getopt_long(argc, argv, ":hvlDz:", ops, 0)) != -1) {
     switch (c) {
       case 'h':
         help(argv[0]);

@@ -224,17 +224,25 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
     if (st.size() == 0) continue;
 
     auto curOcc = st.front();
-    LOGTO(VDEBUG, std::cerr) << "Inserting " << curOcc.station.name;
+    LOGTO(DEBUG, std::cerr) << "Inserting " << curOcc.station.name;
 
-    while (true) {
+    int MAX_INSERTS = 3;
+    int i = 0;
+
+    while (i++ < MAX_INSERTS) {
       auto cands = candidates(curOcc, idx, modOrigEdgs);
 
       if (cands.size() == 0) {
-        LOGTO(VDEBUG, std::cerr) << "  (No insertion candidate found.)";
+        LOGTO(DEBUG, std::cerr) << "  (No insertion candidate found.)";
         break;
       }
 
       auto curCan = cands.front();
+
+      if (curCan.truelyServ == 0) {
+        LOGTO(DEBUG, std::cerr) << "  (No insertion candidate found.)";
+        break;
+      }
 
       if (curCan.edg) {
         auto e = curCan.edg;
@@ -261,11 +269,10 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
         curCan.nd->pl().addStop(curOcc.station);
       }
 
-      // TODO
-      break;
-
       if (curCan.unserved.edges.size() == 0) break;
 
+
+      LOGTO(DEBUG, std::cerr) << "  inserting for remaining " << curCan.unserved.edges.size() << " unserved edges...";
       curOcc = curCan.unserved;
     }
   }

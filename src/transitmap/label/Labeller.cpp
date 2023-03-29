@@ -20,10 +20,6 @@ Labeller::Labeller(const config::Config* cfg) : _cfg(cfg) {}
 
 // _____________________________________________________________________________
 void Labeller::label(const RenderGraph& g, bool notDeg2) {
-  // leave enough room for labels
-  auto bbox = util::geo::pad(g.getBBox(), 500);
-  _statLblGrid = StatLblGrid(200, 200, bbox);
-
   labelStations(g, notDeg2);
   labelLines(g);
 }
@@ -120,7 +116,7 @@ void Labeller::labelStations(const RenderGraph& g, bool notdeg2) {
 
     auto cand = cands.front();
     _stationLabels.push_back(cand);
-    _statLblGrid.add(cand.band, _stationLabels.size() - 1);
+    _statLblIdx.add(cand.band, _stationLabels.size() - 1);
   }
 }
 
@@ -170,7 +166,7 @@ Overlaps Labeller::getOverlaps(const util::geo::MultiLine<double>& band,
   }
 
   std::set<size_t> labelNeighs;
-  _statLblGrid.get(band,
+  _statLblIdx.get(band,
                    g.getMaxLineNum() * (_cfg->lineWidth + _cfg->lineSpacing),
                    &labelNeighs);
 
@@ -184,8 +180,7 @@ Overlaps Labeller::getOverlaps(const util::geo::MultiLine<double>& band,
 
 // _____________________________________________________________________________
 void Labeller::labelLines(const RenderGraph& g) {
-  auto bbox = util::geo::pad(g.getBBox(), 500);
-  LineLblGrid labelGrid = LineLblGrid(200, 200, bbox);
+  LineLblIdx labelIdx = LineLblIdx();
   for (auto n : g.getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
@@ -229,7 +224,7 @@ void Labeller::labelLines(const RenderGraph& g) {
           }
 
           std::set<size_t> labelNeighs;
-          _statLblGrid.get(
+          _statLblIdx.get(
               MultiLine<double>{cand.getLine()},
               g.getMaxLineNum() * (_cfg->lineWidth + _cfg->lineSpacing),
               &labelNeighs);
@@ -245,7 +240,7 @@ void Labeller::labelLines(const RenderGraph& g) {
           if (dir < 0) cand.reverse();
 
           std::set<size_t> lineLabelNeighs;
-          labelGrid.get(cand.getLine(),
+          labelIdx.get(cand.getLine(),
                         20 * (_cfg->lineWidth + _cfg->lineSpacing),
                         &lineLabelNeighs);
 
@@ -274,7 +269,7 @@ void Labeller::labelLines(const RenderGraph& g) {
       std::sort(cands.begin(), cands.end());
       if (cands.size() == 0) continue;
       _lineLabels.push_back(cands.front());
-      labelGrid.add(cands.front().geom.getLine(), _lineLabels.size() - 1);
+      labelIdx.add(cands.front().geom.getLine(), _lineLabels.size() - 1);
     }
   }
 }

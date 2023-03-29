@@ -143,12 +143,16 @@ const std::vector<NodeFront>& LineNodePL::fronts() const { return _nodeFronts; }
 // _____________________________________________________________________________
 void LineNodePL::delFrontFor(const LineEdge* e) {
   auto i = _edgToNf.find(e);
-  if (i == _edgToNf.end()) return;
+  if (i == _edgToNf.end()) {
+    return;
+  }
   size_t idx = i->second;
   _edgToNf.erase(e);
 
-  _edgToNf[_nodeFronts.back().edge] = idx;
-  _nodeFronts[idx] = _nodeFronts.back();
+  if (idx != _nodeFronts.size() - 1) {
+    _edgToNf[_nodeFronts.back().edge] = idx;
+    _nodeFronts[idx] = _nodeFronts.back();
+  }
   _nodeFronts.pop_back();
 }
 

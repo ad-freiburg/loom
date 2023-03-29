@@ -82,7 +82,13 @@ class Grid {
   void add(size_t x, size_t y, V val);
 
   void get(const Box<T>& btbox, std::set<V>* s) const;
-  void get(const G<T>& geom, double d, std::set<V>* s) const;
+
+  template <template <typename> class GG>
+  void get(const GG<T>& geom, double d, std::set<V>* s) const;
+
+  template <template <typename> class GG>
+  void get(const std::vector<GG<T>>& geom, double d, std::set<V>* s) const;
+
   void get(size_t x, size_t y, std::set<V>* s) const;
   void remove(V val);
 

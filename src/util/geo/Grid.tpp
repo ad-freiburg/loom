@@ -95,7 +95,20 @@ void Grid<V, G, T>::get(const Box<T>& box, std::set<V>* s) const {
 
 // _____________________________________________________________________________
 template <typename V, template <typename> class G, typename T>
-void Grid<V, G, T>::get(const G<T>& geom, double d, std::set<V>* s) const {
+template <template <typename> class GG>
+void Grid<V, G, T>::get(const GG<T>& geom, double d, std::set<V>* s) const {
+  Box<T> a = getBoundingBox(geom);
+  Box<T> b(
+      Point<T>(a.getLowerLeft().getX() - d, a.getLowerLeft().getY() - d),
+      Point<T>(a.getUpperRight().getX() + d, a.getUpperRight().getY() + d));
+  return get(b, s);
+}
+
+// _____________________________________________________________________________
+template <typename V, template <typename> class G, typename T>
+template <template <typename> class GG>
+void Grid<V, G, T>::get(const std::vector<GG<T>>& geom, double d,
+                        std::set<V>* s) const {
   Box<T> a = getBoundingBox(geom);
   Box<T> b(
       Point<T>(a.getLowerLeft().getX() - d, a.getLowerLeft().getY() - d),
@@ -182,7 +195,7 @@ void Grid<V, G, T>::getCellNeighbors(size_t cx, size_t cy, size_t xPerm,
 
 // _____________________________________________________________________________
 template <typename V, template <typename> class G, typename T>
-std::set<std::pair<size_t, size_t> > Grid<V, G, T>::getCells(
+std::set<std::pair<size_t, size_t>> Grid<V, G, T>::getCells(
     const V& val) const {
   if (!_hasValIdx) throw GridException("No value index build!");
   return _index.find(val)->second;

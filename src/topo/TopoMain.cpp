@@ -38,9 +38,8 @@ int main(int argc, char** argv) {
   // read input graph
   tg.readFromJson(&(std::cin), 0);
 
-  // util::geo::output::GeoGraphJsonOutput out2;
-  // out2.printLatLng(tg, std::cout);
-  // exit(0);
+  // snap orphan stations
+  tg.snapOrphanStations();
 
   double lenBef = 0, lenAfter = 0;
 
@@ -54,15 +53,21 @@ int main(int argc, char** argv) {
   }
 
   size_t statFr = mc.freeze();
+
   si.init();
+
+  // util::geo::output::GeoGraphJsonOutput out2;
+  // out2.printLatLng(tg, std::cout);
+  // exit(0);
+
 
   mc.averageNodePositions();
 
-  mc.cleanUpGeoms();
 
   // does preserve existing turn restrictions
   mc.removeNodeArtifacts(false);
 
+  mc.cleanUpGeoms();
   // init restriction inferrer
   ri.init();
   size_t restrFr = mc.freeze();
@@ -73,15 +78,14 @@ int main(int argc, char** argv) {
   mc.removeEdgeArtifacts();
 
 
+
   T_START(construction);
   size_t iters = 0;
   iters += mc.collapseShrdSegs(10);
   iters += mc.collapseShrdSegs(cfg.maxAggrDistance);
   double constrT = T_STOP(construction);
 
-
   mc.removeNodeArtifacts(false);
-
 
   double avgMergedEdgs = 0;
   size_t maxMergedEdgs = 0;
@@ -110,10 +114,10 @@ int main(int argc, char** argv) {
   si.insertStations(mc.freezeTrack(statFr));
   double stationT = T_STOP(stationIns);
 
+
   // remove orphan lines, which may be introduced by another station
   // placement
-  std::cerr << "TODO!!!!" << std::endl;
-  // mc.removeOrphanLines();
+  mc.removeOrphanLines();
 
   mc.removeNodeArtifacts(true);
 

@@ -9,6 +9,7 @@
 #include "shared/rendergraph/RenderGraph.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "util/geo/Grid.h"
+#include "util/geo/RTree.h"
 
 namespace transitmapper {
 namespace label {
@@ -75,8 +76,10 @@ inline bool operator<(const StationLabel& a, const StationLabel& b) {
   return a.getPen() < b.getPen();
 }
 
-typedef util::geo::Grid<size_t, util::geo::MultiLine, double> StatLblGrid;
-typedef util::geo::Grid<size_t, util::geo::Line, double> LineLblGrid;
+// typedef util::geo::Grid<size_t, util::geo::MultiLine, double> StatLblIdx;
+// typedef util::geo::Grid<size_t, util::geo::Line, double> LineLblIdx;
+typedef util::geo::RTree<size_t, util::geo::MultiLine, double> StatLblIdx;
+typedef util::geo::RTree<size_t, util::geo::Line, double> LineLblIdx;
 
 class Labeller {
  public:
@@ -93,7 +96,7 @@ class Labeller {
   std::vector<LineLabel> _lineLabels;
   std::vector<StationLabel> _stationLabels;
 
-  StatLblGrid _statLblGrid;
+  StatLblIdx _statLblIdx;
 
   const config::Config* _cfg;
 
