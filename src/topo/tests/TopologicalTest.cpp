@@ -636,9 +636,9 @@ void TopologicalTest::run() {
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
 
-    // util::geo::output::GeoGraphJsonOutput gout;
-    // gout.print(tg, std::cout);
-    // std::cout << std::flush;
+    util::geo::output::GeoGraphJsonOutput gout;
+    gout.print(tg, std::cout);
+    std::cerr << std::flush;
 
     //  1, 2->, 3
     // a ------> b
