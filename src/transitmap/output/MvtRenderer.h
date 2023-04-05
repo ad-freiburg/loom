@@ -36,7 +36,10 @@ struct MvtLineFeature {
 class MvtRenderer : public Renderer {
  public:
   MvtRenderer(const config::Config* cfg, size_t zoom);
-  virtual ~MvtRenderer(){};
+  virtual ~MvtRenderer() {
+    delete[] _grid;
+    delete[] _grid2;
+  };
 
   virtual void print(const shared::rendergraph::RenderGraph& outputGraph);
 
@@ -50,6 +53,7 @@ class MvtRenderer : public Renderer {
  private:
   const config::Config* _cfg;
   size_t _zoom;
+  double _res;
 
   // tile grid
   uint64_t* _grid;

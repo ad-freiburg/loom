@@ -10,6 +10,7 @@
 #include "transitmap/_config.h"
 #include "transitmap/config/ConfigReader.h"
 #include "util/log/Log.h"
+#include "util/String.h"
 
 using transitmapper::config::ConfigReader;
 using std::exception;
@@ -59,7 +60,7 @@ void ConfigReader::help(const char* bin) const {
             << "no labels for deg-2 stations\n"
 #ifdef PROTOBUF_FOUND
             << std::setw(37) << "  -z [ --zoom ] (=14)"
-            << "zoom level to write for MVT tiles\n\n"
+            << "zoom level to write for MVT tiles, comma separated or range\n\n"
 #endif
             << "Misc:\n"
             << std::setw(37) << "  -D [ --from-dot ]"
@@ -103,6 +104,8 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"render-node-fronts", no_argument, 0, 15},
                          {"zoom", required_argument, 0, 'z'},
                          {0, 0, 0, 0}};
+
+  std::string zoom;
 
   char c;
   while ((c = getopt_long(argc, argv, ":hvlDz:", ops, 0)) != -1) {
@@ -165,7 +168,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         cfg->fromDot = true;
         break;
       case 'z':
-        cfg->mvtZoom = atoi(optarg);
+        zoom = optarg;
         break;
       case ':':
         std::cerr << argv[optind - 1];
@@ -182,6 +185,36 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         break;
     }
   }
+
+  for (auto range : util::split(zoom, ',')) {
+    util::replaceAll(range, " ", "");
+    auto parts = util::split(range, '-');
+    if (parts.size() > 2) {
+      std::cerr << "Error while parsing zoom range" << zoom << std::endl;
+      exit(1);
+    }
+
+    int from = atoi(parts.front().c_str());
+    int to = atoi(parts.back().c_str());
+
+    if (from > to) {
+      int a = from;
+      from = to;
+      to = a;
+    }
+
+    if (from < 0 || from > 25 || to < 0 || to > 25) {
+      std::cerr << "Error while parsing zoom range" << zoom << std::endl;
+      exit(1);
+    }
+
+    for (int z = from; z <= to; z++) {
+      cfg->mvtZooms.push_back(z);
+    }
+  }
+
+  if (cfg->mvtZooms.size() == 0) cfg->mvtZooms.push_back(14);
+
   if (cfg->outputPadding < 0) {
     cfg->outputPadding = (cfg->lineWidth + cfg->lineSpacing);
   }

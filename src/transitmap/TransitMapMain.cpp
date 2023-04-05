@@ -4,19 +4,22 @@
 
 #include <stdio.h>
 #include <unistd.h>
+
 #include <fstream>
 #include <iostream>
 #include <set>
 #include <string>
+
 #include "shared/rendergraph/Penalties.h"
 #include "shared/rendergraph/RenderGraph.h"
 #include "transitmap/config/ConfigReader.cpp"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/graph/GraphBuilder.h"
-#include "transitmap/output/SvgRenderer.h"
 #include "transitmap/output/MvtRenderer.h"
+#include "transitmap/output/SvgRenderer.h"
 #include "util/log/Log.h"
 
+using shared::linegraph::LineGraph;
 using shared::rendergraph::RenderGraph;
 using transitmapper::graph::GraphBuilder;
 
@@ -36,26 +39,49 @@ int main(int argc, char** argv) {
   GraphBuilder b(&cfg);
 
   LOGTO(DEBUG, std::cerr) << "Reading graph...";
-  RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
 
-  if (cfg.fromDot) g.readFromDot(&std::cin, cfg.inputSmoothing);
-  else g.readFromJson(&std::cin, cfg.inputSmoothing);
+  if (cfg.renderMethod == "mvt") {
+    LineGraph lg;
+    if (cfg.fromDot)
+      lg.readFromDot(&std::cin, cfg.inputSmoothing);
+    else
+      lg.readFromJson(&std::cin, cfg.inputSmoothing);
 
-  g.smooth();
-  b.writeNodeFronts(&g);
-  b.expandOverlappinFronts(&g);
-  g.createMetaNodes();
+    for (size_t z : cfg.mvtZooms) {
+      std::cerr << "ZOOM " << z << std::endl;
 
-  if (cfg.renderMethod == "svg") {
+      double lWidth = cfg.lineWidth;
+      double lSpacing = cfg.lineSpacing;
+
+      lWidth *= 156543.0 / (1 << z);
+      lSpacing *= 156543.0 / (1 << z);
+
+      RenderGraph g(lg, lWidth, lSpacing);
+
+      g.smooth();
+      b.writeNodeFronts(&g);
+      b.expandOverlappinFronts(&g);
+      g.createMetaNodes();
+
+      LOGTO(DEBUG, std::cerr) << "Outputting to MVT ...";
+      transitmapper::output::MvtRenderer mvtOut(&cfg, z);
+      mvtOut.print(g);
+    }
+  } else if (cfg.renderMethod == "svg") {
+    RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
+    if (cfg.fromDot)
+      g.readFromDot(&std::cin, cfg.inputSmoothing);
+    else
+      g.readFromJson(&std::cin, cfg.inputSmoothing);
+
+    g.smooth();
+    b.writeNodeFronts(&g);
+    b.expandOverlappinFronts(&g);
+    g.createMetaNodes();
+
     LOGTO(DEBUG, std::cerr) << "Outputting to SVG ...";
     transitmapper::output::SvgRenderer svgOut(&std::cout, &cfg);
     svgOut.print(g);
-#ifdef PROTOBUF_FOUND
-  } else if (cfg.renderMethod == "mvt") {
-    LOGTO(DEBUG, std::cerr) << "Outputting to MVT ...";
-    transitmapper::output::MvtRenderer mvtOut(&cfg, cfg.mvtZoom);
-    mvtOut.print(g);
-#endif
   } else {
     LOG(ERROR) << "Unknown render method " << cfg.renderMethod;
     exit(1);

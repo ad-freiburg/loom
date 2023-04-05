@@ -65,6 +65,8 @@ MvtRenderer::MvtRenderer(const config::Config* cfg, size_t zoom)
   for (size_t i = 0; i < GRID2_SIZE * GRID2_SIZE; i++) {
     _grid2[i] = std::numeric_limits<uint32_t>::max();
   }
+
+  _res = 156543.0 / (1 << zoom);
 }
 
 // _____________________________________________________________________________
@@ -106,10 +108,10 @@ void MvtRenderer::outputNodes(const RenderGraph& outG) {
         params["stationId"] = n->pl().stops().front().id;
       }
       params["width"] =
-          util::toString((_cfg->lineWidth / 2) * _cfg->outputResolution);
+          util::toString((_cfg->lineWidth / 2));
 
       for (const auto& geom :
-           outG.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
+           outG.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * _res * 0.8,
                              _cfg->tightStations, 32)) {
         addFeature({geom.getOuter(), "stations", params});
       }
@@ -316,8 +318,8 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
     for (size_t i = 0; i < c.geoms.size(); i++) {
       PolyLine<double> pl = c.geoms[i].geom;
 
-      if (ref.geom.getLength() > (_cfg->lineWidth + _cfg->lineSpacing) * 4) {
-        double off = -(_cfg->lineWidth + _cfg->lineSpacing) *
+      if (ref.geom.getLength() > (_cfg->lineWidth + _cfg->lineSpacing) * _res * 4) {
+        double off = -(_cfg->lineWidth + _cfg->lineSpacing) * _res *
                      (static_cast<int>(c.geoms[i].slotFrom) -
                       static_cast<int>(ref.slotFrom));
 
@@ -348,7 +350,7 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       paramsOut["lineCap"] = "butt";
       paramsOut["class"] = getLineClass(c.geoms[i].from.line->id());
       paramsOut["width"] = util::toString(
-          (_cfg->outlineWidth + _cfg->lineWidth) * _cfg->outputResolution);
+          (_cfg->outlineWidth + _cfg->lineWidth));
 
       addFeature({pl.getLine(), "inner-connections", paramsOut});
 
@@ -358,7 +360,7 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       params["lineCap"] = "round";
       params["class"] = getLineClass(c.geoms[i].from.line->id());
       params["width"] =
-          util::toString(_cfg->lineWidth * _cfg->outputResolution);
+          util::toString(_cfg->lineWidth);
 
       addFeature({pl.getLine(), "inner-connections", params});
     }
@@ -379,7 +381,7 @@ void MvtRenderer::renderLinePart(const PolyLine<double> p, double width,
                                  const std::string& endMarker) {
   std::stringstream styleOutline;
   styleOutline << "fill:none;stroke:#000000;stroke-linecap:round;stroke-width:"
-               << (width + _cfg->outlineWidth) * _cfg->outputResolution << ";"
+               << (width + _cfg->outlineWidth) << ";"
                << oCss;
   Params paramsOutline;
   paramsOutline["style"] = styleOutline.str();
@@ -393,7 +395,7 @@ void MvtRenderer::renderLinePart(const PolyLine<double> p, double width,
   }
 
   styleStr << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
-           << width * _cfg->outputResolution;
+           << width;
   Params params;
   params["style"] = styleStr.str();
   params["class"] = "transit-edge " + getLineClass(line.id());
@@ -414,7 +416,7 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 
   double lineW = _cfg->lineWidth;
   double lineSpc = _cfg->lineSpacing;
-  double offsetStep = lineW + lineSpc;
+  double offsetStep = (lineW + lineSpc) * _res;
   double oo = outG.getTotalWidth(e);
 
   double o = oo;
@@ -428,7 +430,7 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 
     if (p.getLength() < 0.01) continue;
 
-    double offset = -(o - oo / 2.0 - _cfg->lineWidth / 2.0);
+    double offset = -(o - oo / 2.0 - (_cfg->lineWidth * _res) / 2.0);
 
     p.offsetPerp(offset);
 
@@ -458,8 +460,7 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
     paramsOut["line"] = line->label();
     paramsOut["lineCap"] = "butt";
     paramsOut["class"] = getLineClass(line->id());
-    paramsOut["width"] = util::toString((_cfg->outlineWidth + _cfg->lineWidth) *
-                                        _cfg->outputResolution);
+    paramsOut["width"] = util::toString((_cfg->outlineWidth + _cfg->lineWidth));
 
     addFeature({p.getLine(), "lines", paramsOut});
 
@@ -468,7 +469,7 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
     params["line"] = line->label();
     params["lineCap"] = "round";
     params["class"] = getLineClass(line->id());
-    params["width"] = util::toString(_cfg->lineWidth * _cfg->outputResolution);
+    params["width"] = util::toString(_cfg->lineWidth);
 
     addFeature({p.getLine(), "lines", params});
 

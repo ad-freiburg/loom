@@ -39,7 +39,7 @@ struct Config {
   bool renderNodeConnections = true;
   bool tightStations = false;
 
-  size_t mvtZoom = 14;
+  std::vector<size_t> mvtZooms;
 
   bool renderDirMarkers = false;
   std::string worldFilePath;

@@ -4,6 +4,7 @@
 
 #include <set>
 #include <string>
+
 #include "3rdparty/json.hpp"
 #include "shared/linegraph/Line.h"
 #include "shared/rendergraph/OrderCfg.h"
@@ -27,6 +28,25 @@ using util::geo::DPoint;
 using util::geo::MultiLine;
 using util::geo::Polygon;
 using util::geo::PolyLine;
+
+// _____________________________________________________________________________
+RenderGraph::RenderGraph(const shared::linegraph::LineGraph& lg,
+                         double defLineWidth, double defLineSpace)
+    : _defWidth(defLineWidth), _defSpacing(defLineSpace) {
+  std::unordered_map<shared::linegraph::LineNode*, shared::linegraph::LineNode*>
+      nmap;
+
+  for (const auto& nd : lg.getNds()) {
+    nmap[nd] = addNd(nd->pl());
+  }
+
+  for (const auto& nd : lg.getNds()) {
+    for (const auto e : nd->getAdjList()) {
+      if (e->getFrom() != nd) continue;
+      addEdg(nmap[e->getFrom()], nmap[e->getTo()], e->pl());
+    }
+  }
+}
 
 // _____________________________________________________________________________
 void RenderGraph::smooth() {
@@ -398,9 +418,9 @@ std::vector<Polygon<double>> RenderGraph::getStopGeoms(
 
   // prevent too large stations
   // if (util::geo::area(h) > 1.25 * (nfWidth * nfWidth)) {
-    // // render each stop individually
-    // auto served = servedLines(n);
-    // return getIndStopPolys(served, n, d);
+  // // render each stop individually
+  // auto served = servedLines(n);
+  // return getIndStopPolys(served, n, d);
   // }
 
   return {h};

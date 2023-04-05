@@ -32,6 +32,10 @@ class RenderGraph : public shared::linegraph::LineGraph {
   RenderGraph(double defLineWidth, double defLineSpace)
       : _defWidth(defLineWidth), _defSpacing(defLineSpace){};
 
+  RenderGraph(const shared::linegraph::LineGraph& lg) : RenderGraph(lg, 5, 5){};
+  RenderGraph(const shared::linegraph::LineGraph& lg, double defLineWidth,
+              double defLineSpace);
+
   void writePermutation(const OrderCfg&);
 
   std::vector<shared::rendergraph::InnerGeom> innerGeoms(
