@@ -41,6 +41,8 @@ struct Config {
   std::string ilpSolver = "gurobi";
   std::string ilpCacheDir = ".";
 
+  bool skipOnError = false;
+
   double maxGrDist = 3;
 
   int heurLocSearchIters = 100;

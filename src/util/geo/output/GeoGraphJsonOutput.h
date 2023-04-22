@@ -36,6 +36,15 @@ class GeoGraphJsonOutput {
   void printLatLng(const util::graph::Graph<N, E>& outG, std::ostream& str,
                    json::Val attrs);
 
+  // print a graph to the provided GeoJsonOutput, but treat coordinates as Web Mercator
+  // coordinates and reproject to WGS84
+  template <typename N, typename E>
+  void printLatLng(const util::graph::Graph<N, E>& outG, GeoJsonOutput* out);
+
+  // print a graph to the provided GeoJsonOutput
+  template <typename N, typename E>
+  void print(const util::graph::Graph<N, E>& outG, GeoJsonOutput* out);
+
  private:
   template <typename T>
   Line<T> createLine(const util::geo::Point<T>& a,
@@ -45,6 +54,11 @@ class GeoGraphJsonOutput {
   template <typename N, typename E>
   void printImpl(const util::graph::Graph<N, E>& outG, std::ostream& str,
                  bool proj, json::Val attrs);
+
+  // print a graph to the provided path
+  template <typename N, typename E>
+  void printImpl(const util::graph::Graph<N, E>& outG,
+                 bool proj, GeoJsonOutput* out);
 };
 
 #include "util/geo/output/GeoGraphJsonOutput.tpp"

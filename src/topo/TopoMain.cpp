@@ -56,11 +56,6 @@ int main(int argc, char** argv) {
 
   si.init();
 
-  // util::geo::output::GeoGraphJsonOutput out2;
-  // out2.printLatLng(tg, std::cout);
-  // exit(0);
-
-
   mc.averageNodePositions();
 
 
@@ -75,8 +70,8 @@ int main(int argc, char** argv) {
   // only remove the artifacts after the restriction inferrer has been
   // initialized, as these operations do not guarantee that the restrictions
   // are preserved!
-  mc.removeEdgeArtifacts();
 
+  mc.removeEdgeArtifacts();
 
 
   T_START(construction);
@@ -84,6 +79,7 @@ int main(int argc, char** argv) {
   iters += mc.collapseShrdSegs(10);
   iters += mc.collapseShrdSegs(cfg.maxAggrDistance);
   double constrT = T_STOP(construction);
+
 
   mc.removeNodeArtifacts(false);
 
@@ -122,6 +118,9 @@ int main(int argc, char** argv) {
   mc.removeNodeArtifacts(true);
 
   mc.reconstructIntersections();
+
+  // remove orphan lines again
+  mc.removeOrphanLines();
 
   if (cfg.outputStats) {
     for (const auto& nd : tg.getNds()) {

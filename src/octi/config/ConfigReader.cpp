@@ -21,9 +21,7 @@ using std::string;
 using std::vector;
 
 static const char* YEAR = &__DATE__[7];
-static const char* COPY =
-    "University of Freiburg - Chair of Algorithms and Data Structures";
-static const char* AUTHORS = "Patrick Brosi <brosi@informatik.uni-freiburg.de>";
+static const char* COPY = "University of Freiburg - Chair of Algorithms and Data Structures"; static const char* AUTHORS = "Patrick Brosi <brosi@informatik.uni-freiburg.de>";
 
 // _____________________________________________________________________________
 ConfigReader::ConfigReader() {}
@@ -52,6 +50,8 @@ void ConfigReader::help(const char* bin) const {
             << "base graph, either ortholinear, octilinear,\n"
             << std::setw(36) << " " << " orthoradial, quadtree, octihanan\n\n"
             << "Misc:\n"
+            << std::setw(36) << "  --skip-on-error"
+            << "skip graph on error\n"
             << std::setw(36) << "  --ilp-num-threads arg (=0)"
             << "number of threads to use by ILP solver,\n"
             << std::setw(36) << " "
@@ -142,6 +142,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"pen-90", required_argument, 0, 22},
                          {"pen-45", required_argument, 0, 23},
                          {"nd-move-pen", required_argument, 0, 24},
+                         {"skip-on-error", no_argument, 0, 25},
                          {"abort-after", required_argument, 0, 'a'},
                          {0, 0, 0, 0}};
 
@@ -230,6 +231,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         break;
       case 24:
         cfg->pens.ndMovePen= atof(optarg);
+        break;
+      case 25:
+        cfg->skipOnError = true;
         break;
       case 'g':
         cfg->gridSize = optarg;

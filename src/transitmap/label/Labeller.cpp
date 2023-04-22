@@ -29,8 +29,7 @@ util::geo::MultiLine<double> Labeller::getStationLblBand(
     const shared::linegraph::LineNode* n, double fontSize, uint8_t offset,
     const RenderGraph& g) {
   // TODO: the hull padding should be the same as in the renderer
-  auto statHull = g.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                                 _cfg->tightStations, 4);
+  auto statHull = g.getStopGeoms(n, _cfg->tightStations, 4);
 
   double rad = util::geo::getEnclosingRadius(*n->pl().getGeom(), statHull);
 
@@ -86,7 +85,6 @@ void Labeller::labelStations(const RenderGraph& g, bool notdeg2) {
     if (n->pl().stops().size() == 0 || (notdeg2 && n->getDeg() == 2)) continue;
     orderedNds.push_back(n);
   }
-
 
   std::sort(orderedNds.begin(), orderedNds.end(), statNdCmp);
 
@@ -149,9 +147,7 @@ Overlaps Labeller::getOverlaps(const util::geo::MultiLine<double>& band,
         if (nd->pl().stops().size() && !procedNds.count(nd)) {
           procedNds.insert(nd);
 
-          auto statHull =
-              g.getStopGeoms(nd, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                             _cfg->tightStations, 4);
+          auto statHull = g.getStopGeoms(nd, _cfg->tightStations, 4);
 
           double rad =
               util::geo::getEnclosingRadius(*nd->pl().getGeom(), statHull);
@@ -167,8 +163,8 @@ Overlaps Labeller::getOverlaps(const util::geo::MultiLine<double>& band,
 
   std::set<size_t> labelNeighs;
   _statLblIdx.get(band,
-                   g.getMaxLineNum() * (_cfg->lineWidth + _cfg->lineSpacing),
-                   &labelNeighs);
+                  g.getMaxLineNum() * (_cfg->lineWidth + _cfg->lineSpacing),
+                  &labelNeighs);
 
   for (auto id : labelNeighs) {
     auto labelNeigh = _stationLabels[id];
@@ -241,8 +237,8 @@ void Labeller::labelLines(const RenderGraph& g) {
 
           std::set<size_t> lineLabelNeighs;
           labelIdx.get(cand.getLine(),
-                        20 * (_cfg->lineWidth + _cfg->lineSpacing),
-                        &lineLabelNeighs);
+                       20 * (_cfg->lineWidth + _cfg->lineSpacing),
+                       &lineLabelNeighs);
 
           std::vector<const shared::linegraph::Line*> lines;
           for (auto lo : e->pl().getLines()) {

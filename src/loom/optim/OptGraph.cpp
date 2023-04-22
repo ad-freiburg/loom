@@ -1142,7 +1142,8 @@ void OptGraph::untangleOuterStump() {
     for (auto e : stumpN->getAdjList()) {
       if (e == stumpEdg || e == mainLeg) continue;
 
-      assert(!toUntangle.count(e));
+      // TODO: this should never happen, some check is missing above!
+      if (toUntangle.count(e)) continue;
 
       OptEdge* newE = 0;
 

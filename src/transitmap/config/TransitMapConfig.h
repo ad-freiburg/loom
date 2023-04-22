@@ -19,6 +19,8 @@ struct Config {
 
   std::string renderMethod = "svg";
 
+  std::string mvtPath = ".";
+
   double outputResolution = 0.1;
   double inputSmoothing = 3;
   double innerGeometryPrecision = 3;

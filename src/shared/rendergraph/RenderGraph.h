@@ -42,7 +42,7 @@ class RenderGraph : public shared::linegraph::LineGraph {
       const shared::linegraph::LineNode* n, double prec) const;
 
   std::vector<util::geo::Polygon<double>> getStopGeoms(
-      const shared::linegraph::LineNode* n, double d, bool simple,
+      const shared::linegraph::LineNode* n, bool simple,
       size_t pointsPerCircle) const;
 
   // TODO: maybe move this to LineGraph?

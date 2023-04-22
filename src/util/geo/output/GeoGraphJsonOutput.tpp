@@ -22,7 +22,7 @@ void GeoGraphJsonOutput::print(const util::graph::Graph<N, E>& outG,
 // _____________________________________________________________________________
 template <typename N, typename E>
 void GeoGraphJsonOutput::printLatLng(const util::graph::Graph<N, E>& outG,
-                               std::ostream& str) {
+                                     std::ostream& str) {
   printImpl(outG, str, true, {});
 }
 
@@ -36,17 +36,38 @@ void GeoGraphJsonOutput::print(const util::graph::Graph<N, E>& outG,
 // _____________________________________________________________________________
 template <typename N, typename E>
 void GeoGraphJsonOutput::printLatLng(const util::graph::Graph<N, E>& outG,
-                               std::ostream& str, json::Val attrs) {
+                                     std::ostream& str, json::Val attrs) {
   printImpl(outG, str, true, attrs);
 }
 
 // _____________________________________________________________________________
 template <typename N, typename E>
+void GeoGraphJsonOutput::printLatLng(const util::graph::Graph<N, E>& outG,
+                                     GeoJsonOutput* out) {
+  printImpl(outG, true, out);
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
+void GeoGraphJsonOutput::print(const util::graph::Graph<N, E>& outG,
+                               GeoJsonOutput* out) {
+  printImpl(outG, false, out);
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
 void GeoGraphJsonOutput::printImpl(const util::graph::Graph<N, E>& outG,
-                               std::ostream& str, bool proj, json::Val attrs) {
+                                   std::ostream& str, bool proj,
+                                   json::Val attrs) {
+  GeoJsonOutput out(str, attrs);
+  printImpl(outG, proj, &out);
+  out.flush();
+}
 
-  GeoJsonOutput _out(str, attrs);
-
+// _____________________________________________________________________________
+template <typename N, typename E>
+void GeoGraphJsonOutput::printImpl(const util::graph::Graph<N, E>& outG,
+                                   bool proj, GeoJsonOutput* out) {
   // first pass, nodes
   for (util::graph::Node<N, E>* n : outG.getNds()) {
     if (!n->pl().getGeom()) continue;
@@ -60,9 +81,9 @@ void GeoGraphJsonOutput::printImpl(const util::graph::Graph<N, E>& outG,
     props.insert(addProps.begin(), addProps.end());
 
     if (proj) {
-      _out.printLatLng(*n->pl().getGeom(), props);
+      out->printLatLng(*n->pl().getGeom(), props);
     } else {
-      _out.print(*n->pl().getGeom(), props);
+      out->print(*n->pl().getGeom(), props);
     }
   }
 
@@ -84,21 +105,19 @@ void GeoGraphJsonOutput::printImpl(const util::graph::Graph<N, E>& outG,
           if (e->getTo()->pl().getGeom()) {
             auto b = *e->getTo()->pl().getGeom();
             if (proj) {
-              _out.printLatLng(createLine(a, b), props);
+              out->printLatLng(createLine(a, b), props);
             } else {
-              _out.print(createLine(a, b), props);
+              out->print(createLine(a, b), props);
             }
           }
         }
       } else {
         if (proj) {
-          _out.printLatLng(*e->pl().getGeom(), props);
+          out->printLatLng(*e->pl().getGeom(), props);
         } else {
-          _out.print(*e->pl().getGeom(), props);
+          out->print(*e->pl().getGeom(), props);
         }
       }
     }
   }
-
-  _out.flush();
 }

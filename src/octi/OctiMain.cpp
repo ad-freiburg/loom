@@ -4,9 +4,11 @@
 
 #include <stdio.h>
 #include <unistd.h>
+
 #include <fstream>
 #include <iostream>
 #include <set>
+
 #include "3rdparty/json.hpp"
 #include "octi/Enlarger.h"
 #include "octi/Octilinearizer.h"
@@ -113,181 +115,233 @@ int main(int argc, char** argv) {
 
   LOGTO(DEBUG, std::cerr) << "Reading graph file...";
   T_START(read);
-  LineGraph tg;
-  BaseGraph* gg;
-  Drawing d;
+  LineGraph lg;
 
   if (cfg.fromDot)
-    tg.readFromDot(&(std::cin), 0);
+    lg.readFromDot(&(std::cin), 0);
   else
-    tg.readFromJson(&(std::cin), 0);
+    lg.readFromJson(&(std::cin), 0);
 
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(read) << "ms)";
 
   LOGTO(DEBUG, std::cerr) << "Planarizing graph...";
   T_START(planarize);
-  tg.topologizeIsects();
+  lg.topologizeIsects();
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(planarize) << "ms)";
 
-  double avgDist = avgStatDist(tg);
-  LOGTO(DEBUG, std::cerr) << "Average adj. node distance is " << avgDist;
+  std::vector<LineGraph> comps = lg.distConnectedComponents(10000);
 
-  Octilinearizer oct(cfg.baseGraphType);
-  LineGraph res;
+  util::json::Array jsonScores;
+  std::vector<LineGraph*> resultGraphs;
+  std::vector<BaseGraph*> resultGridGraphs;
 
-  double gridSize;
+  LOGTO(DEBUG, std::cerr) << "Broke input graph into " << comps.size()
+                          << " components";
 
-  if (util::trim(cfg.gridSize).back() == '%') {
-    double perc = atof(cfg.gridSize.c_str()) / 100;
-    gridSize = avgDist * perc;
-    LOGTO(DEBUG, std::cerr)
-        << "Grid size " << gridSize << " (" << perc * 100 << "%)";
-  } else {
-    gridSize = atof(cfg.gridSize.c_str());
-    LOGTO(DEBUG, std::cerr) << "Grid size " << gridSize;
-  }
+  for (auto& tg : comps) {
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.printLatLng(tg, std::cout);
+    // exit(0);
 
-  // contract degree 2 nodes without any significance (no station, no exception,
-  // no change in lines
-  tg.contractStrayNds();
+    double avgDist = avgStatDist(tg);
+    LOGTO(DEBUG, std::cerr) << "Average adj. node distance is " << avgDist;
 
-  // heuristic: contract all edges shorter than half the grid size
-  tg.contractEdges(gridSize / 2);
+    Drawing d;
 
-  auto box = tg.getBBox();
+    Octilinearizer oct(cfg.baseGraphType);
+    LineGraph* res = new LineGraph();
+    BaseGraph* gg;
 
-  // split nodes that have a larger degree than the max degree of the grid graph
-  // to allow drawing
-  tg.splitNodes(oct.maxNodeDeg());
+    double gridSize;
 
-  CombGraph cg(&tg, cfg.deg2Heur);
-  box = util::geo::pad(box, gridSize + 1);
-
-  if (cfg.baseGraphType == octi::basegraph::BaseGraphType::ORTHORADIAL ||
-      cfg.baseGraphType == octi::basegraph::BaseGraphType::PSEUDOORTHORADIAL) {
-    auto centerNd = getCenterNd(&cg);
-
-    LOGTO(DEBUG, std::cerr) << "Orthoradial center node is "
-                            << centerNd->pl().getParent()->pl().toString();
-
-    auto cgCtr = *centerNd->pl().getGeom();
-    auto newBox = util::geo::DBox();
-
-    newBox = extendBox(box, newBox);
-    newBox = extendBox(rotate(convexHull(box), 180, cgCtr), newBox);
-    box = newBox;
-  }
-
-  Score sc;
-  octi::ilp::ILPStats ilpstats;
-  double time = 0;
-
-  if (cfg.optMode == "ilp") {
-    T_START(octi);
-    sc = oct.drawILP(cg, box, &res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
-                     cfg.maxGrDist, cfg.orderMethod, cfg.ilpNoSolve,
-                     cfg.enfGeoPen, cfg.hananIters, cfg.ilpTimeLimit,
-                     cfg.ilpCacheDir, cfg.ilpCacheThreshold, cfg.ilpNumThreads,
-                     &ilpstats, cfg.ilpSolver, cfg.ilpPath);
-    time = T_STOP(octi);
-    LOGTO(DEBUG, std::cerr)
-        << "Schematized using ILP in " << time << " ms, score " << sc.full;
-  } else if ((cfg.optMode == "heur")) {
-    T_START(octi);
-    try {
-      sc = oct.draw(cg, box, &res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
-                    cfg.maxGrDist, cfg.orderMethod, cfg.restrLocSearch,
-                    cfg.enfGeoPen, cfg.hananIters, cfg.obstacles,
-                    cfg.heurLocSearchIters, cfg.abortAfter);
-      time = T_STOP(octi);
-    } catch (const NoEmbeddingFoundExc& exc) {
-      LOG(ERROR) << exc.what();
-      exit(1);
-    }
-    LOGTO(DEBUG, std::cerr) << "Schematized using heur approach in " << time
-                            << " ms, score " << sc.full;
-  }
-
-  util::json::Dict jsonScore;
-
-  if (cfg.writeStats) {
-    size_t maxRss = util::getPeakRSS();
-    size_t numEdgs = 0;
-    size_t numEdgsComb = 0;
-    size_t numEdgsTg = 0;
-    for (auto nd : gg->getNds()) {
-      numEdgs += nd->getDeg();
-    }
-    for (auto nd : cg.getNds()) {
-      numEdgsComb += nd->getDeg();
-    }
-    for (auto nd : tg.getNds()) {
-      numEdgsTg += nd->getDeg();
+    if (util::trim(cfg.gridSize).back() == '%') {
+      double perc = atof(cfg.gridSize.c_str()) / 100;
+      gridSize = avgDist * perc;
+      LOGTO(DEBUG, std::cerr)
+          << "Grid size " << gridSize << " (" << perc * 100 << "%)";
+    } else {
+      gridSize = atof(cfg.gridSize.c_str());
+      LOGTO(DEBUG, std::cerr) << "Grid size " << gridSize;
     }
 
-    // translate score to JSON
-    jsonScore = util::json::Dict{
-        {"scores",
-         util::json::Dict{{"total-score", sc.full},
-                          {"topo-violations", util::json::Int(sc.violations)},
-                          {"density-score", sc.dense},
-                          {"bend-score", sc.bend},
-                          {"hop-score", sc.hop},
-                          {"move-score", sc.move}}},
-        {"pens",
-         util::json::Dict{
-             {"density-pen", cfg.pens.densityPen},
-             {"diag-pen", cfg.pens.diagonalPen},
-             {"hori-pen", cfg.pens.horizontalPen},
-             {"vert-pen", cfg.pens.verticalPen},
-             {"180-turn-pen", cfg.pens.p_0},
-             {"135-turn-pen", cfg.pens.p_135},
-             {"90-turn-pen", cfg.pens.p_90},
-             {"45-turn-pen", cfg.pens.p_45},
-         }},
-        {"gridgraph-size", util::json::Dict{{"nodes", gg->getNds().size()},
-                                            {"edges", numEdgs / 2}}},
-        {"combgraph-size", util::json::Dict{{"nodes", cg.getNds().size()},
-                                            {"edges", numEdgsComb / 2}}},
-        {"input-graph-size", util::json::Dict{{"nodes", tg.getNds().size()},
-                                              {"edges", numEdgsTg / 2},
-                                              {"max-deg", tg.maxDeg()}}},
-        {"input-graph-avg-node-dist",
-         avgDist * webMercDistFactor(box.getLowerLeft())},
-        {"area", dist(box.getLowerRight(), box.getLowerLeft()) *
-                     webMercDistFactor(box.getLowerRight()) *
-                     dist(box.getLowerRight(), box.getUpperRight()) *
-                     webMercDistFactor(box.getLowerRight())},
-        {"misc", util::json::Dict{{"method", cfg.optMode},
-                                  {"deg2heur", cfg.deg2Heur},
-                                  {"max-grid-dist", cfg.maxGrDist}}},
-        {"time-ms", time},
-        {"iterations", sc.iters},
-        {"procs", omp_get_num_procs()},
-        {"peak-memory", util::readableSize(maxRss)},
-        {"peak-memory-bytes", maxRss},
-        {"timestamp", util::json::Int(std::time(0))}};
+    // contract degree 2 nodes without any significance (no station, no
+    // exception, no change in lines
+    tg.contractStrayNds();
+
+    // heuristic: contract all edges shorter than half the grid size
+    tg.contractEdges(gridSize / 2);
+
+    auto box = tg.getBBox();
+
+    // split nodes that have a larger degree than the max degree of the grid
+    // graph to allow drawing
+    tg.splitNodes(oct.maxNodeDeg());
+
+    CombGraph cg(&tg, cfg.deg2Heur);
+    box = util::geo::pad(box, gridSize + 1);
+
+    if (cfg.baseGraphType == octi::basegraph::BaseGraphType::ORTHORADIAL ||
+        cfg.baseGraphType ==
+            octi::basegraph::BaseGraphType::PSEUDOORTHORADIAL) {
+      auto centerNd = getCenterNd(&cg);
+
+      LOGTO(DEBUG, std::cerr) << "Orthoradial center node is "
+                              << centerNd->pl().getParent()->pl().toString();
+
+      auto cgCtr = *centerNd->pl().getGeom();
+      auto newBox = util::geo::DBox();
+
+      newBox = extendBox(box, newBox);
+      newBox = extendBox(rotate(convexHull(box), 180, cgCtr), newBox);
+      box = newBox;
+    }
+
+    Score sc;
+    octi::ilp::ILPStats ilpstats;
+    double time = 0;
 
     if (cfg.optMode == "ilp") {
-      jsonScore["ilp"] = util::json::Dict{
-          {"size",
-           util::json::Dict{{"rows", ilpstats.rows}, {"cols", ilpstats.cols}}},
-          {"solve-time", ilpstats.time},
-          {"optimal", util::json::Bool{ilpstats.optimal}}};
+      T_START(octi);
+      sc =
+          oct.drawILP(cg, box, res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
+                      cfg.maxGrDist, cfg.orderMethod, cfg.ilpNoSolve,
+                      cfg.enfGeoPen, cfg.hananIters, cfg.ilpTimeLimit,
+                      cfg.ilpCacheDir, cfg.ilpCacheThreshold, cfg.ilpNumThreads,
+                      &ilpstats, cfg.ilpSolver, cfg.ilpPath);
+      time = T_STOP(octi);
+      LOGTO(DEBUG, std::cerr)
+          << "Schematized using ILP in " << time << " ms, score " << sc.full;
+    } else if ((cfg.optMode == "heur")) {
+      T_START(octi);
+      try {
+        sc = oct.draw(cg, box, res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
+                      cfg.maxGrDist, cfg.orderMethod, cfg.restrLocSearch,
+                      cfg.enfGeoPen, cfg.hananIters, cfg.obstacles,
+                      cfg.heurLocSearchIters, cfg.abortAfter);
+        time = T_STOP(octi);
+      } catch (const NoEmbeddingFoundExc& exc) {
+        if (cfg.skipOnError) {
+          LOGTO(WARN, std::cerr) << exc.what();
+          continue;
+        }
+        LOG(ERROR) << exc.what();
+        exit(1);
+      }
+      LOGTO(DEBUG, std::cerr) << "Schematized using heur approach in " << time
+                              << " ms, score " << sc.full;
     }
+
+    if (cfg.writeStats) {
+      size_t maxRss = util::getPeakRSS();
+      size_t numEdgs = 0;
+      size_t numEdgsComb = 0;
+      size_t numEdgsTg = 0;
+      for (auto nd : gg->getNds()) {
+        numEdgs += nd->getDeg();
+      }
+      for (auto nd : cg.getNds()) {
+        numEdgsComb += nd->getDeg();
+      }
+      for (auto nd : tg.getNds()) {
+        numEdgsTg += nd->getDeg();
+      }
+
+      // translate score to JSON
+      util::json::Dict jsonScore = util::json::Dict{
+          {"scores",
+           util::json::Dict{{"total-score", sc.full},
+                            {"topo-violations", util::json::Int(sc.violations)},
+                            {"density-score", sc.dense},
+                            {"bend-score", sc.bend},
+                            {"hop-score", sc.hop},
+                            {"move-score", sc.move}}},
+          {"pens",
+           util::json::Dict{
+               {"density-pen", cfg.pens.densityPen},
+               {"diag-pen", cfg.pens.diagonalPen},
+               {"hori-pen", cfg.pens.horizontalPen},
+               {"vert-pen", cfg.pens.verticalPen},
+               {"180-turn-pen", cfg.pens.p_0},
+               {"135-turn-pen", cfg.pens.p_135},
+               {"90-turn-pen", cfg.pens.p_90},
+               {"45-turn-pen", cfg.pens.p_45},
+           }},
+          {"gridgraph-size", util::json::Dict{{"nodes", gg->getNds().size()},
+                                              {"edges", numEdgs / 2}}},
+          {"combgraph-size", util::json::Dict{{"nodes", cg.getNds().size()},
+                                              {"edges", numEdgsComb / 2}}},
+          {"input-graph-size", util::json::Dict{{"nodes", tg.getNds().size()},
+                                                {"edges", numEdgsTg / 2},
+                                                {"max-deg", tg.maxDeg()}}},
+          {"input-graph-avg-node-dist",
+           avgDist * webMercDistFactor(box.getLowerLeft())},
+          {"area", dist(box.getLowerRight(), box.getLowerLeft()) *
+                       webMercDistFactor(box.getLowerRight()) *
+                       dist(box.getLowerRight(), box.getUpperRight()) *
+                       webMercDistFactor(box.getLowerRight())},
+          {"misc", util::json::Dict{{"method", cfg.optMode},
+                                    {"deg2heur", cfg.deg2Heur},
+                                    {"max-grid-dist", cfg.maxGrDist}}},
+          {"time-ms", time},
+          {"iterations", sc.iters},
+          {"procs", omp_get_num_procs()},
+          {"peak-memory", util::readableSize(maxRss)},
+          {"peak-memory-bytes", maxRss},
+          {"timestamp", util::json::Int(std::time(0))}};
+
+      if (cfg.optMode == "ilp") {
+        jsonScore["ilp"] = util::json::Dict{
+            {"size", util::json::Dict{{"rows", ilpstats.rows},
+                                      {"cols", ilpstats.cols}}},
+            {"solve-time", ilpstats.time},
+            {"optimal", util::json::Bool{ilpstats.optimal}}};
+      }
+
+      jsonScores.push_back(jsonScore);
+    }
+
+    resultGraphs.push_back(res);
+    resultGridGraphs.push_back(gg);
+  }
+
+  util::geo::output::GeoGraphJsonOutput gout;
+  util::json::Val score;
+  if (jsonScores.size() == 1) {
+    score = jsonScores[0];
+  } else {
+    score = jsonScores;
   }
 
   if (cfg.printMode == "gridgraph") {
     if (cfg.writeStats) {
-      out.printLatLng(*gg, std::cout, util::json::Dict{{"statistics", jsonScore}});
+      util::geo::output::GeoJsonOutput out(
+          std::cout, util::json::Dict{{"statistics", score}});
+      for (auto gg : resultGraphs) {
+        gout.printLatLng(*gg, &out);
+      }
+      out.flush();
     } else {
-      out.printLatLng(*gg, std::cout);
+      util::geo::output::GeoJsonOutput out(std::cout);
+      for (auto gg : resultGraphs) {
+        gout.printLatLng(*gg, &out);
+      }
+      out.flush();
     }
   } else {
     if (cfg.writeStats) {
-      out.printLatLng(res, std::cout, util::json::Dict{{"statistics", jsonScore}});
+      util::geo::output::GeoJsonOutput out(
+          std::cout, util::json::Dict{{"statistics", score}});
+      for (auto res : resultGraphs) {
+        gout.printLatLng(*res, &out);
+      }
+      out.flush();
     } else {
-      out.printLatLng(res, std::cout);
+      util::geo::output::GeoJsonOutput out(std::cout);
+
+      for (auto res : resultGraphs) {
+        gout.printLatLng(*res, &out);
+      }
+      out.flush();
     }
   }
 

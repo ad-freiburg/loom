@@ -155,6 +155,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
 
   void snapOrphanStations();
 
+  std::vector<LineGraph> distConnectedComponents(double d);
+
  private:
   util::geo::Box<double> _bbox;
 

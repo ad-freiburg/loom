@@ -900,6 +900,27 @@ inline double crossProd(const Point<T>& p, const LineSegment<T>& ls) {
 
 // _____________________________________________________________________________
 template <typename T>
+inline double dist(const Polygon<T>& poly1, const Polygon<T>& poly2) {
+  if (contains(poly1, poly2) || contains(poly2, poly1)) return 0;
+  return dist(poly1.getOuter(), poly2.getOuter());
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline double dist(const Line<T>& l, const Polygon<T>& poly) {
+  if (contains(l, poly)) return 0;
+  return dist(l, poly.getOuter());
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline double dist(const Point<T>& p, const Polygon<T>& poly) {
+  if (contains(p, poly)) return 0;
+  return dist(p, poly.getOuter());
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline double dist(const Point<T>& p1, const Point<T>& p2) {
   return dist(p1.getX(), p1.getY(), p2.getX(), p2.getY());
 }

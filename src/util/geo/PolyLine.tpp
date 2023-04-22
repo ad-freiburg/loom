@@ -75,7 +75,7 @@ void PolyLine<T>::offsetPerp(double units) {
   Line<T> ret;
   Point<T> lastP = _line.front();
 
-  Point<T> *lastIns = 0, *befLastIns = 0;
+  Point<T>*lastIns = 0, *befLastIns = 0;
 
   for (size_t i = 1; i < _line.size(); i++) {
     Point<T> curP = _line[i];
@@ -249,8 +249,7 @@ Point<T> PolyLine<T>::interpolate(const Point<T>& a, const Point<T>& b,
   double n = sqrt(n1 * n1 + n2 * n2);
   n1 = n1 / n;
   n2 = n2 / n;
-  return Point<T>(a.getX() + (n1 * p),
-                  a.getY() + (n2 * p));
+  return Point<T>(a.getX() + (n1 * p), a.getY() + (n2 * p));
 }
 
 // _____________________________________________________________________________
@@ -276,6 +275,22 @@ template <typename T>
 PolyLine<T> PolyLine<T>::average(const std::vector<const PolyLine<T>*>& lines,
                                  const std::vector<double>& weights) {
   bool weighted = lines.size() == weights.size();
+
+  if (!weighted && lines.size() == 2 && lines[0]->getLine().size() == 2 &&
+      lines[1]->getLine().size() == 2) {
+    // simple case
+    util::geo::Line<T> avg(2);
+    const auto& a = lines[0]->getLine();
+    const auto& b = lines[1]->getLine();
+
+    avg[0] = {(a[0].getX() + b[0].getX()) / 2.0,
+              (a[0].getY() + b[0].getY()) / 2.0};
+    avg[1] = {(a[1].getX() + b[1].getX()) / 2.0,
+              (a[1].getY() + b[1].getY()) / 2.0};
+
+    return avg;
+  }
+
   double stepSize;
 
   double longestLength = DBL_MIN;  // avoid recalc of length on each comparision
@@ -320,7 +335,7 @@ PolyLine<T> PolyLine<T>::average(const std::vector<const PolyLine<T>*>& lines,
     ret << Point<T>(x / total, y / total);
   }
 
-  ret.simplify(0);
+  ret.simplify(0.0001);
 
   return ret;
 }
@@ -610,12 +625,10 @@ void PolyLine<T>::applyChaikinSmooth(size_t depth) {
       Point<T> pA = _line[i - 1];
       Point<T> pB = _line[i];
 
-      smooth.push_back(
-          Point<T>(0.75 * pA.getX() + 0.25 * pB.getX(),
-                   0.75 * pA.getY() + 0.25 * pB.getY()));
-      smooth.push_back(
-          Point<T>(0.25 * pA.getX() + 0.75 * pB.getX(),
-                   0.25 * pA.getY() + 0.75 * pB.getY()));
+      smooth.push_back(Point<T>(0.75 * pA.getX() + 0.25 * pB.getX(),
+                                0.75 * pA.getY() + 0.25 * pB.getY()));
+      smooth.push_back(Point<T>(0.25 * pA.getX() + 0.75 * pB.getX(),
+                                0.25 * pA.getY() + 0.75 * pB.getY()));
     }
 
     smooth.push_back(_line.back());

@@ -47,9 +47,10 @@ int main(int argc, char** argv) {
     else
       lg.readFromJson(&std::cin, cfg.inputSmoothing);
 
-    for (size_t z : cfg.mvtZooms) {
-      std::cerr << "ZOOM " << z << std::endl;
+    // snap orphan stations
+    lg.snapOrphanStations();
 
+    for (size_t z : cfg.mvtZooms) {
       double lWidth = cfg.lineWidth;
       double lSpacing = cfg.lineSpacing;
 
@@ -58,10 +59,20 @@ int main(int argc, char** argv) {
 
       RenderGraph g(lg, lWidth, lSpacing);
 
+      g.contractStrayNds();
       g.smooth();
       b.writeNodeFronts(&g);
       b.expandOverlappinFronts(&g);
+
       g.createMetaNodes();
+
+      // avoid overlapping stations
+      if (true) {
+        b.dropOverlappingStations(&g);
+        g.contractStrayNds();
+        b.expandOverlappinFronts(&g);
+        g.createMetaNodes();
+      }
 
       LOGTO(DEBUG, std::cerr) << "Outputting to MVT ...";
       transitmapper::output::MvtRenderer mvtOut(&cfg, z);
@@ -74,6 +85,10 @@ int main(int argc, char** argv) {
     else
       g.readFromJson(&std::cin, cfg.inputSmoothing);
 
+    // snap orphan stations
+    g.snapOrphanStations();
+
+    g.contractStrayNds();
     g.smooth();
     b.writeNodeFronts(&g);
     b.expandOverlappinFronts(&g);

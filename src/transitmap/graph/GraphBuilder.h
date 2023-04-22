@@ -34,6 +34,7 @@ class GraphBuilder {
 
   void writeNodeFronts(shared::rendergraph::RenderGraph* g);
   void expandOverlappinFronts(shared::rendergraph::RenderGraph* g);
+  void dropOverlappingStations(shared::rendergraph::RenderGraph* g);
 
  private:
   const config::Config* _cfg;
@@ -41,13 +42,12 @@ class GraphBuilder {
   std::set<shared::linegraph::NodeFront*> nodeGetOverlappingFronts(
       const shared::rendergraph::RenderGraph* g,
       const shared::linegraph::LineNode* n) const;
-  void freeNodeFront(const shared::linegraph::LineNode* n,
-                     shared::linegraph::NodeFront* f);
 
   bool nodeFrontsOverlap(const shared::rendergraph::RenderGraph* g,
                          const shared::linegraph::NodeFront& a,
                          const shared::linegraph::NodeFront& b,
                          double d) const;
+
   mutable std::set<const shared::linegraph::LineEdge*> _indEdges;
   mutable std::map<const shared::linegraph::LineEdge*, size_t> _pEdges;
 };

@@ -6,25 +6,28 @@
 #include <set>
 #include <stack>
 #include <vector>
+
 #include "GraphBuilder.h"
-#include "shared/rendergraph/RenderGraph.h"
 #include "shared/linegraph/Line.h"
+#include "shared/rendergraph/RenderGraph.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
 
-using shared::rendergraph::RenderGraph;
-using shared::rendergraph::OrderCfg;
-using shared::rendergraph::Ordering;
 using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineNode;
 using shared::linegraph::NodeFront;
+using shared::rendergraph::OrderCfg;
+using shared::rendergraph::Ordering;
+using shared::rendergraph::RenderGraph;
 using transitmapper::graph::GraphBuilder;
 using util::geo::DPoint;
 using util::geo::LinePoint;
 using util::geo::LinePointCmp;
 using util::geo::PolyLine;
+
+const static double MINL = 10;
 
 // _____________________________________________________________________________
 GraphBuilder::GraphBuilder(const config::Config* cfg) : _cfg(cfg) {}
@@ -59,10 +62,51 @@ void GraphBuilder::writeNodeFronts(RenderGraph* graph) {
 }
 
 // _____________________________________________________________________________
+void GraphBuilder::dropOverlappingStations(RenderGraph* graph) {
+  util::geo::RTree<LineNode*, util::geo::MultiPolygon, double> tree;
+
+  // store geoms to avoid generating them twice
+  std::unordered_map<LineNode*, util::geo::MultiPolygon<double>> geoms;
+
+  // tmp storage of station nodes
+  std::vector<LineNode*> stations;
+
+  // fill index
+  for (auto n : graph->getNds()) {
+    if (!n->pl().stops().size()) continue;
+    stations.push_back(n);
+    geoms[n] = graph->getStopGeoms(n, _cfg->tightStations, 4);
+    tree.add(geoms[n], n);
+  }
+
+  double PAD = graph->getWidth(0) + graph->getSpacing(0);
+
+  for (auto n : stations) {
+    if (!n->pl().stops().size()) continue;
+    std::set<LineNode*> cands;
+    auto box = util::geo::pad(util::geo::getBoundingBox(geoms[n]), PAD);
+    tree.get(box, &cands);
+
+    for (auto on : cands) {
+      if (on == n || on->pl().stops().size() == 0) continue;
+      if (util::geo::dist(geoms[n], geoms[on]) <= PAD) {
+        // drop n if it is smaller, otherwise wait until the other node
+        // is checked
+        if (n->getDeg() != 1 &&
+            (RenderGraph::getLDeg(n) <= RenderGraph::getLDeg(on) ||
+             on->getDeg() == 1)) {
+          n->pl().clearStops();
+        }
+      }
+    }
+  }
+}
+
+// _____________________________________________________________________________
 void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
   // now, look at the nodes entire front geometries and expand them
   // until nothing overlaps
-  double step = 4;
+  double step = (g->getWidth(0) + g->getSpacing(0)) / 10;
 
   while (true) {
     bool stillFree = false;
@@ -70,19 +114,29 @@ void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
       std::set<NodeFront*> overlaps = nodeGetOverlappingFronts(g, n);
       for (auto f : overlaps) {
         stillFree = true;
+        double len = util::geo::len(*f->edge->pl().getGeom());
+
         if (f->edge->getTo() == n) {
+          double d = fmax(MINL - 1, len - step);
           f->geom = PolyLine<double>(*f->edge->pl().getGeom())
-                        .getOrthoLineAtDist(
-                            util::geo::len(*f->edge->pl().getGeom()) - step,
-                            g->getTotalWidth(f->edge));
+                        .getOrthoLineAtDist(d, g->getTotalWidth(f->edge));
+
+          f->edge->pl().setGeom(PolyLine<double>(*f->edge->pl().getGeom())
+                              .getSegmentAtDist(0, d)
+                              .getLine());
+
         } else {
+          double d = fmin(step, len - MINL + 1);
           f->geom = PolyLine<double>(*f->edge->pl().getGeom())
-                        .getOrthoLineAtDist(step, g->getTotalWidth(f->edge));
+                        .getOrthoLineAtDist(d, g->getTotalWidth(f->edge));
+
+          f->edge->pl().setGeom(PolyLine<double>(*f->edge->pl().getGeom())
+                              .getSegmentAtDist(d, len)
+                              .getLine());
+
           f->geom.reverse();
         }
 
-        // cut the edges to fit the new front
-        freeNodeFront(n, f);
       }
     }
     if (!stillFree) break;
@@ -93,7 +147,6 @@ void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
 std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
     const RenderGraph* g, const LineNode* n) const {
   std::set<NodeFront*> ret;
-  double minLength = 10;
 
   // TODO: why are nodefronts accessed via index?
   for (size_t i = 0; i < n->pl().fronts().size(); ++i) {
@@ -111,22 +164,24 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
       if (n->pl().stops().size() && !g->notCompletelyServed(n)) {
         maxNfDist = .5 * g->getMaxNdFrontWidth(n);
         double fac = 0;
-        if (_cfg->tightStations) maxNfDist = _cfg->lineWidth + _cfg->lineSpacing;
-        overlap = nodeFrontsOverlap(g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
+        if (_cfg->tightStations) maxNfDist = g->getWidth(0) + g->getSpacing(0);
+        overlap = nodeFrontsOverlap(
+            g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
       } else {
         size_t numShr = g->getSharedLines(fa.edge, fb.edge).size();
         double fac = 5;
         if (!numShr) fac = 1;
 
-        overlap = nodeFrontsOverlap(g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
+        overlap = nodeFrontsOverlap(
+            g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
       }
 
       if (overlap) {
-        if (util::geo::len(*fa.edge->pl().getGeom()) > minLength &&
+        if (util::geo::len(*fa.edge->pl().getGeom()) > MINL &&
             fa.geom.distTo(*n->pl().getGeom()) < maxNfDist) {
           ret.insert(const_cast<NodeFront*>(&fa));
         }
-        if (util::geo::len(*fb.edge->pl().getGeom()) > minLength &&
+        if (util::geo::len(*fb.edge->pl().getGeom()) > MINL &&
             fb.geom.distTo(*n->pl().getGeom()) < maxNfDist) {
           ret.insert(const_cast<NodeFront*>(&fb));
         }
@@ -142,25 +197,4 @@ bool GraphBuilder::nodeFrontsOverlap(const RenderGraph* g, const NodeFront& a,
                                      const NodeFront& b, double d) const {
   UNUSED(g);
   return b.geom.distTo(a.geom) <= d;
-}
-
-// _____________________________________________________________________________
-void GraphBuilder::freeNodeFront(const LineNode* n, NodeFront* f) {
-  PolyLine<double> cutLine = f->geom;
-
-  std::set<LinePoint<double>, LinePointCmp<double>> iSects =
-      cutLine.getIntersections(*f->edge->pl().getGeom());
-  if (iSects.size() > 0) {
-    if (f->edge->getTo() != n) {
-      // cut at beginning
-      f->edge->pl().setGeom(PolyLine<double>(*f->edge->pl().getGeom())
-                                .getSegment(iSects.begin()->totalPos, 1)
-                                .getLine());
-    } else {
-      // cut at end
-      f->edge->pl().setGeom(PolyLine<double>(*f->edge->pl().getGeom())
-                                .getSegment(0, (--iSects.end())->totalPos)
-                                .getLine());
-    }
-  }
 }

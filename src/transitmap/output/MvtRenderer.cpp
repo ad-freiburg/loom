@@ -91,6 +91,7 @@ void MvtRenderer::print(const RenderGraph& outG) {
     renderNodeFronts(outG);
   }
 
+  LOGTO(DEBUG, std::cerr) << "Writing tiles...";
   writeTiles(_zoom);
 }
 
@@ -111,8 +112,7 @@ void MvtRenderer::outputNodes(const RenderGraph& outG) {
           util::toString((_cfg->lineWidth / 2));
 
       for (const auto& geom :
-           outG.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * _res * 0.8,
-                             _cfg->tightStations, 32)) {
+           outG.getStopGeoms(n, _cfg->tightStations, 32)) {
         addFeature({geom.getOuter(), "stations", params});
       }
     }
@@ -125,23 +125,18 @@ void MvtRenderer::renderNodeFronts(const RenderGraph& outG) {
     std::string color = n->pl().stops().size() > 0 ? "red" : "black";
     for (auto& f : n->pl().fronts()) {
       const PolyLine<double> p = f.geom;
-      std::stringstream style;
-      style << "fill:none;stroke:" << color
-            << ";stroke-linejoin: "
-               "miter;stroke-linecap:round;stroke-opacity:0.9;stroke-width:1";
-      std::map<std::string, std::string> params;
-      params["style"] = style.str();
-      // printLine(p, params );
+
+      Params params;
+      params["color"] = "ff0000";
+      params["lineCap"] = "round";
+      params["width"] = "2";
+
+      addFeature({p.getLine(), "lines", params});
 
       DPoint a = p.getPointAt(.5).p;
 
-      std::stringstream styleA;
-      styleA << "fill:none;stroke:" << color
-             << ";stroke-linejoin: "
-                "miter;stroke-linecap:round;stroke-opacity:1;stroke-width:.5";
-      params["style"] = styleA.str();
 
-      // printLine(PolyLine<double>(*n->pl().getGeom(), a), params);
+      addFeature({PolyLine<double>(*n->pl().getGeom(), a).getLine(), "lines", params});
     }
   }
 }
@@ -628,7 +623,7 @@ void MvtRenderer::serializeTile(size_t x, size_t y, size_t z,
                                 vector_tile::Tile* tile) {
   std::stringstream ss;
 
-  ss << "/home/patrick/repos/loom-vtiles/";
+  ss << _cfg->mvtPath << "/";
 
   ss << z;
   mkdir(ss.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);

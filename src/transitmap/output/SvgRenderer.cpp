@@ -171,9 +171,7 @@ void SvgRenderer::outputNodes(const RenderGraph& outG,
           util::toString((_cfg->lineWidth / 2) * _cfg->outputResolution);
       params["fill"] = "white";
 
-      for (const auto& geom :
-           outG.getStopGeoms(n, (_cfg->lineSpacing + _cfg->lineWidth) * 0.8,
-                             _cfg->tightStations, 32)) {
+      for (const auto& geom : outG.getStopGeoms(n, _cfg->tightStations, 32)) {
         printPolygon(geom, params, rparams);
       }
     }
@@ -319,10 +317,16 @@ bool SvgRenderer::isNextTo(const InnerGeom& a, const InnerGeom& b) const {
   bool aToInv = a.to.edge->getTo() == nd;
   bool bToInv = b.to.edge->getTo() == nd;
 
-  int aSlotFrom = !aFromInv ? a.slotFrom : (a.from.edge->pl().getLines().size() -1 - a.slotFrom);
-  int aSlotTo = !aToInv ? a.slotTo : (a.to.edge->pl().getLines().size() -1 - a.slotTo);
-  int bSlotFrom = !bFromInv ? b.slotFrom : (b.from.edge->pl().getLines().size() -1 - b.slotFrom);
-  int bSlotTo = !bToInv ? b.slotTo : (b.to.edge->pl().getLines().size() -1 - b.slotTo);
+  int aSlotFrom = !aFromInv
+                      ? a.slotFrom
+                      : (a.from.edge->pl().getLines().size() - 1 - a.slotFrom);
+  int aSlotTo =
+      !aToInv ? a.slotTo : (a.to.edge->pl().getLines().size() - 1 - a.slotTo);
+  int bSlotFrom = !bFromInv
+                      ? b.slotFrom
+                      : (b.from.edge->pl().getLines().size() - 1 - b.slotFrom);
+  int bSlotTo =
+      !bToInv ? b.slotTo : (b.to.edge->pl().getLines().size() - 1 - b.slotTo);
 
   if (a.from.edge == b.from.edge && a.to.edge == b.to.edge) {
     if ((aSlotFrom - bSlotFrom == 1 && bSlotTo - aSlotTo == 1) ||
@@ -417,7 +421,8 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       Params paramsOutlineCropped;
       paramsOutlineCropped["style"] = styleOutlineCropped.str();
       paramsOutlineCropped["class"] += " inner-geom-outline";
-      paramsOutlineCropped["class"] += " " + getLineClass(c.geoms[i].from.line->id());
+      paramsOutlineCropped["class"] +=
+          " " + getLineClass(c.geoms[i].from.line->id());
 
       std::stringstream styleStr;
       styleStr << "fill:none;stroke:#" << c.geoms[i].from.line->color();

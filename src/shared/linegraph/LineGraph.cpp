@@ -9,13 +9,15 @@
 #include "shared/linegraph/LineNodePL.h"
 #include "shared/style/LineStyle.h"
 #include "util/String.h"
+#include "util/graph/Algorithm.h"
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
 #include "util/log/Log.h"
 
 using shared::linegraph::EdgeGrid;
 using shared::linegraph::EdgeOrdering;
-using shared::linegraph::ISect; using shared::linegraph::Line;
+using shared::linegraph::ISect;
+using shared::linegraph::Line;
 using shared::linegraph::LineEdge;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
@@ -24,6 +26,7 @@ using shared::linegraph::NodeGrid;
 using shared::linegraph::Partner;
 using util::geo::DPoint;
 using util::geo::Point;
+using util::graph::Algorithm;
 
 // _____________________________________________________________________________
 void LineGraph::readFromDot(std::istream* s, double smooth) {
@@ -271,7 +274,7 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
       }
 
       if (fromN == toN) {
-        LOG(DEBUG) << "Self edges are not supported, dropping...";
+        LOGTO(DEBUG, std::cerr) << "Self edges are not supported, dropping...";
         continue;
       }
 
@@ -457,6 +460,9 @@ void LineGraph::topologizeIsects() {
 
     nodeRpl(aa, i.b->getTo(), x);
     nodeRpl(ab, i.b->getFrom(), x);
+
+    _edgeGrid.remove(aa);
+    _edgeGrid.remove(ab);
 
     _edgeGrid.add(*aa->pl().getGeom(), aa);
     _edgeGrid.add(*ab->pl().getGeom(), ab);
@@ -832,6 +838,7 @@ void LineGraph::edgeDel(LineNode* n, const LineEdge* oldE) {
 void LineGraph::edgeRpl(LineNode* n, const LineEdge* oldE,
                         const LineEdge* newE) {
   if (oldE == newE) return;
+
   // replace in from
   for (auto& r : n->pl().getConnExc()) {
     auto exFr = r.second.begin();
@@ -857,6 +864,15 @@ void LineGraph::edgeRpl(LineNode* n, const LineEdge* oldE,
           exTo++;
         }
       }
+    }
+  }
+
+  // replace in node fronts
+  for (auto nf : n->pl().fronts()) {
+    if (nf.edge == oldE) {
+      n->pl().delFrontFor(nf.edge);
+      nf.edge = const_cast<LineEdge*>(newE);
+      n->pl().addFront(nf);
     }
   }
 }
@@ -922,21 +938,54 @@ void LineGraph::contractStrayNds() {
       auto pl = a->pl();
 
       if (a->getTo() == n) {
-        pl.setPolyline(PolyLine<double>(*a->getFrom()->pl().getGeom(),
-                                        *b->getOtherNd(n)->pl().getGeom()));
+        if (a->pl().getGeom() && b->pl().getGeom()) {
+          util::geo::Line<double> l;
+          l.insert(l.end(), a->pl().getGeom()->begin(),
+                   a->pl().getGeom()->end());
+          if (b->getFrom() == n)
+            l.insert(l.end(), b->pl().getGeom()->begin(),
+                     b->pl().getGeom()->end());
+          else
+            l.insert(l.end(), b->pl().getGeom()->rbegin(),
+                     b->pl().getGeom()->rend());
+          pl.setPolyline(l);
+        } else {
+          pl.setPolyline(PolyLine<double>(*a->getFrom()->pl().getGeom(),
+                                          *b->getOtherNd(n)->pl().getGeom()));
+        }
+
+        assert(!getEdg(a->getFrom(), b->getOtherNd(n)));
         auto newE = addEdg(a->getFrom(), b->getOtherNd(n), pl);
         edgeRpl(a->getFrom(), b, newE);
         edgeRpl(b->getOtherNd(n), b, newE);
         edgeRpl(a->getFrom(), a, newE);
         edgeRpl(b->getOtherNd(n), a, newE);
       } else {
-        pl.setPolyline(PolyLine<double>(*b->getOtherNd(n)->pl().getGeom(),
-                                        *a->getTo()->pl().getGeom()));
+        if (a->pl().getGeom() && b->pl().getGeom()) {
+          util::geo::Line<double> l;
+          if (b->getTo() == n)
+            l.insert(l.end(), b->pl().getGeom()->begin(),
+                     b->pl().getGeom()->end());
+          else
+            l.insert(l.end(), b->pl().getGeom()->rbegin(),
+                     b->pl().getGeom()->rend());
+          l.insert(l.end(), a->pl().getGeom()->begin(),
+                   a->pl().getGeom()->end());
+          pl.setPolyline(l);
+        } else {
+          pl.setPolyline(PolyLine<double>(*a->getTo()->pl().getGeom(),
+                                          *b->getOtherNd(n)->pl().getGeom()));
+        }
+        assert(!getEdg(b->getOtherNd(n), a->getTo()));
         auto newE = addEdg(b->getOtherNd(n), a->getTo(), pl);
         edgeRpl(a->getTo(), b, newE);
         edgeRpl(b->getOtherNd(n), b, newE);
         edgeRpl(a->getTo(), a, newE);
         edgeRpl(b->getOtherNd(n), a, newE);
+      }
+
+      for (auto e : n->getAdjList()) {
+        _edgeGrid.remove(e);
       }
 
       delNd(n);
@@ -1016,12 +1065,14 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
     if (e->getTo() == b) continue;
     auto ex = getEdg(b, e->getTo());  // check if edge already exists
     auto newE = addEdg(b, e->getTo(), e->pl());
-    _edgeGrid.add(*newE->pl().getGeom(), newE);
     if (ex) {
       for (auto lo : e->pl().getLines()) {
         if (lo.direction == a) lo.direction = b;
         newE->pl().addLine(lo.line, lo.direction);
       }
+    } else {
+      // else add to grid
+      _edgeGrid.add(*newE->pl().getGeom(), newE);
     }
     edgeRpl(b, e, newE);
     edgeRpl(e->getTo(), e, newE);
@@ -1033,12 +1084,14 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
     if (e->getFrom() == b) continue;
     auto ex = getEdg(e->getFrom(), b);  // check if edge already exists
     auto newE = addEdg(e->getFrom(), b, e->pl());
-    _edgeGrid.add(*newE->pl().getGeom(), newE);
     if (ex) {
       for (auto lo : e->pl().getLines()) {
         if (lo.direction == a) lo.direction = b;
         newE->pl().addLine(lo.line, lo.direction);
       }
+    } else {
+      // else add to grid
+      _edgeGrid.add(*newE->pl().getGeom(), newE);
     }
     edgeRpl(b, e, newE);
     edgeRpl(e->getFrom(), e, newE);
@@ -1177,7 +1230,7 @@ std::string LineGraph::getLineId(const nlohmann::json::object_t& line) {
 
 // _____________________________________________________________________________
 std::string LineGraph::getLineColor(const nlohmann::json::object_t& line) {
-  std::string color;
+  std::string color = "000000";
 
   if (line.count("color")) {
     color = line.at("color").get<std::string>();
@@ -1307,6 +1360,74 @@ void LineGraph::extractLine(const nlohmann::json::object_t& line, LineEdge* e,
 }
 
 // _____________________________________________________________________________
+std::vector<LineGraph> LineGraph::distConnectedComponents(double d) {
+  std::vector<LineGraph> ret;
+
+  // first pass, collect components
+  const auto& origComps = Algorithm::connectedComponents(*this);
+  std::unordered_map<LineNode*, size_t> ndToComp;
+  for (size_t comp = 0; comp < origComps.size(); comp++) {
+    for (auto nd : origComps[comp]) {
+      ndToComp[nd] = comp;
+    }
+  }
+
+  for (auto nd : getNds()) {
+    // connect each node with nodes within distance
+    std::set<LineNode*> cands;
+    _nodeGrid.get(*nd->pl().getGeom(), d, &cands);
+
+    for (auto cand : cands) {
+      if (cand != nd && !getEdg(nd, cand) && !getEdg(cand, nd) &&
+          ndToComp[nd] != ndToComp[cand] &&
+          util::geo::dist(*nd->pl().getGeom(), *cand->pl().getGeom()) <= d) {
+        addEdg(nd, cand);
+      }
+    }
+  }
+
+  const auto& geoComps = Algorithm::connectedComponents(*this);
+
+  ret.resize(geoComps.size());
+
+  for (size_t comp = 0; comp < geoComps.size(); comp++) {
+    auto* tg = &ret[comp];
+
+    std::unordered_map<LineNode*, LineNode*> nm;
+    std::unordered_map<LineEdge*, LineEdge*> em;
+
+    // add nodes
+    for (auto nd : geoComps[comp]) {
+      nm[nd] = tg->addNd(nd->pl());
+      tg->expandBBox(*nd->pl().getGeom());
+    }
+
+    // add edges
+    for (auto nd : geoComps[comp]) {
+      for (auto edg : nd->getAdjList()) {
+        if (edg->getFrom() != nd) continue;
+        if (edg->pl().getLines().size() == 0) {
+          continue;
+        } else {
+          tg->edgeDel(nm[nd], edg);
+        }
+
+        em[edg] = tg->addEdg(nm[edg->getFrom()], nm[edg->getTo()], edg->pl());
+        tg->expandBBox(edg->pl().getGeom()->front());
+        tg->expandBBox(edg->pl().getGeom()->back());
+
+        tg->edgeRpl(em[edg]->getFrom(), edg, em[edg]);
+        tg->edgeRpl(em[edg]->getTo(), edg, em[edg]);
+        tg->nodeRpl(em[edg], edg->getTo(), nm[edg->getTo()]);
+        tg->nodeRpl(em[edg], edg->getFrom(), nm[edg->getFrom()]);
+      }
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
 void LineGraph::snapOrphanStations() {
   double MAXD = 1;
 
@@ -1315,11 +1436,12 @@ void LineGraph::snapOrphanStations() {
 
     std::set<LineEdge*> cands;
 
-    _edgeGrid.get(*nd->pl().getGeom(), MAXD, &cands);
+    _edgeGrid.get(*nd->pl().getGeom(), MAXD * 2, &cands);
 
     for (auto e : cands) {
-      if (util::geo::dist(*nd->pl().getGeom(), *e->pl().getGeom()) < MAXD) {
-        double pa = e->pl().getPolyline().projectOn(*nd->pl().getGeom()).totalPos;
+      if (util::geo::dist(*nd->pl().getGeom(), *e->pl().getGeom()) <= MAXD) {
+        double pa =
+            e->pl().getPolyline().projectOn(*nd->pl().getGeom()).totalPos;
         if (getEdg(e->getFrom(), nd) || getEdg(nd, e->getTo())) continue;
 
         assert(e->getFrom() != nd);

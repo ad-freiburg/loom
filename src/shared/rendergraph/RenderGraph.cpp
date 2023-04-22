@@ -404,7 +404,8 @@ bool RenderGraph::notCompletelyServed(const LineNode* n) {
 
 // _____________________________________________________________________________
 std::vector<Polygon<double>> RenderGraph::getStopGeoms(
-    const LineNode* n, double d, bool tight, size_t pointsPerCircle) const {
+    const LineNode* n, bool tight, size_t pointsPerCircle) const {
+  double d = _defWidth + _defSpacing * 0.8;
   if (notCompletelyServed(n)) {
     // render each stop individually
     auto served = servedLines(n);
@@ -641,6 +642,8 @@ void RenderGraph::createMetaNodes() {
 std::vector<NodeFront> RenderGraph::getNextMetaNodeCand() const {
   for (auto n : getNds()) {
     if (n->pl().stops().size()) continue;
+
+    // WHY?
     if (getOpenNodeFronts(n).size() != 1) continue;
 
     std::set<const LineNode*> potClique;
