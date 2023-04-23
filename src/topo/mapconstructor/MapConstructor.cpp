@@ -381,11 +381,6 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
         auto to = e->getTo();
         if ((from->getDeg() == 2 || to->getDeg() == 2)) continue;
         if (combineNodes(from, to, &tgNew)) break;
-        double dCur =
-            util::geo::dist(*from->pl().getGeom(), *to->pl().getGeom());
-        if (dCur < maxD(from, to, dCut)) {
-          if (combineNodes(from, to, &tgNew)) break;
-        }
       }
     }
 
@@ -578,7 +573,6 @@ bool MapConstructor::contractNodes() {
 
         // check if we would fold edges with vastly different geoms
         for (auto* oldE : from->getAdjList()) {
-          if (oldE->getFrom() != from) continue;
           if (e == oldE) continue;
 
           auto* newE = _g->getEdg(to, oldE->getTo());
@@ -1014,6 +1008,11 @@ void MapConstructor::removeOrphanLines() {
              LineGraph::terminatesAt(e, e->getTo(), lo.line))) {
           toDel.push_back(lo.line);
         }
+      }
+
+      // if the edge would run empty, and isnt a stump, dont delete
+      if (e->getFrom()->getDeg() != 1 && e->getTo()->getDeg() != 1 && toDel.size() == e->pl().getLines().size()) {
+        continue;
       }
 
       for (const auto& del : toDel) {

@@ -73,13 +73,15 @@ int main(int argc, char** argv) {
 
   mc.removeEdgeArtifacts();
 
-
   T_START(construction);
   size_t iters = 0;
   iters += mc.collapseShrdSegs(10);
   iters += mc.collapseShrdSegs(cfg.maxAggrDistance);
   double constrT = T_STOP(construction);
 
+  // util::geo::output::GeoGraphJsonOutput gout;
+  // gout.printLatLng(tg, std::cout);
+  // exit(0);
 
   mc.removeNodeArtifacts(false);
 
@@ -99,6 +101,8 @@ int main(int argc, char** argv) {
     }
     avgMergedEdgs /= c;
   }
+
+  mc.reconstructIntersections();
 
   // infer restrictions
   T_START(restrInf);

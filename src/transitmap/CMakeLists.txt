@@ -22,7 +22,7 @@ add_library(transitmap_dep ${transitmap_SRC})
 
 if (Protobuf_FOUND)
 	add_dependencies(transitmap_dep proto)
-	target_link_libraries(transitmap transitmap_dep shared_dep dot_dep util ${Protobuf_LIBRARIES} proto)
+	target_link_libraries(transitmap transitmap_dep shared_dep dot_dep util proto ${Protobuf_LIBRARIES})
 else()
 	target_link_libraries(transitmap transitmap_dep shared_dep dot_dep util)
 endif()

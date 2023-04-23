@@ -709,6 +709,25 @@ inline Point<T> intersection(const LineSegment<T>& s1,
 
 // _____________________________________________________________________________
 template <typename T>
+inline std::vector<Point<T>> intersection(const Line<T>& l1,
+                             const Line<T>& l2) {
+
+  std::vector<Point<T>> ret;
+
+  // TODO: better implementation than this naive baseline
+  for (size_t i = 1; i < l1.size(); i++) {
+    for (size_t j = 1; j < l2.size(); j++) {
+      LineSegment<T> a = {l1[i-1], l1[i]};
+      LineSegment<T> b = {l2[j-1], l2[j]};
+      if (intersects(a, b)) ret.push_back(intersection(a, b));
+    }
+  }
+
+  return ret;
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline bool lineIntersects(T p1x, T p1y, T q1x, T q1y, T p2x, T p2y, T q2x,
                            T q2y) {
   /*

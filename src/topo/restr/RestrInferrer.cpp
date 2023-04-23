@@ -77,10 +77,10 @@ size_t RestrInferrer::infer(const OrigEdgs& origEdgs) {
   size_t ret = 0;
 
   // debug output
-  // util::geo::output::GeoGraphJsonOutput out;
-  // std::ofstream outs;
-  // outs.open("restr_graph.json");
-  // out.print(_rg, outs);
+  util::geo::output::GeoGraphJsonOutput out;
+  std::ofstream outs;
+  outs.open("restr_graph.json");
+  out.printLatLng(_rg, outs);
 
   for (auto nd : _tg->getNds()) {
     for (auto edg1 : nd->getAdjList()) {
@@ -202,17 +202,20 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
   // double MAX_DIST = _cfg->maxAggrDistance;
   AggrDistFunc aggrD(_cfg->maxAggrDistance);
 
-  auto hndlPA = e->pl().getPolyline().getPointAt(1.0 / 3.0).p;
-  auto hndlPB = e->pl().getPolyline().getPointAt(2.0 / 3.0).p;
-
   // we add a small buffer to account for the skip heuristic in the
   // shared segments collapsing
   double MAX_DIST = _cfg->maxAggrDistance * 2;
   double checkPos =
       std::min(e->pl().getPolyline().getLength() / 2, 2 * _cfg->maxAggrDistance);
+
   auto hndlLA =
+      e->pl().getPolyline().getOrthoLineAt(1.0 / 3.0, MAX_DIST).getLine();
+  auto hndlLB =
+      e->pl().getPolyline().getOrthoLineAt(2.0 / 3.0, MAX_DIST).getLine();
+
+  auto hndlLACheck =
       e->pl().getPolyline().getOrthoLineAtDist(checkPos, MAX_DIST).getLine();
-  auto hndlLB = e->pl()
+  auto hndlLBCheck = e->pl()
                     .getPolyline()
                     .getOrthoLineAtDist(
                         e->pl().getPolyline().getLength() - checkPos, MAX_DIST)
@@ -221,6 +224,18 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
   auto a =_rg.addNd(hndlLA.front());
   auto b = _rg.addNd(hndlLA.back());
   _rg.addEdg(a, b, RestrEdgePL(hndlLA));
+
+  a =_rg.addNd(hndlLB.front());
+  b = _rg.addNd(hndlLB.back());
+  _rg.addEdg(a, b, RestrEdgePL(hndlLB));
+
+   // a =_rg.addNd(hndlLACheck.front());
+   // b = _rg.addNd(hndlLACheck.back());
+  // _rg.addEdg(a, b, RestrEdgePL(hndlLACheck));
+
+  // a =_rg.addNd(hndlLBCheck.front());
+  // b = _rg.addNd(hndlLBCheck.back());
+  // _rg.addEdg(a, b, RestrEdgePL(hndlLBCheck));
 
   for (auto edg : origEdgs.find(e)->second) {
     auto origFr = const_cast<LineEdge*>(edg);
@@ -236,20 +251,44 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
       geom.insert(geom.begin(), *restrE->getFrom()->pl().getGeom());
       geom.insert(geom.end(), *restrE->getTo()->pl().getGeom());
 
-      if (util::geo::intersects(hndlLA, geom)) {
-        auto projA = restrE->pl().geom.projectOn(hndlPA);
-        auto handleNdA = _rg.addNd(projA.p);
+      if (util::geo::intersects(hndlLACheck, geom)) {
+        auto isects = util::geo::intersection(geom, hndlLA);
 
-        _handlesA[e].insert(handleNdA);
-        (*handles)[restrE].push_back({handleNdA, projA.totalPos});
+        // if no intersections found, fall back to the handlLACheck
+        if (isects.size() == 0) isects = util::geo::intersection(geom, hndlLACheck);
+
+        for (const auto& isect : isects) {
+          auto projA = restrE->pl().geom.projectOn(isect);
+          auto handleNdA = _rg.addNd(projA.p);
+
+          _handlesA[e].insert(handleNdA);
+          (*handles)[restrE].push_back({handleNdA, projA.totalPos});
+        }
+        // auto projA = restrE->pl().geom.projectOn(hndlPA);
+        // auto handleNdA = _rg.addNd(projA.p);
+
+        // _handlesA[e].insert(handleNdA);
+        // (*handles)[restrE].push_back({handleNdA, projA.totalPos});
       }
 
-      if (util::geo::intersects(hndlLB, geom)) {
-        auto projB = restrE->pl().geom.projectOn(hndlPB);
-        auto handleNdB = _rg.addNd(projB.p);
+      if (util::geo::intersects(hndlLBCheck, geom)) {
+        auto isects = util::geo::intersection(geom, hndlLB);
 
-        _handlesB[e].insert(handleNdB);
-        (*handles)[restrE].push_back({handleNdB, projB.totalPos});
+        // if no intersections found, fall back to the handlLACheck
+        if (isects.size() == 0) isects = util::geo::intersection(geom, hndlLBCheck);
+
+        for (const auto& isect : isects) {
+          auto projB = restrE->pl().geom.projectOn(isect);
+          auto handleNdB = _rg.addNd(projB.p);
+
+          _handlesB[e].insert(handleNdB);
+          (*handles)[restrE].push_back({handleNdB, projB.totalPos});
+        }
+        // auto projB = restrE->pl().geom.projectOn(hndlPB);
+        // auto handleNdB = _rg.addNd(projB.p);
+
+        // _handlesB[e].insert(handleNdB);
+        // (*handles)[restrE].push_back({handleNdB, projB.totalPos});
       }
     }
   }

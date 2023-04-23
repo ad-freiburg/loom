@@ -117,6 +117,7 @@ class PolyLine {
   std::string getWKT() const;
 
   PolyLine getOrthoLineAtDist(double d, double lengt) const;
+  PolyLine getOrthoLineAt(double d, double lengt) const;
 
   Point<T> interpolate(const Point<T>& a, const Point<T>& b, double p) const;
 

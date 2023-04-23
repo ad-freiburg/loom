@@ -533,6 +533,12 @@ std::set<LinePoint<T>, LinePointCmp<T>> PolyLine<T>::getIntersections(
 
 // _____________________________________________________________________________
 template <typename T>
+PolyLine<T> PolyLine<T>::getOrthoLineAt(double d, double length) const {
+  return getOrthoLineAtDist(getLength() * d, length);
+}
+
+// _____________________________________________________________________________
+template <typename T>
 PolyLine<T> PolyLine<T>::getOrthoLineAtDist(double d, double length) const {
   Point<T> avgP = getPointAtDist(d).p;
 
