@@ -43,6 +43,10 @@ struct Score {
   size_t iters;
 };
 
+inline Score operator+(const Score& lh, const Score& rh) {
+  return Score(lh.bend + rh.bend, lh.move + rh.move, lh.hop + rh.hop, lh.dense + rh.dense, lh.full + rh.full, lh.violations + rh.violations); 
+}
+
 struct NodeOnSeg {
   shared::linegraph::LineNode* n;
   double progr;

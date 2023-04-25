@@ -13,6 +13,7 @@ namespace config {
 struct TopoConfig {
   double maxAggrDistance = 50;
   double maxLengthDev = 500;
+  double maxTurnRestrCheckDist = 50;
   bool outputStats = false;
   bool noInferRestrs = false;
 };

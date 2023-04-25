@@ -204,7 +204,7 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
 
   // we add a small buffer to account for the skip heuristic in the
   // shared segments collapsing
-  double MAX_DIST = _cfg->maxAggrDistance * 2;
+  double MAX_DIST = _cfg->maxTurnRestrCheckDist * 2;
   double checkPos =
       std::min(e->pl().getPolyline().getLength() / 2, 2 * _cfg->maxAggrDistance);
 

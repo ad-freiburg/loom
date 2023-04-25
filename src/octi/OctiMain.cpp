@@ -37,6 +37,21 @@ using octi::basegraph::BaseGraph;
 using util::geo::dist;
 using util::geo::DPolygon;
 
+struct TotalScore {
+    Score score;
+    octi::ilp::ILPStats ilpstats;
+
+    size_t gridgraphNumNds = 0;
+    size_t gridgraphNumEdgs = 0;
+    size_t combgraphNumNds =0 ;
+    size_t combgraphNumEdgs = 0;
+    size_t inputgraphNumNds = 0;
+    size_t inputgraphNumEdgs = 0;
+    size_t inputgraphMaxDeg = 0;
+    size_t numNoEmbeddingFound = 0;
+    double timeMs = 0;
+};
+
 // _____________________________________________________________________________
 double avgStatDist(const LineGraph& g) {
   double avg = 0;
@@ -92,60 +107,7 @@ std::vector<DPolygon> readObstacleFile(const std::string& p) {
   return ret;
 }
 
-// _____________________________________________________________________________
-int main(int argc, char** argv) {
-  // disable output buffering for standard output
-  setbuf(stdout, NULL);
-
-  // initialize randomness
-  srand(time(NULL) + rand());
-
-  config::Config cfg;
-
-  config::ConfigReader cr;
-  cr.read(&cfg, argc, argv);
-
-  util::geo::output::GeoGraphJsonOutput out;
-
-  if (cfg.obstaclePath.size()) {
-    LOGTO(DEBUG, std::cerr) << "Reading obstacle file...";
-    cfg.obstacles = readObstacleFile(cfg.obstaclePath);
-    LOGTO(DEBUG, std::cerr) << "Done. (" << cfg.obstacles.size() << " obst.)";
-  }
-
-  LOGTO(DEBUG, std::cerr) << "Reading graph file...";
-  T_START(read);
-  LineGraph lg;
-
-  if (cfg.fromDot)
-    lg.readFromDot(&(std::cin), 0);
-  else
-    lg.readFromJson(&(std::cin), 0);
-
-  LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(read) << "ms)";
-
-  LOGTO(DEBUG, std::cerr) << "Planarizing graph...";
-  T_START(planarize);
-  lg.topologizeIsects();
-  LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(planarize) << "ms)";
-
-  std::vector<LineGraph> comps = lg.distConnectedComponents(10000);
-
-  util::json::Array jsonScores;
-  std::vector<LineGraph*> resultGraphs;
-  std::vector<BaseGraph*> resultGridGraphs;
-
-  LOGTO(DEBUG, std::cerr) << "Broke input graph into " << comps.size()
-                          << " components";
-
-  for (auto& tg : comps) {
-    // util::geo::output::GeoGraphJsonOutput gout;
-    // gout.printLatLng(tg, std::cout);
-    // exit(0);
-
-    double avgDist = avgStatDist(tg);
-    LOGTO(DEBUG, std::cerr) << "Average adj. node distance is " << avgDist;
-
+void drawComp(LineGraph& tg, double avgDist, util::json::Array& jsonScores, std::vector<LineGraph*>& resultGraphs, std::vector<BaseGraph*>& resultGridGraphs, TotalScore& totScore, const config::Config& cfg) {
     Drawing d;
 
     Octilinearizer oct(cfg.baseGraphType);
@@ -213,20 +175,12 @@ int main(int argc, char** argv) {
           << "Schematized using ILP in " << time << " ms, score " << sc.full;
     } else if ((cfg.optMode == "heur")) {
       T_START(octi);
-      try {
-        sc = oct.draw(cg, box, res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
-                      cfg.maxGrDist, cfg.orderMethod, cfg.restrLocSearch,
-                      cfg.enfGeoPen, cfg.hananIters, cfg.obstacles,
-                      cfg.heurLocSearchIters, cfg.abortAfter);
-        time = T_STOP(octi);
-      } catch (const NoEmbeddingFoundExc& exc) {
-        if (cfg.skipOnError) {
-          LOGTO(WARN, std::cerr) << exc.what();
-          continue;
-        }
-        LOG(ERROR) << exc.what();
-        exit(1);
-      }
+      sc = oct.draw(cg, box, res, &gg, &d, cfg.pens, gridSize, cfg.borderRad,
+                    cfg.maxGrDist, cfg.orderMethod, cfg.restrLocSearch,
+                    cfg.enfGeoPen, cfg.hananIters, cfg.obstacles,
+                    cfg.heurLocSearchIters, cfg.abortAfter);
+      time = T_STOP(octi);
+
       LOGTO(DEBUG, std::cerr) << "Schematized using heur approach in " << time
                               << " ms, score " << sc.full;
     }
@@ -245,6 +199,19 @@ int main(int argc, char** argv) {
       for (auto nd : tg.getNds()) {
         numEdgsTg += nd->getDeg();
       }
+
+      // total score
+      totScore.score = totScore.score + sc;
+      totScore.ilpstats = totScore.ilpstats + ilpstats;
+
+      totScore.gridgraphNumNds += gg->getNds().size();
+      totScore.gridgraphNumEdgs += numEdgs / 2;
+      totScore.combgraphNumNds += cg.getNds().size();
+      totScore.combgraphNumEdgs += numEdgsComb / 2;
+      totScore.inputgraphNumNds += tg.getNds().size();
+      totScore.inputgraphNumEdgs += numEdgsTg / 2;
+      totScore.inputgraphMaxDeg = std::max(totScore.inputgraphMaxDeg, tg.maxDeg());
+      totScore.timeMs += time;
 
       // translate score to JSON
       util::json::Dict jsonScore = util::json::Dict{
@@ -302,20 +269,148 @@ int main(int argc, char** argv) {
 
     resultGraphs.push_back(res);
     resultGridGraphs.push_back(gg);
+}
+
+// _____________________________________________________________________________
+int main(int argc, char** argv) {
+  // disable output buffering for standard output
+  setbuf(stdout, NULL);
+
+  // initialize randomness
+  srand(time(NULL) + rand());
+
+  config::Config cfg;
+
+  config::ConfigReader cr;
+  cr.read(&cfg, argc, argv);
+
+  util::geo::output::GeoGraphJsonOutput out;
+
+  if (cfg.obstaclePath.size()) {
+    LOGTO(DEBUG, std::cerr) << "Reading obstacle file...";
+    cfg.obstacles = readObstacleFile(cfg.obstaclePath);
+    LOGTO(DEBUG, std::cerr) << "Done. (" << cfg.obstacles.size() << " obst.)";
+  }
+
+  LOGTO(DEBUG, std::cerr) << "Reading graph file...";
+  T_START(read);
+  LineGraph lg;
+
+  if (cfg.fromDot)
+    lg.readFromDot(&(std::cin), 0);
+  else
+    lg.readFromJson(&(std::cin), 0);
+
+  LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(read) << "ms)";
+
+  LOGTO(DEBUG, std::cerr) << "Planarizing graph...";
+  T_START(planarize);
+  lg.topologizeIsects();
+  LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(planarize) << "ms)";
+
+  std::vector<LineGraph> comps = lg.distConnectedComponents(10000);
+
+  util::json::Array jsonScores;
+  std::vector<LineGraph*> resultGraphs;
+  std::vector<BaseGraph*> resultGridGraphs;
+
+  LOGTO(DEBUG, std::cerr) << "Broke input graph into " << comps.size()
+                          << " components";
+
+  TotalScore totScore;
+
+  for (auto& tg : comps) {
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.printLatLng(tg, std::cout);
+    // exit(0);
+
+    double avgDist = avgStatDist(tg);
+
+    double curDist = avgDist;
+
+    size_t tries = 0;
+    size_t MAX_TRIES = 10;
+
+    LOGTO(DEBUG, std::cerr) << "Average adj. node distance is " << avgDist;
+
+    try {
+      drawComp(tg, curDist, jsonScores, resultGraphs, resultGridGraphs, totScore, cfg);
+    } catch (const NoEmbeddingFoundExc& exc) {
+      if (cfg.retryOnError) {
+        if (tries < MAX_TRIES) {
+          curDist -= avgDist * 0.1;
+          LOGTO(WARN, std::cerr) << "Retrying with grid size " << curDist;
+        }
+        continue;
+      }
+
+      if (cfg.skipOnError) {
+        totScore.numNoEmbeddingFound += 1;
+        LOGTO(WARN, std::cerr) << exc.what();
+        continue;
+      }
+
+      LOG(ERROR) << exc.what();
+      exit(1);
+    }
   }
 
   util::geo::output::GeoGraphJsonOutput gout;
-  util::json::Val score;
-  if (jsonScores.size() == 1) {
-    score = jsonScores[0];
-  } else {
-    score = jsonScores;
+
+  size_t maxRss = util::getPeakRSS();
+
+  // translate score to JSON
+  util::json::Dict totalScore = util::json::Dict{
+      {"scores",
+       util::json::Dict{{"total-score", totScore.score.full},
+                        {"topo-violations", util::json::Int(totScore.score.violations)},
+                        {"density-score", totScore.score.dense},
+                        {"bend-score", totScore.score.bend},
+                        {"hop-score", totScore.score.hop},
+                        {"move-score", totScore.score.move}}},
+      {"pens",
+       util::json::Dict{
+           {"density-pen", cfg.pens.densityPen},
+           {"diag-pen", cfg.pens.diagonalPen},
+           {"hori-pen", cfg.pens.horizontalPen},
+           {"vert-pen", cfg.pens.verticalPen},
+           {"180-turn-pen", cfg.pens.p_0},
+           {"135-turn-pen", cfg.pens.p_135},
+           {"90-turn-pen", cfg.pens.p_90},
+           {"45-turn-pen", cfg.pens.p_45},
+       }},
+
+
+      {"gridgraph-size", util::json::Dict{{"nodes", totScore.gridgraphNumNds},
+                                          {"edges", totScore.gridgraphNumEdgs}}},
+      {"combgraph-size", util::json::Dict{{"nodes", totScore.combgraphNumNds},
+                                          {"edges", totScore.combgraphNumEdgs}}},
+      {"input-graph-size", util::json::Dict{{"nodes", totScore.inputgraphNumNds},
+                                            {"edges", totScore.inputgraphNumEdgs},
+                                            {"max-deg", totScore.inputgraphMaxDeg}}},
+      {"misc", util::json::Dict{{"method", cfg.optMode},
+                                {"deg2heur", cfg.deg2Heur},
+                                {"max-grid-dist", cfg.maxGrDist}}},
+      {"num-comps-no-embedding-found", totScore.numNoEmbeddingFound},
+      {"time-ms", totScore.timeMs},
+      {"iterations", totScore.score.iters},
+      {"procs", omp_get_num_procs()},
+      {"peak-memory", util::readableSize(maxRss)},
+      {"peak-memory-bytes", maxRss},
+      {"timestamp", util::json::Int(std::time(0))}};
+
+  if (cfg.optMode == "ilp") {
+    totalScore["ilp"] = util::json::Dict{
+        {"size", util::json::Dict{{"rows", totScore.ilpstats.rows},
+                                  {"cols", totScore.ilpstats.cols}}},
+        {"solve-time", totScore.ilpstats.time},
+        {"optimal", util::json::Bool{totScore.ilpstats.optimal}}};
   }
 
   if (cfg.printMode == "gridgraph") {
     if (cfg.writeStats) {
       util::geo::output::GeoJsonOutput out(
-          std::cout, util::json::Dict{{"statistics", score}});
+          std::cout, util::json::Dict{{"statistics", totalScore}, {"component-statistics", jsonScores}});
       for (auto gg : resultGraphs) {
         gout.printLatLng(*gg, &out);
       }
@@ -330,7 +425,7 @@ int main(int argc, char** argv) {
   } else {
     if (cfg.writeStats) {
       util::geo::output::GeoJsonOutput out(
-          std::cout, util::json::Dict{{"statistics", score}});
+          std::cout, util::json::Dict{{"statistics", totalScore}, {"component-statistics", jsonScores}});
       for (auto res : resultGraphs) {
         gout.printLatLng(*res, &out);
       }

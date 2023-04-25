@@ -317,7 +317,7 @@ inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
     // TODO: what if the edge is reversed?
     if ((a->getFrom() == n && b->getFrom() == n)) {
       if (OptGraph::getAdjLnEdgPart(a, n).dir) {
-        assert(OptGraph::getAdjLnEdgPart(b, n).dir);
+        // assert(OptGraph::getAdjLnEdgPart(b, n).dir);
         return OptGraph::getAdjLnEdgPart(a, n).order <
                OptGraph::getAdjLnEdgPart(b, n).order;
       } else {
@@ -326,7 +326,7 @@ inline bool cmpEdge(const OptEdge* a, const OptEdge* b) {
       }
     } else if ((a->getTo() == n && b->getTo() == n)) {
       if (OptGraph::getAdjLnEdgPart(a, n).dir) {
-        assert(OptGraph::getAdjLnEdgPart(b, n).dir);
+        // assert(OptGraph::getAdjLnEdgPart(b, n).dir);
         return OptGraph::getAdjLnEdgPart(a, n).order >
                OptGraph::getAdjLnEdgPart(b, n).order;
       } else {

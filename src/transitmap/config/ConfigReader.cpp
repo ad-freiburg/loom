@@ -71,6 +71,8 @@ void ConfigReader::help(const char* bin) const {
             << "padding, -1 for auto\n"
             << std::setw(37) << "  --smoothing arg (=3)"
             << "input line smoothing\n"
+            << std::setw(37) << "  --random-colors"
+            << "fill missing colors with random colors\n"
             << std::setw(37) << "  --no-render-stations"
             << "don't render stations\n"
             << std::setw(37) << "  --tight-stations"
@@ -106,6 +108,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"render-node-fronts", no_argument, 0, 15},
                          {"zoom", required_argument, 0, 'z'},
                          {"mvt-path", required_argument, 0, 17},
+                         {"random-colors", no_argument, 0, 18},
                          {0, 0, 0, 0}};
 
   std::string zoom;
@@ -169,6 +172,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         break;
       case 17:
         cfg->mvtPath = optarg;
+        break;
+      case 18:
+        cfg->randomColors = true;
         break;
       case 'D':
         cfg->fromDot = true;

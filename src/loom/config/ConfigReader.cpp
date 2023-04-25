@@ -64,7 +64,7 @@ void ConfigReader::help(const char* bin) const {
             << "Misc:\n"
             << std::setw(41) << "  -D [ --from-dot ]"
             << "input is in dot format\n"
-            << std::setw(41) << "  --output-stats"
+            << std::setw(41) << "  --write-stats"
             << "Print stats to output\n"
             << std::setw(41) << "  --ilp-solver arg (=gurobi)"
             << "Preferred ILP solver, either glpk, cbc, or gurobi.\n"
@@ -88,7 +88,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       {"version", no_argument, 0, 'v'},
       {"help", no_argument, 0, 'h'},
       {"no-untangle", no_argument, 0, 1},
-      {"output-stats", no_argument, 0, 2},
+      {"write-stats", no_argument, 0, 2},
       {"no-prune", no_argument, 0, 3},
       {"same-seg-cross-pen", required_argument, 0, 4},
       {"diff-seg-cross-pen", required_argument, 0, 9},

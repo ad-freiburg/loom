@@ -270,6 +270,75 @@ inline std::string getHomeDir() {
   return ret;
 }
 
+// ___________________________________________________________________________
+inline std::string rgbToHex(int r, int g, int b) {
+  char hexcol[16];
+  snprintf(hexcol, sizeof hexcol, "%02x%02x%02x", r, g, b);
+  return hexcol;
+}
+
+// ___________________________________________________________________________
+inline void hsvToRgb(float* r, float* g, float* b, float h, float s, float v) {
+  int i;
+  float f, p, q, t;
+
+  if (s == 0) {
+    *r = *g = *b = v;
+    return;
+  }
+
+  h /= 60;
+  i = floor(h);
+  f = h - i;
+  p = v * (1 - s);
+  q = v * (1 - s * f);
+  t = v * (1 - s * (1 - f));
+
+  switch (i) {
+    case 0:
+      *r = v;
+      *g = t;
+      *b = p;
+      break;
+    case 1:
+      *r = q;
+      *g = v;
+      *b = p;
+      break;
+    case 2:
+      *r = p;
+      *g = v;
+      *b = t;
+      break;
+    case 3:
+      *r = p;
+      *g = q;
+      *b = v;
+      break;
+    case 4:
+      *r = t;
+      *g = p;
+      *b = v;
+      break;
+    default:
+      *r = v;
+      *g = p;
+      *b = q;
+      break;
+  }
+}
+
+// ___________________________________________________________________________
+inline std::string randomHtmlColor() {
+  double goldenRatio = 0.618033988749895;
+  double h = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
+  h += goldenRatio;
+  h = fmod(h, 1.0);
+  float r, g, b;
+  hsvToRgb(&r, &g, &b, h * 360, 0.5, 0.95);
+  return rgbToHex(r * 256, g * 256, b * 256);
+}
+
 // _____________________________________________________________________________
 inline char* readableSize(double size, char* buf) {
   int i = 0;

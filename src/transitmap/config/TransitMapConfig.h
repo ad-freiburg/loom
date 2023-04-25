@@ -38,6 +38,8 @@ struct Config {
   bool dontLabelDeg2 = false;
   bool fromDot = false;
 
+  bool randomColors = false;
+
   bool renderNodeConnections = true;
   bool tightStations = false;
 

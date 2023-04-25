@@ -1502,6 +1502,7 @@ inline size_t convexHullImpl(const MultiPoint<T>& a, size_t p1, size_t p2,
   Point<T> pa;
   bool found = false;
   double maxDist = 0;
+
   for (const auto& p : a) {
     double tmpDist = distToSegment((*h)[p1], (*h)[p2], p);
     double cp = crossProd(p, LineSegment<T>((*h)[p1], (*h)[p2]));
@@ -1525,11 +1526,11 @@ inline Polygon<T> convexHull(const MultiPoint<T>& l) {
   if (l.size() == 2) return convexHull(LineSegment<T>(l[0], l[1]));
   if (l.size() == 1) return convexHull(l[0]);
 
-  Point<T> left(std::numeric_limits<T>::max(), 0);
-  Point<T> right(std::numeric_limits<T>::lowest(), 0);
+  Point<T> left(std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
+  Point<T> right(std::numeric_limits<T>::lowest(), std::numeric_limits<T>::lowest());
   for (const auto& p : l) {
-    if (p.getX() < left.getX()) left = p;
-    if (p.getX() > right.getX()) right = p;
+    if (p.getX() < left.getX() || (p.getX() == left.getX() && p.getY() < left.getY())) left = p;
+    if (p.getX() > right.getX() || (p.getX() == right.getX() && p.getY() > right.getY())) right = p;
   }
 
   Line<T> hull{left, right};

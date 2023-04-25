@@ -34,17 +34,19 @@ void ConfigReader::help(const char* bin) const {
             << "Usage: " << bin << " < linegraph.json\n\n"
             << "Allowed options:\n\n"
             << "General:\n"
-            << std::setw(35) << "  -v [ --version ]"
+            << std::setw(37) << "  -v [ --version ]"
             << "print version\n"
-            << std::setw(35) << "  -h [ --help ]"
+            << std::setw(37) << "  -h [ --help ]"
             << "show this help message\n"
-            << std::setw(35) << "  -d [ --max-aggr-dist ] arg (=50)"
+            << std::setw(37) << "  -d [ --max-aggr-dist ] arg (=50)"
             << "maximum distance between segments\n"
-            << std::setw(35) << "  --write-stats"
+            << std::setw(37) << "  --write-stats"
             << "write statistics to output file\n"
-            << std::setw(35) << "  --no-infer-restrs"
+            << std::setw(37) << "  --no-infer-restrs"
             << "don't infer turn restrictions\n"
-            << std::setw(35) << "  --max-length-dev arg (=500)"
+            << std::setw(37) << "  --infer-restr-max-dist arg (=[-d])"
+            << "max dist for considered edges for turn restrictions\n"
+            << std::setw(37) << "  --max-length-dev arg (=500)"
             << "maxumum distance deviation for turn restrictions infer\n";
 }
 
@@ -58,7 +60,10 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
                          {"no-infer-restrs", no_argument, 0, 1},
                          {"write-stats", no_argument, 0, 2},
                          {"max-length-dev", required_argument, 0, 3},
+                         {"infer-restr-max-dist", required_argument, 0, 4},
                          {0, 0, 0, 0}};
+
+  double turnRestrDiff = -1;
 
   char c;
   while ((c = getopt_long(argc, argv, ":hvd:", ops, 0)) != -1) {
@@ -81,6 +86,9 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
       case 3:
         cfg->maxAggrDistance = atof(optarg);
         break;
+      case 4:
+        turnRestrDiff = atof(optarg);
+        break;
       case ':':
         std::cerr << argv[optind - 1];
         std::cerr << " requires an argument" << std::endl;
@@ -96,4 +104,7 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
         break;
     }
   }
+
+  if (turnRestrDiff >= 0) cfg->maxTurnRestrCheckDist = turnRestrDiff;
+  else cfg->maxTurnRestrCheckDist = cfg->maxAggrDistance;
 }

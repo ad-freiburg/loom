@@ -50,6 +50,8 @@ void ConfigReader::help(const char* bin) const {
             << "base graph, either ortholinear, octilinear,\n"
             << std::setw(36) << " " << " orthoradial, quadtree, octihanan\n\n"
             << "Misc:\n"
+            << std::setw(36) << "  --retry-on-error"
+            << "retry with 10\% reduced grid size on error, 10 times\n"
             << std::setw(36) << "  --skip-on-error"
             << "skip graph on error\n"
             << std::setw(36) << "  --ilp-num-threads arg (=0)"
@@ -143,6 +145,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"pen-45", required_argument, 0, 23},
                          {"nd-move-pen", required_argument, 0, 24},
                          {"skip-on-error", no_argument, 0, 25},
+                         {"retry-on-error", no_argument, 0, 26},
                          {"abort-after", required_argument, 0, 'a'},
                          {0, 0, 0, 0}};
 
@@ -234,6 +237,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         break;
       case 25:
         cfg->skipOnError = true;
+        break;
+      case 26:
+        cfg->retryOnError = true;
         break;
       case 'g':
         cfg->gridSize = optarg;

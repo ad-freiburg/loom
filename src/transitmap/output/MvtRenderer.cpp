@@ -35,7 +35,7 @@ using util::geo::LinePointCmp;
 using util::geo::Polygon;
 using util::geo::PolyLine;
 
-const static double TILE_RES = 2048;
+const static double TILE_RES = 1024;
 
 // ground width/height of a single tile on zoom level 0
 const static double WEB_MERC_EXT = 20037508.3427892;
@@ -181,7 +181,7 @@ void MvtRenderer::outputEdges(const RenderGraph& outG) {
 // _____________________________________________________________________________
 void MvtRenderer::renderNodeConnections(const RenderGraph& outG,
                                         const LineNode* n) {
-  auto geoms = outG.innerGeoms(n, _cfg->innerGeometryPrecision);
+  auto geoms = outG.innerGeoms(n, _cfg->innerGeometryPrecision * _res);
 
   for (auto& clique : getInnerCliques(n, geoms, 9999)) renderClique(clique, n);
 }
@@ -544,68 +544,97 @@ void MvtRenderer::printFeature(const PolyLine<double>& pl, size_t z, size_t x,
   const auto& l = pl.getLine();
   if (l.size() < 2) return;
 
-  auto feature = layer->add_features();
-
-  for (const auto& kv : params) {
-    auto kit = keys.find(kv.first);
-    auto vit = vals.find(kv.second);
-
-    if (kit != keys.end()) {
-      feature->add_tags(kit->second);
-    } else {
-      auto k = layer->add_keys();
-      *k = kv.first;
-      feature->add_tags(layer->keys_size() - 1);
-      keys[kv.first] = layer->keys_size() - 1;
-    }
-
-    if (vit != vals.end()) {
-      feature->add_tags(vit->second);
-    } else {
-      auto k = layer->add_values();
-      k->set_string_value(kv.second);
-      feature->add_tags(layer->values_size() - 1);
-      vals[kv.second] = layer->values_size() - 1;
-    }
-  }
-
-  feature->set_id(1);
-
-  if (layer->name() == "stations") {
-    feature->set_type(vector_tile::Tile_GeomType_POLYGON);
-  } else {
-    feature->set_type(vector_tile::Tile_GeomType_LINESTRING);
-  }
-
   double tw = (WEB_MERC_EXT * 2.0) / static_cast<double>(1 << z);
 
   double ox = static_cast<double>(x) * tw - WEB_MERC_EXT;
   double oy = static_cast<double>(y) * tw - WEB_MERC_EXT;
 
-  // MoveTo, 1x
-  feature->add_geometry((1 & 0x7) | (1 << 3));
-  int px = (l[0].getX() - ox) * (TILE_RES / tw);
-  int py = TILE_RES - (l[0].getY() - oy) * (TILE_RES / tw);
-  feature->add_geometry((px << 1) ^ (px >> 31));
-  feature->add_geometry((py << 1) ^ (py >> 31));
+  // crop
+  std::vector<util::geo::Line<double>> croppedLines;
 
-  // LineTo, l.size() - 1 times
-  feature->add_geometry((2 & 0x7) | ((l.size() - 1) << 3));
-
-  for (size_t i = 1; i < l.size(); i++) {
-    int dx = ((l[i].getX() - ox) * (TILE_RES / tw)) - px;
-    int dy = (TILE_RES - (l[i].getY() - oy) * (TILE_RES / tw)) - py;
-
-    px += dx;
-    py += dy;
-
-    feature->add_geometry((dx << 1) ^ (dx >> 31));
-    feature->add_geometry((dy << 1) ^ (dy >> 31));
-  }
+  auto box = getBox(z, x, y);
 
   if (layer->name() == "stations") {
-    // close path
-    feature->add_geometry((7 & 0x7) | (1 << 3));
+    croppedLines.push_back(l);
+  } else {
+    croppedLines.push_back({});
+
+    for (size_t i = 1; i < l.size(); i++) {
+      const auto& curP = l[i];
+      const auto& prevP = l[i-1];
+
+      if (util::geo::intersects(util::geo::LineSegment<double>{curP, prevP}, box)) {
+        croppedLines.back().push_back(prevP);
+        croppedLines.back().push_back(curP);
+      } else if (croppedLines.back().size() > 0) {
+        croppedLines.push_back({});
+      }
+    }
+  }
+
+  for (const auto& ll : croppedLines) {
+    if (ll.size() < 2) continue;
+
+    auto l = util::geo::simplify(ll, 2 * tw / TILE_RES);
+
+    auto feature = layer->add_features();
+
+    for (const auto& kv : params) {
+      auto kit = keys.find(kv.first);
+      auto vit = vals.find(kv.second);
+
+      if (kit != keys.end()) {
+        feature->add_tags(kit->second);
+      } else {
+        auto k = layer->add_keys();
+        *k = kv.first;
+        feature->add_tags(layer->keys_size() - 1);
+        keys[kv.first] = layer->keys_size() - 1;
+      }
+
+      if (vit != vals.end()) {
+        feature->add_tags(vit->second);
+      } else {
+        auto k = layer->add_values();
+        k->set_string_value(kv.second);
+        feature->add_tags(layer->values_size() - 1);
+        vals[kv.second] = layer->values_size() - 1;
+      }
+    }
+
+    feature->set_id(1);
+
+    if (layer->name() == "stations") {
+      feature->set_type(vector_tile::Tile_GeomType_POLYGON);
+    } else {
+      feature->set_type(vector_tile::Tile_GeomType_LINESTRING);
+    }
+
+    // MoveTo, 1x
+    feature->add_geometry((1 & 0x7) | (1 << 3));
+    int px = (l[0].getX() - ox) * (TILE_RES / tw);
+    int py = TILE_RES - (l[0].getY() - oy) * (TILE_RES / tw);
+    feature->add_geometry((px << 1) ^ (px >> 31));
+    feature->add_geometry((py << 1) ^ (py >> 31));
+
+    // LineTo, l.size() - 1 times
+    feature->add_geometry((2 & 0x7) | ((l.size() - 1) << 3));
+
+    for (size_t i = 1; i < l.size(); i++) {
+      int dx = ((l[i].getX() - ox) * (TILE_RES / tw)) - px;
+      int dy = (TILE_RES - (l[i].getY() - oy) * (TILE_RES / tw)) - py;
+
+      px += dx;
+      py += dy;
+
+      feature->add_geometry((dx << 1) ^ (dx >> 31));
+      feature->add_geometry((dy << 1) ^ (dy >> 31));
+    }
+
+    if (layer->name() == "stations") {
+      // close path
+      feature->add_geometry((7 & 0x7) | (1 << 3));
+    }
   }
 }
 

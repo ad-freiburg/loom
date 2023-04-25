@@ -157,6 +157,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
 
   std::vector<LineGraph> distConnectedComponents(double d);
 
+  void fillMissingColors();
+
  private:
   util::geo::Box<double> _bbox;
 

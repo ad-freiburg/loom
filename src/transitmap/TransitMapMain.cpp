@@ -47,6 +47,8 @@ int main(int argc, char** argv) {
     else
       lg.readFromJson(&std::cin, cfg.inputSmoothing);
 
+    if (cfg.randomColors) lg.fillMissingColors();
+
     // snap orphan stations
     lg.snapOrphanStations();
 
@@ -84,6 +86,8 @@ int main(int argc, char** argv) {
       g.readFromDot(&std::cin, cfg.inputSmoothing);
     else
       g.readFromJson(&std::cin, cfg.inputSmoothing);
+
+    if (cfg.randomColors) g.fillMissingColors();
 
     // snap orphan stations
     g.snapOrphanStations();

@@ -42,6 +42,7 @@ struct Config {
   std::string ilpCacheDir = ".";
 
   bool skipOnError = false;
+  bool retryOnError = false;
 
   double maxGrDist = 3;
 

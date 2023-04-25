@@ -23,12 +23,25 @@ namespace octi {
 namespace ilp {
 
 struct ILPStats {
-  double score;
-  double time;
-  size_t rows;
-  size_t cols;
-  bool optimal;
+  ILPStats() {}
+  ILPStats(double score, double time, size_t rows, size_t cols, bool optimal) : score(score), time(time), rows(rows), cols(cols), optimal(optimal) {}
+  double score = 0;
+  double time = 0;
+  size_t rows = 0;
+  size_t cols = 0;
+  bool optimal = false;
 };
+
+inline ILPStats operator+(const ILPStats& lh, const ILPStats& rh) {
+  ILPStats ret;
+  ret.score = lh.score + rh.score;
+  ret.time = lh.time + rh.time;
+  ret.rows = lh.rows + rh.rows;
+  ret.cols = lh.cols + rh.cols;
+  ret.optimal = lh.optimal && rh.optimal;
+
+  return ret;
+}
 
 class ILPGridOptimizer {
  public:

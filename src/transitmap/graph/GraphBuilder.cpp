@@ -74,8 +74,12 @@ void GraphBuilder::dropOverlappingStations(RenderGraph* graph) {
   // fill index
   for (auto n : graph->getNds()) {
     if (!n->pl().stops().size()) continue;
+    auto stopgeoms = graph->getStopGeoms(n, _cfg->tightStations, 4);
+
+    if (stopgeoms.size() == 0) continue;
+
     stations.push_back(n);
-    geoms[n] = graph->getStopGeoms(n, _cfg->tightStations, 4);
+    geoms[n] = stopgeoms;
     tree.add(geoms[n], n);
   }
 

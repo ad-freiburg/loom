@@ -9,6 +9,7 @@
 #include "shared/linegraph/LineNodePL.h"
 #include "shared/style/LineStyle.h"
 #include "util/String.h"
+#include "util/Misc.h"
 #include "util/graph/Algorithm.h"
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
@@ -27,6 +28,7 @@ using shared::linegraph::Partner;
 using util::geo::DPoint;
 using util::geo::Point;
 using util::graph::Algorithm;
+using util::randomHtmlColor;
 
 // _____________________________________________________________________________
 void LineGraph::readFromDot(std::istream* s, double smooth) {
@@ -537,6 +539,17 @@ void LineGraph::addLine(const Line* l) { _lines[l->id()] = l; }
 const Line* LineGraph::getLine(const std::string& id) const {
   if (_lines.find(id) != _lines.end()) return _lines.find(id)->second;
   return 0;
+}
+
+// _____________________________________________________________________________
+void LineGraph::fillMissingColors() {
+  for (auto& l : _lines) {
+    auto ll = const_cast<Line*>(l.second);
+    if (ll->color().empty()) {
+      std::string c = randomHtmlColor();
+      ll->setColor(c);
+    }
+  }
 }
 
 // _____________________________________________________________________________
@@ -1219,18 +1232,26 @@ std::string LineGraph::getLineId(const nlohmann::json::object_t& line) {
     id = line.at("?id").get<std::string>();
   } else if (line.count("\"?id\"")) {
     id = line.at("\"?id\"").get<std::string>();
-  } else if (!getLineLabel(line).empty()) {
-    id = getLineLabel(line);
-  } else if (!getLineColor(line).empty()) {
-    id = getLineColor(line);
   }
+
+  id = util::trim(id, "\"");
+
+  if (id.empty()) {
+    if (!getLineLabel(line).empty()) {
+      id = getLineLabel(line);
+    } else if (!getLineColor(line).empty()) {
+      id = getLineColor(line);
+    }
+  }
+
+  if (id.empty()) id = "<EMPTY PLACEHOLDER>";
 
   return util::trim(id, "\"");
 }
 
 // _____________________________________________________________________________
 std::string LineGraph::getLineColor(const nlohmann::json::object_t& line) {
-  std::string color = "000000";
+  std::string color = "";
 
   if (line.count("color")) {
     color = line.at("color").get<std::string>();
