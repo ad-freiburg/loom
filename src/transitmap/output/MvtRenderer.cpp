@@ -111,6 +111,9 @@ void MvtRenderer::outputNodes(const RenderGraph& outG) {
       params["width"] =
           util::toString((_cfg->lineWidth / 2));
 
+      if (n->pl().getComponent() != std::numeric_limits<size_t>::max())
+        params["component"] = util::toString(n->pl().getComponent());
+
       for (const auto& geom :
            outG.getStopGeoms(n, _cfg->tightStations, 32)) {
         addFeature({geom.getOuter(), "stations", params});
@@ -347,6 +350,9 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       paramsOut["width"] = util::toString(
           (_cfg->outlineWidth + _cfg->lineWidth));
 
+      if (n->pl().getComponent() != std::numeric_limits<size_t>::max())
+        paramsOut["component"] = util::toString(n->pl().getComponent());
+
       addFeature({pl.getLine(), "inner-connections", paramsOut});
 
       Params params;
@@ -357,45 +363,12 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       params["width"] =
           util::toString(_cfg->lineWidth);
 
+      if (n->pl().getComponent() != std::numeric_limits<size_t>::max())
+        params["component"] = util::toString(n->pl().getComponent());
+
       addFeature({pl.getLine(), "inner-connections", params});
     }
   }
-}
-
-// _____________________________________________________________________________
-void MvtRenderer::renderLinePart(const PolyLine<double> p, double width,
-                                 const Line& line, const std::string& css,
-                                 const std::string& oCss) {
-  renderLinePart(p, width, line, css, oCss, "");
-}
-
-// _____________________________________________________________________________
-void MvtRenderer::renderLinePart(const PolyLine<double> p, double width,
-                                 const Line& line, const std::string& css,
-                                 const std::string& oCss,
-                                 const std::string& endMarker) {
-  std::stringstream styleOutline;
-  styleOutline << "fill:none;stroke:#000000;stroke-linecap:round;stroke-width:"
-               << (width + _cfg->outlineWidth) << ";"
-               << oCss;
-  Params paramsOutline;
-  paramsOutline["style"] = styleOutline.str();
-  paramsOutline["class"] = "transit-edge-outline " + getLineClass(line.id());
-
-  std::stringstream styleStr;
-  styleStr << "fill:none;stroke:#" << line.color() << ";" << css;
-
-  if (!endMarker.empty()) {
-    styleStr << ";marker-end:url(#" << endMarker << ")";
-  }
-
-  styleStr << ";stroke-linecap:round;stroke-opacity:1;stroke-width:"
-           << width;
-  Params params;
-  params["style"] = styleStr.str();
-  params["class"] = "transit-edge " + getLineClass(line.id());
-
-  // add to _lines
 }
 
 // _____________________________________________________________________________
@@ -457,6 +430,9 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
     paramsOut["class"] = getLineClass(line->id());
     paramsOut["width"] = util::toString((_cfg->outlineWidth + _cfg->lineWidth));
 
+    if (e->pl().getComponent() != std::numeric_limits<size_t>::max())
+      paramsOut["component"] = util::toString(e->pl().getComponent());
+
     addFeature({p.getLine(), "lines", paramsOut});
 
     Params params;
@@ -465,6 +441,9 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
     params["lineCap"] = "round";
     params["class"] = getLineClass(line->id());
     params["width"] = util::toString(_cfg->lineWidth);
+
+    if (e->pl().getComponent() != std::numeric_limits<size_t>::max())
+      params["component"] = util::toString(e->pl().getComponent());
 
     addFeature({p.getLine(), "lines", params});
 
@@ -573,9 +552,14 @@ void MvtRenderer::printFeature(const PolyLine<double>& pl, size_t z, size_t x,
   }
 
   for (const auto& ll : croppedLines) {
+    // skip point-like geometries
     if (ll.size() < 2) continue;
 
     auto l = util::geo::simplify(ll, 2 * tw / TILE_RES);
+
+    // skip point-like geometries
+    if (ll.size() < 2) continue;
+    if (l.size() == 2 && util::geo::dist(l[0], l[1]) < tw / TILE_RES) continue;
 
     auto feature = layer->add_features();
 

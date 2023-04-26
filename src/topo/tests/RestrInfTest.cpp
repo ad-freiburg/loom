@@ -45,7 +45,7 @@ void RestrInfTest::run() {
     std::set<RestrEdge*> from = {ab};
     std::set<RestrEdge*> to = {cd};
 
-    topo::restr::CostFunc cFunc(&l1, 100);
+    topo::restr::CostFunc cFunc(&l1, 100, 0);
     double cost = EDijkstra::shortestPath(from, to, cFunc);
 
     assert(cost == approx(20));

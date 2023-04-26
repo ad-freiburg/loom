@@ -36,6 +36,8 @@ int main(int argc, char** argv) {
   transitmapper::config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
+  T_START(TIMER);
+
   GraphBuilder b(&cfg);
 
   LOGTO(DEBUG, std::cerr) << "Reading graph...";
@@ -104,6 +106,15 @@ int main(int argc, char** argv) {
   } else {
     LOG(ERROR) << "Unknown render method " << cfg.renderMethod;
     exit(1);
+  }
+
+  double took = T_STOP(TIMER);
+
+  if (cfg.writeStats) {
+    util::json::Writer wr(&std::cout);
+    wr.obj();
+    wr.keyVal("time", took);
+    wr.closeAll();
   }
 
   return (0);

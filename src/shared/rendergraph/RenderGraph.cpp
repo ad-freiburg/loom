@@ -574,7 +574,7 @@ void RenderGraph::createMetaNodes() {
     }
 
     // first node has new ref node id
-    LineNode* ref = addNd(*cands[0].n->pl().getGeom());
+    LineNode* ref = addNd({*cands[0].n->pl().getGeom(), cands[0].n->pl().getComponent()});
 
     std::set<LineNode*> toDel;
 

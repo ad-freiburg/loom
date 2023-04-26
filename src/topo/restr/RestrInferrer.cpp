@@ -77,10 +77,10 @@ size_t RestrInferrer::infer(const OrigEdgs& origEdgs) {
   size_t ret = 0;
 
   // debug output
-  util::geo::output::GeoGraphJsonOutput out;
-  std::ofstream outs;
-  outs.open("restr_graph.json");
-  out.printLatLng(_rg, outs);
+  // util::geo::output::GeoGraphJsonOutput out;
+  // std::ofstream outs;
+  // outs.open("restr_graph.json");
+  // out.printLatLng(_rg, outs);
 
   for (auto nd : _tg->getNds()) {
     for (auto edg1 : nd->getAdjList()) {
@@ -202,6 +202,9 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
   // double MAX_DIST = _cfg->maxAggrDistance;
   AggrDistFunc aggrD(_cfg->maxAggrDistance);
 
+  // auto hndlPA = e->pl().getPolyline().getPointAt(1.0 / 3.0).p;
+  // auto hndlPB = e->pl().getPolyline().getPointAt(2.0 / 3.0).p;
+
   // we add a small buffer to account for the skip heuristic in the
   // shared segments collapsing
   double MAX_DIST = _cfg->maxTurnRestrCheckDist * 2;
@@ -264,11 +267,6 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
           _handlesA[e].insert(handleNdA);
           (*handles)[restrE].push_back({handleNdA, projA.totalPos});
         }
-        // auto projA = restrE->pl().geom.projectOn(hndlPA);
-        // auto handleNdA = _rg.addNd(projA.p);
-
-        // _handlesA[e].insert(handleNdA);
-        // (*handles)[restrE].push_back({handleNdA, projA.totalPos});
       }
 
       if (util::geo::intersects(hndlLBCheck, geom)) {
@@ -284,11 +282,6 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
           _handlesB[e].insert(handleNdB);
           (*handles)[restrE].push_back({handleNdB, projB.totalPos});
         }
-        // auto projB = restrE->pl().geom.projectOn(hndlPB);
-        // auto handleNdB = _rg.addNd(projB.p);
-
-        // _handlesB[e].insert(handleNdB);
-        // (*handles)[restrE].push_back({handleNdB, projB.totalPos});
       }
     }
   }
@@ -335,7 +328,7 @@ bool RestrInferrer::check(const Line* r, const LineEdge* edg1,
   // only return true below if cost - curD < maxL <=> cost < curD + maxL
   // + epsilon to avoid integer rounding issues in the < comparison below
   double eps = 0.1;
-  CostFunc cFunc(r, curD + _cfg->maxLengthDev + eps);
+  CostFunc cFunc(r, curD + _cfg->maxLengthDev + eps, _cfg->turnInferFullTurnPen);
 
   return EDijkstra::shortestPath(from, to, cFunc) - curD < _cfg->maxLengthDev;
 }

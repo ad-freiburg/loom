@@ -21,6 +21,8 @@ struct Config {
 
   std::string mvtPath = ".";
 
+  bool writeStats = false;
+
   double outputResolution = 0.1;
   double inputSmoothing = 3;
   double innerGeometryPrecision = 3;

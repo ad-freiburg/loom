@@ -38,8 +38,13 @@ int main(int argc, char** argv) {
   // read input graph
   tg.readFromJson(&(std::cin), 0);
 
+  if (cfg.randomColors) tg.fillMissingColors();
+
   // snap orphan stations
   tg.snapOrphanStations();
+
+  size_t numNdsBef = tg.getNds().size();
+  size_t numEdgsBef = 0;
 
   double lenBef = 0, lenAfter = 0;
 
@@ -47,6 +52,7 @@ int main(int argc, char** argv) {
     for (const auto& nd : tg.getNds()) {
       for (const auto& e : nd->getAdjList()) {
         if (e->getFrom() != nd) continue;
+        numEdgsBef++;
         lenBef += e->pl().getPolyline().getLength();
       }
     }
@@ -63,13 +69,18 @@ int main(int argc, char** argv) {
   mc.removeNodeArtifacts(false);
 
   mc.cleanUpGeoms();
-  // init restriction inferrer
-  ri.init();
-  size_t restrFr = mc.freeze();
 
   // only remove the artifacts after the restriction inferrer has been
   // initialized, as these operations do not guarantee that the restrictions
   // are preserved!
+
+
+  ri.init();
+  size_t restrFr = mc.freeze();
+
+  // util::geo::output::GeoGraphJsonOutput gout;
+  // gout.printLatLng(tg, std::cout);
+  // exit(0);
 
   mc.removeEdgeArtifacts();
 
@@ -78,10 +89,6 @@ int main(int argc, char** argv) {
   iters += mc.collapseShrdSegs(10);
   iters += mc.collapseShrdSegs(cfg.maxAggrDistance);
   double constrT = T_STOP(construction);
-
-  // util::geo::output::GeoGraphJsonOutput gout;
-  // gout.printLatLng(tg, std::cout);
-  // exit(0);
 
   mc.removeNodeArtifacts(false);
 
@@ -103,6 +110,7 @@ int main(int argc, char** argv) {
   }
 
   mc.reconstructIntersections();
+
 
   // infer restrictions
   T_START(restrInf);
@@ -126,14 +134,35 @@ int main(int argc, char** argv) {
   // remove orphan lines again
   mc.removeOrphanLines();
 
+  size_t numEdgsAfter = 0;
+
   if (cfg.outputStats) {
     for (const auto& nd : tg.getNds()) {
       for (const auto& e : nd->getAdjList()) {
         if (e->getFrom() != nd) continue;
         lenAfter += e->pl().getPolyline().getLength();
+        numEdgsAfter++;
       }
     }
   }
+
+  int numComps = -1;
+
+  if (cfg.writeComponents || !cfg.componentsPath.empty()) {
+    util::geo::output::GeoGraphJsonOutput out;
+    const auto& graphs = tg.distConnectedComponents(10000, cfg.writeComponents);
+
+    numComps = graphs.size();
+
+    for (size_t comp = 0; comp < graphs.size(); comp++) {
+
+      std::ofstream f;
+      f.open(cfg.componentsPath + "/component-" + std::to_string(comp) + ".json");
+
+      out.printLatLng(graphs[comp], f);
+    }
+  }
+
 
   // output
   util::geo::output::GeoGraphJsonOutput out;
@@ -141,6 +170,12 @@ int main(int argc, char** argv) {
     util::json::Dict jsonStats = {
         {"statistics",
          util::json::Dict{
+             {"num_edgs_in", numEdgsBef},
+             {"num_nds_in", numNdsBef},
+             {"num_edgs_out", numEdgsAfter},
+             {"num_nds_out", tg.getNds().size()},
+             {"num_components", numComps},
+             {"time_const", constrT},
              {"iters", iters},
              {"time_const", constrT},
              {"time_restr_inf", restrT},

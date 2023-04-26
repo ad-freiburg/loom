@@ -1498,6 +1498,9 @@ inline Polygon<T> convexHull(const RotatedBox<T>& b) {
 template <typename T>
 inline size_t convexHullImpl(const MultiPoint<T>& a, size_t p1, size_t p2,
                              Line<T>* h) {
+  // emergency stop
+  if (h->size() >= a.size()) return 0;
+
   // quickhull by Barber, Dobkin & Huhdanpaa
   Point<T> pa;
   bool found = false;

@@ -63,6 +63,7 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
  public:
   LineNodePL(){};
   LineNodePL(util::geo::Point<double> pos);
+  LineNodePL(util::geo::Point<double> pos, size_t comp);
 
   const util::geo::Point<double>* getGeom() const;
   void setGeom(const util::geo::Point<double>& p);
@@ -97,6 +98,9 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
   ConnEx& getConnExc() { return _connEx; }
   const ConnEx& getConnExc() const { return _connEx; }
 
+  size_t getComponent() const { return _comp; }
+  void setComponent(size_t id) { _comp = id; }
+
   std::string toString() const;
 
  private:
@@ -105,6 +109,8 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
 
   std::map<const LineEdge*, size_t> _edgToNf;
   std::vector<NodeFront> _nodeFronts;
+
+  size_t _comp = std::numeric_limits<size_t>::max();
 
   ConnEx _connEx;
   NotServedLines _notServed;

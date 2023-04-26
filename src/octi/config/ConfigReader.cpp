@@ -72,7 +72,7 @@ void ConfigReader::help(const char* bin) const {
             << "Preferred ILP solver, either glpk, cbc, or gurobi.\n"
             << std::setw(36) << " "
             << "Will fall back if not available.\n"
-            << std::setw(36) << "  --stats"
+            << std::setw(36) << "  --write-stats"
             << "write stats to output graph\n"
             << std::setw(36) << "  -D [ --from-dot ]"
             << "input is in dot format\n"
@@ -125,7 +125,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"ilp-time-limit", required_argument, 0, 5},
                          {"ilp-cache-dir", required_argument, 0, 6},
                          {"ilp-solver", required_argument, 0, 7},
-                         {"stats", no_argument, 0, 8},
+                         {"write-stats", no_argument, 0, 8},
                          {"obstacles", required_argument, 0, 9},
                          {"from-dot", required_argument, 0, 'D'},
                          {"no-deg2-heur", no_argument, 0, 10},

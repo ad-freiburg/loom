@@ -268,7 +268,12 @@ void drawComp(LineGraph& tg, double avgDist, util::json::Array& jsonScores, std:
     }
 
     resultGraphs.push_back(res);
-    resultGridGraphs.push_back(gg);
+
+    if (cfg.printMode == "gridgraph") {
+      resultGridGraphs.push_back(gg);
+    } else {
+      delete gg;
+    }
 }
 
 // _____________________________________________________________________________
@@ -308,7 +313,7 @@ int main(int argc, char** argv) {
   lg.topologizeIsects();
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(planarize) << "ms)";
 
-  std::vector<LineGraph> comps = lg.distConnectedComponents(10000);
+  std::vector<LineGraph> comps = lg.distConnectedComponents(10000, false);
 
   util::json::Array jsonScores;
   std::vector<LineGraph*> resultGraphs;
@@ -333,25 +338,29 @@ int main(int argc, char** argv) {
 
     LOGTO(DEBUG, std::cerr) << "Average adj. node distance is " << avgDist;
 
-    try {
-      drawComp(tg, curDist, jsonScores, resultGraphs, resultGridGraphs, totScore, cfg);
-    } catch (const NoEmbeddingFoundExc& exc) {
-      if (cfg.retryOnError) {
-        if (tries < MAX_TRIES) {
+    while (tries < MAX_TRIES) {
+      try {
+        drawComp(tg, curDist, jsonScores, resultGraphs, resultGridGraphs, totScore, cfg);
+
+        break;
+      } catch (const NoEmbeddingFoundExc& exc) {
+        if (cfg.retryOnError && tries < MAX_TRIES) {
           curDist -= avgDist * 0.1;
+          tries++;
           LOGTO(WARN, std::cerr) << "Retrying with grid size " << curDist;
+          continue;
         }
-        continue;
-      }
 
-      if (cfg.skipOnError) {
-        totScore.numNoEmbeddingFound += 1;
-        LOGTO(WARN, std::cerr) << exc.what();
-        continue;
-      }
+        if (cfg.skipOnError) {
+          totScore.numNoEmbeddingFound += 1;
+          jsonScores.push_back(util::json::Dict());
+          LOGTO(WARN, std::cerr) << exc.what();
+          break;
+        }
 
-      LOG(ERROR) << exc.what();
-      exit(1);
+        LOG(ERROR) << exc.what();
+        exit(1);
+      }
     }
   }
 
@@ -392,6 +401,7 @@ int main(int argc, char** argv) {
                                 {"deg2heur", cfg.deg2Heur},
                                 {"max-grid-dist", cfg.maxGrDist}}},
       {"num-comps-no-embedding-found", totScore.numNoEmbeddingFound},
+      {"num-comps", comps.size()},
       {"time-ms", totScore.timeMs},
       {"iterations", totScore.score.iters},
       {"procs", omp_get_num_procs()},
@@ -411,7 +421,7 @@ int main(int argc, char** argv) {
     if (cfg.writeStats) {
       util::geo::output::GeoJsonOutput out(
           std::cout, util::json::Dict{{"statistics", totalScore}, {"component-statistics", jsonScores}});
-      for (auto gg : resultGraphs) {
+      for (auto gg : resultGridGraphs) {
         gout.printLatLng(*gg, &out);
       }
       out.flush();

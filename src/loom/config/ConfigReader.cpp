@@ -64,8 +64,10 @@ void ConfigReader::help(const char* bin) const {
             << "Misc:\n"
             << std::setw(41) << "  -D [ --from-dot ]"
             << "input is in dot format\n"
+            << std::setw(41) << "  --output-stats"
+            << "Print stats to stdout\n"
             << std::setw(41) << "  --write-stats"
-            << "Print stats to output\n"
+            << "Write stats to output\n"
             << std::setw(41) << "  --ilp-solver arg (=gurobi)"
             << "Preferred ILP solver, either glpk, cbc, or gurobi.\n"
             << std::setw(41) << " "
@@ -88,7 +90,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       {"version", no_argument, 0, 'v'},
       {"help", no_argument, 0, 'h'},
       {"no-untangle", no_argument, 0, 1},
-      {"write-stats", no_argument, 0, 2},
+      {"output-stats", no_argument, 0, 2},
       {"no-prune", no_argument, 0, 3},
       {"same-seg-cross-pen", required_argument, 0, 4},
       {"diff-seg-cross-pen", required_argument, 0, 9},
@@ -104,6 +106,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       {"optim-runs", required_argument, 0, 13},
       {"dbg-output-path", required_argument, 0, 14},
       {"output-optgraph", required_argument, 0, 15},
+      {"write-stats", no_argument, 0, 16},
       {0, 0, 0, 0}};
 
   char c;
@@ -162,6 +165,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         break;
       case 15:
         cfg->outOptGraph = true;
+        break;
+      case 16:
+        cfg->writeStats = true;
         break;
       case 'D':
         cfg->fromDot = true;

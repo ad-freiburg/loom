@@ -82,7 +82,9 @@ void ConfigReader::help(const char* bin) const {
             << std::setw(37) << "  --no-render-node-connections"
             << "don't render inner node connections\n"
             << std::setw(37) << "  --render-node-fronts"
-            << "render node fronts\n";
+            << "render node fronts"
+            << std::setw(37) << "  --print-stats"
+            << "write stats to stdout\n";
 }
 
 // _____________________________________________________________________________
@@ -109,6 +111,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"zoom", required_argument, 0, 'z'},
                          {"mvt-path", required_argument, 0, 17},
                          {"random-colors", no_argument, 0, 18},
+                         {"print-stats", no_argument, 0, 19},
                          {0, 0, 0, 0}};
 
   std::string zoom;
@@ -175,6 +178,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         break;
       case 18:
         cfg->randomColors = true;
+        break;
+      case 19:
+        cfg->writeStats = true;
         break;
       case 'D':
         cfg->fromDot = true;

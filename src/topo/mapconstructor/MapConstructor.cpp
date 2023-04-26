@@ -181,6 +181,7 @@ void MapConstructor::densifyEdg(LineEdge* e, LineGraph* g, double SEGL) {
   }
 
   auto newE = g->addEdg(last, e->getTo(), e->pl());
+  assert(newE != e);
   combContEdgs(newE, e);
   LineGraph::nodeRpl(newE, e->getFrom(), last);
 
@@ -678,6 +679,9 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n,
   newPl.simplify(0.5);
   newEdge->pl().setPolyline(newPl);
 
+  assert(newEdge != a);
+  assert(newEdge != b);
+
   combContEdgs(newEdge, a);
   combContEdgs(newEdge, b);
 
@@ -690,6 +694,8 @@ bool MapConstructor::combineEdges(LineEdge* a, LineEdge* b, LineNode* n,
   delOrigEdgsFor(g->getEdg(b->getFrom(), b->getTo()));
   g->delEdg(a->getFrom(), a->getTo());
   g->delEdg(b->getFrom(), b->getTo());
+
+  assert(newEdge->getFrom() != n && newEdge->getTo() != n);
 
   delOrigEdgsFor(n);
   g->delNd(n);
@@ -758,7 +764,7 @@ bool MapConstructor::combineNodes(LineNode* a, LineNode* b, LineGraph* g) {
     auto* newE = g->getEdg(b, oldE->getTo());
 
     if (!newE) {
-      // add a new edge going from b to the non-a node
+      // add a new edge going from b to the non-b node
       newE = g->addEdg(b, oldE->getTo(), oldE->pl());
 
       for (const auto& oe : _origEdgs) {
@@ -774,6 +780,8 @@ bool MapConstructor::combineNodes(LineNode* a, LineNode* b, LineGraph* g) {
       // update route dirs
       LineGraph::nodeRpl(newE, a, b);
     }
+
+    assert(newE != connecting);
 
     combContEdgs(newE, oldE);
     combContEdgs(newE, connecting);
@@ -803,9 +811,19 @@ bool MapConstructor::combineNodes(LineNode* a, LineNode* b, LineGraph* g) {
       LineGraph::nodeRpl(newE, a, b);
     }
 
+    assert(newE != connecting);
+
     combContEdgs(newE, oldE);
     combContEdgs(newE, connecting);
   }
+
+  // also add to the edges on b, for symmetry reasons
+  for (auto* oldE : b->getAdjList()) {
+    combContEdgs(oldE, connecting);
+  }
+
+  assert(g->getEdg(a, b));
+  assert(g->getEdg(a, b) == connecting);
 
   delOrigEdgsFor(g->getEdg(a, b));
   g->delEdg(a, b);
@@ -1074,6 +1092,9 @@ void MapConstructor::supportEdge(LineEdge* ex, LineGraph* g) {
   for (const auto& oe : _origEdgs) {
     assert(oe.count(eA) == 0);
   }
+
+  assert(eA != ex);
+  assert(eB != ex);
 
   combContEdgs(eA, ex);
   combContEdgs(eB, ex);

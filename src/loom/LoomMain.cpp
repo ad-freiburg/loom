@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
 
   util::geo::output::GeoGraphJsonOutput out;
 
-  if (cfg.outputStats) {
+  if (cfg.writeStats) {
     util::json::Dict jsonStats = {
         {"statistics",
          util::json::Dict{

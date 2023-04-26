@@ -69,6 +69,9 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   const PolyLine<double>& getPolyline() const;
   void setPolyline(const PolyLine<double>& p);
 
+  size_t getComponent() const { return _comp; }
+  void setComponent(size_t id) { _comp = id; }
+
   void writePermutation(const std::vector<size_t> order);
 
   void setDontContract(bool dontContract) { _dontContract = dontContract; }
@@ -78,6 +81,7 @@ class LineEdgePL : util::geograph::GeoEdgePL<double> {
   std::map<const Line*, size_t> _lineToIdx;
   std::vector<LineOcc> _lines;
   bool _dontContract;
+  size_t _comp = std::numeric_limits<size_t>::max();
 
   PolyLine<double> _p;
 };

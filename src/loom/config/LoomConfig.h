@@ -23,6 +23,7 @@ struct Config {
   bool outOptGraph = false;
 
   bool outputStats = false;
+  bool writeStats = false;
   bool pruneGraph = true;
 
   bool untangleGraph = true;

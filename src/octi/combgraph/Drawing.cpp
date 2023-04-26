@@ -364,8 +364,9 @@ void Drawing::getLineGraph(LineGraph* target) const {
     std::set<shared::linegraph::LineEdge*> activeLineEdges;
 
     // first add new topological node at beginning of segment
-    if (mm.find(seg.start) == mm.end())
+    if (mm.find(seg.start) == mm.end()) {
       mm[seg.start] = target->addNd(seg.geom.front());
+    }
 
     auto from = mm[seg.start];
     double lastProgr = 0;
@@ -417,6 +418,10 @@ void Drawing::getLineGraph(LineGraph* target) const {
 
         assert(childPtr < combEdg->pl().getChilds().size());
         auto child = combEdg->pl().getChilds()[childPtr];
+
+        edge->pl().setComponent(child->pl().getComponent());
+        edge->getFrom()->pl().setComponent(child->pl().getComponent());
+        edge->getTo()->pl().setComponent(child->pl().getComponent());
 
         for (auto lo : child->pl().getLines()) {
           // directions will be handled below by nodeRpl

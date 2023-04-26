@@ -14,8 +14,12 @@ struct TopoConfig {
   double maxAggrDistance = 50;
   double maxLengthDev = 500;
   double maxTurnRestrCheckDist = 50;
+  double turnInferFullTurnPen = 0;
   bool outputStats = false;
   bool noInferRestrs = false;
+  bool writeComponents = false;
+  bool randomColors = false;
+  std::string componentsPath = "";
 };
 
 }  // namespace config

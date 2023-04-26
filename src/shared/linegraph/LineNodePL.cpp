@@ -16,6 +16,9 @@ using util::geo::Point;
 LineNodePL::LineNodePL(Point<double> pos) : _pos(pos) {}
 
 // _____________________________________________________________________________
+LineNodePL::LineNodePL(Point<double> pos, size_t comp) : _pos(pos), _comp(comp) {}
+
+// _____________________________________________________________________________
 const Point<double>* LineNodePL::getGeom() const { return &_pos; }
 
 // _____________________________________________________________________________
@@ -79,6 +82,8 @@ util::json::Dict LineNodePL::getAttrs() const {
       }
     }
   }
+
+  if (_comp != std::numeric_limits<size_t>::max()) obj["component"] = _comp;
 
   if (arr.size()) obj["excluded_line_conns"] = arr;
 

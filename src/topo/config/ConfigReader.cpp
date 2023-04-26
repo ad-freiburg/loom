@@ -47,7 +47,15 @@ void ConfigReader::help(const char* bin) const {
             << std::setw(37) << "  --infer-restr-max-dist arg (=[-d])"
             << "max dist for considered edges for turn restrictions\n"
             << std::setw(37) << "  --max-length-dev arg (=500)"
-            << "maxumum distance deviation for turn restrictions infer\n";
+            << "maximum distance deviation for turn restrictions infer\n"
+            << std::setw(37) << "  --turn-restr-full-turn-pen arg (=0)"
+            << "penalty for full turns during turn restriction infer\n"
+            << std::setw(37) << "  --random-colors"
+            << "fill missing colors with random colors\n"
+            << std::setw(37) << "  --write-components"
+            << "write graph component ID to edge attributes\n"
+            << std::setw(37) << "  --write-components-path"
+            << "write graph components as separated files to given path";
 }
 
 // _____________________________________________________________________________
@@ -61,6 +69,10 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
                          {"write-stats", no_argument, 0, 2},
                          {"max-length-dev", required_argument, 0, 3},
                          {"infer-restr-max-dist", required_argument, 0, 4},
+                         {"write-components", no_argument, 0, 5},
+                         {"write-components-path", required_argument, 0, 6},
+                         {"turn-restr-full-turn-pen", required_argument, 0, 7},
+                         {"random-colors", no_argument, 0, 8},
                          {0, 0, 0, 0}};
 
   double turnRestrDiff = -1;
@@ -88,6 +100,18 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
         break;
       case 4:
         turnRestrDiff = atof(optarg);
+        break;
+      case 5:
+        cfg->writeComponents = true;
+        break;
+      case 6:
+        cfg->componentsPath = optarg;
+        break;
+      case 7:
+        cfg->turnInferFullTurnPen = atof(optarg);
+        break;
+      case 8:
+        cfg->randomColors = true;
         break;
       case ':':
         std::cerr << argv[optind - 1];
