@@ -26,30 +26,43 @@ int main(int argc, char** argv) {
   srand(time(NULL) + rand());
 
   topo::config::TopoConfig cfg;
-  shared::linegraph::LineGraph tg;
-  topo::restr::RestrInferrer ri(&cfg, &tg);
-  topo::MapConstructor mc(&cfg, &tg);
-  topo::StatInserter si(&cfg, &tg);
 
+  size_t iters = 0;
+  double constrT = 0;
+  double restrT = 0;
+  double stationT = 0;
+
+  shared::linegraph::LineGraph lg;
   // read config
   topo::config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
   // read input graph
-  tg.readFromJson(&(std::cin), 0);
+  lg.readFromJson(&(std::cin), 0);
 
-  if (cfg.randomColors) tg.fillMissingColors();
+  if (cfg.randomColors) lg.fillMissingColors();
 
   // snap orphan stations
-  tg.snapOrphanStations();
+  lg.snapOrphanStations();
 
-  size_t numNdsBef = tg.getNds().size();
+  size_t numNdsBef = lg.getNds().size();
   size_t numEdgsBef = 0;
+
+  size_t numEdgsAfter = 0;
+  size_t numNdsAfter = 0;
+  size_t numStationsAfter = 0;
+
+  double avgMergedEdgs = 0;
+  size_t maxMergedEdgs = 0;
+
+  size_t numConExc = 0;
+
+  size_t mergeEdgsC = 0;
 
   double lenBef = 0, lenAfter = 0;
 
   if (cfg.outputStats) {
-    for (const auto& nd : tg.getNds()) {
+    for (const auto& nd : lg.getNds()) {
       for (const auto& e : nd->getAdjList()) {
         if (e->getFrom() != nd) continue;
         numEdgsBef++;
@@ -58,114 +71,137 @@ int main(int argc, char** argv) {
     }
   }
 
-  size_t statFr = mc.freeze();
 
-  si.init();
+  auto graphs = lg.distConnectedComponents(cfg.connectedCompDist, false);
 
-  mc.averageNodePositions();
+  LOGTO(DEBUG, std::cerr) << "Broke up input into " << graphs.size() << " components (including single-node components)";
+
+  std::vector<LineGraph*> resultGraphs;
+
+  size_t compI = 0;
+
+  for (auto& tg : graphs) {
+    LOGTO(DEBUG, std::cerr) << "@ Component" << compI++ << " components";
+
+    topo::restr::RestrInferrer ri(&cfg, &tg);
+    topo::MapConstructor mc(&cfg, &tg);
+    topo::StatInserter si(&cfg, &tg);
 
 
-  // does preserve existing turn restrictions
-  mc.removeNodeArtifacts(false);
+    size_t statFr = mc.freeze();
 
-  mc.cleanUpGeoms();
+    si.init();
 
-  // only remove the artifacts after the restriction inferrer has been
-  // initialized, as these operations do not guarantee that the restrictions
-  // are preserved!
+    mc.averageNodePositions();
 
 
-  ri.init();
-  size_t restrFr = mc.freeze();
+    // does preserve existing turn restrictions
+    mc.removeNodeArtifacts(false);
 
-  // util::geo::output::GeoGraphJsonOutput gout;
-  // gout.printLatLng(tg, std::cout);
-  // exit(0);
+    mc.cleanUpGeoms();
 
-  mc.removeEdgeArtifacts();
+    // only remove the artifacts after the restriction inferrer has been
+    // initialized, as these operations do not guarantee that the restrictions
+    // are preserved!
 
-  T_START(construction);
-  size_t iters = 0;
-  iters += mc.collapseShrdSegs(10);
-  iters += mc.collapseShrdSegs(cfg.maxAggrDistance);
-  double constrT = T_STOP(construction);
 
-  mc.removeNodeArtifacts(false);
+    ri.init();
+    size_t restrFr = mc.freeze();
 
-  double avgMergedEdgs = 0;
-  size_t maxMergedEdgs = 0;
-  if (cfg.outputStats) {
-    size_t c = 0;
-    const auto& origEdgs = mc.freezeTrack(restrFr);
-    for (const auto& nd : tg.getNds()) {
-      for (const auto& e : nd->getAdjList()) {
-        if (e->getFrom() != nd) continue;
-        size_t cur = origEdgs.at(e).size();
-        if (cur > maxMergedEdgs) maxMergedEdgs = cur;
-        avgMergedEdgs += cur;
-        c++;
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.printLatLng(tg, std::cout);
+    // exit(0);
+
+    mc.removeEdgeArtifacts();
+
+    T_START(construction);
+    iters += mc.collapseShrdSegs(10, 50, cfg.segmentLength);
+    iters += mc.collapseShrdSegs(cfg.maxAggrDistance, 50, cfg.segmentLength);
+    constrT += T_STOP(construction);
+
+    mc.removeNodeArtifacts(false);
+
+    if (cfg.outputStats) {
+      size_t c = 0;
+      const auto& origEdgs = mc.freezeTrack(restrFr);
+      for (const auto& nd : tg.getNds()) {
+        for (const auto& e : nd->getAdjList()) {
+          if (e->getFrom() != nd) continue;
+          size_t cur = origEdgs.at(e).size();
+          if (cur > maxMergedEdgs) maxMergedEdgs = cur;
+          avgMergedEdgs += cur;
+          c++;
+        }
       }
     }
-    avgMergedEdgs /= c;
-  }
 
-  mc.reconstructIntersections();
+    mc.reconstructIntersections();
 
 
-  // infer restrictions
-  T_START(restrInf);
-  if (!cfg.noInferRestrs) ri.infer(mc.freezeTrack(restrFr));
-  double restrT = T_STOP(restrInf);
+    // infer restrictions
+    T_START(restrInf);
+    if (!cfg.noInferRestrs) ri.infer(mc.freezeTrack(restrFr));
+    restrT += T_STOP(restrInf);
 
-  // insert stations
-  T_START(stationIns);
-  si.insertStations(mc.freezeTrack(statFr));
-  double stationT = T_STOP(stationIns);
+    // insert stations
+    T_START(stationIns);
+    si.insertStations(mc.freezeTrack(statFr));
+    stationT += T_STOP(stationIns);
 
 
-  // remove orphan lines, which may be introduced by another station
-  // placement
-  mc.removeOrphanLines();
+    // remove orphan lines, which may be introduced by another station
+    // placement
+    mc.removeOrphanLines();
 
-  mc.removeNodeArtifacts(true);
+    mc.removeNodeArtifacts(true);
 
-  mc.reconstructIntersections();
+    mc.reconstructIntersections();
 
-  // remove orphan lines again
-  mc.removeOrphanLines();
+    // remove orphan lines again
+    mc.removeOrphanLines();
 
-  size_t numEdgsAfter = 0;
-
-  if (cfg.outputStats) {
-    for (const auto& nd : tg.getNds()) {
-      for (const auto& e : nd->getAdjList()) {
-        if (e->getFrom() != nd) continue;
-        lenAfter += e->pl().getPolyline().getLength();
-        numEdgsAfter++;
+    if (cfg.outputStats) {
+      for (const auto& nd : tg.getNds()) {
+        numNdsAfter++;
+        if (nd->pl().stops().size()) numStationsAfter++;
+        for (const auto& e : nd->getAdjList()) {
+          if (e->getFrom() != nd) continue;
+          lenAfter += e->pl().getPolyline().getLength();
+          numEdgsAfter++;
+        }
       }
     }
+
+    numConExc = tg.numConnExcs();
+    resultGraphs.push_back(&tg);
   }
 
   int numComps = -1;
 
-  if (cfg.writeComponents || !cfg.componentsPath.empty()) {
-    util::geo::output::GeoGraphJsonOutput out;
-    const auto& graphs = tg.distConnectedComponents(10000, cfg.writeComponents);
+  size_t offset = 0;
 
-    numComps = graphs.size();
+  for (auto& tg : resultGraphs) {
+    if (tg->getNds().size() == 0) continue;
+    if (cfg.writeComponents || !cfg.componentsPath.empty()) {
+      util::geo::output::GeoGraphJsonOutput out;
+      std::cerr << "Writing component with offset " << offset <<  " with " << tg->getNds().size() << " nodes " << std::endl;
+      const auto& graphs = tg->distConnectedComponents(cfg.connectedCompDist, cfg.writeComponents, &offset);
 
-    for (size_t comp = 0; comp < graphs.size(); comp++) {
+      numComps = graphs.size();
 
-      std::ofstream f;
-      f.open(cfg.componentsPath + "/component-" + std::to_string(comp) + ".json");
+      for (size_t comp = 0; comp < graphs.size(); comp++) {
 
-      out.printLatLng(graphs[comp], f);
+        std::ofstream f;
+        f.open(cfg.componentsPath + "/component-" + std::to_string(comp) + ".json");
+
+        out.printLatLng(graphs[comp], f);
+      }
     }
   }
 
 
   // output
-  util::geo::output::GeoGraphJsonOutput out;
+  util::geo::output::GeoGraphJsonOutput gout;
   if (cfg.outputStats) {
     util::json::Dict jsonStats = {
         {"statistics",
@@ -173,7 +209,8 @@ int main(int argc, char** argv) {
              {"num_edgs_in", numEdgsBef},
              {"num_nds_in", numNdsBef},
              {"num_edgs_out", numEdgsAfter},
-             {"num_nds_out", tg.getNds().size()},
+             {"num_nds_out", numNdsAfter},
+             {"num_stations_out", numStationsAfter},
              {"num_components", numComps},
              {"time_const", constrT},
              {"iters", iters},
@@ -181,14 +218,23 @@ int main(int argc, char** argv) {
              {"time_restr_inf", restrT},
              {"time_station_insert", stationT},
              {"len_before", lenBef},
-             {"num_restrs", tg.numConnExcs()},
-             {"avg_merged_edgs", avgMergedEdgs},
+             {"num_restrs", numConExc},
+             {"avg_merged_edgs", (avgMergedEdgs / mergeEdgsC)},
              {"max_merged_edgs", maxMergedEdgs},
              {"len_after", lenAfter},
          }}};
-    out.printLatLng(tg, std::cout, jsonStats);
+
+    util::geo::output::GeoJsonOutput out(std::cout, jsonStats);
+    for (auto gg : resultGraphs) {
+      gout.printLatLng(*gg, &out);
+    }
+    out.flush();
   } else {
-    out.printLatLng(tg, std::cout);
+    util::geo::output::GeoJsonOutput out(std::cout);
+    for (auto gg : resultGraphs) {
+      gout.printLatLng(*gg, &out);
+    }
+    out.flush();
   }
 
   return (0);

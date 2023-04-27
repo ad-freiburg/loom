@@ -108,7 +108,7 @@ util::json::Dict LineEdgePL::getAttrs() const {
   obj["lines"] = arr;
   obj["dbg_lines"] = dbg_lines;
 
-  if (_comp != std::numeric_limits<size_t>::max()) obj["component"] = _comp;
+  if (_comp != std::numeric_limits<uint32_t>::max()) obj["component"] = _comp;
 
   return obj;
 }

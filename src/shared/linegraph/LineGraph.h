@@ -156,6 +156,7 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   void snapOrphanStations();
 
   std::vector<LineGraph> distConnectedComponents(double d, bool write);
+  std::vector<LineGraph> distConnectedComponents(double d, bool write, size_t* offset);
 
   void fillMissingColors();
 

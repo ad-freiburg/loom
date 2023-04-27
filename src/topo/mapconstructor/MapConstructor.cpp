@@ -196,11 +196,11 @@ int MapConstructor::collapseShrdSegs() {
 
 // _____________________________________________________________________________
 int MapConstructor::collapseShrdSegs(double dCut) {
-  return collapseShrdSegs(dCut, 50);
+  return collapseShrdSegs(dCut, 50, 5);
 }
 
 // _____________________________________________________________________________
-int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
+int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS, double SEGL) {
   size_t ITER = 0;
   for (; ITER < MAX_ITERS; ITER++) {
     shared::linegraph::LineGraph tgNew;
@@ -210,8 +210,6 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS) {
 
     std::unordered_map<LineNode*, LineNode*> imgNds;
     std::set<LineNode*> imgNdsSet;
-
-    double SEGL = 5;
 
     std::vector<std::pair<double, LineEdge*>> sortedEdges;
     for (auto n : _g->getNds()) {

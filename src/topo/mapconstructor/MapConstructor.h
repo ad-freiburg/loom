@@ -72,7 +72,7 @@ class MapConstructor {
 
   int collapseShrdSegs();
   int collapseShrdSegs(double dCut);
-  int collapseShrdSegs(double dCut, size_t MAX_ITERS);
+  int collapseShrdSegs(double dCut, size_t MAX_ITERS, double segmentLen);
 
   void averageNodePositions();
   void removeEdgeArtifacts();

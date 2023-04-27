@@ -65,7 +65,7 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
       }
 
       if (!n) {
-        n = addNd({util::geo::Point<double>(x, y), std::numeric_limits<size_t>::max()});
+        n = addNd({util::geo::Point<double>(x, y), std::numeric_limits<uint32_t>::max()});
         idMap[ent.ids[0]] = n;
       }
 
@@ -84,13 +84,13 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
       eid++;
       std::string prevId = ent.ids.front();
       if (idMap.find(prevId) == idMap.end())
-        idMap[prevId] = addNd({util::geo::Point<double>(0, 0), std::numeric_limits<size_t>::max()});
+        idMap[prevId] = addNd({util::geo::Point<double>(0, 0), std::numeric_limits<uint32_t>::max()});
 
       for (size_t i = 1; i < ent.ids.size(); ++i) {
         std::string curId = ent.ids[i];
 
         if (idMap.find(curId) == idMap.end())
-          idMap[curId] = addNd({util::geo::Point<double>(0, 0), std::numeric_limits<size_t>::max()});
+          idMap[curId] = addNd({util::geo::Point<double>(0, 0), std::numeric_limits<uint32_t>::max()});
         auto e = getEdg(idMap[prevId], idMap[curId]);
 
         if (!e) {
@@ -197,7 +197,7 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
 
       if (idMap.count(id)) continue;
 
-      LineNode* n = addNd({point, std::numeric_limits<size_t>::max()});
+      LineNode* n = addNd({point, std::numeric_limits<uint32_t>::max()});
       expandBBox(*n->pl().getGeom());
 
       if (props["component"].is_number()) n->pl().setComponent(props["component"].get<size_t>());
@@ -231,7 +231,7 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
 
       std::vector<std::vector<double>> coords = geom["coordinates"];
 
-      size_t component = std::numeric_limits<size_t>::max();
+      size_t component = std::numeric_limits<uint32_t>::max();
 
       if (props["component"].is_number()) component = props["component"].get<size_t>();
 
@@ -1392,7 +1392,16 @@ void LineGraph::extractLine(const nlohmann::json::object_t& line, LineEdge* e,
 
 // _____________________________________________________________________________
 std::vector<LineGraph> LineGraph::distConnectedComponents(double d, bool write) {
+  return distConnectedComponents(d, write, 0);
+}
+
+// _____________________________________________________________________________
+std::vector<LineGraph> LineGraph::distConnectedComponents(double d, bool write, size_t* offset) {
   std::vector<LineGraph> ret;
+
+  size_t idOffset = 0;
+
+  if (offset) idOffset = *offset;
 
   // first pass, collect components
   const auto& origComps = Algorithm::connectedComponents(*this);
@@ -1437,7 +1446,7 @@ std::vector<LineGraph> LineGraph::distConnectedComponents(double d, bool write) 
 
     // add nodes
     for (auto nd : geoComps[comp]) {
-      if (write) nd->pl().setComponent(comp);
+      if (write) nd->pl().setComponent(idOffset + comp);
       nm[nd] = tg->addNd(nd->pl());
       tg->expandBBox(*nd->pl().getGeom());
     }
@@ -1446,7 +1455,7 @@ std::vector<LineGraph> LineGraph::distConnectedComponents(double d, bool write) 
     for (auto nd : geoComps[comp]) {
       for (auto edg : nd->getAdjList()) {
         if (edg->getFrom() != nd) continue;
-        if (write) edg->pl().setComponent(comp);
+        if (write) edg->pl().setComponent(idOffset + comp);
         if (edg->pl().getLines().size() == 0) {
           continue;
         } else {
@@ -1464,6 +1473,8 @@ std::vector<LineGraph> LineGraph::distConnectedComponents(double d, bool write) 
       }
     }
   }
+
+  if (offset) *offset = idOffset + geoComps.size() + 1;
 
   return ret;
 }

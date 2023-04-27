@@ -46,6 +46,10 @@ void ConfigReader::help(const char* bin) const {
             << "don't infer turn restrictions\n"
             << std::setw(37) << "  --infer-restr-max-dist arg (=[-d])"
             << "max dist for considered edges for turn restrictions\n"
+            << std::setw(37) << "  --max-comp-dist arg (=10000)"
+            << "max distance between nodes in component, in meters"
+            << std::setw(37) << "  --sample-dist arg (=5)"
+            << "sample length for map construction, in pseudometers\n"
             << std::setw(37) << "  --max-length-dev arg (=500)"
             << "maximum distance deviation for turn restrictions infer\n"
             << std::setw(37) << "  --turn-restr-full-turn-pen arg (=0)"
@@ -73,6 +77,8 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
                          {"write-components-path", required_argument, 0, 6},
                          {"turn-restr-full-turn-pen", required_argument, 0, 7},
                          {"random-colors", no_argument, 0, 8},
+                         {"sample-dist", required_argument, 0, 9},
+                         {"max-comp-dist", required_argument, 0, 10},
                          {0, 0, 0, 0}};
 
   double turnRestrDiff = -1;
@@ -112,6 +118,12 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
         break;
       case 8:
         cfg->randomColors = true;
+        break;
+      case 9:
+        cfg->segmentLength = atof(optarg);
+        break;
+      case 10:
+        cfg->connectedCompDist = atof(optarg);
         break;
       case ':':
         std::cerr << argv[optind - 1];

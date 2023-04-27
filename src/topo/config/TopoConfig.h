@@ -15,10 +15,12 @@ struct TopoConfig {
   double maxLengthDev = 500;
   double maxTurnRestrCheckDist = 50;
   double turnInferFullTurnPen = 0;
+  double segmentLength = 5;
   bool outputStats = false;
   bool noInferRestrs = false;
   bool writeComponents = false;
   bool randomColors = false;
+  double connectedCompDist = 10000;
   std::string componentsPath = "";
 };
 

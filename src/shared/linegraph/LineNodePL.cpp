@@ -83,7 +83,7 @@ util::json::Dict LineNodePL::getAttrs() const {
     }
   }
 
-  if (_comp != std::numeric_limits<size_t>::max()) obj["component"] = _comp;
+  if (_comp != std::numeric_limits<uint32_t>::max()) obj["component"] = _comp;
 
   if (arr.size()) obj["excluded_line_conns"] = arr;
 

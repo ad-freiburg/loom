@@ -111,7 +111,7 @@ void MvtRenderer::outputNodes(const RenderGraph& outG) {
       params["width"] =
           util::toString((_cfg->lineWidth / 2));
 
-      if (n->pl().getComponent() != std::numeric_limits<size_t>::max())
+      if (n->pl().getComponent() != std::numeric_limits<uint32_t>::max())
         params["component"] = util::toString(n->pl().getComponent());
 
       for (const auto& geom :
@@ -350,7 +350,7 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       paramsOut["width"] = util::toString(
           (_cfg->outlineWidth + _cfg->lineWidth));
 
-      if (n->pl().getComponent() != std::numeric_limits<size_t>::max())
+      if (n->pl().getComponent() != std::numeric_limits<uint32_t>::max())
         paramsOut["component"] = util::toString(n->pl().getComponent());
 
       addFeature({pl.getLine(), "inner-connections", paramsOut});
@@ -363,7 +363,7 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       params["width"] =
           util::toString(_cfg->lineWidth);
 
-      if (n->pl().getComponent() != std::numeric_limits<size_t>::max())
+      if (n->pl().getComponent() != std::numeric_limits<uint32_t>::max())
         params["component"] = util::toString(n->pl().getComponent());
 
       addFeature({pl.getLine(), "inner-connections", params});
@@ -430,7 +430,7 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
     paramsOut["class"] = getLineClass(line->id());
     paramsOut["width"] = util::toString((_cfg->outlineWidth + _cfg->lineWidth));
 
-    if (e->pl().getComponent() != std::numeric_limits<size_t>::max())
+    if (e->pl().getComponent() != std::numeric_limits<uint32_t>::max())
       paramsOut["component"] = util::toString(e->pl().getComponent());
 
     addFeature({p.getLine(), "lines", paramsOut});
@@ -442,7 +442,7 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
     params["class"] = getLineClass(line->id());
     params["width"] = util::toString(_cfg->lineWidth);
 
-    if (e->pl().getComponent() != std::numeric_limits<size_t>::max())
+    if (e->pl().getComponent() != std::numeric_limits<uint32_t>::max())
       params["component"] = util::toString(e->pl().getComponent());
 
     addFeature({p.getLine(), "lines", params});
