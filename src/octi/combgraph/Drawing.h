@@ -44,7 +44,7 @@ struct Score {
 };
 
 inline Score operator+(const Score& lh, const Score& rh) {
-  return Score(lh.bend + rh.bend, lh.move + rh.move, lh.hop + rh.hop, lh.dense + rh.dense, lh.full + rh.full, lh.violations + rh.violations); 
+  return Score(lh.bend + rh.bend, lh.move + rh.move, lh.hop + rh.hop, lh.dense + rh.dense, lh.full + rh.full, lh.violations + rh.violations, lh.iters + rh.iters);
 }
 
 struct NodeOnSeg {

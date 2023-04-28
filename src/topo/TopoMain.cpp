@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
     resultGraphs.push_back(&tg);
   }
 
-  int numComps = -1;
+  int numComps = 0;
 
   size_t offset = 0;
 
@@ -184,15 +184,16 @@ int main(int argc, char** argv) {
     if (tg->getNds().size() == 0) continue;
     if (cfg.writeComponents || !cfg.componentsPath.empty()) {
       util::geo::output::GeoGraphJsonOutput out;
-      std::cerr << "Writing component with offset " << offset <<  " with " << tg->getNds().size() << " nodes " << std::endl;
+
+      size_t locOffset = offset;
       const auto& graphs = tg->distConnectedComponents(cfg.connectedCompDist, cfg.writeComponents, &offset);
 
-      numComps = graphs.size();
+      numComps += graphs.size();
 
       for (size_t comp = 0; comp < graphs.size(); comp++) {
 
         std::ofstream f;
-        f.open(cfg.componentsPath + "/component-" + std::to_string(comp) + ".json");
+        f.open(cfg.componentsPath + "/component-" + std::to_string(locOffset + comp) + ".json");
 
         out.printLatLng(graphs[comp], f);
       }
