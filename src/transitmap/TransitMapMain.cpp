@@ -43,6 +43,7 @@ int main(int argc, char** argv) {
   LOGTO(DEBUG, std::cerr) << "Reading graph...";
 
   if (cfg.renderMethod == "mvt") {
+#ifdef PROTOBUF_FOUND
     LineGraph lg;
     if (cfg.fromDot)
       lg.readFromDot(&std::cin, cfg.inputSmoothing);
@@ -82,6 +83,12 @@ int main(int argc, char** argv) {
       transitmapper::output::MvtRenderer mvtOut(&cfg, z);
       mvtOut.print(g);
     }
+#else
+    LOG(ERROR) << "transitmap was not compiled with protocol buffers support, "
+                  "cannot use render method "
+               << cfg.renderMethod;
+    exit(1);
+#endif
   } else if (cfg.renderMethod == "svg") {
     RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
     if (cfg.fromDot)
