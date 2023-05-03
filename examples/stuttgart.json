@@ -2099,7 +2099,7 @@
         "type": "Point"
       },
       "properties": {
-        "excluded_line_conns": [],
+        "excluded_conn": [],
         "id": "0x23421e0",
         "station_id": "561302",
         "station_label": "Wasenstr."
@@ -2906,16 +2906,16 @@
         "type": "Point"
       },
       "properties": {
-        "excluded_line_conns": [
+        "excluded_conn": [
           {
-            "edge1_node": "0x22d71a0",
-            "edge2_node": "0x25af4d0",
-            "route": "0x130e850"
+            "node_from": "0x22d71a0",
+            "node_to": "0x25af4d0",
+            "line": "0x130e850"
           },
           {
-            "edge1_node": "0x25af4d0",
-            "edge2_node": "0x22d71a0",
-            "route": "0x130e850"
+            "node_from": "0x25af4d0",
+            "node_to": "0x22d71a0",
+            "line": "0x130e850"
           }
         ],
         "id": "0x2375670"

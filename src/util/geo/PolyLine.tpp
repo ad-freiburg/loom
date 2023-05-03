@@ -73,6 +73,7 @@ void PolyLine<T>::offsetPerp(double units) {
   if (_line.size() < 2) return;
 
   Line<T> ret;
+  ret.reserve(_line.size());
   Point<T> lastP = _line.front();
 
   Point<T>*lastIns = 0, *befLastIns = 0;
@@ -99,22 +100,28 @@ void PolyLine<T>::offsetPerp(double units) {
 
     if (lastIns && befLastIns &&
         lineIntersects(*lastIns, *befLastIns, lastP, curP)) {
-      *lastIns = intersection(*lastIns, *befLastIns, lastP, curP);
+      auto iSect = intersection(*lastIns, *befLastIns, lastP, curP);
 
-      double d = dist(lastP, *lastIns);
-      double d2 = distToSegment(*lastIns, *befLastIns, lastP);
+      double d = fmax(dist(lastP, iSect), dist(*lastIns, iSect));
+      double d2 = distToSegment(iSect, *befLastIns, lastP);
 
-      if (d > fabs(units) * 2 && d2 < d - (fabs(units))) {
-        PolyLine pl(*lastIns, *befLastIns);
-        PolyLine pll(*lastIns, curP);
+      if (d > fabs(units) * 2.0 && d2 < d - (fabs(units))) {
+        PolyLine pl(iSect, *befLastIns);
+        PolyLine pll(iSect, curP);
         pl = pl.getSegment(0, (d - (fabs(units))) / pl.getLength());
         pll = pll.getSegment(0, (d - (fabs(units))) / pll.getLength());
 
-        ret.push_back(pll.back());
+        // careful, after push_back() below, lastIns might point to another
+        // point because of reallocation
         *lastIns = pl.back();
 
+        ret.push_back(pll.back());
         ret.push_back(curP);
       } else {
+        // careful, after push_back() below, lastIns might point to another
+        // point because of reallocation
+        *lastIns = iSect;
+
         ret.push_back(curP);
       }
     } else {

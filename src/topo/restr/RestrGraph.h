@@ -78,19 +78,19 @@ inline util::json::Dict RestrNodePL::getAttrs() const {
     for (const auto& exFr : ro.second) {
       for (const auto* exTo : exFr.second) {
         util::json::Dict ex;
-        ex["route"] = util::toString(ro.first->id());
+        ex["line"] = util::toString(ro.first->id());
         if (exFr.first == exTo) continue;
         auto shrd = RestrGraph::sharedNode(exFr.first, exTo);
         auto nd1 = exFr.first->getOtherNd(shrd);
         auto nd2 = exTo->getOtherNd(shrd);
-        ex["edge1_node"] = util::toString(nd1);
-        ex["edge2_node"] = util::toString(nd2);
+        ex["node_from"] = util::toString(nd1);
+        ex["node_to"] = util::toString(nd2);
         arr.push_back(ex);
       }
     }
   }
 
-  if (arr.size()) obj["excluded_line_conns"] = arr;
+  if (arr.size()) obj["excluded_conn"] = arr;
   return obj;
 }
 }

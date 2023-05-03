@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <climits>
+
 #include "shared/linegraph/LineGraph.h"
 #include "topo/mapconstructor/MapConstructor.h"
 #include "util/geo/Geo.h"
@@ -76,13 +77,11 @@ bool MapConstructor::lineEq(const LineEdge* a, const LineEdge* b) {
 }
 
 // _____________________________________________________________________________
-LineNode* MapConstructor::ndCollapseCand(const std::set<LineNode*>& notFrom,
-                                         const size_t numLines,
-                                         const double dCut,
-                                         const util::geo::Point<double>& point,
-                                         const LineNode* spanA,
-                                         const LineNode* spanB, NodeGeoIdx& geoIdx,
-                                         LineGraph* g) const {
+LineNode* MapConstructor::ndCollapseCand(
+    const std::set<LineNode*>& notFrom, const size_t numLines,
+    const double dCut, const util::geo::Point<double>& point,
+    const LineNode* spanA, const LineNode* spanB, NodeGeoIdx& geoIdx,
+    LineGraph* g) const {
   LineNode* ndMin = 0;
 
   std::set<LineNode*> neighbors;
@@ -200,7 +199,8 @@ int MapConstructor::collapseShrdSegs(double dCut) {
 }
 
 // _____________________________________________________________________________
-int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS, double SEGL) {
+int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS,
+                                     double SEGL) {
   size_t ITER = 0;
   for (; ITER < MAX_ITERS; ITER++) {
     shared::linegraph::LineGraph tgNew;
@@ -367,7 +367,8 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS, double SEGL)
         // this will delete "a" and keep "comb"
         // crucially, "to" has not yet appeared in the list, and we will
         // see the combined node later on
-        if (comb && combineNodes(a, comb, &tgNew) && a != comb) geoIdx.remove(a);
+        if (comb && combineNodes(a, comb, &tgNew) && a != comb)
+          geoIdx.remove(a);
       }
     }
 
@@ -429,7 +430,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS, double SEGL)
 
     // remove edge artifacts 2 times, because an artifact removal
     // might introduce another artifact if we fold edges
-    for (size_t a = 0;  a  < 2; a++) {
+    for (size_t a = 0; a < 2; a++) {
       nds.clear();
       nds.insert(nds.begin(), tgNew.getNds().begin(), tgNew.getNds().end());
       for (auto from : nds) {
@@ -443,8 +444,8 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS, double SEGL)
 
               if (ex && ex->pl().getPolyline().getLength() >
                             2 * maxD(ex->pl().getLines().size(), dCut)) {
-                // if long enough, cut the blocking edge in half and add a support
-                // node here
+                // if long enough, cut the blocking edge in half and add a
+                // support node here
                 supportEdge(ex, &tgNew);
               }
             }
@@ -464,7 +465,6 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS, double SEGL)
       if (n->getDeg() == 2 &&
           !tgNew.getEdg(n->getAdjList().front()->getOtherNd(n),
                         n->getAdjList().back()->getOtherNd(n))) {
-
         double lena = len(*n->getAdjList().front()->pl().getGeom());
         double lenb = len(*n->getAdjList().back()->pl().getGeom());
 
@@ -510,7 +510,6 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS, double SEGL)
         LEN_NEW += e->pl().getPolyline().getLength();
       }
     }
-
 
     *_g = std::move(tgNew);
 
@@ -576,7 +575,9 @@ bool MapConstructor::contractNodes() {
 
           auto* newE = _g->getEdg(to, oldE->getTo());
 
-          if (newE && fabs(util::geo::len(*newE->pl().getGeom()) - util::geo::len(*oldE->pl().getGeom())) > _cfg->maxAggrDistance * 2) {
+          if (newE && fabs(util::geo::len(*newE->pl().getGeom()) -
+                           util::geo::len(*oldE->pl().getGeom())) >
+                          _cfg->maxAggrDistance * 2) {
             dontContract = true;
           }
         }
@@ -1027,7 +1028,8 @@ void MapConstructor::removeOrphanLines() {
       }
 
       // if the edge would run empty, and isnt a stump, dont delete
-      if (e->getFrom()->getDeg() != 1 && e->getTo()->getDeg() != 1 && toDel.size() == e->pl().getLines().size()) {
+      if (e->getFrom()->getDeg() != 1 && e->getTo()->getDeg() != 1 &&
+          toDel.size() == e->pl().getLines().size()) {
         continue;
       }
 

@@ -8,8 +8,8 @@
 #include "shared/linegraph/LineGraph.h"
 #include "shared/linegraph/LineNodePL.h"
 #include "shared/style/LineStyle.h"
-#include "util/String.h"
 #include "util/Misc.h"
+#include "util/String.h"
 #include "util/graph/Algorithm.h"
 #include "util/graph/Edge.h"
 #include "util/graph/Node.h"
@@ -25,10 +25,10 @@ using shared::linegraph::LineNode;
 using shared::linegraph::LineOcc;
 using shared::linegraph::NodeGrid;
 using shared::linegraph::Partner;
+using util::randomHtmlColor;
 using util::geo::DPoint;
 using util::geo::Point;
 using util::graph::Algorithm;
-using util::randomHtmlColor;
 
 // _____________________________________________________________________________
 void LineGraph::readFromDot(std::istream* s, double smooth) {
@@ -65,7 +65,8 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
       }
 
       if (!n) {
-        n = addNd({util::geo::Point<double>(x, y), std::numeric_limits<uint32_t>::max()});
+        n = addNd({util::geo::Point<double>(x, y),
+                   std::numeric_limits<uint32_t>::max()});
         idMap[ent.ids[0]] = n;
       }
 
@@ -84,13 +85,15 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
       eid++;
       std::string prevId = ent.ids.front();
       if (idMap.find(prevId) == idMap.end())
-        idMap[prevId] = addNd({util::geo::Point<double>(0, 0), std::numeric_limits<uint32_t>::max()});
+        idMap[prevId] = addNd({util::geo::Point<double>(0, 0),
+                               std::numeric_limits<uint32_t>::max()});
 
       for (size_t i = 1; i < ent.ids.size(); ++i) {
         std::string curId = ent.ids[i];
 
         if (idMap.find(curId) == idMap.end())
-          idMap[curId] = addNd({util::geo::Point<double>(0, 0), std::numeric_limits<uint32_t>::max()});
+          idMap[curId] = addNd({util::geo::Point<double>(0, 0),
+                                std::numeric_limits<uint32_t>::max()});
         auto e = getEdg(idMap[prevId], idMap[curId]);
 
         if (!e) {
@@ -200,7 +203,8 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
       LineNode* n = addNd({point, std::numeric_limits<uint32_t>::max()});
       expandBBox(*n->pl().getGeom());
 
-      if (props["component"].is_number()) n->pl().setComponent(props["component"].get<size_t>());
+      if (props["component"].is_number())
+        n->pl().setComponent(props["component"].get<size_t>());
 
       Station i("", "", *n->pl().getGeom());
 
@@ -233,7 +237,8 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
 
       size_t component = std::numeric_limits<uint32_t>::max();
 
-      if (props["component"].is_number()) component = props["component"].get<size_t>();
+      if (props["component"].is_number())
+        component = props["component"].get<size_t>();
 
       PolyLine<double> pl;
       for (auto coord : coords) {
@@ -247,13 +252,15 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
       if (from.empty()) {
         from = std::to_string(static_cast<int>(pl.front().getX())) + "|" +
                std::to_string(static_cast<int>(pl.front().getY()));
-        if (!idMap.count(from)) idMap[from] = addNd({pl.getLine().front(), component});
+        if (!idMap.count(from))
+          idMap[from] = addNd({pl.getLine().front(), component});
       }
 
       if (to.empty()) {
         to = std::to_string(static_cast<int>(pl.back().getX())) + "|" +
              std::to_string(static_cast<int>(pl.back().getY()));
-        if (!idMap.count(to)) idMap[to] = addNd({pl.getLine().back(), component});
+        if (!idMap.count(to))
+          idMap[to] = addNd({pl.getLine().back(), component});
       }
 
       pl.applyChaikinSmooth(smooth);
@@ -338,11 +345,11 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
         }
       }
 
-      if (!props["excluded_line_conns"].is_null()) {
-        for (auto excl : props["excluded_line_conns"]) {
-          std::string lid = excl["route"].get<std::string>();
-          std::string nid1 = excl["edge1_node"].get<std::string>();
-          std::string nid2 = excl["edge2_node"].get<std::string>();
+      if (!props["excluded_conn"].is_null()) {
+        for (auto excl : props["excluded_conn"]) {
+          std::string lid = excl["line"].get<std::string>();
+          std::string nid1 = excl["node_from"].get<std::string>();
+          std::string nid2 = excl["node_to"].get<std::string>();
 
           const Line* r = getLine(lid);
 
@@ -1158,7 +1165,11 @@ void LineGraph::contractEdges(double d, bool onlyNonStatConns) {
   // for contraction and iterate over it - we would have to record the changes
   // made in contractEdge(e) and propagate it back.
 
+  std::vector<std::pair<size_t, LineEdge*>> cands;
+
 breakfor:
+  cands.clear();
+
   for (auto n1 : getNds()) {
     for (auto e : n1->getAdjList()) {
       if (e->getFrom() != n1) continue;
@@ -1168,16 +1179,24 @@ breakfor:
       if (onlyNonStatConns && (e->getFrom()->pl().stops().size() ||
                                e->getTo()->pl().stops().size()))
         continue;
+
       if (!e->pl().dontContract() && e->pl().getPolyline().getLength() < d) {
         if (e->getOtherNd(n1)->getAdjList().size() > 1 &&
-            n1->getAdjList().size() > 1 &&
+            (n1->pl().stops().size() == 0 || n1->getAdjList().size() > 1) &&
             (n1->pl().stops().size() == 0 ||
              e->getOtherNd(n1)->pl().stops().size() == 0)) {
-          contractEdge(e);
-          goto breakfor;
+          // contractEdge(e);
+          cands.push_back({e->getFrom()->getDeg() + e->getTo()->getDeg(), e});
+          // goto breakfor;
         }
       }
     }
+  }
+
+  std::sort(cands.begin(), cands.end());
+  for (auto e : cands) {
+    contractEdge(e.second);
+    goto breakfor;
   }
 }
 
@@ -1391,12 +1410,14 @@ void LineGraph::extractLine(const nlohmann::json::object_t& line, LineEdge* e,
 }
 
 // _____________________________________________________________________________
-std::vector<LineGraph> LineGraph::distConnectedComponents(double d, bool write) {
+std::vector<LineGraph> LineGraph::distConnectedComponents(double d,
+                                                          bool write) {
   return distConnectedComponents(d, write, 0);
 }
 
 // _____________________________________________________________________________
-std::vector<LineGraph> LineGraph::distConnectedComponents(double d, bool write, size_t* offset) {
+std::vector<LineGraph> LineGraph::distConnectedComponents(double d, bool write,
+                                                          size_t* offset) {
   std::vector<LineGraph> ret;
 
   size_t idOffset = 0;

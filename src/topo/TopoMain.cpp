@@ -4,16 +4,18 @@
 
 #include <stdio.h>
 #include <unistd.h>
+
 #include <fstream>
 #include <iostream>
 #include <set>
 #include <string>
+
 #include "shared/linegraph/LineGraph.h"
-#include "topo/mapconstructor/MapConstructor.h"
-#include "topo/statinserter/StatInserter.h"
 #include "topo/config/ConfigReader.h"
 #include "topo/config/TopoConfig.h"
+#include "topo/mapconstructor/MapConstructor.h"
 #include "topo/restr/RestrInferrer.h"
+#include "topo/statinserter/StatInserter.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
@@ -71,10 +73,10 @@ int main(int argc, char** argv) {
     }
   }
 
-
   auto graphs = lg.distConnectedComponents(cfg.connectedCompDist, false);
 
-  LOGTO(DEBUG, std::cerr) << "Broke up input into " << graphs.size() << " components (including single-node components)";
+  LOGTO(DEBUG, std::cerr) << "Broke up input into " << graphs.size()
+                          << " components (including single-node components)";
 
   std::vector<LineGraph*> resultGraphs;
 
@@ -87,13 +89,11 @@ int main(int argc, char** argv) {
     topo::MapConstructor mc(&cfg, &tg);
     topo::StatInserter si(&cfg, &tg);
 
-
     size_t statFr = mc.freeze();
 
     si.init();
 
     mc.averageNodePositions();
-
 
     // does preserve existing turn restrictions
     mc.removeNodeArtifacts(false);
@@ -103,7 +103,6 @@ int main(int argc, char** argv) {
     // only remove the artifacts after the restriction inferrer has been
     // initialized, as these operations do not guarantee that the restrictions
     // are preserved!
-
 
     ri.init();
     size_t restrFr = mc.freeze();
@@ -137,7 +136,6 @@ int main(int argc, char** argv) {
 
     mc.reconstructIntersections();
 
-
     // infer restrictions
     T_START(restrInf);
     if (!cfg.noInferRestrs) ri.infer(mc.freezeTrack(restrFr));
@@ -147,7 +145,6 @@ int main(int argc, char** argv) {
     T_START(stationIns);
     si.insertStations(mc.freezeTrack(statFr));
     stationT += T_STOP(stationIns);
-
 
     // remove orphan lines, which may be introduced by another station
     // placement
@@ -186,44 +183,43 @@ int main(int argc, char** argv) {
       util::geo::output::GeoGraphJsonOutput out;
 
       size_t locOffset = offset;
-      const auto& graphs = tg->distConnectedComponents(cfg.connectedCompDist, cfg.writeComponents, &offset);
+      const auto& graphs = tg->distConnectedComponents(
+          cfg.connectedCompDist, cfg.writeComponents, &offset);
 
       numComps += graphs.size();
 
       for (size_t comp = 0; comp < graphs.size(); comp++) {
-
         std::ofstream f;
-        f.open(cfg.componentsPath + "/component-" + std::to_string(locOffset + comp) + ".json");
+        f.open(cfg.componentsPath + "/component-" +
+               std::to_string(locOffset + comp) + ".json");
 
         out.printLatLng(graphs[comp], f);
       }
     }
   }
 
-
   // output
   util::geo::output::GeoGraphJsonOutput gout;
   if (cfg.outputStats) {
     util::json::Dict jsonStats = {
-        {"statistics",
-         util::json::Dict{
-             {"num_edgs_in", numEdgsBef},
-             {"num_nds_in", numNdsBef},
-             {"num_edgs_out", numEdgsAfter},
-             {"num_nds_out", numNdsAfter},
-             {"num_stations_out", numStationsAfter},
-             {"num_components", numComps},
-             {"time_const", constrT},
-             {"iters", iters},
-             {"time_const", constrT},
-             {"time_restr_inf", restrT},
-             {"time_station_insert", stationT},
-             {"len_before", lenBef},
-             {"num_restrs", numConExc},
-             {"avg_merged_edgs", (avgMergedEdgs / mergeEdgsC)},
-             {"max_merged_edgs", maxMergedEdgs},
-             {"len_after", lenAfter},
-         }}};
+        {"statistics", util::json::Dict{
+                           {"num_edgs_in", numEdgsBef},
+                           {"num_nds_in", numNdsBef},
+                           {"num_edgs_out", numEdgsAfter},
+                           {"num_nds_out", numNdsAfter},
+                           {"num_stations_out", numStationsAfter},
+                           {"num_components", numComps},
+                           {"time_const", constrT},
+                           {"iters", iters},
+                           {"time_const", constrT},
+                           {"time_restr_inf", restrT},
+                           {"time_station_insert", stationT},
+                           {"len_before", lenBef},
+                           {"num_restrs", numConExc},
+                           {"avg_merged_edgs", (avgMergedEdgs / mergeEdgsC)},
+                           {"max_merged_edgs", maxMergedEdgs},
+                           {"len_after", lenAfter},
+                       }}};
 
     util::geo::output::GeoJsonOutput out(std::cout, jsonStats);
     for (auto gg : resultGraphs) {

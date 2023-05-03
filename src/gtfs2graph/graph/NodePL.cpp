@@ -123,10 +123,10 @@ util::json::Dict NodePL::getAttrs() const {
                (r.direction != _n && rr.direction == _n)) &&
               !isConnOccuring(r.route, e, f)) {
             auto obj = util::json::Dict();
-            obj["route"] = util::toString(r.route);
-            obj["edge1_node"] =
+            obj["line"] = util::toString(r.route);
+            obj["node_from"] =
                 util::toString(e->getFrom() == _n ? e->getTo() : e->getFrom());
-            obj["edge2_node"] =
+            obj["node_to"] =
                 util::toString(f->getFrom() == _n ? f->getTo() : f->getFrom());
             arr.push_back(obj);
           }
@@ -135,6 +135,6 @@ util::json::Dict NodePL::getAttrs() const {
     }
   }
 
-  if (arr.size()) obj["excluded_line_conns"] = arr;
+  if (arr.size()) obj["excluded_conn"] = arr;
   return obj;
 }

@@ -309,8 +309,8 @@ Polygon<double> RenderGraph::getConvexFrontHull(const LineNode* n, double d,
 
     return util::geo::buffer(hull, d, pointsPerCircle);
 
-  } else {
-    // for two node fronts, take average
+  } else if (fabs(n->pl().fronts()[0].origGeom.getLength() - n->pl().fronts()[1].origGeom.getLength()) < d/2) {
+    // for two node fronts of equal size, take average
     std::vector<const PolyLine<double>*> pols;
 
     PolyLine<double> a = n->pl().fronts()[0].origGeom.getSegment(
@@ -337,6 +337,13 @@ Polygon<double> RenderGraph::getConvexFrontHull(const LineNode* n, double d,
     auto avg = PolyLine<double>::average(pols).getLine();
 
     return util::geo::buffer(avg, d, pointsPerCircle);
+  } else {
+    // for two node fronts of different size, take largest
+    if (n->pl().fronts()[0].origGeom.getLength() > n->pl().fronts()[1].origGeom.getLength()) {
+      return util::geo::buffer(n->pl().fronts()[0].origGeom.getLine(), d, pointsPerCircle);
+    } else {
+      return util::geo::buffer(n->pl().fronts()[1].origGeom.getLine(), d, pointsPerCircle);
+    }
   }
 }
 
@@ -574,7 +581,8 @@ void RenderGraph::createMetaNodes() {
     }
 
     // first node has new ref node id
-    LineNode* ref = addNd({*cands[0].n->pl().getGeom(), cands[0].n->pl().getComponent()});
+    LineNode* ref =
+        addNd({*cands[0].n->pl().getGeom(), cands[0].n->pl().getComponent()});
 
     std::set<LineNode*> toDel;
 

@@ -26,16 +26,16 @@
         "deg": "6", 
         "deg_in": "3", 
         "deg_out": "3", 
-        "excluded_line_conns": [
+        "excluded_conn": [
           {
-            "edge1_node": "0x1903aa0", 
-            "edge2_node": "0x370d4e0", 
-            "route": "0x195bbf0"
+            "node_from": "0x1903aa0", 
+            "node_to": "0x370d4e0", 
+            "line": "0x195bbf0"
           }, 
           {
-            "edge1_node": "0x370d4e0", 
-            "edge2_node": "0x1903aa0", 
-            "route": "0x195bbf0"
+            "node_from": "0x370d4e0", 
+            "node_to": "0x1903aa0", 
+            "line": "0x195bbf0"
           }], 
         "id": "0x1903670", 
         "station_id": "Parent30500", 

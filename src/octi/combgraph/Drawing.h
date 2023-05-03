@@ -24,14 +24,14 @@ typedef std::vector<std::pair<size_t, size_t>> GrPath;
 
 struct Score {
   Score(double bend, double move, double hop, double dense, double full,
-        uint64_t violations)
+        uint64_t violations, size_t iters)
       : bend(bend),
         move(move),
         hop(hop),
         dense(dense),
         full(full),
         violations(violations),
-        iters(0) {}
+        iters(iters) {}
   Score()
       : bend(0), move(0), hop(0), dense(0), full(0), violations(0), iters(0) {}
   double bend;

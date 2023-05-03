@@ -70,14 +70,14 @@ util::json::Dict LineNodePL::getAttrs() const {
     for (const auto& exFr : ro.second) {
       for (const auto* exTo : exFr.second) {
         util::json::Dict ex;
-        ex["route"] = util::toString(ro.first->id());
+        ex["line"] = util::toString(ro.first->id());
         if (exFr.first == exTo) continue;
         auto shrd = LineGraph::sharedNode(exFr.first, exTo);
         if (!shrd) continue;
         auto nd1 = exFr.first->getOtherNd(shrd);
         auto nd2 = exTo->getOtherNd(shrd);
-        ex["edge1_node"] = util::toString(nd1);
-        ex["edge2_node"] = util::toString(nd2);
+        ex["node_from"] = util::toString(nd1);
+        ex["node_to"] = util::toString(nd2);
         arr.push_back(ex);
       }
     }
@@ -85,7 +85,7 @@ util::json::Dict LineNodePL::getAttrs() const {
 
   if (_comp != std::numeric_limits<uint32_t>::max()) obj["component"] = _comp;
 
-  if (arr.size()) obj["excluded_line_conns"] = arr;
+  if (arr.size()) obj["excluded_conn"] = arr;
 
   auto nonServedArr = util::json::Array();
 

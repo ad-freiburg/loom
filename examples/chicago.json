@@ -594,16 +594,16 @@
         "type": "Point"
       },
       "properties": {
-        "excluded_line_conns": [
+        "excluded_conn": [
           {
-            "edge1_node": "0x2d91b200",
-            "edge2_node": "0x2d91af40",
-            "route": "0x1786090"
+            "node_from": "0x2d91b200",
+            "node_to": "0x2d91af40",
+            "line": "0x1786090"
           },
           {
-            "edge1_node": "0x2d91af40",
-            "edge2_node": "0x2d91b200",
-            "route": "0x1786090"
+            "node_from": "0x2d91af40",
+            "node_to": "0x2d91b200",
+            "line": "0x1786090"
           }
         ],
         "id": "0x2d915cb0"
@@ -2218,16 +2218,16 @@
         "type": "Point"
       },
       "properties": {
-        "excluded_line_conns": [
+        "excluded_conn": [
           {
-            "edge1_node": "0x2d9756a0",
-            "edge2_node": "0x2d974790",
-            "route": "0x1785fd0"
+            "node_from": "0x2d9756a0",
+            "node_to": "0x2d974790",
+            "line": "0x1785fd0"
           },
           {
-            "edge1_node": "0x2d974790",
-            "edge2_node": "0x2d9756a0",
-            "route": "0x1785fd0"
+            "node_from": "0x2d974790",
+            "node_to": "0x2d9756a0",
+            "line": "0x1785fd0"
           }
         ],
         "id": "0x2da02ba0"
@@ -2256,36 +2256,36 @@
         "type": "Point"
       },
       "properties": {
-        "excluded_line_conns": [
+        "excluded_conn": [
           {
-            "edge1_node": "0x2d91a6f0",
-            "edge2_node": "0x2d91bad0",
-            "route": "0x1785f10"
+            "node_from": "0x2d91a6f0",
+            "node_to": "0x2d91bad0",
+            "line": "0x1785f10"
           },
           {
-            "edge1_node": "0x2d91a6f0",
-            "edge2_node": "0x2d91bad0",
-            "route": "0x1785cd0"
+            "node_from": "0x2d91a6f0",
+            "node_to": "0x2d91bad0",
+            "line": "0x1785cd0"
           },
           {
-            "edge1_node": "0x2d91a6f0",
-            "edge2_node": "0x2d91bad0",
-            "route": "0x1786150"
+            "node_from": "0x2d91a6f0",
+            "node_to": "0x2d91bad0",
+            "line": "0x1786150"
           },
           {
-            "edge1_node": "0x2d91bad0",
-            "edge2_node": "0x2d91a6f0",
-            "route": "0x1785f10"
+            "node_from": "0x2d91bad0",
+            "node_to": "0x2d91a6f0",
+            "line": "0x1785f10"
           },
           {
-            "edge1_node": "0x2d91bad0",
-            "edge2_node": "0x2d91a6f0",
-            "route": "0x1785cd0"
+            "node_from": "0x2d91bad0",
+            "node_to": "0x2d91a6f0",
+            "line": "0x1785cd0"
           },
           {
-            "edge1_node": "0x2d91bad0",
-            "edge2_node": "0x2d91a6f0",
-            "route": "0x1786150"
+            "node_from": "0x2d91bad0",
+            "node_to": "0x2d91a6f0",
+            "line": "0x1786150"
           }
         ],
         "id": "0x2da058d0"

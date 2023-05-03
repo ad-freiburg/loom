@@ -108,14 +108,12 @@ void MvtRenderer::outputNodes(const RenderGraph& outG) {
         params["stationLabel"] = n->pl().stops().front().name;
         params["stationId"] = n->pl().stops().front().id;
       }
-      params["width"] =
-          util::toString((_cfg->lineWidth / 2));
+      params["width"] = util::toString((_cfg->lineWidth / 2));
 
       if (n->pl().getComponent() != std::numeric_limits<uint32_t>::max())
         params["component"] = util::toString(n->pl().getComponent());
 
-      for (const auto& geom :
-           outG.getStopGeoms(n, _cfg->tightStations, 32)) {
+      for (const auto& geom : outG.getStopGeoms(n, _cfg->tightStations, 32)) {
         addFeature({geom.getOuter(), "stations", params});
       }
     }
@@ -138,8 +136,8 @@ void MvtRenderer::renderNodeFronts(const RenderGraph& outG) {
 
       DPoint a = p.getPointAt(.5).p;
 
-
-      addFeature({PolyLine<double>(*n->pl().getGeom(), a).getLine(), "lines", params});
+      addFeature(
+          {PolyLine<double>(*n->pl().getGeom(), a).getLine(), "lines", params});
     }
   }
 }
@@ -316,7 +314,8 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
     for (size_t i = 0; i < c.geoms.size(); i++) {
       PolyLine<double> pl = c.geoms[i].geom;
 
-      if (ref.geom.getLength() > (_cfg->lineWidth + _cfg->lineSpacing) * _res * 4) {
+      if (ref.geom.getLength() >
+          (_cfg->lineWidth + _cfg->lineSpacing) * _res * 4) {
         double off = -(_cfg->lineWidth + _cfg->lineSpacing) * _res *
                      (static_cast<int>(c.geoms[i].slotFrom) -
                       static_cast<int>(ref.slotFrom));
@@ -347,8 +346,8 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       paramsOut["line"] = c.geoms[i].from.line->label();
       paramsOut["lineCap"] = "butt";
       paramsOut["class"] = getLineClass(c.geoms[i].from.line->id());
-      paramsOut["width"] = util::toString(
-          (_cfg->outlineWidth + _cfg->lineWidth));
+      paramsOut["width"] =
+          util::toString((_cfg->outlineWidth + _cfg->lineWidth));
 
       if (n->pl().getComponent() != std::numeric_limits<uint32_t>::max())
         paramsOut["component"] = util::toString(n->pl().getComponent());
@@ -360,8 +359,7 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       params["line"] = c.geoms[i].from.line->label();
       params["lineCap"] = "round";
       params["class"] = getLineClass(c.geoms[i].from.line->id());
-      params["width"] =
-          util::toString(_cfg->lineWidth);
+      params["width"] = util::toString(_cfg->lineWidth);
 
       if (n->pl().getComponent() != std::numeric_limits<uint32_t>::max())
         params["component"] = util::toString(n->pl().getComponent());
@@ -540,9 +538,10 @@ void MvtRenderer::printFeature(const PolyLine<double>& pl, size_t z, size_t x,
 
     for (size_t i = 1; i < l.size(); i++) {
       const auto& curP = l[i];
-      const auto& prevP = l[i-1];
+      const auto& prevP = l[i - 1];
 
-      if (util::geo::intersects(util::geo::LineSegment<double>{curP, prevP}, box)) {
+      if (util::geo::intersects(util::geo::LineSegment<double>{curP, prevP},
+                                box)) {
         croppedLines.back().push_back(prevP);
         croppedLines.back().push_back(curP);
       } else if (croppedLines.back().size() > 0) {

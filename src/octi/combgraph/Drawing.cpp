@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include "octi/basegraph/BaseGraph.h"
 #include "octi/combgraph/CombGraph.h"
 #include "octi/combgraph/Drawing.h"
@@ -41,7 +42,7 @@ void Drawing::setBaseGraph(const BaseGraph* gg) { _gg = gg; }
 
 // _____________________________________________________________________________
 Score Drawing::fullScore() const {
-  Score ret{0, 0, 0, 0, 0, 0};
+  Score ret{0, 0, 0, 0, 0, 0, 0};
 
   for (auto c : _ndReachCosts) ret.move += c.second;
   for (auto c : _ndBndCosts) ret.bend += c.second;
@@ -233,7 +234,7 @@ void Drawing::getLineGraph(LineGraph* target) const {
     auto n = ndpair.first;
     for (auto f : n->getAdjListOut()) {
       if (f->getFrom() != n) continue;
-      if (_edgs.find(f) == _edgs.end()) continue; // edge was not drawn
+      if (_edgs.find(f) == _edgs.end()) continue;  // edge was not drawn
 
       auto path = _edgs.find(f)->second;
 
