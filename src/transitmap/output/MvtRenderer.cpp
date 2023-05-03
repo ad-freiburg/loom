@@ -465,7 +465,6 @@ void MvtRenderer::addFeature(const MvtLineFeature& feature) {
   for (size_t x = swX; x <= neX && x < GRID_SIZE; x++) {
     for (size_t y = swY; y <= neY && y < GRID_SIZE; y++) {
       if (util::geo::intersects(feature.line, getBox(GRID_ZOOM, x, y))) {
-        // TODO: crop?
         if (_grid[x * GRID_SIZE + y] == std::numeric_limits<uint32_t>::max()) {
           _grid[x * GRID_SIZE + y] = _lines.size();
           _cells.push_back({x, y});
@@ -531,7 +530,8 @@ void MvtRenderer::printFeature(const PolyLine<double>& pl, size_t z, size_t x,
   // crop
   std::vector<util::geo::Line<double>> croppedLines;
 
-  auto box = getBox(z, x, y);
+  // pad!
+  auto box = util::geo::pad(getBox(z, x, y), 50 * (tw / TILE_RES));
 
   if (layer->name() == "stations") {
     croppedLines.push_back(l);
