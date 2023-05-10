@@ -18,7 +18,7 @@ class OctiQuadTree : public OctiHananGraph {
       : OctiHananGraph(bbox, cg, cellSize, spacer, 1, pens) {}
 
   virtual void unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b);
-  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t order);
+  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e);
   virtual CrossEdgPairs getCrossEdgPairs() const;
   virtual double ndMovePen(const CombNode* cbNd, const GridNode* grNd) const;
   virtual void init();

@@ -69,7 +69,7 @@ void ConfigReader::help(const char* bin) const {
             << "input is in dot format\n"
             << std::setw(37) << "  --padding arg (=-1)"
             << "padding, -1 for auto\n"
-            << std::setw(37) << "  --smoothing arg (=3)"
+            << std::setw(37) << "  --smoothing arg (=1)"
             << "input line smoothing\n"
             << std::setw(37) << "  --random-colors"
             << "fill missing colors with random colors\n"
@@ -82,7 +82,7 @@ void ConfigReader::help(const char* bin) const {
             << std::setw(37) << "  --no-render-node-connections"
             << "don't render inner node connections\n"
             << std::setw(37) << "  --render-node-fronts"
-            << "render node fronts"
+            << "render node fronts\n"
             << std::setw(37) << "  --print-stats"
             << "write stats to stdout\n";
 }

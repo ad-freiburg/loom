@@ -4,9 +4,11 @@
 
 #include <float.h>
 #include <getopt.h>
+
 #include <exception>
 #include <iostream>
 #include <string>
+
 #include "topo/_config.h"
 #include "topo/config/ConfigReader.h"
 #include "util/log/Log.h"
@@ -52,6 +54,8 @@ void ConfigReader::help(const char* bin) const {
             << "sample length for map construction, in pseudometers\n"
             << std::setw(37) << "  --max-length-dev arg (=500)"
             << "maximum distance deviation for turn restrictions infer\n"
+            << std::setw(37) << "  --turn-restr-full-turn-angle arg (=0)"
+            << "turn angles smaller than this will count as full turn\n"
             << std::setw(37) << "  --turn-restr-full-turn-pen arg (=0)"
             << "penalty for full turns during turn restriction infer\n"
             << std::setw(37) << "  --random-colors"
@@ -59,27 +63,32 @@ void ConfigReader::help(const char* bin) const {
             << std::setw(37) << "  --write-components"
             << "write graph component ID to edge attributes\n"
             << std::setw(37) << "  --write-components-path"
-            << "write graph components as separated files to given path";
+            << "write graph components as separated files to given path\n"
+            << std::setw(37) << "  --smooth (=0)"
+            << "smooth output graph edge geometries";
 }
 
 // _____________________________________________________________________________
 void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
   std::string motStr = "all";
 
-  struct option ops[] = {{"version", no_argument, 0, 'v'},
-                         {"help", no_argument, 0, 'h'},
-                         {"max-aggr-dist", required_argument, 0, 'd'},
-                         {"no-infer-restrs", no_argument, 0, 1},
-                         {"write-stats", no_argument, 0, 2},
-                         {"max-length-dev", required_argument, 0, 3},
-                         {"infer-restr-max-dist", required_argument, 0, 4},
-                         {"write-components", no_argument, 0, 5},
-                         {"write-components-path", required_argument, 0, 6},
-                         {"turn-restr-full-turn-pen", required_argument, 0, 7},
-                         {"random-colors", no_argument, 0, 8},
-                         {"sample-dist", required_argument, 0, 9},
-                         {"max-comp-dist", required_argument, 0, 10},
-                         {0, 0, 0, 0}};
+  struct option ops[] = {
+      {"version", no_argument, 0, 'v'},
+      {"help", no_argument, 0, 'h'},
+      {"max-aggr-dist", required_argument, 0, 'd'},
+      {"no-infer-restrs", no_argument, 0, 1},
+      {"write-stats", no_argument, 0, 2},
+      {"max-length-dev", required_argument, 0, 3},
+      {"infer-restr-max-dist", required_argument, 0, 4},
+      {"write-components", no_argument, 0, 5},
+      {"write-components-path", required_argument, 0, 6},
+      {"turn-restr-full-turn-pen", required_argument, 0, 7},
+      {"random-colors", no_argument, 0, 8},
+      {"sample-dist", required_argument, 0, 9},
+      {"max-comp-dist", required_argument, 0, 10},
+      {"smooth", required_argument, 0, 11},
+      {"turn-restr-full-turn-angle", required_argument, 0, 12},
+      {0, 0, 0, 0}};
 
   double turnRestrDiff = -1;
 
@@ -125,6 +134,12 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
       case 10:
         cfg->connectedCompDist = atof(optarg);
         break;
+      case 11:
+        cfg->smooth = atof(optarg);
+        break;
+      case 12:
+        cfg->fullTurnAngle = atof(optarg);
+        break;
       case ':':
         std::cerr << argv[optind - 1];
         std::cerr << " requires an argument" << std::endl;
@@ -141,6 +156,8 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
     }
   }
 
-  if (turnRestrDiff >= 0) cfg->maxTurnRestrCheckDist = turnRestrDiff;
-  else cfg->maxTurnRestrCheckDist = cfg->maxAggrDistance;
+  if (turnRestrDiff >= 0)
+    cfg->maxTurnRestrCheckDist = turnRestrDiff;
+  else
+    cfg->maxTurnRestrCheckDist = cfg->maxAggrDistance;
 }

@@ -46,9 +46,9 @@ int main(int argc, char** argv) {
 #ifdef PROTOBUF_FOUND
     LineGraph lg;
     if (cfg.fromDot)
-      lg.readFromDot(&std::cin, cfg.inputSmoothing);
+      lg.readFromDot(&std::cin);
     else
-      lg.readFromJson(&std::cin, cfg.inputSmoothing);
+      lg.readFromJson(&std::cin);
 
     if (cfg.randomColors) lg.fillMissingColors();
 
@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
       RenderGraph g(lg, lWidth, lSpacing);
 
       g.contractStrayNds();
-      g.smooth();
+      g.smooth(cfg.inputSmoothing);
       b.writeNodeFronts(&g);
       b.expandOverlappinFronts(&g);
 
@@ -92,9 +92,9 @@ int main(int argc, char** argv) {
   } else if (cfg.renderMethod == "svg") {
     RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
     if (cfg.fromDot)
-      g.readFromDot(&std::cin, cfg.inputSmoothing);
+      g.readFromDot(&std::cin);
     else
-      g.readFromJson(&std::cin, cfg.inputSmoothing);
+      g.readFromJson(&std::cin);
 
     if (cfg.randomColors) g.fillMissingColors();
 
@@ -102,10 +102,17 @@ int main(int argc, char** argv) {
     g.snapOrphanStations();
 
     g.contractStrayNds();
-    g.smooth();
+    g.smooth(cfg.inputSmoothing);
     b.writeNodeFronts(&g);
     b.expandOverlappinFronts(&g);
     g.createMetaNodes();
+
+    if (true) {
+      b.dropOverlappingStations(&g);
+      g.contractStrayNds();
+      b.expandOverlappinFronts(&g);
+      g.createMetaNodes();
+    }
 
     LOGTO(DEBUG, std::cerr) << "Outputting to SVG ...";
     transitmapper::output::SvgRenderer svgOut(&std::cout, &cfg);

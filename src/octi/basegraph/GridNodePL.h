@@ -47,12 +47,8 @@ class GridNodePL : util::geograph::GeoNodePL<double> {
   bool isSettled() const;
   void setSettled(bool c);
 
-  void setStation();
-
   void setId(size_t id);
   size_t getId() const;
-
-  bool visited;
 
  private:
   Point<double> _pos;
@@ -60,11 +56,13 @@ class GridNodePL : util::geograph::GeoNodePL<double> {
   GridNode* _parent;
   GridNode* _ports[8];
 
-  size_t _x, _y;
-  size_t _id;
-  bool _closed, _sink, _station, _settled;
+  uint32_t _x, _y;
+  uint32_t _id;
+  bool _closed : 1;
+  bool _sink : 1;
+  bool _settled : 1;
 };
-}
-}
+}  // namespace basegraph
+}  // namespace octi
 
 #endif  // OCTI_BASEGRAPH_GRIDNODEPL_H_

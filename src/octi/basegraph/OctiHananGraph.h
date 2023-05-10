@@ -19,7 +19,7 @@ class OctiHananGraph : public OctiGridGraph {
       : OctiGridGraph(bbox, cellSize, spacer, pens), _cg(cg), _iters(iters) {}
 
   virtual void unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b);
-  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t order);
+  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e);
   virtual CrossEdgPairs getCrossEdgPairs() const;
   virtual GridEdge* getNEdg(const GridNode* a, const GridNode* b) const;
   virtual size_t maxDeg() const;
@@ -34,7 +34,8 @@ class OctiHananGraph : public OctiGridGraph {
   virtual size_t ang(size_t i, size_t j) const;
   virtual void connectNodes(GridNode* grNdA, GridNode* grNdB, size_t dir);
   virtual void writeInitialCosts();
-  std::set<std::pair<size_t, size_t>> getIterCoords(const std::set<std::pair<size_t, size_t>>& inCoords) const;
+  std::set<std::pair<size_t, size_t>> getIterCoords(
+      const std::set<std::pair<size_t, size_t>>& inCoords) const;
 
   const combgraph::CombGraph& _cg;
   size_t _iters;

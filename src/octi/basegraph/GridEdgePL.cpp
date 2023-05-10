@@ -2,8 +2,8 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#include "octi/basegraph/GridEdgePL.h"
 #include "octi/basegraph/BaseGraph.h"
+#include "octi/basegraph/GridEdgePL.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
 
@@ -18,15 +18,13 @@ GridEdgePL::GridEdgePL(double c, bool secondary, bool sink)
       _closed(false),
       _softClosed(false),
       _blocked(false),
-      _resEdgs(0), _rndrOrder(0) {}
+      _resEdgs(0) {}
 
 // _____________________________________________________________________________
 const util::geo::Line<double>* GridEdgePL::getGeom() const { return 0; }
 
 // _____________________________________________________________________________
-size_t GridEdgePL::resEdgs() const {
-  return _resEdgs;
-}
+size_t GridEdgePL::resEdgs() const { return _resEdgs; }
 
 // _____________________________________________________________________________
 void GridEdgePL::reset() {
@@ -41,7 +39,6 @@ util::json::Dict GridEdgePL::getAttrs() const {
                     ? "inf"
                     : util::toString(cost());
   obj["res_edges"] = util::toString((int)_resEdgs);
-  obj["rndr_order"] = util::toString((int)_rndrOrder);
   obj["secondary"] = util::toString((int)_isSecondary);
   obj["sink"] = util::toString((int)_isSink);
   obj["closed"] = util::toString(_closed);
@@ -65,16 +62,25 @@ double GridEdgePL::rawCost() const { return _c; }
 void GridEdgePL::addResEdge() { _resEdgs++; }
 
 // _____________________________________________________________________________
-void GridEdgePL::close() { _closed = true; _softClosed = false;}
+void GridEdgePL::close() {
+  _closed = true;
+  _softClosed = false;
+}
 
 // _____________________________________________________________________________
-void GridEdgePL::softClose() { if (!_closed) _softClosed = true; _closed = true;}
+void GridEdgePL::softClose() {
+  if (!_closed) _softClosed = true;
+  _closed = true;
+}
 
 // _____________________________________________________________________________
 bool GridEdgePL::closed() const { return _closed; }
 
 // _____________________________________________________________________________
-void GridEdgePL::open() { _closed = false; _softClosed = false;}
+void GridEdgePL::open() {
+  _closed = false;
+  _softClosed = false;
+}
 
 // _____________________________________________________________________________
 void GridEdgePL::block() { _blocked = true; }
@@ -89,15 +95,12 @@ void GridEdgePL::setCost(double c) { _c = c; }
 bool GridEdgePL::isSecondary() const { return _isSecondary; }
 
 // _____________________________________________________________________________
-void GridEdgePL::delResEdg() { if (_resEdgs > 0) _resEdgs--; }
+void GridEdgePL::delResEdg() {
+  if (_resEdgs > 0) _resEdgs--;
+}
 
 // _____________________________________________________________________________
 void GridEdgePL::setId(size_t id) { _id = id; }
 
 // _____________________________________________________________________________
 size_t GridEdgePL::getId() const { return _id; }
-
-// _____________________________________________________________________________
-void GridEdgePL::setRndrOrder(size_t order) {
-  _rndrOrder = order;
-}

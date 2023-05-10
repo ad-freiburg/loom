@@ -406,7 +406,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS,
         double lenb = len(*n->getAdjList().back()->pl().getGeom());
 
         // avoid edges that are too long, this will cause
-        // orig edge creep
+        // orig edge creep!
         if (lena + lenb > MAX_COLLAPSED_SEG_LENGTH) continue;
 
         auto ex = tgNew.getEdg(n->getAdjList().front()->getOtherNd(n),
@@ -430,12 +430,16 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS,
 
     // remove edge artifacts 2 times, because an artifact removal
     // might introduce another artifact if we fold edges
-    for (size_t a = 0; a < 2; a++) {
+    bool found = false;
+    do {
+      found = false;
       nds.clear();
       nds.insert(nds.begin(), tgNew.getNds().begin(), tgNew.getNds().end());
       for (auto from : nds) {
         for (auto e : from->getAdjList()) {
           if (e->getFrom() != from) continue;
+          if ((e->getFrom()->getDeg() < 3 && e->getTo()->getDeg() < 3)) continue;
+
           auto to = e->getTo();
           if (e->pl().getPolyline().getLength() < maxD(from, to, dCut)) {
             for (auto* oldE : from->getAdjList()) {
@@ -450,14 +454,15 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS,
               }
             }
             if (combineNodes(from, to, &tgNew)) {
+              found = true;
               break;
             }
           }
         }
       }
-    }
+    } while(found);
 
-    // re-collapse again because we might have introduce deg 2 nodes above
+    // re-collapse again because we might have introduced deg 2 nodes above
     nds.clear();
     nds.insert(nds.begin(), tgNew.getNds().begin(), tgNew.getNds().end());
 
@@ -516,7 +521,6 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS,
     LOGTO(DEBUG, std::cerr)
         << "iter " << ITER << ", distance gap: " << (1 - LEN_NEW / LEN_OLD);
     if (fabs(1 - LEN_NEW / LEN_OLD) < THRESHOLD) break;
-    // if (ITER == 2) break;
   }
 
   return ITER + 1;

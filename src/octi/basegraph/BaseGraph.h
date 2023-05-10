@@ -49,7 +49,8 @@ typedef util::graph::Edge<GridNodePL, GridEdgePL> GridEdge;
 typedef std::pair<const GridEdge*, const GridEdge*> EdgPair;
 typedef std::vector<std::pair<EdgPair, EdgPair>> CrossEdgPairs;
 
-typedef std::vector<double> GeoPens;
+// edge-id -> pen
+typedef std::unordered_map<uint32_t, float> GeoPens;
 typedef std::map<const CombEdge*, GeoPens> GeoPensMap;
 
 struct Candidate {
@@ -111,8 +112,7 @@ class BaseGraph : public DirGraph<GridNodePL, GridEdgePL> {
   virtual std::set<GridNode*> getGrNdCands(CombNode* n, size_t maxDis) = 0;
 
   virtual void settleNd(GridNode* n, CombNode* cn) = 0;
-  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e,
-                         size_t rndrOrder) = 0;
+  virtual void settleEdg(GridNode* a, GridNode* b, CombEdge* e) = 0;
 
   virtual const Penalties& getPens() const = 0;
   virtual std::vector<double> getCosts() const = 0;

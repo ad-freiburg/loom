@@ -95,8 +95,9 @@ void GraphBuilder::dropOverlappingStations(RenderGraph* graph) {
       if (on == n || on->pl().stops().size() == 0) continue;
       if (util::geo::dist(geoms[n], geoms[on]) <= PAD) {
         // drop n if it is smaller, otherwise wait until the other node
-        // is checked
-        if (n->getDeg() != 1 &&
+        // is checked. But don't drop terminus stations, as this would
+        // introduce line orphans
+        if (n->getDeg() != 1 && !RenderGraph::isTerminus(n) &&
             (RenderGraph::getLDeg(n) <= RenderGraph::getLDeg(on) ||
              on->getDeg() == 1)) {
           n->pl().clearStops();

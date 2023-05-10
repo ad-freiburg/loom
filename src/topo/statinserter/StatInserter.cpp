@@ -80,9 +80,19 @@ void StatInserter::init() {
         auto& ex = _statClusters[exI->second];
         ex.front().edges.insert(nd->getAdjList().begin(),
                                 nd->getAdjList().end());
+        for (auto e : nd->getAdjList()) {
+          for (const auto& lo : e->pl().getLines()) {
+            ex.front().lines.insert(lo.line);
+          }
+        }
       } else {
-        StationOcc occ{stop,
-                       {nd->getAdjList().begin(), nd->getAdjList().end()}};
+        StationOcc occ{
+            stop, {nd->getAdjList().begin(), nd->getAdjList().end()}, {}};
+        for (auto e : nd->getAdjList()) {
+          for (const auto& lo : e->pl().getLines()) {
+            occ.lines.insert(lo.line);
+          }
+        }
         _statClusters.push_back({occ});
         existing[stop.name] = _statClusters.size() - 1;
       }
@@ -98,19 +108,32 @@ void StatInserter::init() {
 StationOcc StatInserter::unserved(const std::vector<LineEdge*>& adj,
                                   const StationOcc& stationOcc,
                                   const OrigEdgs& origEdgs) {
-  StationOcc ret{stationOcc.station, {}};
+  StationOcc ret{stationOcc.station, {}, {}};
   std::set<const LineEdge*> contained;
+  std::set<const shared::linegraph::Line*> containedLines;
 
   for (auto e : adj)
     contained.insert(origEdgs.find(e)->second.begin(),
                      origEdgs.find(e)->second.end());
+
+  for (auto e : adj) {
+    for (auto lo : e->pl().getLines()) {
+      containedLines.insert(lo.line);
+    }
+  }
 
   std::set<const LineEdge*> diff;
   set_difference(stationOcc.edges.begin(), stationOcc.edges.end(),
                  contained.begin(), contained.end(),
                  std::inserter(diff, diff.begin()));
 
+  std::set<const shared::linegraph::Line*> diffLines;
+  set_difference(stationOcc.lines.begin(), stationOcc.lines.end(),
+                 containedLines.begin(), containedLines.end(),
+                 std::inserter(diffLines, diffLines.begin()));
+
   ret.edges.insert(diff.begin(), diff.end());
+  ret.lines.insert(diffLines.begin(), diffLines.end());
 
   return ret;
 }
@@ -118,19 +141,31 @@ StationOcc StatInserter::unserved(const std::vector<LineEdge*>& adj,
 // _____________________________________________________________________________
 std::pair<size_t, size_t> StatInserter::served(
     const std::vector<LineEdge*>& adj, const std::set<const LineEdge*>& toServe,
+    const std::set<const shared::linegraph::Line*>& linesToServe,
     const OrigEdgs& origEdgs) {
   std::set<const LineEdge*> contained;
+  std::set<const shared::linegraph::Line*> containedLines;
 
   for (auto e : adj)
     contained.insert(origEdgs.find(e)->second.begin(),
                      origEdgs.find(e)->second.end());
 
+  for (auto e : adj) {
+    for (auto lo : e->pl().getLines()) {
+      containedLines.insert(lo.line);
+    }
+  }
+
   std::set<const LineEdge*> iSect;
   set_intersection(contained.begin(), contained.end(), toServe.begin(),
                    toServe.end(), std::inserter(iSect, iSect.begin()));
 
-  // TODO: second return value should be falsely served lines
-  return {iSect.size(), 0};
+  std::set<const shared::linegraph::Line*> iSectLines;
+  set_intersection(containedLines.begin(), containedLines.end(),
+                   linesToServe.begin(), linesToServe.end(),
+                   std::inserter(iSectLines, iSectLines.begin()));
+
+  return {iSect.size(), iSectLines.size()};
 }
 
 // _____________________________________________________________________________
@@ -140,8 +175,11 @@ double StatInserter::candScore(const StationCand& c) {
   score += c.dist;
   score += static_cast<double>(c.shouldServ) /
            static_cast<double>(c.truelyServ) * 100;
+  score += static_cast<double>(c.shouldServLines) /
+           static_cast<double>(c.truelyServedLines) * 200;
 
-  // add a penalty if a station is too close to an existing node
+  // add a penalty if a station is inserted to an edge, and is
+  // too close to an existing node (prefer the existing node later on)
   if (c.edg && c.edg->pl().getPolyline().getLength() * (1 - c.pos) < 100)
     score += 200;
   if (c.edg && c.edg->pl().getPolyline().getLength() * (c.pos) < 100)
@@ -165,27 +203,35 @@ std::vector<StationCand> StatInserter::candidates(const StationOcc& occ,
     auto pos = edg->pl().getPolyline().projectOn(occ.station.pos);
     double d = util::geo::dist(pos.p, occ.station.pos);
 
-    size_t truelyServed, falselyServed;
-    std::tie(truelyServed, falselyServed) = served({edg}, occ.edges, origEdgs);
+    size_t truelyServed, truelyServedLines;
+
+    // add whole edge as cand
+    std::tie(truelyServed, truelyServedLines) =
+        served({edg}, occ.edges, occ.lines, origEdgs);
     StationOcc remaining = unserved({edg}, occ, origEdgs);
-
     ret.push_back(StationCand{edg, pos.totalPos, 0, d, occ.edges.size(),
-                              truelyServed, falselyServed, remaining});
+                              occ.lines.size(), truelyServed, truelyServedLines,
+                              remaining});
 
-    std::tie(truelyServed, falselyServed) =
-        served(edg->getFrom()->getAdjList(), occ.edges, origEdgs);
+    // add from node as cand
+    std::tie(truelyServed, truelyServedLines) =
+        served(edg->getFrom()->getAdjList(), occ.edges, occ.lines, origEdgs);
     remaining = unserved(edg->getFrom()->getAdjList(), occ, origEdgs);
     ret.push_back(StationCand{
         0, 0, edg->getFrom(),
         util::geo::dist(*edg->getFrom()->pl().getGeom(), occ.station.pos),
-        occ.edges.size(), truelyServed, falselyServed, remaining});
-    std::tie(truelyServed, falselyServed) =
-        served(edg->getTo()->getAdjList(), occ.edges, origEdgs);
+        occ.edges.size(), occ.lines.size(), truelyServed, truelyServedLines,
+        remaining});
+
+    // add to node as cand
+    std::tie(truelyServed, truelyServedLines) =
+        served(edg->getTo()->getAdjList(), occ.edges, occ.lines, origEdgs);
     remaining = unserved(edg->getTo()->getAdjList(), occ, origEdgs);
     ret.push_back(StationCand{
         0, 0, edg->getTo(),
         util::geo::dist(*edg->getTo()->pl().getGeom(), occ.station.pos),
-        occ.edges.size(), truelyServed, falselyServed, remaining});
+        occ.edges.size(), occ.lines.size(), truelyServed, truelyServedLines,
+        remaining});
   }
 
   struct {
@@ -203,12 +249,14 @@ std::vector<StationCand> StatInserter::candidates(const StationOcc& occ,
           << "    Edg " << cand.edg << " at position " << cand.pos
           << " with dist = " << cand.dist << " truely serving "
           << cand.truelyServ << "/" << occ.edges.size()
-          << " edges, falsely serving " << cand.falselyServ << " edges.";
+          << " edges, truely serving " << cand.truelyServedLines << "/"
+          << occ.lines.size() << " lines.";
     } else {
       LOGTO(VDEBUG, std::cerr)
           << "    Nd " << cand.nd << " with dist = " << cand.dist
           << " truely serving " << cand.truelyServ << "/" << occ.edges.size()
-          << " edges, falsely serving " << cand.falselyServ << " edges.";
+          << " edges, truely serving " << cand.truelyServedLines << "/"
+          << occ.lines.size() << " lines.";
     }
   }
 
@@ -269,10 +317,14 @@ bool StatInserter::insertStations(const OrigEdgs& origEdgs) {
         curCan.nd->pl().addStop(curOcc.station);
       }
 
-      if (curCan.unserved.edges.size() == 0) break;
+      if (curCan.unserved.edges.size() == 0 &&
+          curCan.unserved.lines.size() == 0)
+        break;
 
-
-      LOGTO(DEBUG, std::cerr) << "  inserting for remaining " << curCan.unserved.edges.size() << " unserved edges...";
+      LOGTO(DEBUG, std::cerr)
+          << "  inserting for remaining " << curCan.unserved.edges.size()
+          << " unserved edges and/or " << curCan.unserved.lines.size()
+          << " unserved lines...";
       curOcc = curCan.unserved;
     }
   }

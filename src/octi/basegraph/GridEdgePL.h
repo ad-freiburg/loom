@@ -46,23 +46,21 @@ class GridEdgePL : util::geograph::GeoEdgePL<double> {
   void setId(size_t id);
   size_t getId() const;
 
-  void setRndrOrder(size_t order);
-
  private:
-  double _c;
+  float _c;
 
-  bool _isSecondary;
-  bool _isSink;
+  bool _isSecondary : 1;
+  bool _isSink : 1;
 
-  bool _closed;
-  bool _softClosed;
+  bool _closed : 1;
+  bool _softClosed : 1;
 
   // edges are blocked if they would cross a settled edge
-  bool _blocked;
+  bool _blocked : 1;
 
-  uint8_t _resEdgs;
-  size_t _rndrOrder;
-  size_t _id;
+  uint8_t _resEdgs : 8;
+
+  uint32_t _id;
 };
 }
 }

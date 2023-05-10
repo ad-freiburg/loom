@@ -7,6 +7,7 @@
 
 #include <unordered_set>
 #include <vector>
+
 #include "ilp/ILPGridOptimizer.h"
 #include "octi/basegraph/BaseGraph.h"
 #include "octi/basegraph/GridGraph.h"
@@ -152,7 +153,15 @@ struct GridCostGeoPen
                            const GridNode* to) const {
     UNUSED(from);
     UNUSED(to);
-    return e->pl().cost() + (*_geoPens)[e->pl().getId()];
+
+    // ignore geopens for secondary edges
+    if (e->pl().isSecondary()) return e->pl().cost();
+
+    auto i = (*_geoPens).find(e->pl().getId());
+    if (i != _geoPens->end()) return e->pl().cost() + i->second;
+
+    // if no geopen was present for grid edge, we assume SOFT_INF penalty
+    return e->pl().cost() + octi::basegraph::SOFT_INF;
   }
 
   float _inf;
@@ -200,7 +209,7 @@ class Octilinearizer {
 
   void settleRes(GridNode* startGridNd, GridNode* toGridNd,
                  basegraph::BaseGraph* gg, CombNode* from, CombNode* to,
-                 const GrEdgList& res, CombEdge* e, size_t rndrOrder);
+                 const GrEdgList& res, CombEdge* e);
 
   static const CombNode* getCenterNd(const CombGraph* cg);
 

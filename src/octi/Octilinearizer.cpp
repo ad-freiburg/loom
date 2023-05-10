@@ -81,8 +81,8 @@ Score Octilinearizer::drawILP(
   const GeoPensMap* geoPens = 0;
 
   if (enfGeoPen) {
-    LOGTO(DEBUG, std::cerr) << "Writing geopens... ";
     auto edges = getOrdering(cg, OrderMethod::NUM_LINES);
+    LOGTO(DEBUG, std::cerr) << "Writing geopens for " << edges.size() << " edges";
     T_START(geopens);
     for (auto cmbEdg : edges) {
       gg->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
@@ -151,9 +151,12 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
   auto edges = getOrdering(cg, OrderMethod::NUM_LINES);
 
   if (enfGeoPen > 0) {
-    LOGTO(DEBUG, std::cerr) << "Writing geopens... ";
+    LOGTO(DEBUG, std::cerr) << "Writing geopens for " << edges.size() << " edges";
     T_START(geopens);
+    size_t i = 0;
     for (auto cmbEdg : edges) {
+      i++;
+      LOGTO(DEBUG, std::cerr) << "@ " << i << "/" << edges.size();
       ggs[0]->writeGeoCoursePens(cmbEdg, &enfGeoPens, enfGeoPen);
     }
     LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(geopens) << "ms)";
@@ -356,8 +359,7 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
 // _____________________________________________________________________________
 void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
                                BaseGraph* gg, CombNode* from, CombNode* to,
-                               const GrEdgList& res, CombEdge* e,
-                               size_t rndrOrder) {
+                               const GrEdgList& res, CombEdge* e) {
   gg->settleNd(toGrNd, to);
   gg->settleNd(frGrNd, from);
 
@@ -365,7 +367,7 @@ void Octilinearizer::settleRes(GridNode* frGrNd, GridNode* toGrNd,
   for (auto f : res) {
     if (f->pl().isSecondary()) continue;
     gg->settleEdg(f->getFrom()->pl().getParent(), f->getTo()->pl().getParent(),
-                  e, rndrOrder);
+                  e);
   }
 }
 
@@ -487,7 +489,6 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
       Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
     } else {
       auto cost = GridCost(cutoff + costOffsetTo + costOffsetFrom);
-
       Dijkstra::shortestPath(frGrNds, toGrNds, cost, *heur, &eL, &nL);
     }
 
@@ -512,7 +513,7 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     drawing->draw(cmbEdg, eL, rev);
 
     if (i > abortAfter) {
-      settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg, i);
+      settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg);
       return DRAWN;
     }
 
@@ -520,7 +521,7 @@ Undrawable Octilinearizer::draw(const std::vector<CombEdge*>& ord,
     for (auto n : toGrNds) gg->closeSinkTo(n);
     for (auto n : frGrNds) gg->closeSinkFr(n);
 
-    settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg, i);
+    settleRes(frGrNd, toGrNd, gg, frCmbNd, toCmbNd, eL, cmbEdg);
   }
 
   return DRAWN;

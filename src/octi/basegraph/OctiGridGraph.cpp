@@ -88,8 +88,7 @@ double OctiGridGraph::getBendPen(size_t i, size_t j) const {
 }
 
 // _____________________________________________________________________________
-void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
-                              size_t rndrOrd) {
+void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   if (a == b) return;
 
   // this closes the grid edge
@@ -98,8 +97,6 @@ void OctiGridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
 
   addResEdg(ge, e);
   addResEdg(gf, e);
-
-  ge->pl().setRndrOrder(rndrOrd);
 
   // this closes both nodes
   // a close means that all major edges reaching this node are closed
@@ -326,8 +323,9 @@ double OctiGridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 
   // return cc;
 
-  // we always count one heurHopCost too much, subtract it at the end!
-  return edgeCost - _heurHopCost;
+  // we always count one heurHopCost too much, subtract it at the end, but
+  // dont make negative
+  return fmax(0, edgeCost - _heurHopCost);
 }
 
 // _____________________________________________________________________________

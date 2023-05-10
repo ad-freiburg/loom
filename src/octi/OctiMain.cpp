@@ -305,9 +305,9 @@ int main(int argc, char** argv) {
   LineGraph lg;
 
   if (cfg.fromDot)
-    lg.readFromDot(&(std::cin), 0);
+    lg.readFromDot(&(std::cin));
   else
-    lg.readFromJson(&(std::cin), 0);
+    lg.readFromJson(&(std::cin));
 
   LOGTO(DEBUG, std::cerr) << "Done. (" << T_STOP(read) << "ms)";
 
@@ -327,13 +327,16 @@ int main(int argc, char** argv) {
 
   TotalScore totScore;
 
+  size_t i = 0;
+
   for (auto& tg : comps) {
+    LOGTO(DEBUG, std::cerr) << "@ component " << i++;
     double avgDist = avgStatDist(tg);
 
     double curDist = avgDist;
 
     size_t tries = 0;
-    size_t MAX_TRIES = 10;
+    size_t MAX_TRIES = 30;
 
     LOGTO(DEBUG, std::cerr) << "Average adj. node distance is " << avgDist;
 
@@ -345,7 +348,7 @@ int main(int argc, char** argv) {
         break;
       } catch (const NoEmbeddingFoundExc& exc) {
         if (cfg.retryOnError && tries < MAX_TRIES) {
-          curDist -= avgDist * 0.1;
+          curDist *= 0.85;
           tries++;
           LOGTO(WARN, std::cerr) << "Retrying with grid size " << curDist;
           continue;

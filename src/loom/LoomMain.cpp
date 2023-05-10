@@ -35,9 +35,9 @@ int main(int argc, char** argv) {
   shared::rendergraph::RenderGraph g(5, 5);
 
   if (cfg.fromDot) {
-    g.readFromDot(&std::cin, 3);
+    g.readFromDot(&std::cin);
   } else {
-    g.readFromJson(&std::cin, 3);
+    g.readFromJson(&std::cin);
   }
 
   LOGTO(DEBUG, std::cerr) << "Optimizing...";

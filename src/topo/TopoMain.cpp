@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   // read input graph
-  lg.readFromJson(&(std::cin), 0);
+  lg.readFromJson(&(std::cin));
 
   if (cfg.randomColors) lg.fillMissingColors();
 
@@ -73,6 +73,9 @@ int main(int argc, char** argv) {
     }
   }
 
+  lg.removeDeg1Nodes();
+
+  LOGTO(DEBUG, std::cerr) << "Computing components...";
   auto graphs = lg.distConnectedComponents(cfg.connectedCompDist, false);
 
   LOGTO(DEBUG, std::cerr) << "Broke up input into " << graphs.size()
@@ -82,6 +85,7 @@ int main(int argc, char** argv) {
 
   size_t compI = 0;
 
+  // TODO: parallelize this (would increase memory usage significantly)?
   for (auto& tg : graphs) {
     LOGTO(DEBUG, std::cerr) << "@ Component" << compI++ << " components";
 
@@ -107,16 +111,16 @@ int main(int argc, char** argv) {
     ri.init();
     size_t restrFr = mc.freeze();
 
-    // util::geo::output::GeoGraphJsonOutput gout;
-    // gout.printLatLng(tg, std::cout);
-    // exit(0);
-
     mc.removeEdgeArtifacts();
 
     T_START(construction);
     iters += mc.collapseShrdSegs(10, 50, cfg.segmentLength);
     iters += mc.collapseShrdSegs(cfg.maxAggrDistance, 50, cfg.segmentLength);
     constrT += T_STOP(construction);
+
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.printLatLng(tg, std::cout);
+    // exit(0);
 
     mc.removeNodeArtifacts(false);
 
@@ -170,6 +174,9 @@ int main(int argc, char** argv) {
     }
 
     numConExc = tg.numConnExcs();
+
+    if (cfg.smooth > 0) tg.smooth(cfg.smooth);
+
     resultGraphs.push_back(&tg);
   }
 

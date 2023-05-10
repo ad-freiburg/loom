@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <unordered_map>
+
 #include "shared/linegraph/LineGraph.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/mapconstructor/MapConstructor.h"
@@ -11,6 +12,7 @@
 #include "topo/restr/RestrInferrer.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/graph/Dijkstra.h"
+#include "util/log/Log.h"
 
 using topo::restr::RestrInferrer;
 
@@ -76,12 +78,6 @@ size_t RestrInferrer::infer(const OrigEdgs& origEdgs) {
 
   size_t ret = 0;
 
-  // debug output
-  // util::geo::output::GeoGraphJsonOutput out;
-  // std::ofstream outs;
-  // outs.open("restr_graph.json");
-  // out.printLatLng(_rg, outs);
-
   for (auto nd : _tg->getNds()) {
     for (auto edg1 : nd->getAdjList()) {
       // check every other edge
@@ -107,6 +103,33 @@ size_t RestrInferrer::infer(const OrigEdgs& origEdgs) {
             nd->pl().addConnExc(ro1.line, edg1, edg2);
             ret++;
           }
+        }
+      }
+    }
+  }
+
+  // clear erroneous or superfluous exceptions
+
+  for (auto nd : _tg->getNds()) {
+    for (auto edg1 : nd->getAdjList()) {
+      for (auto lo1 : edg1->pl().getLines()) {
+        size_t otherOccs = 0;
+        size_t otherCons = 0;
+
+        for (auto edg2 : nd->getAdjList()) {
+          if (edg1 == edg2) continue;
+          if (edg2->pl().hasLine(lo1.line)) otherOccs++;
+          if (edg2->pl().hasLine(lo1.line) && (nd->pl().connOccurs(lo1.line, edg1, edg2) || nd->pl().connOccurs(lo1.line, edg2, edg1))) otherCons++;
+        }
+
+        // everything ok, or there really isn't an edge we could continue
+        // into
+        if (otherCons > 0 || otherOccs == 0) continue;
+
+        // else, delete all exceptions comming from this edge for this line
+        for (auto edg2 : nd->getAdjList()) {
+          LOGTO(DEBUG, std::cerr) << "Deleting exception for line " << lo1.line->label() << " from edge " << edg1 << " to " << edg2 << " at node " << nd;
+          nd->pl().delConnExc(lo1.line, edg1, edg2);
         }
       }
     }
@@ -208,8 +231,8 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
   // we add a small buffer to account for the skip heuristic in the
   // shared segments collapsing
   double MAX_DIST = _cfg->maxTurnRestrCheckDist * 2;
-  double checkPos =
-      std::min(e->pl().getPolyline().getLength() / 2, 2 * _cfg->maxAggrDistance);
+  double checkPos = std::min(e->pl().getPolyline().getLength() / 2,
+                             2 * _cfg->maxAggrDistance);
 
   auto hndlLA =
       e->pl().getPolyline().getOrthoLineAt(1.0 / 3.0, MAX_DIST).getLine();
@@ -218,22 +241,23 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
 
   auto hndlLACheck =
       e->pl().getPolyline().getOrthoLineAtDist(checkPos, MAX_DIST).getLine();
-  auto hndlLBCheck = e->pl()
-                    .getPolyline()
-                    .getOrthoLineAtDist(
-                        e->pl().getPolyline().getLength() - checkPos, MAX_DIST)
-                    .getLine();
+  auto hndlLBCheck =
+      e->pl()
+          .getPolyline()
+          .getOrthoLineAtDist(e->pl().getPolyline().getLength() - checkPos,
+                              MAX_DIST)
+          .getLine();
 
-  auto a =_rg.addNd(hndlLA.front());
+  auto a = _rg.addNd(hndlLA.front());
   auto b = _rg.addNd(hndlLA.back());
   _rg.addEdg(a, b, RestrEdgePL(hndlLA));
 
-  a =_rg.addNd(hndlLB.front());
+  a = _rg.addNd(hndlLB.front());
   b = _rg.addNd(hndlLB.back());
   _rg.addEdg(a, b, RestrEdgePL(hndlLB));
 
-   // a =_rg.addNd(hndlLACheck.front());
-   // b = _rg.addNd(hndlLACheck.back());
+  // a =_rg.addNd(hndlLACheck.front());
+  // b = _rg.addNd(hndlLACheck.back());
   // _rg.addEdg(a, b, RestrEdgePL(hndlLACheck));
 
   // a =_rg.addNd(hndlLBCheck.front());
@@ -258,7 +282,8 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
         auto isects = util::geo::intersection(geom, hndlLA);
 
         // if no intersections found, fall back to the handlLACheck
-        if (isects.size() == 0) isects = util::geo::intersection(geom, hndlLACheck);
+        if (isects.size() == 0)
+          isects = util::geo::intersection(geom, hndlLACheck);
 
         for (const auto& isect : isects) {
           auto projA = restrE->pl().geom.projectOn(isect);
@@ -273,7 +298,8 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
         auto isects = util::geo::intersection(geom, hndlLB);
 
         // if no intersections found, fall back to the handlLACheck
-        if (isects.size() == 0) isects = util::geo::intersection(geom, hndlLBCheck);
+        if (isects.size() == 0)
+          isects = util::geo::intersection(geom, hndlLBCheck);
 
         for (const auto& isect : isects) {
           auto projB = restrE->pl().geom.projectOn(isect);
@@ -328,7 +354,8 @@ bool RestrInferrer::check(const Line* r, const LineEdge* edg1,
   // only return true below if cost - curD < maxL <=> cost < curD + maxL
   // + epsilon to avoid integer rounding issues in the < comparison below
   double eps = 0.1;
-  CostFunc cFunc(r, curD + _cfg->maxLengthDev + eps, _cfg->turnInferFullTurnPen);
+  CostFunc cFunc(r, curD + _cfg->maxLengthDev + eps,
+                 _cfg->turnInferFullTurnPen, _cfg->fullTurnAngle);
 
   return EDijkstra::shortestPath(from, to, cFunc) - curD < _cfg->maxLengthDev;
 }

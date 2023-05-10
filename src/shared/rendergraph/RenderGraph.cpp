@@ -38,27 +38,21 @@ RenderGraph::RenderGraph(const shared::linegraph::LineGraph& lg,
 
   for (const auto& nd : lg.getNds()) {
     nmap[nd] = addNd(nd->pl());
+    expandBBox(*nd->pl().getGeom());
   }
 
   for (const auto& nd : lg.getNds()) {
     for (const auto e : nd->getAdjList()) {
       if (e->getFrom() != nd) continue;
-      addEdg(nmap[e->getFrom()], nmap[e->getTo()], e->pl());
-    }
-  }
-}
+      auto newe = addEdg(nmap[e->getFrom()], nmap[e->getTo()], e->pl());
 
-// _____________________________________________________________________________
-void RenderGraph::smooth() {
-  for (auto n : getNds()) {
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
-      auto pl = e->pl().getPolyline();
-      pl.smoothenOutliers(50);
-      pl.simplify(1);
-      pl.applyChaikinSmooth(1);
-      pl.simplify(1);
-      e->pl().setPolyline(pl);
+      expandBBox(e->pl().getGeom()->front());
+      expandBBox(e->pl().getGeom()->back());
+
+      edgeRpl(newe->getFrom(), e, newe);
+      edgeRpl(newe->getTo(), e, newe);
+      nodeRpl(newe, e->getTo(), nmap[e->getTo()]);
+      nodeRpl(newe, e->getFrom(), nmap[e->getFrom()]);
     }
   }
 }

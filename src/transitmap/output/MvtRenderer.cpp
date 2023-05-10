@@ -343,6 +343,7 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
 
       Params paramsOut;
       paramsOut["color"] = "000000";
+      paramsOut["line-color"] = c.geoms[i].from.line->color();
       paramsOut["line"] = c.geoms[i].from.line->label();
       paramsOut["lineCap"] = "butt";
       paramsOut["class"] = getLineClass(c.geoms[i].from.line->id());
@@ -356,6 +357,7 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
 
       Params params;
       params["color"] = c.geoms[i].from.line->color();
+      params["line-color"] = c.geoms[i].from.line->color();
       params["line"] = c.geoms[i].from.line->label();
       params["lineCap"] = "round";
       params["class"] = getLineClass(c.geoms[i].from.line->id());
@@ -423,6 +425,7 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 
     Params paramsOut;
     paramsOut["color"] = "000000";
+    paramsOut["line-color"] = line->color();
     paramsOut["line"] = line->label();
     paramsOut["lineCap"] = "butt";
     paramsOut["class"] = getLineClass(line->id());
@@ -435,6 +438,7 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 
     Params params;
     params["color"] = line->color();
+    params["line-color"] = line->color();
     params["line"] = line->label();
     params["lineCap"] = "round";
     params["class"] = getLineClass(line->id());
@@ -453,12 +457,20 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 
 // _____________________________________________________________________________
 void MvtRenderer::addFeature(const MvtLineFeature& feature) {
-  const auto& box = util::geo::getBoundingBox(feature.line);
+  double w = (_cfg->lineWidth + _cfg->lineSpacing + 2 * _cfg->lineWidth) * _res;
+  const auto& box = util::geo::pad(util::geo::getBoundingBox(feature.line), w);
   size_t swX = gridC(box.getLowerLeft().getX());
   size_t swY = gridC(box.getLowerLeft().getY());
 
   size_t neX = gridC(box.getUpperRight().getX());
   size_t neY = gridC(box.getUpperRight().getY());
+
+  // also check surrounding
+  if (swX > 0) swX = swX - 1;
+  if (swY > 0) swY = swY - 1;
+
+  if (neX < GRID_SIZE - 1) neX = neX + 1;
+  if (neY < GRID_SIZE - 2) neY = neY + 1;
 
   for (size_t x = swX; x <= neX && x < GRID_SIZE; x++) {
     for (size_t y = swY; y <= neY && y < GRID_SIZE; y++) {

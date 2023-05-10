@@ -602,7 +602,7 @@ void Drawing::applyToGrid(const CombEdge* ce, BaseGraph* gg) {
   for (auto eid : es) {
     auto e = gg->getGrEdgById(eid);
     gg->settleEdg(e->getFrom()->pl().getParent(), e->getTo()->pl().getParent(),
-                  const_cast<CombEdge*>(ce), 0);
+                  const_cast<CombEdge*>(ce));
   }
 }
 

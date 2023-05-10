@@ -9,13 +9,7 @@ using namespace octi::basegraph;
 
 // _____________________________________________________________________________
 GridNodePL::GridNodePL(Point<double> pos)
-    : visited(false),
-      _pos(pos),
-      _parent(0),
-      _closed(false),
-      _sink(false),
-      _station(false),
-      _settled(false) {}
+    : _pos(pos), _parent(0), _closed(false), _sink(false), _settled(false) {}
 
 // _____________________________________________________________________________
 const Point<double>* GridNodePL::getGeom() const { return &_pos; }
@@ -24,7 +18,6 @@ const Point<double>* GridNodePL::getGeom() const { return &_pos; }
 util::json::Dict GridNodePL::getAttrs() const {
   util::json::Dict obj;
 
-  obj["visited"] = visited ? "1" : "0";
   obj["settled"] = _settled ? "1" : "0";
   obj["closed"] = _closed ? "1" : "0";
   obj["grid"] = util::toString(_id);
@@ -81,6 +74,3 @@ void GridNodePL::setSink() { _sink = true; }
 
 // _____________________________________________________________________________
 bool GridNodePL::isSink() const { return _sink; }
-
-// _____________________________________________________________________________
-void GridNodePL::setStation() { _station = true; }

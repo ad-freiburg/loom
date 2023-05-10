@@ -6,6 +6,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <unordered_set>
+
 #include "octi/basegraph/GridGraph.h"
 #include "octi/basegraph/NodeCost.h"
 #include "util/Misc.h"
@@ -182,40 +183,51 @@ void GridGraph::writeObstacleCost(const util::geo::Polygon<double>& obst) {
 // _____________________________________________________________________________
 void GridGraph::writeGeoCoursePens(const CombEdge* ce, GeoPensMap* target,
                                    double pen) {
-  (*target)[ce].resize(_edgeCount);
-  for (size_t x = 0; x < _grid.getXWidth(); x++) {
-    for (size_t y = 0; y < _grid.getYHeight(); y++) {
-      auto grNdA = getNode(x, y);
+  std::set<GridNode*> neighs;
 
-      for (size_t i = 0; i < maxDeg(); i++) {
-        auto grNeigh = neigh(x, y, i);
-        if (!grNeigh) continue;
-        auto ge = getNEdg(grNdA, grNeigh);
+  DBox box;
 
-        double d = std::numeric_limits<double>::infinity();
+  std::vector<util::geo::DLine> geoms;
 
-        for (auto orE : ce->pl().getChilds()) {
-          double dLoc = fmax(fmax(
-              dist(*orE->pl().getGeom(), *ge->getFrom()->pl().getGeom()) /
-              getCellSize(),
-              dist(*orE->pl().getGeom(), util::geo::centroid(util::geo::MultiPoint<double>{*ge->getFrom()->pl().getGeom(), *ge->getFrom()->pl().getGeom()})) /
-              getCellSize()),
-              dist(*orE->pl().getGeom(), *ge->getTo()->pl().getGeom()) /
-              getCellSize());
+  for (auto orE : ce->pl().getChilds()) {
+    box = util::geo::extendBox(*orE->pl().getGeom(), box);
 
-          if (dLoc < d) d = dLoc;
-        }
+    // operate on simplified geometries
+    geoms.push_back(util::geo::simplify(*orE->pl().getGeom(), 5));
+  }
 
-        d *= pen * d;
+  box = util::geo::pad(box, sqrt(SOFT_INF / pen) * getCellSize());
+  _grid.get(box, &neighs);
 
-        (*target)[ce][ge->pl().getId()] = d;
+  for (auto grNdA : neighs) {
+    for (size_t i = 0; i < maxDeg(); i++) {
+      auto grNeigh = neigh(grNdA->pl().getX(), grNdA->pl().getY(), i);
+      if (!grNeigh) continue;
+      auto ge = getNEdg(grNdA, grNeigh);
+
+      float d = std::numeric_limits<float>::infinity();
+
+      for (const auto& geom : geoms) {
+        double dLoc = fmax(
+            fmax(dist(geom, *ge->getFrom()->pl().getGeom()) / getCellSize(),
+                 dist(geom, util::geo::centroid(util::geo::MultiPoint<double>{
+                                *ge->getFrom()->pl().getGeom(),
+                                *ge->getFrom()->pl().getGeom()})) /
+                     getCellSize()),
+            dist(geom, *ge->getTo()->pl().getGeom()) / getCellSize());
+
+        if (dLoc < d) d = dLoc;
       }
+
+      d *= pen * d;
+
+      if (d <= SOFT_INF) (*target)[ce][ge->pl().getId()] = d;
     }
   }
 }
 
 // _____________________________________________________________________________
-void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrO) {
+void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   if (a == b) return;
 
   // this closes the grid edge
@@ -227,8 +239,6 @@ void GridGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e, size_t rndrO) {
 
   addResEdg(ge, e);
   addResEdg(gf, e);
-
-  ge->pl().setRndrOrder(rndrO);
 
   // this closes both nodes
   // a close means that all major edges reaching this node are closed
@@ -244,7 +254,6 @@ bool GridGraph::unused(const GridNode* gnd) const {
     auto e = getNEdg(gnd, neighbor);
     auto f = getNEdg(neighbor, gnd);
     auto a = _resEdgs.find(const_cast<GridEdge*>(e));
-
 
     if (a != _resEdgs.end()) {
       assert(a->second.size() == e->pl().resEdgs());
@@ -567,8 +576,9 @@ double GridGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
   // we have to do at least one turn, which can only be a 90 degree turn
   if (dx != 0 && dy != 0) edgCost += _c.p_90;
 
-  // we always count one heurHopCost too much, subtract it at the end!
-  return edgCost - _heurHopCost;
+  // we always count one heurHopCost too much, subtract it at the end, but
+  // dont make negative!
+  return fmax(0, edgCost - _heurHopCost);
 }
 
 // _____________________________________________________________________________
@@ -768,12 +778,12 @@ GridNode* GridGraph::writeNd(size_t x, size_t y) {
       if (y == _grid.getYHeight() - 1 && i == 2) pen = INF;
 
       auto e = addEdg(n->pl().getPort(i), n->pl().getPort(j),
-                            GridEdgePL(pen, true, false));
+                      GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
 
       e = addEdg(n->pl().getPort(j), n->pl().getPort(i),
-                       GridEdgePL(pen, true, false));
+                 GridEdgePL(pen, true, false));
       e->pl().setId(_edgeCount);
       _edgeCount++;
     }

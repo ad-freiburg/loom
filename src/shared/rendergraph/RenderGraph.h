@@ -64,8 +64,6 @@ class RenderGraph : public shared::linegraph::LineGraph {
                               const shared::linegraph::LineEdge* e, size_t pos,
                               bool inv, bool origG) const;
 
-  void smooth();
-
   void createMetaNodes();
 
   static bool notCompletelyServed(const shared::linegraph::LineNode* n);

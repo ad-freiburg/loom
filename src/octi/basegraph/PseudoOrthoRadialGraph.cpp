@@ -59,37 +59,45 @@ void PseudoOrthoRadialGraph::writeObstacleCost(
 void PseudoOrthoRadialGraph::writeGeoCoursePens(const CombEdge* ce,
                                                 GeoPensMap* target,
                                                 double pen) {
-  (*target)[ce].resize(_edgeCount);
-  for (size_t y = 1; y < _grid.getYHeight() / 2; y++) {
-    for (size_t x = 0; x < _numBeams * multi(y); x++) {
-      auto grNdA = getNode(x, y);
+  std::set<GridNode*> neighs;
 
-      for (size_t i = 0; i < maxDeg(); i++) {
-        auto grNeigh = neigh(x, y, i);
-        if (!grNeigh) continue;
-        auto ge = getNEdg(grNdA, grNeigh);
+  DBox box;
 
-        double d = std::numeric_limits<double>::infinity();
+  std::vector<util::geo::DLine> geoms;
 
-        for (auto orE : ce->pl().getChilds()) {
-          double dLoc = fmax(
-              fmax(dist(*orE->pl().getGeom(), *ge->getFrom()->pl().getGeom()) /
-                       getCellSize(),
-                   dist(*orE->pl().getGeom(),
-                        util::geo::centroid(util::geo::MultiPoint<double>{
-                            *ge->getFrom()->pl().getGeom(),
-                            *ge->getFrom()->pl().getGeom()})) /
-                       getCellSize()),
-              dist(*orE->pl().getGeom(), *ge->getTo()->pl().getGeom()) /
-                  getCellSize());
+  for (auto orE : ce->pl().getChilds()) {
+    box = util::geo::extendBox(*orE->pl().getGeom(), box);
 
-          if (dLoc < d) d = dLoc;
-        }
+    // operate on simplified geometries
+    geoms.push_back(util::geo::simplify(*orE->pl().getGeom(), 5));
+  }
 
-        d *= pen * d;
+  box = util::geo::pad(box, sqrt(SOFT_INF / pen) * getCellSize());
+  _grid.get(box, &neighs);
 
-        (*target)[ce][ge->pl().getId()] = d;
+  for (auto grNdA : neighs) {
+    for (size_t i = 0; i < maxDeg(); i++) {
+      auto grNeigh = neigh(grNdA->pl().getX(), grNdA->pl().getY(), i);
+      if (!grNeigh) continue;
+      auto ge = getNEdg(grNdA, grNeigh);
+
+      double d = std::numeric_limits<double>::infinity();
+
+      for (const auto& geom : geoms) {
+        double dLoc = fmax(
+            fmax(dist(geom, *ge->getFrom()->pl().getGeom()) / getCellSize(),
+                 dist(geom, util::geo::centroid(util::geo::MultiPoint<double>{
+                                *ge->getFrom()->pl().getGeom(),
+                                *ge->getFrom()->pl().getGeom()})) /
+                     getCellSize()),
+            dist(geom, *ge->getTo()->pl().getGeom()) / getCellSize());
+
+        if (dLoc < d) d = dLoc;
       }
+
+      d *= pen * d;
+
+      if (d <= SOFT_INF) (*target)[ce][ge->pl().getId()] = d;
     }
   }
 }
@@ -362,8 +370,7 @@ GridNode* PseudoOrthoRadialGraph::writeNd(size_t x, size_t y) {
   // we are using the raw position here, as grid cells do not reflect the
   // positions in the grid graph as in the octilinear case
   _grid.add(pos, n);
-  n->pl().setXY(x, y);
-  n->pl().setParent(n);
+  n->pl().setXY(x, y); n->pl().setParent(n);
 
   for (int i = 0; i < 4; i++) {
     int xi = 0;
@@ -481,6 +488,7 @@ double PseudoOrthoRadialGraph::heurCost(int64_t xa, int64_t ya, int64_t xb,
 
   double edgCost = (_c.verticalPen + _heurHopCost) * dy;
 
-  // we always count one heurHopCost too much, subtract it at the end!
-  return edgCost - _heurHopCost;
+  // we always count one heurHopCost too much, subtract it at the end, but
+  // dont make negative
+  return fmax(0, edgCost - _heurHopCost);
 }

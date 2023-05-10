@@ -69,16 +69,18 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
     return *this;
   }
 
-  virtual void readFromJson(std::istream* s, double smooth);
-  virtual void readFromGeoJson(nlohmann::json::array_t, double smooth);
+  virtual void readFromJson(std::istream* s);
+  virtual void readFromGeoJson(nlohmann::json::array_t);
   virtual void readFromTopoJson(nlohmann::json::array_t objects,
-                                nlohmann::json::array_t arc, double smooth);
+                                nlohmann::json::array_t arc);
 
-  virtual void readFromJson(std::istream* s, double smooth, bool useWebMerc);
-  virtual void readFromGeoJson(nlohmann::json::array_t, double smooth, bool useWebMerc);
+  virtual void readFromJson(std::istream* s, bool useWebMerc);
+  virtual void readFromGeoJson(nlohmann::json::array_t, bool useWebMerc);
   virtual void readFromTopoJson(nlohmann::json::array_t objects,
-                                nlohmann::json::array_t arc, double smooth, bool useWebMerc);
-  virtual void readFromDot(std::istream* s, double smooth);
+                                nlohmann::json::array_t arc, bool useWebMerc);
+  virtual void readFromDot(std::istream* s);
+
+  void smooth(double smooth);
 
   const util::geo::Box<double>& getBBox() const;
   void topologizeIsects();
@@ -111,6 +113,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
 
   static bool terminatesAt(const LineEdge* fromEdge, const LineNode* terminus,
                            const Line* line);
+
+  static bool isTerminus(const LineNode* terminus);
 
   static std::vector<const Line*> getSharedLines(const LineEdge* a,
                                                  const LineEdge* b);
@@ -159,6 +163,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   std::vector<LineGraph> distConnectedComponents(double d, bool write, size_t* offset);
 
   void fillMissingColors();
+
+  void removeDeg1Nodes();
 
  private:
   util::geo::Box<double> _bbox;

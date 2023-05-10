@@ -3,6 +3,7 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <fstream>
+
 #include "octi/basegraph/BaseGraph.h"
 #include "octi/ilp/ILPGridOptimizer.h"
 #include "shared/optim/ILPSolvProv.h"
@@ -24,8 +25,7 @@ ILPStats ILPGridOptimizer::optimize(BaseGraph* gg, const CombGraph& cg,
                                     combgraph::Drawing* d, double maxGrDist,
                                     bool noSolve, const GeoPensMap* geoPensMap,
                                     int timeLim, const std::string& cacheDir,
-                                    double cacheThreshold,
-                                    int numThreads,
+                                    double cacheThreshold, int numThreads,
                                     const std::string& solverStr,
                                     const std::string& path) const {
   // extract first feasible solution from gridgraph
@@ -180,8 +180,13 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
           double coef;
           if (geoPensMap && !e->pl().isSecondary()) {
             // add geo pen
-            coef = e->pl().cost() +
-                   (*geoPensMap).find(edg)->second[e->pl().getId()];
+            auto thisMap = geoPensMap->find(edg)->second;
+            auto i = thisMap.find(e->pl().getId());
+            if (i != thisMap.end()) coef = e->pl().cost() + i->second;
+
+            // if no geopen was present for grid edge, we assume SOFT_INF
+            // penalty
+            coef = e->pl().cost() + octi::basegraph::SOFT_INF;
           } else {
             coef = e->pl().cost();
           }
@@ -677,7 +682,6 @@ void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
       if (i > -1) {
         double val = lp->getVarVal(i);
         if (val > 0.5) {
-          n->pl().setStation();
           gridNds[nd] = n;
         }
       }
@@ -697,7 +701,6 @@ void ILPGridOptimizer::extractSolution(ILPSolver* lp, BaseGraph* gg,
       // get the start and end grid nodes
       auto grStart = gridNds[edg->getFrom()];
       auto grEnd = gridNds[edg->getTo()];
-
 
       assert(grStart);
       assert(grEnd);

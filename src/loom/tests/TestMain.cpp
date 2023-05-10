@@ -461,7 +461,7 @@ int main(int argc, char** argv) {
 
         std::ifstream input;
         input.open(test.fname);
-        g.readFromJson(&input, 3, true);
+        g.readFromJson(&input, true);
 
         TEST(g.numEdgs(), ==, test.numEdgs);
         TEST(g.numNds(), ==, test.numNds);
@@ -506,7 +506,7 @@ int main(int argc, char** argv) {
       input.open(
           "../src/loom/tests/datasets/"
           "freiburg-tram.json");
-      g.readFromJson(&input, 3, true);
+      g.readFromJson(&input, true);
 
       TEST(g.numEdgs(), ==, 78);
       TEST(g.numNds(), ==, 77);
@@ -553,7 +553,7 @@ int main(int argc, char** argv) {
         input.open(
             "../src/loom/tests/datasets/"
             "freiburg-tram.json");
-        g.readFromJson(&input, 3, true);
+        g.readFromJson(&input, true);
 
         TEST(g.numEdgs(), ==, 78);
         TEST(g.numNds(), ==, 77);
@@ -604,7 +604,7 @@ int main(int argc, char** argv) {
         input.open(
             "../src/loom/tests/datasets/"
             "freiburg-tram.json");
-        g.readFromJson(&input, 3, true);
+        g.readFromJson(&input, true);
 
         TEST(g.numEdgs(), ==, 78);
         TEST(g.numNds(), ==, 77);
@@ -652,7 +652,7 @@ int main(int argc, char** argv) {
 
         std::ifstream input;
         input.open(test.fname);
-        g.readFromJson(&input, 3, true);
+        g.readFromJson(&input, true);
 
         TEST(g.numEdgs(), ==, test.numEdgs);
         TEST(g.numNds(), ==, test.numNds);
@@ -707,7 +707,7 @@ int main(int argc, char** argv) {
         input.open(
             "../src/loom/tests/datasets/"
             "freiburg-tram.json");
-        g.readFromJson(&input, 3, true);
+        g.readFromJson(&input, true);
 
         TEST(g.numEdgs(), ==, 78);
         TEST(g.numNds(), ==, 77);

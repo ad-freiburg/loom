@@ -79,8 +79,7 @@ void OctiQuadTree::unSettleEdg(CombEdge* ce, GridNode* a, GridNode* b) {
 }
 
 // _____________________________________________________________________________
-void OctiQuadTree::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
-                             size_t rndrOrd) {
+void OctiQuadTree::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   if (a == b) return;
 
   // this closes the grid edge
@@ -89,8 +88,6 @@ void OctiQuadTree::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
 
   addResEdg(ge, e);
   addResEdg(gf, e);
-
-  ge->pl().setRndrOrder(rndrOrd);
 
   // this closes both nodes
   // a close means that all major edges reaching this node are closed

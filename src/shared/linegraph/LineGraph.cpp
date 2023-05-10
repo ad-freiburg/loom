@@ -31,8 +31,7 @@ using util::geo::Point;
 using util::graph::Algorithm;
 
 // _____________________________________________________________________________
-void LineGraph::readFromDot(std::istream* s, double smooth) {
-  UNUSED(smooth);
+void LineGraph::readFromDot(std::istream* s) {
   _bbox = util::geo::Box<double>();
 
   dot::parser::Parser dp(s);
@@ -153,29 +152,27 @@ void LineGraph::readFromDot(std::istream* s, double smooth) {
 }
 // _____________________________________________________________________________
 void LineGraph::readFromTopoJson(nlohmann::json::array_t objects,
-                                 nlohmann::json::array_t arcs, double smooth,
+                                 nlohmann::json::array_t arcs,
                                  bool webMercCoords) {
   UNUSED(objects);
   UNUSED(arcs);
-  UNUSED(smooth);
   UNUSED(webMercCoords);
   throw(std::runtime_error("TopoJSON input not yet implemented."));
 }
 
 // _____________________________________________________________________________
 void LineGraph::readFromTopoJson(nlohmann::json::array_t objects,
-                                 nlohmann::json::array_t arcs, double smooth) {
-  return readFromTopoJson(objects, arcs, smooth, false);
+                                 nlohmann::json::array_t arcs) {
+  return readFromTopoJson(objects, arcs, false);
+}
+
+// _____________________________________________________________________________
+void LineGraph::readFromGeoJson(nlohmann::json::array_t features) {
+  return readFromGeoJson(features, false);
 }
 
 // _____________________________________________________________________________
 void LineGraph::readFromGeoJson(nlohmann::json::array_t features,
-                                double smooth) {
-  return readFromGeoJson(features, smooth, false);
-}
-
-// _____________________________________________________________________________
-void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
                                 bool webMercCoords) {
   _bbox = util::geo::Box<double>();
 
@@ -263,7 +260,7 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
           idMap[to] = addNd({pl.getLine().back(), component});
       }
 
-      pl.applyChaikinSmooth(smooth);
+      // pl.applyChaikinSmooth(3);
 
       LineNode* fromN = 0;
       LineNode* toN = 0;
@@ -405,20 +402,17 @@ void LineGraph::readFromGeoJson(nlohmann::json::array_t features, double smooth,
 }
 
 // _____________________________________________________________________________
-void LineGraph::readFromJson(std::istream* s, double smooth) {
-  return readFromJson(s, smooth, false);
-}
+void LineGraph::readFromJson(std::istream* s) { return readFromJson(s, false); }
 
 // _____________________________________________________________________________
-void LineGraph::readFromJson(std::istream* s, double smooth,
-                             bool useWebMercCoords) {
+void LineGraph::readFromJson(std::istream* s, bool useWebMercCoords) {
   nlohmann::json j;
   (*s) >> j;
 
   if (j["type"] == "FeatureCollection")
-    readFromGeoJson(j["features"], smooth, useWebMercCoords);
+    readFromGeoJson(j["features"], useWebMercCoords);
   if (j["type"] == "Topology")
-    readFromTopoJson(j["objects"], j["arcs"], smooth, useWebMercCoords);
+    readFromTopoJson(j["objects"], j["arcs"], useWebMercCoords);
 }
 
 // _____________________________________________________________________________
@@ -1038,7 +1032,6 @@ void LineGraph::contractEdge(LineEdge* e) {
   if (e->getTo()->pl().stops().size() > 0) {
     auto servedLines = LineGraph::servedLines(e->getTo());
     n = mergeNds(e->getFrom(), e->getTo());
-
     for (auto l : LineGraph::servedLines(n)) {
       if (!servedLines.count(l)) n->pl().addLineNotServed(l);
     }
@@ -1063,6 +1056,42 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
   std::vector<std::pair<const Line*, std::pair<LineNode*, LineNode*>>> ex;
 
   if (eConn) {
+    for (auto& ex : a->pl().getConnExc()) {
+      auto line = ex.first;
+      for (auto& exFr : ex.second) {
+        auto fr = exFr.first;
+
+        auto ti = exFr.second.begin();
+        while (ti != exFr.second.end()) {
+          auto to = *ti;
+          if (fr != eConn && to != eConn && lineCtd(fr, eConn, line) &&
+              lineCtd(to, eConn, line) && terminatesAt(eConn, b, line)) {
+            ti = exFr.second.erase(ti);
+          } else {
+            ti++;
+          }
+        }
+      }
+    }
+
+    for (auto& ex : b->pl().getConnExc()) {
+      auto line = ex.first;
+      for (auto& exFr : ex.second) {
+        auto fr = exFr.first;
+
+        auto ti = exFr.second.begin();
+        while (ti != exFr.second.end()) {
+          auto to = *ti;
+          if (fr != eConn && to != eConn && lineCtd(fr, eConn, line) &&
+              lineCtd(to, eConn, line) && terminatesAt(eConn, a, line)) {
+            ti = exFr.second.erase(ti);
+          } else {
+            ti++;
+          }
+        }
+      }
+    }
+
     for (auto fr : a->getAdjList()) {
       if (fr == eConn) continue;
       for (auto lo : fr->pl().getLines()) {
@@ -1070,24 +1099,28 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
           if (to == eConn) continue;
           if (fr->pl().hasLine(lo.line) && to->pl().hasLine(lo.line) &&
               (!lineCtd(fr, eConn, lo.line) || !lineCtd(eConn, to, lo.line))) {
-            ex.push_back({lo.line, {fr->getOtherNd(a), to->getOtherNd(b)}});
+            auto frNd = fr->getOtherNd(a);
+            auto toNd = to->getOtherNd(b);
+            auto exA = getEdg(b, frNd);
+            auto exB = getEdg(b, toNd);
+            if (exA && exB && exA->pl().hasLine(lo.line) && exB->pl().hasLine(lo.line) && lineCtd(exA, exB, lo.line))
+              continue;
+            exA = getEdg(a, frNd);
+            exB = getEdg(a, toNd);
+            if (exA && exB && exA->pl().hasLine(lo.line) && exB->pl().hasLine(lo.line) && lineCtd(exA, exB, lo.line))
+              continue;
+            ex.push_back({lo.line, {frNd, toNd}});
           }
         }
       }
     }
+  }
 
+  if (eConn) {
     edgeDel(a, eConn);
     edgeDel(b, eConn);
     _edgeGrid.remove(eConn);
     delEdg(a, b);
-  }
-
-  for (const auto& ex : a->pl().getConnExc()) {
-    for (const auto& from : ex.second) {
-      for (const auto& to : from.second) {
-        b->pl().addConnExc(ex.first, from.first, to);
-      }
-    }
   }
 
   for (auto e : a->getAdjList()) {
@@ -1201,6 +1234,17 @@ breakfor:
 }
 
 // _____________________________________________________________________________
+bool LineGraph::isTerminus(const LineNode* nd) {
+  for (auto e : nd->getAdjList()) {
+    for (const auto& lo : e->pl().getLines()) {
+      if (terminatesAt(e, nd, lo.line)) return true;
+    }
+  }
+
+  return false;
+}
+
+// _____________________________________________________________________________
 bool LineGraph::terminatesAt(const LineEdge* fromEdge, const LineNode* terminus,
                              const Line* line) {
   for (const auto& toEdg : terminus->getAdjList()) {
@@ -1308,7 +1352,7 @@ std::string LineGraph::getLineColor(const nlohmann::json::object_t& line) {
     color = line.at("\"?col\"").get<std::string>();
   }
 
-  return util::trim(util::trim(color, "\""), "#");
+  return util::normHtmlColor(util::trim(util::trim(color, "\""), "#"));
 }
 
 // _____________________________________________________________________________
@@ -1543,5 +1587,39 @@ void LineGraph::snapOrphanStations() {
         delEdg(e->getFrom(), e->getTo());
       }
     }
+  }
+}
+
+// _____________________________________________________________________________
+void LineGraph::smooth(double smooth) {
+  for (auto n : getNds()) {
+    for (auto e : n->getAdjList()) {
+      if (e->getFrom() != n) continue;
+      auto pl = e->pl().getPolyline();
+      pl.smoothenOutliers(50);
+      pl.simplify(smooth);
+      pl.applyChaikinSmooth(3);
+      pl.simplify(1);
+      e->pl().setPolyline(pl);
+    }
+  }
+}
+
+// _____________________________________________________________________________
+void LineGraph::removeDeg1Nodes() {
+  std::vector<LineNode*> toDel;
+  for (auto n : getNds()) {
+    if (n->getDeg() == 0) {
+      for (auto e : n->getAdjList()) {
+        _edgeGrid.remove(e);
+      }
+
+      toDel.push_back(n);
+    }
+  }
+
+  for (auto n : toDel) {
+    _nodeGrid.remove(n);
+    delNd(n);
   }
 }

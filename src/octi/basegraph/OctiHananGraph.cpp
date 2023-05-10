@@ -80,8 +80,7 @@ double OctiHananGraph::getBendPen(size_t i, size_t j) const {
 }
 
 // _____________________________________________________________________________
-void OctiHananGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
-                               size_t rndrOrd) {
+void OctiHananGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e) {
   if (a == b) return;
 
   // this closes the grid edge
@@ -90,8 +89,6 @@ void OctiHananGraph::settleEdg(GridNode* a, GridNode* b, CombEdge* e,
 
   addResEdg(ge, e);
   addResEdg(gf, e);
-
-  ge->pl().setRndrOrder(rndrOrd);
 
   // this closes both nodes
   // a close means that all major edges reaching this node are closed

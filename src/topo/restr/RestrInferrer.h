@@ -35,7 +35,7 @@ typedef std::vector<Hndl> HndlLst;
 using shared::linegraph::Line;
 
 struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
-  CostFunc(const Line* r, double max, double turnPen) : _max(max), _line(r), _turnPen(turnPen) {}
+  CostFunc(const Line* r, double max, double turnPen, double fullTurnAngle) : _max(max), _line(r), _turnPen(turnPen), _fullTurnAngle(fullTurnAngle) {}
   double inf() const { return _max; };
   double operator()(const RestrEdge* from, const RestrNode* n,
                     const RestrEdge* to) const {
@@ -64,7 +64,7 @@ struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
 
       double ang = util::geo::innerProd(
                     *n->pl().getGeom(), fromPoint, toPoint);
-      if (ang < 35) c += _turnPen;
+      if (ang < _fullTurnAngle) c += _turnPen;
     }
 
     // final cost are turn restriction costs plus length of the (to) edge
@@ -74,6 +74,7 @@ struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
   double _max;
   const Line* _line;
   double _turnPen;
+  double _fullTurnAngle;
 };
 
 struct HndlCmp {
