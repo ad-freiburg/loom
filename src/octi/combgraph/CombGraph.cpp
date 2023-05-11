@@ -137,7 +137,10 @@ EdgeOrdering CombGraph::getEdgeOrderingForNode(CombNode* n,
                                                bool useOrigNextNode) const {
   EdgeOrdering order;
   for (auto e : n->getAdjList()) {
+    // take reference edge next to n
     auto r = e->pl().getChilds().front();
+    if (e->getTo() == n) r = e->pl().getChilds().back();
+
     util::geo::DPoint a = *n->pl().getGeom();
 
     util::geo::DPoint b;
