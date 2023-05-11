@@ -395,6 +395,9 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
 
         pl = ref.geom.offsetted(off);
 
+        if (pl.getLength() / c.geoms[i].geom.getLength() > 1.5)
+          pl = c.geoms[i].geom;
+
         std::set<LinePoint<double>, LinePointCmp<double>> a;
         std::set<LinePoint<double>, LinePointCmp<double>> b;
 
@@ -403,11 +406,11 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
         if (ref.to.edge)
           b = n->pl().frontFor(ref.to.edge)->geom.getIntersections(pl);
 
-        if (a.size() == 1 && b.size() == 1) {
+        if (a.size() > 0 && b.size() > 0) {
           pl = pl.getSegment(a.begin()->totalPos, b.begin()->totalPos);
-        } else if (a.size() == 1) {
+        } else if (a.size() > 0) {
           pl = pl.getSegment(a.begin()->totalPos, 1);
-        } else if (b.size() == 1) {
+        } else if (b.size() > 0) {
           pl = pl.getSegment(0, b.begin()->totalPos);
         }
       }
