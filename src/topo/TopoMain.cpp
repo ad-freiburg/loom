@@ -47,31 +47,57 @@ int main(int argc, char** argv) {
   // snap orphan stations
   lg.snapOrphanStations();
 
-  size_t numNdsBef = lg.getNds().size();
+  size_t numNdsBef = 0;
   size_t numEdgsBef = 0;
+  double lenBef = 0, lenAfter = 0;
+  size_t totMergedEdgs = 0;
+  size_t totSupportGraphEdgs = 0;
+  size_t maxMergedEdgs = 0;
+
+  if (cfg.outputStats) {
+    if (cfg.aggregateStats) {
+      const auto& props = lg.getGraphProps();
+      if (props.count("statistics")) {
+        const auto& stats =
+            props.at("statistics").get<nlohmann::json::object_t>();
+        if (stats.count("num_nds_in"))
+          numNdsBef = stats.at("num_nds_in").get<size_t>();
+        if (stats.count("num_edgs_in"))
+          numEdgsBef = stats.at("num_edgs_in").get<size_t>();
+        if (stats.count("len_before"))
+          lenBef = stats.at("len_before").get<double>();
+        if (stats.count("iters")) iters = stats.at("iters").get<size_t>();
+        if (stats.count("time_const"))
+          constrT = stats.at("time_const").get<double>();
+        if (stats.count("time_restr_inf"))
+          restrT = stats.at("time_restr_inf").get<double>();
+        if (stats.count("time_station_insert"))
+          stationT = stats.at("time_station_insert").get<double>();
+        if (stats.count("max_merged_edgs"))
+          maxMergedEdgs = stats.at("max_merged_edgs").get<size_t>();
+        if (stats.count("tot_merged_edgs"))
+          totMergedEdgs = stats.at("tot_merged_edgs").get<size_t>();
+        if (stats.count("tot_support_graph_edgs"))
+          totSupportGraphEdgs =
+              stats.at("tot_support_graph_edgs").get<size_t>();
+      }
+    } else {
+      numNdsBef = lg.getNds().size();
+      for (const auto& nd : lg.getNds()) {
+        for (const auto& e : nd->getAdjList()) {
+          if (e->getFrom() != nd) continue;
+          numEdgsBef++;
+          lenBef += e->pl().getPolyline().getLength();
+        }
+      }
+    }
+  }
 
   size_t numEdgsAfter = 0;
   size_t numNdsAfter = 0;
   size_t numStationsAfter = 0;
 
-  double avgMergedEdgs = 0;
-  size_t maxMergedEdgs = 0;
-
   size_t numConExc = 0;
-
-  size_t mergeEdgsC = 0;
-
-  double lenBef = 0, lenAfter = 0;
-
-  if (cfg.outputStats) {
-    for (const auto& nd : lg.getNds()) {
-      for (const auto& e : nd->getAdjList()) {
-        if (e->getFrom() != nd) continue;
-        numEdgsBef++;
-        lenBef += e->pl().getPolyline().getLength();
-      }
-    }
-  }
 
   lg.removeDeg1Nodes();
 
@@ -118,10 +144,6 @@ int main(int argc, char** argv) {
     iters += mc.collapseShrdSegs(cfg.maxAggrDistance, 50, cfg.segmentLength);
     constrT += T_STOP(construction);
 
-    // util::geo::output::GeoGraphJsonOutput gout;
-    // gout.printLatLng(tg, std::cout);
-    // exit(0);
-
     mc.removeNodeArtifacts(false);
 
     if (cfg.outputStats) {
@@ -132,7 +154,8 @@ int main(int argc, char** argv) {
           if (e->getFrom() != nd) continue;
           size_t cur = origEdgs.at(e).size();
           if (cur > maxMergedEdgs) maxMergedEdgs = cur;
-          avgMergedEdgs += cur;
+          totMergedEdgs += cur;
+          totSupportGraphEdgs++;
           c++;
         }
       }
@@ -173,7 +196,7 @@ int main(int argc, char** argv) {
       }
     }
 
-    numConExc = tg.numConnExcs();
+    numConExc += tg.numConnExcs();
 
     if (cfg.smooth > 0) tg.smooth(cfg.smooth);
 
@@ -209,24 +232,28 @@ int main(int argc, char** argv) {
   util::geo::output::GeoGraphJsonOutput gout;
   if (cfg.outputStats) {
     util::json::Dict jsonStats = {
-        {"statistics", util::json::Dict{
-                           {"num_edgs_in", numEdgsBef},
-                           {"num_nds_in", numNdsBef},
-                           {"num_edgs_out", numEdgsAfter},
-                           {"num_nds_out", numNdsAfter},
-                           {"num_stations_out", numStationsAfter},
-                           {"num_components", numComps},
-                           {"time_const", constrT},
-                           {"iters", iters},
-                           {"time_const", constrT},
-                           {"time_restr_inf", restrT},
-                           {"time_station_insert", stationT},
-                           {"len_before", lenBef},
-                           {"num_restrs", numConExc},
-                           {"avg_merged_edgs", (avgMergedEdgs / mergeEdgsC)},
-                           {"max_merged_edgs", maxMergedEdgs},
-                           {"len_after", lenAfter},
-                       }}};
+        {"statistics",
+         util::json::Dict{
+             {"num_edgs_in", numEdgsBef},
+             {"num_nds_in", numNdsBef},
+             {"num_edgs_out", numEdgsAfter},
+             {"num_nds_out", numNdsAfter},
+             {"num_stations_out", numStationsAfter},
+             {"num_components", numComps},
+             {"time_const", constrT},
+             {"iters", iters},
+             {"time_const", constrT},
+             {"time_restr_inf", restrT},
+             {"time_station_insert", stationT},
+             {"len_before", lenBef},
+             {"num_restrs", numConExc},
+             {"avg_merged_edgs", (static_cast<double>(totMergedEdgs) /
+                                  static_cast<double>(totSupportGraphEdgs))},
+             {"max_merged_edgs", maxMergedEdgs},
+             {"len_after", lenAfter},
+             {"tot_merged_edgs", totMergedEdgs},
+             {"tot_support_graph_edgs", totSupportGraphEdgs},
+         }}};
 
     util::geo::output::GeoJsonOutput out(std::cout, jsonStats);
     for (auto gg : resultGraphs) {

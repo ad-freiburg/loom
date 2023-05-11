@@ -24,6 +24,7 @@ class Graph {
   virtual Node<N, E>* addNd(const N& pl) = 0;
   Edge<N, E>* addEdg(Node<N, E>* from, Node<N, E>* to);
   virtual Edge<N, E>* addEdg(Node<N, E>* from, Node<N, E>* to, const E& p) = 0;
+  virtual Edge<N, E>* addEdg(Node<N, E>* from, Node<N, E>* to, E&& p) = 0;
   Edge<N, E>* getEdg(Node<N, E>* from, Node<N, E>* to);
   const Edge<N, E>* getEdg(const Node<N, E>* from, const Node<N, E>* to) const;
 

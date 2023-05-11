@@ -55,6 +55,18 @@ class PolyLine {
   PolyLine();
   PolyLine(const Point<T>& from, const Point<T>& to);
   PolyLine(const Line<T>& l);
+  PolyLine(const PolyLine<T>& l);
+  PolyLine(PolyLine<T>&& l);
+
+  PolyLine& operator=(PolyLine<T>&& other) {
+    _line = std::move(other._line);
+    return *this;
+  }
+
+  PolyLine& operator=(const PolyLine<T>& other) {
+    _line = other._line;
+    return *this;
+  }
 
   PolyLine& operator<<(const Point<T>& p);
   PolyLine& operator>>(const Point<T>& p);
@@ -67,11 +79,14 @@ class PolyLine {
   PolyLine offsetted(double units) const;
 
   const Line<T>& getLine() const;
+  Line<T>& getLine();
 
   double distTo(const PolyLine<T>& g) const;
   double distTo(const Point<T>& p) const;
 
   double getLength() const;
+  bool shorterThan(double d) const;
+  bool longerThan(double d) const;
 
   // return point at dist
   LinePoint<T> getPointAtDist(double dist) const;

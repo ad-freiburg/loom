@@ -29,6 +29,7 @@ class UndirGraph : public Graph<N, E> {
   Node<N, E>* addNd(UndirNode<N, E>* n);
   Node<N, E>* addNd(const N& pl);
   Edge<N, E>* addEdg(Node<N, E>* from, Node<N, E>* to, const E& p);
+  Edge<N, E>* addEdg(Node<N, E>* from, Node<N, E>* to, E&& p);
 
   virtual Node<N, E>* mergeNds(Node<N, E>* a, Node<N, E>* b);
 

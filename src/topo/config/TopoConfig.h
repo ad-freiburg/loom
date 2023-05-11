@@ -21,6 +21,7 @@ struct TopoConfig {
   bool noInferRestrs = false;
   bool writeComponents = false;
   bool randomColors = false;
+  bool aggregateStats = false;
   double connectedCompDist = 10000;
   double smooth = 0;
   std::string componentsPath = "";

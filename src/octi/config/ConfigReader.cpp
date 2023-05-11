@@ -5,9 +5,11 @@
 
 #include <float.h>
 #include <getopt.h>
+
 #include <exception>
 #include <iostream>
 #include <string>
+
 #include "octi/_config.h"
 #include "octi/config/ConfigReader.h"
 #include "util/log/Log.h"
@@ -21,7 +23,9 @@ using std::string;
 using std::vector;
 
 static const char* YEAR = &__DATE__[7];
-static const char* COPY = "University of Freiburg - Chair of Algorithms and Data Structures"; static const char* AUTHORS = "Patrick Brosi <brosi@informatik.uni-freiburg.de>";
+static const char* COPY =
+    "University of Freiburg - Chair of Algorithms and Data Structures";
+static const char* AUTHORS = "Patrick Brosi <brosi@informatik.uni-freiburg.de>";
 
 // _____________________________________________________________________________
 ConfigReader::ConfigReader() {}
@@ -30,81 +34,85 @@ ConfigReader::ConfigReader() {}
 void ConfigReader::help(const char* bin) const {
   std::cout << std::setfill(' ') << std::left << "octi (part of LOOM) "
             << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
-            << "\n\n(C) " << YEAR << " " << COPY << "\n"
+            << "\n\n(C) 2017-" << YEAR << " " << COPY << "\n"
             << "Authors: " << AUTHORS << "\n\n"
             << "Usage: " << bin << " < graph.json\n\n"
             << "Allowed options:\n\n"
             << "General:\n"
-            << std::setw(36) << "  -v [ --version ]"
+            << std::setw(39) << "  -v [ --version ]"
             << "print version\n"
-            << std::setw(36) << "  -h [ --help ]"
+            << std::setw(39) << "  -h [ --help ]"
             << "show this help message\n"
-            << std::setw(36) << "  -o [ --optim-mode ] arg (=heur)"
+            << std::setw(39) << "  -o [ --optim-mode ] arg (=heur)"
             << "optimization mode, 'heur' or 'ilp'\n"
-            << std::setw(36) << "  --obstacles arg"
+            << std::setw(39) << "  --obstacles arg"
             << "GeoJSON file containing obstacle polygons\n"
-            << std::setw(36) << "  -g [ --grid-size ] arg (=100%)"
+            << std::setw(39) << "  -g [ --grid-size ] arg (=100%)"
             << "grid cell length, either exact or a\n"
-            << std::setw(36) << " " << " percentage of input adjacent station distance\n"
-            << std::setw(36) << "  -b [ -base-graph ] arg (=octilinear)"
+            << std::setw(39) << " "
+            << " percentage of input adjacent station distance\n"
+            << std::setw(39) << "  -b [ -base-graph ] arg (=octilinear)"
             << "base graph, either ortholinear, octilinear,\n"
-            << std::setw(36) << " " << " orthoradial, quadtree, octihanan\n\n"
+            << std::setw(39) << " "
+            << " orthoradial, quadtree, octihanan\n\n"
             << "Misc:\n"
-            << std::setw(36) << "  --retry-on-error"
-            << "retry with 10\% reduced grid size on error, 10 times\n"
-            << std::setw(36) << "  --skip-on-error"
+            << std::setw(39) << "  --retry-on-error"
+            << "retry 85\% of grid size on error, 30 times\n"
+            << std::setw(39) << "  --skip-on-error"
             << "skip graph on error\n"
-            << std::setw(36) << "  --ilp-num-threads arg (=0)"
+            << std::setw(39) << "  --ilp-num-threads arg (=0)"
             << "number of threads to use by ILP solver,\n"
-            << std::setw(36) << " "
+            << std::setw(39) << " "
             << " 0 means solver default\n"
-            << std::setw(36) << "  --hanan-iters arg (=1)"
+            << std::setw(39) << "  --hanan-iters arg (=1)"
             << "number of Hanan grid iterations\n"
-            << std::setw(36) << "  --loc-search-max-iters arg (=100)"
+            << std::setw(39) << "  --loc-search-max-iters arg (=100)"
             << "max local search iterations\n"
-            << std::setw(36) << "  --ilp-cache-threshold arg (=inf)"
+            << std::setw(39) << "  --ilp-cache-threshold arg (=inf)"
             << "ILP solve cache treshold\n"
-            << std::setw(36) << "  --ilp-time-limit arg (=60)"
+            << std::setw(39) << "  --ilp-time-limit arg (=60)"
             << "ILP solve time limit (seconds), -1 for infinite\n"
-            << std::setw(36) << "  --ilp-cache-dir arg (=.)"
+            << std::setw(39) << "  --ilp-cache-dir arg (=.)"
             << "ILP cache dir\n"
-            << std::setw(36) << "  --ilp-solver arg (=gurobi)"
-            << "Preferred ILP solver, either glpk, cbc, or gurobi.\n"
-            << std::setw(36) << " "
-            << "Will fall back if not available.\n"
-            << std::setw(36) << "  --write-stats"
+            << std::setw(39) << "  --ilp-solver arg (=gurobi)"
+            << "Preferred ILP solver, either glpk, cbc, or gurobi,\n"
+            << std::setw(39) << " "
+            << " will fall back if not available.\n"
+            << std::setw(39) << "  --write-stats"
             << "write stats to output graph\n"
-            << std::setw(36) << "  -D [ --from-dot ]"
+            << std::setw(39) << "  -D [ --from-dot ]"
             << "input is in dot format\n"
-            << std::setw(36) << "  --no-deg2-heur"
+            << std::setw(39) << "  --no-deg2-heur"
             << "don't contract degree 2 nodes\n"
-            << std::setw(36) << "  --geo-pen arg (=0)"
+            << std::setw(39) << "  --geo-pen arg (=0)"
             << "enforces lines to follow input geo course\n"
-            << std::setw(36) << "  --max-grid-dist arg (=3)"
+            << std::setw(39) << "  --max-grid-dist arg (=3)"
             << "max grid distance for station candidates\n"
-            << std::setw(36) << "  --restr-loc-search"
+            << std::setw(39) << "  --restr-loc-search"
             << "restrict local search to max grid distance\n"
-            << std::setw(36) << "  --edge-order arg (=all)"
+            << std::setw(39) << "  --edge-order arg (=all)"
             << "method used for initial edge ordering for heur,\n"
-            << std::setw(36) << " " << " one of num-lines, length, adj-nd-deg,\n"
-            << std::setw(36) << " " << " adj-nd-ldeg, growth-deg, growth-ldef, all\n"
-            << std::setw(36) << "  --density-pen arg (=10)"
+            << std::setw(39) << " "
+            << " one of num-lines, length, adj-nd-deg,\n"
+            << std::setw(39) << " "
+            << " adj-nd-ldeg, growth-deg, growth-ldef, all\n"
+            << std::setw(39) << "  --density-pen arg (=10)"
             << "restrict local search to max grid distance\n"
-            << std::setw(36) << "  --vert-pen arg (=0)"
+            << std::setw(39) << "  --vert-pen arg (=0)"
             << "penalty for vertical edges\n"
-            << std::setw(36) << "  --hori-pen arg (=0)"
+            << std::setw(39) << "  --hori-pen arg (=0)"
             << "penalty for horizontal edges\n"
-            << std::setw(36) << "  --diag-pen arg (=.5)"
+            << std::setw(39) << "  --diag-pen arg (=.5)"
             << "penalty for diagonal edges\n"
-            << std::setw(36) << "  --pen-180 arg (=0)"
+            << std::setw(39) << "  --pen-180 arg (=0)"
             << "penalty for 180 deg bends\n"
-            << std::setw(36) << "  --pen-135 arg (=1)"
+            << std::setw(39) << "  --pen-135 arg (=1)"
             << "penalty for 135 deg bends\n"
-            << std::setw(36) << "  --pen-90 arg (=1.5)"
+            << std::setw(39) << "  --pen-90 arg (=1.5)"
             << "penalty for 90 deg bends\n"
-            << std::setw(36) << "  --pen-45 arg (=2)"
+            << std::setw(39) << "  --pen-45 arg (=2)"
             << "penalty for 45 deg bends\n"
-            << std::setw(36) << "  --nd-move-pen arg (=.5)"
+            << std::setw(39) << "  --nd-move-pen arg (=.5)"
             << "penalty for node movement\n";
 }
 
@@ -114,8 +122,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   std::string baseGraphStr = "octilinear";
   std::string edgeOrderMethod = "all";
 
-  struct option ops[] = {
-                         {"version", no_argument, 0, 'v'},
+  struct option ops[] = {{"version", no_argument, 0, 'v'},
                          {"help", no_argument, 0, 'h'},
                          {"optim-mode", required_argument, 0, 'm'},
                          {"ilp-num-threads", required_argument, 0, 1},
@@ -151,8 +158,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
 
   char c;
 
-  while ((c = getopt_long(argc, argv, ":hvm:Dg:b:", ops, 0)) !=
-         -1) {
+  while ((c = getopt_long(argc, argv, ":hvm:Dg:b:", ops, 0)) != -1) {
     switch (c) {
       case 'a':
         cfg->abortAfter = atoi(optarg);
@@ -233,7 +239,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         cfg->pens.p_45 = atof(optarg);
         break;
       case 24:
-        cfg->pens.ndMovePen= atof(optarg);
+        cfg->pens.ndMovePen = atof(optarg);
         break;
       case 25:
         cfg->skipOnError = true;
@@ -245,7 +251,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         cfg->gridSize = optarg;
         break;
       case 'v':
-        std::cout << "pfaedle " << VERSION_FULL << std::endl;
+        std::cout << "octi - (LOOM " << VERSION_FULL << ")" << std::endl;
         exit(0);
       case 'h':
         help(argv[0]);

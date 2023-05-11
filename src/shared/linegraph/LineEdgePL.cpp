@@ -23,6 +23,22 @@ LineEdgePL::LineEdgePL(const PolyLine<double>& p)
     : _dontContract(false), _p(p) {}
 
 // _____________________________________________________________________________
+LineEdgePL::LineEdgePL(const LineEdgePL& other)
+    : _lineToIdx(other._lineToIdx),
+      _lines(other._lines),
+      _dontContract(other._dontContract),
+      _comp(other._comp),
+      _p(other._p) {}
+
+// _____________________________________________________________________________
+LineEdgePL::LineEdgePL(LineEdgePL&& other)
+    : _lineToIdx(std::move(other._lineToIdx)),
+      _lines(std::move(other._lines)),
+      _dontContract(other._dontContract),
+      _comp(other._comp),
+      _p(std::move(other._p)) {}
+
+// _____________________________________________________________________________
 const util::geo::Line<double>* LineEdgePL::getGeom() const {
   return &_p.getLine();
 }
@@ -32,6 +48,9 @@ void LineEdgePL::setGeom(const util::geo::Line<double>& l) { _p = l; }
 
 // _____________________________________________________________________________
 const PolyLine<double>& LineEdgePL::getPolyline() const { return _p; }
+
+// _____________________________________________________________________________
+PolyLine<double>& LineEdgePL::getPolyline() { return _p; }
 
 // _____________________________________________________________________________
 void LineEdgePL::setPolyline(const PolyLine<double>& p) { _p = p; }
@@ -58,7 +77,6 @@ void LineEdgePL::addLine(const Line* r, const LineNode* dir,
   _lineToIdx[r] = _lines.size();
   LineOcc occ(r, dir, ls);
   _lines.push_back(occ);
-
 }
 
 // _____________________________________________________________________________
@@ -89,8 +107,7 @@ util::json::Dict LineEdgePL::getAttrs() const {
     line["label"] = r.line->label();
     line["color"] = r.line->color();
     if (!r.style.isNull()) {
-      if (r.style.get().getCss().size())
-        line["style"] = r.style.get().getCss();
+      if (r.style.get().getCss().size()) line["style"] = r.style.get().getCss();
       if (r.style.get().getOutlineCss().size())
         line["outline-style"] = r.style.get().getOutlineCss();
     }

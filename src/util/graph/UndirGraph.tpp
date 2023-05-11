@@ -40,6 +40,19 @@ Edge<N, E>* UndirGraph<N, E>::addEdg(Node<N, E>* from, Node<N, E>* to,
 
 // _____________________________________________________________________________
 template <typename N, typename E>
+Edge<N, E>* UndirGraph<N, E>::addEdg(Node<N, E>* from, Node<N, E>* to,
+                                     E&& p) {
+  Edge<N, E>* e = Graph<N, E>::getEdg(from, to);
+  if (!e) {
+    e = new Edge<N, E>(from, to, std::move(p));
+    from->addEdge(e);
+    to->addEdge(e);
+  }
+  return e;
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
 Node<N, E>* UndirGraph<N, E>::mergeNds(Node<N, E>* a, Node<N, E>* b) {
   for (auto e : a->getAdjListOut()) {
     if (e->getFrom() != a) continue;

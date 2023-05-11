@@ -51,6 +51,25 @@ void RTree<V, G, T>::get(const Box<T>& box, std::set<V>* s) const {
 
 // _____________________________________________________________________________
 template <typename V, template <typename> class G, typename T>
+void RTree<V, G, T>::get(const Box<T>& box, std::vector<V>* s) const {
+  T minCoords[2];
+  T maxCoords[2];
+
+  minCoords[0] = box.getLowerLeft().getX();
+  minCoords[1] = box.getLowerLeft().getY();
+
+  maxCoords[0] = box.getUpperRight().getX();
+  maxCoords[1] = box.getUpperRight().getY();
+
+  std::function<bool(const V&)> f = [s](const V& val) {
+    s->push_back(val);
+    return true;
+  };
+  _rtree->Search(minCoords, maxCoords, f);
+}
+
+// _____________________________________________________________________________
+template <typename V, template <typename> class G, typename T>
 void RTree<V, G, T>::remove(V val) {
   auto bit = _valIdx.find(val);
   if (bit == _valIdx.end()) return;
@@ -84,6 +103,21 @@ template <typename V, template <typename> class G, typename T>
 template <template <typename> class GG>
 void RTree<V, G, T>::get(const std::vector<GG<T>>& geom, double d,
                          std::set<V>* s) const {
+  return get(util::geo::pad(getBoundingBox(geom), d), s);
+}
+
+// _____________________________________________________________________________
+template <typename V, template <typename> class G, typename T>
+template <template <typename> class GG>
+void RTree<V, G, T>::get(const GG<T>& geom, double d, std::vector<V>* s) const {
+  return get(util::geo::pad(getBoundingBox(geom), d), s);
+}
+
+// _____________________________________________________________________________
+template <typename V, template <typename> class G, typename T>
+template <template <typename> class GG>
+void RTree<V, G, T>::get(const std::vector<GG<T>>& geom, double d,
+                         std::vector<V>* s) const {
   return get(util::geo::pad(getBoundingBox(geom), d), s);
 }
 

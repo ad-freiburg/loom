@@ -5,8 +5,13 @@
 // _____________________________________________________________________________
 template <typename N, typename E>
 Edge<N, E>::Edge(Node<N, E>* from, Node<N, E>* to, const E& pl)
- : _from(from), _to(to), _pl(pl) {
+    : _from(from), _to(to), _pl(pl) {
+}
 
+// _____________________________________________________________________________
+template <typename N, typename E>
+Edge<N, E>::Edge(Node<N, E>* from, Node<N, E>* to, E&& pl)
+    : _from(from), _to(to), _pl(std::move(pl)) {
 }
 
 // _____________________________________________________________________________

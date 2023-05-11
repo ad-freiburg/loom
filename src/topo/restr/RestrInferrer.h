@@ -6,36 +6,38 @@
 #define TOPO_RESTR_RESTRINFERRER_H_
 
 #include <unordered_map>
-#include "shared/linegraph/LineGraph.h"
+
 #include "shared/linegraph/Line.h"
+#include "shared/linegraph/LineGraph.h"
 #include "topo/config/TopoConfig.h"
 #include "topo/restr/RestrGraph.h"
 #include "util/graph/EDijkstra.h"
 
-using topo::config::TopoConfig;
+using shared::linegraph::LineEdge;
+using shared::linegraph::LineEdgePL;
 using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
-using shared::linegraph::LineEdge;
 using shared::linegraph::LineNodePL;
-using shared::linegraph::LineEdgePL;
-using util::graph::EDijkstra;
+using topo::config::TopoConfig;
 using topo::restr::RestrEdge;
-using topo::restr::RestrNode;
 using topo::restr::RestrEdgePL;
-using topo::restr::RestrNodePL;
 using topo::restr::RestrGraph;
+using topo::restr::RestrNode;
+using topo::restr::RestrNodePL;
+using util::graph::EDijkstra;
 
 namespace topo {
 namespace restr {
 
-typedef std::map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
+typedef std::unordered_map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
 typedef std::pair<RestrNode*, double> Hndl;
 typedef std::vector<Hndl> HndlLst;
 
 using shared::linegraph::Line;
 
 struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
-  CostFunc(const Line* r, double max, double turnPen, double fullTurnAngle) : _max(max), _line(r), _turnPen(turnPen), _fullTurnAngle(fullTurnAngle) {}
+  CostFunc(const Line* r, double max, double turnPen, double fullTurnAngle)
+      : _max(max), _line(r), _turnPen(turnPen), _fullTurnAngle(fullTurnAngle) {}
   double inf() const { return _max; };
   double operator()(const RestrEdge* from, const RestrNode* n,
                     const RestrEdge* to) const {
@@ -52,7 +54,7 @@ struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
     if (n) {
       auto lRestrs = n->pl().restrs.find(_line);
       if (lRestrs != n->pl().restrs.end() && lRestrs->second.count(from)) {
-        if (lRestrs->second.find(from)->second.count(to))  return inf();
+        if (lRestrs->second.find(from)->second.count(to)) return inf();
       }
 
       // dont allow going back the same edge
@@ -62,8 +64,7 @@ struct CostFunc : public EDijkstra::CostFunc<RestrNodePL, RestrEdgePL, double> {
       auto fromPoint = *(++(from->pl().getGeom()->crbegin()));
       auto toPoint = *(++(to->pl().getGeom()->cbegin()));
 
-      double ang = util::geo::innerProd(
-                    *n->pl().getGeom(), fromPoint, toPoint);
+      double ang = util::geo::innerProd(*n->pl().getGeom(), fromPoint, toPoint);
       if (ang < _fullTurnAngle) c += _turnPen;
     }
 
@@ -114,12 +115,11 @@ class RestrInferrer {
   void addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
                 std::map<RestrEdge*, HndlLst>* handles);
 
-  void edgeRpl(RestrNode* n, const RestrEdge* oldE,
-                             const RestrEdge* newE);
+  void edgeRpl(RestrNode* n, const RestrEdge* oldE, const RestrEdge* newE);
 
-  std::map<const LineEdge *, std::set<RestrNode *>> _handlesA, _handlesB;
+  std::map<const LineEdge*, std::set<RestrNode*>> _handlesA, _handlesB;
 };
-}
-}
+}  // namespace restr
+}  // namespace topo
 
 #endif  // TOPO_RESTR_RESTRINFERRER

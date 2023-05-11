@@ -6,12 +6,13 @@
 #define GTFS2GRAPH_GRAPH_NODE_H_
 
 #include <set>
-#include "ad/cppgtfs/gtfs/Stop.h"
+
 #include "ad/cppgtfs/gtfs/Route.h"
-#include "util/geo/PolyLine.h"
+#include "ad/cppgtfs/gtfs/Stop.h"
+#include "gtfs2graph/graph/BuildGraph.h"
 #include "util/geo/Geo.h"
 #include "util/geo/GeoGraph.h"
-#include "gtfs2graph/graph/BuildGraph.h"
+#include "util/geo/PolyLine.h"
 
 using namespace ad::cppgtfs;
 using util::geo::DPoint;
@@ -27,7 +28,7 @@ struct OccuringConnection {
 
 class NodePL : util::geograph::GeoNodePL<double> {
  public:
-  NodePL() {};
+  NodePL(){};
   NodePL(DPoint pos);
   NodePL(double x, double y);
   NodePL(DPoint pos, const gtfs::Stop* stop);
@@ -38,13 +39,16 @@ class NodePL : util::geograph::GeoNodePL<double> {
   const DPoint& getPos() const;
   void setPos(const DPoint& p);
 
-  bool isConnOccuring(const gtfs::Route*, const Edge* from, const Edge* to) const;
+  bool isConnOccuring(const gtfs::Route*, const Edge* from,
+                      const Edge* to) const;
 
   void connOccurs(const gtfs::Route*, const Edge* from, const Edge* to);
 
-  std::vector<const Edge*> getConnectingEdgesFor(const gtfs::Route* to, Edge* a) const;
+  std::vector<const Edge*> getConnectingEdgesFor(const gtfs::Route* to,
+                                                 Edge* a) const;
 
-  const std::map<const gtfs::Route*, std::vector<OccuringConnection> >& getOccuringConnections() const;
+  const std::map<const gtfs::Route*, std::vector<OccuringConnection> >&
+  getOccuringConnections() const;
 
   const util::geo::DPoint* getGeom() const;
   util::json::Dict getAttrs() const;
@@ -53,11 +57,12 @@ class NodePL : util::geograph::GeoNodePL<double> {
 
  private:
   DPoint _pos;
-  const Node* _n; // backpointer to node
+  const Node* _n;  // backpointer to node
 
   std::set<const gtfs::Stop*> _stops;
   std::map<const gtfs::Route*, std::vector<OccuringConnection> > _occConns;
 };
-}}
+}  // namespace graph
+}  // namespace gtfs2graph
 
 #endif  // GTFS2GRAPH_GRAPH_NODE_H_

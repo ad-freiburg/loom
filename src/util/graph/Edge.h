@@ -6,6 +6,7 @@
 #define UTIL_GRAPH_EDGE_H_
 
 #include <vector>
+#include <iostream>
 #include "util/graph/Node.h"
 
 namespace util {
@@ -15,6 +16,7 @@ template <typename N, typename E>
 class Edge {
  public:
   Edge(Node<N, E>* from, Node<N, E>* to, const E& pl);
+  Edge(Node<N, E>* from, Node<N, E>* to, E&& pl);
 
   Node<N, E>* getFrom() const;
   Node<N, E>* getTo() const;

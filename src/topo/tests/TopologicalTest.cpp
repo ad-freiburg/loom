@@ -603,21 +603,21 @@ void TopologicalTest::run() {
     // g <---------- h
     //      3
     shared::linegraph::LineGraph tg;
-    auto a = tg.addNd({{0.0, 2.0}});
-    auto b = tg.addNd({{100.0, 2.0}});
+    auto a = tg.addNd({{0.0, 5.0}});
+    auto b = tg.addNd({{100.0, 5.0}});
     auto c = tg.addNd({{0.0, 0.0}});
     auto d = tg.addNd({{100.0, 0.0}});
 
-    auto e = tg.addNd({{0.0, 4.0}});
-    auto f = tg.addNd({{100.0, 4.0}});
-    auto g = tg.addNd({{0.0, 0.0}});
-    auto h = tg.addNd({{100.0, 0.0}});
+    auto e = tg.addNd({{0.0, 10.0}});
+    auto f = tg.addNd({{100.0, 10.0}});
+    auto g = tg.addNd({{0.0, 15.0}});
+    auto h = tg.addNd({{100.0, 15.0}});
 
-    auto ab = tg.addEdg(a, b, {{{0.0, 2.0}, {100.0, 2.0}}});
+    auto ab = tg.addEdg(a, b, {{{0.0, 5.0}, {100.0, 5.0}}});
     auto cd = tg.addEdg(d, c, {{{100.0, 0.0}, {0.0, 0.0}}});
 
-    auto fe = tg.addEdg(f, e, {{{100.0, 4.0}, {0.0, 4.0}}});
-    auto hg = tg.addEdg(h, g, {{{100.0, 0.0}, {0.0, 0.0}}});
+    auto fe = tg.addEdg(f, e, {{{100.0, 10.0}, {0.0, 10.0}}});
+    auto hg = tg.addEdg(h, g, {{{100.0, 15.0}, {0.0, 15.0}}});
 
     shared::linegraph::Line l1("1", "1", "red");
     shared::linegraph::Line l2("2", "2", "blue");
@@ -631,14 +631,14 @@ void TopologicalTest::run() {
     hg->pl().addLine(&l3, 0);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 30;
+    cfg.maxAggrDistance = 20;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();
 
-    util::geo::output::GeoGraphJsonOutput gout;
-    gout.print(tg, std::cout);
-    std::cerr << std::flush;
+    // util::geo::output::GeoGraphJsonOutput gout;
+    // gout.print(tg, std::cout);
+    // std::cerr << std::flush;
 
     //  1, 2->, 3
     // a ------> b

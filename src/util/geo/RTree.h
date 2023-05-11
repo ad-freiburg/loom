@@ -55,6 +55,14 @@ class RTree {
   template <template <typename> class GG>
   void get(const std::vector<GG<T>>& geom, double d, std::set<V>* s) const;
 
+  void get(const Box<T>& btbox, std::vector<V>* s) const;
+
+  template <template <typename> class GG>
+  void get(const GG<T>& geom, double d, std::vector<V>* s) const;
+
+  template <template <typename> class GG>
+  void get(const std::vector<GG<T>>& geom, double d, std::vector<V>* s) const;
+
   void remove(V val);
 
   void getNeighbors(const V& val, double d, std::set<V>* s) const;

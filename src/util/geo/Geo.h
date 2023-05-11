@@ -1117,6 +1117,43 @@ inline double len(const Line<T>& g) {
 
 // _____________________________________________________________________________
 template <typename T>
+inline bool shorterThan(const Line<T>& g, double d) {
+  double ret = 0;
+  for (size_t i = 1; i < g.size(); i++) {
+    ret += dist(g[i - 1], g[i]);
+    if (ret >= d) return false;
+  }
+  return true;
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline bool longerThan(const Line<T>& g, double d) {
+  double ret = 0;
+  for (size_t i = 1; i < g.size(); i++) {
+    ret += dist(g[i - 1], g[i]);
+    if (ret > d) return true;
+  }
+  return false;
+}
+
+// _____________________________________________________________________________
+template <typename T>
+inline bool longerThan(const Line<T>& a, const Line<T>& b, double d) {
+  double ret = 0;
+  for (size_t i = 1; i < a.size(); i++) {
+    ret += dist(a[i - 1], a[i]);
+    if (ret > d) return true;
+  }
+  for (size_t i = 1; i < b.size(); i++) {
+    ret += dist(b[i - 1], b[i]);
+    if (ret > d) return true;
+  }
+  return false;
+}
+
+// _____________________________________________________________________________
+template <typename T>
 inline Point<T> simplify(const Point<T>& g, double d) {
   UNUSED(d);
   return g;

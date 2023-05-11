@@ -40,7 +40,7 @@ using shared::linegraph::Station;
 // typedef Grid<LineNode*, Point, double> NodeGeoIdx;
 typedef RTree<LineNode*, Point, double> NodeGeoIdx;
 
-typedef std::map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
+typedef std::unordered_map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
 
 namespace topo {
 

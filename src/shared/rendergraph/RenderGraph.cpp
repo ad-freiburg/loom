@@ -111,17 +111,29 @@ std::vector<InnerGeom> RenderGraph::innerGeoms(const LineNode* n,
             util::geo::dist(nfo->geom.getLine(), nf.geom.getLine().front()),
             util::geo::dist(nfo->geom.getLine(), nf.geom.getLine().back()));
 
-        if (prec > 0 && is.geom.getLength() > 0 && dmax > 5) {
+        if (prec > 0 && is.geom.longerThan(0) && dmax > 5) {
           ret.push_back(getInnerBezier(n, o, p, prec));
         } else {
           ret.push_back(is);
+        }
+
+        auto iSects = nfo->geom.getIntersections(ret.back().geom);
+        if (iSects.size() > 0) {
+          ret.back().geom =
+              ret.back().geom.getSegment(0, iSects.begin()->totalPos);
+        }
+
+        auto iSects2 = nf.geom.getIntersections(ret.back().geom);
+        if (iSects2.size() > 0) {
+          ret.back().geom =
+              ret.back().geom.getSegment(iSects2.begin()->totalPos, 1);
         }
       }
 
       // handle lines where this node is the terminus
       if (partners.size() == 0 && !notCompletelyServed(n)) {
         auto is = getTerminusLine(n, o);
-        if (is.geom.getLength() > 0) {
+        if (is.geom.longerThan(0)) {
           if (prec > 0) {
             ret.push_back(getTerminusBezier(n, o, prec));
           } else {
@@ -303,7 +315,8 @@ Polygon<double> RenderGraph::getConvexFrontHull(const LineNode* n, double d,
 
     return util::geo::buffer(hull, d, pointsPerCircle);
 
-  } else if (fabs(n->pl().fronts()[0].origGeom.getLength() - n->pl().fronts()[1].origGeom.getLength()) < d/2) {
+  } else if (fabs(n->pl().fronts()[0].origGeom.getLength() -
+                  n->pl().fronts()[1].origGeom.getLength()) < d / 2) {
     // for two node fronts of equal size, take average
     std::vector<const PolyLine<double>*> pols;
 
@@ -333,10 +346,13 @@ Polygon<double> RenderGraph::getConvexFrontHull(const LineNode* n, double d,
     return util::geo::buffer(avg, d, pointsPerCircle);
   } else {
     // for two node fronts of different size, take largest
-    if (n->pl().fronts()[0].origGeom.getLength() > n->pl().fronts()[1].origGeom.getLength()) {
-      return util::geo::buffer(n->pl().fronts()[0].origGeom.getLine(), d, pointsPerCircle);
+    if (n->pl().fronts()[0].origGeom.getLength() >
+        n->pl().fronts()[1].origGeom.getLength()) {
+      return util::geo::buffer(n->pl().fronts()[0].origGeom.getLine(), d,
+                               pointsPerCircle);
     } else {
-      return util::geo::buffer(n->pl().fronts()[1].origGeom.getLine(), d, pointsPerCircle);
+      return util::geo::buffer(n->pl().fronts()[1].origGeom.getLine(), d,
+                               pointsPerCircle);
     }
   }
 }

@@ -30,7 +30,7 @@ ConfigReader::ConfigReader() {}
 void ConfigReader::help(const char* bin) const {
   std::cout << std::setfill(' ') << std::left << "loom (part of LOOM) "
             << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
-            << "\n\n(C) " << YEAR << " " << COPY << "\n"
+            << "\n\n(C) 2017-" << YEAR << " " << COPY << "\n"
             << "Authors: " << AUTHORS << "\n\n"
             << "Usage: " << bin << " < graph.json\n\n"
             << "Allowed options:\n\n"

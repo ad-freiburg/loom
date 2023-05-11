@@ -27,9 +27,9 @@ ConfigReader::ConfigReader() {}
 void ConfigReader::help(const char* bin) const {
   std::cout << std::setfill(' ') << std::left << "transitmap (part of LOOM) "
             << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
-            << "\n\n(C) " << YEAR << " " << COPY << "\n"
+            << "\n\n(C) 2017-" << YEAR << " " << COPY << "\n"
             << "Authors: " << AUTHORS << "\n\n"
-            << "Usage: " << bin << " <GTFS FEED>\n\n"
+            << "Usage: " << bin << " < linegraph.json\n\n"
             << "Allowed options:\n\n"
             << "General:\n"
             << std::setw(37) << "  -v [ --version ]"
@@ -123,7 +123,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         help(argv[0]);
         exit(0);
       case 'v':
-        std::cout << "gtfs2graph - (LOOM " << VERSION_FULL << ")" << std::endl;
+        std::cout << "transitmap - (LOOM " << VERSION_FULL << ")" << std::endl;
         exit(0);
       case 1:
         cfg->renderMethod = optarg;

@@ -39,7 +39,7 @@ using shared::linegraph::Station;
 
 typedef RTree<LineEdge*, Line, double> EdgeGeoIdx;
 
-typedef std::map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
+typedef std::unordered_map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
 
 namespace topo {
 

@@ -24,7 +24,19 @@ Node<N, E>* DirGraph<N, E>::addNd(DirNode<N, E>* n) {
 // _____________________________________________________________________________
 template <typename N, typename E>
 Edge<N, E>* DirGraph<N, E>::addEdg(Node<N, E>* from, Node<N, E>* to,
-                                    const E& p) {
+                                   const E& p) {
+  Edge<N, E>* e = Graph<N, E>::getEdg(from, to);
+  if (!e) {
+    e = new Edge<N, E>(from, to, p);
+    from->addEdge(e);
+    to->addEdge(e);
+  }
+  return e;
+}
+
+// _____________________________________________________________________________
+template <typename N, typename E>
+Edge<N, E>* DirGraph<N, E>::addEdg(Node<N, E>* from, Node<N, E>* to, E&& p) {
   Edge<N, E>* e = Graph<N, E>::getEdg(from, to);
   if (!e) {
     e = new Edge<N, E>(from, to, p);

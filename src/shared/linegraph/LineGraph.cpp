@@ -409,8 +409,10 @@ void LineGraph::readFromJson(std::istream* s, bool useWebMercCoords) {
   nlohmann::json j;
   (*s) >> j;
 
-  if (j["type"] == "FeatureCollection")
+  if (j["type"] == "FeatureCollection") {
     readFromGeoJson(j["features"], useWebMercCoords);
+    if (j.count("properties")) _graphProps = j["properties"];
+  }
   if (j["type"] == "Topology")
     readFromTopoJson(j["objects"], j["arcs"], useWebMercCoords);
 }
@@ -1213,7 +1215,7 @@ breakfor:
                                e->getTo()->pl().stops().size()))
         continue;
 
-      if (!e->pl().dontContract() && e->pl().getPolyline().getLength() < d) {
+      if (!e->pl().dontContract() && e->pl().getPolyline().shorterThan(d)) {
         if (e->getOtherNd(n1)->getAdjList().size() > 1 &&
             (n1->pl().stops().size() == 0 || n1->getAdjList().size() > 1) &&
             (n1->pl().stops().size() == 0 ||

@@ -16,7 +16,8 @@ using util::geo::Point;
 LineNodePL::LineNodePL(Point<double> pos) : _pos(pos) {}
 
 // _____________________________________________________________________________
-LineNodePL::LineNodePL(Point<double> pos, size_t comp) : _pos(pos), _comp(comp) {}
+LineNodePL::LineNodePL(Point<double> pos, size_t comp)
+    : _pos(pos), _comp(comp) {}
 
 // _____________________________________________________________________________
 const Point<double>* LineNodePL::getGeom() const { return &_pos; }
@@ -30,7 +31,7 @@ size_t LineNodePL::numConnExcs() const {
 
   for (const auto& conn : _connEx) ret += conn.second.size();
 
-  return ret/2; // exceptions are always stored in both directions
+  return ret / 2;  // exceptions are always stored in both directions
 }
 
 // _____________________________________________________________________________

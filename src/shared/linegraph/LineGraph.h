@@ -22,9 +22,6 @@ typedef util::graph::Edge<LineNodePL, LineEdgePL> LineEdge;
 
 typedef std::pair<LineEdge*, LineEdge*> LineEdgePair;
 
-// typedef util::geo::Grid<LineNode*, util::geo::Point, double> NodeGrid;
-// typedef util::geo::Grid<LineEdge*, util::geo::Line, double> EdgeGrid;
-
 typedef util::geo::RTree<LineNode*, util::geo::Point, double> NodeGrid;
 typedef util::geo::RTree<LineEdge*, util::geo::Line, double> EdgeGrid;
 
@@ -160,11 +157,14 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   void snapOrphanStations();
 
   std::vector<LineGraph> distConnectedComponents(double d, bool write);
-  std::vector<LineGraph> distConnectedComponents(double d, bool write, size_t* offset);
+  std::vector<LineGraph> distConnectedComponents(double d, bool write,
+                                                 size_t* offset);
 
   void fillMissingColors();
 
   void removeDeg1Nodes();
+
+  const nlohmann::json::object_t& getGraphProps() const { return _graphProps; }
 
  private:
   util::geo::Box<double> _bbox;
@@ -190,6 +190,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
 
   NodeGrid _nodeGrid;
   EdgeGrid _edgeGrid;
+
+  nlohmann::json::object_t _graphProps;
 };
 
 }  // namespace linegraph

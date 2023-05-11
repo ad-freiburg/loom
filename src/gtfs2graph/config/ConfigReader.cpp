@@ -34,7 +34,7 @@ void ConfigReader::help(const char* bin) const {
   std::cout
       << std::setfill(' ') << std::left << "gtfs2graph (part of LOOM) "
       << VERSION_FULL << "\n(built " << __DATE__ << " " << __TIME__ << ")"
-      << "\n\n(C) " << YEAR << " " << COPY << "\n"
+      << "\n\n(C) 2017-" << YEAR << " " << COPY << "\n"
       << "Authors: " << AUTHORS << "\n\n"
       << "Usage: " << bin << " <GTFS FEED>\n\n"
       << "Allowed options:\n\n"

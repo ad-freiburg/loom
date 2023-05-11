@@ -14,6 +14,16 @@ PolyLine<T>::PolyLine(const Point<T>& from, const Point<T>& to) {
 
 // _____________________________________________________________________________
 template <typename T>
+PolyLine<T>::PolyLine(const PolyLine<T>& l) : _line(l._line) {
+}
+
+// _____________________________________________________________________________
+template <typename T>
+PolyLine<T>::PolyLine(PolyLine<T>&& l) : _line(std::move(l._line)) {
+}
+
+// _____________________________________________________________________________
+template <typename T>
 PolyLine<T>::PolyLine(const Line<T>& l) : _line(l) {}
 
 // _____________________________________________________________________________
@@ -47,6 +57,12 @@ PolyLine<T> PolyLine<T>::reversed() const {
 // _____________________________________________________________________________
 template <typename T>
 const Line<T>& PolyLine<T>::getLine() const {
+  return _line;
+}
+
+// _____________________________________________________________________________
+template <typename T>
+Line<T>& PolyLine<T>::getLine() {
   return _line;
 }
 
@@ -275,6 +291,18 @@ double PolyLine<T>::distTo(const Point<T>& p) const {
 template <typename T>
 double PolyLine<T>::getLength() const {
   return len(_line);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+bool PolyLine<T>::shorterThan(double d) const {
+  return util::geo::shorterThan(_line, d);
+}
+
+// _____________________________________________________________________________
+template <typename T>
+bool PolyLine<T>::longerThan(double d) const {
+  return util::geo::longerThan(_line, d);
 }
 
 // _____________________________________________________________________________
