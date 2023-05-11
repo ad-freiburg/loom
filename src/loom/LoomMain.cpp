@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
   cr.read(&cfg, argc, argv);
 
   LOGTO(DEBUG, std::cerr) << "Reading graph...";
-  shared::rendergraph::RenderGraph g(5, 5);
+  shared::rendergraph::RenderGraph g(5, 1, 5);
 
   if (cfg.fromDot) {
     g.readFromDot(&std::cin);

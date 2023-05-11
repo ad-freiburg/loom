@@ -457,7 +457,7 @@ int main(int argc, char** argv) {
 
     for (auto optim : optimizers) {
       for (const auto& test : fileTests) {
-        shared::rendergraph::RenderGraph g(5, 5);
+        shared::rendergraph::RenderGraph g(5, 1, 5);
 
         std::ifstream input;
         input.open(test.fname);
@@ -500,7 +500,7 @@ int main(int argc, char** argv) {
     optimizers.push_back(&combOptim);
 
     for (auto optim : optimizers) {
-      shared::rendergraph::RenderGraph g(5, 5);
+      shared::rendergraph::RenderGraph g(5, 1, 5);
 
       std::ifstream input;
       input.open(
@@ -547,7 +547,7 @@ int main(int argc, char** argv) {
       optimizers.push_back(&combOptim);
 
       for (auto optim : optimizers) {
-        shared::rendergraph::RenderGraph g(5, 5);
+        shared::rendergraph::RenderGraph g(5, 1, 5);
 
         std::ifstream input;
         input.open(
@@ -598,7 +598,7 @@ int main(int argc, char** argv) {
       optimizers.push_back(&combOptim);
 
       for (auto optim : optimizers) {
-        shared::rendergraph::RenderGraph g(5, 5);
+        shared::rendergraph::RenderGraph g(5, 1, 5);
 
         std::ifstream input;
         input.open(
@@ -648,7 +648,7 @@ int main(int argc, char** argv) {
 
     for (auto optim : optimizers) {
       for (const auto& test : fileTests) {
-        shared::rendergraph::RenderGraph g(5, 5);
+        shared::rendergraph::RenderGraph g(5, 1, 5);
 
         std::ifstream input;
         input.open(test.fname);
@@ -701,7 +701,7 @@ int main(int argc, char** argv) {
       optimizers.push_back(&combOptim);
 
       for (auto optim : optimizers) {
-        shared::rendergraph::RenderGraph g(5, 5);
+        shared::rendergraph::RenderGraph g(5, 1, 5);
 
         std::ifstream input;
         input.open(

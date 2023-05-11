@@ -29,7 +29,7 @@ struct Config {
 
   double outputPadding = -1;
 
-  double outlineWidth = 2;
+  double outlineWidth = 1;
   std::string outlineColor;
 
   bool renderStations = true;

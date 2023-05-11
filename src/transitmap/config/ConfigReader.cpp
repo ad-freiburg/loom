@@ -46,7 +46,7 @@ void ConfigReader::help(const char* bin) const {
             << "width of a single transit line\n"
             << std::setw(37) << "  --line-spacing arg (=10)"
             << "spacing between transit lines\n"
-            << std::setw(37) << "  --outline-width arg (=2)"
+            << std::setw(37) << "  --outline-width arg (=1)"
             << "width of line outlines\n"
             << std::setw(37) << "  --render-dir-markers"
             << "render line direction markers\n"

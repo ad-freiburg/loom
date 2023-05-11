@@ -58,11 +58,13 @@ int main(int argc, char** argv) {
     for (size_t z : cfg.mvtZooms) {
       double lWidth = cfg.lineWidth;
       double lSpacing = cfg.lineSpacing;
+      double lOutlineWidth = cfg.outlineWidth;
 
       lWidth *= 156543.0 / (1 << z);
       lSpacing *= 156543.0 / (1 << z);
+      lOutlineWidth *= 156543.0 / (1 << z);
 
-      RenderGraph g(lg, lWidth, lSpacing);
+      RenderGraph g(lg, lWidth, lOutlineWidth, lSpacing);
 
       g.contractStrayNds();
       g.smooth(cfg.inputSmoothing);
@@ -90,7 +92,7 @@ int main(int argc, char** argv) {
     exit(1);
 #endif
   } else if (cfg.renderMethod == "svg") {
-    RenderGraph g(cfg.lineWidth, cfg.lineSpacing);
+    RenderGraph g(cfg.lineWidth, cfg.outlineWidth, cfg.lineSpacing);
     if (cfg.fromDot)
       g.readFromDot(&std::cin);
     else

@@ -28,13 +28,16 @@ struct InnerGeom {
 
 class RenderGraph : public shared::linegraph::LineGraph {
  public:
-  RenderGraph() : _defWidth(5), _defSpacing(5){};
-  RenderGraph(double defLineWidth, double defLineSpace)
-      : _defWidth(defLineWidth), _defSpacing(defLineSpace){};
+  RenderGraph() : _defWidth(5), _defOutlineWidth(1), _defSpacing(5){};
+  RenderGraph(double defLineWidth, double defOutlineWidth, double defLineSpace)
+      : _defWidth(defLineWidth),
+        _defOutlineWidth(defOutlineWidth),
+        _defSpacing(defLineSpace){};
 
-  RenderGraph(const shared::linegraph::LineGraph& lg) : RenderGraph(lg, 5, 5){};
+  RenderGraph(const shared::linegraph::LineGraph& lg)
+      : RenderGraph(lg, 5, 1, 5){};
   RenderGraph(const shared::linegraph::LineGraph& lg, double defLineWidth,
-              double defLineSpace);
+              double defOutlineWidth, double defLineSpace);
 
   void writePermutation(const OrderCfg&);
 
@@ -77,7 +80,7 @@ class RenderGraph : public shared::linegraph::LineGraph {
                             const shared::linegraph::LineEdge* e);
 
  private:
-  double _defWidth, _defSpacing;
+  double _defWidth, _defOutlineWidth, _defSpacing;
 
   shared::rendergraph::InnerGeom getInnerBezier(
       const shared::linegraph::LineNode* n,

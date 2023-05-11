@@ -315,10 +315,13 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       PolyLine<double> pl = c.geoms[i].geom;
 
       if (ref.geom.getLength() >
-          (_cfg->lineWidth + _cfg->lineSpacing) * _res * 4) {
-        double off = -(_cfg->lineWidth + _cfg->lineSpacing) * _res *
-                     (static_cast<int>(c.geoms[i].slotFrom) -
-                      static_cast<int>(ref.slotFrom));
+          (_cfg->lineWidth + 2 * _cfg->outlineWidth + _cfg->lineSpacing) *
+              _res * 4) {
+        double off =
+            -(_cfg->lineWidth + _cfg->lineSpacing + 2 * _cfg->outlineWidth) *
+            _res *
+            (static_cast<int>(c.geoms[i].slotFrom) -
+             static_cast<int>(ref.slotFrom));
 
         if (ref.from.edge->getTo() == n) off = -off;
 
@@ -351,7 +354,7 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
       paramsOut["lineCap"] = "butt";
       paramsOut["class"] = getLineClass(c.geoms[i].from.line->id());
       paramsOut["width"] =
-          util::toString((_cfg->outlineWidth + _cfg->lineWidth));
+          util::toString((2 * _cfg->outlineWidth + _cfg->lineWidth));
 
       if (n->pl().getComponent() != std::numeric_limits<uint32_t>::max())
         paramsOut["component"] = util::toString(n->pl().getComponent());
@@ -386,8 +389,9 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
   PolyLine<double> center = *e->pl().getGeom();
 
   double lineW = _cfg->lineWidth;
+  double outlineW = _cfg->outlineWidth;
   double lineSpc = _cfg->lineSpacing;
-  double offsetStep = (lineW + lineSpc) * _res;
+  double offsetStep = (lineW + 2 * outlineW + lineSpc) * _res;
   double oo = outG.getTotalWidth(e);
 
   double o = oo;
@@ -401,7 +405,8 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 
     if (p.getLength() < 0.01) continue;
 
-    double offset = -(o - oo / 2.0 - (_cfg->lineWidth * _res) / 2.0);
+    double offset =
+        -(o - oo / 2.0 - ((2 * outlineW + _cfg->lineWidth) * _res) / 2.0);
 
     p.offsetPerp(offset);
 
@@ -432,7 +437,8 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
     paramsOut["line"] = line->label();
     paramsOut["lineCap"] = "butt";
     paramsOut["class"] = getLineClass(line->id());
-    paramsOut["width"] = util::toString((_cfg->outlineWidth + _cfg->lineWidth));
+    paramsOut["width"] =
+        util::toString((2 * _cfg->outlineWidth + _cfg->lineWidth));
 
     if (e->pl().getComponent() != std::numeric_limits<uint32_t>::max())
       paramsOut["component"] = util::toString(e->pl().getComponent());
