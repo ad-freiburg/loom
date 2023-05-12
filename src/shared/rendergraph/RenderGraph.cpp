@@ -425,7 +425,7 @@ bool RenderGraph::notCompletelyServed(const LineNode* n) {
 // _____________________________________________________________________________
 std::vector<Polygon<double>> RenderGraph::getStopGeoms(
     const LineNode* n, bool tight, size_t pointsPerCircle) const {
-  double d = _defWidth + _defSpacing * 0.8;
+  double d = _defWidth + (2 * _defOutlineWidth + _defSpacing) * 0.8;
   if (notCompletelyServed(n)) {
     // render each stop individually
     auto served = servedLines(n);
@@ -492,6 +492,13 @@ double RenderGraph::getSpacing(const shared::linegraph::LineEdge* e) const {
 }
 
 // _____________________________________________________________________________
+double RenderGraph::getOutlineWidth(
+    const shared::linegraph::LineEdge* e) const {
+  UNUSED(e);
+  return _defOutlineWidth;
+}
+
+// _____________________________________________________________________________
 double RenderGraph::getMaxNdFrontWidth() const {
   double ret = 0;
   for (auto n : getNds()) {
@@ -523,12 +530,12 @@ DPoint RenderGraph::linePosOn(const NodeFront& nf, const LineEdge* e,
                               size_t pos, bool inv, bool origG) const {
   double p;
   if (!inv) {
-    p = (getWidth(e) + 2 * _defOutlineWidth + getSpacing(e)) * pos +
-        (getWidth(e) + 2 * _defOutlineWidth) / 2;
+    p = (getWidth(e) + 2 * getOutlineWidth(e) + getSpacing(e)) * pos +
+        (getWidth(e) + 2 * getOutlineWidth(e)) / 2;
   } else {
-    p = (getWidth(e) + 2 * _defOutlineWidth + getSpacing(e)) *
+    p = (getWidth(e) + 2 * getOutlineWidth(e) + getSpacing(e)) *
             (e->pl().getLines().size() - 1 - pos) +
-        (getWidth(e) + 2 * _defOutlineWidth) / 2;
+        (getWidth(e) + 2 * getOutlineWidth(e)) / 2;
   }
   // use interpolate here directly for speed
   if (origG) {
@@ -777,10 +784,11 @@ std::vector<NodeFront> RenderGraph::getOpenNodeFronts(const LineNode* n) const {
   std::vector<NodeFront> res;
   for (auto nf : n->pl().fronts()) {
     if (util::geo::len(*nf.edge->pl().getGeom()) >
-            (getWidth(nf.edge) + 2 * _defOutlineWidth + getSpacing(nf.edge)) ||
+            (getWidth(nf.edge) + 2 * getOutlineWidth(nf.edge) +
+             getSpacing(nf.edge)) ||
         (nf.edge->getOtherNd(n)->pl().frontFor(nf.edge)->geom.distTo(
              *nf.edge->getOtherNd(n)->pl().getGeom()) >
-         6 * (getWidth(nf.edge) + 2 * _defOutlineWidth +
+         6 * (getWidth(nf.edge) + 2 * getOutlineWidth(nf.edge) +
               getSpacing(nf.edge))) ||
         (nf.edge->getTo()->pl().stops().size() > 0) ||
         (nf.edge->getFrom()->pl().stops().size() > 0)) {
@@ -797,10 +805,11 @@ std::vector<NodeFront> RenderGraph::getClosedNodeFronts(
   std::vector<NodeFront> res;
   for (auto nf : n->pl().fronts()) {
     if (!(util::geo::len(*nf.edge->pl().getGeom()) >
-          (getWidth(nf.edge) + 2 * _defOutlineWidth + getSpacing(nf.edge))) &&
+          (getWidth(nf.edge) + 2 * getOutlineWidth(nf.edge) +
+           getSpacing(nf.edge))) &&
         !(nf.edge->getOtherNd(n)->pl().frontFor(nf.edge)->geom.distTo(
               *nf.edge->getOtherNd(n)->pl().getGeom()) >
-          6 * (getWidth(nf.edge) + 2 * _defOutlineWidth +
+          6 * (getWidth(nf.edge) + 2 * getOutlineWidth(nf.edge) +
                getSpacing(nf.edge))) &&
         (nf.edge->getTo()->pl().stops().size() == 0) &&
         (nf.edge->getFrom()->pl().stops().size() == 0)) {

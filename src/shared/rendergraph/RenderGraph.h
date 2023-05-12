@@ -55,6 +55,7 @@ class RenderGraph : public shared::linegraph::LineGraph {
 
   double getWidth(const shared::linegraph::LineEdge* e) const;
   double getSpacing(const shared::linegraph::LineEdge* e) const;
+  double getOutlineWidth(const shared::linegraph::LineEdge* e) const;
 
   double getMaxNdFrontWidth(const shared::linegraph::LineNode* n) const;
   double getMaxNdFrontWidth() const;

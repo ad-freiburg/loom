@@ -83,7 +83,8 @@ void GraphBuilder::dropOverlappingStations(RenderGraph* graph) {
     tree.add(geoms[n], n);
   }
 
-  double PAD = graph->getWidth(0) + graph->getSpacing(0);
+  double PAD =
+      graph->getWidth(0) + graph->getSpacing(0) + 2 * graph->getOutlineWidth(0);
 
   for (auto n : stations) {
     if (!n->pl().stops().size()) continue;
@@ -111,7 +112,8 @@ void GraphBuilder::dropOverlappingStations(RenderGraph* graph) {
 void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
   // now, look at the nodes entire front geometries and expand them
   // until nothing overlaps
-  double step = (g->getWidth(0) + g->getSpacing(0)) / 10;
+  double step =
+      (g->getWidth(0) + g->getSpacing(0) + 2 * g->getOutlineWidth(0)) / 10;
 
   while (true) {
     bool stillFree = false;
@@ -127,8 +129,8 @@ void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
                         .getOrthoLineAtDist(d, g->getTotalWidth(f->edge));
 
           f->edge->pl().setGeom(PolyLine<double>(*f->edge->pl().getGeom())
-                              .getSegmentAtDist(0, d)
-                              .getLine());
+                                    .getSegmentAtDist(0, d)
+                                    .getLine());
 
         } else {
           double d = fmin(step, len - MINL + 1);
@@ -136,12 +138,11 @@ void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
                         .getOrthoLineAtDist(d, g->getTotalWidth(f->edge));
 
           f->edge->pl().setGeom(PolyLine<double>(*f->edge->pl().getGeom())
-                              .getSegmentAtDist(d, len)
-                              .getLine());
+                                    .getSegmentAtDist(d, len)
+                                    .getLine());
 
           f->geom.reverse();
         }
-
       }
     }
     if (!stillFree) break;
@@ -169,16 +170,24 @@ std::set<NodeFront*> GraphBuilder::nodeGetOverlappingFronts(
       if (n->pl().stops().size() && !g->notCompletelyServed(n)) {
         maxNfDist = .5 * g->getMaxNdFrontWidth(n);
         double fac = 0;
-        if (_cfg->tightStations) maxNfDist = g->getWidth(0) + g->getSpacing(0);
-        overlap = nodeFrontsOverlap(
-            g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
+        if (_cfg->tightStations)
+          maxNfDist =
+              g->getWidth(0) + g->getSpacing(0) + 2 * g->getOutlineWidth(0);
+        overlap =
+            nodeFrontsOverlap(g, fa, fb,
+                              (g->getWidth(fa.edge) + g->getSpacing(fa.edge) +
+                               2 * g->getOutlineWidth(fa.edge)) *
+                                  fac);
       } else {
         size_t numShr = g->getSharedLines(fa.edge, fb.edge).size();
         double fac = 5;
         if (!numShr) fac = 1;
 
         overlap = nodeFrontsOverlap(
-            g, fa, fb, (g->getWidth(fa.edge) + g->getSpacing(fa.edge)) * fac);
+            g, fa, fb,
+            (g->getWidth(fa.edge) + 2 * g->getOutlineWidth(fa.edge) +
+             g->getSpacing(fa.edge)) *
+                fac);
       }
 
       if (overlap) {

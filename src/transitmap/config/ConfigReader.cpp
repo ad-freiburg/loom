@@ -4,16 +4,18 @@
 
 #include <float.h>
 #include <getopt.h>
+
 #include <exception>
 #include <iostream>
 #include <string>
+
 #include "transitmap/_config.h"
 #include "transitmap/config/ConfigReader.h"
-#include "util/log/Log.h"
 #include "util/String.h"
+#include "util/log/Log.h"
 
-using transitmapper::config::ConfigReader;
 using std::exception;
+using transitmapper::config::ConfigReader;
 
 static const char* YEAR = &__DATE__[7];
 static const char* COPY =
@@ -202,6 +204,18 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         exit(1);
         break;
     }
+  }
+
+  if (cfg->lineWidth < 0) {
+    std::cerr << "Error: line width " << cfg->lineWidth << " is negative!"
+              << std::endl;
+    exit(1);
+  }
+
+  if (cfg->outlineWidth < 0) {
+    std::cerr << "Error: outline width " << cfg->outlineWidth << " is negative!"
+              << std::endl;
+    exit(1);
   }
 
   for (auto range : util::split(zoom, ',')) {

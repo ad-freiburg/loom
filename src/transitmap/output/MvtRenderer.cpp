@@ -347,19 +347,21 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
         }
       }
 
-      Params paramsOut;
-      paramsOut["color"] = "000000";
-      paramsOut["line-color"] = c.geoms[i].from.line->color();
-      paramsOut["line"] = c.geoms[i].from.line->label();
-      paramsOut["lineCap"] = "butt";
-      paramsOut["class"] = getLineClass(c.geoms[i].from.line->id());
-      paramsOut["width"] =
-          util::toString((2 * _cfg->outlineWidth + _cfg->lineWidth));
+      if (_cfg->outlineWidth > 0) {
+        Params paramsOut;
+        paramsOut["color"] = "000000";
+        paramsOut["line-color"] = c.geoms[i].from.line->color();
+        paramsOut["line"] = c.geoms[i].from.line->label();
+        paramsOut["lineCap"] = "butt";
+        paramsOut["class"] = getLineClass(c.geoms[i].from.line->id());
+        paramsOut["width"] =
+            util::toString((2.0 * _cfg->outlineWidth + _cfg->lineWidth));
 
-      if (n->pl().getComponent() != std::numeric_limits<uint32_t>::max())
-        paramsOut["component"] = util::toString(n->pl().getComponent());
+        if (n->pl().getComponent() != std::numeric_limits<uint32_t>::max())
+          paramsOut["component"] = util::toString(n->pl().getComponent());
 
-      addFeature({pl.getLine(), "inner-connections", paramsOut});
+        addFeature({pl.getLine(), "inner-connections", paramsOut});
+      }
 
       Params params;
       params["color"] = c.geoms[i].from.line->color();
@@ -431,19 +433,21 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
       oCss = lo.style.get().getOutlineCss();
     }
 
-    Params paramsOut;
-    paramsOut["color"] = "000000";
-    paramsOut["line-color"] = line->color();
-    paramsOut["line"] = line->label();
-    paramsOut["lineCap"] = "butt";
-    paramsOut["class"] = getLineClass(line->id());
-    paramsOut["width"] =
-        util::toString((2 * _cfg->outlineWidth + _cfg->lineWidth));
+    if (_cfg->outlineWidth > 0) {
+      Params paramsOut;
+      paramsOut["color"] = "000000";
+      paramsOut["line-color"] = line->color();
+      paramsOut["line"] = line->label();
+      paramsOut["lineCap"] = "butt";
+      paramsOut["class"] = getLineClass(line->id());
+      paramsOut["width"] =
+          util::toString((2.0 * _cfg->outlineWidth + _cfg->lineWidth));
 
-    if (e->pl().getComponent() != std::numeric_limits<uint32_t>::max())
-      paramsOut["component"] = util::toString(e->pl().getComponent());
+      if (e->pl().getComponent() != std::numeric_limits<uint32_t>::max())
+        paramsOut["component"] = util::toString(e->pl().getComponent());
 
-    addFeature({p.getLine(), "lines", paramsOut});
+      addFeature({p.getLine(), "lines", paramsOut});
+    }
 
     Params params;
     params["color"] = line->color();
@@ -466,7 +470,8 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 
 // _____________________________________________________________________________
 void MvtRenderer::addFeature(const MvtLineFeature& feature) {
-  double w = (_cfg->lineWidth + _cfg->lineSpacing + 2 * _cfg->lineWidth) * _res;
+  double w =
+      (_cfg->lineWidth + _cfg->lineSpacing + 2 * _cfg->outlineWidth) * _res;
   const auto& box = util::geo::pad(util::geo::getBoundingBox(feature.line), w);
   size_t swX = gridC(box.getLowerLeft().getX());
   size_t swY = gridC(box.getLowerLeft().getY());
@@ -540,6 +545,11 @@ void MvtRenderer::printFeature(const PolyLine<double>& pl, size_t z, size_t x,
                                std::map<std::string, size_t>& vals) {
   const auto& l = pl.getLine();
   if (l.size() < 2) return;
+
+  // skip zero-width geometries
+  if ((layer->name() == "lines" || layer->name() == "inner-connections") &&
+      params.count("width") && params.find("width")->second == "0")
+    return;
 
   double tw = (WEB_MERC_EXT * 2.0) / static_cast<double>(1 << z);
 
