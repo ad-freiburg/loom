@@ -42,6 +42,8 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
   LineGraph() = default;
   LineGraph(const LineGraph& other) = delete;
   void operator=(const LineGraph& other) = delete;
+  LineGraph(LineGraph& other) = delete;
+  void operator=(LineGraph& other) = delete;
 
   LineGraph(LineGraph&& other) {
     _bbox = other._bbox;
@@ -50,7 +52,11 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
     _nodeGrid = std::move(other._nodeGrid);
     _edgeGrid = std::move(other._edgeGrid);
 
-    _nodes = other._nodes;
+    _graphProps = std::move(other._graphProps);
+
+    _nodes = std::move(other._nodes);
+
+    // important to prevent deletion
     other._nodes.clear();
   }
 
@@ -61,7 +67,11 @@ class LineGraph : public util::graph::UndirGraph<LineNodePL, LineEdgePL> {
     _nodeGrid = std::move(other._nodeGrid);
     _edgeGrid = std::move(other._edgeGrid);
 
-    _nodes = other._nodes;
+    _graphProps = std::move(other._graphProps);
+
+    _nodes = std::move(other._nodes);
+
+    // important to prevent deletion
     other._nodes.clear();
     return *this;
   }

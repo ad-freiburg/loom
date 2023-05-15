@@ -336,7 +336,7 @@ int main(int argc, char** argv) {
     double curDist = avgDist;
 
     size_t tries = 0;
-    size_t MAX_TRIES = 30;
+    size_t MAX_TRIES = 10;
 
     LOGTO(DEBUG, std::cerr) << "Average adj. node distance is " << avgDist;
 

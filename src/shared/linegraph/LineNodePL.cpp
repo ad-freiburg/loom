@@ -173,7 +173,15 @@ void LineNodePL::addFront(const NodeFront& f) {
 }
 
 // _____________________________________________________________________________
+void LineNodePL::setNotServed(const NotServedLines& notServed) {
+  _notServed = notServed;
+}
+
+// _____________________________________________________________________________
 void LineNodePL::addLineNotServed(const Line* r) { _notServed.insert(r); }
+
+// _____________________________________________________________________________
+void LineNodePL::delLineNotServed(const Line* r) { _notServed.erase(r); }
 
 // _____________________________________________________________________________
 bool LineNodePL::lineServed(const Line* r) const {

@@ -48,9 +48,9 @@ void RestrInferrer::init() {
 
   // copy turn restrictions from original graph
   for (auto nd : _tg->getNds()) {
-    for (auto ex : nd->pl().getConnExc()) {
+    for (const auto& ex : nd->pl().getConnExc()) {
       auto line = ex.first;
-      for (auto exPair : ex.second) {
+      for (const auto& exPair : ex.second) {
         const LineEdge* edgeFr = exPair.first;
 
         for (RestrEdge* rEdgeFr : _eMap[edgeFr]) {
@@ -70,11 +70,14 @@ void RestrInferrer::init() {
 size_t RestrInferrer::infer(const OrigEdgs& origEdgs) {
   // delete all existing restrictions
 
-  for (auto nd : _tg->getNds()) {
-    nd->pl().clearConnExc();
-  }
+  for (auto nd : _tg->getNds()) nd->pl().clearConnExc();
 
   addHndls(origEdgs);
+
+  // util::geo::output::GeoGraphJsonOutput out;
+  // std::ofstream outs;
+  // outs.open("restr_graph.json");
+  // out.print(_rg, outs);
 
   size_t ret = 0;
 
@@ -119,16 +122,21 @@ size_t RestrInferrer::infer(const OrigEdgs& origEdgs) {
         for (auto edg2 : nd->getAdjList()) {
           if (edg1 == edg2) continue;
           if (edg2->pl().hasLine(lo1.line)) otherOccs++;
-          if (edg2->pl().hasLine(lo1.line) && (nd->pl().connOccurs(lo1.line, edg1, edg2) || nd->pl().connOccurs(lo1.line, edg2, edg1))) otherCons++;
+          if (edg2->pl().hasLine(lo1.line) &&
+              (nd->pl().connOccurs(lo1.line, edg1, edg2) ||
+               nd->pl().connOccurs(lo1.line, edg2, edg1)))
+            otherCons++;
         }
 
-        // everything ok, or there really isn't an edge we could continue
+        // everything ok, or there really isn't an edge we could continue to
         // into
         if (otherCons > 0 || otherOccs == 0) continue;
 
         // else, delete all exceptions comming from this edge for this line
         for (auto edg2 : nd->getAdjList()) {
-          LOGTO(DEBUG, std::cerr) << "Deleting exception for line " << lo1.line->label() << " from edge " << edg1 << " to " << edg2 << " at node " << nd;
+          LOGTO(DEBUG, std::cerr)
+              << "Deleting exception for line " << lo1.line->label()
+              << " from edge " << edg1 << " to " << edg2 << " at node " << nd;
           nd->pl().delConnExc(lo1.line, edg1, edg2);
         }
       }
@@ -354,8 +362,8 @@ bool RestrInferrer::check(const Line* r, const LineEdge* edg1,
   // only return true below if cost - curD < maxL <=> cost < curD + maxL
   // + epsilon to avoid integer rounding issues in the < comparison below
   double eps = 0.1;
-  CostFunc cFunc(r, curD + _cfg->maxLengthDev + eps,
-                 _cfg->turnInferFullTurnPen, _cfg->fullTurnAngle);
+  CostFunc cFunc(r, curD + _cfg->maxLengthDev + eps, _cfg->turnInferFullTurnPen,
+                 _cfg->fullTurnAngle);
 
   return EDijkstra::shortestPath(from, to, cFunc) - curD < _cfg->maxLengthDev;
 }

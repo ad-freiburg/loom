@@ -1057,6 +1057,23 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
 
   std::vector<std::pair<const Line*, std::pair<LineNode*, LineNode*>>> ex;
 
+  auto lineAdjA = servedLines(a);
+  auto lineAdjB = servedLines(b);
+
+  NotServedLines notServedNew;
+
+  for (const auto& l : lineAdjA) {
+    if (!a->pl().lineServed(l) && (!b->pl().lineServed(l) || !lineAdjB.count(l) )) {
+      notServedNew.insert(l);
+    }
+  }
+
+  for (const auto& l : lineAdjB) {
+    if (!b->pl().lineServed(l) && (!a->pl().lineServed(l) || !lineAdjA.count(l) )) {
+      notServedNew.insert(l);
+    }
+  }
+
   if (eConn) {
     for (auto& ex : a->pl().getConnExc()) {
       auto line = ex.first;
@@ -1105,11 +1122,13 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
             auto toNd = to->getOtherNd(b);
             auto exA = getEdg(b, frNd);
             auto exB = getEdg(b, toNd);
-            if (exA && exB && exA->pl().hasLine(lo.line) && exB->pl().hasLine(lo.line) && lineCtd(exA, exB, lo.line))
+            if (exA && exB && exA->pl().hasLine(lo.line) &&
+                exB->pl().hasLine(lo.line) && lineCtd(exA, exB, lo.line))
               continue;
             exA = getEdg(a, frNd);
             exB = getEdg(a, toNd);
-            if (exA && exB && exA->pl().hasLine(lo.line) && exB->pl().hasLine(lo.line) && lineCtd(exA, exB, lo.line))
+            if (exA && exB && exA->pl().hasLine(lo.line) &&
+                exB->pl().hasLine(lo.line) && lineCtd(exA, exB, lo.line))
               continue;
             ex.push_back({lo.line, {frNd, toNd}});
           }
@@ -1171,6 +1190,8 @@ LineNode* LineGraph::mergeNds(LineNode* a, LineNode* b) {
                        getEdg(b, newEx.second.second));
   }
 
+  b->pl().setNotServed(notServedNew);
+
   return b;
 }
 
@@ -1219,10 +1240,14 @@ breakfor:
         if (e->getOtherNd(n1)->getAdjList().size() > 1 &&
             (n1->pl().stops().size() == 0 || n1->getAdjList().size() > 1) &&
             (n1->pl().stops().size() == 0 ||
-             e->getOtherNd(n1)->pl().stops().size() == 0)) {
-          // contractEdge(e);
-          cands.push_back({e->getFrom()->getDeg() + e->getTo()->getDeg(), e});
-          // goto breakfor;
+             e->getOtherNd(n1)->pl().stops().size() == 0 ||
+             n1->pl().stops().front().name ==
+                 e->getOtherNd(n1)->pl().stops().front().name)) {
+          // first contract edges with lower number of adjacent nodes,
+          // on ties use shorter edge
+          cands.push_back({e->getFrom()->getDeg() + e->getTo()->getDeg() +
+                               e->pl().getPolyline().getLength(),
+                           e});
         }
       }
     }
@@ -1525,8 +1550,6 @@ std::vector<LineGraph> LineGraph::distConnectedComponents(double d, bool write,
         if (write) edg->pl().setComponent(idOffset + comp);
         if (edg->pl().getLines().size() == 0) {
           continue;
-        } else {
-          tg->edgeDel(nm[nd], edg);
         }
 
         em[edg] = tg->addEdg(nm[edg->getFrom()], nm[edg->getTo()], edg->pl());

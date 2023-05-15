@@ -19,6 +19,11 @@ namespace graph {
 template <typename N, typename E>
 class Graph {
  public:
+  Graph() {} ;
+  Graph(const Graph& g) = delete;
+  Graph(Graph& g) = delete;
+  void operator=(const Graph& other) = delete;
+  void operator=(Graph& other) = delete;
   virtual ~Graph();
   virtual Node<N, E>* addNd() = 0;
   virtual Node<N, E>* addNd(const N& pl) = 0;

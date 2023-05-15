@@ -333,7 +333,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS,
       }
 
       // now check all affected nodes for artifact edges (= edges connecting
-      // two deg != 1 nodes under the segment length, they would otherwise
+      // two deg > 2 nodes under the segment length, they would otherwise
       // never be collapsed because they have to collapse into themself)
 
       for (const auto& a : affectedNodes) {
@@ -416,7 +416,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS,
       combineEdges(n->getAdjList().front(), n->getAdjList().back(), n, &tgNew);
     }
 
-    // remove edge artifacts 2 times, because an artifact removal
+    // remove edge artifacts as long as possible, because an artifact removal
     // might introduce another artifact if we fold edges
     bool found;
     do {
@@ -432,7 +432,9 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS,
 
           auto to = e->getTo();
 
-          if (e->pl().getPolyline().shorterThan(maxD(from, to, dCut))) {
+          if (util::geo::dist(*from->pl().getGeom(), *to->pl().getGeom()) <
+                  maxD(from, to, dCut) &&
+              e->pl().getPolyline().shorterThan(maxD(from, to, dCut))) {
             for (auto* oldE : from->getAdjList()) {
               if (e == oldE) continue;
               auto ex = tgNew.getEdg(oldE->getOtherNd(from), to);
@@ -445,20 +447,31 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS,
               }
             }
 
-            // if the from has degree 1, and the to node degree 2,
-            // merge in the direction of from to avoid shortening
-            // terminus lines
+            // don't contract cases where
+            //   1) one of the nodes is a terminus, the other is degree 2,
+            //      and the lines on both edges match
+            //   2) both nodes are degree 2 nodes, and the lines on the three
+            //      edges match
+            // this is to avoid deleting edges that are left during the node 2
+            // contraction phase above to avoid too long edges (resulting in
+            // line creep)
             if (from->getDeg() == 1 && to->getDeg() == 2) {
-              if (combineNodes(to, from, &tgNew)) {
-                skip.insert(to);
-                found = true;
-                break;
-              }
-            } else {
-              if (combineNodes(from, to, &tgNew)) {
-                found = true;
-                break;
-              }
+              if (lineEq(to->getAdjList().front(), to->getAdjList().back()))
+                continue;
+            } else if (from->getDeg() == 2 && to->getDeg() == 1) {
+              if (lineEq(from->getAdjList().front(), from->getAdjList().back()))
+                continue;
+              continue;
+            } else if (from->getDeg() == 2 && to->getDeg() == 2) {
+              if (lineEq(from->getAdjList().front(),
+                         from->getAdjList().back()) &&
+                  lineEq(to->getAdjList().front(), to->getAdjList().back()))
+                continue;
+            }
+
+            if (combineNodes(from, to, &tgNew)) {
+              found = true;
+              break;
             }
           }
         }
@@ -997,51 +1010,88 @@ bool MapConstructor::cleanUpGeoms() {
 
 // _____________________________________________________________________________
 void MapConstructor::removeOrphanLines() {
-  std::vector<LineEdge*> toDelEdgs;
+  bool found;
 
-  for (auto n : _g->getNds()) {
-    for (auto e : n->getAdjList()) {
-      if (e->getFrom() != n) continue;
+  do {
+    found = false;
+    std::vector<LineEdge*> toDelEdgs;
 
-      std::vector<const shared::linegraph::Line*> toDel;
+    for (auto n : _g->getNds()) {
+      for (auto e : n->getAdjList()) {
+        if (e->getFrom() != n) continue;
 
-      for (const auto& lo : e->pl().getLines()) {
-        if ((e->getFrom()->pl().stops().size() == 0 &&
-             LineGraph::terminatesAt(e, e->getFrom(), lo.line)) ||
-            (e->getTo()->pl().stops().size() == 0 &&
-             LineGraph::terminatesAt(e, e->getTo(), lo.line))) {
-          toDel.push_back(lo.line);
+        std::vector<const shared::linegraph::Line*> toDel;
+
+        for (const auto& lo : e->pl().getLines()) {
+          if (((e->getFrom()->pl().stops().size() == 0 ||
+                !e->getFrom()->pl().lineServed(lo.line)) &&
+               LineGraph::terminatesAt(e, e->getFrom(), lo.line)) ||
+              ((e->getTo()->pl().stops().size() == 0 ||
+                !e->getTo()->pl().lineServed(lo.line)) &&
+               LineGraph::terminatesAt(e, e->getTo(), lo.line))) {
+            toDel.push_back(lo.line);
+          }
+        }
+
+        // if the edge would run empty, and isnt a stump, dont delete
+        if (e->getFrom()->getDeg() != 1 && e->getTo()->getDeg() != 1 &&
+            toDel.size() == e->pl().getLines().size()) {
+          continue;
+        }
+
+        // check if this edge was used as a path to connect two edges with this
+        // line
+        for (const auto& del : toDel) {
+          for (auto e2 : n->getAdjList()) {
+            if (e == e2) continue;
+            for (auto e3 : n->getAdjList()) {
+              if (e3 == e2) continue;
+              if (LineGraph::lineCtd(e, e2, del) &&
+                  LineGraph::lineCtd(e, e3, del) &&
+                  !LineGraph::lineCtd(e2, e3, del)) {
+                n->pl().delConnExc(del, e2, e3);
+              }
+            }
+          }
+
+          // clear restrictions
+          for (auto other : e->getFrom()->getAdjList())
+            e->getFrom()->pl().delConnExc(del, e, other);
+          for (auto other : e->getTo()->getAdjList())
+            e->getTo()->pl().delConnExc(del, e, other);
+
+          e->pl().delLine(del);
+          found = true;
+        }
+
+        // if the edge runs empty, delete it
+        if (e->pl().getLines().size() == 0) toDelEdgs.push_back(e);
+      }
+
+      // del removed lines which were marked served
+      std::vector<const shared::linegraph::Line*> notServedToDel;
+      std::set<const shared::linegraph::Line*> adjLines;
+      for (auto e : n->getAdjList()) {
+        for (auto l : e->pl().getLines()) {
+          adjLines.insert(l.line);
         }
       }
-
-      // if the edge would run empty, and isnt a stump, dont delete
-      if (e->getFrom()->getDeg() != 1 && e->getTo()->getDeg() != 1 &&
-          toDel.size() == e->pl().getLines().size()) {
-        continue;
+      for (auto notServed : n->pl().getLinesNotServed()) {
+        if (!adjLines.count(notServed)) notServedToDel.push_back(notServed);
       }
 
-      for (const auto& del : toDel) {
-        // clear restrictions
-        for (auto other : e->getFrom()->getAdjList())
-          e->getFrom()->pl().delConnExc(del, e, other);
-        for (auto other : e->getTo()->getAdjList())
-          e->getTo()->pl().delConnExc(del, e, other);
-        e->pl().delLine(del);
-      }
-
-      // if the edge runs empty, delete it
-      if (e->pl().getLines().size() == 0) toDelEdgs.push_back(e);
+      for (auto l : notServedToDel) n->pl().delLineNotServed(l);
     }
-  }
 
-  for (auto e : toDelEdgs) _g->delEdg(e->getFrom(), e->getTo());
+    for (auto e : toDelEdgs) _g->delEdg(e->getFrom(), e->getTo());
 
-  std::vector<LineNode*> toDelNds;
-  for (auto nd : _g->getNds()) {
-    if (nd->getDeg() == 0) toDelNds.push_back(nd);
-  }
+    std::vector<LineNode*> toDelNds;
+    for (auto nd : _g->getNds()) {
+      if (nd->getDeg() == 0) toDelNds.push_back(nd);
+    }
 
-  for (auto nd : toDelNds) _g->delNd(nd);
+    for (auto nd : toDelNds) _g->delNd(nd);
+  } while (found);
 }
 
 // _____________________________________________________________________________

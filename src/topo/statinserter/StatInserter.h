@@ -44,9 +44,10 @@ typedef std::unordered_map<const LineEdge*, std::set<const LineEdge*>> OrigEdgs;
 namespace topo {
 
 struct StationOcc {
-  Station station;
+  std::vector<Station> stations;
   std::set<const LineEdge*> edges;
   std::set<const shared::linegraph::Line*> lines;
+  std::vector<DPoint> geom;
 };
 
 struct StationCand {
@@ -86,13 +87,17 @@ class StatInserter {
   DBox bbox() const;
   EdgeGeoIdx geoIndex();
 
-  static double candScore(const StationCand& c);
+  double candScore(const StationCand& c);
 
   std::pair<size_t, size_t> served(
       const std::vector<LineEdge*>& adj,
       const std::set<const LineEdge*>& toServe,
       const std::set<const shared::linegraph::Line*>& linesToServe,
       const OrigEdgs& origEdgs);
+
+  std::set<const shared::linegraph::Line*> wronglyServedLines(
+    const std::vector<LineEdge*>& adj,
+    const std::set<const shared::linegraph::Line*>& linesToServe);
 
   StationOcc unserved(const std::vector<LineEdge*>& adj,
                       const StationOcc& stationOcc, const OrigEdgs& origEdgs);
@@ -101,7 +106,7 @@ class StatInserter {
 
   void edgeRpl(LineNode* n, const LineEdge* oldE, const LineEdge* newE);
 
-  std::vector<std::vector<StationOcc>> _statClusters;
+  std::vector<StationOcc> _statClusters;
 };
 
 }  // namespace topo

@@ -367,12 +367,14 @@ std::vector<util::geo::Polygon<double>> RenderGraph::getIndStopPolys(
   double pointsPerCircle = 32;
   std::vector<util::geo::Polygon<double>> retPolys;
 
-  std::vector<std::pair<size_t, const LineEdge*>> orderedEdgs;
+  std::vector<std::pair<std::pair<size_t, size_t>, const LineEdge*>> orderedEdgs;
   for (auto e : n->getAdjList()) {
-    size_t unserved = 0;
+    size_t wronglyServed = 0;
+    size_t correctlyServed = 0;
     for (auto lo : e->pl().getLines())
-      if (!served.count(lo.line)) unserved++;
-    orderedEdgs.push_back({unserved, e});
+      if (!served.count(lo.line)) wronglyServed++;
+      else correctlyServed++;
+    orderedEdgs.push_back({{-correctlyServed, wronglyServed}, e});
   }
 
   std::sort(orderedEdgs.begin(), orderedEdgs.end());
@@ -727,14 +729,15 @@ std::vector<NodeFront> RenderGraph::getNextMetaNodeCand() const {
 bool RenderGraph::isClique(std::set<const LineNode*> potClique) const {
   if (potClique.size() < 2) return false;
 
-  for (const LineNode* a : potClique) {
-    for (const LineNode* b : potClique) {
-      if (util::geo::dist(*a->pl().getGeom(), *b->pl().getGeom()) >
-          (_defWidth + _defSpacing) * 10) {
-        return false;
-      }
-    }
-  }
+  // TODO: make this dependent on line bundle widths or drop completely
+  // for (const LineNode* a : potClique) {
+    // for (const LineNode* b : potClique) {
+      // if (util::geo::dist(*a->pl().getGeom(), *b->pl().getGeom()) >
+          // (_defWidth + 2 * _defOutlineWidth +_defSpacing) * 10) {
+        // return false;
+      // }
+    // }
+  // }
 
   std::set<const LineNode*> periphery;
 

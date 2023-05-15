@@ -89,7 +89,11 @@ class LineNodePL : util::geograph::GeoNodePL<double> {
                   const LineEdge* edgeB) const;
 
   void addLineNotServed(const Line* r);
+  void delLineNotServed(const Line* r);
   bool lineServed(const Line* r) const;
+  void setNotServed(const NotServedLines& notServed);
+
+  const NotServedLines& getLinesNotServed() { return _notServed; }
 
   void clearConnExc();
 

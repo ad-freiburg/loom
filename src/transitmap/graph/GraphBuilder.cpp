@@ -147,6 +147,41 @@ void GraphBuilder::expandOverlappinFronts(RenderGraph* g) {
     }
     if (!stillFree) break;
   }
+
+  // for (auto n : g->getNds()) {
+    // std::vector<util::geo::DLine> lines;
+    // for (size_t i = 0; i < n->pl().fronts().size(); ++i) {
+      // const NodeFront& f = n->pl().fronts()[i];
+      // lines.push_back(f.geom.getLine());
+    // }
+
+    // auto hull = util::geo::convexHull(lines);
+
+    // for (size_t i = 0; i < n->pl().fronts().size(); ++i) {
+      // NodeFront& f = n->pl().fronts()[i];
+
+      // auto isects = PolyLine<double>(*f.edge->pl().getGeom()).getIntersections(hull.getOuter());
+
+      // if (isects.size() == 0) continue;
+
+      // if (f.edge->getTo() == n) {
+        // f.geom = PolyLine<double>(*f.edge->pl().getGeom())
+                      // .getOrthoLineAt(isects.rbegin()->totalPos, g->getTotalWidth(f.edge));
+
+        // f.edge->pl().setGeom(PolyLine<double>(*f.edge->pl().getGeom())
+                                  // .getSegment(0, isects.rbegin()->totalPos)
+                                  // .getLine());
+      // } else {
+        // f.geom = PolyLine<double>(*f.edge->pl().getGeom())
+                      // .getOrthoLineAt(isects.begin()->totalPos, g->getTotalWidth(f.edge));
+
+        // f.edge->pl().setGeom(PolyLine<double>(*f.edge->pl().getGeom())
+                                  // .getSegment(isects.begin()->totalPos, 1)
+                                  // .getLine());
+        // f.geom.reverse();
+      // }
+    // }
+  // }
 }
 
 // _____________________________________________________________________________
