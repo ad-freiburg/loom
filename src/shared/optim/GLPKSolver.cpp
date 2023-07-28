@@ -23,7 +23,7 @@ GLPKSolver::GLPKSolver(DirType dir)
       _status(INF),
       _timeLimit(std::numeric_limits<int>::max()) {
   const char* ver = glp_version();
-  LOGTO(INFO, std::cerr) << "Creating GLPK solver v" << ver << " instance...";
+  LOGTO(DEBUG, std::cerr) << "Creating GLPK solver v" << ver << " instance...";
 
   glp_term_hook(termHook, &_termBuf);
   glp_error_hook(errorHook, this);
@@ -256,7 +256,7 @@ int GLPKSolver::termHook(void* info, const char* str) {
   for (auto ch : s) {
     if (ch == '\n') {
       std::string trimmed = util::ltrim(*buff);
-      if (trimmed.size()) LOGTO(INFO, std::cerr) << trimmed;
+      if (trimmed.size()) LOGTO(DEBUG, std::cerr) << trimmed;
       buff->clear();
     } else {
       buff->push_back(ch);

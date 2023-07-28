@@ -62,11 +62,11 @@ double ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
         << "No solution found for ILP problem (most likely because of a time "
            "limit)!";
   } else {
-    LOGTO(INFO, std::cerr) << "(stats) ILP obj = " << lp->getObjVal();
-    LOGTO(INFO, std::cerr) << "(stats) ILP build time = " << buildT << " ms";
-    LOGTO(INFO, std::cerr) << "(stats) ILP solve time = " << solveT << " ms";
+    LOGTO(DEBUG, std::cerr) << "(stats) ILP obj = " << lp->getObjVal();
+    LOGTO(DEBUG, std::cerr) << "(stats) ILP build time = " << buildT << " ms";
+    LOGTO(DEBUG, std::cerr) << "(stats) ILP solve time = " << solveT << " ms";
     if (status == shared::optim::SolveType::OPTIM)
-      LOGTO(INFO, std::cerr) << "(stats) (which is optimal)";
+      LOGTO(DEBUG, std::cerr) << "(stats) (which is optimal)";
 
     getConfigurationFromSolution(lp, hc, g);
   }

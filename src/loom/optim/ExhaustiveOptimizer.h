@@ -24,6 +24,7 @@ class ExhaustiveOptimizer : public Optimizer {
   virtual double optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                            shared::rendergraph::HierarOrderCfg* c,
                            size_t depth, OptResStats& stats) const;
+  virtual std::string getName() const { return "exhaustive";}
 
  protected:
   OptGraphScorer _optScorer;

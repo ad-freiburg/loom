@@ -55,7 +55,13 @@ COINSolver::COINSolver(DirType dir)
 
   // use or own msghandler which outputs to stderr, set loglevel of CBC (=0) to
   // normal (=1)
-  _msgHandler.setLogLevel(0, 1);
+
+  _msgHandler.setLogLevel(0, 0);
+
+  // set log level based on our own LOGLEVEL
+  if (LOGLEVEL > 2) _msgHandler.setLogLevel(0, 1);
+  if (LOGLEVEL > 3) _msgHandler.setLogLevel(0, 3);
+
   _solver->passInMessageHandler(&_msgHandler);
 
   if (dir == MAX) {

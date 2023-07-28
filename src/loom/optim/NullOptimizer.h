@@ -23,6 +23,8 @@ class NullOptimizer : public Optimizer {
   double optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                    shared::rendergraph::HierarOrderCfg* c, size_t depth,
                    OptResStats& stats) const;
+
+  virtual std::string getName() const { return "null";}
 };
 }  // namespace optim
 }  // namespace loom

@@ -70,6 +70,8 @@ class Optimizer {
   static double solutionSpaceSize(const std::set<OptNode*>& g);
   static double numEdges(const std::set<OptNode*>& g);
 
+  virtual std::string getName() const = 0;
+
  protected:
   const config::Config* _cfg;
   const OptGraphScorer _scorer;

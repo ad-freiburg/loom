@@ -44,6 +44,8 @@ class CombOptimizer : public Optimizer {
                       shared::rendergraph::HierarOrderCfg* c, size_t depth,
                       OptResStats& stats) const;
 
+  virtual std::string getName() const { return "comb";}
+
  private:
   const ILPEdgeOrderOptimizer _ilpOpt;
   const NullOptimizer _nullOpt;

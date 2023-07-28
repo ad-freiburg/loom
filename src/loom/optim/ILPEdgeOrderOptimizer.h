@@ -24,6 +24,8 @@ class ILPEdgeOrderOptimizer : public ILPOptimizer {
                         const shared::rendergraph::Penalties& pens)
       : ILPOptimizer(cfg, pens){};
 
+  virtual std::string getName() const { return "ilp_impr";}
+
  private:
   virtual shared::optim::ILPSolver* createProblem(
       OptGraph* og, const std::set<OptNode*>& g) const;

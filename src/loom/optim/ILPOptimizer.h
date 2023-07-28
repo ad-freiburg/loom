@@ -26,6 +26,8 @@ class ILPOptimizer : public Optimizer {
                               shared::rendergraph::HierarOrderCfg* c,
                               size_t depth, OptResStats& stats) const;
 
+  virtual std::string getName() const { return "ilp";}
+
  protected:
   const loom::optim::ExhaustiveOptimizer _exhausOpt;
   virtual shared::optim::ILPSolver* createProblem(

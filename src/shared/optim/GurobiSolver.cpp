@@ -20,7 +20,7 @@ GurobiSolver::GurobiSolver(DirType dir)
     : _starterArr(0), _status(INF), _numVars(0), _numRows(0) {
   int verMaj, verMin, verTech;
   GRBversion(&verMaj, &verMin, &verTech);
-  LOGTO(INFO, std::cerr) << "Creating gurobi v" << verMaj << "." << verMin
+  LOGTO(DEBUG, std::cerr) << "Creating gurobi v" << verMaj << "." << verMin
                          << "." << verTech << " solver instance...";
 
   int error = GRBemptyenv(&_env);
@@ -264,7 +264,7 @@ SolveType GurobiSolver::solve() {
 
 // _____________________________________________________________________________
 void GurobiSolver::setCacheDir(const std::string& dir) {
-  LOGTO(INFO, std::cerr) << "Setting cache dir to " << dir;
+  LOGTO(DEBUG, std::cerr) << "Setting cache dir to " << dir;
   int error =
       GRBsetstrparam(GRBgetenv(_model), GRB_STR_PAR_NODEFILEDIR, dir.c_str());
   if (error) {
@@ -286,7 +286,7 @@ std::string GurobiSolver::getCacheDir() const {
 
 // _____________________________________________________________________________
 void GurobiSolver::setCacheThreshold(double gb) {
-  LOGTO(INFO, std::cerr) << "Setting cache threshhold to " << gb << " GB";
+  LOGTO(DEBUG, std::cerr) << "Setting cache threshhold to " << gb << " GB";
   int error = GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_NODEFILESTART, gb);
   if (error) {
     throw std::runtime_error("Could not set cache threshold");
@@ -308,7 +308,7 @@ double GurobiSolver::getCacheThreshold() const {
 
 // _____________________________________________________________________________
 void GurobiSolver::setNumThreads(int n) {
-  LOGTO(INFO, std::cerr) << "Setting number of threads to " << n;
+  LOGTO(DEBUG, std::cerr) << "Setting number of threads to " << n;
   int error = GRBsetintparam(GRBgetenv(_model), GRB_INT_PAR_THREADS, n);
   if (error) {
     throw std::runtime_error("Could not set number of threads");
@@ -330,7 +330,7 @@ int GurobiSolver::getNumThreads() const {
 // _____________________________________________________________________________
 void GurobiSolver::setTimeLim(int s) {
   // set time limit
-  LOGTO(INFO, std::cerr) << "Setting solver time limit to " << s << " seconds.";
+  LOGTO(DEBUG, std::cerr) << "Setting solver time limit to " << s << " seconds.";
   int error = GRBsetdblparam(GRBgetenv(_model), GRB_DBL_PAR_TIMELIMIT, s);
   if (error) {
     throw std::runtime_error("Could not set timelimit");
@@ -424,7 +424,7 @@ int GurobiSolver::termHook(GRBmodel* mod, void* cbdata, int where,
     for (auto ch : s) {
       if (ch == '\n') {
         std::string trimmed = util::ltrim(*buff);
-        if (trimmed.size()) LOGTO(INFO, std::cerr) << trimmed;
+        if (trimmed.size()) LOGTO(DEBUG, std::cerr) << trimmed;
         buff->clear();
       } else {
         buff->push_back(ch);

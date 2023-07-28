@@ -456,6 +456,7 @@ int main(int argc, char** argv) {
     size_t i = 0;
 
     for (auto optim : optimizers) {
+      std::cout << optim << " " << optim->getName() << std::endl;
       for (const auto& test : fileTests) {
         shared::rendergraph::RenderGraph g(5, 1, 5);
 
@@ -469,8 +470,9 @@ int main(int argc, char** argv) {
 
         if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
         if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
+        if (optim == &ilpImprOptim && g.searchSpaceSize() > 1e+50) continue;
 
-        std::cout << cfg.optimMethod << " " << test.fname << std::endl;
+        std::cout << optim->getName() << " " << test.fname << " (search space size=" << g.searchSpaceSize() << ")" << std::endl;
 
         try {
           auto res = optim->optimize(&g);
@@ -500,6 +502,7 @@ int main(int argc, char** argv) {
     optimizers.push_back(&combOptim);
 
     for (auto optim : optimizers) {
+      std::cout << optim << " " << optim->getName() << std::endl;
       shared::rendergraph::RenderGraph g(5, 1, 5);
 
       std::ifstream input;
@@ -514,6 +517,11 @@ int main(int argc, char** argv) {
 
       if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
       if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
+      if (optim == &ilpImprOptim && g.searchSpaceSize() > 1e+50) continue;
+
+      if (g.searchSpaceSize() > 1e+50) std::cout << "WHAT 1" << optim << " vs " << &combOptim << std::endl;
+
+      std::cout << optim->getName() << " ../src/loom/tests/datasets/freiburg-tram.json (search space size=" << g.searchSpaceSize() << ")" << std::endl;
 
       try {
         auto res = optim->optimize(&g);
@@ -528,6 +536,7 @@ int main(int argc, char** argv) {
       }
     }
   }
+
 
   {
     shared::rendergraph::Penalties pensLoc = pens;
@@ -547,6 +556,7 @@ int main(int argc, char** argv) {
       optimizers.push_back(&combOptim);
 
       for (auto optim : optimizers) {
+      std::cout << optim << " " << optim->getName() << std::endl;
         shared::rendergraph::RenderGraph g(5, 1, 5);
 
         std::ifstream input;
@@ -561,6 +571,10 @@ int main(int argc, char** argv) {
 
         if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
         if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
+        if (optim == &ilpImprOptim && g.searchSpaceSize() > 1e+50) continue;
+      if (g.searchSpaceSize() > 1e+50) std::cout << "WHAT 2" << optim << " vs " << &combOptim << std::endl;
+      
+      std::cout << optim->getName() << " ../src/loom/tests/datasets/freiburg-tram.json (search space size=" << g.searchSpaceSize() << ")" << std::endl;
 
         try {
           auto res = optim->optimize(&g);
@@ -576,6 +590,7 @@ int main(int argc, char** argv) {
       }
     }
   }
+
 
   {
     shared::rendergraph::Penalties pensLoc = pens;
@@ -598,6 +613,7 @@ int main(int argc, char** argv) {
       optimizers.push_back(&combOptim);
 
       for (auto optim : optimizers) {
+      std::cout << optim << " " << optim->getName() << std::endl;
         shared::rendergraph::RenderGraph g(5, 1, 5);
 
         std::ifstream input;
@@ -612,6 +628,10 @@ int main(int argc, char** argv) {
 
         if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
         if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
+        if (optim == &ilpImprOptim && g.searchSpaceSize() > 1e+50) continue;
+      if (g.searchSpaceSize() > 1e+50) std::cout << "WHAT 3" << optim << " vs " << &combOptim << std::endl;
+ 
+      std::cout << optim->getName() << " ../src/loom/tests/datasets/freiburg-tram.json (search space size=" << g.searchSpaceSize() << ")" << std::endl;
 
         try {
           auto res = optim->optimize(&g);
@@ -647,6 +667,7 @@ int main(int argc, char** argv) {
     optimizers.push_back(&combOptim);
 
     for (auto optim : optimizers) {
+      std::cout << optim << " " << optim->getName() << std::endl;
       for (const auto& test : fileTests) {
         shared::rendergraph::RenderGraph g(5, 1, 5);
 
@@ -660,6 +681,10 @@ int main(int argc, char** argv) {
 
         if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
         if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
+        if (optim == &ilpImprOptim && g.searchSpaceSize() > 1e+50) continue;
+      if (g.searchSpaceSize() > 1e+50) std::cout << "WHAT 4 " << optim << " vs " << &combOptim << std::endl;
+
+      std::cout << optim->getName() << " ../src/loom/tests/datasets/freiburg-tram.json (search space size=" << g.searchSpaceSize() << ")" << std::endl;
 
         try {
           auto res = optim->optimize(&g);
@@ -675,6 +700,7 @@ int main(int argc, char** argv) {
       }
     }
   }
+
 
   {
     shared::rendergraph::Penalties pensLoc = pens;
@@ -701,6 +727,7 @@ int main(int argc, char** argv) {
       optimizers.push_back(&combOptim);
 
       for (auto optim : optimizers) {
+      std::cout << optim << " " << optim->getName() << std::endl;
         shared::rendergraph::RenderGraph g(5, 1, 5);
 
         std::ifstream input;
@@ -715,6 +742,10 @@ int main(int argc, char** argv) {
 
         if (optim == &exhausOptim && g.searchSpaceSize() > 50000) continue;
         if (optim == &ilpOptim && g.searchSpaceSize() > 500000) continue;
+        if (optim == &ilpImprOptim && g.searchSpaceSize() > 1e+50) continue;
+      if (g.searchSpaceSize() > 1e+50) std::cout << "WHAT 5" << optim << " vs " << &combOptim << std::endl;
+
+      std::cout << optim->getName() << " ../src/loom/tests/datasets/freiburg-tram.json (search space size=" << g.searchSpaceSize() << ")" << std::endl;
 
         try {
           auto res = optim->optimize(&g);
