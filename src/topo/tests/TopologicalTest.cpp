@@ -631,7 +631,7 @@ void TopologicalTest::run() {
     hg->pl().addLine(&l3, 0);
 
     topo::config::TopoConfig cfg;
-    cfg.maxAggrDistance = 20;
+    cfg.maxAggrDistance = 10;
 
     topo::MapConstructor mc(&cfg, &tg);
     mc.collapseShrdSegs();

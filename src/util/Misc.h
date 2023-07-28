@@ -498,21 +498,21 @@ inline std::string randomHtmlColor() {
 }
 
 // _____________________________________________________________________________
-inline char* readableSize(double size, char* buf) {
+inline char* readableSize(double size, size_t n, char* buf) {
   int i = 0;
   const char* units[] = {"B", "kB", "MB", "GB", "TB", "PB"};
   while (size > 1024 && i < 5) {
     size /= 1024;
     i++;
   }
-  sprintf(buf, "%.*f %s", i, size, units[i]);
+  snprintf(buf, n, "%.*f %s", i, size, units[i]);
   return buf;
 }
 
 // _____________________________________________________________________________
 inline std::string readableSize(double size) {
   char buffer[30];
-  return readableSize(size, buffer);
+  return readableSize(size, 30, buffer);
 }
 
 // _____________________________________________________________________________
