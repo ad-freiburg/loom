@@ -71,7 +71,7 @@ jobs:
       - name: tests
         run: cd build && ctest --output-on-failure
   macos-latest-build:
-    runs-on: macOS-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
@@ -85,8 +85,23 @@ jobs:
         run: cd build && make
       - name: tests
         run: cd build && ctest --output-on-failure
-  macos-12-build:
-    runs-on: macOS-12
+  macos-11-build:
+    runs-on: macos-11
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: install dependencies
+        run: brew install cmake && brew install glpk && brew tap coin-or-tools/coinor && brew install coin-or-tools/coinor/cbc
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && ctest --output-on-failure
+  macos-13-build:
+    runs-on: macos-13
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
