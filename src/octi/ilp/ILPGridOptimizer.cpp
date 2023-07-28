@@ -116,8 +116,6 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
     oneAssignment << "oneass(" << nd << ")";
     int rowStat = lp->addRow(oneAssignment.str(), 1, shared::optim::FIX);
 
-    size_t i = 0;
-
     for (const GridNode* n : gg->getNds()) {
       if (!n->pl().isSink()) continue;
 
@@ -145,8 +143,6 @@ ILPSolver* ILPGridOptimizer::createProblem(BaseGraph* gg, const CombGraph& cg,
       int col = lp->addCol(varName, shared::optim::BIN, gg->ndMovePen(nd, n));
 
       lp->addColToRow(rowStat, col, 1);
-
-      i++;
     }
   }
 

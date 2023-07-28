@@ -453,8 +453,6 @@ int main(int argc, char** argv) {
     optimizers.push_back(&ilpImprOptim);
     optimizers.push_back(&combOptim);
 
-    size_t i = 0;
-
     for (auto optim : optimizers) {
       for (const auto& test : fileTests) {
         shared::rendergraph::RenderGraph g(5, 1, 5);
@@ -485,7 +483,6 @@ int main(int argc, char** argv) {
           continue;
         }
       }
-      i++;
     }
   }
 

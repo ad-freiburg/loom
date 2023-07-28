@@ -339,10 +339,8 @@ std::vector<PartnerPath> OptGraph::getPartnerLines() const {
 
     const auto& comps = Algorithm::connectedComponents(*this, Check(rt));
 
-    size_t nonNullComps = 0;
     for (const auto& comp : comps) {
       if (comp.size() < 2) continue;
-      nonNullComps++;
       auto p = pathFromComp(comp);
       if (p.partners.size() && p.path.size()) ret.push_back(p);
     }
