@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
     b.simplify(&g);
 
     util::geo::output::GeoGraphJsonOutput out;
-    out.print(g, std::cout);
+    out.printLatLng(g, std::cout);
   }
 
   return 0;

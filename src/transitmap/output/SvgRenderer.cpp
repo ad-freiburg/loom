@@ -386,9 +386,10 @@ void SvgRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
     for (size_t i = 0; i < c.geoms.size(); i++) {
       PolyLine<double> pl = c.geoms[i].geom;
 
-      if (ref.geom.getLength() > (_cfg->lineWidth + _cfg->lineSpacing) * 4) {
+      if (ref.geom.getLength() >
+          (_cfg->lineWidth + 2 * _cfg->outlineWidth + _cfg->lineSpacing) * 4) {
         double off =
-            -(_cfg->lineWidth + _cfg->lineSpacing + _cfg->outlineWidth) *
+            -(_cfg->lineWidth + _cfg->lineSpacing + 2 * _cfg->outlineWidth) *
             (static_cast<int>(c.geoms[i].slotFrom) -
              static_cast<int>(ref.slotFrom));
 
@@ -499,12 +500,11 @@ void SvgRenderer::renderEdgeTripGeom(const RenderGraph& outG,
   double lineW = _cfg->lineWidth;
   double outlineW = _cfg->outlineWidth;
   double lineSpc = _cfg->lineSpacing;
-  double offsetStep = lineW + 2 * outlineW + lineSpc;
+  double offsetStep = lineW + 2.0 * outlineW + lineSpc;
   double oo = outG.getTotalWidth(e);
 
   double o = oo;
 
-  size_t a = 0;
   for (size_t i = 0; i < e->pl().getLines().size(); i++) {
     const auto& lo = e->pl().lineOccAtPos(i);
 
@@ -513,7 +513,7 @@ void SvgRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 
     if (p.getLength() < 0.01) continue;
 
-    double offset = -(o - oo / 2.0 - (2 * outlineW + _cfg->lineWidth) / 2.0);
+    double offset = -(o - oo / 2.0 - (2.0 * outlineW + _cfg->lineWidth) / 2.0);
 
     p.offsetPerp(offset);
 
@@ -567,8 +567,6 @@ void SvgRenderer::renderEdgeTripGeom(const RenderGraph& outG,
     } else {
       renderLinePart(p, lineW, *line, css, oCss);
     }
-
-    a++;
 
     o -= offsetStep;
   }

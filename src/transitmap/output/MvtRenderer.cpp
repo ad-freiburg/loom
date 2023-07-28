@@ -398,7 +398,6 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 
   double o = oo;
 
-  size_t a = 0;
   for (size_t i = 0; i < e->pl().getLines().size(); i++) {
     const auto& lo = e->pl().lineOccAtPos(i);
 
@@ -461,8 +460,6 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
       params["component"] = util::toString(e->pl().getComponent());
 
     addFeature({p.getLine(), "lines", params});
-
-    a++;
 
     o -= offsetStep;
   }

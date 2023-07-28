@@ -147,7 +147,6 @@ int main(int argc, char** argv) {
     mc.removeNodeArtifacts(false);
 
     if (cfg.outputStats) {
-      size_t c = 0;
       const auto& origEdgs = mc.freezeTrack(restrFr);
       for (const auto& nd : tg.getNds()) {
         for (const auto& e : nd->getAdjList()) {
@@ -156,7 +155,6 @@ int main(int argc, char** argv) {
           if (cur > maxMergedEdgs) maxMergedEdgs = cur;
           totMergedEdgs += cur;
           totSupportGraphEdgs++;
-          c++;
         }
       }
     }

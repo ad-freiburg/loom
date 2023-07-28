@@ -144,7 +144,6 @@ ILPSolver* ILPOptimizer::createProblem(OptGraph* og,
       if (e->getFrom() != n) continue;
       // get string repr of lineedge part
 
-      size_t i = 0;
       int rowA = lp->getNumConstrs();
 
       for (size_t p = 0; p < e->pl().getCardinality(); p++) {
@@ -167,8 +166,6 @@ ILPSolver* ILPOptimizer::createProblem(OptGraph* og,
 
           lp->addColToRow(row, curCol, 1);
           lp->addColToRow(rowA + p, curCol, 1);
-
-          i++;
         }
       }
     }

@@ -451,7 +451,7 @@ std::vector<Polygon<double>> RenderGraph::getStopGeoms(
 
 // _____________________________________________________________________________
 double RenderGraph::getTotalWidth(const LineEdge* e) const {
-  return (2 * _defOutlineWidth + _defWidth) * e->pl().getLines().size() +
+  return (2.0 * _defOutlineWidth + _defWidth) * e->pl().getLines().size() +
          _defSpacing * (e->pl().getLines().size() - 1);
 }
 

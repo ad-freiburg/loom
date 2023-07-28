@@ -40,11 +40,7 @@ double HillClimbOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& 
     greedy.getFlatConfig(g, &cur);
   }
 
-  size_t iters = 0;
-
   while (true) {
-    iters++;
-
     double bestChange = 0;
     OptEdge* bestEdge = 0;
     std::vector<const Line*> bestOrder;
