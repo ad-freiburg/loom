@@ -132,6 +132,12 @@ void Grid<V, G, T>::get(size_t x, size_t y, std::set<V>* s) const {
 
 // _____________________________________________________________________________
 template <typename V, template <typename> class G, typename T>
+const std::set<V>& Grid<V, G, T>::getCell(size_t x, size_t y) const {
+  return _grid[x][y];
+}
+
+// _____________________________________________________________________________
+template <typename V, template <typename> class G, typename T>
 void Grid<V, G, T>::remove(V val) {
   if (_hasValIdx) {
     auto i = _index.find(val);

@@ -23,6 +23,12 @@
 namespace util {
 
 // _____________________________________________________________________________
+inline bool endsWith(const std::string& a, const std::string& suff) {
+  if (suff.size() > a.size()) return false;
+  return a.compare(a.length() - suff.length(), suff.length(), suff) == 0;
+}
+
+// _____________________________________________________________________________
 inline std::string urlDecode(const std::string& encoded) {
   std::string decoded;
   for (size_t i = 0; i < encoded.size(); ++i) {

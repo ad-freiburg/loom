@@ -29,8 +29,12 @@ class Polygon {
   const Line<T>& getOuter() const { return _outer; }
   Line<T>& getOuter() { return _outer; }
 
+  const std::vector<Line<T>>& getInners() const { return _inners; }
+  std::vector<Line<T>>& getInners() { return _inners; }
+
  private:
   Line<T> _outer;
+  std::vector<Line<T>> _inners;
 };
 
 template <typename T>

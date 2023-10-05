@@ -9,11 +9,16 @@ using namespace geo;
 using namespace output;
 
 // _____________________________________________________________________________
-GeoJsonOutput::GeoJsonOutput(std::ostream& str) : _wr(&str, 10, true) {
-  _wr.obj();
-  _wr.keyVal("type", "FeatureCollection");
-  _wr.key("features");
-  _wr.arr();
+GeoJsonOutput::GeoJsonOutput(std::ostream& str) : GeoJsonOutput(str, false) {}
+
+// _____________________________________________________________________________
+GeoJsonOutput::GeoJsonOutput(std::ostream& str, bool raw) : _wr(&str, 10, true) {
+  if (!raw) {
+    _wr.obj();
+    _wr.keyVal("type", "FeatureCollection");
+    _wr.key("features");
+    _wr.arr();
+  }
 }
 
 // _____________________________________________________________________________

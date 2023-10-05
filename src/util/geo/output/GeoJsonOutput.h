@@ -19,11 +19,15 @@ namespace output {
 class GeoJsonOutput {
  public:
   GeoJsonOutput(std::ostream& str);
+  GeoJsonOutput(std::ostream& str, bool raw);
   GeoJsonOutput(std::ostream& str, json::Val attrs);
   ~GeoJsonOutput();
 
   template <typename T>
   void print(const Point<T>& p, json::Val attrs);
+
+  template <typename T>
+  void print(const MultiPoint<T>& ps, json::Val attrs);
 
   template <typename T>
   void print(const Line<T>& l, json::Val attrs);
@@ -39,6 +43,9 @@ class GeoJsonOutput {
 
   template <typename T>
   void printLatLng(const Point<T>& p, json::Val attrs);
+
+  template <typename T>
+  void printLatLng(const MultiPoint<T>& ps, json::Val attrs);
 
   template <typename T>
   void printLatLng(const Line<T>& l, json::Val attrs);

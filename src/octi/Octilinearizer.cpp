@@ -314,7 +314,7 @@ Score Octilinearizer::draw(const CombGraph& cg, const DBox& box,
       }
     }
 
-    size_t bestCore;
+    size_t bestCore = 0;
     double bestScore = std::numeric_limits<double>::infinity();
     for (size_t i = 0; i < jobs; i++) {
       if (bestFrIters[i].score() < bestScore) {

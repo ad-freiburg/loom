@@ -29,7 +29,7 @@ namespace http {
 // socket backlog size
 const static size_t BLOG = 128;
 // socket read buffer size
-const static size_t BSIZE = 4 * 1024;
+const static size_t BSIZE = 16 * 1024;
 // zlib compression buffer size
 const size_t BSIZE_C = 128 * 1024;
 
@@ -56,6 +56,7 @@ class HttpErr : public std::exception {
 struct Req {
   std::string cmd, url, ver, payload;
   std::unordered_map<std::string, std::string> params;
+  bool gzip = false;
 };
 
 /*
@@ -68,7 +69,8 @@ struct Answer {
   Answer(const std::string& status, const std::string& pl, bool gz)
       : status(status), pl(pl), gzip(gz) {}
   std::string status, pl;
-  bool gzip;
+  bool gzip = false;
+  bool raw = false;
   std::unordered_map<std::string, std::string> params;
 };
 
