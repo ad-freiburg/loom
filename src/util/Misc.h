@@ -421,6 +421,48 @@ inline std::string getHomeDir() {
   return ret;
 }
 
+// _____________________________________________________________________________
+inline std::string getTmpDir() {
+  // first, check if an env variable is set
+  const char* tmpdir = getenv("TMPDIR");
+  if (tmpdir && std::strlen(tmpdir)) return std::string(tmpdir);
+
+  // second, check if /tmp is writable
+  if (access("/tmp/", W_OK) == 0) return "/tmp";
+
+  // third, check if the cwd is writable
+  if (access(".", W_OK) == 0)  return ".";
+
+  // lastly, return the users home directory as a fallback
+  return getHomeDir();
+}
+
+// _____________________________________________________________________________
+inline std::string getTmpFName(std::string dir, std::string name,
+    std::string postf) {
+  if (postf.size()) postf = "-" + postf;
+  if (dir == "<tmp>") dir = util::getTmpDir();
+  if (dir.size() && dir.back() != '/') dir = dir + "/";
+
+  std::string f = dir + name + postf;
+
+  size_t c = 0;
+
+  while (access(f.c_str(), F_OK) != -1) {
+    c++;
+    if (c > 10000) {
+      // giving up...
+      std::cerr << "Could not find temporary file name!" << std::endl;
+      exit(1);
+    }
+    std::stringstream ss;
+    ss << dir << name << postf << "-" << std::rand();
+    f = ss.str().c_str();
+  }
+
+  return f;
+}
+
 // ___________________________________________________________________________
 inline std::string rgbToHex(int r, int g, int b) {
   char hexcol[16];
@@ -513,22 +555,6 @@ inline char* readableSize(double size, size_t n, char* buf) {
 inline std::string readableSize(double size) {
   char buffer[30];
   return readableSize(size, 30, buffer);
-}
-
-// _____________________________________________________________________________
-inline std::string getTmpDir() {
-  // first, check if an env variable is set
-  const char* tmpdir = getenv("TMPDIR");
-  if (tmpdir && std::strlen(tmpdir)) return std::string(tmpdir);
-
-  // second, check if /tmp is writable
-  if (access("/tmp/", W_OK) == 0) return "/tmp";
-
-  // third, check if the cwd is writable
-  if (access(".", W_OK) == 0)  return ".";
-
-  // lastly, return the users home directory as a fallback
-  return getHomeDir();
 }
 
 // _____________________________________________________________________________

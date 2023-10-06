@@ -3,30 +3,88 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <algorithm>
+#include <fstream>
 #include <map>
+#include <cstring>
 #include <ostream>
 #include <stack>
 #include <string>
+#ifdef BZLIB_FOUND
+#include <bzlib.h>
+#endif
+
 #include "XmlWriter.h"
 
 using namespace util;
 using namespace xml;
 
+using std::map;
 using std::ostream;
 using std::string;
-using std::map;
 
 // _____________________________________________________________________________
 XmlWriter::XmlWriter(std::ostream* out)
-    : _out(out), _pretty(false), _indent(4) {}
+    : _out(out), _pretty(false), _indent(4), _gzfile(0), _bzfile(0) {}
 
 // _____________________________________________________________________________
 XmlWriter::XmlWriter(std::ostream* out, bool pret)
-    : _out(out), _pretty(pret), _indent(4) {}
+    : _out(out), _pretty(pret), _indent(4), _gzfile(0), _bzfile(0) {}
 
 // _____________________________________________________________________________
 XmlWriter::XmlWriter(std::ostream* out, bool pret, size_t indent)
-    : _out(out), _pretty(pret), _indent(indent) {}
+    : _out(out), _pretty(pret), _indent(indent), _gzfile(0), _bzfile(0) {}
+
+// _____________________________________________________________________________
+XmlWriter::XmlWriter(const std::string& file)
+    : XmlWriter::XmlWriter(file, false, 4) {}
+
+// _____________________________________________________________________________
+XmlWriter::XmlWriter(const std::string& file, bool pret)
+    : XmlWriter::XmlWriter(file, pret, 4) {}
+
+// _____________________________________________________________________________
+XmlWriter::XmlWriter(const std::string& file, bool pret, size_t indent)
+    : _out(0), _pretty(pret), _indent(indent), _gzfile(0), _bzfile(0) {
+  if (file.size() > 2 && file[file.size() - 1] == 'z' &&
+      file[file.size() - 2] == 'g' && file[file.size() - 3] == '.') {
+#ifdef ZLIB_FOUND
+    _gzfile = gzopen(file.c_str(), "w");
+    if (_gzfile == Z_NULL) {
+      throw std::runtime_error("Could not open file for writing.");
+    }
+#else
+    throw std::runtime_error(
+        "Could not open gzip file for writing, was compiled without gzip "
+        "support");
+#endif
+  } else if (file.size() > 3 && file[file.size() - 1] == '2' &&
+             file[file.size() - 2] == 'z' && file[file.size() - 3] == 'b' &&
+             file[file.size() - 4] == '.') {
+#ifdef BZLIB_FOUND
+    _bzbuf = new char[BUFFER_S];
+
+    FILE* f = fopen(file.c_str(), "w");
+    int err;
+    if (!f) throw std::runtime_error("Could not open file for writing.");
+
+    _bzfile = BZ2_bzWriteOpen(&err, f, 9, 0, 30);
+
+    if (err != BZ_OK) {
+      throw std::runtime_error("Could not open bzip file for writing.");
+    }
+#else
+    throw std::runtime_error(
+        "Could not open bzip file for writing, was compiled without bzip "
+        "support");
+#endif
+  } else {
+    _outs.open(file);
+    if (_outs.fail()) {
+      throw std::runtime_error("Could not open file for writing.");
+    }
+    _out = &_outs;
+  }
+}
 
 // _____________________________________________________________________________
 void XmlWriter::openTag(const string& tag, const map<string, string>& attrs) {
@@ -38,14 +96,15 @@ void XmlWriter::openTag(const string& tag, const map<string, string>& attrs) {
   closeHanging();
   doIndent();
 
-  *_out << "<" << tag;
+  put("<");
+  put(tag);
 
   for (auto kv : attrs) {
-    *_out << " ";
-    putEsced(_out, kv.first, '"');
-    *_out << "=\"";
-    putEsced(_out, kv.second, '"');
-    *_out << "\"";
+    put(" ");
+    putEsced(kv.first, '"');
+    put("=\"");
+    putEsced(kv.second, '"');
+    put("\"");
   }
 
   _nstack.push(XmlNode(TAG, tag, true));
@@ -71,7 +130,7 @@ void XmlWriter::openComment() {
   closeHanging();
   doIndent();
 
-  *_out << "<!-- ";
+  put("<!-- ");
 
   _nstack.push(XmlNode(COMMENT, "", false));
 }
@@ -83,7 +142,7 @@ void XmlWriter::writeText(const string& text) {
   }
   closeHanging();
   doIndent();
-  putEsced(_out, text, ' ');
+  putEsced(text, ' ');
 }
 
 // _____________________________________________________________________________
@@ -95,16 +154,18 @@ void XmlWriter::closeTag() {
   if (_nstack.top().t == COMMENT) {
     _nstack.pop();
     doIndent();
-    *_out << " -->";
+    put(" -->");
   } else if (_nstack.top().t == TAG) {
     if (_nstack.top().hanging) {
-      *_out << " />";
+      put(" />");
       _nstack.pop();
     } else {
       string tag = _nstack.top().pload;
       _nstack.pop();
       doIndent();
-      *_out << "</" << tag << ">";
+      put("</");
+      put(tag);
+      put(">");
     }
   }
 }
@@ -117,8 +178,8 @@ void XmlWriter::closeTags() {
 // _____________________________________________________________________________
 void XmlWriter::doIndent() {
   if (_pretty) {
-    *_out << std::endl;
-    for (size_t i = 0; i < _nstack.size() * _indent; i++) *_out << " ";
+    put("\n");
+    for (size_t i = 0; i < _nstack.size() * _indent; i++) put(" ");
   }
 }
 
@@ -127,7 +188,7 @@ void XmlWriter::closeHanging() {
   if (_nstack.empty()) return;
 
   if (_nstack.top().hanging) {
-    *_out << ">";
+    put(">");
     _nstack.top().hanging = false;
   } else if (_nstack.top().t == TEXT) {
     _nstack.pop();
@@ -135,25 +196,73 @@ void XmlWriter::closeHanging() {
 }
 
 // _____________________________________________________________________________
-void XmlWriter::putEsced(ostream* out, const string& str, char quot) {
+void XmlWriter::put(const string& str) {
+  if (_gzfile) {
+#ifdef ZLIB_FOUND
+    gzwrite(_gzfile, str.c_str(), str.size());
+#endif
+  } else if (_bzfile) {
+#ifdef BZLIB_FOUND
+    if (_bzbufpos == BUFFER_S || _bzbufpos + str.size() > BUFFER_S) flushBzip();
+    memcpy( _bzbuf + _bzbufpos, str.c_str(), str.size());
+    _bzbufpos += str.size();
+#endif
+  } else {
+    _out->write(str.c_str(), str.size());
+  }
+}
+
+// _____________________________________________________________________________
+void XmlWriter::flushBzip() {
+#ifdef BZLIB_FOUND
+    int err = 0;
+    BZ2_bzWrite(&err, _bzfile, _bzbuf, _bzbufpos);
+    if (err == BZ_IO_ERROR) {
+      BZ2_bzWriteClose(&err, _bzfile, 0, 0, 0);
+      throw std::runtime_error("Could not write to file.");
+    }
+
+    _bzbufpos = 0;
+  #endif
+}
+
+// _____________________________________________________________________________
+void XmlWriter::put(const char c) {
+  if (_gzfile) {
+#ifdef ZLIB_FOUND
+    gzputc(_gzfile, c);
+
+#endif
+  } else if (_bzfile) {
+#ifdef BZLIB_FOUND
+    _bzbuf[_bzbufpos++] = c;
+    if (_bzbufpos == BUFFER_S) flushBzip();
+#endif
+  } else {
+    _out->put(c);
+  }
+}
+
+// _____________________________________________________________________________
+void XmlWriter::putEsced(const string& str, char quot) {
   if (!_nstack.empty() && _nstack.top().t == COMMENT) {
-    *out << str;
+    put(str);
     return;
   }
 
   for (const char& c : str) {
     if (quot == '"' && c == '"')
-      *out << "&quot;";
+      put("&quot;");
     else if (quot == '\'' && c == '\'')
-      *out << "&apos;";
+      put("&apos;");
     else if (c == '<')
-      *out << "&lt;";
+      put("&lt;");
     else if (c == '>')
-      *out << "&gt;";
+      put("&gt;");
     else if (c == '&')
-      *out << "&amp;";
+      put("&amp;");
     else
-      *out << c;
+      put(c);
   }
 }
 

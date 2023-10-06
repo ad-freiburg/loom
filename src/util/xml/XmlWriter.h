@@ -5,13 +5,22 @@
 #ifndef UTIL_XML_XMLWRITER_H_
 #define UTIL_XML_XMLWRITER_H_
 
+#ifdef ZLIB_FOUND
+#include <zlib.h>
+#endif
+#ifdef BZLIB_FOUND
+#include <bzlib.h>
+#endif
 #include <map>
 #include <ostream>
+#include <fstream>
 #include <stack>
 #include <string>
 
 namespace util {
 namespace xml {
+
+static const size_t BUFFER_S = 32 * 1024 * 1024;
 
 class XmlWriterException : public std::exception {
  public:
@@ -30,7 +39,22 @@ class XmlWriter {
   explicit XmlWriter(std::ostream* out);
   XmlWriter(std::ostream* out, bool pretty);
   XmlWriter(std::ostream* out, bool pretty, size_t indent);
-  ~XmlWriter(){};
+
+  explicit XmlWriter(const std::string& file);
+  XmlWriter(const std::string& file, bool pretty);
+  XmlWriter(const std::string& file, bool pretty, size_t indent);
+  ~XmlWriter(){
+#ifdef ZLIB_FOUND
+    if (_gzfile) gzclose(_gzfile);
+#endif
+#ifdef BZLIB_FOUND
+    int err;
+    if (_bzfile) {
+      flushBzip();
+      BZ2_bzWriteClose(&err, _bzfile, 0, 0, 0);
+    }
+#endif
+  };
 
   // open tag without attributes
   void openTag(const std::string& tag);
@@ -55,6 +79,11 @@ class XmlWriter {
   // close all open tags, essentially closing the document
   void closeTags();
 
+  // pushes XML escaped text to stream
+  void putEsced(const std::string& str, char quot);
+  void put(const std::string& str);
+  void put(const char c);
+
  private:
   enum XML_NODE_T { TAG, TEXT, COMMENT };
 
@@ -66,11 +95,28 @@ class XmlWriter {
     bool hanging;
   };
 
+  void flushBzip();
+
   std::ostream* _out;
+  std::ofstream _outs;
   std::stack<XmlNode> _nstack;
 
   bool _pretty;
   size_t _indent;
+
+#ifdef ZLIB_FOUND
+  gzFile _gzfile;
+#else
+  int _gzfile;
+#endif
+
+  char* _bzbuf;
+  size_t _bzbufpos = 0;
+#ifdef BZLIB_FOUND
+  BZFILE* _bzfile;
+#else
+  int _bzfile;
+#endif
 
   // handles indentation
   void doIndent();
@@ -78,8 +124,6 @@ class XmlWriter {
   // close "hanging" tags
   void closeHanging();
 
-  // pushes XML escaped text to stream
-  void putEsced(std::ostream* out, const std::string& str, char quot);
 
   // checks tag names for validiy
   void checkTagName(const std::string& str) const;
