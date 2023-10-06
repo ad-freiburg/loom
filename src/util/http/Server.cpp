@@ -24,6 +24,7 @@
 #include "Server.h"
 #include "util/String.h"
 #include "util/log/Log.h"
+#include "util/Misc.h"
 
 using util::http::HeaderState;
 using util::http::HttpErr;
