@@ -1,11 +1,17 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.12)
 
-project (transitmap)
+project (loom)
+
+if (CMAKE_BUILD_TYPE)
+	string(SUBSTRING ${CMAKE_BUILD_TYPE} 0 1 FIRST_CHAR)
+	string(TOUPPER ${FIRST_CHAR} FIRST_CHAR)
+	string(REGEX REPLACE "^.(.*)" "${FIRST_CHAR}\\1" CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}")
+endif()
 
 enable_testing()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/build")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 
 find_package(OpenMP)
 if(OPENMP_FOUND)
@@ -112,7 +118,7 @@ install(
 )
 
 install(
-  FILES build/transitmap build/topo build/topoeval build/gtfs2graph build/loom build/octi DESTINATION bin
+  FILES ${CMAKE_BINARY_DIR}/transitmap ${CMAKE_BINARY_DIR}/topo ${CMAKE_BINARY_DIR}/topoeval ${CMAKE_BINARY_DIR}/gtfs2graph ${CMAKE_BINARY_DIR}/loom ${CMAKE_BINARY_DIR}/octi DESTINATION bin
   PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
 )
 
