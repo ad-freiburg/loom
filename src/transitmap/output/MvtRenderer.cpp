@@ -312,7 +312,7 @@ void MvtRenderer::renderClique(const InnerClique& cc, const LineNode* n) {
     }
 
     for (size_t i = 0; i < c.geoms.size(); i++) {
-      PolyLine<double> pl = c.geoms[i].geom;
+      PolyLine<double> pl(c.geoms[i].geom);
 
       if (ref.geom.getLength() >
           (_cfg->lineWidth + 2 * _cfg->outlineWidth + _cfg->lineSpacing) *
@@ -388,7 +388,7 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
   assert(nfTo);
   assert(nfFrom);
 
-  PolyLine<double> center = *e->pl().getGeom();
+  PolyLine<double> center(*e->pl().getGeom());
 
   double lineW = _cfg->lineWidth;
   double outlineW = _cfg->outlineWidth;
@@ -535,12 +535,11 @@ Box<double> MvtRenderer::getBox(size_t z, size_t x, size_t y) const {
 }
 
 // _____________________________________________________________________________
-void MvtRenderer::printFeature(const PolyLine<double>& pl, size_t z, size_t x,
-                               size_t y, vector_tile::Tile_Layer* layer,
-                               Params params,
+void MvtRenderer::printFeature(const util::geo::Line<double>& l, size_t z,
+                               size_t x, size_t y,
+                               vector_tile::Tile_Layer* layer, Params params,
                                std::map<std::string, size_t>& keys,
                                std::map<std::string, size_t>& vals) {
-  const auto& l = pl.getLine();
   if (l.size() < 2) return;
 
   // skip zero-width geometries

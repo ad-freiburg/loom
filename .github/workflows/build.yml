@@ -9,6 +9,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Checkout submodules
         run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
       - name: install dependencies
         run: sudo apt install -y cmake gcc g++ libglpk-dev coinor-cbc coinor-libcbc-dev
       - name: cmake
@@ -24,6 +26,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Checkout submodules
         run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
       - name: install dependencies
         run: sudo apt install -y cmake gcc g++ libglpk-dev coinor-cbc coinor-libcbc-dev
       - name: cmake
@@ -39,6 +43,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Checkout submodules
         run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
       - name: install dependencies
         run: sudo apt install -y cmake clang libglpk-dev coinor-cbc coinor-libcbc-dev
       - name: cmake
@@ -58,6 +64,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Checkout submodules
         run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
       - name: install dependencies
         run: sudo apt install -y cmake clang libglpk-dev coinor-cbc coinor-libcbc-dev
       - name: cmake

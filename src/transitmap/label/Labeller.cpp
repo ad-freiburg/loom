@@ -104,8 +104,9 @@ void Labeller::labelStations(const RenderGraph& g, bool notdeg2) {
                 overlaps.statOverlaps >
             0)
           continue;
-        cands.push_back({band[0], band, fontSize, g.isTerminus(n), deg, offset,
-                         overlaps, n->pl().stops().front()});
+        cands.push_back({PolyLine<double>(band[0]), band, fontSize,
+                         g.isTerminus(n), deg, offset, overlaps,
+                         n->pl().stops().front()});
       }
     }
 
@@ -199,8 +200,8 @@ void Labeller::labelLines(const RenderGraph& g) {
       for (int dir = -1; dir < 2; dir += 2) {
         double start = 0;
         while (start + labelW <= geomLen) {
-          PolyLine<double> cand = util::geo::segment(
-              *e->pl().getGeom(), start / geomLen, (start + labelW) / geomLen);
+          PolyLine<double> cand(util::geo::segment(
+              *e->pl().getGeom(), start / geomLen, (start + labelW) / geomLen));
           if (cand.getLength() < 5) break;
           cand.offsetPerp(dir * (g.getTotalWidth(e) / 2 +
                                  (_cfg->lineSpacing + _cfg->lineWidth)));

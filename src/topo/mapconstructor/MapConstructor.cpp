@@ -506,7 +506,7 @@ int MapConstructor::collapseShrdSegs(double dCut, size_t MAX_ITERS,
         auto& pl = e->pl().getPolyline();
         pl.smoothenOutliers(50);
         pl.simplify(1);
-        pl = util::geo::densify(pl.getLine(), 5);
+        pl = PolyLine<double>(util::geo::densify(pl.getLine(), 5));
         pl.applyChaikinSmooth(1);
         pl.simplify(1);
       }

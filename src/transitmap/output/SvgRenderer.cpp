@@ -495,7 +495,7 @@ void SvgRenderer::renderEdgeTripGeom(const RenderGraph& outG,
   assert(nfTo);
   assert(nfFrom);
 
-  PolyLine<double> center = *e->pl().getGeom();
+  PolyLine<double> center(*e->pl().getGeom());
 
   double lineW = _cfg->lineWidth;
   double outlineW = _cfg->outlineWidth;

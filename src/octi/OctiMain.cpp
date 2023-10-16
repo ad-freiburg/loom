@@ -99,7 +99,7 @@ std::vector<DPolygon> readObstacleFile(const std::string& p) {
         for (auto coord : coords) {
           l.push_back({coord[0], coord[1]});
         }
-        ret.push_back(l);
+        ret.push_back(DPolygon(l));
       }
     }
   }

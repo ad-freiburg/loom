@@ -47,8 +47,10 @@ class MvtRenderer : public Renderer {
 
   void serializeTile(size_t x, size_t y, size_t z, vector_tile::Tile* l);
 
-  void printFeature(const util::geo::PolyLine<double>& l, size_t z, size_t x,
-                 size_t y, vector_tile::Tile_Layer* layer, Params params, std::map<std::string, size_t>& keys, std::map<std::string, size_t>& vals);
+  void printFeature(const util::geo::Line<double>& l, size_t z, size_t x,
+                    size_t y, vector_tile::Tile_Layer* layer, Params params,
+                    std::map<std::string, size_t>& keys,
+                    std::map<std::string, size_t>& vals);
 
  private:
   const config::Config* _cfg;

@@ -974,7 +974,7 @@ void LineGraph::contractStrayNds() {
           else
             l.insert(l.end(), b->pl().getGeom()->rbegin(),
                      b->pl().getGeom()->rend());
-          pl.setPolyline(l);
+          pl.setPolyline(PolyLine<double>(l));
         } else {
           pl.setPolyline(PolyLine<double>(*a->getFrom()->pl().getGeom(),
                                           *b->getOtherNd(n)->pl().getGeom()));
@@ -997,7 +997,7 @@ void LineGraph::contractStrayNds() {
                      b->pl().getGeom()->rend());
           l.insert(l.end(), a->pl().getGeom()->begin(),
                    a->pl().getGeom()->end());
-          pl.setPolyline(l);
+          pl.setPolyline(PolyLine<double>(l));
         } else {
           pl.setPolyline(PolyLine<double>(*a->getTo()->pl().getGeom(),
                                           *b->getOtherNd(n)->pl().getGeom()));

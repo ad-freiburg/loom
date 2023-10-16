@@ -230,11 +230,7 @@ void RestrInferrer::edgeRpl(RestrNode* n, const RestrEdge* oldE,
 // _____________________________________________________________________________
 void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
                              std::map<RestrEdge*, HndlLst>* handles) {
-  // double MAX_DIST = _cfg->maxAggrDistance;
   AggrDistFunc aggrD(_cfg->maxAggrDistance);
-
-  // auto hndlPA = e->pl().getPolyline().getPointAt(1.0 / 3.0).p;
-  // auto hndlPB = e->pl().getPolyline().getPointAt(2.0 / 3.0).p;
 
   // we add a small buffer to account for the skip heuristic in the
   // shared segments collapsing
@@ -258,19 +254,11 @@ void RestrInferrer::addHndls(const LineEdge* e, const OrigEdgs& origEdgs,
 
   auto a = _rg.addNd(hndlLA.front());
   auto b = _rg.addNd(hndlLA.back());
-  _rg.addEdg(a, b, RestrEdgePL(hndlLA));
+  _rg.addEdg(a, b, RestrEdgePL(PolyLine<double>(hndlLA)));
 
   a = _rg.addNd(hndlLB.front());
   b = _rg.addNd(hndlLB.back());
-  _rg.addEdg(a, b, RestrEdgePL(hndlLB));
-
-  // a =_rg.addNd(hndlLACheck.front());
-  // b = _rg.addNd(hndlLACheck.back());
-  // _rg.addEdg(a, b, RestrEdgePL(hndlLACheck));
-
-  // a =_rg.addNd(hndlLBCheck.front());
-  // b = _rg.addNd(hndlLBCheck.back());
-  // _rg.addEdg(a, b, RestrEdgePL(hndlLBCheck));
+  _rg.addEdg(a, b, RestrEdgePL(PolyLine<double>(hndlLB)));
 
   for (auto edg : origEdgs.find(e)->second) {
     auto origFr = const_cast<LineEdge*>(edg);
