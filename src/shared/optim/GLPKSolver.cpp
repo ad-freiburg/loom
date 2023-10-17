@@ -309,13 +309,10 @@ int GLPKSolver::getNumVars() const { return glp_get_num_cols(_prob); }
 void GLPKSolver::setStarter(const StarterSol& starterSol) {
   _starterArr = new double[getNumVars() + 1];
 
-  size_t a = 0;
-
   for (const auto& varVal : starterSol) {
     int colId = getVarByName(varVal.first);
     if (colId < 0) continue;
     _starterArr[colId + 1] = varVal.second;
-    a++;
   }
 }
 
