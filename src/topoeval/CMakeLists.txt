@@ -5,7 +5,7 @@ set(topoeval_main TopoEvalMain.cpp)
 list(REMOVE_ITEM topoeval_SRC ${topoeval_main})
 
 include_directories(
-	${TRANSITMAP_INCLUDE_DIR}
+	${LOOM_INCLUDE_DIR}
 )
 
 configure_file (

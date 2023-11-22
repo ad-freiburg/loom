@@ -2,7 +2,7 @@ file(GLOB_RECURSE test_SRC *.cpp)
 list(REMOVE_ITEM test_SRC TestMain.cpp)
 
 include_directories(
-	${TRANSITMAP_INCLUDE_DIR}
+	${LOOM_INCLUDE_DIR}
 )
 
 add_executable(topoTest TestMain.cpp)

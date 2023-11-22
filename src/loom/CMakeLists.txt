@@ -6,7 +6,7 @@ list(REMOVE_ITEM loom_SRC ${loom_main})
 list(REMOVE_ITEM loom_SRC TestMain.cpp)
 
 include_directories(
-	${TRANSITMAP_INCLUDE_DIR}
+	${LOOM_INCLUDE_DIR}
 	SYSTEM ${GUROBI_INCLUDE_DIR}
 	SYSTEM ${GLPK_INCLUDE_DIR}
 	SYSTEM ${COIN_INCLUDE_DIR}

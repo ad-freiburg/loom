@@ -6,7 +6,7 @@ list(REMOVE_ITEM dot_SRC ${dot2tg_main})
 list(REMOVE_ITEM dot_SRC TestMain.cpp)
 
 include_directories(
-	${TRANSITMAP_INCLUDE_DIR}
+	${LOOM_INCLUDE_DIR}
 )
 
 add_subdirectory(tests)

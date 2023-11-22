@@ -1,5 +1,5 @@
 include_directories(
-	${TRANSITMAP_INCLUDE_DIR}
+	${LOOM_INCLUDE_DIR}
 )
 
 add_executable(gtfs2graphTest TestMain.cpp)
