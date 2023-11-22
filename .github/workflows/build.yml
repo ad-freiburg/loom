@@ -116,7 +116,7 @@ jobs:
       - name: Checkout submodules
         run: git submodule update --init --recursive
       - name: install dependencies
-        run: brew install --force --overwrite cmake && brew install --force --overwrite glpk && brew tap coin-or-tools/coinor && brew install --force --overwrite coin-or-tools/coinor/cbc
+        run: rm -rf /usr/local/bin/2to3 && brew install --force --overwrite cmake && brew install --force --overwrite glpk && brew tap coin-or-tools/coinor && brew install --force --overwrite coin-or-tools/coinor/cbc
       - name: cmake
         run: mkdir build && cd build && cmake ..
       - name: make
