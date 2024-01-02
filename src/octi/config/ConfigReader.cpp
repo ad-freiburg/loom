@@ -156,7 +156,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"abort-after", required_argument, 0, 'a'},
                          {0, 0, 0, 0}};
 
-  char c;
+  int c;
 
   while ((c = getopt_long(argc, argv, ":hvm:Dg:b:", ops, 0)) != -1) {
     switch (c) {

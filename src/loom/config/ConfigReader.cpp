@@ -109,7 +109,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
       {"write-stats", no_argument, 0, 16},
       {0, 0, 0, 0}};
 
-  char c;
+  int c;
   while ((c = getopt_long(argc, argv, ":hvm:D", ops, 0)) != -1) {
     switch (c) {
       case 'h':

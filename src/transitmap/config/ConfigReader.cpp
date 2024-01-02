@@ -118,7 +118,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
 
   std::string zoom;
 
-  char c;
+  int c;
   while ((c = getopt_long(argc, argv, ":hvlDz:", ops, 0)) != -1) {
     switch (c) {
       case 'h':

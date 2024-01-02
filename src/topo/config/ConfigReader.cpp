@@ -95,7 +95,7 @@ void ConfigReader::read(TopoConfig* cfg, int argc, char** argv) const {
 
   double turnRestrDiff = -1;
 
-  char c;
+  int c;
   while ((c = getopt_long(argc, argv, ":hvd:", ops, 0)) != -1) {
     switch (c) {
       case 'h':

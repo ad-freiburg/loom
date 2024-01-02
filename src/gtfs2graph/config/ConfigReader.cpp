@@ -76,7 +76,7 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
                          {"prune-threshold", required_argument, 0, 'p'},
                          {0, 0, 0, 0}};
 
-  char c;
+  int c;
   while ((c = getopt_long(argc, argv, ":hvim:p:", ops, 0)) != -1) {
     switch (c) {
       case 'h':
