@@ -665,15 +665,31 @@ void MvtRenderer::serializeTile(size_t x, size_t y, size_t z,
   ss << _cfg->mvtPath << "/";
 
   ss << z;
-  mkdir(ss.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+  int err = mkdir(ss.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+  if (err == -1) {
+    if (errno != EEXIST) {
+      throw std::runtime_error("Could not create output directory " + ss.str());
+    }
+  }
 
   ss << "/" << x;
-  mkdir(ss.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+  err = mkdir(ss.str().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+  if (err == -1) {
+    if (errno != EEXIST) {
+      throw std::runtime_error("Could not create output directory " + ss.str());
+    }
+  }
 
   ss << "/" << ((1 << z) - 1 - y) << ".mvt";
 
   std::fstream fo(ss.str().c_str(),
                   std::ios::out | std::ios::trunc | std::ios::binary);
+
+  if (!fo.is_open()) {
+    throw std::runtime_error("Could not open " + ss.str());
+  }
 
   std::string a;
 
