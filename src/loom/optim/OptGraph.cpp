@@ -674,7 +674,7 @@ size_t OptGraph::getNumLines() const {
   for (auto n : getNds()) {
     for (auto e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
-      for (const auto& to : getFirstLnEdgPart(e).lnEdg->pl().getLines()) {
+      for (auto to : getFirstLnEdgPart(e).lnEdg->pl().getLines()) {
         lines.insert(to.line);
       }
     }
