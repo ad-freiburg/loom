@@ -28,11 +28,11 @@ find_package(LibZip)
 
 # set compiler flags, see http://stackoverflow.com/questions/7724569/debug-vs-release-in-cmake
 if(OPENMP_FOUND)
-	set(CMAKE_CXX_FLAGS "${OpenMP_CXX_FLAGS} -Ofast -fno-signed-zeros -fno-trapping-math -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wno-keyword-macro -Wformat-security -Wformat=2")
+	set(CMAKE_CXX_FLAGS "${OpenMP_CXX_FLAGS} -O3 -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wno-keyword-macro -Wformat-security -Wformat=2")
 
 else()
 	message(WARNING "Configuring without OpenMP!")
-	set(CMAKE_CXX_FLAGS "-Ofast -fno-signed-zeros -fno-trapping-math -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wno-keyword-macro -Wformat-security -Wformat=2")
+	set(CMAKE_CXX_FLAGS "-O3 -Wall -Wno-format-extra-args -Wextra -Wformat-nonliteral -Wno-keyword-macro -Wformat-security -Wformat=2")
 endif()
 
 if(GUROBI_FOUND)
