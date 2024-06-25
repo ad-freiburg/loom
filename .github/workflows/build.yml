@@ -19,6 +19,40 @@ jobs:
         run: cd build && make
       - name: tests
         run: cd build && ctest --output-on-failure
+  ubuntu-22-04-build-gcc:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
+      - name: install dependencies
+        run: sudo apt install -y cmake gcc g++ libglpk-dev coinor-cbc coinor-libcbc-dev
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && ctest --output-on-failure
+  ubuntu-24-04-build-gcc:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
+      - name: install dependencies
+        run: sudo apt install -y cmake gcc g++ libglpk-dev coinor-cbc coinor-libcbc-dev
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && ctest --output-on-failure
   ubuntu-latest-build-gcc:
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +72,48 @@ jobs:
         run: cd build && ctest --output-on-failure
   ubuntu-20-04-build-clang:
     runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
+      - name: install dependencies
+        run: sudo apt install -y cmake clang libglpk-dev coinor-cbc coinor-libcbc-dev
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+        shell: bash
+        env:
+          CC: clang
+          CXX: clang++
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && ctest --output-on-failure
+  ubuntu-22-04-build-clang:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
+      - name: install dependencies
+        run: sudo apt install -y cmake clang libglpk-dev coinor-cbc coinor-libcbc-dev
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+        shell: bash
+        env:
+          CC: clang
+          CXX: clang++
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && ctest --output-on-failure
+  ubuntu-24-04-build-clang:
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
@@ -116,7 +192,7 @@ jobs:
       - name: Checkout submodules
         run: git submodule update --init --recursive
       - name: install dependencies
-        run: brew install --force --overwrite cmake && brew install --force --overwrite glpk && brew tap coin-or-tools/coinor && brew install --force --overwrite coin-or-tools/coinor/cbc
+        run: brew install --force --overwrite cmake && brew install --force --overwrite glpk 
       - name: cmake
         run: mkdir build && cd build && cmake ..
       - name: make
