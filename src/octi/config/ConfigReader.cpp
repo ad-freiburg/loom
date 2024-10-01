@@ -43,7 +43,7 @@ void ConfigReader::help(const char* bin) const {
             << "print version\n"
             << std::setw(39) << "  -h [ --help ]"
             << "show this help message\n"
-            << std::setw(39) << "  -o [ --optim-mode ] arg (=heur)"
+            << std::setw(39) << "  -m [ --optim-mode ] arg (=heur)"
             << "optimization mode, 'heur' or 'ilp'\n"
             << std::setw(39) << "  --obstacles arg"
             << "GeoJSON file containing obstacle polygons\n"
