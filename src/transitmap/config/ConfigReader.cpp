@@ -75,8 +75,6 @@ void ConfigReader::help(const char* bin) const {
             << "input line smoothing\n"
             << std::setw(37) << "  --random-colors"
             << "fill missing colors with random colors\n"
-            << std::setw(37) << "  --no-render-stations"
-            << "don't render stations\n"
             << std::setw(37) << "  --tight-stations"
             << "don't expand node fronts for stations\n"
             << std::setw(37) << "  --no-render-stations"
