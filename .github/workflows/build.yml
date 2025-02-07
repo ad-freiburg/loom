@@ -162,7 +162,7 @@ jobs:
       - name: Checkout submodules
         run: git submodule update --init --recursive
       - name: install dependencies
-        run: brew install --force --overwrite cmake && brew install --force --overwrite glpk && brew tap coin-or-tools/coinor && brew install --force --overwrite coin-or-tools/coinor/cbc
+        run: brew install --force --overwrite cmake && brew install --force --overwrite glpk
       - name: cmake
         run: mkdir build && cd build && cmake ..
       - name: make
@@ -178,21 +178,6 @@ jobs:
         run: git submodule update --init --recursive
       - name: install dependencies
         run: brew install --force --overwrite cmake && brew install --force --overwrite glpk && brew tap coin-or-tools/coinor && brew install --force --overwrite coin-or-tools/coinor/cbc
-      - name: cmake
-        run: mkdir build && cd build && cmake ..
-      - name: make
-        run: cd build && make
-      - name: tests
-        run: cd build && ctest --output-on-failure
-  macos-12-build:
-    runs-on: macos-12
-    steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: install dependencies
-        run: brew install --force --overwrite cmake && brew install --force --overwrite glpk 
       - name: cmake
         run: mkdir build && cd build && cmake ..
       - name: make
