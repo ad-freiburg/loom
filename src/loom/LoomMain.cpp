@@ -11,6 +11,7 @@
 #include "loom/config/ConfigReader.cpp"
 #include "loom/config/LoomConfig.h"
 #include "loom/optim/CombOptimizer.h"
+#include "loom/optim/CombNoILPOptimizer.h"
 #include "loom/optim/GreedyOptimizer.h"
 #include "loom/optim/ILPEdgeOrderOptimizer.h"
 #include "shared/rendergraph/Penalties.h"
@@ -72,6 +73,9 @@ int main(int argc, char** argv) {
   } else if (cfg.optimMethod == "comb") {
     optim::CombOptimizer ilpCombiOptim(&cfg, pens);
     stats = ilpCombiOptim.optimize(&g);
+  } else if (cfg.optimMethod == "comb-no-ilp") {
+    optim::CombNoILPOptimizer noIlpCombiOptim(&cfg, pens);
+    stats = noIlpCombiOptim.optimize(&g);
   } else if (cfg.optimMethod == "exhaust") {
     optim::ExhaustiveOptimizer exhausOptim(&cfg, pens);
     stats = exhausOptim.optimize(&g);

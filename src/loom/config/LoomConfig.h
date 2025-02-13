@@ -15,7 +15,7 @@ struct Config {
   std::string outputPath;
   std::string dbgPath;
 
-  std::string optimMethod = "comb";
+  std::string optimMethod = "comb-no-ilp";
   std::string MPSOutputPath;
 
   size_t optimRuns = 1;
