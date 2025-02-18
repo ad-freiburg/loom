@@ -17,6 +17,7 @@ struct Config {
   double pruneThreshold;
 
   std::set<ad::cppgtfs::gtfs::flat::Route::TYPE> useMots;
+  std::set<std::string> useRoutes;
 };
 
 }  // namespace config

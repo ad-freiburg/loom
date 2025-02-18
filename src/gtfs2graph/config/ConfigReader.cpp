@@ -60,6 +60,8 @@ void ConfigReader::help(const char* bin) const {
       << "  as GTFS mot codes\n"
       << std::setw(36) << " "
       << "  funicular, coach} or as GTFS mot codes\n"
+      << std::setw(36) << "  -r [ --route ]"
+      << "Routes to calculate shapes for, comma separator.\n"
       << std::setw(36) << "  -p [ --prune-threshold ] arg (=0)"
       << "Threshold for pruning of seldomly occuring\n"
       << std::setw(36) << " " << "  lines, between 0 and 1\n";
@@ -68,16 +70,18 @@ void ConfigReader::help(const char* bin) const {
 // _____________________________________________________________________________
 void ConfigReader::read(Config* cfg, int argc, char** argv) const {
   std::string motStr = "all";
+  std::string routeIds = "-1";
   double pruneThreshold = 0;
 
   struct option ops[] = {{"version", no_argument, 0, 'v'},
                          {"help", no_argument, 0, 'h'},
                          {"mots", required_argument, 0, 'm'},
+                         {"route", required_argument, 0, 'r'},
                          {"prune-threshold", required_argument, 0, 'p'},
                          {0, 0, 0, 0}};
 
   int c;
-  while ((c = getopt_long(argc, argv, ":hvim:p:", ops, 0)) != -1) {
+  while ((c = getopt_long(argc, argv, ":hvim:r:p:", ops, 0)) != -1) {
     switch (c) {
       case 'h':
         help(argv[0]);
@@ -87,6 +91,9 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
         exit(0);
       case 'm':
         motStr = optarg;
+        break;
+      case 'r':
+        routeIds = optarg;
         break;
       case 'p':
         pruneThreshold = atof(optarg);
@@ -120,5 +127,10 @@ void ConfigReader::read(Config* cfg, int argc, char** argv) const {
          ad::cppgtfs::gtfs::flat::Route::getTypesFromString(sMotStr)) {
       cfg->useMots.insert(mot);
     }
+  }
+
+  for (auto sRouteStr : util::split(routeIds, ',')) {
+    if (sRouteStr == "-1") continue;
+    cfg->useRoutes.insert(sRouteStr);
   }
 }

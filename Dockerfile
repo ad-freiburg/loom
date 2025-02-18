@@ -30,7 +30,7 @@ ENV GUROBI_HOME /opt/gurobi/linux64
 ENV PATH $PATH:$GUROBI_HOME/bin:/loom/build
 ENV LD_LIBRARY_PATH $GUROBI_HOME/lib
 
-RUN git clone --recurse-submodules https://github.com/ad-freiburg/loom /loom
+RUN git clone --recurse-submodules https://github.com/somardigital/loom /loom
 
 ENV GRB_LICENSE_FILE /gurobi/gurobi.lic
 

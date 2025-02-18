@@ -49,6 +49,7 @@ void Builder::consume(const Feed& f, BuildGraph* g) {
     // ignore trips with only one stop
     if (t->second->getStopTimes().size() < 2) continue;
     if (!_cfg->useMots.count(t->second->getRoute()->getType())) continue;
+    if (_cfg->useRoutes.size() > 0 && !_cfg->useRoutes.count(t->second->getRoute()->getId())) continue;
 
     auto st = t->second->getStopTimes().begin();
 

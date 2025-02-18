@@ -30,13 +30,13 @@ Building and Installation
 
 Fetch this repository and init submodules:
 
-```
+```bash
 git clone --recurse-submodules https://github.com/ad-freiburg/loom.git
 ```
 
 Build and install:
 
-```
+```bash
 cd loom
 mkdir build && cd build
 cmake ..
@@ -44,7 +44,7 @@ make -j
 ```
 
 To (optionally) install, type
-```
+```bash
 make install
 ```
 
@@ -61,50 +61,57 @@ This suite consists of several tools:
 * `octi`, create a schematic version of a line graph
 * `transitmap`, render a line graph into an SVG map (`--render-engine=svg`) or into vector tiles (`--render-engine=mvt`)
 
-All tools output a graph, in the GeoJSON format, to `stdout`, and expect a GeoJSON graph at `stdin`. Exceptions are `gtfs2graph`, where the input is a GTFS feed, and `transitmap`, which writes SVG to `stdout` or MVT vector tiles to a specified folder. Running a tool with `-h` will show a help message with all allowed options.
+All tools output a graph, in the GeoJSON format, to `stdout`, and expect a GeoJSON graph at `stdin`. Exceptions are `gtfs2graph`, where the input is a GTFS feed, and `transitmap`, which writes SVG to `stdout` or MVT vector tiles to a specified folder.
 
 The `example` folder contains several overlapping-free line graphs.
 
 To render the geographically correct Stuttgart map from above, use
-```
+```bash
 cat examples/stuttgart.json | loom | transitmap > stuttgart.svg
 ```
 
 To also render labels, use
 
-```
+```bash
 cat examples/stuttgart.json | loom | transitmap -l > stuttgart-label.svg
 ```
 
 To render an *octilinear* map, put the `octi` tool into the pipe:
 
-```
+```bash
 cat examples/stuttgart.json | loom | octi | transitmap -l > stuttgart-octilin.svg
 ```
 
 To render for example the orthoradial map from above, use a different base graph for `octi`:
 
-```
+```bash
 cat examples/stuttgart.json | loom | octi -b orthoradial | transitmap -l > stuttgart-orthorad.svg
 ```
 
 Line graph extraction from GTFS
 -------------------------------
 
+Help command to get parameters
+
+```bash
+gtfs2graph --help
+```
+
 To extract for example a line graph for streetcars from GTFS data, use `gtfs2graph` as follows:
 
-```
+```bash
 gtfs2graph -m tram freiburg.zip > freiburg.json
 ```
 
 This line graph will have many overlapping edges and stations. To create an overlapping-free line graph ready for rendering, add `topo`:
 
-```
+```bash
 gtfs2graph -m tram freiburg.zip | topo > freiburg.json
 ```
 
 A full pipeline for creating an octilinear map of the Freiburg tram network would look like this:
-```
+
+```bash
 gtfs2graph -m tram freiburg.zip | topo | loom | octi | transitmap > freiburg-tram.svg
 ```
 
@@ -115,24 +122,30 @@ You can also use any tool in a Docker container via the provided Dockerfile.
 
 To build the container:
 
-```
+```bash
 docker build -t loom
 ```
 
 To run a tool from the suite, use
 
-```
+```bash
 docker run -i loom <TOOL>
+```
+***Example:***
+
+```bash
+docker run -i loom gtfs2graph --help
 ```
 
 For example, to octilinearize the Freiburg example, use
 
-```
+```bash
 cat examples/freiburg.json | sudo docker run -i loom octi
 ```
 
-*Note*: if you want to use gurobi for ILP optimization, you *must* mount a folder container a valid gurobi license file `gurobi.lic` to `/gurobi/` in the container. For example, if your `gurobi.lic` is in `/home/user/gurobi`:
+> [!NOTE]
+> If you want to use gurobi for ILP optimization, you *must* mount a folder container a valid gurobi license file `gurobi.lic` to `/gurobi/` in the container. For example, if your `gurobi.lic` is in `/home/user/gurobi`:
 
-```
+```bash
 docker run -v /home/user/gurobi:/gurobi loom <TOOL>
 ```
