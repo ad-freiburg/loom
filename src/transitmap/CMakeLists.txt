@@ -20,7 +20,7 @@ configure_file (
 add_executable(transitmap ${transitmap_main})
 add_library(transitmap_dep ${transitmap_SRC})
 
-if (Protobuf_FOUND)
+if (Protobuf_FOUND AND Protobuf_PROTOC_EXECUTABLE)
 	add_dependencies(transitmap_dep proto)
 	target_link_libraries(transitmap transitmap_dep shared_dep dot_dep util proto ${Protobuf_LIBRARIES})
 else()
