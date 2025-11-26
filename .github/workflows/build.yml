@@ -2,23 +2,6 @@ name: Build
 'on':
   - push
 jobs:
-  ubuntu-20-04-build-gcc:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: update apt
-        run: sudo apt update
-      - name: install dependencies
-        run: sudo apt install -y cmake gcc g++ libglpk-dev coinor-cbc coinor-libcbc-dev
-      - name: cmake
-        run: mkdir build && cd build && cmake ..
-      - name: make
-        run: cd build && make
-      - name: tests
-        run: cd build && ctest --output-on-failure
   ubuntu-22-04-build-gcc:
     runs-on: ubuntu-22.04
     steps:
@@ -70,8 +53,8 @@ jobs:
         run: cd build && make
       - name: tests
         run: cd build && ctest --output-on-failure
-  ubuntu-20-04-build-clang:
-    runs-on: ubuntu-20.04
+  ubuntu-latest-full-protobuf-build-gcc:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
@@ -80,13 +63,26 @@ jobs:
       - name: update apt
         run: sudo apt update
       - name: install dependencies
-        run: sudo apt install -y cmake clang libglpk-dev coinor-cbc coinor-libcbc-dev
+        run: sudo apt install -y cmake gcc g++ libglpk-dev coinor-cbc coinor-libcbc-dev libprotobuf-dev protobuf-compiler
       - name: cmake
         run: mkdir build && cd build && cmake ..
-        shell: bash
-        env:
-          CC: clang
-          CXX: clang++
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && ctest --output-on-failure
+  ubuntu-latest-partial-protobuf-build-gcc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: update apt
+        run: sudo apt update
+      - name: install dependencies
+        run: sudo apt install -y cmake gcc g++ libglpk-dev coinor-cbc coinor-libcbc-dev libprotobuf-dev
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
       - name: make
         run: cd build && make
       - name: tests
@@ -169,8 +165,53 @@ jobs:
         run: cd build && make
       - name: tests
         run: cd build && ctest --output-on-failure
-  macos-13-build:
-    runs-on: macos-13
+  macos-15-large-build:
+    runs-on: macos-15-large
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: install dependencies
+        run: brew install --force --overwrite cmake && brew install --force --overwrite glpk && brew tap coin-or-tools/coinor && brew install --force --overwrite coin-or-tools/coinor/cbc
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && ctest --output-on-failure
+  macos-15-large-protobuf-build:
+    runs-on: macos-15-large
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: install dependencies
+        run: brew install --force --overwrite cmake && brew install --force --overwrite glpk && brew tap coin-or-tools/coinor && brew install --force --overwrite coin-or-tools/coinor/cbc && brew install protobuf
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && ctest --output-on-failure
+  macos-15-xlarge-build:
+    runs-on: macos-15-xlarge
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: install dependencies
+        run: brew install --force --overwrite cmake && brew install --force --overwrite glpk && brew tap coin-or-tools/coinor && brew install --force --overwrite coin-or-tools/coinor/cbc
+      - name: cmake
+        run: mkdir build && cd build && cmake ..
+      - name: make
+        run: cd build && make
+      - name: tests
+        run: cd build && ctest --output-on-failure
+  macos-26-xlarge-build:
+    runs-on: macos-26-xlarge
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
