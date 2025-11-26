@@ -19,23 +19,6 @@ jobs:
         run: cd build && make
       - name: tests
         run: cd build && ctest --output-on-failure
-  ubuntu-24-04-build-gcc:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: update apt
-        run: sudo apt update
-      - name: install dependencies
-        run: sudo apt install -y cmake gcc g++ libglpk-dev coinor-cbc coinor-libcbc-dev
-      - name: cmake
-        run: mkdir build && cd build && cmake ..
-      - name: make
-        run: cd build && make
-      - name: tests
-        run: cd build && ctest --output-on-failure
   ubuntu-latest-build-gcc:
     runs-on: ubuntu-latest
     steps:
@@ -97,28 +80,7 @@ jobs:
       - name: update apt
         run: sudo apt update
       - name: install dependencies
-        run: sudo apt install -y cmake clang libglpk-dev coinor-cbc coinor-libcbc-dev
-      - name: cmake
-        run: mkdir build && cd build && cmake ..
-        shell: bash
-        env:
-          CC: clang
-          CXX: clang++
-      - name: make
-        run: cd build && make
-      - name: tests
-        run: cd build && ctest --output-on-failure
-  ubuntu-24-04-build-clang:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: update apt
-        run: sudo apt update
-      - name: install dependencies
-        run: sudo apt install -y cmake clang libglpk-dev coinor-cbc coinor-libcbc-dev
+        run: sudo apt install -y cmake clang libglpk-dev
       - name: cmake
         run: mkdir build && cd build && cmake ..
         shell: bash
