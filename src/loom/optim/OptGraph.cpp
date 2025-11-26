@@ -29,6 +29,8 @@ using shared::linegraph::LineOcc;
 using shared::rendergraph::RenderGraph;
 using util::Nullable;
 using util::graph::Algorithm;
+using util::graph::Algorithm;
+using util::DEBUG;
 
 const static double DO = 100;
 

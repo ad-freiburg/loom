@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <unordered_map>
+
 #include "loom/optim/ExhaustiveOptimizer.h"
 #include "shared/linegraph/Line.h"
 #include "util/log/Log.h"
@@ -13,6 +14,8 @@ using namespace optim;
 using loom::optim::ExhaustiveOptimizer;
 using shared::linegraph::Line;
 using shared::rendergraph::HierarOrderCfg;
+
+using util::DEBUG;
 
 // _____________________________________________________________________________
 double ExhaustiveOptimizer::optimizeComp(OptGraph* og,

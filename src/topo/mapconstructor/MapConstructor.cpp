@@ -34,6 +34,8 @@ using shared::linegraph::LineNodePL;
 using shared::linegraph::LineOcc;
 using shared::linegraph::Station;
 
+using util::DEBUG;
+
 const static double MAX_COLLAPSED_SEG_LENGTH = 500;
 
 // _____________________________________________________________________________

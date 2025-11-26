@@ -23,6 +23,7 @@ using shared::linegraph::LineGraph;
 using shared::linegraph::LineNode;
 using util::geo::BezierCurve;
 using util::graph::Dijkstra;
+using util::WARN;
 
 // _____________________________________________________________________________
 double Drawing::score() const {

@@ -9,10 +9,12 @@
 using loom::optim::NullOptimizer;
 using shared::rendergraph::HierarOrderCfg;
 
+using util::DEBUG;
+
 // _____________________________________________________________________________
 double NullOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                HierarOrderCfg* hc, size_t depth,
-                                OptResStats& stats) const {
+                                   HierarOrderCfg* hc, size_t depth,
+                                   OptResStats& stats) const {
   UNUSED(og);
   UNUSED(stats);
   LOGTO(DEBUG, std::cerr) << prefix(depth)
