@@ -21,7 +21,7 @@ Requirements
 ------------
 
  * `cmake`
- * `gcc >= 5.0` (or `clang >= 3.9`)
+ * `gcc >= 5.1` (or `clang >= 3.9`)
  * Optional: `libglpk-dev` (ILP solver), `coinor-libcbc-dev` (ILP solver), `gurobi` (ILP solver), `libzip-dev`, `libprotobuf-dev` + `protobuf-compiler` (for vector tile output)
 
 
