@@ -34,6 +34,7 @@ using util::geo::LinePoint;
 using util::geo::LinePointCmp;
 using util::geo::Polygon;
 using util::geo::PolyLine;
+using util::DEBUG;
 
 const static double TILE_RES = 1024;
 
