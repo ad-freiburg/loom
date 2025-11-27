@@ -19,6 +19,8 @@
 #include "util/geo/output/GeoGraphJsonOutput.h"
 #include "util/log/Log.h"
 
+using util::DEBUG;
+
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
   // disable output buffering for standard output

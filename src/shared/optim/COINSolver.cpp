@@ -24,6 +24,11 @@ using shared::optim::COINSolver;
 using shared::optim::DirType;
 using shared::optim::SolveType;
 
+using util::INFO;
+using util::WARN;
+using util::DEBUG;
+using util::ERROR;
+
 // _____________________________________________________________________________
 int callBack(CbcModel* model, int from) {
   int ret = 0;
@@ -58,9 +63,9 @@ COINSolver::COINSolver(DirType dir)
 
   _msgHandler.setLogLevel(0, 0);
 
-  // set log level based on our own LOGLEVEL
-  if (LOGLEVEL > 2) _msgHandler.setLogLevel(0, 1);
-  if (LOGLEVEL > 3) _msgHandler.setLogLevel(0, 3);
+  // set log level based on our own log level
+  if (UTIL_LOGLVL > 2) _msgHandler.setLogLevel(0, 1);
+  if (UTIL_LOGLVL > 3) _msgHandler.setLogLevel(0, 3);
 
   _solver->passInMessageHandler(&_msgHandler);
 

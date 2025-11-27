@@ -43,6 +43,8 @@ using util::geo::Polygon;
 using util::graph::BiDijkstra;
 using util::graph::Dijkstra;
 
+using util::DEBUG;
+
 // _____________________________________________________________________________
 Score Octilinearizer::drawILP(
     const CombGraph& cg, const util::geo::DBox& box, LineGraph* outTg,

@@ -18,18 +18,20 @@
 
 using loom::optim::CombNoILPOptimizer;
 using shared::rendergraph::HierarOrderCfg;
+using util::DEBUG;
 
 // _____________________________________________________________________________
-double CombNoILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                   HierarOrderCfg* hc, size_t depth,
-                                   OptResStats& stats) const {
+double CombNoILPOptimizer::optimizeComp(OptGraph* og,
+                                        const std::set<OptNode*>& g,
+                                        HierarOrderCfg* hc, size_t depth,
+                                        OptResStats& stats) const {
   size_t maxC = maxCard(g);
   double solSp = solutionSpaceSize(g);
 
   LOGTO(DEBUG, std::cerr) << prefix(depth)
-                          << "(CombNoILPOptimizer) Optimizing comp with " << g.size()
-                          << " nodes, max card " << maxC << ", sol space size "
-                          << solSp;
+                          << "(CombNoILPOptimizer) Optimizing comp with "
+                          << g.size() << " nodes, max card " << maxC
+                          << ", sol space size " << solSp;
 
   if (maxC == 1) {
     return _nullOpt.optimizeComp(og, g, hc, depth + 1, stats);

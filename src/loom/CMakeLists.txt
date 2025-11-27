@@ -22,4 +22,4 @@ configure_file (
 add_executable(loom ${loom_main})
 add_library(loom_dep ${loom_SRC})
 
-target_link_libraries(loom loom_dep shared_dep dot_dep util ${GLPK_LIBRARY} ${GUROBI_LIBRARY} ${COIN_LIBRARIES} -lpthread)
+target_link_libraries(loom loom_dep shared_dep dot_dep pb_util_graph pb_util pb_util_json pb_util_geo ${GLPK_LIBRARY} ${GUROBI_LIBRARY} ${COIN_LIBRARIES} -lpthread)

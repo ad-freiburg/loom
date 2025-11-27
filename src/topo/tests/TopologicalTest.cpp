@@ -9,6 +9,7 @@
 #include "topo/tests/TopoTestUtil.h"
 #include "topo/tests/TopologicalTest.h"
 #include "util/Misc.h"
+#include "util/Test.h"
 #include "util/Nullable.h"
 #include "util/String.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"
@@ -317,8 +318,10 @@ void TopologicalTest::run() {
       if (nd->getDeg() == 2) d = nd;
     }
     ed = e->getAdjList().front();
-    TEST(cd->pl().hasLine(&l2) && cd->pl().lineOcc(&l2).direction, ==, c);
-    TEST(ed->pl().hasLine(&l2) && ed->pl().lineOcc(&l2).direction, !=, 0);
+    TEST(cd->pl().hasLine(&l2));
+    TEST(cd->pl().lineOcc(&l2).direction, ==, c);
+    TEST(ed->pl().hasLine(&l2));
+    TEST(ed->pl().lineOcc(&l2).direction, !=, 0);
     TEST(ed->pl().lineOcc(&l2).direction, !=, e);
   }
 

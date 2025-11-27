@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <unordered_map>
+
 #include "loom/optim/GreedyOptimizer.h"
 #include "shared/linegraph/Line.h"
 #include "util/log/Log.h"
@@ -14,11 +15,12 @@ using loom::optim::GreedyOptimizer;
 using loom::optim::SettledEdgs;
 using shared::linegraph::Line;
 using shared::rendergraph::HierarOrderCfg;
+using util::DEBUG;
 
 // _____________________________________________________________________________
 double GreedyOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
-                                  HierarOrderCfg* hc, size_t depth,
-                                  OptResStats& stats) const {
+                                     HierarOrderCfg* hc, size_t depth,
+                                     OptResStats& stats) const {
   UNUSED(og);
   UNUSED(stats);
   LOGTO(DEBUG, std::cerr) << prefix(depth)
@@ -36,7 +38,7 @@ double GreedyOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
 
 // _____________________________________________________________________________
 void GreedyOptimizer::getFlatConfig(const std::set<OptNode*>& g,
-                                   OptOrderCfg* cfg) const {
+                                    OptOrderCfg* cfg) const {
   const OptEdge* e = 0;
   SettledEdgs settled;
 

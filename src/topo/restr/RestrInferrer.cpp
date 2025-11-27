@@ -15,6 +15,7 @@
 #include "util/log/Log.h"
 
 using topo::restr::RestrInferrer;
+using util::DEBUG;
 
 // _____________________________________________________________________________
 RestrInferrer::RestrInferrer(const TopoConfig* cfg, LineGraph* g)

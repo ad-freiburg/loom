@@ -17,6 +17,11 @@ using shared::optim::GLPKSolver;
 using shared::optim::SolveType;
 using shared::optim::VariableMatrix;
 
+using util::INFO;
+using util::WARN;
+using util::DEBUG;
+using util::ERROR;
+
 // _____________________________________________________________________________
 GLPKSolver::GLPKSolver(DirType dir)
     : _starterArr(0),

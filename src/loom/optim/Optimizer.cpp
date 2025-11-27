@@ -33,6 +33,8 @@ using shared::rendergraph::RenderGraph;
 using util::factorial;
 using util::geo::DLine;
 using util::geo::DPoint;
+using util::INFO;
+using util::DEBUG;
 
 // _____________________________________________________________________________
 OptResStats Optimizer::optimize(RenderGraph* rg) const {

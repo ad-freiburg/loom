@@ -32,6 +32,8 @@ using ad::cppgtfs::gtfs::Stop;
 using ad::cppgtfs::gtfs::StopTime;
 using ad::cppgtfs::gtfs::Trip;
 
+using util::DEBUG;
+
 // _____________________________________________________________________________
 Builder::Builder(const config::Config* cfg) : _cfg(cfg) {}
 

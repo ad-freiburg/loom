@@ -7,6 +7,7 @@
 #include "shared/optim/ILPSolver.h"
 #include "shared/tests/ILPSolverTest.h"
 #include "util/Misc.h"
+#include "util/Test.h"
 
 using shared::optim::ILPSolver;
 using util::approx;

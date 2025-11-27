@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <fstream>
 #include <thread>
+
 #include "loom/optim/ILPOptimizer.h"
 #include "loom/optim/OptGraph.h"
 #include "shared/optim/ILPSolvProv.h"
@@ -20,12 +21,14 @@ using namespace optim;
 using shared::linegraph::Line;
 using shared::optim::ILPSolver;
 using shared::rendergraph::HierarOrderCfg;
+using util::DEBUG;
+using util::ERROR;
+using util::WARN;
 
 // _____________________________________________________________________________
 double ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                                   HierarOrderCfg* hc, size_t depth,
                                   OptResStats& stats) const {
-
   // avoid building the entire ILP for small search sizes
   if (solutionSpaceSize(g) < 500) {
     return _exhausOpt.optimizeComp(og, g, hc, depth + 1, stats);

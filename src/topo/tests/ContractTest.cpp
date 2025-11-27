@@ -9,6 +9,7 @@
 #include "topo/tests/ContractTest.h"
 #include "topo/tests/TopoTestUtil.h"
 #include "util/Misc.h"
+#include "util/Test.h"
 #include "util/Nullable.h"
 #include "util/String.h"
 #include "util/geo/output/GeoGraphJsonOutput.h"

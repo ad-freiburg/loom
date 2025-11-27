@@ -16,6 +16,9 @@
 #include "util/graph/EDijkstra.h"
 #include "util/log/Log.h"
 
+using util::DEBUG;
+using util::ERROR;
+
 std::vector<shared::linegraph::LineNode*> gtNds;
 std::vector<std::string> gtStations;
 
@@ -248,9 +251,6 @@ getFromToCands(double d) {
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
-  // disable output buffering for standard output
-  setbuf(stdout, NULL);
-
   // initialize randomness
   srand(time(NULL) + rand());
 

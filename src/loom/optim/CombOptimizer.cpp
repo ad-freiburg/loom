@@ -18,6 +18,7 @@
 
 using loom::optim::CombOptimizer;
 using shared::rendergraph::HierarOrderCfg;
+using util::DEBUG;
 
 // _____________________________________________________________________________
 double CombOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,

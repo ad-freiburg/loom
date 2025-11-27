@@ -36,6 +36,10 @@ using octi::Octilinearizer;
 using octi::basegraph::BaseGraph;
 using util::geo::dist;
 using util::geo::DPolygon;
+using util::INFO;
+using util::DEBUG;
+using util::WARN;
+using util::ERROR;
 
 struct TotalScore {
   Score score;
@@ -281,9 +285,6 @@ void drawComp(LineGraph& tg, double avgDist, util::json::Array& jsonScores,
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
-  // disable output buffering for standard output
-  setbuf(stdout, NULL);
-
   // initialize randomness
   srand(time(NULL) + rand());
 

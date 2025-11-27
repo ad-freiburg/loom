@@ -29,6 +29,7 @@ using util::geo::LinePoint;
 using util::geo::LinePointCmp;
 using util::geo::Polygon;
 using util::geo::PolyLine;
+using util::DEBUG;
 
 // _____________________________________________________________________________
 SvgRenderer::SvgRenderer(std::ostream* o, const config::Config* cfg)

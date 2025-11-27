@@ -11,6 +11,8 @@
 #include "shared/optim/ILPSolver.h"
 #include "util/log/Log.h"
 
+using util::ERROR;
+
 namespace shared {
 namespace optim {
 

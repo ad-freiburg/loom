@@ -29,6 +29,9 @@ using util::randomHtmlColor;
 using util::geo::DPoint;
 using util::geo::Point;
 using util::graph::Algorithm;
+using util::WARN;
+using util::DEBUG;
+using util::ERROR;
 
 // _____________________________________________________________________________
 void LineGraph::readFromDot(std::istream* s) {
