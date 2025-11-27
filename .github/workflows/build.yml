@@ -142,21 +142,6 @@ jobs:
         run: cd build && make
       - name: tests
         run: cd build && ctest --output-on-failure
-  macos-15-protobuf-build:
-    runs-on: macos-15
-    steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: install dependencies
-        run: brew install --force --overwrite cmake && brew install --force --overwrite glpk && brew tap coin-or-tools/coinor && brew install --force --overwrite coin-or-tools/coinor/cbc && brew install protobuf
-      - name: cmake
-        run: mkdir build && cd build && cmake ..
-      - name: make
-        run: cd build && make
-      - name: tests
-        run: cd build && ctest --output-on-failure
   macos-15-intel-build:
     runs-on: macos-15-intel
     steps:
@@ -181,21 +166,6 @@ jobs:
         run: git submodule update --init --recursive
       - name: install dependencies
         run: brew install --force --overwrite cmake && brew install --force --overwrite glpk && brew tap coin-or-tools/coinor && brew install --force --overwrite coin-or-tools/coinor/cbc
-      - name: cmake
-        run: mkdir build && cd build && cmake ..
-      - name: make
-        run: cd build && make
-      - name: tests
-        run: cd build && ctest --output-on-failure
-  macos-26-protobuf-build:
-    runs-on: macos-26
-    steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: install dependencies
-        run: brew install --force --overwrite cmake && brew install --force --overwrite glpk && brew tap coin-or-tools/coinor && brew install --force --overwrite coin-or-tools/coinor/cbc && brew install protobuf
       - name: cmake
         run: mkdir build && cd build && cmake ..
       - name: make
