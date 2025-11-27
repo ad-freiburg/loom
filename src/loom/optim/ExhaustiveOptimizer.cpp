@@ -3,6 +3,8 @@
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
 #include <algorithm>
+#include <random>
+#include <chrono>
 #include <unordered_map>
 
 #include "loom/optim/ExhaustiveOptimizer.h"
@@ -130,6 +132,9 @@ void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
 // _____________________________________________________________________________
 void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
                                         OptOrderCfg* cfg, bool sorted) const {
+  auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+  auto randEng = std::default_random_engine(seed);
+
   for (OptNode* n : g) {
     for (OptEdge* e : n->getAdjList()) {
       if (e->getFrom() != n) continue;
@@ -143,7 +148,7 @@ void ExhaustiveOptimizer::initialConfig(const std::set<OptNode*>& g,
       if (sorted) {
         std::sort((*cfg)[e].begin(), (*cfg)[e].end());
       } else {
-        std::random_shuffle((*cfg)[e].begin(), (*cfg)[e].end());
+        std::shuffle((*cfg)[e].begin(), (*cfg)[e].end(), randEng);
       }
     }
   }
