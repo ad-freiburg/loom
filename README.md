@@ -21,8 +21,10 @@ Requirements
 ------------
 
  * `cmake`
- * `gcc >= 5.0` (or `clang >= 3.9`)
+ * `gcc >= 5.1` (or `clang >= 3.9`)
  * Optional: `libglpk-dev` (ILP solver), `coinor-libcbc-dev` (ILP solver), `gurobi` (ILP solver), `libzip-dev`, `libprotobuf-dev` + `protobuf-compiler` (for vector tile output)
+
+Note: for compilation with newest versions of `libprotobuf` (as shipped e.g. with newer versions of MacOS), you might have to change the line `set(CMAKE_CXX_STANDARD 11)` in `CMakeLists.txt` to `set(CMAKE_CXX_STANDARD 17)`. The `libprotobuf` dependency will be removed with native protocul buffer writing some time in the future, which will resolve this issue.
 
 
 Building and Installation
