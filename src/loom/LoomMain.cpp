@@ -21,6 +21,8 @@
 #include "util/log/Log.h"
 
 using namespace loom;
+using util::DEBUG;
+using util::ERROR;
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {

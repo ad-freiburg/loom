@@ -32,6 +32,9 @@ using shared::linegraph::LineNode;
 using shared::linegraph::LineNodePL;
 using shared::linegraph::Station;
 
+using util::DEBUG;
+using util::VDEBUG;
+
 // _____________________________________________________________________________
 StatInserter::StatInserter(const TopoConfig* cfg, LineGraph* g)
     : _cfg(cfg), _g(g) {

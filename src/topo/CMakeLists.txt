@@ -19,4 +19,4 @@ configure_file (
 add_executable(topo ${topo_main})
 add_library(topo_dep ${topo_SRC})
 
-target_link_libraries(topo topo_dep shared_dep dot_dep util)
+target_link_libraries(topo topo_dep shared_dep dot_dep pb_util_geo pb_util_graph pb_util_json pb_util)

@@ -8,6 +8,10 @@
 #include "loom/optim/CombOptimizer.h"
 #include "shared/optim/ILPSolvProv.h"
 #include "shared/rendergraph/RenderGraph.h"
+#include "util/Test.h"
+#include "util/log/Log.h"
+
+using util::WARN;
 
 struct FileTest {
   std::string fname;

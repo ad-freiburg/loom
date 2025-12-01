@@ -20,13 +20,11 @@
 #include "util/log/Log.h"
 
 using namespace gtfs2graph;
-using std::string;
+using util::ERROR;
+using util::DEBUG;
 
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
-  // disable output buffering for standard output
-  setbuf(stdout, NULL);
-
   // initialize randomness
   srand(time(NULL) + rand());
 

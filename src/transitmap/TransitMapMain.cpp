@@ -23,11 +23,11 @@ using shared::linegraph::LineGraph;
 using shared::rendergraph::RenderGraph;
 using transitmapper::graph::GraphBuilder;
 
+using util::DEBUG;
+using util::ERROR;
+
 // _____________________________________________________________________________
 int main(int argc, char** argv) {
-  // disable output buffering for standard output
-  setbuf(stdout, NULL);
-
   // initialize randomness
   srand(time(NULL) + rand());
 

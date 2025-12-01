@@ -18,9 +18,7 @@ using octi::config::ConfigReader;
 
 using octi::basegraph::BaseGraphType;
 using octi::config::OrderMethod;
-using std::exception;
-using std::string;
-using std::vector;
+using util::ERROR;
 
 static const char* YEAR = &__DATE__[7];
 static const char* COPY =
