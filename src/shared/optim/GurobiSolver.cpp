@@ -15,6 +15,11 @@
 using shared::optim::GurobiSolver;
 using shared::optim::SolveType;
 
+using util::INFO;
+using util::WARN;
+using util::DEBUG;
+using util::ERROR;
+
 // _____________________________________________________________________________
 GurobiSolver::GurobiSolver(DirType dir)
     : _starterArr(0), _status(INF), _numVars(0), _numRows(0) {
