@@ -6,7 +6,6 @@
 #define LOOM_OPTIM_NULLOPTIMIZER_H_
 
 #include "loom/config/LoomConfig.h"
-#include "loom/optim/ILPEdgeOrderOptimizer.h"
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/Optimizer.h"
 #include "shared/rendergraph/OrderCfg.h"

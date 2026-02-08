@@ -6,6 +6,7 @@
 #define LOOM_OPTIM_ILPOPTIMIZER_H_
 
 #include "loom/optim/ExhaustiveOptimizer.h"
+#include "loom/optim/NullOptimizer.h"
 #include "loom/config/LoomConfig.h"
 #include "loom/optim/OptGraph.h"
 #include "loom/optim/Optimizer.h"
@@ -20,7 +21,7 @@ class ILPOptimizer : public Optimizer {
  public:
   ILPOptimizer(const config::Config* cfg,
                const shared::rendergraph::Penalties& pens)
-      : Optimizer(cfg, pens), _exhausOpt(cfg, pens) {};
+      : Optimizer(cfg, pens), _exhausOpt(cfg, pens), _nullOpt(cfg, pens) {};
 
   virtual double optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
                               shared::rendergraph::HierarOrderCfg* c,
@@ -30,6 +31,7 @@ class ILPOptimizer : public Optimizer {
 
  protected:
   const loom::optim::ExhaustiveOptimizer _exhausOpt;
+  const loom::optim::NullOptimizer _nullOpt;
   virtual shared::optim::ILPSolver* createProblem(
       OptGraph* og, const std::set<OptNode*>& g) const;
 
