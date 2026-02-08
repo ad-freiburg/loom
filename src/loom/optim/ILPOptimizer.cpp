@@ -66,7 +66,7 @@ double ILPOptimizer::optimizeComp(OptGraph* og, const std::set<OptNode*>& g,
            "limit)!";
 
     // apply null optimizer to guarantee a valid solution (the input solution)
-    return _nullOpt.optimizeComp(og, g, hc, depth + 1, stats);
+    _nullOpt.optimizeComp(og, g, hc, depth + 1, stats);
   } else {
     LOGTO(DEBUG, std::cerr) << "(stats) ILP obj = " << lp->getObjVal();
     LOGTO(DEBUG, std::cerr) << "(stats) ILP build time = " << buildT << " ms";
