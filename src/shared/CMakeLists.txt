@@ -10,3 +10,5 @@ include_directories(
 add_subdirectory(tests)
 
 add_library(shared_dep ${shared_SRC})
+
+target_link_libraries(shared_dep pb_util_graph pb_util_geo pb_util_json pb_util_xml pb_util)

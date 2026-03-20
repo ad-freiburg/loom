@@ -20,4 +20,5 @@ add_executable(dot2tg ${dot2tg_main})
 add_library(dot_dep ${dot_SRC})
 
 target_include_directories(dot_dep PUBLIC ${PROJECT_SOURCE_DIR}/src/cppgtfs/src)
-target_link_libraries(dot2tg dot_dep util -lpthread)
+target_link_libraries(dot_dep pb_util)
+target_link_libraries(dot2tg dot_dep pb_util -lpthread)

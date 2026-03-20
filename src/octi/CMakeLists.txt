@@ -22,3 +22,4 @@ add_executable(octi ${octi_main})
 add_library(octi_dep ${octi_SRC})
 
 target_link_libraries(octi octi_dep shared_dep pb_util_geo pb_util_graph pb_util_json pb_util dot_dep ${GLPK_LIBRARY} ${GUROBI_LIBRARY} ${COIN_LIBRARIES} -lpthread)
+target_link_libraries(octi_dep shared_dep pb_util_geo pb_util_graph pb_util_json pb_util dot_dep ${GLPK_LIBRARY} ${GUROBI_LIBRARY} ${COIN_LIBRARIES} -lpthread)
