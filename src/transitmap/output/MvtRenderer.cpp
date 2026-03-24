@@ -27,14 +27,15 @@ using shared::rendergraph::RenderGraph;
 using transitmapper::label::Labeller;
 using transitmapper::output::InnerClique;
 using transitmapper::output::MvtRenderer;
+using util::DEBUG;
 using util::geo::Box;
 using util::geo::DPoint;
 using util::geo::DPolygon;
+using util::geo::intersects;
 using util::geo::LinePoint;
 using util::geo::LinePointCmp;
 using util::geo::Polygon;
 using util::geo::PolyLine;
-using util::DEBUG;
 
 const static double TILE_RES = 1024;
 
@@ -486,7 +487,7 @@ void MvtRenderer::addFeature(const MvtLineFeature& feature) {
 
   for (size_t x = swX; x <= neX && x < GRID_SIZE; x++) {
     for (size_t y = swY; y <= neY && y < GRID_SIZE; y++) {
-      if (util::geo::intersects(feature.line, getBox(GRID_ZOOM, x, y))) {
+      if (intersects(feature.line, getBox(GRID_ZOOM, x, y))) {
         if (_grid[x * GRID_SIZE + y] == std::numeric_limits<uint32_t>::max()) {
           _grid[x * GRID_SIZE + y] = _lines.size();
           _cells.push_back({x, y});
@@ -505,7 +506,7 @@ void MvtRenderer::addFeature(const MvtLineFeature& feature) {
 
   for (size_t x = swX; x <= neX && x < GRID2_SIZE; x++) {
     for (size_t y = swY; y <= neY && y < GRID2_SIZE; y++) {
-      if (util::geo::intersects(feature.line, getBox(GRID2_ZOOM, x, y))) {
+      if (intersects(feature.line, getBox(GRID2_ZOOM, x, y))) {
         if (_grid2[x * GRID2_SIZE + y] ==
             std::numeric_limits<uint32_t>::max()) {
           _grid2[x * GRID2_SIZE + y] = _lines2.size();
@@ -568,8 +569,7 @@ void MvtRenderer::printFeature(const util::geo::Line<double>& l, size_t z,
       const auto& curP = l[i];
       const auto& prevP = l[i - 1];
 
-      if (util::geo::intersects(util::geo::LineSegment<double>{curP, prevP},
-                                box)) {
+      if (intersects(util::geo::LineSegment<double>{curP, prevP}, box)) {
         croppedLines.back().push_back(prevP);
         croppedLines.back().push_back(curP);
       } else if (croppedLines.back().size() > 0) {
@@ -710,43 +710,16 @@ void MvtRenderer::writeTiles(size_t z) {
            ccx < ((cx + 1) << (z - GRID_ZOOM)); ccx++) {
         for (size_t ccy = (cy << (z - GRID_ZOOM));
              ccy < ((cy + 1) << (z - GRID_ZOOM)); ccy++) {
-          vector_tile::Tile tile;
-
-          auto layerInner = tile.add_layers();
-          layerInner->set_version(2);
-          layerInner->set_name("inner-connections");
-          layerInner->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysInner, valsInner;
-
-          auto layerLines = tile.add_layers();
-          layerLines->set_version(2);
-          layerLines->set_name("lines");
-          layerLines->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysLines, valsLines;
-
-          auto layerStations = tile.add_layers();
-          layerStations->set_version(2);
-          layerStations->set_name("stations");
-          layerStations->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysStations, valsStations;
+          std::vector<size_t> objects;
 
           for (const size_t lid : _lines[_grid[cx * GRID_SIZE + cy]]) {
             const auto& l = _lineFeatures[lid];
-            if (z == GRID_ZOOM ||
-                util::geo::intersects(l.line, getBox(z, ccx, ccy))) {
-              if (l.layer == "lines")
-                printFeature(l.line, z, ccx, ccy, layerLines, l.params,
-                             keysLines, valsLines);
-              if (l.layer == "inner-connections")
-                printFeature(l.line, z, ccx, ccy, layerInner, l.params,
-                             keysInner, valsInner);
-              if (l.layer == "stations")
-                printFeature(l.line, z, ccx, ccy, layerStations, l.params,
-                             keysStations, valsStations);
+            if (z == GRID_ZOOM || intersects(l.line, getBox(z, ccx, ccy))) {
+              objects.push_back(lid);
             }
           }
 
-          serializeTile(ccx, ccy, z, &tile);
+          whatever(objects, cx, cy, z);
         }
       }
     }
@@ -759,69 +732,22 @@ void MvtRenderer::writeTiles(size_t z) {
            ccx < ((cx + 1) << (z - GRID2_ZOOM)); ccx++) {
         for (size_t ccy = (cy << (z - GRID2_ZOOM));
              ccy < ((cy + 1) << (z - GRID2_ZOOM)); ccy++) {
-          vector_tile::Tile tile;
-
-          auto layerInner = tile.add_layers();
-          layerInner->set_version(2);
-          layerInner->set_name("inner-connections");
-          layerInner->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysInner, valsInner;
-
-          auto layerLines = tile.add_layers();
-          layerLines->set_version(2);
-          layerLines->set_name("lines");
-          layerLines->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysLines, valsLines;
-
-          auto layerStations = tile.add_layers();
-          layerStations->set_version(2);
-          layerStations->set_name("stations");
-          layerStations->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysStations, valsStations;
+          std::vector<size_t> objects;
 
           for (const size_t lid : _lines2[_grid2[cx * GRID2_SIZE + cy]]) {
             const auto& l = _lineFeatures[lid];
-            if (z == GRID2_ZOOM ||
-                util::geo::intersects(l.line, getBox(z, ccx, ccy))) {
-              if (l.layer == "lines")
-                printFeature(l.line, z, ccx, ccy, layerLines, l.params,
-                             keysLines, valsLines);
-              if (l.layer == "inner-connections")
-                printFeature(l.line, z, ccx, ccy, layerInner, l.params,
-                             keysInner, valsInner);
-              if (l.layer == "stations")
-                printFeature(l.line, z, ccx, ccy, layerStations, l.params,
-                             keysStations, valsStations);
+            if (z == GRID2_ZOOM || intersects(l.line, getBox(z, ccx, ccy))) {
+              objects.push_back(lid);
             }
           }
 
-          serializeTile(ccx, ccy, z, &tile);
+          whatever(objects, cx, cy, z);
         }
       }
     }
   } else {
     for (size_t cx = 0; cx < static_cast<size_t>(1 << z); cx++) {
       for (size_t cy = 0; cy < static_cast<size_t>(1 << z); cy++) {
-        vector_tile::Tile tile;
-
-        auto layerInner = tile.add_layers();
-        layerInner->set_version(2);
-        layerInner->set_name("inner-connections");
-        layerInner->set_extent(TILE_RES);
-        std::map<std::string, size_t> keysInner, valsInner;
-
-        auto layerLines = tile.add_layers();
-        layerLines->set_version(2);
-        layerLines->set_name("lines");
-        layerLines->set_extent(TILE_RES);
-        std::map<std::string, size_t> keysLines, valsLines;
-
-        auto layerStations = tile.add_layers();
-        layerStations->set_version(2);
-        layerStations->set_name("stations");
-        layerStations->set_extent(TILE_RES);
-        std::map<std::string, size_t> keysStations, valsStations;
-
         std::vector<size_t> objects;
 
         if (z == 0) {
@@ -845,26 +771,52 @@ void MvtRenderer::writeTiles(size_t z) {
           std::sort(objects.begin(), objects.end());
         }
 
-        for (size_t i = 0; i < objects.size(); i++) {
-          if (i > 0 && objects[i] == objects[i - 1]) continue;
-
-          const auto& l = _lineFeatures[objects[i]];
-
-          if (l.layer == "lines")
-            printFeature(l.line, z, cx, cy, layerLines, l.params, keysLines,
-                         valsLines);
-          if (l.layer == "inner-connections")
-            printFeature(l.line, z, cx, cy, layerInner, l.params, keysInner,
-                         valsInner);
-          if (l.layer == "stations")
-            printFeature(l.line, z, cx, cy, layerStations, l.params,
-                         keysStations, valsStations);
-        }
-
-        serializeTile(cx, cy, z, &tile);
+        whatever(objects, cx, cy, z);
       }
     }
   }
+}
+
+// ____________________________________________________________________________
+void MvtRenderer::whatever(const std::vector<size_t>& objects, size_t cx,
+                           size_t cy, size_t z) {
+  vector_tile::Tile tile;
+
+  auto layerInner = tile.add_layers();
+  layerInner->set_version(2);
+  layerInner->set_name("inner-connections");
+  layerInner->set_extent(TILE_RES);
+  std::map<std::string, size_t> keysInner, valsInner;
+
+  auto layerLines = tile.add_layers();
+  layerLines->set_version(2);
+  layerLines->set_name("lines");
+  layerLines->set_extent(TILE_RES);
+  std::map<std::string, size_t> keysLines, valsLines;
+
+  auto layerStations = tile.add_layers();
+  layerStations->set_version(2);
+  layerStations->set_name("stations");
+  layerStations->set_extent(TILE_RES);
+  std::map<std::string, size_t> keysStations, valsStations;
+
+  for (size_t i = 0; i < objects.size(); i++) {
+    if (i > 0 && objects[i] == objects[i - 1]) continue;
+
+    const auto& l = _lineFeatures[objects[i]];
+
+    if (l.layer == "lines")
+      printFeature(l.line, z, cx, cy, layerLines, l.params, keysLines,
+                   valsLines);
+    if (l.layer == "inner-connections")
+      printFeature(l.line, z, cx, cy, layerInner, l.params, keysInner,
+                   valsInner);
+    if (l.layer == "stations")
+      printFeature(l.line, z, cx, cy, layerStations, l.params, keysStations,
+                   valsStations);
+  }
+
+  serializeTile(cx, cy, z, &tile);
 }
 
 #endif

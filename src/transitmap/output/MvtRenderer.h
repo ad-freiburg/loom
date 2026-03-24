@@ -114,6 +114,9 @@ class MvtRenderer : public Renderer {
                         const std::vector<shared::rendergraph::InnerGeom>& pool,
                         size_t level) const;
 
+  void whatever(const std::vector<size_t>& objects, size_t cx, size_t cy,
+                size_t z);
+
   std::string getLineClass(const std::string& id) const;
 
   std::string getMarkerPathMale(double w) const;
