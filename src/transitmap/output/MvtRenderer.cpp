@@ -2,8 +2,6 @@
 // Chair of Algorithms and Data Structures.
 // Authors: Patrick Brosi <brosi@informatik.uni-freiburg.de>
 
-#ifdef PROTOBUF_FOUND
-
 #include <stdint.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -15,10 +13,10 @@
 #include "shared/rendergraph/RenderGraph.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/output/MvtRenderer.h"
-#include "transitmap/output/protobuf/vector_tile.pb.h"
 #include "util/String.h"
 #include "util/geo/PolyLine.h"
 #include "util/log/Log.h"
+#include "util/protobuf/Protobuf.h"
 
 using shared::linegraph::Line;
 using shared::linegraph::LineNode;
@@ -27,14 +25,15 @@ using shared::rendergraph::RenderGraph;
 using transitmapper::label::Labeller;
 using transitmapper::output::InnerClique;
 using transitmapper::output::MvtRenderer;
+using util::DEBUG;
 using util::geo::Box;
 using util::geo::DPoint;
 using util::geo::DPolygon;
+using util::geo::intersects;
 using util::geo::LinePoint;
 using util::geo::LinePointCmp;
 using util::geo::Polygon;
 using util::geo::PolyLine;
-using util::DEBUG;
 
 const static double TILE_RES = 1024;
 
@@ -57,12 +56,12 @@ const static double GRID2_W =
 // _____________________________________________________________________________
 MvtRenderer::MvtRenderer(const config::Config* cfg, size_t zoom)
     : _cfg(cfg), _zoom(zoom) {
-  _grid = new size_t[GRID_SIZE * GRID_SIZE];
+  _grid = new uint64_t[GRID_SIZE * GRID_SIZE];
   for (size_t i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
     _grid[i] = std::numeric_limits<uint32_t>::max();
   }
 
-  _grid2 = new size_t[GRID2_SIZE * GRID2_SIZE];
+  _grid2 = new uint64_t[GRID2_SIZE * GRID2_SIZE];
   for (size_t i = 0; i < GRID2_SIZE * GRID2_SIZE; i++) {
     _grid2[i] = std::numeric_limits<uint32_t>::max();
   }
@@ -467,7 +466,7 @@ void MvtRenderer::renderEdgeTripGeom(const RenderGraph& outG,
 }
 
 // _____________________________________________________________________________
-void MvtRenderer::addFeature(const MvtLineFeature& feature) {
+void MvtRenderer::addFeature(const Feature& feature) {
   double w =
       (_cfg->lineWidth + _cfg->lineSpacing + 2 * _cfg->outlineWidth) * _res;
   const auto& box = util::geo::pad(util::geo::getBoundingBox(feature.line), w);
@@ -486,7 +485,7 @@ void MvtRenderer::addFeature(const MvtLineFeature& feature) {
 
   for (size_t x = swX; x <= neX && x < GRID_SIZE; x++) {
     for (size_t y = swY; y <= neY && y < GRID_SIZE; y++) {
-      if (util::geo::intersects(feature.line, getBox(GRID_ZOOM, x, y))) {
+      if (intersects(feature.line, getBox(GRID_ZOOM, x, y))) {
         if (_grid[x * GRID_SIZE + y] == std::numeric_limits<uint32_t>::max()) {
           _grid[x * GRID_SIZE + y] = _lines.size();
           _cells.push_back({x, y});
@@ -505,7 +504,7 @@ void MvtRenderer::addFeature(const MvtLineFeature& feature) {
 
   for (size_t x = swX; x <= neX && x < GRID2_SIZE; x++) {
     for (size_t y = swY; y <= neY && y < GRID2_SIZE; y++) {
-      if (util::geo::intersects(feature.line, getBox(GRID2_ZOOM, x, y))) {
+      if (intersects(feature.line, getBox(GRID2_ZOOM, x, y))) {
         if (_grid2[x * GRID2_SIZE + y] ==
             std::numeric_limits<uint32_t>::max()) {
           _grid2[x * GRID2_SIZE + y] = _lines2.size();
@@ -537,14 +536,14 @@ Box<double> MvtRenderer::getBox(size_t z, size_t x, size_t y) const {
 
 // _____________________________________________________________________________
 void MvtRenderer::printFeature(const util::geo::Line<double>& l, size_t z,
-                               size_t x, size_t y,
-                               vector_tile::Tile_Layer* layer, Params params,
+                               size_t x, size_t y, VTLayer* layer,
+                               Params params,
                                std::map<std::string, size_t>& keys,
                                std::map<std::string, size_t>& vals) {
   if (l.size() < 2) return;
 
   // skip zero-width geometries
-  if ((layer->name() == "lines" || layer->name() == "inner-connections") &&
+  if ((layer->name == "lines" || layer->name == "inner-connections") &&
       params.count("width") && params.find("width")->second == "0")
     return;
 
@@ -559,7 +558,7 @@ void MvtRenderer::printFeature(const util::geo::Line<double>& l, size_t z,
   // pad!
   auto box = util::geo::pad(getBox(z, x, y), 50 * (tw / TILE_RES));
 
-  if (layer->name() == "stations") {
+  if (layer->name == "stations") {
     croppedLines.push_back(l);
   } else {
     croppedLines.push_back({});
@@ -568,8 +567,7 @@ void MvtRenderer::printFeature(const util::geo::Line<double>& l, size_t z,
       const auto& curP = l[i];
       const auto& prevP = l[i - 1];
 
-      if (util::geo::intersects(util::geo::LineSegment<double>{curP, prevP},
-                                box)) {
+      if (intersects(util::geo::LineSegment<double>{curP, prevP}, box)) {
         croppedLines.back().push_back(prevP);
         croppedLines.back().push_back(curP);
       } else if (croppedLines.back().size() > 0) {
@@ -588,48 +586,41 @@ void MvtRenderer::printFeature(const util::geo::Line<double>& l, size_t z,
     if (ll.size() < 2) continue;
     if (l.size() == 2 && util::geo::dist(l[0], l[1]) < tw / TILE_RES) continue;
 
-    auto feature = layer->add_features();
+    layer->features.resize(layer->features.size() + 1);
+    auto feature = &layer->features.back();
 
     for (const auto& kv : params) {
       auto kit = keys.find(kv.first);
       auto vit = vals.find(kv.second);
 
       if (kit != keys.end()) {
-        feature->add_tags(kit->second);
+        feature->tags.push_back(kit->second);
       } else {
-        auto k = layer->add_keys();
-        *k = kv.first;
-        feature->add_tags(layer->keys_size() - 1);
-        keys[kv.first] = layer->keys_size() - 1;
+        layer->keys.push_back(kv.first);
+        feature->tags.push_back(layer->keys.size() - 1);
+        keys[kv.first] = layer->keys.size() - 1;
       }
 
       if (vit != vals.end()) {
-        feature->add_tags(vit->second);
+        feature->tags.push_back(vit->second);
       } else {
-        auto k = layer->add_values();
-        k->set_string_value(kv.second);
-        feature->add_tags(layer->values_size() - 1);
-        vals[kv.second] = layer->values_size() - 1;
+        layer->values.push_back(kv.second);
+        feature->tags.push_back(layer->values.size() - 1);
+        vals[kv.second] = layer->values.size() - 1;
       }
     }
 
-    feature->set_id(1);
-
-    if (layer->name() == "stations") {
-      feature->set_type(vector_tile::Tile_GeomType_POLYGON);
-    } else {
-      feature->set_type(vector_tile::Tile_GeomType_LINESTRING);
-    }
+    feature->type = (layer->name == "stations" ? POLYGON : LINESTRING);
 
     // MoveTo, 1x
-    feature->add_geometry((1 & 0x7) | (1 << 3));
+    feature->geometry.push_back((1 & 0x7) | (1 << 3));
     int px = (l[0].getX() - ox) * (TILE_RES / tw);
     int py = TILE_RES - (l[0].getY() - oy) * (TILE_RES / tw);
-    feature->add_geometry((px << 1) ^ (px >> 31));
-    feature->add_geometry((py << 1) ^ (py >> 31));
+    feature->geometry.push_back((px << 1) ^ (px >> 31));
+    feature->geometry.push_back((py << 1) ^ (py >> 31));
 
     // LineTo, l.size() - 1 times
-    feature->add_geometry((2 & 0x7) | ((l.size() - 1) << 3));
+    feature->geometry.push_back((2 & 0x7) | ((l.size() - 1) << 3));
 
     for (size_t i = 1; i < l.size(); i++) {
       int dx = ((l[i].getX() - ox) * (TILE_RES / tw)) - px;
@@ -638,13 +629,13 @@ void MvtRenderer::printFeature(const util::geo::Line<double>& l, size_t z,
       px += dx;
       py += dy;
 
-      feature->add_geometry((dx << 1) ^ (dx >> 31));
-      feature->add_geometry((dy << 1) ^ (dy >> 31));
+      feature->geometry.push_back((dx << 1) ^ (dx >> 31));
+      feature->geometry.push_back((dy << 1) ^ (dy >> 31));
     }
 
-    if (layer->name() == "stations") {
+    if (layer->name == "stations") {
       // close path
-      feature->add_geometry((7 & 0x7) | (1 << 3));
+      feature->geometry.push_back((7 & 0x7) | (1 << 3));
     }
   }
 }
@@ -659,8 +650,7 @@ std::string MvtRenderer::getLineClass(const std::string& id) const {
 }
 
 // _____________________________________________________________________________
-void MvtRenderer::serializeTile(size_t x, size_t y, size_t z,
-                                vector_tile::Tile* tile) {
+void MvtRenderer::serializeTile(size_t x, size_t y, size_t z, VTTile* tile) {
   std::stringstream ss;
 
   ss << _cfg->mvtPath << "/";
@@ -692,11 +682,87 @@ void MvtRenderer::serializeTile(size_t x, size_t y, size_t z,
     throw std::runtime_error("Could not open " + ss.str());
   }
 
-  std::string a;
+  for (auto& layer : tile->layers) {
+    auto data = writeLayer(&layer);
 
-  tile->SerializeToString(&a);
+    // 3 = layers repeated
+    util::protobuf::writeTypeAndId({util::protobuf::VarType::S, 3}, fo);
+    util::protobuf::writeString(data, fo);
+  }
+}
 
-  fo << a;
+// _____________________________________________________________________________
+std::string MvtRenderer::writeFeature(const VTFeature* f) const {
+  std::ostringstream out(std::ios::binary);
+
+  // 1 = feature id, we use a constant ID of 1
+  util::protobuf::writeTypeAndId({util::protobuf::VarType::V, 1}, out);
+  util::protobuf::writeVarUInt(1, out);
+
+  if (!f->tags.empty()) {
+    std::ostringstream buf(std::ios::binary);
+    for (auto t : f->tags) util::protobuf::writeVarUInt(t, buf);
+
+    // 2 = tags, packed repeated
+    util::protobuf::writeTypeAndId({util::protobuf::VarType::S, 2}, out);
+    util::protobuf::writeString(buf.str(), out);
+  }
+
+  // 3 = type
+  util::protobuf::writeTypeAndId({util::protobuf::VarType::V, 3}, out);
+  util::protobuf::writeVarUInt(f->type, out);
+
+  // 4 = geometry
+  util::protobuf::writeTypeAndId({util::protobuf::VarType::S, 4}, out);
+  std::ostringstream buf(std::ios::binary);
+  for (auto g : f->geometry) util::protobuf::writeVarUInt(g, buf);
+
+  auto str = buf.str();
+  util::protobuf::writeString(buf.str(), out);
+
+  return out.str();
+}
+
+// _____________________________________________________________________________
+std::string MvtRenderer::writeLayer(const VTLayer* l) const {
+  std::ostringstream out(std::ios::binary);
+
+  // 1 = name
+  util::protobuf::writeTypeAndId({util::protobuf::VarType::S, 1}, out);
+  util::protobuf::writeString(l->name, out);
+
+  for (auto& f : l->features) {
+    auto data = writeFeature(&f);
+    // 2 = features, repeated
+    util::protobuf::writeTypeAndId({util::protobuf::VarType::S, 2}, out);
+    util::protobuf::writeString(data, out);
+  }
+
+  for (auto& k : l->keys) {
+    // 3 = keys, repeated
+    util::protobuf::writeTypeAndId({util::protobuf::VarType::S, 3}, out);
+    util::protobuf::writeString(k, out);
+  }
+
+  for (auto& v : l->values) {
+    // 4 = values, repeated
+    util::protobuf::writeTypeAndId({util::protobuf::VarType::S, 4}, out);
+    std::ostringstream b(std::ios::binary);
+    // 1 = string_value
+    util::protobuf::writeTypeAndId({util::protobuf::VarType::S, 1}, b);
+    util::protobuf::writeString(v, b);
+    util::protobuf::writeString(b.str(), out);
+  }
+
+  // 5 = extent
+  util::protobuf::writeTypeAndId({util::protobuf::VarType::V, 5}, out);
+  util::protobuf::writeVarUInt(TILE_RES, out);
+
+  // 15 = version
+  util::protobuf::writeTypeAndId({util::protobuf::VarType::V, 15}, out);
+  util::protobuf::writeVarUInt(2, out);
+
+  return out.str();
 }
 
 // _____________________________________________________________________________
@@ -710,43 +776,16 @@ void MvtRenderer::writeTiles(size_t z) {
            ccx < ((cx + 1) << (z - GRID_ZOOM)); ccx++) {
         for (size_t ccy = (cy << (z - GRID_ZOOM));
              ccy < ((cy + 1) << (z - GRID_ZOOM)); ccy++) {
-          vector_tile::Tile tile;
-
-          auto layerInner = tile.add_layers();
-          layerInner->set_version(2);
-          layerInner->set_name("inner-connections");
-          layerInner->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysInner, valsInner;
-
-          auto layerLines = tile.add_layers();
-          layerLines->set_version(2);
-          layerLines->set_name("lines");
-          layerLines->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysLines, valsLines;
-
-          auto layerStations = tile.add_layers();
-          layerStations->set_version(2);
-          layerStations->set_name("stations");
-          layerStations->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysStations, valsStations;
+          std::vector<size_t> objects;
 
           for (const size_t lid : _lines[_grid[cx * GRID_SIZE + cy]]) {
             const auto& l = _lineFeatures[lid];
-            if (z == GRID_ZOOM ||
-                util::geo::intersects(l.line, getBox(z, ccx, ccy))) {
-              if (l.layer == "lines")
-                printFeature(l.line, z, ccx, ccy, layerLines, l.params,
-                             keysLines, valsLines);
-              if (l.layer == "inner-connections")
-                printFeature(l.line, z, ccx, ccy, layerInner, l.params,
-                             keysInner, valsInner);
-              if (l.layer == "stations")
-                printFeature(l.line, z, ccx, ccy, layerStations, l.params,
-                             keysStations, valsStations);
+            if (z == GRID_ZOOM || intersects(l.line, getBox(z, ccx, ccy))) {
+              objects.push_back(lid);
             }
           }
 
-          serializeTile(ccx, ccy, z, &tile);
+          writeTile(objects, cx, cy, z);
         }
       }
     }
@@ -759,69 +798,22 @@ void MvtRenderer::writeTiles(size_t z) {
            ccx < ((cx + 1) << (z - GRID2_ZOOM)); ccx++) {
         for (size_t ccy = (cy << (z - GRID2_ZOOM));
              ccy < ((cy + 1) << (z - GRID2_ZOOM)); ccy++) {
-          vector_tile::Tile tile;
-
-          auto layerInner = tile.add_layers();
-          layerInner->set_version(2);
-          layerInner->set_name("inner-connections");
-          layerInner->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysInner, valsInner;
-
-          auto layerLines = tile.add_layers();
-          layerLines->set_version(2);
-          layerLines->set_name("lines");
-          layerLines->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysLines, valsLines;
-
-          auto layerStations = tile.add_layers();
-          layerStations->set_version(2);
-          layerStations->set_name("stations");
-          layerStations->set_extent(TILE_RES);
-          std::map<std::string, size_t> keysStations, valsStations;
+          std::vector<size_t> objects;
 
           for (const size_t lid : _lines2[_grid2[cx * GRID2_SIZE + cy]]) {
             const auto& l = _lineFeatures[lid];
-            if (z == GRID2_ZOOM ||
-                util::geo::intersects(l.line, getBox(z, ccx, ccy))) {
-              if (l.layer == "lines")
-                printFeature(l.line, z, ccx, ccy, layerLines, l.params,
-                             keysLines, valsLines);
-              if (l.layer == "inner-connections")
-                printFeature(l.line, z, ccx, ccy, layerInner, l.params,
-                             keysInner, valsInner);
-              if (l.layer == "stations")
-                printFeature(l.line, z, ccx, ccy, layerStations, l.params,
-                             keysStations, valsStations);
+            if (z == GRID2_ZOOM || intersects(l.line, getBox(z, ccx, ccy))) {
+              objects.push_back(lid);
             }
           }
 
-          serializeTile(ccx, ccy, z, &tile);
+          writeTile(objects, cx, cy, z);
         }
       }
     }
   } else {
     for (size_t cx = 0; cx < static_cast<size_t>(1 << z); cx++) {
       for (size_t cy = 0; cy < static_cast<size_t>(1 << z); cy++) {
-        vector_tile::Tile tile;
-
-        auto layerInner = tile.add_layers();
-        layerInner->set_version(2);
-        layerInner->set_name("inner-connections");
-        layerInner->set_extent(TILE_RES);
-        std::map<std::string, size_t> keysInner, valsInner;
-
-        auto layerLines = tile.add_layers();
-        layerLines->set_version(2);
-        layerLines->set_name("lines");
-        layerLines->set_extent(TILE_RES);
-        std::map<std::string, size_t> keysLines, valsLines;
-
-        auto layerStations = tile.add_layers();
-        layerStations->set_version(2);
-        layerStations->set_name("stations");
-        layerStations->set_extent(TILE_RES);
-        std::map<std::string, size_t> keysStations, valsStations;
-
         std::vector<size_t> objects;
 
         if (z == 0) {
@@ -845,26 +837,49 @@ void MvtRenderer::writeTiles(size_t z) {
           std::sort(objects.begin(), objects.end());
         }
 
-        for (size_t i = 0; i < objects.size(); i++) {
-          if (i > 0 && objects[i] == objects[i - 1]) continue;
-
-          const auto& l = _lineFeatures[objects[i]];
-
-          if (l.layer == "lines")
-            printFeature(l.line, z, cx, cy, layerLines, l.params, keysLines,
-                         valsLines);
-          if (l.layer == "inner-connections")
-            printFeature(l.line, z, cx, cy, layerInner, l.params, keysInner,
-                         valsInner);
-          if (l.layer == "stations")
-            printFeature(l.line, z, cx, cy, layerStations, l.params,
-                         keysStations, valsStations);
-        }
-
-        serializeTile(cx, cy, z, &tile);
+        writeTile(objects, cx, cy, z);
       }
     }
   }
 }
 
-#endif
+// ____________________________________________________________________________
+void MvtRenderer::writeTile(const std::vector<size_t>& objects, size_t cx,
+                            size_t cy, size_t z) {
+  VTTile tile;
+
+  tile.layers.reserve(tile.layers.size() + 3);
+
+  tile.layers.push_back({});
+  auto layerInner = &tile.layers.back();
+  layerInner->name = "inner-connections";
+  std::map<std::string, size_t> keysInner, valsInner;
+
+  tile.layers.push_back({});
+  auto layerLines = &tile.layers.back();
+  layerLines->name = "lines";
+  std::map<std::string, size_t> keysLines, valsLines;
+
+  tile.layers.push_back({});
+  auto layerStations = &tile.layers.back();
+  layerStations->name = "stations";
+  std::map<std::string, size_t> keysStations, valsStations;
+
+  for (size_t i = 0; i < objects.size(); i++) {
+    if (i > 0 && objects[i] == objects[i - 1]) continue;
+
+    const auto& l = _lineFeatures[objects[i]];
+
+    if (l.layer == "lines")
+      printFeature(l.line, z, cx, cy, layerLines, l.params, keysLines,
+                   valsLines);
+    if (l.layer == "inner-connections")
+      printFeature(l.line, z, cx, cy, layerInner, l.params, keysInner,
+                   valsInner);
+    if (l.layer == "stations")
+      printFeature(l.line, z, cx, cy, layerStations, l.params, keysStations,
+                   valsStations);
+  }
+
+  serializeTile(cx, cy, z, &tile);
+}
