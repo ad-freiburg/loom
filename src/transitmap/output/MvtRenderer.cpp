@@ -56,12 +56,12 @@ const static double GRID2_W =
 // _____________________________________________________________________________
 MvtRenderer::MvtRenderer(const config::Config* cfg, size_t zoom)
     : _cfg(cfg), _zoom(zoom) {
-  _grid = new size_t[GRID_SIZE * GRID_SIZE];
+  _grid = new uint64_t[GRID_SIZE * GRID_SIZE];
   for (size_t i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
     _grid[i] = std::numeric_limits<uint32_t>::max();
   }
 
-  _grid2 = new size_t[GRID2_SIZE * GRID2_SIZE];
+  _grid2 = new uint64_t[GRID2_SIZE * GRID2_SIZE];
   for (size_t i = 0; i < GRID2_SIZE * GRID2_SIZE; i++) {
     _grid2[i] = std::numeric_limits<uint32_t>::max();
   }
