@@ -5,8 +5,6 @@
 #ifndef TRANSITMAP_OUTPUT_MVTRENDERER_H_
 #define TRANSITMAP_OUTPUT_MVTRENDERER_H_
 
-#ifdef PROTOBUF_FOUND
-
 #include <ostream>
 #include <set>
 #include <string>
@@ -17,7 +15,6 @@
 #include "shared/rendergraph/RenderGraph.h"
 #include "transitmap/config/TransitMapConfig.h"
 #include "transitmap/label/Labeller.h"
-#include "transitmap/output/protobuf/vector_tile.pb.h"
 #include "util/geo/Geo.h"
 #include "util/geo/PolyLine.h"
 #include "util/xml/XmlWriter.h"
@@ -27,10 +24,35 @@ using util::Nullable;
 namespace transitmapper {
 namespace output {
 
-struct MvtLineFeature {
+enum VTGeomType : int {
+  UNKNOWN = 0,
+  POINT = 1,
+  LINESTRING = 2,
+  POLYGON = 3
+};
+
+
+struct Feature {
   util::geo::Line<double> line;
   std::string layer;
   Params params;
+};
+
+struct VTFeature {
+  std::vector<uint32_t> tags;
+  std::vector<uint32_t> geometry;
+  VTGeomType type;
+};
+
+struct VTLayer {
+  std::string name;
+  std::vector<VTFeature> features;
+  std::vector<std::string> keys;
+  std::vector<std::string> values;
+};
+
+struct VTTile {
+  std::vector<VTLayer> layers;
 };
 
 class MvtRenderer : public Renderer {
@@ -45,10 +67,10 @@ class MvtRenderer : public Renderer {
 
   void writeTiles(size_t z);
 
-  void serializeTile(size_t x, size_t y, size_t z, vector_tile::Tile* l);
+  void serializeTile(size_t x, size_t y, size_t z, VTTile* l);
 
   void printFeature(const util::geo::Line<double>& l, size_t z, size_t x,
-                    size_t y, vector_tile::Tile_Layer* layer, Params params,
+                    size_t y, VTLayer* layer, Params params,
                     std::map<std::string, size_t>& keys,
                     std::map<std::string, size_t>& vals);
 
@@ -61,7 +83,7 @@ class MvtRenderer : public Renderer {
   uint64_t* _grid;
   uint64_t* _grid2;
 
-  std::vector<MvtLineFeature> _lineFeatures;
+  std::vector<Feature> _lineFeatures;
 
   std::vector<std::vector<size_t>> _lines;
   std::vector<std::pair<uint32_t, uint32_t>> _cells;
@@ -74,7 +96,7 @@ class MvtRenderer : public Renderer {
 
   util::geo::Box<double> getBox(size_t z, size_t x, size_t y) const;
   uint32_t gridC(double c) const;
-  void addFeature(const MvtLineFeature& featuer);
+  void addFeature(const Feature& featuer);
 
   void outputNodes(const shared::rendergraph::RenderGraph& outputGraph);
   void outputEdges(const shared::rendergraph::RenderGraph& outputGraph);
@@ -114,8 +136,11 @@ class MvtRenderer : public Renderer {
                         const std::vector<shared::rendergraph::InnerGeom>& pool,
                         size_t level) const;
 
-  void whatever(const std::vector<size_t>& objects, size_t cx, size_t cy,
+  void writeTile(const std::vector<size_t>& objects, size_t cx, size_t cy,
                 size_t z);
+
+  std::string writeLayer(const VTLayer* l) const;
+  std::string writeFeature(const VTFeature* l) const;
 
   std::string getLineClass(const std::string& id) const;
 
@@ -124,7 +149,5 @@ class MvtRenderer : public Renderer {
 };
 }  // namespace output
 }  // namespace transitmapper
-
-#endif
 
 #endif  // TRANSITMAP_OUTPUT_MVTRENDERER_H_
