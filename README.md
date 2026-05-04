@@ -17,6 +17,8 @@ A pipeline for generating geographically accurate transit maps which appears to 
 
 Also see our web demos [here](https://loom.cs.uni-freiburg.de/), [here](https://loom.cs.uni-freiburg.de/global), and [here](https://octi.cs.uni-freiburg.de).
 
+[Transport for Cairo](https://transportforcairo.com) has created a cross-platform [QGIS plugin](https://github.com/transportforcairo/loom_qgis) for LOOM.
+
 Requirements
 ------------
 
