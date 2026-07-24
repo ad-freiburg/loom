@@ -791,7 +791,7 @@ void MvtRenderer::writeTiles(size_t z) {
             }
           }
 
-          writeTile(objects, cx, cy, z);
+          writeTile(objects, ccx, ccy, z);
         }
       }
     }
@@ -813,7 +813,7 @@ void MvtRenderer::writeTiles(size_t z) {
             }
           }
 
-          writeTile(objects, cx, cy, z);
+          writeTile(objects, ccx, ccy, z);
         }
       }
     }
