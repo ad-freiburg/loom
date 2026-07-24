@@ -36,6 +36,14 @@ int main(int argc, char** argv) {
   transitmapper::config::ConfigReader cr;
   cr.read(&cfg, argc, argv);
 
+  if (cfg.renderMethod == "mvt") {
+    const double scale = 0.1;
+    // for MVT, scale the spacings and widths
+    cfg.lineWidth *= scale;
+    cfg.lineSpacing *= scale;
+    cfg.outlineWidth *= scale;
+  }
+
   T_START(TIMER);
 
   GraphBuilder b(&cfg);
