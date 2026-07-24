@@ -30,6 +30,30 @@ ENDIF(NOT DEFINED COIN_ROOT_DIR)
 MESSAGE(STATUS "COIN_ROOT_DIR hint is : ${COIN_ROOT_DIR}")
 
 #
+# Prefer pkg-config (unless an explicit COIN_ROOT_DIR override was given).
+#
+IF(NOT COIN_ROOT_DIR)
+  FIND_PACKAGE(PkgConfig QUIET)
+  IF(PKG_CONFIG_FOUND)
+    PKG_CHECK_MODULES(CBC QUIET cbc)
+    IF(CBC_FOUND)
+      SET(COIN_INCLUDE_DIR "${CBC_INCLUDE_DIRS}")
+      SET(COIN_INCLUDE_DIRS "${CBC_INCLUDE_DIRS}")
+      IF(CBC_LINK_LIBRARIES)
+        SET(COIN_LIBRARIES "${CBC_LINK_LIBRARIES}")
+      ELSE()
+        SET(COIN_LIBRARIES "${CBC_LDFLAGS}")
+      ENDIF()
+      SET(COIN_FOUND TRUE)
+      MESSAGE(STATUS "Found COIN via pkg-config (cbc)")
+      MESSAGE(STATUS "\tCOIN Include Dirs: ${COIN_INCLUDE_DIR}")
+      MESSAGE(STATUS "\tCOIN Libraries: ${COIN_LIBRARIES}")
+      RETURN()
+    ENDIF()
+  ENDIF()
+ENDIF()
+
+#
 # Find the path based on a required header file
 #
 MESSAGE(STATUS "Coin multiple library dependency status:")
