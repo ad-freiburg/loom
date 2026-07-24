@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <algorithm>
 #include <fstream>
 #include <ostream>
 
@@ -611,6 +612,11 @@ void MvtRenderer::printFeature(const util::geo::Line<double>& l, size_t z,
     }
 
     feature->type = (layer->name == "stations" ? POLYGON : LINESTRING);
+
+    // MVT requires exterior polygon rings to clockwise ordering
+    if (layer->name == "stations") {
+      std::reverse(l.begin(), l.end());
+    }
 
     // MoveTo, 1x
     feature->geometry.push_back((1 & 0x7) | (1 << 3));
