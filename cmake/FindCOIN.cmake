@@ -33,19 +33,20 @@ MESSAGE(STATUS "COIN_ROOT_DIR hint is : ${COIN_ROOT_DIR}")
 # Find the path based on a required header file
 #
 MESSAGE(STATUS "Coin multiple library dependency status:")
-FIND_PATH(COIN_INCLUDE_DIR coin/CbcModel.hpp
+FIND_PATH(COIN_INCLUDE_DIR
+  NAMES CbcModel.hpp
+  PATH_SUFFIXES coin coin-or
   HINTS "${COIN_INCLUDE_DIR}"
   HINTS "${COIN_ROOT_DIR}/include"
-  HINTS /usr/
-  HINTS /usr/include/
-  HINTS /usr/local/
-  HINTS /usr/local/include/
-  HINTS /usr/coin/
-  HINTS /usr/coin-Cbc/
-  HINTS /usr/local/coin/
-  HINTS /usr/local/coin-Cbc/
+  PATHS
+    /usr/include
+    /usr/local/include
+    /opt/homebrew/include
+    /usr/coin
+    /usr/coin-Cbc
+    /usr/local/coin
+    /usr/local/coin-Cbc
 )
-set(COIN_INCLUDE_DIR ${COIN_INCLUDE_DIR}/coin)
 MESSAGE("\tCOIN Include Dir: ${COIN_INCLUDE_DIR}")
 
 #
